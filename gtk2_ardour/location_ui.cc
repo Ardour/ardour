@@ -452,9 +452,11 @@ LocationEditRow::hide_toggled ()
 void
 LocationEditRow::remove_button_pressed ()
 {
-	if (!location) return;
+	if (!location) {
+		return;
+	}
 
-	remove_requested(location); /* 	EMIT_SIGNAL */
+	remove_requested (location); /*	EMIT_SIGNAL */
 }
 
 
@@ -708,11 +710,9 @@ LocationUI::location_added (Location* location)
 
 	if (location->is_auto_punch()) {
 		punch_edit_row.set_location(location);
-	}
-	else if (location->is_auto_loop()) {
+	} else if (location->is_auto_loop()) {
 		loop_edit_row.set_location(location);
-	}
-	else {
+	} else {
 		refresh_location_list ();
 	}
 }
@@ -724,12 +724,17 @@ LocationUI::location_removed (Location* location)
 
 	if (location->is_auto_punch()) {
 		punch_edit_row.set_location(0);
-	}
-	else if (location->is_auto_loop()) {
+	} else if (location->is_auto_loop()) {
 		loop_edit_row.set_location(0);
-	}
-	else {
-		refresh_location_list ();
+	} else if (location->is_range_marker() || location->is_mark()) {
+		Box_Helpers::BoxList& children = location->is_range_marker() ? range_rows.children () : location_rows.children ();
+		for (Box_Helpers::BoxList::iterator i = children.begin(); i != children.end(); ++i) {
+			LocationEditRow* r = dynamic_cast<LocationEditRow*> (i->get_widget());
+			if (r && r->get_location() == location) {
+				children.erase (i);
+				break;
+			}
+		}
 	}
 }
 
@@ -743,7 +748,6 @@ void
 LocationUI::map_locations (Locations::LocationList& locations)
 {
 	Locations::LocationList::iterator i;
-	Location* location;
 	gint n;
 	int mark_n = 0;
 	Locations::LocationList temp = locations;
@@ -752,38 +756,32 @@ LocationUI::map_locations (Locations::LocationList& locations)
 	temp.sort (cmp);
 	locations = temp;
 
-	Box_Helpers::BoxList & loc_children = location_rows.children();
-	Box_Helpers::BoxList & range_children = range_rows.children();
-	LocationEditRow * erow;
-
 	for (n = 0, i = locations.begin(); i != locations.end(); ++n, ++i) {
 
-		location = *i;
+		Location* location = *i;
 
 		if (location->is_mark()) {
-			mark_n++;
-			erow = manage (new LocationEditRow(_session, location, mark_n));
+			LocationEditRow* erow = manage (new LocationEditRow (_session, location, mark_n));
 			erow->remove_requested.connect (sigc::mem_fun(*this, &LocationUI::location_remove_requested));
- 			erow->redraw_ranges.connect (sigc::mem_fun(*this, &LocationUI::location_redraw_ranges));
+			erow->redraw_ranges.connect (sigc::mem_fun(*this, &LocationUI::location_redraw_ranges));
+			Box_Helpers::BoxList & loc_children = location_rows.children();
 			loc_children.push_back(Box_Helpers::Element(*erow, PACK_SHRINK, 1, PACK_START));
 			if (location == newest_location) {
 				newest_location = 0;
 				erow->focus_name();
 			}
-		}
-		else if (location->is_auto_punch()) {
+		} else if (location->is_auto_punch()) {
 			punch_edit_row.set_session (_session);
 			punch_edit_row.set_location (location);
 			punch_edit_row.show_all();
-		}
-		else if (location->is_auto_loop()) {
+		} else if (location->is_auto_loop()) {
 			loop_edit_row.set_session (_session);
 			loop_edit_row.set_location (location);
 			loop_edit_row.show_all();
-		}
-		else {
-			erow = manage (new LocationEditRow(_session, location));
+		} else {
+			LocationEditRow* erow = manage (new LocationEditRow(_session, location));
 			erow->remove_requested.connect (sigc::mem_fun(*this, &LocationUI::location_remove_requested));
+			Box_Helpers::BoxList & range_children = range_rows.children();
 			range_children.push_back(Box_Helpers::Element(*erow,  PACK_SHRINK, 1, PACK_START));
 		}
 	}
@@ -859,7 +857,7 @@ LocationUI::set_session(ARDOUR::Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
-		_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::refresh_location_list, this), gui_context());
+		_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::locations_changed, this, _1), gui_context());
 		_session->locations()->StateChanged.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::refresh_location_list, this), gui_context());
 		_session->locations()->added.connect (_session_connections, invalidator (*this), ui_bind (&LocationUI::location_added, this, _1), gui_context());
 		_session->locations()->removed.connect (_session_connections, invalidator (*this), ui_bind (&LocationUI::location_removed, this, _1), gui_context());
@@ -869,6 +867,17 @@ LocationUI::set_session(ARDOUR::Session* s)
 	punch_edit_row.set_session (s);
 
 	refresh_location_list ();
+}
+
+void
+LocationUI::locations_changed (Locations::Change c)
+{
+	/* removal is signalled by both a removed and a changed signal emission from Locations,
+	   so we don't need to refresh the list on a removal
+	*/
+	if (c != Locations::REMOVAL) {
+		refresh_location_list ();
+	}
 }
 
 void

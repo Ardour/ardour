@@ -492,7 +492,7 @@ Locations::clear ()
 		current_location = 0;
 	}
 
-	changed (); /* EMIT SIGNAL */
+	changed (OTHER); /* EMIT SIGNAL */
 	current_changed (0); /* EMIT SIGNAL */
 }
 
@@ -515,7 +515,7 @@ Locations::clear_markers ()
 		}
 	}
 
-	changed (); /* EMIT SIGNAL */
+	changed (OTHER); /* EMIT SIGNAL */
 }
 
 void
@@ -541,7 +541,7 @@ Locations::clear_ranges ()
 		current_location = 0;
 	}
 
-	changed (); /* EMIT SIGNAL */
+	changed (OTHER); /* EMIT SIGNAL */
 	current_changed (0); /* EMIT SIGNAL */
 }
 
@@ -568,7 +568,6 @@ Locations::add (Location *loc, bool make_current)
 
 void
 Locations::remove (Location *loc)
-
 {
 	bool was_removed = false;
 	bool was_current = false;
@@ -602,14 +601,14 @@ Locations::remove (Location *loc)
 			 current_changed (0); /* EMIT SIGNAL */
 		}
 
-		changed (); /* EMIT_SIGNAL */
+		changed (REMOVAL); /* EMIT_SIGNAL */
 	}
 }
 
 void
 Locations::location_changed (Location* /*loc*/)
 {
-	changed (); /* EMIT SIGNAL */
+	changed (OTHER); /* EMIT SIGNAL */
 }
 
 XMLNode&
@@ -701,7 +700,7 @@ Locations::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	changed (); /* EMIT SIGNAL */
+	changed (OTHER); /* EMIT SIGNAL */
 
 	return 0;
 }

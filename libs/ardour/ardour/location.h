@@ -163,15 +163,23 @@ class Locations : public PBD::StatefulDestructible
 	int set_current (Location *, bool want_lock = true);
 	Location *current () const { return current_location; }
 
-	Location *first_location_before (nframes64_t, bool include_special_ranges = false);
-	Location *first_location_after (nframes64_t, bool include_special_ranges = false);
+	Location* first_location_before (nframes64_t, bool include_special_ranges = false);
+	Location* first_location_after (nframes64_t, bool include_special_ranges = false);
 
 	void marks_either_side (nframes64_t const, nframes64_t &, nframes64_t &) const;
 
 	void find_all_between (nframes64_t start, nframes64_t, LocationList&, Location::Flags);
 
+	enum Change {
+		ADDITION, ///< a location was added, but nothing else changed
+		REMOVAL, ///< a location was removed, but nothing else changed
+		OTHER ///< something more complicated happened
+	};
+
 	PBD::Signal1<void,Location*> current_changed;
-	PBD::Signal0<void>           changed;
+	/** something changed about the location list; the parameter gives some idea as to what */
+	PBD::Signal1<void,Change>    changed;
+	/** a location has been added to the end of the list */
 	PBD::Signal1<void,Location*> added;
 	PBD::Signal1<void,Location*> removed;
 	PBD::Signal1<void,const PBD::PropertyChange&>    StateChanged;

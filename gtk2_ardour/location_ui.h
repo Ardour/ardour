@@ -186,6 +186,7 @@ class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	void location_removed (ARDOUR::Location *);
 	void location_added (ARDOUR::Location *);
+	void locations_changed (ARDOUR::Locations::Change);
 	void map_locations (ARDOUR::Locations::LocationList&);
 };
 
