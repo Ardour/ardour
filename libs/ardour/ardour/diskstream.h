@@ -33,7 +33,6 @@
 
 #include "ardour/ardour.h"
 #include "ardour/chan_count.h"
-#include "ardour/location.h"
 #include "ardour/session_object.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
@@ -48,7 +47,8 @@ class Playlist;
 class Processor;
 class Region;
 class Session;
-class Track;	
+class Track;
+class Location;	
 
 class Diskstream : public SessionObject, public PublicDiskstream
 {

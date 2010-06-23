@@ -44,7 +44,6 @@
 #include "ardour/ardour.h"
 #include "ardour/session_object.h"
 #include "ardour/crossfade_compare.h"
-#include "ardour/location.h"
 #include "ardour/data_type.h"
 
 namespace ARDOUR  {
