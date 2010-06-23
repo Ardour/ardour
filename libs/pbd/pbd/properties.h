@@ -165,7 +165,7 @@ public:
 		: PropertyTemplate<T> (q, v)
 	{}
         
-        void diff (PropertyList& undo, PropertyList& redo) const {
+        void diff (PropertyList& undo, PropertyList& redo, Command* /*ignored*/) const {
                 if (this->_have_old) {
                         undo.add (new Property<T> (this->property_id(), this->_old));
                         redo.add (new Property<T> (this->property_id(), this->_current));
@@ -227,7 +227,7 @@ public:
 		: PropertyTemplate<std::string> (q, v)
 	{}
 
-        void diff (PropertyList& before, PropertyList& after) const {
+        void diff (PropertyList& before, PropertyList& after, Command* /*ignored*/) const {
                 if (this->_have_old) {
                         before.add (new Property<std::string> (PropertyDescriptor<std::string> (this->property_id()), this->_old));
                         after.add (new Property<std::string> (PropertyDescriptor<std::string> (this->property_id()), this->_current));

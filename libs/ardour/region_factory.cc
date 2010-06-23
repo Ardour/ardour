@@ -73,6 +73,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region)
 	}
 
 	if (ret) {
+                cerr << "Pure copy constructor region " << ret << " named " << ret->name() << endl;
 		map_add (ret);
 
 		/* pure copy constructor - no property list */
@@ -124,6 +125,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, b
 
 	if (ret) {
 		ret->set_properties (plist);
+                cerr << "Partial copy constructor region\n";
 		map_add (ret);
 
 		if (announce) {
@@ -163,6 +165,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 	if (ret) {
 
 		ret->set_properties (plist);
+                cerr << "New sources copy constructor region\n";
 		map_add (ret);
 
 		if (announce) {
@@ -208,6 +211,7 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 	if (ret) {
 
 		ret->set_properties (plist);
+                cerr << "de-novo constructor region " << ret << " named " << ret->name() << endl;
 		map_add (ret);
 
 		if (announce) {
@@ -281,6 +285,8 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
 		boost::bind (&RegionFactory::region_changed, _1, boost::weak_ptr<Region> (r))
 		);
 
+        cerr << "Added region with ID = " << r->id() << " named " << r->name() << endl;
+
 	update_region_name_map (r);
 }
 
@@ -292,7 +298,32 @@ RegionFactory::map_remove (boost::shared_ptr<Region> r)
 
         if (i != region_map.end()) {
                 region_map.erase (i);
+                cerr << "Removed region with ID = " << r->id() << " named " << r->name() << endl;;
         }
+
+}
+
+void
+RegionFactory::map_remove_with_equivalents (boost::shared_ptr<Region> r)
+{
+        Glib::Mutex::Lock lm (region_map_lock);
+
+        for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ) {
+                RegionMap::iterator tmp = i;
+                ++tmp;
+
+                if (r->region_list_equivalent (i->second)) {
+                        cerr << "Removed equivalent region " << i->second->name() << '/' << i->first << endl;
+                        region_map.erase (i);
+                } else if (r == i->second) {
+                        cerr << "Removed actual region " << i->second->name() << '/' << i->first << endl;
+                        region_map.erase (i);
+                } 
+
+                i = tmp;
+        }
+
+
 }
 
 boost::shared_ptr<Region>
@@ -486,4 +517,16 @@ RegionFactory::new_region_name (string old)
 
 	error << string_compose (_("cannot create new name for region \"%1\""), old) << endmsg;
 	return old;
+}
+
+void 
+RegionFactory::get_regions_using_source (boost::shared_ptr<Source> s, std::set<boost::shared_ptr<Region> >& r)
+{
+        Glib::Mutex::Lock lm (region_map_lock);
+
+        for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ++i) {
+                if (i->second->uses_source (s)) {
+                        r.insert (i->second);
+                }
+        }
 }

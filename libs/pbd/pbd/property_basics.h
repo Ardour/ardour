@@ -25,6 +25,8 @@
 
 #include "pbd/xml++.h"
 
+class Command;
+
 namespace PBD {
 
 class PropertyList;
@@ -83,7 +85,7 @@ public:
 	{}
 
 	virtual ~PropertyBase () {}
-
+        
 	/** Forget about any old value for this state */
 	virtual void clear_history () = 0;
 
@@ -97,7 +99,7 @@ public:
 	 *  the last call to clear_history, and one that allows redo
 	 *  of those changes.
 	 */
-	virtual void diff (PropertyList& undo, PropertyList& redo) const = 0;
+	virtual void diff (PropertyList& undo, PropertyList& redo, Command*) const = 0;
         
         virtual PropertyBase* maybe_clone_self_if_found_in_history_node (const XMLNode&) const { return 0; }
 

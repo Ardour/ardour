@@ -65,7 +65,8 @@ class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_
         RegionListProperty (Playlist&);
 
         boost::shared_ptr<Region> lookup_id (const PBD::ID& id);
-        void diff (PBD::PropertyList& undo, PBD::PropertyList& redo) const;
+        void diff (PBD::PropertyList& undo, PBD::PropertyList& redo, Command*) const;
+        bool involves (boost::shared_ptr<Region>);
 
   private:
         friend class Playlist;

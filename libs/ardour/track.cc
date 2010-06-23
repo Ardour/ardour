@@ -425,10 +425,10 @@ Track::destructive () const
 	return _diskstream->destructive ();
 }
 
-list<boost::shared_ptr<Region> > &
-Track::last_capture_regions ()
+list<boost::shared_ptr<Source> > &
+Track::last_capture_sources ()
 {
-	return _diskstream->last_capture_regions ();
+	return _diskstream->last_capture_sources ();
 }
 
 void

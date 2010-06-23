@@ -1040,13 +1040,18 @@ Session::state(bool full_state)
 
 		for (SourceMap::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
 
-			/* Don't save information about non-destructive file sources that are empty */
-			/* FIXME: MIDI breaks if this is made FileSource like it should be... */
+			/* Don't save information about non-destructive file sources that are empty
+                           and unused by any regions.
+                        */
 
-			boost::shared_ptr<AudioFileSource> fs;
-			if ((fs = boost::dynamic_pointer_cast<AudioFileSource> (siter->second)) != 0) {
+                        cerr << "Source " << siter->second->name() << " has UC = " << siter->second->used() 
+                             << " length = " <<  siter->second->length (0)
+                             << endl;
+
+			boost::shared_ptr<FileSource> fs;
+			if ((fs = boost::dynamic_pointer_cast<FileSource> (siter->second)) != 0) {
 				if (!fs->destructive()) {
-					if (fs->length(fs->timeline_position()) == 0) {
+					if (fs->length(fs->timeline_position()) == 0 && !fs->used()) {
 						continue;
 					}
 				}

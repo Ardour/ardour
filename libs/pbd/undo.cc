@@ -39,7 +39,6 @@ UndoTransaction::UndoTransaction ()
 
 UndoTransaction::UndoTransaction (const UndoTransaction& rhs)
 	: Command(rhs._name)
-	, PBD::ScopedConnectionList ()
 	, _clearing(false)
 {
 	clear ();
@@ -77,15 +76,15 @@ UndoTransaction::operator= (const UndoTransaction& rhs)
 }
 
 void
-UndoTransaction::add_command (Command *const action)
+UndoTransaction::add_command (Command *const cmd)
 {
 	/* catch death of command (e.g. caused by death of object to
 	   which it refers. command_death() is a normal static function
 	   so there is no need to manage this connection.
 	 */
 
-	action->DropReferences.connect_same_thread (*this, boost::bind (&command_death, this, action));
-	actions.push_back (action);
+	cmd->DropReferences.connect_same_thread (*this, boost::bind (&command_death, this, cmd));
+	actions.push_back (cmd);
 }
 
 void
@@ -250,9 +249,6 @@ UndoHistory::undo (unsigned int n)
 		return;
 	}
 
-	struct timeval start, end, diff;
-	gettimeofday (&start, 0);
-
 	{
 		UndoRedoSignaller exception_safe_signaller (*this);
 
@@ -265,15 +261,7 @@ UndoHistory::undo (unsigned int n)
 			ut->undo ();
 			RedoList.push_back (ut);
 		}
-		gettimeofday (&end, 0);
-		timersub (&end, &start, &diff);
-		cerr << "Undo-pre-signals took " << diff.tv_sec << '.' << diff.tv_usec << endl;
-
 	}
-
-	gettimeofday (&end, 0);
-	timersub (&end, &start, &diff);
-	cerr << "Undo took " << diff.tv_sec << '.' << diff.tv_usec << endl;
 
 	Changed (); /* EMIT SIGNAL */
 }
@@ -284,9 +272,6 @@ UndoHistory::redo (unsigned int n)
 	if (n == 0) {
 		return;
 	}
-
-	struct timeval start, end, diff;
-	gettimeofday (&start, 0);
 
 	{
 		UndoRedoSignaller exception_safe_signaller (*this);
@@ -300,14 +285,7 @@ UndoHistory::redo (unsigned int n)
 			ut->redo ();
 			UndoList.push_back (ut);
 		}
-		gettimeofday (&end, 0);
-		timersub (&end, &start, &diff);
-		cerr << "Redo-pre-signals took " << diff.tv_sec << '.' << diff.tv_usec << endl;
 	}
-
-	gettimeofday (&end, 0);
-	timersub (&end, &start, &diff);
-	cerr << "Redo took " << diff.tv_sec << '.' << diff.tv_usec << endl;
 
 	Changed (); /* EMIT SIGNAL */
 }

@@ -663,16 +663,14 @@ bool
 AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 {
 	boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion> (region);
+
+        if (!r) {
+                return false;
+        }
+
 	bool changed = false;
 	Crossfades::iterator c, ctmp;
 	set<boost::shared_ptr<Crossfade> > unique_xfades;
-
-	if (r == 0) {
-		fatal << _("programming error: non-audio Region passed to remove_overlap in audio playlist")
-		      << endmsg;
-		/*NOTREACHED*/
-		return false;
-	}
 
 	{
 		RegionLock rlock (this);

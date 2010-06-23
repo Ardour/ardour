@@ -4419,10 +4419,12 @@ Editor::remove_last_capture ()
 
 		if (prompter.run () == 1) {
 			_session->remove_last_capture ();
+                        _regions->redisplay ();
 		}
 
 	} else {
 		_session->remove_last_capture();
+                _regions->redisplay ();
 	}
 }
 

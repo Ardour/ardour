@@ -365,7 +365,6 @@ EditorRegions::selection_changed ()
 
 					} else {
 						_change_connection.block (true);
-						cerr << "\tpush to region selection\n";
 						_editor->set_selected_regionview_from_region_list (region, Selection::Add);
 
 						_change_connection.block (false);
@@ -392,13 +391,11 @@ EditorRegions::set_selected (RegionSelection& regions)
 			boost::shared_ptr<Region> compared_region = (*i)[_columns.region];
 
 			if (r == compared_region) {
-				cerr << "\tpush into region list\n";
 				_display.get_selection()->select(*i);
 				break;
 			}
 
 			if (!(*i).children().empty()) {
-				cerr << "\tlook for " << r->name() << " among children of " << (compared_region ? compared_region->name() : string ("NO REGION")) << endl;
 				if (set_selected_in_subrow(r, (*i), 2)) {
 					break;
 				}
@@ -559,7 +556,6 @@ EditorRegions::update_all_rows ()
 		boost::shared_ptr<Region> region = (*i)[_columns.region];
 
 		if (!region->automatic()) {
-			cerr << "level 1 : Updating " << region->name() << "\n";
 			populate_row(region, (*i));
 		}
 
@@ -580,7 +576,6 @@ EditorRegions::update_all_subrows (TreeModel::Row const &parent_row, int level)
 		boost::shared_ptr<Region> region = (*i)[_columns.region];
 
 		if (!region->automatic()) {
-			cerr << "level " << level << " : Updating " << region->name() << "\n";
 			populate_row(region, (*i));
 		}
 

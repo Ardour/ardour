@@ -436,18 +436,6 @@ Diskstream::set_name (const string& str)
 }
 
 void
-Diskstream::remove_region_from_last_capture (boost::weak_ptr<Region> wregion)
-{
-	boost::shared_ptr<Region> region (wregion.lock());
-
-	if (!region) {
-		return;
-	}
-
-	_last_capture_regions.remove (region);
-}
-
-void
 Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const & movements_frames)
 {
 	if (!_track || Config->get_automation_follows_regions () == false) {

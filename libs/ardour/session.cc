@@ -1484,6 +1484,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 			auto_connect_route (track, existing_inputs, existing_outputs);
 
 			track->non_realtime_input_change();
+
 			if (route_group) {
 				route_group->add (track);
 			}
@@ -2483,46 +2484,58 @@ Session::find_whole_file_parent (boost::shared_ptr<Region const> child) const
 }
 
 int
-Session::destroy_region (boost::shared_ptr<Region> region)
+Session::destroy_sources (list<boost::shared_ptr<Source> > srcs)
 {
-	vector<boost::shared_ptr<Source> > srcs;
+        set<boost::shared_ptr<Region> > relevant_regions;
 
-	{
-		if (region->playlist()) {
-			region->playlist()->destroy_region (region);
-		}
-
-		for (uint32_t n = 0; n < region->n_channels(); ++n) {
-			srcs.push_back (region->source (n));
-		}
+	for (list<boost::shared_ptr<Source> >::iterator s = srcs.begin(); s != srcs.end(); ++s) {
+                RegionFactory::get_regions_using_source (*s, relevant_regions);
 	}
 
-	region->drop_references ();
+        cerr << "There are " << relevant_regions.size() << " using " << srcs.size() << " sources" << endl;
 
-	for (vector<boost::shared_ptr<Source> >::iterator i = srcs.begin(); i != srcs.end(); ++i) {
+        for (set<boost::shared_ptr<Region> >::iterator r = relevant_regions.begin(); r != relevant_regions.end(); ) {
+                set<boost::shared_ptr<Region> >::iterator tmp;
 
-                (*i)->mark_for_remove ();
-                (*i)->drop_references ();
+                tmp = r;
+                ++tmp;
+
+                cerr << "Cleanup " << (*r)->name() << " UC = " << (*r).use_count() << endl;
+
+                playlists->destroy_region (*r);
+                RegionFactory::map_remove (*r);
+
+                (*r)->drop_sources ();
+                (*r)->drop_references ();
+
+                cerr << "\tdone UC = " << (*r).use_count() << endl;
+
+                relevant_regions.erase (r);
+
+                r = tmp;
+        }
+
+	for (list<boost::shared_ptr<Source> >::iterator s = srcs.begin(); s != srcs.end(); ) {
                 
-                cerr << "source was not used by any playlist\n";
-	}
+                {
+                        Glib::Mutex::Lock ls (source_lock);
+                        /* remove from the main source list */
+                        sources.erase ((*s)->id());
+                }
 
-	return 0;
-}
+                (*s)->mark_for_remove ();
+                (*s)->drop_references ();
 
-int
-Session::destroy_regions (list<boost::shared_ptr<Region> > regions)
-{
-	for (list<boost::shared_ptr<Region> >::iterator i = regions.begin(); i != regions.end(); ++i) {
-		destroy_region (*i);
-	}
+                s = srcs.erase (s);
+        }
+
 	return 0;
 }
 
 int
 Session::remove_last_capture ()
 {
-	list<boost::shared_ptr<Region> > r;
+	list<boost::shared_ptr<Source> > srcs;
 
 	boost::shared_ptr<RouteList> rl = routes.reader ();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
@@ -2531,15 +2544,15 @@ Session::remove_last_capture ()
 			continue;
 		}
 		
-		list<boost::shared_ptr<Region> >& l = tr->last_capture_regions();
+		list<boost::shared_ptr<Source> >& l = tr->last_capture_sources();
 
 		if (!l.empty()) {
-			r.insert (r.end(), l.begin(), l.end());
+			srcs.insert (srcs.end(), l.begin(), l.end());
 			l.clear ();
 		}
 	}
 
-	destroy_regions (r);
+	destroy_sources (srcs);
 
 	save_state (_current_snapshot_name);
 
@@ -2563,16 +2576,19 @@ Session::add_source (boost::shared_ptr<Source> source)
 	}
 
 	if (result.second) {
+
+                /* yay, new source */
+
 		set_dirty();
-	}
 
-	boost::shared_ptr<AudioFileSource> afs;
-
-	if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(source)) != 0) {
-		if (Config->get_auto_analyse_audio()) {
-			Analyser::queue_source_for_analysis (source, false);
-		}
-	}
+                boost::shared_ptr<AudioFileSource> afs;
+                
+                if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(source)) != 0) {
+                        if (Config->get_auto_analyse_audio()) {
+                                Analyser::queue_source_for_analysis (source, false);
+                        }
+                }
+        }
 }
 
 void

@@ -27,12 +27,11 @@
 #include <sigc++/bind.h>
 #include <sys/time.h>
 
-#include "pbd/signals.h"
 #include "pbd/command.h"
 
 typedef sigc::slot<void> UndoAction;
 
-class UndoTransaction : public Command, public PBD::ScopedConnectionList
+class UndoTransaction : public Command
 {
   public:
 	UndoTransaction ();

@@ -480,8 +480,8 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
                 was_recording = true;
         }
 
-	if (can_record && !_last_capture_regions.empty()) {
-		_last_capture_regions.clear ();
+	if (can_record && !_last_capture_sources.empty()) {
+		_last_capture_sources.clear ();
 	}
 
 	if (rec_nframes) {
@@ -1447,7 +1447,6 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 			plist.add (Properties::start, c->front()->write_source->last_capture_start_frame());
 			plist.add (Properties::length, total_capture);
 			plist.add (Properties::name, whole_file_region_name);
-
 			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 			rx->set_automatic (true);
 			rx->set_whole_file (true);
@@ -1462,7 +1461,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 			/* XXX what now? */
 		}
 
-		_last_capture_regions.push_back (region);
+		_last_capture_sources.insert (_last_capture_sources.end(), srcs.begin(), srcs.end());
 
 		// cerr << _name << ": there are " << capture_info.size() << " capture_info records\n";
 
@@ -1493,10 +1492,6 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 				error << _("AudioDiskstream: could not create region for captured audio!") << endmsg;
 				continue; /* XXX is this OK? */
 			}
-
-			region->DropReferences.connect_same_thread (*this, boost::bind (&Diskstream::remove_region_from_last_capture, this, boost::weak_ptr<Region>(region)));
-
-			_last_capture_regions.push_back (region);
 
 			i_am_the_modifier++;
 			_playlist->add_region (region, (*ci)->start, 1, non_layered());
@@ -1913,6 +1908,8 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	uint32_t n;
+
+        cerr << name() << " resetting write sources, recrodable " << recordable() << " chans = " << c->size() << endl;
 
 	if (!_session.writable() || !recordable()) {
 		return;
@@ -2356,6 +2353,7 @@ void
 AudioDiskstream::ChannelInfo::resize_capture (nframes_t capture_bufsize)
 {
         delete capture_buf;
+
 	capture_buf = new RingBufferNPT<Sample> (capture_bufsize);
 	memset (capture_buf->buffer(), 0, sizeof (Sample) * capture_buf->bufsize());
 }

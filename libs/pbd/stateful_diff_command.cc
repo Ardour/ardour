@@ -32,15 +32,21 @@ using namespace PBD;
  *  @param s Stateful object.
  */
 
-StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<Stateful> s)
-	: _object (s)
+StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<StatefulDestructible> s)
+        : _object (s)
         , _undo (new PropertyList)
         , _redo (new PropertyList)
 {
-        s->diff (*_undo, *_redo);
+        s->diff (*_undo, *_redo, this);
+
+        /* if the stateful object that this command refers to goes away,
+           be sure to notify owners of this command.
+        */
+
+        s->DropReferences.connect_same_thread (*this, boost::bind (&Destructible::drop_references, this));
 }
 
-StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<Stateful> s, XMLNode const & n)
+StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<StatefulDestructible> s, XMLNode const & n)
 	: _object (s)
         , _undo (0)
         , _redo (0)
@@ -57,10 +63,18 @@ StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<Stateful> s, XMLNode
 
         assert (_undo != 0);
         assert (_redo != 0);
+
+        /* if the stateful object that this command refers to goes away,
+           be sure to notify owners of this command.
+        */
+
+        s->DropReferences.connect_same_thread (*this, boost::bind (&Destructible::drop_references, this));
 }
 
 StatefulDiffCommand::~StatefulDiffCommand ()
 {
+        drop_references ();
+
         delete _undo;
         delete _redo;
 }

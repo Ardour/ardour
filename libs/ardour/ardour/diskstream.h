@@ -45,7 +45,7 @@ namespace ARDOUR {
 class IO;
 class Playlist;
 class Processor;
-class Region;
+class Source;
 class Session;
 class Track;
 class Location;	
@@ -134,11 +134,9 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	int set_loop (Location *loc);
 
-	std::list<boost::shared_ptr<Region> >& last_capture_regions () { return _last_capture_regions; }
+	std::list<boost::shared_ptr<Source> >& last_capture_sources () { return _last_capture_sources; }
 
 	void handle_input_change (IOChange, void *src);
-
-	void remove_region_from_last_capture (boost::weak_ptr<Region> wregion);
 
 	void move_processor_automation (boost::weak_ptr<Processor>,
 			std::list<Evoral::RangeMove<framepos_t> > const &);
@@ -228,7 +226,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	virtual bool realtime_set_speed (double, bool global_change);
 
-	std::list<boost::shared_ptr<Region> > _last_capture_regions;
+	std::list<boost::shared_ptr<Source> > _last_capture_sources;
 
 	virtual int use_pending_capture_data (XMLNode& node) = 0;
 

@@ -263,6 +263,9 @@ AudioRegion::connect_to_header_position_offset_changed ()
 
 	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
 
+                /* connect only once to HeaderPositionOffsetChanged, even if sources are replicated
+                 */
+
 		if (unique_srcs.find (*i) == unique_srcs.end ()) {
 			unique_srcs.insert (*i);
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (*i);
@@ -520,23 +523,7 @@ AudioRegion::state (bool full)
 	XMLNode& node (Region::state (full));
 	XMLNode *child;
 	char buf[64];
-	char buf2[64];
 	LocaleGuard lg (X_("POSIX"));
-
-
-	// XXX these should move into Region
-
-	for (uint32_t n=0; n < _sources.size(); ++n) {
-		snprintf (buf2, sizeof(buf2), "source-%d", n);
-		_sources[n]->id().print (buf, sizeof (buf));
-		node.add_property (buf2, buf);
-	}
-
-	for (uint32_t n=0; n < _master_sources.size(); ++n) {
-		snprintf (buf2, sizeof(buf2), "master-source-%d", n);
-		_master_sources[n]->id().print (buf, sizeof (buf));
-		node.add_property (buf2, buf);
-	}
 
 	snprintf (buf, sizeof (buf), "%u", (uint32_t) _sources.size());
 	node.add_property ("channels", buf);
@@ -569,10 +556,6 @@ AudioRegion::state (bool full)
 
 	} else {
 		child->add_property ("default", "yes");
-	}
-
-	if (full && _extra_xml) {
-		node.add_child_copy (*_extra_xml);
 	}
 
 	return node;

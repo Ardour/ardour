@@ -415,6 +415,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 Region::~Region ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Region %1 destructor @ %2\n", _name, this));
+        drop_sources ();
 }
 
 void
@@ -1126,10 +1127,12 @@ Region::set_layer (layer_t l)
 }
 
 XMLNode&
-Region::state (bool /*full_state*/)
+Region::state (bool full)
 {
 	XMLNode *node = new XMLNode ("Region");
 	char buf[64];
+	char buf2[64];
+	LocaleGuard lg (X_("POSIX"));
 	const char* fe = NULL;
 
 	add_properties (*node);
@@ -1162,6 +1165,22 @@ Region::state (bool /*full_state*/)
 		stringstream str;
 		str << _bbt_time;
 		node->add_property ("bbt-position", str.str());
+	}
+
+	for (uint32_t n=0; n < _sources.size(); ++n) {
+		snprintf (buf2, sizeof(buf2), "source-%d", n);
+		_sources[n]->id().print (buf, sizeof(buf));
+		node->add_property (buf2, buf);
+	}
+
+	for (uint32_t n=0; n < _master_sources.size(); ++n) {
+		snprintf (buf2, sizeof(buf2), "master-source-%d", n);
+		_master_sources[n]->id().print (buf, sizeof (buf));
+		node->add_property (buf2, buf);
+	}
+
+	if (full && _extra_xml) {
+		node->add_child_copy (*_extra_xml);
 	}
 
 	return *node;
@@ -1237,11 +1256,6 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 	}
 
 	if (send) {
-		cerr << _name << ": final change to be sent: ";
-		for (PropertyChange::iterator i = what_changed.begin(); i != what_changed.end(); ++i) {
-			cerr << g_quark_to_string ((GQuark) *i) << ' ';
-		}
-		cerr << endl;
 		send_change (what_changed);
 	}
 	
@@ -1335,7 +1349,7 @@ Region::region_list_equivalent (boost::shared_ptr<const Region> other) const
 void
 Region::source_deleted (boost::weak_ptr<Source>)
 {
-	_sources.clear ();
+        drop_sources ();
 
 	if (!_session.deletion_in_progress()) {
 		/* this is a very special case: at least one of the region's
@@ -1366,8 +1380,16 @@ Region::master_source_names ()
 void
 Region::set_master_sources (const SourceList& srcs)
 {
+        for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
+                (*i)->dec_use_count ();
+        }
+
 	_master_sources = srcs;
 	assert (_sources.size() == _master_sources.size());
+
+        for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
+                (*i)->inc_use_count ();
+        }
 }
 
 bool
@@ -1408,6 +1430,7 @@ Region::uses_source (boost::shared_ptr<const Source> source) const
 sframes_t
 Region::source_length(uint32_t n) const
 {
+        assert (n < _sources.size());
 	return _sources[n]->length(_position - _start);
 }
 
@@ -1420,7 +1443,7 @@ Region::verify_length (framecnt_t len)
 
 	framecnt_t maxlen = 0;
 
-	for (uint32_t n=0; n < _sources.size(); ++n) {
+	for (uint32_t n = 0; n < _sources.size(); ++n) {
 		maxlen = max (maxlen, source_length(n) - _start);
 	}
 
@@ -1438,7 +1461,7 @@ Region::verify_start_and_length (framepos_t new_start, framecnt_t& new_length)
 
 	framecnt_t maxlen = 0;
 
-	for (uint32_t n=0; n < _sources.size(); ++n) {
+	for (uint32_t n = 0; n < _sources.size(); ++n) {
 		maxlen = max (maxlen, source_length(n) - new_start);
 	}
 
@@ -1454,7 +1477,7 @@ Region::verify_start (framepos_t pos)
 		return true;
 	}
 
-	for (uint32_t n=0; n < _sources.size(); ++n) {
+	for (uint32_t n = 0; n < _sources.size(); ++n) {
 		if (pos > source_length(n) - _length) {
 			return false;
 		}
@@ -1469,7 +1492,7 @@ Region::verify_start_mutable (framepos_t& new_start)
 		return true;
 	}
 
-	for (uint32_t n=0; n < _sources.size(); ++n) {
+	for (uint32_t n = 0; n < _sources.size(); ++n) {
 		if (new_start > source_length(n) - _length) {
 			new_start = source_length(n) - _length;
 		}
@@ -1508,6 +1531,21 @@ Region::invalidate_transients ()
 	_transients.clear ();
 }
 
+void
+Region::drop_sources ()
+{
+        for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {
+                (*i)->dec_use_count ();
+        }
+
+	_sources.clear ();
+
+        for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
+                (*i)->dec_use_count ();
+        }
+
+        _master_sources.clear ();
+}
 
 void
 Region::use_sources (SourceList const & s)
@@ -1515,16 +1553,19 @@ Region::use_sources (SourceList const & s)
 	set<boost::shared_ptr<Source> > unique_srcs;
 
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
-		_sources.push_back (*i);
-		(*i)->DropReferences.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
-		unique_srcs.insert (*i);
-	}
 
-	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
+		_sources.push_back (*i);
+                (*i)->inc_use_count ();
 		_master_sources.push_back (*i);
-		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->DropReferences.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
-		}
+                (*i)->inc_use_count ();
+
+                /* connect only once to DropReferences, even if sources are replicated
+                 */
+
+		if (unique_srcs.find (*i) == unique_srcs.end ()) {
+			unique_srcs.insert (*i);
+                        (*i)->DropReferences.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
+                }
 	}
 }
 

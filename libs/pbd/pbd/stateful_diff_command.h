@@ -27,7 +27,7 @@
 namespace PBD
 {
 
-class Stateful;	
+class StatefulDestructible;	
 class PropertyList;
 
 /** A Command which stores its action as the differences between the before and after
@@ -36,13 +36,13 @@ class PropertyList;
 class StatefulDiffCommand : public Command
 {
 public:
-	StatefulDiffCommand (boost::shared_ptr<Stateful>);
-	StatefulDiffCommand (boost::shared_ptr<Stateful>, XMLNode const &);
+	StatefulDiffCommand (boost::shared_ptr<StatefulDestructible>);
+	StatefulDiffCommand (boost::shared_ptr<StatefulDestructible>, XMLNode const &);
 	~StatefulDiffCommand ();
 
 	void operator() ();
 	void undo ();
-
+        
 	XMLNode& get_state ();
 
 private:

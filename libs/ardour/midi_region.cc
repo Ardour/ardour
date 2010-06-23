@@ -193,30 +193,7 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& 
 XMLNode&
 MidiRegion::state (bool full)
 {
-	XMLNode& node (Region::state (full));
-	char buf[64];
-	char buf2[64];
-	LocaleGuard lg (X_("POSIX"));
-
-	// XXX these should move into Region
-
-	for (uint32_t n=0; n < _sources.size(); ++n) {
-		snprintf (buf2, sizeof(buf2), "source-%d", n);
-		_sources[n]->id().print (buf, sizeof(buf));
-		node.add_property (buf2, buf);
-	}
-
-	for (uint32_t n=0; n < _master_sources.size(); ++n) {
-		snprintf (buf2, sizeof(buf2), "master-source-%d", n);
-		_master_sources[n]->id().print (buf, sizeof (buf));
-		node.add_property (buf2, buf);
-	}
-
-	if (full && _extra_xml) {
-		node.add_child_copy (*_extra_xml);
-	}
-
-	return node;
+	return Region::state (full);
 }
 
 int

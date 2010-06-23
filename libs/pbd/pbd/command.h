@@ -22,10 +22,12 @@
 #ifndef __lib_pbd_command_h__
 #define __lib_pbd_command_h__
 
-#include "pbd/statefuldestructible.h"
-#include <boost/utility.hpp>
+#include <string>
 
-class Command : public PBD::StatefulDestructible, public boost::noncopyable
+#include "pbd/signals.h"
+#include "pbd/statefuldestructible.h"
+
+class Command : public PBD::StatefulDestructible, public PBD::ScopedConnectionList
 {
 public:
 	virtual ~Command() { /* NOTE: derived classes must call drop_references() */ }
@@ -34,7 +36,7 @@ public:
 	
 	void set_name (const std::string& str) { _name = str; }
 	const std::string& name() const { return _name; }
-	
+
 	virtual void undo() = 0;
 	virtual void redo() { (*this)(); }
 	

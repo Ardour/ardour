@@ -53,6 +53,7 @@ public:
 	template<class T> void foreach (T *obj, void (T::*func)(boost::shared_ptr<Playlist>));
 	void get (std::vector<boost::shared_ptr<Playlist> >&);
 	void unassigned (std::list<boost::shared_ptr<Playlist> > & list);
+        void destroy_region (boost::shared_ptr<Region>);
 
 private:
 	friend class Session;
@@ -69,7 +70,7 @@ private:
 	int load (Session &, const XMLNode&);
 	int load_unused (Session &, const XMLNode&);
 	boost::shared_ptr<Playlist> XMLPlaylistFactory (Session &, const XMLNode&);
-
+        
 	mutable Glib::Mutex lock;
 	typedef std::set<boost::shared_ptr<Playlist> > List;
 	List playlists;

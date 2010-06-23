@@ -359,14 +359,12 @@ bool
 MidiPlaylist::destroy_region (boost::shared_ptr<Region> region)
 {
 	boost::shared_ptr<MidiRegion> r = boost::dynamic_pointer_cast<MidiRegion> (region);
-	bool changed = false;
 
-	if (r == 0) {
-		PBD::fatal << _("programming error: non-midi Region passed to remove_overlap in midi playlist")
-		<< endmsg;
-		/*NOTREACHED*/
+	if (!r) {
 		return false;
 	}
+
+	bool changed = false;
 
 	{
 		RegionLock rlock (this);

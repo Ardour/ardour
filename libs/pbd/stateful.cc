@@ -167,10 +167,10 @@ Stateful::clear_history ()
 }
 
 void
-Stateful::diff (PropertyList& before, PropertyList& after) const
+Stateful::diff (PropertyList& before, PropertyList& after, Command* cmd) const
 {
 	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		i->second->diff (before, after);
+		i->second->diff (before, after, cmd);
 	}
 }
 

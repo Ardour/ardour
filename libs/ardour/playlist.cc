@@ -134,7 +134,7 @@ RegionListProperty::copy_for_history () const
 }
 
 void 
-RegionListProperty::diff (PropertyList& undo, PropertyList& redo) const
+RegionListProperty::diff (PropertyList& undo, PropertyList& redo, Command* cmd) const
 {
         if (changed()) {
 		/* list of the removed/added regions since clear_history() was last called */
@@ -143,6 +143,18 @@ RegionListProperty::diff (PropertyList& undo, PropertyList& redo) const
 		/* the same list, but with removed/added lists swapped (for undo purposes) */
                 RegionListProperty* b = copy_for_history ();
                 b->invert_changes ();
+
+                if (cmd) {
+                        /* whenever one of the regions emits DropReferences, make sure
+                           that the Destructible we've been told to notify hears about
+                           it. the Destructible is likely to be the Command being built
+                           with this diff().
+                        */
+                        
+                        for (set<boost::shared_ptr<Region> >::iterator i = a->change().added.begin(); i != a->change().added.end(); ++i) {
+                                (*i)->DropReferences.connect_same_thread (*cmd, boost::bind (&Destructible::drop_references, cmd));
+                        }
+                }
 
                 undo.add (b);
                 redo.add (a);

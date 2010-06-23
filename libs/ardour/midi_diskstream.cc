@@ -524,8 +524,8 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 	}
 
 
-	if (can_record && !_last_capture_regions.empty()) {
-		_last_capture_regions.clear ();
+	if (can_record && !_last_capture_sources.empty()) {
+		_last_capture_sources.clear ();
 	}
 
 	if (nominally_recording || rec_nframes) {
@@ -975,9 +975,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 			/* XXX what now? */
 		}
 
-		_last_capture_regions.push_back (region);
-
-		// cerr << _name << ": there are " << capture_info.size() << " capture_info records\n";
+		_last_capture_sources.insert (_last_capture_sources.end(), srcs.begin(), srcs.end());
 
 		_playlist->clear_history ();
 		_playlist->freeze ();
@@ -1006,10 +1004,6 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 				error << _("MidiDiskstream: could not create region for captured midi!") << endmsg;
 				continue; /* XXX is this OK? */
 			}
-
-			region->DropReferences.connect_same_thread (*this, boost::bind (&Diskstream::remove_region_from_last_capture, this, boost::weak_ptr<Region>(region)));
-
-			_last_capture_regions.push_back (region);
 
 			// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
 
@@ -1312,6 +1306,8 @@ MidiDiskstream::set_state (const XMLNode& node, int /*version*/)
 int
 MidiDiskstream::use_new_write_source (uint32_t n)
 {
+        cerr << name() << " use new write source for n = " << n << " recordable ? " << recordable() << endl;
+
 	if (!recordable()) {
 		return 1;
 	}

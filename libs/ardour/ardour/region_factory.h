@@ -21,6 +21,7 @@
 #define __ardour_region_factory_h__
 
 #include <map>
+#include <set>
 #include <glibmm/thread.h>
 
 #include "pbd/id.h"
@@ -78,7 +79,10 @@ class RegionFactory {
 	/** create a region with specified sources @param srcs and XML state */
 	static boost::shared_ptr<Region> create (SourceList& srcs, const XMLNode&);
 
+        static void get_regions_using_source (boost::shared_ptr<Source>, std::set<boost::shared_ptr<Region> >& );
+
 	static void map_remove (boost::shared_ptr<Region>);
+	static void map_remove_with_equivalents (boost::shared_ptr<Region>);
         static void delete_all_regions ();
         static const RegionMap& regions() { return region_map; }
         static uint32_t nregions ();

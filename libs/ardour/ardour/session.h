@@ -512,8 +512,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int  cleanup_sources (CleanupReport&);
 	int  cleanup_trash_sources (CleanupReport&);
 
-	int destroy_region (boost::shared_ptr<Region>);
-	int destroy_regions (std::list<boost::shared_ptr<Region> >);
+	int destroy_sources (std::list<boost::shared_ptr<Source> >);
 
 	int remove_last_capture ();
 

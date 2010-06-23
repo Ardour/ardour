@@ -270,6 +270,8 @@ class Region
 		return _pending_explicit_relayer;
 	}
 
+        void drop_sources ();
+
   protected:
 	friend class RegionFactory;
 

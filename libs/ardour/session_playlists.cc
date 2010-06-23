@@ -220,6 +220,21 @@ SessionPlaylists::get (vector<boost::shared_ptr<Playlist> >& s)
 }
 
 void
+SessionPlaylists::destroy_region (boost::shared_ptr<Region> r)
+{
+	Glib::Mutex::Lock lm (lock);
+
+	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+                (*i)->destroy_region (r);
+	}
+	
+	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+                (*i)->destroy_region (r);
+	}
+}
+
+
+void
 SessionPlaylists::find_equivalent_playlist_regions (boost::shared_ptr<Region> region, vector<boost::shared_ptr<Region> >& result)
 {
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i)
@@ -262,14 +277,12 @@ SessionPlaylists::add_state (XMLNode* node, bool full_state)
 	XMLNode* child = node->add_child ("Playlists");
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		if (!(*i)->hidden()) {
-			if (!(*i)->empty()) {
-				if (full_state) {
-					child->add_child_nocopy ((*i)->get_state());
-				} else {
-					child->add_child_nocopy ((*i)->get_template());
-				}
-			}
-		}
+                        if (full_state) {
+                                child->add_child_nocopy ((*i)->get_state());
+                        } else {
+                                child->add_child_nocopy ((*i)->get_template());
+                        }
+                }
 	}
 
 	child = node->add_child ("UnusedPlaylists");

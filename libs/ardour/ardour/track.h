@@ -29,6 +29,7 @@ namespace ARDOUR {
 class Session;
 class Playlist;
 class RouteGroup;
+class Source;
 class Region;
 class Diskstream;
 
@@ -100,7 +101,7 @@ class Track : public Route, public PublicDiskstream
 	boost::shared_ptr<Playlist> playlist ();
 	void monitor_input (bool);
 	bool destructive () const;
-	std::list<boost::shared_ptr<Region> > & last_capture_regions ();
+	std::list<boost::shared_ptr<Source> > & last_capture_sources ();
 	void set_capture_offset ();
 	void reset_write_sources (bool, bool force = false);
 	float playback_buffer_load () const;

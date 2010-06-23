@@ -67,7 +67,7 @@ class Stateful {
         /* history management */
 
 	void clear_history ();
-        void diff (PropertyList&, PropertyList&) const;
+        void diff (PropertyList&, PropertyList&, Command*) const;
         bool changed() const;
 
         /* create a property list from an XMLNode
