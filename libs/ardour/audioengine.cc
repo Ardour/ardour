@@ -25,6 +25,9 @@
 #include <sstream>
 
 #include <glibmm/timer.h>
+#include <jack/jack.h>
+#include <jack/thread.h>
+
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
 #include "pbd/unknown_type.h"
@@ -1479,4 +1482,31 @@ AudioEngine::is_realtime () const
 {
 	GET_PRIVATE_JACK_POINTER_RET (_jack,false);
 	return jack_is_realtime (_priv_jack);
+}
+
+pthread_t
+AudioEngine::create_process_thread (boost::function<void()> f, size_t stacksize)
+{
+        GET_PRIVATE_JACK_POINTER_RET (_jack, 0);
+        pthread_t thread;
+        ThreadData* td = new ThreadData (this, f, stacksize);
+
+        if (jack_client_create_thread (_priv_jack, &thread, jack_client_real_time_priority (_priv_jack), 
+                                       jack_is_realtime (_priv_jack), _start_process_thread, td)) {
+                return -1;
+        } 
+
+        return thread;
+}
+
+void*
+AudioEngine::_start_process_thread (void* arg)
+{
+        ThreadData* td = reinterpret_cast<ThreadData*> (arg);
+        boost::function<void()> f = td->f;
+        delete td;
+
+        f ();
+
+        return 0;
 }

@@ -18,17 +18,11 @@
 
 */
 
-#ifdef __linux__
-#include <unistd.h>
-#elif defined(__APPLE__) || defined(__FreeBSD__)
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#endif
-
 #include <stdio.h>
 #include <cmath>
 
 #include "pbd/compose.h"
+#include "pbd/cpus.h"
 
 #include "ardour/debug.h"
 #include "ardour/graph.h"
@@ -45,22 +39,6 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-static unsigned int 
-hardware_concurrency()
-{
-#if defined(PTW32_VERSION) || defined(__hpux)
-        return pthread_num_processors_np();
-#elif defined(__APPLE__) || defined(__FreeBSD__)
-        int count;
-        size_t size=sizeof(count);
-        return sysctlbyname("hw.ncpu",&count,&size,NULL,0)?0:count;
-#elif defined(HAVE_UNISTD) && defined(_SC_NPROCESSORS_ONLN)
-        int const count=sysconf(_SC_NPROCESSORS_ONLN);
-        return (count>0)?count:0;
-#else
-        return 0;
-#endif
-}
 
 Graph::Graph (Session & session) 
         : SessionHandleRef (session) 
@@ -81,10 +59,34 @@ Graph::Graph (Session & session)
         _graph_empty = true;
 
         int num_cpu = hardware_concurrency();
-        info << string_compose (_("Using %1 CPUs via %1 threads\n"), num_cpu) << endmsg;
-        _thread_list.push_back( Glib::Thread::create( sigc::mem_fun( *this, &Graph::main_thread), 100000, true, true, Glib::THREAD_PRIORITY_NORMAL) );
-        for (int i=1; i<num_cpu; i++)
-                _thread_list.push_back( Glib::Thread::create( sigc::mem_fun( *this, &Graph::helper_thread), 100000, true, true, Glib::THREAD_PRIORITY_NORMAL) );
+        int num_threads = num_cpu;
+        int pu = Config->get_processor_usage ();
+
+        if (pu < 0) {
+                /* use "pu" less cores for DSP than appear to be available
+                 */
+
+                if (pu < num_threads) {
+                        num_threads += pu; // pu is negative
+                } else {
+                        num_threads = 1;
+                }
+        } else {
+                /* use "pu" cores, if available
+                 */
+
+                if (pu <= num_threads) {
+                        num_threads = pu;
+                } 
+        }
+
+        info << string_compose (_("Using %2 threads on %1 CPUs"), num_cpu, num_threads) << endmsg;
+
+        _thread_list.push_back (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::main_thread, this), 100000));
+
+        for (int i = 1; i < num_threads; ++i) {
+                _thread_list.push_back (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::helper_thread, this), 100000));
+        }
 }
 
 void
@@ -98,8 +100,9 @@ Graph::session_going_away()
 
         sem_post( &_callback_start_sem);
 
-        for (std::list<Glib::Thread *>::iterator i=_thread_list.begin(); i!=_thread_list.end(); i++) {
-                (*i)->join();
+        for (std::list<pthread_t>::iterator i = _thread_list.begin(); i != _thread_list.end(); i++) {
+                void* status;
+                pthread_join (*i, &status);
         }
 
         // now drop all references on the nodes.

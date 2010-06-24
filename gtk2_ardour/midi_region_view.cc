@@ -2256,8 +2256,8 @@ MidiRegionView::trim_note (CanvasNoteEvent* event, Evoral::MusicalTime front_del
 {
 	bool change_start = false;
 	bool change_length = false;
-	Evoral::MusicalTime new_start;
-	Evoral::MusicalTime new_length;
+	Evoral::MusicalTime new_start = 0;
+	Evoral::MusicalTime new_length = 0;
 
 	/* NOTE: the semantics of the two delta arguments are slightly subtle:
 
@@ -2685,7 +2685,7 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 	Evoral::MusicalTime beat_delta;
 	Evoral::MusicalTime paste_pos_beats;
 	Evoral::MusicalTime duration;
-	Evoral::MusicalTime end_point;
+	Evoral::MusicalTime end_point = 0;
 
 	duration = (*mcb.notes().rbegin())->end_time() - (*mcb.notes().begin())->time();
 	paste_pos_beats = frames_to_beats (pos - _region->position());

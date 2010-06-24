@@ -85,7 +85,7 @@ class Graph : public SessionHandleRef
         virtual void session_going_away ();
 
     private:
-        std::list<Glib::Thread *> _thread_list;
+        std::list<pthread_t> _thread_list;
         volatile bool _quit_threads;
         
 	node_list_t _nodes_rt[2];

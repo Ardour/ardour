@@ -245,6 +245,8 @@ _	   the regular process() call to session->process() is not made.
 	static AudioEngine* instance() { return _instance; }
 	void died ();
 
+        pthread_t create_process_thread (boost::function<void()>, size_t stacksize);
+
   private:
 	static AudioEngine*       _instance;
 
@@ -316,6 +318,17 @@ _	   the regular process() call to session->process() is not made.
 	static gint      m_meter_exit;
 
         ProcessThread* _main_thread;
+
+        struct ThreadData {
+            AudioEngine* engine;
+            boost::function<void()> f;
+            size_t stacksize;
+            
+            ThreadData (AudioEngine* ae, boost::function<void()> fp, size_t stacksz) 
+            : engine (ae) , f (fp) , stacksize (stacksz) {}
+        };
+        
+        static void* _start_process_thread (void*);
 };
 
 } // namespace ARDOUR

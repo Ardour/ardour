@@ -40,6 +40,7 @@ def configure(conf):
 
 	conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT')
 	conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO')
+	conf.check(header_name='unistd.h', define_name='HAVE_UNISTD')
 
 	conf.write_config_header('libpbd-config.h')
 
@@ -59,6 +60,7 @@ def build(bld):
 		controllable.cc
 		controllable_descriptor.cc
                 crossthread.cc
+                cpus.cc
                 debug.cc
 		enumwriter.cc
                 event_loop.cc

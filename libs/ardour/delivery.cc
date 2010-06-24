@@ -481,7 +481,7 @@ Delivery::target_gain ()
 		return 0.0;
 	}
 
-        MuteMaster::MutePoint mp;
+        MuteMaster::MutePoint mp = MuteMaster::Main; // stupid gcc uninit warning
         
         switch (_role) {
         case Main:
