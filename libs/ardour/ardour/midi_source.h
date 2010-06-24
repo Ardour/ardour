@@ -74,8 +74,9 @@ class MidiSource : virtual public Source
 	virtual void append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev,
 			sframes_t source_start) = 0;
 
-	virtual sframes_t length (sframes_t pos) const;
-	virtual void      update_length (sframes_t pos, sframes_t cnt);
+	virtual bool       empty () const;
+	virtual framecnt_t length (framepos_t pos) const;
+	virtual void       update_length (framepos_t pos, framecnt_t cnt);
 
 	virtual void mark_streaming_midi_write_started (NoteMode mode, sframes_t start_time);
 	virtual void mark_streaming_write_started ();

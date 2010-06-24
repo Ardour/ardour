@@ -126,14 +126,20 @@ AudioSource::set_state (const XMLNode& node, int /*version*/)
 	return 0;
 }
 
-sframes_t
-AudioSource::length (sframes_t /*pos*/) const
+bool
+AudioSource::empty () const
+{
+        return _length == 0;
+}
+
+framecnt_t
+AudioSource::length (framepos_t /*pos*/) const
 {
 	return _length;
 }
 
 void
-AudioSource::update_length (sframes_t pos, sframes_t cnt)
+AudioSource::update_length (framepos_t pos, framecnt_t cnt)
 {
 	if (pos + cnt > _length) {
 		_length = pos + cnt;

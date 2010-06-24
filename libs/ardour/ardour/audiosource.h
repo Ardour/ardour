@@ -50,6 +50,7 @@ class AudioSource : virtual public Source,
 	framecnt_t readable_length() const { return _length; }
 	uint32_t   n_channels()      const { return 1; }
 
+        bool       empty() const;
 	framecnt_t length (framepos_t pos) const;
 	void      update_length (framepos_t pos, framecnt_t cnt);
 

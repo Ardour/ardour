@@ -82,7 +82,7 @@ FileSource::removable () const
 {
 	return (_flags & Removable)
 		&& ((_flags & RemoveAtDestroy) || 
-		    ((_flags & RemovableIfEmpty) && length(timeline_position()) == 0));
+		    ((_flags & RemovableIfEmpty) && empty() == 0));
 }
 
 int

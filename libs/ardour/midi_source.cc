@@ -112,9 +112,19 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 	return 0;
 }
 
-sframes_t
-MidiSource::length (sframes_t pos) const
+bool
+MidiSource::empty () const
 {
+        return _length_beats == 0;
+}
+
+framecnt_t
+MidiSource::length (framepos_t pos) const
+{
+        if (_length_beats == 0) {
+                return 0;
+        }
+
 	BeatsFramesConverter converter(_session.tempo_map(), pos);
 	return converter.to(_length_beats);
 }

@@ -60,6 +60,7 @@ class Source : public SessionObject
 	time_t timestamp() const { return _timestamp; }
 	void stamp (time_t when) { _timestamp = when; }
 
+	virtual bool       empty () const = 0;
 	virtual framecnt_t length (framepos_t pos) const = 0;
 	virtual void       update_length (framepos_t pos, framecnt_t cnt) = 0;
 

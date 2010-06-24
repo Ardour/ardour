@@ -1044,14 +1044,10 @@ Session::state(bool full_state)
                            and unused by any regions.
                         */
 
-                        cerr << "Source " << siter->second->name() << " has UC = " << siter->second->used() 
-                             << " length = " <<  siter->second->length (0)
-                             << endl;
-
 			boost::shared_ptr<FileSource> fs;
 			if ((fs = boost::dynamic_pointer_cast<FileSource> (siter->second)) != 0) {
 				if (!fs->destructive()) {
-					if (fs->length(fs->timeline_position()) == 0 && !fs->used()) {
+					if (fs->empty() && !fs->used()) {
 						continue;
 					}
 				}
