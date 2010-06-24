@@ -185,9 +185,9 @@ LevelMeter::setup_meters (int len, int initial_width)
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
 		uint32_t b, m, t, c;
 		if (n < nmidi) {
-			b = ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorBase.get();
-			m = ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorMid.get();
-			t = ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorTop.get();
+			b = ARDOUR_UI::config()->canvasvar_MidiMeterColorBase.get();
+			m = ARDOUR_UI::config()->canvasvar_MidiMeterColorMid.get();
+			t = ARDOUR_UI::config()->canvasvar_MidiMeterColorTop.get();
 			c = ARDOUR_UI::config()->canvasvar_MeterColorClip.get();
 		} else {
 			b = ARDOUR_UI::config()->canvasvar_MeterColorBase.get();

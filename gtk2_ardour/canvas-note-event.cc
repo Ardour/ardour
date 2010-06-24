@@ -172,17 +172,17 @@ CanvasNoteEvent::set_selected(bool selected)
 {
 	if (!_note) {
 		return;
-	} else if (selected) {
-		set_fill_color(UINT_INTERPOLATE(base_color(),
-				ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get(), 0.5));
-		set_outline_color(calculate_outline(
-				ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get()));
+        }
+
+	_selected = selected;
+        set_fill_color (base_color ());
+        
+	if (_selected) {
+		set_outline_color(calculate_outline(ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get()));
 	} else {
-		set_fill_color(base_color());
 		set_outline_color(calculate_outline(base_color()));
 	}
 
-	_selected = selected;
 }
 
 #define SCALE_USHORT_TO_UINT8_T(x) ((x) / 257)
@@ -201,19 +201,21 @@ CanvasNoteEvent::base_color()
 	case TrackColor:
 		{
 			Gdk::Color color = _region.midi_stream_view()->get_region_color();
-			return RGBA_TO_UINT(
-					SCALE_USHORT_TO_UINT8_T(color.get_red()),
-					SCALE_USHORT_TO_UINT8_T(color.get_green()),
-					SCALE_USHORT_TO_UINT8_T(color.get_blue()),
-					opacity);
+			return UINT_INTERPOLATE (RGBA_TO_UINT(
+                                                         SCALE_USHORT_TO_UINT8_T(color.get_red()),
+                                                         SCALE_USHORT_TO_UINT8_T(color.get_green()),
+                                                         SCALE_USHORT_TO_UINT8_T(color.get_blue()),
+                                                         opacity), 
+                                                 ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get(), 0.5);
 		}
 
 	case ChannelColors:
-		return UINT_RGBA_CHANGE_A(CanvasNoteEvent::midi_channel_colors[_note->channel()],
-				                  opacity);
+                 return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (CanvasNoteEvent::midi_channel_colors[_note->channel()],
+                                                              opacity), 
+                                          ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get(), 0.5);
 
 	default:
-		return meter_style_fill_color(_note->velocity());
+		return meter_style_fill_color(_note->velocity(), selected());
 	};
 
 	return 0;

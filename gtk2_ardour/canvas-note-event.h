@@ -103,18 +103,32 @@ class CanvasNoteEvent : virtual public sigc::trackable
 	const boost::shared_ptr<NoteType> note() const { return _note; }
 	MidiRegionView& region_view() const { return _region; }
 
-	inline static uint32_t meter_style_fill_color(uint8_t vel) {
-		if (vel < 64) {
-			return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorBase.get(),
-					ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorMid.get(),
+	inline static uint32_t meter_style_fill_color(uint8_t vel, bool selected) {
+                if (selected) {
+                        if (vel < 64) {
+                                return UINT_INTERPOLATE(
+					ARDOUR_UI::config()->canvasvar_SelectedMidiNoteColorBase.get(),
+					ARDOUR_UI::config()->canvasvar_SelectedMidiNoteColorMid.get(),
 					(vel / (double)63.0));
-		} else {
-			return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorMid.get(),
-					ARDOUR_UI::config()->canvasvar_MidiNoteMeterColorTop.get(),
+                        } else {
+                                return UINT_INTERPOLATE(
+					ARDOUR_UI::config()->canvasvar_SelectedMidiNoteColorMid.get(),
+					ARDOUR_UI::config()->canvasvar_SelectedMidiNoteColorTop.get(),
 					((vel-64) / (double)63.0));
-		}
+                        }
+                } else {
+                        if (vel < 64) {
+                                return UINT_INTERPOLATE(
+					ARDOUR_UI::config()->canvasvar_MidiNoteColorBase.get(),
+					ARDOUR_UI::config()->canvasvar_MidiNoteColorMid.get(),
+					(vel / (double)63.0));
+                        } else {
+                                return UINT_INTERPOLATE(
+					ARDOUR_UI::config()->canvasvar_MidiNoteColorMid.get(),
+					ARDOUR_UI::config()->canvasvar_MidiNoteColorTop.get(),
+					((vel-64) / (double)63.0));
+                        }
+                }
 	}
 
 	/// calculate outline colors from fill colors of notes

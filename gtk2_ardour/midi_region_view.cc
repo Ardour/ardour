@@ -525,7 +525,7 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 
 	trackview.editor().hide_verbose_canvas_cursor ();
 
-        bool fine = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier);
+        bool fine = !Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier);
         
         if (ev->direction == GDK_SCROLL_UP) {
                 change_velocities (true, fine, false);
@@ -2068,7 +2068,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
 
 			// calculate color based on note velocity
 			resize_rect->property_fill_color_rgba() = UINT_INTERPOLATE(
-					CanvasNoteEvent::meter_style_fill_color(note->note()->velocity()),
+                                CanvasNoteEvent::meter_style_fill_color(note->note()->velocity(), note->selected()),
 					fill_color,
 					0.85);
 
@@ -2227,7 +2227,7 @@ MidiRegionView::change_note_velocity(CanvasNoteEvent* event, int8_t velocity, bo
 		new_velocity = velocity;
 	}
 
-        // event->show_velocity ();
+        event->set_selected (event->selected()); // change color 
         
 	diff_add_change (event, MidiModel::DiffCommand::Velocity, new_velocity);
 }
