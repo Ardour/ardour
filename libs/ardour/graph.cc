@@ -17,7 +17,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-
+#include <iostream>
 #include <stdio.h>
 #include <cmath>
 
@@ -38,6 +38,7 @@
 
 using namespace ARDOUR;
 using namespace PBD;
+using namespace std;
 
 
 Graph::Graph (Session & session) 
@@ -48,6 +49,7 @@ Graph::Graph (Session & session)
 
         sem_init( &_callback_start_sem, 0, 0 );
         sem_init( &_callback_done_sem,  0, 0 );
+        sem_init( &_cleanup_sem,  0, 0 );
 
         _execution_tokens = 0;
 
@@ -100,7 +102,7 @@ Graph::session_going_away()
 
         sem_post( &_callback_start_sem);
 
-        for (std::list<pthread_t>::iterator i = _thread_list.begin(); i != _thread_list.end(); i++) {
+        for (list<pthread_t>::iterator i = _thread_list.begin(); i != _thread_list.end(); i++) {
                 void* status;
                 pthread_join (*i, &status);
         }
@@ -114,6 +116,33 @@ Graph::session_going_away()
 }
 
 void
+Graph::clear_other_chain ()
+{
+        while (1) {
+                pthread_mutex_lock (&_swap_mutex);
+                if (_setup_chain != _pending_chain) {
+
+                        for (node_list_t::iterator ni=_nodes_rt[_setup_chain].begin(); ni!=_nodes_rt[_setup_chain].end(); ni++) {
+                                (*ni)->_activation_set[_setup_chain].clear();
+                        }
+
+                        _nodes_rt[_setup_chain].clear ();
+                        _init_trigger_list[_setup_chain].clear ();
+                        pthread_mutex_unlock (&_swap_mutex);
+
+                        return;
+                }
+                pthread_mutex_unlock (&_swap_mutex);
+                /* setup chain == pending chain - we have
+                   to wait till this is no longer true.
+                */
+                cerr << "Wait for setup != pending (currently " << _setup_chain << '/' << _pending_chain << endl;
+                int ret = sem_wait (&_cleanup_sem);
+                cerr << " back from that wait, ret = " << ret << endl;
+        }
+}
+
+void
 Graph::prep()
 {
         node_list_t::iterator i;
@@ -123,9 +152,11 @@ Graph::prep()
                 // we got the swap mutex.
                 if (_current_chain != _pending_chain)
                 {
-                        //printf ("chain swap ! %d -> %d\n", _current_chain, _pending_chain);
+                        printf ("chain swap ! %d -> %d\n", _current_chain, _pending_chain);
                         _setup_chain = _current_chain;
                         _current_chain = _pending_chain;
+                        printf ("\tNOW: setup %d current %d pending %d\n", _setup_chain, _current_chain, _pending_chain);
+                        sem_post (&_cleanup_sem);
                 }
                 pthread_mutex_unlock (&_swap_mutex);
         }
@@ -295,7 +326,7 @@ Graph::run_one()
                 to_run = 0;
         }
 
-        int wakeup = std::min ((int) _execution_tokens, (int) _trigger_queue.size());
+        int wakeup = min ((int) _execution_tokens, (int) _trigger_queue.size());
         _execution_tokens -= wakeup;
 
         for (int i=0; i<wakeup; i++ ) {

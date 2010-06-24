@@ -1317,9 +1317,7 @@ Session::resort_routes ()
 		return;
 	}
 
-
 	{
-
 		RCUWriter<RouteList> writer (routes);
 		shared_ptr<RouteList> r = writer.get_copy ();
 		resort_routes_using (r);
@@ -1381,7 +1379,7 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 	RouteSorter cmp;
 	r->sort (cmp);
 
-	route_graph->rechain( r );
+	route_graph->rechain (r);
 
 #ifndef NDEBUG
         DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
@@ -2081,7 +2079,7 @@ Session::remove_route (shared_ptr<Route> route)
 
 		/* writer goes out of scope, forces route list update */
 	}
-        
+
         update_route_solo_state ();
 	update_session_range_location_marker ();
 
@@ -2104,6 +2102,11 @@ Session::remove_route (shared_ptr<Route> route)
 
 	update_latency_compensation (false, false);
 	set_dirty();
+
+        /* flush references out of the graph
+         */
+
+        route_graph->clear_other_chain ();
 
 	/* get rid of it from the dead wood collection in the route list manager */
 

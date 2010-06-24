@@ -81,6 +81,8 @@ class Graph : public SessionHandleRef
 
 	void process_one_route (Route * route);
 
+        void clear_other_chain ();
+
     protected:
         virtual void session_going_away ();
 
@@ -95,11 +97,10 @@ class Graph : public SessionHandleRef
 	std::vector<GraphNode *> _trigger_queue;
 	pthread_mutex_t _trigger_mutex;
 
-
 	sem_t _execution_sem;
-
 	sem_t _callback_start_sem;
 	sem_t _callback_done_sem;
+	sem_t _cleanup_sem;
 
 	volatile gint _execution_tokens;
 	volatile gint _finished_refcount;
