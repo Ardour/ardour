@@ -121,6 +121,7 @@ class MidiStreamView : public StreamView
 	void display_track (boost::shared_ptr<ARDOUR::Track> tr);
 
 	void update_contents_height ();
+
 	void draw_note_lines();
 	void apply_note_range(uint8_t lowest, uint8_t highest, bool to_region_views);
 	bool update_data_note_range(uint8_t min, uint8_t max);

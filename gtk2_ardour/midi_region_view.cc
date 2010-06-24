@@ -538,8 +538,6 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 bool
 MidiRegionView::key_press (GdkEventKey* ev)
 { 
-        cerr << "MRV key press\n";
-
         /* since GTK bindings are generally activated on press, and since
            detectable auto-repeat is the name of the game and only sends
            repeated presses, carry out key actions at key press, not release.
@@ -619,8 +617,6 @@ MidiRegionView::key_press (GdkEventKey* ev)
                 /* yes, this steals r */
                 if (midi_view()->midi_track()->step_editing()) {
                         midi_view()->step_edit_rest ();
-                        cerr << "Stole that r because " << midi_view()->midi_track()->name()
-                             << " is step editing!\n";
                         return true;
                 }
         }
@@ -1633,7 +1629,7 @@ MidiRegionView::clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev)
 {
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		if ((*i)->selected() && (*i) != ev) {
-			(*i)->selected(false);
+			(*i)->set_selected(false);
 			(*i)->hide_velocity();
 		}
 	}
@@ -1650,7 +1646,7 @@ MidiRegionView::unique_select(ArdourCanvas::CanvasNoteEvent* ev)
 			Selection::iterator tmp = i;
 			++tmp;
 
-			(*i)->selected (false);
+			(*i)->set_selected (false);
 			_selection.erase (i);
 
 			i = tmp;
@@ -1877,7 +1873,7 @@ MidiRegionView::remove_from_selection (CanvasNoteEvent* ev)
 		_selection.erase (i);
 	}
 
-	ev->selected (false);
+	ev->set_selected (false);
 	ev->hide_velocity ();
 
 	if (_selection.empty()) {
@@ -1896,7 +1892,7 @@ MidiRegionView::add_to_selection (CanvasNoteEvent* ev)
 	}
 
 	if (_selection.insert (ev).second) {
-		ev->selected (true);
+		ev->set_selected (true);
 		play_midi_note ((ev)->note());
 	}
 
@@ -2923,7 +2919,7 @@ MidiRegionView::maybe_select_by_position (GdkEventButton* ev, double x, double y
 
         for (Events::iterator i = e.begin(); i != e.end(); ++i) {
                 if (_selection.insert (*i).second) {
-                        (*i)->selected (true);
+                        (*i)->set_selected (true);
                 }
 	}
 
@@ -2932,3 +2928,15 @@ MidiRegionView::maybe_select_by_position (GdkEventButton* ev, double x, double y
 		editor.get_selection().add (this);
 	}
 }                
+
+void
+MidiRegionView::color_handler ()
+{
+        RegionView::color_handler ();
+
+	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+                (*i)->set_selected ((*i)->selected()); // will change color
+        }
+
+        /* XXX probably more to do here */
+}

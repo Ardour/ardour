@@ -85,7 +85,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 
 	_note_lines->lower_to_bottom();
 
-	ColorsChanged.connect(sigc::mem_fun(*this, &MidiStreamView::draw_note_lines));
+	ColorsChanged.connect(sigc::mem_fun(*this, &MidiStreamView::color_handler));
 
 	note_range_adjustment.set_page_size(_highest_note - _lowest_note);
 	note_range_adjustment.set_value(_lowest_note);
@@ -301,6 +301,10 @@ MidiStreamView::update_contents_height ()
 void
 MidiStreamView::draw_note_lines()
 {
+        if (!_note_lines) {
+                return;
+        }
+
 	double y;
 	double prev_y = contents_height();
 	uint32_t color;
@@ -699,6 +703,8 @@ MidiStreamView::rec_data_range_ready (nframes_t start, nframes_t cnt, boost::wea
 void
 MidiStreamView::color_handler ()
 {
+        draw_note_lines ();
+
 	if (_trackview.is_midi_track()) {
 		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
 	} else {

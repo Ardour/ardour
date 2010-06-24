@@ -66,7 +66,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	virtual void set_height(double h);
 	void set_y (double);
 	void set_color (Gdk::Color const &);
-	
+
 	ArdourCanvas::Item* get_canvas_frame();
 	ArdourCanvas::Group* get_canvas_group();
 	ArdourCanvas::Item* get_name_highlight();

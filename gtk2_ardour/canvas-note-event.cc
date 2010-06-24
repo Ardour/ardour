@@ -117,7 +117,7 @@ CanvasNoteEvent::on_channel_selection_change(uint16_t selection)
 		set_outline_color(calculate_outline(ARDOUR_UI::config()->canvasvar_MidiNoteInactiveChannel.get()));
 	} else {
 		// set the color according to the notes selection state
-		selected(_selected);
+		set_selected(_selected);
 	}
 	// this forces the item to update..... maybe slow...
 	_item->hide();
@@ -168,7 +168,7 @@ CanvasNoteEvent::hide_channel_selector(void)
 }
 
 void
-CanvasNoteEvent::selected(bool selected)
+CanvasNoteEvent::set_selected(bool selected)
 {
 	if (!_note) {
 		return;

@@ -74,7 +74,7 @@ class CanvasNoteEvent : virtual public sigc::trackable
 	void validate ();
 
 	bool selected() const { return _selected; }
-	void selected(bool yn);
+	void set_selected(bool yn);
 
 	virtual void move_event(double dx, double dy) = 0;
 

@@ -366,7 +366,6 @@ MidiModel::DiffCommand::side_effect_remove(const NotePtr note)
                     state once this is done.
                   */
 
-                 cerr << "This undo has " << side_effect_removals.size() << " SER's to be re-added\n";
                  for (set<NotePtr>::iterator i = side_effect_removals.begin(); i != side_effect_removals.end(); ++i) {
                          _model->add_note_unlocked (*i);
                  }
@@ -709,7 +708,6 @@ MidiModel::DiffCommand::side_effect_remove(const NotePtr note)
 
          if (side_effect_notes) {
                  XMLNodeList notes = side_effect_notes->children();
-                 cerr << "Reconstruct DiffCommand with " << notes.size() << " SER's\n";
                  for (XMLNodeList::iterator n = notes.begin(); n != notes.end(); ++n) {
                          side_effect_removals.insert (unmarshal_note (*n));
                  }
