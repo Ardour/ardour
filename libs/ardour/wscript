@@ -224,7 +224,7 @@ def configure(conf):
 	autowaf.configure(conf)
 	conf.check_tool('compiler_cxx gas')
 	autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO', atleast_version='0.3.2')
-	autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.119.0')
+	autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.118.0')
 	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
 	autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF', atleast_version='0.4.0')
 	autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE', atleast_version='0.1.0')
