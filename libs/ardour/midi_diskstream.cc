@@ -938,85 +938,89 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 			total_capture += (*ci)->frames;
 		}
 
-		/* figure out the name for this take */
+                if (_write_source->length (capture_info.front()->start) != 0) {
+                        
+                        /* phew, we have data */
+                        
+                        /* figure out the name for this take */
+                        
+                        srcs.push_back (_write_source);
+                        _write_source->set_timeline_position (capture_info.front()->start);
+                        _write_source->set_captured_for (_name);
+                        
+                        string whole_file_region_name;
+                        whole_file_region_name = region_name_from_path (_write_source->name(), true);
+                        
+                        /* Register a new region with the Session that
+                           describes the entire source. Do this first
+                           so that any sub-regions will obviously be
+                           children of this one (later!)
+                        */
+                        
+                        try {
+                                PropertyList plist;
 
-		srcs.push_back (_write_source);
-		_write_source->set_timeline_position (capture_info.front()->start);
-		_write_source->set_captured_for (_name);
+                                plist.add (Properties::name, whole_file_region_name);
+                                plist.add (Properties::whole_file, true);
+                                plist.add (Properties::automatic, true);
+                                plist.add (Properties::start, 0);
+                                plist.add (Properties::length, total_capture);
+                                plist.add (Properties::layer, 0);
 
-		string whole_file_region_name;
-		whole_file_region_name = region_name_from_path (_write_source->name(), true);
+                                boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 
-		/* Register a new region with the Session that
-		   describes the entire source. Do this first
-		   so that any sub-regions will obviously be
-		   children of this one (later!)
-		   */
-
-		try {
-			PropertyList plist;
-
-			plist.add (Properties::name, whole_file_region_name);
-			plist.add (Properties::whole_file, true);
-			plist.add (Properties::automatic, true);
-			plist.add (Properties::start, 0);
-			plist.add (Properties::length, total_capture);
-			plist.add (Properties::layer, 0);
-
-			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
-
-			region = boost::dynamic_pointer_cast<MidiRegion> (rx);
-			region->special_set_position (capture_info.front()->start);
-		}
+                                region = boost::dynamic_pointer_cast<MidiRegion> (rx);
+                                region->special_set_position (capture_info.front()->start);
+                        }
 
 
-		catch (failed_constructor& err) {
-			error << string_compose(_("%1: could not create region for complete midi file"), _name) << endmsg;
-			/* XXX what now? */
-		}
+                        catch (failed_constructor& err) {
+                                error << string_compose(_("%1: could not create region for complete midi file"), _name) << endmsg;
+                                /* XXX what now? */
+                        }
 
-		_last_capture_sources.insert (_last_capture_sources.end(), srcs.begin(), srcs.end());
+                        _last_capture_sources.insert (_last_capture_sources.end(), srcs.begin(), srcs.end());
 
-		_playlist->clear_history ();
-		_playlist->freeze ();
+                        _playlist->clear_history ();
+                        _playlist->freeze ();
 
-		uint32_t buffer_position = 0;
-		for (buffer_position = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+                        uint32_t buffer_position = 0;
+                        for (buffer_position = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 
-			string region_name;
+                                string region_name;
 
-			RegionFactory::region_name (region_name, _write_source->name(), false);
+                                RegionFactory::region_name (region_name, _write_source->name(), false);
 
-			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
+                                // cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
 
-			try {
-				PropertyList plist;
+                                try {
+                                        PropertyList plist;
 				
-				plist.add (Properties::start, buffer_position);
-				plist.add (Properties::length, (*ci)->frames);
-				plist.add (Properties::name, region_name);
+                                        plist.add (Properties::start, buffer_position);
+                                        plist.add (Properties::length, (*ci)->frames);
+                                        plist.add (Properties::name, region_name);
 				
-				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
-				region = boost::dynamic_pointer_cast<MidiRegion> (rx);
-			}
+                                        boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
+                                        region = boost::dynamic_pointer_cast<MidiRegion> (rx);
+                                }
 
-			catch (failed_constructor& err) {
-				error << _("MidiDiskstream: could not create region for captured midi!") << endmsg;
-				continue; /* XXX is this OK? */
-			}
+                                catch (failed_constructor& err) {
+                                        error << _("MidiDiskstream: could not create region for captured midi!") << endmsg;
+                                        continue; /* XXX is this OK? */
+                                }
 
-			// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
+                                // cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
 
-			i_am_the_modifier++;
-			_playlist->add_region (region, (*ci)->start);
-			i_am_the_modifier--;
+                                i_am_the_modifier++;
+                                _playlist->add_region (region, (*ci)->start);
+                                i_am_the_modifier--;
 
-			buffer_position += (*ci)->frames;
-		}
+                                buffer_position += (*ci)->frames;
+                        }
 
-		_playlist->thaw ();
-		_session.add_command (new StatefulDiffCommand(_playlist));
-
+                        _playlist->thaw ();
+                        _session.add_command (new StatefulDiffCommand(_playlist));
+                }
 	}
 
 	mark_write_completed = true;
@@ -1330,7 +1334,7 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 	}
 
 	try {
-		_write_source = boost::dynamic_pointer_cast<SMFSource>(_session.create_midi_source_for_session (name ()));
+		_write_source = boost::dynamic_pointer_cast<SMFSource>(_session.create_midi_source_for_session (0, name ()));
 		if (!_write_source) {
 			throw failed_constructor();
 		}
@@ -1346,6 +1350,15 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 	_write_source->mark_streaming_midi_write_started (_note_mode, _session.transport_frame());
 
 	return 0;
+}
+
+list<boost::shared_ptr<Source> > 
+MidiDiskstream::steal_write_sources()
+{
+        list<boost::shared_ptr<Source> > ret;
+        ret.push_back (_write_source);
+        reset_write_sources (false);
+        return ret;
 }
 
 void

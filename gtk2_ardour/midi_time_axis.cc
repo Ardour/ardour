@@ -959,7 +959,8 @@ MidiTimeAxisView::add_region (nframes64_t pos)
 	const Tempo& t = _session->tempo_map().tempo_at(start);
 	double length = floor (m.frames_per_bar(t, _session->frame_rate()));
 
-	boost::shared_ptr<Source> src = _session->create_midi_source_for_session (view()->trackview().track()->name());
+	boost::shared_ptr<Source> src = _session->create_midi_source_for_session (view()->trackview().track().get(),
+                                                                                  view()->trackview().track()->name());
 
 	PropertyList plist; 
 	

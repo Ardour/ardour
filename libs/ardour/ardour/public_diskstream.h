@@ -36,6 +36,7 @@ public:
 	virtual bool destructive () const = 0;
 	virtual std::list<boost::shared_ptr<Source> > & last_capture_sources () = 0;
 	virtual void set_capture_offset () = 0;
+	virtual std::list<boost::shared_ptr<Source> > steal_write_sources () = 0;
 	virtual void reset_write_sources (bool, bool force = false) = 0;
 	virtual float playback_buffer_load () const = 0;
 	virtual float capture_buffer_load () const = 0;

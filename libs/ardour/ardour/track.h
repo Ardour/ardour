@@ -103,6 +103,7 @@ class Track : public Route, public PublicDiskstream
 	bool destructive () const;
 	std::list<boost::shared_ptr<Source> > & last_capture_sources ();
 	void set_capture_offset ();
+        std::list<boost::shared_ptr<Source> > steal_write_sources();
 	void reset_write_sources (bool, bool force = false);
 	float playback_buffer_load () const;
 	float capture_buffer_load () const;

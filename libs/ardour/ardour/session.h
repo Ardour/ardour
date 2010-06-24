@@ -533,7 +533,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (size_t, std::string const &, uint32_t, bool);
 
-	boost::shared_ptr<MidiSource> create_midi_source_for_session (std::string const &);
+	boost::shared_ptr<MidiSource> create_midi_source_for_session (Track*, std::string const &);
 
 	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
 	boost::shared_ptr<Source> source_by_path_and_channel (const Glib::ustring&, uint16_t);

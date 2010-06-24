@@ -437,6 +437,12 @@ Track::set_capture_offset ()
 	_diskstream->set_capture_offset ();
 }
 
+list<boost::shared_ptr<Source> > 
+Track::steal_write_sources()
+{
+        return _diskstream->steal_write_sources ();
+}
+
 void
 Track::reset_write_sources (bool r, bool force)
 {

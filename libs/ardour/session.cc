@@ -1456,7 +1456,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 		}
 
 		shared_ptr<MidiTrack> track;
-
+                
 		try {
 			MidiTrack* mt = new MidiTrack (*this, track_name, Route::Flag (0), mode);
 
@@ -2948,8 +2948,24 @@ Session::new_midi_source_name (const string& base)
 
 /** Create a new within-session MIDI source */
 boost::shared_ptr<MidiSource>
-Session::create_midi_source_for_session (string const & n)
+Session::create_midi_source_for_session (Track* track, string const & n)
 {
+        /* try to use the existing write source for the track, to keep numbering sane 
+         */
+
+        if (track) {
+                /*MidiTrack* mt = dynamic_cast<Track*> (track);
+                assert (mt);
+                */
+
+                list<boost::shared_ptr<Source> > l = track->steal_write_sources ();
+                
+                if (!l.empty()) {
+                        assert (boost::dynamic_pointer_cast<MidiSource> (l.front()));
+                        return boost::dynamic_pointer_cast<MidiSource> (l.front());
+                }
+        }
+
 	const string name = new_midi_source_name (n);
 	const string path = new_source_path_from_name (DataType::MIDI, name);
 

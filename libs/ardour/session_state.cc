@@ -2333,6 +2333,8 @@ Session::commit_reversible_command(Command *cmd)
 	gettimeofday(&now, 0);
 	_current_trans.top()->set_timestamp(now);
 
+        cerr << "add cmd @ " << _current_trans.top() << " to history\n";
+
 	_history.add(_current_trans.top());
 	_current_trans.pop();
 }

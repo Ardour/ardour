@@ -122,6 +122,7 @@ class MidiDiskstream : public Diskstream
 	int  internal_playback_seek (nframes_t distance);
 	int  can_internal_playback_seek (nframes_t distance);
 	int  rename_write_sources ();
+        std::list<boost::shared_ptr<Source> > steal_write_sources();
 	void reset_write_sources (bool, bool force = false);
 	void non_realtime_input_change ();
 	void non_realtime_locate (nframes_t location);

@@ -47,6 +47,7 @@ UndoTransaction::UndoTransaction (const UndoTransaction& rhs)
 
 UndoTransaction::~UndoTransaction ()
 {
+        cerr << "UndoTransaction destroyed\n";
 	drop_references ();
 	clear ();
 }
@@ -54,6 +55,8 @@ UndoTransaction::~UndoTransaction ()
 void 
 command_death (UndoTransaction* ut, Command* c)
 {
+        cerr << "Command drop ref\n";
+
 	if (ut->clearing()) {
 		return;
 	}
