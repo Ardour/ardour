@@ -63,11 +63,11 @@ Graph::Graph (Session & session)
         int pu = Config->get_processor_usage ();
 
         if (pu < 0) {
-                /* use "pu" less cores for DSP than appear to be available
+                /* pu is negative: use "pu" less cores for DSP than appear to be available
                  */
 
-                if (pu < num_threads) {
-                        num_threads += pu; // pu is negative
+                if (-pu < num_threads) {
+                        num_threads += pu; 
                 } else {
                         num_threads = 1;
                 }
