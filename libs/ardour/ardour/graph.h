@@ -109,7 +109,8 @@ class Graph : public SessionHandleRef
         bool _graph_empty;
 
 	// chain swapping
-	pthread_mutex_t _swap_mutex;
+        Glib::Mutex  _swap_mutex;
+        Glib::Cond   _cleanup_cond;
 	volatile int _current_chain;
 	volatile int _pending_chain;
 	volatile int _setup_chain;

@@ -17,7 +17,6 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#include <iostream>
 #include <stdio.h>
 #include <cmath>
 
@@ -53,7 +52,6 @@ Graph::Graph (Session & session)
 
         _execution_tokens = 0;
 
-        pthread_mutex_init (&_swap_mutex, NULL);
         _current_chain = 0;
         _pending_chain = 0;
         _setup_chain   = 1;
@@ -118,8 +116,9 @@ Graph::session_going_away()
 void
 Graph::clear_other_chain ()
 {
+        Glib::Mutex::Lock ls (_swap_mutex);
+
         while (1) {
-                pthread_mutex_lock (&_swap_mutex);
                 if (_setup_chain != _pending_chain) {
 
                         for (node_list_t::iterator ni=_nodes_rt[_setup_chain].begin(); ni!=_nodes_rt[_setup_chain].end(); ni++) {
@@ -128,17 +127,12 @@ Graph::clear_other_chain ()
 
                         _nodes_rt[_setup_chain].clear ();
                         _init_trigger_list[_setup_chain].clear ();
-                        pthread_mutex_unlock (&_swap_mutex);
-
-                        return;
+                        break;
                 }
-                pthread_mutex_unlock (&_swap_mutex);
                 /* setup chain == pending chain - we have
                    to wait till this is no longer true.
                 */
-                cerr << "Wait for setup != pending (currently " << _setup_chain << '/' << _pending_chain << endl;
-                int ret = sem_wait (&_cleanup_sem);
-                cerr << " back from that wait, ret = " << ret << endl;
+                _cleanup_cond.wait (_swap_mutex);                
         }
 }
 
@@ -148,17 +142,16 @@ Graph::prep()
         node_list_t::iterator i;
         int chain;
 
-        if (pthread_mutex_trylock (&_swap_mutex) == 0) {
+        if (_swap_mutex.trylock()) {
                 // we got the swap mutex.
                 if (_current_chain != _pending_chain)
                 {
-                        printf ("chain swap ! %d -> %d\n", _current_chain, _pending_chain);
+                        // printf ("chain swap ! %d -> %d\n", _current_chain, _pending_chain);
                         _setup_chain = _current_chain;
                         _current_chain = _pending_chain;
-                        printf ("\tNOW: setup %d current %d pending %d\n", _setup_chain, _current_chain, _pending_chain);
-                        sem_post (&_cleanup_sem);
+                        _cleanup_cond.signal ();
                 }
-                pthread_mutex_unlock (&_swap_mutex);
+                _swap_mutex.unlock ();
         }
 
         chain = _current_chain;
@@ -250,8 +243,8 @@ void
 Graph::rechain (boost::shared_ptr<RouteList> routelist)
 {
         node_list_t::iterator ni;
+        Glib::Mutex::Lock ls (_swap_mutex);
 
-        pthread_mutex_lock (&_swap_mutex);
         int chain = _setup_chain;
         DEBUG_TRACE (DEBUG::Graph, string_compose ("============== setup %1\n", chain));
         // set all refcounts to 0;
@@ -309,9 +302,7 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist)
 
         _pending_chain = chain;
         dump(chain);
-        pthread_mutex_unlock (&_swap_mutex);
 }
-
 
 bool
 Graph::run_one()
