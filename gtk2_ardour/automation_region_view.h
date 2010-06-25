@@ -54,7 +54,6 @@ public:
 	inline AutomationTimeAxisView* automation_view() const
 		{ return dynamic_cast<AutomationTimeAxisView*>(&trackview); }
 
-	void set_line(boost::shared_ptr<AutomationLine> line) { _line = line; }
 	boost::shared_ptr<AutomationLine> line() { return _line; }
 
 	// We are a ghost.  Meta ghosts?  Crazy talk.

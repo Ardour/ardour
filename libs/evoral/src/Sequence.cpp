@@ -53,7 +53,7 @@ Sequence<Time>::const_iterator::const_iterator()
 }
 
 template<typename Time>
-Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t)
+Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t, std::set<Evoral::Parameter> const & filtered)
 	: _seq(&seq)
 	, _type(NIL)
 	, _is_end((t == DBL_MAX) || seq.empty())
@@ -90,6 +90,12 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	bool   found                  = false;
 	size_t earliest_control_index = 0;
 	for (Controls::const_iterator i = seq._controls.begin(); i != seq._controls.end(); ++i) {
+
+		if (filtered.find (i->first) != filtered.end()) {
+			/* this parameter is filtered, so don't bother setting up an iterator for it */
+			continue;
+		}
+		
 		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: control: %1\n", seq._type_map.to_symbol(i->first)));
 		double x, y;
 		bool ret = i->second->list()->rt_safe_earliest_event_unlocked(t, DBL_MAX, x, y, true);
@@ -385,7 +391,7 @@ Sequence<Time>::Sequence(const TypeMap& type_map)
         , _overlap_pitch_resolution (FirstOnFirstOff)
 	, _writing(false)
 	, _type_map(type_map)
-	, _end_iter(*this, DBL_MAX)
+	, _end_iter(*this, DBL_MAX, std::set<Evoral::Parameter> ())
 	, _percussive(false)
 	, _lowest_note(127)
 	, _highest_note(0)
@@ -403,7 +409,7 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
         , _overlap_pitch_resolution (other._overlap_pitch_resolution)
 	, _writing(false)
 	, _type_map(other._type_map)
-	, _end_iter(*this, DBL_MAX)
+	, _end_iter(*this, DBL_MAX, std::set<Evoral::Parameter> ())
 	, _percussive(other._percussive)
 	, _lowest_note(other._lowest_note)
 	, _highest_note(other._highest_note)

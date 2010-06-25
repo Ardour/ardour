@@ -142,11 +142,13 @@ MidiSource::invalidate ()
 	_model_iter.invalidate();
 }
 
+/** @param filtered A set of parameters whose MIDI messages will not be returned */
 nframes_t
 MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, sframes_t source_start,
                        sframes_t start, nframes_t cnt,
                        sframes_t stamp_offset, sframes_t negative_stamp_offset,
-                       MidiStateTracker* tracker) const
+                       MidiStateTracker* tracker,
+		       std::set<Evoral::Parameter> const & filtered) const
 {
 	Glib::Mutex::Lock lm (_lock);
 
@@ -158,7 +160,7 @@ MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, sframes_t source_start
 		// If the cached iterator is invalid, search for the first event past start
 		if (_last_read_end == 0 || start != _last_read_end || !_model_iter_valid) {
 			DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("*** %1 search for relevant iterator for %1 / %2\n", _name, source_start, start));
-			for (i = _model->begin(); i != _model->end(); ++i) {
+			for (i = _model->begin(0, filtered); i != _model->end(); ++i) {
 				if (converter.to(i->time()) >= start) {
 					break;
 				}
@@ -311,4 +313,12 @@ MidiSource::drop_model ()
 {
         cerr << name() << " drop model\n";
         _model.reset(); 
+	ModelChanged (); /* EMIT SIGNAL */
+}
+
+void
+MidiSource::set_model (boost::shared_ptr<MidiModel> m)
+{
+	_model = m;
+	ModelChanged (); /* EMIT SIGNAL */
 }

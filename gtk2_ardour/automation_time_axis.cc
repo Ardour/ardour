@@ -270,6 +270,7 @@ AutomationTimeAxisView::set_automation_state (AutoState state)
 #endif
 	}
 
+	cout << "_view = " << _view << "\n";
 	if (_view) {
 		_view->set_automation_state (state);
 

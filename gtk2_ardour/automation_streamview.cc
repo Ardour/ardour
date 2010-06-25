@@ -58,6 +58,7 @@ AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
 		      new ArdourCanvas::Group(*tv.canvas_display()))
 	, _controller(tv.controller())
 	, _automation_view(tv)
+	, _pending_automation_state (Off)
 {
 	//canvas_rect->property_fill_color_rgba() = stream_base_color;
 	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
@@ -82,9 +83,9 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 			mr->midi_source()->load_model();
 	}
 
-	const boost::shared_ptr<AutomationControl> control
-		= boost::dynamic_pointer_cast<AutomationControl>(
-				region->control(_controller->controllable()->parameter()));
+	const boost::shared_ptr<AutomationControl> control = boost::dynamic_pointer_cast<AutomationControl> (
+		region->control (_controller->controllable()->parameter(), true)
+		);
 
 	boost::shared_ptr<AutomationList> list;
 	if (control) {
@@ -130,6 +131,12 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 	/* catch regionview going away */
 	region->DropReferences.connect (*this, invalidator (*this), boost::bind (&AutomationStreamView::remove_region_view, this, boost::weak_ptr<Region>(region)), gui_context());
 
+	/* setup automation state for this region */
+	boost::shared_ptr<AutomationLine> line = region_view->line ();
+	if (line && line->the_list()) {
+		line->the_list()->set_automation_state (automation_state ());
+	}
+	
 	RegionViewAdded (region_view);
 
 	return region_view;
@@ -144,11 +151,18 @@ AutomationStreamView::display_region(AutomationRegionView* region_view)
 void
 AutomationStreamView::set_automation_state (AutoState state)
 {
-	std::list<RegionView *>::iterator i;
-	for (i = region_views.begin(); i != region_views.end(); ++i) {
-		boost::shared_ptr<AutomationLine> line = ((AutomationRegionView*)(*i))->line();
-		if (line && line->the_list()) {
-			line->the_list()->set_automation_state (state);
+	/* XXX: not sure if this is right, but for now the automation state is basically held by
+	   the regions' AutomationLists.  Each region is always set to have the same AutoState.
+	*/
+	
+	if (region_views.empty()) {
+		_pending_automation_state = state;
+	} else {
+		for (std::list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+			boost::shared_ptr<AutomationLine> line = dynamic_cast<AutomationRegionView*>(*i)->line();
+			if (line && line->the_list()) {
+				line->the_list()->set_automation_state (state);
+			}
 		}
 	}
 }
@@ -196,10 +210,8 @@ AutomationStreamView::color_handler ()
 AutoState
 AutomationStreamView::automation_state () const
 {
-	/* XXX: bit of a hack: just return the state of our first RegionView */
-
 	if (region_views.empty()) {
-		return Off;
+		return _pending_automation_state;
 	}
 
 	boost::shared_ptr<AutomationLine> line = ((AutomationRegionView*) region_views.front())->line ();

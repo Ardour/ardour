@@ -24,6 +24,7 @@
 #include <set>
 #include <string>
 #include <boost/shared_ptr.hpp>
+#include "pbd/signals.h"
 #include "evoral/ControlSet.hpp"
 #include "ardour/types.h"
 
@@ -94,6 +95,9 @@ public:
 	int set_automation_state (const XMLNode&, Evoral::Parameter default_param);
 	XMLNode& get_automation_state();
 
+	/** Emitted when the automation state of one of our controls changes */
+	PBD::Signal1<void, Evoral::Parameter> AutomationStateChanged;
+	
   protected:
 	Session& _a_session;
 
@@ -109,6 +113,10 @@ public:
 
 	nframes_t        _last_automation_snapshot;
 	static nframes_t _automation_interval;
+
+private:
+	void automation_state_changed (Evoral::Parameter const &);
+	PBD::ScopedConnectionList _control_connections; ///< connections to our controls' signals
 };
 
 

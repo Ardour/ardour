@@ -146,7 +146,7 @@ public:
 
         InsertMergePolicy insert_merge_policy () const;
         void set_insert_merge_policy (InsertMergePolicy);
-        
+
 protected:
         int resolve_overlaps_unlocked (const NotePtr, void* arg = 0);
 

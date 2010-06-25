@@ -150,6 +150,16 @@ Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
 	ControlSet::add_control(ac);
 	_can_automate_list.insert(param);
 	auto_state_changed(param); // sync everything up
+
+	/* connect to automation_state_changed so that we can emit a signal when one of our controls'
+	   automation state changes
+	*/
+	boost::shared_ptr<AutomationControl> c = boost::dynamic_pointer_cast<AutomationControl> (ac);
+	if (c) {
+		c->alist()->automation_state_changed.connect_same_thread (
+			_control_connections, boost::bind (&Automatable::automation_state_changed, this, c->parameter())
+			);
+	}
 }
 
 void
@@ -469,3 +479,8 @@ Automatable::automation_control (const Evoral::Parameter& id) const
 	return boost::dynamic_pointer_cast<const AutomationControl>(Evoral::ControlSet::control(id));
 }
 
+void
+Automatable::automation_state_changed (Evoral::Parameter const & p)
+{
+	AutomationStateChanged (p); /* EMIT SIGNAL */
+}

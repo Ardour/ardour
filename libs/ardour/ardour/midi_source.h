@@ -63,7 +63,10 @@ class MidiSource : virtual public Source
 	virtual nframes_t midi_read (Evoral::EventSink<nframes_t>& dst,
 				     sframes_t source_start,
 				     sframes_t start, nframes_t cnt,
-				     sframes_t stamp_offset, sframes_t negative_stamp_offset, MidiStateTracker*) const;
+				     sframes_t stamp_offset,
+				     sframes_t negative_stamp_offset,
+				     MidiStateTracker*,
+				     std::set<Evoral::Parameter> const &) const;
 
 	virtual nframes_t midi_write (MidiRingBuffer<nframes_t>& src,
 	                              sframes_t source_start,
@@ -111,8 +114,11 @@ class MidiSource : virtual public Source
 	void set_note_mode(NoteMode mode);
 
 	boost::shared_ptr<MidiModel> model() { return _model; }
-	void set_model(boost::shared_ptr<MidiModel> m) { _model = m; }
+	void set_model (boost::shared_ptr<MidiModel>);
 	void drop_model();
+
+	/** Emitted when a different MidiModel is set */
+	PBD::Signal0<void> ModelChanged;
 
   protected:
 	virtual void flush_midi() = 0;

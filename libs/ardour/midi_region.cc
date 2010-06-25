@@ -24,7 +24,6 @@
 
 #include <set>
 
-
 #include <glibmm/thread.h>
 
 #include "pbd/basename.h"
@@ -53,6 +52,8 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
 {
 	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
+	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
+	model_changed ();
 	assert(_name.val().find("/") == string::npos);
 	assert(_type == DataType::MIDI);
 }
@@ -63,6 +64,8 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t
 {
 	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
+	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
+	model_changed ();
 }
 
 MidiRegion::~MidiRegion ()
@@ -180,7 +183,8 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& 
 			to_read, // read duration in frames
 			output_buffer_position, // the offset in the output buffer
 			negative_output_buffer_position, // amount to substract from note times
-			tracker
+			tracker,
+			_filtered_parameters
 		    ) != to_read) {
 		return 0; /* "read nothing" */
 	}
@@ -246,14 +250,63 @@ MidiRegion::midi_source (uint32_t n) const
 void
 MidiRegion::switch_source(boost::shared_ptr<Source> src)
 {
+	_source_connection.disconnect ();
+	
 	boost::shared_ptr<MidiSource> msrc = boost::dynamic_pointer_cast<MidiSource>(src);
-	if (!msrc)
+	if (!msrc) {
 		return;
+	}
 
 	// MIDI regions have only one source
 	_sources.clear();
 	_sources.push_back(msrc);
 
 	set_name(msrc->name());
+
+	msrc->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
 }
 
+void
+MidiRegion::model_changed ()
+{
+	/* build list of filtered Parameters, being those whose automation state is not `Play' */
+
+	_filtered_parameters.clear ();
+
+	Automatable::Controls const & c = model()->controls();
+
+	for (Automatable::Controls::const_iterator i = c.begin(); i != c.end(); ++i) {
+		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (i->second);
+		assert (ac);
+		if (ac->alist()->automation_state() != Play) {
+			_filtered_parameters.insert (ac->parameter ());
+		}
+	}
+
+	/* watch for changes to controls' AutoState */
+	model()->AutomationStateChanged.connect_same_thread (
+		_model_connection, boost::bind (&MidiRegion::model_automation_state_changed, this, _1)
+		);
+}
+
+void
+MidiRegion::model_automation_state_changed (Evoral::Parameter const & p)
+{
+	/* Update our filtered parameters list after a change to a parameter's AutoState */
+	
+	boost::shared_ptr<AutomationControl> ac = model()->automation_control (p);
+	assert (ac);
+
+	if (ac->alist()->automation_state() == Play) {
+		_filtered_parameters.erase (p);
+	} else {
+		_filtered_parameters.insert (p);
+	}
+
+	/* the source will have an iterator into the model, and that iterator will have been set up
+	   for a given set of filtered_paramters, so now that we've changed that list we must invalidate
+	   the iterator.
+	*/
+	Glib::Mutex::Lock lm (midi_source(0)->mutex());
+	midi_source(0)->invalidate ();
+}
