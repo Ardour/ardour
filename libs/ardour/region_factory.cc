@@ -73,7 +73,6 @@ RegionFactory::create (boost::shared_ptr<const Region> region)
 	}
 
 	if (ret) {
-                cerr << "Pure copy constructor region " << ret << " named " << ret->name() << endl;
 		map_add (ret);
 
 		/* pure copy constructor - no property list */
@@ -125,7 +124,6 @@ RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, b
 
 	if (ret) {
 		ret->set_properties (plist);
-                cerr << "Partial copy constructor region\n";
 		map_add (ret);
 
 		if (announce) {
@@ -165,7 +163,6 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 	if (ret) {
 
 		ret->set_properties (plist);
-                cerr << "New sources copy constructor region\n";
 		map_add (ret);
 
 		if (announce) {
@@ -211,7 +208,6 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 	if (ret) {
 
 		ret->set_properties (plist);
-                cerr << "de-novo constructor region " << ret << " named " << ret->name() << endl;
 		map_add (ret);
 
 		if (announce) {
@@ -285,8 +281,6 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
 		boost::bind (&RegionFactory::region_changed, _1, boost::weak_ptr<Region> (r))
 		);
 
-        cerr << "Added region with ID = " << r->id() << " named " << r->name() << endl;
-
 	update_region_name_map (r);
 }
 
@@ -298,7 +292,6 @@ RegionFactory::map_remove (boost::shared_ptr<Region> r)
 
         if (i != region_map.end()) {
                 region_map.erase (i);
-                cerr << "Removed region with ID = " << r->id() << " named " << r->name() << endl;;
         }
 
 }
@@ -313,10 +306,8 @@ RegionFactory::map_remove_with_equivalents (boost::shared_ptr<Region> r)
                 ++tmp;
 
                 if (r->region_list_equivalent (i->second)) {
-                        cerr << "Removed equivalent region " << i->second->name() << '/' << i->first << endl;
                         region_map.erase (i);
                 } else if (r == i->second) {
-                        cerr << "Removed actual region " << i->second->name() << '/' << i->first << endl;
                         region_map.erase (i);
                 } 
 

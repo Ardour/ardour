@@ -41,6 +41,7 @@ public:
 	int  move_to_trash (const Glib::ustring& trash_dir_name);
 	void mark_take (const Glib::ustring& id);
 	void mark_immutable ();
+	void mark_nonremovable ();
 
 	const Glib::ustring& take_id ()        const { return _take_id; }
 	bool                 within_session () const { return _within_session; }

@@ -1109,16 +1109,21 @@ AudioEngine::n_physical_outputs (DataType type) const
 {
 	GET_PRIVATE_JACK_POINTER_RET (_jack,0);
 	const char ** ports;
-	uint32_t i = 0;
+	uint32_t cnt = 0;
 
 	if ((ports = jack_get_ports (_priv_jack, NULL, type.to_jack_type(), JackPortIsPhysical|JackPortIsInput)) == 0) {
 		return 0;
 	}
 
-	for (i = 0; ports[i]; ++i) {}
+	for (uint32_t i = 0; ports[i]; ++i) {
+                if (!strstr (ports[i], "Midi-Through")) {
+                        cnt++;
+                }
+        }
+
 	free (ports);
 
-	return i;
+	return cnt;
 }
 
 uint32_t
@@ -1126,16 +1131,21 @@ AudioEngine::n_physical_inputs (DataType type) const
 {
 	GET_PRIVATE_JACK_POINTER_RET (_jack,0);
 	const char ** ports;
-	uint32_t i = 0;
-
+	uint32_t cnt = 0;
+        
 	if ((ports = jack_get_ports (_priv_jack, NULL, type.to_jack_type(), JackPortIsPhysical|JackPortIsOutput)) == 0) {
 		return 0;
 	}
 
-	for (i = 0; ports[i]; ++i) {}
+	for (uint32_t i = 0; ports[i]; ++i) {
+                if (!strstr (ports[i], "Midi-Through")) {
+                        cnt++;
+                }
+        }
+
 	free (ports);
 
-	return i;
+	return cnt;
 }
 
 void
@@ -1150,6 +1160,9 @@ AudioEngine::get_physical_inputs (DataType type, vector<string>& ins)
 
 	if (ports) {
 		for (uint32_t i = 0; ports[i]; ++i) {
+                        if (strstr (ports[i], "Midi-Through")) {
+                                continue;
+                        }
 			ins.push_back (ports[i]);
 		}
 		free (ports);
@@ -1168,6 +1181,9 @@ AudioEngine::get_physical_outputs (DataType type, vector<string>& outs)
 	}
 
 	for (i = 0; ports[i]; ++i) {
+                if (strstr (ports[i], "Midi-Through")) {
+                        continue;
+                }
 		outs.push_back (ports[i]);
 	}
 	free (ports);
@@ -1179,6 +1195,7 @@ AudioEngine::get_nth_physical (DataType type, uint32_t n, int flag)
 	GET_PRIVATE_JACK_POINTER_RET (_jack,"");
 	const char ** ports;
 	uint32_t i;
+	uint32_t idx;
 	string ret;
 
 	assert(type != DataType::NIL);
@@ -1187,10 +1204,14 @@ AudioEngine::get_nth_physical (DataType type, uint32_t n, int flag)
 		return ret;
 	}
 
-	for (i = 0; i < n && ports[i]; ++i) {}
+	for (i = 0, idx = 0; idx < n && ports[i]; ++i) {
+                if (!strstr (ports[i], "Midi-Through")) {
+                        ++idx;
+                }
+        }
 
-	if (ports[i]) {
-		ret = ports[i];
+	if (ports[idx]) {
+		ret = ports[idx];
 	}
 
 	free ((const char **) ports);

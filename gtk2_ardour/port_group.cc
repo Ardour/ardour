@@ -422,6 +422,16 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 			    !track->has_port(p) &&
 			    !ardour->has_port(p) &&
 			    !other->has_port(p)) {
+                                
+                                /* special hack: ignore MIDI ports labelled Midi-Through. these
+                                   are basically useless and mess things up for default
+                                   connections.
+                                */
+
+                                if (p.find ("MIDI-Through") != string::npos) {
+                                        ++n;
+                                        continue;
+                                }
 
 				if (port_has_prefix (p, "system:") ||
 				    port_has_prefix (p, "alsa_pcm") ||

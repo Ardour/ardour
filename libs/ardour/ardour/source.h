@@ -106,15 +106,7 @@ class Source : public SessionObject
 	Flag         flags() const { return _flags; }
 
         void inc_use_count () { g_atomic_int_inc (&_use_count); }
-        void dec_use_count () { 
-#ifndef NDEBUG
-                gint oldval = g_atomic_int_exchange_and_add (&_use_count, -1);
-                assert (oldval > 0);
-#else 
-                g_atomic_int_exchange_and_add (&_use_count, -1);
-#endif
-        }
-
+        void dec_use_count ();
         int  use_count() const { return g_atomic_int_get (&_use_count); }
         bool used() const { return use_count() > 0; }
 

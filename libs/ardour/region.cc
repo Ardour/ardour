@@ -1381,6 +1381,7 @@ void
 Region::set_master_sources (const SourceList& srcs)
 {
         for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
+                cerr << name() << " " << id() << " DEC M SMS\n";
                 (*i)->dec_use_count ();
         }
 
@@ -1535,12 +1536,14 @@ void
 Region::drop_sources ()
 {
         for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {
+                cerr << name() << " " << id() << " DEC DS\n";
                 (*i)->dec_use_count ();
         }
 
 	_sources.clear ();
 
         for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
+                cerr << name() << " " << id() << " DEC MDS \n";
                 (*i)->dec_use_count ();
         }
 

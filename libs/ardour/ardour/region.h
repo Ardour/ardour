@@ -353,7 +353,7 @@ class Region
 
 	void register_properties ();
 
-private:
+protected:
 	void use_sources (SourceList const &);
 };
 

@@ -1917,8 +1917,6 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	uint32_t n;
 
-        cerr << name() << " resetting write sources, recrodable " << recordable() << " chans = " << c->size() << endl;
-
 	if (!_session.writable() || !recordable()) {
 		return;
 	}

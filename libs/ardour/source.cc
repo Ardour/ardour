@@ -272,3 +272,17 @@ Source::set_allow_remove_if_empty (bool yn)
 	}
 }
 
+void
+Source::dec_use_count ()
+{
+#ifndef NDEBUG
+        gint oldval = g_atomic_int_exchange_and_add (&_use_count, -1);
+        cerr << "Bad use dec for " << name() << endl;
+        if (oldval <= 0) {
+                abort ();
+        }
+        assert (oldval > 0);
+#else 
+        g_atomic_int_exchange_and_add (&_use_count, -1);
+#endif
+}

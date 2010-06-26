@@ -780,7 +780,7 @@ MidiModel::DiffCommand::side_effect_remove(const NotePtr note)
          source->mark_streaming_write_completed();
 
          set_edited(false);
-
+        
          return true;
  }
 

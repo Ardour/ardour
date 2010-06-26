@@ -285,8 +285,8 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 		return ret;
 
 	} else if (type == DataType::MIDI) {
-
-		Source* src = new SMFSource (s, path, Source::Flag(0));
+                // XXX writable flags should belong to MidiSource too
+		Source* src = new SMFSource (s, path, SndFileSource::default_writable_flags); 
 		// boost_debug_shared_ptr_mark_interesting (src, "Source");
 		boost::shared_ptr<Source> ret (src);
 

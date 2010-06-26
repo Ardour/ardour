@@ -99,6 +99,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 SMFSource::~SMFSource ()
 {
 	if (removable()) {
+                cerr << name() << " is removable, empty ? " << empty() << " UC " << use_count() << endl;
 		unlink (_path.c_str());
 	}
 }
@@ -383,6 +384,7 @@ SMFSource::mark_streaming_write_completed ()
 	MidiSource::mark_streaming_write_completed();
 
 	if (!writable()) {
+                cerr << "\n\n\n[[[[[[[[[ This SMFS is not writable! ]]]]]]]]]]]\n\n\n";
 		return;
 	}
 
@@ -495,6 +497,11 @@ SMFSource::destroy_model ()
 void
 SMFSource::flush_midi ()
 {
+        if (!writable()) {
+                cerr << "\n\n\n\n " << name() << " CANNOT FLUSH - not writable\n\n\n\n";
+                return;
+        }
+
 	Evoral::SMF::end_write();
 }
 

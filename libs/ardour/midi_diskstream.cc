@@ -36,6 +36,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/enumwriter.h"
 #include "pbd/stateful_diff_command.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
@@ -84,6 +85,7 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 
 	init ();
 	use_new_playlist ();
+        use_new_write_source (0);
 
 	in_set_state = false;
 
@@ -101,6 +103,7 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	, _frames_read_from_ringbuffer(0)
 {
 	in_set_state = true;
+
 	init ();
 
 	if (set_state (node, Stateful::loading_state_version)) {
@@ -108,11 +111,9 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	in_set_state = false;
+        use_new_write_source (0);
 
-	if (destructive()) {
-		use_destructive_playlist ();
-	}
+	in_set_state = false;
 }
 
 void
@@ -183,9 +184,10 @@ MidiDiskstream::non_realtime_input_change ()
 		/* implicit unlock */
 	}
 
-	/* reset capture files */
-
-	reset_write_sources (false);
+        /* unlike with audio, there is never any need to reset write sources
+           based on input configuration changes because ... a MIDI track 
+           has just 1 MIDI port as input, always. 
+        */
 
 	/* now refill channel buffers */
 
@@ -945,8 +947,23 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
                         /* figure out the name for this take */
                         
                         srcs.push_back (_write_source);
+
                         _write_source->set_timeline_position (capture_info.front()->start);
                         _write_source->set_captured_for (_name);
+
+                        /* flush to disk: this step differs from the audio path, 
+                           where all the data is already on disk.
+                         */
+
+                        _write_source->mark_streaming_write_completed ();
+                        
+                        /* we will want to be able to keep (over)writing the source
+                           but we don't want it to be removable. this also differs
+                           from the audio situation, where the source at this point
+                           must be considered immutable
+                        */
+
+			_write_source->mark_nonremovable (); 
                         
                         string whole_file_region_name;
                         whole_file_region_name = region_name_from_path (_write_source->name(), true);
@@ -1021,11 +1038,11 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
                         _playlist->thaw ();
                         _session.add_command (new StatefulDiffCommand(_playlist));
                 }
+
+                mark_write_completed = true;
 	}
 
-	mark_write_completed = true;
-
-	reset_write_sources (mark_write_completed);
+        use_new_write_source (0);
 
 	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 		delete *ci;
@@ -1132,10 +1149,6 @@ MidiDiskstream::engage_record_enable ()
 	if (_source_port && Config->get_monitoring_model() == HardwareMonitoring) {
 		_source_port->request_monitor_input (!(_session.config.get_auto_input() && rolling));
 	}
-
-	// FIXME: Why is this necessary?  Isn't needed for AudioDiskstream...
-	if (!_write_source)
-		use_new_write_source();
 
 	_write_source->mark_streaming_midi_write_started (_note_mode, _session.transport_frame());
 
@@ -1293,45 +1306,19 @@ MidiDiskstream::set_state (const XMLNode& node, int /*version*/)
 
 	in_set_state = false;
 
-	/* make sure this is clear before we do anything else */
-
-	// FIXME?
-	//_capturing_source = 0;
-
-	/* write sources are handled when we handle the input set
-	   up of the IO that owns this DS (::non_realtime_input_change())
-	*/
-
-	in_set_state = false;
-
 	return 0;
 }
 
 int
 MidiDiskstream::use_new_write_source (uint32_t n)
 {
-        cerr << name() << " use new write source for n = " << n << " recordable ? " << recordable() << endl;
-
 	if (!recordable()) {
 		return 1;
 	}
 
 	assert(n == 0);
 
-	if (_write_source) {
-
-		if (_write_source->is_empty ()) {
-			/* remove any region that is using this empty source; they can result when MIDI recordings
-			   are made, but no MIDI data is received.
-			*/
-			_playlist->remove_region_by_source (_write_source);
-			_write_source->mark_for_remove ();
-			_write_source->drop_references ();
-			_write_source.reset();
-		} else {
-			_write_source.reset();
-		}
-	}
+        _write_source.reset();
 
 	try {
 		_write_source = boost::dynamic_pointer_cast<SMFSource>(_session.create_midi_source_for_session (0, name ()));

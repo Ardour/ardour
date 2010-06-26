@@ -288,9 +288,19 @@ MidiSource::clone (Evoral::MusicalTime begin, Evoral::MusicalTime end)
 void
 MidiSource::session_saved()
 {
+        /* this writes a copy of the data to disk. 
+           XXX do we need to do this every time?
+        */
+
 	flush_midi();
+        cerr << name() << " @ " << this << " length at save = " << _length_beats << endl;
+
+#if 0 // old style: clone the source if necessary on every session save
+      // and switch to the new source
 
 	if (_model && _model->edited()) {
+                cerr << "Model exists and is edited\n";
+
 		boost::shared_ptr<MidiSource> newsrc = clone ();
 
                 if (newsrc) {
@@ -298,6 +308,7 @@ MidiSource::session_saved()
                         Switched (newsrc); /* EMIT SIGNAL */
                 }
 	}
+#endif
 }
 
 void
