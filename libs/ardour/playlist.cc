@@ -552,6 +552,7 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 		pending_contents_change = true;
 		pending_length = true;
 	} else {
+                r->clear_history ();
 		pending_length = false;
 		LengthChanged (); /* EMIT SIGNAL */
 		pending_contents_change = false;
@@ -620,7 +621,10 @@ Playlist::flush_notifications ()
 
 	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
 		// cerr << _name << " sends RegionAdded\n";
-		RegionAdded (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
+                /* don't emit RegionAdded signal until relayering is done,
+                   so that the region is fully setup by the time
+                   anyone hear's that its been added
+                */
 		dependent_checks_needed.insert (*s);
 	}
 
@@ -646,6 +650,11 @@ Playlist::flush_notifications ()
 		ContentsChanged (); /* EMIT SIGNAL */
 		// cerr << _name << "done contents change @ " << get_microseconds() << endl;
 	}
+
+	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
+                (*s)->clear_history ();
+		RegionAdded (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
+        }
 
 	for (s = dependent_checks_needed.begin(); s != dependent_checks_needed.end(); ++s) {
 		check_dependents (*s, false);
