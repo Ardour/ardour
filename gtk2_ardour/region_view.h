@@ -86,7 +86,7 @@ class RegionView : public TimeAxisViewItem
 	virtual void entered () {}
 	virtual void exited () {}
 
-	void enable_display(bool yn) { _enable_display = yn; }
+	virtual void enable_display(bool yn) { _enable_display = yn; }
 	virtual void update_coverage_frames (LayerDisplay);
 
 	static PBD::Signal1<void,RegionView*> RegionViewGoingAway;

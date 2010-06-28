@@ -2940,3 +2940,12 @@ MidiRegionView::color_handler ()
 
         /* XXX probably more to do here */
 }
+
+void
+MidiRegionView::enable_display (bool yn)
+{
+	RegionView::enable_display (yn);
+	if (yn) {
+		redisplay_model ();
+	}
+}

@@ -279,6 +279,8 @@ class MidiRegionView : public RegionView
 	void show_list_editor ();
 
 	void selection_as_notelist (Notes& selected, bool allow_all_if_none_selected = false);
+
+	void enable_display (bool);
         
   protected:
 	/** Allows derived types to specify their visibility requirements

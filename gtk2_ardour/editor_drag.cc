@@ -1699,10 +1699,9 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 		speed = tv->track()->speed();
 	}
 
-	nframes64_t region_start = (nframes64_t) (_primary->region()->position() / speed);
-	nframes64_t region_end = (nframes64_t) (_primary->region()->last_frame() / speed);
-	nframes64_t region_length = (nframes64_t) (_primary->region()->length() / speed);
-
+	nframes64_t const region_start = (nframes64_t) (_primary->region()->position() / speed);
+	nframes64_t const region_end = (nframes64_t) (_primary->region()->last_frame() / speed);
+	nframes64_t const region_length = (nframes64_t) (_primary->region()->length() / speed);
 
 	nframes64_t const pf = adjusted_current_frame (event);
 
@@ -1778,6 +1777,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 			RegionView* rv = i->view;
 			rv->fake_set_opaque(false);
+			rv->enable_display (false);
                         rv->region()->clear_history ();
 			rv->region()->suspend_property_changes ();
 
@@ -1869,6 +1869,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 				_editor->thaw_region_after_trim (*i->view);
+				i->view->enable_display (true);
 				i->view->fake_set_opaque (true);
                                 if (_have_transaction) {
                                         _editor->session()->add_command (new StatefulDiffCommand (i->view->region()));
