@@ -1057,6 +1057,8 @@ MidiRegionView::~MidiRegionView ()
 {
 	in_destructor = true;
 
+	trackview.editor().hide_verbose_canvas_cursor ();
+
         note_delete_connection.disconnect ();
 
 	delete _list_editor;
