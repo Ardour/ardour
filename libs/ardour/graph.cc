@@ -394,7 +394,7 @@ Graph::main_thread()
 
         this->prep();
 
-        if (_graph_empty) {
+        if (_graph_empty && !_quit_threads) {
                 sem_post (&_callback_done_sem);
                 goto again;
         }
