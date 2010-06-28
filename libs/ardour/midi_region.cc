@@ -272,6 +272,10 @@ MidiRegion::switch_source(boost::shared_ptr<Source> src)
 void
 MidiRegion::model_changed ()
 {
+	if (!model()) {
+		return;
+	}
+	
 	/* build list of filtered Parameters, being those whose automation state is not `Play' */
 
 	_filtered_parameters.clear ();

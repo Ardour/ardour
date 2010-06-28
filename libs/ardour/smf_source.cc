@@ -388,7 +388,10 @@ SMFSource::mark_streaming_write_completed ()
 		return;
 	}
 
-	_model->set_edited(false);
+	if (_model) {
+		_model->set_edited(false);
+	}
+	
 	Evoral::SMF::end_write ();
 }
 
