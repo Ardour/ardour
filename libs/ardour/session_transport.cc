@@ -769,8 +769,9 @@ Session::micro_locate (nframes_t distance)
 	return 0;
 }
 
+/** @param with_mmc true to send a MMC locate command when the locate is done */
 void
-Session::locate (nframes64_t target_frame, bool with_roll, bool with_flush, bool with_loop, bool force)
+Session::locate (nframes64_t target_frame, bool with_roll, bool with_flush, bool with_loop, bool force, bool with_mmc)
 {
 	if (actively_recording() && !with_loop) {
 		return;
@@ -891,6 +892,10 @@ Session::locate (nframes64_t target_frame, bool with_roll, bool with_flush, bool
 	loop_changing = false;
 
 	_send_timecode_update = true;
+
+	if (with_mmc) {
+		deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
+	}
 
 	Located (); /* EMIT SIGNAL */
 }

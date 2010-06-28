@@ -1168,7 +1168,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void overwrite_some_buffers (Track *);
 	void flush_all_inserts ();
 	int  micro_locate (nframes_t distance);
-        void locate (nframes64_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
+        void locate (nframes64_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false, bool with_mmc=true);
         void start_locate (nframes64_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
 	void force_locate (nframes64_t frame, bool with_roll = false);
 	void set_track_speed (Track *, double speed);

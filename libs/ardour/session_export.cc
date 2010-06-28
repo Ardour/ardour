@@ -224,6 +224,6 @@ Session::finalize_audio_export ()
 	if (post_export_sync) {
 		config.set_external_sync (true);
 	} else {
-		locate (post_export_position, false, false, false);
+		locate (post_export_position, false, false, false, false, false);
 	}
 }

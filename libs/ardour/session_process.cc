@@ -268,7 +268,6 @@ Session::process_with_events (nframes_t nframes)
 	 */
 	if (_send_timecode_update) {
 		send_full_time_code(nframes);
-		deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
 	}
 
 	if (!process_can_proceed()) {
