@@ -64,8 +64,6 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	, _data_note_min(60)
 	, _data_note_max(71)
 {
-	color_handler ();
-
 	/* use a group dedicated to MIDI underlays. Audio underlays are not in this group. */
 	midi_underlay_group = new ArdourCanvas::Group (*_canvas_group);
 	midi_underlay_group->lower_to_bottom();
@@ -84,6 +82,8 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 			_note_lines, &_trackview));
 
 	_note_lines->lower_to_bottom();
+
+	color_handler ();
 
 	ColorsChanged.connect(sigc::mem_fun(*this, &MidiStreamView::color_handler));
 
