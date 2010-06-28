@@ -109,6 +109,10 @@ private:
 	bool set_selected_in_subrow (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, int);
 	bool selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
 	void name_edit (const Glib::ustring&, const Glib::ustring&);
+	void locked_changed (Glib::ustring const &);
+	void glued_changed (Glib::ustring const &);
+	void muted_changed (Glib::ustring const &);
+	void opaque_changed (Glib::ustring const &);
 
 	bool key_press (GdkEventKey *);
 	bool button_press (GdkEventButton *);

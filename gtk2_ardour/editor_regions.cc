@@ -102,6 +102,22 @@ EditorRegions::EditorRegions (Editor* e)
 	tv_col->add_attribute(renderer->property_text(), _columns.name);
 	tv_col->add_attribute(renderer->property_foreground_gdk(), _columns.color_);
 
+	CellRendererToggle* locked_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (7));
+	locked_cell->property_activatable() = true;
+	locked_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::locked_changed));
+
+	CellRendererToggle* glued_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (8));
+	glued_cell->property_activatable() = true;
+	glued_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::glued_changed));
+
+	CellRendererToggle* muted_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (9));
+	muted_cell->property_activatable() = true;
+	muted_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::muted_changed));
+
+	CellRendererToggle* opaque_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (10));
+	opaque_cell->property_activatable() = true;
+	opaque_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::opaque_changed));
+	
 	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
 	_display.add_object_drag (_columns.region.index(), "regions");
 
@@ -306,7 +322,11 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 	if (what_changed.contains (ARDOUR::Properties::name) ||
             what_changed.contains (ARDOUR::Properties::start) ||
             what_changed.contains (ARDOUR::Properties::position) ||
-            what_changed.contains (ARDOUR::Properties::length)) {
+            what_changed.contains (ARDOUR::Properties::length) ||
+	    what_changed.contains (ARDOUR::Properties::locked) ||
+	    what_changed.contains (ARDOUR::Properties::position_lock_style) ||
+	    what_changed.contains (ARDOUR::Properties::muted) ||
+	    what_changed.contains (ARDOUR::Properties::opaque)) {
 
 		/* find the region in our model and update its row */
 		TreeModel::Children rows = _model->children ();
@@ -1195,4 +1215,56 @@ EditorRegions::get_single_selection ()
 	}
 
 	return (*iter)[_columns.region];
+}
+
+void
+EditorRegions::locked_changed (Glib::ustring const & path)
+{
+	TreeIter i = _model->get_iter (path);
+	if (i) {
+		boost::shared_ptr<ARDOUR::Region> region = (*i)[_columns.region];
+		if (region) {
+			region->set_locked (!(*i)[_columns.locked]);
+		}
+	}
+}
+
+void
+EditorRegions::glued_changed (Glib::ustring const & path)
+{
+	TreeIter i = _model->get_iter (path);
+	if (i) {
+		boost::shared_ptr<ARDOUR::Region> region = (*i)[_columns.region];
+		if (region) {
+			/* `glued' means MusicTime, and we're toggling here */
+			region->set_position_lock_style ((*i)[_columns.glued] ? AudioTime : MusicTime);
+		}
+	}
+
+}
+
+void
+EditorRegions::muted_changed (Glib::ustring const & path)
+{
+	TreeIter i = _model->get_iter (path);
+	if (i) {
+		boost::shared_ptr<ARDOUR::Region> region = (*i)[_columns.region];
+		if (region) {
+			region->set_muted (!(*i)[_columns.muted]);
+		}
+	}
+
+}
+
+void
+EditorRegions::opaque_changed (Glib::ustring const & path)
+{
+	TreeIter i = _model->get_iter (path);
+	if (i) {
+		boost::shared_ptr<ARDOUR::Region> region = (*i)[_columns.region];
+		if (region) {
+			region->set_opaque (!(*i)[_columns.opaque]);
+		}
+	}
+
 }
