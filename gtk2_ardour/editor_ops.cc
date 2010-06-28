@@ -157,7 +157,6 @@ Editor::split_regions_at (nframes64_t where, RegionSelection& regions)
 		boost::shared_ptr<Playlist> pl = (*a)->region()->playlist();
 
                 if (!pl) {
-                        cerr << "region " << (*a)->region()->name() << " has no playlist!\n";
                         a = tmp;
                         continue;
                 }
@@ -1950,8 +1949,6 @@ Editor::add_locations_from_audio_region ()
 	_session->begin_reversible_command (rs.size () > 1 ? _("add markers") : _("add marker"));
 	XMLNode &before = _session->locations()->get_state();
 
-	cerr << "Add locations\n";
-
 	for (RegionSelection::iterator i = rs.begin (); i != rs.end (); ++i) {
 
 		boost::shared_ptr<Region> region = (*i)->region ();
@@ -1993,8 +1990,6 @@ Editor::add_location_from_audio_region ()
 	if (!choose_new_marker_name(markername)) {
 		return;
 	}
-
-	cerr << "Add location\n";
 
 	// single range spanning all selected
 	Location *location = new Location (rs.start(), rs.end_frame(), markername, Location::IsRangeMarker);
@@ -2801,7 +2796,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 						latest_regionviews.clear ();
 
 						playlist->partition ((nframes64_t)((*t).start * speed),
-								(nframes64_t)((*t).end * speed), true);
+								(nframes64_t)((*t).end * speed), false);
 
 						c.disconnect ();
 
@@ -2815,6 +2810,17 @@ Editor::separate_regions_between (const TimeSelection& ts)
 								begin_reversible_command (_("separate"));
 								in_command = true;
 							}
+                                                        
+                                                        /* pick up changes to existing regions */
+
+                                                        vector<StatefulDiffCommand*> cmds;
+                                                        playlist->rdiff (cmds);
+                                                        for (vector<StatefulDiffCommand*>::iterator j = cmds.begin(); j != cmds.end(); ++j) {
+                                                                _session->add_command (*j);
+                                                        }
+
+                                                        /* pick up changes to the playlist itself (adds/removes)
+                                                         */
 
 							_session->add_command(new StatefulDiffCommand (playlist));
 						}
@@ -4685,7 +4691,6 @@ Editor::fork_region ()
                         boost::shared_ptr<MidiRegion> newregion = mrv->midi_region()->clone ();
                         
                         playlist->clear_history ();
-                        cerr << "Replace region with " << newregion->name() << endl;
                         playlist->replace_region (mrv->region(), newregion, mrv->region()->position());
                         _session->add_command(new StatefulDiffCommand (playlist));
 		}
@@ -5398,6 +5403,13 @@ Editor::set_playhead_cursor ()
 void
 Editor::split ()
 {
+        if (((mouse_mode == MouseRange) || 
+             (mouse_mode != MouseObject && _join_object_range_state == JOIN_OBJECT_RANGE_RANGE)) && 
+            !selection->time.empty()) {
+                separate_regions_between (selection->time);
+                return;
+        } 
+
 	RegionSelection rs;
 
 	get_regions_for_action (rs, true);
@@ -6320,8 +6332,6 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
                         
                         pl->rdiff (cmds);
                         
-                        cerr << "Shift generated " << cmds.size() << " sdc's\n";
-
                         for (vector<StatefulDiffCommand*>::iterator c = cmds.begin(); c != cmds.end(); ++c) {
                                 _session->add_command (*c);
                         }
