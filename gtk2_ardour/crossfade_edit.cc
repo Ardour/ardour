@@ -27,6 +27,7 @@
 
 #include <libgnomecanvasmm/line.h>
 
+#include "pbd/memento_command.h"
 #include "ardour/automation_list.h"
 #include "evoral/Curve.hpp"
 #include "ardour/crossfade.h"
@@ -783,7 +784,14 @@ CrossfadeEditor::apply_preset (Preset *preset)
 void
 CrossfadeEditor::apply ()
 {
+	_session->begin_reversible_command (_("Edit crossfade"));
+
+	XMLNode& before = xfade->get_state ();
+
 	_apply_to (xfade);
+
+	_session->add_command (new MementoCommand<Crossfade> (*xfade.get(), &before, &xfade->get_state()));
+	_session->commit_reversible_command ();
 }
 
 void

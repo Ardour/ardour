@@ -142,6 +142,9 @@ class Crossfade : public ARDOUR::AudioRegion
 	static framecnt_t short_xfade_length() { return _short_xfade_length; }
 	static void set_short_xfade_length (framecnt_t n);
 
+	/** emitted when the actual fade curves change, as opposed to one of the Stateful properties */
+	PBD::Signal0<void> FadesChanged;
+
   private:
 	friend struct CrossfadeComparePtr;
 	friend class AudioPlaylist;

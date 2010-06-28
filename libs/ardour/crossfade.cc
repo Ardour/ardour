@@ -865,6 +865,7 @@ Crossfade::set_state (const XMLNode& node, int /*version*/)
 	_fade_out.thaw ();
 
 	PropertyChanged (what_changed); /* EMIT SIGNAL */
+	FadesChanged (); /* EMIT SIGNAL */
 
 	return 0;
 }

@@ -1646,7 +1646,7 @@ Editor::add_crossfade_context_items (AudioStreamView* /*view*/, boost::shared_pt
 	}
 
 	items.push_back (MenuElem (str, sigc::bind (sigc::mem_fun(*this, &Editor::toggle_xfade_active), boost::weak_ptr<Crossfade> (xfade))));
-	items.push_back (MenuElem (_("Edit"), sigc::bind (sigc::mem_fun(*this, &Editor::edit_xfade), boost::weak_ptr<Crossfade> (xfade))));
+	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun(*this, &Editor::edit_xfade), boost::weak_ptr<Crossfade> (xfade))));
 
 	if (xfade->can_follow_overlap()) {
 

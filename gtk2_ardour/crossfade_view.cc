@@ -84,6 +84,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	crossfade_changed (all_crossfade_properties);
 
 	crossfade->PropertyChanged.connect (*this, invalidator (*this), ui_bind (&CrossfadeView::crossfade_changed, this, _1), gui_context());
+	crossfade->FadesChanged.connect (*this, invalidator (*this), ui_bind (&CrossfadeView::crossfade_fades_changed, this), gui_context());
 	ColorsChanged.connect (sigc::mem_fun (*this, &CrossfadeView::color_handler));
 }
 
@@ -260,4 +261,10 @@ void
 CrossfadeView::fake_hide ()
 {
 	group->hide();
+}
+
+void
+CrossfadeView::crossfade_fades_changed ()
+{
+	redraw_curves ();
 }
