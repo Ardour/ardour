@@ -134,11 +134,24 @@ protected:
 	{}
 
 	void set (T const& v) {
-                if (!_have_old) {
-                        _old      = _current;
-                        _have_old = true;
-                }
-		_current  = v;
+                if (v != _current) {
+                        if (!_have_old) {
+                                _old = _current;
+                                _have_old = true;
+                        } else {
+                                if (v == _old) {
+                                        /* value has been reset to the value
+                                           at the start of a history transaction,
+                                           before clear_history() is called.
+                                           thus there is effectively no apparent
+                                           history for this property.
+                                        */
+                                        _have_old = false;
+                                }
+                        }
+
+                        _current  = v;
+                } 
 	}
 
 	virtual std::string to_string (T const& v) const             = 0;
