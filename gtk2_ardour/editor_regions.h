@@ -82,6 +82,7 @@ private:
 			add (opaque);
 			add (used);
 			add (path);
+			add (property_toggles_visible);
 		}
 
 		Gtk::TreeModelColumn<Glib::ustring> name;
@@ -99,6 +100,8 @@ private:
 		Gtk::TreeModelColumn<bool> opaque;
 		Gtk::TreeModelColumn<Glib::ustring> used;
 		Gtk::TreeModelColumn<Glib::ustring> path;
+		/** used to indicate whether the locked/glued/muted/opaque should be visible or not */
+		Gtk::TreeModelColumn<bool> property_toggles_visible;
 	};
 
 	Columns _columns;

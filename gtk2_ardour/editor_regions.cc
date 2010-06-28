@@ -105,18 +105,26 @@ EditorRegions::EditorRegions (Editor* e)
 	CellRendererToggle* locked_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (7));
 	locked_cell->property_activatable() = true;
 	locked_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::locked_changed));
+	TreeViewColumn* locked_col = _display.get_column (7);
+	locked_col->add_attribute (locked_cell->property_visible(), _columns.property_toggles_visible);
 
 	CellRendererToggle* glued_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (8));
 	glued_cell->property_activatable() = true;
 	glued_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::glued_changed));
+	TreeViewColumn* glued_col = _display.get_column (8);
+	glued_col->add_attribute (glued_cell->property_visible(), _columns.property_toggles_visible);
 
 	CellRendererToggle* muted_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (9));
 	muted_cell->property_activatable() = true;
 	muted_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::muted_changed));
+	TreeViewColumn* muted_col = _display.get_column (9);
+	muted_col->add_attribute (muted_cell->property_visible(), _columns.property_toggles_visible);
 
 	CellRendererToggle* opaque_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (10));
 	opaque_cell->property_activatable() = true;
 	opaque_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::opaque_changed));
+	TreeViewColumn* opaque_col = _display.get_column (10);
+	opaque_col->add_attribute (opaque_cell->property_visible(), _columns.property_toggles_visible);
 	
 	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
 	_display.add_object_drag (_columns.region.index(), "regions");
@@ -259,6 +267,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 
 		row[_columns.name] = str;
 		row[_columns.region] = region;
+		row[_columns.property_toggles_visible] = false;
 
 		if (missing_source) {
 			row[_columns.path] = _("(MISSING) ") + region->source()->name();
@@ -309,6 +318,8 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 		if (!found_parent) {
 			row = *(_model->append());
 		}
+
+		row[_columns.property_toggles_visible] = true;
 	}
 
 	row[_columns.region] = region;
