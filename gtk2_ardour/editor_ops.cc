@@ -4944,7 +4944,7 @@ Editor::toggle_region_lock_style ()
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
                 (*i)->region()->clear_history ();
-		Region::PositionLockStyle const ns = (*i)->region()->positional_lock_style() == Region::AudioTime ? Region::MusicTime : Region::AudioTime;
+		PositionLockStyle const ns = (*i)->region()->position_lock_style() == AudioTime ? MusicTime : AudioTime;
 		(*i)->region()->set_position_lock_style (ns);
 		_session->add_command (new StatefulDiffCommand ((*i)->region()));
 	}

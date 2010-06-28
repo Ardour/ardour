@@ -443,6 +443,11 @@ namespace ARDOUR {
 		int64_t                  space;
 	};
 
+	enum PositionLockStyle {
+		AudioTime,
+		MusicTime
+	};
+
 	/** A struct used to describe changes to processors in a route.
 	 *  This is useful because objects that respond to a change in processors
 	 *  can optimise what work they do based on details of what has changed.
@@ -500,6 +505,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::TimecodeFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::DenormalModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::PositionLockStyle& sf);
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::SampleFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::HeaderFormat& sf);
@@ -518,6 +524,7 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::TimecodeFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::DenormalModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformScale& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformShape& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::PositionLockStyle& sf);
 
 static inline ARDOUR::nframes64_t
 session_frame_to_track_frame (ARDOUR::nframes64_t session_frame, double speed)

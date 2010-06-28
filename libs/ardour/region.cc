@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <sstream>
 
-
 #include <glibmm/thread.h>
 #include "pbd/xml++.h"
 #include "pbd/stacktrace.h"
@@ -69,6 +68,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<framecnt_t> ancestral_length;
 		PBD::PropertyDescriptor<float> stretch;
 		PBD::PropertyDescriptor<float> shift;
+		PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
 	}
 }
 	
@@ -119,6 +119,8 @@ Region::make_property_quarks ()
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretch = %1\n", 	Properties::stretch.property_id));
 	Properties::shift.property_id = g_quark_from_static_string (X_("shift"));
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for shift = %1\n", 	Properties::shift.property_id));
+	Properties::position_lock_style.property_id = g_quark_from_static_string (X_("positional-lock-style"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position_lock_style = %1\n", 	Properties::position_lock_style.property_id));
 }
 
 void
@@ -147,6 +149,7 @@ Region::register_properties ()
 	add_property (_ancestral_length);
 	add_property (_stretch);
 	add_property (_shift);
+	add_property (_position_lock_style);
 }
 
 #define REGION_DEFAULT_STATE(s,l) \
@@ -170,7 +173,8 @@ Region::register_properties ()
 	, _ancestral_start (Properties::ancestral_start, (s)) \
 	, _ancestral_length (Properties::ancestral_length, (l)) \
 	, _stretch (Properties::stretch, 1.0) \
-	, _shift (Properties::shift, 1.0)
+	, _shift (Properties::shift, 1.0) \
+	, _position_lock_style (Properties::position_lock_style, _type == DataType::AUDIO ? AudioTime : MusicTime)
 
 #define REGION_COPY_STATE(other) \
 	  _muted (other->_muted) \
@@ -193,7 +197,8 @@ Region::register_properties ()
 	, _ancestral_start (other->_ancestral_start) \
 	, _ancestral_length (other->_ancestral_length) \
 	, _stretch (other->_stretch) \
-	, _shift (other->_shift)
+	, _shift (other->_shift) \
+	, _position_lock_style (other->_position_lock_style)
 
 /* derived-from-derived constructor (no sources in constructor) */
 Region::Region (Session& s, framepos_t start, framecnt_t length, const string& name, DataType type)
@@ -202,7 +207,6 @@ Region::Region (Session& s, framepos_t start, framecnt_t length, const string& n
 	, REGION_DEFAULT_STATE(start,length)
 	, _last_length (length)
 	, _last_position (0)
-	, _positional_lock_style(AudioTime)
 	, _first_edit (EditChangesNothing)
 	, _read_data_count(0)
 	, _last_layer_op(0)
@@ -220,7 +224,6 @@ Region::Region (const SourceList& srcs)
 	, REGION_DEFAULT_STATE(0,0)
 	, _last_length (0)
 	, _last_position (0)
-        , _positional_lock_style (_type == DataType::AUDIO ? AudioTime : MusicTime)
 	, _first_edit (EditChangesNothing)
 	, _valid_transients(false)
 	, _read_data_count(0)
@@ -250,7 +253,6 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, boo
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _last_position(other->_last_position) \
-	, _positional_lock_style(other->_positional_lock_style) \
 	, _first_edit (EditChangesNothing)
 	, _valid_transients(false)
 	, _read_data_count(0)
@@ -276,7 +278,7 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, boo
 		   property lists. this would be nice to remove.
 		*/
 
-		_positional_lock_style = other->_positional_lock_style;
+		_position_lock_style = other->_position_lock_style;
 		_first_edit = other->_first_edit;
 
 		if (offset == 0) {
@@ -357,7 +359,6 @@ Region::Region (boost::shared_ptr<const Region> other, const SourceList& srcs)
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _last_position (other->_last_position)
-        , _positional_lock_style (other->_positional_lock_style)
 	, _first_edit (EditChangesID)
 	, _valid_transients (false)
 	, _read_data_count (0)
@@ -388,7 +389,6 @@ Region::Region (boost::shared_ptr<const Region> other)
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _last_position (other->_last_position)
-        , _positional_lock_style (other->_positional_lock_style)
 	, _first_edit (EditChangesID)
 	, _valid_transients(false)
 	, _read_data_count(0)
@@ -545,18 +545,22 @@ Region::special_set_position (framepos_t pos)
 void
 Region::set_position_lock_style (PositionLockStyle ps)
 {
-	boost::shared_ptr<Playlist> pl (playlist());
+	if (_position_lock_style != ps) {
 
-	if (!pl) {
-		return;
+		boost::shared_ptr<Playlist> pl (playlist());
+		
+		if (!pl) {
+			return;
+		}
+		
+		_position_lock_style = ps;
+		
+		if (_position_lock_style == MusicTime) {
+			_session.tempo_map().bbt_time (_position, _bbt_time);
+		}
+
+		send_change (Properties::position_lock_style);
 	}
-
-	_positional_lock_style = ps;
-
-	if (_positional_lock_style == MusicTime) {
-		_session.tempo_map().bbt_time (_position, _bbt_time);
-	}
-
 }
 
 void
@@ -564,7 +568,7 @@ Region::update_position_after_tempo_map_change ()
 {
 	boost::shared_ptr<Playlist> pl (playlist());
 
-	if (!pl || _positional_lock_style != MusicTime) {
+	if (!pl || _position_lock_style != MusicTime) {
 		return;
 	}
 
@@ -643,7 +647,7 @@ Region::set_position_on_top (framepos_t pos, void* /*src*/)
 void
 Region::recompute_position_from_lock_style ()
 {
-	if (_positional_lock_style == MusicTime) {
+	if (_position_lock_style == MusicTime) {
 		_session.tempo_map().bbt_time (_position, _bbt_time);
 	}
 }
@@ -1160,8 +1164,7 @@ Region::state (bool full)
 
 	/* note: flags are stored by derived classes */
 
-	if (_positional_lock_style != AudioTime) {
-		node->add_property ("positional-lock-style", enum_2_string (_positional_lock_style));
+	if (_position_lock_style != AudioTime) {
 		stringstream str;
 		str << _bbt_time;
 		node->add_property ("bbt-position", str.str());
@@ -1210,23 +1213,18 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		_id = prop->value();
 	}
 
-	if ((prop = node.property ("positional-lock-style")) != 0) {
-		_positional_lock_style = PositionLockStyle (string_2_enum (prop->value(), _positional_lock_style));
-
-		if (_positional_lock_style == MusicTime) {
-			if ((prop = node.property ("bbt-position")) == 0) {
-				/* missing BBT info, revert to audio time locking */
-				_positional_lock_style = AudioTime;
-			} else {
-				if (sscanf (prop->value().c_str(), "%d|%d|%d",
-					    &_bbt_time.bars,
-					    &_bbt_time.beats,
-					    &_bbt_time.ticks) != 3) {
-					_positional_lock_style = AudioTime;
-				}
+	if (_position_lock_style == MusicTime) {
+		if ((prop = node.property ("bbt-position")) == 0) {
+			/* missing BBT info, revert to audio time locking */
+			_position_lock_style = AudioTime;
+		} else {
+			if (sscanf (prop->value().c_str(), "%d|%d|%d",
+				    &_bbt_time.bars,
+				    &_bbt_time.beats,
+				    &_bbt_time.ticks) != 3) {
+				_position_lock_style = AudioTime;
 			}
 		}
-
 	}
 
 	/* fix problems with old sessions corrupted by impossible

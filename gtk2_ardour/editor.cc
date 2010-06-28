@@ -1756,8 +1756,8 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	items.push_back (CheckMenuElem (_("Glue to Bars and Beats")));
 	CheckMenuItem* bbt_glue_item = static_cast<CheckMenuItem*>(&items.back());
 
-	switch (region_to_check->positional_lock_style()) {
-	case Region::MusicTime:
+	switch (region_to_check->position_lock_style()) {
+	case MusicTime:
 		bbt_glue_item->set_active (true);
 		break;
 	default:

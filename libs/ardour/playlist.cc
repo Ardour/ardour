@@ -1326,7 +1326,7 @@ Playlist::shift (framepos_t at, frameoffset_t distance, bool move_intersected, b
 		   has to be done separately.
 		*/
 
-		if (!ignore_music_glue && (*r)->positional_lock_style() != Region::AudioTime) {
+		if (!ignore_music_glue && (*r)->position_lock_style() != AudioTime) {
 			fixup.push_back (*r);
 			continue;
 		}

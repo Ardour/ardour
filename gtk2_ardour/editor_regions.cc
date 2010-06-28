@@ -803,7 +803,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 
 		row[_columns.locked] = region->locked();
 
-		if (region->positional_lock_style() == Region::MusicTime) {
+		if (region->position_lock_style() == MusicTime) {
 			row[_columns.glued] = true;
 		} else {
 			row[_columns.glued] = false;

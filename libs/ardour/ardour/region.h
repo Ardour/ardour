@@ -61,6 +61,7 @@ namespace Properties {
 	extern PBD::PropertyDescriptor<framecnt_t> ancestral_length;
 	extern PBD::PropertyDescriptor<float> stretch;
 	extern PBD::PropertyDescriptor<float> shift;
+	extern PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
 };
 
 class Playlist;
@@ -84,11 +85,6 @@ class Region
 
 	static void make_property_quarks ();
 	
-	enum PositionLockStyle {
-		AudioTime,
-		MusicTime
-	};
-
 	static PBD::Signal2<void,boost::shared_ptr<ARDOUR::Region>, const PBD::PropertyChange&> RegionPropertyChanged;
 
         PBD::PropertyList* property_factory (const XMLNode&) const;
@@ -149,7 +145,7 @@ class Region
 	bool external() const    { return _external; }
 	bool import() const      { return _import; }
 
-	PositionLockStyle positional_lock_style() const { return _positional_lock_style; }
+	PositionLockStyle position_lock_style() const { return _position_lock_style; }
 	void set_position_lock_style (PositionLockStyle ps);
 	void recompute_position_from_lock_style ();
 
@@ -330,10 +326,10 @@ class Region
 	PBD::Property<framecnt_t>  _ancestral_length;
 	PBD::Property<float>       _stretch;
 	PBD::Property<float>       _shift;
+	PBD::EnumProperty<PositionLockStyle> _position_lock_style;
 
 	framecnt_t              _last_length;
 	framepos_t              _last_position;
-	PositionLockStyle       _positional_lock_style;
 	mutable RegionEditState _first_edit;
 	BBT_Time                _bbt_time;
 	AnalysisFeatureList     _transients;

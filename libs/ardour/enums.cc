@@ -94,7 +94,7 @@ setup_enum_writer ()
 	Source::Flag _Source_Flag;
 	Diskstream::Flag _Diskstream_Flag;
 	Location::Flags _Location_Flags;
-	Region::PositionLockStyle _Region_PositionLockStyle;
+	PositionLockStyle _PositionLockStyle;
 	Track::FreezeState _Track_FreezeState;
 	AutomationList::InterpolationStyle _AutomationList_InterpolationStyle;
 	AnyTime::Type _AnyTime_Type;
@@ -417,10 +417,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Panner, OppositeDirection);
 	REGISTER (_Panner_LinkDirection);
 
-	REGISTER_CLASS_ENUM (Region, AudioTime);
-	REGISTER_CLASS_ENUM (Region, MusicTime);
-	REGISTER_BITS (_Region_PositionLockStyle);
-
 	REGISTER_CLASS_ENUM (Track, NoFreeze);
 	REGISTER_CLASS_ENUM (Track, Frozen);
 	REGISTER_CLASS_ENUM (Track, UnFrozen);
@@ -553,6 +549,10 @@ setup_enum_writer ()
 	REGISTER_ENUM(Legato);
 	REGISTER_ENUM(Groove);
 	REGISTER(_QuantizeType);
+
+	REGISTER_ENUM(AudioTime);
+	REGISTER_ENUM(MusicTime);
+	REGISTER(_PositionLockStyle);
 }
 
 } /* namespace ARDOUR */
@@ -783,4 +783,16 @@ std::ostream& operator<<(std::ostream& o, const WaveformShape& var)
 	return o << s;
 }
 
+std::istream& operator>>(std::istream& o, PositionLockStyle& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (PositionLockStyle) string_2_enum (s, var);
+	return o;
+}
 
+std::ostream& operator<<(std::ostream& o, const PositionLockStyle& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}

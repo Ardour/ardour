@@ -29,6 +29,7 @@
 #include "pbd/xml++.h"
 #include "pbd/property_basics.h"
 #include "pbd/property_list.h"
+#include "pbd/enumwriter.h"
 
 namespace PBD {
 
@@ -199,14 +200,14 @@ private:
 	 * std::locale aborting on OS X if used with anything
 	 * other than C or POSIX locales.
 	 */
-	std::string to_string (T const& v) const {
+	virtual std::string to_string (T const& v) const {
 		std::stringstream s;
 		s.precision (12); // in case its floating point
 		s << v;
 		return s.str ();
 	}
 
-	T from_string (std::string const& s) const {
+	virtual T from_string (std::string const& s) const {
 		std::stringstream t (s);
 		T                 v;
 		t >> v;
@@ -250,6 +251,29 @@ private:
 
 };
 
+template<class T>
+class EnumProperty : public Property<T>
+{
+public:
+	EnumProperty (PropertyDescriptor<T> q, T const& v)
+		: Property<T> (q, v)
+	{}
+
+	T & operator=(T const& v) {
+		this->set (v);
+		return this->_current;
+	}
+
+private:
+	std::string to_string (T const & v) const {
+		return enum_2_string (v);
+	}
+
+	T from_string (std::string const & s) const {
+		return static_cast<T> (string_2_enum (s, this->_current));
+	}
+};
+	
 } /* namespace PBD */
 
 #include "pbd/property_list_impl.h"
