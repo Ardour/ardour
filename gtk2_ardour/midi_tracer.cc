@@ -25,7 +25,7 @@ MidiTracer::MidiTracer (const std::string& name, Parser& p)
 	, autoscroll (true)
 	, show_hex (true)
 	, collect (true)
-	, update_queued (false)
+	, _update_queued (0)
 	, fifo (1024)
 	, buffer_pool ("miditracer", buffer_size, 1024) // 1024 256 byte buffers
 	, autoscroll_button (_("Auto-Scroll"))
@@ -255,9 +255,9 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 
 	fifo.write (&buf, 1);
 
-	if (!update_queued) {
+	if (g_atomic_int_get (&_update_queued) == 0) {
 		gui_context()->call_slot (invalidator (*this), boost::bind (&MidiTracer::update, this));
-		update_queued = true;
+		g_atomic_int_inc (&_update_queued);
 	}
 }
 
@@ -265,7 +265,7 @@ void
 MidiTracer::update ()
 {
 	bool updated = false;
-	update_queued = false;
+	g_atomic_int_dec_and_test (&_update_queued);
 
 	RefPtr<TextBuffer> buf (text.get_buffer());
 
