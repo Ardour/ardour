@@ -447,6 +447,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void begin_reversible_command (std::string cmd_name);
 	void commit_reversible_command ();
 
+	DragManager* drags () const {
+		return _drags;
+	}
+
+	void maybe_autoscroll (bool, bool);
+	
         /* handy cursors for everyone to use */
 
 	static Gdk::Cursor* cross_hair_cursor;
@@ -941,8 +947,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	int _scroll_callbacks;
 
 	double _canvas_width;
-	double _canvas_height;
-	double full_canvas_height;
+	double _canvas_height; ///< height of the visible area of the track canvas
+	double full_canvas_height; ///< full height of the canvas
 
 	bool track_canvas_map_handler (GdkEventAny*);
 
@@ -1685,8 +1691,6 @@ public:
 	bool autoscroll_canvas ();
 	void start_canvas_autoscroll (int x, int y);
 	void stop_canvas_autoscroll ();
-	void maybe_autoscroll (GdkEventMotion*, bool);
-	bool allow_vertical_scroll;
 
 	/* trimming */
 	void point_trim (GdkEvent *, nframes64_t);

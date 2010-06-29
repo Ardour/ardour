@@ -303,7 +303,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 
 		if (event->motion.state & Gdk::BUTTON1_MASK || event->motion.state & Gdk::BUTTON2_MASK) {
 			if (!from_autoscroll) {
-				_editor->maybe_autoscroll (&event->motion, allow_vertical_autoscroll ());
+				_editor->maybe_autoscroll (true, allow_vertical_autoscroll ());
 			}
 
 			motion (event, _move_threshold_passed != old_move_threshold_passed);

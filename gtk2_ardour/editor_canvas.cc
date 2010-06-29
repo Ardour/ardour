@@ -546,35 +546,33 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& /*context*/,
 }
 
 void
-Editor::maybe_autoscroll (GdkEventMotion* event, bool allow_vert)
+Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert)
 {
 	nframes64_t rightmost_frame = leftmost_frame + current_page_frames();
 	bool startit = false;
 
+	double ty = _drags->current_pointer_y() - get_trackview_group_vertical_offset ();
+
 	autoscroll_y = 0;
 	autoscroll_x = 0;
-	if (event->y < canvas_timebars_vsize && allow_vert) {
+	if (ty < canvas_timebars_vsize && allow_vert) {
 		autoscroll_y = -1;
 		startit = true;
-	} else if (event->y > _canvas_height) {
+	} else if (ty > _canvas_height && allow_vert) {
 		autoscroll_y = 1;
 		startit = true;
 	}
 
-	if (_drags->current_pointer_frame() > rightmost_frame) {
+	if (_drags->current_pointer_frame() > rightmost_frame && allow_horiz) {
 		if (rightmost_frame < max_frames) {
 			autoscroll_x = 1;
 			startit = true;
 		}
-	} else if (_drags->current_pointer_frame() < leftmost_frame) {
+	} else if (_drags->current_pointer_frame() < leftmost_frame && allow_horiz) {
 		if (leftmost_frame > 0) {
 			autoscroll_x = -1;
 			startit = true;
 		}
-	}
-
-	if (!allow_vertical_scroll) {
-		autoscroll_y = 0;
 	}
 
 	if ((autoscroll_x != last_autoscroll_x) || (autoscroll_y != last_autoscroll_y) || (autoscroll_x == 0 && autoscroll_y == 0)) {
@@ -739,7 +737,6 @@ Editor::start_canvas_autoscroll (int dx, int dy)
 void
 Editor::stop_canvas_autoscroll ()
 {
-
 	if (autoscroll_timeout_tag >= 0) {
 		g_source_remove (autoscroll_timeout_tag);
 		autoscroll_timeout_tag = -1;

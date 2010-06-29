@@ -1038,9 +1038,6 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 		if (pointer_window == track_canvas->get_bin_window()) {
 			track_canvas->window_to_world (x, y, wx, wy);
-			allow_vertical_scroll = true;
-		} else {
-			allow_vertical_scroll = false;
 		}
 	}
 

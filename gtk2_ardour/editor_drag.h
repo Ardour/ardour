@@ -24,6 +24,7 @@
 
 #include <gdk/gdk.h>
 #include <stdint.h>
+#include <bitset>
 
 #include "ardour/types.h"
 

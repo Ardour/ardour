@@ -384,7 +384,6 @@ Editor::Editor ()
 	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
 		_global_port_matrix[*i] = 0;
 	}
-	allow_vertical_scroll = false;
 	no_save_visual = false;
 	resize_idle_id = -1;
 

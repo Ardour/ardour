@@ -79,6 +79,7 @@ class MarkerTimeAxis;
 class ImageFrameView;
 class ImageFrameTimeAxis;
 class MarkerView;
+class DragManager;
 
 /// Representation of the interface of the Editor class
 
@@ -359,6 +360,10 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	
 	virtual Gtkmm2ext::TearOff* mouse_mode_tearoff () const = 0;
 	virtual Gtkmm2ext::TearOff* tools_tearoff () const = 0;
+
+	virtual DragManager* drags () const = 0;
+	virtual void maybe_autoscroll (bool, bool) = 0;
+	virtual void stop_canvas_autoscroll () = 0;
 
 	/// Singleton instance, set up by Editor::Editor()
 

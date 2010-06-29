@@ -52,6 +52,7 @@
 #include "rgb_macros.h"
 #include "utils.h"
 #include "streamview.h"
+#include "editor_drag.h"
 
 #include "i18n.h"
 
@@ -1242,6 +1243,7 @@ TimeAxisView::resizer_button_press (GdkEventButton* event)
 bool
 TimeAxisView::resizer_button_release (GdkEventButton*)
 {
+	_editor.stop_canvas_autoscroll ();
 	_resize_drag_start = -1;
 	return true;
 }
@@ -1256,6 +1258,19 @@ bool
 TimeAxisView::resizer_motion (GdkEventMotion* ev)
 {
 	if (_resize_drag_start >= 0) {
+		/* (ab)use the DragManager to do autoscrolling; adjust the event coordinates
+		   into the trackview space that DragManager::motion_handler is expecting,
+		   and then fake a DragManager motion event so that when maybe_autoscroll
+		   asks DragManager for the current pointer position it will get the correct
+		   answers.
+		*/
+		int tx, ty;
+		resizer.translate_coordinates (*control_parent, ev->x, ev->y, tx, ty);
+		ev->y = ty + _editor.get_canvas_timebars_vsize ();
+		_editor.drags()->motion_handler ((GdkEvent *) ev, false);
+		_editor.maybe_autoscroll (false, true);
+
+		/* now do the actual TAV resize */
                 int32_t const delta = (int32_t) floor (ev->y_root - _resize_drag_start);
                 _editor.add_to_idle_resize (this, delta);
                 _resize_drag_start = ev->y_root;
