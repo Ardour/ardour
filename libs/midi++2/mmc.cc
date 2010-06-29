@@ -558,10 +558,12 @@ MachineControl::write_track_status (byte *msg, size_t /*len*/, byte reg)
 			
 			switch (reg) {
 			case 0x4f:
+				trackRecordStatus[base_track+n] = val;
 				TrackRecordStatusChange (*this, base_track+n, val);
 				break;
 				
 			case 0x62:
+				trackMute[base_track+n] = val;
 				TrackMuteChange (*this, base_track+n, val);
 				break;
 			}

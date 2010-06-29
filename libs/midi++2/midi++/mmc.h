@@ -173,6 +173,81 @@ class MachineControl
 	/* The second argument is the number of steps to jump */
 	
 	PBD::Signal2<void,MachineControl &, int> Step;
+
+#define MMC_NTRACKS 48
+
+	/* note: these are not currently in use */
+	
+	byte updateRate;
+	byte responseError;
+	byte commandError;
+	byte commandErrorLevel;
+
+	byte motionControlTally;
+	byte velocityTally;
+	byte stopMode;
+	byte fastMode;
+	byte recordMode;
+	byte recordStatus;
+	bool trackRecordStatus[MMC_NTRACKS];
+	bool trackRecordReady[MMC_NTRACKS];
+	byte globalMonitor;
+	byte recordMonitor;
+	byte trackSyncMonitor;
+	byte trackInputMonitor;
+	byte stepLength;
+	byte playSpeedReference;
+	byte fixedSpeed;
+	byte lifterDefeat;
+	byte controlDisable;
+	byte trackMute[MMC_NTRACKS];
+	byte failure;
+	byte selectedTimeCode;
+	byte shortSelectedTimeCode;
+	byte timeStandard;
+	byte selectedTimeCodeSource;
+	byte selectedTimeCodeUserbits;
+	byte selectedMasterCode;
+	byte requestedOffset;
+	byte actualOffset;
+	byte lockDeviation;
+	byte shortSelectedMasterCode;
+	byte shortRequestedOffset;
+	byte shortActualOffset;
+	byte shortLockDeviation;
+	byte resolvedPlayMode;
+	byte chaseMode;
+	byte generatorTimeCode;
+	byte shortGeneratorTimeCode;
+	byte generatorCommandTally;
+	byte generatorSetUp;
+	byte generatorUserbits;
+	byte vitcInsertEnable;
+	byte midiTimeCodeInput;
+	byte shortMidiTimeCodeInput;
+	byte midiTimeCodeCommandTally;
+	byte midiTimeCodeSetUp;
+	byte gp0;
+	byte gp1;
+	byte gp2;
+	byte gp3;
+	byte gp4;
+	byte gp5;
+	byte gp6;
+	byte gp7;
+	byte shortGp0;
+	byte shortGp1;
+	byte shortGp2;
+	byte shortGp3;
+	byte shortGp4;
+	byte shortGp5;
+	byte shortGp6;
+	byte shortGp7;
+	byte procedureResponse;
+	byte eventResponse;
+	byte responseSegment;
+	byte wait;
+	byte resume;
 	
   private:
 	byte _receive_device_id;
