@@ -277,7 +277,7 @@ class MachineControl
 
 /** Class to describe a MIDI machine control command to be sent.
  *  In an ideal world we might use a class hierarchy for this, but objects of this type
- *  have to be allocated off the stack for thread safety.
+ *  have to be allocated off the stack for RT safety.
  */
 class MachineControlCommand
 {
