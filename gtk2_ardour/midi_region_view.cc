@@ -674,9 +674,28 @@ MidiRegionView::create_note_at(double x, double y, double length, bool sh)
 		length = frames_to_beats (beats_to_frames (length) - 1);
 	}
 
-	const boost::shared_ptr<NoteType> new_note(new NoteType(0,
-			frames_to_beats(start_frames + _region->start()), length,
-			(uint8_t)note, 0x40));
+	uint16_t chn_mask = mtv->channel_selector().get_selected_channels();
+        int chn_cnt = 0;
+        uint8_t channel = 0;
+
+        /* pick the highest selected channel, unless all channels are selected,
+           which is interpreted to mean channel 1 (zero)
+        */
+
+        for (uint16_t i = 0; i < 16; ++i) {
+                if (chn_mask & (1<<i)) {
+                        channel = i;
+                        chn_cnt++;
+                }
+        }
+
+        if (chn_cnt == 16) {
+                channel = 0;
+        }
+
+	const boost::shared_ptr<NoteType> new_note (new NoteType (channel,
+                                                                  frames_to_beats(start_frames + _region->start()), length,
+                                                                  (uint8_t)note, 0x40));
 
         if (_model->contains (new_note)) {
                 return;
