@@ -55,7 +55,7 @@ class RingBuffer
 	}
 	
 	guint read  (T *dest, guint cnt);
-	guint write (T *src,  guint cnt);
+	guint write (T const * src,  guint cnt);
 
 	struct rw_vector {
 	    T *buf[2];
@@ -158,7 +158,7 @@ RingBuffer<T>::read (T *dest, guint cnt)
 }
 
 template<class T> guint
-RingBuffer<T>::write (T *src, guint cnt)
+RingBuffer<T>::write (T const *src, guint cnt)
 
 {
         guint free_cnt;
