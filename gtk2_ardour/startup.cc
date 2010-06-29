@@ -44,8 +44,6 @@ ArdourStartup::ArdourStartup ()
 	, monitor_via_hardware_button (_("Use an external mixer or the hardware mixer of your audio interface.\n\
 Ardour will play NO role in monitoring"))
 	, monitor_via_ardour_button (string_compose (_("Ask %1 to playback material as it is being recorded"), PROGRAM_NAME))
-        , use_monitor_section_button (_("Use a monitor bus in new sessions (more complex, more control)"))
-        , no_monitor_section_button (_("Just use the master out bus (simpler, less control)"))
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, more_new_session_options_button (_("I'd like more options for this session"))
 	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
@@ -373,7 +371,37 @@ ArdourStartup::setup_monitor_section_choice_page ()
 	mon_sec_vbox.set_border_width (24);
 
 	HBox* hbox = manage (new HBox);
-	VBox* vbox = manage (new VBox);
+	VBox* main_vbox = manage (new VBox);
+	VBox* vbox;
+        Label* l = manage (new Label);
+
+	main_vbox->set_spacing (32);
+
+        no_monitor_section_button.set_label (_("Use a Master bus directly"));
+        l->set_alignment (0.0, 1.0);
+        l->set_markup(_("Connect the Master bus directly to your hardware outputs.\n\
+<i>Preferable for simple use</i>."));
+
+        vbox = manage (new VBox);
+	vbox->set_spacing (6);
+	vbox->pack_start (no_monitor_section_button, false, true);
+	vbox->pack_start (*l, false, true);
+
+        main_vbox->pack_start (*vbox, false, false);
+
+        use_monitor_section_button.set_label (_("Use an additional Monitor bus"));
+        l = manage (new Label);
+        l->set_alignment (0.0, 1.0);
+        l->set_text (_("Use a Monitor bus between Master bus and hardware outputs for \n\
+greater control in monitoring without affecting the mix."));
+
+        vbox = manage (new VBox);
+	vbox->set_spacing (6);
+	vbox->pack_start (use_monitor_section_button, false, true);
+	vbox->pack_start (*l, false, true);
+
+        main_vbox->pack_start (*vbox, false, false);
+
 	RadioButton::Group g (use_monitor_section_button.get_group());
 	no_monitor_section_button.set_group (g);
 
@@ -386,23 +414,12 @@ ArdourStartup::setup_monitor_section_choice_page ()
         use_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
         no_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
         
-	monitor_section_label.set_markup("\
-When connecting speakers to Ardour, would you prefer to use a monitor bus,\n\
-which will offer various kinds of control at the last stage of output\n\
-or would you prefer to just connect directly to the master outs?\n\n\
-Most home studio users will probably want to start <i>without</i> a monitor bus.\n\
-Those with experience of traditional mixing consoles may prefer to use one.\n\
-Please choose whichever one is right for your setup.\n\n\
-<i>(You can change this preference at any time, via the Preferences dialog)</i>");
+	monitor_section_label.set_markup(_("<i><small>(You can change this preference at any time, via the Preferences dialog)</small></i>"));
 	monitor_section_label.set_alignment (0.0, 0.0);
 
-	vbox->set_spacing (6);
-
-	vbox->pack_start (no_monitor_section_button, false, true);
-	vbox->pack_start (use_monitor_section_button, false, true);
-	hbox->pack_start (*vbox, true, true, 8);
-	mon_sec_vbox.pack_start (monitor_section_label, false, false);
+	hbox->pack_start (*main_vbox, true, true, 8);
 	mon_sec_vbox.pack_start (*hbox, false, false);
+	mon_sec_vbox.pack_start (monitor_section_label, false, false);
 
 	mon_sec_vbox.show_all ();
 
