@@ -1312,7 +1312,7 @@ MidiDiskstream::set_state (const XMLNode& node, int /*version*/)
 int
 MidiDiskstream::use_new_write_source (uint32_t n)
 {
-	if (!recordable()) {
+	if (!_session.writable() || !recordable()) {
 		return 1;
 	}
 
@@ -1333,7 +1333,6 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 		return -1;
 	}
 
-	_write_source->set_allow_remove_if_empty (true);
 	_write_source->mark_streaming_midi_write_started (_note_mode, _session.transport_frame());
 
 	return 0;
@@ -1344,7 +1343,7 @@ MidiDiskstream::steal_write_sources()
 {
         list<boost::shared_ptr<Source> > ret;
         ret.push_back (_write_source);
-        reset_write_sources (false);
+        use_new_write_source (0);
         return ret;
 }
 
@@ -1357,9 +1356,8 @@ MidiDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 
 	if (_write_source && mark_write_complete) {
 		_write_source->mark_streaming_write_completed ();
-	}
-
-	use_new_write_source (0);
+        }
+        use_new_write_source (0);
 }
 
 int

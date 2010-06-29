@@ -127,7 +127,7 @@ Butler::terminate_thread ()
 	if (thread) {
 		void* status;
 		const char c = Request::Quit;
-		::write (request_pipe[1], &c, 1);
+		(void) ::write (request_pipe[1], &c, 1);
 		pthread_join (thread, &status);
 	}
 }
@@ -383,7 +383,7 @@ void
 Butler::summon ()
 {
 	char c = Request::Run;
-	::write (request_pipe[1], &c, 1);
+	(void) ::write (request_pipe[1], &c, 1);
 }
 
 void
@@ -391,7 +391,7 @@ Butler::stop ()
 {
 	Glib::Mutex::Lock lm (request_lock);
 	char c = Request::Pause;
-	::write (request_pipe[1], &c, 1);
+	(void) ::write (request_pipe[1], &c, 1);
 	paused.wait(request_lock);
 }
 
@@ -400,7 +400,7 @@ Butler::wait_until_finished ()
 {
 	Glib::Mutex::Lock lm (request_lock);
 	char c = Request::Wake;
-	::write (request_pipe[1], &c, 1);
+	(void) ::write (request_pipe[1], &c, 1);
 	paused.wait(request_lock);
 }
 

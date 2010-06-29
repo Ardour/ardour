@@ -2561,8 +2561,17 @@ Session::cleanup_sources (CleanupReport& rep)
 
 		for (set<string>::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
 
-			realpath(spath.c_str(), tmppath1);
-			realpath((*i).c_str(),  tmppath2);
+			if (realpath(spath.c_str(), tmppath1) == 0) {
+                                error << string_compose (_("Cannot expand path %1 (%2)"),
+                                                         spath, strerror (errno)) << endmsg;
+                                continue;
+                        }
+
+                        if (realpath((*i).c_str(),  tmppath2) == 0) {
+                                error << string_compose (_("Cannot expand path %1 (%2)"),
+                                                         (*i), strerror (errno)) << endmsg;
+                                continue;
+                        }
 
 			if (strcmp(tmppath1, tmppath2) == 0) {
 				used = true;

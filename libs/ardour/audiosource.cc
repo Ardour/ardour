@@ -880,7 +880,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, framepos_t first_frame, frame
 		off_t target_length = blocksize * ((first_peak_byte + blocksize + 1) / blocksize);
 
 		if (endpos < target_length) {
-			ftruncate (_peakfile_fd, target_length);
+			(void) ftruncate (_peakfile_fd, target_length);
 			/* error doesn't actually matter though, so continue on without testing */
 		}
 	}
@@ -923,7 +923,7 @@ AudioSource::truncate_peakfile ()
 	off_t end = lseek (_peakfile_fd, 0, SEEK_END);
 
 	if (end > _peak_byte_max) {
-		ftruncate (_peakfile_fd, _peak_byte_max);
+		(void) ftruncate (_peakfile_fd, _peak_byte_max);
 	}
 }
 
