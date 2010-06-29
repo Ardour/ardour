@@ -41,7 +41,6 @@
 #include "pbd/signals.h"
 #include "pbd/undo.h"
 
-#include "midi++/mmc.h"
 #include "midi++/types.h"
 
 #include "ardour/ardour.h"
@@ -64,6 +63,8 @@ class AEffect;
 
 namespace MIDI {
 	class Port;
+	class MachineControl;
+	class Parser;
 }
 
 namespace PBD {
@@ -640,16 +641,13 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void midi_panic(void);
 	int set_mtc_port (std::string port_tag);
-	int set_mmc_port (std::string port_tag);
 	int set_midi_port (std::string port_tag);
 	int set_midi_clock_port (std::string port_tag);
 	MIDI::Port *mtc_port() const { return _mtc_port; }
-	MIDI::Port *mmc_port() const { return _mmc_port; }
 	MIDI::Port *midi_port() const { return _midi_port; }
 	MIDI::Port *midi_clock_port() const { return _midi_clock_port; }
 
 	PBD::Signal0<void> MTC_PortChanged;
-	PBD::Signal0<void> MMC_PortChanged;
 	PBD::Signal0<void> MIDI_PortChanged;
 	PBD::Signal0<void> MIDIClock_PortChanged;
 
@@ -658,9 +656,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	bool get_trace_midi_input(MIDI::Port *port = 0);
 	bool get_trace_midi_output(MIDI::Port *port = 0);
-
-	void set_mmc_receive_device_id (uint32_t id);
-	void set_mmc_send_device_id (uint32_t id);
 
 	/* Scrubbing */
 
@@ -951,15 +946,13 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void check_declick_out ();
 
-	MIDI::MachineControl*    mmc;
-	MIDI::Port*             _mmc_port;
+	MIDI::MachineControl*   _mmc;
 	MIDI::Port*             _mtc_port;
 	MIDI::Port*             _midi_port;
 	MIDI::Port*             _midi_clock_port;
 	std::string             _path;
 	std::string             _name;
         bool                    _is_new;
-	bool                     session_send_mmc;
 	bool                     session_send_mtc;
 	bool                     session_midi_feedback;
 	bool                     play_loop;
@@ -1092,8 +1085,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* MIDI Machine Control */
 
-	void deliver_mmc (MIDI::MachineControl::Command, nframes_t);
-
 	void spp_start (MIDI::Parser&, nframes_t timestamp);
 	void spp_continue (MIDI::Parser&, nframes_t timestamp);
 	void spp_stop (MIDI::Parser&, nframes_t timestamp);
@@ -1121,7 +1112,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	MidiTimeoutList midi_timeouts;
 	bool mmc_step_timeout ();
 
-	MIDI::byte mmc_buffer[32];
 	MIDI::byte mtc_msg[16];
 	MIDI::byte mtc_timecode_bits;   /* encoding of SMTPE type for MTC */
 	MIDI::byte midi_msg[16];
@@ -1444,7 +1434,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void add_session_range_location (nframes_t, nframes_t);
 
-
+	void setup_midi_machine_control ();
 };
 
 } // namespace ARDOUR

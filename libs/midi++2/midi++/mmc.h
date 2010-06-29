@@ -20,20 +20,22 @@
 #ifndef __midipp_mmc_h_h__
 #define __midipp_mmc_h_h__
 
+#include "control_protocol/timecode.h"
 #include "pbd/signals.h"
+#include "pbd/ringbuffer.h"
 #include "midi++/types.h"
 
 namespace MIDI {
 
 class Port;
 class Parser;
+class MachineControlCommand;	
 
+/** Class to handle incoming and outgoing MIDI machine control messages */
 class MachineControl 
 {
   public:
 	typedef PBD::Signal1<void,MachineControl&> MMCSignal;
-	typedef byte CommandSignature[60];
-	typedef byte ResponseSignature[60];
 
 	enum Command {
 		cmdStop = 0x1,
@@ -84,19 +86,21 @@ class MachineControl
 		cmdResume = 0x7F
 	};
 	
-	MachineControl (Port &port,
-			float MMCVersion, 
-			CommandSignature &cs,
-			ResponseSignature &rs);
+	MachineControl ();
+	void set_port (Port* p);
 
-	Port &port() { return _port; }
+	Port* port() { return _port; }
 	
 	void set_receive_device_id (byte id);
 	void set_send_device_id (byte id);
 	byte receive_device_id () const { return _receive_device_id; }
 	byte send_device_id () const { return _send_device_id; }
+	void enable_send (bool);
+	void send (MachineControlCommand const &);
+	void flush_pending ();
 
 	static bool is_mmc (byte *sysex_buf, size_t len);
+	static void set_sending_thread (pthread_t);
 
 	/* Signals to connect to if you want to run "callbacks"
 	   when certain MMC commands are received.
@@ -170,100 +174,48 @@ class MachineControl
 	
 	PBD::Signal2<void,MachineControl &, int> Step;
 	
-  protected:
-
-#define MMC_NTRACKS 48
-
-	/* MMC Information fields (think "registers") */
-
-	CommandSignature commandSignature;
-	ResponseSignature responseSignature;
-
-	byte updateRate;
-	byte responseError;
-	byte commandError;
-	byte commandErrorLevel;
-	
-	byte motionControlTally;
-	byte velocityTally;
-	byte stopMode;
-	byte fastMode;
-	byte recordMode;
-	byte recordStatus;
-	bool trackRecordStatus[MMC_NTRACKS];
-	bool trackRecordReady[MMC_NTRACKS];
-	byte globalMonitor;
-	byte recordMonitor;
-	byte trackSyncMonitor;
-	byte trackInputMonitor;
-	byte stepLength;
-	byte playSpeedReference;
-	byte fixedSpeed;
-	byte lifterDefeat;
-	byte controlDisable;
-	byte trackMute[MMC_NTRACKS];
-	byte failure;
-	byte selectedTimeCode;
-	byte shortSelectedTimeCode;
-	byte timeStandard;
-	byte selectedTimeCodeSource;
-	byte selectedTimeCodeUserbits;
-	byte selectedMasterCode;
-	byte requestedOffset;
-	byte actualOffset;
-	byte lockDeviation;
-	byte shortSelectedMasterCode;
-	byte shortRequestedOffset;
-	byte shortActualOffset;
-	byte shortLockDeviation;
-	byte resolvedPlayMode;
-	byte chaseMode;
-	byte generatorTimeCode;
-	byte shortGeneratorTimeCode;
-	byte generatorCommandTally;
-	byte generatorSetUp;
-	byte generatorUserbits;
-	byte vitcInsertEnable;
-	byte midiTimeCodeInput;
-	byte shortMidiTimeCodeInput;
-	byte midiTimeCodeCommandTally;
-	byte midiTimeCodeSetUp;
-	byte gp0;
-	byte gp1;
-	byte gp2;
-	byte gp3;
-	byte gp4;
-	byte gp5;
-	byte gp6;
-	byte gp7;
-	byte shortGp0;
-	byte shortGp1;
-	byte shortGp2;
-	byte shortGp3;
-	byte shortGp4;
-	byte shortGp5;
-	byte shortGp6;
-	byte shortGp7;
-	byte procedureResponse;
-	byte eventResponse;
-	byte responseSegment;
-	byte wait;
-	byte resume;
-
   private:
 	byte _receive_device_id;
 	byte _send_device_id;
-	MIDI::Port &_port;
+	Port* _port;
+	bool _enable_send; ///< true if MMC sending is enabled
+
+	/** A ringbuffer of MMC commands that were `sent' from the wrong thread, which
+	    are queued up and sent when flush_pending() is called.
+	*/
+	RingBuffer<MachineControlCommand> _pending;
+
+	/** The thread to use for sending MMC commands */
+	static pthread_t _sending_thread;
 
 	void process_mmc_message (Parser &p, byte *, size_t len);
-	PBD::ScopedConnection mmc_connection;
+	PBD::ScopedConnection mmc_connection; ///< connection to our parser for incoming data
 
 	int  do_masked_write (byte *, size_t len);
 	int  do_locate (byte *, size_t len);
 	int  do_step (byte *, size_t len);
 	int  do_shuttle (byte *, size_t len);
+	void send_immediately (MachineControlCommand const &);
 	
 	void write_track_status (byte *, size_t len, byte reg);
+};
+
+/** Class to describe a MIDI machine control command to be sent.
+ *  In an ideal world we might use a class hierarchy for this, but objects of this type
+ *  have to be allocated off the stack for thread safety.
+ */
+class MachineControlCommand
+{
+public:
+	MachineControlCommand () : _command (MachineControl::Command (0)) {}
+	MachineControlCommand (MachineControl::Command);
+	MachineControlCommand (Timecode::Time);
+	
+	MIDI::byte* fill_buffer (MachineControl *mmc, MIDI::byte *) const;
+
+private:
+	MachineControl::Command _command;
+	Timecode::Time _time;
 };
 
 } // namespace MIDI

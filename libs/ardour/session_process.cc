@@ -40,6 +40,7 @@
 #include "ardour/port.h"
 
 #include "midi++/manager.h"
+#include "midi++/mmc.h"
 
 #include "i18n.h"
 
@@ -67,6 +68,8 @@ Session::process (nframes_t nframes)
 			post_transport ();
 		}
 	}
+
+	_mmc->flush_pending ();
         
         _engine.main_thread()->get_buffers ();
 

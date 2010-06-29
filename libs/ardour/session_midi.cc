@@ -56,10 +56,6 @@ using namespace PBD;
 using namespace MIDI;
 using namespace Glib;
 
-MachineControl::CommandSignature MMC_CommandSignature;
-MachineControl::ResponseSignature MMC_ResponseSignature;
-
-
 void
 Session::midi_panic()
 {
@@ -79,12 +75,6 @@ int
 Session::use_config_midi_ports ()
 {
 	string port_name;
-
-	if (default_mmc_port) {
-		set_mmc_port (default_mmc_port->name());
-	} else {
-		set_mmc_port ("");
-	}
 
 	if (default_mtc_port) {
 		set_mtc_port (default_mtc_port->name());
@@ -149,90 +139,6 @@ Session::set_mtc_port (string port_tag)
 
   out:
 	MTC_PortChanged(); /* EMIT SIGNAL */
-	set_dirty();
-	return 0;
-}
-
-void
-Session::set_mmc_receive_device_id (uint32_t device_id)
-{
-	if (mmc) {
-		mmc->set_receive_device_id (device_id);
-	}
-}
-
-void
-Session::set_mmc_send_device_id (uint32_t device_id)
-{
-	if (mmc) {
-		mmc->set_send_device_id (device_id);
-	}
-}
-
-int
-Session::set_mmc_port (string port_tag)
-{
-	MIDI::byte old_recv_device_id = 0;
-	MIDI::byte old_send_device_id = 0;
-	bool reset_id = false;
-
-	if (port_tag.length() == 0) {
-		if (_mmc_port == 0) {
-			return 0;
-		}
-		_mmc_port = 0;
-		goto out;
-	}
-
-	MIDI::Port* port;
-
-	if ((port = MIDI::Manager::instance()->port (port_tag)) == 0) {
-		return -1;
-	}
-
-	_mmc_port = port;
-
-	if (mmc) {
-		old_recv_device_id = mmc->receive_device_id();
-		old_recv_device_id = mmc->send_device_id();
-		reset_id = true;
-		delete mmc;
-	}
-
-	mmc = new MIDI::MachineControl (*_mmc_port, 1.0,
-					MMC_CommandSignature,
-					MMC_ResponseSignature);
-
-	if (reset_id) {
-		mmc->set_receive_device_id (old_recv_device_id);
-		mmc->set_send_device_id (old_send_device_id);
-	}
-
-	mmc->Play.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
-	mmc->DeferredPlay.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
-	mmc->Stop.connect_same_thread (*this, boost::bind (&Session::mmc_stop, this, _1));
-	mmc->FastForward.connect_same_thread (*this, boost::bind (&Session::mmc_fast_forward, this, _1));
-	mmc->Rewind.connect_same_thread (*this, boost::bind (&Session::mmc_rewind, this, _1));
-	mmc->Pause.connect_same_thread (*this, boost::bind (&Session::mmc_pause, this, _1));
-	mmc->RecordPause.connect_same_thread (*this, boost::bind (&Session::mmc_record_pause, this, _1));
-	mmc->RecordStrobe.connect_same_thread (*this, boost::bind (&Session::mmc_record_strobe, this, _1));
-	mmc->RecordExit.connect_same_thread (*this, boost::bind (&Session::mmc_record_exit, this, _1));
-	mmc->Locate.connect_same_thread (*this, boost::bind (&Session::mmc_locate, this, _1, _2));
-	mmc->Step.connect_same_thread (*this, boost::bind (&Session::mmc_step, this, _1, _2));
-	mmc->Shuttle.connect_same_thread (*this, boost::bind (&Session::mmc_shuttle, this, _1, _2, _3));
-	mmc->TrackRecordStatusChange.connect_same_thread (*this, boost::bind (&Session::mmc_record_enable, this, _1, _2, _3));
-
-
-	/* also handle MIDI SPP because its so common */
-
-	_mmc_port->input()->start.connect_same_thread (*this, boost::bind (&Session::spp_start, this, _1, _2));
-	_mmc_port->input()->contineu.connect_same_thread (*this, boost::bind (&Session::spp_continue, this, _1, _2));
-	_mmc_port->input()->stop.connect_same_thread (*this, boost::bind (&Session::spp_stop, this, _1, _2));
-
-	Config->set_mmc_port_name (port_tag);
-
-  out:
-	MMC_PortChanged(); /* EMIT SIGNAL */
 	set_dirty();
 	return 0;
 }
@@ -324,26 +230,26 @@ Session::set_trace_midi_input (bool yn, MIDI::Port* port)
 		}
 	} else {
 
-		if (_mmc_port) {
-			if ((input_parser = _mmc_port->input()) != 0) {
+		if (_mmc->port()) {
+			if ((input_parser = _mmc->port()->input()) != 0) {
 				input_parser->trace (yn, &cout, "input: ");
 			}
 		}
 
-		if (_mtc_port && _mtc_port != _mmc_port) {
+		if (_mtc_port && _mtc_port != _mmc->port()) {
 			if ((input_parser = _mtc_port->input()) != 0) {
 				input_parser->trace (yn, &cout, "input: ");
 			}
 		}
 
-		if (_midi_port && _midi_port != _mmc_port && _midi_port != _mtc_port  ) {
+		if (_midi_port && _midi_port != _mmc->port() && _midi_port != _mtc_port  ) {
 			if ((input_parser = _midi_port->input()) != 0) {
 				input_parser->trace (yn, &cout, "input: ");
 			}
 		}
 
 		if (_midi_clock_port
-			&& _midi_clock_port != _mmc_port
+		    && _midi_clock_port != _mmc->port()
 			&& _midi_clock_port != _mtc_port
 			&& _midi_clock_port != _midi_port) {
 			if ((input_parser = _midi_clock_port->input()) != 0) {
@@ -365,19 +271,19 @@ Session::set_trace_midi_output (bool yn, MIDI::Port* port)
 			output_parser->trace (yn, &cout, "output: ");
 		}
 	} else {
-		if (_mmc_port) {
-			if ((output_parser = _mmc_port->output()) != 0) {
+		if (_mmc->port()) {
+			if ((output_parser = _mmc->port()->output()) != 0) {
 				output_parser->trace (yn, &cout, "output: ");
 			}
 		}
 
-		if (_mtc_port && _mtc_port != _mmc_port) {
+		if (_mtc_port && _mtc_port != _mmc->port()) {
 			if ((output_parser = _mtc_port->output()) != 0) {
 				output_parser->trace (yn, &cout, "output: ");
 			}
 		}
 
-		if (_midi_port && _midi_port != _mmc_port && _midi_port != _mtc_port  ) {
+		if (_midi_port && _midi_port != _mmc->port() && _midi_port != _mtc_port  ) {
 			if ((output_parser = _midi_port->output()) != 0) {
 				output_parser->trace (yn, &cout, "output: ");
 			}
@@ -398,8 +304,8 @@ Session::get_trace_midi_input(MIDI::Port *port)
 		}
 	}
 	else {
-		if (_mmc_port) {
-			if ((input_parser = _mmc_port->input()) != 0) {
+		if (_mmc->port()) {
+			if ((input_parser = _mmc->port()->input()) != 0) {
 				return input_parser->tracing();
 			}
 		}
@@ -430,8 +336,8 @@ Session::get_trace_midi_output(MIDI::Port *port)
 		}
 	}
 	else {
-		if (_mmc_port) {
-			if ((output_parser = _mmc_port->output()) != 0) {
+		if (_mmc->port()) {
+			if ((output_parser = _mmc->port()->output()) != 0) {
 				return output_parser->tracing();
 			}
 		}
@@ -458,13 +364,6 @@ Session::setup_midi_control ()
 {
 	outbound_mtc_timecode_frame = 0;
 	next_quarter_frame_to_send = 0;
-
-	/* setup the MMC buffer */
-
-	mmc_buffer[0] = 0xf0; // SysEx
-	mmc_buffer[1] = 0x7f; // Real Time SysEx ID for MMC
-	mmc_buffer[2] = (mmc ? mmc->send_device_id() : 0x7f);
-	mmc_buffer[3] = 0x6;  // MCC
 
 	/* Set up the qtr frame message */
 
@@ -896,69 +795,6 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
  OUTBOUND MMC STUFF
 **********************************************************************/
 
-void
-Session::deliver_mmc (MIDI::MachineControl::Command cmd, nframes_t where)
-{
-	using namespace MIDI;
-	int nbytes = 4;
-	Timecode::Time timecode;
-
-	if (_mmc_port == 0 || !session_send_mmc) {
-		// cerr << "Not delivering MMC " << _mmc_port << " - " << session_send_mmc << endl;
-		return;
-	}
-
-	mmc_buffer[nbytes++] = cmd;
-
-	// cerr << "delivering MMC, cmd = " << hex << (int) cmd << dec << endl;
-
-	switch (cmd) {
-	case MachineControl::cmdLocate:
-		timecode_time_subframes (where, timecode);
-
-		mmc_buffer[nbytes++] = 0x6; // byte count
-		mmc_buffer[nbytes++] = 0x1; // "TARGET" subcommand
-		mmc_buffer[nbytes++] = timecode.hours;
-		mmc_buffer[nbytes++] = timecode.minutes;
-		mmc_buffer[nbytes++] = timecode.seconds;
-		mmc_buffer[nbytes++] = timecode.frames;
-		mmc_buffer[nbytes++] = timecode.subframes;
-		break;
-
-	case MachineControl::cmdStop:
-		break;
-
-	case MachineControl::cmdPlay:
-		/* always convert Play into Deferred Play */
-		/* Why? [DR] */
-		mmc_buffer[4] = MachineControl::cmdDeferredPlay;
-		break;
-
-	case MachineControl::cmdDeferredPlay:
-		break;
-
-	case MachineControl::cmdRecordStrobe:
-		break;
-
-	case MachineControl::cmdRecordExit:
-		break;
-
-	case MachineControl::cmdRecordPause:
-		break;
-
-	default:
-		nbytes = 0;
-	};
-
-	if (nbytes) {
-
-		mmc_buffer[nbytes++] = 0xf7; // terminate SysEx/MMC message
-
-		if (_mmc_port->midimsg (mmc_buffer, nbytes, 0)) {
-			error << string_compose(_("MMC: cannot send command %1%2%3"), &hex, cmd, &dec) << endmsg;
-		}
-	}
-}
 
 bool
 Session::mmc_step_timeout ()

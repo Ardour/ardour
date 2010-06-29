@@ -70,7 +70,7 @@ def build(bld):
 		obj.source += ' alsa_sequencer_midiport.cc '
 		obj.cxxflags += [ '-DWITH_ALSA' ]
 	obj.export_incdirs = ['.']
-	obj.includes     = ['.']
+	obj.includes     = ['.', '../surfaces/control_protocol']
 	obj.name         = 'libmidipp'
 	obj.target       = 'midipp'
 	obj.uselib       = 'GLIBMM SIGCPP XML JACK OSX COREAUDIO'

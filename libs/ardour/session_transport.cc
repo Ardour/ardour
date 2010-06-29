@@ -183,8 +183,10 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 	// FIXME: where should this really be? [DR]
 	//send_full_time_code();
-	deliver_mmc (MIDI::MachineControl::cmdStop, 0);
-	deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
+	_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
+	Timecode::Time time;
+	timecode_time_subframes (_transport_frame, time);
+	_mmc->send (MIDI::MachineControlCommand (time));
 
 	if (_transport_speed < 0.0f) {
 		todo = (PostTransportWork (todo | PostTransportStop | PostTransportReverse));
@@ -892,7 +894,9 @@ Session::locate (nframes64_t target_frame, bool with_roll, bool with_flush, bool
 	_send_timecode_update = true;
 
 	if (with_mmc) {
-		deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
+		Timecode::Time time;
+		timecode_time_subframes (_transport_frame, time);
+		_mmc->send (MIDI::MachineControlCommand (time));
 	}
 
 	Located (); /* EMIT SIGNAL */
@@ -1129,7 +1133,9 @@ Session::start_transport ()
 		}
 	}
 
-	deliver_mmc(MIDI::MachineControl::cmdDeferredPlay, _transport_frame);
+	Timecode::Time time;
+	timecode_time_subframes (_transport_frame, time);
+	_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
 
 	TransportStateChange (); /* EMIT SIGNAL */
 }

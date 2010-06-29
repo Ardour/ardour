@@ -99,6 +99,7 @@
 #include "ardour/graph.h"
 
 #include "midi++/jack.h"
+#include "midi++/mmc.h"
 
 #include "i18n.h"
 
@@ -135,8 +136,7 @@ Session::Session (AudioEngine &eng,
 	: _engine (eng),
 	  _target_transport_speed (0.0),
 	  _requested_return_frame (-1),
-	  mmc (0),
-	  _mmc_port (default_mmc_port),
+	  _mmc (0),
 	  _mtc_port (default_mtc_port),
 	  _midi_port (default_midi_port),
 	  _midi_clock_port (default_midi_clock_port),
@@ -305,7 +305,7 @@ Session::destroy ()
 
 	Crossfade::set_buffer_size (0);
 
-	delete mmc;
+	delete _mmc;
 
 	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
 	playlists.reset ();
@@ -961,7 +961,7 @@ Session::enable_record ()
 	if (g_atomic_int_get (&_record_status) != Recording) {
 		g_atomic_int_set (&_record_status, Recording);
 		_last_record_location = _transport_frame;
-		deliver_mmc(MIDI::MachineControl::cmdRecordStrobe, _last_record_location);
+		_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordStrobe));
 
 		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 			
@@ -987,17 +987,11 @@ Session::disable_record (bool rt_context, bool force)
 
 		if ((!Config->get_latched_record_enable () && !play_loop) || force) {
 			g_atomic_int_set (&_record_status, Disabled);
+			_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordExit));
 		} else {
 			if (rs == Recording) {
 				g_atomic_int_set (&_record_status, Enabled);
 			}
-		}
-
-		// FIXME: timestamp correct? [DR]
-		// FIXME FIXME FIXME: rt_context?  this must be called in the process thread.
-		// does this /need/ to be sent in all cases?
-		if (rt_context) {
-			deliver_mmc (MIDI::MachineControl::cmdRecordExit, _transport_frame);
 		}
 
 		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
@@ -1053,7 +1047,7 @@ Session::maybe_enable_record ()
 			enable_record ();
 		}
 	} else {
-		deliver_mmc (MIDI::MachineControl::cmdRecordPause, _transport_frame);
+		_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordPause));
 		RecordStateChanged (); /* EMIT SIGNAL */
 	}
 

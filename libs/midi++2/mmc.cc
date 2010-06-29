@@ -20,6 +20,7 @@
 
 #include <map>
 
+#include "control_protocol/timecode.h"
 #include "pbd/error.h"
 #include "midi++/mmc.h"
 #include "midi++/port.h"
@@ -28,6 +29,8 @@
 using namespace std;
 using namespace MIDI;
 using namespace PBD;
+
+pthread_t MachineControl::_sending_thread;
 
 static std::map<int,string> mmc_cmd_map;
 static void build_mmc_cmd_map ()
@@ -192,24 +195,27 @@ static void build_mmc_cmd_map ()
 }
 
 
-MachineControl::MachineControl (Port &p, float /*version*/,
-				CommandSignature & /*csig*/,
-				ResponseSignature & /*rsig*/)
-
-	: _port (p)
+MachineControl::MachineControl ()
+	: _port (0)
+	, _pending (16)
 {
-	Parser *parser;
-	
 	build_mmc_cmd_map ();
 
 	_receive_device_id = 0;
 	_send_device_id = 0x7f;
-	
-	if ((parser = _port.input()) != 0) {
-		parser->mmc.connect_same_thread (mmc_connection, boost::bind (&MachineControl::process_mmc_message, this, _1, _2, _3));
+}
+
+void
+MachineControl::set_port (Port* p)
+{
+	_port = p;
+
+	mmc_connection.disconnect ();
+
+	if (_port->input()) {
+		_port->input()->mmc.connect_same_thread (mmc_connection, boost::bind (&MachineControl::process_mmc_message, this, _1, _2, _3));
 	} else {
-		warning << "MMC connected to a non-input port: useless!"
-			<< endmsg;
+		warning << "MMC connected to a non-input port: useless!" << endmsg;
 	}
 }
 
@@ -227,7 +233,6 @@ MachineControl::set_send_device_id (byte id)
 
 bool
 MachineControl::is_mmc (byte *sysex_buf, size_t len)
-
 {
 	if (len < 4 || len > 48) {
 		return false;
@@ -247,7 +252,6 @@ MachineControl::is_mmc (byte *sysex_buf, size_t len)
 
 void
 MachineControl::process_mmc_message (Parser &, byte *msg, size_t len)
-
 {
 	size_t skiplen;
 	byte *mmc_msg;
@@ -455,7 +459,6 @@ MachineControl::process_mmc_message (Parser &, byte *msg, size_t len)
 
 int
 MachineControl::do_masked_write (byte *msg, size_t len)
-
 {
 	/* return the number of bytes "consumed" */
 
@@ -555,12 +558,10 @@ MachineControl::write_track_status (byte *msg, size_t /*len*/, byte reg)
 			
 			switch (reg) {
 			case 0x4f:
-				trackRecordStatus[base_track+n] = val;
 				TrackRecordStatusChange (*this, base_track+n, val);
 				break;
 				
 			case 0x62:
-				trackMute[base_track+n] = val;
 				TrackMuteChange (*this, base_track+n, val);
 				break;
 			}
@@ -571,7 +572,6 @@ MachineControl::write_track_status (byte *msg, size_t /*len*/, byte reg)
 
 int
 MachineControl::do_locate (byte *msg, size_t /*msglen*/)
-
 {
 	if (msg[2] == 0) {
 		warning << "MIDI::MMC: locate [I/F] command not supported"
@@ -600,7 +600,6 @@ MachineControl::do_step (byte *msg, size_t /*msglen*/)
 
 int
 MachineControl::do_shuttle (byte *msg, size_t /*msglen*/)
-
 {
 	size_t forward;
 	byte sh = msg[2];
@@ -630,3 +629,97 @@ MachineControl::do_shuttle (byte *msg, size_t /*msglen*/)
 	return 0;
 }
 
+void
+MachineControl::enable_send (bool yn)
+{
+	_enable_send = yn;
+}
+
+/** Send a MMC command.  It will be sent immediately if the call is made in _sending_thread,
+ *  otherwise it will be queued and sent next time flush_pending()
+ *  is called.
+ *  @param c command, which this method takes ownership of.
+ */
+void
+MachineControl::send (MachineControlCommand const & c)
+{
+	if (pthread_self() == _sending_thread) {
+		send_immediately (c);
+	} else {
+		_pending.write (&c, 1);
+	}
+}
+
+/** Send any pending MMC commands immediately.  Must be called from _sending_thread */
+void
+MachineControl::flush_pending ()
+{
+	MachineControlCommand c;
+	while (_pending.read (&c, 1) == 1) {
+		send_immediately (c);
+	}
+}
+
+/** Send a MMC immediately.  Must be called from _sending_thread.
+ *  @param c command, which this method takes ownership of.
+ */
+void
+MachineControl::send_immediately (MachineControlCommand const & c)
+{
+	if (_port == 0 || !_enable_send) {
+		// cerr << "Not delivering MMC " << _mmc->port() << " - " << session_send_mmc << endl;
+		return;
+	}
+
+	MIDI::byte buffer[32];
+	MIDI::byte* b = c.fill_buffer (this, buffer);
+
+	if (_port->midimsg (buffer, b - buffer, 0)) {
+		error << "MMC: cannot send command" << endmsg;
+	}
+}
+
+/** Set the thread that we should send MMC in */
+void
+MachineControl::set_sending_thread (pthread_t t)
+{
+	_sending_thread = t;
+}
+
+MachineControlCommand::MachineControlCommand (MachineControl::Command c)
+	: _command (c)
+{
+
+}
+
+MachineControlCommand::MachineControlCommand (Timecode::Time t)
+	: _command (MachineControl::cmdLocate)
+	, _time (t)
+{
+
+}
+
+MIDI::byte * 
+MachineControlCommand::fill_buffer (MachineControl* mmc, MIDI::byte* b) const
+{
+	*b++ = 0xf0; // SysEx
+	*b++ = 0x7f; // Real-time SysEx ID for MMC
+	*b++ = mmc->send_device_id();
+	*b++ = 0x6; // MMC command
+
+	*b++ = _command;
+
+	if (_command == MachineControl::cmdLocate) {
+		*b++ = 0x6; // byte count
+		*b++ = 0x1; // "TARGET" subcommand
+		*b++ = _time.hours;
+		*b++ = _time.minutes;
+		*b++ = _time.seconds;
+		*b++ = _time.frames;
+		*b++ = _time.subframes;
+	}
+
+	*b++ = 0xf7;
+
+	return b;
+}

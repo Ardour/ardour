@@ -33,6 +33,7 @@
 #include "pbd/unknown_type.h"
 
 #include "midi++/jack.h"
+#include "midi++/mmc.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_port.h"
@@ -146,6 +147,7 @@ _thread_init_callback (void * /*arg*/)
 	SessionEvent::create_per_thread_pool (X_("Audioengine"), 512);
 
 	MIDI::JACK_MidiPort::set_process_thread (pthread_self());
+	MIDI::MachineControl::set_sending_thread (pthread_self ());
 }
 
 typedef void (*_JackInfoShutdownCallback)(jack_status_t code, const char* reason, void *arg);

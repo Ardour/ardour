@@ -204,7 +204,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading);
 	_was_seamless = Config->get_seamless_loop ();
 	_slave = 0;
-	session_send_mmc = false;
 	session_send_mtc = false;
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);
@@ -299,6 +298,8 @@ Session::second_stage_init ()
 		return -1;
 	}
 
+	setup_midi_machine_control ();
+
 	// set_state() will call setup_raid_path(), but if it's a new session we need
 	// to call setup_raid_path() here.
 
@@ -321,7 +322,6 @@ Session::second_stage_init ()
 	*/
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave|Loading);
-
 
 	_locations.changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
 	_locations.added.connect_same_thread (*this, boost::bind (&Session::locations_added, this, _1));
@@ -352,8 +352,8 @@ Session::second_stage_init ()
 
 	send_full_time_code (0);
 	_engine.transport_locate (0);
-	deliver_mmc (MIDI::MachineControl::cmdMmcReset, 0);
-	deliver_mmc (MIDI::MachineControl::cmdLocate, 0);
+	_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
+	_mmc->send (MIDI::MachineControlCommand (Timecode::Time ()));
 
 	MidiClockTicker::instance().set_session (this);
 	MIDI::Name::MidiPatchManager::instance().set_session (this);
@@ -1242,6 +1242,8 @@ Session::set_state (const XMLNode& node, int version)
 		error << _("Session: XML state has no options section") << endmsg;
 	}
 
+	setup_midi_machine_control ();
+	
 	if (use_config_midi_ports ()) {
 	}
 
@@ -3180,15 +3182,11 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "mmc-device-id" || p == "mmc-receive-id") {
 
-		if (mmc) {
-			mmc->set_receive_device_id (Config->get_mmc_receive_device_id());
-		}
+		_mmc->set_receive_device_id (Config->get_mmc_receive_device_id());
 
 	} else if (p == "mmc-send-id") {
 
-		if (mmc) {
-			mmc->set_send_device_id (Config->get_mmc_send_device_id());
-		}
+		_mmc->set_send_device_id (Config->get_mmc_send_device_id());
 
 	} else if (p == "midi-control") {
 
@@ -3254,16 +3252,7 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "send-mmc") {
 
-		/* only set the internal flag if we have
-		   a port.
-		*/
-
-		if (_mmc_port != 0) {
-			session_send_mmc = Config->get_send_mmc();
-		} else {
-			mmc = 0;
-			session_send_mmc = false;
-		}
+		_mmc->enable_send (Config->get_send_mmc ());
 
 	} else if (p == "midi-feedback") {
 
@@ -3311,17 +3300,17 @@ Session::config_changed (std::string p, bool ours)
 		sync_order_keys ("session");
 	} else if (p == "initial-program-change") {
 
-		if (_mmc_port && Config->get_initial_program_change() >= 0) {
+		if (_mmc->port() && Config->get_initial_program_change() >= 0) {
 			MIDI::byte buf[2];
 
 			buf[0] = MIDI::program; // channel zero by default
 			buf[1] = (Config->get_initial_program_change() & 0x7f);
 
-			_mmc_port->midimsg (buf, sizeof (buf), 0);
+			_mmc->port()->midimsg (buf, sizeof (buf), 0);
 		}
 	} else if (p == "initial-program-change") {
 
-		if (_mmc_port && Config->get_initial_program_change() >= 0) {
+		if (_mmc->port() && Config->get_initial_program_change() >= 0) {
 			MIDI::byte* buf = new MIDI::byte[2];
 
 			buf[0] = MIDI::program; // channel zero by default
@@ -3373,4 +3362,32 @@ Session::load_diskstreams_2X (XMLNode const & node, int)
         }
 
         return 0;
+}
+
+/** Create our MachineControl object and connect things to it */
+void
+Session::setup_midi_machine_control ()
+{
+	_mmc = new MIDI::MachineControl;
+	_mmc->set_port (default_mmc_port);
+
+	_mmc->Play.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
+	_mmc->DeferredPlay.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
+	_mmc->Stop.connect_same_thread (*this, boost::bind (&Session::mmc_stop, this, _1));
+	_mmc->FastForward.connect_same_thread (*this, boost::bind (&Session::mmc_fast_forward, this, _1));
+	_mmc->Rewind.connect_same_thread (*this, boost::bind (&Session::mmc_rewind, this, _1));
+	_mmc->Pause.connect_same_thread (*this, boost::bind (&Session::mmc_pause, this, _1));
+	_mmc->RecordPause.connect_same_thread (*this, boost::bind (&Session::mmc_record_pause, this, _1));
+	_mmc->RecordStrobe.connect_same_thread (*this, boost::bind (&Session::mmc_record_strobe, this, _1));
+	_mmc->RecordExit.connect_same_thread (*this, boost::bind (&Session::mmc_record_exit, this, _1));
+	_mmc->Locate.connect_same_thread (*this, boost::bind (&Session::mmc_locate, this, _1, _2));
+	_mmc->Step.connect_same_thread (*this, boost::bind (&Session::mmc_step, this, _1, _2));
+	_mmc->Shuttle.connect_same_thread (*this, boost::bind (&Session::mmc_shuttle, this, _1, _2, _3));
+	_mmc->TrackRecordStatusChange.connect_same_thread (*this, boost::bind (&Session::mmc_record_enable, this, _1, _2, _3));
+
+	/* also handle MIDI SPP because its so common */
+
+	_mmc->port()->input()->start.connect_same_thread (*this, boost::bind (&Session::spp_start, this, _1, _2));
+	_mmc->port()->input()->contineu.connect_same_thread (*this, boost::bind (&Session::spp_continue, this, _1, _2));
+	_mmc->port()->input()->stop.connect_same_thread (*this, boost::bind (&Session::spp_stop, this, _1, _2));
 }
