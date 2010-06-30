@@ -176,6 +176,8 @@ Session::butler_thread_work ()
 		pfd[0].fd = butler_request_pipe[0];
 		pfd[0].events = POLLIN|POLLERR|POLLHUP;
 
+                cerr << "Butler sleeps with DWO = " << disk_work_outstanding << endl;
+
 		if (poll (pfd, 1, (disk_work_outstanding ? 0 : -1)) < 0) {
 			
 			if (errno == EINTR) {
@@ -270,6 +272,7 @@ Session::butler_thread_work ()
 				break;
 			case 1:
 				bytes += ds->read_data_count();
+                                cerr << (*i)->name() << " not completely written, DWO = true\n";
 				disk_work_outstanding = true;
 				break;
 				
@@ -283,6 +286,7 @@ Session::butler_thread_work ()
 
 		if (i != dsl->begin() && i != dsl->end()) {
 			/* we didn't get to all the streams */
+                        cerr << "Some streams not serviced, DWO = true\n";
 			disk_work_outstanding = true;
 		}
 		
@@ -301,7 +305,7 @@ Session::butler_thread_work ()
 		bytes = 0;
 		compute_io = true;
 		begin = get_microseconds();
-
+                
 		for (i = dsl->begin(); !transport_work_requested() && butler_should_run && i != dsl->end(); ++i) {
 			// cerr << "write behind for " << (*i)->name () << endl;
 
@@ -314,6 +318,7 @@ Session::butler_thread_work ()
 				break;
 			case 1:
 				bytes += (*i)->write_data_count();
+                                cerr << (*i)->name() << " not completely written, DWO = true\n";
 				disk_work_outstanding = true;
 				break;
 				
