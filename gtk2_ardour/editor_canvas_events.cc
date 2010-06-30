@@ -111,7 +111,6 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			current_stepping_trackview->step_height (false);
 			return true;
 		} else {
-			cout << "down line\n";
 			scroll_tracks_down_line ();
 			return true;
 		}
