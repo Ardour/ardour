@@ -348,6 +348,12 @@ MidiTrack::roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
 		MidiBuffer& mbuf (bufs.get_midi (0));
 
+		/* we are a MIDI track, so we always start the chain with a single-channel diskstream */
+		ChanCount c;
+		c.set_audio (0);
+		c.set_midi (1);
+		bufs.set_count (c);
+
 		diskstream->get_playback (mbuf, start_frame, end_frame);
 
 		/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */
