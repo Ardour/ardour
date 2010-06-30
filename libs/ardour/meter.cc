@@ -67,7 +67,7 @@ PeakMeter::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_fram
 				}
 			}
 		}
-		_peak_power[n] = val;
+		_peak_power[n] = max (val, _peak_power[n]);
 	}
 
 	// Meter audio in to the rest of the peaks
