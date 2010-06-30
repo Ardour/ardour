@@ -284,7 +284,7 @@ Session::butler_thread_work ()
 
 		}
 
-		if (i != dsl->begin() && i != dsl->end()) {
+		if (i != dsl->end()) {
 			/* we didn't get to all the streams */
                         cerr << "Some streams not serviced, DWO = true\n";
 			disk_work_outstanding = true;
@@ -339,7 +339,7 @@ Session::butler_thread_work ()
 			request_stop ();
 		}
                 
-		if (i != dsl->begin() && i != dsl->end()) {
+		if (i != dsl->end()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
