@@ -28,13 +28,14 @@
 #include "pbd/signals.h"
 
 #include "ardour/data_type.h"
+#include "ardour/chan_count.h"
 
 namespace ARDOUR {
 
 class AudioEngine;
 
 /** A set of `channels', each of which is associated with 0 or more ports.
- *  Each channel has a name which can be anything useful.
+ *  Each channel has a name which can be anything useful, and a data type.
  *  Intended for grouping things like, for example, a buss' outputs.
  *  `Channel' is a rather overloaded term but I can't think of a better
  *  one right now.
@@ -49,33 +50,34 @@ class Bundle : public PBD::ScopedConnectionList
 	typedef std::vector<std::string> PortList;
 
 	struct Channel {
-		Channel (std::string n) : name (n) {}
+		Channel (std::string n, DataType t) : name (n), type (t) {}
 
 		bool operator== (Channel const &o) const {
-			return name == o.name && ports == o.ports;
+			return name == o.name && type == o.type && ports == o.ports;
 		}
 
 		std::string name;
+		DataType type;
 		PortList ports;
 	};
 
 	Bundle (bool i = true);
 	Bundle (std::string const &, bool i = true);
-	Bundle (std::string const &, DataType, bool i = true);
 	Bundle (boost::shared_ptr<Bundle>);
 
 	virtual ~Bundle() {}
 
 	/** @return Number of channels that this Bundle has */
-	uint32_t nchannels () const;
+	ChanCount nchannels () const;
 
 	/** @param Channel index.
 	 *  @return Ports associated with this channel.
 	 */
 	PortList const & channel_ports (uint32_t) const;
 
-	void add_channel (std::string const &);
+	void add_channel (std::string const &, DataType);
 	std::string channel_name (uint32_t) const;
+	DataType channel_type (uint32_t) const;
 	void set_channel_name (uint32_t, std::string const &);
 	void add_port_to_channel (uint32_t, std::string);
 	void set_port (uint32_t, std::string);
@@ -97,11 +99,6 @@ class Bundle : public PBD::ScopedConnectionList
 
 	/** @return Bundle name */
 	std::string name () const { return _name; }
-
-	void set_type (DataType);
-
-	/** @return Type of the ports in this Bundle. */
-	DataType type () const { return _type; }
 
 	void set_ports_are_inputs ();
 	void set_ports_are_outputs ();
@@ -135,7 +132,6 @@ class Bundle : public PBD::ScopedConnectionList
 	void emit_changed (Change);
 
 	std::string _name;
-	DataType _type;
 	bool _ports_are_inputs;
 
 	bool _signals_suspended;

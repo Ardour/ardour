@@ -37,7 +37,7 @@ using namespace std;
 using namespace ARDOUR;
 
 BundleEditorMatrix::BundleEditorMatrix (Gtk::Window* parent, Session* session, boost::shared_ptr<Bundle> bundle)
-	: PortMatrix (parent, session, bundle->type())
+	: PortMatrix (parent, session, DataType::NIL)
 	, _bundle (bundle)
 {
 	_port_group = boost::shared_ptr<PortGroup> (new PortGroup (""));
@@ -60,7 +60,7 @@ BundleEditorMatrix::setup_ports (int dim)
 		   otherwise in some cases the basic system IO ports may be hidden, making
 		   the bundle editor useless */
 		
-		_ports[OTHER].gather (_session, _bundle->ports_are_inputs(), true);
+		_ports[OTHER].gather (_session, DataType::NIL, _bundle->ports_are_inputs(), true);
 		_ports[OTHER].remove_bundle (_bundle);
 		_ports[OTHER].resume_signals ();
 	}
@@ -118,7 +118,8 @@ BundleEditorMatrix::add_channel (boost::shared_ptr<Bundle> b)
 			return;
 		}
 
-		_bundle->add_channel (d.get_name());
+		/* XXX: allow user to specify type */
+		_bundle->add_channel (d.get_name(), DataType::AUDIO);
 		setup_ports (OURS);
 
 	} else {
@@ -212,28 +213,6 @@ BundleEditor::BundleEditor (Session* session, boost::shared_ptr<UserBundle> bund
 
 	_input_or_output.signal_changed().connect (sigc::mem_fun (*this, &BundleEditor::input_or_output_changed));
 
-	/* Type (audio or MIDI) */
-	a = new Gtk::Alignment (1, 0.5, 0, 1);
-	a->add (*Gtk::manage (new Gtk::Label (_("Type:"))));
-	t->attach (*Gtk::manage (a), 0, 1, 2, 3, Gtk::FILL, Gtk::FILL);
-	a = new Gtk::Alignment (0, 0.5, 0, 1);
-	a->add (_type);
-	t->attach (*Gtk::manage (a), 1, 2, 2, 3);
-
-	_type.append_text (_("Audio"));
-	_type.append_text (_("MIDI"));
-
-	switch (bundle->type ()) {
-	case DataType::AUDIO:
-		_type.set_active_text (_("Audio"));
-		break;
-	case DataType::MIDI:
-		_type.set_active_text (_("MIDI"));
-		break;
-	}
-
-	_type.signal_changed().connect (sigc::mem_fun (*this, &BundleEditor::type_changed));
-
 	get_vbox()->pack_start (*Gtk::manage (t), false, false);
 	get_vbox()->pack_start (_matrix);
 	get_vbox()->set_spacing (4);
@@ -268,18 +247,6 @@ BundleEditor::input_or_output_changed ()
 	}
 
 	_matrix.setup_all_ports ();
-}
-
-void
-BundleEditor::type_changed ()
-{
-	_bundle->remove_ports_from_channels ();
-
-	DataType const t = _type.get_active_text() == _("Audio") ?
-		DataType::AUDIO : DataType::MIDI;
-
-	_bundle->set_type (t);
-	_matrix.set_type (t);
 }
 
 void
@@ -360,7 +327,8 @@ BundleManager::new_clicked ()
 	boost::shared_ptr<UserBundle> b (new UserBundle (_("Bundle")));
 
 	/* Start off with a single channel */
-	b->add_channel ("1");
+	/* XXX: allow user to specify type */
+	b->add_channel ("1", DataType::AUDIO);
 
 	_session->add_bundle (b);
 	add_bundle (b);

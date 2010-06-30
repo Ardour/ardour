@@ -72,14 +72,12 @@ class BundleEditor : public ArdourDialog
   private:
 	void name_changed ();
 	void input_or_output_changed ();
-	void type_changed ();
 	void on_show ();
 
 	BundleEditorMatrix _matrix;
 	boost::shared_ptr<ARDOUR::UserBundle> _bundle;
 	Gtk::Entry _name;
 	Gtk::ComboBoxText _input_or_output;
-	Gtk::ComboBoxText _type;
 };
 
 class BundleManager : public ArdourDialog

@@ -81,7 +81,7 @@ PortMatrixGrid::render (cairo_t* cr)
 
 		if (!_matrix->show_only_bundles()) {
 			cairo_set_line_width (cr, thin_grid_line_width());
-			for (uint32_t j = 0; j < (*i)->bundle->nchannels(); ++j) {
+			for (uint32_t j = 0; j < (*i)->bundle->nchannels().get(_matrix->type()); ++j) {
 				x += grid_spacing ();
 				cairo_move_to (cr, x, 0);
 				cairo_line_to (cr, x, _height);
@@ -111,7 +111,7 @@ PortMatrixGrid::render (cairo_t* cr)
 
 		if (!_matrix->show_only_bundles()) {
 			cairo_set_line_width (cr, thin_grid_line_width());
-			for (uint32_t j = 0; j < (*i)->bundle->nchannels(); ++j) {
+			for (uint32_t j = 0; j < (*i)->bundle->nchannels().get(_matrix->type()); ++j) {
 				y += grid_spacing ();
 				cairo_move_to (cr, 0, y);
 				cairo_line_to (cr, _width, y);
@@ -169,10 +169,14 @@ PortMatrixGrid::render (cairo_t* cr)
 			for (PortGroup::BundleList::const_iterator j = row_bundles.begin(); j != row_bundles.end(); ++j) {
 
 				x = bx;
-				for (uint32_t k = 0; k < (*i)->bundle->nchannels (); ++k) {
+				for (uint32_t k = 0; k < (*i)->bundle->nchannels().n_total(); ++k) {
 
 					y = by;
-					for (uint32_t l = 0; l < (*j)->bundle->nchannels (); ++l) {
+					for (uint32_t l = 0; l < (*j)->bundle->nchannels().n_total(); ++l) {
+
+						if ((*i)->bundle->channel_type(k) != _matrix->type() || (*j)->bundle->channel_type(l) != _matrix->type()) {
+							continue;
+						}
 
 						ARDOUR::BundleChannel c[2];
 						c[_matrix->column_index()] = ARDOUR::BundleChannel ((*i)->bundle, k);
@@ -198,10 +202,10 @@ PortMatrixGrid::render (cairo_t* cr)
 					x += grid_spacing();
 				}
 
-				by += (*j)->bundle->nchannels () * grid_spacing();
+				by += (*j)->bundle->nchannels().get(_matrix->type()) * grid_spacing();
 			}
 
-			bx += (*i)->bundle->nchannels () * grid_spacing();
+			bx += (*i)->bundle->nchannels().get(_matrix->type()) * grid_spacing();
 		}
 	}
 }
@@ -277,9 +281,13 @@ PortMatrixGrid::get_association (PortMatrixNode node) const
 		bool have_diagonal_association = false;
 		bool have_diagonal_not_association = false;
 
-		for (uint32_t i = 0; i < node.row.bundle->nchannels (); ++i) {
+		for (uint32_t i = 0; i < node.row.bundle->nchannels().n_total(); ++i) {
 
-			for (uint32_t j = 0; j < node.column.bundle->nchannels (); ++j) {
+			for (uint32_t j = 0; j < node.column.bundle->nchannels().n_total(); ++j) {
+
+				if (node.row.bundle->channel_type(i) != _matrix->type() || node.column.bundle->channel_type(j) != _matrix->type()) {
+					continue;
+				}
 
 				ARDOUR::BundleChannel c[2];
 				c[_matrix->column_index()] = ARDOUR::BundleChannel (node.row.bundle, i);
@@ -334,9 +342,13 @@ PortMatrixGrid::set_association (PortMatrixNode node, bool s)
 {
 	if (_matrix->show_only_bundles()) {
 
-		for (uint32_t i = 0; i < node.column.bundle->nchannels(); ++i) {
-			for (uint32_t j = 0; j < node.row.bundle->nchannels(); ++j) {
+		for (uint32_t i = 0; i < node.column.bundle->nchannels().n_total(); ++i) {
+			for (uint32_t j = 0; j < node.row.bundle->nchannels().n_total(); ++j) {
 
+				if (node.column.bundle->channel_type(i) != _matrix->type() || node.row.bundle->channel_type(j) != _matrix->type()) {
+					continue;
+				}
+				
 				ARDOUR::BundleChannel c[2];
 				c[_matrix->column_index()] = ARDOUR::BundleChannel (node.column.bundle, i);
 				c[_matrix->row_index()] = ARDOUR::BundleChannel (node.row.bundle, j);

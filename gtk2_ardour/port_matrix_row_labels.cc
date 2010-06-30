@@ -54,7 +54,12 @@ PortMatrixRowLabels::compute_dimensions ()
 		PortGroup::BundleList const r = (*i)->bundles ();
 		for (PortGroup::BundleList::const_iterator j = r.begin(); j != r.end(); ++j) {
 
-			for (uint32_t k = 0; k < (*j)->bundle->nchannels(); ++k) {
+			for (uint32_t k = 0; k < (*j)->bundle->nchannels().n_total(); ++k) {
+
+				if ((*j)->bundle->channel_type(k) != _matrix->type()) {
+					continue;
+				}
+				
 				cairo_text_extents_t ext;
 				cairo_text_extents (cr, (*j)->bundle->channel_name(k).c_str(), &ext);
 				if (ext.width > _longest_port_name) {
@@ -110,7 +115,12 @@ PortMatrixRowLabels::render (cairo_t* cr)
 		render_bundle_name (cr, background_colour (), (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (N), 0, y, (*i)->bundle);
 
 		if (!_matrix->show_only_bundles()) {
-			for (uint32_t j = 0; j < (*i)->bundle->nchannels(); ++j) {
+			for (uint32_t j = 0; j < (*i)->bundle->nchannels().n_total(); ++j) {
+
+				if ((*i)->bundle->channel_type(j) != _matrix->type()) {
+					continue;
+				}
+				
 				Gdk::Color c = (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (M);
 				render_channel_name (cr, background_colour (), c, 0, y, ARDOUR::BundleChannel ((*i)->bundle, j));
 				y += grid_spacing();
@@ -205,7 +215,7 @@ PortMatrixRowLabels::render_bundle_name (
 {
 	double const x = bundle_name_x ();
 
-	int const n = _matrix->show_only_bundles() ? 1 : b->nchannels();
+	int const n = _matrix->show_only_bundles() ? 1 : b->nchannels().get(_matrix->type());
 	set_source_rgb (cr, bg_colour);
 	cairo_rectangle (cr, xoff + x, yoff, _longest_bundle_name + name_pad() * 2, grid_spacing() * n);
 	cairo_fill_preserve (cr);
@@ -238,7 +248,7 @@ PortMatrixRowLabels::render_channel_name (
 	cairo_text_extents (cr, bc.bundle->channel_name(bc.channel).c_str(), &ext);
 	double const off = (grid_spacing() - ext.height) / 2;
 
-	if (bc.bundle->nchannels() > 1) {
+	if (bc.bundle->nchannels().get(_matrix->type()) > 1) {
 
 		/* only plot the name if the bundle has more than one channel;
 		   the name of a single channel is assumed to be redundant */
@@ -323,7 +333,12 @@ PortMatrixRowLabels::motion (double x, double y)
 			
 			list<PortMatrixNode> n;
 			
-			for (uint32_t i = 0; i < w.bundle->nchannels(); ++i) {
+			for (uint32_t i = 0; i < w.bundle->nchannels().n_total(); ++i) {
+
+				if (w.bundle->channel_type(i) != _matrix->type()) {
+					continue;
+				}
+				
 				ARDOUR::BundleChannel const bc (w.bundle, i);
 				n.push_back (PortMatrixNode (bc, ARDOUR::BundleChannel ()));
 			}

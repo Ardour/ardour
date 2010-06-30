@@ -62,7 +62,11 @@ PortMatrixColumnLabels::compute_dimensions ()
 				_longest_bundle_name = ext.width;
 			}
 
-			for (uint32_t k = 0; k < (*j)->bundle->nchannels (); ++k) {
+			for (uint32_t k = 0; k < (*j)->bundle->nchannels().n_total(); ++k) {
+
+				if ((*j)->bundle->channel_type(k) != _matrix->type()) {
+					continue;
+				}
 
 				cairo_text_extents (
 					cr,
@@ -135,7 +139,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 		if (_matrix->show_only_bundles()) {
 			x += grid_spacing();
 		} else {
-			x += (*i)->bundle->nchannels () * grid_spacing();
+			x += (*i)->bundle->nchannels().get(_matrix->type()) * grid_spacing();
 		}
 		
 		++N;
@@ -149,7 +153,12 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 
 		for (PortGroup::BundleList::const_iterator i = bundles.begin (); i != bundles.end(); ++i) {
 
-			for (uint32_t j = 0; j < (*i)->bundle->nchannels(); ++j) {
+			for (uint32_t j = 0; j < (*i)->bundle->nchannels().n_total(); ++j) {
+
+				if ((*i)->bundle->channel_type(j) != _matrix->type()) {
+					continue;
+				}
+				
 				Gdk::Color c = (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (N);
 				render_channel_name (cr, background_colour (), c, x, 0, ARDOUR::BundleChannel ((*i)->bundle, j));
 				x += grid_spacing();
@@ -254,7 +263,7 @@ PortMatrixColumnLabels::render_bundle_name (
 	if (_matrix->show_only_bundles()) {
 		w = grid_spacing ();
 	} else {
-		w = b->nchannels() * grid_spacing();
+		w = b->nchannels().get(_matrix->type()) * grid_spacing();
 	}
 
 	double x_ = xoff;
@@ -352,7 +361,7 @@ PortMatrixColumnLabels::render_channel_name (
 			);
 	}
 
-	if (bc.bundle->nchannels() > 1) {
+	if (bc.bundle->nchannels().get(_matrix->type()) > 1) {
 
 		/* only plot the name if the bundle has more than one channel;
 		   the name of a single channel is assumed to be redundant */
@@ -478,7 +487,12 @@ PortMatrixColumnLabels::motion (double x, double y)
 		
 		list<PortMatrixNode> n;
 
-		for (uint32_t i = 0; i < w.bundle->nchannels(); ++i) {
+		for (uint32_t i = 0; i < w.bundle->nchannels().n_total(); ++i) {
+
+			if (w.bundle->channel_type(i) != _matrix->type()) {
+				continue;
+			}
+			
 			ARDOUR::BundleChannel const bc (w.bundle, i);
 			n.push_back (PortMatrixNode (ARDOUR::BundleChannel (), bc));
 		}

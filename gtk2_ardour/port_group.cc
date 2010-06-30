@@ -181,10 +181,10 @@ PortGroup::only_bundle ()
 }
 
 
-uint32_t
+ChanCount
 PortGroup::total_channels () const
 {
-	uint32_t n = 0;
+	ChanCount n;
 	for (BundleList::const_iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
 		n += (*i)->bundle->nchannels ();
 	}
@@ -225,14 +225,14 @@ PortGroup::remove_duplicates ()
 				/* this bundle is larger */
 
 				uint32_t k = 0;
-				while (k < (*i)->bundle->nchannels()) {
+				while (k < (*i)->bundle->nchannels().n_total()) {
 					/* see if this channel on *i has an equivalent on *j */
 					uint32_t l = 0;
-					while (l < (*j)->bundle->nchannels() && (*i)->bundle->channel_ports (k) != (*j)->bundle->channel_ports (l)) {
+					while (l < (*j)->bundle->nchannels().n_total() && (*i)->bundle->channel_ports (k) != (*j)->bundle->channel_ports (l)) {
 						++l;
 					}
 
-					if (l == (*j)->bundle->nchannels()) {
+					if (l == (*j)->bundle->nchannels().n_total()) {
 						/* it does not */
 						break;
 					}
@@ -240,7 +240,7 @@ PortGroup::remove_duplicates ()
 					++k;
 				}
 
-				if (k == (*i)->bundle->nchannels ()) {
+				if (k == (*i)->bundle->nchannels().n_total()) {
 					/* all channels on *i are represented by the larger bundle *j, so remove *i */
 					remove = true;
 					break;
@@ -260,7 +260,7 @@ PortGroup::remove_duplicates ()
 /** PortGroupList constructor.
  */
 PortGroupList::PortGroupList ()
-	: _type (DataType::AUDIO), _signals_suspended (false), _pending_change (false), _pending_bundle_change ((Bundle::Change) 0)
+	: _signals_suspended (false), _pending_change (false), _pending_bundle_change ((Bundle::Change) 0)
 {
 
 }
@@ -268,13 +268,6 @@ PortGroupList::PortGroupList ()
 PortGroupList::~PortGroupList() 
 {
 	/* XXX need to clean up bundles, but ownership shared with PortGroups */
-}
-
-void
-PortGroupList::set_type (DataType t)
-{
-	_type = t;
-	clear ();
 }
 
 void
@@ -304,7 +297,7 @@ PortGroupList::maybe_add_processor_to_list (
 
 /** Gather bundles from around the system and put them in this PortGroupList */
 void
-PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
+PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inputs, bool allow_dups)
 {
 	clear ();
 
@@ -342,33 +335,18 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 
 		/* Work out which group to put these bundles in */
 		boost::shared_ptr<PortGroup> g;
-		if (_type == DataType::AUDIO) {
-
-			if (boost::dynamic_pointer_cast<AudioTrack> (*i)) {
-				g = track;
-			} else if (!boost::dynamic_pointer_cast<MidiTrack>(*i)) {
-				g = bus;
-			}
-
-
-		} else if (_type == DataType::MIDI) {
-
-			if (boost::dynamic_pointer_cast<MidiTrack> (*i)) {
-				g = track;
-			}
-
-			/* No MIDI busses yet */
+		if (boost::dynamic_pointer_cast<Track> (*i)) {
+			g = track;
+		} else {
+			g = bus;
 		}
 
-		if (g) {
-
-			TimeAxisView* tv = PublicEditor::instance().axis_view_from_route (*i);
-			for (list<boost::shared_ptr<Bundle> >::iterator i = route_bundles.begin(); i != route_bundles.end(); ++i) {
-				if (tv) {
-					g->add_bundle (*i, io, tv->color ());
-				} else {
-					g->add_bundle (*i, io);
-				}
+		TimeAxisView* tv = PublicEditor::instance().axis_view_from_route (*i);
+		for (list<boost::shared_ptr<Bundle> >::iterator i = route_bundles.begin(); i != route_bundles.end(); ++i) {
+			if (tv) {
+				g->add_bundle (*i, io, tv->color ());
+			} else {
+				g->add_bundle (*i, io);
 			}
 		}
 	}
@@ -380,20 +358,20 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 	boost::shared_ptr<BundleList> b = session->bundles ();
 
 	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if (boost::dynamic_pointer_cast<UserBundle> (*i) && (*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
+		if (boost::dynamic_pointer_cast<UserBundle> (*i) && (*i)->ports_are_inputs() == inputs) {
 			system->add_bundle (*i, allow_dups);
 		}
 	}
 
 	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0 && (*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
+		if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0 && (*i)->ports_are_inputs() == inputs) {
 			system->add_bundle (*i, allow_dups);
 		}
 	}
 	
 	/* Ardour stuff */
 
-	if (!inputs && _type == DataType::AUDIO) {
+	if (!inputs && type == DataType::AUDIO) {
 		ardour->add_bundle (session->the_auditioner()->output()->bundle());
 		ardour->add_bundle (session->click_io()->bundle());
 	}
@@ -403,7 +381,7 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 	std::vector<std::string> extra_system;
 	std::vector<std::string> extra_other;
 
- 	const char **ports = session->engine().get_ports ("", _type.to_jack_type(), inputs ?
+ 	const char **ports = session->engine().get_ports ("", type.to_jack_type(), inputs ?
 							 JackPortIsInput : JackPortIsOutput);
  	if (ports) {
 
@@ -449,12 +427,12 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 	}
 
 	if (!extra_system.empty()) {
-		boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_system, inputs);
+		boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_system, type, inputs);
 		system->add_bundle (b);
 	}
 
 	if (!extra_other.empty()) {
-		other->add_bundle (make_bundle_from_ports (extra_other, inputs));
+		other->add_bundle (make_bundle_from_ports (extra_other, type, inputs));
 	}
 
 	if (!allow_dups) {
@@ -471,9 +449,9 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 }
 
 boost::shared_ptr<Bundle>
-PortGroupList::make_bundle_from_ports (std::vector<std::string> const & p, bool inputs) const
+PortGroupList::make_bundle_from_ports (std::vector<std::string> const & p, ARDOUR::DataType type, bool inputs) const
 {
-	boost::shared_ptr<Bundle> b (new Bundle ("", _type, inputs));
+	boost::shared_ptr<Bundle> b (new Bundle ("", inputs));
 
 	std::string const pre = common_prefix (p);
 	if (!pre.empty()) {
@@ -481,7 +459,7 @@ PortGroupList::make_bundle_from_ports (std::vector<std::string> const & p, bool 
 	}
 
 	for (uint32_t j = 0; j < p.size(); ++j) {
-		b->add_channel (p[j].substr (pre.length()));
+		b->add_channel (p[j].substr (pre.length()), type);
 		b->set_port (j, p[j]);
 	}
 
@@ -560,10 +538,10 @@ PortGroupList::bundles () const
 	return _bundles;
 }
 
-uint32_t
+ChanCount
 PortGroupList::total_channels () const
 {
-	uint32_t n = 0;
+	ChanCount n;
 
 	for (PortGroupList::List::const_iterator i = begin(); i != end(); ++i) {
 		n += (*i)->total_channels ();
@@ -661,7 +639,7 @@ bool
 PortGroupList::empty () const
 {
 	List::const_iterator i = _groups.begin ();
-	while (i != _groups.end() && (*i)->total_channels() == 0) {
+	while (i != _groups.end() && (*i)->total_channels() == ChanCount::ZERO) {
 		++i;
 	}
 

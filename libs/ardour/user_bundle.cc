@@ -50,7 +50,13 @@ ARDOUR::UserBundle::set_state (XMLNode const & node, int /*version*/)
 			return -1;
 		}
 
-		add_channel (name->value ());
+		XMLProperty const * type;
+		if ((type = (*i)->property ("type")) == 0) {
+			PBD::error << _("Node for Channel has no \"type\" property") << endmsg;
+			return -1;
+		}
+
+		add_channel (name->value (), DataType (type->value()));
 
 		XMLNodeList const ports = (*i)->children ();
 
@@ -93,6 +99,7 @@ ARDOUR::UserBundle::get_state ()
 		for (std::vector<Channel>::iterator i = _channel.begin(); i != _channel.end(); ++i) {
 			XMLNode* c = new XMLNode ("Channel");
 			c->add_property ("name", i->name);
+			c->add_property ("type", i->type.to_string());
 
 			for (PortList::iterator j = i->ports.begin(); j != i->ports.end(); ++j) {
 				XMLNode* p = new XMLNode ("Port");

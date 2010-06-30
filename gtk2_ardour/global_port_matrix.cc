@@ -42,7 +42,7 @@ void
 GlobalPortMatrix::setup_ports (int dim)
 {
 	_ports[dim].suspend_signals ();
-	_ports[dim].gather (_session, dim == IN, false);
+	_ports[dim].gather (_session, type(), dim == IN, false);
 	_ports[dim].resume_signals ();
 }
 

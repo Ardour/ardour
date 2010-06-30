@@ -111,6 +111,10 @@ IO::check_bundles_connected ()
 	check_bundles (_bundles_connected, ports());
 }
 
+/** Check the bundles in list to see which are connected to a given PortSet,
+ *  and update list with those that are connected such that every port on every
+ *  bundle channel x is connected to port x in ports.
+ */
 void
 IO::check_bundles (std::vector<UserBundleInfo*>& list, const PortSet& ports)
 {
@@ -118,9 +122,9 @@ IO::check_bundles (std::vector<UserBundleInfo*>& list, const PortSet& ports)
 
 	for (std::vector<UserBundleInfo*>::iterator i = list.begin(); i != list.end(); ++i) {
 
-		uint32_t const N = (*i)->bundle->nchannels ();
+		uint32_t const N = (*i)->bundle->nchannels().n_total();
 
-		if (_ports.num_ports (default_type()) < N) {
+		if (_ports.num_ports() < N) {
 			continue;
 		}
 
@@ -771,7 +775,7 @@ IO::get_port_counts (const XMLNode& node, int version, ChanCount& n, boost::shar
 	if ((prop = node.property ("connection")) != 0) {
 
 		if ((c = find_possible_bundle (prop->value())) != 0) {
-			n = ChanCount::max (n, ChanCount(c->type(), c->nchannels()));
+			n = ChanCount::max (n, c->nchannels());
 		}
 		return 0;
 	}
@@ -780,7 +784,7 @@ IO::get_port_counts (const XMLNode& node, int version, ChanCount& n, boost::shar
 
 		if ((*iter)->name() == X_("Bundle")) {
 			if ((c = find_possible_bundle (prop->value())) != 0) {
-				n = ChanCount::max (n, ChanCount(c->type(), c->nchannels()));
+				n = ChanCount::max (n, c->nchannels());
 				return 0;
 			} else {
 				return -1;
@@ -1328,8 +1332,6 @@ IO::setup_bundle ()
 
 	_bundle->suspend_signals ();
 
-	_bundle->set_type (default_type ());
-
 	_bundle->remove_channels ();
 
 	if (_direction == Input) {
@@ -1340,7 +1342,7 @@ IO::setup_bundle ()
         _bundle->set_name (buf);
 	uint32_t const ni = _ports.num_ports();
 	for (uint32_t i = 0; i < ni; ++i) {
-		_bundle->add_channel (bundle_channel_name (i, ni));
+		_bundle->add_channel (bundle_channel_name (i, ni), _ports.port(i)->type());
 		_bundle->set_port (i, _session.engine().make_port_name_non_relative (_ports.port(i)->name()));
 	}
 

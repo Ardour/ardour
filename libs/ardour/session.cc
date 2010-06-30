@@ -441,7 +441,7 @@ Session::when_engine_running ()
 		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
 
 		shared_ptr<Bundle> c (new Bundle (buf, true));
-		c->add_channel (_("mono"));
+		c->add_channel (_("mono"), DataType::AUDIO);
 		c->set_port (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
 
 		add_bundle (c);
@@ -454,9 +454,9 @@ Session::when_engine_running ()
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("out %" PRIu32 "+%" PRIu32), np + 1, np + 2);
 			shared_ptr<Bundle> c (new Bundle (buf, true));
-			c->add_channel (_("L"));
+			c->add_channel (_("L"), DataType::AUDIO);
 			c->set_port (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
-			c->add_channel (_("R"));
+			c->add_channel (_("R"), DataType::AUDIO);
 			c->set_port (1, _engine.get_nth_physical_output (DataType::AUDIO, np + 1));
 
 			add_bundle (c);
@@ -470,7 +470,7 @@ Session::when_engine_running ()
 		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
 
 		shared_ptr<Bundle> c (new Bundle (buf, false));
-		c->add_channel (_("mono"));
+		c->add_channel (_("mono"), DataType::AUDIO);
 		c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
 
 		add_bundle (c);
@@ -484,9 +484,9 @@ Session::when_engine_running ()
 			snprintf (buf, sizeof(buf), _("in %" PRIu32 "+%" PRIu32), np + 1, np + 2);
 
 			shared_ptr<Bundle> c (new Bundle (buf, false));
-			c->add_channel (_("L"));
+			c->add_channel (_("L"), DataType::AUDIO);
 			c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
-			c->add_channel (_("R"));
+			c->add_channel (_("R"), DataType::AUDIO);
 			c->set_port (1, _engine.get_nth_physical_input (DataType::AUDIO, np + 1));
 
 			add_bundle (c);

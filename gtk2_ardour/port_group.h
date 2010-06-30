@@ -58,7 +58,7 @@ public:
 	void remove_bundle (boost::shared_ptr<ARDOUR::Bundle>);
 	boost::shared_ptr<ARDOUR::Bundle> only_bundle ();
 	void clear ();
-	uint32_t total_channels () const;
+	ARDOUR::ChanCount total_channels () const;
 	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;
 	void remove_duplicates ();
 
@@ -108,12 +108,11 @@ class PortGroupList : public sigc::trackable
 
 	void add_group (boost::shared_ptr<PortGroup>);
 	void add_group_if_not_empty (boost::shared_ptr<PortGroup>);
-	void set_type (ARDOUR::DataType);
-	void gather (ARDOUR::Session *, bool, bool);
+	void gather (ARDOUR::Session *, ARDOUR::DataType, bool, bool);
 	PortGroup::BundleList const & bundles () const;
 	void clear ();
 	void remove_bundle (boost::shared_ptr<ARDOUR::Bundle>);
-	uint32_t total_channels () const;
+	ARDOUR::ChanCount total_channels () const;
 	uint32_t size () const {
 		return _groups.size();
 	}
@@ -144,12 +143,11 @@ class PortGroupList : public sigc::trackable
 	std::string common_prefix_before (std::vector<std::string> const &, std::string const &) const;
 	void emit_changed ();
 	void emit_bundle_changed (ARDOUR::Bundle::Change);
-	boost::shared_ptr<ARDOUR::Bundle> make_bundle_from_ports (std::vector<std::string> const &, bool) const;
+	boost::shared_ptr<ARDOUR::Bundle> make_bundle_from_ports (std::vector<std::string> const &, ARDOUR::DataType, bool) const;
 	void maybe_add_processor_to_list (
 		boost::weak_ptr<ARDOUR::Processor>, std::list<boost::shared_ptr<ARDOUR::Bundle> > *, bool, std::set<boost::shared_ptr<ARDOUR::IO> > &
 		);
 
-	ARDOUR::DataType _type;
 	mutable PortGroup::BundleList _bundles;
 	List _groups;
 	PBD::ScopedConnectionList _bundle_changed_connections;

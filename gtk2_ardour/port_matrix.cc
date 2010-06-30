@@ -77,10 +77,6 @@ PortMatrix::PortMatrix (Window* parent, Session* session, DataType type)
 	_hnotebook.property_tab_border() = 4;
 	_hnotebook.set_name (X_("PortMatrixLabel"));
 
-	for (int i = 0; i < 2; ++i) {
-		_ports[i].set_type (type);
-	}
-
 	_vlabel.set_use_markup ();
 	_vlabel.set_alignment (1, 1);
 	_vlabel.set_padding (4, 16);
@@ -217,8 +213,6 @@ void
 PortMatrix::set_type (DataType t)
 {
 	_type = t;
-	_ports[0].set_type (_type);
-	_ports[1].set_type (_type);
 
 	setup_all_ports ();
 }
@@ -261,9 +255,13 @@ PortMatrix::disassociate_all ()
 	PortGroup::BundleList b = _ports[1].bundles ();
 
 	for (PortGroup::BundleList::iterator i = a.begin(); i != a.end(); ++i) {
-		for (uint32_t j = 0; j < (*i)->bundle->nchannels(); ++j) {
+		for (uint32_t j = 0; j < (*i)->bundle->nchannels().n_total(); ++j) {
 			for (PortGroup::BundleList::iterator k = b.begin(); k != b.end(); ++k) {
-				for (uint32_t l = 0; l < (*k)->bundle->nchannels(); ++l) {
+				for (uint32_t l = 0; l < (*k)->bundle->nchannels().n_total(); ++l) {
+
+					if ((*i)->bundle->channel_type(j) != _type || (*k)->bundle->channel_type(l) != _type) {
+						continue;
+					}
 
 					BundleChannel c[2] = {
 						BundleChannel ((*i)->bundle, j),
@@ -287,8 +285,8 @@ void
 PortMatrix::select_arrangement ()
 {
 	uint32_t const N[2] = {
-		_ports[0].total_channels (),
-		_ports[1].total_channels ()
+		_ports[0].total_channels().get(_type),
+		_ports[1].total_channels().get(_type)
 	};
 
 	/* The list with the most channels goes on left or right, so that the most channel
@@ -426,13 +424,15 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 						MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::remove_all_channels), w))
 						);
 					
-					for (uint32_t i = 0; i < bc[dim].bundle->nchannels(); ++i) {
-						add_remove_option (sub, w, i);
+					for (uint32_t i = 0; i < bc[dim].bundle->nchannels().n_total(); ++i) {
+						if (bc[dim].bundle->channel_type(i) == _type) {
+							add_remove_option (sub, w, i);
+						}
 					}
 				}
 			}
 
-			if (_show_only_bundles || bc[dim].bundle->nchannels() <= 1) {
+			if (_show_only_bundles || bc[dim].bundle->nchannels().get(_type) <= 1) {
 				snprintf (buf, sizeof (buf), _("%s all"), disassociation_verb().c_str());
 				sub.push_back (
 					MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc[dim].channel, dim))
@@ -448,8 +448,10 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 						MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_bundle), w, dim))
 						);
 							
-					for (uint32_t i = 0; i < bc[dim].bundle->nchannels(); ++i) {
-						add_disassociate_option (sub, w, dim, i);
+					for (uint32_t i = 0; i < bc[dim].bundle->nchannels().n_total(); ++i) {
+						if (bc[dim].bundle->channel_type(i) == _type) {
+							add_disassociate_option (sub, w, dim, i);
+						}
 					}
 				}
 			}
@@ -505,8 +507,10 @@ PortMatrix::disassociate_all_on_bundle (boost::weak_ptr<Bundle> bundle, int dim)
 		return;
 	}
 
-	for (uint32_t i = 0; i < sb->nchannels(); ++i) {
-		disassociate_all_on_channel (bundle, i, dim);
+	for (uint32_t i = 0; i < sb->nchannels().n_total(); ++i) {
+		if (sb->channel_type(i) == _type) {
+			disassociate_all_on_channel (bundle, i, dim);
+		}
 	}
 }
 
@@ -521,7 +525,11 @@ PortMatrix::disassociate_all_on_channel (boost::weak_ptr<Bundle> bundle, uint32_
 	PortGroup::BundleList a = _ports[1-dim].bundles ();
 
 	for (PortGroup::BundleList::iterator i = a.begin(); i != a.end(); ++i) {
-		for (uint32_t j = 0; j < (*i)->bundle->nchannels(); ++j) {
+		for (uint32_t j = 0; j < (*i)->bundle->nchannels().n_total(); ++j) {
+
+			if ((*i)->bundle->channel_type(j) != _type) {
+				continue;
+			}
 
 			BundleChannel c[2];
 			c[dim] = BundleChannel (sb, channel);
@@ -662,8 +670,10 @@ PortMatrix::remove_all_channels (boost::weak_ptr<Bundle> w)
 		return;
 	}
 
-	for (uint32_t i = 0; i < b->nchannels(); ++i) {
-		remove_channel (ARDOUR::BundleChannel (b, i));
+	for (uint32_t i = 0; i < b->nchannels().n_total(); ++i) {
+		if (b->channel_type(i) == _type) {
+			remove_channel (ARDOUR::BundleChannel (b, i));
+		}
 	}
 }
 
