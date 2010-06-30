@@ -83,6 +83,15 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 	_latency_control_port = 0;
 	_was_activated = false;
 
+	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
+	_data_access_feature.URI = "http://lv2plug.in/ns/ext/data-access";
+
+	_features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 4);
+	_features[0] = &_instance_access_feature;
+	_features[1] = &_data_access_feature;
+	_features[2] = _uri_map.feature();
+	_features[3] = NULL;
+
 	_instance = slv2_plugin_instantiate(plugin, rate, _features);
 	_name = slv2_plugin_get_name(plugin);
 	assert(_name);
@@ -93,6 +102,10 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 		throw failed_constructor();
 	}
 
+	_instance_access_feature.data = (void*)_instance->lv2_handle;
+	_data_access_extension_data.extension_data = _instance->lv2_descriptor->extension_data;
+	_data_access_feature.data = &_data_access_extension_data;
+
 	if (slv2_plugin_has_feature(plugin, world.in_place_broken)) {
 		error << string_compose(
 				_("LV2: \"%1\" cannot be used, since it cannot do inplace processing"),
@@ -101,19 +114,6 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 		slv2_value_free(_author);
 		throw failed_constructor();
 	}
-
-	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
-	_instance_access_feature.data = (void*)_instance->lv2_handle;
-
-	_data_access_extension_data.extension_data = _instance->lv2_descriptor->extension_data;
-	_data_access_feature.URI = "http://lv2plug.in/ns/ext/data-access";
-	_data_access_feature.data = &_data_access_extension_data;
-
-	_features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 4);
-	_features[0] = &_instance_access_feature;
-	_features[1] = &_data_access_feature;
-	_features[2] = _uri_map.feature();
-	_features[3] = NULL;
 
 	_sample_rate = rate;
 
