@@ -137,7 +137,8 @@ Delivery::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 
 		if (_output) {
 			if (_output->n_ports() != ChanCount::ZERO) {
-				out = _output->n_ports();
+				/* increase number of output ports if the processor chain requires it */
+				out = ChanCount::max (_output->n_ports(), in);
 				return true;
 			} else {
 				/* not configured yet - we will passthru */
@@ -189,8 +190,7 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 		if (_output) {
 			if (_output->n_ports() != out) {
 				if (_output->n_ports() != ChanCount::ZERO) {
-					fatal << _name << " programming error: configure_io with nports = " << _output->n_ports() << " called with " << in << " and " << out << " with " << _output->n_ports() << " output ports" << endmsg;
-					/*NOTREACHED*/
+					_output->ensure_io (out, false, this);
 				} else {
 					/* I/O not yet configured */
 				}
