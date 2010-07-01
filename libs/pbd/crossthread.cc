@@ -72,7 +72,7 @@ void
 CrossThreadChannel::wakeup ()
 {
 	char c = 0;
-	::write (fds[1], &c, 1);
+	(void) ::write (fds[1], &c, 1);
 }
 
 RefPtr<IOSource>
