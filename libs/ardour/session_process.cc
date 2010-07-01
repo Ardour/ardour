@@ -23,6 +23,7 @@
 #include <unistd.h>
 
 #include <pbd/error.h>
+#include <pbd/enumwriter.h>
  
 #include <glibmm/thread.h>
 
@@ -270,6 +271,7 @@ Session::process_with_events (nframes_t nframes)
 	/* handle any pending events */
 
 	while (pending_events.read (&ev, 1) == 1) {
+                cerr << "********** merge event action " << ev->action << " type " << enum_2_string (ev->type) << " to pending\n";
 		merge_event (ev);
 	}
 
@@ -281,6 +283,7 @@ Session::process_with_events (nframes_t nframes)
 	while (!non_realtime_work_pending() && !immediate_events.empty()) {
 		Event *ev = immediate_events.front ();
 		immediate_events.pop_front ();
+                cerr << "******* process immediate effect event type " << ev->action << " type " << enum_2_string (ev->type) << endl;
 		process_event (ev);
 	}
 

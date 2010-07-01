@@ -95,6 +95,7 @@ Session::queue_event (Event* ev)
 	if (_state_of_the_state & Loading) {
 		merge_event (ev);
 	} else {
+                cerr << "********** push event action " << ev->action << " type " << enum_2_string (ev->type) << " to pending\n";
 		pending_events.write (&ev, 1);
 	}
 }
@@ -290,9 +291,12 @@ Session::process_event (Event* ev)
 		if (ev->type != Event::Locate) {
 			immediate_events.insert (immediate_events.end(), ev);
 			_remove_event (ev);
+                        cerr << "**** EARLY RETURN from process event, type was " << enum_2_string (ev->type) << endl;
 			return;
 		}
 	}
+
+        cerr << "%*%*%*%*%*% PROCESS EVENT TYPE " << enum_2_string (ev->type) << endl;
 
 	switch (ev->type) {
 	case Event::SetLoop:
