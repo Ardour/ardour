@@ -384,7 +384,6 @@ SMFSource::mark_streaming_write_completed ()
 	MidiSource::mark_streaming_write_completed();
 
 	if (!writable()) {
-                cerr << "\n\n\n[[[[[[[[[ This SMFS is not writable! ]]]]]]]]]]]\n\n\n";
 		return;
 	}
 

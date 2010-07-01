@@ -352,8 +352,11 @@ Session::second_stage_init ()
 
 	send_full_time_code (0);
 	_engine.transport_locate (0);
-	_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
-	_mmc->send (MIDI::MachineControlCommand (Timecode::Time ()));
+
+        if (_mmc) {
+                _mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
+                _mmc->send (MIDI::MachineControlCommand (Timecode::Time ()));
+        }
 
 	MidiClockTicker::instance().set_session (this);
 	MIDI::Name::MidiPatchManager::instance().set_session (this);
@@ -3191,11 +3194,15 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "mmc-device-id" || p == "mmc-receive-id") {
 
-		_mmc->set_receive_device_id (Config->get_mmc_receive_device_id());
+                if (_mmc) {
+                        _mmc->set_receive_device_id (Config->get_mmc_receive_device_id());
+                }
 
 	} else if (p == "mmc-send-id") {
 
-		_mmc->set_send_device_id (Config->get_mmc_send_device_id());
+                if (_mmc) {
+                        _mmc->set_send_device_id (Config->get_mmc_send_device_id());
+                }
 
 	} else if (p == "midi-control") {
 
@@ -3261,7 +3268,9 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "send-mmc") {
 
-		_mmc->enable_send (Config->get_send_mmc ());
+                if (_mmc) {
+                        _mmc->enable_send (Config->get_send_mmc ());
+                }
 
 	} else if (p == "midi-feedback") {
 
@@ -3309,7 +3318,7 @@ Session::config_changed (std::string p, bool ours)
 		sync_order_keys ("session");
 	} else if (p == "initial-program-change") {
 
-		if (_mmc->port() && Config->get_initial_program_change() >= 0) {
+		if (_mmc && _mmc->port() && Config->get_initial_program_change() >= 0) {
 			MIDI::byte buf[2];
 
 			buf[0] = MIDI::program; // channel zero by default
@@ -3318,8 +3327,8 @@ Session::config_changed (std::string p, bool ours)
 			_mmc->port()->midimsg (buf, sizeof (buf), 0);
 		}
 	} else if (p == "initial-program-change") {
-
-		if (_mmc->port() && Config->get_initial_program_change() >= 0) {
+                
+		if (_mmc && _mmc->port() && Config->get_initial_program_change() >= 0) {
 			MIDI::byte* buf = new MIDI::byte[2];
 
 			buf[0] = MIDI::program; // channel zero by default
@@ -3377,6 +3386,10 @@ Session::load_diskstreams_2X (XMLNode const & node, int)
 void
 Session::setup_midi_machine_control ()
 {
+        if (!default_mmc_port) {
+                return;
+        }
+
 	_mmc = new MIDI::MachineControl;
 	_mmc->set_port (default_mmc_port);
 
