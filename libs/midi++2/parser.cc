@@ -326,6 +326,7 @@ void
 Parser::scanner (unsigned char inbyte)
 {
 	bool statusbit;
+        boost::optional<int> edit_result;
 
 	// cerr << "parse: " << hex << (int) inbyte << dec << " state = " << state << " msgindex = " << msgindex << " runnable = " << runnable << endl;
 	
@@ -497,7 +498,10 @@ Parser::scanner (unsigned char inbyte)
 		
 	case NEEDONEBYTE:
 		/* We've completed a 1 or 2 byte message. */
-		if (edit.empty() || !(*edit (msgbuf, msgindex) == 0)) {
+
+                edit_result = edit (msgbuf, msgindex);
+                
+		if (edit_result.get_value_or (1)) {
 			
 			/* message not cancelled by an editor */
 			

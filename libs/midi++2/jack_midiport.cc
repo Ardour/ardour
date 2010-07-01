@@ -135,7 +135,7 @@ JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 	if (!is_process_thread()) {
 
 		Glib::Mutex::Lock lm (output_fifo_lock);
-		RingBuffer< Evoral::Event<double> >::rw_vector vec;
+		RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0} };
 		
 		output_fifo.get_write_vector (&vec);
 
@@ -206,7 +206,7 @@ JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 void
 JACK_MidiPort::flush (void* jack_port_buffer)
 {
-	RingBuffer< Evoral::Event<double> >::rw_vector vec;
+	RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0 } };
 	size_t written;
 
 	output_fifo.get_read_vector (&vec);
