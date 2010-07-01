@@ -293,22 +293,34 @@ MidiSource::session_saved()
         */
 
 	flush_midi();
-        cerr << name() << " @ " << this << " length at save = " << _length_beats << endl;
-
-#if 0 // old style: clone the source if necessary on every session save
-      // and switch to the new source
 
 	if (_model && _model->edited()) {
-                cerr << "Model exists and is edited\n";
-
+#if 0 // old style: clone the source if necessary on every session save
+      // and switch to the new source
 		boost::shared_ptr<MidiSource> newsrc = clone ();
 
                 if (newsrc) {
-                        _model->set_midi_source (newsrc.get());
+                        _model->set_midi_source (newsrc);
                         Switched (newsrc); /* EMIT SIGNAL */
                 }
-	}
+#else
+                // new style: if the model is edited, write its contents into
+                // the current source file (overwiting previous contents.
+
+                /* temporarily drop our reference to the model so that
+                   as the model pushes its current state to us, we don't
+                   try to update it.
+                */
+
+                boost::shared_ptr<MidiModel> mm = _model ;
+                _model.reset ();   
+                mm->sync_to_source ();
+                _model = mm;
+                /* data is in the file now, its not removable */
 #endif
+        }
+
+        cerr << name() << " @ " << this << " length at save = " << _length_beats << endl;
 }
 
 void
@@ -322,7 +334,6 @@ MidiSource::set_note_mode(NoteMode mode)
 void
 MidiSource::drop_model ()
 {
-        cerr << name() << " drop model\n";
         _model.reset(); 
 	ModelChanged (); /* EMIT SIGNAL */
 }

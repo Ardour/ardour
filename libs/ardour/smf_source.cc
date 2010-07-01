@@ -392,6 +392,10 @@ SMFSource::mark_streaming_write_completed ()
 	}
 	
 	Evoral::SMF::end_write ();
+
+        /* data in the file now, not removable */
+
+        mark_nonremovable (); 
 }
 
 bool
@@ -500,10 +504,11 @@ void
 SMFSource::flush_midi ()
 {
         if (!writable()) {
-                cerr << "\n\n\n\n " << name() << " CANNOT FLUSH - not writable\n\n\n\n";
                 return;
         }
 
 	Evoral::SMF::end_write();
+        /* data in the file means its no longer removable */
+        mark_nonremovable (); 
 }
 
