@@ -275,22 +275,12 @@ SMF::begin_write()
 void
 SMF::end_write() THROW_FILE_ERROR
 {
-        /* don't create empty MIDI files 
-         */
-
-        smf_rewind (_smf); // smf_save() would have done this anyway
-        if (smf_peek_next_event (_smf) == 0) {
-                return;
-        }
-
 	PBD::StdioFileDescriptor d (_file_path, "w+");
 	FILE* f = d.allocate ();
 	if (f == 0) {
 		throw FileError ();
 	}
 
-        cerr << "\n\n\nSAVE SMF to " << _file_path << "\n\n";
-	
 	if (smf_save(_smf, f) != 0) {
 		throw FileError();
 	}
