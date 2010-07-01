@@ -287,6 +287,8 @@ Session::process_with_events (nframes_t nframes)
 		process_event (ev);
 	}
 
+        dump_events ();
+
 	/* Events caused a transport change, send an MTC Full Frame (SMPTE) message.
 	 * This is sent whether rolling or not, to give slaves an idea of ardour time
 	 * on locates (and allow slow slaves to position and prepare for rolling)
