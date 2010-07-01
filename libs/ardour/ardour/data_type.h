@@ -23,6 +23,8 @@
 #include <string>
 #include <jack/jack.h>
 
+#include "i18n.h"
+
 namespace ARDOUR {
 
 
@@ -85,6 +87,14 @@ public:
 			case AUDIO: return "audio";
 			case MIDI:  return "midi";
 			default:    return "unknown"; // reeeally shouldn't ever happen
+		}
+	}
+
+	const char* to_i18n_string() const {
+		switch (_symbol) {
+			case AUDIO: return _("audio");
+			case MIDI: return _("MIDI");
+			default: return _("unknown");
 		}
 	}
 

@@ -259,7 +259,7 @@ PortMatrix::disassociate_all ()
 			for (PortGroup::BundleList::iterator k = b.begin(); k != b.end(); ++k) {
 				for (uint32_t l = 0; l < (*k)->bundle->nchannels().n_total(); ++l) {
 
-					if ((*i)->bundle->channel_type(j) != _type || (*k)->bundle->channel_type(l) != _type) {
+					if (!should_show ((*i)->bundle->channel_type(j)) || !should_show ((*k)->bundle->channel_type(l))) {
 						continue;
 					}
 
@@ -285,8 +285,8 @@ void
 PortMatrix::select_arrangement ()
 {
 	uint32_t const N[2] = {
-		_ports[0].total_channels().get(_type),
-		_ports[1].total_channels().get(_type)
+		count_of_our_type (_ports[0].total_channels()),
+		count_of_our_type (_ports[1].total_channels())
 	};
 
 	/* The list with the most channels goes on left or right, so that the most channel
@@ -389,12 +389,13 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 
 			bool can_add_or_rename = false;
 
-			if (can_add_channel (bc[dim].bundle)) {
-				snprintf (buf, sizeof (buf), _("Add %s"), channel_noun().c_str());
-				sub.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::add_channel_proxy), w)));
-				can_add_or_rename = true;
+			for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+				if (should_show (*i)) {
+					snprintf (buf, sizeof (buf), _("Add %s %s"), (*i).to_i18n_string(), channel_noun().c_str());
+					sub.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::add_channel_proxy), w, *i)));
+					can_add_or_rename = true;
+				}
 			}
-
 
 			if (can_rename_channels (bc[dim].bundle)) {
 				snprintf (
@@ -425,14 +426,14 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 						);
 					
 					for (uint32_t i = 0; i < bc[dim].bundle->nchannels().n_total(); ++i) {
-						if (bc[dim].bundle->channel_type(i) == _type) {
+						if (should_show (bc[dim].bundle->channel_type(i))) {
 							add_remove_option (sub, w, i);
 						}
 					}
 				}
 			}
 
-			if (_show_only_bundles || bc[dim].bundle->nchannels().get(_type) <= 1) {
+			if (_show_only_bundles || count_of_our_type (bc[dim].bundle->nchannels()) <= 1) {
 				snprintf (buf, sizeof (buf), _("%s all"), disassociation_verb().c_str());
 				sub.push_back (
 					MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc[dim].channel, dim))
@@ -449,7 +450,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 						);
 							
 					for (uint32_t i = 0; i < bc[dim].bundle->nchannels().n_total(); ++i) {
-						if (bc[dim].bundle->channel_type(i) == _type) {
+						if (should_show (bc[dim].bundle->channel_type(i))) {
 							add_disassociate_option (sub, w, dim, i);
 						}
 					}
@@ -508,7 +509,7 @@ PortMatrix::disassociate_all_on_bundle (boost::weak_ptr<Bundle> bundle, int dim)
 	}
 
 	for (uint32_t i = 0; i < sb->nchannels().n_total(); ++i) {
-		if (sb->channel_type(i) == _type) {
+		if (should_show (sb->channel_type(i))) {
 			disassociate_all_on_channel (bundle, i, dim);
 		}
 	}
@@ -527,7 +528,7 @@ PortMatrix::disassociate_all_on_channel (boost::weak_ptr<Bundle> bundle, uint32_
 	for (PortGroup::BundleList::iterator i = a.begin(); i != a.end(); ++i) {
 		for (uint32_t j = 0; j < (*i)->bundle->nchannels().n_total(); ++j) {
 
-			if ((*i)->bundle->channel_type(j) != _type) {
+			if (should_show ((*i)->bundle->channel_type(j))) {
 				continue;
 			}
 
@@ -634,12 +635,12 @@ PortMatrix::can_add_channel (boost::shared_ptr<Bundle> b) const
 }
 
 void
-PortMatrix::add_channel (boost::shared_ptr<Bundle> b)
+PortMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 {
 	boost::shared_ptr<IO> io = io_from_bundle (b);
 
 	if (io) {
-		io->add_port ("", this, _type);
+		io->add_port ("", this, t);
 	}
 }
 
@@ -671,21 +672,21 @@ PortMatrix::remove_all_channels (boost::weak_ptr<Bundle> w)
 	}
 
 	for (uint32_t i = 0; i < b->nchannels().n_total(); ++i) {
-		if (b->channel_type(i) == _type) {
+		if (should_show (b->channel_type(i))) {
 			remove_channel (ARDOUR::BundleChannel (b, i));
 		}
 	}
 }
 
 void
-PortMatrix::add_channel_proxy (boost::weak_ptr<Bundle> w)
+PortMatrix::add_channel_proxy (boost::weak_ptr<Bundle> w, DataType t)
 {
 	boost::shared_ptr<Bundle> b = w.lock ();
 	if (!b) {
 		return;
 	}
 
-	add_channel (b);
+	add_channel (b, t);
 }
 
 void
@@ -855,4 +856,21 @@ string
 PortMatrix::channel_noun () const
 {
 	return _("channel");
+}
+
+/** @return true if this matrix should show bundles / ports of type \t */
+bool
+PortMatrix::should_show (DataType t) const
+{
+	return (_type == DataType::NIL || t == _type);
+}
+	
+uint32_t
+PortMatrix::count_of_our_type (ChanCount c) const
+{
+	if (_type == DataType::NIL) {
+		return c.n_total ();
+	}
+
+	return c.get (_type);
 }

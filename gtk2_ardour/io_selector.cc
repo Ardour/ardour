@@ -43,7 +43,7 @@ using namespace ARDOUR;
 using namespace Gtk;
 
 IOSelector::IOSelector (Gtk::Window* p, ARDOUR::Session* session, boost::shared_ptr<ARDOUR::IO> io)
-	: PortMatrix (p, session, io->default_type())
+	: PortMatrix (p, session, DataType::NIL)
 	, _io (io)
 {
 	/* signal flow from 0 to 1 */

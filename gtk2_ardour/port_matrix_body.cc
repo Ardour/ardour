@@ -77,15 +77,19 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 		cairo_rectangle (cr, 0, 0, _alloc_width, _alloc_height);
 		cairo_fill (cr);
 
-		stringstream t;
-		t << _("There are no ") << (_matrix->type() == ARDOUR::DataType::AUDIO ? _("audio") : _("MIDI")) << _(" ports to connect.");
+		string t;
+		if (_matrix->type() == ARDOUR::DataType::NIL) {
+			t = _("There are no ports to connect.");
+		} else {
+			t = string_compose (_("There are no %1 ports to connect."), _matrix->type().to_i18n_string());
+		}
 
 		cairo_text_extents_t ext;
-		cairo_text_extents (cr, t.str().c_str(), &ext);
+		cairo_text_extents (cr, t.c_str(), &ext);
 
 		cairo_set_source_rgb (cr, 1, 1, 1);
 		cairo_move_to (cr, (_alloc_width - ext.width) / 2, (_alloc_height + ext.height) / 2);
-		cairo_show_text (cr, t.str().c_str ());
+		cairo_show_text (cr, t.c_str ());
 
 		cairo_destroy (cr);
 
@@ -469,7 +473,7 @@ PortMatrixBody::highlight_associated_channels (int dim, ARDOUR::BundleChannel h)
 	for (PortGroup::BundleList::const_iterator i = b.begin(); i != b.end(); ++i) {
 	        for (uint32_t j = 0; j < (*i)->bundle->nchannels().n_total(); ++j) {
 
-			if ((*i)->bundle->channel_type(j) != _matrix->type()) {
+			if (!_matrix->should_show ((*i)->bundle->channel_type(j))) {
 				continue;
 			}
 			

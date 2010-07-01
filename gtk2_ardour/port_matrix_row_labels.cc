@@ -56,7 +56,7 @@ PortMatrixRowLabels::compute_dimensions ()
 
 			for (uint32_t k = 0; k < (*j)->bundle->nchannels().n_total(); ++k) {
 
-				if ((*j)->bundle->channel_type(k) != _matrix->type()) {
+				if (!_matrix->should_show ((*j)->bundle->channel_type(k))) {
 					continue;
 				}
 				
@@ -117,7 +117,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 		if (!_matrix->show_only_bundles()) {
 			for (uint32_t j = 0; j < (*i)->bundle->nchannels().n_total(); ++j) {
 
-				if ((*i)->bundle->channel_type(j) != _matrix->type()) {
+				if (!_matrix->should_show ((*i)->bundle->channel_type(j))) {
 					continue;
 				}
 				
@@ -215,7 +215,7 @@ PortMatrixRowLabels::render_bundle_name (
 {
 	double const x = bundle_name_x ();
 
-	int const n = _matrix->show_only_bundles() ? 1 : b->nchannels().get(_matrix->type());
+	int const n = _matrix->show_only_bundles() ? 1 : _matrix->count_of_our_type (b->nchannels());
 	set_source_rgb (cr, bg_colour);
 	cairo_rectangle (cr, xoff + x, yoff, _longest_bundle_name + name_pad() * 2, grid_spacing() * n);
 	cairo_fill_preserve (cr);
@@ -248,7 +248,7 @@ PortMatrixRowLabels::render_channel_name (
 	cairo_text_extents (cr, bc.bundle->channel_name(bc.channel).c_str(), &ext);
 	double const off = (grid_spacing() - ext.height) / 2;
 
-	if (bc.bundle->nchannels().get(_matrix->type()) > 1) {
+	if (_matrix->count_of_our_type (bc.bundle->nchannels()) > 1) {
 
 		/* only plot the name if the bundle has more than one channel;
 		   the name of a single channel is assumed to be redundant */
@@ -335,7 +335,7 @@ PortMatrixRowLabels::motion (double x, double y)
 			
 			for (uint32_t i = 0; i < w.bundle->nchannels().n_total(); ++i) {
 
-				if (w.bundle->channel_type(i) != _matrix->type()) {
+				if (!_matrix->should_show (w.bundle->channel_type(i))) {
 					continue;
 				}
 				

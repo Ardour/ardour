@@ -132,7 +132,7 @@ PortMatrixComponent::group_size (boost::shared_ptr<const PortGroup> g) const
 		s = bundles.size();
 	} else {
 		for (PortGroup::BundleList::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
-			s += (*i)->bundle->nchannels().get (_matrix->type());
+			s += _matrix->count_of_our_type ((*i)->bundle->nchannels());
 		}
 	}
 
@@ -169,7 +169,7 @@ PortMatrixComponent::channel_to_position (ARDOUR::BundleChannel bc, boost::share
 		if (_matrix->show_only_bundles()) {
 			p += 1;
 		} else {
-			p += (*i)->bundle->nchannels().get (_matrix->type());
+			p += _matrix->count_of_our_type ((*i)->bundle->nchannels());
 		}
 	}
 
@@ -195,7 +195,7 @@ PortMatrixComponent::position_to_channel (double p, double, boost::shared_ptr<co
 			
 		} else {
 			
-			uint32_t const s = (*j)->bundle->nchannels().get (_matrix->type());
+			uint32_t const s = _matrix->count_of_our_type ((*j)->bundle->nchannels());
 			if (p < s) {
 				return ARDOUR::BundleChannel ((*j)->bundle, p);
 			} else {

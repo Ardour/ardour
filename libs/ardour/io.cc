@@ -1340,10 +1340,17 @@ IO::setup_bundle ()
 		snprintf(buf, sizeof (buf), _("%s out"), _name.val().c_str());
 	}
         _bundle->set_name (buf);
-	uint32_t const ni = _ports.num_ports();
-	for (uint32_t i = 0; i < ni; ++i) {
-		_bundle->add_channel (bundle_channel_name (i, ni), _ports.port(i)->type());
-		_bundle->set_port (i, _session.engine().make_port_name_non_relative (_ports.port(i)->name()));
+
+	int c = 0;
+	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+
+		uint32_t const N = _ports.count().get (*i);
+		for (uint32_t j = 0; j < N; ++j) {
+			_bundle->add_channel (bundle_channel_name (j, N, *i), *i);
+			_bundle->set_port (c, _session.engine().make_port_name_non_relative (_ports.port(*i, j)->name()));
+			++c;
+		}
+
 	}
 
 	_bundle->resume_signals ();
@@ -1397,18 +1404,27 @@ IO::UserBundleInfo::UserBundleInfo (IO* io, boost::shared_ptr<UserBundle> b)
 }
 
 std::string
-IO::bundle_channel_name (uint32_t c, uint32_t n) const
+IO::bundle_channel_name (uint32_t c, uint32_t n, DataType t) const
 {
 	char buf[32];
 
-	switch (n) {
-	case 1:
-		return _("mono");
-	case 2:
-		return c == 0 ? _("L") : _("R");
-	default:
+	if (t == DataType::AUDIO) {
+
+		switch (n) {
+		case 1:
+			return _("mono");
+		case 2:
+			return c == 0 ? _("L") : _("R");
+		default:
+			snprintf (buf, sizeof(buf), _("%d"), (c + 1));
+			return buf;
+		}
+
+	} else {
+
 		snprintf (buf, sizeof(buf), _("%d"), (c + 1));
 		return buf;
+
 	}
 
 	return "";

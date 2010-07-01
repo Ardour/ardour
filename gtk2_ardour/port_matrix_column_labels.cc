@@ -64,7 +64,7 @@ PortMatrixColumnLabels::compute_dimensions ()
 
 			for (uint32_t k = 0; k < (*j)->bundle->nchannels().n_total(); ++k) {
 
-				if ((*j)->bundle->channel_type(k) != _matrix->type()) {
+				if (!_matrix->should_show ((*j)->bundle->channel_type(k))) {
 					continue;
 				}
 
@@ -139,7 +139,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 		if (_matrix->show_only_bundles()) {
 			x += grid_spacing();
 		} else {
-			x += (*i)->bundle->nchannels().get(_matrix->type()) * grid_spacing();
+			x += _matrix->count_of_our_type ((*i)->bundle->nchannels()) * grid_spacing();
 		}
 		
 		++N;
@@ -155,7 +155,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 
 			for (uint32_t j = 0; j < (*i)->bundle->nchannels().n_total(); ++j) {
 
-				if ((*i)->bundle->channel_type(j) != _matrix->type()) {
+				if (!_matrix->should_show ((*i)->bundle->channel_type(j))) {
 					continue;
 				}
 				
@@ -263,7 +263,7 @@ PortMatrixColumnLabels::render_bundle_name (
 	if (_matrix->show_only_bundles()) {
 		w = grid_spacing ();
 	} else {
-		w = b->nchannels().get(_matrix->type()) * grid_spacing();
+		w = _matrix->count_of_our_type (b->nchannels()) * grid_spacing();
 	}
 
 	double x_ = xoff;
@@ -361,7 +361,7 @@ PortMatrixColumnLabels::render_channel_name (
 			);
 	}
 
-	if (bc.bundle->nchannels().get(_matrix->type()) > 1) {
+	if (_matrix->count_of_our_type (bc.bundle->nchannels()) > 1) {
 
 		/* only plot the name if the bundle has more than one channel;
 		   the name of a single channel is assumed to be redundant */
@@ -489,7 +489,7 @@ PortMatrixColumnLabels::motion (double x, double y)
 
 		for (uint32_t i = 0; i < w.bundle->nchannels().n_total(); ++i) {
 
-			if (w.bundle->channel_type(i) != _matrix->type()) {
+			if (!_matrix->should_show (w.bundle->channel_type(i))) {
 				continue;
 			}
 			

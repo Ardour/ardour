@@ -81,7 +81,7 @@ PortMatrixGrid::render (cairo_t* cr)
 
 		if (!_matrix->show_only_bundles()) {
 			cairo_set_line_width (cr, thin_grid_line_width());
-			for (uint32_t j = 0; j < (*i)->bundle->nchannels().get(_matrix->type()); ++j) {
+			for (uint32_t j = 0; j < _matrix->count_of_our_type ((*i)->bundle->nchannels()); ++j) {
 				x += grid_spacing ();
 				cairo_move_to (cr, x, 0);
 				cairo_line_to (cr, x, _height);
@@ -111,7 +111,7 @@ PortMatrixGrid::render (cairo_t* cr)
 
 		if (!_matrix->show_only_bundles()) {
 			cairo_set_line_width (cr, thin_grid_line_width());
-			for (uint32_t j = 0; j < (*i)->bundle->nchannels().get(_matrix->type()); ++j) {
+			for (uint32_t j = 0; j < _matrix->count_of_our_type ((*i)->bundle->nchannels()); ++j) {
 				y += grid_spacing ();
 				cairo_move_to (cr, 0, y);
 				cairo_line_to (cr, _width, y);
@@ -174,7 +174,7 @@ PortMatrixGrid::render (cairo_t* cr)
 					y = by;
 					for (uint32_t l = 0; l < (*j)->bundle->nchannels().n_total(); ++l) {
 
-						if ((*i)->bundle->channel_type(k) != _matrix->type() || (*j)->bundle->channel_type(l) != _matrix->type()) {
+						if (!_matrix->should_show ((*i)->bundle->channel_type(k)) || !_matrix->should_show ((*j)->bundle->channel_type(l))) {
 							continue;
 						}
 
@@ -202,10 +202,10 @@ PortMatrixGrid::render (cairo_t* cr)
 					x += grid_spacing();
 				}
 
-				by += (*j)->bundle->nchannels().get(_matrix->type()) * grid_spacing();
+				by += _matrix->count_of_our_type ((*j)->bundle->nchannels()) * grid_spacing();
 			}
 
-			bx += (*i)->bundle->nchannels().get(_matrix->type()) * grid_spacing();
+			bx += _matrix->count_of_our_type ((*i)->bundle->nchannels()) * grid_spacing();
 		}
 	}
 }
@@ -285,7 +285,7 @@ PortMatrixGrid::get_association (PortMatrixNode node) const
 
 			for (uint32_t j = 0; j < node.column.bundle->nchannels().n_total(); ++j) {
 
-				if (node.row.bundle->channel_type(i) != _matrix->type() || node.column.bundle->channel_type(j) != _matrix->type()) {
+				if (!_matrix->should_show (node.row.bundle->channel_type(i)) || !_matrix->should_show (node.column.bundle->channel_type(j))) {
 					continue;
 				}
 
@@ -345,7 +345,7 @@ PortMatrixGrid::set_association (PortMatrixNode node, bool s)
 		for (uint32_t i = 0; i < node.column.bundle->nchannels().n_total(); ++i) {
 			for (uint32_t j = 0; j < node.row.bundle->nchannels().n_total(); ++j) {
 
-				if (node.column.bundle->channel_type(i) != _matrix->type() || node.row.bundle->channel_type(j) != _matrix->type()) {
+				if (!_matrix->should_show (node.column.bundle->channel_type(i)) || !_matrix->should_show (node.row.bundle->channel_type(j))) {
 					continue;
 				}
 				

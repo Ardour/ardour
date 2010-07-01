@@ -124,6 +124,9 @@ public:
 
 	std::pair<uint32_t, uint32_t> max_size () const;
 
+	bool should_show (ARDOUR::DataType) const;
+	uint32_t count_of_our_type (ARDOUR::ChanCount) const;
+
 	/** @param c Channels; where c[0] is from _ports[0] and c[1] is from _ports[1].
 	 *  @param s New state.
 	 */
@@ -136,7 +139,7 @@ public:
 	virtual bool list_is_global (int) const = 0;
 
 	virtual bool can_add_channel (boost::shared_ptr<ARDOUR::Bundle>) const;
-	virtual void add_channel (boost::shared_ptr<ARDOUR::Bundle>);
+	virtual void add_channel (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::DataType);
 	virtual bool can_remove_channels (boost::shared_ptr<ARDOUR::Bundle>) const;
 	virtual void remove_channel (ARDOUR::BundleChannel);
 	virtual void remove_all_channels (boost::weak_ptr<ARDOUR::Bundle>);
@@ -171,7 +174,7 @@ private:
 	void routes_changed ();
 	void reconnect_to_routes ();
 	void select_arrangement ();
-	void add_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>);
+	void add_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, ARDOUR::DataType);
 	void remove_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle>, uint32_t, int);
@@ -192,7 +195,7 @@ private:
 
 	Gtk::Window* _parent;
 
-	/// port type that we are working with
+	/// port type that we are working with, or NIL if we are working with all of them
 	ARDOUR::DataType _type;
 	PBD::ScopedConnectionList _route_connections;
 	PBD::ScopedConnectionList _changed_connections;

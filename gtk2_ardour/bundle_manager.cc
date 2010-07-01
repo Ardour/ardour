@@ -107,7 +107,7 @@ BundleEditorMatrix::can_add_channel (boost::shared_ptr<Bundle> b) const
 }
 
 void
-BundleEditorMatrix::add_channel (boost::shared_ptr<Bundle> b)
+BundleEditorMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 {
 	if (b == _bundle) {
 
@@ -118,13 +118,12 @@ BundleEditorMatrix::add_channel (boost::shared_ptr<Bundle> b)
 			return;
 		}
 
-		/* XXX: allow user to specify type */
-		_bundle->add_channel (d.get_name(), DataType::AUDIO);
+		_bundle->add_channel (d.get_name(), t);
 		setup_ports (OURS);
 
 	} else {
 
-		PortMatrix::add_channel (b);
+		PortMatrix::add_channel (b, t);
 
 	}
 }

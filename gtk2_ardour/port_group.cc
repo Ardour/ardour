@@ -295,7 +295,9 @@ PortGroupList::maybe_add_processor_to_list (
 }
 
 
-/** Gather bundles from around the system and put them in this PortGroupList */
+/** Gather bundles from around the system and put them in this PortGroupList.
+ *  @param type Type of bundles to collect, or NIL for all types.
+ */
 void
 PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inputs, bool allow_dups)
 {
@@ -371,25 +373,26 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	
 	/* Ardour stuff */
 
-	if (!inputs && type == DataType::AUDIO) {
+	if (!inputs && (type == DataType::AUDIO || type == DataType::NIL)) {
 		ardour->add_bundle (session->the_auditioner()->output()->bundle());
 		ardour->add_bundle (session->click_io()->bundle());
 	}
 
 	/* Now find all other ports that we haven't thought of yet */
 
-	std::vector<std::string> extra_system;
-	std::vector<std::string> extra_other;
+	std::vector<std::string> extra_system[DataType::num_types];
+	std::vector<std::string> extra_other[DataType::num_types];
 
- 	const char **ports = session->engine().get_ports ("", type.to_jack_type(), inputs ?
-							 JackPortIsInput : JackPortIsOutput);
+	const char ** ports = 0;
+	if (type == DataType::NIL) {
+		ports = session->engine().get_ports ("", "", inputs ? JackPortIsInput : JackPortIsOutput);
+	} else {
+		ports = session->engine().get_ports ("", type.to_jack_type(), inputs ? JackPortIsInput : JackPortIsOutput);
+	}
+	
  	if (ports) {
 
 		int n = 0;
-		string client_matching_string;
-
-		client_matching_string = session->engine().client_name();
-		client_matching_string += ':';
 
 		while (ports[n]) {
 
@@ -411,12 +414,18 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
                                         continue;
                                 }
 
-				if (port_has_prefix (p, "system:") ||
-				    port_has_prefix (p, "alsa_pcm") ||
-				    port_has_prefix (p, "ardour:")) {
-					extra_system.push_back (p);
-				} else {
-					extra_other.push_back (p);
+				/* can't use the audio engine for this as we are looking at non-Ardour ports */
+
+				jack_port_t* jp = jack_port_by_name (session->engine().jack(), p.c_str());
+				if (jp) {
+					DataType t (jack_port_type (jp));
+					if (t != DataType::NIL) {
+						if (port_has_prefix (p, "system:") || port_has_prefix (p, "alsa_pcm") || port_has_prefix (p, "ardour:")) {
+							extra_system[t].push_back (p);
+						} else {
+							extra_other[t].push_back (p);
+						}
+					}
 				}
 			}
 
@@ -426,13 +435,16 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		free (ports);
 	}
 
-	if (!extra_system.empty()) {
-		boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_system, type, inputs);
-		system->add_bundle (b);
+	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+		if (!extra_system[*i].empty()) {
+			system->add_bundle (make_bundle_from_ports (extra_system[*i], *i, inputs));
+		}
 	}
 
-	if (!extra_other.empty()) {
-		other->add_bundle (make_bundle_from_ports (extra_other, type, inputs));
+	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+		if (!extra_other[*i].empty()) {
+			other->add_bundle (make_bundle_from_ports (extra_other[*i], *i, inputs));
+		}
 	}
 
 	if (!allow_dups) {

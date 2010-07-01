@@ -218,7 +218,7 @@ class IO : public SessionObject, public Latent
 	int32_t find_port_hole (const char* base);
 
 	void setup_bundle ();
-	std::string bundle_channel_name (uint32_t, uint32_t) const;
+	std::string bundle_channel_name (uint32_t, uint32_t, DataType) const;
 };
 
 } // namespace ARDOUR
