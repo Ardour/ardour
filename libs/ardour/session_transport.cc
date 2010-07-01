@@ -1062,8 +1062,10 @@ Session::post_transport ()
 {
 	if (post_transport_work & PostTransportAudition) {
 		if (auditioner && auditioner->active()) {
+                        cerr << "P3 pf = pa\n";
 			process_function = &Session::process_audition;
 		} else {
+                        cerr << "P4 pf = pwe\n";
 			process_function = &Session::process_with_events;
 		}
 	}

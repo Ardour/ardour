@@ -223,6 +223,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	click_emphasis_length = 0;
 	_clicking = false;
 
+        cerr << "P2 pf = pwe\n";
 	process_function = &Session::process_with_events;
 
 	if (Config->get_use_video_sync()) {
