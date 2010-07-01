@@ -17,6 +17,7 @@
 
 */
 
+#include <iostream>
 #include <cmath>
 #include <unistd.h>
 
@@ -34,6 +35,7 @@
 
 using namespace ARDOUR;
 using namespace PBD;
+using namespace std;
 
 MultiAllocSingleReleasePool Session::Event::pool ("event", sizeof (Session::Event), 512);
 
@@ -291,7 +293,8 @@ Session::process_event (Event* ev)
 		if (ev->type != Event::Locate) {
 			immediate_events.insert (immediate_events.end(), ev);
 			_remove_event (ev);
-                        cerr << "**** EARLY RETURN from process event, type was " << enum_2_string (ev->type) << endl;
+                        cerr << "**** EARLY RETURN from process event, pending = " 
+                             << hex << (int) post_transport_work << dec << " type was " << enum_2_string (ev->type) << endl;
 			return;
 		}
 	}
