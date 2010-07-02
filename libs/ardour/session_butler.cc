@@ -245,11 +245,12 @@ Session::butler_thread_work ()
 			}
 		}
 
-		disk_work_outstanding = false;
 		bytes = 0;
 		compute_io = true;
 
           restart:
+
+		disk_work_outstanding = false;
                 cerr << "transport work = " << g_atomic_int_get (&butler_should_do_transport_work) << endl;
 		if (transport_work_requested()) {
                         cerr << "Do transport work\n";
@@ -380,7 +381,7 @@ Session::butler_thread_work ()
 
 		{
 			Glib::Mutex::Lock lm (butler_request_lock);
-
+                        
 			if (butler_should_run && (disk_work_outstanding || transport_work_requested())) {
 //				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 //					cerr << "AFTER " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
