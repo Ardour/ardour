@@ -386,6 +386,11 @@ Session::butler_thread_work ()
 //					cerr << "AFTER " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
 //				}
 
+                                cerr << "Loop done, but BSR = "
+                                     << butler_should_run
+                                     << " DWO = " << disk_work_outstanding
+                                     << " TWR = " << g_atomic_int_get (&butler_should_do_transport_work)
+                                     << " so back to restart\n";
                                 goto restart;
 			}
 
