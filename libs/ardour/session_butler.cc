@@ -190,8 +190,11 @@ Session::butler_thread_work ()
 			break;
 		}
 
+                cerr << "Butler awake\n";
+
 		if (pfd[0].revents & ~POLLIN) {
 			error << string_compose (_("Error on butler thread request pipe: fd=%1 err=%2"), pfd[0].fd, pfd[0].revents) << endmsg;
+			cerr << string_compose (_("Error on butler thread request pipe: fd=%1 err=%2"), pfd[0].fd, pfd[0].revents) << endl;
 			break;
 		}
 		
@@ -208,17 +211,21 @@ Session::butler_thread_work ()
 					switch ((ButlerRequest::Type) req) {
 						
 					case ButlerRequest::Wake:
+                                                cerr << "\tWAKE request\n";
 						break;
 
 					case ButlerRequest::Run:
+                                                cerr << "\tRUN request\n";
 						butler_should_run = true;
 						break;
 						
 					case ButlerRequest::Pause:
+                                                cerr << "\tPAUSE request\n";
 						butler_should_run = false;
 						break;
 						
 					case ButlerRequest::Quit:
+                                                cerr << "\tQUIT request\n";
 						pthread_exit_pbd (0);
 						/*NOTREACHED*/
 						break;
@@ -239,8 +246,12 @@ Session::butler_thread_work ()
 		}
 
 		if (transport_work_requested()) {
+                        cerr << "Do transport work\n";
 			butler_transport_work ();
-		}
+                        cerr << "\tdone with that\n";
+		} else {
+                        cerr << "no transport work to do\n";
+                }
 
 		disk_work_outstanding = false;
 		bytes = 0;
@@ -291,15 +302,16 @@ Session::butler_thread_work ()
 		}
 		
 		if (!err && transport_work_requested()) {
+                        cerr << "transport worked is now requested, going back to the start\n";
 			continue;
 		}
 
 		if (compute_io) {
 			end = get_microseconds(); 
 			if(end-begin > 0) {
-			_read_data_rate = (float) bytes / (float) (end - begin);
+                                _read_data_rate = (float) bytes / (float) (end - begin);
 			} else { _read_data_rate = 0; // infinity better
-			 }
+                        }
 		}
 
 		bytes = 0;
@@ -345,6 +357,7 @@ Session::butler_thread_work ()
 		}
 		
 		if (!err && transport_work_requested()) {
+                        cerr << "transport worked is now requested, going back to the start 2\n";
 			continue;
 		}
 
@@ -376,6 +389,8 @@ Session::butler_thread_work ()
 
 			butler_paused.signal();
 		}
+
+                cerr << "Butler loop done\n";
 	}
 
 	pthread_exit_pbd (0);
