@@ -245,6 +245,11 @@ Session::butler_thread_work ()
 			}
 		}
 
+		disk_work_outstanding = false;
+		bytes = 0;
+		compute_io = true;
+
+          restart:
 		if (transport_work_requested()) {
                         cerr << "Do transport work\n";
 			butler_transport_work ();
@@ -252,10 +257,6 @@ Session::butler_thread_work ()
 		} else {
                         cerr << "no transport work to do\n";
                 }
-
-		disk_work_outstanding = false;
-		bytes = 0;
-		compute_io = true;
 
 		begin = get_microseconds();
 
@@ -303,7 +304,7 @@ Session::butler_thread_work ()
 		
 		if (!err && transport_work_requested()) {
                         cerr << "transport worked is now requested, going back to the start\n";
-			continue;
+			goto restart;
 		}
 
 		if (compute_io) {
@@ -358,7 +359,7 @@ Session::butler_thread_work ()
 		
 		if (!err && transport_work_requested()) {
                         cerr << "transport worked is now requested, going back to the start 2\n";
-			continue;
+                        goto restart;
 		}
 
 		if (compute_io) {
