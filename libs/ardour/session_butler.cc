@@ -250,6 +250,7 @@ Session::butler_thread_work ()
 		compute_io = true;
 
           restart:
+                cerr << "transport work = " << g_atomic_int_get (&butler_should_do_transport_work) << endl;
 		if (transport_work_requested()) {
                         cerr << "Do transport work\n";
 			butler_transport_work ();
