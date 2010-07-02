@@ -366,9 +366,9 @@ Session::butler_thread_work ()
 			// there are no apparent users for this calculation?
 			end = get_microseconds();
 			if(end-begin > 0) {
-			_write_data_rate = (float) bytes / (float) (end - begin);
+                                _write_data_rate = (float) bytes / (float) (end - begin);
 			} else {
-			_write_data_rate = 0; // Well, infinity would be better
+                                _write_data_rate = 0; // Well, infinity would be better
 			}
 		}
 		
@@ -385,7 +385,7 @@ Session::butler_thread_work ()
 //					cerr << "AFTER " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
 //				}
 
-				continue;
+                                goto restart;
 			}
 
 			butler_paused.signal();
