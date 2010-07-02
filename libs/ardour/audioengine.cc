@@ -292,15 +292,12 @@ AudioEngine::_process_callback (nframes_t nframes, void *arg)
 void
 AudioEngine::_freewheel_callback (int onoff, void *arg)
 {
-        cerr << "JACK says FREEWHEEL = " << onoff << endl;
 	static_cast<AudioEngine*>(arg)->_freewheeling = onoff;
 }
 
 int
 AudioEngine::process_callback (nframes_t nframes)
 {
-        cerr << "JACK says PROCESS (" << nframes << ')' << endl;
-
 	// CycleTimer ct ("AudioEngine::process");
         GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
 	Glib::Mutex::Lock tm (_process_lock, Glib::TRY_LOCK);

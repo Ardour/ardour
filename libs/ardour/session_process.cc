@@ -260,8 +260,6 @@ Session::process_with_events (nframes_t nframes)
 	nframes_t stop_limit;
 	long           frames_moved;
         
-        cerr << "++PWE\n";
-
 	/* make sure the auditioner is silent */
 
 	if (auditioner) {
@@ -271,7 +269,6 @@ Session::process_with_events (nframes_t nframes)
 	/* handle any pending events */
 
 	while (pending_events.read (&ev, 1) == 1) {
-                cerr << "********** merge event action " << ev->action << " type " << enum_2_string (ev->type) << " to pending\n";
 		merge_event (ev);
 	}
 
@@ -283,11 +280,8 @@ Session::process_with_events (nframes_t nframes)
 	while (!non_realtime_work_pending() && !immediate_events.empty()) {
 		Event *ev = immediate_events.front ();
 		immediate_events.pop_front ();
-                cerr << "******* process immediate effect event type " << ev->action << " type " << enum_2_string (ev->type) << endl;
 		process_event (ev);
 	}
-
-        dump_events ();
 
 	/* Events caused a transport change, send an MTC Full Frame (SMPTE) message.
 	 * This is sent whether rolling or not, to give slaves an idea of ardour time
@@ -299,13 +293,11 @@ Session::process_with_events (nframes_t nframes)
 
 	if (!process_can_proceed()) {
 		_silent = true;
-                cerr << "++PWE out 1\n";
 		return;
 	}
 		
 	if (events.empty() || next_event == events.end()) {
 		process_without_events (nframes);
-                cerr << "++PWE out 2\n";
 		return;
 	}
 
@@ -328,7 +320,6 @@ Session::process_with_events (nframes_t nframes)
 
 		if (_transport_speed == 0) {
 			no_roll (nframes);
-                        cerr << "++PWE out 3\n";
 			return;
 		}
 
@@ -345,7 +336,6 @@ Session::process_with_events (nframes_t nframes)
 
 		if (maybe_stop (stop_limit)) {
 			no_roll (nframes);
-                        cerr << "++PWE out 4\n";
 			return;
 		} 
 
@@ -375,7 +365,6 @@ Session::process_with_events (nframes_t nframes)
 
 				if (process_routes (this_nframes)) {
 					fail_roll (nframes);
-                                        cerr << "++PWE out 4\n";
 					return;
 				}
 				
@@ -434,7 +423,6 @@ Session::process_with_events (nframes_t nframes)
 		send_midi_time_code_in_another_thread ();
 	}
 
-        cerr << "++PWE out 5\n";
 	return;
 }		
 
@@ -754,8 +742,6 @@ Session::process_without_events (nframes_t nframes)
 	nframes_t stop_limit;
 	long frames_moved;
 
-        cerr << "++PwE\n";
-
 	if (!process_can_proceed()) {
 		_silent = true;
 		return;
@@ -763,14 +749,12 @@ Session::process_without_events (nframes_t nframes)
 
 	if (!_exporting && _slave) {
 		if (!follow_slave (nframes)) {
-                        cerr << "++PwE out 1\n";
 			return;
 		}
 	} 
 
 	if (_transport_speed == 0) {
 		fail_roll (nframes);
-                cerr << "++PwE out 2\n";
 		return;
 	}
 		
@@ -786,12 +770,10 @@ Session::process_without_events (nframes_t nframes)
 		
 	if (maybe_stop (stop_limit)) {
 		no_roll (nframes);
-                cerr << "++PwE out 2\n";
 		return;
 	} 
 
 	if (maybe_sync_start (nframes)) {
-                cerr << "++PwE out 3\n";
 		return;
 	}
 
@@ -803,7 +785,6 @@ Session::process_without_events (nframes_t nframes)
 
 	if (process_routes (nframes)) {
 		fail_roll (nframes);
-                cerr << "++PwE out 4\n";
 		return;
 	}
 
@@ -826,7 +807,6 @@ Session::process_without_events (nframes_t nframes)
 		send_midi_time_code_in_another_thread ();
 	}
 
-        cerr << "++PwE out 5\n";
 	return;
 }		
 
@@ -866,7 +846,6 @@ Session::process_audition (nframes_t nframes)
 	}
 
 	if (!auditioner->active()) {
-                cerr << "P1 pf = pwe\n";
 		process_function = &Session::process_with_events;
 	}
 }

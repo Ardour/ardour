@@ -176,8 +176,6 @@ Session::butler_thread_work ()
 		pfd[0].fd = butler_request_pipe[0];
 		pfd[0].events = POLLIN|POLLERR|POLLHUP;
 
-                cerr << "Butler sleeps with DWO = " << disk_work_outstanding << endl;
-
 		if (poll (pfd, 1, (disk_work_outstanding ? 0 : -1)) < 0) {
 			
 			if (errno == EINTR) {
@@ -190,11 +188,8 @@ Session::butler_thread_work ()
 			break;
 		}
 
-                cerr << "Butler awake\n";
-
 		if (pfd[0].revents & ~POLLIN) {
 			error << string_compose (_("Error on butler thread request pipe: fd=%1 err=%2"), pfd[0].fd, pfd[0].revents) << endmsg;
-			cerr << string_compose (_("Error on butler thread request pipe: fd=%1 err=%2"), pfd[0].fd, pfd[0].revents) << endl;
 			break;
 		}
 		
@@ -211,21 +206,17 @@ Session::butler_thread_work ()
 					switch ((ButlerRequest::Type) req) {
 						
 					case ButlerRequest::Wake:
-                                                cerr << "\tWAKE request\n";
 						break;
 
 					case ButlerRequest::Run:
-                                                cerr << "\tRUN request\n";
 						butler_should_run = true;
 						break;
 						
 					case ButlerRequest::Pause:
-                                                cerr << "\tPAUSE request\n";
 						butler_should_run = false;
 						break;
 						
 					case ButlerRequest::Quit:
-                                                cerr << "\tQUIT request\n";
 						pthread_exit_pbd (0);
 						/*NOTREACHED*/
 						break;
@@ -251,14 +242,9 @@ Session::butler_thread_work ()
           restart:
 
 		disk_work_outstanding = false;
-                cerr << "transport work = " << g_atomic_int_get (&butler_should_do_transport_work) << endl;
 		if (transport_work_requested()) {
-                        cerr << "Do transport work\n";
 			butler_transport_work ();
-                        cerr << "\tdone with that\n";
-		} else {
-                        cerr << "no transport work to do\n";
-                }
+		} 
 
 		begin = get_microseconds();
 
@@ -286,7 +272,6 @@ Session::butler_thread_work ()
 				break;
 			case 1:
 				bytes += ds->read_data_count();
-                                cerr << (*i)->name() << " not completely written, DWO = true\n";
 				disk_work_outstanding = true;
 				break;
 				
@@ -300,12 +285,10 @@ Session::butler_thread_work ()
 
 		if (i != dsl->begin() && i != dsl->end()) {
 			/* we didn't get to all the streams */
-                        cerr << "Some streams not serviced, DWO = true\n";
 			disk_work_outstanding = true;
 		}
 		
 		if (!err && transport_work_requested()) {
-                        cerr << "transport worked is now requested, going back to the start\n";
 			goto restart;
 		}
 
@@ -333,7 +316,6 @@ Session::butler_thread_work ()
 				break;
 			case 1:
 				bytes += (*i)->write_data_count();
-                                cerr << (*i)->name() << " not completely written, DWO = true\n";
 				disk_work_outstanding = true;
 				break;
 				
@@ -360,7 +342,6 @@ Session::butler_thread_work ()
 		}
 		
 		if (!err && transport_work_requested()) {
-                        cerr << "transport worked is now requested, going back to the start 2\n";
                         goto restart;
 		}
 
@@ -387,18 +368,11 @@ Session::butler_thread_work ()
 //					cerr << "AFTER " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
 //				}
 
-                                cerr << "Loop done, but BSR = "
-                                     << butler_should_run
-                                     << " DWO = " << disk_work_outstanding
-                                     << " TWR = " << g_atomic_int_get (&butler_should_do_transport_work)
-                                     << " so back to restart\n";
                                 goto restart;
 			}
 
 			butler_paused.signal();
 		}
-
-                cerr << "Butler loop done\n";
 	}
 
 	pthread_exit_pbd (0);
