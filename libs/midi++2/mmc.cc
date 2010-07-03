@@ -210,10 +210,13 @@ MachineControl::set_port (Port* p)
 {
 	_port = p;
 
-	mmc_connection.disconnect ();
+	port_connections.drop_connections ();
 
 	if (_port->input()) {
-		_port->input()->mmc.connect_same_thread (mmc_connection, boost::bind (&MachineControl::process_mmc_message, this, _1, _2, _3));
+		_port->input()->mmc.connect_same_thread (port_connections, boost::bind (&MachineControl::process_mmc_message, this, _1, _2, _3));
+		_port->input()->start.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_start, this, _1, _2));
+		_port->input()->contineu.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_continue, this, _1, _2));
+		_port->input()->stop.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_stop, this, _1, _2));
 	} else {
 		warning << "MMC connected to a non-input port: useless!" << endmsg;
 	}
@@ -688,6 +691,24 @@ MachineControl::set_sending_thread (pthread_t t)
 	_sending_thread = t;
 }
 
+void
+MachineControl::spp_start (Parser& parser, nframes_t timestamp)
+{
+	SPPStart (parser, timestamp); /* EMIT SIGNAL */
+}
+
+void
+MachineControl::spp_continue (Parser& parser, nframes_t timestamp)
+{
+	SPPContinue (parser, timestamp); /* EMIT SIGNAL */
+}
+
+void
+MachineControl::spp_stop (Parser& parser, nframes_t timestamp)
+{
+	SPPStop (parser, timestamp); /* EMIT SIGNAL */
+}
+
 MachineControlCommand::MachineControlCommand (MachineControl::Command c)
 	: _command (c)
 {
@@ -725,3 +746,4 @@ MachineControlCommand::fill_buffer (MachineControl* mmc, MIDI::byte* b) const
 
 	return b;
 }
+

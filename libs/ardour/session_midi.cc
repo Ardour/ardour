@@ -76,6 +76,10 @@ Session::use_config_midi_ports ()
 {
 	string port_name;
 
+	if (default_mmc_port) {
+		_mmc->set_port (default_mmc_port);
+	}
+
 	if (default_mtc_port) {
 		set_mtc_port (default_mtc_port->name());
 	} else {
@@ -230,26 +234,26 @@ Session::set_trace_midi_input (bool yn, MIDI::Port* port)
 		}
 	} else {
 
-		if (_mmc && _mmc->port()) {
+		if (_mmc->port()) {
 			if ((input_parser = _mmc->port()->input()) != 0) {
 				input_parser->trace (yn, &cout, "input: ");
 			}
 		}
 
-		if (_mtc_port && (!_mmc || (_mtc_port != _mmc->port()))) {
+		if (_mtc_port && _mtc_port != _mmc->port()) {
 			if ((input_parser = _mtc_port->input()) != 0) {
 				input_parser->trace (yn, &cout, "input: ");
 			}
 		}
 
-		if (_midi_port && (!_mmc || (_midi_port != _mmc->port())) && _midi_port != _mtc_port  ) {
+		if (_midi_port && _midi_port != _mmc->port() && _midi_port != _mtc_port) {
 			if ((input_parser = _midi_port->input()) != 0) {
 				input_parser->trace (yn, &cout, "input: ");
 			}
 		}
 
 		if (_midi_clock_port
-		    && (!_mmc || (_midi_clock_port != _mmc->port()))
+		    && _midi_clock_port != _mmc->port()
 			&& _midi_clock_port != _mtc_port
 			&& _midi_clock_port != _midi_port) {
 			if ((input_parser = _midi_clock_port->input()) != 0) {
@@ -271,7 +275,7 @@ Session::set_trace_midi_output (bool yn, MIDI::Port* port)
 			output_parser->trace (yn, &cout, "output: ");
 		}
 	} else {
-		if (_mmc && _mmc->port()) {
+		if (_mmc->port()) {
 			if ((output_parser = _mmc->port()->output()) != 0) {
 				output_parser->trace (yn, &cout, "output: ");
 			}
@@ -283,7 +287,7 @@ Session::set_trace_midi_output (bool yn, MIDI::Port* port)
 			}
 		}
 
-		if (_midi_port && (!_mmc || (_midi_port != _mmc->port())) && _midi_port != _mtc_port  ) {
+		if (_midi_port && _midi_port != _mmc->port() && _midi_port != _mtc_port) {
 			if ((output_parser = _midi_port->output()) != 0) {
 				output_parser->trace (yn, &cout, "output: ");
 			}
@@ -304,7 +308,7 @@ Session::get_trace_midi_input(MIDI::Port *port)
 		}
 	}
 	else {
-		if (_mmc && _mmc->port()) {
+		if (_mmc->port()) {
 			if ((input_parser = _mmc->port()->input()) != 0) {
 				return input_parser->tracing();
 			}
@@ -336,7 +340,7 @@ Session::get_trace_midi_output(MIDI::Port *port)
 		}
 	}
 	else {
-		if (_mmc && _mmc->port()) {
+		if (_mmc->port()) {
 			if ((output_parser = _mmc->port()->output()) != 0) {
 				return output_parser->tracing();
 			}

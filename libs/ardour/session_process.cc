@@ -69,9 +69,7 @@ Session::process (nframes_t nframes)
 		}
 	}
 
-        if (_mmc) {
-                _mmc->flush_pending ();
-        }
+	_mmc->flush_pending ();
         
         _engine.main_thread()->get_buffers ();
 

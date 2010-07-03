@@ -24,12 +24,13 @@
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
 #include "midi++/types.h"
+#include "midi++/parser.h"
 
 namespace MIDI {
 
 class Port;
 class Parser;
-class MachineControlCommand;	
+class MachineControlCommand;
 
 /** Class to handle incoming and outgoing MIDI machine control messages */
 class MachineControl 
@@ -142,6 +143,10 @@ class MachineControl
 	MMCSignal RecordStrobeVariable;
 	MMCSignal Wait;
 	MMCSignal Resume;
+
+	TimestampedSignal SPPStart;
+	TimestampedSignal SPPContinue;
+	TimestampedSignal SPPStop;
 
 	/* The second argument is the shuttle speed, the third is
 	   true if the direction is "forwards", false for "reverse"
@@ -264,7 +269,7 @@ class MachineControl
 	static pthread_t _sending_thread;
 
 	void process_mmc_message (Parser &p, byte *, size_t len);
-	PBD::ScopedConnection mmc_connection; ///< connection to our parser for incoming data
+	PBD::ScopedConnectionList port_connections; ///< connections to our parser for incoming data
 
 	int  do_masked_write (byte *, size_t len);
 	int  do_locate (byte *, size_t len);
@@ -273,6 +278,9 @@ class MachineControl
 	void send_immediately (MachineControlCommand const &);
 	
 	void write_track_status (byte *, size_t len, byte reg);
+	void spp_start (Parser&, nframes_t);
+	void spp_continue (Parser&, nframes_t);
+	void spp_stop (Parser&, nframes_t);
 };
 
 /** Class to describe a MIDI machine control command to be sent.
