@@ -448,7 +448,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		_moved = true;
 
 		/* don't alter x if we clicked outside and above or below the viewbox */
-		if (_start_position == INSIDE || _start_position == TO_LEFT_OR_RIGHT) {
+		if (_start_position == INSIDE || _start_position == TO_LEFT_OR_RIGHT || _start_position == OTHERWISE_OUTSIDE) {
 			xr.first += ev->x - _start_mouse_x;
 			xr.second += ev->x - _start_mouse_x;
 		}
