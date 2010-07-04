@@ -2137,6 +2137,12 @@ CursorDrag::motion (GdkEvent* event, bool)
 
 	_editor->show_verbose_time_cursor (_cursor->current_frame, 10);
 
+	if (_editor->session() && _item == &_editor->playhead_cursor->canvas_item) {
+		_editor->session()->request_locate (_editor->playhead_cursor->current_frame, false);
+		_editor->_pending_locate_request = true;
+	}
+	
+
 #ifdef GTKOSX
 	_editor->update_canvas_now ();
 #endif
