@@ -216,13 +216,16 @@ Butler::thread_work ()
 			}
 		}
 
+
+		bytes = 0;
+		compute_io = true;
+
+restart:		
+		disk_work_outstanding = false;
+		
 		if (transport_work_requested()) {
 			_session.butler_transport_work ();
 		}
-
-		disk_work_outstanding = false;
-		bytes = 0;
-		compute_io = true;
 
 		begin = get_microseconds();
 
@@ -273,7 +276,7 @@ Butler::thread_work ()
 		}
 
 		if (!err && transport_work_requested()) {
-			continue;
+			goto restart;
 		}
 
 		if (compute_io) {
@@ -332,7 +335,7 @@ Butler::thread_work ()
 		}
 
 		if (!err && transport_work_requested()) {
-			continue;
+			goto restart;
 		}
 
 		if (compute_io) {
@@ -358,7 +361,7 @@ Butler::thread_work ()
 //					cerr << "AFTER " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
 //				}
 
-				continue;
+				goto restart;
 			}
 
 			paused.signal();
