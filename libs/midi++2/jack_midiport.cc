@@ -132,6 +132,10 @@ JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 {
 	int ret = 0;
 
+	if (!_jack_output_port) {
+		return ret;
+	}
+	
 	if (!is_process_thread()) {
 
 		Glib::Mutex::Lock lm (output_fifo_lock);
@@ -162,8 +166,6 @@ JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 
 	} else {
 
-		assert(_jack_output_port);
-		
 		// XXX This had to be temporarily commented out to make export work again
 		if (!(timestamp < _nframes_this_cycle)) {
 			std::cerr << "assertion timestamp < _nframes_this_cycle failed!" << std::endl;
