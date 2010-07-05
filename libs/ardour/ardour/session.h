@@ -279,6 +279,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	PBD::Signal0<void> Located;
 
 	PBD::Signal1<void,RouteList&> RouteAdded;
+	/** Emitted when anything about any of our route groups changes */
 	PBD::Signal0<void> RouteGroupChanged;
 
 	void queue_event (SessionEvent*);

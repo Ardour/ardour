@@ -1902,7 +1902,6 @@ Session::add_routes (RouteList& new_routes, bool save)
 		r->mute_changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this, _1));
 		r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
 		r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
-		r->route_group_changed.connect_same_thread (*this, boost::bind (&Session::route_group_changed, this));
 
 		if (r->is_master()) {
 			_master_out = r;
@@ -3834,6 +3833,7 @@ Session::solo_control_mode_changed ()
         }
 }
 
+/** Called when anything about any of our route groups changes (membership, state etc.) */
 void
 Session::route_group_changed ()
 {

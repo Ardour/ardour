@@ -2251,6 +2251,10 @@ Session::add_route_group (RouteGroup* g)
 {
 	_route_groups.push_back (g);
 	route_group_added (g); /* EMIT SIGNAL */
+
+	g->MembershipChanged.connect_same_thread (*this, boost::bind (&Session::route_group_changed, this));
+	g->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::route_group_changed, this));
+	
 	set_dirty ();
 }
 
