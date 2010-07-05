@@ -83,6 +83,9 @@ class Manager {
 
 	int get_known_ports (std::vector<PortSet>&);
 
+	void reestablish (void *);
+	void reconnect ();
+
 	PBD::Signal0<void> PortsChanged;
 
   private:

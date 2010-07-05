@@ -268,13 +268,26 @@ JACK_MidiPort::create_ports(const XMLNode& node)
 	assert(!_jack_input_port);
 	assert(!_jack_output_port);
 	
-	jack_nframes_t nframes = jack_get_buffer_size(_jack_client);
+	if (desc.mode == O_RDWR || desc.mode == O_WRONLY) {
+		_jack_output_port_name = string(desc.tag).append ("_out");
+	}
 
+	if (desc.mode == O_RDWR || desc.mode == O_RDONLY) {
+		_jack_input_port_name = string(desc.tag).append ("_in");
+	}
+
+	return create_ports ();
+}
+
+int
+JACK_MidiPort::create_ports ()
+{
 	bool ret = true;
 
-	if (desc.mode == O_RDWR || desc.mode == O_WRONLY) {
-		_jack_output_port = jack_port_register(_jack_client,
-						       string(desc.tag).append("_out").c_str(),
+	jack_nframes_t nframes = jack_get_buffer_size(_jack_client);
+
+	if (!_jack_output_port_name.empty()) {
+		_jack_output_port = jack_port_register(_jack_client, _jack_output_port_name.c_str(),
 						       JACK_DEFAULT_MIDI_TYPE, JackPortIsOutput, 0);
 		if (_jack_output_port) {
 			jack_midi_clear_buffer(jack_port_get_buffer(_jack_output_port, nframes));
@@ -282,9 +295,8 @@ JACK_MidiPort::create_ports(const XMLNode& node)
 		ret = ret && (_jack_output_port != NULL);
 	}
 	
-	if (desc.mode == O_RDWR || desc.mode == O_RDONLY) {
-		_jack_input_port = jack_port_register(_jack_client,
-						      string(desc.tag).append("_in").c_str(),
+	if (!_jack_input_port_name.empty()) {
+		_jack_input_port = jack_port_register(_jack_client, _jack_input_port_name.c_str(),
 						      JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
 		if (_jack_input_port) {
 			jack_midi_clear_buffer(jack_port_get_buffer(_jack_input_port, nframes));
@@ -401,4 +413,21 @@ bool
 JACK_MidiPort::is_process_thread()
 {
 	return (pthread_self() == _process_thread);
+}
+
+void
+JACK_MidiPort::reestablish (void* jack)
+{
+	_jack_client = static_cast<jack_client_t*> (jack);
+	int const r = create_ports ();
+
+	if (r) {
+		PBD::error << "could not reregister ports for " << name() << endmsg;
+	}
+}
+
+void
+JACK_MidiPort::reconnect ()
+{
+	make_connections ();
 }

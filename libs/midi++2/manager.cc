@@ -234,3 +234,21 @@ Manager::get_known_ports (vector<PortSet>& ports)
 {
 	return PortFactory::get_known_ports (ports);
 }
+
+/** Re-register ports that disappear on JACK shutdown */
+void
+Manager::reestablish (void* a)
+{
+	for (PortList::const_iterator p = _ports.begin(); p != _ports.end(); ++p) {
+		(*p)->reestablish (a);
+	}
+}
+
+/** Re-connect ports after a reestablish () */
+void
+Manager::reconnect ()
+{
+	for (PortList::const_iterator p = _ports.begin(); p != _ports.end(); ++p) {
+		(*p)->reconnect ();
+	}
+}

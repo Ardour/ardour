@@ -157,6 +157,9 @@ class Port {
 	    XMLNode& get_state();
 	};
 
+	virtual void reestablish (void *) {}
+	virtual void reconnect () {}
+
   protected:
 	bool             _ok;
 	bool             _currently_in_cycle;

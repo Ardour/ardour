@@ -34,6 +34,7 @@
 
 #include "midi++/jack.h"
 #include "midi++/mmc.h"
+#include "midi++/manager.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_port.h"
@@ -1395,6 +1396,8 @@ AudioEngine::reconnect_to_jack ()
 
 	GET_PRIVATE_JACK_POINTER_RET (_jack,-1);
 
+	MIDI::Manager::instance()->reestablish (_priv_jack);
+	
 	if (_session) {
 		_session->reset_jack_connection (_priv_jack);
                 jack_bufsize_callback (jack_get_buffer_size (_priv_jack));
@@ -1434,6 +1437,8 @@ AudioEngine::reconnect_to_jack ()
 	for (i = p->begin(); i != p->end(); ++i) {
 		(*i)->reconnect ();
 	}
+
+	MIDI::Manager::instance()->reconnect ();
 
 	Running (); /* EMIT SIGNAL*/
 

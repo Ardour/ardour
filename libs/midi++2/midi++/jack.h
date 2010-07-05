@@ -71,6 +71,9 @@ public:
 	
 	nframes_t nframes_this_cycle() const {	return _nframes_this_cycle; }
 
+	void reestablish (void *);
+	void reconnect ();
+
 	static PBD::Signal0<void> MakeConnections;
 	static PBD::Signal0<void> JackHalted;
 
@@ -81,9 +84,12 @@ public:
 
 private:
 	int create_ports(const XMLNode&);
+	int create_ports ();
 
 	jack_client_t* _jack_client;
+	std::string    _jack_input_port_name; /// input port name, or empty if there isn't one
 	jack_port_t*   _jack_input_port;
+	std::string    _jack_output_port_name; /// output port name, or empty if there isn't one
 	jack_port_t*   _jack_output_port;
 	nframes_t      _last_read_index;
 	timestamp_t    _last_write_timestamp;
