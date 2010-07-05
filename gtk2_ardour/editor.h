@@ -1928,6 +1928,9 @@ public:
 	sigc::connection step_timeout;
 
 	TimeAxisView* entered_track;
+	/** If the mouse is over a RegionView or one of its child canvas items, this is set up
+	    to point to the RegionView.  Otherwise it is 0.
+	*/
 	RegionView*   entered_regionview;
 
 

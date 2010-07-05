@@ -406,10 +406,12 @@ Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, 
 		break;
 
 	case GDK_ENTER_NOTIFY:
+		set_entered_regionview (rv);
 		ret = enter_handler (item, event, FadeInHandleItem);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
+		set_entered_regionview (0);
 		ret = leave_handler (item, event, FadeInHandleItem);
 		break;
 
@@ -485,10 +487,12 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 		break;
 
 	case GDK_ENTER_NOTIFY:
+		set_entered_regionview (rv);
 		ret = enter_handler (item, event, FadeOutHandleItem);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
+		set_entered_regionview (0);
 		ret = leave_handler (item, event, FadeOutHandleItem);
 		break;
 
@@ -793,10 +797,12 @@ Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, Re
 		ret = motion_handler (item, event);
 		break;
 	case GDK_ENTER_NOTIFY:
+		set_entered_regionview (rv);
 		ret = enter_handler (item, event, type);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
+		set_entered_regionview (0);
 		ret = leave_handler (item, event, type);
 		break;
 
@@ -835,10 +841,12 @@ Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::
                 ret = true; // force this to avoid progagating the event into the regionview
 		break;
 	case GDK_ENTER_NOTIFY:
+		set_entered_regionview (rv);
 		ret = enter_handler (item, event, RegionViewNameHighlight);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
+		set_entered_regionview (0);
 		ret = leave_handler (item, event, RegionViewNameHighlight);
 		break;
 
@@ -875,10 +883,12 @@ Editor::canvas_region_view_name_event (GdkEvent *event, ArdourCanvas::Item* item
 		ret = motion_handler (item, event);
 		break;
 	case GDK_ENTER_NOTIFY:
+		set_entered_regionview (rv);
 		ret = enter_handler (item, event, RegionViewName);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
+		set_entered_regionview (0);
 		ret = leave_handler (item, event, RegionViewName);
 		break;
 
