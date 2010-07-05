@@ -788,6 +788,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	boost::shared_ptr<SessionPlaylists> playlists;
 
+	void send_mmc_locate (nframes64_t);
+
   protected:
 	friend class AudioEngine;
 	void set_block_size (nframes_t nframes);
