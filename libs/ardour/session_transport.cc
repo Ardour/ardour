@@ -783,6 +783,7 @@ Session::locate (nframes64_t target_frame, bool with_roll, bool with_flush, bool
 			set_transport_speed (1.0, false);
 		}
 		loop_changing = false;
+		Located (); /* EMIT SIGNAL */
 		return;
 	}
 
