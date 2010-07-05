@@ -203,7 +203,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 				int cmd = msg[4];
 				if (cmd == 0x44 && msg[5] == 0x06 && msg[6] == 0x01) {
 					s += snprintf (
-						&buf[s], bufsize, " MMC locate to %d:%d:%d:%d.%d\n",
+						&buf[s], bufsize, " MMC locate to %02d:%02d:%02d:%02d.%02d\n",
 						msg[7], msg[8], msg[9], msg[10], msg[11]
 						);
 				} else {
