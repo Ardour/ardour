@@ -45,11 +45,8 @@ def build(bld):
 	# Library
 	obj = bld.new_task_gen('cxx', 'shlib')
 	obj.source = '''
-		fd_midiport.cc
-		fifomidi.cc
 		midi.cc
 		channel.cc
-		factory.cc
 		manager.cc
 		parser.cc
 		port.cc
@@ -59,21 +56,12 @@ def build(bld):
 		version.cc
 	'''
 	# everybody loves JACK
-	obj.source += ' jack_midiport.cc '
 	obj.cxxflags = [ '-DWITH_JACK_MIDI' ]
-	if bld.env['HAVE_COREAUDIO'] and bld.env['COREAUDIO']:
-		# OS X
-		obj.source += ' coremidi_midiport.cc '
-		obj.cxxflags += [ '-DWITH_COREMIDI' ]
-	elif sys.platform == 'linux':
-		# linux
-		obj.source += ' alsa_sequencer_midiport.cc '
-		obj.cxxflags += [ '-DWITH_ALSA' ]
 	obj.export_incdirs = ['.']
 	obj.includes     = ['.', '../surfaces/control_protocol']
 	obj.name         = 'libmidipp'
 	obj.target       = 'midipp'
-	obj.uselib       = 'GLIBMM SIGCPP XML JACK OSX COREAUDIO'
+	obj.uselib       = 'GLIBMM SIGCPP XML JACK OSX'
 	obj.uselib_local = 'libpbd libevoral'
 	obj.vnum         = LIBMIDIPP_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')

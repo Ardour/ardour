@@ -81,8 +81,6 @@ class Manager {
 		return theManager;
 	}
 
-	int get_known_ports (std::vector<PortSet>&);
-
 	void reestablish (void *);
 	void reconnect ();
 

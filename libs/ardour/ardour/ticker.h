@@ -19,7 +19,6 @@
 */
 
 
-#include "midi++/jack.h"
 #include "pbd/signals.h"
 
 #include "ardour/types.h"
@@ -28,6 +27,10 @@
 
 #ifndef TICKER_H_
 #define TICKER_H_
+
+namespace MIDI {
+	class Port;
+}
 
 namespace ARDOUR
 {

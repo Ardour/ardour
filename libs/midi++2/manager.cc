@@ -25,8 +25,8 @@
 
 #include "midi++/types.h"
 #include "midi++/manager.h"
-#include "midi++/factory.h"
 #include "midi++/channel.h"
+#include "midi++/port.h"
 
 using namespace std;
 using namespace MIDI;
@@ -60,7 +60,6 @@ Port *
 Manager::add_port (const XMLNode& node)
 {
 	Port::Descriptor desc (node);
-	PortFactory factory;
 	Port *port;
 	PortList::iterator p;
 
@@ -68,29 +67,15 @@ Manager::add_port (const XMLNode& node)
 
 		if (desc.tag == (*p)->name()) {
 			break;
-		} 
-
-		if (!PortFactory::ignore_duplicate_devices (desc.type)) {
-			if (desc.device == (*p)->device()) {
-				/* If the existing is duplex, and this request
-				   is not, then fail, because most drivers won't
-				   allow opening twice with duplex and non-duplex
-				   operation.
-				*/
-
-				if ((desc.mode == O_RDWR && (*p)->mode() != O_RDWR) ||
-				    (desc.mode != O_RDWR && (*p)->mode() == O_RDWR)) {
-					break;
-				}
-			}
 		}
+		
 	}
 
 	if (p != _ports.end()) {
 		return 0;
 	}
 	
-	port = factory.create_port (node, api_data);
+	port = new Port (node, (jack_client_t *) api_data);
 	
 	if (port == 0) {
 		return 0;
@@ -226,13 +211,6 @@ Manager::cycle_end()
 	for (PortList::iterator p = _ports.begin(); p != _ports.end(); ++p) {
 		(*p)->cycle_end ();
 	}
-}
-
-
-int
-Manager::get_known_ports (vector<PortSet>& ports)
-{
-	return PortFactory::get_known_ports (ports);
 }
 
 /** Re-register ports that disappear on JACK shutdown */

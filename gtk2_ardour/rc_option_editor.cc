@@ -8,7 +8,6 @@
 #include "pbd/cpus.h"
 
 #include "midi++/manager.h"
-#include "midi++/factory.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/dB.h"
@@ -209,7 +208,6 @@ private:
 
 		node.add_property ("tag", dialog.port_name.get_text());
 		node.add_property ("device", X_("ardour")); // XXX this can't be right for all types
-		node.add_property ("type", MIDI::PortFactory::default_port_type());
 		node.add_property ("mode", smod);
 
 		if (MIDI::Manager::instance()->add_port (node) != 0) {

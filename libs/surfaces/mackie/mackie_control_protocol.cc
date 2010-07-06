@@ -563,20 +563,14 @@ MackieControlProtocol::connect_session_signals()
 void 
 MackieControlProtocol::add_port (MIDI::Port & midi_port, int number)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("add port %1,%2,%3\n", midi_port.name(), midi_port.device(), midi_port.type()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("add port %1\n", midi_port.name()));
 
-	if (string (midi_port.device()) == string ("ardour") && midi_port.type() == MIDI::Port::ALSA_Sequencer) {
-		throw MackieControlException ("The Mackie MCU driver will not use a port with device=ardour");
-	} else if (midi_port.type() == MIDI::Port::ALSA_Sequencer) {
-		throw MackieControlException ("alsa/sequencer ports don't work with the Mackie MCU driver right now");
-	} else {
-		MackiePort * sport = new MackiePort (*this, midi_port, number);
-		_ports.push_back (sport);
-		
-		sport->init_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_port_init, this, sport));
-		sport->active_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_port_active, this, sport));
-		sport->inactive_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_port_inactive, this, sport));
-	}
+	MackiePort * sport = new MackiePort (*this, midi_port, number);
+	_ports.push_back (sport);
+	
+	sport->init_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_port_init, this, sport));
+	sport->active_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_port_active, this, sport));
+	sport->inactive_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_port_inactive, this, sport));
 }
 
 void 

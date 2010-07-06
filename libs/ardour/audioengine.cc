@@ -32,7 +32,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/unknown_type.h"
 
-#include "midi++/jack.h"
+#include "midi++/port.h"
 #include "midi++/mmc.h"
 #include "midi++/manager.h"
 
@@ -147,7 +147,7 @@ _thread_init_callback (void * /*arg*/)
 
 	SessionEvent::create_per_thread_pool (X_("Audioengine"), 512);
 
-	MIDI::JACK_MidiPort::set_process_thread (pthread_self());
+	MIDI::Port::set_process_thread (pthread_self());
 	MIDI::MachineControl::set_sending_thread (pthread_self ());
 }
 
@@ -263,7 +263,7 @@ AudioEngine::stop (bool forever)
 		} else {
 			jack_deactivate (_priv_jack);
 			Stopped(); /* EMIT SIGNAL */
-			MIDI::JACK_MidiPort::JackHalted (); /* EMIT SIGNAL */
+			MIDI::Port::JackHalted (); /* EMIT SIGNAL */
 		}
 	}
 
@@ -1074,7 +1074,7 @@ AudioEngine::halted (void *arg)
 
 	if (was_running) {
 		ae->Halted(""); /* EMIT SIGNAL */
-		MIDI::JACK_MidiPort::JackHalted (); /* EMIT SIGNAL */
+		MIDI::Port::JackHalted (); /* EMIT SIGNAL */
 	}
 }
 
@@ -1358,7 +1358,7 @@ AudioEngine::disconnect_from_jack ()
 	if (_running) {
 		_running = false;
 		Stopped(); /* EMIT SIGNAL */
-		MIDI::JACK_MidiPort::JackHalted (); /* EMIT SIGNAL */
+		MIDI::Port::JackHalted (); /* EMIT SIGNAL */
 	}
 
 	return 0;

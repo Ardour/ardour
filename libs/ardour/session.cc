@@ -98,7 +98,7 @@
 #include "ardour/utils.h"
 #include "ardour/graph.h"
 
-#include "midi++/jack.h"
+#include "midi++/port.h"
 #include "midi++/mmc.h"
 
 #include "i18n.h"
@@ -645,7 +645,7 @@ Session::hookup_io ()
 	/* Tell all IO objects to connect themselves together */
 
 	IO::enable_connecting ();
-	MIDI::JACK_MidiPort::MakeConnections ();
+	MIDI::Port::MakeConnections ();
 
 	/* Now reset all panners */
 

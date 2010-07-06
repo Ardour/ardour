@@ -104,9 +104,7 @@ MidiControlUI::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 
 	if (ioc & IO_IN) {
 
-		if (port->must_drain_selectable()) {
-			CrossThreadChannel::drain (port->selectable());
-		}
+		CrossThreadChannel::drain (port->selectable());
 
 		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", port->name()));
 		nframes64_t now = _session.engine().frame_time();

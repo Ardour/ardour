@@ -173,8 +173,6 @@ void SurfacePort::write_sysex( MIDI::byte msg )
 ostream & Mackie::operator << ( ostream & os, const SurfacePort & port )
 {
 	os << "{ ";
-	os << "device: " << port.port().device();
-	os << "; ";
 	os << "name: " << port.port().name();
 	os << "; ";
 	os << " }";

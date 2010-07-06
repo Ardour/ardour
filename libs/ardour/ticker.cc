@@ -18,6 +18,8 @@
     $Id$
 */
 
+#include "midi++/port.h"
+#include "evoral/midi_events.h"
 #include "ardour/ticker.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -138,9 +140,6 @@ void MidiClockTicker::tick(const nframes_t& transport_frames, const BBT_Time& /*
 	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f || _midi_port == 0)
 		return;
 
-	MIDI::JACK_MidiPort* jack_port = dynamic_cast<MIDI::JACK_MidiPort*>(_midi_port);
-	assert(jack_port);
-
 	while (true) {
 		double next_tick = _last_tick + one_ppqn_in_frames(transport_frames);
 		nframes_t next_tick_offset = nframes_t(next_tick) - transport_frames;
@@ -150,11 +149,11 @@ void MidiClockTicker::tick(const nframes_t& transport_frames, const BBT_Time& /*
 			 << ":Last tick time:" << _last_tick << ":"
 			 << ":Next tick time:" << next_tick << ":"
 			 << "Offset:" << next_tick_offset << ":"
-			 << "cycle length:" << jack_port->nframes_this_cycle()
+		         << "cycle length:" << _midi_port->nframes_this_cycle()
 			 << endl;
 #endif
 
-		if (next_tick_offset >= jack_port->nframes_this_cycle())
+		if (next_tick_offset >= _midi_port->nframes_this_cycle())
 			return;
 
 		send_midi_clock_event(next_tick_offset);
@@ -183,9 +182,7 @@ void MidiClockTicker::send_midi_clock_event(nframes_t offset)
 		return;
 	}
 
-#ifdef WITH_JACK_MIDI
-	assert (MIDI::JACK_MidiPort::is_process_thread());
-#endif // WITH_JACK_MIDI
+	assert (MIDI::Port::is_process_thread());
 #ifdef DEBUG_MIDI_CLOCK
 	cerr << "Tick with offset " << offset << endl;
 #endif // DEBUG_MIDI_CLOCK

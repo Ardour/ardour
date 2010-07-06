@@ -28,7 +28,6 @@
 #include "pbd/pthread_utils.h"
 
 #include "midi++/port.h"
-#include "midi++/jack.h"
 
 #include "ardour/debug.h"
 #include "ardour/slave.h"
