@@ -294,6 +294,7 @@ void
 Editor::mapover_tracks (sigc::slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisView* basis, PBD::PropertyID prop) const
 {
 	RouteTimeAxisView* route_basis = dynamic_cast<RouteTimeAxisView*> (basis);
+
 	if (route_basis == 0) {
 		return;
 	}
@@ -302,7 +303,8 @@ Editor::mapover_tracks (sigc::slot<void, RouteTimeAxisView&, uint32_t> sl, TimeA
 	tracks.insert (route_basis);
 
 	RouteGroup* group = route_basis->route()->route_group();
-	if (group && group->enabled_property (prop)) {
+
+	if (group && group->enabled_property(prop) && group->enabled_property (Properties::active.property_id) ) {
 
 		/* the basis is a member of an active route group, with the appropriate
 		   properties; find other members */
@@ -317,6 +319,7 @@ Editor::mapover_tracks (sigc::slot<void, RouteTimeAxisView&, uint32_t> sl, TimeA
 
 	/* call the slots */
 	uint32_t const sz = tracks.size ();
+	
 	for (set<RouteTimeAxisView*>::iterator i = tracks.begin(); i != tracks.end(); ++i) {
 		sl (**i, sz);
 	}
