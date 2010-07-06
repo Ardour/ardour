@@ -172,12 +172,13 @@
                <menuitem action='editor-delete'/>
                <menuitem action='editor-crop'/>
                <menuitem action='split-region'/>
+	       <menuitem action='split-region-at-transients'/>
 	       <menu action="SeparateMenu">
+		    <menuitem action='separate-under-region'/>
 	            <menuitem action='editor-separate'/>
 	            <menuitem action='separate-from-loop'/>
 	            <menuitem action='separate-from-punch'/>
 		    <separator/>
-		    <menuitem action='split-region-at-transients'/>
                </menu>
 	       <menu action="AlignMenu">
 		   <menuitem action='align-regions-start'/>
@@ -272,8 +273,14 @@
 	      <menuitem action='set-punch-from-region'/>
 	      <menuitem action='add-range-marker-from-region'/>
 	      <menuitem action='add-range-markers-from-region'/>
+
 	      <separator/>
+	      <menuitem action='snap-regions-to-grid'/>
+	      <menuitem action='close-region-gaps'/>
+	      <separator/>
+	      <menuitem action='place-transient' />
 	      <menuitem action='toggle-rhythm-ferret'/>
+	      
 	</menu>
 
         <menu action='TrackMenu'>

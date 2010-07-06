@@ -101,15 +101,14 @@ AudioRegion::register_properties ()
 	, _fade_in_active (Properties::fade_in_active, true) \
 	, _fade_out_active (Properties::fade_out_active, true) \
 	, _scale_amplitude (Properties::scale_amplitude, 1.0)
-
+	
 #define AUDIOREGION_COPY_STATE(other) \
 	 _envelope_active (other->_envelope_active) \
 	, _default_fade_in (other->_default_fade_in) \
 	, _default_fade_out (other->_default_fade_out) \
         , _fade_in_active (other->_fade_in_active) \
         , _fade_out_active (other->_fade_out_active) \
-	, _scale_amplitude (other->_scale_amplitude) 
-
+	, _scale_amplitude (other->_scale_amplitude)
 /* a Session will reset these to its chosen defaults by calling AudioRegion::set_default_fade() */
 
 void
@@ -1263,6 +1262,63 @@ AudioRegion::audio_source (uint32_t n) const
 {
 	// Guaranteed to succeed (use a static cast for speed?)
 	return boost::dynamic_pointer_cast<AudioSource>(source(n));
+}
+
+int 
+AudioRegion::adjust_transients (nframes64_t delta)
+{
+	for (AnalysisFeatureList::iterator x = _transients.begin(); x != _transients.end(); ++x) {
+		(*x) = (*x) + delta;
+	}
+	
+	send_change (PropertyChange (Properties::valid_transients));
+	
+	return 0;  
+} 
+
+int
+AudioRegion::update_transient (nframes64_t old_position, nframes64_t new_position)
+{
+	for (AnalysisFeatureList::iterator x = _transients.begin(); x != _transients.end(); ++x) {
+		if ((*x) == old_position) {
+			(*x) = new_position;
+			send_change (PropertyChange (Properties::valid_transients));
+			
+			break;
+		}
+	}
+	
+	return 0;
+}
+
+void
+AudioRegion::add_transient (nframes64_t where)
+{
+	_transients.push_back(where);
+	_valid_transients = true;
+	
+	send_change (PropertyChange (Properties::valid_transients));
+}
+
+void
+AudioRegion::remove_transient (nframes64_t where)
+{
+	_transients.remove(where);
+	_valid_transients = true;
+	
+	send_change (PropertyChange (Properties::valid_transients));
+}
+
+int
+AudioRegion::set_transients (AnalysisFeatureList& results)
+{
+	_transients.clear();
+	_transients = results;
+	_valid_transients = true;
+	
+	send_change (PropertyChange (Properties::valid_transients));
+	
+	return 0;
 }
 
 int

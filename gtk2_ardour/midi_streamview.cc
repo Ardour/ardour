@@ -63,6 +63,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	, _highest_note(71)
 	, _data_note_min(60)
 	, _data_note_max(71)
+        , _note_lines (0)
 {
 	/* use a group dedicated to MIDI underlays. Audio underlays are not in this group. */
 	midi_underlay_group = new ArdourCanvas::Group (*_canvas_group);
@@ -617,11 +618,23 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 
 							const boost::shared_ptr<MidiRegionView::NoteType>& note = *i;
 
+                                                        cerr << "New note arrived, length = " << note->length()
+                                                             << " num " << note->note()
+                                                             << endl;
+
+                                                        if (note->length() == 0) {
+                                                                /* we got NoteOn but not NoteOff (yet)
+                                                                 */
+                                                                continue;
+                                                        }
+                                                        
 							nframes_t note_start_frames = tconv.to(note->time());
 							nframes_t note_end_frames   = tconv.to(note->end_time());
 
-							if (note->length() > 0 && note_end_frames + region->position() > start)
+
+							if (note->length() > 0 && note_end_frames + region->position() > start) {
 								mrv->resolve_note(note->note(), note_end_frames);
+                                                        }
 
 							if (note_start_frames + region->position() < start) {
 								continue;

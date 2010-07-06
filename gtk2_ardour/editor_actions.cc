@@ -476,6 +476,15 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "mute-unmute-region", _("Mute/Unmute Region"), sigc::mem_fun(*this, &Editor::kbd_mute_unmute_region));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "snap-regions-to-grid", _("Snap Regions to Grid"), sigc::mem_fun(*this, &Editor::snap_regions_to_grid));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::region_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "close-region-gaps", _("Close Region Gaps"), sigc::mem_fun(*this, &Editor::close_region_gaps));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::region_selection_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "place-transient", _("Place Transient"), sigc::mem_fun(*this, &Editor::place_transient));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::region_selection_sensitive_actions.push_back (act);	
 
 	undo_action = act = ActionManager::register_action (editor_actions, "undo", _("Undo"), sigc::bind (sigc::mem_fun(*this, &Editor::undo), 1U));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -487,20 +496,28 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "export-range", _("Export Range"), sigc::mem_fun(*this, &Editor::export_range));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (editor_actions, "separate-under-region", _("Separate Under Selected Regions"), sigc::mem_fun(*this, &Editor::separate_under_selected_regions));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (editor_actions, "editor-separate", _("Separate"), sigc::mem_fun(*this, &Editor::separate_region_from_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
+	
 	act = ActionManager::register_action (editor_actions, "separate-from-punch", _("Separate Using Punch Range"), sigc::mem_fun(*this, &Editor::separate_region_from_punch));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
+	
 	act = ActionManager::register_action (editor_actions, "separate-from-loop", _("Separate Using Loop Range"), sigc::mem_fun(*this, &Editor::separate_region_from_loop));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
+	
 	act = ActionManager::register_action (editor_actions, "editor-crop", _("Crop"), sigc::mem_fun(*this, &Editor::crop_region_to_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::mouse_edit_point_requires_canvas_actions.push_back (act);
+	
 	act = ActionManager::register_action (editor_actions, "editor-cut", _("Cut"), sigc::mem_fun(*this, &Editor::cut));
 	ActionManager::session_sensitive_actions.push_back (act);
+	
 	/* Note: for now, editor-delete does the exact same thing as editor-cut */
 	act = ActionManager::register_action (editor_actions, "editor-delete", _("Delete"), sigc::mem_fun(*this, &Editor::cut));
 	ActionManager::session_sensitive_actions.push_back (act);

@@ -304,6 +304,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual bool canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_region_view_name_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
+	virtual bool canvas_feature_line_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_stream_view_event (GdkEvent* event, ArdourCanvas::Item*, RouteTimeAxisView*) = 0;
 	virtual bool canvas_marker_event (GdkEvent* event, ArdourCanvas::Item*, Marker*) = 0;
 	virtual bool canvas_zoom_rect_event (GdkEvent* event, ArdourCanvas::Item*) = 0;

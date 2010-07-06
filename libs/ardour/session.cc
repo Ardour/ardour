@@ -957,25 +957,33 @@ Session::handle_locations_changed (Locations::LocationList& locations)
 void
 Session::enable_record ()
 {
-	/* XXX really atomic compare+swap here */
-	if (g_atomic_int_get (&_record_status) != Recording) {
-		g_atomic_int_set (&_record_status, Recording);
-		_last_record_location = _transport_frame;
-		_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordStrobe));
+        while (1) {
+                RecordState rs = (RecordState) g_atomic_int_get (&_record_status);
+                
+                if (rs == Recording) {
+                        break;
+                }
 
-		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
-			
-			boost::shared_ptr<RouteList> rl = routes.reader ();
-			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-				if (tr && tr->record_enabled ()) {
-					tr->monitor_input (true);
-				}
-			}
-		}
-
-		RecordStateChanged ();
-	}
+                if (g_atomic_int_compare_and_exchange (&_record_status, rs, Recording)) {
+                        
+                        _last_record_location = _transport_frame;
+                        _mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordStrobe));
+                        
+                        if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
+                                
+                                boost::shared_ptr<RouteList> rl = routes.reader ();
+                                for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+                                        boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+                                        if (tr && tr->record_enabled ()) {
+                                                tr->monitor_input (true);
+                                        }
+                                }
+                        }
+                        
+                        RecordStateChanged ();
+                        break;
+                }
+        }
 }
 
 void

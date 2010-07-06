@@ -105,6 +105,9 @@ class AudioRegionView : public RegionView
 
 	void set_fade_visibility (bool);
 	void update_coverage_frames (LayerDisplay);
+	
+	void update_transient(float old_pos, float new_pos);
+	void remove_transient(float pos);
 
 	void show_region_editor ();
 
@@ -127,6 +130,9 @@ class AudioRegionView : public RegionView
 
     std::vector<ArdourCanvas::WaveView *> waves;
     std::vector<ArdourCanvas::WaveView *> tmp_waves; ///< see ::create_waves()
+    
+    std::list<std::pair<nframes64_t, ArdourCanvas::SimpleLine*> > feature_lines;
+    
     ArdourCanvas::Polygon*           sync_mark; ///< polgyon for sync position
     ArdourCanvas::SimpleLine*        zero_line;
     ArdourCanvas::Polygon*           fade_in_shape;
@@ -169,6 +175,8 @@ class AudioRegionView : public RegionView
     void color_handler ();
 
     std::vector<GnomeCanvasWaveViewCache*> wave_caches;
+    
+    void transients_changed();
 
   private:
 

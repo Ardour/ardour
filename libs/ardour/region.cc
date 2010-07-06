@@ -59,6 +59,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> right_of_split;
 		PBD::PropertyDescriptor<bool> hidden;
 		PBD::PropertyDescriptor<bool> position_locked;
+		PBD::PropertyDescriptor<bool> valid_transients;
 		PBD::PropertyDescriptor<framepos_t> start;
 		PBD::PropertyDescriptor<framecnt_t> length;
 		PBD::PropertyDescriptor<framepos_t> position;
@@ -101,6 +102,8 @@ Region::make_property_quarks ()
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for hidden = %1\n", 	Properties::hidden.property_id));
 	Properties::position_locked.property_id = g_quark_from_static_string (X_("position-locked"));
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position-locked = %1\n", 	Properties::position_locked.property_id));
+	Properties::valid_transients.property_id = g_quark_from_static_string (X_("valid-transients"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for valid-transients = %1\n", 	Properties::valid_transients.property_id));
 	Properties::start.property_id = g_quark_from_static_string (X_("start"));
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for start = %1\n", 	Properties::start.property_id));
 	Properties::length.property_id = g_quark_from_static_string (X_("length"));
@@ -140,6 +143,7 @@ Region::register_properties ()
 	add_property (_right_of_split);
 	add_property (_hidden);
 	add_property (_position_locked);
+	add_property (_valid_transients);
 	add_property (_start);
 	add_property (_length);
 	add_property (_position);
@@ -165,6 +169,7 @@ Region::register_properties ()
 	, _right_of_split (Properties::right_of_split, false) \
 	, _hidden (Properties::hidden, false) \
 	, _position_locked (Properties::position_locked, false) \
+	, _valid_transients (Properties::valid_transients, false) \
 	, _start (Properties::start, (s))	\
 	, _length (Properties::length, (l))	\
 	, _position (Properties::position, 0) \
@@ -189,6 +194,7 @@ Region::register_properties ()
 	, _right_of_split (other->_right_of_split) \
 	, _hidden (other->_hidden) \
 	, _position_locked (other->_position_locked) \
+	, _valid_transients (other->_valid_transients) \
 	, _start(other->_start) \
 	, _length(other->_length) \
 	, _position(other->_position) \
@@ -225,7 +231,6 @@ Region::Region (const SourceList& srcs)
 	, _last_length (0)
 	, _last_position (0)
 	, _first_edit (EditChangesNothing)
-	, _valid_transients(false)
 	, _read_data_count(0)
 	, _last_layer_op (0)
 	, _pending_explicit_relayer (false)
@@ -254,7 +259,6 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, boo
 	, _last_length (other->_last_length)
 	, _last_position(other->_last_position) \
 	, _first_edit (EditChangesNothing)
-	, _valid_transients(false)
 	, _read_data_count(0)
 	, _last_layer_op (0)
 	, _pending_explicit_relayer (false)
@@ -360,7 +364,6 @@ Region::Region (boost::shared_ptr<const Region> other, const SourceList& srcs)
 	, _last_length (other->_last_length)
 	, _last_position (other->_last_position)
 	, _first_edit (EditChangesID)
-	, _valid_transients (false)
 	, _read_data_count (0)
 	, _last_layer_op (other->_last_layer_op)
 	, _pending_explicit_relayer (false)
@@ -390,7 +393,6 @@ Region::Region (boost::shared_ptr<const Region> other)
 	, _last_length (other->_last_length)
 	, _last_position (other->_last_position)
 	, _first_edit (EditChangesID)
-	, _valid_transients(false)
 	, _read_data_count(0)
 	, _last_layer_op(other->_last_layer_op)
 	, _pending_explicit_relayer (false)
@@ -609,13 +611,12 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 			recompute_position_from_lock_style ();
 		}
 
-		invalidate_transients ();
+		//invalidate_transients ();
 	}
 
 	/* do this even if the position is the same. this helps out
 	   a GUI that has moved its representation already.
 	*/
-
 	send_change (Properties::position);
 }
 
@@ -802,7 +803,8 @@ Region::modify_front (nframes_t new_position, bool reset_fade, void *src)
 
 	if (new_position < end) { /* can't trim it zero or negative length */
 		
-		nframes_t newlen;
+		nframes_t newlen = 0;
+		nframes64_t delta = 0;
 
 		/* can't trim it back passed where source position zero is located */
 		
@@ -810,17 +812,24 @@ Region::modify_front (nframes_t new_position, bool reset_fade, void *src)
 		
 		if (new_position > _position) {
 			newlen = _length - (new_position - _position);
+			delta = -1 * (new_position - _position);
 		} else {
 			newlen = _length + (_position - new_position);
+			delta = _position - new_position;
 		}
 		
 		trim_to_internal (new_position, newlen, src);
+		
 		if (reset_fade) {
                         _right_of_split = true;
 		}
 	
                 if (!property_changes_suspended()) {
 			recompute_at_start ();
+		}
+		
+		if (_transients.size() > 0){
+			adjust_transients(delta);
 		}
 	}
 }
@@ -892,7 +901,6 @@ Region::trim_to_internal (framepos_t position, framecnt_t length, void */*src*/)
 			new_start = _start + start_shift;
 		}
 
-
 	} else if (start_shift < 0) {
 
 		if (_start < -start_shift) {
@@ -900,6 +908,7 @@ Region::trim_to_internal (framepos_t position, framecnt_t length, void */*src*/)
 		} else {
 			new_start = _start + start_shift;
 		}
+
 	} else {
 		new_start = _start;
 	}
@@ -1528,6 +1537,8 @@ Region::invalidate_transients ()
 {
 	_valid_transients = false;
 	_transients.clear ();
+	
+	send_change (PropertyChange (Properties::valid_transients));
 }
 
 void

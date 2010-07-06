@@ -604,6 +604,33 @@ private:
 	double _cumulative_y_drag;
 };
 
+/** Transient feature line drags*/
+class FeatureLineDrag : public Drag
+{
+public:
+	FeatureLineDrag (Editor *e, ArdourCanvas::Item *i);
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted ();
+
+	bool active (Editing::MouseMode) {
+		return true;
+	}
+
+private:
+
+	ArdourCanvas::SimpleLine* _line;
+	AudioRegionView* _arv;
+	
+	double _region_view_grab_x;
+	double _cumulative_x_drag;
+	
+	uint32_t _before;
+	uint32_t _max_x;
+};
+
 /** Dragging of a rubberband rectangle for selecting things */
 class RubberbandSelectDrag : public Drag
 {

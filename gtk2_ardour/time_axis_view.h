@@ -165,9 +165,6 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	virtual ARDOUR::RouteGroup* route_group() const { return 0; }
 	virtual boost::shared_ptr<ARDOUR::Playlist> playlist() const { return boost::shared_ptr<ARDOUR::Playlist> (); }
 
-	virtual void show_feature_lines (const ARDOUR::AnalysisFeatureList&);
-	virtual void hide_feature_lines ();
-
 	virtual void set_samples_per_unit (double);
 	virtual void show_selection (TimeSelection&);
 	virtual void hide_selection ();
@@ -309,10 +306,6 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	void set_heights (uint32_t h);
 	void color_handler ();
-
-	std::list<ArdourCanvas::SimpleLine*> feature_lines;
-	ARDOUR::AnalysisFeatureList analysis_features;
-	void reshow_feature_lines ();
 
 	void conditionally_add_to_selection ();
 

@@ -52,6 +52,7 @@ namespace Properties {
 	extern PBD::PropertyDescriptor<bool> right_of_split;
 	extern PBD::PropertyDescriptor<bool> hidden;
 	extern PBD::PropertyDescriptor<bool> position_locked;
+	extern PBD::PropertyDescriptor<bool> valid_transients;
 	extern PBD::PropertyDescriptor<framepos_t> start;
 	extern PBD::PropertyDescriptor<framecnt_t> length;
 	extern PBD::PropertyDescriptor<framepos_t> position;
@@ -95,6 +96,8 @@ class Region
 	bool set_name (const std::string& str);
 
 	const DataType& data_type() const { return _type; }
+	
+	AnalysisFeatureList transients () { return _transients; };
 
 	/** How the region parameters play together:
 	 *   
@@ -137,6 +140,7 @@ class Region
 	bool opaque ()    const  { return _opaque; }
 	bool locked()     const  { return _locked; }
 	bool position_locked() const { return _position_locked; }
+	bool valid_transients() const { return _valid_transients; }
 	bool automatic()  const  { return _automatic; }
 	bool whole_file() const  { return _whole_file; }
 	bool captured()   const  { return !(_import || _external); }
@@ -245,8 +249,31 @@ class Region
 
 	virtual int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&) = 0;
 
+	virtual void add_transient (nframes64_t where) {
+		// no transients, but its OK
+	}
+
+	virtual int update_transient (nframes64_t old_position, nframes64_t new_position) {
+		// no transients, but its OK
+		return 0;
+	}
+
+	virtual void remove_transient (nframes64_t where) {
+		// no transients, but its OK
+	}
+
+	virtual int set_transients (AnalysisFeatureList&) {
+		// no transients, but its OK
+		return 0;
+	}
+
 	virtual int get_transients (AnalysisFeatureList&, bool force_new = false) {
 		(void) force_new;
+		// no transients, but its OK
+		return 0;
+	}
+
+	virtual int adjust_transients (nframes64_t delta) {
 		// no transients, but its OK
 		return 0;
 	}
@@ -317,6 +344,7 @@ class Region
 	PBD::Property<bool>        _right_of_split;
 	PBD::Property<bool>        _hidden;
 	PBD::Property<bool>        _position_locked;
+	PBD::Property<bool>        _valid_transients;
 	PBD::Property<framepos_t>  _start;
 	PBD::Property<framecnt_t>  _length;
 	PBD::Property<framepos_t>  _position;
@@ -333,7 +361,7 @@ class Region
 	mutable RegionEditState _first_edit;
 	BBT_Time                _bbt_time;
 	AnalysisFeatureList     _transients;
-	bool                    _valid_transients;
+	
 	mutable uint64_t        _read_data_count;  ///< modified in read()
 	uint64_t                _last_layer_op;  ///< timestamp
 	SourceList              _sources;

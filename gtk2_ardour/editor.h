@@ -228,6 +228,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void new_region_from_selection ();
 	void separate_regions_between (const TimeSelection&);
 	void separate_region_from_selection ();
+	void separate_under_selected_regions ();
 	void separate_region_from_punch ();
 	void separate_region_from_loop ();
 	void separate_regions_using_location (ARDOUR::Location&);
@@ -921,10 +922,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void    select_all_selectables_between (bool within);
 	void    select_range_between ();
 
-	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes64_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
-	nframes64_t find_next_region_boundary (nframes64_t, int32_t dir, const TrackViewList&);
+	boost::shared_ptr<ARDOUR::Region> find_next_region (ARDOUR::framepos_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
+        ARDOUR::framepos_t find_next_region_boundary (ARDOUR::framepos_t, int32_t dir, const TrackViewList&);
 
-	std::vector<nframes64_t> region_boundary_cache;
+	std::vector<ARDOUR::framepos_t> region_boundary_cache;
 	void build_region_boundary_cache ();
 
 	Gtk::HBox           top_hbox;
@@ -1124,6 +1125,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void cut ();
 	void copy ();
 	void paste (float times);
+	
+	void place_transient ();
+	void remove_transient (ArdourCanvas::Item* item);
+	void snap_regions_to_grid ();
+	void close_region_gaps ();
 
 	int  get_prefix (float&, bool&);
 
@@ -1364,6 +1370,7 @@ public:
 	bool canvas_frame_handle_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_highlight_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
+	bool canvas_feature_line_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*);
 	bool canvas_stream_view_event (GdkEvent* event,ArdourCanvas::Item*, RouteTimeAxisView*);
 	bool canvas_marker_event (GdkEvent* event,ArdourCanvas::Item*, Marker*);
 	bool canvas_zoom_rect_event (GdkEvent* event,ArdourCanvas::Item*);
@@ -2064,6 +2071,7 @@ public:
 	friend class EditorGroupTabs;
 
 	friend class EditorRoutes;
+	friend class RhythmFerret;
 };
 
 #endif /* __ardour_editor_h__ */

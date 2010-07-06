@@ -14,7 +14,7 @@
 
 #include "rhythm_ferret.h"
 #include "audio_region_view.h"
-#include "public_editor.h"
+#include "editor.h"
 #include "utils.h"
 #include "time_axis_view.h"
 
@@ -53,7 +53,7 @@ static const gchar * _operation_strings[] = {
 	0
 };
 
-RhythmFerret::RhythmFerret (PublicEditor& e)
+RhythmFerret::RhythmFerret (Editor& e)
 	: ArdourDialog (_("Rhythm Ferret"))
 	, editor (e)
 	, detection_threshold_adjustment (3, 0, 20, 1, 4)
@@ -205,13 +205,10 @@ RhythmFerret::run_analysis ()
 		default:
 			break;
 		}
-
+		
+		(*i)->region()->set_transients (current_results);
+		current_results.clear();
 	}
-
-	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
-		(*i)->get_time_axis_view().show_feature_lines (current_results);
-	}
-
 }
 
 int
@@ -233,9 +230,9 @@ RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readabl
 
 		/* translate all transients to give absolute position */
 
-		for (AnalysisFeatureList::iterator x = these_results.begin(); x != these_results.end(); ++x) {
-			(*x) += offset;
-		}
+		//for (AnalysisFeatureList::iterator x = these_results.begin(); x != these_results.end(); ++x) {
+		//	(*x) += offset;
+		//}
 
 		/* merge */
 
@@ -289,9 +286,9 @@ RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, nfr
 
 			/* translate all transients to give absolute position */
 
-			for (AnalysisFeatureList::iterator x = these_results.begin(); x != these_results.end(); ++x) {
-				(*x) += offset;
-			}
+			//for (AnalysisFeatureList::iterator x = these_results.begin(); x != these_results.end(); ++x) {
+			//	(*x) += offset;
+			//}
 
 			/* merge */
 
@@ -314,7 +311,7 @@ RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, nfr
 void
 RhythmFerret::do_action ()
 {
-	if (!_session || current_results.empty()) {
+	if (!_session) {
 		return;
 	}
 
@@ -322,7 +319,9 @@ RhythmFerret::do_action ()
 	case SplitRegion:
 		do_split_action ();
 		break;
-
+	case ConformRegion:
+		editor.close_region_gaps();
+		break;
 	default:
 		break;
 	}
@@ -333,13 +332,29 @@ RhythmFerret::do_split_action ()
 {
 	/* this can/will change the current selection, so work with a copy */
 
-	RegionSelection& regions (editor.get_selection().regions);
+	//RegionSelection& regions (editor.get_selection().regions);
+	RegionSelection regions;
+	editor.get_regions_for_action(regions);
 
 	if (regions.empty()) {
 		return;
 	}
 
 	_session->begin_reversible_command (_("split regions (rhythm ferret)"));
+	
+	/* Merge the transient positions for regions in consideration */
+	AnalysisFeatureList merged_features;
+	
+	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
+		
+		AnalysisFeatureList features;
+		features = (*i)->region()->transients();
+		
+		merged_features.insert (merged_features.end(), features.begin(), features.end());		
+	}
+	
+	merged_features.sort();
+	merged_features.unique();
 
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ) {
 
@@ -348,9 +363,9 @@ RhythmFerret::do_split_action ()
 		tmp = i;
 		++tmp;
 
-		(*i)->get_time_axis_view().hide_feature_lines ();
-
-		editor.split_region_at_points ((*i)->region(), current_results, false);
+		AnalysisFeatureList features;
+		features = (*i)->region()->transients();
+		editor.split_region_at_points ((*i)->region(), merged_features, false);
 
 		/* i is invalid at this point */
 
@@ -367,15 +382,9 @@ RhythmFerret::set_session (Session* s)
 	current_results.clear ();
 }
 
-static void hide_time_axis_features (TimeAxisView& tav)
-{
-	tav.hide_feature_lines ();
-}
-
 void
 RhythmFerret::on_hide ()
 {
-	editor.foreach_time_axis_view (sigc::ptr_fun (hide_time_axis_features));
 	ArdourDialog::on_hide ();
 }
 

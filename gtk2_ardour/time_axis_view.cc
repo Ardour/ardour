@@ -203,10 +203,6 @@ TimeAxisView::~TimeAxisView()
 		delete (*i)->end_trim;
 	}
 
-	for (list<SimpleLine*>::iterator i = feature_lines.begin(); i != feature_lines.end(); ++i) {
-		delete (*i);
-	}
-
 	delete selection_group;
 	selection_group = 0;
 
@@ -426,8 +422,6 @@ TimeAxisView::set_height(uint32_t h)
 		/* resize the selection rect */
 		show_selection (_editor.get_selection().time);
 	}
-
-	reshow_feature_lines ();
 }
 
 bool
@@ -652,11 +646,6 @@ TimeAxisView::set_samples_per_unit (double spu)
 
 	AnalysisFeatureList::const_iterator i;
 	list<ArdourCanvas::SimpleLine*>::iterator l;
-
-	for (i = analysis_features.begin(), l = feature_lines.begin(); i != analysis_features.end() && l != feature_lines.end(); ++i, ++l) {
-		(*l)->property_x1() = _editor.frame_to_pixel (*i);
-		(*l)->property_x2() = _editor.frame_to_pixel (*i);
-	}
 }
 
 void
@@ -1186,51 +1175,6 @@ TimeAxisView::covers_y_position (double y)
 	}
 
 	return std::make_pair ( (TimeAxisView *) 0, 0);
-}
-
-void
-TimeAxisView::show_feature_lines (const AnalysisFeatureList& pos)
-{
-	analysis_features = pos;
-	reshow_feature_lines ();
-}
-
-
-void
-TimeAxisView::hide_feature_lines ()
-{
-	list<ArdourCanvas::SimpleLine*>::iterator l;
-
-	for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
-		(*l)->hide();
-	}
-}
-
-void
-TimeAxisView::reshow_feature_lines ()
-{
-	while (feature_lines.size()< analysis_features.size()) {
-		ArdourCanvas::SimpleLine* l = new ArdourCanvas::SimpleLine (*_canvas_display);
-		l->property_color_rgba() = (guint) ARDOUR_UI::config()->canvasvar_ZeroLine.get();
-		feature_lines.push_back (l);
-	}
-
-	while (feature_lines.size() > analysis_features.size()) {
-		ArdourCanvas::SimpleLine *line = feature_lines.back();
-		feature_lines.pop_back ();
-		delete line;
-	}
-
-	AnalysisFeatureList::const_iterator i;
-	list<ArdourCanvas::SimpleLine*>::iterator l;
-
-	for (i = analysis_features.begin(), l = feature_lines.begin(); i != analysis_features.end() && l != feature_lines.end(); ++i, ++l) {
-		(*l)->property_x1() = _editor.frame_to_pixel (*i);
-		(*l)->property_x2() = _editor.frame_to_pixel (*i);
-		(*l)->property_y1() = 0;
-		(*l)->property_y2() = current_height();
-		(*l)->show ();
-	}
 }
 
 bool

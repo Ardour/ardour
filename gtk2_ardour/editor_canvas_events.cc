@@ -900,6 +900,45 @@ Editor::canvas_region_view_name_event (GdkEvent *event, ArdourCanvas::Item* item
 }
 
 bool
+Editor::canvas_feature_line_event (GdkEvent *event, ArdourCanvas::Item* item, RegionView *rv)
+{
+	bool ret = false;
+
+	switch (event->type) {
+	case GDK_BUTTON_PRESS:
+	case GDK_2BUTTON_PRESS:
+	case GDK_3BUTTON_PRESS:
+		clicked_regionview = 0;
+		clicked_control_point = 0;
+		clicked_axisview = 0;
+		clicked_routeview = 0; //dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
+		ret = button_press_handler (item, event, FeatureLineItem);
+		break;
+
+	case GDK_BUTTON_RELEASE:
+		ret = button_release_handler (item, event, FeatureLineItem);
+		break;
+
+	case GDK_MOTION_NOTIFY:
+		ret = motion_handler (item, event);
+		break;
+
+	case GDK_ENTER_NOTIFY:
+		ret = enter_handler (item, event, FeatureLineItem);
+		break;
+
+	case GDK_LEAVE_NOTIFY:
+		ret = leave_handler (item, event, FeatureLineItem);
+		break;
+
+	default:
+		break;
+	}
+
+	return ret;
+}
+
+bool
 Editor::canvas_marker_event (GdkEvent *event, ArdourCanvas::Item* item, Marker* /*marker*/)
 {
 	return typed_event (item, event, MarkerItem);

@@ -735,10 +735,23 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				return true;
 			}
 
+			case FeatureLineItem:
+			{			
+				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
+					remove_transient(item);
+					return true;
+				}
+				
+				_drags->set (new FeatureLineDrag (this, item), event);
+				return true;
+				break;
+			}
+
 			case RegionItem:
 				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
 					add_region_copy_drag (item, event, clicked_regionview);
-				} else if (Keyboard::the_keyboard().key_is_down (GDK_b)) {
+				} 
+				else if (Keyboard::the_keyboard().key_is_down (GDK_b)) {
 					add_region_brush_drag (item, event, clicked_regionview);
 				} else {
 					add_region_drag (item, event, clicked_regionview);
@@ -1616,7 +1629,12 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			track_canvas->get_window()->set_cursor (*fade_out_cursor);
 		}
 		break;
-
+	case FeatureLineItem:
+		{
+			ArdourCanvas::SimpleLine *line = dynamic_cast<ArdourCanvas::SimpleLine *> (item);
+			line->property_color_rgba() = 0xFF0000FF;
+		}
+		break;
 	default:
 		break;
 	}
@@ -1759,6 +1777,12 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 			clear_entered_track = true;
 			Glib::signal_idle().connect (sigc::mem_fun(*this, &Editor::left_automation_track));
+		}
+		break;
+	case FeatureLineItem:
+		{
+			ArdourCanvas::SimpleLine *line = dynamic_cast<ArdourCanvas::SimpleLine *> (item);
+			line->property_color_rgba() = (guint) ARDOUR_UI::config()->canvasvar_ZeroLine.get();;
 		}
 		break;
 

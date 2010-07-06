@@ -696,7 +696,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, flo
 	framepos_t pos = position;
 
 	if (times == 1 && auto_partition){
-		partition(pos, (pos + region->length()), true);
+		partition((nframes_t) pos - 1, (nframes_t) (pos + region->length()), true);
 	}
 
 	if (itimes >= 1) {
@@ -869,9 +869,7 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region)
 		}
 	}
 
-	/* XXX and thaw ... */
-
-	return ret;
+	return -1;
 }
 
 void
@@ -1284,7 +1282,7 @@ Playlist::duplicate (boost::shared_ptr<Region> region, framepos_t position, floa
 
 	RegionLock rl (this);
 	int itimes = (int) floor (times);
-	framepos_t pos = position;
+	nframes_t pos = position + 1;
 
 	while (itimes--) {
 		boost::shared_ptr<Region> copy = RegionFactory::create (region);
@@ -2094,6 +2092,7 @@ Playlist::find_next_region_boundary (framepos_t frame, int dir)
 	return ret;
 }
 
+
 /***********************************************************************/
 
 
@@ -2257,7 +2256,7 @@ Playlist::set_state (const XMLNode& node, int version)
 				error << _("Playlist: cannot create region from XML") << endmsg;
 				continue;
 			}
-                        
+
 			add_region (region, region->position(), 1.0);
 
 			// So that layer_op ordering doesn't get screwed up
@@ -2300,7 +2299,7 @@ XMLNode&
 Playlist::state (bool full_state)
 {
 	XMLNode *node = new XMLNode (X_("Playlist"));
-	char buf[64];
+	char buf[64] = "";
 
 	node->add_property (X_("id"), id().to_s());
 	node->add_property (X_("name"), _name);
@@ -2312,6 +2311,7 @@ Playlist::state (bool full_state)
 
 	if (full_state) {
 		RegionLock rlock (this, false);
+
 		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 			node->add_child_nocopy ((*i)->get_state());
 		}

@@ -2935,6 +2935,76 @@ LineDrag::aborted ()
 	_line->reset ();
 }
 
+FeatureLineDrag::FeatureLineDrag (Editor* e, ArdourCanvas::Item* i)
+	: Drag (e, i),
+	  _line (0),
+	  _cumulative_x_drag (0)
+{
+
+}
+void
+FeatureLineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
+{
+  
+	Drag::start_grab (event);
+	
+	_line = reinterpret_cast<SimpleLine*> (_item);
+	assert (_line);
+
+	/* need to get x coordinate in terms of parent (AudioRegionView) origin. */
+
+	double cx = event->button.x;
+	double cy = event->button.y;
+
+	_item->property_parent().get_value()->w2i(cx, cy);
+
+	/* store grab start in parent frame */
+	_region_view_grab_x = cx;
+	
+	_before = _line->property_x1();
+	
+	_arv = reinterpret_cast<AudioRegionView*> (_item->get_data ("regionview"));
+		
+	_max_x = _editor->frame_to_pixel(_arv->get_duration());
+}
+
+void
+FeatureLineDrag::motion (GdkEvent* event, bool)
+{
+	double dx = _drags->current_pointer_x() - last_pointer_x();
+	
+	double cx = _region_view_grab_x + _cumulative_x_drag + dx;
+	
+	_cumulative_x_drag += dx;
+		
+	/* Clamp the min and max extent of the drag to keep it within the region view bounds */
+	
+	if (cx > _max_x){
+		cx = _max_x;
+	}
+	else if(cx < 0){
+		cx = 0;
+	}
+	
+	_line->property_x1() = cx; 
+	_line->property_x2() = cx;
+
+	_before = _line->property_x1();
+}
+
+void
+FeatureLineDrag::finished (GdkEvent* event, bool)
+{
+	_arv = reinterpret_cast<AudioRegionView*> (_item->get_data ("regionview"));
+	_arv->update_transient(_before, _line->property_x1());
+}
+
+void
+FeatureLineDrag::aborted ()
+{
+	//_line->reset ();
+}
+
 void
 RubberbandSelectDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {

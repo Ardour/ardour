@@ -17,7 +17,7 @@ namespace ARDOUR {
 	class Readable;
 }
 
-class PublicEditor;
+class Editor;
 class RegionView;
 
 class RhythmFerret : public ArdourDialog {
@@ -36,7 +36,7 @@ class RhythmFerret : public ArdourDialog {
 		ConformRegion
 	};
 
-	RhythmFerret (PublicEditor&);
+	RhythmFerret (Editor&);
 
 	void set_session (ARDOUR::Session*);
 
@@ -44,7 +44,7 @@ class RhythmFerret : public ArdourDialog {
 	void on_hide ();
 
   private:
-	PublicEditor& editor;
+	Editor& editor;
 
 	Gtk::ComboBoxText operation_selector;
 
