@@ -25,6 +25,11 @@
 #include <cassert>
 #include <iostream>
 #include <cstdio>
+
+#ifdef __APPLE__
+#include <mach/mach_time.h>
+#endif
+
 #include "pbd/compose.h"
 #include "pbd/file_manager.h"
 #include "pbd/debug.h"
@@ -110,9 +115,13 @@ FileManager::allocate (FileDescriptor* d)
 		DEBUG_TRACE (DEBUG::FileManager, string_compose ("opened file for %1; now have %2 of %3 open.\n", d->_name, _open, _max_open));
 	}
 
+#ifdef __APPLE__
+	d->_last_used = get_absolute_time();
+#else
 	struct timespec t;
 	clock_gettime (CLOCK_MONOTONIC, &t);
 	d->_last_used = t.tv_sec + (double) t.tv_nsec / 10e9;
+#endif
 
 	d->_refcount++;
 	
