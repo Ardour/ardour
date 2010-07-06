@@ -148,7 +148,6 @@ _thread_init_callback (void * /*arg*/)
 	SessionEvent::create_per_thread_pool (X_("Audioengine"), 512);
 
 	MIDI::Port::set_process_thread (pthread_self());
-	MIDI::MachineControl::set_sending_thread (pthread_self ());
 }
 
 typedef void (*_JackInfoShutdownCallback)(jack_status_t code, const char* reason, void *arg);

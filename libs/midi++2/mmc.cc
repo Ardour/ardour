@@ -30,8 +30,6 @@ using namespace std;
 using namespace MIDI;
 using namespace PBD;
 
-pthread_t MachineControl::_sending_thread;
-
 static std::map<int,string> mmc_cmd_map;
 static void build_mmc_cmd_map ()
 {
@@ -197,7 +195,6 @@ static void build_mmc_cmd_map ()
 
 MachineControl::MachineControl ()
 	: _port (0)
-	, _pending (16)
 {
 	build_mmc_cmd_map ();
 
@@ -640,36 +637,11 @@ MachineControl::enable_send (bool yn)
 	_enable_send = yn;
 }
 
-/** Send a MMC command.  It will be sent immediately if the call is made in _sending_thread,
- *  otherwise it will be queued and sent next time flush_pending()
- *  is called.
- *  @param c command, which this method takes ownership of.
+/** Send a MMC command to a the MMC port.
+ *  @param c command.
  */
 void
 MachineControl::send (MachineControlCommand const & c)
-{
-	if (pthread_self() == _sending_thread) {
-		send_immediately (c);
-	} else {
-		_pending.write (&c, 1);
-	}
-}
-
-/** Send any pending MMC commands immediately.  Must be called from _sending_thread */
-void
-MachineControl::flush_pending ()
-{
-	MachineControlCommand c;
-	while (_pending.read (&c, 1) == 1) {
-		send_immediately (c);
-	}
-}
-
-/** Send a MMC immediately.  Must be called from _sending_thread.
- *  @param c command, which this method takes ownership of.
- */
-void
-MachineControl::send_immediately (MachineControlCommand const & c)
 {
 	if (_port == 0 || !_enable_send) {
 		// cerr << "Not delivering MMC " << _mmc->port() << " - " << session_send_mmc << endl;
@@ -682,13 +654,6 @@ MachineControl::send_immediately (MachineControlCommand const & c)
 	if (_port->midimsg (buffer, b - buffer, 0)) {
 		error << "MMC: cannot send command" << endmsg;
 	}
-}
-
-/** Set the thread that we should send MMC in */
-void
-MachineControl::set_sending_thread (pthread_t t)
-{
-	_sending_thread = t;
 }
 
 void

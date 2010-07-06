@@ -98,10 +98,8 @@ class MachineControl
 	byte send_device_id () const { return _send_device_id; }
 	void enable_send (bool);
 	void send (MachineControlCommand const &);
-	void flush_pending ();
 
 	static bool is_mmc (byte *sysex_buf, size_t len);
-	static void set_sending_thread (pthread_t);
 
 	/* Signals to connect to if you want to run "callbacks"
 	   when certain MMC commands are received.
@@ -260,14 +258,6 @@ class MachineControl
 	Port* _port;
 	bool _enable_send; ///< true if MMC sending is enabled
 
-	/** A ringbuffer of MMC commands that were `sent' from the wrong thread, which
-	    are queued up and sent when flush_pending() is called.
-	*/
-	RingBuffer<MachineControlCommand> _pending;
-
-	/** The thread to use for sending MMC commands */
-	static pthread_t _sending_thread;
-
 	void process_mmc_message (Parser &p, byte *, size_t len);
 	PBD::ScopedConnectionList port_connections; ///< connections to our parser for incoming data
 
@@ -275,7 +265,6 @@ class MachineControl
 	int  do_locate (byte *, size_t len);
 	int  do_step (byte *, size_t len);
 	int  do_shuttle (byte *, size_t len);
-	void send_immediately (MachineControlCommand const &);
 	
 	void write_track_status (byte *, size_t len, byte reg);
 	void spp_start (Parser&, nframes_t);
