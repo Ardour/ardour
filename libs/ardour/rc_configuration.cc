@@ -258,26 +258,7 @@ RCConfiguration::set_state (const XMLNode& root, int /*version*/)
 
 		node = *niter;
 
-		if (node->name() == "MIDI-port") {
-
-			try {
-
-				MIDI::Port::Descriptor desc (*node);
-				map<string,XMLNode>::iterator x;
-				
-				if ((x = midi_ports.find (desc.tag)) != midi_ports.end()) {
-					warning << string_compose (_("Duplicate MIDI port definition found (tag=\"%1\") - ignored"),
-								   desc.tag) << endmsg;
-					continue;
-				}
-				midi_ports.insert (pair<string,XMLNode>(desc.tag,*node));
-			}
-
-			catch (failed_constructor& err) {
-				warning << _("ill-formed MIDI port specification in ardour rcfile (ignored)") << endmsg;
-			}
-
-		} else if (node->name() == "Config") {
+		if (node->name() == "Config") {
 
 			set_variables (*node);
 

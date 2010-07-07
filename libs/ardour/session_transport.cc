@@ -1246,9 +1246,9 @@ Session::switch_to_sync_source (SyncSource src)
 			return;
 		}
 
-		if (_mtc_port) {
+		if (_mtc_input_port) {
 			try {
-				new_slave = new MTC_Slave (*this, *_mtc_port);
+				new_slave = new MTC_Slave (*this, *_mtc_input_port);
 			}
 
 			catch (failed_constructor& err) {
@@ -1266,9 +1266,9 @@ Session::switch_to_sync_source (SyncSource src)
 			return;
 		}
 
-		if (_midi_clock_port) {
+		if (_midi_clock_input_port) {
 			try {
-				new_slave = new MIDIClock_Slave (*this, *_midi_clock_port, 24);
+				new_slave = new MIDIClock_Slave (*this, *_midi_clock_input_port, 24);
 			}
 
 			catch (failed_constructor& err) {

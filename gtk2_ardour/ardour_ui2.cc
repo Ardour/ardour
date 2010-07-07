@@ -45,6 +45,7 @@
 #include "actions.h"
 #include "utils.h"
 #include "theme_manager.h"
+#include "midi_tracer.h"
 
 #include "i18n.h"
 
@@ -106,6 +107,9 @@ ARDOUR_UI::setup_windows ()
 	setup_transport();
 	build_menu_bar ();
 
+	_midi_tracer_window = new MidiTracer ();
+	manage_window (*_midi_tracer_window);
+	
 	setup_tooltips ();
 
 	return 0;

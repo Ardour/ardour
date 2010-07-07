@@ -18,6 +18,7 @@
     $Id$
 */
 
+#include <fcntl.h>
 #include <map>
 
 #include "control_protocol/timecode.h"
@@ -25,6 +26,7 @@
 #include "midi++/mmc.h"
 #include "midi++/port.h"
 #include "midi++/parser.h"
+#include "midi++/manager.h"
 
 using namespace std;
 using namespace MIDI;
@@ -193,30 +195,20 @@ static void build_mmc_cmd_map ()
 }
 
 
-MachineControl::MachineControl ()
-	: _port (0)
+MachineControl::MachineControl (jack_client_t* jack)
 {
 	build_mmc_cmd_map ();
 
 	_receive_device_id = 0;
 	_send_device_id = 0x7f;
-}
 
-void
-MachineControl::set_port (Port* p)
-{
-	_port = p;
+	_input_port = Manager::instance()->add_port (new Port ("MMC", O_RDONLY, jack));
+	_output_port = Manager::instance()->add_port (new Port ("MMC", O_WRONLY, jack));
 
-	port_connections.drop_connections ();
-
-	if (_port->input()) {
-		_port->input()->mmc.connect_same_thread (port_connections, boost::bind (&MachineControl::process_mmc_message, this, _1, _2, _3));
-		_port->input()->start.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_start, this, _1, _2));
-		_port->input()->contineu.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_continue, this, _1, _2));
-		_port->input()->stop.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_stop, this, _1, _2));
-	} else {
-		warning << "MMC connected to a non-input port: useless!" << endmsg;
-	}
+	_input_port->input()->mmc.connect_same_thread (port_connections, boost::bind (&MachineControl::process_mmc_message, this, _1, _2, _3));
+	_input_port->input()->start.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_start, this, _1, _2));
+	_input_port->input()->contineu.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_continue, this, _1, _2));
+	_input_port->input()->stop.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_stop, this, _1, _2));
 }
 
 void
@@ -643,7 +635,7 @@ MachineControl::enable_send (bool yn)
 void
 MachineControl::send (MachineControlCommand const & c)
 {
-	if (_port == 0 || !_enable_send) {
+	if (_output_port == 0 || !_enable_send) {
 		// cerr << "Not delivering MMC " << _mmc->port() << " - " << session_send_mmc << endl;
 		return;
 	}
@@ -651,7 +643,7 @@ MachineControl::send (MachineControlCommand const & c)
 	MIDI::byte buffer[32];
 	MIDI::byte* b = c.fill_buffer (this, buffer);
 
-	if (_port->midimsg (buffer, b - buffer, 0)) {
+	if (_output_port->midimsg (buffer, b - buffer, 0)) {
 		error << "MMC: cannot send command" << endmsg;
 	}
 }

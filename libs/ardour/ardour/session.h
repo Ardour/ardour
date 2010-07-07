@@ -641,22 +641,16 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* MIDI control */
 
 	void midi_panic(void);
-	int set_mtc_port (std::string port_tag);
-	int set_midi_port (std::string port_tag);
-	int set_midi_clock_port (std::string port_tag);
-	MIDI::Port *mtc_port() const { return _mtc_port; }
-	MIDI::Port *midi_port() const { return _midi_port; }
-	MIDI::Port *midi_clock_port() const { return _midi_clock_port; }
+	MIDI::Port *mtc_input_port() const { return _mtc_input_port; }
+	MIDI::Port *mtc_output_port() const { return _mtc_output_port; }
+	MIDI::Port *midi_input_port() const { return _midi_input_port; }
+	MIDI::Port *midi_output_port() const { return _midi_output_port; }
+	MIDI::Port *midi_clock_input_port() const { return _midi_clock_input_port; }
+	MIDI::Port *midi_clock_output_port() const { return _midi_clock_output_port; }
 
 	PBD::Signal0<void> MTC_PortChanged;
 	PBD::Signal0<void> MIDI_PortChanged;
 	PBD::Signal0<void> MIDIClock_PortChanged;
-
-	void set_trace_midi_input (bool, MIDI::Port* port = 0);
-	void set_trace_midi_output (bool, MIDI::Port* port = 0);
-
-	bool get_trace_midi_input(MIDI::Port *port = 0);
-	bool get_trace_midi_output(MIDI::Port *port = 0);
 
 	/* Scrubbing */
 
@@ -950,9 +944,12 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void check_declick_out ();
 
 	MIDI::MachineControl*   _mmc;
-	MIDI::Port*             _mtc_port;
-	MIDI::Port*             _midi_port;
-	MIDI::Port*             _midi_clock_port;
+	MIDI::Port*             _mtc_input_port;
+	MIDI::Port*             _mtc_output_port;
+	MIDI::Port*             _midi_input_port;
+	MIDI::Port*             _midi_output_port;
+	MIDI::Port*             _midi_clock_input_port;
+	MIDI::Port*             _midi_clock_output_port;
 	std::string             _path;
 	std::string             _name;
         bool                    _is_new;
@@ -1153,8 +1150,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	int           start_midi_thread ();
 	void          terminate_midi_thread ();
-
-	int           use_config_midi_ports ();
 
 	void set_play_loop (bool yn);
 	void unset_play_loop ();

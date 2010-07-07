@@ -98,11 +98,6 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-MIDI::Port *ARDOUR::default_mmc_port = 0;
-MIDI::Port *ARDOUR::default_mtc_port = 0;
-MIDI::Port *ARDOUR::default_midi_port = 0;
-MIDI::Port *ARDOUR::default_midi_clock_port = 0;
-
 compute_peak_t          ARDOUR::compute_peak = 0;
 find_peaks_t            ARDOUR::find_peaks = 0;
 apply_gain_to_buffer_t  ARDOUR::apply_gain_to_buffer = 0;
@@ -144,87 +139,6 @@ ARDOUR::make_property_quarks ()
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade_out_FAKE = %1\n", 	Properties::fade_out.property_id));
 	Properties::envelope.property_id = g_quark_from_static_string (X_("envelope_FAKE"));
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for envelope_FAKE = %1\n", 	Properties::envelope.property_id));
-}
-
-int
-ARDOUR::setup_midi ()
-{
-	if (Config->midi_ports.size() == 0) {
-		return 0;
-	}
-
-	BootMessage (_("Configuring MIDI ports"));
-
-	for (std::map<string,XMLNode>::iterator i = Config->midi_ports.begin(); i != Config->midi_ports.end(); ++i) {
-		MIDI::Manager::instance()->add_port (i->second);
-	}
-
-	MIDI::Port* first;
-	const MIDI::Manager::PortList& ports = MIDI::Manager::instance()->get_midi_ports();
-
-	if (ports.size() > 1) {
-
-		first = ports.front();
-
-		/* More than one port, so try using specific names for each port */
-
-		default_mmc_port =  MIDI::Manager::instance()->port (Config->get_mmc_port_name());
-		default_mtc_port =  MIDI::Manager::instance()->port (Config->get_mtc_port_name());
-		default_midi_port =  MIDI::Manager::instance()->port (Config->get_midi_port_name());
-		default_midi_clock_port =  MIDI::Manager::instance()->port (Config->get_midi_clock_port_name());
-
-		/* If that didn't work, just use the first listed port */
-
-		if (default_mmc_port == 0) {
-			default_mmc_port = first;
-		}
-
-		if (default_mtc_port == 0) {
-			default_mtc_port = first;
-		}
-
-		if (default_midi_port == 0) {
-			default_midi_port = first;
-		}
-
-		if (default_midi_clock_port == 0) {
-			default_midi_clock_port = first;
-		}
-
-	} else if (ports.size() == 1) {
-
-		first = ports.front();
-
-		/* Only one port described, so use it for both MTC and MMC */
-
-		default_mmc_port = first;
-		default_mtc_port = default_mmc_port;
-		default_midi_port = default_mmc_port;
-		default_midi_clock_port = default_mmc_port;
-	}
-
-	if (default_mmc_port == 0) {
-		warning << string_compose (_("No MMC control (MIDI port \"%1\" not available)"), Config->get_mmc_port_name())
-			<< endmsg;
-	}
-
-
-	if (default_mtc_port == 0) {
-		warning << string_compose (_("No MTC support (MIDI port \"%1\" not available)"), Config->get_mtc_port_name())
-			<< endmsg;
-	}
-
-	if (default_midi_port == 0) {
-		warning << string_compose (_("No MIDI parameter support (MIDI port \"%1\" not available)"), Config->get_midi_port_name())
-			<< endmsg;
-	}
-
-	if (default_midi_clock_port == 0) {
-		warning << string_compose (_("No MIDI Clock support (MIDI port \"%1\" not available)"), Config->get_midi_clock_port_name())
-			<< endmsg;
-	}
-
-	return 0;
 }
 
 void
@@ -372,8 +286,6 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
 	
 	Config->set_use_vst (use_vst);
-
-	cerr << "After config loaded, MTC port name = " << Config->get_mtc_port_name() << endl;
 
 	Profile = new RuntimeProfile;
 

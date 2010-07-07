@@ -365,9 +365,6 @@ ARDOUR_UI::post_engine ()
 	/* Things to be done once we create the AudioEngine
 	 */
 
-	MIDI::Manager::instance()->set_api_data (engine->jack());
-	setup_midi ();
-	
 	ARDOUR::init_post_engine ();
 
 	ActionManager::init ();

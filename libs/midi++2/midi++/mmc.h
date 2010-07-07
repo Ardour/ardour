@@ -20,6 +20,7 @@
 #ifndef __midipp_mmc_h_h__
 #define __midipp_mmc_h_h__
 
+#include <jack/types.h>
 #include "control_protocol/timecode.h"
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
@@ -87,10 +88,9 @@ class MachineControl
 		cmdResume = 0x7F
 	};
 	
-	MachineControl ();
-	void set_port (Port* p);
+	MachineControl (jack_client_t *);
 
-	Port* port() { return _port; }
+	Port* output_port() { return _output_port; }
 	
 	void set_receive_device_id (byte id);
 	void set_send_device_id (byte id);
@@ -255,7 +255,8 @@ class MachineControl
   private:
 	byte _receive_device_id;
 	byte _send_device_id;
-	Port* _port;
+	Port* _input_port;
+	Port* _output_port;
 	bool _enable_send; ///< true if MMC sending is enabled
 
 	void process_mmc_message (Parser &p, byte *, size_t len);

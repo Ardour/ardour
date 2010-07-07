@@ -7,6 +7,7 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/label.h>
+#include <gtkmm/comboboxtext.h>
 
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
@@ -21,11 +22,11 @@ namespace MIDI {
 class MidiTracer : public ArdourDialog
 {
   public:
-	MidiTracer (const std::string&, MIDI::Parser&);
+	MidiTracer ();
 	~MidiTracer();
 
   private:
-	MIDI::Parser& parser;
+	MIDI::Parser* parser;
 	Gtk::TextView text;
 	Gtk::ScrolledWindow scroller;
 	Gtk::Adjustment line_count_adjustment;
@@ -53,14 +54,17 @@ class MidiTracer : public ArdourDialog
 	Gtk::CheckButton autoscroll_button;
 	Gtk::CheckButton base_button;
 	Gtk::CheckButton collect_button;
+	Gtk::ComboBoxText _port_combo;
 
 	void base_toggle ();
 	void autoscroll_toggle ();
 	void collect_toggle ();
 
-	void connect ();
+	void port_changed ();
+	void ports_changed ();
 	void disconnect ();
-	PBD::ScopedConnection connection;
+	PBD::ScopedConnection _parser_connection;
+	PBD::ScopedConnection _manager_connection;
 };
 
 #endif /* __ardour_gtk_midi_tracer_h__ */

@@ -55,6 +55,7 @@
 
 #include "midi++/mmc.h"
 #include "midi++/port.h"
+#include "midi++/manager.h"
 
 #include "pbd/boost_debug.h"
 #include "pbd/controllable_descriptor.h"
@@ -276,6 +277,17 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	Delivery::disable_panners ();
 	IO::disable_connecting ();
+
+	/* Create MIDI control ports */
+
+	MIDI::Manager* m = MIDI::Manager::instance ();
+
+	_mtc_input_port = m->add_port (new MIDI::Port ("MTC", O_RDONLY, _engine.jack()));
+	_mtc_output_port = m->add_port (new MIDI::Port ("MTC", O_WRONLY, _engine.jack()));
+	_midi_input_port = m->add_port (new MIDI::Port ("MIDI control", O_RDONLY, _engine.jack()));
+	_midi_output_port = m->add_port (new MIDI::Port ("MIDI control", O_WRONLY, _engine.jack()));
+	_midi_clock_input_port = m->add_port (new MIDI::Port ("MIDI clock", O_RDONLY, _engine.jack()));
+	_midi_clock_output_port = m->add_port (new MIDI::Port ("MIDI clock", O_WRONLY, _engine.jack()));
 }
 
 int
@@ -1242,8 +1254,6 @@ Session::set_state (const XMLNode& node, int version)
 	} else {
 		error << _("Session: XML state has no options section") << endmsg;
 	}
-
-	use_config_midi_ports ();
 
 	if (version >= 3000) {
 		if ((child = find_named_node (node, "Metadata")) == 0) {
@@ -3247,18 +3257,10 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "send-mtc") {
 
-		/* only set the internal flag if we have
-		   a port.
-		*/
-
-		if (_mtc_port != 0) {
-			session_send_mtc = Config->get_send_mtc();
-			if (session_send_mtc) {
-				/* mark us ready to send */
-				next_quarter_frame_to_send = 0;
-			}
-		} else {
-			session_send_mtc = false;
+		session_send_mtc = Config->get_send_mtc();
+		if (session_send_mtc) {
+			/* mark us ready to send */
+			next_quarter_frame_to_send = 0;
 		}
 
 	} else if (p == "send-mmc") {
@@ -3267,13 +3269,7 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "midi-feedback") {
 
-		/* only set the internal flag if we have
-		   a port.
-		*/
-
-		if (_mtc_port != 0) {
-			session_midi_feedback = Config->get_midi_feedback();
-		}
+		session_midi_feedback = Config->get_midi_feedback();
 
 	} else if (p == "jack-time-master") {
 
@@ -3311,22 +3307,13 @@ Session::config_changed (std::string p, bool ours)
 		sync_order_keys ("session");
 	} else if (p == "initial-program-change") {
 
-		if (_mmc->port() && Config->get_initial_program_change() >= 0) {
+		if (_mmc->output_port() && Config->get_initial_program_change() >= 0) {
 			MIDI::byte buf[2];
 
 			buf[0] = MIDI::program; // channel zero by default
 			buf[1] = (Config->get_initial_program_change() & 0x7f);
 
-			_mmc->port()->midimsg (buf, sizeof (buf), 0);
-		}
-	} else if (p == "initial-program-change") {
-                
-		if (_mmc->port() && Config->get_initial_program_change() >= 0) {
-			MIDI::byte* buf = new MIDI::byte[2];
-
-			buf[0] = MIDI::program; // channel zero by default
-			buf[1] = (Config->get_initial_program_change() & 0x7f);
-			// deliver_midi (_mmc_port, buf, 2);
+			_mmc->output_port()->midimsg (buf, sizeof (buf), 0);
 		}
 	} else if (p == "solo-mute-override") {
 		// catch_up_on_solo_mute_override ();
@@ -3379,7 +3366,7 @@ Session::load_diskstreams_2X (XMLNode const & node, int)
 void
 Session::setup_midi_machine_control ()
 {
-	_mmc = new MIDI::MachineControl;
+	_mmc = new MIDI::MachineControl (_engine.jack());
 	
 	_mmc->Play.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
 	_mmc->DeferredPlay.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));

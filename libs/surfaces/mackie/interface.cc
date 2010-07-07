@@ -31,36 +31,19 @@ using namespace std;
 ControlProtocol*
 new_mackie_protocol (ControlProtocolDescriptor*, Session* s)
 {
-	if ( Config->get_mmc_port_name().substr(0,3) == "mcu" )
-	{
-		error << "mcu already used as mmc port" << endmsg;
+	MackieControlProtocol* mcp = 0;
+	
+	try {
+		mcp = new MackieControlProtocol (*s);
+		mcp->set_active (true);
 	}
-	else if ( Config->get_mtc_port_name().substr(0,3) == "mcu" )
-	{
-		error << "mcu already used as mtc port" << endmsg;
+	catch (exception & e) {
+		error << "Error instantiating MackieControlProtocol: " << e.what() << endmsg;
+		delete mcp;
+		mcp = 0;
 	}
-	else if ( Config->get_midi_port_name().substr(0,3) == "mcu" )
-	{
-		error << "mcu already used as midi port" << endmsg;
-	}
-	else
-	{
-		// no one else is using the port, so try instantiate the object
-		MackieControlProtocol * mcp = 0;
-		try
-		{
-			mcp = new MackieControlProtocol (*s);
-			mcp->set_active( true );
-		}
-		catch( exception & e )
-		{
-			error << "Error instantiating MackieControlProtocol: " << e.what() << endmsg;
-			delete mcp;
-			mcp = 0;
-		}
-		return mcp;
-	}
-	return 0;
+	
+	return mcp;
 }
 
 void

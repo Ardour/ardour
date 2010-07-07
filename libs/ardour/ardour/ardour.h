@@ -71,13 +71,6 @@ namespace ARDOUR {
 	static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
 
 	void setup_fpu ();
-
-	extern MIDI::Port* default_mmc_port;
-	extern MIDI::Port* default_mtc_port;
-	extern MIDI::Port* default_midi_port;
-	extern MIDI::Port *default_midi_clock_port;
-
-	int setup_midi ();
 }
 
 #endif /* __ardour_ardour_h__ */

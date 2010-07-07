@@ -84,6 +84,7 @@ class RouteParams_UI;
 class SessionOptionEditor;
 class Splash;
 class ThemeManager;
+class MidiTracer;
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -164,6 +165,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_theme_manager ();
 	void toggle_bundle_manager ();
 	void toggle_big_clock_window ();
+	void toggle_midi_tracer_window ();
 	void toggle_route_params_window ();
 	void toggle_editing_space();
 
@@ -324,6 +326,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void update_transport_clocks (nframes_t pos);
 	void record_state_changed ();
+
+	MidiTracer* _midi_tracer_window;
 
 	/* Transport Control */
 

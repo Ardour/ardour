@@ -137,9 +137,6 @@ Session::Session (AudioEngine &eng,
 	  _target_transport_speed (0.0),
 	  _requested_return_frame (-1),
 	  _mmc (0),
-	  _mtc_port (default_mtc_port),
-	  _midi_port (default_midi_port),
-	  _midi_clock_port (default_midi_clock_port),
 	  _session_dir (new SessionDirectory(fullpath)),
 	  state_tree (0),
 	  _butler (new Butler (*this)),
@@ -306,6 +303,13 @@ Session::destroy ()
 	Crossfade::set_buffer_size (0);
 
 	delete _mmc;
+
+	delete _mtc_input_port;
+	delete _mtc_output_port;
+	delete _midi_input_port;
+	delete _midi_output_port;
+	delete _midi_clock_input_port;
+	delete _midi_clock_output_port;
 
 	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
 	playlists.reset ();
@@ -3855,11 +3859,11 @@ Session::get_available_sync_options () const
 	
 	ret.push_back (JACK);
 
-	if (mtc_port()) {
+	if (mtc_input_port()) {
 		ret.push_back (MTC);
 	} 
 
-	if (midi_clock_port()) {
+	if (midi_clock_input_port()) {
 		ret.push_back (MIDIClock);
 	} 
 

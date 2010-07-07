@@ -32,17 +32,10 @@ using namespace std;
 using namespace MIDI;
 using namespace PBD;
 
-/* XXX check for strdup leaks */
-
 Manager *Manager::theManager = 0;
 
 Manager::Manager () 
 {
-	inputPort = 0;
-	outputPort = 0;
-	inputChannelNumber = 0;
-	outputChannelNumber = 0;
-	api_data = 0;
 }
 
 Manager::~Manager ()
@@ -57,144 +50,13 @@ Manager::~Manager ()
 }
 
 Port *
-Manager::add_port (const XMLNode& node)
+Manager::add_port (Port* p)
 {
-	Port::Descriptor desc (node);
-	Port *port;
-	PortList::iterator p;
-
-	for (p = _ports.begin(); p != _ports.end(); ++p) {
-
-		if (desc.tag == (*p)->name()) {
-			break;
-		}
-		
-	}
-
-	if (p != _ports.end()) {
-		return 0;
-	}
-	
-	port = new Port (node, (jack_client_t *) api_data);
-	
-	if (port == 0) {
-		return 0;
-	}
-
-	if (!port->ok()) {
-		delete port;
-		return 0;
-	}
-
-	_ports.push_back (port);
-
-	/* first port added becomes the default input
-	   port.
-	*/
-
-	if (inputPort == 0) {
-		inputPort = port;
-	} 
-
-	if (outputPort == 0) {
-		outputPort = port;
-	}
+	_ports.push_back (p);
 
 	PortsChanged (); /* EMIT SIGNAL */
 
-	return port;
-}
-
-int 
-Manager::remove_port (Port* port)
-{
-	if (inputPort == port) {
-		inputPort = 0;
-	}
-
-	if (outputPort == port) {
-		outputPort = 0;
-	}
-
-	_ports.remove (port);
-	delete port;
-
-	PortsChanged (); /* EMIT SIGNAL */
-
-	return 0;
-}
-
-int
-Manager::set_input_port (string tag)
-{
-	for (PortList::iterator p = _ports.begin(); p != _ports.end(); ++p) {
-		if ((*p)->name() == tag) {
-			inputPort = (*p);
-			return 0;
-		}
-	}
-
-	return -1;
-}
-
-int
-Manager::set_output_port (string tag)
-{
-	PortList::iterator p;
-
-	for (p = _ports.begin(); p != _ports.end(); ++p) {
-		if ((*p)->name() == tag) {
-			inputPort = (*p);
-			break;
-		}
-	}
-
-	if (p == _ports.end()) {
-		return -1;
-	}
-
-	// XXX send a signal to say we're about to change output ports
-
-	if (outputPort) {
-		for (channel_t chan = 0; chan < 16; chan++) {
-			outputPort->channel (chan)->all_notes_off (0);
-		}
-	}
-	
-	outputPort = (*p);
-
-	// XXX send a signal to say we've changed output ports
-
-	return 0;
-}
-
-Port *
-Manager::port (string name)
-{
-	for (PortList::iterator p = _ports.begin(); p != _ports.end(); ++p) {
-		if (name == (*p)->name()) {
-			return (*p);
-		}
-	}
-
-	return 0;
-}
-
-int
-Manager::foreach_port (int (*func)(const Port &, size_t, void *),
-			   void *arg)
-{
-	int n = 0;
-		
-	for (PortList::const_iterator p = _ports.begin(); p != _ports.end(); ++p, ++n) {
-		int retval;
-
-		if ((retval = func (**p, n, arg)) != 0) {
-			return retval;
-		}
-	}
-
-	return 0;
+	return p;
 }
 
 void
@@ -229,4 +91,19 @@ Manager::reconnect ()
 	for (PortList::const_iterator p = _ports.begin(); p != _ports.end(); ++p) {
 		(*p)->reconnect ();
 	}
+}
+
+Port*
+Manager::port (string const & n)
+{
+	PortList::const_iterator p = _ports.begin();
+	while (p != _ports.end() && (*p)->name() != n) {
+		++p;
+	}
+
+	if (p == _ports.end()) {
+		return 0;
+	}
+
+	return *p;
 }

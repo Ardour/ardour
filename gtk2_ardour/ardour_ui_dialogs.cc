@@ -39,6 +39,7 @@
 #include "bundle_manager.h"
 #include "keyeditor.h"
 #include "gui_thread.h"
+#include "midi_tracer.h"
 
 #include "i18n.h"
 
@@ -211,6 +212,22 @@ ARDOUR_UI::toggle_big_clock_window ()
 		} else {
 			big_clock_window->hide ();
 		}
+	}
+}
+
+void
+ARDOUR_UI::toggle_midi_tracer_window ()
+{
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleMIDITracer"));
+	if (!act) {
+		return;
+	}
+
+	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
+	if (tact->get_active ()) {
+		_midi_tracer_window->show_all ();
+	} else {
+		_midi_tracer_window->hide ();
 	}
 }
 

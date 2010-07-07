@@ -44,6 +44,19 @@ pthread_t Port::_process_thread;
 Signal0<void> Port::JackHalted;
 Signal0<void> Port::MakeConnections;
 
+Port::Port (string const & name, int mode, jack_client_t* jack_client)
+	: _currently_in_cycle (false)
+	, _nframes_this_cycle (0)
+	, _jack_client (jack_client)
+	, _jack_input_port (0)
+	, _jack_output_port (0)
+	, _last_read_index (0)
+	, output_fifo (512)
+	, input_fifo (1024)
+{
+	init (name, mode);
+}
+
 Port::Port (const XMLNode& node, jack_client_t* jack_client)
 	: _currently_in_cycle (false)
 	, _nframes_this_cycle (0)
@@ -56,6 +69,14 @@ Port::Port (const XMLNode& node, jack_client_t* jack_client)
 {
 	Descriptor desc (node);
 
+	init (desc.tag, desc.mode);
+
+	set_state (node);
+}
+
+void
+Port::init (string const & name, int mode)
+{
 	_ok = false;  /* derived class must set to true if constructor
 			 succeeds.
 		      */
@@ -63,8 +84,8 @@ Port::Port (const XMLNode& node, jack_client_t* jack_client)
 	input_parser = 0;
 	output_parser = 0;
 
-	_tagname = desc.tag;
-	_mode = desc.mode;
+	_tagname = name;
+	_mode = mode;
 
 	if (_mode == O_RDONLY || _mode == O_RDWR) {
 		input_parser = new Parser (*this);
@@ -90,14 +111,14 @@ Port::Port (const XMLNode& node, jack_client_t* jack_client)
 		}
 	}
 
-	if (!create_ports (node)) {
+	create_port_names ();
+	
+	if (!create_ports ()) {
 		_ok = true;
 	}
 
 	MakeConnections.connect_same_thread (connect_connection, boost::bind (&Port::make_connections, this));
 	JackHalted.connect_same_thread (halt_connection, boost::bind (&Port::jack_halted, this));
-
-	set_state (node);
 }
 
 
@@ -108,17 +129,17 @@ Port::~Port ()
 	}
 
 	if (_jack_input_port) {
-		if (_jack_client) {
+		if (_jack_client && _jack_input_port) {
 			jack_port_unregister (_jack_client, _jack_input_port);
 		}
 		_jack_input_port = 0;
 	}
 
 	if (_jack_output_port) {
-		if (_jack_client) {
-			jack_port_unregister (_jack_client, _jack_input_port);
+		if (_jack_client && _jack_output_port) {
+			jack_port_unregister (_jack_client, _jack_output_port);
 		}
-		_jack_input_port = 0;
+		_jack_output_port = 0;
 	}
 }
 
@@ -407,23 +428,19 @@ Port::read (byte *, size_t)
 	return 0;
 }
 
-int
-Port::create_ports(const XMLNode& node)
+void
+Port::create_port_names ()
 {
-	Descriptor desc (node);
-
 	assert(!_jack_input_port);
 	assert(!_jack_output_port);
 	
-	if (desc.mode == O_RDWR || desc.mode == O_WRONLY) {
-		_jack_output_port_name = string(desc.tag).append ("_out");
+	if (_mode == O_RDWR || _mode == O_WRONLY) {
+		_jack_output_port_name = _tagname.append ("_out");
 	}
 
-	if (desc.mode == O_RDWR || desc.mode == O_RDONLY) {
-		_jack_input_port_name = string(desc.tag).append ("_in");
+	if (_mode == O_RDWR || _mode == O_RDONLY) {
+		_jack_input_port_name = _tagname.append ("_in");
 	}
-
-	return create_ports ();
 }
 
 int

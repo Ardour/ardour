@@ -5,7 +5,7 @@
  *
  *  This is subclassed from OptionEditor.  Simple options (e.g. boolean and simple choices)
  *  are expressed using subclasses of Option.  More complex UI elements are represented
- *  using individual classes subclassed rom OptionEditorBox.
+ *  using individual classes subclassed from OptionEditorBox.
  */
 
 /** Editor for options which are obtained from and written back to one of the .rc files. */

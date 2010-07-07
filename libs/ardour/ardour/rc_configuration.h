@@ -43,8 +43,6 @@ class RCConfiguration : public Configuration
 	XMLNode& get_variables ();
 	void set_variables (XMLNode const &);
 
-	std::map<std::string, XMLNode> midi_ports;
-
 	int load_state ();
 	int save_state ();
 

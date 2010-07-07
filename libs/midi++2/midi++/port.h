@@ -42,6 +42,7 @@ class PortRequest;
 
 class Port {
   public:
+	Port (std::string const &, int, jack_client_t *);
 	Port (const XMLNode&, jack_client_t *);
 	~Port ();
 
@@ -135,7 +136,7 @@ private:
 
 	static size_t nports;
 
-	int create_ports(const XMLNode&);
+	void create_port_names ();
 	int create_ports ();
 
 	jack_client_t* _jack_client;
@@ -156,6 +157,7 @@ private:
 	void flush (void* jack_port_buffer);
 	void jack_halted ();
 	void make_connections();
+	void init (std::string const &, int);
 
 	static pthread_t _process_thread;
 

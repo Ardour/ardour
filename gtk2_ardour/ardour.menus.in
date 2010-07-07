@@ -437,6 +437,7 @@
                <menuitem action='ToggleBundleManager'/>
                <menuitem action='ToggleThemeManager'/>
                <menuitem action='ToggleBigClock'/>
+               <menuitem action='ToggleMIDITracer'/>
                <menuitem action='toggle-audio-connection-manager'/>
                <menuitem action='toggle-midi-connection-manager'/>
                <menuitem action='toggle-log-window'/>

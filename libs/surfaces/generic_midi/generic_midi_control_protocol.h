@@ -50,7 +50,8 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	int set_active (bool yn);
 	static bool probe() { return true; }
 
-	MIDI::Port* port () const { return _port; }
+	MIDI::Port* input_port () const { return _input_port; }
+	MIDI::Port* output_port () const { return _output_port; }
 	void set_feedback_interval (ARDOUR::microseconds_t);
 
 	int set_feedback (bool yn);
@@ -81,7 +82,8 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	void prev_bank ();
 
   private:
-	MIDI::Port* _port;
+	MIDI::Port* _input_port;
+	MIDI::Port* _output_port;
 	ARDOUR::microseconds_t _feedback_interval;
 	ARDOUR::microseconds_t last_feedback_time;
 

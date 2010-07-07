@@ -225,6 +225,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleBigClock"), _("Big Clock"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_big_clock_window));
 	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (common_actions, X_("ToggleMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_midi_tracer_window));
+	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_action (common_actions, X_("About"), _("About"),  sigc::mem_fun(*this, &ARDOUR_UI::show_about));
 	ActionManager::register_action (common_actions, X_("Chat"), _("Chat"),  sigc::mem_fun(*this, &ARDOUR_UI::launch_chat));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleThemeManager"), _("Theme Manager"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_theme_manager));

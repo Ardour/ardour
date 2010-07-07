@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2010 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #define __STDC_FORMAT_MACROS 1
 #include <stdint.h>
 
@@ -6,6 +25,7 @@
 #include <time.h>
 
 #include "midi++/parser.h"
+#include "midi++/manager.h"
 
 #include "midi_tracer.h"
 #include "gui_thread.h"
@@ -16,9 +36,9 @@ using namespace std;
 using namespace MIDI;
 using namespace Glib;
 
-MidiTracer::MidiTracer (const std::string& name, Parser& p)
-	: ArdourDialog (string_compose (_("MIDI Trace %1"), name))
-	, parser (p)
+MidiTracer::MidiTracer ()
+	: ArdourDialog (_("MIDI Tracer"))
+	, parser (0)
 	, line_count_adjustment (200, 1, 2000, 1, 10)
 	, line_count_spinner (line_count_adjustment)
 	, line_count_label (_("Store this many lines: "))
@@ -32,6 +52,18 @@ MidiTracer::MidiTracer (const std::string& name, Parser& p)
 	, base_button (_("Decimal"))
 	, collect_button (_("Enabled"))
 {
+	get_vbox()->set_spacing (4);
+
+	Manager::instance()->PortsChanged.connect (_manager_connection, invalidator (*this), boost::bind (&MidiTracer::ports_changed, this), gui_context());
+	
+	HBox* pbox = manage (new HBox);
+	pbox->pack_start (*manage (new Label (_("Port:"))), false, false);
+
+	_port_combo.signal_changed().connect (sigc::mem_fun (*this, &MidiTracer::port_changed));
+	pbox->pack_start (_port_combo);
+	pbox->show_all ();
+	get_vbox()->pack_start (*pbox, false, false);
+	
 	scroller.add (text);
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (scroller, true, true);
@@ -71,7 +103,8 @@ MidiTracer::MidiTracer (const std::string& name, Parser& p)
 	collect_button.show ();
 	autoscroll_button.show ();
 
-	connect ();
+	ports_changed ();
+	port_changed ();
 }
 
 
@@ -80,16 +113,36 @@ MidiTracer::~MidiTracer()
 }
 
 void
-MidiTracer::connect ()
+MidiTracer::ports_changed ()
+{
+	string const c = _port_combo.get_active_text ();
+	_port_combo.clear ();
+	
+	Manager::PortList const & p = Manager::instance()->get_midi_ports ();
+	for (Manager::PortList::const_iterator i = p.begin(); i != p.end(); ++i) {
+		_port_combo.append_text ((*i)->name());
+	}
+
+	_port_combo.set_active_text (c);
+}
+
+void
+MidiTracer::port_changed ()
 {
 	disconnect ();
-	parser.any.connect_same_thread (connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3));
+
+	Port* p = Manager::instance()->port (_port_combo.get_active_text());
+
+	if (p) {
+		Parser* parser = p->input() ? p->input() : p->output();
+		parser->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3));
+	}
 }
 
 void
 MidiTracer::disconnect ()
 {
-	connection.disconnect ();
+	_parser_connection.disconnect ();
 }
 
 void
@@ -330,7 +383,7 @@ void
 MidiTracer::collect_toggle ()
 {
 	if (collect_button.get_active ()) {
-		connect ();
+		port_changed ();
 	} else {
 		disconnect ();
 	}

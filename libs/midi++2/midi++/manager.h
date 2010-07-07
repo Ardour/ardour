@@ -21,7 +21,6 @@
 #define __midi_manager_h__
 
 #include <list>
-#include <vector>
 
 #include <string>
 
@@ -33,8 +32,6 @@ namespace MIDI {
 class Manager {
   public:
 	~Manager ();
-	
-	void set_api_data(void* data) { api_data = data; }
 	
 	/** Signal the start of an audio cycle.
 	 * This MUST be called before any reading/writing for this cycle.
@@ -49,26 +46,9 @@ class Manager {
 	 */
 	void cycle_end();
 
-	Port *add_port (const XMLNode& node);
-	int   remove_port (Port*);
+	Port* add_port (Port *);
 
-	Port *port (std::string name);
-
-	size_t nports () const { return _ports.size(); }
-
-	/* defaults for clients who are not picky */
-	
-	Port *inputPort;
-	Port *outputPort;
-	channel_t inputChannelNumber;
-	channel_t outputChannelNumber;
-
-	int set_input_port (std::string);
-	int set_output_port (std::string);
-	int set_input_channel (channel_t);
-	int set_output_channel (channel_t);
-
-	int foreach_port (int (*func)(const Port &, size_t n, void *), void *arg);
+	Port* port (std::string const &);
 
 	typedef std::list<Port *> PortList;
 
@@ -90,13 +70,9 @@ class Manager {
 	/* This is a SINGLETON pattern */
 	
 	Manager ();
-
 	static Manager *theManager;
+	
 	std::list<Port*> _ports;
-
-	void* api_data;
-
-	void close_ports ();
 };
 
 } // namespace MIDI

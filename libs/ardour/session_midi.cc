@@ -71,298 +71,6 @@ Session::midi_panic()
 	}
 }
 
-int
-Session::use_config_midi_ports ()
-{
-	string port_name;
-
-	if (default_mmc_port) {
-		_mmc->set_port (default_mmc_port);
-	}
-
-	if (default_mtc_port) {
-		set_mtc_port (default_mtc_port->name());
-	} else {
-		set_mtc_port ("");
-	}
-
-	if (default_midi_port) {
-		set_midi_port (default_midi_port->name());
-	} else {
-		set_midi_port ("");
-	}
-
-	if (default_midi_clock_port) {
-		set_midi_clock_port (default_midi_clock_port->name());
-	} else {
-		set_midi_clock_port ("");
-	}
-
-	return 0;
-}
-
-
-/***********************************************************************
- MTC, MMC, etc.
-**********************************************************************/
-
-int
-Session::set_mtc_port (string port_tag)
-{
-	MTC_Slave *ms;
-
-	if (port_tag.length() == 0) {
-
-		if (_slave && ((ms = dynamic_cast<MTC_Slave*> (_slave)) != 0)) {
-			error << string_compose (_("%1 is slaved to MTC - port cannot be reset"), PROGRAM_NAME) << endmsg;
-			return -1;
-		}
-
-		if (_mtc_port == 0) {
-			return 0;
-		}
-
-		_mtc_port = 0;
-		goto out;
-	}
-
-	MIDI::Port* port;
-
-	if ((port = MIDI::Manager::instance()->port (port_tag)) == 0) {
-		error << string_compose (_("unknown port %1 requested for MTC"), port_tag) << endl;
-		return -1;
-	}
-
-	_mtc_port = port;
-
-	if (_slave && ((ms = dynamic_cast<MTC_Slave*> (_slave)) != 0)) {
-		ms->rebind (*port);
-	}
-
-	Config->set_mtc_port_name (port_tag);
-
-  out:
-	MTC_PortChanged(); /* EMIT SIGNAL */
-	set_dirty();
-	return 0;
-}
-
-int
-Session::set_midi_port (string /*port_tag*/)
-{
-#if 0
-	if (port_tag.length() == 0) {
-		if (_midi_port == 0) {
-			return 0;
-		}
-		_midi_port = 0;
-		goto out;
-	}
-
-	MIDI::Port* port;
-
-	if ((port = MIDI::Manager::instance()->port (port_tag)) == 0) {
-		return -1;
-	}
-
-	_midi_port = port;
-
-	/* XXX need something to forward this to control protocols ? or just
-	   use the signal below
-	*/
-
-	Config->set_midi_port_name (port_tag);
-
-  out:
-#endif
-	MIDI_PortChanged(); /* EMIT SIGNAL */
-	set_dirty();
-	return 0;
-}
-
-int
-Session::set_midi_clock_port (string port_tag)
-{
-	MIDIClock_Slave *ms;
-
-	if (port_tag.length() == 0) {
-
-		if (_slave && ((ms = dynamic_cast<MIDIClock_Slave*> (_slave)) != 0)) {
-			error << string_compose (_("%1 is slaved to MIDI Clock - port cannot be reset"), PROGRAM_NAME) << endmsg;
-			return -1;
-		}
-
-		if (_midi_clock_port == 0) {
-			return 0;
-		}
-
-		_midi_clock_port = 0;
-		goto out;
-	}
-
-	MIDI::Port* port;
-
-	if ((port = MIDI::Manager::instance()->port (port_tag)) == 0) {
-		error << string_compose (_("unknown port %1 requested for MIDI Clock"), port_tag) << endl;
-		return -1;
-	}
-
-	_midi_clock_port = port;
-
-	if (_slave && ((ms = dynamic_cast<MIDIClock_Slave*> (_slave)) != 0)) {
-		ms->rebind (*port);
-	}
-
-	Config->set_midi_clock_port_name (port_tag);
-
-  out:
-	MIDIClock_PortChanged(); /* EMIT SIGNAL */
-	set_dirty();
-	return 0;
-}
-
-void
-Session::set_trace_midi_input (bool yn, MIDI::Port* port)
-{
-	MIDI::Parser* input_parser;
-
-	cerr << "enabling tracing: " << yn << " for input port " << port->name() << endl;
-
-	if (port) {
-		if ((input_parser = port->input()) != 0) {
-			input_parser->trace (yn, &cout, "input: ");
-		}
-	} else {
-
-		if (_mmc->port()) {
-			if ((input_parser = _mmc->port()->input()) != 0) {
-				input_parser->trace (yn, &cout, "input: ");
-			}
-		}
-
-		if (_mtc_port && _mtc_port != _mmc->port()) {
-			if ((input_parser = _mtc_port->input()) != 0) {
-				input_parser->trace (yn, &cout, "input: ");
-			}
-		}
-
-		if (_midi_port && _midi_port != _mmc->port() && _midi_port != _mtc_port) {
-			if ((input_parser = _midi_port->input()) != 0) {
-				input_parser->trace (yn, &cout, "input: ");
-			}
-		}
-
-		if (_midi_clock_port
-		    && _midi_clock_port != _mmc->port()
-			&& _midi_clock_port != _mtc_port
-			&& _midi_clock_port != _midi_port) {
-			if ((input_parser = _midi_clock_port->input()) != 0) {
-				input_parser->trace (yn, &cout, "input: ");
-			}
-		}
-	}
-
-	Config->set_trace_midi_input (yn);
-}
-
-void
-Session::set_trace_midi_output (bool yn, MIDI::Port* port)
-{
-	MIDI::Parser* output_parser;
-
-	if (port) {
-		if ((output_parser = port->output()) != 0) {
-			output_parser->trace (yn, &cout, "output: ");
-		}
-	} else {
-		if (_mmc->port()) {
-			if ((output_parser = _mmc->port()->output()) != 0) {
-				output_parser->trace (yn, &cout, "output: ");
-			}
-		}
-
-		if (_mtc_port && _mtc_port != _mmc->port()) {
-			if ((output_parser = _mtc_port->output()) != 0) {
-				output_parser->trace (yn, &cout, "output: ");
-			}
-		}
-
-		if (_midi_port && _midi_port != _mmc->port() && _midi_port != _mtc_port) {
-			if ((output_parser = _midi_port->output()) != 0) {
-				output_parser->trace (yn, &cout, "output: ");
-			}
-		}
-
-	}
-
-	Config->set_trace_midi_output (yn);
-}
-
-bool
-Session::get_trace_midi_input(MIDI::Port *port)
-{
-	MIDI::Parser* input_parser;
-	if (port) {
-		if ((input_parser = port->input()) != 0) {
-			return input_parser->tracing();
-		}
-	}
-	else {
-		if (_mmc->port()) {
-			if ((input_parser = _mmc->port()->input()) != 0) {
-				return input_parser->tracing();
-			}
-		}
-
-		if (_mtc_port) {
-			if ((input_parser = _mtc_port->input()) != 0) {
-				return input_parser->tracing();
-			}
-		}
-
-		if (_midi_port) {
-			if ((input_parser = _midi_port->input()) != 0) {
-				return input_parser->tracing();
-			}
-		}
-	}
-
-	return false;
-}
-
-bool
-Session::get_trace_midi_output(MIDI::Port *port)
-{
-	MIDI::Parser* output_parser;
-	if (port) {
-		if ((output_parser = port->output()) != 0) {
-			return output_parser->tracing();
-		}
-	}
-	else {
-		if (_mmc->port()) {
-			if ((output_parser = _mmc->port()->output()) != 0) {
-				return output_parser->tracing();
-			}
-		}
-
-		if (_mtc_port) {
-			if ((output_parser = _mtc_port->output()) != 0) {
-				return output_parser->tracing();
-			}
-		}
-
-		if (_midi_port) {
-			if ((output_parser = _midi_port->output()) != 0) {
-				return output_parser->tracing();
-			}
-		}
-	}
-
-	return false;
-
-}
-
 void
 Session::setup_midi_control ()
 {
@@ -649,7 +357,7 @@ Session::send_full_time_code(nframes_t /*nframes*/)
 
 	_send_timecode_update = false;
 
-	if (_mtc_port == 0 || !session_send_mtc || _slave) {
+	if (_mtc_output_port == 0 || !session_send_mtc || _slave) {
 		return 0;
 	}
 
@@ -684,7 +392,7 @@ Session::send_full_time_code(nframes_t /*nframes*/)
 	msg[8] = timecode.frames;
 
 	// Send message at offset 0, sent time is for the start of this cycle
-	if (_mtc_port->midimsg (msg, sizeof (msg), 0)) {
+	if (_mtc_output_port->midimsg (msg, sizeof (msg), 0)) {
 		error << _("Session: could not send full MIDI time code") << endmsg;
 		return -1;
 	}
@@ -702,7 +410,7 @@ Session::send_full_time_code(nframes_t /*nframes*/)
 int
 Session::send_midi_time_code_for_cycle(nframes_t nframes)
 {
-	if (_mtc_port == 0 || _slave || !session_send_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
+	if (_mtc_output_port == 0 || _slave || !session_send_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
 		// cerr << "(MTC) Not sending MTC\n";
 		return 0;
 	}
@@ -763,7 +471,7 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 		nframes_t out_stamp = msg_time - _transport_frame;
 		assert(out_stamp < nframes);
 
-		if (_mtc_port->midimsg (mtc_msg, 2, out_stamp)) {
+		if (_mtc_output_port->midimsg (mtc_msg, 2, out_stamp)) {
 			error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno))
 			      << endmsg;
 			return -1;
