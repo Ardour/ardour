@@ -783,6 +783,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::shared_ptr<SessionPlaylists> playlists;
 
 	void send_mmc_locate (nframes64_t);
+	int send_full_time_code (nframes64_t);
 
   protected:
 	friend class AudioEngine;
@@ -1133,7 +1134,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	bool _send_timecode_update; ///< Flag to send a full frame (Timecode) MTC message this cycle
 
-	int send_full_time_code(nframes_t nframes);
 	int send_midi_time_code_for_cycle(nframes_t nframes);
 
 	nframes_t adjust_apparent_position (nframes_t frames);

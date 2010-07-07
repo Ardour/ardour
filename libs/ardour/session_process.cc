@@ -268,7 +268,7 @@ Session::process_with_events (nframes_t nframes)
 	 * on locates (and allow slow slaves to position and prepare for rolling)
 	 */
 	if (_send_timecode_update) {
-		send_full_time_code(nframes);
+		send_full_time_code (_transport_frame);
 	}
 
 	if (!process_can_proceed()) {

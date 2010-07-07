@@ -2138,7 +2138,9 @@ CursorDrag::motion (GdkEvent* event, bool)
 	_editor->show_verbose_time_cursor (_cursor->current_frame, 10);
 
 	if (_editor->session() && _item == &_editor->playhead_cursor->canvas_item) {
-		_editor->session()->send_mmc_locate (_editor->playhead_cursor->current_frame);
+		nframes64_t const f = _editor->playhead_cursor->current_frame;
+		_editor->session()->send_mmc_locate (f);
+		_editor->session()->send_full_time_code (f);
 	}
 	
 

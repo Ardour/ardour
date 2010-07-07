@@ -345,9 +345,10 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 /** Send MTC Full Frame message (complete Timecode time) for the start of this cycle.
  * This resets the MTC code, the next quarter frame message that is sent will be
  * the first one with the beginning of this cycle as the new start point.
+ * @param t time to send.
  */
 int
-Session::send_full_time_code(nframes_t /*nframes*/)
+Session::send_full_time_code (nframes64_t const t)
 {
 	/* This function could easily send at a given frame offset, but would
 	 * that be useful?  Does ardour do sub-block accurate locating? [DR] */
@@ -361,11 +362,11 @@ Session::send_full_time_code(nframes_t /*nframes*/)
 		return 0;
 	}
 
-	// Get timecode time for this transport frame
-	sample_to_timecode(_transport_frame, timecode, true /* use_offset */, false /* no subframes */);
+	// Get timecode time for the given time
+	sample_to_timecode (t, timecode, true /* use_offset */, false /* no subframes */);
 
 	transmitting_timecode_time = timecode;
-	outbound_mtc_timecode_frame = _transport_frame;
+	outbound_mtc_timecode_frame = t;
 
 	// I don't understand this bit yet.. [DR]
 	if (((mtc_timecode_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_timecode_time.frames % 2)) {

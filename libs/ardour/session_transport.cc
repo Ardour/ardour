@@ -562,7 +562,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	have_looped = false;
 
-	send_full_time_code (0);
+	send_full_time_code (_transport_frame);
 
 	if ((ptw & PostTransportLocate) && get_record_enabled()) {
 		/* capture start has been changed, so save pending state */
