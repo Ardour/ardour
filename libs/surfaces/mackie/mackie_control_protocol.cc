@@ -16,6 +16,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <fcntl.h>
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -49,6 +50,7 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/types.h"
+#include "ardour/audioengine.h"
 
 #include "mackie_control_protocol.h"
 
@@ -577,11 +579,11 @@ void
 MackieControlProtocol::create_ports()
 {
 	MIDI::Manager * mm = MIDI::Manager::instance();
-	MIDI::Port * midi_port = mm->port (default_port_name);
+	MIDI::Port * midi_port = mm->add_port (new MIDI::Port (default_port_name, O_RDWR, session->engine().jack()));
 
 	// open main port		
 
-	if (midi_port == 0) {
+	if (!midi_port->ok()) {
 		ostringstream os;
 		os << string_compose (_("no MIDI port named \"%1\" exists - Mackie control disabled"), default_port_name);
 		error << os.str() << endmsg;
@@ -598,8 +600,8 @@ MackieControlProtocol::create_ports()
 	for (int index = 1; index <= 9; ++index) {
 		ostringstream os;
 		os << ext_port_base << index;
-		MIDI::Port * midi_port = mm->port (os.str());
-		if (midi_port != 0) {
+		MIDI::Port * midi_port = mm->add_port (new MIDI::Port (os.str(), O_RDWR, session->engine().jack()));
+		if (midi_port->ok()) {
 			add_port (*midi_port, index);
 		}
 	}
