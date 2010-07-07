@@ -249,52 +249,57 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 				break;
 			} 
 
-		} else {
-
-			if (len > 5 && msg[0] == 0xf0 && msg[1] == 0x7f && msg[3] == 0x06) {
-				/* MMC */
-				int cmd = msg[4];
-				if (cmd == 0x44 && msg[5] == 0x06 && msg[6] == 0x01) {
-					s += snprintf (
-						&buf[s], bufsize, " MMC locate to %02d:%02d:%02d:%02d.%02d\n",
-						msg[7], msg[8], msg[9], msg[10], msg[11]
-						);
-				} else {
-					std::string name;
-					if (cmd == 0x1) {
-						name = "STOP";
-					} else if (cmd == 0x3) {
-						name = "DEFERRED PLAY";
-					} else if (cmd == 0x6) {
-						name = "RECORD STROBE";
-					} else if (cmd == 0x7) {
-						name = "RECORD EXIT";
-					} else if (cmd == 0x8) {
-						name = "RECORD PAUSE";
-					}
-					if (!name.empty()) {
-						s += snprintf (&buf[s], bufsize, " MMC command %s\n", name.c_str());
-					} else {
-						s += snprintf (&buf[s], bufsize, " MMC command %02x\n", cmd);
-					}
-				}
-				
+		} else if (len > 5 && msg[0] == 0xf0 && msg[1] == 0x7f && msg[3] == 0x06) {
+			/* MMC */
+			int cmd = msg[4];
+			if (cmd == 0x44 && msg[5] == 0x06 && msg[6] == 0x01) {
+				s += snprintf (
+					&buf[s], bufsize, " MMC locate to %02d:%02d:%02d:%02d.%02d\n",
+					msg[7], msg[8], msg[9], msg[10], msg[11]
+					);
 			} else {
-				/* other sys-ex */
-
-				s += snprintf (&buf[s], bufsize, "%16s (%d) = [", "Sysex", (int) len);
-				bufsize -= s;
-				
-				for (unsigned int i = 0; i < len && bufsize > 3; ++i) {
-					if (i > 0) {
-						s += snprintf (&buf[s], bufsize, " %02x", msg[i]);
-					} else {
-						s += snprintf (&buf[s], bufsize, "%02x", msg[i]);
-					}
-					bufsize -= s;
+				std::string name;
+				if (cmd == 0x1) {
+					name = "STOP";
+				} else if (cmd == 0x3) {
+					name = "DEFERRED PLAY";
+				} else if (cmd == 0x6) {
+					name = "RECORD STROBE";
+				} else if (cmd == 0x7) {
+					name = "RECORD EXIT";
+				} else if (cmd == 0x8) {
+					name = "RECORD PAUSE";
 				}
-				s += snprintf (&buf[s], bufsize, "]\n");
+				if (!name.empty()) {
+					s += snprintf (&buf[s], bufsize, " MMC command %s\n", name.c_str());
+				} else {
+					s += snprintf (&buf[s], bufsize, " MMC command %02x\n", cmd);
+				}
 			}
+			
+		} else if (len == 10 && msg[0] == 0xf0 && msg[1] == 0x7f && msg[9] == 0xf7)  {
+
+			/* MTC full frame */
+			s += snprintf (
+				&buf[s], bufsize, " MTC full frame to %02d:%02d:%02d:%02d\n", msg[5] & 0x1f, msg[6], msg[7], msg[8]
+				);
+
+		} else {
+			
+			/* other sys-ex */
+			
+			s += snprintf (&buf[s], bufsize, "%16s (%d) = [", "Sysex", (int) len);
+			bufsize -= s;
+			
+			for (unsigned int i = 0; i < len && bufsize > 3; ++i) {
+				if (i > 0) {
+					s += snprintf (&buf[s], bufsize, " %02x", msg[i]);
+				} else {
+					s += snprintf (&buf[s], bufsize, "%02x", msg[i]);
+				}
+				bufsize -= s;
+			}
+			s += snprintf (&buf[s], bufsize, "]\n");
 		}
 		break;
 	    
