@@ -2110,12 +2110,18 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 	if (_cursor == _editor->playhead_cursor) {
 		_editor->_dragging_playhead = true;
 
-		if (_editor->session() && _was_rolling && _stop) {
-			_editor->session()->request_stop ();
-		}
+		if (_editor->session()) {
+			if (_was_rolling && _stop) {
+				_editor->session()->request_stop ();
+			}
 
-		if (_editor->session() && _editor->session()->is_auditioning()) {
-			_editor->session()->cancel_audition ();
+			if (_editor->session()->is_auditioning()) {
+				_editor->session()->cancel_audition ();
+			}
+
+			nframes64_t const f = _editor->playhead_cursor->current_frame;
+			_editor->session()->send_mmc_locate (f);
+			_editor->session()->send_full_time_code (f);
 		}
 	}
 
