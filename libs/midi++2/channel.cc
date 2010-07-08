@@ -33,31 +33,17 @@ Channel::Channel (byte channelnum, Port &p) : _port (p)
 }	
 
 void
-Channel::connect_input_signals ()
+Channel::connect_signals ()
 {
-	_port.input()->channel_pressure[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_chanpress, this, _1, _2));
-	_port.input()->channel_note_on[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_note_on, this, _1, _2));
-	_port.input()->channel_note_off[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_note_off, this, _1, _2));
-	_port.input()->channel_poly_pressure[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_polypress, this, _1, _2));
-	_port.input()->channel_program_change[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_program_change, this, _1, _2));
-	_port.input()->channel_controller[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_controller, this, _1, _2));
-	_port.input()->channel_pitchbend[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_pitchbend, this, _1, _2));
+	_port.parser()->channel_pressure[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_chanpress, this, _1, _2));
+	_port.parser()->channel_note_on[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_note_on, this, _1, _2));
+	_port.parser()->channel_note_off[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_note_off, this, _1, _2));
+	_port.parser()->channel_poly_pressure[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_polypress, this, _1, _2));
+	_port.parser()->channel_program_change[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_program_change, this, _1, _2));
+	_port.parser()->channel_controller[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_controller, this, _1, _2));
+	_port.parser()->channel_pitchbend[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_pitchbend, this, _1, _2));
 
-	_port.input()->reset.connect_same_thread (*this, boost::bind (&Channel::process_reset, this, _1));
-}
-
-void
-Channel::connect_output_signals ()
-{
-	_port.output()->channel_pressure[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_chanpress, this, _1, _2));
-	_port.output()->channel_note_on[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_note_on, this, _1, _2));
-	_port.output()->channel_note_off[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_note_off, this, _1, _2));
-	_port.output()->channel_poly_pressure[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_polypress, this, _1, _2));
-	_port.output()->channel_program_change[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_program_change, this, _1, _2));
-	_port.output()->channel_controller[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_controller, this, _1, _2));
-	_port.output()->channel_pitchbend[_channel_number].connect_same_thread (*this, boost::bind (&Channel::process_pitchbend, this, _1, _2));
-
-	_port.output()->reset.connect_same_thread (*this, boost::bind (&Channel::process_reset, this, _1));
+	_port.parser()->reset.connect_same_thread (*this, boost::bind (&Channel::process_reset, this, _1));
 }
 
 void
@@ -188,11 +174,8 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 
 	if (tb->controller_number == 0) {
 		_bank_number = (unsigned short) _controller_val[0];
-		if (_port.input()) {
-			_port.input()->bank_change (*_port.input(), _bank_number);
-			_port.input()->channel_bank_change[_channel_number] 
-				(*_port.input(), _bank_number);
-		}
+		_port.parser()->bank_change (*_port.parser(), _bank_number);
+		_port.parser()->channel_bank_change[_channel_number] (*_port.parser(), _bank_number);
 	}
 
 }

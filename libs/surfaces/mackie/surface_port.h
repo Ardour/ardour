@@ -37,7 +37,7 @@ namespace Mackie
 class SurfacePort
 {
 public:
-	SurfacePort( MIDI::Port & port, int number );
+	SurfacePort (MIDI::Port & input_port, MIDI::Port & output_port, int number);
 	virtual ~SurfacePort();
 	
 	// when this is successful, active() should return true
@@ -60,8 +60,10 @@ public:
 	/// return the correct sysex header for this port
 	virtual const MidiByteArray & sysex_hdr() const = 0;
 
-	MIDI::Port & port() { return *_port; }
-	const MIDI::Port & port() const { return *_port; }
+	MIDI::Port & input_port() { return *_input_port; }
+	const MIDI::Port & input_port() const { return *_input_port; }
+	MIDI::Port & output_port() { return *_output_port; }
+	const MIDI::Port & output_port() const { return *_output_port; }
 	
 	// all control notofications are sent from here
 	PBD::Signal3<void,SurfacePort &, Control &, const ControlState &> control_event;
@@ -90,7 +92,8 @@ protected:
 	SurfacePort();
 	
 private:
-	MIDI::Port * _port;
+	MIDI::Port * _input_port;
+	MIDI::Port * _output_port;
 	int _number;
 	bool _active;
 

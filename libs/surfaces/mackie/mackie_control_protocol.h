@@ -266,7 +266,7 @@ class MackieControlProtocol
 	*/
 	bool handle_strip_button(Mackie::Control &, Mackie::ButtonState, boost::shared_ptr<ARDOUR::Route>);
 
-	void add_port(MIDI::Port &, int number);
+	void add_port (MIDI::Port &, MIDI::Port &, int number);
 
 	/**
 	   Read session data and send to surface. Includes

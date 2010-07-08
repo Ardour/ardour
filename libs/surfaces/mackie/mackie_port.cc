@@ -48,12 +48,12 @@ MidiByteArray mackie_sysex_hdr ( 5, MIDI::sysex, 0x0, 0x0, 0x66, 0x10 );
 // The MCU extender sysex header
 MidiByteArray mackie_sysex_hdr_xt ( 5, MIDI::sysex, 0x0, 0x0, 0x66, 0x11 );
 
-MackiePort::MackiePort( MackieControlProtocol & mcp, MIDI::Port & port, int number, port_type_t port_type )
-  : SurfacePort( port, number )
-  , _mcp( mcp )
-  , _port_type( port_type )
-  , _emulation( none )
-  , _initialising( true )
+MackiePort::MackiePort (MackieControlProtocol & mcp, MIDI::Port & input_port, MIDI::Port & output_port, int number, port_type_t port_type)
+	: SurfacePort (input_port, output_port, number)
+	, _mcp( mcp )
+	, _port_type( port_type )
+	, _emulation( none )
+	, _initialising( true )
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackiePort::MackiePort\n");
 }
@@ -91,7 +91,7 @@ void MackiePort::open()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackiePort::open %1\n", *this));
 	
-	port().input()->sysex.connect_same_thread (sysex_connection, boost::bind (&MackiePort::handle_midi_sysex, this, _1, _2, _3));
+	input_port().parser()->sysex.connect_same_thread (sysex_connection, boost::bind (&MackiePort::handle_midi_sysex, this, _1, _2, _3));
 		     
 	// make sure the device is connected
 	init();
@@ -147,7 +147,7 @@ MidiByteArray MackiePort::host_connection_query( MidiByteArray & bytes )
 	{
 		finalise_init( false );
 		ostringstream os;
-		os << "expecting 18 bytes, read " << bytes << " from " << port().name();
+		os << "expecting 18 bytes, read " << bytes << " from " << input_port().name();
 		throw MackieControlException( os.str() );
 	}
 
@@ -169,7 +169,7 @@ MidiByteArray MackiePort::host_connection_confirmation( const MidiByteArray & by
 	{
 		finalise_init( false );
 		ostringstream os;
-		os << "expecting 14 bytes, read " << bytes << " from " << port().name();
+		os << "expecting 14 bytes, read " << bytes << " from " << input_port().name();
 		throw MackieControlException( os.str() );
 	}
 	
@@ -273,7 +273,7 @@ void MackiePort::finalise_init( bool yn )
 void MackiePort::connect_any()
 {
 	if (!any_connection.connected()) {
-		port().input()->any.connect_same_thread (any_connection, boost::bind (&MackiePort::handle_midi_any, this, _1, _2, _3));
+		input_port().parser()->any.connect_same_thread (any_connection, boost::bind (&MackiePort::handle_midi_any, this, _1, _2, _3));
 	}
 }
 

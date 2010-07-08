@@ -36,12 +36,12 @@ using namespace std;
 using namespace Mackie;
 
 SurfacePort::SurfacePort()
-: _port( 0 ), _number( 0 ), _active( false )
+	: _input_port (0), _output_port (0), _number (0), _active (false)
 {
 }
 
-SurfacePort::SurfacePort( MIDI::Port & port, int number )
-: _port( &port ), _number( number ), _active( false )
+SurfacePort::SurfacePort (MIDI::Port & input_port, MIDI::Port & output_port, int number)
+	: _input_port (&input_port), _output_port (&output_port), _number (number), _active (false)
 {
 }
 
@@ -90,7 +90,7 @@ MidiByteArray SurfacePort::read()
 #endif
 	
 	// read port and copy to return value
-	int nread = port().read( buf, sizeof (buf) );
+	int nread = input_port().read( buf, sizeof (buf) );
 
 	if (nread >= 0) {
 		retval.copy( nread, buf );
@@ -107,7 +107,7 @@ MidiByteArray SurfacePort::read()
 		if ( errno != EAGAIN )
 		{
 			ostringstream os;
-			os << "Surface: error reading from port: " << port().name();
+			os << "Surface: error reading from port: " << input_port().name();
 			os << ": " << errno << fetch_errmsg( errno );
 
 			cout << os.str() << endl;
@@ -134,17 +134,17 @@ void SurfacePort::write( const MidiByteArray & mba )
 	Glib::RecMutex::Lock lock( _rwlock );
 	if ( !active() ) return;
 
-	int count = port().write( mba.bytes().get(), mba.size(), 0);
+	int count = output_port().write( mba.bytes().get(), mba.size(), 0);
 	if ( count != (int)mba.size() )
 	{
 		if ( errno == 0 )
 		{
-			cout << "port overflow on " << port().name() << ". Did not write all of " << mba << endl;
+			cout << "port overflow on " << output_port().name() << ". Did not write all of " << mba << endl;
 		}
 		else if ( errno != EAGAIN )
 		{
 			ostringstream os;
-			os << "Surface: couldn't write to port " << port().name();
+			os << "Surface: couldn't write to port " << output_port().name();
 			os << ", error: " << fetch_errmsg( errno ) << "(" << errno << ")";
 			
 			cout << os.str() << endl;
@@ -173,7 +173,7 @@ void SurfacePort::write_sysex( MIDI::byte msg )
 ostream & Mackie::operator << ( ostream & os, const SurfacePort & port )
 {
 	os << "{ ";
-	os << "name: " << port.port().name();
+	os << "name: " << port.input_port().name() << " " << port.output_port().name();
 	os << "; ";
 	os << " }";
 	return os;

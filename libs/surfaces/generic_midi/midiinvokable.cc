@@ -127,11 +127,11 @@ MIDIInvokable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	control_channel = chn;
 	control_additional = additional;
 
-	if (_port.input() == 0) {
+	if (_port.parser() == 0) {
 		return;
 	}
 
-	Parser& p = *_port.input();
+	Parser& p = *_port.parser();
 
 	int chn_i = chn;
 

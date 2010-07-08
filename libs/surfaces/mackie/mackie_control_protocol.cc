@@ -563,11 +563,11 @@ MackieControlProtocol::connect_session_signals()
 }
 
 void 
-MackieControlProtocol::add_port (MIDI::Port & midi_port, int number)
+MackieControlProtocol::add_port (MIDI::Port & midi_input_port, MIDI::Port & midi_output_port, int number)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("add port %1\n", midi_port.name()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("add port %1 %2\n", midi_input_port.name(), midi_output_port.name()));
 
-	MackiePort * sport = new MackiePort (*this, midi_port, number);
+	MackiePort * sport = new MackiePort (*this, midi_input_port, midi_output_port, number);
 	_ports.push_back (sport);
 	
 	sport->init_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_port_init, this, sport));
@@ -579,18 +579,19 @@ void
 MackieControlProtocol::create_ports()
 {
 	MIDI::Manager * mm = MIDI::Manager::instance();
-	MIDI::Port * midi_port = mm->add_port (new MIDI::Port (default_port_name, O_RDWR, session->engine().jack()));
+	MIDI::Port * midi_input_port = mm->add_port (new MIDI::Port (default_port_name, MIDI::Port::IsInput, session->engine().jack()));
+	MIDI::Port * midi_output_port = mm->add_port (new MIDI::Port (default_port_name, MIDI::Port::IsOutput, session->engine().jack()));
 
 	// open main port		
 
-	if (!midi_port->ok()) {
+	if (!midi_input_port->ok() || !midi_output_port->ok()) {
 		ostringstream os;
-		os << string_compose (_("no MIDI port named \"%1\" exists - Mackie control disabled"), default_port_name);
+		os << _("Mackie control MIDI ports could not be created; Mackie control disabled");
 		error << os.str() << endmsg;
 		throw MackieControlException (os.str());
 	}
 
-	add_port (*midi_port, 0);
+	add_port (*midi_input_port, *midi_output_port, 0);
 
 	// open extender ports. Up to 9. Should be enough.
 	// could also use mm->get_midi_ports()
@@ -600,9 +601,10 @@ MackieControlProtocol::create_ports()
 	for (int index = 1; index <= 9; ++index) {
 		ostringstream os;
 		os << ext_port_base << index;
-		MIDI::Port * midi_port = mm->add_port (new MIDI::Port (os.str(), O_RDWR, session->engine().jack()));
-		if (midi_port->ok()) {
-			add_port (*midi_port, index);
+		MIDI::Port * midi_input_port = mm->add_port (new MIDI::Port (os.str(), MIDI::Port::IsInput, session->engine().jack()));
+		MIDI::Port * midi_output_port = mm->add_port (new MIDI::Port (os.str(), MIDI::Port::IsOutput, session->engine().jack()));
+		if (midi_input_port->ok() && midi_output_port->ok()) {
+			add_port (*midi_input_port, *midi_output_port, index);
 		}
 	}
 }

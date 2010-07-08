@@ -95,9 +95,9 @@ MTC_Slave::rebind (MIDI::Port& p)
 	
 	port = &p;
 	
-	port->input()->mtc_time.connect_same_thread (port_connections,  boost::bind (&MTC_Slave::update_mtc_time, this, _1, _2, _3));
-	port->input()->mtc_qtr.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_qtr, this, _1, _2, _3));
-	port->input()->mtc_status.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_status, this, _1));
+	port->parser()->mtc_time.connect_same_thread (port_connections,  boost::bind (&MTC_Slave::update_mtc_time, this, _1, _2, _3));
+	port->parser()->mtc_qtr.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_qtr, this, _1, _2, _3));
+	port->parser()->mtc_status.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_status, this, _1));
 }
 
 void
@@ -381,7 +381,7 @@ MTC_Slave::read_current (SafeTime *st) const
 bool
 MTC_Slave::locked () const
 {
-	return port->input()->mtc_locked();
+	return port->parser()->mtc_locked();
 }
 
 bool
@@ -543,7 +543,7 @@ MTC_Slave::reset_window (nframes64_t root)
 	   ahead of the window root (taking direction into account).
 	*/
 
-	switch (port->input()->mtc_running()) {
+	switch (port->parser()->mtc_running()) {
 	case MTC_Forward:
 		window_begin = root;
 		if (session.slave_state() == Session::Running) {

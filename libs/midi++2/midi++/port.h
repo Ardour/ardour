@@ -42,7 +42,12 @@ class PortRequest;
 
 class Port {
   public:
-	Port (std::string const &, int, jack_client_t *);
+	enum Flags {
+		IsInput = JackPortIsInput,
+		IsOutput = JackPortIsOutput,
+	};
+	
+	Port (std::string const &, Flags, jack_client_t *);
 	Port (const XMLNode&, jack_client_t *);
 	~Port ();
 
@@ -96,16 +101,24 @@ class Port {
 		return _channel[chn&0x7F];
 	}
 	
-	Parser *input()     { return input_parser; }
-	Parser *output()    { return output_parser; }
+	Parser* parser () {
+		return _parser;
+	}
 	
 	const char *name () const   { return _tagname.c_str(); }
-	int    mode () const        { return _mode; }
 	bool   ok ()   const        { return _ok; }
+
+	bool receives_input () const {
+		return _flags == IsInput;
+	}
+
+	bool sends_output () const {
+		return _flags == IsOutput;
+	}
 
 	struct Descriptor {
 	    std::string tag;
-	    int mode;
+	    Flags flags;
 
 	    Descriptor (const XMLNode&);
 	    XMLNode& get_state();
@@ -128,36 +141,27 @@ private:
 	bool             _currently_in_cycle;
 	nframes_t        _nframes_this_cycle;
 	std::string      _tagname;
-	int              _mode;
 	size_t           _number;
 	Channel          *_channel[16];
-	Parser           *input_parser;
-	Parser           *output_parser;
+	Parser           *_parser;
 
-	static size_t nports;
-
-	void create_port_names ();
-	int create_ports ();
+	int create_port ();
 
 	jack_client_t* _jack_client;
-	std::string    _jack_input_port_name; /// input port name, or empty if there isn't one
-	jack_port_t*   _jack_input_port;
-	std::string    _jack_output_port_name; /// output port name, or empty if there isn't one
-	jack_port_t*   _jack_output_port;
+	jack_port_t*   _jack_port;
 	nframes_t      _last_read_index;
 	timestamp_t    _last_write_timestamp;
 
 	/** Channel used to signal to the MidiControlUI that input has arrived */
 	CrossThreadChannel xthread;
 	
-	std::string    _inbound_connections;
-	std::string    _outbound_connections;
+	std::string _connections;
 	PBD::ScopedConnection connect_connection;
 	PBD::ScopedConnection halt_connection;
 	void flush (void* jack_port_buffer);
 	void jack_halted ();
-	void make_connections();
-	void init (std::string const &, int);
+	void make_connections ();
+	void init (std::string const &, Flags);
 
 	static pthread_t _process_thread;
 
@@ -165,7 +169,8 @@ private:
 	Evoral::EventRingBuffer<timestamp_t> input_fifo;
 
 	Glib::Mutex output_fifo_lock;
-	
+
+	Flags _flags;
 };
 
 struct PortSet {

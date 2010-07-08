@@ -202,13 +202,13 @@ MachineControl::MachineControl (jack_client_t* jack)
 	_receive_device_id = 0;
 	_send_device_id = 0x7f;
 
-	_input_port = Manager::instance()->add_port (new Port ("MMC", O_RDONLY, jack));
-	_output_port = Manager::instance()->add_port (new Port ("MMC", O_WRONLY, jack));
+	_input_port = Manager::instance()->add_port (new Port ("MMC in", Port::IsInput, jack));
+	_output_port = Manager::instance()->add_port (new Port ("MMC out", Port::IsOutput, jack));
 
-	_input_port->input()->mmc.connect_same_thread (port_connections, boost::bind (&MachineControl::process_mmc_message, this, _1, _2, _3));
-	_input_port->input()->start.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_start, this, _1, _2));
-	_input_port->input()->contineu.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_continue, this, _1, _2));
-	_input_port->input()->stop.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_stop, this, _1, _2));
+	_input_port->parser()->mmc.connect_same_thread (port_connections, boost::bind (&MachineControl::process_mmc_message, this, _1, _2, _3));
+	_input_port->parser()->start.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_start, this, _1, _2));
+	_input_port->parser()->contineu.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_continue, this, _1, _2));
+	_input_port->parser()->stop.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_stop, this, _1, _2));
 }
 
 void

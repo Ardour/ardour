@@ -124,7 +124,7 @@ void
 MIDIControllable::learn_about_external_control ()
 {
 	drop_external_control ();
-	_port.input()->any.connect_same_thread (midi_learn_connection, boost::bind (&MIDIControllable::midi_receiver, this, _1, _2, _3));
+	_port.parser()->any.connect_same_thread (midi_learn_connection, boost::bind (&MIDIControllable::midi_receiver, this, _1, _2, _3));
 }
 
 void
@@ -268,7 +268,7 @@ MIDIControllable::midi_receiver (Parser &, byte *msg, size_t /*len*/)
 
 	/* if the our port doesn't do input anymore, forget it ... */
 
-	if (!_port.input()) {
+	if (!_port.parser()) {
 		return;
 	}
 
@@ -288,11 +288,11 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	control_channel = chn;
 	control_additional = additional;
 
-	if (_port.input() == 0) {
+	if (_port.parser() == 0) {
 		return;
 	}
 
-	Parser& p = *_port.input();
+	Parser& p = *_port.parser();
 
 	int chn_i = chn;
 	switch (ev) {

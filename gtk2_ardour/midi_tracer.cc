@@ -134,8 +134,7 @@ MidiTracer::port_changed ()
 	Port* p = Manager::instance()->port (_port_combo.get_active_text());
 
 	if (p) {
-		Parser* parser = p->input() ? p->input() : p->output();
-		parser->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3));
+		p->parser()->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3));
 	}
 }
 

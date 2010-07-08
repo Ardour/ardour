@@ -77,11 +77,11 @@ MIDIClock_Slave::rebind (MIDI::Port& p)
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MIDIClock_Slave: connecting to port %1\n", port->name()));
 
-	port->input()->timing.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::update_midi_clock, this, _1, _2));
-	port->input()->start.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::start, this, _1, _2));
-	port->input()->contineu.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::contineu, this, _1, _2));
-	port->input()->stop.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::stop, this, _1, _2));
-	port->input()->position.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::position, this, _1, _2, 3));
+	port->parser()->timing.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::update_midi_clock, this, _1, _2));
+	port->parser()->start.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::start, this, _1, _2));
+	port->parser()->contineu.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::contineu, this, _1, _2));
+	port->parser()->stop.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::stop, this, _1, _2));
+	port->parser()->position.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::position, this, _1, _2, 3));
 }
 
 void

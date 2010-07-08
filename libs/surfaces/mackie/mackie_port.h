@@ -43,7 +43,7 @@ public:
 	enum port_type_t { mcu, ext };
 	enum emulation_t { none, mackie, bcf2000 };
 	
-	MackiePort( MackieControlProtocol & mcp, MIDI::Port & port, int number, port_type_t = mcu );
+	MackiePort (MackieControlProtocol & mcp, MIDI::Port & input_port, MIDI::Port & output_port, int number, port_type_t = mcu);
 	~MackiePort();
 
 	virtual void open();

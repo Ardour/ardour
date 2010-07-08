@@ -112,8 +112,7 @@ class Channel : public PBD::ScopedConnectionList {
 
   protected:
 	friend class Port;
-	void connect_input_signals ();
-	void connect_output_signals ();
+	void connect_signals ();
 
   private:
 	Port & _port;

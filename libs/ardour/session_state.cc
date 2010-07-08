@@ -282,12 +282,12 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	MIDI::Manager* m = MIDI::Manager::instance ();
 
-	_mtc_input_port = m->add_port (new MIDI::Port ("MTC", O_RDONLY, _engine.jack()));
-	_mtc_output_port = m->add_port (new MIDI::Port ("MTC", O_WRONLY, _engine.jack()));
-	_midi_input_port = m->add_port (new MIDI::Port ("MIDI control", O_RDONLY, _engine.jack()));
-	_midi_output_port = m->add_port (new MIDI::Port ("MIDI control", O_WRONLY, _engine.jack()));
-	_midi_clock_input_port = m->add_port (new MIDI::Port ("MIDI clock", O_RDONLY, _engine.jack()));
-	_midi_clock_output_port = m->add_port (new MIDI::Port ("MIDI clock", O_WRONLY, _engine.jack()));
+	_mtc_input_port = m->add_port (new MIDI::Port ("MTC in", MIDI::Port::IsInput, _engine.jack()));
+	_mtc_output_port = m->add_port (new MIDI::Port ("MTC out", MIDI::Port::IsOutput, _engine.jack()));
+	_midi_input_port = m->add_port (new MIDI::Port ("MIDI control in", MIDI::Port::IsInput, _engine.jack()));
+	_midi_output_port = m->add_port (new MIDI::Port ("MIDI control out", MIDI::Port::IsOutput, _engine.jack()));
+	_midi_clock_input_port = m->add_port (new MIDI::Port ("MIDI clock in", MIDI::Port::IsInput, _engine.jack()));
+	_midi_clock_output_port = m->add_port (new MIDI::Port ("MIDI clock out", MIDI::Port::IsOutput, _engine.jack()));
 }
 
 int
