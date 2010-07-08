@@ -107,9 +107,6 @@ ARDOUR_UI::setup_windows ()
 	setup_transport();
 	build_menu_bar ();
 
-	_midi_tracer_window = new MidiTracer ();
-	manage_window (*_midi_tracer_window);
-	
 	setup_tooltips ();
 
 	return 0;

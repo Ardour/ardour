@@ -216,18 +216,27 @@ ARDOUR_UI::toggle_big_clock_window ()
 }
 
 void
-ARDOUR_UI::toggle_midi_tracer_window ()
+ARDOUR_UI::new_midi_tracer_window ()
 {
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleMIDITracer"));
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("NewMIDITracer"));
 	if (!act) {
 		return;
 	}
 
-	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
-	if (tact->get_active ()) {
-		_midi_tracer_window->show_all ();
+	std::list<MidiTracer*>::iterator i = _midi_tracer_windows.begin ();
+	while (i != _midi_tracer_windows.end() && (*i)->get_visible() == true) {
+		++i;
+	}
+
+	if (i == _midi_tracer_windows.end()) {
+		/* all our MIDITracer windows are visible; make a new one */
+		MidiTracer* t = new MidiTracer ();
+		manage_window (*t);
+		t->show_all ();
+		_midi_tracer_windows.push_back (t);
 	} else {
-		_midi_tracer_window->hide ();
+		/* re-use the hidden one */
+		(*i)->show_all ();
 	}
 }
 
