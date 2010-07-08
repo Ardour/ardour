@@ -29,6 +29,8 @@
 
 namespace MIDI {
 
+class MachineControl;	
+
 class Manager {
   public:
 	~Manager ();
@@ -46,22 +48,32 @@ class Manager {
 	 */
 	void cycle_end();
 
+	MachineControl* mmc () const { return _mmc; }
+	Port *mtc_input_port() const { return _mtc_input_port; }
+	Port *mtc_output_port() const { return _mtc_output_port; }
+	Port *midi_input_port() const { return _midi_input_port; }
+	Port *midi_output_port() const { return _midi_output_port; }
+	Port *midi_clock_input_port() const { return _midi_clock_input_port; }
+	Port *midi_clock_output_port() const { return _midi_clock_output_port; }
+
 	Port* add_port (Port *);
 
 	Port* port (std::string const &);
+
+	void set_port_states (std::list<XMLNode*>);
 
 	typedef std::list<Port *> PortList;
 
 	const PortList& get_midi_ports() const { return _ports; } 
 
+	static void create (jack_client_t* jack);
+	
 	static Manager *instance () {
-		if (theManager == 0) {
-			theManager = new Manager;
-		}
+		assert (theManager);
 		return theManager;
 	}
 
-	void reestablish (void *);
+	void reestablish (jack_client_t *);
 	void reconnect ();
 
 	PBD::Signal0<void> PortsChanged;
@@ -69,8 +81,16 @@ class Manager {
   private:
 	/* This is a SINGLETON pattern */
 	
-	Manager ();
+	Manager (jack_client_t *);
 	static Manager *theManager;
+
+	MIDI::MachineControl*   _mmc;
+	MIDI::Port*             _mtc_input_port;
+	MIDI::Port*             _mtc_output_port;
+	MIDI::Port*             _midi_input_port;
+	MIDI::Port*             _midi_output_port;
+	MIDI::Port*             _midi_clock_input_port;
+	MIDI::Port*             _midi_clock_output_port;
 	
 	std::list<Port*> _ports;
 };

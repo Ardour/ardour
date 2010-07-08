@@ -32,6 +32,7 @@ namespace MIDI {
 class Port;
 class Parser;
 class MachineControlCommand;
+class Manager;	
 
 /** Class to handle incoming and outgoing MIDI machine control messages */
 class MachineControl 
@@ -88,7 +89,7 @@ class MachineControl
 		cmdResume = 0x7F
 	};
 	
-	MachineControl (jack_client_t *);
+	MachineControl (Manager *, jack_client_t *);
 
 	Port* output_port() { return _output_port; }
 	

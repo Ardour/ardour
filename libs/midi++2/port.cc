@@ -42,6 +42,7 @@ using namespace PBD;
 pthread_t Port::_process_thread;
 Signal0<void> Port::JackHalted;
 Signal0<void> Port::MakeConnections;
+string Port::state_node_name = "MIDI-port";
 
 Port::Port (string const & name, Flags flags, jack_client_t* jack_client)
 	: _currently_in_cycle (false)
@@ -406,7 +407,7 @@ Port::create_port ()
 XMLNode& 
 Port::get_state () const
 {
-	XMLNode* root = new XMLNode ("MIDI-port");
+	XMLNode* root = new XMLNode (state_node_name);
 	root->add_property ("tag", _tagname);
 
 	if (_flags == IsInput) {
@@ -459,6 +460,10 @@ Port::set_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
 
+	if ((prop = node.property ("tag")) == 0 || prop->value() != _tagname) {
+		return;
+	}
+
 	if ((prop = node.property ("connections")) != 0 && _jack_port) {
 		_connections = prop->value ();
 	}
@@ -498,9 +503,9 @@ Port::is_process_thread()
 }
 
 void
-Port::reestablish (void* jack)
+Port::reestablish (jack_client_t* jack)
 {
-	_jack_client = static_cast<jack_client_t*> (jack);
+	_jack_client = jack;
 	int const r = create_port ();
 
 	if (r) {

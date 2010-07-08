@@ -100,6 +100,7 @@
 
 #include "midi++/port.h"
 #include "midi++/mmc.h"
+#include "midi++/manager.h"
 
 #include "i18n.h"
 
@@ -136,7 +137,6 @@ Session::Session (AudioEngine &eng,
 	: _engine (eng),
 	  _target_transport_speed (0.0),
 	  _requested_return_frame (-1),
-	  _mmc (0),
 	  _session_dir (new SessionDirectory(fullpath)),
 	  state_tree (0),
 	  _butler (new Butler (*this)),
@@ -301,15 +301,6 @@ Session::destroy ()
 	}
 
 	Crossfade::set_buffer_size (0);
-
-	delete _mmc;
-
-	delete _mtc_input_port;
-	delete _mtc_output_port;
-	delete _midi_input_port;
-	delete _midi_output_port;
-	delete _midi_clock_input_port;
-	delete _midi_clock_output_port;
 
 	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
 	playlists.reset ();
@@ -971,7 +962,7 @@ Session::enable_record ()
                 if (g_atomic_int_compare_and_exchange (&_record_status, rs, Recording)) {
                         
                         _last_record_location = _transport_frame;
-                        _mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordStrobe));
+			MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordStrobe));
                         
                         if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
                                 
@@ -999,7 +990,7 @@ Session::disable_record (bool rt_context, bool force)
 
 		if ((!Config->get_latched_record_enable () && !play_loop) || force) {
 			g_atomic_int_set (&_record_status, Disabled);
-			_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordExit));
+			MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordExit));
 		} else {
 			if (rs == Recording) {
 				g_atomic_int_set (&_record_status, Enabled);
@@ -1059,7 +1050,7 @@ Session::maybe_enable_record ()
 			enable_record ();
 		}
 	} else {
-		_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordPause));
+		MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordPause));
 		RecordStateChanged (); /* EMIT SIGNAL */
 	}
 
@@ -3858,14 +3849,8 @@ Session::get_available_sync_options () const
 	vector<SyncSource> ret;
 	
 	ret.push_back (JACK);
-
-	if (mtc_input_port()) {
-		ret.push_back (MTC);
-	} 
-
-	if (midi_clock_input_port()) {
-		ret.push_back (MIDIClock);
-	} 
+	ret.push_back (MTC);
+	ret.push_back (MIDIClock);
 
 	return ret;
 }

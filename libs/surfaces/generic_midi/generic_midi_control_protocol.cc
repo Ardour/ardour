@@ -30,6 +30,7 @@
 #include "pbd/xml++.h"
 
 #include "midi++/port.h"
+#include "midi++/manager.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/session.h"
@@ -56,8 +57,8 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	, gui (0)
 {
 
-	_input_port = s.midi_input_port ();
-	_output_port = s.midi_output_port ();
+	_input_port = MIDI::Manager::instance()->midi_input_port ();
+	_output_port = MIDI::Manager::instance()->midi_output_port ();
 
 	do_feedback = false;
 	_feedback_interval = 10000; // microseconds

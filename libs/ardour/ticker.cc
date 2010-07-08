@@ -19,6 +19,7 @@
 */
 
 #include "midi++/port.h"
+#include "midi++/manager.h"
 #include "evoral/midi_events.h"
 #include "ardour/ticker.h"
 #include "ardour/session.h"
@@ -45,7 +46,6 @@ void MidiClockTicker::set_session (Session* s)
 	 Ticker::set_session (s);
 
 	 if (_session) {
-		 _session->MIDIClock_PortChanged.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::update_midi_clock_port, this));
 		 _session->TransportStateChange.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::transport_state_changed, this));
 		 _session->PositionChanged.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::position_changed, this, _1));
 		 _session->TransportLooped.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::transport_looped, this));
@@ -62,7 +62,7 @@ MidiClockTicker::session_going_away ()
 
 void MidiClockTicker::update_midi_clock_port()
 {
-	_midi_port = _session->midi_clock_output_port();
+	_midi_port = MIDI::Manager::instance()->midi_clock_output_port();
 }
 
 void MidiClockTicker::transport_state_changed()

@@ -68,6 +68,10 @@ RCConfiguration::RCConfiguration ()
 
 RCConfiguration::~RCConfiguration ()
 {
+	for (list<XMLNode*>::iterator i = _midi_port_states.begin(); i != _midi_port_states.end(); ++i) {
+		delete *i;
+	}
+
 	delete _control_protocol_state;
 }
 
@@ -254,19 +258,24 @@ RCConfiguration::set_state (const XMLNode& root, int /*version*/)
 	XMLNodeConstIterator niter;
 	XMLNode *node;
 
+	for (list<XMLNode*>::iterator i = _midi_port_states.begin(); i != _midi_port_states.end(); ++i) {
+		delete *i;
+	}
+
+	_midi_port_states.clear ();
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		node = *niter;
 
 		if (node->name() == "Config") {
-
 			set_variables (*node);
-
 		} else if (node->name() == "Extra") {
 			_extra_xml = new XMLNode (*node);
-
 		} else if (node->name() == ControlProtocolManager::state_node_name) {
 			_control_protocol_state = new XMLNode (*node);
+		} else if (node->name() == MIDI::Port::state_node_name) {
+			_midi_port_states.push_back (new XMLNode (*node));
 		}
 	}
 

@@ -130,8 +130,9 @@ Session::mmc_record_pause (MIDI::MachineControl &/*mmc*/)
 void
 Session::mmc_record_strobe (MIDI::MachineControl &/*mmc*/)
 {
-	if (!Config->get_mmc_control())
+	if (!Config->get_mmc_control()) {
 		return;
+	}
 
 	/* record strobe does an implicit "Play" command */
 
@@ -358,7 +359,7 @@ Session::send_full_time_code (nframes64_t const t)
 
 	_send_timecode_update = false;
 
-	if (_mtc_output_port == 0 || !session_send_mtc || _slave) {
+	if (!session_send_mtc || _slave) {
 		return 0;
 	}
 
@@ -393,7 +394,7 @@ Session::send_full_time_code (nframes64_t const t)
 	msg[8] = timecode.frames;
 
 	// Send message at offset 0, sent time is for the start of this cycle
-	if (_mtc_output_port->midimsg (msg, sizeof (msg), 0)) {
+	if (MIDI::Manager::instance()->mtc_output_port()->midimsg (msg, sizeof (msg), 0)) {
 		error << _("Session: could not send full MIDI time code") << endmsg;
 		return -1;
 	}
@@ -411,7 +412,7 @@ Session::send_full_time_code (nframes64_t const t)
 int
 Session::send_midi_time_code_for_cycle(nframes_t nframes)
 {
-	if (_mtc_output_port == 0 || _slave || !session_send_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
+	if (_slave || !session_send_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
 		// cerr << "(MTC) Not sending MTC\n";
 		return 0;
 	}
@@ -472,7 +473,7 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 		nframes_t out_stamp = msg_time - _transport_frame;
 		assert(out_stamp < nframes);
 
-		if (_mtc_output_port->midimsg (mtc_msg, 2, out_stamp)) {
+		if (MIDI::Manager::instance()->mtc_output_port()->midimsg (mtc_msg, 2, out_stamp)) {
 			error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno))
 			      << endmsg;
 			return -1;

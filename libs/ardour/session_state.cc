@@ -277,17 +277,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	Delivery::disable_panners ();
 	IO::disable_connecting ();
-
-	/* Create MIDI control ports */
-
-	MIDI::Manager* m = MIDI::Manager::instance ();
-
-	_mtc_input_port = m->add_port (new MIDI::Port ("MTC in", MIDI::Port::IsInput, _engine.jack()));
-	_mtc_output_port = m->add_port (new MIDI::Port ("MTC out", MIDI::Port::IsOutput, _engine.jack()));
-	_midi_input_port = m->add_port (new MIDI::Port ("MIDI control in", MIDI::Port::IsInput, _engine.jack()));
-	_midi_output_port = m->add_port (new MIDI::Port ("MIDI control out", MIDI::Port::IsOutput, _engine.jack()));
-	_midi_clock_input_port = m->add_port (new MIDI::Port ("MIDI clock in", MIDI::Port::IsInput, _engine.jack()));
-	_midi_clock_output_port = m->add_port (new MIDI::Port ("MIDI clock out", MIDI::Port::IsOutput, _engine.jack()));
 }
 
 int
@@ -365,8 +354,8 @@ Session::second_stage_init ()
 	send_full_time_code (0);
 	_engine.transport_locate (0);
 
-	_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
-	_mmc->send (MIDI::MachineControlCommand (Timecode::Time ()));
+	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
+	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (Timecode::Time ()));
 
 	MidiClockTicker::instance().set_session (this);
 	MIDI::Name::MidiPatchManager::instance().set_session (this);
@@ -3203,11 +3192,11 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "mmc-device-id" || p == "mmc-receive-id") {
 
-		_mmc->set_receive_device_id (Config->get_mmc_receive_device_id());
+		MIDI::Manager::instance()->mmc()->set_receive_device_id (Config->get_mmc_receive_device_id());
 
 	} else if (p == "mmc-send-id") {
 
-		_mmc->set_send_device_id (Config->get_mmc_send_device_id());
+		MIDI::Manager::instance()->mmc()->set_send_device_id (Config->get_mmc_send_device_id());
 
 	} else if (p == "midi-control") {
 
@@ -3265,7 +3254,7 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "send-mmc") {
 
-		_mmc->enable_send (Config->get_send_mmc ());
+		MIDI::Manager::instance()->mmc()->enable_send (Config->get_send_mmc ());
 
 	} else if (p == "midi-feedback") {
 
@@ -3307,13 +3296,13 @@ Session::config_changed (std::string p, bool ours)
 		sync_order_keys ("session");
 	} else if (p == "initial-program-change") {
 
-		if (_mmc->output_port() && Config->get_initial_program_change() >= 0) {
+		if (MIDI::Manager::instance()->mmc()->output_port() && Config->get_initial_program_change() >= 0) {
 			MIDI::byte buf[2];
 
 			buf[0] = MIDI::program; // channel zero by default
 			buf[1] = (Config->get_initial_program_change() & 0x7f);
 
-			_mmc->output_port()->midimsg (buf, sizeof (buf), 0);
+			MIDI::Manager::instance()->mmc()->output_port()->midimsg (buf, sizeof (buf), 0);
 		}
 	} else if (p == "solo-mute-override") {
 		// catch_up_on_solo_mute_override ();
@@ -3362,29 +3351,29 @@ Session::load_diskstreams_2X (XMLNode const & node, int)
         return 0;
 }
 
-/** Create our MachineControl object and connect things to it */
+/** Connect things to the MMC object */
 void
 Session::setup_midi_machine_control ()
 {
-	_mmc = new MIDI::MachineControl (_engine.jack());
+	MIDI::MachineControl* mmc = MIDI::Manager::instance()->mmc ();
 	
-	_mmc->Play.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
-	_mmc->DeferredPlay.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
-	_mmc->Stop.connect_same_thread (*this, boost::bind (&Session::mmc_stop, this, _1));
-	_mmc->FastForward.connect_same_thread (*this, boost::bind (&Session::mmc_fast_forward, this, _1));
-	_mmc->Rewind.connect_same_thread (*this, boost::bind (&Session::mmc_rewind, this, _1));
-	_mmc->Pause.connect_same_thread (*this, boost::bind (&Session::mmc_pause, this, _1));
-	_mmc->RecordPause.connect_same_thread (*this, boost::bind (&Session::mmc_record_pause, this, _1));
-	_mmc->RecordStrobe.connect_same_thread (*this, boost::bind (&Session::mmc_record_strobe, this, _1));
-	_mmc->RecordExit.connect_same_thread (*this, boost::bind (&Session::mmc_record_exit, this, _1));
-	_mmc->Locate.connect_same_thread (*this, boost::bind (&Session::mmc_locate, this, _1, _2));
-	_mmc->Step.connect_same_thread (*this, boost::bind (&Session::mmc_step, this, _1, _2));
-	_mmc->Shuttle.connect_same_thread (*this, boost::bind (&Session::mmc_shuttle, this, _1, _2, _3));
-	_mmc->TrackRecordStatusChange.connect_same_thread (*this, boost::bind (&Session::mmc_record_enable, this, _1, _2, _3));
+	mmc->Play.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
+	mmc->DeferredPlay.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
+	mmc->Stop.connect_same_thread (*this, boost::bind (&Session::mmc_stop, this, _1));
+	mmc->FastForward.connect_same_thread (*this, boost::bind (&Session::mmc_fast_forward, this, _1));
+	mmc->Rewind.connect_same_thread (*this, boost::bind (&Session::mmc_rewind, this, _1));
+	mmc->Pause.connect_same_thread (*this, boost::bind (&Session::mmc_pause, this, _1));
+	mmc->RecordPause.connect_same_thread (*this, boost::bind (&Session::mmc_record_pause, this, _1));
+	mmc->RecordStrobe.connect_same_thread (*this, boost::bind (&Session::mmc_record_strobe, this, _1));
+	mmc->RecordExit.connect_same_thread (*this, boost::bind (&Session::mmc_record_exit, this, _1));
+	mmc->Locate.connect_same_thread (*this, boost::bind (&Session::mmc_locate, this, _1, _2));
+	mmc->Step.connect_same_thread (*this, boost::bind (&Session::mmc_step, this, _1, _2));
+	mmc->Shuttle.connect_same_thread (*this, boost::bind (&Session::mmc_shuttle, this, _1, _2, _3));
+	mmc->TrackRecordStatusChange.connect_same_thread (*this, boost::bind (&Session::mmc_record_enable, this, _1, _2, _3));
 
 	/* also handle MIDI SPP because its so common */
 
-	_mmc->SPPStart.connect_same_thread (*this, boost::bind (&Session::spp_start, this, _1, _2));
-	_mmc->SPPContinue.connect_same_thread (*this, boost::bind (&Session::spp_continue, this, _1, _2));
-	_mmc->SPPStop.connect_same_thread (*this, boost::bind (&Session::spp_stop, this, _1, _2));
+	mmc->SPPStart.connect_same_thread (*this, boost::bind (&Session::spp_start, this, _1, _2));
+	mmc->SPPContinue.connect_same_thread (*this, boost::bind (&Session::spp_continue, this, _1, _2));
+	mmc->SPPStop.connect_same_thread (*this, boost::bind (&Session::spp_stop, this, _1, _2));
 }

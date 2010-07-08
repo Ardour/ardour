@@ -638,19 +638,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	PBD::Signal1<void,boost::shared_ptr<Bundle> > BundleAdded;
 	PBD::Signal1<void,boost::shared_ptr<Bundle> > BundleRemoved;
 
-	/* MIDI control */
-
-	void midi_panic(void);
-	MIDI::Port *mtc_input_port() const { return _mtc_input_port; }
-	MIDI::Port *mtc_output_port() const { return _mtc_output_port; }
-	MIDI::Port *midi_input_port() const { return _midi_input_port; }
-	MIDI::Port *midi_output_port() const { return _midi_output_port; }
-	MIDI::Port *midi_clock_input_port() const { return _midi_clock_input_port; }
-	MIDI::Port *midi_clock_output_port() const { return _midi_clock_output_port; }
-
-	PBD::Signal0<void> MTC_PortChanged;
-	PBD::Signal0<void> MIDI_PortChanged;
-	PBD::Signal0<void> MIDIClock_PortChanged;
+	void midi_panic ();
 
 	/* Scrubbing */
 
@@ -944,13 +932,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void check_declick_out ();
 
-	MIDI::MachineControl*   _mmc;
-	MIDI::Port*             _mtc_input_port;
-	MIDI::Port*             _mtc_output_port;
-	MIDI::Port*             _midi_input_port;
-	MIDI::Port*             _midi_output_port;
-	MIDI::Port*             _midi_clock_input_port;
-	MIDI::Port*             _midi_clock_output_port;
 	std::string             _path;
 	std::string             _name;
         bool                    _is_new;

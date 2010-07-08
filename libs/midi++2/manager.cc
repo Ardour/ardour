@@ -27,6 +27,7 @@
 #include "midi++/manager.h"
 #include "midi++/channel.h"
 #include "midi++/port.h"
+#include "midi++/mmc.h"
 
 using namespace std;
 using namespace MIDI;
@@ -34,12 +35,23 @@ using namespace PBD;
 
 Manager *Manager::theManager = 0;
 
-Manager::Manager () 
+Manager::Manager (jack_client_t* jack) 
 {
+	_mmc = new MachineControl (this, jack);
+	
+	_mtc_input_port = add_port (new MIDI::Port ("MTC in", Port::IsInput, jack));
+	_mtc_output_port = add_port (new MIDI::Port ("MTC out", Port::IsOutput, jack));
+	_midi_input_port = add_port (new MIDI::Port ("MIDI control in", Port::IsInput, jack));
+	_midi_output_port = add_port (new MIDI::Port ("MIDI control out", Port::IsOutput, jack));
+	_midi_clock_input_port = add_port (new MIDI::Port ("MIDI clock in", Port::IsInput, jack));
+	_midi_clock_output_port = add_port (new MIDI::Port ("MIDI clock out", Port::IsOutput, jack));
 }
 
 Manager::~Manager ()
 {
+	delete _mmc;
+	
+	/* This will delete our MTC etc. ports */
 	for (PortList::iterator p = _ports.begin(); p != _ports.end(); ++p) {
 		delete *p;
 	}
@@ -77,10 +89,10 @@ Manager::cycle_end()
 
 /** Re-register ports that disappear on JACK shutdown */
 void
-Manager::reestablish (void* a)
+Manager::reestablish (jack_client_t* jack)
 {
 	for (PortList::const_iterator p = _ports.begin(); p != _ports.end(); ++p) {
-		(*p)->reestablish (a);
+		(*p)->reestablish (jack);
 	}
 }
 
@@ -106,4 +118,21 @@ Manager::port (string const & n)
 	}
 
 	return *p;
+}
+
+void
+Manager::create (jack_client_t* jack)
+{
+	assert (theManager == 0);
+	theManager = new Manager (jack);
+}
+
+void
+Manager::set_port_states (list<XMLNode*> s)
+{
+	for (list<XMLNode*>::iterator i = s.begin(); i != s.end(); ++i) {
+		for (PortList::const_iterator j = _ports.begin(); j != _ports.end(); ++j) {
+			(*j)->set_state (**i);
+		}
+	}
 }

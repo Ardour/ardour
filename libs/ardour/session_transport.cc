@@ -30,6 +30,7 @@
 
 #include "midi++/mmc.h"
 #include "midi++/port.h"
+#include "midi++/manager.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
@@ -184,7 +185,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 	// FIXME: where should this really be? [DR]
 	//send_full_time_code();
 	
-	_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
+	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
 	send_mmc_locate (_transport_frame);
 
 	if (_transport_speed < 0.0f) {
@@ -1133,7 +1134,7 @@ Session::start_transport ()
 
 	Timecode::Time time;
 	timecode_time_subframes (_transport_frame, time);
-	_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
+	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
 
 	TransportStateChange (); /* EMIT SIGNAL */
 }
@@ -1246,17 +1247,11 @@ Session::switch_to_sync_source (SyncSource src)
 			return;
 		}
 
-		if (_mtc_input_port) {
-			try {
-				new_slave = new MTC_Slave (*this, *_mtc_input_port);
-			}
+		try {
+			new_slave = new MTC_Slave (*this, *MIDI::Manager::instance()->mtc_input_port());
+		}
 
-			catch (failed_constructor& err) {
-				return;
-			}
-
-		} else {
-			error << _("No MTC port defined: MTC slaving is impossible.") << endmsg;
+		catch (failed_constructor& err) {
 			return;
 		}
 		break;
@@ -1266,17 +1261,11 @@ Session::switch_to_sync_source (SyncSource src)
 			return;
 		}
 
-		if (_midi_clock_input_port) {
-			try {
-				new_slave = new MIDIClock_Slave (*this, *_midi_clock_input_port, 24);
-			}
-
-			catch (failed_constructor& err) {
-				return;
-			}
-
-		} else {
-			error << _("No MIDI Clock port defined: MIDI Clock slaving is impossible.") << endmsg;
+		try {
+			new_slave = new MIDIClock_Slave (*this, *MIDI::Manager::instance()->midi_clock_input_port(), 24);
+		}
+		
+		catch (failed_constructor& err) {
 			return;
 		}
 		break;
@@ -1570,5 +1559,5 @@ Session::send_mmc_locate (nframes64_t t)
 {
 	Timecode::Time time;
 	timecode_time_subframes (t, time);
-	_mmc->send (MIDI::MachineControlCommand (time));
+	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (time));
 }

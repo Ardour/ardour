@@ -126,12 +126,14 @@ class Port {
 
 	nframes_t nframes_this_cycle() const {	return _nframes_this_cycle; }
 
-	void reestablish (void *);
+	void reestablish (jack_client_t *);
 	void reconnect ();
 
 	static void set_process_thread (pthread_t);
 	static pthread_t get_process_thread () { return _process_thread; }
 	static bool is_process_thread();
+
+	static std::string state_node_name;
 	
 	static PBD::Signal0<void> MakeConnections;
 	static PBD::Signal0<void> JackHalted;
