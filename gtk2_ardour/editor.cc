@@ -980,11 +980,14 @@ Editor::map_position_change (nframes64_t frame)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::map_position_change, frame)
 
-	if (_session == 0 || !_follow_playhead) {
+	if (_session == 0) {
 		return;
 	}
 
-	center_screen (frame);
+	if (_follow_playhead) {
+		center_screen (frame);
+	}
+
 	playhead_cursor->set_position (frame);
 }
 
