@@ -215,6 +215,7 @@ Gdk::Cursor* Editor::right_side_trim_cursor = 0;
 Gdk::Cursor* Editor::fade_in_cursor = 0;
 Gdk::Cursor* Editor::fade_out_cursor = 0;
 Gdk::Cursor* Editor::grabber_cursor = 0;
+Gdk::Cursor* Editor::grabber_note_cursor = 0;
 Gdk::Cursor* Editor::grabber_edit_point_cursor = 0;
 Gdk::Cursor* Editor::zoom_cursor = 0;
 Gdk::Cursor* Editor::time_fx_cursor = 0;
@@ -1238,6 +1239,11 @@ Editor::build_cursors ()
 	grabber_cursor = new Gdk::Cursor (HAND2);
 
 	{
+		Glib::RefPtr<Gdk::Pixbuf> grabber_note_pixbuf (::get_icon ("grabber_note"));
+		grabber_note_cursor = new Gdk::Cursor (Gdk::Display::get_default(), grabber_note_pixbuf, 5, 10);
+	}
+
+	{
 		Glib::RefPtr<Gdk::Pixbuf> grabber_edit_point_pixbuf (::get_icon ("grabber_edit_point"));
 		grabber_edit_point_cursor = new Gdk::Cursor (Gdk::Display::get_default(), grabber_edit_point_pixbuf, 5, 17);
 	}
@@ -1505,7 +1511,10 @@ Editor::build_track_region_context_menu (nframes64_t frame)
 		boost::shared_ptr<Track> tr;
 		boost::shared_ptr<Playlist> pl;
 
-		if ((tr = rtv->track()) && ((pl = tr->playlist()))) {
+		/* Don't offer a region submenu if we are in internal edit mode, as we don't select regions in this
+		   mode and so offering region context is somewhat confusing.
+		*/
+		if ((tr = rtv->track()) && ((pl = tr->playlist())) && !internal_editing()) {
 			Playlist::RegionList* regions = pl->regions_at ((nframes64_t) floor ( (double)frame * tr->speed()));
 
  			if (selection->regions.size() > 1) {

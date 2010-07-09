@@ -464,6 +464,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	static Gdk::Cursor* fade_out_cursor;
 	static Gdk::Cursor* selector_cursor;
 	static Gdk::Cursor* grabber_cursor;
+	static Gdk::Cursor* grabber_note_cursor;
 	static Gdk::Cursor* grabber_edit_point_cursor;
 	static Gdk::Cursor* zoom_cursor;
 	static Gdk::Cursor* time_fx_cursor;

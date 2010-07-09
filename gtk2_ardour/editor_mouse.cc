@@ -177,7 +177,7 @@ Editor::which_grabber_cursor ()
 			break;
 
 		case MouseObject:
-			c = grabber_cursor;
+			c = grabber_note_cursor;
 			break;
 
 		case MouseTimeFX:
@@ -427,6 +427,10 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	   region alignment.
 
 	   note: not dbl-click or triple-click
+
+	   Also note that there is no region selection in internal edit mode, otherwise
+	   for operations operating on the selection (e.g. cut) it is not obvious whether
+	   to cut notes or regions.
 	*/
 
 	if (((mouse_mode != MouseObject) &&
@@ -435,8 +439,8 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
 	     (mouse_mode != MouseGain) &&
 	     (mouse_mode != MouseRange)) ||
-
-	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3)) {
+	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3) ||
+	    internal_editing()) {
 
 		return;
 	}
@@ -460,7 +464,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
 	switch (item_type) {
 	case RegionItem:
-		if (mouse_mode != MouseRange || internal_editing() || _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
+		if (mouse_mode != MouseRange || _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
 			set_selected_regionview_from_click (press, op, true);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			selection->clear_tracks ();
@@ -469,14 +473,13 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		if (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT && !selection->regions.empty()) {
 			clicked_selection = select_range_around_region (selection->regions.front());
 		}
-			
 		break;
 
  	case RegionViewNameHighlight:
  	case RegionViewName:
         case LeftFrameHandle:
         case RightFrameHandle:
-		if (mouse_mode != MouseRange || internal_editing() || _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
+		if (mouse_mode != MouseRange || _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
 			set_selected_regionview_from_click (press, op, true);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			set_selected_track_as_side_effect ();
@@ -2662,9 +2665,10 @@ Editor::set_internal_edit (bool yn)
 			}
 		}
 
-		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-			(*i)->hide_selection ();
-		}
+		/* deselect everything to avoid confusion when e.g. we can't now cut a previously selected
+		   region because cut means "cut note" rather than "cut region".
+		*/
+		selection->clear ();
 
 		start_step_editing ();
                 set_canvas_cursor ();
