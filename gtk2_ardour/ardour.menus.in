@@ -124,12 +124,6 @@
 	       </menu>
 
 	       <separator/>
-	       <menu action='SyncMenu'>
-               	     <menuitem action='SendMTC'/>
-               	     <menuitem action='SendMMC'/>
-               	     <menuitem action='UseMMC'/>
-               	     <menuitem action='SendMidiClock'/>
-	       </menu>
 	       <menuitem action='ToggleTimeMaster'/>
                <menuitem action='TogglePunch'/>
                <menuitem action='TogglePunchIn'/>
