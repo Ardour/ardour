@@ -182,12 +182,6 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 	/* assume that when we start, we'll be moving forwards */
 
-	// FIXME: where should this really be? [DR]
-	//send_full_time_code();
-	
-	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
-	send_mmc_locate (_transport_frame);
-
 	if (_transport_speed < 0.0f) {
 		todo = (PostTransportWork (todo | PostTransportStop | PostTransportReverse));
 	} else {
@@ -564,6 +558,8 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	have_looped = false;
 
 	send_full_time_code (_transport_frame);
+	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
+	send_mmc_locate (_transport_frame);
 
 	if ((ptw & PostTransportLocate) && get_record_enabled()) {
 		/* capture start has been changed, so save pending state */
