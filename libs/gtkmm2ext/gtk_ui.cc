@@ -184,7 +184,20 @@ UI::load_rcfile (string path, bool themechange)
 
 	fatal_widget.set_name ("FatalMessage");
 	delete fatal_style;
-	fatal_style = new Glib::RefPtr<Style>(rc.get_style(fatal_widget));
+
+	/* This next line and the similar ones below are sketchily
+	 * guessed to fix #2885.  I think maybe that problems occur
+	 * because with gtk_rc_get_style (to quote its docs) "no
+	 * refcount is added to the returned style".  So I've switched
+	 * this to use Glib::wrap with take_copy == true, which requires
+	 * all the nasty casts and calls to plain-old-C GTK.
+	 *
+	 * At worst I think this causes a memory leak; at least it appears
+	 * to fix the bug.
+	 *
+	 * I could be wrong about any or all of the above.
+	 */
+	fatal_style = new Glib::RefPtr<Style> (Glib::wrap (gtk_rc_get_style (reinterpret_cast<GtkWidget*> (fatal_widget.gobj())), true));
 
 	fatal_ptag->property_font_desc().set_value((*fatal_style)->get_font());
 	fatal_ptag->property_foreground_gdk().set_value((*fatal_style)->get_fg(STATE_ACTIVE));
@@ -195,7 +208,7 @@ UI::load_rcfile (string path, bool themechange)
 
 	error_widget.set_name ("ErrorMessage");
 	delete error_style;
-	error_style = new Glib::RefPtr<Style>(rc.get_style(error_widget));
+	error_style = new Glib::RefPtr<Style> (Glib::wrap (gtk_rc_get_style (reinterpret_cast<GtkWidget*> (error_widget.gobj())), true));
 
 	error_ptag->property_font_desc().set_value((*error_style)->get_font());
 	error_ptag->property_foreground_gdk().set_value((*error_style)->get_fg(STATE_ACTIVE));
@@ -206,7 +219,7 @@ UI::load_rcfile (string path, bool themechange)
 
 	warning_widget.set_name ("WarningMessage");
 	delete warning_style;
-	warning_style = new Glib::RefPtr<Style>(rc.get_style(warning_widget));
+	warning_style = new Glib::RefPtr<Style> (Glib::wrap (gtk_rc_get_style (reinterpret_cast<GtkWidget*> (warning_widget.gobj())), true));
 
 	warning_ptag->property_font_desc().set_value((*warning_style)->get_font());
 	warning_ptag->property_foreground_gdk().set_value((*warning_style)->get_fg(STATE_ACTIVE));
@@ -217,7 +230,7 @@ UI::load_rcfile (string path, bool themechange)
 
 	info_widget.set_name ("InfoMessage");
 	delete info_style;
-	info_style = new Glib::RefPtr<Style>(rc.get_style(info_widget));
+	info_style = new Glib::RefPtr<Style> (Glib::wrap (gtk_rc_get_style (reinterpret_cast<GtkWidget*> (info_widget.gobj())), true));
 
 	info_ptag->property_font_desc().set_value((*info_style)->get_font());
 	info_ptag->property_foreground_gdk().set_value((*info_style)->get_fg(STATE_ACTIVE));
