@@ -246,7 +246,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 		waiting_for_sync_offset = true;
 	}
 
-	transport_sub_state = ((!config.get_external_sync()&& config.get_auto_return()) ? AutoReturning : 0);
+	transport_sub_state = 0;
 }
 
 void

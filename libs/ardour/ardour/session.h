@@ -791,9 +791,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		PendingDeclickIn   = 0x1,
 		PendingDeclickOut  = 0x2,
 		StopPendingCapture = 0x4,
-		AutoReturning      = 0x10,
 		PendingLocate      = 0x20,
-		PendingSetLoop     = 0x40
 	};
 
 	/* stuff used in process() should be close together to
