@@ -312,8 +312,10 @@ def build(bld):
 		obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc', 'uri_map.cc' ]
 		obj.uselib += ' SLV2 '
 		
-	if bld.env['VST']:
+	if bld.env['VST_SUPPORT']:
 		obj.source += [ 'vst_plugin.cc', 'session_vst.cc' ]
+		obj.includes += [ '../fst' ]
+		obj.cxxflags += [ '-DVST_SUPPORT' ]
 
 	if bld.env['HAVE_COREAUDIO'] and bld.env['COREAUDIO']:
 		obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]

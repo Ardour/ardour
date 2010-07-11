@@ -29,6 +29,12 @@
 #include "ardour/data_type.h"
 #include "ardour/types.h"
 
+#ifdef VST_SUPPORT
+#include "evoral/MIDIEvent.hpp"
+struct VstEvents;
+struct VstMidiEvent;
+#endif	
+
 namespace ARDOUR {
 
 class Buffer;
@@ -105,6 +111,10 @@ public:
 	void flush_lv2_midi(bool input, size_t i);
 #endif
 
+#ifdef VST_SUPPORT
+	VstEvents* get_vst_midi (size_t);
+#endif	
+
 	void read_from(const BufferSet& in, nframes_t nframes);
 	void merge_from(const BufferSet& in, nframes_t nframes);
 
@@ -158,6 +168,31 @@ private:
 	typedef std::vector< std::pair<bool, LV2EventBuffer*> > LV2Buffers;
 	LV2Buffers _lv2_buffers;
 #endif
+
+#ifdef VST_SUPPORT
+	class VSTBuffer {
+	public:
+		VSTBuffer (size_t);
+		~VSTBuffer ();
+
+		void clear ();
+		void push_back (Evoral::MIDIEvent<nframes_t> const &);
+		VstEvents* events () const {
+			return _events;
+		}
+
+	private:
+		/* prevent copy construction */
+		VSTBuffer (VSTBuffer const &);
+		
+		VstEvents* _events; /// the parent VSTEvents struct
+		VstMidiEvent* _midi_events; ///< storage area for VSTMidiEvents
+		size_t _capacity;
+	};
+	
+	typedef std::vector<VSTBuffer*> VSTBuffers;
+	VSTBuffers _vst_buffers;
+#endif	
 
 	/// Use counts (there may be more actual buffers than this)
 	ChanCount _count;

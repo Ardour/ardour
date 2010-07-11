@@ -237,13 +237,29 @@ def configure(conf):
 	autowaf.check_header(conf, 'boost/shared_ptr.hpp')
 	autowaf.check_header(conf, 'boost/weak_ptr.hpp')
 
+# Add a waf `feature' to allow compilation of things using winegcc
+from TaskGen import feature
+@feature("wine")
+def set_winegcc(self):
+	self.env.LINK_CXX = self.env.LINK_CC = 'wineg++'
+	self.env.CC = 'winegcc'
+
 def build(bld):
-	# Program
-	obj = bld.new_task_gen(features = 'cxx cc cprogram')
+	# GTK front-end; if we're using VST we build this as a shared library, otherwise
+	# it's a normal executabale
+	if bld.env['VST_SUPPORT']:
+		obj = bld.new_task_gen(features = 'cxx cc cshlib')
+	else:
+		obj = bld.new_task_gen(features = 'cxx cc cprogram')
+
 	obj.includes     = ['.']
 	obj.source       = gtk2_ardour_sources
 	obj.name         = 'gtk2_ardour'
-	obj.target       = 'ardour-3.0'
+	if bld.env['VST_SUPPORT']:
+		obj.target = 'gtk2_ardour'
+		obj.includes += ['../libs/fst']
+	else:
+		obj.target = 'ardour-3.0'
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	obj.uselib       = 'UUID FLAC GLIBMM GTHREAD GTK GNOMECANVAS OGG ALSA'
 	obj.uselib       += ' GTKMM GNOMECANVASMM OSX GTKOSX COREAUDIO'
@@ -266,7 +282,7 @@ def build(bld):
 	if bld.env['FREESOUND']:
 		obj.source +=  [ 'sfdb_freesound_mootcher.cc' ]
 
-	if bld.env['VST']:
+	if bld.env['VST_SUPPORT']:
 		obj.source += [ 'vst_pluginui.cc' ]
 		obj.cxxflags += [ '-DVST_SUPPORT' ]
 
@@ -280,6 +296,24 @@ def build(bld):
 
 	else:
 		obj.source += [ 'x11.cc' ]
+
+	if bld.env['VST_SUPPORT']:
+		# If we require VST support we build a stub main() and the FST library here using
+		# winegcc, and link it to the GTK front-end library
+		obj = bld.new_task_gen (features = 'cxx cc cprogram wine')
+		obj.source = '''
+			../libs/fst/fst.c
+			../libs/fst/fstinfofile.c
+			../libs/fst/vsti.c
+			../libs/fst/vstwin.c
+			../vst/winmain.c
+		'''
+		obj.includes = '../libs/fst'
+		obj.target = 'ardour-3.0-vst'
+		obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
+		obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
+		obj.uselib = 'ALSA'
+		obj.uselib_local = '''libpbd libmidipp libtaglib libardour libardour_cp libgtkmm2ext libtaglib gtk2_ardour'''
 
 	# Wrappers
 

@@ -33,6 +33,9 @@
 #include "ardour/lv2_plugin.h"
 #include "ardour/lv2_event_buffer.h"
 #endif
+#ifdef VST_SUPPORT
+#include "vestige/aeffectx.h"
+#endif
 
 namespace ARDOUR {
 
@@ -69,6 +72,14 @@ BufferSet::clear()
 	_buffers.clear();
 	_count.reset();
 	_available.reset();
+
+#ifdef VST_SUPPORT	
+	for (VSTBuffers::iterator i = _vst_buffers.begin(); i != _vst_buffers.end(); ++i) {
+		delete *i;
+	}
+
+	_vst_buffers.clear ();
+#endif	
 }
 
 /** Make this BufferSet a direct mirror of a PortSet's buffers.
@@ -146,6 +157,15 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 		}
 	}
 #endif
+
+#ifdef VST_SUPPORT
+	// As above but for VST
+	if (type == DataType::MIDI) {
+		while (_vst_buffers.size() < _buffers[type].size()) {
+			_vst_buffers.push_back (new VSTBuffer (buffer_capacity));
+		}
+	}
+#endif	
 
 	// Post-conditions
 	assert(bufs[0]->type() == type);
@@ -288,7 +308,86 @@ BufferSet::flush_lv2_midi(bool input, size_t i)
 	}
 }
 
-#endif
+#endif /* HAVE_SLV2 */
+
+#ifdef VST_SUPPORT
+
+VstEvents*
+BufferSet::get_vst_midi (size_t b)
+{
+	MidiBuffer& m = get_midi (b);
+	VSTBuffer* vst = _vst_buffers[b];
+
+	vst->clear ();
+
+	for (MidiBuffer::iterator i = m.begin(); i != m.end(); ++i) {
+		vst->push_back (*i);
+	}
+	
+	return vst->events();
+}
+
+BufferSet::VSTBuffer::VSTBuffer (size_t c)
+  : _capacity (c)
+{
+	_events = static_cast<VstEvents*> (malloc (sizeof (VstEvents) + _capacity * sizeof (VstEvent *)));
+	_midi_events = static_cast<VstMidiEvent*> (malloc (sizeof (VstMidiEvent) * _capacity));
+
+	if (_events == 0 || _midi_events == 0) {
+		free (_events);
+		free (_midi_events);
+		throw failed_constructor ();
+	}
+
+	_events->numEvents = 0;
+	_events->reserved = 0;
+}
+
+BufferSet::VSTBuffer::~VSTBuffer ()
+{
+	free (_events);
+	free (_midi_events);
+}
+
+void
+BufferSet::VSTBuffer::clear ()
+{
+	_events->numEvents = 0;
+}
+
+void
+BufferSet::VSTBuffer::push_back (Evoral::MIDIEvent<nframes_t> const & ev)
+{
+	if (ev.size() > 3) {
+		/* XXX: this will silently drop MIDI messages longer than 3 bytes, so
+		   they won't be passed to VST plugins or VSTis
+		*/
+		return;
+	}
+	int const n = _events->numEvents;
+	assert (n < (int) _capacity);
+
+	_events->events[n] = reinterpret_cast<VstEvent*> (_midi_events + n);
+	VstMidiEvent* v = reinterpret_cast<VstMidiEvent*> (_events->events[n]);
+	
+	v->type = kVstMidiType;
+	v->byteSize = sizeof (VstMidiEvent);
+	v->deltaFrames = ev.time ();
+
+	v->flags = 0;
+	v->detune = 0;
+	v->noteLength = 0;
+	v->noteOffset = 0;
+	v->reserved1 = 0;
+	v->reserved2 = 0;
+	v->noteOffVelocity = 0;
+	memcpy (v->midiData, ev.buffer(), ev.size());
+	v->midiData[3] = 0;
+
+	_events->numEvents++;
+}
+
+#endif /* VST_SUPPORT */
 
 void
 BufferSet::read_from (const BufferSet& in, nframes_t nframes)

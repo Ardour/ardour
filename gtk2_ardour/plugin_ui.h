@@ -298,9 +298,24 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	Gtk::Socket socket;
 	Gtk::HBox   preset_box;
 	Gtk::VBox   vpacker;
+	Gtk::ComboBoxText vst_preset_combo;
+	Glib::RefPtr<Gtk::ListStore> preset_model;
+
+	struct PresetModelColumns : public Gtk::TreeModel::ColumnRecord {
+	    PresetModelColumns() { 
+		    add (name);
+		    add (number);
+	    }
+	    Gtk::TreeModelColumn<Glib::ustring> name;
+	    Gtk::TreeModelColumn<int> number;
+	};
+
+	PresetModelColumns preset_columns;
 
 	bool configure_handler (GdkEventConfigure*, Gtk::Socket*);
 	void save_plugin_setting ();
+	void create_preset_store ();
+	void preset_chosen ();
 };
 #endif // VST_SUPPORT
 

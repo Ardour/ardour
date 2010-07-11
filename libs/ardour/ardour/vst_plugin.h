@@ -85,7 +85,7 @@ class VSTPlugin : public ARDOUR::Plugin
 	bool has_editor () const;
 
 	XMLNode& get_state();
-	int set_state(const XMLNode& node);
+	int set_state (XMLNode const &, int);
 
 	AEffect* plugin() const { return _plugin; }
 	FST* fst() const { return _fst; }

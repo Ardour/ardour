@@ -558,6 +558,7 @@ PluginManager::vst_discover (string path)
 	info->index = 0;
 	info->n_inputs.set_audio (finfo->numInputs);
 	info->n_outputs.set_audio (finfo->numOutputs);
+	info->n_inputs.set_midi (finfo->wantMidi ? 1 : 0);
 	info->type = ARDOUR::VST;
 
 	_vst_plugin_info->push_back (info);

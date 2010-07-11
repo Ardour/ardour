@@ -58,11 +58,11 @@ long Session::vst_callback (AEffect* effect,
 	if (effect && effect->user) {
 	        plug = (VSTPlugin*) (effect->user);
 		session = &plug->session();
-		SHOW_CALLBACK ("am callback 0x%x, opcode = %ld, plugin = \"%s\" ", pthread_self(), opcode, plug->name());
+		SHOW_CALLBACK ("am callback 0x%x, opcode = %ld, plugin = \"%s\" ", (int) pthread_self(), opcode, plug->name());
 	} else {
 		plug = 0;
 		session = 0;
-		SHOW_CALLBACK ("am callback 0x%x, opcode = %ld", pthread_self(), opcode);
+		SHOW_CALLBACK ("am callback 0x%x, opcode = %ld", (int) pthread_self(), opcode);
 	}
 
 	switch(opcode){
@@ -107,6 +107,9 @@ long Session::vst_callback (AEffect* effect,
 	case audioMasterWantMidi:
 		SHOW_CALLBACK ("amc: audioMasterWantMidi\n");
 		// <value> is a filter which is currently ignored
+		if (plug) {
+			plug->get_info()->n_inputs.set_midi (1);
+		}
 		return 0;
 
 	case audioMasterGetTime:
@@ -345,7 +348,7 @@ long Session::vst_callback (AEffect* effect,
 		return 0;
 
 	default:
-		SHOW_CALLBACK ("VST master dispatcher: undefed: %d\n", opcode);
+		SHOW_CALLBACK ("VST master dispatcher: undefed: %ld\n", opcode);
 		break;
 	}
 

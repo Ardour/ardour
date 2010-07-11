@@ -20,7 +20,7 @@
 #include <fst.h>
 #include <gtk/gtk.h>
 #include <gtk/gtksocket.h>
-#include "ardour/insert.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/vst_plugin.h"
 
 #include "plugin_ui.h"

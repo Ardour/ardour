@@ -49,12 +49,14 @@
 #include "ardour/vst_plugin.h"
 #include "ardour/buffer_set.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/midi_buffer.h"
 
 #include "pbd/stl_delete.h"
 
 #include "i18n.h"
 #include <locale.h>
 
+using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using std::min;
@@ -192,7 +194,7 @@ VSTPlugin::get_state()
 }
 
 int
-VSTPlugin::set_state(const XMLNode& node)
+VSTPlugin::set_state(const XMLNode& node, int)
 {
 	LocaleGuard lg (X_("POSIX"));
 
@@ -204,7 +206,7 @@ VSTPlugin::set_state(const XMLNode& node)
 	const XMLProperty* prop;
 
 	if ((prop = node.property ("current-program")) != 0) {
-		_fst->current_program = atoi (prop->value());
+		_fst->current_program = atoi (prop->value().c_str());
 	}
 
 	XMLNode* child;
@@ -392,11 +394,13 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 
 	const uint32_t nbufs = bufs.count().n_audio();
 
+	int in_index = 0;
 	for (i = 0; i < (int32_t) _plugin->numInputs; ++i) {
 		ins[i] = bufs.get_audio(min((uint32_t) in_index, nbufs - 1)).data() + offset;
 		in_index++;
 	}
 
+	int out_index = 0;
 	for (i = 0; i < (int32_t) _plugin->numOutputs; ++i) {
 		outs[i] = bufs.get_audio(min((uint32_t) out_index, nbufs - 1)).data() + offset;
 
@@ -409,6 +413,11 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		out_index++;
 	}
 
+
+	if (bufs.count().n_midi() > 0) {
+		VstEvents* v = bufs.get_vst_midi (0);
+		_plugin->dispatcher (_plugin, effProcessEvents, 0, 0, v, 0);
+	}
 
 	/* we already know it can support processReplacing */
 
