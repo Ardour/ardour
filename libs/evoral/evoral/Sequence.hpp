@@ -79,6 +79,7 @@ protected:
 	};
 
 public:
+
         typedef typename boost::shared_ptr<Evoral::Note<Time> >  NotePtr;
         typedef typename boost::shared_ptr<const Evoral::Note<Time> >  constNotePtr;
 
@@ -274,6 +275,8 @@ private:
         void get_notes_by_pitch (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
         void get_notes_by_velocity (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
 
+	void control_list_marked_dirty ();
+
 	const TypeMap& _type_map;
 
         Notes   _notes;       // notes indexed by time
@@ -282,9 +285,6 @@ private:
 
 	typedef std::multiset<NotePtr, EarlierNoteComparator> WriteNotes;
 	WriteNotes _write_notes[16];
-
-	typedef std::vector< boost::shared_ptr<const ControlList> > ControlLists;
-	ControlLists _dirty_controls;
 
 	const   const_iterator _end_iter;
 	bool                   _percussive;

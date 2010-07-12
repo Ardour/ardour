@@ -26,9 +26,9 @@ Parameter::TypeMetadata Parameter::_type_metadata;
 
 Control::Control(const Parameter& parameter, boost::shared_ptr<ControlList> list)
 	: _parameter(parameter)
-	, _list(list)
 	, _user_value(list ? list->default_value() : parameter.normal())
 {
+	set_list (list);
 }
 
 
@@ -59,7 +59,19 @@ Control::set_float(float value, bool to_list, FrameTime frame)
 void
 Control::set_list(boost::shared_ptr<ControlList> list)
 {
+	_list_marked_dirty_connection.disconnect ();
+	
 	_list = list;
+
+	if (_list) {
+		_list->Dirty.connect_same_thread (_list_marked_dirty_connection, boost::bind (&Control::list_marked_dirty, this));
+	}
+}
+
+void
+Control::list_marked_dirty ()
+{
+	ListMarkedDirty (); /* EMIT SIGNAL */
 }
 
 } // namespace Evoral

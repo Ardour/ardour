@@ -534,7 +534,6 @@ Sequence<Time>::start_write()
 	for (int i = 0; i < 16; ++i) {
 		_write_notes[i].clear();
 	}
-	_dirty_controls.clear();
 }
 
 /** Finish a write of events to the model.
@@ -574,10 +573,6 @@ Sequence<Time>::end_write (bool delete_stuck)
 					<< _write_notes[i].size() << " stuck notes" << endl;
 		}
 		_write_notes[i].clear();
-	}
-
-	for (ControlLists::const_iterator i = _dirty_controls.begin(); i != _dirty_controls.end(); ++i) {
-		(*i)->mark_dirty();
 	}
 
 	_writing = false;
@@ -1034,6 +1029,13 @@ Sequence<Time>::set_overlap_pitch_resolution (OverlapPitchResolution opr)
         _overlap_pitch_resolution = opr;
 
         /* XXX todo: clean up existing overlaps in source data? */
+}
+
+template<typename Time>
+void
+Sequence<Time>::control_list_marked_dirty ()
+{
+	set_edited (true);
 }
 
 template class Sequence<Evoral::MusicalTime>;

@@ -484,3 +484,11 @@ Automatable::automation_state_changed (Evoral::Parameter const & p)
 {
 	AutomationStateChanged (p); /* EMIT SIGNAL */
 }
+
+void
+Automatable::clear_controls ()
+{
+	_control_connections.drop_connections ();
+	ControlSet::clear_controls ();
+}
+	

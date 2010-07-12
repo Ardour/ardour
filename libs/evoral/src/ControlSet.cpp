@@ -41,6 +41,8 @@ void
 ControlSet::add_control(boost::shared_ptr<Control> ac)
 {
 	_controls[ac->parameter()] = ac;
+
+	ac->ListMarkedDirty.connect_same_thread (_control_connections, boost::bind (&ControlSet::control_list_marked_dirty, this));
 }
 
 void
@@ -107,6 +109,8 @@ void
 ControlSet::clear_controls ()
 {
 	Glib::Mutex::Lock lm (_control_lock);
+
+	_control_connections.drop_connections ();
 
 	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li)
 		li->second->list()->clear();

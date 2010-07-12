@@ -22,6 +22,7 @@
 #include <set>
 #include <map>
 #include <boost/shared_ptr.hpp>
+#include "pbd/signals.h"
 #include "evoral/types.hpp"
 #include "evoral/Parameter.hpp"
 
@@ -55,10 +56,17 @@ public:
 
 	inline const Parameter& parameter() const { return _parameter; }
 
+	/** Emitted when the our ControlList is marked dirty */
+	PBD::Signal0<void> ListMarkedDirty;
+
 protected:
 	Parameter                      _parameter;
 	boost::shared_ptr<ControlList> _list;
 	float                          _user_value;
+	PBD::ScopedConnection          _list_marked_dirty_connection;
+
+private:
+	void list_marked_dirty ();
 };
 
 } // namespace Evoral

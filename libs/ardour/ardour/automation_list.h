@@ -51,7 +51,6 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 	bool operator== (const AutomationList&);
 
 	void thaw ();
-	void mark_dirty () const;
 
 	void set_automation_state (AutoState);
 	AutoState automation_state() const { return _state; }
@@ -71,7 +70,6 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 	PBD::Signal0<void> StateChanged;
 
 	static PBD::Signal1<void,AutomationList*> AutomationListCreated;
-	mutable PBD::Signal0<void> Dirty;
 
 	void start_touch ();
 	void stop_touch ();

@@ -24,6 +24,7 @@
 #include <boost/pool/pool.hpp>
 #include <boost/pool/pool_alloc.hpp>
 #include <glibmm/thread.h>
+#include "pbd/signals.h"
 #include "evoral/types.hpp"
 #include "evoral/Parameter.hpp"
 
@@ -224,7 +225,7 @@ public:
 	Curve&       curve()       { assert(_curve); return *_curve; }
 	const Curve& curve() const { assert(_curve); return *_curve; }
 
-	virtual void mark_dirty () const;
+	void mark_dirty () const;
 
 	enum InterpolationStyle {
 		Discrete,
@@ -235,6 +236,9 @@ public:
 	InterpolationStyle interpolation() const { return _interpolation; }
 	void set_interpolation(InterpolationStyle style) { _interpolation = style; }
 
+	/** Emitted when mark_dirty() is called on this object */
+	mutable PBD::Signal0<void> Dirty;
+	
 protected:
 
 	/** Called by unlocked_eval() to handle cases of 3 or more control points. */

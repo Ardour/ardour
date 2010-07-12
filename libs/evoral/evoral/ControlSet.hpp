@@ -24,6 +24,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <glibmm/thread.h>
+#include "pbd/signals.h"
 #include "evoral/types.hpp"
 #include "evoral/Parameter.hpp"
 
@@ -67,8 +68,13 @@ public:
 	Glib::Mutex& control_lock() const { return _control_lock; }
 
 protected:
+	virtual void control_list_marked_dirty () {}
+
 	mutable Glib::Mutex _control_lock;
 	Controls            _controls;
+
+private:
+	PBD::ScopedConnectionList _control_connections;
 };
 
 

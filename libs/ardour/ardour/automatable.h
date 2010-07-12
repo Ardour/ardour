@@ -58,6 +58,7 @@ public:
 	automation_control (const Evoral::Parameter& id) const;
 
 	virtual void add_control(boost::shared_ptr<Evoral::Control>);
+	void clear_controls ();
 
 	virtual void automation_snapshot(nframes_t now, bool force);
 	virtual void transport_stopped (sframes_t now);

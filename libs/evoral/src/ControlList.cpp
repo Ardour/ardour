@@ -558,8 +558,12 @@ ControlList::mark_dirty () const
 {
 	_lookup_cache.left = -1;
 	_search_cache.left = -1;
-	if (_curve)
+
+	if (_curve) {
 		_curve->mark_dirty();
+	}
+
+	Dirty (); /* EMIT SIGNAL */
 }
 
 void

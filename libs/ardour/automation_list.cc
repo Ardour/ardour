@@ -218,13 +218,6 @@ AutomationList::thaw ()
 	}
 }
 
-void
-AutomationList::mark_dirty () const
-{
-	ControlList::mark_dirty ();
-	Dirty (); /* EMIT SIGNAL */
-}
-
 XMLNode&
 AutomationList::get_state ()
 {
