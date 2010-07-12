@@ -2398,14 +2398,14 @@ MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush)
 		i = next;
 	}
 
+	apply_diff();
+	
         if (!_selection.empty()) {
                 char buf[24];
                 snprintf (buf, sizeof (buf), "Vel %d", 
                           (int) (*_selection.begin())->note()->velocity());
                 trackview.editor().show_verbose_canvas_cursor_with (buf);
         }
-
-	apply_diff();
 }
 
 
