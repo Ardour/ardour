@@ -1227,6 +1227,7 @@ void
 AutomationLine::set_interpolation(AutomationList::InterpolationStyle style)
 {
 	_interpolation = style;
+	alist->set_interpolation (_interpolation);
 
 	if (style == AutomationList::Discrete) {
 		show_all_control_points();
