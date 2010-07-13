@@ -33,7 +33,6 @@
 #include "pbd/controllable.h"
 
 #include "ardour/ardour.h"
-#include "ardour/automatable_controls.h"
 #include "ardour/automation_control.h"
 #include "ardour/bundle.h"
 #include "ardour/chan_count.h"

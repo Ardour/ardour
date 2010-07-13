@@ -27,7 +27,7 @@
 #include "pbd/undo.h"
 
 #include "ardour/ardour.h"
-#include "ardour/automatable_controls.h"
+#include "ardour/automatable.h"
 #include "ardour/gain.h"
 #include "ardour/logcurve.h"
 #include "ardour/region.h"
@@ -233,7 +233,7 @@ class AudioRegion : public Region
 	void connect_to_analysis_changed ();
 	void connect_to_header_position_offset_changed ();
 
-	AutomatableControls _automatable;
+	Automatable _automatable;
 
 	boost::shared_ptr<AutomationList> _fade_in;
 	boost::shared_ptr<AutomationList> _fade_out;

@@ -72,7 +72,7 @@ PBD::Signal0<void> Route::RemoteControlIDChange;
 
 Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	: SessionObject (sess, name)
-	, AutomatableControls (sess)
+	, Automatable (sess)
 	, GraphNode( sess.route_graph )
         , _active (true)
         , _initial_delay (0)

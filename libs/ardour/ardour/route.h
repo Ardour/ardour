@@ -44,6 +44,7 @@
 #include "ardour/mute_master.h"
 #include "ardour/route_group_member.h"
 #include "ardour/graphnode.h"
+#include "ardour/automatable.h"
 
 namespace ARDOUR {
 
@@ -57,7 +58,7 @@ class Send;
 class InternalReturn;
 class MonitorProcessor;
 
-class Route : public SessionObject, public AutomatableControls, public RouteGroupMember, public GraphNode
+class Route : public SessionObject, public Automatable, public RouteGroupMember, public GraphNode
 {
   public:
 

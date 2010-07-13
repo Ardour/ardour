@@ -26,13 +26,12 @@
 
 #include "pbd/statefuldestructible.h"
 
-
 #include "ardour/ardour.h"
-#include "ardour/automatable_controls.h"
 #include "ardour/buffer_set.h"
 #include "ardour/latent.h"
 #include "ardour/session_object.h"
 #include "ardour/types.h"
+#include "ardour/automatable.h"
 
 class XMLNode;
 
@@ -43,7 +42,7 @@ class Route;
 
 /* A mixer strip element - plugin, send, meter, etc.
  */
-class Processor : public SessionObject, public AutomatableControls, public Latent
+class Processor : public SessionObject, public Automatable, public Latent
 {
   public:
 	static const std::string state_node_name;

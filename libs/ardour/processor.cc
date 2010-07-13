@@ -61,7 +61,7 @@ const string Processor::state_node_name = "Processor";
 
 Processor::Processor(Session& session, const string& name)
 	: SessionObject(session, name)
-	, AutomatableControls(session)
+	, Automatable (session)
 	, _pending_active(false)
 	, _active(false)
 	, _next_ab_is_active(false)

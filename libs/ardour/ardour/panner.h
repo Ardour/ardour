@@ -199,7 +199,7 @@ class Multi2dPanner : public StreamPanner
 /** Class to pan from some number of inputs to some number of outputs.
  *  This class has a number of StreamPanners, one for each input.
  */
-class Panner : public SessionObject, public AutomatableControls
+class Panner : public SessionObject, public Automatable
 {
 public:
 	struct Output {

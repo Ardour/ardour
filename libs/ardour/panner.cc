@@ -767,7 +767,7 @@ Multi2dPanner::set_state (const XMLNode& node, int /*version*/)
 
 Panner::Panner (string name, Session& s)
 	: SessionObject (s, name)
-	, AutomatableControls (s)
+	, Automatable (s)
 {
 	//set_name_old_auto (name);
 	set_name (name);
