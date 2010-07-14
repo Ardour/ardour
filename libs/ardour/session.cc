@@ -263,7 +263,7 @@ Session::destroy ()
 	RegionFactory::delete_all_regions ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete routes\n");
-	
+
 	/* reset these three references to special routes before we do the usual route delete thing */
 
 	auditioner.reset ();
@@ -2099,9 +2099,11 @@ Session::remove_route (shared_ptr<Route> route)
 	update_latency_compensation (false, false);
 	set_dirty();
 
-        /* flush references out of the graph
+        /* Re-sort routes to remove the graph's current references to the one that is
+	 * going away, then flush old references out of the graph.
          */
 
+	resort_routes ();
         route_graph->clear_other_chain ();
 
 	/* get rid of it from the dead wood collection in the route list manager */
