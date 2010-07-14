@@ -16,6 +16,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <iostream>
 #include <limits>
 #include "evoral/ControlSet.hpp"
 #include "evoral/ControlList.hpp"
@@ -43,6 +44,10 @@ ControlSet::add_control(boost::shared_ptr<Control> ac)
 	_controls[ac->parameter()] = ac;
 
 	ac->ListMarkedDirty.connect_same_thread (_control_connections, boost::bind (&ControlSet::control_list_marked_dirty, this));
+
+	ac->list()->InterpolationChanged.connect_same_thread (
+		_list_connections, boost::bind (&ControlSet::control_list_interpolation_changed, this, ac->parameter(), _1)
+		);
 }
 
 void
@@ -111,10 +116,10 @@ ControlSet::clear_controls ()
 	Glib::Mutex::Lock lm (_control_lock);
 
 	_control_connections.drop_connections ();
+	_list_connections.drop_connections ();
 
 	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li)
 		li->second->list()->clear();
 }
-
 
 } // namespace Evoral

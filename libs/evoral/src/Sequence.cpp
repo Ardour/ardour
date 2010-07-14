@@ -52,14 +52,16 @@ Sequence<Time>::const_iterator::const_iterator()
 	_event = boost::shared_ptr< Event<Time> >(new Event<Time>());
 }
 
+/** @param force_discrete true to force ControlLists to use discrete evaluation, otherwise false to get them to use their configured mode */
 template<typename Time>
-Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t, std::set<Evoral::Parameter> const & filtered)
+Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t, bool force_discrete, std::set<Evoral::Parameter> const & filtered)
 	: _seq(&seq)
 	, _type(NIL)
 	, _is_end((t == DBL_MAX) || seq.empty())
 	, _note_iter(seq.notes().end())
 	, _sysex_iter(seq.sysexes().end())
 	, _control_iter(_control_iters.end())
+	, _force_discrete (force_discrete)
 {
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("Created Iterator @ %1 (is end: %2)\n)", t, _is_end));
 
@@ -98,7 +100,12 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		
 		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: control: %1\n", seq._type_map.to_symbol(i->first)));
 		double x, y;
-		bool ret = i->second->list()->rt_safe_earliest_event_unlocked(t, DBL_MAX, x, y, true);
+		bool ret;
+		if (_force_discrete) {
+			ret = i->second->list()->rt_safe_earliest_event_discrete_unlocked (t, DBL_MAX, x, y, true);
+		} else {
+			ret = i->second->list()->rt_safe_earliest_event_unlocked(t, DBL_MAX, x, y, true);
+		}
 		if (!ret) {
 			DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: CC %1 (size %2) has no events past %3\n",
                                                                       i->first.id(), i->second->list()->size(), t));
@@ -246,8 +253,11 @@ Sequence<Time>::const_iterator::operator++()
 		break;
 	case CONTROL:
 		// Increment current controller iterator
-		ret = _control_iter->list->rt_safe_earliest_event_unlocked(
-				_control_iter->x, DBL_MAX, x, y, false);
+		if (_force_discrete) {
+			ret = _control_iter->list->rt_safe_earliest_event_discrete_unlocked (_control_iter->x, DBL_MAX, x, y, false);
+		} else {
+			ret = _control_iter->list->rt_safe_earliest_event_unlocked (_control_iter->x, DBL_MAX, x, y, false);
+		}
 		assert(!ret || x > _control_iter->x);
 		if (ret) {
 			_control_iter->x = x;
@@ -366,6 +376,7 @@ Sequence<Time>::const_iterator::operator=(const const_iterator& other)
 	_note_iter     = other._note_iter;
 	_sysex_iter    = other._sysex_iter;
 	_control_iters = other._control_iters;
+	_force_discrete = other._force_discrete;
 
 	if (other._lock)
 		_lock = _seq->read_lock();
@@ -391,7 +402,7 @@ Sequence<Time>::Sequence(const TypeMap& type_map)
         , _overlap_pitch_resolution (FirstOnFirstOff)
 	, _writing(false)
 	, _type_map(type_map)
-	, _end_iter(*this, DBL_MAX, std::set<Evoral::Parameter> ())
+	, _end_iter(*this, DBL_MAX, false, std::set<Evoral::Parameter> ())
 	, _percussive(false)
 	, _lowest_note(127)
 	, _highest_note(0)
@@ -409,7 +420,7 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
         , _overlap_pitch_resolution (other._overlap_pitch_resolution)
 	, _writing(false)
 	, _type_map(other._type_map)
-	, _end_iter(*this, DBL_MAX, std::set<Evoral::Parameter> ())
+	, _end_iter(*this, DBL_MAX, false, std::set<Evoral::Parameter> ())
 	, _percussive(other._percussive)
 	, _lowest_note(other._lowest_note)
 	, _highest_note(other._highest_note)

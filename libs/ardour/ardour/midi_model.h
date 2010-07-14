@@ -148,6 +148,8 @@ public:
         InsertMergePolicy insert_merge_policy () const;
         void set_insert_merge_policy (InsertMergePolicy);
 
+	boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
+
 protected:
         int resolve_overlaps_unlocked (const NotePtr, void* arg = 0);
 
@@ -169,6 +171,11 @@ public:
 
 private:
 	friend class DeltaCommand;
+
+	void source_interpolation_changed (Evoral::Parameter, Evoral::ControlList::InterpolationStyle);
+	void control_list_interpolation_changed (Evoral::Parameter, Evoral::ControlList::InterpolationStyle);
+	
+	PBD::ScopedConnectionList _midi_source_connections;
 
 	// We cannot use a boost::shared_ptr here to avoid a retain cycle
 	MidiSource* _midi_source;

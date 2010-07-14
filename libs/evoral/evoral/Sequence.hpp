@@ -185,7 +185,7 @@ public:
 	class const_iterator {
 	public:
 		const_iterator();
-		const_iterator(const Sequence<Time>& seq, Time t, std::set<Evoral::Parameter> const &);
+		const_iterator(const Sequence<Time>& seq, Time t, bool, std::set<Evoral::Parameter> const &);
 		~const_iterator();
 
 		inline bool valid() const { return !_is_end && _event; }
@@ -220,10 +220,11 @@ public:
 		typename SysExes::const_iterator _sysex_iter;
 		ControlIterators                 _control_iters;
 		ControlIterators::iterator       _control_iter;
+		bool                             _force_discrete;
 	};
 
-	const_iterator begin (Time t=0, std::set<Evoral::Parameter> const & f = std::set<Evoral::Parameter> ()) const {
-		return const_iterator (*this, t, f);
+	const_iterator begin (Time t = 0, bool force_discrete = false, std::set<Evoral::Parameter> const & f = std::set<Evoral::Parameter> ()) const {
+		return const_iterator (*this, t, force_discrete, f);
 	}
 	const const_iterator& end()           const { return _end_iter; }
 

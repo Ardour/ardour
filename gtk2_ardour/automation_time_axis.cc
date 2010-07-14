@@ -270,7 +270,6 @@ AutomationTimeAxisView::set_automation_state (AutoState state)
 #endif
 	}
 
-	cout << "_view = " << _view << "\n";
 	if (_view) {
 		_view->set_automation_state (state);
 
@@ -347,13 +346,12 @@ AutomationTimeAxisView::automation_state_changed ()
 	}
 }
 
+/** The interpolation style of our AutomationList has changed, so update */
 void
-AutomationTimeAxisView::interpolation_changed ()
+AutomationTimeAxisView::interpolation_changed (AutomationList::InterpolationStyle s)
 {
-	AutomationList::InterpolationStyle style = _control->list()->interpolation();
-
 	if (mode_line_item && mode_discrete_item) {
-		if (style == AutomationList::Discrete) {
+		if (s == AutomationList::Discrete) {
 			mode_discrete_item->set_active(true);
 			mode_line_item->set_active(false);
 		} else {
@@ -361,25 +359,20 @@ AutomationTimeAxisView::interpolation_changed ()
 			mode_discrete_item->set_active(false);
 		}
 	}
-
-	if (_line) {
-		_line->set_interpolation(style);
-	}
-
-	if (_view) {
-		_view->set_interpolation (style);
-	}
 }
 
+/** A menu item has been selected to change our interpolation mode */
 void
 AutomationTimeAxisView::set_interpolation (AutomationList::InterpolationStyle style)
 {
-	_control->list()->set_interpolation(style);
-	if (_line) {
-		_line->set_interpolation(style);
-	}
+	/* Tell our view's list, if we have one, otherwise tell our own.
+	 * Everything else will be signalled back from that.
+	 */
+	
 	if (_view) {
 		_view->set_interpolation (style);
+	} else {
+		_control->list()->set_interpolation (style);
 	}
 }
 
@@ -546,6 +539,9 @@ AutomationTimeAxisView::build_display_menu ()
 
 	/* mode menu */
 
+	/* current interpolation state */
+	AutomationList::InterpolationStyle const s = _view ? _view->interpolation() : _control->list()->interpolation ();
+
 	if (EventTypeMap::instance().is_midi_parameter(_control->parameter())) {
 
 		Menu* auto_mode_menu = manage (new Menu);
@@ -558,17 +554,13 @@ AutomationTimeAxisView::build_display_menu ()
 				sigc::mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
 				AutomationList::Discrete)));
 		mode_discrete_item = dynamic_cast<CheckMenuItem*>(&am_items.back());
-		mode_discrete_item->set_active(_control->list()->interpolation() == AutomationList::Discrete);
+		mode_discrete_item->set_active (s == AutomationList::Discrete);
 
 		am_items.push_back (RadioMenuElem (group, _("Linear"), sigc::bind (
 				sigc::mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
 				AutomationList::Linear)));
 		mode_line_item = dynamic_cast<CheckMenuItem*>(&am_items.back());
-
-		// Set default interpolation type to linear if this isn't a (usually) discrete controller
-		if (EventTypeMap::instance().interpolation_of(_control->parameter()) == Evoral::ControlList::Linear) {
-			mode_line_item->set_active(_control->list()->interpolation() == AutomationList::Linear);
-		}
+		mode_line_item->set_active (s == AutomationList::Linear);
 
 		items.push_back (MenuElem (_("Mode"), *auto_mode_menu));
 	}
@@ -576,7 +568,7 @@ AutomationTimeAxisView::build_display_menu ()
 	/* make sure the automation menu state is correct */
 
 	automation_state_changed ();
-	interpolation_changed ();
+	interpolation_changed (s);
 }
 
 void
@@ -834,7 +826,7 @@ void
 AutomationTimeAxisView::clear_lines ()
 {
 	_line.reset();
-	automation_connection.disconnect ();
+	_list_connections.drop_connections ();
 }
 
 void
@@ -844,7 +836,13 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 	assert(!_line);
 	assert(line->the_list() == _control->list());
 
-	_control->alist()->automation_state_changed.connect (automation_connection, invalidator (*this), boost::bind (&AutomationTimeAxisView::automation_state_changed, this), gui_context());
+	_control->alist()->automation_state_changed.connect (
+		_list_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::automation_state_changed, this), gui_context()
+		);
+	
+	_control->alist()->InterpolationChanged.connect (
+		_list_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::interpolation_changed, this, _1), gui_context()
+		);
 
 	_line = line;
 	//_controller = AutomationController::create(_session, line->the_list(), _control);

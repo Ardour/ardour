@@ -116,7 +116,8 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	ArdourCanvas::SimpleRect* _base_rect;
 	boost::shared_ptr<AutomationLine> _line;
-	AutomationStreamView*             _view;
+	/** AutomationStreamView if we are editing region-based automation (for MIDI), otherwise 0 */
+	AutomationStreamView* _view;
 
 	std::string _name;
 	bool    ignore_toggle;
@@ -156,9 +157,9 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void automation_state_changed ();
 
 	void set_interpolation (ARDOUR::AutomationList::InterpolationStyle);
-	void interpolation_changed ();
+	void interpolation_changed (ARDOUR::AutomationList::InterpolationStyle);
 
-	PBD::ScopedConnection automation_connection;
+	PBD::ScopedConnectionList _list_connections;
 
 	void update_extra_xml_shown (bool editor_shown);
 

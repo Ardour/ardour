@@ -109,7 +109,7 @@ Route::init ()
 
 	_solo_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
 	_mute_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
-	
+
 	add_control (_solo_control);
 	add_control (_mute_control);
 

@@ -97,6 +97,12 @@ MidiSource::get_state ()
 		node.add_property ("captured-for", _captured_for);
 	}
 
+	for (InterpolationStyleMap::const_iterator i = _interpolation_style.begin(); i != _interpolation_style.end(); ++i) {
+		XMLNode* child = node.add_child (X_("InterpolationStyle"));
+		child->add_property (X_("parameter"), EventTypeMap::instance().to_symbol (i->first));
+		child->add_property (X_("style"), enum_2_string (i->second));
+	}
+				     
 	return node;
 }
 
@@ -107,6 +113,28 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("captured-for")) != 0) {
 		_captured_for = prop->value();
+	}
+
+	XMLNodeList children = node.children ();
+	for (XMLNodeConstIterator i = children.begin(); i != children.end(); ++i) {
+		if ((*i)->name() == X_("InterpolationStyle")) {
+			XMLProperty* prop;
+
+			if ((prop = (*i)->property (X_("parameter"))) == 0) {
+				error << _("Missing parameter property on InterpolationStyle") << endmsg;
+				return -1;
+			}
+			
+			Evoral::Parameter p = EventTypeMap::instance().new_parameter (prop->value());
+
+			if ((prop = (*i)->property (X_("style"))) == 0) {
+				error << _("Missing style property on InterpolationStyle") << endmsg;
+				return -1;
+			}
+
+			Evoral::ControlList::InterpolationStyle s = static_cast<Evoral::ControlList::InterpolationStyle> (string_2_enum (prop->value(), s));
+			set_interpolation_of (p, s);
+		}
 	}
 
 	return 0;
@@ -160,7 +188,7 @@ MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, sframes_t source_start
 		// If the cached iterator is invalid, search for the first event past start
 		if (_last_read_end == 0 || start != _last_read_end || !_model_iter_valid) {
 			DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("*** %1 search for relevant iterator for %1 / %2\n", _name, source_start, start));
-			for (i = _model->begin(0, filtered); i != _model->end(); ++i) {
+			for (i = _model->begin(0, false, filtered); i != _model->end(); ++i) {
 				if (converter.to(i->time()) >= start) {
 					break;
 				}
@@ -260,6 +288,7 @@ MidiSource::clone (Evoral::MusicalTime begin, Evoral::MusicalTime end)
                                               newpath, false, _session.frame_rate()));
         
         newsrc->set_timeline_position(_timeline_position);
+	newsrc->copy_interpolation_from (this);
 
         if (_model) {
                 if (begin == Evoral::MinMusicalTime && end == Evoral::MaxMusicalTime) {
@@ -343,4 +372,50 @@ MidiSource::set_model (boost::shared_ptr<MidiModel> m)
 {
 	_model = m;
 	ModelChanged (); /* EMIT SIGNAL */
+}
+
+/** @return Interpolation style that should be used for control parameter \a p */
+Evoral::ControlList::InterpolationStyle
+MidiSource::interpolation_of (Evoral::Parameter p) const
+{
+	InterpolationStyleMap::const_iterator i = _interpolation_style.find (p);
+	if (i == _interpolation_style.end()) {
+		return EventTypeMap::instance().interpolation_of (p);
+	}
+
+	return i->second;
+}
+
+/** Set interpolation style to be used for a given parameter.  This change will be
+ *  propagated to anyone who needs to know.
+ */
+void
+MidiSource::set_interpolation_of (Evoral::Parameter p, Evoral::ControlList::InterpolationStyle s)
+{
+	if (interpolation_of (p) == s) {
+		return;
+	}
+	
+	if (EventTypeMap::instance().interpolation_of (p) == s) {
+		/* interpolation type is being set to the default, so we don't need a note in our map */
+		_interpolation_style.erase (p);
+	} else {
+		_interpolation_style[p] = s;
+	}
+
+	InterpolationChanged (p, s); /* EMIT SIGNAL */
+}
+
+void
+MidiSource::copy_interpolation_from (boost::shared_ptr<MidiSource> s)
+{
+	copy_interpolation_from (s.get ());
+}
+
+void
+MidiSource::copy_interpolation_from (MidiSource* s)
+{
+	_interpolation_style = s->_interpolation_style;
+
+	/* XXX: should probably emit signals here */
 }

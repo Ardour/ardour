@@ -237,14 +237,28 @@ AutomationStreamView::has_automation () const
 	return false;
 }
 
+/** Our parent AutomationTimeAxisView calls this when the user requests a particular
+ *  InterpolationStyle; tell the AutomationLists in our regions.
+ */
 void
 AutomationStreamView::set_interpolation (AutomationList::InterpolationStyle s)
 {
-	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+	for (list<RegionView*>::const_iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*i);
 		assert (arv);
-		if (arv->line()) {
-			arv->line()->set_interpolation (s);
-		}
+		arv->line()->the_list()->set_interpolation (s);
 	}
+}
+
+AutomationList::InterpolationStyle
+AutomationStreamView::interpolation () const
+{
+	if (region_views.empty()) {
+		return AutomationList::Linear;
+	}
+
+	AutomationRegionView* v = dynamic_cast<AutomationRegionView*> (region_views.front());
+	assert (v);
+
+	return v->line()->the_list()->interpolation ();
 }

@@ -52,6 +52,7 @@ namespace Gnome {
 	}
 }
 
+/** A GUI representation of an ARDOUR::AutomationList */
 class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 {
   public:
@@ -90,8 +91,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	void     set_line_color (uint32_t);
 	uint32_t get_line_color() const { return _line_color; }
-
-	void set_interpolation(ARDOUR::AutomationList::InterpolationStyle style);
 
 	void    show ();
 	void    hide ();
@@ -174,7 +173,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	void reset_callback (const Evoral::ControlList&);
 	void list_changed ();
-	PBD::ScopedConnection _state_connection;
 
 	virtual bool event_handler (GdkEvent*);
 	virtual void add_model_point (ALPoints& tmp_points, double frame, double yfract);
@@ -189,12 +187,12 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	std::list<double> _always_in_view;
 
 	const Evoral::TimeConverter<double, ARDOUR::sframes_t>& _time_converter;
-	ARDOUR::AutomationList::InterpolationStyle              _interpolation;
 
 	void reset_line_coords (ControlPoint&);
 	void add_visible_control_point (uint32_t, uint32_t, double, double, ARDOUR::AutomationList::iterator, uint32_t);
-
 	double control_point_box_size ();
+	void connect_to_list ();
+	void interpolation_changed (ARDOUR::AutomationList::InterpolationStyle);
 
 	struct ModelRepresentation {
 	    ARDOUR::AutomationList::iterator start;
@@ -211,6 +209,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	void model_representation (ControlPoint&, ModelRepresentation&);
 
+	PBD::ScopedConnectionList _list_connections;
+	
 	friend class AudioRegionGainLine;
 };
 

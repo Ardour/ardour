@@ -218,6 +218,7 @@ public:
 
 	bool rt_safe_earliest_event (double start, double end, double& x, double& y, bool start_inclusive=false) const;
 	bool rt_safe_earliest_event_unlocked (double start, double end, double& x, double& y, bool start_inclusive=false) const;
+	bool rt_safe_earliest_event_discrete_unlocked (double start, double end, double& x, double& y, bool inclusive) const;
 
 	void create_curve();
 	void destroy_curve();
@@ -234,10 +235,12 @@ public:
 	};
 
 	InterpolationStyle interpolation() const { return _interpolation; }
-	void set_interpolation(InterpolationStyle style) { _interpolation = style; }
+	void set_interpolation (InterpolationStyle);
 
 	/** Emitted when mark_dirty() is called on this object */
 	mutable PBD::Signal0<void> Dirty;
+	/** Emitted when our interpolation style changes */
+	PBD::Signal1<void, InterpolationStyle> InterpolationChanged;
 	
 protected:
 
@@ -246,7 +249,6 @@ protected:
 
 	void build_search_cache_if_necessary(double start, double end) const;
 
-	bool rt_safe_earliest_event_discrete_unlocked (double start, double end, double& x, double& y, bool inclusive) const;
 	bool rt_safe_earliest_event_linear_unlocked (double start, double end, double& x, double& y, bool inclusive) const;
 
 	boost::shared_ptr<ControlList> cut_copy_clear (double, double, int op);

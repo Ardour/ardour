@@ -954,10 +954,11 @@ ControlList::rt_safe_earliest_event(double start, double end, double& x, double&
 bool
 ControlList::rt_safe_earliest_event_unlocked(double start, double end, double& x, double& y, bool inclusive) const
 {
-	if (_interpolation == Discrete)
+	if (_interpolation == Discrete) {
 		return rt_safe_earliest_event_discrete_unlocked(start, end, x, y, inclusive);
-	else
+	} else {
 		return rt_safe_earliest_event_linear_unlocked(start, end, x, y, inclusive);
+	}
 }
 
 
@@ -1354,6 +1355,17 @@ ControlList::move_ranges (const list< RangeMove<double> >& movements)
 	}
 
 	maybe_signal_changed ();
+}
+
+void
+ControlList::set_interpolation (InterpolationStyle s)
+{
+	if (_interpolation == s) {
+		return;
+	}
+
+	_interpolation = s;
+	InterpolationChanged (s); /* EMIT SIGNAL */
 }
 
 } // namespace Evoral

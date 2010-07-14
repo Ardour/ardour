@@ -82,8 +82,6 @@ private:
 			sframes_t position,
 			nframes_t cnt);
 
-	void set_default_controls_interpolation ();
-
 	double    _last_ev_time_beats;
 	sframes_t _last_ev_time_frames;
 	/** end time (start + duration) of last call to read_unlocked */

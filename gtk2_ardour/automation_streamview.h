@@ -57,6 +57,7 @@ class AutomationStreamView : public StreamView
 	bool has_automation () const;
 
 	void set_interpolation (ARDOUR::AutomationList::InterpolationStyle);
+	ARDOUR::AutomationList::InterpolationStyle interpolation () const;
 
   private:
 	void setup_rec_box ();

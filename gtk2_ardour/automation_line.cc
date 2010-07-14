@@ -67,7 +67,6 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	, _parent_group (parent)
 	, _time_converter (converter ? (*converter) : default_converter)
 {
-	_interpolation = al->interpolation();
 	points_visible = false;
 	update_pending = false;
 	_uses_gain_mapping = false;
@@ -86,7 +85,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 
 	line->signal_event().connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
 
-	alist->StateChanged.connect (_state_connection, invalidator (*this), boost::bind (&AutomationLine::list_changed, this), gui_context());
+	connect_to_list ();
 
 	trackview.session()->register_with_memento_command_factory(alist->id(), this);
 
@@ -95,7 +94,9 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 		set_uses_gain_mapping (true);
 	}
 
-	set_interpolation(alist->interpolation());
+	interpolation_changed (alist->interpolation ());
+
+	connect_to_list ();
 }
 
 AutomationLine::~AutomationLine ()
@@ -122,7 +123,7 @@ AutomationLine::queue_reset ()
 void
 AutomationLine::show ()
 {
-	if (_interpolation != AutomationList::Discrete) {
+	if (alist->interpolation() != AutomationList::Discrete) {
 		line->show();
 	}
 
@@ -148,7 +149,7 @@ AutomationLine::hide ()
 double
 AutomationLine::control_point_box_size ()
 {
-	if (_interpolation == AutomationList::Discrete) {
+	if (alist->interpolation() == AutomationList::Discrete) {
 		return max((_height*4.0) / (double)(alist->parameter().max() - alist->parameter().min()),
 				4.0);
 	}
@@ -470,7 +471,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 
 		line->property_points() = line_points;
 
-		if (_visible && _interpolation != AutomationList::Discrete) {
+		if (_visible && alist->interpolation() != AutomationList::Discrete) {
 			line->show();
 		}
 
@@ -1117,10 +1118,11 @@ AutomationLine::change_model (AutomationList::iterator /*i*/, double /*x*/, doub
 }
 
 void
-AutomationLine::set_list(boost::shared_ptr<ARDOUR::AutomationList> list)
+AutomationLine::set_list (boost::shared_ptr<ARDOUR::AutomationList> list)
 {
 	alist = list;
-	queue_reset();
+	queue_reset ();
+	connect_to_list ();
 }
 
 void
@@ -1222,13 +1224,10 @@ AutomationLine::model_to_view_coord (double& x, double& y) const
 	x = _time_converter.to(x);
 }
 
-
+/** Called when our list has announced that its interpolation style has changed */
 void
-AutomationLine::set_interpolation(AutomationList::InterpolationStyle style)
+AutomationLine::interpolation_changed (AutomationList::InterpolationStyle style)
 {
-	_interpolation = style;
-	alist->set_interpolation (_interpolation);
-
 	if (style == AutomationList::Discrete) {
 		show_all_control_points();
 		line->hide();
@@ -1301,3 +1300,14 @@ AutomationLine::clear_always_in_view ()
 	alist->apply_to_points (*this, &AutomationLine::reset_callback);
 }
 
+void
+AutomationLine::connect_to_list ()
+{
+	_list_connections.drop_connections ();
+	
+	alist->StateChanged.connect (_list_connections, invalidator (*this), boost::bind (&AutomationLine::list_changed, this), gui_context());
+	
+	alist->InterpolationChanged.connect (
+		_list_connections, invalidator (*this), boost::bind (&AutomationLine::interpolation_changed, this, _1), gui_context()
+		);
+}

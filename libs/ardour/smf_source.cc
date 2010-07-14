@@ -257,10 +257,6 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, sframes_t position
 		append_event_unlocked_frames(ev, position);
 	}
 
-	if (_model) {
-		set_default_controls_interpolation();
-	}
-
 	Evoral::SMF::flush();
 	free(buf);
 
@@ -471,8 +467,6 @@ SMFSource::load_model (bool lock, bool force_reload)
 		_length_beats = max(_length_beats, ev.time());
 	}
 
-	set_default_controls_interpolation();
-
 	_model->end_write(false);
 	_model->set_edited(false);
 
@@ -480,18 +474,6 @@ SMFSource::load_model (bool lock, bool force_reload)
 
 	free(buf);
 }
-
-void
-SMFSource::set_default_controls_interpolation ()
-{
-	// set interpolation style to defaults, can be changed by the GUI later
-	Evoral::ControlSet::Controls controls = _model->controls();
-	for (Evoral::ControlSet::Controls::iterator c = controls.begin(); c != controls.end(); ++c) {
-		(*c).second->list()->set_interpolation(
-			EventTypeMap::instance().interpolation_of((*c).first));
-	}
-}
-
 
 void
 SMFSource::destroy_model ()

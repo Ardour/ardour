@@ -90,7 +90,10 @@ MidiStretch::run (boost::shared_ptr<Region> r)
 	boost::shared_ptr<MidiModel> new_model = new_src->model();
 	new_model->start_write();
 
-	for (Evoral::Sequence<MidiModel::TimeType>::const_iterator i = old_model->begin();
+	/* Note: pass true into force_discrete for the begin() iterator so that the model doesn't
+	 * do interpolation of controller data when we stretch.
+	 */
+	for (Evoral::Sequence<MidiModel::TimeType>::const_iterator i = old_model->begin (0, true);
 			i != old_model->end(); ++i) {
 		const double new_time = i->time() * _request.time_fraction;
 
@@ -102,6 +105,8 @@ MidiStretch::run (boost::shared_ptr<Region> r)
 
 	new_model->end_write();
 	new_model->set_edited(true);
+
+	new_src->copy_interpolation_from (src);
 
 	const int ret = finish (region, nsrcs, new_name);
 

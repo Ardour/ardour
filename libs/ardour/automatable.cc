@@ -58,7 +58,7 @@ Automatable::Automatable (const Automatable& other)
 
         for (Controls::const_iterator i = other._controls.begin(); i != other._controls.end(); ++i) {
                 boost::shared_ptr<Evoral::Control> ac (control_factory (i->first));
-                _controls[ac->parameter()] = ac;
+		add_control (ac);
         }
 }
 int

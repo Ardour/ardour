@@ -41,8 +41,9 @@ using namespace PBD;
 
 MidiModel::MidiModel(MidiSource* s)
 	: AutomatableSequence<TimeType>(s->session())
-	, _midi_source(s)
+	, _midi_source (0)
 {
+	set_midi_source (s);
 }
 
 /** Start a new Diff command.
@@ -761,6 +762,9 @@ MidiModel::DiffCommand::get_state ()
  * user can switch a recorded track (with note durations from some instrument)
  * to percussive, save, reload, then switch it back to sustained without
  * destroying the original note durations.
+ *
+ * Similarly, control events are written without interpolation (as with the
+ * `Discrete' mode).
  */
 bool
 MidiModel::write_to (boost::shared_ptr<MidiSource> source)
@@ -773,7 +777,7 @@ MidiModel::write_to (boost::shared_ptr<MidiSource> source)
         source->drop_model();
         source->mark_streaming_midi_write_started(note_mode(), _midi_source->timeline_position());
 
-        for (Evoral::Sequence<TimeType>::const_iterator i = begin(); i != end(); ++i) {
+        for (Evoral::Sequence<TimeType>::const_iterator i = begin(0, true); i != end(); ++i) {
                 source->append_event_unlocked_beats(*i);
         }
 
@@ -800,7 +804,7 @@ MidiModel::sync_to_source ()
 
         _midi_source->mark_streaming_midi_write_started(note_mode(), _midi_source->timeline_position());
 
-        for (Evoral::Sequence<TimeType>::const_iterator i = begin(); i != end(); ++i) {
+        for (Evoral::Sequence<TimeType>::const_iterator i = begin(0, true); i != end(); ++i) {
                 _midi_source->append_event_unlocked_beats(*i);
         }
 
@@ -832,7 +836,7 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource> source, Evoral::Music
         source->drop_model();
         source->mark_streaming_midi_write_started(note_mode(), _midi_source->timeline_position());
 
-        for (Evoral::Sequence<TimeType>::const_iterator i = begin(); i != end(); ++i) {
+        for (Evoral::Sequence<TimeType>::const_iterator i = begin(0, true); i != end(); ++i) {
                 const Evoral::Event<Evoral::MusicalTime>& ev (*i);
 
                 if (ev.time() >= begin_time && ev.time() < end_time) {
@@ -1138,6 +1142,54 @@ MidiModel::insert_merge_policy () const
 void
 MidiModel::set_midi_source (MidiSource* s)
 {
-	_midi_source->invalidate ();
+	if (_midi_source) {
+		_midi_source->invalidate ();
+	}
+
+	_midi_source_connections.drop_connections ();
+
 	_midi_source = s;
+
+	_midi_source->InterpolationChanged.connect_same_thread (
+		_midi_source_connections, boost::bind (&MidiModel::source_interpolation_changed, this, _1, _2)
+		);
+}
+
+/** The source has signalled that the interpolation style for a parameter has changed.  In order to
+ *  keep MidiSource and ControlList interpolation state the same, we pass this change onto the
+ *  appropriate ControlList.
+ *
+ *  The idea is that MidiSource and the MidiModel's ControlList states are kept in sync, and the
+ *  MidiSource's InterpolationChanged signal is listened to by the GUI.
+ */
+void
+MidiModel::source_interpolation_changed (Evoral::Parameter p, Evoral::ControlList::InterpolationStyle s)
+{
+	Glib::Mutex::Lock lm (_control_lock);
+	control(p)->list()->set_interpolation (s);
+}
+
+/** A ControlList has signalled that its interpolation style has changed.  Again, in order to keep
+ *  MidiSource and ControlList interpolation state in sync, we pass this change onto our MidiSource.
+ */
+void
+MidiModel::control_list_interpolation_changed (Evoral::Parameter p, Evoral::ControlList::InterpolationStyle s)
+{
+	_midi_source->set_interpolation_of (p, s);
+}
+
+boost::shared_ptr<Evoral::Control>
+MidiModel::control_factory (Evoral::Parameter const & p)
+{
+	boost::shared_ptr<Evoral::Control> c = Automatable::control_factory (p);
+
+	/* Set up newly created control's lists to the appropriate interpolation state
+	   from our source.
+	*/
+
+	assert (_midi_source);
+
+	c->list()->set_interpolation (_midi_source->interpolation_of (p));
+
+	return c;
 }

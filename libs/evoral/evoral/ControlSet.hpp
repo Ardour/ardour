@@ -27,11 +27,11 @@
 #include "pbd/signals.h"
 #include "evoral/types.hpp"
 #include "evoral/Parameter.hpp"
+#include "evoral/ControlList.hpp"
 
 namespace Evoral {
 
 class Control;
-class ControlList;
 class ControlEvent;
 
 class ControlSet : public boost::noncopyable {
@@ -69,12 +69,15 @@ public:
 
 protected:
 	virtual void control_list_marked_dirty () {}
+	virtual void control_list_interpolation_changed (Parameter, ControlList::InterpolationStyle) {}
 
 	mutable Glib::Mutex _control_lock;
 	Controls            _controls;
 
 private:
+
 	PBD::ScopedConnectionList _control_connections;
+	PBD::ScopedConnectionList _list_connections;
 };
 
 

@@ -117,8 +117,15 @@ class MidiSource : virtual public Source
 	void set_model (boost::shared_ptr<MidiModel>);
 	void drop_model();
 
+	Evoral::ControlList::InterpolationStyle interpolation_of (Evoral::Parameter) const;
+	void set_interpolation_of (Evoral::Parameter, Evoral::ControlList::InterpolationStyle);
+	void copy_interpolation_from (boost::shared_ptr<MidiSource>);
+	void copy_interpolation_from (MidiSource *);
+
 	/** Emitted when a different MidiModel is set */
 	PBD::Signal0<void> ModelChanged;
+	/** Emitted when a parameter's interpolation style is changed */
+	PBD::Signal2<void, Evoral::Parameter, Evoral::ControlList::InterpolationStyle> InterpolationChanged;
 
   protected:
 	virtual void flush_midi() = 0;
@@ -146,6 +153,12 @@ class MidiSource : virtual public Source
 	mutable double    _length_beats;
 	mutable sframes_t _last_read_end;
 	sframes_t         _last_write_end;
+
+	/** Map of interpolation styles to use for Parameters; if they are not in this map,
+	 *  the correct interpolation style can be obtained from EventTypeMap::interpolation_of ()
+	 */
+	typedef std::map<Evoral::Parameter, Evoral::ControlList::InterpolationStyle> InterpolationStyleMap;
+	InterpolationStyleMap _interpolation_style;
 };
 
 }
