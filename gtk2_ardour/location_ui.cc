@@ -703,6 +703,12 @@ LocationUI::location_redraw_ranges ()
 	range_rows.show();
 }
 
+struct LocationSortByStart {
+    bool operator() (Location *a, Location *b) {
+	    return a->start() < b->start();
+    }
+};
+
 void
 LocationUI::location_added (Location* location)
 {
@@ -712,8 +718,39 @@ LocationUI::location_added (Location* location)
 		punch_edit_row.set_location(location);
 	} else if (location->is_auto_loop()) {
 		loop_edit_row.set_location(location);
-	} else {
-		refresh_location_list ();
+	} else if (location->is_range_marker() || location->is_mark()) {
+		Locations::LocationList loc = _session->locations()->list ();
+		loc.sort (LocationSortByStart ());
+
+		LocationEditRow* erow = manage (new LocationEditRow (_session, location));
+		erow->remove_requested.connect (sigc::mem_fun (*this, &LocationUI::location_remove_requested));
+		Box_Helpers::BoxList & children = location->is_range_marker() ? range_rows.children () : location_rows.children ();
+
+		/* Step through the location list and the GUI list to find the place to insert */
+		Locations::LocationList::iterator i = loc.begin ();
+		Box_Helpers::BoxList::iterator j = children.begin ();
+		while (i != loc.end()) {
+
+			if (location->flags() != (*i)->flags()) {
+				/* Skip locations in the session list that aren't of the right type */
+				++i;
+				continue;
+			}
+
+			if (*i == location) {
+				children.insert (j, Box_Helpers::Element (*erow, PACK_SHRINK, 1, PACK_START));
+				break;
+			}
+
+			++i;
+			
+			if (j != children.end()) {
+				++j;
+			}
+		}
+
+		range_rows.show_all ();
+		location_rows.show_all ();
 	}
 }
 
@@ -737,12 +774,6 @@ LocationUI::location_removed (Location* location)
 		}
 	}
 }
-
-struct LocationSortByStart {
-    bool operator() (Location *a, Location *b) {
-	    return a->start() < b->start();
-    }
-};
 
 void
 LocationUI::map_locations (Locations::LocationList& locations)

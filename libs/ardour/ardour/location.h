@@ -104,6 +104,8 @@ class Location : public PBD::StatefulDestructible
 	bool is_range_marker() const { return _flags & IsRangeMarker; }
 	bool matches (Flags f) const { return _flags & f; }
 
+	Flags flags () const { return _flags; }
+
 	PBD::Signal1<void,Location*> name_changed;
 	PBD::Signal1<void,Location*> end_changed;
 	PBD::Signal1<void,Location*> start_changed;
