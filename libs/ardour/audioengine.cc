@@ -495,7 +495,11 @@ AudioEngine::process_callback (nframes_t nframes)
 		(*i)->cycle_start (nframes);
 	}
 
-	if (_freewheeling) {
+	/* test if we are freewheeling and there are freewheel signals connected.
+           ardour should act normally even when freewheeling unless /it/ is exporting */
+
+
+	if (_freewheeling && !Freewheel.empty()) {
 		/* emit the Freewheel signal and stop freewheeling in the event of trouble 
 		 */
                 boost::optional<int> r = Freewheel (nframes);
