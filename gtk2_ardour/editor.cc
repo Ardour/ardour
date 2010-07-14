@@ -2950,7 +2950,6 @@ Editor::setup_toolbar ()
 	set_popdown_strings (zoom_focus_selector, zoom_focus_strings, true);
 	zoom_focus_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done));
 
-	_zoom_box.pack_start (zoom_focus_selector);
 	_zoom_box.pack_start (zoom_out_button, false, false);
 	_zoom_box.pack_start (zoom_in_button, false, false);
 	_zoom_box.pack_start (zoom_out_full_button, false, false);
@@ -2969,6 +2968,8 @@ Editor::setup_toolbar ()
 	_zoom_box.pack_start (tav_expand_button);
 	_zoom_box.pack_start (tav_shrink_button);
 
+	_zoom_box.pack_start (zoom_focus_selector);
+	
 	_zoom_tearoff = manage (new TearOff (_zoom_box));
 
 	_zoom_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
@@ -3039,8 +3040,8 @@ Editor::setup_toolbar ()
 	toolbar_hbox.set_border_width (1);
 
 	toolbar_hbox.pack_start (*_mouse_mode_tearoff, false, false);
-	toolbar_hbox.pack_start (*_tools_tearoff, false, false);
 	toolbar_hbox.pack_start (*_zoom_tearoff, false, false);
+	toolbar_hbox.pack_start (*_tools_tearoff, false, false);
 
 	hbox->pack_start (snap_box, false, false);
 	hbox->pack_start (*nudge_box, false, false);
