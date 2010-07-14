@@ -218,7 +218,9 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	double const x = trackview.editor().frame_to_unit (_time_converter.to((*cp.model())->when));
 
 	trackview.editor().session()->begin_reversible_command (_("automation event move"));
-	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
+	trackview.editor().session()->add_command (
+		new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0)
+		);
 
 	cp.move_to (x, y, ControlPoint::Full);
 	reset_line_coords (cp);
@@ -233,7 +235,10 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 
 	update_pending = false;
 
-	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), 0, &alist->get_state()));
+	trackview.editor().session()->add_command (
+		new MementoCommand<AutomationList> (memento_command_binder(), 0, &alist->get_state())
+		);
+	
 	trackview.editor().session()->commit_reversible_command ();
 	trackview.editor().session()->set_dirty ();
 }
@@ -568,7 +573,9 @@ void
 AutomationLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 {
 	trackview.editor().session()->begin_reversible_command (_("automation event move"));
-	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
+	trackview.editor().session()->add_command (
+		new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0)
+		);
 
 	_drag_points.clear ();
 	_drag_points.push_back (cp);
@@ -593,7 +600,9 @@ void
 AutomationLine::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
 {
 	trackview.editor().session()->begin_reversible_command (_("automation range move"));
-	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
+	trackview.editor().session()->add_command (
+		new MementoCommand<AutomationList> (memento_command_binder (), &get_state(), 0)
+		);
 
 	_drag_points.clear ();
 	for (uint32_t i = i1; i <= i2; i++) {
@@ -611,7 +620,9 @@ void
 AutomationLine::start_drag_multiple (list<ControlPoint*> cp, float fraction, XMLNode* state)
 {
 	trackview.editor().session()->begin_reversible_command (_("automation range move"));
-	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), state, 0));
+	trackview.editor().session()->add_command (
+		new MementoCommand<AutomationList> (memento_command_binder(), state, 0)
+		);
 
 	_drag_points = cp;
 	start_drag_common (0, fraction);
@@ -778,7 +789,10 @@ AutomationLine::end_drag ()
 
 	update_pending = false;
 
-	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), 0, &alist->get_state()));
+	trackview.editor().session()->add_command (
+		new MementoCommand<AutomationList>(memento_command_binder (), 0, &alist->get_state())
+		);
+	
 	trackview.editor().session()->commit_reversible_command ();
 	trackview.editor().session()->set_dirty ();
 }
@@ -924,8 +938,10 @@ AutomationLine::remove_point (ControlPoint& cp)
 
 	alist->erase (mr.start, mr.end);
 
-	trackview.editor().session()->add_command(new MementoCommand<AutomationList>(
-			*alist.get(), &before, &alist->get_state()));
+	trackview.editor().session()->add_command(
+		new MementoCommand<AutomationList> (memento_command_binder (), &before, &alist->get_state())
+		);
+	
 	trackview.editor().session()->commit_reversible_command ();
 	trackview.editor().session()->set_dirty ();
 }
@@ -1107,7 +1123,11 @@ AutomationLine::clear ()
 	/* parent must create command */
 	XMLNode &before = alist->get_state();
 	alist->clear();
-	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*(alist.get()), &before, &alist->get_state()));
+
+	trackview.editor().session()->add_command (
+		new MementoCommand<AutomationList> (memento_command_binder (), &before, &alist->get_state())
+		);
+	
 	trackview.editor().session()->commit_reversible_command ();
 	trackview.editor().session()->set_dirty ();
 }
@@ -1310,4 +1330,10 @@ AutomationLine::connect_to_list ()
 	alist->InterpolationChanged.connect (
 		_list_connections, invalidator (*this), boost::bind (&AutomationLine::interpolation_changed, this, _1), gui_context()
 		);
+}
+
+MementoCommandBinder<AutomationList>*
+AutomationLine::memento_command_binder ()
+{
+	return new SimpleMementoCommandBinder<AutomationList> (*alist.get());
 }

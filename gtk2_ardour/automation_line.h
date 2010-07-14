@@ -34,6 +34,7 @@
 
 #include "pbd/undo.h"
 #include "pbd/statefuldestructible.h"
+#include "pbd/memento_command.h"
 
 #include "ardour/automation_list.h"
 #include "ardour/types.h"
@@ -130,6 +131,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	void add_always_in_view (double);
 	void clear_always_in_view ();
+
+	virtual MementoCommandBinder<ARDOUR::AutomationList>* memento_command_binder ();
 
   protected:
 

@@ -22,10 +22,13 @@
 #include "ardour/event_type_map.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
+#include "ardour/midi_automation_list_binder.h"
+#include "ardour/midi_region.h"
 
 #include "automation_region_view.h"
 #include "gui_thread.h"
 #include "public_editor.h"
+#include "midi_automation_line.h"
 
 #include "i18n.h"
 
@@ -71,9 +74,12 @@ AutomationRegionView::init (Gdk::Color const & basic_color, bool /*wfd*/)
 void
 AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> list)
 {
-	_line = boost::shared_ptr<AutomationLine>(new AutomationLine(
+	_line = boost::shared_ptr<AutomationLine> (new MidiAutomationLine(
 				ARDOUR::EventTypeMap::instance().to_symbol(list->parameter()),
-				trackview, *get_canvas_group(), list, &_time_converter));
+				trackview, *get_canvas_group(), list,
+				boost::dynamic_pointer_cast<ARDOUR::MidiRegion> (_region),
+				_parameter,
+				&_time_converter));
 	_line->set_colors();
 	_line->set_height ((uint32_t)rint(trackview.current_height() - NAME_HIGHLIGHT_SIZE));
 	_line->show();
@@ -130,8 +136,15 @@ AutomationRegionView::add_automation_event (GdkEvent *, nframes_t when, double y
 	_line->the_list()->add (when_d, y);
 
 	XMLNode& after = _line->the_list()->get_state();
-	view->session()->commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(
-			*_line->the_list(), &before, &after));
+
+	/* XXX: hack! */
+	boost::shared_ptr<ARDOUR::MidiRegion> mr = boost::dynamic_pointer_cast<ARDOUR::MidiRegion> (_region);
+	assert (mr);
+	
+	view->session()->commit_reversible_command (
+		new MementoCommand<ARDOUR::AutomationList> (new ARDOUR::MidiAutomationListBinder (mr->midi_source(), _parameter), &before, &after)
+		);
+	
 
 	view->session()->set_dirty ();
 }

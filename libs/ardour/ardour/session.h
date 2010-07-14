@@ -1204,8 +1204,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* SOURCES */
 
 	mutable Glib::Mutex source_lock;
+
+  public:	
 	typedef std::map<PBD::ID,boost::shared_ptr<Source> > SourceMap;
 
+  private:	
 	SourceMap sources;
 
   public:

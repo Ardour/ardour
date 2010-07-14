@@ -31,6 +31,56 @@
 #include <sigc++/slot.h>
 #include <typeinfo>
 
+/** A class that can return a Stateful object which is the subject of a MementoCommand.
+ *
+ *  The existence of this class means that the undo record can refer to objects which
+ *  don't exist in the session file.  Currently this is just used for MIDI automation;
+ *  when MIDI automation is edited, undo records are written for the AutomationList being
+ *  changed.  However this AutomationList is a temporary structure, built by a MidiModel,
+ *  which doesn't get written to the session file.  Hence we need to be able to go from
+ *  a MidiSource and Parameter to an AutomationList.  This Binder mechanism allows this
+ *  through MidiAutomationListBinder; the undo record stores the source and parameter,
+ *  and these are bound to an AutomationList by the Binder.
+ */
+template <class obj_T>
+class MementoCommandBinder : public PBD::Destructible
+{
+public:
+	/** @return Stateful object to operate on */
+	virtual obj_T* get () = 0;
+
+	/** Add our own state to an XMLNode */
+	virtual void add_state (XMLNode *) = 0;
+};
+
+/** A simple MementoCommandBinder which binds directly to an object */
+template <class obj_T>
+class SimpleMementoCommandBinder : public MementoCommandBinder<obj_T>
+{
+public:
+	SimpleMementoCommandBinder (obj_T& o)
+		: _object (o)
+	{
+		_object.Destroyed.connect_same_thread (_object_death_connection, boost::bind (&SimpleMementoCommandBinder::object_died, this));
+	}
+
+	obj_T* get () {
+		return &_object;
+	}
+
+	void add_state (XMLNode* node) {
+		node->add_property ("obj_id", _object.id().to_s());
+	}
+	
+	void object_died () {
+		this->drop_references ();
+	}
+
+private:
+	obj_T& _object;
+	PBD::ScopedConnection _object_death_connection;
+};
+
 /** This command class is initialized with before and after mementos 
  * (from Stateful::get_state()), so undo becomes restoring the before
  * memento, and redo is restoring the after memento.
@@ -39,32 +89,38 @@ template <class obj_T>
 class MementoCommand : public Command
 {
 public:
-	MementoCommand(obj_T& a_object, XMLNode* a_before, XMLNode* a_after) 
-		: obj(a_object), before(a_before), after(a_after)
+	MementoCommand (obj_T& a_object, XMLNode* a_before, XMLNode* a_after) 
+		: _binder (new SimpleMementoCommandBinder<obj_T> (a_object)), before (a_before), after (a_after)
 	{
-		/* if the object dies, make sure that we die and that everyone knows about it */
-		obj.Destroyed.connect_same_thread (obj_death_connection, boost::bind (&MementoCommand::object_died, this));
+		_binder->Destroyed.connect_same_thread (_binder_death_connection, boost::bind (&MementoCommand::binder_died, this));
 	}
 
+	MementoCommand (MementoCommandBinder<obj_T>* b, XMLNode* a_before, XMLNode* a_after) 
+		: _binder (b), before (a_before), after (a_after)
+	{
+		_binder->Destroyed.connect_same_thread (_binder_death_connection, boost::bind (&MementoCommand::binder_died, this));
+	}
+	
 	~MementoCommand () {
 		drop_references ();
 		delete before;
 		delete after;
+		delete _binder;
 	}
 
-	void object_died () {
+	void binder_died () {
 		delete this;
 	}
 
 	void operator() () {
 		if (after) {
-			obj.set_state(*after, Stateful::current_state_version); 
+			_binder->get()->set_state(*after, Stateful::current_state_version); 
 		}
 	}
 
 	void undo() { 
 		if (before) {
-			obj.set_state(*before, Stateful::current_state_version); 
+			_binder->get()->set_state(*before, Stateful::current_state_version); 
 		}
 	}
 
@@ -79,9 +135,9 @@ public:
 		}
 
 		XMLNode* node = new XMLNode(name);
-
-		node->add_property("obj_id", obj.id().to_s());
-		node->add_property("type_name", demangled_name (obj));
+		_binder->add_state (node);
+		
+		node->add_property("type_name", demangled_name (*_binder->get()));
 
 		if (before) {
 			node->add_child_copy(*before);
@@ -95,10 +151,10 @@ public:
 	}
 
 protected:
-	obj_T&   obj;
+	MementoCommandBinder<obj_T>* _binder;
 	XMLNode* before;
 	XMLNode* after;
-	PBD::ScopedConnection obj_death_connection;
+	PBD::ScopedConnection _binder_death_connection;
 };
 
 #endif // __lib_pbd_memento_h__

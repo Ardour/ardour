@@ -33,6 +33,7 @@
 #include "ardour/midi_region.h"
 #include "ardour/session_playlists.h"
 #include "ardour/region_factory.h"
+#include "ardour/midi_automation_list_binder.h"
 #include "pbd/error.h"
 #include "pbd/id.h"
 #include "pbd/statefuldestructible.h"
@@ -58,7 +59,12 @@ Session::memento_command_factory(XMLNode *n)
     XMLNode *child = 0;
 
     /* get id */
-    id = PBD::ID(n->property("obj-id")->value());
+
+    /* XXX: HACK! */
+    bool have_id = n->property("obj-id") != 0;
+    if (have_id) {
+	    id = PBD::ID(n->property("obj-id")->value());
+    }
 
     /* get before/after */
 
@@ -121,11 +127,20 @@ Session::memento_command_factory(XMLNode *n)
 		}
 
     } else if (obj_T == "Evoral::Curve" || obj_T == "ARDOUR::AutomationList") {
-		std::map<PBD::ID, AutomationList*>::iterator i = automation_lists.find(id);
-		if (i != automation_lists.end()) {
-		    return new MementoCommand<AutomationList>(*i->second, before, after);
-		}
-                cerr << "Alist not found\n";
+	    if (have_id) {
+		    std::map<PBD::ID, AutomationList*>::iterator i = automation_lists.find(id);
+		    if (i != automation_lists.end()) {
+			    return new MementoCommand<AutomationList>(*i->second, before, after);
+		    }
+	    } else {
+		    return new MementoCommand<AutomationList> (
+			    new MidiAutomationListBinder (n, sources),
+			    before, after
+			    );
+	    }
+	    
+	    cerr << "Alist not found\n";
+	    
     } else if (registry.count(id)) { // For Editor and AutomationLine which are off-limits herea
 	    return new MementoCommand<PBD::StatefulDestructible>(*registry[id], before, after);
     }
