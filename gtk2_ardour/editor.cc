@@ -535,7 +535,6 @@ Editor::Editor ()
 	edit_packer.set_border_width (0);
 	edit_packer.set_name ("EditorWindow");
 
-	edit_packer.attach (zoom_vbox,               0, 1, 0, 2,    SHRINK,        FILL, 0, 0);
 	/* labels for the rulers */
 	edit_packer.attach (ruler_label_event_box,   1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
 	/* labels for the marker "tracks" */
@@ -2932,8 +2931,8 @@ Editor::setup_toolbar ()
 
 	/* Zoom */
 
-	zoom_box.set_spacing (1);
-	zoom_box.set_border_width (0);
+	_zoom_box.set_spacing (1);
+	_zoom_box.set_border_width (0);
 
 	zoom_in_button.set_name ("EditorTimeButton");
 	zoom_in_button.set_image (*(manage (new Image (Stock::ZOOM_IN, Gtk::ICON_SIZE_MENU))));
@@ -2951,9 +2950,10 @@ Editor::setup_toolbar ()
 	set_popdown_strings (zoom_focus_selector, zoom_focus_strings, true);
 	zoom_focus_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done));
 
-	zoom_box.pack_start (zoom_out_button, false, false);
-	zoom_box.pack_start (zoom_in_button, false, false);
-	zoom_box.pack_start (zoom_out_full_button, false, false);
+	_zoom_box.pack_start (zoom_focus_selector);
+	_zoom_box.pack_start (zoom_out_button, false, false);
+	_zoom_box.pack_start (zoom_in_button, false, false);
+	_zoom_box.pack_start (zoom_out_full_button, false, false);
 
 	/* Track zoom buttons */
 	tav_expand_button.set_name ("TrackHeightButton");
@@ -2966,18 +2966,20 @@ Editor::setup_toolbar ()
 	tav_shrink_button.add (*(manage (new Image (::get_icon("tav_shrink")))));
 	tav_shrink_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &Editor::tav_zoom_step), false));
 
-	track_zoom_box.set_spacing (1);
-	track_zoom_box.set_border_width (0);
+	_zoom_box.pack_start (tav_expand_button);
+	_zoom_box.pack_start (tav_shrink_button);
 
-	track_zoom_box.pack_start (tav_shrink_button, false, false);
-	track_zoom_box.pack_start (tav_expand_button, false, false);
+	_zoom_tearoff = manage (new TearOff (_zoom_box));
 
-	HBox* zbc = manage (new HBox);
-	zbc->pack_start (zoom_focus_selector, PACK_SHRINK);
-	zoom_vbox.pack_start (*zbc, PACK_SHRINK);
-	zoom_vbox.pack_start (zoom_box, PACK_SHRINK);
-	zoom_vbox.pack_start (track_zoom_box, PACK_SHRINK);
-
+	_zoom_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
+						   &_zoom_tearoff->tearoff_window()));
+	_zoom_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
+						   &_zoom_tearoff->tearoff_window(), 0));
+	_zoom_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
+						   &_zoom_tearoff->tearoff_window()));
+	_zoom_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
+						    &_zoom_tearoff->tearoff_window(), 0));
+	
 	snap_box.set_spacing (1);
 	snap_box.set_border_width (2);
 
@@ -3038,6 +3040,7 @@ Editor::setup_toolbar ()
 
 	toolbar_hbox.pack_start (*_mouse_mode_tearoff, false, false);
 	toolbar_hbox.pack_start (*_tools_tearoff, false, false);
+	toolbar_hbox.pack_start (*_zoom_tearoff, false, false);
 
 	hbox->pack_start (snap_box, false, false);
 	hbox->pack_start (*nudge_box, false, false);
@@ -4125,6 +4128,7 @@ Editor::maximise_editing_space ()
 {
 	_mouse_mode_tearoff->set_visible (false);
 	_tools_tearoff->set_visible (false);
+	_zoom_tearoff->set_visible (false);
 
 	pre_maximal_horizontal_pane_position = edit_pane.get_position ();
 	pre_maximal_vertical_pane_position = editor_summary_pane.get_position ();
@@ -4173,6 +4177,7 @@ Editor::restore_editing_space ()
 
 	_mouse_mode_tearoff->set_visible (true);
 	_tools_tearoff->set_visible (true);
+	_zoom_tearoff->set_visible (true);
 	post_maximal_editor_width = this->get_width();
 	post_maximal_editor_height = this->get_height();
 

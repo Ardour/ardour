@@ -1586,10 +1586,8 @@ public:
 
 	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
 
-	Gtk::HBox           zoom_box;
-	Gtk::HBox           track_zoom_box;
-	Gtk::VBox           zoom_vbox;
-
+	Gtk::HBox           _zoom_box;
+	Gtkmm2ext::TearOff* _zoom_tearoff;
 	void                zoom_adjustment_changed();
 
 	void setup_toolbar ();
