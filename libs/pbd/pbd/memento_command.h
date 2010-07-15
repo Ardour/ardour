@@ -73,6 +73,7 @@ public:
 	}
 	
 	void object_died () {
+		/* The object we are binding died, so drop references to ourselves */
 		this->drop_references ();
 	}
 
@@ -92,13 +93,15 @@ public:
 	MementoCommand (obj_T& a_object, XMLNode* a_before, XMLNode* a_after) 
 		: _binder (new SimpleMementoCommandBinder<obj_T> (a_object)), before (a_before), after (a_after)
 	{
-		_binder->Destroyed.connect_same_thread (_binder_death_connection, boost::bind (&MementoCommand::binder_died, this));
+		/* The binder's object died, so we must die */
+		_binder->DropReferences.connect_same_thread (_binder_death_connection, boost::bind (&MementoCommand::binder_dying, this));
 	}
 
 	MementoCommand (MementoCommandBinder<obj_T>* b, XMLNode* a_before, XMLNode* a_after) 
 		: _binder (b), before (a_before), after (a_after)
 	{
-		_binder->Destroyed.connect_same_thread (_binder_death_connection, boost::bind (&MementoCommand::binder_died, this));
+		/* The binder's object died, so we must die */
+		_binder->DropReferences.connect_same_thread (_binder_death_connection, boost::bind (&MementoCommand::binder_dying, this));
 	}
 	
 	~MementoCommand () {
@@ -108,7 +111,7 @@ public:
 		delete _binder;
 	}
 
-	void binder_died () {
+	void binder_dying () {
 		delete this;
 	}
 
