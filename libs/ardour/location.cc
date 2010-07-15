@@ -82,15 +82,21 @@ Location::operator= (const Location& other)
 	return this;
 }
 
+/** Set start position.
+ *  @param s New start.
+ *  @param force true to force setting, even if the given new start is after the current end.
+ */
 int
-Location::set_start (nframes64_t s)
+Location::set_start (nframes64_t s, bool force)
 {
 	if (_locked) {
 		return -1;
 	}
 
-	if (((is_auto_punch() || is_auto_loop()) && s >= _end) || (!is_mark() && s > _end)) {
-		return -1;
+	if (!force) {
+		if (((is_auto_punch() || is_auto_loop()) && s >= _end) || (!is_mark() && s > _end)) {
+			return -1;
+		}
 	}
 
 	if (is_mark()) {
@@ -115,15 +121,21 @@ Location::set_start (nframes64_t s)
 	return 0;
 }
 
+/** Set end position.
+ *  @param s New end.
+ *  @param force true to force setting, even if the given new start is after the current end.
+ */
 int
-Location::set_end (nframes64_t e)
+Location::set_end (nframes64_t e, bool force)
 {
 	if (_locked) {
 		return -1;
 	}
 
-	if (((is_auto_punch() || is_auto_loop()) && e <= _start) || e < _start) {
-		return -1;
+	if (!force) {
+		if (((is_auto_punch() || is_auto_loop()) && e <= _start) || e < _start) {
+			return -1;
+		}
 	}
 	
 	if (is_mark()) {
@@ -151,8 +163,14 @@ Location::set_end (nframes64_t e)
 int
 Location::set (nframes64_t start, nframes64_t end)
 {
-	int const s = set_start (start);
-	int const e = set_end (end);
+	/* check validity */
+	if (((is_auto_punch() || is_auto_loop()) && start >= end) || (!is_mark() && start > end)) {
+		return -1;
+	}
+
+	/* now we know these values are ok, so force-set them */
+	int const s = set_start (start, true);
+	int const e = set_end (end, true);
 
 	return (s == 0 && e == 0) ? 0 : -1;
 }

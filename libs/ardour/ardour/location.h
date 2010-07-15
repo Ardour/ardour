@@ -80,8 +80,8 @@ class Location : public PBD::StatefulDestructible
 	nframes64_t end() const { return _end; }
 	nframes64_t length() const { return _end - _start; }
 
-	int set_start (nframes64_t s);
-	int set_end (nframes64_t e);
+	int set_start (nframes64_t s, bool force = false);
+	int set_end (nframes64_t e, bool force = false);
 	int set (nframes64_t start, nframes64_t end);
 
 	int move_to (nframes64_t pos);
