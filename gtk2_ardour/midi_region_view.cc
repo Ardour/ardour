@@ -969,6 +969,9 @@ MidiRegionView::redisplay_model()
 		}
 	}
 
+	_pgm_changes.clear();
+	_sys_exes.clear();
+	
 	display_sysexes();
 	display_program_changes();
 
