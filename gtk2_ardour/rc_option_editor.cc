@@ -717,13 +717,13 @@ RCOptionEditor::RCOptionEditor ()
                 
                 ComboOption<uint32_t>* procs = new ComboOption<uint32_t> (
                         "processor-usage",
-                        _("Signal processing uses: "),
+                        _("Signal processing uses"),
                         sigc::mem_fun (*_rc_config, &RCConfiguration::get_processor_usage),
                         sigc::mem_fun (*_rc_config, &RCConfiguration::set_processor_usage)
                         );
                 
-                procs->add (-1, _("All but one"));
-                procs->add (0, _("All available processors"));
+                procs->add (-1, _("all but one processor"));
+                procs->add (0, _("all available processors"));
                 
                 for (uint32_t i = 2; i < hwcpus; ++i) {
                         procs->add (1, string_compose (_("%1 processors"), i));
