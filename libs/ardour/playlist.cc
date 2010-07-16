@@ -696,7 +696,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, flo
 	framepos_t pos = position;
 
 	if (times == 1 && auto_partition){
-		partition((nframes_t) pos - 1, (nframes_t) (pos + region->length()), true);
+		partition(pos - 1, (pos + region->length()), true);
 	}
 
 	if (itimes >= 1) {
@@ -1282,7 +1282,7 @@ Playlist::duplicate (boost::shared_ptr<Region> region, framepos_t position, floa
 
 	RegionLock rl (this);
 	int itimes = (int) floor (times);
-	nframes_t pos = position + 1;
+	framepos_t pos = position + 1;
 
 	while (itimes--) {
 		boost::shared_ptr<Region> copy = RegionFactory::create (region);
@@ -2256,6 +2256,7 @@ Playlist::set_state (const XMLNode& node, int version)
 				error << _("Playlist: cannot create region from XML") << endmsg;
 				continue;
 			}
+
 
 			add_region (region, region->position(), 1.0);
 
