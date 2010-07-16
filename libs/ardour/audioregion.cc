@@ -550,6 +550,22 @@ AudioRegion::state ()
 		child->add_child_nocopy (_envelope->get_state ());
 	}
 
+	child = node.add_child (X_("FadeIn"));
+
+	if (_default_fade_in) {
+		child->add_property ("default", "yes");
+	} else {
+		child->add_child_nocopy (_fade_in->get_state ());
+	}
+
+	child = node.add_child (X_("FadeOut"));
+
+	if (_default_fade_out) {
+		child->add_property ("default", "yes");
+	} else {
+		child->add_child_nocopy (_fade_out->get_state ());
+	}
+
 	return node;
 }
 
