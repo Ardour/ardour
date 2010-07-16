@@ -131,8 +131,7 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 
 void
 TimeAxisViewItem::init (
-	const string& it_name, double spu, Gdk::Color const & base_color, nframes64_t start, nframes64_t duration, Visibility vis, bool wide, bool high
-	)
+	const string& it_name, double spu, Gdk::Color const & base_color, nframes64_t start, nframes64_t duration, Visibility vis, bool wide, bool high)
 {
 	item_name = it_name;
 	samples_per_unit = spu;
@@ -164,38 +163,31 @@ TimeAxisViewItem::init (
 
 	if (visibility & ShowFrame) {
 		frame = new ArdourCanvas::SimpleRect (*group, 0.0, 1.0, trackview.editor().frame_to_pixel(duration), trackview.current_height());
+		
 		frame->property_outline_pixels() = 1;
 		frame->property_outline_what() = 0xF;
-		frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
-
-		/* by default draw all 4 edges */
-
-		uint32_t outline_what = 0x1|0x2|0x4|0x8;
-
-		if (visibility & HideFrameLeft) {
-			outline_what &= ~(0x1);
+		
+		if(_recregion){
+			frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 		}
-
-		if (visibility & HideFrameRight) {
-			outline_what &= ~(0x2);
+		else {
+			frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
 		}
-
-		if (visibility & HideFrameTB) {
-			outline_what &= ~(0x4 | 0x8);
-		}
-
-		frame->property_outline_what() = outline_what;
+		
+		frame->property_outline_what() = 0x1|0x2|0x4|0x8;
 
 	} else {
 		frame = 0;
 	}
 
 	if (visibility & ShowNameHighlight) {
+		
 		if (visibility & FullWidthNameHighlight) {
 			name_highlight = new ArdourCanvas::SimpleRect (*group, 0.0, trackview.editor().frame_to_pixel(item_duration), trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, trackview.current_height() - 1);
 		} else {
 			name_highlight = new ArdourCanvas::SimpleRect (*group, 1.0, trackview.editor().frame_to_pixel(item_duration) - 1, trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, trackview.current_height() - 1);
 		}
+		
 		name_highlight->set_data ("timeaxisviewitem", this);
 
 	} else {

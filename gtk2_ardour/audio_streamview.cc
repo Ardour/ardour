@@ -121,7 +121,10 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 		if (recording) {
 			region_view = new AudioRegionView (_canvas_group, _trackview, region,
 					_samples_per_unit, region_color, recording, TimeAxisViewItem::Visibility(
-							TimeAxisViewItem::ShowFrame | TimeAxisViewItem::HideFrameRight));
+							TimeAxisViewItem::ShowFrame | 
+							TimeAxisViewItem::HideFrameRight |
+							TimeAxisViewItem::HideFrameLeft |
+							TimeAxisViewItem::HideFrameTB));
 		} else {
 			region_view = new AudioRegionView (_canvas_group, _trackview, region,
 					_samples_per_unit, region_color);
@@ -160,6 +163,7 @@ RegionView*
 AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_waves, bool recording)
 {
 	RegionView *region_view = create_region_view (r, wait_for_waves, recording);
+	
 	if (region_view == 0) {
 		return 0;
 	}
@@ -486,7 +490,7 @@ AudioStreamView::setup_rec_box ()
 				assert(region);
 				region->block_property_changes ();
 				region->set_position (_trackview.session()->transport_frame(), this);
-				rec_regions.push_back (make_pair(region, (RegionView*)0));
+				rec_regions.push_back (make_pair(region, (RegionView*) 0));
 			}
 
 			/* start a new rec box */
@@ -521,8 +525,8 @@ AudioStreamView::setup_rec_box ()
 			rec_rect->property_y1() = 1.0;
 			rec_rect->property_x2() = xend;
 			rec_rect->property_y2() = child_height ();
+			rec_rect->property_outline_what() = 0x0;
 			rec_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
-			rec_rect->property_outline_what() = 0x1 | 0x2 | 0x4 | 0x8;
 			rec_rect->property_fill_color_rgba() = fill_color;
 			rec_rect->lower_to_bottom();
 
@@ -640,6 +644,7 @@ AudioStreamView::update_rec_regions ()
 			}
 
 			boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(iter->first);
+			
 			if (!region) {
 				iter = tmp;
 				continue;

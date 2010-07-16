@@ -379,19 +379,53 @@ TimeAxisView::hide ()
 void
 TimeAxisView::step_height (bool bigger)
 {
-	static const uint32_t step = 20;
+	static const uint32_t step = 25;
 
 	if (bigger) {
-		set_height (height + step);
-	} else {
-		if (height > step) {
-			set_height (std::max (height - step, preset_height (HeightSmall)));
-		} else if (height != preset_height (HeightSmall)) {
-			set_height (HeightSmall);
+		if (height == preset_height(HeightSmall)) {
+			set_height (preset_height(HeightSmaller));
+		} 
+		else if (height == preset_height(HeightSmaller)) {
+			set_height (preset_height(HeightNormal));
+		} 
+		else {
+			set_height (height + step);
 		}
+
+	} else {
+		if ( height == preset_height(HeightSmall)){
+			return;
+		}
+		if (height == preset_height (HeightSmaller)) {
+			set_height (preset_height(HeightSmall));
+		}
+		else if (height > step) {	
+			
+			if ( height <= preset_height (HeightNormal) && height > preset_height (HeightSmaller)){
+				set_height (preset_height(HeightSmaller));
+			}
+			else {
+				set_height (height - step);
+			}
+		} 
 	}
 }
-
+/*
+	switch (h) {
+	case HeightLargest:
+		return extra_height + 48 + 250;
+	case HeightLarger:
+		return extra_height + 48 + 150;
+	case HeightLarge:
+		return extra_height + 48 + 50;
+	case HeightNormal:
+		return extra_height + 48;
+	case HeightSmall:
+		return 27;
+	case HeightSmaller:
+		return smaller_height;
+	}
+*/
 void
 TimeAxisView::set_heights (uint32_t h)
 {
@@ -714,12 +748,12 @@ TimeAxisView::show_selection (TimeSelection& ts)
 			rect->start_trim->property_x1() = x1;
 			rect->start_trim->property_y1() = 1.0;
 			rect->start_trim->property_x2() = x1 + trim_handle_size;
-			rect->start_trim->property_y2() = 1.0 + trim_handle_size;
+			rect->start_trim->property_y2() = y2;
 
 			rect->end_trim->property_x1() = x2 - trim_handle_size;
 			rect->end_trim->property_y1() = 1.0;
 			rect->end_trim->property_x2() = x2;
-			rect->end_trim->property_y2() = 1.0 + trim_handle_size;
+			rect->end_trim->property_y2() = y2;
 
 			rect->start_trim->show();
 			rect->end_trim->show();
@@ -815,24 +849,22 @@ TimeAxisView::get_selection_rect (uint32_t id)
 		rect = new SelectionRect;
 
 		rect->rect = new SimpleRect (*selection_group);
+		rect->rect->property_outline_what() = 0x0;
 		rect->rect->property_x1() = 0.0;
 		rect->rect->property_y1() = 0.0;
 		rect->rect->property_x2() = 0.0;
 		rect->rect->property_y2() = 0.0;
 		rect->rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectionRect.get();
-		rect->rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
 
 		rect->start_trim = new SimpleRect (*selection_group);
+		rect->start_trim->property_outline_what() = 0x0;
 		rect->start_trim->property_x1() = 0.0;
 		rect->start_trim->property_x2() = 0.0;
-		rect->start_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
-		rect->start_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
-
+		
 		rect->end_trim = new SimpleRect (*selection_group);
+		rect->end_trim->property_outline_what() = 0x0;
 		rect->end_trim->property_x1() = 0.0;
 		rect->end_trim->property_x2() = 0.0;
-		rect->end_trim->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
-		rect->end_trim->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_Selection.get();
 
 		free_selection_rects.push_front (rect);
 
@@ -1034,7 +1066,7 @@ TimeAxisView::compute_heights ()
 	const int border_width = 2;
 	extra_height = (2 * border_width)
 		//+ 2   // 2 pixels for the hseparator between TimeAxisView control areas
-		+ 10; // resizer button (3 x 2 pixel elements + 2 x 2 pixel gaps)
+		+ 6; // resizer button (3 x 2 pixel elements + 2 x 2 pixel gaps)
 
 	window.add (one_row_table);
 

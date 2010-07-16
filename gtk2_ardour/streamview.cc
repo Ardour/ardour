@@ -568,7 +568,7 @@ StreamView::update_contents_height ()
 	}
 
 	for (vector<RecBoxInfo>::iterator i = rec_rects.begin(); i != rec_rects.end(); ++i) {
-		i->rectangle->property_y2() = height - 1.0;
+		i->rectangle->property_y2() = height;
 	}
 }
 
