@@ -1140,7 +1140,7 @@ Region::set_layer (layer_t l)
 }
 
 XMLNode&
-Region::state (bool full)
+Region::state ()
 {
 	XMLNode *node = new XMLNode ("Region");
 	char buf[64];
@@ -1191,7 +1191,7 @@ Region::state (bool full)
 		node->add_property (buf2, buf);
 	}
 
-	if (full && _extra_xml) {
+	if (_extra_xml) {
 		node->add_child_copy (*_extra_xml);
 	}
 
@@ -1201,7 +1201,7 @@ Region::state (bool full)
 XMLNode&
 Region::get_state ()
 {
-	return state (true);
+	return state ();
 }
 
 int

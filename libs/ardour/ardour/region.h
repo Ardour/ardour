@@ -236,7 +236,7 @@ class Region
 	/* serialization */
 
 	XMLNode&         get_state ();
-	virtual XMLNode& state (bool);
+	virtual XMLNode& state ();
 	virtual int      set_state (const XMLNode&, int version);
 
 	virtual boost::shared_ptr<Region> get_parent() const;

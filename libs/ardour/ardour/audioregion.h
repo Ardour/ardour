@@ -121,7 +121,7 @@ class AudioRegion : public Region
 	
 	virtual framecnt_t read_raw_internal (Sample*, framepos_t, framecnt_t, int channel) const;
 
-	XMLNode& state (bool);
+	XMLNode& state ();
 	int set_state (const XMLNode&, int version);
 
 	static void set_default_fade (float steepness, framecnt_t len);

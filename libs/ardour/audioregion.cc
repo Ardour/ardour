@@ -517,9 +517,9 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 }
 
 XMLNode&
-AudioRegion::state (bool full)
+AudioRegion::state ()
 {
-	XMLNode& node (Region::state (full));
+	XMLNode& node (Region::state ());
 	XMLNode *child;
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
@@ -527,34 +527,27 @@ AudioRegion::state (bool full)
 	snprintf (buf, sizeof (buf), "%u", (uint32_t) _sources.size());
 	node.add_property ("channels", buf);
 
-	if (full) {
-		Stateful::add_properties (node);
-	}
+	Stateful::add_properties (node);
 
 	child = node.add_child ("Envelope");
 
-	if (full) {
-		bool default_env = false;
-
-		// If there are only two points, the points are in the start of the region and the end of the region
-		// so, if they are both at 1.0f, that means the default region.
-
-		if (_envelope->size() == 2 &&
-		    _envelope->front()->value == 1.0f &&
-		    _envelope->back()->value==1.0f) {
-			if (_envelope->front()->when == 0 && _envelope->back()->when == _length) {
-				default_env = true;
-			}
+	bool default_env = false;
+	
+	// If there are only two points, the points are in the start of the region and the end of the region
+	// so, if they are both at 1.0f, that means the default region.
+	
+	if (_envelope->size() == 2 &&
+	    _envelope->front()->value == 1.0f &&
+	    _envelope->back()->value==1.0f) {
+		if (_envelope->front()->when == 0 && _envelope->back()->when == _length) {
+			default_env = true;
 		}
-
-		if (default_env) {
-			child->add_property ("default", "yes");
-		} else {
-			child->add_child_nocopy (_envelope->get_state ());
-		}
-
-	} else {
+	}
+	
+	if (default_env) {
 		child->add_property ("default", "yes");
+	} else {
+		child->add_child_nocopy (_envelope->get_state ());
 	}
 
 	return node;

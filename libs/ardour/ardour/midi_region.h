@@ -71,7 +71,7 @@ class MidiRegion : public Region
 				   uint32_t  chan_n = 0,
 				   NoteMode  mode = Sustained) const;
 
-	XMLNode& state (bool);
+	XMLNode& state ();
 	int      set_state (const XMLNode&, int version);
 	
 	int separate_by_channel (ARDOUR::Session&, std::vector< boost::shared_ptr<Region> >&) const;

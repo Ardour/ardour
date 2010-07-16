@@ -195,9 +195,9 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& 
 }
 
 XMLNode&
-MidiRegion::state (bool full)
+MidiRegion::state ()
 {
-	return Region::state (full);
+	return Region::state ();
 }
 
 int
