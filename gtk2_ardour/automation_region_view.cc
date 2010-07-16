@@ -186,7 +186,7 @@ AutomationRegionView::region_resized (const PBD::PropertyChange& what_changed)
 
 
 void
-AutomationRegionView::entered()
+AutomationRegionView::entered (bool)
 {
 	if (_line)
 		_line->track_entered();

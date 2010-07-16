@@ -68,7 +68,7 @@ protected:
 	void region_resized (const PBD::PropertyChange&);
 	bool canvas_event(GdkEvent* ev);
 	void add_automation_event (GdkEvent* event, nframes_t when, double y);
-	void entered();
+	void entered (bool);
 	void exited();
 
 private:

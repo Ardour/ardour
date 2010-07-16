@@ -797,7 +797,7 @@ Editor::set_entered_regionview (RegionView* rv)
 	}
 
 	if ((entered_regionview = rv) != 0) {
-		entered_regionview->entered ();
+		entered_regionview->entered (internal_editing ());
 	}
 }
 

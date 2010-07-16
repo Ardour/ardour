@@ -111,7 +111,7 @@ class AudioRegionView : public RegionView
 
 	void show_region_editor ();
 
-	virtual void entered ();
+	virtual void entered (bool);
 	virtual void exited ();
 
   protected:

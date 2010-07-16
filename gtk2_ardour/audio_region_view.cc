@@ -1229,7 +1229,7 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 }
 
 void
-AudioRegionView::entered ()
+AudioRegionView::entered (bool internal_editing)
 {
 	if (gain_line && _flags & EnvelopeVisible) {
 		gain_line->show_all_control_points ();
@@ -1239,7 +1239,7 @@ AudioRegionView::entered ()
 	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
 	a=255;
 
-	if (fade_in_handle) {
+	if (fade_in_handle && !internal_editing) {
 		fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
 		fade_out_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
 	}

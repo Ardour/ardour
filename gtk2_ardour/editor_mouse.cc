@@ -1612,7 +1612,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case FadeInHandleItem:
-		if (mouse_mode == MouseObject) {
+		if (mouse_mode == MouseObject && !internal_editing()) {
 			ArdourCanvas::SimpleRect *rect = dynamic_cast<ArdourCanvas::SimpleRect *> (item);
 			if (rect) {
 				rect->property_fill_color_rgba() = 0;
@@ -1623,7 +1623,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
                 break;
 
 	case FadeOutHandleItem:
-		if (mouse_mode == MouseObject) {
+		if (mouse_mode == MouseObject && !internal_editing()) {
 			ArdourCanvas::SimpleRect *rect = dynamic_cast<ArdourCanvas::SimpleRect *> (item);
 			if (rect) {
 				rect->property_fill_color_rgba() = 0;

@@ -83,7 +83,7 @@ class RegionView : public TimeAxisViewItem
 
 	uint32_t get_fill_color ();
 
-	virtual void entered () {}
+	virtual void entered (bool) {}
 	virtual void exited () {}
 
 	virtual void enable_display(bool yn) { _enable_display = yn; }
