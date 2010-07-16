@@ -34,6 +34,7 @@
 
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/accelmap.h>
+#include <gtkmm2ext/application.h>
 
 #include <pbd/error.h>
 #include <pbd/basename.h>
@@ -643,6 +644,11 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 void
 ARDOUR_UI::startup ()
 {
+	Application* app = Application::instance();
+
+	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
+	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
+
 	string name, path;
 	
 	new_session_dialog = new NewSessionDialog();
@@ -653,7 +659,9 @@ ARDOUR_UI::startup ()
 	if (audio_setup) {
 		new_session_dialog->engine_control.set_state (*audio_setup);
 	}
-	
+
+	app->ready ();
+
 	if (!get_session_parameters (backend_audio_is_running, ARDOUR_COMMAND_LINE::new_session)) {
 		return;
 	}
@@ -2347,6 +2355,7 @@ void
 ARDOUR_UI::idle_load (const Glib::ustring& path)
 {
 	if (session) {
+
 		if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
 			/* /path/to/foo => /path/to/foo, foo */
 			load_session (path, basename_nosuffix (path));
@@ -2354,12 +2363,12 @@ ARDOUR_UI::idle_load (const Glib::ustring& path)
 			/* /path/to/foo/foo.ardour => /path/to/foo, foo */
 			load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
 		}
+
 	} else {
 
 		ARDOUR_COMMAND_LINE::session_name = path;
 
 		if (new_session_dialog) {
-
 
 			/* make it break out of Dialog::run() and
 			   start again.

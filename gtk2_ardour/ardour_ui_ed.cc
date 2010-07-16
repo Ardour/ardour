@@ -891,9 +891,6 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 	}
 
 	app->set_menu_bar (*menu_bar);
-
-	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
-	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
 }
 
 void
