@@ -95,6 +95,15 @@ fixup_bundle_environment ()
 	*/
 
 	path = dir_path;
+
+	/* JACK is often in /usr/local/bin and since Info.plist refuses to 
+	   set PATH, we have to force this in order to discover a running
+	   instance of JACK ...
+	*/
+	
+	path += ':';
+	path += "/usr/local/bin";
+
 	if (cstr) {
 		path += ':';
 		path += cstr;
