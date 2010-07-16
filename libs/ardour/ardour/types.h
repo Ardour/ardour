@@ -27,6 +27,7 @@
 #include <istream>
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include <sys/types.h>
 
 #include <inttypes.h>
 #include <jack/types.h>
@@ -440,7 +441,7 @@ namespace ARDOUR {
 
 	struct CleanupReport {
 		std::vector<std::string> paths;
-		int64_t                  space;
+		size_t                   space;
 	};
 
 	enum PositionLockStyle {

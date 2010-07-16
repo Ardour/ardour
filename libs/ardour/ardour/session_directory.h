@@ -53,10 +53,28 @@ public:
 
 	/**
 	 * @return the absolute path to the directory in which
+	 * the session stores STUB audio files.
+	 *
+	 * If the session is an older session with an existing
+	 * "sounds" directory then it will return a path to that
+	 * directory otherwise it will return the new location
+	 * of root_path()/interchange/session_name/audiofiles/.stubs
+	 */
+	const PBD::sys::path sound_stub_path () const;
+
+	/**
+	 * @return the absolute path to the directory in which
 	 * the session stores MIDI files, ie
 	 * root_path()/interchange/session_name/midifiles
 	 */
 	const PBD::sys::path midi_path () const;
+
+	/**
+	 * @return the absolute path to the directory in which
+	 * the session stores STUB MIDI files, ie
+	 * root_path()/interchange/session_name/midifiles/.stubs
+	 */
+	const PBD::sys::path midi_stub_path () const;
 
 	/**
 	 * @return the absolute path to the directory in which

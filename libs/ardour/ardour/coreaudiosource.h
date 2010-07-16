@@ -34,6 +34,8 @@ class CoreAudioSource : public AudioFileSource {
 	CoreAudioSource (ARDOUR::Session&, const string& path, int chn, Flag);
 	~CoreAudioSource ();
 
+        void set_path (const std::string& p);
+
 	float sample_rate() const;
 	int update_header (sframes_t when, struct tm&, time_t);
 

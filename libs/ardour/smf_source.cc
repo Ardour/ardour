@@ -99,7 +99,6 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 SMFSource::~SMFSource ()
 {
 	if (removable()) {
-                cerr << name() << " is removable, empty ? " << empty() << " UC " << use_count() << endl;
 		unlink (_path.c_str());
 	}
 }
@@ -170,7 +169,7 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t s
 		assert(time >= start_ticks);
 		const sframes_t ev_frame_time = converter.to(time / (double)ppqn()) + stamp_offset;
 
-#if 1
+#if 0
 		cerr << " frames = " << ev_frame_time
 		     << " w/offset = " << ev_frame_time - negative_stamp_offset
 		     << endl;
@@ -494,3 +493,9 @@ SMFSource::flush_midi ()
         mark_nonremovable (); 
 }
 
+void
+SMFSource::set_path (const string& p)
+{
+        FileSource::set_path (p);
+        SMF::set_path (_path);
+}

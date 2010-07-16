@@ -86,7 +86,7 @@ SndFileDescriptor::open ()
 {
 	/* we must have a lock on the FileManager's mutex */
 	
-	_sndfile = sf_open (_name.c_str(), _writeable ? SFM_RDWR : SFM_READ, _info);
+	_sndfile = sf_open (_path.c_str(), _writeable ? SFM_RDWR : SFM_READ, _info);
 	return (_sndfile == 0);
 }
 

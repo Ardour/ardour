@@ -51,7 +51,10 @@ public:
 	FileDescriptor (std::string const &, bool);
 	virtual ~FileDescriptor () {}
 
+        const std::string& path() const { return _path; }
+
 	void release ();
+        virtual void set_path (const std::string&);
 
 	/** Emitted when the file is closed */
 	PBD::Signal0<void> Closed;
@@ -71,7 +74,7 @@ protected:
 
 	int _refcount; ///< number of active users of this file
 	double _last_used; ///< monotonic time that this file was last allocated
-	std::string _name; ///< filename
+	std::string _path; ///< file path
 	bool _writeable; ///< true if it should be opened writeable, otherwise false
 
 	FileManager* manager ();

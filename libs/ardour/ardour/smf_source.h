@@ -69,7 +69,10 @@ public:
 
 	static bool safe_midi_file_extension (const Glib::ustring& path);
 
-private:
+  protected:
+        void set_path (const std::string& newpath);
+        
+  private:
 	nframes_t read_unlocked (Evoral::EventSink<nframes_t>& dst,
 				 sframes_t position,
 				 sframes_t start,

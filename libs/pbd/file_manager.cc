@@ -100,19 +100,19 @@ FileManager::allocate (FileDescriptor* d)
 				DEBUG::FileManager,
 				string_compose (
 					"closed file for %1 to release file handle; now have %2 of %3 open\n",
-					(*oldest)->_name, _open, _max_open
+					(*oldest)->_path, _open, _max_open
 					)
 				);
 		}
 
 		if (d->open ()) {
-			DEBUG_TRACE (DEBUG::FileManager, string_compose ("open of %1 failed.\n", d->_name));
+			DEBUG_TRACE (DEBUG::FileManager, string_compose ("open of %1 failed.\n", d->_path));
 			return true;
 		}
 
 		_open++;
 
-		DEBUG_TRACE (DEBUG::FileManager, string_compose ("opened file for %1; now have %2 of %3 open.\n", d->_name, _open, _max_open));
+		DEBUG_TRACE (DEBUG::FileManager, string_compose ("opened file for %1; now have %2 of %3 open.\n", d->_path, _open, _max_open));
 	}
 
 #ifdef __APPLE__
@@ -148,7 +148,7 @@ FileManager::remove (FileDescriptor* d)
 		close (d);
 		DEBUG_TRACE (
 			DEBUG::FileManager,
-			string_compose ("closed file for %1; file is being removed; now have %2 of %3 open\n", d->_name, _open, _max_open)
+			string_compose ("closed file for %1; file is being removed; now have %2 of %3 open\n", d->_path, _open, _max_open)
 			);
 	}
 
@@ -168,7 +168,7 @@ FileManager::close (FileDescriptor* d)
 FileDescriptor::FileDescriptor (string const & n, bool w)
 	: _refcount (0)
 	, _last_used (0)
-	, _name (n)
+	, _path (n)
 	, _writeable (w)
 {
 
@@ -224,7 +224,7 @@ FdFileDescriptor::open ()
 {
 	/* we must have a lock on the FileManager's mutex */
 	
-	_fd = ::open (_name.c_str(), _writeable ? (O_RDWR | O_CREAT) : O_RDONLY, _mode);
+	_fd = ::open (_path.c_str(), _writeable ? (O_RDWR | O_CREAT) : O_RDONLY, _mode);
 	return (_fd == -1);
 }
 
@@ -252,6 +252,13 @@ FdFileDescriptor::allocate ()
 	return _fd;
 }
 
+
+void
+FileDescriptor::set_path (const string& p)
+{
+        assert (!is_open());
+        _path = p;
+}
 
 /** @param n Filename.
  *  @param w true to open writeable, otherwise false.
@@ -283,7 +290,7 @@ StdioFileDescriptor::open ()
 {
 	/* we must have a lock on the FileManager's mutex */
 	
-	_file = fopen (_name.c_str(), _mode.c_str());
+	_file = fopen (_path.c_str(), _mode.c_str());
 	return (_file == 0);
 }
 

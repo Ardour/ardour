@@ -1388,6 +1388,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 
 				(*chan)->write_source->mark_for_remove ();
 				(*chan)->write_source->drop_references ();
+                                _session.remove_source ((*chan)->write_source);
 				(*chan)->write_source.reset ();
 			}
 
@@ -1409,9 +1410,13 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 
 		if (s) {
 			srcs.push_back (s);
+                        if (s->unstubify ()) {
+                                error << string_compose (_("Could not move capture file from %1"), s->path()) << endmsg;
+                        }
 			s->update_header (capture_info.front()->start, when, twhen);
 			s->set_captured_for (_name.val());
 			s->mark_immutable ();
+
 			if (Config->get_auto_analyse_audio()) {
 				Analyser::queue_source_for_analysis (s, true);
 			}
@@ -1880,7 +1885,13 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 	}
 
 	try {
-		if ((chan->write_source = _session.create_audio_source_for_session (n_channels().n_audio(), name(), n, destructive())) == 0) {
+                /* file starts off as a stub file, it will be converted
+                   when we're done with a capture pass.
+                */
+
+		if ((chan->write_source = _session.create_audio_source_for_session (n_channels().n_audio(), 
+                                                                                    name(), n, destructive(), 
+                                                                                    true)) == 0) {
 			throw failed_constructor();
 		}
 	}
@@ -1895,10 +1906,6 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 
 	chan->write_source->set_allow_remove_if_empty (!destructive());
 	
-	/* until we write, this file is considered removable */
-
-	chan->write_source->mark_for_remove ();
-
 	return 0;
 }
 

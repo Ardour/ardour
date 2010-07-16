@@ -273,6 +273,12 @@ Source::set_allow_remove_if_empty (bool yn)
 }
 
 void
+Source::inc_use_count ()
+{
+        g_atomic_int_inc (&_use_count);
+}
+
+void
 Source::dec_use_count ()
 {
 #ifndef NDEBUG

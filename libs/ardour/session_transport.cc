@@ -432,12 +432,23 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: DS stop\n"));
+
+        if (abort && did_record) {
+                /* no reason to save the session file when we remove sources
+                 */
+                _state_of_the_state = StateOfTheState (_state_of_the_state|InCleanup);
+        }
+
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr) {
 			tr->transport_stopped_wallclock (*now, xnow, abort);
 		}
 	}
+
+        if (abort && did_record) {
+                _state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);                
+        }
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
 

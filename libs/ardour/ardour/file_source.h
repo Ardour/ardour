@@ -35,6 +35,9 @@ public:
 class FileSource : virtual public Source {
 public:
 	const Glib::ustring& path() const { return _path; }
+        
+        int  unstubify ();
+        void stubify ();
 
 	virtual bool safe_file_extension (const Glib::ustring& path) const = 0;
 
@@ -57,6 +60,8 @@ public:
 			bool must_exist, bool& is_new, uint16_t& chan,
 			Glib::ustring& found_path);
 
+        void inc_use_count ();
+
 protected:
 	FileSource (Session& session, DataType type,
 			const Glib::ustring& path, 
@@ -66,6 +71,7 @@ protected:
 
 	virtual int init (const Glib::ustring& idstr, bool must_exist);
 
+        virtual void set_path (const std::string&);
 	virtual int move_dependents_to_trash() { return 0; }
 	void set_within_session_from_path (const std::string&);
 

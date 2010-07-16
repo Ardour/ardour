@@ -321,19 +321,11 @@ MidiSource::session_saved()
            XXX do we need to do this every time?
         */
 
-	flush_midi();
-
 	if (_model && _model->edited()) {
-#if 0 // old style: clone the source if necessary on every session save
-      // and switch to the new source
-		boost::shared_ptr<MidiSource> newsrc = clone ();
 
-                if (newsrc) {
-                        _model->set_midi_source (newsrc);
-                        Switched (newsrc); /* EMIT SIGNAL */
-                }
-#else
-                // new style: if the model is edited, write its contents into
+
+
+                // if the model is edited, write its contents into
                 // the current source file (overwiting previous contents.
 
                 /* temporarily drop our reference to the model so that
@@ -343,13 +335,19 @@ MidiSource::session_saved()
 
                 boost::shared_ptr<MidiModel> mm = _model ;
                 _model.reset ();   
-                mm->sync_to_source ();
-                _model = mm;
-                /* data is in the file now, its not removable */
-#endif
-        }
 
-        cerr << name() << " @ " << this << " length at save = " << _length_beats << endl;
+                /* flush model contents to disk
+                 */
+
+                mm->sync_to_source ();
+
+                /* reacquire model */
+
+                _model = mm;
+
+        } else {
+                flush_midi();
+        }
 }
 
 void

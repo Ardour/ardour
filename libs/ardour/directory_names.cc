@@ -17,5 +17,6 @@ const char* const templates_dir_name = X_("templates");
 const char* const route_templates_dir_name = X_("route_templates");
 const char* const surfaces_dir_name = X_("surfaces");
 const char* const user_config_dir_name = X_("ardour3");
+const char* const stub_dir_name = X_(".stubs");
 
 }

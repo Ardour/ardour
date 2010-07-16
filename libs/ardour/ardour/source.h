@@ -105,8 +105,8 @@ class Source : public SessionObject
 	Glib::Mutex& mutex()       { return _lock; }
 	Flag         flags() const { return _flags; }
 
-        void inc_use_count () { g_atomic_int_inc (&_use_count); }
-        void dec_use_count ();
+        virtual void inc_use_count ();
+        virtual void dec_use_count ();
         int  use_count() const { return g_atomic_int_get (&_use_count); }
         bool used() const { return use_count() > 0; }
 

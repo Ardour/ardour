@@ -66,6 +66,7 @@ class SndFileSource : public AudioFileSource {
 	static int get_soundfile_info (const Glib::ustring& path, SoundFileInfo& _info, std::string& error_msg);
 
   protected:
+        void set_path (const std::string& p);
 	void set_header_timeline_position ();
 
 	framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const;

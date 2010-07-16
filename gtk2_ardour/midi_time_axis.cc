@@ -33,11 +33,12 @@
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
 
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/selector.h>
-#include <gtkmm2ext/bindable_button.h>
-#include <gtkmm2ext/utils.h>
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/selector.h"
+#include "gtkmm2ext/bindable_button.h"
+#include "gtkmm2ext/utils.h"
 
+#include "ardour/file_source.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_diskstream.h"
 #include "ardour/midi_patch_manager.h"
@@ -961,7 +962,6 @@ MidiTimeAxisView::add_region (nframes64_t pos)
 
 	boost::shared_ptr<Source> src = _session->create_midi_source_for_session (view()->trackview().track().get(),
                                                                                   view()->trackview().track()->name());
-
 	PropertyList plist; 
 	
 	plist.add (ARDOUR::Properties::start, 0);
@@ -969,7 +969,7 @@ MidiTimeAxisView::add_region (nframes64_t pos)
 	plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
 	
 	boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
-
+        
 	playlist()->add_region (region, start);
 	_session->add_command (new StatefulDiffCommand (playlist()));
 

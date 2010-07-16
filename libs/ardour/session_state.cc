@@ -41,7 +41,6 @@
 #include <signal.h>
 #include <sys/mman.h>
 #include <sys/time.h>
-#include <dirent.h>
 
 #ifdef HAVE_SYS_VFS_H
 #include <sys/vfs.h>
@@ -66,6 +65,7 @@
 #include "pbd/search_path.h"
 #include "pbd/stacktrace.h"
 #include "pbd/convert.h"
+#include "pbd/clear_dir.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_diskstream.h"
@@ -288,7 +288,7 @@ Session::second_stage_init ()
 		if (load_state (_current_snapshot_name)) {
 			return -1;
 		}
-		remove_empty_sounds ();
+                cleanup_stubfiles ();
 	}
 
 	if (_butler->start_thread()) {
@@ -460,10 +460,24 @@ Session::ensure_subdirs ()
 		return -1;
 	}
 
+	dir = session_directory().sound_stub_path().to_string();
+
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session stub sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
+	}
+
 	dir = session_directory().midi_path().to_string();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session midi dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+		return -1;
+	}
+
+	dir = session_directory().midi_stub_path().to_string();
+
+	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+		error << string_compose(_("Session: cannot create session stub midi dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -1595,15 +1609,11 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 
 	try {
 
-	if ( !type || type->value() == "audio" ) {
-
-		return boost::shared_ptr<Region>(XMLAudioRegionFactory (node, full));
-
-	} else if (type->value() == "midi") {
-
-		return boost::shared_ptr<Region>(XMLMidiRegionFactory (node, full));
-
-	}
+                if (!type || type->value() == "audio") {
+                        return boost::shared_ptr<Region>(XMLAudioRegionFactory (node, full));
+                } else if (type->value() == "midi") {
+                        return boost::shared_ptr<Region>(XMLMidiRegionFactory (node, full));
+                }
 
 	} catch (failed_constructor& err) {
 		return boost::shared_ptr<Region> ();
@@ -1738,23 +1748,15 @@ Session::XMLMidiRegionFactory (const XMLNode& node, bool /*full*/)
 	boost::shared_ptr<Source> source;
 	boost::shared_ptr<MidiSource> ms;
 	SourceList sources;
-	uint32_t nchans = 1;
 
 	if (node.name() != X_("Region")) {
 		return boost::shared_ptr<MidiRegion>();
-	}
-
-	if ((prop = node.property (X_("channels"))) != 0) {
-		nchans = atoi (prop->value().c_str());
 	}
 
 	if ((prop = node.property ("name")) == 0) {
 		cerr << "no name for this region\n";
 		abort ();
 	}
-
-	// Multiple midi channels?  that's just crazy talk
-	assert(nchans == 1);
 
 	if ((prop = node.property (X_("source-0"))) == 0) {
 		if ((prop = node.property ("source")) == 0) {
@@ -2339,6 +2341,10 @@ Session::commit_reversible_command(Command *cmd)
 static bool
 accept_all_non_peak_files (const string& path, void */*arg*/)
 {
+        if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
+                return false;
+        }
+
 	return (path.length() > 5 && path.find (peakfile_suffix) != (path.length() - 5));
 }
 
@@ -2710,9 +2716,6 @@ Session::cleanup_trash_sources (CleanupReport& rep)
 
 	vector<space_and_path>::iterator i;
 	string dead_sound_dir;
-	struct dirent* dentry;
-	struct stat statbuf;
-	DIR* dead;
 
 	rep.paths.clear ();
 	rep.space = 0;
@@ -2722,48 +2725,49 @@ Session::cleanup_trash_sources (CleanupReport& rep)
 		dead_sound_dir = (*i).path;
 		dead_sound_dir += dead_sound_dir_name;
 
-		if ((dead = opendir (dead_sound_dir.c_str())) == 0) {
-			continue;
-		}
-
-		while ((dentry = readdir (dead)) != 0) {
-
-			/* avoid '.' and '..' */
-
-			if ((dentry->d_name[0] == '.' && dentry->d_name[1] == '\0') ||
-			    (dentry->d_name[2] == '\0' && dentry->d_name[0] == '.' && dentry->d_name[1] == '.')) {
-				continue;
-			}
-
-			string fullpath;
-
-			fullpath = dead_sound_dir;
-			fullpath += '/';
-			fullpath += dentry->d_name;
-
-			if (stat (fullpath.c_str(), &statbuf)) {
-				continue;
-			}
-
-			if (!S_ISREG (statbuf.st_mode)) {
-				continue;
-			}
-
-			if (unlink (fullpath.c_str())) {
-				error << string_compose (_("cannot remove dead sound file %1 (%2)"),
-						  fullpath, strerror (errno))
-				      << endmsg;
-			}
-
-			rep.paths.push_back (dentry->d_name);
-			rep.space += statbuf.st_size;
-		}
-
-		closedir (dead);
-
+                clear_directory (dead_sound_dir, &rep.space, &rep.paths);
 	}
 
 	return 0;
+}
+
+void
+Session::cleanup_stubfiles ()
+{
+	vector<space_and_path>::iterator i;
+
+	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+
+                string dir;
+                string lname = legalize_for_path (_name);
+
+                vector<string> v;
+
+                /* XXX this is a hack caused by semantic conflicts
+                   between space_and_path and the SessionDirectory concept.
+                */
+
+                v.push_back ((*i).path);
+                v.push_back ("interchange");
+                v.push_back (lname);
+                v.push_back ("audiofiles");
+                v.push_back (stub_dir_name);
+
+                dir = Glib::build_filename (v);
+                
+                clear_directory (dir);
+
+                v.clear ();
+                v.push_back ((*i).path);
+                v.push_back ("interchange");
+                v.push_back (lname);
+                v.push_back ("midifiles");
+                v.push_back (stub_dir_name);
+
+                dir = Glib::build_filename (v);
+
+                clear_directory (dir);
+	}
 }
 
 void

@@ -90,14 +90,13 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 		return -1;
 	}
 	
-	_smf = smf_load (f);
-	if (_smf == NULL) {
+	if ((_smf = smf_load (f)) == 0) {
 		return -1;
 	}
 
-	_smf_track = smf_get_track_by_number(_smf, track);
-	if (!_smf_track)
+	if ((_smf_track = smf_get_track_by_number(_smf, track)) == 0) {
 		return -2;
+        }
 
 	//cerr << "Track " << track << " # events: " << _smf_track->number_of_events << endl;
 	if (_smf_track->number_of_events == 0) {
@@ -157,15 +156,22 @@ void
 SMF::close() THROW_FILE_ERROR
 {
 	if (_smf) {
+#if 0
+                /* XXX why would we automatically save-on-close? 
+                 */
+
 		PBD::StdioFileDescriptor d (_file_path, "w+");
 		FILE* f = d.allocate ();
 		if (f == 0) {
 			throw FileError ();
 		}
 		
+                cerr << "CLOSE: Save SMF to " << _file_path << endl;
+
 		if (smf_save(_smf, f) != 0) {
 			throw FileError();
 		}
+#endif
 		smf_delete(_smf);
 		_smf = 0;
 		_smf_track = 0;
@@ -294,5 +300,10 @@ SMF::round_to_file_precision (double val) const
 	return round (val * div) / div;
 }
 
+void
+SMF::set_path (const std::string& p)
+{
+        _file_path = p;
+}
 
 } // namespace Evoral

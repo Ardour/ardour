@@ -889,3 +889,13 @@ SndFileSource::file_closed ()
 	
 	touch_peakfile ();
 }
+
+void
+SndFileSource::set_path (const string& p)
+{
+        FileSource::set_path (p);
+
+        if (_descriptor) {
+                _descriptor->set_path (_path);
+        }
+}

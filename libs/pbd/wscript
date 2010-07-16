@@ -59,6 +59,7 @@ def build(bld):
 		convert.cc
 		controllable.cc
 		controllable_descriptor.cc
+                clear_dir.cc
                 crossthread.cc
                 cpus.cc
                 debug.cc

@@ -368,3 +368,9 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string& 
 	return ret;
 
 }
+
+void
+CoreAudioSource::set_path (const string& p)
+{
+        FileSource::set_path (p);
+}

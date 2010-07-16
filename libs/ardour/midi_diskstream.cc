@@ -957,14 +957,18 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 
                         _write_source->mark_streaming_write_completed ();
                         
+                        /* make it not a stub anymore */
+
+                        _write_source->unstubify ();
+
                         /* we will want to be able to keep (over)writing the source
                            but we don't want it to be removable. this also differs
                            from the audio situation, where the source at this point
-                           must be considered immutable
+                           must be considered immutable. luckily, we can rely on
+                           MidiSource::mark_streaming_write_completed() to have 
+                           already done the necessary work for that.
                         */
 
-			_write_source->mark_nonremovable (); 
-                        
                         string whole_file_region_name;
                         whole_file_region_name = region_name_from_path (_write_source->name(), true);
                         
@@ -1321,7 +1325,14 @@ MidiDiskstream::use_new_write_source (uint32_t n)
         _write_source.reset();
 
 	try {
-		_write_source = boost::dynamic_pointer_cast<SMFSource>(_session.create_midi_source_for_session (0, name ()));
+                /* file starts off as a stub file, it will be converted
+                   when we're done with a capture pass, or when "stolen"
+                   by the GUI.
+                */
+
+		_write_source = boost::dynamic_pointer_cast<SMFSource>(
+                        _session.create_midi_source_for_session (0, name (), true));
+
 		if (!_write_source) {
 			throw failed_constructor();
 		}
@@ -1342,8 +1353,26 @@ list<boost::shared_ptr<Source> >
 MidiDiskstream::steal_write_sources()
 {
         list<boost::shared_ptr<Source> > ret;
+
+        /* put some data on the disk, even if its just a header for an empty file.
+           XXX should we not have a more direct method for doing this? Maybe not
+           since we don't want to mess around with the model/disk relationship
+           that the Source has to pay attention to.
+         */
+        
+        boost::dynamic_pointer_cast<MidiSource>(_write_source)->session_saved ();
+
+        /* make it visible/present */
+        _write_source->unstubify ();
+        /* never let it go away */
+        _write_source->mark_nonremovable ();
+
         ret.push_back (_write_source);
+
+        /* get a new one */
+
         use_new_write_source (0);
+
         return ret;
 }
 

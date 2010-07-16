@@ -39,6 +39,7 @@
 #include <glibmm/thread.h>
 
 #include "ardour/file_source.h"
+#include "ardour/directory_names.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/source_factory.h"
@@ -50,8 +51,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
-
-static const std::string PATH_SEP = "/"; // I don't do windows
 
 map<DataType, ustring> FileSource::search_paths;
 
@@ -80,9 +79,14 @@ FileSource::FileSource (Session& session, const XMLNode& node, bool /*must_exist
 bool
 FileSource::removable () const
 {
-	return (_flags & Removable)
-		&& ((_flags & RemoveAtDestroy) || 
-		    ((_flags & RemovableIfEmpty) && empty() == 0));
+        bool r = (_path.find (stub_dir_name) != string::npos) ||
+                ((_flags & Removable)
+                 && ((_flags & RemoveAtDestroy) || 
+                     ((_flags & RemovableIfEmpty) && empty() == 0)));
+
+        cerr << "is " << _path << " removable ? " << r << endl;
+
+        return r;
 }
 
 int
@@ -140,15 +144,16 @@ FileSource::move_to_trash (const ustring& trash_dir_name)
 	   trash_dir_name directory on whichever filesystem it was already on
 	*/
 
-	ustring newpath;
-	newpath = Glib::path_get_dirname (_path);
-	newpath = Glib::path_get_dirname (newpath);
+        vector<string> v;
+	v.push_back (Glib::path_get_dirname (Glib::path_get_dirname (_path)));
+        v.push_back (trash_dir_name);
+	v.push_back (Glib::path_get_basename (_path));
 
-	newpath += string(PATH_SEP) + trash_dir_name + PATH_SEP;
-	newpath += Glib::path_get_basename (_path);
+	string newpath = Glib::build_filename (v);
 
 	/* the new path already exists, try versioning */
-	if (access (newpath.c_str(), F_OK) == 0) {
+
+	if (Glib::file_test (newpath.c_str(), Glib::FILE_TEST_EXISTS)) {
 		char buf[PATH_MAX+1];
 		int version = 1;
 		ustring newpath_v;
@@ -391,7 +396,7 @@ FileSource::set_source_name (const ustring& newname, bool destructive)
 		return -1;
 	}
 
-	if (rename (oldpath.c_str(), newpath.c_str()) != 0) {
+	if (::rename (oldpath.c_str(), newpath.c_str()) != 0) {
 		error << string_compose (_("cannot rename audio file %1 to %2"), _name, newpath) << endmsg;
 		return -1;
 	}
@@ -428,3 +433,42 @@ FileSource::set_within_session_from_path (const std::string& path)
 {
 	_within_session = _session.path_is_within_session (path);
 }
+
+int
+FileSource::unstubify ()
+{
+        string::size_type pos = _path.find (stub_dir_name);
+
+        if (pos == string::npos || (_flags & Destructive)) {
+                return 0;
+        }
+
+        vector<string> v;
+
+        v.push_back (Glib::path_get_dirname (Glib::path_get_dirname (_path)));
+	v.push_back (Glib::path_get_basename(_path));
+        
+        string newpath = Glib::build_filename (v);
+
+        if (::rename (_path.c_str(), newpath.c_str()) != 0) {
+                error << string_compose (_("rename from %1 to %2 failed: %3)"), _path, newpath, strerror (errno)) << endmsg;
+                return -1;
+        }
+
+        set_path (newpath);
+
+        return 0;
+}
+
+void
+FileSource::set_path (const std::string& newpath)
+{
+        _path = newpath;
+}
+
+void 
+FileSource::inc_use_count ()
+{
+        Source::inc_use_count ();
+}
+ 

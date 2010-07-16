@@ -226,6 +226,10 @@ Session::destroy ()
 
 	delete state_tree;
 
+        /* remove all stubfiles that might still be lurking */
+
+        cleanup_stubfiles ();
+
 	/* reset dynamic state version back to default */
 
 	Stateful::loading_state_version = 0;
@@ -2606,6 +2610,7 @@ Session::remove_source (boost::weak_ptr<Source> src)
 		Glib::Mutex::Lock lm (source_lock);
 
 		if ((i = sources.find (source->id())) != sources.end()) {
+                        cerr << "Removing source " << source->name() << endl;
 			sources.erase (i);
 		}
 	}
@@ -2640,7 +2645,6 @@ Session::source_by_path_and_channel (const Glib::ustring& path, uint16_t chn)
 	Glib::Mutex::Lock lm (source_lock);
 
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
-		cerr << "comparing " << path << " with " << i->second->name() << endl;
 		boost::shared_ptr<AudioFileSource> afs
 			= boost::dynamic_pointer_cast<AudioFileSource>(i->second);
 
@@ -2670,18 +2674,12 @@ Session::change_source_path_by_name (string path, string oldname, string newname
 		    the task here is to replace NAME with the new name.
 		*/
 
-		/* find last slash */
-
 		string dir;
 		string prefix;
-		string::size_type slash;
 		string::size_type dash;
 
-		if ((slash = path.find_last_of ('/')) == string::npos) {
-			return "";
-		}
-
-		dir = path.substr (0, slash+1);
+		dir = Glib::path_get_dirname (path);
+                path = Glib::path_get_basename (path);
 
 		/* '-' is not a legal character for the NAME part of the path */
 
@@ -2689,7 +2687,7 @@ Session::change_source_path_by_name (string path, string oldname, string newname
 			return "";
 		}
 
-		prefix = path.substr (slash+1, dash-(slash+1));
+		prefix = path.substr (0, dash);
 
 		path = dir;
 		path += prefix;
@@ -2708,17 +2706,11 @@ Session::change_source_path_by_name (string path, string oldname, string newname
 
 		string dir;
 		string suffix;
-		string::size_type slash;
 		string::size_type dash;
 		string::size_type postfix;
 
-		/* find last slash */
-
-		if ((slash = path.find_last_of ('/')) == string::npos) {
-			return "";
-		}
-
-		dir = path.substr (0, slash+1);
+		dir = Glib::path_get_dirname (path);
+                path = Glib::path_get_basename (path);
 
 		/* '-' is not a legal character for the NAME part of the path */
 
@@ -2750,7 +2742,7 @@ Session::change_source_path_by_name (string path, string oldname, string newname
 
 			snprintf (buf, sizeof(buf), "%s%s-%u%s", dir.c_str(), newname.c_str(), cnt, suffix.c_str());
 
-			if (access (buf, F_OK) != 0) {
+			if (!Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
 				path = buf;
 				break;
 			}
@@ -2771,7 +2763,7 @@ Session::change_source_path_by_name (string path, string oldname, string newname
  *         (e.g. as returned by new_*_source_name)
  */
 string
-Session::new_source_path_from_name (DataType type, const string& name)
+Session::new_source_path_from_name (DataType type, const string& name, bool as_stub)
 {
 	assert(name.find("/") == string::npos);
 
@@ -2779,9 +2771,9 @@ Session::new_source_path_from_name (DataType type, const string& name)
 
 	sys::path p;
 	if (type == DataType::AUDIO) {
-		p = sdir.sound_path();
+		p = (as_stub ? sdir.sound_stub_path() : sdir.sound_path());
 	} else if (type == DataType::MIDI) {
-		p = sdir.midi_path();
+		p = (as_stub ? sdir.midi_stub_path() : sdir.midi_path());
 	} else {
 		error << "Unknown source type, unable to create file path" << endmsg;
 		return "";
@@ -2889,10 +2881,10 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 
 /** Create a new within-session audio source */
 boost::shared_ptr<AudioFileSource>
-Session::create_audio_source_for_session (size_t n_chans, string const & n, uint32_t chan, bool destructive)
+Session::create_audio_source_for_session (size_t n_chans, string const & n, uint32_t chan, bool destructive, bool as_stub)
 {
 	const string name    = new_audio_source_name (n, n_chans, chan, destructive);
-	const string path    = new_source_path_from_name(DataType::AUDIO, name);
+	const string path    = new_source_path_from_name(DataType::AUDIO, name, as_stub);
 
 	return boost::dynamic_pointer_cast<AudioFileSource> (
 		SourceFactory::createWritable (DataType::AUDIO, *this, path, destructive, frame_rate()));
@@ -2949,7 +2941,7 @@ Session::new_midi_source_name (const string& base)
 
 /** Create a new within-session MIDI source */
 boost::shared_ptr<MidiSource>
-Session::create_midi_source_for_session (Track* track, string const & n)
+Session::create_midi_source_for_session (Track* track, string const & n, bool as_stub)
 {
         /* try to use the existing write source for the track, to keep numbering sane 
          */
@@ -2968,7 +2960,7 @@ Session::create_midi_source_for_session (Track* track, string const & n)
         }
 
 	const string name = new_midi_source_name (n);
-	const string path = new_source_path_from_name (DataType::MIDI, name);
+	const string path = new_source_path_from_name (DataType::MIDI, name, as_stub);
 
 	return boost::dynamic_pointer_cast<SMFSource> (
 			SourceFactory::createWritable (
@@ -3065,42 +3057,6 @@ Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::
                 return false;
         }
 	return a->order_key(N_("signal")) < b->order_key(N_("signal"));
-}
-
-void
-Session::remove_empty_sounds ()
-{
-	vector<string> audio_filenames;
-
-	get_files_in_directory (_session_dir->sound_path(), audio_filenames);
-
-	Glib::Mutex::Lock lm (source_lock);
-
-	TapeFileMatcher tape_file_matcher;
-
-	remove_if (audio_filenames.begin(), audio_filenames.end(),
-		   boost::bind (&TapeFileMatcher::matches, &tape_file_matcher, _1));
-	
-	for (vector<string>::iterator i = audio_filenames.begin(); i != audio_filenames.end(); ++i) {
-
-		sys::path audio_file_path (_session_dir->sound_path());
-
-		audio_file_path /= *i;
-
-		if (AudioFileSource::is_empty (*this, audio_file_path.to_string())) {
-
-			try
-			{
-				sys::remove (audio_file_path);
-				const string peakfile = peak_path (audio_file_path.to_string());
-				sys::remove (peakfile);
-			}
-			catch (const sys::filesystem_error& err)
-			{
-				error << err.what() << endmsg;
-			}
-		}
-	}
 }
 
 bool

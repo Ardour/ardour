@@ -40,10 +40,11 @@ PlaylistFactory::create (Session& s, const XMLNode& node, bool hidden, bool unus
 
 	boost::shared_ptr<Playlist> pl;
 
-	if ( !type || type->value() == "audio" )
+	if (!type || type->value() == "audio") {
 		pl = boost::shared_ptr<Playlist> (new AudioPlaylist (s, node, hidden));
-	else if ( type->value() == "midi" )
+        } else if (type->value() == "midi") {
 		pl = boost::shared_ptr<Playlist> (new MidiPlaylist (s, node, hidden));
+        }
 
 	pl->set_region_ownership ();
 
