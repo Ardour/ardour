@@ -256,7 +256,6 @@ FdFileDescriptor::allocate ()
 void
 FileDescriptor::set_path (const string& p)
 {
-        assert (!is_open());
         _path = p;
 }
 
