@@ -219,7 +219,7 @@ EventTypeMap::new_parameter(const string& str) const
 		assert(channel < 16);
 		p_id = 0;
 		p_channel = channel;
-	} else if (str.length() > 24 && str.substr(0, 24) == "midi-channel-pressure-") {
+	} else if (str.length() > 22 && str.substr(0, 22) == "midi-channel-pressure-") {
 		p_type = MidiChannelPressureAutomation;
 		uint32_t channel = 0;
 		sscanf(str.c_str(), "midi-channel-pressure-%d", &channel);
