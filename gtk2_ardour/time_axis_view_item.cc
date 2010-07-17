@@ -749,7 +749,9 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			frame_handle_end->hide();
 		}
 
-	} if (pixel_width < 2.0) {
+	}
+
+	if (pixel_width < 2.0) {
 
 		if (show_vestigial) {
 			vestigial_frame->show();

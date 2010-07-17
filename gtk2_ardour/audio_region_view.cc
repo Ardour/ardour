@@ -497,13 +497,10 @@ AudioRegionView::set_height (gdouble height)
 
 	uint32_t wcnt = waves.size();
 
-	// FIXME: ick
-	height -= 2;
-
 	for (uint32_t n = 0; n < wcnt; ++n) {
 		gdouble ht;
 
-		if ((height) < NAME_HIGHLIGHT_THRESH) {
+		if (height < NAME_HIGHLIGHT_THRESH) {
 			ht = ((height - 2 * wcnt) / (double) wcnt);
 		} else {
 			ht = (((height - 2 * wcnt) - NAME_HIGHLIGHT_SIZE) / (double) wcnt);
