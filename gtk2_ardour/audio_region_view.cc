@@ -179,7 +179,7 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	fade_out_shape->property_fill_color_rgba() = fade_color;
 	fade_out_shape->set_data ("regionview", this);
 
-	{
+	if (!_recregion) {
 		uint32_t r,g,b,a;
 		UINT_TO_RGBA(fill_color,&r,&g,&b,&a);
 
@@ -231,9 +231,15 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	reset_width_dependent_items (_pixel_width);
 
 	fade_in_shape->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_event), fade_in_shape, this));
-	fade_in_handle->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_handle_event), fade_in_handle, this));
+	if (fade_in_handle) {
+		fade_in_handle->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_handle_event), fade_in_handle, this));
+	}
+
 	fade_out_shape->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_event), fade_out_shape, this));
-	fade_out_handle->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_handle_event), fade_out_handle, this));
+
+	if (fade_out_handle) {
+		fade_out_handle->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_handle_event), fade_out_handle, this));
+	}
 
 	set_colors ();
 
@@ -650,7 +656,9 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 	delete points;
 
 	/* ensure trim handle stays on top */
-	frame_handle_start->raise_to_top();
+	if (frame_handle_start) {
+		frame_handle_start->raise_to_top();
+	}
 }
 
 void
@@ -741,7 +749,9 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 	delete points;
 
 	/* ensure trim handle stays on top */
-	frame_handle_end->raise_to_top();
+	if (frame_handle_end) {
+		frame_handle_end->raise_to_top();
+	}
 }
 
 void
@@ -1399,8 +1409,10 @@ AudioRegionView::update_coverage_frames (LayerDisplay d)
 {
 	RegionView::update_coverage_frames (d);
 
-	fade_in_handle->raise_to_top ();
-	fade_out_handle->raise_to_top ();
+	if (fade_in_handle) {
+		fade_in_handle->raise_to_top ();
+		fade_out_handle->raise_to_top ();
+	}
 }
 
 void

@@ -137,8 +137,8 @@ class AudioRegionView : public RegionView
     ArdourCanvas::SimpleLine*        zero_line;
     ArdourCanvas::Polygon*           fade_in_shape;
     ArdourCanvas::Polygon*           fade_out_shape;
-    ArdourCanvas::SimpleRect*        fade_in_handle;
-    ArdourCanvas::SimpleRect*        fade_out_handle;
+    ArdourCanvas::SimpleRect*        fade_in_handle; ///< fade in handle, or 0
+    ArdourCanvas::SimpleRect*        fade_out_handle; ///< fade out handle, or 0
 
     AudioRegionGainLine * gain_line;
 

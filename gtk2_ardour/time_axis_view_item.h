@@ -229,8 +229,10 @@ protected:
 	ArdourCanvas::SimpleRect* frame;
 	ArdourCanvas::Pixbuf*     name_pixbuf;
 	ArdourCanvas::SimpleRect* name_highlight;
-	ArdourCanvas::SimpleRect* frame_handle_start;
-	ArdourCanvas::SimpleRect* frame_handle_end;
+
+	/* with these two values, if frame_handle_start == 0 then frame_handle_end will also be 0 */
+	ArdourCanvas::SimpleRect* frame_handle_start; ///< `frame' (fade) handle for the start of the item, or 0
+	ArdourCanvas::SimpleRect* frame_handle_end; ///< `frame' (fade) handle for the end of the item, or 0
 	
 	double _height;
 	Visibility visibility;

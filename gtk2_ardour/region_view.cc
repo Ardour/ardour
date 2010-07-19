@@ -157,16 +157,19 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 		name_highlight->set_data ("regionview", this);
 		name_highlight->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
 
-		frame_handle_start->set_data ("regionview", this);
-		frame_handle_start->set_data ("isleft", (void*) 1);
-		frame_handle_start->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_start, this));
+		if (frame_handle_start) {
+			frame_handle_start->set_data ("regionview", this);
+			frame_handle_start->set_data ("isleft", (void*) 1);
+			frame_handle_start->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_start, this));
+			frame_handle_start->raise_to_top();
+		}
 
-		frame_handle_end->set_data ("regionview", this);
-		frame_handle_end->set_data ("isleft", (void*) 0);
-		frame_handle_end->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_end, this));
-
-		frame_handle_start->raise_to_top();
-		frame_handle_end->raise_to_top();
+		if (frame_handle_end) {
+			frame_handle_end->set_data ("regionview", this);
+			frame_handle_end->set_data ("isleft", (void*) 0);
+			frame_handle_end->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_end, this));
+			frame_handle_end->raise_to_top();
+		}
 	}
 
 	if (name_pixbuf) {
@@ -673,6 +676,8 @@ RegionView::update_coverage_frames (LayerDisplay d)
 		cr->property_x2() = trackview.editor().frame_to_pixel (end - position);
 	}
 
-	frame_handle_start->raise_to_top ();
-	frame_handle_end->raise_to_top ();
+	if (frame_handle_start) {
+		frame_handle_start->raise_to_top ();
+		frame_handle_end->raise_to_top ();
+	}
 }

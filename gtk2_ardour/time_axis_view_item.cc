@@ -204,11 +204,14 @@ TimeAxisViewItem::init (
 	}
 
 	/* create our grab handles used for trimming/duration etc */
-	frame_handle_start = new ArdourCanvas::SimpleRect (*group, 0.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH, 5.0, trackview.current_height());
-	frame_handle_start->property_outline_what() = 0x0;
-
-	frame_handle_end = new ArdourCanvas::SimpleRect (*group, 0.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH, 5.0, trackview.current_height());
-	frame_handle_end->property_outline_what() = 0x0;
+	if (!_recregion) {
+		frame_handle_start = new ArdourCanvas::SimpleRect (*group, 0.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH, 5.0, trackview.current_height());
+		frame_handle_start->property_outline_what() = 0x0;
+		frame_handle_end = new ArdourCanvas::SimpleRect (*group, 0.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH, 5.0, trackview.current_height());
+		frame_handle_end->property_outline_what() = 0x0;
+	} else {
+		frame_handle_start = frame_handle_end = 0;
+	}
 
 	set_color (base_color);
 
@@ -527,8 +530,10 @@ TimeAxisViewItem::set_height (double height)
 
 	if (frame) {
 		frame->property_y2() = height - 1;
-		frame_handle_start->property_y2() = height - 1;
-		frame_handle_end->property_y2() = height - 1;
+		if (frame_handle_start) {
+			frame_handle_start->property_y2() = height - 1;
+			frame_handle_end->property_y2() = height - 1;
+		}
 	}
 
 	vestigial_frame->property_y2() = height - 1;
