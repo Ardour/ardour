@@ -23,7 +23,7 @@
 #include <gtkmm/treeview.h>
 #include "editor_component.h"
 
-class EditorSnapshots : public EditorComponent
+class EditorSnapshots : public EditorComponent, public ARDOUR::SessionHandlePtr
 {
 public:
 	EditorSnapshots (Editor *);

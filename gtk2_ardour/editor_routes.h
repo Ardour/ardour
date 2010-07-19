@@ -23,7 +23,7 @@
 #include "pbd/signals.h"
 #include "editor_component.h"
 
-class EditorRoutes : public EditorComponent, public PBD::ScopedConnectionList
+class EditorRoutes : public EditorComponent, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
 public:
 	EditorRoutes (Editor *);

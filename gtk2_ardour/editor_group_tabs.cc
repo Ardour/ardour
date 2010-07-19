@@ -23,12 +23,13 @@
 #include "route_time_axis.h"
 #include "utils.h"
 #include "editor_route_groups.h"
+#include "editor_routes.h"
 
 using namespace std;
 using namespace ARDOUR;
 
 EditorGroupTabs::EditorGroupTabs (Editor* e)
-	: GroupTabs (e)
+	: EditorComponent (e)
 {
 
 }
@@ -146,14 +147,54 @@ EditorGroupTabs::routes_for_tab (Tab const * t) const
 }
 
 
-Gtk::Menu*
-EditorGroupTabs::get_menu (RouteGroup *g)
+void
+EditorGroupTabs::add_menu_items (Gtk::Menu* m, RouteGroup* g)
 {
-	return _editor->_route_groups->menu (g);
+	using namespace Gtk::Menu_Helpers;
+	
+	if (g) {
+		MenuList& items = m->items ();
+		items.push_back (MenuElem (_("Fit to Window"), sigc::bind (sigc::mem_fun (*_editor, &Editor::fit_route_group), g)));
+	}
 }
 
-RouteGroup *
-EditorGroupTabs::new_route_group () const
+PBD::PropertyList
+EditorGroupTabs::default_properties () const
 {
-	return _editor->_route_groups->new_route_group ();
+	PBD::PropertyList plist;
+	
+	plist.add (Properties::active, true);
+	plist.add (Properties::mute, true);
+	plist.add (Properties::solo, true);
+	plist.add (Properties::recenable, true);
+	plist.add (Properties::edit, true);
+
+	return plist;
+}
+	
+string
+EditorGroupTabs::order_key () const
+{
+	return X_("editor");
+}
+
+RouteList
+EditorGroupTabs::selected_routes () const
+{
+	RouteList rl;
+
+	for (TrackSelection::iterator i = _editor->get_selection().tracks.begin(); i != _editor->get_selection().tracks.end(); ++i) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (rtv) {
+			rl.push_back (rtv->route());
+		}
+	}
+
+	return rl;
+}
+
+void
+EditorGroupTabs::sync_order_keys ()
+{
+	_editor->_routes->sync_order_keys ("");
 }

@@ -33,18 +33,23 @@ using namespace Gtk;
 using namespace ARDOUR;
 using Gtkmm2ext::Keyboard;
 
-GroupTabs::GroupTabs (Editor* e)
-	: EditorComponent (e),
-	  _dragging (0),
-	  _dragging_new_tab (0)
+GroupTabs::GroupTabs ()
+	: _menu (0)
+	, _dragging (0)
+	, _dragging_new_tab (0)
 {
 
+}
+
+GroupTabs::~GroupTabs ()
+{
+	delete _menu;
 }
 
 void
 GroupTabs::set_session (Session* s)
 {
-	EditorComponent::set_session (s);
+	SessionHandlePtr::set_session (s);
 
 	if (_session) {
 		_session->RouteGroupChanged.connect (_session_connections, invalidator (*this), boost::bind (&GroupTabs::set_dirty, this), gui_context());
@@ -184,7 +189,7 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 
 		if (!routes.empty()) {
 			if (_dragging_new_tab) {
-				RouteGroup* g = new_route_group ();
+				RouteGroup* g = create_and_add_group ();
 				if (g) {
 					for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
 						g->add (*i);
@@ -280,3 +285,223 @@ GroupTabs::click_to_tab (double c, list<Tab>::iterator* prev, list<Tab>::iterato
 	return under;
 }
 
+Gtk::Menu*
+GroupTabs::get_menu (RouteGroup* g)
+{
+	using namespace Menu_Helpers;
+
+	delete _menu;
+
+	Menu* new_from = new Menu;
+	MenuList& f = new_from->items ();
+	f.push_back (MenuElem (_("Selection..."), sigc::mem_fun (*this, &GroupTabs::new_from_selection)));
+	f.push_back (MenuElem (_("Record Enabled..."), sigc::mem_fun (*this, &GroupTabs::new_from_rec_enabled)));
+	f.push_back (MenuElem (_("Soloed..."), sigc::mem_fun (*this, &GroupTabs::new_from_soloed)));
+
+	_menu = new Menu;
+	_menu->set_name ("ArdourContextMenu");
+	MenuList& items = _menu->items();
+
+	items.push_back (MenuElem (_("New..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_group))));
+	items.push_back (MenuElem (_("New From"), *new_from));
+	
+	if (g) {
+		items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::edit_group), g)));
+		items.push_back (MenuElem (_("Subgroup"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g)));
+		items.push_back (MenuElem (_("Collect"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::collect), g)));
+	}
+
+	add_menu_items (_menu, g);
+	
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Activate All"), sigc::mem_fun(*this, &GroupTabs::activate_all)));
+	items.push_back (MenuElem (_("Disable All"), sigc::mem_fun(*this, &GroupTabs::disable_all)));
+
+	return _menu;
+	
+}
+
+void
+GroupTabs::new_from_selection ()
+{
+	RouteList rl = selected_routes ();
+	if (rl.empty()) {
+		return;
+	}
+
+	run_new_group_dialog (rl);
+}
+
+void
+GroupTabs::new_from_rec_enabled ()
+{
+	boost::shared_ptr<RouteList> rl = _session->get_routes ();
+
+	RouteList rec_enabled;
+
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		if ((*i)->record_enabled()) {
+			rec_enabled.push_back (*i);
+		}
+	}
+
+	if (rec_enabled.empty()) {
+		return;
+	}
+
+	run_new_group_dialog (rec_enabled);
+}
+
+void
+GroupTabs::new_from_soloed ()
+{
+	boost::shared_ptr<RouteList> rl = _session->get_routes ();
+
+	RouteList soloed;
+
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		if (!(*i)->is_master() && (*i)->soloed()) {
+			soloed.push_back (*i);
+		}
+	}
+
+	if (soloed.empty()) {
+		return;
+	}
+
+	run_new_group_dialog (soloed);
+
+}
+
+void
+GroupTabs::run_new_group_dialog (RouteList const & rl)
+{
+	RouteGroup* g = new RouteGroup (*_session, "");
+	g->set_properties (default_properties ());
+
+	RouteGroupDialog d (g, Gtk::Stock::NEW);
+	int const r = d.do_run ();
+
+	switch (r) {
+	case Gtk::RESPONSE_OK:
+	case Gtk::RESPONSE_ACCEPT:
+		_session->add_route_group (g);
+		for (RouteList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
+			g->add (*i);
+		}
+		break;
+	default:
+		delete g;
+	}
+}
+
+RouteGroup *
+GroupTabs::create_and_add_group () const
+{
+	RouteGroup* g = new RouteGroup (*_session, "");
+
+	g->set_properties (default_properties ());
+
+	RouteGroupDialog d (g, Gtk::Stock::NEW);
+	int const r = d.do_run ();
+
+	if (r != Gtk::RESPONSE_OK) {
+		delete g;
+		return 0;
+	}
+	
+	_session->add_route_group (g);
+	return g;
+}
+
+void
+GroupTabs::edit_group (RouteGroup* g)
+{
+	RouteGroupDialog d (g, Gtk::Stock::APPLY);
+	d.do_run ();
+}
+
+void
+GroupTabs::subgroup (RouteGroup* g)
+{
+	g->make_subgroup ();
+}
+
+struct CollectSorter {
+	CollectSorter (std::string const & key) : _key (key) {}
+	
+	bool operator () (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
+		return a->order_key (_key) < b->order_key (_key);
+	}
+
+	std::string _key;
+};
+
+/** Collect all members of a RouteGroup so that they are together in the Editor or Mixer.
+ *  @param g Group to collect.
+ */
+void
+GroupTabs::collect (RouteGroup* g)
+{
+	boost::shared_ptr<RouteList> group_routes = g->route_list ();
+	group_routes->sort (CollectSorter (order_key ()));
+	int const N = group_routes->size ();
+
+	RouteList::iterator i = group_routes->begin ();
+	boost::shared_ptr<RouteList> routes = _session->get_routes ();
+	RouteList::const_iterator j = routes->begin ();
+
+	int diff = 0;
+	int coll = -1;
+	while (i != group_routes->end() && j != routes->end()) {
+
+		int const k = (*j)->order_key (order_key ());
+
+		if (*i == *j) {
+
+			if (coll == -1) {
+				coll = k;
+				diff = N - 1;
+			} else {
+				--diff;
+			}
+
+			(*j)->set_order_key (order_key (), coll);
+
+			++coll;
+			++i;
+
+		} else {
+			
+			(*j)->set_order_key (order_key (), k + diff);
+			
+		}
+
+		++j;
+	}
+
+	sync_order_keys ();
+}
+
+void
+GroupTabs::activate_all ()
+{
+	_session->foreach_route_group (
+		sigc::bind (sigc::mem_fun (*this, &GroupTabs::set_activation), true)
+		);
+}
+
+void
+GroupTabs::disable_all ()
+{
+	_session->foreach_route_group (
+		sigc::bind (sigc::mem_fun (*this, &GroupTabs::set_activation), false)
+		);
+}
+
+void
+GroupTabs::set_activation (RouteGroup* g, bool a)
+{
+	g->set_active (a, this);
+}
+	

@@ -32,9 +32,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 MixerGroupTabs::MixerGroupTabs (Mixer_UI* m)
-	: GroupTabs (0),
-	  _mixer (m),
-	  _menu (0)
+	: _mixer (m)
 {
 
 }
@@ -152,54 +150,8 @@ MixerGroupTabs::routes_for_tab (Tab const * t) const
 	return routes;
 }
 
-Gtk::Menu*
-MixerGroupTabs::get_menu (RouteGroup* g)
-{
-	if (g == 0) {
-		return 0;
-	}
-
-	using namespace Menu_Helpers;
-
-	delete _menu;
-	_menu = new Menu;
-
-	MenuList& items = _menu->items ();
-	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &MixerGroupTabs::edit_group), g)));
-	items.push_back (MenuElem (_("Subgroup"), sigc::bind (sigc::mem_fun (*this, &MixerGroupTabs::make_subgroup), g)));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun (*this, &MixerGroupTabs::remove_group), g)));
-
-	return _menu;
-}
-
-void
-MixerGroupTabs::edit_group (RouteGroup* g)
-{
-	RouteGroupDialog d (g, Gtk::Stock::APPLY);
-	d.do_run ();
-}
-
-void
-MixerGroupTabs::remove_group (RouteGroup *g)
-{
-	_session->remove_route_group (*g);
-}
-
-void
-MixerGroupTabs::make_subgroup (RouteGroup* g)
-{
-	g->make_subgroup ();
-}
-
-void
-MixerGroupTabs::destroy_subgroup (RouteGroup* g)
-{
-	g->destroy_subgroup ();
-}
-
-ARDOUR::RouteGroup *
-MixerGroupTabs::new_route_group () const
+PropertyList
+MixerGroupTabs::default_properties () const
 {
 	PropertyList plist;
 
@@ -209,17 +161,23 @@ MixerGroupTabs::new_route_group () const
 	plist.add (Properties::gain, true);
 	plist.add (Properties::recenable, true);
 
-	RouteGroup* g = new RouteGroup (*_session, "");
-	g->set_properties (plist);
+	return plist;
+}
 
-	RouteGroupDialog d (g, Gtk::Stock::NEW);
-	int const r = d.do_run ();
+string
+MixerGroupTabs::order_key () const
+{
+	return X_("signal");
+}
 
-	if (r != Gtk::RESPONSE_OK) {
-		delete g;
-		return 0;
-	}
-	
-	_session->add_route_group (g);
-	return g;
+RouteList
+MixerGroupTabs::selected_routes () const
+{
+	return _mixer->selection().routes;
+}
+
+void
+MixerGroupTabs::sync_order_keys ()
+{
+	_mixer->sync_order_keys ("");
 }

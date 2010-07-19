@@ -157,7 +157,7 @@ EditorRegions::EditorRegions (Editor* e)
 void
 EditorRegions::set_session (ARDOUR::Session* s)
 {
-	EditorComponent::set_session (s);
+	SessionHandlePtr::set_session (s);
 	redisplay ();
 }
 

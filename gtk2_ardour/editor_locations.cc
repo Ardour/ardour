@@ -34,7 +34,7 @@ EditorLocations::EditorLocations (Editor* e)
 void
 EditorLocations::set_session (ARDOUR::Session* s)
 {
-	EditorComponent::set_session (s);
+	SessionHandlePtr::set_session (s);
 	locations->set_session (s);
 }
 

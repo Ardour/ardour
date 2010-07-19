@@ -201,7 +201,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 void
 EditorRoutes::set_session (Session* s)
 {
-	EditorComponent::set_session (s);
+	SessionHandlePtr::set_session (s);
 
 	initial_display ();
 

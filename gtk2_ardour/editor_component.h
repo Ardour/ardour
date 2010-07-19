@@ -20,13 +20,9 @@
 #ifndef __ardour_gtk_editor_component_h__
 #define __ardour_gtk_editor_component_h__
 
-#include <list>
-
-#include "ardour/session_handle.h"
-
 class Editor;
 
-class EditorComponent : public ARDOUR::SessionHandlePtr
+class EditorComponent
 {
 public:
 	EditorComponent (Editor *);

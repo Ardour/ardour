@@ -1320,6 +1320,8 @@ Mixer_UI::add_route_group (RouteGroup* group)
 		group_display.set_cursor (group_model->get_path (row), *col, *name_cell, true);
 	}
 
+	_group_tabs->set_dirty ();
+
 	in_group_row_change = false;
 }
 

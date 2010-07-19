@@ -20,6 +20,7 @@
 #ifndef __gtk_ardour_editor_locations_h__
 #define __gtk_ardour_editor_locations_h__
 
+#include "ardour/session_handle.h"
 #include "editor_component.h"
 
 class LocationUI;
@@ -28,7 +29,7 @@ namespace Gtk {
 	class Widget;
 }
 
-class EditorLocations : public EditorComponent
+class EditorLocations : public EditorComponent, public ARDOUR::SessionHandlePtr
 {
   public:
 	EditorLocations (Editor *);

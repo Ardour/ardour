@@ -48,7 +48,6 @@ using Gtkmm2ext::Keyboard;
 
 EditorRouteGroups::EditorRouteGroups (Editor* e)
 	: EditorComponent (e),
-	  _menu (0),
 	  _in_row_change (false)
 
 {
@@ -153,7 +152,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	w->show();
 	remove_button->add (*w);
 
-	add_button->signal_clicked().connect (hide_return (sigc::mem_fun (*this, &EditorRouteGroups::new_route_group)));
+	add_button->signal_clicked().connect (sigc::hide_return (sigc::mem_fun (*this, &EditorRouteGroups::run_new_group_dialog)));
 	remove_button->signal_clicked().connect (sigc::mem_fun (*this, &EditorRouteGroups::remove_selected));
 
 	button_box->pack_start (*add_button);
@@ -161,196 +160,6 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 
 	_display_packer->pack_start (_scroller, true, true);
 	_display_packer->pack_start (*button_box, false, false);
-}
-
-
-Gtk::Menu*
-EditorRouteGroups::menu (RouteGroup* g)
-{
-	using namespace Gtk::Menu_Helpers;
-
-	delete _menu;
-
-	Menu* new_from = new Menu;
-	MenuList& f = new_from->items ();
-	f.push_back (MenuElem (_("Selection..."), sigc::mem_fun (*this, &EditorRouteGroups::new_from_selection)));
-	f.push_back (MenuElem (_("Record Enabled..."), sigc::mem_fun (*this, &EditorRouteGroups::new_from_rec_enabled)));
-	f.push_back (MenuElem (_("Soloed..."), sigc::mem_fun (*this, &EditorRouteGroups::new_from_soloed)));
-
-	_menu = new Menu;
-	_menu->set_name ("ArdourContextMenu");
-	MenuList& items = _menu->items();
-
-	items.push_back (MenuElem (_("New..."), hide_return (sigc::mem_fun(*this, &EditorRouteGroups::new_route_group))));
-	items.push_back (MenuElem (_("New From"), *new_from));
-	if (g) {
-		items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &EditorRouteGroups::edit), g)));
-		items.push_back (MenuElem (_("Fit to Window"), sigc::bind (sigc::mem_fun (*_editor, &Editor::fit_route_group), g)));
-		items.push_back (MenuElem (_("Subgroup"), sigc::bind (sigc::mem_fun (*this, &EditorRouteGroups::subgroup), g)));
-		items.push_back (MenuElem (_("Collect"), sigc::bind (sigc::mem_fun (*this, &EditorRouteGroups::collect), g)));
-	}
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Activate All"), sigc::mem_fun(*this, &EditorRouteGroups::activate_all)));
-	items.push_back (MenuElem (_("Disable All"), sigc::mem_fun(*this, &EditorRouteGroups::disable_all)));
-
-	return _menu;
-}
-
-void
-EditorRouteGroups::subgroup (RouteGroup* g)
-{
-	g->make_subgroup ();
-}
-
-void
-EditorRouteGroups::unsubgroup (RouteGroup* g)
-{
-	g->destroy_subgroup ();
-}
-
-void
-EditorRouteGroups::activate_all ()
-{
-	_session->foreach_route_group (
-		sigc::bind (sigc::mem_fun (*this, &EditorRouteGroups::set_activation), true)
-		);
-}
-
-void
-EditorRouteGroups::disable_all ()
-{
-	_session->foreach_route_group (
-		sigc::bind (sigc::mem_fun (*this, &EditorRouteGroups::set_activation), false)
-		);
-}
-
-void
-EditorRouteGroups::set_activation (RouteGroup* g, bool a)
-{
-	g->set_active (a, this);
-}
-
-ARDOUR::RouteGroup *
-EditorRouteGroups::new_route_group () const
-{
-	PropertyList plist;
-
-	plist.add (Properties::active, true);
-	plist.add (Properties::mute, true);
-	plist.add (Properties::solo, true);
-	plist.add (Properties::edit, true);
-
-	RouteGroup* g = new RouteGroup (*_session, "");
-
-	g->set_properties (plist);
-
-	RouteGroupDialog d (g, Gtk::Stock::NEW);
-	int const r = d.do_run ();
-
-	if (r != Gtk::RESPONSE_OK) {
-		delete g;
-		return 0;
-	}
-	
-	_session->add_route_group (g);
-	return g;
-}
-void
-EditorRouteGroups::run_new_group_dialog (const RouteList& rl)
-{
-	PropertyList plist;
-
-	plist.add (Properties::active, true);
-	plist.add (Properties::mute, true);
-	plist.add (Properties::solo, true);
-	plist.add (Properties::recenable, true);
-	plist.add (Properties::edit, true);
-
-	RouteGroup* g = new RouteGroup (*_session, "");
-	g->set_properties (plist);
-
-	RouteGroupDialog d (g, Gtk::Stock::NEW);
-	int const r = d.do_run ();
-
-	switch (r) {
-	case Gtk::RESPONSE_OK:
-	case Gtk::RESPONSE_ACCEPT:
-		_session->add_route_group (g);
-		for (RouteList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
-			g->add (*i);
-		}
-		break;
-	default:
-		delete g;
-	}
-}
-
-void
-EditorRouteGroups::new_from_selection ()
-{
-	if (_editor->get_selection().tracks.empty()) {
-		return;
-	}
-
-	RouteList rl;
-
-	for (TrackSelection::iterator i = _editor->get_selection().tracks.begin(); i != _editor->get_selection().tracks.end(); ++i) {
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-		if (rtv) {
-			rl.push_back (rtv->route());
-		}
-	}
-
-	if (rl.empty()) {
-		return;
-	}
-
-	run_new_group_dialog (rl);
-}
-
-void
-EditorRouteGroups::new_from_rec_enabled ()
-{
-	RouteList rl;
-
-	for (TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-		if (rtv && rtv->route()->record_enabled()) {
-			rl.push_back (rtv->route());
-		}
-	}
-
-	if (rl.empty()) {
-		return;
-	}
-
-	run_new_group_dialog (rl);
-}
-
-void
-EditorRouteGroups::new_from_soloed ()
-{
-	RouteList rl;
-
-	for (TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-		if (rtv && !rtv->route()->is_master() && rtv->route()->soloed()) {
-			rl.push_back (rtv->route());
-		}
-	}
-
-	if (rl.empty()) {
-		return;
-	}
-
-	run_new_group_dialog (rl);
-}
-
-void
-EditorRouteGroups::edit (RouteGroup* g)
-{
-	RouteGroupDialog d (g, Gtk::Stock::APPLY);
-	d.do_run ();
 }
 
 void
@@ -381,7 +190,7 @@ EditorRouteGroups::remove_selected ()
 void
 EditorRouteGroups::button_clicked ()
 {
-	new_route_group ();
+	run_new_group_dialog ();
 }
 
 gint
@@ -405,7 +214,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		menu(group)->popup (1, ev->time);
+		_editor->_group_tabs->get_menu(group)->popup (1, ev->time);
 		return true;
 	}
 
@@ -678,7 +487,7 @@ EditorRouteGroups::clear ()
 void
 EditorRouteGroups::set_session (Session* s)
 {
-	EditorComponent::set_session (s);
+	SessionHandlePtr::set_session (s);
 
 	if (_session) {
 		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::add, this, _1), gui_context());
@@ -688,58 +497,10 @@ EditorRouteGroups::set_session (Session* s)
 	groups_changed ();
 }
 
-struct CollectSorter {
-    bool operator () (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		return a->order_key (N_ ("editor")) < b->order_key (N_ ("editor"));
-	}
-};
-
-/** Collect all members of a RouteGroup so that they are together in the Editor.
- *  @param g Group to collect.
- */
 void
-EditorRouteGroups::collect (RouteGroup* g)
+EditorRouteGroups::run_new_group_dialog ()
 {
-	boost::shared_ptr<RouteList> routes = g->route_list ();
-	routes->sort (CollectSorter ());
-	int const N = routes->size ();
-
-	RouteList::iterator i = routes->begin ();
-	TrackViewList::const_iterator j = _editor->get_track_views().begin();
-
-	int diff = 0;
-	int coll = -1;
-	while (i != routes->end() && j != _editor->get_track_views().end()) {
-
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*j);
-		if (rtv) {
-
-			boost::shared_ptr<Route> r = rtv->route ();
-			int const k = r->order_key (N_ ("editor"));
-
-			if (*i == r) {
-
-				if (coll == -1) {
-					coll = k;
-					diff = N - 1;
-				} else {
-					--diff;
-				}
-
-				r->set_order_key (N_ ("editor"), coll);
-
-				++coll;
-				++i;
-
-			} else {
-
-				r->set_order_key (N_ ("editor"), k + diff);
-
-			}
-		}
-
-		++j;
-	}
-
-	_editor->_routes->sync_order_keys ("");
+	RouteList rl;
+	
+	return _editor->_group_tabs->run_new_group_dialog (rl);
 }

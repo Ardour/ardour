@@ -33,7 +33,7 @@ class Editor;
 /** Class to provide a visual summary of the contents of an editor window; represents
  *  the whole session as a set of lines, one per region view.
  */
-class EditorSummary : public CairoWidget, public EditorComponent
+class EditorSummary : public CairoWidget, public EditorComponent, public ARDOUR::SessionHandlePtr
 {
 public:
 	EditorSummary (Editor *);

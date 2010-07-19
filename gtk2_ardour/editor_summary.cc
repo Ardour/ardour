@@ -60,7 +60,7 @@ EditorSummary::EditorSummary (Editor* e)
 void
 EditorSummary::set_session (Session* s)
 {
-	EditorComponent::set_session (s);
+	SessionHandlePtr::set_session (s);
 
 	set_dirty ();
 

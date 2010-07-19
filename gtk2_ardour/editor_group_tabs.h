@@ -22,7 +22,7 @@
 
 class Editor;
 
-class EditorGroupTabs : public GroupTabs
+class EditorGroupTabs : public GroupTabs, public EditorComponent
 {
 public:
 	EditorGroupTabs (Editor *);
@@ -35,6 +35,9 @@ private:
 	double extent () const {
 		return _height;
 	}
-	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g);
-	ARDOUR::RouteGroup* new_route_group () const;
+	void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *);
+	PBD::PropertyList default_properties () const;
+	std::string order_key () const;
+	ARDOUR::RouteList selected_routes () const;
+	void sync_order_keys ();
 };

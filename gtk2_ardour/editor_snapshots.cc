@@ -54,7 +54,7 @@ EditorSnapshots::EditorSnapshots (Editor* e)
 void
 EditorSnapshots::set_session (Session* s)
 {
-	EditorComponent::set_session (s);
+	SessionHandlePtr::set_session (s);
 
 	redisplay ();
 }

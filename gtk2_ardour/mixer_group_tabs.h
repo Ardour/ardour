@@ -34,14 +34,11 @@ private:
 	double extent () const {
 		return _width;
 	}
-	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g);
-	ARDOUR::RouteGroup* new_route_group () const;
 
-	void edit_group (ARDOUR::RouteGroup *);
-	void remove_group (ARDOUR::RouteGroup *);
-	void make_subgroup (ARDOUR::RouteGroup *);
-	void destroy_subgroup (ARDOUR::RouteGroup *);
+	PBD::PropertyList default_properties () const;
+	std::string order_key () const;
+	ARDOUR::RouteList selected_routes () const;
+	void sync_order_keys ();
 
 	Mixer_UI* _mixer;
-	Gtk::Menu* _menu;
 };

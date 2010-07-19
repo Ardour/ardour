@@ -21,7 +21,7 @@
 
 #include "editor_component.h"
 
-class EditorRegions : public EditorComponent
+class EditorRegions : public EditorComponent, public ARDOUR::SessionHandlePtr
 {
 public:
 	EditorRegions (Editor *);

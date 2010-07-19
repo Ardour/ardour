@@ -19,7 +19,7 @@
 
 #include "editor_component.h"
 
-class EditorRouteGroups : public EditorComponent
+class EditorRouteGroups : public EditorComponent, public ARDOUR::SessionHandlePtr
 {
 public:
 	EditorRouteGroups (Editor *);
@@ -30,10 +30,7 @@ public:
 		return *_display_packer;
 	}
 
-	Gtk::Menu* menu (ARDOUR::RouteGroup *);
-
 	void clear ();
-	ARDOUR::RouteGroup* new_route_group () const;
 
 private:
 
@@ -64,29 +61,16 @@ private:
 
 	Columns _columns;
 
-	void activate_all ();
-	void disable_all ();
-	void subgroup (ARDOUR::RouteGroup *);
-	void unsubgroup (ARDOUR::RouteGroup *);
-	void collect (ARDOUR::RouteGroup *);
-
+	void add (ARDOUR::RouteGroup *);
 	void row_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
 	void name_edit (const Glib::ustring&, const Glib::ustring&);
-	void new_from_selection ();
-	void new_from_rec_enabled ();
-	void new_from_soloed ();
-	void edit (ARDOUR::RouteGroup *);
 	void button_clicked ();
 	gint button_press_event (GdkEventButton* ev);
-	void add (ARDOUR::RouteGroup* group);
-	void remove_route_group ();
 	void groups_changed ();
 	void property_changed (ARDOUR::RouteGroup*, const PBD::PropertyChange &);
-	void set_activation (ARDOUR::RouteGroup *, bool);
 	void remove_selected ();
-	void run_new_group_dialog (const ARDOUR::RouteList&);
+	void run_new_group_dialog ();
 
-	Gtk::Menu* _menu;
 	Glib::RefPtr<Gtk::ListStore> _model;
 	Glib::RefPtr<Gtk::TreeSelection> _selection;
 	Gtk::TreeView _display;

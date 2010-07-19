@@ -31,12 +31,20 @@ class Editor;
 /** Parent class for tabs which represent route groups as coloured tabs;
  *  Currently used on the left-hand side of the editor and at the top of the mixer.
  */
-class GroupTabs : public CairoWidget, public EditorComponent
+class GroupTabs : public CairoWidget, public ARDOUR::SessionHandlePtr
 {
 public:
-	GroupTabs (Editor *);
+	GroupTabs ();
+	virtual ~GroupTabs ();
 
 	void set_session (ARDOUR::Session *);
+
+	/** @param g Route group, or 0.
+         *  @return Menu to be popped up on right-click over the given route group.
+	 */
+	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g);
+
+	void run_new_group_dialog (ARDOUR::RouteList const &);
 
 protected:
 
@@ -72,13 +80,23 @@ private:
 	/** @return Size of the widget along the primary axis */
 	virtual double extent () const = 0;
 
-	/** @param g Route group, or 0.
-         *  @return Menu to be popped up on right-click over the given route group.
-	 */
-	virtual Gtk::Menu* get_menu (ARDOUR::RouteGroup* g) = 0;
+	virtual void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *) {}
+	virtual PBD::PropertyList default_properties () const = 0;
+	virtual std::string order_key () const = 0;
+	virtual ARDOUR::RouteList selected_routes () const = 0;
+	virtual void sync_order_keys () = 0;
 
-	virtual ARDOUR::RouteGroup* new_route_group () const = 0;
-
+	void new_from_selection ();
+	void new_from_rec_enabled ();
+	void new_from_soloed ();
+	ARDOUR::RouteGroup* create_and_add_group () const;
+	void collect (ARDOUR::RouteGroup *);
+	void set_activation (ARDOUR::RouteGroup *, bool);
+	void edit_group (ARDOUR::RouteGroup *);
+	void subgroup (ARDOUR::RouteGroup *);
+	void activate_all ();
+	void disable_all ();
+	
 	void render (cairo_t *);
 	void on_size_request (Gtk::Requisition *);
 	bool on_button_press_event (GdkEventButton *);
@@ -87,6 +105,7 @@ private:
 
 	Tab * click_to_tab (double, std::list<Tab>::iterator *, std::list<Tab>::iterator *);
 
+	Gtk::Menu* _menu;
 	std::list<Tab> _tabs; ///< current list of tabs
 	Tab* _dragging; ///< tab being dragged, or 0
 	bool _dragging_new_tab; ///< true if we're dragging a new tab
