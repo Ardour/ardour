@@ -1756,8 +1756,6 @@ Session::new_audio_route (bool aux, int input_channels, int output_channels, Rou
 				goto failure;
 			}
 
-			auto_connect_route (bus, existing_inputs, existing_outputs);
-
 			if (route_group) {
 				route_group->add (bus);
 			}
