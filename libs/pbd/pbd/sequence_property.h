@@ -46,9 +46,34 @@ class SequenceProperty : public PropertyBase
         typedef std::set<typename Container::value_type> ChangeContainer;
 
 	/** A record of changes made */
-        struct ChangeRecord { 
-	    ChangeContainer added;
-	    ChangeContainer removed;
+        struct ChangeRecord {
+
+		void add (typename Container::value_type const & r) {
+			typename ChangeContainer::iterator i = removed.find (r);
+			if (i != removed.end()) {
+				/* we're adding, and this thing has already been marked as removed, so
+				   just remove it from the removed list
+				*/
+				removed.erase (r);
+			} else {
+				added.insert (r);
+			}
+		}
+
+		void remove (typename Container::value_type const & r) {
+			typename ChangeContainer::iterator i = added.find (r);
+			if (i != added.end()) {
+				/* we're removing, and this thing has already been marked as added, so
+				   just remove it from the added list
+				*/
+				added.erase (i);
+			} else {
+				removed.insert (r);
+			}
+		}
+
+		ChangeContainer added;
+		ChangeContainer removed;
 	};
 
 	SequenceProperty (PropertyID id, const boost::function<void(const ChangeRecord&)>& update)
@@ -65,7 +90,7 @@ class SequenceProperty : public PropertyBase
                    calling this method on the "before" item of the pair.
                 */
 
-                _change.removed.swap (_change.added);
+		_change.removed.swap (_change.added);
         }
 
 	void add_history_state (XMLNode* history_node) const {
@@ -116,7 +141,7 @@ class SequenceProperty : public PropertyBase
 					if (prop) {
 						typename Container::value_type v = lookup_id (PBD::ID (prop->value()));
 						if (v) {
-							_change.added.insert (v);
+							_change.add (v);
 						}
 					}
 				}
@@ -127,7 +152,7 @@ class SequenceProperty : public PropertyBase
 					if (prop) {
 						typename Container::value_type v = lookup_id (PBD::ID (prop->value()));
 						if (v) {
-							_change.removed.insert (v);
+							_change.remove (v);
 						}
 					}
 				}
@@ -182,50 +207,52 @@ class SequenceProperty : public PropertyBase
 	typename Container::const_reverse_iterator rend() const { return _val.rend(); }
 
 	typename Container::iterator insert (typename Container::iterator i, const typename Container::value_type& v) {
-		_change.added.insert (v);
+		_change.add (v);
 		return _val.insert (i, v);
 	}
 
 	typename Container::iterator erase (typename Container::iterator i) {
 		if (i != _val.end()) {
-			_change.removed.insert (*i);
+			_change.remove (*i);
 		}
 		return _val.erase (i);
 	}
 
 	typename Container::iterator erase (typename Container::iterator f, typename Container::iterator l) {
 		for (typename Container::const_iterator i = f; i != l; ++i) {
-			_change.removed.insert(*i);
+			_change.remove (*i);
 		}
 		return _val.erase (f, l);
 	}
 
 	void push_back (const typename Container::value_type& v) {
-		_change.added.insert (v);
+		_change.add (v);
 		_val.push_back (v);
 	}
 
 	void push_front (const typename Container::value_type& v) {
-		_change.added.insert (v);
+		_change.add (v);
 		_val.push_front (v);
 	}
 
 	void pop_front () {
                 if (!_val.empty()) {
-                        _change.removed.insert (front());
+                        _change.remove (front());
                 }
 		_val.pop_front ();
 	}
 
 	void pop_back () {
                 if (!_val.empty()) {
-                        _change.removed.insert (front());
+                        _change.remove (back());
                 }
 		_val.pop_back ();
 	}
 
 	void clear () {
-		_change.removed.insert (_val.begin(), _val.end());
+		for (typename Container::iterator i = _val.begin(); i != _val.end(); ++i) {
+			_change.remove (*i);
+		}
 		_val.clear ();
 	}
 	
@@ -238,8 +265,12 @@ class SequenceProperty : public PropertyBase
 	}
 
 	Container& operator= (const Container& other) {
-                _change.removed.insert (_val.begin(), _val.end());
-                _change.added.insert (other.begin(), other.end());
+		for (typename Container::iterator i = _val.begin(); i != _val.end(); ++i) {
+			_change.remove (*i);
+		}
+		for (typename Container::iterator i = other.begin(); i != other.end(); ++i) {
+			_change.add (*i);
+		}
 		return _val = other;
 	}
 
@@ -268,17 +299,6 @@ class SequenceProperty : public PropertyBase
 	}
         
         const ChangeRecord& change() const { return _change; }
-
-        /* for use in building up a SequenceProperty from a serialized
-           version on disk.
-        */
-
-        void record_addition (typename Container::value_type v) {
-                _change.added.insert (v);
-        }
-        void record_removal (typename Container::value_type v) {
-                _change.added.erase (v);
-        }
 
   protected:
 	Container _val;
