@@ -566,7 +566,7 @@ style "transport_button_active"
 
 style "transport_rec_button"
 {
-	bg[ACTIVE] = { 1.0, 0, 0 }
+
 }
 
 style "transport_rec_button_active"
