@@ -1030,7 +1030,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
 		"input-auto-connect",
-		_("Connect track and bus inputs"),
+		_("Connect track inputs"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_input_auto_connect),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_input_auto_connect)
 		);
