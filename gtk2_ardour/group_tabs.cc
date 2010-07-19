@@ -309,6 +309,7 @@ GroupTabs::get_menu (RouteGroup* g)
 		items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::edit_group), g)));
 		items.push_back (MenuElem (_("Subgroup"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g)));
 		items.push_back (MenuElem (_("Collect"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::collect), g)));
+		items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::remove_group), g)));
 	}
 
 	add_menu_items (_menu, g);
@@ -505,3 +506,8 @@ GroupTabs::set_activation (RouteGroup* g, bool a)
 	g->set_active (a, this);
 }
 	
+void
+GroupTabs::remove_group (RouteGroup* g)
+{
+	_session->remove_route_group (*g);
+}

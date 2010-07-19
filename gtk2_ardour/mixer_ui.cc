@@ -67,7 +67,6 @@ Mixer_UI::Mixer_UI ()
 	_strip_width = Config->get_default_narrow_ms() ? Narrow : Wide;
 	track_menu = 0;
         _monitor_section = 0;
-	route_group_context_menu = 0;
 	no_track_list_redisplay = false;
 	in_group_row_change = false;
 	_visible = false;
@@ -171,8 +170,8 @@ Mixer_UI::Mixer_UI ()
 	route_group_add_button->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_route_group));
 	route_group_remove_button->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::remove_selected_route_group));
 
-	route_group_display_button_box->add (*route_group_remove_button);
 	route_group_display_button_box->add (*route_group_add_button);
+	route_group_display_button_box->add (*route_group_remove_button);
 
 	group_display_vbox.pack_start (group_display_scroller, true, true);
 	group_display_vbox.pack_start (*route_group_display_button_box, false, false);
@@ -1056,37 +1055,9 @@ Mixer_UI::strip_property_changed (const PropertyChange& what_changed, MixerStrip
 	error << _("track display list item for renamed strip not found!") << endmsg;
 }
 
-
-void
-Mixer_UI::build_route_group_context_menu ()
-{
-	using namespace Gtk::Menu_Helpers;
-
-	route_group_context_menu = new Menu;
-	route_group_context_menu->set_name ("ArdourContextMenu");
-	MenuList& items = route_group_context_menu->items();
-
-	items.push_back (MenuElem (_("Activate All"), sigc::mem_fun(*this, &Mixer_UI::activate_all_route_groups)));
-	items.push_back (MenuElem (_("Disable All"), sigc::mem_fun(*this, &Mixer_UI::disable_all_route_groups)));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Add group"), sigc::mem_fun(*this, &Mixer_UI::new_route_group)));
-
-}
-
 bool
 Mixer_UI::group_display_button_press (GdkEventButton* ev)
 {
-	if (Keyboard::is_context_menu_event (ev)) {
-		if (route_group_context_menu == 0) {
-			build_route_group_context_menu ();
-		}
-		route_group_context_menu->popup (1, ev->time);
-		return true;
-	}
-
-
-        RouteGroup* group;
-	TreeIter iter;
 	TreeModel::Path path;
 	TreeViewColumn* column;
 	int cellx;
@@ -1096,32 +1067,40 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 		return false;
 	}
 
+	TreeIter iter = group_model->get_iter (path);
+	if (!iter) {
+		return false;
+	}
+
+	RouteGroup* group = (*iter)[group_columns.group];
+
+	if (Keyboard::is_context_menu_event (ev)) {
+		_group_tabs->get_menu(group)->popup (1, ev->time);
+		return true;
+	}
+
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
 	case 0:
 		if (Keyboard::is_edit_event (ev)) {
-			if ((iter = group_model->get_iter (path))) {
-				if ((group = (*iter)[group_columns.group]) != 0) {
-					// edit_route_group (group);
+			if (group) {
+				// edit_route_group (group);
 #ifdef GTKOSX
-					group_display.queue_draw();
+				group_display.queue_draw();
 #endif
-					return true;
-				}
+				return true;
 			}
-
 		}
 		break;
 
 	case 1:
-		if ((iter = group_model->get_iter (path))) {
-			bool visible = (*iter)[group_columns.visible];
-			(*iter)[group_columns.visible] = !visible;
+	{
+		bool visible = (*iter)[group_columns.visible];
+		(*iter)[group_columns.visible] = !visible;
 #ifdef GTKOSX
-			group_display.queue_draw();
+		group_display.queue_draw();
 #endif
-			return true;
-		}
-		break;
+		return true;
+	}
 
 	default:
 		break;
@@ -1160,22 +1139,16 @@ Mixer_UI::route_groups_changed ()
 	}
 
 	_session->foreach_route_group (sigc::mem_fun (*this, &Mixer_UI::add_route_group));
+
+	_group_tabs->set_dirty ();
 }
 
 void
 Mixer_UI::new_route_group ()
 {
-	PropertyList plist;
-
-	plist.add (Properties::active, true);
-	plist.add (Properties::gain, true);
-	plist.add (Properties::mute, true);
-	plist.add (Properties::solo, true);
-
-	RouteGroup* g = new RouteGroup (*_session, "");
-	g->set_properties (plist);
-
-	_session->add_route_group (g);
+	RouteList rl;
+	
+	_group_tabs->run_new_group_dialog (rl);
 }
 
 void

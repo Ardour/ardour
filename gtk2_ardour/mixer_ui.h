@@ -176,7 +176,6 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void show_all_audiotracks();
 	void hide_all_audiotracks ();
 
-	Gtk::Menu* route_group_context_menu;
 	bool in_group_row_change;
 
 	void group_selected (gint row, gint col, GdkEvent *ev);
@@ -184,7 +183,6 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void group_display_active_clicked();
 	void new_route_group ();
 	void remove_selected_route_group ();
-	void build_route_group_context_menu ();
 	void activate_all_route_groups ();
 	void disable_all_route_groups ();
 	void add_route_group (ARDOUR::RouteGroup *);

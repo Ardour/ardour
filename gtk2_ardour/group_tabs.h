@@ -96,6 +96,7 @@ private:
 	void subgroup (ARDOUR::RouteGroup *);
 	void activate_all ();
 	void disable_all ();
+	void remove_group (ARDOUR::RouteGroup *);
 	
 	void render (cairo_t *);
 	void on_size_request (Gtk::Requisition *);
