@@ -1507,6 +1507,12 @@ Editor::build_track_region_context_menu (nframes64_t frame)
 	MenuList& edit_items  = track_region_context_menu.items();
 	edit_items.clear();
 
+	/* we've just cleared the track region context menu, so the menu that these
+	   two items were on will have disappeared; stop them dangling.
+	*/
+	region_edit_menu_split_item = 0;
+	region_edit_menu_split_multichannel_item = 0;
+
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (clicked_axisview);
 
 	if (rtv) {
