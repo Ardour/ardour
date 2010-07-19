@@ -3069,7 +3069,7 @@ Editor::setup_tooltips ()
 	ARDOUR_UI::instance()->set_tip (mouse_move_button, _("Select/Move Objects"));
 	ARDOUR_UI::instance()->set_tip (mouse_gain_button, _("Draw Gain Automation"));
 	ARDOUR_UI::instance()->set_tip (mouse_zoom_button, _("Select Zoom Range"));
-	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch/Shrink Regions"));
+	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch/Shrink Regions and MIDI Notes"));
 	ARDOUR_UI::instance()->set_tip (mouse_audition_button, _("Listen to Specific Regions"));
 	ARDOUR_UI::instance()->set_tip (join_object_range_button, _("Select/Move Objects or Ranges"));
 	ARDOUR_UI::instance()->set_tip (internal_edit_button, _("Edit Region Contents (e.g. notes)"));
