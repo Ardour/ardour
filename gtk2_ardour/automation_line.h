@@ -109,6 +109,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	std::string fraction_to_string (double) const;
 	double string_to_fraction (std::string const &) const;
 	void   view_to_model_coord (double& x, double& y) const;
+	void   view_to_model_coord_x (double &) const;
+	void   view_to_model_coord_y (double &) const;
 	void   model_to_view_coord (double& x, double& y) const;
 
 	void set_list(boost::shared_ptr<ARDOUR::AutomationList> list);

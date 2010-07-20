@@ -223,6 +223,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 		);
 
 	cp.move_to (x, y, ControlPoint::Full);
+
 	reset_line_coords (cp);
 
 	if (line_points.size() > 1) {
@@ -279,12 +280,13 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 		mr.xval = (*cp.model())->when;
 	} else {
 		mr.xval = trackview.editor().unit_to_frame (mr.xval);
+		view_to_model_coord_x (mr.xval);
 	}
 
-	/* convert to model units
+	/* convert y to model units; the x was already done above
 	*/
 
-	view_to_model_coord (mr.xval, mr.yval);
+	view_to_model_coord_y (mr.yval);
 
 	/* part 2: find out where the model point is now
 	 */
@@ -835,7 +837,6 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp, bool did_push, int
 	update_pending = true;
 	alist->modify (cp.model(), mr.xval, mr.yval);
 
-
 	/* change later points */
 
 	AutomationList::iterator i = cp.model();
@@ -1207,6 +1208,19 @@ AutomationLine::set_state (const XMLNode &node, int version)
 void
 AutomationLine::view_to_model_coord (double& x, double& y) const
 {
+	view_to_model_coord_x (x);
+	view_to_model_coord_y (y);
+}
+
+void
+AutomationLine::view_to_model_coord_x (double& x) const
+{
+	x = _time_converter.from(x);
+}
+
+void
+AutomationLine::view_to_model_coord_y (double& y) const
+{
 	/* TODO: This should be more generic ... */
 	if (alist->parameter().type() == GainAutomation ||
 	    alist->parameter().type() == EnvelopeAutomation) {
@@ -1221,8 +1235,6 @@ AutomationLine::view_to_model_coord (double& x, double& y) const
 	} else {
 		y = (int)(y * alist->parameter().max());
 	}
-
-	x = _time_converter.from(x);
 }
 
 void
