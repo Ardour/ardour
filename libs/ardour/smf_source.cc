@@ -134,7 +134,9 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t s
 		DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: seek to %1\n", start));
 		Evoral::SMF::seek_to_start();
 		while (time < start_ticks) {
-			ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
+                        gint ignored;
+
+			ret = read_event(&ev_delta_t, &ev_size, &ev_buffer, &ignored);
 			if (ret == -1) { // EOF
 				_smf_last_read_end = start + duration;
 				return duration;
@@ -149,7 +151,9 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t s
 	_smf_last_read_end = start + duration;
 
 	while (true) {
-		ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
+                gint ignored; /* XXX don't ignore note id's ??*/
+
+		ret = read_event(&ev_delta_t, &ev_size, &ev_buffer, &ignored);
 		if (ret == -1) { // EOF
 			break;
 		}
@@ -247,6 +251,8 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, sframes_t position
 
 		ev.set(buf, size, time);
 		ev.set_event_type(EventTypeMap::instance().midi_event_type(ev.buffer()[0]));
+                ev.set_id (Evoral::next_event_id());
+
 		if (!(ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex())) {
 			/*cerr << "SMFSource: WARNING: caller tried to write non SMF-Event of type "
 					<< std::hex << int(ev.buffer()[0]) << endl;*/
@@ -273,10 +279,10 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 	if (ev.size() == 0)  {
 		return;
 	}
-
-	/*printf("SMFSource: %s - append_event_unlocked_beats time = %lf, size = %u, data = ",
-			name().c_str(), ev.time(), ev.size());
-	for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
+        
+	/* printf("SMFSource: %s - append_event_unlocked_beats ID = %d time = %lf, size = %u, data = ",
+               name().c_str(), ev.id(), ev.time(), ev.size());
+           for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
 
 	assert(ev.time() >= 0);
 	if (ev.time() < _last_ev_time_beats) {
@@ -284,19 +290,28 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 		return;
 	}
 
+        Evoral::event_id_t event_id;
+
+        if (ev.id() < 0) {
+                event_id  = Evoral::next_event_id();
+        } else {
+                event_id = ev.id();
+        }
+
+	if (_model) {
+		_model->append (ev, event_id);
+	}
+
 	_length_beats = max(_length_beats, ev.time());
 
 	const double delta_time_beats   = ev.time() - _last_ev_time_beats;
 	const uint32_t delta_time_ticks = (uint32_t)lrint(delta_time_beats * (double)ppqn());
 
-	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer());
+	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_beats = ev.time();
 
 	_write_data_count += ev.size();
 
-	if (_model) {
-		_model->append (ev);
-	}
 }
 
 /** Append an event with a timestamp in frames (nframes_t) */
@@ -308,34 +323,44 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sfr
 		return;
 	}
 
-	/*printf("SMFSource: %s - append_event_unlocked_frames time = %u, size = %u, data = ",
-			name().c_str(), ev.time(), ev.size());
-	for (size_t i=0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
+	/* printf("SMFSource: %s - append_event_unlocked_frames ID = %d time = %u, size = %u, data = ",
+               name().c_str(), ev.id(), ev.time(), ev.size());
+	   for (size_t i=0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
 
 	if (ev.time() < _last_ev_time_frames) {
 		cerr << "SMFSource: Warning: Skipping event with non-monotonic time" << endl;
 		return;
 	}
-
+        
 	BeatsFramesConverter converter(_session.tempo_map(), position);
+        const double ev_time_beats = converter.from(ev.time());
+        Evoral::event_id_t event_id;
 
-	_length_beats = max(_length_beats, converter.from(ev.time()));
+        if (ev.id() < 0) {
+                event_id  = Evoral::next_event_id();
+        } else {
+                event_id = ev.id();
+        }
+
+	if (_model) {
+		const Evoral::Event<double> beat_ev (ev.event_type(), 
+                                                     ev_time_beats, 
+                                                     ev.size(), 
+                                                     (uint8_t*)ev.buffer());
+		_model->append (beat_ev, event_id);
+	} 
+
+	_length_beats = max(_length_beats, ev_time_beats);
 
 	const sframes_t delta_time_frames = ev.time() - _last_ev_time_frames;
 	const double    delta_time_beats  = converter.from(delta_time_frames);
 	const uint32_t  delta_time_ticks  = (uint32_t)(lrint(delta_time_beats * (double)ppqn()));
 
-	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer());
+	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_frames = ev.time();
 
 	_write_data_count += ev.size();
 
-	if (_model) {
-		const double ev_time_beats = converter.from(ev.time());
-		const Evoral::Event<double> beat_ev(
-				ev.event_type(), ev_time_beats, ev.size(), (uint8_t*)ev.buffer());
-		_model->append (beat_ev);
-	}
 }
 
 XMLNode&
@@ -435,13 +460,35 @@ SMFSource::load_model (bool lock, bool force_reload)
 	uint32_t size    = 0;
 	uint8_t* buf     = NULL;
 	int ret;
-	while ((ret = read_event(&delta_t, &size, &buf)) >= 0) {
-		time += delta_t;
-		ev.set(buf, size, time / (double)ppqn());
+        gint event_id;
+        bool have_event_id = false;
 
-		if (ret > 0) { // didn't skip (meta) event
+	while ((ret = read_event (&delta_t, &size, &buf, &event_id)) >= 0) {
+
+		time += delta_t;
+                
+                if (ret == 0) {
+
+                        /* meta-event : did we get an event ID ?
+                         */
+
+                        if (event_id >= 0) {
+                                have_event_id = true;
+                        }
+
+                        continue;
+                } 
+                        
+		if (ret > 0) { 
+
+                        /* not a meta-event */
+
+                        ev.set (buf, size, time / (double)ppqn());
 			ev.set_event_type(EventTypeMap::instance().midi_event_type(buf[0]));
 
+                        if (!have_event_id) {
+                                event_id = Evoral::next_event_id();   
+                        }
 #ifndef NDEBUG
                         std::string ss;
                         
@@ -455,15 +502,21 @@ SMFSource::load_model (bool lock, bool force_reload)
                                                                           delta_t, time, size, ss , ev.event_type(), name()));
 #endif
                         
-			_model->append (ev);
-		}
+			_model->append (ev, event_id);
 
-		if (ev.size() > scratch_size) {
-			scratch_size = ev.size();
-		}
-		ev.size() = scratch_size; // ensure read_event only allocates if necessary
+                        if (ev.size() > scratch_size) {
+                                scratch_size = ev.size();
+                        }
+                        
+                        ev.size() = scratch_size; // ensure read_event only allocates if necessary
+                        
+                        _length_beats = max(_length_beats, ev.time());
+                }
 
-		_length_beats = max(_length_beats, ev.time());
+                /* event ID's must immediately precede the event they are for
+                 */
+                   
+                have_event_id = false;
 	}
 
 	_model->end_write(false);

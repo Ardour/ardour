@@ -18,7 +18,6 @@
 #ifndef EVORAL_EVENT_RING_BUFFER_HPP
 #define EVORAL_EVENT_RING_BUFFER_HPP
 
-#include <glib.h>
 #include "evoral/RingBuffer.hpp"
 #include "evoral/EventSink.hpp"
 #include "evoral/types.hpp"
@@ -47,7 +46,7 @@ public:
 
 	bool peek_time(Time* time);
 
-	uint32_t write(Time  time, EventType  type, uint32_t  size, const uint8_t* buf);
+        uint32_t write(Time  time, EventType  type, uint32_t  size, const uint8_t* buf);
 	bool     read (Time* time, EventType* type, uint32_t* size,       uint8_t* buf);
 };
 

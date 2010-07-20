@@ -21,6 +21,7 @@
 #define EVORAL_SMF_HPP
 
 #include <cassert>
+#include "evoral/types.hpp"
 
 struct smf_struct;
 struct smf_track_struct;
@@ -52,14 +53,14 @@ public:
 	void seek_to_start() const;
 	int  seek_to_track(int track);
 
-	int read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const;
+        int read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* note_id) const;
 
 	uint16_t num_tracks() const;
 	uint16_t ppqn()       const;
 	bool     is_empty()   const { return _empty; }
 
 	void begin_write();
-	void append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf);
+        void append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, event_id_t note_id);
 	void end_write() THROW_FILE_ERROR;
 
 	void flush() {};

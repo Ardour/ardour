@@ -144,6 +144,7 @@ public:
 	void set_midi_source (MidiSource *);
 
 	boost::shared_ptr<Evoral::Note<TimeType> > find_note (NotePtr);
+	boost::shared_ptr<Evoral::Note<TimeType> > find_note (gint note_id);
 
         InsertMergePolicy insert_merge_policy () const;
         void set_insert_merge_policy (InsertMergePolicy);

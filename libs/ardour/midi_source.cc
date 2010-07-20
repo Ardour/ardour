@@ -205,7 +205,7 @@ MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, sframes_t source_start
 			const sframes_t time_frames = converter.to(i->time());
 			if (time_frames < start + cnt) {
 				dst.write(time_frames + stamp_offset - negative_stamp_offset,
-						i->event_type(), i->size(), i->buffer());
+                                          i->event_type(), i->size(), i->buffer());
 				if (tracker) {
 					Evoral::MIDIEvent<Evoral::MusicalTime>& ev (*(Evoral::MIDIEvent<Evoral::MusicalTime>*) (&(*i)));
 					if (ev.is_note_on()) {

@@ -28,6 +28,12 @@
 
 namespace Evoral {
 
+/** ID of an event (note or other). This must be operable on by glib
+    atomic ops
+*/
+
+typedef int32_t event_id_t;
+
 /** Frame count (i.e. length of time in audio frames) */
 typedef uint32_t FrameTime;
 

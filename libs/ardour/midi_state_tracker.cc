@@ -152,7 +152,6 @@ MidiStateTracker::resolve_notes (MidiSource& src, Evoral::MusicalTime time)
                                 ev.set_velocity (0);
                                 src.append_event_unlocked_beats (ev);
 				_active_notes[note + 128 * channel]--;
-                                cerr << "Resolved " << ev << endl;
                                 /* don't stack events up at the same time
                                  */
                                 time += 1.0/128.0;

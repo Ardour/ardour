@@ -378,9 +378,12 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
                 bool first = true;
 
 		while (!status.cancel) {
-			size = buf_size;
+                        gint ignored; // imported files either don't have NoteID's or
+                                      // we ignore them.
 
-			int ret = source->read_event(&delta_t, &size, &buf);
+			size = buf_size;
+                        
+			int ret = source->read_event(&delta_t, &size, &buf, &ignored);
 			if (size > buf_size)
 				buf_size = size;
 

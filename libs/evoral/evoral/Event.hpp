@@ -26,7 +26,6 @@
 #include <assert.h>
 #include "evoral/types.hpp"
 
-
 /** If this is not defined, all methods of MidiEvent are RT safe
  * but MidiEvent will never deep copy and (depending on the scenario)
  * may not be usable in STL containers, signals, etc.
@@ -35,6 +34,9 @@
 
 namespace Evoral {
 
+event_id_t event_id_counter();
+event_id_t next_event_id();
+void init_event_id_counter (event_id_t n);
 
 /** An event (much like a type generic jack_midi_event_t)
  *
@@ -43,7 +45,7 @@ namespace Evoral {
 template<typename Time>
 struct Event {
 #ifdef EVORAL_EVENT_ALLOC
-	Event(EventType type=0, Time time=0, uint32_t size=0, uint8_t* buf=NULL, bool alloc=false);
+         Event (EventType type=0, Time time=0, uint32_t size=0, uint8_t* buf=NULL, bool alloc=false);
 
 	/** Copy \a copy.
 	 *
@@ -56,6 +58,7 @@ struct Event {
 	~Event();
 
 	inline const Event& operator=(const Event& copy) {
+                _id = copy.id(); // XXX is this right? do we want ID copy semantics?
 		_type = copy._type;
 		_original_time = copy._original_time;
 		_nominal_time = copy._nominal_time;
@@ -75,20 +78,6 @@ struct Event {
 
 		_size = copy._size;
 		return *this;
-	}
-
-	inline void shallow_copy(const Event& copy) {
-		if (_owns_buf) {
-			free(_buf);
-			_buf = false;
-			_owns_buf = false;
-		}
-
-		_type = copy._type;
-		_original_time = copy._nominal_time;
-		_nominal_time = copy._nominal_time;
-		_size = copy._size;
-		_buf  = copy._buf;
 	}
 
 	inline void set(uint8_t* buf, uint32_t size, Time t) {
@@ -181,6 +170,9 @@ struct Event {
 	inline const uint8_t* buffer()             const { return _buf; }
 	inline uint8_t*&      buffer()                   { return _buf; }
 
+        inline event_id_t id() const { return _id; }
+        inline void set_id (event_id_t n) { _id = n; }
+
 protected:
 	EventType _type; /**< Type of event (application relative, NOT MIDI 'type') */
 	Time      _original_time; /**< Sample index (or beat time) at which event is valid */
@@ -189,17 +181,17 @@ protected:
 	uint8_t*  _buf;  /**< Raw MIDI data */
 
 #ifdef EVORAL_EVENT_ALLOC
-	bool _owns_buf; /**< Whether buffer is locally allocated */
+	bool      _owns_buf; /**< Whether buffer is locally allocated */
 #endif
+        event_id_t  _id; /** UUID for each event, should probably be 64bit or at least unsigned */
 };
-
 
 } // namespace Evoral
 
 
 template<typename Time>
 std::ostream& operator<<(std::ostream& o, const Evoral::Event<Time>& ev) {
-	o << "Event type = " << ev.event_type() << " @ " << ev.time();
+	o << "Event #" << ev.id() << " type = " << ev.event_type() << " @ " << ev.time();
 	o << std::hex;
 	for (uint32_t n = 0; n < ev.size(); ++n) {
 		o << ' ' << (int) ev.buffer()[n];

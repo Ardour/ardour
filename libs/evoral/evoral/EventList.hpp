@@ -35,9 +35,9 @@ class EventList : public std::list<Evoral::Event<Time> *>, public Evoral::EventS
 public:
 	EventList() {}
 
-	uint32_t write(Time  time, EventType  type, uint32_t  size, const uint8_t* buf) {
+        uint32_t write(Time  time, EventType  type, uint32_t  size, const uint8_t* buf) {
 		push_back(new Evoral::Event<Time>(
-				type, time, size, const_cast<uint8_t*>(buf), true)); // Event copies buffer
+                                  type, time, size, const_cast<uint8_t*>(buf), true)); // Event copies buffer
 		return size;
 	}
 };

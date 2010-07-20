@@ -98,7 +98,7 @@ public:
 	bool writing() const { return _writing; }
 	void end_write(bool delete_stuck=false);
 
-	void append(const Event<Time>& ev);
+        void append(const Event<Time>& ev, Evoral::event_id_t evid);
 
 	inline size_t n_notes() const { return _notes.size(); }
 	inline bool   empty()   const { return _notes.size() == 0 && ControlSet::controls_empty(); }
@@ -268,10 +268,10 @@ private:
         bool overlaps_unlocked (const NotePtr& ev, const NotePtr& ignore_this_note) const;
         bool contains_unlocked (const NotePtr& ev) const;
 
-        void append_note_on_unlocked (NotePtr);
+        void append_note_on_unlocked (NotePtr, Evoral::event_id_t);
         void append_note_off_unlocked(NotePtr);
-	void append_control_unlocked(const Parameter& param, Time time, double value);
-	void append_sysex_unlocked(const MIDIEvent<Time>& ev);
+        void append_control_unlocked(const Parameter& param, Time time, double value, Evoral::event_id_t);
+        void append_sysex_unlocked(const MIDIEvent<Time>& ev, Evoral::event_id_t);
 
         void get_notes_by_pitch (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
         void get_notes_by_velocity (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;

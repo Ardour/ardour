@@ -283,8 +283,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	if (Config->load_state ()) {
 		return -1;
 	}
-
-	
+        
 	Config->set_use_vst (use_vst);
 
 	Profile = new RuntimeProfile;

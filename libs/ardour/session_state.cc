@@ -1043,6 +1043,11 @@ Session::state(bool full_state)
 	snprintf (buf, sizeof (buf), "%" PRIu64, ID::counter());
 	node->add_property ("id-counter", buf);
 
+	/* save the event ID counter */
+
+	snprintf (buf, sizeof (buf), "%d", Evoral::event_id_counter());
+	node->add_property ("event-counter", buf);
+
 	/* various options */
 
 	node->add_child_nocopy (config.get_variables ());
@@ -1225,6 +1230,9 @@ Session::set_state (const XMLNode& node, int version)
 		ID::init_counter (now);
 	}
 
+        if ((prop = node.property (X_("event-counter"))) != 0) {
+                Evoral::init_event_id_counter (atoi (prop->value()));
+        }
 
 	IO::disable_connecting ();
 

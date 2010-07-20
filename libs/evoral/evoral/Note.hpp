@@ -19,6 +19,7 @@
 #ifndef EVORAL_NOTE_HPP
 #define EVORAL_NOTE_HPP
 
+#include <glib.h>
 #include <stdint.h>
 #include "evoral/MIDIEvent.hpp"
 
@@ -31,7 +32,7 @@ namespace Evoral {
 template<typename Time>
 class Note {
 public:
-	Note(uint8_t chan=0, Time time=0, Time len=0, uint8_t note=0, uint8_t vel=0x40);
+        Note(uint8_t chan=0, Time time=0, Time len=0, uint8_t note=0, uint8_t vel=0x40);
 	Note(const Note<Time>& copy);
 	~Note();
 
@@ -45,6 +46,9 @@ public:
 			off_velocity() == other.off_velocity() &&
 			channel()  == other.channel();
 	}
+
+        inline event_id_t id() const { return _on_event.id(); }
+        void set_id (event_id_t);
 
 	inline Time        time()     const { return _on_event.time(); }
 	inline Time        end_time() const { return _off_event.time(); }
@@ -69,7 +73,7 @@ public:
 	inline       Event<Time>& off_event()       { return _off_event; }
 	inline const Event<Time>& off_event() const { return _off_event; }
 
-private:
+  private:
 	// Event buffers are self-contained
 	MIDIEvent<Time> _on_event;
 	MIDIEvent<Time> _off_event;
@@ -79,7 +83,7 @@ private:
 
 template<typename Time>
 std::ostream& operator<<(std::ostream& o, const Evoral::Note<Time>& n) {
-	o << "Note: pitch = " << (int) n.note()
+	o << "Note #" << n.id() << ": pitch = " << (int) n.note()
 	  << " @ " << n.time() << " .. " << n.end_time()
 	  << " velocity " << (int) n.velocity()
 	  << " chn " << (int) n.channel();

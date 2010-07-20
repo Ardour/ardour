@@ -382,25 +382,41 @@ MidiModel::DiffCommand::marshal_note(const NotePtr note)
 
         cerr << "Marshalling note: " << *note << endl;
 
-        ostringstream note_str(ios::ate);
-        note_str << int(note->note());
-        xml_note->add_property("note", note_str.str());
+        {
+                ostringstream id_str(ios::ate);
+                id_str << int(note->id());
+                xml_note->add_property("id", id_str.str());
+        }
 
-        ostringstream channel_str(ios::ate);
-        channel_str << int(note->channel());
-        xml_note->add_property("channel", channel_str.str());
+        {
+                ostringstream note_str(ios::ate);
+                note_str << int(note->note());
+                xml_note->add_property("note", note_str.str());
+        }
 
-        ostringstream time_str(ios::ate);
-        time_str << note->time();
-        xml_note->add_property("time", time_str.str());
+        {
+                ostringstream channel_str(ios::ate);
+                channel_str << int(note->channel());
+                xml_note->add_property("channel", channel_str.str());
+        }
 
-        ostringstream length_str(ios::ate);
-        length_str << note->length();
-        xml_note->add_property("length", length_str.str());
+        {
+                ostringstream time_str(ios::ate);
+                time_str << note->time();
+                xml_note->add_property("time", time_str.str());
+        }
 
-        ostringstream velocity_str(ios::ate);
-        velocity_str << (unsigned int) note->velocity();
-        xml_note->add_property("velocity", velocity_str.str());
+        {
+                ostringstream length_str(ios::ate);
+                length_str << note->length();
+                xml_note->add_property("length", length_str.str());
+        }
+
+        {
+                ostringstream velocity_str(ios::ate);
+                velocity_str << (unsigned int) note->velocity();
+                xml_note->add_property("velocity", velocity_str.str());
+        }
 
         return *xml_note;
 }
@@ -414,6 +430,15 @@ MidiModel::DiffCommand::unmarshal_note(XMLNode *xml_note)
         unsigned int time;
         unsigned int length;
         unsigned int velocity;
+        gint id;
+
+        if ((prop = xml_note->property("id")) != 0) {
+                istringstream id_str(prop->value());
+                id_str >> id;
+        } else {
+                error << "note information missing ID value" << endmsg;
+                id = -1;
+        }
 
         if ((prop = xml_note->property("note")) != 0) {
                 istringstream note_str(prop->value());
@@ -456,6 +481,7 @@ MidiModel::DiffCommand::unmarshal_note(XMLNode *xml_note)
         }
 
         NotePtr note_ptr(new Evoral::Note<TimeType>(channel, time, length, note, velocity));
+        note_ptr->set_id (id);
 
         return note_ptr;
 }
@@ -463,7 +489,7 @@ MidiModel::DiffCommand::unmarshal_note(XMLNode *xml_note)
 XMLNode&
 MidiModel::DiffCommand::marshal_change(const NoteChange& change)
 {
-        XMLNode* xml_change = new XMLNode("change");
+        XMLNode* xml_change = new XMLNode("Change");
 
         /* first, the change itself */
 
@@ -489,49 +515,9 @@ MidiModel::DiffCommand::marshal_change(const NoteChange& change)
                 xml_change->add_property ("new", new_value_str.str());
         }
 
-        /* now the rest of the note */
-
-        const SMFSource* smf = dynamic_cast<const SMFSource*> (_model->midi_source());
-
-        if (change.property != NoteNumber) {
-                ostringstream note_str;
-                note_str << int(change.note->note());
-                xml_change->add_property("note", note_str.str());
-        }
-
-        if (change.property != Channel) {
-                ostringstream channel_str;
-                channel_str << int(change.note->channel());
-                xml_change->add_property("channel", channel_str.str());
-        }
-
-        if (change.property != StartTime) {
-                ostringstream time_str;
-                if (smf) {
-                        time_str << smf->round_to_file_precision (change.note->time());
-                } else {
-                        time_str << change.note->time();
-                }
-                xml_change->add_property("time", time_str.str());
-        }
-
-        if (change.property != Length) {
-                ostringstream length_str;
-                if (smf) {
-                        length_str << smf->round_to_file_precision (change.note->length());
-                } else {
-                        length_str << change.note->length();
-                }
-                xml_change->add_property ("length", length_str.str());
-        }
-
-        if (change.property != Velocity) {
-                ostringstream velocity_str;
-                velocity_str << int (change.note->velocity());
-                xml_change->add_property("velocity", velocity_str.str());
-        }
-
-        /* and now notes that were remove as a side-effect */
+        ostringstream id_str;
+        id_str << change.note->id();
+        xml_change->add_property ("id", id_str.str());
 
         return *xml_change;
 }
@@ -541,11 +527,6 @@ MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
 {
         XMLProperty* prop;
         NoteChange change;
-        unsigned int note;
-        unsigned int channel;
-        unsigned int velocity;
-        Evoral::MusicalTime time;
-        Evoral::MusicalTime length;
 
         if ((prop = xml_change->property("property")) != 0) {
                 change.property = (Property) string_2_enum (prop->value(), change.property);
@@ -553,6 +534,13 @@ MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
                 fatal << "!!!" << endmsg;
                 /*NOTREACHED*/
         }
+
+        if ((prop = xml_change->property ("id")) == 0) {
+                error << _("No NoteID found for note property change - ignored") << endmsg;
+                return change;
+        }
+
+        gint note_id = atoi (prop->value().c_str());
 
         if ((prop = xml_change->property ("old")) != 0) {
                 istringstream old_str (prop->value());
@@ -582,78 +570,15 @@ MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
                 /*NOTREACHED*/
         }
 
-        if (change.property != NoteNumber) {
-                if ((prop = xml_change->property("note")) != 0) {
-                        istringstream note_str(prop->value());
-                        note_str >> note;
-                } else {
-                        warning << "note information missing note value" << endmsg;
-                        note = 127;
-                }
-        } else {
-                note = change.new_value;
-        }
-
-        if (change.property != Channel) {
-                if ((prop = xml_change->property("channel")) != 0) {
-                        istringstream channel_str(prop->value());
-                        channel_str >> channel;
-                } else {
-                        warning << "note information missing channel" << endmsg;
-                        channel = 0;
-                }
-        } else {
-                channel = change.new_value;
-        }
-
-        if (change.property != StartTime) {
-                if ((prop = xml_change->property("time")) != 0) {
-                        istringstream time_str(prop->value());
-                        time_str >> time;
-                } else {
-                        warning << "note information missing time" << endmsg;
-                        time = 0;
-                }
-        } else {
-                time = change.new_time;
-        }
-
-        if (change.property != Length) {
-                if ((prop = xml_change->property("length")) != 0) {
-                        istringstream length_str(prop->value());
-                        length_str >> length;
-                } else {
-                        warning << "note information missing length" << endmsg;
-                        length = 1;
-                }
-        } else {
-                length = change.new_time;
-        }
-
-        if (change.property != Velocity) {
-                if ((prop = xml_change->property("velocity")) != 0) {
-                        istringstream velocity_str(prop->value());
-                        velocity_str >> velocity;
-                } else {
-                        warning << "note information missing velocity" << endmsg;
-                        velocity = 127;
-                }
-        } else {
-                velocity = change.new_value;
-        }
-
         /* we must point at the instance of the note that is actually in the model.
            so go look for it ...
         */
 
-        NotePtr new_note (new Evoral::Note<TimeType> (channel, time, length, note, velocity));
-
-        change.note = _model->find_note (new_note);
+        change.note = _model->find_note (note_id);
 
         if (!change.note) {
-                warning << "MIDI note " << *new_note << " not found in model - programmers should investigate this" << endmsg;
-                /* use the actual new note */
-                change.note = new_note;
+                warning << "MIDI note #" << note_id << " not found in model - programmers should investigate this" << endmsg;
+                return change;
         }
 
         return change;
@@ -919,6 +844,22 @@ MidiModel::find_note (NotePtr other)
                         if (**l == *other) {
                                 return *l;
                         }
+                }
+        }
+
+        return NotePtr();
+}
+
+Evoral::Sequence<MidiModel::TimeType>::NotePtr
+MidiModel::find_note (gint note_id)
+{
+        /* used only for looking up notes when reloading history from disk,
+           so we don't care about performance *too* much.
+        */
+
+        for (Notes::iterator l = notes().begin(); l != notes().end(); ++l) {
+                if ((*l)->id() == note_id) {
+                        return *l;
                 }
         }
 

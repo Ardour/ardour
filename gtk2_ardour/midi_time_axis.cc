@@ -885,7 +885,6 @@ void
 MidiTimeAxisView::check_step_edit ()
 {
 	MidiRingBuffer<nframes_t>& incoming (midi_track()->step_edit_ring_buffer());
-	Evoral::Note<Evoral::MusicalTime> note;
 	uint8_t* buf;
 	uint32_t bufsize = 32;
 

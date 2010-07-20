@@ -271,7 +271,6 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
 
         { 
                 Glib::Mutex::Lock lm (region_map_lock);
-                cerr << "MAP ADD: " << r->name() << " ID = " << r->id() << endl;
                 region_map.insert (p);
         }
 

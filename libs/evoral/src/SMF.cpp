@@ -184,6 +184,22 @@ SMF::seek_to_start() const
 	_smf_track->next_event_number = 1;
 }
 
+static void
+midify_note_id (event_id_t note_id, uint8_t* buf)
+{
+        buf[0] = (note_id & 0xfe000000) >> 25;
+        buf[1] = (note_id & 0x01fc0000) >> 18;
+        buf[2] = (note_id & 0x0003f800) >> 11;
+        buf[3] = (note_id & 0x000007f0) >> 4;
+        buf[4] = (note_id & 0x0000000f);
+}
+
+static event_id_t
+unmidify_note_id (uint8_t* buf)
+{
+        return ((int) buf[0] << 25) | ((int) buf[1] << 18) | ((int) buf[2] << 11) | ((int)buf[3] << 4) | (int) buf[4];
+}
+
 /** Read an event from the current position in file.
  *
  * File position MUST be at the beginning of a delta time, or this will die very messily.
@@ -195,24 +211,37 @@ SMF::seek_to_start() const
  * \a size must be the capacity of \a buf.  If it is not large enough, \a buf will
  * be reallocated and *size will be set to the new size of buf.
  *
+ * if the event is a meta-event and is an Evoral Note ID, then \a note_id will be set
+ * to the value of the NoteID; otherwise, meta-events will set \a note_id to -1.
+ *
  * \return event length (including status byte) on success, 0 if event was
- * skipped (e.g. a meta event), or -1 on EOF (or end of track).
+ * a meta event, or -1 on EOF (or end of track).
  */
 int
-SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
+SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* note_id) const
 {
 	smf_event_t* event;
 
 	assert(delta_t);
 	assert(size);
 	assert(buf);
+        assert(note_id);
 
 	if ((event = smf_track_get_next_event(_smf_track)) != NULL) {
 
 		*delta_t = event->delta_time_pulses;
 
 		if (smf_event_is_metadata(event)) {
-			return 0;
+                        *note_id = -1; // "no note id in this meta-event */
+                        if (event->midi_buffer[1] == 0x99) { // Evoral meta-event
+                                if (event->midi_buffer[2] == 6) { // 6 bytes following
+                                        if (event->midi_buffer[3] == 0x1) { // Evoral Note ID
+                                                *note_id = unmidify_note_id  (&event->midi_buffer[4]);
+                                                cerr << "Loaded Event ID " << *note_id << endl;
+                                        }
+                                }
+                        }
+			return 0; /* this is a meta-event */
 		}
 
 		int event_size = event->midi_buffer_length;
@@ -239,7 +268,7 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 }
 
 void
-SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf)
+SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, event_id_t note_id)
 {
 	if (size == 0) {
 		return;
@@ -256,6 +285,26 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf)
 	}
 
 	smf_event_t* event;
+
+        /* XXX july 2010: currently only store event ID's for notes
+         */
+
+        if (((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON || ((buf[0] & 0xf0) == MIDI_CMD_NOTE_OFF)) && note_id >= 0) {
+                event = smf_event_new ();
+                assert(event != NULL);
+
+                event->midi_buffer = new uint8_t[9];
+                event->midi_buffer_length = 9;
+
+                event->midi_buffer[0] = 0xff; // Meta-event
+                event->midi_buffer[1] = 0x99; // Evoral meta-event
+                event->midi_buffer[2] = 6;    // 6 bytes of data follow */
+                event->midi_buffer[3] = 0x1;  // Evoral Note ID
+                midify_note_id (note_id, &event->midi_buffer[4]);
+
+                assert(_smf_track);
+                smf_track_add_event_delta_pulses(_smf_track, event, 0);
+        } 
 
 	event = smf_event_new_from_pointer(buf, size);
 	assert(event != NULL);
