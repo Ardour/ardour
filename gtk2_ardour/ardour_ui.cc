@@ -2542,7 +2542,13 @@ ARDOUR_UI::close_session()
         }
 
 	ARDOUR_COMMAND_LINE::session_name = "";
-	get_session_parameters (true, false);
+
+	if (get_session_parameters (true, false)) {
+		exit (1);
+	}
+
+	goto_editor_window ();
+	show ();
 }
 
 int
