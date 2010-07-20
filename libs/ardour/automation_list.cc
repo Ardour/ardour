@@ -448,10 +448,23 @@ AutomationList::set_state (const XMLNode& node, int version)
 		_max_xval = 0; // means "no limit ;
 	}
 
+	bool have_events = false;
+	
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == X_("events")) {
 			deserialize_events (*(*niter));
+			have_events = true;
 		}
+	}
+
+	if (!have_events) {
+		/* there was no Events child node; clear any current events */
+		freeze ();
+		clear ();
+		mark_dirty ();
+		reposition_for_rt_add (0);
+		maybe_signal_changed ();
+		thaw ();
 	}
 
 	return 0;
