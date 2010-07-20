@@ -111,15 +111,17 @@ fixup_bundle_environment ()
 	setenv ("PATH", path.c_str(), 1);
 
 	path = dir_path;
-	path += "/../Resources";
+	path += "/../Resources:";
 	path += dir_path;
-	path += "/../Resources/Surfaces";
+	path += "/../Resources/Surfaces:";
 	path += dir_path;
-	path += "/../Resources/Panners";
+	path += "/../Resources/Panners:";
 
 	setenv ("ARDOUR_MODULE_PATH", path.c_str(), 1);
 
-	path = dir_path;
+        path = get_user_ardour_path ();
+        path += ':';
+	path += dir_path;
 	path += "/../Resources/icons:";
 	path += dir_path;
 	path += "/../Resources/pixmaps:";
