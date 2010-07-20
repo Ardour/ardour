@@ -771,28 +771,11 @@ EngineControl::enumerate_alsa_devices ()
 
 			while (snd_ctl_pcm_next_device (handle, &device) >= 0 && device >= 0) {
 
-				bool have_playback = false;
-				bool have_capture = false;
-
-				/* find duplex devices only */
-
-				snd_pcm_info_set_device (pcminfo, device);
-				snd_pcm_info_set_subdevice (pcminfo, 0);
-				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_CAPTURE);
-
-				if (snd_ctl_pcm_info (handle, pcminfo) >= 0) {
-					have_capture = true;
-				}
-
 				snd_pcm_info_set_device (pcminfo, device);
 				snd_pcm_info_set_subdevice (pcminfo, 0);
 				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_PLAYBACK);
 
 				if (snd_ctl_pcm_info (handle, pcminfo) >= 0) {
-					have_playback = true;
-				}
-
-				if (have_capture && have_playback) {
 					devs.push_back (snd_pcm_info_get_name (pcminfo));
 					devname += ',';
 					devname += to_string (device, std::dec);
