@@ -166,6 +166,12 @@ GlobalPortMatrixWindow::on_show ()
 	resize_window_to_proportion_of_monitor (this, pm_max.first, pm_max.second);
 }
 
+void
+GlobalPortMatrixWindow::set_session (ARDOUR::Session* s)
+{
+	_port_matrix.set_session (s);
+}
+
 string
 GlobalPortMatrix::disassociation_verb () const
 {

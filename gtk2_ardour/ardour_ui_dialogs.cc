@@ -40,6 +40,7 @@
 #include "keyeditor.h"
 #include "gui_thread.h"
 #include "midi_tracer.h"
+#include "add_route_dialog.h"
 
 #include "i18n.h"
 
@@ -64,6 +65,14 @@ ARDOUR_UI::set_session (Session *s)
 
 	if (route_params) {
 		route_params->set_session (s);
+	}
+
+	if (add_route_dialog) {
+		add_route_dialog->set_session (s);
+	}
+
+	if (session_option_editor) {
+		session_option_editor->set_session (s);
 	}
 
 	primary_clock.set_session (s);

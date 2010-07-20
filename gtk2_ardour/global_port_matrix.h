@@ -56,6 +56,8 @@ class GlobalPortMatrixWindow : public Gtk::Window
 public:
 	GlobalPortMatrixWindow (ARDOUR::Session *, ARDOUR::DataType);
 
+	void set_session (ARDOUR::Session *);
+
 private:
 	void on_show ();
 

@@ -1076,6 +1076,12 @@ Editor::set_session (Session *t)
 		sfbrowser->set_session (_session);
 	}
 
+	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
+		if (_global_port_matrix[*i]) {
+			_global_port_matrix[*i]->set_session (_session);
+		}
+	}
+
 	compute_fixed_ruler_scale ();
 
 	/* there are never any selected regions at startup */
