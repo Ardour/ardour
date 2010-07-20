@@ -1518,9 +1518,9 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 	return ret;
 }
 
+/** @param connect_inputs true to connect inputs as well as outputs, false to connect just outputs */
 void
-Session::auto_connect_route (boost::shared_ptr<Route> route,
-		ChanCount& existing_inputs, ChanCount& existing_outputs)
+Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing_inputs, ChanCount& existing_outputs, bool connect_inputs)
 {
 	/* If both inputs and outputs are auto-connected to physical ports,
 	   use the max of input and output offsets to ensure auto-connected
@@ -1529,9 +1529,11 @@ Session::auto_connect_route (boost::shared_ptr<Route> route,
 	   port number).  Otherwise just use the lowest input or output
 	   offset possible.
 	*/
+
 	const bool in_out_physical =
 		   (Config->get_input_auto_connect() & AutoConnectPhysical)
-		&& (Config->get_output_auto_connect() & AutoConnectPhysical);
+		&& (Config->get_output_auto_connect() & AutoConnectPhysical)
+		&& connect_inputs;
 
 	const ChanCount in_offset = in_out_physical
 		? ChanCount::max(existing_inputs, existing_outputs)
@@ -1548,7 +1550,7 @@ Session::auto_connect_route (boost::shared_ptr<Route> route,
 		_engine.get_physical_outputs (*t, physoutputs);
 		_engine.get_physical_inputs (*t, physinputs);
 
-		if (!physinputs.empty()) {
+		if (!physinputs.empty() && connect_inputs) {
 			uint32_t nphysical_in = physinputs.size();
 			for (uint32_t i = 0; i < route->n_inputs().get(*t) && i < nphysical_in; ++i) {
 				string port;
@@ -1755,6 +1757,8 @@ Session::new_audio_route (bool aux, int input_channels, int output_channels, Rou
 				      << endmsg;
 				goto failure;
 			}
+
+			auto_connect_route (bus, existing_inputs, existing_outputs, false);
 
 			if (route_group) {
 				route_group->add (bus);
