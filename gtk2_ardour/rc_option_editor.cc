@@ -1048,7 +1048,7 @@ RCOptionEditor::RCOptionEditor ()
 		);
 
 	oac->add (AutoConnectPhysical, _("automatically to physical outputs"));
-	oac->add (AutoConnectMaster, _("automatically to master outputs"));
+	oac->add (AutoConnectMaster, _("automatically to master bus"));
 	oac->add (ManualConnect, _("manually"));
 
 	add_option (_("Audio"), oac);
