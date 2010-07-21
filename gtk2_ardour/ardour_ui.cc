@@ -299,12 +299,11 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 bool
 ARDOUR_UI::run_startup (bool should_be_new, string load_template)
 {
-	if (_startup == 0) {
-		_startup = new ArdourStartup ();
-	}
-	
-	XMLNode* audio_setup = Config->extra_xml ("AudioSetup");
+	delete _startup;
+	_startup = new ArdourStartup ();
 
+	XMLNode* audio_setup = Config->extra_xml ("AudioSetup");
+	
 	if (audio_setup && _startup->engine_control()) {
 		_startup->engine_control()->set_state (*audio_setup);
 	}

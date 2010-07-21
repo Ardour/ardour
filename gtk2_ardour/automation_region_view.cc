@@ -97,6 +97,10 @@ AutomationRegionView::canvas_event(GdkEvent* ev)
 		/* convert to item coordinates in the time axis view */
 		automation_view()->canvas_display()->w2i (x, y);
 
+		/* clamp y */
+		y = max (y, 0.0);
+		y = min (y, _height - NAME_HIGHLIGHT_SIZE);
+
 		add_automation_event (ev, trackview.editor().pixel_to_frame (x) - _region->position(), y);
 	}
 
@@ -154,8 +158,9 @@ AutomationRegionView::set_height (double h)
 {
 	RegionView::set_height(h);
 
-	if (_line)
+	if (_line) {
 		_line->set_height ((uint32_t)rint(h - NAME_HIGHLIGHT_SIZE));
+	}
 }
 
 bool
