@@ -395,11 +395,11 @@ FileSource::set_source_name (const ustring& newname, bool destructive)
 		error << string_compose (_("Programming error! %1 tried to rename a file over another file! It's safe to continue working, but please report this to the developers."), PROGRAM_NAME) << endmsg;
 		return -1;
 	}
-
-	if (::rename (oldpath.c_str(), newpath.c_str()) != 0) {
-		error << string_compose (_("cannot rename audio file %1 to %2"), _name, newpath) << endmsg;
-		return -1;
-	}
+        
+        if (::rename (oldpath.c_str(), newpath.c_str()) != 0) {
+                error << string_compose (_("cannot rename file %1 to %2 (%3)"), oldpath, newpath, strerror(errno)) << endmsg;
+                return -1;
+        }
 
 	_name = Glib::path_get_basename (newpath);
 	_path = newpath;

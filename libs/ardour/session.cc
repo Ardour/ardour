@@ -2692,11 +2692,12 @@ Session::change_source_path_by_name (string path, string oldname, string newname
 
 		prefix = path.substr (0, dash);
 
-		path = dir;
 		path += prefix;
 		path += '-';
 		path += new_legalized;
 		path += ".wav";  /* XXX gag me with a spoon */
+
+                path = Glib::build_filename (dir, path);
 
 	} else {
 
@@ -2743,10 +2744,12 @@ Session::change_source_path_by_name (string path, string oldname, string newname
 
 		for (uint32_t cnt = 1; cnt <= limit; ++cnt) {
 
-			snprintf (buf, sizeof(buf), "%s%s-%u%s", dir.c_str(), newname.c_str(), cnt, suffix.c_str());
+			snprintf (buf, sizeof(buf), "%s-%u%s", newname.c_str(), cnt, suffix.c_str());
 
-			if (!Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
-				path = buf;
+                        string p = Glib::build_filename (dir, buf);
+
+			if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
+				path = p;
 				break;
 			}
 			path = "";
@@ -2755,7 +2758,6 @@ Session::change_source_path_by_name (string path, string oldname, string newname
 		if (path == "") {
 			error << "FATAL ERROR! Could not find a " << endl;
 		}
-
 	}
 
 	return path;
