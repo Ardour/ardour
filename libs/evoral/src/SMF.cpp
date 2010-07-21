@@ -128,11 +128,12 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 	_file_path = path;
 
 	_smf = smf_new();
-	if (smf_set_ppqn(_smf, ppqn) != 0) {
-		throw FileError();
-	}
 
 	if (_smf == NULL) {
+                return -1;
+	}
+
+	if (smf_set_ppqn(_smf, ppqn) != 0) {
 		return -1;
 	}
 
@@ -147,6 +148,21 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 		return -2;
 
 	_smf_track->next_event_number = 0;
+
+        {
+                /* put a stub file on disk */
+
+                PBD::StdioFileDescriptor d (_file_path, "w+");
+                FILE* f = d.allocate ();
+                if (f == 0) {
+                        return -1;
+                }
+                
+                if (smf_save (_smf, f)) {
+                        return -1;
+                }
+        }
+
 	_empty = true;
 
 	return 0;
