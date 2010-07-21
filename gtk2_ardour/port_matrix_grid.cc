@@ -127,7 +127,11 @@ PortMatrixGrid::render (cairo_t* cr)
 		++N;
 	}
 
-	/* ASSOCIATION INDICATORS */
+	/* ASSOCIATION INDICATORS and NON-CONNECTABLE INDICATORS */
+
+	/* we draw a grey square in a matrix box if the two ports that intersect at that box
+	   cannot be connected because they are of different types (MIDI vs. audio)
+	*/
 
 	uint32_t bx = 0;
 	uint32_t by = 0;
@@ -182,18 +186,24 @@ PortMatrixGrid::render (cairo_t* cr)
 						c[_matrix->column_index()] = ARDOUR::BundleChannel ((*i)->bundle, k);
 						c[_matrix->row_index()] = ARDOUR::BundleChannel ((*j)->bundle, l);
 
-						PortMatrixNode::State const s = _matrix->get_state (c);
-
-						switch (s) {
-						case PortMatrixNode::ASSOCIATED:
-							draw_association_indicator (cr, x, y);
-							break;
-
-						case PortMatrixNode::NOT_ASSOCIATED:
-							break;
-
-						default:
-							break;
+						if (c[0].bundle->channel_type (c[0].channel) != c[1].bundle->channel_type (c[1].channel)) {
+							/* these two channels are of different types */
+							draw_non_connectable_indicator (cr, x, y);
+						} else {
+							/* these two channels might be associated */
+							PortMatrixNode::State const s = _matrix->get_state (c);
+							
+							switch (s) {
+							case PortMatrixNode::ASSOCIATED:
+								draw_association_indicator (cr, x, y);
+								break;
+								
+							case PortMatrixNode::NOT_ASSOCIATED:
+								break;
+								
+							default:
+								break;
+							}
 						}
 
 						y += grid_spacing();
@@ -231,6 +241,23 @@ void
 PortMatrixGrid::draw_empty_square (cairo_t* cr, uint32_t x, uint32_t y)
 {
 	set_source_rgb (cr, background_colour());
+	cairo_rectangle (
+		cr,
+		x + thick_grid_line_width(),
+		y + thick_grid_line_width(),
+		grid_spacing() - 2 * thick_grid_line_width(),
+		grid_spacing() - 2 * thick_grid_line_width()
+		);
+	cairo_fill (cr);
+}
+
+/** Draw a square to indicate that two channels in a matrix cannot be associated
+ *  with each other.
+ */
+void
+PortMatrixGrid::draw_non_connectable_indicator (cairo_t* cr, uint32_t x, uint32_t y)
+{
+	set_source_rgb (cr, non_connectable_colour ());
 	cairo_rectangle (
 		cr,
 		x + thick_grid_line_width(),

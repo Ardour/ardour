@@ -137,7 +137,7 @@ protected:
 	}
 
 	/** @return colour to paint grid squares when they can't be associated */
-	static Gdk::Color unknown_colour () {
+	static Gdk::Color non_connectable_colour () {
 		return Gdk::Color ("#cccccc");
 	}
 
