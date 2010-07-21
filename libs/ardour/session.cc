@@ -1911,6 +1911,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 		r->mute_changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this, _1));
 		r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
 		r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
+		r->order_key_changed.connect_same_thread (*this, boost::bind (&Session::route_order_key_changed, this));
 
 		if (r->is_master()) {
 			_master_out = r;
@@ -3897,4 +3898,11 @@ Session::add_session_range_location (nframes_t start, nframes_t end)
 {
 	_session_range_location = new Location (start, end, _("session"), Location::IsSessionRange);
 	_locations.add (_session_range_location);
+}
+
+/** Called when one of our routes' order keys has changed */
+void
+Session::route_order_key_changed ()
+{
+	RouteOrderKeyChanged (); /* EMIT SIGNAL */
 }

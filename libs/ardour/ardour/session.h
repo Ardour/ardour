@@ -774,6 +774,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void send_mmc_locate (nframes64_t);
 	int send_full_time_code (nframes64_t);
 
+	PBD::Signal0<void> RouteOrderKeyChanged;
+
   protected:
 	friend class AudioEngine;
 	void set_block_size (nframes_t nframes);
@@ -1416,6 +1418,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void setup_midi_machine_control ();
         void cleanup_stubfiles ();
+
+	void route_order_key_changed ();
 };
 
 } // namespace ARDOUR

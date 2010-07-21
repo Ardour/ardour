@@ -257,6 +257,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	PBD::Signal0<void>       meter_change; 
 	PBD::Signal0<void>       signal_latency_changed;
 	PBD::Signal0<void>       initial_delay_changed;
+	PBD::Signal0<void>       order_key_changed;
 
 	/* gui's call this for their own purposes. */
 

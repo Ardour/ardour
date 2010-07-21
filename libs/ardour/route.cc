@@ -227,15 +227,32 @@ Route::order_key (std::string const & name) const
 void
 Route::set_order_key (std::string const & name, long n)
 {
-	order_keys[name] = n;
+	bool changed = false;
+
+	/* This method looks more complicated than it should, but
+	   it's important that we don't emit order_key_changed unless
+	   it actually has, as expensive things happen on receipt of that
+	   signal.
+	*/
+
+	if (order_keys.find(name) == order_keys.end() || order_keys[name] != n) {
+		order_keys[name] = n;
+		changed = true;
+	}
 
 	if (Config->get_sync_all_route_ordering()) {
 		for (OrderKeys::iterator x = order_keys.begin(); x != order_keys.end(); ++x) {
-			x->second = n;
+			if (x->second != n) {
+				x->second = n;
+				changed = true;
+			}
 		}
 	}
 
-	_session.set_dirty ();
+	if (changed) {
+		order_key_changed (); /* EMIT SIGNAL */
+		_session.set_dirty ();
+	}
 }
 
 /** Set all order keys to be the same as that for `base', if such a key
@@ -263,8 +280,17 @@ Route::sync_order_keys (std::string const & base)
 		i = order_keys.begin();
 	}
 
+	bool changed = false;
+	
 	for (; i != order_keys.end(); ++i) {
-		i->second = key;
+		if (i->second != key) {
+			i->second = key;
+			changed = true;
+		}
+	}
+
+	if (changed) {
+		order_key_changed (); /* EMIT SIGNAL */
 	}
 }
 

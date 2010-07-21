@@ -151,6 +151,8 @@ PortMatrix::init ()
 	/* and also ports */
 	_session->engine().PortRegisteredOrUnregistered.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
 
+	/* watch for route order keys changing, which changes the order of things in our global ports list(s) */
+	_session->RouteOrderKeyChanged.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
 
 	/* Part 3: other stuff */
 	
@@ -201,7 +203,7 @@ PortMatrix::setup ()
 {
 	/* this needs to be done first, as the visible_ports() method uses the
 	   notebook state to decide which ports are being shown */
-	
+
 	setup_notebooks ();
 	
 	_body->setup ();

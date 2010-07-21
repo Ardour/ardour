@@ -272,7 +272,7 @@ PortGroupList::~PortGroupList()
 
 void
 PortGroupList::maybe_add_processor_to_list (
-	boost::weak_ptr<Processor> wp, list<boost::shared_ptr<Bundle> >* route_bundles, bool inputs, set<boost::shared_ptr<IO> >& used_io
+	boost::weak_ptr<Processor> wp, list<boost::shared_ptr<IO> >* route_ios, bool inputs, set<boost::shared_ptr<IO> >& used_io
 	)
 {
 	boost::shared_ptr<Processor> p (wp.lock());
@@ -288,12 +288,28 @@ PortGroupList::maybe_add_processor_to_list (
 		boost::shared_ptr<IO> io = inputs ? iop->input() : iop->output();
 
 		if (io && used_io.find (io) == used_io.end()) {
-			route_bundles->push_back (io->bundle ());
+			route_ios->push_back (io);
 			used_io.insert (io);
 		}
 	}
 }
 
+struct RouteIOs {
+	RouteIOs (boost::shared_ptr<Route> r, boost::shared_ptr<IO> i) {
+		route = r;
+		ios.push_back (i);
+	}
+	
+	boost::shared_ptr<Route> route;
+	std::list<boost::shared_ptr<IO> > ios;
+};
+
+class RouteIOsComparator {
+public:
+	bool operator() (RouteIOs const & a, RouteIOs const & b) {
+		return a.route->order_key (X_("editor")) < b.route->order_key (X_("editor"));
+	}
+};
 
 /** Gather bundles from around the system and put them in this PortGroupList.
  *  @param type Type of bundles to collect, or NIL for all types.
@@ -313,15 +329,15 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	boost::shared_ptr<PortGroup> ardour (new PortGroup (_("Ardour")));
 	boost::shared_ptr<PortGroup> other (new PortGroup (_("Other")));
 
-	/* Find the bundles for routes.  We use the RouteBundle class to join
-	   the route's input/output and processor bundles together so that they
-	   are presented as one bundle in the matrix. */
+	/* Find the IOs which have bundles for routes and their processors.  We store
+	   these IOs in a RouteIOs class so that we can then sort the results by route
+	   order key.
+	*/
 
 	boost::shared_ptr<RouteList> routes = session->get_routes ();
+	list<RouteIOs> route_ios;
 
 	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
-
-		list<boost::shared_ptr<Bundle> > route_bundles;
 
 		/* keep track of IOs that we have taken bundles from,
 		   so that we can avoid taking the same IO from both
@@ -331,24 +347,32 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		boost::shared_ptr<IO> io = inputs ? (*i)->input() : (*i)->output();
 		used_io.insert (io);
 
-		route_bundles.push_back (io->bundle ());
+		RouteIOs rb (*i, io);
+		(*i)->foreach_processor (boost::bind (&PortGroupList::maybe_add_processor_to_list, this, _1, &rb.ios, inputs, used_io));
 
-		(*i)->foreach_processor (boost::bind (&PortGroupList::maybe_add_processor_to_list, this, _1, &route_bundles, inputs, used_io));
+		route_ios.push_back (rb);
+	}
 
-		/* Work out which group to put these bundles in */
+	/* Sort RouteIOs by the routes' editor order keys */
+	route_ios.sort (RouteIOsComparator ());
+
+	/* Now put the bundles that belong to these sorted RouteIOs into the PortGroup */
+	for (list<RouteIOs>::iterator i = route_ios.begin(); i != route_ios.end(); ++i) {
+		TimeAxisView* tv = PublicEditor::instance().axis_view_from_route (i->route);
+
+		/* Work out which group to put these IOs' bundles in */
 		boost::shared_ptr<PortGroup> g;
-		if (boost::dynamic_pointer_cast<Track> (*i)) {
+		if (boost::dynamic_pointer_cast<Track> (i->route)) {
 			g = track;
 		} else {
 			g = bus;
 		}
-
-		TimeAxisView* tv = PublicEditor::instance().axis_view_from_route (*i);
-		for (list<boost::shared_ptr<Bundle> >::iterator i = route_bundles.begin(); i != route_bundles.end(); ++i) {
+		
+		for (list<boost::shared_ptr<IO> >::iterator j = i->ios.begin(); j != i->ios.end(); ++j) {
 			if (tv) {
-				g->add_bundle (*i, io, tv->color ());
+				g->add_bundle ((*j)->bundle(), *j, tv->color ());
 			} else {
-				g->add_bundle (*i, io);
+				g->add_bundle ((*j)->bundle(), *j);
 			}
 		}
 	}

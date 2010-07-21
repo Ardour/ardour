@@ -40,7 +40,6 @@ namespace ARDOUR {
 }
 
 class PortMatrix;
-class RouteBundle;
 class PublicEditor;
 
 /** A list of bundles grouped by some aspect of their type e.g. busses, tracks, system.
@@ -145,7 +144,7 @@ class PortGroupList : public sigc::trackable
 	void emit_bundle_changed (ARDOUR::Bundle::Change);
 	boost::shared_ptr<ARDOUR::Bundle> make_bundle_from_ports (std::vector<std::string> const &, ARDOUR::DataType, bool) const;
 	void maybe_add_processor_to_list (
-		boost::weak_ptr<ARDOUR::Processor>, std::list<boost::shared_ptr<ARDOUR::Bundle> > *, bool, std::set<boost::shared_ptr<ARDOUR::IO> > &
+		boost::weak_ptr<ARDOUR::Processor>, std::list<boost::shared_ptr<ARDOUR::IO> > *, bool, std::set<boost::shared_ptr<ARDOUR::IO> > &
 		);
 
 	mutable PortGroup::BundleList _bundles;
