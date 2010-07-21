@@ -172,22 +172,6 @@ void
 SMF::close() THROW_FILE_ERROR
 {
 	if (_smf) {
-#if 0
-                /* XXX why would we automatically save-on-close? 
-                 */
-
-		PBD::StdioFileDescriptor d (_file_path, "w+");
-		FILE* f = d.allocate ();
-		if (f == 0) {
-			throw FileError ();
-		}
-		
-                cerr << "CLOSE: Save SMF to " << _file_path << endl;
-
-		if (smf_save(_smf, f) != 0) {
-			throw FileError();
-		}
-#endif
 		smf_delete(_smf);
 		_smf = 0;
 		_smf_track = 0;
