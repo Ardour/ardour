@@ -868,8 +868,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	static const int delta_accumulator_size = 25;
 	int delta_accumulator_cnt;
-	long delta_accumulator[delta_accumulator_size];
-	long average_slave_delta;
+	int32_t delta_accumulator[delta_accumulator_size];
+	int32_t average_slave_delta;
 	int  average_dir;
 	bool have_first_delta_accumulator;
 

@@ -113,7 +113,7 @@ struct SessionEvent {
     
     static const nframes_t Immediate = 0;
     
-    static void create_per_thread_pool (const std::string& n, unsigned long nitems);
+    static void create_per_thread_pool (const std::string& n, uint32_t nitems);
     static void init_event_pool ();
 
 private:

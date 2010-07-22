@@ -421,7 +421,7 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 	assert (next_quarter_frame_to_send <= 7);
 
 	/* Duration of one quarter frame */
-	nframes_t quarter_frame_duration = ((long) _frames_per_timecode_frame) >> 2;
+	nframes_t quarter_frame_duration = ((nframes_t) _frames_per_timecode_frame) >> 2;
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("TF %1 SF %2 NQ %3 FD %4\n",  _transport_frame, outbound_mtc_timecode_frame,
 						 next_quarter_frame_to_send, quarter_frame_duration));

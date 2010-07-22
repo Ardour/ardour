@@ -159,7 +159,7 @@ VSTPlugin::get_state()
 		/* fetch the current chunk */
 
 		guchar* data;
-		long  data_size;
+                int32_t data_size;
 
 		if ((data_size = _plugin->dispatcher (_plugin, 23 /* effGetChunk */, 0, 0, &data, false)) == 0) {
 			return *root;
@@ -179,7 +179,7 @@ VSTPlugin::get_state()
 
 		XMLNode* parameters = new XMLNode ("parameters");
 
-		for (long n = 0; n < _plugin->numParams; ++n) {
+		for (int32_t n = 0; n < _plugin->numParams; ++n) {
 			char index[64];
 			char val[32];
 			snprintf (index, sizeof (index), "param_%ld", n);
@@ -233,10 +233,10 @@ VSTPlugin::set_state(const XMLNode& node, int)
 		XMLPropertyList::const_iterator i;
 
 		for (i = child->properties().begin(); i != child->properties().end(); ++i) {
-			long param;
+			int32_t param;
 			float val;
 
-			sscanf ((*i)->name().c_str(), "param_%ld", &param);
+			sscanf ((*i)->name().c_str(), "param_%d", &param);
 			sscanf ((*i)->value().c_str(), "%f", &val);
 
 			_plugin->setParameter (_plugin, param, val);

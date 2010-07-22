@@ -96,7 +96,7 @@ bump_name_once (const std::string& name, char delimiter)
 		}
 
 		errno = 0;
-		long int version = strtol (name.c_str()+delim+1, (char **)NULL, 10);
+		int32_t version = strtol (name.c_str()+delim+1, (char **)NULL, 10);
 
 		if (isnumber == 0 || errno != 0) {
 			// last_element is not a number, or is too large
@@ -106,7 +106,7 @@ bump_name_once (const std::string& name, char delimiter)
 		} else {
 			char buf[32];
 
-			snprintf (buf, sizeof(buf), "%ld", version+1);
+			snprintf (buf, sizeof(buf), "%d", version+1);
 
 			newname  = name.substr (0, delim+1);
 			newname += buf;

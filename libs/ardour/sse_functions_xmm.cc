@@ -31,7 +31,7 @@ x86_sse_find_peaks(const ARDOUR::Sample* buf, ARDOUR::nframes_t nframes, float *
 	current_max = _mm_set1_ps(*max);
 
 	// Work input until "buf" reaches 16 byte alignment
-	while ( ((unsigned long)buf) % 16 != 0 && nframes > 0) {
+	while ( ((intptr_t)buf) % 16 != 0 && nframes > 0) {
 
 		// Load the next float into the work buffer
 		work = _mm_set1_ps(*buf);

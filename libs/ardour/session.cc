@@ -1693,11 +1693,11 @@ Session::set_remote_control_ids ()
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (MixerOrdered == m) {
-			long order = (*i)->order_key(N_("signal"));
+			int32_t order = (*i)->order_key(N_("signal"));
 			(*i)->set_remote_control_id (order+1, false);
 			emit_signal = true;
 		} else if (EditorOrdered == m) {
-			long order = (*i)->order_key(N_("editor"));
+			int32_t order = (*i)->order_key(N_("editor"));
 			(*i)->set_remote_control_id (order+1, false);
 			emit_signal = true;
 		} else if (UserOrdered == m) {

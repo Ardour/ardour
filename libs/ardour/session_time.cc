@@ -158,9 +158,9 @@ Session::sync_time_vars ()
 	_current_frame_rate = (nframes_t) round (_base_frame_rate * (1.0 + (config.get_video_pullup()/100.0)));
 	_frames_per_timecode_frame = (double) _current_frame_rate / (double) timecode_frames_per_second();
 	if (timecode_drop_frames()) {
-	  _frames_per_hour = (long)(107892 * _frames_per_timecode_frame);
+	  _frames_per_hour = (int32_t)(107892 * _frames_per_timecode_frame);
 	} else {
-	  _frames_per_hour = (long)(3600 * rint(timecode_frames_per_second()) * _frames_per_timecode_frame);
+	  _frames_per_hour = (int32_t)(3600 * rint(timecode_frames_per_second()) * _frames_per_timecode_frame);
 	}
 	_timecode_frames_per_hour = (nframes_t)rint(timecode_frames_per_second() * 3600.0);
 
@@ -252,9 +252,9 @@ Session::timecode_to_sample( Timecode::Time& timecode, nframes_t& sample, bool u
 		nframes_t base_samples = (nframes_t) (((timecode.hours * 107892) + ((timecode.minutes / 10) * 17982)) * _frames_per_timecode_frame);
 
 		// Samples inside time exceeding the nearest 10 minutes (always offset, see above)
-		long exceeding_df_minutes = timecode.minutes % 10;
-		long exceeding_df_seconds = (exceeding_df_minutes * 60) + timecode.seconds;
-		long exceeding_df_frames = (30 * exceeding_df_seconds) + timecode.frames - (2 * exceeding_df_minutes);
+		int32_t exceeding_df_minutes = timecode.minutes % 10;
+		int32_t exceeding_df_seconds = (exceeding_df_minutes * 60) + timecode.seconds;
+		int32_t exceeding_df_frames = (30 * exceeding_df_seconds) + timecode.frames - (2 * exceeding_df_minutes);
 		nframes_t exceeding_samples = (nframes_t) rint(exceeding_df_frames * _frames_per_timecode_frame);
 		sample = base_samples + exceeding_samples;
 	} else {
@@ -269,7 +269,7 @@ Session::timecode_to_sample( Timecode::Time& timecode, nframes_t& sample, bool u
 	}
 
 	if (use_subframes) {
-		sample += (long) (((double)timecode.subframes * _frames_per_timecode_frame) / config.get_subframes_per_frame());
+		sample += (int32_t) (((double)timecode.subframes * _frames_per_timecode_frame) / config.get_subframes_per_frame());
 	}
 
 	if (use_offset) {
@@ -321,7 +321,7 @@ Session::sample_to_timecode( nframes_t sample, Timecode::Time& timecode, bool us
 
 	double timecode_frames_left_exact;
 	double timecode_frames_fraction;
-	unsigned long timecode_frames_left;
+	uint32_t timecode_frames_left;
 
 	// Extract whole hours. Do this to prevent rounding errors with
 	// high sample numbers in the calculations that follow.
@@ -331,7 +331,7 @@ Session::sample_to_timecode( nframes_t sample, Timecode::Time& timecode, bool us
 	// Calculate exact number of (exceeding) timecode frames and fractional frames
 	timecode_frames_left_exact = (double) offset_sample / _frames_per_timecode_frame;
 	timecode_frames_fraction = timecode_frames_left_exact - floor( timecode_frames_left_exact );
-	timecode.subframes = (long) rint(timecode_frames_fraction * config.get_subframes_per_frame());
+	timecode.subframes = (int32_t) rint(timecode_frames_fraction * config.get_subframes_per_frame());
 
 	// XXX Not sure if this is necessary anymore...
 	if (timecode.subframes == config.get_subframes_per_frame()) {
@@ -341,20 +341,20 @@ Session::sample_to_timecode( nframes_t sample, Timecode::Time& timecode, bool us
 	}
 
 	// Extract hour-exceeding frames for minute, second and frame calculations
-	timecode_frames_left = ((long) floor( timecode_frames_left_exact ));
+	timecode_frames_left = (uint32_t) floor (timecode_frames_left_exact);
 
 	if (timecode_drop_frames()) {
-		// See long explanation in timecode_to_sample()...
+		// See int32_t explanation in timecode_to_sample()...
 
 		// Number of 10 minute chunks
 		timecode.minutes = (timecode_frames_left / 17982) * 10; // exactly 17982 frames in 10 minutes
 		// frames exceeding the nearest 10 minute barrier
-		long exceeding_df_frames = timecode_frames_left % 17982;
+		int32_t exceeding_df_frames = timecode_frames_left % 17982;
 
 		// Find minutes exceeding the nearest 10 minute barrier
 		if (exceeding_df_frames >= 1800) { // nothing to do if we are inside the first minute (0-1799)
 			exceeding_df_frames -= 1800; // take away first minute (different number of frames than the others)
-			long extra_minutes_minus_1 = exceeding_df_frames / 1798; // how many minutes after the first one
+			int32_t extra_minutes_minus_1 = exceeding_df_frames / 1798; // how many minutes after the first one
 			exceeding_df_frames -= extra_minutes_minus_1 * 1798; // take away the (extra) minutes just found
 			timecode.minutes += extra_minutes_minus_1 + 1; // update with exceeding minutes
 		}
@@ -379,10 +379,10 @@ Session::sample_to_timecode( nframes_t sample, Timecode::Time& timecode, bool us
 		}
 	} else {
 		// Non drop is easy
-		timecode.minutes = timecode_frames_left / ((long) rint (timecode_frames_per_second ()) * 60);
-		timecode_frames_left = timecode_frames_left % ((long) rint (timecode_frames_per_second ()) * 60);
-		timecode.seconds = timecode_frames_left / (long) rint(timecode_frames_per_second ());
-		timecode.frames = timecode_frames_left % (long) rint(timecode_frames_per_second ());
+		timecode.minutes = timecode_frames_left / ((int32_t) rint (timecode_frames_per_second ()) * 60);
+		timecode_frames_left = timecode_frames_left % ((int32_t) rint (timecode_frames_per_second ()) * 60);
+		timecode.seconds = timecode_frames_left / (int32_t) rint(timecode_frames_per_second ());
+		timecode.frames = timecode_frames_left % (int32_t) rint(timecode_frames_per_second ());
 	}
 
 	if (!use_subframes) {

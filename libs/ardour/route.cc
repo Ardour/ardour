@@ -213,7 +213,7 @@ Route::remote_control_id() const
 	return _remote_control_id;
 }
 
-long
+int32_t
 Route::order_key (std::string const & name) const
 {
 	OrderKeys::const_iterator i = order_keys.find (name);
@@ -225,7 +225,7 @@ Route::order_key (std::string const & name) const
 }
 
 void
-Route::set_order_key (std::string const & name, long n)
+Route::set_order_key (std::string const & name, int32_t n)
 {
 	bool changed = false;
 
@@ -267,7 +267,7 @@ Route::sync_order_keys (std::string const & base)
 	}
 
 	OrderKeys::iterator i;
-	uint32_t key;
+	int32_t key;
 
 	if ((i = order_keys.find (base)) == order_keys.end()) {
 		/* key doesn't exist, use the first existing key (during session initialization) */
@@ -1890,7 +1890,7 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 
 	if ((prop = node.property (X_("order-keys"))) != 0) {
 
-		long n;
+		int32_t n;
 
 		string::size_type colon, equal;
 		string remaining = prop->value();
@@ -1901,7 +1901,7 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 				error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
 				      << endmsg;
 			} else {
-				if (sscanf (remaining.substr (equal+1).c_str(), "%ld", &n) != 1) {
+				if (sscanf (remaining.substr (equal+1).c_str(), "%d", &n) != 1) {
 					error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
 					      << endmsg;
 				} else {
@@ -2066,7 +2066,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 
 	if ((prop = node.property (X_("order-keys"))) != 0) {
 
-		long n;
+		int32_t n;
 
 		string::size_type colon, equal;
 		string remaining = prop->value();
@@ -2077,7 +2077,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 				error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
 					<< endmsg;
 			} else {
-				if (sscanf (remaining.substr (equal+1).c_str(), "%ld", &n) != 1) {
+				if (sscanf (remaining.substr (equal+1).c_str(), "%d", &n) != 1) {
 					error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
 						<< endmsg;
 				} else {

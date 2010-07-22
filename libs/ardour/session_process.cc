@@ -238,7 +238,7 @@ Session::process_with_events (nframes_t nframes)
 	nframes_t      end_frame;
 	bool           session_needs_butler = false;
 	nframes_t      stop_limit;
-	long           frames_moved;
+	framecnt_t     frames_moved;
 
 	/* make sure the auditioner is silent */
 
@@ -282,11 +282,11 @@ Session::process_with_events (nframes_t nframes)
 	}
 
 	if (_transport_speed == 1.0) {
-		frames_moved = (long) nframes;
+		frames_moved = (framecnt_t) nframes;
 	} else {
 		interpolation.set_target_speed (fabs(_target_transport_speed));
 		interpolation.set_speed (fabs(_transport_speed));
-		frames_moved = (long) interpolation.interpolate (0, nframes, 0, 0);
+		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
 	}
 
 	end_frame = _transport_frame + (nframes_t)frames_moved;
@@ -342,12 +342,12 @@ Session::process_with_events (nframes_t nframes)
 		while (nframes) {
 
 			this_nframes = nframes; /* real (jack) time relative */
-			frames_moved = (long) floor (_transport_speed * nframes); /* transport relative */
+			frames_moved = (framecnt_t) floor (_transport_speed * nframes); /* transport relative */
 
 			/* running an event, position transport precisely to its time */
 			if (this_event && this_event->action_frame <= end_frame && this_event->action_frame >= _transport_frame) {
 				/* this isn't quite right for reverse play */
-				frames_moved = (long) (this_event->action_frame - _transport_frame);
+				frames_moved = (framecnt_t) (this_event->action_frame - _transport_frame);
 				this_nframes = (nframes_t) abs( floor(frames_moved / _transport_speed) );
 			}
 
@@ -570,7 +570,7 @@ Session::calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta)
 	}
 
 	if (delta_accumulator_cnt != 0 || this_delta < _current_frame_rate) {
-		delta_accumulator[delta_accumulator_cnt++] = long(dir) * long(this_delta);
+		delta_accumulator[delta_accumulator_cnt++] = (nframes_t) dir *  (nframes_t) this_delta;
 	}
 
 	if (have_first_delta_accumulator) {
@@ -578,7 +578,7 @@ Session::calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta)
 		for (int i = 0; i < delta_accumulator_size; ++i) {
 			average_slave_delta += delta_accumulator[i];
 		}
-		average_slave_delta /= long(delta_accumulator_size);
+		average_slave_delta /= (int32_t) delta_accumulator_size;
 		if (average_slave_delta < 0L) {
 			average_dir = -1;
 			average_slave_delta = abs(average_slave_delta);
@@ -667,7 +667,7 @@ Session::track_slave_state (float slave_speed, nframes_t slave_transport_frame, 
 					/* XXX what? */
 				}
 
-				memset (delta_accumulator, 0, sizeof (long) * delta_accumulator_size);
+				memset (delta_accumulator, 0, sizeof (int32_t) * delta_accumulator_size);
 				average_slave_delta = 0L;
 				this_delta = 0;
 			}
@@ -744,7 +744,7 @@ Session::process_without_events (nframes_t nframes)
 {
 	bool session_needs_butler = false;
 	nframes_t stop_limit;
-	long frames_moved;
+	framecnt_t frames_moved;
 
 	if (!process_can_proceed()) {
 		_silent = true;
@@ -788,11 +788,11 @@ Session::process_without_events (nframes_t nframes)
 	click (_transport_frame, nframes);
 
 	if (_transport_speed == 1.0) {
-		frames_moved = (long) nframes;
+		frames_moved = (framecnt_t) nframes;
 	} else {
 		interpolation.set_target_speed (fabs(_target_transport_speed));
 		interpolation.set_speed (fabs(_transport_speed));
-		frames_moved = (long) interpolation.interpolate (0, nframes, 0, 0);
+		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
 	}
 
 	if (process_routes (nframes, session_needs_butler)) {

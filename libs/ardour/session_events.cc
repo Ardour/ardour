@@ -46,7 +46,7 @@ SessionEvent::init_event_pool ()
 }
 
 void
-SessionEvent::create_per_thread_pool (const std::string& name, unsigned long nitems)
+SessionEvent::create_per_thread_pool (const std::string& name, uint32_t nitems)
 {
 	/* this is a per-thread call that simply creates a thread-private ptr to
 	   a CrossThreadPool for use by this thread whenever events are allocated/released

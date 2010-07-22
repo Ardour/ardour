@@ -91,8 +91,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	bool set_name (const std::string& str);
 
-	long order_key (std::string const &) const;
-	void set_order_key (std::string const &, long);
+	int32_t order_key (std::string const &) const;
+	void set_order_key (std::string const &, int32_t);
 
 	bool is_hidden() const { return _flags & Hidden; }
 	bool is_master() const { return _flags & MasterOut; }
