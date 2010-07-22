@@ -5,6 +5,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include <glibmm/miscutils.h>
+
 #include "pbd/error.h"
 #include "pbd/compose.h"
 #include "pbd/clear_dir.h"
@@ -35,12 +37,8 @@ PBD::clear_directory (const string& dir, size_t* size, vector<string>* paths)
                         continue;
                 }
                 
-                string fullpath;
+                string fullpath = Glib::build_filename (dir, dentry->d_name);
 
-                fullpath = dir;
-                fullpath += '/';
-                fullpath += dentry->d_name;
-                
                 if (::stat (fullpath.c_str(), &statbuf)) {
                         continue;
                 }
