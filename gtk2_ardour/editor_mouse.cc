@@ -770,12 +770,12 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case RegionViewNameHighlight:
 			case LeftFrameHandle:
                         case RightFrameHandle:
-			{
-				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
-				_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
-				return true;
+				if (!internal_editing ()) {
+					RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
+					_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
+					return true;
+				}
 				break;
-			}
 
 			case RegionViewName:
 			{
@@ -998,7 +998,9 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case RegionViewNameHighlight:
                 case LeftFrameHandle:
                 case RightFrameHandle:
-			_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
+			if (!internal_editing ()) {
+				_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
+			}
 			return true;
 			break;
 
@@ -1504,19 +1506,19 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case RegionViewNameHighlight:
-		if (is_drawable() && (mouse_mode == MouseObject || (internal_editing() && mouse_mode == MouseRange))) {
+		if (is_drawable() && mouse_mode == MouseObject && !internal_editing()) {
 			track_canvas->get_window()->set_cursor (*trimmer_cursor);
 		}
 		break;
 
 	case LeftFrameHandle:
-		if (is_drawable() && (mouse_mode == MouseObject || (internal_editing() && mouse_mode == MouseRange))) {
+		if (is_drawable() && mouse_mode == MouseObject && !internal_editing()) {
 			track_canvas->get_window()->set_cursor (*left_side_trim_cursor);
 		}
                 break;
 
 	case RightFrameHandle:
-		if (is_drawable() && (mouse_mode == MouseObject || (internal_editing() && mouse_mode == MouseRange))) {
+		if (is_drawable() && mouse_mode == MouseObject && !internal_editing()) {
 			track_canvas->get_window()->set_cursor (*right_side_trim_cursor);
 		}
                 break;
