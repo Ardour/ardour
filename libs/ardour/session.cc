@@ -2746,17 +2746,18 @@ Session::change_source_path_by_name (string path, string oldname, string newname
 
 			snprintf (buf, sizeof(buf), "%s-%u%s", newname.c_str(), cnt, suffix.c_str());
 
-                        string p = Glib::build_filename (dir, buf);
-
-			if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
-				path = p;
+                        if (!matching_unsuffixed_filename_exists_in (dir, buf)) {
+                                path = Glib::build_filename (dir, buf);
 				break;
 			}
+
 			path = "";
 		}
 
-		if (path == "") {
-			error << "FATAL ERROR! Could not find a " << endl;
+		if (path.empty()) {
+			fatal << string_compose (_("FATAL ERROR! Could not find a suitable version of %1 for a rename"),
+                                                 newname) << endl;
+                        /*NOTREACHED*/
 		}
 	}
 
@@ -2800,7 +2801,6 @@ Session::peak_path (Glib::ustring base) const
 string
 Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t chan, bool destructive)
 {
-	string spath;
 	uint32_t cnt;
 	char buf[PATH_MAX+1];
 	const uint32_t limit = 10000;
@@ -2818,55 +2818,60 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 
 		for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 
-			SessionDirectory sdir((*i).path);
-
-			spath = sdir.sound_path().to_string();
-
 			if (destructive) {
 
 				if (nchan < 2) {
-					snprintf (buf, sizeof(buf), "%s/T%04d-%s%s",
-                                                  spath.c_str(), cnt, legalized.c_str(), ext.c_str());
+					snprintf (buf, sizeof(buf), "T%04d-%s%s",
+                                                  cnt, legalized.c_str(), ext.c_str());
 				} else if (nchan == 2) {
 					if (chan == 0) {
-						snprintf (buf, sizeof(buf), "%s/T%04d-%s%%L%s",
-                                                          spath.c_str(), cnt, legalized.c_str(), ext.c_str());
+						snprintf (buf, sizeof(buf), "T%04d-%s%%L%s",
+                                                          cnt, legalized.c_str(), ext.c_str());
 					} else {
-						snprintf (buf, sizeof(buf), "%s/T%04d-%s%%R%s",
-                                                          spath.c_str(), cnt, legalized.c_str(), ext.c_str());
+						snprintf (buf, sizeof(buf), "T%04d-%s%%R%s",
+                                                          cnt, legalized.c_str(), ext.c_str());
 					}
 				} else if (nchan < 26) {
-					snprintf (buf, sizeof(buf), "%s/T%04d-%s%%%c%s",
-                                                  spath.c_str(), cnt, legalized.c_str(), 'a' + chan, ext.c_str());
+					snprintf (buf, sizeof(buf), "T%04d-%s%%%c%s",
+                                                  cnt, legalized.c_str(), 'a' + chan, ext.c_str());
 				} else {
-					snprintf (buf, sizeof(buf), "%s/T%04d-%s%s",
-                                                  spath.c_str(), cnt, legalized.c_str(), ext.c_str());
+					snprintf (buf, sizeof(buf), "T%04d-%s%s",
+                                                  cnt, legalized.c_str(), ext.c_str());
 				}
 
 			} else {
 
-				spath += '/';
-				spath += legalized;
-
 				if (nchan < 2) {
-					snprintf (buf, sizeof(buf), "%s-%u%s", spath.c_str(), cnt, ext.c_str());
+					snprintf (buf, sizeof(buf), "%s-%u%s", legalized.c_str(), cnt, ext.c_str());
 				} else if (nchan == 2) {
 					if (chan == 0) {
-						snprintf (buf, sizeof(buf), "%s-%u%%L%s", spath.c_str(), cnt, ext.c_str());
+						snprintf (buf, sizeof(buf), "%s-%u%%L%s", legalized.c_str(), cnt, ext.c_str());
 					} else {
-						snprintf (buf, sizeof(buf), "%s-%u%%R%s", spath.c_str(), cnt, ext.c_str());
+						snprintf (buf, sizeof(buf), "%s-%u%%R%s", legalized.c_str(), cnt, ext.c_str());
 					}
 				} else if (nchan < 26) {
-					snprintf (buf, sizeof(buf), "%s-%u%%%c%s", spath.c_str(), cnt, 'a' + chan, ext.c_str());
+					snprintf (buf, sizeof(buf), "%s-%u%%%c%s", legalized.c_str(), cnt, 'a' + chan, ext.c_str());
 				} else {
-					snprintf (buf, sizeof(buf), "%s-%u%s", spath.c_str(), cnt, ext.c_str());
+					snprintf (buf, sizeof(buf), "%s-%u%s", legalized.c_str(), cnt, ext.c_str());
 				}
 			}
 
-			if (sys::exists(buf)) {
-				existing++;
-			}
+			SessionDirectory sdir((*i).path);
 
+			string spath = sdir.sound_path().to_string();
+			string spath_stubs = sdir.sound_stub_path().to_string();
+
+                        /* note that we search *without* the extension so that
+                           we don't end up both "Audio 1-1.wav" and "Audio 1-1.caf" 
+                           in the event that this new name is required for
+                           a file format change.
+                        */
+
+                        if (matching_unsuffixed_filename_exists_in (spath, buf) ||
+                            matching_unsuffixed_filename_exists_in (spath_stubs, buf)) {
+                                existing++;
+                                break;
+                        }
 		}
 
 		if (existing == 0) {
@@ -2881,8 +2886,8 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 			throw failed_constructor();
 		}
 	}
-
-	return Glib::path_get_basename(buf);
+        
+	return Glib::path_get_basename (buf);
 }
 
 /** Create a new within-session audio source */
@@ -3398,7 +3403,12 @@ Session::reset_native_file_format ()
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr) {
+                        /* don't save state as we do this, there's no point
+                         */
+
+                        _state_of_the_state = StateOfTheState (_state_of_the_state|InCleanup);
 			tr->reset_write_sources (false);
+                        _state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);
 		}
 	}
 }

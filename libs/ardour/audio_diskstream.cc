@@ -1931,11 +1931,22 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 	capturing_sources.clear ();
 
 	for (chan = c->begin(), n = 0; chan != c->end(); ++chan, ++n) {
+
 		if (!destructive()) {
 
 			if ((*chan)->write_source && mark_write_complete) {
 				(*chan)->write_source->mark_streaming_write_completed ();
 			}
+
+                        if ((*chan)->write_source) {
+                                if ((*chan)->write_source->removable()) {
+                                        (*chan)->write_source->mark_for_remove ();
+                                        (*chan)->write_source->drop_references ();
+                                        _session.remove_source ((*chan)->write_source);
+                                } 
+                                (*chan)->write_source.reset ();
+                        }
+
 			use_new_write_source (n);
 
 			if (record_enabled()) {
@@ -1943,6 +1954,7 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 			}
 
 		} else {
+
 			if ((*chan)->write_source == 0) {
 				use_new_write_source (n);
 			}

@@ -61,6 +61,7 @@ public:
 			Glib::ustring& found_path);
 
         void inc_use_count ();
+	bool removable () const;
 
 protected:
 	FileSource (Session& session, DataType type,
@@ -74,8 +75,6 @@ protected:
         virtual void set_path (const std::string&);
 	virtual int move_dependents_to_trash() { return 0; }
 	void set_within_session_from_path (const std::string&);
-
-	bool removable () const;
 
 	Glib::ustring _path;
 	Glib::ustring _take_id;

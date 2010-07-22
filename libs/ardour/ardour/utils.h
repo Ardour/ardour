@@ -105,6 +105,7 @@ ARDOUR::MeterFalloff meter_falloff_from_float (float);
 float meter_falloff_to_db_per_sec (float);
 
 const char* native_header_format_extension (ARDOUR::HeaderFormat, const ARDOUR::DataType& type);
+bool matching_unsuffixed_filename_exists_in (const std::string& dir, const std::string& name);
 
 #if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)
 std::string CFStringRefToStdString(CFStringRef stringRef);

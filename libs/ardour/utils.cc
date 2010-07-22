@@ -35,7 +35,10 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <fcntl.h>
-#include <unistd.h>
+#include <dirent.h>
+#include <errno.h>
+
+#include <glibmm/miscutils.h>
 
 #ifdef HAVE_WORDEXP
 #include <wordexp.h>
@@ -536,6 +539,51 @@ native_header_format_extension (HeaderFormat hf, const DataType& type)
         fatal << string_compose (_("programming error: unknown native header format: %1"), hf);
         /*NOTREACHED*/
         return ".wav";
+}
+
+bool
+matching_unsuffixed_filename_exists_in (const string& dir, const string& path)
+{
+        string bws = basename_nosuffix (path);
+	struct dirent* dentry;
+	struct stat statbuf;
+	DIR* dead;
+        bool ret = false;
+
+        if ((dead = ::opendir (dir.c_str())) == 0) {
+                error << string_compose (_("cannot open directory %1 (%2)"), dir, strerror (errno)) << endl;
+                return false;
+        }
+        
+        while ((dentry = ::readdir (dead)) != 0) {
+                
+                /* avoid '.' and '..' */
+                
+                if ((dentry->d_name[0] == '.' && dentry->d_name[1] == '\0') ||
+                    (dentry->d_name[2] == '\0' && dentry->d_name[0] == '.' && dentry->d_name[1] == '.')) {
+                        continue;
+                }
+        
+                string fullpath = Glib::build_filename (dir, dentry->d_name);
+
+                if (::stat (fullpath.c_str(), &statbuf)) {
+                        continue;
+                }
+                
+                if (!S_ISREG (statbuf.st_mode)) {
+                        continue;
+                }
+
+                string bws2 = basename_nosuffix (dentry->d_name);
+                
+                if (bws2 == bws) {
+                        ret = true;
+                        break;
+                }
+        }
+
+        ::closedir (dead);
+        return ret;
 }
 
 extern "C" {
