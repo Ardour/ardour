@@ -63,7 +63,7 @@ class AudioPlaylist : public ARDOUR::Playlist
 
 	/* playlist "callbacks" */
 	void notify_crossfade_added (boost::shared_ptr<Crossfade>);
-	void flush_notifications ();
+	void flush_notifications (bool);
 
 	void finalize_split_region (boost::shared_ptr<Region> orig, boost::shared_ptr<Region> left, boost::shared_ptr<Region> right);
 

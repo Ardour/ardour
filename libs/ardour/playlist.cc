@@ -446,7 +446,7 @@ Playlist::begin_undo ()
 void
 Playlist::end_undo ()
 {
-	thaw ();
+	thaw (true);
         in_update = false;
 }
 
@@ -457,11 +457,12 @@ Playlist::freeze ()
 	g_atomic_int_inc (&ignore_state_changes);
 }
 
+/** @param from_undo true if this thaw is triggered by the end of an undo on this playlist */
 void
-Playlist::thaw ()
+Playlist::thaw (bool from_undo)
 {
 	g_atomic_int_dec_and_test (&ignore_state_changes);
-	release_notifications ();
+	release_notifications (from_undo);
 }
 
 
@@ -472,11 +473,12 @@ Playlist::delay_notifications ()
 	freeze_length = _get_extent().second;
 }
 
+/** @param from_undo true if this release is triggered by the end of an undo on this playlist */
 void
-Playlist::release_notifications ()
+Playlist::release_notifications (bool from_undo)
 {
 	if (g_atomic_int_dec_and_test (&block_notifications)) {
-		flush_notifications ();
+		flush_notifications (from_undo);
         }
 
 }
@@ -535,7 +537,7 @@ Playlist::notify_region_moved (boost::shared_ptr<Region> r)
 
 		list< Evoral::RangeMove<framepos_t> > m;
 		m.push_back (move);
-		RangesMoved (m);
+		RangesMoved (m, false);
 	}
 
 }
@@ -574,8 +576,9 @@ Playlist::notify_length_changed ()
 	}
 }
 
+/** @param from_undo true if this flush is triggered by the end of an undo on this playlist */
 void
-Playlist::flush_notifications ()
+Playlist::flush_notifications (bool from_undo)
 {
 	set<boost::shared_ptr<Region> > dependent_checks_needed;
 	set<boost::shared_ptr<Region> >::iterator s;
@@ -661,8 +664,7 @@ Playlist::flush_notifications ()
 	}
 
 	if (!pending_range_moves.empty ()) {
-		// cerr << _name << " sends RangesMoved\n";
-		RangesMoved (pending_range_moves);
+		RangesMoved (pending_range_moves, from_undo);
 	}
 	
 	clear_pending ();

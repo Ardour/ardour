@@ -241,9 +241,9 @@ AudioPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 
 
 void
-AudioPlaylist::flush_notifications ()
+AudioPlaylist::flush_notifications (bool from_undo)
 {
-	Playlist::flush_notifications();
+	Playlist::flush_notifications (from_undo);
 
 	if (in_flush) {
 		return;

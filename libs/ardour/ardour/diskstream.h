@@ -208,7 +208,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	virtual void playlist_changed (const PBD::PropertyChange&);
 	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
-	virtual void playlist_ranges_moved (std::list< Evoral::RangeMove<framepos_t> > const &);
+	virtual void playlist_ranges_moved (std::list< Evoral::RangeMove<framepos_t> > const &, bool);
 
 	virtual void transport_stopped_wallclock (struct tm&, time_t, bool abort) = 0;
 	virtual void transport_looped (nframes_t transport_frame) = 0;

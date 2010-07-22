@@ -182,12 +182,12 @@ class Playlist : public SessionObject
 	PBD::Signal0<void>      NameChanged;
 	PBD::Signal0<void>      LengthChanged;
 	PBD::Signal0<void>      LayeringChanged;
-	PBD::Signal1<void,std::list< Evoral::RangeMove<framepos_t> > const &> RangesMoved;
+	PBD::Signal2<void,std::list< Evoral::RangeMove<framepos_t> > const &, bool> RangesMoved;
 
 	static std::string bump_name (std::string old_name, Session&);
 
 	void freeze ();
-	void thaw ();
+	void thaw (bool from_undo = false);
 
 	void raise_region (boost::shared_ptr<Region>);
 	void lower_region (boost::shared_ptr<Region>);
@@ -289,8 +289,8 @@ class Playlist : public SessionObject
 	}
 
 	void delay_notifications ();
-	void release_notifications ();
-	virtual void flush_notifications ();
+	void release_notifications (bool from_undo = false);
+	virtual void flush_notifications (bool from_undo = false);
 	void clear_pending ();
 
         void _set_sort_id ();

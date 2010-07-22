@@ -363,7 +363,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 
 		_playlist->ContentsChanged.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_modified, this));
 		_playlist->DropReferences.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_deleted, this, boost::weak_ptr<Playlist>(_playlist)));
-		_playlist->RangesMoved.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_ranges_moved, this, _1));
+		_playlist->RangesMoved.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_ranges_moved, this, _1, _2));
 	}
 
 	/* don't do this if we've already asked for it *or* if we are setting up
@@ -436,8 +436,17 @@ Diskstream::set_name (const string& str)
 }
 
 void
-Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const & movements_frames)
+Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const & movements_frames, bool from_undo)
 {
+	/* If we're coming from an undo, it will have handled
+	   automation undo (it must, since automation-follows-regions
+	   can lose automation data).  Hence we can do nothing here.
+	*/
+	
+	if (from_undo) {
+		return;
+	}
+	
 	if (!_track || Config->get_automation_follows_regions () == false) {
 		return;
 	}
@@ -483,7 +492,10 @@ Diskstream::move_processor_automation (boost::weak_ptr<Processor> p, list< Evora
 
 	set<Evoral::Parameter> const a = processor->what_can_be_automated ();
 
+	cout << "move processor auto for " << processor->name() << "\n";
+
 	for (set<Evoral::Parameter>::iterator i = a.begin (); i != a.end (); ++i) {
+		cout << "moving " << *i << "\n";
 		boost::shared_ptr<AutomationList> al = processor->automation_control(*i)->alist();
 		XMLNode & before = al->get_state ();
 		al->move_ranges (movements);
