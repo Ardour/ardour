@@ -182,6 +182,8 @@ class Playlist : public SessionObject
 	PBD::Signal0<void>      NameChanged;
 	PBD::Signal0<void>      LengthChanged;
 	PBD::Signal0<void>      LayeringChanged;
+
+	/** Emitted when regions have moved (not when regions have only been trimmed) */
 	PBD::Signal2<void,std::list< Evoral::RangeMove<framepos_t> > const &, bool> RangesMoved;
 
 	static std::string bump_name (std::string old_name, Session&);
@@ -253,6 +255,11 @@ class Playlist : public SessionObject
 	bool             pending_contents_change;
 	bool             pending_layering;
 	bool             pending_length;
+
+	/** Movements of time ranges caused by region moves; note that
+	 *  region trims are not included in this list; it is used to
+	 *  do automation-follows-regions.
+	 */
 	std::list< Evoral::RangeMove<framepos_t> > pending_range_moves;
 	bool             save_on_thaw;
 	std::string      last_save_reason;

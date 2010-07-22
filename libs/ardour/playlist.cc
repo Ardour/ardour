@@ -1619,7 +1619,7 @@ Playlist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<
 		check_dependents (region, false);
 	}
 
-	if (what_changed.contains (Properties::position)) {
+	if (what_changed.contains (Properties::position) && !what_changed.contains (Properties::length)) {
 		notify_region_moved (region);
 	}
 
