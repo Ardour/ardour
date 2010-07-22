@@ -117,25 +117,25 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 }
 
 static std::string
-get_non_existent_filename (DataType type, const bool allow_replacing, const std::string& destdir, const std::string& basename, uint channel, uint channels)
+get_non_existent_filename (HeaderFormat hf, DataType type, const bool allow_replacing, const std::string& destdir, const std::string& basename, uint channel, uint channels)
 {
 	char buf[PATH_MAX+1];
 	bool goodfile = false;
 	string base(basename);
-	const char* ext = (type == DataType::AUDIO) ? "wav" : "mid";
+	string ext = native_header_format_extension (hf, type);
 
 	do {
 
 		if (type == DataType::AUDIO && channels == 2) {
 			if (channel == 0) {
-				snprintf (buf, sizeof(buf), "%s-L.wav", base.c_str());
+				snprintf (buf, sizeof(buf), "%s-L%s", base.c_str(), ext.c_str());
 			} else {
-				snprintf (buf, sizeof(buf), "%s-R.wav", base.c_str());
+				snprintf (buf, sizeof(buf), "%s-R%s", base.c_str(), ext.c_str());
 			}
 		} else if (channels > 1) {
-			snprintf (buf, sizeof(buf), "%s-c%d.%s", base.c_str(), channel, ext);
+			snprintf (buf, sizeof(buf), "%s-c%d%s", base.c_str(), channel, ext.c_str());
 		} else {
-			snprintf (buf, sizeof(buf), "%s.%s", base.c_str(), ext);
+			snprintf (buf, sizeof(buf), "%s%s", base.c_str(), ext.c_str());
 		}
 
 
@@ -160,7 +160,7 @@ get_non_existent_filename (DataType type, const bool allow_replacing, const std:
 }
 
 static vector<string>
-get_paths_for_new_sources (const bool allow_replacing, const string& import_file_path, const string& session_dir, uint channels)
+get_paths_for_new_sources (HeaderFormat hf, const bool allow_replacing, const string& import_file_path, const string& session_dir, uint channels)
 {
 	vector<string> new_paths;
 	const string basename = basename_nosuffix (import_file_path);
@@ -175,7 +175,7 @@ get_paths_for_new_sources (const bool allow_replacing, const string& import_file
 				? sdir.midi_path().to_string() : sdir.sound_path().to_string();
 
 		filepath += '/';
-		filepath += get_non_existent_filename (type, allow_replacing, filepath, basename, n, channels);
+		filepath += get_non_existent_filename (hf, type, allow_replacing, filepath, basename, n, channels);
 		new_paths.push_back (filepath);
 	}
 
@@ -478,7 +478,8 @@ Session::import_audiofiles (ImportStatus& status)
 			}
 		}
 
-		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source, *p,
+		vector<string> new_paths = get_paths_for_new_sources (config.get_native_file_header_format(),
+                                                                      status.replace_existing_source, *p,
 								      get_best_session_directory_for_new_source (),
 								      channels);
 		Sources newfiles;

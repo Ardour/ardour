@@ -34,7 +34,8 @@
 
 bool string_is_affirmative (const std::string&);
 
-#include "ardour.h"
+#include "ardour/ardour.h"
+#include "ardour/data_type.h"
 
 class XMLNode;
 
@@ -102,6 +103,8 @@ slider_position_to_gain (double pos)
 float meter_falloff_to_float (ARDOUR::MeterFalloff);
 ARDOUR::MeterFalloff meter_falloff_from_float (float);
 float meter_falloff_to_db_per_sec (float);
+
+const char* native_header_format_extension (ARDOUR::HeaderFormat, const ARDOUR::DataType& type);
 
 #if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)
 std::string CFStringRefToStdString(CFStringRef stringRef);

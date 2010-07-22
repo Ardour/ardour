@@ -1832,7 +1832,7 @@ Session::path_from_region_name (DataType type, string name, string identifier)
 	sys::path source_dir = ((type == DataType::AUDIO)
 		? sdir.sound_path() : sdir.midi_path());
 
-	string ext = ((type == DataType::AUDIO) ? ".wav" : ".mid");
+        string ext = native_header_format_extension (config.get_native_file_header_format(), type);
 
 	for (n = 0; n < 999999; ++n) {
 		if (identifier.length()) {

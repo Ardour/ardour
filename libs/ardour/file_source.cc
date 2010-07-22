@@ -383,7 +383,7 @@ FileSource::set_source_name (const ustring& newname, bool destructive)
 {
 	Glib::Mutex::Lock lm (_lock);
 	ustring oldpath = _path;
-	ustring newpath = Session::change_source_path_by_name (oldpath, _name, newname, destructive);
+	ustring newpath = _session.change_source_path_by_name (oldpath, _name, newname, destructive);
 
 	if (newpath.empty()) {
 		error << string_compose (_("programming error: %1"), "cannot generate a changed file path") << endmsg;

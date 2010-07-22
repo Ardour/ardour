@@ -180,7 +180,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	Glib::ustring peak_path (Glib::ustring) const;
 
-	static std::string change_source_path_by_name (std::string oldpath, std::string oldname, std::string newname, bool destructive);
+	std::string change_source_path_by_name (std::string oldpath, std::string oldname, std::string newname, bool destructive);
 
 	std::string peak_path_from_audio_path (std::string) const;
 	std::string new_audio_source_name (const std::string&, uint32_t nchans, uint32_t chan, bool destructive);

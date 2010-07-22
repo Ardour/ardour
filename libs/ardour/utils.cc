@@ -509,6 +509,35 @@ string_is_affirmative (const std::string& str)
 	return str == "1" || str == "y" || str == "Y" || (!g_strncasecmp(str.c_str(), "yes", str.length()));
 }
 
+const char*
+native_header_format_extension (HeaderFormat hf, const DataType& type)
+{
+        if (type == DataType::MIDI) {
+                return ".mid";
+        }
+        
+        switch (hf) {
+        case BWF:
+                return ".wav";
+        case WAVE:
+                return ".wav";
+        case WAVE64:
+                return ".w64";
+        case CAF:
+                return ".caf";
+        case AIFF:
+                return ".aif";
+        case iXML:
+                return ".ixml";
+        case RF64:
+                return ".rf64";
+        }
+
+        fatal << string_compose (_("programming error: unknown native header format: %1"), hf);
+        /*NOTREACHED*/
+        return ".wav";
+}
+
 extern "C" {
 	void c_stacktrace() { stacktrace (cerr); }
 }

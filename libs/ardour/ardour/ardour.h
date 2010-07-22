@@ -54,7 +54,7 @@ namespace ARDOUR {
 	int cleanup ();
 	bool no_auto_connect ();
 	void make_property_quarks ();
-
+        
 	extern PBD::PropertyChange bounds_change;
 
 	std::string get_ardour_revision ();

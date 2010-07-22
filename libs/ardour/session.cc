@@ -2695,7 +2695,7 @@ Session::change_source_path_by_name (string path, string oldname, string newname
 		path += prefix;
 		path += '-';
 		path += new_legalized;
-		path += ".wav";  /* XXX gag me with a spoon */
+		path += native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
 
                 path = Glib::build_filename (dir, path);
 
@@ -2805,6 +2805,7 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 	char buf[PATH_MAX+1];
 	const uint32_t limit = 10000;
 	string legalized;
+        string ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
 
 	buf[0] = '\0';
 	legalized = legalize_for_path (base);
@@ -2824,22 +2825,22 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 			if (destructive) {
 
 				if (nchan < 2) {
-					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav",
-							spath.c_str(), cnt, legalized.c_str());
+					snprintf (buf, sizeof(buf), "%s/T%04d-%s%s",
+                                                  spath.c_str(), cnt, legalized.c_str(), ext.c_str());
 				} else if (nchan == 2) {
 					if (chan == 0) {
-						snprintf (buf, sizeof(buf), "%s/T%04d-%s%%L.wav",
-								spath.c_str(), cnt, legalized.c_str());
+						snprintf (buf, sizeof(buf), "%s/T%04d-%s%%L%s",
+                                                          spath.c_str(), cnt, legalized.c_str(), ext.c_str());
 					} else {
-						snprintf (buf, sizeof(buf), "%s/T%04d-%s%%R.wav",
-								spath.c_str(), cnt, legalized.c_str());
+						snprintf (buf, sizeof(buf), "%s/T%04d-%s%%R%s",
+                                                          spath.c_str(), cnt, legalized.c_str(), ext.c_str());
 					}
 				} else if (nchan < 26) {
-					snprintf (buf, sizeof(buf), "%s/T%04d-%s%%%c.wav",
-							spath.c_str(), cnt, legalized.c_str(), 'a' + chan);
+					snprintf (buf, sizeof(buf), "%s/T%04d-%s%%%c%s",
+                                                  spath.c_str(), cnt, legalized.c_str(), 'a' + chan, ext.c_str());
 				} else {
-					snprintf (buf, sizeof(buf), "%s/T%04d-%s.wav",
-							spath.c_str(), cnt, legalized.c_str());
+					snprintf (buf, sizeof(buf), "%s/T%04d-%s%s",
+                                                  spath.c_str(), cnt, legalized.c_str(), ext.c_str());
 				}
 
 			} else {
@@ -2848,17 +2849,17 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 				spath += legalized;
 
 				if (nchan < 2) {
-					snprintf (buf, sizeof(buf), "%s-%u.wav", spath.c_str(), cnt);
+					snprintf (buf, sizeof(buf), "%s-%u%s", spath.c_str(), cnt, ext.c_str());
 				} else if (nchan == 2) {
 					if (chan == 0) {
-						snprintf (buf, sizeof(buf), "%s-%u%%L.wav", spath.c_str(), cnt);
+						snprintf (buf, sizeof(buf), "%s-%u%%L%s", spath.c_str(), cnt, ext.c_str());
 					} else {
-						snprintf (buf, sizeof(buf), "%s-%u%%R.wav", spath.c_str(), cnt);
+						snprintf (buf, sizeof(buf), "%s-%u%%R%s", spath.c_str(), cnt, ext.c_str());
 					}
 				} else if (nchan < 26) {
-					snprintf (buf, sizeof(buf), "%s-%u%%%c.wav", spath.c_str(), cnt, 'a' + chan);
+					snprintf (buf, sizeof(buf), "%s-%u%%%c%s", spath.c_str(), cnt, 'a' + chan, ext.c_str());
 				} else {
-					snprintf (buf, sizeof(buf), "%s-%u.wav", spath.c_str(), cnt);
+					snprintf (buf, sizeof(buf), "%s-%u%s", spath.c_str(), cnt, ext.c_str());
 				}
 			}
 
@@ -3468,6 +3469,7 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 	SessionDirectory sdir(get_best_session_directory_for_new_source ());
 	const string sound_dir = sdir.sound_path().to_string();
 	nframes_t len = end - start;
+        string ext;
 
 	if (end <= start) {
 		error << string_compose (_("Cannot write a range where end <= start (e.g. %1 <= %2)"),
@@ -3493,10 +3495,12 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 		goto out;
 	}
 
+        ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
+
 	for (uint32_t chan_n=0; chan_n < nchans.n_audio(); ++chan_n) {
 
 		for (x = 0; x < 99999; ++x) {
-			snprintf (buf, sizeof(buf), "%s/%s-%d-bounce-%" PRIu32 ".wav", sound_dir.c_str(), playlist->name().c_str(), chan_n, x+1);
+			snprintf (buf, sizeof(buf), "%s/%s-%d-bounce-%" PRIu32 "%s", sound_dir.c_str(), playlist->name().c_str(), chan_n, x+1, ext.c_str());
 			if (access (buf, F_OK) != 0) {
 				break;
 			}
