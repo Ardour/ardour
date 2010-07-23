@@ -4171,6 +4171,12 @@ Editor::maximise_editing_space ()
 	} else {
 		editor_summary_pane.set_position (post_maximal_vertical_pane_position);
 	}
+
+	if (Config->get_keep_tearoffs()) {
+		_mouse_mode_tearoff->set_visible (true);
+		_tools_tearoff->set_visible (true);
+		_zoom_tearoff->set_visible (true);
+	}
 }
 
 void

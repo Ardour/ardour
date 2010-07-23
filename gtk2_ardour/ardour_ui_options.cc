@@ -47,6 +47,14 @@ using namespace ARDOUR;
 using namespace PBD;
 
 void
+ARDOUR_UI::toggle_keep_tearoffs ()
+{
+	ActionManager::toggle_config_state ("Common", "KeepTearoffs", &RCConfiguration::set_keep_tearoffs, &RCConfiguration::get_keep_tearoffs);
+ 
+	ARDOUR_UI::toggle_editing_space ();
+}
+
+void
 ARDOUR_UI::toggle_external_sync()
 {
 	ActionManager::toggle_config_state_foo ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::set_external_sync), sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
@@ -334,6 +342,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 #endif
 
+	} else if (p == "keep-tearoffs") {
+		ActionManager::map_some_state ("Common", "KeepTearoffs", &RCConfiguration::get_keep_tearoffs);
 	} else if (p == "mmc-control") {
 		ActionManager::map_some_state ("options", "UseMMC", &RCConfiguration::get_mmc_control);
 	} else if (p == "midi-feedback") {

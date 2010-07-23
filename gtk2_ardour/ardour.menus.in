@@ -297,6 +297,26 @@
 	</menu>
 
         <menu name='View' action = 'View'>
+		<menuitem action='ToggleMaximalEditor'/>
+		<menuitem action='KeepTearoffs'/>
+
+		<separator/>
+
+	       <menu action="PrimaryClockMenu">
+	       	     <menuitem action="primary-clock-bbt"/>
+	       	     <menuitem action="primary-clock-minsec"/>
+	       	     <menuitem action="primary-clock-samples"/>
+	       	     <menuitem action="primary-clock-off"/>
+	       </menu>
+	       <menu action="SecondaryClockMenu">
+	       	     <menuitem action="secondary-clock-bbt"/>
+	       	     <menuitem action="secondary-clock-minsec"/>
+	       	     <menuitem action="secondary-clock-samples"/>
+	       	     <menuitem action="secondary-clock-off"/>
+	       </menu>
+
+		<separator/>
+
 	       <menu action="ZoomMenu">
                	     <menuitem action='temporal-zoom-in'/>
                	     <menuitem action='temporal-zoom-out'/>
@@ -341,18 +361,7 @@
 		   <menuitem action='snap-to-region-sync'/>
 		   <menuitem action='snap-to-region-boundary'/>
                </menu>
-	       <menu action="PrimaryClockMenu">
-	       	     <menuitem action="primary-clock-bbt"/>
-	       	     <menuitem action="primary-clock-minsec"/>
-	       	     <menuitem action="primary-clock-samples"/>
-	       	     <menuitem action="primary-clock-off"/>
-	       </menu>
-	       <menu action="SecondaryClockMenu">
-	       	     <menuitem action="secondary-clock-bbt"/>
-	       	     <menuitem action="secondary-clock-minsec"/>
-	       	     <menuitem action="secondary-clock-samples"/>
-	       	     <menuitem action="secondary-clock-off"/>
-	       </menu>
+
 	       <menu action="RulerMenu">
 	       	     <menuitem action="toggle-minsec-ruler"/>
 	       	     <menuitem action="toggle-samples-ruler"/>
@@ -397,7 +406,8 @@
                	     <menuitem action='goto-visual-state-12'/>
 	       </menu>
 
-	       <menuitem action='ToggleMaximalEditor'/>
+		<separator/>
+
 	       <menuitem action='show-editor-mixer'/>
 	       <menuitem action='show-editor-list'/>
                <menuitem action='ToggleMeasureVisibility'/>
@@ -420,17 +430,21 @@
                </menu>
         </menu>
         <menu action = 'WindowMenu'>
-	       <menuitem action='ToggleMaximalEditor'/>
-	       <separator/>
                <menuitem action='goto-editor'/>
                <menuitem action='goto-mixer'/>
                <menuitem action='toggle-editor-mixer-on-top'/>
+
+	       <separator/>
+
                <menuitem action='ToggleInspector'/>
                <menuitem action='ToggleLocations'/>
                <menuitem action='ToggleKeyEditor'/>
                <menuitem action='ToggleBundleManager'/>
                <menuitem action='ToggleThemeManager'/>
                <menuitem action='ToggleBigClock'/>
+
+	       <separator/>
+
                <menuitem action='NewMIDITracer'/>
                <menuitem action='toggle-audio-connection-manager'/>
                <menuitem action='toggle-midi-connection-manager'/>

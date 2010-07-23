@@ -949,6 +949,9 @@ ARDOUR_UI::maximise_editing_space ()
 
 	transport_tearoff->set_visible (false);
 	editor->maximise_editing_space ();
+ 	if (Config->get_keep_tearoffs()) {
+		transport_tearoff->set_visible (true);
+	}
 }
 
 void
