@@ -1246,12 +1246,12 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		max = waveview->cache->data[cache_index].max;
 		min = waveview->cache->data[cache_index].min;
 		
-		if (max >= 1.0) {
+		if (max >= 0.98853) { // -0.9dBFS
 			max = 1.0;
 			next_clip_max = 1;
 		}
 		
-		if (min <= -1.0) {
+		if (min <= -0.98853) { // ditto
 			min = -1.0;
 			next_clip_min = 1;
 		}
