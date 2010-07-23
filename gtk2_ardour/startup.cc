@@ -229,7 +229,7 @@ ArdourStartup::setup_audio_page ()
 
 	audio_page_index = append_page (*engine_dialog);
 	set_page_type (*engine_dialog, ASSISTANT_PAGE_CONTENT);
-	set_page_title (*engine_dialog, _("Audio Setup"));
+	set_page_title (*engine_dialog, _("Audio / MIDI Setup"));
 
 	/* the default parameters should work, so the page is potentially complete */
 

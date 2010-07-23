@@ -66,6 +66,7 @@ class EngineControl : public Gtk::VBox {
 	Gtk::ComboBoxText audio_mode_combo;
 	Gtk::ComboBoxText input_device_combo;
 	Gtk::ComboBoxText output_device_combo;
+	Gtk::ComboBoxText midi_driver_combo;
 
 	Gtk::Table basic_packer;
 	Gtk::Table options_packer;
