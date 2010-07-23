@@ -54,10 +54,13 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 	tearoff_event_box.set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 	tearoff_event_box.signal_button_release_event().connect (mem_fun (*this, &TearOff::tearoff_click));
 
+        tearoff_event_box.set_tooltip_text (_("Click to to tear this into its own window"));
+        
 	close_event_box.add (close_arrow);
 	close_event_box.set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 	close_event_box.signal_button_release_event().connect (mem_fun (*this, &TearOff::close_click));
-	
+
+        close_event_box.set_tooltip_text (_("Click to put this back in the main window"));
 
 	VBox* box1;
 	box1 = manage (new VBox);
@@ -151,6 +154,9 @@ TearOff::tear_it_off ()
         window_box.pack_start (contents);
         own_window.set_name (get_name());
         close_event_box.set_name (get_name());
+        if (own_window_width == 0) {
+                own_window.set_position (WIN_POS_MOUSE);
+        }
         own_window.show_all ();
         own_window.present ();
         hide ();
