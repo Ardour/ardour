@@ -1176,7 +1176,13 @@ TempoMap::round_to_beat_subdivision (nframes64_t fr, int sub_num, int dir)
 			difference = mod;
 		}
 
-		the_beat = bbt_subtract (the_beat, BBT_Time (0, 0, difference));
+                try { 
+                        the_beat = bbt_subtract (the_beat, BBT_Time (0, 0, difference));
+                } catch (...) {
+                        /* can't go backwards from wherever pos is, so just return it */
+                        return fr;
+                }
+                        
 
 	} else {
 		/* round to nearest */
