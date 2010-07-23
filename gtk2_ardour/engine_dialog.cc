@@ -398,6 +398,8 @@ EngineControl::build_command_line (vector<string>& cmd)
 		cmd.push_back ("-R");
 		cmd.push_back ("-P");
 		cmd.push_back (to_string ((uint32_t) floor (priority_spinner.get_value()), std::dec));
+	} else {
+		cmd.push_back ("-r"); /* override jackd's default --realtime */
 	}
 
 	if (unlock_memory_button.get_active()) {
