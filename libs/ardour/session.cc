@@ -1041,6 +1041,10 @@ Session::step_back_from_record ()
 void
 Session::maybe_enable_record ()
 {
+        if (_step_editors > 0) {
+                return;
+        }
+
 	g_atomic_int_set (&_record_status, Enabled);
 
 	/* this function is currently called from somewhere other than an RT thread.
@@ -1926,6 +1930,11 @@ Session::add_routes (RouteList& new_routes, bool save)
 			tr->PlaylistChanged.connect_same_thread (*this, boost::bind (&Session::track_playlist_changed, this, boost::weak_ptr<Track> (tr)));
 			track_playlist_changed (boost::weak_ptr<Track> (tr));
 			tr->RecordEnableChanged.connect_same_thread (*this, boost::bind (&Session::update_have_rec_enabled_track, this));
+
+                        boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (tr);
+                        if (mt) {
+                                mt->StepEditStatusChange.connect_same_thread (*this, boost::bind (&Session::step_edit_status_change, this, _1));
+                        }
 		}
 	}
 
@@ -2102,6 +2111,13 @@ Session::remove_route (shared_ptr<Route> route)
 			}
 		}
 	}	
+
+        boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (route);
+        if (mt && mt->step_editing()) {
+                if (_step_editors > 0) {
+                        _step_editors--;
+                }
+        }
 
 	update_latency_compensation (false, false);
 	set_dirty();
@@ -3921,4 +3937,29 @@ void
 Session::route_order_key_changed ()
 {
 	RouteOrderKeyChanged (); /* EMIT SIGNAL */
+}
+
+void
+Session::step_edit_status_change (bool yn)
+{
+        bool send = false;
+
+        bool val = false;
+        if (yn) {
+                send = (_step_editors == 0);
+                val = true;
+
+                _step_editors++;
+        } else {
+                send = (_step_editors == 1);
+                val = false;
+
+                if (_step_editors > 0) {
+                        _step_editors--;
+                }
+        }
+
+        if (send) {
+                StepEditStatusChange (val);
+        }
 }

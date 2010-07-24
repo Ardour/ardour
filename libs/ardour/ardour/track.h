@@ -90,7 +90,7 @@ class Track : public Route, public PublicDiskstream
 	boost::shared_ptr<PBD::Controllable> rec_enable_control() { return _rec_enable_control; }
 
 	bool record_enabled() const;
-	void set_record_enable (bool yn, void *src);
+	void set_record_enabled (bool yn, void *src);
 
 	/* XXX: unfortunate that this is exposed */
 	PBD::ID const & diskstream_id () const;
@@ -132,7 +132,6 @@ class Track : public Route, public PublicDiskstream
 	ChanCount n_channels ();
 	nframes_t get_capture_start_frame (uint32_t n = 0);
 	AlignStyle alignment_style () const;
-	void set_record_enabled (bool);
 	nframes_t current_capture_start () const;
 	nframes_t current_capture_end () const;
 	void playlist_modified ();

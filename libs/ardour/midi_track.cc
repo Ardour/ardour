@@ -49,6 +49,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+PBD::Signal1<void,bool> MidiTrack::StepEditStatusChange;
+
 MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
 	: Track (sess, name, flag, mode, DataType::MIDI)
 	, _immediate_events(1024) // FIXME: size?
@@ -82,6 +84,16 @@ MidiTrack::use_new_diskstream ()
 	ds->set_block_size (_session.get_block_size ());
 
 	set_diskstream (ds);
+}
+
+void
+MidiTrack::set_record_enabled (bool yn, void *src)
+{
+        if (_step_editing) {
+                return;
+        }
+
+        Track::set_record_enabled (yn, src);
 }
 
 void
@@ -376,7 +388,7 @@ MidiTrack::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_fram
 {
 	int ret = Track::no_roll (nframes, start_frame, end_frame, state_changing, can_record, rec_monitors_input);
 
-	if (ret == 0 && _diskstream->record_enabled() && _step_editing) {
+	if (ret == 0 && _step_editing) {
 		push_midi_input_to_step_edit_ringbuffer (nframes);
 	}
 
@@ -570,8 +582,14 @@ MidiTrack::MidiControl::set_value(float val)
 void
 MidiTrack::set_step_editing (bool yn)
 {
-        cerr << name() << " IS NOW STEP EDITING\n";
-	_step_editing = yn;
+        if (_session.record_status() != Session::Disabled) {
+                return;
+        }
+
+        if (yn != _step_editing) {
+                _step_editing = yn;
+                StepEditStatusChange (yn);
+        }
 }
 
 void

@@ -1020,10 +1020,11 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, d
 	//<< ", x: " << x << ", y: " << y << ", inclusive: " << inclusive <<  ")" << endl;
 
 	const_iterator length_check_iter = _events.begin();
-	if (_events.empty()) // 0 events
+	if (_events.empty()) { // 0 events
 		return false;
-	else if (_events.end() == ++length_check_iter) // 1 event
+        } else if (_events.end() == ++length_check_iter) { // 1 event
 		return rt_safe_earliest_event_discrete_unlocked(start, end, x, y, inclusive);
+        }
 
 	// Hack to avoid infinitely repeating the same event
 	build_search_cache_if_necessary(start, end);

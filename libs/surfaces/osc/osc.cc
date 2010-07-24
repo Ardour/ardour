@@ -748,7 +748,7 @@ OSC::route_recenable (int rid, int yn)
 	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
 
 	if (r) {
-		r->set_record_enable (yn, this);
+		r->set_record_enabled (yn, this);
 	}
 	return 0;
 }

@@ -2037,6 +2037,7 @@ public:
 	EditorGroupTabs* _group_tabs;
 	void fit_route_group (ARDOUR::RouteGroup *);
 
+        void step_edit_status_change (bool);
 	void start_step_editing ();
 	void stop_step_editing ();
 	bool check_step_edit ();

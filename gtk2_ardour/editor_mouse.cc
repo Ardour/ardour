@@ -2659,37 +2659,19 @@ Editor::set_internal_edit (bool yn)
 		mouse_select_button.set_image (*(manage (new Image (::get_icon("midi_tool_pencil")))));
 		mouse_select_button.get_image ()->show ();
                 ARDOUR_UI::instance()->tooltips().set_tip (mouse_select_button, _("Draw/Edit MIDI Notes"));
-
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (*i);
-			if (mtv) {
-				mtv->start_step_editing ();
-			}
-		}
+                set_canvas_cursor ();
 
 		/* deselect everything to avoid confusion when e.g. we can't now cut a previously selected
 		   region because cut means "cut note" rather than "cut region".
 		*/
 		selection->clear ();
 
-		start_step_editing ();
-                set_canvas_cursor ();
-
 	} else {
 
 		mouse_select_button.set_image (*(manage (new Image (::get_icon("tool_range")))));
 		mouse_select_button.get_image ()->show ();
                 ARDOUR_UI::instance()->tooltips().set_tip (mouse_select_button, _("Select/Move Ranges"));
-		stop_step_editing ();
-
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (*i);
-			if (mtv) {
-				mtv->stop_step_editing ();
-			}
-		}
-
-                mouse_mode_toggled (mouse_mode);
+                mouse_mode_toggled (mouse_mode); // sets cursor
 	}
 }
 

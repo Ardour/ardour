@@ -5116,7 +5116,7 @@ Editor::toggle_record_enable ()
 			first = false;
 		}
 
-		rtav->track()->set_record_enable(new_state, this);
+		rtav->track()->set_record_enabled (new_state, this);
 	}
 }
 

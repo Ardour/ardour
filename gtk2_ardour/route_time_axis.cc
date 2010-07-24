@@ -170,7 +170,12 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 		rec_enable_button->show_all ();
 
 		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-		ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record"));
+
+                if (is_midi_track()) {
+                        ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
+                } else {
+                        ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record"));
+                }
 
 		rec_enable_button->set_sensitive (_session->writable());
 	}

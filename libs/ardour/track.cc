@@ -132,7 +132,7 @@ void
 Track::RecEnableControllable::set_value (float val)
 {
 	bool bval = ((val >= 0.5f) ? true: false);
-	track.set_record_enable (bval, this);
+	track.set_record_enabled (bval, this);
 }
 
 float
@@ -161,7 +161,7 @@ Track::can_record()
 }
 
 void
-Track::set_record_enable (bool yn, void *src)
+Track::set_record_enabled (bool yn, void *src)
 {
 	if (!_session.writable()) {
 		return;
@@ -172,7 +172,7 @@ Track::set_record_enable (bool yn, void *src)
 	}
 
 	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_recenable()) {
-		_route_group->apply (&Track::set_record_enable, yn, _route_group);
+		_route_group->apply (&Track::set_record_enabled, yn, _route_group);
 		return;
 	}
 
@@ -597,12 +597,6 @@ AlignStyle
 Track::alignment_style () const
 {
 	return _diskstream->alignment_style ();
-}
-
-void
-Track::set_record_enabled (bool r)
-{
-	_diskstream->set_record_enabled (r);
 }
 
 nframes_t

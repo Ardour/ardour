@@ -180,6 +180,13 @@ class RouteUI : public virtual AxisView
 	void toggle_route_active ();
 	virtual void route_active_changed ();
 
+        Gtk::Menu* record_menu;
+        void build_record_menu ();
+
+	Gtk::CheckMenuItem *step_edit_item;
+	virtual void toggle_step_edit ();
+	virtual void step_edit_changed (bool);
+
 	virtual void polarity_changed ();
 
 	Gtk::CheckMenuItem *denormal_menu_item;

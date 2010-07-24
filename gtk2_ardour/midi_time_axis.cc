@@ -859,6 +859,20 @@ MidiTimeAxisView::route_active_changed ()
 }
 
 void
+MidiTimeAxisView::toggle_step_edit ()
+{
+        if (_route->record_enabled()) {
+                return;
+        }
+
+        if (midi_track()->step_editing ()) {
+                stop_step_editing ();
+        } else {
+                start_step_editing ();
+        }
+}
+
+void
 MidiTimeAxisView::start_step_editing ()
 {
 	step_edit_insert_position = _editor.get_preferred_edit_position ();
@@ -918,6 +932,8 @@ MidiTimeAxisView::check_step_edit ()
 					fatal << X_("programming error: no view found for new MIDI region") << endmsg;
 					/*NOTREACHED*/
 				}
+                                cerr << "New step edit region is called " << step_edit_region->name() 
+                                     << " view @ " << step_edit_region_view << endl;
 			}
 
 			if (step_edit_region_view) {
@@ -946,7 +962,7 @@ MidiTimeAxisView::step_edit_rest ()
 }
 
 boost::shared_ptr<Region>
-MidiTimeAxisView::add_region (nframes64_t pos)
+MidiTimeAxisView::add_region (framepos_t pos)
 {
 	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
 

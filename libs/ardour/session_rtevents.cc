@@ -148,17 +148,17 @@ Session::rt_set_solo_isolated (boost::shared_ptr<RouteList> rl, bool yn, bool /*
 }
 
 void
-Session::set_record_enable (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
+Session::set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
 {
 	if (!writable()) {
 		return;
 	}
 	
-	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_record_enable));
+	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_record_enabled));
 }
 
 void
-Session::rt_set_record_enable (boost::shared_ptr<RouteList> rl, bool yn, bool group_override)
+Session::rt_set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, bool group_override)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if ((*i)->is_hidden()) {
@@ -168,7 +168,7 @@ Session::rt_set_record_enable (boost::shared_ptr<RouteList> rl, bool yn, bool gr
 		boost::shared_ptr<Track> t;
 
 		if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
-			t->set_record_enable (yn, (group_override ? (void*) t->route_group() : (void *) this));
+			t->set_record_enabled (yn, (group_override ? (void*) t->route_group() : (void *) this));
 		}
 	}
 

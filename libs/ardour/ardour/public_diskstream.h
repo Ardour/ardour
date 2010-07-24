@@ -65,7 +65,6 @@ public:
 	virtual ChanCount n_channels () = 0;
 	virtual nframes_t get_capture_start_frame (uint32_t n = 0) = 0;
 	virtual AlignStyle alignment_style () const = 0;
-	virtual void set_record_enabled (bool) = 0;
 	virtual nframes_t current_capture_start () const = 0;
 	virtual nframes_t current_capture_end () const = 0;
 	virtual void playlist_modified () = 0;

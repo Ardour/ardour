@@ -130,7 +130,7 @@ Session::mmc_record_pause (MIDI::MachineControl &/*mmc*/)
 void
 Session::mmc_record_strobe (MIDI::MachineControl &/*mmc*/)
 {
-	if (!Config->get_mmc_control()) {
+	if (!Config->get_mmc_control() || (_step_editors > 0)) {
 		return;
 	}
 
@@ -335,7 +335,7 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 
 			if ((at = dynamic_cast<AudioTrack*>((*i).get())) != 0) {
 				if (trk == at->remote_control_id()) {
-					at->set_record_enable (enabled, &mmc);
+					at->set_record_enabled (enabled, &mmc);
 					break;
 				}
 			}

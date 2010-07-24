@@ -1102,6 +1102,7 @@ Editor::set_session (Session *t)
 	   but use Gtkmm2ext::UI::instance()->call_slot();
 	*/
 
+        _session->StepEditStatusChange.connect (_session_connections, invalidator (*this), ui_bind(&Editor::step_edit_status_change, this, _1), gui_context());
 	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&Editor::map_transport_state, this), gui_context());
 	_session->PositionChanged.connect (_session_connections, invalidator (*this), ui_bind (&Editor::map_position_change, this, _1), gui_context());
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), ui_bind (&Editor::handle_new_route, this, _1), gui_context());
@@ -5189,6 +5190,16 @@ Editor::show_region_in_region_list ()
 }
 
 void
+Editor::step_edit_status_change (bool yn)
+{
+        if (yn) {
+                start_step_editing ();
+        } else {
+                stop_step_editing ();
+        }
+}
+
+void
 Editor::start_step_editing ()
 {
 	step_edit_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &Editor::check_step_edit), 20);
@@ -5480,3 +5491,4 @@ Editor::show_editor_list (bool yn)
 		the_notebook.hide();
 	}
 }
+

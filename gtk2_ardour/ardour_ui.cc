@@ -1690,7 +1690,7 @@ ARDOUR_UI::transport_forward (int option)
 }
 
 void
-ARDOUR_UI::toggle_record_enable (uint32_t dstream)
+ARDOUR_UI::toggle_record_enable (uint32_t rid)
 {
 	if (_session == 0) {
 		return;
@@ -1698,12 +1698,12 @@ ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 
 	boost::shared_ptr<Route> r;
 
-	if ((r = _session->route_by_remote_id (dstream)) != 0) {
+	if ((r = _session->route_by_remote_id (rid)) != 0) {
 
 		Track* t;
 
 		if ((t = dynamic_cast<Track*>(r.get())) != 0) {
-			t->set_record_enabled (!t->record_enabled());
+			t->set_record_enabled (!t->record_enabled(), this);
 		}
 	}
 	if (_session == 0) {
@@ -2102,6 +2102,10 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 	if (_session == 0) {
 		return;
 	}
+
+        if (_session->step_editing()) {
+                return;
+        }
 
 	Session::RecordState const r = _session->record_status ();
 	bool const h = _session->have_rec_enabled_track ();
@@ -3346,6 +3350,22 @@ ARDOUR_UI::update_transport_clocks (nframes_t pos)
 	if (big_clock_window) {
 		big_clock.set (pos);
 	}
+}
+
+
+void
+ARDOUR_UI::step_edit_status_change (bool yn)
+{
+        // XXX should really store pre-step edit status of things
+        // we make insensitive
+
+        if (yn) {
+                rec_button.set_visual_state (3);
+                rec_button.set_sensitive (false);
+        } else {
+                rec_button.set_visual_state (0);
+                rec_button.set_sensitive (true);
+        }
 }
 
 void

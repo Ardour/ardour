@@ -46,6 +46,7 @@ public:
 
 	void use_new_diskstream ();
         void set_diskstream (boost::shared_ptr<Diskstream>);
+	void set_record_enabled (bool yn, void *src);
 
 	void set_latency_delay (nframes_t);
 
@@ -83,6 +84,8 @@ public:
 	void set_step_editing (bool yn);
 	MidiRingBuffer<nframes_t>& step_edit_ring_buffer() { return _step_edit_ring_buffer; }
 
+        static PBD::Signal1<void,bool> StepEditStatusChange;
+
 	uint8_t default_channel() const { return _default_channel; }
 	void set_default_channel (uint8_t chn);
 
@@ -94,7 +97,7 @@ public:
 	ChannelMode get_channel_mode ();
 	uint16_t get_channel_mask ();
 	boost::shared_ptr<MidiPlaylist> midi_playlist ();
-	
+
 protected:
 	XMLNode& state (bool full);
 	

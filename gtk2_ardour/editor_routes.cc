@@ -222,7 +222,7 @@ EditorRoutes::on_tv_rec_enable_toggled (Glib::ustring const & path_string)
 	if (atv != 0 && atv->is_audio_track()){
 		boost::shared_ptr<RouteList> rl (new RouteList);
 		rl->push_back (atv->route());
-		_session->set_record_enable (rl, !atv->track()->record_enabled(), Session::rt_cleanup);
+		_session->set_record_enabled (rl, !atv->track()->record_enabled(), Session::rt_cleanup);
 	}
 }
 

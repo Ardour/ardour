@@ -190,7 +190,7 @@ ControlProtocol::route_set_rec_enable (uint32_t table_index, bool yn)
 	boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(r);
 
 	if (at) {
-		at->set_record_enable (yn, this);
+		at->set_record_enabled (yn, this);
 	}
 }
 

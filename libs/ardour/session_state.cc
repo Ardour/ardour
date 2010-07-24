@@ -216,6 +216,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	first_file_header_format_reset = true;
 	post_export_sync = false;
 	midi_control_ui = 0;
+        _step_editors = 0;
 
 	AudioDiskstream::allocate_working_buffers();
 

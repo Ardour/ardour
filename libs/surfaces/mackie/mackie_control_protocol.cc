@@ -403,7 +403,7 @@ MackieControlProtocol::handle_strip_button (Control & control, ButtonState bs, b
 		if (control.name() == "recenable")
 		{
 			state = !route->record_enabled();
-			route->set_record_enable (state, this);
+			route->set_record_enabled (state, this);
 		}
 		else if (control.name() == "mute")
 		{

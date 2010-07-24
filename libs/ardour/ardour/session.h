@@ -282,6 +282,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/** Emitted when anything about any of our route groups changes */
 	PBD::Signal0<void> RouteGroupChanged;
 
+        /* Step Editing status changed */
+        PBD::Signal1<void,bool> StepEditStatusChange;
+
 	void queue_event (SessionEvent*);
 
 	void request_roll_at_and_return (nframes_t start, nframes_t return_to);
@@ -591,7 +594,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void set_just_one_solo (boost::shared_ptr<Route>, bool, SessionEvent::RTeventCallback after = rt_cleanup);
 	void set_mute (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_listen (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
-	void set_record_enable (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
+	void set_record_enabled (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
         void set_solo_isolated (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 
 	PBD::Signal1<void,bool> SoloActive;
@@ -775,6 +778,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int send_full_time_code (nframes64_t);
 
 	PBD::Signal0<void> RouteOrderKeyChanged;
+
+        bool step_editing() const { return (_step_editors > 0); }
 
   protected:
 	friend class AudioEngine;
@@ -1409,7 +1414,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void rt_set_mute (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_listen (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_solo_isolated (boost::shared_ptr<RouteList>, bool yn, bool group_override);
-	void rt_set_record_enable (boost::shared_ptr<RouteList>, bool yn, bool group_override);
+	void rt_set_record_enabled (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 
 	/** temporary list of Diskstreams used only during load of 2.X sessions */
 	std::list<boost::shared_ptr<Diskstream> > _diskstreams_2X;
@@ -1420,6 +1425,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
         void cleanup_stubfiles ();
 
 	void route_order_key_changed ();
+
+        void step_edit_status_change (bool);
+        uint32_t _step_editors;
 };
 
 } // namespace ARDOUR

@@ -83,6 +83,7 @@ RouteUI::~RouteUI()
 	delete solo_menu;
 	delete mute_menu;
 	delete sends_menu;
+        delete record_menu;
 }
 
 void
@@ -93,6 +94,7 @@ RouteUI::init ()
 	mute_menu = 0;
 	solo_menu = 0;
 	sends_menu = 0;
+        record_menu = 0;
 	pre_fader_mute_check = 0;
 	post_fader_mute_check = 0;
 	listen_mute_check = 0;
@@ -106,6 +108,7 @@ RouteUI::init ()
 	_mute_release = 0;
 	route_active_menu_item = 0;
 	denormal_menu_item = 0;
+        step_edit_item = 0;
 	multiple_mute_change = false;
 	multiple_solo_change = false;
 
@@ -229,6 +232,12 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
  		rec_enable_button->set_controllable (t->rec_enable_control());
 
 		update_rec_display ();
+
+                if (is_midi_track()) {
+                        midi_track()->StepEditStatusChange.connect (route_connections, invalidator (*this),
+                                                                    ui_bind (&RouteUI::step_edit_changed, this, _1), gui_context());
+                }
+
 	}
 
 	mute_button->unset_flags (Gtk::CAN_FOCUS);
@@ -526,6 +535,15 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		return true;
 	}
 
+        if (is_midi_track()) {
+
+                /* cannot rec-enable while step-editing */
+
+                if (midi_track()->step_editing()) {
+                        return true;
+                } 
+        }
+
 	if (!ignore_toggle && is_track() && rec_enable_button) {
 
 		if (Keyboard::is_button2_event (ev)) {
@@ -535,7 +553,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-			_session->set_record_enable (_session->get_routes(), !rec_enable_button->get_active());
+			_session->set_record_enabled (_session->get_routes(), !rec_enable_button->get_active());
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -543,7 +561,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			   NOTE: Primary-button2 is MIDI learn.
 			*/
 			if (ev->button == 1 && _route->route_group()) {
-				_session->set_record_enable (_route->route_group()->route_list(), !rec_enable_button->get_active(), Session::rt_cleanup, true);
+				_session->set_record_enabled (_route->route_group()->route_list(), !rec_enable_button->get_active(), Session::rt_cleanup, true);
 			}
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
@@ -554,16 +572,67 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 			boost::shared_ptr<RouteList> rl (new RouteList);
 			rl->push_back (route());
-			_session->set_record_enable (rl, !rec_enable_button->get_active());
+			_session->set_record_enabled (rl, !rec_enable_button->get_active());
 		}
 	}
 
 	return true;
 }
 
-bool
-RouteUI::rec_enable_release (GdkEventButton*)
+void
+RouteUI::build_record_menu ()
 {
+        if (record_menu) {
+                return;
+        }
+
+        /* no rec-button context menu for non-MIDI tracks 
+         */
+
+        if (!is_midi_track()) {
+                return;
+        }
+        
+        record_menu = new Menu;
+        record_menu->set_name ("ArdourContextMenu");
+
+        using namespace Menu_Helpers;
+	MenuList& items = record_menu->items();
+
+        items.push_back (CheckMenuElem (_("Step Edit"), sigc::mem_fun (*this, &RouteUI::toggle_step_edit)));
+        step_edit_item = dynamic_cast<CheckMenuItem*> (&items.back());
+}
+
+void
+RouteUI::toggle_step_edit ()
+{
+}
+
+void
+RouteUI::step_edit_changed (bool yn)
+{
+        if (yn) {
+                if (rec_enable_button) {
+                        rec_enable_button->set_visual_state (3);
+                } 
+        } else {
+                if (rec_enable_button) {
+                        rec_enable_button->set_visual_state (0);
+                } 
+        }
+}
+
+bool
+RouteUI::rec_enable_release (GdkEventButton* ev)
+{
+        if (Keyboard::is_context_menu_event (ev)) {
+                build_record_menu ();
+                if (record_menu) {
+                        record_menu->popup (1, ev->time);
+                }
+                return true;
+        }
+
 	return true;
 }
 
@@ -907,7 +976,7 @@ RouteUI::update_mute_display ()
 void
 RouteUI::route_rec_enable_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteUI::update_rec_display, this));
+        update_rec_display ();
 }
 
 void
@@ -939,18 +1008,17 @@ RouteUI::update_rec_display ()
 	/* now make sure its color state is correct */
 
 	if (model) {
-
-		switch (_session->record_status ()) {
-		case Session::Recording:
-			rec_enable_button->set_visual_state (1);
-			break;
-
-		case Session::Disabled:
-		case Session::Enabled:
-			rec_enable_button->set_visual_state (2);
-			break;
-
-		}
+                switch (_session->record_status ()) {
+                case Session::Recording:
+                        rec_enable_button->set_visual_state (1);
+                        break;
+                        
+                case Session::Disabled:
+                case Session::Enabled:
+                        rec_enable_button->set_visual_state (2);
+                        break;
+                        
+                }
 
 	} else {
 		rec_enable_button->set_visual_state (0);
