@@ -124,6 +124,7 @@ def build(bld):
 		obj.uselib       = 'CPPUNIT SNDFILE'
 		obj.libs         = 'gcov'
 		obj.target       = 'run-tests'
+		obj.name         = 'libevoral-tests'
 		obj.install_path = ''
 		obj.ccflags      = [ '-fprofile-arcs',  '-ftest-coverage' ]
 		obj.cxxflags     = [ '-fprofile-arcs',  '-ftest-coverage' ]
