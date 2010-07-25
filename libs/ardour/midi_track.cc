@@ -419,9 +419,14 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (nframes_t nframes)
 
 			const Evoral::MIDIEvent<nframes_t> ev(*e, false);
 
-			/* we don't care about the time for this purpose */
-
-			_step_edit_ring_buffer.write (0, ev.type(), ev.size(), ev.buffer());
+                        /* note on, since for step edit, note length is determined
+                           elsewhere 
+                        */
+                        
+                        if (ev.is_note_on()) {
+                                /* we don't care about the time for this purpose */
+                                _step_edit_ring_buffer.write (0, ev.type(), ev.size(), ev.buffer());
+                        }
 		}
 	}
 }
