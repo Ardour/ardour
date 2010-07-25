@@ -396,36 +396,19 @@ TimeAxisView::step_height (bool bigger)
 		if ( height == preset_height(HeightSmall)){
 			return;
 		}
-		if (height == preset_height (HeightSmaller)) {
+		
+		if (height <= preset_height (HeightSmaller) && height > preset_height (HeightSmall)) {
 			set_height (preset_height(HeightSmall));
 		}
-		else if (height > step) {	
-			
-			if ( height <= preset_height (HeightNormal) && height > preset_height (HeightSmaller)){
-				set_height (preset_height(HeightSmaller));
-			}
-			else {
-				set_height (height - step);
-			}
+		else if ( height <= preset_height (HeightNormal) && height > preset_height (HeightSmaller)){
+			set_height (preset_height(HeightSmaller));
+		}
+		else {
+			set_height (height - step);
 		} 
 	}
 }
-/*
-	switch (h) {
-	case HeightLargest:
-		return extra_height + 48 + 250;
-	case HeightLarger:
-		return extra_height + 48 + 150;
-	case HeightLarge:
-		return extra_height + 48 + 50;
-	case HeightNormal:
-		return extra_height + 48;
-	case HeightSmall:
-		return 27;
-	case HeightSmaller:
-		return smaller_height;
-	}
-*/
+
 void
 TimeAxisView::set_heights (uint32_t h)
 {
