@@ -136,11 +136,13 @@ void
 CanvasNoteEvent::show_channel_selector(void)
 {
 	if (_channel_selector_widget == 0) {
-		cerr << "Note has channel: " << int(_note->channel()) << endl;
 		SingleMidiChannelSelector* _channel_selector = new SingleMidiChannelSelector(_note->channel());
 		_channel_selector->show_all();
 		_channel_selector->channel_selected.connect(
 			sigc::mem_fun(this, &CanvasNoteEvent::on_channel_change));
+
+                _channel_selector->clicked.connect (
+                        sigc::mem_fun (this, &CanvasNoteEvent::hide_channel_selector));
 
 		_channel_selector_widget = new Widget(*(_item->property_parent()),
 				x1(),
@@ -238,7 +240,6 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 		break;
 
 	case GDK_BUTTON_PRESS:
-                cerr << "button press, bton = " << ev->button.button << endl;
 		if (ev->button.button == 3 && Keyboard::no_modifiers_active (ev->button.state)) {
                         show_channel_selector();
 			return true;

@@ -53,6 +53,10 @@ MidiChannelSelector::MidiChannelSelector(int n_rows, int n_columns, int start_ro
 					&_buttons[row][column],
 					channel_nr - 1));
 
+			_buttons[row][column].signal_button_release_event().connect(
+                                sigc::mem_fun(this, &MidiChannelSelector::was_clicked), false);
+
+
 			int table_row    = start_row + row;
 			int table_column = start_column + column;
 			attach(_buttons[row][column], table_column, table_column + 1, table_row, table_row + 1);
@@ -62,6 +66,13 @@ MidiChannelSelector::MidiChannelSelector(int n_rows, int n_columns, int start_ro
 
 MidiChannelSelector::~MidiChannelSelector()
 {
+}
+
+bool
+MidiChannelSelector::was_clicked (GdkEventButton*)
+{
+        clicked ();
+        return false;
 }
 
 void

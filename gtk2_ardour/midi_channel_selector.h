@@ -37,6 +37,7 @@ public:
 	virtual ~MidiChannelSelector() = 0;
 
 	sigc::signal<void, ARDOUR::ChannelMode, uint16_t> mode_changed;
+	sigc::signal<void> clicked;
 
 	void set_channel_colors(const uint32_t new_channel_colors[16]);
 	void set_default_channel_color();
@@ -46,6 +47,7 @@ protected:
 	Gtk::Label        _button_labels[4][4];
 	Gtk::ToggleButton _buttons[4][4];
 	int               _recursion_counter;
+        bool              was_clicked (GdkEventButton*);
 };
 
 class SingleMidiChannelSelector : public MidiChannelSelector

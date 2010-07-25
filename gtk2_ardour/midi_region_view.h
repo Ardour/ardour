@@ -93,7 +93,7 @@ class MidiRegionView : public RegionView
 	inline MidiStreamView* midi_stream_view() const
 		{ return midi_view()->midi_view(); }
 
-	void add_note (uint8_t channel, uint8_t number, uint8_t velocity,
+	void step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
 		       Evoral::MusicalTime pos, Evoral::MusicalTime len);
 
 	void set_height (double);

@@ -816,7 +816,6 @@ MidiRegionView::apply_diff ()
 	_model->apply_command(*trackview.session(), _diff_command);
 	_diff_command = 0;
 	midi_view()->midi_track()->playlist_modified();
-
         
         if (add_or_remove) {
         	_marked_for_selection.clear();
@@ -1435,7 +1434,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 	if (event) {
 		if (_marked_for_selection.find(note) != _marked_for_selection.end()) {
 			note_selected(event, true);
-		}
+                }
 
 		if (_marked_for_velocity.find(note) != _marked_for_velocity.end()) {
 			event->show_velocity();
@@ -1452,14 +1451,10 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 }
 
 void
-MidiRegionView::add_note (uint8_t channel, uint8_t number, uint8_t velocity,
+MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
 			  Evoral::MusicalTime pos, Evoral::MusicalTime len)
 {
 	boost::shared_ptr<NoteType> new_note (new NoteType (channel, pos, len, number, velocity));
-
-	start_diff_command (_("step add"));
-	diff_add_note (new_note, true, false);
-	apply_diff();
 
 	/* potentially extend region to hold new note */
 
@@ -1468,9 +1463,13 @@ MidiRegionView::add_note (uint8_t channel, uint8_t number, uint8_t velocity,
 
 	if (end_frame > region_end) {
 		_region->set_length (end_frame, this);
-	} else {
-		redisplay_model ();
 	}
+
+	start_diff_command (_("step add"));
+	diff_add_note (new_note, true, false);
+	apply_diff();
+
+        // last_step_edit_note = new_note;
 }
 
 void

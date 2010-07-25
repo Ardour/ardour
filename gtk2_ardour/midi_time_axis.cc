@@ -945,7 +945,7 @@ MidiTimeAxisView::check_step_edit ()
 					continue;
 				}
 
-				step_edit_region_view->add_note (buf[0] & 0xf, buf[1], buf[2], step_edit_beat_pos, beats);
+				step_edit_region_view->step_add_note (buf[0] & 0xf, buf[1], buf[2], step_edit_beat_pos, beats);
 				step_edit_beat_pos += beats;
 			}
 		}
