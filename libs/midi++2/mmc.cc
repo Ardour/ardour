@@ -199,7 +199,7 @@ MachineControl::MachineControl (Manager* m, jack_client_t* jack)
 {
 	build_mmc_cmd_map ();
 
-	_receive_device_id = 0;
+	_receive_device_id = 0x7f;
 	_send_device_id = 0x7f;
 
 	_input_port = m->add_port (new Port ("MMC in", Port::IsInput, jack));
