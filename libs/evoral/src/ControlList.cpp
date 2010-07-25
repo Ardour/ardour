@@ -1036,10 +1036,6 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, d
 		const ControlEvent* first = NULL;
 		const ControlEvent* next = NULL;
 
-		/* No events past start (maybe?) */
-		if (next && next->when < start)
-			return false;
-
 		/* Step is after first */
 		if (range.first == _events.begin() || (*range.first)->when == start) {
 			first = *range.first;
