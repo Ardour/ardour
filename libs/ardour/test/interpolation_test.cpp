@@ -10,9 +10,9 @@ void
 InterpolationTest::linearInterpolationTest ()
 {
 	nframes_t result = 0;
-	cout << "\nLinear Interpolation Test\n";
+//	cout << "\nLinear Interpolation Test\n";
 
-	cout << "\nSpeed: 1/3";
+//	cout << "\nSpeed: 1/3";
 	for (int i = 0; 3*i < NUM_SAMPLES - 1024;) {
 		linear.set_speed (double(1.0)/double(3.0));
 		linear.set_target_speed (double(1.0)/double(3.0));
@@ -20,7 +20,7 @@ InterpolationTest::linearInterpolationTest ()
 		i += result;
 	}
 
-	cout << "\nSpeed: 1.0";
+//	cout << "\nSpeed: 1.0";
 	linear.reset();
 	linear.set_speed (1.0);
 	linear.set_target_speed (linear.speed());
@@ -30,7 +30,7 @@ InterpolationTest::linearInterpolationTest ()
 		CPPUNIT_ASSERT_EQUAL (1.0f, output[i]);
 	}
 
-	cout << "\nSpeed: 0.5";
+//	cout << "\nSpeed: 0.5";
 	linear.reset();
 	linear.set_speed (0.5);
 	linear.set_target_speed (linear.speed());
@@ -40,14 +40,14 @@ InterpolationTest::linearInterpolationTest ()
 		CPPUNIT_ASSERT_EQUAL (1.0f, output[i]);
 	}
 
-	cout << "\nSpeed: 0.2";
+//	cout << "\nSpeed: 0.2";
 	linear.reset();
 	linear.set_speed (0.2);
 	linear.set_target_speed (linear.speed());
 	result = linear.interpolate (0, NUM_SAMPLES, input, output);
 	CPPUNIT_ASSERT_EQUAL ((uint32_t)(NUM_SAMPLES * linear.speed()), result);
 
-	cout << "\nSpeed: 0.02";
+//	cout << "\nSpeed: 0.02";
 	linear.reset();
 	linear.set_speed (0.02);
 	linear.set_target_speed (linear.speed());
@@ -64,7 +64,7 @@ InterpolationTest::linearInterpolationTest ()
 	   CPPUNIT_ASSERT_EQUAL ((nframes_t)(NUM_SAMPLES * linear.speed()), result);
 	   */
 
-	cout << "\nSpeed: 2.0";
+//	cout << "\nSpeed: 2.0";
 	linear.reset();
 	linear.set_speed (2.0);
 	linear.set_target_speed (linear.speed());
@@ -74,7 +74,7 @@ InterpolationTest::linearInterpolationTest ()
 		CPPUNIT_ASSERT_EQUAL (1.0f, output[i]);
 	}
 
-	cout << "\nSpeed: 10.0";
+//	cout << "\nSpeed: 10.0";
 	linear.set_speed (10.0);
 	linear.set_target_speed (linear.speed());
 	result = linear.interpolate (0, NUM_SAMPLES / 10, input, output);
@@ -93,9 +93,9 @@ void
 InterpolationTest::cubicInterpolationTest ()
 {
 	nframes_t result = 0;
-	cout << "\nCubic Interpolation Test\n";
+//	cout << "\nCubic Interpolation Test\n";
 
-	cout << "\nSpeed: 1/3";
+//	cout << "\nSpeed: 1/3";
 	for (int i = 0; 3*i < NUM_SAMPLES - 1024;) {
 		cubic.set_speed (double(1.0)/double(3.0));
 		cubic.set_target_speed (double(1.0)/double(3.0));
@@ -103,7 +103,7 @@ InterpolationTest::cubicInterpolationTest ()
 		i += result;
 	}
 
-	cout << "\nSpeed: 1.0";
+//	cout << "\nSpeed: 1.0";
 	cubic.reset();
 	cubic.set_speed (1.0);
 	cubic.set_target_speed (cubic.speed());
@@ -113,7 +113,7 @@ InterpolationTest::cubicInterpolationTest ()
 		CPPUNIT_ASSERT_EQUAL (1.0f, output[i]);
 	}
 
-	cout << "\nSpeed: 0.5";
+//	cout << "\nSpeed: 0.5";
 	cubic.reset();
 	cubic.set_speed (0.5);
 	cubic.set_target_speed (cubic.speed());
@@ -123,14 +123,14 @@ InterpolationTest::cubicInterpolationTest ()
 		CPPUNIT_ASSERT_EQUAL (1.0f, output[i]);
 	}
 
-	cout << "\nSpeed: 0.2";
+//	cout << "\nSpeed: 0.2";
 	cubic.reset();
 	cubic.set_speed (0.2);
 	cubic.set_target_speed (cubic.speed());
 	result = cubic.interpolate (0, NUM_SAMPLES, input, output);
 	CPPUNIT_ASSERT_EQUAL ((uint32_t)(NUM_SAMPLES * cubic.speed()), result);
 
-	cout << "\nSpeed: 0.02";
+//	cout << "\nSpeed: 0.02";
 	cubic.reset();
 	cubic.set_speed (0.02);
 	cubic.set_target_speed (cubic.speed());
@@ -147,7 +147,7 @@ InterpolationTest::cubicInterpolationTest ()
 	   CPPUNIT_ASSERT_EQUAL ((nframes_t)(NUM_SAMPLES * cubic.speed()), result);
 	   */
 
-	cout << "\nSpeed: 2.0";
+//	cout << "\nSpeed: 2.0";
 	cubic.reset();
 	cubic.set_speed (2.0);
 	cubic.set_target_speed (cubic.speed());
@@ -157,7 +157,7 @@ InterpolationTest::cubicInterpolationTest ()
 		CPPUNIT_ASSERT_EQUAL (1.0f, output[i]);
 	}
 
-	cout << "\nSpeed: 10.0";
+//	cout << "\nSpeed: 10.0";
 	cubic.set_speed (10.0);
 	cubic.set_target_speed (cubic.speed());
 	result = cubic.interpolate (0, NUM_SAMPLES / 10, input, output);

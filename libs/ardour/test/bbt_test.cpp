@@ -18,15 +18,15 @@ BBTTest::addTest ()
 
 	// Test basic operations with a flat tempo map
 	BBT_Time time = map.bbt_add(BBT_Time(1, 1, 0), BBT_Time(1, 2, 3));
-	//cerr << "result: BBT_Time(" << time.bars << ", " << time.beats << ", " 
+	//cout << "result: BBT_Time(" << time.bars << ", " << time.beats << ", " 
 	//     << time.ticks << ")" << endl;
-	CPPUNIT_ASSERT(time == BBT_Time(2, 3, 0));
+	CPPUNIT_ASSERT(time == BBT_Time(2, 3, 3));
 
 
 	time = map.bbt_add(BBT_Time(1, 2, 3), BBT_Time(2, 2, 3));
 	//cerr << "result: BBT_Time(" << time.bars << ", " << time.beats << ", " 
 	//     << time.ticks << ")" << endl;
-	CPPUNIT_ASSERT(time == BBT_Time(3, 4, 3));
+	CPPUNIT_ASSERT(time == BBT_Time(3, 4, 6));
 }
 
 void
