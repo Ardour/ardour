@@ -160,7 +160,6 @@ Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t targ
 
 	for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
 
-
 		MidiBuffer& mb (*i);
 
 		for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
@@ -171,6 +170,59 @@ Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t targ
 				ev.scale_velocity (initial+scale);
 			}
 		}
+	}
+
+	/* Audio Gain */
+
+	for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+		Sample* const buffer = i->data();
+
+		fractional_pos = 1.0;
+
+		for (nframes_t nx = 0; nx < declick; ++nx) {
+			buffer[nx] *= (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
+			fractional_pos += fractional_shift;
+		}
+
+		/* now ensure the rest of the buffer has the target value applied, if necessary. */
+
+		if (declick != nframes) {
+
+			if (target == 0.0) {
+				memset (&buffer[declick], 0, sizeof (Sample) * (nframes - declick));
+			} else if (target != 1.0) {
+				apply_gain_to_buffer (&buffer[declick], nframes - declick, target);
+			}
+		}
+	}
+}
+
+void
+Amp::declick (BufferSet& bufs, nframes_t nframes, int dir)
+{
+        /* Almost exactly like ::apply_gain() but skips MIDI buffers and has fixed initial+target
+           values.
+         */
+
+	if (nframes == 0 || bufs.count().n_total() == 0) {
+		return;
+	}
+
+	const nframes_t declick = std::min ((nframes_t)128, nframes);
+	gain_t         delta, initial, target;
+	double         fractional_shift = -1.0/declick;
+	double         fractional_pos;
+
+	if (dir < 0) {
+		/* fade out: remove more and more of delta from initial */
+		delta = -1.0;
+                initial = 1.0;
+                target = 0.0;
+	} else {
+		/* fade in: add more and more of delta from initial */
+		delta = 1.0;
+                initial = 0.0;
+                target = 1.0;
 	}
 
 	/* Audio Gain */

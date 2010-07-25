@@ -413,9 +413,9 @@ Route::process_output_buffers (BufferSet& bufs,
 	   ----------------------------------------------------------------------------------------- */
 
 	if (declick > 0) {
-		Amp::apply_gain (bufs, nframes, 0.0, 1.0);
+		Amp::declick (bufs, nframes, 1);
 	} else if (declick < 0) {
-		Amp::apply_gain (bufs, nframes, 1.0, 0.0);
+		Amp::declick (bufs, nframes, -1);
 	}
 
 	_pending_declick = 0;
