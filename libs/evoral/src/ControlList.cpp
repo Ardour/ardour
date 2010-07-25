@@ -1007,8 +1007,7 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (double start, double& x, 
 bool
 ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, double& y, bool inclusive) const
 {
-	//cerr << "earliest_event(start: " << start << ", end: " << end
-	//<< ", x: " << x << ", y: " << y << ", inclusive: " << inclusive <<  ")" << endl;
+	// cout << "earliest_event(start: " << start << ", x: " << x << ", y: " << y << ", inclusive: " << inclusive <<  ")" << endl;
 
 	const_iterator length_check_iter = _events.begin();
 	if (_events.empty()) { // 0 events
@@ -1026,9 +1025,13 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 		const ControlEvent* next = NULL;
 
 		/* Step is after first */
-		if (_search_cache.first == _events.begin() || (*_search_cache.first)->when == start) {
+		if (_search_cache.first == _events.begin() || (*_search_cache.first)->when <= start) {
 			first = *_search_cache.first;
-			next = *(++_search_cache.first);
+			++_search_cache.first;
+			if (_search_cache.first == _events.end()) {
+				return false;
+			}
+			next = *_search_cache.first;
 
 		/* Step is before first */
 		} else {
