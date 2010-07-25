@@ -428,7 +428,6 @@ void
 SMFSource::load_model (bool lock, bool force_reload)
 {
 	if (_writing) {
-		cout << "early out\n";
 		return;
 	}
 
@@ -437,16 +436,12 @@ SMFSource::load_model (bool lock, bool force_reload)
 		lm = boost::shared_ptr<Glib::Mutex::Lock>(new Glib::Mutex::Lock(_lock));
 
 	if (_model && !force_reload) {
-		cout << "earlyish out\n";
 		return;
 	}
 
 	if (! _model) {
 		_model = boost::shared_ptr<MidiModel>(new MidiModel(this));
-		cerr << _name << " loaded new model " << _model.get() << endl;
 	} else {
-		cerr << _name << " reloading model " << _model.get()
-			<< " (" << _model->n_notes() << " notes)" << endl;
 		_model->clear();
 	}
 
