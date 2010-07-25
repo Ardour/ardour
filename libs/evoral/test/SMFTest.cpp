@@ -42,7 +42,7 @@ SMFTest::takeFiveTest ()
 			// make ev.time absolute time in frames
 			ev.time() = time * frames_per_beat / (double)smf.ppqn();
 			ev.set_event_type(type_map->midi_event_type(buf[0]));
-			seq->append(ev);
+			seq->append(ev, next_event_id ());
 		}
 	}
 

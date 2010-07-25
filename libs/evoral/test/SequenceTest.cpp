@@ -29,21 +29,21 @@ SequenceTest::preserveEventOrderingTest ()
 		);
 
 		event->buffer()[0] = MIDI_CMD_CONTROL;
-		event->buffer()[1] = event->time() / 100;
-		event->buffer()[2] = event->time() / 100;
+		event->buffer()[1] = event->time() / 1000;
+		event->buffer()[2] = event->time() / 1000;
 
 		boost::shared_ptr<Event<Time> > event_ptr(event);
 
-		seq->append((*i)->on_event());
+		seq->append((*i)->on_event(), next_event_id ());
 		inserted_events.push_back(
 				boost::shared_ptr<Event<Time> >(
 						new Event<Time>((*i)->on_event(), true)
 		));
 
-		seq->append(*event_ptr);
+		seq->append(*event_ptr, next_event_id ());
 		inserted_events.push_back(event_ptr);
 
-		seq->append((*i)->off_event());
+		seq->append((*i)->off_event(), next_event_id ());
 		inserted_events.push_back(
 				boost::shared_ptr<Event<Time> >(
 						new Event<Time>((*i)->off_event(), true)

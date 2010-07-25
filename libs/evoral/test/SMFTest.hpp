@@ -40,7 +40,8 @@ public:
 	}
 
 	int read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const {
-		return SMF::read_event(delta_t, size, buf);
+		event_id_t id;
+		return SMF::read_event(delta_t, size, buf, &id);
 	}
 
 private:

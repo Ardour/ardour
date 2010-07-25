@@ -106,7 +106,7 @@ def build(bld):
 		obj.name           = 'libevoral_static'
 		obj.target         = 'evoral_static'
 		obj.uselib         = 'GLIBMM GTHREAD SMF'
-		obj.uselib_local   = 'libsmf'
+		obj.uselib_local   = 'libsmf libpbd'
 		obj.vnum           = EVORAL_LIB_VERSION
 		obj.install_path   = ''
 		obj.ccflags        = [ '-fprofile-arcs',  '-ftest-coverage' ]
@@ -121,7 +121,7 @@ def build(bld):
 		'''
 		obj.includes     = ['.', './src']
 		obj.uselib_local = 'libevoral_static'
-		obj.uselib       = 'CPPUNIT'
+		obj.uselib       = 'CPPUNIT SNDFILE'
 		obj.libs         = 'gcov'
 		obj.target       = 'run-tests'
 		obj.install_path = ''

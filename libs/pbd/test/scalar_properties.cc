@@ -38,7 +38,7 @@ ScalarPropertiesTest::testBasic ()
 
 	PropertyList undo;
 	PropertyList redo;
-	_fred.diff (undo, redo);
+	_fred.diff (undo, redo, 0);
 
 	CPPUNIT_ASSERT (undo.size() == 1);
 	CPPUNIT_ASSERT (redo.size() == 1);
