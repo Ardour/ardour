@@ -102,9 +102,9 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		double x, y;
 		bool ret;
 		if (_force_discrete) {
-			ret = i->second->list()->rt_safe_earliest_event_discrete_unlocked (t, DBL_MAX, x, y, true);
+			ret = i->second->list()->rt_safe_earliest_event_discrete_unlocked (t, x, y, true);
 		} else {
-			ret = i->second->list()->rt_safe_earliest_event_unlocked(t, DBL_MAX, x, y, true);
+			ret = i->second->list()->rt_safe_earliest_event_unlocked(t, x, y, true);
 		}
 		if (!ret) {
 			DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: CC %1 (size %2) has no events past %3\n",
@@ -253,9 +253,9 @@ Sequence<Time>::const_iterator::operator++()
 	case CONTROL:
 		// Increment current controller iterator
 		if (_force_discrete) {
-			ret = _control_iter->list->rt_safe_earliest_event_discrete_unlocked (_control_iter->x, DBL_MAX, x, y, false);
+			ret = _control_iter->list->rt_safe_earliest_event_discrete_unlocked (_control_iter->x, x, y, false);
 		} else {
-			ret = _control_iter->list->rt_safe_earliest_event_unlocked (_control_iter->x, DBL_MAX, x, y, false);
+			ret = _control_iter->list->rt_safe_earliest_event_unlocked (_control_iter->x, x, y, false);
 		}
 		assert(!ret || x > _control_iter->x);
 		if (ret) {

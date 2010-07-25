@@ -49,7 +49,7 @@ ControlList::ControlList (const Parameter& id)
 	_lookup_cache.left = -1;
 	_lookup_cache.range.first = _events.end();
 	_search_cache.left = -1;
-	_search_cache.range.first = _events.end();
+	_search_cache.first = _events.end();
 	_sort_pending = false;
 }
 
@@ -66,7 +66,7 @@ ControlList::ControlList (const ControlList& other)
 	_default_value = other._default_value;
 	_rt_insertion_point = _events.end();
 	_lookup_cache.range.first = _events.end();
-	_search_cache.range.first = _events.end();
+	_search_cache.first = _events.end();
 	_sort_pending = false;
 
 	for (const_iterator i = other._events.begin(); i != other._events.end(); ++i) {
@@ -89,7 +89,7 @@ ControlList::ControlList (const ControlList& other, double start, double end)
 	_default_value = other._default_value;
 	_rt_insertion_point = _events.end();
 	_lookup_cache.range.first = _events.end();
-	_search_cache.range.first = _events.end();
+	_search_cache.first = _events.end();
 	_sort_pending = false;
 
 	/* now grab the relevant points, and shift them back if necessary */
@@ -902,29 +902,23 @@ ControlList::multipoint_eval (double x) const
 }
 
 void
-ControlList::build_search_cache_if_necessary(double start, double end) const
+ControlList::build_search_cache_if_necessary (double start) const
 {
 	/* Only do the range lookup if x is in a different range than last time
 	 * this was called (or if the search cache has been marked "dirty" (left<0) */
-	if (!_events.empty() && ((_search_cache.left < 0) ||
-			((_search_cache.left > start) ||
-			 (_search_cache.right < end)))) {
+	if (!_events.empty() && ((_search_cache.left < 0) || (_search_cache.left > start))) {
 
 		const ControlEvent start_point (start, 0);
-		const ControlEvent end_point (end, 0);
 
 		//cerr << "REBUILD: (" << _search_cache.left << ".." << _search_cache.right << ") := ("
 		//	<< start << ".." << end << ")" << endl;
 
-		_search_cache.range.first = lower_bound (_events.begin(), _events.end(), &start_point, time_comparator);
-		_search_cache.range.second = upper_bound (_events.begin(), _events.end(), &end_point, time_comparator);
-
+		_search_cache.first = lower_bound (_events.begin(), _events.end(), &start_point, time_comparator);
 		_search_cache.left = start;
-		_search_cache.right = end;
 	}
 }
 
-/** Get the earliest event between \a start and \a end, using the current interpolation style.
+/** Get the earliest event after \a start using the current interpolation style.
  *
  * If an event is found, \a x and \a y are set to its coordinates.
  *
@@ -932,7 +926,7 @@ ControlList::build_search_cache_if_necessary(double start, double end) const
  * \return true if event is found (and \a x and \a y are valid).
  */
 bool
-ControlList::rt_safe_earliest_event(double start, double end, double& x, double& y, bool inclusive) const
+ControlList::rt_safe_earliest_event (double start, double& x, double& y, bool inclusive) const
 {
 	// FIXME: It would be nice if this was unnecessary..
 	Glib::Mutex::Lock lm(_lock, Glib::TRY_LOCK);
@@ -940,11 +934,11 @@ ControlList::rt_safe_earliest_event(double start, double end, double& x, double&
 		return false;
 	}
 
-	return rt_safe_earliest_event_unlocked(start, end, x, y, inclusive);
+	return rt_safe_earliest_event_unlocked (start, x, y, inclusive);
 }
 
 
-/** Get the earliest event between \a start and \a end, using the current interpolation style.
+/** Get the earliest event after \a start using the current interpolation style.
  *
  * If an event is found, \a x and \a y are set to its coordinates.
  *
@@ -952,17 +946,17 @@ ControlList::rt_safe_earliest_event(double start, double end, double& x, double&
  * \return true if event is found (and \a x and \a y are valid).
  */
 bool
-ControlList::rt_safe_earliest_event_unlocked(double start, double end, double& x, double& y, bool inclusive) const
+ControlList::rt_safe_earliest_event_unlocked (double start, double& x, double& y, bool inclusive) const
 {
 	if (_interpolation == Discrete) {
-		return rt_safe_earliest_event_discrete_unlocked(start, end, x, y, inclusive);
+		return rt_safe_earliest_event_discrete_unlocked(start, x, y, inclusive);
 	} else {
-		return rt_safe_earliest_event_linear_unlocked(start, end, x, y, inclusive);
+		return rt_safe_earliest_event_linear_unlocked(start, x, y, inclusive);
 	}
 }
 
 
-/** Get the earliest event between \a start and \a end (Discrete (lack of) interpolation)
+/** Get the earliest event after \a start without interpolation.
  *
  * If an event is found, \a x and \a y are set to its coordinates.
  *
@@ -970,19 +964,17 @@ ControlList::rt_safe_earliest_event_unlocked(double start, double end, double& x
  * \return true if event is found (and \a x and \a y are valid).
  */
 bool
-ControlList::rt_safe_earliest_event_discrete_unlocked (double start, double end, double& x, double& y, bool inclusive) const
+ControlList::rt_safe_earliest_event_discrete_unlocked (double start, double& x, double& y, bool inclusive) const
 {
-	build_search_cache_if_necessary(start, end);
+	build_search_cache_if_necessary (start);
 
-	const pair<const_iterator,const_iterator>& range = _search_cache.range;
-
-	if (range.first != _events.end()) {
-		const ControlEvent* const first = *range.first;
+	if (_search_cache.first != _events.end()) {
+		const ControlEvent* const first = *_search_cache.first;
 
 		const bool past_start = (inclusive ? first->when >= start : first->when > start);
 
 		/* Earliest points is in range, return it */
-		if (past_start && first->when < end) {
+		if (past_start) {
 
 			x = first->when;
 			y = first->value;
@@ -990,10 +982,9 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (double start, double end,
 			/* Move left of cache to this point
 			 * (Optimize for immediate call this cycle within range) */
 			_search_cache.left = x;
-			++_search_cache.range.first;
+			++_search_cache.first;
 
 			assert(x >= start);
-			assert(x < end);
 			return true;
 
 		} else {
@@ -1014,7 +1005,7 @@ ControlList::rt_safe_earliest_event_discrete_unlocked (double start, double end,
  * \return true if event is found (and \a x and \a y are valid).
  */
 bool
-ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, double& x, double& y, bool inclusive) const
+ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, double& y, bool inclusive) const
 {
 	//cerr << "earliest_event(start: " << start << ", end: " << end
 	//<< ", x: " << x << ", y: " << y << ", inclusive: " << inclusive <<  ")" << endl;
@@ -1023,31 +1014,28 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, d
 	if (_events.empty()) { // 0 events
 		return false;
         } else if (_events.end() == ++length_check_iter) { // 1 event
-		return rt_safe_earliest_event_discrete_unlocked(start, end, x, y, inclusive);
+		return rt_safe_earliest_event_discrete_unlocked (start, x, y, inclusive);
         }
 
 	// Hack to avoid infinitely repeating the same event
-	build_search_cache_if_necessary(start, end);
+	build_search_cache_if_necessary (start);
 
-	pair<const_iterator,const_iterator> range = _search_cache.range;
-
-	if (range.first != _events.end()) {
+	if (_search_cache.first != _events.end()) {
 
 		const ControlEvent* first = NULL;
 		const ControlEvent* next = NULL;
 
 		/* Step is after first */
-		if (range.first == _events.begin() || (*range.first)->when == start) {
-			first = *range.first;
-			next = *(++range.first);
-			++_search_cache.range.first;
+		if (_search_cache.first == _events.begin() || (*_search_cache.first)->when == start) {
+			first = *_search_cache.first;
+			next = *(++_search_cache.first);
 
 		/* Step is before first */
 		} else {
-			const_iterator prev = range.first;
+			const_iterator prev = _search_cache.first;
 			--prev;
 			first = *prev;
-			next = *range.first;
+			next = *_search_cache.first;
 		}
 
 		if (inclusive && first->when == start) {
@@ -1062,7 +1050,7 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, d
 		}
 
 		if (fabs(first->value - next->value) <= 1) {
-			if (next->when <= end && (next->when > start)) {
+			if (next->when > start) {
 				x = next->when;
 				y = next->value;
 				/* Move left of cache to this point
@@ -1108,7 +1096,7 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double end, d
 
 
 		const bool past_start = (inclusive ? x >= start : x > start);
-		if (past_start && x < end) {
+		if (past_start) {
 			/* Move left of cache to this point
 			 * (Optimize for immediate call this cycle within range) */
 			_search_cache.left = x;

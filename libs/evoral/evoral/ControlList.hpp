@@ -193,12 +193,11 @@ public:
 		std::pair<ControlList::const_iterator,ControlList::const_iterator> range;
 	};
 
-	/** Lookup cache for point finding, range contains points between left and right */
+	/** Lookup cache for point finding, range contains points after left */
 	struct SearchCache {
-		SearchCache() : left(-1), right(-1) {}
-		double left;  /* leftmost x coordinate used when finding "range" */
-		double right; /* rightmost x coordinate used when finding "range" */
-		std::pair<ControlList::const_iterator,ControlList::const_iterator> range;
+		SearchCache () : left(-1) {}
+		double left;  /* leftmost x coordinate used when finding "first" */
+		ControlList::const_iterator first;
 	};
 
 	const EventList& events() const { return _events; }
@@ -216,9 +215,9 @@ public:
 	 */
 	double unlocked_eval (double x) const;
 
-	bool rt_safe_earliest_event (double start, double end, double& x, double& y, bool start_inclusive=false) const;
-	bool rt_safe_earliest_event_unlocked (double start, double end, double& x, double& y, bool start_inclusive=false) const;
-	bool rt_safe_earliest_event_discrete_unlocked (double start, double end, double& x, double& y, bool inclusive) const;
+	bool rt_safe_earliest_event (double start, double& x, double& y, bool start_inclusive=false) const;
+	bool rt_safe_earliest_event_unlocked (double start, double& x, double& y, bool start_inclusive=false) const;
+	bool rt_safe_earliest_event_discrete_unlocked (double start, double& x, double& y, bool inclusive) const;
 
 	void create_curve();
 	void destroy_curve();
@@ -247,9 +246,9 @@ protected:
 	/** Called by unlocked_eval() to handle cases of 3 or more control points. */
 	double multipoint_eval (double x) const;
 
-	void build_search_cache_if_necessary(double start, double end) const;
+	void build_search_cache_if_necessary (double start) const;
 
-	bool rt_safe_earliest_event_linear_unlocked (double start, double end, double& x, double& y, bool inclusive) const;
+	bool rt_safe_earliest_event_linear_unlocked (double start, double& x, double& y, bool inclusive) const;
 
 	boost::shared_ptr<ControlList> cut_copy_clear (double, double, int op);
 	bool erase_range_internal (double start, double end, EventList &);
