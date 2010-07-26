@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2010 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #include <vector>
 #include <cmath>
 #include <fstream>
@@ -199,9 +218,9 @@ EngineControl::EngineControl ()
 	row++;
 #endif
 
-	interface_combo.set_size_request (125, -1);
-	input_device_combo.set_size_request (125, -1);
-	output_device_combo.set_size_request (125, -1);
+	interface_combo.set_size_request (250, -1);
+	input_device_combo.set_size_request (250, -1);
+	output_device_combo.set_size_request (250, -1);
 
 	/*
 
@@ -350,15 +369,15 @@ EngineControl::EngineControl ()
 	device_packer.attach (input_latency, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	label = manage (new Label (_("samples")));
 	label->set_alignment (0, 0.5);
-	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	device_packer.attach (*label, 2, 3, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 	label = manage (new Label (_("Hardware output latency:")));
-	label->set_alignment (1.0, 0.5);
+	label->set_alignment (0, 0.5);
 	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (output_latency, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	label = manage (new Label (_("samples")));
 	label->set_alignment (0, 0.5);
-	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	device_packer.attach (*label, 2, 3, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 
 	basic_hbox.pack_start (basic_packer, false, false);
@@ -1174,6 +1193,10 @@ EngineControl::get_state ()
 	child->add_property ("val", output_device_combo.get_active_text());
 	root->add_child_nocopy (*child);
 
+	child = new XMLNode ("mididriver");
+	child->add_property ("val", midi_driver_combo.get_active_text());
+	root->add_child_nocopy (*child);
+
 	return *root;
 }
 
@@ -1317,6 +1340,8 @@ EngineControl::set_state (const XMLNode& root)
 			input_device_combo.set_active_text(strval);
 		} else if (child->name() == "outputdevice") {
 			output_device_combo.set_active_text(strval);
+		} else if (child->name() == "mididriver") {
+			midi_driver_combo.set_active_text(strval);
 		}
 	}
 }
