@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2010 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #ifndef __gtk2_ardour_startup_h__
 #define __gtk2_ardour_startup_h__
 
@@ -122,6 +141,8 @@ class ArdourStartup : public Gtk::Assistant {
 	/* recent sessions */
 
 	void setup_existing_session_page ();
+	/** true when setup_existing_session_page () has already been called at least once */
+	bool _have_setup_existing_session_page;
 
 	struct RecentSessionsSorter {
 	    bool operator() (std::pair<std::string,std::string> a, std::pair<std::string,std::string> b) const {
@@ -142,9 +163,12 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::TreeView                recent_session_display;
 	Glib::RefPtr<Gtk::TreeStore> recent_session_model;
 	Gtk::ScrolledWindow          recent_scroller;
+	Gtk::FileChooserButton       existing_session_chooser;
 	int redisplay_recent_sessions ();
 	void recent_session_row_selected ();
 	void recent_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col);
+
+	void existing_session_selected ();
 
 	/* audio setup page */
 
@@ -264,6 +288,7 @@ class ArdourStartup : public Gtk::Assistant {
 
 	void move_along_now ();
 
+	bool _existing_session_chooser_used; ///< set to true when the existing session chooser has been used
 };
 
 #endif /* __gtk2_ardour_startup_h__ */
