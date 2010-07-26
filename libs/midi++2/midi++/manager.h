@@ -69,7 +69,6 @@ class Manager {
 	static void create (jack_client_t* jack);
 	
 	static Manager *instance () {
-		assert (theManager);
 		return theManager;
 	}
 
