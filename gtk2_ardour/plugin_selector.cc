@@ -602,7 +602,7 @@ PluginSelector::build_plugin_menu ()
 	Gtk::Menu* favs = create_favs_menu(all_plugs);
 	items.push_back (MenuElem (_("Favorites"), *manage (favs)));
 
-	items.push_back (MenuElem (_("Plugin Manager"), sigc::mem_fun (*this, &PluginSelector::show_manager)));
+	items.push_back (MenuElem (_("Plugin Manager..."), sigc::mem_fun (*this, &PluginSelector::show_manager)));
 	items.push_back (SeparatorElem ());
 
 	Menu* by_creator = create_by_creator_menu(all_plugs);
