@@ -163,7 +163,8 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	}
 
 	/* make envelope visible if it has anything interesting in it */
-	if (audio_region()->envelope()->size() > 2) {
+	boost::shared_ptr<AutomationList> env = audio_region()->envelope ();
+	if (env->size() > 2 || (env->size() == 2 && env->front()->value != env->back()->value)) {
 		_flags |= EnvelopeVisible;
 	}
 
