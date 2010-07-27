@@ -218,9 +218,7 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session* session, boost::shared_ptr<
 	set_name ("IOSelectorWindow2");
 	set_title (_("I/O selector"));
 
-	Gtk::Alignment* alignment = manage(new Gtk::Alignment(0.5, 0.5, 0.0, 0.0));
-	alignment->add (_selector);
-	add (*alignment);
+	add (_selector);
 
 	set_position (Gtk::WIN_POS_MOUSE);
 

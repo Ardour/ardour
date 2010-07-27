@@ -304,7 +304,7 @@ PortMatrix::select_arrangement ()
 		_hlabel.set_label (_("<b>Destinations</b>"));
 		_vlabel.set_angle (90);
 
-		attach (*_body, 1, 2, 0, 1);
+		attach (*_body, 1, 2, 0, 1, FILL | EXPAND, FILL | EXPAND);
 		attach (_vscroll, 2, 3, 0, 1, SHRINK);
 		attach (_hscroll, 1, 2, 2, 3, FILL | EXPAND, SHRINK);
 		attach (_vbox, 0, 1, 0, 1, SHRINK);
@@ -322,7 +322,7 @@ PortMatrix::select_arrangement ()
 		_vlabel.set_label (_("<b>Destinations</b>"));
 		_vlabel.set_angle (-90);
 
-		attach (*_body, 0, 1, 1, 2);
+		attach (*_body, 0, 1, 1, 2, FILL | EXPAND, FILL | EXPAND);
 		attach (_vscroll, 2, 3, 1, 2, SHRINK);
 		attach (_hscroll, 0, 1, 2, 3, FILL | EXPAND, SHRINK);
 		attach (_vbox, 1, 2, 1, 2, SHRINK);
@@ -587,8 +587,8 @@ PortMatrix::max_size () const
 {
 	pair<uint32_t, uint32_t> m = _body->max_size ();
 
-	m.first += _vscroll.get_width ();
-	m.second += _hscroll.get_height ();
+	m.first += _vscroll.get_width () + _vbox.get_width () + 4;
+	m.second += _hscroll.get_height () + _hbox.get_height () + 4;
 
 	return m;
 }
@@ -787,6 +787,8 @@ PortMatrix::body_dimensions_changed ()
 		_vspacer.hide ();
 	}
 
+	pair<uint32_t, uint32_t> const m = max_size ();
+	resize_window_to_proportion_of_monitor (_parent, m.first, m.second);
 }
 
 
