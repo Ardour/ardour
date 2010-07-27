@@ -136,6 +136,9 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Evoral::MusicalTime step_edit_beat_pos;
 	boost::shared_ptr<ARDOUR::Region> step_edit_region;
 	MidiRegionView* step_edit_region_view;
+        void region_removed (boost::weak_ptr<ARDOUR::Region>);
+        void playlist_changed ();
+        PBD::ScopedConnection step_edit_region_connection;
 
 	Gtk::Menu* build_def_channel_menu();
 	void set_default_channel (int);

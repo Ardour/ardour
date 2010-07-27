@@ -165,6 +165,12 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 		/* ask for notifications of any new RegionViews */
 		_view->RegionViewAdded.connect (sigc::mem_fun(*this, &MidiTimeAxisView::region_view_added));
 		_view->attach ();
+                
+                midi_track()->PlaylistChanged.connect (*this, invalidator (*this),
+                                                       boost::bind (&MidiTimeAxisView::playlist_changed, this),
+                                                       gui_context());
+                playlist_changed ();
+
 	}
 
 	HBox* midi_controls_hbox = manage(new HBox());
@@ -227,6 +233,31 @@ MidiTimeAxisView::~MidiTimeAxisView ()
 	_range_scroomer = 0;
 
 	delete controller_menu;
+}
+
+void
+MidiTimeAxisView::playlist_changed ()
+{
+        step_edit_region_connection.disconnect ();
+        midi_track()->playlist()->RegionRemoved.connect (step_edit_region_connection, invalidator (*this),
+                                                         ui_bind (&MidiTimeAxisView::region_removed, this, _1),
+                                                         gui_context());
+}
+
+void
+MidiTimeAxisView::region_removed (boost::weak_ptr<Region> wr)
+{
+        boost::shared_ptr<Region> r (wr.lock());
+ 
+        if (!r) {
+                return;
+        }
+
+        if (step_edit_region == r) {
+                step_edit_region.reset();
+                // force a recompute of the insert position
+                step_edit_beat_pos = -1.0;
+        }
 }
 
 void MidiTimeAxisView::model_changed()
@@ -876,7 +907,7 @@ void
 MidiTimeAxisView::start_step_editing ()
 {
 	step_edit_insert_position = _editor.get_preferred_edit_position ();
-	step_edit_beat_pos = 0;
+        step_edit_beat_pos = -1.0;
 	step_edit_region = playlist()->top_region_at (step_edit_insert_position);
 
 	if (step_edit_region) {
@@ -925,18 +956,18 @@ MidiTimeAxisView::check_step_edit ()
 
 				step_edit_region = add_region (step_edit_insert_position);
 				RegionView* rv = view()->find_view (step_edit_region);
-
-				if (rv) {
-					step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
-				} else {
-					fatal << X_("programming error: no view found for new MIDI region") << endmsg;
-					/*NOTREACHED*/
-				}
-                                cerr << "New step edit region is called " << step_edit_region->name() 
-                                     << " view @ " << step_edit_region_view << endl;
+                                step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
 			}
 
-			if (step_edit_region_view) {
+			if (step_edit_region && step_edit_region_view) {
+                        
+                                if (step_edit_beat_pos < 0.0) {
+                                        framecnt_t frames_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
+                                        if (frames_from_start < 0) {
+                                                continue;
+                                        }
+                                        step_edit_beat_pos = step_edit_region_view->frames_to_beats (frames_from_start);
+                                }
 
 				bool success;
 				Evoral::MusicalTime beats = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
@@ -944,7 +975,7 @@ MidiTimeAxisView::check_step_edit ()
 				if (!success) {
 					continue;
 				}
-
+                                
 				step_edit_region_view->step_add_note (buf[0] & 0xf, buf[1], buf[2], step_edit_beat_pos, beats);
 				step_edit_beat_pos += beats;
 			}
