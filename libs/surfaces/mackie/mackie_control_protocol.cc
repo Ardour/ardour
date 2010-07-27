@@ -579,8 +579,12 @@ void
 MackieControlProtocol::create_ports()
 {
 	MIDI::Manager * mm = MIDI::Manager::instance();
-	MIDI::Port * midi_input_port = mm->add_port (new MIDI::Port (default_port_name, MIDI::Port::IsInput, session->engine().jack()));
-	MIDI::Port * midi_output_port = mm->add_port (new MIDI::Port (default_port_name, MIDI::Port::IsOutput, session->engine().jack()));
+	MIDI::Port * midi_input_port = mm->add_port (
+		new MIDI::Port (string_compose (_("%1 in"), default_port_name), MIDI::Port::IsInput, session->engine().jack())
+		);
+	MIDI::Port * midi_output_port = mm->add_port (
+		new MIDI::Port (string_compose (_("%1 out"), default_port_name), MIDI::Port::IsOutput, session->engine().jack())
+		);
 
 	// open main port		
 
@@ -596,13 +600,13 @@ MackieControlProtocol::create_ports()
 	// open extender ports. Up to 9. Should be enough.
 	// could also use mm->get_midi_ports()
 
-	string ext_port_base = "mcu_xt_";
-
 	for (int index = 1; index <= 9; ++index) {
-		ostringstream os;
-		os << ext_port_base << index;
-		MIDI::Port * midi_input_port = mm->add_port (new MIDI::Port (os.str(), MIDI::Port::IsInput, session->engine().jack()));
-		MIDI::Port * midi_output_port = mm->add_port (new MIDI::Port (os.str(), MIDI::Port::IsOutput, session->engine().jack()));
+		MIDI::Port * midi_input_port = mm->add_port (
+			new MIDI::Port (string_compose (_("mcu_xt_%1 in"), index), MIDI::Port::IsInput, session->engine().jack())
+			);
+		MIDI::Port * midi_output_port = mm->add_port (
+			new MIDI::Port (string_compose (_("mcu_xt_%1 out"), index), MIDI::Port::IsOutput, session->engine().jack())
+			);
 		if (midi_input_port->ok() && midi_output_port->ok()) {
 			add_port (*midi_input_port, *midi_output_port, index);
 		}

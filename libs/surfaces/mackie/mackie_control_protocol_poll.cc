@@ -29,12 +29,7 @@ const char * MackieControlProtocol::default_port_name = "mcu";
 
 bool MackieControlProtocol::probe()
 {
-	if ( MIDI::Manager::instance()->port(default_port_name)  == 0 ) {
-		info << "Mackie: No MIDI port called " << default_port_name << endmsg;
-		return false;
-	} else {
-		return true;
-	}
+	return true;
 }
 
 void MackieControlProtocol::handle_port_inactive( SurfacePort * port )
