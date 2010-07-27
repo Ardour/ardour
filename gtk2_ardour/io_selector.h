@@ -57,11 +57,16 @@ class IOSelector : public PortMatrix
 
   private:
 
+	void setup_type ();
+	void io_changed ();
+	void io_changed_proxy ();
+	
 	int _other;
 	int _ours;
 	boost::shared_ptr<ARDOUR::IO> _io;
 	boost::shared_ptr<PortGroup> _port_group;
 	bool _find_inputs_for_io_outputs;
+	PBD::ScopedConnection _io_connection;
 };
 
 class IOSelectorWindow : public Gtk::Window

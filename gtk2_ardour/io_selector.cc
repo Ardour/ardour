@@ -46,6 +46,8 @@ IOSelector::IOSelector (Gtk::Window* p, ARDOUR::Session* session, boost::shared_
 	: PortMatrix (p, session, DataType::NIL)
 	, _io (io)
 {
+	setup_type ();
+	
 	/* signal flow from 0 to 1 */
 
 	_find_inputs_for_io_outputs = (_io->direction() == IO::Output);
@@ -61,8 +63,49 @@ IOSelector::IOSelector (Gtk::Window* p, ARDOUR::Session* session, boost::shared_
 	_port_group.reset (new PortGroup (io->name()));
 	_ports[_ours].add_group (_port_group);
 
+	io->changed.connect (_io_connection, invalidator (*this), boost::bind (&IOSelector::io_changed_proxy, this), gui_context ());
+
 	setup_all_ports ();
 	init ();
+}
+
+void
+IOSelector::setup_type ()
+{
+	/* set type according to what's in the IO */
+
+	int N = 0;
+	DataType type_with_ports = DataType::NIL;
+	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+		if (_io->ports().num_ports (*i)) {
+			type_with_ports = *i;
+			++N;
+		}
+	}
+
+	if (N <= 1) {
+		set_type (type_with_ports);
+	} else {
+		set_type (DataType::NIL);
+	}
+}
+
+void
+IOSelector::io_changed_proxy ()
+{
+	/* The IO's changed signal is emitted from code that holds its route's processor lock,
+	   so we can't call setup_all_ports (which results in a call to Route::foreach_processor)
+	   without a deadlock unless we break things up with this idle handler.
+	*/
+	
+	Glib::signal_idle().connect_once (sigc::mem_fun (*this, &IOSelector::io_changed));
+}
+
+void
+IOSelector::io_changed ()
+{
+	setup_type ();
+	setup_all_ports ();
 }
 
 void
@@ -71,7 +114,7 @@ IOSelector::setup_ports (int dim)
 	if (!_session) {
 		return;
 	}
-	
+
 	_ports[dim].suspend_signals ();
 
 	if (dim == _other) {

@@ -215,8 +215,6 @@ void
 PortMatrix::set_type (DataType t)
 {
 	_type = t;
-
-	setup_all_ports ();
 }
 
 void
