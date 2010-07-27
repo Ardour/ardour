@@ -251,8 +251,10 @@ MixerStrip::init ()
 	group_label.set_name ("MixerGroupButtonLabel");
 
 	comment_button.set_name ("MixerCommentButton");
-
 	comment_button.signal_clicked().connect (sigc::mem_fun(*this, &MixerStrip::comment_button_clicked));
+
+	_mono_button.set_name ("MixerMonoButton");
+	_mono_button.signal_clicked().connect (sigc::mem_fun (*this, &MixerStrip::mono_button_clicked));
 
 	global_vpacker.set_border_width (0);
 	global_vpacker.set_spacing (0);
@@ -279,9 +281,7 @@ MixerStrip::init ()
 	global_vpacker.pack_start (middle_button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (gain_meter_alignment,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table,Gtk::PACK_SHRINK);
-	if (!is_midi_track()) {
-		global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
-	}
+	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_mono_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (comment_button, Gtk::PACK_SHRINK);
@@ -408,6 +408,14 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (is_audio_track()) {
 		boost::shared_ptr<AudioTrack> at = audio_track();
 		at->FreezeChange.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::map_frozen, this), gui_context());
+
+		_mono_button.show ();
+		panners.show_all ();
+	}
+
+	if (is_midi_track()) {
+		_mono_button.hide ();
+		panners.hide_all ();
 	}
 
 	if (is_track ()) {
@@ -427,9 +435,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	invert_button->set_active (_route->phase_invert ());
-
-	_mono_button.set_name ("MixerMonoButton");
-	_mono_button.signal_clicked().connect (sigc::mem_fun (*this, &MixerStrip::mono_button_clicked));
 
 	switch (_route->meter_point()) {
 	case MeterInput:
@@ -509,7 +514,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	bottom_button_table.show();
 	processor_box.show_all ();
 	gpm.show_all ();
-	panners.show_all ();
 	gain_meter_alignment.show ();
 	gain_unit_button.show();
 	gain_unit_label.show();
