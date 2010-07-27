@@ -64,7 +64,7 @@ public:
 
 	static void declick (BufferSet& bufs, nframes_t nframes, int dir);
 
-	gain_t         gain () const { return _gain_control->user_float(); }
+	gain_t         gain () const { return _gain_control->user_double(); }
 
 	virtual void   set_gain (gain_t g, void *src);
 	void           inc_gain (gain_t delta, void *src);
@@ -81,8 +81,8 @@ public:
 			set_flags (Controllable::Flag (flags() | Controllable::GainLike));
 		}
 
-		void set_value (float val);
-		float get_value (void) const;
+		void set_value (double val);
+		double get_value (void) const;
 
 		Amp* _amp;
 	};

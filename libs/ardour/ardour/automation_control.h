@@ -77,14 +77,14 @@ public:
 	/** Set the value and do the right thing based on automation state
 	 * (e.g. record if necessary, etc.)
 	 */
-	void set_value(float val);
+	void set_value(double val);
 
 	/** Get the current effective value based on automation state.
 	 */
-	float get_value() const;
+	double get_value() const;
 
-        float lower() const { return parameter().min(); }
-        float upper() const { return parameter().max(); }
+        double lower() const { return parameter().min(); }
+        double upper() const { return parameter().max(); }
 
 protected:
 	ARDOUR::Session& _session;

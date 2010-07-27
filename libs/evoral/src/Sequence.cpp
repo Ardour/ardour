@@ -693,7 +693,6 @@ Sequence<Time>::append(const Event<Time>& event, event_id_t evid)
                 return;
         }
 
-
         if (ev.is_note_on()) {
                 NotePtr note(new Note<Time>(ev.channel(), ev.time(), 0, ev.note(), ev.velocity()));
                 append_note_on_unlocked (note, evid);

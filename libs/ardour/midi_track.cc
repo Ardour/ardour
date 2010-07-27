@@ -527,7 +527,7 @@ MidiTrack::write_immediate_event(size_t size, const uint8_t* buf)
 }
 
 void
-MidiTrack::MidiControl::set_value(float val)
+MidiTrack::MidiControl::set_value(double val)
 {
 	bool valid = false;
 	if (isinf(val)) {

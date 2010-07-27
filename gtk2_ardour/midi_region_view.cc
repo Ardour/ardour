@@ -40,6 +40,7 @@
 #include "ardour/session.h"
 
 #include "evoral/Parameter.hpp"
+#include "evoral/MIDIParameters.hpp"
 #include "evoral/Control.hpp"
 #include "evoral/midi_util.h"
 
@@ -988,14 +989,27 @@ MidiRegionView::redisplay_model()
 void
 MidiRegionView::display_program_changes()
 {
-	boost::shared_ptr<Evoral::Control> control = _model->control(MidiPgmChangeAutomation);
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	uint16_t chn_mask = mtv->channel_selector().get_selected_channels();
+
+        for (uint8_t i = 0; i < 16; ++i) {
+                if (chn_mask & (1<<i)) {
+                        display_program_changes_on_channel (i);
+                }
+        }
+}
+
+void
+MidiRegionView::display_program_changes_on_channel(uint8_t channel)
+{
+	boost::shared_ptr<Evoral::Control> control = 
+                _model->control(Evoral::MIDI::ProgramChange (MidiPgmChangeAutomation, channel));
+
 	if (!control) {
 		return;
 	}
 
 	Glib::Mutex::Lock lock (control->list()->lock());
-
-	uint8_t channel = control->parameter().channel();
 
 	for (AutomationList::const_iterator event = control->list()->begin();
 			event != control->list()->end(); ++event) {
@@ -1007,7 +1021,7 @@ MidiRegionView::display_program_changes()
 		boost::shared_ptr<Evoral::Control> msb_control = _model->control(bank_select_msb);
 		uint8_t msb = 0;
 		if (msb_control != 0) {
-			msb = uint8_t(floor(msb_control->get_float(true, event_time) + 0.5));
+			msb = uint8_t(floor(msb_control->get_double(true, event_time) + 0.5));
 		}
 
 		// Get current value of bank select LSB at time of the program change
@@ -1015,7 +1029,7 @@ MidiRegionView::display_program_changes()
 		boost::shared_ptr<Evoral::Control> lsb_control = _model->control(bank_select_lsb);
 		uint8_t lsb = 0;
 		if (lsb_control != 0) {
-			lsb = uint8_t(floor(lsb_control->get_float(true, event_time) + 0.5));
+			lsb = uint8_t(floor(lsb_control->get_double(true, event_time) + 0.5));
 		}
 
 		MIDI::Name::PatchPrimaryKey patch_key(msb, lsb, program_number);
@@ -1030,7 +1044,8 @@ MidiRegionView::display_program_changes()
 			add_pgm_change(program_change, patch->name());
 		} else {
 			char buf[4];
-			snprintf(buf, 4, "%d", int(program_number));
+                        // program_number is zero-based: convert to one-based
+			snprintf(buf, 4, "%d", int(program_number+1));
 			add_pgm_change(program_change, buf);
 		}
 	}
@@ -1504,29 +1519,25 @@ MidiRegionView::add_pgm_change(PCEvent& program, const string& displaytext)
 void
 MidiRegionView::get_patch_key_at(double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key)
 {
-	cerr << "getting patch key at " << time << " for channel " << channel << endl;
 	Evoral::Parameter bank_select_msb(MidiCCAutomation, channel, MIDI_CTL_MSB_BANK);
 	boost::shared_ptr<Evoral::Control> msb_control = _model->control(bank_select_msb);
-	float msb = -1.0;
+	double msb = 0.0;
 	if (msb_control != 0) {
-		msb = int(msb_control->get_float(true, time));
-		cerr << "got msb " << msb;
+		msb = int(msb_control->get_double(true, time));
 	}
 
 	Evoral::Parameter bank_select_lsb(MidiCCAutomation, channel, MIDI_CTL_LSB_BANK);
 	boost::shared_ptr<Evoral::Control> lsb_control = _model->control(bank_select_lsb);
-	float lsb = -1.0;
+	double lsb = 0.0;
 	if (lsb_control != 0) {
-		lsb = lsb_control->get_float(true, time);
-		cerr << " got lsb " << lsb;
+		lsb = lsb_control->get_double(true, time);
 	}
 
 	Evoral::Parameter program_change(MidiPgmChangeAutomation, channel, 0);
 	boost::shared_ptr<Evoral::Control> program_control = _model->control(program_change);
-	float program_number = -1.0;
+	double program_number = -1.0;
 	if (program_control != 0) {
-		program_number = program_control->get_float(true, time);
-		cerr << " got program " << program_number << endl;
+		program_number = program_control->get_double(true, time);
 	}
 
 	key.msb = (int) floor(msb + 0.5);
@@ -1543,23 +1554,24 @@ MidiRegionView::alter_program_change(PCEvent& old_program, const MIDI::Name::Pat
 	Evoral::Parameter bank_select_msb(MidiCCAutomation, old_program.channel, MIDI_CTL_MSB_BANK);
 	boost::shared_ptr<Evoral::Control> msb_control = _model->control(bank_select_msb);
 	if (msb_control != 0) {
-		msb_control->set_float(float(new_patch.msb), true, old_program.time);
+		msb_control->set_double(double(new_patch.msb), true, old_program.time);
 	}
 
 	// TODO: Get the real event here and alter them at the original times
 	Evoral::Parameter bank_select_lsb(MidiCCAutomation, old_program.channel, MIDI_CTL_LSB_BANK);
 	boost::shared_ptr<Evoral::Control> lsb_control = _model->control(bank_select_lsb);
 	if (lsb_control != 0) {
-		lsb_control->set_float(float(new_patch.lsb), true, old_program.time);
+		lsb_control->set_double(double(new_patch.lsb), true, old_program.time);
 	}
 
 	Evoral::Parameter program_change(MidiPgmChangeAutomation, old_program.channel, 0);
 	boost::shared_ptr<Evoral::Control> program_control = _model->control(program_change);
 
 	assert(program_control != 0);
-	program_control->set_float(float(new_patch.program_number), true, old_program.time);
+	program_control->set_double(float(new_patch.program_number), true, old_program.time);
 
-	redisplay_model();
+        _pgm_changes.clear ();
+        display_program_changes (); // XXX would be nice to limit to just old_program.channel
 }
 
 void
@@ -1572,39 +1584,27 @@ MidiRegionView::program_selected(CanvasProgramChange& program, const MIDI::Name:
 void
 MidiRegionView::previous_program(CanvasProgramChange& program)
 {
-	MIDI::Name::PatchPrimaryKey key;
-	get_patch_key_at(program.event_time(), program.channel(), key);
+        if (program.program() < 127) {
+                MIDI::Name::PatchPrimaryKey key;
+                get_patch_key_at(program.event_time(), program.channel(), key);
+                PCEvent program_change_event(program.event_time(), program.program(), program.channel());
 
-	boost::shared_ptr<MIDI::Name::Patch> patch =
-		MIDI::Name::MidiPatchManager::instance().previous_patch(
-				_model_name,
-				_custom_device_mode,
-				program.channel(),
-				key);
-
-	PCEvent program_change_event(program.event_time(), program.program(), program.channel());
-	if (patch) {
-		alter_program_change(program_change_event, patch->patch_primary_key());
-	}
+                key.program_number++;
+                alter_program_change(program_change_event, key);
+        }
 }
 
 void
 MidiRegionView::next_program(CanvasProgramChange& program)
 {
-	MIDI::Name::PatchPrimaryKey key;
-	get_patch_key_at(program.event_time(), program.channel(), key);
+        if (program.program() > 0) {
+                MIDI::Name::PatchPrimaryKey key;
+                get_patch_key_at(program.event_time(), program.channel(), key);
+                PCEvent program_change_event(program.event_time(), program.program(), program.channel());
 
-	boost::shared_ptr<MIDI::Name::Patch> patch =
-		MIDI::Name::MidiPatchManager::instance().next_patch(
-				_model_name,
-				_custom_device_mode,
-				program.channel(),
-				key);
-
-	PCEvent program_change_event(program.event_time(), program.program(), program.channel());
-	if (patch) {
-		alter_program_change(program_change_event, patch->patch_primary_key());
-	}
+                key.program_number--;
+                alter_program_change(program_change_event, key);
+        }
 }
 
 void

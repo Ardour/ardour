@@ -26,7 +26,7 @@ public:
 		double          y,
 		string&         model_name,
 		string&         custom_device_mode,
-		nframes_t       event_time,
+		double          _event_time,
 		uint8_t         channel,
 		uint8_t         program
 	);
@@ -41,8 +41,8 @@ public:
 	string custom_device_mode() const { return _custom_device_mode; }
 	void set_custom_device_mode(string custom_device_mode) { _custom_device_mode = custom_device_mode; }
 
-	nframes_t event_time() const { return _event_time; }
-	void set_event_time(nframes_t new_time) { _event_time = new_time; };
+	double event_time() const { return _event_time; }
+	void set_event_time(double new_time) { _event_time = new_time; };
 
 	uint8_t program() const { return _program; }
 	void set_program(uint8_t new_program) { _program = new_program; };
@@ -57,7 +57,7 @@ public:
 private:
 	string        _model_name;
 	string        _custom_device_mode;
-	nframes_t     _event_time;
+        double        _event_time;
 	uint8_t       _channel;
 	uint8_t       _program;
 	Gtk::Menu     _popup;

@@ -291,8 +291,8 @@ public:
 		AutomationList* alist() { return (AutomationList*)_list.get(); }
 		Panner& panner;
 
-		void set_value (float);
-		float get_value (void) const;
+		void set_value (double);
+		double get_value (void) const;
 	};
 
 	boost::shared_ptr<AutomationControl> pan_control (int id, int chan=0) {

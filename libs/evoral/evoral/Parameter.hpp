@@ -61,33 +61,7 @@ public:
 
 	/** Strict weak ordering
 	 * See: http://www.sgi.com/tech/stl/StrictWeakOrdering.html
-	 * Sort Parameters first according to type then to id and lastly to channel.
-	 *
-	 * Proof:
-	 * <ol>
-	 * <li>Irreflexivity: f(x, x) is false because of the irreflexivity of \c < in each branch.</li>
-	 * <li>Antisymmetry: given x != y, f(x, y) implies !f(y, x) because of the same
-	 *     property of \c < in each branch and the symmetry of operator==. </li>
-	 * <li>Transitivity: let f(x, y) and f(y, z) => f(x, z) be true.
-	 *    We prove by contradiction, assuming the contrary:
-	 *    f(x, y) and f(x, z) hold => !f(x, z)
-	 *
-	 *    That implies one of the following:
-	 *    <ol>
-	 *      <li> x == z which contradicts the assumption f(x, y) and f(y, x)
-	 *                 because of antisymmetry.
-	 *      </li>
-	 *      <li> f(z, x) is true. That would imply that one of the ivars (we call it i)
-	 *           of x is greater than the same ivar in z while all "previous" ivars
-	 *           are equal. That would imply that also in y all those "previous"
-	 *           ivars are equal and because if x.i > z.i it is impossible
-	 *           that there is an y that satisfies x.i < y.i < z.i at the same
-	 *           time which contradicts the assumption.
-	 *      </li>
-	 *      Therefore f(x, z) is true (transitivity)
-	 *    </ol>
-	 * </li>
-	 * </ol>
+	 * Sort Parameters first according to type then to channel and lastly to ID.
 	 */
 	inline bool operator<(const Parameter& other) const {
 		if (_type < other._type) {

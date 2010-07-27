@@ -34,8 +34,8 @@ Control::Control(const Parameter& parameter, boost::shared_ptr<ControlList> list
 
 /** Get the currently effective value (ie the one that corresponds to current output)
  */
-float
-Control::get_float(bool from_list, FrameTime frame) const
+double
+Control::get_double (bool from_list, double frame) const
 {
 	if (from_list) {
 		return _list->eval(frame);
@@ -46,12 +46,12 @@ Control::get_float(bool from_list, FrameTime frame) const
 
 
 void
-Control::set_float(float value, bool to_list, FrameTime frame)
+Control::set_double (double value, bool to_list, double frame)
 {
 	_user_value = value;
 
 	if (to_list) {
-		_list->add(frame, value);
+		_list->add (frame, value);
 	}
 }
 

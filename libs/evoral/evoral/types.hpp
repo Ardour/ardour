@@ -34,9 +34,6 @@ namespace Evoral {
 
 typedef int32_t event_id_t;
 
-/** Frame count (i.e. length of time in audio frames) */
-typedef uint32_t FrameTime;
-
 /** Musical time: beats relative to some defined origin */
 typedef double MusicalTime;
 const MusicalTime MaxMusicalTime = DBL_MAX;
@@ -53,9 +50,9 @@ typedef uint32_t EventType;
 /** Type to describe the movement of a time range */
 template<typename T>
 struct RangeMove {
-	RangeMove (T f, FrameTime l, T t) : from (f), length (l), to (t) {}
+	RangeMove (T f, double l, T t) : from (f), length (l), to (t) {}
 	T         from;   ///< start of the range
-	FrameTime length; ///< length of the range
+        double    length; ///< length of the range
 	T         to;     ///< new start of the range
 };
 

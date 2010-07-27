@@ -48,7 +48,7 @@ template<typename T> class MPControl : public PBD::Controllable {
         
         /* Controllable API */
         
-        void set_value (float v) { 
+        void set_value (double v) { 
                 T newval = (T) v;
                 if (newval != _value) {
                         _value = newval;
@@ -56,12 +56,12 @@ template<typename T> class MPControl : public PBD::Controllable {
                 }
         }
         
-        float get_value () const { 
+        double get_value () const { 
                 return (float) _value;
         }
         
-        float lower () const { return _lower; }
-        float upper () const { return _upper; }
+        double lower () const { return _lower; }
+        double upper () const { return _upper; }
 
         /* "access as T" API */
         

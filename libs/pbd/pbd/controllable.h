@@ -45,8 +45,8 @@ class Controllable : public PBD::StatefulDestructible {
 	Controllable (const std::string& name, Flag f = Flag (0));
 	virtual ~Controllable() { Destroyed (this); }
 
-	virtual void set_value (float) = 0;
-	virtual float get_value (void) const = 0;
+	virtual void set_value (double) = 0;
+	virtual double get_value (void) const = 0;
 
 	PBD::Signal0<void> LearningFinished;
 	static PBD::Signal3<void,PBD::Controllable*,int,int> CreateBinding;
@@ -72,8 +72,8 @@ class Controllable : public PBD::StatefulDestructible {
 	bool is_gain_like() const { return _flags & GainLike; }
 	bool is_integral_only() const { return _flags & IntegerOnly; }
 
-        virtual float lower() const { return 0.0f; }
-        virtual float upper() const { return 1.0f; }
+        virtual double lower() const { return 0.0; }
+        virtual double upper() const { return 1.0; }
 
 	Flag flags() const { return _flags; }
 	void set_flags (Flag f);
@@ -107,8 +107,8 @@ class IgnorableControllable : public Controllable
 	IgnorableControllable () : PBD::Controllable ("ignoreMe") {}
 	~IgnorableControllable () {}
     
-	void set_value (float /*v*/) {}
-	float get_value () const { return 0.0; }
+	void set_value (double /*v*/) {}
+	double get_value () const { return 0.0; }
 };
 
 }

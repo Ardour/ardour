@@ -129,17 +129,17 @@ Track::RecEnableControllable::RecEnableControllable (Track& s)
 }
 
 void
-Track::RecEnableControllable::set_value (float val)
+Track::RecEnableControllable::set_value (double val)
 {
-	bool bval = ((val >= 0.5f) ? true: false);
+	bool bval = ((val >= 0.5) ? true: false);
 	track.set_record_enabled (bval, this);
 }
 
-float
+double
 Track::RecEnableControllable::get_value (void) const
 {
-	if (track.record_enabled()) { return 1.0f; }
-	return 0.0f;
+	if (track.record_enabled()) { return 1.0; }
+	return 0.0;
 }
 
 bool

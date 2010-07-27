@@ -100,13 +100,13 @@ StreamPanner::set_mono (bool yn)
 }
 
 void
-Panner::PanControllable::set_value (float val)
+Panner::PanControllable::set_value (double val)
 {
 	panner.streampanner (parameter().id()).set_position (direct_control_to_pan (val));
 	AutomationControl::set_value(val);
 }
 
-float
+double
 Panner::PanControllable::get_value (void) const
 {
 	return AutomationControl::get_value();

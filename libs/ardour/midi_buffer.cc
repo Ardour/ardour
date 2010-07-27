@@ -170,9 +170,6 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
                 DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
 #endif
 
-	// cerr << "MidiBuffer: pushing event @ " << time
-        // << " size = " << size << endl;
-
 	if (_size + stamp_size + size >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
 		return false;

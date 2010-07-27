@@ -185,8 +185,8 @@ class Track : public Route, public PublicDiskstream
 	struct RecEnableControllable : public PBD::Controllable {
 		RecEnableControllable (Track&);
 
-		void set_value (float);
-		float get_value (void) const;
+		void set_value (double);
+		double get_value (void) const;
 
 		Track& track;
 	};

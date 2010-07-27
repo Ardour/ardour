@@ -78,8 +78,8 @@ class PluginInsert : public Processor
 		PluginControl (PluginInsert* p, const Evoral::Parameter &param,
 				boost::shared_ptr<AutomationList> list = boost::shared_ptr<AutomationList>());
 
-		void set_value (float val);
-		float get_value (void) const;
+		void set_value (double val);
+		double get_value (void) const;
 
 	private:
 		PluginInsert* _plugin;

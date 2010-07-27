@@ -3018,7 +3018,7 @@ Route::SoloControllable::SoloControllable (std::string name, Route& r)
 }
 
 void
-Route::SoloControllable::set_value (float val)
+Route::SoloControllable::set_value (double val)
 {
 	bool bval = ((val >= 0.5f) ? true: false);
 # if 0
@@ -3037,7 +3037,7 @@ Route::SoloControllable::set_value (float val)
 #endif
 }
 
-float
+double
 Route::SoloControllable::get_value (void) const
 {
 	if (Config->get_solo_control_is_listen_control()) {
@@ -3057,7 +3057,7 @@ Route::MuteControllable::MuteControllable (std::string name, Route& r)
 }
 
 void
-Route::MuteControllable::set_value (float val)
+Route::MuteControllable::set_value (double val)
 {
 	bool bval = ((val >= 0.5f) ? true: false);
 # if 0
@@ -3071,7 +3071,7 @@ Route::MuteControllable::set_value (float val)
 #endif
 }
 
-float
+double
 Route::MuteControllable::get_value (void) const
 {
 	return route.muted() ? 1.0f : 0.0f;

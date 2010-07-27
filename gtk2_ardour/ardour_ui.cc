@@ -3425,18 +3425,18 @@ ARDOUR_UI::TransportControllable::TransportControllable (std::string name, ARDOU
 }
 
 void
-ARDOUR_UI::TransportControllable::set_value (float val)
+ARDOUR_UI::TransportControllable::set_value (double val)
 {
 	if (type == ShuttleControl) {
 		double fract;
 
-		if (val == 0.5f) {
+		if (val == 0.5) {
 			fract = 0.0;
 		} else {
-			if (val < 0.5f) {
-				fract = -((0.5f - val)/0.5f);
+			if (val < 0.5) {
+				fract = -((0.5 - val)/0.5);
 			} else {
-				fract = ((val - 0.5f)/0.5f);
+				fract = ((val - 0.5)/0.5);
 			}
 		}
 
@@ -3444,7 +3444,7 @@ ARDOUR_UI::TransportControllable::set_value (float val)
 		return;
 	}
 
-	if (val < 0.5f) {
+	if (val < 0.5) {
 		/* do nothing: these are radio-style actions */
 		return;
 	}
@@ -3488,10 +3488,10 @@ ARDOUR_UI::TransportControllable::set_value (float val)
 	}
 }
 
-float
+double
 ARDOUR_UI::TransportControllable::get_value (void) const
 {
-	float val = 0.0f;
+	float val = 0.0;
 
 	switch (type) {
 	case Roll:

@@ -420,6 +420,9 @@ class MidiRegionView : public RegionView
         void drop_down_keys ();
         void maybe_select_by_position (GdkEventButton* ev, double x, double y);
         void get_events (Events& e, Evoral::Sequence<Evoral::MusicalTime>::NoteOperator op, uint8_t val, int chan_mask = 0);
+
+	void display_program_changes_on_channel (uint8_t);
+
 };
 
 

@@ -82,11 +82,11 @@ ControlSet::control (const Parameter& parameter, bool create_if_missing)
 }
 
 bool
-ControlSet::find_next_event (FrameTime now, FrameTime end, ControlEvent& next_event) const
+ControlSet::find_next_event (double now, double end, ControlEvent& next_event) const
 {
 	Controls::const_iterator li;
 
-	next_event.when = std::numeric_limits<FrameTime>::max();
+	next_event.when = std::numeric_limits<double>::max();
 
   	for (li = _controls.begin(); li != _controls.end(); ++li) {
 		ControlList::const_iterator i;
@@ -107,7 +107,7 @@ ControlSet::find_next_event (FrameTime now, FrameTime end, ControlEvent& next_ev
  		}
  	}
 
- 	return next_event.when != std::numeric_limits<FrameTime>::max();
+ 	return next_event.when != std::numeric_limits<double>::max();
 }
 
 void

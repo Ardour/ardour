@@ -72,7 +72,7 @@ public:
 			, _route (route)
 		{}
 
-		void set_value (float val);
+		void set_value (double val);
 
 		MidiTrack* _route;
 	};

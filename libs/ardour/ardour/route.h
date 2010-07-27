@@ -319,16 +319,16 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	struct SoloControllable : public AutomationControl {
 		SoloControllable (std::string name, Route&);
-		void set_value (float);
-		float get_value (void) const;
+		void set_value (double);
+		double get_value (void) const;
 
 		Route& route;
 	};
 
 	struct MuteControllable : public AutomationControl {
 		MuteControllable (std::string name, Route&);
-		void set_value (float);
-		float get_value (void) const;
+		void set_value (double);
+		double get_value (void) const;
 
 		Route& route;
 	};

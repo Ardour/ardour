@@ -75,12 +75,11 @@ MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
 
 			jack_midi_event_get (&ev, jack_buffer, i);
 
-#if 0
                         if (ev.buffer[0] == 0xfe) {
                                 /* throw away active sensing */
                                 continue;
                         }
-#endif                       
+
 			if (ev.time > off && ev.time < off+nframes) {
 				_buffer->push_back (ev);
 			}

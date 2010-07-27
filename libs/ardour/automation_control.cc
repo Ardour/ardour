@@ -40,22 +40,20 @@ AutomationControl::AutomationControl(
 {
 }
 
-
-float
+double
 AutomationControl::get_value() const
 {
 	bool from_list = _list && ((AutomationList*)_list.get())->automation_playback();
-	return Control::get_float(from_list, _session.transport_frame());
+	return Control::get_double (from_list, _session.transport_frame());
 }
 
-
 void
-AutomationControl::set_value(float value)
+AutomationControl::set_value(double value)
 {
 	bool to_list = _list && _session.transport_stopped()
 		&& ((AutomationList*)_list.get())->automation_write();
 
-	Control::set_float(value, to_list, _session.transport_frame());
+	Control::set_double(value, to_list, _session.transport_frame());
 
 	Changed(); /* EMIT SIGNAL */
 }

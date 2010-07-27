@@ -37,8 +37,8 @@ public:
 	Control(const Parameter& parameter, boost::shared_ptr<ControlList>);
 	virtual ~Control() {}
 
-	virtual void  set_float(float val, bool to_list=false, FrameTime frame=0);
-	virtual float get_float(bool from_list=false, FrameTime frame=0) const;
+	virtual void   set_double(double val, bool to_list=false, double frame=0);
+	virtual double get_double(bool from_list=false, double frame=0) const;
 
 
 	/** Get the latest user-set value
@@ -47,9 +47,10 @@ public:
 	 * Automation write/touch works by periodically sampling this value
 	 * and adding it to the ControlList.
 	 */
-	float user_float() const { return _user_value; }
+        double user_double() const { return _user_value; }
 
 	void set_list(boost::shared_ptr<ControlList>);
+
 
 	boost::shared_ptr<ControlList>       list()       { return _list; }
 	boost::shared_ptr<const ControlList> list() const { return _list; }
@@ -62,7 +63,7 @@ public:
 protected:
 	Parameter                      _parameter;
 	boost::shared_ptr<ControlList> _list;
-	float                          _user_value;
+        double                         _user_value;
 	PBD::ScopedConnection          _list_marked_dirty_connection;
 
 private:

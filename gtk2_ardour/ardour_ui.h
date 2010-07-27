@@ -368,8 +368,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	    };
 
 	    TransportControllable (std::string name, ARDOUR_UI&, ToggleType);
-	    void set_value (float);
-	    float get_value (void) const;
+	    void set_value (double);
+	    double get_value (void) const;
 
 	    void set_id (const std::string&);
 

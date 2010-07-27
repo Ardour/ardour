@@ -93,7 +93,7 @@ Amp::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, n
 
 		} else { /* manual (scalar) gain */
 
-			gain_t const dg = _gain_control->user_float();
+			gain_t const dg = _gain_control->user_double();
 
 			if (_current_gain != dg) {
 
@@ -353,7 +353,7 @@ Amp::apply_simple_gain (AudioBuffer& buf, nframes_t nframes, gain_t target)
 void
 Amp::inc_gain (gain_t factor, void *src)
 {
-	float desired_gain = _gain_control->user_float();
+	float desired_gain = _gain_control->user_double();
 
 	if (desired_gain == 0.0f) {
 		set_gain (0.000001f + (0.000001f * factor), src);
@@ -379,7 +379,7 @@ Amp::set_gain (gain_t val, void *src)
 		return;
 	}
 
-	_gain_control->set_float(val, false);
+	_gain_control->set_double(val, false);
 	_session.set_dirty();
 }
 
@@ -416,7 +416,7 @@ Amp::set_state (const XMLNode& node, int version)
 }
 
 void
-Amp::GainControl::set_value (float val)
+Amp::GainControl::set_value (double val)
 {
 	// max gain at about +6dB (10.0 ^ ( 6 dB * 0.05))
 	if (val > 1.99526231f)
@@ -427,7 +427,7 @@ Amp::GainControl::set_value (float val)
 	AutomationControl::set_value(val);
 }
 
-float
+double
 Amp::GainControl::get_value (void) const
 {
 	return AutomationControl::get_value();

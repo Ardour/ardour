@@ -979,7 +979,7 @@ PluginInsert::PluginControl::PluginControl (PluginInsert* p, const Evoral::Param
 }
 
 void
-PluginInsert::PluginControl::set_value (float val)
+PluginInsert::PluginControl::set_value (double val)
 {
 	/* FIXME: probably should be taking out some lock here.. */
 
@@ -1020,12 +1020,12 @@ PluginInsert::PluginControl::set_value (float val)
 	AutomationControl::set_value(val);
 }
 
-float
+double
 PluginInsert::PluginControl::get_value (void) const
 {
 	/* FIXME: probably should be taking out some lock here.. */
 
-	float val = _plugin->get_parameter (_list->parameter());
+	double val = _plugin->get_parameter (_list->parameter());
 
 	return val;
 
