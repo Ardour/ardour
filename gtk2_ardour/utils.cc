@@ -957,8 +957,8 @@ resize_window_to_proportion_of_monitor (Gtk::Window* window, int max_width, int 
 	Gdk::Rectangle monitor_rect;
 	screen->get_monitor_geometry (0, monitor_rect);
 
-	int const w = std::min (monitor_rect.get_width(), max_width) * 0.8;
-	int const h = std::min (monitor_rect.get_height(), max_height) * 0.8;
+	int const w = std::min (int (monitor_rect.get_width() * 0.8), max_width);
+	int const h = std::min (int (monitor_rect.get_height() * 0.8), max_height);
 
 	window->resize (w, h);
 }
