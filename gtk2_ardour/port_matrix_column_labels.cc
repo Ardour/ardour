@@ -133,8 +133,18 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 	PortGroup::BundleList const & bundles = _matrix->visible_columns()->bundles ();
 	for (PortGroup::BundleList::const_iterator i = bundles.begin (); i != bundles.end(); ++i) {
 
-		Gdk::Color c = (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (N);
-		render_bundle_name (cr, background_colour (), c, x, 0, (*i)->bundle);
+		bool should_show_this_bundle = false;
+		for (uint32_t j = 0; j < (*i)->bundle->nchannels().n_total(); ++j) {
+			if (_matrix->should_show ((*i)->bundle->channel_type (j))) {
+				should_show_this_bundle = true;
+				break;
+			}
+		}
+
+		if (should_show_this_bundle) {
+			Gdk::Color c = (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (N);
+			render_bundle_name (cr, background_colour (), c, x, 0, (*i)->bundle);
+		}
 
 		if (_matrix->show_only_bundles()) {
 			x += grid_spacing();
