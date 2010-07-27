@@ -160,8 +160,10 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes64_
 	, _automatable (other->session())
 	, _fade_in (new AutomationList (*other->_fade_in))
 	, _fade_out (new AutomationList (*other->_fade_out))
-	  /* XXX is this guaranteed to work for all values of offset+offset_relative? */
-	, _envelope (new AutomationList (*other->_envelope, _start, _start + _length))
+	  /* As far as I can see, the _envelope's times are relative to region position, and have nothing
+	     to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
+	  */
+	, _envelope (new AutomationList (*other->_envelope, offset, other->_length))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {

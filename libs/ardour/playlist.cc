@@ -1401,12 +1401,15 @@ Playlist::_split_region (boost::shared_ptr<Region> region, framepos_t playlist_p
 	{
 		PropertyList plist;
 		
-		plist.add (Properties::start, region->start());
 		plist.add (Properties::length, before);
 		plist.add (Properties::name, before_name);
 		plist.add (Properties::left_of_split, true);
-		
-		left = RegionFactory::create (region, plist);
+
+		/* note: we must use the version of ::create with an offset here,
+		   since it supplies that offset to the Region constructor, which
+		   is necessary to get audio region gain envelopes right.
+		*/
+		left = RegionFactory::create (region, 0, plist);
 	}
 
 	RegionFactory::region_name (after_name, region->name(), false);
@@ -1414,12 +1417,12 @@ Playlist::_split_region (boost::shared_ptr<Region> region, framepos_t playlist_p
 	{
 		PropertyList plist;
 		
-		plist.add (Properties::start, region->start() + before);
 		plist.add (Properties::length, after);
 		plist.add (Properties::name, after_name);
 		plist.add (Properties::right_of_split, true);
 
-		right = RegionFactory::create (region, plist);
+		/* same note as above */
+		right = RegionFactory::create (region, before, plist);
 	}
 
 	add_region_internal (left, region->position());

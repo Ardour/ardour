@@ -247,10 +247,10 @@ Region::Region (const SourceList& srcs)
 
 /** Create a new Region from part of an existing one, starting at one of two places:
 
-    if @param offset_relative is true, then the start within @param other is given by @param offset
-    (i.e. relative to the start of @param other's sources, the start is @param offset + @param other.start()
+    if \a offset_relative is true, then the start within \a other is given by \a offset
+    (i.e. relative to the start of \a other's sources, the start is \a offset + \a other.start()
 
-    if @param offset_relative is false, then the start within the source is given @param offset.
+    if @param offset_relative is false, then the start within the source is given \a offset.
 */
 Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, bool offset_relative)
 	: SessionObject(other->session(), other->name())
