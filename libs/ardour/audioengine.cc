@@ -1109,58 +1109,49 @@ AudioEngine::can_request_hardware_monitoring ()
 	return true;
 }
 
-
-uint32_t
-AudioEngine::n_physical_outputs (DataType type) const
+ChanCount
+AudioEngine::n_physical (unsigned long flags) const
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack,0);
-	const char ** ports;
-	uint32_t cnt = 0;
+	ChanCount c;
+	
+	GET_PRIVATE_JACK_POINTER_RET (_jack, c);
 
-	if ((ports = jack_get_ports (_priv_jack, NULL, type.to_jack_type(), JackPortIsPhysical|JackPortIsInput)) == 0) {
-		return 0;
+	const char ** ports = jack_get_ports (_priv_jack, NULL, NULL, JackPortIsPhysical | flags);
+	if (ports == 0) {
+		return c;
 	}
 
 	for (uint32_t i = 0; ports[i]; ++i) {
-                if (!strstr (ports[i], "Midi-Through")) {
-                        cnt++;
-                }
-        }
+		if (!strstr (ports[i], "Midi-Through")) {
+			DataType t (jack_port_type (jack_port_by_name (_jack, ports[i])));
+			c.set (t, c.get (t) + 1);
+		}
+	}
 
 	free (ports);
 
-	return cnt;
+	return c;
 }
 
-uint32_t
-AudioEngine::n_physical_inputs (DataType type) const
+ChanCount
+AudioEngine::n_physical_inputs () const
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack,0);
-	const char ** ports;
-	uint32_t cnt = 0;
-        
-	if ((ports = jack_get_ports (_priv_jack, NULL, type.to_jack_type(), JackPortIsPhysical|JackPortIsOutput)) == 0) {
-		return 0;
-	}
+	return n_physical (JackPortIsInput);
+}
 
-	for (uint32_t i = 0; ports[i]; ++i) {
-                if (!strstr (ports[i], "Midi-Through")) {
-                        cnt++;
-                }
-        }
-
-	free (ports);
-
-	return cnt;
+ChanCount
+AudioEngine::n_physical_outputs () const
+{
+	return n_physical (JackPortIsOutput);
 }
 
 void
-AudioEngine::get_physical_inputs (DataType type, vector<string>& ins)
+AudioEngine::get_physical (DataType type, unsigned long flags, vector<string>& phy)
 {
 	GET_PRIVATE_JACK_POINTER (_jack);
 	const char ** ports;
 
-	if ((ports = jack_get_ports (_priv_jack, NULL, type.to_jack_type(), JackPortIsPhysical|JackPortIsOutput)) == 0) {
+	if ((ports = jack_get_ports (_priv_jack, NULL, type.to_jack_type(), JackPortIsPhysical | flags)) == 0) {
 		return;
 	}
 
@@ -1169,30 +1160,22 @@ AudioEngine::get_physical_inputs (DataType type, vector<string>& ins)
                         if (strstr (ports[i], "Midi-Through")) {
                                 continue;
                         }
-			ins.push_back (ports[i]);
+			phy.push_back (ports[i]);
 		}
 		free (ports);
 	}
 }
 
 void
+AudioEngine::get_physical_inputs (DataType type, vector<string>& ins)
+{
+	get_physical (type, JackPortIsInput, ins);
+}
+
+void
 AudioEngine::get_physical_outputs (DataType type, vector<string>& outs)
 {
-	GET_PRIVATE_JACK_POINTER (_jack);
-	const char ** ports;
-	uint32_t i = 0;
-
-	if ((ports = jack_get_ports (_priv_jack, NULL, type.to_jack_type(), JackPortIsPhysical|JackPortIsInput)) == 0) {
-		return;
-	}
-
-	for (i = 0; ports[i]; ++i) {
-                if (strstr (ports[i], "Midi-Through")) {
-                        continue;
-                }
-		outs.push_back (ports[i]);
-	}
-	free (ports);
+	get_physical (type, JackPortIsOutput, outs);
 }
 
 string

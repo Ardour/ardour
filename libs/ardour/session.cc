@@ -35,6 +35,8 @@
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 
+#include <boost/algorithm/string/erase.hpp>
+
 #include "pbd/error.h"
 #include "pbd/boost_debug.h"
 #include "pbd/pathscanner.h"
@@ -163,8 +165,8 @@ Session::Session (AudioEngine &eng,
 		throw failed_constructor();
 	}
 
-	n_physical_outputs = _engine.n_physical_outputs(DataType::AUDIO);
-	n_physical_inputs =  _engine.n_physical_inputs(DataType::AUDIO);
+	n_physical_outputs = _engine.n_physical_outputs ();
+	n_physical_inputs =  _engine.n_physical_inputs ();
 
 	first_stage_init (fullpath, snapshot_name);
 
@@ -435,7 +437,7 @@ Session::when_engine_running ()
 
 	/* mono output bundles */
 
-	for (uint32_t np = 0; np < n_physical_outputs; ++np) {
+	for (uint32_t np = 0; np < n_physical_outputs.n_audio(); ++np) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
 
@@ -448,8 +450,8 @@ Session::when_engine_running ()
 
 	/* stereo output bundles */
 
-	for (uint32_t np = 0; np < n_physical_outputs; np += 2) {
-		if (np + 1 < n_physical_outputs) {
+	for (uint32_t np = 0; np < n_physical_outputs.n_audio(); np += 2) {
+		if (np + 1 < n_physical_outputs.n_audio ()) {
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("out %" PRIu32 "+%" PRIu32), np + 1, np + 2);
 			shared_ptr<Bundle> c (new Bundle (buf, true));
@@ -464,7 +466,7 @@ Session::when_engine_running ()
 
 	/* mono input bundles */
 
-	for (uint32_t np = 0; np < n_physical_inputs; ++np) {
+	for (uint32_t np = 0; np < n_physical_inputs.n_audio(); ++np) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
 
@@ -477,8 +479,8 @@ Session::when_engine_running ()
 
 	/* stereo input bundles */
 
-	for (uint32_t np = 0; np < n_physical_inputs; np += 2) {
-		if (np + 1 < n_physical_inputs) {
+	for (uint32_t np = 0; np < n_physical_inputs.n_audio(); np += 2) {
+		if (np + 1 < n_physical_inputs.n_audio()) {
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("in %" PRIu32 "+%" PRIu32), np + 1, np + 2);
 
@@ -490,6 +492,34 @@ Session::when_engine_running ()
 
 			add_bundle (c);
 		}
+	}
+
+	/* MIDI input bundles */
+
+	for (uint32_t np = 0; np < n_physical_inputs.n_midi(); ++np) {
+		string const p = _engine.get_nth_physical_input (DataType::MIDI, np);
+
+		string n = p;
+		boost::erase_first (n, X_("alsa_pcm:"));
+		
+		shared_ptr<Bundle> c (new Bundle (n, false));
+		c->add_channel ("", DataType::MIDI);
+		c->set_port (0, p);
+		add_bundle (c);
+	}
+		
+	/* MIDI output bundles */
+
+	for (uint32_t np = 0; np < n_physical_outputs.n_midi(); ++np) {
+		string const p = _engine.get_nth_physical_output (DataType::MIDI, np);
+
+		string n = p;
+		boost::erase_first (n, X_("alsa_pcm:"));
+
+		shared_ptr<Bundle> c (new Bundle (n, true));
+		c->add_channel ("", DataType::MIDI);
+		c->set_port (0, p);
+		add_bundle (c);
 	}
 
 	BootMessage (_("Setup signal flow and plugins"));
@@ -569,7 +599,7 @@ Session::when_engine_running ()
 				} else {
                                         
 					for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-						uint32_t mod = _engine.n_physical_outputs (*t);
+						uint32_t mod = n_physical_outputs.get (*t);
 						uint32_t limit = _monitor_out->n_outputs().get(*t);
 
 						for (uint32_t n = 0; n < limit; ++n) {

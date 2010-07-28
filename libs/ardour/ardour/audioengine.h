@@ -44,6 +44,7 @@
 #include "ardour/data_type.h"
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
+#include "ardour/chan_count.h"
 
 #ifdef HAVE_JACK_SESSION
 #include <jack/session.h>
@@ -162,8 +163,8 @@ class AudioEngine : public SessionHandlePtr
 
 	bool can_request_hardware_monitoring ();
 
-	uint32_t n_physical_outputs (DataType type) const;
-	uint32_t n_physical_inputs (DataType type) const;
+	ChanCount n_physical_outputs () const;
+	ChanCount n_physical_inputs () const;
 
 	void get_physical_outputs (DataType type, std::vector<std::string>&);
 	void get_physical_inputs (DataType type, std::vector<std::string>&);
@@ -282,6 +283,8 @@ _	   the regular process() call to session->process() is not made.
 	void   remove_all_ports ();
 
 	std::string get_nth_physical (DataType type, uint32_t n, int flags);
+	ChanCount n_physical (unsigned long) const;
+	void get_physical (DataType, unsigned long, std::vector<std::string> &);
 
 	void port_registration_failure (const std::string& portname);
 
