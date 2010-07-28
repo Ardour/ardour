@@ -59,12 +59,17 @@ Auditioner::init ()
 	string left = _session.config.get_auditioner_output_left();
 	string right = _session.config.get_auditioner_output_right();
 
+	vector<string> outputs;
+	_session.engine().get_physical_outputs (DataType::AUDIO, outputs);
+
 	if (left == "default") {
                 if (_session.monitor_out()) {
                         left = _session.monitor_out()->input()->audio (0)->name();
                         via_monitor = true;
                 } else {
-                        left = _session.engine().get_nth_physical_output (DataType::AUDIO, 0);
+			if (outputs.size() > 0) {
+				left = outputs[0];
+			}
                 }
 	}
 
@@ -73,7 +78,9 @@ Auditioner::init ()
                         right = _session.monitor_out()->input()->audio (1)->name();
                         via_monitor = true;
                 } else {
-                        right = _session.engine().get_nth_physical_output (DataType::AUDIO, 1);
+			if (outputs.size() > 1) {
+				right = outputs[1];
+			}
                 }
 	}
 
@@ -231,8 +238,12 @@ Auditioner::output_changed (IOChange change, void* /*src*/)
 	if (change & ConnectionsChanged) {
 		string phys;
 		vector<string> connections;
+		vector<string> outputs;
+		_session.engine().get_physical_outputs (DataType::AUDIO, outputs);
 		if (_output->nth (0)->get_connections (connections)) {
-			phys = _session.engine().get_nth_physical_output (DataType::AUDIO, 0);
+			if (outputs.size() > 0) {
+				phys = outputs[0];
+			}
 			if (phys != connections[0]) {
 				_session.config.set_auditioner_output_left (connections[0]);
 			} else {
@@ -245,7 +256,9 @@ Auditioner::output_changed (IOChange change, void* /*src*/)
 		connections.clear ();
 
 		if (_output->nth (1)->get_connections (connections)) {
-			phys = _session.engine().get_nth_physical_output (DataType::AUDIO, 1);
+			if (outputs.size() > 1) {
+				phys = outputs[1];
+			}
 			if (phys != connections[0]) {
 				_session.config.set_auditioner_output_right (connections[0]);
 			} else {

@@ -169,14 +169,6 @@ class AudioEngine : public SessionHandlePtr
 	void get_physical_outputs (DataType type, std::vector<std::string>&);
 	void get_physical_inputs (DataType type, std::vector<std::string>&);
 
-	std::string get_nth_physical_output (DataType type, uint32_t n) {
-		return get_nth_physical (type, n, JackPortIsInput);
-	}
-
-	std::string get_nth_physical_input (DataType type, uint32_t n) {
-		return get_nth_physical (type, n, JackPortIsOutput);
-	}
-
 	void update_total_latencies ();
 	void update_total_latency (const Port&);
 
@@ -282,7 +274,6 @@ _	   the regular process() call to session->process() is not made.
         void   finish_process_cycle (int status);
 	void   remove_all_ports ();
 
-	std::string get_nth_physical (DataType type, uint32_t n, int flags);
 	ChanCount n_physical (unsigned long) const;
 	void get_physical (DataType, unsigned long, std::vector<std::string> &);
 

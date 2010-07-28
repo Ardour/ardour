@@ -397,22 +397,23 @@ Session::when_engine_running ()
 
 			/* default state for Click: dual-mono to first 2 physical outputs */
 
-                       for (int physport = 0; physport < 2; ++physport) {
-                               string physical_output = _engine.get_nth_physical_output (DataType::AUDIO, physport);
+			vector<string> outs;
+			_engine.get_physical_outputs (DataType::AUDIO, outs);
 
-                               if (physical_output.length()) {
-                                       if (_click_io->add_port (physical_output, this)) {
-                                               // relax, even though its an error
-				       }
-			       }
-		       }
-
-                       if (_click_io->n_ports () > ChanCount::ZERO) {
-                               _clicking = Config->get_clicking ();
-                       }
+			for (uint32_t physport = 0; physport < 2; ++physport) {
+				if (outs.size() > physport) {
+					if (_click_io->add_port (outs[physport], this)) {
+						// relax, even though its an error
+					}
+				}
+			}
+			
+			if (_click_io->n_ports () > ChanCount::ZERO) {
+				_clicking = Config->get_clicking ();
+			}
 		}
 	}
-
+	
 	catch (failed_constructor& err) {
 		error << _("cannot setup Click I/O") << endmsg;
 	}
@@ -427,6 +428,13 @@ Session::when_engine_running ()
 
 	BootMessage (_("Set up standard connections"));
 
+	vector<string> inputs[DataType::num_types];
+	vector<string> outputs[DataType::num_types];
+	for (uint32_t i = 0; i < DataType::num_types; ++i) {
+		_engine.get_physical_inputs (DataType (DataType::Symbol (i)), inputs[i]);
+		_engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
+	}
+
 	/* Create a set of Bundle objects that map
 	   to the physical I/O currently available.  We create both
 	   mono and stereo bundles, so that the common cases of mono
@@ -437,28 +445,28 @@ Session::when_engine_running ()
 
 	/* mono output bundles */
 
-	for (uint32_t np = 0; np < n_physical_outputs.n_audio(); ++np) {
+	for (uint32_t np = 0; np < outputs[DataType::AUDIO].size(); ++np) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
 
 		shared_ptr<Bundle> c (new Bundle (buf, true));
 		c->add_channel (_("mono"), DataType::AUDIO);
-		c->set_port (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
+		c->set_port (0, outputs[DataType::AUDIO][np]);
 
 		add_bundle (c);
 	}
 
 	/* stereo output bundles */
 
-	for (uint32_t np = 0; np < n_physical_outputs.n_audio(); np += 2) {
-		if (np + 1 < n_physical_outputs.n_audio ()) {
+	for (uint32_t np = 0; np < outputs[DataType::AUDIO].size(); np += 2) {
+		if (np + 1 < outputs[DataType::AUDIO].size()) {
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("out %" PRIu32 "+%" PRIu32), np + 1, np + 2);
 			shared_ptr<Bundle> c (new Bundle (buf, true));
 			c->add_channel (_("L"), DataType::AUDIO);
-			c->set_port (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
+			c->set_port (0, outputs[DataType::AUDIO][np]);
 			c->add_channel (_("R"), DataType::AUDIO);
-			c->set_port (1, _engine.get_nth_physical_output (DataType::AUDIO, np + 1));
+			c->set_port (1, outputs[DataType::AUDIO][np + 1]);
 
 			add_bundle (c);
 		}
@@ -466,29 +474,29 @@ Session::when_engine_running ()
 
 	/* mono input bundles */
 
-	for (uint32_t np = 0; np < n_physical_inputs.n_audio(); ++np) {
+	for (uint32_t np = 0; np < inputs[DataType::AUDIO].size(); ++np) {
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
 
 		shared_ptr<Bundle> c (new Bundle (buf, false));
 		c->add_channel (_("mono"), DataType::AUDIO);
-		c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
+		c->set_port (0, inputs[DataType::AUDIO][np]);
 
 		add_bundle (c);
 	}
 
 	/* stereo input bundles */
 
-	for (uint32_t np = 0; np < n_physical_inputs.n_audio(); np += 2) {
-		if (np + 1 < n_physical_inputs.n_audio()) {
+	for (uint32_t np = 0; np < inputs[DataType::AUDIO].size(); np += 2) {
+		if (np + 1 < inputs[DataType::AUDIO].size()) {
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("in %" PRIu32 "+%" PRIu32), np + 1, np + 2);
 
 			shared_ptr<Bundle> c (new Bundle (buf, false));
 			c->add_channel (_("L"), DataType::AUDIO);
-			c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
+			c->set_port (0, inputs[DataType::AUDIO][np]);
 			c->add_channel (_("R"), DataType::AUDIO);
-			c->set_port (1, _engine.get_nth_physical_input (DataType::AUDIO, np + 1));
+			c->set_port (1, inputs[DataType::AUDIO][np + 1]);
 
 			add_bundle (c);
 		}
@@ -496,29 +504,25 @@ Session::when_engine_running ()
 
 	/* MIDI input bundles */
 
-	for (uint32_t np = 0; np < n_physical_inputs.n_midi(); ++np) {
-		string const p = _engine.get_nth_physical_input (DataType::MIDI, np);
-
-		string n = p;
+	for (uint32_t np = 0; np < inputs[DataType::MIDI].size(); ++np) {
+		string n = inputs[DataType::MIDI][np];
 		boost::erase_first (n, X_("alsa_pcm:"));
 		
-		shared_ptr<Bundle> c (new Bundle (n, false));
+		shared_ptr<Bundle> c (new Bundle (n, true));
 		c->add_channel ("", DataType::MIDI);
-		c->set_port (0, p);
+		c->set_port (0, inputs[DataType::MIDI][np]);
 		add_bundle (c);
 	}
 		
 	/* MIDI output bundles */
 
-	for (uint32_t np = 0; np < n_physical_outputs.n_midi(); ++np) {
-		string const p = _engine.get_nth_physical_output (DataType::MIDI, np);
-
-		string n = p;
+	for (uint32_t np = 0; np < outputs[DataType::MIDI].size(); ++np) {
+		string n = outputs[DataType::MIDI][np];
 		boost::erase_first (n, X_("alsa_pcm:"));
 
-		shared_ptr<Bundle> c (new Bundle (n, true));
+		shared_ptr<Bundle> c (new Bundle (n, false));
 		c->add_channel ("", DataType::MIDI);
-		c->set_port (0, p);
+		c->set_port (0, outputs[DataType::MIDI][np]);
 		add_bundle (c);
 	}
 
@@ -539,7 +543,10 @@ Session::when_engine_running ()
 
 			for (uint32_t n = 0; n < limit; ++n) {
 				Port* p = _master_out->output()->nth (n);
-				string connect_to = _engine.get_nth_physical_output (DataType (p->type()), n);
+				string connect_to;
+				if (outputs[p->type()].size() > n) {
+					connect_to = outputs[p->type()][n];
+				}
 
 				if (!connect_to.empty() && p->connected_to (connect_to) == false) {
 					if (_master_out->output()->connect (p, connect_to, this)) {
@@ -605,7 +612,10 @@ Session::when_engine_running ()
 						for (uint32_t n = 0; n < limit; ++n) {
 
 							Port* p = _monitor_out->output()->ports().port(*t, n);
-							string connect_to = _engine.get_nth_physical_output (*t, (n % mod));
+							string connect_to;
+							if (outputs[*t].size() > (n % mod)) {
+								connect_to = outputs[*t][n % mod];
+							}
 
 							if (!connect_to.empty()) {
 								if (_monitor_out->output()->connect (p, connect_to, this)) {

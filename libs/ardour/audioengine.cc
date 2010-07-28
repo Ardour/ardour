@@ -1178,36 +1178,6 @@ AudioEngine::get_physical_outputs (DataType type, vector<string>& outs)
 	get_physical (type, JackPortIsOutput, outs);
 }
 
-string
-AudioEngine::get_nth_physical (DataType type, uint32_t n, int flag)
-{
-	GET_PRIVATE_JACK_POINTER_RET (_jack,"");
-	const char ** ports;
-	uint32_t i;
-	uint32_t idx;
-	string ret;
-
-	assert(type != DataType::NIL);
-
-	if ((ports = jack_get_ports (_priv_jack, NULL, type.to_jack_type(), JackPortIsPhysical|flag)) == 0) {
-		return ret;
-	}
-
-	for (i = 0, idx = 0; idx < n && ports[i]; ++i) {
-                if (!strstr (ports[i], "Midi-Through")) {
-                        ++idx;
-                }
-        }
-
-	if (ports[idx]) {
-		ret = ports[idx];
-	}
-
-	free ((const char **) ports);
-
-	return ret;
-}
-
 void
 AudioEngine::update_total_latency (const Port& port)
 {
