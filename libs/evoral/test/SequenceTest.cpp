@@ -99,8 +99,8 @@ SequenceTest::controlInterpolationTest ()
 		seq->notes().insert(*i);
 	}
 
-	static const FrameTime delay   = 1000;
-	static const uint32_t  cc_type = 1;
+	static const uint64_t delay   = 1000;
+	static const uint32_t cc_type = 1;
 
 	boost::shared_ptr<Control> c = seq->control(MIDI::ContinuousController(cc_type, 1, 1), true);
 	CPPUNIT_ASSERT(c);
@@ -109,9 +109,9 @@ SequenceTest::controlInterpolationTest ()
 	MIDI::controller_range(min, max, normal);
 
 	// Make a ramp like /\ from min to max and back to min
-	c->set_float(min, true, 0);
-	c->set_float(max, true, delay);
-	c->set_float(min, true, 2*delay);
+	c->set_double(min, true, 0);
+	c->set_double(max, true, delay);
+	c->set_double(min, true, 2*delay);
 
 	CCTestSink<Time> sink(cc_type);
 
