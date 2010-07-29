@@ -165,6 +165,18 @@ Bundle::add_channel (std::string const & n, DataType t)
 	emit_changed (ConfigurationChanged);
 }
 
+/** @param n Channel name */
+void
+Bundle::add_channel (std::string const & n, DataType t, PortList p)
+{
+	{
+		Glib::Mutex::Lock lm (_channel_mutex);
+		_channel.push_back (Channel (n, t, p));
+	}
+
+	emit_changed (ConfigurationChanged);
+}
+
 bool
 Bundle::port_attached_to_channel (uint32_t ch, std::string portname)
 {
@@ -471,3 +483,4 @@ Bundle::channel_type (uint32_t c) const
 	Glib::Mutex::Lock lm (_channel_mutex);
 	return _channel[c].type;
 }	
+

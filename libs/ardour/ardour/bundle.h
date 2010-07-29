@@ -51,6 +51,7 @@ class Bundle : public PBD::ScopedConnectionList
 
 	struct Channel {
 		Channel (std::string n, DataType t) : name (n), type (t) {}
+		Channel (std::string n, DataType t, PortList p) : name (n), type (t), ports (p) {}
 
 		bool operator== (Channel const &o) const {
 			return name == o.name && type == o.type && ports == o.ports;
@@ -76,6 +77,7 @@ class Bundle : public PBD::ScopedConnectionList
 	PortList const & channel_ports (uint32_t) const;
 
 	void add_channel (std::string const &, DataType);
+	void add_channel (std::string const &, DataType, PortList);
 	std::string channel_name (uint32_t) const;
 	DataType channel_type (uint32_t) const;
 	void set_channel_name (uint32_t, std::string const &);
