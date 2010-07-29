@@ -277,6 +277,8 @@ MackieControlProtocol::switch_banks (int initial)
 		for (; it != end && it != sorted.end(); ++it, ++i)
 		{
 			boost::shared_ptr<Route> route = *it;
+
+			assert (surface().strips[i]);
 			Strip & strip = *surface().strips[i];
 
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("remote id %1 connecting %2 to %3 with port %4\n", 
@@ -957,7 +959,9 @@ MackieControlProtocol::notify_property_changed (const PropertyChange& what_chang
 	try
 	{
 		Strip & strip = route_signal->strip();
-		if (!strip.is_master())
+		
+		/* XXX: not sure about this check to only display stuff for strips of index < 8 */
+		if (!strip.is_master() && strip.index() < 8)
 		{
 			string line1;
 			string fullname = route_signal->route()->name();

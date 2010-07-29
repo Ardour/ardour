@@ -54,6 +54,7 @@ Port::Port (string const & name, Flags flags, jack_client_t* jack_client)
 	, input_fifo (1024)
 	, _flags (flags)
 {
+	assert (jack_client);
 	init (name, flags);
 }
 
@@ -66,6 +67,8 @@ Port::Port (const XMLNode& node, jack_client_t* jack_client)
 	, output_fifo (512)
 	, input_fifo (1024)
 {
+	assert (jack_client);
+	
 	Descriptor desc (node);
 
 	init (desc.tag, desc.flags);

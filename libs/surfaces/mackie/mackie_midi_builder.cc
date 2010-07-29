@@ -114,8 +114,13 @@ MidiByteArray MackieMidiBuilder::zero_strip( SurfacePort & port, const Strip & s
 	}
 	
 	// These must have sysex headers
-	retval << strip_display_blank( port, strip, 0 );
-	retval << strip_display_blank( port, strip, 1 );
+
+	/* XXX: not sure about this check to only display stuff for strips of index < 8 */
+	if (strip.index() < 8) {
+		retval << strip_display_blank( port, strip, 0 );
+		retval << strip_display_blank( port, strip, 1 );
+	}
+	
 	return retval;
 }
 
@@ -186,15 +191,8 @@ MidiByteArray MackieMidiBuilder::strip_display_blank( SurfacePort & port, const 
 
 MidiByteArray MackieMidiBuilder::strip_display( SurfacePort & port, const Strip & strip, unsigned int line_number, const std::string & line )
 {
-	if ( line_number > 1 )
-	{
-		throw runtime_error( "line_number must be 0 or 1" );
-	}
-	
-	if ( strip.index() > 7 )
-	{
-		throw runtime_error( "strip.index() must be between 0 and 7" );
-	}
+	assert (line_number <= 1);
+	assert (strip.index() < 8);
 
 #ifdef DEBUG	
 	cout << "MackieMidiBuilder::strip_display index: " << strip.index() << ", line " << line_number << ": " << line << endl;

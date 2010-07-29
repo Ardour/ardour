@@ -124,7 +124,7 @@ MidiByteArray SurfacePort::read()
 void SurfacePort::write( const MidiByteArray & mba )
 {
 #ifdef PORT_DEBUG
-	cout << "SurfacePort::write: " << mba << endl;
+	cout << "SurfacePort::write: " << mba << " to " << output_port().name() << endl;
 #endif
 	
 	// check active before and after lock - to make sure

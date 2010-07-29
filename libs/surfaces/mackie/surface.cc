@@ -46,9 +46,9 @@ void Surface::init_strips( uint32_t max_strips, uint32_t unit_strips )
 {
 	if ( strips.size() < max_strips )
 	{
-		strips.resize( max_strips );
-		for ( uint32_t i = strips.size(); i < max_strips; ++i )
-		{
+		uint32_t const old_size = strips.size();
+		strips.resize (max_strips);
+		for (uint32_t i = old_size; i < max_strips; ++i) {
 			// because I can't find itoa
 			ostringstream os;
 			os << "strip_" << i + 1;
