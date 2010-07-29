@@ -979,6 +979,7 @@ SoundFileOmega::reset_options ()
 			}
 			if (same_size) {
 				channel_strings.push_back (_("all files in one track"));
+				channel_strings.push_back (_("merge files"));
 			}
 			
 		}
