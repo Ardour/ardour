@@ -33,6 +33,7 @@ namespace ARDOUR {
 
 class Route;
 class Session;
+class Bundle;
 
 class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI {
   public:
@@ -97,6 +98,8 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 	void route_set_soloed (uint32_t table_index, bool);
 
 	std::string route_get_name (uint32_t table_index);
+
+	virtual std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
 
 	virtual bool  has_editor () const { return false; }
 	virtual void* get_gui() const { return 0; }

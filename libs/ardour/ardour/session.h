@@ -89,7 +89,6 @@ class AuxInput;
 class BufferSet;
 class Bundle;
 class Butler;
-class ControlProtocolInfo;
 class Diskstream;
 class ExportHandler;
 class ExportStatus;

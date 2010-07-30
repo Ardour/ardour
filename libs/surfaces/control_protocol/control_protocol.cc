@@ -354,3 +354,8 @@ ControlProtocol:: route_get_name (uint32_t table_index)
 	return r->name();
 }
 
+list<boost::shared_ptr<Bundle> >
+ControlProtocol::bundles ()
+{
+       return list<boost::shared_ptr<Bundle> > ();
+}

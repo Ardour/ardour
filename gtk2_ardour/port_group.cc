@@ -29,6 +29,8 @@
 #include "ardour/port.h"
 #include "ardour/session.h"
 #include "ardour/auditioner.h"
+#include "ardour/control_protocol_manager.h"
+#include "control_protocol/control_protocol.h"
 
 #include "gui_thread.h"
 #include "port_group.h"
@@ -419,6 +421,20 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		b = bundle_for_type (session->click_io()->bundle(), type);
 		if (b) {
 			ardour->add_bundle (b);
+		}
+	}
+
+	/* Ardour's surfaces */
+
+	ControlProtocolManager& m = ControlProtocolManager::instance ();
+	for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
+		if ((*i)->protocol) {
+			list<boost::shared_ptr<Bundle> > b = (*i)->protocol->bundles ();
+			for (list<boost::shared_ptr<Bundle> >::iterator j = b.begin(); j != b.end(); ++j) {
+				if ((*j)->ports_are_inputs() == inputs) {
+					ardour->add_bundle (*j);
+				}
+			}
 		}
 	}
 

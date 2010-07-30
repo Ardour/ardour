@@ -85,6 +85,8 @@ class MackieControlProtocol
 	
 	Mackie::Surface & surface();
 
+	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
+
 	// control events
 	void handle_control_event(Mackie::SurfacePort & port, Mackie::Control & control, const Mackie::ControlState & state);
 
@@ -337,6 +339,11 @@ class MackieControlProtocol
 	
 	// Which timecode are we displaying? BBT or Timecode
 	ARDOUR::AnyTime::Type _timecode_type;
+
+	// Bundle to represent our input ports
+	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
+	// Bundle to represent our output ports
+	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
 };
 
 #endif // ardour_mackie_control_protocol_h

@@ -83,6 +83,8 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _surface (0)
 	, _jog_wheel (*this)
 	, _timecode_type (ARDOUR::AnyTime::BBT)
+	, _input_bundle (new ARDOUR::Bundle (_("Mackie Control In"), true))
+	, _output_bundle (new ARDOUR::Bundle (_("Mackie Control Out"), false))
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 }
@@ -575,6 +577,18 @@ MackieControlProtocol::add_port (MIDI::Port & midi_input_port, MIDI::Port & midi
 	sport->init_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_port_init, this, sport));
 	sport->active_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_port_active, this, sport));
 	sport->inactive_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_port_inactive, this, sport));
+
+	_input_bundle->add_channel (
+		midi_input_port.name(),
+		ARDOUR::DataType::MIDI,
+		session->engine().make_port_name_non_relative (midi_input_port.name())
+		);
+	
+	_output_bundle->add_channel (
+		midi_output_port.name(),
+		ARDOUR::DataType::MIDI,
+		session->engine().make_port_name_non_relative (midi_output_port.name())
+		);
 }
 
 void 
@@ -1707,3 +1721,11 @@ MackieControlProtocol::timecode_beats_release (Button &)
 	return off;
 }
 
+list<boost::shared_ptr<ARDOUR::Bundle> >
+MackieControlProtocol::bundles ()
+{
+	list<boost::shared_ptr<ARDOUR::Bundle> > b;
+	b.push_back (_input_bundle);
+	b.push_back (_output_bundle);
+	return b;
+}
