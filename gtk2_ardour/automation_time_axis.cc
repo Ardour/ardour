@@ -379,10 +379,18 @@ AutomationTimeAxisView::set_interpolation (AutomationList::InterpolationStyle st
 void
 AutomationTimeAxisView::clear_clicked ()
 {
+	assert (_line || _view);
+	
+	_session->begin_reversible_command (_("clear automation"));
+	
 	if (_line) {
-		_session->begin_reversible_command (_("clear automation"));
 		_line->clear ();
+	} else if (_view) {
+		_view->clear ();
 	}
+
+	_session->commit_reversible_command ();
+	_session->set_dirty ();
 }
 
 void

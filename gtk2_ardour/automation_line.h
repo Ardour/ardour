@@ -64,7 +64,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	void queue_reset ();
 	void reset ();
-	void clear();
+	void clear ();
 
 	std::list<ControlPoint*> point_selection_to_control_points (PointSelection const &); 
 	void set_selected_points (PointSelection&);

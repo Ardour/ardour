@@ -262,3 +262,14 @@ AutomationStreamView::interpolation () const
 
 	return v->line()->the_list()->interpolation ();
 }
+
+/** Clear all automation displayed in this view */
+void
+AutomationStreamView::clear ()
+{
+	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*i);
+		assert (arv);
+		arv->line()->clear ();
+	}
+}
