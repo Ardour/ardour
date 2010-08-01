@@ -20,6 +20,9 @@
 #include <cstring>
 #include <boost/shared_ptr.hpp>
 
+#include "midi++/manager.h"
+#include "midi++/mmc.h"
+
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/bundle.h"
@@ -436,6 +439,44 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 				}
 			}
 		}
+	}
+
+	/* Ardour's sync ports */
+
+	MIDI::Manager* midi_manager = MIDI::Manager::instance ();
+	if (midi_manager && (type == DataType::MIDI || type == DataType::NIL)) {
+		boost::shared_ptr<Bundle> sync (new Bundle (_("Sync"), inputs));
+		MIDI::MachineControl* mmc = midi_manager->mmc ();
+		AudioEngine& ae = session->engine ();
+		if (inputs) {
+			sync->add_channel (
+				_("MTC in"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->mtc_input_port()->name())
+				);
+			sync->add_channel (
+				_("MIDI control in"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->midi_input_port()->name())
+				);
+			sync->add_channel (
+				_("MIDI clock in"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->midi_clock_input_port()->name())
+				);
+			sync->add_channel (
+				_("MMC in"), DataType::MIDI, ae.make_port_name_non_relative (mmc->input_port()->name())
+				);
+		} else {
+			sync->add_channel (
+				_("MTC out"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->mtc_output_port()->name())
+				);
+			sync->add_channel (
+				_("MIDI control out"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->midi_output_port()->name())
+				);
+			sync->add_channel (
+				_("MIDI clock out"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->midi_clock_output_port()->name())
+				);
+			sync->add_channel (
+				_("MMC out"), DataType::MIDI, ae.make_port_name_non_relative (mmc->output_port()->name())
+				);
+		}
+		
+		ardour->add_bundle (sync);
 	}
 
 	/* Now find all other ports that we haven't thought of yet */

@@ -91,6 +91,7 @@ class MachineControl
 	
 	MachineControl (Manager *, jack_client_t *);
 
+	Port* input_port() { return _input_port; }
 	Port* output_port() { return _output_port; }
 	
 	void set_receive_device_id (byte id);
