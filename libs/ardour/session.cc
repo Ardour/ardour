@@ -511,7 +511,7 @@ Session::when_engine_running ()
 		string n = inputs[DataType::MIDI][np];
 		boost::erase_first (n, X_("alsa_pcm:"));
 		
-		shared_ptr<Bundle> c (new Bundle (n, true));
+		shared_ptr<Bundle> c (new Bundle (n, false));
 		c->add_channel ("", DataType::MIDI);
 		c->set_port (0, inputs[DataType::MIDI][np]);
 		add_bundle (c);
@@ -523,7 +523,7 @@ Session::when_engine_running ()
 		string n = outputs[DataType::MIDI][np];
 		boost::erase_first (n, X_("alsa_pcm:"));
 
-		shared_ptr<Bundle> c (new Bundle (n, false));
+		shared_ptr<Bundle> c (new Bundle (n, true));
 		c->add_channel ("", DataType::MIDI);
 		c->set_port (0, outputs[DataType::MIDI][np]);
 		add_bundle (c);

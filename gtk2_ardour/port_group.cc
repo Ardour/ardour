@@ -469,7 +469,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
                                    connections.
                                 */
 
-                                if (p.find ("MIDI-Through") != string::npos) {
+                                if (p.find ("Midi-Through") != string::npos) {
                                         ++n;
                                         continue;
                                 }
