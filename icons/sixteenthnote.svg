@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Sodipodi ("http://www.sodipodi.com/") -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xml:space="preserve"
+   width="257mm"
+   height="95mm"
+   style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd"
+   viewBox="0 0 8268 11692"
+   id="svg2"
+   sodipodi:version="0.34"
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="Notes.svg"
+   version="1.1"><metadata
+     id="metadata34"><rdf:RDF><cc:Work
+         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><sodipodi:namedview
+     inkscape:window-height="1155"
+     inkscape:window-width="1643"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     id="base"
+     inkscape:zoom="2.0103972"
+     inkscape:cx="534.71016"
+     inkscape:cy="281.79409"
+     inkscape:window-x="82"
+     inkscape:window-y="0"
+     inkscape:current-layer="svg2"
+     showgrid="false"
+     inkscape:window-maximized="0" /><defs
+     id="defs4"><inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 168.30708 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="910.62994 : 168.30708 : 1"
+       inkscape:persp3d-origin="455.31497 : 112.20472 : 1"
+       id="perspective20" /><style
+       type="text/css"
+       id="style6">
+   
+    .str1 {stroke:#131516;stroke-width:3}
+    .str0 {stroke:#131516;stroke-width:42}
+    .fil0 {fill:none}
+    .fil1 {fill:#131516}
+   
+  </style></defs><path
+     style="fill:none;stroke:#131516;stroke-width:132.11592102"
+     id="path17"
+     d="m -11065.602,11076.63 30399.205,0"
+     class="fil0 str0" /><path
+     style="fill:#131516;stroke:#131516;stroke-width:9.4368515"
+     id="path27"
+     d="m 8183.8842,7837.8677 0,-4880.2396 162.9985,0 c 21.942,243.065 75.23,432.4662 162.9984,561.8904 84.6338,129.4243 225.6901,284.102 426.3035,457.7198 197.4789,176.7745 351.0736,337.7656 463.9186,482.9733 162.9984,205.1847 285.2472,404.056 373.0156,593.4573 84.6338,189.4013 128.518,407.2128 128.518,656.5911 0,192.558 -28.2113,391.4293 -87.7684,599.7707 109.7105,148.3644 162.9985,381.9593 162.9985,694.4714 0,202.028 -25.0767,400.8994 -78.3647,599.7707 -56.4225,198.8714 -134.7871,372.4892 -238.2284,517.6968 l -103.4413,0 c 197.4788,-385.1159 294.651,-722.8815 294.651,-1010.1401 0,-549.2637 -316.5931,-984.8867 -952.9139,-1306.8688 -47.0188,-25.2535 -112.8451,-66.2905 -197.4788,-126.2676 -87.7684,-56.8203 -156.7293,-104.1707 -200.6135,-132.5809 -47.0188,-28.4102 -97.1721,-56.8203 -153.5946,-75.7605 l 0,2777.8855 c 0,189.4012 -62.6917,363.0191 -184.9406,517.6968 -125.3834,154.6777 -282.1126,274.6319 -473.3223,363.0191 -191.2097,85.2306 -379.2848,129.4242 -564.2253,129.4242 -178.6713,0 -325.9968,-41.0369 -441.9765,-123.1108 -119.1142,-82.0739 -184.9405,-205.1847 -197.4788,-369.3325 0,-186.2446 62.6917,-363.0191 191.2096,-530.3236 128.518,-167.3044 291.5164,-299.8853 485.8607,-397.7427 197.4789,-97.8573 385.554,-145.2076 570.4945,-145.2076 191.2097,0 341.6698,47.3503 451.3802,145.2076 z M 8384.4977,4131.916 c 0,277.7886 72.0954,517.6968 216.2863,719.7249 147.3255,202.028 354.2081,432.4662 626.917,694.4713 269.5743,262.0051 438.8419,457.7198 507.8028,590.3007 15.6729,-82.0739 21.9421,-170.4612 21.9421,-265.1618 0,-208.3414 -40.7496,-404.0561 -125.3834,-580.8306 -84.6338,-179.9312 -194.3443,-340.9223 -325.9968,-479.8166 -131.6526,-138.8942 -275.8435,-262.0051 -429.4382,-372.4891 -156.7292,-110.4841 -319.7277,-211.4981 -492.1298,-306.1988 z"
+     class="fil1 str1" /></svg>

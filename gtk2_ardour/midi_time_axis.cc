@@ -81,6 +81,7 @@
 #include "rgb_macros.h"
 #include "selection.h"
 #include "simplerect.h"
+#include "step_entry.h"
 #include "utils.h"
 
 #include "ardour/midi_track.h"
@@ -918,6 +919,11 @@ MidiTimeAxisView::start_step_editing ()
 	}
 
 	midi_track()->set_step_editing (true);
+
+        StepEntry* se = new StepEntry (*this);
+
+        se->set_position (WIN_POS_MOUSE);
+        se->present ();
 }
 
 void
@@ -951,37 +957,44 @@ MidiTimeAxisView::check_step_edit ()
 		incoming.read_contents (size, buf);
 
 		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON) {
-
-			if (step_edit_region == 0) {
-
-				step_edit_region = add_region (step_edit_insert_position);
-				RegionView* rv = view()->find_view (step_edit_region);
-                                step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
-			}
-
-			if (step_edit_region && step_edit_region_view) {
-                        
-                                if (step_edit_beat_pos < 0.0) {
-                                        framecnt_t frames_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
-                                        if (frames_from_start < 0) {
-                                                continue;
-                                        }
-                                        step_edit_beat_pos = step_edit_region_view->frames_to_beats (frames_from_start);
-                                }
-
-				bool success;
-				Evoral::MusicalTime beats = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
-
-				if (!success) {
-					continue;
-				}
-                                
-				step_edit_region_view->step_add_note (buf[0] & 0xf, buf[1], buf[2], step_edit_beat_pos, beats);
-				step_edit_beat_pos += beats;
-			}
+                        step_add_note (buf[0] & 0xf, buf[1], buf[2], 0.0);
 		}
-
 	}
+}
+
+int
+MidiTimeAxisView::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evoral::MusicalTime beat_duration)
+{
+        if (step_edit_region == 0) {
+                
+                step_edit_region = add_region (step_edit_insert_position);
+                RegionView* rv = view()->find_view (step_edit_region);
+                step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
+        }
+        
+        if (step_edit_region && step_edit_region_view) {
+                if (step_edit_beat_pos < 0.0) {
+                        framecnt_t frames_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
+                        if (frames_from_start < 0) {
+                                return 1;
+                        }
+                        step_edit_beat_pos = step_edit_region_view->frames_to_beats (frames_from_start);
+                }
+                
+                if (beat_duration == 0.0) {
+                        bool success;
+                        beat_duration = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
+                        
+                        if (!success) {
+                                return -1;
+                        }
+                }
+                                
+                step_edit_region_view->step_add_note (channel, pitch, velocity, step_edit_beat_pos, beat_duration);
+                step_edit_beat_pos += beat_duration;
+        }
+
+        return 0;
 }
 
 void

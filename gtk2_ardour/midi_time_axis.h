@@ -91,6 +91,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void stop_step_editing ();
 	void check_step_edit ();
 	void step_edit_rest ();
+        int step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, 
+                           Evoral::MusicalTime beat_duration);
 
 	const MidiMultipleChannelSelector& channel_selector() { return _channel_selector; }
 

@@ -1555,7 +1555,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		_session->cancel_audition ();
 		return;
 	}
-	
+
 	if (_session->config.get_external_sync()) {
 		switch (_session->config.get_sync_source()) {
 		case JACK:
