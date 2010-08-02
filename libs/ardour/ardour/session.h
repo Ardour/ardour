@@ -780,6 +780,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
         bool step_editing() const { return (_step_editors > 0); }
 
+	void request_suspend_timecode_transmission ();
+	void request_resume_timecode_transmission ();
+	bool timecode_transmission_suspended () const;
+
   protected:
 	friend class AudioEngine;
 	void set_block_size (nframes_t nframes);
@@ -1421,6 +1425,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
         void step_edit_status_change (bool);
         uint32_t _step_editors;
+
+	/** true if timecode transmission by the transport is suspended, otherwise false */
+	mutable gint _suspend_timecode_transmission;
 };
 
 } // namespace ARDOUR

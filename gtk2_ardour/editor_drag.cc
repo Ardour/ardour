@@ -2110,18 +2110,24 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 	if (_cursor == _editor->playhead_cursor) {
 		_editor->_dragging_playhead = true;
 
-		if (_editor->session()) {
+		Session* s = _editor->session ();
+
+		if (s) {
 			if (_was_rolling && _stop) {
-				_editor->session()->request_stop ();
+				s->request_stop ();
 			}
 
-			if (_editor->session()->is_auditioning()) {
-				_editor->session()->cancel_audition ();
+			if (s->is_auditioning()) {
+				s->cancel_audition ();
 			}
 
-			nframes64_t const f = _editor->playhead_cursor->current_frame;
-			_editor->session()->send_mmc_locate (f);
-			_editor->session()->send_full_time_code (f);
+			s->request_suspend_timecode_transmission ();
+
+			if (s->timecode_transmission_suspended ()) {
+				nframes64_t const f = _editor->playhead_cursor->current_frame;
+				s->send_mmc_locate (f);
+				s->send_full_time_code (f);
+			}
 		}
 	}
 
@@ -2143,10 +2149,11 @@ CursorDrag::motion (GdkEvent* event, bool)
 
 	_editor->show_verbose_time_cursor (_cursor->current_frame, 10);
 
-	if (_editor->session() && _item == &_editor->playhead_cursor->canvas_item) {
+	Session* s = _editor->session ();
+	if (s && _item == &_editor->playhead_cursor->canvas_item && s->timecode_transmission_suspended ()) {
 		nframes64_t const f = _editor->playhead_cursor->current_frame;
-		_editor->session()->send_mmc_locate (f);
-		_editor->session()->send_full_time_code (f);
+		s->send_mmc_locate (f);
+		s->send_full_time_code (f);
 	}
 	
 
@@ -2168,9 +2175,11 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 	motion (event, false);
 
 	if (_item == &_editor->playhead_cursor->canvas_item) {
-		if (_editor->session()) {
-			_editor->session()->request_locate (_editor->playhead_cursor->current_frame, _was_rolling);
+		Session* s = _editor->session ();
+		if (s) {
+			s->request_locate (_editor->playhead_cursor->current_frame, _was_rolling);
 			_editor->_pending_locate_request = true;
+			s->request_resume_timecode_transmission ();
 		}
 	}
 }
@@ -2178,7 +2187,11 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 CursorDrag::aborted ()
 {
-	_editor->_dragging_playhead = false;
+	if (_editor->_dragging_playhead) {
+		_editor->session()->request_resume_timecode_transmission ();
+		_editor->_dragging_playhead = false;
+	}
+	
 	_cursor->set_position (adjusted_frame (grab_frame (), 0, false));
 }
 

@@ -1568,3 +1568,27 @@ Session::send_mmc_locate (nframes64_t t)
 	timecode_time_subframes (t, time);
 	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (time));
 }
+
+/** Ask the transport to not send timecode until further notice.  The suspension
+ *  will come into effect some finite time after this call, and timecode_transmission_suspended()
+ *  should be checked by the caller to find out when.
+ */
+void
+Session::request_suspend_timecode_transmission ()
+{
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetTimecodeTransmission, SessionEvent::Add, SessionEvent::Immediate, 0, 0, false);
+	queue_event (ev);
+}
+
+void
+Session::request_resume_timecode_transmission ()
+{
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetTimecodeTransmission, SessionEvent::Add, SessionEvent::Immediate, 0, 0, true);
+	queue_event (ev);
+}
+
+bool
+Session::timecode_transmission_suspended () const
+{
+	return g_atomic_int_get (&_suspend_timecode_transmission) == 1;
+}

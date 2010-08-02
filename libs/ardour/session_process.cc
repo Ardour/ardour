@@ -311,7 +311,7 @@ Session::process_with_events (nframes_t nframes)
 			return;
 		}
 
-		if (!_exporting) {
+		if (!_exporting && !timecode_transmission_suspended()) {
 			send_midi_time_code_for_cycle (nframes);
 		}
 
@@ -762,7 +762,7 @@ Session::process_without_events (nframes_t nframes)
 		return;
 	}
 
-	if (!_exporting) {
+	if (!_exporting && !timecode_transmission_suspended()) {
 		send_midi_time_code_for_cycle (nframes);
 	}
 
@@ -1098,6 +1098,10 @@ Session::process_event (SessionEvent* ev)
         case SessionEvent::AdjustCaptureBuffering:
                 schedule_capture_buffering_adjustment ();
                 break;
+
+	case SessionEvent::SetTimecodeTransmission:
+		g_atomic_int_set (&_suspend_timecode_transmission, ev->yes_or_no ? 0 : 1);
+		break;
 
 	default:
 	  fatal << string_compose(_("Programming error: illegal event type in process_event (%1)"), ev->type) << endmsg;

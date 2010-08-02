@@ -154,8 +154,8 @@ Session::Session (AudioEngine &eng,
 	  click_emphasis_data (0),
 	  main_outs (0),
 	  _metadata (new SessionMetadata()),
-	  _have_rec_enabled_track (false)
-
+	  _have_rec_enabled_track (false),
+	  _suspend_timecode_transmission (0)
 {
 	playlists.reset (new SessionPlaylists);
 	
@@ -4006,3 +4006,4 @@ Session::step_edit_status_change (bool yn)
                 StepEditStatusChange (val);
         }
 }
+
