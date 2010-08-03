@@ -91,8 +91,12 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void stop_step_editing ();
 	void check_step_edit ();
 	void step_edit_rest ();
-        int step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, 
-                           Evoral::MusicalTime beat_duration);
+        int  step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, 
+                            Evoral::MusicalTime beat_duration);
+        bool step_edit_within_triplet () const;
+        void step_edit_toggle_triplet ();
+        bool step_edit_within_chord () const;
+        void step_edit_toggle_chord ();
 
 	const MidiMultipleChannelSelector& channel_selector() { return _channel_selector; }
 
@@ -138,6 +142,9 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Evoral::MusicalTime step_edit_beat_pos;
 	boost::shared_ptr<ARDOUR::Region> step_edit_region;
 	MidiRegionView* step_edit_region_view;
+        uint8_t _step_edit_triplet_countdown;
+        bool    _step_edit_within_chord;
+        Evoral::MusicalTime _step_edit_chord_duration;
         void region_removed (boost::weak_ptr<ARDOUR::Region>);
         void playlist_changed ();
         PBD::ScopedConnection step_edit_region_connection;

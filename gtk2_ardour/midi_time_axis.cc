@@ -909,6 +909,10 @@ MidiTimeAxisView::start_step_editing ()
 {
 	step_edit_insert_position = _editor.get_preferred_edit_position ();
         step_edit_beat_pos = -1.0;
+        _step_edit_triplet_countdown = 0;
+        _step_edit_within_chord = 0;
+        _step_edit_chord_duration = 0.0;
+
 	step_edit_region = playlist()->top_region_at (step_edit_insert_position);
 
 	if (step_edit_region) {
@@ -989,12 +993,61 @@ MidiTimeAxisView::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocit
                                 return -1;
                         }
                 }
-                                
+
                 step_edit_region_view->step_add_note (channel, pitch, velocity, step_edit_beat_pos, beat_duration);
-                step_edit_beat_pos += beat_duration;
+
+                if (_step_edit_triplet_countdown > 0) {
+                        _step_edit_triplet_countdown--;
+
+                        if (_step_edit_triplet_countdown == 0) {
+                                _step_edit_triplet_countdown = 3;
+                        }
+                }
+
+                if (!_step_edit_within_chord) {
+                        step_edit_beat_pos += beat_duration;
+                } else {
+                        step_edit_beat_pos += 1.0/Meter::ticks_per_beat; // tiny, but no longer overlapping
+                        _step_edit_chord_duration = beat_duration;
+                }
         }
 
         return 0;
+}
+
+bool
+MidiTimeAxisView::step_edit_within_triplet() const
+{
+        return _step_edit_triplet_countdown > 0;
+}
+
+bool
+MidiTimeAxisView::step_edit_within_chord() const
+{
+        return _step_edit_within_chord;
+}
+
+void
+MidiTimeAxisView::step_edit_toggle_triplet ()
+{
+        if (_step_edit_triplet_countdown == 0) {
+                _step_edit_within_chord = false;
+                _step_edit_triplet_countdown = 3;
+        } else {
+                _step_edit_triplet_countdown = 0;
+        }
+}
+
+void
+MidiTimeAxisView::step_edit_toggle_chord ()
+{
+        if (_step_edit_within_chord) {
+                _step_edit_within_chord = false;
+                step_edit_beat_pos += _step_edit_chord_duration;
+        } else {
+                _step_edit_triplet_countdown = 0;
+                _step_edit_within_chord = true;
+        }
 }
 
 void

@@ -17,6 +17,8 @@
 
 */
 
+#include <iostream>
+
 #include "midi_time_axis.h"
 #include "step_entry.h"
 #include "utils.h"
@@ -169,6 +171,8 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 	g_signal_connect(G_OBJECT(_piano), "note-off", G_CALLBACK(_note_off_event_handler), this);
 
         rest_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::rest_click));
+        chord_button.signal_toggled().connect (sigc::mem_fun (*this, &StepEntry::chord_toggled));
+        triplet_button.signal_toggled().connect (sigc::mem_fun (*this, &StepEntry::triplet_toggled));
 
         packer.set_spacing (6);
         packer.pack_start (upper_box, false, false);
@@ -226,18 +230,31 @@ StepEntry::note_off_event_handler (int note)
                 velocity = 127;
         }
 
-        if (!triplet_button.get_active()) {
-                _mtv->step_add_note (channel_adjustment.get_value(), note, velocity, length);
-        } else {
+        if (_mtv->step_edit_within_triplet()) {
                 length *= 2.0/3.0;
-                _mtv->step_add_note (channel_adjustment.get_value(), note, velocity, length);
-                _mtv->step_add_note (channel_adjustment.get_value(), note, velocity, length);
-                _mtv->step_add_note (channel_adjustment.get_value(), note, velocity, length);
         }
+
+        _mtv->step_add_note (channel_adjustment.get_value(), note, velocity, length);
 }
 
 void
 StepEntry::rest_click ()
 {
         _mtv->step_edit_rest ();
+}
+
+void
+StepEntry::triplet_toggled ()
+{
+        if (triplet_button.get_active () != _mtv->step_edit_within_triplet()) {
+                _mtv->step_edit_toggle_triplet ();
+        }
+}
+
+void
+StepEntry::chord_toggled ()
+{
+        if (chord_button.get_active() != _mtv->step_edit_within_chord ()) {
+                _mtv->step_edit_toggle_chord ();
+        }
 }

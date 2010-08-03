@@ -79,6 +79,8 @@ class StepEntry : public ArdourDialog
 
         void rest_click ();
         void sustain_click ();
+        void chord_toggled ();
+        void triplet_toggled ();
 };
 
 #endif /* __gtk2_ardour_step_entry_h__ */
