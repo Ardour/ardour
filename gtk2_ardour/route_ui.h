@@ -184,9 +184,9 @@ class RouteUI : public virtual AxisView
         void build_record_menu ();
 
 	Gtk::CheckMenuItem *step_edit_item;
-	virtual void toggle_step_edit ();
+	void toggle_step_edit ();
 	virtual void step_edit_changed (bool);
-
+        
 	virtual void polarity_changed ();
 
 	Gtk::CheckMenuItem *denormal_menu_item;
@@ -221,6 +221,8 @@ class RouteUI : public virtual AxisView
  	void reset ();
 
 	void self_delete ();
+        virtual void start_step_editing () {}
+        virtual void stop_step_editing() {}
 
   private:
 	void check_rec_enable_sensitivity ();

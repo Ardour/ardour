@@ -173,8 +173,6 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
         upper_box.pack_start (channel_spinner, false, false);
 
         _piano = (PianoKeyboard*) piano_keyboard_new ();
-        piano_keyboard_set_keyboard_cue (PIANO_KEYBOARD(_piano), 1);
-        
         piano = Glib::wrap ((GtkWidget*) _piano);
 
         piano->set_flags (Gtk::CAN_FOCUS);

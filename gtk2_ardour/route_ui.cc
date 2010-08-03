@@ -589,23 +589,32 @@ RouteUI::build_record_menu ()
         /* no rec-button context menu for non-MIDI tracks 
          */
 
-        if (!is_midi_track()) {
-                return;
+        if (is_midi_track()) {
+                record_menu = new Menu;
+                record_menu->set_name ("ArdourContextMenu");
+                
+                using namespace Menu_Helpers;
+                MenuList& items = record_menu->items();
+                
+                items.push_back (CheckMenuElem (_("Step Edit"), sigc::mem_fun (*this, &RouteUI::toggle_step_edit)));
+                step_edit_item = dynamic_cast<CheckMenuItem*> (&items.back());
+
+                if (_route->record_enabled()) {
+                        step_edit_item->set_sensitive (false);
+                }
+
+                step_edit_item->set_active (midi_track()->step_editing());
         }
-        
-        record_menu = new Menu;
-        record_menu->set_name ("ArdourContextMenu");
-
-        using namespace Menu_Helpers;
-	MenuList& items = record_menu->items();
-
-        items.push_back (CheckMenuElem (_("Step Edit"), sigc::mem_fun (*this, &RouteUI::toggle_step_edit)));
-        step_edit_item = dynamic_cast<CheckMenuItem*> (&items.back());
 }
 
 void
 RouteUI::toggle_step_edit ()
 {
+        if (!is_midi_track() || _route->record_enabled()) {
+                return;
+        }
+
+        midi_track()->set_step_editing (step_edit_item->get_active());
 }
 
 void
@@ -615,10 +624,24 @@ RouteUI::step_edit_changed (bool yn)
                 if (rec_enable_button) {
                         rec_enable_button->set_visual_state (3);
                 } 
+
+                start_step_editing ();
+
+                if (step_edit_item) {
+                        step_edit_item->set_active (true);
+                }
+
         } else {
+
                 if (rec_enable_button) {
                         rec_enable_button->set_visual_state (0);
                 } 
+
+                stop_step_editing ();
+
+                if (step_edit_item) {
+                        step_edit_item->set_active (false);
+                }
         }
 }
 
@@ -1020,9 +1043,18 @@ RouteUI::update_rec_display ()
                         
                 }
 
+                if (step_edit_item) {
+                        step_edit_item->set_sensitive (false);
+                }
+
 	} else {
 		rec_enable_button->set_visual_state (0);
+
+                if (step_edit_item) {
+                        step_edit_item->set_sensitive (true);
+                }
 	}
+        
 
 	check_rec_enable_sensitivity ();
 }

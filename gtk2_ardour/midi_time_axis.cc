@@ -892,20 +892,6 @@ MidiTimeAxisView::route_active_changed ()
 }
 
 void
-MidiTimeAxisView::toggle_step_edit ()
-{
-        if (_route->record_enabled()) {
-                return;
-        }
-
-        if (midi_track()->step_editing ()) {
-                stop_step_editing ();
-        } else {
-                start_step_editing ();
-        }
-}
-
-void
 MidiTimeAxisView::start_step_editing ()
 {
 	step_edit_insert_position = _editor.get_preferred_edit_position ();
@@ -923,7 +909,6 @@ MidiTimeAxisView::start_step_editing ()
 		step_edit_region_view = 0;
 	}
 
-	midi_track()->set_step_editing (true);
 
         if (step_editor == 0) {
                 step_editor = new StepEntry (*this);
@@ -937,15 +922,14 @@ MidiTimeAxisView::start_step_editing ()
 bool
 MidiTimeAxisView::step_editor_hidden (GdkEventAny*)
 {
-        stop_step_editing ();
+        /* everything else will follow the change in the model */
+	midi_track()->set_step_editing (false);
         return true;
 }
 
 void
 MidiTimeAxisView::stop_step_editing ()
 {
-	midi_track()->set_step_editing (false);
-
         if (step_editor) {
                 step_editor->hide ();
         }

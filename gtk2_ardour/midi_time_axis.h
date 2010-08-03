@@ -87,9 +87,6 @@ class MidiTimeAxisView : public RouteTimeAxisView
 		return _midi_patch_settings_changed;
 	}
 
-        void toggle_step_edit ();
-	void start_step_editing ();
-	void stop_step_editing ();
 	void check_step_edit ();
 	void step_edit_rest ();
         int  step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, 
@@ -102,7 +99,11 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	const MidiMultipleChannelSelector& channel_selector() { return _channel_selector; }
 
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
-	
+
+  protected:
+	void start_step_editing ();
+	void stop_step_editing ();
+
   private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 
