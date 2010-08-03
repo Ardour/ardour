@@ -167,9 +167,10 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 
         _piano = (PianoKeyboard*) piano_keyboard_new ();
         piano = Glib::wrap ((GtkWidget*) _piano);
+        piano_keyboard_set_keyboard_cue (PIANO_KEYBOARD(_piano), 1);
 
-	g_signal_connect(G_OBJECT(_piano), "note-off", G_CALLBACK(_note_off_event_handler), this);
-
+        g_signal_connect(G_OBJECT(_piano), "note-off", G_CALLBACK(_note_off_event_handler), this);
+        
         rest_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::rest_click));
         chord_button.signal_toggled().connect (sigc::mem_fun (*this, &StepEntry::chord_toggled));
         triplet_button.signal_toggled().connect (sigc::mem_fun (*this, &StepEntry::triplet_toggled));

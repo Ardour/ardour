@@ -35,6 +35,7 @@
 #include <string.h>
 #include <strings.h>
 #include <stdint.h>
+#include <cairo/cairo.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
@@ -52,71 +53,84 @@ enum {
 static guint	piano_keyboard_signals[LAST_SIGNAL] = { 0 };
 
 static void
-draw_keyboard_cue(PianoKeyboard *pk)
+draw_keyboard_cue(PianoKeyboard *pk, cairo_t* cr)
 {
 	int		w = pk->notes[0].w;
 	int		h = pk->notes[0].h;
-
-	GdkGC          *gc = GTK_WIDGET(pk)->style->fg_gc[0];
 
 	int		first_note_in_lower_row = (pk->octave + 5) * 12;
 	int		last_note_in_lower_row = (pk->octave + 6) * 12 - 1;
 	int		first_note_in_higher_row = (pk->octave + 6) * 12;
 	int		last_note_in_higher_row = (pk->octave + 7) * 12 + 4;
 
-	gdk_draw_line(GTK_WIDGET(pk)->window, gc, pk->notes[first_note_in_lower_row].x + 3,
-			h - 6, pk->notes[last_note_in_lower_row].x + w - 3, h - 6);
+        cairo_set_source_rgb (cr, 1.0f, 0.0f, 0.0f);
+        cairo_move_to (cr, pk->notes[first_note_in_lower_row].x + 3, h - 6);
+        cairo_line_to (cr, pk->notes[last_note_in_lower_row].x + w - 3, h - 6);
+        cairo_stroke (cr);
 
-	gdk_draw_line(GTK_WIDGET(pk)->window, gc, pk->notes[first_note_in_higher_row].x + 3,
-			h - 9, pk->notes[last_note_in_higher_row].x + w - 3, h - 9);
+        cairo_set_source_rgb (cr, 0.0f, 0.0f, 1.0f);
+        cairo_move_to (cr, pk->notes[first_note_in_higher_row].x + 3, h - 9);
+        cairo_line_to (cr, pk->notes[last_note_in_higher_row].x + w - 3, h - 9);
+        cairo_stroke (cr);
+}
+
+static void
+queue_note_draw (PianoKeyboard* pk, int note)
+{
+        GdkWindow* w = GTK_WIDGET(pk)->window;
+
+        if (w) {
+                GdkRectangle r;
+
+                r.x = pk->notes[note].x;
+                r.y = 0;
+                r.width = pk->notes[note].w;
+                r.height = pk->notes[note].h;
+
+                gdk_window_invalidate_rect (w, &r, TRUE);
+        }
 }
 
 static void 
-draw_note(PianoKeyboard *pk, int note)
+draw_note(PianoKeyboard *pk, cairo_t* cr, int note)
 {
-	GdkColor	black = {0, 0, 0, 0};
-	GdkColor	white = {0, 65535, 65535, 65535};
-
-	GdkGC		*gc = GTK_WIDGET(pk)->style->fg_gc[0];
-	GtkWidget	*widget;
-
 	int		is_white = pk->notes[note].white;
 
 	int		x = pk->notes[note].x;
 	int		w = pk->notes[note].w;
 	int		h = pk->notes[note].h;
 
-	if (pk->notes[note].pressed || pk->notes[note].sustained)
+	if (pk->notes[note].pressed || pk->notes[note].sustained) {
 		is_white = !is_white;
+        }
 
-	if (is_white)
-		gdk_gc_set_rgb_fg_color(gc, &white);
-	else
-		gdk_gc_set_rgb_fg_color(gc, &black);
+        cairo_set_line_width (cr, 1.0);
 
-	gdk_draw_rectangle(GTK_WIDGET(pk)->window, gc, TRUE, x, 0, w, h);
-	gdk_gc_set_rgb_fg_color(gc, &black);
-	gdk_draw_rectangle(GTK_WIDGET(pk)->window, gc, FALSE, x, 0, w, h);
+	if (is_white) {
+                cairo_set_source_rgb (cr, 1.0f, 1.0f, 1.0f);
+        } else {
+                cairo_set_source_rgb (cr, 0.0f, 0.0f, 0.0f);
+        }
 
-	if (pk->enable_keyboard_cue)
-		draw_keyboard_cue(pk);
+        cairo_rectangle (cr, x, 0, w, h);
+        cairo_fill (cr);
+
+        cairo_set_source_rgb(cr, 0.0f, 0.0f, 0.0f); /* black outline */
+        cairo_rectangle (cr, x, 0, w, h);
+        cairo_stroke (cr);
+
+	if (pk->enable_keyboard_cue) {
+		draw_keyboard_cue (pk, cr);
+        }
 
 	/* We need to redraw black keys that partially obscure the white one. */
-	if (note < NNOTES - 2 && !pk->notes[note + 1].white)
-		draw_note(pk, note + 1);
+	if (note < NNOTES - 2 && !pk->notes[note + 1].white) {
+		draw_note(pk, cr, note + 1);
+        }
 
-	if (note > 0 && !pk->notes[note - 1].white)
-		draw_note(pk, note - 1);
-
-	/*
-	 * XXX: This doesn't really belong here.  Originally I wanted to pack PianoKeyboard into GtkFrame
-	 * packed into GtkAlignment.  I failed to make it behave the way I want.  GtkFrame would need
-	 * to adapt to the "proper" size of PianoKeyboard, i.e. to the useful_width, not allocated width;
-	 * that didn't work.
-	 */
-	widget = GTK_WIDGET(pk);
-	gtk_paint_shadow(widget->style, widget->window, GTK_STATE_NORMAL, GTK_SHADOW_IN, NULL, widget, NULL, pk->widget_margin, 0,
-		widget->allocation.width - pk->widget_margin * 2 + 1, widget->allocation.height);
+	if (note > 0 && !pk->notes[note - 1].white) {
+		draw_note(pk, cr, note - 1);
+        }
 }
 
 static int 
@@ -139,7 +153,7 @@ press_key(PianoKeyboard *pk, int key)
 	pk->notes[key].pressed = 1;
 
 	g_signal_emit_by_name(GTK_WIDGET(pk), "note-on", key);
-	draw_note(pk, key);
+	queue_note_draw(pk, key);
 
 	return 1;
 }
@@ -164,7 +178,7 @@ release_key(PianoKeyboard *pk, int key)
 		return 0;
 
 	g_signal_emit_by_name(GTK_WIDGET(pk), "note-off", key);
-	draw_note(pk, key);
+	queue_note_draw(pk, key);
 
 	return 1;
 }
@@ -178,7 +192,7 @@ stop_unsustained_notes(PianoKeyboard *pk)
 		if (pk->notes[i].pressed && !pk->notes[i].sustained) {
 			pk->notes[i].pressed = 0;
 			g_signal_emit_by_name(GTK_WIDGET(pk), "note-off", i);
-			draw_note(pk, i);
+			queue_note_draw(pk, i);
 		}
 	}
 }
@@ -193,7 +207,7 @@ stop_sustained_notes(PianoKeyboard *pk)
 			pk->notes[i].pressed = 0;
 			pk->notes[i].sustained = 0;
 			g_signal_emit_by_name(GTK_WIDGET(pk), "note-off", i);
-			draw_note(pk, i);
+			queue_note_draw(pk, i);
 		}
 	}
 }
@@ -461,9 +475,30 @@ piano_keyboard_expose(GtkWidget *widget, GdkEventExpose *event)
 {
 	int i;
 	PianoKeyboard *pk = PIANO_KEYBOARD(widget);
+        cairo_t* cr = gdk_cairo_create (GDK_DRAWABLE (GTK_WIDGET(pk)->window));
+        
+        gdk_cairo_region (cr, event->region);
+        cairo_clip (cr);
 
-	for (i = 0; i < NNOTES; i++)
-		draw_note(pk, i);
+	for (i = 0; i < NNOTES; i++) {
+                GdkRectangle r;
+
+                r.x = pk->notes[i].x;
+                r.y = 0;
+                r.width = pk->notes[i].w;
+                r.height = pk->notes[i].h;
+
+                switch (gdk_region_rect_in (event->region, &r)) {
+                case GDK_OVERLAP_RECTANGLE_PART:
+                case GDK_OVERLAP_RECTANGLE_IN:
+                        draw_note (pk, cr, i);
+                        break;
+                default:
+                        break;
+                }
+        }
+
+        cairo_destroy (cr);
 
 	return TRUE;
 }
@@ -642,7 +677,7 @@ piano_keyboard_set_note_on(PianoKeyboard *pk, int note)
 {
 	if (pk->notes[note].pressed == 0) {
 		pk->notes[note].pressed = 1;
-		draw_note(pk, note);
+                queue_note_draw (pk, note);
 	}
 }
 
@@ -652,7 +687,7 @@ piano_keyboard_set_note_off(PianoKeyboard *pk, int note)
 	if (pk->notes[note].pressed || pk->notes[note].sustained) {
 		pk->notes[note].pressed = 0;
 		pk->notes[note].sustained = 0;
-		draw_note(pk, note);
+                queue_note_draw (pk, note);
 	}
 }
 
