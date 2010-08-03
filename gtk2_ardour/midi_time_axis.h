@@ -53,6 +53,7 @@ class PublicEditor;
 class MidiStreamView;
 class MidiScroomer;
 class PianoRollHeader;
+class StepEntry;
 
 class MidiTimeAxisView : public RouteTimeAxisView
 {
@@ -172,6 +173,9 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	ParameterMenuMap _channel_command_menu_map;
 	/** parameter -> menu item map for the controller menu */
 	ParameterMenuMap _controller_menu_map;
+
+        StepEntry* step_editor;
+        bool step_editor_hidden (GdkEventAny*);
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

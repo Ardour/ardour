@@ -116,6 +116,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 	, _midi_thru_item (0)
 	, default_channel_menu (0)
 	, controller_menu (0)
+        , step_editor (0)
 {
 	subplugin_menu.set_name ("ArdourContextMenu");
 
@@ -924,16 +925,30 @@ MidiTimeAxisView::start_step_editing ()
 
 	midi_track()->set_step_editing (true);
 
-        StepEntry* se = new StepEntry (*this);
+        if (step_editor == 0) {
+                step_editor = new StepEntry (*this);
+                step_editor->signal_delete_event().connect (sigc::mem_fun (*this, &MidiTimeAxisView::step_editor_hidden));
+        }
 
-        se->set_position (WIN_POS_MOUSE);
-        se->present ();
+        step_editor->set_position (WIN_POS_MOUSE);
+        step_editor->present ();
+}
+
+bool
+MidiTimeAxisView::step_editor_hidden (GdkEventAny*)
+{
+        stop_step_editing ();
+        return true;
 }
 
 void
 MidiTimeAxisView::stop_step_editing ()
 {
 	midi_track()->set_step_editing (false);
+
+        if (step_editor) {
+                step_editor->hide ();
+        }
 }
 
 void

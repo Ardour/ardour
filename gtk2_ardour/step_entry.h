@@ -38,7 +38,8 @@ class StepEntry : public ArdourDialog
         ~StepEntry ();
 
         void note_off_event_handler (int note);
-        
+        void rest_event_handler ();
+
   private:
         Gtk::VBox packer;
         Gtk::HBox upper_box;
@@ -81,6 +82,10 @@ class StepEntry : public ArdourDialog
         void sustain_click ();
         void chord_toggled ();
         void triplet_toggled ();
+
+        bool piano_enter_notify_event (GdkEventCrossing *ev);
+        bool on_key_release_event (GdkEventKey*);
+        bool on_key_press_event (GdkEventKey*);
 };
 
 #endif /* __gtk2_ardour_step_entry_h__ */

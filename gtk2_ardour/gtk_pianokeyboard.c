@@ -47,6 +47,7 @@
 enum {
 	NOTE_ON_SIGNAL,
 	NOTE_OFF_SIGNAL,
+        REST_SIGNAL,
 	LAST_SIGNAL
 };
 
@@ -183,6 +184,12 @@ release_key(PianoKeyboard *pk, int key)
 	return 1;
 }
 
+static void
+rest (PianoKeyboard* pk)
+{
+	g_signal_emit_by_name(GTK_WIDGET(pk), "rest");
+}        
+
 static void 
 stop_unsustained_notes(PianoKeyboard *pk)
 {
@@ -249,6 +256,8 @@ bind_keys_qwerty(PianoKeyboard *pk)
 {
 	clear_notes(pk);
 
+        bind_key(pk, "space", 128);
+
 	/* Lower keyboard row - "zxcvbnm". */
 	bind_key(pk, "z", 12);	/* C0 */
 	bind_key(pk, "s", 13);
@@ -299,6 +308,8 @@ static void
 bind_keys_azerty(PianoKeyboard *pk)
 {
 	clear_notes(pk);
+
+        bind_key(pk, "space", 128);
 
 	/* Lower keyboard row - "wxcvbn,". */
 	bind_key(pk, "w", 12);	/* C0 */
@@ -366,6 +377,14 @@ keyboard_event_handler(GtkWidget *mk, GdkEventKey *event, gpointer notused)
 		/* Key was not bound.  Maybe it's one of the keys handled in jack-keyboard.c. */
 		return FALSE;
 	}
+
+        if (note == 128) {
+                if (event->type == GDK_KEY_RELEASE) {
+                        rest (pk);
+                }
+                        
+                return TRUE;
+        }
 
 	note += pk->octave * 12;
 
@@ -586,6 +605,10 @@ piano_keyboard_class_init(PianoKeyboardClass *klass)
 		G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
 		0, NULL, NULL, g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1, G_TYPE_INT);
 
+	piano_keyboard_signals[REST_SIGNAL] = g_signal_new ("rest",
+                G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                0, NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+
 	widget_klass = (GtkWidgetClass*) klass;	
 
 	widget_klass->expose_event = piano_keyboard_expose;
@@ -621,6 +644,7 @@ piano_keyboard_get_type(void)
 			sizeof (PianoKeyboard),
 			0,    /* n_preallocs */
 			(GInstanceInitFunc) piano_keyboard_init,
+                        0,    /* value_table */
 		};
 
 		mk_type = g_type_register_static(GTK_TYPE_DRAWING_AREA, "PianoKeyboard", &mk_info, 0);

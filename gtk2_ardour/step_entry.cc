@@ -19,6 +19,8 @@
 
 #include <iostream>
 
+#include "gtkmm2ext/keyboard.h"
+
 #include "midi_time_axis.h"
 #include "step_entry.h"
 #include "utils.h"
@@ -33,9 +35,14 @@ _note_off_event_handler (GtkWidget* widget, int note, gpointer arg)
         ((StepEntry*)arg)->note_off_event_handler (note);
 }
 
+static void
+_rest_event_handler (GtkWidget* widget, gpointer arg)
+{
+        ((StepEntry*)arg)->rest_event_handler ();
+}
 
 StepEntry::StepEntry (MidiTimeAxisView& mtv)
-        : ArdourDialog (_("Step Entry Editor"))
+        : ArdourDialog (string_compose (_("Step Entry: %1"), mtv.name()))
         , triplet_button ("3")
         , sustain_button ("sustain")
         , rest_button ("rest")
@@ -166,10 +173,15 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
         upper_box.pack_start (channel_spinner, false, false);
 
         _piano = (PianoKeyboard*) piano_keyboard_new ();
-        piano = Glib::wrap ((GtkWidget*) _piano);
         piano_keyboard_set_keyboard_cue (PIANO_KEYBOARD(_piano), 1);
+        
+        piano = Glib::wrap ((GtkWidget*) _piano);
+
+        piano->set_flags (Gtk::CAN_FOCUS);
+        piano->signal_enter_notify_event().connect (sigc::mem_fun (*this, &StepEntry::piano_enter_notify_event), false);
 
         g_signal_connect(G_OBJECT(_piano), "note-off", G_CALLBACK(_note_off_event_handler), this);
+        g_signal_connect(G_OBJECT(_piano), "rest", G_CALLBACK(_rest_event_handler), this);
         
         rest_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::rest_click));
         chord_button.signal_toggled().connect (sigc::mem_fun (*this, &StepEntry::chord_toggled));
@@ -185,6 +197,28 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 
 StepEntry::~StepEntry()
 {
+}
+
+bool
+StepEntry::on_key_press_event (GdkEventKey* ev)
+{
+        int ret;
+        g_signal_emit_by_name (G_OBJECT(_piano), "key-press-event", ev, &ret);
+        return ret;
+}
+
+bool
+StepEntry::on_key_release_event (GdkEventKey* ev)
+{
+        int ret;
+        g_signal_emit_by_name (G_OBJECT(_piano), "key-release-event", ev, &ret);
+        return ret;
+}
+
+void
+StepEntry::rest_event_handler ()
+{
+        _mtv->step_edit_rest();
 }
 
 void
@@ -259,3 +293,11 @@ StepEntry::chord_toggled ()
                 _mtv->step_edit_toggle_chord ();
         }
 }
+
+bool
+StepEntry::piano_enter_notify_event (GdkEventCrossing *ev)
+{
+        piano->grab_focus ();
+        return false;
+}
+
