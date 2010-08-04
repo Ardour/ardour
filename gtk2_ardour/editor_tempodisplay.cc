@@ -45,6 +45,7 @@
 #include "ardour_ui.h"
 #include "time_axis_view.h"
 #include "tempo_lines.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -196,7 +197,7 @@ Editor::draw_measures ()
 	}
 
 	if (tempo_lines == 0) {
-		tempo_lines = new TempoLines(*track_canvas, time_line_group, physical_screen_height);
+		tempo_lines = new TempoLines(*track_canvas, time_line_group, physical_screen_height (get_window()));
 	}
 
 	tempo_lines->draw(*current_bbt_points, frames_per_unit);

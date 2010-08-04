@@ -100,4 +100,7 @@ Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_ustring (const Glib::ustring& name,
 					       int clip_width,
 					       int clip_height);
 
+int physical_screen_height (Glib::RefPtr<Gdk::Window>);
+int physical_screen_width (Glib::RefPtr<Gdk::Window>);
+
 #endif /* __ardour_gtk_utils_h__ */

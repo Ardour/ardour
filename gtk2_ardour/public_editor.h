@@ -152,7 +152,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void toggle_follow_playhead () = 0;
 	virtual bool follow_playhead() const = 0;
 	virtual bool dragging_playhead() const = 0;
-	virtual double get_physical_screen_width() const = 0;
 	virtual void ensure_float (Gtk::Window&) = 0;
 	virtual void show_window () = 0;
 	virtual TrackViewList* get_valid_views (TimeAxisView*, ARDOUR::RouteGroup* grp = 0) = 0;
