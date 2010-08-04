@@ -1471,7 +1471,7 @@ MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity
 	nframes64_t region_end = _region->position() + _region->length() - 1;
 
 	if (end_frame > region_end) {
-		_region->set_length (end_frame, this);
+		_region->set_length (end_frame - _region->position(), this);
 	}
 
 	start_diff_command (_("step add"));

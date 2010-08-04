@@ -968,14 +968,6 @@ MidiTimeAxisView::check_step_edit ()
 int
 MidiTimeAxisView::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evoral::MusicalTime beat_duration)
 {
-        MidiStreamView* msv = midi_view();
-
-        /* make sure its visible on the vertical axis */
-
-        if (pitch < msv->lowest_note() || pitch > msv->highest_note()) {
-                msv->update_note_range (pitch);
-                msv->set_note_range (MidiStreamView::ContentsRange);
-        }
 
         if (step_edit_region == 0) {
                 
@@ -1000,6 +992,24 @@ MidiTimeAxisView::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocit
                         if (!success) {
                                 return -1;
                         }
+                }
+
+                MidiStreamView* msv = midi_view();
+                
+                /* make sure its visible on the vertical axis */
+                
+                if (pitch < msv->lowest_note() || pitch > msv->highest_note()) {
+                        msv->update_note_range (pitch);
+                        msv->set_note_range (MidiStreamView::ContentsRange);
+                }
+
+                /* make sure its visible on the horizontal axis */
+
+                nframes64_t fpos = step_edit_region->position() + 
+                        step_edit_region_view->beats_to_frames (step_edit_beat_pos + beat_duration);
+
+                if (fpos >= (_editor.leftmost_position() + _editor.current_page_frames())) {
+                        _editor.reset_x_origin (fpos - (_editor.current_page_frames()/4));
                 }
 
                 step_edit_region_view->step_add_note (channel, pitch, velocity, step_edit_beat_pos, beat_duration);

@@ -250,10 +250,6 @@ StepEntry::~StepEntry()
 bool
 StepEntry::on_key_press_event (GdkEventKey* ev)
 {
-        std::cerr << "Propagate key press, focus widget = "
-                  << gtk_window_get_focus (GTK_WINDOW(gobj()))
-                  << " _piano = " << _piano << std::endl;
-
         if (!gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
                 return gtk_window_activate_key (GTK_WINDOW(gobj()), ev);
         }
@@ -263,10 +259,6 @@ StepEntry::on_key_press_event (GdkEventKey* ev)
 bool
 StepEntry::on_key_release_event (GdkEventKey* ev)
 {
-        std::cerr << "Propagate key release, focus widget = "
-                  << gtk_window_get_focus (GTK_WINDOW(gobj()))
-                  << " _piano = " << _piano << std::endl;
-
         if (!gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
                 return gtk_window_activate_key (GTK_WINDOW(gobj()), ev);
         }
