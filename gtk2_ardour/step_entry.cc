@@ -46,9 +46,11 @@ _rest_event_handler (GtkWidget* widget, gpointer arg)
 StepEntry::StepEntry (MidiTimeAxisView& mtv)
         : ArdourDialog (string_compose (_("Step Entry: %1"), mtv.name()))
         , triplet_button ("3")
-        , sustain_button ("sustain")
-        , rest_button ("rest")
-        , grid_rest_button ("g-rest")
+        , beat_resync_button (_(">beat"))
+        , bar_resync_button (_(">bar"))
+        , sustain_button (_("sustain"))
+        , rest_button (_("rest"))
+        , grid_rest_button (_("g-rest"))
         , channel_adjustment (1, 1, 16, 0, 1, 4) 
         , channel_spinner (channel_adjustment)
         , _piano (0)
@@ -199,11 +201,16 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
         rest_box.pack_start (rest_button, false, false);
         rest_box.pack_start (grid_rest_button, false, false);
 
+        resync_box.pack_start (beat_resync_button, false, false);
+        resync_box.pack_start (bar_resync_button, false, false);
+
         ARDOUR_UI::instance()->set_tip (&chord_button, _("Stack inserted notes to form a chord"), "");
         ARDOUR_UI::instance()->set_tip (&sustain_button, _("Extend selected notes by note length"), "");
         ARDOUR_UI::instance()->set_tip (&dot_button, _("Use dotted note lengths"), "");
         ARDOUR_UI::instance()->set_tip (&rest_button, _("Insert a note-length's rest"), "");
         ARDOUR_UI::instance()->set_tip (&grid_rest_button, _("Insert a grid-unit's rest"), "");
+        ARDOUR_UI::instance()->set_tip (&beat_resync_button, _("Insert a rest until the next beat"), "");
+        ARDOUR_UI::instance()->set_tip (&bar_resync_button, _("Insert a rest until the next bar"), "");
 
         VBox* v = manage (new VBox);
         l = manage (new Label (_("Channel")));
@@ -218,6 +225,7 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
         upper_box.pack_start (dot_button, false, false);
         upper_box.pack_start (sustain_button, false, false);
         upper_box.pack_start (rest_box, false, false);
+        upper_box.pack_start (resync_box, false, false);
         upper_box.pack_start (note_velocity_box, false, false, 12);
         upper_box.pack_start (*v, false, false);
 
@@ -225,7 +233,6 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
         piano = Glib::wrap ((GtkWidget*) _piano);
 
         piano->set_flags (Gtk::CAN_FOCUS);
-        piano->signal_enter_notify_event().connect (sigc::mem_fun (*this, &StepEntry::piano_enter_notify_event), false);
 
         g_signal_connect(G_OBJECT(_piano), "note-off", G_CALLBACK(_note_off_event_handler), this);
         g_signal_connect(G_OBJECT(_piano), "rest", G_CALLBACK(_rest_event_handler), this);
@@ -234,6 +241,8 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
         grid_rest_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::grid_rest_click));
         chord_button.signal_toggled().connect (sigc::mem_fun (*this, &StepEntry::chord_toggled));
         triplet_button.signal_toggled().connect (sigc::mem_fun (*this, &StepEntry::triplet_toggled));
+        beat_resync_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::beat_resync_click));
+        bar_resync_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::bar_resync_click));
 
         packer.set_spacing (6);
         packer.pack_start (upper_box, false, false);
@@ -370,18 +379,20 @@ StepEntry::chord_toggled ()
         }
 }
 
-bool
-StepEntry::piano_enter_notify_event (GdkEventCrossing *ev)
-{
-        std::cerr << "PIANO ENTER\n";
-        piano->grab_focus ();
-        return false;
-}
-
 void
 StepEntry::on_show ()
 {
         ArdourDialog::on_show ();
         piano->grab_focus ();
-        std::cerr << "SHOW, piano has focus\n";
+}
+
+void
+StepEntry::beat_resync_click ()
+{
+        _mtv->step_edit_beat_sync ();
+}
+
+void
+StepEntry::bar_resync_click ()
+{
 }

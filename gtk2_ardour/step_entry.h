@@ -55,6 +55,10 @@ class StepEntry : public ArdourDialog
         Gtk::ToggleButton dot_button;
         Gtk::ToggleButton restart_button;
 
+        Gtk::VBox   resync_box;
+        Gtk::Button beat_resync_button;
+        Gtk::Button bar_resync_button;
+
         Gtk::Button sustain_button;
         Gtk::Button rest_button;
         Gtk::Button grid_rest_button;
@@ -90,6 +94,8 @@ class StepEntry : public ArdourDialog
         void sustain_click ();
         void chord_toggled ();
         void triplet_toggled ();
+        void beat_resync_click ();
+        void bar_resync_click ();
 
         bool piano_enter_notify_event (GdkEventCrossing *ev);
         bool on_key_release_event (GdkEventKey*);

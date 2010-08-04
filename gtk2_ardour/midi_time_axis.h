@@ -89,6 +89,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	void check_step_edit ();
 	void step_edit_rest (Evoral::MusicalTime beats);
+        void step_edit_beat_sync ();
+        void step_edit_bar_sync ();
         int  step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, 
                             Evoral::MusicalTime beat_duration);
         bool step_edit_within_triplet () const;

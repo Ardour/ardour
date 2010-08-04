@@ -1084,6 +1084,17 @@ MidiTimeAxisView::step_edit_rest (Evoral::MusicalTime beats)
         }
 }
 
+void 
+MidiTimeAxisView::step_edit_beat_sync ()
+{
+        step_edit_beat_pos = ceil (step_edit_beat_pos);
+}
+
+void 
+MidiTimeAxisView::step_edit_bar_sync ()
+{
+}
+
 boost::shared_ptr<Region>
 MidiTimeAxisView::add_region (framepos_t pos)
 {
