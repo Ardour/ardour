@@ -23,14 +23,16 @@
 using namespace std;
 
 MidiAutomationLine::MidiAutomationLine (
-	const std::string& name, TimeAxisView& tav, ArdourCanvas::Group& group,
-	boost::shared_ptr<ARDOUR::AutomationList> list,
-	boost::shared_ptr<ARDOUR::MidiRegion> region,
-	Evoral::Parameter parameter,
-	const Evoral::TimeConverter<double, ARDOUR::sframes_t>* converter
-	) : AutomationLine (name, tav, group, list, converter)
-	  , _region (region)
-	  , _parameter (parameter)
+	const std::string&                                      name,
+	TimeAxisView&                                           tav,
+	ArdourCanvas::Group&                                    group,
+	boost::shared_ptr<ARDOUR::AutomationList>               list,
+	boost::shared_ptr<ARDOUR::MidiRegion>                   region,
+	Evoral::Parameter                                       parameter,
+	const Evoral::TimeConverter<double, ARDOUR::sframes_t>* converter)
+  : AutomationLine (name, tav, group, list, converter)
+  , _region (region)
+  , _parameter (parameter)
 {
 
 }

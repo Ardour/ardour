@@ -47,7 +47,7 @@
 enum {
 	NOTE_ON_SIGNAL,
 	NOTE_OFF_SIGNAL,
-        REST_SIGNAL,
+	REST_SIGNAL,
 	LAST_SIGNAL
 };
 
@@ -64,32 +64,32 @@ draw_keyboard_cue(PianoKeyboard *pk, cairo_t* cr)
 	int		first_note_in_higher_row = (pk->octave + 6) * 12;
 	int		last_note_in_higher_row = (pk->octave + 7) * 12 + 4;
 
-        cairo_set_source_rgb (cr, 1.0f, 0.0f, 0.0f);
-        cairo_move_to (cr, pk->notes[first_note_in_lower_row].x + 3, h - 6);
-        cairo_line_to (cr, pk->notes[last_note_in_lower_row].x + w - 3, h - 6);
-        cairo_stroke (cr);
+	cairo_set_source_rgb (cr, 1.0f, 0.0f, 0.0f);
+	cairo_move_to (cr, pk->notes[first_note_in_lower_row].x + 3, h - 6);
+	cairo_line_to (cr, pk->notes[last_note_in_lower_row].x + w - 3, h - 6);
+	cairo_stroke (cr);
 
-        cairo_set_source_rgb (cr, 0.0f, 0.0f, 1.0f);
-        cairo_move_to (cr, pk->notes[first_note_in_higher_row].x + 3, h - 9);
-        cairo_line_to (cr, pk->notes[last_note_in_higher_row].x + w - 3, h - 9);
-        cairo_stroke (cr);
+	cairo_set_source_rgb (cr, 0.0f, 0.0f, 1.0f);
+	cairo_move_to (cr, pk->notes[first_note_in_higher_row].x + 3, h - 9);
+	cairo_line_to (cr, pk->notes[last_note_in_higher_row].x + w - 3, h - 9);
+	cairo_stroke (cr);
 }
 
 static void
 queue_note_draw (PianoKeyboard* pk, int note)
 {
-        GdkWindow* w = GTK_WIDGET(pk)->window;
+	GdkWindow* w = GTK_WIDGET(pk)->window;
 
-        if (w) {
-                GdkRectangle r;
+	if (w) {
+		GdkRectangle r;
 
-                r.x = pk->notes[note].x;
-                r.y = 0;
-                r.width = pk->notes[note].w;
-                r.height = pk->notes[note].h;
+		r.x = pk->notes[note].x;
+		r.y = 0;
+		r.width = pk->notes[note].w;
+		r.height = pk->notes[note].h;
 
-                gdk_window_invalidate_rect (w, &r, TRUE);
-        }
+		gdk_window_invalidate_rect (w, &r, TRUE);
+	}
 }
 
 static void 
@@ -103,35 +103,35 @@ draw_note(PianoKeyboard *pk, cairo_t* cr, int note)
 
 	if (pk->notes[note].pressed || pk->notes[note].sustained) {
 		is_white = !is_white;
-        }
+	}
 
-        cairo_set_line_width (cr, 1.0);
+	cairo_set_line_width (cr, 1.0);
 
 	if (is_white) {
-                cairo_set_source_rgb (cr, 1.0f, 1.0f, 1.0f);
-        } else {
-                cairo_set_source_rgb (cr, 0.0f, 0.0f, 0.0f);
-        }
+		cairo_set_source_rgb (cr, 1.0f, 1.0f, 1.0f);
+	} else {
+		cairo_set_source_rgb (cr, 0.0f, 0.0f, 0.0f);
+	}
 
-        cairo_rectangle (cr, x, 0, w, h);
-        cairo_fill (cr);
+	cairo_rectangle (cr, x, 0, w, h);
+	cairo_fill (cr);
 
-        cairo_set_source_rgb(cr, 0.0f, 0.0f, 0.0f); /* black outline */
-        cairo_rectangle (cr, x, 0, w, h);
-        cairo_stroke (cr);
+	cairo_set_source_rgb(cr, 0.0f, 0.0f, 0.0f); /* black outline */
+	cairo_rectangle (cr, x, 0, w, h);
+	cairo_stroke (cr);
 
 	if (pk->enable_keyboard_cue) {
 		draw_keyboard_cue (pk, cr);
-        }
+	}
 
 	/* We need to redraw black keys that partially obscure the white one. */
 	if (note < NNOTES - 2 && !pk->notes[note + 1].white) {
 		draw_note(pk, cr, note + 1);
-        }
+	}
 
 	if (note > 0 && !pk->notes[note - 1].white) {
 		draw_note(pk, cr, note - 1);
-        }
+	}
 }
 
 static int 
@@ -256,7 +256,7 @@ bind_keys_qwerty(PianoKeyboard *pk)
 {
 	clear_notes(pk);
 
-        bind_key(pk, "space", 128);
+	bind_key(pk, "space", 128);
 
 	/* Lower keyboard row - "zxcvbnm". */
 	bind_key(pk, "z", 12);	/* C0 */
@@ -309,7 +309,7 @@ bind_keys_azerty(PianoKeyboard *pk)
 {
 	clear_notes(pk);
 
-        bind_key(pk, "space", 128);
+	bind_key(pk, "space", 128);
 
 	/* Lower keyboard row - "wxcvbn,". */
 	bind_key(pk, "w", 12);	/* C0 */
@@ -378,13 +378,13 @@ keyboard_event_handler(GtkWidget *mk, GdkEventKey *event, gpointer notused)
 		return FALSE;
 	}
 
-        if (note == 128) {
-                if (event->type == GDK_KEY_RELEASE) {
-                        rest (pk);
-                }
+	if (note == 128) {
+		if (event->type == GDK_KEY_RELEASE) {
+			rest (pk);
+		}
                         
-                return TRUE;
-        }
+		return TRUE;
+	}
 
 	note += pk->octave * 12;
 
@@ -494,30 +494,30 @@ piano_keyboard_expose(GtkWidget *widget, GdkEventExpose *event)
 {
 	int i;
 	PianoKeyboard *pk = PIANO_KEYBOARD(widget);
-        cairo_t* cr = gdk_cairo_create (GDK_DRAWABLE (GTK_WIDGET(pk)->window));
-        
-        gdk_cairo_region (cr, event->region);
-        cairo_clip (cr);
+	cairo_t* cr = gdk_cairo_create (GDK_DRAWABLE (GTK_WIDGET(pk)->window));
+	
+	gdk_cairo_region (cr, event->region);
+	cairo_clip (cr);
 
 	for (i = 0; i < NNOTES; i++) {
-                GdkRectangle r;
+		GdkRectangle r;
 
-                r.x = pk->notes[i].x;
-                r.y = 0;
-                r.width = pk->notes[i].w;
-                r.height = pk->notes[i].h;
+		r.x = pk->notes[i].x;
+		r.y = 0;
+		r.width = pk->notes[i].w;
+		r.height = pk->notes[i].h;
 
-                switch (gdk_region_rect_in (event->region, &r)) {
-                case GDK_OVERLAP_RECTANGLE_PART:
-                case GDK_OVERLAP_RECTANGLE_IN:
-                        draw_note (pk, cr, i);
-                        break;
-                default:
-                        break;
-                }
-        }
+		switch (gdk_region_rect_in (event->region, &r)) {
+		case GDK_OVERLAP_RECTANGLE_PART:
+		case GDK_OVERLAP_RECTANGLE_IN:
+			draw_note (pk, cr, i);
+			break;
+		default:
+			break;
+		}
+	}
 
-        cairo_destroy (cr);
+	cairo_destroy (cr);
 
 	return TRUE;
 }
@@ -624,8 +624,8 @@ piano_keyboard_init(GtkWidget *mk)
 	g_signal_connect(G_OBJECT(mk), "button-press-event", G_CALLBACK(mouse_button_event_handler), NULL);
 	g_signal_connect(G_OBJECT(mk), "button-release-event", G_CALLBACK(mouse_button_event_handler), NULL);
 	g_signal_connect(G_OBJECT(mk), "motion-notify-event", G_CALLBACK(mouse_motion_event_handler), NULL);
-        g_signal_connect(G_OBJECT(mk), "key-press-event", G_CALLBACK(keyboard_event_handler), NULL);
-        g_signal_connect(G_OBJECT(mk), "key-release-event", G_CALLBACK(keyboard_event_handler), NULL);
+	g_signal_connect(G_OBJECT(mk), "key-press-event", G_CALLBACK(keyboard_event_handler), NULL);
+	g_signal_connect(G_OBJECT(mk), "key-release-event", G_CALLBACK(keyboard_event_handler), NULL);
 }
 
 GType
@@ -701,7 +701,7 @@ piano_keyboard_set_note_on(PianoKeyboard *pk, int note)
 {
 	if (pk->notes[note].pressed == 0) {
 		pk->notes[note].pressed = 1;
-                queue_note_draw (pk, note);
+		queue_note_draw (pk, note);
 	}
 }
 
@@ -711,7 +711,7 @@ piano_keyboard_set_note_off(PianoKeyboard *pk, int note)
 	if (pk->notes[note].pressed || pk->notes[note].sustained) {
 		pk->notes[note].pressed = 0;
 		pk->notes[note].sustained = 0;
-                queue_note_draw (pk, note);
+		queue_note_draw (pk, note);
 	}
 }
 
