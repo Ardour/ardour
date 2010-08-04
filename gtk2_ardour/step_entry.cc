@@ -394,4 +394,5 @@ StepEntry::beat_resync_click ()
 void
 StepEntry::bar_resync_click ()
 {
+        _mtv->step_edit_bar_sync ();
 }

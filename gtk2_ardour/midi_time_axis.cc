@@ -1093,6 +1093,14 @@ MidiTimeAxisView::step_edit_beat_sync ()
 void 
 MidiTimeAxisView::step_edit_bar_sync ()
 {
+        if (!_session || !step_edit_region_view || !step_edit_region) {
+                return;
+        }
+
+        nframes64_t fpos = step_edit_region->position() + 
+                step_edit_region_view->beats_to_frames (step_edit_beat_pos);
+        fpos = _session->tempo_map().round_to_bar (fpos, 1);
+        step_edit_beat_pos = ceil (step_edit_region_view->frames_to_beats (fpos - step_edit_region->position()));
 }
 
 boost::shared_ptr<Region>
