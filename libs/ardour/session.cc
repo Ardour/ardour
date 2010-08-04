@@ -431,11 +431,8 @@ Session::when_engine_running ()
 	vector<string> inputs[DataType::num_types];
 	vector<string> outputs[DataType::num_types];
 	for (uint32_t i = 0; i < DataType::num_types; ++i) {
-		/* the engine's terms for inputs and outputs are reversed from what the
-		   code below expects.
-		 */
-		_engine.get_physical_outputs (DataType (DataType::Symbol (i)), inputs[i]);
-		_engine.get_physical_inputs (DataType (DataType::Symbol (i)), outputs[i]);
+		_engine.get_physical_inputs (DataType (DataType::Symbol (i)), inputs[i]);
+		_engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
 	}
 
 	/* Create a set of Bundle objects that map

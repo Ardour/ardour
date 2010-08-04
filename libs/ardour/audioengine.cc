@@ -1166,16 +1166,22 @@ AudioEngine::get_physical (DataType type, unsigned long flags, vector<string>& p
 	}
 }
 
+/** Get physical ports for which JackPortIsOutput is set; ie those that correspond to
+ *  a physical input connector.
+ */
 void
 AudioEngine::get_physical_inputs (DataType type, vector<string>& ins)
 {
-	get_physical (type, JackPortIsInput, ins);
+	get_physical (type, JackPortIsOutput, ins);
 }
 
+/** Get physical ports for which JackPortIsInput is set; ie those that correspond to
+ *  a physical output connector.
+ */
 void
 AudioEngine::get_physical_outputs (DataType type, vector<string>& outs)
 {
-	get_physical (type, JackPortIsOutput, outs);
+	get_physical (type, JackPortIsInput, outs);
 }
 
 void
