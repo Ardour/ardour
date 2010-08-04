@@ -993,7 +993,7 @@ Editor::select_all_within (nframes64_t start, nframes64_t end, double top, doubl
 
 		(*iter)->get_selectables (start, end, top, bot, found);
 	}
-	
+
 	if (found.empty()) {
 		return false;
 	}

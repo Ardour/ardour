@@ -53,6 +53,7 @@
 #include "rgb_macros.h"
 #include "control_point_dialog.h"
 #include "editor_drag.h"
+#include "automation_region_view.h"
 
 #include "ardour/types.h"
 #include "ardour/profile.h"
@@ -525,10 +526,6 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 bool
 Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	if (_drags->active ()) {
-		_drags->abort ();
-	}
-
 	/* single mouse clicks on any of these item types operate
 	   independent of mouse mode, mostly because they are
 	   not on the main track canvas or because we want
@@ -751,6 +748,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 
 			case RegionItem:
+				if (dynamic_cast<AutomationRegionView*> (clicked_regionview)) {
+					/* click on an automation region view; do nothing here and let the ARV's signal handler
+					   sort it out.
+					*/
+					break;
+				}
+				
+				/* click on a normal region view */
 				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
 					add_region_copy_drag (item, event, clicked_regionview);
 				} 
@@ -759,7 +764,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				} else {
 					add_region_drag (item, event, clicked_regionview);
 				}
-
+				
 				if (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT && !selection->regions.empty()) {
 					_drags->add (new SelectionDrag (this, clicked_axisview->get_selection_rect (clicked_selection)->rect, SelectionDrag::SelectionMove));
 				}
@@ -1926,6 +1931,7 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 	if (_drags->active ()) {
 		handled = _drags->motion_handler (event, from_autoscroll);
 	}
+	
 	if (!handled) {
 		return false;
 	}

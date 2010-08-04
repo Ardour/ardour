@@ -948,14 +948,14 @@ AutomationLine::remove_point (ControlPoint& cp)
 }
 
 void
-AutomationLine::get_selectables (nframes_t& start, nframes_t& end,
+AutomationLine::get_selectables (nframes_t start, nframes_t end,
 		double botfrac, double topfrac, list<Selectable*>& results)
 {
 
 	double top;
 	double bot;
-	double nstart;
-	double nend;
+	sframes_t nstart;
+	sframes_t nend;
 	bool collecting = false;
 
 	/* Curse X11 and its inverted coordinate system! */
@@ -967,7 +967,7 @@ AutomationLine::get_selectables (nframes_t& start, nframes_t& end,
 	nend = 0;
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		double when = (*(*i)->model())->when;
+		sframes_t const when = _time_converter.to ((*(*i)->model())->when);
 
 		if (when >= start && when <= end) {
 

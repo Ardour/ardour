@@ -61,6 +61,9 @@ class AutomationStreamView : public StreamView
 
 	void clear ();
 
+	void get_selectables (nframes_t, nframes_t, double, double, std::list<Selectable*> &);
+	void set_selected_points (PointSelection &);
+
   private:
 	void setup_rec_box ();
 

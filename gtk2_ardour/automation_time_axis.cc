@@ -783,7 +783,11 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, nframes_t pos, float ti
 void
 AutomationTimeAxisView::get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable*>& results)
 {
-	if (_line && touched (top, bot)) {
+	if (!_line && !_view) {
+		return;
+	}
+	
+	if (touched (top, bot)) {
 		double topfrac;
 		double botfrac;
 
@@ -810,8 +814,11 @@ AutomationTimeAxisView::get_selectables (nframes_t start, nframes_t end, double 
 			botfrac = 1.0 - ((bot - _y_position) / height);
 		}
 
-		if (_line)
+		if (_line) {
 			_line->get_selectables (start, end, botfrac, topfrac, results);
+		} else if (_view) {
+			_view->get_selectables (start, end, botfrac, topfrac, results);
+		}
 	}
 }
 
@@ -827,6 +834,8 @@ AutomationTimeAxisView::set_selected_points (PointSelection& points)
 {
 	if (_line) {
 		_line->set_selected_points (points);
+	} else if (_view) {
+		_view->set_selected_points (points);
 	}
 }
 

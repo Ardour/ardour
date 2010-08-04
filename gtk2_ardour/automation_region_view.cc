@@ -29,6 +29,8 @@
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "midi_automation_line.h"
+#include "editor_drag.h"
+#include "editor.h"
 
 #include "i18n.h"
 
@@ -89,18 +91,27 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 bool
 AutomationRegionView::canvas_event(GdkEvent* ev)
 {
-	if (ev->type == GDK_BUTTON_RELEASE) {
+	if (ev->type == GDK_BUTTON_PRESS) {
 
+		/* XXX: icky dcast to Editor */
+		trackview.editor().drags()->set (new RubberbandSelectDrag (dynamic_cast<Editor*> (&trackview.editor()), group), ev);
+		
+	} else if (ev->type == GDK_BUTTON_RELEASE) {
+
+		if (trackview.editor().drags()->active() && trackview.editor().drags()->end_grab (ev)) {
+			return true;
+		}
+		
 		double x = ev->button.x;
 		double y = ev->button.y;
-
+		
 		/* convert to item coordinates in the time axis view */
 		automation_view()->canvas_display()->w2i (x, y);
 
 		/* clamp y */
 		y = max (y, 0.0);
 		y = min (y, _height - NAME_HIGHLIGHT_SIZE);
-
+		
 		add_automation_event (ev, trackview.editor().pixel_to_frame (x) - _region->position(), y);
 	}
 

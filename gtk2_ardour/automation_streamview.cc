@@ -273,3 +273,23 @@ AutomationStreamView::clear ()
 		arv->line()->clear ();
 	}
 }
+
+void
+AutomationStreamView::get_selectables (nframes_t start, nframes_t end, double botfrac, double topfrac, list<Selectable*>& results)
+{
+	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*i);
+		assert (arv);
+		arv->line()->get_selectables (start - (*i)->region()->position(), end - (*i)->region()->position(), botfrac, topfrac, results);
+	}
+}
+
+void
+AutomationStreamView::set_selected_points (PointSelection& ps)
+{
+	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*i);
+		assert (arv);
+		arv->line()->set_selected_points (ps);
+	}
+}
