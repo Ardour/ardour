@@ -1878,12 +1878,6 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 
 	ChannelInfo* chan = (*c)[n];
 
-	if (chan->write_source) {
-		chan->write_source->done_with_peakfile_writes ();
-		chan->write_source->set_allow_remove_if_empty (true);
-		chan->write_source.reset ();
-	}
-
 	try {
                 /* file starts off as a stub file, it will be converted
                    when we're done with a capture pass.
@@ -1934,16 +1928,19 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 
 		if (!destructive()) {
 
-			if ((*chan)->write_source && mark_write_complete) {
-				(*chan)->write_source->mark_streaming_write_completed ();
-			}
+			if ((*chan)->write_source) {
 
-                        if ((*chan)->write_source) {
+				if (mark_write_complete) {
+					(*chan)->write_source->mark_streaming_write_completed ();
+					(*chan)->write_source->done_with_peakfile_writes ();
+				}
+
                                 if ((*chan)->write_source->removable()) {
                                         (*chan)->write_source->mark_for_remove ();
                                         (*chan)->write_source->drop_references ();
                                         _session.remove_source ((*chan)->write_source);
-                                } 
+                                }
+				
                                 (*chan)->write_source.reset ();
                         }
 
