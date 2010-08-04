@@ -40,6 +40,10 @@ class StepEntry : public ArdourDialog
         void note_off_event_handler (int note);
         void rest_event_handler ();
 
+        Evoral::MusicalTime note_length() const;
+        uint8_t note_velocity() const;
+        uint8_t note_channel() const;
+
   private:
         Gtk::VBox packer;
         Gtk::HBox upper_box;
@@ -49,9 +53,12 @@ class StepEntry : public ArdourDialog
         Gtk::ToggleButton chord_button;
         Gtk::ToggleButton triplet_button;
         Gtk::ToggleButton dot_button;
+        Gtk::ToggleButton restart_button;
 
         Gtk::Button sustain_button;
         Gtk::Button rest_button;
+        Gtk::Button grid_rest_button;
+        Gtk::VBox   rest_box;
 
         Gtk::RadioButton length_1_button;
         Gtk::RadioButton length_2_button;
@@ -79,6 +86,7 @@ class StepEntry : public ArdourDialog
         MidiTimeAxisView* _mtv;
 
         void rest_click ();
+        void grid_rest_click ();
         void sustain_click ();
         void chord_toggled ();
         void triplet_toggled ();
@@ -86,6 +94,8 @@ class StepEntry : public ArdourDialog
         bool piano_enter_notify_event (GdkEventCrossing *ev);
         bool on_key_release_event (GdkEventKey*);
         bool on_key_press_event (GdkEventKey*);
+
+        void on_show ();
 };
 
 #endif /* __gtk2_ardour_step_entry_h__ */

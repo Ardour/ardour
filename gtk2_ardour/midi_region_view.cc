@@ -613,13 +613,7 @@ MidiRegionView::key_press (GdkEventKey* ev)
                 
         } else if (ev->keyval == GDK_Control_L) {
                 return true;
-                
-        } else if (ev->keyval == GDK_r) {
-                /* yes, this steals r */
-                if (midi_view()->midi_track()->step_editing()) {
-                        midi_view()->step_edit_rest ();
-                        return true;
-                }
+
         }
         
         return false;

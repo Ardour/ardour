@@ -21,6 +21,8 @@
 
 #include "gtkmm2ext/keyboard.h"
 
+#include "ardour_ui.h"
+#include "midi_channel_selector.h"
 #include "midi_time_axis.h"
 #include "step_entry.h"
 #include "utils.h"
@@ -46,12 +48,27 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
         , triplet_button ("3")
         , sustain_button ("sustain")
         , rest_button ("rest")
-        , channel_adjustment (0, 15, 0, 1, 4)
+        , grid_rest_button ("g-rest")
+        , channel_adjustment (1, 1, 16, 0, 1, 4) 
         , channel_spinner (channel_adjustment)
         , _piano (0)
         , piano (0)
         , _mtv (&mtv)
 {
+        /* set channel selector to first selected channel. if none
+           are selected, it will remain at the value set in its
+           constructor, above (1)
+        */
+
+        uint16_t chn_mask = _mtv->channel_selector().get_selected_channels();
+        
+        for (uint32_t i = 0; i < 16; ++i) {
+                if (chn_mask & (1<<i)) {
+                        channel_adjustment.set_value (i+1);
+                        break;
+                }
+        }
+
 	RadioButtonGroup length_group = length_1_button.get_group();
 	length_2_button.set_group (length_group);
 	length_4_button.set_group (length_group);
@@ -101,6 +118,14 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
         note_length_box.pack_start (length_32_button, false, false);
         note_length_box.pack_start (length_64_button, false, false);
 
+        ARDOUR_UI::instance()->set_tip (&length_1_button, _("Set note length to a whole note"), "");
+        ARDOUR_UI::instance()->set_tip (&length_2_button, _("Set note length to a half note"), "");
+        ARDOUR_UI::instance()->set_tip (&length_4_button, _("Set note length to a quarter note"), "");
+        ARDOUR_UI::instance()->set_tip (&length_8_button, _("Set note length to a eighth note"), "");
+        ARDOUR_UI::instance()->set_tip (&length_16_button, _("Set note length to a sixteenth note"), "");
+        ARDOUR_UI::instance()->set_tip (&length_32_button, _("Set note length to a thirty-second note"), "");
+        ARDOUR_UI::instance()->set_tip (&length_64_button, _("Set note length to a sixty-fourth note"), "");
+
 	RadioButtonGroup velocity_group = velocity_ppp_button.get_group();
         velocity_pp_button.set_group (velocity_group);
         velocity_p_button.set_group (velocity_group);
@@ -144,6 +169,15 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
         velocity_ff_button.property_draw_indicator() = false;
         velocity_fff_button.property_draw_indicator() = false;
 
+        ARDOUR_UI::instance()->set_tip (&velocity_ppp_button, _("Set volume (velocity) to pianississimo"), "");
+        ARDOUR_UI::instance()->set_tip (&velocity_pp_button, _("Set volume (velocity) to pianissimo"), "");
+        ARDOUR_UI::instance()->set_tip (&velocity_p_button, _("Set volume (velocity) to piano"), "");
+        ARDOUR_UI::instance()->set_tip (&velocity_mp_button, _("Set volume (velocity) to mezzo-piano"), "");
+        ARDOUR_UI::instance()->set_tip (&velocity_mf_button, _("Set volume (velocity) to mezzo-forte"), "");
+        ARDOUR_UI::instance()->set_tip (&velocity_f_button, _("Set volume (velocity) to forte"), "");
+        ARDOUR_UI::instance()->set_tip (&velocity_ff_button, _("Set volume (velocity) to forteissimo"), "");
+        ARDOUR_UI::instance()->set_tip (&velocity_fff_button, _("Set volume (velocity) to forteississimo"), "");
+
         note_velocity_box.pack_start (velocity_ppp_button, false, false);
         note_velocity_box.pack_start (velocity_pp_button, false, false);
         note_velocity_box.pack_start (velocity_p_button, false, false);
@@ -162,15 +196,30 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 	w->show();
 	chord_button.add (*w);
 
+        rest_box.pack_start (rest_button, false, false);
+        rest_box.pack_start (grid_rest_button, false, false);
+
+        ARDOUR_UI::instance()->set_tip (&chord_button, _("Stack inserted notes to form a chord"), "");
+        ARDOUR_UI::instance()->set_tip (&sustain_button, _("Extend selected notes by note length"), "");
+        ARDOUR_UI::instance()->set_tip (&dot_button, _("Use dotted note lengths"), "");
+        ARDOUR_UI::instance()->set_tip (&rest_button, _("Insert a note-length's rest"), "");
+        ARDOUR_UI::instance()->set_tip (&grid_rest_button, _("Insert a grid-unit's rest"), "");
+
+        VBox* v = manage (new VBox);
+        l = manage (new Label (_("Channel")));
+        v->set_spacing (6);
+        v->pack_start (*l, false, false);
+        v->pack_start (channel_spinner, false, false);
+
         upper_box.set_spacing (6);
         upper_box.pack_start (chord_button, false, false);
         upper_box.pack_start (note_length_box, false, false, 12);
         upper_box.pack_start (triplet_button, false, false);
         upper_box.pack_start (dot_button, false, false);
         upper_box.pack_start (sustain_button, false, false);
-        upper_box.pack_start (rest_button, false, false);
+        upper_box.pack_start (rest_box, false, false);
         upper_box.pack_start (note_velocity_box, false, false, 12);
-        upper_box.pack_start (channel_spinner, false, false);
+        upper_box.pack_start (*v, false, false);
 
         _piano = (PianoKeyboard*) piano_keyboard_new ();
         piano = Glib::wrap ((GtkWidget*) _piano);
@@ -182,6 +231,7 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
         g_signal_connect(G_OBJECT(_piano), "rest", G_CALLBACK(_rest_event_handler), this);
         
         rest_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::rest_click));
+        grid_rest_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::grid_rest_click));
         chord_button.signal_toggled().connect (sigc::mem_fun (*this, &StepEntry::chord_toggled));
         triplet_button.signal_toggled().connect (sigc::mem_fun (*this, &StepEntry::triplet_toggled));
 
@@ -200,30 +250,39 @@ StepEntry::~StepEntry()
 bool
 StepEntry::on_key_press_event (GdkEventKey* ev)
 {
-        int ret;
-        g_signal_emit_by_name (G_OBJECT(_piano), "key-press-event", ev, &ret);
-        return ret;
+        std::cerr << "Propagate key press, focus widget = "
+                  << gtk_window_get_focus (GTK_WINDOW(gobj()))
+                  << " _piano = " << _piano << std::endl;
+
+        if (!gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
+                return gtk_window_activate_key (GTK_WINDOW(gobj()), ev);
+        }
+        return true;
 }
 
 bool
 StepEntry::on_key_release_event (GdkEventKey* ev)
 {
-        int ret;
-        g_signal_emit_by_name (G_OBJECT(_piano), "key-release-event", ev, &ret);
-        return ret;
+        std::cerr << "Propagate key release, focus widget = "
+                  << gtk_window_get_focus (GTK_WINDOW(gobj()))
+                  << " _piano = " << _piano << std::endl;
+
+        if (!gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
+                return gtk_window_activate_key (GTK_WINDOW(gobj()), ev);
+        }
+        return true;
 }
 
 void
 StepEntry::rest_event_handler ()
 {
-        _mtv->step_edit_rest();
+        _mtv->step_edit_rest (0.0);
 }
 
-void
-StepEntry::note_off_event_handler (int note)
+Evoral::MusicalTime
+StepEntry::note_length () const
 {
-        Evoral::MusicalTime length = 1.0;
-        uint8_t velocity = 64;
+        Evoral::MusicalTime length = 0.0;
 
         if (length_64_button.get_active()) {
                 length = 1.0/64.0;
@@ -245,6 +304,18 @@ StepEntry::note_off_event_handler (int note)
                 length *= 0.5;
         }
 
+        if (_mtv->step_edit_within_triplet()) {
+                length *= 2.0/3.0;
+        }
+
+        return length;
+}
+
+uint8_t
+StepEntry::note_velocity () const
+{
+        uint8_t velocity = 64;
+
         if (velocity_ppp_button.get_active()) {
                 velocity = 16;
         } else if (velocity_pp_button.get_active()) {
@@ -263,17 +334,32 @@ StepEntry::note_off_event_handler (int note)
                 velocity = 127;
         }
 
-        if (_mtv->step_edit_within_triplet()) {
-                length *= 2.0/3.0;
-        }
+        return velocity;
+}
 
-        _mtv->step_add_note (channel_adjustment.get_value(), note, velocity, length);
+uint8_t 
+StepEntry::note_channel() const
+{
+        return channel_adjustment.get_value() - 1;
+}
+
+void
+StepEntry::note_off_event_handler (int note)
+{
+
+        _mtv->step_add_note (note_channel(), note, note_velocity(), note_length());
 }
 
 void
 StepEntry::rest_click ()
 {
-        _mtv->step_edit_rest ();
+        _mtv->step_edit_rest (note_length());
+}
+
+void
+StepEntry::grid_rest_click ()
+{
+        _mtv->step_edit_rest (0.0);
 }
 
 void
@@ -295,7 +381,15 @@ StepEntry::chord_toggled ()
 bool
 StepEntry::piano_enter_notify_event (GdkEventCrossing *ev)
 {
+        std::cerr << "PIANO ENTER\n";
         piano->grab_focus ();
         return false;
 }
 
+void
+StepEntry::on_show ()
+{
+        ArdourDialog::on_show ();
+        piano->grab_focus ();
+        std::cerr << "SHOW, piano has focus\n";
+}

@@ -968,6 +968,15 @@ MidiTimeAxisView::check_step_edit ()
 int
 MidiTimeAxisView::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evoral::MusicalTime beat_duration)
 {
+        MidiStreamView* msv = midi_view();
+
+        /* make sure its visible on the vertical axis */
+
+        if (pitch < msv->lowest_note() || pitch > msv->highest_note()) {
+                msv->update_note_range (pitch);
+                msv->set_note_range (MidiStreamView::ContentsRange);
+        }
+
         if (step_edit_region == 0) {
                 
                 step_edit_region = add_region (step_edit_insert_position);
@@ -1050,11 +1059,19 @@ MidiTimeAxisView::step_edit_toggle_chord ()
 }
 
 void
-MidiTimeAxisView::step_edit_rest ()
+MidiTimeAxisView::step_edit_rest (Evoral::MusicalTime beats)
 {
 	bool success;
-	Evoral::MusicalTime beats = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
-	step_edit_beat_pos += beats;
+
+        if (beats == 0.0) {
+                beats = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
+        } else {
+                success = true;
+        }
+
+        if (success) {
+                step_edit_beat_pos += beats;
+        }
 }
 
 boost::shared_ptr<Region>
