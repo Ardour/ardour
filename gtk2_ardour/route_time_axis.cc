@@ -1363,7 +1363,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 }
 
 bool
-RouteTimeAxisView::paste (nframes_t pos, float times, Selection& selection, size_t nth)
+RouteTimeAxisView::paste (framepos_t pos, float times, Selection& selection, size_t nth)
 {
 	if (!is_track()) {
 		return false;

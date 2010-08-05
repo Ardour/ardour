@@ -93,7 +93,7 @@ public:
 
 	/* Editing operations */
 	void cut_copy_clear (Selection&, Editing::CutCopyOp);
-	bool paste (nframes_t, float times, Selection&, size_t nth);
+	bool paste (ARDOUR::framepos_t, float times, Selection&, size_t nth);
 
 	TimeAxisView::Children get_child_list();
 

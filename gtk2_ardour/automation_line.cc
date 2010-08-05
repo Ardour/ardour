@@ -947,15 +947,25 @@ AutomationLine::remove_point (ControlPoint& cp)
 	trackview.editor().session()->set_dirty ();
 }
 
+/** Get selectable points within an area.
+ *  @param start Start position in session frames.
+ *  @param end End position in session frames.
+ *  @param botfrac Bottom of area, as a fraction of the line height.
+ *  @param topfrac Bottom of area, as a fraction of the line height.
+ */
 void
-AutomationLine::get_selectables (nframes_t start, nframes_t end,
-		double botfrac, double topfrac, list<Selectable*>& results)
+AutomationLine::get_selectables (
+	framepos_t start, framepos_t end, double botfrac, double topfrac, list<Selectable*>& results
+	)
 {
 
 	double top;
 	double bot;
-	sframes_t nstart;
-	sframes_t nend;
+
+	/* these two are in AutomationList model coordinates */
+	double nstart;
+	double nend;
+	
 	bool collecting = false;
 
 	/* Curse X11 and its inverted coordinate system! */
@@ -963,21 +973,22 @@ AutomationLine::get_selectables (nframes_t start, nframes_t end,
 	bot = (1.0 - topfrac) * _height;
 	top = (1.0 - botfrac) * _height;
 
-	nstart = max_frames;
+	nstart = DBL_MAX;
 	nend = 0;
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		sframes_t const when = _time_converter.to ((*(*i)->model())->when);
+		double const model_when = (*(*i)->model())->when;
+		framepos_t const session_frames_when = _time_converter.to (model_when) + _time_converter.origin_b ();
 
-		if (when >= start && when <= end) {
+		if (session_frames_when >= start && session_frames_when <= end) {
 
 			if ((*i)->get_y() >= bot && (*i)->get_y() <= top) {
 
 				(*i)->show();
 				(*i)->set_visible(true);
 				collecting = true;
-				nstart = min (nstart, when);
-				nend = max (nend, when);
+				nstart = min (nstart, model_when);
+				nend = max (nend, model_when);
 
 			} else {
 
@@ -985,7 +996,7 @@ AutomationLine::get_selectables (nframes_t start, nframes_t end,
 
 					results.push_back (new AutomationSelectable (nstart, nend, botfrac, topfrac, &trackview));
 					collecting = false;
-					nstart = max_frames;
+					nstart = DBL_MAX;
 					nend = 0;
 				}
 			}
@@ -1023,8 +1034,8 @@ AutomationLine::point_selection_to_control_points (PointSelection const & s)
 
 		for (vector<ControlPoint*>::iterator j = control_points.begin(); j != control_points.end(); ++j) {
 
-			double const rstart = trackview.editor().frame_to_unit (i->start);
-			double const rend = trackview.editor().frame_to_unit (i->end);
+			double const rstart = trackview.editor().frame_to_unit (_time_converter.to (i->start));
+			double const rend = trackview.editor().frame_to_unit (_time_converter.to (i->end));
 
 			if ((*j)->get_x() >= rstart && (*j)->get_x() <= rend) {
 				if ((*j)->get_y() >= bot && (*j)->get_y() <= top) {

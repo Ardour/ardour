@@ -269,7 +269,7 @@ RegionView::region_resized (const PropertyChange& what_changed)
 
 	if (what_changed.contains (ARDOUR::Properties::position)) {
 		set_position (_region->position(), 0);
-		_time_converter.set_origin(_region->position());
+		_time_converter.set_origin_b (_region->position());
 	}
 
 	PropertyChange s_and_l;

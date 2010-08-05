@@ -274,13 +274,16 @@ AutomationStreamView::clear ()
 	}
 }
 
+/** @param start Start position in session frames.
+ *  @param end End position in session frames.
+ */
 void
-AutomationStreamView::get_selectables (nframes_t start, nframes_t end, double botfrac, double topfrac, list<Selectable*>& results)
+AutomationStreamView::get_selectables (framepos_t start, framepos_t end, double botfrac, double topfrac, list<Selectable*>& results)
 {
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*i);
 		assert (arv);
-		arv->line()->get_selectables (start - (*i)->region()->position(), end - (*i)->region()->position(), botfrac, topfrac, results);
+		arv->line()->get_selectables (start, end, botfrac, topfrac, results);
 	}
 }
 
@@ -306,4 +309,47 @@ AutomationStreamView::get_lines () const
 	}
 
 	return lines;
+}
+
+struct RegionPositionSorter {
+	bool operator() (RegionView* a, RegionView* b) {
+		return a->region()->position() < b->region()->position();
+	}
+};
+	
+
+/** @param pos Position, in session frames.
+ *  @return AutomationLine to paste to for that position, or 0 if there is none appropriate.
+ */
+boost::shared_ptr<AutomationLine>
+AutomationStreamView::paste_line (framepos_t pos)
+{
+	/* XXX: not sure how best to pick this; for now, just use the last region which starts before pos */
+
+	if (region_views.empty()) {
+		return boost::shared_ptr<AutomationLine> ();
+	}
+
+	region_views.sort (RegionPositionSorter ());
+
+	list<RegionView*>::const_iterator prev = region_views.begin ();
+
+	for (list<RegionView*>::const_iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		if ((*i)->region()->position() > pos) {
+			break;
+		}
+		prev = i;
+	}
+
+	boost::shared_ptr<Region> r = (*prev)->region ();
+
+	/* If *prev doesn't cover pos, it's no good */
+	if (r->position() > pos || ((r->position() + r->length()) < pos)) {
+		return boost::shared_ptr<AutomationLine> ();
+	}
+
+	AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*prev);
+	assert (arv);
+
+	return arv->line ();
 }

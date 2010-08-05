@@ -29,6 +29,7 @@ namespace Evoral {
 template<typename A, typename B>
 class TimeConverter {
 public:
+	TimeConverter (B ob = 0) : _origin_b (ob) {}
 	virtual ~TimeConverter() {}
 
 	/** Convert A time to B time (A to B) */
@@ -36,6 +37,17 @@ public:
 
 	/** Convert B time to A time (A from B) */
 	virtual A from(B b) const = 0;
+
+	B origin_b () const {
+		return _origin_b;
+	}
+	
+	void set_origin_b (B o) {
+		_origin_b = o;
+	}
+
+protected:
+	B _origin_b;
 };
 
 

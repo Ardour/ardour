@@ -88,7 +88,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	void cut_copy_clear (Selection&, Editing::CutCopyOp);
 	void cut_copy_clear_objects (PointSelection&, Editing::CutCopyOp);
-	bool paste (nframes_t, float times, Selection&, size_t nth);
+	bool paste (ARDOUR::framepos_t, float times, Selection&, size_t nth);
 	void reset_objects (PointSelection&);
 
 	int  set_state (const XMLNode&, int version);
@@ -148,7 +148,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	void cut_copy_clear_one (AutomationLine&, Selection&, Editing::CutCopyOp);
 	void cut_copy_clear_objects_one (AutomationLine&, PointSelection&, Editing::CutCopyOp);
-	bool paste_one (AutomationLine&, nframes_t, float times, Selection&, size_t nth);
+	bool paste_one (AutomationLine&, ARDOUR::framepos_t, float times, Selection&, size_t nth);
 	void reset_objects_one (AutomationLine&, PointSelection&);
 
 	void set_automation_state (ARDOUR::AutoState);

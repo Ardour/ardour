@@ -977,11 +977,13 @@ Editor::invert_selection ()
 	selection->set (touched);
 }
 
-/** @param top Top (lower) y limit in trackview coordinates.
+/** @param start Start time in session frames.
+ *  @param end End time in session frames.
+ *  @param top Top (lower) y limit in trackview coordinates.
  *  @param bottom Bottom (higher) y limit in trackview coordinates.
  */
 bool
-Editor::select_all_within (nframes64_t start, nframes64_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op)
+Editor::select_all_within (framepos_t start, framepos_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op)
 {
 	list<Selectable*> found;
 

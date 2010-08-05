@@ -634,21 +634,27 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 
 	XMLNode &before = alist->get_state();
 
+	/* convert time selection to automation list model coordinates */
+	const Evoral::TimeConverter<double, ARDOUR::sframes_t>& tc = line.time_converter ();
+	double const start = tc.from (selection.time.front().start - tc.origin_b ());
+	double const end = tc.from (selection.time.front().end - tc.origin_b ());
+	
 	switch (op) {
 	case Cut:
-		if ((what_we_got = alist->cut (selection.time.front().start, selection.time.front().end)) != 0) {
+		
+		if ((what_we_got = alist->cut (start, end)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
 			_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 		}
 		break;
 	case Copy:
-		if ((what_we_got = alist->copy (selection.time.front().start, selection.time.front().end)) != 0) {
+		if ((what_we_got = alist->copy (start, end)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
 		}
 		break;
 
 	case Clear:
-		if ((what_we_got = alist->cut (selection.time.front().start, selection.time.front().end)) != 0) {
+		if ((what_we_got = alist->cut (start, end)) != 0) {
 			_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 		}
 		break;
@@ -740,8 +746,6 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 
 	delete &before;
 
-	cout << "CCC objects " << what_we_got->size() << "\n";
-	
 	if (what_we_got) {
 		for (AutomationList::iterator x = what_we_got->begin(); x != what_we_got->end(); ++x) {
 			double when = (*x)->when;
@@ -753,14 +757,32 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 	}
 }
 
+/** Paste a selection.
+ *  @param pos Position to paste to (session frames).
+ *  @param times Number of times to paste.
+ *  @param selection Selection to paste.
+ *  @param nth Index of the AutomationList within the selection to paste from.
+ */
 bool
-AutomationTimeAxisView::paste (nframes_t pos, float times, Selection& selection, size_t nth)
+AutomationTimeAxisView::paste (framepos_t pos, float times, Selection& selection, size_t nth)
 {
-	return paste_one (*_line, pos, times, selection, nth);
+	boost::shared_ptr<AutomationLine> line;
+	
+	if (_line) {
+		line = _line;
+	} else if (_view) {
+		line = _view->paste_line (pos);
+	}
+
+	if (!line) {
+		return false;
+	}
+	
+	return paste_one (*line, pos, times, selection, nth);
 }
 
 bool
-AutomationTimeAxisView::paste_one (AutomationLine& line, nframes_t pos, float times, Selection& selection, size_t nth)
+AutomationTimeAxisView::paste_one (AutomationLine& line, framepos_t pos, float times, Selection& selection, size_t nth)
 {
 	AutomationSelection::iterator p;
 	boost::shared_ptr<AutomationList> alist(line.the_list());
@@ -786,8 +808,10 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, nframes_t pos, float ti
 		(*x)->value = val;
 	}
 
+	double const model_pos = line.time_converter().from (pos - line.time_converter().origin_b ());
+
 	XMLNode &before = alist->get_state();
-	alist->paste (copy, pos, times);
+	alist->paste (copy, model_pos, times);
 	_session->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 
 	return true;

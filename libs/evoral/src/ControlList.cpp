@@ -1145,7 +1145,10 @@ ControlList::cut (iterator start, iterator end)
 	return nal;
 }
 
-/** @param op 0 = cut, 1 = copy, 2 = clear */
+/** @param start Start position in model coordinates.
+ *  @param end End position in model coordinates.
+ *  @param op 0 = cut, 1 = copy, 2 = clear.
+ */
 boost::shared_ptr<ControlList>
 ControlList::cut_copy_clear (double start, double end, int op)
 {
@@ -1247,9 +1250,10 @@ ControlList::copy (double start, double end)
 void
 ControlList::clear (double start, double end)
 {
-	(void) cut_copy_clear (start, end, 2);
+	cut_copy_clear (start, end, 2);
 }
 
+/** @param pos Position in model coordinates */
 bool
 ControlList::paste (ControlList& alist, double pos, float /*times*/)
 {
