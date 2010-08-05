@@ -396,3 +396,67 @@ StepEntry::bar_resync_click ()
 {
         _mtv->step_edit_bar_sync ();
 }
+#if 0
+void
+StepEntry::register_actions ()
+{
+	step_entry_actions = ActionGroup::create (X_("StepEdit"));
+
+	/* non-operative menu items for menu bar */
+
+	ActionManager::register_action (editor_actions, X_("AlignMenu"), _("Align"));
+
+	/* add named actions for the editor */
+
+	ActionManager::register_action (step_entry_actions, "insert-a", _("Insert Note A"), sigc::mem_fun (*this, &StepEntry::insert_a));
+	ActionManager::register_action (step_entry_actions, "insert-bsharp", _("Insert Note A-sharp"), sigc::mem_fun (*this, &StepEntry::insert_asharp));
+	ActionManager::register_action (step_entry_actions, "insert-b", _("Insert Note B"), sigc::mem_fun (*this, &StepEntry::insert_b));
+	ActionManager::register_action (step_entry_actions, "insert-bsharp", _("Insert Note B-sharp"), sigc::mem_fun (*this, &StepEntry::insert_bsharp));
+	ActionManager::register_action (step_entry_actions, "insert-c", _("Insert Note C"), sigc::mem_fun (*this, &StepEntry::insert_c));
+	ActionManager::register_action (step_entry_actions, "insert-csharp", _("Insert Note C-sharp"), sigc::mem_fun (*this, &StepEntry::insert_csharp));
+	ActionManager::register_action (step_entry_actions, "insert-d", _("Insert Note D"), sigc::mem_fun (*this, &StepEntry::insert_d));
+	ActionManager::register_action (step_entry_actions, "insert-dsharp", _("Insert Note D-sharp"), sigc::mem_fun (*this, &StepEntry::insert_dsharp));
+	ActionManager::register_action (step_entry_actions, "insert-e", _("Insert Note E"), sigc::mem_fun (*this, &StepEntry::insert_e));
+	ActionManager::register_action (step_entry_actions, "insert-f", _("Insert Note F"), sigc::mem_fun (*this, &StepEntry::insert_f));
+	ActionManager::register_action (step_entry_actions, "insert-fsharp", _("Insert Note F-sharp"), sigc::mem_fun (*this, &StepEntry::insert_fsharp));
+	ActionManager::register_action (step_entry_actions, "insert-g", _("Insert Note G"), sigc::mem_fun (*this, &StepEntry::insert_g));
+
+        RadioAction::Group note_length_group;
+
+	ActionManager::register_radio_action (step_entry_actions, note_length_group, "note-length-whole", 
+                                              _("Set Note Length to Whole"), sigc::mem_fun (*this, &StepEntry::note_length_whole));
+	ActionManager::register_radio_action (step_entry_actions, note_length_group, "note-length-half", 
+                                              _("Set Note Length to 1/2"), sigc::mem_fun (*this, &StepEntry::note_length_half));
+	ActionManager::register_radio_action (step_entry_actions, note_length_group, "note-length-quarter",
+                                              _("Set Note Length to 1/4"), sigc::mem_fun (*this, &StepEntry::note_length_quarter));
+	ActionManager::register_radio_action (step_entry_actions, note_length_group, "note-length-eighth",
+                                              _("Set Note Length to 1/8"), sigc::mem_fun (*this, &StepEntry::note_length_eighth));
+	ActionManager::register_radio_action (step_entry_actions, note_length_group, "note-length-sixteenth",
+                                              _("Set Note Length to 1/16"), sigc::mem_fun (*this, &StepEntry::note_length_sixteenth));
+	ActionManager::register_radio_action (step_entry_actions, note_length_group, "note-length-thirtysecond",
+                                              _("Set Note Length to 1/32"), sigc::mem_fun (*this, &StepEntry::note_length_thirtysecond));
+	ActionManager::register_radio_action (step_entry_actions, note_length_group, "note-length-sixtyfourth",
+                                              _("Set Note Length to 1/64"), sigc::mem_fun (*this, &StepEntry::note_length_sixtyfourth));
+        
+        RadioAction::Group note_velocity_group;
+        
+	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-ppp",
+                                              _("Set Note Velocity to Pianississimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_ppp));
+	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-pp",
+                                              _("Set Note Velocity to Pianissimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_pp));
+	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-p",
+                                              _("Set Note Velocity to Piano"), sigc::mem_fun (*this, &StepEntry::note_velocity_p));
+	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-mp",
+                                              _("Set Note Velocity to Mezzo-Piano"), sigc::mem_fun (*this, &StepEntry::note_velocity_mp));
+	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-mf",
+                                              _("Set Note Velocity to Mezzo-Forte"), sigc::mem_fun (*this, &StepEntry::note_velocity_mf));
+	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-f",
+                                              _("Set Note Velocity to Forte"), sigc::mem_fun (*this, &StepEntry::note_velocity_f));
+	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-ff",
+                                              _("Set Note Velocity to Fortississimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_ff));
+	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-fff",
+                                              _("Set Note Velocity to Fortississimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_fff));
+        
+        uim->insert_action_group (step_entry_actions);
+}
+#endif
