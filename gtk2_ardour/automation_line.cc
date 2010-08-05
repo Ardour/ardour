@@ -280,7 +280,7 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 		mr.xval = (*cp.model())->when;
 	} else {
 		mr.xval = trackview.editor().unit_to_frame (mr.xval);
-		view_to_model_coord_x (mr.xval);
+		mr.xval = _time_converter.from (mr.xval);
 	}
 
 	/* convert y to model units; the x was already done above
@@ -1216,14 +1216,8 @@ AutomationLine::set_state (const XMLNode &node, int version)
 void
 AutomationLine::view_to_model_coord (double& x, double& y) const
 {
-	view_to_model_coord_x (x);
+	x = _time_converter.from (x);
 	view_to_model_coord_y (y);
-}
-
-void
-AutomationLine::view_to_model_coord_x (double& x) const
-{
-	x = _time_converter.from(x);
 }
 
 void
