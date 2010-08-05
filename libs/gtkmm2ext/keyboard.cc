@@ -195,6 +195,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 #if 0
 	cerr << "snoop widget " << widget << " key " << event->keyval << " type: " << event->type
 	     << " state " << std::hex << event->state << std::dec
+             << " magic ? " << _some_magic_widget_has_focus 
 	     << endl;
 #endif
 
