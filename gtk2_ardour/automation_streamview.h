@@ -64,6 +64,8 @@ class AutomationStreamView : public StreamView
 	void get_selectables (nframes_t, nframes_t, double, double, std::list<Selectable*> &);
 	void set_selected_points (PointSelection &);
 
+	std::list<boost::shared_ptr<AutomationLine> > get_lines () const;
+
   private:
 	void setup_rec_box ();
 

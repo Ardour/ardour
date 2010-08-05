@@ -92,7 +92,7 @@ public:
 	nframes64_t find_next_region_boundary (nframes64_t pos, int32_t dir);
 
 	/* Editing operations */
-	bool cut_copy_clear (Selection&, Editing::CutCopyOp);
+	void cut_copy_clear (Selection&, Editing::CutCopyOp);
 	bool paste (nframes_t, float times, Selection&, size_t nth);
 
 	TimeAxisView::Children get_child_list();

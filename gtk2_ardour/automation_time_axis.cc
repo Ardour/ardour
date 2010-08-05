@@ -407,8 +407,9 @@ AutomationTimeAxisView::set_height (uint32_t h)
 	TimeAxisView::set_height (h);
 	_base_rect->property_y2() = h;
 
-	if (_line)
+	if (_line) {
 		_line->set_height(h);
+	}
 
 	if (_view) {
 		_view->set_height(h);
@@ -480,11 +481,13 @@ AutomationTimeAxisView::set_samples_per_unit (double spu)
 {
 	TimeAxisView::set_samples_per_unit (spu);
 
-	if (_line)
+	if (_line) {
 		_line->reset ();
+	}
 
-	if (_view)
+	if (_view) {
 		_view->set_samples_per_unit (spu);
+	}
 }
 
 void
@@ -608,18 +611,26 @@ AutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* /*item*/, GdkE
 	_session->set_dirty ();
 }
 
-bool
+void
 AutomationTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
-	return (_line ? cut_copy_clear_one (*_line, selection, op) : false);
+	list<boost::shared_ptr<AutomationLine> > lines;
+	if (_line) {
+		lines.push_back (_line);
+	} else if (_view) {
+		lines = _view->get_lines ();
+	}
+
+	for (list<boost::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
+		cut_copy_clear_one (**i, selection, op);
+	}
 }
 
-bool
+void
 AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& selection, CutCopyOp op)
 {
 	boost::shared_ptr<Evoral::ControlList> what_we_got;
 	boost::shared_ptr<AutomationList> alist (line.the_list());
-	bool ret = false;
 
 	XMLNode &before = alist->get_state();
 
@@ -628,7 +639,6 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 		if ((what_we_got = alist->cut (selection.time.front().start, selection.time.front().end)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
 			_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
-			ret = true;
 		}
 		break;
 	case Copy:
@@ -640,7 +650,6 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 	case Clear:
 		if ((what_we_got = alist->cut (selection.time.front().start, selection.time.front().end)) != 0) {
 			_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
-			ret = true;
 		}
 		break;
 	}
@@ -654,8 +663,6 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 			(*x)->value = val;
 		}
 	}
-
-	return ret;
 }
 
 void
@@ -681,18 +688,26 @@ AutomationTimeAxisView::reset_objects_one (AutomationLine& line, PointSelection&
 	}
 }
 
-bool
+void
 AutomationTimeAxisView::cut_copy_clear_objects (PointSelection& selection, CutCopyOp op)
 {
-	return cut_copy_clear_objects_one (*_line, selection, op);
+	list<boost::shared_ptr<AutomationLine> > lines;
+	if (_line) {
+		lines.push_back (_line);
+	} else if (_view) {
+		lines = _view->get_lines ();
+	}
+
+	for (list<boost::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
+		cut_copy_clear_objects_one (**i, selection, op);
+	}
 }
 
-bool
+void
 AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointSelection& selection, CutCopyOp op)
 {
 	boost::shared_ptr<Evoral::ControlList> what_we_got;
 	boost::shared_ptr<AutomationList> alist(line.the_list());
-	bool ret = false;
 
 	XMLNode &before = alist->get_state();
 
@@ -707,7 +722,6 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 			if ((what_we_got = alist->cut ((*i).start, (*i).end)) != 0) {
 				_editor.get_cut_buffer().add (what_we_got);
 				_session->add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
-				ret = true;
 			}
 			break;
 		case Copy:
@@ -719,7 +733,6 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 		case Clear:
 			if ((what_we_got = alist->cut ((*i).start, (*i).end)) != 0) {
 				_session->add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
-				ret = true;
 			}
 			break;
 		}
@@ -727,6 +740,8 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 
 	delete &before;
 
+	cout << "CCC objects " << what_we_got->size() << "\n";
+	
 	if (what_we_got) {
 		for (AutomationList::iterator x = what_we_got->begin(); x != what_we_got->end(); ++x) {
 			double when = (*x)->when;
@@ -736,8 +751,6 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 			(*x)->value = val;
 		}
 	}
-
-	return ret;
 }
 
 bool
@@ -825,8 +838,9 @@ AutomationTimeAxisView::get_selectables (nframes_t start, nframes_t end, double 
 void
 AutomationTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& result)
 {
-	if (_line)
+	if (_line) {
 		_line->get_inverted_selectables (sel, result);
+	}
 }
 
 void

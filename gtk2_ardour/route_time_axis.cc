@@ -1299,17 +1299,16 @@ RouteTimeAxisView::find_next_region_boundary (nframes64_t pos, int32_t dir)
 	return -1;
 }
 
-bool
+void
 RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
 	boost::shared_ptr<Playlist> what_we_got;
 	boost::shared_ptr<Track> tr = track ();
 	boost::shared_ptr<Playlist> playlist;
-	bool ret = false;
 
 	if (tr == 0) {
 		/* route is a bus, not a track */
-		return false;
+		return;
 	}
 
 	playlist = tr->playlist();
@@ -1339,7 +1338,6 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
                                 _session->add_command (*c);
                         }
                         _session->add_command (new StatefulDiffCommand (playlist));
-			ret = true;
 		}
 		break;
 	case Copy:
@@ -1359,12 +1357,9 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
                         }
                         _session->add_command (new StatefulDiffCommand (playlist));
 			what_we_got->release ();
-			ret = true;
 		}
 		break;
 	}
-
-	return ret;
 }
 
 bool

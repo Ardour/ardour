@@ -3106,8 +3106,6 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		_editor->begin_reversible_command (_("rubberband selection"));
 
-		cout << "RSD finished, selecting all within <fred>\n";
-
 		if (grab_frame() < last_pointer_frame()) {
 			committed = _editor->select_all_within (grab_frame(), last_pointer_frame() - 1, y1, y2, _editor->track_views, op);
 		} else {

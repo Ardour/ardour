@@ -177,7 +177,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	/* editing operations */
 
-	virtual bool cut_copy_clear (Selection&, Editing::CutCopyOp) { return false; }
+	virtual void cut_copy_clear (Selection&, Editing::CutCopyOp) {}
 	virtual bool paste (nframes_t, float /*times*/, Selection&, size_t /*nth*/) { return false; }
 
 	virtual void set_selected_regionviews (RegionSelection&) {}
