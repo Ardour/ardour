@@ -55,6 +55,7 @@
 #include "midi++/manager.h"
 
 #include "ardour/ardour.h"
+#include "ardour/callback.h"
 #include "ardour/profile.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_route.h"
@@ -646,6 +647,11 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 void
 ARDOUR_UI::startup ()
 {
+
+#ifdef PHONE_HOME
+        call_the_mothership (VERSIONSTRING);
+#endif
+
 	if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
 		exit (1);
 	}

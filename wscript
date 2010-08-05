@@ -328,7 +328,7 @@ def set_options(opt):
 	opt.add_option('--boost-sp-debug', action='store_true', default=False, dest='boost_sp_debug',
 			help='Compile with Boost shared pointer debugging')
 	opt.add_option('--audiounits', action='store_true', default=False, dest='audiounits',
-			help='Compile with Apple\'s AudioUnit library (experimental)')
+			help='Compile with Apple\'s AudioUnit library')
 	opt.add_option('--coreaudio', action='store_true', default=False, dest='coreaudio',
 			help='Compile with Apple\'s CoreAudio library')
 	opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
@@ -351,6 +351,7 @@ def set_options(opt):
 	opt.add_option('--nls', action='store_true', default=True, dest='nls',
 			help='Enable i18n (native language support) (default)')
 	opt.add_option('--no-nls', action='store_false', dest='nls')
+	opt.add_option('--phone-home', action='store_false', default=True, dest='phone_home')
 	opt.add_option('--stl-debug', action='store_true', default=False, dest='stl_debug',
 			help='Build with debugging for the STL')
 	opt.add_option('--test', action='store_true', default=False, dest='build_tests', 
@@ -503,7 +504,13 @@ def configure(conf):
 	conf.env.append_value('CXXFLAGS', '-DWAF_BUILD')
 	
 	autowaf.print_summary(conf)
+
+        # debug builds should not call home
+
 	opts = Options.options
+        if opts.debug:
+                opts.phone_home = False;
+
 	autowaf.display_header('Ardour Configuration')
 	autowaf.display_msg(conf, 'Build Target', conf.env['build_target'])
 	autowaf.display_msg(conf, 'Architecture flags', opts.arch)
@@ -514,6 +521,9 @@ def configure(conf):
 		conf.define ('COREAUDIO', 1)
 	if opts.audiounits:
 		conf.define('AUDIOUNITS',1)
+	autowaf.display_msg(conf, 'Phone Home', opts.phone_home)
+	if opts.phone_home:
+		conf.env['PHONE_HOME'] = opts.phone_home
 	autowaf.display_msg(conf, 'FPU Optimization', opts.fpu_optimization)
 	if opts.fpu_optimization:
 		conf.define('FPU_OPTIMIZATION', 1)
@@ -534,7 +544,7 @@ def configure(conf):
 	autowaf.display_msg(conf, 'Tranzport', opts.tranzport)
 	if opts.build_tests:
 		conf.env['BUILD_TESTS'] = opts.build_tests
-		autowaf.display_msg(conf, 'Unit Tests', bool(conf.env['BUILD_TESTS']) and bool (conf.env['HAVE_CPPUNIT']))
+	autowaf.display_msg(conf, 'Unit Tests', bool(conf.env['BUILD_TESTS']) and bool (conf.env['HAVE_CPPUNIT']))
 	if opts.tranzport:
 		conf.define('TRANZPORT', 1)
 	autowaf.display_msg(conf, 'Universal Binary', opts.universal)
