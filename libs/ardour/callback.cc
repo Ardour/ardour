@@ -1,11 +1,18 @@
 #include <iostream>
 #include <string>
-
+#include <stdio.h>
 #include <sys/utsname.h>
 #include <curl/curl.h>
 
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
 #include "pbd/compose.h"
+#include "pbd/strsplit.h"
+#include "pbd/convert.h"
+
 #include "ardour/callback.h"
+#include "ardour/filesystem_paths.h"
 
 using namespace std;
 
@@ -14,6 +21,20 @@ using namespace std;
 static size_t
 curl_write_data (char *bufptr, size_t size, size_t nitems, void *ptr)
 {
+        /* we know its a string */
+
+        string* sptr = (string*) ptr;
+
+        for (size_t i = 0; i < nitems; ++i) {
+                for (size_t n = 0; n < size; ++n) {
+                        if (*bufptr == '\n') {
+                                break;
+                        }
+
+                        (*sptr) += *bufptr++;
+                }
+        }
+
         return size * nitems;
 }
 
@@ -26,8 +47,18 @@ watermark ()
 void
 call_the_mothership (const string& version)
 {
+        /* check if the user says never to do this 
+         */
+
+        string hangup = Glib::build_filename (ARDOUR::user_config_directory().to_string(), ".offthehook");
+
+        if (Glib::file_test (hangup, Glib::FILE_TEST_EXISTS)) {
+                return;
+        }
+
         CURL* c;
         struct utsname utb;
+        std::string versionstr;
 
         if (uname (&utb)) {
                 return;
@@ -50,7 +81,7 @@ call_the_mothership (const string& version)
         curl_easy_setopt(c, CURLOPT_POSTFIELDS, data.c_str());
         curl_easy_setopt(c, CURLOPT_URL, PING_URL);
         curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, curl_write_data); 
-        curl_easy_setopt(c, CURLOPT_WRITEDATA, 0); 
+        curl_easy_setopt(c, CURLOPT_WRITEDATA, &versionstr); 
         
         std::cerr << "Callback to ardour.org ...\n";
 
@@ -58,7 +89,39 @@ call_the_mothership (const string& version)
         curl_easy_setopt(c, CURLOPT_ERRORBUFFER, errbuf); 
 
         if (curl_easy_perform (c) == 0) {
+                cerr << "Current release is " << versionstr << endl;
 
+                vector<string> ours;
+                vector<string> current;
+                
+                split (version, ours, '.');
+                split (versionstr, current, '.');
+                
+                if (ours.size() == 3 && current.size() == 3) {
+
+                        int ours_n[3];
+                        int current_n[3];
+
+                        using namespace PBD;
+
+                        ours_n[0] = atoi (ours[0]);
+                        ours_n[1] = atoi (ours[1]);
+                        ours_n[2] = atoi (ours[2]);
+
+                        current_n[0] = atoi (current[0]);
+                        current_n[1] = atoi (current[1]);
+                        current_n[2] = atoi (current[2]);
+
+                        if (ours_n[0] < current_n[0] ||
+                            ((ours_n[0] == current_n[0]) && (ours_n[1] < current_n[1])) || 
+                            ((ours_n[0] == current_n[0]) && (ours_n[1] == current_n[1]) && (ours_n[2] < current_n[2]))) {
+                                cerr << "TOO OLD\n";
+                        } else {
+                                cerr << "CURRENT\n";
+                        }
+                } else {
+                        cerr << "Unusual local version: " << version << endl;
+                }
         }
         
         curl_easy_cleanup (c);
