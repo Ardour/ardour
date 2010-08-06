@@ -674,7 +674,16 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 void
 AutomationTimeAxisView::reset_objects (PointSelection& selection)
 {
-	reset_objects_one (*_line, selection);
+	list<boost::shared_ptr<AutomationLine> > lines;
+	if (_line) {
+		lines.push_back (_line);
+	} else if (_view) {
+		lines = _view->get_lines ();
+	}
+
+	for (list<boost::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
+		reset_objects_one (**i, selection);
+	}
 }
 
 void
