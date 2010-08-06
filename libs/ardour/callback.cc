@@ -1,6 +1,11 @@
 #include <iostream>
 #include <string>
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <cstdlib>
 #include <sys/utsname.h>
 #include <curl/curl.h>
 
@@ -17,6 +22,7 @@
 using namespace std;
 
 #define PING_URL "http://ardour.org/pingback/versioncheck"
+#define OFF_THE_HOOK ".offthehook"
 
 static size_t
 curl_write_data (char *bufptr, size_t size, size_t nitems, void *ptr)
@@ -41,7 +47,31 @@ curl_write_data (char *bufptr, size_t size, size_t nitems, void *ptr)
 static string
 watermark ()
 {
-        return "";
+        return string();
+}
+
+void
+block_mothership ()
+{
+        string hangup = Glib::build_filename (ARDOUR::user_config_directory().to_string(), OFF_THE_HOOK);
+        int fd;
+        if ((fd = ::open (hangup.c_str(), O_RDWR|O_CREAT, 0600)) >= 0) {
+                close (fd);
+        }
+}
+
+void
+unblock_mothership ()
+{
+        string hangup = Glib::build_filename (ARDOUR::user_config_directory().to_string(), OFF_THE_HOOK);
+        ::unlink (hangup.c_str());
+}
+
+bool
+mothership_blocked ()
+{
+        string hangup = Glib::build_filename (ARDOUR::user_config_directory().to_string(), OFF_THE_HOOK);
+        return Glib::file_test (hangup, Glib::FILE_TEST_EXISTS);
 }
 
 void
@@ -50,9 +80,7 @@ call_the_mothership (const string& version)
         /* check if the user says never to do this 
          */
 
-        string hangup = Glib::build_filename (ARDOUR::user_config_directory().to_string(), ".offthehook");
-
-        if (Glib::file_test (hangup, Glib::FILE_TEST_EXISTS)) {
+        if (mothership_blocked()) {
                 return;
         }
 
