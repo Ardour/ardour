@@ -19,7 +19,14 @@
 
 #include <iostream>
 
+#include "pbd/filesystem.h"
+#include "pbd/file_utils.h"
+
 #include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/bindings.h"
+
+#include "ardour/filesystem_paths.h"
 
 #include "ardour_ui.h"
 #include "midi_channel_selector.h"
@@ -29,7 +36,11 @@
 
 #include "i18n.h"
 
+using namespace std;
 using namespace Gtk;
+using namespace Gtkmm2ext;
+using namespace PBD;
+using namespace ARDOUR;
 
 static void
 _note_off_event_handler (GtkWidget* widget, int note, gpointer arg)
@@ -250,6 +261,9 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 	packer.show_all ();
 
 	get_vbox()->add (packer);
+
+        register_actions ();
+        load_bindings ();
 }
 
 StepEntry::~StepEntry()
@@ -259,6 +273,12 @@ StepEntry::~StepEntry()
 bool
 StepEntry::on_key_press_event (GdkEventKey* ev)
 {
+        KeyboardKey k (ev->state, ev->keyval);
+        
+        if (bindings.activate (k, KeyboardKey::Press)) {
+                return true;
+        }
+        
 	if (!gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
 		return gtk_window_activate_key (GTK_WINDOW(gobj()), ev);
 	}
@@ -396,67 +416,182 @@ StepEntry::bar_resync_click ()
 {
         _mtv->step_edit_bar_sync ();
 }
-#if 0
+
 void
 StepEntry::register_actions ()
 {
-	step_entry_actions = ActionGroup::create (X_("StepEdit"));
-
-	/* non-operative menu items for menu bar */
-
-	ActionManager::register_action (editor_actions, X_("AlignMenu"), _("Align"));
-
 	/* add named actions for the editor */
 
-	ActionManager::register_action (step_entry_actions, "insert-a", _("Insert Note A"), sigc::mem_fun (*this, &StepEntry::insert_a));
-	ActionManager::register_action (step_entry_actions, "insert-bsharp", _("Insert Note A-sharp"), sigc::mem_fun (*this, &StepEntry::insert_asharp));
-	ActionManager::register_action (step_entry_actions, "insert-b", _("Insert Note B"), sigc::mem_fun (*this, &StepEntry::insert_b));
-	ActionManager::register_action (step_entry_actions, "insert-bsharp", _("Insert Note B-sharp"), sigc::mem_fun (*this, &StepEntry::insert_bsharp));
-	ActionManager::register_action (step_entry_actions, "insert-c", _("Insert Note C"), sigc::mem_fun (*this, &StepEntry::insert_c));
-	ActionManager::register_action (step_entry_actions, "insert-csharp", _("Insert Note C-sharp"), sigc::mem_fun (*this, &StepEntry::insert_csharp));
-	ActionManager::register_action (step_entry_actions, "insert-d", _("Insert Note D"), sigc::mem_fun (*this, &StepEntry::insert_d));
-	ActionManager::register_action (step_entry_actions, "insert-dsharp", _("Insert Note D-sharp"), sigc::mem_fun (*this, &StepEntry::insert_dsharp));
-	ActionManager::register_action (step_entry_actions, "insert-e", _("Insert Note E"), sigc::mem_fun (*this, &StepEntry::insert_e));
-	ActionManager::register_action (step_entry_actions, "insert-f", _("Insert Note F"), sigc::mem_fun (*this, &StepEntry::insert_f));
-	ActionManager::register_action (step_entry_actions, "insert-fsharp", _("Insert Note F-sharp"), sigc::mem_fun (*this, &StepEntry::insert_fsharp));
-	ActionManager::register_action (step_entry_actions, "insert-g", _("Insert Note G"), sigc::mem_fun (*this, &StepEntry::insert_g));
+	myactions.register_action ("StepEditing", "insert-a", _("Insert Note A"), sigc::mem_fun (*this, &StepEntry::insert_a));
+	myactions.register_action ("StepEditing", "insert-bsharp", _("Insert Note A-sharp"), sigc::mem_fun (*this, &StepEntry::insert_asharp));
+	myactions.register_action ("StepEditing", "insert-b", _("Insert Note B"), sigc::mem_fun (*this, &StepEntry::insert_b));
+	myactions.register_action ("StepEditing", "insert-bsharp", _("Insert Note B-sharp"), sigc::mem_fun (*this, &StepEntry::insert_bsharp));
+	myactions.register_action ("StepEditing", "insert-c", _("Insert Note C"), sigc::mem_fun (*this, &StepEntry::insert_c));
+	myactions.register_action ("StepEditing", "insert-csharp", _("Insert Note C-sharp"), sigc::mem_fun (*this, &StepEntry::insert_csharp));
+	myactions.register_action ("StepEditing", "insert-d", _("Insert Note D"), sigc::mem_fun (*this, &StepEntry::insert_d));
+	myactions.register_action ("StepEditing", "insert-dsharp", _("Insert Note D-sharp"), sigc::mem_fun (*this, &StepEntry::insert_dsharp));
+	myactions.register_action ("StepEditing", "insert-e", _("Insert Note E"), sigc::mem_fun (*this, &StepEntry::insert_e));
+	myactions.register_action ("StepEditing", "insert-f", _("Insert Note F"), sigc::mem_fun (*this, &StepEntry::insert_f));
+	myactions.register_action ("StepEditing", "insert-fsharp", _("Insert Note F-sharp"), sigc::mem_fun (*this, &StepEntry::insert_fsharp));
+	myactions.register_action ("StepEditing", "insert-g", _("Insert Note G"), sigc::mem_fun (*this, &StepEntry::insert_g));
 
         RadioAction::Group note_length_group;
 
-	ActionManager::register_radio_action (step_entry_actions, note_length_group, "note-length-whole", 
+	myactions.register_radio_action ("StepEditing", note_length_group, "note-length-whole", 
                                               _("Set Note Length to Whole"), sigc::mem_fun (*this, &StepEntry::note_length_whole));
-	ActionManager::register_radio_action (step_entry_actions, note_length_group, "note-length-half", 
+	myactions.register_radio_action ("StepEditing", note_length_group, "note-length-half", 
                                               _("Set Note Length to 1/2"), sigc::mem_fun (*this, &StepEntry::note_length_half));
-	ActionManager::register_radio_action (step_entry_actions, note_length_group, "note-length-quarter",
+	myactions.register_radio_action ("StepEditing", note_length_group, "note-length-quarter",
                                               _("Set Note Length to 1/4"), sigc::mem_fun (*this, &StepEntry::note_length_quarter));
-	ActionManager::register_radio_action (step_entry_actions, note_length_group, "note-length-eighth",
+	myactions.register_radio_action ("StepEditing", note_length_group, "note-length-eighth",
                                               _("Set Note Length to 1/8"), sigc::mem_fun (*this, &StepEntry::note_length_eighth));
-	ActionManager::register_radio_action (step_entry_actions, note_length_group, "note-length-sixteenth",
+	myactions.register_radio_action ("StepEditing", note_length_group, "note-length-sixteenth",
                                               _("Set Note Length to 1/16"), sigc::mem_fun (*this, &StepEntry::note_length_sixteenth));
-	ActionManager::register_radio_action (step_entry_actions, note_length_group, "note-length-thirtysecond",
+	myactions.register_radio_action ("StepEditing", note_length_group, "note-length-thirtysecond",
                                               _("Set Note Length to 1/32"), sigc::mem_fun (*this, &StepEntry::note_length_thirtysecond));
-	ActionManager::register_radio_action (step_entry_actions, note_length_group, "note-length-sixtyfourth",
+	myactions.register_radio_action ("StepEditing", note_length_group, "note-length-sixtyfourth",
                                               _("Set Note Length to 1/64"), sigc::mem_fun (*this, &StepEntry::note_length_sixtyfourth));
         
         RadioAction::Group note_velocity_group;
         
-	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-ppp",
+	myactions.register_radio_action ("StepEditing", note_velocity_group, "note-velocity-ppp",
                                               _("Set Note Velocity to Pianississimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_ppp));
-	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-pp",
+	myactions.register_radio_action ("StepEditing", note_velocity_group, "note-velocity-pp",
                                               _("Set Note Velocity to Pianissimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_pp));
-	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-p",
+	myactions.register_radio_action ("StepEditing", note_velocity_group, "note-velocity-p",
                                               _("Set Note Velocity to Piano"), sigc::mem_fun (*this, &StepEntry::note_velocity_p));
-	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-mp",
+	myactions.register_radio_action ("StepEditing", note_velocity_group, "note-velocity-mp",
                                               _("Set Note Velocity to Mezzo-Piano"), sigc::mem_fun (*this, &StepEntry::note_velocity_mp));
-	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-mf",
+	myactions.register_radio_action ("StepEditing", note_velocity_group, "note-velocity-mf",
                                               _("Set Note Velocity to Mezzo-Forte"), sigc::mem_fun (*this, &StepEntry::note_velocity_mf));
-	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-f",
+	myactions.register_radio_action ("StepEditing", note_velocity_group, "note-velocity-f",
                                               _("Set Note Velocity to Forte"), sigc::mem_fun (*this, &StepEntry::note_velocity_f));
-	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-ff",
+	myactions.register_radio_action ("StepEditing", note_velocity_group, "note-velocity-ff",
                                               _("Set Note Velocity to Fortississimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_ff));
-	ActionManager::register_radio_action (step_entry_actions, note_velocity_group, "note-velocity-fff",
+	myactions.register_radio_action ("StepEditing", note_velocity_group, "note-velocity-fff",
                                               _("Set Note Velocity to Fortississimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_fff));
-        
-        uim->insert_action_group (step_entry_actions);
 }
-#endif
+
+void
+StepEntry::load_bindings ()
+{
+        bindings.set_action_map (myactions);
+
+	sys::path binding_file;
+	SearchPath spath = ardour_search_path() + user_config_directory() + system_config_search_path();
+
+	if (find_file_in_search_path (spath, "step_editing.bindings", binding_file)) {
+                bindings.load (binding_file.to_string());
+        }
+}
+
+void
+StepEntry::insert_a ()
+{
+}
+void
+StepEntry::insert_asharp ()
+{
+}
+void
+StepEntry::insert_b ()
+{
+}
+void
+StepEntry::insert_bsharp ()
+{
+}
+void
+StepEntry::insert_c ()
+{
+}
+void
+StepEntry::insert_csharp ()
+{
+}
+void
+StepEntry::insert_d ()
+{
+}
+void
+StepEntry::insert_dsharp ()
+{
+}
+void
+StepEntry::insert_e ()
+{
+}
+void
+StepEntry::insert_f ()
+{
+}
+void
+StepEntry::insert_fsharp ()
+{
+}
+void
+StepEntry::insert_g ()
+{
+}
+
+void
+StepEntry::note_length_whole ()
+{
+}
+void
+StepEntry::note_length_half ()
+{
+}
+void
+StepEntry::note_length_quarter ()
+{
+}
+void
+StepEntry::note_length_eighth ()
+{
+}
+void
+StepEntry::note_length_sixteenth ()
+{
+}
+void
+StepEntry::note_length_thirtysecond ()
+{
+}
+void
+StepEntry::note_length_sixtyfourth ()
+{
+}
+
+void
+StepEntry::note_velocity_ppp ()
+{
+}
+void
+StepEntry::note_velocity_pp ()
+{
+}
+void
+StepEntry::note_velocity_p ()
+{
+}
+void
+StepEntry::note_velocity_mp ()
+{
+}
+void
+StepEntry::note_velocity_mf ()
+{
+}
+void
+StepEntry::note_velocity_f ()
+{
+}
+void
+StepEntry::note_velocity_ff ()
+{
+}
+void
+StepEntry::note_velocity_fff ()
+{
+}

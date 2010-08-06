@@ -208,12 +208,10 @@ Bindings::load (const string& path)
         XMLTree tree;
 
         if (!action_map) {
-                cerr << "No action map to load bindings with!\n";
                 return false;
         }
 
         if (!tree.read (path)) {
-                cerr << "Cannot load XML file @ " << path << endl;
                 return false;
         }
         
@@ -223,11 +221,7 @@ Bindings::load (const string& path)
         XMLNode& root (*tree.root());
         const XMLNodeList& children (root.children());
 
-        cerr << "check the " << children.size() << " children\n";
-        
         for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-
-                cerr << "child name: " << (*i)->name() << endl;
 
                 if ((*i)->name() == X_("Press") || (*i)->name() == X_("Release")) {
 
@@ -253,8 +247,6 @@ Bindings::load (const string& path)
                                         continue;
                                 }
 
-                                cerr << "key = " << kp->value () << " action = " << ap->value() << endl;
-                                
                                 RefPtr<Action> act = action_map->find_action (ap->value());
                                 
                                 if (!act) {
@@ -266,8 +258,6 @@ Bindings::load (const string& path)
                                 if (!KeyboardKey::make_key (kp->value(), k)) {
                                         continue;
                                 }
-
-                                cerr << "binding " << act->get_name() << " to " << k.name() << endl;
 
                                 add (k, op, act);
                         }
@@ -304,7 +294,6 @@ ActionMap::register_action (const char* path,
         fullpath += name;
 
         actions.insert (_ActionMap::value_type (fullpath, act));
-        cerr << "Registered action @ " << fullpath << endl;
         return act;
 }
 
@@ -323,13 +312,11 @@ ActionMap::register_radio_action (const char* path, Gtk::RadioAction::Group& rgr
         fullpath += name;
 
         actions.insert (_ActionMap::value_type (fullpath, act));
-        cerr << "Registered action @ " << fullpath << endl;
-
         return act;
 }
 
 RefPtr<Action> 
-ActionMap::register_toggle_action (const char*path,
+ActionMap::register_toggle_action (const char* path,
                                    const char* name, const char* label, sigc::slot<void> sl)
 {
         string fullpath;
@@ -343,7 +330,5 @@ ActionMap::register_toggle_action (const char*path,
         fullpath += name;
 
         actions.insert (_ActionMap::value_type (fullpath, act));
-        cerr << "Registered action @ " << fullpath << endl;
-
         return act;
 }

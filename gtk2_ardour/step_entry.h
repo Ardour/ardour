@@ -25,6 +25,7 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/box.h>
 #include <gtkmm/adjustment.h>
+#include <gtkmm2ext/bindings.h>
 
 #include "ardour_dialog.h"
 #include "gtk_pianokeyboard.h"
@@ -102,6 +103,44 @@ class StepEntry : public ArdourDialog
         bool on_key_press_event (GdkEventKey*);
 
         void on_show ();
+
+        /* actions */
+
+        void register_actions ();
+        Gtkmm2ext::ActionMap myactions;
+
+        void insert_a ();
+        void insert_asharp ();
+        void insert_b ();
+        void insert_bsharp ();
+        void insert_c ();
+        void insert_csharp ();
+        void insert_d ();
+        void insert_dsharp ();
+        void insert_e ();
+        void insert_f ();
+        void insert_fsharp ();
+        void insert_g ();
+        
+        void note_length_whole ();
+        void note_length_half ();
+        void note_length_quarter ();
+        void note_length_eighth ();
+        void note_length_sixteenth ();
+        void note_length_thirtysecond ();
+        void note_length_sixtyfourth ();
+
+        void note_velocity_ppp ();
+        void note_velocity_pp ();
+        void note_velocity_p ();
+        void note_velocity_mp ();
+        void note_velocity_mf ();
+        void note_velocity_f ();
+        void note_velocity_ff ();
+        void note_velocity_fff ();
+
+        void load_bindings ();
+        Gtkmm2ext::Bindings  bindings;
 };
 
 #endif /* __gtk2_ardour_step_entry_h__ */
