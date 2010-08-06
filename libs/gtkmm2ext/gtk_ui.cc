@@ -333,10 +333,13 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 	Glib::RefPtr<Gtk::Action> action = w->get_action();
 	if (action) {
 		Gtk::AccelKey key;
-		bool has_key = ActionManager::lookup_entry(action->get_accel_path(), key);
-		if (has_key && key.get_abbrev() != "") {
-			msg.append("\n\n Key: ").append(key.get_abbrev());
-		}
+                ustring ap = action->get_accel_path();
+                if (!ap.empty()) {
+                        bool has_key = ActionManager::lookup_entry(ap, key);
+                        if (has_key && key.get_abbrev() != "") {
+                                msg.append("\n\n Key: ").append(key.get_abbrev());
+                        }
+                }
 	}
 
 	if (req == 0) {
