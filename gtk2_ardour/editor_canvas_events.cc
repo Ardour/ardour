@@ -275,7 +275,7 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, Rou
 		clicked_regionview = 0;
 		clicked_control_point = 0;
 		clicked_axisview = tv;
-		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(tv);
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		ret = button_press_handler (item, event, StreamItem);
 		break;
 

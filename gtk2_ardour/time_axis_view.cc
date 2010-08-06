@@ -886,8 +886,15 @@ TimeAxisView::remove_child (boost::shared_ptr<TimeAxisView> child)
 	}
 }
 
+/** Get selectable things within a given range.
+ *  @param start Start time in session frames.
+ *  @param end End time in session frames.
+ *  @param top Top y range, in trackview coordinates (ie 0 is the top of the track view)
+ *  @param bot Bottom y range, in trackview coordinates (ie 0 is the top of the track view)
+ *  @param result Filled in with selectable things.
+ */
 void
-TimeAxisView::get_selectables (nframes_t /*start*/, nframes_t /*end*/, double /*top*/, double /*bot*/, list<Selectable*>& /*result*/)
+TimeAxisView::get_selectables (framepos_t /*start*/, framepos_t /*end*/, double /*top*/, double /*bot*/, list<Selectable*>& /*result*/)
 {
 	return;
 }

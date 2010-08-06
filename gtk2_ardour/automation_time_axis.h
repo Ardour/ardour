@@ -78,7 +78,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	boost::shared_ptr<AutomationLine> line() { return _line; }
 
 	void set_selected_points (PointSelection&);
-	void get_selectables (nframes_t start, nframes_t end, double top, double bot, std::list<Selectable *>&);
+	void get_selectables (ARDOUR::framepos_t start, ARDOUR::framepos_t end, double top, double bot, std::list<Selectable *>&);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
 	void show_timestretch (nframes_t /*start*/, nframes_t /*end*/) {}

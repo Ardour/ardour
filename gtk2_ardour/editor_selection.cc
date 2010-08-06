@@ -170,23 +170,23 @@ Editor::select_all_tracks ()
 	selection->set (visible_views);
 }
 
-/** Select clicked_routeview, unless there are no currently selected
+/** Select clicked_axisview, unless there are no currently selected
  *  tracks, in which case nothing will happen unless `force' is true.
  */
 void
 Editor::set_selected_track_as_side_effect (bool force)
 {
-	if (!clicked_routeview) {
+	if (!clicked_axisview) {
 		return;
 	}
 
 	if (!selection->tracks.empty()) {
-		if (!selection->selected (clicked_routeview)) {
-			selection->add (clicked_routeview);
+		if (!selection->selected (clicked_axisview)) {
+			selection->add (clicked_axisview);
 		}
 
 	} else if (force) {
-		selection->set (clicked_routeview);
+		selection->set (clicked_axisview);
 	}
 }
 
@@ -255,9 +255,10 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool /*n
 	 */
 
 	double const size = clicked_control_point->size ();
+	AutomationLine& line = clicked_control_point->line ();
 	
-	nframes64_t const x1 = pixel_to_frame (clicked_control_point->get_x() - size / 2);
-	nframes64_t const x2 = pixel_to_frame (clicked_control_point->get_x() + size / 2);
+	nframes64_t const x1 = pixel_to_frame (clicked_control_point->get_x() - size / 2) + line.time_converter().origin_b ();
+	nframes64_t const x2 = pixel_to_frame (clicked_control_point->get_x() + size / 2) + line.time_converter().origin_b ();
  	double y1 = clicked_control_point->get_y() - size / 2;
 	double y2 = clicked_control_point->get_y() + size / 2;
 
@@ -269,7 +270,7 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool /*n
 	_trackview_group->w2i (dummy, y2);
 
 	/* and set up the selection */
-	return select_all_within (x1, x2, y1, y2, selection->tracks, Selection::Set);
+	return select_all_within (x1, x2, y1, y2, selection->tracks, op);
 }
 
 void
@@ -979,8 +980,8 @@ Editor::invert_selection ()
 
 /** @param start Start time in session frames.
  *  @param end End time in session frames.
- *  @param top Top (lower) y limit in trackview coordinates.
- *  @param bottom Bottom (higher) y limit in trackview coordinates.
+ *  @param top Top (lower) y limit in trackview coordinates (ie 0 at the top of the track view)
+ *  @param bottom Bottom (higher) y limit in trackview coordinates (ie 0 at the top of the track view)
  */
 bool
 Editor::select_all_within (framepos_t start, framepos_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op)

@@ -2832,7 +2832,7 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		/* just a click */
 
-		if ((event->type == GDK_BUTTON_RELEASE) && (event->button.button == 1) && Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
 			_editor->reset_point_selection ();
 		}
 

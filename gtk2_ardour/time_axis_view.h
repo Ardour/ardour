@@ -189,7 +189,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
   	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
 
-	virtual void get_selectables (nframes_t start, nframes_t end, double top, double bot, std::list<Selectable*>& results);
+	virtual void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable*>&);
 	virtual void get_inverted_selectables (Selection&, std::list<Selectable *>& results);
 
 	void add_ghost (RegionView*);

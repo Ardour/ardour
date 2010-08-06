@@ -57,7 +57,6 @@ class MidiStreamView : public StreamView
 	~MidiStreamView ();
 
 	void set_selected_regionviews (RegionSelection&);
-	void get_selectables (nframes_t start, nframes_t end, std::list<Selectable* >&);
 	void get_inverted_selectables (Selection&, std::list<Selectable* >& results);
 
 	enum VisibleNoteRange {

@@ -827,21 +827,23 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, framepos_t pos, float t
 }
 
 void
-AutomationTimeAxisView::get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable*>& results)
+AutomationTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results)
 {
 	if (!_line && !_view) {
 		return;
 	}
-	
+
 	if (touched (top, bot)) {
-		double topfrac;
-		double botfrac;
 
 		/* remember: this is X Window - coordinate space starts in upper left and moves down.
 		   _y_position is the "origin" or "top" of the track.
 		*/
 
-		double mybot = _y_position + height;
+		/* bottom of our track */
+		double const mybot = _y_position + height;
+
+		double topfrac;
+		double botfrac;
 
 		if (_y_position >= top && mybot <= bot) {
 
@@ -858,6 +860,7 @@ AutomationTimeAxisView::get_selectables (nframes_t start, nframes_t end, double 
 
 			topfrac = 1.0 - ((top - _y_position) / height);
 			botfrac = 1.0 - ((bot - _y_position) / height);
+
 		}
 
 		if (_line) {

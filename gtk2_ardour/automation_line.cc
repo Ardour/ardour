@@ -950,28 +950,24 @@ AutomationLine::remove_point (ControlPoint& cp)
 /** Get selectable points within an area.
  *  @param start Start position in session frames.
  *  @param end End position in session frames.
- *  @param botfrac Bottom of area, as a fraction of the line height.
- *  @param topfrac Bottom of area, as a fraction of the line height.
+ *  @param bot Bottom y range, as a fraction of line height, where 0 is the bottom of the line.
+ *  @param top Top y range, as a fraction of line height, where 0 is the bottom of the line.
+ *  @param result Filled in with selectable things.
  */
 void
 AutomationLine::get_selectables (
 	framepos_t start, framepos_t end, double botfrac, double topfrac, list<Selectable*>& results
 	)
 {
-
-	double top;
-	double bot;
-
 	/* these two are in AutomationList model coordinates */
 	double nstart;
 	double nend;
 	
 	bool collecting = false;
 
-	/* Curse X11 and its inverted coordinate system! */
-
-	bot = (1.0 - topfrac) * _height;
-	top = (1.0 - botfrac) * _height;
+	/* convert fractions to display coordinates with 0 at the top of the track */
+	double const bot_track = (1 - topfrac) * trackview.current_height ();
+	double const top_track = (1 - botfrac) * trackview.current_height ();
 
 	nstart = DBL_MAX;
 	nend = 0;
@@ -982,7 +978,7 @@ AutomationLine::get_selectables (
 
 		if (session_frames_when >= start && session_frames_when <= end) {
 
-			if ((*i)->get_y() >= bot && (*i)->get_y() <= top) {
+			if ((*i)->get_y() >= bot_track && (*i)->get_y() <= top_track) {
 
 				(*i)->show();
 				(*i)->set_visible(true);
@@ -1027,10 +1023,8 @@ AutomationLine::point_selection_to_control_points (PointSelection const & s)
 			continue;
 		}
 
-		/* Curse X11 and its inverted coordinate system! */
-
-		double const bot = (1.0 - i->high_fract) * _height;
-		double const top = (1.0 - i->low_fract) * _height;
+		double const bot = (1 - i->high_fract) * trackview.current_height ();
+		double const top = (1 - i->low_fract) * trackview.current_height ();
 
 		for (vector<ControlPoint*>::iterator j = control_points.begin(); j != control_points.end(); ++j) {
 

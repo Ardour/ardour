@@ -276,6 +276,10 @@ AutomationStreamView::clear ()
 
 /** @param start Start position in session frames.
  *  @param end End position in session frames.
+ *  @param bot Bottom position expressed as a fraction of track height where 0 is the bottom of the track.
+ *  @param top Top position expressed as a fraction of track height where 0 is the bottom of the track.
+ *  NOTE: this y system is different to that for the StreamView method that this overrides, which is a little
+ *  confusing.
  */
 void
 AutomationStreamView::get_selectables (framepos_t start, framepos_t end, double botfrac, double topfrac, list<Selectable*>& results)

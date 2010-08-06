@@ -25,8 +25,11 @@
 class TimeAxisView;
 
 /** A selected automation point, expressed as a rectangle.
+ *
  *  x coordinates start/end are in AutomationList model coordinates.
- *  y coordinates are a expressed as a fraction of track height.
+ *  y coordinates are a expressed as a fraction of the AutomationTimeAxisView's height, where 0 is the
+ *  bottom of the track, and 1 is the top.
+ *
  *  This representation falls between the visible GUI control points and
  *  the back-end "actual" automation points, some of which may not be
  *  visible; it is not trivial to convert from one of these to the

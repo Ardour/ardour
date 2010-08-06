@@ -1182,7 +1182,7 @@ RouteTimeAxisView::set_selected_regionviews (RegionSelection& regions)
  * @param results List to add things to.
  */
 void
-RouteTimeAxisView::get_selectables (nframes_t start, nframes_t end, double top, double bot, list<Selectable*>& results)
+RouteTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results)
 {
 	double speed = 1.0;
 
