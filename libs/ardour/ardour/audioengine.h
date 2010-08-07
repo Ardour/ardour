@@ -135,13 +135,15 @@ class AudioEngine : public SessionHandlePtr
 
 	class PortRegistrationFailure : public std::exception {
 	public:
-		PortRegistrationFailure (const char* why = "") {
-			reason = why;
-		}
-		virtual const char *what() const throw() { return reason; }
+		PortRegistrationFailure (std::string const & why = "")
+			: reason (why) {}
+
+		~PortRegistrationFailure () throw () {}
+
+		virtual const char *what() const throw () { return reason.c_str(); }
 
 	private:
-		const char* reason;
+		std::string reason;
 	};
 
 	class NoBackendAvailable : public std::exception {
