@@ -57,16 +57,8 @@ class Panner2d : public Gtk::DrawingArea
 	void allow_y_motion(bool);
 	void allow_target_motion (bool);
 
-	void hide_puck (int which);
-	void show_puck (int which);
 	int  add_target (float x, float y);
 	int  add_puck (const char* text, float x, float y);
-	void hide_target (int);
-	void show_target (int);
-	void remove_target (int);
-	void drop_targets ();
-	void drop_pucks ();
-	void move_target (int, float x, float y);
 	void move_puck (int, float x, float y);
 	void reset (uint32_t n_inputs);
 
@@ -101,7 +93,7 @@ class Panner2d : public Gtk::DrawingArea
 	boost::shared_ptr<ARDOUR::Panner> panner;
 	Glib::RefPtr<Pango::Layout> layout;
 
-	typedef std::map<int,Target *> Targets;
+	typedef std::vector<Target*> Targets;
 	Targets targets;
 	Targets pucks;
 

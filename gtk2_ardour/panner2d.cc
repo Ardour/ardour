@@ -82,7 +82,7 @@ Panner2d::Panner2d (boost::shared_ptr<Panner> p, int32_t h)
 Panner2d::~Panner2d()
 {
 	for (Targets::iterator i = targets.begin(); i != targets.end(); ++i) {
-		delete i->second;
+		delete *i;
 	}
 }
 
@@ -97,12 +97,16 @@ Panner2d::reset (uint32_t n_inputs)
 		add_puck ("", 0.0, 0.0);
 	}
 
-	while (pucks.size() > n_inputs) {
-		pucks.erase (pucks.begin());
-	}
+	if (pucks.size() > n_inputs) {
+		for (uint32_t i = pucks.size(); i < n_inputs; ++i) {
+			delete pucks[i];
+		}
 
+		pucks.resize (n_inputs);
+	}
+						
 	for (Targets::iterator x = pucks.begin(); x != pucks.end(); ++x) {
-		(*x).second->visible = false;
+		(*x)->visible = false;
 	}
 
 	switch (n_inputs) {
@@ -141,12 +145,16 @@ Panner2d::reset (uint32_t n_inputs)
 		add_target (0.0, 0.0);
 	}
 
-	while (targets.size() > panner->nouts()) {
-		targets.erase (targets.begin());
+	if (targets.size() > panner->nouts()) {
+		for (uint32_t i = panner->nouts(); i < targets.size(); ++i) {
+			delete targets[i];
+		}
+
+		targets.resize (panner->nouts ());
 	}
 
 	for (Targets::iterator x = targets.begin(); x != targets.end(); ++x) {
-		(*x).second->visible = false;
+		(*x)->visible = false;
 	}
 
 	for (uint32_t n = 0; n < panner->nouts(); ++n) {
@@ -191,12 +199,7 @@ int
 Panner2d::add_puck (const char* text, float x, float y)
 {
 	Target* puck = new Target (x, y, text);
-
-	pair<int,Target *> newpair;
-	newpair.first = pucks.size();
-	newpair.second = puck;
-
-	pucks.insert (newpair);
+	pucks.push_back (puck);
 	puck->visible = true;
 
 	return 0;
@@ -205,48 +208,12 @@ Panner2d::add_puck (const char* text, float x, float y)
 int
 Panner2d::add_target (float x, float y)
 {
-	Target *target = new Target (x, y, "");
-
-	pair<int,Target *> newpair;
-	newpair.first = targets.size();
-	newpair.second = target;
-
-	targets.insert (newpair);
+	Target* target = new Target (x, y, "");
+	targets.push_back (target);
 	target->visible = true;
 	queue_draw ();
 
-	return newpair.first;
-}
-
-void
-Panner2d::drop_targets ()
-{
-	for (Targets::iterator i = targets.begin(); i != targets.end(); ) {
-
-		Targets::iterator tmp;
-
-		tmp = i;
-		++tmp;
-
-		delete i->second;
-		targets.erase (i);
-
-		i = tmp;
-	}
-
-	queue_draw ();
-}
-
-void
-Panner2d::remove_target (int which)
-{
-	Targets::iterator i = targets.find (which);
-
-	if (i != targets.end()) {
-		delete i->second;
-		targets.erase (i);
-		queue_draw ();
-	}
+	return targets.size() - 1;
 }
 
 void
@@ -279,89 +246,15 @@ Panner2d::handle_position_change ()
 }
 
 void
-Panner2d::move_target (int which, float x, float y)
-{
-	Targets::iterator i = targets.find (which);
-	Target *target;
-
-	if (!allow_target) {
-		return;
-	}
-
-	if (i != targets.end()) {
-		target = i->second;
-		target->x.set_value (x);
-		target->y.set_value (y);
-
-		queue_draw ();
-	}
-}
-
-void
 Panner2d::move_puck (int which, float x, float y)
 {
-	Targets::iterator i = pucks.find (which);
-	Target *target;
-
-	if (i != pucks.end()) {
-		target = i->second;
-		target->x.set_value (x);
-		target->y.set_value (y);
-
-		queue_draw ();
+	if (which >= int (targets.size())) {
+		return;
 	}
-}
-
-void
-Panner2d::show_puck (int which)
-{
-	Targets::iterator i = pucks.find (which);
-
-	if (i != pucks.end()) {
-		Target* puck = i->second;
-		if (!puck->visible) {
-			puck->visible = true;
-			queue_draw ();
-		}
-	}
-}
-
-void
-Panner2d::hide_puck (int which)
-{
-	Targets::iterator i = pucks.find (which);
-
-	if (i != pucks.end()) {
-		Target* puck = i->second;
-		if (!puck->visible) {
-			puck->visible = false;
-			queue_draw ();
-		}
-	}
-}
-
-void
-Panner2d::show_target (int which)
-{
-	Targets::iterator i = targets.find (which);
-	if (i != targets.end()) {
-		if (!i->second->visible) {
-			i->second->visible = true;
-			queue_draw ();
-		}
-	}
-}
-
-void
-Panner2d::hide_target (int which)
-{
-	Targets::iterator i = targets.find (which);
-	if (i != targets.end()) {
-		if (i->second->visible) {
-			i->second->visible = false;
-			queue_draw ();
-		}
-	}
+	
+	targets[which]->x.set_value (x);
+	targets[which]->y.set_value (y);
+	queue_draw ();
 }
 
 Panner2d::Target *
@@ -382,7 +275,7 @@ Panner2d::find_closest_object (gdouble x, gdouble y, int& which, bool& is_puck) 
 	is_puck = false;
 
 	for (Targets::const_iterator i = targets.begin(); i != targets.end(); ++i, ++which) {
-		candidate = i->second;
+		candidate = *i;
 
 		cx = candidate->x.get_value();
 		cy = candidate->y.get_value();
@@ -397,7 +290,7 @@ Panner2d::find_closest_object (gdouble x, gdouble y, int& which, bool& is_puck) 
 	}
 
 	for (Targets::const_iterator i = pucks.begin(); i != pucks.end(); ++i, ++pwhich) {
-		candidate = i->second;
+		candidate = *i;
 
 		cx = candidate->x.get_value();
 		cy = candidate->y.get_value();
@@ -483,7 +376,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 		for (Targets::iterator i = pucks.begin(); i != pucks.end(); ++i) {
 
-			Target* puck = i->second;
+			Target* puck = *i;
 
 			if (puck->visible) {
 				/* redraw puck */
@@ -545,7 +438,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 		int n = 0;
 
 		for (Targets::iterator i = targets.begin(); i != targets.end(); ++i) {
-			Target *target = i->second;
+			Target *target = *i;
 			char buf[256];
 			++n;
 
