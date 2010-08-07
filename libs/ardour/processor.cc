@@ -150,10 +150,13 @@ Processor::set_state_2X (const XMLNode & node, int /*version*/)
 			}
 
 			if ((prop = (*i)->property ("active")) != 0) {
-				if (_active != string_is_affirmative (prop->value())) {
-					_active = !_active;
-                                        _pending_active = _active;
-					ActiveChanged (); /* EMIT_SIGNAL */
+				bool const a = string_is_affirmative (prop->value ());
+				if (_active != a) {
+					if (a) {
+						activate ();
+					} else {
+						deactivate ();
+					}
 				}
 			}
 		}
@@ -232,10 +235,13 @@ Processor::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if (_active != string_is_affirmative (prop->value())) {
-		_active = !_active;
-                _pending_active = _active;
- 		ActiveChanged (); /* EMIT_SIGNAL */
+	bool const a = string_is_affirmative (prop->value ());
+	if (_active != a) {
+		if (a) {
+			activate ();
+		} else {
+			deactivate ();
+		}
 	}
 
 	return 0;

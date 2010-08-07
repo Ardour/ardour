@@ -232,11 +232,11 @@ PluginInsert::set_block_size (nframes_t nframes)
 void
 PluginInsert::activate ()
 {
-	Processor::activate ();
-
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->activate ();
 	}
+	
+	Processor::activate ();
 }
 
 void
