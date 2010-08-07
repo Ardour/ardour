@@ -1464,7 +1464,7 @@ public:
 	void marker_menu_edit ();
 	void marker_menu_remove ();
 	void marker_menu_rename ();
-	void marker_menu_lock (bool yn);
+	void toggle_marker_menu_lock ();
 	void marker_menu_hide ();
 	void marker_menu_loop_range ();
 	void marker_menu_select_all_selectables_using_range ();
@@ -1486,7 +1486,7 @@ public:
 	void transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void new_transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void build_range_marker_menu (bool loop_or_punch);
-	void build_marker_menu (bool);
+	void build_marker_menu (bool, ARDOUR::Location *);
 	void build_tempo_or_meter_marker_menu (bool);
 	void build_new_transport_marker_menu ();
 	void dynamic_cast_marker_object (void*, MeterMarker**, TempoMarker**) const;

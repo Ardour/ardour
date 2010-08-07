@@ -535,13 +535,12 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 		if (loc->is_mark()) {
 			Menu *markerMenu;
 			if (loc->is_session_range ()) {
-				if (session_range_marker_menu == 0) {
-			   		build_marker_menu (true);
-				}
+				delete session_range_marker_menu;
+				build_marker_menu (true, loc);
 				markerMenu = session_range_marker_menu;
 			} else {
-				if (marker_menu == 0)
-			   		build_marker_menu (false);
+				delete marker_menu;
+				build_marker_menu (false, loc);
 				markerMenu = marker_menu;
 			}
 
@@ -596,7 +595,7 @@ Editor::transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item*)
 }
 
 void
-Editor::build_marker_menu (bool session_range)
+Editor::build_marker_menu (bool session_range, Location* loc)
 {
 	using namespace Menu_Helpers;
 
@@ -622,9 +621,14 @@ Editor::build_marker_menu (bool session_range)
 		return;
 	}
 	items.push_back (MenuElem (_("Rename"), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
-	items.push_back (MenuElem (_("Lock"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_lock), true)));
-	items.push_back (MenuElem (_("Unlock"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_lock), false)));
 
+	items.push_back (CheckMenuElem (_("Lock")));
+	CheckMenuItem* lock_item = static_cast<CheckMenuItem*> (&items.back());
+	if (loc->locked ()) {
+		lock_item->set_active ();
+	}
+	lock_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_lock));
+	
 	items.push_back (SeparatorElem());
 
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
@@ -1029,9 +1033,8 @@ Editor::marker_menu_remove ()
 }
 
 void
-Editor::marker_menu_lock (bool yn)
+Editor::toggle_marker_menu_lock ()
 {
-
 	Marker* marker;
 
 	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
@@ -1044,12 +1047,14 @@ Editor::marker_menu_lock (bool yn)
 
 	loc = find_location_from_marker (marker, ignored);
 
-	if (!loc) return;
+	if (!loc) {
+		return;
+	}
 
-	if (yn) {
-		loc->lock();
-	} else {
+	if (loc->locked()) {
 		loc->unlock ();
+	} else {
+		loc->lock ();
 	}
 }
 
