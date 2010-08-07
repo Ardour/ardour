@@ -69,6 +69,7 @@ SndFileDescriptor::close ()
 {
 	/* we must have a lock on the FileManager's mutex */
 
+	assert (_sndfile);
 	sf_close (_sndfile);
 	_sndfile = 0;
 }
