@@ -264,7 +264,7 @@ def build(bld):
 	else:
 		obj.target = 'ardour-3.0'
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-	obj.uselib       = 'UUID FLAC GLIBMM GTHREAD GTK GNOMECANVAS OGG ALSA'
+	obj.uselib       = 'UUID FLAC GLIBMM GTHREAD GTK GNOMECANVAS OGG ALSA CURL DL'
 	obj.uselib       += ' GTKMM GNOMECANVASMM OSX GTKOSX COREAUDIO'
 	obj.uselib_local = '''libpbd libmidipp libtaglib libardour libardour_cp
 	                      libgtkmm2ext libtaglib'''

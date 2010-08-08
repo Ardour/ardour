@@ -498,6 +498,9 @@ def configure(conf):
 	# Fix utterly braindead FLAC include path to not smash assert.h
 	conf.env['CPPPATH_FLAC'] = []
 
+	conf.check_cc(function_name='dlopen', header_name='dlfcn.h', linkflags='-ldl', uselib_store='DL')
+	conf.check_cc(function_name='curl_global_init', header_name='curl/curl.h', linkflags='-lcurl', uselib_store='CURL')
+
 	# Tell everyone that this is a waf build
 
 	conf.env.append_value('CCFLAGS', '-DWAF_BUILD')
