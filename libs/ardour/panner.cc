@@ -29,6 +29,7 @@
 #include <locale.h>
 #include <unistd.h>
 #include <float.h>
+#include <iomanip>
 
 #include <glibmm.h>
 
@@ -1639,4 +1640,26 @@ Panner::set_mono (bool yn)
 	for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 		(*i)->set_mono (yn);
 	}
+}
+
+string
+Panner::value_as_string (double v)
+{
+	if (Panner::equivalent (v, 0.5)) {
+		return _("C");
+	} else if (equivalent (v, 0)) {
+		return _("L");
+	} else if (equivalent (v, 1)) {
+		return _("R");
+	} else if (v < 0.5) {
+		stringstream s;
+		s << fixed << setprecision (0) << _("L") << ((0.5 - v) * 200) << "%";
+		return s.str();
+	} else {
+		stringstream s;
+		s << fixed << setprecision (0) << _("R") << ((v -0.5) * 200) << "%";
+		return s.str ();
+	}
+
+	return "";
 }

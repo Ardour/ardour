@@ -38,7 +38,6 @@ class PannerBar : public Gtkmm2ext::BarController
 
   private:
 	std::string get_label (int&);
-	std::string value_as_string (double v) const;
 };
 
 #endif /* __gtk_ardour_panner_h__ */

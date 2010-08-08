@@ -303,6 +303,8 @@ public:
 		return automation_control (Evoral::Parameter (PanAutomation, chan, id));
 	}
 
+	static std::string value_as_string (double);
+
   private:
 	/* disallow copy construction */
 	Panner (Panner const &);

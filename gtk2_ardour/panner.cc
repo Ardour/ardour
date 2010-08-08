@@ -164,30 +164,8 @@ bool
 PannerBar::entry_output ()
 {
 	Entry* e = dynamic_cast<Entry*> (&spinner);
-	e->set_text (value_as_string (spinner.get_adjustment()->get_value()));
+	e->set_text (ARDOUR::Panner::value_as_string (spinner.get_adjustment()->get_value()));
 	return true;
-}
-
-string
-PannerBar::value_as_string (double v) const
-{
-	if (ARDOUR::Panner::equivalent (v, 0.5)) {
-		return _("C");
-	} else if (ARDOUR::Panner::equivalent (v, 0)) {
-		return _("L");
-	} else if (ARDOUR::Panner::equivalent (v, 1)) {
-		return _("R");
-	} else if (v < 0.5) {
-		std::stringstream s;
-		s << fixed << setprecision (0) << _("L") << ((0.5 - v) * 200) << "%";
-		return s.str();
-	} else if (v > 0.5) {
-		std::stringstream s;
-		s << fixed << setprecision (0) << _("R") << ((v -0.5) * 200) << "%";
-		return s.str ();
-	}
-
-	return "";
 }
 
 std::string
@@ -209,7 +187,7 @@ PannerBar::get_label (int& x)
 
  		Glib::RefPtr<Pango::Context> p = get_pango_context ();
  		Glib::RefPtr<Pango::Layout> l = Pango::Layout::create (p);
- 		l->set_text (value_as_string (value));
+ 		l->set_text (ARDOUR::Panner::value_as_string (value));
 
  		Pango::Rectangle const ext = l->get_ink_extents ();
 
@@ -220,5 +198,5 @@ PannerBar::get_label (int& x)
  		}
  	}
 
-	return value_as_string (value);
+	return ARDOUR::Panner::value_as_string (value);
 }
