@@ -137,8 +137,8 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (speed_display_box, _("Current transport speed"));
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	set_tip (auditioning_alert_button, _("When active, auditioning is taking place\nClick to stop the audition"));
-	set_tip (primary_clock, _("Primary clock"));
-	set_tip (secondary_clock, _("secondary clock"));
+	set_tip (primary_clock, _("Primary Clock"));
+	set_tip (secondary_clock, _("Secondary Clock"));
 
 	editor->setup_tooltips ();
 }
