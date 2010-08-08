@@ -3094,6 +3094,7 @@ Editor::setup_tooltips ()
 	ARDOUR_UI::instance()->set_tip (edit_point_selector, _("Edit point"));
 	ARDOUR_UI::instance()->set_tip (midi_sound_notes, _("Sound Notes"));
 	ARDOUR_UI::instance()->set_tip (midi_panic_button, _("Send note off and reset controller messages on all MIDI channels"));
+	ARDOUR_UI::instance()->set_tip (edit_mode_selector, _("Edit Mode"));
 }
 
 void
@@ -3501,22 +3502,7 @@ Editor::cycle_edit_mode ()
 void
 Editor::edit_mode_selection_done ()
 {
-	if (_session == 0) {
-		return;
-	}
-
-	string choice = edit_mode_selector.get_active_text();
-	EditMode mode = Slide;
-
-	if (choice == _("Splice Edit")) {
-		mode = Splice;
-	} else if (choice == _("Slide Edit")) {
-		mode = Slide;
-	} else if (choice == _("Lock Edit")) {
-		mode = Lock;
-	}
-
-	Config->set_edit_mode (mode);
+	Config->set_edit_mode (string_to_edit_mode (edit_mode_selector.get_active_text ()));
 }
 
 void

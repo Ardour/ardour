@@ -309,11 +309,11 @@ compute_equal_power_fades (nframes_t nframes, float* in, float* out)
 EditMode
 string_to_edit_mode (string str)
 {
-	if (str == _("Splice Edit")) {
+	if (str == _("Splice")) {
 		return Splice;
-	} else if (str == _("Slide Edit")) {
+	} else if (str == _("Slide")) {
 		return Slide;
-	} else if (str == _("Lock Edit")) {
+	} else if (str == _("Lock")) {
 		return Lock;
 	}
 	fatal << string_compose (_("programming error: unknown edit mode string \"%1\""), str) << endmsg;
@@ -326,14 +326,14 @@ edit_mode_to_string (EditMode mode)
 {
 	switch (mode) {
 	case Slide:
-		return _("Slide Edit");
+		return _("Slide");
 
 	case Lock:
-		return _("Lock Edit");
+		return _("Lock");
 
 	default:
 	case Splice:
-		return _("Splice Edit");
+		return _("Splice");
 	}
 }
 
