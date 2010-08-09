@@ -180,7 +180,7 @@ AutomationList::set_automation_state (AutoState s)
 {
 	if (s != _state) {
 		_state = s;
-		automation_state_changed (); /* EMIT SIGNAL */
+		automation_state_changed (s); /* EMIT SIGNAL */
 	}
 }
 

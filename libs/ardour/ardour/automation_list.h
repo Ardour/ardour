@@ -54,7 +54,7 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 
 	void set_automation_state (AutoState);
 	AutoState automation_state() const { return _state; }
-	PBD::Signal0<void> automation_state_changed;
+	PBD::Signal1<void, AutoState> automation_state_changed;
 
 	void set_automation_style (AutoStyle m);
 	AutoStyle automation_style() const { return _style; }

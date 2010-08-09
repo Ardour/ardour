@@ -102,7 +102,13 @@ MidiSource::get_state ()
 		child->add_property (X_("parameter"), EventTypeMap::instance().to_symbol (i->first));
 		child->add_property (X_("style"), enum_2_string (i->second));
 	}
-				     
+
+	for (AutomationStateMap::const_iterator i = _automation_state.begin(); i != _automation_state.end(); ++i) {
+		XMLNode* child = node.add_child (X_("AutomationState"));
+		child->add_property (X_("parameter"), EventTypeMap::instance().to_symbol (i->first));
+		child->add_property (X_("state"), enum_2_string (i->second));
+	}
+
 	return node;
 }
 
@@ -134,6 +140,25 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 
 			Evoral::ControlList::InterpolationStyle s = static_cast<Evoral::ControlList::InterpolationStyle> (string_2_enum (prop->value(), s));
 			set_interpolation_of (p, s);
+			
+		} else if ((*i)->name() == X_("AutomationState")) {
+			
+			XMLProperty* prop;
+
+			if ((prop = (*i)->property (X_("parameter"))) == 0) {
+				error << _("Missing parameter property on AutomationState") << endmsg;
+				return -1;
+			}
+			
+			Evoral::Parameter p = EventTypeMap::instance().new_parameter (prop->value());
+
+			if ((prop = (*i)->property (X_("state"))) == 0) {
+				error << _("Missing state property on AutomationState") << endmsg;
+				return -1;
+			}
+
+			AutoState s = static_cast<AutoState> (string_2_enum (prop->value(), s));
+			set_automation_state_of (p, s);
 		}
 	}
 
@@ -290,6 +315,7 @@ MidiSource::clone (Evoral::MusicalTime begin, Evoral::MusicalTime end)
         
         newsrc->set_timeline_position(_timeline_position);
 	newsrc->copy_interpolation_from (this);
+	newsrc->copy_automation_state_from (this);
 
         if (_model) {
                 if (begin == Evoral::MinMusicalTime && end == Evoral::MaxMusicalTime) {
@@ -385,6 +411,17 @@ MidiSource::interpolation_of (Evoral::Parameter p) const
 	return i->second;
 }
 
+AutoState
+MidiSource::automation_state_of (Evoral::Parameter p) const
+{
+	AutomationStateMap::const_iterator i = _automation_state.find (p);
+	if (i == _automation_state.end()) {
+		return Off;
+	}
+
+	return i->second;
+}
+
 /** Set interpolation style to be used for a given parameter.  This change will be
  *  propagated to anyone who needs to know.
  */
@@ -406,15 +443,46 @@ MidiSource::set_interpolation_of (Evoral::Parameter p, Evoral::ControlList::Inte
 }
 
 void
+MidiSource::set_automation_state_of (Evoral::Parameter p, AutoState s)
+{
+	if (automation_state_of (p) == s) {
+		return;
+	}
+	
+	if (s == Off) {
+		/* automation state is being set to the default, so we don't need a note in our map */
+		_automation_state.erase (p);
+	} else {
+		_automation_state[p] = s;
+	}
+
+	AutomationStateChanged (p, s); /* EMIT SIGNAL */
+}
+
+void
 MidiSource::copy_interpolation_from (boost::shared_ptr<MidiSource> s)
 {
 	copy_interpolation_from (s.get ());
 }
 
 void
+MidiSource::copy_automation_state_from (boost::shared_ptr<MidiSource> s)
+{
+	copy_automation_state_from (s.get ());
+}
+
+void
 MidiSource::copy_interpolation_from (MidiSource* s)
 {
 	_interpolation_style = s->_interpolation_style;
+
+	/* XXX: should probably emit signals here */
+}
+
+void
+MidiSource::copy_automation_state_from (MidiSource* s)
+{
+	_automation_state = s->_automation_state;
 
 	/* XXX: should probably emit signals here */
 }

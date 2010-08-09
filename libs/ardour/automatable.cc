@@ -147,19 +147,17 @@ Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
 {
 	Evoral::Parameter param = ac->parameter();
 
-	ControlSet::add_control(ac);
-	_can_automate_list.insert(param);
-	auto_state_changed(param); // sync everything up
+	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (ac->list ());
+	assert (al);
+	
+	al->automation_state_changed.connect_same_thread (
+		_list_connections, boost::bind (&Automatable::automation_list_automation_state_changed, this, ac->parameter(), _1)
+		);
 
-	/* connect to automation_state_changed so that we can emit a signal when one of our controls'
-	   automation state changes
-	*/
-	boost::shared_ptr<AutomationControl> c = boost::dynamic_pointer_cast<AutomationControl> (ac);
-	if (c) {
-		c->alist()->automation_state_changed.connect_same_thread (
-			_control_connections, boost::bind (&Automatable::automation_state_changed, this, c->parameter())
-			);
-	}
+	ControlSet::add_control (ac);
+	_can_automate_list.insert (param);
+
+	automation_list_automation_state_changed (param, al->automation_state ()); // sync everything up
 }
 
 void
@@ -315,21 +313,16 @@ Automatable::set_parameter_automation_state (Evoral::Parameter param, AutoState 
 }
 
 AutoState
-Automatable::get_parameter_automation_state (Evoral::Parameter param, bool lock)
+Automatable::get_parameter_automation_state (Evoral::Parameter param)
 {
 	AutoState result = Off;
-
-	if (lock)
-		control_lock().lock();
 
 	boost::shared_ptr<Evoral::Control> c = control(param);
 	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
 
-	if (c)
+	if (c) {
 		result = l->automation_state();
-
-	if (lock)
-		control_lock().unlock();
+	}
 
 	return result;
 }
@@ -480,15 +473,8 @@ Automatable::automation_control (const Evoral::Parameter& id) const
 }
 
 void
-Automatable::automation_state_changed (Evoral::Parameter const & p)
-{
-	AutomationStateChanged (p); /* EMIT SIGNAL */
-}
-
-void
 Automatable::clear_controls ()
 {
 	_control_connections.drop_connections ();
 	ControlSet::clear_controls ();
 }
-	

@@ -65,7 +65,7 @@ public:
 
 	virtual std::string describe_parameter(Evoral::Parameter param);
 
-	AutoState get_parameter_automation_state (Evoral::Parameter param, bool lock = true);
+	AutoState get_parameter_automation_state (Evoral::Parameter param);
 	virtual void set_parameter_automation_state (Evoral::Parameter param, AutoState);
 
 	AutoStyle get_parameter_automation_style (Evoral::Parameter param);
@@ -95,16 +95,13 @@ public:
 
 	int set_automation_state (const XMLNode&, Evoral::Parameter default_param);
 	XMLNode& get_automation_state();
-
-	/** Emitted when the automation state of one of our controls changes */
-	PBD::Signal1<void, Evoral::Parameter> AutomationStateChanged;
 	
   protected:
 	Session& _a_session;
 
 	void can_automate(Evoral::Parameter);
 
-	virtual void auto_state_changed (Evoral::Parameter /*which*/) {}
+	virtual void automation_list_automation_state_changed (Evoral::Parameter, AutoState) {}
 
 	int load_automation (const std::string& path);
 	int old_set_automation_state(const XMLNode&);
@@ -116,7 +113,6 @@ public:
 	static nframes_t _automation_interval;
 
 private:
-	void automation_state_changed (Evoral::Parameter const &);
 	PBD::ScopedConnectionList _control_connections; ///< connections to our controls' signals
 };
 

@@ -122,10 +122,17 @@ class MidiSource : virtual public Source
 	void copy_interpolation_from (boost::shared_ptr<MidiSource>);
 	void copy_interpolation_from (MidiSource *);
 
+	AutoState automation_state_of (Evoral::Parameter) const;
+	void set_automation_state_of (Evoral::Parameter, AutoState);
+	void copy_automation_state_from (boost::shared_ptr<MidiSource>);
+	void copy_automation_state_from (MidiSource *);
+
 	/** Emitted when a different MidiModel is set */
 	PBD::Signal0<void> ModelChanged;
 	/** Emitted when a parameter's interpolation style is changed */
 	PBD::Signal2<void, Evoral::Parameter, Evoral::ControlList::InterpolationStyle> InterpolationChanged;
+	/** Emitted when a parameter's automation state is changed */
+	PBD::Signal2<void, Evoral::Parameter, AutoState> AutomationStateChanged;
 
   protected:
 	virtual void flush_midi() = 0;
@@ -159,6 +166,12 @@ class MidiSource : virtual public Source
 	 */
 	typedef std::map<Evoral::Parameter, Evoral::ControlList::InterpolationStyle> InterpolationStyleMap;
 	InterpolationStyleMap _interpolation_style;
+
+	/** Map of automation states to use for Parameters; if they are not in this map,
+	 *  the correct automation state is Off.
+	 */
+	typedef std::map<Evoral::Parameter, AutoState> AutomationStateMap;
+	AutomationStateMap  _automation_state;
 };
 
 }

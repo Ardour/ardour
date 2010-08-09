@@ -151,9 +151,7 @@ AutomationStreamView::display_region(AutomationRegionView* region_view)
 void
 AutomationStreamView::set_automation_state (AutoState state)
 {
-	/* XXX: not sure if this is right, but for now the automation state is basically held by
-	   the regions' AutomationLists.  Each region is always set to have the same AutoState.
-	*/
+	/* Setting the automation state for this view sets the state of all regions' lists to the same thing */
 	
 	if (region_views.empty()) {
 		_pending_automation_state = state;

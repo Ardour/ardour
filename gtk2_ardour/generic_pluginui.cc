@@ -346,7 +346,7 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 
 	// don't lock to avoid deadlock because we're triggered by
 	// AutomationControl::Changed() while the automation lock is taken
-	switch (insert->get_parameter_automation_state (cui->parameter(), false)
+	switch (insert->get_parameter_automation_state (cui->parameter())
 			& (Off|Play|Touch|Write)) {
 	case Off:
 		cui->automate_button.set_label (_("Manual"));

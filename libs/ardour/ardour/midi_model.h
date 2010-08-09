@@ -174,7 +174,9 @@ private:
 	friend class DeltaCommand;
 
 	void source_interpolation_changed (Evoral::Parameter, Evoral::ControlList::InterpolationStyle);
+	void source_automation_state_changed (Evoral::Parameter, AutoState);
 	void control_list_interpolation_changed (Evoral::Parameter, Evoral::ControlList::InterpolationStyle);
+	void automation_list_automation_state_changed (Evoral::Parameter, AutoState);
 	
 	PBD::ScopedConnectionList _midi_source_connections;
 

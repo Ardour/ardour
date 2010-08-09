@@ -114,7 +114,7 @@ PluginInsert::~PluginInsert ()
 }
 
 void
-PluginInsert::auto_state_changed (Evoral::Parameter which)
+PluginInsert::control_list_automation_state_changed (Evoral::Parameter which, AutoState s)
 {
 	if (which.type() != PluginAutomation)
 		return;
@@ -122,7 +122,7 @@ PluginInsert::auto_state_changed (Evoral::Parameter which)
 	boost::shared_ptr<AutomationControl> c
 			= boost::dynamic_pointer_cast<AutomationControl>(control (which));
 
-	if (c && ((AutomationList*)c->list().get())->automation_state() != Off) {
+	if (c && s != Off) {
 		_plugins[0]->set_parameter (which.id(), c->list()->eval (_session.transport_frame()));
 	}
 }

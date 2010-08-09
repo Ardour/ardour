@@ -1094,14 +1094,18 @@ MidiModel::set_midi_source (MidiSource* s)
 	_midi_source->InterpolationChanged.connect_same_thread (
 		_midi_source_connections, boost::bind (&MidiModel::source_interpolation_changed, this, _1, _2)
 		);
+
+	_midi_source->AutomationStateChanged.connect_same_thread (
+		_midi_source_connections, boost::bind (&MidiModel::source_automation_state_changed, this, _1, _2)
+		);
 }
 
 /** The source has signalled that the interpolation style for a parameter has changed.  In order to
  *  keep MidiSource and ControlList interpolation state the same, we pass this change onto the
  *  appropriate ControlList.
  *
- *  The idea is that MidiSource and the MidiModel's ControlList states are kept in sync, and the
- *  MidiSource's InterpolationChanged signal is listened to by the GUI.
+ *  The idea is that MidiSource and the MidiModel's ControlList states are kept in sync, and one
+ *  or the other is listened to by the GUI.
  */
 void
 MidiModel::source_interpolation_changed (Evoral::Parameter p, Evoral::ControlList::InterpolationStyle s)
@@ -1119,18 +1123,37 @@ MidiModel::control_list_interpolation_changed (Evoral::Parameter p, Evoral::Cont
 	_midi_source->set_interpolation_of (p, s);
 }
 
+void
+MidiModel::source_automation_state_changed (Evoral::Parameter p, AutoState s)
+{
+	Glib::Mutex::Lock lm (_control_lock);
+	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (control(p)->list ());
+	al->set_automation_state (s);
+}
+
+void
+MidiModel::automation_list_automation_state_changed (Evoral::Parameter p, AutoState s)
+{
+	_midi_source->set_automation_state_of (p, s);
+}
+
 boost::shared_ptr<Evoral::Control>
 MidiModel::control_factory (Evoral::Parameter const & p)
 {
 	boost::shared_ptr<Evoral::Control> c = Automatable::control_factory (p);
 
-	/* Set up newly created control's lists to the appropriate interpolation state
-	   from our source.
+	/* Set up newly created control's lists to the appropriate interpolation and
+	   automation state from our source.
 	*/
 
 	assert (_midi_source);
 
 	c->list()->set_interpolation (_midi_source->interpolation_of (p));
+
+	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (c->list ());
+	assert (al);
+
+	al->set_automation_state (_midi_source->automation_state_of (p));
 
 	return c;
 }

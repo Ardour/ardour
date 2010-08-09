@@ -74,10 +74,11 @@ protected:
 	mutable Glib::Mutex _control_lock;
 	Controls            _controls;
 
+	PBD::ScopedConnectionList _list_connections;
+	
 private:
 
 	PBD::ScopedConnectionList _control_connections;
-	PBD::ScopedConnectionList _list_connections;
 };
 
 

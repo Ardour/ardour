@@ -291,7 +291,7 @@ MidiRegion::model_changed ()
 	}
 
 	/* watch for changes to controls' AutoState */
-	model()->AutomationStateChanged.connect_same_thread (
+	midi_source()->AutomationStateChanged.connect_same_thread (
 		_model_connection, boost::bind (&MidiRegion::model_automation_state_changed, this, _1)
 		);
 }
