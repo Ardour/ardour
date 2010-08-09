@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2000-2010 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #include "ardour/session.h"
 #include "ardour/io.h"
 #include "ardour/auditioner.h"
@@ -6,136 +25,10 @@
 
 #include "gui_thread.h"
 #include "session_option_editor.h"
-#include "port_matrix.h"
 #include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
-
-class OptionsPortMatrix : public PortMatrix
-{
-public:
-	OptionsPortMatrix (Gtk::Window* parent, ARDOUR::Session* session)
-		: PortMatrix (parent, session, DataType::AUDIO)
-	{
-		_port_group.reset (new PortGroup (""));
-		_ports[OURS].add_group (_port_group);
-
-		setup_all_ports ();
-		init ();
-	}
-
-	void setup_ports (int dim)
-	{
-		if (dim == OURS) {
-			_port_group->clear ();
-			_port_group->add_bundle (_session->click_io()->bundle());
-			_port_group->add_bundle (_session->the_auditioner()->output()->bundle());
-		} else {
-			_ports[OTHER].gather (_session, DataType::AUDIO, true, false);
-		}
-	}
-
-	void set_state (ARDOUR::BundleChannel c[2], bool s)
-	{
-		Bundle::PortList const & our_ports = c[OURS].bundle->channel_ports (c[OURS].channel);
-		Bundle::PortList const & other_ports = c[OTHER].bundle->channel_ports (c[OTHER].channel);
-
-		if (c[OURS].bundle == _session->click_io()->bundle()) {
-
-			for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
-				for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
-
-					Port* f = _session->engine().get_port_by_name (*i);
-					assert (f);
-
-					if (s) {
-						_session->click_io()->connect (f, *j, 0);
-					} else {
-						_session->click_io()->disconnect (f, *j, 0);
-					}
-				}
-			}
-		}
-	}
-
-	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const
-	{
-		Bundle::PortList const & our_ports = c[OURS].bundle->channel_ports (c[OURS].channel);
-		Bundle::PortList const & other_ports = c[OTHER].bundle->channel_ports (c[OTHER].channel);
-
-		if (c[OURS].bundle == _session->click_io()->bundle()) {
-
-			for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
-				for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
-					Port* f = _session->engine().get_port_by_name (*i);
-					assert (f);
-
-					if (f->connected_to (*j)) {
-						return PortMatrixNode::ASSOCIATED;
-					} else {
-						return PortMatrixNode::NOT_ASSOCIATED;
-					}
-				}
-			}
-
-		} else {
-
-			/* XXX */
-
-		}
-
-		return PortMatrixNode::NOT_ASSOCIATED;
-	}
-
-	bool list_is_global (int dim) const {
-		return (dim == OTHER);
-	}
-
-	bool can_remove_channels (boost::shared_ptr<Bundle>) const {
-		return false;
-	}
-
-	void remove_channel (ARDOUR::BundleChannel) {}
-
-	std::string disassociation_verb () const {
-		return _("Disassociate");
-	}
-
-private:
-	/* see PortMatrix: signal flow from 0 to 1 (out to in) */
-	enum {
-		OURS = 0,
-		OTHER = 1,
-	};
-
-	boost::shared_ptr<PortGroup> _port_group;
-
-};
-
-
-class ConnectionOptions : public OptionEditorBox
-{
-public:
-	ConnectionOptions (Gtk::Window* parent, ARDOUR::Session* s)
-		: _port_matrix (parent, s)
-	{
-		_box->pack_start (_port_matrix);
-	}
-
-	void parameter_changed (string const &)
-	{
-
-	}
-
-	void set_state_from_config ()
-	{
-
-	}
-
-private:
-	OptionsPortMatrix _port_matrix;
-};
 
 SessionOptionEditor::SessionOptionEditor (Session* s)
 	: OptionEditor (&(s->config), _("Session Properties"))
@@ -334,17 +227,17 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	ComboOption<InsertMergePolicy>* li = new ComboOption<InsertMergePolicy> (
 		"insert-merge-policy",
-		_("Handle same note+channel overlaps by"),
+		_("Policy for handling same note and channel overlaps"),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_insert_merge_policy),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_insert_merge_policy)
 		);
 
-        li->add (InsertMergeReject, _("Never allowing them"));
-        li->add (InsertMergeRelax, _("Don't do anything in particular"));
-        li->add (InsertMergeReplace, _("Replace any overlapped existing note"));
-        li->add (InsertMergeTruncateExisting, _("Shorten the overlapped existing note"));
-        li->add (InsertMergeTruncateAddition, _("Shorten the overlapping new note"));
-        li->add (InsertMergeExtend, _("Replace both overlapping notes with a single note"));
+        li->add (InsertMergeReject, _("never allow them"));
+        li->add (InsertMergeRelax, _("don't do anything in particular"));
+        li->add (InsertMergeReplace, _("replace any overlapped existing note"));
+        li->add (InsertMergeTruncateExisting, _("shorten the overlapped existing note"));
+        li->add (InsertMergeTruncateAddition, _("shorten the overlapping new note"));
+        li->add (InsertMergeExtend, _("replace both overlapping notes with a single note"));
 
 	add_option (_("Misc"), li);
 
@@ -363,8 +256,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_bwf_organization_code),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_bwf_organization_code)
 			    ));
-
-	add_option (_("Connections"), new ConnectionOptions (this, s));
 }
 
 void
