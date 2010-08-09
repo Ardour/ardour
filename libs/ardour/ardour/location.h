@@ -58,8 +58,8 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 	Location* operator= (const Location& other);
 
 	bool locked() const { return _locked; }
-	void lock() { _locked = true; LockChanged (this); }
-	void unlock() { _locked = false; LockChanged (this); }
+	void lock ();
+	void unlock ();
 
 	nframes64_t start() const  { return _start; }
 	nframes64_t end() const { return _end; }

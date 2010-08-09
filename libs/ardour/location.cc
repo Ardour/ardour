@@ -357,6 +357,7 @@ Location::get_state ()
 	node->add_property ("end", buf);
 	node->add_property ("flags", enum_2_string (_flags));
 	node->add_property ("locked", (_locked ? "yes" : "no"));
+	node->add_property ("position-lock-style", enum_2_string (_position_lock_style));
 
 	return *node;
 }
@@ -427,24 +428,27 @@ Location::set_state (const XMLNode& node, int /*version*/)
 		  cd_node = *cd_iter;
 
 		  if (cd_node->name() != "CD-Info") {
-		    continue;
+			  continue;
 		  }
 
 		  if ((prop = cd_node->property ("name")) != 0) {
-		    cd_name = prop->value();
+			  cd_name = prop->value();
 		  } else {
-		    throw failed_constructor ();
+			  throw failed_constructor ();
 		  }
 
 		  if ((prop = cd_node->property ("value")) != 0) {
-		    cd_value = prop->value();
+			  cd_value = prop->value();
 		  } else {
-		    throw failed_constructor ();
+			  throw failed_constructor ();
 		  }
 
 
 		  cd_info[cd_name] = cd_value;
+	}
 
+	if ((prop = node.property ("position-lock-style")) != 0) {
+		_position_lock_style = PositionLockStyle (string_2_enum (prop->value(), _position_lock_style));
 	}
 
 	recompute_bbt_from_frames ();
@@ -488,6 +492,20 @@ Location::recompute_frames_from_bbt ()
 
 	TempoMap& map (_session.tempo_map());
 	set (map.frame_time (_bbt_start), map.frame_time (_bbt_end), false);
+}
+
+void
+Location::lock ()
+{
+	_locked = true;
+	LockChanged (this);
+}
+
+void
+Location::unlock ()
+{
+	_locked = false;
+	LockChanged (this);
 }
 
 /*---------------------------------------------------------------------- */

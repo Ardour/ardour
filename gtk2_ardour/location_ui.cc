@@ -193,7 +193,11 @@ LocationEditRow::set_location (Location *loc)
 
 	location = loc;
 
-	if (!location) return;
+	if (!location) {
+		return;
+	}
+
+	++i_am_the_modifier;
 
 	if (!hide_check_button.get_parent()) {
 		item_table.attach (hide_check_button, 5, 6, 0, 1, FILL, Gtk::FILL, 4, 0);
@@ -292,6 +296,8 @@ LocationEditRow::set_location (Location *loc)
 	start_clock.set_sensitive (!location->locked());
 	end_clock.set_sensitive (!location->locked());
 	length_clock.set_sensitive (!location->locked());
+
+	--i_am_the_modifier;
 
 	location->start_changed.connect (connections, invalidator (*this), ui_bind (&LocationEditRow::start_changed, this, _1), gui_context());
 	location->end_changed.connect (connections, invalidator (*this), ui_bind (&LocationEditRow::end_changed, this, _1), gui_context());
