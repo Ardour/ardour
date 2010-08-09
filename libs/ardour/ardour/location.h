@@ -58,8 +58,8 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 	Location* operator= (const Location& other);
 
 	bool locked() const { return _locked; }
-	void lock() { _locked = true; changed (this); }
-	void unlock() { _locked = false; changed (this); }
+	void lock() { _locked = true; LockChanged (this); }
+	void unlock() { _locked = false; LockChanged (this); }
 
 	nframes64_t start() const  { return _start; }
 	nframes64_t end() const { return _end; }
@@ -95,10 +95,11 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 	PBD::Signal1<void,Location*> end_changed;
 	PBD::Signal1<void,Location*> start_changed;
 
+	PBD::Signal1<void,Location*> LockChanged;
 	PBD::Signal2<void,Location*,void*> FlagsChanged;
+	PBD::Signal1<void,Location*> PositionLockStyleChanged;
 
-	/* this is sent only when both start&end change at the same time */
-
+	/* this is sent only when both start and end change at the same time */
 	PBD::Signal1<void,Location*> changed;
 
 	/* CD Track / CD-Text info */

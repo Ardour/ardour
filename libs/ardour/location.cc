@@ -464,6 +464,8 @@ Location::set_position_lock_style (PositionLockStyle ps)
 	_position_lock_style = ps;
 
 	recompute_bbt_from_frames ();
+
+	PositionLockStyleChanged (this); /* EMIT SIGNAL */
 }
 
 void

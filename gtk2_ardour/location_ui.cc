@@ -51,6 +51,8 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	  length_clock (X_("locationlength"), true, X_("LocationEditRowClock"), true, false, true),
 	  cd_check_button (_("CD")),
 	  hide_check_button (_("Hide")),
+	  lock_check_button (_("Lock")),
+	  glue_check_button (_("Glue")),
 	  scms_check_button (_("SCMS")),
 	  preemph_check_button (_("Pre-Emphasis"))
 
@@ -68,6 +70,8 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	end_go_button.set_name ("LocationEditGoButton");
 	cd_check_button.set_name ("LocationEditCdButton");
 	hide_check_button.set_name ("LocationEditHideButton");
+	lock_check_button.set_name ("LocationEditLockButton");
+	glue_check_button.set_name ("LocationEditGlueButton");
 	remove_button.set_name ("LocationEditRemoveButton");
 	isrc_label.set_name ("LocationEditNumberLabel");
 	isrc_entry.set_name ("LocationEditNameEntry");
@@ -137,6 +141,8 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 
 	cd_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::cd_toggled));
 	hide_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::hide_toggled));
+	lock_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::lock_toggled));
+	glue_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::glue_toggled));
 
 	remove_button.signal_clicked().connect(sigc::mem_fun(*this, &LocationEditRow::remove_button_pressed));
 
@@ -191,8 +197,12 @@ LocationEditRow::set_location (Location *loc)
 
 	if (!hide_check_button.get_parent()) {
 		item_table.attach (hide_check_button, 5, 6, 0, 1, FILL, Gtk::FILL, 4, 0);
+		item_table.attach (lock_check_button, 6, 7, 0, 1, FILL, Gtk::FILL, 4, 0);
+		item_table.attach (glue_check_button, 7, 8, 0, 1, FILL, Gtk::FILL, 4, 0);
 	}
 	hide_check_button.set_active (location->is_hidden());
+	lock_check_button.set_active (location->locked());
+	glue_check_button.set_active (location->position_lock_style() == MusicTime);
 
 	if (location->is_auto_loop() || location-> is_auto_punch()) {
 		// use label instead of entry
@@ -222,7 +232,7 @@ LocationEditRow::set_location (Location *loc)
 			item_table.attach (cd_check_button, 4, 5, 0, 1, FILL, FILL, 4, 0);
 		}
 		if (!remove_button.get_parent()) {
-			item_table.attach (remove_button, 6, 7, 0, 1, FILL, FILL, 4, 0);
+			item_table.attach (remove_button, 8, 9, 0, 1, FILL, FILL, 4, 0);
 		}
 
 		if (location->is_session_range()) {
@@ -239,6 +249,8 @@ LocationEditRow::set_location (Location *loc)
 		}
 
 		hide_check_button.show();
+		lock_check_button.show();
+		glue_check_button.show();
 	}
 
 	start_clock.set (location->start(), true);
@@ -286,6 +298,8 @@ LocationEditRow::set_location (Location *loc)
 	location->name_changed.connect (connections, invalidator (*this), ui_bind (&LocationEditRow::name_changed, this, _1), gui_context());
 	location->changed.connect (connections, invalidator (*this), ui_bind (&LocationEditRow::location_changed, this, _1), gui_context());
 	location->FlagsChanged.connect (connections, invalidator (*this), ui_bind (&LocationEditRow::flags_changed, this, _1, _2), gui_context());
+	location->LockChanged.connect (connections, invalidator (*this), ui_bind (&LocationEditRow::lock_changed, this, _1), gui_context());
+	location->PositionLockStyleChanged.connect (connections, invalidator (*this), ui_bind (&LocationEditRow::position_lock_style_changed, this, _1), gui_context());
 }
 
 void
@@ -444,9 +458,39 @@ LocationEditRow::cd_toggled ()
 void
 LocationEditRow::hide_toggled ()
 {
-	if (i_am_the_modifier || !location) return;
+	if (i_am_the_modifier || !location) {
+		return;
+	}
 
 	location->set_hidden (hide_check_button.get_active(), this);
+}
+
+void
+LocationEditRow::lock_toggled ()
+{
+	if (i_am_the_modifier || !location) {
+		return;
+	}
+
+	if (location->locked()) {
+		location->unlock ();
+	} else {
+		location->lock ();
+	}
+}
+
+void
+LocationEditRow::glue_toggled ()
+{
+	if (i_am_the_modifier || !location) {
+		return;
+	}
+
+	if (location->position_lock_style() == AudioTime) {
+		location->set_position_lock_style (MusicTime);
+	} else {
+		location->set_position_lock_style (AudioTime);
+	}
 }
 
 void
@@ -564,14 +608,43 @@ LocationEditRow::location_changed (ARDOUR::Location *loc)
 void
 LocationEditRow::flags_changed (ARDOUR::Location *loc, void *src)
 {
-	ENSURE_GUI_THREAD (*this, &LocationEditRow::flags_changed, loc, src)
-
-	if (!location) return;
+	if (!location) {
+		return;
+	}
 
 	i_am_the_modifier++;
 
 	cd_check_button.set_active (location->is_cd_marker());
 	hide_check_button.set_active (location->is_hidden());
+	glue_check_button.set_active (location->position_lock_style() == MusicTime);
+
+	i_am_the_modifier--;
+}
+
+void
+LocationEditRow::lock_changed (ARDOUR::Location *loc)
+{
+	if (!location) {
+		return;
+	}
+
+	i_am_the_modifier++;
+
+	lock_check_button.set_active (location->locked());
+
+	i_am_the_modifier--;
+}
+
+void
+LocationEditRow::position_lock_style_changed (ARDOUR::Location* loc)
+{
+	if (!location) {
+		return;
+	}
+
+	i_am_the_modifier++;
+
+	glue_check_button.set_active (location->position_lock_style() == MusicTime);
 
 	i_am_the_modifier--;
 }

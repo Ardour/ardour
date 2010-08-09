@@ -86,6 +86,8 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	AudioClock    length_clock;
 	Gtk::CheckButton cd_check_button;
 	Gtk::CheckButton hide_check_button;
+	Gtk::CheckButton lock_check_button;
+	Gtk::CheckButton glue_check_button;
 
 	Gtk::Button   remove_button;
 
@@ -117,6 +119,8 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	void cd_toggled ();
 	void hide_toggled ();
+	void lock_toggled ();
+	void glue_toggled ();
 	void remove_button_pressed ();
 
 	void scms_toggled ();
@@ -127,6 +131,8 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void name_changed (ARDOUR::Location *);
 	void location_changed (ARDOUR::Location *);
 	void flags_changed (ARDOUR::Location *, void *src);
+	void lock_changed (ARDOUR::Location *);
+	void position_lock_style_changed (ARDOUR::Location *);
 
 	PBD::ScopedConnectionList connections;
 };
