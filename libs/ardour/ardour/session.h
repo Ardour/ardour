@@ -334,7 +334,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* Locations */
 
-	Locations *locations() { return &_locations; }
+	Locations *locations() { return _locations; }
 
 	PBD::Signal1<void,Location*>    auto_loop_location_changed;
 	PBD::Signal1<void,Location*>    auto_punch_location_changed;
@@ -1024,7 +1024,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void set_rf_speed (float speed);
 	void reset_rf_scale (nframes_t frames_moved);
 
-	Locations        _locations;
+	Locations*       _locations;
 	void              locations_changed ();
 	void              locations_added (Location*);
 	void              handle_locations_changed (Locations::LocationList&);
@@ -1428,6 +1428,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/** true if timecode transmission by the transport is suspended, otherwise false */
 	mutable gint _suspend_timecode_transmission;
+
+	void update_locations_after_tempo_map_change (Locations::LocationList &);
 };
 
 } // namespace ARDOUR

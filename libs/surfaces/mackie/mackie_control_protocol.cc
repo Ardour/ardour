@@ -1601,7 +1601,7 @@ MackieControlProtocol::marker_press (Button &)
 	string markername;
 	nframes_t where = session->audible_frame();
 	session->locations()->next_available_name(markername,"mcu");
-	Location *location = new Location (where, where, markername, Location::IsMark);
+	Location *location = new Location (*session, where, where, markername, Location::IsMark);
 	session->begin_reversible_command (_("add marker"));
 	XMLNode &before = session->locations()->get_state();
 	session->locations()->add (location, true);

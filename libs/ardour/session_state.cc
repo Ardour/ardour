@@ -325,8 +325,8 @@ Session::second_stage_init ()
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave|Loading);
 
-	_locations.changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
-	_locations.added.connect_same_thread (*this, boost::bind (&Session::locations_added, this, _1));
+	_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
+	_locations->added.connect_same_thread (*this, boost::bind (&Session::locations_added, this, _1));
 	setup_click_sounds (0);
 	setup_midi_control ();
 
@@ -1094,12 +1094,12 @@ Session::state(bool full_state)
 	}
 
 	if (full_state) {
-		node->add_child_nocopy (_locations.get_state());
+		node->add_child_nocopy (_locations->get_state());
 	} else {
 		// for a template, just create a new Locations, populate it
 		// with the default start and end, and get the state for that.
-		Locations loc;
-		Location* range = new Location (0, 0, _("session"), Location::IsSessionRange);
+		Locations loc (*this);
+		Location* range = new Location (*this, 0, 0, _("session"), Location::IsSessionRange);
 		range->set (max_frames, 0);
 		loc.add (range);
 		node->add_child_nocopy (loc.get_state());
@@ -1278,21 +1278,21 @@ Session::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, "Locations")) == 0) {
 		error << _("Session: XML state has no locations section") << endmsg;
 		goto out;
-	} else if (_locations.set_state (*child, version)) {
+	} else if (_locations->set_state (*child, version)) {
 		goto out;
 	}
 
 	Location* location;
 
-	if ((location = _locations.auto_loop_location()) != 0) {
+	if ((location = _locations->auto_loop_location()) != 0) {
 		set_auto_loop_location (location);
 	}
 
-	if ((location = _locations.auto_punch_location()) != 0) {
+	if ((location = _locations->auto_punch_location()) != 0) {
 		set_auto_punch_location (location);
 	}
 
-	if ((location = _locations.session_range_location()) != 0) {
+	if ((location = _locations->session_range_location()) != 0) {
 		delete _session_range_location;
 		_session_range_location = location;
 	}
@@ -3165,7 +3165,7 @@ Session::config_changed (std::string p, bool ours)
 
 		Location* location;
 
-		if ((location = _locations.auto_punch_location()) != 0) {
+		if ((location = _locations->auto_punch_location()) != 0) {
 
 			if (config.get_punch_in ()) {
 				replace_event (SessionEvent::PunchIn, location->start());
@@ -3178,7 +3178,7 @@ Session::config_changed (std::string p, bool ours)
 
 		Location* location;
 
-		if ((location = _locations.auto_punch_location()) != 0) {
+		if ((location = _locations->auto_punch_location()) != 0) {
 
 			if (config.get_punch_out()) {
 				replace_event (SessionEvent::PunchOut, location->end());

@@ -1465,6 +1465,7 @@ public:
 	void marker_menu_remove ();
 	void marker_menu_rename ();
 	void toggle_marker_menu_lock ();
+	void toggle_marker_menu_glue ();
 	void marker_menu_hide ();
 	void marker_menu_loop_range ();
 	void marker_menu_select_all_selectables_using_range ();

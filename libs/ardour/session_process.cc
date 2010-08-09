@@ -608,7 +608,7 @@ Session::track_slave_state (float slave_speed, nframes_t slave_transport_frame, 
 
 				_slave_state = Running;
 
-				Location* al = _locations.auto_loop_location();
+				Location* al = _locations->auto_loop_location();
 
 				if (al && play_loop && (slave_transport_frame < al->start() || slave_transport_frame > al->end())) {
 					// cancel looping

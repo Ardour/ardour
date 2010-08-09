@@ -34,10 +34,11 @@
 #include "pbd/statefuldestructible.h"
 
 #include "ardour/ardour.h"
+#include "ardour/session_handle.h"
 
 namespace ARDOUR {
 
-class Location : public PBD::StatefulDestructible
+class Location : public SessionHandleRef, public PBD::StatefulDestructible
 {
   public:
 	enum Flags {
@@ -50,26 +51,10 @@ class Location : public PBD::StatefulDestructible
 		IsSessionRange = 0x40
 	};
 
-	Location (nframes64_t sample_start,
-			nframes64_t sample_end,
-			const std::string &name,
-			Flags bits = Flags(0))
-
-		: _name (name),
-		_start (sample_start),
-		_end (sample_end),
-		_flags (bits),
-		_locked (false) { }
-
-	Location () {
-		_start = 0;
-		_end = 0;
-		_flags = Flags (0);
-		_locked = false;
-	}
-
+	Location (Session &);
+	Location (Session &, nframes64_t, nframes64_t, const std::string &, Flags bits = Flags(0));
 	Location (const Location& other);
-	Location (const XMLNode&);
+	Location (Session &, const XMLNode&);
 	Location* operator= (const Location& other);
 
 	bool locked() const { return _locked; }
@@ -80,9 +65,9 @@ class Location : public PBD::StatefulDestructible
 	nframes64_t end() const { return _end; }
 	nframes64_t length() const { return _end - _start; }
 
-	int set_start (nframes64_t s, bool force = false);
-	int set_end (nframes64_t e, bool force = false);
-	int set (nframes64_t start, nframes64_t end);
+	int set_start (nframes64_t s, bool force = false, bool allow_bbt_recompute = true);
+	int set_end (nframes64_t e, bool force = false, bool allow_bbt_recompute = true);
+	int set (nframes64_t start, nframes64_t end, bool allow_bbt_recompute = true);
 
 	int move_to (nframes64_t pos);
 
@@ -124,23 +109,31 @@ class Location : public PBD::StatefulDestructible
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 
+	PositionLockStyle position_lock_style() const { return _position_lock_style; }
+	void set_position_lock_style (PositionLockStyle ps);
+	void recompute_frames_from_bbt ();
+
   private:
 	std::string   _name;
 	nframes64_t   _start;
+	BBT_Time      _bbt_start;
 	nframes64_t   _end;
+	BBT_Time      _bbt_end;
 	Flags         _flags;
 	bool          _locked;
+	PositionLockStyle _position_lock_style;
 
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
+	void recompute_bbt_from_frames ();
 };
 
-class Locations : public PBD::StatefulDestructible
+class Locations : public SessionHandleRef, public PBD::StatefulDestructible
 {
   public:
 	typedef std::list<Location *> LocationList;
 
-	Locations ();
+	Locations (Session &);
 	~Locations ();
 
 	const LocationList& list() { return locations; }

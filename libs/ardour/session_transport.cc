@@ -142,7 +142,7 @@ void
 Session::request_play_loop (bool yn, bool leave_rolling)
 {
 	SessionEvent* ev;
-	Location *location = _locations.auto_loop_location();
+	Location *location = _locations->auto_loop_location();
 
 	if (location == 0 && yn) {
 		error << _("Cannot loop - no loop range defined")
@@ -503,7 +503,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 						if (!synced_to_jack()) {
 
-							Location *location = _locations.auto_loop_location();
+							Location *location = _locations->auto_loop_location();
 							
 							if (location != 0) {
 								_transport_frame = location->start();
@@ -653,7 +653,7 @@ Session::set_play_loop (bool yn)
 
 	Location *loc;
 
-	if (yn == play_loop || (actively_recording() && yn) || (loc = _locations.auto_loop_location()) == 0) {
+	if (yn == play_loop || (actively_recording() && yn) || (loc = _locations->auto_loop_location()) == 0) {
 		/* nothing to do, or can't change loop status while recording */
 		return;
 	}
@@ -873,7 +873,7 @@ Session::locate (nframes64_t target_frame, bool with_roll, bool with_flush, bool
 
 	/* cancel looped playback if transport pos outside of loop range */
 	if (play_loop) {
-		Location* al = _locations.auto_loop_location();
+		Location* al = _locations->auto_loop_location();
 
 		if (al && (_transport_frame < al->start() || _transport_frame > al->end())) {
 			// cancel looping directly, this is called from event handling context

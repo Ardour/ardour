@@ -25,7 +25,6 @@
 #include <ctime>
 #include <list>
 
-
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
@@ -33,6 +32,7 @@
 #include "ardour/location.h"
 #include "ardour/session.h"
 #include "ardour/audiofilesource.h"
+#include "ardour/tempo.h"
 
 #include "i18n.h"
 
@@ -42,19 +42,47 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+Location::Location (Session& s)
+	: SessionHandleRef (s)
+	, _start (0)
+	, _end (0)
+	, _flags (Flags (0))
+	, _locked (false)
+	, _position_lock_style (AudioTime)
+{
+
+}
+
+Location::Location (Session& s, nframes64_t sample_start, nframes64_t sample_end, const std::string &name, Flags bits)
+	: SessionHandleRef (s)
+	, _name (name)
+	, _start (sample_start)
+	, _end (sample_end)
+	, _flags (bits)
+	, _locked (false)
+	, _position_lock_style (AudioTime)
+{
+	recompute_bbt_from_frames ();
+}
+
 Location::Location (const Location& other)
-	: StatefulDestructible(),
-	  _name (other._name),
-	  _start (other._start),
-	  _end (other._end),
-	  _flags (other._flags)
+	: SessionHandleRef (other._session)
+	, StatefulDestructible()
+	, _name (other._name)
+	, _start (other._start)
+	, _bbt_start (other._bbt_start)
+	, _end (other._end)
+	, _bbt_end (other._bbt_end)
+	, _flags (other._flags)
+	, _position_lock_style (other._position_lock_style)
 {
 	/* copy is not locked even if original was */
 
 	_locked = false;
 }
 
-Location::Location (const XMLNode& node)
+Location::Location (Session& s, const XMLNode& node)
+	: SessionHandleRef (s)
 {
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
@@ -70,8 +98,11 @@ Location::operator= (const Location& other)
 
 	_name = other._name;
 	_start = other._start;
+	_bbt_start = other._bbt_start;
 	_end = other._end;
+	_bbt_end = other._bbt_end;
 	_flags = other._flags;
+	_position_lock_style = other._position_lock_style;
 
 	/* copy is not locked even if original was */
 
@@ -85,9 +116,10 @@ Location::operator= (const Location& other)
 /** Set start position.
  *  @param s New start.
  *  @param force true to force setting, even if the given new start is after the current end.
+ *  @param allow_bbt_recompute True to recompute BBT start time from the new given start time.
  */
 int
-Location::set_start (nframes64_t s, bool force)
+Location::set_start (nframes64_t s, bool force, bool allow_bbt_recompute)
 {
 	if (_locked) {
 		return -1;
@@ -103,6 +135,9 @@ Location::set_start (nframes64_t s, bool force)
 		if (_start != s) {
 			_start = s;
 			_end = s;
+			if (allow_bbt_recompute) {
+				recompute_bbt_from_frames ();
+			}
 			start_changed (this); /* EMIT SIGNAL */
 			end_changed (this); /* EMIT SIGNAL */
 		}
@@ -111,6 +146,9 @@ Location::set_start (nframes64_t s, bool force)
 	
 	if (s != _start) {
 		_start = s;
+		if (allow_bbt_recompute) {
+			recompute_bbt_from_frames ();
+		}
 		start_changed (this); /* EMIT SIGNAL */
 		if (is_session_range ()) {
 			Session::StartTimeChanged (); /* EMIT SIGNAL */
@@ -124,9 +162,10 @@ Location::set_start (nframes64_t s, bool force)
 /** Set end position.
  *  @param s New end.
  *  @param force true to force setting, even if the given new start is after the current end.
+ *  @param allow_bbt_recompute True to recompute BBT end time from the new given end time.
  */
 int
-Location::set_end (nframes64_t e, bool force)
+Location::set_end (nframes64_t e, bool force, bool allow_bbt_recompute)
 {
 	if (_locked) {
 		return -1;
@@ -142,6 +181,9 @@ Location::set_end (nframes64_t e, bool force)
 		if (_start != e) {
 			_start = e;
 			_end = e;
+			if (allow_bbt_recompute) {
+				recompute_bbt_from_frames ();
+			}
 			start_changed (this); /* EMIT SIGNAL */
 			end_changed (this); /* EMIT SIGNAL */
 		}
@@ -150,6 +192,9 @@ Location::set_end (nframes64_t e, bool force)
 
 	if (e != _end) {
 		_end = e;
+		if (allow_bbt_recompute) {
+			recompute_bbt_from_frames ();
+		}
 		end_changed(this); /* EMIT SIGNAL */
 
 		if (is_session_range()) {
@@ -161,7 +206,7 @@ Location::set_end (nframes64_t e, bool force)
 }
 
 int
-Location::set (nframes64_t start, nframes64_t end)
+Location::set (nframes64_t start, nframes64_t end, bool allow_bbt_recompute)
 {
 	/* check validity */
 	if (((is_auto_punch() || is_auto_loop()) && start >= end) || (!is_mark() && start > end)) {
@@ -169,8 +214,8 @@ Location::set (nframes64_t start, nframes64_t end)
 	}
 
 	/* now we know these values are ok, so force-set them */
-	int const s = set_start (start, true);
-	int const e = set_end (end, true);
+	int const s = set_start (start, true, allow_bbt_recompute);
+	int const e = set_end (end, true, allow_bbt_recompute);
 
 	return (s == 0 && e == 0) ? 0 : -1;
 }
@@ -185,6 +230,7 @@ Location::move_to (nframes64_t pos)
 	if (_start != pos) {
 		_start = pos;
 		_end = _start + length();
+		recompute_bbt_from_frames ();
 
 		changed (this); /* EMIT SIGNAL */
 	}
@@ -291,7 +337,7 @@ Location::cd_info_node(const string & name, const string & value)
 
 
 XMLNode&
-Location::get_state (void)
+Location::get_state ()
 {
 	XMLNode *node = new XMLNode ("Location");
 	char buf[64];
@@ -401,15 +447,51 @@ Location::set_state (const XMLNode& node, int /*version*/)
 
 	}
 
-	changed(this); /* EMIT SIGNAL */
+	recompute_bbt_from_frames ();
+
+	changed (this); /* EMIT SIGNAL */
 
 	return 0;
 }
 
+void
+Location::set_position_lock_style (PositionLockStyle ps)
+{
+	if (_position_lock_style == ps) {
+		return;
+	}
+
+	_position_lock_style = ps;
+
+	recompute_bbt_from_frames ();
+}
+
+void
+Location::recompute_bbt_from_frames ()
+{
+	if (_position_lock_style != MusicTime) {
+		return;
+	}
+	
+	_session.tempo_map().bbt_time (_start, _bbt_start);
+	_session.tempo_map().bbt_time (_end, _bbt_end);
+}
+
+void
+Location::recompute_frames_from_bbt ()
+{
+	if (_position_lock_style != MusicTime) {
+		return;
+	}
+
+	TempoMap& map (_session.tempo_map());
+	set (map.frame_time (_bbt_start), map.frame_time (_bbt_end), false);
+}
+
 /*---------------------------------------------------------------------- */
 
-Locations::Locations ()
-
+Locations::Locations (Session& s)
+	: SessionHandleRef (s)
 {
 	current_location = 0;
 }
@@ -426,7 +508,6 @@ Locations::~Locations ()
 
 int
 Locations::set_current (Location *loc, bool want_lock)
-
 {
 	int ret;
 
@@ -658,7 +739,7 @@ Locations::set_state (const XMLNode& node, int version)
 
 	Location* session_range_location = 0;
 	if (version < 3000) {
-		session_range_location = new Location (0, 0, _("session"), Location::IsSessionRange);
+		session_range_location = new Location (_session, 0, 0, _("session"), Location::IsSessionRange);
 		locations.push_back (session_range_location);
 	}
 
@@ -670,7 +751,7 @@ Locations::set_state (const XMLNode& node, int version)
 
 			try {
 
-				Location *loc = new Location (**niter);
+				Location *loc = new Location (_session, **niter);
 
 				bool add = true;
 

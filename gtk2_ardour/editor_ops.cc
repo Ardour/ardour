@@ -1904,7 +1904,7 @@ Editor::add_location_from_selection ()
 	nframes64_t end = selection->time[clicked_selection].end;
 
 	_session->locations()->next_available_name(rangename,"selection");
-	Location *location = new Location (start, end, rangename, Location::IsRangeMarker);
+	Location *location = new Location (*_session, start, end, rangename, Location::IsRangeMarker);
 
 	_session->begin_reversible_command (_("add marker"));
         XMLNode &before = _session->locations()->get_state();
@@ -1925,7 +1925,7 @@ Editor::add_location_mark (nframes64_t where)
 	if (!choose_new_marker_name(markername)) {
 		return;
 	}
-	Location *location = new Location (where, where, markername, Location::IsMark);
+	Location *location = new Location (*_session, where, where, markername, Location::IsMark);
 	_session->begin_reversible_command (_("add marker"));
         XMLNode &before = _session->locations()->get_state();
 	_session->locations()->add (location, true);
@@ -1958,7 +1958,7 @@ Editor::add_locations_from_audio_region ()
 
 		boost::shared_ptr<Region> region = (*i)->region ();
 
-		Location *location = new Location (region->position(), region->last_frame(), region->name(), Location::IsRangeMarker);
+		Location *location = new Location (*_session, region->position(), region->last_frame(), region->name(), Location::IsRangeMarker);
 
 		_session->locations()->add (location, true);
 	}
@@ -1997,7 +1997,7 @@ Editor::add_location_from_audio_region ()
 	}
 
 	// single range spanning all selected
-	Location *location = new Location (rs.start(), rs.end_frame(), markername, Location::IsRangeMarker);
+	Location *location = new Location (*_session, rs.start(), rs.end_frame(), markername, Location::IsRangeMarker);
 	_session->locations()->add (location, true);
 
 	XMLNode &after = _session->locations()->get_state();
@@ -2114,7 +2114,7 @@ Editor::set_mark ()
 	if (!choose_new_marker_name(markername)) {
 		return;
 	}
-	_session->locations()->add (new Location (pos, 0, markername, Location::IsMark), true);
+	_session->locations()->add (new Location (*_session, pos, 0, markername, Location::IsMark), true);
 }
 
 void

@@ -413,7 +413,7 @@ Editor::mouse_add_new_marker (nframes64_t where, bool is_cd, bool is_xrun)
 		if (!is_xrun && !choose_new_marker_name(markername)) {
 			return;
 		}
-		Location *location = new Location (where, where, markername, (Location::Flags) flags);
+		Location *location = new Location (*_session, where, where, markername, (Location::Flags) flags);
 		_session->begin_reversible_command (_("add marker"));
 		XMLNode &before = _session->locations()->get_state();
 		_session->locations()->add (location, true);
@@ -628,6 +628,13 @@ Editor::build_marker_menu (bool session_range, Location* loc)
 		lock_item->set_active ();
 	}
 	lock_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_lock));
+
+	items.push_back (CheckMenuElem (_("Glue to Bars and Beats")));
+	CheckMenuItem* glue_item = static_cast<CheckMenuItem*> (&items.back());
+	if (loc->position_lock_style() == MusicTime) {
+		glue_item->set_active ();
+	}
+	glue_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_glue));
 	
 	items.push_back (SeparatorElem());
 
@@ -867,7 +874,7 @@ Editor::marker_menu_range_to_next ()
 		string range_name = l->name();
 		range_name += "-range";
 
-		Location* newrange = new Location (marker->position(), end, range_name, Location::IsRangeMarker);
+		Location* newrange = new Location (*_session, marker->position(), end, range_name, Location::IsRangeMarker);
 		_session->locations()->add (newrange);
 	}
 }
@@ -1242,4 +1249,31 @@ Editor::goto_nth_marker (int n)
 			--n;
 		}
 	}
+}
+
+void
+Editor::toggle_marker_menu_glue ()
+{
+	Marker* marker;
+
+	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		/*NOTREACHED*/
+	}
+
+	Location* loc;
+	bool ignored;
+
+	loc = find_location_from_marker (marker, ignored);
+
+	if (!loc) {
+		return;
+	}
+
+	if (loc->position_lock_style() == MusicTime) {
+		loc->set_position_lock_style (AudioTime);
+	} else {
+		loc->set_position_lock_style (MusicTime);
+	}
+
 }

@@ -103,13 +103,13 @@ Session::memento_command_factory(XMLNode *n)
 		    return new MementoCommand<Source>(*sources[id], before, after);
 
     } else if (obj_T == "ARDOUR::Location") {
-	    Location* loc = _locations.get_location_by_id(id);
+	    Location* loc = _locations->get_location_by_id(id);
 	    if (loc) {
 		    return new MementoCommand<Location>(*loc, before, after);
 	    }
 
     } else if (obj_T == "ARDOUR::Locations") {
-	    return new MementoCommand<Locations>(_locations, before, after);
+	    return new MementoCommand<Locations>(*_locations, before, after);
 
     } else if (obj_T == "ARDOUR::TempoMap") {
 	    return new MementoCommand<TempoMap>(*_tempo_map, before, after);

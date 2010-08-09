@@ -157,6 +157,8 @@ Session::Session (AudioEngine &eng,
 	  _have_rec_enabled_track (false),
 	  _suspend_timecode_transmission (0)
 {
+	_locations = new Locations (*this);
+		
 	playlists.reset (new SessionPlaylists);
 	
 	interpolation.add_channel_to (0, 0);
@@ -312,6 +314,8 @@ Session::destroy ()
 	playlists.reset ();
 
 	boost_debug_list_ptrs ();
+
+	delete _locations;
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 }
@@ -871,7 +875,7 @@ Session::set_auto_punch_location (Location* location)
 {
 	Location* existing;
 
-	if ((existing = _locations.auto_punch_location()) != 0 && existing != location) {
+	if ((existing = _locations->auto_punch_location()) != 0 && existing != location) {
 		punch_connections.drop_connections();
 		existing->set_auto_punch (false, this);
 		remove_event (existing->start(), SessionEvent::PunchIn);
@@ -908,7 +912,7 @@ Session::set_auto_loop_location (Location* location)
 {
 	Location* existing;
 
-	if ((existing = _locations.auto_loop_location()) != 0 && existing != location) {
+	if ((existing = _locations->auto_loop_location()) != 0 && existing != location) {
 		loop_connections.drop_connections ();
 		existing->set_auto_loop (false, this);
 		remove_event (existing->end(), SessionEvent::AutoLoop);
@@ -954,7 +958,7 @@ Session::locations_added (Location *)
 void
 Session::locations_changed ()
 {
-	_locations.apply (*this, &Session::handle_locations_changed);
+	_locations->apply (*this, &Session::handle_locations_changed);
 }
 
 void
@@ -3262,7 +3266,17 @@ Session::tempo_map_changed (const PropertyChange&)
 
 	playlists->update_after_tempo_map_change ();
 
+	_locations->apply (*this, &Session::update_locations_after_tempo_map_change);
+	
 	set_dirty ();
+}
+
+void
+Session::update_locations_after_tempo_map_change (Locations::LocationList& loc)
+{
+	for (Locations::LocationList::iterator i = loc.begin(); i != loc.end(); ++i) {
+		(*i)->recompute_frames_from_bbt ();
+	}
 }
 
 /** Ensures that all buffers (scratch, send, silent, etc) are allocated for
@@ -3968,8 +3982,8 @@ Session::current_end_frame () const
 void
 Session::add_session_range_location (nframes_t start, nframes_t end)
 {
-	_session_range_location = new Location (start, end, _("session"), Location::IsSessionRange);
-	_locations.add (_session_range_location);
+	_session_range_location = new Location (*this, start, end, _("session"), Location::IsSessionRange);
+	_locations->add (_session_range_location);
 }
 
 /** Called when one of our routes' order keys has changed */

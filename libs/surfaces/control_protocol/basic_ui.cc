@@ -95,7 +95,7 @@ void
 BasicUI::add_marker ()
 {
 	nframes_t when = session->audible_frame();
-	session->locations()->add (new Location (when, when, _("unnamed"), Location::IsMark));
+	session->locations()->add (new Location (*session, when, when, _("unnamed"), Location::IsMark));
 }
 
 void

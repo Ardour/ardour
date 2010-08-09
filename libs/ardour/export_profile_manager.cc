@@ -52,7 +52,7 @@ ExportProfileManager::ExportProfileManager (Session & s) :
   handler (s.get_export_handler()),
   session (s),
 
-  session_range (new Location ()),
+  session_range (new Location (s)),
   ranges (new LocationList ()),
   single_range_mode (false),
 
@@ -286,7 +286,7 @@ ExportProfileManager::set_selection_range (nframes_t start, nframes_t end)
 {
 
 	if (start || end) {
-		selection_range.reset (new Location());
+		selection_range.reset (new Location (session));
 		selection_range->set_name (_("Selection"));
 		selection_range->set (start, end);
 	} else {
@@ -303,7 +303,7 @@ ExportProfileManager::set_single_range (nframes_t start, nframes_t end, Glib::us
 {
 	single_range_mode = true;
 
-	single_range.reset (new Location());
+	single_range.reset (new Location (session));
 	single_range->set_name (name);
 	single_range->set (start, end);
 

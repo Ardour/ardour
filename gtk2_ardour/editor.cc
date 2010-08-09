@@ -1135,7 +1135,7 @@ Editor::set_session (Session *t)
 
 	Location* loc = _session->locations()->auto_loop_location();
 	if (loc == 0) {
-		loc = new Location (0, _session->current_end_frame(), _("Loop"),(Location::Flags) (Location::IsAutoLoop | Location::IsHidden));
+		loc = new Location (*_session, 0, _session->current_end_frame(), _("Loop"),(Location::Flags) (Location::IsAutoLoop | Location::IsHidden));
 		if (loc->start() == loc->end()) {
 			loc->set_end (loc->start() + 1);
 		}
@@ -1148,7 +1148,7 @@ Editor::set_session (Session *t)
 
 	loc = _session->locations()->auto_punch_location();
 	if (loc == 0) {
-		loc = new Location (0, _session->current_end_frame(), _("Punch"), (Location::Flags) (Location::IsAutoPunch | Location::IsHidden));
+		loc = new Location (*_session, 0, _session->current_end_frame(), _("Punch"), (Location::Flags) (Location::IsAutoPunch | Location::IsHidden));
 		if (loc->start() == loc->end()) {
 			loc->set_end (loc->start() + 1);
 		}
@@ -4602,7 +4602,7 @@ Editor::set_loop_range (nframes64_t start, nframes64_t end, string cmd)
 	Location* tll;
 
 	if ((tll = transport_loop_location()) == 0) {
-		Location* loc = new Location (start, end, _("Loop"),  Location::IsAutoLoop);
+		Location* loc = new Location (*_session, start, end, _("Loop"),  Location::IsAutoLoop);
 		XMLNode &before = _session->locations()->get_state();
 		_session->locations()->add (loc, true);
 		_session->set_auto_loop_location (loc);
@@ -4629,7 +4629,7 @@ Editor::set_punch_range (nframes64_t start, nframes64_t end, string cmd)
 	Location* tpl;
 
 	if ((tpl = transport_punch_location()) == 0) {
-		Location* loc = new Location (start, end, _("Loop"),  Location::IsAutoPunch);
+		Location* loc = new Location (*_session, start, end, _("Loop"),  Location::IsAutoPunch);
 		XMLNode &before = _session->locations()->get_state();
 		_session->locations()->add (loc, true);
 		_session->set_auto_loop_location (loc);

@@ -829,7 +829,7 @@ LocationUI::add_new_location()
 	if (_session) {
 		nframes_t where = _session->audible_frame();
 		_session->locations()->next_available_name(markername,"mark");
-		Location *location = new Location (where, where, markername, Location::IsMark);
+		Location *location = new Location (*_session, where, where, markername, Location::IsMark);
 		if (Config->get_name_new_markers()) {
 			newest_location = location;
 		}
@@ -851,7 +851,7 @@ LocationUI::add_new_range()
 	if (_session) {
 		nframes_t where = _session->audible_frame();
 		_session->locations()->next_available_name(rangename,"unnamed");
-		Location *location = new Location (where, where, rangename, Location::IsRangeMarker);
+		Location *location = new Location (*_session, where, where, rangename, Location::IsRangeMarker);
 		_session->begin_reversible_command (_("add range marker"));
 		XMLNode &before = _session->locations()->get_state();
 		_session->locations()->add (location, true);

@@ -3504,7 +3504,7 @@ RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	Gdk::Cursor* cursor = 0;
 
 	if (!_editor->temp_location) {
-		_editor->temp_location = new Location;
+		_editor->temp_location = new Location (*_editor->session());
 	}
 
 	switch (_operation) {
@@ -3625,7 +3625,10 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 				flags = Location::IsRangeMarker;
 				_editor->range_bar_drag_rect->hide();
 			}
-			newloc = new Location(_editor->temp_location->start(), _editor->temp_location->end(), rangename, (Location::Flags) flags);
+			newloc = new Location (
+				*_editor->session(), _editor->temp_location->start(), _editor->temp_location->end(), rangename, (Location::Flags) flags
+				);
+			
 			_editor->session()->locations()->add (newloc, true);
 			XMLNode &after = _editor->session()->locations()->get_state();
 			_editor->session()->add_command(new MementoCommand<Locations>(*(_editor->session()->locations()), &before, &after));
