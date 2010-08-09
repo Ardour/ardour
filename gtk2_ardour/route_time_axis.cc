@@ -1390,20 +1390,6 @@ RouteTimeAxisView::paste (framepos_t pos, float times, Selection& selection, siz
 }
 
 
-TimeAxisView::Children
-RouteTimeAxisView::get_child_list()
-{
-	TimeAxisView::Children redirect_children;
-
-	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-		if (!(*i)->hidden()) {
-			redirect_children.push_back(*i);
-		}
-	}
-	return redirect_children;
-}
-
-
 struct PlaylistSorter {
     bool operator() (boost::shared_ptr<Playlist> a, boost::shared_ptr<Playlist> b) const {
             return a->sort_id() < b->sort_id();

@@ -212,6 +212,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	virtual StreamView* view () const { return 0; }
 
 	typedef std::vector<boost::shared_ptr<TimeAxisView> > Children;
+	Children get_child_list ();
 
 	SelectionRect* get_selection_rect(uint32_t id);
 

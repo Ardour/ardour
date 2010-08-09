@@ -5027,12 +5027,10 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 		entered_track = 0;
 	}
 
-	if (rtav) {
-		TimeAxisView::Children c = rtav->get_child_list ();
-		for (TimeAxisView::Children::const_iterator i = c.begin(); i != c.end(); ++i) {
-			if (entered_track == i->get()) {
-				entered_track = 0;
-			}
+	TimeAxisView::Children c = tv->get_child_list ();
+	for (TimeAxisView::Children::const_iterator i = c.begin(); i != c.end(); ++i) {
+		if (entered_track == i->get()) {
+			entered_track = 0;
 		}
 	}
 

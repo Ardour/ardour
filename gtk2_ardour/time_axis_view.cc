@@ -1320,3 +1320,20 @@ TimeAxisView::preset_height (Height h)
 	/* NOTREACHED */
 	return 0;
 }
+
+/** @return Child time axis views that are not hidden */
+TimeAxisView::Children
+TimeAxisView::get_child_list ()
+{
+	Children c;
+
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		if (!(*i)->hidden()) {
+			c.push_back(*i);
+		}
+	}
+	
+	return c;
+}
+
+
