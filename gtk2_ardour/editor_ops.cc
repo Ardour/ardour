@@ -6674,20 +6674,31 @@ Editor::fit_tracks (TrackViewList & tracks)
 
 	undo_visual_stack.push_back (current_visual_state());
 
+	/* build a list of all tracks, including children */
+
+	TrackViewList all;
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		all.push_back (*i);
+		TimeAxisView::Children c = (*i)->get_child_list ();
+		for (TimeAxisView::Children::iterator j = c.begin(); j != c.end(); ++j) {
+			all.push_back (j->get());
+		}
+	}
+
 	/* operate on all tracks, hide unselected ones that are in the middle of selected ones */
 
 	bool prev_was_selected = false;
-	bool is_selected = tracks.contains (track_views.front());
+	bool is_selected = tracks.contains (all.front());
 	bool next_is_selected;
 
-	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
+	for (TrackViewList::iterator t = all.begin(); t != all.end(); ++t) {
 
 		TrackViewList::iterator next;
 
 		next = t;
 		++next;
 
-		if (next != track_views.end()) {
+		if (next != all.end()) {
 			next_is_selected = tracks.contains (*next);
 		} else {
 			next_is_selected = false;
