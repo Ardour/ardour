@@ -792,10 +792,11 @@ Locations::first_location_after (nframes64_t frame, bool include_special_ranges)
 }
 
 /** Look for the `marks' (either locations which are marks, or start/end points of range markers) either
- *  side of a frame.
+ *  side of a frame.  Note that if frame is exactly on a `mark', that mark will not be considered for returning
+ *  as before/after.
  *  @param frame Frame to look for.
  *  @param before Filled in with the position of the last `mark' before `frame' (or max_frames if none exists)
- *  @param after Filled in with the position of the last `mark' after `frame' (or max_frames if none exists)
+ *  @param after Filled in with the position of the next `mark' after `frame' (or max_frames if none exists)
  */
 void
 Locations::marks_either_side (nframes64_t const frame, nframes64_t& before, nframes64_t& after) const
@@ -809,6 +810,8 @@ Locations::marks_either_side (nframes64_t const frame, nframes64_t& before, nfra
 		locs = locations;
 	}
 
+	/* Get a list of positions; don't store any that are exactly on our requested position */
+	
 	std::list<nframes64_t> positions;
 
 	for (LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
@@ -818,10 +821,16 @@ Locations::marks_either_side (nframes64_t const frame, nframes64_t& before, nfra
 
 		if (!(*i)->is_hidden()) {
 			if ((*i)->is_mark ()) {
-				positions.push_back ((*i)->start ());
+				if ((*i)->start() != frame) {
+					positions.push_back ((*i)->start ());
+				}
 			} else {
-				positions.push_back ((*i)->start ());
-				positions.push_back ((*i)->end ());
+				if ((*i)->start() != frame) {
+					positions.push_back ((*i)->start ());
+				}
+				if ((*i)->end() != frame) {
+					positions.push_back ((*i)->end ());
+				}
 			}
 		}
 	}
