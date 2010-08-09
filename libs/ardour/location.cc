@@ -83,7 +83,12 @@ Location::Location (const Location& other)
 
 Location::Location (Session& s, const XMLNode& node)
 	: SessionHandleRef (s)
+	, _position_lock_style (AudioTime)
 {
+	/* Note: _position_lock_style is initialised above in case set_state doesn't set it
+	   (for 2.X session file compatibility).
+	*/
+	
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
 	}
