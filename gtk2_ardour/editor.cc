@@ -5018,14 +5018,24 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 	}
 
 	ENSURE_GUI_THREAD (*this, &Editor::timeaxisview_deleted, tv);
-		
 
+	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tv);
+	
 	_routes->route_removed (tv);
 
 	if (tv == entered_track) {
 		entered_track = 0;
 	}
-	
+
+	if (rtav) {
+		TimeAxisView::Children c = rtav->get_child_list ();
+		for (TimeAxisView::Children::const_iterator i = c.begin(); i != c.end(); ++i) {
+			if (entered_track == i->get()) {
+				entered_track = 0;
+			}
+		}
+	}
+
 	/* remove it from the list of track views */
 
 	TrackViewList::iterator i;
@@ -5037,7 +5047,6 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 	/* update whatever the current mixer strip is displaying, if revelant */
 
 	boost::shared_ptr<Route> route;
-	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tv);
 
 	if (rtav) {
 		route = rtav->route ();
