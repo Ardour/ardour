@@ -3872,7 +3872,7 @@ NoteDrag::motion (GdkEvent*, bool)
 		region->move_selection (dx, dy);
 
                 char buf[12];
-                snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (cnote->note()->note()).c_str(),
+                snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (cnote->note()->note() + drag_delta_note).c_str(),
                           (int) floor ((cnote->note()->note() + drag_delta_note)));
 		_editor->show_verbose_canvas_cursor_with (buf);
         }
