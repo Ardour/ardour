@@ -802,7 +802,7 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* /*ev*/, StreamView*
 void
 Editor::track_selection_changed ()
 {
-	switch (selection->tracks.size()){
+	switch (selection->tracks.size()) {
 	case 0:
 		break;
 	default:
@@ -811,10 +811,11 @@ Editor::track_selection_changed ()
 	}
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		if (find (selection->tracks.begin(), selection->tracks.end(), *i) != selection->tracks.end()) {
-			(*i)->set_selected (true);
-		} else {
-			(*i)->set_selected (false);
+		(*i)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), *i) != selection->tracks.end());
+
+		TimeAxisView::Children c = (*i)->get_child_list ();
+		for (TimeAxisView::Children::iterator j = c.begin(); j != c.end(); ++j) {
+			(*j)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), j->get()) != selection->tracks.end());
 		}
 	}
 
