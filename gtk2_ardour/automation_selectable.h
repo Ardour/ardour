@@ -24,7 +24,7 @@
 
 class TimeAxisView;
 
-/** A selected automation point, expressed as a rectangle.
+/** One or more selected automation points, expressed as a rectangle.
  *
  *  x coordinates start/end are in AutomationList model coordinates.
  *  y coordinates are a expressed as a fraction of the AutomationTimeAxisView's height, where 0 is the
