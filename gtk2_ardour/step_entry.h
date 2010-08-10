@@ -44,8 +44,13 @@ class StepEntry : public ArdourDialog
         Evoral::MusicalTime note_length() const;
         uint8_t note_velocity() const;
         uint8_t note_channel() const;
-
+        
+        int current_octave () const { return (int) floor (octave_adjustment.get_value()); }
+        
   private:
+        Evoral::MusicalTime _current_note_length;
+        uint8_t _current_note_velocity;
+
         Gtk::VBox packer;
         Gtk::HBox upper_box;
         Gtk::HBox note_length_box;
@@ -86,6 +91,20 @@ class StepEntry : public ArdourDialog
         Gtk::Adjustment channel_adjustment;
         Gtk::SpinButton channel_spinner;
 
+        Gtk::Adjustment octave_adjustment;
+        Gtk::SpinButton octave_spinner;
+
+        Gtk::Adjustment length_divisor_adjustment;
+        Gtk::SpinButton length_divisor_spinner;
+
+        Gtk::Adjustment velocity_adjustment;
+        Gtk::SpinButton velocity_spinner;
+
+        void length_changed ();
+        void velocity_changed ();
+        void velocity_value_change ();
+        void length_value_change ();
+
         PianoKeyboard* _piano;
         Gtk::Widget* piano;
         MidiTimeAxisView* _mtv;
@@ -109,6 +128,10 @@ class StepEntry : public ArdourDialog
         void register_actions ();
         Gtkmm2ext::ActionMap myactions;
 
+        void insert_note (uint8_t);
+        void insert_rest ();
+        void insert_grid_rest ();
+
         void insert_a ();
         void insert_asharp ();
         void insert_b ();
@@ -121,23 +144,13 @@ class StepEntry : public ArdourDialog
         void insert_f ();
         void insert_fsharp ();
         void insert_g ();
+        void insert_gsharp ();
         
-        void note_length_whole ();
-        void note_length_half ();
-        void note_length_quarter ();
-        void note_length_eighth ();
-        void note_length_sixteenth ();
-        void note_length_thirtysecond ();
-        void note_length_sixtyfourth ();
+        void note_length_change (GtkAction*);
+        void note_velocity_change (GtkAction*);
 
-        void note_velocity_ppp ();
-        void note_velocity_pp ();
-        void note_velocity_p ();
-        void note_velocity_mp ();
-        void note_velocity_mf ();
-        void note_velocity_f ();
-        void note_velocity_ff ();
-        void note_velocity_fff ();
+        bool radio_button_press (GdkEventButton*);
+        bool radio_button_release (GdkEventButton*, Gtk::RadioButton*, int);
 
         void load_bindings ();
         Gtkmm2ext::Bindings  bindings;
