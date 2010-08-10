@@ -408,12 +408,12 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (is_audio_track()) {
 		boost::shared_ptr<AudioTrack> at = audio_track();
 		at->FreezeChange.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::map_frozen, this), gui_context());
-
-		_mono_button.show ();
-		panners.show_all ();
 	}
 
-	if (is_midi_track()) {
+	if (has_audio_outputs ()) {
+		_mono_button.show ();
+		panners.show_all ();
+	} else {
 		_mono_button.hide ();
 		panners.hide_all ();
 	}

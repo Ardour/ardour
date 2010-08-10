@@ -1508,6 +1508,12 @@ RouteUI::midi_track() const
 	return boost::dynamic_pointer_cast<MidiTrack>(_route);
 }
 
+bool
+RouteUI::has_audio_outputs () const
+{
+	return (_route->n_outputs().n_audio() > 0);
+}
+
 string
 RouteUI::name() const
 {
