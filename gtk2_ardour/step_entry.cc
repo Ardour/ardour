@@ -311,16 +311,35 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 	upper_box.pack_start (resync_box, false, false);
 	upper_box.pack_start (note_velocity_box, false, false, 12);
 
-	VBox* v = manage (new VBox);
+	VBox* v;
+
+        v = manage (new VBox);
 	l = manage (new Label (_("Channel")));
 	v->set_spacing (6);
 	v->pack_start (*l, false, false);
 	v->pack_start (channel_spinner, false, false);
 	upper_box.pack_start (*v, false, false);
 
-	upper_box.pack_start (length_divisor_spinner, false, false);
-	upper_box.pack_start (velocity_spinner, false, false);
-	upper_box.pack_start (octave_spinner, false, false);
+        v = manage (new VBox);
+	l = manage (new Label (_("1/Note")));
+	v->set_spacing (6);
+	v->pack_start (*l, false, false);
+	v->pack_start (length_divisor_spinner, false, false);
+	upper_box.pack_start (*v, false, false);
+
+        v = manage (new VBox);
+	l = manage (new Label (_("Velocity")));
+	v->set_spacing (6);
+	v->pack_start (*l, false, false);
+	v->pack_start (velocity_spinner, false, false);
+	upper_box.pack_start (*v, false, false);
+
+        v = manage (new VBox);
+	l = manage (new Label (_("Octave")));
+	v->set_spacing (6);
+	v->pack_start (*l, false, false);
+	v->pack_start (octave_spinner, false, false);
+	upper_box.pack_start (*v, false, false);
 
         velocity_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &StepEntry::velocity_value_change));
         length_divisor_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &StepEntry::length_value_change));
