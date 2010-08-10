@@ -293,9 +293,7 @@ LocationEditRow::set_location (Location *loc)
 		length_clock.hide();
 	}
 
-	start_clock.set_sensitive (!location->locked());
-	end_clock.set_sensitive (!location->locked());
-	length_clock.set_sensitive (!location->locked());
+	set_clock_sensitivity ();
 
 	--i_am_the_modifier;
 
@@ -383,7 +381,9 @@ LocationEditRow::go_button_pressed (LocationPart part)
 void
 LocationEditRow::clock_changed (LocationPart part)
 {
-	if (i_am_the_modifier || !location) return;
+	if (i_am_the_modifier || !location) {
+		return;
+	}
 
 	switch (part) {
 	case LocStart:
@@ -397,7 +397,6 @@ LocationEditRow::clock_changed (LocationPart part)
 	default:
 		break;
 	}
-
 }
 
 void
@@ -603,9 +602,7 @@ LocationEditRow::location_changed (ARDOUR::Location *loc)
 	end_clock.set (location->end());
 	length_clock.set (location->length());
 
-	start_clock.set_sensitive (!location->locked());
-	end_clock.set_sensitive (!location->locked());
-	length_clock.set_sensitive (!location->locked());
+	set_clock_sensitivity ();
 
 	i_am_the_modifier--;
 
@@ -637,6 +634,8 @@ LocationEditRow::lock_changed (ARDOUR::Location *loc)
 	i_am_the_modifier++;
 
 	lock_check_button.set_active (location->locked());
+
+	set_clock_sensitivity ();
 
 	i_am_the_modifier--;
 }
@@ -1009,6 +1008,14 @@ LocationUI::session_going_away()
 	punch_edit_row.set_location (0);
 
 	SessionHandlePtr::session_going_away ();
+}
+
+void
+LocationEditRow::set_clock_sensitivity ()
+{
+	start_clock.set_sensitive (!location->locked());
+	end_clock.set_sensitive (!location->locked());
+	length_clock.set_sensitive (!location->locked());
 }
 
 /*------------------------*/
