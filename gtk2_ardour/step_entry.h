@@ -135,7 +135,6 @@ class StepEntry : public ArdourDialog
         void insert_a ();
         void insert_asharp ();
         void insert_b ();
-        void insert_bsharp ();
         void insert_c ();
         void insert_csharp ();
         void insert_d ();

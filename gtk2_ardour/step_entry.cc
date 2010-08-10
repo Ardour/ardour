@@ -485,9 +485,8 @@ StepEntry::register_actions ()
 	/* add named actions for the editor */
 
 	myactions.register_action ("StepEditing", "insert-a", _("Insert Note A"), sigc::mem_fun (*this, &StepEntry::insert_a));
-	myactions.register_action ("StepEditing", "insert-bsharp", _("Insert Note A-sharp"), sigc::mem_fun (*this, &StepEntry::insert_asharp));
+	myactions.register_action ("StepEditing", "insert-asharp", _("Insert Note A-sharp"), sigc::mem_fun (*this, &StepEntry::insert_asharp));
 	myactions.register_action ("StepEditing", "insert-b", _("Insert Note B"), sigc::mem_fun (*this, &StepEntry::insert_b));
-	myactions.register_action ("StepEditing", "insert-bsharp", _("Insert Note B-sharp"), sigc::mem_fun (*this, &StepEntry::insert_bsharp));
 	myactions.register_action ("StepEditing", "insert-c", _("Insert Note C"), sigc::mem_fun (*this, &StepEntry::insert_c));
 	myactions.register_action ("StepEditing", "insert-csharp", _("Insert Note C-sharp"), sigc::mem_fun (*this, &StepEntry::insert_csharp));
 	myactions.register_action ("StepEditing", "insert-d", _("Insert Note D"), sigc::mem_fun (*this, &StepEntry::insert_d));
@@ -626,12 +625,6 @@ void
 StepEntry::insert_b ()
 {
         insert_note (11 + (current_octave() * 12));
-}
-
-void
-StepEntry::insert_bsharp ()
-{
-        insert_note (12 + (current_octave() * 12));
 }
 
 void
