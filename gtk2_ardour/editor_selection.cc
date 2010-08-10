@@ -241,13 +241,6 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool /*n
 		return false;
 	}
 
-	if (clicked_control_point->selected()) {
-		/* the clicked control point is already selected; others may be as well, so
-		   don't change the selection.
-		*/
-		return true;
-	}
-
 	/* We know the ControlPoint that was clicked, but (as discussed in automation_selectable.h)
 	 * selected automation data are described by areas on the AutomationLine.  A ControlPoint
 	 * represents any model points in the space that it takes up, so the AutomationSelectable
@@ -270,7 +263,7 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool /*n
 	_trackview_group->w2i (dummy, y2);
 
 	/* and set up the selection */
-	return select_all_within (x1, x2, y1, y2, selection->tracks, op);
+	return select_all_within (x1, x2, y1, y2, selection->tracks, op, true);
 }
 
 void
@@ -983,9 +976,12 @@ Editor::invert_selection ()
  *  @param end End time in session frames.
  *  @param top Top (lower) y limit in trackview coordinates (ie 0 at the top of the track view)
  *  @param bottom Bottom (higher) y limit in trackview coordinates (ie 0 at the top of the track view)
+ *  @param preserve_if_selected true to leave the current selection alone if all of the selectables within the region are already selected.
  */
 bool
-Editor::select_all_within (framepos_t start, framepos_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op)
+Editor::select_all_within (
+	framepos_t start, framepos_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op, bool preserve_if_selected
+	)
 {
 	list<Selectable*> found;
 
@@ -1000,6 +996,17 @@ Editor::select_all_within (framepos_t start, framepos_t end, double top, double 
 
 	if (found.empty()) {
 		return false;
+	}
+
+	if (preserve_if_selected) {
+		list<Selectable*>::iterator i = found.begin();
+		while (i != found.end() && (*i)->get_selected()) {
+			++i;
+		}
+
+		if (i == found.end()) {
+			return false;
+		}
 	}
 
 	begin_reversible_command (_("select all within"));

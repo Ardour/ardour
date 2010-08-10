@@ -3107,9 +3107,9 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->begin_reversible_command (_("rubberband selection"));
 
 		if (grab_frame() < last_pointer_frame()) {
-			committed = _editor->select_all_within (grab_frame(), last_pointer_frame() - 1, y1, y2, _editor->track_views, op);
+			committed = _editor->select_all_within (grab_frame(), last_pointer_frame() - 1, y1, y2, _editor->track_views, op, false);
 		} else {
-			committed = _editor->select_all_within (last_pointer_frame(), grab_frame() - 1, y1, y2, _editor->track_views, op);
+			committed = _editor->select_all_within (last_pointer_frame(), grab_frame() - 1, y1, y2, _editor->track_views, op, false);
 		}
 
 		if (!committed) {
@@ -3662,7 +3662,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			switch (_editor->mouse_mode) {
 			case MouseObject:
 				/* find the two markers on either side and then make the selection from it */
-				_editor->select_all_within (start, end, 0.0f, FLT_MAX, _editor->track_views, Selection::Set);
+				_editor->select_all_within (start, end, 0.0f, FLT_MAX, _editor->track_views, Selection::Set, false);
 				break;
 
 			case MouseRange:

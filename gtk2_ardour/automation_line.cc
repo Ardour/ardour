@@ -990,7 +990,13 @@ AutomationLine::get_selectables (
 
 				if (collecting) {
 
-					results.push_back (new AutomationSelectable (nstart, nend, botfrac, topfrac, &trackview));
+					AutomationSelectable* s = new AutomationSelectable (nstart, nend, botfrac, topfrac, &trackview);
+					PointSelection& ps = trackview.editor().get_selection().points;
+					if (find (ps.begin(), ps.end(), *s) != ps.end()) {
+						s->set_selected (true);
+					}
+
+					results.push_back (s);
 					collecting = false;
 					nstart = DBL_MAX;
 					nend = 0;
@@ -1000,7 +1006,14 @@ AutomationLine::get_selectables (
 	}
 
 	if (collecting) {
-		results.push_back (new AutomationSelectable (nstart, nend, botfrac, topfrac, &trackview));
+		AutomationSelectable* s = new AutomationSelectable (nstart, nend, botfrac, topfrac, &trackview);
+		
+		PointSelection& ps = trackview.editor().get_selection().points;
+		if (find (ps.begin(), ps.end(), *s) != ps.end()) {
+			s->set_selected (true);
+		}
+		
+		results.push_back (s);
 	}
 
 }

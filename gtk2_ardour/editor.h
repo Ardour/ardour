@@ -1657,7 +1657,7 @@ public:
 
 	/* object rubberband select process */
 
-	bool select_all_within (nframes64_t, nframes64_t, double, double, TrackViewList const &, Selection::Operation op);
+	bool select_all_within (nframes64_t, nframes64_t, double, double, TrackViewList const &, Selection::Operation, bool);
 
 	ArdourCanvas::SimpleRect   *rubberband_rect;
 

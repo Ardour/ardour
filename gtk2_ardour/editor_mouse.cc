@@ -1070,8 +1070,6 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		return true;
 	}
 
-	button_selection (item, event, item_type);
-
 	if (!_drags->active () &&
 	    (Keyboard::is_delete_event (&event->button) ||
 	     Keyboard::is_context_menu_event (&event->button) ||
@@ -1113,7 +1111,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 	}
 
-	/* first, see if we're finishing a drag ... */
+	/* see if we're finishing a drag */
 
 	bool were_dragging = false;
 	if (_drags->active ()) {
