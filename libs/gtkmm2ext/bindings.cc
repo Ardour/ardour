@@ -299,13 +299,17 @@ ActionMap::register_action (const char* path,
 
 RefPtr<Action> 
 ActionMap::register_radio_action (const char* path, Gtk::RadioAction::Group& rgroup,
-                                 const char* name, const char* label, sigc::slot<void> sl)
+                                  const char* name, const char* label, 
+                                  sigc::slot<void,GtkAction*> sl,
+                                  int value)
 {
         string fullpath;
 
         RefPtr<Action> act = RadioAction::create (rgroup, name, label);
+        RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+        ract->property_value() = value;
 
-        act->signal_activate().connect (sl);
+        act->signal_activate().connect (sigc::bind (sl, act->gobj()));
 
         fullpath = path;
         fullpath += '/';

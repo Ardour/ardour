@@ -55,7 +55,9 @@ class ActionMap {
 	Glib::RefPtr<Gtk::Action> register_action (const char* path,
 						   const char* name, const char* label, sigc::slot<void> sl);
 	Glib::RefPtr<Gtk::Action> register_radio_action (const char* path, Gtk::RadioAction::Group&,
-							 const char* name, const char* label, sigc::slot<void> sl);
+							 const char* name, const char* label, 
+                                                         sigc::slot<void,GtkAction*> sl,
+                                                         int value);
 	Glib::RefPtr<Gtk::Action> register_toggle_action (const char*path,
 							  const char* name, const char* label, sigc::slot<void> sl);
 
