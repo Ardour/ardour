@@ -976,7 +976,8 @@ Editor::invert_selection ()
  *  @param end End time in session frames.
  *  @param top Top (lower) y limit in trackview coordinates (ie 0 at the top of the track view)
  *  @param bottom Bottom (higher) y limit in trackview coordinates (ie 0 at the top of the track view)
- *  @param preserve_if_selected true to leave the current selection alone if all of the selectables within the region are already selected.
+ *  @param preserve_if_selected true to leave the current selection alone if we're adding to the selection and all of the selectables
+ *  within the region are already selected.
  */
 bool
 Editor::select_all_within (
@@ -998,7 +999,7 @@ Editor::select_all_within (
 		return false;
 	}
 
-	if (preserve_if_selected) {
+	if (preserve_if_selected && op != Selection::Toggle) {
 		list<Selectable*>::iterator i = found.begin();
 		while (i != found.end() && (*i)->get_selected()) {
 			++i;
