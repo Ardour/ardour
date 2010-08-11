@@ -65,12 +65,19 @@ InsertTimeDialog::InsertTimeDialog (PublicEditor& e)
 	get_vbox()->pack_start (_move_glued);
 	_move_markers.set_label (_("Move markers"));
 	get_vbox()->pack_start (_move_markers);
+	_move_markers.signal_toggled().connect (sigc::mem_fun (*this, &InsertTimeDialog::move_markers_toggled));
+	_move_glued_markers.set_label (_("Move glued markers"));
+	get_vbox()->pack_start (_move_glued_markers);
+	_move_locked_markers.set_label (_("Move locked markers"));
+	get_vbox()->pack_start (_move_locked_markers);
 	_move_tempos.set_label (_("Move tempo and meter changes"));
 	get_vbox()->pack_start (_move_tempos);
 
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	add_button (_("Insert time"), Gtk::RESPONSE_OK);
 	show_all ();
+
+	move_markers_toggled ();
 }
 
 InsertTimeOption
@@ -112,8 +119,27 @@ InsertTimeDialog::move_markers () const
 	return _move_markers.get_active ();
 }
 
+bool
+InsertTimeDialog::move_glued_markers () const
+{
+	return _move_glued_markers.get_active ();
+}
+
+bool
+InsertTimeDialog::move_locked_markers () const
+{
+	return _move_locked_markers.get_active ();
+}
+
 nframes64_t
 InsertTimeDialog::distance () const
 {
 	return _clock.current_duration (_editor.get_preferred_edit_position ());
+}
+
+void
+InsertTimeDialog::move_markers_toggled ()
+{
+	_move_glued_markers.set_sensitive (_move_markers.get_active ());
+	_move_locked_markers.set_sensitive (_move_markers.get_active ());
 }

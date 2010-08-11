@@ -1102,7 +1102,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void fork_region ();
 
 	void do_insert_time ();
-	void insert_time (nframes64_t, nframes64_t, Editing::InsertTimeOption, bool, bool, bool);
+	void insert_time (nframes64_t, nframes64_t, Editing::InsertTimeOption, bool, bool, bool, bool, bool);
 
 	void tab_to_transient (bool forward);
 

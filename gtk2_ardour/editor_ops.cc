@@ -6500,12 +6500,21 @@ Editor::do_insert_time ()
 
 	InsertTimeOption opt = d.intersected_region_action ();
 
-	insert_time (get_preferred_edit_position(), d.distance(), opt, d.move_glued(), d.move_markers(), d.move_tempos());
+	insert_time (
+		get_preferred_edit_position(),
+		d.distance(),
+		opt,
+		d.move_glued(),
+		d.move_markers(),
+		d.move_glued_markers(),
+		d.move_locked_markers(),
+		d.move_tempos()
+		);
 }
 
 void
 Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
-		     bool ignore_music_glue, bool markers_too, bool tempo_too)
+		     bool ignore_music_glue, bool markers_too, bool glued_markers_too, bool locked_markers_too, bool tempo_too)
 {
 	bool commit = false;
 
@@ -6560,12 +6569,25 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
 
 			Locations::LocationList::const_iterator tmp;
 
-			if ((*i)->start() >= pos) {
-				(*i)->set_start ((*i)->start() + frames);
-				if (!(*i)->is_mark()) {
-					(*i)->set_end ((*i)->end() + frames);
+			bool const was_locked = (*i)->locked ();
+			if (locked_markers_too) {
+				(*i)->unlock ();
+			}
+
+			if ((*i)->position_lock_style() == AudioTime || glued_markers_too) {
+
+				if ((*i)->start() >= pos) {
+					(*i)->set_start ((*i)->start() + frames);
+					if (!(*i)->is_mark()) {
+						(*i)->set_end ((*i)->end() + frames);
+					}
+					moved = true;
 				}
-				moved = true;
+				
+			}
+
+			if (was_locked) {
+				(*i)->lock ();
 			}
 		}
 

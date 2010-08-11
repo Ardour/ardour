@@ -30,14 +30,20 @@ public:
 	Editing::InsertTimeOption intersected_region_action ();
 	bool move_glued () const;
 	bool move_markers () const;
+	bool move_glued_markers () const;
+	bool move_locked_markers () const;
 	bool move_tempos () const;
 	nframes64_t distance () const;
 
 private:
+	void move_markers_toggled ();
+	
 	PublicEditor& _editor;
 	Gtk::ComboBoxText _intersected_combo;
 	Gtk::CheckButton _move_glued;
 	Gtk::CheckButton _move_markers;
+	Gtk::CheckButton _move_glued_markers;
+	Gtk::CheckButton _move_locked_markers;
 	Gtk::CheckButton _move_tempos;
 	AudioClock _clock;
 };
