@@ -1146,7 +1146,8 @@ MidiTimeAxisView::add_region (framepos_t pos)
         playlist()->clear_history ();
 
 	framepos_t start = pos;
-	real_editor->snap_to (start, -1);
+	real_editor->snap_to (start, 0);
+        cerr << "Snap backwards from " << pos << " gave us " << start << endl;
 	const Meter& m = _session->tempo_map().meter_at(start);
 	const Tempo& t = _session->tempo_map().tempo_at(start);
 	double length = floor (m.frames_per_bar(t, _session->frame_rate()));
