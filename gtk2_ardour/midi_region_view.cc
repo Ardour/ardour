@@ -23,7 +23,6 @@
 #include <ostream>
 
 #include <gtkmm.h>
-#include <libgnomecanvasmm/pixbuf.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 
@@ -61,6 +60,7 @@
 #include "midi_time_axis.h"
 #include "midi_util.h"
 #include "public_editor.h"
+#include "rgb_macros.h"
 #include "selection.h"
 #include "simpleline.h"
 #include "streamview.h"
@@ -89,6 +89,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _ghost_note(0)
         , _drag_rect (0)
         , _step_edit_cursor (0)
+        , _step_edit_cursor_width (1.0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -1151,6 +1152,10 @@ MidiRegionView::set_height (double height)
         
         for (PgmChanges::iterator x = _pgm_changes.begin(); x != _pgm_changes.end(); ++x) {
                 (*x)->set_height (midi_stream_view()->contents_height());
+        }
+
+        if (_step_edit_cursor) {
+                _step_edit_cursor->property_y2() = midi_stream_view()->contents_height();
         }
 }
 
@@ -2983,9 +2988,11 @@ MidiRegionView::show_step_edit_cursor (Evoral::MusicalTime pos)
         if (_step_edit_cursor == 0) {
                 ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
 
-                _step_edit_cursor = new ArdourCanvas::Pixbuf (*group);
-                _step_edit_cursor->property_y() = 0;
-                _step_edit_cursor->property_pixbuf() = ::get_icon ("wholenote");
+                _step_edit_cursor = new ArdourCanvas::SimpleRect (*group);
+                _step_edit_cursor->property_y1() = 0;
+                _step_edit_cursor->property_y2() = midi_stream_view()->contents_height();
+                _step_edit_cursor->property_fill_color_rgba() = RGBA_TO_UINT (45,45,45,90);
+                _step_edit_cursor->property_outline_color_rgba() = RGBA_TO_UINT (255,255,255,90);
         }
 
         move_step_edit_cursor (pos);
@@ -2997,13 +3004,8 @@ MidiRegionView::move_step_edit_cursor (Evoral::MusicalTime pos)
 {
         if (_step_edit_cursor) {
                 double pixel = trackview.editor().frame_to_pixel (beats_to_frames (pos));
-                Glib::RefPtr<Gdk::Pixbuf> pb = _step_edit_cursor->property_pixbuf();
-
-                if (pixel >= (pb->get_width()/2.0)) {
-                        pixel -= pb->get_width()/2.0;
-                }
-
-                _step_edit_cursor->property_x() = pixel;
+                _step_edit_cursor->property_x1() = pixel;
+                _step_edit_cursor->property_x2() = pixel + _step_edit_cursor_width;
         }
 }
 
@@ -3014,3 +3016,11 @@ MidiRegionView::hide_step_edit_cursor ()
                 _step_edit_cursor->hide ();
         }
 }
+
+void
+MidiRegionView::set_step_edit_cursor_width (Evoral::MusicalTime beats)
+{
+        _step_edit_cursor_width = trackview.editor().frame_to_pixel (beats_to_frames (beats));
+        _step_edit_cursor->property_x2() = _step_edit_cursor->property_x1() + _step_edit_cursor_width;
+}
+

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001-2007 Paul Davis
+    Copyright (C) 2001-2010 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,12 +45,6 @@
 #include "canvas-note-event.h"
 #include "canvas-program-change.h"
 #include "canvas-sysex.h"
-
-namespace Gnome { 
-        namespace Canvas {
-                class Pixbuf;
-        }
-};
 
 namespace ARDOUR {
 	class MidiRegion;
@@ -113,6 +107,7 @@ class MidiRegionView : public RegionView
         void show_step_edit_cursor (Evoral::MusicalTime pos);
         void move_step_edit_cursor (Evoral::MusicalTime pos);
         void hide_step_edit_cursor ();
+        void set_step_edit_cursor_width (Evoral::MusicalTime beats);
 
 	void redisplay_model();
 
@@ -373,8 +368,9 @@ class MidiRegionView : public RegionView
         double                               _last_x;
         double                               _last_y;
 	ArdourCanvas::SimpleRect*            _drag_rect;
-        ArdourCanvas::Pixbuf*                _step_edit_cursor;
-
+        ArdourCanvas::SimpleRect*            _step_edit_cursor;
+        double                               _step_edit_cursor_width;
+        
 	MouseState _mouse_state;
 	int _pressed_button;
 

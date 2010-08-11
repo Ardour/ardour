@@ -805,6 +805,8 @@ StepEntry::length_value_change ()
         length_16_button.set_inconsistent (inconsistent);
         length_32_button.set_inconsistent (inconsistent);
         length_64_button.set_inconsistent (inconsistent);
+
+        _mtv->set_step_edit_cursor_width (note_length());
 }
 
 bool

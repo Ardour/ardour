@@ -912,13 +912,14 @@ MidiTimeAxisView::start_step_editing ()
                 step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
         }
 
-        if (step_edit_region_view) {
-                step_edit_region_view->show_step_edit_cursor (0.0);
-        }
-
         if (step_editor == 0) {
                 step_editor = new StepEntry (*this);
                 step_editor->signal_delete_event().connect (sigc::mem_fun (*this, &MidiTimeAxisView::step_editor_hidden));
+        }
+
+        if (step_edit_region_view) {
+                step_edit_region_view->show_step_edit_cursor (0.0);
+                step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
         }
 
         step_editor->set_position (WIN_POS_MOUSE);
@@ -1046,6 +1047,14 @@ MidiTimeAxisView::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocit
         }
 
         return 0;
+}
+
+void
+MidiTimeAxisView::set_step_edit_cursor_width (Evoral::MusicalTime beats)
+{
+        if (step_edit_region_view) {
+                step_edit_region_view->set_step_edit_cursor_width (beats);
+        }
 }
 
 bool

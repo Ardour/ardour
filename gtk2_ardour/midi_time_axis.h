@@ -99,7 +99,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
         void step_edit_toggle_triplet ();
         bool step_edit_within_chord () const;
         void step_edit_toggle_chord ();
-
+        void set_step_edit_cursor_width (Evoral::MusicalTime beats);
+        
 	const MidiMultipleChannelSelector& channel_selector() { return _channel_selector; }
 
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
