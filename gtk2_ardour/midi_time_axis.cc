@@ -895,7 +895,6 @@ void
 MidiTimeAxisView::start_step_editing ()
 {
 	step_edit_insert_position = _editor.get_preferred_edit_position ();
-        step_edit_beat_pos = -1.0;
         _step_edit_triplet_countdown = 0;
         _step_edit_within_chord = 0;
         _step_edit_chord_duration = 0.0;
@@ -912,15 +911,23 @@ MidiTimeAxisView::start_step_editing ()
                 step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
         }
 
+        assert (step_edit_region);
+        assert (step_edit_region_view);
+
         if (step_editor == 0) {
                 step_editor = new StepEntry (*this);
                 step_editor->signal_delete_event().connect (sigc::mem_fun (*this, &MidiTimeAxisView::step_editor_hidden));
+                step_editor->signal_hide().connect (sigc::mem_fun (*this, &MidiTimeAxisView::step_editor_hide));
         }
 
-        if (step_edit_region_view) {
-                step_edit_region_view->show_step_edit_cursor (0.0);
-                step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
-        }
+        framecnt_t frames_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
+
+        assert (frames_from_start >= 0);
+
+        step_edit_beat_pos = step_edit_region_view->frames_to_beats (frames_from_start);
+
+        step_edit_region_view->show_step_edit_cursor (step_edit_beat_pos);
+        step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
 
         step_editor->set_position (WIN_POS_MOUSE);
         step_editor->present ();
@@ -929,9 +936,15 @@ MidiTimeAxisView::start_step_editing ()
 bool
 MidiTimeAxisView::step_editor_hidden (GdkEventAny*)
 {
+        step_editor_hide ();
+        return true;
+}
+
+void
+MidiTimeAxisView::step_editor_hide ()
+{
         /* everything else will follow the change in the model */
 	midi_track()->set_step_editing (false);
-        return true;
 }
 
 void
@@ -992,13 +1005,6 @@ int
 MidiTimeAxisView::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evoral::MusicalTime beat_duration)
 {
         if (step_edit_region && step_edit_region_view) {
-                if (step_edit_beat_pos < 0.0) {
-                        framecnt_t frames_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
-                        if (frames_from_start < 0) {
-                                return 1;
-                        }
-                        step_edit_beat_pos = step_edit_region_view->frames_to_beats (frames_from_start);
-                }
                 
                 if (beat_duration == 0.0) {
                         bool success;

@@ -2991,8 +2991,8 @@ MidiRegionView::show_step_edit_cursor (Evoral::MusicalTime pos)
                 _step_edit_cursor = new ArdourCanvas::SimpleRect (*group);
                 _step_edit_cursor->property_y1() = 0;
                 _step_edit_cursor->property_y2() = midi_stream_view()->contents_height();
-                _step_edit_cursor->property_fill_color_rgba() = RGBA_TO_UINT (45,45,45,90);
-                _step_edit_cursor->property_outline_color_rgba() = RGBA_TO_UINT (255,255,255,90);
+                _step_edit_cursor->property_fill_color_rgba() = RGBA_TO_UINT (45,0,0,90);
+                _step_edit_cursor->property_outline_color_rgba() = RGBA_TO_UINT (85,0,0,90);
         }
 
         move_step_edit_cursor (pos);

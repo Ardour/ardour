@@ -182,6 +182,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
         StepEntry* step_editor;
         bool step_editor_hidden (GdkEventAny*);
+        void step_editor_hide ();
 };
 
 #endif /* __ardour_midi_time_axis_h__ */
