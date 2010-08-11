@@ -80,6 +80,7 @@
 #include "editor_regions.h"
 #include "quantize_dialog.h"
 #include "interthread_progress_window.h"
+#include "insert_time_dialog.h"
 
 #include "i18n.h"
 
@@ -6486,76 +6487,20 @@ Editor::do_insert_time ()
 		return;
 	}
 
-	ArdourDialog d (*this, _("Insert Time"));
-
-	nframes64_t const pos = get_preferred_edit_position ();
-
-	d.get_vbox()->set_border_width (12);
-	d.get_vbox()->set_spacing (4);
-
-	Table table (2, 2);
-	table.set_spacings (4);
-
-	Label time_label (_("Time to insert:"));
-	time_label.set_alignment (1, 0.5);
-	table.attach (time_label, 0, 1, 0, 1, FILL | EXPAND);
-	AudioClock clock ("insertTimeClock", true, X_("InsertTimeClock"), true, false, true, true);
-	clock.set (0);
-	clock.set_session (_session);
-	clock.set_bbt_reference (pos);
-	table.attach (clock, 1, 2, 0, 1);
-
-	Label intersected_label (_("Intersected regions should:"));
-	intersected_label.set_alignment (1, 0.5);
-	table.attach (intersected_label, 0, 1, 1, 2, FILL | EXPAND);
-	ComboBoxText intersected_combo;
-	intersected_combo.append_text (_("stay in position"));
-	intersected_combo.append_text (_("move"));
-	intersected_combo.append_text (_("be split"));
-	intersected_combo.set_active (0);
-	table.attach (intersected_combo, 1, 2, 1, 2);
-
-	d.get_vbox()->pack_start (table);
-
-	CheckButton move_glued (_("Move glued regions"));
-	d.get_vbox()->pack_start (move_glued);
-	CheckButton move_markers (_("Move markers"));
-	d.get_vbox()->pack_start (move_markers);
-	CheckButton move_tempos (_("Move tempo and meter changes"));
-	d.get_vbox()->pack_start (move_tempos);
-
-	d.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	d.add_button (_("Insert time"), Gtk::RESPONSE_OK);
-	d.show_all ();
-
+	InsertTimeDialog d (*this);
 	int response = d.run ();
 
 	if (response != RESPONSE_OK) {
 		return;
 	}
 
-	nframes64_t distance = clock.current_duration (pos);
-
-	if (distance == 0) {
+	if (d.distance() == 0) {
 		return;
 	}
 
-	/* only setting this to keep GCC quiet */
-	InsertTimeOption opt = LeaveIntersected;
+	InsertTimeOption opt = d.intersected_region_action ();
 
-	switch (intersected_combo.get_active_row_number ()) {
-	case 0:
-		opt = LeaveIntersected;
-		break;
-	case 1:
-		opt = MoveIntersected;
-		break;
-	case 2:
-		opt = SplitIntersected;
-		break;
-	}
-
-	insert_time (pos, distance, opt, move_glued.get_active(), move_markers.get_active(), move_tempos.get_active());
+	insert_time (get_preferred_edit_position(), d.distance(), opt, d.move_glued(), d.move_markers(), d.move_tempos());
 }
 
 void
