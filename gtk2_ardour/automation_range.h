@@ -17,14 +17,12 @@
 
 */
 
-#ifndef __ardour_gtk_automation_selectable_h__
-#define __ardour_gtk_automation_selectable_h__
-
-#include "selectable.h"
+#ifndef __ardour_gtk_automation_range_h__
+#define __ardour_gtk_automation_range_h__
 
 class TimeAxisView;
 
-/** One or more selected automation points, expressed as a rectangle.
+/** A rectangular range of an automation line, used to express a selected area.
  *
  *  x coordinates start/end are in AutomationList model coordinates.
  *  y coordinates are a expressed as a fraction of the AutomationTimeAxisView's height, where 0 is the
@@ -35,8 +33,10 @@ class TimeAxisView;
  *  visible; it is not trivial to convert from one of these to the
  *  other, so the AutomationSelectable is a kind of "best and worst of
  *  both worlds".
+ *
+ *  It offers a zoom-independent representation of a selected area of automation.
  */
-struct AutomationSelectable : public Selectable
+struct AutomationRange
 {
 	double start;
 	double end;
@@ -44,16 +44,8 @@ struct AutomationSelectable : public Selectable
 	double high_fract;
 	TimeAxisView* track; // ref would be better, but ARDOUR::SessionHandlePtr is non-assignable
 	
-	AutomationSelectable (double s, double e, double l, double h, TimeAxisView* atv)
+	AutomationRange (double s, double e, double l, double h, TimeAxisView* atv)
 		: start (s), end (e), low_fract (l), high_fract (h), track (atv) {}
-	
-	bool operator== (const AutomationSelectable& other) {
-		return start == other.start &&
-			end == other.end &&
-			low_fract == other.low_fract &&
-			high_fract == other.high_fract &&
-			track == other.track;
-	}
 };
 
-#endif /* __ardour_gtk_automation_selectable_h__ */
+#endif /* __ardour_gtk_automation_range_h__ */

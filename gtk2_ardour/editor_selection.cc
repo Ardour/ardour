@@ -240,30 +240,23 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool /*n
 	if (!clicked_control_point) {
 		return false;
 	}
-
-	/* We know the ControlPoint that was clicked, but (as discussed in automation_selectable.h)
-	 * selected automation data are described by areas on the AutomationLine.  A ControlPoint
-	 * represents any model points in the space that it takes up, so the AutomationSelectable
-	 * needs to be the size of the ControlPoint.
-	 */
-
-	double const size = clicked_control_point->size ();
-	AutomationLine& line = clicked_control_point->line ();
 	
-	nframes64_t const x1 = pixel_to_frame (clicked_control_point->get_x() - size / 2) + line.time_converter().origin_b ();
-	nframes64_t const x2 = pixel_to_frame (clicked_control_point->get_x() + size / 2) + line.time_converter().origin_b ();
- 	double y1 = clicked_control_point->get_y() - size / 2;
-	double y2 = clicked_control_point->get_y() + size / 2;
+	switch (op) {
+	case Selection::Set:
+		selection->set (clicked_control_point);
+		break;
+	case Selection::Add:
+		selection->add (clicked_control_point);
+		break;
+	case Selection::Toggle:
+		selection->toggle (clicked_control_point);
+		break;
+	case Selection::Extend:
+		/* XXX */
+		break;
+	}
 
-	/* convert the y values to trackview space */
-	double dummy = 0;
-	clicked_control_point->line().parent_group().i2w (dummy, y1);
-	clicked_control_point->line().parent_group().i2w (dummy, y2);
-	_trackview_group->w2i (dummy, y1);
-	_trackview_group->w2i (dummy, y2);
-
-	/* and set up the selection */
-	return select_all_within (x1, x2, y1, y2, selection->tracks, op, true);
+	return true;
 }
 
 void

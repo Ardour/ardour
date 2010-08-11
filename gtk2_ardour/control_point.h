@@ -26,6 +26,7 @@
 
 #include "canvas.h"
 #include "simplerect.h"
+#include "selectable.h"
 
 class AutomationLine;
 class ControlPoint;
@@ -42,7 +43,7 @@ namespace Gnome {
 	}
 }
 
-class ControlPoint
+class ControlPoint : public Selectable
 {
   public:
 	ControlPoint (AutomationLine& al);
@@ -74,8 +75,6 @@ class ControlPoint
 
 	bool     can_slide() const          { return _can_slide; }
 	void     set_can_slide(bool yn)     { _can_slide = yn; }
-	bool     selected() const           { return _selected; }
-	void     set_selected(bool yn)      { _selected = yn; }
 	uint32_t view_index() const         { return _view_index; }
 	void     set_view_index(uint32_t i) { _view_index = i; }
 
@@ -92,7 +91,6 @@ class ControlPoint
 	ARDOUR::AutomationList::iterator _model;
 	uint32_t _view_index;
 	bool     _can_slide;
-	bool     _selected;
 
 	virtual bool event_handler (GdkEvent*);
 

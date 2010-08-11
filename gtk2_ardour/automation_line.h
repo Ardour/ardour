@@ -82,6 +82,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	virtual void end_drag ();
 
 	ControlPoint* nth (uint32_t);
+	ControlPoint const * nth (uint32_t) const;
 	uint32_t npoints() const { return control_points.size(); }
 
 	std::string  name()    const { return _name; }

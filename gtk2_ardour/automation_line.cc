@@ -41,7 +41,6 @@
 #include "selection.h"
 #include "time_axis_view.h"
 #include "point_selection.h"
-#include "automation_selectable.h"
 #include "automation_time_axis.h"
 #include "public_editor.h"
 
@@ -196,6 +195,16 @@ AutomationLine::set_uses_gain_mapping (bool yn)
 
 ControlPoint*
 AutomationLine::nth (uint32_t n)
+{
+	if (n < control_points.size()) {
+		return control_points[n];
+	} else {
+		return 0;
+	}
+}
+
+ControlPoint const *
+AutomationLine::nth (uint32_t n) const
 {
 	if (n < control_points.size()) {
 		return control_points[n];
@@ -582,9 +591,9 @@ AutomationLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 	_drag_points.clear ();
 	_drag_points.push_back (cp);
 
-	if (cp->selected ()) {
+	if (cp->get_selected ()) {
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			if (*i != cp && (*i)->selected()) {
+			if (*i != cp && (*i)->get_selected()) {
 				_drag_points.push_back (*i);
 			}
 		}
@@ -952,70 +961,25 @@ AutomationLine::remove_point (ControlPoint& cp)
  *  @param end End position in session frames.
  *  @param bot Bottom y range, as a fraction of line height, where 0 is the bottom of the line.
  *  @param top Top y range, as a fraction of line height, where 0 is the bottom of the line.
- *  @param result Filled in with selectable things.
+ *  @param result Filled in with selectable things; in this case, ControlPoints.
  */
 void
 AutomationLine::get_selectables (
 	framepos_t start, framepos_t end, double botfrac, double topfrac, list<Selectable*>& results
 	)
 {
-	/* these two are in AutomationList model coordinates */
-	double nstart;
-	double nend;
-	
-	bool collecting = false;
-
 	/* convert fractions to display coordinates with 0 at the top of the track */
 	double const bot_track = (1 - topfrac) * trackview.current_height ();
 	double const top_track = (1 - botfrac) * trackview.current_height ();
-
-	nstart = DBL_MAX;
-	nend = 0;
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		double const model_when = (*(*i)->model())->when;
 		framepos_t const session_frames_when = _time_converter.to (model_when) + _time_converter.origin_b ();
 
-		if (session_frames_when >= start && session_frames_when <= end) {
-
-			if ((*i)->get_y() >= bot_track && (*i)->get_y() <= top_track) {
-
-				(*i)->show();
-				(*i)->set_visible(true);
-				collecting = true;
-				nstart = min (nstart, model_when);
-				nend = max (nend, model_when);
-
-			} else {
-
-				if (collecting) {
-
-					AutomationSelectable* s = new AutomationSelectable (nstart, nend, botfrac, topfrac, &trackview);
-					PointSelection& ps = trackview.editor().get_selection().points;
-					if (find (ps.begin(), ps.end(), *s) != ps.end()) {
-						s->set_selected (true);
-					}
-
-					results.push_back (s);
-					collecting = false;
-					nstart = DBL_MAX;
-					nend = 0;
-				}
-			}
+		if (session_frames_when >= start && session_frames_when <= end && (*i)->get_y() >= bot_track && (*i)->get_y() <= top_track) {
+			results.push_back (*i);
 		}
 	}
-
-	if (collecting) {
-		AutomationSelectable* s = new AutomationSelectable (nstart, nend, botfrac, topfrac, &trackview);
-		
-		PointSelection& ps = trackview.editor().get_selection().points;
-		if (find (ps.begin(), ps.end(), *s) != ps.end()) {
-			s->set_selected (true);
-		}
-		
-		results.push_back (s);
-	}
-
 }
 
 void
@@ -1184,7 +1148,7 @@ AutomationLine::hide_all_but_selected_control_points ()
 	points_visible = false;
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		if (!(*i)->selected()) {
+		if (!(*i)->get_selected()) {
 			(*i)->set_visible (false);
 		}
 	}

@@ -33,6 +33,7 @@
 #include "time_axis_view.h"
 #include "automation_time_axis.h"
 #include "public_editor.h"
+#include "control_point.h"
 
 #include "i18n.h"
 
@@ -817,34 +818,35 @@ Selection::empty (bool internal_selection)
 }
 
 void
-Selection::toggle (const vector<AutomationSelectable*>& autos)
+Selection::toggle (ControlPoint* cp)
 {
-	for (vector<AutomationSelectable*>::const_iterator x = autos.begin(); x != autos.end(); ++x) {
-		if ((*x)->get_selected()) {
-			points.remove (**x);
-		} else {
-			points.push_back (**x);
-		}
+	cp->set_selected (!cp->get_selected ());
+	set_point_selection_from_line (cp->line ());
+}
 
-		delete *x;
+void
+Selection::toggle (vector<ControlPoint*> const & cps)
+{
+	for (vector<ControlPoint*>::const_iterator i = cps.begin(); i != cps.end(); ++i) {
+		(*i)->set_selected (!(*i)->get_selected ());
 	}
 
-	PointsChanged (); /* EMIT SIGNAL */
+	set_point_selection_from_line (cps.front()->line ());
 }
 
 void
 Selection::toggle (list<Selectable*> const & selectables)
 {
 	RegionView* rv;
-	AutomationSelectable* as;
+	ControlPoint* cp;
 	vector<RegionView*> rvs;
-	vector<AutomationSelectable*> autos;
+	vector<ControlPoint*> cps;
 
 	for (std::list<Selectable*>::const_iterator i = selectables.begin(); i != selectables.end(); ++i) {
 		if ((rv = dynamic_cast<RegionView*> (*i)) != 0) {
 			rvs.push_back (rv);
-		} else if ((as = dynamic_cast<AutomationSelectable*> (*i)) != 0) {
-			autos.push_back (as);
+		} else if ((cp = dynamic_cast<ControlPoint*> (*i)) != 0) {
+			cps.push_back (cp);
 		} else {
 			fatal << _("programming error: ")
 			      << X_("unknown selectable type passed to Selection::toggle()")
@@ -857,8 +859,8 @@ Selection::toggle (list<Selectable*> const & selectables)
 		toggle (rvs);
 	}
 
-	if (!autos.empty()) {
-		toggle (autos);
+	if (!cps.empty()) {
+		toggle (cps);
 	}
 }
 
@@ -875,15 +877,15 @@ void
 Selection::add (list<Selectable*> const & selectables)
 {
 	RegionView* rv;
-	AutomationSelectable* as;
+	ControlPoint* cp;
 	vector<RegionView*> rvs;
-	vector<AutomationSelectable*> autos;
+	vector<ControlPoint*> cps;
 
 	for (std::list<Selectable*>::const_iterator i = selectables.begin(); i != selectables.end(); ++i) {
 		if ((rv = dynamic_cast<RegionView*> (*i)) != 0) {
 			rvs.push_back (rv);
-		} else if ((as = dynamic_cast<AutomationSelectable*> (*i)) != 0) {
-			autos.push_back (as);
+		} else if ((cp = dynamic_cast<ControlPoint*> (*i)) != 0) {
+			cps.push_back (cp);
 		} else {
 			fatal << _("programming error: ")
 			      << X_("unknown selectable type passed to Selection::add()")
@@ -896,8 +898,8 @@ Selection::add (list<Selectable*> const & selectables)
 		add (rvs);
 	}
 
-	if (!autos.empty()) {
-		add (autos);
+	if (!cps.empty()) {
+		add (cps);
 	}
 }
 
@@ -911,13 +913,33 @@ Selection::clear_points ()
 }
 
 void
-Selection::add (vector<AutomationSelectable*>& autos)
+Selection::add (ControlPoint* cp)
 {
-	for (vector<AutomationSelectable*>::iterator i = autos.begin(); i != autos.end(); ++i) {
-		points.push_back (**i);
+	cp->set_selected (true);
+	set_point_selection_from_line (cp->line ());
+}
+
+void
+Selection::add (vector<ControlPoint*> const & cps)
+{
+	for (vector<ControlPoint*>::const_iterator i = cps.begin(); i != cps.end(); ++i) {
+		(*i)->set_selected (true);
 	}
 
-	PointsChanged ();
+	set_point_selection_from_line (cps.front()->line ());
+}
+
+void
+Selection::set (ControlPoint* cp)
+{
+	if (cp->get_selected()) {
+		return;
+	}
+
+	points.clear ();
+	vector<ControlPoint*> cps;
+	cps.push_back (cp);
+	add (cps);
 }
 
 void
@@ -985,4 +1007,71 @@ MarkerSelection::range (nframes64_t& s, nframes64_t& e)
 
 	s = std::min (s, e);
 	e = std::max (s, e);
+}
+
+/** Automation control point selection is mostly manipulated using the selected state
+ *  of the ControlPoints themselves.  For example, to add a point to a selection, its
+ *  ControlPoint is marked as selected and then this method is called.  It sets up
+ *  our PointSelection from the selected ControlPoints of a given AutomationLine.
+ *
+ *  We can't use ControlPoints directly in the selection, as we need to express a
+ *  selection of not just a visible ControlPoint but also (possibly) some invisible
+ *  points nearby.  Hence the selection stores AutomationRanges, and these are synced
+ *  with ControlPoint selection state using AutomationLine::set_selected_points.
+ */
+
+void
+Selection::set_point_selection_from_line (AutomationLine const & line)
+{
+	points.clear ();
+	
+	AutomationRange current (DBL_MAX, 0, 1, 0, &line.trackview);
+
+	for (uint32_t i = 0; i < line.npoints(); ++i) {
+		ControlPoint const * cp = line.nth (i);
+
+		if (cp->get_selected()) {
+			/* x and y position of this control point in coordinates suitable for
+			   an AutomationRange (ie model time and fraction of track height)
+			*/
+			double const x = (*(cp->model()))->when;
+			double const y = 1 - (cp->get_y() / line.trackview.current_height ());
+
+			/* work out the position of a rectangle the size of a control point centred
+			   on this point
+			*/
+
+			double const size = cp->size ();
+			double const x_size = line.time_converter().from (line.trackview.editor().pixel_to_frame (size));
+			double const y_size = size / line.trackview.current_height ();
+			
+			double const x1 = x - x_size / 2;
+			double const x2 = x + x_size / 2;
+			double const y1 = y - y_size / 2;
+			double const y2 = y + y_size / 2;
+
+			/* extend the current AutomationRange to put this point in */
+			current.start = min (current.start, x1);
+			current.end = max (current.end, x2);
+			current.low_fract = min (current.low_fract, y1);
+			current.high_fract = max (current.high_fract, y2);
+
+		} else {
+			/* this point isn't selected; if the current AutomationRange has some
+			   stuff in it, push it onto the list and make a new one
+			*/
+			if (current.start < DBL_MAX) {
+				points.push_back (current);
+				current = AutomationRange (DBL_MAX, 0, 1, 0, &line.trackview);
+			}
+		}
+	}
+
+	/* Maybe push the current AutomationRange, as above */
+	if (current.start < DBL_MAX) {
+		points.push_back (current);
+		current = AutomationRange (DBL_MAX, 0, 1, 0, &line.trackview);
+	}
+
+	PointsChanged (); /* EMIT SIGNAL */
 }

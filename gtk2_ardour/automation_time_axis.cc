@@ -35,7 +35,6 @@
 #include "simplerect.h"
 #include "selection.h"
 #include "rgb_macros.h"
-#include "automation_selectable.h"
 #include "point_selection.h"
 #include "canvas_impl.h"
 #include "utils.h"

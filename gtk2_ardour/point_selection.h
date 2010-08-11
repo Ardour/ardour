@@ -23,9 +23,9 @@
 #include <list>
 #include <boost/noncopyable.hpp>
 
-#include "automation_selectable.h"
+#include "automation_range.h"
 
-struct PointSelection : public std::list<AutomationSelectable>
+struct PointSelection : public std::list<AutomationRange>
 {
 };
 

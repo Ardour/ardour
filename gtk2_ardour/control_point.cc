@@ -40,7 +40,6 @@ ControlPoint::ControlPoint (AutomationLine& al)
 	_y = 0;
 	_shape = Full;
 	_size = 4.0;
-	_selected = false;
 
 	_item = new Canvas::SimpleRect (_line.canvas_group());
 	_item->property_draw() = true;
@@ -69,7 +68,6 @@ ControlPoint::ControlPoint (const ControlPoint& other, bool /*dummy_arg_to_force
 	_y = other._y;
 	_shape = other._shape;
 	_size = other._size;
-	_selected = false;
 
 	_item = new Canvas::SimpleRect (_line.canvas_group());
 	_item->property_fill() = false;

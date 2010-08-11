@@ -43,6 +43,9 @@ class RegionView;
 class Selectable;
 class PublicEditor;
 class MidiRegionView;
+class AutomationLine;
+class ControlPoint;
+
 
 namespace ARDOUR {
 	class Region;
@@ -122,7 +125,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void set (boost::shared_ptr<Evoral::ControlList>);
 	void set (boost::shared_ptr<ARDOUR::Playlist>);
 	void set (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
-	void set (AutomationSelectable*);
+	void set (ControlPoint *);
 	void set (Marker*);
 	void set (const RegionSelection&);
 
@@ -137,7 +140,8 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void toggle (ARDOUR::AutomationList*);
 	void toggle (boost::shared_ptr<ARDOUR::Playlist>);
 	void toggle (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
-	void toggle (const std::vector<AutomationSelectable*>&);
+	void toggle (ControlPoint *);
+	void toggle (std::vector<ControlPoint*> const &);
 	void toggle (Marker*);
 
 	void add (TimeAxisView*);
@@ -151,6 +155,8 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void add (boost::shared_ptr<Evoral::ControlList>);
 	void add (boost::shared_ptr<ARDOUR::Playlist>);
 	void add (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
+	void add (ControlPoint *);
+	void add (std::vector<ControlPoint*> const &);
 	void add (Marker*);
 	void add (const std::list<Marker*>&);
 	void add (const RegionSelection&);
@@ -186,10 +192,10 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	template<class A> void foreach_region (void (ARDOUR::Region::*method)(A), A arg);
 
   private:
+	void set_point_selection_from_line (AutomationLine const &);
+
 	PublicEditor const * editor;
 	uint32_t next_time_id;
-	
-	void add (std::vector<AutomationSelectable*>&);
 };
 
 bool operator==(const Selection& a, const Selection& b);
