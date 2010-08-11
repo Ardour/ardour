@@ -90,6 +90,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
         , _drag_rect (0)
         , _step_edit_cursor (0)
         , _step_edit_cursor_width (1.0)
+        , _step_edit_cursor_position (0.0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -1132,6 +1133,9 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 	if (_enable_display) {
 		redisplay_model();
 	}
+        
+        move_step_edit_cursor (_step_edit_cursor_position);
+        set_step_edit_cursor_width (_step_edit_cursor_width);
 }
 
 void
@@ -3002,10 +3006,12 @@ MidiRegionView::show_step_edit_cursor (Evoral::MusicalTime pos)
 void
 MidiRegionView::move_step_edit_cursor (Evoral::MusicalTime pos)
 {
+        _step_edit_cursor_position = pos;
+
         if (_step_edit_cursor) {
                 double pixel = trackview.editor().frame_to_pixel (beats_to_frames (pos));
                 _step_edit_cursor->property_x1() = pixel;
-                _step_edit_cursor->property_x2() = pixel + _step_edit_cursor_width;
+                set_step_edit_cursor_width (_step_edit_cursor_width);
         }
 }
 
@@ -3020,7 +3026,10 @@ MidiRegionView::hide_step_edit_cursor ()
 void
 MidiRegionView::set_step_edit_cursor_width (Evoral::MusicalTime beats)
 {
-        _step_edit_cursor_width = trackview.editor().frame_to_pixel (beats_to_frames (beats));
-        _step_edit_cursor->property_x2() = _step_edit_cursor->property_x1() + _step_edit_cursor_width;
+        _step_edit_cursor_width = beats;
+
+        if (_step_edit_cursor) {
+                _step_edit_cursor->property_x2() = _step_edit_cursor->property_x1() + trackview.editor().frame_to_pixel (beats_to_frames (beats));
+        }
 }
 
