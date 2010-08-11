@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Bindings>
+<Bindings name="qwerty">
   <Press>
      <Binding key="a" action="StepEditing/insert-a"/>
      <Binding key="Primary-a" action="StepEditing/insert-b"/>

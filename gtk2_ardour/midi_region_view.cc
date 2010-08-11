@@ -23,6 +23,7 @@
 #include <ostream>
 
 #include <gtkmm.h>
+#include <libgnomecanvasmm/pixbuf.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 
@@ -87,6 +88,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _diff_command(0)
 	, _ghost_note(0)
         , _drag_rect (0)
+        , _step_edit_cursor (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -1101,8 +1103,10 @@ MidiRegionView::~MidiRegionView ()
 
 	_selection.clear();
 	clear_events();
+
 	delete _note_group;
 	delete _diff_command;
+        delete _step_edit_cursor;
 }
 
 void
@@ -1144,6 +1148,10 @@ MidiRegionView::set_height (double height)
 	if (name_pixbuf) {
 		name_pixbuf->raise_to_top();
 	}
+        
+        for (PgmChanges::iterator x = _pgm_changes.begin(); x != _pgm_changes.end(); ++x) {
+                (*x)->set_height (midi_stream_view()->contents_height());
+        }
 }
 
 
@@ -2967,4 +2975,42 @@ MidiRegionView::enable_display (bool yn)
 	if (yn) {
 		redisplay_model ();
 	}
+}
+
+void
+MidiRegionView::show_step_edit_cursor (Evoral::MusicalTime pos)
+{
+        if (_step_edit_cursor == 0) {
+                ArdourCanvas::Group* const group = (ArdourCanvas::Group*)get_canvas_group();
+
+                _step_edit_cursor = new ArdourCanvas::Pixbuf (*group);
+                _step_edit_cursor->property_y() = 0;
+                _step_edit_cursor->property_pixbuf() = ::get_icon ("wholenote");
+        }
+
+        move_step_edit_cursor (pos);
+        _step_edit_cursor->show ();
+}
+
+void
+MidiRegionView::move_step_edit_cursor (Evoral::MusicalTime pos)
+{
+        if (_step_edit_cursor) {
+                double pixel = trackview.editor().frame_to_pixel (beats_to_frames (pos));
+                Glib::RefPtr<Gdk::Pixbuf> pb = _step_edit_cursor->property_pixbuf();
+
+                if (pixel >= (pb->get_width()/2.0)) {
+                        pixel -= pb->get_width()/2.0;
+                }
+
+                _step_edit_cursor->property_x() = pixel;
+        }
+}
+
+void
+MidiRegionView::hide_step_edit_cursor ()
+{
+        if (_step_edit_cursor) {
+                _step_edit_cursor->hide ();
+        }
 }

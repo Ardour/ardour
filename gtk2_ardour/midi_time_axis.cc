@@ -905,10 +905,16 @@ MidiTimeAxisView::start_step_editing ()
 	if (step_edit_region) {
 		RegionView* rv = view()->find_view (step_edit_region);
 		step_edit_region_view = dynamic_cast<MidiRegionView*> (rv);
-	} else {
-		step_edit_region_view = 0;
-	}
 
+	} else {
+                step_edit_region = add_region (step_edit_insert_position);
+                RegionView* rv = view()->find_view (step_edit_region);
+                step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
+        }
+
+        if (step_edit_region_view) {
+                step_edit_region_view->show_step_edit_cursor (0.0);
+        }
 
         if (step_editor == 0) {
                 step_editor = new StepEntry (*this);
@@ -932,6 +938,10 @@ MidiTimeAxisView::stop_step_editing ()
 {
         if (step_editor) {
                 step_editor->hide ();
+        }
+
+        if (step_edit_region_view) {
+                step_edit_region_view->hide_step_edit_cursor();
         }
 }
 
@@ -966,16 +976,20 @@ MidiTimeAxisView::check_step_edit ()
 }
 
 int
+MidiTimeAxisView::step_add_bank_change (uint8_t channel, uint8_t bank)
+{
+        return 0;
+}
+
+int
+MidiTimeAxisView::step_add_program_change (uint8_t channel, uint8_t program)
+{
+        return 0;
+}
+
+int
 MidiTimeAxisView::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evoral::MusicalTime beat_duration)
 {
-
-        if (step_edit_region == 0) {
-                
-                step_edit_region = add_region (step_edit_insert_position);
-                RegionView* rv = view()->find_view (step_edit_region);
-                step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
-        }
-        
         if (step_edit_region && step_edit_region_view) {
                 if (step_edit_beat_pos < 0.0) {
                         framecnt_t frames_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
@@ -1024,9 +1038,10 @@ MidiTimeAxisView::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocit
 
                 if (!_step_edit_within_chord) {
                         step_edit_beat_pos += beat_duration;
+                        step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
                 } else {
                         step_edit_beat_pos += 1.0/Meter::ticks_per_beat; // tiny, but no longer overlapping
-                        _step_edit_chord_duration = beat_duration;
+                        _step_edit_chord_duration = max (_step_edit_chord_duration, beat_duration);
                 }
         }
 
@@ -1062,6 +1077,7 @@ MidiTimeAxisView::step_edit_toggle_chord ()
         if (_step_edit_within_chord) {
                 _step_edit_within_chord = false;
                 step_edit_beat_pos += _step_edit_chord_duration;
+                step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
         } else {
                 _step_edit_triplet_countdown = 0;
                 _step_edit_within_chord = true;
@@ -1081,6 +1097,7 @@ MidiTimeAxisView::step_edit_rest (Evoral::MusicalTime beats)
 
         if (success) {
                 step_edit_beat_pos += beats;
+                step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
         }
 }
 
@@ -1088,6 +1105,7 @@ void
 MidiTimeAxisView::step_edit_beat_sync ()
 {
         step_edit_beat_pos = ceil (step_edit_beat_pos);
+        step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 
 void 
@@ -1101,6 +1119,7 @@ MidiTimeAxisView::step_edit_bar_sync ()
                 step_edit_region_view->beats_to_frames (step_edit_beat_pos);
         fpos = _session->tempo_map().round_to_bar (fpos, 1);
         step_edit_beat_pos = ceil (step_edit_region_view->frames_to_beats (fpos - step_edit_region->position()));
+        step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 
 boost::shared_ptr<Region>

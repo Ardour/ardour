@@ -100,6 +100,14 @@ class StepEntry : public ArdourDialog
         Gtk::Adjustment velocity_adjustment;
         Gtk::SpinButton velocity_spinner;
 
+        Gtk::Adjustment bank_adjustment;
+        Gtk::SpinButton bank_spinner;
+        Gtk::Button     bank_button;
+
+        Gtk::Adjustment program_adjustment;
+        Gtk::SpinButton program_spinner;
+        Gtk::Button     program_button;
+
         void length_changed ();
         void velocity_changed ();
         void velocity_value_change ();
@@ -109,6 +117,8 @@ class StepEntry : public ArdourDialog
         Gtk::Widget* piano;
         MidiTimeAxisView* _mtv;
 
+        void bank_click ();
+        void program_click ();
         void rest_click ();
         void grid_rest_click ();
         void sustain_click ();

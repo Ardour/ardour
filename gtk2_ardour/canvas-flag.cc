@@ -76,3 +76,13 @@ CanvasFlag::on_event(GdkEvent* /*ev*/)
         */
 	return false;
 }
+
+void
+CanvasFlag::set_height (double h)
+{
+        _height = h;
+
+        if (_line) {
+                _line->property_y2() = _height;
+        }
+}

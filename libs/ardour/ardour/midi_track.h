@@ -84,7 +84,7 @@ public:
 	void set_step_editing (bool yn);
 	MidiRingBuffer<nframes_t>& step_edit_ring_buffer() { return _step_edit_ring_buffer; }
 
-        static PBD::Signal1<void,bool> StepEditStatusChange;
+        PBD::Signal1<void,bool> StepEditStatusChange;
 
 	uint8_t default_channel() const { return _default_channel; }
 	void set_default_channel (uint8_t chn);

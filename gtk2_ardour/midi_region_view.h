@@ -46,6 +46,12 @@
 #include "canvas-program-change.h"
 #include "canvas-sysex.h"
 
+namespace Gnome { 
+        namespace Canvas {
+                class Pixbuf;
+        }
+};
+
 namespace ARDOUR {
 	class MidiRegion;
 	class MidiModel;
@@ -103,6 +109,10 @@ class MidiRegionView : public RegionView
 
 	void set_frame_color();
         void color_handler ();
+        
+        void show_step_edit_cursor (Evoral::MusicalTime pos);
+        void move_step_edit_cursor (Evoral::MusicalTime pos);
+        void hide_step_edit_cursor ();
 
 	void redisplay_model();
 
@@ -363,6 +373,7 @@ class MidiRegionView : public RegionView
         double                               _last_x;
         double                               _last_y;
 	ArdourCanvas::SimpleRect*            _drag_rect;
+        ArdourCanvas::Pixbuf*                _step_edit_cursor;
 
 	MouseState _mouse_state;
 	int _pressed_button;

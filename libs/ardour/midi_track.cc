@@ -49,8 +49,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal1<void,bool> MidiTrack::StepEditStatusChange;
-
 MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
 	: Track (sess, name, flag, mode, DataType::MIDI)
 	, _immediate_events(1024) // FIXME: size?

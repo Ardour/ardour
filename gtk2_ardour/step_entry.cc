@@ -73,6 +73,12 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
         , length_divisor_spinner (length_divisor_adjustment)
         , velocity_adjustment (64.0, 0.0, 127.0, 1.0, 4.0)
         , velocity_spinner (velocity_adjustment)
+        , bank_adjustment (0, 0.0, 127.0, 1.0, 4.0)
+        , bank_spinner (bank_adjustment)
+        , bank_button (_("+"))
+        , program_adjustment (0, 0.0, 127.0, 1.0, 4.0)
+        , program_spinner (program_adjustment)
+        , program_button (_("+"))
 	, _piano (0)
 	, piano (0)
 	, _mtv (&mtv)
@@ -287,11 +293,11 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 	w->show();
 	chord_button.add (*w);
 
-	rest_box.pack_start (rest_button, false, false);
-	rest_box.pack_start (grid_rest_button, false, false);
+	rest_box.pack_start (rest_button, true, false);
+	rest_box.pack_start (grid_rest_button, true, false);
 
-	resync_box.pack_start (beat_resync_button, false, false);
-	resync_box.pack_start (bar_resync_button, false, false);
+	resync_box.pack_start (beat_resync_button, true, false);
+	resync_box.pack_start (bar_resync_button, true, false);
 
 	ARDOUR_UI::instance()->set_tip (&chord_button, _("Stack inserted notes to form a chord"), "");
 	ARDOUR_UI::instance()->set_tip (&sustain_button, _("Extend selected notes by note length"), "");
@@ -300,6 +306,8 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 	ARDOUR_UI::instance()->set_tip (&grid_rest_button, _("Insert a grid-unit's rest"), "");
 	ARDOUR_UI::instance()->set_tip (&beat_resync_button, _("Insert a rest until the next beat"), "");
 	ARDOUR_UI::instance()->set_tip (&bar_resync_button, _("Insert a rest until the next bar"), "");
+	ARDOUR_UI::instance()->set_tip (&bank_button, _("Insert a bank change message"), "");
+	ARDOUR_UI::instance()->set_tip (&program_button, _("Insert a program change message"), "");
 
 	upper_box.set_spacing (6);
 	upper_box.pack_start (chord_button, false, false);
@@ -341,6 +349,22 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 	v->pack_start (octave_spinner, false, false);
 	upper_box.pack_start (*v, false, false);
 
+        v = manage (new VBox);
+	l = manage (new Label (_("Bank")));
+	v->set_spacing (6);
+	v->pack_start (*l, false, false);
+	v->pack_start (bank_spinner, false, false);
+	v->pack_start (bank_button, false, false);
+	upper_box.pack_start (*v, false, false);
+
+        v = manage (new VBox);
+	l = manage (new Label (_("Program")));
+	v->set_spacing (6);
+	v->pack_start (*l, false, false);
+	v->pack_start (program_spinner, false, false);
+	v->pack_start (program_button, false, false);
+	upper_box.pack_start (*v, false, false);
+
         velocity_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &StepEntry::velocity_value_change));
         length_divisor_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &StepEntry::length_value_change));
 
@@ -352,6 +376,8 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 	g_signal_connect(G_OBJECT(_piano), "note-off", G_CALLBACK(_note_off_event_handler), this);
 	g_signal_connect(G_OBJECT(_piano), "rest", G_CALLBACK(_rest_event_handler), this);
         
+	program_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::program_click));
+	bank_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::bank_click));
 	rest_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::rest_click));
 	grid_rest_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::grid_rest_click));
 	chord_button.signal_toggled().connect (sigc::mem_fun (*this, &StepEntry::chord_toggled));
@@ -564,6 +590,18 @@ StepEntry::load_bindings ()
 	if (find_file_in_search_path (spath, "step_editing.bindings", binding_file)) {
                 bindings.load (binding_file.to_string());
         }
+}
+
+void
+StepEntry::program_click ()
+{
+        _mtv->step_add_program_change (note_channel(), (int8_t) floor (program_adjustment.get_value()));
+}
+
+void
+StepEntry::bank_click ()
+{
+        _mtv->step_add_bank_change (note_channel(), (int8_t) floor (bank_adjustment.get_value()));
 }
 
 void
