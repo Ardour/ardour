@@ -148,7 +148,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	playlist_button.unset_flags (Gtk::CAN_FOCUS);
 	automation_button.unset_flags (Gtk::CAN_FOCUS);
 
- 	route_group_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::edit_click), false);
+ 	route_group_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::route_group_click), false);
 	playlist_button.signal_clicked().connect (sigc::mem_fun(*this, &RouteTimeAxisView::playlist_click));
 	automation_button.signal_clicked().connect (sigc::mem_fun(*this, &RouteTimeAxisView::automation_click));
 
@@ -277,7 +277,7 @@ RouteTimeAxisView::post_construct ()
 }
 
 gint
-RouteTimeAxisView::edit_click (GdkEventButton *ev)
+RouteTimeAxisView::route_group_click (GdkEventButton *ev)
 {
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 		if (_route->route_group()) {
@@ -342,15 +342,7 @@ RouteTimeAxisView::take_name_changed (void *src)
 void
 RouteTimeAxisView::playlist_click ()
 {
-	// always build a new action menu
-
-	delete playlist_action_menu;
-
-	playlist_action_menu = new Menu;
-	playlist_action_menu->set_name ("ArdourContextMenu");
-
- 	build_playlist_menu (playlist_action_menu);
-
+ 	build_playlist_menu ();
 	conditionally_add_to_selection ();
 	playlist_action_menu->popup (1, gtk_get_current_event_time());
 }
@@ -544,6 +536,17 @@ RouteTimeAxisView::build_display_menu ()
 		if (color_mode_menu) {
 			items.push_back (MenuElem (_("Color Mode"), *color_mode_menu));
 		}
+
+		items.push_back (SeparatorElem());
+
+		build_playlist_menu ();
+		items.push_back (MenuElem (_("Playlist"), *playlist_action_menu));
+
+		route_group_menu->rebuild (_route->route_group ());
+		items.push_back (MenuElem (_("Route Group"), *route_group_menu));
+
+		build_automation_action_menu ();
+		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
 
 		items.push_back (SeparatorElem());
 	}
@@ -1402,20 +1405,23 @@ struct PlaylistSorter {
 };
 
 void
-RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
+RouteTimeAxisView::build_playlist_menu ()
 {
 	using namespace Menu_Helpers;
 
-	if (!menu || !is_track()) {
+	if (!is_track()) {
 		return;
 	}
 
-	MenuList& playlist_items = menu->items();
-	menu->set_name ("ArdourContextMenu");
+	delete playlist_action_menu;
+	playlist_action_menu = new Menu;
+	playlist_action_menu->set_name ("ArdourContextMenu");
+
+	MenuList& playlist_items = playlist_action_menu->items();
+	playlist_action_menu->set_name ("ArdourContextMenu");
 	playlist_items.clear();
 
 	delete playlist_menu;
-
 
         vector<boost::shared_ptr<Playlist> > playlists, playlists_tr;
 	boost::shared_ptr<Track> tr = track();

@@ -105,8 +105,7 @@ public:
 	/* group playlist name resolving */
 	std::string resolve_new_group_playlist_name(std::string &, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 
-
-	void build_playlist_menu (Gtk::Menu *);
+	void build_playlist_menu ();
 
 	void add_underlay (StreamView*, bool update_xml = true);
 	void remove_underlay (StreamView*);
@@ -172,7 +171,7 @@ protected:
 
 	void update_diskstream_display ();
 
-	gint edit_click  (GdkEventButton *);
+	gint route_group_click  (GdkEventButton *);
 
 	void processors_changed (ARDOUR::RouteProcessorChange);
 
