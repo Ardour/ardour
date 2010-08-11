@@ -475,45 +475,50 @@ RouteTimeAxisView::build_display_menu ()
 
 		items.push_back (MenuElem (_("Layers"), *layers_menu));
 
-		Menu* alignment_menu = manage (new Menu);
-		MenuList& alignment_items = alignment_menu->items();
-		alignment_menu->set_name ("ArdourContextMenu");
-
-		RadioMenuItem::Group align_group;
-
-		alignment_items.push_back (RadioMenuElem (align_group, _("Align With Existing Material"),
-					sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), ExistingMaterial)));
-		align_existing_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
-		if (track()->alignment_style() == ExistingMaterial) {
-			align_existing_item->set_active();
-		}
-
-		alignment_items.push_back (RadioMenuElem (align_group, _("Align With Capture Time"),
-					sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), CaptureTime)));
-		align_capture_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
-		if (track()->alignment_style() == CaptureTime) {
-			align_capture_item->set_active();
-		}
-
 		if (!Profile->get_sae()) {
 
+			Menu* alignment_menu = manage (new Menu);
+			MenuList& alignment_items = alignment_menu->items();
+			alignment_menu->set_name ("ArdourContextMenu");
+			
+			RadioMenuItem::Group align_group;
+			
+			alignment_items.push_back (RadioMenuElem (align_group, _("Align With Existing Material"),
+								  sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), ExistingMaterial)));
+			align_existing_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
+			if (track()->alignment_style() == ExistingMaterial) {
+				align_existing_item->set_active();
+			}
+			
+			alignment_items.push_back (RadioMenuElem (align_group, _("Align With Capture Time"),
+								  sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), CaptureTime)));
+			align_capture_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
+			if (track()->alignment_style() == CaptureTime) {
+				align_capture_item->set_active();
+			}
+			
 			items.push_back (MenuElem (_("Alignment"), *alignment_menu));
 			track()->AlignmentStyleChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteTimeAxisView::align_style_changed, this), gui_context());
 
+			Menu* mode_menu = manage (new Menu);
+			MenuList& mode_items = mode_menu->items ();
+			mode_menu->set_name ("ArdourContextMenu");
+
 			RadioMenuItem::Group mode_group;
-			items.push_back (RadioMenuElem (mode_group, _("Normal Mode"), sigc::bind (
+
+			mode_items.push_back (RadioMenuElem (mode_group, _("Normal Mode"), sigc::bind (
 					sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode),
 					ARDOUR::Normal)));
-			normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+			normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&mode_items.back());
 
-			items.push_back (RadioMenuElem (mode_group, _("Tape Mode"), sigc::bind (
+			mode_items.push_back (RadioMenuElem (mode_group, _("Tape Mode"), sigc::bind (
 					sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode),
 					ARDOUR::Destructive)));
-			destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+			destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&mode_items.back());
 
- 			items.push_back (RadioMenuElem (mode_group, _("Non-Layered Mode"),
+ 			mode_items.push_back (RadioMenuElem (mode_group, _("Non-Layered Mode"),
  							sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::NonLayered)));
- 			non_layered_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
+ 			non_layered_track_mode_item = dynamic_cast<RadioMenuItem*>(&mode_items.back());
 
 
 			_ignore_track_mode_change = true;
@@ -531,9 +536,9 @@ RouteTimeAxisView::build_display_menu ()
 			}
 			
 			_ignore_track_mode_change = false;
-		}
 
-		track()->AlignmentStyleChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteTimeAxisView::align_style_changed, this), gui_context());
+			items.push_back (MenuElem (_("Mode"), *mode_menu));
+		}
 
 		color_mode_menu = build_color_mode_menu();
 		if (color_mode_menu) {
