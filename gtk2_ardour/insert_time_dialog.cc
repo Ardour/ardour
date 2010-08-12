@@ -20,6 +20,7 @@
 #include <gtkmm/table.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/stock.h>
+#include <gtkmm/alignment.h>
 #include "insert_time_dialog.h"
 #include "audio_clock.h"
 #include "i18n.h"
@@ -67,9 +68,15 @@ InsertTimeDialog::InsertTimeDialog (PublicEditor& e)
 	get_vbox()->pack_start (_move_markers);
 	_move_markers.signal_toggled().connect (sigc::mem_fun (*this, &InsertTimeDialog::move_markers_toggled));
 	_move_glued_markers.set_label (_("Move glued markers"));
-	get_vbox()->pack_start (_move_glued_markers);
+	Alignment* indent = manage (new Alignment);
+	indent->set_padding (0, 0, 12, 0);
+	indent->add (_move_glued_markers);
+	get_vbox()->pack_start (*indent);
 	_move_locked_markers.set_label (_("Move locked markers"));
-	get_vbox()->pack_start (_move_locked_markers);
+	indent = manage (new Alignment);
+	indent->set_padding (0, 0, 12, 0);
+	indent->add (_move_locked_markers);
+	get_vbox()->pack_start (*indent);
 	_move_tempos.set_label (_("Move tempo and meter changes"));
 	get_vbox()->pack_start (_move_tempos);
 
