@@ -327,6 +327,7 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 	boost::shared_ptr<Track> track;
 	vector<ustring> to_import;
 	int nth = 0;
+        bool use_timestamp = (pos == -1);
 
 	current_interthread_info = &import_status;
 	import_status.current = 1;
@@ -377,6 +378,12 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 				fatal << "Illegal return " << check <<  " from check_whether_and_how_to_import()!" << endmsg;
 				/* NOTREACHED*/
 			}
+
+                        /* have to reset this for every file we handle */
+                        
+                        if (use_timestamp) {
+                                pos = -1;
+                        }
 
                         switch (chns) {
                         case Editing::ImportDistinctFiles:
@@ -718,14 +725,6 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 
 	use_timestamp = (pos == -1);
 
-	if (use_timestamp) {
-		if (sources[0]->natural_position() != 0) {
-			pos = sources[0]->natural_position();
-		} else {
-			pos = _session->current_start_frame();
-		}
-	}
-
 	// kludge (for MIDI we're abusing "channel" for "track" here)
 	if (SMFSource::safe_midi_file_extension (paths.front())) {
 		target_regions = -1;
@@ -806,16 +805,55 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 	}
 
 	int n = 0;
+        framepos_t rlen = 0;
 
 	for (vector<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
+                
+                boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*r);
+                
+                if (use_timestamp && ar) {
+                        
+                        cerr << "Using timestamp to place region " << (*r)->name() << endl;
+                        
+                        /* get timestamp for this region */
+
+                        const boost::shared_ptr<Source> s (ar->sources().front());
+                        const boost::shared_ptr<AudioSource> as = boost::dynamic_pointer_cast<AudioSource> (s);
+                        
+                        assert (as);
+                        
+                        if (as->natural_position() != 0) {
+                                pos = as->natural_position();
+                                cerr << "\tgot " << pos << " from source TC info\n";
+                        } else if (target_tracks == 1) {
+                                /* hmm, no timestamp available, put it after the previous region
+                                 */
+                                if (n == 0) {
+                                        pos = get_preferred_edit_position ();
+                                        cerr << "\tno timestamp, first file, use edit pos = " << pos << endl;
+                                } else {
+                                        pos += rlen;
+                                        cerr << "\tpacked-sequence-shuffle to " << pos << endl;
+                                }
+                        } else {
+                                pos = get_preferred_edit_position ();
+                                cerr << "\tmultitracks, using edit position = " << pos << endl;
+                        }
+                                
+                }
 
 		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track);
 
-		if (target_tracks != 1) {
-			track.reset ();
-		} else {
-			pos += (*r)->length();
-		}
+                rlen = (*r)->length();
+                
+                if (target_tracks != 1) {
+                        track.reset ();
+                } else { 
+                        if (!use_timestamp || !ar) {
+                                /* line each one up right after the other */
+                                pos += (*r)->length();
+                        }
+                }
 	}
 
 	/* setup peak file building in another thread */
