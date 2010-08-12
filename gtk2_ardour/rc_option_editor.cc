@@ -907,7 +907,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "automation-follows-regions",
-		     _("Move relevant automation when regions are moved"),
+		     _("Move relevant automation when audio regions are moved"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_follows_regions),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_follows_regions)
 		     ));
