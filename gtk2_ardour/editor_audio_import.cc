@@ -164,7 +164,9 @@ Editor::external_audio_dialog ()
 		}
 
 		SrcQuality quality = sfbrowser->get_src_quality();
+                
 
+                cerr << "Start import of " << paths.size() << " at " << where << endl;
 
 		if (sfbrowser->copy_files_btn.get_active()) {
 			do_import (paths, chns, mode, quality, where);
@@ -289,6 +291,7 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 	boost::shared_ptr<AudioTrack> track;
 	vector<ustring> to_import;
 	int nth = 0;
+        bool use_timestamp = (pos == -1);
 
 	if (interthread_progress_window == 0) {
 		build_interthread_progress_window ();
@@ -339,6 +342,11 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 				/* NOTREACHED*/
 			}
 
+                        /* have to reset this for every file we handle */
+
+                        if (use_timestamp) {
+                                pos = -1;
+                        }
 
 			switch (chns) {
 			case Editing::ImportDistinctFiles:
@@ -682,14 +690,6 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 	
 	use_timestamp = (pos == -1);
 
-	if (use_timestamp) {
-		if (sources[0]->natural_position() != 0) {
-			pos = sources[0]->natural_position();
-		} else {
-			pos = get_preferred_edit_position ();
-		}
-	}
-
 	if (target_regions == 1) {
 
 		/* take all the sources we have and package them up as a region */
@@ -699,8 +699,8 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 				   (RegionFactory::create (sources, 0, sources[0]->length(), region_name, 0,
 							   Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
 							   
-        if (use_timestamp) {
-		    ar->special_set_position(sources[0]->natural_position());
+                if (use_timestamp) {
+                        ar->special_set_position(sources[0]->natural_position());
 		}
 		
 		regions.push_back (ar);
@@ -750,16 +750,57 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 	}
 
 	int n = 0;
+        nframes_t rlen = 0;
+
+        cerr << "About to add " << regions.size() << endl;
 
         for (vector<boost::shared_ptr<AudioRegion> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
-                
+
+                if (use_timestamp) {
+                        
+                        cerr << "Using timestamp to place region " << (*r)->name() << endl;
+
+                        /* get timestamp for this region */
+
+                        const boost::shared_ptr<Source> s ((*r)->get_sources().front());
+                        const boost::shared_ptr<AudioSource> as = boost::dynamic_pointer_cast<AudioSource> (s);
+                        
+                        assert (as);
+                        
+                        if (as->natural_position() != 0) {
+                                pos = as->natural_position();
+                                cerr << "\tgot " << pos << " from source TC info\n";
+                        } else if (target_tracks == 1) {
+                                /* hmm, no timestamp available, put it after the previous region
+                                 */
+                                if (n == 0) {
+                                        pos = get_preferred_edit_position ();
+                                        cerr << "\tno timestamp, first file, use edit pos = " << pos << endl;
+                                } else {
+                                        pos += rlen;
+                                        cerr << "\tpacked-sequence-shuffle to " << pos << endl;
+                                }
+                        } else {
+                                pos = get_preferred_edit_position ();
+                                cerr << "\tmultitracks, using edit position = " << pos << endl;
+                        }
+                                
+                }
+
+                cerr << "Actually inserting at " << pos << endl;
+
                 finish_bringing_in_audio (*r, input_chan, output_chan, pos, mode, track);
+
+                rlen = (*r)->length();
 
                 if (target_tracks != 1) {
                         track.reset ();
-		} else {
-			pos += (*r)->length();
-		} 
+                } else { 
+                        if (!use_timestamp) {
+                                /* line each one up right after the other */
+                                pos += (*r)->length();
+                        }
+                }
 	}
 
 	/* setup peak file building in another thread */
