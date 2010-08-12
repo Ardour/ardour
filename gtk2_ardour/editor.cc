@@ -1536,11 +1536,18 @@ Editor::build_track_region_context_menu (nframes64_t frame)
  				// there's already a multiple selection: just add a
  				// single region context menu that will act on all
  				// selected regions
- 				boost::shared_ptr<Region> dummy_region; // = NULL
- 				add_region_context_items (rtv->view(), dummy_region, edit_items);
+
+				list<boost::shared_ptr<Region> > regions;
+				for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+					regions.push_back ((*i)->region ());
+				}
+				
+ 				add_region_context_items (rtv->view(), regions, edit_items);
  			} else {
  				for (Playlist::RegionList::reverse_iterator i = regions->rbegin(); i != regions->rend(); ++i) {
- 					add_region_context_items (rtv->view(), (*i), edit_items);
+					list<boost::shared_ptr<Region> > regions;
+					regions.push_back (*i);
+ 					add_region_context_items (rtv->view(), regions, edit_items);
  				}
 			}
 
@@ -1584,11 +1591,18 @@ Editor::build_track_crossfade_context_menu (nframes64_t frame)
 				// there's already a multiple selection: just add a
 				// single region context menu that will act on all
 				// selected regions
-				boost::shared_ptr<Region> dummy_region; // = NULL
-				add_region_context_items (atv->audio_view(), dummy_region, edit_items);
+
+				list<boost::shared_ptr<Region> > regions;
+				for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+					regions.push_back ((*i)->region ());
+				}
+
+				add_region_context_items (atv->audio_view(), regions, edit_items);
 			} else {
  				for (Playlist::RegionList::reverse_iterator i = regions->rbegin(); i != regions->rend(); ++i) {
-					add_region_context_items (atv->audio_view(), (*i), edit_items);
+					list<boost::shared_ptr<Region> > regions;
+					regions.push_back (*i);
+					add_region_context_items (atv->audio_view(), regions, edit_items);
 				}
 			}
 			delete regions;
@@ -1711,7 +1725,7 @@ Editor::xfade_edit_right_region ()
 }
 
 void
-Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> region, Menu_Helpers::MenuList& edit_items)
+Editor::add_region_context_items (StreamView* sv, list<boost::shared_ptr<Region> > regions, Menu_Helpers::MenuList& edit_items)
 {
 	using namespace Menu_Helpers;
 	Gtk::MenuItem* foo_item;
@@ -1719,24 +1733,100 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	MenuList& items       = region_menu->items();
 	region_menu->set_name ("ArdourContextMenu");
 
-	boost::shared_ptr<AudioRegion> ar;
-	boost::shared_ptr<MidiRegion>  mr;
+	/* Look through the regions that we are handling and make notes about what we have got */
+	
+	bool have_audio = false;
+	bool have_midi = false;
+	bool have_locked = false;
+	bool have_unlocked = false;
+	bool have_position_lock_style_audio = false;
+	bool have_position_lock_style_music = false;
+	bool have_muted = false;
+	bool have_unmuted = false;
+	bool have_opaque = false;
+	bool have_non_opaque = false;
+	bool have_not_at_natural_position = false;
+	bool have_envelope_visible = false;
+	bool have_envelope_invisible = false;
+	bool have_envelope_active = false;
+	bool have_envelope_inactive = false;
+	bool have_non_unity_scale_amplitude = false;
 
-	if (region) {
-		ar = boost::dynamic_pointer_cast<AudioRegion> (region);
-		mr = boost::dynamic_pointer_cast<MidiRegion> (region);
+	for (list<boost::shared_ptr<Region> >::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*i);
+		if (ar) {
+			have_audio = true;
+		}
+		if (boost::dynamic_pointer_cast<MidiRegion> (*i)) {
+			have_midi = true;
+		}
+
+		if ((*i)->locked()) {
+			have_locked = true;
+		} else {
+			have_unlocked = true;
+		}
+
+		if ((*i)->position_lock_style() == MusicTime) {
+			have_position_lock_style_music = true;
+		} else {
+			have_position_lock_style_audio = true;
+		}
+
+		if ((*i)->muted()) {
+			have_muted = true;
+		} else {
+			have_unmuted = true;
+		}
+
+		if ((*i)->opaque()) {
+			have_opaque = true;
+		} else {
+			have_non_opaque = true;
+		}
+
+		if (!(*i)->at_natural_position()) {
+			have_not_at_natural_position = true;
+		}
+
+		if (ar) {
+			RegionView* rv = sv->find_view (ar);
+			AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
+			
+			if (arv->envelope_visible()) {
+				have_envelope_visible = true;
+			} else {
+				have_envelope_invisible = true;
+			}
+
+			if (ar->envelope_active()) {
+				have_envelope_active = true;
+			} else {
+				have_envelope_inactive = true;
+			}
+
+			if (ar->scale_amplitude() != 1) {
+				have_non_unity_scale_amplitude = true;
+			}
+		}
+	}
+
+	if (regions.size() == 1) {
 
 		/* when this particular menu pops up, make the relevant region
 		   become selected.
 		*/
 
 		region_menu->signal_map_event().connect (
-			sigc::bind (sigc::mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, boost::weak_ptr<Region>(region)));
+			sigc::bind (sigc::mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, boost::weak_ptr<Region> (regions.front()))
+			);
 
 		items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &Editor::rename_region)));
-		if (mr) {
+		
+		if (have_midi) {
 			items.push_back (MenuElem (_("List Editor..."), sigc::mem_fun(*this, &Editor::show_midi_list_editor)));
 		}
+		
 		items.push_back (MenuElem (_("Region Properties..."), sigc::mem_fun(*this, &Editor::edit_region)));
 	}
 
@@ -1754,107 +1844,96 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	items.push_back (MenuElem (_("Export..."), sigc::mem_fun(*this, &Editor::export_region)));
 	items.push_back (MenuElem (_("Bounce"), sigc::mem_fun(*this, &Editor::bounce_region_selection)));
 
-	if (ar) {
+	if (have_audio) {
 		items.push_back (MenuElem (_("Spectral Analysis..."), sigc::mem_fun(*this, &Editor::analyze_region_selection)));
 	}
 
 	items.push_back (SeparatorElem());
 
-	sigc::connection fooc;
-	boost::shared_ptr<Region> region_to_check;
-
-	if (region) {
-		region_to_check = region;
-	} else {
-		region_to_check = selection->regions.front()->region();
-	}
-
 	items.push_back (CheckMenuElem (_("Lock")));
 	CheckMenuItem* region_lock_item = static_cast<CheckMenuItem*>(&items.back());
-	if (region_to_check->locked()) {
+	if (have_locked && !have_unlocked) {
 		region_lock_item->set_active();
+	} else if (have_locked && have_unlocked) {
+		region_lock_item->set_inconsistent ();
 	}
 	region_lock_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_region_lock));
 
 	items.push_back (CheckMenuElem (_("Glue to Bars and Beats")));
 	CheckMenuItem* bbt_glue_item = static_cast<CheckMenuItem*>(&items.back());
 
-	switch (region_to_check->position_lock_style()) {
-	case MusicTime:
-		bbt_glue_item->set_active (true);
-		break;
-	default:
-		bbt_glue_item->set_active (false);
-		break;
+	if (have_position_lock_style_music && !have_position_lock_style_audio) {
+		bbt_glue_item->set_active ();
+	} else if (have_position_lock_style_music && have_position_lock_style_audio) {
+		bbt_glue_item->set_inconsistent ();
 	}
 
 	bbt_glue_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_region_lock_style));
 
 	items.push_back (CheckMenuElem (_("Mute")));
 	CheckMenuItem* region_mute_item = static_cast<CheckMenuItem*>(&items.back());
-	fooc = region_mute_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_region_mute));
-	if (region_to_check->muted()) {
-		fooc.block (true);
+
+	if (have_muted && !have_unmuted) {
 		region_mute_item->set_active();
-		fooc.block (false);
+	} else if (have_muted && have_unmuted) {
+		region_mute_item->set_inconsistent ();
 	}
         
+	region_mute_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_region_mute));
+	
         items.push_back (MenuElem (_("Transpose..."), mem_fun(*this, &Editor::pitch_shift_regions)));
 
 	if (!Profile->get_sae()) {
 		items.push_back (CheckMenuElem (_("Opaque")));
 		CheckMenuItem* region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
-		fooc = region_opaque_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_region_opaque));
-		if (region_to_check->opaque()) {
-			fooc.block (true);
+		if (have_opaque && !have_non_opaque) {
 			region_opaque_item->set_active();
-			fooc.block (false);
+		} else if (have_opaque && have_non_opaque) {
+			region_opaque_item->set_inconsistent ();
 		}
+		region_opaque_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_region_opaque));
 	}
 
 	items.push_back (CheckMenuElem (_("Original Position"), sigc::mem_fun(*this, &Editor::naturalize)));
-	if (region_to_check->at_natural_position()) {
+	if (!have_not_at_natural_position) {
 		items.back().set_sensitive (false);
 	}
 
 	items.push_back (SeparatorElem());
 
-	if (ar) {
-
-		RegionView* rv = sv->find_view (ar);
-		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
+	if (have_audio) {
 
 		if (!Profile->get_sae()) {
 			items.push_back (MenuElem (_("Reset Envelope"), sigc::mem_fun(*this, &Editor::reset_region_gain_envelopes)));
 
 			items.push_back (CheckMenuElem (_("Envelope Visible")));
 			CheckMenuItem* region_envelope_visible_item = static_cast<CheckMenuItem*> (&items.back());
-			fooc = region_envelope_visible_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_gain_envelope_visibility));
-			if (arv->envelope_visible()) {
-				fooc.block (true);
-				region_envelope_visible_item->set_active (true);
-				fooc.block (false);
+			if (have_envelope_visible && !have_envelope_invisible) {
+				region_envelope_visible_item->set_active ();
+			} else if (have_envelope_visible && have_envelope_invisible) {
+				region_envelope_visible_item->set_inconsistent ();
 			}
+			region_envelope_visible_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_gain_envelope_visibility));
 
 			items.push_back (CheckMenuElem (_("Envelope Active")));
 			CheckMenuItem* region_envelope_active_item = static_cast<CheckMenuItem*> (&items.back());
-			fooc = region_envelope_active_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_gain_envelope_active));
 
-			if (ar->envelope_active()) {
-				fooc.block (true);
-				region_envelope_active_item->set_active (true);
-				fooc.block (false);
+			if (have_envelope_active && !have_envelope_inactive) {
+				region_envelope_active_item->set_active ();
+			} else if (have_envelope_active && have_envelope_inactive) {
+				region_envelope_active_item->set_inconsistent ();
 			}
 
+			region_envelope_active_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_gain_envelope_active));
 			items.push_back (SeparatorElem());
 		}
 
 		items.push_back (MenuElem (_("Normalize..."), sigc::mem_fun(*this, &Editor::normalize_region)));
-		if (ar->scale_amplitude() != 1) {
+		if (have_non_unity_scale_amplitude) {
 			items.push_back (MenuElem (_("Reset Gain"), sigc::mem_fun(*this, &Editor::reset_region_scale_amplitude)));
 		}
 
-	} else if (mr) {
+	} else if (have_midi) {
 		items.push_back (MenuElem (_("Quantize"), sigc::mem_fun(*this, &Editor::quantize_region)));
 		items.push_back (MenuElem (_("Fork"), sigc::mem_fun(*this, &Editor::fork_region)));
 		items.push_back (SeparatorElem());
@@ -1916,8 +1995,10 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 		region_edit_menu_split_item->set_sensitive (false);
 	}
 
-	items.push_back (MenuElem (_("Make Mono Regions"), (sigc::mem_fun(*this, &Editor::split_multichannel_region))));
-	region_edit_menu_split_multichannel_item = &items.back();
+	if (have_audio) {
+		items.push_back (MenuElem (_("Make Mono Regions"), (sigc::mem_fun(*this, &Editor::split_multichannel_region))));
+		region_edit_menu_split_multichannel_item = &items.back();
+	}
 
 	items.push_back (MenuElem (_("Duplicate"), (sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), false))));
 	items.push_back (MenuElem (_("Multi-Duplicate..."), (sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), true))));
@@ -1934,7 +2015,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	*/
 
 	string::size_type pos = 0;
-	string menu_item_name = (region) ? region->name() : _("Selected Regions");
+	string menu_item_name = (regions.size() == 1) ? regions.front()->name() : _("Selected Regions");
 
 	while ((pos = menu_item_name.find ("_", pos)) != string::npos) {
 		menu_item_name.replace (pos, 1, "__");

@@ -1111,15 +1111,46 @@ AudioRegion::set_scale_amplitude (gain_t g)
 	send_change (PropertyChange (Properties::scale_amplitude));
 }
 
-void
-AudioRegion::normalize_to (float target_dB)
+/** @return the maximum (linear) amplitude of the region */
+double
+AudioRegion::maximum_amplitude () const
 {
-	const framecnt_t blocksize = 64 * 1024;
-	Sample buf[blocksize];
-	framepos_t fpos;
-	framepos_t fend;
-	framecnt_t to_read;
+	framepos_t fpos = _start;
+	framepos_t const fend = _start + _length;
 	double maxamp = 0;
+
+	framecnt_t const blocksize = 64 * 1024;
+	Sample buf[blocksize];
+	
+	while (fpos < fend) {
+
+		uint32_t n;
+
+		framecnt_t const to_read = min (fend - fpos, blocksize);
+
+		for (n = 0; n < n_channels(); ++n) {
+
+			/* read it in */
+
+			if (read_raw_internal (buf, fpos, to_read, 0) != to_read) {
+				return 0;
+			}
+
+			maxamp = compute_peak (buf, to_read, maxamp);
+		}
+
+		fpos += to_read;
+	}
+
+	return maxamp;
+}
+
+/** Normalize using a given maximum amplitude and target, so that region
+ *  _scale_amplitude becomes target / max_amplitude.
+ */
+void
+AudioRegion::normalize (float max_amplitude, float target_dB)
+{
 	gain_t target = dB_to_coefficient (target_dB);
 
 	if (target == 1.0f) {
@@ -1129,56 +1160,17 @@ AudioRegion::normalize_to (float target_dB)
 		target -= FLT_EPSILON;
 	}
 
-	fpos = _start;
-	fend = _start + _length;
-
-	/* first pass: find max amplitude */
-
-	while (fpos < fend) {
-
-		uint32_t n;
-
-		to_read = min (fend - fpos, blocksize);
-
-		for (n = 0; n < n_channels(); ++n) {
-
-			/* read it in */
-
-			if (read_raw_internal (buf, fpos, to_read, 0) != to_read) {
-				return;
-			}
-
-			maxamp = compute_peak (buf, to_read, maxamp);
-		}
-
-		fpos += to_read;
-	};
-
-	if (maxamp == 0.0f) {
+	if (max_amplitude == 0.0f) {
 		/* don't even try */
 		return;
 	}
 
-	if (maxamp == target) {
+	if (max_amplitude == target) {
 		/* we can't do anything useful */
 		return;
 	}
 
-	/* compute scale factor */
-
-	_scale_amplitude = target/maxamp;
-
-	/* tell the diskstream we're in */
-
-	boost::shared_ptr<Playlist> pl (playlist());
-
-	if (pl) {
-		pl->ContentsChanged();
-	}
-
-	/* tell everybody else */
-
-	send_change (PropertyChange (Properties::scale_amplitude));
+	set_scale_amplitude (target / max_amplitude);
 }
 
 void

@@ -4551,6 +4551,11 @@ Editor::normalize_region ()
 	}
 
 	Dialog dialog (rs.size() > 1 ? _("Normalize regions") : _("Normalize region"));
+
+	VBox vbox;
+	vbox.set_spacing (6);
+	vbox.set_border_width (6);
+	
 	HBox hbox;
 	hbox.set_spacing (6);
 	hbox.set_border_width (6);
@@ -4562,9 +4567,18 @@ Editor::normalize_region ()
 	hbox.pack_start (spin);
 	spin.set_value (_last_normalization_value);
 	hbox.pack_start (*manage (new Label (_("dbFS"))));
-	hbox.show_all ();
+	vbox.pack_start (hbox);
+
+	CheckButton* normalize_across_all = manage (new CheckButton (_("Normalize across all selected regions")));
+	vbox.pack_start (*normalize_across_all);
+	if (rs.size() <= 1) {
+		normalize_across_all->set_sensitive (false);
+	}
+
+	vbox.show_all ();
+	
 	dialog.get_vbox()->set_spacing (12);
-	dialog.get_vbox()->pack_start (hbox);
+	dialog.get_vbox()->pack_start (vbox);
 	dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	dialog.add_button (_("Normalize"), RESPONSE_ACCEPT);
 
@@ -4577,14 +4591,28 @@ Editor::normalize_region ()
 	track_canvas->get_window()->set_cursor (*wait_cursor);
 	gdk_flush ();
 
+	double maxamp = 0;
+	if (normalize_across_all->get_active ()) {
+		for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
+			AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (*r);
+			if (!arv) {
+				continue;
+			}
+			maxamp = max (maxamp, arv->audio_region()->maximum_amplitude ());
+		}
+	}
+	
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
-		if (!arv)
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (*r);
+		if (!arv) {
 			continue;
-                arv->region()->clear_history ();
-		arv->audio_region()->normalize_to (spin.get_value());
+		}
+		arv->region()->clear_history ();
+
+		double const amp = normalize_across_all->get_active() ? maxamp : arv->audio_region()->maximum_amplitude ();
+		
+		arv->audio_region()->normalize (amp, spin.get_value ());
 		_session->add_command (new StatefulDiffCommand (arv->region()));
-                                       
 	}
 
 	commit_reversible_command ();
