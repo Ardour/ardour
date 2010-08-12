@@ -922,7 +922,12 @@ MidiTimeAxisView::start_step_editing ()
 
         framecnt_t frames_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
 
-        assert (frames_from_start >= 0);
+        if (frames_from_start < 0) {
+                /* this can happen with snap enabled, and the edit point == Playhead. we snap the
+                   position of the new region, and it can end up after the edit point.
+                */
+                frames_from_start = 0;
+        }
 
         step_edit_beat_pos = step_edit_region_view->frames_to_beats (frames_from_start);
 
@@ -1097,6 +1102,8 @@ MidiTimeAxisView::step_edit_toggle_chord ()
                 _step_edit_triplet_countdown = 0;
                 _step_edit_within_chord = true;
         }
+        
+        cerr << "Within chord now: " << _step_edit_within_chord << endl;
 }
 
 void
@@ -1130,7 +1137,7 @@ MidiTimeAxisView::step_edit_bar_sync ()
                 return;
         }
 
-        nframes64_t fpos = step_edit_region->position() + 
+        framepos_t fpos = step_edit_region->position() + 
                 step_edit_region_view->beats_to_frames (step_edit_beat_pos);
         fpos = _session->tempo_map().round_to_bar (fpos, 1);
         step_edit_beat_pos = ceil (step_edit_region_view->frames_to_beats (fpos - step_edit_region->position()));
@@ -1145,11 +1152,9 @@ MidiTimeAxisView::add_region (framepos_t pos)
 	real_editor->begin_reversible_command (_("create region"));
         playlist()->clear_history ();
 
-	framepos_t start = pos;
-	real_editor->snap_to (start, 0);
-        cerr << "Snap backwards from " << pos << " gave us " << start << endl;
-	const Meter& m = _session->tempo_map().meter_at(start);
-	const Tempo& t = _session->tempo_map().tempo_at(start);
+	real_editor->snap_to (pos, 0);
+	const Meter& m = _session->tempo_map().meter_at(pos);
+	const Tempo& t = _session->tempo_map().tempo_at(pos);
 	double length = floor (m.frames_per_bar(t, _session->frame_rate()));
 
 	boost::shared_ptr<Source> src = _session->create_midi_source_for_session (view()->trackview().track().get(),
@@ -1162,7 +1167,7 @@ MidiTimeAxisView::add_region (framepos_t pos)
 	
 	boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
         
-	playlist()->add_region (region, start);
+	playlist()->add_region (region, pos);
 	_session->add_command (new StatefulDiffCommand (playlist()));
 
 	real_editor->commit_reversible_command();

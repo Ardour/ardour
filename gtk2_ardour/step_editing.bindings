@@ -1,7 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Bindings name="qwerty">
+<Bindings name="logic">
   <Press>
-     <Binding key="a" action="StepEditing/insert-a"/>
-     <Binding key="Primary-a" action="StepEditing/insert-b"/>
+     <Binding key="1" action="StepEditing/octave-0"/>
+     <Binding key="2" action="StepEditing/octave-1"/>
+     <Binding key="3" action="StepEditing/octave-2"/>
+     <Binding key="4" action="StepEditing/octave-3"/>
+     <Binding key="5" action="StepEditing/octave-4"/>
+     <Binding key="6" action="StepEditing/octave-5"/>
+     <Binding key="7" action="StepEditing/octave-6"/>
+     <Binding key="8" action="StepEditing/octave-7"/>
+     <Binding key="9" action="StepEditing/octave-8"/>
+     <Binding key="0" action="StepEditing/octave-9"/>
+     <Binding key="Minus" action="StepEditing/octave-10"/>
+
+     <Binding key="F1" action="StepEditing/note-length-whole"/>
+     <Binding key="F2" action="StepEditing/note-length-half"/>
+     <Binding key="F3" action="StepEditing/note-length-quarter"/>
+     <Binding key="F4" action="StepEditing/note-length-eighth"/>
+     <Binding key="F5" action="StepEditing/note-length-sixteenth"/>
+     <Binding key="F6" action="StepEditing/note-length-thirtysecond"/>
+     <Binding key="F7" action="StepEditing/note-length-sixtyfourth"/>
+
+     <Binding key="a" action="StepEditing/insert-c"/>
+     <Binding key="w" action="StepEditing/insert-csharp"/>
+     <Binding key="s" action="StepEditing/insert-d"/>
+     <Binding key="e" action="StepEditing/insert-dsharp"/>
+     <Binding key="d" action="StepEditing/insert-e"/>
+     <Binding key="f" action="StepEditing/insert-f"/>
+     <Binding key="t" action="StepEditing/insert-fsharp"/>
+     <Binding key="g" action="StepEditing/insert-g"/>
+     <Binding key="y" action="StepEditing/insert-gsharp"/>
+     <Binding key="h" action="StepEditing/insert-a"/>
+     <Binding key="j" action="StepEditing/insert-asharp"/>
+     <Binding key="k" action="StepEditing/insert-b"/>
+     
+     <Binding key="Tab" action="StepEditing/insert-rest"/>
+     <Binding key="Primary-Tab" action="StepEditing/insert-snap-rest"/>
+
+     <Binding key="x" action="StepEditing/note-velocity-ppp"/>
+     <Binding key="c" action="StepEditing/note-velocity-pp"/>
+     <Binding key="v" action="StepEditing/note-velocity-p"/>
+     <Binding key="b" action="StepEditing/note-velocity-mp"/>
+     <Binding key="n" action="StepEditing/note-velocity-mf"/>
+     <Binding key="m" action="StepEditing/note-velocity-f"/>
+     <Binding key="comma" action="StepEditing/note-velocity-ff"/>
+     <Binding key="slash" action="StepEditing/note-velocity-fff"/>
+
+     <Binding key="Up" action="StepEditing/next-note-velocity"/>
+     <Binding key="Down" action="StepEditing/prev-note-velocity"/>
+     <Binding key="Primary-Up" action="StepEditing/next-note-length"/>
+     <Binding key="Primary-Down" action="StepEditing/prev-note-length"/>
+
+     <Binding key="apostrophe" action="StepEditing/toggle-triplet"/>
+     <Binding key="period" action="StepEditing/toggle-dotted"/>
+     <Binding key="bar" action="StepEditing/toggle-chord"/>
   </Press>
 </Bindings>

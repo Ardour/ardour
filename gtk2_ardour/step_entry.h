@@ -41,7 +41,7 @@ class StepEntry : public ArdourDialog
         void note_off_event_handler (int note);
         void rest_event_handler ();
 
-        Evoral::MusicalTime note_length() const;
+        Evoral::MusicalTime note_length();
         uint8_t note_velocity() const;
         uint8_t note_channel() const;
         
@@ -119,11 +119,6 @@ class StepEntry : public ArdourDialog
 
         void bank_click ();
         void program_click ();
-        void rest_click ();
-        void grid_rest_click ();
-        void sustain_click ();
-        void chord_toggled ();
-        void triplet_toggled ();
         void beat_resync_click ();
         void bar_resync_click ();
 
@@ -163,6 +158,38 @@ class StepEntry : public ArdourDialog
 
         void load_bindings ();
         Gtkmm2ext::Bindings  bindings;
+
+        void inc_note_velocity ();
+        void dec_note_velocity ();
+        void next_note_velocity ();
+        void prev_note_velocity ();
+
+        void inc_note_length ();
+        void dec_note_length ();
+        void next_note_length ();
+        void prev_note_length ();
+
+        void next_octave ();
+        void prev_octave ();
+
+        void octave_n (int n);
+        void octave_0 () { octave_n (0); }
+        void octave_1 () { octave_n (1); }
+        void octave_2 () { octave_n (2); }
+        void octave_3 () { octave_n (3); }
+        void octave_4 () { octave_n (4); }
+        void octave_5 () { octave_n (5); }
+        void octave_6 () { octave_n (6); }
+        void octave_7 () { octave_n (7); }
+        void octave_8 () { octave_n (8); }
+        void octave_9 () { octave_n (9); }
+        void octave_10 () { octave_n (10); }
+
+        void toggle_dotted();
+        void toggle_triplet();
+        void toggle_chord();
+        
+        void do_sustain ();
 };
 
 #endif /* __gtk2_ardour_step_entry_h__ */

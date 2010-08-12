@@ -67,7 +67,7 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 	, grid_rest_button (_("g-rest"))
 	, channel_adjustment (1, 1, 16, 1, 4) 
 	, channel_spinner (channel_adjustment)
-        , octave_adjustment (0, 1, 11, 1, 4)
+        , octave_adjustment (4, 1, 11, 1, 4) // start in octave 4
         , octave_spinner (octave_adjustment)
         , length_divisor_adjustment (1.0, 1.0, 128, 1.0, 4.0)
         , length_divisor_spinner (length_divisor_adjustment)
@@ -309,6 +309,25 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 	ARDOUR_UI::instance()->set_tip (&bank_button, _("Insert a bank change message"), "");
 	ARDOUR_UI::instance()->set_tip (&program_button, _("Insert a program change message"), "");
 
+        act = myactions.find_action ("StepEditing/toggle-triplet");
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (triplet_button.gobj()), false);
+        gtk_activatable_set_related_action (GTK_ACTIVATABLE (triplet_button.gobj()), act->gobj());
+        act = myactions.find_action ("StepEditing/toggle-dotted");
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dot_button.gobj()), false);
+        gtk_activatable_set_related_action (GTK_ACTIVATABLE (dot_button.gobj()), act->gobj());
+        act = myactions.find_action ("StepEditing/toggle-chord");
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (chord_button.gobj()), false);
+        gtk_activatable_set_related_action (GTK_ACTIVATABLE (chord_button.gobj()), act->gobj());
+        act = myactions.find_action ("StepEditing/insert-rest");
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (rest_button.gobj()), false);
+        gtk_activatable_set_related_action (GTK_ACTIVATABLE (rest_button.gobj()), act->gobj());
+        act = myactions.find_action ("StepEditing/insert-snap-rest");
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (grid_rest_button.gobj()), false);
+        gtk_activatable_set_related_action (GTK_ACTIVATABLE (grid_rest_button.gobj()), act->gobj());
+        act = myactions.find_action ("StepEditing/sustain");
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (sustain_button.gobj()), false);
+        gtk_activatable_set_related_action (GTK_ACTIVATABLE (sustain_button.gobj()), act->gobj());
+                
 	upper_box.set_spacing (6);
 	upper_box.pack_start (chord_button, false, false);
 	upper_box.pack_start (note_length_box, false, false, 12);
@@ -378,10 +397,6 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
         
 	program_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::program_click));
 	bank_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::bank_click));
-	rest_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::rest_click));
-	grid_rest_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::grid_rest_click));
-	chord_button.signal_toggled().connect (sigc::mem_fun (*this, &StepEntry::chord_toggled));
-	triplet_button.signal_toggled().connect (sigc::mem_fun (*this, &StepEntry::triplet_toggled));
 	beat_resync_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::beat_resync_click));
 	bar_resync_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::bar_resync_click));
 
@@ -432,10 +447,6 @@ StepEntry::on_key_press_event (GdkEventKey* ev)
 bool
 StepEntry::on_key_release_event (GdkEventKey* ev)
 {
-        /* focus widget gets first shot, then bindings, otherwise
-           forward to main window
-        */
-
 	if (!gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
                 KeyboardKey k (ev->state, ev->keyval);
 
@@ -443,8 +454,10 @@ StepEntry::on_key_release_event (GdkEventKey* ev)
                         return true;
                 }
 	}
+        
+        /* don't forward releases */
 
-        return forward_key_press (ev);
+        return true;
 }
 
 void
@@ -454,9 +467,27 @@ StepEntry::rest_event_handler ()
 }
 
 Evoral::MusicalTime
-StepEntry::note_length () const
+StepEntry::note_length ()
 {
-        return 1.0 / (Evoral::MusicalTime) length_divisor_adjustment.get_value();
+        Evoral::MusicalTime base_time = 1.0 / (Evoral::MusicalTime) length_divisor_adjustment.get_value();
+        
+        RefPtr<Action> act = myactions.find_action ("StepEditing/toggle-triplet");
+        RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
+        bool triplets = tact->get_active ();
+
+        act = myactions.find_action ("StepEditing/toggle-dotted");
+        tact = RefPtr<ToggleAction>::cast_dynamic (act);
+        bool dotted = tact->get_active ();
+
+        if (triplets) {
+                base_time *= (2.0/3.0);
+        }
+
+        if (dotted) {
+                base_time *= 1.5; // add support for multiple dots sometime
+        }
+
+        return base_time;
 }
 
 uint8_t
@@ -477,39 +508,12 @@ StepEntry::note_off_event_handler (int note)
         insert_note (note);
 }
 
-void
-StepEntry::rest_click ()
-{
-        insert_rest ();
-}
-
-void
-StepEntry::grid_rest_click ()
-{
-        insert_grid_rest ();
-}
-
-void
-StepEntry::triplet_toggled ()
-{
-	if (triplet_button.get_active () != _mtv->step_edit_within_triplet()) {
-		_mtv->step_edit_toggle_triplet ();
-	}
-}
-
-void
-StepEntry::chord_toggled ()
-{
-	if (chord_button.get_active() != _mtv->step_edit_within_chord ()) {
-		_mtv->step_edit_toggle_chord ();
-	}
-}
 
 void
 StepEntry::on_show ()
 {
 	ArdourDialog::on_show ();
-	piano->grab_focus ();
+	//piano->grab_focus ();
 }
 
 void
@@ -541,6 +545,37 @@ StepEntry::register_actions ()
 	myactions.register_action ("StepEditing", "insert-fsharp", _("Insert Note F-sharp"), sigc::mem_fun (*this, &StepEntry::insert_fsharp));
 	myactions.register_action ("StepEditing", "insert-g", _("Insert Note G"), sigc::mem_fun (*this, &StepEntry::insert_g));
 	myactions.register_action ("StepEditing", "insert-gsharp", _("Insert Note G-sharp"), sigc::mem_fun (*this, &StepEntry::insert_gsharp));
+
+	myactions.register_action ("StepEditing", "insert-rest", _("Insert a Note-length Rest"), sigc::mem_fun (*this, &StepEntry::insert_rest));
+	myactions.register_action ("StepEditing", "insert-snap-rest", _("Insert a Snap-length Rest"), sigc::mem_fun (*this, &StepEntry::insert_grid_rest));
+
+	myactions.register_action ("StepEditing", "next-octave", _("Move to next octave"), sigc::mem_fun (*this, &StepEntry::next_octave));
+	myactions.register_action ("StepEditing", "prev-octave", _("Move to next octave"), sigc::mem_fun (*this, &StepEntry::prev_octave));
+
+	myactions.register_action ("StepEditing", "next-note-length", _("Move to Next Note Length"), sigc::mem_fun (*this, &StepEntry::next_note_length));
+	myactions.register_action ("StepEditing", "prev-note-length", _("Move to Previous Note Length"), sigc::mem_fun (*this, &StepEntry::prev_note_length));
+
+	myactions.register_action ("StepEditing", "inc-note-length", _("Increase Note Length"), sigc::mem_fun (*this, &StepEntry::inc_note_length));
+	myactions.register_action ("StepEditing", "dec-note-length", _("Decrease Note Length"), sigc::mem_fun (*this, &StepEntry::dec_note_length));
+
+	myactions.register_action ("StepEditing", "next-note-velocity", _("Move to Next Note Velocity"), sigc::mem_fun (*this, &StepEntry::next_note_velocity));
+	myactions.register_action ("StepEditing", "prev-note-velocity", _("Move to Previous Note Velocity"), sigc::mem_fun (*this, &StepEntry::prev_note_velocity));
+
+	myactions.register_action ("StepEditing", "inc-note-velocity", _("Increase Note Velocity"), sigc::mem_fun (*this, &StepEntry::inc_note_velocity));
+	myactions.register_action ("StepEditing", "dec-note-velocity", _("Decrease Note Velocity"), sigc::mem_fun (*this, &StepEntry::dec_note_velocity));
+
+	myactions.register_action ("StepEditing", "octave-0", _("Switch to the 1st octave"), sigc::mem_fun (*this, &StepEntry::octave_0));
+	myactions.register_action ("StepEditing", "octave-1", _("Switch to the 2nd octave"), sigc::mem_fun (*this, &StepEntry::octave_1));
+	myactions.register_action ("StepEditing", "octave-2", _("Switch to the 3rd octave"), sigc::mem_fun (*this, &StepEntry::octave_2));
+	myactions.register_action ("StepEditing", "octave-3", _("Switch to the 4th octave"), sigc::mem_fun (*this, &StepEntry::octave_3));
+	myactions.register_action ("StepEditing", "octave-4", _("Switch to the 5th octave"), sigc::mem_fun (*this, &StepEntry::octave_4));
+	myactions.register_action ("StepEditing", "octave-5", _("Switch to the 6th octave"), sigc::mem_fun (*this, &StepEntry::octave_5));
+	myactions.register_action ("StepEditing", "octave-6", _("Switch to the 7th octave"), sigc::mem_fun (*this, &StepEntry::octave_6));
+	myactions.register_action ("StepEditing", "octave-7", _("Switch to the 8th octave"), sigc::mem_fun (*this, &StepEntry::octave_7));
+	myactions.register_action ("StepEditing", "octave-8", _("Switch to the 9th octave"), sigc::mem_fun (*this, &StepEntry::octave_8));
+	myactions.register_action ("StepEditing", "octave-9", _("Switch to the 10th octave"), sigc::mem_fun (*this, &StepEntry::octave_9));
+	myactions.register_action ("StepEditing", "octave-10", _("Switch to the 11th octave"), sigc::mem_fun (*this, &StepEntry::octave_10));
+
 
         RadioAction::Group note_length_group;
 
@@ -577,11 +612,23 @@ StepEntry::register_actions ()
                                          _("Set Note Velocity to Fortississimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_change), 112);
 	myactions.register_radio_action ("StepEditing", note_velocity_group, "note-velocity-fff",
                                          _("Set Note Velocity to Fortississimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_change), 127);
+
+        myactions.register_toggle_action ("StepEditing", "toggle-triplet", _("Toggle Triple Notes"),
+                                          sigc::mem_fun (*this, &StepEntry::toggle_dotted));
+        myactions.register_toggle_action ("StepEditing", "toggle-dotted", _("Toggled Dotted Notes"), 
+                                          sigc::mem_fun (*this, &StepEntry::toggle_triplet));
+        myactions.register_toggle_action ("StepEditing", "toggle-chord", _("Toggle Chord Entry"),
+                                          sigc::mem_fun (*this, &StepEntry::toggle_chord));
+        myactions.register_action ("StepEditing", "sustain", _("Sustain Selected Notes by Note Length"),
+                                   sigc::mem_fun (*this, &StepEntry::do_sustain));
 }
 
 void
 StepEntry::load_bindings ()
 {
+        /* XXX move this to a better place */
+        KeyboardKey::set_ignored_state (GDK_LOCK_MASK|GDK_MOD2_MASK|GDK_MOD3_MASK);
+
         bindings.set_action_map (myactions);
 
 	sys::path binding_file;
@@ -590,6 +637,24 @@ StepEntry::load_bindings ()
 	if (find_file_in_search_path (spath, "step_editing.bindings", binding_file)) {
                 bindings.load (binding_file.to_string());
         }
+}
+
+void
+StepEntry::toggle_triplet ()
+{
+        // nowt to be done
+}
+
+void
+StepEntry::toggle_chord ()
+{
+        _mtv->step_edit_toggle_chord ();
+}
+
+void
+StepEntry::toggle_dotted ()
+{
+        // nowt to be done
 }
 
 void
@@ -714,7 +779,6 @@ StepEntry::note_velocity_change (GtkAction* act)
         
         if (gtk_toggle_action_get_active (GTK_TOGGLE_ACTION(act))) {
                 gint v = gtk_radio_action_get_current_value (GTK_RADIO_ACTION (act));
-                cerr << "Velocity reset to " << v << endl;
                 velocity_adjustment.set_value (v);
         }
 }
@@ -833,4 +897,137 @@ StepEntry::radio_button_release (GdkEventButton* ev, RadioButton* btn, int v)
         } 
 
         return false;
+}
+
+void
+StepEntry::next_octave ()
+{
+        octave_adjustment.set_value (octave_adjustment.get_value() + 1.0);
+}
+
+void
+StepEntry::prev_octave ()
+{
+        octave_adjustment.set_value (octave_adjustment.get_value() - 1.0);
+}
+
+void
+StepEntry::inc_note_length ()
+{
+        length_divisor_adjustment.set_value (length_divisor_adjustment.get_value() - 1.0);
+}
+
+void
+StepEntry::dec_note_length ()
+{
+        length_divisor_adjustment.set_value (length_divisor_adjustment.get_value() + 1.0);
+}
+
+void
+StepEntry::prev_note_length ()
+{
+        double l = length_divisor_adjustment.get_value();
+        int il = (int) lrintf (l); // round to nearest integer
+        il = (il/2) * 2; // round to power of 2
+
+        if (il == 0) {
+                il = 1;
+        }
+
+        il *= 2; // double
+
+        length_divisor_adjustment.set_value (il);
+}
+
+void
+StepEntry::next_note_length ()
+{
+        double l = length_divisor_adjustment.get_value();
+        int il = (int) lrintf (l); // round to nearest integer
+        il = (il/2) * 2; // round to power of 2
+
+        if (il == 0) {
+                il = 1;
+        }
+
+        il /= 2; // half
+
+        if (il > 0) {
+                length_divisor_adjustment.set_value (il);
+        }
+}
+
+void
+StepEntry::inc_note_velocity ()
+{
+        velocity_adjustment.set_value (velocity_adjustment.get_value() + 1.0);
+}
+
+void
+StepEntry::dec_note_velocity ()
+{
+        velocity_adjustment.set_value (velocity_adjustment.get_value() - 1.0);
+}
+
+void
+StepEntry::next_note_velocity ()
+{
+        double l = velocity_adjustment.get_value ();
+
+        if (l < 16) {
+                l = 16;
+        } else if (l < 32) {
+                l = 32;
+        } else if (l < 48) {
+                l = 48;
+        } else if (l < 64) {
+                l = 64;
+        } else if (l < 80) {
+                l = 80;
+        } else if (l < 96) {
+                l = 96;
+        } else if (l < 112) {
+                l = 112;
+        } else if (l < 127) {
+                l = 127;
+        }
+        
+        velocity_adjustment.set_value (l);
+}
+
+void
+StepEntry::prev_note_velocity ()
+{
+        double l = velocity_adjustment.get_value ();
+
+        if (l > 112) {
+                l = 112;
+        } else if (l > 96) {
+                l = 96;
+        } else if (l > 80) {
+                l = 80;
+        } else if (l > 64) {
+                l = 64;
+        } else if (l > 48) {
+                l = 48;
+        } else if (l > 32) {
+                l = 32;
+        } else if (l > 16) {
+                l = 16;
+        } else {
+                l = 1;
+        }
+        
+        velocity_adjustment.set_value (l);
+}
+
+void
+StepEntry::octave_n (int n)
+{
+        octave_adjustment.set_value (n);
+}
+
+void
+StepEntry::do_sustain ()
+{
 }

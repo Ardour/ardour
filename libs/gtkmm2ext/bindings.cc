@@ -10,6 +10,24 @@ using namespace Glib;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
+uint32_t KeyboardKey::_ignored_state = 0;
+
+KeyboardKey::KeyboardKey (uint32_t state, uint32_t keycode)
+{
+        uint32_t ignore = _ignored_state;
+        
+        if (gdk_keyval_is_upper (keycode) && gdk_keyval_is_lower (keycode)) {
+                /* key is not subject to case, so ignore SHIFT
+                 */
+                ignore |= GDK_SHIFT_MASK;
+        }
+
+        _val = (state & ~ignore);
+        _val <<= 32;
+        _val |= keycode;
+};
+
+
 string
 KeyboardKey::name () const
 {
@@ -126,7 +144,6 @@ Bindings::activate (KeyboardKey kb, KeyboardKey::Operation op)
 
         /* lets do it ... */
 
-        cerr << "Firing up " << k->second->get_name() << endl;
         k->second->activate ();
         return true;
 }
@@ -150,6 +167,7 @@ Bindings::add (KeyboardKey kb, KeyboardKey::Operation op, RefPtr<Action> what)
         if (k == kbm->end()) {
                 pair<KeyboardKey,RefPtr<Action> > newpair (kb, what);
                 kbm->insert (newpair);
+                cerr << "Bindings added " << kb.key() << " w/ " << kb.state() << endl;
         } else {
                 k->second = what;
         }

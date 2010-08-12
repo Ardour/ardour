@@ -23,14 +23,10 @@ class KeyboardKey
                 _val = GDK_VoidSymbol;
         }
         
-        KeyboardKey (int state, int keycode) {
-                _val = state;
-                _val <<= 32;
-                _val |= keycode;
-        };
+        KeyboardKey (uint32_t state, uint32_t keycode);
         
-        int state() const { return _val >> 32; }
-        int key() const { return _val & 0xffff; }
+        uint32_t state() const { return _val >> 32; }
+        uint32_t key() const { return _val & 0xffff; }
         
         bool operator<(const KeyboardKey& other) const {
                 return _val < other._val;
@@ -42,9 +38,13 @@ class KeyboardKey
 
         std::string name() const;
         static bool make_key (const std::string&, KeyboardKey&);
-        
+        static void set_ignored_state (int mask) {
+                _ignored_state = mask;
+        }
+
   private:
         uint64_t _val;
+        static uint32_t _ignored_state;
 };
 
 class ActionMap {
