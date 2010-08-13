@@ -100,6 +100,9 @@ class MidiTimeAxisView : public RouteTimeAxisView
         void step_edit_toggle_triplet ();
         bool step_edit_within_chord () const;
         void step_edit_toggle_chord ();
+        void reset_step_edit_beat_pos ();
+        void resync_step_edit_to_edit_point ();
+        void move_step_edit_beat_pos (Evoral::MusicalTime beats);
         void set_step_edit_cursor_width (Evoral::MusicalTime beats);
         
 	const MidiMultipleChannelSelector& channel_selector() { return _channel_selector; }
@@ -184,6 +187,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
         StepEntry* step_editor;
         bool step_editor_hidden (GdkEventAny*);
         void step_editor_hide ();
+        void resync_step_edit_position ();
+        void prepare_step_edit_region ();
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

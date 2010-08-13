@@ -60,11 +60,14 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
         , _current_note_length (1.0)
         , _current_note_velocity (64)
 	, triplet_button ("3")
+        , dot_adjustment (0.0, 0.0, 3.0, 1.0, 1.0)
 	, beat_resync_button (_(">beat"))
 	, bar_resync_button (_(">bar"))
+	, resync_button (_(">EP"))
 	, sustain_button (_("sustain"))
 	, rest_button (_("rest"))
 	, grid_rest_button (_("g-rest"))
+	, back_button (_("back"))
 	, channel_adjustment (1, 1, 16, 1, 4) 
 	, channel_spinner (channel_adjustment)
         , octave_adjustment (4, 1, 11, 1, 4) // start in octave 4
@@ -285,36 +288,78 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 	note_velocity_box.pack_start (velocity_fff_button, false, false);
 
 	Label* l = manage (new Label);
+	l->set_markup ("<b><big>-</big></b>");
+	l->show ();
+	dot0_button.add (*l);
+
+	l = manage (new Label);
 	l->set_markup ("<b><big>.</big></b>");
 	l->show ();
-	dot_button.add (*l);
+	dot1_button.add (*l);
+
+	l = manage (new Label);
+	l->set_markup ("<b><big>..</big></b>");
+	l->show ();
+	dot2_button.add (*l);
+
+	l = manage (new Label);
+	l->set_markup ("<b><big>...</big></b>");
+	l->show ();
+	dot3_button.add (*l);
 
 	w = manage (new Image (::get_icon (X_("chord"))));
 	w->show();
 	chord_button.add (*w);
 
+	dot_box1.pack_start (dot0_button, true, false);
+	dot_box1.pack_start (dot1_button, true, false);
+	dot_box2.pack_start (dot2_button, true, false);
+	dot_box2.pack_start (dot3_button, true, false);
+
 	rest_box.pack_start (rest_button, true, false);
 	rest_box.pack_start (grid_rest_button, true, false);
+	rest_box.pack_start (back_button, true, false);
 
 	resync_box.pack_start (beat_resync_button, true, false);
 	resync_box.pack_start (bar_resync_button, true, false);
+	resync_box.pack_start (resync_button, true, false);
 
 	ARDOUR_UI::instance()->set_tip (&chord_button, _("Stack inserted notes to form a chord"), "");
 	ARDOUR_UI::instance()->set_tip (&sustain_button, _("Extend selected notes by note length"), "");
-	ARDOUR_UI::instance()->set_tip (&dot_button, _("Use dotted note lengths"), "");
+	ARDOUR_UI::instance()->set_tip (&dot0_button, _("Use undotted note lengths"), "");
+	ARDOUR_UI::instance()->set_tip (&dot1_button, _("Use dotted (* 1.5) note lengths"), "");
+	ARDOUR_UI::instance()->set_tip (&dot2_button, _("Use double-dotted (* 1.75) note lengths"), "");
+	ARDOUR_UI::instance()->set_tip (&dot3_button, _("Use triple-dotted (* 1.875) note lengths"), "");
 	ARDOUR_UI::instance()->set_tip (&rest_button, _("Insert a note-length's rest"), "");
 	ARDOUR_UI::instance()->set_tip (&grid_rest_button, _("Insert a grid-unit's rest"), "");
 	ARDOUR_UI::instance()->set_tip (&beat_resync_button, _("Insert a rest until the next beat"), "");
 	ARDOUR_UI::instance()->set_tip (&bar_resync_button, _("Insert a rest until the next bar"), "");
 	ARDOUR_UI::instance()->set_tip (&bank_button, _("Insert a bank change message"), "");
 	ARDOUR_UI::instance()->set_tip (&program_button, _("Insert a program change message"), "");
+	ARDOUR_UI::instance()->set_tip (&back_button, _("Move Insert Position Back by Note Length"), "");
+	ARDOUR_UI::instance()->set_tip (&resync_button, _("Move Insert Position to Edit Point"), "");
 
+        act = myactions.find_action ("StepEditing/back");
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (back_button.gobj()), false);
+        gtk_activatable_set_related_action (GTK_ACTIVATABLE (back_button.gobj()), act->gobj());
+        act = myactions.find_action ("StepEditing/sync-to-edit-point");
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (resync_button.gobj()), false);
+        gtk_activatable_set_related_action (GTK_ACTIVATABLE (resync_button.gobj()), act->gobj());
         act = myactions.find_action ("StepEditing/toggle-triplet");
         gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (triplet_button.gobj()), false);
         gtk_activatable_set_related_action (GTK_ACTIVATABLE (triplet_button.gobj()), act->gobj());
+        act = myactions.find_action ("StepEditing/no-dotted");
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dot0_button.gobj()), false);
+        gtk_activatable_set_related_action (GTK_ACTIVATABLE (dot0_button.gobj()), act->gobj());
         act = myactions.find_action ("StepEditing/toggle-dotted");
-        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dot_button.gobj()), false);
-        gtk_activatable_set_related_action (GTK_ACTIVATABLE (dot_button.gobj()), act->gobj());
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dot1_button.gobj()), false);
+        gtk_activatable_set_related_action (GTK_ACTIVATABLE (dot1_button.gobj()), act->gobj());
+        act = myactions.find_action ("StepEditing/toggle-double-dotted");
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dot2_button.gobj()), false);
+        gtk_activatable_set_related_action (GTK_ACTIVATABLE (dot2_button.gobj()), act->gobj());
+        act = myactions.find_action ("StepEditing/toggle-triple-dotted");
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dot3_button.gobj()), false);
+        gtk_activatable_set_related_action (GTK_ACTIVATABLE (dot3_button.gobj()), act->gobj());
         act = myactions.find_action ("StepEditing/toggle-chord");
         gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (chord_button.gobj()), false);
         gtk_activatable_set_related_action (GTK_ACTIVATABLE (chord_button.gobj()), act->gobj());
@@ -332,7 +377,8 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 	upper_box.pack_start (chord_button, false, false);
 	upper_box.pack_start (note_length_box, false, false, 12);
 	upper_box.pack_start (triplet_button, false, false);
-	upper_box.pack_start (dot_button, false, false);
+	upper_box.pack_start (dot_box1, false, false);
+	upper_box.pack_start (dot_box2, false, false);
 	upper_box.pack_start (sustain_button, false, false);
 	upper_box.pack_start (rest_box, false, false);
 	upper_box.pack_start (resync_box, false, false);
@@ -386,6 +432,7 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 
         velocity_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &StepEntry::velocity_value_change));
         length_divisor_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &StepEntry::length_value_change));
+        dot_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &StepEntry::dot_value_change));
 
 	_piano = (PianoKeyboard*) piano_keyboard_new ();
 	piano = wrap ((GtkWidget*) _piano);
@@ -475,16 +522,15 @@ StepEntry::note_length ()
         RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
         bool triplets = tact->get_active ();
 
-        act = myactions.find_action ("StepEditing/toggle-dotted");
-        tact = RefPtr<ToggleAction>::cast_dynamic (act);
-        bool dotted = tact->get_active ();
-
         if (triplets) {
                 base_time *= (2.0/3.0);
         }
 
-        if (dotted) {
-                base_time *= 1.5; // add support for multiple dots sometime
+        double dots = dot_adjustment.get_value ();
+
+        if (dots > 0) {
+                dots = pow (2.0, dots);
+                base_time *= 1 + ((dots - 1.0)/dots);
         }
 
         return base_time;
@@ -614,13 +660,28 @@ StepEntry::register_actions ()
                                          _("Set Note Velocity to Fortississimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_change), 127);
 
         myactions.register_toggle_action ("StepEditing", "toggle-triplet", _("Toggle Triple Notes"),
-                                          sigc::mem_fun (*this, &StepEntry::toggle_dotted));
-        myactions.register_toggle_action ("StepEditing", "toggle-dotted", _("Toggled Dotted Notes"), 
                                           sigc::mem_fun (*this, &StepEntry::toggle_triplet));
+
+        RadioAction::Group dot_group;
+
+        myactions.register_radio_action ("StepEditing", dot_group, "no-dotted", _("No Dotted Notes"), 
+                                         sigc::mem_fun (*this, &StepEntry::dot_change), 0);
+        myactions.register_radio_action ("StepEditing", dot_group, "toggle-dotted", _("Toggled Dotted Notes"), 
+                                         sigc::mem_fun (*this, &StepEntry::dot_change), 1);
+        myactions.register_radio_action ("StepEditing", dot_group, "toggle-double-dotted", _("Toggled Double-Dotted Notes"), 
+                                         sigc::mem_fun (*this, &StepEntry::dot_change), 2);
+        myactions.register_radio_action ("StepEditing", dot_group, "toggle-triple-dotted", _("Toggled Triple-Dotted Notes"), 
+                                         sigc::mem_fun (*this, &StepEntry::dot_change), 3);
+
         myactions.register_toggle_action ("StepEditing", "toggle-chord", _("Toggle Chord Entry"),
                                           sigc::mem_fun (*this, &StepEntry::toggle_chord));
         myactions.register_action ("StepEditing", "sustain", _("Sustain Selected Notes by Note Length"),
                                    sigc::mem_fun (*this, &StepEntry::do_sustain));
+
+        myactions.register_action ("StepEditing", "sync-to-edit-point", _("Move Insert Position to Edit Point"),
+                                   sigc::mem_fun (*this, &StepEntry::sync_to_edit_point));
+        myactions.register_action ("StepEditing", "back", _("Move Insert Position Back by Note Length"),
+                                   sigc::mem_fun (*this, &StepEntry::back));
 }
 
 void
@@ -642,7 +703,7 @@ StepEntry::load_bindings ()
 void
 StepEntry::toggle_triplet ()
 {
-        // nowt to be done
+        _mtv->set_step_edit_cursor_width (note_length());
 }
 
 void
@@ -652,9 +713,50 @@ StepEntry::toggle_chord ()
 }
 
 void
-StepEntry::toggle_dotted ()
+StepEntry::dot_change (GtkAction* act)
 {
-        // nowt to be done
+        if (gtk_toggle_action_get_active (GTK_TOGGLE_ACTION(act))) {
+                gint v = gtk_radio_action_get_current_value (GTK_RADIO_ACTION (act));
+                dot_adjustment.set_value (v);
+        }
+}
+
+void
+StepEntry::dot_value_change ()
+{
+        RefPtr<Action> act;
+        RefPtr<RadioAction> ract;
+        double val = dot_adjustment.get_value();
+        bool inconsistent = true;
+        vector<const char*> dot_actions;
+
+        dot_actions.push_back ("StepEditing/no-dotted");
+        dot_actions.push_back ("StepEditing/toggle-dotted");
+        dot_actions.push_back ("StepEditing/toggle-double-dotted");
+        dot_actions.push_back ("StepEditing/toggle-triple-dotted");
+
+        for (vector<const char*>::iterator i = dot_actions.begin(); i != dot_actions.end(); ++i) {
+
+                act = myactions.find_action (*i);
+                
+                if (act) {
+                        ract = RefPtr<RadioAction>::cast_dynamic (act);
+
+                        if (ract) { 
+                                if (ract->property_value() == val) {
+                                        ract->set_active (true);
+                                        inconsistent = false;
+                                        break;
+                                }
+                        }
+                }
+        }
+        
+        dot1_button.set_inconsistent (inconsistent);
+        dot2_button.set_inconsistent (inconsistent);
+        dot3_button.set_inconsistent (inconsistent);
+
+        _mtv->set_step_edit_cursor_width (note_length());
 }
 
 void
@@ -1031,4 +1133,16 @@ void
 StepEntry::do_sustain ()
 {
         _mtv->step_edit_sustain (note_length());
+}
+
+void
+StepEntry::back ()
+{
+        _mtv->move_step_edit_beat_pos (-note_length());
+}
+
+void
+StepEntry::sync_to_edit_point ()
+{
+        _mtv->resync_step_edit_to_edit_point ();
 }

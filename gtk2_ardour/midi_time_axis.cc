@@ -257,6 +257,7 @@ MidiTimeAxisView::region_removed (boost::weak_ptr<Region> wr)
 
         if (step_edit_region == r) {
                 step_edit_region.reset();
+                step_edit_region_view = 0;
                 // force a recompute of the insert position
                 step_edit_beat_pos = -1.0;
         }
@@ -894,11 +895,50 @@ MidiTimeAxisView::route_active_changed ()
 void
 MidiTimeAxisView::start_step_editing ()
 {
-	step_edit_insert_position = _editor.get_preferred_edit_position ();
         _step_edit_triplet_countdown = 0;
         _step_edit_within_chord = 0;
         _step_edit_chord_duration = 0.0;
-        
+        step_edit_region.reset ();
+        step_edit_region_view = 0;
+
+        resync_step_edit_position ();
+        prepare_step_edit_region ();
+        reset_step_edit_beat_pos ();
+
+        assert (step_edit_region);
+        assert (step_edit_region_view);
+
+        if (step_editor == 0) {
+                step_editor = new StepEntry (*this);
+                step_editor->signal_delete_event().connect (sigc::mem_fun (*this, &MidiTimeAxisView::step_editor_hidden));
+                step_editor->signal_hide().connect (sigc::mem_fun (*this, &MidiTimeAxisView::step_editor_hide));
+        }
+
+        step_edit_region_view->show_step_edit_cursor (step_edit_beat_pos);
+        step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
+
+        step_editor->set_position (WIN_POS_MOUSE);
+        step_editor->present ();
+}
+
+void
+MidiTimeAxisView::resync_step_edit_position ()
+{
+	step_edit_insert_position = _editor.get_preferred_edit_position ();
+}
+
+void
+MidiTimeAxisView::resync_step_edit_to_edit_point ()
+{
+        resync_step_edit_position ();
+        if (step_edit_region) {
+                reset_step_edit_beat_pos ();
+        }
+}
+
+void
+MidiTimeAxisView::prepare_step_edit_region ()
+{
         boost::shared_ptr<Region> r = playlist()->top_region_at (step_edit_insert_position);
 
         if (r) {
@@ -914,32 +954,26 @@ MidiTimeAxisView::start_step_editing ()
                 RegionView* rv = view()->find_view (step_edit_region);
                 step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
         }
+}
 
+
+void
+MidiTimeAxisView::reset_step_edit_beat_pos ()
+{
         assert (step_edit_region);
         assert (step_edit_region_view);
 
-        if (step_editor == 0) {
-                step_editor = new StepEntry (*this);
-                step_editor->signal_delete_event().connect (sigc::mem_fun (*this, &MidiTimeAxisView::step_editor_hidden));
-                step_editor->signal_hide().connect (sigc::mem_fun (*this, &MidiTimeAxisView::step_editor_hide));
-        }
-
         framecnt_t frames_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
-
+        
         if (frames_from_start < 0) {
                 /* this can happen with snap enabled, and the edit point == Playhead. we snap the
                    position of the new region, and it can end up after the edit point.
                 */
                 frames_from_start = 0;
         }
-
+        
         step_edit_beat_pos = step_edit_region_view->frames_to_beats (frames_from_start);
-
-        step_edit_region_view->show_step_edit_cursor (step_edit_beat_pos);
-        step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
-
-        step_editor->set_position (WIN_POS_MOUSE);
-        step_editor->present ();
+        step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 
 bool
@@ -1020,55 +1054,81 @@ MidiTimeAxisView::step_edit_sustain (Evoral::MusicalTime beats)
         }
 }
 
+void
+MidiTimeAxisView::move_step_edit_beat_pos (Evoral::MusicalTime beats)
+{
+        if (beats > 0.0) {
+                step_edit_beat_pos = min (step_edit_beat_pos + beats, 
+                                          step_edit_region_view->frames_to_beats (step_edit_region->length()));
+        } else if (beats < 0.0) {
+                if (beats < step_edit_beat_pos) {
+                        step_edit_beat_pos += beats; // its negative, remember
+                } else {
+                        step_edit_beat_pos = 0;
+                }
+        }
+        step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
+}
+
 int
 MidiTimeAxisView::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evoral::MusicalTime beat_duration)
 {
-        if (step_edit_region && step_edit_region_view) {
+        /* do these things in case undo removed the step edit region
+        */
+        if (!step_edit_region) {
+                resync_step_edit_position ();
+                prepare_step_edit_region ();
+                reset_step_edit_beat_pos ();
+                step_edit_region_view->show_step_edit_cursor (step_edit_beat_pos);
+                step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
+        }
+
+        assert (step_edit_region);
+        assert (step_edit_region_view);
                 
-                if (beat_duration == 0.0) {
-                        bool success;
-                        beat_duration = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
-                        
-                        if (!success) {
-                                return -1;
-                        }
-                }
-
-                MidiStreamView* msv = midi_view();
+        if (beat_duration == 0.0) {
+                bool success;
+                beat_duration = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
                 
-                /* make sure its visible on the vertical axis */
+                if (!success) {
+                        return -1;
+                }
+        }
+        
+        MidiStreamView* msv = midi_view();
+        
+        /* make sure its visible on the vertical axis */
+        
+        if (pitch < msv->lowest_note() || pitch > msv->highest_note()) {
+                msv->update_note_range (pitch);
+                msv->set_note_range (MidiStreamView::ContentsRange);
+        }
+        
+        /* make sure its visible on the horizontal axis */
+        
+        nframes64_t fpos = step_edit_region->position() + 
+                step_edit_region_view->beats_to_frames (step_edit_beat_pos + beat_duration);
+        
+        if (fpos >= (_editor.leftmost_position() + _editor.current_page_frames())) {
+                _editor.reset_x_origin (fpos - (_editor.current_page_frames()/4));
+        }
+        
+        step_edit_region_view->step_add_note (channel, pitch, velocity, step_edit_beat_pos, beat_duration);
+        
+        if (_step_edit_triplet_countdown > 0) {
+                _step_edit_triplet_countdown--;
                 
-                if (pitch < msv->lowest_note() || pitch > msv->highest_note()) {
-                        msv->update_note_range (pitch);
-                        msv->set_note_range (MidiStreamView::ContentsRange);
+                if (_step_edit_triplet_countdown == 0) {
+                        _step_edit_triplet_countdown = 3;
                 }
-
-                /* make sure its visible on the horizontal axis */
-
-                nframes64_t fpos = step_edit_region->position() + 
-                        step_edit_region_view->beats_to_frames (step_edit_beat_pos + beat_duration);
-
-                if (fpos >= (_editor.leftmost_position() + _editor.current_page_frames())) {
-                        _editor.reset_x_origin (fpos - (_editor.current_page_frames()/4));
-                }
-
-                step_edit_region_view->step_add_note (channel, pitch, velocity, step_edit_beat_pos, beat_duration);
-
-                if (_step_edit_triplet_countdown > 0) {
-                        _step_edit_triplet_countdown--;
-
-                        if (_step_edit_triplet_countdown == 0) {
-                                _step_edit_triplet_countdown = 3;
-                        }
-                }
-
-                if (!_step_edit_within_chord) {
-                        step_edit_beat_pos += beat_duration;
-                        step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
-                } else {
-                        step_edit_beat_pos += 1.0/Meter::ticks_per_beat; // tiny, but no longer overlapping
-                        _step_edit_chord_duration = max (_step_edit_chord_duration, beat_duration);
-                }
+        }
+        
+        if (!_step_edit_within_chord) {
+                step_edit_beat_pos += beat_duration;
+                step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
+        } else {
+                step_edit_beat_pos += 1.0/Meter::ticks_per_beat; // tiny, but no longer overlapping
+                _step_edit_chord_duration = max (_step_edit_chord_duration, beat_duration);
         }
 
         return 0;
@@ -1116,8 +1176,6 @@ MidiTimeAxisView::step_edit_toggle_chord ()
                 _step_edit_triplet_countdown = 0;
                 _step_edit_within_chord = true;
         }
-        
-        cerr << "Within chord now: " << _step_edit_within_chord << endl;
 }
 
 void

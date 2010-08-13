@@ -58,17 +58,26 @@ class StepEntry : public ArdourDialog
 
         Gtk::ToggleButton chord_button;
         Gtk::ToggleButton triplet_button;
-        Gtk::ToggleButton dot_button;
+        Gtk::ToggleButton dot0_button;
+        Gtk::ToggleButton dot1_button;
+        Gtk::ToggleButton dot2_button;
+        Gtk::ToggleButton dot3_button;
+        Gtk::Adjustment   dot_adjustment;
+        Gtk::VBox dot_box1;
+        Gtk::VBox dot_box2;
         Gtk::ToggleButton restart_button;
 
         Gtk::VBox   resync_box;
         Gtk::Button beat_resync_button;
         Gtk::Button bar_resync_button;
+        Gtk::Button resync_button;
 
         Gtk::Button sustain_button;
         Gtk::Button rest_button;
         Gtk::Button grid_rest_button;
         Gtk::VBox   rest_box;
+
+        Gtk::Button back_button;
 
         Gtk::RadioButton length_1_button;
         Gtk::RadioButton length_2_button;
@@ -185,11 +194,15 @@ class StepEntry : public ArdourDialog
         void octave_9 () { octave_n (9); }
         void octave_10 () { octave_n (10); }
 
-        void toggle_dotted();
+        void dot_change (GtkAction*);
+        void dot_value_change ();
+
         void toggle_triplet();
         void toggle_chord();
         
         void do_sustain ();
+        void back();
+        void sync_to_edit_point ();
 };
 
 #endif /* __gtk2_ardour_step_entry_h__ */

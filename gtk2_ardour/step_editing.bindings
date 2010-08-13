@@ -53,6 +53,7 @@
 
      <Binding key="apostrophe" action="StepEditing/toggle-triplet"/>
      <Binding key="period" action="StepEditing/toggle-dotted"/>
+     <Binding key="Primary-period" action="StepEditing/no-dotted"/>
      <Binding key="bar" action="StepEditing/toggle-chord"/>
   </Press>
 </Bindings>
