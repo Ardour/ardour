@@ -212,6 +212,17 @@ Bindings::save (const string& path)
                 presses->add_child_nocopy (*child);
         }
 
+        XMLNode* releases = new XMLNode (X_("Release"));
+        root->add_child_nocopy (*releases);
+
+        for (KeybindingMap::iterator k = release_bindings.begin(); k != release_bindings.end(); ++k) {
+                XMLNode* child;
+                child = new XMLNode (X_("Binding"));
+                child->add_property (X_("key"), k->first.name());
+                child->add_property (X_("action"), k->second->get_name());
+                releases->add_child_nocopy (*child);
+        }
+
         if (!tree.write (path)) {
                 ::unlink (path.c_str());
                 return false;
