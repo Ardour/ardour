@@ -749,7 +749,7 @@ MidiDiskstream::read (nframes_t& start, nframes_t dur, bool reversed)
 			if (reloop) {
 				// Synthesize LoopEvent here, because the next events
 				// written will have non-monotonic timestamps.
-				_playback_buf->write(loop_end - 1, LoopEventType, 0, 0);
+				_playback_buf->write(loop_end - 1, LoopEventType, sizeof (nframes_t), (uint8_t *) &loop_start);
 				cout << "Pushing LoopEvent ts=" << loop_end-1
 				     << " start+this_read " << start+this_read << endl;
 

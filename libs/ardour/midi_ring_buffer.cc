@@ -44,16 +44,44 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 	Evoral::EventType ev_type;
 	uint32_t          ev_size;
 
+	/* If we see the end of a loop during this read, we must write the events after it
+	   to the MidiBuffer with adjusted times.  The situation is as follows:
+
+           session frames----------------------------->
+	   
+	             |                            |                    |
+	        start_of_loop                   start              end_of_loop
+
+	   The MidiDiskstream::read method which will have happened before this checks for
+	   loops ending, and helpfully inserts a magic LoopEvent into the ringbuffer.  After this,
+	   the MidiDiskstream continues to write events with their proper session frame times,
+	   so after the LoopEvent event times will go backwards (ie non-monotonically).
+
+	   Once we hit end_of_loop, we need to fake it to make it look as though the loop has been
+	   immediately repeated.  Say that an event E after the end_of_loop in the ringbuffer
+	   has time E_t, which is a time in session frames.  Its offset from the start
+	   of the loop will be E_t - start_of_loop.  Its `faked' time will therefore be
+	   end_of_loop + E_t - start_of_loop.  And so its port-buffer-relative time (for
+	   writing to the MidiBuffer) will be end_of_loop + E_t - start_of_loop - start.
+
+	   The subtraction of start is already taken care of, so if we see a LoopEvent, we'll
+	   set up loop_offset to equal end_of_loop - start_of_loop, so that given an event
+	   time E_t in the ringbuffer we can get the port-buffer-relative time as
+	   E_t + offset - start.
+	*/
+
+	frameoffset_t loop_offset = 0;
+
 	size_t count = 0;
 
 	while (this->read_space() >= sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t)) {
 
 		this->full_peek(sizeof(T), (uint8_t*)&ev_time);
 
-		if (ev_time >= end) {
+		if (ev_time + loop_offset >= end) {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 past end @ %2\n", ev_time, end));
 			break;
-		} else if (ev_time < start) {
+		} else if (ev_time + loop_offset < start) {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 before start @ %2\n", ev_time, start));
 			break;
 		} else {
@@ -68,14 +96,17 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 
 		// This event marks a loop end (i.e. the next event's timestamp will be non-monotonic)
 		if (ev_type == LoopEventType) {
-			/*ev_time -= start;
-			  ev_time += offset;*/
 			cerr << "MRB loop boundary @ " << ev_time << endl;
+			
+			assert (ev_size == sizeof (nframes_t));
+			nframes_t loop_start;
+			read_contents (ev_size, (uint8_t *) &loop_start);
 
-			// Return without reading data or writing to buffer (loop events have no data)
-			// FIXME: This is not correct, loses events after the loop this cycle
-			return count + 1;
+			loop_offset = ev_time - loop_start;
+			continue;
 		}
+
+		ev_time += loop_offset;
 
 		uint8_t status;
 		success = this->full_peek(sizeof(uint8_t), &status);
@@ -92,6 +123,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		}
 
 		assert(ev_time >= start);
+		
 		ev_time -= start;
 		ev_time += offset;
 
