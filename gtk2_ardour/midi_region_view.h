@@ -94,8 +94,8 @@ class MidiRegionView : public RegionView
 		{ return midi_view()->midi_view(); }
 
 	void step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
-		       Evoral::MusicalTime pos, Evoral::MusicalTime len);
-
+                            Evoral::MusicalTime pos, Evoral::MusicalTime len);
+        void step_sustain (Evoral::MusicalTime beats);
 	void set_height (double);
 	void apply_note_range(uint8_t lowest, uint8_t highest, bool force=false);
 
@@ -276,7 +276,7 @@ class MidiRegionView : public RegionView
 
 	void goto_previous_note ();
 	void goto_next_note ();
-	void change_note_lengths (bool, bool, bool start, bool end);
+	void change_note_lengths (bool, bool, Evoral::MusicalTime beats, bool start, bool end);
 	void change_velocities (bool up, bool fine, bool allow_smush);
 	void transpose (bool up, bool fine, bool allow_smush);
 	void nudge_notes (bool forward);

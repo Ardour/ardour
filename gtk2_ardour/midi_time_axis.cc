@@ -898,8 +898,12 @@ MidiTimeAxisView::start_step_editing ()
         _step_edit_triplet_countdown = 0;
         _step_edit_within_chord = 0;
         _step_edit_chord_duration = 0.0;
+        
+        boost::shared_ptr<Region> r = playlist()->top_region_at (step_edit_insert_position);
 
-	step_edit_region = playlist()->top_region_at (step_edit_insert_position);
+        if (r) {
+                step_edit_region = boost::dynamic_pointer_cast<MidiRegion>(r);
+        }
 
 	if (step_edit_region) {
 		RegionView* rv = view()->find_view (step_edit_region);
@@ -962,6 +966,8 @@ MidiTimeAxisView::stop_step_editing ()
         if (step_edit_region_view) {
                 step_edit_region_view->hide_step_edit_cursor();
         }
+
+        step_edit_region.reset ();
 }
 
 void
@@ -1004,6 +1010,14 @@ int
 MidiTimeAxisView::step_add_program_change (uint8_t channel, uint8_t program)
 {
         return 0;
+}
+
+void
+MidiTimeAxisView::step_edit_sustain (Evoral::MusicalTime beats)
+{
+        if (step_edit_region_view) {
+                step_edit_region_view->step_sustain (beats);
+        }
 }
 
 int
@@ -1144,7 +1158,7 @@ MidiTimeAxisView::step_edit_bar_sync ()
         step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 
-boost::shared_ptr<Region>
+boost::shared_ptr<MidiRegion>
 MidiTimeAxisView::add_region (framepos_t pos)
 {
 	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
@@ -1172,7 +1186,7 @@ MidiTimeAxisView::add_region (framepos_t pos)
 
 	real_editor->commit_reversible_command();
 
-	return region;
+	return boost::dynamic_pointer_cast<MidiRegion>(region);
 }
 
 void

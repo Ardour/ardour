@@ -68,7 +68,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void set_height (uint32_t);
 	void hide ();
 
-	boost::shared_ptr<ARDOUR::Region> add_region (ARDOUR::framepos_t pos);
+	boost::shared_ptr<ARDOUR::MidiRegion> add_region (ARDOUR::framepos_t pos);
 
 	void show_all_automation ();
 	void show_existing_automation ();
@@ -95,6 +95,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
         int  step_add_program_change (uint8_t channel, uint8_t program);
         int  step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, 
                             Evoral::MusicalTime beat_duration);
+        void step_edit_sustain (Evoral::MusicalTime beats);
         bool step_edit_within_triplet () const;
         void step_edit_toggle_triplet ();
         bool step_edit_within_chord () const;
@@ -147,7 +148,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	nframes64_t step_edit_insert_position;
 	Evoral::MusicalTime step_edit_beat_pos;
-	boost::shared_ptr<ARDOUR::Region> step_edit_region;
+	boost::shared_ptr<ARDOUR::MidiRegion> step_edit_region;
 	MidiRegionView* step_edit_region_view;
         uint8_t _step_edit_triplet_countdown;
         bool    _step_edit_within_chord;

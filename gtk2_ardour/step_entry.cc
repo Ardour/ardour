@@ -1030,4 +1030,5 @@ StepEntry::octave_n (int n)
 void
 StepEntry::do_sustain ()
 {
+        _mtv->step_edit_sustain (note_length());
 }

@@ -563,7 +563,7 @@ MidiRegionView::key_press (GdkEventKey* ev)
                 bool shorter = Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier);
                 bool fine = Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
                 
-                change_note_lengths (fine, shorter, start, end);
+                change_note_lengths (fine, shorter, 0.0, start, end);
                 
                 return true;
                 
@@ -1478,7 +1478,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 
 void
 MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
-			  Evoral::MusicalTime pos, Evoral::MusicalTime len)
+                               Evoral::MusicalTime pos, Evoral::MusicalTime len)
 {
 	boost::shared_ptr<NoteType> new_note (new NoteType (channel, pos, len, number, velocity));
 
@@ -1499,6 +1499,12 @@ MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity
 	apply_diff();
 
         // last_step_edit_note = new_note;
+}
+
+void
+MidiRegionView::step_sustain (Evoral::MusicalTime beats)
+{
+        change_note_lengths (false, false, beats, false, true);
 }
 
 void
@@ -2473,22 +2479,22 @@ MidiRegionView::transpose (bool up, bool fine, bool allow_smush)
 }
 
 void
-MidiRegionView::change_note_lengths (bool fine, bool shorter, bool start, bool end)
+MidiRegionView::change_note_lengths (bool fine, bool shorter, Evoral::MusicalTime delta, bool start, bool end)
 {
-	Evoral::MusicalTime delta;
-
-	if (fine) {
-		delta = 1.0/128.0;
-	} else {
-		/* grab the current grid distance */
-		bool success;
-		delta = trackview.editor().get_grid_type_as_beats (success, _region->position());
-		if (!success) {
-			/* XXX cannot get grid type as beats ... should always be possible ... FIX ME */
-			cerr << "Grid type not available as beats - TO BE FIXED\n";
-			return;
-		}
-	}
+        if (delta == 0.0) {
+                if (fine) {
+                        delta = 1.0/128.0;
+                } else {
+                        /* grab the current grid distance */
+                        bool success;
+                        delta = trackview.editor().get_grid_type_as_beats (success, _region->position());
+                        if (!success) {
+                                /* XXX cannot get grid type as beats ... should always be possible ... FIX ME */
+                                cerr << "Grid type not available as beats - TO BE FIXED\n";
+                                return;
+                        }
+                }
+        }
 
 	if (shorter) {
 		delta = -delta;
