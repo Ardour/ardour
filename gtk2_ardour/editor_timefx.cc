@@ -171,21 +171,42 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 
 	txt = current_timefx->stretch_opts_selector.get_active_text ();
 
-	if (txt == rb_opt_strings[0]) {
-		transients = NoTransients; peaklock = false; longwin = true; shortwin = false;
-	} else if (txt == rb_opt_strings[1]) {
-		transients = NoTransients; peaklock = false; longwin = false; shortwin = false;
-	} else if (txt == rb_opt_strings[2]) {
-		transients = NoTransients; peaklock = true; longwin = false; shortwin = false;
-	} else if (txt == rb_opt_strings[3]) {
-		transients = BandLimitedTransients; peaklock = true; longwin = false; shortwin = false;
-	} else if (txt == rb_opt_strings[5]) {
-		transients = Transients; peaklock = false; longwin = false; shortwin = true;
-	} else {
-		/* default/4 */
-
-		transients = Transients; peaklock = true; longwin = false; shortwin = false;
+	for (int i = 0; i <= 6; i++) {
+		if (txt == rb_opt_strings[i]) {
+			rb_current_opt = i;
+			break;
+		}
 	}
+	
+	switch (rb_current_opt) {
+		case 0:
+			transients = NoTransients; peaklock = false; longwin = true; shortwin = false; 
+			break;
+		case 1:
+			transients = NoTransients; peaklock = false; longwin = false; shortwin = false; 
+			break;
+		case 2:
+			transients = NoTransients; peaklock = true; longwin = false; shortwin = false; 
+			break;
+		case 3:
+			transients = BandLimitedTransients; peaklock = true; longwin = false; shortwin = false; 
+			break;
+		case 5:
+			transients = Transients; peaklock = false; longwin = false; shortwin = true; 
+			break;
+		case 6:
+			transients = NoTransients;
+			precise = true;
+			preserve_formants = false;
+			current_timefx->request.pitch_fraction = 1/val;
+			shortwin = true;
+			// peaklock = false;
+			break;
+		default:
+			/* default/4 */	
+			transients = Transients; peaklock = true; longwin = false; shortwin = false; 
+			break;
+	};
 
 	if (realtime)          options |= RubberBandStretcher::OptionProcessRealTime;
 	if (precise)           options |= RubberBandStretcher::OptionStretchPrecise;

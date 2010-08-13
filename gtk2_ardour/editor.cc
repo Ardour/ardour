@@ -201,6 +201,7 @@ static const gchar *_rb_opt_strings[] = {
 	N_("Unpitched percussion with stable notes"),
 	N_("Crisp monophonic instrumental"),
 	N_("Unpitched solo percussion"),
+	N_("Resample without preserving pitch"),
 	0
 };
 #endif
@@ -329,6 +330,7 @@ Editor::Editor ()
 	edit_point_strings = I18N (_edit_point_strings);
 #ifdef USE_RUBBERBAND
 	rb_opt_strings = I18N (_rb_opt_strings);
+	rb_current_opt = 4;
 #endif
 
 	snap_threshold = 5.0;

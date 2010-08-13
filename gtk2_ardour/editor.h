@@ -221,6 +221,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 #ifdef USE_RUBBERBAND
 	std::vector<std::string> rb_opt_strings;
+	int rb_current_opt;
 #endif
 
 	/* things that need to be public to be used in the main menubar */

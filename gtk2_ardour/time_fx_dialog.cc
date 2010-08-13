@@ -145,7 +145,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 
 		set_popdown_strings (stretch_opts_selector, editor.rb_opt_strings);
 		/* set default */
-		stretch_opts_selector.set_active_text (editor.rb_opt_strings[4]);
+		stretch_opts_selector.set_active_text (editor.rb_opt_strings[editor.rb_current_opt]);
 		table->attach (stretch_opts_selector, 2, 3, 0, 1, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
 
 		table->attach (precise_button, 1, 3, 1, 2, Gtk::FILL, Gtk::EXPAND, 0, 0);
