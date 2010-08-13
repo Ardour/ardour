@@ -2662,7 +2662,7 @@ Editor::set_internal_edit (bool yn)
 	if (yn) {
 		mouse_select_button.set_image (*(manage (new Image (::get_icon("midi_tool_pencil")))));
 		mouse_select_button.get_image ()->show ();
-                ARDOUR_UI::instance()->tooltips().set_tip (mouse_select_button, _("Draw/Edit MIDI Notes"));
+                ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Draw/Edit MIDI Notes"));
                 set_canvas_cursor ();
 
 		/* deselect everything to avoid confusion when e.g. we can't now cut a previously selected
@@ -2674,7 +2674,7 @@ Editor::set_internal_edit (bool yn)
 
 		mouse_select_button.set_image (*(manage (new Image (::get_icon("tool_range")))));
 		mouse_select_button.get_image ()->show ();
-                ARDOUR_UI::instance()->tooltips().set_tip (mouse_select_button, _("Select/Move Ranges"));
+                ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Select/Move Ranges"));
                 mouse_mode_toggled (mouse_mode); // sets cursor
 	}
 }
