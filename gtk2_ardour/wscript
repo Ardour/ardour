@@ -448,6 +448,9 @@ def build(bld):
 			)
 		obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
 
+        # not modified at present
+	bld.install_files(os.path.join(bld.env['CONFIGDIR'], 'ardour3'), 'step_editing.bindings')
+
 	# Icons/Images
 	bld.install_files('${DATADIR}/ardour3/icons', 'icons/*.png')
 	bld.install_files('${DATADIR}/ardour3/pixmaps', 'pixmaps/*.xpm')

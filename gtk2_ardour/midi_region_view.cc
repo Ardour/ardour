@@ -1491,6 +1491,9 @@ MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity
 		_region->set_length (end_frame - _region->position(), this);
 	}
 
+        _marked_for_selection.clear ();
+        clear_selection ();
+
 	start_diff_command (_("step add"));
 	diff_add_note (new_note, true, false);
 	apply_diff();
