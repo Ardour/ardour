@@ -47,6 +47,16 @@ class AudioPort : public Port
 
 	AudioBuffer& get_audio_buffer (nframes_t nframes, nframes_t offset = 0);
 
+	static nframes_t port_offset() { return _port_offset; }
+
+	static void set_port_offset (nframes_t off) {
+		_port_offset = off;
+	}
+	
+	static void increment_port_offset (nframes_t n) {
+		_port_offset += n;
+	}
+	
   protected:
 	friend class AudioEngine;
 
@@ -55,6 +65,7 @@ class AudioPort : public Port
   private:
 	AudioBuffer* _buffer;
 
+	static nframes_t _port_offset;
 };
 
 } // namespace ARDOUR

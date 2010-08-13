@@ -67,8 +67,6 @@ MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
 		   into our MidiBuffer
 		*/
 
-		nframes_t off = offset + _port_offset;
-
 		for (nframes_t i = 0; i < event_count; ++i) {
 
 			jack_midi_event_t ev;
@@ -80,10 +78,10 @@ MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
                                 continue;
                         }
 
-			if (ev.time >= off && ev.time < off+nframes) {
+			if (ev.time > offset && ev.time < (offset + nframes)) {
 				_buffer->push_back (ev);
 			} else {
-				cerr << "Dropping incoming MIDI at time " << ev.time << "; offset=" << off << " limit=" << (off + nframes) << "\n";
+				cerr << "Dropping incoming MIDI at time " << ev.time << "; offset=" << offset << " limit=" << (offset + nframes) << "\n";
 			}
 		}
 
@@ -139,18 +137,14 @@ MidiPort::flush_buffers (nframes_t nframes, nframes64_t time, nframes_t offset)
 
 			// event times are in frames, relative to cycle start
 
-			// XXX split cycle start or cycle start?
+			assert (ev.time() < (nframes + offset));
 
-			assert(ev.time() < (nframes+offset+_port_offset));
-
-			if (ev.time() >= offset + _port_offset) {
+			if (ev.time() >= offset) {
 				if (jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size()) != 0) {
-                                        cerr << "write failed, drop flushed note off on the floor, time " << ev.time() << " > " << offset << " + " << _port_offset 
-                                             << endl;			
+                                        cerr << "write failed, drop flushed note off on the floor, time " << ev.time() << " > " << offset << endl;
                                 }
                         } else {
-                                cerr << "drop flushed note off on the floor, time " << ev.time() << " > " << offset << " + " << _port_offset 
-                                     << endl;
+                                cerr << "drop flushed event on the floor, time " << ev.time() << " < " << offset << endl;
                         }
 		}
 	}

@@ -401,7 +401,7 @@ AudioEngine::split_cycle (nframes_t offset)
 {
 	/* caller must hold process lock */
 
-	Port::increment_port_offset (offset);
+	AudioPort::increment_port_offset (offset);
 
 	/* tell all Ports that we're going to start a new (split) cycle */
 
@@ -484,7 +484,7 @@ AudioEngine::process_callback (nframes_t nframes)
 	/* tell all relevant objects that we're starting a new cycle */
 
 	Delivery::CycleStart (nframes);
-	Port::set_port_offset (0);
+	AudioPort::set_port_offset (0);
 	InternalReturn::CycleStart (nframes);
 
 	/* tell all Ports that we're starting a new cycle */

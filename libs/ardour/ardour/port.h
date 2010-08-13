@@ -45,14 +45,6 @@ public:
 
 	virtual ~Port ();
 
-	static nframes_t port_offset() { return _port_offset; }
-
-	static void set_port_offset (nframes_t off) {
-		_port_offset = off;
-	}
-	static void increment_port_offset (nframes_t n) {
-		_port_offset += n;
-	}
 	static void set_buffer_size (nframes_t sz) {
 		_buffer_size = sz;
 	}
@@ -62,7 +54,6 @@ public:
 	static bool connecting_blocked() { 
 		return _connecting_blocked;
 	}
-
 
 	/** @return Port short name */
 	std::string name () const {
@@ -135,7 +126,6 @@ protected:
 
 	jack_port_t* _jack_port; ///< JACK port
 
-	static nframes_t _port_offset;
 	static nframes_t _buffer_size;
 	static bool	 _connecting_blocked;
         

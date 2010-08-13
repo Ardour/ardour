@@ -34,7 +34,6 @@ using namespace std;
 using namespace ARDOUR;
 
 AudioEngine* Port::_engine = 0;
-nframes_t Port::_port_offset = 0;
 nframes_t Port::_buffer_size = 0;
 bool Port::_connecting_blocked = false;
 

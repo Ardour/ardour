@@ -25,6 +25,8 @@
 using namespace ARDOUR;
 using namespace std;
 
+nframes_t AudioPort::_port_offset = 0;
+
 AudioPort::AudioPort (const std::string& name, Flags flags)
 	: Port (name, DataType::AUDIO, flags)
 	, _buffer (new AudioBuffer (0))

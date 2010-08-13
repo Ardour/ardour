@@ -37,7 +37,7 @@
 #include "ardour/slave.h"
 #include "ardour/timestamps.h"
 #include "ardour/graph.h"
-#include "ardour/port.h"
+#include "ardour/audio_port.h"
 
 #include "midi++/manager.h"
 #include "midi++/mmc.h"
@@ -884,7 +884,7 @@ Session::maybe_sync_start (nframes_t& nframes)
 
 		no_roll (sync_offset);
 		nframes -= sync_offset;
-		Port::increment_port_offset (sync_offset);
+		AudioPort::increment_port_offset (sync_offset);
 		waiting_for_sync_offset = false;
 
 		if (nframes == 0) {
