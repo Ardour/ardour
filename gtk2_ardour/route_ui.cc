@@ -1670,7 +1670,7 @@ RouteUI::setup_invert_buttons ()
 		b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::invert_toggled), i, b));
 		b->signal_button_press_event().connect (sigc::mem_fun (*this, &RouteUI::invert_press));
 		
-		b->set_name (X_("InvertButton"));
+		b->set_name (X_("MixerInvertButton"));
 		if (to_add == 1) {
 			b->add (*manage (new Label (X_("Ø"))));
 		} else {
