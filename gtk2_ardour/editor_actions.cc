@@ -654,6 +654,8 @@ Editor::register_actions ()
 	mouse_select_button.set_name ("MouseModeButton");
 	mouse_select_button.get_image ()->show ();
 
+	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Link Object / Range Tools"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
+	act->connect_proxy (join_object_range_button);
 	join_object_range_button.set_image (*(manage (new Image (::get_icon ("tool_object_range")))));
 	join_object_range_button.set_label ("");
 	join_object_range_button.set_name ("MouseModeButton");
@@ -680,7 +682,7 @@ Editor::register_actions ()
 	mouse_audition_button.set_name ("MouseModeButton");
 	mouse_audition_button.get_image ()->show ();
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Timefx Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));
 	act->connect_proxy (mouse_timefx_button);
 	mouse_timefx_button.set_image (*(manage (new Image (::get_icon("tool_stretch")))));
 	mouse_timefx_button.set_label ("");

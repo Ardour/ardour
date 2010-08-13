@@ -215,6 +215,7 @@
 		   <menuitem action='set-mouse-mode-gain'/>
 		   <menuitem action='set-mouse-mode-zoom'/>
 		   <menuitem action='set-mouse-mode-timefx'/>
+		   <menuitem action='set-mouse-mode-object-range'/>
 		   <separator/>
 		   <menuitem action='toggle-internal-edit'/>
 		   <separator/>

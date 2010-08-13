@@ -1544,6 +1544,7 @@ public:
 	Gtk::ToggleButton         join_object_range_button;
 
 	void                     mouse_mode_toggled (Editing::MouseMode m);
+	void			 mouse_mode_object_range_toggled () {}
 	bool                     ignore_mouse_mode_toggle;
 
 	Gtk::ToggleButton        internal_edit_button;

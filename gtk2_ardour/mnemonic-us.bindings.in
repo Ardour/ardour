@@ -148,6 +148,7 @@ This mode provides many different operations on both regions and control points,
 @mmode|MouseMode/set-mouse-mode-timefx|t|timefx mode
 @rop|Editor/pitch-shift-region|<@SECONDARY@>t|transpose
 @eep|Editor/insert-time|<@PRIMARY@>t|insert time
+@mmode|MouseMode/set-mouse-mode-object-range|y|link object/range tools
 @select|Editor/select-all-between-cursors|<@PRIMARY@>u|all enclosed by edit range
 @select|Editor/select-all-within-cursors|u|all present in edit range
 @eep|Editor/insert-region|i|insert from region list

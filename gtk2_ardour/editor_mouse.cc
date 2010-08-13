@@ -326,8 +326,6 @@ Editor::mouse_mode_toggled (MouseMode m)
 
 	instant_save ();
         
-        cerr << "Mouse mode toggled to " << m << endl;
-
         if (!internal_editing()) {
                 if (mouse_mode != MouseRange && _join_object_range_state == JOIN_OBJECT_RANGE_NONE) {
                         
