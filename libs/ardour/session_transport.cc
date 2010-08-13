@@ -658,8 +658,6 @@ Session::set_play_loop (bool yn)
 		return;
 	}
 	
-	set_dirty();
-	
 	if (yn && Config->get_seamless_loop() && synced_to_jack()) {
 		warning << string_compose (_("Seamless looping cannot be supported while %1 is using JACK transport.\n"
                                              "Recommend changing the configured options"), PROGRAM_NAME)
