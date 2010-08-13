@@ -512,7 +512,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, nframes64_t* pending_
 	   the region would be if we moved it by that much.
 	*/
 	*pending_region_position = adjusted_current_frame (event);
-	
+
 	nframes64_t sync_frame;
 	nframes64_t sync_offset;
 	int32_t sync_dir;
@@ -537,41 +537,29 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, nframes64_t* pending_
 		*pending_region_position = _last_frame_position;
 	}
 
-	double x_delta = 0;
+	double dx = 0;
 
 	if ((*pending_region_position != _last_frame_position) && x_move_allowed ()) {
 
-		/* now compute the canvas unit distance we need to move the regionview
-		   to make it appear at the new location.
-		*/
+		/* x movement since last time */
+		dx = (static_cast<double> (*pending_region_position) - _last_frame_position) / _editor->frames_per_unit;
+		
+		/* total x movement */
+		framecnt_t total_dx = *pending_region_position - grab_frame () + _pointer_frame_offset;
 
-		x_delta = (static_cast<double> (*pending_region_position) - _last_frame_position) / _editor->frames_per_unit;
-
-		if (*pending_region_position <= _last_frame_position) {
-
-			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-
-				RegionView* rv = i->view;
-
-				// If any regionview is at zero, we need to know so we can stop further leftward motion.
-
-				double ix1, ix2, iy1, iy2;
-				rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-				rv->get_canvas_frame()->i2w (ix1, iy1);
-
-				if (-x_delta > ix1 + _editor->horizontal_position()) {
-					x_delta = 0;
-					*pending_region_position = _last_frame_position;
-					break;
-				}
+		/* check that no regions have gone off the start of the session */
+		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+			if ((i->view->region()->position() + total_dx) < 0) {
+				dx = 0;
+				*pending_region_position = _last_frame_position;
+				break;
 			}
-
 		}
 
 		_last_frame_position = *pending_region_position;
 	}
 
-	return x_delta;
+	return dx;
 }
 
 void
@@ -883,8 +871,6 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 
 	/* make a list of where each region ended up */
 	final = find_time_axis_views_and_layers ();
-
-        cerr << "Iterate over " << _views.size() << " views\n";
 
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ) {
 
