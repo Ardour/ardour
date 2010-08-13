@@ -62,6 +62,8 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
 
+uint32_t RouteUI::_max_invert_buttons = 4;
+
 RouteUI::RouteUI (ARDOUR::Session* sess)
 	: AxisView(sess)
 {
@@ -84,6 +86,7 @@ RouteUI::~RouteUI()
 	delete mute_menu;
 	delete sends_menu;
         delete record_menu;
+	delete _invert_menu;
 }
 
 void
@@ -95,6 +98,7 @@ RouteUI::init ()
 	solo_menu = 0;
 	sends_menu = 0;
         record_menu = 0;
+	_invert_menu = 0;
 	pre_fader_mute_check = 0;
 	post_fader_mute_check = 0;
 	listen_mute_check = 0;
@@ -103,7 +107,6 @@ RouteUI::init ()
         solo_isolated_check = 0;
         solo_isolated_led = 0;
         solo_safe_led = 0;
-	ignore_toggle = false;
 	_solo_release = 0;
 	_mute_release = 0;
 	route_active_menu_item = 0;
@@ -111,13 +114,9 @@ RouteUI::init ()
         step_edit_item = 0;
 	multiple_mute_change = false;
 	multiple_solo_change = false;
+	_i_am_the_modifier = 0;
 
-	invert_button = manage (new BindableToggleButton ());
-	// mute_button->set_self_managed (true);
-	invert_button->set_name ("InvertButton");
-	invert_button->add (invert_button_label);
-	invert_button_label.show ();
-	UI::instance()->set_tip (invert_button, _("Invert (Phase reverse) this track"), "");
+	setup_invert_buttons ();
 
 	mute_button = manage (new BindableToggleButton ());
 	// mute_button->set_self_managed (true);
@@ -162,8 +161,6 @@ RouteUI::init ()
 	solo_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::solo_release), false);
 	mute_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::mute_press), false);
 	mute_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::mute_release), false);
-	invert_button->signal_toggled().connect (sigc::mem_fun(*this, &RouteUI::invert_toggled), false);
-
 }
 
 void
@@ -223,6 +220,8 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
         _route->phase_invert_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::property_changed, this, _1), gui_context());
 
+	_route->io_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::setup_invert_buttons, this), gui_context ());
+
 	if (_session->writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
@@ -244,7 +243,6 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	solo_button->unset_flags (Gtk::CAN_FOCUS);
 
 	mute_button->show();
-        invert_button->show ();
 
 	if (_route->is_monitor()) {
 		solo_button->hide ();
@@ -253,12 +251,9 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	}
 
 	map_frozen ();
-}
 
-void
-RouteUI::invert_toggled ()
-{
-        _route->set_phase_invert (invert_button->get_active());
+	setup_invert_buttons ();
+	set_invert_button_state ();
 }
 
 void
@@ -267,12 +262,8 @@ RouteUI::polarity_changed ()
         if (!_route) {
                 return;
         }
-        
-	if (_route->phase_invert()) {
-                invert_button->set_active (true);
-	} else {
-                invert_button->set_active (false);
-	}
+
+	set_invert_button_state ();
 }
 
 bool
@@ -284,7 +275,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 	multiple_mute_change = false;
 
-	if (!ignore_toggle) {
+	if (!_i_am_the_modifier) {
 
 		if (Keyboard::is_context_menu_event (ev)) {
 
@@ -357,7 +348,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 bool
 RouteUI::mute_release (GdkEventButton*)
 {
-	if (!ignore_toggle) {
+	if (!_i_am_the_modifier) {
 		if (_mute_release){
 			_session->set_mute (_mute_release->routes, _mute_release->active, Session::rt_cleanup, true);
 			delete _mute_release;
@@ -379,7 +370,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 	
 	multiple_solo_change = false;
 
-	if (!ignore_toggle) {
+	if (!_i_am_the_modifier) {
 		
 		if (Keyboard::is_context_menu_event (ev)) {
 			
@@ -500,7 +491,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 bool
 RouteUI::solo_release (GdkEventButton*)
 {
-	if (!ignore_toggle) {
+	if (!_i_am_the_modifier) {
 		
 		if (_solo_release) {
 
@@ -544,7 +535,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
                 } 
         }
 
-	if (!ignore_toggle && is_track() && rec_enable_button) {
+	if (!_i_am_the_modifier && is_track() && rec_enable_button) {
 
 		if (Keyboard::is_button2_event (ev)) {
 
@@ -730,7 +721,7 @@ RouteUI::show_sends_press(GdkEventButton* ev)
 		return true;
 	}
 
-	if (!ignore_toggle && !is_track() && show_sends_button) {
+	if (!_i_am_the_modifier && !is_track() && show_sends_button) {
 
 		if (Keyboard::is_button2_event (ev) && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -883,17 +874,17 @@ RouteUI::update_solo_display ()
 	if (Config->get_solo_control_is_listen_control()) {
 
 		if (solo_button->get_active() != (x = _route->listening())) {
-			ignore_toggle = true;
+			++_i_am_the_modifier;
 			solo_button->set_active(x);
-			ignore_toggle = false;
+			--_i_am_the_modifier;
 		}
 
 	} else {
 
 		if (solo_button->get_active() != (x = _route->soloed())) {
-			ignore_toggle = true;
+			++_i_am_the_modifier;
 			solo_button->set_active (x);
-			ignore_toggle = false;
+			--_i_am_the_modifier;
 		}
 
 	}
@@ -988,9 +979,9 @@ RouteUI::update_mute_display ()
 	*/
 
 	if (model != view) {
-		ignore_toggle = true;
+		++_i_am_the_modifier;
 		mute_button->set_active (model);
-		ignore_toggle = false;
+		--_i_am_the_modifier;
 	}
 
 	mute_button->set_visual_state (mute_visual_state (_session, _route));
@@ -1023,9 +1014,9 @@ RouteUI::update_rec_display ()
 	*/
 
 	if (model != view) {
-		ignore_toggle = true;
+		++_i_am_the_modifier;
 		rec_enable_button->set_active (model);
-		ignore_toggle = false;
+		--_i_am_the_modifier;
 	}
 
 	/* now make sure its color state is correct */
@@ -1654,4 +1645,124 @@ RouteUI::open_remote_control_id_dialog ()
 	if (r == RESPONSE_ACCEPT) {
 		_route->set_remote_control_id (spin->get_value_as_int ());
 	}
+}
+
+void
+RouteUI::setup_invert_buttons ()
+{
+	/* remove old invert buttons */
+	for (list<BindableToggleButton*>::iterator i = _invert_buttons.begin(); i != _invert_buttons.end(); ++i) {
+		_invert_button_box.remove (**i);
+	}
+
+	_invert_buttons.clear ();
+
+	if (!_route || !_route->input()) {
+		return;
+	}
+
+	uint32_t const N = _route->input()->n_ports().n_audio ();
+
+	uint32_t const to_add = (N <= _max_invert_buttons) ? N : 1;
+
+	for (uint32_t i = 0; i < to_add; ++i) {
+		BindableToggleButton* b = manage (new BindableToggleButton);
+		b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::invert_toggled), i, b));
+		b->signal_button_press_event().connect (sigc::mem_fun (*this, &RouteUI::invert_press));
+		
+		b->set_name (X_("InvertButton"));
+		if (to_add == 1) {
+			b->add (*manage (new Label (X_("Ø"))));
+		} else {
+			b->add (*manage (new Label (string_compose (X_("Ø%1"), i + 1))));
+		}
+
+		if (N <= 4) {
+			UI::instance()->set_tip (*b, string_compose (_("Left-click to invert (phase reverse) channel %1 of this track.  Right-click to show menu."), i + 1));
+		} else {
+			UI::instance()->set_tip (*b, string_compose (_("Left-click to invert (phase reverse) all channels of this track.  Right-click to show menu."), i + 1));
+		}
+		
+		_invert_buttons.push_back (b);
+		_invert_button_box.pack_start (*b);
+	}
+	
+	_invert_button_box.show_all ();
+}
+
+void
+RouteUI::set_invert_button_state ()
+{
+	++_i_am_the_modifier;
+	
+	uint32_t const N = _route->input()->n_ports().n_audio();
+	if (N > _max_invert_buttons) {
+		_invert_buttons.front()->set_active (_route->phase_invert().any());
+		--_i_am_the_modifier;
+		return;
+	}
+
+	int j = 0;
+	for (list<BindableToggleButton*>::iterator i = _invert_buttons.begin(); i != _invert_buttons.end(); ++i, ++j) {
+		(*i)->set_active (_route->phase_invert (j));
+	}
+
+	--_i_am_the_modifier;
+}
+
+void
+RouteUI::invert_toggled (uint32_t i, BindableToggleButton* b)
+{
+	if (_i_am_the_modifier) {
+		return;
+	}
+	
+	uint32_t const N = _route->input()->n_ports().n_audio();
+	if (N <= _max_invert_buttons) {
+		_route->set_phase_invert (i, b->get_active ());
+	} else {
+		boost::dynamic_bitset<> p (N);
+		if (b->get_active ()) {
+			p.set ();
+		}
+		_route->set_phase_invert (p);
+	}
+}
+
+bool
+RouteUI::invert_press (GdkEventButton* ev)
+{
+	using namespace Menu_Helpers;
+
+	if (ev->button != 3) {
+		return true;
+	}
+
+	delete _invert_menu;
+	_invert_menu = new Menu;
+	_invert_menu->set_name ("ArdourContextMenu");
+	MenuList& items = _invert_menu->items ();
+
+	uint32_t const N = _route->input()->n_ports().n_audio();
+	for (uint32_t i = 0; i < N; ++i) {
+		items.push_back (CheckMenuElem (string_compose (X_("Ø%1"), i + 1), sigc::bind (sigc::mem_fun (*this, &RouteUI::invert_menu_toggled), i)));
+		CheckMenuItem* e = dynamic_cast<CheckMenuItem*> (&items.back ());
+		++_i_am_the_modifier;
+		e->set_active (_route->phase_invert (i));
+		--_i_am_the_modifier;
+	}
+
+	_invert_menu->popup (0, ev->time);
+
+	return false;
+}
+
+void
+RouteUI::invert_menu_toggled (uint32_t c)
+{
+	if (_i_am_the_modifier) {
+		return;
+	}
+	
+	_route->set_phase_invert (c, !_route->phase_invert (c));
 }

@@ -29,6 +29,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include <boost/dynamic_bitset.hpp>
 
 #include <glibmm/thread.h>
 #include "pbd/fastlog.h"
@@ -150,8 +151,10 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void set_listen (bool yn, void* src);
 	bool listening () const;
 
-	void set_phase_invert (bool yn);
-	bool phase_invert() const;
+	void set_phase_invert (uint32_t, bool yn);
+	void set_phase_invert (boost::dynamic_bitset<>);
+	bool phase_invert (uint32_t) const;
+	boost::dynamic_bitset<> phase_invert () const;
 
 	void set_denormal_protection (bool yn);
 	bool denormal_protection() const;
@@ -258,6 +261,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	PBD::Signal0<void>       signal_latency_changed;
 	PBD::Signal0<void>       initial_delay_changed;
 	PBD::Signal0<void>       order_key_changed;
+	PBD::Signal0<void>       io_changed;
 
 	/* gui's call this for their own purposes. */
 
@@ -411,7 +415,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	Flag           _flags;
 	int            _pending_declick;
 	MeterPoint     _meter_point;
-	uint32_t       _phase_invert;
+	boost::dynamic_bitset<> _phase_invert;
 	bool           _self_solo;
 	uint32_t       _soloed_by_others_upstream;
 	uint32_t       _soloed_by_others_downstream;

@@ -80,7 +80,6 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _flags (flg)
         , _pending_declick (true)
         , _meter_point (MeterPostFader)
-        , _phase_invert (0)
         , _self_solo (false)
         , _soloed_by_others_upstream (0)
         , _soloed_by_others_downstream (0)
@@ -424,7 +423,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   DENORMAL CONTROL/PHASE INVERT
 	   ----------------------------------------------------------------------------------------- */
 
-	if (_phase_invert) {
+	if (_phase_invert.any ()) {
 
 		int chn = 0;
 
@@ -433,7 +432,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i, ++chn) {
 				Sample* const sp = i->data();
 
-				if (_phase_invert & chn) {
+				if (_phase_invert[chn]) {
 					for (nframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx]  = -sp[nx];
 						sp[nx] += 1.0e-27f;
@@ -450,7 +449,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i, ++chn) {
 				Sample* const sp = i->data();
 
-				if (_phase_invert & (1<<chn)) {
+				if (_phase_invert[chn]) {
 					for (nframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] = -sp[nx];
 					}
@@ -1720,7 +1719,9 @@ Route::state(bool full_state)
 	}
 
 	node->add_property("active", _active?"yes":"no");
-	node->add_property("phase-invert", _phase_invert?"yes":"no");
+	string p;
+	boost::to_string (_phase_invert, p);
+	node->add_property("phase-invert", p);
 	node->add_property("denormal-protection", _denormal_protection?"yes":"no");
 	node->add_property("meter-point", enum_2_string (_meter_point));
 
@@ -1867,7 +1868,7 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 	}
 
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
-		set_phase_invert (string_is_affirmative (prop->value()));
+		set_phase_invert (boost::dynamic_bitset<> (prop->value ()));
 	}
 
 	if ((prop = node.property (X_("denormal-protection"))) != 0) {
@@ -1982,7 +1983,11 @@ Route::_set_state_2X (const XMLNode& node, int version)
 	}
 	
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
-		set_phase_invert (string_is_affirmative (prop->value()));
+		boost::dynamic_bitset<> p (_input->n_ports().n_audio ());
+		if (string_is_affirmative (prop->value ())) {
+			p.set ();
+		}			
+		set_phase_invert (p);
 	}
 
 	if ((prop = node.property (X_("denormal-protection"))) != 0) {
@@ -2644,6 +2649,8 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 {
 	if ((change & ConfigurationChanged)) {
 		configure_processors (0);
+		_phase_invert.resize (_input->n_ports().n_audio ());
+		io_changed (); /* EMIT SIGNAL */
 	}
 }
 
@@ -3223,25 +3230,39 @@ Route::internal_send_for (boost::shared_ptr<const Route> target) const
 	return boost::shared_ptr<Send>();
 }
 
+/** @param c Audio channel index.
+ *  @param yn true to invert phase, otherwise false.
+ */
 void
-Route::set_phase_invert (bool yn)
+Route::set_phase_invert (uint32_t c, bool yn)
 {
-	if (_phase_invert != yn) {
-                if (yn) {
-                        _phase_invert = 0xffff; // XXX all channels
-                } else {
-                        _phase_invert = 0; // XXX no channels
-                }
+	if (_phase_invert[c] != yn) {
+		_phase_invert[c] = yn;
+		phase_invert_changed (); /* EMIT SIGNAL */
+                _session.set_dirty ();
+	}
+}
 
+void
+Route::set_phase_invert (boost::dynamic_bitset<> p)
+{
+	if (_phase_invert != p) {
+		_phase_invert = p;
 		phase_invert_changed (); /* EMIT SIGNAL */
                 _session.set_dirty ();
 	}
 }
 
 bool
+Route::phase_invert (uint32_t c) const
+{
+	return _phase_invert[c];
+}
+
+boost::dynamic_bitset<>
 Route::phase_invert () const
 {
-	return _phase_invert != 0;
+	return _phase_invert;
 }
 
 void
@@ -3405,3 +3426,4 @@ Route::set_processor_positions ()
 		}
 	}
 }
+

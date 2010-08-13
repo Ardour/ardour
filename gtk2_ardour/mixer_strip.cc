@@ -183,7 +183,6 @@ MixerStrip::init ()
 
 	mute_button->set_name ("MixerMuteButton");
 	solo_button->set_name ("MixerSoloButton");
-        invert_button->set_name ("MixerInvertButton");
 
         solo_isolated_led = manage (new LED);
         solo_isolated_led->show ();
@@ -228,7 +227,7 @@ MixerStrip::init ()
 
 	button_table.attach (name_button, 0, 2, 0, 1);
 	button_table.attach (input_button, 0, 2, 1, 2);
-	button_table.attach (*invert_button, 0, 2, 3, 4);
+	button_table.attach (_invert_button_box, 0, 2, 3, 4);
 
 	middle_button_table.set_homogeneous (true);
 	middle_button_table.set_spacings (0);
@@ -433,8 +432,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 			show_sends_button->show();
 		}
 	}
-
-	invert_button->set_active (_route->phase_invert ());
 
 	switch (_route->meter_point()) {
 	case MeterInput:
@@ -1769,8 +1766,6 @@ MixerStrip::revert_to_default_display ()
 void
 MixerStrip::set_button_names ()
 {
-        invert_button_label.set_text (X_("Ø"));
-
         switch (_width) {
 	case Wide:
 		rec_enable_button_label.set_text (_("Rec"));
