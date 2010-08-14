@@ -91,6 +91,10 @@ class RegionView : public TimeAxisViewItem
 
 	static PBD::Signal1<void,RegionView*> RegionViewGoingAway;
 
+	ARDOUR::BeatsFramesConverter const & time_converter () {
+		return _time_converter;
+	}
+
   protected:
 
 	/** Allows derived types to specify their visibility requirements

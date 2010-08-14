@@ -2261,6 +2261,12 @@ MidiRegionView::commit_resizing (ArdourCanvas::CanvasNote* primary, bool at_fron
 }
 
 void
+MidiRegionView::change_note_channel (CanvasNoteEvent* event, int8_t channel)
+{
+	diff_add_change (event, MidiModel::DiffCommand::Channel, (uint8_t) channel);
+}
+
+void
 MidiRegionView::change_note_velocity(CanvasNoteEvent* event, int8_t velocity, bool relative)
 {
 	uint8_t new_velocity;
@@ -2384,6 +2390,12 @@ MidiRegionView::change_note_time (CanvasNoteEvent* event, Evoral::MusicalTime de
 	}
 
 	diff_add_change (event, MidiModel::DiffCommand::StartTime, new_time);
+}
+
+void
+MidiRegionView::change_note_length (CanvasNoteEvent* event, Evoral::MusicalTime t)
+{
+	diff_add_change (event, MidiModel::DiffCommand::Length, t);
 }
 
 void

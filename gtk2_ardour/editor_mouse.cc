@@ -54,6 +54,7 @@
 #include "control_point_dialog.h"
 #include "editor_drag.h"
 #include "automation_region_view.h"
+#include "edit_note_dialog.h"
 
 #include "ardour/types.h"
 #include "ardour/profile.h"
@@ -1150,6 +1151,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			edit_control_point (item);
 			break;
 
+		case NoteItem:
+			edit_note (item);
+			break;
+
 		default:
 			break;
 		}
@@ -1989,6 +1994,19 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 	p->line().modify_point_y (*p, d.get_y_fraction ());
 }
 
+void
+Editor::edit_note (ArdourCanvas::Item* item)
+{
+	ArdourCanvas::CanvasNoteEvent* e = dynamic_cast<ArdourCanvas::CanvasNoteEvent*> (item);
+	assert (e);
+
+	EditNoteDialog d (&e->region_view(), e);
+	d.set_position (Gtk::WIN_POS_MOUSE);
+	ensure_float (d);
+
+	d.run ();
+}
+	
 
 void
 Editor::visible_order_range (int* low, int* high) const

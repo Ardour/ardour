@@ -64,6 +64,7 @@ class AutomationTimeAxisView;
 class AutomationRegionView;
 class MidiCutBuffer;
 class MidiListEditor;
+class EditNoteDialog;
 
 class MidiRegionView : public RegionView
 {
@@ -224,12 +225,6 @@ class MidiRegionView : public RegionView
 	void update_resizing (ArdourCanvas::CanvasNote *, bool, double, bool);
 	void commit_resizing (ArdourCanvas::CanvasNote *, bool, double, bool);
 
-	/** Adjust the velocity on a note, and the selection if applicable.
-	 * @param velocity the relative or absolute velocity
-	 * @param relative whether velocity is relative or absolute
-	 */
-	void change_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t velocity, bool relative=false);
-
 	/** Change the channel of the selection.
 	 * @param channel - the channel number of the new channel, zero-based
 	 */
@@ -306,6 +301,9 @@ class MidiRegionView : public RegionView
 	void reset_width_dependent_items (double pixel_width);
 
   private:
+
+	friend class EditNoteDialog;
+	
 	/** Play the NoteOn event of the given note immediately
 	 * and schedule the playback of the corresponding NoteOff event.
 	 */
@@ -325,9 +323,11 @@ class MidiRegionView : public RegionView
 	void midi_channel_mode_changed(ARDOUR::ChannelMode mode, uint16_t mask);
 	void midi_patch_settings_changed(std::string model, std::string custom_device_mode);
 
+	void change_note_channel (ArdourCanvas::CanvasNoteEvent *, int8_t);
 	void change_note_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t vel, bool relative=false);
 	void change_note_note(ArdourCanvas::CanvasNoteEvent* ev, int8_t note, bool relative=false);
 	void change_note_time(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::TimeType, bool relative=false);
+	void change_note_length (ArdourCanvas::CanvasNoteEvent *, ARDOUR::MidiModel::TimeType);
 	void trim_note(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::TimeType start_delta,
 		       ARDOUR::MidiModel::TimeType end_delta);
 
