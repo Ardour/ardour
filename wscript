@@ -559,8 +559,7 @@ def configure(conf):
 	autowaf.display_msg(conf, 'Wiimote Support', opts.wiimote)
 	if opts.wiimote:
 		conf.define('WIIMOTE',1)
-	if opts.windows_key:
-		conf.define('WINDOWS_KEY', opts.windows_key)
+	conf.define('WINDOWS_KEY', opts.windows_key)
 	autowaf.display_msg(conf, 'Windows Key', opts.windows_key)
         conf.env['PROGRAM_NAME'] = opts.program_name
         autowaf.display_msg(conf, 'Program Name', opts.program_name)

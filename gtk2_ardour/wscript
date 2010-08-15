@@ -445,7 +445,7 @@ def build(bld):
 		obj = bld.new_task_gen (
 			target = b + '.bindings',
 			source = b + '.bindings.in',
-			rule = '../tools/fmt-bindings --winkey=%s --accelmap <${SRC} >${TGT}' % bld.env['windows_key']
+			rule = '../tools/fmt-bindings --winkey="%s" --accelmap <${SRC} >${TGT}' % bld.env['WINDOWS_KEY']
 			)
 		obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
 
