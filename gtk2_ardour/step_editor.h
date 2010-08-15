@@ -61,6 +61,8 @@ class StepEditor : public PBD::ScopedConnectionList, public sigc::trackable
         boost::shared_ptr<ARDOUR::MidiTrack> _track;
         StepEntry*                            step_editor;
         MidiTimeAxisView&                    _mtv;
+        int8_t                                last_added_pitch;
+        Evoral::MusicalTime                   last_added_end;
 
         void region_removed (boost::weak_ptr<ARDOUR::Region>);
         void playlist_changed ();

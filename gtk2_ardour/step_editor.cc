@@ -44,6 +44,8 @@ StepEditor::start_step_editing ()
         _step_edit_chord_duration = 0.0;
         step_edit_region.reset ();
         step_edit_region_view = 0;
+        last_added_pitch = -1;
+        last_added_end = 0;
 
         resync_step_edit_position ();
         prepare_step_edit_region ();
@@ -250,15 +252,31 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
         
         /* make sure its visible on the horizontal axis */
         
-        nframes64_t fpos = step_edit_region->position() + 
+        framepos_t fpos = step_edit_region->position() + 
                 step_edit_region_view->beats_to_frames (step_edit_beat_pos + beat_duration);
         
         if (fpos >= (_editor.leftmost_position() + _editor.current_page_frames())) {
                 _editor.reset_x_origin (fpos - (_editor.current_page_frames()/4));
         }
-        
-        step_edit_region_view->step_add_note (channel, pitch, velocity, step_edit_beat_pos, beat_duration);
-        
+
+        Evoral::MusicalTime at = step_edit_beat_pos;
+        Evoral::MusicalTime len = beat_duration;
+
+        if ((last_added_pitch >= 0) && (pitch == last_added_pitch) && (last_added_end == step_edit_beat_pos)) {
+
+                /* avoid any apparent note overlap - move the start of this note
+                   up by 1 tick from where the last note ended
+                */
+                
+                at += 1.0/Meter::ticks_per_beat;
+                len -= 1.0/Meter::ticks_per_beat;
+        }
+
+        step_edit_region_view->step_add_note (channel, pitch, velocity, at, len);
+
+        last_added_pitch = pitch;
+        last_added_end = at+len;
+
         if (_step_edit_triplet_countdown > 0) {
                 _step_edit_triplet_countdown--;
                 
