@@ -92,7 +92,8 @@ EditorRoutes::EditorRoutes (Editor* e)
 	CellRendererPixbufMulti* mute_col_renderer = manage (new CellRendererPixbufMulti());
 
 	mute_col_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
-	mute_col_renderer->set_pixbuf (1, ::get_icon("mute-enabled"));
+	mute_col_renderer->set_pixbuf (1, ::get_icon("muted-by-others"));
+	mute_col_renderer->set_pixbuf (2, ::get_icon("mute-enabled"));
 	mute_col_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_mute_enable_toggled));
 
 	TreeViewColumn* mute_state_column = manage (new TreeViewColumn("M", *mute_col_renderer));
@@ -108,6 +109,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	solo_col_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
 	solo_col_renderer->set_pixbuf (1, ::get_icon("solo-enabled"));
+	solo_col_renderer->set_pixbuf (3, ::get_icon("soloed-by-others"));
 	solo_col_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_solo_enable_toggled));
 
 	TreeViewColumn* solo_state_column = manage (new TreeViewColumn("S", *solo_col_renderer));
@@ -1076,7 +1078,7 @@ EditorRoutes::update_mute_display ()
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		boost::shared_ptr<Route> route = (*i)[_columns.route];
-		(*i)[_columns.mute_state] = RouteUI::mute_visual_state (_session, route) > 0 ? 1 : 0;
+		(*i)[_columns.mute_state] = RouteUI::mute_visual_state (_session, route);
 	}
 }
 
@@ -1088,7 +1090,7 @@ EditorRoutes::update_solo_display (bool /* selfsoloed */)
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		boost::shared_ptr<Route> route = (*i)[_columns.route];
-		(*i)[_columns.solo_state] = RouteUI::solo_visual_state (route) > 0 ? 1 : 0;
+		(*i)[_columns.solo_state] = RouteUI::solo_visual_state (route);
 	}
 }
 
