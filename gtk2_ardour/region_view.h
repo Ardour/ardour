@@ -98,53 +98,53 @@ class RegionView : public TimeAxisViewItem
   protected:
 
 	/** Allows derived types to specify their visibility requirements
-     * to the TimeAxisViewItem parent class
-     */
-    RegionView (ArdourCanvas::Group *,
-		TimeAxisView&,
-		boost::shared_ptr<ARDOUR::Region>,
-		double samples_per_unit,
-		Gdk::Color const & basic_color,
-		bool recording,
-		TimeAxisViewItem::Visibility);
+	 * to the TimeAxisViewItem parent class
+	 */
+	RegionView (ArdourCanvas::Group *,
+		    TimeAxisView&,
+		    boost::shared_ptr<ARDOUR::Region>,
+		    double samples_per_unit,
+		    Gdk::Color const & basic_color,
+		    bool recording,
+		    TimeAxisViewItem::Visibility);
+	
+	virtual void region_resized (const PBD::PropertyChange&);
+	virtual void region_muted ();
+	void         region_locked ();
+	void         region_opacity ();
+	virtual void region_renamed ();
+	void         region_sync_changed ();
+	
+	Glib::ustring make_name () const;
+	
+	static gint _lock_toggle (ArdourCanvas::Item*, GdkEvent*, void*);
+	void        lock_toggle ();
+	
+	virtual void set_colors ();
+	virtual void set_frame_color ();
+	virtual void reset_width_dependent_items (double pixel_width);
+	
+	virtual void color_handler () {}
+	
+	boost::shared_ptr<ARDOUR::Region> _region;
+	
+	ArdourCanvas::Polygon* sync_mark; ///< polgyon for sync position
+	ArdourCanvas::Line* sync_line; ///< polgyon for sync position
+	
+	RegionEditor* editor;
+	
+	std::vector<ControlPoint *> control_points;
+	double current_visible_sync_position;
 
-    virtual void region_resized (const PBD::PropertyChange&);
-    virtual void region_muted ();
-    void         region_locked ();
-    void         region_opacity ();
-    virtual void region_renamed ();
-    void         region_sync_changed ();
-
-    Glib::ustring make_name () const;
-
-    static gint _lock_toggle (ArdourCanvas::Item*, GdkEvent*, void*);
-    void        lock_toggle ();
-
-    virtual void set_colors ();
-    virtual void set_frame_color ();
-    virtual void reset_width_dependent_items (double pixel_width);
-
-    virtual void color_handler () {}
-
-    boost::shared_ptr<ARDOUR::Region> _region;
-
-    ArdourCanvas::Polygon* sync_mark; ///< polgyon for sync position
-    ArdourCanvas::Line* sync_line; ///< polgyon for sync position
-
-    RegionEditor* editor;
-
-    std::vector<ControlPoint *> control_points;
-    double current_visible_sync_position;
-
-    bool    valid; ///< see StreamView::redisplay_diskstream()
-    bool    _enable_display; ///< see StreamView::redisplay_diskstream()
-    double  _pixel_width;
-    bool    in_destructor;
-
-    bool wait_for_data;
-
-    std::vector<GhostRegion*> ghosts;
-
+	bool    valid; ///< see StreamView::redisplay_diskstream()
+	bool    _enable_display; ///< see StreamView::redisplay_diskstream()
+	double  _pixel_width;
+	bool    in_destructor;
+	
+	bool wait_for_data;
+	
+	std::vector<GhostRegion*> ghosts;
+	
 	/** a list of rectangles which are used in stacked display mode to colour
 	    different bits of regions according to whether or not they are the one
 	    that will be played at any given time.
