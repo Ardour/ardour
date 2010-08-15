@@ -41,6 +41,7 @@
 #include "pbd/unknown_type.h"
 
 #include "ardour/route.h"
+#include "ardour/midi_track.h"
 
 #include "gtkmm2ext/cell_renderer_pixbuf_multi.h"
 #include "gtkmm2ext/cell_renderer_pixbuf_toggle.h"
@@ -70,15 +71,17 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.set_model (_model);
 
 	// Record enable toggle
-	CellRendererPixbufToggle* rec_col_renderer = manage (new CellRendererPixbufToggle());
+	CellRendererPixbufMulti* rec_col_renderer = manage (new CellRendererPixbufMulti());
 
-	rec_col_renderer->set_active_pixbuf (::get_icon("rec-enabled"));
-	rec_col_renderer->set_inactive_pixbuf (::get_icon("act-disabled"));
-	rec_col_renderer->signal_toggled().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_rec_enable_toggled));
+	rec_col_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
+	rec_col_renderer->set_pixbuf (1, ::get_icon("rec-in-progress"));
+	rec_col_renderer->set_pixbuf (2, ::get_icon("rec-enabled"));
+	rec_col_renderer->set_pixbuf (3, ::get_icon("step-editing"));
+	rec_col_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_rec_enable_changed));
 
 	TreeViewColumn* rec_state_column = manage (new TreeViewColumn("R", *rec_col_renderer));
 
-	rec_state_column->add_attribute(rec_col_renderer->property_active(), _columns.rec_enabled);
+	rec_state_column->add_attribute(rec_col_renderer->property_state(), _columns.rec_state);
 	rec_state_column->add_attribute(rec_col_renderer->property_visible(), _columns.is_track);
 	rec_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	rec_state_column->set_alignment(ALIGN_CENTER);
@@ -207,11 +210,12 @@ EditorRoutes::set_session (Session* s)
 
 	if (_session) {
 		_session->SoloChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::solo_changed_so_update_mute, this), gui_context());
+		_session->RecordStateChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
 	}
 }
 
 void
-EditorRoutes::on_tv_rec_enable_toggled (Glib::ustring const & path_string)
+EditorRoutes::on_tv_rec_enable_changed (Glib::ustring const & path_string)
 {
 	// Get the model row that has been toggled.
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
@@ -460,6 +464,11 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		if ((*x)->is_track()) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> ((*x)->route());
 			t->RecordEnableChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
+		}
+
+		if ((*x)->is_midi_track()) {
+			boost::shared_ptr<MidiTrack> t = boost::dynamic_pointer_cast<MidiTrack> ((*x)->route());
+			t->StepEditStatusChange.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
 		}
 
 		(*x)->route()->mute_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_mute_display, this), gui_context());
@@ -1039,8 +1048,21 @@ EditorRoutes::update_rec_display ()
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		boost::shared_ptr<Route> route = (*i)[_columns.route];
 
-		if (boost::dynamic_pointer_cast<Track>(route)) {
-			(*i)[_columns.rec_enabled] = route->record_enabled ();
+		if (boost::dynamic_pointer_cast<Track> (route)) {
+			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (route);
+
+			if (route->record_enabled()) {
+				if (_session->record_status() == Session::Recording) {
+					(*i)[_columns.rec_state] = 1;
+				} else {
+					(*i)[_columns.rec_state] = 2;
+				}
+			} else if (mt && mt->step_editing()) {
+				(*i)[_columns.rec_state] = 3;
+			} else {
+				(*i)[_columns.rec_state] = 0;
+			}
+		
 			(*i)[_columns.name_editable] = !route->record_enabled ();
 		}
 	}

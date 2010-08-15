@@ -59,7 +59,7 @@ public:
 private:
 
 	void initial_display ();
-	void on_tv_rec_enable_toggled (Glib::ustring const &);
+	void on_tv_rec_enable_changed (Glib::ustring const &);
 	void on_tv_mute_enable_toggled (Glib::ustring const &);
 	void on_tv_solo_enable_toggled (Glib::ustring const &);
 	void on_tv_solo_isolate_toggled (Glib::ustring const &);
@@ -102,7 +102,7 @@ private:
 		ModelColumns() {
 			add (text);
 			add (visible);
-			add (rec_enabled);
+			add (rec_state);
 			add (mute_state);
 			add (solo_state);
 			add (solo_isolate_state);
@@ -115,7 +115,7 @@ private:
 		
 		Gtk::TreeModelColumn<Glib::ustring>  text;
 		Gtk::TreeModelColumn<bool>           visible;
-		Gtk::TreeModelColumn<bool>           rec_enabled;
+		Gtk::TreeModelColumn<uint32_t>       rec_state;
 		Gtk::TreeModelColumn<uint32_t>       mute_state;
 		Gtk::TreeModelColumn<uint32_t>       solo_state;
 		Gtk::TreeModelColumn<uint32_t>       solo_isolate_state;
