@@ -148,6 +148,7 @@ static const gchar *_snap_type_strings[] = {
 	N_("Beats/32"),
 	N_("Beats/28"),
 	N_("Beats/24"),
+	N_("Beats/20"),
 	N_("Beats/16"),
 	N_("Beats/14"),
 	N_("Beats/12"),
@@ -2249,6 +2250,7 @@ Editor::set_snap_to (SnapType st)
 	case SnapToBeatDiv32:
 	case SnapToBeatDiv28:
 	case SnapToBeatDiv24:
+	case SnapToBeatDiv20:
 	case SnapToBeatDiv16:
 	case SnapToBeatDiv14:
 	case SnapToBeatDiv12:
@@ -2812,6 +2814,9 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 		break;
 	case SnapToBeatDiv24:
 		start = _session->tempo_map().round_to_beat_subdivision (start, 24, direction);
+		break;
+	case SnapToBeatDiv20:
+		start = _session->tempo_map().round_to_beat_subdivision (start, 20, direction);
 		break;
 	case SnapToBeatDiv16:
 		start = _session->tempo_map().round_to_beat_subdivision (start, 16, direction);
@@ -3616,6 +3621,8 @@ Editor::snap_type_selection_done ()
 		snaptype = SnapToBeatDiv14;
 	} else if (choice == _("Beats/16")) {
 		snaptype = SnapToBeatDiv16;
+	} else if (choice == _("Beats/20")) {
+		snaptype = SnapToBeatDiv20;
 	} else if (choice == _("Beats/24")) {
 		snaptype = SnapToBeatDiv24;
 	} else if (choice == _("Beats/28")) {
@@ -4016,6 +4023,9 @@ Editor::get_grid_type_as_beats (bool& success, nframes64_t position)
 		break;
 	case SnapToBeatDiv24:
 		return 1.0/24.0;
+		break;
+	case SnapToBeatDiv20:
+		return 1.0/20.0;
 		break;
 	case SnapToBeatDiv16:
 		return 1.0/16.0;

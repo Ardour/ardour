@@ -1194,6 +1194,10 @@ Editor::compute_bbt_ruler_scale (nframes64_t lower, nframes64_t upper)
                 bbt_beat_subdivision = 16;
 		bbt_accent_modulo = 4;
 		break;
+	case SnapToBeatDiv20:
+                bbt_beat_subdivision = 20;
+		bbt_accent_modulo = 5;
+		break;
 	case SnapToBeatDiv24:
                 bbt_beat_subdivision = 24;
 		bbt_accent_modulo = 6;
