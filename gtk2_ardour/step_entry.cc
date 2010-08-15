@@ -31,6 +31,7 @@
 #include "ardour_ui.h"
 #include "midi_channel_selector.h"
 #include "midi_time_axis.h"
+#include "step_editor.h"
 #include "step_entry.h"
 #include "utils.h"
 
@@ -55,8 +56,8 @@ _rest_event_handler (GtkWidget* widget, gpointer arg)
 	((StepEntry*)arg)->rest_event_handler ();
 }
 
-StepEntry::StepEntry (MidiTimeAxisView& mtv)
-	: ArdourDialog (string_compose (_("Step Entry: %1"), mtv.name()))
+StepEntry::StepEntry (StepEditor& seditor)
+	: ArdourDialog (string_compose (_("Step Entry: %1"), seditor.name()))
         , _current_note_length (1.0)
         , _current_note_velocity (64)
 	, triplet_button ("3")
@@ -84,17 +85,18 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
         , program_button (_("+"))
 	, _piano (0)
 	, piano (0)
-	, _mtv (&mtv)
+	, se (&seditor)
 {
         register_actions ();
         load_bindings ();
 
+#if 0
 	/* set channel selector to first selected channel. if none
 	   are selected, it will remain at the value set in its
 	   constructor, above (1)
 	*/
 
-	uint16_t chn_mask = _mtv->channel_selector().get_selected_channels();
+	uint16_t chn_mask = se->channel_selector().get_selected_channels();
         
 	for (uint32_t i = 0; i < 16; ++i) {
 		if (chn_mask & (1<<i)) {
@@ -102,6 +104,8 @@ StepEntry::StepEntry (MidiTimeAxisView& mtv)
 			break;
 		}
 	}
+
+#endif
 
 	RadioButtonGroup length_group = length_1_button.get_group();
 	length_2_button.set_group (length_group);
@@ -510,7 +514,7 @@ StepEntry::on_key_release_event (GdkEventKey* ev)
 void
 StepEntry::rest_event_handler ()
 {
-	_mtv->step_edit_rest (0.0);
+	se->step_edit_rest (0.0);
 }
 
 Evoral::MusicalTime
@@ -565,13 +569,13 @@ StepEntry::on_show ()
 void
 StepEntry::beat_resync_click ()
 {
-	_mtv->step_edit_beat_sync ();
+	se->step_edit_beat_sync ();
 }
 
 void
 StepEntry::bar_resync_click ()
 {
-        _mtv->step_edit_bar_sync ();
+        se->step_edit_bar_sync ();
 }
 
 void
@@ -703,13 +707,13 @@ StepEntry::load_bindings ()
 void
 StepEntry::toggle_triplet ()
 {
-        _mtv->set_step_edit_cursor_width (note_length());
+        se->set_step_edit_cursor_width (note_length());
 }
 
 void
 StepEntry::toggle_chord ()
 {
-        _mtv->step_edit_toggle_chord ();
+        se->step_edit_toggle_chord ();
 }
 
 void
@@ -756,37 +760,37 @@ StepEntry::dot_value_change ()
         dot2_button.set_inconsistent (inconsistent);
         dot3_button.set_inconsistent (inconsistent);
 
-        _mtv->set_step_edit_cursor_width (note_length());
+        se->set_step_edit_cursor_width (note_length());
 }
 
 void
 StepEntry::program_click ()
 {
-        _mtv->step_add_program_change (note_channel(), (int8_t) floor (program_adjustment.get_value()));
+        se->step_add_program_change (note_channel(), (int8_t) floor (program_adjustment.get_value()));
 }
 
 void
 StepEntry::bank_click ()
 {
-        _mtv->step_add_bank_change (note_channel(), (int8_t) floor (bank_adjustment.get_value()));
+        se->step_add_bank_change (note_channel(), (int8_t) floor (bank_adjustment.get_value()));
 }
 
 void
 StepEntry::insert_rest ()
 {
-	_mtv->step_edit_rest (note_length());
+	se->step_edit_rest (note_length());
 }
 
 void
 StepEntry::insert_grid_rest ()
 {
-	_mtv->step_edit_rest (0.0);
+	se->step_edit_rest (0.0);
 }
 
 void
 StepEntry::insert_note (uint8_t note)
 {
-	_mtv->step_add_note (note_channel(), note, note_velocity(), note_length());
+	se->step_add_note (note_channel(), note, note_velocity(), note_length());
 }
 void
 StepEntry::insert_c ()
@@ -972,7 +976,7 @@ StepEntry::length_value_change ()
         length_32_button.set_inconsistent (inconsistent);
         length_64_button.set_inconsistent (inconsistent);
 
-        _mtv->set_step_edit_cursor_width (note_length());
+        se->set_step_edit_cursor_width (note_length());
 }
 
 bool
@@ -1132,17 +1136,17 @@ StepEntry::octave_n (int n)
 void
 StepEntry::do_sustain ()
 {
-        _mtv->step_edit_sustain (note_length());
+        se->step_edit_sustain (note_length());
 }
 
 void
 StepEntry::back ()
 {
-        _mtv->move_step_edit_beat_pos (-note_length());
+        se->move_step_edit_beat_pos (-note_length());
 }
 
 void
 StepEntry::sync_to_edit_point ()
 {
-        _mtv->resync_step_edit_to_edit_point ();
+        se->resync_step_edit_to_edit_point ();
 }

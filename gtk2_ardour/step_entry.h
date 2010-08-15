@@ -30,12 +30,12 @@
 #include "ardour_dialog.h"
 #include "gtk_pianokeyboard.h"
 
-class MidiTimeAxisView;
+class StepEditor;
 
 class StepEntry : public ArdourDialog
 {
   public:
-        StepEntry (MidiTimeAxisView&);
+        StepEntry (StepEditor&);
         ~StepEntry ();
 
         void note_off_event_handler (int note);
@@ -124,7 +124,7 @@ class StepEntry : public ArdourDialog
 
         PianoKeyboard* _piano;
         Gtk::Widget* piano;
-        MidiTimeAxisView* _mtv;
+        StepEditor*   se;
 
         void bank_click ();
         void program_click ();

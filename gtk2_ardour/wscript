@@ -190,6 +190,7 @@ gtk2_ardour_sources = [
 	'simplerect.cc',
 	'splash.cc',
 	'startup.cc',
+        'step_editor.cc',
         'step_entry.cc',
 	'streamview.cc',
 	'strip_silence_dialog.cc',

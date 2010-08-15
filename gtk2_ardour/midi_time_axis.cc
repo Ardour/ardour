@@ -80,8 +80,8 @@
 #include "region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
+#include "step_editor.h"
 #include "simplerect.h"
-#include "step_entry.h"
 #include "utils.h"
 
 #include "ardour/midi_track.h"
@@ -116,7 +116,6 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 	, _midi_thru_item (0)
 	, default_channel_menu (0)
 	, controller_menu (0)
-        , step_editor (0)
 {
 	subplugin_menu.set_name ("ArdourContextMenu");
 
@@ -126,8 +125,6 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 	
 	mute_button->set_active (false);
 	solo_button->set_active (false);
-
-	step_edit_insert_position = 0;
 
 	if (is_midi_track()) {
 		controls_ebox.set_name ("MidiTimeAxisViewControlsBaseUnselected");
@@ -168,11 +165,6 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 		_view->RegionViewAdded.connect (sigc::mem_fun(*this, &MidiTimeAxisView::region_view_added));
 		_view->attach ();
                 
-                midi_track()->PlaylistChanged.connect (*this, invalidator (*this),
-                                                       boost::bind (&MidiTimeAxisView::playlist_changed, this),
-                                                       gui_context());
-                playlist_changed ();
-
 	}
 
 	HBox* midi_controls_hbox = manage(new HBox());
@@ -235,35 +227,17 @@ MidiTimeAxisView::~MidiTimeAxisView ()
 	_range_scroomer = 0;
 
 	delete controller_menu;
+        delete _step_editor;
 }
 
 void
-MidiTimeAxisView::playlist_changed ()
+MidiTimeAxisView::check_step_edit ()
 {
-        step_edit_region_connection.disconnect ();
-        midi_track()->playlist()->RegionRemoved.connect (step_edit_region_connection, invalidator (*this),
-                                                         ui_bind (&MidiTimeAxisView::region_removed, this, _1),
-                                                         gui_context());
+        _step_editor->check_step_edit ();
 }
 
-void
-MidiTimeAxisView::region_removed (boost::weak_ptr<Region> wr)
-{
-        boost::shared_ptr<Region> r (wr.lock());
- 
-        if (!r) {
-                return;
-        }
-
-        if (step_edit_region == r) {
-                step_edit_region.reset();
-                step_edit_region_view = 0;
-                // force a recompute of the insert position
-                step_edit_beat_pos = -1.0;
-        }
-}
-
-void MidiTimeAxisView::model_changed()
+void 
+MidiTimeAxisView::model_changed()
 {
 	std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance()
 		.custom_device_mode_names_by_model(_model_selector.get_active_text());
@@ -892,360 +866,7 @@ MidiTimeAxisView::route_active_changed ()
 	}
 }
 
-void
-MidiTimeAxisView::start_step_editing ()
-{
-        _step_edit_triplet_countdown = 0;
-        _step_edit_within_chord = 0;
-        _step_edit_chord_duration = 0.0;
-        step_edit_region.reset ();
-        step_edit_region_view = 0;
 
-        resync_step_edit_position ();
-        prepare_step_edit_region ();
-        reset_step_edit_beat_pos ();
-
-        assert (step_edit_region);
-        assert (step_edit_region_view);
-
-        if (step_editor == 0) {
-                step_editor = new StepEntry (*this);
-                step_editor->signal_delete_event().connect (sigc::mem_fun (*this, &MidiTimeAxisView::step_editor_hidden));
-                step_editor->signal_hide().connect (sigc::mem_fun (*this, &MidiTimeAxisView::step_editor_hide));
-        }
-
-        step_edit_region_view->show_step_edit_cursor (step_edit_beat_pos);
-        step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
-
-        step_editor->set_position (WIN_POS_MOUSE);
-        step_editor->present ();
-}
-
-void
-MidiTimeAxisView::resync_step_edit_position ()
-{
-	step_edit_insert_position = _editor.get_preferred_edit_position ();
-}
-
-void
-MidiTimeAxisView::resync_step_edit_to_edit_point ()
-{
-        resync_step_edit_position ();
-        if (step_edit_region) {
-                reset_step_edit_beat_pos ();
-        }
-}
-
-void
-MidiTimeAxisView::prepare_step_edit_region ()
-{
-        boost::shared_ptr<Region> r = playlist()->top_region_at (step_edit_insert_position);
-
-        if (r) {
-                step_edit_region = boost::dynamic_pointer_cast<MidiRegion>(r);
-        }
-
-	if (step_edit_region) {
-		RegionView* rv = view()->find_view (step_edit_region);
-		step_edit_region_view = dynamic_cast<MidiRegionView*> (rv);
-
-	} else {
-                step_edit_region = add_region (step_edit_insert_position);
-                RegionView* rv = view()->find_view (step_edit_region);
-                step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
-        }
-}
-
-
-void
-MidiTimeAxisView::reset_step_edit_beat_pos ()
-{
-        assert (step_edit_region);
-        assert (step_edit_region_view);
-
-        framecnt_t frames_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
-        
-        if (frames_from_start < 0) {
-                /* this can happen with snap enabled, and the edit point == Playhead. we snap the
-                   position of the new region, and it can end up after the edit point.
-                */
-                frames_from_start = 0;
-        }
-        
-        step_edit_beat_pos = step_edit_region_view->frames_to_beats (frames_from_start);
-        step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
-}
-
-bool
-MidiTimeAxisView::step_editor_hidden (GdkEventAny*)
-{
-        step_editor_hide ();
-        return true;
-}
-
-void
-MidiTimeAxisView::step_editor_hide ()
-{
-        /* everything else will follow the change in the model */
-	midi_track()->set_step_editing (false);
-}
-
-void
-MidiTimeAxisView::stop_step_editing ()
-{
-        if (step_editor) {
-                step_editor->hide ();
-        }
-
-        if (step_edit_region_view) {
-                step_edit_region_view->hide_step_edit_cursor();
-        }
-
-        step_edit_region.reset ();
-}
-
-void
-MidiTimeAxisView::check_step_edit ()
-{
-	MidiRingBuffer<nframes_t>& incoming (midi_track()->step_edit_ring_buffer());
-	uint8_t* buf;
-	uint32_t bufsize = 32;
-
-	buf = new uint8_t[bufsize];
-
-	while (incoming.read_space()) {
-		nframes_t time;
-		Evoral::EventType type;
-		uint32_t size;
-
-		incoming.read_prefix (&time, &type, &size);
-
-		if (size > bufsize) {
-			delete [] buf;
-			bufsize = size;
-			buf = new uint8_t[bufsize];
-		}
-
-		incoming.read_contents (size, buf);
-
-		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON) {
-                        step_add_note (buf[0] & 0xf, buf[1], buf[2], 0.0);
-		}
-	}
-}
-
-int
-MidiTimeAxisView::step_add_bank_change (uint8_t channel, uint8_t bank)
-{
-        return 0;
-}
-
-int
-MidiTimeAxisView::step_add_program_change (uint8_t channel, uint8_t program)
-{
-        return 0;
-}
-
-void
-MidiTimeAxisView::step_edit_sustain (Evoral::MusicalTime beats)
-{
-        if (step_edit_region_view) {
-                step_edit_region_view->step_sustain (beats);
-        }
-}
-
-void
-MidiTimeAxisView::move_step_edit_beat_pos (Evoral::MusicalTime beats)
-{
-        if (beats > 0.0) {
-                step_edit_beat_pos = min (step_edit_beat_pos + beats, 
-                                          step_edit_region_view->frames_to_beats (step_edit_region->length()));
-        } else if (beats < 0.0) {
-                if (beats < step_edit_beat_pos) {
-                        step_edit_beat_pos += beats; // its negative, remember
-                } else {
-                        step_edit_beat_pos = 0;
-                }
-        }
-        step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
-}
-
-int
-MidiTimeAxisView::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evoral::MusicalTime beat_duration)
-{
-        /* do these things in case undo removed the step edit region
-        */
-        if (!step_edit_region) {
-                resync_step_edit_position ();
-                prepare_step_edit_region ();
-                reset_step_edit_beat_pos ();
-                step_edit_region_view->show_step_edit_cursor (step_edit_beat_pos);
-                step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
-        }
-
-        assert (step_edit_region);
-        assert (step_edit_region_view);
-                
-        if (beat_duration == 0.0) {
-                bool success;
-                beat_duration = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
-                
-                if (!success) {
-                        return -1;
-                }
-        }
-        
-        MidiStreamView* msv = midi_view();
-        
-        /* make sure its visible on the vertical axis */
-        
-        if (pitch < msv->lowest_note() || pitch > msv->highest_note()) {
-                msv->update_note_range (pitch);
-                msv->set_note_range (MidiStreamView::ContentsRange);
-        }
-        
-        /* make sure its visible on the horizontal axis */
-        
-        nframes64_t fpos = step_edit_region->position() + 
-                step_edit_region_view->beats_to_frames (step_edit_beat_pos + beat_duration);
-        
-        if (fpos >= (_editor.leftmost_position() + _editor.current_page_frames())) {
-                _editor.reset_x_origin (fpos - (_editor.current_page_frames()/4));
-        }
-        
-        step_edit_region_view->step_add_note (channel, pitch, velocity, step_edit_beat_pos, beat_duration);
-        
-        if (_step_edit_triplet_countdown > 0) {
-                _step_edit_triplet_countdown--;
-                
-                if (_step_edit_triplet_countdown == 0) {
-                        _step_edit_triplet_countdown = 3;
-                }
-        }
-        
-        if (!_step_edit_within_chord) {
-                step_edit_beat_pos += beat_duration;
-                step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
-        } else {
-                step_edit_beat_pos += 1.0/Meter::ticks_per_beat; // tiny, but no longer overlapping
-                _step_edit_chord_duration = max (_step_edit_chord_duration, beat_duration);
-        }
-
-        return 0;
-}
-
-void
-MidiTimeAxisView::set_step_edit_cursor_width (Evoral::MusicalTime beats)
-{
-        if (step_edit_region_view) {
-                step_edit_region_view->set_step_edit_cursor_width (beats);
-        }
-}
-
-bool
-MidiTimeAxisView::step_edit_within_triplet() const
-{
-        return _step_edit_triplet_countdown > 0;
-}
-
-bool
-MidiTimeAxisView::step_edit_within_chord() const
-{
-        return _step_edit_within_chord;
-}
-
-void
-MidiTimeAxisView::step_edit_toggle_triplet ()
-{
-        if (_step_edit_triplet_countdown == 0) {
-                _step_edit_within_chord = false;
-                _step_edit_triplet_countdown = 3;
-        } else {
-                _step_edit_triplet_countdown = 0;
-        }
-}
-
-void
-MidiTimeAxisView::step_edit_toggle_chord ()
-{
-        if (_step_edit_within_chord) {
-                _step_edit_within_chord = false;
-                step_edit_beat_pos += _step_edit_chord_duration;
-                step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
-        } else {
-                _step_edit_triplet_countdown = 0;
-                _step_edit_within_chord = true;
-        }
-}
-
-void
-MidiTimeAxisView::step_edit_rest (Evoral::MusicalTime beats)
-{
-	bool success;
-
-        if (beats == 0.0) {
-                beats = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
-        } else {
-                success = true;
-        }
-
-        if (success) {
-                step_edit_beat_pos += beats;
-                step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
-        }
-}
-
-void 
-MidiTimeAxisView::step_edit_beat_sync ()
-{
-        step_edit_beat_pos = ceil (step_edit_beat_pos);
-        step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
-}
-
-void 
-MidiTimeAxisView::step_edit_bar_sync ()
-{
-        if (!_session || !step_edit_region_view || !step_edit_region) {
-                return;
-        }
-
-        framepos_t fpos = step_edit_region->position() + 
-                step_edit_region_view->beats_to_frames (step_edit_beat_pos);
-        fpos = _session->tempo_map().round_to_bar (fpos, 1);
-        step_edit_beat_pos = ceil (step_edit_region_view->frames_to_beats (fpos - step_edit_region->position()));
-        step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
-}
-
-boost::shared_ptr<MidiRegion>
-MidiTimeAxisView::add_region (framepos_t pos)
-{
-	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
-
-	real_editor->begin_reversible_command (_("create region"));
-        playlist()->clear_history ();
-
-	real_editor->snap_to (pos, 0);
-	const Meter& m = _session->tempo_map().meter_at(pos);
-	const Tempo& t = _session->tempo_map().tempo_at(pos);
-	double length = floor (m.frames_per_bar(t, _session->frame_rate()));
-
-	boost::shared_ptr<Source> src = _session->create_midi_source_for_session (view()->trackview().track().get(),
-                                                                                  view()->trackview().track()->name());
-	PropertyList plist; 
-	
-	plist.add (ARDOUR::Properties::start, 0);
-	plist.add (ARDOUR::Properties::length, length);
-	plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
-	
-	boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
-        
-	playlist()->add_region (region, pos);
-	_session->add_command (new StatefulDiffCommand (playlist()));
-
-	real_editor->commit_reversible_command();
-
-	return boost::dynamic_pointer_cast<MidiRegion>(region);
-}
 
 void
 MidiTimeAxisView::add_note_selection (uint8_t note)
@@ -1379,4 +1000,53 @@ MidiTimeAxisView::automation_child_menu_item (Evoral::Parameter param)
 	}
 
 	return 0;
+}
+
+boost::shared_ptr<MidiRegion>
+MidiTimeAxisView::add_region (framepos_t pos)
+{
+	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
+
+	real_editor->begin_reversible_command (_("create region"));
+        playlist()->clear_history ();
+
+	real_editor->snap_to (pos, 0);
+	const Meter& m = _session->tempo_map().meter_at(pos);
+	const Tempo& t = _session->tempo_map().tempo_at(pos);
+	double length = floor (m.frames_per_bar(t, _session->frame_rate()));
+
+	boost::shared_ptr<Source> src = _session->create_midi_source_for_session (view()->trackview().track().get(),
+                                                                                  view()->trackview().track()->name());
+	PropertyList plist; 
+	
+	plist.add (ARDOUR::Properties::start, 0);
+	plist.add (ARDOUR::Properties::length, length);
+	plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
+	
+	boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
+        
+	playlist()->add_region (region, pos);
+	_session->add_command (new StatefulDiffCommand (playlist()));
+
+	real_editor->commit_reversible_command();
+
+	return boost::dynamic_pointer_cast<MidiRegion>(region);
+}
+
+void 
+MidiTimeAxisView::start_step_editing ()
+{
+        if (!_step_editor) {
+                _step_editor = new StepEditor (_editor, midi_track(), *this);
+        }
+
+        _step_editor->start_step_editing ();
+
+}
+void 
+MidiTimeAxisView::stop_step_editing ()
+{
+        if (_step_editor) {
+                _step_editor->stop_step_editing ();
+        }
 }
