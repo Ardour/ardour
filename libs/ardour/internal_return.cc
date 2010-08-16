@@ -62,10 +62,11 @@ InternalReturn::configure_io (ChanCount in, ChanCount out)
 	return true;
 }
 
-void
+int
 InternalReturn::set_block_size (nframes_t nframes)
 {
 	allocate_buffers (nframes);
+        return 0;
 }
 
 void

@@ -70,7 +70,7 @@ public:
 
 	/* supplemental method used with MIDI */
 
-	void flush (nframes_t nframes, nframes64_t time);
+	void flush_buffers (nframes_t nframes, nframes64_t time);
 	void transport_stopped ();
 
 	void no_outs_cuz_we_no_monitor(bool);

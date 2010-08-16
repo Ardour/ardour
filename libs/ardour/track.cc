@@ -328,7 +328,7 @@ Track::no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		passthru (start_frame, end_frame, nframes, false);
 	}
 
-	_main_outs->flush (nframes, end_frame - start_frame - 1);
+	_main_outs->flush_buffers (nframes, end_frame - start_frame - 1);
 
 	return 0;
 }

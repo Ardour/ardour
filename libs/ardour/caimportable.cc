@@ -24,7 +24,9 @@ CAImportableSource::CAImportableSource (const string& path)
 		af.SetClientFormat (client_format);
 
 	} catch (CAXException& cax) {
-		error << string_compose ("CAImportable: %1", cax.mOperation) << endmsg;
+                //Don't report an error here since there is one higher up in import.
+                //Since libsndfile gets tried second, any failures here may show as
+                //invalid errors in the Error log.
 		throw failed_constructor ();
 	}
 

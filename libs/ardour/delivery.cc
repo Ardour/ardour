@@ -441,7 +441,7 @@ Delivery::transport_stopped (sframes_t frame)
 }
 
 void
-Delivery::flush (nframes_t nframes, nframes64_t time)
+Delivery::flush_buffers (nframes_t nframes, nframes64_t time)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 

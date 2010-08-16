@@ -599,6 +599,7 @@ Sequence<Time>::add_note_unlocked(const NotePtr note, void* arg)
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 add note %2 @ %3\n", this, (int)note->note(), note->time()));
 
         if (resolve_overlaps_unlocked (note, arg)) {
+                DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 DISALLOWED: note %2 @ %3\n", this, (int)note->note(), note->time()));
                 return false;
 	}
 

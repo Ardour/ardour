@@ -65,7 +65,8 @@ class Processor : public SessionObject, public Automatable, public Latent
 
 	virtual void transport_stopped (sframes_t /*frame*/) {}
 
-	virtual void set_block_size (nframes_t /*nframes*/) {}
+	virtual int set_block_size (nframes_t /*nframes*/) { return 0; }
+        virtual bool requires_fixed_sized_buffers() const { return false; }
 
 	/** @param result_required true if, on return from this method, bufs is required to contain valid data;
 	 *  if false, the method need not bother writing to bufs if it doesn't want to.
@@ -75,6 +76,7 @@ class Processor : public SessionObject, public Automatable, public Latent
 
 	virtual void activate ()   { _pending_active = true; ActiveChanged(); }
 	virtual void deactivate () { _pending_active = false; ActiveChanged(); }
+        virtual void flush() {}
 
 	virtual bool configure_io (ChanCount in, ChanCount out);
 

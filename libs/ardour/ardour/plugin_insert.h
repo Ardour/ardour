@@ -57,8 +57,9 @@ class PluginInsert : public Processor
 
 	void activate ();
 	void deactivate ();
+        void flush ();
 
-	void set_block_size (nframes_t nframes);
+	int set_block_size (nframes_t nframes);
 
 	ChanCount output_streams() const;
 	ChanCount input_streams() const;

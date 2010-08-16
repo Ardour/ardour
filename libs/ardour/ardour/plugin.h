@@ -110,7 +110,9 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual uint32_t nth_parameter (uint32_t which, bool& ok) const = 0;
 	virtual void activate () = 0;
 	virtual void deactivate () = 0;
-	virtual void set_block_size (nframes_t nframes) = 0;
+        virtual void flush () { deactivate(); activate(); }
+
+	virtual int set_block_size (nframes_t nframes) = 0;
 
 	virtual int connect_and_run (BufferSet& bufs,
 			ChanMapping in, ChanMapping out,

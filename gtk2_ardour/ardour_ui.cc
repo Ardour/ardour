@@ -733,6 +733,19 @@ ARDOUR_UI::check_memory_locking ()
 
 
 void
+ARDOUR_UI::queue_finish ()
+{
+	Glib::signal_idle().connect (mem_fun (*this, &ARDOUR_UI::idle_finish));
+}
+
+bool
+ARDOUR_UI::idle_finish ()
+{
+	finish ();
+	return false; /* do not call again */
+}
+
+void
 ARDOUR_UI::finish()
 {
 	if (_session) {
@@ -772,6 +785,7 @@ If you still wish to quit, please use the\n\n\
 		point_oh_five_second_connection.disconnect ();
 		point_zero_one_second_connection.disconnect();
 		
+                _session->set_clean ();
 		// _session->set_deletion_in_progress ();
 		_session->remove_pending_capture_state ();
 		delete _session;

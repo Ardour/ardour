@@ -25,6 +25,7 @@
 #include <algorithm>
 
 #include <pbd/controllable.h>
+#include <pbd/locale_guard.h>
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
@@ -471,13 +472,19 @@ BarController::entry_input (double* new_value)
 
 	// extract a double from the string and take its log
 	Entry *entry = dynamic_cast<Entry *>(&spinner);
-	stringstream stream(entry->get_text());
-	stream.imbue(std::locale(""));
-
 	double value;
-	stream >> value;
-	
+
+	{
+		// Switch to user's preferred locale so that
+		// if they use different LC_NUMERIC conventions,
+		// we will honor them.
+
+		PBD::LocaleGuard lg ("");
+		sscanf (entry->get_text().c_str(), "%lf", &value);
+	}
+
 	*new_value = log(value);
+
 	return true;
 }
 
@@ -502,29 +509,20 @@ BarController::entry_output ()
 	
 	stringstream stream;
 	string str;
-	size_t found;
 
-	// Gtk.Entry does not like the thousands separator, so we have to  
-	// remove it after conversion from float to string.
+	char buf[128];
 
-	stream.imbue(std::locale(""));
-	stream.precision(spinner.get_digits());
-
-	stream << fixed << exp(spinner.get_adjustment()->get_value());
-	
-	str=stream.str();
-
-	// find thousands separators, remove them
-	found = str.find(use_facet<numpunct<char> >(std::locale("")).thousands_sep());
-	while(found != str.npos) {
-		str.erase(found,1);
-
-		//find next
-		found = str.find(use_facet<numpunct<char> >(std::locale("")).thousands_sep());
+	{
+		// Switch to user's preferred locale so that
+		// if they use different LC_NUMERIC conventions,
+		// we will honor them.
+		
+		PBD::LocaleGuard lg ("");
+		snprintf (buf, sizeof (buf), "%g", exp (spinner.get_adjustment()->get_value()));
 	}
 
 	Entry *entry = dynamic_cast<Entry *>(&spinner);
-	entry->set_text(str);
+	entry->set_text(buf);
 	
 	return true;
 }

@@ -3532,7 +3532,7 @@ Session::freeze_all (InterThreadInfo& itt)
 }
 
 boost::shared_ptr<Region>
-Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
+Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 			  bool /*overwrite*/, vector<boost::shared_ptr<Source> >& srcs,
 			  InterThreadInfo& itt, bool enable_processing)
 {
@@ -3542,13 +3542,14 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 	uint32_t x;
 	char buf[PATH_MAX+1];
 	ChanCount nchans(track.n_channels());
-	nframes_t position;
-	nframes_t this_chunk;
-	nframes_t to_do;
+	framepos_t position;
+	framecnt_t this_chunk;
+	framepos_t to_do;
 	BufferSet buffers;
 	SessionDirectory sdir(get_best_session_directory_for_new_source ());
 	const string sound_dir = sdir.sound_path().to_string();
-	nframes_t len = end - start;
+	framepos_t len = end - start;
+        bool need_block_size_reset = false;
         string ext;
 
 	if (end <= start) {
@@ -3557,7 +3558,7 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 		return result;
 	}
 
-	const nframes_t chunk_size = (256 * 1024)/4;
+	const framecnt_t chunk_size = (256 * 1024)/4;
 
 	// block all process callback handling
 
@@ -3603,6 +3604,11 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 
 		srcs.push_back (fsource);
 	}
+
+        /* tell redirects that care that we are about to use a much larger blocksize */
+        
+        need_block_size_reset = true;
+        track.set_block_size (chunk_size);
 
 	/* XXX need to flush all redirects */
 
@@ -3694,6 +3700,11 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 		}
 	}
 
+
+        if (need_block_size_reset) {
+                track.set_block_size (get_block_size());
+        }
+        
 	unblock_processing ();
 
 	return result;

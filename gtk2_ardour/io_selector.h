@@ -38,6 +38,8 @@ class IOSelector : public PortMatrix
 	std::string disassociation_verb () const;
 	std::string channel_noun () const;
 
+        ARDOUR::Session* session() const { return _session; }
+
 	uint32_t n_io_ports () const;
 	boost::shared_ptr<ARDOUR::IO> const io () { return _io; }
 	void setup_ports (int);
@@ -109,6 +111,7 @@ class PortInsertUI : public Gtk::HBox
 
         bool check_latency_measurement ();
         void latency_button_toggled ();
+        void update_latency_display ();
 };
 
 class PortInsertWindow : public ArdourDialog

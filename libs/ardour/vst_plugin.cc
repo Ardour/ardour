@@ -107,12 +107,13 @@ VSTPlugin::~VSTPlugin ()
 	fst_close (_fst);
 }
 
-void
+int 
 VSTPlugin::set_block_size (nframes_t nframes)
 {
 	deactivate ();
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, nframes, NULL, 0.0f);
 	activate ();
+        return 0;
 }
 
 float

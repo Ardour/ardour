@@ -221,12 +221,16 @@ PluginInsert::parameter_changed (Evoral::Parameter which, float val)
 	}
 }
 
-void
+int
 PluginInsert::set_block_size (nframes_t nframes)
 {
+        int ret = 0;
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		(*i)->set_block_size (nframes);
+		if ((*i)->set_block_size (nframes) != 0) {
+                        ret = -1;
+                }
 	}
+        return ret;
 }
 
 void
@@ -247,6 +251,14 @@ PluginInsert::deactivate ()
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->deactivate ();
 	}
+}
+
+void
+PluginInsert::flush ()
+{
+        for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+                (*i)->flush ();
+        }
 }
 
 void
@@ -436,7 +448,7 @@ PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes)
 		return;
 	}
 
-	if (!find_next_event (now, end, next_event)) {
+	if (!find_next_event (now, end, next_event) || requires_fixed_sized_buffers()) {
 
 		/* no events have a time within the relevant range */
 

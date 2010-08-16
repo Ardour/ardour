@@ -699,6 +699,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	PBD::ScopedConnectionList forever_connections;
 
         void step_edit_status_change (bool);
+
+	/* these are used only in response to a platform-specific "ShouldQuit" signal
+	 */
+	bool idle_finish ();
+	void queue_finish ();
 };
 
 #endif /* __ardour_gui_h__ */

@@ -64,7 +64,7 @@ class VSTPlugin : public ARDOUR::Plugin
 	uint32_t nth_parameter (uint32_t port, bool& ok) const;
 	void activate ();
 	void deactivate ();
-	void set_block_size (nframes_t nframes);
+        int set_block_size (nframes_t nframes);
 
 	int connect_and_run (BufferSet&,
 			ChanMapping in, ChanMapping out,

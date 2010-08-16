@@ -69,6 +69,7 @@ class PortInsert : public IOProcessor
 
         MTDM* mtdm () const { return _mtdm; }
         void set_measured_latency (nframes_t);
+        nframes_t latency() const;
 
   private:
 	/* disallow copy construction */

@@ -909,12 +909,15 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
         TimeType note_time = note->time();
         TimeType note_length = note->length();
 
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 checking overlaps for note %2 @ %3\n", this, (int)note->note(), note->time()));
+
         for (Pitches::const_iterator i = p.lower_bound (search_note); 
              i != p.end() && (*i)->note() == note->note(); ++i) {
 
                 TimeType sb = (*i)->time();
                 TimeType eb = (*i)->end_time();
                 OverlapType overlap = OverlapNone;
+
 
                 if ((sb > sa) && (eb <= ea)) {
                         overlap = OverlapInternal;
@@ -929,7 +932,11 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
                         continue;
                 }
 
+                DEBUG_TRACE (DEBUG::Sequence, string_compose ("\toverlap is %1 for (%2,%3) vs (%4,%5)\n", enum_2_string(overlap), 
+                                                              sa, ea, sb, eb));
+
                 if (insert_merge_policy() == InsertMergeReject) {
+                        DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 just reject\n", this));
                         return -1;
                 }
 

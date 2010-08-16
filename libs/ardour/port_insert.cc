@@ -83,6 +83,23 @@ PortInsert::set_measured_latency (nframes_t n)
         _measured_latency = n;
 }
 
+nframes_t 
+PortInsert::latency() const 
+{
+	/* because we deliver and collect within the same cycle,
+	   all I/O is necessarily delayed by at least frames_per_cycle().
+
+	   if the return port for insert has its own latency, we
+	   need to take that into account too.
+	*/
+
+	if (_measured_latency == 0) {
+		return _session.engine().frames_per_cycle() + _input->latency();
+	} else {
+		return _measured_latency;
+	}
+}
+
 void
 PortInsert::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool)
 {
@@ -149,6 +166,10 @@ PortInsert::state (bool full)
 	node.add_property ("type", "port");
 	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
 	node.add_property ("bitslot", buf);
+        snprintf (buf, sizeof (buf), "%u", _measured_latency);
+        node.add_property("latency", buf);
+        snprintf (buf, sizeof (buf), "%u", _session.get_block_size());
+        node.add_property("block_size", buf);
 
 	return node;
 }
@@ -182,6 +203,18 @@ PortInsert::set_state (const XMLNode& node, int version)
 		error << _("non-port insert XML used for port plugin insert") << endmsg;
 		return -1;
 	}
+
+        uint32_t blocksize = 0;
+        if ((prop = node.property ("block_size")) != 0) {
+                sscanf (prop->value().c_str(), "%u", &blocksize);
+        }
+        
+        //if the jack period is the same as when the value was saved, we can recall our latency..
+        if ( (_session.get_block_size() == blocksize) && (prop = node.property ("latency")) != 0) {
+                uint32_t latency = 0;
+                sscanf (prop->value().c_str(), "%u", &latency);
+                _measured_latency = latency;
+        }
 
 	if ((prop = node.property ("bitslot")) == 0) {
 		bitslot = _session.next_insert_id();

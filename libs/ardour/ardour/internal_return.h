@@ -41,7 +41,7 @@ class InternalReturn : public Return
 	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool);
 	bool configure_io (ChanCount in, ChanCount out);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
-	void set_block_size (nframes_t);
+	int  set_block_size (nframes_t);
 
 	BufferSet* get_buffers();
 	void release_buffers();

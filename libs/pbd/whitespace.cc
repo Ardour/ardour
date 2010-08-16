@@ -18,6 +18,7 @@
 */
 
 #include "pbd/whitespace.h"
+#include <glibmm/ustring.h>
 
 using namespace std;
 
@@ -75,6 +76,14 @@ strip_whitespace_edges (string& str)
     } else {
 	    str = str.substr (s);
     }
+}
+
+void
+strip_whitespace_edges (Glib::ustring& str)
+{   
+	string copy (str.raw());
+	strip_whitespace_edges (copy);
+	str = copy;
 }
 
 } // namespace PBD

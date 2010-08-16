@@ -145,10 +145,11 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 	_active = _pending_active;
 }
 
-void
+int
 InternalSend::set_block_size (nframes_t nframes)
 {
 	mixbufs.ensure_buffers (_configured_input, nframes);
+        return 0;
 }
 
 bool

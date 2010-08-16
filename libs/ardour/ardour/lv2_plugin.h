@@ -94,7 +94,7 @@ class LV2Plugin : public ARDOUR::Plugin
 		_instance = NULL;
 	}
 
-	void set_block_size (nframes_t /*nframes*/) {}
+	int  set_block_size (nframes_t /*nframes*/) { return 0; }
 
 	int connect_and_run (BufferSet& bufs,
 			ChanMapping in, ChanMapping out,

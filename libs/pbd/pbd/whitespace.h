@@ -22,11 +22,16 @@
 
 #include <string>
 
+namespace Glib {
+	class ustring;
+}
+
 namespace PBD {
 
 // returns the empty string if the entire string is whitespace
 // so check length after calling.
 extern void strip_whitespace_edges (std::string& str);
+extern void strip_whitespace_edges (Glib::ustring& str);
 
 } // namespace PBD
 

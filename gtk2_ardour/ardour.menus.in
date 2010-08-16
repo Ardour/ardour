@@ -29,10 +29,11 @@
                <menuitem action='CleanupUnused'/>
                <menuitem action='FlushWastebasket'/>
            </menu>
+#ifndef GTKOSX
            <separator/>
+#endif
            <menuitem action='ToggleSessionOptionsEditor'/>
-           <separator/>
-#ifdef GTKOSX
+#ifndef GTKOSX
            <menuitem action='ToggleRCOptionsEditor'/>
            <menuitem action='About'/>
 #endif
@@ -265,6 +266,7 @@
 	      <menuitem action='region-fill-track'/>
 	      <separator/>
 	      <menuitem action='loop-region'/>
+	      <menuitem action='set-loop-from-region'/>
 	      <menuitem action='set-punch-from-region'/>
 	      <menuitem action='add-range-marker-from-region'/>
 	      <menuitem action='add-range-markers-from-region'/>
