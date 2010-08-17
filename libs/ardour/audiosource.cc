@@ -945,3 +945,14 @@ AudioSource::available_peaks (double zoom_factor) const
 	return (end/sizeof(PeakData)) * _FPP;
 }
 
+void
+AudioSource::dec_read_data_count (nframes_t cnt)
+{
+        uint32_t val = cnt * sizeof (Sample);
+
+        if (val < _read_data_count) {
+                _read_data_count -= val;
+        } else { 
+                _read_data_count = 0;
+        }
+}

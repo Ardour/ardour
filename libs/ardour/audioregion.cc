@@ -356,6 +356,10 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 	framecnt_t to_read;
 	bool raw = (rops == ReadOpsNone);
 
+        if (n_channels() == 0) {
+                return 0;
+        }
+
 	if (muted() && !raw) {
 		return 0; /* read nothing */
 	}
@@ -407,7 +411,22 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 		   we don't have.
 		*/
 
-		memset (mixdown_buffer, 0, sizeof (Sample) * cnt);
+                if (Config->get_replicate_missing_region_channels()) {
+                       /* track is N-channel, this region has less channels, so use a relevant channel
+                        */
+                        
+                        uint32_t channel = n_channels() % chan_n;
+                        boost::shared_ptr<AudioSource> src = audio_source (channel);
+
+                        if (src->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
+                                return 0; /* "read nothing" */
+                        }
+
+                        /* adjust read data count appropriately since this was a duplicate read */
+                        src->dec_read_data_count (to_read);
+                } else {
+                        memset (mixdown_buffer, 0, sizeof (Sample) * cnt);
+                }
 	}
 
 	if (rops & ReadOpsFades) {
