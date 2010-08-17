@@ -83,12 +83,12 @@ UIConfiguration::load_defaults ()
 		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
 
 		if (!tree.read (rcfile.c_str())) {
-			error << string_compose(_("Ardour: cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
+			error << string_compose(_("cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
 			return -1;
 		}
 
 		if (set_state (*tree.root(), Stateful::loading_state_version)) {
-			error << string_compose(_("Ardour: default ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
+			error << string_compose(_("default ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
 		}
 	}
@@ -114,12 +114,12 @@ UIConfiguration::load_state ()
 		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
 
 		if (!tree.read (rcfile.c_str())) {
-			error << string_compose(_("Ardour: cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
+			error << string_compose(_("cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
 			return -1;
 		}
 
 		if (set_state (*tree.root(), Stateful::loading_state_version)) {
-			error << string_compose(_("Ardour: default ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
+			error << string_compose(_("default ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
 		}
 	}
@@ -137,18 +137,18 @@ UIConfiguration::load_state ()
 		info << string_compose (_("Loading user ui configuration file %1"), rcfile) << endl;
 
 		if (!tree.read (rcfile)) {
-			error << string_compose(_("Ardour: cannot read ui configuration file \"%1\""), rcfile) << endmsg;
+			error << string_compose(_("cannot read ui configuration file \"%1\""), rcfile) << endmsg;
 			return -1;
 		}
 
 		if (set_state (*tree.root(), Stateful::loading_state_version)) {
-			error << string_compose(_("Ardour: user ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
+			error << string_compose(_("user ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
 		}
 	}
 
 	if (!found)
-		error << "Ardour: could not find any ui configuration file, canvas will look broken." << endmsg;
+		error << _("could not find any ui configuration file, canvas will look broken.") << endmsg;
 
 	pack_canvasvars();
 	return 0;

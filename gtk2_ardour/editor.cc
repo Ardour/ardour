@@ -711,7 +711,7 @@ Editor::Editor ()
 	WindowTitle title(Glib::get_application_name());
 	title += _("Editor");
 	set_title (title.get_string());
-	set_wmclass (X_("ardour_editor"), "Ardour");
+	set_wmclass (X_("ardour_editor"), PROGRAM_NAME);
 
 	add (vpacker);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);

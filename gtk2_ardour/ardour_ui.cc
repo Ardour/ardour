@@ -272,7 +272,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 		SessionEvent::create_per_thread_pool ("GUI", 512);
 
 	} catch (failed_constructor& err) {
-		error << _("could not initialize Ardour.") << endmsg;
+		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
 		// pass it on up
 		throw;
 	}
@@ -1302,10 +1302,10 @@ ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t 
 
 	catch (...) {
 		MessageDialog msg (*editor,
-				   _("There are insufficient JACK ports available\n\
+				   string_compose (_("There are insufficient JACK ports available\n\
 to create a new track or bus.\n\
-You should save Ardour, exit and\n\
-restart JACK with more ports."));
+You should save %1, exit and\n\
+restart JACK with more ports."), PROGRAM_NAME));
 		msg.run ();
 	}
 }
@@ -1351,10 +1351,10 @@ ARDOUR_UI::session_add_audio_route (bool track, bool aux, int32_t input_channels
 
 	catch (...) {
 		MessageDialog msg (*editor,
-				   _("There are insufficient JACK ports available\n\
+				   string_compose (_("There are insufficient JACK ports available\n\
 to create a new track or bus.\n\
-You should save Ardour, exit and\n\
-restart JACK with more ports."));
+You should save %1, exit and\n\
+restart JACK with more ports."), PROGRAM_NAME));
 		pop_back_splash ();
 		msg.run ();
 	}
@@ -1881,11 +1881,11 @@ ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
 	if (strlen (reason)) {
 		msgstr = string_compose (_("The audio backend (JACK) was shutdown because:\n\n%1"), reason);
 	} else {
-		msgstr = _("\
+		msgstr = string_compose (_("\
 JACK has either been shutdown or it\n\
-disconnected Ardour because Ardour\n\
+disconnected %1 because %1\n\
 was not fast enough. Try to restart\n\
-JACK, reconnect and save the session.");
+JACK, reconnect and save the session."), PROGRAM_NAME);
 	}
 
 	MessageDialog msg (*editor, msgstr);
@@ -2203,12 +2203,12 @@ ARDOUR_UI::fontconfig_dialog ()
 
 	if (!Glib::file_test (fontconfig, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
 		MessageDialog msg (*_startup,
-				   _("Welcome to Ardour.\n\n"
-				     "The program will take a bit longer to start up\n"
-				     "while the system fonts are checked.\n\n"
-				     "This will only be done once, and you will\n"
-				     "not see this message again\n"),
-				   true,
+				   string_compose (_("Welcome to %1.\n\n"
+                                                     "The program will take a bit longer to start up\n"
+                                                     "while the system fonts are checked.\n\n"
+                                                     "This will only be done once, and you will\n"
+                                                     "not see this message again\n"), PROGRAM_NAME),
+                                   true,
 				   Gtk::MESSAGE_INFO,
 				   Gtk::BUTTONS_OK);
 		pop_back_splash ();
@@ -2301,7 +2301,7 @@ ARDOUR_UI::ask_about_loading_existing_session (const Glib::ustring& session_path
 
 	msg.set_name (X_("OpenExistingDialog"));
 	msg.set_title (_("Open Existing Session"));
-	msg.set_wmclass (X_("existing_session"), "Ardour");
+	msg.set_wmclass (X_("existing_session"), PROGRAM_NAME);
 	msg.set_position (Gtk::WIN_POS_MOUSE);
 	pop_back_splash ();
 
@@ -2939,7 +2939,7 @@ After cleanup, unused audio files will be moved to a \
 	checker.set_default_response (RESPONSE_CANCEL);
 
 	checker.set_name (_("CleanupDialog"));
-	checker.set_wmclass (X_("ardour_cleanup"), "Ardour");
+	checker.set_wmclass (X_("ardour_cleanup"), PROGRAM_NAME);
 	checker.set_position (Gtk::WIN_POS_MOUSE);
 
 	switch (checker.run()) {
@@ -3185,12 +3185,12 @@ ARDOUR_UI::disk_overrun_handler ()
 
 	if (!have_disk_speed_dialog_displayed) {
 		have_disk_speed_dialog_displayed = true;
-		MessageDialog* msg = new MessageDialog (*editor, _("\
+		MessageDialog* msg = new MessageDialog (*editor, string_compose (_("\
 The disk system on your computer\n\
-was not able to keep up with Ardour.\n\
+was not able to keep up with %1.\n\
 \n\
 Specifically, it failed to write data to disk\n\
-quickly enough to keep up with recording.\n"));
+quickly enough to keep up with recording.\n"), PROGRAM_NAME));
 		msg->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::disk_speed_dialog_gone), msg));
 		msg->show ();
 	}
@@ -3204,11 +3204,11 @@ ARDOUR_UI::disk_underrun_handler ()
 	if (!have_disk_speed_dialog_displayed) {
 		have_disk_speed_dialog_displayed = true;
 		MessageDialog* msg = new MessageDialog (*editor,
-				   _("The disk system on your computer\n\
-was not able to keep up with Ardour.\n\
+                                                        string_compose (_("The disk system on your computer\n\
+was not able to keep up with %1.\n\
 \n\
 Specifically, it failed to read data from disk\n\
-quickly enough to keep up with playback.\n"));
+quickly enough to keep up with playback.\n"), PROGRAM_NAME));
 		msg->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::disk_speed_dialog_gone), msg));
 		msg->show ();
 	}
@@ -3557,3 +3557,39 @@ ARDOUR_UI::setup_profile ()
 	}
 }
 
+void
+ARDOUR_UI::toggle_translations ()
+{
+        using namespace Glib;
+        
+        RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_("EnableTranslation"));
+        if (act) {
+                RefPtr<ToggleAction> ract = RefPtr<ToggleAction>::cast_dynamic (act);
+                if (ract) {
+                        
+                        string i18n_killer = ARDOUR::translation_kill_path();
+                        
+                        bool already_enabled = !ARDOUR::translations_are_disabled ();
+                        
+                        if (ract->get_active ()) {
+/* we don't care about errors */
+                                int fd = ::open (i18n_killer.c_str(), O_RDONLY|O_CREAT, 0644);
+                                close (fd);
+                        } else {
+/* we don't care about errors */
+                                unlink (i18n_killer.c_str());
+                        }
+                        
+                        if (already_enabled != ract->get_active()) {
+                                MessageDialog win (already_enabled ? _("Translations disabled") : _("Translations enabled"),
+                                                   false,
+                                                   Gtk::MESSAGE_WARNING,
+                                                   Gtk::BUTTONS_OK);
+                                win.set_secondary_text (string_compose (_("You must restart %1 for this to take effect."), PROGRAM_NAME));
+                                win.set_position (Gtk::WIN_POS_CENTER);
+                                win.present ();
+                                win.run ();
+                        }
+                }
+        }
+}        

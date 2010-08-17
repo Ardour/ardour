@@ -2107,6 +2107,8 @@ Session::remove_route (shared_ptr<Route> route)
                 return;
         }
 
+        route->set_solo (false, this);
+
 	{
 		RCUWriter<RouteList> writer (routes);
 		shared_ptr<RouteList> rs = writer.get_copy ();

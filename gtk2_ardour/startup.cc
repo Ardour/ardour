@@ -294,7 +294,7 @@ using the program.</span>\
 
 	new_user_page_index = append_page (*vbox);
 	set_page_type (*vbox, ASSISTANT_PAGE_INTRO);
-	set_page_title (*vbox, _("Welcome to Ardour"));
+	set_page_title (*vbox, string_compose (_("Welcome to %1"), PROGRAM_NAME));
 	set_page_header_image (*vbox, icon_pixbuf);
 	set_page_complete (*vbox, true);
 }
@@ -321,12 +321,12 @@ ArdourStartup::setup_first_time_config_page ()
 	HBox* hbox = manage (new HBox);
 	VBox* vbox = manage (new VBox);
 
-	txt->set_markup (_("\
-Each project that you work on with Ardour has its own folder.\n\
+	txt->set_markup (string_compose (_("\
+Each project that you work on with %1 has its own folder.\n\
 These can require a lot of disk space if you are recording audio.\n\
 \n\
-Where would you like new Ardour sessions to be stored by default?\n\n\
-<i>(You can put new sessions anywhere, this is just a default)</i>"));
+Where would you like new %1 sessions to be stored by default?\n\n\
+<i>(You can put new sessions anywhere, this is just a default)</i>"), PROGRAM_NAME));
 	txt->set_alignment (0.0, 0.0);
 
 	vbox->set_spacing (18);
@@ -680,6 +680,10 @@ ArdourStartup::setup_new_session_page ()
 			new_folder_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 		}
 		new_folder_chooser.set_title (_("Select folder for session"));
+
+#ifdef GTKOSX
+                new_folder_chooser->add_shortcut_folder_uri("file:///Volumes");
+#endif
 
 		vbox1->pack_start (*hbox2, false, false);
 

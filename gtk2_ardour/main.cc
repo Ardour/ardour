@@ -100,12 +100,16 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 #include <sys/param.h>
 #include <fstream>
 
+extern void set_language_preference (); // cocoacarbon.mm
+
 void
 fixup_bundle_environment ()
 {
 	if (!getenv ("ARDOUR_BUNDLED")) {
 		return;
 	}
+
+	set_language_preference ();
 
 	char execpath[MAXPATHLEN+1];
 	uint32_t pathsz = sizeof (execpath);
@@ -208,13 +212,17 @@ fixup_bundle_environment ()
 
 	setenv ("GTK_PATH", path.c_str(), 1);
 
-	path = dir_path;
-	path += "/../Resources/locale";
+	if (!ARDOUR::translations_are_disabled ()) {
 
-	localedir = strdup (path.c_str());
+		path = dir_path;
+		path += "/../Resources/locale";
+		
+		localedir = strdup (path.c_str());
+		setenv ("GTK_LOCALEDIR", localedir, 1);
+	}
 
 	/* write a pango.rc file and tell pango to use it. we'd love
-	   to put this into the Ardour.app bundle and leave it there,
+	   to put this into the PROGRAM_NAME.app bundle and leave it there,
 	   but the user may not have write permission. so ...
 
 	   we also have to make sure that the user ardour directory
@@ -288,12 +296,12 @@ tell_about_jack_death (void* /* ignored */)
 		/* died during startup */
 		MessageDialog msg (_("JACK exited"), false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK);
 		msg.set_position (Gtk::WIN_POS_CENTER);
-		msg.set_secondary_text (_(
-"JACK exited unexpectedly, and without notifying Ardour.\n\
+		msg.set_secondary_text (string_compose (_(
+"JACK exited unexpectedly, and without notifying %1.\n\
 \n\
 This could be due to misconfiguration or to an error inside JACK.\n\
 \n\
-Click OK to exit Ardour."));
+Click OK to exit %1."), PROGRAM_NAME));
     
 		msg.run ();
 		_exit (0);
@@ -303,12 +311,12 @@ Click OK to exit Ardour."));
 		/* engine has already run, so this is a mid-session JACK death */
 		
 		MessageDialog* msg = manage (new MessageDialog (_("JACK exited"), false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_NONE));
-		msg->set_secondary_text (_(
-"JACK exited unexpectedly, and without notifying Ardour.\n\
+		msg->set_secondary_text (string_compose (_(
+"JACK exited unexpectedly, and without notifying %1.\n\
 \n\
 This is probably due to an error inside JACK. You should restart JACK\n\
-and reconnect Ardour to it, or exit Ardour now. You cannot save your\n\
-session at this time, because we would lose your connection information.\n"));
+and reconnect %1 to it, or exit %1 now. You cannot save your\n\
+session at this time, because we would lose your connection information.\n"), PROGRAM_NAME));
 		msg->present ();
 	}
 	return false; /* do not call again */

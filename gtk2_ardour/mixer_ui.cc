@@ -213,7 +213,7 @@ Mixer_UI::Mixer_UI ()
 	title += _("Mixer");
 	set_title (title.get_string());
 
-	set_wmclass (X_("ardour_mixer"), "Ardour");
+	set_wmclass (X_("ardour_mixer"), PROGRAM_NAME);
 
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
 

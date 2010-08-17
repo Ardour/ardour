@@ -142,7 +142,7 @@ RouteParams_UI::RouteParams_UI ()
 
 	set_name ("RouteParamsWindow");
 	set_default_size (620,370);
-	set_wmclass (X_("ardour_route_parameters"), "Ardour");
+	set_wmclass (X_("ardour_route_parameters"), PROGRAM_NAME);
 
 	// events
 	route_display.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &RouteParams_UI::route_selected));

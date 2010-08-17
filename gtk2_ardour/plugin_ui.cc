@@ -131,7 +131,7 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 		add (*manage(hbox));
 		*/
 
-		set_wmclass (X_("ardour_plugin_editor"), "Ardour");
+		set_wmclass (X_("ardour_plugin_editor"), PROGRAM_NAME);
 
 		signal_map_event().connect (sigc::mem_fun (*pu, &GenericPluginUI::start_updating));
 		signal_unmap_event().connect (sigc::mem_fun (*pu, &GenericPluginUI::stop_updating));

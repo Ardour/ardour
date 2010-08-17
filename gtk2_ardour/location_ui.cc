@@ -1023,7 +1023,7 @@ LocationEditRow::set_clock_sensitivity ()
 LocationUIWindow::LocationUIWindow ()
 	: ArdourDialog (_("Locations"))
 {
-	set_wmclass(X_("ardour_locations"), "Ardour");
+	set_wmclass(X_("ardour_locations"), PROGRAM_NAME);
 	set_name ("LocationWindow");
 
 	get_vbox()->pack_start (_ui);

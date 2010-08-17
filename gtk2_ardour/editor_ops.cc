@@ -6470,16 +6470,17 @@ edit your ardour.rc file to set the\n\
 		if (nbusses) {
 			prompt  = string_compose (_("Do you really want to remove %1 %2 and %3 %4?\n"
 						    "(You may also lose the playlists associated with the %2)\n\n"
-						    "This action cannot be undone!"),
+						    "This action cannot be undone, and the session file will be overwritten!"),
 						  ntracks, trackstr, nbusses, busstr);
 		} else {
 			prompt  = string_compose (_("Do you really want to remove %1 %2?\n"
 						    "(You may also lose the playlists associated with the %2)\n\n"
-						    "This action cannot be undone!"),
+						    "This action cannot be undone, and the session file will be overwritten!"),
 						  ntracks, trackstr);
 		}
 	} else if (nbusses) {
-		prompt  = string_compose (_("Do you really want to remove %1 %2?"),
+		prompt  = string_compose (_("Do you really want to remove %1 %2?\n\n"
+                                            "This action cannot be undon, and the session file will be overwritten"),
 					  nbusses, busstr);
 	}
 

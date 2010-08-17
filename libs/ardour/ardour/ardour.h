@@ -62,6 +62,9 @@ namespace ARDOUR {
 
 	void find_bindings_files (std::map<std::string,std::string>&);
 
+        std::string translation_kill_path ();
+        bool translations_are_disabled ();
+
 	const layer_t max_layer = UCHAR_MAX;
 
 	static inline microseconds_t get_microseconds () {

@@ -43,7 +43,7 @@ AddMidiCCTrackDialog::AddMidiCCTrackDialog ()
 	, _cc_num_spinner (_cc_num_adjustment)
 {
 	set_name ("AddMidiCCTrackDialog");
-	set_wmclass (X_("ardour_add_track_bus"), "Ardour");
+	set_wmclass (X_("ardour_add_track_bus"), PROGRAM_NAME);
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_resizable (false);
 

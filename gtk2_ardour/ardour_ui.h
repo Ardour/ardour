@@ -695,6 +695,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void platform_specific ();
 	void platform_setup ();
 	void fontconfig_dialog ();
+        void toggle_translations ();
 
 	PBD::ScopedConnectionList forever_connections;
 
