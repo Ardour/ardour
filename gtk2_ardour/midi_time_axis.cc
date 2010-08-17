@@ -116,6 +116,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 	, _midi_thru_item (0)
 	, default_channel_menu (0)
 	, controller_menu (0)
+        , _step_editor (0)
 {
 	subplugin_menu.set_name ("ArdourContextMenu");
 
