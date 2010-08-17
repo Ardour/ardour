@@ -20,6 +20,7 @@ VERSION = GTKMM2EXT_VERSION
 
 gtkmm2ext_sources = [
 	'actions.cc',
+        'application.cc',
 	'auto_spin.cc',
 	'barcontroller.cc',
 	'binding_proxy.cc',

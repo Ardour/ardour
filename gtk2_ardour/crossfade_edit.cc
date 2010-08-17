@@ -419,15 +419,16 @@ CrossfadeEditor::point_event (GdkEvent* event, Point* point)
 		if (point_grabbed) {
 			double new_x, new_y;
 
-			/* can't drag first or last points horizontally */
+			/* can't drag first or last points horizontally or vertically */
 
 			if (point == fade[current].points.front() || point == fade[current].points.back()) {
 				new_x = point->x;
+                                new_y = point->y;
 			} else {
 				new_x = (event->motion.x - canvas_border)/effective_width();
+                                new_y = 1.0 - ((event->motion.y - canvas_border)/effective_height());
 			}
 
-			new_y = 1.0 - ((event->motion.y - canvas_border)/effective_height());
 			point->move_to (x_coordinate (new_x), y_coordinate (new_y),
 					new_x, new_y);
 			redraw ();

@@ -48,9 +48,7 @@
 #include "startup.h"
 #include "utils.h"
 
-#ifdef GTKOSX
-#include <gtkmm2ext/sync-menu.h>
-#endif
+#include <gtkmm2ext/application.h>
 
 #include "ardour/session.h"
 #include "ardour/profile.h"
@@ -231,6 +229,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_action (common_actions, X_("About"), _("About"),  sigc::mem_fun(*this, &ARDOUR_UI::show_about));
 	ActionManager::register_action (common_actions, X_("Chat"), _("Chat"),  sigc::mem_fun(*this, &ARDOUR_UI::launch_chat));
+        ActionManager::register_action (common_actions, X_("Manual"), _("Manual"),  mem_fun(*this, &ARDOUR_UI::launch_manual));
+        ActionManager::register_action (common_actions, X_("Reference"), _("Reference"),  mem_fun(*this, &ARDOUR_UI::launch_reference));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleThemeManager"), _("Theme Manager"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_theme_manager));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleKeyEditor"), _("Key Bindings"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_key_editor));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleBundleManager"), _("Bundle Manager"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_bundle_manager));
@@ -547,10 +547,7 @@ ARDOUR_UI::build_menu_bar ()
 void
 ARDOUR_UI::use_menubar_as_top_menubar ()
 {
-#ifdef GTKOSX
-	ige_mac_menu_set_menu_bar ((GtkMenuShell*) menu_bar->gobj());
-	// ige_mac_menu_set_quit_menu_item (some_item->gobj());
-#endif
+	gtk_application_set_menu_bar ((GtkMenuShell*) menu_bar->gobj());
 }
 
 void

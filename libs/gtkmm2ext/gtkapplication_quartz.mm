@@ -50,6 +50,8 @@
  *
  */
 
+static gint _exiting = 0;
+
 static guint
 gdk_quartz_keyval_to_ns_keyval (guint keyval)
 {
@@ -891,9 +893,13 @@ cocoa_menu_item_accel_changed (GtkAccelGroup   *accel_group,
 				GClosure        *accel_closure,
 				GtkWidget       *widget)
 {
-  GNSMenuItem *cocoa_item = cocoa_menu_item_get (widget);
+  GNSMenuItem *cocoa_item;
   GtkWidget      *label;
 
+  if (_exiting) 
+    return;
+
+  cocoa_item = cocoa_menu_item_get (widget);
   get_menu_label_text (widget, &label);
 
   if (GTK_IS_ACCEL_LABEL (label) &&
@@ -945,7 +951,12 @@ cocoa_menu_item_notify_label (GObject    *object,
 			       GParamSpec *pspec,
 			       gpointer    data)
 {
-  GNSMenuItem *cocoa_item = cocoa_menu_item_get (GTK_WIDGET (object));
+  GNSMenuItem *cocoa_item;
+
+  if (_exiting) 
+    return;
+
+  cocoa_item = cocoa_menu_item_get (GTK_WIDGET (object));
 
   if (!strcmp (pspec->name, "label"))
     {
@@ -964,6 +975,9 @@ cocoa_menu_item_notify (GObject        *object,
 			GParamSpec     *pspec,
 			NSMenuItem *cocoa_item)
 {
+  if (_exiting)
+    return;
+
   if (!strcmp (pspec->name, "sensitive") ||
       !strcmp (pspec->name, "visible"))
     {
@@ -1449,10 +1463,18 @@ gtk_application_ready ()
 extern "C" void
 gtk_application_cleanup()
 {
-	if (_window_menu)
+	_exiting = 1;
+
+	if (_window_menu) {
 		[ _window_menu release ];
-	if (_app_menu)
+		_window_menu = 0;
+	}
+	if (_app_menu) {
 		[ _app_menu release ];
-	if (_main_menubar)
+	        _app_menu = 0;
+	}
+	if (_main_menubar) {
 		[ _main_menubar release ];
+	        _main_menubar = 0;
+	}
 }

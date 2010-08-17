@@ -2656,6 +2656,15 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		goto out;
 	}
 
+	/* Now the session been created, add the transport controls */
+	new_session->add_controllable(roll_controllable);
+	new_session->add_controllable(stop_controllable);
+	new_session->add_controllable(goto_start_controllable);
+	new_session->add_controllable(goto_end_controllable);
+	new_session->add_controllable(auto_loop_controllable);
+	new_session->add_controllable(play_selection_controllable);
+	new_session->add_controllable(rec_controllable);
+
 	set_session (new_session);
 
 	session_loaded = true;
@@ -2750,6 +2759,18 @@ ARDOUR_UI::show_about ()
 
         about->set_transient_for(*editor);
 	about->show_all ();
+}
+
+void
+ARDOUR_UI::launch_manual ()
+{
+	PBD::open_uri("http://ardour.org/flossmanual");
+}
+
+void
+ARDOUR_UI::launch_reference ()
+{
+	PBD::open_uri("http://ardour.org/refmanual");
 }
 
 void
