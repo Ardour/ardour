@@ -459,6 +459,8 @@
 	     <menuitem action='About'/>
 #endif
              <menuitem action='Chat'/>
+	     <menuitem action='Manual'/>
+	     <menuitem action='Reference'/>
 	</menu>
      </menubar>
 
