@@ -205,7 +205,7 @@ path_is_paired (ustring path, ustring& pair_base)
 
 	/* remove any leading path */
 
-	if ((pos = path.find_last_of ('/')) != string::npos) {
+	if ((pos = path.find_last_of (G_DIR_SEPARATOR)) != string::npos) {
 		path = path.substr(pos+1);
 	}
 

@@ -514,7 +514,7 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 
 	adjust_capture_position = 0;
 
-	if (nominally_recording || (_session.get_record_enabled() && _session.config.get_punch_in())) {
+	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && _session.config.get_punch_in())) {
 		OverlapType ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
 
 		calculate_record_range(ot, transport_frame, nframes, rec_nframes, rec_offset);

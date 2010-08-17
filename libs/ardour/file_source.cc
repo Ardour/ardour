@@ -215,7 +215,7 @@ FileSource::find (DataType type, const ustring& path, bool must_exist,
 
 	isnew = false;
 
-	if (pathstr[0] != '/') {
+	if (!Glib::path_is_absolute (pathstr)) {
 
 		/* non-absolute pathname: find pathstr in search path */
 
@@ -234,12 +234,8 @@ FileSource::find (DataType type, const ustring& path, bool must_exist,
 		cnt = 0;
 
 		for (vector<ustring>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
-			fullpath = *i;
-			if (fullpath[fullpath.length()-1] != '/') {
-				fullpath += '/';
-			}
-
-			fullpath += pathstr;
+                        
+                        fullpath = Glib::build_filename (*i, pathstr);
 
 			/* i (paul) made a nasty design error by using ':' as a special character in
 			   Ardour 0.99 .. this hack tries to make things sort of work.
@@ -263,13 +259,7 @@ FileSource::find (DataType type, const ustring& path, bool must_exist,
 						 */
 
 						ustring shorter = pathstr.substr (0, pos);
-						fullpath = *i;
-
-						if (fullpath[fullpath.length()-1] != '/') {
-							fullpath += '/';
-						}
-
-						fullpath += shorter;
+                                                fullpath = Glib::build_filename (*i, shorter);
 
 						if (Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 							chan = atoi (pathstr.substr (pos+1));

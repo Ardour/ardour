@@ -201,7 +201,7 @@ PluginManager::ladspa_refresh ()
 				case ':' :
 				case '\0':
 					continue;
-				case '/' :
+				case G_DIR_SEPARATOR :
 					if (ladspa_path[found + strlen(standard_paths[i]) + 1] == ':' ||
 					    ladspa_path[found + strlen(standard_paths[i]) + 1] == '\0') {
 						continue;

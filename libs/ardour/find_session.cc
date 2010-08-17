@@ -5,6 +5,8 @@
 #include <climits>
 #include <cerrno>
 
+#include <glibmm/miscutils.h>
+
 #include "pbd/compose.h"
 #include "pbd/error.h"
 
@@ -53,17 +55,13 @@ ARDOUR::find_session (string str, string& path, string& snapshot, bool& isnew)
 
 		if (S_ISDIR (statbuf.st_mode)) {
 
-			string::size_type slash = str.find_last_of ('/');
+			string::size_type slash = str.find_last_of (G_DIR_SEPARATOR);
 
 			if (slash == string::npos) {
 
 				/* a subdirectory of cwd, so statefile should be ... */
 
-				string tmp;
-				tmp = str;
-				tmp += '/';
-				tmp += str;
-				tmp += statefile_suffix;
+				string tmp = Glib::build_filename (str, str+statefile_suffix);
 
 				/* is it there ? */
 
@@ -90,7 +88,7 @@ ARDOUR::find_session (string str, string& path, string& snapshot, bool& isnew)
 
 		} else if (S_ISREG (statbuf.st_mode)) {
 
-			string::size_type slash = str.find_last_of ('/');
+			string::size_type slash = str.find_last_of (G_DIR_SEPARATOR);
 			string::size_type suffix;
 
 			/* remove the suffix */
@@ -148,7 +146,7 @@ ARDOUR::find_session (string str, string& path, string& snapshot, bool& isnew)
 		   as "dirname" does.
 		*/
 
-		string::size_type slash = str.find_last_of ('/');
+		string::size_type slash = str.find_last_of (G_DIR_SEPARATOR);
 
 		if (slash == string::npos) {
 

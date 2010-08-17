@@ -22,6 +22,9 @@
 #include <inttypes.h>
 #include <cstdio>
 #include <errno.h>
+
+#include <glibmm/miscutils.h>
+
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 
@@ -98,7 +101,7 @@ Automatable::load_automation (const string& path)
 {
 	string fullpath;
 
-	if (path[0] == '/') { // legacy
+	if (Glib::path_is_absolute (path)) { // legacy
 		fullpath = path;
 	} else {
 		fullpath = _a_session.automation_dir();

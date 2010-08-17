@@ -174,8 +174,8 @@ get_paths_for_new_sources (HeaderFormat hf, const bool allow_replacing, const st
 		std::string filepath = (type == DataType::MIDI)
 				? sdir.midi_path().to_string() : sdir.sound_path().to_string();
 
-		filepath += '/';
-		filepath += get_non_existent_filename (hf, type, allow_replacing, filepath, basename, n, channels);
+                filepath = Glib::build_filename (filepath, 
+                                                 get_non_existent_filename (hf, type, allow_replacing, filepath, basename, n, channels));
 		new_paths.push_back (filepath);
 	}
 

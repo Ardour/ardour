@@ -145,7 +145,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_path = string(buf);
 
 	if (_path[_path.length()-1] != '/') {
-		_path += '/';
+		_path += G_DIR_SEPARATOR;
 	}
 
 	if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS) && ::access (_path.c_str(), W_OK)) {
@@ -2225,7 +2225,7 @@ remove_end(string* state)
 	string statename(*state);
 
 	string::size_type start,end;
-	if ((start = statename.find_last_of ('/')) != string::npos) {
+	if ((start = statename.find_last_of (G_DIR_SEPARATOR)) != string::npos) {
 		statename = statename.substr (start+1);
 	}
 
@@ -2398,7 +2398,7 @@ Session::find_all_sources (string path, set<string>& result)
 			continue;
 		}
 
-		if (prop->value()[0] == '/') {
+		if (Glib::path_is_absolute (prop->value())) {
 			/* external file, ignore */
 			continue;
 		}
@@ -2427,7 +2427,7 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 
 	ripped = _path;
 
-	if (ripped[ripped.length()-1] == '/') {
+	if (ripped[ripped.length()-1] == G_DIR_SEPARATOR) {
 		ripped = ripped.substr (0, ripped.length() - 1);
 	}
 
@@ -2634,18 +2634,16 @@ Session::cleanup_sources (CleanupReport& rep)
 			newpath = Glib::path_get_dirname (newpath); // "session-dir"
 		}
 
-		newpath += '/';
-		newpath += dead_sound_dir_name;
+		newpath = Glib::build_filename (newpath, dead_sound_dir_name);
 
 		if (g_mkdir_with_parents (newpath.c_str(), 0755) < 0) {
 			error << string_compose(_("Session: cannot create session peakfile folder \"%1\" (%2)"), newpath, strerror (errno)) << endmsg;
 			return -1;
 		}
 
-		newpath += '/';
-		newpath += Glib::path_get_basename ((*x));
-
-		if (access (newpath.c_str(), F_OK) == 0) {
+		newpath = Glib::build_filename (newpath, Glib::path_get_basename ((*x)));
+                
+		if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
 
 			/* the new path already exists, try versioning */
 
