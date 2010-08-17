@@ -1427,7 +1427,7 @@ ARDOUR_UI::transport_goto_wallclock ()
 		frames += tmnow.tm_min * (60 * _session->frame_rate());
 		frames += tmnow.tm_sec * _session->frame_rate();
 
-		_session->request_locate (frames);
+		_session->request_locate (frames, _session->transport_rolling ());
 
 		/* force displayed area in editor to start no matter
 		   what "follow playhead" setting is.
