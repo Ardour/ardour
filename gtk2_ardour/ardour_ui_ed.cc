@@ -676,7 +676,9 @@ ARDOUR_UI::save_ardour_state ()
         XMLNode* window_node = new XMLNode (X_("UI"));
 
 	for (list<WindowProxyBase*>::iterator i = _window_proxies.begin(); i != _window_proxies.end(); ++i) {
-		window_node->add_child_nocopy (*((*i)->get_state ()));
+		if ((*i)->rc_configured()) {
+			window_node->add_child_nocopy (*((*i)->get_state ()));
+		}
 	}
         
         /* tearoffs */

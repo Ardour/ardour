@@ -83,6 +83,9 @@ public:
 	ProcessorWindowProxy (std::string const &, XMLNode const *, ProcessorBox *, boost::weak_ptr<ARDOUR::Processor>);
 
 	void show ();
+	bool rc_configured () const {
+		return false;
+	}
 
 	boost::weak_ptr<ARDOUR::Processor> processor () const {
 		return _processor;

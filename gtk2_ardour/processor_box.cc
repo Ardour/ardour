@@ -996,7 +996,7 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 	
 	ProcessorWindowProxy* wp = new ProcessorWindowProxy (
 		string_compose ("%1-%2-%3", loc, _route->id(), p->id()),
-		Config->extra_xml (X_("UI")),
+		_session->extra_xml (X_("UI")),
 		this,
 		w);
 	

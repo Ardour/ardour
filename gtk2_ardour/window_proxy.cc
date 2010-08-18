@@ -35,6 +35,10 @@ WindowProxyBase::WindowProxyBase (string const & name, XMLNode const * node)
 	, _width (-1)
 	, _height (-1)
 {
+	if (!node) {
+		return;
+	}
+	
 	XMLNodeList children = node->children ();
 
 	XMLNodeList::const_iterator i = children.begin ();

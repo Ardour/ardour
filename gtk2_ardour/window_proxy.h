@@ -51,6 +51,12 @@ public:
 	/** Show this window */
 	virtual void show () = 0;
 
+	/** @return true if the configuration for this window should be
+	 *  global (ie across all sessions), otherwise false if it should
+	 *  be session-specific.
+	 */
+	virtual bool rc_configured () const = 0;
+
 	virtual Gtk::Window* get_gtk_window () const = 0;
 
 private:
@@ -122,6 +128,10 @@ public:
 			assert (tact);
 			tact->set_active (true);
 		}
+	}
+
+	bool rc_configured () const {
+		return true;
 	}
 
 private:

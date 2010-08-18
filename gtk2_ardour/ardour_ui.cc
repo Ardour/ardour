@@ -2100,6 +2100,16 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 void
 ARDOUR_UI::save_state (const string & name, bool switch_to_it)
 {
+	XMLNode* node = new XMLNode (X_("UI"));
+
+	for (list<WindowProxyBase*>::iterator i = _window_proxies.begin(); i != _window_proxies.end(); ++i) {
+		if (!(*i)->rc_configured()) {
+			node->add_child_nocopy (*((*i)->get_state ()));
+		}
+	}
+
+	_session->add_extra_xml (*node);
+	
 	save_state_canfail (name, switch_to_it);
 }
 
