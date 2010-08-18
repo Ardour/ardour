@@ -78,7 +78,7 @@ MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
                                 continue;
                         }
 
-			if (ev.time > offset && ev.time < (offset + nframes)) {
+			if (ev.time >= offset && ev.time < (offset + nframes)) {
 				_buffer->push_back (ev);
 			} else {
 				cerr << "Dropping incoming MIDI at time " << ev.time << "; offset=" << offset << " limit=" << (offset + nframes) << "\n";
