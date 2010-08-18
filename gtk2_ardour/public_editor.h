@@ -274,7 +274,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual TimeAxisView* get_named_time_axis(const std::string & name)  = 0;
 #endif
 
-	virtual RouteTimeAxisView* get_route_view_by_id (PBD::ID& id) = 0;
+	virtual RouteTimeAxisView* get_route_view_by_route_id (PBD::ID& id) const = 0;
 
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, PBD::PropertyID) const = 0;
 

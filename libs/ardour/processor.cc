@@ -66,7 +66,6 @@ Processor::Processor(Session& session, const string& name)
 	, _active(false)
 	, _next_ab_is_active(false)
 	, _configured(false)
-	, _gui(0)
 	, _display_to_user (true)
 	, _pre_fader (false)
 {

@@ -52,6 +52,7 @@
 #include "io_selector.h"
 #include "send_ui.h"
 #include "enums.h"
+#include "window_proxy.h"
 
 class MotionController;
 class PluginSelector;
@@ -70,6 +71,29 @@ namespace ARDOUR {
 	class Send;
 	class Session;
 }
+
+class ProcessorBox;
+
+/** A WindowProxy for Processor UI windows; it knows how to ask a ProcessorBox
+ *  to create a UI window for a particular processor.
+ */
+class ProcessorWindowProxy : public WindowProxy<Gtk::Window>
+{
+public:
+	ProcessorWindowProxy (std::string const &, XMLNode const *, ProcessorBox *, boost::weak_ptr<ARDOUR::Processor>);
+
+	void show ();
+
+	boost::weak_ptr<ARDOUR::Processor> processor () const {
+		return _processor;
+	}
+
+	bool marked;
+
+private:
+	ProcessorBox* _processor_box;
+	boost::weak_ptr<ARDOUR::Processor> _processor;
+};
 
 class ProcessorEntry : public Gtkmm2ext::DnDVBoxChild, public sigc::trackable
 {
@@ -145,12 +169,19 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void select_all_inserts ();
 	void select_all_sends ();
 
+	Gtk::Window* get_processor_ui (boost::shared_ptr<ARDOUR::Processor>) const;
+	void edit_processor (boost::shared_ptr<ARDOUR::Processor>);
+	
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorSelected;
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorUnselected;
 
 	static void register_actions();
 
   private:
+
+	/* prevent copy construction */
+	ProcessorBox (ProcessorBox const &);
+	
 	boost::shared_ptr<ARDOUR::Route>  _route;
 	MixerStrip*         _parent_strip; // null if in RouteParamsUI
 	bool                _owner_is_mixer;
@@ -212,8 +243,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void reordered ();
 	void route_processors_changed (ARDOUR::RouteProcessorChange);
 
-	void remove_processor_gui (boost::shared_ptr<ARDOUR::Processor>);
-
 	void processors_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
 	void compute_processor_sort_keys ();
 
@@ -249,7 +278,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	void activate_processor (boost::shared_ptr<ARDOUR::Processor>);
 	void deactivate_processor (boost::shared_ptr<ARDOUR::Processor>);
-	void edit_processor (boost::shared_ptr<ARDOUR::Processor>);
 	void hide_processor_editor (boost::shared_ptr<ARDOUR::Processor>);
 	void rename_processor (boost::shared_ptr<ARDOUR::Processor>);
 
@@ -281,6 +309,10 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	void route_property_changed (const PBD::PropertyChange&);
 	std::string generate_processor_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);
+
+	std::list<ProcessorWindowProxy*> _processor_window_proxies;
+	void set_processor_ui (boost::shared_ptr<ARDOUR::Processor>, Gtk::Window *);
+	void maybe_add_processor_to_ui_list (boost::weak_ptr<ARDOUR::Processor>);
 };
 
 #endif /* __ardour_gtk_processor_box__ */

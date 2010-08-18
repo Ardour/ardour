@@ -65,6 +65,7 @@
 #include "editor_items.h"
 #include "region_selection.h"
 #include "canvas.h"
+#include "window_proxy.h"
 
 namespace Gnome { namespace Canvas {
 	class NoEventText;
@@ -106,7 +107,6 @@ class BundleManager;
 class ControlPoint;
 class CrossfadeView;
 class DragManager;
-class GlobalPortMatrixWindow;
 class GroupedButtons;
 class Marker;
 class MidiRegionView;
@@ -213,7 +213,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
 	void add_to_idle_resize (TimeAxisView*, int32_t);
 
-	RouteTimeAxisView* get_route_view_by_id (PBD::ID& id);
+	RouteTimeAxisView* get_route_view_by_route_id (PBD::ID& id) const;
 
 	void consider_auditioning (boost::shared_ptr<ARDOUR::Region>);
 	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);
@@ -413,7 +413,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_meter_updating();
 
 	void show_rhythm_ferret();
-	void show_global_port_matrix (ARDOUR::DataType);
 
 	void goto_visual_state (uint32_t);
 	void save_visual_state (uint32_t);
@@ -2003,7 +2002,6 @@ public:
 
 	RhythmFerret* rhythm_ferret;
 	BundleManager* _bundle_manager;
-	GlobalPortMatrixWindow* _global_port_matrix[ARDOUR::DataType::num_types];
 
 	void fit_tracks (TrackViewList &);
 	void fit_selected_tracks ();

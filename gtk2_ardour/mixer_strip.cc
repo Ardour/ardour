@@ -362,6 +362,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		button_table.remove (*show_sends_button);
 	}
 
+	processor_box.set_route (rt);
+
 	RouteUI::set_route (rt);
 
 	/* map the current state */
@@ -376,8 +378,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	output_selector = 0;
 
 	revert_to_default_display ();
-
-	processor_box.set_route (rt);
 
 	if (set_color_from_route()) {
 		set_color (unique_random_color());
@@ -1540,6 +1540,7 @@ MixerStrip::map_frozen ()
 		switch (at->freeze_state()) {
 		case AudioTrack::Frozen:
 			processor_box.set_sensitive (false);
+			hide_redirect_editors ();
 			break;
 		default:
 			processor_box.set_sensitive (true);
@@ -1547,8 +1548,6 @@ MixerStrip::map_frozen ()
 			break;
 		}
 	}
-
-	hide_redirect_editors ();
 }
 
 void
@@ -1565,10 +1564,10 @@ MixerStrip::hide_processor_editor (boost::weak_ptr<Processor> p)
 		return;
 	}
 
-	void* gui = processor->get_gui ();
+	Gtk::Window* w = processor_box.get_processor_ui (processor);
 
-	if (gui) {
-		static_cast<Gtk::Widget*>(gui)->hide ();
+	if (w) {
+		w->hide ();
 	}
 }
 

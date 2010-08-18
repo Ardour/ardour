@@ -99,6 +99,10 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void set_button_names ();
 	void show_send (boost::shared_ptr<ARDOUR::Send>);
 
+	bool mixer_owned () const {
+		return _mixer_owned;
+	}
+
 	sigc::signal<void>      WidthChanged;
 
 	static sigc::signal<void,boost::shared_ptr<ARDOUR::Route> > SwitchIO;

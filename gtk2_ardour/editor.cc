@@ -385,9 +385,6 @@ Editor::Editor ()
 	select_new_marker = false;
 	rhythm_ferret = 0;
 	_bundle_manager = 0;
-	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
-		_global_port_matrix[*i] = 0;
-	}
 	no_save_visual = false;
 	resize_idle_id = -1;
 
@@ -667,9 +664,6 @@ Editor::Editor ()
 	set_snap_mode (_snap_mode);
 	set_mouse_mode (MouseObject, true);
 	set_edit_point_preference (EditAtMouse, true);
-
-	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
-	set_state (*node, Stateful::loading_state_version);
 
 	_playlist_selector = new PlaylistSelector();
 	_playlist_selector->signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (_playlist_selector)));
@@ -1077,12 +1071,6 @@ Editor::set_session (Session *t)
 
 	if (sfbrowser) {
 		sfbrowser->set_session (_session);
-	}
-
-	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
-		if (_global_port_matrix[*i]) {
-			_global_port_matrix[*i]->set_session (_session);
-		}
 	}
 
 	compute_fixed_ruler_scale ();
@@ -2555,6 +2543,11 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		the_notebook.set_current_page (atoi (prop->value ()));
 	}
 
+	XMLNodeList children = node.children ();
+	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+		selection->set_state (**i, Stateful::current_state_version);
+	}
+
 	return 0;
 }
 
@@ -2641,6 +2634,8 @@ Editor::get_state ()
 	snprintf (buf, sizeof (buf), "%d", the_notebook.get_current_page ());
 	node->add_property (X_("editor-list-page"), buf);
 
+	node->add_child_nocopy (selection->get_state ());
+	
 	return *node;
 }
 
@@ -4906,16 +4901,6 @@ Editor::show_rhythm_ferret ()
 }
 
 void
-Editor::show_global_port_matrix (ARDOUR::DataType t)
-{
-	if (_global_port_matrix[t] == 0) {
-		_global_port_matrix[t] = new GlobalPortMatrixWindow (_session, t);
-	}
-
-	_global_port_matrix[t]->show ();
-}
-
-void
 Editor::first_idle ()
 {
 	MessageDialog* dialog = 0;
@@ -5200,12 +5185,13 @@ Editor::foreach_time_axis_view (sigc::slot<void,TimeAxisView&> theslot)
 	}
 }
 
+/** Find a RouteTimeAxisView by the ID of its route */
 RouteTimeAxisView*
-Editor::get_route_view_by_id (PBD::ID& id)
+Editor::get_route_view_by_route_id (PBD::ID& id) const
 {
 	RouteTimeAxisView* v;
 
-	for(TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		if((v = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
 			if(v->route()->id() == id) {
 				return v;

@@ -47,6 +47,8 @@
 #include "mixer_ui.h"
 #include "startup.h"
 #include "utils.h"
+#include "window_proxy.h"
+#include "global_port_matrix.h"
 
 #include <gtkmm2ext/application.h>
 
@@ -68,7 +70,6 @@ using namespace Glib;
 
 int
 ARDOUR_UI::create_editor ()
-
 {
 	try {
 		editor = new Editor ();
@@ -224,6 +225,10 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleLocations"), _("Locations"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_location_window));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleBigClock"), _("Big Clock"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_big_clock_window));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (common_actions, X_("toggle-audio-connection-manager"), _("Audio Connection Manager"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_global_port_matrix), ARDOUR::DataType::AUDIO));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (common_actions, X_("toggle-midi-connection-manager"), _("MIDI Connection Manager"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_global_port_matrix), ARDOUR::DataType::MIDI));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -555,20 +560,20 @@ ARDOUR_UI::setup_clock ()
 {
 	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (big_clock, &AudioClock::set), false));
 
-	big_clock_window = new Window (WINDOW_TOPLEVEL);
+	big_clock_window->set (new Window (WINDOW_TOPLEVEL));
 
-	big_clock_window->set_keep_above (true);
-	big_clock_window->set_border_width (0);
-	big_clock_window->add  (big_clock);
+	big_clock_window->get()->set_keep_above (true);
+	big_clock_window->get()->set_border_width (0);
+	big_clock_window->get()->add (big_clock);
 
-	big_clock_window->set_title (_("Big Clock"));
-	big_clock_window->set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
-	big_clock_window->signal_realize().connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_realized));
-	big_clock_window->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));
-	big_clock_window->signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), big_clock_window), false);
-	big_clock_window->signal_size_allocate().connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_size_allocate));
+	big_clock_window->get()->set_title (_("Big Clock"));
+	big_clock_window->get()->set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+	big_clock_window->get()->signal_realize().connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_realized));
+	big_clock_window->get()->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));
+	big_clock_window->get()->signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), big_clock_window->get()), false);
+	big_clock_window->get()->signal_size_allocate().connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_size_allocate));
 
-	manage_window (*big_clock_window);
+	manage_window (*big_clock_window->get());
 }
 
 void
@@ -576,8 +581,8 @@ ARDOUR_UI::big_clock_realized ()
 {
 	int x, y, w, d;
 
-	set_decoration (big_clock_window, (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
-	big_clock_window->get_window()->get_geometry (x, y, w, big_clock_height, d);
+	set_decoration (big_clock_window->get(), (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
+	big_clock_window->get()->get_window()->get_geometry (x, y, w, big_clock_height, d);
 
         original_big_clock_height = big_clock_height;
         original_big_clock_width = w;
@@ -588,45 +593,6 @@ ARDOUR_UI::big_clock_realized ()
         if (!fd.get_size_is_absolute ()) {
                 original_big_clock_font_size /= PANGO_SCALE;
         }
-
-        /* we can't set the real size until we know the original one, with the UI rc-file-set font 
-           size, so do this here.
-        */
-
-	XMLNode* node = Config->extra_xml (X_("UI"));
-
-	if (node) {
-
-		const XMLProperty* prop;
-                int w, h, x, y;
-                int have_pos = 0;
-
-                w = h = x = y = 0;
-
-                if ((prop = node->property ("big-clock-x-size")) != 0) {
-                        w = atoi (prop->value());
-                }
-                if ((prop = node->property ("big-clock-y-size")) != 0) {
-                        h = atoi (prop->value());
-                }
-
-                if (w && h) {
-                        big_clock_window->set_default_size (w, h);
-                }
-
-                if ((prop = node->property ("big-clock-x-off")) != 0) {
-                        x = atoi (prop->value());
-                        have_pos++;
-                }
-                if ((prop = node->property ("big-clock-y-off")) != 0) {
-                        y = atoi (prop->value());
-                        have_pos++;
-                }
-
-                if (have_pos == 2) {
-                        big_clock_window->move (x, y);
-                }
-        }
 }
 
 void
@@ -634,9 +600,9 @@ ARDOUR_UI::float_big_clock (Gtk::Window* parent)
 {
 	if (big_clock_window) {
 		if (parent) {
-			big_clock_window->set_transient_for (*parent);
+			big_clock_window->get()->set_transient_for (*parent);
 		} else {
-			gtk_window_set_transient_for (big_clock_window->gobj(), (GtkWindow*) 0);
+			gtk_window_set_transient_for (big_clock_window->get()->gobj(), (GtkWindow*) 0);
 		}
 	}
 }
@@ -655,7 +621,7 @@ ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
 {
 	big_clock_resize_in_progress = false;
 
-	Glib::RefPtr<Gdk::Window> win = big_clock_window->get_window();
+	Glib::RefPtr<Gdk::Window> win = big_clock_window->get()->get_window();
 	Pango::FontDescription fd (big_clock.get_style()->get_font());
 	int current_size = fd.get_size ();
         int x, y, w, h, d;
@@ -708,30 +674,11 @@ ARDOUR_UI::save_ardour_state ()
 	Config->add_extra_xml (get_transport_controllable_state());
 
         XMLNode* window_node = new XMLNode (X_("UI"));
+
+	for (list<WindowProxyBase*>::iterator i = _window_proxies.begin(); i != _window_proxies.end(); ++i) {
+		window_node->add_child_nocopy (*((*i)->get_state ()));
+	}
         
-        window_node->add_property ("show-big-clock", (big_clock_window && big_clock_window->is_visible() ? "yes" : "no"));
-
-        Glib::RefPtr<Gdk::Window> win;
-
-        if (big_clock_window && (win = big_clock_window->get_window())) {
-
-                int w, h;
-                int xoff, yoff;
-                char buf[32];
-
-                win->get_size (w, h);
-                win->get_position (xoff, yoff);
-
-                snprintf (buf, sizeof (buf), "%d", w);
-                window_node->add_property ("big-clock-x-size", buf);
-                snprintf (buf, sizeof (buf), "%d", h);
-                window_node->add_property ("big-clock-y-size", buf);
-                snprintf (buf, sizeof (buf), "%d", xoff);
-                window_node->add_property ("big-clock-x-off", buf);
-                snprintf (buf, sizeof (buf), "%d", yoff);
-                window_node->add_property ("big-clock-y-off", buf);
-        }
-
         /* tearoffs */
 
         XMLNode* tearoff_node = new XMLNode (X_("Tearoffs"));
@@ -776,5 +723,19 @@ ARDOUR_UI::save_ardour_state ()
 	}
 
 	Keyboard::save_keybindings ();
+}
+
+void
+ARDOUR_UI::toggle_global_port_matrix (ARDOUR::DataType t)
+{
+	if (_global_port_matrix[t]->get() == 0) {
+		_global_port_matrix[t]->set (new GlobalPortMatrixWindow (_session, t));
+	}
+
+	if (_global_port_matrix[t]->get()->is_visible ()) {
+		_global_port_matrix[t]->get()->hide ();
+	} else {
+		_global_port_matrix[t]->get()->present ();
+	}
 }
 

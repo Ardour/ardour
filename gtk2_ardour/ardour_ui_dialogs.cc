@@ -41,6 +41,7 @@
 #include "gui_thread.h"
 #include "midi_tracer.h"
 #include "add_route_dialog.h"
+#include "global_port_matrix.h"
 
 #include "i18n.h"
 
@@ -59,8 +60,8 @@ ARDOUR_UI::set_session (Session *s)
 		return;
 	}
 
-	if (location_ui) {
-		location_ui->set_session(s);
+	if (location_ui->get()) {
+		location_ui->get()->set_session(s);
 	}
 
 	if (route_params) {
@@ -73,6 +74,12 @@ ARDOUR_UI::set_session (Session *s)
 
 	if (session_option_editor) {
 		session_option_editor->set_session (s);
+	}
+
+	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
+		if (_global_port_matrix[*i]->get()) {
+			_global_port_matrix[*i]->get()->set_session (_session);
+		}
 	}
 
 	primary_clock.set_session (s);
@@ -217,10 +224,10 @@ ARDOUR_UI::toggle_big_clock_window ()
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 
 		if (tact->get_active()) {
-			big_clock_window->show_all ();
-			big_clock_window->present ();
+			big_clock_window->get()->show_all ();
+			big_clock_window->get()->present ();
 		} else {
-			big_clock_window->hide ();
+			big_clock_window->get()->hide ();
 		}
 	}
 }
@@ -297,9 +304,9 @@ int
 ARDOUR_UI::create_location_ui ()
 {
 	if (location_ui == 0) {
-		location_ui = new LocationUIWindow ();
-		location_ui->set_session (_session);
-		location_ui->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleLocations")));
+		location_ui->set (new LocationUIWindow ());
+		location_ui->get()->set_session (_session);
+		location_ui->get()->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleLocations")));
 	}
 	return 0;
 }
@@ -316,10 +323,10 @@ ARDOUR_UI::toggle_location_window ()
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 
 		if (tact->get_active()) {
-			location_ui->show_all ();
-			location_ui->present ();
+			location_ui->get()->show_all ();
+			location_ui->get()->present ();
 		} else {
-			location_ui->hide ();
+			location_ui->get()->hide ();
 		}
 	}
 }

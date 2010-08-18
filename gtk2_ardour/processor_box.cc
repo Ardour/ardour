@@ -393,28 +393,6 @@ ProcessorBox::set_width (Width w)
 }
 
 void
-ProcessorBox::remove_processor_gui (boost::shared_ptr<Processor> processor)
-{
-	boost::shared_ptr<Send> send;
-	boost::shared_ptr<Return> retrn;
-	boost::shared_ptr<PortInsert> port_insert;
-
-	if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (processor)) != 0) {
-		PortInsertUI *io_selector = reinterpret_cast<PortInsertUI *> (port_insert->get_gui());
-		port_insert->set_gui (0);
-		delete io_selector;
-	} else if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0) {
-		SendUIWindow *sui = reinterpret_cast<SendUIWindow*> (send->get_gui());
-		send->set_gui (0);
-		delete sui;
-	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
-		ReturnUIWindow *rui = reinterpret_cast<ReturnUIWindow*> (retrn->get_gui());
-		retrn->set_gui (0);
-		delete rui;
-	}
-}
-
-void
 ProcessorBox::build_send_action_menu ()
 {
 	using namespace Menu_Helpers;
@@ -958,6 +936,73 @@ ProcessorBox::redisplay_processors ()
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::add_processor_to_display));
 
 	build_processor_tooltip (processor_eventbox, _("Inserts, sends & plugins:"));
+
+	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::maybe_add_processor_to_ui_list));
+
+	/* trim dead wood from the processor window proxy list */
+
+	list<ProcessorWindowProxy*>::iterator i = _processor_window_proxies.begin();
+	while (i != _processor_window_proxies.end()) {
+		list<ProcessorWindowProxy*>::iterator j = i;
+		++j;
+
+		if (!(*i)->marked) {
+			ARDOUR_UI::instance()->remove_window_proxy (*i);
+			_processor_window_proxies.erase (i);
+			delete *i;
+		}
+
+		i = j;
+	}
+}
+
+/** Add a ProcessorWindowProxy for a processor to our list, if that processor does
+ *  not already have one.
+ */
+void
+ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
+{
+	boost::shared_ptr<Processor> p = w.lock ();
+	if (!p) {
+		return;
+	}
+
+	list<ProcessorWindowProxy*>::iterator i = _processor_window_proxies.begin ();
+	while (i != _processor_window_proxies.end()) {
+
+		boost::shared_ptr<Processor> t = (*i)->processor().lock ();
+		
+		if (p == t) {
+			/* this processor is already on the list; done */
+			(*i)->marked = true;
+			return;
+		}
+
+		++i;
+	}
+
+	/* not on the list; add it */
+
+	string loc;
+	if (_parent_strip) {
+		if (_parent_strip->mixer_owned()) {
+			loc = X_("M");
+		} else {
+			loc = X_("R");
+		}
+	} else {
+		loc = X_("P");
+	}
+	
+	ProcessorWindowProxy* wp = new ProcessorWindowProxy (
+		string_compose ("%1-%2-%3", loc, _route->id(), p->id()),
+		Config->extra_xml (X_("UI")),
+		this,
+		w);
+	
+	wp->marked = true;
+	_processor_window_proxies.push_back (wp);
+	ARDOUR_UI::instance()->add_window_proxy (wp);
 }
 
 void
@@ -1102,10 +1147,10 @@ ProcessorBox::cut_processors (const ProcSelection& to_be_removed)
 		    (boost::dynamic_pointer_cast<Send>((*i)) != 0) ||
 		    (boost::dynamic_pointer_cast<Return>((*i)) != 0)) {
 
-			void* gui = (*i)->get_gui ();
+			Window* w = get_processor_ui (*i);
 
-			if (gui) {
-				static_cast<Gtk::Widget*>(gui)->hide ();
+			if (w) {
+				w->hide ();
 			}
 
 			XMLNode& child ((*i)->get_state());
@@ -1174,10 +1219,10 @@ ProcessorBox::delete_processors (const ProcSelection& targets)
 
 	for (ProcSelection::const_iterator i = targets.begin(); i != targets.end(); ++i) {
 
-		void* gui = (*i)->get_gui ();
+		Window* w = get_processor_ui (*i);
 
-		if (gui) {
-			static_cast<Gtk::Widget*>(gui)->hide ();
+		if (w) {
+			w->hide ();
 		}
 
 		_route->remove_processor(*i);
@@ -1195,10 +1240,10 @@ ProcessorBox::delete_dragged_processors (const list<boost::shared_ptr<Processor>
 	no_processor_redisplay = true;
 	for (x = procs.begin(); x != procs.end(); ++x) {
 
-		void* gui = (*x)->get_gui ();
+		Window* w = get_processor_ui (*x);
 
-		if (gui) {
-			static_cast<Gtk::Widget*>(gui)->hide ();
+		if (w) {
+			w->hide ();
 		}
 
 		_route->remove_processor(*x);
@@ -1488,13 +1533,14 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 #ifdef OLD_SEND_EDITING
 		SendUIWindow *send_ui;
 
-		if (send->get_gui() == 0) {
+		Window* w = get_processor_ui (send);
+		if (w == 0) {
 			send_ui = new SendUIWindow (send, _session);
 			send_ui->set_title (send->name());
-			send->set_gui (send_ui);
+			set_processor_ui (send, send_ui);
 
 		} else {
-			send_ui = reinterpret_cast<SendUIWindow *> (send->get_gui());
+			send_ui = dynamic_cast<SendUIWindow *> (w);
 		}
 
 		gidget = send_ui;
@@ -1513,15 +1559,16 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 		boost::shared_ptr<Return> retrn = boost::dynamic_pointer_cast<Return> (processor);
 
 		ReturnUIWindow *return_ui;
+		Window* w = get_processor_ui (retrn);
 
-		if (retrn->get_gui() == 0) {
+		if (w == 0) {
 
 			return_ui = new ReturnUIWindow (retrn, _session);
 			return_ui->set_title (retrn->name ());
-			send->set_gui (return_ui);
+			set_processor_ui (send, return_ui);
 
 		} else {
-			return_ui = reinterpret_cast<ReturnUIWindow *> (retrn->get_gui());
+			return_ui = dynamic_cast<ReturnUIWindow *> (w);
 		}
 
 		gidget = return_ui;
@@ -1535,14 +1582,16 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 		Container* toplevel = get_toplevel();
 		Window* win = dynamic_cast<Gtk::Window*>(toplevel);
 
-		if (plugin_insert->get_gui() == 0) {
+		Window* w = get_processor_ui (plugin_insert);
+
+		if (w == 0) {
 
 			plugin_ui = new PluginUIWindow (win, plugin_insert);
 			plugin_ui->set_title (generate_processor_title (plugin_insert));
-			plugin_insert->set_gui (plugin_ui);
+			set_processor_ui (plugin_insert, plugin_ui);
 
 		} else {
-			plugin_ui = reinterpret_cast<PluginUIWindow *> (plugin_insert->get_gui());
+			plugin_ui = dynamic_cast<PluginUIWindow *> (w);
 			plugin_ui->set_parent (win);
 		}
 
@@ -1558,12 +1607,14 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 
 		PortInsertWindow *io_selector;
 
-		if (port_insert->get_gui() == 0) {
+		Window* w = get_processor_ui (port_insert);
+
+		if (w == 0) {
 			io_selector = new PortInsertWindow (_session, port_insert);
-			port_insert->set_gui (io_selector);
+			set_processor_ui (port_insert, io_selector);
 
 		} else {
-			io_selector = reinterpret_cast<PortInsertWindow *> (port_insert->get_gui());
+			io_selector = dynamic_cast<PortInsertWindow *> (w);
 		}
 
 		gidget = io_selector;
@@ -1838,18 +1889,18 @@ ProcessorBox::route_property_changed (const PropertyChange& what_changed)
 
   		processor = (*iter)->processor ();
 
-		void* gui = processor->get_gui();
+		Window* w = get_processor_ui (processor);
 
-		if (!gui) {
+		if (!w) {
 			continue;
 		}
 
 		/* rename editor windows for sends and plugins */
 
 		if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0) {
-			static_cast<Window*>(gui)->set_title (send->name ());
+			w->set_title (send->name ());
 		} else if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (processor)) != 0) {
-			static_cast<Window*>(gui)->set_title (generate_processor_title (plugin_insert));
+			w->set_title (generate_processor_title (plugin_insert));
 		}
 	}
 }
@@ -1881,4 +1932,76 @@ ProcessorBox::on_size_allocate (Allocation& a)
 	for (list<ProcessorEntry*>::const_iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->set_pixel_width (a.get_width ());
 	}
+}
+
+/** @param p Processor.
+ *  @return the UI window for \a p.
+ */
+Window *
+ProcessorBox::get_processor_ui (boost::shared_ptr<Processor> p) const
+{
+	list<ProcessorWindowProxy*>::const_iterator i = _processor_window_proxies.begin ();
+	while (i != _processor_window_proxies.end()) {
+		boost::shared_ptr<Processor> t = (*i)->processor().lock ();
+		if (t && t == p) {
+			return (*i)->get ();
+		}
+
+		++i;
+	}
+
+	/* we shouldn't get here, because the ProcessorUIList should always contain
+	   an entry for each processor.
+	*/
+	assert (false);
+}
+
+/** Make a note of the UI window that a processor is using.
+ *  @param p Processor.
+ *  @param w UI window.
+ */
+void
+ProcessorBox::set_processor_ui (boost::shared_ptr<Processor> p, Gtk::Window* w)
+{
+ 	list<ProcessorWindowProxy*>::iterator i = _processor_window_proxies.begin ();
+	while (i != _processor_window_proxies.end()) {
+		boost::shared_ptr<Processor> t = (*i)->processor().lock ();
+		if (t && t == p) {
+			(*i)->set (w);
+			return;
+		}
+
+		++i;
+	}
+
+	/* we shouldn't get here, because the ProcessorUIList should always contain
+	   an entry for each processor.
+	*/
+	assert (false);
+}
+
+ProcessorWindowProxy::ProcessorWindowProxy (
+	string const & name,
+	XMLNode const * node,
+	ProcessorBox* box,
+	boost::weak_ptr<Processor> processor
+	)
+	: WindowProxy<Gtk::Window> (name, node)
+	, marked (false)
+	, _processor_box (box)
+	, _processor (processor)
+{
+
+}
+
+
+void
+ProcessorWindowProxy::show ()
+{
+	boost::shared_ptr<Processor> p = _processor.lock ();
+	if (!p) {
+		return;
+	}
+
+	_processor_box->edit_processor (p);
 }

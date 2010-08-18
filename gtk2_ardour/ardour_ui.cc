@@ -98,6 +98,9 @@ typedef uint64_t microseconds_t;
 #include "engine_dialog.h"
 #include "processor_box.h"
 #include "time_axis_view_item.h"
+#include "window_proxy.h"
+#include "global_port_matrix.h"
+#include "location_ui.h"
 
 #include "i18n.h"
 
@@ -164,7 +167,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	  auditioning_alert_button (_("AUDITION")),
 	  solo_alert_button (_("SOLO")),
-	  shown_flag (false),
 	  error_log_button (_("Errors"))
 
 {
@@ -289,6 +291,21 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	reset_dpi();
 
         TimeAxisViewItem::set_constant_heights ();
+
+	/* The following must happen after ARDOUR::init() so that Config is set up */
+	
+	location_ui = new ActionWindowProxy<LocationUIWindow> (X_("locations"), Config->extra_xml (X_("UI")), X_("ToggleLocations"));
+	big_clock_window = new ActionWindowProxy<Gtk::Window> (X_("bigclock"), Config->extra_xml (X_("UI")), X_("ToggleBigClock"));
+	
+	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
+		_global_port_matrix[*i] = new ActionWindowProxy<GlobalPortMatrixWindow> (
+			string_compose ("GlobalPortMatrix-%1", (*i).to_string()),
+			Config->extra_xml (X_("UI")),
+			string_compose ("toggle-%1-connection-manager", (*i).to_string())
+			);
+	}
+
+	setup_clock ();
 
 	starting.connect (sigc::mem_fun(*this, &ARDOUR_UI::startup));
 	stopping.connect (sigc::mem_fun(*this, &ARDOUR_UI::shutdown));
@@ -660,8 +677,16 @@ ARDOUR_UI::startup ()
 
 	goto_editor_window ();
 
+	/* Add the window proxies here; their addition may cause windows to be opened, and we want them
+	   to be opened on top of the editor window that goto_editor_window() just opened.
+	*/
+	add_window_proxy (location_ui);
+	add_window_proxy (big_clock_window);
+	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
+		add_window_proxy (_global_port_matrix[*i]);
+	}
+	
 	BootMessage (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
-	show ();
 }
 
 void
@@ -784,16 +809,21 @@ If you still wish to quit, please use the\n\n\
 		point_one_second_connection.disconnect ();
 		point_oh_five_second_connection.disconnect ();
 		point_zero_one_second_connection.disconnect();
-		
-                _session->set_clean ();
+	}
+
+	/* Save state before deleting the session, as that causes some
+	   windows to be destroyed before their visible state can be
+	   saved.
+	*/
+	save_ardour_state ();
+
+	if (_session) {
 		// _session->set_deletion_in_progress ();
+                _session->set_clean ();
 		_session->remove_pending_capture_state ();
 		delete _session;
 		_session = 0;
 	}
-
-        cerr << "Save before quit\n";
-	save_ardour_state ();
 
 	ArdourDialog::close_all_dialogs ();
 	engine->stop (true);
@@ -2571,7 +2601,6 @@ ARDOUR_UI::close_session()
 	}
 
 	goto_editor_window ();
-	show ();
 }
 
 int
@@ -2723,20 +2752,6 @@ ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_n
 	new_session->save_state(new_session->name());
 
 	return 0;
-}
-
-void
-ARDOUR_UI::show ()
-{
-	if (editor) {
-		editor->show_window ();
-
-		if (!shown_flag) {
-			editor->present ();
-		}
-
-		shown_flag = true;
-	}
 }
 
 void
@@ -3355,22 +3370,10 @@ ARDOUR_UI::reconnect_to_jack ()
 void
 ARDOUR_UI::use_config ()
 {
-
 	XMLNode* node = Config->extra_xml (X_("TransportControllables"));
 	if (node) {
 		set_transport_controllable_state (*node);
 	}
-
-	node = Config->extra_xml (X_("UI"));
-
-        if (node) {
-                const XMLProperty* prop = node->property (X_("show-big-clock"));
-                Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleBigClock"));
-                if (act) {
-                        Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-                        tact->set_active (string_is_affirmative (prop->value()));
-                }
-        }
 }
 
 void
@@ -3388,7 +3391,7 @@ ARDOUR_UI::update_transport_clocks (nframes_t pos)
 		secondary_clock.set (pos);
 	}
 
-	if (big_clock_window) {
+	if (big_clock_window->get()) {
 		big_clock.set (pos);
 	}
 }
@@ -3414,7 +3417,7 @@ ARDOUR_UI::record_state_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::record_state_changed);
 
-	if (!_session || !big_clock_window) {
+	if (!_session || !big_clock_window->get()) {
 		/* why bother - the clock isn't visible */
 		return;
 	}
@@ -3614,3 +3617,23 @@ ARDOUR_UI::toggle_translations ()
                 }
         }
 }        
+
+/** Add a window proxy to our list, so that its state will be saved.
+ *  This call also causes the window to be created and opened if its
+ *  state was saved as `visible'.
+ */
+void
+ARDOUR_UI::add_window_proxy (WindowProxyBase* p)
+{
+	_window_proxies.push_back (p);
+	p->maybe_show ();
+}
+
+/** Remove a window proxy from our list.  Must be called if a WindowProxy
+ *  is deleted, to prevent hanging pointers.
+ */
+void
+ARDOUR_UI::remove_window_proxy (WindowProxyBase* p)
+{
+	_window_proxies.remove (p);
+}

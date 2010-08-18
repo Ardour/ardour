@@ -209,6 +209,7 @@ gtk2_ardour_sources = [
 	'version.cc',
         'volume_controller.cc',
 	'waveview.cc',
+	'window_proxy.cc'
 ]
 
 def set_options(opt):

@@ -46,6 +46,8 @@
 #include "utils.h"
 #include "theme_manager.h"
 #include "midi_tracer.h"
+#include "global_port_matrix.h"
+#include "location_ui.h"
 
 #include "i18n.h"
 
@@ -103,7 +105,6 @@ ARDOUR_UI::setup_windows ()
 
 	editor->add_toplevel_controls (top_packer);
 
-	setup_clock ();
 	setup_transport();
 	build_menu_bar ();
 

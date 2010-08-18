@@ -2275,7 +2275,7 @@ RouteTimeAxisView::set_underlay_state()
 		if (prop) {
 			PBD::ID id (prop->value());
 
-			RouteTimeAxisView* v = _editor.get_route_view_by_id (id);
+			RouteTimeAxisView* v = _editor.get_route_view_by_route_id (id);
 
 			if (v) {
 				add_underlay(v->view(), false);

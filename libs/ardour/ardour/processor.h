@@ -95,9 +95,6 @@ class Processor : public SessionObject, public Automatable, public Latent
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 	
-	void *get_gui () const { return _gui; }
-	void  set_gui (void *p) { _gui = p; }
-
 	void set_pre_fader (bool);
 
 	PBD::Signal0<void>                     ActiveChanged;
@@ -110,7 +107,6 @@ protected:
 	bool      _configured;
 	ChanCount _configured_input;
 	ChanCount _configured_output;
-	void*     _gui;  /* generic, we don't know or care what this is */
 	bool      _display_to_user;
 	bool      _pre_fader;
 

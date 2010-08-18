@@ -67,6 +67,7 @@
 #include "ardour_dialog.h"
 #include "editing.h"
 #include "ui_config.h"
+#include "window_proxy.h"
 
 class About;
 class AddRouteDialog;
@@ -85,6 +86,8 @@ class SessionOptionEditor;
 class Splash;
 class ThemeManager;
 class MidiTracer;
+class WindowProxyBase;
+class GlobalPortMatrixWindow;
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -109,9 +112,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	~ARDOUR_UI();
 
 	bool run_startup (bool should_be_new, std::string load_template);
-
-	void show ();
-	bool shown() { return shown_flag; }
 
 	void show_splash ();
 	void hide_splash ();
@@ -233,6 +233,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void set_shuttle_fract (double);
 
+	void add_window_proxy (WindowProxyBase *);
+	void remove_window_proxy (WindowProxyBase *);
+	
   protected:
 	friend class PublicEditor;
 
@@ -313,7 +316,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void manage_window (Gtk::Window&);
 
 	AudioClock   big_clock;
-	Gtk::Window* big_clock_window;
+	ActionWindowProxy<Gtk::Window>* big_clock_window;
         int original_big_clock_width;
         int original_big_clock_height;
         double original_big_clock_font_size;
@@ -588,9 +591,12 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	BundleManager *bundle_manager;
 	void create_bundle_manager ();
 
-	LocationUIWindow *location_ui;
+	ActionWindowProxy<LocationUIWindow>* location_ui;
 	int               create_location_ui ();
 	void              handle_locations_change (ARDOUR::Location*);
+
+	ActionWindowProxy<GlobalPortMatrixWindow>* _global_port_matrix[ARDOUR::DataType::num_types];
+	void toggle_global_port_matrix (ARDOUR::DataType);
 
 	static UIConfiguration *ui_config;
 	ThemeManager *theme_manager;
@@ -625,7 +631,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	About* about;
 	Splash* splash;
 	void pop_back_splash ();
-	bool shown_flag;
 
 	/* cleanup */
 
@@ -707,6 +712,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	 */
 	bool idle_finish ();
 	void queue_finish ();
+
+	std::list<WindowProxyBase*> _window_proxies;
 };
 
 #endif /* __ardour_gui_h__ */

@@ -542,10 +542,6 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "toggle-rhythm-ferret", _("Rhythm Ferret..."), sigc::mem_fun(*this, &Editor::show_rhythm_ferret));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "toggle-audio-connection-manager", _("Audio Connection Manager"), sigc::bind (sigc::mem_fun (*this, &Editor::show_global_port_matrix), ARDOUR::DataType::AUDIO));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "toggle-midi-connection-manager", _("MIDI Connection Manager"), sigc::bind (sigc::mem_fun (*this, &Editor::show_global_port_matrix), ARDOUR::DataType::MIDI));
-	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "toggle-log-window", _("Log"),
 			sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::toggle_errors));
 	ActionManager::session_sensitive_actions.push_back (act);

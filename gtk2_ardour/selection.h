@@ -191,6 +191,9 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void foreach_midi_regionview (void (MidiRegionView::*method)(void));
 	template<class A> void foreach_region (void (ARDOUR::Region::*method)(A), A arg);
 
+	XMLNode& get_state () const;
+	int set_state (XMLNode const &, int);
+
   private:
 	void set_point_selection_from_line (AutomationLine const &);
 

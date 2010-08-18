@@ -1075,3 +1075,68 @@ Selection::set_point_selection_from_line (AutomationLine const & line)
 
 	PointsChanged (); /* EMIT SIGNAL */
 }
+
+XMLNode&
+Selection::get_state () const
+{
+	/* XXX: not complete; just sufficient to get track selection state
+	   so that re-opening plugin windows for editor mixer strips works
+	*/
+	
+	XMLNode* node = new XMLNode (X_("Selection"));
+
+	for (TrackSelection::const_iterator i = tracks.begin(); i != tracks.end(); ++i) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (*i);
+		if (rtv) {
+			XMLNode* t = node->add_child (X_("RouteView"));
+			t->add_property (X_("id"), atoi (rtv->route()->id().to_s().c_str()));
+		} else if (atv) {
+			XMLNode* t = node->add_child (X_("AutomationView"));
+			t->add_property (X_("id"), atoi (atv->parent_route()->id().to_s().c_str()));
+			t->add_property (X_("parameter"), EventTypeMap::instance().to_symbol (atv->control()->parameter ()));
+		}
+	}
+
+	return *node;
+}
+
+int
+Selection::set_state (XMLNode const & node, int)
+{
+	if (node.name() != X_("Selection")) {
+		return -1;
+	}
+	
+	XMLNodeList children = node.children ();
+	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+		if ((*i)->name() == X_("RouteView")) {
+			
+			XMLProperty* prop_id = (*i)->property (X_("id"));
+			assert (prop_id);
+			PBD::ID id (prop_id->value ());
+			RouteTimeAxisView* rtv = editor->get_route_view_by_route_id (id);
+			assert (rtv);
+			add (rtv);
+			
+		} else if ((*i)->name() == X_("AutomationView")) {
+			
+			XMLProperty* prop_id = (*i)->property (X_("id"));
+			XMLProperty* prop_parameter = (*i)->property (X_("parameter"));
+
+			assert (prop_id);
+			assert (prop_parameter);
+
+			PBD::ID id (prop_id->value ());
+			RouteTimeAxisView* rtv = editor->get_route_view_by_route_id (id);
+			assert (rtv);
+			
+			boost::shared_ptr<AutomationTimeAxisView> atv = rtv->automation_child (EventTypeMap::instance().new_parameter (prop_parameter->value ()));
+			assert (atv);
+			
+			add (atv.get());
+		}
+	}
+
+	return 0;
+}
