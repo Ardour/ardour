@@ -141,10 +141,6 @@ struct _ProlooksParamSpecHSV {
 };
 
 
-static gpointer cairo_color_parent_class = NULL;
-static gpointer prolooks_hsl_parent_class = NULL;
-static gpointer prolooks_hsv_parent_class = NULL;
-
 gpointer cairo_color_ref (gpointer instance);
 void cairo_color_unref (gpointer instance);
 GParamSpec* cairo_param_spec_color (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
@@ -191,7 +187,6 @@ void cairo_color_set_as_source_in (CairoColor* self, cairo_t* cr);
 void cairo_color_add_color_stop_to (CairoColor* self, cairo_pattern_t* p, double offset);
 CairoColor* prolooks_gdk_color_to_cairo (const GdkColor* color);
 void prolooks_color_from_string (const char* webcolor, GdkColor* result);
-static void cairo_color_finalize (CairoColor* obj);
 GType prolooks_button_state_get_type (void);
 GType prolooks_button_type_get_type (void);
 void prolooks_set_line_width_from_device (cairo_t* cr);
@@ -217,7 +212,6 @@ char* prolooks_hsl_to_string (ProlooksHSL* self);
 void prolooks_hsl_to_gdk_color (ProlooksHSL* self, GdkColor* result);
 void prolooks_hsl_from_gdk_color (ProlooksHSL* self, const GdkColor* color);
 void prolooks_hsl_set_hue (ProlooksHSL* self, double value);
-static void prolooks_hsl_finalize (ProlooksHSL* obj);
 gpointer prolooks_hsv_ref (gpointer instance);
 void prolooks_hsv_unref (gpointer instance);
 GParamSpec* prolooks_param_spec_hsv (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
@@ -246,7 +240,6 @@ void prolooks_hsv_set_hue (ProlooksHSV* self, double value);
 void prolooks_hsv_set_saturation (ProlooksHSV* self, double value);
 ProlooksHSV* prolooks_hsv_new (void);
 ProlooksHSV* prolooks_hsv_construct (GType object_type);
-static void prolooks_hsv_finalize (ProlooksHSV* obj);
 void prolooks_shade_color (const GdkColor* orig, double shade_ratio, GdkColor* result);
 GdkPixbuf* prolooks_cairo_image_surface_to_pixbuf (cairo_surface_t* surface);
 

@@ -8,6 +8,10 @@
 
 #include "gtkmm2ext/prolooks-helpers.h"
 
+static gpointer cairo_color_parent_class = NULL;
+static gpointer prolooks_hsl_parent_class = NULL;
+static gpointer prolooks_hsv_parent_class = NULL;
+
 CairoColor* cairo_color_construct (GType object_type, double red, double green, double blue, double alpha) {
 	CairoColor* self;
 	self = (CairoColor*) g_type_create_instance (object_type);
@@ -262,6 +266,10 @@ void cairo_value_take_color (GValue* value, gpointer v_object) {
 	}
 }
 
+static void cairo_color_finalize (CairoColor* obj) {
+	CairoColor * self;
+	self = CAIRO_COLOR (obj);
+}
 
 static void cairo_color_class_init (CairoColorClass * klass) {
 	cairo_color_parent_class = g_type_class_peek_parent (klass);
@@ -275,11 +283,6 @@ static void cairo_color_instance_init (CairoColor * self) {
 	self->ref_count = 1;
 }
 
-
-static void cairo_color_finalize (CairoColor* obj) {
-	CairoColor * self;
-	self = CAIRO_COLOR (obj);
-}
 
 
 GType cairo_color_get_type (void) {
@@ -850,6 +853,10 @@ void prolooks_value_take_hsl (GValue* value, gpointer v_object) {
 	}
 }
 
+static void prolooks_hsl_finalize (ProlooksHSL* obj) {
+	ProlooksHSL * self;
+	self = PROLOOKS_HSL (obj);
+}
 
 static void prolooks_hsl_class_init (ProlooksHSLClass * klass) {
 	prolooks_hsl_parent_class = g_type_class_peek_parent (klass);
@@ -863,11 +870,6 @@ static void prolooks_hsl_instance_init (ProlooksHSL * self) {
 	self->ref_count = 1;
 }
 
-
-static void prolooks_hsl_finalize (ProlooksHSL* obj) {
-	ProlooksHSL * self;
-	self = PROLOOKS_HSL (obj);
-}
 
 
 GType prolooks_hsl_get_type (void) {
@@ -1259,6 +1261,10 @@ void prolooks_value_take_hsv (GValue* value, gpointer v_object) {
 	}
 }
 
+static void prolooks_hsv_finalize (ProlooksHSV* obj) {
+	ProlooksHSV * self;
+	self = PROLOOKS_HSV (obj);
+}
 
 static void prolooks_hsv_class_init (ProlooksHSVClass * klass) {
 	prolooks_hsv_parent_class = g_type_class_peek_parent (klass);
@@ -1271,13 +1277,6 @@ static void prolooks_hsv_instance_init (ProlooksHSV * self) {
 	self->priv = PROLOOKS_HSV_GET_PRIVATE (self);
 	self->ref_count = 1;
 }
-
-
-static void prolooks_hsv_finalize (ProlooksHSV* obj) {
-	ProlooksHSV * self;
-	self = PROLOOKS_HSV (obj);
-}
-
 
 GType prolooks_hsv_get_type (void) {
 	static volatile gsize prolooks_hsv_type_id__volatile = 0;
