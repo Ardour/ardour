@@ -598,7 +598,7 @@ ARDOUR_UI::big_clock_realized ()
 void
 ARDOUR_UI::float_big_clock (Gtk::Window* parent)
 {
-	if (big_clock_window) {
+	if (big_clock_window->get()) {
 		if (parent) {
 			big_clock_window->get()->set_transient_for (*parent);
 		} else {
