@@ -90,10 +90,12 @@ public:
 		return _window;
 	}
 
-	/** Set the window and set it up.  To be used after initial window creation */
-	void set (T* w) {
+	/** Set the window and maybe set it up.  To be used after initial window creation */
+	void set (T* w, bool s = true) {
 		_window = w;
-		setup ();
+		if (s) {
+			setup ();
+		}
 	}
 
 private:

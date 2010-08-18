@@ -560,7 +560,7 @@ ARDOUR_UI::setup_clock ()
 {
 	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (big_clock, &AudioClock::set), false));
 
-	big_clock_window->set (new Window (WINDOW_TOPLEVEL));
+	big_clock_window->set (new Window (WINDOW_TOPLEVEL), false);
 
 	big_clock_window->get()->set_keep_above (true);
 	big_clock_window->get()->set_border_width (0);
@@ -593,6 +593,8 @@ ARDOUR_UI::big_clock_realized ()
         if (!fd.get_size_is_absolute ()) {
                 original_big_clock_font_size /= PANGO_SCALE;
         }
+
+	big_clock_window->setup ();
 }
 
 void

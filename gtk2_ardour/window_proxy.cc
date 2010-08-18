@@ -82,7 +82,6 @@ WindowProxyBase::maybe_show ()
 {
 	if (_visible) {
 		show ();
-		setup ();
 	}
 }
 
