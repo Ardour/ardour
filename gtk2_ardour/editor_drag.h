@@ -53,7 +53,7 @@ public:
 	void abort ();
 	void add (Drag *);
 	void set (Drag *, GdkEvent *, Gdk::Cursor* c = 0);
-	void start_grab (GdkEvent *);
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	bool end_grab (GdkEvent *);
 	bool have_item (ArdourCanvas::Item *) const;
 

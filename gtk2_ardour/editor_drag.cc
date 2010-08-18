@@ -96,16 +96,16 @@ DragManager::set (Drag* d, GdkEvent* e, Gdk::Cursor* c)
 	assert (_drags.empty ());
 	d->set_manager (this);
 	_drags.push_back (d);
-	start_grab (e);
+	start_grab (e, c);
 }
 
 void
-DragManager::start_grab (GdkEvent* e)
+DragManager::start_grab (GdkEvent* e, Gdk::Cursor* c)
 {
 	_current_pointer_frame = _editor->event_frame (e, &_current_pointer_x, &_current_pointer_y);
 	
 	for (list<Drag*>::const_iterator i = _drags.begin(); i != _drags.end(); ++i) {
-		(*i)->start_grab (e);
+		(*i)->start_grab (e, c);
 	}
 }
 

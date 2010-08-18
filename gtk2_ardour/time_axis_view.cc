@@ -87,6 +87,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	_canvas_display->hide(); // reveal as needed 
 
 	selection_group = new Group (*_canvas_display);
+	selection_group->set_data (X_("timeselection"), (void *) 1);
 	selection_group->hide();
 
 	_ghost_group = new Group (*_canvas_display);

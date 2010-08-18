@@ -230,6 +230,7 @@ Gdk::Cursor* Editor::midi_erase_cursor = 0;
 Gdk::Cursor* Editor::wait_cursor = 0;
 Gdk::Cursor* Editor::timebar_cursor = 0;
 Gdk::Cursor* Editor::transparent_cursor = 0;
+Gdk::Cursor* Editor::up_down_cursor = 0;
 
 void
 show_me_the_size (Requisition* r, const char* what)
@@ -301,7 +302,6 @@ Editor::Editor ()
 	, meters_running(false)
 	, _pending_locate_request (false)
 	, _pending_initial_locate (false)
-
 {
 	constructed = false;
 
@@ -1279,6 +1279,7 @@ Editor::build_cursors ()
 	midi_select_cursor = new Gdk::Cursor (CENTER_PTR);
 	midi_resize_cursor = new Gdk::Cursor (SIZING);
 	midi_erase_cursor = new Gdk::Cursor (DRAPED_BOX);
+	up_down_cursor = new Gdk::Cursor (Gdk::SB_V_DOUBLE_ARROW);
 }
 
 /** Pop up a context menu for when the user clicks on a fade in or fade out */

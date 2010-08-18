@@ -474,6 +474,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	static Gdk::Cursor* midi_select_cursor;
 	static Gdk::Cursor* midi_resize_cursor;
 	static Gdk::Cursor* midi_erase_cursor;
+	static Gdk::Cursor* up_down_cursor;
 	static Gdk::Cursor* wait_cursor;
 	static Gdk::Cursor* timebar_cursor;
 	static Gdk::Cursor* transparent_cursor;
@@ -2044,6 +2045,8 @@ public:
 	void stop_step_editing ();
 	bool check_step_edit ();
 	sigc::connection step_edit_connection;
+
+	double _last_motion_y;
 
 	friend class Drag;
 	friend class RegionDrag;

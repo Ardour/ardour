@@ -266,6 +266,16 @@ Editor::set_canvas_cursor ()
 		break;
 	}
 
+	/* up-down cursor as a cue that automation can be dragged up and down when in join object/range mode */
+	if (join_object_range_button.get_active() && last_item_entered) {
+		if (last_item_entered->property_parent() && (*last_item_entered->property_parent()).get_data (X_("timeselection"))) {
+			pair<TimeAxisView*, int> tvp = trackview_by_y_position (_last_motion_y + vertical_adjustment.get_value() - canvas_timebars_vsize);
+			if (dynamic_cast<AutomationTimeAxisView*> (tvp.first)) {
+				current_canvas_cursor = up_down_cursor;
+			}
+		}
+	}
+
 	if (is_drawable()) {
 	        track_canvas->get_window()->set_cursor(*current_canvas_cursor);
 	}
@@ -654,7 +664,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
 					if (join_object_range_button.get_active() && atv) {
 						/* smart "join" mode: drag automation */
-						_drags->set (new AutomationRangeDrag (this, atv->base_item(), selection->time), event);
+						_drags->set (new AutomationRangeDrag (this, atv->base_item(), selection->time), event, up_down_cursor);
 					} else {
 						/* this was debated, but decided the more common action was to
 						   make a new selection */
@@ -824,7 +834,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 						/* if we're over an automation track, start a drag of its data */
 						AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
 						if (atv) {
-							_drags->set (new AutomationRangeDrag (this, atv->base_item(), selection->time), event);
+							_drags->set (new AutomationRangeDrag (this, atv->base_item(), selection->time), event, up_down_cursor);
 						}
 
 						/* if we're over a track and a region, and in the `object' part of a region,
@@ -1646,6 +1656,12 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			line->property_color_rgba() = 0xFF0000FF;
 		}
 		break;
+	case SelectionItem:
+		if (join_object_range_button.get_active()) {
+			set_canvas_cursor ();
+		}
+		break;
+		
 	default:
 		break;
 	}
@@ -1896,6 +1912,8 @@ Editor::scrub (nframes64_t frame, double current_x)
 bool
 Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from_autoscroll)
 {
+	_last_motion_y = event->motion.y;
+	
 	if (event->motion.is_hint) {
 		gint x, y;
 
