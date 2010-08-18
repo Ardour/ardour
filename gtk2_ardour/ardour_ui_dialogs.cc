@@ -303,7 +303,7 @@ ARDOUR_UI::toggle_session_options_window ()
 int
 ARDOUR_UI::create_location_ui ()
 {
-	if (location_ui == 0) {
+	if (location_ui->get() == 0) {
 		location_ui->set (new LocationUIWindow ());
 		location_ui->get()->set_session (_session);
 		location_ui->get()->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleLocations")));
