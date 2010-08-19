@@ -110,7 +110,7 @@ class MonitorProcessor : public Processor
 
         bool display_to_user() const;
 
-	void run (BufferSet& /*bufs*/, sframes_t /*start_frame*/, sframes_t /*end_frame*/, nframes_t /*nframes*/, bool /*result_required*/);
+	void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, nframes_t /*nframes*/, bool /*result_required*/);
 
         XMLNode& state (bool full);
         int set_state (const XMLNode&, int /* version */);

@@ -64,14 +64,14 @@ public:
 		return ((ARDOUR::AutomationList*)_list.get())->set_automation_state(as);
 	}
 
-	inline void start_touch() {
+	inline void start_touch(double when) {
 		set_touching (true);
-		return ((ARDOUR::AutomationList*)_list.get())->start_touch();
+		return ((ARDOUR::AutomationList*)_list.get())->start_touch(when);
 	}
 
-	inline void stop_touch() {
+	inline void stop_touch(bool mark, double when) {
 		set_touching (false);
-		return ((ARDOUR::AutomationList*)_list.get())->stop_touch();
+		return ((ARDOUR::AutomationList*)_list.get())->stop_touch(mark, when);
 	}
 
 	/** Set the value and do the right thing based on automation state
@@ -85,6 +85,8 @@ public:
 
         double lower() const { return parameter().min(); }
         double upper() const { return parameter().max(); }
+
+        const ARDOUR::Session& session() const { return _session; }
 
 protected:
 	ARDOUR::Session& _session;

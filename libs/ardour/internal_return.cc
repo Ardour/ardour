@@ -37,7 +37,7 @@ InternalReturn::InternalReturn (Session& s)
 }
 
 void
-InternalReturn::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, nframes_t nframes, bool)
+InternalReturn::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, nframes_t nframes, bool)
 {
 	if (!_active && !_pending_active) {
 		return;

@@ -101,7 +101,7 @@ PortInsert::latency() const
 }
 
 void
-PortInsert::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool)
+PortInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool)
 {
 	if (_output->n_ports().n_total() == 0) {
 		return;

@@ -53,7 +53,7 @@ AutomationList::AutomationList (Evoral::Parameter id)
 {
 	_state = Off;
 	_style = Absolute;
-	_touching = false;
+	g_atomic_int_set (&_touching, 0);
 
 	create_curve_if_necessary();
 
@@ -67,7 +67,7 @@ AutomationList::AutomationList (const AutomationList& other)
 {
 	_style = other._style;
 	_state = other._state;
-	_touching = other._touching;
+	g_atomic_int_set (&_touching, other.touching());
 
 	create_curve_if_necessary();
 
@@ -80,7 +80,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 {
 	_style = other._style;
 	_state = other._state;
-	_touching = other._touching;
+	g_atomic_int_set (&_touching, other.touching());
 
 	create_curve_if_necessary();
 
@@ -94,7 +94,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 AutomationList::AutomationList (const XMLNode& node, Evoral::Parameter id)
 	: ControlList(id)
 {
-	_touching = false;
+	g_atomic_int_set (&_touching, 0);
 	_state = Off;
 	_style = Absolute;
 
@@ -180,6 +180,12 @@ AutomationList::set_automation_state (AutoState s)
 {
 	if (s != _state) {
 		_state = s;
+
+                if (_state == Write) {
+                        Glib::Mutex::Lock lm (ControlList::_lock);
+                        nascent.push_back (new NascentInfo (false));
+                }
+
 		automation_state_changed (s); /* EMIT SIGNAL */
 	}
 }
@@ -194,17 +200,37 @@ AutomationList::set_automation_style (AutoStyle s)
 }
 
 void
-AutomationList::start_touch ()
+AutomationList::start_touch (double when)
 {
-	_touching = true;
-	_new_value = true;
+        if (_state == Touch) {
+                Glib::Mutex::Lock lm (ControlList::_lock);
+                nascent.push_back (new NascentInfo (true, when));
+        }
+
+	g_atomic_int_set (&_touching, 1);
 }
 
 void
-AutomationList::stop_touch ()
+AutomationList::stop_touch (bool mark, double when)
 {
-	_touching = false;
-	_new_value = false;
+	g_atomic_int_set (&_touching, 0);
+
+        if (_state == Touch) {
+                Glib::Mutex::Lock lm (ControlList::_lock);
+                
+                if (mark) {
+                        nascent.back()->end_time = when;
+                        
+                } else {
+                        
+                        /* nascent info created in start touch but never used. just get rid of it.
+                         */
+                        
+                        NascentInfo* ninfo = nascent.back ();
+                        nascent.erase (nascent.begin());
+                        delete ninfo;
+                }
+        }
 }
 
 void
@@ -247,7 +273,14 @@ AutomationList::state (bool full)
 	root->add_property ("interpolation-style", enum_2_string (_interpolation));
 
 	if (full) {
-		root->add_property ("state", auto_state_to_string (_state));
+                /* never serialize state with Write enabled - too dangerous
+                   for the user's data
+                */
+                if (_state != Write) {
+                        root->add_property ("state", auto_state_to_string (_state));
+                } else {
+                        root->add_property ("state", auto_state_to_string (Off));
+                }
 	} else {
 		/* never save anything but Off for automation state to a template */
 		root->add_property ("state", auto_state_to_string (Off));
@@ -327,7 +360,6 @@ AutomationList::deserialize_events (const XMLNode& node)
 		error << _("automation list: cannot load coordinates from XML, all points ignored") << endmsg;
 	} else {
 		mark_dirty ();
-		reposition_for_rt_add (0);
 		maybe_signal_changed ();
 	}
 
@@ -426,6 +458,9 @@ AutomationList::set_state (const XMLNode& node, int version)
 
 	if ((prop = node.property (X_("state"))) != 0) {
 		_state = string_to_auto_state (prop->value());
+                if (_state == Write) {
+                        _state = Off;
+                }
 	} else {
 		_state = Off;
 	}
@@ -462,7 +497,6 @@ AutomationList::set_state (const XMLNode& node, int version)
 		freeze ();
 		clear ();
 		mark_dirty ();
-		reposition_for_rt_add (0);
 		maybe_signal_changed ();
 		thaw ();
 	}

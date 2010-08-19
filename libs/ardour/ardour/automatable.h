@@ -61,7 +61,7 @@ public:
 	void clear_controls ();
 
 	virtual void automation_snapshot(nframes_t now, bool force);
-	virtual void transport_stopped (sframes_t now);
+	virtual void transport_stopped (framepos_t now);
 
 	virtual std::string describe_parameter(Evoral::Parameter param);
 

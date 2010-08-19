@@ -593,14 +593,14 @@ GainMeterBase::meter_point_clicked ()
 gint
 GainMeterBase::start_gain_touch (GdkEventButton*)
 {
-	_amp->gain_control()->start_touch ();
+	_amp->gain_control()->start_touch (_amp->session().transport_frame());
 	return FALSE;
 }
 
 gint
 GainMeterBase::end_gain_touch (GdkEventButton*)
 {
-	_amp->gain_control()->stop_touch ();
+	_amp->gain_control()->stop_touch (false, _amp->session().transport_frame());
 	return FALSE;
 }
 

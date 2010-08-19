@@ -80,7 +80,7 @@ InternalSend::send_to_going_away ()
 }
 
 void
-InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool)
+InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool)
 {
 	if ((!_active && !_pending_active) || !target || !_send_to) {
 		_meter->reset ();

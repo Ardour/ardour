@@ -228,7 +228,7 @@ public:
 	bool can_support_io_configuration (const ChanCount& /*in*/, ChanCount& /*out*/) const { return true; };
 
 	/// The fundamental Panner function
-	void run (BufferSet& src, BufferSet& dest, sframes_t start_frame, sframes_t end_frames, nframes_t nframes);
+	void run (BufferSet& src, BufferSet& dest, framepos_t start_frame, framepos_t end_frames, nframes_t nframes);
 
 	bool bypassed() const { return _bypassed; }
 	void set_bypassed (bool yn);

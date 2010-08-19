@@ -405,8 +405,10 @@ PannerUI::setup_pan ()
 			boost::shared_ptr<AutomationControl> ac = _panner->pan_control (asz);
 
 			if (asz) {
-				bc->StartGesture.connect (sigc::mem_fun (*ac, &AutomationControl::start_touch));
-				bc->StopGesture.connect (sigc::mem_fun (*ac, &AutomationControl::stop_touch));
+				bc->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
+                                                                      boost::weak_ptr<AutomationControl> (ac)));
+				bc->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
+                                                                     boost::weak_ptr<AutomationControl>(ac)));
 			}
 
 			char buf[64];
@@ -457,6 +459,26 @@ PannerUI::setup_pan ()
 		panning_viewport.add (*twod_panner);
 		panning_viewport.show_all ();
 	}
+}
+
+void
+PannerUI::start_touch (boost::weak_ptr<AutomationControl> wac)
+{
+        boost::shared_ptr<AutomationControl> ac = wac.lock();
+        if (!ac) {
+                return;
+        }
+        ac->start_touch (ac->session().transport_frame());
+}
+
+void
+PannerUI::stop_touch (boost::weak_ptr<AutomationControl> wac)
+{
+        boost::shared_ptr<AutomationControl> ac = wac.lock();
+        if (!ac) {
+                return;
+        }
+        ac->stop_touch (false, ac->session().transport_frame());
 }
 
 bool

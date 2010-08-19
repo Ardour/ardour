@@ -45,7 +45,9 @@ namespace ARDOUR {
 	class Session;
 	class Panner;
 	class Delivery;
+        class AutomationControl;
 }
+
 namespace Gtkmm2ext {
 	class FastMeter;
 }
@@ -167,6 +169,9 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	std::string astyle_string (ARDOUR::AutoStyle);
 	std::string short_astyle_string (ARDOUR::AutoStyle);
 	std::string _astyle_string (ARDOUR::AutoStyle, bool);
+
+        void start_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
+        void stop_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
 };
 
 #endif /* __ardour_gtk_panner_ui_h__ */

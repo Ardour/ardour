@@ -1489,7 +1489,7 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 }
 
 void
-Panner::run (BufferSet& inbufs, BufferSet& outbufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+Panner::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes)
 {
 	if (outbufs.count().n_audio() == 0) {
 		// Failing to deliver audio we were asked to deliver is a bug

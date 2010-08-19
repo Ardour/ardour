@@ -27,6 +27,7 @@
 
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
+#include "pbd/stacktrace.h"
 
 #include "midi++/names.h"
 
@@ -393,7 +394,7 @@ Automatable::automation_snapshot (nframes_t now, bool force)
 		for (Controls::iterator i = controls().begin(); i != controls().end(); ++i) {
 			boost::shared_ptr<AutomationControl> c
 					= boost::dynamic_pointer_cast<AutomationControl>(i->second);
-			if (c->automation_write()) {
+			if (_a_session.transport_rolling() && c->automation_write()) {
 				c->list()->rt_add (now, i->second->user_double());
 			}
 		}
@@ -403,20 +404,28 @@ Automatable::automation_snapshot (nframes_t now, bool force)
 }
 
 void
-Automatable::transport_stopped (sframes_t now)
+Automatable::transport_stopped (framepos_t now)
 {
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 
 		boost::shared_ptr<AutomationControl> c
 				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
-		boost::shared_ptr<AutomationList> l
+                if (c) {
+                        boost::shared_ptr<AutomationList> l
 				= boost::dynamic_pointer_cast<AutomationList>(c->list());
-
-		c->list()->reposition_for_rt_add (now);
-
-		if (c->automation_state() != Off) {
-			c->set_value(c->list()->eval(now));
-		}
+                        
+                        if (l) {
+                                l->write_pass_finished (now);
+                                
+                                if (l->automation_playback()) {
+                                        c->set_value(c->list()->eval(now));
+                                }
+                                
+                                if (l->automation_state() == Write) {
+                                        l->set_automation_state (Touch);
+                                }
+                        }
+                }
 	}
 }
 

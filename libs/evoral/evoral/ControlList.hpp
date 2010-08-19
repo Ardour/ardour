@@ -114,10 +114,10 @@ public:
 	bool extend_to (double);
 	void slide (iterator before, double distance);
 
-	void reposition_for_rt_add (double when);
 	void rt_add (double when, double value);
 	void add (double when, double value);
 	void fast_simple_add (double when, double value);
+        void merge_nascent (double when);
 
 	void reset_range (double start, double end);
 	void erase_range (double start, double end);
@@ -129,10 +129,6 @@ public:
 	boost::shared_ptr<ControlList> cut (double, double);
 	boost::shared_ptr<ControlList> copy (double, double);
 	void clear (double, double);
-
-	boost::shared_ptr<ControlList> cut (iterator, iterator);
-	boost::shared_ptr<ControlList> copy (iterator, iterator);
-	void clear (iterator, iterator);
 
 	bool paste (ControlList&, double position, float times);
 
@@ -236,6 +232,11 @@ public:
 	InterpolationStyle interpolation() const { return _interpolation; }
 	void set_interpolation (InterpolationStyle);
 
+        virtual bool touching() const { return false; }
+        virtual bool writing() const { return false; }
+        virtual bool touch_enabled() const { return false; }
+        void write_pass_finished (double when);
+
 	/** Emitted when mark_dirty() is called on this object */
 	mutable PBD::Signal0<void> Dirty;
 	/** Emitted when our interpolation style changes */
@@ -257,25 +258,37 @@ protected:
 
 	void _x_scale (double factor);
 
-	mutable LookupCache _lookup_cache;
-	mutable SearchCache _search_cache;
+	mutable LookupCache   _lookup_cache;
+	mutable SearchCache   _search_cache;
 
-	Parameter           _parameter;
-	InterpolationStyle  _interpolation;
-	EventList           _events;
-	mutable Glib::Mutex _lock;
-	int8_t              _frozen;
-	bool                _changed_when_thawed;
-	bool                _new_value;
-	double              _max_xval;
-	double              _min_yval;
-	double              _max_yval;
-	double              _default_value;
-	bool                _sort_pending;
-	iterator            _rt_insertion_point;
-	double              _rt_pos;
+	Parameter             _parameter;
+	InterpolationStyle    _interpolation;
+	EventList             _events;
+	mutable Glib::Mutex   _lock;
+	int8_t                _frozen;
+	bool                  _changed_when_thawed;
+	double                _max_xval;
+	double                _min_yval;
+	double                _max_yval;
+	double                _default_value;
+	bool                  _sort_pending;
 
 	Curve* _curve;
+
+        struct NascentInfo {
+            EventList events;
+            bool   is_touch;
+            double start_time;
+            double end_time;
+            
+            NascentInfo (bool touching, double start = -1.0)
+                    : is_touch (touching)
+                    , start_time (start)
+                    , end_time (-1.0) 
+            {}
+        };
+    
+        std::list<NascentInfo*> nascent;
 };
 
 } // namespace Evoral

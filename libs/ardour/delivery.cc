@@ -221,7 +221,7 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool result_required)
+Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool result_required)
 {
 	assert (_output);
 
@@ -418,27 +418,22 @@ Delivery::reset_panners ()
 
 
 void
-Delivery::start_pan_touch (uint32_t which)
+Delivery::start_pan_touch (uint32_t which, double when)
 {
 	if (which < _panner->npanners()) {
-		_panner->pan_control(which)->start_touch();
+		_panner->pan_control(which)->start_touch(when);
 	}
 }
 
 void
-Delivery::end_pan_touch (uint32_t which)
+Delivery::end_pan_touch (uint32_t which, bool mark, double when)
 {
 	if (which < _panner->npanners()) {
-		_panner->pan_control(which)->stop_touch();
+		_panner->pan_control(which)->stop_touch(mark, when);
 	}
 
 }
 
-void
-Delivery::transport_stopped (sframes_t frame)
-{
-	_panner->transport_stopped (frame);
-}
 
 void
 Delivery::flush_buffers (nframes_t nframes, nframes64_t time)
@@ -453,15 +448,19 @@ Delivery::flush_buffers (nframes_t nframes, nframes64_t time)
 }
 
 void
-Delivery::transport_stopped ()
+Delivery::transport_stopped (framepos_t now)
 {
-	/* turn off any notes that are on */
+        Processor::transport_stopped (now);
 
-	PortSet& ports (_output->ports());
+	_panner->transport_stopped (now);
 
-	for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-		(*i).transport_stopped ();
-	}
+        if (_output) {
+                PortSet& ports (_output->ports());
+                
+                for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
+                        (*i).transport_stopped ();
+                }
+        }
 }
 
 gain_t

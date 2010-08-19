@@ -396,11 +396,8 @@ MidiTrack::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_fram
 void
 MidiTrack::handle_transport_stopped (bool abort, bool did_locate, bool flush_processors)
 {
-
-	_main_outs->transport_stopped ();
 	Route::handle_transport_stopped (abort, did_locate, flush_processors);
 }
-
 
 void
 MidiTrack::push_midi_input_to_step_edit_ringbuffer (nframes_t nframes)

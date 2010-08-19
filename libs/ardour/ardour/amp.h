@@ -43,7 +43,7 @@ public:
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
 
-	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool);
+	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool);
 
 	bool apply_gain() const  { return _apply_gain; }
 	void apply_gain(bool yn) { _apply_gain = yn; }

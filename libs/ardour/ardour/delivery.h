@@ -71,10 +71,7 @@ public:
 	/* supplemental method used with MIDI */
 
 	void flush_buffers (nframes_t nframes, nframes64_t time);
-	void transport_stopped ();
-
 	void no_outs_cuz_we_no_monitor(bool);
-
 	void cycle_start (nframes_t);
 	void increment_output_offset (nframes_t);
 	void transport_stopped (sframes_t frame);
@@ -100,8 +97,8 @@ public:
 	void allow_pan_reset ();
 
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
-	void start_pan_touch (uint32_t which);
-	void end_pan_touch (uint32_t which);
+	void start_pan_touch (uint32_t which, double when);
+	void end_pan_touch (uint32_t which, bool mark, double when);
 
   protected:
 	Role        _role;

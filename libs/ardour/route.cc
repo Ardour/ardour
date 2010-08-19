@@ -2621,7 +2621,7 @@ Route::direct_feeds (boost::shared_ptr<Route> other, bool* only_send)
 void
 Route::handle_transport_stopped (bool /*abort_ignored*/, bool did_locate, bool can_flush_processors)
 {
-	nframes_t now = _session.transport_frame();
+	framepos_t now = _session.transport_frame();
 
 	{
 		Glib::RWLock::ReaderLock lm (_processor_lock);
@@ -2629,6 +2629,8 @@ Route::handle_transport_stopped (bool /*abort_ignored*/, bool did_locate, bool c
 		if (!did_locate) {
 			automation_snapshot (now, true);
 		}
+
+                Automatable::transport_stopped (now);
 
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 

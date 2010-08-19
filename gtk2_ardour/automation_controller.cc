@@ -19,12 +19,16 @@
 */
 
 #include <iomanip>
+
 #include "pbd/error.h"
+
 #include "ardour/automation_list.h"
 #include "ardour/automation_control.h"
 #include "ardour/event_type_map.h"
 #include "ardour/automatable.h"
 #include "ardour/panner.h"
+#include "ardour/session.h"
+
 #include "ardour_ui.h"
 #include "utils.h"
 #include "automation_controller.h"
@@ -121,13 +125,24 @@ AutomationController::value_adjusted()
 void
 AutomationController::start_touch()
 {
-	_controllable->start_touch();
+	_controllable->start_touch (_controllable->session().transport_frame());
 }
 
 void
-AutomationController::end_touch()
+AutomationController::end_touch ()
 {
-	_controllable->stop_touch();
+        if (_controllable->automation_state() == Touch) {
+
+                bool mark = false;
+                double when = 0;
+                
+                if (_controllable->session().transport_rolling()) {
+                        mark = true;
+                        when = _controllable->session().transport_frame();
+                }
+
+                _controllable->stop_touch (mark, when);
+        }
 }
 
 void

@@ -39,7 +39,7 @@ PBD::Signal0<void> Metering::Meter;
  * be set to 0.
  */
 void
-PeakMeter::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, nframes_t nframes, bool)
+PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, nframes_t nframes, bool)
 {
 	if (!_active && !_pending_active) {
 		return;

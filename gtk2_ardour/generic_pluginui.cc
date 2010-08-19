@@ -45,6 +45,7 @@
 #ifdef HAVE_SLV2
 #include "ardour/lv2_plugin.h"
 #endif
+#include "ardour/session.h"
 
 #include <lrdf.h>
 
@@ -603,13 +604,13 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 void
 GenericPluginUI::start_touch (GenericPluginUI::ControlUI* cui)
 {
-	cui->control->start_touch ();
+	cui->control->start_touch (cui->control->session().transport_frame());
 }
 
 void
 GenericPluginUI::stop_touch (GenericPluginUI::ControlUI* cui)
 {
-	cui->control->stop_touch ();
+	cui->control->stop_touch (false, cui->control->session().transport_frame());
 }
 
 void

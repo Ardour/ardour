@@ -61,19 +61,21 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 	PBD::Signal0<void> automation_style_changed;
 
 	bool automation_playback() const {
-		return (_state & Play) || ((_state & Touch) && !_touching);
+		return (_state & Play) || ((_state & Touch) && !touching());
 	}
 	bool automation_write () const {
-		return (_state & Write) || ((_state & Touch) && _touching);
-	}
+                return ((_state & Write) || ((_state & Touch) && touching()));
+        }
 
 	PBD::Signal0<void> StateChanged;
 
 	static PBD::Signal1<void,AutomationList*> AutomationListCreated;
 
-	void start_touch ();
-	void stop_touch ();
-	bool touching() const { return _touching; }
+	void start_touch (double when);
+	void stop_touch (bool mark, double when);
+	bool touching() const { return g_atomic_int_get (&_touching); }
+	bool writing() const { return _state == Write; }
+        bool touch_enabled() const { return _state == Touch; }
 
 	XMLNode& get_state (); 
 	int set_state (const XMLNode &, int version);
@@ -86,9 +88,9 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 
 	void maybe_signal_changed ();
 
-	AutoState _state;
-	AutoStyle _style;
-	bool      _touching;
+	AutoState    _state;
+	AutoStyle    _style;
+	gint         _touching;
 };
 
 } // namespace

@@ -245,7 +245,7 @@ MonitorProcessor::state (bool full)
 }
 
 void
-MonitorProcessor::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, nframes_t nframes, bool /*result_required*/)
+MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, nframes_t nframes, bool /*result_required*/)
 {
         uint32_t chn = 0;
         gain_t target_gain;
