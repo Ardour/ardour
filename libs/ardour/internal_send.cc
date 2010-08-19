@@ -34,6 +34,7 @@ using namespace std;
 
 InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost::shared_ptr<Route> sendto, Delivery::Role role)
 	: Send (s, mm, role)
+	, target (0)
 {
         if (sendto) {
                 if (use_target (sendto)) {
@@ -149,6 +150,11 @@ int
 InternalSend::set_block_size (nframes_t nframes)
 {
 	mixbufs.ensure_buffers (_configured_input, nframes);
+
+	/* ensure that our target can cope with us merging this many frames to it */
+	if (target) {
+		target->ensure_buffers (_configured_input, nframes);
+	}
         return 0;
 }
 
