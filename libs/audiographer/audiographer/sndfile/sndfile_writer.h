@@ -9,6 +9,7 @@
 #include "audiographer/sink.h"
 #include "audiographer/types.h"
 #include "audiographer/sndfile/sndfile_base.h"
+#include "audiographer/broadcast_info.h"
 
 #include "pbd/signals.h"
 
@@ -26,11 +27,15 @@ class SndfileWriter
   , public FlagDebuggable<>
 {
   public:
-	SndfileWriter (std::string const & path, int format, ChannelCount channels, nframes_t samplerate)
+	SndfileWriter (std::string const & path, int format, ChannelCount channels, nframes_t samplerate, boost::shared_ptr<BroadcastInfo> broadcast_info)
 	  : SndfileHandle (path, Write, format, channels, samplerate)
 	  , path (path)
 	{
 		add_supported_flag (ProcessContext<T>::EndOfInput);
+
+		if (broadcast_info) {
+			broadcast_info->write_to_file (this);
+		}
 	}
 	
 	virtual ~SndfileWriter () {}

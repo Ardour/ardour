@@ -532,7 +532,7 @@ SndFileSource::setup_broadcast_info (sframes_t /*when*/, struct tm& now, time_t 
 		return 0;
 	}
 
-	_broadcast_info->set_originator_ref (_session);
+	_broadcast_info->set_originator_ref_from_session (_session);
 	_broadcast_info->set_origination_time (&now);
 
 	/* now update header position taking header offset into account */

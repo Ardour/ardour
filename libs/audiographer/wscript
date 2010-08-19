@@ -59,6 +59,7 @@ def build(bld):
 		src/general/sample_format_converter.cc
 		src/routines.cc
 		src/debug_utils.cc
+		src/general/broadcast_info.cc
 	'''
 	
 	if bld.env['HAVE_SAMPLERATE']:

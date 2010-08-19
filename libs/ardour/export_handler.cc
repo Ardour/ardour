@@ -118,9 +118,9 @@ ExportHandler::~ExportHandler ()
 }
 
 bool
-ExportHandler::add_export_config (TimespanPtr timespan, ChannelConfigPtr channel_config, FormatPtr format, FilenamePtr filename)
+ExportHandler::add_export_config (TimespanPtr timespan, ChannelConfigPtr channel_config, FormatPtr format, FilenamePtr filename, boost::shared_ptr<AudioGrapher::BroadcastInfo> broadcast_info)
 {
-	FileSpec spec (channel_config, format, filename);
+	FileSpec spec (channel_config, format, filename, broadcast_info);
 	ConfigPair pair (timespan, spec);
 	config_map.insert (pair);
 	

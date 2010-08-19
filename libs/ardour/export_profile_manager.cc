@@ -38,6 +38,7 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/broadcast_info.h"
 
 #include "i18n.h"
 
@@ -122,7 +123,14 @@ ExportProfileManager::prepare_for_export ()
 		     ++format_it, ++filename_it) {
 
 //			filename->include_timespan = (ts_list->size() > 1); Disabled for now...
-			handler->add_export_config (*ts_it, channel_config, (*format_it)->format, (*filename_it)->filename);
+
+			boost::shared_ptr<BroadcastInfo> b;
+			if ((*format_it)->format->has_broadcast_info()) {
+				b.reset (new BroadcastInfo);
+				b->set_from_session (session, (*ts_it)->get_start());
+			}
+			
+			handler->add_export_config (*ts_it, channel_config, (*format_it)->format, (*filename_it)->filename, b);
 		}
 	}
 }

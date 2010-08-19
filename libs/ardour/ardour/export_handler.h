@@ -31,6 +31,10 @@
 #include "ardour/session.h"
 #include "ardour/types.h"
 
+namespace AudioGrapher {
+	class BroadcastInfo;
+}
+
 namespace ARDOUR
 {
 
@@ -39,6 +43,7 @@ class ExportChannelConfiguration;
 class ExportFormatSpecification;
 class ExportFilename;
 class ExportGraphBuilder;
+
 
 class ExportElementFactory
 {
@@ -73,15 +78,17 @@ class ExportHandler : public ExportElementFactory
   public:
 	struct FileSpec {
 		FileSpec() {}
-		FileSpec (ChannelConfigPtr channel_config, FormatPtr format, FilenamePtr filename)
+		FileSpec (ChannelConfigPtr channel_config, FormatPtr format, FilenamePtr filename, boost::shared_ptr<AudioGrapher::BroadcastInfo> broadcast_info)
 		  : channel_config (channel_config)
 		  , format (format)
 		  , filename (filename)
+		  , broadcast_info (broadcast_info)
 			{}
 
 		ChannelConfigPtr channel_config;
 		FormatPtr        format;
 		FilenamePtr      filename;
+		boost::shared_ptr<AudioGrapher::BroadcastInfo> broadcast_info;
 	};
 	
   private:
@@ -107,7 +114,7 @@ class ExportHandler : public ExportElementFactory
   public:
 	~ExportHandler ();
 
-	bool add_export_config (TimespanPtr timespan, ChannelConfigPtr channel_config, FormatPtr format, FilenamePtr filename);
+	bool add_export_config (TimespanPtr timespan, ChannelConfigPtr channel_config, FormatPtr format, FilenamePtr filename, boost::shared_ptr<AudioGrapher::BroadcastInfo> broadcast_info);
 	void do_export (bool rt = false);
 
   private:
