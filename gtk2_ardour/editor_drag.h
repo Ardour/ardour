@@ -255,6 +255,11 @@ public:
 	virtual void finished (GdkEvent *, bool) = 0;
 	virtual void aborted ();
 
+	/** @return true if the regions being `moved' came from somewhere on the canvas;
+	 *  false if they came from outside (e.g. from the region list).
+	 */
+	virtual bool regions_came_from_canvas () const = 0;
+
 protected:
 	struct TimeAxisViewSummary {
 		TimeAxisViewSummary () : height_list(512) {}
@@ -300,6 +305,10 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted ();
 
+	bool regions_came_from_canvas () const {
+		return true;
+	}
+
 	std::pair<nframes64_t, int> move_threshold () const {
 		return std::make_pair (4, 4);
 	}
@@ -316,6 +325,10 @@ public:
 
 	void finished (GdkEvent *, bool);
 	void aborted ();
+
+	bool regions_came_from_canvas () const {
+		return false;
+	}
 };
 
 /** Region drag in splice mode */

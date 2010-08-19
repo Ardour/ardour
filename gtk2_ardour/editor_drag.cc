@@ -543,9 +543,12 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, nframes64_t* pending_
 
 		/* x movement since last time */
 		dx = (static_cast<double> (*pending_region_position) - _last_frame_position) / _editor->frames_per_unit;
-		
+
 		/* total x movement */
-		framecnt_t total_dx = *pending_region_position - grab_frame () + _pointer_frame_offset;
+		framecnt_t total_dx = *pending_region_position;
+		if (regions_came_from_canvas()) {
+			total_dx = total_dx - grab_frame () + _pointer_frame_offset;
+		}
 
 		/* check that no regions have gone off the start of the session */
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
@@ -773,7 +776,6 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			/* INTER-LAYER MOVEMENT in the same track */
 			y_delta = rtv->view()->child_height () * pointer_layer_span;
 		}
-
 
 		if (_brushing) {
 			_editor->mouse_brush_insert_region (rv, pending_region_position);
