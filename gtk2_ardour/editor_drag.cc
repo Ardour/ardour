@@ -3751,9 +3751,12 @@ MouseZoomDrag::aborted ()
 
 NoteDrag::NoteDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
+	, _cumulative_dx (0)
+	, _cumulative_dy (0)
 {
-	CanvasNoteEvent*     cnote = dynamic_cast<CanvasNoteEvent*>(_item);
-	region = &cnote->region_view();
+	_primary = dynamic_cast<CanvasNoteEvent*> (_item);
+	_region = &_primary->region_view ();
+	_note_height = _region->midi_stream_view()->note_height ();
 }
 
 void
@@ -3761,23 +3764,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	Drag::start_grab (event);
 
-	drag_delta_x = 0;
-	drag_delta_note = 0;
-
-	double event_x;
-	double event_y;
-
-	event_x = _drags->current_pointer_x();
-	event_y = _drags->current_pointer_y();
-
-	_item->property_parent().get_value()->w2i(event_x, event_y);
-
-	last_x = region->snap_to_pixel(event_x);
-	last_y = event_y;
-
-	CanvasNoteEvent* cnote = dynamic_cast<CanvasNoteEvent*>(_item);
-
-	if (!(was_selected = cnote->selected())) {
+	if (!(_was_selected = _primary->selected())) {
 
 		/* tertiary-click means extend selection - we'll do that on button release,
 		   so don't add it here, because otherwise we make it hard to figure
@@ -3790,79 +3777,73 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 			bool add = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
 
 			if (add) {
-				region->note_selected (cnote, true);
+				_region->note_selected (_primary, true);
 			} else {
-				region->unique_select (cnote);
+				_region->unique_select (_primary);
 			}
 		}
 	}
 }
 
-void
-NoteDrag::motion (GdkEvent*, bool)
+/** @return Current total drag x change in frames */
+frameoffset_t
+NoteDrag::total_dx () const
 {
-	MidiStreamView* streamview = region->midi_stream_view();
-	double event_x;
-	double event_y;
+	/* dx in frames */
+	frameoffset_t const dx = _editor->unit_to_frame (_drags->current_pointer_x() - grab_x());
 
-	event_x = _drags->current_pointer_x();
-	event_y = _drags->current_pointer_y();
+	/* primary note time */
+	frameoffset_t const n = _region->beats_to_frames (_primary->note()->time ());
+	
+	/* new time of the primary note relative to the region position */
+	frameoffset_t const st = n + dx;
 
-	_item->property_parent().get_value()->w2i(event_x, event_y);
+	/* snap and return corresponding delta */
+	return _region->snap_frame_to_frame (st) - n;
+}
 
-	event_x = region->snap_to_pixel(event_x);
+/** @return Current total drag y change in notes */
+int8_t
+NoteDrag::total_dy () const
+{
+	/* this is `backwards' to make increasing note number go in the right direction */
+	double const dy = _drags->current_pointer_y() - grab_y();
 
-	double dx     = event_x - last_x;
-	double dy     = event_y - last_y;
-	last_x = event_x;
+	/* dy in notes */
+	int8_t ndy = 0;
 
-	drag_delta_x += dx;
-
-	// Snap to note rows
-
-	if (abs (dy) < streamview->note_height()) {
-		dy = 0.0;
-	} else {
-		int8_t this_delta_note;
+	if (abs (dy) >= _note_height) {
 		if (dy > 0) {
-			this_delta_note = (int8_t)ceil(dy / streamview->note_height() / 2.0);
+			ndy = (int8_t) ceil (dy / _note_height / 2.0);
 		} else {
-			this_delta_note = (int8_t)floor(dy / streamview->note_height() / 2.0);
+			ndy = (int8_t) floor (dy / _note_height / 2.0);
 		}
-		drag_delta_note -= this_delta_note;
-		dy = streamview->note_height() * this_delta_note;
-		last_y = last_y + dy;
 	}
 
-	if (dx || dy) {
-                
-		CanvasNoteEvent* cnote = dynamic_cast<CanvasNoteEvent*>(_item);
-                Evoral::MusicalTime new_time;
-                
-                if (drag_delta_x) {
-                        nframes64_t start_frames = region->beats_to_frames(cnote->note()->time());
-                        if (drag_delta_x >= 0) {
-                                start_frames += region->snap_frame_to_frame(_editor->pixel_to_frame(drag_delta_x));
-                        } else {
-                                start_frames -= region->snap_frame_to_frame(_editor->pixel_to_frame(-drag_delta_x));
-                        }
-                        new_time = region->frames_to_beats(start_frames);
-                } else {
-                        new_time = cnote->note()->time();
-                }
-                
-                boost::shared_ptr<Evoral::Note<Evoral::MusicalTime> > check_note (
-                        new Evoral::Note<Evoral::MusicalTime> (cnote->note()->channel(), 
-                                                               new_time,
-                                                               cnote->note()->length(), 
-                                                               cnote->note()->note() + drag_delta_note,
-                                                               cnote->note()->velocity()));
+ 	return ndy;
+}
+	
 
-		region->move_selection (dx, dy);
+void
+NoteDrag::motion (GdkEvent *, bool)
+{
+	/* Total change in x and y since the start of the drag */
+	frameoffset_t const dx = total_dx ();
+	int8_t const dy = total_dy ();
+
+	/* Now work out what we have to do to the note canvas items to set this new drag delta */
+	double const tdx = _editor->frame_to_unit (dx) - _cumulative_dx;
+	double const tdy = dy * _note_height - _cumulative_dy;
+
+	if (tdx || tdy) {
+		_region->move_selection (tdx, tdy);
+		_cumulative_dx += tdx;
+		_cumulative_dy += tdy;
 
                 char buf[12];
-                snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (cnote->note()->note() + drag_delta_note).c_str(),
-                          (int) floor ((cnote->note()->note() + drag_delta_note)));
+                snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (_primary->note()->note() + dy).c_str(),
+                          (int) floor (_primary->note()->note() + dy));
+		
 		_editor->show_verbose_canvas_cursor_with (buf);
         }
 }
@@ -3870,31 +3851,29 @@ NoteDrag::motion (GdkEvent*, bool)
 void
 NoteDrag::finished (GdkEvent* ev, bool moved)
 {
-	ArdourCanvas::CanvasNote* cnote = dynamic_cast<ArdourCanvas::CanvasNote*>(_item);
-
 	if (!moved) {
 		if (_editor->current_mouse_mode() == Editing::MouseObject) {
 
-			if (was_selected) {
+			if (_was_selected) {
 				bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
 				if (add) {
-					region->note_deselected (cnote);
+					_region->note_deselected (_primary);
 				}
 			} else {
 				bool extend = Keyboard::modifier_state_equals (ev->button.state, Keyboard::TertiaryModifier);
 				bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
 
-				if (!extend && !add && region->selection_size() > 1) {
-					region->unique_select(cnote);
+				if (!extend && !add && _region->selection_size() > 1) {
+					_region->unique_select (_primary);
 				} else if (extend) {
-					region->note_selected (cnote, true, true);
+					_region->note_selected (_primary, true, true);
 				} else {
 					/* it was added during button press */
 				}
 			}
 		}
 	} else {
-		region->note_dropped (cnote, drag_delta_x, drag_delta_note);
+		_region->note_dropped (_primary, total_dx(), - total_dy());
 	}
 }
 

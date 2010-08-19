@@ -35,6 +35,12 @@ namespace ARDOUR {
 	class Location;
 }
 
+namespace Gnome {
+	namespace Canvas {
+		class CanvasNoteEvent;
+	}
+}
+
 class Editor;
 class EditorCursor;
 class TimeAxisView;
@@ -356,6 +362,7 @@ private:
 	bool                at_front;
 };
 
+/** Drags to move MIDI notes */
 class NoteDrag : public Drag
 {
   public:
@@ -367,12 +374,16 @@ class NoteDrag : public Drag
 	void aborted ();
 
   private:
-	MidiRegionView* region;
-	double last_x;
-	double last_y;
-	double drag_delta_x;
-	double drag_delta_note;
-	bool   was_selected;
+
+	ARDOUR::frameoffset_t total_dx () const;
+	int8_t total_dy () const;
+	
+	MidiRegionView* _region;
+	Gnome::Canvas::CanvasNoteEvent* _primary;
+	double _cumulative_dx;
+	double _cumulative_dy;
+	bool _was_selected;
+	double _note_height;
 };
 
 /** Drag of region gain */

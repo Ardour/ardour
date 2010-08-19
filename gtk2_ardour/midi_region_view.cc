@@ -1956,7 +1956,7 @@ MidiRegionView::move_selection(double dx, double dy)
 }
 
 void
-MidiRegionView::note_dropped(CanvasNoteEvent *, double dt, int8_t dnote)
+MidiRegionView::note_dropped(CanvasNoteEvent *, frameoffset_t dt, int8_t dnote)
 {
 	assert (!_selection.empty());
 
@@ -1991,15 +1991,7 @@ MidiRegionView::note_dropped(CanvasNoteEvent *, double dt, int8_t dnote)
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ++i) {
 
-		nframes64_t start_frames = beats_to_frames((*i)->note()->time());
-
-		if (dt >= 0) {
-			start_frames += snap_frame_to_frame(trackview.editor().pixel_to_frame(dt));
-		} else {
-			start_frames -= snap_frame_to_frame(trackview.editor().pixel_to_frame(-dt));
-		}
-
-		Evoral::MusicalTime new_time = frames_to_beats(start_frames);
+		Evoral::MusicalTime new_time = frames_to_beats (beats_to_frames ((*i)->note()->time()) + dt);
 
 		if (new_time < 0) {
 			continue;
