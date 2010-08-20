@@ -936,7 +936,15 @@ Selection::set (ControlPoint* cp)
 		return;
 	}
 
-	points.clear ();
+	/* We're going to set up the PointSelection from the selected ControlPoints
+	   on this point's line, so we need to deselect all ControlPoints before
+	   we re-add this one.
+	*/
+
+	for (uint32_t i = 0; i < cp->line().npoints(); ++i) {
+		cp->line().nth (i)->set_selected (false);
+	}
+
 	vector<ControlPoint*> cps;
 	cps.push_back (cp);
 	add (cps);
