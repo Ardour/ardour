@@ -483,7 +483,11 @@ Route::process_output_buffers (BufferSet& bufs,
 			     << endl;
 		}
 		assert (bufs.count() == (*i)->input_streams());
-		
+                
+                /* should we NOT run plugins here if the route is inactive?
+                   do we catch route != active somewhere higher?
+                */
+
 		(*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
 		bufs.set_count ((*i)->output_streams());
 	}
