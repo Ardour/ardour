@@ -86,6 +86,7 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 	_line->set_height ((uint32_t)rint(trackview.current_height() - NAME_HIGHLIGHT_SIZE));
 	_line->show();
 	_line->show_all_control_points();
+	_line->set_maximum_time (_region->length());
 }
 
 bool
@@ -177,6 +178,10 @@ AutomationRegionView::set_height (double h)
 bool
 AutomationRegionView::set_position (nframes64_t pos, void* src, double* ignored)
 {
+	if (_line) {
+		_line->set_maximum_time (_region->length ());
+	}
+	
 	return RegionView::set_position(pos, src, ignored);
 }
 
@@ -186,8 +191,9 @@ AutomationRegionView::reset_width_dependent_items (double pixel_width)
 {
 	RegionView::reset_width_dependent_items(pixel_width);
 
-	if (_line)
+	if (_line) {
 		_line->reset();
+	}
 }
 
 
@@ -196,8 +202,10 @@ AutomationRegionView::region_resized (const PBD::PropertyChange& what_changed)
 {
 	RegionView::region_resized(what_changed);
 
-	if (_line)
+	if (_line) {
 		_line->reset();
+		_line->set_maximum_time (_region->length());
+	}
 }
 
 

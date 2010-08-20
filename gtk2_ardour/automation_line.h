@@ -137,6 +137,11 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	const Evoral::TimeConverter<double, ARDOUR::sframes_t>& time_converter () const {
 		return _time_converter;
 	}
+
+	void set_maximum_time (ARDOUR::framepos_t);
+ 	ARDOUR::framepos_t maximum_time () const {
+		return _maximum_time;
+	}
 	
   protected:
 
@@ -217,6 +222,9 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	void model_representation (ControlPoint&, ModelRepresentation&);
 
 	PBD::ScopedConnectionList _list_connections;
+
+	/** maximum time that a point on this line can be at, relative to the start of its region or track */
+	ARDOUR::framecnt_t _maximum_time;
 	
 	friend class AudioRegionGainLine;
 };

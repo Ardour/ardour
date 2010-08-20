@@ -2736,12 +2736,12 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	// start the grab at the center of the control point so
 	// the point doesn't 'jump' to the mouse after the first drag
-	_time_axis_view_grab_x = _point->get_x();
-	_time_axis_view_grab_y = _point->get_y();
+	_fixed_grab_x = _point->get_x();
+	_fixed_grab_y = _point->get_y();
 
 	float const fraction = 1 - (_point->get_y() / _point->line().height());
 
-	_point->line().start_drag_single (_point, _time_axis_view_grab_x, fraction);
+	_point->line().start_drag_single (_point, _fixed_grab_x, fraction);
 
 	_editor->set_verbose_canvas_cursor (_point->line().get_verbose_cursor_string (fraction),
 					    event->button.x + 10, event->button.y + 10);
@@ -2760,9 +2760,10 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 		dy *= 0.1;
 	}
 
-	/* coordinate in TimeAxisView's space */
-	double cx = _time_axis_view_grab_x + _cumulative_x_drag + dx;
-	double cy = _time_axis_view_grab_y + _cumulative_y_drag + dy;
+	/* coordinate in pixels relative to the start of the region (for region-based automation)
+	   or track (for track-based automation) */
+	double cx = _fixed_grab_x + _cumulative_x_drag + dx;
+	double cy = _fixed_grab_y + _cumulative_y_drag + dy;
 
 	// calculate zero crossing point. back off by .01 to stay on the
 	// positive side of zero
@@ -2774,24 +2775,26 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	}
 
 	if (_x_constrained) {
-		cx = _time_axis_view_grab_x;
+		cx = _fixed_grab_x;
 	}
 	if (_y_constrained) {
-		cy = _time_axis_view_grab_y;
+		cy = _fixed_grab_y;
 	}
 
-	_cumulative_x_drag = cx - _time_axis_view_grab_x;
-	_cumulative_y_drag = cy - _time_axis_view_grab_y;
+	_cumulative_x_drag = cx - _fixed_grab_x;
+	_cumulative_y_drag = cy - _fixed_grab_y;
 
 	cx = max (0.0, cx);
 	cy = max (0.0, cy);
 	cy = min ((double) _point->line().height(), cy);
 
-	nframes64_t cx_frames = _editor->unit_to_frame (cx);
-
+	framepos_t cx_frames = _editor->unit_to_frame (cx);
+	
 	if (!_x_constrained) {
 		_editor->snap_to_with_modifier (cx_frames, event);
 	}
+
+	cx_frames = min (cx_frames, _point->line().maximum_time());
 
 	float const fraction = 1.0 - (cy / _point->line().height());
 
@@ -2875,8 +2878,8 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	/* store grab start in parent frame */
 
-	_time_axis_view_grab_x = cx;
-	_time_axis_view_grab_y = cy;
+	_fixed_grab_x = cx;
+	_fixed_grab_y = cy;
 
 	double fraction = 1.0 - (cy / _line->height());
 
@@ -2897,9 +2900,9 @@ LineDrag::motion (GdkEvent* event, bool)
 		dy *= 0.1;
 	}
 
-	double cy = _time_axis_view_grab_y + _cumulative_y_drag + dy;
+	double cy = _fixed_grab_y + _cumulative_y_drag + dy;
 
-	_cumulative_y_drag = cy - _time_axis_view_grab_y;
+	_cumulative_y_drag = cy - _fixed_grab_y;
 
 	cy = max (0.0, cy);
 	cy = min ((double) _line->height(), cy);

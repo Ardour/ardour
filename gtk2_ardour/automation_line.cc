@@ -65,6 +65,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	, alist (al)
 	, _parent_group (parent)
 	, _time_converter (converter ? (*converter) : default_converter)
+	, _maximum_time (max_frames)
 {
 	points_visible = false;
 	update_pending = false;
@@ -1321,4 +1322,13 @@ MementoCommandBinder<AutomationList>*
 AutomationLine::memento_command_binder ()
 {
 	return new SimpleMementoCommandBinder<AutomationList> (*alist.get());
+}
+
+/** Set the maximum time that points on this line can be at, relative
+ *  to the start of the track or region that it is on.
+ */
+void
+AutomationLine::set_maximum_time (framepos_t t)
+{
+	_maximum_time = t;
 }

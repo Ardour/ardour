@@ -596,8 +596,8 @@ public:
 private:
 
 	ControlPoint* _point;
-	double _time_axis_view_grab_x;
-	double _time_axis_view_grab_y;
+	double _fixed_grab_x;
+	double _fixed_grab_y;
 	double _cumulative_x_drag;
 	double _cumulative_y_drag;
 	static double const _zero_gain_fraction;
@@ -621,8 +621,8 @@ public:
 private:
 
 	AutomationLine* _line;
-	double _time_axis_view_grab_x;
-	double _time_axis_view_grab_y;
+	double _fixed_grab_x;
+	double _fixed_grab_y;
 	uint32_t _before;
 	uint32_t _after;
 	double _cumulative_y_drag;
