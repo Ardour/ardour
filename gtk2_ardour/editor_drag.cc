@@ -1523,51 +1523,40 @@ RegionSpliceDrag::aborted ()
 
 RegionCreateDrag::RegionCreateDrag (Editor* e, ArdourCanvas::Item* i, TimeAxisView* v)
 	: Drag (e, i),
-	  _view (v)
+	  _view (dynamic_cast<MidiTimeAxisView*> (v))
 {
-
+	assert (_view);
 }
 
 void
-RegionCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
-{
-	_dest_trackview = _view;
-
-	Drag::start_grab (event);
-}
-
-
-void
-RegionCreateDrag::motion (GdkEvent* /*event*/, bool first_move)
+RegionCreateDrag::motion (GdkEvent *, bool first_move)
 {
 	if (first_move) {
-		// TODO: create region-create-drag region view here
-	}
+		/* don't use a zero-length region otherwise its region view will be hidden when it is created */
+		_region = _view->add_region (grab_frame(), 1, false);
+	} else {
+		if (_drags->current_pointer_frame() < grab_frame()) {
+			_region->set_position (_drags->current_pointer_frame(), this);
+		}
 
-	// TODO: resize region-create-drag region view here
+		/* again, don't use a zero-length region (see above) */
+		framecnt_t const len = abs (_drags->current_pointer_frame() - grab_frame ());
+		_region->set_length (len < 1 ? 1 : len, this);
+	}
 }
 
 void
 RegionCreateDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (_dest_trackview);
-
-	if (!mtv) {
-		return;
-	}
-
-	if (!movement_occurred) {
-		mtv->add_region (grab_frame ());
-	} else {
-		motion (event, false);
-		// TODO: create region-create-drag region here
+	if (movement_occurred) {
+		_editor->commit_reversible_command ();
 	}
 }
 
 void
 RegionCreateDrag::aborted ()
 {
-	/* XXX: TODO */
+	/* XXX */
 }
 
 NoteResizeDrag::NoteResizeDrag (Editor* e, ArdourCanvas::Item* i)

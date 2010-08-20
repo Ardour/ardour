@@ -44,6 +44,7 @@ namespace Gnome {
 class Editor;
 class EditorCursor;
 class TimeAxisView;
+class MidiTimeAxisView;
 class Drag;
 
 /** Class to manage current drags */
@@ -180,7 +181,7 @@ protected:
 		return _grab_y;
 	}
 
-	double grab_frame () const {
+	ARDOUR::framepos_t grab_frame () const {
 		return _grab_frame;
 	}
 
@@ -348,14 +349,13 @@ class RegionCreateDrag : public Drag
 public:
 	RegionCreateDrag (Editor *, ArdourCanvas::Item *, TimeAxisView *);
 
-	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 	void aborted ();
 
 private:
-	TimeAxisView* _view;
-	TimeAxisView* _dest_trackview;
+	MidiTimeAxisView* _view;
+	boost::shared_ptr<ARDOUR::Region> _region;
 };
 
 /** Drags to resize MIDI notes */

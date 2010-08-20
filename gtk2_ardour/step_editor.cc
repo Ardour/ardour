@@ -96,7 +96,12 @@ StepEditor::prepare_step_edit_region ()
 		step_edit_region_view = dynamic_cast<MidiRegionView*> (rv);
 
 	} else {
-                step_edit_region = _mtv.add_region (step_edit_insert_position);
+
+		const Meter& m = _mtv.session()->tempo_map().meter_at (step_edit_insert_position);
+		const Tempo& t = _mtv.session()->tempo_map().tempo_at (step_edit_insert_position);
+		
+                step_edit_region = _mtv.add_region (step_edit_insert_position, floor (m.frames_per_bar (t, _mtv.session()->frame_rate())), true);
+		
                 RegionView* rv = _mtv.midi_view()->find_view (step_edit_region);
                 step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
         }

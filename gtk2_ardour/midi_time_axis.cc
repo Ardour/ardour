@@ -1004,7 +1004,7 @@ MidiTimeAxisView::automation_child_menu_item (Evoral::Parameter param)
 }
 
 boost::shared_ptr<MidiRegion>
-MidiTimeAxisView::add_region (framepos_t pos)
+MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit)
 {
 	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
 
@@ -1012,10 +1012,7 @@ MidiTimeAxisView::add_region (framepos_t pos)
         playlist()->clear_history ();
 
 	real_editor->snap_to (pos, 0);
-	const Meter& m = _session->tempo_map().meter_at(pos);
-	const Tempo& t = _session->tempo_map().tempo_at(pos);
-	double length = floor (m.frames_per_bar(t, _session->frame_rate()));
-
+	
 	boost::shared_ptr<Source> src = _session->create_midi_source_for_session (view()->trackview().track().get(),
                                                                                   view()->trackview().track()->name());
 	PropertyList plist; 
@@ -1029,7 +1026,9 @@ MidiTimeAxisView::add_region (framepos_t pos)
 	playlist()->add_region (region, pos);
 	_session->add_command (new StatefulDiffCommand (playlist()));
 
-	real_editor->commit_reversible_command();
+	if (commit) {
+		real_editor->commit_reversible_command ();
+	}
 
 	return boost::dynamic_pointer_cast<MidiRegion>(region);
 }

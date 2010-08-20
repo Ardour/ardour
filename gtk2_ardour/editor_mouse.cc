@@ -683,8 +683,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
                 case StreamItem:
                         if (internal_editing()) {
-                                _drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
-                                return true;
+				if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
+					_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
+					return true;
+				}
                         } else {
 				_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
 				return true;
@@ -812,7 +814,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case StreamItem:
 				if (internal_editing()) {
-					_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
+					if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
+						_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
+					}
 					return true;
 				} else {
 					_drags->set (new RubberbandSelectDrag (this, item), event);

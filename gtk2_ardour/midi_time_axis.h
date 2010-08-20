@@ -69,7 +69,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void set_height (uint32_t);
 	void hide ();
 
-	boost::shared_ptr<ARDOUR::MidiRegion> add_region (ARDOUR::framepos_t pos);
+	boost::shared_ptr<ARDOUR::MidiRegion> add_region (ARDOUR::framepos_t, ARDOUR::framecnt_t, bool);
 
 	void show_all_automation ();
 	void show_existing_automation ();
