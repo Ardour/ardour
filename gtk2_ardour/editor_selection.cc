@@ -797,13 +797,13 @@ Editor::track_selection_changed ()
 	}
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		(*i)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), *i) != selection->tracks.end());
-
-		TimeAxisView::Children c = (*i)->get_child_list ();
-		for (TimeAxisView::Children::iterator j = c.begin(); j != c.end(); ++j) {
-			(*j)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), j->get()) != selection->tracks.end());
-		}
-	}
+                (*i)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), *i) != selection->tracks.end());
+                
+                TimeAxisView::Children c = (*i)->get_child_list ();
+                for (TimeAxisView::Children::iterator j = c.begin(); j != c.end(); ++j) {
+                        (*j)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), j->get()) != selection->tracks.end());
+                }
+        }
 
 	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, !selection->tracks.empty());
 }
