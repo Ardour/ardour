@@ -1135,6 +1135,7 @@ Session::start_transport ()
 		if (tr) {
 			tr->realtime_set_speed (tr->speed(), true);
 		}
+                (*i)->automation_snapshot (_transport_frame, true);
 	}
 
 	Timecode::Time time;

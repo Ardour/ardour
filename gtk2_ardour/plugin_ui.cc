@@ -76,10 +76,10 @@ using namespace Gtk;
 
 PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert> insert, bool scrollable)
 	: parent (win)
+        , was_visible (false)
+        , _keyboard_focused (false)
 {
 	bool have_gui = false;
-	non_gtk_gui = false;
-	was_visible = false;
 
 	Label* label = manage (new Label());
 	label->set_markup ("<b>THIS IS THE PLUGIN UI</b>");
@@ -120,6 +120,7 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 		GenericPluginUI*  pu  = new GenericPluginUI (insert, scrollable);
 
 		_pluginui = pu;
+		_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
 		add (*pu);
 
 		/*
@@ -266,11 +267,11 @@ PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert>)
 		VSTPluginUI* vpu = new VSTPluginUI (insert, vp);
 
 		_pluginui = vpu;
+		_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
 		add (*vpu);
 		vpu->package (*this);
 	}
 
-	non_gtk_gui = true;
 	return true;
 #endif
 }
@@ -287,8 +288,8 @@ PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert>)
 #else
 	VBox* box;
 	_pluginui = create_au_gui (insert, &box);
+        _pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
 	add (*box);
-	non_gtk_gui = true;
 
 	extern sigc::signal<void,bool> ApplicationActivationChanged;
 	ApplicationActivationChanged.connect (sigc::mem_fun (*this, &PluginUIWindow::app_activated));
@@ -341,21 +342,56 @@ PluginUIWindow::create_lv2_editor(boost::shared_ptr<PluginInsert> insert)
 		lpu->package (*this);
 	}
 
-	non_gtk_gui = false;
 	return true;
 #endif
+}
+
+void
+PluginUIWindow::keyboard_focused (bool yn)
+{
+	_keyboard_focused = yn;
 }
 
 bool
 PluginUIWindow::on_key_press_event (GdkEventKey* event)
 {
-	return relay_key_press (event, this);
+	if (_keyboard_focused) {
+		if (_pluginui) {
+                        if (_pluginui->non_gtk_gui()) {
+                                _pluginui->forward_key_event (event); 
+                        } else {
+                                return relay_key_press (event, this);
+                        }
+		}
+		return true;
+	} else {
+                if (_pluginui->non_gtk_gui()) {
+                        /* pass editor window as the window for the event
+                           to be handled in, not this one, because there are
+                           no widgets in this window that we want to have
+                           key focus.
+                        */
+                        return relay_key_press (event, &PublicEditor::instance());
+                } else {
+                        return relay_key_press (event, this);
+                }
+	}
 }
 
 bool
-PluginUIWindow::on_key_release_event (GdkEventKey *)
+PluginUIWindow::on_key_release_event (GdkEventKey *event)
 {
-	return true;
+	if (_keyboard_focused) {
+		if (_pluginui) {
+                        if (_pluginui->non_gtk_gui()) {
+                                _pluginui->forward_key_event (event);
+                        } 
+                        return true;
+		}
+		return false;
+	} else {
+		return true;
+	}
 }
 
 void
@@ -539,12 +575,14 @@ PlugUIBase::focus_toggled (GdkEventButton*)
 		focus_button.add (*focus_out_image);
 		focus_out_image->show ();
 		ARDOUR_UI::instance()->set_tip (focus_button, string_compose (_("Click to allow the plugin to receive keyboard events that %1 would normally use as a shortcut"), PROGRAM_NAME));
+		KeyboardFocused (false);
 	} else {
 		Keyboard::the_keyboard().magic_widget_grab_focus();
 		focus_button.remove ();
 		focus_button.add (*focus_in_image);
 		focus_in_image->show ();
 		ARDOUR_UI::instance()->set_tip (focus_button, string_compose (_("Click to allow normal use of %1 keyboard shortcuts"), PROGRAM_NAME));
+		KeyboardFocused (true);
 	}
 
 	return true;

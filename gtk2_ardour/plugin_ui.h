@@ -93,6 +93,11 @@ class PlugUIBase : public virtual sigc::trackable
 	virtual bool on_window_show(const Glib::ustring& /*title*/) { return true; }
 	virtual void on_window_hide() {}
 
+	virtual void forward_key_event (GdkEventKey*) {}
+        virtual bool non_gtk_gui() const { return false; }
+
+	sigc::signal<void,bool> KeyboardFocused;
+
   protected:
 	boost::shared_ptr<ARDOUR::PluginInsert> insert;
 	boost::shared_ptr<ARDOUR::Plugin> plugin;
@@ -268,8 +273,9 @@ class PluginUIWindow : public Gtk::Window
 	PBD::ScopedConnection death_connection;
 	Gtk::Window* parent;
 	Gtk::VBox vbox;
-	bool non_gtk_gui;
 	bool was_visible;
+	bool _keyboard_focused;
+	void keyboard_focused (bool yn);
 
 	void app_activated (bool);
 	void plugin_going_away ();

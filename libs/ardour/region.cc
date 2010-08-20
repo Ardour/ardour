@@ -1404,6 +1404,11 @@ Region::source_equivalent (boost::shared_ptr<const Region> other) const
 {
 	if (!other)
 		return false;
+        
+        if ((_sources.size() != other->_sources.size()) ||
+            (_master_sources.size() != other->_master_sources.size())) {
+                return false;
+        }
 
 	SourceList::const_iterator i;
 	SourceList::const_iterator io;

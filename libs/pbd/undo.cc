@@ -41,6 +41,7 @@ UndoTransaction::UndoTransaction (const UndoTransaction& rhs)
 	: Command(rhs._name)
 	, _clearing(false)
 {
+        _timestamp = rhs._timestamp;
 	clear ();
 	actions.insert(actions.end(),rhs.actions.begin(),rhs.actions.end());
 }

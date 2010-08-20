@@ -128,6 +128,15 @@ fixup_bundle_environment ()
 	*/
 
 	path = dir_path;
+
+	/* JACK is often in /usr/local/bin and since Info.plist refuses to 
+	   set PATH, we have to force this in order to discover a running
+	   instance of JACK ...
+	*/
+	
+	path += ':';
+	path += "/usr/local/bin";
+
 	if (cstr) {
 		path += ':';
 		path += cstr;
@@ -143,7 +152,9 @@ fixup_bundle_environment ()
 
 	setenv ("ARDOUR_MODULE_PATH", path.c_str(), 1);
 
-	path = dir_path;
+        path = user_config_directory.to_string();
+        path += ':';
+	path += dir_path;
 	path += "/../Resources/icons:";
 	path += dir_path;
 	path += "/../Resources/pixmaps:";

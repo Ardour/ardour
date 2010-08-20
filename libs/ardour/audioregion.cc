@@ -522,7 +522,7 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 		}
 	}
 
-	if (!opaque()) {
+	if (!opaque() && (buf != mixdown_buffer)) {
 
 		/* gack. the things we do for users.
 		 */

@@ -682,7 +682,7 @@ ArdourStartup::setup_new_session_page ()
 		new_folder_chooser.set_title (_("Select folder for session"));
 
 #ifdef GTKOSX
-                new_folder_chooser->add_shortcut_folder_uri("file:///Volumes");
+                new_folder_chooser->add_shortcut_folder ("/Volumes");
 #endif
 
 		vbox1->pack_start (*hbox2, false, false);
@@ -934,6 +934,10 @@ ArdourStartup::setup_existing_session_page ()
 	existing_session_chooser.set_title (_("Select session file"));
 	existing_session_chooser.signal_file_set().connect (sigc::mem_fun (*this, &ArdourStartup::existing_session_selected));
 	
+#ifdef GTKOSX
+        existing_session_chooser->add_shortcut_folder ("/Volumes");
+#endif
+
 	HBox* hbox = manage (new HBox);
 	hbox->set_spacing (4);
 	hbox->pack_start (*manage (new Label (_("Browse:"))), PACK_SHRINK);

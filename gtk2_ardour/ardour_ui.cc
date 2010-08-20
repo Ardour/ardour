@@ -45,6 +45,7 @@
 #include "pbd/openuri.h"
 #include "pbd/file_utils.h"
 
+#include "gtkmm2ext/application.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/click_box.h"
@@ -664,10 +665,16 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 void
 ARDOUR_UI::startup ()
 {
+        Application* app = Application::instance ();
+
+        app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
+        app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
 
 #ifdef PHONE_HOME
         call_the_mothership (VERSIONSTRING);
 #endif
+
+        app->ready ();
 
 	if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
 		exit (1);

@@ -552,7 +552,26 @@ ARDOUR_UI::build_menu_bar ()
 void
 ARDOUR_UI::use_menubar_as_top_menubar ()
 {
-	gtk_application_set_menu_bar ((GtkMenuShell*) menu_bar->gobj());
+	Gtk::Widget* widget;
+	Application* app = Application::instance ();
+
+	/* Quit will be taken of separately */
+
+	if ((widget = ActionManager::get_widget ("/ui/Main/Session/Quit"))) {
+		widget->hide ();
+	}
+
+	GtkApplicationMenuGroup* group = app->add_app_menu_group ();
+
+	if ((widget = ActionManager::get_widget ("/ui/Main/Help/About"))) {
+		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
+	}
+
+	if ((widget = ActionManager::get_widget ("/ui/Main/WindowMenu/ToggleOptionsEditor"))) {
+		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
+	}
+
+	app->set_menu_bar (*menu_bar);
 }
 
 void
