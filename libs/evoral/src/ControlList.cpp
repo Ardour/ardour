@@ -510,7 +510,9 @@ ControlList::erase_range_internal (double start, double endt, EventList & events
 		cp.when = endt;
 		e = upper_bound (events.begin(), events.end(), &cp, time_comparator);
 		events.erase (s, e);
-		erased = true;
+		if (s != e) {
+			erased = true;
+		}
 	}
 
 	return erased;
@@ -1354,8 +1356,10 @@ ControlList::paste (ControlList& alist, double pos, float /*times*/)
 	return true;
 }
 
-/** Move automation around according to a list of region movements */
-void
+/** Move automation around according to a list of region movements.
+ *  @param return true if anything was changed, otherwise false (ie nothing needed changing)
+ */
+bool
 ControlList::move_ranges (const list< RangeMove<double> >& movements)
 {
 	typedef list< RangeMove<double> > RangeMoveList;
@@ -1367,11 +1371,21 @@ ControlList::move_ranges (const list< RangeMove<double> >& movements)
 		EventList old_events = _events;
 
 		/* clear the source and destination ranges in the new list */
+		bool things_erased = false;
 		for (RangeMoveList::const_iterator i = movements.begin (); i != movements.end (); ++i) {
 
-			erase_range_internal (i->from, i->from + i->length, _events);
-			erase_range_internal (i->to, i->to + i->length, _events);
+			if (erase_range_internal (i->from, i->from + i->length, _events)) {
+				things_erased = true;
+			}
 
+			if (erase_range_internal (i->to, i->to + i->length, _events)) {
+				things_erased = true;
+			}
+		}
+
+		/* if nothing was erased, there is nothing to do */
+		if (!things_erased) {
+			return false;
 		}
 
 		/* copy the events into the new list */
@@ -1399,6 +1413,7 @@ ControlList::move_ranges (const list< RangeMove<double> >& movements)
 	}
 
 	maybe_signal_changed ();
+	return true;
 }
 
 void

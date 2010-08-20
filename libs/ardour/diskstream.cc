@@ -466,9 +466,11 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const &
 		for (uint32_t i = 0; i < p->npanners (); ++i) {
 			boost::shared_ptr<AutomationList> pan_alist = p->streampanner(i).pan_control()->alist();
 			XMLNode & before = pan_alist->get_state ();
-			pan_alist->move_ranges (movements);
-			_session.add_command (new MementoCommand<AutomationList> (
-						      *pan_alist.get(), &before, &pan_alist->get_state ()));
+			bool const things_moved = pan_alist->move_ranges (movements);
+			if (things_moved) {
+				_session.add_command (new MementoCommand<AutomationList> (
+							      *pan_alist.get(), &before, &pan_alist->get_state ()));
+			}
 		}
 	}
 
@@ -485,25 +487,23 @@ Diskstream::move_processor_automation (boost::weak_ptr<Processor> p, list< Evora
 	}
 
 	list< Evoral::RangeMove<double> > movements;
-	for (list< Evoral::RangeMove<framepos_t> >::const_iterator i = movements_frames.begin();
-		   i != movements_frames.end(); ++i) {
+	for (list< Evoral::RangeMove<framepos_t> >::const_iterator i = movements_frames.begin(); i != movements_frames.end(); ++i) {
 		movements.push_back(Evoral::RangeMove<double>(i->from, i->length, i->to));
 	}
 
 	set<Evoral::Parameter> const a = processor->what_can_be_automated ();
 
-	cout << "move processor auto for " << processor->name() << "\n";
-
 	for (set<Evoral::Parameter>::iterator i = a.begin (); i != a.end (); ++i) {
-		cout << "moving " << *i << "\n";
 		boost::shared_ptr<AutomationList> al = processor->automation_control(*i)->alist();
 		XMLNode & before = al->get_state ();
-		al->move_ranges (movements);
-		_session.add_command (
-			new MementoCommand<AutomationList> (
-				*al.get(), &before, &al->get_state ()
-				)
-			);
+		bool const things_moved = al->move_ranges (movements);
+		if (things_moved) {
+			_session.add_command (
+				new MementoCommand<AutomationList> (
+					*al.get(), &before, &al->get_state ()
+					)
+				);
+		}
 	}
 }
 
