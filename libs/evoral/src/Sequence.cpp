@@ -822,7 +822,7 @@ Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, doubl
         DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 %2 @ %3\t=\t%4 # controls: %5\n",
                                                       this, _type_map.to_symbol(param), time, value, _controls.size()));
         boost::shared_ptr<Control> c = control(param, true);
-        c->list()->rt_add(time, value);
+        c->list()->add (time, value);
         /* XXX control events should use IDs */
 }
 
