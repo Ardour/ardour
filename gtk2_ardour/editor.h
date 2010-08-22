@@ -369,10 +369,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_measure_visibility ();
 	void toggle_logo_visibility ();
 
-	double get_physical_screen_width () const { return physical_screen_width; };
-	double physical_screen_width;
-	double physical_screen_height;
-
 	/* fades/xfades */
 
  	void toggle_selected_region_fades (int dir);

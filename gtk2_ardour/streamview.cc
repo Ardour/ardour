@@ -67,7 +67,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* background_g
 	canvas_rect = new ArdourCanvas::SimpleRect (*_background_group);
 	canvas_rect->property_x1() = 0.0;
 	canvas_rect->property_y1() = 0.0;
-	canvas_rect->property_x2() = _trackview.editor().get_physical_screen_width ();
+	canvas_rect->property_x2() = physical_screen_width (_trackview.editor().get_window());
 	canvas_rect->property_y2() = (double) tv.current_height();
 	canvas_rect->raise(1); // raise above tempo lines
 

@@ -1054,3 +1054,32 @@ control_link (ScopedConnectionList& scl, boost::shared_ptr<Controllable> c, Gtk:
                             gui_context());
 }
                                            
+int
+physical_screen_height (Glib::RefPtr<Gdk::Window> win)
+{
+        GdkScreen* scr = gdk_screen_get_default();
+
+        if (win) {
+                GdkRectangle r;
+                gint monitor = gdk_screen_get_monitor_at_window (scr, win->gobj());
+                gdk_screen_get_monitor_geometry (scr, monitor, &r);
+                return r.height;
+        } else {
+                return gdk_screen_get_height (scr);
+        }
+}
+
+int
+physical_screen_width (Glib::RefPtr<Gdk::Window> win)
+{
+        GdkScreen* scr = gdk_screen_get_default();
+        
+        if (win) {
+                GdkRectangle r;
+                gint monitor = gdk_screen_get_monitor_at_window (scr, win->gobj());
+                gdk_screen_get_monitor_geometry (scr, monitor, &r);
+                return r.width;
+        } else {
+                return gdk_screen_get_width (scr);
+        }
+}

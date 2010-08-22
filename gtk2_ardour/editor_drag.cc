@@ -2398,7 +2398,7 @@ MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	assert (_marker);
 
 	_points.push_back (Gnome::Art::Point (0, 0));
-	_points.push_back (Gnome::Art::Point (0, _editor->physical_screen_height));
+	_points.push_back (Gnome::Art::Point (0, physical_screen_height (_editor->get_window())));
 
 	_line = new ArdourCanvas::Line (*_editor->timebar_group);
 	_line->property_width_pixels() = 1;
@@ -3467,7 +3467,8 @@ RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operat
 	  _operation (o),
 	  _copy (false)
 {
-	_drag_rect = new ArdourCanvas::SimpleRect (*_editor->time_line_group, 0.0, 0.0, 0.0, _editor->physical_screen_height);
+	_drag_rect = new ArdourCanvas::SimpleRect (*_editor->time_line_group, 0.0, 0.0, 0.0, 
+                                                   physical_screen_height (_editor->get_window()));
 	_drag_rect->hide ();
 
 	_drag_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragRect.get();

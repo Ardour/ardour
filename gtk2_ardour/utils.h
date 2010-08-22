@@ -104,4 +104,7 @@ std::string escape_underscores (std::string const &);
 
 void control_link (PBD::ScopedConnectionList& scl, boost::shared_ptr<PBD::Controllable> c, Gtk::Adjustment& a);
 
+int physical_screen_height (Glib::RefPtr<Gdk::Window>);
+int physical_screen_width (Glib::RefPtr<Gdk::Window>);
+
 #endif /* __ardour_gtk_utils_h__ */

@@ -105,13 +105,8 @@ Editor::initialize_canvas ()
 	track_canvas->set_center_scroll_region (false);
 	track_canvas->set_dither (Gdk::RGB_DITHER_NONE);
 
-	Glib::RefPtr<Gdk::Screen> screen = get_screen();
-
-	if (!screen) {
-		screen = Gdk::Screen::get_default();
-	}
-	physical_screen_width = screen->get_width ();
-	physical_screen_height = screen->get_height ();
+        gint phys_width = physical_screen_width (Glib::RefPtr<Gdk::Window>());
+        gint phys_height = physical_screen_height (Glib::RefPtr<Gdk::Window>());
 
 	/* stuff for the verbose canvas cursor */
 
@@ -142,14 +137,14 @@ Editor::initialize_canvas ()
 
 #ifdef GTKOSX
 	/*XXX please don't laugh. this actually improves canvas performance on osx */
-	bogus_background_rect =  new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, max_canvas_coordinate/3, physical_screen_height);
+	bogus_background_rect =  new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, max_canvas_coordinate/3, phys_height);
 	bogus_background_rect->property_outline_pixels() = 0;
 #endif
-	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, physical_screen_height);
+	transport_loop_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, phys_height);
 	transport_loop_range_rect->property_outline_pixels() = 1;
 	transport_loop_range_rect->hide();
 
-	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, physical_screen_height);
+	transport_punch_range_rect = new ArdourCanvas::SimpleRect (*time_line_group, 0.0, 0.0, 0.0, phys_height);
 	transport_punch_range_rect->property_outline_pixels() = 0;
 	transport_punch_range_rect->hide();
 
@@ -161,60 +156,60 @@ Editor::initialize_canvas ()
 
 	meter_bar_group = new ArdourCanvas::Group (*track_canvas->root ());
 	if (Profile->get_sae()) {
-		meter_bar = new ArdourCanvas::SimpleRect (*meter_bar_group, 0.0, 0.0, physical_screen_width, timebar_height - 1);
+		meter_bar = new ArdourCanvas::SimpleRect (*meter_bar_group, 0.0, 0.0, phys_width, timebar_height - 1);
 		meter_bar->property_outline_pixels() = 1;
 	} else {
-		meter_bar = new ArdourCanvas::SimpleRect (*meter_bar_group, 0.0, 0.0, physical_screen_width, timebar_height);
+		meter_bar = new ArdourCanvas::SimpleRect (*meter_bar_group, 0.0, 0.0, phys_width, timebar_height);
 		meter_bar->property_outline_pixels() = 0;
 	}
 	meter_bar->property_outline_what() = (0x1 | 0x8);
 
 	tempo_bar_group = new ArdourCanvas::Group (*track_canvas->root ());
 	if (Profile->get_sae()) {
-		tempo_bar = new ArdourCanvas::SimpleRect (*tempo_bar_group, 0.0, 0.0, physical_screen_width, (timebar_height - 1));
+		tempo_bar = new ArdourCanvas::SimpleRect (*tempo_bar_group, 0.0, 0.0, phys_width, (timebar_height - 1));
 		tempo_bar->property_outline_pixels() = 1;
 	} else {
-		tempo_bar = new ArdourCanvas::SimpleRect (*tempo_bar_group, 0.0, 0.0, physical_screen_width, (timebar_height));
+		tempo_bar = new ArdourCanvas::SimpleRect (*tempo_bar_group, 0.0, 0.0, phys_width, (timebar_height));
 		tempo_bar->property_outline_pixels() = 0;
 	}
 	tempo_bar->property_outline_what() = (0x1 | 0x8);
 
 	range_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root ());
 	if (Profile->get_sae()) {
-		range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_bar_group, 0.0, 0.0, physical_screen_width, (timebar_height - 1));
+		range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_bar_group, 0.0, 0.0, phys_width, (timebar_height - 1));
 		range_marker_bar->property_outline_pixels() = 1;
 	} else {
-		range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_bar_group, 0.0, 0.0, physical_screen_width, (timebar_height));
+		range_marker_bar = new ArdourCanvas::SimpleRect (*range_marker_bar_group, 0.0, 0.0, phys_width, (timebar_height));
 		range_marker_bar->property_outline_pixels() = 0;
 	}
 	range_marker_bar->property_outline_what() = (0x1 | 0x8);
 
 	transport_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root ());
 	if (Profile->get_sae()) {
-		transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_bar_group, 0.0, 0.0,  physical_screen_width, (timebar_height - 1));
+		transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_bar_group, 0.0, 0.0,  phys_width, (timebar_height - 1));
 		transport_marker_bar->property_outline_pixels() = 1;
 	} else {
-		transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_bar_group, 0.0, 0.0,  physical_screen_width, (timebar_height));
+		transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_bar_group, 0.0, 0.0,  phys_width, (timebar_height));
 		transport_marker_bar->property_outline_pixels() = 0;
 	}
 	transport_marker_bar->property_outline_what() = (0x1 | 0x8);
 
 	marker_bar_group = new ArdourCanvas::Group (*track_canvas->root ());
 	if (Profile->get_sae()) {
-		marker_bar = new ArdourCanvas::SimpleRect (*marker_bar_group, 0.0, 0.0, physical_screen_width, (timebar_height - 1));
+		marker_bar = new ArdourCanvas::SimpleRect (*marker_bar_group, 0.0, 0.0, phys_width, (timebar_height - 1));
 		marker_bar->property_outline_pixels() = 1;
 	} else {
-		marker_bar = new ArdourCanvas::SimpleRect (*marker_bar_group, 0.0, 0.0, physical_screen_width, (timebar_height));
+		marker_bar = new ArdourCanvas::SimpleRect (*marker_bar_group, 0.0, 0.0, phys_width, (timebar_height));
 		marker_bar->property_outline_pixels() = 0;
 	}
 	marker_bar->property_outline_what() = (0x1 | 0x8);
 
 	cd_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root ());
 	if (Profile->get_sae()) {
-		cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_bar_group, 0.0, 0.0, physical_screen_width, (timebar_height - 1));
+		cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_bar_group, 0.0, 0.0, phys_width, (timebar_height - 1));
 		cd_marker_bar->property_outline_pixels() = 1;
 	} else {
-		cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_bar_group, 0.0, 0.0, physical_screen_width, (timebar_height));
+		cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_bar_group, 0.0, 0.0, phys_width, (timebar_height));
 		cd_marker_bar->property_outline_pixels() = 0;
 	}
  	cd_marker_bar->property_outline_what() = (0x1 | 0x8);
@@ -245,14 +240,14 @@ Editor::initialize_canvas ()
 	transport_punchin_line->property_x1() = 0.0;
 	transport_punchin_line->property_y1() = 0.0;
 	transport_punchin_line->property_x2() = 0.0;
-	transport_punchin_line->property_y2() = physical_screen_height;
+	transport_punchin_line->property_y2() = phys_height;
 	transport_punchin_line->hide ();
 
 	transport_punchout_line  = new ArdourCanvas::SimpleLine (*_master_group);
 	transport_punchout_line->property_x1() = 0.0;
 	transport_punchout_line->property_y1() = 0.0;
 	transport_punchout_line->property_x2() = 0.0;
-	transport_punchout_line->property_y2() = physical_screen_height;
+	transport_punchout_line->property_y2() = phys_height;
 	transport_punchout_line->hide();
 
 	// used to show zoom mode active zooming
@@ -332,14 +327,10 @@ Editor::track_canvas_size_allocated ()
 
 	if (_session) {
 		TrackViewList::iterator i;
-		double height = 0;
 
 		for (i = track_views.begin(); i != track_views.end(); ++i) {
-			height += (*i)->effective_height ();
 			(*i)->clip_to_viewport ();
 		}
-
-		full_canvas_height = height + canvas_timebars_vsize;
 	}
 
 	if (height_changed) {
@@ -377,10 +368,9 @@ Editor::controls_layout_size_request (Requisition* req)
 	double pos = 0;
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		pos += (*i)->effective_height ();
-		(*i)->clip_to_viewport ();
 	}
 
-	gint height = min ((gint) pos, (gint) (physical_screen_height - 600));
+	gint height = min ((gint) pos, (gint) (physical_screen_height(get_window()) - 600));
 
 	bool changed = false;
 
@@ -393,7 +383,7 @@ Editor::controls_layout_size_request (Requisition* req)
 
 	/* don't get too big. the fudge factors here are just guesses */
 
-	width =  min (width, (gint) (physical_screen_width - 300));
+	width =  min (width, (gint) (physical_screen_width(get_window()) - 300));
 
 	if ((req->width != width) || (req->height != height)) {
 		changed = true;
