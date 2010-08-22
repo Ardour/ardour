@@ -29,22 +29,6 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace PBD;
 
-std::vector<struct lv2_external_ui*> g_external_uis;
-
-void close_external_ui_windows()
-{
-	struct lv2_external_ui* external_ui_ptr;
-
-	//cout << "close_external_ui_windows" << endl;
-
-	while (!g_external_uis.empty()) {
-		//cout << "pop" << endl;
-		external_ui_ptr = g_external_uis.back();
-		LV2_EXTERNAL_UI_HIDE(external_ui_ptr);
-		g_external_uis.pop_back();
-	}
-}
-
 void
 LV2PluginUI::lv2_ui_write(
 		LV2UI_Controller controller,
@@ -63,19 +47,8 @@ LV2PluginUI::lv2_ui_write(
 
 void LV2PluginUI::on_external_ui_closed(LV2UI_Controller controller)
 {
-	//cout << "on_external_ui_closed" << endl;
-
 	LV2PluginUI* me = (LV2PluginUI*)controller;
 	me->_screen_update_connection.disconnect();
-	//me->insert->set_gui(0);
-
-	for (std::vector<struct lv2_external_ui*>::iterator it = g_external_uis.begin() ; it < g_external_uis.end(); it++) {
-		if (*it == me->_external_ui_ptr) {
-			g_external_uis.erase(it);
-		}
-	}
-
-	//slv2_ui_instance_get_descriptor(me->_inst)->cleanup(me->_inst);
 	me->_external_ui_ptr = NULL;
 }
 
@@ -212,7 +185,6 @@ LV2PluginUI::lv2ui_instantiate(const Glib::ustring& title)
 			pack_start(*_gui_widget, true, true);
 		} else {
 			_external_ui_ptr = (struct lv2_external_ui *)slv2_ui_instance_get_widget(_inst);
-			g_external_uis.push_back(_external_ui_ptr);
 		}
 	}
 
@@ -239,6 +211,23 @@ LV2PluginUI::~LV2PluginUI ()
 		delete[] _values;
 	}
 	// plugin destructor destroys the GTK GUI
+	
+        
+        const LV2UI_Descriptor* ui_desc = slv2_ui_instance_get_descriptor(_inst);
+        LV2UI_Handle ui_handle = slv2_ui_instance_get_handle(_inst);
+		
+        /*Call cleanup to tell the plugin to close its GUI and delete it*/
+		
+        if (ui_desc) {
+                ui_desc->cleanup(ui_handle);
+        }
+		
+        _screen_update_connection.disconnect();		
+
+        if (_lv2->is_external_ui()) {
+		/*external UI is no longer valid - on_window_hide() will not try to use it if is NULL*/
+		_external_ui_ptr = NULL;
+	}
 }
 
 int
