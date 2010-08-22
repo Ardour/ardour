@@ -30,6 +30,7 @@
 #include "pbd/convert.h"
 #include "pbd/id.h"
 #include "pbd/property_basics.h"
+#include "pbd/property_list.h"
 
 namespace PBD {
 
@@ -193,6 +194,34 @@ class SequenceProperty : public PropertyBase
 		_update_callback (cr);
 	}
 
+	void diff (PBD::PropertyList& undo, PBD::PropertyList& redo, Command* cmd) const {
+		if (changed ()) {
+			/* list of the removed/added items since clear_history() was last called */
+			SequenceProperty<Container>* a = copy_for_history ();
+
+			/* the same list, but with removed/added lists swapped (for undo purposes) */
+			SequenceProperty<Container>* b = copy_for_history ();
+			b->invert_changes ();
+
+			if (cmd) {
+				/* whenever one of the items emits DropReferences, make sure
+				   that the Destructible we've been told to notify hears about
+				   it. the Destructible is likely to be the Command being built
+				   with this diff().
+				*/
+                        
+				for (typename ChangeContainer::iterator i = a->change().added.begin(); i != a->change().added.end(); ++i) {
+					(*i)->DropReferences.connect_same_thread (*cmd, boost::bind (&Destructible::drop_references, cmd));
+				}
+                        }
+			
+			undo.add (b);
+			redo.add (a);
+		}
+        }
+
+        Container rlist() { return _val; }
+	
 	/* Wrap salient methods of Sequence
 	 */
 
@@ -332,6 +361,22 @@ class SequenceProperty : public PropertyBase
 
                 return true;
         }
+
+private:
+	virtual SequenceProperty<Container>* create () const = 0;
+
+        /* create a copy of this ListSequenceProperty that only
+           has what is needed for use in a history list command. This
+           means that it won't contain the actual item list but
+           will have the added/removed list.
+        */
+	
+	SequenceProperty<Container>* copy_for_history () const {
+		SequenceProperty<Container>* copy = create ();
+		/* this is all we need */
+		copy->_change = _change;
+		return copy;
+	}
 };
 
 }

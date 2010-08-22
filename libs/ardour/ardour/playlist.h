@@ -59,28 +59,19 @@ namespace Properties {
         extern PBD::PropertyDescriptor<bool> regions;
 }
 
-class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_ptr<Region > > >
+class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_ptr<Region> > >
 {
   public:
         RegionListProperty (Playlist&);
 
         boost::shared_ptr<Region> lookup_id (const PBD::ID& id);
-        void diff (PBD::PropertyList& undo, PBD::PropertyList& redo, Command*) const;
-        bool involves (boost::shared_ptr<Region>);
 
   private:
-        friend class Playlist;
-        std::list<boost::shared_ptr<Region> > rlist() { return _val; }
+	PBD::SequenceProperty<std::list<boost::shared_ptr<Region> > >* create () const;
 
+        friend class Playlist;
         /* we live and die with our playlist, no lifetime management needed */
         Playlist& _playlist;
-
-        /* create a copy of this RegionListProperty that only
-           has what is needed for use in a history list command. This
-           means that it won't contain the actual region list but
-           will have the added/removed list.
-        */
-        RegionListProperty* copy_for_history () const;
 };
 
 class Playlist : public SessionObject
