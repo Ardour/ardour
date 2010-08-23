@@ -53,6 +53,7 @@ GroupTabs::set_session (Session* s)
 
 	if (_session) {
 		_session->RouteGroupChanged.connect (_session_connections, invalidator (*this), boost::bind (&GroupTabs::set_dirty, this), gui_context());
+		_session->route_group_removed.connect (_session_connections, invalidator (*this), boost::bind (&GroupTabs::set_dirty, this), gui_context());
 	}
 }
 
