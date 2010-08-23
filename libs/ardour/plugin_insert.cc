@@ -195,7 +195,7 @@ PluginInsert::set_automatable ()
 			   but we want the Controllable related to this Parameter to have those limits.
 			*/
 
-			param.set_range (desc.lower, desc.upper, _plugins.front()->default_value(i->id()));
+			param.set_range (desc.lower, desc.upper, _plugins.front()->default_value(i->id()), desc.toggled);
 			can_automate (param);
 			boost::shared_ptr<AutomationList> list(new AutomationList(param));
 			add_control (boost::shared_ptr<AutomationControl>(new PluginControl(this, param, list)));
@@ -402,8 +402,9 @@ PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end
 void
 PluginInsert::set_parameter (Evoral::Parameter param, float val)
 {
-	if (param.type() != PluginAutomation)
+	if (param.type() != PluginAutomation) {
 		return;
+        }
 
 	/* the others will be set from the event triggered by this */
 

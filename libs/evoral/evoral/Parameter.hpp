@@ -79,22 +79,23 @@ public:
 
 	/** Not used in indentity/comparison */
 	struct Metadata {
-		Metadata(double low=0.0, double high=1.0, double mid=0.0)
-			: min(low), max(high), normal(mid)
+                Metadata(double low=0.0, double high=1.0, double mid=0.0, bool tog=false)
+                        : min(low), max(high), normal(mid), toggled(tog)
 		{}
 		double min;
 		double max;
 		double normal;
+                bool   toggled;
 	};
 
-	inline static void set_range(uint32_t type, double min, double max, double normal) {
-		_type_metadata[type] = Metadata(min, max, normal);
+        inline static void set_range(uint32_t type, double min, double max, double normal, bool toggled) {
+		_type_metadata[type] = Metadata(min, max, normal, toggled);
 	}
 
-	inline void set_range(double min, double max, double normal) {
-		_metadata = boost::shared_ptr<Metadata>(new Metadata(min, max, normal));
+        inline void set_range(double min, double max, double normal, bool toggled) {
+                _metadata = boost::shared_ptr<Metadata>(new Metadata(min, max, normal, toggled));
 	}
-
+    
 	inline Metadata& metadata() const {
 		if (_metadata)
 			return *_metadata.get();
@@ -102,9 +103,10 @@ public:
 			return _type_metadata[_type];
 	}
 
-	inline double min()    const { return metadata().min; }
-	inline double max()    const { return metadata().max; }
-	inline double normal() const { return metadata().normal; }
+	inline double min()     const { return metadata().min; }
+	inline double max()     const { return metadata().max; }
+	inline double normal()  const { return metadata().normal; }
+	inline double toggled() const { return metadata().toggled; }
 
 protected:
 	// Default copy constructor is ok

@@ -52,8 +52,16 @@ AutomationControl::set_value(double value)
 {
 	bool to_list = _list && _session.transport_stopped()
 		&& ((AutomationList*)_list.get())->automation_write();
+ 
+        if (to_list && parameter().toggled()) {
 
-	Control::set_double(value, to_list, _session.transport_frame());
+                //store the previous value just before this so any 
+                // interpolation works right
+                
+                _list->add (get_double(), _session.transport_frame()-1);
+        }
+
+	Control::set_double (value, to_list, _session.transport_frame());
 
 	Changed(); /* EMIT SIGNAL */
 }

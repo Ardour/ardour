@@ -156,6 +156,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	bool    terminal_points_can_slide : 1;
 	bool    update_pending            : 1;
 	bool    no_draw                   : 1;
+	bool    _is_boolean               : 1;
 	bool    points_visible            : 1;
 	bool    did_push;
 

@@ -72,6 +72,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	_uses_gain_mapping = false;
 	no_draw = false;
 	_visible = true;
+        _is_boolean = false;
 	terminal_points_can_slide = true;
 	_height = 0;
 
@@ -1129,6 +1130,11 @@ AutomationLine::set_list (boost::shared_ptr<ARDOUR::AutomationList> list)
 void
 AutomationLine::show_all_control_points ()
 {
+        if (_is_boolean) {
+                // show the line but don't allow any control points
+                return;
+        }
+
 	points_visible = true;
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {

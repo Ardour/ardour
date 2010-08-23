@@ -465,14 +465,19 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 			control_ui->pack_start (control_ui->label, true, true);
 			control_ui->pack_start (*control_ui->button, false, true);
-			// control_ui->pack_start (control_ui->automate_button, false, false);
+			control_ui->pack_start (control_ui->automate_button, false, false);
 
 			control_ui->button->signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::control_port_toggled), control_ui));
-			mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::toggle_parameter_changed, this, control_ui), gui_context());
+			control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui, (uint32_t) port_index));
 
+			mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::toggle_parameter_changed, this, control_ui), gui_context());
+                        mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
+	
 			if (plugin->get_parameter (port_index) > 0.5){
 				control_ui->button->set_active(true);
 			}
+
+                        automation_state_changed (control_ui);
 
 			return control_ui;
 		}
@@ -480,32 +485,31 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		/* create the controller */
 
 		control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), mcontrol);
+
 		/* XXX this code is not right yet, because it doesn't handle
 		   the absence of bounds in any sensible fashion.
 		*/
 
-//#if 0
-		control_ui->controller->adjustment()->set_lower (desc.lower);
-		control_ui->controller->adjustment()->set_upper (desc.upper);
+                Adjustment* adj = control_ui->controller->adjustment();
 
-		control_ui->logarithmic = false; // just disable it for now
-		/*
+		adj->set_lower (desc.lower);
+		adj->set_upper (desc.upper);
+
 		control_ui->logarithmic = desc.logarithmic;
+
 		if (control_ui->logarithmic) {
-			if (control_ui->controller->adjustment()->get_lower() == 0.0) {
-				control_ui->controller->adjustment()->set_lower (control_ui->controller->adjustment()->get_upper()/10000);
+			if (adj->get_lower() == 0.0) {
+				adj->set_lower (adj->get_upper()/10000);
 			}
-			control_ui->controller->adjustment()->set_upper (log(control_ui->controller->adjustment()->get_upper()));
-			control_ui->controller->adjustment()->set_lower (log(control_ui->controller->adjustment()->get_lower()));
-		}*/
+			adj->set_upper (log(adj->get_upper()));
+			adj->set_lower (log(adj->get_lower()));
+		}
 
-
-		control_ui->controller->adjustment()->set_step_increment (desc.step);
-		control_ui->controller->adjustment()->set_page_increment (desc.largestep);
-//#endif
+		adj->set_step_increment (desc.step);
+		adj->set_page_increment (desc.largestep);
 
 		if (desc.integer_step) {
-			control_ui->clickbox = new ClickBox (control_ui->controller->adjustment(), "PluginUIClickBox");
+			control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox");
 			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
 			control_ui->clickbox->set_print_func (integer_printer, 0);
 		} else {
@@ -523,9 +527,9 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		}
 
 		if (control_ui->logarithmic) {
-			control_ui->controller->adjustment()->set_value(log(plugin->get_parameter(port_index)));
+			adj->set_value(log(plugin->get_parameter(port_index)));
 		} else{
-			control_ui->controller->adjustment()->set_value(plugin->get_parameter(port_index));
+			adj->set_value(plugin->get_parameter(port_index));
 		}
 
 		/* XXX memory leak: SliderController not destroyed by ControlUI

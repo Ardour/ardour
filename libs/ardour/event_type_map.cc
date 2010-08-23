@@ -168,7 +168,7 @@ EventTypeMap::new_parameter(uint32_t type, uint8_t channel, uint32_t id) const
 		return p;
 	}
 
-	p.set_range(type, min, max, normal);
+	p.set_range(type, min, max, normal, false);
 	return p;
 }
 
