@@ -738,8 +738,13 @@ PortMatrix::setup_notebooks ()
 
 	_ignore_notebook_page_selected = false;
 
-	_vnotebook.set_tab_pos (POS_LEFT);
-	_hnotebook.set_tab_pos (POS_TOP);
+	if (_arrangement == TOP_TO_RIGHT) {
+		_vnotebook.set_tab_pos (POS_RIGHT);
+		_hnotebook.set_tab_pos (POS_TOP);
+	} else {
+		_vnotebook.set_tab_pos (POS_LEFT);
+		_hnotebook.set_tab_pos (POS_BOTTOM);
+	}
 
 	if (h_current_page != -1 && _hnotebook.get_n_pages() > h_current_page) {
 		_hnotebook.set_current_page (h_current_page);
