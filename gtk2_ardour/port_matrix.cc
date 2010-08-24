@@ -63,12 +63,9 @@ PortMatrix::PortMatrix (Window* parent, Session* session, DataType type)
 	_body = new PortMatrixBody (this);
 	_body->DimensionsChanged.connect (sigc::mem_fun (*this, &PortMatrix::body_dimensions_changed));
 
-	_vbox.pack_start (_vspacer, false, false);
-	_vbox.pack_start (_vnotebook, false, false);
-	_vbox.pack_start (_vlabel, true, true);
-	_hbox.pack_start (_hspacer, false, false);
-	_hbox.pack_start (_hnotebook, false, false);
-	_hbox.pack_start (_hlabel, true, true);
+	_hbox.pack_end (_hspacer, true, true);
+	_hbox.pack_end (_hnotebook, false, false);
+	_hbox.pack_end (_hlabel, false, false);
 
 	_vnotebook.signal_switch_page().connect (sigc::mem_fun (*this, &PortMatrix::notebook_page_selected));
 	_vnotebook.property_tab_border() = 4;
@@ -289,6 +286,20 @@ PortMatrix::select_arrangement ()
 		count_of_our_type (_ports[1].total_channels())
 	};
 
+	/* XXX: shirley there's an easier way than this */
+
+	if (_vspacer.get_parent()) {
+		_vbox.remove (_vspacer);
+	}
+
+	if (_vnotebook.get_parent()) {
+		_vbox.remove (_vnotebook);
+	}
+
+	if (_vlabel.get_parent()) {
+		_vbox.remove (_vlabel);
+	}
+
 	/* The list with the most channels goes on left or right, so that the most channel
 	   names are printed horizontally and hence more readable.  However we also
 	   maintain notional `signal flow' vaguely from left to right.  Subclasses
@@ -303,6 +314,10 @@ PortMatrix::select_arrangement ()
 		_vlabel.set_label (_("<b>Sources</b>"));
 		_hlabel.set_label (_("<b>Destinations</b>"));
 		_vlabel.set_angle (90);
+
+		_vbox.pack_end (_vlabel, false, false);
+		_vbox.pack_end (_vnotebook, false, false);
+		_vbox.pack_end (_vspacer, true, true);
 
 		attach (*_body, 1, 2, 0, 1, FILL | EXPAND, FILL | EXPAND);
 		attach (_vscroll, 2, 3, 0, 1, SHRINK);
@@ -321,6 +336,10 @@ PortMatrix::select_arrangement ()
 		_hlabel.set_label (_("<b>Sources</b>"));
 		_vlabel.set_label (_("<b>Destinations</b>"));
 		_vlabel.set_angle (-90);
+
+		_vbox.pack_end (_vspacer, true, true);
+		_vbox.pack_end (_vnotebook, false, false);
+		_vbox.pack_end (_vlabel, false, false);
 
 		attach (*_body, 0, 1, 1, 2, FILL | EXPAND, FILL | EXPAND);
 		attach (_vscroll, 2, 3, 1, 2, SHRINK);
