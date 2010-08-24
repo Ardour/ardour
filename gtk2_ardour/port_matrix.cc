@@ -46,7 +46,7 @@ using namespace ARDOUR;
  *  @param type Port type that we are handling.
  */
 PortMatrix::PortMatrix (Window* parent, Session* session, DataType type)
-	: Table (3, 3)
+	: Table (4, 4)
 	, _parent (parent)
 	, _type (type)
 	, _menu (0)
@@ -82,6 +82,11 @@ PortMatrix::PortMatrix (Window* parent, Session* session, DataType type)
 	_hlabel.set_alignment (1, 0.5);
 	_hlabel.set_padding (16, 4);
 	_hlabel.set_name (X_("PortMatrixLabel"));
+
+	set_row_spacing (0, 8);
+	set_col_spacing (0, 8);
+	set_row_spacing (2, 8);
+	set_col_spacing (2, 8);
 
 	_body->show ();
 	_vbox.show ();
@@ -319,14 +324,11 @@ PortMatrix::select_arrangement ()
 		_vbox.pack_end (_vnotebook, false, false);
 		_vbox.pack_end (_vspacer, true, true);
 
-		attach (*_body, 1, 2, 0, 1, FILL | EXPAND, FILL | EXPAND);
-		attach (_vscroll, 2, 3, 0, 1, SHRINK);
-		attach (_hscroll, 1, 2, 2, 3, FILL | EXPAND, SHRINK);
-		attach (_vbox, 0, 1, 0, 1, SHRINK);
-		attach (_hbox, 1, 2, 1, 2, FILL | EXPAND, SHRINK);
-
-		set_col_spacing (0, 4);
-		set_row_spacing (0, 4);
+		attach (*_body, 2, 3, 1, 2, FILL | EXPAND, FILL | EXPAND);
+		attach (_vscroll, 3, 4, 1, 2, SHRINK);
+		attach (_hscroll, 2, 3, 3, 4, FILL | EXPAND, SHRINK);
+		attach (_vbox, 1, 2, 1, 2, SHRINK);
+		attach (_hbox, 2, 3, 2, 3, FILL | EXPAND, SHRINK);
 		
 	} else {
 
@@ -341,14 +343,11 @@ PortMatrix::select_arrangement ()
 		_vbox.pack_end (_vnotebook, false, false);
 		_vbox.pack_end (_vlabel, false, false);
 
-		attach (*_body, 0, 1, 1, 2, FILL | EXPAND, FILL | EXPAND);
-		attach (_vscroll, 2, 3, 1, 2, SHRINK);
-		attach (_hscroll, 0, 1, 2, 3, FILL | EXPAND, SHRINK);
-		attach (_vbox, 1, 2, 1, 2, SHRINK);
-		attach (_hbox, 0, 1, 0, 1, FILL | EXPAND, SHRINK);
-
-		set_col_spacing (1, 4);
-		set_row_spacing (1, 4);
+		attach (*_body, 1, 2, 2, 3, FILL | EXPAND, FILL | EXPAND);
+		attach (_vscroll, 3, 4, 2, 3, SHRINK);
+		attach (_hscroll, 1, 2, 3, 4, FILL | EXPAND, SHRINK);
+		attach (_vbox, 2, 3, 2, 3, SHRINK);
+		attach (_hbox, 1, 2, 1, 2, FILL | EXPAND, SHRINK);
 	}
 }
 
