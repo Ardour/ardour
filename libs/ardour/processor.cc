@@ -115,10 +115,11 @@ Processor::state (bool full_state)
 			stringstream sstr;
 			for (set<Evoral::Parameter>::iterator x = _visible_controls.begin();
 					x != _visible_controls.end(); ++x) {
+                                
 				if (x != _visible_controls.begin()) {
 					sstr << ' ';
 				}
-				sstr << *x;
+				sstr << (*x).id();
 			}
 
 			automation.add_property ("visible", sstr.str());

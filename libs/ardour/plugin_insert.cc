@@ -684,25 +684,6 @@ PluginInsert::state (bool full)
 	node.add_property("count", string_compose("%1", _plugins.size()));
 	node.add_child_nocopy (_plugins[0]->get_state());
 
-	/* add port automation state */
-	XMLNode *autonode = new XMLNode(port_automation_node_name);
-	set<Evoral::Parameter> automatable = _plugins[0]->automatable();
-
-	for (set<Evoral::Parameter>::iterator x = automatable.begin(); x != automatable.end(); ++x) {
-		
-		/*XMLNode* child = new XMLNode("port");
-		snprintf(buf, sizeof(buf), "%" PRIu32, *x);
-		child->add_property("number", string(buf));
-		
-		child->add_child_nocopy (automation_list (*x).state (full));
-		autonode->add_child_nocopy (*child);
-		*/
-		AutomationList* list = dynamic_cast<AutomationList*>(control(*x)->list().get());
-		autonode->add_child_nocopy (list->state (full));
-	}
-
-	node.add_child_nocopy (*autonode);
-
 	return node;
 }
 
@@ -816,11 +797,11 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			}
 		}
 		
-		set_parameter_state_2X (node, version);
+		// set_parameter_state_2X (node, version);
 		
 	} else {
 
-		set_parameter_state (node, version);
+		// set_parameter_state (node, version);
 	}
 
 	// The name of the PluginInsert comes from the plugin, nothing else

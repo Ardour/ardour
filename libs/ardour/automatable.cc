@@ -253,7 +253,7 @@ Automatable::set_automation_state (const XMLNode& node, Evoral::Parameter legacy
 			if (param.type() == NullAutomation) {
 				warning << "Automation has null type" << endl;
 				continue;
-			}
+                        }
 
 			boost::shared_ptr<AutomationList> al (new AutomationList(**niter, param));
 

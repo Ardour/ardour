@@ -41,13 +41,12 @@ PBD::Signal1<void,AutomationList *> AutomationList::AutomationListCreated;
 static void dumpit (const AutomationList& al, string prefix = "")
 {
 	cerr << prefix << &al << endl;
-	for (AutomationList::const_iterator i = al.const_begin(); i != al.const_end(); ++i) {
+	for (AutomationList::const_iterator i = al.begin(); i != al.end(); ++i) {
 		cerr << prefix << '\t' << (*i)->when << ',' << (*i)->value << endl;
 	}
 	cerr << "\n";
 }
 #endif
-
 AutomationList::AutomationList (Evoral::Parameter id)
 	: ControlList(id)
 {
@@ -364,7 +363,7 @@ AutomationList::deserialize_events (const XMLNode& node)
 	}
 
         thaw ();
-        
+
 	return 0;
 }
 
@@ -465,19 +464,19 @@ AutomationList::set_state (const XMLNode& node, int version)
 		_state = Off;
 	}
 
-	if ((prop = node.property (X_("min_yval"))) != 0) {
+	if ((prop = node.property (X_("min-yval"))) != 0) {
 		_min_yval = atof (prop->value ().c_str());
 	} else {
 		_min_yval = FLT_MIN;
 	}
 
-	if ((prop = node.property (X_("max_yval"))) != 0) {
+	if ((prop = node.property (X_("max-yval"))) != 0) {
 		_max_yval = atof (prop->value ().c_str());
 	} else {
 		_max_yval = FLT_MAX;
 	}
 
-	if ((prop = node.property (X_("max_xval"))) != 0) {
+	if ((prop = node.property (X_("max-xval"))) != 0) {
 		_max_xval = atof (prop->value ().c_str());
 	} else {
 		_max_xval = 0; // means "no limit ;

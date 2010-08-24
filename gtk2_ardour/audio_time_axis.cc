@@ -210,6 +210,10 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 		ensure_xml_node ();
 		ensure_pan_views (show);
 
+        } else if (param.type() == PluginAutomation) {
+                
+                /* handled elsewhere */
+
 	} else {
 		error << "AudioTimeAxisView: unknown automation child " << EventTypeMap::instance().to_symbol(param) << endmsg;
 	}

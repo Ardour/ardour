@@ -1140,9 +1140,15 @@ Selection::set_state (XMLNode const & node, int)
 			assert (rtv);
 			
 			boost::shared_ptr<AutomationTimeAxisView> atv = rtv->automation_child (EventTypeMap::instance().new_parameter (prop_parameter->value ()));
-			assert (atv);
-			
-			add (atv.get());
+                        
+                        /* the automation could be for an entity that was never saved
+                           in the session file. Don't freak out if we can't find
+                           it.
+                        */
+
+                        if (atv) {
+                                add (atv.get());
+                        }
 		}
 	}
 

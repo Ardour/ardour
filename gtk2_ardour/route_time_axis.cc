@@ -1827,9 +1827,10 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 	ProcessorAutomationNode* pan;
 
 	if ((pan = find_processor_automation_node (processor, what)) == 0) {
-		error << _("programming error: ")
-		      << string_compose (X_("processor automation curve for %1:%2 not registered with track!"),
-				  processor->name(), what)
+                /* session state may never have been saved with new plugin */
+                error << _("programming error: ")
+		      << string_compose (X_("processor automation curve for %1:%2/%3/%4 not registered with track!"),
+                                         processor->name(), what.type(), (int) what.channel(), what.id() )
 		      << endmsg;
 		/*NOTREACHED*/
 		return;
@@ -1846,7 +1847,7 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 	/* FIXME: ew */
 
 	char state_name[256];
-	snprintf (state_name, sizeof (state_name), "Redirect-%s-%" PRIu32, legalize_for_xml_node (processor->name()).c_str(), what.id());
+	snprintf (state_name, sizeof (state_name), "%s-%" PRIu32, legalize_for_xml_node (processor->name()).c_str(), what.id());
 
 	boost::shared_ptr<AutomationControl> control
 			= boost::dynamic_pointer_cast<AutomationControl>(processor->control(what, true));
