@@ -864,6 +864,14 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Transport"),
 	     new BoolOption (
+		     "seamless-loop",
+		     _("Do seamless looping (not possible when slaved to MTC, JACK etc)"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_seamless_loop),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_seamless_loop)
+		     ));
+
+	add_option (_("Transport"),
+	     new BoolOption (
 		     "primary-clock-delta-edit-cursor",
 		     _("Primary clock delta to edit cursor"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_primary_clock_delta_edit_cursor),
