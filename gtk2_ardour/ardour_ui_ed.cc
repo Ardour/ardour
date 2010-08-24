@@ -751,14 +751,22 @@ ARDOUR_UI::save_ardour_state ()
 void
 ARDOUR_UI::toggle_global_port_matrix (ARDOUR::DataType t)
 {
+	std::string const action = string_compose ("toggle-%1-connection-manager", t.to_string ());
+	
 	if (_global_port_matrix[t]->get() == 0) {
 		_global_port_matrix[t]->set (new GlobalPortMatrixWindow (_session, t));
+		_global_port_matrix[t]->get()->signal_unmap().connect(sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), string_compose (X_("<Actions>/Common/%1"), action)));
 	}
 
-	if (_global_port_matrix[t]->get()->is_visible ()) {
-		_global_port_matrix[t]->get()->hide ();
-	} else {
-		_global_port_matrix[t]->get()->present ();
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), action.c_str());
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
+
+		if (tact->get_active()) {
+			_global_port_matrix[t]->get()->present ();
+		} else {
+			_global_port_matrix[t]->get()->hide ();
+		}
 	}
 }
 

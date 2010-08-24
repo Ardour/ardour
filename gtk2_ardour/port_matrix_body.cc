@@ -223,21 +223,21 @@ PortMatrixBody::compute_rectangles ()
 	} else if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
 
 		col_rect.set_height (min (_alloc_height, col.second));
-
-		row_rect.set_x (0);
-		row_rect.set_y (0);
-		row_rect.set_width (min (_alloc_width, row.first));
 		row_rect.set_height (std::min (_alloc_height - col_rect.get_height(), row.second));
 
+		row_rect.set_x (0);
+		row_rect.set_y (_alloc_height - row_rect.get_height() - col_rect.get_height());
+		row_rect.set_width (min (_alloc_width, row.first));
+
 		grid_rect.set_x (row_rect.get_width());
-		grid_rect.set_y (0);
+		grid_rect.set_y (_alloc_height - row_rect.get_height() - col_rect.get_height());
 		grid_rect.set_width (std::min (_alloc_width - row_rect.get_width(), grid.first));
 		grid_rect.set_height (row_rect.get_height ());
 
 		col_rect.set_width (grid_rect.get_width () + col_overhang);
 		col_rect.set_x (row_rect.get_width() + grid_rect.get_width() - col_rect.get_width());
 		_column_labels_border_x = col_rect.get_x () >= 0 ? col_rect.get_x () : 0;
-		col_rect.set_y (row_rect.get_height());
+		col_rect.set_y (_alloc_height - col_rect.get_height());
 	}
 
 	_column_labels_height = col_rect.get_height ();

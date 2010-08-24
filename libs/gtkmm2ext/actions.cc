@@ -268,8 +268,10 @@ ActionManager::set_sensitive (vector<RefPtr<Action> >& actions, bool state)
 }
 
 void
-ActionManager::uncheck_toggleaction (const char * name)
+ActionManager::uncheck_toggleaction (string n)
 {
+	char const * name = n.c_str ();
+	
 	const char *last_slash = strrchr (name, '/');
 
 	if (last_slash == 0) {

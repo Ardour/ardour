@@ -787,7 +787,16 @@ PortMatrix::body_dimensions_changed ()
 		_vspacer.hide ();
 	}
 
-	pair<uint32_t, uint32_t> const m = max_size ();
+	int curr_width;
+	int curr_height;
+	_parent->get_size (curr_width, curr_height);
+
+	pair<uint32_t, uint32_t> m = max_size ();
+
+	/* Don't shrink the window */
+	m.first = max (int (m.first), curr_width);
+	m.second = max (int (m.second), curr_height);
+	
 	resize_window_to_proportion_of_monitor (_parent, m.first, m.second);
 }
 
