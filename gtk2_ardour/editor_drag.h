@@ -35,6 +35,10 @@ namespace ARDOUR {
 	class Location;
 }
 
+namespace PBD {
+	class StatefulDiffCommand;
+}
+
 namespace Gnome {
 	namespace Canvas {
 		class CanvasNoteEvent;
@@ -223,6 +227,7 @@ struct DraggingView
 
 	RegionView* view; ///< the view
 	double initial_y; ///< the initial y position of the view before any reparenting
+	boost::shared_ptr<ARDOUR::Playlist> initial_playlist;
 };
 
 /** Abstract base class for drags that involve region(s) */
@@ -315,7 +320,42 @@ public:
 	}
 
 private:
+	typedef std::set<boost::shared_ptr<ARDOUR::Playlist> > PlaylistSet;
+
+	void finished_no_copy (
+		std::map<RegionView*, std::pair<RouteTimeAxisView*, int> > const &,
+		bool const,
+		bool const,
+		ARDOUR::framecnt_t const
+		);
+
+	void finished_copy (
+		std::map<RegionView*, std::pair<RouteTimeAxisView*, int> > const &,
+		bool const,
+		bool const,
+		ARDOUR::framecnt_t const
+		);
+
+	RegionView* insert_region_into_playlist (
+		boost::shared_ptr<ARDOUR::Region>,
+		RouteTimeAxisView*,
+		ARDOUR::layer_t,
+		ARDOUR::framecnt_t,
+		PlaylistSet&
+		);
+
+	void remove_region_from_playlist (
+		boost::shared_ptr<ARDOUR::Region>,
+		boost::shared_ptr<ARDOUR::Playlist>,
+		PlaylistSet& modified_playlists
+		);
+
+	void add_stateful_diff_commands_for_playlists (PlaylistSet const &);
+
+	void collect_new_region_view (RegionView *);
+	
 	bool _copy;
+	RegionView* _new_region_view;
 };
 
 /** Drag to insert a region from somewhere */

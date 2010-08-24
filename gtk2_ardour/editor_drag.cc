@@ -809,37 +809,9 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 void
 RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 {
-	vector<RegionView*> copies;
-	boost::shared_ptr<Track> tr;
-	boost::shared_ptr<Playlist> from_playlist;
-	boost::shared_ptr<Playlist> to_playlist;
-	RegionSelection new_views;
-	typedef set<boost::shared_ptr<Playlist> > PlaylistSet;
-	PlaylistSet modified_playlists;
-	PlaylistSet frozen_playlists;
-	list <sigc::connection> modified_playlist_connections;
-	pair<PlaylistSet::iterator,bool> insert_result, frozen_insert_result;
-	nframes64_t drag_delta;
-	bool changed_tracks, changed_position;
-	map<RegionView*, pair<RouteTimeAxisView*, int> > final;
-	RouteTimeAxisView* source_tv;
-        vector<StatefulDiffCommand*> sdc;
-
 	if (!movement_occurred) {
 		/* just a click */
 		return;
-	}
-
-	if (_brushing) {
-		/* all changes were made during motion event handlers */
-
-		if (_copy) {
-			for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
-				copies.push_back (i->view);
-			}
-		}
-
-		goto out;
 	}
 
 	/* reverse this here so that we have the correct logic to finalize
@@ -850,45 +822,156 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 		_x_constrained = !_x_constrained;
 	}
 
-	if (_copy) {
-		if (_x_constrained) {
-			_editor->begin_reversible_command (_("fixed time region copy"));
-		} else {
-			_editor->begin_reversible_command (_("region copy"));
-		}
-	} else {
-		if (_x_constrained) {
-			_editor->begin_reversible_command (_("fixed time region drag"));
-		} else {
-			_editor->begin_reversible_command (_("region drag"));
-		}
-	}
-
-	changed_position = (_last_frame_position != (nframes64_t) (_primary->region()->position()));
-	changed_tracks = (_dest_trackview != &_primary->get_time_axis_view());
-
-	drag_delta = _primary->region()->position() - _last_frame_position;
+	bool const changed_position = (_last_frame_position != (nframes64_t) (_primary->region()->position()));
+	bool const changed_tracks = (_dest_trackview != &_primary->get_time_axis_view());
+	framecnt_t const drag_delta = _primary->region()->position() - _last_frame_position;
 
 	_editor->update_canvas_now ();
+	
+	if (_copy) {
+		
+		finished_copy (
+			find_time_axis_views_and_layers (),
+			changed_position,
+			changed_tracks,
+			drag_delta
+			);
+		
+	} else {
+		
+		finished_no_copy (
+			find_time_axis_views_and_layers (),
+			changed_position,
+			changed_tracks,
+			drag_delta
+			);
+		
+	}
+}
 
-	/* make a list of where each region ended up */
-	final = find_time_axis_views_and_layers ();
+void
+RegionMoveDrag::finished_copy (
+	map<RegionView*, pair<RouteTimeAxisView*, int> > const & final,
+	bool const changed_position,
+	bool const changed_tracks,
+	framecnt_t const drag_delta
+	)
+{
+	RegionSelection new_views;
+	PlaylistSet modified_playlists;
+	list<RegionView*> views_to_delete;
+
+	if (_brushing) {
+		/* all changes were made during motion event handlers */
+
+		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
+			delete i->view;
+		}
+
+		_editor->commit_reversible_command ();
+		return;
+	}
+
+	if (_x_constrained) {
+		_editor->begin_reversible_command (_("fixed time region copy"));
+	} else {
+		_editor->begin_reversible_command (_("region copy"));
+	}
+
+	/* insert the regions into their new playlists */
+	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+
+		nframes64_t where;
+
+		if (i->view->region()->locked()) {
+			continue;
+		}
+
+		if (changed_position && !_x_constrained) {
+			where = i->view->region()->position() - drag_delta;
+		} else {
+			where = i->view->region()->position();
+		}
+
+		map<RegionView*, pair<RouteTimeAxisView*, int> >::const_iterator j = final.find (i->view);
+		assert (j != final.end());
+
+		RegionView* new_view = insert_region_into_playlist (
+			i->view->region(), j->second.first, j->second.second, where, modified_playlists
+			);
+		
+		if (new_view == 0) {
+			continue;
+		}
+
+		new_views.push_back (new_view);
+		
+		/* we don't need the copied RegionView any more */
+		views_to_delete.push_back (i->view);
+	}
+
+	/* Delete views that are no longer needed; we can't do this directly in the iteration over _views
+	   because when views are deleted they are automagically removed from _views, which messes
+	   up the iteration.
+	*/
+	for (list<RegionView*>::iterator i = views_to_delete.begin(); i != views_to_delete.end(); ++i) {
+		delete *i;
+	}
+
+	/* If we've created new regions either by copying or moving 
+	   to a new track, we want to replace the old selection with the new ones 
+	*/
+
+	if (new_views.size() > 0) {
+		_editor->selection->set (new_views);
+	}
+
+	/* write commands for the accumulated diffs for all our modified playlists */
+	add_stateful_diff_commands_for_playlists (modified_playlists);
+
+	_editor->commit_reversible_command ();
+}
+
+void
+RegionMoveDrag::finished_no_copy (
+	map<RegionView*, pair<RouteTimeAxisView*, int> > const & final,
+	bool const changed_position,
+	bool const changed_tracks,
+	framecnt_t const drag_delta
+	)
+{
+	RegionSelection new_views;
+	PlaylistSet modified_playlists;
+	PlaylistSet frozen_playlists;
+
+	if (_brushing) {
+		/* all changes were made during motion event handlers */
+		_editor->commit_reversible_command ();
+		return;
+	}
+
+	if (_x_constrained) {
+		_editor->begin_reversible_command (_("fixed time region drag"));
+	} else {
+		_editor->begin_reversible_command (_("region drag"));
+	}
 
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ) {
 
 		RegionView* rv = i->view;
-		RouteTimeAxisView* dest_rtv = final[rv].first;
-		layer_t dest_layer = final[rv].second;
 
-		nframes64_t where;
-
-                from_playlist.reset ();
-                to_playlist.reset ();
+		map<RegionView*, pair<RouteTimeAxisView*, int> >::const_iterator j = final.find (rv);
+		assert (j != final.end());
+		
+		RouteTimeAxisView* dest_rtv = j->second.first;
+		layer_t dest_layer = j->second.second;
 
 		if (rv->region()->locked()) {
 			++i;
 			continue;
 		}
+
+		nframes64_t where;
 
 		if (changed_position && !_x_constrained) {
 			where = rv->region()->position() - drag_delta;
@@ -896,65 +979,35 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			where = rv->region()->position();
 		}
 
-		boost::shared_ptr<Region> new_region;
+		if (changed_tracks) {
 
-		if (_copy) {
-			/* we already made a copy */
-			new_region = rv->region();
+			/* insert into new playlist */
 
-			/* undo the previous hide_dependent_views so that xfades don't
-			   disappear on copying regions
-			*/
+			RegionView* new_view = insert_region_into_playlist (
+				RegionFactory::create (rv->region ()), dest_rtv, dest_layer, where, modified_playlists
+				);
 
-			//rv->get_time_axis_view().reveal_dependent_views (*rv);
-
-		} else if (changed_tracks && dest_rtv->playlist()) {
-			new_region = RegionFactory::create (rv->region());
-		}
-
-		if (changed_tracks || _copy) {
-
-			to_playlist = dest_rtv->playlist();
-
-			if (!to_playlist) {
+			if (new_view == 0) {
 				++i;
 				continue;
 			}
 
-			_editor->latest_regionviews.clear ();
+			new_views.push_back (new_view);
 
-			sigc::connection c = dest_rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*_editor, &Editor::collect_new_region_view));
+			/* remove from old playlist */
 
-			insert_result = modified_playlists.insert (to_playlist);
+			/* the region that used to be in the old playlist is not
+			   moved to the new one - we use a copy of it. as a result,
+			   any existing editor for the region should no longer be
+			   visible.
+			*/
+			rv->hide_region_editor();
+			rv->fake_set_opaque (false);
 
-			if (insert_result.second) {
-                                to_playlist->clear_history ();
-			}
-
-                        cerr << "To playlist " << to_playlist->name() << " region history contains "
-                             << to_playlist->region_list().change().added.size() << " adds and " 
-                             << to_playlist->region_list().change().removed.size() << " removes\n";
-
-                        cerr << "Adding new region " << new_region->id() << " based on "
-                             << rv->region()->id() << endl;
-                        
-			to_playlist->add_region (new_region, where);
-
-			if (dest_rtv->view()->layer_display() == Stacked) {
-				new_region->set_layer (dest_layer);
-				new_region->set_pending_explicit_relayer (true);
-			}
-
-			c.disconnect ();
-
-			if (!_editor->latest_regionviews.empty()) {
-				// XXX why just the first one ? we only expect one
-				// commented out in nick_m's canvas reworking. is that intended?
-				//dest_atv->reveal_dependent_views (*latest_regionviews.front());
-				new_views.push_back (_editor->latest_regionviews.front());
-			}
+			remove_region_from_playlist (rv->region(), i->initial_playlist, modified_playlists);
 
 		} else {
+			
 			rv->region()->clear_history ();
 
 			/*
@@ -978,87 +1031,38 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			
 			/* freeze playlist to avoid lots of relayering in the case of a multi-region drag */
 
-			frozen_insert_result = frozen_playlists.insert(playlist);
+			pair<PlaylistSet::iterator, bool> r = frozen_playlists.insert (playlist);
 
-			if (frozen_insert_result.second) {
-				playlist->freeze();
+			if (r.second) {
+				playlist->freeze ();
 			}
-
-                        cerr << "Moving region " << rv->region()->id() << endl;
 
 			rv->region()->set_position (where, (void*) this);
 
-			sdc.push_back (new StatefulDiffCommand (rv->region()));
+			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
 		}
 
-		if (changed_tracks && !_copy) {
-
-			/* get the playlist where this drag started. we can't use rv->region()->playlist()
-			   because we may have copied the region and it has not been attached to a playlist.
-			*/
-
-			source_tv = dynamic_cast<RouteTimeAxisView*> (&rv->get_time_axis_view());
-			tr = source_tv->track();
-			from_playlist = tr->playlist();
-
-			assert (source_tv);
-			assert (tr);
-			assert (from_playlist);
-
-			/* moved to a different audio track, without copying */
-
-			/* the region that used to be in the old playlist is not
-			   moved to the new one - we use a copy of it. as a result,
-			   any existing editor for the region should no longer be
-			   visible.
-			*/
-
-			rv->hide_region_editor();
-			rv->fake_set_opaque (false);
-
-			/* remove the region from the old playlist */
-
-			insert_result = modified_playlists.insert (from_playlist);
-
-			if (insert_result.second) {
-				from_playlist->clear_history ();
-			}
-                        
-                        cerr << "From playlist " << from_playlist->name() << " region history contains "
-                             << from_playlist->region_list().change().added.size() << " adds and " 
-                             << from_playlist->region_list().change().removed.size() << " removes\n";
-
-                        cerr << "removing region " << rv->region() << endl;
-                        
-			from_playlist->remove_region (rv->region());
-
+		if (changed_tracks) {
+			
 			/* OK, this is where it gets tricky. If the playlist was being used by >1 tracks, and the region
 			   was selected in all of them, then removing it from a playlist will have removed all
-			   trace of it from the selection (i.e. there were N regions selected, we removed 1,
+			   trace of it from _views (i.e. there were N regions selected, we removed 1,
 			   but since its the same playlist for N tracks, all N tracks updated themselves, removed the
-			   corresponding regionview, and the selection is now empty).
+			   corresponding regionview, and _views is now empty).
 
-			   this could have invalidated any and all iterators into the region selection.
+			   This could have invalidated any and all iterators into _views.
 
-			   the heuristic we use here is: if the region selection is empty, break out of the loop
+			   The heuristic we use here is: if the region selection is empty, break out of the loop
 			   here. if the region selection is not empty, then restart the loop because we know that
 			   we must have removed at least the region(view) we've just been working on as well as any
 			   that we processed on previous iterations.
 
-			   EXCEPT .... if we are doing a copy drag, then the selection hasn't been modified and
+			   EXCEPT .... if we are doing a copy drag, then _views hasn't been modified and
 			   we can just iterate.
 			*/
 
+			
 			if (_views.empty()) {
-                                if (to_playlist) {
-                                        sdc.push_back (new StatefulDiffCommand (to_playlist));
-                                        cerr << "Saved diff for to:" << to_playlist->name() << endl;
-                                }
-                                
-                                if (from_playlist && (from_playlist != to_playlist)) {
-                                        sdc.push_back (new StatefulDiffCommand (from_playlist));
-                                        cerr << "Saved diff for from:" << from_playlist->name() << endl;
-                                }				
                                 break;
 			} else {
 				i = _views.begin();
@@ -1067,26 +1071,9 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 		} else {
 			++i;
 		}
-
-		if (_copy) {
-			copies.push_back (rv);
-		}
-
-                cerr << "Done with TV, top = " << to_playlist << " from = " << from_playlist << endl;
-
-                if (to_playlist) {
-                        sdc.push_back (new StatefulDiffCommand (to_playlist));
-                        cerr << "Saved diff for to:" << to_playlist->name() << endl;
-                }
-
-                if (from_playlist && (from_playlist != to_playlist)) {
-                        sdc.push_back (new StatefulDiffCommand (from_playlist));
-                        cerr << "Saved diff for from:" << from_playlist->name() << endl;
-                }
 	}
 
-	/*
-	   if we've created new regions either by copying or moving 
+	/* If we've created new regions either by copying or moving 
 	   to a new track, we want to replace the old selection with the new ones 
 	*/
 
@@ -1098,17 +1085,97 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 		(*p)->thaw();
 	}
 
-  out:
-        for (vector<StatefulDiffCommand*>::iterator i = sdc.begin(); i != sdc.end(); ++i) {
-		_editor->session()->add_command (*i);
-        }
+	/* write commands for the accumulated diffs for all our modified playlists */
+	add_stateful_diff_commands_for_playlists (modified_playlists);
 
 	_editor->commit_reversible_command ();
+}
 
-	for (vector<RegionView*>::iterator x = copies.begin(); x != copies.end(); ++x) {
-		delete *x;
+/** Remove a region from a playlist, clearing the diff history of the playlist first if necessary.
+ *  @param region Region to remove.
+ *  @param playlist playlist To remove from.
+ *  @param modified_playlists The playlist will be added to this if it is not there already; used to ensure
+ *  that clear_history () is only called once per playlist.
+ */
+void
+RegionMoveDrag::remove_region_from_playlist (
+	boost::shared_ptr<Region> region,
+	boost::shared_ptr<Playlist> playlist,
+	PlaylistSet& modified_playlists
+	)
+{
+	pair<set<boost::shared_ptr<Playlist> >::iterator, bool> r = modified_playlists.insert (playlist);
+
+	if (r.second) {
+		playlist->clear_history ();
+	}
+
+	playlist->remove_region (region);
+}
+	
+
+/** Insert a region into a playlist, handling the recovery of the resulting new RegionView, and
+ *  clearing the playlist's diff history first if necessary.
+ *  @param region Region to insert.
+ *  @param dest_rtv Destination RouteTimeAxisView.
+ *  @param dest_layer Destination layer.
+ *  @param where Destination position.
+ *  @param modified_playlists The playlist will be added to this if it is not there already; used to ensure
+ *  that clear_history () is only called once per playlist. 
+ *  @return New RegionView, or 0 if no insert was performed.
+ */
+RegionView *
+RegionMoveDrag::insert_region_into_playlist (
+	boost::shared_ptr<Region> region,
+	RouteTimeAxisView* dest_rtv,
+	layer_t dest_layer,
+	framecnt_t where,
+	PlaylistSet& modified_playlists
+	)
+{
+	boost::shared_ptr<Playlist> dest_playlist = dest_rtv->playlist ();
+	if (!dest_playlist) {
+		return 0;
+	}
+
+	/* arrange to collect the new region view that will be created as a result of our playlist insertion */
+	_new_region_view = 0;
+	sigc::connection c = dest_rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &RegionMoveDrag::collect_new_region_view));
+
+	/* clear history for the playlist we are about to insert to, provided we haven't already done so */	
+	pair<PlaylistSet::iterator, bool> r = modified_playlists.insert (dest_playlist);
+	if (r.second) {
+		dest_playlist->clear_history ();
+	}
+
+	dest_playlist->add_region (region, where);
+
+	if (dest_rtv->view()->layer_display() == Stacked) {
+		region->set_layer (dest_layer);
+		region->set_pending_explicit_relayer (true);
+	}
+
+	c.disconnect ();
+
+	assert (_new_region_view);
+
+	return _new_region_view;
+}
+
+void
+RegionMoveDrag::collect_new_region_view (RegionView* rv)
+{
+	_new_region_view = rv;
+}
+
+void
+RegionMoveDrag::add_stateful_diff_commands_for_playlists (PlaylistSet const & playlists)
+{
+	for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		_editor->session()->add_command (new StatefulDiffCommand (*i));
 	}
 }
+
 
 void
 RegionMoveDrag::aborted ()
@@ -3993,4 +4060,5 @@ DraggingView::DraggingView (RegionView* v)
 	: view (v)
 {
 	initial_y = v->get_canvas_group()->property_y ();
+	initial_playlist = v->region()->playlist ();
 }
