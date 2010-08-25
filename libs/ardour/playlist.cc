@@ -1665,6 +1665,21 @@ Playlist::regions_at (framepos_t frame)
 	return find_regions_at (frame);
 }
 
+uint32_t
+Playlist::count_regions_at (framepos_t frame)
+{
+	RegionLock rlock (this);
+	uint32_t cnt = 0;
+
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		if ((*i)->covers (frame)) {
+			cnt++;
+		}
+	}
+
+	return cnt;
+}
+
 boost::shared_ptr<Region>
 Playlist::top_region_at (framepos_t frame)
 
@@ -2463,10 +2478,10 @@ Playlist::relayer ()
 void
 Playlist::raise_region (boost::shared_ptr<Region> region)
 {
-	uint32_t rsz = regions.size();
+	uint32_t top = regions.size() - 1;
 	layer_t target = region->layer() + 1U;
 
-	if (target >= rsz) {
+	if (target >= top) {
 		/* its already at the effective top */
 		return;
 	}

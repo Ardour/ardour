@@ -1117,7 +1117,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 bool
 Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	nframes64_t where = event_frame (event, 0, 0);
+	framepos_t where = event_frame (event, 0, 0);
 	AutomationTimeAxisView* atv = 0;
 
 	/* no action if we're recording */
@@ -1138,6 +1138,8 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		were_dragging = true;
 	}
+
+        update_region_layering_order_editor (where);
 
 	/* edit events get handled here */
 

@@ -115,6 +115,7 @@
 #include "editor_locations.h"
 #include "editor_snapshots.h"
 #include "editor_summary.h"
+#include "region_layering_order_editor.h"
 
 #include "i18n.h"
 
@@ -384,6 +385,7 @@ Editor::Editor ()
 	_dragging_edit_point = false;
 	select_new_marker = false;
 	rhythm_ferret = 0;
+        layering_order_editor = 0;
 	_bundle_manager = 0;
 	no_save_visual = false;
 	resize_idle_id = -1;
@@ -748,7 +750,7 @@ Editor::~Editor()
 		image_socket_listener = 0 ;
 	}
 #endif
-
+        
 	delete _routes;
 	delete _route_groups;
 	delete track_canvas;
@@ -1522,28 +1524,26 @@ Editor::build_track_region_context_menu (nframes64_t frame)
 		   mode and so offering region context is somewhat confusing.
 		*/
 		if ((tr = rtv->track()) && ((pl = tr->playlist())) && !internal_editing()) {
-			Playlist::RegionList* regions = pl->regions_at ((nframes64_t) floor ( (double)frame * tr->speed()));
+                        framepos_t framepos = (framepos_t) floor ((double)frame * tr->speed());
+                        uint32_t regions_at = pl->count_regions_at (framepos);
+                        list<boost::shared_ptr<Region> > regions_for_menu;
 
  			if (selection->regions.size() > 1) {
  				// there's already a multiple selection: just add a
  				// single region context menu that will act on all
  				// selected regions
 
-				list<boost::shared_ptr<Region> > regions;
 				for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-					regions.push_back ((*i)->region ());
+					regions_for_menu.push_back ((*i)->region ());
 				}
-				
- 				add_region_context_items (rtv->view(), regions, edit_items);
- 			} else {
- 				for (Playlist::RegionList::reverse_iterator i = regions->rbegin(); i != regions->rend(); ++i) {
-					list<boost::shared_ptr<Region> > regions;
-					regions.push_back (*i);
- 					add_region_context_items (rtv->view(), regions, edit_items);
- 				}
-			}
+                        } else {
+                                boost::shared_ptr<Region> top_region = pl->top_region_at (framepos);
+                                if (top_region) {
+                                        regions_for_menu.push_back (top_region);
+                                }
+                        }
 
-			delete regions;
+                        add_region_context_items (rtv->view(), regions_for_menu, edit_items, framepos, regions_at > 1);
 		}
 	}
 
@@ -1568,7 +1568,6 @@ Editor::build_track_crossfade_context_menu (nframes64_t frame)
 
 		if ((tr = atv->track()) && ((pl = tr->playlist()) != 0) && ((apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl)) != 0)) {
 
-			Playlist::RegionList* regions = pl->regions_at (frame);
 			AudioPlaylist::Crossfades xfades;
 
 			apl->crossfades_at (frame, xfades);
@@ -1579,25 +1578,26 @@ Editor::build_track_crossfade_context_menu (nframes64_t frame)
 				add_crossfade_context_items (atv->audio_view(), (*i), edit_items, many);
 			}
 
+			framepos_t framepos = (framepos_t) floor ((double)frame * tr->speed());
+			uint32_t regions_at = pl->count_regions_at (framepos);
+                        list<boost::shared_ptr<Region> > regions_for_menu;
+
 			if (selection->regions.size() > 1) {
-				// there's already a multiple selection: just add a
-				// single region context menu that will act on all
-				// selected regions
+ 				// there's already a multiple selection: just add a
+ 				// single region context menu that will act on all
+ 				// selected regions
 
-				list<boost::shared_ptr<Region> > regions;
 				for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-					regions.push_back ((*i)->region ());
+					regions_for_menu.push_back ((*i)->region ());
 				}
-
-				add_region_context_items (atv->audio_view(), regions, edit_items);
-			} else {
- 				for (Playlist::RegionList::reverse_iterator i = regions->rbegin(); i != regions->rend(); ++i) {
-					list<boost::shared_ptr<Region> > regions;
-					regions.push_back (*i);
-					add_region_context_items (atv->audio_view(), regions, edit_items);
-				}
-			}
-			delete regions;
+                        } else {
+                                boost::shared_ptr<Region> top_region = pl->top_region_at (framepos);
+                                if (top_region) {
+                                        regions_for_menu.push_back (top_region);
+                                }
+                        }
+                        
+                        add_region_context_items (atv->audio_view(), regions_for_menu, edit_items, framepos, regions_at > 1);
 		}
 	}
 
@@ -1717,7 +1717,8 @@ Editor::xfade_edit_right_region ()
 }
 
 void
-Editor::add_region_context_items (StreamView* sv, list<boost::shared_ptr<Region> > regions, Menu_Helpers::MenuList& edit_items)
+Editor::add_region_context_items (StreamView* sv, list<boost::shared_ptr<Region> > regions, Menu_Helpers::MenuList& edit_items,
+                                  framepos_t position, bool multiple_regions_at_position)
 {
 	using namespace Menu_Helpers;
 	Gtk::MenuItem* foo_item;
@@ -2015,6 +2016,9 @@ Editor::add_region_context_items (StreamView* sv, list<boost::shared_ptr<Region>
 	}
 
 	edit_items.push_back (MenuElem (menu_item_name, *region_menu));
+	if (multiple_regions_at_position && (layering_order_editor == 0 || !layering_order_editor->is_visible ())) {
+		edit_items.push_back (MenuElem (_("Choose top region"), (bind (mem_fun(*this, &Editor::change_region_layering_order), position))));
+	}
 	edit_items.push_back (SeparatorElem());
 }
 
@@ -5565,3 +5569,44 @@ Editor::show_editor_list (bool yn)
 	}
 }
 
+void
+Editor::change_region_layering_order (framepos_t position)
+{
+	if (!clicked_regionview) {
+                if (layering_order_editor) {
+                        layering_order_editor->hide ();
+                }
+		return;
+	}
+
+        if (!clicked_routeview) {
+		return;
+	}
+
+        boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (clicked_routeview->route());
+
+        if (!track) {
+                return;
+        }
+
+	boost::shared_ptr<Playlist> pl = track->playlist();
+
+	if (!pl) {
+                return;
+        }
+                
+        if (layering_order_editor == 0) {
+                layering_order_editor = new RegionLayeringOrderEditor(*this);
+        }
+
+        layering_order_editor->set_context (clicked_routeview->name(), _session, pl, position);
+        layering_order_editor->maybe_present ();
+}
+
+void
+Editor::update_region_layering_order_editor (framepos_t frame)
+{
+	if (layering_order_editor && layering_order_editor->is_visible ()) {
+		change_region_layering_order (frame);
+	}
+}

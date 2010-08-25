@@ -128,6 +128,7 @@ class EditorRegions;
 class EditorLocations;
 class EditorSnapshots;
 class EditorSummary;
+class RegionLayeringOrderEditor;
 
 /* <CMT Additions> */
 class ImageFrameView;
@@ -672,7 +673,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Menu* build_track_selection_context_menu (nframes64_t);
 	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
-	void add_region_context_items (StreamView*, std::list<boost::shared_ptr<ARDOUR::Region> >, Gtk::Menu_Helpers::MenuList&);
+	void add_region_context_items (StreamView*, std::list<boost::shared_ptr<ARDOUR::Region> >, Gtk::Menu_Helpers::MenuList&,
+                                       ARDOUR::framepos_t, bool);
 	void add_crossfade_context_items (AudioStreamView*, boost::shared_ptr<ARDOUR::Crossfade>, Gtk::Menu_Helpers::MenuList&, bool many);
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
 
@@ -1062,6 +1064,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_region_lock_style ();
 	void raise_region ();
 	void raise_region_to_top ();
+        void change_region_layering_order (ARDOUR::framepos_t);
 	void lower_region ();
 	void lower_region_to_bottom ();
 	void split_regions_at (nframes64_t, RegionSelection&);
@@ -2043,6 +2046,9 @@ public:
 	sigc::connection step_edit_connection;
 
 	double _last_motion_y;
+
+        RegionLayeringOrderEditor* layering_order_editor;
+        void update_region_layering_order_editor (ARDOUR::framepos_t);
 
 	friend class Drag;
 	friend class RegionDrag;
