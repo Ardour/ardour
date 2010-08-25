@@ -122,45 +122,8 @@ class SequenceProperty : public PropertyBase
 	}
 
 	bool set_state_from_owner_state (XMLNode const& owner_state) {
-
-		XMLProperty const* n = owner_state.property ("name");
-
-                if (!n) {
-                        return false;
-                }
-
-                assert (g_quark_from_string (n->value().c_str()) == property_id());
-
-		const XMLNodeList& children = owner_state.children();
-
-		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
-
-			if ((*c)->name() == "Added") {
-				const XMLNodeList& grandchildren = (*c)->children();
-				for (XMLNodeList::const_iterator gc = grandchildren.begin(); gc != grandchildren.end(); ++gc) {
-					const XMLProperty* prop = (*gc)->property ("id");
-					if (prop) {
-						typename Container::value_type v = lookup_id (PBD::ID (prop->value()));
-						if (v) {
-							_change.add (v);
-						}
-					}
-				}
-			} else if ((*c)->name() == "Removed") {
-				const XMLNodeList& grandchildren = (*c)->children();
-				for (XMLNodeList::const_iterator gc = grandchildren.begin(); gc != grandchildren.end(); ++gc) {
-					const XMLProperty* prop = (*gc)->property ("id");
-					if (prop) {
-						typename Container::value_type v = lookup_id (PBD::ID (prop->value()));
-						if (v) {
-							_change.remove (v);
-						}
-					}
-				}
-			}
-		}
-
-		return true;
+		assert (false);
+		return false;
 	}
 
 	void add_state_to_owner_state (XMLNode& owner_state_node) const {
