@@ -180,8 +180,46 @@ class SequenceProperty : public PropertyBase
 		}
         }
 
+	SequenceProperty<Container>* maybe_clone_self_if_found_in_history_node (XMLNode const & node) const {
+
+		XMLNodeList const children = node.children ();
+		
+		for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+
+			if ((*i)->name() == capitalize (property_name())) {
+				
+				SequenceProperty<Container>* p = create ();
+				
+				if (p->set_change (**i)) {
+					return p;
+				} else {
+					delete p;
+				}
+			}
+                }
+
+		return 0;
+        }
+
+	void clear_owned_history () {
+		for (typename Container::iterator i = begin(); i != end(); ++i) {
+			(*i)->clear_history ();
+		}
+	}
+
+	void rdiff (std::vector<StatefulDiffCommand*>& cmds) const {
+		for (typename Container::const_iterator i = begin(); i != end(); ++i) {
+			if ((*i)->changed ()) {
+				StatefulDiffCommand* sdc = new StatefulDiffCommand (*i);
+				cmds.push_back (sdc);
+			}
+		}
+	}
+
+		
+
         Container rlist() { return _val; }
-	
+
 	/* Wrap salient methods of Sequence
 	 */
 

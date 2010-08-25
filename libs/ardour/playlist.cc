@@ -2079,38 +2079,18 @@ Playlist::mark_session_dirty ()
 	}
 }
 
-bool
-Playlist::set_property (const PropertyBase& prop)
-{
-        if (prop == Properties::regions.property_id) {
-                const RegionListProperty::ChangeRecord& change (dynamic_cast<const RegionListProperty*>(&prop)->change());
-                regions.update (change);
-                return (!change.added.empty() && !change.removed.empty());
-        }
-        return false;
-}
-
 void
 Playlist::rdiff (vector<StatefulDiffCommand*>& cmds) const
 {
 	RegionLock rlock (const_cast<Playlist *> (this));
-
-	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		if ((*i)->changed ()) {
-                        StatefulDiffCommand* sdc = new StatefulDiffCommand (*i);
-                        cmds.push_back (sdc);
-                }
-	}
+	Stateful::rdiff (cmds);
 }
 
 void
 Playlist::clear_owned_history ()
 {
 	RegionLock rlock (this);
-
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-                (*i)->clear_history ();
-        }
+	Stateful::clear_owned_history ();
 }
 
 void
@@ -2130,32 +2110,6 @@ Playlist::update (const RegionListProperty::ChangeRecord& change)
         }
 
         thaw ();
-}
-
-PropertyList*
-Playlist::property_factory (const XMLNode& history_node) const
-{
-        const XMLNodeList& children (history_node.children());
-        PropertyList* prop_list = 0;
-
-        for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-
-                if ((*i)->name() == capitalize (regions.property_name())) {
-                        
-                        RegionListProperty* rlp = new RegionListProperty (*const_cast<Playlist*> (this));
-
-                        if (rlp->set_change (**i)) {
-                                if (!prop_list) {
-                                        prop_list = new PropertyList();
-                                }
-                                prop_list->add (rlp);
-                        } else {
-                                delete rlp;
-                        }
-                }
-        }
-
-        return prop_list;
 }
 
 int

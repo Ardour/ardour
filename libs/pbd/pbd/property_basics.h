@@ -22,6 +22,7 @@
 
 #include <glib.h>
 #include <set>
+#include <vector>
 
 #include "pbd/xml++.h"
 
@@ -30,6 +31,7 @@ class Command;
 namespace PBD {
 
 class PropertyList;
+class StatefulDiffCommand;	
 
 /** A unique identifier for a property of a Stateful object */
 typedef GQuark PropertyID;
@@ -89,6 +91,9 @@ public:
 	/** Forget about any old value for this state */
 	virtual void clear_history () = 0;
 
+	/** Tell any things we own to forget about their old values */
+	virtual void clear_owned_history () {}
+
         /** Get any change in this property as XML and add it to a node */
 	virtual void get_change (XMLNode *) const = 0;
 
@@ -98,7 +103,10 @@ public:
 	 *  of those changes.
 	 */
 	virtual void diff (PropertyList& undo, PropertyList& redo, Command*) const = 0;
-        
+
+	/** Collect StatefulDiffCommands for changes to anything that we own */
+	virtual void rdiff (std::vector<StatefulDiffCommand*> &) const {}
+	
         virtual PropertyBase* maybe_clone_self_if_found_in_history_node (const XMLNode&) const { return 0; }
 
 	/** Set our value from an XML node.

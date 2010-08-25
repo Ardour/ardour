@@ -88,8 +88,6 @@ class Region
 	
 	static PBD::Signal2<void,boost::shared_ptr<ARDOUR::Region>, const PBD::PropertyChange&> RegionPropertyChanged;
 
-        PBD::PropertyList* property_factory (const XMLNode&) const;
-
 	virtual ~Region();
 	
 	/** Note: changing the name of a Region does not constitute an edit */

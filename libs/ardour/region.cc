@@ -1582,19 +1582,3 @@ Region::use_sources (SourceList const & s)
                 }
 	}
 }
-
-PropertyList*
-Region::property_factory (const XMLNode& history_node) const
-{
-        PropertyList* prop_list = new PropertyList;
-
-        for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
-                PropertyBase* prop = i->second->maybe_clone_self_if_found_in_history_node (history_node);
-
-                if (prop) {
-                        prop_list->add (prop);
-                }
-        }
-
-        return prop_list;
-}

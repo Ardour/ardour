@@ -68,12 +68,14 @@ class Stateful {
         /* history management */
 
 	void clear_history ();
+	virtual void clear_owned_history ();
         void diff (PropertyList&, PropertyList&, Command*) const;
+	virtual void rdiff (std::vector<StatefulDiffCommand*> &) const;
         bool changed() const;
 
         /* create a property list from an XMLNode
          */
-        virtual PropertyList* property_factory(const XMLNode&) const { return 0; }
+        virtual PropertyList* property_factory (const XMLNode&) const;
 
 	/* How stateful's notify of changes to their properties
 	 */
