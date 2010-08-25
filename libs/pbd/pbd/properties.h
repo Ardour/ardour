@@ -122,7 +122,6 @@ public:
 	
 	void apply_changes (PropertyBase const * p) {
 		T v = dynamic_cast<const PropertyTemplate<T>* > (p)->val ();
-		std::cout << "Apply changes: " << v << " cf " << _current << "\n";
 		if (v != _current) {
 			set (v);
 		}
@@ -132,8 +131,13 @@ public:
 		T const tmp = _current;
 		_current = _old;
 		_old = tmp;
-		std::cout << "Inverted to " << _old << " -> " << _current << "\n";
 	}
+
+        void get_changes_as_properties (PropertyList& changes, Command *) const {
+                if (this->_have_old) {
+			changes.add (clone ());
+                }
+        }
 
 protected:
         /** Constructs a PropertyTemplate with a default
@@ -198,12 +202,6 @@ public:
 		return new Property<T> (*this);
 	}
 	
-        void get_changes_as_properties (PropertyList& changes, Command *) const {
-                if (this->_have_old) {
-			changes.add (new Property<T> (*this));
-                }
-        }
-
         Property<T>* clone_from_xml (const XMLNode& node) const {
 		XMLNodeList const & children = node.children ();
 		XMLNodeList::const_iterator i = children.begin();
@@ -275,12 +273,6 @@ public:
 		return new Property<std::string> (*this);
 	}
 	
-        void get_changes_as_properties (PropertyList& changes, Command* /*ignored*/) const {
-                if (this->_have_old) {
-			changes.add (new Property<std::string> (*this));
-		}
-        }
-
 	std::string & operator=(std::string const& v) {
 		this->set (v);
 		return this->_current;

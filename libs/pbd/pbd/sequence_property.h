@@ -80,7 +80,7 @@ class SequenceProperty : public PropertyBase
 	SequenceProperty (PropertyID id, const boost::function<void(const ChangeRecord&)>& update)
                 : PropertyBase (id), _update_callback (update) {}
 
-	virtual typename Container::value_type lookup_id (const PBD::ID&) = 0;
+	virtual typename Container::value_type lookup_id (const PBD::ID&) const = 0;
 
         void invert () {
 		_changes.removed.swap (_changes.added);
@@ -147,43 +147,63 @@ class SequenceProperty : public PropertyBase
 	}
 
 	void get_changes_as_properties (PBD::PropertyList& changes, Command* cmd) const {
-		if (changed ()) {
-			SequenceProperty<Container>* a = copy_for_history ();
-			changes.add (a);
-
-			if (cmd) {
-				/* whenever one of the items emits DropReferences, make sure
-				   that the Destructible we've been told to notify hears about
-				   it. the Destructible is likely to be the Command being built
-				   with this diff().
-				*/
+		if (!changed ()) {
+			return;
+		}
+		
+		/* Create a property with just the changes and not the actual values */
+		SequenceProperty<Container>* a = create ();
+		a->_changes = _changes;
+		changes.add (a);
+		
+		if (cmd) {
+			/* whenever one of the items emits DropReferences, make sure
+			   that the Destructible we've been told to notify hears about
+			   it. the Destructible is likely to be the Command being built
+			   with this diff().
+			*/
                         
-				for (typename ChangeContainer::iterator i = a->changes().added.begin(); i != a->changes().added.end(); ++i) {
-					(*i)->DropReferences.connect_same_thread (*cmd, boost::bind (&Destructible::drop_references, cmd));
-				}
-                        }
+			for (typename ChangeContainer::iterator i = a->changes().added.begin(); i != a->changes().added.end(); ++i) {
+				(*i)->DropReferences.connect_same_thread (*cmd, boost::bind (&Destructible::drop_references, cmd));
+			}
 		}
         }
 
 	SequenceProperty<Container>* clone_from_xml (XMLNode const & node) const {
 
 		XMLNodeList const children = node.children ();
+
+		/* find the node for this property name */
 		
-		for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+		std::string const c = capitalize (property_name ());
+		XMLNodeList::const_iterator i = children.begin();
+		while (i != children.end() && (*i)->name() != c) {
+			++i;
+		}
 
-			if ((*i)->name() == capitalize (property_name())) {
-				
-				SequenceProperty<Container>* p = create ();
-				
-				if (p->set_changes (**i)) {
-					return p;
-				} else {
-					delete p;
-				}
+		if (i == children.end()) {
+			return 0;
+		}
+
+		/* create a property with the changes */
+		
+		SequenceProperty<Container>* p = create ();
+
+		XMLNodeList const & grandchildren = (*i)->children ();
+		for (XMLNodeList::const_iterator j = grandchildren.begin(); j != grandchildren.end(); ++j) {
+			XMLProperty const * prop = (*j)->property ("id");
+			assert (prop);
+			PBD::ID id (prop->value ());
+			typename Container::value_type v = lookup_id (id);
+			assert (v);
+			if ((*j)->name() == "Add") {
+				p->_changes.added.insert (v);
+			} else if ((*j)->name() == "Remove") {
+				p->_changes.removed.insert (v);
 			}
-                }
+		}
 
-		return 0;
+		return p;
         }
 
 	void clear_owned_changes () {
@@ -310,54 +330,13 @@ class SequenceProperty : public PropertyBase
         
         const ChangeRecord& changes () const { return _changes; }
 
-  protected:
-	Container _val;
-	ChangeRecord _changes;
+protected:
+	Container _val; ///< our actual container of things
+	ChangeRecord _changes; ///< changes to the container (adds/removes) that have happened since clear_changes() was last called
 	boost::function<void(const ChangeRecord&)> _update_callback;
 
-        /** Load serialized change history.
-         * @return true if loading succeeded, false otherwise
-         */
-
-	bool set_changes (XMLNode const & history_node) {
-
-                const XMLNodeList& children (history_node.children());
-
-                for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-                        const XMLProperty* prop = (*i)->property ("id");
-                        if (prop) {
-                                PBD::ID id (prop->value());
-                                typename Container::value_type v = lookup_id (id);
-                                if (!v) {
-                                        std::cerr << "No such item, ID = " << id.to_s() << " (from " << prop->value() << ")\n";
-                                        return false;
-                                }
-                                if ((*i)->name() == "Add") {
-                                        _changes.added.insert (v);
-                                } else if ((*i)->name() == "Remove") {
-                                        _changes.removed.insert (v);
-                                }
-                        }
-                }
-
-                return true;
-        }
-
-private:
+private:	
 	virtual SequenceProperty<Container>* create () const = 0;
-
-        /* create a copy of this ListSequenceProperty that only
-           has what is needed for use in a history list command. This
-           means that it won't contain the actual item list but
-           will have the added/removed list.
-        */
-	
-	SequenceProperty<Container>* copy_for_history () const {
-		SequenceProperty<Container>* copy = create ();
-		/* this is all we need */
-		copy->_changes = _changes;
-		return copy;
-	}
 };
 
 }

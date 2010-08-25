@@ -65,7 +65,7 @@ class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_
 
 	RegionListProperty* clone () const;
 
-        boost::shared_ptr<Region> lookup_id (const PBD::ID& id);
+        boost::shared_ptr<Region> lookup_id (const PBD::ID& id) const;
 
   private:
 	RegionListProperty* create () const;
@@ -92,7 +92,7 @@ public:
         void clear_owned_changes ();
         void rdiff (std::vector<PBD::StatefulDiffCommand*>&) const;
 
-	boost::shared_ptr<Region> region_by_id (const PBD::ID&);
+	boost::shared_ptr<Region> region_by_id (const PBD::ID&) const;
 
 	void set_region_ownership ();
 

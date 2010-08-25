@@ -113,7 +113,7 @@ RegionListProperty::RegionListProperty (Playlist& pl)
 }
 
 boost::shared_ptr<Region>
-RegionListProperty::lookup_id (const ID& id)
+RegionListProperty::lookup_id (const ID& id) const
 {
         boost::shared_ptr<Region> ret =  _playlist.region_by_id (id);
         
@@ -2673,7 +2673,7 @@ Playlist::find_region (const ID& id) const
 }
 
 boost::shared_ptr<Region>
-Playlist::region_by_id (const ID& id)
+Playlist::region_by_id (const ID& id) const
 {
 	/* searches all regions ever added to this playlist */
 
