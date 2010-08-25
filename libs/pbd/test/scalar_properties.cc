@@ -36,18 +36,12 @@ ScalarPropertiesTest::testBasic ()
 	CPPUNIT_ASSERT (_fred == 5);
 	CPPUNIT_ASSERT (_fred.changed() == true);
 
-	PropertyList undo;
-	PropertyList redo;
-	_fred.diff (undo, redo, 0);
+	PropertyList changes;
+	_fred.get_changes_as_properties (changes, 0);
 
-	CPPUNIT_ASSERT (undo.size() == 1);
-	CPPUNIT_ASSERT (redo.size() == 1);
+	CPPUNIT_ASSERT (changes.size() == 1);
 
-	PropertyTemplate<int>* t = dynamic_cast<Property<int>*> (undo.begin()->second);
+	PropertyTemplate<int>* t = dynamic_cast<Property<int>*> (changes.begin()->second);
 	CPPUNIT_ASSERT (t);
 	CPPUNIT_ASSERT (t->val() == 4);
-
-	t = dynamic_cast<Property<int>*> (redo.begin()->second);
-	CPPUNIT_ASSERT (t);
-	CPPUNIT_ASSERT (t->val() == 5);
 }
