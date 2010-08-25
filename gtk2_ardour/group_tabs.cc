@@ -379,7 +379,7 @@ void
 GroupTabs::run_new_group_dialog (RouteList const & rl)
 {
 	RouteGroup* g = new RouteGroup (*_session, "");
-	g->set_properties (default_properties ());
+	g->apply_changes (default_properties ());
 
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();
@@ -402,7 +402,7 @@ GroupTabs::create_and_add_group () const
 {
 	RouteGroup* g = new RouteGroup (*_session, "");
 
-	g->set_properties (default_properties ());
+	g->apply_changes (default_properties ());
 
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();

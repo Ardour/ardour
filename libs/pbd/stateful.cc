@@ -174,17 +174,18 @@ Stateful::diff (PropertyList& before, PropertyList& after, Command* cmd) const
 	}
 }
 
-/** Set state of some/all _properties from an XML node.
- *  @param owner_state Node.
- *  @return PropertyChanges made.
+/** Set our property values from an XML node.
+ *  Derived types can call this from ::set_state() (or elsewhere)
+ *  to get basic property setting done.
+ *  @return IDs of properties that were changed.
  */
 PropertyChange
-Stateful::set_properties (XMLNode const & owner_state)
+Stateful::set_values (XMLNode const & node)
 {
 	PropertyChange c;
         
 	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		if (i->second->set_state_from_owner_state (owner_state)) {
+		if (i->second->set_value (node)) {
 			c.add (i->first);
 		}
 	}
@@ -195,7 +196,7 @@ Stateful::set_properties (XMLNode const & owner_state)
 }
 
 PropertyChange
-Stateful::set_properties (const PropertyList& property_list)
+Stateful::apply_changes (const PropertyList& property_list)
 {
 	PropertyChange c;
 	PropertyList::const_iterator p;
@@ -209,7 +210,7 @@ Stateful::set_properties (const PropertyList& property_list)
         for (PropertyList::const_iterator i = property_list.begin(); i != property_list.end(); ++i) {
                 if ((p = _properties->find (i->first)) != _properties->end()) {
                         DEBUG_TRACE (DEBUG::Stateful, string_compose ("actually setting property %1\n", p->second->property_name()));
-			if (set_property (*i->second)) {
+			if (apply_change (*i->second)) {
 				c.add (i->first);
 			}
 		} else {
@@ -232,7 +233,7 @@ void
 Stateful::add_properties (XMLNode& owner_state)
 {
 	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		i->second->add_state_to_owner_state (owner_state);
+		i->second->get_value (owner_state);
 	}
 }
 
@@ -302,14 +303,14 @@ Stateful::changed() const
 }
 
 bool
-Stateful::set_property (const PropertyBase& prop)
+Stateful::apply_change (const PropertyBase& prop)
 {
 	OwnedPropertyList::iterator i = _properties->find (prop.property_id());
 	if (i == _properties->end()) {
 		return false;
 	}
 
-	i->second->set_state_from_property (&prop);
+	i->second->apply_change (&prop);
 	return true;
 }
 

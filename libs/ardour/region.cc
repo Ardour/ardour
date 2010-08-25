@@ -1216,7 +1216,7 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 {
 	const XMLProperty* prop;
 
-	what_changed = set_properties (node);
+	what_changed = set_values (node);
 
 	if ((prop = node.property (X_("id")))) {
 		_id = prop->value();

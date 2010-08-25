@@ -123,7 +123,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, b
 	}
 
 	if (ret) {
-		ret->set_properties (plist);
+		ret->apply_changes (plist);
 		map_add (ret);
 
 		if (announce) {
@@ -162,7 +162,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 
 	if (ret) {
 
-		ret->set_properties (plist);
+		ret->apply_changes (plist);
 		map_add (ret);
 
 		if (announce) {
@@ -207,7 +207,7 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 
 	if (ret) {
 
-		ret->set_properties (plist);
+		ret->apply_changes (plist);
 		map_add (ret);
 
 		if (announce) {

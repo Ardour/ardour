@@ -108,7 +108,7 @@ RouteGroupMenu::new_group ()
 	}
 
 	RouteGroup* g = new RouteGroup (*_session, "");
-	g->set_properties (*_default_properties);
+	g->apply_changes (*_default_properties);
 
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();

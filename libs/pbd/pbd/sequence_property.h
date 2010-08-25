@@ -94,12 +94,8 @@ class SequenceProperty : public PropertyBase
 		_change.removed.swap (_change.added);
         }
 
-	void add_history_state (XMLNode* history_node) const {
+	void get_change (XMLNode* history_node) const {
 
-		/* We could record the whole of the current state here, but its
-		   obviously more efficient just to record what has changed.
-		*/
-                
                 XMLNode* child = new XMLNode (PBD::capitalize (property_name()));
                 history_node->add_child_nocopy (*child);
                 
@@ -121,14 +117,15 @@ class SequenceProperty : public PropertyBase
 		}
 	}
 
-	bool set_state_from_owner_state (XMLNode const& owner_state) {
+	bool set_value (XMLNode const &) {
+		/* XXX: not used, but probably should be */
 		assert (false);
 		return false;
 	}
 
-	void add_state_to_owner_state (XMLNode& owner_state_node) const {
+	void get_value (XMLNode & node) const {
                 for (typename Container::const_iterator i = _val.begin(); i != _val.end(); ++i) {
-                        owner_state_node.add_child_nocopy ((*i)->get_state ());
+                        node.add_child_nocopy ((*i)->get_state ());
                 } 
 	}
 
@@ -141,7 +138,7 @@ class SequenceProperty : public PropertyBase
 		_change.removed.clear ();
 	}
 
-	void set_state_from_property (PropertyBase const * p) {
+	void apply_change (PropertyBase const * p) {
 		const ChangeRecord& change (dynamic_cast<const SequenceProperty*> (p)->change ());
 		update (change);
 	}
@@ -301,7 +298,7 @@ class SequenceProperty : public PropertyBase
          * @return true if loading succeeded, false otherwise
          */
 
-        bool load_history_state (const XMLNode& history_node) {
+	bool set_change (XMLNode const & history_node) {
 
                 const XMLNodeList& children (history_node.children());
 

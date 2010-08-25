@@ -85,20 +85,16 @@ public:
 		_have_old = false;
 	}
 
-	void add_history_state (XMLNode* history_node) const {
+	void get_change (XMLNode* history_node) const {
 		/* We can get to the current state of a scalar property like this one simply
 		   by knowing what the new state is.
 		*/
                 history_node->add_property (property_name(), to_string (_current));
 	}
 
-	/** Try to set state from the property of an XML node.
-	 *  @param node XML node.
-	 *  @return true if the value of the property is changed
-	 */
-	bool set_state_from_owner_state (XMLNode const& owner_state) {
+	bool set_value (XMLNode const & node) {
 
-		XMLProperty const* p = owner_state.property (property_name());
+		XMLProperty const* p = node.property (property_name());
 
 		if (p) {
 			T const v = from_string (p->value ());
@@ -112,12 +108,13 @@ public:
 		return false;
 	}
 
-	void add_state_to_owner_state (XMLNode& owner_state) const {
-                owner_state.add_property (property_name(), to_string (_current));
+	void get_value (XMLNode & node) const {
+                node.add_property (property_name(), to_string (_current));
 	}
 
 	bool changed () const { return _have_old; }
-	void set_state_from_property (PropertyBase const * p) {
+	
+	void apply_change (PropertyBase const * p) {
 		T v = dynamic_cast<const PropertyTemplate<T>* > (p)->val ();
 		if (v != _current) {
 			set (v);

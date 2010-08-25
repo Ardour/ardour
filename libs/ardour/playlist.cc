@@ -2144,7 +2144,7 @@ Playlist::property_factory (const XMLNode& history_node) const
                         
                         RegionListProperty* rlp = new RegionListProperty (*const_cast<Playlist*> (this));
 
-                        if (rlp->load_history_state (**i)) {
+                        if (rlp->set_change (**i)) {
                                 if (!prop_list) {
                                         prop_list = new PropertyList();
                                 }

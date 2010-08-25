@@ -235,7 +235,7 @@ RouteGroup::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
-	set_properties (node);
+	set_values (node);
 
 	const XMLProperty *prop;
 
@@ -260,7 +260,7 @@ RouteGroup::set_state (const XMLNode& node, int version)
 int
 RouteGroup::set_state_2X (const XMLNode& node, int /*version*/)
 {
-	set_properties (node);
+	set_values (node);
 
 	if (node.name() == "MixGroup") {
 		_gain = true;

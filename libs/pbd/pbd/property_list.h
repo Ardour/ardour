@@ -36,7 +36,7 @@ public:
         
 	virtual ~PropertyList();
 
-        void add_history_state (XMLNode* before);
+        void get_changes (XMLNode *);
 
         /** Add a property (of some kind) to the list. Used when
             constructing PropertyLists that describe a change/operation.

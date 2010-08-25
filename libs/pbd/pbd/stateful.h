@@ -48,9 +48,10 @@ class Stateful {
 
 	virtual XMLNode& get_state (void) = 0;
 	virtual int set_state (const XMLNode&, int version) = 0;
-	virtual bool set_property (const PropertyBase&);
 
-	PropertyChange set_properties (const PropertyList&);
+	virtual bool apply_change (PropertyBase const &);
+	PropertyChange apply_changes (PropertyList const &);
+	
         const OwnedPropertyList& properties() const { return *_properties; }
 
 	void add_property (PropertyBase& s);
@@ -92,10 +93,8 @@ class Stateful {
 	void add_instant_xml (XMLNode&, const sys::path& directory_path);
 	XMLNode *instant_xml (const std::string& str, const sys::path& directory_path);
 	void add_properties (XMLNode &);
-	/* derived types can call this from ::set_state() (or elsewhere)
-	   to get basic property setting done.
-	*/
-	PropertyChange set_properties (XMLNode const &);
+
+	PropertyChange set_values (XMLNode const &);
 	
 	/* derived classes can implement this to do cross-checking
 	   of property values after either a PropertyList or XML 

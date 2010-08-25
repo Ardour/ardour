@@ -416,7 +416,7 @@ AddRouteDialog::group_changed ()
 
 		PropertyList plist;
 		plist.add (Properties::active, true);
-		g->set_properties (plist);
+		g->apply_changes (plist);
 
 		RouteGroupDialog d (g, Gtk::Stock::NEW);
 		int const r = d.do_run ();

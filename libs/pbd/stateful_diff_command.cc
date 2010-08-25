@@ -85,7 +85,7 @@ StatefulDiffCommand::operator() ()
 	boost::shared_ptr<Stateful> s (_object.lock());
 
 	if (s) {
-                s->set_properties (*_redo);
+                s->apply_changes (*_redo);
 	}
 }
 
@@ -96,7 +96,7 @@ StatefulDiffCommand::undo ()
 
 	if (s) {
                 std::cerr << "Undoing a stateful diff command\n";
-                s->set_properties (*_undo);
+                s->apply_changes (*_undo);
 	}
 }
 
@@ -118,8 +118,8 @@ StatefulDiffCommand::get_state ()
         XMLNode* undo = new XMLNode (X_("Undo"));
         XMLNode* redo = new XMLNode (X_("Do"));
 
-        _undo->add_history_state (undo);
-        _redo->add_history_state (redo);
+        _undo->get_changes (undo);
+        _redo->get_changes (redo);
         
         node->add_child_nocopy (*undo);
         node->add_child_nocopy (*redo);

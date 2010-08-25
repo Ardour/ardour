@@ -39,13 +39,13 @@ PropertyList::~PropertyList ()
 }
 
 void
-PropertyList::add_history_state (XMLNode* history_node)
+PropertyList::get_changes (XMLNode* history_node)
 {
         for (const_iterator i = begin(); i != end(); ++i) {
                 DEBUG_TRACE (DEBUG::Properties, string_compose ("Add before/after to %1 for %2\n",
                                                                 history_node->name(), 
                                                                 i->second->property_name()));
-                i->second->add_history_state (history_node);
+                i->second->get_change (history_node);
         }
 }
 
