@@ -216,8 +216,6 @@ class SequenceProperty : public PropertyBase
 		}
 	}
 
-		
-
         Container rlist() { return _val; }
 
 	/* Wrap salient methods of Sequence

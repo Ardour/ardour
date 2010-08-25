@@ -3960,26 +3960,6 @@ Session::goto_start ()
 	}
 }
 
-void
-Session::set_session_start (nframes_t start)
-{
-	if (_session_range_location) {
-		_session_range_location->set_start (start);
-	} else {
-		add_session_range_location (start, start);
-	}
-}
-	      
-void
-Session::set_session_end (nframes_t end)
-{
-	if (_session_range_location) {
-		_session_range_location->set_end (end);
-	} else {
-		add_session_range_location (end, end);
-	}
-}
-
 nframes_t
 Session::current_start_frame () const
 {

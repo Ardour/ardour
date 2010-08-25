@@ -297,8 +297,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	nframes_t  last_transport_start() const { return _last_roll_location; }
 	void goto_end ();
 	void goto_start ();
-	void set_session_start (nframes_t);
-	void set_session_end (nframes_t);
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
 	void request_transport_speed (double speed);
