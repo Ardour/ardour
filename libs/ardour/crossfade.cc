@@ -220,8 +220,17 @@ Crossfade::initialize ()
 
 	_sources = _in->sources();
 	_sources.insert (_sources.end(), _out->sources().begin(), _out->sources().end());
+
+        for (SourceList::iterator i = _sources.begin(); i != _sources.end(); ++i) {
+                (*i)->inc_use_count ();
+        }
+        
 	_master_sources = _in->master_sources();
 	_master_sources.insert(_master_sources.end(), _out->master_sources().begin(), _out->master_sources().end());
+
+        for (SourceList::iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
+                (*i)->inc_use_count ();
+        }
 
 	_in_update = false;
 
