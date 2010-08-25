@@ -1008,7 +1008,7 @@ RegionMoveDrag::finished_no_copy (
 
 		} else {
 			
-			rv->region()->clear_history ();
+			rv->region()->clear_changes ();
 
 			/*
 			   motion on the same track. plonk the previously reparented region
@@ -1095,7 +1095,7 @@ RegionMoveDrag::finished_no_copy (
  *  @param region Region to remove.
  *  @param playlist playlist To remove from.
  *  @param modified_playlists The playlist will be added to this if it is not there already; used to ensure
- *  that clear_history () is only called once per playlist.
+ *  that clear_changes () is only called once per playlist.
  */
 void
 RegionMoveDrag::remove_region_from_playlist (
@@ -1107,7 +1107,7 @@ RegionMoveDrag::remove_region_from_playlist (
 	pair<set<boost::shared_ptr<Playlist> >::iterator, bool> r = modified_playlists.insert (playlist);
 
 	if (r.second) {
-		playlist->clear_history ();
+		playlist->clear_changes ();
 	}
 
 	playlist->remove_region (region);
@@ -1121,7 +1121,7 @@ RegionMoveDrag::remove_region_from_playlist (
  *  @param dest_layer Destination layer.
  *  @param where Destination position.
  *  @param modified_playlists The playlist will be added to this if it is not there already; used to ensure
- *  that clear_history () is only called once per playlist. 
+ *  that clear_changes () is only called once per playlist. 
  *  @return New RegionView, or 0 if no insert was performed.
  */
 RegionView *
@@ -1145,7 +1145,7 @@ RegionMoveDrag::insert_region_into_playlist (
 	/* clear history for the playlist we are about to insert to, provided we haven't already done so */	
 	pair<PlaylistSet::iterator, bool> r = modified_playlists.insert (dest_playlist);
 	if (r.second) {
-		dest_playlist->clear_history ();
+		dest_playlist->clear_changes ();
 	}
 
 	dest_playlist->add_region (region, where);
@@ -1488,7 +1488,7 @@ RegionInsertDrag::finished (GdkEvent* /*event*/, bool /*movement_occurred*/)
 	boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
 
 	_editor->begin_reversible_command (_("insert region"));
-        playlist->clear_history ();
+        playlist->clear_changes ();
 	playlist->add_region (_primary->region (), _last_frame_position);
 	_editor->session()->add_command (new StatefulDiffCommand (playlist));
 	_editor->commit_reversible_command ();
@@ -1823,7 +1823,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			RegionView* rv = i->view;
 			rv->fake_set_opaque(false);
 			rv->enable_display (false);
-                        rv->region()->clear_history ();
+                        rv->region()->clear_changes ();
 			rv->region()->suspend_property_changes ();
 
 			AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (rv);

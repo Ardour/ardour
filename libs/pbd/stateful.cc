@@ -157,12 +157,12 @@ Stateful::instant_xml (const string& str, const sys::path& directory_path)
 	return 0;
 }
 
-/** Forget about any old state for this object */	
+/** Forget about any changes to this object's properties */
 void
-Stateful::clear_history ()
+Stateful::clear_changes ()
 {
 	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		i->second->clear_history ();
+		i->second->clear_changes ();
 	}
 }
 
@@ -329,7 +329,7 @@ Stateful::property_factory (const XMLNode& history_node) const
         PropertyList* prop_list = new PropertyList;
 
         for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
-                PropertyBase* prop = i->second->maybe_clone_self_if_found_in_history_node (history_node);
+                PropertyBase* prop = i->second->clone_from_xml (history_node);
 
                 if (prop) {
                         prop_list->add (prop);
@@ -348,10 +348,10 @@ Stateful::rdiff (vector<StatefulDiffCommand*>& cmds) const
 }
 
 void
-Stateful::clear_owned_history ()
+Stateful::clear_owned_changes ()
 {
 	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		i->second->clear_owned_history ();
+		i->second->clear_owned_changes ();
 	}
 }
   

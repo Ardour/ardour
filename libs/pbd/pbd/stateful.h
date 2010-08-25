@@ -67,8 +67,8 @@ class Stateful {
 
         /* history management */
 
-	void clear_history ();
-	virtual void clear_owned_history ();
+	void clear_changes ();
+	virtual void clear_owned_changes ();
         PropertyList* get_changes_as_properties (Command *) const;
 	virtual void rdiff (std::vector<StatefulDiffCommand*> &) const;
         bool changed() const;

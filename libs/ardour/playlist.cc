@@ -527,7 +527,7 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 		pending_contents_change = true;
 		pending_length = true;
 	} else {
-                r->clear_history ();
+                r->clear_changes ();
 		pending_length = false;
 		LengthChanged (); /* EMIT SIGNAL */
 		pending_contents_change = false;
@@ -628,7 +628,7 @@ Playlist::flush_notifications (bool from_undo)
 	}
 
 	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
-                (*s)->clear_history ();
+                (*s)->clear_changes ();
 		RegionAdded (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
         }
 
@@ -2092,10 +2092,10 @@ Playlist::rdiff (vector<StatefulDiffCommand*>& cmds) const
 }
 
 void
-Playlist::clear_owned_history ()
+Playlist::clear_owned_changes ()
 {
 	RegionLock rlock (this);
-	Stateful::clear_owned_history ();
+	Stateful::clear_owned_changes ();
 }
 
 void

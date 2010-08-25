@@ -125,7 +125,7 @@ class SequenceProperty : public PropertyBase
 		return !_changes.added.empty() || !_changes.removed.empty();
 	}
 	
-	void clear_history () {
+	void clear_changes () {
 		_changes.added.clear ();
 		_changes.removed.clear ();
 	}
@@ -165,7 +165,7 @@ class SequenceProperty : public PropertyBase
 		}
         }
 
-	SequenceProperty<Container>* maybe_clone_self_if_found_in_history_node (XMLNode const & node) const {
+	SequenceProperty<Container>* clone_from_xml (XMLNode const & node) const {
 
 		XMLNodeList const children = node.children ();
 		
@@ -186,9 +186,9 @@ class SequenceProperty : public PropertyBase
 		return 0;
         }
 
-	void clear_owned_history () {
+	void clear_owned_changes () {
 		for (typename Container::iterator i = begin(); i != end(); ++i) {
-			(*i)->clear_history ();
+			(*i)->clear_changes ();
 		}
 	}
 

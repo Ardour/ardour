@@ -1331,8 +1331,8 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		}
 	}
 
-        playlist->clear_history ();
-        playlist->clear_owned_history ();
+        playlist->clear_changes ();
+        playlist->clear_owned_changes ();
 
 	switch (op) {
 	case Cut:
@@ -1391,7 +1391,7 @@ RouteTimeAxisView::paste (framepos_t pos, float times, Selection& selection, siz
 		pos = session_frame_to_track_frame (pos, track()->speed());
 	}
 
-        pl->clear_history ();
+        pl->clear_changes ();
 	pl->paste (*p, pos, times);
 	_session->add_command (new StatefulDiffCommand (pl));
 

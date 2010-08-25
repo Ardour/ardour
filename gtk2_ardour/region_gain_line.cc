@@ -75,7 +75,7 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 	XMLNode &before = alist->get_state();
 
 	if (!rv.audio_region()->envelope_active()) {
-                rv.audio_region()->clear_history ();
+                rv.audio_region()->clear_changes ();
 		rv.audio_region()->set_envelope_active(true);
 		trackview.session()->add_command(new StatefulDiffCommand (rv.audio_region()));
 	}

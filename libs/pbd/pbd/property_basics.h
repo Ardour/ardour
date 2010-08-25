@@ -90,21 +90,25 @@ public:
 
 	virtual PropertyBase* clone () const = 0;
         
-	/** Forget about any old value for this state */
-	virtual void clear_history () = 0;
+	/** Forget about any old changes to this property's value */
+	virtual void clear_changes () = 0;
 
 	/** Tell any things we own to forget about their old values */
-	virtual void clear_owned_history () {}
+	virtual void clear_owned_changes () {}
 
-        /** Get any changes in this property as XML and add it to a node */
+        /** Get any changes in this property as XML and add them to a node */
 	virtual void get_changes_as_xml (XMLNode *) const = 0;
 	
+        /** Get any changes in this property as Properties and add them to a list */
 	virtual void get_changes_as_properties (PropertyList& changes, Command *) const = 0;
 
 	/** Collect StatefulDiffCommands for changes to anything that we own */
 	virtual void rdiff (std::vector<StatefulDiffCommand*> &) const {}
-	
-        virtual PropertyBase* maybe_clone_self_if_found_in_history_node (const XMLNode&) const { return 0; }
+
+	/** Look in an XML node written by get_changes_as_xml and, if XML from this property
+	 *  is found, create a property with the changes from the XML.
+	 */
+        virtual PropertyBase* clone_from_xml (const XMLNode &) const { return 0; }
 
 	/** Set our value from an XML node.
 	 *  @return true if the value was set.
@@ -115,7 +119,7 @@ public:
 	virtual void get_value (XMLNode& node) const = 0;
 
 	/** @return true if this property has changed in value since construction or since
-	 *  the last call to clear_history(), whichever was more recent.
+	 *  the last call to clear_changes (), whichever was more recent.
 	 */
 	virtual bool changed() const = 0;
 
@@ -125,8 +129,8 @@ public:
 	/** Invert the changes in this property */
 	virtual void invert () = 0;
 
-	const gchar*property_name () const { return g_quark_to_string (_property_id); }
-	PropertyID  property_id () const   { return _property_id; }
+	const gchar* property_name () const { return g_quark_to_string (_property_id); }
+	PropertyID   property_id () const   { return _property_id; }
 
 	bool operator==(PropertyID pid) const {
 		return _property_id == pid;

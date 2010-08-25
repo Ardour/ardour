@@ -895,7 +895,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
 		boost::shared_ptr<Region> copy (RegionFactory::create (region, region->properties()));
 		begin_reversible_command (_("insert file"));
-                playlist->clear_history ();
+                playlist->clear_changes ();
 		playlist->add_region (copy, pos);
 		_session->add_command (new StatefulDiffCommand (playlist));
 		commit_reversible_command ();

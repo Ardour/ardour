@@ -1002,7 +1002,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 
                         _last_capture_sources.insert (_last_capture_sources.end(), srcs.begin(), srcs.end());
 
-                        _playlist->clear_history ();
+                        _playlist->clear_changes ();
                         _playlist->freeze ();
 
                         uint32_t buffer_position = 0;

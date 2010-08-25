@@ -2399,7 +2399,7 @@ Editor::point_trim (GdkEvent* event, nframes64_t new_bound)
 				}
 
 				if (!(*i)->region()->locked()) {
-					(*i)->region()->clear_history ();
+					(*i)->region()->clear_changes ();
 					(*i)->region()->trim_front (new_bound, this);
 					_session->add_command(new StatefulDiffCommand ((*i)->region()));
 				}
@@ -2407,7 +2407,7 @@ Editor::point_trim (GdkEvent* event, nframes64_t new_bound)
 
 		} else {
 			if (!rv->region()->locked()) {
-				rv->region()->clear_history ();
+				rv->region()->clear_changes ();
 				rv->region()->trim_front (new_bound, this);
 				_session->add_command(new StatefulDiffCommand (rv->region()));
 			}
@@ -2424,7 +2424,7 @@ Editor::point_trim (GdkEvent* event, nframes64_t new_bound)
 			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i)
 			{
 				if (!(*i)->region()->locked()) {
-					(*i)->region()->clear_history();
+					(*i)->region()->clear_changes();
 					(*i)->region()->trim_end (new_bound, this);
 					_session->add_command(new StatefulDiffCommand ((*i)->region()));
 				}
@@ -2433,7 +2433,7 @@ Editor::point_trim (GdkEvent* event, nframes64_t new_bound)
 		} else {
 
 			if (!rv->region()->locked()) {
-				rv->region()->clear_history ();
+				rv->region()->clear_changes ();
 				rv->region()->trim_end (new_bound, this);
 				_session->add_command (new StatefulDiffCommand (rv->region()));
 			}
@@ -2555,7 +2555,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes64_t pos)
 	boost::shared_ptr<Playlist> playlist = rtv->playlist();
 	double speed = rtv->track()->speed();
 
-        playlist->clear_history ();
+        playlist->clear_changes ();
 	boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region()));
         playlist->add_region (new_region, (nframes64_t) (pos * speed));
 	_session->add_command (new StatefulDiffCommand (playlist));
@@ -2661,7 +2661,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 
 	boost::shared_ptr<Playlist> playlist = clicked_axisview->playlist();
 
-        playlist->clear_history ();
+        playlist->clear_changes ();
 	clicked_routeview->playlist()->add_region (region, selection->time[clicked_selection].start);
 	_session->add_command(new StatefulDiffCommand (playlist));
 

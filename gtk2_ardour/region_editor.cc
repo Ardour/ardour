@@ -230,7 +230,7 @@ RegionEditor::position_clock_changed ()
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
-		_region->clear_history ();
+		_region->clear_changes ();
 		_region->set_position (position_clock.current_time(), this);
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
@@ -246,7 +246,7 @@ RegionEditor::end_clock_changed ()
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
-                _region->clear_history ();
+                _region->clear_changes ();
 		_region->trim_end (end_clock.current_time(), this);
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
@@ -266,7 +266,7 @@ RegionEditor::length_clock_changed ()
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
-                _region->clear_history ();
+                _region->clear_changes ();
 		_region->trim_end (_region->position() + frames - 1, this);
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
@@ -357,7 +357,7 @@ RegionEditor::sync_offset_absolute_clock_changed ()
 {
 	_session->begin_reversible_command (_("change region sync point"));
 
-        _region->clear_history ();
+        _region->clear_changes ();
 	_region->set_sync_position (sync_offset_absolute_clock.current_time());
 	_session->add_command (new StatefulDiffCommand (_region));
 	
@@ -369,7 +369,7 @@ RegionEditor::sync_offset_relative_clock_changed ()
 {
 	_session->begin_reversible_command (_("change region sync point"));
 
-        _region->clear_history ();
+        _region->clear_changes ();
 	_region->set_sync_position (sync_offset_relative_clock.current_time() + _region->position ());
 	_session->add_command (new StatefulDiffCommand (_region));
 	

@@ -2764,7 +2764,7 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 
 		trackview.session()->begin_reversible_command (_("paste"));
 
-                _region->clear_history ();
+                _region->clear_changes ();
 		_region->set_length (end_frame, this);
 		trackview.session()->add_command (new StatefulDiffCommand (_region));
 	}

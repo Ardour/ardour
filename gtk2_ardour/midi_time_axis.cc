@@ -1009,7 +1009,7 @@ MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit)
 	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
 
 	real_editor->begin_reversible_command (_("create region"));
-        playlist()->clear_history ();
+        playlist()->clear_changes ();
 
 	real_editor->snap_to (pos, 0);
 	

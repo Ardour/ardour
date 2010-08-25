@@ -28,7 +28,7 @@ using namespace std;
 using namespace PBD;
 
 /** Create a new StatefulDiffCommand by examining the changes made to a Stateful
- *  since the last time that clear_history was called on it.
+ *  since the last time that clear_changes was called on it.
  *  @param s Stateful object.
  */
 

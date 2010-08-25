@@ -89,7 +89,7 @@ public:
 	virtual ~Playlist ();
 
         void update (const RegionListProperty::ChangeRecord&);
-        void clear_owned_history ();
+        void clear_owned_changes ();
         void rdiff (std::vector<PBD::StatefulDiffCommand*>&) const;
 
 	boost::shared_ptr<Region> region_by_id (const PBD::ID&);

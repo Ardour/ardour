@@ -88,7 +88,7 @@ public:
 		return _current;
 	}
 
-	void clear_history () {
+	void clear_changes () {
 		_have_old = false;
 	}
 
@@ -153,7 +153,7 @@ protected:
                                 if (v == _old) {
                                         /* value has been reset to the value
                                            at the start of a history transaction,
-                                           before clear_history() is called.
+                                           before clear_changes() is called.
                                            thus there is effectively no apparent
                                            history for this property.
                                         */
@@ -204,7 +204,7 @@ public:
                 }
         }
 
-        Property<T>* maybe_clone_self_if_found_in_history_node (const XMLNode& node) const {
+        Property<T>* clone_from_xml (const XMLNode& node) const {
 		XMLNodeList const & children = node.children ();
 		XMLNodeList::const_iterator i = children.begin();
 		while (i != children.end() && (*i)->name() != this->property_name()) {

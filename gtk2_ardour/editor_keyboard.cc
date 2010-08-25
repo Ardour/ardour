@@ -91,7 +91,7 @@ Editor::kbd_mute_unmute_region ()
 
 		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 
-			(*i)->region()->playlist()->clear_history ();
+			(*i)->region()->playlist()->clear_changes ();
 			(*i)->region()->set_muted (!(*i)->region()->muted ());
 			_session->add_command (new StatefulDiffCommand ((*i)->region()->playlist()));
 
@@ -102,7 +102,7 @@ Editor::kbd_mute_unmute_region ()
 	} else if (entered_regionview) {
 
 		begin_reversible_command (_("mute region"));
-                entered_regionview->region()->playlist()->clear_history ();
+                entered_regionview->region()->playlist()->clear_changes ();
 		entered_regionview->region()->set_muted (!entered_regionview->region()->muted());
 		_session->add_command (new StatefulDiffCommand (entered_regionview->region()->playlist()));
 		commit_reversible_command();

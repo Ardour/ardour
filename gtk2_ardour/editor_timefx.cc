@@ -81,7 +81,7 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 		MidiStretch stretch(*_session, request);
 		begin_reversible_command ("midi stretch");
 		stretch.run(regions.front()->region());
-                playlist->clear_history ();
+                playlist->clear_changes ();
 		playlist->replace_region (regions.front()->region(), stretch.results[0],
 				regions.front()->region()->position());
 		_session->add_command (new StatefulDiffCommand (playlist));
@@ -337,7 +337,7 @@ Editor::do_timefx (TimeFXDialog& dialog)
 				in_command = true;
 			}
 
-                        playlist->clear_history ();
+                        playlist->clear_changes ();
 			playlist->replace_region (region, new_region, region->position());
 			_session->add_command (new StatefulDiffCommand (playlist));
 		}
