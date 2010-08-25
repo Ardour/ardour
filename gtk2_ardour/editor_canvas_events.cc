@@ -518,6 +518,7 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 	case GDK_BUTTON_PRESS:
 		clicked_crossfadeview = xfv;
 		clicked_axisview = &clicked_crossfadeview->get_time_axis_view();
+		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
 		if (event->button.button == 3) {
 			return button_press_handler (item, event, CrossfadeViewItem);
 		}

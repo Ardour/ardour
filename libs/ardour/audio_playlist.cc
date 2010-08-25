@@ -399,7 +399,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 		touched_regions = 0;
 
 		try {
-			nframes_t xfade_length;
+			framecnt_t xfade_length;
 			switch (c) {
 			case OverlapNone:
 				break;

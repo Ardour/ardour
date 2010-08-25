@@ -219,6 +219,7 @@ RegionLayeringOrderEditor::maybe_present ()
 		hide ();
 		return;
 	}
+
 	present ();
 }
 

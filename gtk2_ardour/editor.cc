@@ -2017,7 +2017,7 @@ Editor::add_region_context_items (StreamView* sv, list<boost::shared_ptr<Region>
 
 	edit_items.push_back (MenuElem (menu_item_name, *region_menu));
 	if (multiple_regions_at_position && (layering_order_editor == 0 || !layering_order_editor->is_visible ())) {
-		edit_items.push_back (MenuElem (_("Choose top region"), (bind (mem_fun(*this, &Editor::change_region_layering_order), position))));
+		edit_items.push_back (MenuElem (_("Choose Top Region"), (bind (mem_fun(*this, &Editor::change_region_layering_order), position))));
 	}
 	edit_items.push_back (SeparatorElem());
 }
@@ -5572,14 +5572,10 @@ Editor::show_editor_list (bool yn)
 void
 Editor::change_region_layering_order (framepos_t position)
 {
-	if (!clicked_regionview) {
+        if (!clicked_routeview) {
                 if (layering_order_editor) {
                         layering_order_editor->hide ();
                 }
-		return;
-	}
-
-        if (!clicked_routeview) {
 		return;
 	}
 
