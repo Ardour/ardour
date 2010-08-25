@@ -1596,18 +1596,19 @@ RegionCreateDrag::RegionCreateDrag (Editor* e, ArdourCanvas::Item* i, TimeAxisVi
 }
 
 void
-RegionCreateDrag::motion (GdkEvent *, bool first_move)
+RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move) {
 		/* don't use a zero-length region otherwise its region view will be hidden when it is created */
 		_region = _view->add_region (grab_frame(), 1, false);
 	} else {
-		if (_drags->current_pointer_frame() < grab_frame()) {
-			_region->set_position (_drags->current_pointer_frame(), this);
+		framepos_t const f = adjusted_current_frame (event);
+		if (f < grab_frame()) {
+			_region->set_position (f, this);
 		}
 
 		/* again, don't use a zero-length region (see above) */
-		framecnt_t const len = abs (_drags->current_pointer_frame() - grab_frame ());
+		framecnt_t const len = abs (f - grab_frame ());
 		_region->set_length (len < 1 ? 1 : len, this);
 	}
 }
