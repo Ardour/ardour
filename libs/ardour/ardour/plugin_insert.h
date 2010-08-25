@@ -135,7 +135,6 @@ class PluginInsert : public Processor
 
 	void set_automatable ();
 	void control_list_automation_state_changed (Evoral::Parameter, AutoState);
-	void set_parameter_state (const XMLNode& node, int version);
 	void set_parameter_state_2X (const XMLNode& node, int version);
 
 	int32_t count_for_configuration (ChanCount in, ChanCount out) const;

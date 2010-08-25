@@ -789,6 +789,10 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 	if (version < 3000) {
 
+                /* Only 2.X sessions need a call to set_parameter_state() - in 3.X and above
+                   this is all handled by Automatable
+                */
+
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			if ((*niter)->name() == "Redirect") {
 				/* XXX do we need to tackle placement? i think not (pd; oct 16 2009) */
@@ -797,11 +801,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			}
 		}
 		
-		// set_parameter_state_2X (node, version);
-		
-	} else {
-
-		// set_parameter_state (node, version);
+		set_parameter_state_2X (node, version);
 	}
 
 	// The name of the PluginInsert comes from the plugin, nothing else
@@ -815,66 +815,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	}
 
 	return 0;
-}
-
-void
-PluginInsert::set_parameter_state (const XMLNode& node, int version)
-{
-	XMLNodeList nlist = node.children();
-	XMLNodeIterator niter;
-
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		
-		if ((*niter)->name() != port_automation_node_name) {
-			continue;
-		}
-		
-		XMLNodeList cnodes;
-		XMLProperty *cprop;
-		XMLNodeConstIterator iter;
-		XMLNode *child;
-		const char *port;
-		uint32_t port_id;
-
-		cnodes = (*niter)->children ("AutomationList");
-
-		for (iter = cnodes.begin(); iter != cnodes.end(); ++iter) {
-
-			child = *iter;
-
-			/* XXX this code knows way too much about the internal details of an AutomationList state node */
-
-			if ((cprop = child->property("automation-id")) != 0) {
-				port = cprop->value().c_str();
-			} else {
-				warning << _("PluginInsert: Auto: no plugin parameter number seen") << endmsg;
-				continue;
-			}
-
-			if (sscanf (port, "parameter-%" PRIu32, &port_id) != 1) {
-				warning << _("PluginInsert: Auto: no parameter number found") << endmsg;
-				continue;
-			}
-
-			if (port_id >= _plugins[0]->parameter_count()) {
-				warning << _("PluginInsert: Auto: plugin parameter out of range") << endmsg;
-				continue;
-			}
-
-			boost::shared_ptr<AutomationControl> c = boost::dynamic_pointer_cast<AutomationControl>(
-					control(Evoral::Parameter(PluginAutomation, 0, port_id), true));
-
-			if (c) {
-				c->alist()->set_state (*child, version);
-			} else {
-				error << string_compose (_("PluginInsert: automatable control %1 not found - ignored"), port_id) << endmsg;
-			}
-		}
-
-		/* done */
-		
-		break;
-	}
 }
 
 void
