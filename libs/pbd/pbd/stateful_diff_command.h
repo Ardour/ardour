@@ -47,8 +47,7 @@ public:
 
 private:
 	boost::weak_ptr<Stateful> _object; ///< the object in question
-        PBD::PropertyList* _undo; ///< its (partial) state before the command, to allow undo
-        PBD::PropertyList* _redo;  ///< its (partial) state after the operation, to allow redo
+        PBD::PropertyList* _changes; ///< property changes to execute this command
 };
 
 };

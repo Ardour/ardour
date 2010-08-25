@@ -32,11 +32,13 @@ namespace PBD {
 class PropertyList : public std::map<PropertyID, PropertyBase*>
 {
 public:
-	PropertyList();
+	PropertyList ();
+	PropertyList (PropertyList const &);
         
 	virtual ~PropertyList();
 
-        void get_changes (XMLNode *);
+        void get_changes_as_xml (XMLNode *);
+	void invert ();
 
         /** Add a property (of some kind) to the list. Used when
             constructing PropertyLists that describe a change/operation.

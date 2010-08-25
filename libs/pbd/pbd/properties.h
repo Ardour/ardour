@@ -24,7 +24,7 @@
 #include <sstream>
 #include <list>
 #include <set>
-#include <glib.h>
+#include <iostream>
 
 #include "pbd/xml++.h"
 #include "pbd/property_basics.h"
@@ -45,6 +45,13 @@ public:
 		, _current (v)
 	{}
 
+	PropertyTemplate (PropertyDescriptor<T> p, T const& o, T const& c)
+		: PropertyBase (p.property_id)
+		, _have_old (true)
+		, _current (c)
+		, _old (o)
+	{}
+	
 	PropertyTemplate<T>& operator=(PropertyTemplate<T> const& s) {
 		/* XXX: isn't there a nicer place to do this? */
 		_have_old    = s._have_old;
@@ -85,11 +92,10 @@ public:
 		_have_old = false;
 	}
 
-	void get_change (XMLNode* history_node) const {
-		/* We can get to the current state of a scalar property like this one simply
-		   by knowing what the new state is.
-		*/
-                history_node->add_property (property_name(), to_string (_current));
+	void get_changes_as_xml (XMLNode* history_node) const {
+		XMLNode* node = history_node->add_child (property_name());
+                node->add_property ("from", to_string (_old));
+                node->add_property ("to", to_string (_current));
 	}
 
 	bool set_value (XMLNode const & node) {
@@ -114,11 +120,19 @@ public:
 
 	bool changed () const { return _have_old; }
 	
-	void apply_change (PropertyBase const * p) {
+	void apply_changes (PropertyBase const * p) {
 		T v = dynamic_cast<const PropertyTemplate<T>* > (p)->val ();
+		std::cout << "Apply changes: " << v << " cf " << _current << "\n";
 		if (v != _current) {
 			set (v);
 		}
+	}
+
+	void invert () {
+		T const tmp = _current;
+		_current = _old;
+		_old = tmp;
+		std::cout << "Inverted to " << _old << " -> " << _current << "\n";
 	}
 
 protected:
@@ -175,20 +189,39 @@ public:
 	Property (PropertyDescriptor<T> q, T const& v)
 		: PropertyTemplate<T> (q, v)
 	{}
-        
-        void diff (PropertyList& undo, PropertyList& redo, Command* /*ignored*/) const {
+
+	Property (PropertyDescriptor<T> q, T const& o, T const& c)
+		: PropertyTemplate<T> (q, o, c)
+	{}
+
+	Property<T>* clone () const {
+		return new Property<T> (*this);
+	}
+	
+        void get_changes_as_properties (PropertyList& changes, Command *) const {
                 if (this->_have_old) {
-                        undo.add (new Property<T> (this->property_id(), this->_old));
-                        redo.add (new Property<T> (this->property_id(), this->_current));
+			changes.add (new Property<T> (*this));
                 }
         }
 
         Property<T>* maybe_clone_self_if_found_in_history_node (const XMLNode& node) const {
-                const XMLProperty* prop = node.property (this->property_name());
-                if (!prop) {
-                        return 0;
-                }
-                return new Property<T> (this->property_id(), from_string (prop->value()));
+		XMLNodeList const & children = node.children ();
+		XMLNodeList::const_iterator i = children.begin();
+		while (i != children.end() && (*i)->name() != this->property_name()) {
+			++i;
+		}
+
+		if (i == children.end()) {
+			return 0;
+		}
+		XMLProperty* from = (*i)->property ("from");
+		XMLProperty* to = (*i)->property ("to");
+				
+		if (!from || !to) {
+			return 0;
+		}
+			
+		return new Property<T> (this->property_id(), from_string (from->value()), from_string (to->value ()));
         }
 
 	T & operator=(T const& v) {
@@ -238,11 +271,14 @@ public:
 		: PropertyTemplate<std::string> (q, v)
 	{}
 
-        void diff (PropertyList& before, PropertyList& after, Command* /*ignored*/) const {
+	Property<std::string>* clone () const {
+		return new Property<std::string> (*this);
+	}
+	
+        void get_changes_as_properties (PropertyList& changes, Command* /*ignored*/) const {
                 if (this->_have_old) {
-                        before.add (new Property<std::string> (PropertyDescriptor<std::string> (this->property_id()), this->_old));
-                        after.add (new Property<std::string> (PropertyDescriptor<std::string> (this->property_id()), this->_current));
-                }
+			changes.add (new Property<std::string> (*this));
+		}
         }
 
 	std::string & operator=(std::string const& v) {

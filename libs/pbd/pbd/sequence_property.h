@@ -79,37 +79,29 @@ class SequenceProperty : public PropertyBase
 
 	SequenceProperty (PropertyID id, const boost::function<void(const ChangeRecord&)>& update)
                 : PropertyBase (id), _update_callback (update) {}
-        
+
 	virtual typename Container::value_type lookup_id (const PBD::ID&) = 0;
 
-        void invert_changes () {
-
-                /* reverse the adds/removes so that this property's change member
-                   correctly describes how to undo the changes it currently
-                   reflects. A derived instance of this type of property will
-                   create a diff() pair by copying the property twice, and
-                   calling this method on the "before" item of the pair.
-                */
-
-		_change.removed.swap (_change.added);
+        void invert () {
+		_changes.removed.swap (_changes.added);
         }
 
-	void get_change (XMLNode* history_node) const {
+	void get_changes_as_xml (XMLNode* history_node) const {
 
                 XMLNode* child = new XMLNode (PBD::capitalize (property_name()));
                 history_node->add_child_nocopy (*child);
                 
 		/* record the change described in our change member */
 
-		if (!_change.added.empty()) {
-			for (typename ChangeContainer::iterator i = _change.added.begin(); i != _change.added.end(); ++i) {
+		if (!_changes.added.empty()) {
+			for (typename ChangeContainer::iterator i = _changes.added.begin(); i != _changes.added.end(); ++i) {
                                 XMLNode* add_node = new XMLNode ("Add");
                                 child->add_child_nocopy (*add_node);
                                 add_node->add_property ("id", (*i)->id().to_s());
 			}
 		}
-		if (!_change.removed.empty()) {
-			for (typename ChangeContainer::iterator i = _change.removed.begin(); i != _change.removed.end(); ++i) {
+		if (!_changes.removed.empty()) {
+			for (typename ChangeContainer::iterator i = _changes.removed.begin(); i != _changes.removed.end(); ++i) {
                                 XMLNode* remove_node = new XMLNode ("Remove");
                                 child->add_child_nocopy (*remove_node);
                                 remove_node->add_property ("id", (*i)->id().to_s());
@@ -130,16 +122,16 @@ class SequenceProperty : public PropertyBase
 	}
 
 	bool changed () const {
-		return !_change.added.empty() || !_change.removed.empty();
+		return !_changes.added.empty() || !_changes.removed.empty();
 	}
 	
 	void clear_history () {
-		_change.added.clear ();
-		_change.removed.clear ();
+		_changes.added.clear ();
+		_changes.removed.clear ();
 	}
 
-	void apply_change (PropertyBase const * p) {
-		const ChangeRecord& change (dynamic_cast<const SequenceProperty*> (p)->change ());
+	void apply_changes (PropertyBase const * p) {
+		const ChangeRecord& change (dynamic_cast<const SequenceProperty*> (p)->changes ());
 		update (change);
 	}
 
@@ -154,14 +146,10 @@ class SequenceProperty : public PropertyBase
 		_update_callback (cr);
 	}
 
-	void diff (PBD::PropertyList& undo, PBD::PropertyList& redo, Command* cmd) const {
+	void get_changes_as_properties (PBD::PropertyList& changes, Command* cmd) const {
 		if (changed ()) {
-			/* list of the removed/added items since clear_history() was last called */
 			SequenceProperty<Container>* a = copy_for_history ();
-
-			/* the same list, but with removed/added lists swapped (for undo purposes) */
-			SequenceProperty<Container>* b = copy_for_history ();
-			b->invert_changes ();
+			changes.add (a);
 
 			if (cmd) {
 				/* whenever one of the items emits DropReferences, make sure
@@ -170,13 +158,10 @@ class SequenceProperty : public PropertyBase
 				   with this diff().
 				*/
                         
-				for (typename ChangeContainer::iterator i = a->change().added.begin(); i != a->change().added.end(); ++i) {
+				for (typename ChangeContainer::iterator i = a->changes().added.begin(); i != a->changes().added.end(); ++i) {
 					(*i)->DropReferences.connect_same_thread (*cmd, boost::bind (&Destructible::drop_references, cmd));
 				}
                         }
-			
-			undo.add (b);
-			redo.add (a);
 		}
         }
 
@@ -190,7 +175,7 @@ class SequenceProperty : public PropertyBase
 				
 				SequenceProperty<Container>* p = create ();
 				
-				if (p->set_change (**i)) {
+				if (p->set_changes (**i)) {
 					return p;
 				} else {
 					delete p;
@@ -232,51 +217,51 @@ class SequenceProperty : public PropertyBase
 	typename Container::const_reverse_iterator rend() const { return _val.rend(); }
 
 	typename Container::iterator insert (typename Container::iterator i, const typename Container::value_type& v) {
-		_change.add (v);
+		_changes.add (v);
 		return _val.insert (i, v);
 	}
 
 	typename Container::iterator erase (typename Container::iterator i) {
 		if (i != _val.end()) {
-			_change.remove (*i);
+			_changes.remove (*i);
 		}
 		return _val.erase (i);
 	}
 
 	typename Container::iterator erase (typename Container::iterator f, typename Container::iterator l) {
 		for (typename Container::const_iterator i = f; i != l; ++i) {
-			_change.remove (*i);
+			_changes.remove (*i);
 		}
 		return _val.erase (f, l);
 	}
 
 	void push_back (const typename Container::value_type& v) {
-		_change.add (v);
+		_changes.add (v);
 		_val.push_back (v);
 	}
 
 	void push_front (const typename Container::value_type& v) {
-		_change.add (v);
+		_changes.add (v);
 		_val.push_front (v);
 	}
 
 	void pop_front () {
                 if (!_val.empty()) {
-                        _change.remove (front());
+                        _changes.remove (front());
                 }
 		_val.pop_front ();
 	}
 
 	void pop_back () {
                 if (!_val.empty()) {
-                        _change.remove (back());
+                        _changes.remove (back());
                 }
 		_val.pop_back ();
 	}
 
 	void clear () {
 		for (typename Container::iterator i = _val.begin(); i != _val.end(); ++i) {
-			_change.remove (*i);
+			_changes.remove (*i);
 		}
 		_val.clear ();
 	}
@@ -291,10 +276,10 @@ class SequenceProperty : public PropertyBase
 
 	Container& operator= (const Container& other) {
 		for (typename Container::iterator i = _val.begin(); i != _val.end(); ++i) {
-			_change.remove (*i);
+			_changes.remove (*i);
 		}
 		for (typename Container::iterator i = other.begin(); i != other.end(); ++i) {
-			_change.add (*i);
+			_changes.add (*i);
 		}
 		return _val = other;
 	}
@@ -323,18 +308,18 @@ class SequenceProperty : public PropertyBase
 		_val.sort (comp);
 	}
         
-        const ChangeRecord& change() const { return _change; }
+        const ChangeRecord& changes () const { return _changes; }
 
   protected:
 	Container _val;
-	ChangeRecord _change;
+	ChangeRecord _changes;
 	boost::function<void(const ChangeRecord&)> _update_callback;
 
         /** Load serialized change history.
          * @return true if loading succeeded, false otherwise
          */
 
-	bool set_change (XMLNode const & history_node) {
+	bool set_changes (XMLNode const & history_node) {
 
                 const XMLNodeList& children (history_node.children());
 
@@ -348,9 +333,9 @@ class SequenceProperty : public PropertyBase
                                         return false;
                                 }
                                 if ((*i)->name() == "Add") {
-                                        _change.added.insert (v);
+                                        _changes.added.insert (v);
                                 } else if ((*i)->name() == "Remove") {
-                                        _change.removed.insert (v);
+                                        _changes.removed.insert (v);
                                 }
                         }
                 }
@@ -370,7 +355,7 @@ private:
 	SequenceProperty<Container>* copy_for_history () const {
 		SequenceProperty<Container>* copy = create ();
 		/* this is all we need */
-		copy->_change = _change;
+		copy->_changes = _changes;
 		return copy;
 	}
 };

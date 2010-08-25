@@ -63,10 +63,12 @@ class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_
   public:
         RegionListProperty (Playlist&);
 
+	RegionListProperty* clone () const;
+
         boost::shared_ptr<Region> lookup_id (const PBD::ID& id);
 
   private:
-	PBD::SequenceProperty<std::list<boost::shared_ptr<Region> > >* create () const;
+	RegionListProperty* create () const;
 
         friend class Playlist;
         /* we live and die with our playlist, no lifetime management needed */

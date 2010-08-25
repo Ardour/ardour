@@ -27,6 +27,20 @@ using namespace PBD;
 PropertyList::PropertyList() 
         : _property_owner (true) 
 {
+	
+}
+
+PropertyList::PropertyList (PropertyList const & other)
+	: std::map<PropertyID, PropertyBase*> (other)
+	, _property_owner (other._property_owner)
+{
+	if (_property_owner) {
+		/* make our own copies of the properties */
+		clear ();
+		for (std::map<PropertyID, PropertyBase*>::const_iterator i = other.begin(); i != other.end(); ++i) {
+			insert (std::make_pair (i->first, i->second->clone ()));
+		}
+	}
 }
 
 PropertyList::~PropertyList ()
@@ -39,13 +53,13 @@ PropertyList::~PropertyList ()
 }
 
 void
-PropertyList::get_changes (XMLNode* history_node)
+PropertyList::get_changes_as_xml (XMLNode* history_node)
 {
         for (const_iterator i = begin(); i != end(); ++i) {
-                DEBUG_TRACE (DEBUG::Properties, string_compose ("Add before/after to %1 for %2\n",
+                DEBUG_TRACE (DEBUG::Properties, string_compose ("Add changes to %1 for %2\n",
                                                                 history_node->name(), 
                                                                 i->second->property_name()));
-                i->second->get_change (history_node);
+                i->second->get_changes_as_xml (history_node);
         }
 }
 
@@ -53,7 +67,15 @@ bool
 PropertyList::add (PropertyBase* prop)
 {
         return insert (value_type (prop->property_id(), prop)).second;
-}        
+}
+
+void
+PropertyList::invert ()
+{
+	for (iterator i = begin(); i != end(); ++i) {
+		i->second->invert ();
+	}
+}
 
 OwnedPropertyList::OwnedPropertyList ()
 {

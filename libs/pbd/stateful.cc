@@ -166,12 +166,16 @@ Stateful::clear_history ()
 	}
 }
 
-void
-Stateful::diff (PropertyList& before, PropertyList& after, Command* cmd) const
+PropertyList *
+Stateful::get_changes_as_properties (Command* cmd) const
 {
+	PropertyList* pl = new PropertyList;
+	
 	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
-		i->second->diff (before, after, cmd);
+		i->second->get_changes_as_properties (*pl, cmd);
 	}
+
+	return pl;
 }
 
 /** Set our property values from an XML node.
@@ -209,8 +213,13 @@ Stateful::apply_changes (const PropertyList& property_list)
         
         for (PropertyList::const_iterator i = property_list.begin(); i != property_list.end(); ++i) {
                 if ((p = _properties->find (i->first)) != _properties->end()) {
-                        DEBUG_TRACE (DEBUG::Stateful, string_compose ("actually setting property %1\n", p->second->property_name()));
-			if (apply_change (*i->second)) {
+
+                        DEBUG_TRACE (
+				DEBUG::Stateful,
+				string_compose ("actually setting property %1 using %2\n", p->second->property_name(), i->second->property_name())
+				);
+			
+			if (apply_changes (*i->second)) {
 				c.add (i->first);
 			}
 		} else {
@@ -303,14 +312,14 @@ Stateful::changed() const
 }
 
 bool
-Stateful::apply_change (const PropertyBase& prop)
+Stateful::apply_changes (const PropertyBase& prop)
 {
 	OwnedPropertyList::iterator i = _properties->find (prop.property_id());
 	if (i == _properties->end()) {
 		return false;
 	}
 
-	i->second->apply_change (&prop);
+	i->second->apply_changes (&prop);
 	return true;
 }
 

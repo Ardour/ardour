@@ -124,7 +124,12 @@ RegionListProperty::lookup_id (const ID& id)
         return ret;
 }
 
-SequenceProperty<std::list<boost::shared_ptr<Region> > >* RegionListProperty::create () const
+RegionListProperty* RegionListProperty::clone () const
+{
+	return new RegionListProperty (*this);
+}
+
+RegionListProperty* RegionListProperty::create () const
 {
 	return new RegionListProperty (_playlist);
 }

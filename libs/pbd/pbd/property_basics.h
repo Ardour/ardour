@@ -87,6 +87,8 @@ public:
 	{}
 
 	virtual ~PropertyBase () {}
+
+	virtual PropertyBase* clone () const = 0;
         
 	/** Forget about any old value for this state */
 	virtual void clear_history () = 0;
@@ -94,15 +96,10 @@ public:
 	/** Tell any things we own to forget about their old values */
 	virtual void clear_owned_history () {}
 
-        /** Get any change in this property as XML and add it to a node */
-	virtual void get_change (XMLNode *) const = 0;
-
-	/** Add information to two property lists: one that allows
-	 *  undo of the changes in this property's state betwen now and
-	 *  the last call to clear_history, and one that allows redo
-	 *  of those changes.
-	 */
-	virtual void diff (PropertyList& undo, PropertyList& redo, Command*) const = 0;
+        /** Get any changes in this property as XML and add it to a node */
+	virtual void get_changes_as_xml (XMLNode *) const = 0;
+	
+	virtual void get_changes_as_properties (PropertyList& changes, Command *) const = 0;
 
 	/** Collect StatefulDiffCommands for changes to anything that we own */
 	virtual void rdiff (std::vector<StatefulDiffCommand*> &) const {}
@@ -122,8 +119,11 @@ public:
 	 */
 	virtual bool changed() const = 0;
 
-	/** Apply a change contained in another Property to this one */
-	virtual void apply_change (PropertyBase const *) = 0;
+	/** Apply changes contained in another Property to this one */
+	virtual void apply_changes (PropertyBase const *) = 0;
+
+	/** Invert the changes in this property */
+	virtual void invert () = 0;
 
 	const gchar*property_name () const { return g_quark_to_string (_property_id); }
 	PropertyID  property_id () const   { return _property_id; }

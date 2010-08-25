@@ -34,10 +34,9 @@ using namespace PBD;
 
 StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<StatefulDestructible> s)
         : _object (s)
-        , _undo (new PropertyList)
-        , _redo (new PropertyList)
+        , _changes (0)
 {
-        s->diff (*_undo, *_redo, this);
+	_changes = s->get_changes_as_properties (this);
 
         /* if the stateful object that this command refers to goes away,
            be sure to notify owners of this command.
@@ -48,21 +47,17 @@ StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<StatefulDestructible
 
 StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<StatefulDestructible> s, XMLNode const & n)
 	: _object (s)
-        , _undo (0)
-        , _redo (0)
+        , _changes (0)
 {
         const XMLNodeList& children (n.children());
 
         for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-                if ((*i)->name() == X_("Undo")) {
-                        _undo = s->property_factory (**i);
-                } else if ((*i)->name() == X_("Do")) {
-                        _redo = s->property_factory (**i);
+                if ((*i)->name() == X_("Changes")) {
+                        _changes = s->property_factory (**i);
                 }
-        }
+	}
 
-        assert (_undo != 0);
-        assert (_redo != 0);
+        assert (_changes != 0);
 
         /* if the stateful object that this command refers to goes away,
            be sure to notify owners of this command.
@@ -75,8 +70,7 @@ StatefulDiffCommand::~StatefulDiffCommand ()
 {
         drop_references ();
 
-        delete _undo;
-        delete _redo;
+        delete _changes;
 }
 
 void
@@ -85,7 +79,7 @@ StatefulDiffCommand::operator() ()
 	boost::shared_ptr<Stateful> s (_object.lock());
 
 	if (s) {
-                s->apply_changes (*_redo);
+                s->apply_changes (*_changes);
 	}
 }
 
@@ -95,8 +89,9 @@ StatefulDiffCommand::undo ()
 	boost::shared_ptr<Stateful> s (_object.lock());
 
 	if (s) {
-                std::cerr << "Undoing a stateful diff command\n";
-                s->apply_changes (*_undo);
+		PropertyList p = *_changes;
+		p.invert ();
+                s->apply_changes (p);
 	}
 }
 
@@ -115,14 +110,11 @@ StatefulDiffCommand::get_state ()
 	node->add_property ("obj-id", s->id().to_s());
 	node->add_property ("type-name", demangled_name (*s.get()));
 
-        XMLNode* undo = new XMLNode (X_("Undo"));
-        XMLNode* redo = new XMLNode (X_("Do"));
+        XMLNode* changes = new XMLNode (X_("Changes"));
 
-        _undo->get_changes (undo);
-        _redo->get_changes (redo);
+        _changes->get_changes_as_xml (changes);
         
-        node->add_child_nocopy (*undo);
-        node->add_child_nocopy (*redo);
+        node->add_child_nocopy (*changes);
 
 	return *node;
 }

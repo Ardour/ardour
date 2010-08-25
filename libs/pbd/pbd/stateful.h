@@ -49,7 +49,7 @@ class Stateful {
 	virtual XMLNode& get_state (void) = 0;
 	virtual int set_state (const XMLNode&, int version) = 0;
 
-	virtual bool apply_change (PropertyBase const &);
+	virtual bool apply_changes (PropertyBase const &);
 	PropertyChange apply_changes (PropertyList const &);
 	
         const OwnedPropertyList& properties() const { return *_properties; }
@@ -69,7 +69,7 @@ class Stateful {
 
 	void clear_history ();
 	virtual void clear_owned_history ();
-        void diff (PropertyList&, PropertyList&, Command*) const;
+        PropertyList* get_changes_as_properties (Command *) const;
 	virtual void rdiff (std::vector<StatefulDiffCommand*> &) const;
         bool changed() const;
 
