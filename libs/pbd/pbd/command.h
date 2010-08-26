@@ -43,6 +43,10 @@ public:
 	virtual XMLNode &get_state();
 	virtual int set_state(const XMLNode&, int /*version*/) { /* noop */ return 0; }
 
+	virtual bool empty () const {
+		return false;
+	}
+
 protected:
 	Command() {}
 	Command(const std::string& name) : _name(name) {}

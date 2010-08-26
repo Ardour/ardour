@@ -31,6 +31,7 @@
 #include "pbd/id.h"
 #include "pbd/property_basics.h"
 #include "pbd/property_list.h"
+#include "pbd/stateful_diff_command.h"
 
 namespace PBD {
 
@@ -80,8 +81,6 @@ class SequenceProperty : public PropertyBase
 	SequenceProperty (PropertyID id, const boost::function<void(const ChangeRecord&)>& update)
                 : PropertyBase (id), _update_callback (update) {}
 
-	virtual typename Container::value_type lookup_id (const PBD::ID&) const = 0;
-
         void invert () {
 		_changes.removed.swap (_changes.added);
         }
@@ -97,17 +96,24 @@ class SequenceProperty : public PropertyBase
 			for (typename ChangeContainer::iterator i = _changes.added.begin(); i != _changes.added.end(); ++i) {
                                 XMLNode* add_node = new XMLNode ("Add");
                                 child->add_child_nocopy (*add_node);
-                                add_node->add_property ("id", (*i)->id().to_s());
+				get_content_as_xml (*i, *add_node);
 			}
 		}
 		if (!_changes.removed.empty()) {
 			for (typename ChangeContainer::iterator i = _changes.removed.begin(); i != _changes.removed.end(); ++i) {
                                 XMLNode* remove_node = new XMLNode ("Remove");
                                 child->add_child_nocopy (*remove_node);
-                                remove_node->add_property ("id", (*i)->id().to_s());
+				get_content_as_xml (*i, *remove_node);
 			}
 		}
 	}
+
+	/** Get a representation of one of our items as XML.  The representation must be sufficient to
+	 *  restore the item's state later; an ID is ok if someone else is storing the item state,
+	 *  otherwise it needs to be the full state.  The supplied node is an <Add> or <Remove>
+	 *  which this method can either add properties or children to.
+	 */
+	virtual void get_content_as_xml (typename ChangeContainer::value_type, XMLNode &) const = 0;
 
 	bool set_value (XMLNode const &) {
 		/* XXX: not used, but probably should be */
@@ -191,11 +197,10 @@ class SequenceProperty : public PropertyBase
 
 		XMLNodeList const & grandchildren = (*i)->children ();
 		for (XMLNodeList::const_iterator j = grandchildren.begin(); j != grandchildren.end(); ++j) {
-			XMLProperty const * prop = (*j)->property ("id");
-			assert (prop);
-			PBD::ID id (prop->value ());
-			typename Container::value_type v = lookup_id (id);
+
+			typename Container::value_type v = get_content_from_xml (**j);
 			assert (v);
+			
 			if ((*j)->name() == "Add") {
 				p->_changes.added.insert (v);
 			} else if ((*j)->name() == "Remove") {
@@ -206,13 +211,16 @@ class SequenceProperty : public PropertyBase
 		return p;
         }
 
+	/** Given an <Add> or <Remove> node as passed into get_content_to_xml, obtain an item */
+	virtual typename Container::value_type get_content_from_xml (XMLNode const & node) const = 0;
+
 	void clear_owned_changes () {
 		for (typename Container::iterator i = begin(); i != end(); ++i) {
 			(*i)->clear_changes ();
 		}
 	}
 
-	void rdiff (std::vector<StatefulDiffCommand*>& cmds) const {
+	void rdiff (std::vector<Command*>& cmds) const {
 		for (typename Container::const_iterator i = begin(); i != end(); ++i) {
 			if ((*i)->changed ()) {
 				StatefulDiffCommand* sdc = new StatefulDiffCommand (*i);
@@ -253,6 +261,11 @@ class SequenceProperty : public PropertyBase
 			_changes.remove (*i);
 		}
 		return _val.erase (f, l);
+	}
+
+	void remove (const typename Container::value_type& v) {
+		_changes.remove (v);
+		_val.remove (v);
 	}
 
 	void push_back (const typename Container::value_type& v) {

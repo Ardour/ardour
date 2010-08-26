@@ -33,12 +33,39 @@ class Region;
 class AudioRegion;
 class Source;
 
+namespace Properties {
+        /* fake the type, since crossfades are handled by SequenceProperty which doesn't
+           care about such things.
+        */
+        extern PBD::PropertyDescriptor<bool> crossfades;
+}
+
+class AudioPlaylist;	
+
+class CrossfadeListProperty : public PBD::SequenceProperty<std::list<boost::shared_ptr<Crossfade> > >
+{
+public:
+	CrossfadeListProperty (AudioPlaylist &);
+
+	void get_content_as_xml (boost::shared_ptr<Crossfade>, XMLNode &) const;
+	boost::shared_ptr<Crossfade> get_content_from_xml (XMLNode const &) const;
+
+private:
+	CrossfadeListProperty* clone () const;
+	CrossfadeListProperty* create () const;
+
+        friend class AudioPlaylist;
+        /* we live and die with our playlist, no lifetime management needed */
+        AudioPlaylist& _playlist;
+};
+
+	
 class AudioPlaylist : public ARDOUR::Playlist
 {
-  public:
+public:
 	typedef std::list<boost::shared_ptr<Crossfade> > Crossfades;
+	static void make_property_quarks ();
 
-   public:
 	AudioPlaylist (Session&, const XMLNode&, bool hidden = false);
 	AudioPlaylist (Session&, std::string name, bool hidden = false);
 	AudioPlaylist (boost::shared_ptr<const AudioPlaylist>, std::string name, bool hidden = false);
@@ -59,6 +86,8 @@ class AudioPlaylist : public ARDOUR::Playlist
 
 	bool destroy_region (boost::shared_ptr<Region>);
 
+	void update (const CrossfadeListProperty::ChangeRecord &);
+
     protected:
 
 	/* playlist "callbacks" */
@@ -72,7 +101,7 @@ class AudioPlaylist : public ARDOUR::Playlist
         void remove_dependents (boost::shared_ptr<Region> region);
 
     private:
-       Crossfades      _crossfades;
+       CrossfadeListProperty _crossfades;
        Crossfades      _pending_xfade_adds;
 
        void crossfade_invalidated (boost::shared_ptr<Region>);

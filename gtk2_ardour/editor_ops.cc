@@ -2820,11 +2820,9 @@ Editor::separate_regions_between (const TimeSelection& ts)
                                                         
                                                         /* pick up changes to existing regions */
 
-                                                        vector<StatefulDiffCommand*> cmds;
+                                                        vector<Command*> cmds;
                                                         playlist->rdiff (cmds);
-                                                        for (vector<StatefulDiffCommand*>::iterator j = cmds.begin(); j != cmds.end(); ++j) {
-                                                                _session->add_command (*j);
-                                                        }
+							_session->add_commands (cmds);
 
                                                         /* pick up changes to the playlist itself (adds/removes)
                                                          */
@@ -3773,11 +3771,9 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 			playlist->add_region (r, start);
 		}
 
-		vector<StatefulDiffCommand*> cmds;
+		vector<Command*> cmds;
 		playlist->rdiff (cmds);
-		for (vector<StatefulDiffCommand*>::iterator j = cmds.begin(); j != cmds.end(); ++j) {
-			_session->add_command (*j);
-		}
+		_session->add_commands (cmds);
 
                 _session->add_command (new StatefulDiffCommand (playlist));
 	}
@@ -4492,13 +4488,10 @@ Editor::nudge_track (bool use_edit, bool forwards)
 
 		playlist->nudge_after (start, distance, forwards);
                 
-                vector<StatefulDiffCommand*> cmds;
+                vector<Command*> cmds;
 
                 playlist->rdiff (cmds);
-
-                for (vector<StatefulDiffCommand*>::iterator c = cmds.begin(); c != cmds.end(); ++c) {
-                        _session->add_command (*c);
-                }
+		_session->add_commands (cmds);
 
                 _session->add_command (new StatefulDiffCommand (playlist));
 	}
@@ -6568,14 +6561,10 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
 
 			pl->shift (pos, frames, (opt == MoveIntersected), ignore_music_glue);
 
-                        vector<StatefulDiffCommand*> cmds;
-                        
+                        vector<Command*> cmds;
                         pl->rdiff (cmds);
-                        
-                        for (vector<StatefulDiffCommand*>::iterator c = cmds.begin(); c != cmds.end(); ++c) {
-                                _session->add_command (*c);
-                        }
-                        
+			_session->add_commands (cmds);
+			
 			_session->add_command (new StatefulDiffCommand (pl));
 			commit = true;
 		}

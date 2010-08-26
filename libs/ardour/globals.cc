@@ -69,7 +69,7 @@
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/mix.h"
-#include "ardour/playlist.h"
+#include "ardour/audioplaylist.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
@@ -251,6 +251,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	AudioRegion::make_property_quarks ();
 	RouteGroup::make_property_quarks ();
         Playlist::make_property_quarks ();
+        AudioPlaylist::make_property_quarks ();
 
 	/* this is a useful ready to use PropertyChange that many
 	   things need to check. This avoids having to compose

@@ -124,7 +124,7 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioR
 	initialize ();
 }
 
-Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
+Crossfade::Crossfade (const Playlist& playlist, XMLNode const & node)
 	: AudioRegion (playlist.session(), 0, 0, "unnamed crossfade")
 	, CROSSFADE_DEFAULT_PROPERTIES
 	, _fade_in (Evoral::Parameter(FadeInAutomation)) // linear (gain coefficient) => -inf..+6dB
@@ -132,7 +132,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 
 {
 	boost::shared_ptr<Region> r;
-	XMLProperty* prop;
+	XMLProperty const * prop;
 	LocaleGuard lg (X_("POSIX"));
 
 	/* we have to find the in/out regions before we can do anything else */

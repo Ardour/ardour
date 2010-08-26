@@ -21,7 +21,6 @@
 
 #include <cstdlib>
 
-
 #include "ardour/types.h"
 #include "ardour/debug.h"
 #include "ardour/configuration.h"
@@ -38,13 +37,69 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
+namespace ARDOUR {
+	namespace Properties {
+		PBD::PropertyDescriptor<bool> crossfades;
+	}
+}
+
+void
+AudioPlaylist::make_property_quarks ()
+{
+        Properties::crossfades.property_id = g_quark_from_static_string (X_("crossfades"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for crossfades = %1\n", Properties::crossfades.property_id));
+}
+
+CrossfadeListProperty::CrossfadeListProperty (AudioPlaylist& pl)
+        : SequenceProperty<std::list<boost::shared_ptr<Crossfade> > > (Properties::crossfades.property_id, boost::bind (&AudioPlaylist::update, &pl, _1))
+        , _playlist (pl)
+{
+	
+}
+
+
+CrossfadeListProperty *
+CrossfadeListProperty::create () const
+{
+	return new CrossfadeListProperty (_playlist);
+}
+
+CrossfadeListProperty *
+CrossfadeListProperty::clone () const
+{
+	return new CrossfadeListProperty (*this);
+}
+
+void
+CrossfadeListProperty::get_content_as_xml (boost::shared_ptr<Crossfade> xfade, XMLNode & node) const
+{
+	/* Crossfades are not written to any state when they are no
+	   longer in use, so we must write their state here.
+	*/
+
+	XMLNode& c = xfade->get_state ();
+	node.add_child_nocopy (c);
+}
+
+boost::shared_ptr<Crossfade>
+CrossfadeListProperty::get_content_from_xml (XMLNode const & node) const
+{
+	XMLNodeList const c = node.children ();
+	assert (c.size() == 1);
+	return boost::shared_ptr<Crossfade> (new Crossfade (_playlist, *c.front()));
+}
+
+
 AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden)
 	: Playlist (session, node, DataType::AUDIO, hidden)
+	, _crossfades (*this)
 {
 #ifndef NDEBUG
 	const XMLProperty* prop = node.property("type");
 	assert(!prop || DataType(prop->value()) == DataType::AUDIO);
 #endif
+
+	add_property (_crossfades);
 
 	in_set_state++;
 	set_state (node, Stateful::loading_state_version);
@@ -53,12 +108,17 @@ AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden
 
 AudioPlaylist::AudioPlaylist (Session& session, string name, bool hidden)
 	: Playlist (session, name, DataType::AUDIO, hidden)
+	, _crossfades (*this)
 {
+	add_property (_crossfades);
 }
 
 AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, string name, bool hidden)
 	: Playlist (other, name, hidden)
+	, _crossfades (*this)
 {
+	add_property (_crossfades);
+	
 	RegionList::const_iterator in_o  = other->regions.begin();
 	RegionList::iterator in_n = regions.begin();
 
@@ -99,7 +159,10 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, stri
 
 AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, nframes_t start, nframes_t cnt, string name, bool hidden)
 	: Playlist (other, start, cnt, name, hidden)
+	, _crossfades (*this)
 {
+	add_property (_crossfades);
+	
 	/* this constructor does NOT notify others (session) */
 }
 
@@ -794,4 +857,14 @@ AudioPlaylist::foreach_crossfade (boost::function<void (boost::shared_ptr<Crossf
 	for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
 		s (*i);
 	}
+}
+
+void
+AudioPlaylist::update (const CrossfadeListProperty::ChangeRecord& change)
+{
+	for (CrossfadeListProperty::ChangeContainer::const_iterator i = change.added.begin(); i != change.added.end(); ++i) {
+		add_crossfade (*i);
+	}
+
+	/* don't remove crossfades here; they will be dealt with by the dependency code */
 }

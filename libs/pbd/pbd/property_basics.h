@@ -103,7 +103,7 @@ public:
 	virtual void get_changes_as_properties (PropertyList& changes, Command *) const = 0;
 
 	/** Collect StatefulDiffCommands for changes to anything that we own */
-	virtual void rdiff (std::vector<StatefulDiffCommand*> &) const {}
+	virtual void rdiff (std::vector<Command*> &) const {}
 
 	/** Look in an XML node written by get_changes_as_xml and, if XML from this property
 	 *  is found, create a property with the changes from the XML.

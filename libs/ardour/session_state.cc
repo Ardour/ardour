@@ -2313,6 +2313,14 @@ Session::finish_reversible_command (UndoTransaction& ut)
 }
 
 void
+Session::add_commands (vector<Command*> const & cmds)
+{
+	for (vector<Command*>::const_iterator i = cmds.begin(); i != cmds.end(); ++i) {
+		add_command (*i);
+	}
+}
+
+void
 Session::begin_reversible_command(const string& name)
 {
 	UndoTransaction* trans = new UndoTransaction();

@@ -64,8 +64,8 @@ class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_
         RegionListProperty (Playlist&);
 
 	RegionListProperty* clone () const;
-
-        boost::shared_ptr<Region> lookup_id (const PBD::ID& id) const;
+	void get_content_as_xml (boost::shared_ptr<Region>, XMLNode &) const;
+	boost::shared_ptr<Region> get_content_from_xml (XMLNode const &) const;
 
   private:
 	RegionListProperty* create () const;
@@ -90,7 +90,7 @@ public:
 
         void update (const RegionListProperty::ChangeRecord&);
         void clear_owned_changes ();
-        void rdiff (std::vector<PBD::StatefulDiffCommand*>&) const;
+        void rdiff (std::vector<Command*>&) const;
 
 	boost::shared_ptr<Region> region_by_id (const PBD::ID&) const;
 

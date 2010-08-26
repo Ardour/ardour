@@ -1037,6 +1037,15 @@ RegionMoveDrag::finished_no_copy (
 				playlist->freeze ();
 			}
 
+			/* this movement may result in a crossfade being modified, so we need to get undo
+			   data from the playlist as well as the region.
+			*/
+			
+			r = modified_playlists.insert (playlist);
+			if (r.second) {
+				playlist->clear_changes ();
+			}
+
 			rv->region()->set_position (where, (void*) this);
 
 			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
@@ -1172,7 +1181,12 @@ void
 RegionMoveDrag::add_stateful_diff_commands_for_playlists (PlaylistSet const & playlists)
 {
 	for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
-		_editor->session()->add_command (new StatefulDiffCommand (*i));
+		StatefulDiffCommand* c = new StatefulDiffCommand (*i);
+		if (!c->empty()) {
+			_editor->session()->add_command (new StatefulDiffCommand (*i));
+		} else {
+			delete c;
+		}
 	}
 }
 

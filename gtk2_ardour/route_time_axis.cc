@@ -1339,13 +1339,10 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
 
-                        vector<StatefulDiffCommand*> cmds;
-                        
+                        vector<Command*> cmds;
                         playlist->rdiff (cmds);
-                        
-                        for (vector<StatefulDiffCommand*>::iterator c = cmds.begin(); c != cmds.end(); ++c) {
-                                _session->add_command (*c);
-                        }
+                        _session->add_commands (cmds);
+			
                         _session->add_command (new StatefulDiffCommand (playlist));
 		}
 		break;
@@ -1357,13 +1354,10 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 
 	case Clear:
 		if ((what_we_got = playlist->cut (time)) != 0) {
-                        vector<StatefulDiffCommand*> cmds;
-                        
+
+                        vector<Command*> cmds;
                         playlist->rdiff (cmds);
-                        
-                        for (vector<StatefulDiffCommand*>::iterator c = cmds.begin(); c != cmds.end(); ++c) {
-                                _session->add_command (*c);
-                        }
+			_session->add_commands (cmds);
                         _session->add_command (new StatefulDiffCommand (playlist));
 			what_we_got->release ();
 		}

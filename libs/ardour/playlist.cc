@@ -110,28 +110,46 @@ RegionListProperty::RegionListProperty (Playlist& pl)
         : SequenceProperty<std::list<boost::shared_ptr<Region> > > (Properties::regions.property_id, boost::bind (&Playlist::update, &pl, _1))
         , _playlist (pl)
 {
+	
+}
+
+RegionListProperty *
+RegionListProperty::clone () const
+{
+	return new RegionListProperty (*this);
+}
+
+RegionListProperty *
+RegionListProperty::create () const
+{
+	return new RegionListProperty (_playlist);
+}
+
+void
+RegionListProperty::get_content_as_xml (boost::shared_ptr<Region> region, XMLNode & node) const
+{
+	/* All regions (even those which are deleted) have their state saved by other
+	   code, so we can just store ID here.
+	*/
+	
+	node.add_property ("id", region->id().to_s ());
 }
 
 boost::shared_ptr<Region>
-RegionListProperty::lookup_id (const ID& id) const
+RegionListProperty::get_content_from_xml (XMLNode const & node) const
 {
-        boost::shared_ptr<Region> ret =  _playlist.region_by_id (id);
+	XMLProperty const * prop = node.property ("id");
+	assert (prop);
+
+	PBD::ID id (prop->value ());
+
+        boost::shared_ptr<Region> ret = _playlist.region_by_id (id);
         
         if (!ret) {
                 ret = RegionFactory::region_by_id (id);
         }
 
         return ret;
-}
-
-RegionListProperty* RegionListProperty::clone () const
-{
-	return new RegionListProperty (*this);
-}
-
-RegionListProperty* RegionListProperty::create () const
-{
-	return new RegionListProperty (_playlist);
 }
 
 Playlist::Playlist (Session& sess, string nom, DataType type, bool hide)
@@ -2100,7 +2118,7 @@ Playlist::mark_session_dirty ()
 }
 
 void
-Playlist::rdiff (vector<StatefulDiffCommand*>& cmds) const
+Playlist::rdiff (vector<Command*>& cmds) const
 {
 	RegionLock rlock (const_cast<Playlist *> (this));
 	Stateful::rdiff (cmds);

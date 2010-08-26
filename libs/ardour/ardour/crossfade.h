@@ -73,7 +73,7 @@ class Crossfade : public ARDOUR::AudioRegion
 
 	/* the usual XML constructor */
 
-	Crossfade (const Playlist&, XMLNode&);
+	Crossfade (const Playlist&, XMLNode const &);
 	virtual ~Crossfade();
 
 	static void make_property_quarks ();

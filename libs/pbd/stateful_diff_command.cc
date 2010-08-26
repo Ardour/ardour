@@ -118,3 +118,9 @@ StatefulDiffCommand::get_state ()
 
 	return *node;
 }
+
+bool
+StatefulDiffCommand::empty () const
+{
+	return _changes->empty();
+}

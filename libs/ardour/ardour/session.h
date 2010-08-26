@@ -680,6 +680,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		_current_trans.top()->add_command (cmd);
 	}
 
+	void add_commands (std::vector<Command*> const & cmds);
+
 	std::map<PBD::ID,PBD::StatefulDestructible*> registry;
 
 	// these commands are implemented in libs/ardour/session_command.cc

@@ -340,7 +340,7 @@ Stateful::property_factory (const XMLNode& history_node) const
 }
 
 void
-Stateful::rdiff (vector<StatefulDiffCommand*>& cmds) const
+Stateful::rdiff (vector<Command*>& cmds) const
 {
 	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
 		i->second->rdiff (cmds);

@@ -45,6 +45,8 @@ public:
         
 	XMLNode& get_state ();
 
+	bool empty () const;
+
 private:
 	boost::weak_ptr<Stateful> _object; ///< the object in question
         PBD::PropertyList* _changes; ///< property changes to execute this command

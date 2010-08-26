@@ -788,10 +788,10 @@ CrossfadeEditor::apply ()
 	_session->begin_reversible_command (_("Edit crossfade"));
 
 	XMLNode& before = xfade->get_state ();
-
+	
 	_apply_to (xfade);
 
-	_session->add_command (new MementoCommand<Crossfade> (*xfade.get(), &before, &xfade->get_state()));
+	_session->add_command (new MementoCommand<Crossfade> (*xfade.get(), &before, &xfade->get_state ()));
 	_session->commit_reversible_command ();
 }
 
