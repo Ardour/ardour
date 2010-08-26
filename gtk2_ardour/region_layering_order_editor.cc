@@ -36,50 +36,37 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
 	layering_order_display.set_reorderable (false);
 	layering_order_display.set_rules_hint (true);
 
-	scroller.set_border_width (10);
 	scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	scroller.add (layering_order_display);
 
 	clock.set_mode (AudioClock::BBT);
-
 
         Gtk::Table* scroller_table = manage (new Gtk::Table);
         scroller_table->set_size_request (300, 250);
         scroller_table->attach (scroller, 0, 1, 0, 1);
         scroller_table->set_col_spacings (5);
         scroller_table->set_row_spacings (5);
-        scroller_table->set_border_width (5);
   
         track_label.set_name ("RegionLayeringOrderEditorLabel");
         track_label.set_text (_("Track:"));
+	track_label.set_alignment (0, 0.5);
         clock_label.set_name ("RegionLayeringOrderEditorLabel");
         clock_label.set_text (_("Position:"));
+	clock_label.set_alignment (0, 0.5);
         track_name_label.set_name ("RegionLayeringOrderEditorNameLabel");
+	track_name_label.set_alignment (0, 0.5);
         clock.set_mode (AudioClock::BBT);
-  
-        Gtk::Alignment* track_alignment = manage (new Gtk::Alignment);
-        track_alignment->set (1.0, 0.5);
-        track_alignment->add (track_label);
-  
-        Gtk::Alignment* clock_alignment = manage (new Gtk::Alignment);
-        clock_alignment->set (1.0, 0.5);
-        clock_alignment->add (clock_label);
   
         Gtk::Table* info_table = manage (new Gtk::Table (2, 2));
         info_table->set_col_spacings (5);
         info_table->set_row_spacings (5);
-        info_table->set_border_width (5);
-        info_table->attach (*track_alignment, 0, 1, 0, 1, FILL, FILL);
+        info_table->attach (track_label, 0, 1, 0, 1, FILL, FILL);
         info_table->attach (track_name_label, 1, 2, 0, 1, FILL, FILL);
-        info_table->attach (*clock_alignment, 0, 1, 1, 2, FILL, FILL);
+        info_table->attach (clock_label, 0, 1, 1, 2, FILL, FILL);
         info_table->attach (clock, 1, 2, 1, 2, FILL, FILL);
  
-        HBox* info_hbox = manage (new HBox);
- 
-        info_hbox->pack_start (*info_table, true, false);
- 
-        get_vbox()->set_spacing (5);
-        get_vbox()->pack_start (*info_hbox, false, false);
+        get_vbox()->set_spacing (12);
+        get_vbox()->pack_start (*info_table, false, false);
         get_vbox()->pack_start (*scroller_table, true, true);
  
         info_table->set_name ("RegionLayeringOrderTable");
