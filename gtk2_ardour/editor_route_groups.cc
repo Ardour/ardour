@@ -47,8 +47,9 @@ using namespace Gtk;
 using Gtkmm2ext::Keyboard;
 
 EditorRouteGroups::EditorRouteGroups (Editor* e)
-	: EditorComponent (e),
-	  _in_row_change (false)
+	: EditorComponent (e)
+        , _all_group_active_button (_("\"all\" group"))
+        , _in_row_change (false)
 
 {
 	_model = ListStore::create (_columns);
@@ -135,7 +136,6 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 
 	_display.signal_button_press_event().connect (sigc::mem_fun(*this, &EditorRouteGroups::button_press_event), false);
 
-	_display_packer = new VBox;
 	HBox* button_box = manage (new HBox());
 	button_box->set_homogeneous (true);
 
@@ -158,8 +158,11 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	button_box->pack_start (*add_button);
 	button_box->pack_start (*remove_button);
 
-	_display_packer->pack_start (_scroller, true, true);
-	_display_packer->pack_start (*button_box, false, false);
+        _all_group_active_button.show ();
+
+	_display_packer.pack_start (_scroller, true, true);
+        _display_packer.pack_start (_all_group_active_button, false, false);
+	_display_packer.pack_start (*button_box, false, false);
 }
 
 void
@@ -417,14 +420,6 @@ EditorRouteGroups::groups_changed ()
 	/* just rebuild the while thing */
 
 	_model->clear ();
-
-	{
-		TreeModel::Row row;
-		row = *(_model->append());
-		row[_columns.is_visible] = true;
-		row[_columns.text] = (_("-all-"));
-		row[_columns.routegroup] = 0;
-	}
 
 	if (_session) {
 		_session->foreach_route_group (sigc::mem_fun (*this, &EditorRouteGroups::add));

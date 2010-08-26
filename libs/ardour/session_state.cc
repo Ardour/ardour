@@ -2295,6 +2295,12 @@ Session::route_group_by_name (string name)
 	return 0;
 }
 
+RouteGroup&
+Session::all_route_group() const
+{
+        return *_all_route_group;
+}
+
 UndoTransaction*
 Session::start_reversible_command (const string& name)
 {

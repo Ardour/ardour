@@ -243,7 +243,6 @@ AudioEngine::start ()
                         error << _("Cannot create temporary MIDI port to determine MIDI buffer size") << endmsg;
                 } else {
                         _raw_buffer_sizes[DataType::MIDI] = jack_midi_max_event_size (jack_port_get_buffer(midi_port, blocksize));
-                        cerr << "MIDI port buffers = " << _raw_buffer_sizes[DataType::MIDI] << endl;
                         jack_port_unregister (_priv_jack, midi_port);
                 }
 	}

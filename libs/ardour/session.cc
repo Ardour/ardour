@@ -136,31 +136,35 @@ Session::Session (AudioEngine &eng,
                   BusProfile* bus_profile,
 		  string mix_template)
 
-	: _engine (eng),
-	  _target_transport_speed (0.0),
-	  _requested_return_frame (-1),
-	  _session_dir (new SessionDirectory(fullpath)),
-	  state_tree (0),
-	  _butler (new Butler (*this)),
-	  _post_transport_work (0),
-	  _send_timecode_update (false),
-	  route_graph (new Graph(*this)),
-	  routes (new RouteList),
-	  _total_free_4k_blocks (0),
-	  _bundles (new BundleList),
-	  _bundle_xml_node (0),
-	  _click_io ((IO*) 0),
-	  click_data (0),
-	  click_emphasis_data (0),
-	  main_outs (0),
-	  _metadata (new SessionMetadata()),
-	  _have_rec_enabled_track (false),
-	  _suspend_timecode_transmission (0)
+	: _engine (eng)
+        , _target_transport_speed (0.0)
+        , _requested_return_frame (-1)
+        , _session_dir (new SessionDirectory(fullpath))
+        , state_tree (0)
+        , _butler (new Butler (*this))
+        , _post_transport_work (0)
+        , _send_timecode_update (false)
+        , _all_route_group (new RouteGroup (*this, "all"))
+        , route_graph (new Graph(*this))
+        , routes (new RouteList)
+        , _total_free_4k_blocks (0)
+        , _bundles (new BundleList)
+        , _bundle_xml_node (0)
+        , _click_io ((IO*) 0)
+        , click_data (0)
+        , click_emphasis_data (0)
+        , main_outs (0)
+        , _metadata (new SessionMetadata())
+        , _have_rec_enabled_track (false)
+        , _suspend_timecode_transmission (0)
 {
 	_locations = new Locations (*this);
 		
 	playlists.reset (new SessionPlaylists);
-	
+
+        _all_route_group->set_edit (true);
+        _all_route_group->set_active (true, this);
+
 	interpolation.add_channel_to (0, 0);
 
 	if (!eng.connected()) {
@@ -241,6 +245,7 @@ Session::destroy ()
 	_butler->drop_references ();
 	delete _butler;
 	delete midi_control_ui;
+        delete _all_route_group;
 
 	if (click_data != default_click) {
 		delete [] click_data;

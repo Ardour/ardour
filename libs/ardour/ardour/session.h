@@ -393,7 +393,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void add_route_group (RouteGroup *);
 	void remove_route_group (RouteGroup&);
 
-	RouteGroup *route_group_by_name (std::string);
+	RouteGroup* route_group_by_name (std::string);
+        RouteGroup& all_route_group() const;
 
 	PBD::Signal1<void,RouteGroup*> route_group_added;
 	PBD::Signal0<void>             route_group_removed;
@@ -1171,6 +1172,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int load_route_groups (const XMLNode&, int);
 
 	std::list<RouteGroup *> _route_groups;
+        RouteGroup*             _all_route_group;
 
 	/* routes stuff */
 

@@ -134,7 +134,7 @@ UIConfiguration::load_state ()
 
 		string rcfile = user_ui_rc_file.to_string();
 
-		info << string_compose (_("Loading user ui configuration file %1"), rcfile) << endl;
+		info << string_compose (_("Loading user ui configuration file %1"), rcfile) << endmsg;
 
 		if (!tree.read (rcfile)) {
 			error << string_compose(_("cannot read ui configuration file \"%1\""), rcfile) << endmsg;

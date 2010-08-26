@@ -3401,14 +3401,16 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 			if (_copy) {
 				/* adding to the selection */
-				_editor->selection->add (_editor->clicked_axisview);
+                                _editor->set_selected_track_as_side_effect (Selection::Add);
+				//_editor->selection->add (_editor->clicked_axisview);
 				_editor->clicked_selection = _editor->selection->add (start, end);
 				_copy = false;
 			} else {
 				/* new selection */
 
 				if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
-					_editor->selection->set (_editor->clicked_axisview);
+                                        //_editor->selection->set (_editor->clicked_axisview);
+                                        _editor->set_selected_track_as_side_effect (Selection::Set);
 				}
 				
 				_editor->clicked_selection = _editor->selection->set (start, end);
@@ -3417,6 +3419,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 		/* select the track that we're in */
 		if (find (_added_time_axes.begin(), _added_time_axes.end(), pending_time_axis.first) == _added_time_axes.end()) {
+                        // _editor->set_selected_track_as_side_effect (Selection::Add);
 			_editor->selection->add (pending_time_axis.first);
 			_added_time_axes.push_back (pending_time_axis.first);
 		}

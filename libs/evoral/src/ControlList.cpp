@@ -390,7 +390,9 @@ ControlList::fast_simple_add (double when, double value)
 void
 ControlList::add (double when, double value)
 {
-	/* this is for graphical editing */
+        /* this is for making changes from some kind of user interface or 
+           control surface (GUI, MIDI, OSC etc) 
+        */
 
 	{
 		Glib::Mutex::Lock lm (_lock);

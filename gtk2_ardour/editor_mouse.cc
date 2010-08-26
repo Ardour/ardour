@@ -478,7 +478,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 			set_selected_regionview_from_click (press, op, true);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			selection->clear_tracks ();
-			set_selected_track_as_side_effect (true);
+			set_selected_track_as_side_effect (op, true);
 		}
 		if (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT && !selection->regions.empty()) {
 			clicked_selection = select_range_around_region (selection->regions.front());
@@ -492,7 +492,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		if (mouse_mode != MouseRange || _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
 			set_selected_regionview_from_click (press, op, true);
 		} else if (event->type == GDK_BUTTON_PRESS) {
-			set_selected_track_as_side_effect ();
+			set_selected_track_as_side_effect (op);
 		}
 		break;
 
@@ -504,12 +504,12 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		if (mouse_mode != MouseRange || _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
 			set_selected_regionview_from_click (press, op, true);
 		} else if (event->type == GDK_BUTTON_PRESS) {
-			set_selected_track_as_side_effect ();
+			set_selected_track_as_side_effect (op);
 		}
 		break;
 
 	case ControlPointItem:
-		set_selected_track_as_side_effect (true);
+		set_selected_track_as_side_effect (op, true);
 		if (mouse_mode != MouseRange || _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
 			set_selected_control_point_from_click (op, false);
 		}
@@ -519,12 +519,12 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		/* for context click, select track */
 		if (event->button.button == 3) {
 			selection->clear_tracks ();
-			set_selected_track_as_side_effect (true);
+			set_selected_track_as_side_effect (op, true);
 		}
 		break;
 
 	case AutomationTrackItem:
-		set_selected_track_as_side_effect (true);
+		set_selected_track_as_side_effect (op, true);
 		break;
 
 	default:

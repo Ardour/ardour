@@ -92,7 +92,6 @@ GainMeterBase::GainMeterBase (Session* s,
 	ignore_toggle = false;
 	meter_menu = 0;
 	next_release_selects = false;
-	style_changed = true;
 	_width = Wide;
 
 	if (horizontal) {
@@ -915,12 +914,8 @@ GainMeter::render_metrics (Gtk::Widget& w)
 gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
-	static Glib::RefPtr<Gtk::Style> meter_style;
-	if (style_changed) {
-		meter_style = meter_metric_area.get_style();
-	}
 	Glib::RefPtr<Gdk::Window> win (meter_metric_area.get_window());
-	Glib::RefPtr<Gdk::GC> bg_gc (meter_style->get_bg_gc (Gtk::STATE_INSENSITIVE));
+	Glib::RefPtr<Gdk::GC> bg_gc (meter_metric_area.get_style()->get_bg_gc (Gtk::STATE_INSENSITIVE));
 	GdkRectangle base_rect;
 	GdkRectangle draw_rect;
 	gint width, height;

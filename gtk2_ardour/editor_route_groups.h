@@ -27,10 +27,11 @@ public:
 	void set_session (ARDOUR::Session *);
 
 	Gtk::Widget& widget () {
-		return *_display_packer;
+		return _display_packer;
 	}
 
 	void clear ();
+        Gtk::ToggleButton& all_group_active_button() { return _all_group_active_button; }
 
 private:
 
@@ -75,7 +76,8 @@ private:
 	Glib::RefPtr<Gtk::TreeSelection> _selection;
 	Gtk::TreeView _display;
 	Gtk::ScrolledWindow _scroller;
-	Gtk::VBox* _display_packer;
+	Gtk::VBox _display_packer;
+        Gtk::ToggleButton _all_group_active_button;
 	bool _in_row_change;
 	PBD::ScopedConnection property_changed_connection;
 };

@@ -174,11 +174,82 @@ Editor::select_all_tracks ()
  *  tracks, in which case nothing will happen unless `force' is true.
  */
 void
-Editor::set_selected_track_as_side_effect (bool force)
+Editor::set_selected_track_as_side_effect (Selection::Operation op, bool force)
 {
+        cerr << "E::sstase ca = " << clicked_axisview << " cr = " << clicked_routeview 
+             << " op = " << op << " force = " << force
+             << endl;
+
 	if (!clicked_axisview) {
 		return;
 	}
+
+#if 1
+        if (!clicked_routeview) {
+                return;
+        }
+
+        RouteGroup* group = clicked_routeview->route()->route_group();
+        
+	switch (op) {
+	case Selection::Toggle: 
+		if (selection->selected (clicked_axisview)) {
+			if (_session->all_route_group().is_active()) {
+				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
+                                        selection->remove(*i);
+				}
+			} else if (group && group->is_active()) {
+				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
+					if ((*i)->route_group() == group)
+						selection->remove(*i);
+				}
+			} else {
+				selection->remove (clicked_axisview);
+                        }
+		} else {
+			if (_session->all_route_group().is_active()) {
+				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
+						selection->add(*i);
+				}
+			} else if (group && group->is_active()) {
+				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
+					if ( (*i)->route_group() == group)
+						selection->add(*i);
+				}
+                        } else {
+                                selection->add (clicked_axisview);
+                        }
+		}
+                break;
+	
+	case Selection::Add: 
+		selection->clear();
+		cerr << ("Editor::set_selected_track_as_side_effect  case  Selection::Add  not yet implemented\n");
+                break;
+		
+	case Selection::Set:
+		selection->clear();
+		if (_session->all_route_group().is_active()) {
+			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
+					selection->add(*i);
+			}
+		} else if (group && group->is_active()) {
+			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
+				if ((*i)->route_group() == group)
+					selection->add(*i);
+			}
+                } else {
+			selection->set (clicked_axisview);
+                }
+                break;
+	
+	case Selection::Extend: 
+		selection->clear();
+		cerr << ("Editor::set_selected_track_as_side_effect  case  Selection::Add  not yet implemented\n");
+                break;
+	}
+
+#else // the older version
 
 	if (!selection->tracks.empty()) {
 		if (!selection->selected (clicked_axisview)) {
@@ -188,6 +259,7 @@ Editor::set_selected_track_as_side_effect (bool force)
 	} else if (force) {
 		selection->set (clicked_axisview);
 	}
+#endif
 }
 
 void
@@ -797,11 +869,20 @@ Editor::track_selection_changed ()
 	}
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-                (*i)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), *i) != selection->tracks.end());
+
+                bool yn = (find (selection->tracks.begin(), selection->tracks.end(), *i) != selection->tracks.end());
+                
+                (*i)->set_selected (yn);
                 
                 TimeAxisView::Children c = (*i)->get_child_list ();
                 for (TimeAxisView::Children::iterator j = c.begin(); j != c.end(); ++j) {
                         (*j)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), j->get()) != selection->tracks.end());
+                }
+
+                if (yn) {
+                        (*i)->reshow_selection (selection->time);
+                } else {
+                        (*i)->hide_selection ();
                 }
         }
 

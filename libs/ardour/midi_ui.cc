@@ -158,8 +158,6 @@ MidiControlUI::thread_init ()
 	strcpy (c, X_("midiUI"));
 	pthread_set_name (c);
 
-	cerr << "MIDI UI running\n";
-
 	PBD::notify_gui_about_thread_creation (X_("gui"), pthread_self(), X_("MIDI"), 2048);
 	SessionEvent::create_per_thread_pool (X_("MIDI I/O"), 128);
 
