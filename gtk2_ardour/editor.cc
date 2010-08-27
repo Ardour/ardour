@@ -352,7 +352,6 @@ Editor::Editor ()
 	show_gain_after_trim = false;
 	verbose_cursor_on = true;
 	last_item_entered = 0;
-	last_item_entered_n = 0;
 
 	have_pending_keyboard_selection = false;
 	_follow_playhead = true;

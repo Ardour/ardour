@@ -1471,10 +1471,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	double fraction;
         bool ret = true;
 
-	if (last_item_entered != item) {
-		last_item_entered = item;
-		last_item_entered_n = 0;
-	}
+	last_item_entered = item;
 
 	switch (item_type) {
 	case ControlPointItem:
@@ -1495,11 +1492,8 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			        track_canvas->get_window()->set_cursor (*fader_cursor);
 			}
 
-			last_item_entered_n++;
 			set_verbose_canvas_cursor (cp->line().get_verbose_cursor_string (fraction), at_x, at_y);
-			if (last_item_entered_n < 10) {
-				show_verbose_canvas_cursor ();
-			}
+			show_verbose_canvas_cursor ();
 		}
 		break;
 
