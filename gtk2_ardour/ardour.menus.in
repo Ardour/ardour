@@ -33,7 +33,7 @@
            <separator/>
 #endif
            <menuitem action='ToggleSessionOptionsEditor'/>
-#ifndef GTKOSX
+#ifdef GTKOSX
            <menuitem action='ToggleRCOptionsEditor'/>
            <menuitem action='About'/>
 #endif
