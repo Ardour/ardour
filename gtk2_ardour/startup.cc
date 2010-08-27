@@ -906,6 +906,10 @@ ArdourStartup::setup_existing_session_page ()
 		return;
 	}
 	
+	if (!session_hbox.get_children().empty()) {
+		session_hbox.remove (**session_hbox.get_children().begin());
+	}
+
 	recent_session_display.set_model (recent_session_model);
 	recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
 	recent_session_display.set_headers_visible (false);
