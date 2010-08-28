@@ -209,7 +209,8 @@ PortGroup::io_from_bundle (boost::shared_ptr<ARDOUR::Bundle> b) const
 		return boost::shared_ptr<IO> ();
 	}
 
-	return (*i)->io;
+	boost::shared_ptr<IO> io ((*i)->io.lock ());
+	return io;
 }
 
 /** Remove bundles whose channels are already represented by other, larger bundles */
@@ -306,6 +307,7 @@ struct RouteIOs {
 	}
 	
 	boost::shared_ptr<Route> route;
+	/* it's ok to use a shared_ptr here as RouteIOs structs are only used during ::gather () */
 	std::list<boost::shared_ptr<IO> > ios;
 };
 
