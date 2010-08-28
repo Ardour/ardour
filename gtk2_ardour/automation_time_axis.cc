@@ -255,23 +255,25 @@ AutomationTimeAxisView::auto_clicked ()
 void
 AutomationTimeAxisView::set_automation_state (AutoState state)
 {
-	if (!ignore_state_request) {
-		if (_automatable) {
-			_automatable->set_parameter_automation_state (_control->parameter(), state);
-		}
-#if 0
-		if (_route == _automatable) { // This is a time axis for route (not region) automation
-			_route->set_parameter_automation_state (_control->parameter(), state);
-		}
-
-		if (_control->list())
-			_control->alist()->set_automation_state(state);
-#endif
+	if (ignore_state_request) {
+		return;
 	}
 
+	if (_automatable) {
+		_automatable->set_parameter_automation_state (_control->parameter(), state);
+	}
+#if 0
+	if (_route == _automatable) { // This is a time axis for route (not region) automation
+		_route->set_parameter_automation_state (_control->parameter(), state);
+	}
+	
+	if (_control->list()) {
+		_control->alist()->set_automation_state(state);
+	}
+#endif
 	if (_view) {
 		_view->set_automation_state (state);
-
+		
 		/* AutomationStreamViews don't signal when their automation state changes, so handle
 		   our updates `manually'.
 		*/
