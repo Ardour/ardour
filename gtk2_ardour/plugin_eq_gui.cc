@@ -61,13 +61,12 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	_analysis_scale_surface = 0;
 
 	_analysis_area = new Gtk::DrawingArea();
-	_analysis_width = 500.0;
-	_analysis_height = 500.0;
+	_analysis_width = 256.0;
+	_analysis_height = 256.0;
 	_analysis_area->set_size_request(_analysis_width, _analysis_height);
 
 	_analysis_area->signal_expose_event().connect( sigc::mem_fun (*this, &PluginEqGui::expose_analysis_area));
 	_analysis_area->signal_size_allocate().connect( sigc::mem_fun (*this, &PluginEqGui::resize_analysis_area));
-
 
 	// dB selection
 	dBScaleModel = Gtk::ListStore::create(dBColumns);
