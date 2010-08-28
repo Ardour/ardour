@@ -141,8 +141,6 @@ class ArdourStartup : public Gtk::Assistant {
 	/* recent sessions */
 
 	void setup_existing_session_page ();
-	/** true when setup_existing_session_page () has already been called at least once */
-	bool _have_setup_existing_session_page;
 
 	struct RecentSessionsSorter {
 	    bool operator() (std::pair<std::string,std::string> a, std::pair<std::string,std::string> b) const {
@@ -198,6 +196,7 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::ComboBox template_chooser;
 
 	Gtk::VBox session_new_vbox;
+	Gtk::VBox session_existing_vbox;
 	Gtk::CheckButton more_new_session_options_button;
 	Gtk::RadioButtonGroup session_template_group;
 	Gtk::RadioButton use_session_as_template_button;

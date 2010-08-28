@@ -63,7 +63,6 @@ ArdourStartup::ArdourStartup ()
 	, monitor_via_hardware_button (_("Use an external mixer or the hardware mixer of your audio interface.\n\
 Ardour will play NO role in monitoring"))
 	, monitor_via_ardour_button (string_compose (_("Ask %1 to playback material as it is being recorded"), PROGRAM_NAME))
-	, _have_setup_existing_session_page (false)
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, more_new_session_options_button (_("I'd like more options for this session"))
 	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
@@ -506,8 +505,7 @@ ArdourStartup::setup_initial_choice_page ()
 bool
 ArdourStartup::initial_button_press (GdkEventButton *event)
 {
-	if (event && event->type == GDK_2BUTTON_PRESS && session_page_index != -1)
-	{
+	if (event && event->type == GDK_2BUTTON_PRESS && session_page_index != -1) {
 		set_current_page(session_page_index);
 		return true;
 	} else {
@@ -902,60 +900,56 @@ ArdourStartup::setup_existing_session_page ()
 	recent_session_model = TreeStore::create (recent_session_columns);
 	redisplay_recent_sessions ();
 
-	if (_have_setup_existing_session_page) {
-		return;
-	}
-	
 	if (!session_hbox.get_children().empty()) {
 		session_hbox.remove (**session_hbox.get_children().begin());
 	}
 
-	recent_session_display.set_model (recent_session_model);
-	recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
-	recent_session_display.set_headers_visible (false);
-	recent_session_display.get_selection()->set_mode (SELECTION_BROWSE);
-	
-	recent_session_display.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ArdourStartup::recent_session_row_selected));
-	
-	recent_scroller.add (recent_session_display);
-	recent_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-	recent_scroller.set_shadow_type	(Gtk::SHADOW_IN);
+	if (session_existing_vbox.get_children().empty()) {
+
+		recent_session_display.set_model (recent_session_model);
+		recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
+		recent_session_display.set_headers_visible (false);
+		recent_session_display.get_selection()->set_mode (SELECTION_BROWSE);
 		
-	recent_session_display.show();
+		recent_session_display.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ArdourStartup::recent_session_row_selected));
+		
+		recent_scroller.add (recent_session_display);
+		recent_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+		recent_scroller.set_shadow_type	(Gtk::SHADOW_IN);
+		
+		recent_session_display.show();
+		
+		recent_scroller.show();
+		int cnt = redisplay_recent_sessions ();
+		recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &ArdourStartup::recent_row_activated));
+		
+		if (cnt > 4) {
+			recent_scroller.set_size_request (-1, 300);
+		}
 
-	recent_scroller.show();
-	int cnt = redisplay_recent_sessions ();
-	recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &ArdourStartup::recent_row_activated));
+		session_existing_vbox.set_spacing (8);
+		session_existing_vbox.pack_start (recent_scroller, true, true);
 
-	if (cnt > 4) {
-		recent_scroller.set_size_request (-1, 300);
-	}
-
-	VBox* vbox = manage (new VBox);
-	vbox->set_spacing (8);
-	vbox->pack_start (recent_scroller, true, true);
-
-	existing_session_chooser.set_title (_("Select session file"));
-	existing_session_chooser.signal_file_set().connect (sigc::mem_fun (*this, &ArdourStartup::existing_session_selected));
-	
+		existing_session_chooser.set_title (_("Select session file"));
+		existing_session_chooser.signal_file_set().connect (sigc::mem_fun (*this, &ArdourStartup::existing_session_selected));
+		
 #ifdef GTKOSX
-        existing_session_chooser->add_shortcut_folder ("/Volumes");
+		existing_session_chooser->add_shortcut_folder ("/Volumes");
 #endif
-
-	HBox* hbox = manage (new HBox);
-	hbox->set_spacing (4);
-	hbox->pack_start (*manage (new Label (_("Browse:"))), PACK_SHRINK);
-	hbox->pack_start (existing_session_chooser);
-	vbox->pack_start (*hbox);
-	hbox->show_all ();
+		
+		HBox* hbox = manage (new HBox);
+		hbox->set_spacing (4);
+		hbox->pack_start (*manage (new Label (_("Browse:"))), PACK_SHRINK);
+		hbox->pack_start (existing_session_chooser);
+		session_existing_vbox.pack_start (*hbox);
+		hbox->show_all ();
+	}
 	
-	vbox->show_all ();
-	session_hbox.pack_start (*vbox, true, true);
+	session_existing_vbox.show_all ();
+	session_hbox.pack_start (session_existing_vbox, true, true);
 
 	set_page_title (session_vbox, _("Select a session"));
 	set_page_type (session_vbox, ASSISTANT_PAGE_CONFIRM);
-
-	_have_setup_existing_session_page = true;
 }
 
 void
