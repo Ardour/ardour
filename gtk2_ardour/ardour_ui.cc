@@ -2762,6 +2762,10 @@ ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_n
 		return -1;
 	}
 
+	/* Give the new session the default GUI state */
+	new_session->add_instant_xml (*Config->instant_xml (X_("Editor")), false);
+	new_session->add_instant_xml (*Config->instant_xml (X_("Mixer")), false);
+
 	set_session (new_session);
 
 	session_loaded = true;
@@ -3172,7 +3176,7 @@ ARDOUR_UI::editor_settings () const
 	} else {
 		node = Config->instant_xml(X_("Editor"));
 	}
-
+	
 	if (!node) {
 		if (getenv("ARDOUR_INSTANT_XML_PATH")) {
 			node = Config->instant_xml(getenv("ARDOUR_INSTANT_XML_PATH"));

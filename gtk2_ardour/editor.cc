@@ -2467,7 +2467,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("show-measures"))) {
 		bool yn = string_is_affirmative (prop->value());
-		_show_measures = !yn;
+		_show_measures = yn;
 		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
 		if (act) {
 			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
