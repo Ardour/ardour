@@ -656,7 +656,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		sprintf (end_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 		_session->timecode_time (region->length(), timecode);
 		sprintf (length_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
-		_session->timecode_time (region->sync_position() + region->position(), timecode);
+		_session->timecode_time (region->sync_position(), timecode);
 		sprintf (sync_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 
 		if (audioRegion && !fades_in_seconds) {
@@ -675,7 +675,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		sprintf (end_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
 		_session->tempo_map().bbt_time (region->length(), bbt);
 		sprintf (length_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
-		_session->tempo_map().bbt_time (region->sync_position() + region->position(), bbt);
+		_session->tempo_map().bbt_time (region->sync_position(), bbt);
 		sprintf (sync_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
 
 		if (audioRegion && !fades_in_seconds) {
@@ -716,7 +716,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		secs = left / (float) _session->frame_rate();
 		sprintf (length_str, "%02d:%02d:%06.3f", hrs, mins, secs);
 
-		left = region->sync_position() + region->position();
+		left = region->sync_position();
 		hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
 		left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
 		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
@@ -748,7 +748,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		snprintf (start_str, sizeof (start_str), "%" PRId64, region->position());
 		snprintf (end_str, sizeof (end_str), "%" PRId64, (region->last_frame()));
 		snprintf (length_str, sizeof (length_str), "%" PRId64, region->length());
-		snprintf (sync_str, sizeof (sync_str), "%" PRId64, region->sync_position() + region->position());
+		snprintf (sync_str, sizeof (sync_str), "%" PRId64, region->sync_position());
 
 		if (audioRegion && !fades_in_seconds) {
 			snprintf (fadein_str, sizeof (fadein_str), "%u", uint (audioRegion->fade_in()->back()->when));
@@ -804,9 +804,9 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		row[_columns.start] = start_str;
 		row[_columns.end] = end_str;
 
-		if (region->sync_position() == 0) {
+		if (region->sync_position() == region->position()) {
 			row[_columns.sync] = _("Start");
-		} else if (region->sync_position() == region->length() - 1) {
+		} else if (region->sync_position() == (region->position() + region->length() - 1)) {
 			row[_columns.sync] = _("End");
 		} else {
 			row[_columns.sync] = sync_str;

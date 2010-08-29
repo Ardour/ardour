@@ -346,6 +346,7 @@ class Region
 	PBD::Property<framepos_t>  _start;
 	PBD::Property<framecnt_t>  _length;
 	PBD::Property<framepos_t>  _position;
+	/** Sync position relative to the start of our file */
 	PBD::Property<framepos_t>  _sync_position;
 	PBD::Property<layer_t>     _layer;
 	PBD::Property<framepos_t>  _ancestral_start;

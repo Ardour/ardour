@@ -1013,9 +1013,13 @@ Region::set_position_locked (bool yn)
 	}
 }
 
+/** Set the region's sync point.
+ *  @param absolute_pos Session time.
+ */
 void
 Region::set_sync_position (framepos_t absolute_pos)
 {
+	/* position within our file */
 	framepos_t const file_pos = _start + (absolute_pos - _position);
 
 	if (file_pos != _sync_position) {
@@ -1040,11 +1044,10 @@ Region::clear_sync_position ()
 	}
 }
 
+/* @return the sync point relative the first frame of the region */
 framepos_t
 Region::sync_offset (int& dir) const
 {
-	/* returns the sync point relative the first frame of the region */
-
 	if (sync_marked()) {
 		if (_sync_position > _start) {
 			dir = 1;
@@ -1082,13 +1085,15 @@ Region::adjust_to_sync (framepos_t pos) const
 	return pos;
 }
 
+/** @return Sync position in session time */
 framepos_t
 Region::sync_position() const
 {
 	if (sync_marked()) {
-		return _sync_position;
+		return _position - _start + _sync_position;
 	} else {
-		return _start;
+		/* if sync has not been marked, use the start of the region */
+		return _position;
 	}
 }
 
