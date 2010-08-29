@@ -835,8 +835,6 @@ Editor::show_window ()
 			tv = (static_cast<TimeAxisView*>(*i));
 			tv->reset_height ();
 		}
-
-		reset_zoom (frames_per_unit);
 	}
 
 	present ();
@@ -2419,6 +2417,8 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("zoom"))) {
 		reset_zoom (PBD::atof (prop->value()));
+	} else {
+		reset_zoom (frames_per_unit);
 	}
 
 	if ((prop = node.property ("snap-to"))) {
