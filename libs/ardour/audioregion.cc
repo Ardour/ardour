@@ -103,12 +103,12 @@ AudioRegion::register_properties ()
 	, _scale_amplitude (Properties::scale_amplitude, 1.0)
 	
 #define AUDIOREGION_COPY_STATE(other) \
-	 _envelope_active (other->_envelope_active) \
-	, _default_fade_in (other->_default_fade_in) \
-	, _default_fade_out (other->_default_fade_out) \
-        , _fade_in_active (other->_fade_in_active) \
-        , _fade_out_active (other->_fade_out_active) \
-	, _scale_amplitude (other->_scale_amplitude)
+	_envelope_active (Properties::envelope_active, other->_envelope_active) \
+	, _default_fade_in (Properties::default_fade_in, other->_default_fade_in) \
+	, _default_fade_out (Properties::default_fade_out, other->_default_fade_out) \
+	, _fade_in_active (Properties::fade_in_active, other->_fade_in_active) \
+	, _fade_out_active (Properties::fade_out_active, other->_fade_out_active) \
+	, _scale_amplitude (Properties::scale_amplitude, other->_scale_amplitude)
 /* a Session will reset these to its chosen defaults by calling AudioRegion::set_default_fade() */
 
 void

@@ -113,6 +113,13 @@ RegionListProperty::RegionListProperty (Playlist& pl)
 	
 }
 
+RegionListProperty::RegionListProperty (RegionListProperty const & p)
+	: PBD::SequenceProperty<std::list<boost::shared_ptr<Region> > > (p)
+	, _playlist (p._playlist)
+{
+
+}
+
 RegionListProperty *
 RegionListProperty::clone () const
 {

@@ -54,6 +54,9 @@ private:
 	CrossfadeListProperty* clone () const;
 	CrossfadeListProperty* create () const;
 
+	/* copy construction only by ourselves */
+	CrossfadeListProperty (CrossfadeListProperty const & p);
+
         friend class AudioPlaylist;
         /* we live and die with our playlist, no lifetime management needed */
         AudioPlaylist& _playlist;

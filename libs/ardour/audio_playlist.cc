@@ -57,6 +57,13 @@ CrossfadeListProperty::CrossfadeListProperty (AudioPlaylist& pl)
 	
 }
 
+CrossfadeListProperty::CrossfadeListProperty (CrossfadeListProperty const & p)
+	: PBD::SequenceProperty<std::list<boost::shared_ptr<Crossfade> > > (p)
+	, _playlist (p._playlist)
+{
+
+}
+
 
 CrossfadeListProperty *
 CrossfadeListProperty::create () const

@@ -344,6 +344,15 @@ class SequenceProperty : public PropertyBase
         const ChangeRecord& changes () const { return _changes; }
 
 protected:
+
+	/* copy construction only by subclasses */
+	SequenceProperty (SequenceProperty<Container> const & p)
+		: PropertyBase (p)
+		, _val (p._val)
+		, _changes (p._changes)
+		, _update_callback (p._update_callback)
+	{}
+	
 	Container _val; ///< our actual container of things
 	ChangeRecord _changes; ///< changes to the container (adds/removes) that have happened since clear_changes() was last called
 	boost::function<void(const ChangeRecord&)> _update_callback;

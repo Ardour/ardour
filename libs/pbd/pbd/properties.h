@@ -51,20 +51,24 @@ public:
 		, _current (c)
 		, _old (o)
 	{}
-	
-	PropertyTemplate<T>& operator=(PropertyTemplate<T> const& s) {
-		/* XXX: isn't there a nicer place to do this? */
-		_have_old    = s._have_old;
-		_property_id = s._property_id;
 
-		_current = s._current;
-		_old     = s._old;
-		return *this;
-	}
+	PropertyTemplate (PropertyDescriptor<T> p, PropertyTemplate<T> const & s)
+		: PropertyBase (p.property_id)
+		, _have_old (false)
+		, _current (s._current)
+	{}
 
 	T & operator=(T const& v) {
 		set (v);
 		return _current;
+	}
+
+	/* This will mean that, if fred and jim are both PropertyTemplates,
+	 * fred = jim will result in fred taking on jim's current value,
+	 * but NOT jim's property ID.
+	 */
+	PropertyTemplate<T> & operator= (PropertyTemplate<T> const & p) {
+		set (p._current);
 	}
 
 	T & operator+=(T const& v) {
@@ -140,13 +144,6 @@ public:
         }
 
 protected:
-        /** Constructs a PropertyTemplate with a default
-            value for _old and _current.
-        */
-
-	PropertyTemplate (PropertyDescriptor<T> p)
-		: PropertyBase (p.property_id)
-	{}
 
 	void set (T const& v) {
                 if (v != _current) {
@@ -175,6 +172,12 @@ protected:
 	bool _have_old;
 	T _current;
 	T _old;
+
+private:
+	/* disallow copy-construction; it's not obvious whether it should mean
+	   a copy of just the value, or the value and property ID.
+	*/
+	PropertyTemplate (PropertyTemplate<T> const &);
 };
 
 template<class T>
@@ -198,8 +201,12 @@ public:
 		: PropertyTemplate<T> (q, o, c)
 	{}
 
+	Property (PropertyDescriptor<T> q, Property<T> const& v)
+		: PropertyTemplate<T> (q, v)
+	{}
+
 	Property<T>* clone () const {
-		return new Property<T> (*this);
+		return new Property<T> (this->property_id(), this->_old, this->_current);
 	}
 	
         Property<T>* clone_from_xml (const XMLNode& node) const {
@@ -230,9 +237,8 @@ public:
 private:
         friend class PropertyFactory;
 
-	Property (PropertyDescriptor<T> q)
-		: PropertyTemplate<T> (q)
-	{}
+	/* no copy-construction */
+	Property (Property<T> const &);
 
 	/* Note that we do not set a locale for the streams used
 	 * in to_string() or from_string(), because we want the
@@ -265,15 +271,19 @@ template<>
 class Property<std::string> : public PropertyTemplate<std::string>
 {
 public:
-	Property (PropertyDescriptor<std::string> q, std::string const& v)
-		: PropertyTemplate<std::string> (q, v)
+	Property (PropertyDescriptor<std::string> d, std::string const & v)
+		: PropertyTemplate<std::string> (d, v)
 	{}
 
-	Property<std::string>* clone () const {
-		return new Property<std::string> (*this);
-	}
+	Property (PropertyDescriptor<std::string> d, std::string const & o, std::string const & c)
+		: PropertyTemplate<std::string> (d, o, c)
+	{}
 	
-	std::string & operator=(std::string const& v) {
+	Property<std::string>* clone () const {
+		return new Property<std::string> (this->property_id(), _old, _current);
+	}
+
+	std::string & operator= (std::string const& v) {
 		this->set (v);
 		return this->_current;
 	}
@@ -287,6 +297,8 @@ private:
 		return s;
 	}
 
+	/* no copy-construction */
+	Property (Property<std::string> const &);
 };
 
 template<class T>
@@ -310,6 +322,9 @@ private:
 	T from_string (std::string const & s) const {
 		return static_cast<T> (string_2_enum (s, this->_current));
 	}
+
+	/* no copy-construction */
+	EnumProperty (EnumProperty const &);
 };
 	
 } /* namespace PBD */

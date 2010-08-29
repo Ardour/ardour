@@ -136,8 +136,15 @@ public:
 		return _property_id == pid;
 	}
 
-protected:
+protected:	
+	/* copy construction only by subclasses */
+	PropertyBase (PropertyBase const & b)
+		: _property_id (b._property_id)
+	{}
+	
+private:
 	PropertyID _property_id;
+
 };
 
 }

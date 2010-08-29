@@ -182,29 +182,29 @@ Region::register_properties ()
 	, _position_lock_style (Properties::position_lock_style, _type == DataType::AUDIO ? AudioTime : MusicTime)
 
 #define REGION_COPY_STATE(other) \
-	  _muted (other->_muted) \
-	, _opaque (other->_opaque) \
-	, _locked (other->_locked) \
-	, _automatic (other->_automatic) \
-	, _whole_file (other->_whole_file) \
-	, _import (other->_import) \
-	, _external (other->_external) \
-	, _sync_marked (other->_sync_marked) \
-	, _left_of_split (other->_left_of_split) \
-	, _right_of_split (other->_right_of_split) \
-	, _hidden (other->_hidden) \
-	, _position_locked (other->_position_locked) \
-	, _valid_transients (other->_valid_transients) \
-	, _start(other->_start) \
-	, _length(other->_length) \
-	, _position(other->_position) \
-	, _sync_position(other->_sync_position) \
-        , _layer (other->_layer) \
-	, _ancestral_start (other->_ancestral_start) \
-	, _ancestral_length (other->_ancestral_length) \
-	, _stretch (other->_stretch) \
-	, _shift (other->_shift) \
-	, _position_lock_style (other->_position_lock_style)
+	  _muted (Properties::muted, other->_muted)			\
+	, _opaque (Properties::opaque, other->_opaque)		\
+	, _locked (Properties::locked, other->_locked)		\
+	, _automatic (Properties::automatic, other->_automatic)	\
+	, _whole_file (Properties::whole_file, other->_whole_file) \
+	, _import (Properties::import, other->_import)		\
+	, _external (Properties::external, other->_external)	\
+	, _sync_marked (Properties::sync_marked, other->_sync_marked) \
+	, _left_of_split (Properties::left_of_split, other->_left_of_split) \
+	, _right_of_split (Properties::right_of_split, other->_right_of_split) \
+	, _hidden (Properties::hidden, other->_hidden)		\
+	, _position_locked (Properties::position_locked, other->_position_locked) \
+	, _valid_transients (Properties::valid_transients, other->_valid_transients) \
+	, _start(Properties::start, other->_start)		\
+	, _length(Properties::length, other->_length)		\
+	, _position(Properties::position, other->_position)	\
+	, _sync_position(Properties::sync_position, other->_sync_position) \
+	, _layer (Properties::layer, other->_layer)		\
+	, _ancestral_start (Properties::ancestral_start, other->_ancestral_start) \
+	, _ancestral_length (Properties::ancestral_length, other->_ancestral_length) \
+	, _stretch (Properties::stretch, other->_stretch)	\
+	, _shift (Properties::shift, other->_shift)		\
+	, _position_lock_style (Properties::position_lock_style, other->_position_lock_style)
 
 /* derived-from-derived constructor (no sources in constructor) */
 Region::Region (Session& s, framepos_t start, framecnt_t length, const string& name, DataType type)

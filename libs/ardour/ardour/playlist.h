@@ -70,6 +70,9 @@ class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_
   private:
 	RegionListProperty* create () const;
 
+	/* copy construction only by ourselves */
+	RegionListProperty (RegionListProperty const & p);
+
         friend class Playlist;
         /* we live and die with our playlist, no lifetime management needed */
         Playlist& _playlist;
