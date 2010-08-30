@@ -893,7 +893,9 @@ Editor::track_selection_changed ()
                         (*j)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), j->get()) != selection->tracks.end());
                 }
 
-                if (yn) {
+                if (yn && 
+                    ((mouse_mode == MouseRange) || 
+                     ((mouse_mode == MouseObject) && (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT)))) {
                         (*i)->reshow_selection (selection->time);
                 } else {
                         (*i)->hide_selection ();
