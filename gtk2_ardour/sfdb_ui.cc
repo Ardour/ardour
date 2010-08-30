@@ -1031,6 +1031,8 @@ SoundFileOmega::reset_options ()
 		}
 	}
 
+	resetting_ourselves = true;
+
 	existing_choice = channel_combo.get_active_text();
 
 	set_popdown_strings (channel_combo, channel_strings);
@@ -1051,6 +1053,8 @@ SoundFileOmega::reset_options ()
 	} else {
 		channel_combo.set_active_text (channel_strings.front());
 	}
+
+	resetting_ourselves = false;
 
 	if (src_needed) {
 		src_combo.set_sensitive (true);
@@ -1319,6 +1323,7 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	reset_options ();
 
 	action_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::reset_options_noret));
+	channel_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::reset_options_noret));
 
 	copy_files_btn.set_active (true);
 
