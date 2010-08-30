@@ -869,6 +869,11 @@ Selection::set (list<Selectable*> const & selectables)
 {
 	clear_regions();
 	clear_points ();
+
+	if (Config->get_link_region_and_track_selection ()) {
+		clear_tracks ();
+	}
+	
 	add (selectables);
 }
 
