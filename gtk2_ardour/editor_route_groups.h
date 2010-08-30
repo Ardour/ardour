@@ -72,6 +72,7 @@ private:
 	void remove_selected ();
 	void run_new_group_dialog ();
         void all_group_toggled();
+        void all_group_changed (const PBD::PropertyChange&);
 
 	Glib::RefPtr<Gtk::ListStore> _model;
 	Glib::RefPtr<Gtk::TreeSelection> _selection;

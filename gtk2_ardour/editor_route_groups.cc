@@ -487,9 +487,19 @@ EditorRouteGroups::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
+
+                RouteGroup& arg (_session->all_route_group());
+                
+                arg.PropertyChanged.connect (property_changed_connection, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::all_group_changed, this, _1), gui_context());
+
 		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::add, this, _1), gui_context());
 		_session->route_group_removed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::groups_changed, this), gui_context());
 	}
+
+        PBD::PropertyChange pc;
+        pc.add (Properties::select);
+        pc.add (Properties::active);
+        all_group_changed (pc);
 
 	groups_changed ();
 }
@@ -510,3 +520,15 @@ EditorRouteGroups::all_group_toggled ()
         }
 }
 
+void
+EditorRouteGroups::all_group_changed (const PropertyChange&)
+{
+        if (_session) {
+                RouteGroup& arg (_session->all_route_group());
+                _all_group_active_button.set_active (arg.is_active() && arg.is_select());
+        } else {
+                _all_group_active_button.set_active (false);
+        }
+
+}
+        
