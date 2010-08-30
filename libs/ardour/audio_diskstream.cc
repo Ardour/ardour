@@ -466,7 +466,9 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
         */
 
 
-        // Safeguard against situations where process() goes haywire when autopunching and last_recordable_frame < first_recordable_frame
+        // Safeguard against situations where process() goes haywire when autopunching 
+        // and last_recordable_frame < first_recordable_frame
+
         if (last_recordable_frame < first_recordable_frame) {
                 last_recordable_frame = max_frames;
         }

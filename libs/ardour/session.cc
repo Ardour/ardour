@@ -162,7 +162,6 @@ Session::Session (AudioEngine &eng,
 		
 	playlists.reset (new SessionPlaylists);
 
-        _all_route_group->set_edit (true);
         _all_route_group->set_active (true, this);
 
 	interpolation.add_channel_to (0, 0);
