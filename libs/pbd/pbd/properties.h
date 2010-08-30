@@ -69,6 +69,7 @@ public:
 	 */
 	PropertyTemplate<T> & operator= (PropertyTemplate<T> const & p) {
 		set (p._current);
+		return *this;
 	}
 
 	T & operator+=(T const& v) {
