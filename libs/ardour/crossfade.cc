@@ -29,6 +29,7 @@
 #include "ardour/utils.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
+#include "ardour/region_factory.h"
 
 #include "i18n.h"
 #include <locale.h>
@@ -144,8 +145,17 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode const & node)
 
 	PBD::ID id (prop->value());
 
-	if ((r = playlist.find_region (id)) == 0) {
-		error << string_compose (_("Crossfade: no \"in\" region %1 found in playlist %2"), id, playlist.name())
+	r = playlist.find_region (id);
+
+	if (!r) {
+		/* the `in' region is not in a playlist, which probably means that this crossfade
+		   is in the undo record, so we have to find the region in the global region map.
+		*/
+		r = RegionFactory::region_by_id (id);
+	}
+	
+	if (!r) {
+		error << string_compose (_("Crossfade: no \"in\" region %1 found in playlist %2 nor in region map"), id, playlist.name())
 		      << endmsg;
 		throw failed_constructor();
 	}
@@ -161,8 +171,14 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode const & node)
 
 	PBD::ID id2 (prop->value());
 
-	if ((r = playlist.find_region (id2)) == 0) {
-		error << string_compose (_("Crossfade: no \"out\" region %1 found in playlist %2"), id2, playlist.name())
+	r = playlist.find_region (id2);
+
+	if (!r) {
+		r = RegionFactory::region_by_id (id2);
+	}
+	
+	if (!r) {
+		error << string_compose (_("Crossfade: no \"out\" region %1 found in playlist %2 nor in region map"), id2, playlist.name())
 		      << endmsg;
 		throw failed_constructor();
 	}
