@@ -82,7 +82,7 @@ void
 ReturnUI::ins_changed (IOChange change, void* ignored)
 {
 	ENSURE_GUI_THREAD (*this, &ReturnUI::ins_changed, change, ignored)
-	if (change & ConfigurationChanged) {
+	if (change.type & IOChange::ConfigurationChanged) {
 		_gpm.setup_meters ();
 	}
 }

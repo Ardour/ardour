@@ -36,6 +36,7 @@
 #include "pbd/id.h"
 
 #include "ardour/bbt_time.h"
+#include "ardour/chan_count.h"
 
 #include <map>
 
@@ -70,10 +71,21 @@ namespace ARDOUR {
 	/* any count of audio frames */
 	typedef int64_t framecnt_t;
 
-	enum IOChange {
-		NoChange = 0,
-		ConfigurationChanged = 0x1,
-		ConnectionsChanged = 0x2
+	struct IOChange {
+
+		enum Type {
+			NoChange = 0,
+			ConfigurationChanged = 0x1,
+			ConnectionsChanged = 0x2
+		} type;
+
+		IOChange () : type (NoChange) {}
+		IOChange (Type t) : type (t) {}
+
+		/** channel count of IO before a ConfigurationChanged, if appropriate */
+		ARDOUR::ChanCount before;
+		/** channel count of IO after a ConfigurationChanged, if appropriate */
+		ARDOUR::ChanCount after;
 	};
 
 	enum OverlapType {

@@ -165,7 +165,7 @@ AudioDiskstream::non_realtime_input_change ()
 	{
 		Glib::Mutex::Lock lm (state_lock);
 
-		if (input_change_pending == NoChange) {
+		if (input_change_pending.type == IOChange::NoChange) {
 			return;
 		}
 
@@ -192,7 +192,7 @@ AudioDiskstream::non_realtime_input_change ()
 			set_align_style_from_io ();
 		}
 
-		input_change_pending = NoChange;
+		input_change_pending = IOChange::NoChange;
 
 		/* implicit unlock */
 	}

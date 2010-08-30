@@ -92,7 +92,7 @@ void
 SendUI::ins_changed (IOChange change, void* ignored)
 {
 	ENSURE_GUI_THREAD (*this, &SendUI::ins_changed, change, ignored)
-	if (change & ConfigurationChanged) {
+	if (change.type & IOChange::ConfigurationChanged) {
 		_panners.setup_pan ();
 	}
 }
@@ -101,7 +101,7 @@ void
 SendUI::outs_changed (IOChange change, void* ignored)
 {
 	ENSURE_GUI_THREAD (*this, &SendUI::outs_changed, change, ignored)
-	if (change & ConfigurationChanged) {
+	if (change.type & IOChange::ConfigurationChanged) {
 		_panners.setup_pan ();
 		_gpm.setup_meters ();
 	}

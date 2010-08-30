@@ -158,11 +158,11 @@ MidiDiskstream::non_realtime_input_change ()
 	{
 		Glib::Mutex::Lock lm (state_lock);
 
-		if (input_change_pending == NoChange) {
+		if (input_change_pending.type == IOChange::NoChange) {
 			return;
 		}
 
-		if (input_change_pending & ConfigurationChanged) {
+		if (input_change_pending.type & IOChange::ConfigurationChanged) {
 			if (_io->n_ports().n_midi() != _n_channels.n_midi()) {
 				error << "Can not feed IO " << _io->n_ports()
 					<< " with diskstream " << _n_channels << endl;
@@ -179,7 +179,7 @@ MidiDiskstream::non_realtime_input_change ()
 			set_align_style_from_io ();
 		}
 
-		input_change_pending = NoChange;
+		input_change_pending.type = IOChange::NoChange;
 
 		/* implicit unlock */
 	}

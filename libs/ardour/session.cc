@@ -1470,6 +1470,7 @@ Session::find_route_name (const char* base, uint32_t& id, char* name, size_t nam
 	return false;
 }
 
+/** Count the total ins and outs of all non-hidden routes in the session and return them in in and out */
 void
 Session::count_existing_route_channels (ChanCount& in, ChanCount& out)
 {
@@ -1478,8 +1479,8 @@ Session::count_existing_route_channels (ChanCount& in, ChanCount& out)
 	shared_ptr<RouteList> r = routes.reader ();
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->is_hidden()) {
-			in += (*i)->n_inputs();
-			out	+= (*i)->n_outputs();
+			in  += (*i)->n_inputs();
+			out += (*i)->n_outputs();
 		}
 	}
 }
@@ -1532,7 +1533,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 				goto failed;
 			}
 
-			auto_connect_route (track, existing_inputs, existing_outputs);
+			auto_connect_route (track.get(), existing_inputs, existing_outputs);
 
 			track->non_realtime_input_change();
 
@@ -1570,9 +1571,14 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 	return ret;
 }
 
-/** @param connect_inputs true to connect inputs as well as outputs, false to connect just outputs */
+/** @param connect_inputs true to connect inputs as well as outputs, false to connect just outputs.
+ *  @param input_start Where to start from when auto-connecting inputs; e.g. if this is 0, auto-connect starting from input 0.
+ *  @param output_start As \a input_start, but for outputs.
+ */
 void
-Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing_inputs, ChanCount& existing_outputs, bool connect_inputs)
+Session::auto_connect_route (
+	Route* route, ChanCount& existing_inputs, ChanCount& existing_outputs, bool connect_inputs, ChanCount input_start, ChanCount output_start
+	)
 {
 	/* If both inputs and outputs are auto-connected to physical ports,
 	   use the max of input and output offsets to ensure auto-connected
@@ -1604,7 +1610,7 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
 
 		if (!physinputs.empty() && connect_inputs) {
 			uint32_t nphysical_in = physinputs.size();
-			for (uint32_t i = 0; i < route->n_inputs().get(*t) && i < nphysical_in; ++i) {
+			for (uint32_t i = input_start.get(*t); i < route->n_inputs().get(*t) && i < nphysical_in; ++i) {
 				string port;
 
 				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
@@ -1620,7 +1626,7 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
 
 		if (!physoutputs.empty()) {
 			uint32_t nphysical_out = physoutputs.size();
-			for (uint32_t i = 0; i < route->n_outputs().get(*t); ++i) {
+			for (uint32_t i = output_start.get(*t); i < route->n_outputs().get(*t); ++i) {
 				string port;
 
 				if (Config->get_output_auto_connect() & AutoConnectPhysical) {
@@ -1697,7 +1703,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				goto failed;
 			}
 
-			auto_connect_route (track, existing_inputs, existing_outputs);
+			auto_connect_route (track.get(), existing_inputs, existing_outputs);
 
 			if (route_group) {
 				route_group->add (track);
@@ -1810,7 +1816,7 @@ Session::new_audio_route (bool aux, int input_channels, int output_channels, Rou
 				goto failure;
 			}
 
-			auto_connect_route (bus, existing_inputs, existing_outputs, false);
+			auto_connect_route (bus.get(), existing_inputs, existing_outputs, false);
 
 			if (route_group) {
 				route_group->add (bus);
@@ -1901,8 +1907,11 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 				   picks up the configuration of the route. During session
 				   loading this normally happens in a different way.
 				*/
-				route->input()->changed (IOChange (ConfigurationChanged|ConnectionsChanged), this);
-				route->output()->changed (IOChange (ConfigurationChanged|ConnectionsChanged), this);
+				IOChange change (IOChange::Type (IOChange::ConfigurationChanged | IOChange::ConnectionsChanged));
+				change.after = route->input()->n_ports();
+				route->input()->changed (change, this);
+				change.after = route->output()->n_ports();
+				route->output()->changed (change, this);
 			}
 
 			route->set_remote_control_id (control_id);

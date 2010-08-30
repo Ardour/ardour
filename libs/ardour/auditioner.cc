@@ -235,7 +235,7 @@ Auditioner::play_audition (nframes_t nframes)
 void
 Auditioner::output_changed (IOChange change, void* /*src*/)
 {
-	if (change & ConnectionsChanged) {
+	if (change.type & IOChange::ConnectionsChanged) {
 		string phys;
 		vector<string> connections;
 		vector<string> outputs;

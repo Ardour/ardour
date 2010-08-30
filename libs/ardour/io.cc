@@ -186,7 +186,7 @@ IO::disconnect (Port* our_port, string other_port, void* src)
 		}
 	}
 
-	changed (ConnectionsChanged, src); /* EMIT SIGNAL */
+	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
 	_session.set_dirty ();
 
 	return 0;
@@ -219,7 +219,7 @@ IO::connect (Port* our_port, string other_port, void* src)
 		}
 	}
 
-	changed (ConnectionsChanged, src); /* EMIT SIGNAL */
+	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
 	_session.set_dirty ();
 	return 0;
 }
@@ -227,20 +227,23 @@ IO::connect (Port* our_port, string other_port, void* src)
 int
 IO::remove_port (Port* port, void* src)
 {
-	IOChange change (NoChange);
+	IOChange change;
 
 	{
 		BLOCK_PROCESS_CALLBACK ();
 
-
 		{
 			Glib::Mutex::Lock lm (io_lock);
 
+			ChanCount before = _ports.count ();
+
 			if (_ports.remove(port)) {
-				change = IOChange (change|ConfigurationChanged);
+				change.type = IOChange::Type (change.type | IOChange::ConfigurationChanged);
+				change.before = before;
+				change.after = _ports.count ();
 
 				if (port->connected()) {
-					change = IOChange (change|ConnectionsChanged);
+					change.type = IOChange::Type (change.type | IOChange::ConnectionsChanged);
 				}
 
 				_session.engine().unregister_port (*port);
@@ -251,11 +254,11 @@ IO::remove_port (Port* port, void* src)
 		PortCountChanged (n_ports()); /* EMIT SIGNAL */
 	}
 
-	if (change & ConfigurationChanged) {
+	if (change.type & IOChange::ConfigurationChanged) {
 		setup_bundle ();
 	}
 
-	if (change != NoChange) {
+	if (change.type != IOChange::NoChange) {
 		changed (change, src);
 		_session.set_dirty ();
 		return 0;
@@ -278,6 +281,8 @@ IO::add_port (string destination, void* src, DataType type)
 	if (type == DataType::NIL) {
 		type = _default_type;
 	}
+
+	IOChange change;
 
 	{
 		BLOCK_PROCESS_CALLBACK ();
@@ -302,6 +307,7 @@ IO::add_port (string destination, void* src, DataType type)
 				}
 			}
 
+			change.before = _ports.count ();
 			_ports.add (our_port);
 		}
 
@@ -315,7 +321,9 @@ IO::add_port (string destination, void* src, DataType type)
 	}
 
 	// pan_changed (src); /* EMIT SIGNAL */
-	changed (ConfigurationChanged, src); /* EMIT SIGNAL */
+	change.type = IOChange::ConfigurationChanged;
+	change.after = _ports.count ();
+	changed (change, src); /* EMIT SIGNAL */
 	setup_bundle ();
 	_session.set_dirty ();
 
@@ -339,7 +347,7 @@ IO::disconnect (void* src)
 		}
 	}
 
-	changed (ConnectionsChanged, src); /* EMIT SIGNAL */
+	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
 
 	return 0;
 }
@@ -421,6 +429,10 @@ IO::ensure_ports (ChanCount count, bool clear, bool lockit, void* src)
 		return 0;
 	}
 
+	IOChange change;
+
+	change.before = _ports.count ();
+	
 	if (lockit) {
 		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock im (io_lock);
@@ -430,7 +442,9 @@ IO::ensure_ports (ChanCount count, bool clear, bool lockit, void* src)
 	}
 
 	if (changed) {
-		this->changed (ConfigurationChanged, src); /* EMIT SIGNAL */
+		change.after = _ports.count ();
+		change.type = IOChange::ConfigurationChanged;
+		this->changed (change, src); /* EMIT SIGNAL */
 		setup_bundle ();
 		_session.set_dirty ();
 	}
@@ -1170,7 +1184,7 @@ IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 		}
 	}
 
-	changed (IOChange (ConfigurationChanged|ConnectionsChanged), src); /* EMIT SIGNAL */
+	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
 	return 0;
 }
 
@@ -1200,7 +1214,7 @@ IO::disconnect_ports_from_bundle (boost::shared_ptr<Bundle> c, void* src)
 		}
 	}
 
-	changed (IOChange (ConfigurationChanged|ConnectionsChanged), src); /* EMIT SIGNAL */
+	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
 	return 0;
 }
 

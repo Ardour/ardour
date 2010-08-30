@@ -98,7 +98,6 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
         , overwrite_offset (0)
         , _pending_overwrite (false)
         , overwrite_queued (false)
-        , input_change_pending (NoChange)
         , wrap_buffer_size (0)
         , speed_buffer_size (0)
         , _speed (1.0)
@@ -146,7 +145,6 @@ Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
         , overwrite_offset (0)
         , _pending_overwrite (false)
         , overwrite_queued (false)
-        , input_change_pending (NoChange)
         , wrap_buffer_size (0)
         , speed_buffer_size (0)
         , _speed (1.0)
@@ -184,7 +182,7 @@ Diskstream::set_track (Track* t)
 	ic_connection.disconnect();
 	_io->changed.connect_same_thread (ic_connection, boost::bind (&Diskstream::handle_input_change, this, _1, _2));
 
-	input_change_pending = ConfigurationChanged;
+	input_change_pending = IOChange::ConfigurationChanged;
 	non_realtime_input_change ();
 	set_align_style_from_io ();
 
@@ -196,8 +194,8 @@ Diskstream::handle_input_change (IOChange change, void * /*src*/)
 {
 	Glib::Mutex::Lock lm (state_lock);
 
-	if (!(input_change_pending & change)) {
-		input_change_pending = IOChange (input_change_pending|change);
+	if (!(input_change_pending.type & change.type)) {
+		input_change_pending.type = IOChange::Type (input_change_pending.type | change.type);
 		_session.request_input_change_handling ();
 	}
 }

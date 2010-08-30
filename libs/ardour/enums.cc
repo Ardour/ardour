@@ -125,11 +125,6 @@ setup_enum_writer ()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
 #define REGISTER_CLASS_ENUM(t,e) i.push_back (t::e); s.push_back (#e)
 
-	REGISTER_ENUM (NoChange);
-	REGISTER_ENUM (ConfigurationChanged);
-	REGISTER_ENUM (ConnectionsChanged);
-	REGISTER_BITS (_IOChange);
-
 	REGISTER_ENUM (OverlapNone);
 	REGISTER_ENUM (OverlapInternal);
 	REGISTER_ENUM (OverlapStart);

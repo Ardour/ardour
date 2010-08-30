@@ -537,7 +537,7 @@ Delivery::set_name (const std::string& name)
 void
 Delivery::output_changed (IOChange change, void* /*src*/)
 {
-	if (change & ARDOUR::ConfigurationChanged) {
+	if (change.type & IOChange::ConfigurationChanged) {
 		reset_panner ();
 	}
 }
