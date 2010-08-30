@@ -71,6 +71,7 @@ private:
 	void property_changed (ARDOUR::RouteGroup*, const PBD::PropertyChange &);
 	void remove_selected ();
 	void run_new_group_dialog ();
+        void all_group_toggled();
 
 	Glib::RefPtr<Gtk::ListStore> _model;
 	Glib::RefPtr<Gtk::TreeSelection> _selection;

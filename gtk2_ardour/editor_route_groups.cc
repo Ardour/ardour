@@ -48,7 +48,7 @@ using Gtkmm2ext::Keyboard;
 
 EditorRouteGroups::EditorRouteGroups (Editor* e)
 	: EditorComponent (e)
-        , _all_group_active_button (_("\"all\" group"))
+        , _all_group_active_button (_("No Selection = All Tracks"))
         , _in_row_change (false)
 
 {
@@ -163,6 +163,8 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_display_packer.pack_start (_scroller, true, true);
         _display_packer.pack_start (_all_group_active_button, false, false);
 	_display_packer.pack_start (*button_box, false, false);
+
+        _all_group_active_button.signal_toggled().connect (sigc::mem_fun (*this, &EditorRouteGroups::all_group_toggled));
 }
 
 void
@@ -499,3 +501,12 @@ EditorRouteGroups::run_new_group_dialog ()
 	
 	return _editor->_group_tabs->run_new_group_dialog (rl);
 }
+
+void
+EditorRouteGroups::all_group_toggled ()
+{
+        if (_session) {
+                _session->all_route_group().set_select (_all_group_active_button.get_active());
+        }
+}
+
