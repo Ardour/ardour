@@ -1129,8 +1129,9 @@ Selection::set_state (XMLNode const & node, int)
 			assert (prop_id);
 			PBD::ID id (prop_id->value ());
 			RouteTimeAxisView* rtv = editor->get_route_view_by_route_id (id);
-			assert (rtv);
-			add (rtv);
+			if (rtv) {
+				add (rtv);
+			}
 			
 		} else if ((*i)->name() == X_("AutomationView")) {
 			
