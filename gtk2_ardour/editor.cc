@@ -1783,7 +1783,7 @@ Editor::add_region_context_items (StreamView* sv, list<boost::shared_ptr<Region>
 			RegionView* rv = sv->find_view (ar);
 			AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
 			
-			if (arv->envelope_visible()) {
+			if (rv && arv && arv->envelope_visible()) {
 				have_envelope_visible = true;
 			} else {
 				have_envelope_invisible = true;

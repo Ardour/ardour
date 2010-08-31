@@ -1281,10 +1281,10 @@ style "sync_alert"
 	# active, and alternates with another style if sync is active
 	# but we are not locked
 	#
-	bg[ACTIVE] = { 0.52, 1.0, 0}
-	bg[PRELIGHT] = { 0.52, 1.0, 0}
-	bg[SELECTED] = { 0.52, 1.0, 0}
-	bg[NORMAL] = { 0.52, 1.0, 0}
+	bg[ACTIVE] = { 0.98, 0.4, 0}
+	bg[PRELIGHT] = { 0.98, 0.4, 0}
+	bg[SELECTED] = { 0.98, 0.4, 0}
+	bg[NORMAL] = { 0.98, 0.4, 0}
 	
 	fg[NORMAL] = { 0, 0, 0 }
 	fg[PRELIGHT] = { 0, 0, 0 }

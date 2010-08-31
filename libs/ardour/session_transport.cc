@@ -1281,6 +1281,10 @@ Session::switch_to_sync_source (SyncSource src)
 			return;
 		}
 
+                if (config.get_video_pullup() != 0.0f) {
+                        return;
+                }
+
 		new_slave = new JACK_Slave (_engine.jack());
 		break;
 		

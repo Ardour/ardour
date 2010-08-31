@@ -201,6 +201,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void restore_clock_modes ();
 	void reset_main_clocks ();
 
+        void synchronize_sync_source_and_video_pullup ();
+
 	void add_route (Gtk::Window* float_window);
 
 	void session_add_audio_track (int input_channels, int32_t output_channels, ARDOUR::TrackMode mode, ARDOUR::RouteGroup* route_group, uint32_t how_many) {

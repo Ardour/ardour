@@ -131,7 +131,6 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 	set_tip (click_button, _("Enable/Disable audio click"));
-	set_tip (sync_button, _("Enable/Disable external positional sync"));
 	set_tip (time_master_button, string_compose (_("Does %1 control the time?"), PROGRAM_NAME));
 	set_tip (shuttle_box, _("Shuttle speed control"));
 	set_tip (shuttle_units_button, _("Select semitones or %%-age for speed display"));
@@ -140,6 +139,8 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (auditioning_alert_button, _("When active, auditioning is taking place\nClick to stop the audition"));
 	set_tip (primary_clock, _("Primary Clock"));
 	set_tip (secondary_clock, _("Secondary Clock"));
+
+        synchronize_sync_source_and_video_pullup ();
 
 	editor->setup_tooltips ();
 }
