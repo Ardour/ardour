@@ -17,15 +17,10 @@
 
 */
 
-#ifndef __ardour_ui_io_selector_h__
-#define __ardour_ui_io_selector_h__
+#ifndef __gtkardour_io_selector_h__
+#define __gtkardour_io_selector_h__
 
-#include "ardour_dialog.h"
 #include "port_matrix.h"
-
-namespace ARDOUR {
-	class PortInsert;
-}
 
 class IOSelector : public PortMatrix
 {
@@ -89,55 +84,4 @@ class IOSelectorWindow : public Gtk::Window
 	bool wm_delete (GdkEventAny*);
 };
 
-
-class PortInsertUI : public Gtk::HBox
-{
-  public:
-	PortInsertUI (Gtk::Window*, ARDOUR::Session *, boost::shared_ptr<ARDOUR::PortInsert>);
-
-	void redisplay ();
-	void finished (IOSelector::Result);
-
-  private:
-        boost::shared_ptr<ARDOUR::PortInsert> _pi;
-        
-        Gtk::ToggleButton latency_button;
-	IOSelector input_selector;
-	IOSelector output_selector;
-        Gtk::Label latency_display;
-        Gtk::Frame latency_frame;
-        Gtk::HBox  latency_hbox;
-        sigc::connection latency_timeout;
-
-        bool check_latency_measurement ();
-        void latency_button_toggled ();
-        void update_latency_display ();
-};
-
-class PortInsertWindow : public ArdourDialog
-{
-  public:
-	PortInsertWindow (ARDOUR::Session *, boost::shared_ptr<ARDOUR::PortInsert>, bool can_cancel = false);
-
-  protected:
-	void on_map ();
-
-  private:
-	PortInsertUI _portinsertui;
-	Gtk::VBox vbox;
-
-	Gtk::Button ok_button;
-	Gtk::Button cancel_button;
-	Gtk::Frame button_frame;
-
-	void cancel ();
-	void accept ();
-
-	void plugin_going_away ();
-	PBD::ScopedConnection going_away_connection;
-
-	bool wm_delete (GdkEventAny*);
-};
-
-
-#endif
+#endif /* __gtkardour_io_selector_h__ */

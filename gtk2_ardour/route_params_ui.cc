@@ -44,6 +44,7 @@
 #include "io_selector.h"
 #include "keyboard.h"
 #include "mixer_strip.h"
+#include "port_insert_ui.h"
 #include "plugin_selector.h"
 #include "plugin_ui.h"
 #include "return_ui.h"

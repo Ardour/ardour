@@ -156,6 +156,7 @@ gtk2_ardour_sources = [
 	'plugin_selector.cc',
 	'plugin_ui.cc',
 	'port_group.cc',
+        'port_insert_ui.cc',
 	'port_matrix.cc',
 	'port_matrix_body.cc',
 	'port_matrix_column_labels.cc',
