@@ -493,10 +493,9 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 {
 	BBT_Time bbt;
 
-	/* frame info */
-
-	pos->frame = _transport_frame;
-	pos->valid = JackPositionTimecode;
+        if (pos->frame != _transport_frame) {
+                cerr << "ARDOUR says " << _transport_frame << " JACK says " << pos->frame << endl;
+        }
 
 	/* BBT info */
 
@@ -528,8 +527,9 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 #if 0
 	/* Timecode info */
 
-	t.timecode_offset = _timecode_offset;
+	pos->timecode_offset = _timecode_offset;
 	t.timecode_frame_rate = timecode_frames_per_second();
+	pos->valid = jack_position_bits_t (pos->valid | JackPositionTimecode;
 
 	if (_transport_speed) {
 
@@ -561,7 +561,6 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 		}
 
 	}
-
 #endif
 }
 
