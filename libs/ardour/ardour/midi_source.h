@@ -56,15 +56,11 @@ class MidiSource : virtual public Source
 	 * \param source_start Start position of the SOURCE in this read context
 	 * \param start Start of range to be read
 	 * \param cnt Length of range to be read (in audio frames)
-	 * \param stamp_offset Offset to add to event times written to dst
-	 * \param negative_stamp_offset Offset to subtract from event times written to dst
 	 * \param tracker an optional pointer to MidiStateTracker object, for note on/off tracking
 	 */
 	virtual nframes_t midi_read (Evoral::EventSink<nframes_t>& dst,
 				     sframes_t source_start,
 				     sframes_t start, nframes_t cnt,
-				     sframes_t stamp_offset,
-				     sframes_t negative_stamp_offset,
 				     MidiStateTracker*,
 				     std::set<Evoral::Parameter> const &) const;
 
@@ -140,7 +136,6 @@ class MidiSource : virtual public Source
 	virtual nframes_t read_unlocked (Evoral::EventSink<nframes_t>& dst,
 					 sframes_t position,
 					 sframes_t start, nframes_t cnt,
-					 sframes_t stamp_offset, sframes_t negative_stamp_offset,
 					 MidiStateTracker* tracker) const = 0;
 
 	virtual nframes_t write_unlocked (MidiRingBuffer<nframes_t>& dst,

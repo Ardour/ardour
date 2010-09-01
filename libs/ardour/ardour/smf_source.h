@@ -77,8 +77,6 @@ public:
 				 sframes_t position,
 				 sframes_t start,
 				 nframes_t cnt,
-				 sframes_t stamp_offset,
-				 sframes_t negative_stamp_offset,
 				 MidiStateTracker* tracker) const;
 
 	nframes_t write_unlocked (MidiRingBuffer<nframes_t>& src,

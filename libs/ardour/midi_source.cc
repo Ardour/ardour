@@ -199,7 +199,6 @@ MidiSource::invalidate ()
 nframes_t
 MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, sframes_t source_start,
                        sframes_t start, nframes_t cnt,
-                       sframes_t stamp_offset, sframes_t negative_stamp_offset,
                        MidiStateTracker* tracker,
 		       std::set<Evoral::Parameter> const & filtered) const
 {
@@ -229,8 +228,8 @@ MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, sframes_t source_start
 		for (; i != _model->end(); ++i) {
 			const sframes_t time_frames = converter.to(i->time());
 			if (time_frames < start + cnt) {
-				dst.write(time_frames + stamp_offset - negative_stamp_offset,
-                                          i->event_type(), i->size(), i->buffer());
+				/* convert event times to session frames by adding on the source start position in session frames */
+				dst.write (time_frames + source_start, i->event_type(), i->size(), i->buffer());
 
 				if (tracker) {
 					Evoral::MIDIEvent<Evoral::MusicalTime>& ev (*(Evoral::MIDIEvent<Evoral::MusicalTime>*) (&(*i)));
@@ -248,7 +247,7 @@ MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, sframes_t source_start
 		}
 		return cnt;
 	} else {
-		return read_unlocked (dst, source_start, start, cnt, stamp_offset, negative_stamp_offset, tracker);
+		return read_unlocked (dst, source_start, start, cnt, tracker);
 	}
 }
 

@@ -105,9 +105,8 @@ SMFSource::~SMFSource ()
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t source_start,
+SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t const source_start,
 			  sframes_t start, nframes_t duration,
-			  sframes_t stamp_offset, sframes_t negative_stamp_offset,
 			  MidiStateTracker* tracker) const
 {
 	int      ret  = 0;
@@ -171,16 +170,14 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t s
 								  ev_delta_t, time, ev_buffer[0], ev_type));
 
 		assert(time >= start_ticks);
-		const sframes_t ev_frame_time = converter.to(time / (double)ppqn()) + stamp_offset;
 
-#if 0
-		cerr << " frames = " << ev_frame_time
-		     << " w/offset = " << ev_frame_time - negative_stamp_offset
-		     << endl;
-#endif
+		/* Note that we add on the source start time (in session frames) here so that ev_frame_time
+		   is in session frames.
+		*/
+		const sframes_t ev_frame_time = converter.to(time / (double)ppqn()) + source_start;
 
 		if (ev_frame_time < start + duration) {
-			destination.write(ev_frame_time - negative_stamp_offset, ev_type, ev_size, ev_buffer);
+			destination.write (ev_frame_time, ev_type, ev_size, ev_buffer);
 
 			if (tracker) {
 				if (ev_buffer[0] & MIDI_CMD_NOTE_ON) {

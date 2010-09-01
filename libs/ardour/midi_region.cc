@@ -124,7 +124,6 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& 
 		      NoteMode mode, MidiStateTracker* tracker) const
 {
 	frameoffset_t internal_offset = 0;
-	frameoffset_t src_offset      = 0;
 	framecnt_t to_read         = 0;
 
 	/* precondition: caller has verified that we cover the desired section */
@@ -136,12 +135,12 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& 
 	}
 
 	if (position < _position) {
+		/* we are starting the read from before the start of the region */
 		internal_offset = 0;
-		src_offset = _position - position;
-		dur -= src_offset;
+		dur -= _position - position;
 	} else {
+		/* we are starting the read from after the start of the region */
 		internal_offset = position - _position;
-		src_offset = 0;
 	}
 
 	if (internal_offset >= _length) {
@@ -157,31 +156,20 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& 
 	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
 	src->set_note_mode(mode);
 
-	framepos_t output_buffer_position = 0;
-	framepos_t negative_output_buffer_position = 0;
-	if (_position >= _start) {
-		// handle resizing of beginnings of regions correctly
-		output_buffer_position = _position - _start;
-	} else {
-		// the reverse of the above
-		negative_output_buffer_position = _start - _position;
-	}
-
 	/*cerr << "MR read @ " << position << " * " << to_read
 		<< " _position = " << _position
 	    << " _start = " << _start
 	    << " offset = " << output_buffer_position
-	    << " negoffset = " << negative_output_buffer_position
 	    << " intoffset = " << internal_offset
 	    << endl;*/
 
+	/* This call reads events from a source and writes them to `dst' timed in session frames */
+
 	if (src->midi_read (
 			dst, // destination buffer
-			_position - _start, // start position of the source in this read context
+			_position - _start, // start position of the source in session frames
 			_start + internal_offset, // where to start reading in the source
 			to_read, // read duration in frames
-			output_buffer_position, // the offset in the output buffer
-			negative_output_buffer_position, // amount to substract from note times
 			tracker,
 			_filtered_parameters
 		    ) != to_read) {
