@@ -415,7 +415,11 @@ MidiSource::automation_state_of (Evoral::Parameter p) const
 {
 	AutomationStateMap::const_iterator i = _automation_state.find (p);
 	if (i == _automation_state.end()) {
-		return Off;
+		/* default to `play', otherwise if MIDI is recorded /
+		   imported with controllers etc. they are by default
+		   not played back, which is a little surprising.
+		*/
+		return Play;
 	}
 
 	return i->second;
@@ -448,7 +452,7 @@ MidiSource::set_automation_state_of (Evoral::Parameter p, AutoState s)
 		return;
 	}
 	
-	if (s == Off) {
+	if (s == Play) {
 		/* automation state is being set to the default, so we don't need a note in our map */
 		_automation_state.erase (p);
 	} else {
