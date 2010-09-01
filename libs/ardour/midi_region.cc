@@ -163,9 +163,8 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& 
 		// handle resizing of beginnings of regions correctly
 		output_buffer_position = _position - _start;
 	} else {
-		// when _start is greater than _position, we have to subtract
-		// _start from the note times in the midi source
-		negative_output_buffer_position = _start;
+		// the reverse of the above
+		negative_output_buffer_position = _start - _position;
 	}
 
 	/*cerr << "MR read @ " << position << " * " << to_read
