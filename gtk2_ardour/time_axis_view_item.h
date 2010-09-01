@@ -141,7 +141,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	
 protected:
 	TimeAxisViewItem(const std::string &, ArdourCanvas::Group&, TimeAxisView&, double, Gdk::Color const &,
-			 nframes64_t, nframes64_t, bool recording = false, Visibility v = Visibility (0));
+			 nframes64_t, nframes64_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
 	
 	TimeAxisViewItem (const TimeAxisViewItem&);
 	
@@ -237,6 +237,7 @@ protected:
 	double _height;
 	Visibility visibility;
 	bool _recregion;
+	bool _automation; ///< true if this is an automation region view
 	
 }; /* class TimeAxisViewItem */
 

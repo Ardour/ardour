@@ -41,7 +41,7 @@ AutomationRegionView::AutomationRegionView(ArdourCanvas::Group*                 
                                            boost::shared_ptr<ARDOUR::AutomationList> list,
                                            double                                    spu,
                                            Gdk::Color const &                        basic_color)
-	: RegionView(parent, time_axis, region, spu, basic_color)
+	: RegionView(parent, time_axis, region, spu, basic_color, true)
 	, _parameter(param)
 {
 	if (list) {

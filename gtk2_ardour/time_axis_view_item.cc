@@ -83,19 +83,23 @@ TimeAxisViewItem::set_constant_heights ()
  * Construct a new TimeAxisViewItem.
  *
  * @param it_name the unique name of this item
- * @param parant the parent canvas group
+ * @param parent the parent canvas group
  * @param tv the TimeAxisView we are going to be added to
  * @param spu samples per unit
  * @param base_color
  * @param start the start point of this item
  * @param duration the duration of this item
+ * @param recording true if this is a recording region view
+ * @param automation true if this is an automation region view
  */
-TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color,
-				   nframes64_t start, nframes64_t duration, bool recording,
-				   Visibility vis)
+TimeAxisViewItem::TimeAxisViewItem(
+	const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color,
+	nframes64_t start, nframes64_t duration, bool recording, bool automation, Visibility vis
+	)
 	: trackview (tv)
 	, _height (1.0)
 	, _recregion (recording)
+	, _automation (automation)
 {
 	group = new ArdourCanvas::Group (parent);
 
@@ -107,6 +111,7 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	, PBD::ScopedConnectionList()
 	, trackview (other.trackview)
 	, _recregion (other._recregion)
+	, _automation (other._automation)
 {
 
 	Gdk::Color c;
@@ -167,10 +172,9 @@ TimeAxisViewItem::init (
 		frame->property_outline_pixels() = 1;
 		frame->property_outline_what() = 0xF;
 		
-		if(_recregion){
+		if (_recregion) {
 			frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
-		}
-		else {
+		} else {
 			frame->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
 		}
 		
@@ -204,7 +208,7 @@ TimeAxisViewItem::init (
 	}
 
 	/* create our grab handles used for trimming/duration etc */
-	if (!_recregion) {
+	if (!_recregion && !_automation) {
 		frame_handle_start = new ArdourCanvas::SimpleRect (*group, 0.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH, 5.0, trackview.current_height());
 		frame_handle_start->property_outline_what() = 0x0;
 		frame_handle_end = new ArdourCanvas::SimpleRect (*group, 0.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH, 5.0, trackview.current_height());
