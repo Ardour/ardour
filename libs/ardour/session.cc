@@ -141,6 +141,7 @@ Session::Session (AudioEngine &eng,
         , _requested_return_frame (-1)
         , _session_dir (new SessionDirectory(fullpath))
         , state_tree (0)
+	, _state_of_the_state (Clean)
         , _butler (new Butler (*this))
         , _post_transport_work (0)
         , _send_timecode_update (false)
