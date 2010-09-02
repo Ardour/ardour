@@ -291,7 +291,7 @@ public:
 
 private:
 	std::string to_string (std::string const& v) const {
-		return _current;
+		return v;
 	}
 
 	std::string from_string (std::string const& s) const {
