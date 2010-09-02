@@ -140,6 +140,7 @@ class PluginInsert : public Processor
 	int32_t count_for_configuration (ChanCount in, ChanCount out) const;
 
 	boost::shared_ptr<Plugin> plugin_factory (boost::shared_ptr<Plugin>);
+	void add_plugin_with_activation (boost::shared_ptr<Plugin>);
 };
 
 } // namespace ARDOUR

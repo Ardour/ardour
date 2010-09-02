@@ -634,6 +634,9 @@ LadspaPlugin::run_in_place (nframes_t nframes)
 			_control_data[i] = _shadow_data[i];
 		}
 	}
+
+	assert (_was_activated);
+	
 	_descriptor->run (_handle, nframes);
 }
 

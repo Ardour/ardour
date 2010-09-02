@@ -92,7 +92,7 @@ PluginInsert::set_count (uint32_t num)
 		uint32_t diff = num - _plugins.size();
 
 		for (uint32_t n = 0; n < diff; ++n) {
-			_plugins.push_back (plugin_factory (_plugins[0]));
+			add_plugin_with_activation (_plugins[0]);
 
 			if (require_state) {
 				/* XXX do something */
@@ -762,10 +762,10 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 	if (_plugins.size() != count) {
 
-		_plugins.push_back (plugin);
+		add_plugin_with_activation (plugin);
 
 		for (uint32_t n = 1; n < count; ++n) {
-			_plugins.push_back (plugin_factory (plugin));
+			add_plugin_with_activation (plugin_factory (plugin));
 		}
 	}
 
@@ -1003,3 +1003,12 @@ PluginInsert::collect_signal_for_analysis(nframes_t nframes)
 	_signal_analysis_collect_nframes_max = nframes;
 }
 
+/** Add a plugin to our list and activate it if we have already been activated */
+void
+PluginInsert::add_plugin_with_activation (boost::shared_ptr<Plugin> plugin)
+{
+	_plugins.push_back (plugin);
+	if (active()) {
+		plugin->activate ();
+	}
+}
