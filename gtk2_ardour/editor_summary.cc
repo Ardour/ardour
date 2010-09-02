@@ -363,12 +363,19 @@ EditorSummary::get_position (double x, double y) const
 {
 	/* how close the mouse has to be to the edge of the view rectangle to be considered `on it',
 	   in pixels */
-	int const edge_size = 8;
+
+	int x_edge_size = (_view_rectangle_x.second - _view_rectangle_x.first) / 4;
+	x_edge_size = min (x_edge_size, 8);
+	x_edge_size = max (x_edge_size, 1);
+
+	int y_edge_size = (_view_rectangle_y.second - _view_rectangle_y.first) / 4;
+	y_edge_size = min (y_edge_size, 8);
+	y_edge_size = max (y_edge_size, 1);
 	
-	bool const near_left = (std::abs (x - _view_rectangle_x.first) < edge_size);
-	bool const near_right = (std::abs (x - _view_rectangle_x.second) < edge_size);
- 	bool const near_top = (std::abs (y - _view_rectangle_y.first) < edge_size);
- 	bool const near_bottom = (std::abs (y - _view_rectangle_y.second) < edge_size);
+	bool const near_left = (std::abs (x - _view_rectangle_x.first) < x_edge_size);
+	bool const near_right = (std::abs (x - _view_rectangle_x.second) < x_edge_size);
+ 	bool const near_top = (std::abs (y - _view_rectangle_y.first) < y_edge_size);
+ 	bool const near_bottom = (std::abs (y - _view_rectangle_y.second) < y_edge_size);
 	bool const within_x = _view_rectangle_x.first < x && x < _view_rectangle_x.second;
 	bool const within_y = _view_rectangle_y.first < y && y < _view_rectangle_y.second;
 
