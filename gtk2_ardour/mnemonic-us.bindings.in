@@ -323,7 +323,6 @@ This mode provides many different operations on both regions and control points,
 
 ;; numbers
 
-@eep|Editor/toggle-edit-mode|1|cycle to next edit mode
 @eep|Editor/cycle-snap-mode|2|cycle to next grid snap mode
 @eep|Editor/cycle-snap-choice|3|cycle to next grid unit
 @trans|Editor/step-mouse-mode|4|toggle auto play
