@@ -334,7 +334,7 @@ RouteGroup::set_edit (bool yn)
 }
 
 void
-RouteGroup::set_active (bool yn, void *src)
+RouteGroup::set_active (bool yn, void* /*src*/)
 {
 	if (is_active() == yn) {
 		return;
@@ -347,7 +347,7 @@ RouteGroup::set_active (bool yn, void *src)
 }
 
 void
-RouteGroup::set_relative (bool yn, void *src)
+RouteGroup::set_relative (bool yn, void* /*src*/)
 {
 	if (is_relative() == yn) {
 		return;
@@ -357,7 +357,7 @@ RouteGroup::set_relative (bool yn, void *src)
 }
 
 void
-RouteGroup::set_hidden (bool yn, void *src)
+RouteGroup::set_hidden (bool yn, void* /*src*/)
 {
 	if (is_hidden() == yn) {
 		return;

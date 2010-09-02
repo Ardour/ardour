@@ -87,7 +87,7 @@ RegionLayeringOrderEditor::~RegionLayeringOrderEditor ()
 }
 
 void
-RegionLayeringOrderEditor::row_activated (const TreeModel::Path& path, TreeViewColumn* column)
+RegionLayeringOrderEditor::row_activated (const TreeModel::Path& path, TreeViewColumn*)
 {
 	if (in_row_change) {
 		return;

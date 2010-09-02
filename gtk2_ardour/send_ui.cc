@@ -89,7 +89,7 @@ SendUI::~SendUI ()
 }
 
 void
-SendUI::ins_changed (IOChange change, void* ignored)
+SendUI::ins_changed (IOChange change, void* /*ignored*/)
 {
 	ENSURE_GUI_THREAD (*this, &SendUI::ins_changed, change, ignored)
 	if (change.type & IOChange::ConfigurationChanged) {
@@ -98,7 +98,7 @@ SendUI::ins_changed (IOChange change, void* ignored)
 }
 
 void
-SendUI::outs_changed (IOChange change, void* ignored)
+SendUI::outs_changed (IOChange change, void* /*ignored*/)
 {
 	ENSURE_GUI_THREAD (*this, &SendUI::outs_changed, change, ignored)
 	if (change.type & IOChange::ConfigurationChanged) {

@@ -55,7 +55,7 @@ MIDIAction::get_state ()
 }
 
 int
-MIDIAction::set_state (const XMLNode& node, int version)
+MIDIAction::set_state (const XMLNode& /*node*/, int /*version*/)
 {
 	return 0;
 }

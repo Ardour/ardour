@@ -4208,10 +4208,8 @@ Editor::control_layout_scroll (GdkEventScroll* ev)
 }
 
 void
-Editor::session_state_saved (string snap_name)
+Editor::session_state_saved (string)
 {
-	ENSURE_GUI_THREAD (*this, &Editor::session_state_saved, snap_name);
-	
 	update_title ();	
 	_snapshots->redisplay ();
 }

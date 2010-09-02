@@ -518,7 +518,7 @@ ARDOUR_UI::auditioning_changed (bool onoff)
 }
 
 bool
-ARDOUR_UI::audition_alert_press (GdkEventButton* ev)
+ARDOUR_UI::audition_alert_press (GdkEventButton*)
 {
 	if (_session) {
 		_session->cancel_audition();
@@ -527,7 +527,7 @@ ARDOUR_UI::audition_alert_press (GdkEventButton* ev)
 }
 
 bool
-ARDOUR_UI::solo_alert_press (GdkEventButton* ev)
+ARDOUR_UI::solo_alert_press (GdkEventButton*)
 {
         if (_session) {
                 if (_session->soloing()) {

@@ -45,13 +45,13 @@ using namespace PBD;
 using namespace ARDOUR;
 
 static void
-_note_off_event_handler (GtkWidget* widget, int note, gpointer arg)
+_note_off_event_handler (GtkWidget* /*widget*/, int note, gpointer arg)
 {
 	((StepEntry*)arg)->note_off_event_handler (note);
 }
 
 static void
-_rest_event_handler (GtkWidget* widget, gpointer arg)
+_rest_event_handler (GtkWidget* /*widget*/, gpointer arg)
 {
 	((StepEntry*)arg)->rest_event_handler ();
 }

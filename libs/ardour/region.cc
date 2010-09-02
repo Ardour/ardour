@@ -835,7 +835,7 @@ Region::modify_front (nframes_t new_position, bool reset_fade, void *src)
 }
 
 void
-Region::modify_end (nframes_t new_endpoint, bool reset_fade, void *src)
+Region::modify_end (nframes_t new_endpoint, bool reset_fade, void* /*src*/)
 {
 	if (locked()) {
 		return;
@@ -1217,7 +1217,7 @@ Region::set_state (const XMLNode& node, int version)
 }
 
 int
-Region::_set_state (const XMLNode& node, int version, PropertyChange& what_changed, bool send)
+Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_changed, bool send)
 {
 	const XMLProperty* prop;
 

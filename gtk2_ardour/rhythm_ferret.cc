@@ -212,7 +212,7 @@ RhythmFerret::run_analysis ()
 }
 
 int
-RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readable, nframes64_t offset, AnalysisFeatureList& results)
+RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readable, nframes64_t /*offset*/, AnalysisFeatureList& results)
 {
 	TransientDetector t (_session->frame_rate());
 
@@ -265,7 +265,7 @@ RhythmFerret::get_note_onset_function ()
 }
 
 int
-RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, nframes64_t offset, AnalysisFeatureList& results)
+RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, nframes64_t /*offset*/, AnalysisFeatureList& results)
 {
 	try {
 		OnsetDetector t (_session->frame_rate());

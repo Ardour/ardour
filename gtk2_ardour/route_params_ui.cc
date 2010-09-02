@@ -488,9 +488,8 @@ RouteParams_UI::route_selected()
 }
 
 void
-RouteParams_UI::processors_changed (RouteProcessorChange c)
+RouteParams_UI::processors_changed (RouteProcessorChange)
 {
-	ENSURE_GUI_THREAD (*this, &RouteParams_UI::processors_changed, c)
 	cleanup_view();
 
 	_processor.reset ((Processor*) 0);

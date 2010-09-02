@@ -36,7 +36,7 @@ static bool sort_ports_by_name (Port* a, Port* b)
         Glib::ustring bname (b->name());
         
         Glib::ustring::size_type last_digit_position_a = aname.size();
-        Glib::ustring::const_reverse_iterator r_iterator = aname.rbegin();
+        Glib::ustring::reverse_iterator r_iterator = aname.rbegin();
         
         while (r_iterator!= aname.rend() && Glib::Unicode::isdigit(*r_iterator)) {
                 r_iterator++; 

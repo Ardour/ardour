@@ -247,16 +247,16 @@ class Region
 
 	virtual int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&) = 0;
 
-	virtual void add_transient (nframes64_t where) {
+	virtual void add_transient (nframes64_t) {
 		// no transients, but its OK
 	}
 
-	virtual int update_transient (nframes64_t old_position, nframes64_t new_position) {
+	virtual int update_transient (nframes64_t /* old_position */, nframes64_t /* new_position */) {
 		// no transients, but its OK
 		return 0;
 	}
 
-	virtual void remove_transient (nframes64_t where) {
+	virtual void remove_transient (nframes64_t /* where */) {
 		// no transients, but its OK
 	}
 
@@ -271,7 +271,7 @@ class Region
 		return 0;
 	}
 
-	virtual int adjust_transients (nframes64_t delta) {
+	virtual int adjust_transients (nframes64_t /*delta*/) {
 		// no transients, but its OK
 		return 0;
 	}

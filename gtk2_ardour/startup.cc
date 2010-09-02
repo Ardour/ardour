@@ -621,7 +621,7 @@ ArdourStartup::populate_session_templates ()
 }
 
 static bool
-lost_name_entry_focus (GdkEventFocus* ev)
+lost_name_entry_focus (GdkEventFocus*)
 {
         cerr << "lost focus\n";
         return false;

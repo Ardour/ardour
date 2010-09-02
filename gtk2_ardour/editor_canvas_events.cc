@@ -901,7 +901,7 @@ Editor::canvas_region_view_name_event (GdkEvent *event, ArdourCanvas::Item* item
 }
 
 bool
-Editor::canvas_feature_line_event (GdkEvent *event, ArdourCanvas::Item* item, RegionView *rv)
+Editor::canvas_feature_line_event (GdkEvent *event, ArdourCanvas::Item* item, RegionView*)
 {
 	bool ret = false;
 

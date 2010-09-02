@@ -416,7 +416,7 @@ AudioEngine::split_cycle (nframes_t offset)
 }
 
 void
-AudioEngine::finish_process_cycle (int status)
+AudioEngine::finish_process_cycle (int /* status*/ )
 {
         GET_PRIVATE_JACK_POINTER(_jack);
         jack_cycle_signal (_jack, 0);

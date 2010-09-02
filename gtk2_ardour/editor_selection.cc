@@ -174,7 +174,7 @@ Editor::select_all_tracks ()
  *  tracks, in which case nothing will happen unless `force' is true.
  */
 void
-Editor::set_selected_track_as_side_effect (Selection::Operation op, bool force)
+Editor::set_selected_track_as_side_effect (Selection::Operation op, bool /*force*/)
 {
 	if (!clicked_axisview) {
 		return;

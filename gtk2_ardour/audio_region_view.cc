@@ -1463,7 +1463,7 @@ AudioRegionView::transients_changed ()
 }
 
 void
-AudioRegionView::update_transient(float old_pos, float new_pos)
+AudioRegionView::update_transient(float /*old_pos*/, float new_pos)
 {
 	/* Find frame at old pos, calulate new frame then update region transients*/
 	list<std::pair<nframes64_t, ArdourCanvas::SimpleLine*> >::iterator l;

@@ -79,7 +79,7 @@ ReturnUI::~ReturnUI ()
 }
 
 void
-ReturnUI::ins_changed (IOChange change, void* ignored)
+ReturnUI::ins_changed (IOChange change, void* /*ignored*/)
 {
 	ENSURE_GUI_THREAD (*this, &ReturnUI::ins_changed, change, ignored)
 	if (change.type & IOChange::ConfigurationChanged) {

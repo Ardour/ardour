@@ -21,7 +21,7 @@ SampleFormatConverter<TOut>::SampleFormatConverter (ChannelCount channels) :
 
 template <>
 void
-SampleFormatConverter<float>::init (nframes_t max_frames, int type, int data_width)
+SampleFormatConverter<float>::init (nframes_t max_frames, int /* type */, int data_width)
 {
 	if (throw_level (ThrowObject) && data_width != 32) {
 		throw Exception (*this, "Unsupported data width");

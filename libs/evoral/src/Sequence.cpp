@@ -817,7 +817,7 @@ Sequence<Time>::append_note_off_unlocked (NotePtr note)
 
 template<typename Time>
 void
-Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, double value, event_id_t evid)
+Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, double value, event_id_t /* evid */)
 {
         DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 %2 @ %3\t=\t%4 # controls: %5\n",
                                                       this, _type_map.to_symbol(param), time, value, _controls.size()));
@@ -828,7 +828,7 @@ Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, doubl
 
 template<typename Time>
 void
-Sequence<Time>::append_sysex_unlocked(const MIDIEvent<Time>& ev, event_id_t evid)
+Sequence<Time>::append_sysex_unlocked(const MIDIEvent<Time>& ev, event_id_t /* evid */)
 {
 #ifdef DEBUG_SEQUENCE
         cerr << this << " SysEx @ " << ev.time() << " \t= \t [ " << hex;

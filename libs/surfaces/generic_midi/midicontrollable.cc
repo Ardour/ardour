@@ -178,7 +178,7 @@ MIDIControllable::midi_sense_note_off (Parser &p, EventTwoBytes *tb)
 }
 
 void
-MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool is_on)
+MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /*is_on*/)
 {
 	if (!controllable) { 
 		return;

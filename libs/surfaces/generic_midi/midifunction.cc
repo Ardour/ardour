@@ -120,7 +120,7 @@ MIDIFunction::get_state ()
 }
 
 int
-MIDIFunction::set_state (const XMLNode& node, int version)
+MIDIFunction::set_state (const XMLNode& /*node*/, int /*version*/)
 {
 	return 0;
 }

@@ -244,8 +244,8 @@ static Glib::ustring
 compose_status_message (const string& path,
 			uint file_samplerate,
 			uint session_samplerate,
-			uint current_file,
-			uint total_files)
+			uint /* current_file */,
+			uint /* total_files */)
 {
 	if (file_samplerate != session_samplerate) {
 		return string_compose (_("Resampling %1 from %2kHz to %3kHz"),

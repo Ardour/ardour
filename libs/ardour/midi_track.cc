@@ -605,7 +605,7 @@ MidiTrack::set_midi_thru (bool yn)
 }
 
 boost::shared_ptr<SMFSource>
-MidiTrack::write_source (uint32_t n)
+MidiTrack::write_source (uint32_t)
 {
 	return midi_diskstream()->write_source ();
 }

@@ -254,7 +254,7 @@ protected:
 	mutable Glib::RWLock   _lock;
 	bool                   _writing;
 
-        virtual int resolve_overlaps_unlocked (const NotePtr, void* arg = 0) {
+        virtual int resolve_overlaps_unlocked (const NotePtr, void* /* arg */ = 0) {
                 return 0;
         }
 

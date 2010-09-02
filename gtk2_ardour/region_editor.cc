@@ -377,7 +377,7 @@ RegionEditor::sync_offset_relative_clock_changed ()
 }
 
 bool
-RegionEditor::on_delete_event (GdkEventAny* ev)
+RegionEditor::on_delete_event (GdkEventAny*)
 {
 	PropertyChange change;
 
