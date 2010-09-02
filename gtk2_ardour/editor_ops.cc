@@ -4213,9 +4213,14 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		foo.push_back ((*i).pl);
 	}
 
-
 	if (!foo.empty()) {
 		cut_buffer->set (foo);
+	}
+
+	if (pmap.empty()) {
+		_last_cut_copy_source_track = 0;
+	} else {
+		_last_cut_copy_source_track = pmap.front().tv;
 	}
         
 	for (FreezeList::iterator pl = freezelist.begin(); pl != freezelist.end(); ++pl) {
@@ -4293,10 +4298,14 @@ Editor::paste_internal (nframes64_t position, float times)
 	/* get everything in the correct order */
 
 	if (!selection->tracks.empty()) {
+		/* there are some selected tracks, so paste to them */
 		sort_track_selection ();
 		ts = selection->tracks;
-	} else if (entered_track) {
-		ts.push_back (entered_track);
+	} else if (_last_cut_copy_source_track) {
+		/* otherwise paste to the track that the cut/copy came from;
+		   see discussion in mants #3333.
+		*/
+		ts.push_back (_last_cut_copy_source_track);
 	}
 
 	for (nth = 0, i = ts.begin(); i != ts.end(); ++i, ++nth) {

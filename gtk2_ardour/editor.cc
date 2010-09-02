@@ -303,6 +303,7 @@ Editor::Editor ()
 	, meters_running(false)
 	, _pending_locate_request (false)
 	, _pending_initial_locate (false)
+	, _last_cut_copy_source_track (0)
 {
 	constructed = false;
 

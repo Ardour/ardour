@@ -2044,6 +2044,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         RegionLayeringOrderEditor* layering_order_editor;
         void update_region_layering_order_editor (ARDOUR::framepos_t);
 
+	/** Track that was the source for the last cut/copy operation.  Used as a place
+	    to paste things iff there is no selected track.
+	*/
+	TimeAxisView* _last_cut_copy_source_track;
+
 	friend class Drag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;
