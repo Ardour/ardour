@@ -110,7 +110,7 @@ public:
 	/** Remove and delete all nodes with property prop matching val */
 	void remove_nodes_and_delete(const std::string& propname, const std::string& val);
 
-	void debug (std::ostream &, std::string p = "");
+	void dump (std::ostream &, std::string p = "") const;
 
 private:
 	std::string         _name;

@@ -592,15 +592,15 @@ static XMLSharedNodeList* find_impl(xmlXPathContext* ctxt, const string& xpath)
 
 /** Dump a node, its properties and children to a stream */
 void
-XMLNode::debug (ostream& s, string p)
+XMLNode::dump (ostream& s, string p) const
 {
 	s << p << _name << " ";
-	for (XMLPropertyList::iterator i = _proplist.begin(); i != _proplist.end(); ++i) {
+	for (XMLPropertyList::const_iterator i = _proplist.begin(); i != _proplist.end(); ++i) {
 		s << (*i)->name() << "=" << (*i)->value() << " ";
 	}
 	s << "\n";
 	
-	for (XMLNodeList::iterator i = _children.begin(); i != _children.end(); ++i) {
-		(*i)->debug (s, p + "  ");
+	for (XMLNodeList::const_iterator i = _children.begin(); i != _children.end(); ++i) {
+		(*i)->dump (s, p + "  ");
 	}
 }
