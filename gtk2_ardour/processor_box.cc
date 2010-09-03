@@ -1688,7 +1688,7 @@ ProcessorBox::register_actions ()
 					sigc::ptr_fun (ProcessorBox::rb_ab_plugins));
 
 	/* show editors */
-	act = ActionManager::register_action (popup_act_grp, X_("edit"), _("Edit"),
+	act = ActionManager::register_action (popup_act_grp, X_("edit"), _("Edit..."),
 					      sigc::ptr_fun (ProcessorBox::rb_edit));
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);
 
