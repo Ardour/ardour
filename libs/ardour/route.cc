@@ -918,12 +918,30 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 }
 
 bool
-Route::add_processor_from_xml_2X (const XMLNode& node, int version, ProcessorList::iterator iter)
+Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 {
 	const XMLProperty *prop;
 
 	try {
 		boost::shared_ptr<Processor> processor;
+
+		/* bit of a hack: get the `placement' property from the <Redirect> tag here
+		   so that we can add the processor in the right place (pre/post-fader)
+		*/
+
+		XMLNodeList const & children = node.children ();
+		XMLNodeList::const_iterator i = children.begin ();
+		while (i != children.end() && (*i)->name() != X_("Redirect")) {
+			++i;
+		}
+
+		Placement placement = PreFader;
+
+		if (i != children.end()) {
+			if ((prop = node.property (X_("placement"))) != 0) {
+				placement = Placement (string_2_enum (prop->value(), placement));
+			}
+		}
 
 		if (node.name() == "Insert") {
 
@@ -957,19 +975,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version, ProcessorLis
                         return false;
                 }
 
-		if (iter == _processors.end() && processor->display_to_user() && !_processors.empty()) {
-			/* check for invisible processors stacked at the end and leave them there */
-			ProcessorList::iterator p;
-			p = _processors.end();
-			--p;
-			while (!(*p)->display_to_user() && p != _processors.begin()) {
-				--p;
-			}
-			++p;
-			iter = p;
-		}
-
-		return (add_processor (processor, iter) == 0);
+		return (add_processor (processor, placement) == 0);
 	}
 
 	catch (failed_constructor &err) {
@@ -2245,7 +2251,7 @@ Route::set_processor_state_2X (XMLNodeList const & nList, int version)
 	*/
 
 	for (XMLNodeConstIterator i = nList.begin(); i != nList.end(); ++i) {
-		add_processor_from_xml_2X (**i, version, _processors.begin ());
+		add_processor_from_xml_2X (**i, version);
 	}
 }
 

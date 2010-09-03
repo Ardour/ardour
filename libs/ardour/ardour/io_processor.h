@@ -80,6 +80,9 @@ class IOProcessor : public Processor
   private:
 	/* disallow copy construction */
 	IOProcessor (const IOProcessor&);
+
+	virtual int set_state_2X (const XMLNode &, int);
+	
 	bool _own_input;
 	bool _own_output;
 

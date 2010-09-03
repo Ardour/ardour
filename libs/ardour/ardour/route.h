@@ -477,8 +477,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	int configure_processors_unlocked (ProcessorStreams*);
 
-	bool add_processor_from_xml (const XMLNode&, ProcessorList::iterator iter);	
-	bool add_processor_from_xml_2X (const XMLNode&, int, ProcessorList::iterator iter);	
+	bool add_processor_from_xml_2X (const XMLNode&, int);
 
 	void placement_range (Placement p, ProcessorList::iterator& start, ProcessorList::iterator& end);
 

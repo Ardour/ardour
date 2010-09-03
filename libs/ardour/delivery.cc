@@ -209,8 +209,9 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 				}
 			}
 		}
-	}
 
+	}
+	
 	if (!Processor::configure_io (in, out)) {
 		return false;
 	}

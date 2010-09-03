@@ -99,6 +99,8 @@ class Processor : public SessionObject, public Automatable, public Latent
 	PBD::Signal2<void,ChanCount,ChanCount> ConfigurationChanged;
 
 protected:
+	virtual int set_state_2X (const XMLNode&, int version);
+	
 	int       _pending_active;
 	bool      _active;
 	bool      _next_ab_is_active;
@@ -107,9 +109,6 @@ protected:
 	ChanCount _configured_output;
 	bool      _display_to_user;
 	bool      _pre_fader;
-
-private:
-	int set_state_2X (const XMLNode&, int version);
 };
 
 } // namespace ARDOUR

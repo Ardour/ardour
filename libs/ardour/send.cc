@@ -139,6 +139,10 @@ Send::state (bool full)
 int
 Send::set_state (const XMLNode& node, int version)
 {
+	if (version < 3000) {
+		return set_state_2X (node, version);
+	}
+	
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
 	const XMLProperty* prop;
@@ -162,6 +166,41 @@ Send::set_state (const XMLNode& node, int version)
 	return 0;
 }
 
+int
+Send::set_state_2X (const XMLNode& node, int version)
+{
+	/* use the IO's name for the name of the send */
+	XMLNodeList const & children = node.children ();
+
+	XMLNodeList::const_iterator i = children.begin();
+	while (i != children.end() && (*i)->name() != X_("Redirect")) {
+		++i;
+	}
+
+	if (i == children.end()) {
+		return -1;
+	}
+
+	XMLNodeList const & grand_children = (*i)->children ();
+	XMLNodeList::const_iterator j = grand_children.begin ();
+	while (j != grand_children.end() && (*j)->name() != X_("IO")) {
+		++j;
+	}
+
+	if (j == grand_children.end()) {
+		return -1;
+	}
+
+	XMLProperty const * prop = (*j)->property X_("name");
+	if (!prop) {
+		return -1;
+	}
+
+	set_name (prop->value ());
+
+	return 0;
+}
+
 bool
 Send::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
@@ -178,6 +217,10 @@ Send::configure_io (ChanCount in, ChanCount out)
 {
 	if (!_amp->configure_io (in, out) || !_meter->configure_io (in, out)) {
 		return false;
+	}
+
+	if (_output) {
+		_output->ensure_io (out, false, 0);
 	}
 
 	if (!Processor::configure_io (in, out)) {

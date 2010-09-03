@@ -77,6 +77,8 @@ class Send : public Delivery
 	/* disallow copy construction */
 	Send (const Send&);
 
+	int set_state_2X (XMLNode const &, int);
+
 	uint32_t  _bitslot;
 };
 
