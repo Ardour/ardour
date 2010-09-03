@@ -2110,23 +2110,6 @@ Route::_set_state_2X (const XMLNode& node, int version)
 		}
 	}
 
-	/* add standard processors */
-
-	//_meter.reset (new PeakMeter (_session));
-	//add_processor (_meter, PreFader);
-
-	if (is_monitor()) {
-		/* where we listen to tracks */
-		_intreturn.reset (new InternalReturn (_session));
-		add_processor (_intreturn, PreFader);
-
-                _monitor_control.reset (new MonitorProcessor (_session));
-                add_processor (_monitor_control, PostFader);
-	}
-
-	_main_outs.reset (new Delivery (_session, _output, _mute_master, _name, Delivery::Main));
-	add_processor (_main_outs, PostFader);
-
 	/* IOs */
 
 	nlist = node.children ();
