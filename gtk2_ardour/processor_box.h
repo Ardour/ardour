@@ -277,6 +277,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	static Glib::RefPtr<Gtk::Action> cut_action;
 	static Glib::RefPtr<Gtk::Action> paste_action;
 	static Glib::RefPtr<Gtk::Action> rename_action;
+	static Glib::RefPtr<Gtk::Action> edit_action;
 	void paste_processor_state (const XMLNodeList&, boost::shared_ptr<ARDOUR::Processor>);
 
 	void activate_processor (boost::shared_ptr<ARDOUR::Processor>);
@@ -316,6 +317,9 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	std::list<ProcessorWindowProxy*> _processor_window_proxies;
 	void set_processor_ui (boost::shared_ptr<ARDOUR::Processor>, Gtk::Window *);
 	void maybe_add_processor_to_ui_list (boost::weak_ptr<ARDOUR::Processor>);
+
+	bool one_processor_can_be_edited ();
+	bool processor_can_be_edited (boost::shared_ptr<ARDOUR::Processor>);
 };
 
 #endif /* __ardour_gtk_processor_box__ */

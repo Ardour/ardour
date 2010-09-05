@@ -89,6 +89,7 @@ ProcessorBox* ProcessorBox::_current_processor_box = 0;
 RefPtr<Action> ProcessorBox::paste_action;
 RefPtr<Action> ProcessorBox::cut_action;
 RefPtr<Action> ProcessorBox::rename_action;
+RefPtr<Action> ProcessorBox::edit_action;
 Glib::RefPtr<Gdk::Pixbuf> SendProcessorEntry::_slider;
 
 ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
@@ -693,8 +694,9 @@ ProcessorBox::build_processor_menu ()
 void
 ProcessorBox::selection_changed ()
 {
-	bool sensitive = (processor_display.selection().empty()) ? false : true;
+	bool const sensitive = (processor_display.selection().empty()) ? false : true;
 	ActionManager::set_sensitive (ActionManager::plugin_selection_sensitive_actions, sensitive);
+	edit_action->set_sensitive (one_processor_can_be_edited ());
 
 	/* disallow rename for multiple selections and for plugin inserts */
 	rename_action->set_sensitive (
@@ -1509,6 +1511,38 @@ ProcessorBox::clear_processors (Placement p)
 	}
 }
 
+bool
+ProcessorBox::processor_can_be_edited (boost::shared_ptr<Processor> processor)
+{
+	boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack> (_route);
+	if (at && at->freeze_state() == AudioTrack::Frozen) {
+		return false;
+	}
+
+	if (
+		boost::dynamic_pointer_cast<Send> (processor) ||
+		boost::dynamic_pointer_cast<Return> (processor) ||
+		boost::dynamic_pointer_cast<PluginInsert> (processor) ||
+		boost::dynamic_pointer_cast<PortInsert> (processor)
+		) {
+		return true;
+	}
+
+	return false;
+}
+
+bool
+ProcessorBox::one_processor_can_be_edited ()
+{
+	list<ProcessorEntry*> selection = processor_display.selection ();
+	list<ProcessorEntry*>::iterator i = selection.begin();
+	while (i != selection.end() && processor_can_be_edited ((*i)->processor()) == false) {
+		++i;
+	}
+
+	return (i != selection.end());
+}
+
 void
 ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 {
@@ -1688,9 +1722,8 @@ ProcessorBox::register_actions ()
 					sigc::ptr_fun (ProcessorBox::rb_ab_plugins));
 
 	/* show editors */
-	act = ActionManager::register_action (popup_act_grp, X_("edit"), _("Edit..."),
-					      sigc::ptr_fun (ProcessorBox::rb_edit));
-	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+	edit_action = ActionManager::register_action (popup_act_grp, X_("edit"), _("Edit..."),
+						      sigc::ptr_fun (ProcessorBox::rb_edit));
 
 	ActionManager::add_action_group (popup_act_grp);
 }
