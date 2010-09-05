@@ -1988,6 +1988,7 @@ ProcessorBox::get_processor_ui (boost::shared_ptr<Processor> p) const
 	   an entry for each processor.
 	*/
 	assert (false);
+	return 0;
 }
 
 /** Make a note of the UI window that a processor is using.
