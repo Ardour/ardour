@@ -2657,8 +2657,12 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 
 		/* XXX resize all listeners to match _main_outs? */
 
-		/* auto-connect newly-created outputs */
-		if (Config->get_output_auto_connect()) {
+		/* Auto-connect newly-created outputs, unless we're auto-connecting to master
+		   and we are master (as an auto-connect in this situation would cause a
+		   feedback loop)
+		*/
+		AutoConnectOption ac = Config->get_output_auto_connect ();
+		if (ac == AutoConnectPhysical || (ac == AutoConnectMaster && !is_master ())) {
 
 			ChanCount start = change.before;
 			
