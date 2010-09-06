@@ -267,9 +267,9 @@ IO::remove_port (Port* port, void* src)
 	return -1;
 }
 
-/** Add an output port.
+/** Add a port.
  *
- * @param destination Name of input port to connect new port to.
+ * @param destination Name of port to connect new port to.
  * @param src Source for emitted ConfigurationChanged signal.
  * @param type Data type of port.  Default value (NIL) will use this IO's default type.
  */
@@ -291,7 +291,7 @@ IO::add_port (string destination, void* src, DataType type)
 		{
 			Glib::Mutex::Lock lm (io_lock);
 
-			/* Create a new output port */
+			/* Create a new port */
 
 			string portname = build_legal_port_name (type);
 
