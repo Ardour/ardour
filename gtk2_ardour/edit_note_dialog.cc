@@ -80,7 +80,7 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, Gnome::Canvas::CanvasNoteEve
 	table->attach (_time_clock, 1, 2, r, r + 1);
 	++r;
 
-	_time_clock.set_session (_region_view->get_trackview().session ());
+	_time_clock.set_session (_region_view->get_time_axis_view().session ());
 	_time_clock.set_mode (AudioClock::BBT);
 	_time_clock.set (_region_view->time_converter().to (ev->note()->time ()), true);
 
@@ -90,7 +90,7 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, Gnome::Canvas::CanvasNoteEve
 	table->attach (_length_clock, 1, 2, r, r + 1);
 	++r;
 
-	_length_clock.set_session (_region_view->get_trackview().session ());
+	_length_clock.set_session (_region_view->get_time_axis_view().session ());
 	_length_clock.set_mode (AudioClock::BBT);
 	_length_clock.set (_region_view->time_converter().to (ev->note()->length ()), true);
 

@@ -400,7 +400,7 @@ Selection::add (vector<RegionView*>& v)
 		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
 			changed = regions.add ((*i));
 			if (Config->get_link_region_and_track_selection() && changed) {
-				add (&(*i)->get_trackview());
+				add (&(*i)->get_time_axis_view());
 			}
 		}
 	}
@@ -422,7 +422,7 @@ Selection::add (const RegionSelection& rs)
 		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
 			changed = regions.add ((*i));
 			if (Config->get_link_region_and_track_selection() && changed) {
-				add (&(*i)->get_trackview());
+				add (&(*i)->get_time_axis_view());
 			}
 		}
 	}
@@ -438,7 +438,7 @@ Selection::add (RegionView* r)
 	if (find (regions.begin(), regions.end(), r) == regions.end()) {
 		regions.add (r);
 		if (Config->get_link_region_and_track_selection()) {
-			add (&r->get_trackview());
+			add (&r->get_time_axis_view());
 		}
 		RegionsChanged ();
 	}
@@ -452,7 +452,7 @@ Selection::add (MidiRegionView* mrv)
 		/* XXX should we do this? */
 #if 0
 		if (Config->get_link_region_and_track_selection()) {
-			add (&mrv->get_trackview());
+			add (&mrv->get_time_axis_view());
 		}
 #endif
 		MidiRegionsChanged ();
@@ -610,8 +610,8 @@ Selection::remove (RegionView* r)
 		RegionsChanged ();
 	}
 
-	if (Config->get_link_region_and_track_selection() && !regions.involves (r->get_trackview())) {
-		remove (&r->get_trackview());
+	if (Config->get_link_region_and_track_selection() && !regions.involves (r->get_time_axis_view())) {
+		remove (&r->get_time_axis_view());
 	}
 }
 
@@ -627,8 +627,8 @@ Selection::remove (MidiRegionView* mrv)
 
 #if 0
 	/* XXX fix this up ? */
-	if (Config->get_link_region_and_track_selection() && !regions.involves (r->get_trackview())) {
-		remove (&r->get_trackview());
+	if (Config->get_link_region_and_track_selection() && !regions.involves (r->get_time_axis_view())) {
+		remove (&r->get_time_axis_view());
 	}
 #endif
 }

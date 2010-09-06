@@ -221,11 +221,18 @@ private:
 	nframes64_t _last_pointer_frame; ///< adjusted_frame the last time a motion occurred
 };
 
+class RegionDrag;
+
+/** Container for details about a region being dragged */
 struct DraggingView
 {
-	DraggingView (RegionView* v);
+	DraggingView (RegionView *, RegionDrag *);
 
 	RegionView* view; ///< the view
+	/** index into RegionDrag::_time_axis_views of the view that this region is currently beind displayed on */
+	int time_axis_view;
+	/** layer that this region is currently being displayed on */
+	ARDOUR::layer_t layer;
 	double initial_y; ///< the initial y position of the view before any reparenting
 	boost::shared_ptr<ARDOUR::Playlist> initial_playlist;
 };
@@ -242,7 +249,17 @@ protected:
 	RegionView* _primary; ///< the view that was clicked on (or whatever) to start the drag
 	std::list<DraggingView> _views; ///< information about all views that are being dragged
 
+	/** a list of the non-hidden TimeAxisViews sorted by editor order key */
+	std::vector<TimeAxisView*> _time_axis_views;
+	int find_time_axis_view (TimeAxisView *) const;
+
+	int _visible_y_low;
+	int _visible_y_high;
+
+	friend class DraggingView;
+	
 private:
+	
 	void region_going_away (RegionView *);
 	PBD::ScopedConnection death_connection;
 };
@@ -267,33 +284,15 @@ public:
 	virtual bool regions_came_from_canvas () const = 0;
 
 protected:
-	struct TimeAxisViewSummary {
-		TimeAxisViewSummary () : height_list(512) {}
 
-		std::bitset<512> tracks;
-		std::vector<int32_t> height_list;
-		int visible_y_low;
-		int visible_y_high;
-	};
-
-	void copy_regions (GdkEvent *);
-	bool y_movement_disallowed (int, int, int, TimeAxisViewSummary const &) const;
-	std::map<RegionView*, std::pair<RouteTimeAxisView*, int> > find_time_axis_views_and_layers ();
 	double compute_x_delta (GdkEvent const *, nframes64_t *);
-	bool compute_y_delta (
-		TimeAxisView const *, TimeAxisView*, int32_t, int32_t, TimeAxisViewSummary const &,
-		int32_t *, int32_t *, int32_t *
-		);
+	bool y_movement_allowed (int, ARDOUR::layer_t) const;
 
-	TimeAxisViewSummary get_time_axis_view_summary ();
-	bool x_move_allowed () const;
-
-	TimeAxisView* _dest_trackview;
-	ARDOUR::layer_t _dest_layer;
-	bool check_possible (RouteTimeAxisView **, ARDOUR::layer_t *);
 	bool _brushing;
 	nframes64_t _last_frame_position; ///< last position of the thing being dragged
 	double _total_x_delta;
+	int _last_pointer_time_axis_view;
+	ARDOUR::layer_t _last_pointer_layer;
 };
 
 
@@ -323,14 +322,12 @@ private:
 	typedef std::set<boost::shared_ptr<ARDOUR::Playlist> > PlaylistSet;
 
 	void finished_no_copy (
-		std::map<RegionView*, std::pair<RouteTimeAxisView*, int> > const &,
 		bool const,
 		bool const,
 		ARDOUR::framecnt_t const
 		);
 
 	void finished_copy (
-		std::map<RegionView*, std::pair<RouteTimeAxisView*, int> > const &,
 		bool const,
 		bool const,
 		ARDOUR::framecnt_t const

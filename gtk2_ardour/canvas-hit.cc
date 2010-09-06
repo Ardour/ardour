@@ -26,7 +26,7 @@ bool
 CanvasHit::on_event(GdkEvent* ev)
 {
         if (!CanvasNoteEvent::on_event (ev)) {
-                return _region.get_trackview().editor().canvas_note_event (ev, this);
+                return _region.get_time_axis_view().editor().canvas_note_event (ev, this);
 	} 
         return true;
 }

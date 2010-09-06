@@ -61,7 +61,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	virtual void set_should_show_selection (bool yn);
 	void set_sensitive (bool yn) { _sensitive = yn; }
 	bool sensitive () const { return _sensitive; }
-	TimeAxisView& get_time_axis_view();
+	TimeAxisView& get_time_axis_view () const;
 	void set_name_text(const Glib::ustring&);
 	virtual void set_height(double h);
 	void set_y (double);
@@ -71,8 +71,6 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	ArdourCanvas::Group* get_canvas_group();
 	ArdourCanvas::Item* get_name_highlight();
 	ArdourCanvas::Pixbuf* get_name_pixbuf();
-
-	TimeAxisView& get_trackview() const { return trackview; }
 
 	virtual void set_samples_per_unit(double spu);
 

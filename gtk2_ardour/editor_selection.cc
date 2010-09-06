@@ -430,7 +430,7 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t, RegionVi
 void
 Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions, PBD::PropertyID property) const
 {
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), &basis->get_trackview(), property);
+	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), &basis->get_time_axis_view(), property);
 
 	/* add clicked regionview since we skipped all other regions in the same track as the one it was in */
 
@@ -448,7 +448,7 @@ Editor::get_equivalent_regions (RegionSelection & basis, PBD::PropertyID prop) c
 
 		mapover_tracks (
 			sigc::bind (sigc::mem_fun (*this, &Editor::mapped_get_equivalent_regions), *i, &eq),
-			&(*i)->get_trackview(), prop
+			&(*i)->get_time_axis_view(), prop
 			);
 
 		for (vector<RegionView*>::iterator j = eq.begin(); j != eq.end(); ++j) {

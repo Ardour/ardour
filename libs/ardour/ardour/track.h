@@ -60,6 +60,8 @@ class Track : public Route, public PublicDiskstream
         bool needs_butler() const { return _needs_butler; }
 	void toggle_monitor_input ();
 
+	virtual DataType data_type () const = 0;
+
 	bool can_record();
 
         virtual void use_new_diskstream () = 0;

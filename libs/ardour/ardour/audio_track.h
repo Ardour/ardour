@@ -45,6 +45,10 @@ class AudioTrack : public Track
 	void use_new_diskstream ();
         void set_diskstream (boost::shared_ptr<Diskstream>);
 
+	DataType data_type () const {
+		return DataType::AUDIO;
+	}
+
 	int export_stuff (BufferSet& bufs, sframes_t start_frame, nframes_t nframes, bool enable_processing = true);
 
 	void freeze_me (InterThreadInfo&);

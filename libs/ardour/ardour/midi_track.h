@@ -48,6 +48,10 @@ public:
         void set_diskstream (boost::shared_ptr<Diskstream>);
 	void set_record_enabled (bool yn, void *src);
 
+	DataType data_type () const {
+		return DataType::MIDI;
+	}
+
 	void set_latency_delay (nframes_t);
 
 	int export_stuff (BufferSet& bufs, nframes_t nframes, sframes_t end_frame);

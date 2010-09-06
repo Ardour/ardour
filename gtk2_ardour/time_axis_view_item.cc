@@ -472,7 +472,7 @@ TimeAxisViewItem::set_should_show_selection (bool yn)
 
 /** @return the TimeAxisView that this item is on */
 TimeAxisView&
-TimeAxisViewItem::get_time_axis_view()
+TimeAxisViewItem::get_time_axis_view () const
 {
 	return trackview;
 }

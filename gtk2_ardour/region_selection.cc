@@ -253,10 +253,10 @@ struct RegionSortByTrack {
 
 	    /* really, track and position */
 
-	    if (a->get_trackview().order() == b->get_trackview().order()) {
+	    if (a->get_time_axis_view().order() == b->get_time_axis_view().order()) {
 		    return a->region()->position() < b->region()->position();
 	    } else {
-		    return a->get_trackview().order() < b->get_trackview().order();
+		    return a->get_time_axis_view().order() < b->get_time_axis_view().order();
 	    }
     }
 };
@@ -298,7 +298,7 @@ bool
 RegionSelection::involves (const TimeAxisView& tv) const
 {
 	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
-		if (&(*i)->get_trackview() == &tv) {
+		if (&(*i)->get_time_axis_view() == &tv) {
 			return true;
 		}
 	}

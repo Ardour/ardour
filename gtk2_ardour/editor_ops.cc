@@ -4131,7 +4131,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			}
 		}
 
-		TimeAxisView* tv = &(*x)->get_trackview();
+		TimeAxisView* tv = &(*x)->get_time_axis_view();
 		vector<PlaylistMapping>::iterator z;
 
 		for (z = pmap.begin(); z != pmap.end(); ++z) {
@@ -4154,7 +4154,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			continue;
 		}
 
-		TimeAxisView& tv = (*x)->get_trackview();
+		TimeAxisView& tv = (*x)->get_time_axis_view();
 		boost::shared_ptr<Playlist> npl;
 		RegionSelection::iterator tmp;
 
