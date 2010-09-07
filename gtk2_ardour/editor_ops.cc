@@ -664,12 +664,6 @@ Editor::build_region_boundary_cache ()
 	/* finally sort to be sure that the order is correct */
 
 	sort (region_boundary_cache.begin(), region_boundary_cache.end());
-
-        cerr << "RBC contains " << region_boundary_cache.size() << endl;
-
-        for (vector<framepos_t>::iterator x = region_boundary_cache.begin(); x != region_boundary_cache.end(); ++x) {
-                cerr << "Region boundary @ " << *x << endl;
-        }
 }
 
 boost::shared_ptr<Region>
