@@ -29,7 +29,10 @@ TrackSelection::TrackSelection (PublicEditor const * e, TrackViewList const &t)
 	: TrackViewList (t)
 	, _editor (e)
 {
+}
 
+TrackSelection::~TrackSelection ()
+{
 }
 
 TrackViewList

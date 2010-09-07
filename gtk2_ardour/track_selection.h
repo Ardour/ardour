@@ -29,6 +29,8 @@ class TrackSelection : public TrackViewList
 public:
 	TrackSelection (PublicEditor const * e) : _editor (e) {}
 	TrackSelection (PublicEditor const *, TrackViewList const &);
+
+	virtual ~TrackSelection ();
 	
 	TrackViewList add (TrackViewList const &);
 

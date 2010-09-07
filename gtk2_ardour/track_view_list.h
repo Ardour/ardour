@@ -30,6 +30,8 @@ public:
 	TrackViewList () {}
 	TrackViewList (std::list<TimeAxisView*> const &);
 
+	virtual ~TrackViewList ();
+
 	virtual TrackViewList add (TrackViewList const &);
 	bool contains (TimeAxisView const *) const;
 };

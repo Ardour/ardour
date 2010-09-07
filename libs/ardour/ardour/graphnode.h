@@ -41,6 +41,7 @@ class GraphNode
 {
     public:
 	GraphNode( boost::shared_ptr<Graph> Graph );
+	virtual ~GraphNode();
 
 	void prep( int chain );
 	void dec_ref();

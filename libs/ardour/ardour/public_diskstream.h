@@ -30,6 +30,7 @@ class Location;
 class PublicDiskstream
 {
 public:
+	virtual ~PublicDiskstream() {}
 
 	virtual boost::shared_ptr<Playlist> playlist () = 0;
 	virtual void monitor_input (bool) = 0;

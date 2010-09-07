@@ -25,7 +25,10 @@ using namespace std;
 TrackViewList::TrackViewList (list<TimeAxisView*> const & t)
 	: list<TimeAxisView*> (t)
 {
+}
 
+TrackViewList::~TrackViewList ()
+{
 }
 
 bool

@@ -29,6 +29,10 @@ GraphNode::GraphNode (graph_ptr_t graph)
 { 
 }
 
+GraphNode::~GraphNode()
+{
+}
+
 void
 GraphNode::prep (int chain)
 {
