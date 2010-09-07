@@ -102,7 +102,10 @@ class AudioRegionView : public RegionView
 
 	void reset_fade_in_shape_width (nframes_t);
 	void reset_fade_out_shape_width (nframes_t);
-
+	
+	void show_fade_line(nframes64_t pos);
+	void hide_fade_line();
+	
 	void set_fade_visibility (bool);
 	void update_coverage_frames (LayerDisplay);
 	
@@ -139,6 +142,7 @@ class AudioRegionView : public RegionView
     ArdourCanvas::Polygon*           fade_out_shape;
     ArdourCanvas::SimpleRect*        fade_in_handle; ///< fade in handle, or 0
     ArdourCanvas::SimpleRect*        fade_out_handle; ///< fade out handle, or 0
+    ArdourCanvas::SimpleLine*        fade_position_line;
 
     AudioRegionGainLine * gain_line;
 
@@ -158,7 +162,7 @@ class AudioRegionView : public RegionView
     void region_resized (const PBD::PropertyChange&);
     void region_muted ();
     void region_scale_amplitude_changed ();
-	void region_renamed ();
+    void region_renamed ();
 
     void create_one_wave (uint32_t, bool);
     void manage_zero_line ();

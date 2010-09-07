@@ -73,6 +73,7 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, fade_out_shape(0)
 	, fade_in_handle(0)
 	, fade_out_handle(0)
+	, fade_position_line(0)
 	, gain_line(0)
 	, _amplitude_above_axis(1.0)
 	, _flags(0)
@@ -90,6 +91,7 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, fade_out_shape(0)
 	, fade_in_handle(0)
 	, fade_out_handle(0)
+	, fade_position_line(0)
 	, gain_line(0)
 	, _amplitude_above_axis(1.0)
 	, _flags(0)
@@ -106,6 +108,7 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other)
 	, fade_out_shape(0)
 	, fade_in_handle(0)
 	, fade_out_handle(0)
+	, fade_position_line(0)
 	, gain_line(0)
 	, _amplitude_above_axis(1.0)
 	, _flags(0)
@@ -127,6 +130,7 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 	, fade_out_shape(0)
 	, fade_in_handle(0)
 	, fade_out_handle(0)
+	, fade_position_line(0)
 	, gain_line(0)
 	, _amplitude_above_axis(1.0)
 	, _flags(0)
@@ -195,6 +199,13 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 		fade_out_handle->property_outline_pixels() = 0;
 
 		fade_out_handle->set_data ("regionview", this);
+		
+		fade_position_line = new ArdourCanvas::SimpleLine (*group);
+		fade_position_line->property_color_rgba() = 0xBBBBBBAA;
+		fade_position_line->property_y1() = 7;
+		fade_position_line->property_y2() = _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1;
+
+		fade_position_line->hide();
 	}
 
 	setup_fade_handle_positions ();
@@ -322,36 +333,24 @@ AudioRegionView::fade_out_changed ()
 void
 AudioRegionView::fade_in_active_changed ()
 {
-//	uint32_t r,g,b,a;
-//	uint32_t col;
-//	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
-
 	if (audio_region()->fade_in_active()) {
 		fade_in_shape->property_fill_color_rgba() = RGBA_TO_UINT(45,45,45,90);				// FIXME make a themeable colour
 		fade_in_shape->property_width_pixels() = 1;
-		fade_in_shape->property_outline_color_rgba() = RGBA_TO_UINT(180,180,180,190);			// FIXME make a themeable colour
 	} else {
 		fade_in_shape->property_fill_color_rgba() = RGBA_TO_UINT(45,45,45,20);				// FIXME make a themeable colour
 		fade_in_shape->property_width_pixels() = 1;
-		fade_in_shape->property_outline_color_rgba() = RGBA_TO_UINT(45,45,45,150);			// FIXME make a themeable colour
 	}
 }
 
 void
 AudioRegionView::fade_out_active_changed ()
 {
-//	uint32_t r,g,b,a;
-//	uint32_t col;
-//	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
-
 	if (audio_region()->fade_out_active()) {
 		fade_out_shape->property_fill_color_rgba() = RGBA_TO_UINT(45,45,45,90);				// FIXME make a themeable colour
 		fade_out_shape->property_width_pixels() = 1;
-		fade_out_shape->property_outline_color_rgba() = RGBA_TO_UINT(180,180,180,200);			// FIXME make a themeable colour
 	} else {
 		fade_out_shape->property_fill_color_rgba() = RGBA_TO_UINT(45,45,45,20);				// FIXME make a themeable colour
 		fade_out_shape->property_width_pixels() = 1;
-		fade_out_shape->property_outline_color_rgba() = RGBA_TO_UINT(45,45,45,200);			// FIXME make a themeable colour
 	}
 }
 
@@ -436,19 +435,13 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 	}
 
 	if (fade_in_handle) {
-		if (pixel_width <= 6.0) {
+		if (pixel_width <= 6.0 || _height < 5.0 || !trackview.session()->config.get_show_region_fades()) {
 			fade_in_handle->hide();
 			fade_out_handle->hide();
-		} else {
-			if (_height < 5.0) {
-				fade_in_handle->hide();
-				fade_out_handle->hide();
-			} else {
-				if (trackview.session()->config.get_show_region_fades()) {
-					fade_in_handle->show();
-					fade_out_handle->show();
-				}
-			}
+		}
+		else {
+			fade_in_handle->show();
+			fade_out_handle->show();		  
 		}
 	}
 
@@ -589,6 +582,7 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 	width = std::max ((nframes_t) 64, width);
 
 	Points* points;
+	
 	double pwidth = width / samples_per_unit;
 	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
 	double h;
@@ -603,7 +597,7 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 	handle_center = pwidth;
 
 	if (handle_center > 7.0) {
-		handle_center -= 3.0;
+		handle_center -= 2.0;
 	} else {
 		handle_center = 3.0;
 	}
@@ -626,7 +620,7 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 	points = get_canvas_points ("fade in shape", npoints + 3);
 
 	if (_height >= NAME_HIGHLIGHT_THRESH) {
-		h = _height - NAME_HIGHLIGHT_SIZE;
+		h = _height - NAME_HIGHLIGHT_SIZE - 2;
 	} else {
 		h = _height;
 	}
@@ -694,7 +688,7 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 	handle_center = (_region->length() - width) / samples_per_unit;
 
 	if (handle_center > 7.0) {
-		handle_center -= 3.0;
+		handle_center -= 2.0;
 	} else {
 		handle_center = 3.0;
 	}
@@ -717,7 +711,7 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 	audio_region()->fade_out()->curve().get_vector (0, audio_region()->fade_out()->back()->when, curve, npoints);
 
 	if (_height >= NAME_HIGHLIGHT_THRESH) {
-		h = _height - NAME_HIGHLIGHT_SIZE;
+		h = _height - NAME_HIGHLIGHT_SIZE - 2;
 	} else {
 		h = _height;
 	}
@@ -730,7 +724,7 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 	double xdelta = pwidth/npoints;
 
 	for (pi = 0, pc = 0; pc < npoints; ++pc) {
-		(*points)[pi].set_x(_pixel_width - 1 - pwidth + (pc*xdelta));
+		(*points)[pi].set_x(_pixel_width - pwidth + (pc * xdelta));
 		(*points)[pi++].set_y(2 + (h - (curve[pc] * h)));
 	}
 
@@ -1427,6 +1421,23 @@ AudioRegionView::show_region_editor ()
 	editor->set_position (Gtk::WIN_POS_MOUSE);
 	editor->show_all();
 }
+
+
+void
+AudioRegionView::show_fade_line (nframes64_t pos)
+{
+	fade_position_line->property_x1() = trackview.editor().frame_to_pixel (pos);
+	fade_position_line->property_x2() = trackview.editor().frame_to_pixel (pos);
+	fade_position_line->show ();
+	fade_position_line->raise_to_top ();
+}
+
+void
+AudioRegionView::hide_fade_line ()
+{
+	fade_position_line->hide ();
+}
+
 
 void
 AudioRegionView::transients_changed ()

@@ -1980,12 +1980,13 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	AudioRegionView* a = dynamic_cast<AudioRegionView*> (_primary);
-	boost::shared_ptr<AudioRegion> const r = a->audio_region ();
+	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
+	boost::shared_ptr<AudioRegion> const r = arv->audio_region ();
 
 	_pointer_frame_offset = grab_frame() - ((nframes64_t) r->fade_in()->back()->when + r->position());
 	_editor->show_verbose_duration_cursor (r->position(), r->position() + r->fade_in()->back()->when, 10);
 	
+	arv->show_fade_line((nframes64_t) r->fade_in()->back()->when);
 }
 
 void
@@ -2014,6 +2015,7 @@ FadeInDrag::motion (GdkEvent* event, bool)
 		}
 
 		tmp->reset_fade_in_shape_width (fade_length);
+		tmp->show_fade_line((nframes64_t) fade_length);
 	}
 
 	_editor->show_verbose_duration_cursor (region->position(), region->position() + fade_length, 10);
@@ -2055,6 +2057,7 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		tmp->audio_region()->set_fade_in_length (fade_length);
 		tmp->audio_region()->set_fade_in_active (true);
+		tmp->hide_fade_line();
 
 		XMLNode &after = alist->get_state();
 		_editor->session()->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
@@ -2074,6 +2077,7 @@ FadeInDrag::aborted ()
 		}
 
 		tmp->reset_fade_in_shape_width (tmp->audio_region()->fade_in()->back()->when);
+		tmp->hide_fade_line();
 	}
 }
 
@@ -2088,11 +2092,13 @@ FadeOutDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	AudioRegionView* a = dynamic_cast<AudioRegionView*> (_primary);
-	boost::shared_ptr<AudioRegion> r = a->audio_region ();
+	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
+	boost::shared_ptr<AudioRegion> r = arv->audio_region ();
 
 	_pointer_frame_offset = grab_frame() - (r->length() - (nframes64_t) r->fade_out()->back()->when + r->position());
 	_editor->show_verbose_duration_cursor (r->last_frame() - r->fade_out()->back()->when, r->last_frame(), 10);
+	
+	arv->show_fade_line(r->length() - r->fade_out()->back()->when);
 }
 
 void
@@ -2123,6 +2129,7 @@ FadeOutDrag::motion (GdkEvent* event, bool)
 		}
 
 		tmp->reset_fade_out_shape_width (fade_length);
+		tmp->show_fade_line(region->length() - fade_length);
 	}
 
 	_editor->show_verbose_duration_cursor (region->last_frame() - fade_length, region->last_frame(), 10);
@@ -2166,6 +2173,7 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		tmp->audio_region()->set_fade_out_length (fade_length);
 		tmp->audio_region()->set_fade_out_active (true);
+		tmp->hide_fade_line();
 
 		XMLNode &after = alist->get_state();
 		_editor->session()->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
@@ -2185,6 +2193,7 @@ FadeOutDrag::aborted ()
 		}
 
 		tmp->reset_fade_out_shape_width (tmp->audio_region()->fade_out()->back()->when);
+		tmp->hide_fade_line();
 	}
 }
 

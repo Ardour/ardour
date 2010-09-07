@@ -1633,8 +1633,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if (mouse_mode == MouseObject && !internal_editing()) {
 			ArdourCanvas::SimpleRect *rect = dynamic_cast<ArdourCanvas::SimpleRect *> (item);
 			if (rect) {
-				rect->property_fill_color_rgba() = 0;
-				rect->property_outline_pixels() = 1;
+				rect->property_fill_color_rgba() = 0xBBBBBBAA;
 			}
 			track_canvas->get_window()->set_cursor (*fade_in_cursor);
 		}
@@ -1644,8 +1643,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if (mouse_mode == MouseObject && !internal_editing()) {
 			ArdourCanvas::SimpleRect *rect = dynamic_cast<ArdourCanvas::SimpleRect *> (item);
 			if (rect) {
-				rect->property_fill_color_rgba() = 0;
-				rect->property_outline_pixels() = 1;
+				rect->property_fill_color_rgba() = 0xBBBBBBAA;
 			}
 			track_canvas->get_window()->set_cursor (*fade_out_cursor);
 		}
