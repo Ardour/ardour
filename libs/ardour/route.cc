@@ -2160,6 +2160,9 @@ Route::_set_state_2X (const XMLNode& node, int version)
 				
 				if (io_child->name() == X_("Panner")) {
 					_main_outs->panner()->set_state(*io_child, version);
+				} else if (io_child->name() == X_("Automation")) {
+					/* IO's automation is for the fader */
+					_amp->set_automation_state (*io_child, Evoral::Parameter (GainAutomation));
 				}
 			}
 		}
@@ -2189,7 +2192,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 			XMLNode *cmt = *(child->children().begin());
 			_comment = cmt->content();
 
-		} else if (child->name() == X_("Extra")) {
+		} else if (child->name() == X_("extra")) {
 
 			_extra_xml = new XMLNode (*child);
 

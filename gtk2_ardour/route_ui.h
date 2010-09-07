@@ -111,7 +111,7 @@ class RouteUI : public virtual AxisView
 	XMLNode *xml_node;
 	void ensure_xml_node ();
 
-	virtual XMLNode* get_automation_child_xml_node (Evoral::Parameter param);
+	virtual XMLNode* get_automation_child_xml_node (Evoral::Parameter, int);
 
 	bool mute_press(GdkEventButton*);
 	bool mute_release(GdkEventButton*);

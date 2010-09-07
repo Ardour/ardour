@@ -206,7 +206,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	/* call this on the parent */
 
-	virtual XMLNode* get_automation_child_xml_node (Evoral::Parameter /*param*/) { return 0; }
+	virtual XMLNode* get_automation_child_xml_node (Evoral::Parameter, int) { return 0; }
 
 	virtual LayerDisplay layer_display () const { return Overlaid; }
 	virtual StreamView* view () const { return 0; }

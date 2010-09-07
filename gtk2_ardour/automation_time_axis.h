@@ -175,6 +175,9 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	static Pango::FontDescription* name_font;
 	static bool have_name_font;
+
+private:
+	int set_state_2X (const XMLNode &, int);
 };
 
 #endif /* __ardour_gtk_automation_time_axis_h__ */

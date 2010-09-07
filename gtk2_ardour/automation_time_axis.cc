@@ -194,7 +194,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session* s, boost::shared_ptr<Ro
 	controls_ebox.set_name (controls_base_unselected_name);
 
 	XMLNode* xml_node = get_parent_with_state()->get_automation_child_xml_node (
-			_control->parameter());
+		_control->parameter(), Stateful::loading_state_version
+		);
 
 	if (xml_node) {
 		set_state (*xml_node, Stateful::loading_state_version);
@@ -403,7 +404,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 
 	TimeAxisView* state_parent = get_parent_with_state ();
 	assert(state_parent);
-	XMLNode* xml_node = state_parent->get_automation_child_xml_node (_control->parameter());
+	XMLNode* xml_node = state_parent->get_automation_child_xml_node (_control->parameter(), Stateful::loading_state_version);
 
 	TimeAxisView::set_height (h);
 	_base_rect->property_y2() = h;
@@ -950,6 +951,10 @@ AutomationTimeAxisView::set_state (const XMLNode& node, int version)
 {
 	TimeAxisView::set_state (node, version);
 
+	if (version < 3000) {
+		return set_state_2X (node, version);
+	}
+	
 	XMLProperty const * type = node.property ("automation-id");
 	if (type && type->value () == ARDOUR::EventTypeMap::instance().to_symbol (_control->parameter())) {
 		XMLProperty const * shown = node.property ("shown");
@@ -966,13 +971,31 @@ AutomationTimeAxisView::set_state (const XMLNode& node, int version)
 	return 0;
 }
 
+int
+AutomationTimeAxisView::set_state_2X (const XMLNode& node, int version)
+{
+	if (node.name() == X_("gain") && _control->parameter() == Evoral::Parameter (GainAutomation)) {
+		XMLProperty const * shown = node.property (X_("shown"));
+		if (shown && string_is_affirmative (shown->value ())) {
+			set_marked_for_display (true);
+			_canvas_display->show (); /* FIXME: necessary? show_at? */
+		}
+	}
+
+	if (!_marked_for_display) {
+		hide ();
+	}
+
+	return 0;
+}
+
 XMLNode*
 AutomationTimeAxisView::get_state_node ()
 {
 	TimeAxisView* state_parent = get_parent_with_state ();
 
 	if (state_parent) {
-		return state_parent->get_automation_child_xml_node (_control->parameter());
+		return state_parent->get_automation_child_xml_node (_control->parameter(), Stateful::loading_state_version);
 	} else {
 		return 0;
 	}

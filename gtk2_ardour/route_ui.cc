@@ -1271,7 +1271,7 @@ RouteUI::ensure_xml_node ()
 }
 
 XMLNode*
-RouteUI::get_automation_child_xml_node (Evoral::Parameter param)
+RouteUI::get_automation_child_xml_node (Evoral::Parameter param, int version)
 {
 	ensure_xml_node ();
 
@@ -1281,10 +1281,17 @@ RouteUI::get_automation_child_xml_node (Evoral::Parameter param)
 	const string sym = ARDOUR::EventTypeMap::instance().to_symbol(param);
 
 	for (iter = kids.begin(); iter != kids.end(); ++iter) {
-		if ((*iter)->name() == AutomationTimeAxisView::state_node_name) {
-			XMLProperty* type = (*iter)->property("automation-id");
-			if (type && type->value() == sym)
+
+		if (version < 3000) {
+			if ((*iter)->name() == sym) {
 				return *iter;
+			}
+		} else {
+			if ((*iter)->name() == AutomationTimeAxisView::state_node_name) {
+				XMLProperty* type = (*iter)->property("automation-id");
+				if (type && type->value() == sym)
+					return *iter;
+			}
 		}
 	}
 
