@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # Waf utilities for easily building standard unixey packages/libraries
 # Licensed under the GNU GPL v2 or later, see COPYING file for details.
-# Copyright (C) 2008 Dave Robillard
+# Copyright (C) 2008 David Robillard
 # Copyright (C) 2008 Nedko Arnaudov
 
-import os
-import misc
 import Configure
 import Options
 import Utils
+import misc
+import os
+import subprocess
 import sys
-import glob
 from TaskGen import feature, before, after
 
 global g_is_child
@@ -41,7 +41,7 @@ def set_options(opt):
 			help="Build debuggable binaries [Default: False]")
 	opt.add_option('--strict', action='store_true', default=False, dest='strict',
 			help="Use strict compiler flags and show all warnings [Default: False]")
-	opt.add_option('--build-docs', action='store_true', default=False, dest='build_docs',
+	opt.add_option('--docs', action='store_true', default=False, dest='docs',
 			help="Build documentation - requires doxygen [Default: False]")
 	opt.add_option('--bundle', action='store_true', default=False,
 			help="Build a self-contained bundle [Default: False]")
@@ -77,10 +77,13 @@ def check_header(conf, name, define='', mandatory=False):
 	checked = conf.env['AUTOWAF_HEADERS']
 	if not name in checked:
 		checked[name] = True
+		includes = '' # search default system include paths
+		if sys.platform == "darwin":
+			includes = '/opt/local/include'
 		if define != '':
-			conf.check(header_name=name, define_name=define, mandatory=mandatory)
+			conf.check(header_name=name, includes=includes, define_name=define, mandatory=mandatory)
 		else:
-			conf.check(header_name=name, mandatory=mandatory)
+			conf.check(header_name=name, includes=includes, mandatory=mandatory)
 
 def nameify(name):
 	return name.replace('/', '_').replace('++', 'PP').replace('-', '_').replace('.', '_')
@@ -108,14 +111,6 @@ def check_pkg(conf, name, **args):
 			if args['mandatory'] == True:
 				conf.fatal("Required package " + name + " not found")
 
-def chop_prefix(conf, var):
-	name = conf.env[var][len(conf.env['PREFIX']):]
-	if len(name) > 0 and name[0] == '/':
-		name = name[1:]
-	if name == "":
-		name = "/"
-	return name;
-
 def configure(conf):
 	global g_step
 	if g_step > 1:
@@ -123,15 +118,14 @@ def configure(conf):
 	def append_cxx_flags(vals):
 		conf.env.append_value('CCFLAGS', vals.split())
 		conf.env.append_value('CXXFLAGS', vals.split())
-	conf.line_just = 43
+	display_header('Global Configuration')
 	conf.check_tool('misc')
 	conf.check_tool('compiler_cc')
 	conf.check_tool('compiler_cxx')
-	conf.env['BUILD_DOCS'] = Options.options.build_docs
+	conf.env['DOCS'] = Options.options.docs
 	conf.env['DEBUG'] = Options.options.debug
 	conf.env['STRICT'] = Options.options.strict
 	conf.env['PREFIX'] = os.path.abspath(os.path.expanduser(os.path.normpath(conf.env['PREFIX'])))
-
 	if Options.options.bundle:
 		conf.env['BUNDLE'] = True
 		conf.define('BUNDLE', 1)
@@ -186,22 +180,40 @@ def configure(conf):
 				else:
 					conf.env['LV2DIR'] = os.path.join(conf.env['LIBDIR'], 'lv2')
 		
-	conf.env['BINDIRNAME'] = chop_prefix(conf, 'BINDIR')
-	conf.env['LIBDIRNAME'] = chop_prefix(conf, 'LIBDIR')
-	conf.env['DATADIRNAME'] = chop_prefix(conf, 'DATADIR')
-	conf.env['CONFIGDIRNAME'] = chop_prefix(conf, 'CONFIGDIR')
-	conf.env['LV2DIRNAME'] = chop_prefix(conf, 'LV2DIR')
-	
+	conf.env['BINDIRNAME'] = os.path.basename(conf.env['BINDIR'])
+	conf.env['LIBDIRNAME'] = os.path.basename(conf.env['LIBDIR'])
+	conf.env['DATADIRNAME'] = os.path.basename(conf.env['DATADIR'])
+	conf.env['CONFIGDIRNAME'] = os.path.basename(conf.env['CONFIGDIR'])
+	conf.env['LV2DIRNAME'] = os.path.basename(conf.env['LV2DIR'])
+
+	if Options.options.docs:
+		doxygen = conf.find_program('doxygen')
+		if not doxygen:
+			conf.fatal("Doxygen is required to build documentation, configure without --docs")
+
+		dot = conf.find_program('dot')
+		if not dot:
+			conf.fatal("Graphviz (dot) is required to build documentation, configure without --docs")
+		
 	if Options.options.debug:
 		conf.env['CCFLAGS'] = [ '-O0', '-g' ]
 		conf.env['CXXFLAGS'] = [ '-O0',  '-g' ]
 	else:
 		append_cxx_flags('-DNDEBUG')
+
 	if Options.options.strict:
 		conf.env.append_value('CCFLAGS', [ '-std=c99', '-pedantic' ])
-		conf.env.append_value('CXXFLAGS', [ '-ansi', '-Woverloaded-virtual'])
+		conf.env.append_value('CXXFLAGS', [ '-ansi', '-Woverloaded-virtual', '-Wnon-virtual-dtor'])
 		append_cxx_flags('-Wall -Wextra -Wno-unused-parameter')
+
 	append_cxx_flags('-fPIC -DPIC -fshow-column')
+
+	display_msg(conf, "Install prefix", conf.env['PREFIX'])
+	display_msg(conf, "Debuggable build", str(conf.env['DEBUG']))
+	display_msg(conf, "Strict compiler flags", str(conf.env['STRICT']))
+	display_msg(conf, "Build documentation", str(conf.env['DOCS']))
+	print
+
 	g_step = 2
 	
 def set_local_lib(conf, name, has_objects):
@@ -248,23 +260,8 @@ def display_msg(conf, msg, status = None, color = None):
 		color = 'GREEN'
 	elif type(status) == bool and not status or status == "False":
 		color = 'YELLOW'
-	Utils.pprint('NORMAL', "%s :" % msg.ljust(conf.line_just), sep='')
+	Utils.pprint('BOLD', "%s :" % msg.ljust(conf.line_just), sep='')
 	Utils.pprint(color, status)
-
-def print_summary(conf):
-	global g_step
-	if g_step > 2:
-		print
-		return
-	e = conf.env
-	print
-	display_header('Global configuration')
-	display_msg(conf, "Install prefix", conf.env['PREFIX'])
-	display_msg(conf, "Debuggable build", str(conf.env['DEBUG']))
-	display_msg(conf, "Strict compiler flags", str(conf.env['STRICT']))
-	display_msg(conf, "Build documentation", str(conf.env['BUILD_DOCS']))
-	print
-	g_step = 3
 
 def link_flags(env, lib):
 	return ' '.join(map(lambda x: env['LIB_ST'] % x, env['LIB_' + lib]))
@@ -298,7 +295,7 @@ def build_pc(bld, name, version, libs):
 	obj.dict = {
 		'prefix'           : pkg_prefix,
 		'exec_prefix'      : '${prefix}',
-		'libdir'           : '${exec_prefix}/lib',
+		'libdir'           : '${prefix}/' + bld.env['LIBDIRNAME'],
 		'includedir'       : '${prefix}/include',
 		name + '_VERSION'  : version,
 	}
@@ -310,7 +307,7 @@ def build_pc(bld, name, version, libs):
 
 # Doxygen API documentation
 def build_dox(bld, name, version, srcdir, blddir):
-	if not bld.env['BUILD_DOCS']:
+	if not bld.env['DOCS']:
 		return
 	obj = bld.new_task_gen('subst')
 	obj.source = 'doc/reference.doxygen.in'
@@ -367,42 +364,71 @@ def build_version_files(header_path, source_path, domain, major, minor, micro):
 		
 	return None
 
-# Internationalisation (gettext)
-def build_i18n(bld,dir,name,sources):
-	pwd = bld.get_curdir()
-	os.chdir(pwd)
+def run_tests(ctx, appname, tests):
+	orig_dir = os.path.abspath(os.curdir)
+	failures = 0
+	base = '..'
 
-	pot_file = '%s.pot' % name
+	top_level = os.path.abspath(ctx.curdir) != os.path.abspath(os.curdir)
+	if top_level:
+		os.chdir('./build/default/' + appname)
+		base = '../..'
+	else:
+		os.chdir('./build/default')
 
-	args = [ 'xgettext',
-		 '--keyword=_',
-		 '--keyword=N_',
-		 '--from-code=UTF-8',
-		 '-o', pot_file,
-		 '--copyright-holder="Paul Davis"' ]
-	args += sources
-	Utils.pprint('GREEN', 'Updating ' + pot_file, sep='')
-	os.spawnvp (os.P_WAIT, 'xgettext', args)
-	
-	po_files = glob.glob ('po/*.po')
-	
-	for po_file in po_files:
-		args = [ 'msgmerge',
-			 '--update',
-			 po_file,
-			 pot_file ]
-		Utils.pprint('GREEN', 'Updating ' + po_file, sep='')
-		os.spawnvp (os.P_WAIT, 'msgmerge', args)
+	lcov = True
+	lcov_log = open('lcov.log', 'w')
+	try:
+		# Clear coverage data
+		subprocess.call('lcov -d ./src -z'.split(),
+				stdout=lcov_log, stderr=lcov_log)
+	except:
+		lcov = False
+		print "Failed to run lcov, no coverage report will be generated"
+
+
+	# Run all tests
+	for i in tests:
+		print
+		Utils.pprint('BOLD', 'Running %s test %s' % (appname, i))
+		if subprocess.call(i) == 0:
+			Utils.pprint('GREEN', 'Passed %s %s' % (appname, i))
+		else:
+			failures += 1
+			Utils.pprint('RED', 'Failed %s %s' % (appname, i))
+
+	if lcov:
+		# Generate coverage data
+		coverage_lcov = open('coverage.lcov', 'w')
+		subprocess.call(('lcov -c -d ./src -d ./test -b ' + base).split(),
+				stdout=coverage_lcov, stderr=lcov_log)
+		coverage_lcov.close()
 		
-	for po_file in po_files:
-		mo_file = po_file.replace ('.po', '.mo')
-		args = [ 'msgfmt',
-			 '-c',
-			 '-o',
-			 mo_file,
-			 po_file ]
-		Utils.pprint('GREEN', 'Generating ' + po_file)
-		os.spawnvp (os.P_WAIT, 'msgfmt', args)
+		# Strip out unwanted stuff
+		coverage_stripped_lcov = open('coverage-stripped.lcov', 'w')
+		subprocess.call('lcov --remove coverage.lcov *boost* c++*'.split(),
+				stdout=coverage_stripped_lcov, stderr=lcov_log)
+		coverage_stripped_lcov.close()
+	
+		# Generate HTML coverage output
+		if not os.path.isdir('./coverage'):
+			os.makedirs('./coverage')
+		subprocess.call('genhtml -o coverage coverage-stripped.lcov'.split(),
+				stdout=lcov_log, stderr=lcov_log)
+	
+	lcov_log.close()
+
+	print
+	Utils.pprint('BOLD', 'Summary:', sep=''),
+	if failures == 0:
+		Utils.pprint('GREEN', 'All ' + appname + ' tests passed')
+	else:
+		Utils.pprint('RED', str(failures) + ' ' + appname + ' test(s) failed')
+
+	Utils.pprint('BOLD', 'Coverage:', sep='')
+	print os.path.abspath('coverage/index.html')
+
+	os.chdir(orig_dir)
 
 def shutdown():
 	# This isn't really correct (for packaging), but people asking is annoying

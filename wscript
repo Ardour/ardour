@@ -120,7 +120,7 @@ def set_compiler_flags (conf,opt):
 	config_os = 3
 	config = config_guess.split ("-")
 
-	print "system triple: " + config_guess
+	autowaf.display_msg(conf, "System Triple", config_guess)
 
 	# Autodetect
 	if opt.dist_target == 'auto':
@@ -219,7 +219,7 @@ def set_compiler_flags (conf,opt):
 			print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
 	
 	# check this even if we aren't using FPU optimization
-	if conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', ccflags='-D_XOPEN_SOURCE=600') == False:
+	if not conf.env['HAVE_POSIX_MEMALIGN']:
 		optimization_flags.append("-DNO_POSIX_MEMALIGN")
 
 	# end optimization section
@@ -380,8 +380,10 @@ def sub_config_and_use(conf, name, has_objects = True):
 def configure(conf):
 	create_stored_revision()
         conf.env['VERSION'] = VERSION
+	conf.line_just = 52
 	autowaf.set_recursive()
 	autowaf.configure(conf)
+	autowaf.display_header('Ardour Configuration')
 
 	gcc_versions = fetch_gcc_version()
         if not Options.options.debug and gcc_versions[0] == '4' and gcc_versions[1] > '4':
@@ -490,6 +492,7 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
 	autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.2')
 	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
+
 	if sys.platform == 'darwin':
 		sub_config_and_use(conf, 'libs/appleutility')
 	for i in children:
@@ -501,25 +504,26 @@ def configure(conf):
 	conf.check_cc(function_name='dlopen', header_name='dlfcn.h', linkflags='-ldl', uselib_store='DL')
 	conf.check_cc(function_name='curl_global_init', header_name='curl/curl.h', linkflags='-lcurl', uselib_store='CURL')
 
+	if conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', ccflags='-D_XOPEN_SOURCE=600') == False:
+		conf.env['HAVE_POSIX_MEMALIGN'] = True
+
 	# Tell everyone that this is a waf build
 
 	conf.env.append_value('CCFLAGS', '-DWAF_BUILD')
 	conf.env.append_value('CXXFLAGS', '-DWAF_BUILD')
 	
-	autowaf.print_summary(conf)
-
         # debug builds should not call home
 
 	opts = Options.options
         if opts.debug:
                 opts.phone_home = False;
 
-	autowaf.display_header('Ardour Configuration')
 	autowaf.display_msg(conf, 'Build Target', conf.env['build_target'])
 	autowaf.display_msg(conf, 'Architecture flags', opts.arch)
 	autowaf.display_msg(conf, 'Aubio', bool(conf.env['HAVE_AUBIO']))
 	autowaf.display_msg(conf, 'AudioUnits', opts.audiounits)
 	autowaf.display_msg(conf, 'CoreAudio', bool(conf.env['HAVE_COREAUDIO']))
+	autowaf.display_msg(conf, 'FLAC', bool(conf.env['HAVE_FLAC']))
 	if bool(conf.env['HAVE_COREAUDIO']):
 		conf.define ('COREAUDIO', 1)
 	if opts.audiounits:
@@ -538,6 +542,7 @@ def configure(conf):
 	if opts.gtkosx:
 		conf.define ('GTKOSX', 1)
 	autowaf.display_msg(conf, 'LV2 Support', bool(conf.env['HAVE_SLV2']))
+	autowaf.display_msg(conf, 'OGG', bool(conf.env['HAVE_OGG']))
 	autowaf.display_msg(conf, 'Rubberband', bool(conf.env['HAVE_RUBBERBAND']))
 	autowaf.display_msg(conf, 'Samplerate', bool(conf.env['HAVE_SAMPLERATE']))
 	autowaf.display_msg(conf, 'Soundtouch', bool(conf.env['HAVE_SOUNDTOUCH']))
@@ -568,6 +573,7 @@ def configure(conf):
 
 	autowaf.display_msg(conf, 'C Compiler flags', conf.env['CCFLAGS'])
 	autowaf.display_msg(conf, 'C++ Compiler flags', conf.env['CXXFLAGS'])
+	print
 
 	# and dump the same stuff to a file for use in the build
 
@@ -576,7 +582,7 @@ def configure(conf):
 	config_text.write ("Install prefix: "); config_text.write (str (conf.env['PREFIX'])); config_text.write ("\\n\\\n")
 	config_text.write ("Debuggable build: "); config_text.write (str (str(conf.env['DEBUG']))); config_text.write ("\\n\\\n")
 	config_text.write ("Strict compiler flags: "); config_text.write (str (str(conf.env['STRICT']))); config_text.write ("\\n\\\n")
-	config_text.write ("Build documentation: "); config_text.write (str (str(conf.env['BUILD_DOCS']))); config_text.write ("\\n\\\n")
+	config_text.write ("Build documentation: "); config_text.write (str (str(conf.env['DOCS']))); config_text.write ("\\n\\\n")
 	config_text.write ('Build target: '); config_text.write (str (conf.env['build_target'])); config_text.write ("\\n\\\n")
 	config_text.write ('Architecture flags: '); config_text.write (str (opts.arch)); config_text.write ("\\n\\\n")
 	config_text.write ('Aubio: '); config_text.write (str (bool(conf.env['HAVE_AUBIO']))); config_text.write ("\\n\\\n")

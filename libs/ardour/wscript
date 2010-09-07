@@ -260,14 +260,8 @@ def configure(conf):
                       
 	if flac_supported():
 		conf.define ('HAVE_FLAC', 1)
-		autowaf.display_msg(conf, 'Checking for FLAC support', True)
-	else:
-		autowaf.display_msg(conf, 'Checking for FLAC support', False)
 	if ogg_supported():
 		conf.define ('HAVE_OGG', 1)
-		autowaf.display_msg(conf, 'Checking for Ogg/Vorbis support', True)
-	else:
-		autowaf.display_msg(conf, 'Checking for Ogg/Vorbis Support', False)
 
 	conf.write_config_header('libardour-config.h')
 
