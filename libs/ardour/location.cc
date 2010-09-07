@@ -742,7 +742,7 @@ Locations::get_state ()
 	LocationList::iterator iter;
 	Glib::Mutex::Lock lm (lock);
 
-	for (iter  = locations.begin(); iter != locations.end(); ++iter) {
+	for (iter = locations.begin(); iter != locations.end(); ++iter) {
 		node->add_child_nocopy ((*iter)->get_state ());
 	}
 
@@ -791,10 +791,10 @@ Locations::set_state (const XMLNode& node, int version)
 							string::size_type const c = v.find_first_of (',');
 							string const s = v.substr (0, c);
 							if (s == X_("IsStart")) {
-								session_range_location->set_start (loc->start());
+								session_range_location->set_start (loc->start(), true);
 								add = false;
 							} else if (s == X_("IsEnd")) {
-								session_range_location->set_end (loc->start());
+								session_range_location->set_end (loc->start(), true);
 								add = false;
 							}
 
