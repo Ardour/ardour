@@ -535,6 +535,15 @@ AudioRegionView::set_height (gdouble height)
 		(*l).second->property_y2() = _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1;
 	}	
 
+	if (fade_position_line) {
+		if (height < NAME_HIGHLIGHT_THRESH) {
+			fade_position_line->property_y2() = _height - 1;
+		}
+		else {
+			fade_position_line->property_y2() = _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1;
+		}
+	}
+
 	if (name_pixbuf) {
 		name_pixbuf->raise_to_top();
 	}
