@@ -167,6 +167,7 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i)
 	, _item (i)
 	, _pointer_frame_offset (0)
 	, _move_threshold_passed (false)
+	, _raw_grab_frame (0)
 	, _grab_frame (0)
 	, _last_pointer_frame (0)
 {
@@ -208,8 +209,8 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 		_y_constrained = false;
 	}
 
-	_grab_frame = _editor->event_frame (event, &_grab_x, &_grab_y);
-	_grab_frame = adjusted_frame (_grab_frame, event);
+	_raw_grab_frame = _editor->event_frame (event, &_grab_x, &_grab_y);
+	_grab_frame = adjusted_frame (_raw_grab_frame, event);
 	_last_pointer_frame = _grab_frame;
 	_last_pointer_x = _grab_x;
 	_last_pointer_y = _grab_y;
@@ -1169,7 +1170,7 @@ RegionMoveDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 {
 	RegionMotionDrag::start_grab (event, c);
 
-	_pointer_frame_offset = grab_frame() - _last_frame_position;
+	_pointer_frame_offset = raw_grab_frame() - _last_frame_position;
 }
 
 RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, RouteTimeAxisView* v, nframes64_t pos)
@@ -1715,7 +1716,7 @@ MeterMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	Drag::start_grab (event, cursor);
 
-	_pointer_frame_offset = grab_frame() - _marker->meter().frame();
+	_pointer_frame_offset = raw_grab_frame() - _marker->meter().frame();
 
 	_editor->show_verbose_time_cursor (adjusted_current_frame(event), 10);
 }
@@ -1806,7 +1807,7 @@ TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	Drag::start_grab (event, cursor);
 
-	_pointer_frame_offset = grab_frame() - _marker->tempo().frame();
+	_pointer_frame_offset = raw_grab_frame() - _marker->tempo().frame();
 	_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
 }
 
@@ -1905,7 +1906,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 		}
 	}
 
-	_pointer_frame_offset = grab_frame() - _cursor->current_frame;
+	_pointer_frame_offset = raw_grab_frame() - _cursor->current_frame;
 
 	_editor->show_verbose_time_cursor (_cursor->current_frame, 10);
 }
@@ -1983,7 +1984,7 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> const r = arv->audio_region ();
 
-	_pointer_frame_offset = grab_frame() - ((nframes64_t) r->fade_in()->back()->when + r->position());
+	_pointer_frame_offset = raw_grab_frame() - ((nframes64_t) r->fade_in()->back()->when + r->position());
 	_editor->show_verbose_duration_cursor (r->position(), r->position() + r->fade_in()->back()->when, 10);
 	
 	arv->show_fade_line((nframes64_t) r->fade_in()->back()->when);
@@ -2095,7 +2096,7 @@ FadeOutDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> r = arv->audio_region ();
 
-	_pointer_frame_offset = grab_frame() - (r->length() - (nframes64_t) r->fade_out()->back()->when + r->position());
+	_pointer_frame_offset = raw_grab_frame() - (r->length() - (nframes64_t) r->fade_out()->back()->when + r->position());
 	_editor->show_verbose_duration_cursor (r->last_frame() - r->fade_out()->back()->when, r->last_frame(), 10);
 	
 	arv->show_fade_line(r->length() - r->fade_out()->back()->when);
@@ -2231,7 +2232,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	Location *location = _editor->find_location_from_marker (_marker, is_start);
 	_editor->_dragging_edit_point = true;
 
-	_pointer_frame_offset = grab_frame() - (is_start ? location->start() : location->end());
+	_pointer_frame_offset = raw_grab_frame() - (is_start ? location->start() : location->end());
 
 	update_item (location);
 
@@ -3051,7 +3052,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		}
 		Drag::start_grab (event, _editor->left_side_trim_cursor);
 		start = _editor->selection->time[_editor->clicked_selection].start;
-		_pointer_frame_offset = grab_frame() - start;
+		_pointer_frame_offset = raw_grab_frame() - start;
 		break;
 
 	case SelectionEndTrim:
@@ -3060,13 +3061,13 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		}
 		Drag::start_grab (event, _editor->right_side_trim_cursor);
 		end = _editor->selection->time[_editor->clicked_selection].end;
-		_pointer_frame_offset = grab_frame() - end;
+		_pointer_frame_offset = raw_grab_frame() - end;
 		break;
 
 	case SelectionMove:
 		start = _editor->selection->time[_editor->clicked_selection].start;
 		Drag::start_grab (event, cursor);
-		_pointer_frame_offset = grab_frame() - start;
+		_pointer_frame_offset = raw_grab_frame() - start;
 		break;
 	}
 

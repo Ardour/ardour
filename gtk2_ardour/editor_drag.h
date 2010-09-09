@@ -185,6 +185,10 @@ protected:
 		return _grab_y;
 	}
 
+	ARDOUR::framepos_t raw_grab_frame () const {
+		return _raw_grab_frame;
+	}
+
 	ARDOUR::framepos_t grab_frame () const {
 		return _grab_frame;
 	}
@@ -217,6 +221,7 @@ private:
 	double _grab_y; ///< trackview y of the grab start position
 	double _last_pointer_x; ///< trackview x of the pointer last time a motion occurred
 	double _last_pointer_y; ///< trackview y of the pointer last time a motion occurred
+	ARDOUR::framepos_t _raw_grab_frame; ///< unsnapped frame that the mouse was at when start_grab was called, or 0
 	nframes64_t _grab_frame; ///< adjusted_frame that the mouse was at when start_grab was called, or 0
 	nframes64_t _last_pointer_frame; ///< adjusted_frame the last time a motion occurred
 };
