@@ -185,7 +185,7 @@ CrossfadeView::redraw_curves ()
 		p.set_x (i + 1);
 		p.set_y (_height - ((_height - 2) * vec[i]));
 	}
-	
+
 	fade_in->property_points() = *points;
 
 	crossfade->fade_out().curve().get_vector (0, crossfade->length(), vec, npoints);
@@ -246,8 +246,9 @@ CrossfadeView::upper_regionview () const
 void
 CrossfadeView::show ()
 {
-	group->show();
 	_visible = true;
+	group->show();
+	redraw_curves ();
 }
 
 void

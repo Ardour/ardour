@@ -61,7 +61,7 @@ using namespace Editing;
 AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	: StreamView (tv)
 {
-	crossfades_visible = true;
+	crossfades_visible = tv.session()->config.get_xfades_visible ();
 	color_handler ();
 	_amplitude_above_axis = 1.0;
 
@@ -329,7 +329,7 @@ AudioStreamView::add_crossfade (boost::weak_ptr<Crossfade> wc)
 	cv->set_valid (true);
 	crossfade->Invalidated.connect (*this, invalidator (*this), ui_bind (&AudioStreamView::remove_crossfade, this, _1), gui_context());
 	crossfade_views[cv->crossfade] = cv;
-	if (!_trackview.session()->config.get_xfades_visible() || !crossfades_visible) {
+	if (!crossfades_visible) {
 		cv->hide ();
 	}
 
@@ -795,8 +795,6 @@ AudioStreamView::update_contents_height ()
 void
 AudioStreamView::update_content_height (CrossfadeView* cv)
 {
-	cv->show ();
-
 	if (_layer_display == Overlaid) {
 
 		cv->set_y (0);
