@@ -31,6 +31,7 @@
 #include "midi_automation_line.h"
 #include "editor_drag.h"
 #include "editor.h"
+#include "editing.h"
 
 #include "i18n.h"
 
@@ -92,10 +93,12 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 bool
 AutomationRegionView::canvas_event(GdkEvent* ev)
 {
-	if (ev->type == GDK_BUTTON_PRESS) {
+	PublicEditor& e = trackview.editor ();
+
+	if (ev->type == GDK_BUTTON_PRESS && e.current_mouse_mode() == Editing::MouseObject) {
 
 		/* XXX: icky dcast to Editor */
-		trackview.editor().drags()->set (new RubberbandSelectDrag (dynamic_cast<Editor*> (&trackview.editor()), group), ev);
+		e.drags()->set (new RubberbandSelectDrag (dynamic_cast<Editor*> (&e), group), ev);
 		
 	} else if (ev->type == GDK_BUTTON_RELEASE) {
 
