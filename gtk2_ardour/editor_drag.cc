@@ -2649,7 +2649,9 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 	} else {
 		motion (event, false);
 	}
+	
 	_point->line().end_drag ();
+	_editor->session()->commit_reversible_command ();
 }
 
 void
@@ -2759,6 +2761,7 @@ LineDrag::finished (GdkEvent* event, bool)
 {
 	motion (event, false);
 	_line->end_drag ();
+	_editor->session()->commit_reversible_command ();
 }
 
 void
@@ -3739,8 +3742,8 @@ NoteDrag::aborted ()
 	/* XXX: TODO */
 }
 
-AutomationRangeDrag::AutomationRangeDrag (Editor* e, ArdourCanvas::Item* i, list<AudioRange> const & r)
-	: Drag (e, i)
+AutomationRangeDrag::AutomationRangeDrag (Editor* editor, ArdourCanvas::Item* item, list<AudioRange> const & r)
+	: Drag (editor, item)
 	, _ranges (r)
 	, _nothing_to_drag (false)
 {
@@ -3749,7 +3752,39 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* e, ArdourCanvas::Item* i, list
 	_atav = reinterpret_cast<AutomationTimeAxisView*> (_item->get_data ("trackview"));
 	assert (_atav);
 
-	_line = _atav->line ();
+	/* get all lines in the automation view */
+	list<boost::shared_ptr<AutomationLine> > lines = _atav->lines ();
+
+	/* find those that overlap the ranges being dragged */
+	list<boost::shared_ptr<AutomationLine> >::iterator i = lines.begin ();
+	while (i != lines.end ()) {
+		list<boost::shared_ptr<AutomationLine> >::iterator j = i;
+		++j;
+
+		pair<framepos_t, framepos_t> const r = (*i)->get_point_x_range ();
+
+		/* check this range against all the AudioRanges that we are using */
+		list<AudioRange>::const_iterator k = _ranges.begin ();
+		while (k != _ranges.end()) {
+			if (k->coverage (r.first, r.second) != OverlapNone) {
+				break;
+			}
+			++k;
+		}
+
+		/* add it to our list if it overlaps at all */
+		if (k != _ranges.end()) {
+			Line n;
+			n.line = *i;
+			n.state = 0;
+			n.range = r;
+			_lines.push_back (n);
+		}
+
+		i = j;
+	}
+
+	/* Now ::lines contains the AutomationLines that somehow overlap our drag */
 }
 
 void
@@ -3757,67 +3792,120 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	list<ControlPoint*> points;
+	/* Get line states before we start changing things */
+	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
+		i->state = &i->line->get_state ();
+	}
 
-	XMLNode* state = &_line->get_state ();
-	
 	if (_ranges.empty()) {
-		
-		uint32_t const N = _line->npoints ();
-		for (uint32_t i = 0; i < N; ++i) {
-			points.push_back (_line->nth (i));
+
+		/* No selected time ranges: drag all points */
+		for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
+			uint32_t const N = i->line->npoints ();
+			for (uint32_t j = 0; j < N; ++j) {
+				i->points.push_back (i->line->nth (j));
+			}
 		}
 		
 	} else {
 
-		boost::shared_ptr<AutomationList> the_list = _line->the_list ();
-		for (list<AudioRange>::const_iterator j = _ranges.begin(); j != _ranges.end(); ++j) {
+		for (list<AudioRange>::const_iterator i = _ranges.begin(); i != _ranges.end(); ++i) {
 
-			/* fade into and out of the region that we're dragging;
-			   64 samples length plucked out of thin air.
-			*/
-			framecnt_t const h = (j->start + j->end) / 2;
-			framepos_t a = j->start + 64;
-			if (a > h) {
-				a = h;
-			}
-			framepos_t b = j->end - 64;
-			if (b < h) {
-				b = h;
-			}
+			framecnt_t const half = (i->start + i->end) / 2;
 			
-			the_list->add (j->start, the_list->eval (j->start));
-			_line->add_always_in_view (j->start);
-			the_list->add (a, the_list->eval (a));
-			_line->add_always_in_view (a);
-			the_list->add (b, the_list->eval (b));
-			_line->add_always_in_view (b);
-			the_list->add (j->end, the_list->eval (j->end));
-			_line->add_always_in_view (j->end);
-		}
-
-		uint32_t const N = _line->npoints ();
-		for (uint32_t i = 0; i < N; ++i) {
-
-			ControlPoint* p = _line->nth (i);
-
-			list<AudioRange>::const_iterator j = _ranges.begin ();
-			while (j != _ranges.end() && (j->start >= (*p->model())->when || j->end <= (*p->model())->when)) {
+			/* find the line that this audio range starts in */
+			list<Line>::iterator j = _lines.begin();
+			while (j != _lines.end() && (j->range.first > i->start || j->range.second < i->start)) {
 				++j;
 			}
 
-			if (j != _ranges.end()) {
-				points.push_back (p);
+			if (j != _lines.end()) {
+				boost::shared_ptr<AutomationList> the_list = j->line->the_list ();
+				
+				/* j is the line that this audio range starts in; fade into it;
+				   64 samples length plucked out of thin air.
+				*/
+
+				framepos_t a = i->start + 64;
+				if (a > half) {
+					a = half;
+				}
+
+				double const p = j->line->time_converter().from (i->start - j->line->time_converter().origin_b ());
+				double const q = j->line->time_converter().from (a - j->line->time_converter().origin_b ());
+
+				the_list->add (p, the_list->eval (p));
+				j->line->add_always_in_view (p);
+				the_list->add (q, the_list->eval (q));
+				j->line->add_always_in_view (q);
+			}
+
+			/* same thing for the end */
+			
+			j = _lines.begin();
+			while (j != _lines.end() && (j->range.first > i->end || j->range.second < i->end)) {
+				++j;
+			}
+
+			if (j != _lines.end()) {
+				boost::shared_ptr<AutomationList> the_list = j->line->the_list ();
+				
+				/* j is the line that this audio range starts in; fade out of it;
+				   64 samples length plucked out of thin air.
+				*/
+				
+				framepos_t b = i->end - 64;
+				if (b < half) {
+					b = half;
+				}
+
+				double const p = j->line->time_converter().from (b - j->line->time_converter().origin_b ());
+				double const q = j->line->time_converter().from (i->end - j->line->time_converter().origin_b ());
+				
+				the_list->add (p, the_list->eval (p));
+				j->line->add_always_in_view (p);
+				the_list->add (q, the_list->eval (q));
+				j->line->add_always_in_view (q);
+			}
+		}
+
+		_nothing_to_drag = true;
+
+		/* Find all the points that should be dragged and put them in the relevant
+		   points lists in the Line structs.
+		*/
+
+		for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
+
+			uint32_t const N = i->line->npoints ();
+			for (uint32_t j = 0; j < N; ++j) {
+
+				/* here's a control point on this line */
+				ControlPoint* p = i->line->nth (j);
+				double const w = i->line->time_converter().to ((*p->model())->when) + i->line->time_converter().origin_b ();
+
+				/* see if it's inside a range */
+				list<AudioRange>::const_iterator k = _ranges.begin ();
+				while (k != _ranges.end() && (k->start >= w || k->end <= w)) {
+					++k;
+				}
+
+				if (k != _ranges.end()) {
+					/* dragging this point */
+					_nothing_to_drag = false;
+					i->points.push_back (p);
+				}
 			}
 		}
 	}
 
-	if (points.empty()) {
-		_nothing_to_drag = true;
+	if (_nothing_to_drag) {
 		return;
 	}
 
-	_line->start_drag_multiple (points, 1 - (_drags->current_pointer_y() / _line->height ()), state);
+	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
+		i->line->start_drag_multiple (i->points, 1 - (_drags->current_pointer_y() / i->line->height ()), i->state);
+	}
 }
 
 void
@@ -3826,11 +3914,13 @@ AutomationRangeDrag::motion (GdkEvent* event, bool first_move)
 	if (_nothing_to_drag) {
 		return;
 	}
-	
-	float const f = 1 - (_drags->current_pointer_y() / _line->height());
 
-	/* we are ignoring x position for this drag, so we can just pass in anything */
-	_line->drag_motion (0, f, true, false);
+	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
+		float const f = 1 - (_drags->current_pointer_y() / i->line->height());
+
+		/* we are ignoring x position for this drag, so we can just pass in anything */
+		i->line->drag_motion (0, f, true, false);
+	}
 }
 
 void
@@ -3841,15 +3931,21 @@ AutomationRangeDrag::finished (GdkEvent* event, bool)
 	}
 	
 	motion (event, false);
-	_line->end_drag ();
-	_line->clear_always_in_view ();
+	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
+		i->line->end_drag ();
+		i->line->clear_always_in_view ();
+	}
+
+	_editor->session()->commit_reversible_command ();
 }
 
 void
 AutomationRangeDrag::aborted ()
 {
-	_line->clear_always_in_view ();
-	_line->reset ();
+	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
+		i->line->clear_always_in_view ();
+		i->line->reset ();
+	}
 }
 
 DraggingView::DraggingView (RegionView* v, RegionDrag* parent)

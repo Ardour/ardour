@@ -806,7 +806,6 @@ AutomationLine::end_drag ()
 		new MementoCommand<AutomationList>(memento_command_binder (), 0, &alist->get_state())
 		);
 	
-	trackview.editor().session()->commit_reversible_command ();
 	trackview.editor().session()->set_dirty ();
 }
 
@@ -1337,4 +1336,19 @@ void
 AutomationLine::set_maximum_time (framepos_t t)
 {
 	_maximum_time = t;
+}
+
+
+/** @return min and max x positions of points that are in the list, in session frames */
+pair<framepos_t, framepos_t>
+AutomationLine::get_point_x_range () const
+{
+	pair<framepos_t, framepos_t> r (max_frames, 0);
+
+	for (AutomationList::const_iterator i = the_list()->begin(); i != the_list()->end(); ++i) {
+		r.first = min (r.first, _time_converter.to ((*i)->when) + _time_converter.origin_b ());
+		r.second = max (r.second, _time_converter.to ((*i)->when) + _time_converter.origin_b ());
+	}
+
+	return r;
 }

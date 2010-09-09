@@ -138,6 +138,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 		return _time_converter;
 	}
 
+	std::pair<ARDOUR::framepos_t, ARDOUR::framepos_t> get_point_x_range () const;
+
 	void set_maximum_time (ARDOUR::framepos_t);
  	ARDOUR::framepos_t maximum_time () const {
 		return _maximum_time;

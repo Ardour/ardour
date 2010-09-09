@@ -75,7 +75,12 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, nframes_t, double);
 
 	void clear_lines ();
+
+	/** @return Our AutomationLine, if this view has one, or 0 if it uses AutomationRegionViews */
 	boost::shared_ptr<AutomationLine> line() { return _line; }
+
+	/** @return All AutomationLines associated with this view */
+	std::list<boost::shared_ptr<AutomationLine> > lines () const;
 
 	void set_selected_points (PointSelection&);
 	void get_selectables (ARDOUR::framepos_t start, ARDOUR::framepos_t end, double top, double bot, std::list<Selectable *>&);

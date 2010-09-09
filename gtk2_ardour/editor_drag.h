@@ -826,7 +826,17 @@ public:
 private:
 	std::list<ARDOUR::AudioRange> _ranges;
 	AutomationTimeAxisView* _atav;
-	boost::shared_ptr<AutomationLine> _line;
+
+	/** A line that is part of the drag */
+	struct Line {
+		boost::shared_ptr<AutomationLine> line; ///< the line
+		std::list<ControlPoint*> points; ///< points to drag on the line
+		std::pair<ARDOUR::framepos_t, ARDOUR::framepos_t> range; ///< the range of all points on the line, in session frames
+		XMLNode* state; ///< the XML state node before the drag
+	};
+	
+	std::list<Line> _lines;
+	
 	bool _nothing_to_drag;
 };
 

@@ -1044,3 +1044,17 @@ AutomationTimeAxisView::has_automation () const
 {
 	return ( (_line && _line->npoints() > 0) || (_view && _view->has_automation()) );
 }
+
+list<boost::shared_ptr<AutomationLine> >
+AutomationTimeAxisView::lines () const
+{
+	list<boost::shared_ptr<AutomationLine> > lines;
+	
+	if (_line) {
+		lines.push_back (_line);
+	} else if (_view) {
+		lines = _view->get_lines ();
+	}
+
+	return lines;
+}
