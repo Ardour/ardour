@@ -445,7 +445,7 @@ class NoteDrag : public Drag
 class RegionGainDrag : public Drag
 {
 public:
-	RegionGainDrag (Editor *e, ArdourCanvas::Item *i) : Drag (e, i) {}
+	RegionGainDrag (Editor *, ArdourCanvas::Item *);
 
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
@@ -701,7 +701,7 @@ private:
 class RubberbandSelectDrag : public Drag
 {
 public:
-	RubberbandSelectDrag (Editor *e, ArdourCanvas::Item *i) : Drag (e, i) {}
+	RubberbandSelectDrag (Editor *, ArdourCanvas::Item *);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -717,7 +717,7 @@ public:
 class TimeFXDrag : public RegionDrag
 {
 public:
-	TimeFXDrag (Editor *e, ArdourCanvas::Item *i, RegionView* p, std::list<RegionView*> const & v) : RegionDrag (e, i, p, v) {}
+	TimeFXDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -729,7 +729,7 @@ public:
 class ScrubDrag : public Drag
 {
 public:
-	ScrubDrag (Editor *e, ArdourCanvas::Item *i) : Drag (e, i) {}
+	ScrubDrag (Editor *, ArdourCanvas::Item *);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -800,7 +800,7 @@ private:
 class MouseZoomDrag : public Drag
 {
 public:
-	MouseZoomDrag (Editor* e, ArdourCanvas::Item *i) : Drag (e, i) {}
+	MouseZoomDrag (Editor *, ArdourCanvas::Item *);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);

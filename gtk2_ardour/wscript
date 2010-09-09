@@ -65,6 +65,7 @@ gtk2_ardour_sources = [
 	'crossfade_edit.cc',
 	'crossfade_view.cc',
 	'curvetest.cc',
+	'debug.cc',
 	'diamond.cc',
 	'edit_note_dialog.cc',
 	'editing.cc',
