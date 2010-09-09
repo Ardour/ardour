@@ -88,7 +88,7 @@ public:
 	}
 
 	/** @return current pointer frame */
-	nframes64_t current_pointer_frame () const {
+	ARDOUR::framepos_t current_pointer_frame () const {
 		return _current_pointer_frame;
 	}
 
@@ -98,7 +98,7 @@ private:
 	bool _ending; ///< true if end_grab or abort is in progress, otherwise false
 	double _current_pointer_x; ///< trackview x of the current pointer
 	double _current_pointer_y; ///< trackview y of the current pointer
-	nframes64_t _current_pointer_frame; ///< frame that the pointer is now at
+	ARDOUR::framepos_t _current_pointer_frame; ///< frame that the pointer is now at
 };
 
 /** Abstract base class for dragging of things within the editor */
@@ -121,8 +121,8 @@ public:
 	bool motion_handler (GdkEvent*, bool);
 	void abort ();
 
-	nframes64_t adjusted_frame (nframes64_t, GdkEvent const *, bool snap = true) const;
-	nframes64_t adjusted_current_frame (GdkEvent const *, bool snap = true) const;
+	ARDOUR::framepos_t adjusted_frame (ARDOUR::framepos_t, GdkEvent const *, bool snap = true) const;
+	ARDOUR::framepos_t adjusted_current_frame (GdkEvent const *, bool snap = true) const;
 	
 	/** Called to start a grab of an item.
 	 *  @param e Event that caused the grab to start.
@@ -157,7 +157,7 @@ public:
 	}
 
 	/** @return minimum number of frames (in x) and pixels (in y) that should be considered a movement */
-	virtual std::pair<nframes64_t, int> move_threshold () const {
+	virtual std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
 		return std::make_pair (1, 1);
 	}
 
@@ -209,7 +209,7 @@ protected:
 	DragManager* _drags;
 	ArdourCanvas::Item* _item; ///< our item
 	/** Offset from the mouse's position for the drag to the start of the thing that is being dragged */
-	nframes64_t _pointer_frame_offset;
+	ARDOUR::framecnt_t _pointer_frame_offset;
 	bool _x_constrained; ///< true if x motion is constrained, otherwise false
 	bool _y_constrained; ///< true if y motion is constrained, otherwise false
 	bool _was_rolling; ///< true if the session was rolling before the drag started, otherwise false
@@ -222,8 +222,8 @@ private:
 	double _last_pointer_x; ///< trackview x of the pointer last time a motion occurred
 	double _last_pointer_y; ///< trackview y of the pointer last time a motion occurred
 	ARDOUR::framepos_t _raw_grab_frame; ///< unsnapped frame that the mouse was at when start_grab was called, or 0
-	nframes64_t _grab_frame; ///< adjusted_frame that the mouse was at when start_grab was called, or 0
-	nframes64_t _last_pointer_frame; ///< adjusted_frame the last time a motion occurred
+	ARDOUR::framepos_t _grab_frame; ///< adjusted_frame that the mouse was at when start_grab was called, or 0
+	ARDOUR::framepos_t _last_pointer_frame; ///< adjusted_frame the last time a motion occurred
 };
 
 class RegionDrag;
@@ -290,11 +290,11 @@ public:
 
 protected:
 
-	double compute_x_delta (GdkEvent const *, nframes64_t *);
+	double compute_x_delta (GdkEvent const *, ARDOUR::framecnt_t *);
 	bool y_movement_allowed (int, ARDOUR::layer_t) const;
 
 	bool _brushing;
-	nframes64_t _last_frame_position; ///< last position of the thing being dragged
+	ARDOUR::framepos_t _last_frame_position; ///< last position of the thing being dragged
 	double _total_x_delta;
 	int _last_pointer_time_axis_view;
 	ARDOUR::layer_t _last_pointer_layer;
@@ -319,7 +319,7 @@ public:
 		return true;
 	}
 
-	std::pair<nframes64_t, int> move_threshold () const {
+	std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
 		return std::make_pair (4, 4);
 	}
 
@@ -364,7 +364,7 @@ private:
 class RegionInsertDrag : public RegionMotionDrag
 {
 public:
-	RegionInsertDrag (Editor *, boost::shared_ptr<ARDOUR::Region>, RouteTimeAxisView*, nframes64_t);
+	RegionInsertDrag (Editor *, boost::shared_ptr<ARDOUR::Region>, RouteTimeAxisView*, ARDOUR::framepos_t);
 
 	void finished (GdkEvent *, bool);
 	void aborted ();
@@ -708,7 +708,7 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted ();
 
-	std::pair<nframes64_t, int> move_threshold () const {
+	std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
 		return std::make_pair (8, 1);
 	}
 };
