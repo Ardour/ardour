@@ -369,7 +369,8 @@ PluginInsert::silence (nframes_t nframes)
 void
 PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, nframes_t nframes, bool)
 {
-	if (_active || _pending_active) {
+	if (_pending_active) {
+		/* run as normal if we are active or moving from inactive to active */
 
 		if (_session.transport_rolling()) {
 			automation_run (bufs, nframes);
