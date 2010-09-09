@@ -1133,7 +1133,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Audio"),
 	     new BoolOption (
 		     "replicate-missing-region-channels",
-		     _("Replicate Missing Region Channels"),
+		     _("Replicate missing region channels"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_replicate_missing_region_channels),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_replicate_missing_region_channels)
 		     ));
