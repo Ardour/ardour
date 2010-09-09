@@ -931,6 +931,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 
 		XMLNodeList const & children = node.children ();
 		XMLNodeList::const_iterator i = children.begin ();
+		
 		while (i != children.end() && (*i)->name() != X_("Redirect")) {
 			++i;
 		}
@@ -938,7 +939,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 		Placement placement = PreFader;
 
 		if (i != children.end()) {
-			if ((prop = node.property (X_("placement"))) != 0) {
+			if ((prop = (*i)->property (X_("placement"))) != 0) {
 				placement = Placement (string_2_enum (prop->value(), placement));
 			}
 		}
