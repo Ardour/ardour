@@ -1781,13 +1781,19 @@ Editor::add_region_context_items (StreamView* sv, list<boost::shared_ptr<Region>
 		}
 
 		if (ar) {
+                        /* its a bit unfortunate that "envelope visible" is a view-only
+                           property. we have to find the regionview to able to check
+                           its current setting.
+                        */
+
 			RegionView* rv = sv->find_view (ar);
-			AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
-			
-			if (rv && arv && arv->envelope_visible()) {
-				have_envelope_visible = true;
-			} else {
-				have_envelope_invisible = true;
+                        have_envelope_invisible = true;
+
+                        if (rv) {
+                                AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
+                                if (arv && arv->envelope_visible()) {
+                                        have_envelope_visible = true;
+                                }
 			}
 
 			if (ar->envelope_active()) {
