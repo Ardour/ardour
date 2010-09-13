@@ -398,6 +398,7 @@ public:
 private:
 	MidiTimeAxisView* _view;
 	boost::shared_ptr<ARDOUR::Region> _region;
+        void add_region ();
 };
 
 /** Drags to resize MIDI notes */

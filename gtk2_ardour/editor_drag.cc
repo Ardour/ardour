@@ -1336,26 +1336,46 @@ void
 RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move) {
-		/* don't use a zero-length region otherwise its region view will be hidden when it is created */
-		_region = _view->add_region (grab_frame(), 1, false);
+                add_region();
 	} else {
-		framepos_t const f = adjusted_current_frame (event);
-		if (f < grab_frame()) {
-			_region->set_position (f, this);
-		}
-
-		/* again, don't use a zero-length region (see above) */
-		framecnt_t const len = abs (f - grab_frame ());
-		_region->set_length (len < 1 ? 1 : len, this);
-	}
+                if (_region) {
+                        framepos_t const f = adjusted_current_frame (event);
+                        if (f < grab_frame()) {
+                                _region->set_position (f, this);
+                        }
+                        
+                        /* again, don't use a zero-length region (see above) */
+                        framecnt_t const len = abs (f - grab_frame ());
+                        _region->set_length (len < 1 ? 1 : len, this);
+                }
+        }
 }
 
 void
 RegionCreateDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (movement_occurred) {
-		_editor->commit_reversible_command ();
+	if (!movement_occurred) {
+                add_region ();
 	}
+
+        if (_region) {
+                _editor->commit_reversible_command ();
+        }
+}
+
+void
+RegionCreateDrag::add_region ()
+{
+        if (_editor->session()) {
+                const TempoMap& map (_editor->session()->tempo_map());
+                framecnt_t pos = grab_frame();
+                const Meter& m = map.meter_at (pos);
+                /* not that the frame rate used here can be affected by pull up/down which
+                   might be wrong.
+                */
+                framecnt_t len = m.frames_per_bar (map.tempo_at (pos), _editor->session()->frame_rate());
+                _region = _view->add_region (grab_frame(), len, false);
+        }
 }
 
 void

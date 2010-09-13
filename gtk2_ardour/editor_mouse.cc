@@ -682,6 +682,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			return true;
 
                 case StreamItem:
+                        cerr << "press on stream item, internal? " << internal_editing() << " MIDI ? "
+                             << dynamic_cast<MidiTimeAxisView*>(clicked_axisview)
+                             << endl;
                         if (internal_editing()) {
 				if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
 					_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
