@@ -41,6 +41,7 @@ class Playlist;
 class Region;
 class Source;
 class Session;
+class Crossfade;	
 	
 class SessionPlaylists : public PBD::ScopedConnectionList
 {
@@ -54,6 +55,7 @@ public:
 	void get (std::vector<boost::shared_ptr<Playlist> >&);
 	void unassigned (std::list<boost::shared_ptr<Playlist> > & list);
         void destroy_region (boost::shared_ptr<Region>);
+	boost::shared_ptr<Crossfade> find_crossfade (const PBD::ID &);
 
 private:
 	friend class Session;

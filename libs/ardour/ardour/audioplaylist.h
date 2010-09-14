@@ -91,6 +91,8 @@ public:
 
 	void update (const CrossfadeListProperty::ChangeRecord &);
 
+	boost::shared_ptr<Crossfade> find_crossfade (const PBD::ID &) const;
+	
     protected:
 
 	/* playlist "callbacks" */

@@ -50,6 +50,7 @@ namespace ARDOUR  {
 class Session;
 class Region;
 class Playlist;
+class Crossfade;	
 
 namespace Properties {
         /* fake the type, since regions are handled by SequenceProperty which doesn't
@@ -209,6 +210,10 @@ public:
 	}
 
 	void set_explicit_relayering (bool e);
+
+	virtual boost::shared_ptr<Crossfade> find_crossfade (const PBD::ID &) const {
+		return boost::shared_ptr<Crossfade> ();
+	}
 
   protected:
 	friend class Session;

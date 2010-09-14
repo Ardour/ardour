@@ -717,6 +717,8 @@ Crossfade::get_state ()
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
+	id().print (buf, sizeof (buf));
+	node->add_property ("id", buf);
 	_out->id().print (buf, sizeof (buf));
 	node->add_property ("out", buf);
 	_in->id().print (buf, sizeof (buf));
@@ -773,6 +775,10 @@ Crossfade::set_state (const XMLNode& node, int /*version*/)
 	LocaleGuard lg (X_("POSIX"));
 	PropertyChange what_changed;
 	framepos_t val;
+
+	if ((prop = node.property (X_("id")))) {
+		_id = prop->value();
+	}
 
 	if ((prop = node.property ("position")) != 0) {
 		sscanf (prop->value().c_str(), "%" PRId64, &val);

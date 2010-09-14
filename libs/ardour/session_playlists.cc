@@ -390,3 +390,26 @@ SessionPlaylists::XMLPlaylistFactory (Session& session, const XMLNode& node)
 	}
 }
 
+boost::shared_ptr<Crossfade>
+SessionPlaylists::find_crossfade (const PBD::ID& id)
+{
+	Glib::Mutex::Lock lm (lock);
+
+	boost::shared_ptr<Crossfade> c;
+	
+	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		c = (*i)->find_crossfade (id);
+		if (c) {
+			return c;
+		}
+	}
+
+	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+		c = (*i)->find_crossfade (id);
+		if (c) {
+			return c;
+		}
+	}
+
+	return boost::shared_ptr<Crossfade> ();
+}

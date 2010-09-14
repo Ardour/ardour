@@ -875,3 +875,18 @@ AudioPlaylist::update (const CrossfadeListProperty::ChangeRecord& change)
 
 	/* don't remove crossfades here; they will be dealt with by the dependency code */
 }
+
+boost::shared_ptr<Crossfade>
+AudioPlaylist::find_crossfade (const PBD::ID& id) const
+{
+	Crossfades::const_iterator i = _crossfades.begin ();
+	while (i != _crossfades.end() && (*i)->id() != id) {
+		++i;
+	}
+
+	if (i == _crossfades.end()) {
+		return boost::shared_ptr<Crossfade> ();
+	}
+
+	return *i;
+}
