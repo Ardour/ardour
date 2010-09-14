@@ -2632,8 +2632,6 @@ Route::handle_transport_stopped (bool /*abort_ignored*/, bool did_locate, bool c
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 			if (Config->get_plugins_stop_with_transport() && can_flush_processors) {
-				(*i)->deactivate ();
-				(*i)->activate ();
                                 (*i)->flush ();
 			}
 
