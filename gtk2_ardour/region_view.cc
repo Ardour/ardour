@@ -123,9 +123,9 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                       spu,
                         Gdk::Color const &           basic_color,
-						bool recording,
+			bool                         recording,
                         TimeAxisViewItem::Visibility visibility)
-	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), recording, visibility)
+	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), recording, false, visibility)
 	, _region (r)
 	, sync_mark(0)
 	, sync_line(0)
