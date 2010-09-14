@@ -23,8 +23,7 @@
 
 #include <map>
 #include <list>
-
-#include <glibmm/ustring.h>
+#include <string>
 
 #include "ardour/export_status.h"
 #include "ardour/export_channel.h"
@@ -48,11 +47,11 @@ class ExportTimespan
   public:
 	~ExportTimespan ();
 
-	Glib::ustring name () const { return _name; }
-	void set_name (Glib::ustring name) { _name = name; }
+	std::string name () const { return _name; }
+	void set_name (std::string name) { _name = name; }
 
-	Glib::ustring range_id () const { return _range_id; }
-	void set_range_id (Glib::ustring range_id) { _range_id = range_id; }
+	std::string range_id () const { return _range_id; }
+	void set_range_id (std::string range_id) { _range_id = range_id; }
 
 	void set_range (nframes_t start, nframes_t end);
 	nframes_t get_length () const { return end_frame - start_frame; }
@@ -68,8 +67,8 @@ class ExportTimespan
 	nframes_t      position;
 	nframes_t      frame_rate;
 
-	Glib::ustring _name;
-	Glib::ustring _range_id;
+	std::string _name;
+	std::string _range_id;
 
 };
 

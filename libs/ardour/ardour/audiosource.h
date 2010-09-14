@@ -26,7 +26,6 @@
 #include <time.h>
 
 #include <glibmm/thread.h>
-#include <glibmm/ustring.h>
 #include <boost/function.hpp>
 
 #include "ardour/source.h"
@@ -43,7 +42,7 @@ class AudioSource : virtual public Source,
 		public boost::enable_shared_from_this<ARDOUR::AudioSource>
 {
   public:
-	AudioSource (Session&, Glib::ustring name);
+	AudioSource (Session&, std::string name);
 	AudioSource (Session&, const XMLNode&);
 	virtual ~AudioSource ();
 
@@ -65,8 +64,8 @@ class AudioSource : virtual public Source,
 
 	virtual bool can_truncate_peaks() const { return true; }
 
-	void set_captured_for (Glib::ustring str) { _captured_for = str; }
-	Glib::ustring captured_for() const { return _captured_for; }
+	void set_captured_for (std::string str) { _captured_for = str; }
+	std::string captured_for() const { return _captured_for; }
 
 	uint32_t read_data_count() const { return _read_data_count; }
 	uint32_t write_data_count() const { return _write_data_count; }
@@ -84,7 +83,7 @@ class AudioSource : virtual public Source,
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-	int rename_peakfile (Glib::ustring newpath);
+	int rename_peakfile (std::string newpath);
 	void touch_peakfile ();
 
 	static void set_build_missing_peakfiles (bool yn) {
@@ -114,13 +113,13 @@ class AudioSource : virtual public Source,
 	framecnt_t           _length;
 	bool                 _peaks_built;
 	mutable Glib::Mutex  _peaks_ready_lock;
-	Glib::ustring         peakpath;
-	Glib::ustring        _captured_for;
+	std::string         peakpath;
+	std::string        _captured_for;
 
 	mutable uint32_t _read_data_count;  // modified in read()
 	mutable uint32_t _write_data_count; // modified in write()
 
-	int initialize_peakfile (bool newfile, Glib::ustring path);
+	int initialize_peakfile (bool newfile, std::string path);
 	int build_peaks_from_scratch ();
 	int compute_and_write_peaks (Sample* buf, framepos_t first_frame, framecnt_t cnt,
 	bool force, bool intermediate_peaks_ready_signal);
@@ -130,9 +129,9 @@ class AudioSource : virtual public Source,
 
 	virtual framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const = 0;
 	virtual framecnt_t write_unlocked (Sample *dst, framecnt_t cnt) = 0;
-	virtual Glib::ustring peak_path(Glib::ustring audio_path) = 0;
-	virtual Glib::ustring find_broken_peakfile (Glib::ustring missing_peak_path,
-	                                            Glib::ustring audio_path) = 0;
+	virtual std::string peak_path(std::string audio_path) = 0;
+	virtual std::string find_broken_peakfile (std::string missing_peak_path,
+                                                  std::string audio_path) = 0;
 
 	virtual int read_peaks_with_fpp (PeakData *peaks,
 					 framecnt_t npeaks, framepos_t start, framecnt_t cnt,

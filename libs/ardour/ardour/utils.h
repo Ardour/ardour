@@ -39,7 +39,7 @@ bool string_is_affirmative (const std::string&);
 
 class XMLNode;
 
-Glib::ustring legalize_for_path (Glib::ustring str);
+std::string legalize_for_path (const std::string& str);
 XMLNode* find_named_node (const XMLNode& node, std::string name);
 std::string bool_as_string (bool);
 
@@ -56,11 +56,11 @@ std::string bump_name_once(const std::string& s, char delimiter);
 
 int cmp_nocase (const std::string& s, const std::string& s2);
 
-int touch_file(Glib::ustring path);
+int touch_file(std::string path);
 
-Glib::ustring path_expand (Glib::ustring);
-Glib::ustring region_name_from_path (Glib::ustring path, bool strip_channels, bool add_channel_suffix = false, uint32_t total = 0, uint32_t this_one = 0);
-bool path_is_paired (Glib::ustring path, Glib::ustring& pair_base);
+std::string path_expand (std::string);
+std::string region_name_from_path (std::string path, bool strip_channels, bool add_channel_suffix = false, uint32_t total = 0, uint32_t this_one = 0);
+bool path_is_paired (std::string path, std::string& pair_base);
 
 void compute_equal_power_fades (ARDOUR::nframes_t nframes, float* in, float* out);
 

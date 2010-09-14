@@ -24,6 +24,8 @@
 #include <unistd.h>
 #include <algorithm>
 
+#include <glibmm/ustring.h>
+
 #include <sndfile.h>
 
 #include "pbd/pthread_utils.h"
@@ -94,7 +96,7 @@ Editor::add_external_audio_action (ImportMode mode_hint)
 void
 Editor::external_audio_dialog ()
 {
-	vector<Glib::ustring> paths;
+	vector<string> paths;
 	uint32_t track_cnt;
 
 	if (_session == 0) {
@@ -148,8 +150,11 @@ Editor::external_audio_dialog ()
 
 		/* lets do it */
 
-		paths = sfbrowser->get_paths ();
-
+		vector<ustring> upaths = sfbrowser->get_paths ();
+                for (vector<ustring>::iterator x = upaths.begin(); x != upaths.end(); ++x) {
+                        paths.push_back (*x);
+                }
+                
 		ImportPosition pos = sfbrowser->get_position ();
 		ImportMode mode = sfbrowser->get_mode ();
 		ImportDisposition chns = sfbrowser->get_channel_disposition ();
@@ -322,10 +327,10 @@ Editor::get_nth_selected_midi_track (int nth) const
 }
 
 void
-Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, nframes64_t& pos)
+Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, nframes64_t& pos)
 {
 	boost::shared_ptr<Track> track;
-	vector<ustring> to_import;
+	vector<string> to_import;
 	int nth = 0;
         bool use_timestamp = (pos == -1);
 
@@ -342,7 +347,7 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 		*/
 
 		bool cancel = false;
-		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+		for (vector<string>::iterator a = paths.begin(); a != paths.end(); ++a) {
 			int check = check_whether_and_how_to_import(*a, false);
 			if (check == 2) {
 				cancel = true;
@@ -359,7 +364,7 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
                 bool replace = false;
 		bool ok = true;
 
-		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+		for (vector<string>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
                         const int check = check_whether_and_how_to_import (*a, true);
                         
@@ -423,18 +428,18 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 }
 
 void
-Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
+Editor::do_embed (vector<string> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
 {
 	boost::shared_ptr<Track> track;
 	bool check_sample_rate = true;
 	bool ok = false;
-	vector<ustring> to_embed;
+	vector<string> to_embed;
 	bool multi = paths.size() > 1;
 	int nth = 0;
 
 	switch (chns) {
 	case Editing::ImportDistinctFiles:
-		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+		for (vector<string>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
 			to_embed.clear ();
 			to_embed.push_back (*a);
@@ -450,7 +455,7 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
 		break;
 
 	case Editing::ImportDistinctChannels:
-		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+		for (vector<string>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
 			to_embed.clear ();
 			to_embed.push_back (*a);
@@ -468,7 +473,7 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
                 break;
 
 	case Editing::ImportSerializeFiles:
-		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+		for (vector<string>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
 			to_embed.clear ();
 			to_embed.push_back (*a);
@@ -489,7 +494,7 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
 }
 
 int
-Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality quality, nframes64_t& pos,
+Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quality, nframes64_t& pos,
 			 int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool replace)
 {
 	import_status.paths = paths;
@@ -546,7 +551,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 }
 
 int
-Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
+Editor::embed_sndfiles (vector<string> paths, bool multifile,
 			bool& check_sample_rate, ImportMode mode, nframes64_t& pos, int target_regions, int target_tracks,
 			boost::shared_ptr<Track>& track)
 {
@@ -555,14 +560,14 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 	string linked_path;
 	SoundFileInfo finfo;
 	int ret = 0;
-	Glib::ustring path_to_use;
+	string path_to_use;
 
 	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	gdk_flush ();
 
-	for (vector<Glib::ustring>::iterator p = paths.begin(); p != paths.end(); ++p) {
+	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
 
-		ustring path = *p;
+		string path = *p;
 
 		if (Config->get_try_link_for_embed()) {
 
@@ -714,11 +719,11 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 }
 
 int
-Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64_t& pos, ImportMode mode,
+Editor::add_sources (vector<string> paths, SourceList& sources, nframes64_t& pos, ImportMode mode,
 		     int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool /*add_channel_suffix*/)
 {
 	vector<boost::shared_ptr<Region> > regions;
-	ustring region_name;
+	string region_name;
 	uint32_t input_chan = 0;
 	uint32_t output_chan = 0;
 	bool use_timestamp;

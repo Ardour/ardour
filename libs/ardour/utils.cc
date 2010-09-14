@@ -39,6 +39,7 @@
 #include <errno.h>
 
 #include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
 
 #ifdef HAVE_WORDEXP
 #include <wordexp.h>
@@ -48,6 +49,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
 #include "pbd/basename.h"
+#include "pbd/strsplit.h"
 #include "ardour/utils.h"
 
 #include "i18n.h"
@@ -55,14 +57,14 @@
 using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
-using Glib::ustring;
 
-ustring
-legalize_for_path (ustring str)
+string
+legalize_for_path (const string& str)
 {
-	ustring::size_type pos;
-	ustring legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+=: ";
-	ustring legal;
+#if OLD_SCHOOL_PROHIBITIVE
+	string::size_type pos;
+	string legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+=: ";
+	string legal;
 
 	legal = str;
 	pos = 0;
@@ -73,6 +75,21 @@ legalize_for_path (ustring str)
 	}
 
 	return legal;
+#else
+	string::size_type pos;
+	string illegal_chars = "/\\"; /* DOS, POSIX. Yes, we're going to ignore HFS */
+	string legal;
+
+	legal = str;
+	pos = 0;
+
+	while ((pos = legal.find_first_of (illegal_chars, pos)) != string::npos) {
+		legal.replace (pos, 1, "_");
+		pos += 1;
+	}
+
+	return legal;
+#endif
 }
 
 string 
@@ -117,6 +134,46 @@ bump_name_once (const std::string& name, char delimiter)
 
 }
 
+bool
+could_be_a_valid_path (const string& path)
+{
+        vector<string> posix_dirs;
+        vector<string> dos_dirs;
+        string testpath;
+
+        split (path, posix_dirs, '/');
+        split (path, dos_dirs, '\\');
+
+        /* remove the last component of each */
+
+        posix_dirs.erase (--posix_dirs.end());
+        dos_dirs.erase (--dos_dirs.end());
+        
+        if (G_DIR_SEPARATOR == '/') {
+                for (vector<string>::iterator x = posix_dirs.begin(); x != posix_dirs.end(); ++x) {
+                        testpath = Glib::build_filename (testpath, *x);
+                        cerr << "Testing " << testpath << endl;
+                        if (!Glib::file_test (testpath, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
+                                return false;
+                        }
+                }
+        }
+
+        if (G_DIR_SEPARATOR == '\\') {
+                testpath = "";
+                for (vector<string>::iterator x = dos_dirs.begin(); x != dos_dirs.end(); ++x) {
+                        testpath = Glib::build_filename (testpath, *x);
+                        cerr << "Testing " << testpath << endl;
+                        if (!Glib::file_test (testpath, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
+                                return false;
+                        }
+                }
+        }
+
+        return true;
+}
+
+
 XMLNode *
 find_named_node (const XMLNode& node, string name)
 {
@@ -156,7 +213,7 @@ cmp_nocase (const string& s, const string& s2)
 }
 
 int
-touch_file (ustring path)
+touch_file (string path)
 {
 	int fd = open (path.c_str(), O_RDWR|O_CREAT, 0660);
 	if (fd >= 0) {
@@ -166,8 +223,8 @@ touch_file (ustring path)
 	return 1;
 }
 
-ustring
-region_name_from_path (ustring path, bool strip_channels, bool add_channel_suffix, uint32_t total, uint32_t this_one)
+string
+region_name_from_path (string path, bool strip_channels, bool add_channel_suffix, uint32_t total, uint32_t this_one)
 {
 	path = PBD::basename_nosuffix (path);
 
@@ -175,7 +232,7 @@ region_name_from_path (ustring path, bool strip_channels, bool add_channel_suffi
 
 		/* remove any "?R", "?L" or "?[a-z]" channel identifier */
 
-		ustring::size_type len = path.length();
+		string::size_type len = path.length();
 
 		if (len > 3 && (path[len-2] == '%' || path[len-2] == '?' || path[len-2] == '.') &&
 		    (path[len-1] == 'R' || path[len-1] == 'L' || (islower (path[len-1])))) {
@@ -199,9 +256,9 @@ region_name_from_path (ustring path, bool strip_channels, bool add_channel_suffi
 }
 
 bool
-path_is_paired (ustring path, ustring& pair_base)
+path_is_paired (string path, string& pair_base)
 {
-	ustring::size_type pos;
+	string::size_type pos;
 
 	/* remove any leading path */
 
@@ -215,7 +272,7 @@ path_is_paired (ustring path, ustring& pair_base)
 		path = path.substr (0, pos);
 	}
 
-	ustring::size_type len = path.length();
+	string::size_type len = path.length();
 
 	/* look for possible channel identifier: "?R", "%R", ".L" etc. */
 
@@ -230,8 +287,8 @@ path_is_paired (ustring path, ustring& pair_base)
 	return false;
 }
 
-ustring
-path_expand (ustring path)
+string
+path_expand (string path)
 {
 #ifdef HAVE_WORDEXP
 	/* Handle tilde and environment variable expansion in session path */

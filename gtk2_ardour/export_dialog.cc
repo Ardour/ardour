@@ -33,6 +33,7 @@
 
 using namespace ARDOUR;
 using namespace PBD;
+using std::string;
 
 ExportDialog::ExportDialog (PublicEditor & editor, Glib::ustring title) :
   ArdourDialog (title),
@@ -243,18 +244,18 @@ ExportDialog::update_warnings ()
 
 	boost::shared_ptr<ExportProfileManager::Warnings> warnings = profile_manager->get_warnings();
 
-	for (std::list<Glib::ustring>::iterator it = warnings->errors.begin(); it != warnings->errors.end(); ++it) {
+	for (std::list<string>::iterator it = warnings->errors.begin(); it != warnings->errors.end(); ++it) {
 		add_error (*it);
 	}
 
-	for (std::list<Glib::ustring>::iterator it = warnings->warnings.begin(); it != warnings->warnings.end(); ++it) {
+	for (std::list<string>::iterator it = warnings->warnings.begin(); it != warnings->warnings.end(); ++it) {
 		add_warning (*it);
 	}
 
 	if (!warnings->conflicting_filenames.empty()) {
 		list_files_hbox.show ();
-		for (std::list<Glib::ustring>::iterator it = warnings->conflicting_filenames.begin(); it != warnings->conflicting_filenames.end(); ++it) {
-			Glib::ustring::size_type pos = it->find_last_of ("/");
+		for (std::list<string>::iterator it = warnings->conflicting_filenames.begin(); it != warnings->conflicting_filenames.end(); ++it) {
+			string::size_type pos = it->find_last_of ("/");
 			list_files_string += "\n" + it->substr (0, pos + 1) + "<b>" + it->substr (pos + 1) + "</b>";
 		}
 	}
@@ -350,7 +351,7 @@ ExportDialog::progress_timeout ()
 }
 
 void
-ExportDialog::add_error (Glib::ustring const & text)
+ExportDialog::add_error (string const & text)
 {
 	fast_export_button->set_sensitive (false);
 	//rt_export_button->set_sensitive (false);
@@ -365,7 +366,7 @@ ExportDialog::add_error (Glib::ustring const & text)
 }
 
 void
-ExportDialog::add_warning (Glib::ustring const & text)
+ExportDialog::add_warning (string const & text)
 {
 	if (warn_string.empty()) {
 		warn_string = _("<span color=\"#ffa755\">Warning: ") + text + "</span>";
@@ -378,7 +379,7 @@ ExportDialog::add_warning (Glib::ustring const & text)
 
 /*** Dialog specializations ***/
 
-ExportRangeDialog::ExportRangeDialog (PublicEditor & editor, Glib::ustring range_id) :
+ExportRangeDialog::ExportRangeDialog (PublicEditor & editor, string range_id) :
   ExportDialog (editor, _("Export Range")),
   range_id (range_id)
 {}
@@ -422,7 +423,7 @@ ExportRegionDialog::init_gui ()
 void
 ExportRegionDialog::init_components ()
 {
-	Glib::ustring loc_id = profile_manager->set_single_range (region.position(), region.position() + region.length(), region.name());
+	string loc_id = profile_manager->set_single_range (region.position(), region.position() + region.length(), region.name());
 
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorSingle (_session, profile_manager, loc_id));

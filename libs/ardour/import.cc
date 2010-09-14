@@ -240,7 +240,7 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 	return true;
 }
 
-static Glib::ustring
+static string
 compose_status_message (const string& path,
 			uint file_samplerate,
 			uint session_samplerate,
@@ -448,7 +448,7 @@ Session::import_audiofiles (ImportStatus& status)
 
 	status.sources.clear ();
 
-	for (vector<Glib::ustring>::iterator p = status.paths.begin();
+	for (vector<string>::iterator p = status.paths.begin();
 	     p != status.paths.end() && !status.cancel;
 	     ++p)
 	{

@@ -21,6 +21,7 @@
 #ifndef __ardour_export_format_compatibility_h__
 #define __ardour_export_format_compatibility_h__
 
+#include <string>
 #include "ardour/export_format_base.h"
 
 namespace ARDOUR
@@ -31,7 +32,7 @@ class ExportFormatCompatibility : public ExportFormatBase, public ExportFormatBa
   private:
 
   public:
-	ExportFormatCompatibility (Glib::ustring name)
+        ExportFormatCompatibility (std::string name)
 	{
 		set_name (name);
 		sample_formats.insert (SF_None);

@@ -31,10 +31,10 @@ namespace ARDOUR {
 class SndFileSource : public AudioFileSource {
   public:
 	/** Constructor to be called for existing external-to-session files */
-	SndFileSource (Session&, const Glib::ustring& path, int chn, Flag flags);
+	SndFileSource (Session&, const std::string& path, int chn, Flag flags);
 
 	/* Constructor to be called for new in-session files */
-	SndFileSource (Session&, const Glib::ustring& path, 
+	SndFileSource (Session&, const std::string& path, 
 			SampleFormat samp_format, HeaderFormat hdr_format, nframes_t rate,
 			Flag flags = SndFileSource::default_writable_flags);
 
@@ -63,7 +63,7 @@ class SndFileSource : public AudioFileSource {
 	static void setup_standard_crossfades (Session const &, nframes_t sample_rate);
 	static const Source::Flag default_writable_flags;
 
-	static int get_soundfile_info (const Glib::ustring& path, SoundFileInfo& _info, std::string& error_msg);
+	static int get_soundfile_info (const std::string& path, SoundFileInfo& _info, std::string& error_msg);
 
   protected:
         void set_path (const std::string& p);

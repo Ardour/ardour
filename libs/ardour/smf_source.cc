@@ -50,7 +50,7 @@ using namespace Glib;
 using namespace PBD;
 
 /** Constructor used for new internal-to-session files.  File cannot exist. */
-SMFSource::SMFSource (Session& s, const ustring& path, Source::Flag flags)
+SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 	: Source(s, DataType::MIDI, path, flags)
 	, MidiSource(s, path)
 	, FileSource(s, DataType::MIDI, path, flags)
@@ -416,9 +416,9 @@ SMFSource::mark_streaming_write_completed ()
 }
 
 bool
-SMFSource::safe_midi_file_extension (const Glib::ustring& file)
+SMFSource::safe_midi_file_extension (const string& file)
 {
-	return (file.rfind(".mid") != Glib::ustring::npos);
+	return (file.rfind(".mid") != string::npos);
 }
 
 void

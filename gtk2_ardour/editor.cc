@@ -3223,7 +3223,7 @@ Editor::setup_midi_toolbar ()
 
 int
 Editor::convert_drop_to_paths (
-		vector<ustring>&                paths,
+		vector<string>&                paths,
 		const RefPtr<Gdk::DragContext>& /*context*/,
 		gint                            /*x*/,
 		gint                            /*y*/,
@@ -3234,7 +3234,7 @@ Editor::convert_drop_to_paths (
 	if (_session == 0) {
 		return -1;
 	}
-
+        
 	vector<ustring> uris = data.get_uris();
 
 	if (uris.empty()) {

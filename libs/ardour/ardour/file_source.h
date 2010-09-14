@@ -34,55 +34,55 @@ public:
 /** A source associated with a file on disk somewhere */
 class FileSource : virtual public Source {
 public:
-	const Glib::ustring& path() const { return _path; }
+	const std::string& path() const { return _path; }
         
         int  unstubify ();
         void stubify ();
 
-	virtual bool safe_file_extension (const Glib::ustring& path) const = 0;
+	virtual bool safe_file_extension (const std::string& path) const = 0;
 
-	int  move_to_trash (const Glib::ustring& trash_dir_name);
-	void mark_take (const Glib::ustring& id);
+	int  move_to_trash (const std::string& trash_dir_name);
+	void mark_take (const std::string& id);
 	void mark_immutable ();
 	void mark_nonremovable ();
 
-	const Glib::ustring& take_id ()        const { return _take_id; }
+	const std::string& take_id ()        const { return _take_id; }
 	bool                 within_session () const { return _within_session; }
 	uint16_t             channel()         const { return _channel; }
 
 	int set_state (const XMLNode&, int version);
 
-	int set_source_name (const Glib::ustring& newname, bool destructive);
+	int set_source_name (const std::string& newname, bool destructive);
 
-	static void set_search_path (DataType type, const Glib::ustring& path);
+	static void set_search_path (DataType type, const std::string& path);
 
-	static bool find (DataType type, const Glib::ustring& path,
+	static bool find (DataType type, const std::string& path,
 			bool must_exist, bool& is_new, uint16_t& chan,
-			Glib::ustring& found_path);
+			std::string& found_path);
 
         void inc_use_count ();
 	bool removable () const;
 
 protected:
 	FileSource (Session& session, DataType type,
-			const Glib::ustring& path, 
+			const std::string& path, 
 			Source::Flag flags = Source::Flag(0));
 
 	FileSource (Session& session, const XMLNode& node, bool must_exist);
 
-	virtual int init (const Glib::ustring& idstr, bool must_exist);
+	virtual int init (const std::string& idstr, bool must_exist);
 
         virtual void set_path (const std::string&);
 	virtual int move_dependents_to_trash() { return 0; }
 	void set_within_session_from_path (const std::string&);
 
-	Glib::ustring _path;
-	Glib::ustring _take_id;
+	std::string _path;
+	std::string _take_id;
 	bool          _file_is_new;
 	uint16_t      _channel;
 	bool          _within_session;
 
-	static std::map<DataType, Glib::ustring> search_paths;
+	static std::map<DataType, std::string> search_paths;
 };
 
 } // namespace ARDOUR

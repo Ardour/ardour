@@ -118,6 +118,8 @@ sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void,nframes_t, bool, nframes_t> ARDOUR_UI::Clock;
 
+bool could_be_a_valid_path (const string& path);
+
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp),
@@ -2465,9 +2467,9 @@ ARDOUR_UI::loading_message (const std::string& /*msg*/)
 int
 ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, string load_template)
 {
-	Glib::ustring session_name;
-	Glib::ustring session_path;
-	Glib::ustring template_name;
+	string session_name;
+	string session_path;
+	string template_name;
 	int ret = -1;
 	bool likely_new = false;
 
@@ -2496,6 +2498,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		} else {
 
 			bool const apply = run_startup (should_be_new, load_template);
+
 			if (!apply) {
 				if (quit_on_cancel) {
 					exit (1);
@@ -2513,16 +2516,17 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			/* this shouldn't happen, but we catch it just in case it does */
 
 			if (session_name.empty()) {
-				break;
+				continue;
 			}
+
 			if (_startup->use_session_template()) {
 				template_name = _startup->session_template_name();
 				_session_is_new = true;
 			}
 
-			if (session_name[0] == '/' ||
-			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
-			    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
+			if (session_name[0] == G_DIR_SEPARATOR ||
+			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == G_DIR_SEPARATOR) ||
+			    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == G_DIR_SEPARATOR)) {
 
                                 /* absolute path or cwd-relative path specified for session name: infer session folder
                                    from what was given.
@@ -2534,6 +2538,22 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			} else {
 
 				session_path = _startup->session_folder();
+
+                                if (session_name.find ('/') != string::npos) {
+                                        MessageDialog msg (*_startup, _("To ensure compatibility with various systems\n"
+                                                                        "session names may not contain a '/' character"));
+                                        msg.run ();
+                                        ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
+                                        continue;
+                                }
+                                
+                                if (session_name.find ('\\') != string::npos) {
+                                        MessageDialog msg (*_startup, _("To ensure compatibility with various systems\n"
+                                                                        "session names may not contain a '\\' character"));
+                                        msg.run ();
+                                        ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
+                                        continue;
+                                }
 			}
 		}
 

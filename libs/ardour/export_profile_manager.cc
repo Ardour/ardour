@@ -307,7 +307,7 @@ ExportProfileManager::set_selection_range (nframes_t start, nframes_t end)
 }
 
 std::string
-ExportProfileManager::set_single_range (nframes_t start, nframes_t end, Glib::ustring name)
+ExportProfileManager::set_single_range (nframes_t start, nframes_t end, string name)
 {
 	single_range_mode = true;
 
@@ -361,7 +361,7 @@ ExportProfileManager::deserialize_timespan (XMLNode & root)
 
 		prop = (*node_it)->property ("id");
 		if (!prop) { continue; }
-		ustring id = prop->value();
+		string id = prop->value();
 
 		for (LocationList::iterator it = ranges->begin(); it != ranges->end(); ++it) {
 			if ((!id.compare ("session") && *it == session_range.get()) ||
@@ -494,7 +494,7 @@ ExportProfileManager::save_format_to_disk (FormatPtr format)
 
 	/* Get filename for file */
 
-	Glib::ustring new_name = format->name();
+	string new_name = format->name();
 	new_name += export_format_suffix;
 
 	sys::path new_path (export_config_dir);
@@ -777,7 +777,7 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 			for (uint32_t chan = 1; chan <= channel_config->get_n_chans(); ++chan) {
 				filename->set_channel (chan);
 
-				Glib::ustring path = filename->get_path (format);
+				string path = filename->get_path (format);
 
 				if (sys::exists (sys::path (path))) {
 					warnings->conflicting_filenames.push_back (path);
@@ -785,7 +785,7 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 			}
 
 		} else {
-			Glib::ustring path = filename->get_path (format);
+			string path = filename->get_path (format);
 
 			if (sys::exists (sys::path (path))) {
 				warnings->conflicting_filenames.push_back (path);

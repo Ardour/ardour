@@ -16,11 +16,13 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <glibmm/ustring.h>
+#include <string>
 
 #include "ardour/port_set.h"
 #include "ardour/midi_port.h"
 #include "ardour/audio_port.h"
+
+using std::string;
 
 namespace ARDOUR {
 
@@ -32,18 +34,18 @@ PortSet::PortSet()
 
 static bool sort_ports_by_name (Port* a, Port* b)
 {
-        Glib::ustring aname (a->name());
-        Glib::ustring bname (b->name());
+        string aname (a->name());
+        string bname (b->name());
         
-        Glib::ustring::size_type last_digit_position_a = aname.size();
-        Glib::ustring::reverse_iterator r_iterator = aname.rbegin();
+        string::size_type last_digit_position_a = aname.size();
+        string::reverse_iterator r_iterator = aname.rbegin();
         
         while (r_iterator!= aname.rend() && Glib::Unicode::isdigit(*r_iterator)) {
                 r_iterator++; 
                 last_digit_position_a--;
         }
         
-        Glib::ustring::size_type last_digit_position_b = bname.size();
+        string::size_type last_digit_position_b = bname.size();
         r_iterator = bname.rbegin();
         
         while (r_iterator != bname.rend() && Glib::Unicode::isdigit(*r_iterator)) {

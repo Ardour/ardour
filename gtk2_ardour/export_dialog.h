@@ -22,6 +22,7 @@
 #define __export_dialog_h__
 
 #include <boost/scoped_ptr.hpp>
+#include <string>
 
 #include "ardour/export_profile_manager.h"
 
@@ -120,8 +121,8 @@ class ExportDialog : public ArdourDialog {
 	Gtk::Button         list_files_button;
 	Glib::ustring       list_files_string;
 
-	void add_error (Glib::ustring const & text);
-	void add_warning (Glib::ustring const & text);
+	void add_error (std::string const & text);
+	void add_warning (std::string const & text);
 
 	/* Progress bar */
 
@@ -140,12 +141,12 @@ class ExportDialog : public ArdourDialog {
 class ExportRangeDialog : public ExportDialog
 {
   public:
-	ExportRangeDialog (PublicEditor & editor, Glib::ustring range_id);
+	ExportRangeDialog (PublicEditor & editor, std::string range_id);
 
   private:
 	void init_components ();
-
-	Glib::ustring range_id;
+        
+        std::string range_id;
 };
 
 class ExportSelectionDialog : public ExportDialog

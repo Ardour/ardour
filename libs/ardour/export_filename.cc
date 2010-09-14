@@ -18,6 +18,7 @@
 
 */
 
+#include <string>
 #include "ardour/export_filename.h"
 
 #include "pbd/xml++.h"
@@ -35,6 +36,7 @@
 
 using namespace PBD;
 using namespace Glib;
+using std::string;
 
 namespace ARDOUR
 {
@@ -136,10 +138,10 @@ ExportFilename::set_state (const XMLNode & node)
 	return 0;
 }
 
-ustring
+string
 ExportFilename::get_path (FormatPtr format) const
 {
-	ustring path = folder;
+	string path = folder;
 	bool filename_empty = true;
 
 	path += "/";
@@ -200,7 +202,7 @@ ExportFilename::get_path (FormatPtr format) const
 	return path;
 }
 
-ustring
+string
 ExportFilename::get_time_format_str (TimeFormat format) const
 {
 	switch ( format ) {
@@ -218,7 +220,7 @@ ExportFilename::get_time_format_str (TimeFormat format) const
 	}
 }
 
-ustring
+string
 ExportFilename::get_date_format_str (DateFormat format) const
 {
 	switch (format) {
@@ -267,32 +269,32 @@ ExportFilename::set_date_format (DateFormat format)
 }
 
 void
-ExportFilename::set_label (ustring value)
+ExportFilename::set_label (string value)
 {
 	label = value;
 	include_label = !value.compare ("");
 }
 
 bool
-ExportFilename::set_folder (ustring path)
+ExportFilename::set_folder (string path)
 {
 	// TODO check folder existence
 	folder = path;
 	return true;
 }
 
-ustring
-ExportFilename::get_formatted_time (ustring const & format) const
+string
+ExportFilename::get_formatted_time (string const & format) const
 {
 	char buffer [80];
 	strftime (buffer, 80, format.c_str(), time_struct);
 
-	ustring return_value (buffer);
+	string return_value (buffer);
 	return return_value;
 }
 
 void
-ExportFilename::add_field (XMLNode * node, ustring const & name, bool enabled, ustring const & value)
+ExportFilename::add_field (XMLNode * node, string const & name, bool enabled, string const & value)
 {
 	XMLNode * child = node->add_child ("Field");
 
@@ -309,7 +311,7 @@ ExportFilename::add_field (XMLNode * node, ustring const & name, bool enabled, u
 }
 
 ExportFilename::FieldPair
-ExportFilename::get_field (XMLNode const & node, ustring const & name)
+ExportFilename::get_field (XMLNode const & node, string const & name)
 {
 	FieldPair pair;
 	pair.first = false;
@@ -344,10 +346,10 @@ ExportFilename::analyse_folder ()
 {
 	FieldPair pair;
 
-	ustring session_dir = session.session_directory().root_path().to_string();
-	ustring::size_type session_dir_len = session_dir.length();
+	string session_dir = session.session_directory().root_path().to_string();
+	string::size_type session_dir_len = session_dir.length();
 
-	ustring folder_beginning = folder.substr (0, session_dir_len);
+	string folder_beginning = folder.substr (0, session_dir_len);
 
 	if (!folder_beginning.compare (session_dir)) {
 		pair.first = true;

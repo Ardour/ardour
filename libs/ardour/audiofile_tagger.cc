@@ -31,8 +31,8 @@
 #include "taglib/taglib.h"
 #include "taglib/xiphcomment.h"
 
-/* Convert Glib::ustring to TagLib::String */
-#define TL_STR(ustring) TagLib::String ((ustring).c_str(), TagLib::String::UTF8)
+/* Convert string to TagLib::String */
+#define TL_STR(string) TagLib::String ((string).c_str(), TagLib::String::UTF8)
 
 using namespace PBD;
 

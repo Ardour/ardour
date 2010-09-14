@@ -68,7 +68,7 @@ HasSampleFormat::add_sample_format (ExportFormatBase::SampleFormat format)
 }
 
 void
-HasSampleFormat::add_dither_type (ExportFormatBase::DitherType type, Glib::ustring name)
+HasSampleFormat::add_dither_type (ExportFormatBase::DitherType type, string name)
 {
 	DitherTypePtr ptr (new DitherTypeState (type, name));
 	dither_type_states.push_back (ptr);
@@ -179,7 +179,7 @@ HasSampleFormat::get_sample_format_name (ExportFormatBase::SampleFormat format)
 
 /*** Linear ***/
 
-ExportFormatLinear::ExportFormatLinear (Glib::ustring name, FormatId format_id) :
+ExportFormatLinear::ExportFormatLinear (string name, FormatId format_id) :
   HasSampleFormat (sample_formats),
   _default_sample_format (SF_None)
 {

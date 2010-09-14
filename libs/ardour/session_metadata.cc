@@ -88,9 +88,9 @@ SessionMetadata::~SessionMetadata ()
 }
 
 XMLNode *
-SessionMetadata::get_xml (const ustring & name)
+SessionMetadata::get_xml (const string & name)
 {
-	ustring value = get_value (name);
+	string value = get_value (name);
 	if (value.empty()) {
 		return 0;
 	}
@@ -102,8 +102,8 @@ SessionMetadata::get_xml (const ustring & name)
 	return node;
 }
 
-ustring
-SessionMetadata::get_value (const ustring & name) const
+string
+SessionMetadata::get_value (const string & name) const
 {
 	PropertyMap::const_iterator it = map.find (name);
 	if (it == map.end()) {
@@ -116,13 +116,13 @@ SessionMetadata::get_value (const ustring & name) const
 }
 
 uint32_t
-SessionMetadata::get_uint_value (const ustring & name) const
+SessionMetadata::get_uint_value (const string & name) const
 {
 	return atoi (get_value (name).c_str());
 }
 
 void
-SessionMetadata::set_value (const ustring & name, const ustring & value)
+SessionMetadata::set_value (const string & name, const string & value)
 {
 	PropertyMap::iterator it = map.find (name);
 	if (it == map.end()) {
@@ -135,7 +135,7 @@ SessionMetadata::set_value (const ustring & name, const ustring & value)
 }
 
 void
-SessionMetadata::set_value (const ustring & name, uint32_t value)
+SessionMetadata::set_value (const string & name, uint32_t value)
 {
 	std::ostringstream oss;
 	oss << value;
@@ -166,8 +166,8 @@ int
 SessionMetadata::set_state (const XMLNode & state, int /*version*/)
 {
 	const XMLNodeList & children = state.children();
-	ustring name;
-	ustring value;
+	string name;
+	string value;
 	XMLNode * node;
 
 	for (XMLNodeConstIterator it = children.begin(); it != children.end(); it++) {
@@ -187,19 +187,19 @@ SessionMetadata::set_state (const XMLNode & state, int /*version*/)
 }
 
 /*** Accessing ***/
-ustring
+string
 SessionMetadata::comment () const
 {
 	return get_value("comment");
 }
 
-ustring
+string
 SessionMetadata::copyright () const
 {
 	return get_value("copyright");
 }
 
-ustring
+string
 SessionMetadata::isrc () const
 {
 	return get_value("isrc");
@@ -211,103 +211,103 @@ SessionMetadata::year () const
 	return get_uint_value("year");
 }
 
-ustring
+string
 SessionMetadata::grouping () const
 {
 	return get_value("grouping");
 }
 
-ustring
+string
 SessionMetadata::title () const
 {
 	return get_value("title");
 }
 
-ustring
+string
 SessionMetadata::subtitle () const
 {
 	return get_value("subtitle");
 }
 
-ustring
+string
 SessionMetadata::artist () const
 {
 	return get_value("artist");
 }
 
-ustring
+string
 SessionMetadata::album_artist () const
 {
 	return get_value("album_artist");
 }
 
-ustring
+string
 SessionMetadata::lyricist () const
 {
 	return get_value("lyricist");
 }
 
-ustring
+string
 SessionMetadata::composer () const
 {
 	return get_value("composer");
 }
 
-ustring
+string
 SessionMetadata::conductor () const
 {
 	return get_value("conductor");
 }
 
-ustring
+string
 SessionMetadata::remixer () const
 {
 	return get_value("remixer");
 }
 
-ustring
+string
 SessionMetadata::arranger () const
 {
 	return get_value("arranger");
 }
 
-ustring
+string
 SessionMetadata::engineer () const
 {
 	return get_value("engineer");
 }
 
-ustring
+string
 SessionMetadata::producer () const
 {
 	return get_value("producer");
 }
 
-ustring
+string
 SessionMetadata::dj_mixer () const
 {
 	return get_value("dj_mixer");
 }
 
-ustring
+string
 SessionMetadata::mixer () const
 {
 	return get_value("mixer");
 }
 
-ustring
+string
 SessionMetadata::album () const
 {
 	return get_value("album");
 }
 
-ustring
+string
 SessionMetadata::compilation () const
 {
 	return get_value("compilation");
 }
 
-ustring
+string
 SessionMetadata::disc_subtitle () const
 {
 	return get_value("disc_subtitle");
@@ -337,7 +337,7 @@ SessionMetadata::total_tracks () const
 	return get_uint_value("total_tracks");
 }
 
-ustring
+string
 SessionMetadata::genre () const
 {
 	return get_value("genre");
@@ -345,19 +345,19 @@ SessionMetadata::genre () const
 
 /*** Editing ***/
 void
-SessionMetadata::set_comment (const ustring & v)
+SessionMetadata::set_comment (const string & v)
 {
 	set_value ("comment", v);
 }
 
 void
-SessionMetadata::set_copyright (const ustring & v)
+SessionMetadata::set_copyright (const string & v)
 {
 	set_value ("copyright", v);
 }
 
 void
-SessionMetadata::set_isrc (const ustring & v)
+SessionMetadata::set_isrc (const string & v)
 {
 	set_value ("isrc", v);
 }
@@ -369,103 +369,103 @@ SessionMetadata::set_year (uint32_t v)
 }
 
 void
-SessionMetadata::set_grouping (const ustring & v)
+SessionMetadata::set_grouping (const string & v)
 {
 	set_value ("grouping", v);
 }
 
 void
-SessionMetadata::set_title (const ustring & v)
+SessionMetadata::set_title (const string & v)
 {
 	set_value ("title", v);
 }
 
 void
-SessionMetadata::set_subtitle (const ustring & v)
+SessionMetadata::set_subtitle (const string & v)
 {
 	set_value ("subtitle", v);
 }
 
 void
-SessionMetadata::set_artist (const ustring & v)
+SessionMetadata::set_artist (const string & v)
 {
 	set_value ("artist", v);
 }
 
 void
-SessionMetadata::set_album_artist (const ustring & v)
+SessionMetadata::set_album_artist (const string & v)
 {
 	set_value ("album_artist", v);
 }
 
 void
-SessionMetadata::set_lyricist (const ustring & v)
+SessionMetadata::set_lyricist (const string & v)
 {
 	set_value ("lyricist", v);
 }
 
 void
-SessionMetadata::set_composer (const ustring & v)
+SessionMetadata::set_composer (const string & v)
 {
 	set_value ("composer", v);
 }
 
 void
-SessionMetadata::set_conductor (const ustring & v)
+SessionMetadata::set_conductor (const string & v)
 {
 	set_value ("conductor", v);
 }
 
 void
-SessionMetadata::set_remixer (const ustring & v)
+SessionMetadata::set_remixer (const string & v)
 {
 	set_value ("remixer", v);
 }
 
 void
-SessionMetadata::set_arranger (const ustring & v)
+SessionMetadata::set_arranger (const string & v)
 {
 	set_value ("arranger", v);
 }
 
 void
-SessionMetadata::set_engineer (const ustring & v)
+SessionMetadata::set_engineer (const string & v)
 {
 	set_value ("engineer", v);
 }
 
 void
-SessionMetadata::set_producer (const ustring & v)
+SessionMetadata::set_producer (const string & v)
 {
 	set_value ("producer", v);
 }
 
 void
-SessionMetadata::set_dj_mixer (const ustring & v)
+SessionMetadata::set_dj_mixer (const string & v)
 {
 	set_value ("dj_mixer", v);
 }
 
 void
-SessionMetadata::set_mixer (const ustring & v)
+SessionMetadata::set_mixer (const string & v)
 {
 	set_value ("mixer", v);
 }
 
 void
-SessionMetadata::set_album (const ustring & v)
+SessionMetadata::set_album (const string & v)
 {
 	set_value ("album", v);
 }
 
 void
-SessionMetadata::set_compilation (const ustring & v)
+SessionMetadata::set_compilation (const string & v)
 {
 	set_value ("compilation", v);
 }
 
 void
-SessionMetadata::set_disc_subtitle (const ustring & v)
+SessionMetadata::set_disc_subtitle (const string & v)
 {
 	set_value ("disc_subtitle", v);
 }
@@ -495,7 +495,7 @@ SessionMetadata::set_total_tracks (uint32_t v)
 }
 
 void
-SessionMetadata::set_genre (const ustring & v)
+SessionMetadata::set_genre (const string & v)
 {
 	set_value ("genre", v);
 }

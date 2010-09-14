@@ -25,10 +25,10 @@
 #include <vector>
 #include <map>
 #include <stdexcept>
+#include <string>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
-#include <glibmm/ustring.h>
 
 #include "pbd/uuid.h"
 #include "pbd/file_utils.h"
@@ -137,7 +137,7 @@ class ExportProfileManager
 	typedef std::list<TimespanStatePtr> TimespanStateList;
 
 	void set_selection_range (nframes_t start = 0, nframes_t end = 0);
-	std::string set_single_range (nframes_t start, nframes_t end, Glib::ustring name);
+	std::string set_single_range (nframes_t start, nframes_t end, std::string name);
 	TimespanStateList const & get_timespans () { return check_list (timespans); }
 
   private:
@@ -250,9 +250,9 @@ class ExportProfileManager
 /* Warnings */
   public:
 	struct Warnings {
-		std::list<Glib::ustring> errors;
-		std::list<Glib::ustring> warnings;
-		std::list<Glib::ustring> conflicting_filenames;
+		std::list<std::string> errors;
+		std::list<std::string> warnings;
+		std::list<std::string> conflicting_filenames;
 	};
 
 	boost::shared_ptr<Warnings> get_warnings ();

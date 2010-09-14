@@ -1119,7 +1119,7 @@ EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 				   const SelectionData& data,
 				   guint info, guint time)
 {
-	vector<ustring> paths;
+	vector<string> paths;
 
 	if (data.get_target() == "GTK_TREE_MODEL_ROW") {
 		/* something is being dragged over the region list */

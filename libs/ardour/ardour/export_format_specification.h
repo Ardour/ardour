@@ -21,7 +21,7 @@
 #ifndef __ardour_export_format_specification_h__
 #define __ardour_export_format_specification_h__
 
-#include <glibmm/ustring.h>
+#include <string>
 
 #include "pbd/uuid.h"
 
@@ -76,7 +76,7 @@ class ExportFormatSpecification : public ExportFormatBase {
 
 	void set_format (boost::shared_ptr<ExportFormat> format);
 
-	void set_name (Glib::ustring const & name) { _name = name; }
+	void set_name (std::string const & name) { _name = name; }
 
 	void set_type (Type type) { _type = type; }
 	void set_format_id (FormatId value) { format_ids.clear(); format_ids.insert (value); }
@@ -100,12 +100,12 @@ class ExportFormatSpecification : public ExportFormatBase {
 	/* Accessing functions */
 
 	PBD::UUID const & id () { return _id; }
-	Glib::ustring const & name () const { return _name; }
-	Glib::ustring description ();
+	std::string const & name () const { return _name; }
+	std::string description ();
 
 	bool has_broadcast_info () const { return _has_broadcast_info; }
 	uint32_t channel_limit () const { return _channel_limit; }
-	Glib::ustring format_name () const { return _format_name; }
+	std::string format_name () const { return _format_name; }
 
 	Type type () const { return _type; }
 	FormatId format_id () const { return *format_ids.begin(); }
@@ -144,7 +144,7 @@ class ExportFormatSpecification : public ExportFormatBase {
 
 	/* The variables below do not have setters (usually set via set_format) */
 
-	Glib::ustring  _format_name;
+	std::string  _format_name;
 	bool            has_sample_format;
 	bool            supports_tagging;
 	bool           _has_broadcast_info;
@@ -152,7 +152,7 @@ class ExportFormatSpecification : public ExportFormatBase {
 
 	/* The variables below have getters and setters */
 
-	Glib::ustring   _name;
+	std::string   _name;
 	PBD::UUID       _id;
 
 	Type            _type;

@@ -20,6 +20,7 @@
 #include "pbd/filesystem.h"
 
 using namespace AudioGrapher;
+using std::string;
 
 namespace ARDOUR {
 
@@ -166,7 +167,7 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::Sndfil
 {
 	unsigned channels = config.channel_config->get_n_chans();
 	int format = get_real_format (config);
-	Glib::ustring filename = config.filename->get_path (config.format);
+	string filename = config.filename->get_path (config.format);
 	
 	writer.reset (new AudioGrapher::SndfileWriter<T> (filename, format, channels, config.format->sample_rate(), config.broadcast_info));
 	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));

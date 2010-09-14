@@ -37,7 +37,7 @@ struct ImportStatus : public InterThreadInfo {
 	uint32_t                   total;
 	SrcQuality                 quality;
 	volatile bool              freeze;
-	std::vector<Glib::ustring> paths;
+	std::vector<std::string>   paths;
 	bool                       replace_existing_source;
 
 	/* result */

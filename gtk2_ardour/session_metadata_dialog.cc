@@ -37,7 +37,7 @@ using namespace Glib;
 
 /*** MetadataField ***/
 
-MetadataField::MetadataField (ustring const & field_name) :
+MetadataField::MetadataField (string const & field_name) :
   _name (field_name)
 {
 }
@@ -46,7 +46,7 @@ MetadataField::~MetadataField() { }
 
 /* TextMetadataField */
 
-TextMetadataField::TextMetadataField (Getter getter, Setter setter, ustring const & field_name, guint width ) :
+TextMetadataField::TextMetadataField (Getter getter, Setter setter, string const & field_name, guint width ) :
   MetadataField (field_name),
   getter (getter),
   setter (setter),
@@ -112,7 +112,7 @@ TextMetadataField::update_value ()
 
 /* NumberMetadataField */
 
-NumberMetadataField::NumberMetadataField (Getter getter, Setter setter, ustring const & field_name, guint numbers, guint width) :
+NumberMetadataField::NumberMetadataField (Getter getter, Setter setter, string const & field_name, guint numbers, guint width) :
   MetadataField (field_name),
   getter (getter),
   setter (setter),
@@ -183,7 +183,7 @@ NumberMetadataField::edit_widget ()
 	return *entry;
 }
 
-ustring
+string
 NumberMetadataField::uint_to_str (uint32_t i) const
 {
 	std::ostringstream oss ("");
@@ -196,11 +196,11 @@ NumberMetadataField::uint_to_str (uint32_t i) const
 }
 
 uint32_t
-NumberMetadataField::str_to_uint (ustring const & str) const
+NumberMetadataField::str_to_uint (string const & str) const
 {
-	ustring tmp (str);
-	ustring::size_type i;
-	while ((i = tmp.find_first_not_of("1234567890")) != ustring::npos) {
+	string tmp (str);
+	string::size_type i;
+	while ((i = tmp.find_first_not_of("1234567890")) != string::npos) {
 		tmp.erase (i, 1);
 	}
 
@@ -213,8 +213,8 @@ NumberMetadataField::str_to_uint (ustring const & str) const
 
 /* SessionMetadataSet */
 
-SessionMetadataSet::SessionMetadataSet (ustring const & name) :
-  name (name)
+SessionMetadataSet::SessionMetadataSet (string const & name) 
+  : name (name)
 {
 }
 
@@ -226,8 +226,8 @@ SessionMetadataSet::add_data_field (MetadataPtr field)
 
 /* SessionMetadataSetEditable */
 
-SessionMetadataSetEditable::SessionMetadataSetEditable (ustring const & name) :
-  SessionMetadataSet (name)
+SessionMetadataSetEditable::SessionMetadataSetEditable (string const & name) 
+  : SessionMetadataSet (name)
 {
 	table.set_row_spacings (6);
 	table.set_col_spacings (12);
@@ -277,9 +277,9 @@ SessionMetadataSetEditable::save_data ()
 
 /* SessionMetadataSetImportable */
 
-SessionMetadataSetImportable::SessionMetadataSetImportable (ustring const & name) :
-  SessionMetadataSet (name),
-  session_list (list)
+SessionMetadataSetImportable::SessionMetadataSetImportable (string const & name) 
+  : SessionMetadataSet (name)
+  , session_list (list)
 {
 	tree = Gtk::ListStore::create (tree_cols);
 	tree_view.set_model (tree);
@@ -351,8 +351,8 @@ SessionMetadataSetImportable::load_extra_data (ARDOUR::SessionMetadata const & d
 		import_field->load_data(data); // hasn't been done yet
 
 		// Make string for values TODO get color from somewhere?
-		ustring values = "<span weight=\"ultralight\" color=\"#777\">" + session_field->value() + "</span>\n"
-				+ "<span weight=\"bold\">" + import_field->value() + "</span>";
+		string values = "<span weight=\"ultralight\" color=\"#777\">" + session_field->value() + "</span>\n"
+                        + "<span weight=\"bold\">" + import_field->value() + "</span>";
 
 		Gtk::TreeModel::iterator row_iter = tree->append();
 		Gtk::TreeModel::Row row = *row_iter;
@@ -401,7 +401,7 @@ SessionMetadataSetImportable::select_all ()
 }
 
 void
-SessionMetadataSetImportable::selection_changed (ustring const & path)
+SessionMetadataSetImportable::selection_changed (string const & path)
 {
 	select_all_check.set_inconsistent (true);
 
@@ -413,7 +413,7 @@ SessionMetadataSetImportable::selection_changed (ustring const & path)
 /* SessionMetadataDialog */
 
 template <typename DataSet>
-SessionMetadataDialog<DataSet>::SessionMetadataDialog (ustring const & name) :
+SessionMetadataDialog<DataSet>::SessionMetadataDialog (string const & name) :
   ArdourDialog (name, true)
 {
 	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -477,7 +477,7 @@ SessionMetadataDialog<DataSet>::end_dialog ()
 
 template <typename DataSet>
 void
-SessionMetadataDialog<DataSet>::warn_user (ustring const & string)
+SessionMetadataDialog<DataSet>::warn_user (string const & string)
 {
 	Gtk::MessageDialog msg (string, false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
 	msg.run();

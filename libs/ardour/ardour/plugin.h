@@ -21,7 +21,7 @@
 #define __ardour_plugin_h__
 
 #include <boost/shared_ptr.hpp>
-#include <glibmm/ustring.h>
+#include <string>
 
 #include "pbd/statefuldestructible.h"
 #include "pbd/controllable.h"
@@ -55,8 +55,8 @@ class PluginInfo {
 
 	std::string name;
 	std::string category;
-	Glib::ustring creator;
-	Glib::ustring path;
+	std::string creator;
+	std::string path;
 	ChanCount n_inputs;
 	ChanCount n_outputs;
 	ARDOUR::PluginType type;

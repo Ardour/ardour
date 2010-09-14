@@ -22,7 +22,7 @@
 #define __ardour_export_filename_h__
 
 #include <boost/shared_ptr.hpp>
-#include <glibmm/ustring.h>
+#include <string>
 #include "pbd/statefuldestructible.h"
 
 namespace ARDOUR
@@ -68,25 +68,25 @@ class ExportFilename {
 
 	/* data access */
 
-	Glib::ustring get_path (FormatPtr format) const;
-	Glib::ustring get_folder () const { return folder; }
+	std::string get_path (FormatPtr format) const;
+	std::string get_folder () const { return folder; }
 
 	TimeFormat get_time_format () const { return time_format; }
 	DateFormat get_date_format () const { return date_format; }
-	Glib::ustring get_time_format_str (TimeFormat format) const;
-	Glib::ustring get_date_format_str (DateFormat format) const;
+	std::string get_time_format_str (TimeFormat format) const;
+	std::string get_date_format_str (DateFormat format) const;
 
-	Glib::ustring get_label () const { return label; }
+	std::string get_label () const { return label; }
 	uint32_t get_revision () const { return revision; }
 
 	/* data modification */
 
 	void set_time_format (TimeFormat format);
 	void set_date_format (DateFormat format);
-	void set_label (Glib::ustring value);
+	void set_label (std::string value);
 	void set_revision (uint32_t value) { revision = value; }
 	void set_channel (uint32_t value) { channel = value; }
-	bool set_folder (Glib::ustring path);
+	bool set_folder (std::string path);
 
 	void set_timespan (TimespanPtr ts) { timespan = ts; }
 	void set_channel_config (ChannelConfigPtr cc) { channel_config = cc; }
@@ -106,16 +106,16 @@ class ExportFilename {
 
 	Session & session;
 
-	Glib::ustring   label;
+	std::string   label;
 	uint32_t  revision;
 	uint32_t  channel;
 
-	Glib::ustring   folder;
+	std::string   folder;
 
 	DateFormat date_format;
 	TimeFormat time_format;
 
-	Glib::ustring get_formatted_time (Glib::ustring const & format) const;
+	std::string get_formatted_time (std::string const & format) const;
 	// Due to the static allocation used in strftime(), no destructor or copy-ctor is needed for this
 	struct tm * time_struct;
 
@@ -124,10 +124,10 @@ class ExportFilename {
 
 	/* Serialization helpers */
 
-	typedef std::pair<bool, Glib::ustring> FieldPair;
+	typedef std::pair<bool, std::string> FieldPair;
 
-	void add_field (XMLNode * node, Glib::ustring const & name, bool enabled, Glib::ustring const & value = "");
-	FieldPair get_field (XMLNode const & node, Glib::ustring const & name);
+	void add_field (XMLNode * node, std::string const & name, bool enabled, std::string const & value = "");
+	FieldPair get_field (XMLNode const & node, std::string const & name);
 	FieldPair analyse_folder ();
 };
 

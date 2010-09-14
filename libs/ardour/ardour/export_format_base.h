@@ -24,7 +24,7 @@
 #include <set>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
-#include <glibmm/ustring.h>
+#include <string>
 
 #include <sndfile.h>
 #include <samplerate.h>
@@ -122,19 +122,19 @@ class ExportFormatBase {
 
 		bool selected () const { return _selected; }
 		bool compatible () const { return _compatible; }
-		Glib::ustring name () const { return _name; }
+		std::string name () const { return _name; }
 
 		void set_selected (bool value);
 		void set_compatible (bool value);
 
 	  protected:
-		void set_name (Glib::ustring name) { _name = name; }
+		void set_name (std::string name) { _name = name; }
 
 	  private:
 		bool _selected;
 		bool _compatible;
 
-		Glib::ustring _name;
+		std::string _name;
 	};
 
   public:
@@ -160,8 +160,8 @@ class ExportFormatBase {
 	bool has_format (FormatId format) const { return format_ids.find (format) != format_ids.end(); }
 	bool has_quality (Quality quality) const { return qualities.find (quality) != qualities.end(); }
 
-	void set_extension (Glib::ustring const & extension) { _extension = extension; }
-	Glib::ustring const & extension () const { return _extension; }
+	void set_extension (std::string const & extension) { _extension = extension; }
+	std::string const & extension () const { return _extension; }
 
   protected:
 
@@ -182,7 +182,7 @@ class ExportFormatBase {
 
   private:
 
-	Glib::ustring  _extension;
+	std::string  _extension;
 
 	enum SetOperation {
 		SetUnion,

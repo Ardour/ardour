@@ -30,7 +30,7 @@
 #include <sys/stat.h>
 #include <cerrno>
 
-#include <glibmm/ustring.h>
+#include <glibmm/string.h>
 #include <glibmm/miscutils.h>
 
 #include <lrdf.h>

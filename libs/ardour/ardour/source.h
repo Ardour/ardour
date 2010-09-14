@@ -64,7 +64,7 @@ class Source : public SessionObject
 	virtual framecnt_t length (framepos_t pos) const = 0;
 	virtual void       update_length (framepos_t pos, framecnt_t cnt) = 0;
 
-	virtual const Glib::ustring& path() const = 0;
+	virtual const std::string& path() const = 0;
 
 	virtual framepos_t natural_position() const { return 0; }
 

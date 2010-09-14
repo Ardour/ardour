@@ -52,9 +52,9 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
 
-map<DataType, ustring> FileSource::search_paths;
+map<DataType, string> FileSource::search_paths;
 
-FileSource::FileSource (Session& session, DataType type, const ustring& path, Source::Flag flag)
+FileSource::FileSource (Session& session, DataType type, const string& path, Source::Flag flag)
 	: Source(session, type, path, flag)
 	, _path(path)
 	, _file_is_new(true)
@@ -90,7 +90,7 @@ FileSource::removable () const
 }
 
 int
-FileSource::init (const ustring& pathstr, bool must_exist)
+FileSource::init (const string& pathstr, bool must_exist)
 {
 	_timeline_position = 0;
 
@@ -126,7 +126,7 @@ FileSource::set_state (const XMLNode& node, int /*version*/)
 }
 
 void
-FileSource::mark_take (const ustring& id)
+FileSource::mark_take (const string& id)
 {
 	if (writable ()) {
 		_take_id = id;
@@ -134,7 +134,7 @@ FileSource::mark_take (const ustring& id)
 }
 
 int
-FileSource::move_to_trash (const ustring& trash_dir_name)
+FileSource::move_to_trash (const string& trash_dir_name)
 {
 	if (!within_session() || !writable()) {
 		return -1;
@@ -156,7 +156,7 @@ FileSource::move_to_trash (const ustring& trash_dir_name)
 	if (Glib::file_test (newpath.c_str(), Glib::FILE_TEST_EXISTS)) {
 		char buf[PATH_MAX+1];
 		int version = 1;
-		ustring newpath_v;
+		string newpath_v;
 
 		snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), version);
 		newpath_v = buf;
@@ -204,13 +204,13 @@ FileSource::move_to_trash (const ustring& trash_dir_name)
  * \return true iff the file was found.
  */
 bool
-FileSource::find (DataType type, const ustring& path, bool must_exist,
-		  bool& isnew, uint16_t& chan, ustring& found_path)
+FileSource::find (DataType type, const string& path, bool must_exist,
+		  bool& isnew, uint16_t& chan, string& found_path)
 {
-	Glib::ustring search_path = search_paths[type];
+	string search_path = search_paths[type];
 
-	ustring pathstr = path;
-	ustring::size_type pos;
+	string pathstr = path;
+	string::size_type pos;
 	bool ret = false;
 
 	isnew = false;
@@ -219,10 +219,10 @@ FileSource::find (DataType type, const ustring& path, bool must_exist,
 
 		/* non-absolute pathname: find pathstr in search path */
 
-		vector<ustring> dirs;
+		vector<string> dirs;
 		int cnt;
-		ustring fullpath;
-		ustring keeppath;
+		string fullpath;
+		string keeppath;
 
 		if (search_path.length() == 0) {
 			error << _("FileSource: search path not set") << endmsg;
@@ -233,7 +233,7 @@ FileSource::find (DataType type, const ustring& path, bool must_exist,
 
 		cnt = 0;
 
-		for (vector<ustring>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
+		for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
                         
                         fullpath = Glib::build_filename (*i, pathstr);
 
@@ -241,7 +241,7 @@ FileSource::find (DataType type, const ustring& path, bool must_exist,
 			   Ardour 0.99 .. this hack tries to make things sort of work.
 			*/
 
-			if ((pos = pathstr.find_last_of (':')) != ustring::npos) {
+			if ((pos = pathstr.find_last_of (':')) != string::npos) {
 
 				if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 
@@ -258,7 +258,7 @@ FileSource::find (DataType type, const ustring& path, bool must_exist,
 						   without the :suffix exists
 						 */
 
-						ustring shorter = pathstr.substr (0, pos);
+						string shorter = pathstr.substr (0, pos);
                                                 fullpath = Glib::build_filename (*i, shorter);
 
 						if (Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
@@ -323,9 +323,9 @@ FileSource::find (DataType type, const ustring& path, bool must_exist,
 
 		/* ugh, handle ':' situation */
 
-		if ((pos = pathstr.find_last_of (':')) != ustring::npos) {
+		if ((pos = pathstr.find_last_of (':')) != string::npos) {
 
-			ustring shorter = pathstr.substr (0, pos);
+			string shorter = pathstr.substr (0, pos);
 
 			if (Glib::file_test (shorter, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 				chan = atoi (pathstr.substr (pos+1));
@@ -369,11 +369,11 @@ out:
 }
 
 int
-FileSource::set_source_name (const ustring& newname, bool destructive)
+FileSource::set_source_name (const string& newname, bool destructive)
 {
 	Glib::Mutex::Lock lm (_lock);
-	ustring oldpath = _path;
-	ustring newpath = _session.change_source_path_by_name (oldpath, _name, newname, destructive);
+	string oldpath = _path;
+	string newpath = _session.change_source_path_by_name (oldpath, _name, newname, destructive);
 
 	if (newpath.empty()) {
 		error << string_compose (_("programming error: %1"), "cannot generate a changed file path") << endmsg;
@@ -398,7 +398,7 @@ FileSource::set_source_name (const ustring& newname, bool destructive)
 }
 
 void
-FileSource::set_search_path (DataType type, const ustring& p)
+FileSource::set_search_path (DataType type, const string& p)
 {
 	search_paths[type] = p;
 }

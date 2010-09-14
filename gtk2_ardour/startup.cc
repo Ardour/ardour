@@ -27,6 +27,7 @@
 #include "pbd/file_utils.h"
 #include "pbd/filesystem.h"
 #include "pbd/replace_all.h"
+#include "pbd/whitespace.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/recent_sessions.h"
@@ -207,7 +208,9 @@ ArdourStartup::session_name (bool& should_be_new)
 {
 	if (ic_new_session_button.get_active()) {
 		should_be_new = true;
-		return new_name_entry.get_text ();
+		string val = new_name_entry.get_text ();
+                strip_whitespace_edges (val);
+                return val;
 	} else if (_existing_session_chooser_used) {
 		/* existing session chosen from file chooser */
 		should_be_new = false;

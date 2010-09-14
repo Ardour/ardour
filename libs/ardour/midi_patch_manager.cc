@@ -65,7 +65,7 @@ MidiPatchManager::refresh()
 
 	assert(is_directory(path_to_patches));
 
-	Glib::PatternSpec pattern(Glib::ustring("*.midnam"));
+	Glib::PatternSpec pattern(string("*.midnam"));
 	vector<path> result;
 
 	find_matching_files_in_directory(path_to_patches, pattern, result);

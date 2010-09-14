@@ -2719,7 +2719,7 @@ Session::source_by_id (const PBD::ID& id)
 }
 
 boost::shared_ptr<Source>
-Session::source_by_path_and_channel (const Glib::ustring& path, uint16_t chn)
+Session::source_by_path_and_channel (const string& path, uint16_t chn)
 {
 	Glib::Mutex::Lock lm (source_lock);
 
@@ -2865,8 +2865,8 @@ Session::new_source_path_from_name (DataType type, const string& name, bool as_s
 	return p.to_string();
 }
 
-Glib::ustring
-Session::peak_path (Glib::ustring base) const
+string
+Session::peak_path (string base) const
 {
 	sys::path peakfile_path(_session_dir->peak_path());
 	peakfile_path /= basename_nosuffix (base) + peakfile_suffix;

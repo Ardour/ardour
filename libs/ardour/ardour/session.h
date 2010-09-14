@@ -177,7 +177,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	int ensure_subdirs ();
 
-	Glib::ustring peak_path (Glib::ustring) const;
+        std::string peak_path (std::string) const;
 
 	std::string change_source_path_by_name (std::string oldpath, std::string oldname, std::string newname, bool destructive);
 
@@ -540,7 +540,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::shared_ptr<MidiSource> create_midi_source_for_session (Track*, std::string const &, bool as_stub = false);
 
 	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
-	boost::shared_ptr<Source> source_by_path_and_channel (const Glib::ustring&, uint16_t);
+	boost::shared_ptr<Source> source_by_path_and_channel (const std::string&, uint16_t);
 
 	void add_playlist (boost::shared_ptr<Playlist>, bool unused = false);
 

@@ -65,7 +65,7 @@ class ExportFormatManager : public PBD::ScopedConnectionList
 
 	class QualityState : public ExportFormatBase::SelectableCompatible {
 	public:
-		QualityState (ExportFormatBase::Quality quality, Glib::ustring name) :
+		QualityState (ExportFormatBase::Quality quality, std::string name) :
 			quality (quality) { set_name (name); }
 		ExportFormatBase::Quality  quality;
 	};
@@ -77,7 +77,7 @@ class ExportFormatManager : public PBD::ScopedConnectionList
 
 	class SampleRateState : public ExportFormatBase::SelectableCompatible {
 	  public:
-		SampleRateState (ExportFormatBase::SampleRate rate, Glib::ustring name)
+		SampleRateState (ExportFormatBase::SampleRate rate, std::string name)
 			: rate (rate) { set_name (name); }
 		ExportFormatBase::SampleRate  rate;
 	};
@@ -103,7 +103,7 @@ class ExportFormatManager : public PBD::ScopedConnectionList
 
 	/* Non interactive selections */
 
-	void set_name (Glib::ustring name);
+	void set_name (std::string name);
 
 	void select_src_quality (ExportFormatBase::SRCQuality value);
 	void select_trim_beginning (bool value);

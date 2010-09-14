@@ -512,10 +512,10 @@ ExportFormatSpecification::set_format (boost::shared_ptr<ExportFormat> format)
 	}
 }
 
-Glib::ustring
+string
 ExportFormatSpecification::description ()
 {
-	Glib::ustring desc;
+	string desc;
 
 	desc = _name + ": ";
 

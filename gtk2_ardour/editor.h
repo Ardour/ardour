@@ -27,8 +27,6 @@
 #include <sys/time.h>
 #include <bitset>
 
-#include <glibmm/ustring.h>
-
 #include <boost/optional.hpp>
 
 #include <libgnomecanvasmm/canvas.h>
@@ -424,8 +422,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	int get_regionview_count_from_region_list (boost::shared_ptr<ARDOUR::Region>);
 
-	void do_import (std::vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
-	void do_embed (std::vector<Glib::ustring> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
+	void do_import (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
+	void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
 
 	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
 
@@ -1172,21 +1170,21 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void session_import_dialog ();
 
 	int  check_whether_and_how_to_import(std::string, bool all_or_nothing = true);
-	bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
+	bool check_multichannel_status (const std::vector<std::string>& paths);
 
 	SoundFileOmega* sfbrowser;
 
 	void bring_in_external_audio (Editing::ImportMode mode,  nframes64_t& pos);
 
-	bool  idle_drop_paths  (std::vector<Glib::ustring> paths, nframes64_t frame, double ypos);
-	void  drop_paths_part_two  (const std::vector<Glib::ustring>& paths, nframes64_t frame, double ypos);
+	bool  idle_drop_paths  (std::vector<std::string> paths, nframes64_t frame, double ypos);
+	void  drop_paths_part_two  (const std::vector<std::string>& paths, nframes64_t frame, double ypos);
 
-	int  import_sndfiles (std::vector<Glib::ustring> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
+	int  import_sndfiles (std::vector<std::string> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
 			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool);
-	int  embed_sndfiles (std::vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode,
+	int  embed_sndfiles (std::vector<std::string> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode,
 			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&);
 
-	int add_sources (std::vector<Glib::ustring> paths, ARDOUR::SourceList& sources, nframes64_t& pos, Editing::ImportMode,
+	int add_sources (std::vector<std::string> paths, ARDOUR::SourceList& sources, nframes64_t& pos, Editing::ImportMode,
 			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool add_channel_suffix);
 	int finish_bringing_in_material (boost::shared_ptr<ARDOUR::Region> region, uint32_t, uint32_t,  nframes64_t& pos, Editing::ImportMode mode,
 				      boost::shared_ptr<ARDOUR::Track>& existing_track);
@@ -1217,7 +1215,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* to support this ... */
 
 	void import_audio (bool as_tracks);
-	void do_import (std::vector<Glib::ustring> paths, bool split, bool as_tracks);
+	void do_import (std::vector<std::string> paths, bool split, bool as_tracks);
 
 	void move_to_start ();
 	void move_to_end ();
@@ -1722,46 +1720,46 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* Drag-n-Drop */
 
 	int convert_drop_to_paths (
-			std::vector<Glib::ustring>&           paths,
-			const Glib::RefPtr<Gdk::DragContext>& context,
-			gint                                  x,
-			gint                                  y,
-			const Gtk::SelectionData&             data,
-			guint                                 info,
-			guint                                 time);
-
+                std::vector<std::string>&           paths,
+                const Glib::RefPtr<Gdk::DragContext>& context,
+                gint                                  x,
+                gint                                  y,
+                const Gtk::SelectionData&             data,
+                guint                                 info,
+                guint                                 time);
+        
 	void track_canvas_drag_data_received (
-			const Glib::RefPtr<Gdk::DragContext>& context,
-			gint                                  x,
-			gint                                  y,
-			const Gtk::SelectionData&             data,
-			guint                                 info,
-			guint                                 time);
-
+                const Glib::RefPtr<Gdk::DragContext>& context,
+                gint                                  x,
+                gint                                  y,
+                const Gtk::SelectionData&             data,
+                guint                                 info,
+                guint                                 time);
+        
 	void drop_paths (
-			const Glib::RefPtr<Gdk::DragContext>& context,
-			gint                                  x,
-			gint                                  y,
-			const Gtk::SelectionData&             data,
-			guint                                 info,
-			guint                                 time);
-
+                const Glib::RefPtr<Gdk::DragContext>& context,
+                gint                                  x,
+                gint                                  y,
+                const Gtk::SelectionData&             data,
+                guint                                 info,
+                guint                                 time);
+        
 	void drop_regions (
-			const Glib::RefPtr<Gdk::DragContext>& context,
-			gint                                  x,
-			gint                                  y,
-			const Gtk::SelectionData&             data,
-			guint                                 info,
-			guint                                 time);
-
+                const Glib::RefPtr<Gdk::DragContext>& context,
+                gint                                  x,
+                gint                                  y,
+                const Gtk::SelectionData&             data,
+                guint                                 info,
+                guint                                 time);
+        
 	void drop_routes (
-			const Glib::RefPtr<Gdk::DragContext>& context,
-			gint                x,
-			gint                y,
-			const Gtk::SelectionData& data,
-			guint               info,
-			guint               time);
-
+                const Glib::RefPtr<Gdk::DragContext>& context,
+                gint                x,
+                gint                y,
+                const Gtk::SelectionData& data,
+                guint               info,
+                guint               time);
+        
 	/* audio export */
 
 	int  write_region_selection(RegionSelection&);

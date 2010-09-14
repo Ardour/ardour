@@ -167,7 +167,7 @@ class AUPluginInfo : public PluginInfo {
 	AUPluginCachedInfo cache;
 
 	static PluginInfoList* discover ();
-	static void get_names (CAComponentDescription&, std::string& name, Glib::ustring& maker);
+	static void get_names (CAComponentDescription&, std::string& name, std::string& maker);
         static std::string stringify_descriptor (const CAComponentDescription&);
 
 	static int load_cached_info ();
@@ -180,7 +180,7 @@ class AUPluginInfo : public PluginInfo {
 	static void discover_fx (PluginInfoList&);
 	static void discover_generators (PluginInfoList&);
 	static void discover_by_description (PluginInfoList&, CAComponentDescription&);
-	static Glib::ustring au_cache_path ();
+	static std::string au_cache_path ();
 
 	typedef std::map<std::string,AUPluginCachedInfo> CachedInfoMap;
 	static CachedInfoMap cached_info;

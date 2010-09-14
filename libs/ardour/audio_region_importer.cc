@@ -356,7 +356,7 @@ AudioRegionImporter::prepare_sources ()
 	session.import_audiofiles (status);
 
 	// Add imported sources to handlers map
-	std::vector<Glib::ustring>::iterator file_it = status.paths.begin();
+	std::vector<string>::iterator file_it = status.paths.begin();
 	for (SourceList::iterator source_it = status.sources.begin(); source_it != status.sources.end(); ++source_it) {
 		if (*source_it) {
 			handler.add_source(*file_it, *source_it);

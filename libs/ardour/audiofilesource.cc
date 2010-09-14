@@ -68,7 +68,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
 
-ustring AudioFileSource::peak_dir = "";
+string AudioFileSource::peak_dir = "";
 
 PBD::Signal0<void> AudioFileSource::HeaderPositionOffsetChanged;
 uint64_t           AudioFileSource::header_position_offset = 0;
@@ -92,7 +92,7 @@ struct SizedSampleBuffer {
 Glib::StaticPrivate<SizedSampleBuffer> thread_interleave_buffer = GLIBMM_STATIC_PRIVATE_INIT;
 
 /** Constructor used for existing internal-to-session files. */
-AudioFileSource::AudioFileSource (Session& s, const ustring& path, Source::Flag flags)
+AudioFileSource::AudioFileSource (Session& s, const string& path, Source::Flag flags)
 	: Source (s, DataType::AUDIO, path, flags)
 	, AudioSource (s, path)
 	, FileSource (s, DataType::AUDIO, path, flags)
@@ -104,7 +104,7 @@ AudioFileSource::AudioFileSource (Session& s, const ustring& path, Source::Flag 
 }
 
 /** Constructor used for new internal-to-session files. */
-AudioFileSource::AudioFileSource (Session& s, const ustring& path, Source::Flag flags,
+AudioFileSource::AudioFileSource (Session& s, const string& path, Source::Flag flags,
 				  SampleFormat /*samp_format*/, HeaderFormat /*hdr_format*/)
 	: Source (s, DataType::AUDIO, path, flags)
 	, AudioSource (s, path)
@@ -140,16 +140,16 @@ AudioFileSource::~AudioFileSource ()
 }
 
 int
-AudioFileSource::init (const ustring& pathstr, bool must_exist)
+AudioFileSource::init (const string& pathstr, bool must_exist)
 {
 	_peaks_built = false;
 	return FileSource::init (pathstr, must_exist);
 }
 
-ustring
-AudioFileSource::peak_path (ustring audio_path)
+string
+AudioFileSource::peak_path (string audio_path)
 {
-	ustring base;
+	string base;
 
 	base = PBD::basename_nosuffix (audio_path);
 	base += '%';
@@ -158,10 +158,10 @@ AudioFileSource::peak_path (ustring audio_path)
 	return _session.peak_path (base);
 }
 
-ustring
-AudioFileSource::find_broken_peakfile (ustring peak_path, ustring audio_path)
+string
+AudioFileSource::find_broken_peakfile (string peak_path, string audio_path)
 {
-	ustring str;
+	string str;
 
 	/* check for the broken location in use by 2.0 for several months */
 
@@ -199,21 +199,21 @@ AudioFileSource::find_broken_peakfile (ustring peak_path, ustring audio_path)
 	return peak_path;
 }
 
-ustring
-AudioFileSource::broken_peak_path (ustring audio_path)
+string
+AudioFileSource::broken_peak_path (string audio_path)
 {
 	return _session.peak_path (audio_path);
 }
 
-ustring
-AudioFileSource::old_peak_path (ustring audio_path)
+string
+AudioFileSource::old_peak_path (string audio_path)
 {
 	/* XXX hardly bombproof! fix me */
 
 	struct stat stat_file;
 	struct stat stat_mount;
 
-	ustring mp = mountpoint (audio_path);
+	string mp = mountpoint (audio_path);
 
 	stat (audio_path.c_str(), &stat_file);
 	stat (mp.c_str(), &stat_mount);
@@ -225,7 +225,7 @@ AudioFileSource::old_peak_path (ustring audio_path)
 	snprintf (buf, sizeof (buf), "%" PRId64 "-%" PRId64 "-%d.peak", (int64_t) stat_mount.st_ino, (int64_t) stat_file.st_ino, _channel);
 #endif
 
-	ustring res = peak_dir;
+	string res = peak_dir;
 	res += buf;
 	res += peakfile_suffix;
 
@@ -233,7 +233,7 @@ AudioFileSource::old_peak_path (ustring audio_path)
 }
 
 bool
-AudioFileSource::get_soundfile_info (ustring path, SoundFileInfo& _info, string& error_msg)
+AudioFileSource::get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg)
 {
         /* try sndfile first because it gets timecode info from .wav (BWF) if it exists,
            which at present, ExtAudioFile from Apple seems unable to do.
@@ -312,7 +312,7 @@ AudioFileSource::set_header_position_offset (nframes_t offset)
 }
 
 bool
-AudioFileSource::is_empty (Session& /*s*/, ustring path)
+AudioFileSource::is_empty (Session& /*s*/, string path)
 {
 	SoundFileInfo info;
 	string err;
@@ -336,7 +336,7 @@ AudioFileSource::setup_peakfile ()
 }
 
 bool
-AudioFileSource::safe_audio_file_extension(const ustring& file)
+AudioFileSource::safe_audio_file_extension(const string& file)
 {
 	const char* suffixes[] = {
 		".aif", ".AIF",

@@ -21,7 +21,6 @@
 #define __ardour_session_metadata_h__
 
 #include <string>
-#include <glibmm/ustring.h>
 
 #include <map>
 #include <utility>
@@ -42,68 +41,68 @@ class SessionMetadata : public PBD::StatefulDestructible
 	~SessionMetadata ();
 
 	/*** Accessing ***/
-	Glib::ustring comment () const;
-	Glib::ustring copyright () const;
-	Glib::ustring isrc () const;
+	std::string comment () const;
+	std::string copyright () const;
+	std::string isrc () const;
 	uint32_t year () const;
 
-	Glib::ustring grouping () const;
-	Glib::ustring title () const;
-	Glib::ustring subtitle () const;
+	std::string grouping () const;
+	std::string title () const;
+	std::string subtitle () const;
 
-	Glib::ustring artist () const;
-	Glib::ustring album_artist () const;
-	Glib::ustring lyricist () const;
-	Glib::ustring composer () const;
-	Glib::ustring conductor () const;
-	Glib::ustring remixer () const;
-	Glib::ustring arranger () const;
-	Glib::ustring engineer () const;
-	Glib::ustring producer () const;
-	Glib::ustring dj_mixer () const;
-	Glib::ustring mixer () const;
+	std::string artist () const;
+	std::string album_artist () const;
+	std::string lyricist () const;
+	std::string composer () const;
+	std::string conductor () const;
+	std::string remixer () const;
+	std::string arranger () const;
+	std::string engineer () const;
+	std::string producer () const;
+	std::string dj_mixer () const;
+	std::string mixer () const;
 
-	Glib::ustring album () const;
-	Glib::ustring compilation () const;
-	Glib::ustring disc_subtitle () const;
+	std::string album () const;
+	std::string compilation () const;
+	std::string disc_subtitle () const;
 	uint32_t disc_number () const;
 	uint32_t total_discs () const;
 	uint32_t track_number () const;
 	uint32_t total_tracks () const;
 
-	Glib::ustring genre () const;
+	std::string genre () const;
 
 	/*** Editing ***/
-	void set_comment (const Glib::ustring &);
-	void set_copyright (const Glib::ustring &);
-	void set_isrc (const Glib::ustring &);
+	void set_comment (const std::string &);
+	void set_copyright (const std::string &);
+	void set_isrc (const std::string &);
 	void set_year (uint32_t);
 
-	void set_grouping (const Glib::ustring &);
-	void set_title (const Glib::ustring &);
-	void set_subtitle (const Glib::ustring &);
+	void set_grouping (const std::string &);
+	void set_title (const std::string &);
+	void set_subtitle (const std::string &);
 
-	void set_artist (const Glib::ustring &);
-	void set_album_artist (const Glib::ustring &);
-	void set_lyricist (const Glib::ustring &);
-	void set_composer (const Glib::ustring &);
-	void set_conductor (const Glib::ustring &);
-	void set_remixer (const Glib::ustring &);
-	void set_arranger (const Glib::ustring &);
-	void set_engineer (const Glib::ustring &);
-	void set_producer (const Glib::ustring &);
-	void set_dj_mixer (const Glib::ustring &);
-	void set_mixer (const Glib::ustring &);
+	void set_artist (const std::string &);
+	void set_album_artist (const std::string &);
+	void set_lyricist (const std::string &);
+	void set_composer (const std::string &);
+	void set_conductor (const std::string &);
+	void set_remixer (const std::string &);
+	void set_arranger (const std::string &);
+	void set_engineer (const std::string &);
+	void set_producer (const std::string &);
+	void set_dj_mixer (const std::string &);
+	void set_mixer (const std::string &);
 
-	void set_album (const Glib::ustring &);
-	void set_compilation (const Glib::ustring &);
-	void set_disc_subtitle (const Glib::ustring &);
+	void set_album (const std::string &);
+	void set_compilation (const std::string &);
+	void set_disc_subtitle (const std::string &);
 	void set_disc_number (uint32_t);
 	void set_total_discs (uint32_t);
 	void set_track_number (uint32_t);
 	void set_total_tracks (uint32_t);
 
-	void set_genre (const Glib::ustring &);
+	void set_genre (const std::string &);
 
 	/*** Serialization ***/
 	XMLNode & get_state ();
@@ -111,17 +110,17 @@ class SessionMetadata : public PBD::StatefulDestructible
 
   private:
 
-	typedef std::pair<Glib::ustring, Glib::ustring> Property;
-	typedef std::map<Glib::ustring, Glib::ustring> PropertyMap;
+	typedef std::pair<std::string, std::string> Property;
+	typedef std::map<std::string, std::string> PropertyMap;
 	PropertyMap map;
 
-	XMLNode * get_xml (const Glib::ustring & name);
+	XMLNode * get_xml (const std::string & name);
 
-	Glib::ustring get_value (const Glib::ustring & name) const;
-	uint32_t get_uint_value (const Glib::ustring & name) const;
+	std::string get_value (const std::string & name) const;
+	uint32_t get_uint_value (const std::string & name) const;
 
-	void set_value (const Glib::ustring & name, const Glib::ustring & value);
-	void set_value (const Glib::ustring & name, uint32_t value);
+	void set_value (const std::string & name, const std::string & value);
+	void set_value (const std::string & name, uint32_t value);
 };
 
 } // namespace ARDOUR

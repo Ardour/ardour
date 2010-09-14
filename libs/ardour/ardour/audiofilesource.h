@@ -43,15 +43,15 @@ public:
 		return (set_source_name(newname, destructive()) == 0);
 	}
 
-	Glib::ustring peak_path (Glib::ustring audio_path);
-	Glib::ustring find_broken_peakfile (Glib::ustring missing_peak_path,
-			Glib::ustring audio_path);
+        std::string peak_path (std::string audio_path);
+        std::string find_broken_peakfile (std::string missing_peak_path,
+			std::string audio_path);
 
-	static void set_peak_dir (Glib::ustring dir) { peak_dir = dir; }
+	static void set_peak_dir (std::string dir) { peak_dir = dir; }
 
-	static bool get_soundfile_info (Glib::ustring path, SoundFileInfo& _info, std::string& error);
+	static bool get_soundfile_info (std::string path, SoundFileInfo& _info, std::string& error);
 
-	bool safe_file_extension (const Glib::ustring& path) const {
+	bool safe_file_extension (const std::string& path) const {
 		return safe_audio_file_extension(path);
 	}
 
@@ -77,9 +77,9 @@ public:
 	bool can_truncate_peaks() const { return !destructive(); }
 	bool can_be_analysed() const    { return _length > 0; }
 
-	static bool safe_audio_file_extension (const Glib::ustring& path);
+	static bool safe_audio_file_extension (const std::string& path);
 
-	static bool is_empty (Session&, Glib::ustring path);
+	static bool is_empty (Session&, std::string path);
 
 	static void set_bwf_serial_number (int);
 	static void set_header_position_offset (nframes_t offset );
@@ -88,16 +88,16 @@ public:
 
 protected:
 	/** Constructor to be called for existing external-to-session files */
-	AudioFileSource (Session&, const Glib::ustring& path, Source::Flag flags);
+	AudioFileSource (Session&, const std::string& path, Source::Flag flags);
 
 	/** Constructor to be called for new in-session files */
-	AudioFileSource (Session&, const Glib::ustring& path, Source::Flag flags,
+	AudioFileSource (Session&, const std::string& path, Source::Flag flags,
 			SampleFormat samp_format, HeaderFormat hdr_format);
 
 	/** Constructor to be called for existing in-session files */
 	AudioFileSource (Session&, const XMLNode&, bool must_exist = true);
 
-	int init (const Glib::ustring& idstr, bool must_exist);
+	int init (const std::string& idstr, bool must_exist);
 
 	virtual void set_header_timeline_position () = 0;
 	virtual void handle_header_position_change () {}
@@ -106,7 +106,7 @@ protected:
 
 	static Sample* get_interleave_buffer (nframes_t size);
 
-	static Glib::ustring peak_dir;
+	static std::string peak_dir;
 
 	static char bwf_country_code[3];
 	static char bwf_organization_code[4];
@@ -115,8 +115,8 @@ protected:
 	static uint64_t header_position_offset;
 
   private:
-	Glib::ustring old_peak_path (Glib::ustring audio_path);
-	Glib::ustring broken_peak_path (Glib::ustring audio_path);
+	std::string old_peak_path (std::string audio_path);
+	std::string broken_peak_path (std::string audio_path);
 };
 
 } // namespace ARDOUR

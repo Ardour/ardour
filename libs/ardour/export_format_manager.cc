@@ -26,6 +26,8 @@
 
 #include "i18n.h"
 
+using std::string;
+
 namespace ARDOUR
 {
 
@@ -248,7 +250,7 @@ ExportFormatManager::add_sample_rate (SampleRatePtr ptr)
 }
 
 void
-ExportFormatManager::set_name (Glib::ustring name)
+ExportFormatManager::set_name (string name)
 {
 	current_selection->set_name (name);
 }

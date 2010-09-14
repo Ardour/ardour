@@ -2417,7 +2417,7 @@ Session::find_all_sources (string path, set<string>& result)
 			continue;
 		}
 
-		Glib::ustring found_path;
+		string found_path;
 		bool is_new;
 		uint16_t chan;
 

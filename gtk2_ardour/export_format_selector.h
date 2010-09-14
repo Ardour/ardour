@@ -21,12 +21,12 @@
 #ifndef __export_format_selector_h__
 #define __export_format_selector_h__
 
-#include "ardour/export_profile_manager.h"
-
+#include <string>
 #include <gtkmm.h>
 #include <sigc++/signal.h>
 #include <boost/shared_ptr.hpp>
 
+#include "ardour/export_profile_manager.h"
 #include "ardour/session_handle.h"
 
 namespace ARDOUR {
@@ -76,7 +76,7 @@ class ExportFormatSelector : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	{
 	  public:
 		Gtk::TreeModelColumn<FormatPtr>      format;
-		Gtk::TreeModelColumn<Glib::ustring>  label;
+		Gtk::TreeModelColumn<std::string>  label;
 
 		FormatCols () { add (format); add (label); }
 	};

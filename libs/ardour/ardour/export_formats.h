@@ -91,7 +91,7 @@ class HasSampleFormat : public PBD::ScopedConnectionList {
 
 	class SampleFormatState : public ExportFormatBase::SelectableCompatible {
 	  public:
-		SampleFormatState (ExportFormatBase::SampleFormat format, Glib::ustring name) :
+                SampleFormatState (ExportFormatBase::SampleFormat format, std::string name) :
 		  format (format) { set_name (name); }
 
 		ExportFormatBase::SampleFormat  format;
@@ -145,7 +145,7 @@ class HasSampleFormat : public PBD::ScopedConnectionList {
   private:
 	/* Connected to signals */
 
-	void add_dither_type (ExportFormatBase::DitherType type, Glib::ustring name);
+	void add_dither_type (ExportFormatBase::DitherType type, std::string name);
 	void update_sample_format_selection (bool);
 	void update_dither_type_selection (bool);
 
@@ -156,7 +156,7 @@ class HasSampleFormat : public PBD::ScopedConnectionList {
 class ExportFormatLinear : public ExportFormat, public HasSampleFormat {
   public:
 
-	ExportFormatLinear (Glib::ustring name, FormatId format_id);
+        ExportFormatLinear (std::string name, FormatId format_id);
 	~ExportFormatLinear () {};
 
 	bool set_compatibility_state (ExportFormatCompatibility const & compatibility);
