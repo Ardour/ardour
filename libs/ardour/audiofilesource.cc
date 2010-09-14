@@ -142,7 +142,6 @@ AudioFileSource::~AudioFileSource ()
 int
 AudioFileSource::init (const string& pathstr, bool must_exist)
 {
-	_peaks_built = false;
 	return FileSource::init (pathstr, must_exist);
 }
 
@@ -287,15 +286,7 @@ AudioFileSource::mark_streaming_write_completed ()
 		return;
 	}
 
-	/* XXX notice that we're readers of _peaks_built
-	   but we must hold a solid lock on PeaksReady.
-	*/
-
-	Glib::Mutex::Lock lm (_lock);
-
-	if (_peaks_built) {
-		PeaksReady (); /* EMIT SIGNAL */
-	}
+	AudioSource::mark_streaming_write_completed ();
 }
 
 int

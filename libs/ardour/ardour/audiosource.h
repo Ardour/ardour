@@ -60,7 +60,7 @@ class AudioSource : virtual public Source,
 
 	virtual float sample_rate () const = 0;
 
-	virtual void mark_streaming_write_completed () {}
+	virtual void mark_streaming_write_completed ();
 
 	virtual bool can_truncate_peaks() const { return true; }
 
@@ -111,8 +111,6 @@ class AudioSource : virtual public Source,
 	static bool _build_peakfiles;
 
 	framecnt_t           _length;
-	bool                 _peaks_built;
-	mutable Glib::Mutex  _peaks_ready_lock;
 	std::string         peakpath;
 	std::string        _captured_for;
 
@@ -142,6 +140,15 @@ class AudioSource : virtual public Source,
 				     framecnt_t frames_per_peak);
 
   private:
+	bool _peaks_built;
+	/** This mutex is used to protect both the _peaks_built
+	 *  variable and also the emission (and handling) of the
+	 *  PeaksReady signal.  Holding the lock when emitting
+	 *  PeaksReady means that _peaks_built cannot be changed
+	 *  during the handling of the signal.
+	 */
+	mutable Glib::Mutex _peaks_ready_lock;
+	
 	PBD::FdFileDescriptor* _peakfile_descriptor;
 	int        _peakfile_fd;
 	framecnt_t peak_leftover_cnt;

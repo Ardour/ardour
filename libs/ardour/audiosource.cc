@@ -165,10 +165,6 @@ AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, ScopedConnect
 	bool ret;
 	Glib::Mutex::Lock lm (_peaks_ready_lock);
 
-	/* check to see if the peak data is ready. if not
-	   connect the slot while still holding the lock.
-	*/
-
 	if (!(ret = _peaks_built)) {
 		*connect_here_if_not = new ScopedConnection;
 		PeaksReady.connect (**connect_here_if_not, MISSING_INVALIDATOR, doThisWhenReady, event_loop);
@@ -683,13 +679,7 @@ AudioSource::build_peaks_from_scratch ()
 		}
 
 		done_with_peakfile_writes ((cnt == 0));
-	}
-
-	{
-		Glib::Mutex::Lock lm (_peaks_ready_lock);
-
-		if (_peaks_built) {
-			PeaksReady (); /* EMIT SIGNAL */
+		if (cnt == 0) {
 			ret = 0;
 		}
 	}
@@ -723,7 +713,9 @@ AudioSource::done_with_peakfile_writes (bool done)
 	}
 
 	if (done) {
+		Glib::Mutex::Lock lm (_peaks_ready_lock);
 		_peaks_built = true;
+		PeaksReady (); /* EMIT SIGNAL */
 	}
 
 	delete _peakfile_descriptor;
@@ -954,4 +946,14 @@ AudioSource::dec_read_data_count (nframes_t cnt)
         } else { 
                 _read_data_count = 0;
         }
+}
+
+void
+AudioSource::mark_streaming_write_completed ()
+{
+	Glib::Mutex::Lock lm (_peaks_ready_lock);
+
+	if (_peaks_built) {
+		PeaksReady (); /* EMIT SIGNAL */
+	}
 }
