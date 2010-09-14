@@ -29,7 +29,7 @@ namespace Gnome { namespace Canvas {
 class NoEventText : public Text
 {
   public:
-	NoEventText(Group& parent, double x, double y, const Glib::ustring& text) 
+	NoEventText(Group& parent, double x, double y, const std::string& text) 
 		: Text (parent, x, y, text) {}
         NoEventText(Group& parent)
 	  : Text (parent) {}

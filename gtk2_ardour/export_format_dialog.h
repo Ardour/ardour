@@ -77,7 +77,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	/* These are connected to signals from GUI components, and should change element states  */
 
-	void update_compatibility_selection (Glib::ustring const & path);
+	void update_compatibility_selection (std::string const & path);
 	void update_quality_selection ();
 	void update_format_selection ();
 	void update_sample_rate_selection ();
@@ -108,7 +108,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	template<typename T, typename ColsT>
 	void change_compatibility (bool compatibility, boost::weak_ptr<T> w_ptr, Glib::RefPtr<Gtk::ListStore> & list, ColsT & cols,
-	                           Glib::ustring const & c_incompatible = "red", Glib::ustring const & c_compatible = "white");
+	                           std::string const & c_incompatible = "red", std::string const & c_compatible = "white");
 
 	uint32_t applying_changes_from_engine;
 
@@ -179,7 +179,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	  public:
 		Gtk::TreeModelColumn<ARDOUR::ExportFormatManager::CompatPtr>  ptr;
 		Gtk::TreeModelColumn<bool>                                    selected;
-		Gtk::TreeModelColumn<Glib::ustring>                           label;
+		Gtk::TreeModelColumn<std::string>                           label;
 
 		CompatibilityCols () { add(ptr); add(selected); add(label); }
 	};
@@ -194,8 +194,8 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	{
 	  public:
 		Gtk::TreeModelColumn<ARDOUR::ExportFormatManager::QualityPtr>  ptr;
-		Gtk::TreeModelColumn<Glib::ustring>                            color;
-		Gtk::TreeModelColumn<Glib::ustring>                            label;
+		Gtk::TreeModelColumn<std::string>                            color;
+		Gtk::TreeModelColumn<std::string>                            label;
 
 		QualityCols () { add(ptr); add(color); add(label); }
 	};
@@ -206,8 +206,8 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	{
 	  public:
 		Gtk::TreeModelColumn<ARDOUR::ExportFormatManager::FormatPtr>  ptr;
-		Gtk::TreeModelColumn<Glib::ustring>                           color;
-		Gtk::TreeModelColumn<Glib::ustring>                           label;
+		Gtk::TreeModelColumn<std::string>                           color;
+		Gtk::TreeModelColumn<std::string>                           label;
 
 		FormatCols () { add(ptr); add(color); add(label); }
 	};
@@ -218,8 +218,8 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	{
 	  public:
 		Gtk::TreeModelColumn<ARDOUR::ExportFormatManager::SampleRatePtr>  ptr;
-		Gtk::TreeModelColumn<Glib::ustring>                               color;
-		Gtk::TreeModelColumn<Glib::ustring>                               label;
+		Gtk::TreeModelColumn<std::string>                               color;
+		Gtk::TreeModelColumn<std::string>                               label;
 
 		SampleRateCols () { add(ptr); add(color); add(label); }
 	};
@@ -244,7 +244,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	{
 	  public:
 		Gtk::TreeModelColumn<ARDOUR::ExportFormatBase::SRCQuality>  id;
-		Gtk::TreeModelColumn<Glib::ustring>                         label;
+		Gtk::TreeModelColumn<std::string>                         label;
 
 		SRCQualityCols () { add(id); add(label); }
 	};
@@ -274,8 +274,8 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	{
 	  public:
 		Gtk::TreeModelColumn<ARDOUR::HasSampleFormat::SampleFormatPtr>   ptr;
-		Gtk::TreeModelColumn<Glib::ustring>                              color;
-		Gtk::TreeModelColumn<Glib::ustring>                              label;
+		Gtk::TreeModelColumn<std::string>                              color;
+		Gtk::TreeModelColumn<std::string>                              label;
 
 		SampleFormatCols () { add(ptr); add(color); add(label); }
 	};
@@ -286,8 +286,8 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	{
 	  public:
 		Gtk::TreeModelColumn<ARDOUR::HasSampleFormat::DitherTypePtr>   ptr;
-		Gtk::TreeModelColumn<Glib::ustring>                            color;
-		Gtk::TreeModelColumn<Glib::ustring>                            label;
+		Gtk::TreeModelColumn<std::string>                            color;
+		Gtk::TreeModelColumn<std::string>                            label;
 
 		DitherTypeCols () { add(ptr); add (color); add(label); }
 	};

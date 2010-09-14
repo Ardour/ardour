@@ -1215,7 +1215,7 @@ Mixer_UI::route_group_property_changed (RouteGroup* group, const PropertyChange&
 }
 
 void
-Mixer_UI::route_group_name_edit (const Glib::ustring& path, const Glib::ustring& new_text)
+Mixer_UI::route_group_name_edit (const std::string& path, const std::string& new_text)
 {
 	RouteGroup* group;
 	TreeIter iter;
@@ -1259,7 +1259,7 @@ Mixer_UI::route_group_row_change (const Gtk::TreeModel::Path&, const Gtk::TreeMo
 		}
 	}
 
-	Glib::ustring name = (*iter)[group_columns.text];
+	std::string name = (*iter)[group_columns.text];
 
 	if (name != group->name()) {
 		group->set_name (name);

@@ -55,7 +55,7 @@ class ExportPresetSelector : public Gtk::HBox
 	{
 	  public:
 		Gtk::TreeModelColumn<PresetPtr>      preset;
-		Gtk::TreeModelColumn<Glib::ustring>  label;
+		Gtk::TreeModelColumn<std::string>  label;
 
 		PresetCols () { add (preset); add (label); }
 	};

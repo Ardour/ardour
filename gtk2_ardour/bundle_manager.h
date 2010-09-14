@@ -103,7 +103,7 @@ class BundleManager : public ArdourDialog
 			add (bundle);
 		}
 
-		Gtk::TreeModelColumn<Glib::ustring> name;
+		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::UserBundle> > bundle;
 	};
 

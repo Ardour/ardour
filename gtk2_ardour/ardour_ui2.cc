@@ -165,7 +165,7 @@ ARDOUR_UI::status_bar_button_press (GdkEventButton* ev)
 void
 ARDOUR_UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuffer::Tag> ptag, RefPtr<TextBuffer::Tag> mtag, const char *msg)
 {
-	ustring text;
+	string text;
 
 	UI::display_message (prefix, prefix_len, ptag, mtag, msg);
 #ifdef TOP_MENUBAR
@@ -880,7 +880,7 @@ ARDOUR_UI::shuttle_unit_clicked ()
 void
 ARDOUR_UI::shuttle_style_changed ()
 {
-	ustring str = shuttle_style_button.get_active_text ();
+	string str = shuttle_style_button.get_active_text ();
 
 	if (str == _("sprung")) {
 		Config->set_shuttle_behaviour (Sprung);

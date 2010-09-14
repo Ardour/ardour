@@ -456,7 +456,7 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange& ch
 }
 
 void
-EditorRouteGroups::name_edit (const Glib::ustring& path, const Glib::ustring& new_text)
+EditorRouteGroups::name_edit (const std::string& path, const std::string& new_text)
 {
 	RouteGroup* group;
 	TreeIter iter;

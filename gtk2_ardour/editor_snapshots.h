@@ -45,8 +45,8 @@ private:
 			add (visible_name);
 			add (real_name);
 		}
-		Gtk::TreeModelColumn<Glib::ustring> visible_name;
-		Gtk::TreeModelColumn<Glib::ustring> real_name;
+		Gtk::TreeModelColumn<std::string> visible_name;
+		Gtk::TreeModelColumn<std::string> real_name;
 	};
 
 	Columns _columns;
@@ -56,7 +56,7 @@ private:
 
 	bool button_press (GdkEventButton *);
 	void selection_changed ();
-	void popup_context_menu (int, int32_t, Glib::ustring);
-	void remove (Glib::ustring);
-	void rename (Glib::ustring);
+	void popup_context_menu (int, int32_t, std::string);
+	void remove (std::string);
+	void rename (std::string);
 };

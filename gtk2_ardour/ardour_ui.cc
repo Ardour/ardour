@@ -1228,8 +1228,8 @@ ARDOUR_UI::open_recent_session ()
 			return;
 		}
 
-		Glib::ustring path = (*i)[recent_session_columns.fullpath];
-		Glib::ustring state = (*i)[recent_session_columns.visible_name];
+		std::string path = (*i)[recent_session_columns.fullpath];
+		std::string state = (*i)[recent_session_columns.visible_name];
 
 		_session_is_new = false;
 
@@ -2248,7 +2248,7 @@ ARDOUR_UI::fontconfig_dialog ()
 	   may not and it can take a while to build it. Warn them.
 	*/
 
-	Glib::ustring fontconfig = Glib::build_filename (Glib::get_home_dir(), ".fontconfig");
+	std::string fontconfig = Glib::build_filename (Glib::get_home_dir(), ".fontconfig");
 
 	if (!Glib::file_test (fontconfig, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
 		MessageDialog msg (*_startup,
@@ -2269,7 +2269,7 @@ ARDOUR_UI::fontconfig_dialog ()
 }
 
 void
-ARDOUR_UI::parse_cmdline_path (const Glib::ustring& cmdline_path, Glib::ustring& session_name, Glib::ustring& session_path, bool& existing_session)
+ARDOUR_UI::parse_cmdline_path (const std::string& cmdline_path, std::string& session_name, std::string& session_path, bool& existing_session)
 {
 	existing_session = false;
 
@@ -2288,7 +2288,7 @@ ARDOUR_UI::parse_cmdline_path (const Glib::ustring& cmdline_path, Glib::ustring&
 }
 
 int
-ARDOUR_UI::load_cmdline_session (const Glib::ustring& session_name, const Glib::ustring& session_path, bool& existing_session)
+ARDOUR_UI::load_cmdline_session (const std::string& session_name, const std::string& session_path, bool& existing_session)
 {
 	/* when this is called, the backend audio system must be running */
 
@@ -2304,7 +2304,7 @@ ARDOUR_UI::load_cmdline_session (const Glib::ustring& session_name, const Glib::
 
 	if (Glib::file_test (session_path, Glib::FILE_TEST_IS_DIR)) {
 
-		Glib::ustring predicted_session_file;
+		std::string predicted_session_file;
 
 		predicted_session_file = session_path;
 		predicted_session_file += '/';
@@ -2337,9 +2337,9 @@ ARDOUR_UI::load_cmdline_session (const Glib::ustring& session_name, const Glib::
 }
 
 bool
-ARDOUR_UI::ask_about_loading_existing_session (const Glib::ustring& session_path)
+ARDOUR_UI::ask_about_loading_existing_session (const std::string& session_path)
 {
-	Glib::ustring str = string_compose (_("This session\n%1\nalready exists. Do you want to open it?"), session_path);
+	std::string str = string_compose (_("This session\n%1\nalready exists. Do you want to open it?"), session_path);
 
 	MessageDialog msg (str,
 			   false,
@@ -2363,7 +2363,7 @@ ARDOUR_UI::ask_about_loading_existing_session (const Glib::ustring& session_path
 }
 
 int
-ARDOUR_UI::build_session_from_nsd (const Glib::ustring& session_path, const Glib::ustring& session_name)
+ARDOUR_UI::build_session_from_nsd (const std::string& session_path, const std::string& session_name)
 {
         BusProfile bus_profile;
 
@@ -2415,7 +2415,7 @@ ARDOUR_UI::build_session_from_nsd (const Glib::ustring& session_path, const Glib
 }
 
 void
-ARDOUR_UI::idle_load (const Glib::ustring& path)
+ARDOUR_UI::idle_load (const std::string& path)
 {
 	if (_session) {
 		if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
@@ -2565,7 +2565,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 			if (likely_new) {
 
-				Glib::ustring existing = Glib::build_filename (session_path, session_name);
+				std::string existing = Glib::build_filename (session_path, session_name);
 
 				if (!ask_about_loading_existing_session (existing)) {
 					ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
@@ -2584,7 +2584,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 				continue;
 			}
 
-                        if (session_name.find ('/') != Glib::ustring::npos) {
+                        if (session_name.find ('/') != std::string::npos) {
                                 MessageDialog msg (*_startup, _("To ensure compatibility with various systems\n"
                                                                           "session names may not contain a '/' character"));
                                 msg.run ();
@@ -2592,7 +2592,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
                                 continue;
                         }
 
-                        if (session_name.find ('\\') != Glib::ustring::npos) {
+                        if (session_name.find ('\\') != std::string::npos) {
                                 MessageDialog msg (*_startup, _("To ensure compatibility with various systems\n"
                                                                           "session names may not contain a '\\' character"));
                                 msg.run ();
@@ -2641,7 +2641,7 @@ ARDOUR_UI::close_session()
 }
 
 int
-ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_name, Glib::ustring mix_template)
+ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, std::string mix_template)
 {
 	Session *new_session;
 	int unload_status;
@@ -2749,7 +2749,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 }
 
 int
-ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_name, BusProfile& bus_profile)
+ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name, BusProfile& bus_profile)
 {
 	Session *new_session;
 	int x;
@@ -2900,8 +2900,8 @@ require some unused files to continue to exist."));
 		    add (visible_name);
 		    add (fullpath);
 	    }
-	    Gtk::TreeModelColumn<Glib::ustring> visible_name;
-	    Gtk::TreeModelColumn<Glib::ustring> fullpath;
+	    Gtk::TreeModelColumn<std::string> visible_name;
+	    Gtk::TreeModelColumn<std::string> fullpath;
 	};
 
 

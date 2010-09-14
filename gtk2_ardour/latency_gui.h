@@ -72,7 +72,7 @@ class LatencyGUI : public Gtk::VBox
 class LatencyDialog : public ArdourDialog
 {
   public:
-	LatencyDialog (const Glib::ustring& title, ARDOUR::Latent&, nframes64_t sample_rate, nframes64_t period_size);
+	LatencyDialog (const std::string& title, ARDOUR::Latent&, nframes64_t sample_rate, nframes64_t period_size);
 	~LatencyDialog() {}
 
   private:

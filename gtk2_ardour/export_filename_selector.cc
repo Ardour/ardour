@@ -294,7 +294,7 @@ ExportFilenameSelector::open_browse_dialog ()
 	int result = dialog.run();
 
 	if (result == Gtk::RESPONSE_OK) {
-		Glib::ustring filename = dialog.get_filename();
+		std::string filename = dialog.get_filename();
 
 		if (filename.length()) {
 			path_entry.set_text (filename);

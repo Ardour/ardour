@@ -116,7 +116,7 @@ class RegionView : public TimeAxisViewItem
 	virtual void region_renamed ();
 	void         region_sync_changed ();
 	
-	Glib::ustring make_name () const;
+	std::string make_name () const;
 	
 	static gint _lock_toggle (ArdourCanvas::Item*, GdkEvent*, void*);
 	void        lock_toggle ();

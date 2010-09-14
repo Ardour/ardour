@@ -53,8 +53,8 @@ class ThemeManager : public ArdourDialog
 		    add (rgba);
 	    }
 
-	    Gtk::TreeModelColumn<Glib::ustring>  name;
-	    Gtk::TreeModelColumn<Glib::ustring>  color;
+	    Gtk::TreeModelColumn<std::string>  name;
+	    Gtk::TreeModelColumn<std::string>  color;
 	    Gtk::TreeModelColumn<Gdk::Color>     gdkcolor;
 	    Gtk::TreeModelColumn<UIConfigVariable<uint32_t> *> pVar;
 	    Gtk::TreeModelColumn<uint32_t>       rgba;

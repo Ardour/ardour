@@ -58,7 +58,7 @@ using Gtkmm2ext::Keyboard;
 sigc::signal<void>  DPIReset;
 
 int
-pixel_width (const ustring& str, Pango::FontDescription& font)
+pixel_width (const string& str, Pango::FontDescription& font)
 {
 	Label foo;
 	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
@@ -71,20 +71,20 @@ pixel_width (const ustring& str, Pango::FontDescription& font)
 	return width;
 }
 
-ustring
-fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses)
+string
+fit_to_pixels (const string& str, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses)
 {
 	Label foo;
 	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
-	ustring::size_type shorter_by = 0;
-	ustring txt;
+	string::size_type shorter_by = 0;
+	string txt;
 
 	layout->set_font_description (font);
 
 	actual_width = 0;
 
-	ustring ustr = str;
-	ustring::iterator last = ustr.end();
+	string ustr = str;
+	string::iterator last = ustr.end();
 	--last; /* now points at final entry */
 
 	txt = ustr;
@@ -780,7 +780,7 @@ get_xpm (std::string name)
 	return xpm_map[name];
 }
 
-Glib::ustring
+std::string
 get_icon_path (const char* cname)
 {
 	string name = cname;
@@ -964,7 +964,7 @@ resize_window_to_proportion_of_monitor (Gtk::Window* window, int max_width, int 
 }
 
 Glib::RefPtr<Gdk::Pixbuf>
-pixbuf_from_ustring(const ustring& name, Pango::FontDescription* font, int clip_width, int clip_height, Gdk::Color fg)
+pixbuf_from_string(const string& name, Pango::FontDescription* font, int clip_width, int clip_height, Gdk::Color fg)
 {
 	static Glib::RefPtr<Gdk::Pixbuf>* empty_pixbuf = 0;
 

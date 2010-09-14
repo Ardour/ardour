@@ -239,7 +239,7 @@ PluginUIWindow::on_hide ()
 }
 
 void
-PluginUIWindow::set_title(const Glib::ustring& title)
+PluginUIWindow::set_title(const std::string& title)
 {
 	//cout << "PluginUIWindow::set_title(\"" << title << "\"" << endl;
 	Gtk::Window::set_title(title);

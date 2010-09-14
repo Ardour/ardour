@@ -148,7 +148,7 @@ MidiListEditor::delete_selected_note ()
 }
 
 void
-MidiListEditor::editing_started (CellEditable*, const ustring& path, int colno)
+MidiListEditor::editing_started (CellEditable*, const string& path, int colno)
 {
 	_current_edit = path;
 	cerr << "Now editing " << _current_edit << " Column " << colno << endl;
@@ -161,7 +161,7 @@ MidiListEditor::editing_canceled ()
 }
 
 void
-MidiListEditor::edited (const Glib::ustring& path, const Glib::ustring& /* text */)
+MidiListEditor::edited (const std::string& path, const std::string& /* text */)
 {
 	TreeModel::iterator iter = model->get_iter (path);
 

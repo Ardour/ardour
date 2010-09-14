@@ -3235,7 +3235,7 @@ Editor::convert_drop_to_paths (
 		return -1;
 	}
         
-	vector<ustring> uris = data.get_uris();
+	vector<string> uris = data.get_uris();
 
 	if (uris.empty()) {
 
@@ -3253,7 +3253,7 @@ Editor::convert_drop_to_paths (
 		   THERE MAY BE NO NULL TERMINATING CHAR!!!
 		*/
 
-		ustring txt = data.get_text();
+		string txt = data.get_text();
 		const char* p;
 		const char* q;
 
@@ -3281,7 +3281,7 @@ Editor::convert_drop_to_paths (
 
 					if (q > p)
 					{
-						uris.push_back (ustring (p, q - p + 1));
+						uris.push_back (string (p, q - p + 1));
 					}
 				}
 			}
@@ -3297,18 +3297,18 @@ Editor::convert_drop_to_paths (
 		}
 	}
 
-	for (vector<ustring>::iterator i = uris.begin(); i != uris.end(); ++i) {
+	for (vector<string>::iterator i = uris.begin(); i != uris.end(); ++i) {
 
 		if ((*i).substr (0,7) == "file://") {
 
-			ustring p = *i;
+			string p = *i;
 			PBD::url_decode (p);
 
 			// scan forward past three slashes
 
-			ustring::size_type slashcnt = 0;
-			ustring::size_type n = 0;
-			ustring::iterator x = p.begin();
+			string::size_type slashcnt = 0;
+			string::size_type n = 0;
+			string::iterator x = p.begin();
 
 			while (slashcnt < 3 && x != p.end()) {
 				if ((*x) == '/') {

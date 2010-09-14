@@ -114,7 +114,7 @@ class PortExportChannelSelector : public ExportChannelSelector
 		/* Static columns */
 
 		Gtk::TreeModelColumn<bool>           selected;
-		Gtk::TreeModelColumn<Glib::ustring>  name;
+		Gtk::TreeModelColumn<std::string>  name;
 		Gtk::TreeModelColumn<ARDOUR::IO *>   io;
 
 		/* Combo list column (shared by all channels) */
@@ -129,7 +129,7 @@ class PortExportChannelSelector : public ExportChannelSelector
 			Channel (RouteCols & cols) { cols.add (port); cols.add (label); }
 
 			Gtk::TreeModelColumn<ARDOUR::AudioPort *>  port;
-			Gtk::TreeModelColumn<Glib::ustring>        label;
+			Gtk::TreeModelColumn<std::string>        label;
 		};
 		std::list<Channel> channels;
 
@@ -147,7 +147,7 @@ class PortExportChannelSelector : public ExportChannelSelector
 
 			Gtk::TreeModelColumn<bool>                  selected;  // not used ATM
 			Gtk::TreeModelColumn<ARDOUR::AudioPort *>   port;
-			Gtk::TreeModelColumn<Glib::ustring>         label;
+			Gtk::TreeModelColumn<std::string>         label;
 		};
 		PortCols port_cols;
 	};
@@ -175,8 +175,8 @@ class PortExportChannelSelector : public ExportChannelSelector
 
 		/* Signal handlers for selections changes in the view */
 
-		void update_toggle_selection (Glib::ustring const & path);
-		void update_selection_text (Glib::ustring const & path, Glib::ustring const & new_text, uint32_t channel);
+		void update_toggle_selection (std::string const & path);
+		void update_selection_text (std::string const & path, std::string const & new_text, uint32_t channel);
 
 		RouteCols                     route_cols;
 		Glib::RefPtr<Gtk::ListStore>  route_list;

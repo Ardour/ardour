@@ -117,9 +117,9 @@ fixup_bundle_environment ()
 
 	_NSGetExecutablePath (execpath, &pathsz);
 
-	Glib::ustring exec_path (execpath);
-	Glib::ustring dir_path = Glib::path_get_dirname (exec_path);
-	Glib::ustring path;
+	std::string exec_path (execpath);
+	std::string dir_path = Glib::path_get_dirname (exec_path);
+	std::string path;
 	const char *cstr = getenv ("PATH");
 
 	/* ensure that we find any bundled executables (e.g. JACK),
@@ -367,7 +367,7 @@ int ardour_main (int argc, char *argv[])
 int main (int argc, char *argv[])
 #endif
 {
-	vector<Glib::ustring> null_file_list;
+	vector<std::string> null_file_list;
 
 #ifdef __APPLE__
 	fixup_bundle_environment ();

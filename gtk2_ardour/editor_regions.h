@@ -85,21 +85,21 @@ private:
 			add (property_toggles_visible);
 		}
 
-		Gtk::TreeModelColumn<Glib::ustring> name;
+		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Region> > region;
 		Gtk::TreeModelColumn<Gdk::Color> color_;
-		Gtk::TreeModelColumn<Glib::ustring> start;
-		Gtk::TreeModelColumn<Glib::ustring> end;
-		Gtk::TreeModelColumn<Glib::ustring> length;
-		Gtk::TreeModelColumn<Glib::ustring> sync;
-		Gtk::TreeModelColumn<Glib::ustring> fadein;
-		Gtk::TreeModelColumn<Glib::ustring> fadeout;
+		Gtk::TreeModelColumn<std::string> start;
+		Gtk::TreeModelColumn<std::string> end;
+		Gtk::TreeModelColumn<std::string> length;
+		Gtk::TreeModelColumn<std::string> sync;
+		Gtk::TreeModelColumn<std::string> fadein;
+		Gtk::TreeModelColumn<std::string> fadeout;
 		Gtk::TreeModelColumn<bool> locked;
 		Gtk::TreeModelColumn<bool> glued;
 		Gtk::TreeModelColumn<bool> muted;
 		Gtk::TreeModelColumn<bool> opaque;
-		Gtk::TreeModelColumn<Glib::ustring> used;
-		Gtk::TreeModelColumn<Glib::ustring> path;
+		Gtk::TreeModelColumn<std::string> used;
+		Gtk::TreeModelColumn<std::string> path;
 		/** used to indicate whether the locked/glued/muted/opaque should be visible or not */
 		Gtk::TreeModelColumn<bool> property_toggles_visible;
 	};
@@ -111,11 +111,11 @@ private:
 	sigc::connection _change_connection;
 	bool set_selected_in_subrow (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, int);
 	bool selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
-	void name_edit (const Glib::ustring&, const Glib::ustring&);
-	void locked_changed (Glib::ustring const &);
-	void glued_changed (Glib::ustring const &);
-	void muted_changed (Glib::ustring const &);
-	void opaque_changed (Glib::ustring const &);
+	void name_edit (const std::string&, const std::string&);
+	void locked_changed (std::string const &);
+	void glued_changed (std::string const &);
+	void muted_changed (std::string const &);
+	void opaque_changed (std::string const &);
 
 	bool key_press (GdkEventKey *);
 	bool button_press (GdkEventButton *);

@@ -68,7 +68,7 @@ EditorSnapshots::selection_changed ()
 
 		TreeModel::iterator i = _display.get_selection()->get_selected();
 
-		Glib::ustring snap_name = (*i)[_columns.real_name];
+		std::string snap_name = (*i)[_columns.real_name];
 
 		if (snap_name.length() == 0) {
 			return;
@@ -111,7 +111,7 @@ EditorSnapshots::button_press (GdkEventButton* ev)
  * @snapshot_name Name of the snapshot that the menu click was over.
  */
 void
-EditorSnapshots::popup_context_menu (int button, int32_t time, Glib::ustring snapshot_name)
+EditorSnapshots::popup_context_menu (int button, int32_t time, std::string snapshot_name)
 {
 	using namespace Menu_Helpers;
 
@@ -128,7 +128,7 @@ EditorSnapshots::popup_context_menu (int button, int32_t time, Glib::ustring sna
 }
 
 void
-EditorSnapshots::rename (Glib::ustring old_name)
+EditorSnapshots::rename (std::string old_name)
 {
 	ArdourPrompter prompter(true);
 
@@ -150,7 +150,7 @@ EditorSnapshots::rename (Glib::ustring old_name)
 
 
 void
-EditorSnapshots::remove (Glib::ustring name)
+EditorSnapshots::remove (std::string name)
 {
 	vector<string> choices;
 

@@ -122,12 +122,12 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void show_about ();
 	void hide_about ();
 
-	void idle_load (const Glib::ustring& path);
+	void idle_load (const std::string& path);
 	void finish();
 
-	int load_session (const Glib::ustring& path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
+	int load_session (const std::string& path, const std::string& snapshot, std::string mix_template = std::string());
 	bool session_loaded;
-	int build_session (const Glib::ustring& path, const Glib::ustring& snapshot, ARDOUR::BusProfile&);
+	int build_session (const std::string& path, const std::string& snapshot, ARDOUR::BusProfile&);
 	bool session_is_new() const { return _session_is_new; }
 
 	ARDOUR::Session* the_session() { return _session; }
@@ -141,10 +141,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	}
 
 	int get_session_parameters (bool quit_on_cancel, bool should_be_new = false, std::string load_template = "");
-	void parse_cmdline_path (const Glib::ustring& cmdline_path, Glib::ustring& session_name, Glib::ustring& session_path, bool& existing_session);
-	int  load_cmdline_session (const Glib::ustring& session_name, const Glib::ustring& session_path, bool& existing_session);
-	int  build_session_from_nsd (const Glib::ustring& session_name, const Glib::ustring& session_path);
-	bool ask_about_loading_existing_session (const Glib::ustring& session_path);
+	void parse_cmdline_path (const std::string& cmdline_path, std::string& session_name, std::string& session_path, bool& existing_session);
+	int  load_cmdline_session (const std::string& session_name, const std::string& session_path, bool& existing_session);
+	int  build_session_from_nsd (const std::string& session_name, const std::string& session_path);
+	bool ask_about_loading_existing_session (const std::string& session_path);
 
 	/// @return true if session was successfully unloaded.
 	int unload_session (bool hide_stuff = false);
@@ -479,8 +479,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 		    add (visible_name);
 		    add (fullpath);
 	    }
-	    Gtk::TreeModelColumn<Glib::ustring> visible_name;
-	    Gtk::TreeModelColumn<Glib::ustring> fullpath;
+	    Gtk::TreeModelColumn<std::string> visible_name;
+	    Gtk::TreeModelColumn<std::string> fullpath;
 	};
 
 	RecentSessionModelColumns    recent_session_columns;

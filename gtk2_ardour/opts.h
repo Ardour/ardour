@@ -21,7 +21,6 @@
 #define __ardour_opts_h__
 
 #include <string>
-#include <glibmm/ustring.h>
 
 namespace ARDOUR_COMMAND_LINE {
 
@@ -37,7 +36,7 @@ extern bool   try_hw_optimization;
 extern bool no_connect_ports;
 extern bool   use_gtk_theme;
 extern std::string keybindings_path;
-extern Glib::ustring menus_file;
+extern std::string menus_file;
 extern bool   finder_invoked_ardour;
 extern std::string immediate_save;
 extern std::string jack_session_uuid;

@@ -35,7 +35,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 
-ExportDialog::ExportDialog (PublicEditor & editor, Glib::ustring title) :
+ExportDialog::ExportDialog (PublicEditor & editor, std::string title) :
   ArdourDialog (title),
   editor (editor),
 
@@ -198,7 +198,7 @@ void
 ExportDialog::notify_errors ()
 {
 	if (status->errors()) {
-		Glib::ustring txt = _("Export has been aborted due to an error!\nSee the Log for details.");
+		std::string txt = _("Export has been aborted due to an error!\nSee the Log for details.");
 		Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
 		msg.run();
 	}

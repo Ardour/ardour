@@ -65,7 +65,7 @@ CanvasProgramChange::initialize_popup_menus()
 	     bank != patch_banks.end();
 	     ++bank) {
 		Glib::RefPtr<Glib::Regex> underscores = Glib::Regex::create("_");
-		Glib::ustring replacement(" ");
+		std::string replacement(" ");
 
 		Gtk::Menu& patch_bank_menu = *manage(new Gtk::Menu());
 
@@ -75,7 +75,7 @@ CanvasProgramChange::initialize_popup_menus()
 		for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
 		     patch != patches.end();
 		     ++patch) {
-			Glib::ustring name = underscores->replace((*patch)->name().c_str(), -1, 0, replacement);
+			std::string name = underscores->replace((*patch)->name().c_str(), -1, 0, replacement);
 
 			patch_menus.push_back(
 				Gtk::Menu_Helpers::MenuElem(
@@ -86,7 +86,7 @@ CanvasProgramChange::initialize_popup_menus()
 		}
 
 
-		Glib::ustring name = underscores->replace((*bank)->name().c_str(), -1, 0, replacement);
+		std::string name = underscores->replace((*bank)->name().c_str(), -1, 0, replacement);
 
 		patch_bank_menus.push_back(
 			Gtk::Menu_Helpers::MenuElem(

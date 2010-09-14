@@ -51,11 +51,11 @@ class ArdourStartup : public Gtk::Assistant {
 	void set_new_only (bool);
         void set_load_template( std::string load_template );
 
-	Glib::ustring session_name (bool& should_be_new);
-	Glib::ustring session_folder ();
+	std::string session_name (bool& should_be_new);
+	std::string session_folder ();
 
 	bool use_session_template();
-	Glib::ustring session_template_name();
+	std::string session_template_name();
 
 	EngineControl* engine_control() { return engine_dialog; }
 
@@ -153,8 +153,8 @@ class ArdourStartup : public Gtk::Assistant {
 		    add (visible_name);
 		    add (fullpath);
 	    }
-	    Gtk::TreeModelColumn<Glib::ustring> visible_name;
-	    Gtk::TreeModelColumn<Glib::ustring> fullpath;
+	    Gtk::TreeModelColumn<std::string> visible_name;
+	    Gtk::TreeModelColumn<std::string> fullpath;
 	};
 
 	RecentSessionModelColumns    recent_session_columns;

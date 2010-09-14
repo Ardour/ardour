@@ -91,7 +91,7 @@ NagScreen::nag ()
 NagScreen*
 NagScreen::maybe_nag (std::string why)
 {
-	Glib::ustring path;
+	std::string path;
 	bool really_subscribed;
 	bool maybe_subscribed;
 
@@ -113,7 +113,7 @@ NagScreen::maybe_nag (std::string why)
 void
 NagScreen::mark_never_again ()
 {
-	Glib::ustring path;
+	std::string path;
 
 	path = Glib::build_filename (user_config_directory().to_string(), ".nevernag");
 
@@ -123,7 +123,7 @@ NagScreen::mark_never_again ()
 void
 NagScreen::mark_subscriber ()
 {
-	Glib::ustring path;
+	std::string path;
 
 	path = Glib::build_filename (user_config_directory().to_string(), ".askedaboutsub");
 
@@ -133,7 +133,7 @@ NagScreen::mark_subscriber ()
 void
 NagScreen::mark_affirmed_subscriber ()
 {
-	Glib::ustring path;
+	std::string path;
 
 	path = Glib::build_filename (user_config_directory().to_string(), ".isubscribe");
 
@@ -143,7 +143,7 @@ NagScreen::mark_affirmed_subscriber ()
 bool
 NagScreen::is_subscribed (bool& really)
 {
-	Glib::ustring path;
+	std::string path;
 
 	really = false;
 

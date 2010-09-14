@@ -128,7 +128,7 @@ LV2PluginUI::LV2PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 }
 
 void
-LV2PluginUI::lv2ui_instantiate(const Glib::ustring& title)
+LV2PluginUI::lv2ui_instantiate(const std::string& title)
 {
 	LV2_Feature** features;
 	LV2_Feature** features_src;
@@ -274,7 +274,7 @@ LV2PluginUI::is_update_wanted(uint32_t /*index*/)
 }
 
 bool
-LV2PluginUI::on_window_show(const Glib::ustring& title)
+LV2PluginUI::on_window_show(const std::string& title)
 {
 	//cout << "on_window_show - " << title << endl; flush(cout);
 

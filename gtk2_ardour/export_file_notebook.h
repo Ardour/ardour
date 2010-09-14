@@ -39,7 +39,7 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 	void set_session_and_manager (ARDOUR::Session * s, boost::shared_ptr<ARDOUR::ExportProfileManager> manager);
 	void sync_with_manager ();
 
-	Glib::ustring get_nth_format_name (uint32_t n);
+	std::string get_nth_format_name (uint32_t n);
 
 	sigc::signal<void> CriticalSelectionChanged;
 
@@ -77,7 +77,7 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 
 		Gtk::Widget & get_tab_widget () { return tab_widget; }
 		void set_remove_sensitive (bool value);
-		Glib::ustring get_format_name () const;
+		std::string get_format_name () const;
 
 		ARDOUR::ExportProfileManager::FormatStatePtr   get_format_state () const { return format_state; }
 		ARDOUR::ExportProfileManager::FilenameStatePtr get_filename_state () const { return filename_state; }

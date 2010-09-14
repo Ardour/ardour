@@ -42,7 +42,7 @@ char* ARDOUR_COMMAND_LINE::curvetest_file = 0;
 bool ARDOUR_COMMAND_LINE::try_hw_optimization = true;
 bool ARDOUR_COMMAND_LINE::no_connect_ports = false;
 string ARDOUR_COMMAND_LINE::keybindings_path = ""; /* empty means use builtin default */
-Glib::ustring ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
+std::string ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
 bool ARDOUR_COMMAND_LINE::finder_invoked_ardour = false;
 string ARDOUR_COMMAND_LINE::immediate_save;
 string ARDOUR_COMMAND_LINE::jack_session_uuid;

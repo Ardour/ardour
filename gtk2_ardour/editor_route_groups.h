@@ -64,7 +64,7 @@ private:
 
 	void add (ARDOUR::RouteGroup *);
 	void row_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
-	void name_edit (const Glib::ustring&, const Glib::ustring&);
+	void name_edit (const std::string&, const std::string&);
 	void button_clicked ();
 	gint button_press_event (GdkEventButton* ev);
 	void groups_changed ();

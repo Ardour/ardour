@@ -24,8 +24,6 @@
 #include <unistd.h>
 #include <algorithm>
 
-#include <glibmm/ustring.h>
-
 #include <sndfile.h>
 
 #include "pbd/pthread_utils.h"
@@ -71,7 +69,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace Editing;
-using Glib::ustring;
+using std::string;
 
 /* Functions supporting the incorporation of external (non-captured) audio material into ardour */
 
@@ -150,8 +148,8 @@ Editor::external_audio_dialog ()
 
 		/* lets do it */
 
-		vector<ustring> upaths = sfbrowser->get_paths ();
-                for (vector<ustring>::iterator x = upaths.begin(); x != upaths.end(); ++x) {
+		vector<string> upaths = sfbrowser->get_paths ();
+                for (vector<string>::iterator x = upaths.begin(); x != upaths.end(); ++x) {
                         paths.push_back (*x);
                 }
                 

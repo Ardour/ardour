@@ -485,7 +485,7 @@ ExportFormatDialog::init_encoding_option_widgets ()
 }
 
 void
-ExportFormatDialog::update_compatibility_selection (Glib::ustring const & path)
+ExportFormatDialog::update_compatibility_selection (std::string const & path)
 {
 
 	Gtk::TreeModel::iterator iter = compatibility_view.get_model ()->get_iter (path);
@@ -668,7 +668,7 @@ ExportFormatDialog::change_dither_type_compatibility (bool compatibility, WeakDi
 template<typename T, typename ColsT>
 void
 ExportFormatDialog::change_compatibility (bool compatibility, boost::weak_ptr<T> w_ptr, Glib::RefPtr<Gtk::ListStore> & list, ColsT & cols,
-                                          Glib::ustring const & c_incompatible, Glib::ustring const & c_compatible)
+                                          std::string const & c_incompatible, std::string const & c_compatible)
 {
 	boost::shared_ptr<T> ptr = w_ptr.lock();
 

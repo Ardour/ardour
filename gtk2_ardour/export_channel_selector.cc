@@ -219,11 +219,11 @@ PortExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
 			Glib::RefPtr<Gtk::ListStore> port_list = r_it->get_value (route_cols.port_list_col);
 			std::set<AudioPort *> route_ports;
 			std::set<AudioPort *> intersection;
-			std::map<AudioPort *, ustring> port_labels;
+			std::map<AudioPort *, string> port_labels;
 
 			for (Gtk::ListStore::Children::const_iterator p_it = port_list->children().begin(); p_it != port_list->children().end(); ++p_it) {
 				route_ports.insert ((*p_it)->get_value (route_cols.port_cols.port));
-				port_labels.insert (std::pair<AudioPort*, ustring> ((*p_it)->get_value (route_cols.port_cols.port),
+				port_labels.insert (std::pair<AudioPort*, string> ((*p_it)->get_value (route_cols.port_cols.port),
 				                                                    (*p_it)->get_value (route_cols.port_cols.label)));
 			}
 
@@ -244,13 +244,13 @@ PortExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
 
 				for (uint32_t chn = 1; chn < i; ++chn) {
 					r_it->set_value (route_cols.get_channel (chn).port, (AudioPort *) 0);
-					r_it->set_value (route_cols.get_channel (chn).label, ustring ("(none)"));
+					r_it->set_value (route_cols.get_channel (chn).label, string ("(none)"));
 				}
 			}
 
 			AudioPort * port = *intersection.begin();
-			std::map<AudioPort *, ustring>::iterator label_it = port_labels.find (port);
-			ustring label = label_it != port_labels.end() ? label_it->second : "error";
+			std::map<AudioPort *, string>::iterator label_it = port_labels.find (port);
+			string label = label_it != port_labels.end() ? label_it->second : "error";
 
 			r_it->set_value (route_cols.get_channel (i).port, port);
 			r_it->set_value (route_cols.get_channel (i).label, label);
@@ -328,7 +328,7 @@ PortExportChannelSelector::ChannelTreeView::set_channel_count (uint32_t channels
 		/* put data into view */
 
 		for (Gtk::ListStore::Children::iterator it = route_list->children().begin(); it != route_list->children().end(); ++it) {
-			Glib::ustring label = it->get_value(route_cols.selected) ? "(none)" : "";
+			std::string label = it->get_value(route_cols.selected) ? "(none)" : "";
 			it->set_value (route_cols.get_channel (n_channels).label, label);
 			it->set_value (route_cols.get_channel (n_channels).port, (AudioPort *) 0);
 		}
@@ -384,7 +384,7 @@ PortExportChannelSelector::ChannelTreeView::update_config ()
 }
 
 void
-PortExportChannelSelector::ChannelTreeView::update_toggle_selection (Glib::ustring const & path)
+PortExportChannelSelector::ChannelTreeView::update_toggle_selection (std::string const & path)
 {
 	Gtk::TreeModel::iterator iter = get_model ()->get_iter (path);
 	bool selected = iter->get_value (route_cols.selected);
@@ -392,11 +392,11 @@ PortExportChannelSelector::ChannelTreeView::update_toggle_selection (Glib::ustri
 	for (uint32_t i = 1; i <= n_channels; ++i) {
 
 		if (!selected) {
-			iter->set_value (route_cols.get_channel (i).label, Glib::ustring (""));
+			iter->set_value (route_cols.get_channel (i).label, std::string (""));
 			continue;
 		}
 
-		iter->set_value (route_cols.get_channel (i).label, Glib::ustring("(none)"));
+		iter->set_value (route_cols.get_channel (i).label, std::string("(none)"));
 		iter->set_value (route_cols.get_channel (i).port, (AudioPort *) 0);
 
 		Glib::RefPtr<Gtk::ListStore> port_list = iter->get_value (route_cols.port_list_col);
@@ -405,7 +405,7 @@ PortExportChannelSelector::ChannelTreeView::update_toggle_selection (Glib::ustri
 
 		for (port_it = port_list->children().begin(); port_it != port_list->children().end(); ++port_it) {
 			if (port_number == i) {
-				iter->set_value (route_cols.get_channel (i).label, (Glib::ustring) (*port_it)->get_value (route_cols.port_cols.label));
+				iter->set_value (route_cols.get_channel (i).label, (std::string) (*port_it)->get_value (route_cols.port_cols.label));
 				iter->set_value (route_cols.get_channel (i).port, (AudioPort *) (*port_it)->get_value (route_cols.port_cols.port));
 			}
 
@@ -417,7 +417,7 @@ PortExportChannelSelector::ChannelTreeView::update_toggle_selection (Glib::ustri
 }
 
 void
-PortExportChannelSelector::ChannelTreeView::update_selection_text (Glib::ustring const & path, Glib::ustring const & new_text, uint32_t channel)
+PortExportChannelSelector::ChannelTreeView::update_selection_text (std::string const & path, std::string const & new_text, uint32_t channel)
 {
 	Gtk::TreeModel::iterator iter = get_model ()->get_iter (path);
 	iter->set_value (route_cols.get_channel (channel).label, new_text);
@@ -426,7 +426,7 @@ PortExportChannelSelector::ChannelTreeView::update_selection_text (Glib::ustring
 	Gtk::ListStore::Children::iterator port_it;
 
 	for (port_it = port_list->children().begin(); port_it != port_list->children().end(); ++port_it) {
-		Glib::ustring label = port_it->get_value (route_cols.port_cols.label);
+		std::string label = port_it->get_value (route_cols.port_cols.label);
 		if (label == new_text) {
 			iter->set_value (route_cols.get_channel (channel).port, (AudioPort *) (*port_it)[route_cols.port_cols.port]);
 		}

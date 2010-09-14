@@ -88,7 +88,7 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	{
 	  public:
 		Gtk::TreeModelColumn<DateFormat>     format;
-		Gtk::TreeModelColumn<Glib::ustring>  label;
+		Gtk::TreeModelColumn<std::string>  label;
 
 		DateFormatCols () { add(format); add(label); }
 	};
@@ -104,7 +104,7 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	{
 	  public:
 		Gtk::TreeModelColumn<TimeFormat>     format;
-		Gtk::TreeModelColumn<Glib::ustring>  label;
+		Gtk::TreeModelColumn<std::string>  label;
 
 		TimeFormatCols () { add(format); add(label); }
 	};

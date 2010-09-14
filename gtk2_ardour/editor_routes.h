@@ -59,15 +59,15 @@ public:
 private:
 
 	void initial_display ();
-	void on_tv_rec_enable_changed (Glib::ustring const &);
-	void on_tv_mute_enable_toggled (Glib::ustring const &);
-	void on_tv_solo_enable_toggled (Glib::ustring const &);
-	void on_tv_solo_isolate_toggled (Glib::ustring const &);
-	void on_tv_solo_safe_toggled (Glib::ustring const &);
+	void on_tv_rec_enable_changed (std::string const &);
+	void on_tv_mute_enable_toggled (std::string const &);
+	void on_tv_solo_enable_toggled (std::string const &);
+	void on_tv_solo_isolate_toggled (std::string const &);
+	void on_tv_solo_safe_toggled (std::string const &);
 	void build_menu ();
 	void show_menu ();
 	void route_deleted (Gtk::TreeModel::Path const &);
-	void visible_changed (Glib::ustring const &);
+	void visible_changed (std::string const &);
 	void reordered (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &, int *);
 	bool button_press (GdkEventButton *);
 	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route>);
@@ -95,7 +95,7 @@ private:
 	
 	void track_list_reorder (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const & iter, int* new_order);
 	bool selection_filter (Glib::RefPtr<Gtk::TreeModel> const &, Gtk::TreeModel::Path const &, bool);
-	void name_edit (Glib::ustring const &, Glib::ustring const &);
+	void name_edit (std::string const &, std::string const &);
 	void solo_changed_so_update_mute ();
 
 	struct ModelColumns : public Gtk::TreeModel::ColumnRecord {
@@ -113,7 +113,7 @@ private:
 			add (name_editable);
 		}
 		
-		Gtk::TreeModelColumn<Glib::ustring>  text;
+		Gtk::TreeModelColumn<std::string>  text;
 		Gtk::TreeModelColumn<bool>           visible;
 		Gtk::TreeModelColumn<uint32_t>       rec_state;
 		Gtk::TreeModelColumn<uint32_t>       mute_state;

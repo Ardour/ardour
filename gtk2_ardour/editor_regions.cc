@@ -196,7 +196,8 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 			boost::shared_ptr<Region> proxy = parent[_columns.region];
 			proxy.reset ();
 		} else {
-			if ((*iter)[_columns.name] != _("Hidden")) {
+                        string s = (*iter)[_columns.name];
+			if (s != _("Hidden")) {
 				parent = *(_model->insert(iter));
 				parent[_columns.name] = _("Hidden");
 				boost::shared_ptr<Region> proxy = parent[_columns.region];
@@ -998,8 +999,8 @@ EditorRegions::sorter (TreeModel::iterator a, TreeModel::iterator b)
 	boost::shared_ptr<AudioRegion> region2 = boost::dynamic_pointer_cast<AudioRegion> (r2);
 
 	if (region1 == 0 || region2 == 0) {
-		Glib::ustring s1;
-		Glib::ustring s2;
+		std::string s1;
+		std::string s2;
 		switch (_sort_type) {
 		case ByName:
 			s1 = (*a)[_columns.name];
@@ -1157,7 +1158,7 @@ EditorRegions::selection_filter (const RefPtr<TreeModel>& model, const TreeModel
 }
 
 void
-EditorRegions::name_edit (const Glib::ustring& path, const Glib::ustring& new_text)
+EditorRegions::name_edit (const std::string& path, const std::string& new_text)
 {
 	boost::shared_ptr<Region> region;
 	TreeIter iter;
@@ -1229,7 +1230,7 @@ EditorRegions::get_single_selection ()
 }
 
 void
-EditorRegions::locked_changed (Glib::ustring const & path)
+EditorRegions::locked_changed (std::string const & path)
 {
 	TreeIter i = _model->get_iter (path);
 	if (i) {
@@ -1241,7 +1242,7 @@ EditorRegions::locked_changed (Glib::ustring const & path)
 }
 
 void
-EditorRegions::glued_changed (Glib::ustring const & path)
+EditorRegions::glued_changed (std::string const & path)
 {
 	TreeIter i = _model->get_iter (path);
 	if (i) {
@@ -1255,7 +1256,7 @@ EditorRegions::glued_changed (Glib::ustring const & path)
 }
 
 void
-EditorRegions::muted_changed (Glib::ustring const & path)
+EditorRegions::muted_changed (std::string const & path)
 {
 	TreeIter i = _model->get_iter (path);
 	if (i) {
@@ -1268,7 +1269,7 @@ EditorRegions::muted_changed (Glib::ustring const & path)
 }
 
 void
-EditorRegions::opaque_changed (Glib::ustring const & path)
+EditorRegions::opaque_changed (std::string const & path)
 {
 	TreeIter i = _model->get_iter (path);
 	if (i) {

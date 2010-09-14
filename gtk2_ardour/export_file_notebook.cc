@@ -88,7 +88,7 @@ ExportFileNotebook::sync_with_manager ()
 	CriticalSelectionChanged ();
 }
 
-Glib::ustring
+std::string
 ExportFileNotebook::get_nth_format_name (uint32_t n)
 {
 	FilePage * page;
@@ -232,7 +232,7 @@ ExportFileNotebook::FilePage::set_remove_sensitive (bool value)
 	tab_close_button.set_sensitive (value);
 }
 
-Glib::ustring
+std::string
 ExportFileNotebook::FilePage::get_format_name () const
 {
 	if (format_state && format_state->format) {

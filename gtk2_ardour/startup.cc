@@ -180,7 +180,7 @@ ArdourStartup::use_session_template ()
 	}
 }
 
-Glib::ustring
+std::string
 ArdourStartup::session_template_name ()
 {
         if (!load_template_override.empty()) {
@@ -189,7 +189,7 @@ ArdourStartup::session_template_name ()
         }
 
 	if (ic_existing_session_button.get_active()) {
-		return ustring();
+		return string();
 	}
 
 	if (use_template_button.get_active()) {
@@ -203,7 +203,7 @@ ArdourStartup::session_template_name ()
 	}
 }
 
-Glib::ustring
+std::string
 ArdourStartup::session_name (bool& should_be_new)
 {
 	if (ic_new_session_button.get_active()) {
@@ -229,11 +229,11 @@ ArdourStartup::session_name (bool& should_be_new)
 	}
 }
 
-Glib::ustring
+std::string
 ArdourStartup::session_folder ()
 {
 	if (ic_new_session_button.get_active()) {
-		Glib::ustring legal_session_folder_name = legalize_for_path (new_name_entry.get_text());
+		std::string legal_session_folder_name = legalize_for_path (new_name_entry.get_text());
 		return Glib::build_filename (new_folder_chooser.get_current_folder(), legal_session_folder_name);
 	} else if (_existing_session_chooser_used) {
 		/* existing session chosen from file chooser */

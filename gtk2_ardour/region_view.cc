@@ -427,10 +427,10 @@ RegionView::hide_region_editor()
 	}
 }
 
-Glib::ustring
+std::string
 RegionView::make_name () const
 {
-	Glib::ustring str;
+	std::string str;
 
 	// XXX nice to have some good icons for this
 
@@ -456,7 +456,7 @@ RegionView::make_name () const
 void
 RegionView::region_renamed ()
 {
-	Glib::ustring str = make_name ();
+	std::string str = make_name ();
 
 	set_item_name (str, this);
 	set_name_text (str);

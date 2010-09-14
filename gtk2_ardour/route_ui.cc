@@ -1393,10 +1393,9 @@ RouteUI::route_rename ()
 	name_prompter.show_all ();
 
 	switch (name_prompter.run ()) {
-
 	case Gtk::RESPONSE_ACCEPT:
-        name_prompter.get_result (result);
-        if (result.length()) {
+                name_prompter.get_result (result);
+                if (result.length()) {
 			_route->set_name (result);
 		}
 		break;
@@ -1547,7 +1546,7 @@ void
 RouteUI::save_as_template ()
 {
 	sys::path path;
-	Glib::ustring safe_name;
+	std::string safe_name;
 	string name;
 
 	path = ARDOUR::user_route_template_directory ();

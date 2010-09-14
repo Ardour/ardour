@@ -123,7 +123,7 @@ class PluginEqGui : public Gtk::Table
 			Gtk::TreeModelColumn<float> dBMin;
 			Gtk::TreeModelColumn<float> dBMax;
 			Gtk::TreeModelColumn<float> dBStep;
-			Gtk::TreeModelColumn<Glib::ustring> name;
+			Gtk::TreeModelColumn<std::string> name;
 		};
 
 		dBSelectionColumns dBColumns;

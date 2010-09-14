@@ -369,7 +369,7 @@ AudioRegionView::region_scale_amplitude_changed ()
 void
 AudioRegionView::region_renamed ()
 {
-	Glib::ustring str = RegionView::make_name ();
+	std::string str = RegionView::make_name ();
 
 	if (audio_region()->speed_mismatch (trackview.session()->frame_rate())) {
 		str = string ("*") + str;

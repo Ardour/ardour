@@ -254,7 +254,7 @@ ExportMultiplicator::get_hbox (TablePosition position)
 	return widget;
 }
 
-ExportMultiplicator::ButtonWidget::ButtonWidget (Glib::ustring name, boost::shared_ptr<ExportProfileManager> m, ExportProfileManager::GraphNode * node) :
+ExportMultiplicator::ButtonWidget::ButtonWidget (std::string name, boost::shared_ptr<ExportProfileManager> m, ExportProfileManager::GraphNode * node) :
   label (name),
   node (node),
   split_position (0.5)
@@ -268,7 +268,7 @@ ExportMultiplicator::ButtonWidget::ButtonWidget (Glib::ustring name, boost::shar
 	ui_manager = Gtk::UIManager::create();
 	ui_manager->insert_action_group (menu_actions);
 
-	Glib::ustring ui_info =
+	std::string ui_info =
 		"<ui>"
 		"  <popup name='PopupMenu'>"
 		"    <menuitem action='Split'/>"

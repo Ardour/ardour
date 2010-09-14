@@ -76,12 +76,12 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	void change_time_format ();
 
-	Glib::ustring construct_label (ARDOUR::Location const * location) const;
-	Glib::ustring bbt_str (nframes_t frames) const;
-	Glib::ustring timecode_str (nframes_t frames) const;
-	Glib::ustring ms_str (nframes_t frames) const;
+	std::string construct_label (ARDOUR::Location const * location) const;
+	std::string bbt_str (nframes_t frames) const;
+	std::string timecode_str (nframes_t frames) const;
+	std::string ms_str (nframes_t frames) const;
 
-	void update_range_name (Glib::ustring const & path, Glib::ustring const & new_text);
+	void update_range_name (std::string const & path, std::string const & new_text);
 
 	/*** GUI components ***/
 
@@ -96,7 +96,7 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	{
 	  public:
 		Gtk::TreeModelColumn<TimeFormat>      format;
-		Gtk::TreeModelColumn<Glib::ustring>   label;
+		Gtk::TreeModelColumn<std::string>   label;
 
 		TimeFormatCols () { add(format); add(label); }
 	};
@@ -110,9 +110,9 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	{
 	  public:
 		Gtk::TreeModelColumn<ARDOUR::Location *>  location;
-		Gtk::TreeModelColumn<Glib::ustring>       label;
+		Gtk::TreeModelColumn<std::string>       label;
 		Gtk::TreeModelColumn<bool>                selected;
-		Gtk::TreeModelColumn<Glib::ustring>       name;
+		Gtk::TreeModelColumn<std::string>       name;
 
 		RangeCols () { add (location); add(label); add(selected); add(name); }
 	};
@@ -143,13 +143,13 @@ class ExportTimespanSelectorMultiple : public ExportTimespanSelector
 class ExportTimespanSelectorSingle : public ExportTimespanSelector
 {
   public:
-	ExportTimespanSelectorSingle (ARDOUR::Session * session, ProfileManagerPtr manager, Glib::ustring range_id);
+	ExportTimespanSelectorSingle (ARDOUR::Session * session, ProfileManagerPtr manager, std::string range_id);
 
   private:
 
 	virtual void fill_range_list ();
 
-	Glib::ustring range_id;
+	std::string range_id;
 
 };
 

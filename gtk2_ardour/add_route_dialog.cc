@@ -243,7 +243,7 @@ AddRouteDialog::mode ()
 		return ARDOUR::Normal;
 	}
 
-	Glib::ustring str = mode_combo.get_active_text();
+	std::string str = mode_combo.get_active_text();
 	if (str == _("Normal")) {
 		return ARDOUR::Normal;
 	} else if (str == _("Non Layered")){

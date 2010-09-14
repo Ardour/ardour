@@ -217,7 +217,7 @@ EditorRoutes::set_session (Session* s)
 }
 
 void
-EditorRoutes::on_tv_rec_enable_changed (Glib::ustring const & path_string)
+EditorRoutes::on_tv_rec_enable_changed (std::string const & path_string)
 {
 	// Get the model row that has been toggled.
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
@@ -233,7 +233,7 @@ EditorRoutes::on_tv_rec_enable_changed (Glib::ustring const & path_string)
 }
 
 void
-EditorRoutes::on_tv_mute_enable_toggled (Glib::ustring const & path_string)
+EditorRoutes::on_tv_mute_enable_toggled (std::string const & path_string)
 {
 	// Get the model row that has been toggled.
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
@@ -249,7 +249,7 @@ EditorRoutes::on_tv_mute_enable_toggled (Glib::ustring const & path_string)
 }
 
 void
-EditorRoutes::on_tv_solo_enable_toggled (Glib::ustring const & path_string)
+EditorRoutes::on_tv_solo_enable_toggled (std::string const & path_string)
 {
 	// Get the model row that has been toggled.
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
@@ -265,7 +265,7 @@ EditorRoutes::on_tv_solo_enable_toggled (Glib::ustring const & path_string)
 }
 
 void
-EditorRoutes::on_tv_solo_isolate_toggled (Glib::ustring const & path_string)
+EditorRoutes::on_tv_solo_isolate_toggled (std::string const & path_string)
 {
 	// Get the model row that has been toggled.
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
@@ -279,7 +279,7 @@ EditorRoutes::on_tv_solo_isolate_toggled (Glib::ustring const & path_string)
 }
 
 void
-EditorRoutes::on_tv_solo_safe_toggled (Glib::ustring const & path_string)
+EditorRoutes::on_tv_solo_safe_toggled (std::string const & path_string)
 {
 	// Get the model row that has been toggled.
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
@@ -404,7 +404,7 @@ EditorRoutes::route_deleted (Gtk::TreeModel::Path const &)
 }
 
 void
-EditorRoutes::visible_changed (Glib::ustring const & path)
+EditorRoutes::visible_changed (std::string const & path)
 {
 	if (_session && _session->deletion_in_progress()) {
 		return;
@@ -1138,7 +1138,7 @@ EditorRoutes::clear ()
 }
 
 void
-EditorRoutes::name_edit (Glib::ustring const & path, Glib::ustring const & new_text)
+EditorRoutes::name_edit (std::string const & path, std::string const & new_text)
 {
 	TreeIter iter = _model->get_iter (path);
 	if (!iter) {

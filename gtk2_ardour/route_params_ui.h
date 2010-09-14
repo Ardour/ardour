@@ -150,7 +150,7 @@ class RouteParams_UI : public ArdourDialog, public PBD::ScopedConnectionList
 			add(text);
 			add(route);
 		}
-		Gtk::TreeModelColumn<Glib::ustring> text;
+		Gtk::TreeModelColumn<std::string> text;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> > route;
 	};
 

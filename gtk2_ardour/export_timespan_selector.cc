@@ -39,6 +39,7 @@
 using namespace Glib;
 using namespace ARDOUR;
 using namespace PBD;
+using std::string;
 
 ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, ProfileManagerPtr manager) :
 	manager (manager),
@@ -102,7 +103,7 @@ ExportTimespanSelector::add_range_to_selection (ARDOUR::Location const * loc)
 {
 	TimespanPtr span = _session->get_export_handler()->add_timespan();
 
-	Glib::ustring id;
+	std::string id;
 	if (loc == state->session_range.get()) {
 		id = "session";
 	} else if (loc == state->selection_range.get()) {
@@ -147,12 +148,12 @@ ExportTimespanSelector::change_time_format ()
 	}
 }
 
-Glib::ustring
+std::string
 ExportTimespanSelector::construct_label (ARDOUR::Location const * location) const
 {
-	Glib::ustring label;
-	Glib::ustring start;
-	Glib::ustring end;
+	std::string label;
+	std::string start;
+	std::string end;
 
 	nframes_t start_frame = location->start();
 	nframes_t end_frame = location->end();
@@ -198,7 +199,7 @@ ExportTimespanSelector::construct_label (ARDOUR::Location const * location) cons
 }
 
 
-Glib::ustring
+std::string
 ExportTimespanSelector::bbt_str (nframes_t frames) const
 {
 	if (!_session) {
@@ -221,7 +222,7 @@ ExportTimespanSelector::bbt_str (nframes_t frames) const
 	return oss.str();
 }
 
-Glib::ustring
+std::string
 ExportTimespanSelector::timecode_str (nframes_t frames) const
 {
 	if (!_session) {
@@ -246,7 +247,7 @@ ExportTimespanSelector::timecode_str (nframes_t frames) const
 	return oss.str();
 }
 
-Glib::ustring
+std::string
 ExportTimespanSelector::ms_str (nframes_t frames) const
 {
 	if (!_session) {
@@ -283,7 +284,7 @@ ExportTimespanSelector::ms_str (nframes_t frames) const
 }
 
 void
-ExportTimespanSelector::update_range_name (Glib::ustring const & path, Glib::ustring const & new_text)
+ExportTimespanSelector::update_range_name (std::string const & path, std::string const & new_text)
 {
 	Gtk::TreeStore::iterator it = range_list->get_iter (path);
 	it->get_value (range_cols.location)->set_name (new_text);
@@ -293,7 +294,7 @@ ExportTimespanSelector::update_range_name (Glib::ustring const & path, Glib::ust
 
 /*** ExportTimespanSelectorSingle ***/
 
-ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * session, ProfileManagerPtr manager, Glib::ustring range_id) :
+ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * session, ProfileManagerPtr manager, std::string range_id) :
 	ExportTimespanSelector (session, manager),
 	range_id (range_id)
 {
@@ -322,7 +323,7 @@ ExportTimespanSelectorSingle::fill_range_list ()
 {
 	if (!state) { return; }
 
-	Glib::ustring id;
+	std::string id;
 	if (!range_id.compare (X_("session"))) {
 		id = state->session_range->id().to_s();
 	} else if (!range_id.compare (X_("selection"))) {
@@ -408,7 +409,7 @@ ExportTimespanSelectorMultiple::set_selection_from_state ()
 	Gtk::TreeModel::Children::iterator tree_it;
 
 	for (TimespanList::iterator it = state->timespans->begin(); it != state->timespans->end(); ++it) {
-		ustring id = (*it)->range_id();
+		string id = (*it)->range_id();
 		for (tree_it = range_list->children().begin(); tree_it != range_list->children().end(); ++tree_it) {
 			Location * loc = tree_it->get_value (range_cols.location);
 

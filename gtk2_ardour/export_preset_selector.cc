@@ -75,7 +75,7 @@ ExportPresetSelector::sync_with_manager ()
 	for (PresetList::const_iterator it = presets.begin(); it != presets.end(); ++it) {
 		tree_it = list->append();
 		tree_it->set_value (cols.preset, *it);
-		tree_it->set_value (cols.label, Glib::ustring ((*it)->name()));
+		tree_it->set_value (cols.label, std::string ((*it)->name()));
 
 		if (*it == current) {
 			select_connection.block (true);
@@ -89,7 +89,7 @@ void
 ExportPresetSelector::update_selection ()
 {
 	Gtk::ListStore::iterator it = entry.get_active ();
-	Glib::ustring text = entry.get_entry()->get_text();
+	std::string text = entry.get_entry()->get_text();
 	bool preset_name_exists = false;
 
 	for (PresetList::const_iterator it = profile_manager->get_presets().begin(); it != profile_manager->get_presets().end(); ++it) {

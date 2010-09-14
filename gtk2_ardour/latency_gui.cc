@@ -118,7 +118,7 @@ LatencyGUI::refresh ()
 void
 LatencyGUI::change_latency_from_button (int dir)
 {
-	Glib::ustring unitstr = units_combo.get_active_text();
+	std::string unitstr = units_combo.get_active_text();
 	double shift = 0.0;
 
 	if (unitstr == unit_strings[0]) {
@@ -140,7 +140,7 @@ LatencyGUI::change_latency_from_button (int dir)
 	}
 }
 
-LatencyDialog::LatencyDialog (const Glib::ustring& title, Latent& l, nframes64_t sr, nframes64_t psz)
+LatencyDialog::LatencyDialog (const std::string& title, Latent& l, nframes64_t sr, nframes64_t psz)
 	: ArdourDialog (title, false, true),
 	  lwidget (l, sr, psz)
 {

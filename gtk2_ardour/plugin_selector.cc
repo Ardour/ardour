@@ -636,7 +636,7 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 {
 	using namespace Menu_Helpers;
 
-	typedef std::map<Glib::ustring,Gtk::Menu*> SubmenuMap;
+	typedef std::map<std::string,Gtk::Menu*> SubmenuMap;
 	SubmenuMap creator_submenu_map;
 
 	Menu* by_creator = new Menu();
@@ -664,7 +664,7 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 		} else {
 			submenu = new Gtk::Menu;
 			by_creator_items.push_back (MenuElem (creator, *manage (submenu)));
-			creator_submenu_map.insert (pair<Glib::ustring,Menu*> (creator, submenu));
+			creator_submenu_map.insert (pair<std::string,Menu*> (creator, submenu));
 			submenu->set_name("ArdourContextMenu");
 		}
 		submenu->items().push_back (MenuElem ((*i)->name, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
@@ -677,7 +677,7 @@ PluginSelector::create_by_category_menu (ARDOUR::PluginInfoList& all_plugs)
 {
 	using namespace Menu_Helpers;
 
-	typedef std::map<Glib::ustring,Gtk::Menu*> SubmenuMap;
+	typedef std::map<std::string,Gtk::Menu*> SubmenuMap;
 	SubmenuMap category_submenu_map;
 
 	Menu* by_category = new Menu();
@@ -700,7 +700,7 @@ PluginSelector::create_by_category_menu (ARDOUR::PluginInfoList& all_plugs)
 		} else {
 			submenu = new Gtk::Menu;
 			by_category_items.push_back (MenuElem (category, *manage (submenu)));
-			category_submenu_map.insert (pair<Glib::ustring,Menu*> (category, submenu));
+			category_submenu_map.insert (pair<std::string,Menu*> (category, submenu));
 			submenu->set_name("ArdourContextMenu");
 		}
 		submenu->items().push_back (MenuElem ((*i)->name, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
@@ -723,7 +723,7 @@ PluginSelector::plugin_chosen_from_menu (const PluginInfoPtr& pi)
 }
 
 void
-PluginSelector::favorite_changed (const Glib::ustring& path)
+PluginSelector::favorite_changed (const std::string& path)
 {
 	PluginInfoPtr pi;
 
@@ -759,7 +759,7 @@ PluginSelector::favorite_changed (const Glib::ustring& path)
 }
 
 void
-PluginSelector::hidden_changed (const Glib::ustring& path)
+PluginSelector::hidden_changed (const std::string& path)
 {
 	PluginInfoPtr pi;
 

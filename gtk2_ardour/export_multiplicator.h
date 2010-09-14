@@ -93,7 +93,7 @@ class ExportMultiplicator : public Gtk::EventBox {
 
 	class ButtonWidget : public Gtk::EventBox {
 	  public:
-		ButtonWidget (Glib::ustring name, boost::shared_ptr<ExportProfileManager> m, ExportProfileManager::GraphNode * node);
+		ButtonWidget (std::string name, boost::shared_ptr<ExportProfileManager> m, ExportProfileManager::GraphNode * node);
 
 	  private:
 

@@ -46,7 +46,7 @@ struct ModelColumns : public TreeModel::ColumnRecord {
 	    add (port);
     }
     TreeModelColumn<bool>         used;
-    TreeModelColumn<ustring>      text;
+    TreeModelColumn<string>      text;
     TreeModelColumn<jack_port_t*> port;
 };
 

@@ -357,7 +357,7 @@ Marker::set_name (const string& new_name)
 {
 	int name_width = pixel_width (new_name, *name_font) + 2;
 
-	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(new_name, name_font, name_width, name_height, Gdk::Color ("#000000"));
+	name_pixbuf->property_pixbuf() = pixbuf_from_string(new_name, name_font, name_width, name_height, Gdk::Color ("#000000"));
 
 	if (_type == End || _type == LoopEnd || _type == PunchOut) {
 		name_pixbuf->property_x() = - (name_width);

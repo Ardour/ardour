@@ -47,7 +47,7 @@ class ExportDialog : public ArdourDialog {
 
   public:
 
-	explicit ExportDialog (PublicEditor & editor, Glib::ustring title);
+	explicit ExportDialog (PublicEditor & editor, std::string title);
 	~ExportDialog ();
 
 	void set_session (ARDOUR::Session* s);
@@ -114,12 +114,12 @@ class ExportDialog : public ArdourDialog {
 
 	Gtk::HBox           warn_hbox;
 	Gtk::Label          warn_label;
-	Glib::ustring       warn_string;
+	std::string       warn_string;
 
 	Gtk::HBox           list_files_hbox;
 	Gtk::Label          list_files_label;
 	Gtk::Button         list_files_button;
-	Glib::ustring       list_files_string;
+	std::string       list_files_string;
 
 	void add_error (std::string const & text);
 	void add_warning (std::string const & text);

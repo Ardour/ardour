@@ -26,7 +26,6 @@
 #include "ardour/types.h"
 #include <libgnomecanvasmm/line.h>
 #include <gdkmm/types.h>
-#include <glibmm/ustring.h>
 #include <gtkmm/menushell.h>
 
 #include "canvas.h"
@@ -43,11 +42,11 @@ namespace Gtk {
         class Adjustment;
 }
 
-Glib::ustring fit_to_pixels (const Glib::ustring&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
+std::string fit_to_pixels (const std::string&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
 
 std::pair<std::string, double> fit_to_pixels (cairo_t *, std::string, double);
 
-int pixel_width (const Glib::ustring& str, Pango::FontDescription& font);
+int pixel_width (const std::string& str, Pango::FontDescription& font);
 
 gint   just_hide_it (GdkEventAny*, Gtk::Window*);
 void   allow_keyboard_focus (bool);
@@ -77,7 +76,7 @@ bool forward_key_press (GdkEventKey* ev);
 bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev);
 
 Glib::RefPtr<Gdk::Pixbuf> get_xpm (std::string);
-Glib::ustring get_icon_path (const char*);
+std::string get_icon_path (const char*);
 Glib::RefPtr<Gdk::Pixbuf> get_icon (const char*);
 static std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> > xpm_map;
 const char* const *get_xpm_data (std::string path);
@@ -92,11 +91,11 @@ void convert_bgra_to_rgba (guint8 const* src,
 			   int           width,
 			   int           height);
 
-Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_ustring (const Glib::ustring& name,
-					       Pango::FontDescription* font,
-					       int clip_width,
-					       int clip_height,
-					       Gdk::Color);
+Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_string (const std::string& name,
+                                              Pango::FontDescription* font,
+                                              int clip_width,
+                                              int clip_height,
+                                              Gdk::Color);
 
 void resize_window_to_proportion_of_monitor (Gtk::Window*, int, int);
 
