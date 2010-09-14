@@ -187,12 +187,15 @@ TimeAxisViewItem::init (
 	if (visibility & ShowNameHighlight) {
 		
 		if (visibility & FullWidthNameHighlight) {
-			name_highlight = new ArdourCanvas::SimpleRect (*group, 0.0, trackview.editor().frame_to_pixel(item_duration), trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, trackview.current_height() - 1);
+			name_highlight = new ArdourCanvas::SimpleRect (*group, 0.0, trackview.editor().frame_to_pixel(item_duration), trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, trackview.current_height());
 		} else {
-			name_highlight = new ArdourCanvas::SimpleRect (*group, 1.0, trackview.editor().frame_to_pixel(item_duration) - 1, trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, trackview.current_height() - 1);
+			name_highlight = new ArdourCanvas::SimpleRect (*group, 1.0, trackview.editor().frame_to_pixel(item_duration) - 1, trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, trackview.current_height());
 		}
 		
 		name_highlight->set_data ("timeaxisviewitem", this);
+                name_highlight->property_outline_what() = 0x4;
+                /* we should really use a canvas color property here */
+		name_highlight->property_outline_color_rgba() = RGBA_TO_UINT (0,0,0,255);
 
 	} else {
 		name_highlight = 0;
@@ -519,7 +522,7 @@ TimeAxisViewItem::set_height (double height)
 
 		if (height > NAME_HIGHLIGHT_SIZE) {
 			name_highlight->property_y1() = (double) height - 1 - NAME_HIGHLIGHT_SIZE;
-			name_highlight->property_y2() = (double) height - 2;
+			name_highlight->property_y2() = (double) height - 1;
 		}
 		else {
 			/* it gets hidden now anyway */
@@ -680,7 +683,6 @@ TimeAxisViewItem::set_colors()
 
 	if (name_highlight) {
 		name_highlight->property_fill_color_rgba() = fill_color;
-		name_highlight->property_outline_color_rgba() = fill_color;
 	}
 	set_trim_handle_colors();
 }
