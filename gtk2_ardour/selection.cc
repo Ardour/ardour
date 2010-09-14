@@ -1143,18 +1143,19 @@ Selection::set_state (XMLNode const & node, int)
 
 			PBD::ID id (prop_id->value ());
 			RouteTimeAxisView* rtv = editor->get_route_view_by_route_id (id);
-			assert (rtv);
-			
-			boost::shared_ptr<AutomationTimeAxisView> atv = rtv->automation_child (EventTypeMap::instance().new_parameter (prop_parameter->value ()));
-                        
-                        /* the automation could be for an entity that was never saved
-                           in the session file. Don't freak out if we can't find
-                           it.
-                        */
 
-                        if (atv) {
-                                add (atv.get());
-                        }
+			if (rtv) {
+				boost::shared_ptr<AutomationTimeAxisView> atv = rtv->automation_child (EventTypeMap::instance().new_parameter (prop_parameter->value ()));
+                        
+				/* the automation could be for an entity that was never saved
+				   in the session file. Don't freak out if we can't find
+				   it.
+				*/
+				
+				if (atv) {
+					add (atv.get());
+				}
+			}
 		}
 	}
 
