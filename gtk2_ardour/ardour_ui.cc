@@ -2782,9 +2782,17 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 		return -1;
 	}
 
-	/* Give the new session the default GUI state */
-	new_session->add_instant_xml (*Config->instant_xml (X_("Editor")), false);
-	new_session->add_instant_xml (*Config->instant_xml (X_("Mixer")), false);
+	/* Give the new session the default GUI state, if such things exist */
+
+        XMLNode* n;
+        n = Config->instant_xml (X_("Editor"));
+        if (n) {
+                new_session->add_instant_xml (*n, false);
+        }
+        n = Config->instant_xml (X_("Mixer"));
+        if (n) {
+                new_session->add_instant_xml (*n, false);
+        }
 
 	set_session (new_session);
 
