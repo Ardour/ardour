@@ -59,6 +59,7 @@
 #include "midi_time_axis.h"
 #include "midi_time_axis.h"
 #include "midi_util.h"
+#include "note_player.h"
 #include "public_editor.h"
 #include "rgb_macros.h"
 #include "selection.h"
@@ -91,6 +92,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
         , _step_edit_cursor (0)
         , _step_edit_cursor_width (1.0)
         , _step_edit_cursor_position (0.0)
+        , _earliest_selected_time (Evoral::MaxMusicalTime)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -115,6 +117,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _diff_command(0)
 	, _ghost_note(0)
         , _drag_rect (0)
+        , _earliest_selected_time (Evoral::MaxMusicalTime)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -138,6 +141,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _diff_command(0)
 	, _ghost_note(0)
         , _drag_rect (0)
+        , _earliest_selected_time (Evoral::MaxMusicalTime)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -165,6 +169,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _diff_command(0)
 	, _ghost_note(0)
         , _drag_rect (0)
+        , _earliest_selected_time (Evoral::MaxMusicalTime)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -1308,6 +1313,7 @@ MidiRegionView::extend_active_notes()
 	}
 }
 
+
 void
 MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 {
@@ -1321,35 +1327,33 @@ MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
                 return;
         }
 
-	route_ui->midi_track()->write_immediate_event(
-			note->on_event().size(), note->on_event().buffer());
-
-	const double note_length_beats = (note->off_event().time() - note->on_event().time());
-	nframes_t note_length_ms = beats_to_frames(note_length_beats)
-			* (1000 / (double)route_ui->session()->nominal_frame_rate());
-
-        /* note: we probably should not be binding a shared_ptr<NoteType> 
-           here. Since its a one-shot timeout, its sort of OK, but ...
-        */
-
-	Glib::signal_timeout().connect(sigc::bind(sigc::mem_fun(this, &MidiRegionView::play_midi_note_off), note),
-			note_length_ms, G_PRIORITY_DEFAULT);
+        NotePlayer* np = new NotePlayer (route_ui->midi_track());
+        np->add (note);
+        np->play ();
 }
 
-bool
-MidiRegionView::play_midi_note_off(boost::shared_ptr<NoteType> note)
+void
+MidiRegionView::play_midi_chord (vector<boost::shared_ptr<NoteType> > notes)
 {
-	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
+	if (no_sound_notes || !trackview.editor().sound_notes()) {
+		return;
+	}
 
+	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
+        
         if (!route_ui || !route_ui->midi_track()) {
-                return false;
+                return;
         }
 
-	route_ui->midi_track()->write_immediate_event(
-			note->off_event().size(), note->off_event().buffer());
+        NotePlayer* np = new NotePlayer (route_ui->midi_track());
 
-	return false;
+        for (vector<boost::shared_ptr<NoteType> >::iterator n = notes.begin(); n != notes.end(); ++n) {
+                np->add (*n);
+        }
+
+        np->play ();
 }
+
 
 bool
 MidiRegionView::note_in_region_range(const boost::shared_ptr<NoteType> note, bool& visible) const
@@ -1691,6 +1695,7 @@ MidiRegionView::clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev)
 	}
 
 	_selection.clear();
+        _earliest_selected_time = Evoral::MaxMusicalTime;
 }
 
 void
@@ -1932,9 +1937,25 @@ MidiRegionView::remove_from_selection (CanvasNoteEvent* ev)
 	ev->set_selected (false);
 	ev->hide_velocity ();
 
+
+        if (Evoral::musical_time_equal (ev->note()->time(), _earliest_selected_time)) {
+
+                _earliest_selected_time = Evoral::MaxMusicalTime;
+
+                /* compute new earliest time */
+
+                for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+                        if (!Evoral::musical_time_equal ((*i)->note()->time(), _earliest_selected_time) &&
+                            (*i)->note()->time() < _earliest_selected_time) {
+                                _earliest_selected_time = (*i)->note()->time();
+                        }
+                }
+        }
+
 	if (_selection.empty()) {
 		PublicEditor& editor (trackview.editor());
 		editor.get_selection().remove (this);
+                _earliest_selected_time = Evoral::MaxMusicalTime;
 	}
 }
 
@@ -1950,7 +1971,11 @@ MidiRegionView::add_to_selection (CanvasNoteEvent* ev)
 	if (_selection.insert (ev).second) {
 		ev->set_selected (true);
 		play_midi_note ((ev)->note());
-	}
+
+                if (ev->note()->time() < _earliest_selected_time) {
+                        _earliest_selected_time = ev->note()->time();
+                }
+        }
 
 	if (add_mrv_selection) {
 		PublicEditor& editor (trackview.editor());
@@ -1961,16 +1986,37 @@ MidiRegionView::add_to_selection (CanvasNoteEvent* ev)
 void
 MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 {
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		(*i)->move_event(dx, dy);
+        typedef vector<boost::shared_ptr<NoteType> > PossibleChord;
+        PossibleChord to_play;
 
-                if (dy) {
-                        boost::shared_ptr<NoteType> 
-                                moved_note (new NoteType (*((*i)->note())));
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+                if (Evoral::musical_time_equal ((*i)->note()->time(), _earliest_selected_time)) {
+                        to_play.push_back ((*i)->note());
+                }
+		(*i)->move_event(dx, dy);
+        }
+
+        if (dy && !_selection.empty() && !no_sound_notes && trackview.editor().sound_notes()) {
+                
+                if (to_play.size() > 1) {
+
+                        PossibleChord shifted;
+
+                        for (PossibleChord::iterator n = to_play.begin(); n != to_play.end(); ++n) {
+                                boost::shared_ptr<NoteType> moved_note (new NoteType (**n));
+                                moved_note->set_note (moved_note->note() + cumulative_dy);
+                                shifted.push_back (moved_note);
+                        }
+
+                        play_midi_chord (shifted);
+
+                } else if (!to_play.empty()) {
+
+                        boost::shared_ptr<NoteType> moved_note (new NoteType (*to_play.front()));
                         moved_note->set_note (moved_note->note() + cumulative_dy);
                         play_midi_note (moved_note);
                 }
-	}
+        }
 }
 
 void
@@ -2755,7 +2801,7 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 	beat_delta = (*mcb.notes().begin())->time() - paste_pos_beats;
 	paste_pos_beats = 0;
 
-	_selection.clear ();
+        clear_selection ();
 
 	for (int n = 0; n < (int) times; ++n) {
 

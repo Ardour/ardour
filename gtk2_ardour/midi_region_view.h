@@ -308,6 +308,7 @@ class MidiRegionView : public RegionView
 	 * and schedule the playback of the corresponding NoteOff event.
 	 */
 	void play_midi_note(boost::shared_ptr<NoteType> note);
+        void play_midi_chord (std::vector<boost::shared_ptr<NoteType> > notes);
 
 	/** Play the NoteOff-Event of the given note immediately
 	 * (scheduled by @ref play_midi_note()).
@@ -371,7 +372,8 @@ class MidiRegionView : public RegionView
         ArdourCanvas::SimpleRect*            _step_edit_cursor;
         Evoral::MusicalTime                  _step_edit_cursor_width;
         Evoral::MusicalTime                  _step_edit_cursor_position;
-        
+        Evoral::MusicalTime                  _earliest_selected_time;
+
 	MouseState _mouse_state;
 	int _pressed_button;
 
