@@ -98,11 +98,20 @@ bool RegionSelection::contains (RegionView* rv) const
 
 /** Add a region to the selection.
  *  @param rv Region to add.
- *  @return false if we already had the region, otherwise true.
+ *  @return false if we already had the region or if it cannot be added, 
+ *          otherwise true.
  */
 bool
 RegionSelection::add (RegionView* rv)
 {
+        if (!rv->region()->playlist()) {
+                /* not attached to a playlist - selection not allowed.
+                   This happens if the user tries to select a region
+                   during a capture pass.
+                */
+                return false;
+        }
+
 	if (contains (rv)) {
 		/* we already have it */
 		return false;

@@ -4144,7 +4144,10 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		boost::shared_ptr<Playlist> pl = (*x)->region()->playlist();
 
 		if (!pl) {
-			/* impossible, but this handles it for the future */
+			/* region not yet associated with a playlist (e.g. unfinished
+                           capture pass.
+                        */
+                        ++x;
 			continue;
 		}
 
@@ -4203,8 +4206,10 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 	/* the pmap is in the same order as the tracks in which selected regions occured */
 
 	for (vector<PlaylistMapping>::iterator i = pmap.begin(); i != pmap.end(); ++i) {
-		(*i).pl->thaw();
-		foo.push_back ((*i).pl);
+                if ((*i).pl) {
+                        (*i).pl->thaw();
+                        foo.push_back ((*i).pl);
+                }
 	}
 
 	if (!foo.empty()) {

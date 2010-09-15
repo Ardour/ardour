@@ -436,11 +436,13 @@ void
 Selection::add (RegionView* r)
 {
 	if (find (regions.begin(), regions.end(), r) == regions.end()) {
-		regions.add (r);
-		if (Config->get_link_region_and_track_selection()) {
-			add (&r->get_time_axis_view());
-		}
-		RegionsChanged ();
+		bool changed = regions.add (r);
+                if (Config->get_link_region_and_track_selection() && changed) {
+                        add (&r->get_time_axis_view());
+                }
+                if (changed) {
+                        RegionsChanged ();
+                }
 	}
 }
 
