@@ -3722,7 +3722,14 @@ NoteDrag::motion (GdkEvent *, bool)
                 char buf[12];
                 snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (_primary->note()->note() + dy).c_str(),
                           (int) floor (_primary->note()->note() + dy));
-		
+                
+                if (dy) {
+                        boost::shared_ptr<Evoral::Note<Evoral::MusicalTime> > 
+                                moved_note (new Evoral::Note<Evoral::MusicalTime> (*(_primary->note())));
+                        moved_note->set_note (moved_note->note() + dy);
+                        _region->play_midi_note (moved_note);
+                }
+
 		_editor->show_verbose_canvas_cursor_with (buf);
         }
 }

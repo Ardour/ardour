@@ -1324,6 +1324,11 @@ MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 	const double note_length_beats = (note->off_event().time() - note->on_event().time());
 	nframes_t note_length_ms = beats_to_frames(note_length_beats)
 			* (1000 / (double)route_ui->session()->nominal_frame_rate());
+
+        /* note: we probably should not be binding a shared_ptr<NoteType> 
+           here. Since its a one-shot timeout, its sort of OK, but ...
+        */
+
 	Glib::signal_timeout().connect(sigc::bind(sigc::mem_fun(this, &MidiRegionView::play_midi_note_off), note),
 			note_length_ms, G_PRIORITY_DEFAULT);
 }

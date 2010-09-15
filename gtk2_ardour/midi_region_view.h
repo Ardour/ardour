@@ -303,7 +303,8 @@ class MidiRegionView : public RegionView
   private:
 
 	friend class EditNoteDialog;
-	
+        friend class NoteDrag;
+
 	/** Play the NoteOn event of the given note immediately
 	 * and schedule the playback of the corresponding NoteOff event.
 	 */
