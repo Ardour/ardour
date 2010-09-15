@@ -146,6 +146,13 @@ Source::set_state (const XMLNode& node, int /*version*/)
 		_flags = Flag (_flags | Destructive);
 	}
 
+        /* a source with an XML node must necessarily already exist, 
+           and therefore cannot be removable/writable etc. etc.
+        */
+        if (!(_flags & Destructive)) {
+                _flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
+        }
+
 	return 0;
 }
 
