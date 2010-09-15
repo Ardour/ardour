@@ -2385,7 +2385,7 @@ Editor::point_trim (GdkEvent* event, nframes64_t new_bound)
 	/* Choose action dependant on which button was pressed */
 	switch (event->button.button) {
 	case 1:
-		begin_reversible_command (_("Start point trim"));
+		begin_reversible_command (_("start point trim"));
 
 		if (selection->selected (rv)) {
 			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin();
