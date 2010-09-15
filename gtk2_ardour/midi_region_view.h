@@ -199,7 +199,7 @@ class MidiRegionView : public RegionView
 	void   delete_note (boost::shared_ptr<NoteType>);
 	size_t selection_size() { return _selection.size(); }
 
-	void move_selection(double dx, double dy);
+	void move_selection(double dx, double dy, double cumulative_dy);
 	void note_dropped (ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::frameoffset_t, int8_t d_note);
 
 	void select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend);
@@ -303,7 +303,6 @@ class MidiRegionView : public RegionView
   private:
 
 	friend class EditNoteDialog;
-        friend class NoteDrag;
 
 	/** Play the NoteOn event of the given note immediately
 	 * and schedule the playback of the corresponding NoteOff event.

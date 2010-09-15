@@ -1316,7 +1316,10 @@ MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 	}
 
 	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
-	assert(route_ui);
+        
+        if (!route_ui || !route_ui->midi_track()) {
+                return;
+        }
 
 	route_ui->midi_track()->write_immediate_event(
 			note->on_event().size(), note->on_event().buffer());
@@ -1337,7 +1340,10 @@ bool
 MidiRegionView::play_midi_note_off(boost::shared_ptr<NoteType> note)
 {
 	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
-	assert(route_ui);
+
+        if (!route_ui || !route_ui->midi_track()) {
+                return false;
+        }
 
 	route_ui->midi_track()->write_immediate_event(
 			note->off_event().size(), note->off_event().buffer());
@@ -1953,10 +1959,17 @@ MidiRegionView::add_to_selection (CanvasNoteEvent* ev)
 }
 
 void
-MidiRegionView::move_selection(double dx, double dy)
+MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 {
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		(*i)->move_event(dx, dy);
+
+                if (dy) {
+                        boost::shared_ptr<NoteType> 
+                                moved_note (new NoteType (*((*i)->note())));
+                        moved_note->set_note (moved_note->note() + cumulative_dy);
+                        play_midi_note (moved_note);
+                }
 	}
 }
 
