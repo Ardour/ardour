@@ -103,17 +103,33 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev)
 		unzoomed_val = max(unzoomed_val, adj.get_lower());
 		break;
 	case Handle1:
+
 		unzoomed_page += scale * fract * range;
 		unzoomed_page = min(unzoomed_page, adj.get_upper() - unzoomed_val);
 		unzoomed_page = max(unzoomed_page, min_page_size);
+		
+		if (pinch){
+			temp = unzoomed_val + unzoomed_page;
+			unzoomed_val -= scale * fract * range * 0.5;
+			unzoomed_val = min(unzoomed_val, temp - min_page_size);
+			unzoomed_val = max(unzoomed_val, adj.get_lower());
+		}
+		
 		break;
 	case Handle2:
 		temp = unzoomed_val + unzoomed_page;
 		unzoomed_val += scale * fract * range;
 		unzoomed_val = min(unzoomed_val, temp - min_page_size);
 		unzoomed_val = max(unzoomed_val, adj.get_lower());
-
+		
 		unzoomed_page = temp - unzoomed_val;
+		
+		if (pinch){
+			
+			unzoomed_page -= scale * fract * range;
+		}
+		
+		unzoomed_page = min(unzoomed_page, adj.get_upper() - unzoomed_val);		
 		unzoomed_page = max(unzoomed_page, min_page_size);
 		break;
 	default:
@@ -178,28 +194,18 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev)
 		val = unzoomed_val;
 		page = unzoomed_page;
 	}
-
-	adj.set_page_size(page);
 	
-	if (val == adj.get_value()) {
-		adj.value_changed();
-	}
-
-	if (val < adj.get_lower()) {
-		adj.value_changed();
-	} else if (val > adj.get_upper()) {
-		adj.value_changed();
-	} else {
-		adj.set_value(val);
-	}
-
+	adj.set_page_size(page);
+	adj.set_value(val);
+	adj.value_changed();
+	
 	return true;
 }
 
 bool
 Scroomer::on_button_press_event (GdkEventButton* ev)
 {
-	if (ev->button == 1) {
+	if (ev->button == 1 || ev->button == 3) {
 		Component comp = point_in(ev->y);
 
 		if (comp == Total || comp == None) {
@@ -212,7 +218,14 @@ Scroomer::on_button_press_event (GdkEventButton* ev)
 		unzoomed_val = adj.get_value();
 		unzoomed_page = adj.get_page_size();
 		grab_window = ev->window;
+		
+		if (ev->button == 3){
+			pinch = true;
+		} else {
+                        pinch = false;
+                }
 	}
+	
 	return false;
 }
 
@@ -229,7 +242,7 @@ Scroomer::on_button_release_event (GdkEventButton* ev)
 		return true;
 	}
 
-	if (ev->button != 1) {
+	if (ev->button != 1 && ev->button != 3) {
 		return true;
 	}
 

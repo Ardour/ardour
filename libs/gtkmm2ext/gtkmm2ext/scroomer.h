@@ -81,6 +81,7 @@ private:
 	double grab_y;
 	double unzoomed_val;
 	double unzoomed_page;
+	bool pinch;
 };
 
 } // namespace
