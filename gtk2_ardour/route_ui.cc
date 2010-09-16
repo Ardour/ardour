@@ -62,7 +62,7 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
 
-uint32_t RouteUI::_max_invert_buttons = 4;
+uint32_t RouteUI::_max_invert_buttons = 3;
 
 RouteUI::RouteUI (ARDOUR::Session* sess)
 	: AxisView(sess)
