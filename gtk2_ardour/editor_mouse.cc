@@ -2577,6 +2577,10 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent* event, RegionView* 
 {
 	assert (region_view);
 
+        if (!region_view->region()->playlist()) {
+                return;
+        }
+
 	_region_motion_group->raise_to_top ();
 
 	if (Config->get_edit_mode() == Splice) {
@@ -2595,6 +2599,10 @@ Editor::add_region_copy_drag (ArdourCanvas::Item* item, GdkEvent* event, RegionV
 {
 	assert (region_view);
 
+        if (!region_view->region()->playlist()) {
+                return;
+        }
+
 	_region_motion_group->raise_to_top ();
 
 	RegionSelection s = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
@@ -2606,6 +2614,10 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent* event, Region
 {
 	assert (region_view);
 
+        if (!region_view->region()->playlist()) {
+                return;
+        }
+        
 	if (Config->get_edit_mode() == Splice) {
 		return;
 	}
