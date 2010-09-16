@@ -827,20 +827,16 @@ Editor::add_sources (vector<string> paths, SourceList& sources, nframes64_t& pos
                         
                         if (as->natural_position() != 0) {
                                 pos = as->natural_position();
-                                cerr << "\tgot " << pos << " from source TC info\n";
                         } else if (target_tracks == 1) {
                                 /* hmm, no timestamp available, put it after the previous region
                                  */
                                 if (n == 0) {
                                         pos = get_preferred_edit_position ();
-                                        cerr << "\tno timestamp, first file, use edit pos = " << pos << endl;
                                 } else {
                                         pos += rlen;
-                                        cerr << "\tpacked-sequence-shuffle to " << pos << endl;
                                 }
                         } else {
                                 pos = get_preferred_edit_position ();
-                                cerr << "\tmultitracks, using edit position = " << pos << endl;
                         }
                                 
                 }

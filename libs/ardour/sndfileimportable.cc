@@ -57,10 +57,10 @@ SndFileImportableSource::channels () const
 	return sf_info.channels;
 }
 
-nframes_t
+framecnt_t
 SndFileImportableSource::length () const
 {
-	return sf_info.frames;
+	return (framecnt_t) sf_info.frames;
 }
 
 nframes_t
@@ -75,10 +75,10 @@ SndFileImportableSource::seek (nframes_t /*pos*/)
 	sf_seek (in.get(), 0, SEEK_SET);
 }
 
-nframes64_t
+framepos_t
 SndFileImportableSource::natural_position () const
 {
-	return timecode;
+	return (framepos_t) timecode;
 }
 
 bool

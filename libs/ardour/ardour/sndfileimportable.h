@@ -33,18 +33,23 @@ class SndFileImportableSource : public ImportableSource {
 	SndFileImportableSource (const std::string& path);
 	virtual ~SndFileImportableSource();
 
-	nframes_t read (Sample* buffer, nframes_t nframes);
-	uint32_t  channels() const;
-	nframes_t length() const;
-	nframes_t samplerate() const;
-	void      seek (nframes_t pos);
-	nframes64_t natural_position() const;
-	bool clamped_at_unity () const;
+	nframes_t  read (Sample* buffer, nframes_t nframes);
+	uint32_t   channels() const;
+	framecnt_t length() const;
+	nframes_t  samplerate() const;
+	void       seek (nframes_t pos);
+	framepos_t natural_position() const;
+	bool       clamped_at_unity () const;
 
    protected:
 	SF_INFO sf_info;
 	boost::shared_ptr<SNDFILE> in;
-	nframes_t timecode;
+        
+        /* these are int64_t so as to be independent of whatever
+           types Ardour may use for framepos_t, framecnt_t etc.
+        */
+
+	int64_t timecode;
 	int64_t get_timecode_info (SNDFILE*, SF_BROADCAST_INFO*, bool&);
 };
 

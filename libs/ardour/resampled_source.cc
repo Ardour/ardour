@@ -134,3 +134,8 @@ ResampledImportableSource::seek (nframes_t pos)
 	src_data.end_of_input = 0;
 }
 	
+framepos_t
+ResampledImportableSource::natural_position () const
+{
+        return source->natural_position() * ratio ();
+}

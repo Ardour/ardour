@@ -34,13 +34,13 @@ class ResampledImportableSource : public ImportableSource
 
 	~ResampledImportableSource ();
 
-	nframes_t read (Sample* buffer, nframes_t nframes);
-	float ratio() const { return src_data.src_ratio; }
-	uint32_t channels() const { return source->channels(); }
-	nframes_t length() const { return source->length(); }
-	nframes_t samplerate() const { return source->samplerate(); }
-	void      seek (nframes_t);
-	nframes64_t natural_position() const { return source->natural_position(); }
+	nframes_t  read (Sample* buffer, nframes_t nframes);
+	float      ratio() const { return src_data.src_ratio; }
+	uint32_t   channels() const { return source->channels(); }
+	framecnt_t length() const { return source->length(); }
+	nframes_t  samplerate() const { return source->samplerate(); }
+	void       seek (nframes_t);
+	framepos_t natural_position() const;
 
 	bool clamped_at_unity () const {
 		/* resampling may generate inter-sample peaks with magnitude > 1 */

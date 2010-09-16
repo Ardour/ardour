@@ -1997,7 +1997,7 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
         }
 
         if (dy && !_selection.empty() && !no_sound_notes && trackview.editor().sound_notes()) {
-                
+
                 if (to_play.size() > 1) {
 
                         PossibleChord shifted;

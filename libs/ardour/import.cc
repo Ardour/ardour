@@ -214,7 +214,6 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 		{
 			const DataType type = SMFSource::safe_midi_file_extension (*i) ? DataType::MIDI : DataType::AUDIO;
 
-
 			source = SourceFactory::createWritable (type, sess,
 					i->c_str(),
 					false, // destructive
