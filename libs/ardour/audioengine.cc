@@ -76,7 +76,7 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 	_running = false;
 	_has_run = false;
 	last_monitor_check = 0;
-	monitor_check_interval = max_frames;
+	monitor_check_interval = INT32_MAX;
 	_processed_frames = 0;
 	_usecs_per_cycle = 0;
 	_jack = 0;
@@ -463,8 +463,8 @@ AudioEngine::process_callback (nframes_t nframes)
 
 	/* handle wrap around of total frames counter */
 
-	if (max_frames - _processed_frames < nframes) {
-		next_processed_frames = nframes - (max_frames - _processed_frames);
+	if (max_framepos - _processed_frames < nframes) {
+		next_processed_frames = nframes - (max_framepos - _processed_frames);
 	} else {
 		next_processed_frames = _processed_frames + nframes;
 	}

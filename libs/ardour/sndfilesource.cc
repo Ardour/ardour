@@ -487,7 +487,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, framecnt_t cnt)
 }
 
 int
-SndFileSource::update_header (sframes_t when, struct tm& now, time_t tnow)
+SndFileSource::update_header (framepos_t when, struct tm& now, time_t tnow)
 {
 	set_timeline_position (when);
 
@@ -818,7 +818,7 @@ SndFileSource::setup_standard_crossfades (Session const & s, nframes_t rate)
 }
 
 void
-SndFileSource::set_timeline_position (int64_t pos)
+SndFileSource::set_timeline_position (framepos_t pos)
 {
 	// destructive track timeline postion does not change
 	// except at instantion or when header_position_offset

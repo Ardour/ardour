@@ -18,7 +18,6 @@
 */
 
 #include <algorithm>
-#define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
 #include <glibmm/thread.h>

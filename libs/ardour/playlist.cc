@@ -17,9 +17,7 @@
 
 */
 
-#define __STDC_LIMIT_MACROS
 #include <stdint.h>
-
 #include <set>
 #include <fstream>
 #include <algorithm>
@@ -1501,8 +1499,8 @@ Playlist::core_splice (framepos_t at, framecnt_t distance, boost::shared_ptr<Reg
 			framepos_t new_pos = (*i)->position() + distance;
 			if (new_pos < 0) {
 				new_pos = 0;
-			} else if (new_pos >= max_frames - (*i)->length()) {
-				new_pos = max_frames - (*i)->length();
+			} else if (new_pos >= max_framepos - (*i)->length()) {
+				new_pos = max_framepos - (*i)->length();
 			}
 
 			(*i)->set_position (new_pos, this);
@@ -1985,7 +1983,7 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 {
 	RegionLock rlock (this);
 	boost::shared_ptr<Region> ret;
-	framepos_t closest = max_frames;
+	framepos_t closest = max_framepos;
 
 	bool end_iter = false;
 
@@ -2046,7 +2044,7 @@ Playlist::find_next_region_boundary (framepos_t frame, int dir)
 {
 	RegionLock rlock (this);
 
-	framepos_t closest = max_frames;
+	framepos_t closest = max_framepos;
 	framepos_t ret = -1;
 
 	if (dir > 0) {
@@ -2320,7 +2318,7 @@ Playlist::get_extent () const
 pair<framecnt_t, framecnt_t>
 Playlist::_get_extent () const
 {
-	pair<framecnt_t, framecnt_t> ext (max_frames, 0);
+	pair<framecnt_t, framecnt_t> ext (max_framepos, 0);
 
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 		pair<framecnt_t, framecnt_t> const e ((*i)->position(), (*i)->position() + (*i)->length());
@@ -2670,8 +2668,8 @@ Playlist::nudge_after (framepos_t start, framecnt_t distance, bool forwards)
 
 				if (forwards) {
 
-					if ((*i)->last_frame() > max_frames - distance) {
-						new_pos = max_frames - (*i)->length();
+					if ((*i)->last_frame() > max_framepos - distance) {
+						new_pos = max_framepos - (*i)->length();
 					} else {
 						new_pos = (*i)->position() + distance;
 					}

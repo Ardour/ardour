@@ -162,22 +162,22 @@ class AudioDiskstream : public Diskstream
 	void set_pending_overwrite(bool);
 	int  overwrite_existing_buffers ();
 	void set_block_size (nframes_t);
-	int  internal_playback_seek (nframes_t distance);
-	int  can_internal_playback_seek (nframes_t distance);
+	int  internal_playback_seek (framecnt_t distance);
+	int  can_internal_playback_seek (framecnt_t distance);
 	int  rename_write_sources ();
         std::list<boost::shared_ptr<Source> > steal_write_sources();
 	void reset_write_sources (bool, bool force = false);
 	void non_realtime_input_change ();
-	void non_realtime_locate (nframes_t location);
+	void non_realtime_locate (framepos_t location);
 
   protected:
 	friend class Auditioner;
-	int  seek (nframes_t which_sample, bool complete_refill = false);
+	int  seek (framepos_t which_sample, bool complete_refill = false);
 
   protected:
 	friend class AudioTrack;
 
-	int  process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler);
+	int  process (framepos_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler);
 	bool commit  (nframes_t nframes);
 
   private:
@@ -233,12 +233,12 @@ class AudioDiskstream : public Diskstream
 	int do_refill_with_alloc ();
 
 	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
-			nframes_t& start, nframes_t cnt,
-			ChannelInfo* channel_info, int channel, bool reversed);
+                  framepos_t& start, nframes_t cnt,
+                  ChannelInfo* channel_info, int channel, bool reversed);
 
 	void finish_capture (bool rec_monitors_input, boost::shared_ptr<ChannelList>);
 	void transport_stopped_wallclock (struct tm&, time_t, bool abort);
-	void transport_looped (nframes_t transport_frame);
+	void transport_looped (framepos_t transport_frame);
 
 	void init ();
 
@@ -254,7 +254,7 @@ class AudioDiskstream : public Diskstream
 	int use_pending_capture_data (XMLNode& node);
 
 	void get_input_sources ();
-	void prepare_record_status(nframes_t capture_start_frame);
+	void prepare_record_status(framepos_t capture_start_frame);
 	void set_align_style_from_io();
 	void setup_destructive_playlist ();
 	void use_destructive_playlist ();

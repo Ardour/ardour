@@ -285,13 +285,13 @@ BasicUI::timecode_time (nframes_t where, Timecode::Time& timecode)
 }
 
 void 
-BasicUI::timecode_to_sample (Timecode::Time& timecode, nframes_t& sample, bool use_offset, bool use_subframes) const
+BasicUI::timecode_to_sample (Timecode::Time& timecode, int64_t& sample, bool use_offset, bool use_subframes) const
 {
 	session->timecode_to_sample (*((Timecode::Time*)&timecode), sample, use_offset, use_subframes);
 }
 
 void 
-BasicUI::sample_to_timecode (nframes_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const
+BasicUI::sample_to_timecode (int64_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const
 {
 	session->sample_to_timecode (sample, *((Timecode::Time*)&timecode), use_offset, use_subframes);
 }

@@ -554,7 +554,7 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert)
 	}
 
 	if (_drags->current_pointer_frame() > rightmost_frame && allow_horiz) {
-		if (rightmost_frame < max_frames) {
+		if (rightmost_frame < max_framepos) {
 			autoscroll_x = 1;
 			startit = true;
 		}
@@ -586,8 +586,8 @@ Editor::_autoscroll_canvas (void *arg)
 bool
 Editor::autoscroll_canvas ()
 {
-	nframes64_t new_frame;
-	nframes64_t limit = max_frames - current_page_frames();
+	framepos_t new_frame;
+	framepos_t limit = max_framepos - current_page_frames();
 	GdkEventMotion ev;
 	double new_pixel;
 	double target_pixel;

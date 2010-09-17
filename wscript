@@ -310,6 +310,10 @@ def set_compiler_flags (conf,opt):
 	conf.env.append_value('CCFLAGS', [ '-D_FILE_OFFSET_BITS=64', '-D_FILE_OFFSET_BITS=64' ])
 	conf.env.append_value('CXXFLAGS', [ '-D_LARGEFILE64_SOURCE', '-D_LARGEFILE_SOURCE' ])
 	conf.env.append_value('CXXFLAGS', [ '-D_FILE_OFFSET_BITS=64', '-D_FILE_OFFSET_BITS=64' ])
+
+	conf.env.append_value('CXXFLAGS', [ '-D__STDC_LIMIT_MACROS', '-D__STDC_LIMIT_MACROS' ])
+	conf.env.append_value('CXXFLAGS', [ '-D__STDC_FORMAT_MACROS', '-D__STDC_FORMAT_MACROS' ])
+
 	if opt.nls:
 		conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
 		conf.env.append_value('CCFLAGS', '-DENABLE_NLS')

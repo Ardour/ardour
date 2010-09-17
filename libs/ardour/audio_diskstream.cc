@@ -204,19 +204,19 @@ AudioDiskstream::non_realtime_input_change ()
 	/* now refill channel buffers */
 
 	if (speed() != 1.0f || speed() != -1.0f) {
-		seek ((nframes_t) (_session.transport_frame() * (double) speed()));
+		seek ((framepos_t) (_session.transport_frame() * (double) speed()));
 	} else {
 		seek (_session.transport_frame());
 	}
 }
 
 void
-AudioDiskstream::non_realtime_locate (nframes_t location)
+AudioDiskstream::non_realtime_locate (framepos_t location)
 {
 	/* now refill channel buffers */
 
 	if (speed() != 1.0f || speed() != -1.0f) {
-		seek ((nframes_t) (location * (double) speed()));
+		seek ((framepos_t) (location * (double) speed()));
 	} else {
 		seek (location);
 	}
@@ -347,7 +347,7 @@ AudioDiskstream::setup_destructive_playlist ()
 	PropertyList plist;
 	plist.add (Properties::name, _name.val());
 	plist.add (Properties::start, 0);
-	plist.add (Properties::length, max_frames - max_frames - srcs.front()->natural_position());
+	plist.add (Properties::length, max_framepos - (max_framepos - srcs.front()->natural_position()));
 
 	boost::shared_ptr<Region> region (RegionFactory::create (srcs, plist));
 	_playlist->add_region (region, srcs.front()->natural_position());
@@ -377,7 +377,7 @@ AudioDiskstream::use_destructive_playlist ()
 
 	/* be sure to stretch the region out to the maximum length */
 
-	region->set_length (max_frames - region->position(), this);
+	region->set_length (max_framepos - region->position(), this);
 
 	uint32_t n;
 	ChannelList::iterator chan;
@@ -397,7 +397,7 @@ AudioDiskstream::use_destructive_playlist ()
 }
 
 void
-AudioDiskstream::prepare_record_status(nframes_t capture_start_frame)
+AudioDiskstream::prepare_record_status(framepos_t capture_start_frame)
 {
 	if (recordable() && destructive()) {
 		boost::shared_ptr<ChannelList> c = channels.reader();
@@ -421,7 +421,7 @@ AudioDiskstream::prepare_record_status(nframes_t capture_start_frame)
 }
 
 int
-AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler)
+AudioDiskstream::process (framepos_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler)
 {
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -470,7 +470,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
         // and last_recordable_frame < first_recordable_frame
 
         if (last_recordable_frame < first_recordable_frame) {
-                last_recordable_frame = max_frames;
+                last_recordable_frame = max_framepos;
         }
         
         OverlapType ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
@@ -759,7 +759,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 	size--;
 
 	uint32_t n=0;
-	nframes_t start;
+	framepos_t start;
 
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
@@ -808,7 +808,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 }
 
 int
-AudioDiskstream::seek (nframes_t frame, bool complete_refill)
+AudioDiskstream::seek (framepos_t frame, bool complete_refill)
 {
 	uint32_t n;
 	int ret = -1;
@@ -841,13 +841,13 @@ AudioDiskstream::seek (nframes_t frame, bool complete_refill)
 }
 
 int
-AudioDiskstream::can_internal_playback_seek (nframes_t distance)
+AudioDiskstream::can_internal_playback_seek (framecnt_t distance)
 {
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	for (chan = c->begin(); chan != c->end(); ++chan) {
-		if ((*chan)->playback_buf->read_space() < distance) {
+		if ((*chan)->playback_buf->read_space() < (size_t) distance) {
 			return false;
 		}
 	}
@@ -855,7 +855,7 @@ AudioDiskstream::can_internal_playback_seek (nframes_t distance)
 }
 
 int
-AudioDiskstream::internal_playback_seek (nframes_t distance)
+AudioDiskstream::internal_playback_seek (framecnt_t distance)
 {
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -871,13 +871,14 @@ AudioDiskstream::internal_playback_seek (nframes_t distance)
 }
 
 int
-AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, nframes_t& start, nframes_t cnt,
+AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
+                       framepos_t& start, nframes_t cnt,
 		       ChannelInfo* /*channel_info*/, int channel, bool reversed)
 {
 	nframes_t this_read = 0;
 	bool reloop = false;
-	nframes_t loop_end = 0;
-	nframes_t loop_start = 0;
+	framepos_t loop_end = 0;
+	framepos_t loop_start = 0;
 	nframes_t offset = 0;
 	Location *loc = 0;
 
@@ -885,7 +886,7 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
 
 	if (!reversed) {
 
-		nframes_t loop_length = 0;
+		framecnt_t loop_length = 0;
 
 		/* Make the use of a Location atomic for this read operation.
 
@@ -1082,7 +1083,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 	} else {
 
-		if (file_frame == max_frames) {
+		if (file_frame == max_framepos) {
 
 			/* at end: nothing to do but fill with silence */
 
@@ -1099,19 +1100,19 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 			return 0;
 		}
 
-		if (file_frame > max_frames - total_space) {
+		if (file_frame > max_framepos - total_space) {
 
 			/* to close to the end: read what we can, and zero fill the rest */
 
-			zero_fill = total_space - (max_frames - file_frame);
-			total_space = max_frames - file_frame;
+			zero_fill = total_space - (max_framepos - file_frame);
+			total_space = max_framepos - file_frame;
 
 		} else {
 			zero_fill = 0;
 		}
 	}
 
-	nframes_t file_frame_tmp = 0;
+	framepos_t file_frame_tmp = 0;
 
 	for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 
@@ -1527,7 +1528,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 }
 
 void
-AudioDiskstream::transport_looped (nframes_t transport_frame)
+AudioDiskstream::transport_looped (framepos_t transport_frame)
 {
 	if (was_recording) {
 		// all we need to do is finish this capture, with modified capture length
@@ -1552,7 +1553,7 @@ AudioDiskstream::transport_looped (nframes_t transport_frame)
 		// no latency adjustment or capture offset needs to be made, as that already happened the first time
 		capture_start_frame = transport_frame;
 		first_recordable_frame = transport_frame; // mild lie
-		last_recordable_frame = max_frames;
+		last_recordable_frame = max_framepos;
 		was_recording = true;
 
 		if (recordable() && destructive()) {
@@ -1581,8 +1582,8 @@ void
 AudioDiskstream::finish_capture (bool /*rec_monitors_input*/, boost::shared_ptr<ChannelList> c)
 {
 	was_recording = false;
-        first_recordable_frame = max_frames;
-        last_recordable_frame = max_frames;
+        first_recordable_frame = max_framepos;
+        last_recordable_frame = max_framepos;
 
 	if (capture_captured == 0) {
 		return;
@@ -1627,7 +1628,7 @@ AudioDiskstream::finish_capture (bool /*rec_monitors_input*/, boost::shared_ptr<
 	capture_captured = 0;
 
 	/* now we've finished a capture, reset first_recordable_frame for next time */
-	first_recordable_frame = max_frames;
+	first_recordable_frame = max_framepos;
 }
 
 void
@@ -2147,13 +2148,13 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	boost::shared_ptr<AudioFileSource> fs;
 	boost::shared_ptr<AudioFileSource> first_fs;
 	SourceList pending_sources;
-	nframes_t position;
+	framepos_t position;
 
 	if ((prop = node.property (X_("at"))) == 0) {
 		return -1;
 	}
 
-	if (sscanf (prop->value().c_str(), "%" PRIu32, &position) != 1) {
+	if (sscanf (prop->value().c_str(), "%" PRIu64, &position) != 1) {
 		return -1;
 	}
 

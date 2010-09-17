@@ -1007,11 +1007,11 @@ ARDOUR_UI::update_disk_space()
 		return;
 	}
 
-	nframes_t frames = _session->available_capture_duration();
+	framecnt_t frames = _session->available_capture_duration();
 	char buf[64];
 	nframes_t fr = _session->frame_rate();
 
-	if (frames == max_frames) {
+	if (frames == max_framecnt) {
 		strcpy (buf, _("Disk: 24hrs+"));
 	} else {
 		rec_enabled_streams = 0;

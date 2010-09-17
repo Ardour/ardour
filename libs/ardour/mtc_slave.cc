@@ -123,7 +123,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 	Timecode::Time timecode;
 	TimecodeFormat tc_format;
 	bool reset_tc = true;
-	nframes64_t window_root = -1;
+	framepos_t window_root = -1;
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("full mtc time known at %1, full ? %2\n", now, was_full));
 	

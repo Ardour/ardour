@@ -17,7 +17,6 @@
 
 */
 
-#define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
 #include <algorithm>
@@ -2491,11 +2490,11 @@ Session::update_session_range_location_marker ()
 		return;
 	}
 
-	pair<nframes_t, nframes_t> const ext = get_extent ();
+	pair<framepos_t, framepos_t> const ext = get_extent ();
 
 	if (_session_range_location == 0) {
 		/* we don't have a session range yet; use this one (provided it is valid) */
-		if (ext.first != max_frames) {
+		if (ext.first != max_framepos) {
 			add_session_range_location (ext.first, ext.second);
 		}
 	} else {
@@ -2514,12 +2513,12 @@ Session::update_session_range_location_marker ()
 }
 
 /** @return Extent of the session's contents; if the session is empty, the first value of
- *  the pair will equal max_frames.
+ *  the pair will equal max_framepos.
  */
-pair<nframes_t, nframes_t>
+pair<framepos_t, framepos_t>
 Session::get_extent () const
 {
-	pair<nframes_t, nframes_t> ext (max_frames, 0);
+	pair<framepos_t, framepos_t> ext (max_framepos, 0);
 	
 	boost::shared_ptr<RouteList> rl = routes.reader ();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
@@ -3189,7 +3188,7 @@ Session::graph_reordered ()
 	}
 }
 
-nframes_t
+framecnt_t
 Session::available_capture_duration ()
 {
 	float sample_bytes_on_disk = 4.0; // keep gcc happy
@@ -3217,11 +3216,11 @@ Session::available_capture_duration ()
 
 	double scale = 4096.0 / sample_bytes_on_disk;
 
-	if (_total_free_4k_blocks * scale > (double) max_frames) {
-		return max_frames;
+	if (_total_free_4k_blocks * scale > (double) max_framecnt) {
+		return max_framecnt;
 	}
-
-	return (nframes_t) floor (_total_free_4k_blocks * scale);
+        
+	return (framecnt_t) floor (_total_free_4k_blocks * scale);
 }
 
 void
@@ -3974,13 +3973,13 @@ Session::goto_start ()
 	}
 }
 
-nframes_t
+framepos_t
 Session::current_start_frame () const
 {
 	return _session_range_location ? _session_range_location->start() : 0;
 }
 
-nframes_t
+framepos_t
 Session::current_end_frame () const
 {
 	return _session_range_location ? _session_range_location->end() : 0;

@@ -901,13 +901,13 @@ Locations::first_location_after (nframes64_t frame, bool include_special_ranges)
  *  side of a frame.  Note that if frame is exactly on a `mark', that mark will not be considered for returning
  *  as before/after.
  *  @param frame Frame to look for.
- *  @param before Filled in with the position of the last `mark' before `frame' (or max_frames if none exists)
- *  @param after Filled in with the position of the next `mark' after `frame' (or max_frames if none exists)
+ *  @param before Filled in with the position of the last `mark' before `frame' (or max_framepos if none exists)
+ *  @param after Filled in with the position of the next `mark' after `frame' (or max_framepos if none exists)
  */
 void
 Locations::marks_either_side (nframes64_t const frame, nframes64_t& before, nframes64_t& after) const
 {
-	before = after = max_frames;
+	before = after = max_framepos;
 	
 	LocationList locs;
 

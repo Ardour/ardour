@@ -68,14 +68,14 @@ TimeSelection::consolidate ()
 	return changed;
 }
 
-nframes_t
+framepos_t
 TimeSelection::start ()
 {
 	if (empty()) {
 		return 0;
 	}
 
-	nframes_t first = max_frames;
+	framepos_t first = max_framepos;
 
 	for (std::list<AudioRange>::iterator i = begin(); i != end(); ++i) {
 		if ((*i).start < first) {
@@ -85,10 +85,10 @@ TimeSelection::start ()
 	return first;
 }
 
-nframes_t
+framepos_t
 TimeSelection::end_frame ()
 {
-	nframes_t last = 0;
+	framepos_t last = 0;
 
 	/* XXX make this work like RegionSelection: no linear search needed */
 
@@ -100,7 +100,7 @@ TimeSelection::end_frame ()
 	return last;
 }
 
-nframes_t
+framecnt_t
 TimeSelection::length()
 {
 	return end_frame() - start() + 1;

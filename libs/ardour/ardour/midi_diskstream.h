@@ -62,7 +62,7 @@ class MidiDiskstream : public Diskstream
 	float playback_buffer_load() const;
 	float capture_buffer_load() const;
 
-	void get_playback(MidiBuffer& dst, nframes_t start, nframes_t end);
+	void get_playback(MidiBuffer& dst, framepos_t start, framepos_t end);
 
 	void set_record_enabled (bool yn);
 
@@ -119,23 +119,23 @@ class MidiDiskstream : public Diskstream
 	void set_pending_overwrite(bool);
 	int  overwrite_existing_buffers ();
 	void set_block_size (nframes_t);
-	int  internal_playback_seek (nframes_t distance);
-	int  can_internal_playback_seek (nframes_t distance);
+	int  internal_playback_seek (framecnt_t distance);
+	int  can_internal_playback_seek (framecnt_t distance);
 	int  rename_write_sources ();
         std::list<boost::shared_ptr<Source> > steal_write_sources();
 	void reset_write_sources (bool, bool force = false);
 	void non_realtime_input_change ();
-	void non_realtime_locate (nframes_t location);
+	void non_realtime_locate (framepos_t location);
 
 	static void set_readahead_frames(nframes_t frames_ahead) { midi_readahead = frames_ahead; }
 
   protected:
-	int seek (nframes_t which_sample, bool complete_refill = false);
+	int seek (framepos_t which_sample, bool complete_refill = false);
 
   protected:
 	friend class MidiTrack;
 
-	int  process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler);
+	int  process (framepos_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler);
 	bool commit  (nframes_t nframes);
 	static nframes_t midi_readahead;
 
@@ -147,11 +147,11 @@ class MidiDiskstream : public Diskstream
 
 	int do_refill_with_alloc();
 
-	int read (nframes_t& start, nframes_t cnt, bool reversed);
+	int read (framepos_t& start, nframes_t cnt, bool reversed);
 
 	void finish_capture (bool rec_monitors_input);
 	void transport_stopped_wallclock (struct tm&, time_t, bool abort);
-	void transport_looped (nframes_t transport_frame);
+	void transport_looped (framepos_t transport_frame);
 
 	void init ();
 

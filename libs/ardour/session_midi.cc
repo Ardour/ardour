@@ -270,7 +270,7 @@ Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 		return;
 	}
 
-	nframes_t target_frame;
+	framepos_t target_frame;
 	Timecode::Time timecode;
 
 	timecode.hours = mmc_tc[0] & 0xf;
@@ -283,8 +283,8 @@ Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 	// Also takes timecode offset into account:
 	timecode_to_sample( timecode, target_frame, true /* use_offset */, false /* use_subframes */ );
 
-	if (target_frame > max_frames) {
-		target_frame = max_frames;
+	if (target_frame > max_framepos) {
+		target_frame = max_framepos;
 	}
 
 	/* Some (all?) MTC/MMC devices do not send a full MTC frame

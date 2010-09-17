@@ -452,7 +452,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, framepos_t* pending_r
 		*pending_region_position = _last_frame_position;
 	}
 
-	if (*pending_region_position > max_frames - _primary->region()->length()) {
+	if (*pending_region_position > max_framepos - _primary->region()->length()) {
 		*pending_region_position = _last_frame_position;
 	}
 
@@ -2307,7 +2307,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		e = max (_marker->position(), e);
 		s = min (s, e);
 		e = max (s, e);
-		if (e < max_frames) {
+		if (e < max_framepos) {
 			++e;
 		}
 		_editor->session()->locations()->find_all_between (s, e, ll, Location::Flags (0));
@@ -3508,11 +3508,11 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 
 			_editor->session()->locations()->marks_either_side (grab_frame(), start, end);
 
-			if (end == max_frames) {
+			if (end == max_framepos) {
 				end = _editor->session()->current_end_frame ();
 			}
 
-			if (start == max_frames) {
+			if (start == max_framepos) {
 				start = _editor->session()->current_start_frame ();
 			}
 

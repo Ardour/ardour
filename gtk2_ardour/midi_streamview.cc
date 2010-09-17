@@ -75,7 +75,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 
 	_note_lines->property_x1() = 0;
 	_note_lines->property_y1() = 0;
-	_note_lines->property_x2() = trackview().editor().frame_to_pixel (max_frames);
+	_note_lines->property_x2() = trackview().editor().frame_to_pixel (max_framepos);
 	_note_lines->property_y2() = 0;
 
 	_note_lines->signal_event().connect(sigc::bind(

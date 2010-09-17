@@ -143,7 +143,7 @@ MidiDiskstream::~MidiDiskstream ()
 
 
 void
-MidiDiskstream::non_realtime_locate (nframes_t position)
+MidiDiskstream::non_realtime_locate (framepos_t position)
 {
 	if (_write_source) {
 		_write_source->set_timeline_position (position);
@@ -192,7 +192,7 @@ MidiDiskstream::non_realtime_input_change ()
 	/* now refill channel buffers */
 
 	if (speed() != 1.0f || speed() != -1.0f) {
-		seek ((nframes_t) (_session.transport_frame() * (double) speed()));
+		seek ((framepos_t) (_session.transport_frame() * (double) speed()));
 	}
 	else {
 		seek (_session.transport_frame());
@@ -488,7 +488,7 @@ trace_midi (ostream& o, MIDI::byte *msg, size_t len)
 #endif
 
 int
-MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler)
+MidiDiskstream::process (framepos_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler)
 {
 	int       ret = -1;
 	nframes_t rec_offset = 0;
@@ -619,7 +619,7 @@ MidiDiskstream::set_pending_overwrite (bool yn)
 int
 MidiDiskstream::overwrite_existing_buffers ()
 {
-	//read(overwrite_frame, disk_io_chunk_frames, false);
+	read (overwrite_frame, disk_io_chunk_frames, false);
 	overwrite_queued = false;
 	_pending_overwrite = false;
 
@@ -627,7 +627,7 @@ MidiDiskstream::overwrite_existing_buffers ()
 }
 
 int
-MidiDiskstream::seek (nframes_t frame, bool complete_refill)
+MidiDiskstream::seek (framepos_t frame, bool complete_refill)
 {
 	Glib::Mutex::Lock lm (state_lock);
 	int ret = -1;
@@ -650,7 +650,7 @@ MidiDiskstream::seek (nframes_t frame, bool complete_refill)
 }
 
 int
-MidiDiskstream::can_internal_playback_seek (nframes_t distance)
+MidiDiskstream::can_internal_playback_seek (framecnt_t distance)
 {
 	uint32_t frames_read    = g_atomic_int_get(&_frames_read_from_ringbuffer);
 	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
@@ -658,7 +658,7 @@ MidiDiskstream::can_internal_playback_seek (nframes_t distance)
 }
 
 int
-MidiDiskstream::internal_playback_seek (nframes_t distance)
+MidiDiskstream::internal_playback_seek (framecnt_t distance)
 {
 	first_recordable_frame += distance;
 	playback_sample += distance;
@@ -668,17 +668,17 @@ MidiDiskstream::internal_playback_seek (nframes_t distance)
 
 /** @a start is set to the new frame position (TIME) read up to */
 int
-MidiDiskstream::read (nframes_t& start, nframes_t dur, bool reversed)
+MidiDiskstream::read (framepos_t& start, nframes_t dur, bool reversed)
 {
 	nframes_t this_read = 0;
 	bool reloop = false;
-	nframes_t loop_end = 0;
-	nframes_t loop_start = 0;
+	framepos_t loop_end = 0;
+	framepos_t loop_start = 0;
 	Location *loc = 0;
 
 	if (!reversed) {
 
-		nframes_t loop_length = 0;
+		framecnt_t loop_length = 0;
 
 		/* Make the use of a Location atomic for this read operation.
 
@@ -749,7 +749,7 @@ MidiDiskstream::read (nframes_t& start, nframes_t dur, bool reversed)
 			if (reloop) {
 				// Synthesize LoopEvent here, because the next events
 				// written will have non-monotonic timestamps.
-				_playback_buf->write(loop_end - 1, LoopEventType, sizeof (nframes_t), (uint8_t *) &loop_start);
+				_playback_buf->write(loop_end - 1, LoopEventType, sizeof (framepos_t), (uint8_t *) &loop_start);
 				cout << "Pushing LoopEvent ts=" << loop_end-1
 				     << " start+this_read " << start+this_read << endl;
 
@@ -788,13 +788,13 @@ MidiDiskstream::do_refill ()
 	}
 
 	/* at end: nothing to do */
-	if (file_frame == max_frames) {
+	if (file_frame == max_framepos) {
 		return 0;
 	}
 
 	// At this point we...
 	assert(_playback_buf->write_space() > 0); // ... have something to write to, and
-	assert(file_frame <= max_frames); // ... something to write
+	assert(file_frame <= max_framepos); // ... something to write
 
 	// now calculate how much time is in the ringbuffer.
 	// and lets write as much as we need to get this to be midi_readahead;
@@ -810,7 +810,7 @@ MidiDiskstream::do_refill ()
 	//cout << "MDS read for midi_readahead " << to_read << "  rb_contains: "
 	//	<< frames_written - frames_read << endl;
 
-	to_read = min(to_read, (max_frames - file_frame));
+	to_read = (nframes_t) min ((framecnt_t) to_read, (framecnt_t) (max_framepos - file_frame));
 
 	if (read (file_frame, to_read, reversed)) {
 		ret = -1;
@@ -1061,7 +1061,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 }
 
 void
-MidiDiskstream::transport_looped (nframes_t transport_frame)
+MidiDiskstream::transport_looped (framepos_t transport_frame)
 {
 	if (was_recording) {
 
@@ -1084,7 +1084,7 @@ MidiDiskstream::transport_looped (nframes_t transport_frame)
 		// no latency adjustment or capture offset needs to be made, as that already happened the first time
 		capture_start_frame = transport_frame;
 		first_recordable_frame = transport_frame; // mild lie
-		last_recordable_frame = max_frames;
+		last_recordable_frame = max_framepos;
 		was_recording = true;
 	}
 }
@@ -1463,7 +1463,7 @@ MidiDiskstream::use_pending_capture_data (XMLNode& /*node*/)
  * so that an event at \a start has time = 0
  */
 void
-MidiDiskstream::get_playback (MidiBuffer& dst, nframes_t start, nframes_t end)
+MidiDiskstream::get_playback (MidiBuffer& dst, framepos_t start, framepos_t end)
 {
 	dst.clear();
 	assert(dst.size() == 0);

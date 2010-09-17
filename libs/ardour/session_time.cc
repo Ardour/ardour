@@ -205,7 +205,7 @@ Session::set_timecode_offset_negative (bool neg)
 }
 
 void
-Session::timecode_to_sample( Timecode::Time& timecode, nframes_t& sample, bool use_offset, bool use_subframes ) const
+Session::timecode_to_sample( Timecode::Time& timecode, framepos_t& sample, bool use_offset, bool use_subframes ) const
 {
 
 	if (timecode.drop) {
@@ -297,9 +297,9 @@ Session::timecode_to_sample( Timecode::Time& timecode, nframes_t& sample, bool u
 
 
 void
-Session::sample_to_timecode( nframes_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes ) const
+Session::sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes ) const
 {
-	nframes_t offset_sample;
+	framepos_t offset_sample;
 
 	if (!use_offset) {
 		offset_sample = sample;
@@ -430,7 +430,7 @@ Session::timecode_duration (nframes_t when, Timecode::Time& timecode) const
 }
 
 void
-Session::timecode_duration_string (char* buf, nframes_t when) const
+Session::timecode_duration_string (char* buf, framepos_t when) const
 {
 	Timecode::Time timecode;
 

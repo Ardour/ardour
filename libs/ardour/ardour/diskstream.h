@@ -101,7 +101,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	virtual void punch_out() {}
 
 	void non_realtime_set_speed ();
-	virtual void non_realtime_locate (nframes_t /*location*/) {};
+	virtual void non_realtime_locate (framepos_t /*location*/) {};
 	virtual void playlist_modified ();
 
 	boost::shared_ptr<Playlist> playlist () { return _playlist; }
@@ -110,10 +110,10 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	virtual int use_new_playlist () = 0;
 	virtual int use_copy_playlist () = 0;
 
-	nframes_t current_capture_start() const { return capture_start_frame; }
-	nframes_t current_capture_end()   const { return capture_start_frame + capture_captured; }
-	nframes_t get_capture_start_frame (uint32_t n=0);
-	nframes_t get_captured_frames (uint32_t n=0);
+	framepos_t current_capture_start() const { return capture_start_frame; }
+	framepos_t current_capture_end()   const { return capture_start_frame + capture_captured; }
+	framepos_t get_capture_start_frame (uint32_t n=0);
+	framecnt_t get_captured_frames (uint32_t n=0);
 
 	ChanCount n_channels() { return _n_channels; }
 
@@ -169,8 +169,8 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	virtual void set_pending_overwrite (bool) = 0;
 	virtual int  overwrite_existing_buffers () = 0;
-	virtual int  internal_playback_seek (nframes_t distance) = 0;
-	virtual int  can_internal_playback_seek (nframes_t distance) = 0;
+	virtual int  internal_playback_seek (framecnt_t distance) = 0;
+	virtual int  can_internal_playback_seek (framecnt_t distance) = 0;
 	virtual int  rename_write_sources () = 0;
 	virtual void reset_write_sources (bool, bool force = false) = 0;
 	virtual void non_realtime_input_change () = 0;
@@ -180,12 +180,12 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
   protected:
 	friend class Auditioner;
-	virtual int  seek (nframes_t which_sample, bool complete_refill = false) = 0;
+	virtual int  seek (framepos_t which_sample, bool complete_refill = false) = 0;
 
   protected:
 	friend class Track;
 
-	virtual int  process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler) = 0;
+	virtual int  process (framepos_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler) = 0;
 	virtual bool commit  (nframes_t nframes) = 0;
 
 	//private:
@@ -197,7 +197,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	struct CaptureTransition {
 		TransitionType   type;
-		nframes_t   capture_val; ///< The start or end file frame position
+		framepos_t       capture_val; ///< The start or end file frame position
 	};
 
 	/* The two central butler operations */
@@ -211,11 +211,11 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	virtual void playlist_ranges_moved (std::list< Evoral::RangeMove<framepos_t> > const &, bool);
 
 	virtual void transport_stopped_wallclock (struct tm&, time_t, bool abort) = 0;
-	virtual void transport_looped (nframes_t transport_frame) = 0;
+	virtual void transport_looped (framepos_t transport_frame) = 0;
 
 	struct CaptureInfo {
-		uint32_t start;
-		uint32_t frames;
+            framepos_t start;
+            framecnt_t frames;
 	};
 
 	virtual int use_new_write_source (uint32_t n=0) = 0;
@@ -230,14 +230,14 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	virtual int use_pending_capture_data (XMLNode& node) = 0;
 
-	virtual void check_record_status (nframes_t transport_frame, nframes_t nframes, bool can_record);
-	virtual void prepare_record_status (nframes_t /*capture_start_frame*/) {}
+	virtual void check_record_status (framepos_t transport_frame, nframes_t nframes, bool can_record);
+	virtual void prepare_record_status (framepos_t /*capture_start_frame*/) {}
 	virtual void set_align_style_from_io() {}
 	virtual void setup_destructive_playlist () {}
 	virtual void use_destructive_playlist () {}
         virtual void prepare_to_stop (framepos_t pos);
 
-	void calculate_record_range(OverlapType ot, sframes_t transport_frame, nframes_t nframes,
+	void calculate_record_range(OverlapType ot, framepos_t transport_frame, framecnt_t nframes,
 			nframes_t& rec_nframes, nframes_t& rec_offset);
 
 	static nframes_t disk_io_chunk_frames;
@@ -260,20 +260,20 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	bool         _seek_required;
 
 	bool          force_refill;
-	nframes_t     capture_start_frame;
-	nframes_t     capture_captured;
+	framepos_t    capture_start_frame;
+	framecnt_t    capture_captured;
 	bool          was_recording;
 	nframes_t     adjust_capture_position;
 	nframes_t    _capture_offset;
 	nframes_t    _roll_delay;
-	nframes_t     first_recordable_frame;
-	nframes_t     last_recordable_frame;
+	framepos_t    first_recordable_frame;
+	framepos_t    last_recordable_frame;
 	int           last_possibly_recording;
 	AlignStyle   _alignment_style;
 	bool         _scrubbing;
 	bool         _slaved;
 	Location*     loop_location;
-	nframes_t     overwrite_frame;
+	framepos_t    overwrite_frame;
 	off_t         overwrite_offset;
 	bool          _pending_overwrite;
 	bool          overwrite_queued;
@@ -284,9 +284,9 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	double        _speed;
 	double        _target_speed;
 
-	nframes_t     file_frame;
-	nframes_t     playback_sample;
-	nframes_t     playback_distance;
+	framepos_t     file_frame;
+	framepos_t     playback_sample;
+	framecnt_t     playback_distance;
 
 	uint32_t     _read_data_count;
 	uint32_t     _write_data_count;
@@ -297,9 +297,9 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	Glib::Mutex state_lock;
 
-	nframes_t scrub_start;
-	nframes_t scrub_buffer_size;
-	nframes_t scrub_offset;
+	framepos_t scrub_start;
+	nframes_t  scrub_buffer_size;
+	nframes_t  scrub_offset;
 
 	PBD::ScopedConnectionList playlist_connections;
 

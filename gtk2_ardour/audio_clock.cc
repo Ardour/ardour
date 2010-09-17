@@ -1493,7 +1493,7 @@ AudioClock::timecode_frame_from_display () const
 	}
 
 	Timecode::Time timecode;
-	nframes_t sample;
+	framepos_t sample;
 
 	timecode.hours = atoi (hours_label.get_text());
 	timecode.minutes = atoi (minutes_label.get_text());
@@ -1516,12 +1516,12 @@ AudioClock::timecode_frame_from_display () const
 
 	// Testcode for timecode<->sample conversions (P.S.)
 	Timecode::Time timecode1;
-	nframes_t sample1;
-	nframes_t oldsample = 0;
+	framepos_t sample1;
+	framepos_t oldsample = 0;
 	Timecode::Time timecode2;
-	nframes_t sample_increment;
+	framecnt_t sample_increment;
 
-	sample_increment = (long)rint(_session->frame_rate() / _session->timecode_frames_per_second);
+	sample_increment = (framecnt_t)rint(_session->frame_rate() / _session->timecode_frames_per_second);
 
 #ifdef Timecode_SAMPLE_TEST_1
 	// Test 1: use_offset = false, use_subframes = false

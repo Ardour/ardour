@@ -22,6 +22,8 @@
 #define __ardour_basic_ui_h__
 
 #include <string>
+#include <stdint.h>
+
 #include "pbd/signals.h"
 
 #include <jack/types.h>
@@ -78,8 +80,8 @@ class BasicUI {
 	jack_nframes_t timecode_frames_per_hour ();
 
 	void timecode_time (jack_nframes_t where, Timecode::Time&);
-	void timecode_to_sample (Timecode::Time& timecode, jack_nframes_t& sample, bool use_offset, bool use_subframes) const;
-	void sample_to_timecode (jack_nframes_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
+	void timecode_to_sample (Timecode::Time& timecode, int64_t& sample, bool use_offset, bool use_subframes) const;
+	void sample_to_timecode (int64_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
 
   protected:
 	BasicUI ();

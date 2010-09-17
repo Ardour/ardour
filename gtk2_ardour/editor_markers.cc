@@ -870,7 +870,7 @@ Editor::marker_menu_range_to_next ()
 	nframes64_t end;
 	_session->locations()->marks_either_side (marker->position(), start, end);
 
-	if (end != max_frames) {
+	if (end != max_framepos) {
 		string range_name = l->name();
 		range_name += "-range";
 

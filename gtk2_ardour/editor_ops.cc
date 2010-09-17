@@ -351,20 +351,20 @@ Editor::nudge_forward (bool next, bool force_playhead)
 					if (next) {
 						distance = next_distance;
 					}
-					if (max_frames - distance > loc->start() + loc->length()) {
+					if (max_framepos - distance > loc->start() + loc->length()) {
 						loc->set_start (loc->start() + distance);
 					} else {
-						loc->set_start (max_frames - loc->length());
+						loc->set_start (max_framepos - loc->length());
 					}
 				} else {
 					distance = get_nudge_distance (loc->end(), next_distance);
 					if (next) {
 						distance = next_distance;
 					}
-					if (max_frames - distance > loc->end()) {
+					if (max_framepos - distance > loc->end()) {
 						loc->set_end (loc->end() + distance);
 					} else {
-						loc->set_end (max_frames);
+						loc->set_end (max_framepos);
 					}
 				}
 				XMLNode& after (loc->get_state());
@@ -597,7 +597,7 @@ Editor::build_region_boundary_cache ()
 	while (pos < _session->current_end_frame() && !at_end) {
 
 		framepos_t rpos;
-		framepos_t lpos = max_frames;
+		framepos_t lpos = max_framepos;
 
 		for (vector<RegionPoint>::iterator p = interesting_points.begin(); p != interesting_points.end(); ++p) {
 
@@ -670,7 +670,7 @@ boost::shared_ptr<Region>
 Editor::find_next_region (framepos_t frame, RegionPoint point, int32_t dir, TrackViewList& tracks, TimeAxisView **ontrack)
 {
 	TrackViewList::iterator i;
-	nframes64_t closest = max_frames;
+	framepos_t closest = max_framepos;
 	boost::shared_ptr<Region> ret;
 	framepos_t rpos = 0;
 
@@ -732,7 +732,7 @@ Editor::find_next_region (framepos_t frame, RegionPoint point, int32_t dir, Trac
 framepos_t
 Editor::find_next_region_boundary (framepos_t pos, int32_t dir, const TrackViewList& tracks)
 {
-	framecnt_t distance = max_frames;
+	framecnt_t distance = max_framepos;
 	framepos_t current_nearest = -1;
 
 	for (TrackViewList::const_iterator i = tracks.begin(); i != tracks.end(); ++i) {
@@ -1183,18 +1183,18 @@ Editor::selected_marker_to_selection_end ()
 void
 Editor::scroll_playhead (bool forward)
 {
-	nframes64_t pos = playhead_cursor->current_frame;
-	nframes64_t delta = (nframes64_t) floor (current_page_frames() / 0.8);
+	framepos_t pos = playhead_cursor->current_frame;
+	framecnt_t delta = (framecnt_t) floor (current_page_frames() / 0.8);
 
 	if (forward) {
-		if (pos == max_frames) {
+		if (pos == max_framepos) {
 			return;
 		}
 
-		if (pos < max_frames - delta) {
+		if (pos < max_framepos - delta) {
 			pos += delta ;
 		} else {
-			pos = max_frames;
+			pos = max_framepos;
 		}
 
 	} else {
@@ -1428,8 +1428,8 @@ Editor::scroll_forward (float pages)
 		}
 	}
 
-	if (max_frames - cnt < leftmost_frame) {
-		frame = max_frames - cnt;
+	if (max_framepos - cnt < leftmost_frame) {
+		frame = max_framepos - cnt;
 	} else {
 		frame = leftmost_frame + cnt;
 	}
@@ -1584,8 +1584,8 @@ Editor::temporal_zoom (gdouble fpu)
 
 		if (l < 0) {
 			leftmost_after_zoom = 0;
-		} else if (l > max_frames) {
-			leftmost_after_zoom = max_frames - new_page_size;
+		} else if (l > max_framepos) {
+			leftmost_after_zoom = max_framepos - new_page_size;
 		} else {
 			leftmost_after_zoom = (nframes64_t) l;
 		}
@@ -1610,8 +1610,8 @@ Editor::temporal_zoom (gdouble fpu)
 
 			if (l < 0) {
 				leftmost_after_zoom = 0;
-			} else if (l > max_frames) {
-				leftmost_after_zoom = max_frames - new_page_size;
+			} else if (l > max_framepos) {
+				leftmost_after_zoom = max_framepos - new_page_size;
 			} else {
 				leftmost_after_zoom = (nframes64_t) l;
 			}
@@ -1629,8 +1629,8 @@ Editor::temporal_zoom (gdouble fpu)
 
 			if (l < 0) {
 				leftmost_after_zoom = 0;
-			} else if (l > max_frames) {
-				leftmost_after_zoom = max_frames - new_page_size;
+			} else if (l > max_framepos) {
+				leftmost_after_zoom = max_framepos - new_page_size;
 			} else {
 				leftmost_after_zoom = (nframes64_t) l;
 			}
@@ -1651,9 +1651,8 @@ Editor::temporal_zoom (gdouble fpu)
 void
 Editor::temporal_zoom_region (bool both_axes)
 {
-
-	nframes64_t start = max_frames;
-	nframes64_t end = 0;
+	framepos_t start = max_framepos;
+	framepos_t end = 0;
 	RegionSelection rs;
 	set<TimeAxisView*> tracks;
 
@@ -1701,10 +1700,10 @@ Editor::temporal_zoom_region (bool both_axes)
 		start = 0;
 	}
 
-	if (max_frames - extra_samples > end) {
+	if (max_framepos - extra_samples > end) {
 		end += extra_samples;
 	} else {
-		end = max_frames;
+		end = max_framepos;
 	}
 
 	if (both_axes) {
@@ -2566,8 +2565,8 @@ Editor::play_edit_range ()
 void
 Editor::play_selected_region ()
 {
-	nframes64_t start = max_frames;
-	nframes64_t end = 0;
+	framepos_t start = max_framepos;
+	framepos_t end = 0;
 	RegionSelection rs;
 
 	get_regions_for_action (rs);
@@ -3058,10 +3057,10 @@ Editor::crop_region_to (nframes64_t start, nframes64_t end)
 		*/
 
 		the_start = max (the_start, (nframes64_t) region->position());
-		if (max_frames - the_start < region->length()) {
+		if (max_framepos - the_start < region->length()) {
 			the_end = the_start + region->length() - 1;
 		} else {
-			the_end = max_frames;
+			the_end = max_framepos;
 		}
 		the_end = min (end, the_end);
 		cnt = the_end - the_start + 1;
@@ -4091,7 +4090,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 	vector<PlaylistMapping> pmap;
 
-	nframes64_t first_position = max_frames;
+	framepos_t first_position = max_framepos;
 
 	typedef set<boost::shared_ptr<Playlist> > FreezeList;
         FreezeList freezelist;
@@ -4284,7 +4283,7 @@ Editor::paste_internal (nframes64_t position, float times)
 		}
 	}
 
-	if (position == max_frames) {
+	if (position == max_framepos) {
 		position = get_preferred_edit_position();
 	}
 
@@ -5712,8 +5711,8 @@ Editor::set_loop_from_edit_range (bool play)
 void
 Editor::set_loop_from_region (bool play)
 {
-	nframes64_t start = max_frames;
-	nframes64_t end = 0;
+	framepos_t start = max_framepos;
+	framepos_t end = 0;
 
 	RegionSelection rs;
 
@@ -5773,8 +5772,8 @@ Editor::set_punch_from_edit_range ()
 void
 Editor::set_punch_from_region ()
 {
-	nframes64_t start = max_frames;
-	nframes64_t end = 0;
+	framepos_t start = max_framepos;
+	framepos_t end = 0;
 
 	RegionSelection rs;
 
@@ -6341,8 +6340,8 @@ void
 Editor::playhead_forward_to_grid ()
 {
 	if (!_session) return;
-	nframes64_t pos = playhead_cursor->current_frame;
-	if (pos < max_frames - 1) {
+	framepos_t pos = playhead_cursor->current_frame;
+	if (pos < max_framepos - 1) {
 		pos += 2;
 		snap_to_internal (pos, 1, false);
 		_session->request_locate (pos);

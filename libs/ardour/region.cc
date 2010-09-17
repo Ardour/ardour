@@ -452,7 +452,7 @@ Region::set_length (framecnt_t len, void */*src*/)
 		   length impossible.
 		*/
 
-		if (max_frames - len < _position) {
+		if (max_framepos - len < _position) {
 			return;
 		}
 
@@ -602,9 +602,9 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 		   XXX is this the right thing to do?
 		*/
 
-		if (max_frames - _length < _position) {
+		if (max_framepos - _length < _position) {
 			_last_length = _length;
-			_length = max_frames - _position;
+			_length = max_framepos - _position;
 		}
 
 		if (allow_bbt_recompute) {
@@ -667,8 +667,8 @@ Region::nudge_position (frameoffset_t n, void* /*src*/)
 	_last_position = _position;
 
 	if (n > 0) {
-		if (_position > max_frames - n) {
-			_position = max_frames;
+		if (_position > max_framepos - n) {
+			_position = max_framepos;
 		} else {
 			_position += n;
 		}
@@ -735,8 +735,8 @@ Region::trim_start (framepos_t new_position, void */*src*/)
 
 	if (start_shift > 0) {
 
-		if (_start > max_frames - start_shift) {
-			new_start = max_frames;
+		if (_start > max_framepos - start_shift) {
+			new_start = max_framepos;
 		} else {
 			new_start = _start + start_shift;
 		}
@@ -895,8 +895,8 @@ Region::trim_to_internal (framepos_t position, framecnt_t length, void */*src*/)
 
 	if (start_shift > 0) {
 
-		if (_start > max_frames - start_shift) {
-			new_start = max_frames;
+		if (_start > max_framepos - start_shift) {
+			new_start = max_framepos;
 		} else {
 			new_start = _start + start_shift;
 		}
@@ -1077,7 +1077,7 @@ Region::adjust_to_sync (framepos_t pos) const
 			pos = 0;
 		}
 	} else {
-		if (max_frames - pos > offset) {
+		if (max_framepos - pos > offset) {
 			pos += offset;
 		}
 	}

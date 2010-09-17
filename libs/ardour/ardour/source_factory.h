@@ -41,7 +41,7 @@ class SourceFactory {
 
 	static boost::shared_ptr<Source> create (Session&, const XMLNode& node, bool async = false);
 	static boost::shared_ptr<Source> createSilent (Session&, const XMLNode& node,
-			nframes_t nframes, float sample_rate);
+                                                       framecnt_t nframes, float sample_rate);
 
 	static boost::shared_ptr<Source> createReadable (DataType type, Session&,
 			const std::string& path, 

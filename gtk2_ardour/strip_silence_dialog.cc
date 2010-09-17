@@ -488,9 +488,9 @@ StripSilenceDialog::update_stats (const SilenceResult& res)
         }
 
         max_silence = 0;
-        min_silence = max_frames;
+        min_silence = max_framepos;
         max_audible = 0;
-        min_audible = max_frames;
+        min_audible = max_framepos;
         
         SilenceResult::const_iterator cur;
 

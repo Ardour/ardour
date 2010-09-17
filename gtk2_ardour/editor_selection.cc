@@ -586,14 +586,14 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 	} else if (op == Selection::Extend) {
 
 		list<Selectable*> results;
-		nframes64_t last_frame;
-		nframes64_t first_frame;
+		framepos_t last_frame;
+		framepos_t first_frame;
 		bool same_track = false;
 
 		/* 1. find the last selected regionview in the track that was clicked in */
 
 		last_frame = 0;
-		first_frame = max_frames;
+		first_frame = max_framepos;
 
 		for (RegionSelection::iterator x = selection->regions.begin(); x != selection->regions.end(); ++x) {
 			if (&(*x)->get_time_axis_view() == &clicked_regionview->get_time_axis_view()) {
@@ -988,7 +988,7 @@ Editor::select_all_in_track (Selection::Operation op)
 		return;
 	}
 
-	clicked_routeview->get_selectables (0, max_frames, 0, DBL_MAX, touched);
+	clicked_routeview->get_selectables (0, max_framepos, 0, DBL_MAX, touched);
 
 	switch (op) {
 	case Selection::Toggle:
@@ -1015,7 +1015,7 @@ Editor::select_all (Selection::Operation op)
 		if ((*iter)->hidden()) {
 			continue;
 		}
-		(*iter)->get_selectables (0, max_frames, 0, DBL_MAX, touched);
+		(*iter)->get_selectables (0, max_framepos, 0, DBL_MAX, touched);
 	}
 	begin_reversible_command (_("select all"));
 	switch (op) {

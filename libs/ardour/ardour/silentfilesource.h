@@ -27,7 +27,7 @@ namespace ARDOUR {
 
 class SilentFileSource : public AudioFileSource {
 public:
-	int update_header (sframes_t /*when*/, struct tm&, time_t) { return 0; }
+	int update_header (framepos_t /*when*/, struct tm&, time_t) { return 0; }
 	int flush_header () { return 0; }
 	float sample_rate () const { return _sample_rate; }
 

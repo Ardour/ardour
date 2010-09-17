@@ -46,7 +46,6 @@ namespace ARDOUR {
 
 	class AudioEngine;
 
-	static const nframes_t max_frames = JACK_MAX_FRAMES;
 	extern PBD::Signal1<void,std::string> BootMessage;
 
 	int init (bool with_vst, bool try_optimization);

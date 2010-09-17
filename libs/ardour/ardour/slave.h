@@ -249,13 +249,13 @@ class MTC_Slave : public Slave {
 	static const int frame_tolerance;
 
 	SafeTime       current;
-	nframes_t      mtc_frame;               /* current time */
-	nframes_t      last_inbound_frame;      /* when we got it; audio clocked */
+	framepos_t     mtc_frame;               /* current time */
+	framepos_t     last_inbound_frame;      /* when we got it; audio clocked */
 	MIDI::byte     last_mtc_fps_byte;
-	nframes64_t    window_begin;
-	nframes64_t    window_end;
-	nframes64_t    last_mtc_timestamp;
-	nframes64_t    last_mtc_frame;
+	framepos_t     window_begin;
+	framepos_t     window_end;
+	framepos_t     last_mtc_timestamp;
+	framepos_t     last_mtc_frame;
 	bool           did_reset_tc_format;
 	TimecodeFormat saved_tc_format;
 	size_t         speed_accumulator_size;

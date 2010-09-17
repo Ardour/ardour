@@ -44,7 +44,7 @@ class SndFileSource : public AudioFileSource {
 	~SndFileSource ();
 
 	float sample_rate () const;
-	int update_header (sframes_t when, struct tm&, time_t);
+	int update_header (framepos_t when, struct tm&, time_t);
 	int flush_header ();
 
 	nframes64_t natural_position () const;

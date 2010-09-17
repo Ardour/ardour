@@ -311,9 +311,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	int wipe ();
 
-	std::pair<nframes_t, nframes_t> get_extent () const;
-	nframes_t current_end_frame () const;
-	nframes_t current_start_frame () const;
+	std::pair<framepos_t, framepos_t> get_extent () const;
+	framepos_t current_end_frame () const;
+	framepos_t current_start_frame () const;
 	/// "actual" sample rate of session, set by current audioengine rate, pullup/down etc.
 	nframes_t frame_rate() const   { return _current_frame_rate; }
 	/// "native" sample rate of session, regardless of current audioengine rate, pullup/down etc
@@ -447,14 +447,14 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void sync_time_vars();
 
 	void bbt_time (nframes_t when, BBT_Time&);
-	void timecode_to_sample(Timecode::Time& timecode, nframes_t& sample, bool use_offset, bool use_subframes) const;
-	void sample_to_timecode(nframes_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
+	void timecode_to_sample(Timecode::Time& timecode, framepos_t& sample, bool use_offset, bool use_subframes) const;
+	void sample_to_timecode(framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
 	void timecode_time (Timecode::Time &);
 	void timecode_time (nframes_t when, Timecode::Time&);
 	void timecode_time_subframes (nframes_t when, Timecode::Time&);
 
 	void timecode_duration (nframes_t, Timecode::Time&) const;
-	void timecode_duration_string (char *, nframes_t) const;
+	void timecode_duration_string (char *, framecnt_t) const;
 
 	void           set_timecode_offset (nframes_t);
 	nframes_t      timecode_offset () const { return _timecode_offset; }
@@ -629,7 +629,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* s/w "RAID" management */
 
-	nframes_t available_capture_duration();
+	framecnt_t available_capture_duration();
 
 	/* I/O bundles */
 
@@ -1048,15 +1048,15 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void enable_record ();
 
-	void increment_transport_position (uint32_t val) {
-		if (max_frames - val < _transport_frame) {
-			_transport_frame = max_frames;
+	void increment_transport_position (framecnt_t val) {
+		if (max_framepos - val < _transport_frame) {
+			_transport_frame = max_framepos;
 		} else {
 			_transport_frame += val;
 		}
 	}
 
-	void decrement_transport_position (uint32_t val) {
+	void decrement_transport_position (framecnt_t val) {
 		if (val < _transport_frame) {
 			_transport_frame -= val;
 		} else {

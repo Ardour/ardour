@@ -218,7 +218,7 @@ CoreAudioSource::sample_rate() const
 }
 
 int
-CoreAudioSource::update_header (sframes_t when, struct tm&, time_t)
+CoreAudioSource::update_header (framepos_t when, struct tm&, time_t)
 {
 	return 0;
 }

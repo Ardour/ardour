@@ -2610,11 +2610,12 @@ MidiRegionView::nudge_notes (bool forward)
 
 		/* use grid */
 
-		nframes64_t next_pos = ref_point;
+		framepos_t next_pos = ref_point;
 
 		if (forward) {
-			/* XXX need check on max_frames, but that needs max_frames64 or something */
-			next_pos += 1;
+			if (max_framepos - 1 < next_pos) {
+                                next_pos += 1;
+                        }
 		} else {
 			if (next_pos == 0) {
 				return;

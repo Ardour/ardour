@@ -37,7 +37,7 @@ class CoreAudioSource : public AudioFileSource {
         void set_path (const std::string& p);
 
 	float sample_rate() const;
-	int update_header (sframes_t when, struct tm&, time_t);
+	int update_header (framepos_t when, struct tm&, time_t);
 
 	int flush_header () {return 0;};
 	void set_header_timeline_position () {};

@@ -380,8 +380,6 @@ MidiModel::DiffCommand::marshal_note(const NotePtr note)
 {
         XMLNode* xml_note = new XMLNode("note");
 
-        cerr << "Marshalling note: " << *note << endl;
-
         {
                 ostringstream id_str(ios::ate);
                 id_str << int(note->id());

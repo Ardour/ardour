@@ -87,8 +87,8 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
         , adjust_capture_position (0)
         , _capture_offset (0)
         , _roll_delay (0)
-        , first_recordable_frame (max_frames)
-        , last_recordable_frame (max_frames)
+        , first_recordable_frame (max_framepos)
+        , last_recordable_frame (max_framepos)
         , last_possibly_recording (0)
         , _alignment_style (ExistingMaterial)
         , _scrubbing (false)
@@ -134,8 +134,8 @@ Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
         , adjust_capture_position (0)
         , _capture_offset (0)
         , _roll_delay (0)
-        , first_recordable_frame (max_frames)
-        , last_recordable_frame (max_frames)
+        , first_recordable_frame (max_framepos)
+        , last_recordable_frame (max_framepos)
         , last_possibly_recording (0)
         , _alignment_style (ExistingMaterial)
         , _scrubbing (false)
@@ -213,7 +213,7 @@ Diskstream::non_realtime_set_speed ()
 
 	if (_seek_required) {
 		if (speed() != 1.0f || speed() != -1.0f) {
-			seek ((nframes_t) (_session.transport_frame() * (double) speed()), true);
+			seek ((framepos_t) (_session.transport_frame() * (double) speed()), true);
 		}
 		else {
 			seek (_session.transport_frame(), true);
@@ -237,7 +237,7 @@ Diskstream::realtime_set_speed (double sp, bool global)
 	if (new_speed != _actual_speed) {
 
 		nframes_t required_wrap_size = (nframes_t) floor (_session.get_block_size() *
-									    fabs (new_speed)) + 1;
+                                                                  fabs (new_speed)) + 1;
 
 		if (required_wrap_size > wrap_buffer_size) {
 			_buffer_reallocation_required = true;
@@ -297,7 +297,7 @@ Diskstream::set_loop (Location *location)
 	return 0;
 }
 
-ARDOUR::nframes_t
+ARDOUR::framepos_t
 Diskstream::get_capture_start_frame (uint32_t n)
 {
 	Glib::Mutex::Lock lm (capture_info_lock);
@@ -310,7 +310,7 @@ Diskstream::get_capture_start_frame (uint32_t n)
 	}
 }
 
-ARDOUR::nframes_t
+ARDOUR::framecnt_t
 Diskstream::get_captured_frames (uint32_t n)
 {
 	Glib::Mutex::Lock lm (capture_info_lock);
@@ -506,7 +506,7 @@ Diskstream::move_processor_automation (boost::weak_ptr<Processor> p, list< Evora
 }
 
 void
-Diskstream::check_record_status (nframes_t transport_frame, nframes_t /*nframes*/, bool can_record)
+Diskstream::check_record_status (framepos_t transport_frame, nframes_t /*nframes*/, bool can_record)
 {
 	int possibly_recording;
 	int rolling;
@@ -536,7 +536,7 @@ Diskstream::check_record_status (nframes_t transport_frame, nframes_t /*nframes*
                 /* we transitioned to recording. lets see if its transport based or a punch */
                 
 		first_recordable_frame = transport_frame + _capture_offset;
-		last_recordable_frame = max_frames;
+		last_recordable_frame = max_framepos;
 		capture_start_frame = transport_frame;
 
                 if (change & transport_rolling) {
@@ -633,7 +633,7 @@ Diskstream::route_going_away ()
 }
 
 void
-Diskstream::calculate_record_range(OverlapType ot, sframes_t transport_frame, nframes_t nframes,
+Diskstream::calculate_record_range(OverlapType ot, framepos_t transport_frame, framecnt_t nframes,
 				   nframes_t& rec_nframes, nframes_t& rec_offset)
 {
 	switch (ot) {

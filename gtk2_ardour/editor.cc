@@ -904,8 +904,8 @@ Editor::control_scroll (float fraction)
 
 	if ((fraction < 0.0f) && (*_control_scroll_target < (nframes64_t) fabs(step))) {
 		*_control_scroll_target = 0;
-	} else if ((fraction > 0.0f) && (max_frames - *_control_scroll_target < step)) {
-		*_control_scroll_target = max_frames - (current_page_frames()*2); // allow room for slop in where the PH is on the screen
+	} else if ((fraction > 0.0f) && (max_framepos - *_control_scroll_target < step)) {
+		*_control_scroll_target = max_framepos - (current_page_frames()*2); // allow room for slop in where the PH is on the screen
 	} else {
 		*_control_scroll_target += (nframes64_t) floor (step);
 	}
@@ -2865,11 +2865,11 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 
 		_session->locations()->marks_either_side (start, before, after);
 
-		if (before == max_frames) {
+		if (before == max_framepos) {
 			start = after;
-		} else if (after == max_frames) {
+		} else if (after == max_framepos) {
 			start = before;
-		} else if (before != max_frames && after != max_frames) {
+		} else if (before != max_framepos && after != max_framepos) {
 			/* have before and after */
 			if ((start - before) < (after - start)) {
 				start = before;
@@ -4506,7 +4506,7 @@ Editor::set_frames_per_unit (double fpu)
 	   of frames into an 800 pixel wide space.
 	*/
 
-	if (max_frames / fpu < 800.0) {
+	if (max_framepos / fpu < 800.0) {
 		return;
 	}
 
@@ -4804,7 +4804,7 @@ Editor::get_regions_after (RegionSelection& rs, nframes64_t where, const TrackVi
 			if ((tr = rtv->track()) && ((pl = tr->playlist()))) {
 
 				Playlist::RegionList* regions = pl->regions_touched (
-						(nframes64_t) floor ( (double)where * tr->speed()), max_frames);
+                                        (framepos_t) floor ( (double)where * tr->speed()), max_framepos);
 
 				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 

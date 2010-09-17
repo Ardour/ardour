@@ -425,13 +425,10 @@ MidiPlaylist::region_changed (const PBD::PropertyChange& what_changed, boost::sh
 		return false;
 	}
 
-	// Feeling rather uninterested today, but thanks for the heads up anyway!
-
 	PBD::PropertyChange our_interests;
+        our_interests.add (Properties::midi_data);
 
-	bool parent_wants_notify;
-
-	parent_wants_notify = Playlist::region_changed (what_changed, region);
+	bool parent_wants_notify = Playlist::region_changed (what_changed, region);
 
 	if (parent_wants_notify || what_changed.contains (our_interests)) {
 		notify_contents_changed ();

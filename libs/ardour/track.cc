@@ -480,9 +480,9 @@ Track::set_pending_overwrite (bool o)
 }
 
 int
-Track::seek (nframes_t s, bool complete_refill)
+Track::seek (framepos_t p, bool complete_refill)
 {
-	return _diskstream->seek (s, complete_refill);
+	return _diskstream->seek (p, complete_refill);
 }
 
 bool
@@ -492,15 +492,15 @@ Track::hidden () const
 }
 
 int
-Track::can_internal_playback_seek (nframes_t d)
+Track::can_internal_playback_seek (framepos_t p)
 {
-	return _diskstream->can_internal_playback_seek (d);
+	return _diskstream->can_internal_playback_seek (p);
 }
 
 int
-Track::internal_playback_seek (nframes_t d)
+Track::internal_playback_seek (framepos_t p)
 {
-	return _diskstream->internal_playback_seek (d);
+	return _diskstream->internal_playback_seek (p);
 }
 
 void
@@ -510,7 +510,7 @@ Track::non_realtime_input_change ()
 }
 
 void
-Track::non_realtime_locate (nframes_t p)
+Track::non_realtime_locate (framepos_t p)
 {
 	_diskstream->non_realtime_locate (p);
 }
@@ -527,7 +527,7 @@ Track::overwrite_existing_buffers ()
 	return _diskstream->overwrite_existing_buffers ();
 }
 
-nframes_t
+framecnt_t
 Track::get_captured_frames (uint32_t n)
 {
 	return _diskstream->get_captured_frames (n);
@@ -540,9 +540,9 @@ Track::set_loop (Location* l)
 }
 
 void
-Track::transport_looped (nframes_t f)
+Track::transport_looped (framepos_t p)
 {
-	_diskstream->transport_looped (f);
+	_diskstream->transport_looped (p);
 }
 
 bool
@@ -587,7 +587,7 @@ Track::n_channels ()
 	return _diskstream->n_channels ();
 }
 
-nframes_t
+framepos_t
 Track::get_capture_start_frame (uint32_t n)
 {
 	return _diskstream->get_capture_start_frame (n);
@@ -599,13 +599,13 @@ Track::alignment_style () const
 	return _diskstream->alignment_style ();
 }
 
-nframes_t
+framepos_t
 Track::current_capture_start () const
 {
 	return _diskstream->current_capture_start ();
 }
 
-nframes_t
+framepos_t
 Track::current_capture_end () const
 {
 	return _diskstream->current_capture_end ();

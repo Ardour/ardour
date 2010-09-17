@@ -1100,7 +1100,7 @@ Session::state(bool full_state)
 		// with the default start and end, and get the state for that.
 		Locations loc (*this);
 		Location* range = new Location (*this, 0, 0, _("session"), Location::IsSessionRange);
-		range->set (max_frames, 0);
+		range->set (max_framepos, 0);
 		loc.add (range);
 		node->add_child_nocopy (loc.get_state());
 	}
@@ -1877,7 +1877,7 @@ Session::load_sources (const XMLNode& node)
 			}
 		} catch (MissingSource& err) {
 			warning << _("A sound file is missing. It will be replaced by silence.") << endmsg;
-			source = SourceFactory::createSilent (*this, **niter, max_frames, _current_frame_rate);
+			source = SourceFactory::createSilent (*this, **niter, max_framecnt, _current_frame_rate);
 		}
 	}
 

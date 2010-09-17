@@ -146,7 +146,7 @@ TimeAxisViewItem::init (
 	name_connected = false;
 	fill_opacity = 60;
 	position_locked = false;
-	max_item_duration = ARDOUR::max_frames;
+	max_item_duration = ARDOUR::max_framepos;
 	min_item_duration = 0;
 	show_vestigial = true;
 	visibility = vis;

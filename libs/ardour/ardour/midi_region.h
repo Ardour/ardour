@@ -36,6 +36,16 @@
 class XMLNode;
 
 namespace ARDOUR {
+        namespace Properties {
+                /* this is pseudo-property: nothing has this as an actual
+                   property, but it allows us to signal changes to the
+                   MidiModel used by the MidiRegion 
+                */
+                extern PBD::PropertyDescriptor<void*> midi_data; 
+        }
+}
+
+namespace ARDOUR {
 
 class Route;
 class Playlist;
@@ -48,6 +58,8 @@ template<typename T> class MidiRingBuffer;
 class MidiRegion : public Region
 {
   public:
+	static void make_property_quarks ();
+
 	~MidiRegion();
 
         boost::shared_ptr<MidiRegion> clone ();
@@ -109,6 +121,8 @@ class MidiRegion : public Region
 			     NoteMode mode = Sustained, 
 			     MidiStateTracker* tracker = 0) const;
 
+	void register_properties ();
+
 	void recompute_at_start ();
 	void recompute_at_end ();
 
@@ -117,10 +131,12 @@ class MidiRegion : public Region
 	void switch_source(boost::shared_ptr<Source> source);
 	void model_changed ();
 	void model_automation_state_changed (Evoral::Parameter const &);
+        void model_contents_changed ();
 
 	std::set<Evoral::Parameter> _filtered_parameters; ///< parameters that we ask our source not to return when reading
 	PBD::ScopedConnection _model_connection;
 	PBD::ScopedConnection _source_connection;
+        PBD::ScopedConnection _model_contents_connection;
 };
 
 } /* namespace ARDOUR */

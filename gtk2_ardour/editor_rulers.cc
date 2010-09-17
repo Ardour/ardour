@@ -195,10 +195,10 @@ Editor::ruler_scroll (GdkEventScroll* event)
 
 	case GDK_SCROLL_RIGHT:
 		xdelta = (current_page_frames() / 2);
-		if (max_frames - xdelta > leftmost_frame) {
+		if (max_framepos - xdelta > leftmost_frame) {
 			reset_x_origin (leftmost_frame + xdelta);
 		} else {
-			reset_x_origin (max_frames - current_page_frames());
+			reset_x_origin (max_framepos - current_page_frames());
 		}
 		handled = true;
 		break;
@@ -977,8 +977,8 @@ Editor::set_timecode_ruler_scale (gdouble lower, gdouble upper)
 gint
 Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
 {
-	nframes_t pos;
-	nframes64_t spacer;
+	framepos_t pos;
+	framecnt_t spacer;
 	Timecode::Time timecode;
 	gchar buf[16];
 	gint n;
@@ -987,7 +987,7 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 		return 0;
 	}
 
-	if (lower > (spacer = (nframes64_t)(128 * Editor::get_current_zoom ()))) {
+	if (lower > (spacer = (framecnt_t)(128 * Editor::get_current_zoom ()))) {
 		lower = lower - spacer;
 	} else {
 		lower = 0;

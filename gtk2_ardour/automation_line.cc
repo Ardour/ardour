@@ -65,7 +65,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	, alist (al)
 	, _parent_group (parent)
 	, _time_converter (converter ? (*converter) : default_converter)
-	, _maximum_time (max_frames)
+	, _maximum_time (max_framepos)
 {
 	points_visible = false;
 	update_pending = false;
@@ -565,13 +565,13 @@ AutomationLine::string_to_fraction (string const & s) const
 bool
 AutomationLine::invalid_point (ALPoints& p, uint32_t index)
 {
-	return p[index].x == max_frames && p[index].y == DBL_MAX;
+	return p[index].x == max_framepos && p[index].y == DBL_MAX;
 }
 
 void
 AutomationLine::invalidate_point (ALPoints& p, uint32_t index)
 {
-	p[index].x = max_frames;
+	p[index].x = max_framepos;
 	p[index].y = DBL_MAX;
 }
 
@@ -1343,7 +1343,7 @@ AutomationLine::set_maximum_time (framepos_t t)
 pair<framepos_t, framepos_t>
 AutomationLine::get_point_x_range () const
 {
-	pair<framepos_t, framepos_t> r (max_frames, 0);
+	pair<framepos_t, framepos_t> r (max_framepos, 0);
 
 	for (AutomationList::const_iterator i = the_list()->begin(); i != the_list()->end(); ++i) {
 		r.first = min (r.first, _time_converter.to ((*i)->when) + _time_converter.origin_b ());

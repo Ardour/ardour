@@ -233,11 +233,11 @@ Session::get_track_statistics ()
 void
 Session::process_with_events (nframes_t nframes)
 {
-	SessionEvent*         ev;
+	SessionEvent*  ev;
 	nframes_t      this_nframes;
-	nframes_t      end_frame;
+	framepos_t     end_frame;
 	bool           session_needs_butler = false;
-	nframes_t      stop_limit;
+	framepos_t     stop_limit;
 	framecnt_t     frames_moved;
 
 	/* make sure the auditioner is silent */
@@ -316,13 +316,13 @@ Session::process_with_events (nframes_t nframes)
 		}
 
 		if (actively_recording()) {
-			stop_limit = max_frames;
+			stop_limit = max_framepos;
 		} else {
 
 			if (Config->get_stop_at_session_end()) {
 				stop_limit = current_end_frame();
 			} else {
-				stop_limit = max_frames;
+				stop_limit = max_framepos;
 			}
 		}
 
@@ -722,16 +722,16 @@ Session::follow_slave_silently (nframes_t nframes, float slave_speed)
 		} else {
 			increment_transport_position (frames_moved);
 		}
-
-		nframes_t stop_limit;
+                
+		framepos_t stop_limit;
 
 		if (actively_recording()) {
-			stop_limit = max_frames;
+			stop_limit = max_framepos;
 		} else {
 			if (Config->get_stop_at_session_end()) {
 				stop_limit = current_end_frame();
 			} else {
-				stop_limit = max_frames;
+				stop_limit = max_framepos;
 			}
 		}
 
@@ -743,7 +743,7 @@ void
 Session::process_without_events (nframes_t nframes)
 {
 	bool session_needs_butler = false;
-	nframes_t stop_limit;
+	framepos_t stop_limit;
 	framecnt_t frames_moved;
 
 	if (!process_can_proceed()) {
@@ -767,12 +767,12 @@ Session::process_without_events (nframes_t nframes)
 	}
 
 	if (actively_recording()) {
-		stop_limit = max_frames;
+		stop_limit = max_framepos;
 	} else {
 		if (Config->get_stop_at_session_end()) {
 			stop_limit = current_end_frame();
 		} else {
-			stop_limit = max_frames;
+			stop_limit = max_framepos;
 		}
 	}
 

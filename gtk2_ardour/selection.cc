@@ -1004,9 +1004,9 @@ Selection::add (const list<Marker*>& m)
 }
 
 void
-MarkerSelection::range (nframes64_t& s, nframes64_t& e)
+MarkerSelection::range (framepos_t& s, framepos_t& e)
 {
-	s = max_frames;
+	s = max_framepos;
 	e = 0;
 
 	for (MarkerSelection::iterator i = begin(); i != end(); ++i) {

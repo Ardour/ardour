@@ -64,7 +64,7 @@ public:
 	virtual void      clear_capture_marks() {}
 	virtual bool      one_of_several_channels () const { return false; }
 
-	virtual int update_header (sframes_t when, struct tm&, time_t) = 0;
+	virtual int update_header (framepos_t when, struct tm&, time_t) = 0;
 	virtual int flush_header () = 0;
 
 	void mark_streaming_write_completed ();

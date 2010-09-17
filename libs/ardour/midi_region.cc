@@ -47,10 +47,31 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+namespace ARDOUR {
+	namespace Properties {
+		PBD::PropertyDescriptor<void*> midi_data;
+        }
+}
+
+void
+MidiRegion::make_property_quarks ()
+{
+        Properties::midi_data.property_id = g_quark_from_static_string (X_("midi-data"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for midi-data = %1\n", Properties::midi_data.property_id));
+}
+
+void
+MidiRegion::register_properties ()
+{
+        /* none yet, but its only a matter of time */
+}
+
 /* Basic MidiRegion constructor (many channels) */
 MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
 {
+        register_properties ();
+
 	// midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
 	model_changed ();
@@ -62,6 +83,8 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset, bool offset_relative)
 	: Region (other, offset, offset_relative)
 {
+        register_properties ();
+
 	assert(_name.val().find("/") == string::npos);
 	// midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
@@ -155,13 +178,14 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& 
 
 	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
 	src->set_note_mode(mode);
-
-	/*cerr << "MR read @ " << position << " * " << to_read
-		<< " _position = " << _position
-	    << " _start = " << _start
-	    << " offset = " << output_buffer_position
-	    << " intoffset = " << internal_offset
-	    << endl;*/
+        
+        /*
+          cerr << "MR read @ " << position << " * " << to_read
+          << " _position = " << _position
+          << " _start = " << _start
+          << " intoffset = " << internal_offset
+          << endl;
+        */
 
 	/* This call reads events from a source and writes them to `dst' timed in session frames */
 
@@ -281,6 +305,15 @@ MidiRegion::model_changed ()
 	midi_source()->AutomationStateChanged.connect_same_thread (
 		_model_connection, boost::bind (&MidiRegion::model_automation_state_changed, this, _1)
 		);
+
+        model()->ContentsChanged.connect_same_thread (
+                _model_contents_connection, boost::bind (&MidiRegion::model_contents_changed, this));
+}
+
+void
+MidiRegion::model_contents_changed ()
+{
+        send_change (PropertyChange (Properties::midi_data));        
 }
 
 void
