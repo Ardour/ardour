@@ -372,7 +372,6 @@ class MidiRegionView : public RegionView
         ArdourCanvas::SimpleRect*            _step_edit_cursor;
         Evoral::MusicalTime                  _step_edit_cursor_width;
         Evoral::MusicalTime                  _step_edit_cursor_position;
-        Evoral::MusicalTime                  _earliest_selected_time;
 
 	MouseState _mouse_state;
 	int _pressed_button;

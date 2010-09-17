@@ -92,7 +92,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
         , _step_edit_cursor (0)
         , _step_edit_cursor_width (1.0)
         , _step_edit_cursor_position (0.0)
-        , _earliest_selected_time (Evoral::MaxMusicalTime)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -117,7 +116,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _diff_command(0)
 	, _ghost_note(0)
         , _drag_rect (0)
-        , _earliest_selected_time (Evoral::MaxMusicalTime)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -141,7 +139,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _diff_command(0)
 	, _ghost_note(0)
         , _drag_rect (0)
-        , _earliest_selected_time (Evoral::MaxMusicalTime)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -169,7 +166,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _diff_command(0)
 	, _ghost_note(0)
         , _drag_rect (0)
-        , _earliest_selected_time (Evoral::MaxMusicalTime)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -1695,7 +1691,6 @@ MidiRegionView::clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev)
 	}
 
 	_selection.clear();
-        _earliest_selected_time = Evoral::MaxMusicalTime;
 }
 
 void
@@ -1832,7 +1827,7 @@ MidiRegionView::note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool 
 	} else {
 		/* find end of latest note selected, select all between that and the start of "ev" */
 
-		Evoral::MusicalTime earliest = DBL_MAX;
+		Evoral::MusicalTime earliest = Evoral::MaxMusicalTime;
 		Evoral::MusicalTime latest = 0;
 
 		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
@@ -1937,25 +1932,9 @@ MidiRegionView::remove_from_selection (CanvasNoteEvent* ev)
 	ev->set_selected (false);
 	ev->hide_velocity ();
 
-
-        if (Evoral::musical_time_equal (ev->note()->time(), _earliest_selected_time)) {
-
-                _earliest_selected_time = Evoral::MaxMusicalTime;
-
-                /* compute new earliest time */
-
-                for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-                        if (!Evoral::musical_time_equal ((*i)->note()->time(), _earliest_selected_time) &&
-                            (*i)->note()->time() < _earliest_selected_time) {
-                                _earliest_selected_time = (*i)->note()->time();
-                        }
-                }
-        }
-
 	if (_selection.empty()) {
 		PublicEditor& editor (trackview.editor());
 		editor.get_selection().remove (this);
-                _earliest_selected_time = Evoral::MaxMusicalTime;
 	}
 }
 
@@ -1971,10 +1950,6 @@ MidiRegionView::add_to_selection (CanvasNoteEvent* ev)
 	if (_selection.insert (ev).second) {
 		ev->set_selected (true);
 		play_midi_note ((ev)->note());
-
-                if (ev->note()->time() < _earliest_selected_time) {
-                        _earliest_selected_time = ev->note()->time();
-                }
         }
 
 	if (add_mrv_selection) {
@@ -1988,9 +1963,16 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 {
         typedef vector<boost::shared_ptr<NoteType> > PossibleChord;
         PossibleChord to_play;
+        Evoral::MusicalTime earliest = Evoral::MaxMusicalTime;
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-                if (Evoral::musical_time_equal ((*i)->note()->time(), _earliest_selected_time)) {
+                if ((*i)->note()->time() < earliest) {
+                        earliest = (*i)->note()->time();
+                }
+        }
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+                if (Evoral::musical_time_equal ((*i)->note()->time(), earliest)) {
                         to_play.push_back ((*i)->note());
                 }
 		(*i)->move_event(dx, dy);

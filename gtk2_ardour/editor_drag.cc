@@ -3718,11 +3718,13 @@ NoteDrag::motion (GdkEvent *, bool)
 		_cumulative_dx += tdx;
 		_cumulative_dy += tdy;
 
-		_region->move_selection (tdx, tdy, _cumulative_dy);
+                int8_t note_delta = total_dy();
+
+		_region->move_selection (tdx, tdy, note_delta);
 
                 char buf[12];
-                snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (_primary->note()->note() + dy).c_str(),
-                          (int) floor (_primary->note()->note() + dy));
+                snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (_primary->note()->note() + note_delta).c_str(),
+                          (int) floor (_primary->note()->note() + note_delta));
                 
 		_editor->show_verbose_canvas_cursor_with (buf);
         }
