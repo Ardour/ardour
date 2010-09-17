@@ -65,6 +65,10 @@ EngineControl::EngineControl ()
 	  priority_spinner (priority_adjustment),
 	  ports_adjustment (128, 8, 1024, 1, 16),
 	  ports_spinner (ports_adjustment),
+	  input_latency_adjustment (0, 0, 99999, 1),
+	  input_latency (input_latency_adjustment),
+	  output_latency_adjustment (0, 0, 99999, 1),
+	  output_latency (output_latency_adjustment),
 	  realtime_button (_("Realtime")),
 	  no_memory_lock_button (_("Do not lock memory")),
 	  unlock_memory_button (_("Unlock memory")),
@@ -584,6 +588,19 @@ EngineControl::build_command_line (vector<string>& cmd)
 			cmd.push_back ("-X raw");
 		}
 
+                double val = input_latency_adjustment.get_value();
+
+                if (val) {
+                        cmd.push_back ("-I");
+                        cmd.push_back (to_string ((uint32_t) val, std::dec));
+                }
+
+                val = output_latency_adjustment.get_value();
+                if (val) {
+                        cmd.push_back ("-O");
+                        cmd.push_back (to_string ((uint32_t) val, std::dec));
+                }
+
 	} else if (using_coreaudio) {
 
 #ifdef __APPLE__
@@ -597,6 +614,19 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 		cmd.push_back ("-d");
 		cmd.push_back (device);
+
+                double val = input_latency_adjustment.get_value();
+
+                if (val) {
+                        cmd.push_back ("-I");
+                        cmd.push_back (to_string ((uint32_t) val, std::dec));
+                }
+
+                double val = output_latency_adjustment.get_value();
+                if (val) {
+                        cmd.push_back ("-O");
+                        cmd.push_back (to_string ((uint32_t) val, std::dec));
+                }
 #endif
 
 	} else if (using_oss) {
