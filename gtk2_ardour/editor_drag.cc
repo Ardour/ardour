@@ -3699,9 +3699,12 @@ NoteDrag::total_dy () const
 		}
 	}
 
- 	return -ndy; /* larger = higher, which is the inverse of the X-centric geometric universe */
-}
-	
+        /* more positive value = higher pitch and higher y-axis position on track,
+           which is the inverse of the X-centric geometric universe 
+        */
+
+ 	return -ndy; 
+}	
 
 void
 NoteDrag::motion (GdkEvent *, bool)
