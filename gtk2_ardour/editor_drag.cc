@@ -3699,7 +3699,7 @@ NoteDrag::total_dy () const
 		}
 	}
 
- 	return ndy;
+ 	return -ndy; /* larger = higher, which is the inverse of the X-centric geometric universe */
 }
 	
 
@@ -3708,7 +3708,7 @@ NoteDrag::motion (GdkEvent *, bool)
 {
 	/* Total change in x and y since the start of the drag */
 	frameoffset_t const dx = total_dx ();
-	int8_t const dy = total_dy ();
+	int8_t const dy = -total_dy ();
 
 	/* Now work out what we have to do to the note canvas items to set this new drag delta */
 	double const tdx = _editor->frame_to_unit (dx) - _cumulative_dx;
