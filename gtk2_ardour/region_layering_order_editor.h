@@ -32,7 +32,7 @@ class RegionLayeringOrderEditor : public ArdourDialog
 
   private:
 	boost::shared_ptr<ARDOUR::Playlist> playlist;
-	nframes64_t position;
+	framepos_t position;
 	bool in_row_change;
 	uint32_t regions_at_position;
 	

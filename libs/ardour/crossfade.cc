@@ -355,7 +355,7 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 
 		start = _position;
 		buf += offset;
-		to_write = min (_length.val(), (nframes64_t) cnt);
+		to_write = min (_length.val(), cnt);
 
 	} else {
 

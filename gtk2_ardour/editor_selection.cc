@@ -1178,8 +1178,8 @@ Editor::select_all_selectables_using_time_selection ()
 		return;
 	}
 
-	nframes64_t start = selection->time[clicked_selection].start;
-	nframes64_t end = selection->time[clicked_selection].end;
+	framepos_t start = selection->time[clicked_selection].start;
+	framepos_t end = selection->time[clicked_selection].end;
 
 	if (end - start < 1)  {
 		return;
@@ -1271,8 +1271,8 @@ Editor::select_all_selectables_using_loop()
 void
 Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 {
-        nframes64_t start;
-	nframes64_t end;
+        framepos_t start;
+	framepos_t end;
 	list<Selectable *> touched;
 
 	if (after) {
@@ -1311,8 +1311,8 @@ Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 void
 Editor::select_all_selectables_using_edit (bool after)
 {
-        nframes64_t start;
-	nframes64_t end;
+        framepos_t start;
+	framepos_t end;
 	list<Selectable *> touched;
 
 	if (after) {
@@ -1351,8 +1351,8 @@ Editor::select_all_selectables_using_edit (bool after)
 void
 Editor::select_all_selectables_between (bool /*within*/)
 {
-        nframes64_t start;
-	nframes64_t end;
+        framepos_t start;
+	framepos_t end;
 	list<Selectable *> touched;
 
 	if (!get_edit_op_range (start, end)) {
@@ -1380,8 +1380,8 @@ Editor::select_all_selectables_between (bool /*within*/)
 void
 Editor::select_range_between ()
 {
-        nframes64_t start;
-	nframes64_t end;
+        framepos_t start;
+	framepos_t end;
 
         if (mouse_mode == MouseRange && !selection->time.empty()) {
                 selection->clear_time ();
@@ -1396,9 +1396,9 @@ Editor::select_range_between ()
 }
 
 bool
-Editor::get_edit_op_range (nframes64_t& start, nframes64_t& end) const
+Editor::get_edit_op_range (framepos_t& start, framepos_t& end) const
 {
-	nframes64_t m;
+	framepos_t m;
 	bool ignored;
 
 	/* in range mode, use any existing selection */

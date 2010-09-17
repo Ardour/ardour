@@ -101,13 +101,13 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	/* these are the core of the API of a Route. see the protected sections as well */
 
-	virtual int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+	virtual int roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
                           int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
 
-	virtual int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+	virtual int no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			bool state_changing, bool can_record, bool rec_monitors_input);
 
-	virtual int silent_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+	virtual int silent_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
                                  bool can_record, bool rec_monitors_input, bool& need_butler);
 
 	virtual void toggle_monitor_input ();
@@ -120,7 +120,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	/* end of vfunc-based API */
 
-	void shift (nframes64_t, nframes64_t);
+	void shift (framepos_t, framepos_t);
 
 	void set_gain (gain_t val, void *src);
 	void inc_gain (gain_t delta, void *src);
@@ -382,20 +382,20 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void mod_solo_by_others_downstream (int32_t);
 	bool has_external_redirects() const;
 	void curve_reallocate ();
-	void just_meter_input (sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	void just_meter_input (framepos_t start_frame, framepos_t end_frame, nframes_t nframes);
 	virtual void set_block_size (nframes_t nframes);
 
   protected:
 	nframes_t check_initial_delay (nframes_t, nframes_t&);
 
-	void passthru (sframes_t start_frame, sframes_t end_frame,
+	void passthru (framepos_t start_frame, framepos_t end_frame,
 			nframes_t nframes, int declick);
 
-	virtual void write_out_of_band_data (BufferSet& /* bufs */, sframes_t /* start_frame */, sframes_t /* end_frame */,
+	virtual void write_out_of_band_data (BufferSet& /* bufs */, framepos_t /* start_frame */, framepos_t /* end_frame */,
 			nframes_t /* nframes */) {}
 
 	virtual void process_output_buffers (BufferSet& bufs,
-			sframes_t start_frame, sframes_t end_frame,
+			framepos_t start_frame, framepos_t end_frame,
 			nframes_t nframes, bool with_processors, int declick);
 
 	boost::shared_ptr<IO> _input;
@@ -444,7 +444,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	int configure_processors (ProcessorStreams*);
 
-	void passthru_silence (sframes_t start_frame, sframes_t end_frame,
+	void passthru_silence (framepos_t start_frame, framepos_t end_frame,
 	                       nframes_t nframes, int declick);
 
 	void silence (nframes_t);

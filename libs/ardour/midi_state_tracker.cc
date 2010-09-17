@@ -90,7 +90,7 @@ MidiStateTracker::track (const MidiBuffer::iterator &from, const MidiBuffer::ite
 }
 
 void
-MidiStateTracker::resolve_notes (MidiBuffer &dst, nframes64_t time)
+MidiStateTracker::resolve_notes (MidiBuffer &dst, framepos_t time)
 {
 	if (!_on) {
 		return;
@@ -111,7 +111,7 @@ MidiStateTracker::resolve_notes (MidiBuffer &dst, nframes64_t time)
 }
 
 void
-MidiStateTracker::resolve_notes (Evoral::EventSink<nframes_t> &dst, nframes64_t time)
+MidiStateTracker::resolve_notes (Evoral::EventSink<nframes_t> &dst, framepos_t time)
 {
 	uint8_t buf[3];
 

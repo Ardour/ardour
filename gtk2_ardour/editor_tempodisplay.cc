@@ -197,7 +197,7 @@ Editor::draw_measures ()
 }
 
 void
-Editor::mouse_add_new_tempo_event (nframes64_t frame)
+Editor::mouse_add_new_tempo_event (framepos_t frame)
 {
 	if (_session == 0) {
 		return;
@@ -239,7 +239,7 @@ Editor::mouse_add_new_tempo_event (nframes64_t frame)
 }
 
 void
-Editor::mouse_add_new_meter_event (nframes64_t frame)
+Editor::mouse_add_new_meter_event (framepos_t frame)
 {
 	if (_session == 0) {
 		return;

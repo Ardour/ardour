@@ -48,7 +48,7 @@ public:
 	bool apply_gain() const  { return _apply_gain; }
 	void apply_gain(bool yn) { _apply_gain = yn; }
 
-	void setup_gain_automation (sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	void setup_gain_automation (framepos_t start_frame, framepos_t end_frame, nframes_t nframes);
 
 	bool apply_gain_automation() const  { return _apply_gain_automation; }
 	void apply_gain_automation(bool yn) { _apply_gain_automation = yn; }

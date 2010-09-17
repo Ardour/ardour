@@ -74,7 +74,7 @@ private:
 	void set_editor_x (std::pair<double, double> const &);
 	void set_editor_y (double);
 	void set_editor_y (std::pair<double, double> const &);
-	void playhead_position_changed (nframes64_t);
+	void playhead_position_changed (framepos_t);
 	double summary_y_to_editor (double) const;
 	double editor_y_to_summary (double) const;
 	Position get_position (double, double) const;

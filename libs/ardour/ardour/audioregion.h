@@ -177,12 +177,12 @@ class AudioRegion : public Region
 	void resume_fade_in ();
 	void resume_fade_out ();
 
-	void add_transient (nframes64_t where);
-	void remove_transient (nframes64_t where);
+	void add_transient (framepos_t where);
+	void remove_transient (framepos_t where);
 	int set_transients (AnalysisFeatureList&);
 	int get_transients (AnalysisFeatureList&, bool force_new = false);
-	int update_transient (nframes64_t old_position, nframes64_t new_position);
-	int adjust_transients (nframes64_t delta);
+	int update_transient (framepos_t old_position, framepos_t new_position);
+	int adjust_transients (framepos_t delta);
 
 	std::list<std::pair<frameoffset_t, framecnt_t> > find_silence (Sample, framecnt_t, InterThreadInfo&) const;
 

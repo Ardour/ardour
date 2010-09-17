@@ -52,7 +52,7 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 	};
 
 	Location (Session &);
-	Location (Session &, nframes64_t, nframes64_t, const std::string &, Flags bits = Flags(0));
+	Location (Session &, framepos_t, framepos_t, const std::string &, Flags bits = Flags(0));
 	Location (const Location& other);
 	Location (Session &, const XMLNode&);
 	Location* operator= (const Location& other);
@@ -61,15 +61,15 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 	void lock ();
 	void unlock ();
 
-	nframes64_t start() const  { return _start; }
-	nframes64_t end() const { return _end; }
-	nframes64_t length() const { return _end - _start; }
+	framepos_t start() const  { return _start; }
+	framepos_t end() const { return _end; }
+	framepos_t length() const { return _end - _start; }
 
-	int set_start (nframes64_t s, bool force = false, bool allow_bbt_recompute = true);
-	int set_end (nframes64_t e, bool force = false, bool allow_bbt_recompute = true);
-	int set (nframes64_t start, nframes64_t end, bool allow_bbt_recompute = true);
+	int set_start (framepos_t s, bool force = false, bool allow_bbt_recompute = true);
+	int set_end (framepos_t e, bool force = false, bool allow_bbt_recompute = true);
+	int set (framepos_t start, framepos_t end, bool allow_bbt_recompute = true);
 
-	int move_to (nframes64_t pos);
+	int move_to (framepos_t pos);
 
 	const std::string& name() const { return _name; }
 	void set_name (const std::string &str) { _name = str; name_changed(this); }
@@ -116,9 +116,9 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 
   private:
 	std::string   _name;
-	nframes64_t   _start;
+	framepos_t   _start;
 	BBT_Time      _bbt_start;
-	nframes64_t   _end;
+	framepos_t   _end;
 	BBT_Time      _bbt_end;
 	Flags         _flags;
 	bool          _locked;
@@ -159,12 +159,12 @@ class Locations : public SessionHandleRef, public PBD::StatefulDestructible
 	int set_current (Location *, bool want_lock = true);
 	Location *current () const { return current_location; }
 
-	Location* first_location_before (nframes64_t, bool include_special_ranges = false);
-	Location* first_location_after (nframes64_t, bool include_special_ranges = false);
+	Location* first_location_before (framepos_t, bool include_special_ranges = false);
+	Location* first_location_after (framepos_t, bool include_special_ranges = false);
 
-	void marks_either_side (nframes64_t const, nframes64_t &, nframes64_t &) const;
+	void marks_either_side (framepos_t const, framepos_t &, framepos_t &) const;
 
-	void find_all_between (nframes64_t start, nframes64_t, LocationList&, Location::Flags);
+	void find_all_between (framepos_t start, framepos_t, LocationList&, Location::Flags);
 
 	enum Change {
 		ADDITION, ///< a location was added, but nothing else changed

@@ -1113,11 +1113,11 @@ Session::maybe_enable_record ()
 	set_dirty();
 }
 
-nframes64_t
+framepos_t
 Session::audible_frame () const
 {
-	nframes64_t ret;
-	nframes64_t tf;
+	framepos_t ret;
+	framepos_t tf;
 	nframes_t offset;
 
 	/* the first of these two possible settings for "offset"
@@ -3929,7 +3929,7 @@ Session::get_available_sync_options () const
 }
 
 boost::shared_ptr<RouteList>
-Session::get_routes_with_regions_at (nframes64_t const p) const
+Session::get_routes_with_regions_at (framepos_t const p) const
 {
 	shared_ptr<RouteList> r = routes.reader ();
 	shared_ptr<RouteList> rl (new RouteList);

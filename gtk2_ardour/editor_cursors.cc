@@ -56,7 +56,7 @@ EditorCursor::~EditorCursor ()
 }
 
 void
-EditorCursor::set_position (nframes64_t frame)
+EditorCursor::set_position (framepos_t frame)
 {
 	PositionChanged (frame);
 

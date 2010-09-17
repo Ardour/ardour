@@ -32,6 +32,9 @@
 
 class TimeAxisView;
 
+using ARDOUR::framepos_t;
+using ARDOUR::framecnt_t;
+
 /**
  * Base class for items that may appear upon a TimeAxisView.
  */
@@ -41,14 +44,14 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
    public:
 	virtual ~TimeAxisViewItem();
 
-	virtual bool set_position(nframes64_t, void*, double* delta = 0);
-	nframes64_t get_position() const;
-	virtual bool set_duration(nframes64_t, void*);
-	nframes64_t get_duration() const;
-	virtual void set_max_duration(nframes64_t, void*);
-	nframes64_t get_max_duration() const;
-	virtual void set_min_duration(nframes64_t, void*);
-	nframes64_t get_min_duration() const;
+	virtual bool set_position(framepos_t, void*, double* delta = 0);
+	framepos_t get_position() const;
+	virtual bool set_duration(framecnt_t, void*);
+	framecnt_t get_duration() const;
+	virtual void set_max_duration(framecnt_t, void*);
+	framecnt_t get_max_duration() const;
+	virtual void set_min_duration(framecnt_t, void*);
+	framecnt_t get_min_duration() const;
 	virtual void set_position_locked(bool, void*);
 	bool get_position_locked() const;
 	void set_max_duration_active(bool, void*);
@@ -112,19 +115,19 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	sigc::signal<void,std::string,std::string,void*> NameChanged;
 	
 	/** Emiited when the position of this item changes */
-	sigc::signal<void,nframes64_t,void*> PositionChanged;
+	sigc::signal<void,framepos_t,void*> PositionChanged;
 	
 	/** Emitted when the position lock of this item is changed */
 	sigc::signal<void,bool,void*> PositionLockChanged;
 	
 	/** Emitted when the duration of this item changes */
-	sigc::signal<void,nframes64_t,void*> DurationChanged;
+	sigc::signal<void,framecnt_t,void*> DurationChanged;
 	
 	/** Emitted when the maximum item duration is changed */
-	sigc::signal<void,nframes64_t,void*> MaxDurationChanged;
+	sigc::signal<void,framecnt_t,void*> MaxDurationChanged;
 	
 	/** Emitted when the mionimum item duration is changed */
-	sigc::signal<void,nframes64_t,void*> MinDurationChanged;
+	sigc::signal<void,framecnt_t,void*> MinDurationChanged;
 	
 	enum Visibility {
 		ShowFrame = 0x1,
@@ -137,13 +140,13 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 		FullWidthNameHighlight = 0x80
 	};
 	
-protected:
+  protected:
 	TimeAxisViewItem(const std::string &, ArdourCanvas::Group&, TimeAxisView&, double, Gdk::Color const &,
-			 nframes64_t, nframes64_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
+			 framepos_t, framepos_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
 	
 	TimeAxisViewItem (const TimeAxisViewItem&);
 	
-	void init (const std::string&, double, Gdk::Color const &, nframes64_t, nframes64_t, Visibility, bool, bool);
+	void init (const std::string&, double, Gdk::Color const &, framepos_t, framepos_t, Visibility, bool, bool);
 
 	virtual void compute_colors (Gdk::Color const &);
 	virtual void set_colors();
@@ -163,16 +166,16 @@ protected:
 	bool position_locked;
 	
 	/** position of this item on the timeline */
-	nframes64_t frame_position;
+	framepos_t frame_position;
 
 	/** duration of this item upon the timeline */
-	nframes64_t item_duration;
-	
+	framecnt_t item_duration;
+        
 	/** maximum duration that this item can have */
-	nframes64_t max_item_duration;
+	framecnt_t max_item_duration;
 	
 	/** minimum duration that this item can have */
-	nframes64_t min_item_duration;
+	framecnt_t min_item_duration;
 	
 	/** indicates whether the max duration constraint is active */
 	bool max_duration_active;

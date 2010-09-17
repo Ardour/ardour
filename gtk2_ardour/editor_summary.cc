@@ -713,7 +713,7 @@ EditorSummary::set_editor_y (pair<double, double> const & y)
 }
 
 void
-EditorSummary::playhead_position_changed (nframes64_t p)
+EditorSummary::playhead_position_changed (framepos_t p)
 {
 	if (_session && int (p * _x_scale) != int (_last_playhead)) {
 		set_overlays_dirty ();

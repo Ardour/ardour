@@ -1505,7 +1505,7 @@ IO::connected_to (boost::shared_ptr<const IO> other) const
 }
 
 void
-IO::process_input (boost::shared_ptr<Processor> proc, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, framepos_t end_frame, nframes_t nframes)
 {
 	BufferSet bufs;
 

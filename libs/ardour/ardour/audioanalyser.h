@@ -56,8 +56,8 @@ class AudioAnalyser : public boost::noncopyable {
 	AnalysisPlugin* plugin;
 	AnalysisPluginKey plugin_key;
 
-	nframes64_t bufsize;
-	nframes64_t stepsize;
+	nframes_t bufsize;
+	nframes_t stepsize;
 
 	int initialize_plugin (AnalysisPluginKey name, float sample_rate);
 	int analyse (const std::string& path, Readable*, uint32_t channel);

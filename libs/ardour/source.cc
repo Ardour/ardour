@@ -195,7 +195,7 @@ Source::load_transients (const string& path)
 		file >> val;
 
 		if (!file.fail()) {
-			nframes64_t frame = (nframes64_t) floor (val * _session.frame_rate());
+			framepos_t frame = (framepos_t) floor (val * _session.frame_rate());
 			transients.push_back (frame);
 		}
 	}

@@ -324,7 +324,7 @@ RegionView::lower_to_bottom ()
 }
 
 bool
-RegionView::set_position (nframes64_t pos, void* /*src*/, double* ignored)
+RegionView::set_position (framepos_t pos, void* /*src*/, double* ignored)
 {
 	double delta;
 	bool ret;
@@ -360,7 +360,7 @@ RegionView::set_samples_per_unit (gdouble spu)
 }
 
 bool
-RegionView::set_duration (nframes64_t frames, void *src)
+RegionView::set_duration (framecnt_t frames, void *src)
 {
 	if (!TimeAxisViewItem::set_duration (frames, src)) {
 		return false;

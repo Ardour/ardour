@@ -381,8 +381,8 @@ Editor::LocationMarkers::set_name (const string& str)
 }
 
 void
-Editor::LocationMarkers::set_position (nframes64_t startf,
-				       nframes64_t endf)
+Editor::LocationMarkers::set_position (framepos_t startf,
+				       framepos_t endf)
 {
 	start->set_position (startf);
 	if (end) { end->set_position (endf); }
@@ -396,7 +396,7 @@ Editor::LocationMarkers::set_color_rgba (uint32_t rgba)
 }
 
 void
-Editor::mouse_add_new_marker (nframes64_t where, bool is_cd, bool is_xrun)
+Editor::mouse_add_new_marker (framepos_t where, bool is_cd, bool is_xrun)
 {
 	string markername, markerprefix;
 	int flags = (is_cd ? Location::IsCDMarker|Location::IsMark : Location::IsMark);
@@ -866,8 +866,8 @@ Editor::marker_menu_range_to_next ()
 		return;
 	}
 
-	nframes64_t start;
-	nframes64_t end;
+	framepos_t start;
+	framepos_t end;
 	_session->locations()->marks_either_side (marker->position(), start, end);
 
 	if (end != max_framepos) {

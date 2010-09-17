@@ -45,7 +45,7 @@ class CoreAudioSource : public AudioFileSource {
 	static int get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg);
 
   protected:
-	nframes_t read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const;
+	nframes_t read_unlocked (Sample *dst, framepos_t start, nframes_t cnt) const;
 	nframes_t write_unlocked (Sample *dst, nframes_t cnt) { return 0; }
 
   private:

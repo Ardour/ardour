@@ -53,13 +53,20 @@ namespace ARDOUR {
 	typedef uint32_t                    layer_t;
 	typedef uint64_t                    microseconds_t;
 	typedef uint32_t                    nframes_t;
-	typedef int64_t                     nframes64_t;
 
-	typedef int64_t sframes_t;
+        /* Any position measured in audio frames.
+           Assumed to be non-negative but not enforced.
+         */
 	typedef int64_t framepos_t;
-	/* any offset from a framepos_t, measured in audio frames */
+
+        /* Any distance from a given framepos_t.
+           Maybe positive or negative.
+        */
 	typedef int64_t frameoffset_t;
-	/* any count of audio frames */
+
+	/* Any count of audio frames. 
+           Assumed to be positive but not enforced.
+        */
 	typedef int64_t framecnt_t;
 
         static const framepos_t max_framepos = INT64_MAX;
@@ -422,7 +429,7 @@ namespace ARDOUR {
 		int   opts; // really RubberBandStretcher::Options
 	};
 
-	typedef std::list<nframes64_t> AnalysisFeatureList;
+	typedef std::list<framepos_t> AnalysisFeatureList;
 
 	typedef std::list<boost::shared_ptr<Route> >      RouteList;
 
@@ -533,22 +540,22 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformScale& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformShape& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PositionLockStyle& sf);
 
-static inline ARDOUR::nframes64_t
-session_frame_to_track_frame (ARDOUR::nframes64_t session_frame, double speed)
+static inline ARDOUR::framepos_t
+session_frame_to_track_frame (ARDOUR::framepos_t session_frame, double speed)
 {
-	return (ARDOUR::nframes64_t)( (double)session_frame * speed );
+	return (ARDOUR::framepos_t)( (double)session_frame * speed );
 }
 
-static inline ARDOUR::nframes64_t
-track_frame_to_session_frame (ARDOUR::nframes64_t track_frame, double speed)
+static inline ARDOUR::framepos_t
+track_frame_to_session_frame (ARDOUR::framepos_t track_frame, double speed)
 {
-	return (ARDOUR::nframes64_t)( (double)track_frame / speed );
+	return (ARDOUR::framepos_t)( (double)track_frame / speed );
 }
 
 /* for now, break the rules and use "using" to make these "global" */
 
 using ARDOUR::nframes_t;
-using ARDOUR::nframes64_t;
+using ARDOUR::framepos_t;
 
 
 #endif /* __ardour_types_h__ */

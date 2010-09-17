@@ -114,7 +114,7 @@ MidiPort::cycle_split ()
 }
 
 void
-MidiPort::flush_buffers (nframes_t nframes, nframes64_t time, nframes_t offset)
+MidiPort::flush_buffers (nframes_t nframes, framepos_t time, nframes_t offset)
 {
 	if (sends_output ()) {
 

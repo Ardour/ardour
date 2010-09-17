@@ -68,11 +68,11 @@ class Marker : public sigc::trackable
 	void hide_line ();
 	void set_line_vpos (double y_origin, double height);
 
-	void set_position (nframes64_t);
+	void set_position (framepos_t);
 	void set_name (const std::string&);
 	void set_color_rgba (uint32_t rgba);
 
-	nframes64_t position() const { return frame_position; }
+	framepos_t position() const { return frame_position; }
 
 	ArdourCanvas::Group * get_parent() { return _parent; }
 	void reparent (ArdourCanvas::Group & parent);
@@ -96,7 +96,7 @@ class Marker : public sigc::trackable
 	ArdourCanvas::Points *line_points;
 
 	double        unit_position;
-	nframes64_t   frame_position;
+	framepos_t   frame_position;
 	unsigned char shift; /* should be double, but its always small and integral */
 	Type          _type;
 	int           name_height;

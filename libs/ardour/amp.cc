@@ -434,7 +434,7 @@ Amp::GainControl::get_value (void) const
 }
 
 void
-Amp::setup_gain_automation (sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+Amp::setup_gain_automation (framepos_t start_frame, framepos_t end_frame, nframes_t nframes)
 {
 	Glib::Mutex::Lock am (control_lock(), Glib::TRY_LOCK);
 

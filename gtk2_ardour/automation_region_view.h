@@ -64,7 +64,7 @@ public:
 
 protected:
 	void create_line(boost::shared_ptr<ARDOUR::AutomationList> list);
-	bool set_position(nframes64_t pos, void* src, double* ignored);
+	bool set_position(framepos_t pos, void* src, double* ignored);
 	void region_resized (const PBD::PropertyChange&);
 	bool canvas_event(GdkEvent* ev);
 	void add_automation_event (GdkEvent* event, nframes_t when, double y);

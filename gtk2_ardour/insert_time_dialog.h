@@ -33,7 +33,7 @@ public:
 	bool move_glued_markers () const;
 	bool move_locked_markers () const;
 	bool move_tempos () const;
-	nframes64_t distance () const;
+	framepos_t distance () const;
 
 private:
 	void move_markers_toggled ();

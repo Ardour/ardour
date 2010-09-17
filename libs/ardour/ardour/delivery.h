@@ -66,15 +66,15 @@ public:
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
 
-	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool);
+	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool);
 
 	/* supplemental method used with MIDI */
 
-	void flush_buffers (nframes_t nframes, nframes64_t time);
+	void flush_buffers (nframes_t nframes, framepos_t time);
 	void no_outs_cuz_we_no_monitor(bool);
 	void cycle_start (nframes_t);
 	void increment_output_offset (nframes_t);
-	void transport_stopped (sframes_t frame);
+	void transport_stopped (framepos_t frame);
 
 	BufferSet& output_buffers() { return *_output_buffers; }
 

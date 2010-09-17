@@ -230,8 +230,8 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 					 * its not the average, but we will assign it to current.speed below
 					 */
 
-				    static nframes64_t last_seen_timestamp = 0; 
-				    static nframes64_t last_seen_position = 0; 
+				    static framepos_t last_seen_timestamp = 0; 
+				    static framepos_t last_seen_position = 0; 
 
 				    if ((now - last_seen_timestamp) < 300) {
 					mtc_frame = (mtc_frame + last_seen_position)/2;
@@ -247,7 +247,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 					/* Non-PiC 
 					 */
 
-					nframes64_t time_delta = (now - last_mtc_timestamp);
+					framepos_t time_delta = (now - last_mtc_timestamp);
 					
 					if (time_delta != 0) {
 						double apparent_speed = (mtc_frame - last_mtc_frame) / (double) (time_delta);
@@ -391,9 +391,9 @@ MTC_Slave::ok() const
 }
 
 bool
-MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
+MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 {
-	nframes64_t now = session.engine().frame_time();
+	framepos_t now = session.engine().frame_time();
 	SafeTime last;
 	nframes_t elapsed;
 	bool in_control = false;
@@ -423,12 +423,12 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 
 	if (give_slave_full_control_over_transport_speed()) {
 		in_control = (session.slave_state() == Session::Running);
-		nframes64_t pic_want_locate = 0; 
-		//nframes64_t slave_pos = session.audible_frame();
-		nframes64_t slave_pos = session.transport_frame();
+		framepos_t pic_want_locate = 0; 
+		//framepos_t slave_pos = session.audible_frame();
+		framepos_t slave_pos = session.transport_frame();
 		static double average_speed = 0;
 		
-		nframes64_t ref_now = session.engine().frame_time_at_cycle_start();
+		framepos_t ref_now = session.engine().frame_time_at_cycle_start();
 		average_speed = pic->get_ratio (last.timestamp, last.position, ref_now, slave_pos, in_control, session.engine().frames_per_cycle());
   
 		pic_want_locate = pic->want_locate();
@@ -535,7 +535,7 @@ MTC_Slave::reset (bool with_position)
 }
 
 void
-MTC_Slave::reset_window (nframes64_t root)
+MTC_Slave::reset_window (framepos_t root)
 {
 	
 	/* if we're waiting for the master to catch us after seeking ahead, keep the window
@@ -581,7 +581,7 @@ MTC_Slave::reset_window (nframes64_t root)
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("legal MTC window now %1 .. %2\n", window_begin, window_end));
 }
 
-nframes64_t
+framecnt_t
 MTC_Slave::seekahead_distance () const
 {
 	/* 1 second */
@@ -589,7 +589,7 @@ MTC_Slave::seekahead_distance () const
 }
 
 bool
-MTC_Slave::outside_window (nframes64_t pos) const
+MTC_Slave::outside_window (framepos_t pos) const
 {
 	return ((pos < window_begin) || (pos > window_end));
 }

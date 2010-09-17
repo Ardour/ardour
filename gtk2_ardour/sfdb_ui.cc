@@ -1099,7 +1099,7 @@ bool
 SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& src_needed, bool& multichannel)
 {
 	SoundFileInfo info;
-	nframes64_t sz = 0;
+	framepos_t sz = 0;
 	bool err = false;
 	string errmsg;
 

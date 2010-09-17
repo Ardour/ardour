@@ -1296,8 +1296,8 @@ RouteTimeAxisView::find_next_region (nframes_t pos, RegionPoint point, int32_t d
 	return boost::shared_ptr<Region> ();
 }
 
-nframes64_t
-RouteTimeAxisView::find_next_region_boundary (nframes64_t pos, int32_t dir)
+framepos_t
+RouteTimeAxisView::find_next_region_boundary (framepos_t pos, int32_t dir)
 {
 	boost::shared_ptr<Playlist> pl = playlist ();
 

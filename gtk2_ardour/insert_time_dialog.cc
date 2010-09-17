@@ -35,7 +35,7 @@ InsertTimeDialog::InsertTimeDialog (PublicEditor& e)
 {
 	set_session (_editor.session ());
 	
-	nframes64_t const pos = _editor.get_preferred_edit_position ();
+	framepos_t const pos = _editor.get_preferred_edit_position ();
 
 	get_vbox()->set_border_width (12);
 	get_vbox()->set_spacing (4);
@@ -138,7 +138,7 @@ InsertTimeDialog::move_locked_markers () const
 	return _move_locked_markers.get_active ();
 }
 
-nframes64_t
+framepos_t
 InsertTimeDialog::distance () const
 {
 	return _clock.current_duration (_editor.get_preferred_edit_position ());

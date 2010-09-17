@@ -379,7 +379,7 @@ Route::set_gain (gain_t val, void *src)
  */
 void
 Route::process_output_buffers (BufferSet& bufs,
-			       sframes_t start_frame, sframes_t end_frame, nframes_t nframes,
+			       framepos_t start_frame, framepos_t end_frame, nframes_t nframes,
 			       bool /*with_processors*/, int declick)
 {
 	bool monitor;
@@ -500,7 +500,7 @@ Route::n_process_buffers ()
 }
 
 void
-Route::passthru (sframes_t start_frame, sframes_t end_frame, nframes_t nframes, int declick)
+Route::passthru (framepos_t start_frame, framepos_t end_frame, nframes_t nframes, int declick)
 {
 	BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
 
@@ -540,7 +540,7 @@ Route::passthru (sframes_t start_frame, sframes_t end_frame, nframes_t nframes, 
 }
 
 void
-Route::passthru_silence (sframes_t start_frame, sframes_t end_frame, nframes_t nframes, int declick)
+Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, nframes_t nframes, int declick)
 {
 	BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
 	bufs.set_count (_input->n_ports());
@@ -2701,7 +2701,7 @@ Route::pans_required () const
 }
 
 int
-Route::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+Route::no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		bool session_state_changing, bool /*can_record*/, bool /*rec_monitors_input*/)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
@@ -2766,7 +2766,7 @@ Route::check_initial_delay (nframes_t nframes, nframes_t& transport_frame)
 }
 
 int
-Route::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, int declick,
+Route::roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
 	     bool /*can_record*/, bool /*rec_monitors_input*/, bool& /* need_butler */)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
@@ -2799,7 +2799,7 @@ Route::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, int 
 }
 
 int
-Route::silent_roll (nframes_t nframes, sframes_t /*start_frame*/, sframes_t /*end_frame*/,
+Route::silent_roll (nframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 		    bool /*can_record*/, bool /*rec_monitors_input*/, bool& /* need_butler */)
 {
 	silence (nframes);
@@ -3148,7 +3148,7 @@ Route::set_pending_declick (int declick)
  */
 
 void
-Route::shift (nframes64_t /*pos*/, nframes64_t /*frames*/)
+Route::shift (framepos_t /*pos*/, framecnt_t /*frames*/)
 {
 #ifdef THIS_NEEDS_FIXING_FOR_V3
 

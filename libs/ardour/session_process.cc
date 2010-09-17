@@ -435,7 +435,7 @@ bool
 Session::follow_slave (nframes_t nframes)
 {
 	double slave_speed;
-	nframes64_t slave_transport_frame;
+	framepos_t slave_transport_frame;
 	nframes_t this_delta;
 	int dir;
 

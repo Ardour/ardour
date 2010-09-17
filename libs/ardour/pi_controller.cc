@@ -152,15 +152,15 @@ PIChaser::~PIChaser() {
 }
 
 double
-PIChaser::get_ratio(nframes64_t chasetime_measured, nframes64_t chasetime, nframes64_t slavetime_measured, nframes64_t slavetime, bool in_control, int period_size ) {
+PIChaser::get_ratio(framepos_t chasetime_measured, framepos_t chasetime, framepos_t slavetime_measured, framepos_t slavetime, bool in_control, int period_size ) {
 
 	feed_estimator( chasetime_measured, chasetime );
 	std::cerr << (double)chasetime_measured/48000.0 << " " << chasetime << " " << slavetime << " ";
 	double crude = get_estimate();
 	double fine;  
-	nframes64_t massaged_chasetime = chasetime + (nframes64_t)( (double)(slavetime_measured - chasetime_measured) * crude );
+	framepos_t massaged_chasetime = chasetime + (framepos_t)( (double)(slavetime_measured - chasetime_measured) * crude );
 
-	fine = pic->get_ratio( slavetime - massaged_chasetime, period_size );
+	fine = pic->get_ratio (slavetime - massaged_chasetime, period_size);
 	if (in_control) {
 	    if (fabs(fine-crude) > crude*speed_threshold) {
 		std::cout << "reset to " << crude << " fine = " << fine << "\n";
@@ -188,7 +188,7 @@ PIChaser::get_ratio(nframes64_t chasetime_measured, nframes64_t chasetime, nfram
 }
 
 void
-PIChaser::feed_estimator( nframes64_t realtime, nframes64_t chasetime ) {
+PIChaser::feed_estimator (framepos_t realtime, framepos_t chasetime ) {
 	array_index += 1;
 	realtime_stamps [ array_index%ESTIMATOR_SIZE ] = realtime;
 	chasetime_stamps[ array_index%ESTIMATOR_SIZE ] = chasetime;
@@ -199,8 +199,8 @@ PIChaser::get_estimate() {
 	double est = 0;
 	int num=0;
 	int i;
-	nframes64_t n1_realtime;
-	nframes64_t n1_chasetime;
+	framepos_t n1_realtime;
+	framepos_t n1_chasetime;
 	for( i=(array_index + 1); i<=(array_index + ESTIMATOR_SIZE); i++ ) {
 	    if( realtime_stamps[(i)%ESTIMATOR_SIZE] ) {
 		n1_realtime = realtime_stamps[(i)%ESTIMATOR_SIZE];
@@ -213,8 +213,8 @@ PIChaser::get_estimate() {
 	for( ; i<=(array_index + ESTIMATOR_SIZE); i++ ) {
 	    if( realtime_stamps[(i)%ESTIMATOR_SIZE] ) {
 		if( (realtime_stamps[(i)%ESTIMATOR_SIZE] - n1_realtime) > 200 ) {
-		    nframes64_t n_realtime = realtime_stamps[(i)%ESTIMATOR_SIZE];
-		    nframes64_t n_chasetime = chasetime_stamps[(i)%ESTIMATOR_SIZE];
+		    framepos_t n_realtime = realtime_stamps[(i)%ESTIMATOR_SIZE];
+		    framepos_t n_chasetime = chasetime_stamps[(i)%ESTIMATOR_SIZE];
 		    est += ((double)( n_chasetime - n1_chasetime ))
 			  / ((double)( n_realtime - n1_realtime ));
 		    n1_realtime = n_realtime;

@@ -212,7 +212,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	boost::shared_ptr<RouteList> get_routes_with_internal_returns() const;
 
-	boost::shared_ptr<RouteList> get_routes_with_regions_at (nframes64_t const) const;
+	boost::shared_ptr<RouteList> get_routes_with_regions_at (framepos_t const) const;
 
 	uint32_t nroutes() const { return routes.reader()->size(); }
 	uint32_t ntracks () const;
@@ -270,8 +270,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* Transport mechanism signals */
 
 	PBD::Signal0<void> TransportStateChange; /* generic */
-	PBD::Signal1<void,nframes64_t> PositionChanged; /* sent after any non-sequential motion */
-	PBD::Signal1<void,nframes64_t> Xrun;
+	PBD::Signal1<void,framepos_t> PositionChanged; /* sent after any non-sequential motion */
+	PBD::Signal1<void,framepos_t> Xrun;
 	PBD::Signal0<void> TransportLooped;
 
 	/** emitted when a locate has occurred */
@@ -428,9 +428,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* Time */
 
-        nframes64_t transport_frame () const {return _transport_frame; }
-	nframes64_t audible_frame () const;
-	nframes64_t requested_return_frame() const { return _requested_return_frame; }
+        framepos_t transport_frame () const {return _transport_frame; }
+	framepos_t audible_frame () const;
+	framepos_t requested_return_frame() const { return _requested_return_frame; }
 
 	enum PullupFormat {
 		pullup_Plus4Plus1,
@@ -774,8 +774,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	boost::shared_ptr<SessionPlaylists> playlists;
 
-	void send_mmc_locate (nframes64_t);
-	int send_full_time_code (nframes64_t);
+	void send_mmc_locate (framepos_t);
+	int send_full_time_code (framepos_t);
 
 	PBD::Signal0<void> RouteOrderKeyChanged;
 
@@ -822,7 +822,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	nframes_t               _nominal_frame_rate;  //ignores audioengine setting, "native" SR
 	int                      transport_sub_state;
 	mutable gint            _record_status;
-	volatile nframes64_t    _transport_frame;
+	volatile framepos_t    _transport_frame;
 	Location*               _session_range_location; ///< session range, or 0 if there is nothing in the session yet
 	Slave*                  _slave;
 	bool                    _silent;
@@ -834,9 +834,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	CubicInterpolation          interpolation;
 
 	bool                     auto_play_legal;
-	nframes64_t             _last_slave_transport_frame;
+	framepos_t             _last_slave_transport_frame;
 	nframes_t                maximum_output_latency;
-	volatile nframes64_t    _requested_return_frame;
+	volatile framepos_t    _requested_return_frame;
 	nframes_t                current_block_size;
 	nframes_t               _worst_output_latency;
 	nframes_t               _worst_input_latency;
@@ -1147,9 +1147,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void overwrite_some_buffers (Track *);
 	void flush_all_inserts ();
 	int  micro_locate (nframes_t distance);
-        void locate (nframes64_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false, bool with_mmc=true);
-        void start_locate (nframes64_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
-	void force_locate (nframes64_t frame, bool with_roll = false);
+        void locate (framepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false, bool with_mmc=true);
+        void start_locate (framepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
+	void force_locate (framepos_t frame, bool with_roll = false);
 	void set_track_speed (Track *, double speed);
         void set_transport_speed (double speed, bool abort = false, bool clear_state = false);
 	void stop_transport (bool abort = false, bool clear_state = false);

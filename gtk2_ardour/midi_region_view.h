@@ -118,7 +118,7 @@ class MidiRegionView : public RegionView
 	void resolve_note(uint8_t note_num, double end_time);
 
 	void cut_copy_clear (Editing::CutCopyOp);
-	void paste (nframes64_t pos, float times, const MidiCutBuffer&);
+	void paste (framepos_t pos, float times, const MidiCutBuffer&);
 
 	struct PCEvent {
 		PCEvent(double a_time, uint8_t a_value, uint8_t a_channel)
@@ -253,21 +253,21 @@ class MidiRegionView : public RegionView
 
 	/** Snap a region relative pixel coordinate to frame units.
 	 * @param x a pixel coordinate relative to region start
-	 * @return the snapped nframes64_t coordinate relative to region start
+	 * @return the snapped framepos_t coordinate relative to region start
 	 */
-	nframes64_t snap_pixel_to_frame(double x);
+	framepos_t snap_pixel_to_frame(double x);
 
 	/** Snap a region relative frame coordinate to frame units.
 	 * @param x a pixel coordinate relative to region start
-	 * @return the snapped nframes64_t coordinate relative to region start
+	 * @return the snapped framepos_t coordinate relative to region start
 	 */
-	nframes64_t snap_frame_to_frame(nframes64_t x);
+	framepos_t snap_frame_to_frame(framepos_t x);
 
 	/** Convert a timestamp in beats to frames (both relative to region start) */
-	nframes64_t beats_to_frames(double beats) const;
+	framepos_t beats_to_frames(double beats) const;
 
 	/** Convert a timestamp in frames to beats (both relative to region start) */
-	double frames_to_beats(nframes64_t) const;
+	double frames_to_beats(framepos_t) const;
 
 	void goto_previous_note ();
 	void goto_next_note ();

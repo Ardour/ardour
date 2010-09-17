@@ -53,14 +53,14 @@ struct SessionEvent {
     
     Type             type;
     Action           action;
-    nframes64_t      action_frame;
-    nframes64_t      target_frame;
+    framepos_t      action_frame;
+    framepos_t      target_frame;
     double           speed;
     
     union {
 	void*        ptr;
 	bool         yes_or_no;
-	nframes64_t  target2_frame;
+	framepos_t  target2_frame;
 	Slave*       slave;
 	Route*       route;
     };
@@ -148,13 +148,13 @@ protected:
 
 	void dump_events () const;
 	void merge_event (SessionEvent*);
-	void replace_event (SessionEvent::Type, nframes64_t action_frame, nframes64_t target = 0);
+	void replace_event (SessionEvent::Type, framepos_t action_frame, framepos_t target = 0);
 	bool _replace_event (SessionEvent*);
 	bool _remove_event (SessionEvent *);
 	void _clear_event_type (SessionEvent::Type);
 
-	void add_event (nframes64_t action_frame, SessionEvent::Type type, nframes64_t target_frame = 0);
-	void remove_event (nframes64_t frame, SessionEvent::Type type);
+	void add_event (framepos_t action_frame, SessionEvent::Type type, framepos_t target_frame = 0);
+	void remove_event (framepos_t frame, SessionEvent::Type type);
 
 	virtual void process_event(SessionEvent*) = 0;
 	virtual void set_next_event () = 0;

@@ -179,7 +179,7 @@ AutomationRegionView::set_height (double h)
 }
 
 bool
-AutomationRegionView::set_position (nframes64_t pos, void* src, double* ignored)
+AutomationRegionView::set_position (framepos_t pos, void* src, double* ignored)
 {
 	if (_line) {
 		_line->set_maximum_time (_region->length ());

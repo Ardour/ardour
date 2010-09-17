@@ -43,7 +43,7 @@ Editor::keyboard_selection_finish (bool add)
 {
 	if (_session && have_pending_keyboard_selection) {
 
-		nframes64_t end;
+		framepos_t end;
 		bool ignored;
 
 		if (_session->transport_rolling()) {
@@ -73,7 +73,7 @@ Editor::keyboard_selection_begin ()
 			have_pending_keyboard_selection = true;
 		} else {
 			bool ignored;
-			nframes64_t where; // XXX fix me
+			framepos_t where; // XXX fix me
 
 			if (mouse_frame (where, ignored)) {
 				pending_keyboard_selection_start = where;

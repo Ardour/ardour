@@ -1130,7 +1130,7 @@ EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 	}
 
 	if (_editor->convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
-		nframes64_t pos = 0;
+		framepos_t pos = 0;
 		if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
 			_editor->do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion, SrcBest, pos);
 		} else {

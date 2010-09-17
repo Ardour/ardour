@@ -168,7 +168,7 @@ Editor::initialize_rulers ()
 bool
 Editor::ruler_scroll (GdkEventScroll* event)
 {
-	nframes64_t xdelta;
+	framepos_t xdelta;
 	int direction = event->direction;
 	bool handled = false;
 
@@ -274,7 +274,7 @@ Editor::ruler_button_release (GdkEventButton* ev)
 
 		stop_canvas_autoscroll();
 
-		nframes64_t where = leftmost_frame + pixel_to_frame (x);
+		framepos_t where = leftmost_frame + pixel_to_frame (x);
 		snap_to (where);
 		popup_ruler_menu (where);
 	}
@@ -317,7 +317,7 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 
 
 void
-Editor::popup_ruler_menu (nframes64_t where, ItemType t)
+Editor::popup_ruler_menu (framepos_t where, ItemType t)
 {
 	using namespace Menu_Helpers;
 
@@ -774,7 +774,7 @@ Editor::update_just_timecode ()
 		return;
 	}
 
-	nframes64_t rightmost_frame = leftmost_frame + current_page_frames();
+	framepos_t rightmost_frame = leftmost_frame + current_page_frames();
 
 	if (ruler_timecode_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_timecode_ruler), leftmost_frame, rightmost_frame,
@@ -801,7 +801,7 @@ Editor::compute_fixed_ruler_scale ()
 void
 Editor::update_fixed_rulers ()
 {
-	nframes64_t rightmost_frame;
+	framepos_t rightmost_frame;
 
 	if (_session == 0) {
 		return;
@@ -877,9 +877,9 @@ Editor::_metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble u
 void
 Editor::set_timecode_ruler_scale (gdouble lower, gdouble upper)
 {
-	nframes64_t range;
-	nframes64_t spacer;
-	nframes64_t fr;
+	framepos_t range;
+	framepos_t spacer;
+	framepos_t fr;
 
 	if (_session == 0) {
 		return;
@@ -887,13 +887,13 @@ Editor::set_timecode_ruler_scale (gdouble lower, gdouble upper)
 
 	fr = _session->frame_rate();
 
-	if (lower > (spacer = (nframes64_t)(128 * Editor::get_current_zoom ()))) {
+	if (lower > (spacer = (framepos_t)(128 * Editor::get_current_zoom ()))) {
 		lower = lower - spacer;
 	} else {
 		lower = 0;
 	}
 	upper = upper + spacer;
-	range = (nframes64_t) floor (upper - lower);
+	range = (framepos_t) floor (upper - lower);
 
 	if (range < (2 * _session->frames_per_timecode_frame())) { /* 0 - 2 frames */
 		timecode_ruler_scale = timecode_show_bits;
@@ -902,19 +902,19 @@ Editor::set_timecode_ruler_scale (gdouble lower, gdouble upper)
 	} else if (range <= (fr / 4)) { /* 2 frames - 0.250 second */
 		timecode_ruler_scale = timecode_show_frames;
 		timecode_mark_modulo = 1;
-		timecode_nmarks = 2 + (range / (nframes64_t)_session->frames_per_timecode_frame());
+		timecode_nmarks = 2 + (range / (framepos_t)_session->frames_per_timecode_frame());
 	} else if (range <= (fr / 2)) { /* 0.25-0.5 second */
 		timecode_ruler_scale = timecode_show_frames;
 		timecode_mark_modulo = 2;
-		timecode_nmarks = 2 + (range / (nframes64_t)_session->frames_per_timecode_frame());
+		timecode_nmarks = 2 + (range / (framepos_t)_session->frames_per_timecode_frame());
 	} else if (range <= fr) { /* 0.5-1 second */
 		timecode_ruler_scale = timecode_show_frames;
 		timecode_mark_modulo = 5;
-		timecode_nmarks = 2 + (range / (nframes64_t)_session->frames_per_timecode_frame());
+		timecode_nmarks = 2 + (range / (framepos_t)_session->frames_per_timecode_frame());
 	} else if (range <= 2 * fr) { /* 1-2 seconds */
 		timecode_ruler_scale = timecode_show_frames;
 		timecode_mark_modulo = 10;
-		timecode_nmarks = 2 + (range / (nframes64_t)_session->frames_per_timecode_frame());
+		timecode_nmarks = 2 + (range / (framepos_t)_session->frames_per_timecode_frame());
 	} else if (range <= 8 * fr) { /* 2-8 seconds */
 		timecode_ruler_scale = timecode_show_seconds;
 		timecode_mark_modulo = 1;
@@ -965,7 +965,7 @@ Editor::set_timecode_ruler_scale (gdouble lower, gdouble upper)
 		timecode_nmarks = 2 + 24;
 	} else {
 
-		/* not possible if nframes64_t is a 32 bit quantity */
+		/* not possible if framepos_t is a 32 bit quantity */
 
 		timecode_ruler_scale = timecode_show_hours;
 		timecode_mark_modulo = 4;
@@ -1133,7 +1133,7 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 
 
 void
-Editor::compute_bbt_ruler_scale (nframes64_t lower, nframes64_t upper)
+Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper)
 {
         if (_session == 0) {
                 return;
@@ -1267,15 +1267,15 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 
         char buf[64];
         gint  n = 0;
-	nframes64_t pos;
+	framepos_t pos;
 	BBT_Time next_beat;
-	nframes64_t next_beat_pos;
+	framepos_t next_beat_pos;
         uint32_t beats = 0;
 
 	uint32_t tick = 0;
 	uint32_t skip;
 	uint32_t t;
-	nframes64_t frame_skip;
+	framepos_t frame_skip;
 	double frame_skip_error;
 	double bbt_position_of_helper;
 	double accumulated_error;
@@ -1378,7 +1378,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 
 			next_beat_pos = _session->tempo_map().frame_time(next_beat);
 
-			frame_skip = (nframes64_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
+			frame_skip = (framepos_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
 			frame_skip_error -= frame_skip;
 			skip = (uint32_t) (Meter::ticks_per_beat / bbt_beat_subdivision);
 
@@ -1396,7 +1396,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 				snprintf (buf, sizeof(buf), " ");
 				(*marks)[n].label = g_strdup (buf);
 
-				/* Error compensation for float to nframes64_t*/
+				/* Error compensation for float to framepos_t*/
 				accumulated_error += frame_skip_error;
 				if (accumulated_error > 1) {
 					pos += 1;
@@ -1470,7 +1470,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 
 			next_beat_pos = _session->tempo_map().frame_time(next_beat);
 
-			frame_skip = (nframes64_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
+			frame_skip = (framepos_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
 			frame_skip_error -= frame_skip;
 			skip = (uint32_t) (Meter::ticks_per_beat / bbt_beat_subdivision);
 
@@ -1493,7 +1493,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 
 				(*marks)[n].label = g_strdup (buf);
 
-				/* Error compensation for float to nframes64_t*/
+				/* Error compensation for float to framepos_t*/
 				accumulated_error += frame_skip_error;
 				if (accumulated_error > 1) {
 				        pos += 1;
@@ -1567,7 +1567,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 
 			next_beat_pos = _session->tempo_map().frame_time(next_beat);
 
-			frame_skip = (nframes64_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
+			frame_skip = (framepos_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
 			frame_skip_error -= frame_skip;
 			skip = (uint32_t) (Meter::ticks_per_beat / bbt_beat_subdivision);
 
@@ -1590,7 +1590,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 
 				  (*marks)[n].label = g_strdup (buf);
 
-				  /* Error compensation for float to nframes64_t*/
+				  /* Error compensation for float to framepos_t*/
 				  accumulated_error += frame_skip_error;
 				  if (accumulated_error > 1) {
 					  pos += 1;
@@ -1731,10 +1731,10 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 gint
 Editor::metric_get_frames (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint /*maxchars*/)
 {
-	nframes64_t mark_interval;
-	nframes64_t pos;
-	nframes64_t ilower = (nframes64_t) floor (lower);
-	nframes64_t iupper = (nframes64_t) floor (upper);
+	framepos_t mark_interval;
+	framepos_t pos;
+	framepos_t ilower = (framepos_t) floor (lower);
+	framepos_t iupper = (framepos_t) floor (upper);
 	gchar buf[16];
 	gint nmarks;
 	gint n;
@@ -1762,15 +1762,15 @@ Editor::metric_get_frames (GtkCustomRulerMark **marks, gdouble lower, gdouble up
 }
 
 static void
-sample_to_clock_parts ( nframes64_t sample,
-			nframes64_t sample_rate,
+sample_to_clock_parts ( framepos_t sample,
+			framepos_t sample_rate,
 			long *hrs_p,
 			long *mins_p,
 			long *secs_p,
 			long *millisecs_p)
 
 {
-	nframes64_t left;
+	framepos_t left;
 	long hrs;
 	long mins;
 	long secs;
@@ -1796,9 +1796,9 @@ sample_to_clock_parts ( nframes64_t sample,
 void
 Editor::set_minsec_ruler_scale (gdouble lower, gdouble upper)
 {
-	nframes64_t range;
-	nframes64_t fr;
-	nframes64_t spacer;
+	framepos_t range;
+	framepos_t fr;
+	framepos_t spacer;
 
 	if (_session == 0) {
 		return;
@@ -1807,13 +1807,13 @@ Editor::set_minsec_ruler_scale (gdouble lower, gdouble upper)
 	fr = _session->frame_rate();
 
 	/* to prevent 'flashing' */
-	if (lower > (spacer = (nframes64_t)(128 * Editor::get_current_zoom ()))) {
+	if (lower > (spacer = (framepos_t)(128 * Editor::get_current_zoom ()))) {
 		lower -= spacer;
 	} else {
 		lower = 0;
 	}
 	upper += spacer;
-	range = (nframes64_t) (upper - lower);
+	range = (framepos_t) (upper - lower);
 
 	if (range <  (fr / 50)) {
 		minsec_mark_interval =  fr / 1000; /* show 1/1000 seconds */
@@ -1885,7 +1885,7 @@ Editor::set_minsec_ruler_scale (gdouble lower, gdouble upper)
 		minsec_mark_modulo = 2;
         } else {
 
-                /* not possible if nframes64_t is a 32 bit quantity */
+                /* not possible if framepos_t is a 32 bit quantity */
 
                 minsec_mark_interval = 4 * 60 * 60 * fr; /* show 4 hrs */
         }
@@ -1895,8 +1895,8 @@ Editor::set_minsec_ruler_scale (gdouble lower, gdouble upper)
 gint
 Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
 {
-	nframes64_t pos;
-	nframes64_t spacer;
+	framepos_t pos;
+	framepos_t spacer;
 	long hrs, mins, secs, millisecs;
 	gchar buf[16];
 	gint n;
@@ -1906,14 +1906,14 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
 	}
 
 	/* to prevent 'flashing' */
-	if (lower > (spacer = (nframes64_t)(128 * Editor::get_current_zoom ()))) {
+	if (lower > (spacer = (framepos_t)(128 * Editor::get_current_zoom ()))) {
 		lower = lower - spacer;
 	} else {
 		lower = 0;
 	}
 
 	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * minsec_nmarks);
-	pos = ((((nframes64_t) floor(lower)) + (minsec_mark_interval/2))/minsec_mark_interval) * minsec_mark_interval;
+	pos = ((((framepos_t) floor(lower)) + (minsec_mark_interval/2))/minsec_mark_interval) * minsec_mark_interval;
 	switch (minsec_ruler_scale) {
 	case minsec_show_seconds:
 		for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {

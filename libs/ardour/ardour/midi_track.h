@@ -54,7 +54,7 @@ public:
 
 	void set_latency_delay (nframes_t);
 
-	int export_stuff (BufferSet& bufs, nframes_t nframes, sframes_t end_frame);
+	int export_stuff (BufferSet& bufs, nframes_t nframes, framepos_t end_frame);
 
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
@@ -110,7 +110,7 @@ protected:
 private:
 	boost::shared_ptr<MidiDiskstream> midi_diskstream () const;
 
-	void write_out_of_band_data (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	void write_out_of_band_data (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes);
 
 	void set_state_part_two ();
 	void set_state_part_three ();
@@ -122,7 +122,7 @@ private:
 	uint8_t                   _default_channel;
 	bool                      _midi_thru;
 
-	int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+	int no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			bool state_changing, bool can_record, bool rec_monitors_input);
 	void push_midi_input_to_step_edit_ringbuffer (nframes_t nframes);
 };

@@ -113,7 +113,7 @@ class Slave {
 	 * @param position - The transport position requested
 	 * @return - The return value is currently ignored (see Session::follow_slave)
 	 */
-	virtual bool speed_and_position (double& speed, nframes64_t& position) = 0;
+	virtual bool speed_and_position (double& speed, framepos_t& position) = 0;
 
 	/**
 	 * reports to ARDOUR whether the Slave is currently synced to its external
@@ -156,7 +156,7 @@ class Slave {
 	 * only if requires_seekahead() returns true.
 	 */
 
-	virtual nframes64_t seekahead_distance() const { return 0; }
+	virtual framepos_t seekahead_distance() const { return 0; }
 
 	/**
 	 * @return - when returning true, ARDOUR will use transport speed 1.0 no matter what
@@ -176,12 +176,12 @@ class ISlaveSessionProxy {
 	virtual ~ISlaveSessionProxy() {}
 	virtual TempoMap& tempo_map()                 const   { return *((TempoMap *) 0); }
 	virtual nframes_t   frame_rate()                const   { return 0; }
-	virtual nframes64_t audible_frame ()            const   { return 0; }
-	virtual nframes64_t transport_frame ()          const   { return 0; }
+	virtual framepos_t audible_frame ()            const   { return 0; }
+	virtual framepos_t transport_frame ()          const   { return 0; }
 	virtual nframes_t   frames_since_cycle_start () const   { return 0; }
-	virtual nframes64_t frame_time ()               const   { return 0; }
+	virtual framepos_t frame_time ()               const   { return 0; }
 
-	virtual void request_locate (nframes64_t /*frame*/, bool with_roll = false) {
+	virtual void request_locate (framepos_t /*frame*/, bool with_roll = false) {
 		(void) with_roll;
 	}
 	virtual void request_transport_speed (double /*speed*/)                   {}
@@ -197,19 +197,19 @@ class SlaveSessionProxy : public ISlaveSessionProxy {
 
 	TempoMap&   tempo_map()                 const;
 	nframes_t   frame_rate()                const;
-	nframes64_t audible_frame ()            const;
-	nframes64_t transport_frame ()          const;
+	framepos_t audible_frame ()            const;
+	framepos_t transport_frame ()          const;
 	nframes_t   frames_since_cycle_start () const;
-	nframes64_t frame_time ()               const;
+	framepos_t frame_time ()               const;
 
-	void request_locate (nframes64_t frame, bool with_roll = false);
+	void request_locate (framepos_t frame, bool with_roll = false);
 	void request_transport_speed (double speed);
 };
 
 struct SafeTime {
     volatile int guard1;
-    nframes64_t  position;
-    nframes64_t  timestamp;
+    framepos_t  position;
+    framepos_t  timestamp;
     double       speed;
     volatile int guard2;
     
@@ -228,7 +228,7 @@ class MTC_Slave : public Slave {
 	~MTC_Slave ();
 
 	void rebind (MIDI::Port&);
-	bool speed_and_position (double&, nframes64_t&);
+	bool speed_and_position (double&, framepos_t&);
 
 	bool locked() const;
 	bool ok() const;
@@ -236,7 +236,7 @@ class MTC_Slave : public Slave {
 
 	nframes_t resolution() const;
 	bool requires_seekahead () const { return true; }
-	nframes64_t seekahead_distance() const;
+	framepos_t seekahead_distance() const;
 	bool give_slave_full_control_over_transport_speed() const;
 
   private:
@@ -275,8 +275,8 @@ class MTC_Slave : public Slave {
 	void update_mtc_time (const MIDI::byte *, bool, nframes_t);
 	void update_mtc_status (MIDI::MTC_Status);
 	void read_current (SafeTime *) const;
-	void reset_window (nframes64_t);
-	bool outside_window (nframes64_t) const;
+	void reset_window (framepos_t);
+	bool outside_window (framepos_t) const;
 	void process_apparent_speed (double);
 };
 
@@ -289,7 +289,7 @@ class MIDIClock_Slave : public Slave {
 	~MIDIClock_Slave ();
 
 	void rebind (MIDI::Port&);
-	bool speed_and_position (double&, nframes64_t&);
+	bool speed_and_position (double&, framepos_t&);
 
 	bool locked() const;
 	bool ok() const;
@@ -344,17 +344,17 @@ class MIDIClock_Slave : public Slave {
 	double b, c, omega;
 
 	void reset ();
-	void start (MIDI::Parser& parser, nframes64_t timestamp);
-	void contineu (MIDI::Parser& parser, nframes64_t timestamp);
-	void stop (MIDI::Parser& parser, nframes64_t timestamp);
+	void start (MIDI::Parser& parser, framepos_t timestamp);
+	void contineu (MIDI::Parser& parser, framepos_t timestamp);
+	void stop (MIDI::Parser& parser, framepos_t timestamp);
 	void position (MIDI::Parser& parser, MIDI::byte* message, size_t size);
 	// we can't use continue because it is a C++ keyword
-	void calculate_one_ppqn_in_frames_at(nframes64_t time);
-	nframes64_t calculate_song_position(uint16_t song_position_in_sixteenth_notes);
+	void calculate_one_ppqn_in_frames_at(framepos_t time);
+	framepos_t calculate_song_position(uint16_t song_position_in_sixteenth_notes);
 	void calculate_filter_coefficients();
-	void update_midi_clock (MIDI::Parser& parser, nframes64_t timestamp);
+	void update_midi_clock (MIDI::Parser& parser, framepos_t timestamp);
 	void read_current (SafeTime *) const;
-	bool stop_if_no_more_clock_events(nframes64_t& pos, nframes64_t now);
+	bool stop_if_no_more_clock_events(framepos_t& pos, framepos_t now);
 
 	/// whether transport should be rolling
 	bool _started;
@@ -370,7 +370,7 @@ class JACK_Slave : public Slave
 	JACK_Slave (jack_client_t*);
 	~JACK_Slave ();
 
-	bool speed_and_position (double& speed, nframes64_t& pos);
+	bool speed_and_position (double& speed, framepos_t& pos);
 
 	bool starting() const { return _starting; }
 	bool locked() const;

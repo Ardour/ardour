@@ -141,7 +141,7 @@ class ExportHandler : public ExportElementFactory
 	TimespanBounds        timespan_bounds;
 	
 	PBD::ScopedConnection process_connection;
-	sframes_t             process_position;
+	framepos_t             process_position;
 
 	/* CD Marker stuff */
 
@@ -161,13 +161,13 @@ class ExportHandler : public ExportElementFactory
 
 		/* Track info */
 		uint32_t       track_number;
-		sframes_t      track_position;
-		sframes_t      track_duration;
-		sframes_t      track_start_frame;
+		framepos_t      track_position;
+		framepos_t      track_duration;
+		framepos_t      track_start_frame;
 
 		/* Index info */
 		uint32_t       index_number;
-		sframes_t      index_position;
+		framepos_t      index_position;
 	};
 
 
@@ -182,7 +182,7 @@ class ExportHandler : public ExportElementFactory
 	void write_index_info_cue (CDMarkerStatus & status);
 	void write_index_info_toc (CDMarkerStatus & status);
 
-	void frames_to_cd_frames_string (char* buf, sframes_t when);
+	void frames_to_cd_frames_string (char* buf, framepos_t when);
 
 	int cue_tracknum;
 	int cue_indexnum;

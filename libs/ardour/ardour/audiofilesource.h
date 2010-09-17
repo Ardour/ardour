@@ -58,8 +58,8 @@ public:
 	/* this block of methods do nothing for regular file sources, but are significant
 	   for files used in destructive recording.
 	*/
-	virtual sframes_t last_capture_start_frame() const { return 0; }
-	virtual void      mark_capture_start (sframes_t) {}
+	virtual framepos_t last_capture_start_frame() const { return 0; }
+	virtual void      mark_capture_start (framepos_t) {}
 	virtual void      mark_capture_end () {}
 	virtual void      clear_capture_marks() {}
 	virtual bool      one_of_several_channels () const { return false; }

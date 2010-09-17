@@ -131,7 +131,7 @@ Session::request_locate (nframes_t target_frame, bool with_roll)
 }
 
 void
-Session::force_locate (nframes64_t target_frame, bool with_roll)
+Session::force_locate (framepos_t target_frame, bool with_roll)
 {
 	SessionEvent *ev = new SessionEvent (with_roll ? SessionEvent::LocateRoll : SessionEvent::Locate, SessionEvent::Add, SessionEvent::Immediate, target_frame, 0, true);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request forced locate to %1\n", target_frame));
@@ -594,7 +594,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	// can't cast away volatile so copy and emit that
-	nframes64_t tframe = _transport_frame;
+	framepos_t tframe = _transport_frame;
 	PositionChanged (tframe); /* EMIT SIGNAL */
 	TransportStateChange (); /* EMIT SIGNAL */
 
@@ -724,12 +724,12 @@ Session::flush_all_inserts ()
 }
 
 void
-Session::start_locate (nframes64_t target_frame, bool with_roll, bool with_flush, bool with_loop, bool force)
+Session::start_locate (framepos_t target_frame, bool with_roll, bool with_flush, bool with_loop, bool force)
 {
 	if (synced_to_jack()) {
 
 		double sp;
-		nframes64_t pos;
+		framepos_t pos;
 
 		_slave->speed_and_position (sp, pos);
 
@@ -776,7 +776,7 @@ Session::micro_locate (nframes_t distance)
 
 /** @param with_mmc true to send a MMC locate command when the locate is done */
 void
-Session::locate (nframes64_t target_frame, bool with_roll, bool with_flush, bool with_loop, bool force, bool with_mmc)
+Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool with_loop, bool force, bool with_mmc)
 {
 	if (actively_recording() && !with_loop) {
 		return;
@@ -1444,7 +1444,7 @@ void
 Session::xrun_recovery ()
 {
 	// can't cast away volatile so copy and emit that
-	nframes64_t tframe = _transport_frame;
+	framepos_t tframe = _transport_frame;
 	Xrun (tframe); //EMIT SIGNAL
 
 	if (Config->get_stop_recording_on_xrun() && actively_recording()) {
@@ -1565,7 +1565,7 @@ Session::maybe_stop (nframes_t limit)
 }
 
 void
-Session::send_mmc_locate (nframes64_t t)
+Session::send_mmc_locate (framepos_t t)
 {
 	Timecode::Time time;
 	timecode_time_subframes (t, time);

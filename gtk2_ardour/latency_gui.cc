@@ -32,7 +32,7 @@ LatencyBarController::get_label (int&)
 	std::stringstream s;
 
 	if (nframes < (_latency_gui->sample_rate / 1000.0)) {
-		s << ((nframes64_t) rint (nframes)) << " samples";
+		s << ((framepos_t) rint (nframes)) << " samples";
 	} else {
 		s << std::fixed << std::setprecision (2) << (nframes / (_latency_gui->sample_rate / 1000.0)) << " msecs";
 	}
@@ -40,7 +40,7 @@ LatencyBarController::get_label (int&)
 	return s.str ();
 }
 
-LatencyGUI::LatencyGUI (Latent& l, nframes64_t sr, nframes64_t psz)
+LatencyGUI::LatencyGUI (Latent& l, framepos_t sr, framepos_t psz)
 	: _latent (l),
 	  initial_value (_latent.signal_latency()),
 	  sample_rate (sr),
@@ -95,7 +95,7 @@ LatencyGUI::LatencyGUI (Latent& l, nframes64_t sr, nframes64_t psz)
 void
 LatencyGUI::finish ()
 {
-	nframes64_t new_value = (nframes64_t) adjustment.get_value();
+	framepos_t new_value = (framepos_t) adjustment.get_value();
 	if (new_value != initial_value) {
 		_latent.set_user_latency (new_value);
 	}
@@ -140,7 +140,7 @@ LatencyGUI::change_latency_from_button (int dir)
 	}
 }
 
-LatencyDialog::LatencyDialog (const std::string& title, Latent& l, nframes64_t sr, nframes64_t psz)
+LatencyDialog::LatencyDialog (const std::string& title, Latent& l, framepos_t sr, framepos_t psz)
 	: ArdourDialog (title, false, true),
 	  lwidget (l, sr, psz)
 {

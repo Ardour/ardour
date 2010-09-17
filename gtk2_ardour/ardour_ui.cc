@@ -1457,7 +1457,7 @@ ARDOUR_UI::transport_goto_wallclock ()
 
 		time_t now;
 		struct tm tmnow;
-		nframes64_t frames;
+		framepos_t frames;
 
 		time (&now);
 		localtime_r (&now, &tmnow);

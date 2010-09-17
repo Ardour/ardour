@@ -348,7 +348,7 @@ AudioTrack::set_state_part_two ()
 }
 
 int
-AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, int declick,
+AudioTrack::roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
 		  bool can_record, bool rec_monitors_input, bool& need_butler)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
@@ -522,7 +522,7 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 }
 
 int
-AudioTrack::export_stuff (BufferSet& buffers, sframes_t start, nframes_t nframes, bool enable_processing)
+AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nframes, bool enable_processing)
 {
 	boost::scoped_array<gain_t> gain_buffer (new gain_t[nframes]);
 	boost::scoped_array<Sample> mix_buffer (new Sample[nframes]);
@@ -533,7 +533,7 @@ AudioTrack::export_stuff (BufferSet& buffers, sframes_t start, nframes_t nframes
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist());
 	assert(apl);
 
-	assert(buffers.get_audio(0).capacity() >= nframes);
+	assert ((framecnt_t) buffers.get_audio(0).capacity() >= nframes);
 
 	if (apl->read (buffers.get_audio(0).data(), mix_buffer.get(), gain_buffer.get(), start, nframes) != nframes) {
 		return -1;

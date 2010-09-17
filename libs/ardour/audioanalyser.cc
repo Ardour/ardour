@@ -88,8 +88,8 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 	int ret = -1;
 	bool done = false;
 	Sample* data = 0;
-	nframes64_t len = src->readable_length();
-	nframes64_t pos = 0;
+	framecnt_t len = src->readable_length();
+	framepos_t pos = 0;
 	float* bufs[1] = { 0 };
 	string tmp_path;
 
@@ -111,11 +111,11 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 
 	while (!done) {
 
-		nframes64_t to_read;
+		nframes_t to_read;
 
 		/* read from source */
 
-		to_read = min ((len - pos), bufsize);
+		to_read = min ((len - pos), (framecnt_t) bufsize);
 
 		if (src->read (data, pos, to_read, channel) != to_read) {
 			goto out;

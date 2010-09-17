@@ -381,7 +381,7 @@ MidiTrack::roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame
 }
 
 int
-MidiTrack::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+MidiTrack::no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		    bool state_changing, bool can_record, bool rec_monitors_input)
 {
 	int ret = Track::no_roll (nframes, start_frame, end_frame, state_changing, can_record, rec_monitors_input);
@@ -427,7 +427,7 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (nframes_t nframes)
 }
 
 void
-MidiTrack::write_out_of_band_data (BufferSet& bufs, sframes_t /*start*/, sframes_t /*end*/, nframes_t nframes)
+MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framepos_t /*end*/, nframes_t nframes)
 {
 	// Append immediate events
 	MidiBuffer& buf (bufs.get_midi (0));
@@ -444,7 +444,7 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, sframes_t /*start*/, sframes
 }
 
 int
-MidiTrack::export_stuff (BufferSet& /*bufs*/, nframes_t /*nframes*/, sframes_t /*end_frame*/)
+MidiTrack::export_stuff (BufferSet& /*bufs*/, nframes_t /*nframes*/, framepos_t /*end_frame*/)
 {
 	return -1;
 }

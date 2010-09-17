@@ -156,7 +156,7 @@ Editor::external_audio_dialog ()
 		ImportPosition pos = sfbrowser->get_position ();
 		ImportMode mode = sfbrowser->get_mode ();
 		ImportDisposition chns = sfbrowser->get_channel_disposition ();
-		nframes64_t where;
+		framepos_t where;
 
 		switch (pos) {
 			case ImportAtEditPoint:
@@ -325,7 +325,7 @@ Editor::get_nth_selected_midi_track (int nth) const
 }
 
 void
-Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, nframes64_t& pos)
+Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, framepos_t& pos)
 {
 	boost::shared_ptr<Track> track;
 	vector<string> to_import;
@@ -426,7 +426,7 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 }
 
 void
-Editor::do_embed (vector<string> paths, ImportDisposition chns, ImportMode mode, nframes64_t& pos)
+Editor::do_embed (vector<string> paths, ImportDisposition chns, ImportMode mode, framepos_t& pos)
 {
 	boost::shared_ptr<Track> track;
 	bool check_sample_rate = true;
@@ -492,7 +492,7 @@ Editor::do_embed (vector<string> paths, ImportDisposition chns, ImportMode mode,
 }
 
 int
-Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quality, nframes64_t& pos,
+Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quality, framepos_t& pos,
 			 int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool replace)
 {
 	import_status.paths = paths;
@@ -550,7 +550,7 @@ Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quali
 
 int
 Editor::embed_sndfiles (vector<string> paths, bool multifile,
-			bool& check_sample_rate, ImportMode mode, nframes64_t& pos, int target_regions, int target_tracks,
+			bool& check_sample_rate, ImportMode mode, framepos_t& pos, int target_regions, int target_tracks,
 			boost::shared_ptr<Track>& track)
 {
 	boost::shared_ptr<AudioFileSource> source;
@@ -717,7 +717,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 }
 
 int
-Editor::add_sources (vector<string> paths, SourceList& sources, nframes64_t& pos, ImportMode mode,
+Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos, ImportMode mode,
 		     int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool /*add_channel_suffix*/)
 {
 	vector<boost::shared_ptr<Region> > regions;
@@ -865,7 +865,7 @@ Editor::add_sources (vector<string> paths, SourceList& sources, nframes64_t& pos
 }
 
 int
-Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t in_chans, uint32_t out_chans, nframes64_t& pos,
+Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t in_chans, uint32_t out_chans, framepos_t& pos,
 				  ImportMode mode, boost::shared_ptr<Track>& existing_track)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(region);

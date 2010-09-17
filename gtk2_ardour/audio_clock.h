@@ -54,7 +54,7 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void set_from_playhead ();
 	void locate ();
 	void set_mode (Mode);
-	void set_bbt_reference (nframes64_t);
+	void set_bbt_reference (framepos_t);
 
 	void set_widget_name (std::string);
 
@@ -162,7 +162,7 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	Gtk::EventBox  clock_base;
 	Gtk::Frame     clock_frame;
 
-	nframes64_t bbt_reference_time;
+	framepos_t bbt_reference_time;
 	nframes_t last_when;
 	bool last_pdelta;
 	bool last_sdelta;

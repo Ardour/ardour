@@ -521,7 +521,7 @@ SndFileSource::flush_header ()
 }
 
 int
-SndFileSource::setup_broadcast_info (sframes_t /*when*/, struct tm& now, time_t /*tnow*/)
+SndFileSource::setup_broadcast_info (framepos_t /*when*/, struct tm& now, time_t /*tnow*/)
 {
 	if (!writable()) {
 		warning << string_compose (_("attempt to store broadcast info in a non-writable audio file source (%1)"), _path) << endmsg;
@@ -632,7 +632,7 @@ SndFileSource::clear_capture_marks ()
 }
 
 void
-SndFileSource::mark_capture_start (sframes_t pos)
+SndFileSource::mark_capture_start (framepos_t pos)
 {
 	if (destructive()) {
 		if (pos < _timeline_position) {
@@ -775,7 +775,7 @@ SndFileSource::crossfade (Sample* data, framecnt_t cnt, int fade_in)
 	return cnt;
 }
 
-sframes_t
+framepos_t
 SndFileSource::last_capture_start_frame () const
 {
 	if (destructive()) {

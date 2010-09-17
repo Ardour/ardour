@@ -100,7 +100,7 @@ OnsetDetector::cleanup_onsets (AnalysisFeatureList& t, float sr, float gap_msecs
 
 	AnalysisFeatureList::iterator i = t.begin();
 	AnalysisFeatureList::iterator f, b;
-	const nframes64_t gap_frames = (nframes64_t) floor (gap_msecs * (sr / 1000.0));
+	const framecnt_t gap_frames = (framecnt_t) floor (gap_msecs * (sr / 1000.0));
 
 	while (i != t.end()) {
 

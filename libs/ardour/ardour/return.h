@@ -74,7 +74,7 @@ private:
 	uint32_t  _bitslot;
 
 	void collect_input  (BufferSet& bufs, nframes_t nframes, ChanCount offset=ChanCount::ZERO);
-	void just_meter_input (sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	void just_meter_input (framepos_t start_frame, framepos_t end_frame, nframes_t nframes);
 };
 
 } // namespace ARDOUR

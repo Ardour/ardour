@@ -61,7 +61,7 @@ using Gtkmm2ext::Keyboard;
 bool
 Editor::track_canvas_scroll (GdkEventScroll* ev)
 {
-	nframes64_t xdelta;
+	framepos_t xdelta;
 	int direction = ev->direction;
 
   retry:
@@ -1033,7 +1033,7 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & /*c*/, 
 
 		double px;
 		double py;
-		nframes64_t const pos = event_frame (&event, &px, &py);
+		framepos_t const pos = event_frame (&event, &px, &py);
 
 		std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
 		if (tv.first == 0) {

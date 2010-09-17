@@ -328,7 +328,7 @@ bool
 MidiRegionView::button_release (GdkEventButton* ev)
 {
 	double event_x, event_y;
-	nframes64_t event_frame = 0;
+	framepos_t event_frame = 0;
 
         event_x = ev->x;
         event_y = ev->y;
@@ -398,7 +398,7 @@ bool
 MidiRegionView::motion (GdkEventMotion* ev)
 {
 	double event_x, event_y;
-	nframes64_t event_frame = 0;
+	framepos_t event_frame = 0;
 
         event_x = ev->x;
         event_y = ev->y;
@@ -665,7 +665,7 @@ MidiRegionView::create_note_at(double x, double y, double length, bool sh)
 	assert(note <= 127.0);
 
 	// Start of note in frames relative to region start
-	nframes64_t const start_frames = snap_frame_to_frame(trackview.editor().pixel_to_frame(x));
+	framepos_t const start_frames = snap_frame_to_frame(trackview.editor().pixel_to_frame(x));
 	assert(start_frames >= 0);
 
 	// Snap length
@@ -1289,7 +1289,7 @@ MidiRegionView::resolve_note(uint8_t note, double end_time)
 	}
 
 	if (_active_notes && _active_notes[note]) {
-		const nframes64_t end_time_frames = beats_to_frames(end_time);
+		const framepos_t end_time_frames = beats_to_frames(end_time);
 		_active_notes[note]->property_x2() = trackview.editor().frame_to_pixel(end_time_frames);
 		_active_notes[note]->property_outline_what() = (guint32) 0xF; // all edges
 		_active_notes[note] = 0;
@@ -1358,7 +1358,7 @@ MidiRegionView::play_midi_chord (vector<boost::shared_ptr<NoteType> > notes)
 bool
 MidiRegionView::note_in_region_range(const boost::shared_ptr<NoteType> note, bool& visible) const
 {
-	const nframes64_t note_start_frames = beats_to_frames(note->time());
+	const framepos_t note_start_frames = beats_to_frames(note->time());
 
 	bool outside = (note_start_frames - _region->start() >= _region->length()) ||
 		(note_start_frames < _region->start());
@@ -1374,10 +1374,10 @@ MidiRegionView::update_note (CanvasNote* ev)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
 
-	const nframes64_t note_start_frames = beats_to_frames(note->time());
+	const framepos_t note_start_frames = beats_to_frames(note->time());
 
 	/* trim note display to not overlap the end of its region */
-	const nframes64_t note_end_frames = min (beats_to_frames (note->end_time()), _region->start() + _region->length());
+	const framepos_t note_end_frames = min (beats_to_frames (note->end_time()), _region->start() + _region->length());
 
 	const double x = trackview.editor().frame_to_pixel(note_start_frames - _region->start());
 	const double y1 = midi_stream_view()->note_to_y(note->note());
@@ -1418,7 +1418,7 @@ MidiRegionView::update_hit (CanvasHit* ev)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
 
-	const nframes64_t note_start_frames = beats_to_frames(note->time());
+	const framepos_t note_start_frames = beats_to_frames(note->time());
 	const double x = trackview.editor().frame_to_pixel(note_start_frames - _region->start());
 	const double diamond_size = midi_stream_view()->note_height() / 2.0;
 	const double y = midi_stream_view()->note_to_y(note->note()) + ((diamond_size-2) / 4.0);
@@ -1499,8 +1499,8 @@ MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity
 
 	/* potentially extend region to hold new note */
 
-	nframes64_t end_frame = _region->position() + beats_to_frames (new_note->end_time());
-	nframes64_t region_end = _region->position() + _region->length() - 1;
+	framepos_t end_frame = _region->position() + beats_to_frames (new_note->end_time());
+	framepos_t region_end = _region->position() + _region->length() - 1;
 
 	if (end_frame > region_end) {
 		_region->set_length (end_frame - _region->position(), this);
@@ -2090,22 +2090,22 @@ MidiRegionView::note_dropped(CanvasNoteEvent *, frameoffset_t dt, int8_t dnote)
 	}
 }
 
-nframes64_t
+framepos_t
 MidiRegionView::snap_pixel_to_frame(double x)
 {
 	PublicEditor& editor = trackview.editor();
 	// x is region relative, convert it to global absolute frames
-	nframes64_t frame = editor.pixel_to_frame(x) + _region->position();
+	framepos_t frame = editor.pixel_to_frame(x) + _region->position();
 	editor.snap_to(frame);
 	return frame - _region->position(); // convert back to region relative
 }
 
-nframes64_t
-MidiRegionView::snap_frame_to_frame(nframes64_t x)
+framepos_t
+MidiRegionView::snap_frame_to_frame(framepos_t x)
 {
 	PublicEditor& editor = trackview.editor();
 	// x is region relative, convert it to global absolute frames
-	nframes64_t frame = x + _region->position();
+	framepos_t frame = x + _region->position();
 	editor.snap_to(frame);
 	return frame - _region->position(); // convert back to region relative
 }
@@ -2119,25 +2119,25 @@ MidiRegionView::snap_to_pixel(double x)
 double
 MidiRegionView::get_position_pixels()
 {
-	nframes64_t region_frame = get_position();
+	framepos_t region_frame = get_position();
 	return trackview.editor().frame_to_pixel(region_frame);
 }
 
 double
 MidiRegionView::get_end_position_pixels()
 {
-	nframes64_t frame = get_position() + get_duration ();
+	framepos_t frame = get_position() + get_duration ();
 	return trackview.editor().frame_to_pixel(frame);
 }
 
-nframes64_t
+framepos_t
 MidiRegionView::beats_to_frames(double beats) const
 {
 	return _time_converter.to(beats);
 }
 
 double
-MidiRegionView::frames_to_beats(nframes64_t frames) const
+MidiRegionView::frames_to_beats(framepos_t frames) const
 {
 	return _time_converter.from(frames);
 }
@@ -2596,9 +2596,9 @@ MidiRegionView::nudge_notes (bool forward)
 	   into a vector and sort before using the first one.
 	*/
 
-	nframes64_t ref_point = _region->position() + beats_to_frames ((*(_selection.begin()))->note()->time());
-	nframes64_t unused;
-	nframes64_t distance;
+	framepos_t ref_point = _region->position() + beats_to_frames ((*(_selection.begin()))->note()->time());
+	framepos_t unused;
+	framepos_t distance;
 
 	if (trackview.editor().snap_mode() == Editing::SnapOff) {
 		
@@ -2784,7 +2784,7 @@ MidiRegionView::selection_as_cut_buffer () const
 }
 
 void
-MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
+MidiRegionView::paste (framepos_t pos, float times, const MidiCutBuffer& mcb)
 {
 	if (mcb.empty()) {
 		return;
@@ -2822,8 +2822,8 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 
 	/* if we pasted past the current end of the region, extend the region */
 
-	nframes64_t end_frame = _region->position() + beats_to_frames (end_point);
-	nframes64_t region_end = _region->position() + _region->length() - 1;
+	framepos_t end_frame = _region->position() + beats_to_frames (end_point);
+	framepos_t region_end = _region->position() + _region->length() - 1;
 
 	if (end_frame > region_end) {
 
@@ -2859,7 +2859,7 @@ MidiRegionView::time_sort_events ()
 void
 MidiRegionView::goto_next_note ()
 {
-	// nframes64_t pos = -1;
+	// framepos_t pos = -1;
 	bool use_next = false;
 
 	if (_events.back()->selected()) {
@@ -2888,7 +2888,7 @@ MidiRegionView::goto_next_note ()
 void
 MidiRegionView::goto_previous_note ()
 {
-	// nframes64_t pos = -1;
+	// framepos_t pos = -1;
 	bool use_next = false;
 
 	if (_events.front()->selected()) {
@@ -2941,7 +2941,7 @@ MidiRegionView::update_ghost_note (double x, double y)
 	_last_ghost_y = y;
 	
 	group->w2i (x, y);
-	nframes64_t f = trackview.editor().pixel_to_frame (x) + _region->position ();
+	framepos_t f = trackview.editor().pixel_to_frame (x) + _region->position ();
 	trackview.editor().snap_to (f);
 	f -= _region->position ();
 

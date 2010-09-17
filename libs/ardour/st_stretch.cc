@@ -177,8 +177,8 @@ STStretch::run (boost::shared_ptr<Region> a_region)
 	/* now reset ancestral data for each new region */
 
 	for (vector<boost::shared_ptr<Region> >::iterator x = results.begin(); x != results.end(); ++x) {
-		nframes64_t astart = (*x)->ancestral_start();
-		nframes64_t alength = (*x)->ancestral_length();
+		framepos_t astart = (*x)->ancestral_start();
+		framepos_t alength = (*x)->ancestral_length();
 		nframes_t start;
 		nframes_t length;
 

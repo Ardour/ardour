@@ -103,8 +103,8 @@ class Region
 	 * START:    first frame of the region within its source(s)
 	 * LENGTH:   number of frames the region represents
 	 */
-	sframes_t  position () const { return _position; }
-	sframes_t  start ()    const { return _start; }
+	framepos_t  position () const { return _position; }
+	framepos_t  start ()    const { return _start; }
 	framecnt_t length()    const { return _length; }
 	layer_t    layer ()    const { return _layer; }
 
@@ -112,15 +112,15 @@ class Region
 
 	/* these two are valid ONLY during a StateChanged signal handler */
 
-	sframes_t  last_position() const { return _last_position; }
+	framepos_t  last_position() const { return _last_position; }
 	framecnt_t last_length() const { return _last_length; }
 
-	sframes_t ancestral_start () const { return _ancestral_start; }
+	framepos_t ancestral_start () const { return _ancestral_start; }
 	framecnt_t ancestral_length () const { return _ancestral_length; }
 	float stretch() const { return _stretch; }
 	float shift() const { return _shift; }
 
-	void set_ancestral_data (nframes64_t start, nframes64_t length, float stretch, float shift);
+	void set_ancestral_data (framepos_t start, framepos_t length, float stretch, float shift);
 
 	frameoffset_t sync_offset(int& dir) const;
 	framepos_t sync_position() const;
@@ -247,16 +247,16 @@ class Region
 
 	virtual int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&) = 0;
 
-	virtual void add_transient (nframes64_t) {
+	virtual void add_transient (framepos_t) {
 		// no transients, but its OK
 	}
 
-	virtual int update_transient (nframes64_t /* old_position */, nframes64_t /* new_position */) {
+	virtual int update_transient (framepos_t /* old_position */, framepos_t /* new_position */) {
 		// no transients, but its OK
 		return 0;
 	}
 
-	virtual void remove_transient (nframes64_t /* where */) {
+	virtual void remove_transient (framepos_t /* where */) {
 		// no transients, but its OK
 	}
 
@@ -271,7 +271,7 @@ class Region
 		return 0;
 	}
 
-	virtual int adjust_transients (nframes64_t /*delta*/) {
+	virtual int adjust_transients (framepos_t /*delta*/) {
 		// no transients, but its OK
 		return 0;
 	}

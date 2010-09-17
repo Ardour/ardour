@@ -38,7 +38,7 @@ private:
 class LatencyGUI : public Gtk::VBox
 {
   public:
-	LatencyGUI (ARDOUR::Latent&, nframes64_t sample_rate, nframes64_t period_size);
+	LatencyGUI (ARDOUR::Latent&, framepos_t sample_rate, framepos_t period_size);
 	~LatencyGUI() { }
 
 	void finish ();
@@ -47,9 +47,9 @@ class LatencyGUI : public Gtk::VBox
 
   private:
 	ARDOUR::Latent& _latent;
-	nframes64_t initial_value;
-	nframes64_t sample_rate;
-	nframes64_t period_size;
+	framepos_t initial_value;
+	framepos_t sample_rate;
+	framepos_t period_size;
 	boost::shared_ptr<PBD::IgnorableControllable> ignored;
 
 	Gtk::Adjustment adjustment;
@@ -72,7 +72,7 @@ class LatencyGUI : public Gtk::VBox
 class LatencyDialog : public ArdourDialog
 {
   public:
-	LatencyDialog (const std::string& title, ARDOUR::Latent&, nframes64_t sample_rate, nframes64_t period_size);
+	LatencyDialog (const std::string& title, ARDOUR::Latent&, framepos_t sample_rate, framepos_t period_size);
 	~LatencyDialog() {}
 
   private:

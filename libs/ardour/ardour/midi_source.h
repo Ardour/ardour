@@ -59,25 +59,25 @@ class MidiSource : virtual public Source
 	 * \param tracker an optional pointer to MidiStateTracker object, for note on/off tracking
 	 */
 	virtual nframes_t midi_read (Evoral::EventSink<nframes_t>& dst,
-				     sframes_t source_start,
-				     sframes_t start, nframes_t cnt,
+				     framepos_t source_start,
+				     framepos_t start, nframes_t cnt,
 				     MidiStateTracker*,
 				     std::set<Evoral::Parameter> const &) const;
 
 	virtual nframes_t midi_write (MidiRingBuffer<nframes_t>& src,
-	                              sframes_t source_start,
+	                              framepos_t source_start,
 	                              nframes_t cnt);
 
 	virtual void append_event_unlocked_beats(const Evoral::Event<Evoral::MusicalTime>& ev) = 0;
 
 	virtual void append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev,
-			sframes_t source_start) = 0;
+			framepos_t source_start) = 0;
 
 	virtual bool       empty () const;
 	virtual framecnt_t length (framepos_t pos) const;
 	virtual void       update_length (framepos_t pos, framecnt_t cnt);
 
-	virtual void mark_streaming_midi_write_started (NoteMode mode, sframes_t start_time);
+	virtual void mark_streaming_midi_write_started (NoteMode mode, framepos_t start_time);
 	virtual void mark_streaming_write_started ();
 	virtual void mark_streaming_write_completed ();
 
@@ -92,7 +92,7 @@ class MidiSource : virtual public Source
 	static PBD::Signal1<void,MidiSource*> MidiSourceCreated;
 
 	// Signal a range of recorded data is available for reading from model()
-	mutable PBD::Signal2<void,sframes_t,nframes_t> ViewDataRangeReady;
+	mutable PBD::Signal2<void,framepos_t,nframes_t> ViewDataRangeReady;
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
@@ -134,12 +134,12 @@ class MidiSource : virtual public Source
 	virtual void flush_midi() = 0;
 
 	virtual nframes_t read_unlocked (Evoral::EventSink<nframes_t>& dst,
-					 sframes_t position,
-					 sframes_t start, nframes_t cnt,
+					 framepos_t position,
+					 framepos_t start, nframes_t cnt,
 					 MidiStateTracker* tracker) const = 0;
 
 	virtual nframes_t write_unlocked (MidiRingBuffer<nframes_t>& dst,
-			sframes_t position,
+			framepos_t position,
 			nframes_t cnt) = 0;
 
 	std::string      _captured_for;
@@ -153,8 +153,8 @@ class MidiSource : virtual public Source
 	mutable bool                                                  _model_iter_valid;
 
 	mutable double    _length_beats;
-	mutable sframes_t _last_read_end;
-	sframes_t         _last_write_end;
+	mutable framepos_t _last_read_end;
+	framepos_t         _last_write_end;
 
 	/** Map of interpolation styles to use for Parameters; if they are not in this map,
 	 *  the correct interpolation style can be obtained from EventTypeMap::interpolation_of ()

@@ -103,7 +103,7 @@ class AudioRegionView : public RegionView
 	void reset_fade_in_shape_width (nframes_t);
 	void reset_fade_out_shape_width (nframes_t);
 	
-	void show_fade_line(nframes64_t pos);
+	void show_fade_line(framepos_t pos);
 	void hide_fade_line();
 	
 	void set_fade_visibility (bool);
@@ -134,7 +134,7 @@ class AudioRegionView : public RegionView
     std::vector<ArdourCanvas::WaveView *> waves;
     std::vector<ArdourCanvas::WaveView *> tmp_waves; ///< see ::create_waves()
     
-    std::list<std::pair<nframes64_t, ArdourCanvas::SimpleLine*> > feature_lines;
+    std::list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> > feature_lines;
     
     ArdourCanvas::Polygon*           sync_mark; ///< polgyon for sync position
     ArdourCanvas::SimpleLine*        zero_line;

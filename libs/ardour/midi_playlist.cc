@@ -103,7 +103,7 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 
 	// relevent regions overlapping start <--> end
 	vector< boost::shared_ptr<Region> > regs;
-	typedef pair<MidiStateTracker*,nframes64_t> TrackerInfo;
+	typedef pair<MidiStateTracker*,framepos_t> TrackerInfo;
 	vector<TrackerInfo> tracker_info;
 	uint32_t note_cnt = 0;
 
@@ -123,7 +123,7 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 				   of this read range.
 				*/
 
-				nframes64_t resolve_at = (*i)->last_frame();
+				framepos_t resolve_at = (*i)->last_frame();
 				if (resolve_at >= end) {
 					resolve_at = start;
 				}

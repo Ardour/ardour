@@ -866,10 +866,10 @@ Editor::zoom_adjustment_changed ()
 
 	if (fpu < 1.0) {
 		fpu = 1.0;
-		zoom_range_clock.set ((nframes64_t) floor (fpu * _canvas_width));
+		zoom_range_clock.set ((framepos_t) floor (fpu * _canvas_width));
 	} else if (fpu > _session->current_end_frame() / _canvas_width) {
 		fpu = _session->current_end_frame() / _canvas_width;
-		zoom_range_clock.set ((nframes64_t) floor (fpu * _canvas_width));
+		zoom_range_clock.set ((framepos_t) floor (fpu * _canvas_width));
 	}
 
 	temporal_zoom (fpu);
@@ -889,7 +889,7 @@ Editor::control_scroll (float fraction)
 	/*
 		_control_scroll_target is an optional<T>
 
-		it acts like a pointer to an nframes64_t, with
+		it acts like a pointer to an framepos_t, with
 		a operator conversion to boolean to check
 		that it has a value could possibly use
 		playhead_cursor->current_frame to store the
@@ -902,12 +902,12 @@ Editor::control_scroll (float fraction)
 		_dragging_playhead = true;
 	}
 
-	if ((fraction < 0.0f) && (*_control_scroll_target < (nframes64_t) fabs(step))) {
+	if ((fraction < 0.0f) && (*_control_scroll_target < (framepos_t) fabs(step))) {
 		*_control_scroll_target = 0;
 	} else if ((fraction > 0.0f) && (max_framepos - *_control_scroll_target < step)) {
 		*_control_scroll_target = max_framepos - (current_page_frames()*2); // allow room for slop in where the PH is on the screen
 	} else {
-		*_control_scroll_target += (nframes64_t) floor (step);
+		*_control_scroll_target += (framepos_t) floor (step);
 	}
 
 	/* move visuals, we'll catch up with it later */
@@ -938,7 +938,7 @@ Editor::control_scroll (float fraction)
 }
 
 bool
-Editor::deferred_control_scroll (nframes64_t /*target*/)
+Editor::deferred_control_scroll (framepos_t /*target*/)
 {
 	_session->request_locate (*_control_scroll_target, _session->transport_rolling());
 	// reset for next stream
@@ -972,7 +972,7 @@ Editor::on_realize ()
 }
 
 void
-Editor::map_position_change (nframes64_t frame)
+Editor::map_position_change (framepos_t frame)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::map_position_change, frame)
 
@@ -988,7 +988,7 @@ Editor::map_position_change (nframes64_t frame)
 }
 
 void
-Editor::center_screen (nframes64_t frame)
+Editor::center_screen (framepos_t frame)
 {
 	double page = _canvas_width * frames_per_unit;
 
@@ -1001,12 +1001,12 @@ Editor::center_screen (nframes64_t frame)
 }
 
 void
-Editor::center_screen_internal (nframes64_t frame, float page)
+Editor::center_screen_internal (framepos_t frame, float page)
 {
 	page /= 2;
 
 	if (frame > page) {
-		frame -= (nframes64_t) page;
+		frame -= (framepos_t) page;
 	} else {
 		frame = 0;
 	}
@@ -1356,10 +1356,10 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 }
 
 void
-Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, bool with_selection, nframes64_t frame)
+Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, bool with_selection, framepos_t frame)
 {
 	using namespace Menu_Helpers;
-	Menu* (Editor::*build_menu_function)(nframes64_t);
+	Menu* (Editor::*build_menu_function)(framepos_t);
 	Menu *menu;
 
 	switch (item_type) {
@@ -1476,7 +1476,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 }
 
 Menu*
-Editor::build_track_context_menu (nframes64_t)
+Editor::build_track_context_menu (framepos_t)
 {
 	using namespace Menu_Helpers;
 
@@ -1488,7 +1488,7 @@ Editor::build_track_context_menu (nframes64_t)
 }
 
 Menu*
-Editor::build_track_bus_context_menu (nframes64_t)
+Editor::build_track_bus_context_menu (framepos_t)
 {
 	using namespace Menu_Helpers;
 
@@ -1500,7 +1500,7 @@ Editor::build_track_bus_context_menu (nframes64_t)
 }
 
 Menu*
-Editor::build_track_region_context_menu (nframes64_t frame)
+Editor::build_track_region_context_menu (framepos_t frame)
 {
 	using namespace Menu_Helpers;
 	MenuList& edit_items  = track_region_context_menu.items();
@@ -1551,7 +1551,7 @@ Editor::build_track_region_context_menu (nframes64_t frame)
 }
 
 Menu*
-Editor::build_track_crossfade_context_menu (nframes64_t frame)
+Editor::build_track_crossfade_context_menu (framepos_t frame)
 {
 	using namespace Menu_Helpers;
 	MenuList& edit_items  = track_crossfade_context_menu.items();
@@ -1641,7 +1641,7 @@ Editor::analyze_range_selection()
 }
 
 Menu*
-Editor::build_track_selection_context_menu (nframes64_t)
+Editor::build_track_selection_context_menu (framepos_t)
 {
 	using namespace Menu_Helpers;
 	MenuList& edit_items  = track_selection_context_menu.items();
@@ -2327,7 +2327,7 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 		Glib::RefPtr<RadioAction>::cast_dynamic(act)->set_active (true);
 	}
 
-	nframes64_t foo;
+	framepos_t foo;
 	bool in_track_canvas;
 
 	if (!mouse_frame (foo, in_track_canvas)) {
@@ -2407,7 +2407,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	move (x, y);
 
 	if (_session && (prop = node.property ("playhead"))) {
-		nframes64_t pos;
+		framepos_t pos;
                 sscanf (prop->value().c_str(), "%" PRIi64, &pos);
 		playhead_cursor->set_position (pos);
 	} else {
@@ -2444,7 +2444,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if ((prop = node.property ("left-frame")) != 0){
-		nframes64_t pos;
+		framepos_t pos;
 		if (sscanf (prop->value().c_str(), "%" PRId64, &pos) == 1) {
 			reset_x_origin (pos);
 		}
@@ -2677,7 +2677,7 @@ Editor::trackview_by_y_position (double y)
  *  @param event Event to get current key modifier information from, or 0.
  */
 void
-Editor::snap_to_with_modifier (nframes64_t& start, GdkEvent const * event, int32_t direction, bool for_mark)
+Editor::snap_to_with_modifier (framepos_t& start, GdkEvent const * event, int32_t direction, bool for_mark)
 {
 	if (!_session || !event) {
 		return;
@@ -2695,7 +2695,7 @@ Editor::snap_to_with_modifier (nframes64_t& start, GdkEvent const * event, int32
 }
 
 void
-Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
+Editor::snap_to (framepos_t& start, int32_t direction, bool for_mark)
 {
 	if (!_session || _snap_mode == SnapOff) {
 		return;
@@ -2705,17 +2705,17 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 }
 
 void
-Editor::timecode_snap_to_internal (nframes64_t& start, int32_t direction, bool /*for_mark*/)
+Editor::timecode_snap_to_internal (framepos_t& start, int32_t direction, bool /*for_mark*/)
 {
-	const nframes64_t one_timecode_second = (nframes64_t)(rint(_session->timecode_frames_per_second()) * _session->frames_per_timecode_frame());
-	nframes64_t one_timecode_minute = (nframes64_t)(rint(_session->timecode_frames_per_second()) * _session->frames_per_timecode_frame() * 60);
+	const framepos_t one_timecode_second = (framepos_t)(rint(_session->timecode_frames_per_second()) * _session->frames_per_timecode_frame());
+	framepos_t one_timecode_minute = (framepos_t)(rint(_session->timecode_frames_per_second()) * _session->frames_per_timecode_frame() * 60);
 
 	switch (_snap_type) {
 	case SnapToTimecodeFrame:
 		if (((direction == 0) && (fmod((double)start, (double)_session->frames_per_timecode_frame()) > (_session->frames_per_timecode_frame() / 2))) || (direction > 0)) {
-			start = (nframes64_t) (ceil ((double) start / _session->frames_per_timecode_frame()) * _session->frames_per_timecode_frame());
+			start = (framepos_t) (ceil ((double) start / _session->frames_per_timecode_frame()) * _session->frames_per_timecode_frame());
 		} else {
-			start = (nframes64_t) (floor ((double) start / _session->frames_per_timecode_frame()) *  _session->frames_per_timecode_frame());
+			start = (framepos_t) (floor ((double) start / _session->frames_per_timecode_frame()) *  _session->frames_per_timecode_frame());
 		}
 		break;
 
@@ -2727,9 +2727,9 @@ Editor::timecode_snap_to_internal (nframes64_t& start, int32_t direction, bool /
 			start -= _session->timecode_offset ();
 		}
 		if (((direction == 0) && (start % one_timecode_second > one_timecode_second / 2)) || direction > 0) {
-			start = (nframes64_t) ceil ((double) start / one_timecode_second) * one_timecode_second;
+			start = (framepos_t) ceil ((double) start / one_timecode_second) * one_timecode_second;
 		} else {
-			start = (nframes64_t) floor ((double) start / one_timecode_second) * one_timecode_second;
+			start = (framepos_t) floor ((double) start / one_timecode_second) * one_timecode_second;
 		}
 
 		if (_session->timecode_offset_negative())
@@ -2748,9 +2748,9 @@ Editor::timecode_snap_to_internal (nframes64_t& start, int32_t direction, bool /
 			start -= _session->timecode_offset ();
 		}
 		if (((direction == 0) && (start % one_timecode_minute > one_timecode_minute / 2)) || direction > 0) {
-			start = (nframes64_t) ceil ((double) start / one_timecode_minute) * one_timecode_minute;
+			start = (framepos_t) ceil ((double) start / one_timecode_minute) * one_timecode_minute;
 		} else {
-			start = (nframes64_t) floor ((double) start / one_timecode_minute) * one_timecode_minute;
+			start = (framepos_t) floor ((double) start / one_timecode_minute) * one_timecode_minute;
 		}
 		if (_session->timecode_offset_negative())
 		{
@@ -2766,13 +2766,13 @@ Editor::timecode_snap_to_internal (nframes64_t& start, int32_t direction, bool /
 }
 
 void
-Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
+Editor::snap_to_internal (framepos_t& start, int32_t direction, bool for_mark)
 {
-	const nframes64_t one_second = _session->frame_rate();
-	const nframes64_t one_minute = _session->frame_rate() * 60;
-	nframes64_t presnap = start;
-	nframes64_t before;
-	nframes64_t after;
+	const framepos_t one_second = _session->frame_rate();
+	const framepos_t one_minute = _session->frame_rate() * 60;
+	framepos_t presnap = start;
+	framepos_t before;
+	framepos_t after;
 
 	switch (_snap_type) {
 	case SnapToTimecodeFrame:
@@ -2782,25 +2782,25 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 
 	case SnapToCDFrame:
 		if (((direction == 0) && (start % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
-			start = (nframes64_t) ceil ((double) start / (one_second / 75)) * (one_second / 75);
+			start = (framepos_t) ceil ((double) start / (one_second / 75)) * (one_second / 75);
 		} else {
-			start = (nframes64_t) floor ((double) start / (one_second / 75)) * (one_second / 75);
+			start = (framepos_t) floor ((double) start / (one_second / 75)) * (one_second / 75);
 		}
 		break;
 
 	case SnapToSeconds:
 		if (((direction == 0) && (start % one_second > one_second / 2)) || (direction > 0)) {
-			start = (nframes64_t) ceil ((double) start / one_second) * one_second;
+			start = (framepos_t) ceil ((double) start / one_second) * one_second;
 		} else {
-			start = (nframes64_t) floor ((double) start / one_second) * one_second;
+			start = (framepos_t) floor ((double) start / one_second) * one_second;
 		}
 		break;
 
 	case SnapToMinutes:
 		if (((direction == 0) && (start % one_minute > one_minute / 2)) || (direction > 0)) {
-			start = (nframes64_t) ceil ((double) start / one_minute) * one_minute;
+			start = (framepos_t) ceil ((double) start / one_minute) * one_minute;
 		} else {
-			start = (nframes64_t) floor ((double) start / one_minute) * one_minute;
+			start = (framepos_t) floor ((double) start / one_minute) * one_minute;
 		}
 		break;
 
@@ -2886,8 +2886,8 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 	case SnapToRegionBoundary:
 		if (!region_boundary_cache.empty()) {
 
-			vector<nframes64_t>::iterator prev = region_boundary_cache.end ();
-			vector<nframes64_t>::iterator next = region_boundary_cache.end ();
+			vector<framepos_t>::iterator prev = region_boundary_cache.end ();
+			vector<framepos_t>::iterator next = region_boundary_cache.end ();
 
 			if (direction > 0) {
 				next = std::upper_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start);
@@ -2900,8 +2900,8 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 				prev--;
 			}
 
-			nframes64_t const p = (prev == region_boundary_cache.end()) ? region_boundary_cache.front () : *prev;
-			nframes64_t const n = (next == region_boundary_cache.end()) ? region_boundary_cache.back () : *next;
+			framepos_t const p = (prev == region_boundary_cache.end()) ? region_boundary_cache.front () : *prev;
+			framepos_t const n = (next == region_boundary_cache.end()) ? region_boundary_cache.back () : *next;
 
 			if (start > (p + n) / 2) {
 				start = n;
@@ -4012,7 +4012,7 @@ Editor::playlist_selector () const
 }
 
 Evoral::MusicalTime
-Editor::get_grid_type_as_beats (bool& success, nframes64_t position)
+Editor::get_grid_type_as_beats (bool& success, framepos_t position)
 {
 	success = true;
 
@@ -4091,10 +4091,10 @@ Editor::get_grid_type_as_beats (bool& success, nframes64_t position)
 	return 0.0;
 }
 
-nframes64_t
-Editor::get_nudge_distance (nframes64_t pos, nframes64_t& next)
+framecnt_t
+Editor::get_nudge_distance (framepos_t pos, framecnt_t& next)
 {
-	nframes64_t ret;
+	framecnt_t ret;
 
 	ret = nudge_clock.current_duration (pos);
 	next = ret + 1; /* XXXX fix me */
@@ -4139,7 +4139,7 @@ Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
 }
 
 bool
-Editor::audio_region_selection_covers (nframes64_t where)
+Editor::audio_region_selection_covers (framepos_t where)
 {
 	for (RegionSelection::iterator a = selection->regions.begin(); a != selection->regions.end(); ++a) {
 		if ((*a)->region()->covers (where)) {
@@ -4370,7 +4370,7 @@ Editor::on_key_release_event (GdkEventKey* ev)
  *  @param frame New x origin.
  */
 void
-Editor::reset_x_origin (nframes64_t frame)
+Editor::reset_x_origin (framepos_t frame)
 {
 	queue_visual_change (frame);
 }
@@ -4388,7 +4388,7 @@ Editor::reset_zoom (double fpu)
 }
 
 void
-Editor::reposition_and_zoom (nframes64_t frame, double fpu)
+Editor::reposition_and_zoom (framepos_t frame, double fpu)
 {
 	reset_x_origin (frame);
 	reset_zoom (fpu);
@@ -4522,7 +4522,7 @@ Editor::post_zoom ()
 {
 	// convert fpu to frame count
 
-	nframes64_t frames = (nframes64_t) floor (frames_per_unit * _canvas_width);
+	framepos_t frames = (framepos_t) floor (frames_per_unit * _canvas_width);
 
 	if (frames_per_unit != zoom_range_clock.current_duration()) {
 		zoom_range_clock.set (frames);
@@ -4549,7 +4549,7 @@ Editor::post_zoom ()
 }
 
 void
-Editor::queue_visual_change (nframes64_t where)
+Editor::queue_visual_change (framepos_t where)
 {
 	pending_visual_change.add (VisualChange::TimeOrigin);
 	pending_visual_change.time_origin = where;
@@ -4641,11 +4641,11 @@ Editor::sort_track_selection (TrackViewList* sel)
 	}
 }
 
-nframes64_t
+framepos_t
 Editor::get_preferred_edit_position (bool ignore_playhead)
 {
 	bool ignored;
-	nframes64_t where = 0;
+	framepos_t where = 0;
 	EditPoint ep = _edit_point;
 
 	if (entered_marker) {
@@ -4690,7 +4690,7 @@ Editor::get_preferred_edit_position (bool ignore_playhead)
 }
 
 void
-Editor::set_loop_range (nframes64_t start, nframes64_t end, string cmd)
+Editor::set_loop_range (framepos_t start, framepos_t end, string cmd)
 {
 	if (!_session) return;
 
@@ -4717,7 +4717,7 @@ Editor::set_loop_range (nframes64_t start, nframes64_t end, string cmd)
 }
 
 void
-Editor::set_punch_range (nframes64_t start, nframes64_t end, string cmd)
+Editor::set_punch_range (framepos_t start, framepos_t end, string cmd)
 {
 	if (!_session) return;
 
@@ -4750,7 +4750,7 @@ Editor::set_punch_range (nframes64_t start, nframes64_t end, string cmd)
  *  @param ts Tracks to look on; if this is empty, all tracks are examined.
  */
 void
-Editor::get_regions_at (RegionSelection& rs, nframes64_t where, const TrackViewList& ts) const
+Editor::get_regions_at (RegionSelection& rs, framepos_t where, const TrackViewList& ts) const
 {
 	const TrackViewList* tracks;
 
@@ -4769,7 +4769,7 @@ Editor::get_regions_at (RegionSelection& rs, nframes64_t where, const TrackViewL
 			if ((tr = rtv->track()) && ((pl = tr->playlist()))) {
 
 				Playlist::RegionList* regions = pl->regions_at (
-						(nframes64_t) floor ( (double)where * tr->speed()));
+						(framepos_t) floor ( (double)where * tr->speed()));
 
 				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 					RegionView* rv = rtv->view()->find_view (*i);
@@ -4785,7 +4785,7 @@ Editor::get_regions_at (RegionSelection& rs, nframes64_t where, const TrackViewL
 }
 
 void
-Editor::get_regions_after (RegionSelection& rs, nframes64_t where, const TrackViewList& ts) const
+Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackViewList& ts) const
 {
 	const TrackViewList* tracks;
 
@@ -4858,7 +4858,7 @@ Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered, bool al
 
 		if (!tracks.empty()) {
 			/* now find regions that are at the edit position on those tracks */
-			nframes64_t const where = get_preferred_edit_position ();
+			framepos_t const where = get_preferred_edit_position ();
 			get_regions_at (rs, where, tracks);
 		}
 	}
@@ -5368,7 +5368,7 @@ Editor::horizontal_scroll_right_release ()
 void
 Editor::reset_x_origin_to_follow_playhead ()
 {
-	nframes64_t const frame = playhead_cursor->current_frame;
+	framepos_t const frame = playhead_cursor->current_frame;
 
 	if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
 
@@ -5384,7 +5384,7 @@ Editor::reset_x_origin_to_follow_playhead ()
 						
 			if (frame < leftmost_frame) {
 				/* moving left */
-				nframes64_t l = 0;
+				framepos_t l = 0;
 				if (_session->transport_rolling()) {
 					/* rolling; end up with the playhead at the right of the page */
 					l = frame - current_page_frames ();
@@ -5438,7 +5438,7 @@ Editor::super_rapid_screen_update ()
 
 	/* PLAYHEAD AND VIEWPORT */
 
-	nframes64_t const frame = _session->audible_frame();
+	framepos_t const frame = _session->audible_frame();
 
 	/* There are a few reasons why we might not update the playhead / viewport stuff:
 	 *

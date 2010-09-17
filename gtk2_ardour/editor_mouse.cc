@@ -84,7 +84,7 @@ using namespace Editing;
 using Gtkmm2ext::Keyboard;
 
 bool
-Editor::mouse_frame (nframes64_t& where, bool& in_track_canvas) const
+Editor::mouse_frame (framepos_t& where, bool& in_track_canvas) const
 {
 	int x, y;
 	double wx, wy;
@@ -117,7 +117,7 @@ Editor::mouse_frame (nframes64_t& where, bool& in_track_canvas) const
 	return true;
 }
 
-nframes64_t
+framepos_t
 Editor::event_frame (GdkEvent const * event, double* pcx, double* pcy) const
 {
 	double cx, cy;
@@ -1832,7 +1832,7 @@ Editor::left_automation_track ()
 }
 
 void
-Editor::scrub (nframes64_t frame, double current_x)
+Editor::scrub (framepos_t frame, double current_x)
 {
 	double delta;
 
@@ -2065,34 +2065,34 @@ Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 			speed = rtv->track()->speed();
 		}
 
-		nframes64_t where = get_preferred_edit_position();
+		framepos_t where = get_preferred_edit_position();
 
 		if (where >= 0) {
 
 			if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
 
-				align_region (rv.region(), SyncPoint, (nframes64_t) (where * speed));
+				align_region (rv.region(), SyncPoint, (framepos_t) (where * speed));
 
 			} else if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-				align_region (rv.region(), End, (nframes64_t) (where * speed));
+				align_region (rv.region(), End, (framepos_t) (where * speed));
 
 			} else {
 
-				align_region (rv.region(), Start, (nframes64_t) (where * speed));
+				align_region (rv.region(), Start, (framepos_t) (where * speed));
 			}
 		}
 	}
 }
 
 void
-Editor::show_verbose_time_cursor (nframes64_t frame, double offset, double xpos, double ypos)
+Editor::show_verbose_time_cursor (framepos_t frame, double offset, double xpos, double ypos)
 {
 	char buf[128];
 	Timecode::Time timecode;
 	BBT_Time bbt;
 	int hours, mins;
-	nframes64_t frame_rate;
+	framepos_t frame_rate;
 	float secs;
 
 	if (_session == 0) {
@@ -2143,14 +2143,14 @@ Editor::show_verbose_time_cursor (nframes64_t frame, double offset, double xpos,
 }
 
 void
-Editor::show_verbose_duration_cursor (nframes64_t start, nframes64_t end, double offset, double xpos, double ypos)
+Editor::show_verbose_duration_cursor (framepos_t start, framepos_t end, double offset, double xpos, double ypos)
 {
 	char buf[128];
 	Timecode::Time timecode;
 	BBT_Time sbbt;
 	BBT_Time ebbt;
 	int hours, mins;
-	nframes64_t distance, frame_rate;
+	framepos_t distance, frame_rate;
 	float secs;
 	Meter meter_at_start(_session->tempo_map().meter_at(start));
 
@@ -2251,7 +2251,7 @@ Editor::cancel_selection ()
 
 
 void
-Editor::single_contents_trim (RegionView& rv, nframes64_t frame_delta, bool left_direction, bool swap_direction)
+Editor::single_contents_trim (RegionView& rv, framepos_t frame_delta, bool left_direction, bool swap_direction)
 {
 	boost::shared_ptr<Region> region (rv.region());
 
@@ -2259,7 +2259,7 @@ Editor::single_contents_trim (RegionView& rv, nframes64_t frame_delta, bool left
 		return;
 	}
 
-	nframes64_t new_bound;
+	framepos_t new_bound;
 
 	double speed = 1.0;
 	TimeAxisView* tvp = clicked_axisview;
@@ -2271,24 +2271,24 @@ Editor::single_contents_trim (RegionView& rv, nframes64_t frame_delta, bool left
 
 	if (left_direction) {
 		if (swap_direction) {
-			new_bound = (nframes64_t) (region->position()/speed) + frame_delta;
+			new_bound = (framepos_t) (region->position()/speed) + frame_delta;
 		} else {
-			new_bound = (nframes64_t) (region->position()/speed) - frame_delta;
+			new_bound = (framepos_t) (region->position()/speed) - frame_delta;
 		}
 	} else {
 		if (swap_direction) {
-			new_bound = (nframes64_t) (region->position()/speed) - frame_delta;
+			new_bound = (framepos_t) (region->position()/speed) - frame_delta;
 		} else {
-			new_bound = (nframes64_t) (region->position()/speed) + frame_delta;
+			new_bound = (framepos_t) (region->position()/speed) + frame_delta;
 		}
 	}
 
-	region->trim_start ((nframes64_t) (new_bound * speed), this);
+	region->trim_start ((framepos_t) (new_bound * speed), this);
 	rv.region_changed (PropertyChange (ARDOUR::Properties::start));
 }
 
 void
-Editor::single_start_trim (RegionView& rv, nframes64_t new_bound, bool no_overlap)
+Editor::single_start_trim (RegionView& rv, framepos_t new_bound, bool no_overlap)
 {
 	boost::shared_ptr<Region> region (rv.region());
 
@@ -2304,9 +2304,9 @@ Editor::single_start_trim (RegionView& rv, nframes64_t new_bound, bool no_overla
 		speed = tv->track()->speed();
 	}
 
-	nframes64_t pre_trim_first_frame = region->first_frame();
+	framepos_t pre_trim_first_frame = region->first_frame();
 
-	region->trim_front ((nframes64_t) (new_bound * speed), this);
+	region->trim_front ((framepos_t) (new_bound * speed), this);
 
 	if (no_overlap) {
 		//Get the next region on the left of this region and shrink/expand it.
@@ -2331,7 +2331,7 @@ Editor::single_start_trim (RegionView& rv, nframes64_t new_bound, bool no_overla
 }
 
 void
-Editor::single_end_trim (RegionView& rv, nframes64_t new_bound, bool no_overlap)
+Editor::single_end_trim (RegionView& rv, framepos_t new_bound, bool no_overlap)
 {
 	boost::shared_ptr<Region> region (rv.region());
 
@@ -2347,9 +2347,9 @@ Editor::single_end_trim (RegionView& rv, nframes64_t new_bound, bool no_overlap)
 		speed = tv->track()->speed();
 	}
 
-	nframes64_t pre_trim_last_frame = region->last_frame();
+	framepos_t pre_trim_last_frame = region->last_frame();
 
-	region->trim_end ((nframes64_t) (new_bound * speed), this);
+	region->trim_end ((framepos_t) (new_bound * speed), this);
 
 	if (no_overlap) {
 		//Get the next region on the right of this region and shrink/expand it.
@@ -2378,7 +2378,7 @@ Editor::single_end_trim (RegionView& rv, nframes64_t new_bound, bool no_overlap)
 
 
 void
-Editor::point_trim (GdkEvent* event, nframes64_t new_bound)
+Editor::point_trim (GdkEvent* event, framepos_t new_bound)
 {
 	RegionView* rv = clicked_regionview;
 
@@ -2479,7 +2479,7 @@ Editor::hide_marker (ArdourCanvas::Item* item, GdkEvent* /*event*/)
 
 
 void
-Editor::reposition_zoom_rect (nframes64_t start, nframes64_t end)
+Editor::reposition_zoom_rect (framepos_t start, framepos_t end)
 {
 	double x1 = frame_to_pixel (start);
 	double x2 = frame_to_pixel (end);
@@ -2518,7 +2518,7 @@ Editor::mouse_rename_region (ArdourCanvas::Item* /*item*/, GdkEvent* /*event*/)
 
 
 void
-Editor::mouse_brush_insert_region (RegionView* rv, nframes64_t pos)
+Editor::mouse_brush_insert_region (RegionView* rv, framepos_t pos)
 {
 	/* no brushing without a useful snap setting */
 
@@ -2554,7 +2554,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes64_t pos)
 
         playlist->clear_changes ();
 	boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region()));
-        playlist->add_region (new_region, (nframes64_t) (pos * speed));
+        playlist->add_region (new_region, (framepos_t) (pos * speed));
 	_session->add_command (new StatefulDiffCommand (playlist));
 
 	// playlist is frozen, so we have to update manually XXX this is disgusting

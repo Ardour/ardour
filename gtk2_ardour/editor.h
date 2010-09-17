@@ -142,17 +142,17 @@ struct EditorCursor {
 	Editor&               editor;
 	ArdourCanvas::Points  points;
 	ArdourCanvas::Line    canvas_item;
-	nframes64_t           current_frame;
+	framepos_t           current_frame;
 	double		  length;
 
 	EditorCursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
 	~EditorCursor ();
 
-	void set_position (nframes64_t);
+	void set_position (framepos_t);
 	void set_length (double units);
 	void set_y_axis (double position);
 
-        PBD::Signal1<void, nframes64_t> PositionChanged;
+        PBD::Signal1<void, framepos_t> PositionChanged;
 };
 
 class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
@@ -167,10 +167,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void             first_idle ();
 	virtual bool     have_idled () const { return _have_idled; }
 
-	nframes64_t leftmost_position() const { return leftmost_frame; }
+	framepos_t leftmost_position() const { return leftmost_frame; }
 
-	nframes64_t current_page_frames() const {
-		return (nframes64_t) floor (_canvas_width * frames_per_unit);
+	framecnt_t current_page_frames() const {
+		return (framecnt_t) floor (_canvas_width * frames_per_unit);
 	}
 
 	double canvas_height () const {
@@ -236,11 +236,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* undo related */
 
-	nframes64_t unit_to_frame (double unit) const {
-		return (nframes64_t) rint (unit * frames_per_unit);
+	framepos_t unit_to_frame (double unit) const {
+		return (framepos_t) rint (unit * frames_per_unit);
 	}
 
-	double frame_to_unit (nframes64_t frame) const {
+	double frame_to_unit (framepos_t frame) const {
 		return rint ((double) frame / (double) frames_per_unit);
 	}
 
@@ -255,7 +255,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	   xscroll_adjustment.
 	*/
 
-	nframes64_t pixel_to_frame (double pixel) const {
+	framepos_t pixel_to_frame (double pixel) const {
 
 		/* pixel can be less than zero when motion events
 		   are processed. since we've already run the world->canvas
@@ -264,13 +264,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		*/
 
 		if (pixel >= 0) {
-			return (nframes64_t) rint (pixel * frames_per_unit * GNOME_CANVAS(track_canvas->gobj())->pixels_per_unit);
+			return (framepos_t) rint (pixel * frames_per_unit * GNOME_CANVAS(track_canvas->gobj())->pixels_per_unit);
 		} else {
 			return 0;
 		}
 	}
 
-	gulong frame_to_pixel (nframes64_t frame) const {
+	gulong frame_to_pixel (framepos_t frame) const {
 		return (gulong) rint ((frame / (frames_per_unit * GNOME_CANVAS(track_canvas->gobj())->pixels_per_unit)));
 	}
 
@@ -340,8 +340,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 
-	nframes64_t get_nudge_distance (nframes64_t pos, nframes64_t& next);
-	Evoral::MusicalTime get_grid_type_as_beats (bool& success, nframes64_t position);
+	framecnt_t get_nudge_distance (framepos_t pos, framecnt_t& next);
+	Evoral::MusicalTime get_grid_type_as_beats (bool& success, framepos_t position);
 
 	void nudge_forward (bool next, bool force_playhead);
 	void nudge_backward (bool next, bool force_playhead);
@@ -394,13 +394,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void maximise_editing_space();
 	void restore_editing_space();
 
-	void reset_x_origin (nframes64_t);
+	void reset_x_origin (framepos_t);
 	void reset_x_origin_to_follow_playhead ();
 	void reset_y_origin (double);
 	void reset_zoom (double);
-	void reposition_and_zoom (nframes64_t, double);
+	void reposition_and_zoom (framepos_t, double);
 
-	nframes64_t get_preferred_edit_position (bool ignore_playhead = false);
+	framepos_t get_preferred_edit_position (bool ignore_playhead = false);
 
 	bool update_mouse_speed ();
 	bool decelerate_mouse_speed ();
@@ -422,23 +422,23 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	int get_regionview_count_from_region_list (boost::shared_ptr<ARDOUR::Region>);
 
-	void do_import (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, nframes64_t&);
-	void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode,  nframes64_t&);
+	void do_import (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, framepos_t&);
+	void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode,  framepos_t&);
 
 	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
 
 	void show_verbose_canvas_cursor_with (const std::string& txt);
 	void hide_verbose_canvas_cursor();
 
-	void center_screen (nframes64_t);
+	void center_screen (framepos_t);
 
 	TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const;
 	Gtkmm2ext::TearOff* mouse_mode_tearoff () const { return _mouse_mode_tearoff; }
 	Gtkmm2ext::TearOff* tools_tearoff () const { return _tools_tearoff; }
 
-	void snap_to (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
-	void snap_to_with_modifier (nframes64_t& first, GdkEvent const *, int32_t direction = 0, bool for_mark = false);
-	void snap_to (nframes64_t& first, nframes64_t& last, int32_t direction = 0, bool for_mark = false);
+	void snap_to (framepos_t& first, int32_t direction = 0, bool for_mark = false);
+	void snap_to_with_modifier (framepos_t& first, GdkEvent const *, int32_t direction = 0, bool for_mark = false);
+	void snap_to (framepos_t& first, framepos_t& last, int32_t direction = 0, bool for_mark = false);
 
 	void begin_reversible_command (std::string cmd_name);
 	void commit_reversible_command ();
@@ -476,7 +476,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
   protected:
 	void map_transport_state ();
-	void map_position_change (nframes64_t);
+	void map_position_change (framepos_t);
 
 	void on_realize();
 
@@ -487,7 +487,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool                 constructed;
 
 	// to keep track of the playhead position for control_scroll
-	boost::optional<nframes64_t> _control_scroll_target;
+	boost::optional<framepos_t> _control_scroll_target;
 
 	PlaylistSelector* _playlist_selector;
 
@@ -496,7 +496,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	struct VisualState {
 	    double              y_position;
 	    double              frames_per_unit;
-	    nframes64_t         leftmost_frame;
+	    framepos_t         leftmost_frame;
 	    Editing::ZoomFocus  zoom_focus;
 	    std::list<TAVState> track_states;
 	};
@@ -516,7 +516,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void cancel_visual_state_op (uint32_t n);
 	bool end_visual_state_op (uint32_t n);
 
-	nframes64_t leftmost_frame;
+	framepos_t leftmost_frame;
 	double      frames_per_unit;
 	Editing::ZoomFocus zoom_focus;
 
@@ -588,7 +588,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	    void hide();
 	    void show ();
 	    void set_name (const std::string&);
-	    void set_position (nframes64_t start, nframes64_t end = 0);
+	    void set_position (framepos_t start, framepos_t end = 0);
 	    void set_color_rgba (uint32_t);
 	};
 
@@ -601,7 +601,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
-	void mouse_add_new_marker (nframes64_t where, bool is_cd=false, bool is_xrun=false);
+	void mouse_add_new_marker (framepos_t where, bool is_cd=false, bool is_xrun=false);
 	bool choose_new_marker_name(std::string &name);
 	void update_cd_marker_display ();
 	void ensure_cd_marker_updated (LocationMarkers * lam, ARDOUR::Location * location);
@@ -663,12 +663,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Menu * track_edit_playlist_submenu;
 	Gtk::Menu * track_selection_edit_playlist_submenu;
 
-	void popup_track_context_menu (int, int, ItemType, bool, nframes64_t);
-	Gtk::Menu* build_track_context_menu (nframes64_t);
-	Gtk::Menu* build_track_bus_context_menu (nframes64_t);
-	Gtk::Menu* build_track_region_context_menu (nframes64_t frame);
-	Gtk::Menu* build_track_crossfade_context_menu (nframes64_t);
-	Gtk::Menu* build_track_selection_context_menu (nframes64_t);
+	void popup_track_context_menu (int, int, ItemType, bool, framepos_t);
+	Gtk::Menu* build_track_context_menu (framepos_t);
+	Gtk::Menu* build_track_bus_context_menu (framepos_t);
+	Gtk::Menu* build_track_region_context_menu (framepos_t frame);
+	Gtk::Menu* build_track_crossfade_context_menu (framepos_t);
+	Gtk::Menu* build_track_selection_context_menu (framepos_t);
 	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_region_context_items (StreamView*, std::list<boost::shared_ptr<ARDOUR::Region> >, Gtk::Menu_Helpers::MenuList&,
@@ -784,7 +784,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void compute_fixed_ruler_scale (); //calculates the RulerScale of the fixed rulers
 	void update_fixed_rulers ();
 	void update_tempo_based_rulers ();
-	void popup_ruler_menu (nframes64_t where = 0, ItemType type = RegionItem);
+	void popup_ruler_menu (framepos_t where = 0, ItemType type = RegionItem);
 	void update_ruler_visibility ();
 	void set_ruler_visible (RulerType, bool);
 	void toggle_ruler_visibility (RulerType rt);
@@ -845,7 +845,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	gint bbt_nmarks;
 	uint32_t bbt_bar_helper_on;
 	uint32_t bbt_accent_modulo;
-	void compute_bbt_ruler_scale (nframes64_t lower, nframes64_t upper);
+	void compute_bbt_ruler_scale (framepos_t lower, framepos_t upper);
 
 	gint metric_get_timecode (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	gint metric_get_bbt (GtkCustomRulerMark **, gdouble, gdouble, gint);
@@ -895,7 +895,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	EditorCursor*        playhead_cursor;
 	ArdourCanvas::Group* cursor_group;
 
-	nframes64_t get_region_boundary (nframes64_t pos, int32_t dir, bool with_selection, bool only_onscreen);
+	framepos_t get_region_boundary (framepos_t pos, int32_t dir, bool with_selection, bool only_onscreen);
 
 	void    cursor_to_region_boundary (bool with_selection, int32_t dir);
 	void    cursor_to_next_region_boundary (bool with_selection);
@@ -963,7 +963,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void control_scroll (float);
 	void access_action (std::string,std::string);
-	bool deferred_control_scroll (nframes64_t);
+	bool deferred_control_scroll (framepos_t);
 	sigc::connection control_scroll_connection;
 
 	gdouble get_trackview_group_vertical_offset () const { return vertical_adjustment.get_value () - canvas_timebars_vsize;}
@@ -984,7 +984,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		};
 
 		Type pending;
-		nframes64_t time_origin;
+		framepos_t time_origin;
 		double frames_per_unit;
 		double y_origin;
 
@@ -1002,7 +1002,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	static int _idle_visual_changer (void *arg);
 	int idle_visual_changer ();
 
-	void queue_visual_change (nframes64_t);
+	void queue_visual_change (framepos_t);
 	void queue_visual_change (double);
 	void queue_visual_change_y (double);
 	void ensure_visual_change_idle_handler ();
@@ -1017,15 +1017,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	static void build_cursors ();
 
 	sigc::connection super_rapid_screen_update_connection;
-	nframes64_t last_update_frame;
-	void center_screen_internal (nframes64_t, float);
+	framepos_t last_update_frame;
+	void center_screen_internal (framepos_t, float);
 
 	void super_rapid_screen_update ();
 
 	void session_going_away ();
 
-	nframes64_t cut_buffer_start;
-	nframes64_t cut_buffer_length;
+	framepos_t cut_buffer_start;
+	framecnt_t cut_buffer_length;
 
 	bool typed_event (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
@@ -1040,7 +1040,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void register_actions ();
 
-	int ensure_cursor (nframes64_t* pos);
+	int ensure_cursor (framepos_t* pos);
 
 	void cut_copy (Editing::CutCopyOp);
 	bool can_cut_copy () const;
@@ -1050,7 +1050,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void cut_copy_midi (Editing::CutCopyOp);
 
 	void mouse_paste ();
-	void paste_internal (nframes64_t position, float times);
+	void paste_internal (framepos_t position, float times);
 
 	/* EDITING OPERATIONS */
 
@@ -1065,18 +1065,18 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         void change_region_layering_order (ARDOUR::framepos_t);
 	void lower_region ();
 	void lower_region_to_bottom ();
-	void split_regions_at (nframes64_t, RegionSelection&);
+	void split_regions_at (framepos_t, RegionSelection&);
 	void split_region_at_transients ();
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret);
 	void crop_region_to_selection ();
-	void crop_region_to (nframes64_t start, nframes64_t end);
-	void set_sync_point (nframes64_t, const RegionSelection&);
+	void crop_region_to (framepos_t start, framepos_t end);
+	void set_sync_point (framepos_t, const RegionSelection&);
 	void set_region_sync_from_edit_point ();
 	void remove_region_sync();
-	void align_selection (ARDOUR::RegionPoint, nframes64_t position, const RegionSelection&);
-	void align_selection_relative (ARDOUR::RegionPoint point, nframes64_t position, const RegionSelection&);
-	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes64_t position);
-	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, nframes64_t position);
+	void align_selection (ARDOUR::RegionPoint, framepos_t position, const RegionSelection&);
+	void align_selection_relative (ARDOUR::RegionPoint point, framepos_t position, const RegionSelection&);
+	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, framepos_t position);
+	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, framepos_t position);
 	void remove_selected_regions ();
 	void remove_clicked_region ();
 	void edit_region ();
@@ -1100,14 +1100,14 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void fork_region ();
 
 	void do_insert_time ();
-	void insert_time (nframes64_t, nframes64_t, Editing::InsertTimeOption, bool, bool, bool, bool, bool);
+	void insert_time (framepos_t, framecnt_t, Editing::InsertTimeOption, bool, bool, bool, bool, bool);
 
 	void tab_to_transient (bool forward);
 
 	void use_region_as_bar ();
 	void use_range_as_bar ();
 
-	void define_one_bar (nframes64_t start, nframes64_t end);
+	void define_one_bar (framepos_t start, framepos_t end);
 
 	void audition_region_from_region_list ();
 	void hide_region_from_region_list ();
@@ -1152,8 +1152,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void zoom_to_region (bool both_axes);
 	void temporal_zoom_session ();
 	void temporal_zoom (gdouble scale);
-	void temporal_zoom_by_frame (nframes64_t start, nframes64_t end, const std::string & op);
-	void temporal_zoom_to_frame (bool coarser, nframes64_t frame);
+	void temporal_zoom_by_frame (framepos_t start, framepos_t end, const std::string & op);
+	void temporal_zoom_to_frame (bool coarser, framepos_t frame);
 
 	void amplitude_zoom (gdouble scale);
 	void amplitude_zoom_step (bool in);
@@ -1174,19 +1174,19 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	SoundFileOmega* sfbrowser;
 
-	void bring_in_external_audio (Editing::ImportMode mode,  nframes64_t& pos);
+	void bring_in_external_audio (Editing::ImportMode mode,  framepos_t& pos);
 
-	bool  idle_drop_paths  (std::vector<std::string> paths, nframes64_t frame, double ypos);
-	void  drop_paths_part_two  (const std::vector<std::string>& paths, nframes64_t frame, double ypos);
+	bool  idle_drop_paths  (std::vector<std::string> paths, framepos_t frame, double ypos);
+	void  drop_paths_part_two  (const std::vector<std::string>& paths, framepos_t frame, double ypos);
 
-	int  import_sndfiles (std::vector<std::string> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
+	int  import_sndfiles (std::vector<std::string> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, framepos_t& pos,
 			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool);
 	int  embed_sndfiles (std::vector<std::string> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode,
-			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&);
+			     framepos_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&);
 
-	int add_sources (std::vector<std::string> paths, ARDOUR::SourceList& sources, nframes64_t& pos, Editing::ImportMode,
+	int add_sources (std::vector<std::string> paths, ARDOUR::SourceList& sources, framepos_t& pos, Editing::ImportMode,
 			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool add_channel_suffix);
-	int finish_bringing_in_material (boost::shared_ptr<ARDOUR::Region> region, uint32_t, uint32_t,  nframes64_t& pos, Editing::ImportMode mode,
+	int finish_bringing_in_material (boost::shared_ptr<ARDOUR::Region> region, uint32_t, uint32_t,  framepos_t& pos, Editing::ImportMode mode,
 				      boost::shared_ptr<ARDOUR::Track>& existing_track);
 
 	boost::shared_ptr<ARDOUR::AudioTrack> get_nth_selected_audio_track (int nth) const;
@@ -1200,7 +1200,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	struct EditorImportStatus : public ARDOUR::ImportStatus {
 	    Editing::ImportMode mode;
-	    nframes64_t pos;
+	    framepos_t pos;
 	    int target_tracks;
 	    int target_regions;
 	    boost::shared_ptr<ARDOUR::Track> track;
@@ -1257,7 +1257,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_selection_from_loop ();
 	void set_selection_from_region ();
 
-	void add_location_mark (nframes64_t where);
+	void add_location_mark (framepos_t where);
 	void add_location_from_audio_region ();
 	void add_locations_from_audio_region ();
 	void add_location_from_selection ();
@@ -1269,8 +1269,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_loop_from_region (bool play);
 	void set_punch_from_edit_range ();
 
-	void set_loop_range (nframes64_t start, nframes64_t end, std::string cmd);
-	void set_punch_range (nframes64_t start, nframes64_t end, std::string cmd);
+	void set_loop_range (framepos_t start, framepos_t end, std::string cmd);
+	void set_punch_range (framepos_t start, framepos_t end, std::string cmd);
 
 	void add_location_from_playhead_cursor ();
 	bool select_new_marker;
@@ -1282,12 +1282,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	int scrubbing_direction;
 	int scrub_reversals;
 	int scrub_reverse_distance;
-	void scrub (nframes64_t, double);
+	void scrub (framepos_t, double);
 
 	void keyboard_selection_begin ();
 	void keyboard_selection_finish (bool add);
 	bool have_pending_keyboard_selection;
-	nframes64_t pending_keyboard_selection_start;
+	framepos_t pending_keyboard_selection_start;
 
 	boost::shared_ptr<ARDOUR::Region> select_region_for_operation (int dir, TimeAxisView **tv);
 	void extend_selection_to_end_of_region (bool next);
@@ -1337,11 +1337,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void remove_gain_control_point (ArdourCanvas::Item*, GdkEvent*);
 	void remove_control_point (ArdourCanvas::Item*, GdkEvent*);
 
-	void mouse_brush_insert_region (RegionView*, nframes64_t pos);
-	void brush (nframes64_t);
+	void mouse_brush_insert_region (RegionView*, framepos_t pos);
+	void brush (framepos_t);
 
-	void show_verbose_time_cursor (nframes64_t frame, double offset = 0, double xpos=-1, double ypos=-1);
-	void show_verbose_duration_cursor (nframes64_t start, nframes64_t end, double offset = 0, double xpos=-1, double ypos=-1);
+	void show_verbose_time_cursor (framepos_t frame, double offset = 0, double xpos=-1, double ypos=-1);
+	void show_verbose_duration_cursor (framepos_t start, framepos_t end, double offset = 0, double xpos=-1, double ypos=-1);
 	double clamp_verbose_cursor_x (double);
 	double clamp_verbose_cursor_y (double);
 
@@ -1439,8 +1439,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void new_tempo_section ();
 
-	void mouse_add_new_tempo_event (nframes64_t where);
-	void mouse_add_new_meter_event (nframes64_t where);
+	void mouse_add_new_tempo_event (framepos_t where);
+	void mouse_add_new_meter_event (framepos_t where);
 
 	void remove_tempo_marker (ArdourCanvas::Item*);
 	void remove_meter_marker (ArdourCanvas::Item*);
@@ -1623,7 +1623,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void region_selection_op (void (ARDOUR::Region::*pmf)(void*), void*);
 	void region_selection_op (void (ARDOUR::Region::*pmf)(bool), bool);
 
-	bool audio_region_selection_covers (nframes64_t where);
+	bool audio_region_selection_covers (framepos_t where);
 
 	/* transport range select process */
 
@@ -1651,14 +1651,14 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* object rubberband select process */
 
-	bool select_all_within (nframes64_t, nframes64_t, double, double, TrackViewList const &, Selection::Operation, bool);
+	bool select_all_within (framepos_t, framepos_t, double, double, TrackViewList const &, Selection::Operation, bool);
 
 	ArdourCanvas::SimpleRect   *rubberband_rect;
 
 	/* mouse zoom process */
 
 	ArdourCanvas::SimpleRect   *zoom_rect;
-	void reposition_zoom_rect (nframes64_t start, nframes64_t end);
+	void reposition_zoom_rect (framepos_t start, framepos_t end);
 
 	EditorRouteGroups* _route_groups;
 	EditorRoutes* _routes;
@@ -1685,7 +1685,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	int last_autoscroll_x;
 	int last_autoscroll_y;
 	uint32_t autoscroll_cnt;
-	nframes64_t autoscroll_x_distance;
+	framecnt_t autoscroll_x_distance;
 	double autoscroll_y_distance;
 
 	static gint _autoscroll_canvas (void *);
@@ -1694,10 +1694,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void stop_canvas_autoscroll ();
 
 	/* trimming */
-	void point_trim (GdkEvent *, nframes64_t);
-	void single_contents_trim (RegionView&, nframes64_t, bool, bool);
-	void single_start_trim (RegionView&, nframes64_t, bool);
-	void single_end_trim (RegionView&, nframes64_t, bool);
+	void point_trim (GdkEvent *, framepos_t);
+	void single_contents_trim (RegionView&, framepos_t, bool, bool);
+	void single_start_trim (RegionView&, framepos_t, bool);
+	void single_end_trim (RegionView&, framepos_t, bool);
 
 	void thaw_region_after_trim (RegionView& rv);
 
@@ -1808,11 +1808,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void duplicate_dialog (bool with_dialog);
 
-	nframes64_t event_frame (GdkEvent const *, double* px = 0, double* py = 0) const;
+	framepos_t event_frame (GdkEvent const *, double* px = 0, double* py = 0) const;
 
 	/* returns false if mouse pointer is not in track or marker canvas
 	 */
-	bool mouse_frame (nframes64_t&, bool& in_track_canvas) const;
+	bool mouse_frame (framepos_t&, bool& in_track_canvas) const;
 
 	/* "whats mine is yours" */
 
@@ -1975,10 +1975,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void selected_marker_moved (ARDOUR::Location*);
 
-	bool get_edit_op_range (nframes64_t& start, nframes64_t& end) const;
+	bool get_edit_op_range (framepos_t& start, framepos_t& end) const;
 
-	void get_regions_at (RegionSelection&, nframes64_t where, const TrackViewList& ts) const;
-	void get_regions_after (RegionSelection&, nframes64_t where, const TrackViewList& ts) const;
+	void get_regions_at (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
+	void get_regions_after (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
 
 	void get_regions_for_action (RegionSelection&, bool allow_entered = false, bool allow_edit_position = true);
 
@@ -1989,8 +1989,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void select_next_route ();
 	void select_prev_route ();
 
-	void snap_to_internal (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
-	void timecode_snap_to_internal (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
+	void snap_to_internal (framepos_t& first, int32_t direction = 0, bool for_mark = false);
+	void timecode_snap_to_internal (framepos_t& first, int32_t direction = 0, bool for_mark = false);
 
 	RhythmFerret* rhythm_ferret;
 	BundleManager* _bundle_manager;

@@ -105,8 +105,8 @@ SMFSource::~SMFSource ()
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t const source_start,
-			  sframes_t start, nframes_t duration,
+SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, framepos_t const source_start,
+			  framepos_t start, nframes_t duration,
 			  MidiStateTracker* tracker) const
 {
 	int      ret  = 0;
@@ -174,7 +174,7 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t c
 		/* Note that we add on the source start time (in session frames) here so that ev_frame_time
 		   is in session frames.
 		*/
-		const sframes_t ev_frame_time = converter.to(time / (double)ppqn()) + source_start;
+		const framepos_t ev_frame_time = converter.to(time / (double)ppqn()) + source_start;
 
 		if (ev_frame_time < start + duration) {
 			destination.write (ev_frame_time, ev_type, ev_size, ev_buffer);
@@ -203,7 +203,7 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t c
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, sframes_t position, nframes_t duration)
+SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, framepos_t position, nframes_t duration)
 {
 	_write_data_count = 0;
 
@@ -313,7 +313,7 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 
 /** Append an event with a timestamp in frames (nframes_t) */
 void
-SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sframes_t position)
+SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, framepos_t position)
 {
 	assert(_writing);
 	if (ev.size() == 0)  {
@@ -349,7 +349,7 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sfr
 
 	_length_beats = max(_length_beats, ev_time_beats);
 
-	const sframes_t delta_time_frames = ev.time() - _last_ev_time_frames;
+	const framepos_t delta_time_frames = ev.time() - _last_ev_time_frames;
 	const double    delta_time_beats  = converter.from(delta_time_frames);
 	const uint32_t  delta_time_ticks  = (uint32_t)(lrint(delta_time_beats * (double)ppqn()));
 
@@ -385,7 +385,7 @@ SMFSource::set_state (const XMLNode& node, int version)
 }
 
 void
-SMFSource::mark_streaming_midi_write_started (NoteMode mode, sframes_t start_frame)
+SMFSource::mark_streaming_midi_write_started (NoteMode mode, framepos_t start_frame)
 {
 	Glib::Mutex::Lock lm (_lock);
 	MidiSource::mark_streaming_midi_write_started (mode, start_frame);

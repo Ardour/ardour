@@ -139,7 +139,7 @@ CoreAudioSource::safe_read (Sample* dst, nframes_t start, nframes_t cnt, AudioBu
 
 
 nframes_t
-CoreAudioSource::read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const
+CoreAudioSource::read_unlocked (Sample *dst, framepos_t start, nframes_t cnt) const
 {
 	nframes_t file_cnt;
 	AudioBufferList abl;

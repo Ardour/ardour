@@ -183,7 +183,7 @@ MidiSource::length (framepos_t pos) const
 }
 
 void
-MidiSource::update_length (sframes_t /*pos*/, sframes_t /*cnt*/)
+MidiSource::update_length (framepos_t /*pos*/, framecnt_t /*cnt*/)
 {
 	// You're not the boss of me!
 }
@@ -197,8 +197,8 @@ MidiSource::invalidate ()
 
 /** @param filtered A set of parameters whose MIDI messages will not be returned */
 nframes_t
-MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, sframes_t source_start,
-                       sframes_t start, nframes_t cnt,
+MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, framepos_t source_start,
+                       framepos_t start, nframes_t cnt,
                        MidiStateTracker* tracker,
 		       std::set<Evoral::Parameter> const & filtered) const
 {
@@ -226,7 +226,7 @@ MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, sframes_t source_start
 
 		// Read events up to end
 		for (; i != _model->end(); ++i) {
-			const sframes_t time_frames = converter.to(i->time());
+			const framecnt_t time_frames = converter.to(i->time());
 			if (time_frames < start + cnt) {
 				/* convert event times to session frames by adding on the source start position in session frames */
 				dst.write (time_frames + source_start, i->event_type(), i->size(), i->buffer());
@@ -252,7 +252,7 @@ MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, sframes_t source_start
 }
 
 nframes_t
-MidiSource::midi_write (MidiRingBuffer<nframes_t>& source, sframes_t source_start, nframes_t duration)
+MidiSource::midi_write (MidiRingBuffer<nframes_t>& source, framepos_t source_start, nframes_t duration)
 {
 	Glib::Mutex::Lock lm (_lock);
 	const nframes_t ret = write_unlocked (source, source_start, duration);
@@ -261,7 +261,7 @@ MidiSource::midi_write (MidiRingBuffer<nframes_t>& source, sframes_t source_star
 }
 
 void
-MidiSource::mark_streaming_midi_write_started (NoteMode mode, sframes_t start_frame)
+MidiSource::mark_streaming_midi_write_started (NoteMode mode, framepos_t start_frame)
 {
 	set_timeline_position(start_frame);
 

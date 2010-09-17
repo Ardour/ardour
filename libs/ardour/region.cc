@@ -804,7 +804,7 @@ Region::modify_front (nframes_t new_position, bool reset_fade, void *src)
 	if (new_position < end) { /* can't trim it zero or negative length */
 		
 		nframes_t newlen = 0;
-		nframes64_t delta = 0;
+		framepos_t delta = 0;
 
 		/* can't trim it back passed where source position zero is located */
 		
@@ -1444,11 +1444,11 @@ Region::uses_source (boost::shared_ptr<const Source> source) const
 	return false;
 }
 
-sframes_t
+framecnt_t
 Region::source_length(uint32_t n) const
 {
         assert (n < _sources.size());
-	return _sources[n]->length(_position - _start);
+	return _sources[n]->length (_position - _start);
 }
 
 bool

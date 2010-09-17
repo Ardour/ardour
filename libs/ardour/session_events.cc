@@ -78,21 +78,21 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 }
 
 void
-SessionEventManager::add_event (nframes64_t frame, SessionEvent::Type type, nframes64_t target_frame)
+SessionEventManager::add_event (framepos_t frame, SessionEvent::Type type, framepos_t target_frame)
 {
 	SessionEvent* ev = new SessionEvent (type, SessionEvent::Add, frame, target_frame, 0);
 	queue_event (ev);
 }
 
 void
-SessionEventManager::remove_event (nframes64_t frame, SessionEvent::Type type)
+SessionEventManager::remove_event (framepos_t frame, SessionEvent::Type type)
 {
 	SessionEvent* ev = new SessionEvent (type, SessionEvent::Remove, frame, 0, 0);
 	queue_event (ev);
 }
 
 void
-SessionEventManager::replace_event (SessionEvent::Type type, nframes64_t frame, nframes64_t target)
+SessionEventManager::replace_event (SessionEvent::Type type, framepos_t frame, framepos_t target)
 {
 	SessionEvent* ev = new SessionEvent (type, SessionEvent::Replace, frame, target, 0);
 	queue_event (ev);

@@ -195,8 +195,8 @@ ExportHandler::process_timespan (nframes_t frames)
 	/* update position */
 
 	nframes_t frames_to_read = 0;
-	sframes_t const start = current_timespan->get_start();
-	sframes_t const end = current_timespan->get_end();
+	framepos_t const start = current_timespan->get_start();
+	framepos_t const end = current_timespan->get_end();
 	
 	bool const last_cycle = (process_position + frames >= end);
 
@@ -308,7 +308,7 @@ ExportHandler::export_cd_marker_file (TimespanPtr timespan, FormatPtr file_forma
 
 	/* Start actual marker stuff */
 
-	sframes_t last_end_time = timespan->get_start(), last_start_time = timespan->get_start();
+	framepos_t last_end_time = timespan->get_start(), last_start_time = timespan->get_start();
 	status.track_position = last_start_time - timespan->get_start();
 
 	for (i = temp.begin(); i != temp.end(); ++i) {
@@ -535,9 +535,9 @@ ExportHandler::write_index_info_toc (CDMarkerStatus & status)
 }
 
 void
-ExportHandler::frames_to_cd_frames_string (char* buf, sframes_t when)
+ExportHandler::frames_to_cd_frames_string (char* buf, framepos_t when)
 {
-	sframes_t remainder;
+	framecnt_t remainder;
 	nframes_t fr = session.nominal_frame_rate();
 	int mins, secs, frames;
 

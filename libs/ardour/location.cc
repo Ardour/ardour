@@ -53,7 +53,7 @@ Location::Location (Session& s)
 
 }
 
-Location::Location (Session& s, nframes64_t sample_start, nframes64_t sample_end, const std::string &name, Flags bits)
+Location::Location (Session& s, framepos_t sample_start, framepos_t sample_end, const std::string &name, Flags bits)
 	: SessionHandleRef (s)
 	, _name (name)
 	, _start (sample_start)
@@ -124,7 +124,7 @@ Location::operator= (const Location& other)
  *  @param allow_bbt_recompute True to recompute BBT start time from the new given start time.
  */
 int
-Location::set_start (nframes64_t s, bool force, bool allow_bbt_recompute)
+Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 {
 	if (_locked) {
 		return -1;
@@ -170,7 +170,7 @@ Location::set_start (nframes64_t s, bool force, bool allow_bbt_recompute)
  *  @param allow_bbt_recompute True to recompute BBT end time from the new given end time.
  */
 int
-Location::set_end (nframes64_t e, bool force, bool allow_bbt_recompute)
+Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 {
 	if (_locked) {
 		return -1;
@@ -211,7 +211,7 @@ Location::set_end (nframes64_t e, bool force, bool allow_bbt_recompute)
 }
 
 int
-Location::set (nframes64_t start, nframes64_t end, bool allow_bbt_recompute)
+Location::set (framepos_t start, framepos_t end, bool allow_bbt_recompute)
 {
 	/* check validity */
 	if (((is_auto_punch() || is_auto_loop()) && start >= end) || (!is_mark() && start > end)) {
@@ -226,7 +226,7 @@ Location::set (nframes64_t start, nframes64_t end, bool allow_bbt_recompute)
 }
 
 int
-Location::move_to (nframes64_t pos)
+Location::move_to (framepos_t pos)
 {
 	if (_locked) {
 		return -1;
@@ -844,7 +844,7 @@ struct LocationStartLaterComparison
 };
 
 Location *
-Locations::first_location_before (nframes64_t frame, bool include_special_ranges)
+Locations::first_location_before (framepos_t frame, bool include_special_ranges)
 {
 	LocationList locs;
 
@@ -871,7 +871,7 @@ Locations::first_location_before (nframes64_t frame, bool include_special_ranges
 }
 
 Location *
-Locations::first_location_after (nframes64_t frame, bool include_special_ranges)
+Locations::first_location_after (framepos_t frame, bool include_special_ranges)
 {
 	LocationList locs;
 
@@ -905,7 +905,7 @@ Locations::first_location_after (nframes64_t frame, bool include_special_ranges)
  *  @param after Filled in with the position of the next `mark' after `frame' (or max_framepos if none exists)
  */
 void
-Locations::marks_either_side (nframes64_t const frame, nframes64_t& before, nframes64_t& after) const
+Locations::marks_either_side (framepos_t const frame, framepos_t& before, framepos_t& after) const
 {
 	before = after = max_framepos;
 	
@@ -918,7 +918,7 @@ Locations::marks_either_side (nframes64_t const frame, nframes64_t& before, nfra
 
 	/* Get a list of positions; don't store any that are exactly on our requested position */
 	
-	std::list<nframes64_t> positions;
+	std::list<framepos_t> positions;
 
 	for (LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
 		if (((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
@@ -947,7 +947,7 @@ Locations::marks_either_side (nframes64_t const frame, nframes64_t& before, nfra
 
 	positions.sort ();
 
-	std::list<nframes64_t>::iterator i = positions.begin ();
+	std::list<framepos_t>::iterator i = positions.begin ();
 	while (i != positions.end () && *i < frame) {
 		++i;
 	}
@@ -1027,7 +1027,7 @@ Locations::get_location_by_id(PBD::ID id)
 }
 
 void
-Locations::find_all_between (nframes64_t start, nframes64_t end, LocationList& ll, Location::Flags flags)
+Locations::find_all_between (framepos_t start, framepos_t end, LocationList& ll, Location::Flags flags)
 {
 	Glib::Mutex::Lock lm (lock);
 

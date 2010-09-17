@@ -57,7 +57,7 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace Editing;
 
-/* XXX this is a hack. it ought to be the maximum value of an nframes64_t */
+/* XXX this is a hack. it ought to be the maximum value of an framepos_t */
 
 const double max_canvas_coordinate = (double) JACK_MAX_FRAMES;
 
@@ -443,14 +443,14 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 }
 
 bool
-Editor::idle_drop_paths (vector<string> paths, nframes64_t frame, double ypos)
+Editor::idle_drop_paths (vector<string> paths, framepos_t frame, double ypos)
 {
 	drop_paths_part_two (paths, frame, ypos);
 	return false;
 }
 
 void
-Editor::drop_paths_part_two (const vector<string>& paths, nframes64_t frame, double ypos)
+Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, double ypos)
 {
 	RouteTimeAxisView* tv;
 
@@ -492,7 +492,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 {
 	vector<string> paths;
 	GdkEvent ev;
-	nframes64_t frame;
+	framepos_t frame;
 	double wx;
 	double wy;
 	double cy;
@@ -538,7 +538,7 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& /*context*/,
 void
 Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert)
 {
-	nframes64_t rightmost_frame = leftmost_frame + current_page_frames();
+	framepos_t rightmost_frame = leftmost_frame + current_page_frames();
 	bool startit = false;
 
 	double ty = _drags->current_pointer_y() - get_trackview_group_vertical_offset ();
@@ -715,7 +715,7 @@ Editor::start_canvas_autoscroll (int dx, int dy)
 	autoscroll_active = true;
 	autoscroll_x = dx;
 	autoscroll_y = dy;
-	autoscroll_x_distance = (nframes64_t) floor (current_page_frames()/50.0);
+	autoscroll_x_distance = (framepos_t) floor (current_page_frames()/50.0);
 	autoscroll_y_distance = fabs (dy * 5); /* pixels */
 	autoscroll_cnt = 0;
 
@@ -780,7 +780,7 @@ Editor::set_horizontal_position (double p)
 	time_line_group->move (x_delta, 0);
 	cursor_group->move (x_delta, 0);
 
-	leftmost_frame = (nframes64_t) floor (p * frames_per_unit);
+	leftmost_frame = (framepos_t) floor (p * frames_per_unit);
 
 	update_fixed_rulers ();
 	redisplay_tempo (true);

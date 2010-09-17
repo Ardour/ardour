@@ -159,11 +159,11 @@ bool
 Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 {
 	boost::shared_ptr<AudioFileSource> fs;
-	const nframes64_t chunk_size = 4096;
-	nframes64_t to_read;
+	const framepos_t chunk_size = 4096;
+	framepos_t to_read;
 	Sample buf[chunk_size];
 	gain_t gain_buffer[chunk_size];
-	nframes64_t pos;
+	framepos_t pos;
 	char s[PATH_MAX+1];
 	uint32_t cnt;
 	vector<boost::shared_ptr<AudioFileSource> > sources;
@@ -231,7 +231,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 	pos = region->position();
 
 	while (to_read) {
-		nframes64_t this_time;
+		framepos_t this_time;
 
 		this_time = min (to_read, chunk_size);
 
@@ -309,11 +309,11 @@ bool
 Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list<AudioRange>& range)
 {
 	boost::shared_ptr<AudioFileSource> fs;
-	const nframes64_t chunk_size = 4096;
-	nframes64_t nframes;
+	const framepos_t chunk_size = 4096;
+	framepos_t nframes;
 	Sample buf[chunk_size];
 	gain_t gain_buffer[chunk_size];
-	nframes64_t pos;
+	framepos_t pos;
 	char s[PATH_MAX+1];
 	uint32_t cnt;
 	string path;
@@ -369,7 +369,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 		pos = (*i).start;
 
 		while (nframes) {
-			nframes64_t this_time;
+			framepos_t this_time;
 
 			this_time = min (nframes, chunk_size);
 
@@ -401,7 +401,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 
 			while (nframes) {
 
-				nframes64_t this_time = min (nframes, chunk_size);
+				framepos_t this_time = min (nframes, chunk_size);
 				memset (buf, 0, sizeof (Sample) * this_time);
 
 				for (uint32_t n=0; n < channels; ++n) {

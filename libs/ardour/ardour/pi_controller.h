@@ -60,24 +60,24 @@ class PIChaser {
     PIChaser();
     ~PIChaser();
 
-    double get_ratio( nframes64_t chasetime_measured, nframes64_t chasetime, nframes64_t slavetime_measured, nframes64_t slavetime, bool in_control, int period_size );
+    double get_ratio( framepos_t chasetime_measured, framepos_t chasetime, framepos_t slavetime_measured, framepos_t slavetime, bool in_control, int period_size );
     void reset();
-    nframes64_t want_locate() { return want_locate_val; }
+    framepos_t want_locate() { return want_locate_val; }
 
   private:
     PIController *pic;
-    nframes64_t realtime_stamps[ESTIMATOR_SIZE];
-    nframes64_t chasetime_stamps[ESTIMATOR_SIZE];
+    framepos_t realtime_stamps[ESTIMATOR_SIZE];
+    framepos_t chasetime_stamps[ESTIMATOR_SIZE];
     int array_index;
-    nframes64_t want_locate_val;
+    framepos_t want_locate_val;
 
-    void feed_estimator( nframes64_t realtime, nframes64_t chasetime );
+    void feed_estimator( framepos_t realtime, framepos_t chasetime );
     double get_estimate();
 
     double speed;
 
     double speed_threshold;
-    nframes64_t pos_threshold;
+    framepos_t pos_threshold;
 };
 
 

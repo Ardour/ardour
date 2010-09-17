@@ -668,7 +668,7 @@ AudioClock::set_bbt (nframes_t when, bool force)
 	}
 
 	if (bbt_upper_info_label) {
-		nframes64_t pos;
+		framepos_t pos;
 
 		if (bbt_reference_time < 0) {
 			pos = when;
@@ -2078,7 +2078,7 @@ AudioClock::set_size_requests ()
 }
 
 void
-AudioClock::set_bbt_reference (nframes64_t pos)
+AudioClock::set_bbt_reference (framepos_t pos)
 {
 	bbt_reference_time = pos;
 }

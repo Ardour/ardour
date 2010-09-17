@@ -218,7 +218,7 @@ struct MetricSectionSorter {
     }
 };
 
-TempoMap::TempoMap (nframes64_t fr)
+TempoMap::TempoMap (nframes_t fr)
 {
 	metrics = new Metrics;
 	_frame_rate = fr;
@@ -259,11 +259,11 @@ TempoMap::move_metric_section (MetricSection& section, const BBT_Time& when)
 
 		/* position by audio frame, then recompute BBT timestamps from the audio ones */
 
-		nframes64_t frame = frame_time (when);
+		framepos_t frame = frame_time (when);
 		// cerr << "nominal frame time = " << frame << endl;
 
-		nframes64_t prev_frame = round_to_type (frame, -1, Beat);
-		nframes64_t next_frame = round_to_type (frame, 1, Beat);
+		framepos_t prev_frame = round_to_type (frame, -1, Beat);
+		framepos_t next_frame = round_to_type (frame, 1, Beat);
 
 		// cerr << "previous beat at " << prev_frame << " next at " << next_frame << endl;
 
@@ -439,7 +439,7 @@ TempoMap::add_tempo (const Tempo& tempo, BBT_Time where)
 }
 
 void
-TempoMap::add_tempo (const Tempo& tempo, nframes64_t where)
+TempoMap::add_tempo (const Tempo& tempo, framepos_t where)
 {
 	{
 		Glib::RWLock::WriterLock lm (lock);
@@ -506,7 +506,7 @@ TempoMap::add_meter (const Meter& meter, BBT_Time where)
 }
 
 void
-TempoMap::add_meter (const Meter& meter, nframes64_t where)
+TempoMap::add_meter (const Meter& meter, framepos_t where)
 {
 	{
 		Glib::RWLock::WriterLock lm (lock);
@@ -559,7 +559,7 @@ TempoMap::change_initial_tempo (double beats_per_minute, double note_type)
 }
 
 void
-TempoMap::change_existing_tempo_at (nframes64_t where, double beats_per_minute, double note_type)
+TempoMap::change_existing_tempo_at (framepos_t where, double beats_per_minute, double note_type)
 {
 	Tempo newtempo (beats_per_minute, note_type);
 
@@ -649,8 +649,8 @@ TempoMap::timestamp_metrics (bool use_bbt)
 
 		// cerr << "\n\n\n ######################\nTIMESTAMP via BBT ##############\n" << endl;
 
-		nframes64_t current = 0;
-		nframes64_t section_frames;
+		framepos_t current = 0;
+		framepos_t section_frames;
 		BBT_Time start;
 		BBT_Time end;
 
@@ -744,7 +744,7 @@ TempoMap::timestamp_metrics (bool use_bbt)
 }
 
 TempoMetric
-TempoMap::metric_at (nframes64_t frame) const
+TempoMap::metric_at (framepos_t frame) const
 {
 	TempoMetric m (first_meter(), first_tempo());
 	const Meter* meter;
@@ -812,7 +812,7 @@ TempoMap::metric_at (BBT_Time bbt) const
 }
 
 void
-TempoMap::bbt_time (nframes64_t frame, BBT_Time& bbt) const
+TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt) const
 {
 	{
 		Glib::RWLock::ReaderLock lm (lock);
@@ -821,15 +821,15 @@ TempoMap::bbt_time (nframes64_t frame, BBT_Time& bbt) const
 }
 
 void
-TempoMap::bbt_time_unlocked (nframes64_t frame, BBT_Time& bbt) const
+TempoMap::bbt_time_unlocked (framepos_t frame, BBT_Time& bbt) const
 {
 	bbt_time_with_metric (frame, bbt, metric_at (frame));
 }
 
 void
-TempoMap::bbt_time_with_metric (nframes64_t frame, BBT_Time& bbt, const TempoMetric& metric) const
+TempoMap::bbt_time_with_metric (framepos_t frame, BBT_Time& bbt, const TempoMetric& metric) const
 {
-	nframes64_t frame_diff;
+	framecnt_t frame_diff;
 
 	// cerr << "---- BBT time for " << frame << " using metric @ " << metric.frame() << " BBT " << metric.start() << endl;
 
@@ -872,16 +872,16 @@ TempoMap::bbt_time_with_metric (nframes64_t frame, BBT_Time& bbt, const TempoMet
 	// cerr << "-----\t RETURN " << bbt << endl;
 }
 
-nframes64_t
-TempoMap::count_frames_between ( const BBT_Time& start, const BBT_Time& end) const
+framecnt_t
+TempoMap::count_frames_between (const BBT_Time& start, const BBT_Time& end) const
 {
         /* for this to work with fractional measure types, start and end have to be "legal" BBT types,
 	   that means that the beats and ticks should be inside a bar
 	*/
 
-	nframes64_t frames = 0;
-	nframes64_t start_frame = 0;
-	nframes64_t end_frame = 0;
+	framecnt_t frames = 0;
+	framepos_t start_frame = 0;
+	framepos_t end_frame = 0;
 
 	TempoMetric m = metric_at (start);
 
@@ -891,7 +891,7 @@ TempoMap::count_frames_between ( const BBT_Time& start, const BBT_Time& end) con
 		+ start.ticks/Meter::ticks_per_beat;
 
 
-	start_frame = m.frame() + (nframes64_t) rint( beat_offset * m.tempo().frames_per_beat(_frame_rate, m.meter()));
+	start_frame = m.frame() + (framepos_t) rint( beat_offset * m.tempo().frames_per_beat(_frame_rate, m.meter()));
 
 	m =  metric_at(end);
 
@@ -900,7 +900,7 @@ TempoMap::count_frames_between ( const BBT_Time& start, const BBT_Time& end) con
 	beat_offset = bar_offset * m.meter().beats_per_bar() - (m.start().beats -1) + (end.beats - 1)
 		+ end.ticks/Meter::ticks_per_beat;
 
-	end_frame = m.frame() + (nframes64_t) rint(beat_offset * m.tempo().frames_per_beat(_frame_rate, m.meter()));
+	end_frame = m.frame() + (framepos_t) rint(beat_offset * m.tempo().frames_per_beat(_frame_rate, m.meter()));
 
 	frames = end_frame - start_frame;
 
@@ -908,12 +908,12 @@ TempoMap::count_frames_between ( const BBT_Time& start, const BBT_Time& end) con
 
 }
 
-nframes64_t
+framecnt_t
 TempoMap::count_frames_between_metrics (const Meter& meter, const Tempo& tempo, const BBT_Time& start, const BBT_Time& end) const
 {
         /* this is used in timestamping the metrics by actually counting the beats */
 
-	nframes64_t frames = 0;
+	framecnt_t frames = 0;
 	uint32_t bar = start.bars;
 	double beat = (double) start.beats;
 	double beats_counted = 0;
@@ -952,13 +952,13 @@ TempoMap::count_frames_between_metrics (const Meter& meter, const Tempo& tempo, 
 	// << " fpb was " << beat_frames
 	// << endl;
 
-	frames = (nframes64_t) floor (beats_counted * beat_frames);
+	frames = (framecnt_t) llrint (floor (beats_counted * beat_frames));
 
 	return frames;
 
 }
 
-nframes64_t
+framepos_t
 TempoMap::frame_time (const BBT_Time& bbt) const
 {
 	BBT_Time start ; /* 1|1|0 */
@@ -966,10 +966,10 @@ TempoMap::frame_time (const BBT_Time& bbt) const
 	return  count_frames_between ( start, bbt);
 }
 
-nframes64_t
-TempoMap::bbt_duration_at (nframes64_t pos, const BBT_Time& bbt, int dir) const
+framecnt_t
+TempoMap::bbt_duration_at (framepos_t pos, const BBT_Time& bbt, int dir) const
 {
-	nframes64_t frames = 0;
+	framecnt_t frames = 0;
 
 	BBT_Time when;
 	bbt_time(pos, when);
@@ -982,11 +982,10 @@ TempoMap::bbt_duration_at (nframes64_t pos, const BBT_Time& bbt, int dir) const
 	return frames;
 }
 
-nframes64_t
+framecnt_t
 TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, int dir) const
 {
-
-	nframes64_t frames = 0;
+	framecnt_t frames = 0;
 
 	double beats_per_bar;
 	BBT_Time result;
@@ -1109,8 +1108,8 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 
 
 
-nframes64_t
-TempoMap::round_to_bar (nframes64_t fr, int dir)
+framepos_t
+TempoMap::round_to_bar (framepos_t fr, int dir)
 {
         {
 	        Glib::RWLock::ReaderLock lm (lock);
@@ -1119,8 +1118,8 @@ TempoMap::round_to_bar (nframes64_t fr, int dir)
 }
 
 
-nframes64_t
-TempoMap::round_to_beat (nframes64_t fr, int dir)
+framepos_t
+TempoMap::round_to_beat (framepos_t fr, int dir)
 {
         {
 	        Glib::RWLock::ReaderLock lm (lock);
@@ -1128,8 +1127,8 @@ TempoMap::round_to_beat (nframes64_t fr, int dir)
 	}
 }
 
-nframes64_t
-TempoMap::round_to_beat_subdivision (nframes64_t fr, int sub_num, int dir)
+framepos_t
+TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, int dir)
 {
 	BBT_Time the_beat;
 	uint32_t ticks_one_half_subdivisions_worth;
@@ -1199,8 +1198,8 @@ TempoMap::round_to_beat_subdivision (nframes64_t fr, int sub_num, int dir)
 	return frame_time (the_beat);
 }
 
-nframes64_t
-TempoMap::round_to_type (nframes64_t frame, int dir, BBTPointType type)
+framepos_t
+TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 {
 	TempoMetric metric = metric_at (frame);
 	BBT_Time bbt;
@@ -1320,7 +1319,7 @@ TempoMap::round_to_type (nframes64_t frame, int dir, BBTPointType type)
 }
 
 TempoMap::BBTPointList *
-TempoMap::get_points (nframes64_t lower, nframes64_t upper) const
+TempoMap::get_points (framepos_t lower, framepos_t upper) const
 {
 
 	Metrics::const_iterator i;
@@ -1339,7 +1338,7 @@ TempoMap::get_points (nframes64_t lower, nframes64_t upper) const
 	double delta_bars;
 	double delta_beats;
 	double dummy;
-	nframes64_t limit;
+	framepos_t limit;
 
 	meter = &first_meter ();
 	tempo = &first_tempo ();
@@ -1416,7 +1415,7 @@ TempoMap::get_points (nframes64_t lower, nframes64_t upper) const
 			if (beat == 1) {
 				if (current >= lower) {
 					// cerr << "Add Bar at " << bar << "|1" << " @ " << current << endl;
-					points->push_back (BBTPoint (*meter, *tempo,(nframes64_t)rint(current), Bar, bar, 1));
+					points->push_back (BBTPoint (*meter, *tempo,(framepos_t)rint(current), Bar, bar, 1));
 
 				}
 			}
@@ -1428,7 +1427,7 @@ TempoMap::get_points (nframes64_t lower, nframes64_t upper) const
 			while (beat <= ceil( beats_per_bar) && beat_frame < limit) {
 				if (beat_frame >= lower) {
 					// cerr << "Add Beat at " << bar << '|' << beat << " @ " << beat_frame << endl;
-					points->push_back (BBTPoint (*meter, *tempo, (nframes64_t) rint(beat_frame), Beat, bar, beat));
+					points->push_back (BBTPoint (*meter, *tempo, (framepos_t) rint(beat_frame), Beat, bar, beat));
 				}
 				beat_frame += beat_frames;
 				current+= beat_frames;
@@ -1509,7 +1508,7 @@ TempoMap::get_points (nframes64_t lower, nframes64_t upper) const
 }
 
 const TempoSection&
-TempoMap::tempo_section_at (nframes64_t frame)
+TempoMap::tempo_section_at (framepos_t frame)
 {
 	Glib::RWLock::ReaderLock lm (lock);
 	Metrics::iterator i;
@@ -1536,7 +1535,7 @@ TempoMap::tempo_section_at (nframes64_t frame)
 }
 
 const Tempo&
-TempoMap::tempo_at (nframes64_t frame) const
+TempoMap::tempo_at (framepos_t frame) const
 {
 	TempoMetric m (metric_at (frame));
 	return m.tempo();
@@ -1544,7 +1543,7 @@ TempoMap::tempo_at (nframes64_t frame) const
 
 
 const Meter&
-TempoMap::meter_at (nframes64_t frame) const
+TempoMap::meter_at (framepos_t frame) const
 {
 	TempoMetric m (metric_at (frame));
 	return m.meter();
@@ -1671,7 +1670,7 @@ TempoMap::n_meters() const
 }
 
 void
-TempoMap::insert_time (nframes64_t where, nframes64_t amount)
+TempoMap::insert_time (framepos_t where, framecnt_t amount)
 {
 	for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
 		if ((*i)->frame() >= where) {

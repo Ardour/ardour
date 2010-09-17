@@ -59,7 +59,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
   public:
 	AutomationLine (const std::string& name, TimeAxisView&, ArdourCanvas::Group&,
 			boost::shared_ptr<ARDOUR::AutomationList>,
-			const Evoral::TimeConverter<double, ARDOUR::sframes_t>* converter = 0);
+			const Evoral::TimeConverter<double, ARDOUR::framepos_t>* converter = 0);
 	virtual ~AutomationLine ();
 
 	void queue_reset ();
@@ -134,7 +134,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	virtual MementoCommandBinder<ARDOUR::AutomationList>* memento_command_binder ();
 
-	const Evoral::TimeConverter<double, ARDOUR::sframes_t>& time_converter () const {
+	const Evoral::TimeConverter<double, ARDOUR::framepos_t>& time_converter () const {
 		return _time_converter;
 	}
 
@@ -201,7 +201,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	double _last_drag_fraction; ///< last y position of the drag, as a fraction
 	std::list<double> _always_in_view;
 
-	const Evoral::TimeConverter<double, ARDOUR::sframes_t>& _time_converter;
+	const Evoral::TimeConverter<double, ARDOUR::framepos_t>& _time_converter;
 
 	void reset_line_coords (ControlPoint&);
 	void add_visible_control_point (uint32_t, uint32_t, double, double, ARDOUR::AutomationList::iterator, uint32_t);

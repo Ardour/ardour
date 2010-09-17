@@ -154,7 +154,7 @@ AudioRegion::AudioRegion (const SourceList& srcs)
 	assert (_sources.size() == _master_sources.size());
 }
 
-AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes64_t offset, bool offset_relative)
+AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, framecnt_t offset, bool offset_relative)
 	: Region (other, offset, offset_relative)
 	, AUDIOREGION_COPY_STATE (other)
 	, _automatable (other->session())
@@ -1287,7 +1287,7 @@ AudioRegion::audio_source (uint32_t n) const
 }
 
 int 
-AudioRegion::adjust_transients (nframes64_t delta)
+AudioRegion::adjust_transients (frameoffset_t delta)
 {
 	for (AnalysisFeatureList::iterator x = _transients.begin(); x != _transients.end(); ++x) {
 		(*x) = (*x) + delta;
@@ -1299,7 +1299,7 @@ AudioRegion::adjust_transients (nframes64_t delta)
 } 
 
 int
-AudioRegion::update_transient (nframes64_t old_position, nframes64_t new_position)
+AudioRegion::update_transient (framepos_t old_position, framepos_t new_position)
 {
 	for (AnalysisFeatureList::iterator x = _transients.begin(); x != _transients.end(); ++x) {
 		if ((*x) == old_position) {
@@ -1314,7 +1314,7 @@ AudioRegion::update_transient (nframes64_t old_position, nframes64_t new_positio
 }
 
 void
-AudioRegion::add_transient (nframes64_t where)
+AudioRegion::add_transient (framepos_t where)
 {
 	_transients.push_back(where);
 	_valid_transients = true;
@@ -1323,7 +1323,7 @@ AudioRegion::add_transient (nframes64_t where)
 }
 
 void
-AudioRegion::remove_transient (nframes64_t where)
+AudioRegion::remove_transient (framepos_t where)
 {
 	_transients.remove(where);
 	_valid_transients = true;

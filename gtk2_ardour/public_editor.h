@@ -81,6 +81,9 @@ class ImageFrameTimeAxis;
 class MarkerView;
 class DragManager;
 
+using ARDOUR::framepos_t;
+using ARDOUR::framecnt_t;
+
 /// Representation of the interface of the Editor class
 
 /** This class contains just the public interface of the Editor class,
@@ -128,7 +131,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual void set_snap_threshold (double t) = 0;
 
 	/** Snap a value according to the current snap setting. */
-	virtual void snap_to (nframes64_t& first, int32_t direction = 0, bool for_mark = false) = 0;
+	virtual void snap_to (framepos_t& first, int32_t direction = 0, bool for_mark = false) = 0;
 
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.
@@ -185,15 +188,15 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual void separate_region_from_selection () = 0;
 
 	virtual void transition_to_rolling (bool fwd) = 0;
-	virtual nframes64_t unit_to_frame (double unit) const = 0;
-	// XXX remove me when libardour goes nframes64_t
+	virtual framepos_t unit_to_frame (double unit) const = 0;
+	// XXX remove me when libardour goes framepos_t
 	double frame_to_unit (nframes_t frame) const {
-		return frame_to_unit ((nframes64_t) frame);
+		return frame_to_unit ((framepos_t) frame);
 	}
-	virtual double frame_to_unit (nframes64_t frame) const = 0;
+	virtual double frame_to_unit (framepos_t frame) const = 0;
 	virtual double frame_to_unit (double frame) const = 0;
-	virtual nframes64_t pixel_to_frame (double pixel) const = 0;
-	virtual gulong frame_to_pixel (nframes64_t frame) const = 0;
+	virtual framepos_t pixel_to_frame (double pixel) const = 0;
+	virtual gulong frame_to_pixel (framepos_t frame) const = 0;
 	virtual Selection& get_selection () const = 0;
 	virtual Selection& get_cut_buffer () const = 0;
 	virtual bool extend_selection_to_track (TimeAxisView&) = 0;
@@ -245,25 +248,25 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual bool dragging_playhead () const = 0;
 	virtual void ensure_float (Gtk::Window&) = 0;
 	virtual void show_window () = 0;
-	virtual nframes64_t leftmost_position() const = 0;
-	virtual nframes64_t current_page_frames() const = 0;
+	virtual framepos_t leftmost_position() const = 0;
+	virtual framecnt_t current_page_frames() const = 0;
 	virtual void temporal_zoom_step (bool coarser) = 0;
 	virtual void scroll_tracks_down_line () = 0;
 	virtual void scroll_tracks_up_line () = 0;
 	virtual void prepare_for_cleanup () = 0;
 	virtual void finish_cleanup () = 0;
-	virtual void reset_x_origin (nframes64_t frame) = 0;
+	virtual void reset_x_origin (framepos_t frame) = 0;
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space () = 0;
 	virtual void restore_editing_space () = 0;
-	virtual nframes64_t get_preferred_edit_position (bool ignore_playhead = false) = 0;
+	virtual framepos_t get_preferred_edit_position (bool ignore_playhead = false) = 0;
 	virtual void toggle_meter_updating() = 0;
 	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret) = 0;
-	virtual void mouse_add_new_marker (nframes64_t where, bool is_cd=false, bool is_xrun=false) = 0;
+	virtual void mouse_add_new_marker (framepos_t where, bool is_cd=false, bool is_xrun=false) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
-	virtual nframes64_t get_nudge_distance (nframes64_t pos, nframes64_t& next) = 0;
-	virtual Evoral::MusicalTime get_grid_type_as_beats (bool& success, nframes64_t position) = 0;
+	virtual framecnt_t get_nudge_distance (framepos_t pos, framecnt_t& next) = 0;
+	virtual Evoral::MusicalTime get_grid_type_as_beats (bool& success, framepos_t position) = 0;
 
 #ifdef WITH_CMT
 	virtual void connect_to_image_compositor()  = 0;
@@ -281,7 +284,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> Resized;
 	sigc::signal<void> Realized;
-	sigc::signal<void,nframes64_t> UpdateAllTransportClocks;
+	sigc::signal<void,framepos_t> UpdateAllTransportClocks;
 
         static sigc::signal<void> DropDownKeys;
         
@@ -353,7 +356,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual void show_verbose_canvas_cursor_with (const std::string& txt) = 0;
 	virtual void hide_verbose_canvas_cursor() = 0;
 
-	virtual void center_screen (nframes64_t) = 0;
+	virtual void center_screen (framepos_t) = 0;
 
 	virtual TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const = 0;
 	virtual TrackViewList const & get_track_views () = 0;

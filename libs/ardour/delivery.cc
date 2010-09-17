@@ -437,7 +437,7 @@ Delivery::end_pan_touch (uint32_t which, bool mark, double when)
 
 
 void
-Delivery::flush_buffers (nframes_t nframes, nframes64_t time)
+Delivery::flush_buffers (nframes_t nframes, framepos_t time)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 

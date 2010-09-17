@@ -272,7 +272,7 @@ AudioRegionView::~AudioRegionView ()
 		delete *i;
 	}
 
-	for (list<std::pair<nframes64_t, ArdourCanvas::SimpleLine*> >::iterator i = feature_lines.begin(); i != feature_lines.end(); ++i) {
+	for (list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> >::iterator i = feature_lines.begin(); i != feature_lines.end(); ++i) {
 		delete ((*i).second);
 	}
 	
@@ -411,7 +411,7 @@ AudioRegionView::region_resized (const PropertyChange& what_changed)
 		
 		/* hide transient lines that extend beyond the region end */
 		
-		list<std::pair<nframes64_t, ArdourCanvas::SimpleLine*> >::iterator l;
+		list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> >::iterator l;
 		
 		for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
 			if ((*l).first > _region->length()- 1){
@@ -447,7 +447,7 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 
 	AnalysisFeatureList analysis_features = _region->transients();
 	AnalysisFeatureList::const_iterator i;
-	list<std::pair<nframes64_t, ArdourCanvas::SimpleLine*> >::iterator l;
+	list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> >::iterator l;
 
 	for (i = analysis_features.begin(), l = feature_lines.begin(); i != analysis_features.end() && l != feature_lines.end(); ++i, ++l) {
 		(*l).second->property_x1() = trackview.editor().frame_to_pixel (*i);
@@ -529,7 +529,7 @@ AudioRegionView::set_height (gdouble height)
 	reset_fade_shapes ();
 	
 	/* Update hights for any active feature lines */
-	list<std::pair<nframes64_t, ArdourCanvas::SimpleLine*> >::iterator l;
+	list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> >::iterator l;
 
 	for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
 		(*l).second->property_y2() = _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1;
@@ -1433,7 +1433,7 @@ AudioRegionView::show_region_editor ()
 
 
 void
-AudioRegionView::show_fade_line (nframes64_t pos)
+AudioRegionView::show_fade_line (framepos_t pos)
 {
 	fade_position_line->property_x1() = trackview.editor().frame_to_pixel (pos);
 	fade_position_line->property_x2() = trackview.editor().frame_to_pixel (pos);
@@ -1466,7 +1466,7 @@ AudioRegionView::transients_changed ()
 	}
 
 	AnalysisFeatureList::const_iterator i;
-	list<std::pair<nframes64_t, ArdourCanvas::SimpleLine*> >::iterator l;
+	list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> >::iterator l;
 
 	for (i = analysis_features.begin(), l = feature_lines.begin(); i != analysis_features.end() && l != feature_lines.end(); ++i, ++l) {
 		(*l).first = *i;
@@ -1486,14 +1486,14 @@ void
 AudioRegionView::update_transient(float /*old_pos*/, float new_pos)
 {
 	/* Find frame at old pos, calulate new frame then update region transients*/
-	list<std::pair<nframes64_t, ArdourCanvas::SimpleLine*> >::iterator l;
+	list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> >::iterator l;
 
 	for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
 		/* Simple line x1 has been updated in drag so we compare to new_pos */
 		if (rint(new_pos) == rint((*l).second->property_x1())) {
 		    
-		    nframes64_t old_frame = (*l).first;
-		    nframes64_t new_frame = trackview.editor().pixel_to_frame (new_pos);
+		    framepos_t old_frame = (*l).first;
+		    framepos_t new_frame = trackview.editor().pixel_to_frame (new_pos);
 
 		    _region->update_transient (old_frame, new_frame);
 		    
@@ -1506,7 +1506,7 @@ void
 AudioRegionView::remove_transient(float pos)
 {
 	/* Find frame at old pos, calulate new frame then update region transients*/
-	list<std::pair<nframes64_t, ArdourCanvas::SimpleLine*> >::iterator l;
+	list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> >::iterator l;
 
 	for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
 		/* Simple line x1 has been updated in drag so we compare to new_pos */

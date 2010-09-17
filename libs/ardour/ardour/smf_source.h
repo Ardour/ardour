@@ -52,9 +52,9 @@ public:
 	bool set_name (const std::string& newname) { return (set_source_name(newname, false) == 0); }
 
 	void append_event_unlocked_beats (const Evoral::Event<Evoral::MusicalTime>& ev);
-	void append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sframes_t source_start);
+	void append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, framepos_t source_start);
 
-	void mark_streaming_midi_write_started (NoteMode mode, sframes_t start_time);
+	void mark_streaming_midi_write_started (NoteMode mode, framepos_t start_time);
 	void mark_streaming_write_completed ();
 
 	XMLNode& get_state ();
@@ -74,21 +74,21 @@ public:
         
   private:
 	nframes_t read_unlocked (Evoral::EventSink<nframes_t>& dst,
-				 sframes_t position,
-				 sframes_t start,
+				 framepos_t position,
+				 framepos_t start,
 				 nframes_t cnt,
 				 MidiStateTracker* tracker) const;
 
 	nframes_t write_unlocked (MidiRingBuffer<nframes_t>& src,
-			sframes_t position,
+			framepos_t position,
 			nframes_t cnt);
 
 	double    _last_ev_time_beats;
-	sframes_t _last_ev_time_frames;
+	framepos_t _last_ev_time_frames;
 	/** end time (start + duration) of last call to read_unlocked */
-	mutable sframes_t _smf_last_read_end;
+	mutable framepos_t _smf_last_read_end;
 	/** time (in SMF ticks, 1 tick per _ppqn) of the last event read by read_unlocked */
-	mutable sframes_t _smf_last_read_time;
+	mutable framepos_t _smf_last_read_time;
 };
 
 }; /* namespace ARDOUR */

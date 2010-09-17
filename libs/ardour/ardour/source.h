@@ -97,8 +97,8 @@ class Source : public SessionObject
 	std::string get_transients_path() const;
 	int load_transients (const std::string&);
 
-	sframes_t    timeline_position() const { return _timeline_position; }
-	virtual void set_timeline_position (sframes_t pos);
+	framepos_t    timeline_position() const { return _timeline_position; }
+	virtual void set_timeline_position (framepos_t pos);
 
 	void set_allow_remove_if_empty (bool yn);
 
@@ -114,7 +114,7 @@ class Source : public SessionObject
 	DataType            _type;
 	Flag                _flags;
 	time_t              _timestamp;
-	sframes_t           _timeline_position;
+	framepos_t           _timeline_position;
 	bool                _analysed;
 	mutable Glib::Mutex _lock;
 	mutable Glib::Mutex _analysis_lock;
