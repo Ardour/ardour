@@ -2047,6 +2047,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	*/
 	TimeAxisView* _last_cut_copy_source_track;
 
+	/** true if the update of the region list's selection from the current Selection
+	    should be blocked if the Selection is empty.  See EditorRegions::selection_changed.
+	*/
+	bool _block_region_list_update_if_empty;
+
 	friend class Drag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;

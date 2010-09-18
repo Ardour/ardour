@@ -957,7 +957,9 @@ Editor::region_selection_changed ()
 	_regions->block_change_connection (true);
 	editor_regions_selection_changed_connection.block(true);
 
-	_regions->unselect_all ();
+	if (!_block_region_list_update_if_empty || !selection->regions.empty()) {
+		_regions->unselect_all ();
+	}
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(*i)->set_selected_regionviews (selection->regions);

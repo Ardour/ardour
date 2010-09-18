@@ -377,6 +377,13 @@ EditorRegions::selection_changed ()
 		return;
 	}
 
+	/* We may have selected a region which is not displayed in the Editor.  If this happens, the
+	   result will be no selected regions in the editor's Selection.  Without the following line,
+	   this `no-selection' will be mapped back to our list, meaning that the selection will
+	   appear not to take.
+	*/
+	_editor->_block_region_list_update_if_empty = true;
+
 	if (_display.get_selection()->count_selected_rows() > 0) {
 
 		TreeIter iter;
@@ -409,6 +416,8 @@ EditorRegions::selection_changed ()
 	} else {
 		_editor->get_selection().clear_regions ();
 	}
+
+	_editor->_block_region_list_update_if_empty = false;
 }
 
 void
