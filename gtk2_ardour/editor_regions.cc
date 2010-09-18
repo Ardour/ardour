@@ -338,7 +338,9 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 	    what_changed.contains (ARDOUR::Properties::locked) ||
 	    what_changed.contains (ARDOUR::Properties::position_lock_style) ||
 	    what_changed.contains (ARDOUR::Properties::muted) ||
-	    what_changed.contains (ARDOUR::Properties::opaque)) {
+	    what_changed.contains (ARDOUR::Properties::opaque) ||
+	    what_changed.contains (ARDOUR::Properties::fade_in) ||
+	    what_changed.contains (ARDOUR::Properties::fade_out)) {
 
 		/* find the region in our model and update its row */
 		TreeModel::Children rows = _model->children ();

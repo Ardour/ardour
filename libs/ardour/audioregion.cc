@@ -784,6 +784,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 	}
 
         _fade_in->thaw ();
+	send_change (PropertyChange (Properties::fade_in));
 }
 
 void
@@ -849,6 +850,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 	}
 
         _fade_out->thaw ();
+	send_change (PropertyChange (Properties::fade_in));
 }
 
 void
