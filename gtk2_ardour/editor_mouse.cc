@@ -768,6 +768,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					*/
 					break;
 				}
+
+				if (internal_editing ()) {
+					/* no region drags in internal edit mode */
+					break;
+				}
 				
 				/* click on a normal region view */
 				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {

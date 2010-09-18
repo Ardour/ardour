@@ -365,6 +365,8 @@ RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Re
 			}
 		}
 	}
+
+	assert (!v.empty ());
 	
 	for (list<RegionView*>::const_iterator i = v.begin(); i != v.end(); ++i) {
 		_views.push_back (DraggingView (*i, this));
@@ -758,6 +760,8 @@ RegionMoveDrag::finished (GdkEvent *, bool movement_occurred)
 	if (Config->get_edit_mode() == Lock) {
 		_x_constrained = !_x_constrained;
 	}
+
+	assert (!_views.empty ());
 
 	bool const changed_position = (_last_frame_position != _primary->region()->position());
 	bool const changed_tracks = (_time_axis_views[_views.front().time_axis_view] != &_views.front().view->get_time_axis_view());
