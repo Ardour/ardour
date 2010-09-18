@@ -224,7 +224,7 @@ Automatable::mark_automation_visible (Evoral::Parameter what, bool yn)
  * pass that type and it will be used for the untyped AutomationList found.
  */
 int
-Automatable::set_automation_state (const XMLNode& node, Evoral::Parameter legacy_param)
+Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter legacy_param)
 {
 	Glib::Mutex::Lock lm (control_lock());
 
@@ -272,7 +272,7 @@ Automatable::set_automation_state (const XMLNode& node, Evoral::Parameter legacy
 			}
 
 		} else {
-			error << "Expected AutomationList node, got '" << (*niter)->name() << endmsg;
+			error << "Expected AutomationList node, got '" << (*niter)->name() << "'" << endmsg;
 		}
 	}
 
@@ -282,7 +282,7 @@ Automatable::set_automation_state (const XMLNode& node, Evoral::Parameter legacy
 }
 
 XMLNode&
-Automatable::get_automation_state ()
+Automatable::get_automation_xml_state ()
 {
 	Glib::Mutex::Lock lm (control_lock());
 	XMLNode* node = new XMLNode (X_("Automation"));

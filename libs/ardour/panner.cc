@@ -183,7 +183,7 @@ StreamPanner::set_state (const XMLNode& node, int /*version*/)
 	if ((prop = node.property (X_("mono")))) {
 		set_mono (string_is_affirmative (prop->value()));
 	}
-	
+
 	return 0;
 }
 
@@ -1153,6 +1153,7 @@ Panner::state (bool full)
 		node->add_child_nocopy ((*i)->state (full));
 	}
 
+	node->add_child_nocopy (get_automation_xml_state ());
 
 	return *node;
 }
@@ -1259,6 +1260,12 @@ Panner::set_state (const XMLNode& node, int version)
 		automation_path = Glib::build_filename(_session.automation_dir(), prop->value ());
 	}
 
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() == X_("Automation")) {
+			set_automation_xml_state (**niter, Evoral::Parameter (PanAutomation));
+		}
+	}
+	
 	return 0;
 }
 

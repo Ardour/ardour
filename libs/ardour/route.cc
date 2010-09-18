@@ -2163,7 +2163,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 					_main_outs->panner()->set_state(*io_child, version);
 				} else if (io_child->name() == X_("Automation")) {
 					/* IO's automation is for the fader */
-					_amp->set_automation_state (*io_child, Evoral::Parameter (GainAutomation));
+					_amp->set_automation_xml_state (*io_child, Evoral::Parameter (GainAutomation));
 				}
 			}
 		}

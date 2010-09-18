@@ -107,7 +107,7 @@ Processor::state (bool full_state)
 	}
 
 	if (full_state) {
-		XMLNode& automation = Automatable::get_automation_state();
+		XMLNode& automation = Automatable::get_automation_xml_state();
 		if (!automation.children().empty()
 				|| !automation.properties().empty()
 				|| !_visible_controls.empty()) {
@@ -197,7 +197,7 @@ Processor::set_state (const XMLNode& node, int version)
 			if ((prop = (*niter)->property ("path")) != 0) {
 				old_set_automation_state (*(*niter));
 			} else {
-				set_automation_state (*(*niter), Evoral::Parameter(PluginAutomation));
+				set_automation_xml_state (*(*niter), Evoral::Parameter(PluginAutomation));
 			}
 
 			if ((prop = (*niter)->property ("visible")) != 0) {

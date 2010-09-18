@@ -93,8 +93,8 @@ public:
 
 	typedef Evoral::ControlSet::Controls Controls;
 
-	int set_automation_state (const XMLNode&, Evoral::Parameter default_param);
-	XMLNode& get_automation_state();
+	int set_automation_xml_state (const XMLNode&, Evoral::Parameter default_param);
+	XMLNode& get_automation_xml_state();
 	
   protected:
 	Session& _a_session;
