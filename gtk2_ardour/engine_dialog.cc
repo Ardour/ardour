@@ -138,6 +138,7 @@ EngineControl::EngineControl ()
 #else
 	strings.push_back (X_("ALSA"));
 	strings.push_back (X_("OSS"));
+	strings.push_back (X_("FreeBoB"));
 	strings.push_back (X_("FFADO"));
 #endif
 	strings.push_back (X_("NetJACK"));
@@ -410,11 +411,8 @@ EngineControl::build_command_line (vector<string>& cmd)
 {
 	string str;
 	string driver;
-	bool using_oss = false;
 	bool using_alsa = false;
 	bool using_coreaudio = false;
-	bool using_netjack = false;
-	bool using_ffado = false;
 	bool using_dummy = false;
 
 	/* first, path to jackd */
@@ -471,27 +469,16 @@ EngineControl::build_command_line (vector<string>& cmd)
 		using_alsa = true;
 		cmd.push_back ("alsa");
 	} else if (driver == X_("OSS")) {
-		using_oss = true;
 		cmd.push_back ("oss");
 	} else if (driver == X_("CoreAudio")) {
 		using_coreaudio = true;
 		cmd.push_back ("coreaudio");
 	} else if (driver == X_("NetJACK")) {
-		using_netjack = true;
 		cmd.push_back ("netjack");
+	} else if (driver == X_("FreeBoB")) {
+		cmd.push_back ("freebob");
 	} else if (driver == X_("FFADO")) {
-		using_ffado = true;
-
-		/* do this until FFADO becomes the standard */
-
-		char* hack = getenv ("ARDOUR_FIREWIRE_DRIVER_NAME");
-
-		if (hack) {
-			cmd.push_back (hack);
-		} else {
-			cmd.push_back ("freebob");
-		}
-
+		cmd.push_back ("firewire");
 	} else if ( driver == X_("Dummy")) {
 		using_dummy = true;
 		cmd.push_back ("dummy");
@@ -527,7 +514,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 			cmd.push_back ("-C");
 		}
 
-		if (! using_dummy ) {
+		if (!using_dummy) {
 			cmd.push_back ("-n");
 			cmd.push_back (to_string ((uint32_t) floor (periods_spinner.get_value()), std::dec));
 		}
@@ -629,10 +616,6 @@ EngineControl::build_command_line (vector<string>& cmd)
                 }
 #endif
 
-	} else if (using_oss) {
-
-	} else if (using_netjack) {
-
 	}
 }
 
@@ -704,6 +687,8 @@ EngineControl::enumerate_devices (const string& driver)
 #ifndef __APPLE__
 	} else if (driver == "ALSA") {
 		devices[driver] = enumerate_alsa_devices ();
+	} else if (driver == "FreeBOB") {
+		devices[driver] = enumerate_freebob_devices ();
 	} else if (driver == "FFADO") {
 		devices[driver] = enumerate_ffado_devices ();
 	} else if (driver == "OSS") {
@@ -888,6 +873,7 @@ EngineControl::enumerate_freebob_devices ()
 	vector<string> devs;
 	return devs;
 }
+
 vector<string>
 EngineControl::enumerate_oss_devices ()
 {
@@ -920,7 +906,7 @@ EngineControl::driver_changed ()
 
 	vector<string>& strings = devices[driver];
 
-	if (strings.empty() && driver != "FFADO" && driver != "Dummy") {
+	if (strings.empty() && driver != "FreeBoB" && driver != "FFADO" && driver != "Dummy") {
 		error << string_compose (_("No devices found for driver \"%1\""), driver) << endmsg;
 		return;
 	}
