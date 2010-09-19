@@ -841,7 +841,7 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Region List"), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
+	act = ActionManager::register_action (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Region List..."), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 

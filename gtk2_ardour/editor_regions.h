@@ -63,6 +63,9 @@ public:
 		_display.get_selection()->unselect_all ();
 	}
 
+	XMLNode& get_state () const;
+	void set_state (const XMLNode &);
+
 private:
 
 	struct Columns : public Gtk::TreeModel::ColumnRecord {
@@ -119,7 +122,6 @@ private:
 
 	bool key_press (GdkEventKey *);
 	bool button_press (GdkEventButton *);
-	void build_menu ();
 	void show_context_menu (int button, int time);
 
 	int sorter (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);
@@ -137,15 +139,19 @@ private:
 		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint
 		);
 
+	Glib::RefPtr<Gtk::RadioAction> sort_type_action (Editing::RegionListSortType) const;
+	void set_full (bool);
+
+	Glib::RefPtr<Gtk::Action> hide_action () const;
+	Glib::RefPtr<Gtk::Action> show_action () const;
+	Glib::RefPtr<Gtk::ToggleAction> toggle_full_action () const;
+	Glib::RefPtr<Gtk::ToggleAction> toggle_show_auto_regions_action () const;
+	
 	Gtk::Menu* _menu;
 	Gtk::ScrolledWindow _scroller;
 	Gtk::Frame _frame;
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Region> > _display;
 	Glib::RefPtr<Gtk::TreeStore> _model;
-	Glib::RefPtr<Gtk::Action> _hide_action; ///< the action for our Hide menu option
-	Glib::RefPtr<Gtk::Action> _show_action; ///< the action for our Show menu option
-	Glib::RefPtr<Gtk::ToggleAction> _toggle_full_action;
-	Glib::RefPtr<Gtk::ToggleAction> _toggle_show_auto_regions_action;
 	bool _show_automatic_regions;
 	Editing::RegionListSortType _sort_type;
 	bool _no_redisplay;

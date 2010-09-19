@@ -493,16 +493,15 @@ EditorRegions::redisplay ()
 
 	bool tree_expanded = false;
 
-	if (_toggle_full_action && _toggle_full_action->get_active()) {   //If the list was expanded prior to rebuilding,
-		tree_expanded = true;																//expand it again afterwards
+	/* If the list was expanded prior to rebuilding, expand it again afterwards */
+	if (toggle_full_action()->get_active()) {
+		tree_expanded = true;
 	}
 
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	_model->clear ();
 
-	/* now add everything we have, via a temporary list used to help with
-		sorting.
-	*/
+	/* now add everything we have, via a temporary list used to help with sorting */
 
 	tmp_region_list.clear();
 
@@ -874,39 +873,22 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 }
 
 void
-EditorRegions::build_menu ()
-{
-	_menu = dynamic_cast<Menu*>(ActionManager::get_widget ("/RegionListMenu"));
-
-	/* now grab specific menu items that we need */
-
-	Glib::RefPtr<Action> act;
-
-	_hide_action = ActionManager::get_action (X_("RegionList"), X_("rlHide"));
-	_show_action = ActionManager::get_action (X_("RegionList"), X_("rlShow"));
-
-	act = ActionManager::get_action (X_("RegionList"), X_("rlShowAll"));
-	if (act) {
-		_toggle_full_action = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	}
-
-	act = ActionManager::get_action (X_("RegionList"), X_("rlShowAuto"));
-	if (act) {
-		_toggle_show_auto_regions_action = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	}
-}
-
-void
 EditorRegions::toggle_show_auto_regions ()
 {
-	_show_automatic_regions = _toggle_show_auto_regions_action->get_active();
+	_show_automatic_regions = toggle_show_auto_regions_action()->get_active();
 	redisplay ();
 }
 
 void
 EditorRegions::toggle_full ()
 {
-	if (_toggle_full_action->get_active()) {
+	set_full (toggle_full_action()->get_active ());
+}
+
+void
+EditorRegions::set_full (bool f)
+{
+	if (f) {
 		_display.expand_all ();
 	} else {
 		_display.collapse_all ();
@@ -917,7 +899,7 @@ void
 EditorRegions::show_context_menu (int button, int time)
 {
 	if (_menu == 0) {
-		build_menu ();
+		_menu = dynamic_cast<Menu*> (ActionManager::get_widget ("/RegionListMenu"));
 	}
 
 	if (_display.get_selection()->count_selected_rows() > 0) {
@@ -944,8 +926,8 @@ EditorRegions::show_context_menu (int button, int time)
 		}
 	}
 
-	_hide_action->set_sensitive (have_shown);
-	_show_action->set_sensitive (have_hidden);
+	hide_action()->set_sensitive (have_shown);
+	show_action()->set_sensitive (have_hidden);
 
 	_menu->popup (button, time);
 }
@@ -1291,4 +1273,141 @@ EditorRegions::opaque_changed (std::string const & path)
 		}
 	}
 
+}
+
+XMLNode &
+EditorRegions::get_state () const
+{
+	XMLNode* node = new XMLNode (X_("RegionList"));
+
+	node->add_property (X_("sort-type"), enum_2_string (_sort_type));
+
+	RefPtr<Action> act = ActionManager::get_action (X_("RegionList"), X_("SortAscending"));
+	bool const ascending = RefPtr<RadioAction>::cast_dynamic(act)->get_active ();
+	node->add_property (X_("sort-ascending"), ascending ? "yes" : "no");
+	node->add_property (X_("show-all"), toggle_full_action()->get_active() ? "yes" : "no");
+	node->add_property (X_("show-automatic-regions"), _show_automatic_regions ? "yes" : "no");
+
+	return *node;
+}
+		
+void
+EditorRegions::set_state (const XMLNode & node)
+{
+	if (node.name() != X_("RegionList")) {
+		return;
+	}
+
+	XMLProperty const * p = node.property (X_("sort-type"));
+	if (p) {
+		Editing::RegionListSortType const t = static_cast<Editing::RegionListSortType> (string_2_enum (p->value(), _sort_type));
+		reset_sort_type (t, true);
+		RefPtr<RadioAction> ract = sort_type_action (t);
+		ract->set_active ();
+	}
+
+	p = node.property (X_("sort-ascending"));
+	if (p) {
+		bool const a = string_is_affirmative (p->value ());
+		reset_sort_direction (a);
+		RefPtr<Action> act;
+		if (a) {
+			act = ActionManager::get_action (X_("RegionList"), X_("SortAscending"));
+		} else {
+			act = ActionManager::get_action (X_("RegionList"), X_("SortDescending"));
+		}
+
+		RefPtr<RadioAction>::cast_dynamic(act)->set_active ();
+	}
+
+	p = node.property (X_("show-all"));
+	if (p) {
+		bool const s = string_is_affirmative (p->value ());
+		set_full (s);
+		toggle_full_action()->set_active (s);
+	}
+
+	p = node.property (X_("show-automatic-regions"));
+	if (p) {
+		bool const s = string_is_affirmative (p->value ());
+		_show_automatic_regions = s;
+		redisplay ();
+		toggle_show_auto_regions_action()->set_active (s);
+	}
+}
+
+RefPtr<RadioAction>
+EditorRegions::sort_type_action (Editing::RegionListSortType t) const
+{
+	const char* action = 0;
+
+	switch (t) {
+	case Editing::ByName:
+		action = X_("SortByRegionName");
+		break;
+	case Editing::ByLength:
+		action = X_("SortByRegionLength");
+		break;
+	case Editing::ByPosition:
+		action = X_("SortByRegionPosition");
+		break;
+	case Editing::ByTimestamp:
+		action = X_("SortByRegionTimestamp");
+		break;
+	case Editing::ByStartInFile:
+		action = X_("SortByRegionStartinFile");
+		break;
+	case Editing::ByEndInFile:
+		action = X_("SortByRegionEndinFile");
+		break;
+	case Editing::BySourceFileName:
+		action = X_("SortBySourceFileName");
+		break;
+	case Editing::BySourceFileLength:
+		action = X_("SortBySourceFileLength");
+		break;
+	case Editing::BySourceFileCreationDate:
+		action = X_("SortBySourceFileCreationDate");
+		break;
+	case Editing::BySourceFileFS:
+		action = X_("SortBySourceFilesystem");
+		break;
+	default:
+		fatal << string_compose (_("programming error: %1: %2"), "EditorRegions: impossible sort type", (int) t) << endmsg;
+		/*NOTREACHED*/
+	}
+
+	RefPtr<Action> act = ActionManager::get_action (X_("RegionList"), action);
+	assert (act);
+
+	return RefPtr<RadioAction>::cast_dynamic (act);
+}
+
+RefPtr<Action>
+EditorRegions::hide_action () const
+{
+	return ActionManager::get_action (X_("RegionList"), X_("rlHide"));
+	
+}
+
+RefPtr<Action>
+EditorRegions::show_action () const
+{
+	return ActionManager::get_action (X_("RegionList"), X_("rlShow"));
+}
+
+RefPtr<ToggleAction>
+EditorRegions::toggle_full_action () const
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("RegionList"), X_("rlShowAll"));
+	assert (act);
+	return Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+}
+
+RefPtr<ToggleAction>
+EditorRegions::toggle_show_auto_regions_action () const
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("RegionList"), X_("rlShowAuto"));
+	assert (act);
+	return Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 }

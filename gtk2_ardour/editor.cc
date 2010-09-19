@@ -2559,6 +2559,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	XMLNodeList children = node.children ();
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		selection->set_state (**i, Stateful::current_state_version);
+		_regions->set_state (**i);
 	}
 
 	return 0;
@@ -2648,6 +2649,7 @@ Editor::get_state ()
 	node->add_property (X_("editor-list-page"), buf);
 
 	node->add_child_nocopy (selection->get_state ());
+	node->add_child_nocopy (_regions->get_state ());
 	
 	return *node;
 }
