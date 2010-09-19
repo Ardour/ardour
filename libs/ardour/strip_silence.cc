@@ -111,7 +111,7 @@ StripSilence::run (boost::shared_ptr<Region> r)
                                 copy->position() << std::endl;
 
                         copy->set_fade_in_active (true);
-                        copy->set_fade_in (AudioRegion::Linear, _fade_length);
+                        copy->set_fade_in (FadeLinear, _fade_length);
                         results.push_back (copy);
                 }
 

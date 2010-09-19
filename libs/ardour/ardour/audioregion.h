@@ -129,14 +129,6 @@ class AudioRegion : public Region
 	bool fade_in_is_default () const;
 	bool fade_out_is_default () const;
 
-	enum FadeShape {
-		Linear,
-		Fast,
-		Slow,
-		LogA,
-		LogB
-	};
-
 	void set_fade_in_active (bool yn);
 	void set_fade_in_shape (FadeShape);
 	void set_fade_in_length (framecnt_t);

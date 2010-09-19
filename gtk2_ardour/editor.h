@@ -1308,8 +1308,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Menu fade_context_menu;
 	void popup_fade_context_menu (int, int, ArdourCanvas::Item*, ItemType);
 
-	void set_fade_in_shape (ARDOUR::AudioRegion::FadeShape);
-	void set_fade_out_shape (ARDOUR::AudioRegion::FadeShape);
+	void set_fade_in_shape (ARDOUR::FadeShape);
+	void set_fade_out_shape (ARDOUR::FadeShape);
 
 	void set_fade_length (bool in);
 	void toggle_fade_active (bool in);
@@ -2051,6 +2051,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	    should be blocked if the Selection is empty.  See EditorRegions::selection_changed.
 	*/
 	bool _block_region_list_update_if_empty;
+
+	void setup_fade_images ();
+	std::map<ARDOUR::FadeShape, Gtk::Image*> _fade_in_images;
+	std::map<ARDOUR::FadeShape, Gtk::Image*> _fade_out_images;
 
 	friend class Drag;
 	friend class RegionDrag;

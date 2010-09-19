@@ -736,12 +736,12 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 	_fade_in->clear ();
 
 	switch (shape) {
-	case Linear:
+	case FadeLinear:
 		_fade_in->fast_simple_add (0.0, 0.0);
 		_fade_in->fast_simple_add (len, 1.0);
 		break;
 
-	case Fast:
+	case FadeFast:
 		_fade_in->fast_simple_add (0, 0);
 		_fade_in->fast_simple_add (len * 0.389401, 0.0333333);
 		_fade_in->fast_simple_add (len * 0.629032, 0.0861111);
@@ -751,7 +751,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		_fade_in->fast_simple_add (len, 1);
 		break;
 
-	case Slow:
+	case FadeSlow:
 		_fade_in->fast_simple_add (0, 0);
 		_fade_in->fast_simple_add (len * 0.0207373, 0.197222);
 		_fade_in->fast_simple_add (len * 0.0645161, 0.525);
@@ -762,7 +762,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		_fade_in->fast_simple_add (len, 1);
 		break;
 
-	case LogA:
+	case FadeLogA:
 		_fade_in->fast_simple_add (0, 0);
 		_fade_in->fast_simple_add (len * 0.0737327, 0.308333);
 		_fade_in->fast_simple_add (len * 0.246544, 0.658333);
@@ -772,7 +772,7 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		_fade_in->fast_simple_add (len, 1);
 		break;
 
-	case LogB:
+	case FadeLogB:
 		_fade_in->fast_simple_add (0, 0);
 		_fade_in->fast_simple_add (len * 0.304147, 0.0694444);
 		_fade_in->fast_simple_add (len * 0.529954, 0.152778);
@@ -804,7 +804,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 	_fade_out->clear ();
 
 	switch (shape) {
-	case Fast:
+	case FadeFast:
 		_fade_out->fast_simple_add (len * 0, 1);
 		_fade_out->fast_simple_add (len * 0.023041, 0.697222);
 		_fade_out->fast_simple_add (len * 0.0553,   0.483333);
@@ -814,7 +814,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		_fade_out->fast_simple_add (len * 1, 0);
 		break;
 
-	case LogA:
+	case FadeLogA:
 		_fade_out->fast_simple_add (len * 0, 1);
 		_fade_out->fast_simple_add (len * 0.228111, 0.988889);
 		_fade_out->fast_simple_add (len * 0.347926, 0.972222);
@@ -824,7 +824,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		_fade_out->fast_simple_add (len * 1, 0);
 		break;
 
-	case Slow:
+	case FadeSlow:
 		_fade_out->fast_simple_add (len * 0, 1);
 		_fade_out->fast_simple_add (len * 0.305556, 1);
 		_fade_out->fast_simple_add (len * 0.548611, 0.991736);
@@ -834,7 +834,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		_fade_out->fast_simple_add (len * 1, 0);
 		break;
 
-	case LogB:
+	case FadeLogB:
 		_fade_out->fast_simple_add (len * 0, 1);
 		_fade_out->fast_simple_add (len * 0.080645, 0.730556);
 		_fade_out->fast_simple_add (len * 0.277778, 0.289256);
@@ -843,7 +843,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		_fade_out->fast_simple_add (len * 1, 0);
 		break;
 
-	case Linear:
+	case FadeLinear:
 		_fade_out->fast_simple_add (len * 0, 1);
 		_fade_out->fast_simple_add (len * 1, 0);
 		break;
@@ -920,14 +920,14 @@ void
 AudioRegion::set_default_fade_in ()
 {
 	_fade_in_suspended = 0;
-	set_fade_in (Linear, 64);
+	set_fade_in (FadeLinear, 64);
 }
 
 void
 AudioRegion::set_default_fade_out ()
 {
 	_fade_out_suspended = 0;
-	set_fade_out (Linear, 64);
+	set_fade_out (FadeLinear, 64);
 }
 
 void

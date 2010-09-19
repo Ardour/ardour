@@ -82,7 +82,7 @@ setup_enum_writer ()
 	SessionEvent::Type _SessionEvent_Type;
 	TimecodeFormat _Session_TimecodeFormat;
 	Session::PullupFormat _Session_PullupFormat;
-	AudioRegion::FadeShape _AudioRegion_FadeShape;
+	FadeShape _FadeShape;
 	Panner::LinkDirection _Panner_LinkDirection;
 	IOChange _IOChange;
 	AutomationType _AutomationType;
@@ -387,12 +387,12 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Source, Destructive);
 	REGISTER_BITS (_Source_Flag);
 
-	REGISTER_CLASS_ENUM (AudioRegion, Linear);
-	REGISTER_CLASS_ENUM (AudioRegion, Fast);
-	REGISTER_CLASS_ENUM (AudioRegion, Slow);
-	REGISTER_CLASS_ENUM (AudioRegion, LogA);
-	REGISTER_CLASS_ENUM (AudioRegion, LogB);
-	REGISTER (_AudioRegion_FadeShape);
+	REGISTER_ENUM (FadeLinear);
+	REGISTER_ENUM (FadeFast);
+	REGISTER_ENUM (FadeSlow);
+	REGISTER_ENUM (FadeLogA);
+	REGISTER_ENUM (FadeLogB);
+	REGISTER (_FadeShape);
 
 	REGISTER_CLASS_ENUM (Diskstream, Recordable);
 	REGISTER_CLASS_ENUM (Diskstream, Hidden);

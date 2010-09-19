@@ -5272,7 +5272,7 @@ Editor::toggle_fade_active (bool in)
 }
 
 void
-Editor::set_fade_in_shape (AudioRegion::FadeShape shape)
+Editor::set_fade_in_shape (FadeShape shape)
 {
 	RegionSelection rs;
 
@@ -5305,7 +5305,7 @@ Editor::set_fade_in_shape (AudioRegion::FadeShape shape)
 }
 
 void
-Editor::set_fade_out_shape (AudioRegion::FadeShape shape)
+Editor::set_fade_out_shape (FadeShape shape)
 {
 	RegionSelection rs;
 

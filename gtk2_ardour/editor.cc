@@ -737,6 +737,8 @@ Editor::Editor ()
 
 	constructed = true;
 	instant_save ();
+
+	setup_fade_images ();
 }
 
 Editor::~Editor()
@@ -1312,14 +1314,57 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		items.push_back (SeparatorElem());
 
 		if (Profile->get_sae()) {
-			items.push_back (MenuElem (_("Linear"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Linear)));
-			items.push_back (MenuElem (_("Slowest"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Fast)));
+			
+			items.push_back (MenuElem (_("Linear"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLinear)));
+			items.push_back (MenuElem (_("Slowest"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeFast)));
+			
 		} else {
-			items.push_back (MenuElem (_("Linear"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Linear)));
-			items.push_back (MenuElem (_("Slowest"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Fast)));
-			items.push_back (MenuElem (_("Slow"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogB)));
-			items.push_back (MenuElem (_("Fast"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::LogA)));
-			items.push_back (MenuElem (_("Fastest"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), AudioRegion::Slow)));
+
+			items.push_back (
+				ImageMenuElem (
+					_("Linear"),
+					*_fade_in_images[FadeLinear],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLinear)
+					)
+				);
+
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+
+			items.push_back (
+				ImageMenuElem (
+					_("Slowest"),
+					*_fade_in_images[FadeFast],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeFast)
+					));
+			
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+			
+			items.push_back (
+				ImageMenuElem (
+					_("Slow"),
+					*_fade_in_images[FadeLogB],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLogB)
+					));
+			
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+			
+			items.push_back (
+				ImageMenuElem (
+					_("Fast"),
+					*_fade_in_images[FadeLogA],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeLogA)
+					));
+			
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+			
+			items.push_back (
+				ImageMenuElem (
+					_("Fastest"),
+					*_fade_in_images[FadeSlow],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeSlow)
+					));
+			
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
 		}
 
 		break;
@@ -1335,14 +1380,55 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 		items.push_back (SeparatorElem());
 
 		if (Profile->get_sae()) {
-			items.push_back (MenuElem (_("Linear"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Linear)));
-			items.push_back (MenuElem (_("Slowest"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Slow)));
+			items.push_back (MenuElem (_("Linear"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeLinear)));
+			items.push_back (MenuElem (_("Slowest"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeSlow)));
 		} else {
-			items.push_back (MenuElem (_("Linear"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Linear)));
-			items.push_back (MenuElem (_("Slowest"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Slow)));
-			items.push_back (MenuElem (_("Slow"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogA)));
-			items.push_back (MenuElem (_("Fast"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::LogB)));
-			items.push_back (MenuElem (_("Fastest"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), AudioRegion::Fast)));
+
+			items.push_back (
+				ImageMenuElem (
+					_("Linear"),
+					*_fade_out_images[FadeLinear],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeLinear)
+					)
+				);
+
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+
+			items.push_back (
+				ImageMenuElem (
+					_("Slowest"),
+					*_fade_out_images[FadeFast],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeSlow)
+					));
+			
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+			
+			items.push_back (
+				ImageMenuElem (
+					_("Slow"),
+					*_fade_out_images[FadeLogB],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeLogA)
+					));
+			
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+			
+			items.push_back (
+				ImageMenuElem (
+					_("Fast"),
+					*_fade_out_images[FadeLogA],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeLogB)
+					));
+			
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
+			
+			items.push_back (
+				ImageMenuElem (
+					_("Fastest"),
+					*_fade_out_images[FadeSlow],
+					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeFast)
+					));
+			
+			dynamic_cast<ImageMenuItem*>(&items.back())->set_always_show_image ();
 		}
 
 		break;
@@ -5614,3 +5700,20 @@ Editor::update_region_layering_order_editor (framepos_t frame)
 		change_region_layering_order (frame);
 	}
 }
+
+void
+Editor::setup_fade_images ()
+{
+	_fade_in_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("crossfade-in-linear")));
+	_fade_in_images[FadeFast] = new Gtk::Image (get_icon_path (X_("crossfade-in-short-cut")));
+	_fade_in_images[FadeLogB] = new Gtk::Image (get_icon_path (X_("crossfade-in-slow-cut")));
+	_fade_in_images[FadeLogA] = new Gtk::Image (get_icon_path (X_("crossfade-in-fast-cut")));
+	_fade_in_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("crossfade-in-long-cut")));
+
+	_fade_out_images[FadeLinear] = new Gtk::Image (get_icon_path (X_("crossfade-out-linear")));
+	_fade_out_images[FadeFast] = new Gtk::Image (get_icon_path (X_("crossfade-out-short-cut")));
+	_fade_out_images[FadeLogB] = new Gtk::Image (get_icon_path (X_("crossfade-out-slow-cut")));
+	_fade_out_images[FadeLogA] = new Gtk::Image (get_icon_path (X_("crossfade-out-fast-cut")));
+	_fade_out_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("crossfade-out-long-cut")));
+}
+

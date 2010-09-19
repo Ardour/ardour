@@ -495,6 +495,14 @@ namespace ARDOUR {
             uint32_t requested_physical_out; /* now many of the available physical inputs to consider usable */
         };
 
+	enum FadeShape {
+		FadeLinear,
+		FadeFast,
+		FadeSlow,
+		FadeLogA,
+		FadeLogB
+	};
+
 } // namespace ARDOUR
 
 
