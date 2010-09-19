@@ -108,8 +108,7 @@ LineSet::line_compare(const Line& a, const Line& b)
 void
 LineSet::print_lines()
 {
-	for (Lines::iterator it = lines.begin(); it != lines.end(); ++it)
-{
+	for (Lines::iterator it = lines.begin(); it != lines.end(); ++it) {
 		cerr << "   " << it->coord << " " << it->width << " " << (int)it->r << " " << (int)it->g << " " << (int)it->b << " " << (int)it->a << endl;
 	}
 }
@@ -323,21 +322,26 @@ LineSet::line_at(double coord)
 }
 
 void
-LineSet::redraw_request(ArtIRect& r)
-{
-	get_canvas()->request_redraw(r.x0, r.y0, r.x1, r.y1);
-}
-
-void
-LineSet::redraw_request(ArtDRect& r)
+LineSet::redraw_request (ArtDRect const & r)
 {
 	int x0, y0, x1, y1;
 	Canvas& cv = *get_canvas();
 
 	//cerr << "redraw request: " << r.x0 << " " << r.y0 << " " << r.x1 << " " << r.y1 << endl;
 
-	cv.w2c(r.x0, r.y0, x0, y0);
-	cv.w2c(r.x1, r.y1, x1, y1);
+	double fx0 = r.x0;
+	if (fx0 > INT_MAX) {
+		fx0 = INT_MAX;
+	}
+
+	double fx1 = r.x1;
+	if (fx1 > INT_MAX) {
+		fx1 = INT_MAX;
+	}
+
+	cv.w2c (fx0, r.y0, x0, y0);
+	cv.w2c (fx1, r.y1, x1, y1);
+
 	cv.request_redraw(x0, y0, x1, y1);
 }
 
@@ -403,8 +407,19 @@ LineSet::update_bounds()
 	item->y2 = new_b.y1;
 
 	/* Update bounding box used in rendering function */
-	cv.w2c(new_b.x0, new_b.y0, bbox.x0, bbox.y0);
-	cv.w2c(new_b.x1, new_b.y1, bbox.x1, bbox.y1);
+
+	double fx0 = new_b.x0;
+	if (fx0 > INT_MAX) {
+		fx0 = INT_MAX;
+	}
+
+	double fx1 = new_b.x1;
+	if (fx1 > INT_MAX) {
+		fx1 = INT_MAX;
+	}
+	
+	cv.w2c (fx0, new_b.y0, bbox.x0, bbox.y0);
+	cv.w2c (fx1, new_b.y1, bbox.x1, bbox.y1);
 
 	/*
 	 * if the first primary axis property (x1 for Vertical, y1 for Horizontal) changed, we must redraw everything,

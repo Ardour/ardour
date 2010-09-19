@@ -153,8 +153,7 @@ protected:
 	void region_needs_update(double coord1, double coord2);
 	bool update_bounds();
 	void update_lines(bool need_redraw);
-	void redraw_request(ArtIRect&);
-	void redraw_request(ArtDRect&);
+	void redraw_request (ArtDRect const &);
 
 	Lines::iterator line_at(double coord);
 
