@@ -51,6 +51,7 @@ public:
 	boost::shared_ptr<Playlist> by_name (std::string name);
 	boost::shared_ptr<Playlist> by_id (const PBD::ID&);
 	uint32_t source_use_count (boost::shared_ptr<const Source> src) const;
+        uint32_t region_use_count (boost::shared_ptr<Region> region) const;
 	template<class T> void foreach (T *obj, void (T::*func)(boost::shared_ptr<Playlist>));
 	void get (std::vector<boost::shared_ptr<Playlist> >&);
 	void unassigned (std::list<boost::shared_ptr<Playlist> > & list);

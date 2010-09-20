@@ -176,6 +176,7 @@ private:
 	PBD::ScopedConnection check_new_region_connection;
 	bool ignore_region_list_selection_change;
 	bool ignore_selected_region_change;
+        bool expanded;
 };
 
 #endif /* __gtk_ardour_editor_regions_h__ */

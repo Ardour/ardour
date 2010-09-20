@@ -2712,6 +2712,21 @@ Playlist::find_region (const ID& id) const
 	return boost::shared_ptr<Region> ();
 }
 
+uint32_t
+Playlist::region_use_count (boost::shared_ptr<Region> r) const
+{
+	RegionLock rlock (const_cast<Playlist*> (this));
+        uint32_t cnt = 0;
+
+	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+		if ((*i) == r) {
+                        cnt++;
+		}
+	}
+
+	return cnt;
+}
+
 boost::shared_ptr<Region>
 Playlist::region_by_id (const ID& id) const
 {

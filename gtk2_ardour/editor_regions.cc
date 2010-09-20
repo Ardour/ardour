@@ -25,11 +25,13 @@
 
 #include "pbd/basename.h"
 #include "pbd/enumwriter.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/audioregion.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
+#include "ardour/session_playlists.h"
 #include "ardour/silentfilesource.h"
 #include "ardour/profile.h"
 
@@ -62,6 +64,7 @@ EditorRegions::EditorRegions (Editor* e)
  	, _no_redisplay (false) 
 	, ignore_region_list_selection_change (false)
 	, ignore_selected_region_change (false)
+        , expanded (false)
 {
 	_display.set_size_request (100, -1);
 	_display.set_name ("RegionListDisplay");
@@ -547,6 +550,9 @@ EditorRegions::redisplay ()
                 insert_into_tmp_regionlist (i->second);
         }
 
+        stacktrace (cerr, 22);
+        cerr << "Redisplay with " << tmp_region_list.size() << " regions\n";
+
 	for (list<boost::shared_ptr<Region> >::iterator r = tmp_region_list.begin(); r != tmp_region_list.end(); ++r) {
 		add_region (*r);
 	}
@@ -709,7 +715,7 @@ void
 EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
 	boost::shared_ptr<AudioRegion> audioregion = boost::dynamic_pointer_cast<AudioRegion>(region);
-        uint32_t used = _editor->get_regionview_count_from_region_list (region);
+        uint32_t used = _session->playlists->region_use_count (region);
 
         populate_row_position (region, row, used);
         populate_row_end (region, row, used);
@@ -941,8 +947,10 @@ EditorRegions::set_full (bool f)
 {
 	if (f) {
 		_display.expand_all ();
+                expanded = true;
 	} else {
 		_display.collapse_all ();
+                expanded = false;
 	}
 }
 
@@ -1345,6 +1353,8 @@ EditorRegions::get_state () const
 void
 EditorRegions::set_state (const XMLNode & node)
 {
+        bool changed = false;
+
 	if (node.name() != X_("RegionList")) {
 		return;
 	}
@@ -1352,6 +1362,9 @@ EditorRegions::set_state (const XMLNode & node)
 	XMLProperty const * p = node.property (X_("sort-type"));
 	if (p) {
 		Editing::RegionListSortType const t = static_cast<Editing::RegionListSortType> (string_2_enum (p->value(), _sort_type));
+                if (_sort_type != t) {
+                        changed = true;
+                }
 		reset_sort_type (t, true);
 		RefPtr<RadioAction> ract = sort_type_action (t);
 		ract->set_active ();
@@ -1359,10 +1372,17 @@ EditorRegions::set_state (const XMLNode & node)
 
 	p = node.property (X_("sort-ascending"));
 	if (p) {
-		bool const a = string_is_affirmative (p->value ());
-		reset_sort_direction (a);
+		bool const yn = string_is_affirmative (p->value ());
+                SortType old_sort_type;
+                int old_sort_column;
+
+                _model->get_sort_column_id (old_sort_column, old_sort_type);
+                if (old_sort_type != (yn ? SORT_ASCENDING : SORT_DESCENDING)) {
+                        changed = true;
+                }
+		reset_sort_direction (yn);
 		RefPtr<Action> act;
-		if (a) {
+		if (yn) {
 			act = ActionManager::get_action (X_("RegionList"), X_("SortAscending"));
 		} else {
 			act = ActionManager::get_action (X_("RegionList"), X_("SortDescending"));
@@ -1373,18 +1393,29 @@ EditorRegions::set_state (const XMLNode & node)
 
 	p = node.property (X_("show-all"));
 	if (p) {
-		bool const s = string_is_affirmative (p->value ());
-		set_full (s);
-		toggle_full_action()->set_active (s);
+		bool const yn = string_is_affirmative (p->value ());
+                if (expanded != yn) {
+                        changed = true;
+                }
+		set_full (yn);
+		toggle_full_action()->set_active (yn);
 	}
 
 	p = node.property (X_("show-automatic-regions"));
 	if (p) {
-		bool const s = string_is_affirmative (p->value ());
-		_show_automatic_regions = s;
-		redisplay ();
-		toggle_show_auto_regions_action()->set_active (s);
-	}
+		bool const yn = string_is_affirmative (p->value ());
+                if (yn != _show_automatic_regions) {
+                        _show_automatic_regions = yn;
+                        toggle_show_auto_regions_action()->set_active (yn);
+                        /* no need to set changed because the above toggle 
+                           will have triggered a redisplay 
+                        */
+                }
+        }
+        
+        if (changed) {
+                redisplay ();
+        }
 }
 
 RefPtr<RadioAction>

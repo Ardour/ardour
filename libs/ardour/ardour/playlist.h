@@ -151,6 +151,7 @@ public:
         uint32_t                   count_regions_at (framepos_t);
 	RegionList*                regions_touched (framepos_t start, framepos_t end);
 	RegionList*                regions_to_read (framepos_t start, framepos_t end);
+	uint32_t                   region_use_count (boost::shared_ptr<Region>) const;
 	boost::shared_ptr<Region>  find_region (const PBD::ID&) const;
 	boost::shared_ptr<Region>  top_region_at (framepos_t frame);
 	boost::shared_ptr<Region>  top_unmuted_region_at (framepos_t frame);

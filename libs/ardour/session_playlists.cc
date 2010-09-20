@@ -413,3 +413,20 @@ SessionPlaylists::find_crossfade (const PBD::ID& id)
 
 	return boost::shared_ptr<Crossfade> ();
 }
+
+uint32_t
+SessionPlaylists::region_use_count (boost::shared_ptr<Region> region) const
+{
+	Glib::Mutex::Lock lm (lock);
+        uint32_t cnt = 0;
+	
+	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+                cnt += (*i)->region_use_count (region);
+	}
+
+	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+                cnt += (*i)->region_use_count (region);
+	}
+
+	return cnt;
+}
