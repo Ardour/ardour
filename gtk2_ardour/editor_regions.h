@@ -73,7 +73,7 @@ private:
 			add (name);
 			add (region);
 			add (color_);
-			add (start);
+			add (position);
 			add (end);
 			add (length);
 			add (sync);
@@ -91,7 +91,7 @@ private:
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Region> > region;
 		Gtk::TreeModelColumn<Gdk::Color> color_;
-		Gtk::TreeModelColumn<std::string> start;
+		Gtk::TreeModelColumn<std::string> position;
 		Gtk::TreeModelColumn<std::string> end;
 		Gtk::TreeModelColumn<std::string> length;
 		Gtk::TreeModelColumn<std::string> sync;
@@ -126,9 +126,25 @@ private:
 
 	int sorter (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);
 
+        void format_position (ARDOUR::framepos_t pos, char* buf, size_t bufsize);
+
 	void add_region (boost::shared_ptr<ARDOUR::Region>);
 	void add_regions (std::vector<boost::shared_ptr<ARDOUR::Region> > & );
 	void populate_row (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &);
+        void populate_row_used (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used);
+        void populate_row_position (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used);
+        void populate_row_end (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used);
+        void populate_row_sync (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used);
+        void populate_row_fade_in (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used, boost::shared_ptr<ARDOUR::AudioRegion>);
+        void populate_row_fade_out (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used, boost::shared_ptr<ARDOUR::AudioRegion>);
+        void populate_row_locked (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used);
+        void populate_row_muted (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used);
+        void populate_row_glued (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used);
+        void populate_row_opaque (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used);
+        void populate_row_length (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row);
+        void populate_row_name (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row);
+        void populate_row_source (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row);
+
 	void update_row (boost::shared_ptr<ARDOUR::Region>);
 	bool update_subrows (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, int);
 	void update_all_rows ();

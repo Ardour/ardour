@@ -367,8 +367,6 @@ int ardour_main (int argc, char *argv[])
 int main (int argc, char *argv[])
 #endif
 {
-	vector<std::string> null_file_list;
-
 #ifdef __APPLE__
 	fixup_bundle_environment ();
 #endif
@@ -440,7 +438,7 @@ int main (int argc, char *argv[])
 	PBD::ID::init ();
 
 	if (::signal (SIGPIPE, sigpipe_handler)) {
-		cerr << _("Cannot install SIGPIPE error handler") << endl;
+		cerr << _("Cannot xinstall SIGPIPE error handler") << endl;
 	}
 
 	try {

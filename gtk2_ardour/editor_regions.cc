@@ -77,7 +77,7 @@ EditorRegions::EditorRegions (Editor* e)
 
 	_display.set_model (_model);
 	_display.append_column (_("Regions"), _columns.name);
-	_display.append_column (_("Start"), _columns.start);
+	_display.append_column (_("Position"), _columns.position);
 	_display.append_column (_("End"), _columns.end);
 	_display.append_column (_("Length"), _columns.length);
 	_display.append_column (_("Sync"), _columns.sync);
@@ -332,16 +332,19 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 void
 EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange& what_changed)
 {
-	if (what_changed.contains (ARDOUR::Properties::name) ||
-            what_changed.contains (ARDOUR::Properties::start) ||
-            what_changed.contains (ARDOUR::Properties::position) ||
-            what_changed.contains (ARDOUR::Properties::length) ||
-	    what_changed.contains (ARDOUR::Properties::locked) ||
-	    what_changed.contains (ARDOUR::Properties::position_lock_style) ||
-	    what_changed.contains (ARDOUR::Properties::muted) ||
-	    what_changed.contains (ARDOUR::Properties::opaque) ||
-	    what_changed.contains (ARDOUR::Properties::fade_in) ||
-	    what_changed.contains (ARDOUR::Properties::fade_out)) {
+        PropertyChange our_interests;
+
+        our_interests.add (ARDOUR::Properties::name);
+        our_interests.add (ARDOUR::Properties::position);
+        our_interests.add (ARDOUR::Properties::length);
+        our_interests.add (ARDOUR::Properties::locked);
+        our_interests.add (ARDOUR::Properties::position_lock_style);
+        our_interests.add (ARDOUR::Properties::muted);
+        our_interests.add (ARDOUR::Properties::opaque);
+        our_interests.add (ARDOUR::Properties::fade_in);
+        our_interests.add (ARDOUR::Properties::fade_out);
+
+        if (what_changed.contains (our_interests)) {
 
 		/* find the region in our model and update its row */
 		TreeModel::Children rows = _model->children ();
@@ -358,7 +361,41 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 			}
 
 			if (j != children.end()) {
-                                populate_row (r, *j);
+
+                                boost::shared_ptr<AudioRegion> audioregion = boost::dynamic_pointer_cast<AudioRegion>(r);
+                                uint32_t used = _editor->get_regionview_count_from_region_list (r);
+
+                                if (what_changed.contains (ARDOUR::Properties::name)) {
+                                        populate_row_name (r, *j);
+                                }
+                                if (what_changed.contains (ARDOUR::Properties::position)) {
+                                        populate_row_position (r, *j, used);
+                                        populate_row_end (r, *j, used);
+                                }
+                                if (what_changed.contains (ARDOUR::Properties::length)) {
+                                        populate_row_end (r, *j, used);
+                                        populate_row_length (r, *j);
+                                }
+                                if (what_changed.contains (ARDOUR::Properties::locked)) {
+                                        populate_row_locked (r, *j, used);
+                                }
+                                if (what_changed.contains (ARDOUR::Properties::position_lock_style)) {
+                                        populate_row_glued (r, *j, used);
+                                }
+                                if (what_changed.contains (ARDOUR::Properties::muted)) {
+                                        populate_row_muted (r, *j, used);
+                                }
+                                if (what_changed.contains (ARDOUR::Properties::opaque)) {
+                                        populate_row_opaque (r, *j, used);
+                                }
+                                if (what_changed.contains (ARDOUR::Properties::fade_in)) {
+                                        populate_row_fade_in (r, *j, used, audioregion);
+                                }
+                                if (what_changed.contains (ARDOUR::Properties::fade_out)) {
+                                        populate_row_fade_out (r, *j, used, audioregion);
+                                }
+
+                                break;
 			}
 
 			++i;
@@ -629,150 +666,67 @@ EditorRegions::update_all_subrows (TreeModel::Row const &parent_row, int level)
 }
 
 void
-EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row const &row)
+EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize)
 {
-	char start_str[16];
-	char end_str[16];
-	char length_str[16];
-	char sync_str[16];
-	char fadein_str[16];
-	char fadeout_str[16];
-	char used_str[8];
-	int used;
 	BBT_Time bbt;
 	Timecode::Time timecode;
 
-	bool missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source());
-
-	boost::shared_ptr<AudioRegion> audioRegion = boost::dynamic_pointer_cast<AudioRegion>(region);
-
-	bool fades_in_seconds = false;
-
-	start_str[0] = '\0';
-	end_str[0] = '\0';
-	length_str[0] = '\0';
-	sync_str[0] = '\0';
-	fadein_str[0] = '\0';
-	fadeout_str[0] = '\0';
-	used_str[0] = '\0';
-
-	used = _editor->get_regionview_count_from_region_list (region);
-	sprintf (used_str, "%4d" , used);
-
 	switch (ARDOUR_UI::instance()->secondary_clock.mode ()) {
-	case AudioClock::Timecode:
-	case AudioClock::Off:												/* If the secondary clock is off, default to Timecode */
-		_session->timecode_time (region->position(), timecode);
-		sprintf (start_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
-		_session->timecode_time (region->position() + region->length() - 1, timecode);
-		sprintf (end_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
-		_session->timecode_time (region->length(), timecode);
-		sprintf (length_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
-		_session->timecode_time (region->sync_position(), timecode);
-		sprintf (sync_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
-
-		if (audioRegion && !fades_in_seconds) {
-			_session->timecode_time (audioRegion->fade_in()->back()->when, timecode);
-			sprintf (fadein_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
-			_session->timecode_time (audioRegion->fade_out()->back()->when, timecode);
-			sprintf (fadeout_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
-		}
-
-		break;
-
 	case AudioClock::BBT:
-		_session->tempo_map().bbt_time (region->position(), bbt);
-		sprintf (start_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
-		_session->tempo_map().bbt_time (region->position() + region->length() - 1, bbt);
-		sprintf (end_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
-		_session->tempo_map().bbt_time (region->length(), bbt);
-		sprintf (length_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
-		_session->tempo_map().bbt_time (region->sync_position(), bbt);
-		sprintf (sync_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
-
-		if (audioRegion && !fades_in_seconds) {
-			_session->tempo_map().bbt_time (audioRegion->fade_in()->back()->when, bbt);
-			sprintf (fadein_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
-			_session->tempo_map().bbt_time (audioRegion->fade_out()->back()->when, bbt);
-			sprintf (fadeout_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
-		}
+		_session->tempo_map().bbt_time (pos, bbt);
+		snprintf (buf, bufsize, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
 		break;
 
 	case AudioClock::MinSec:
-		nframes_t left;
+		framepos_t left;
 		int hrs;
 		int mins;
 		float secs;
 
-		left = region->position();
+		left = pos;
 		hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
 		left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
 		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
 		left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
 		secs = left / (float) _session->frame_rate();
-		sprintf (start_str, "%02d:%02d:%06.3f", hrs, mins, secs);
-
-		left = region->position() + region->length() - 1;
-		hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
-		left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
-		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-		left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
-		secs = left / (float) _session->frame_rate();
-		sprintf (end_str, "%02d:%02d:%06.3f", hrs, mins, secs);
-
-		left = region->length();
-		hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
-		left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
-		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-		left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
-		secs = left / (float) _session->frame_rate();
-		sprintf (length_str, "%02d:%02d:%06.3f", hrs, mins, secs);
-
-		left = region->sync_position();
-		hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
-		left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
-		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-		left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
-		secs = left / (float) _session->frame_rate();
-		sprintf (sync_str, "%02d:%02d:%06.3f", hrs, mins, secs);
-
-		if (audioRegion && !fades_in_seconds) {
-			left = audioRegion->fade_in()->back()->when;
-			hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
-			left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
-			mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-			left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
-			secs = left / (float) _session->frame_rate();
-			sprintf (fadein_str, "%02d:%02d:%06.3f", hrs, mins, secs);
-
-			left = audioRegion->fade_out()->back()->when;
-			hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
-			left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
-			mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-			left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
-			secs = left / (float) _session->frame_rate();
-			sprintf (fadeout_str, "%02d:%02d:%06.3f", hrs, mins, secs);
-		}
-
+		snprintf (buf, bufsize, "%02d:%02d:%06.3f", hrs, mins, secs);
 		break;
 
 	case AudioClock::Frames:
-		snprintf (start_str, sizeof (start_str), "%" PRId64, region->position());
-		snprintf (end_str, sizeof (end_str), "%" PRId64, (region->last_frame()));
-		snprintf (length_str, sizeof (length_str), "%" PRId64, region->length());
-		snprintf (sync_str, sizeof (sync_str), "%" PRId64, region->sync_position());
-
-		if (audioRegion && !fades_in_seconds) {
-			snprintf (fadein_str, sizeof (fadein_str), "%u", uint (audioRegion->fade_in()->back()->when));
-			snprintf (fadeout_str, sizeof (fadeout_str), "%u", uint (audioRegion->fade_out()->back()->when));
-		}
-
+		snprintf (buf, bufsize, "%" PRId64, pos);
 		break;
 
+	case AudioClock::Timecode:
+	case AudioClock::Off: /* If the secondary clock is off, default to Timecode */
 	default:
+		_session->timecode_time (pos, timecode);
+		snprintf (buf, bufsize, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 		break;
 	}
+}
 
+void
+EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row const &row)
+{
+	boost::shared_ptr<AudioRegion> audioregion = boost::dynamic_pointer_cast<AudioRegion>(region);
+        uint32_t used = _editor->get_regionview_count_from_region_list (region);
+
+        populate_row_position (region, row, used);
+        populate_row_end (region, row, used);
+        populate_row_sync (region, row, used);
+        populate_row_fade_in (region, row, used, audioregion);
+        populate_row_fade_out (region, row, used, audioregion);
+        populate_row_locked (region, row, used);
+        populate_row_glued (region, row, used);
+        populate_row_muted (region, row, used);
+        populate_row_opaque (region, row, used);
+        populate_row_length (region, row);
+        populate_row_source (region, row);
+        populate_row_name (region, row);
+        populate_row_used (region, row, used);
+}
+
+#if 0
 	if (audioRegion && fades_in_seconds) {
 
 		nframes_t left;
@@ -801,74 +755,171 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 			sprintf (fadeout_str, "%01dmS", millisecs);
 		}
 	}
+#endif
 
-	if (used > 1) {
-		row[_columns.start] = _("Multiple");
-		row[_columns.end] = _("Multiple");
-		row[_columns.sync] = _("Multiple");
-		row[_columns.fadein] = _("Multiple");
-		row[_columns.fadeout] = _("Multiple");
-		row[_columns.locked] = false;
-		row[_columns.glued] = false;
-		row[_columns.muted] = false;
-		row[_columns.opaque] = false;
-	} else {
-		row[_columns.start] = start_str;
-		row[_columns.end] = end_str;
+void
+EditorRegions::populate_row_used (boost::shared_ptr<Region> region, TreeModel::Row const& row, uint32_t used)
+{
+        char buf[8];
+	snprintf (buf, sizeof (buf), "%4d" , used);
+	row[_columns.used] = buf;
+}
 
+void
+EditorRegions::populate_row_length (boost::shared_ptr<Region> region, TreeModel::Row const &row)
+{
+        char buf[16];
+        format_position (region->length(), buf, sizeof (buf));
+        row[_columns.length] = buf;
+}
+
+void
+EditorRegions::populate_row_end (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
+{
+        if (used > 1) {
+                row[_columns.end] = _("Multiple");
+        } else {
+                char buf[16];
+                format_position (region->last_frame(), buf, sizeof (buf));
+                row[_columns.end] = buf;
+        }
+}
+
+void
+EditorRegions::populate_row_position (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
+{
+        if (used > 1) {
+                row[_columns.position] = _("Multiple");
+        } else {
+                char buf[16];
+                format_position (region->position(), buf, sizeof (buf));
+                row[_columns.position] = buf;
+        }
+}
+
+void
+EditorRegions::populate_row_sync (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
+{
+        if (used > 1) {
+                row[_columns.sync] = _("Multiple");
+        } else {
 		if (region->sync_position() == region->position()) {
 			row[_columns.sync] = _("Start");
-		} else if (region->sync_position() == (region->position() + region->length() - 1)) {
+		} else if (region->sync_position() == (region->last_frame())) {
 			row[_columns.sync] = _("End");
 		} else {
-			row[_columns.sync] = sync_str;
+                        char buf[16];
+                        format_position (region->sync_position(), buf, sizeof (buf));
+			row[_columns.sync] = buf;
 		}
+        }
+}
 
-		if (audioRegion) {
-			if (audioRegion->fade_in_active()) {
-				row[_columns.fadein] = string_compose("%1%2%3", " ", fadein_str, " ");
-			} else {
-				row[_columns.fadein] = string_compose("%1%2%3", "(", fadein_str, ")");
-			}
-		} else {
+void
+EditorRegions::populate_row_fade_in (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used, boost::shared_ptr<AudioRegion> audioregion)
+{
+        if (!audioregion) {
 			row[_columns.fadein] = "";
-		}
+        } else {
+                if (used > 1) {
+                        row[_columns.fadein] = _("Multiple");
+                } else {
 
-		if (audioRegion) {
-			if (audioRegion->fade_out_active()) {
-				row[_columns.fadeout] = string_compose("%1%2%3", " ", fadeout_str, " ");
+                        char buf[16];
+                        format_position (audioregion->fade_in()->back()->when, buf, sizeof (buf));
+                        row[_columns.fadein] = buf;
+                        
+			if (audioregion->fade_in_active()) {
+				row[_columns.fadein] = string_compose("%1%2%3", " ", buf, " ");
 			} else {
-				row[_columns.fadeout] = string_compose("%1%2%3", "(", fadeout_str, ")");
+				row[_columns.fadein] = string_compose("%1%2%3", "(", buf, ")");
 			}
-		} else {
-			row[_columns.fadeout] = "";
-		}
+                }
+        }
+}
 
+void
+EditorRegions::populate_row_fade_out (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used, boost::shared_ptr<AudioRegion> audioregion)
+{
+        if (!audioregion) {
+                row[_columns.fadeout] = "";
+        } else {
+                if (used > 1) {
+                        row[_columns.fadeout] = _("Multiple");
+                } else {
+                        char buf[16];
+                        format_position (audioregion->fade_out()->back()->when, buf, sizeof (buf));
+                        
+                        if (audioregion->fade_out_active()) {
+                                row[_columns.fadeout] = string_compose("%1%2%3", " ", buf, " ");
+                        } else {
+                                row[_columns.fadeout] = string_compose("%1%2%3", "(", buf, ")");
+                        }
+                } 
+        }
+}
+        
+void
+EditorRegions::populate_row_locked (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
+{
+        if (used > 1) {
+                row[_columns.locked] = false;
+        } else {
 		row[_columns.locked] = region->locked();
+        }
+}
 
+void
+EditorRegions::populate_row_glued (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
+{
+        if (used > 1) {
+                row[_columns.glued] = false;
+        } else {
 		if (region->position_lock_style() == MusicTime) {
 			row[_columns.glued] = true;
 		} else {
 			row[_columns.glued] = false;
 		}
+        }
+}
 
+void
+EditorRegions::populate_row_muted (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
+{
+        if (used > 1) {
+                row[_columns.muted] = false;
+        } else {
 		row[_columns.muted] = region->muted();
+        }
+}
+
+void
+EditorRegions::populate_row_opaque (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
+{
+        if (used > 1) {
+                row[_columns.opaque] = false;
+        } else {
 		row[_columns.opaque] = region->opaque();
-	}
+        }
+}
 
-	row[_columns.length] = length_str;
-	row[_columns.used] = used_str;
-
-	if (missing_source) {
-		row[_columns.path] = _("MISSING ") + region->source()->name();
-	} else {
-		row[_columns.path] = region->source()->name();
-	}
-
+void
+EditorRegions::populate_row_name (boost::shared_ptr<Region> region, TreeModel::Row const &row)
+{
 	if (region->n_channels() > 1) {
 		row[_columns.name] = string_compose("%1  [%2]", region->name(), region->n_channels());
 	} else {
 		row[_columns.name] = region->name();
+	}
+}        
+
+void
+EditorRegions::populate_row_source (boost::shared_ptr<Region> region, TreeModel::Row const &row)
+{
+        if (boost::dynamic_pointer_cast<SilentFileSource>(region->source())) {
+		row[_columns.path] = _("MISSING ") + region->source()->name();
+	} else {
+		row[_columns.path] = region->source()->name();
 	}
 }
 
