@@ -127,6 +127,7 @@ class EditorLocations;
 class EditorSnapshots;
 class EditorSummary;
 class RegionLayeringOrderEditor;
+class ProgressReporter;
 
 /* <CMT Additions> */
 class ImageFrameView;
@@ -1910,7 +1911,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* audio filters */
 
-	void apply_filter (ARDOUR::Filter&, std::string cmd);
+	void apply_filter (ARDOUR::Filter&, std::string cmd, ProgressReporter* progress = 0);
 
 	Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv);
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op);

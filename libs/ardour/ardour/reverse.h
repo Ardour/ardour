@@ -29,7 +29,7 @@ class Reverse : public Filter {
 	Reverse (ARDOUR::Session&);
 	~Reverse ();
 
-	int run (boost::shared_ptr<ARDOUR::Region>);
+	int run (boost::shared_ptr<ARDOUR::Region>, Progress *);
 };
 
 } /* namespace */

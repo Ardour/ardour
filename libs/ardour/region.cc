@@ -1535,9 +1535,9 @@ Region::get_parent() const
 }
 
 int
-Region::apply (Filter& filter)
+Region::apply (Filter& filter, Progress* progress)
 {
-	return filter.run (shared_from_this());
+	return filter.run (shared_from_this(), progress);
 }
 
 

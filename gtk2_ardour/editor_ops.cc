@@ -4740,7 +4740,7 @@ Editor::strip_region_silence ()
 
 	if (r == Gtk::RESPONSE_OK) {
 		StripSilence s (*_session, d.threshold (), d.minimum_length (), d.fade_length ());
-		apply_filter (s, _("strip silence"));
+		apply_filter (s, _("strip silence"), &d);
 	}
 }
 
@@ -4855,7 +4855,7 @@ Editor::quantize_region ()
 }
 
 void
-Editor::apply_filter (Filter& filter, string command)
+Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress)
 {
 	RegionSelection rs;
 
@@ -4870,6 +4870,9 @@ Editor::apply_filter (Filter& filter, string command)
 	track_canvas->get_window()->set_cursor (*wait_cursor);
 	gdk_flush ();
 
+	int n = 0;
+	int const N = rs.size ();
+	
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
 		RegionSelection::iterator tmp = r;
 		++tmp;
@@ -4878,10 +4881,14 @@ Editor::apply_filter (Filter& filter, string command)
 		if (arv) {
 			boost::shared_ptr<Playlist> playlist = arv->region()->playlist();
 
-			if (arv->audio_region()->apply (filter) == 0) {
+			if (progress) {
+				progress->descend (1.0 / N);
+			}
+
+			if (arv->audio_region()->apply (filter, progress) == 0) {
 
 				playlist->clear_changes ();
-                                
+
 				if (filter.results.empty ()) {
 
 					/* no regions returned; remove the old one */
@@ -4907,9 +4914,15 @@ Editor::apply_filter (Filter& filter, string command)
 			} else {
 				goto out;
 			}
+
+			if (progress) {
+				progress->ascend ();
+				progress->set_progress (float (n + 1) / N);
+			}
 		}
 
 		r = tmp;
+		++n;
 	}
 
 	commit_reversible_command ();

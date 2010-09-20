@@ -53,6 +53,7 @@ StripSilenceDialog* StripSilenceDialog::current = 0;
 /** Construct Strip silence dialog box */
 StripSilenceDialog::StripSilenceDialog (Session* s, list<boost::shared_ptr<ARDOUR::AudioRegion> > const & regions)
 	: ArdourDialog (_("Strip Silence"))
+	, ProgressReporter ()
         , _minimum_length (X_("silence duration"), true, "SilenceDurationClock", true, false, true, false)
         , _fade_length (X_("silence duration"), true, "SilenceDurationClock", true, false, true, false)
         , _wave_width (640)
@@ -142,6 +143,8 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<boost::shared_ptr<ARDOU
 	}
 
 	get_vbox()->pack_start (*_canvas, true, true);
+
+	get_vbox()->pack_start (_progress_bar, true, true);
 
 	show_all ();
 
@@ -559,4 +562,10 @@ StripSilenceDialog::Wave::~Wave ()
 	for (list<SimpleRect*>::iterator i = silence_rects.begin(); i != silence_rects.end(); ++i) {
 		delete *i;
 	}
+}
+
+void
+StripSilenceDialog::update_progress_gui (float p)
+{
+	_progress_bar.set_fraction (p);
 }

@@ -148,6 +148,7 @@ libardour_sources = [
 	'port_set.cc',
 	'process_thread.cc',
 	'processor.cc',
+	'progress.cc',
 	'quantize.cc',
 	'rc_configuration.cc',
 	'recent_sessions.cc',

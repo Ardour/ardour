@@ -27,7 +27,7 @@ class StripSilence : public Filter {
 public:
 	StripSilence (Session &, double, nframes_t, nframes_t);
 
-	int run (boost::shared_ptr<ARDOUR::Region>);
+	int run (boost::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
 
 private:
 	double _threshold; ///< silence threshold, in dBFS

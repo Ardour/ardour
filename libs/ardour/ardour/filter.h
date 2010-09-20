@@ -28,13 +28,14 @@ namespace ARDOUR {
 
 class Region;
 class Session;
+class Progress;	
 
 class Filter {
 
   public:
 	virtual ~Filter() {}
 
-	virtual int run (boost::shared_ptr<ARDOUR::Region>) = 0;
+	virtual int run (boost::shared_ptr<ARDOUR::Region>, Progress* progress = 0) = 0;
 	std::vector<boost::shared_ptr<ARDOUR::Region> > results;
 
   protected:

@@ -24,6 +24,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/dB.h"
+#include "ardour/progress.h"
 
 using namespace ARDOUR;
 
@@ -41,7 +42,7 @@ StripSilence::StripSilence (Session & s, double threshold, nframes_t minimum_len
 }
 
 int
-StripSilence::run (boost::shared_ptr<Region> r)
+StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 {
 	results.clear ();
 
@@ -88,6 +89,9 @@ StripSilence::run (boost::shared_ptr<Region> r)
                 in_silence = false;
         }
 
+	int n = 0;
+	int const N = silence.size ();
+
         while (s != silence.end()) {
 
                 framecnt_t interval_duration;
@@ -119,6 +123,11 @@ StripSilence::run (boost::shared_ptr<Region> r)
                 ++s;
                 end = s->first;
                 in_silence = !in_silence;
+
+		if (progress) {
+			progress->set_progress (float (n) / N);
+		}
+		++n;
         }
 
 	return 0;

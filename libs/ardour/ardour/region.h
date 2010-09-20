@@ -68,6 +68,7 @@ namespace Properties {
 class Playlist;
 class Filter;
 class ExportSpecification;
+class Progress;	
 
 enum RegionEditState {
 	EditChangesNothing = 0,
@@ -205,7 +206,7 @@ class Region
 	void set_locked (bool yn);
 	void set_position_locked (bool yn);
 
-	int apply (Filter&);
+	int apply (Filter &, Progress* progress = 0);
 
 	virtual uint64_t read_data_count() const { return _read_data_count; }
 

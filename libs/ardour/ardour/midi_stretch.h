@@ -29,7 +29,7 @@ class MidiStretch : public Filter {
 	MidiStretch (ARDOUR::Session&, TimeFXRequest&);
 	~MidiStretch ();
 
-	int run (boost::shared_ptr<ARDOUR::Region>);
+	int run (boost::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
 
   private:
 	TimeFXRequest& _request;

@@ -23,6 +23,7 @@
 #include "ardour/types.h"
 #include "ardour_dialog.h"
 #include "canvas.h"
+#include "progress_reporter.h"
 
 namespace ARDOUR {
 	class AudioRegion;
@@ -30,7 +31,7 @@ namespace ARDOUR {
 }
 
 /// Dialog box to set options for the `strip silence' filter
-class StripSilenceDialog : public ArdourDialog
+class StripSilenceDialog : public ArdourDialog, public ProgressReporter
 {
 public:
         StripSilenceDialog (ARDOUR::Session*, std::list<boost::shared_ptr<ARDOUR::AudioRegion> > const &);
@@ -52,6 +53,7 @@ private:
         void resize_silence_rects ();
 	void update_threshold_line ();
 	void threshold_changed ();
+	void update_progress_gui (float);
 
 	Gtk::SpinButton _threshold;
 	AudioClock      _minimum_length;
@@ -59,6 +61,7 @@ private:
         Gtk::Label      _segment_count_label;
 	Gtk::Label      _shortest_silence_label;
 	Gtk::Label      _shortest_audible_label;
+	Gtk::ProgressBar _progress_bar;
         typedef std::list<std::pair<ARDOUR::frameoffset_t,ARDOUR::framecnt_t> > SilenceResult;
 
 	struct Wave {
