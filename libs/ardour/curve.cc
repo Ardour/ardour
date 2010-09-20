@@ -312,7 +312,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int64_t veclen)
 		return;
 	}
 
- 	if (npoints == 1 ) {
+ 	if (npoints == 1) {
  	
  		for (i = 0; i < veclen; ++i) {
  			vec[i] = events.front()->value;
@@ -355,17 +355,18 @@ Curve::_get_vector (double x0, double x1, float *vec, int64_t veclen)
 
 	rx = lx;
 
+	/* note: if there are veclen elements in the output,
+	   there are only veclen-1 steps between them.
+	*/
+	
 	if (veclen > 1) {
-
-		/* note: if there are veclen elements in the output,
-		   there are only veclen-1 steps between them.
-		*/
-
 		dx = (hx - lx) / (veclen-1);
-
-		for (i = 0; i < veclen; ++i, rx += dx) {
-			vec[i] = multipoint_eval (rx);
-		}
+	} else {
+		dx = 0;
+	}
+	
+	for (i = 0; i < veclen; ++i, rx += dx) {
+		vec[i] = multipoint_eval (rx);
 	}
 }
 
