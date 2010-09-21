@@ -476,6 +476,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	static Gdk::Cursor* timebar_cursor;
 	static Gdk::Cursor* transparent_cursor;
 
+        Gdk::Cursor* get_canvas_cursor () const { return current_canvas_cursor; }
+        void set_canvas_cursor (Gdk::Cursor*);
+
   protected:
 	void map_transport_state ();
 	void map_position_change (framepos_t);
@@ -686,8 +689,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::VBox           vpacker;
 
 	Gdk::Cursor*          current_canvas_cursor;
-	void set_canvas_cursor ();
 	Gdk::Cursor* which_grabber_cursor ();
+	void set_canvas_cursor ();
 
 	ArdourCanvas::Canvas* track_canvas;
 

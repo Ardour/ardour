@@ -53,6 +53,8 @@ CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item, const boost
 	, _note(note)
 	, _selected(false)
 	, _valid (true)
+        , _mouse_x_fraction (-1.0)
+        , _mouse_y_fraction (-1.0)
 {
 }
 
@@ -223,6 +225,60 @@ CanvasNoteEvent::base_color()
 	return 0;
 }
 
+void
+CanvasNoteEvent::set_mouse_fractions (GdkEvent* ev)
+{
+        double ix, iy;
+        double bx1, bx2, by1, by2;
+
+	switch (ev->type) {
+        case GDK_MOTION_NOTIFY:
+                ix = ev->motion.x;
+                iy = ev->motion.y;
+                break;
+        case GDK_ENTER_NOTIFY:
+                ix = ev->crossing.x;
+                iy = ev->crossing.y;
+                break;
+        case GDK_BUTTON_PRESS:
+        case GDK_BUTTON_RELEASE:
+                ix = ev->button.x;
+                iy = ev->button.y;
+                break;
+        default:
+                _mouse_x_fraction = -1.0;
+                _mouse_y_fraction = -1.0;
+                return;
+        }
+
+        _item->get_bounds (bx1, by1, bx2, by2);
+        _item->w2i (ix, iy);
+        /* hmm, something wrong here. w2i should give item-local coordinates
+           but it doesn't. for now, finesse this.
+        */
+        ix = ix - bx1;
+        iy = iy - by1;
+
+        /* fraction of width/height */
+        double xf;
+        double yf;
+        bool notify = false;
+
+        xf = ix / (bx2 - bx1);
+        yf = iy / (by2 - by1);
+
+        if (xf != _mouse_x_fraction || yf != _mouse_y_fraction) {
+                notify = true;
+        }
+
+        _mouse_x_fraction = xf;
+        _mouse_y_fraction = yf;
+
+        if (notify) {
+                _region.note_mouse_position (_mouse_x_fraction, _mouse_y_fraction);
+        }
+}
+
 bool
 CanvasNoteEvent::on_event(GdkEvent* ev)
 {
@@ -232,22 +288,21 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
-		_region.note_entered(this);
+                set_mouse_fractions (ev);
+		_region.note_entered (this);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
+                set_mouse_fractions (ev);
 		_region.note_left (this);
 		break;
 
         case GDK_MOTION_NOTIFY:
-                double ix, iy;
-                ix = ev->motion.x;
-                iy = ev->motion.y;
-                _item->w2i (ix, iy);
-                cerr << "note motion at " << ix << ',' << iy << endl;
+                set_mouse_fractions (ev);
                 break;
 
 	case GDK_BUTTON_PRESS:
+                set_mouse_fractions (ev);
 		if (ev->button.button == 3 && Keyboard::no_modifiers_active (ev->button.state)) {
                         show_channel_selector();
 			return true;
@@ -255,6 +310,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 		break;
 
 	case GDK_BUTTON_RELEASE:
+                set_mouse_fractions (ev);
 		if (ev->button.button == 3 && Keyboard::no_modifiers_active (ev->button.state)) {
 			return true;
 		}
@@ -265,6 +321,13 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 	}
 
 	return false;
+}
+
+bool
+CanvasNoteEvent::mouse_near_ends () const
+{
+        return (_mouse_x_fraction >= 0.0 && _mouse_x_fraction < 0.25) ||
+                (_mouse_x_fraction >= 0.75 && _mouse_x_fraction < 1.0);
 }
 
 } // namespace Canvas

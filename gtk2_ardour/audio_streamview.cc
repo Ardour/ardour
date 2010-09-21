@@ -488,7 +488,7 @@ AudioStreamView::setup_rec_box ()
 					boost::dynamic_pointer_cast<AudioRegion>(RegionFactory::create (sources, plist, false)));
 
 				assert(region);
-				region->block_property_changes ();
+				region->suspend_property_changes ();
 				region->set_position (_trackview.session()->transport_frame(), this);
 				rec_regions.push_back (make_pair(region, (RegionView*) 0));
 			}

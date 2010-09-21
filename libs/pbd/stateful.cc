@@ -40,7 +40,6 @@ int Stateful::loading_state_version = 0;
 
 Stateful::Stateful ()
         : _frozen (0)
-        , _no_property_changes (false)
         , _properties (new OwnedPropertyList)
 {
 	_extra_xml = 0;

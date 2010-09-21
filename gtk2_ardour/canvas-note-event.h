@@ -139,7 +139,9 @@ class CanvasNoteEvent : virtual public sigc::trackable
 	/// hue circle divided into 16 equal-looking parts, courtesy Thorsten Wilms
 	static const uint32_t midi_channel_colors[16];
 
-protected:
+        bool mouse_near_ends () const;
+  
+  protected:
 	enum State { None, Pressed, Dragging };
 
 	MidiRegionView&                   _region;
@@ -151,6 +153,10 @@ protected:
 	bool                              _own_note;
 	bool                              _selected;
 	bool                              _valid;
+        float                             _mouse_x_fraction;
+        float                             _mouse_y_fraction;
+        
+        void set_mouse_fractions (GdkEvent*);
 };
 
 } // namespace Gnome

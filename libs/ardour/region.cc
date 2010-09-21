@@ -1310,7 +1310,7 @@ Region::send_change (const PropertyChange& what_changed)
 
         Stateful::send_change (what_changed);
 
-	if (!_no_property_changes) {
+	if (!Stateful::frozen()) {
 		
 		/* Try and send a shared_pointer unless this is part of the constructor.
 		   If so, do nothing.

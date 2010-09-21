@@ -86,10 +86,9 @@ class Stateful {
 
 	virtual void suspend_property_changes ();
 	virtual void resume_property_changes ();
+        
+        virtual bool frozen() const { return _frozen; }
 
-	void unlock_property_changes () { _no_property_changes = false; }
-	void block_property_changes () { _no_property_changes = true; }
-	
   protected:
 
 	void add_instant_xml (XMLNode&, const sys::path& directory_path);
@@ -108,7 +107,6 @@ class Stateful {
 	XMLNode *_instant_xml;
 	PBD::ID  _id;
         int32_t  _frozen;
-        bool     _no_property_changes;
 	PBD::PropertyChange     _pending_changed;
         Glib::Mutex _lock;
 

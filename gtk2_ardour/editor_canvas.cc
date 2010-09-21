@@ -917,6 +917,14 @@ Editor::horizontal_position () const
 {
 	return frame_to_unit (leftmost_frame);
 }
+void
+Editor::set_canvas_cursor (Gdk::Cursor* cursor)
+{
+	if (is_drawable()) {
+	        track_canvas->get_window()->set_cursor(*cursor);
+	}
+
+}
 
 bool
 Editor::track_canvas_key_press (GdkEventKey* event)

@@ -3769,7 +3769,7 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			}
 		}
 	} else {
-		_region->note_dropped (_primary, total_dx(), - total_dy());
+		_region->note_dropped (_primary, total_dx(), total_dy());
 	}
 }
 

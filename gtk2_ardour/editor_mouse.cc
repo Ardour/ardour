@@ -35,6 +35,7 @@
 
 #include "ardour_ui.h"
 #include "actions.h"
+#include "canvas-note.h"
 #include "editor.h"
 #include "time_axis_view.h"
 #include "audio_time_axis.h"
@@ -677,14 +678,16 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                 case NoteItem:
                         if (internal_editing()) {
                                 /* trim notes if we're in internal edit mode and near the ends of the note */
-                                _drags->set (new NoteResizeDrag (this, item), event);
+                                ArdourCanvas::CanvasNote* cn = dynamic_cast<ArdourCanvas::CanvasNote*> (item);
+                                if (cn->mouse_near_ends()) {
+                                        _drags->set (new NoteResizeDrag (this, item), event);
+                                } else {
+                                        _drags->set (new NoteDrag (this, item), event);
+                                }
                         }
 			return true;
 
                 case StreamItem:
-                        cerr << "press on stream item, internal? " << internal_editing() << " MIDI ? "
-                             << dynamic_cast<MidiTimeAxisView*>(clicked_axisview)
-                             << endl;
                         if (internal_editing()) {
 				if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
 					_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
@@ -718,7 +721,12 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		switch (item_type) {
 		case NoteItem:
 			if (internal_editing()) {
-				_drags->set (new NoteDrag (this, item), event);
+                                ArdourCanvas::CanvasNote* cn = dynamic_cast<ArdourCanvas::CanvasNote*> (item);
+                                if (cn->mouse_near_ends()) {
+                                        _drags->set (new NoteResizeDrag (this, item), event);
+                                } else {
+                                        _drags->set (new NoteDrag (this, item), event);
+                                }
 				return true;
 			}
 			break;

@@ -89,8 +89,8 @@ EditorRegions::EditorRegions (Editor* e)
 	_display.append_column (_("G"), _columns.glued);
 	_display.append_column (_("M"), _columns.muted);
 	_display.append_column (_("O"), _columns.opaque);
-	_display.append_column (_("Used"), _columns.used);
-	_display.append_column (_("Path"), _columns.path);
+	// _display.append_column (_("Used"), _columns.used);
+	// _display.append_column (_("Path"), _columns.path);
 	_display.set_headers_visible (true);
 	//_display.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
 
@@ -461,10 +461,6 @@ EditorRegions::selection_changed ()
                                 // they could have clicked on a row that is just a placeholder, like "Hidden"
 				if (region) {
                                         
-                                        cerr << "Selected region has use count "
-                                             << _session->playlists->region_use_count (region) 
-                                             << endl;
-
 					if (region->automatic()) {
 
 						_display.get_selection()->unselect(*i);

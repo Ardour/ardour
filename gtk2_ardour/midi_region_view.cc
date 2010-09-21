@@ -49,6 +49,7 @@
 #include "canvas-hit.h"
 #include "canvas-note.h"
 #include "canvas-program-change.h"
+#include "editor.h"
 #include "ghostregion.h"
 #include "gui_thread.h"
 #include "keyboard.h"
@@ -2646,6 +2647,10 @@ MidiRegionView::change_channel(uint8_t channel)
 void
 MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 {
+	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
+        
+        pre_enter_cursor = editor->get_canvas_cursor ();
+
 	if (_mouse_state == SelectTouchDragging) {
 		note_selected (ev, true);
 	}
@@ -2656,17 +2661,28 @@ MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 void
 MidiRegionView::note_left (ArdourCanvas::CanvasNoteEvent* note)
 {
+	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
+
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		(*i)->hide_velocity ();
 	}
 
-	trackview.editor().hide_verbose_canvas_cursor ();
+	editor->hide_verbose_canvas_cursor ();
+        editor->set_canvas_cursor (pre_enter_cursor);
 }
 
 void
-MidiRegionView::note_motion (float fraction)
+MidiRegionView::note_mouse_position (float x_fraction, float y_fraction)
 {
-        cerr << "Now at " << fraction << " within note\n";
+	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
+
+        if (x_fraction > 0.0 && x_fraction < 0.25) {
+                editor->set_canvas_cursor (editor->left_side_trim_cursor);
+        } else if (x_fraction >= 0.75 && x_fraction < 1.0) {
+                editor->set_canvas_cursor (editor->right_side_trim_cursor);
+        } else {
+                editor->set_canvas_cursor (pre_enter_cursor);
+        }
 }
 
 void
