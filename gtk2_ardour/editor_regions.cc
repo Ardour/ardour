@@ -346,7 +346,7 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
         our_interests.add (ARDOUR::Properties::fade_in);
         our_interests.add (ARDOUR::Properties::fade_out);
 	
-	if (last_row != NULL){
+	if (last_row != 0) {
 
 		TreeModel::iterator j = _model->get_iter (last_row.get_path());
 		boost::shared_ptr<Region> c = (*j)[_columns.region];
