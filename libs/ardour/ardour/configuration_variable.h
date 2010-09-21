@@ -24,6 +24,7 @@
 #include <ostream>
 
 #include <pbd/xml++.h>
+#include <pbd/enumwriter.h>
 
 #include "ardour/utils.h"
 
@@ -113,9 +114,9 @@ class ConfigVariable : public ConfigVariableBase
 					if ((prop = child->property ("name")) != 0) {
 						if (prop->value() == _name) {
 							if ((prop = child->property ("value")) != 0) {
-								std::stringstream ss;
-								ss << prop->value();
-								ss >> value;
+                                                                std::stringstream ss;
+                                                                ss << enum_validate (value, prop->value());
+                                                                ss >> value;
 								_owner = (ConfigVariableBase::Owner)(_owner |owner);
 								return true;
 							}
@@ -138,12 +139,12 @@ class ConfigVariable : public ConfigVariableBase
 			for (oiter = olist.begin(); oiter != olist.end(); ++oiter) {
 				
 				option = *oiter;
-				
+                                
 				if (option->name() == _name) {
 					if ((opt_prop = option->property ("val")) != 0) {
-						std::stringstream ss;
-						ss << opt_prop->value();
-						ss >> value;
+                                                std::stringstream ss;
+                                                ss << enum_validate (value, opt_prop->value());
+                                                ss >> value;
 						_owner = (ConfigVariableBase::Owner)(_owner |owner);
 						return true;
 					}

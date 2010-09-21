@@ -174,6 +174,83 @@ EnumWriter::write_distinct (EnumRegistration& er, int value)
 	return string();
 }
 
+string
+EnumWriter::validate_string (EnumRegistration& er, const string& str)
+{
+        if (er.values.empty()) {
+                return str;
+        }
+
+        vector<int>::iterator i;
+        int val = atoi (str.c_str());
+        
+        for (i = er.values.begin(); i != er.values.end(); ++i) {
+                if (*i == val) {
+                        return str; /* string is a legal representation of a enumerated value */
+                }
+        }
+        
+        string enum_name = _("unknown enumeration");
+        
+        for (Registry::iterator x = registry.begin(); x != registry.end(); ++x) {
+                if (&er == &(*x).second) {
+                        enum_name = (*x).first;
+                }
+        }
+
+        warning << string_compose (_("Illegal value loaded for %1 (%2) - %3 used instead"),
+                                   enum_name, val, er.names.front()) 
+                << endmsg;
+
+        stringstream ss;
+        ss << er.values.front();
+
+        return ss.str();
+}
+
+string
+EnumWriter::typed_validate (const string& type, const string& value_str) 
+{
+        for (Registry::iterator x = registry.begin(); x != registry.end(); ++x) {
+                if (x->first == type) {
+                        return validate_string (x->second, value_str);
+                }
+        }        
+
+        /* not a known enum */
+
+        return value_str;
+}
+
+int
+EnumWriter::validate (EnumRegistration& er, int val)
+{
+        if (er.values.empty()) {
+                return val;
+        }
+
+        vector<int>::iterator i;
+                string enum_name = _("unknown enumeration");
+
+                for (Registry::iterator x = registry.begin(); x != registry.end(); ++x) {
+                        if (&er == &(*x).second) {
+                                enum_name = (*x).first;
+                        }
+                }
+
+
+        for (i = er.values.begin(); i != er.values.end(); ++i) {
+                if (*i == val) {
+                        return val;
+                }
+        }
+        
+        warning << string_compose (_("Illegal value loaded for %1 (%2) - %3 used instead"),
+                                   enum_name, val, er.names.front()) 
+                << endmsg;
+        return er.values.front();
+}
+
 int
 EnumWriter::read_bits (EnumRegistration& er, string str)
 {
@@ -186,14 +263,16 @@ EnumWriter::read_bits (EnumRegistration& er, string str)
 	/* catch old-style hex numerics */
 
 	if (str.length() > 2 && str[0] == '0' && str[1] == 'x') {
-		return strtol (str.c_str(), (char **) 0, 16);
+		int val = strtol (str.c_str(), (char **) 0, 16);
+                return validate (er, val);
 	}
 
 	/* catch old style dec numerics */
 
 	if (strspn (str.c_str(), "0123456789") == str.length()) {
-		return strtol (str.c_str(), (char **) 0, 10);
-	}
+		int val = strtol (str.c_str(), (char **) 0, 10);
+                return validate (er, val);
+        }
 
 	do {
 		
@@ -231,14 +310,16 @@ EnumWriter::read_distinct (EnumRegistration& er, string str)
 	/* catch old-style hex numerics */
 
 	if (str.length() > 2 && str[0] == '0' && str[1] == 'x') {
-		return strtol (str.c_str(), (char **) 0, 16);
+		int val = strtol (str.c_str(), (char **) 0, 16);
+                return validate (er, val);
 	}
 
 	/* catch old style dec numerics */
 
 	if (strspn (str.c_str(), "0123456789") == str.length()) {
-		return strtol (str.c_str(), (char **) 0, 10);
-	}
+		int val = strtol (str.c_str(), (char **) 0, 10);
+                return validate (er, val);
+        }
 
 	for (i = er.values.begin(), s = er.names.begin(); i != er.values.end(); ++i, ++s) {
 		if (str == (*s) || nocase_cmp (str, *s) == 0) {

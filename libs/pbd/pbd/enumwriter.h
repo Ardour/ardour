@@ -18,6 +18,9 @@
     $Id$
 */
 
+#ifndef __pbd_enumwriter_h__
+#define __pbd_enumwriter_h__
+
 #include <map>
 #include <string>
 #include <vector>
@@ -45,6 +48,7 @@ class EnumWriter {
 	int         read  (std::string type, std::string value);
 
 	void add_to_hack_table (std::string str, std::string hacked_str);
+        std::string typed_validate (const std::string& type, const std::string&);
 
   private:
 	struct EnumRegistration {
@@ -68,10 +72,16 @@ class EnumWriter {
 
 	static EnumWriter* _instance;
 	static std::map<std::string,std::string> hack_table;
+
+        int validate (EnumRegistration& er, int value);
+
+        std::string validate_string (EnumRegistration& er, const std::string&);
 };
 
 }
 
+#define enum_validate(v,str) PBD::EnumWriter::instance().typed_validate (typeid(v).name(),str)
 #define enum_2_string(e) (PBD::EnumWriter::instance().write (typeid(e).name(), e))
 #define string_2_enum(str,e) (PBD::EnumWriter::instance().read (typeid(e).name(), (str)))
 
+#endif /* __pbd_enumwriter_h__ */
