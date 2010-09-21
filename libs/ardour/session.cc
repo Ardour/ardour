@@ -1095,12 +1095,6 @@ Session::maybe_enable_record ()
 
 	g_atomic_int_set (&_record_status, Enabled);
 
-	/* this function is currently called from somewhere other than an RT thread.
-	   this save_state() call therefore doesn't impact anything.
-	*/
-
-	save_state ("", true);
-
 	if (_transport_speed) {
 		if (!config.get_punch_in()) {
 			enable_record ();
