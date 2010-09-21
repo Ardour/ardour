@@ -136,7 +136,7 @@ PixFader::on_button_press_event (GdkEventButton* ev)
 	} 
 			       
 
-	return false;
+	return true;
 }
 
 bool
