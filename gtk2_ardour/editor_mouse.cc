@@ -2773,9 +2773,11 @@ Editor::update_join_object_range_location (double x, double y)
 			double cy = y;
 			rtv->canvas_display()->w2i (cx, cy);
 
-			bool const top_half = cy < rtv->current_height () / 2;
-			
-			_join_object_range_state = top_half ? JOIN_OBJECT_RANGE_RANGE : JOIN_OBJECT_RANGE_OBJECT;
+			double const c = cy / rtv->view()->child_height();
+			double d;
+			double const f = modf (c, &d);
+
+			_join_object_range_state = f < 0.5 ? JOIN_OBJECT_RANGE_RANGE : JOIN_OBJECT_RANGE_OBJECT;
 		}
 	}
 }
