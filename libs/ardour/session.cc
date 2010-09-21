@@ -1095,6 +1095,14 @@ Session::maybe_enable_record ()
 
 	g_atomic_int_set (&_record_status, Enabled);
 
+	/* This function is currently called from somewhere other than an RT thread.
+	   This save_state() call therefore doesn't impact anything.  Doing it here
+	   means that we save pending state of which sources the next record will use,
+	   which gives us some chance of recovering from a crash during the record.
+	*/
+	
+	save_state ("", true);
+	
 	if (_transport_speed) {
 		if (!config.get_punch_in()) {
 			enable_record ();
