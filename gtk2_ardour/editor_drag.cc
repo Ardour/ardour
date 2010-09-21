@@ -522,6 +522,8 @@ RegionMotionDrag::y_movement_allowed (int delta_track, layer_t delta_layer) cons
 void
 RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 {
+	assert (!_views.empty ());
+
 	/* Find the TimeAxisView that the pointer is now over */
 	pair<TimeAxisView*, int> const tv = _editor->trackview_by_y_position (_drags->current_pointer_y ());
 
