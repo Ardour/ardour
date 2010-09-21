@@ -25,7 +25,6 @@
 
 #include "pbd/basename.h"
 #include "pbd/enumwriter.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/audioregion.h"
 #include "ardour/audiofilesource.h"
@@ -346,18 +345,41 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
         our_interests.add (ARDOUR::Properties::opaque);
         our_interests.add (ARDOUR::Properties::fade_in);
         our_interests.add (ARDOUR::Properties::fade_out);
+	
+	if (last_row != NULL){
+
+		TreeModel::iterator j = _model->get_iter (last_row.get_path());
+		boost::shared_ptr<Region> c = (*j)[_columns.region];
+
+		if (c == r) {
+			populate_row (r, (*j));
+			
+			if (what_changed.contains (ARDOUR::Properties::hidden)) {
+				redisplay ();
+			}
+			
+			return;
+		}
+	}
+
 
         if (what_changed.contains (our_interests)) {
 
 		/* find the region in our model and update its row */
 		TreeModel::Children rows = _model->children ();
 		TreeModel::iterator i = rows.begin ();
+		
 		while (i != rows.end ()) {
+			
 			TreeModel::Children children = (*i)->children ();
 			TreeModel::iterator j = children.begin ();
+			
 			while (j != children.end()) {
+			  
 				boost::shared_ptr<Region> c = (*j)[_columns.region];
+			
 				if (c == r) {
+					last_row = TreeRowReference(_model, TreePath(j));
 					break;
 				}
 				++j;
@@ -403,7 +425,6 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 
 			++i;
 		}
-
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::hidden)) {
@@ -438,8 +459,11 @@ EditorRegions::selection_changed ()
 				boost::shared_ptr<Region> region = (*iter)[_columns.region];
 
                                 // they could have clicked on a row that is just a placeholder, like "Hidden"
-
 				if (region) {
+                                        
+                                        cerr << "Selected region has use count "
+                                             << _session->playlists->region_use_count (region) 
+                                             << endl;
 
 					if (region->automatic()) {
 
@@ -464,10 +488,12 @@ EditorRegions::selection_changed ()
 void
 EditorRegions::set_selected (RegionSelection& regions)
 {
+	TreeModel::Children rows = _model->children();
+
 	for (RegionSelection::iterator iter = regions.begin(); iter != regions.end(); ++iter) {
 
 		TreeModel::iterator i;
-		TreeModel::Children rows = _model->children();
+		
 		boost::shared_ptr<Region> r ((*iter)->region());
 
 		for (i = rows.begin(); i != rows.end(); ++i) {
@@ -509,6 +535,7 @@ EditorRegions::set_selected_in_subrow (boost::shared_ptr<Region> region, TreeMod
 			}
 		}
 	}
+	
 	return false;
 }
 
@@ -549,9 +576,6 @@ EditorRegions::redisplay ()
         for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end(); ++i) {
                 insert_into_tmp_regionlist (i->second);
         }
-
-        stacktrace (cerr, 22);
-        cerr << "Redisplay with " << tmp_region_list.size() << " regions\n";
 
 	for (list<boost::shared_ptr<Region> >::iterator r = tmp_region_list.begin(); r != tmp_region_list.end(); ++r) {
 		add_region (*r);

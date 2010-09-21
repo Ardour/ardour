@@ -2218,7 +2218,7 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 
 	begin_reversible_command (_("insert dragged region"));
         playlist->clear_changes ();
-	playlist->add_region (RegionFactory::create (region), where, 1.0);
+	playlist->add_region (RegionFactory::create (region, true), where, 1.0);
 	_session->add_command(new StatefulDiffCommand (playlist));
 	commit_reversible_command ();
 }
@@ -2297,7 +2297,7 @@ Editor::insert_region_list_selection (float times)
 
 	begin_reversible_command (_("insert region"));
         playlist->clear_changes ();
-	playlist->add_region ((RegionFactory::create (region)), get_preferred_edit_position(), times);
+	playlist->add_region ((RegionFactory::create (region, true)), get_preferred_edit_position(), times);
 	_session->add_command(new StatefulDiffCommand (playlist));
 	commit_reversible_command ();
 }
@@ -3106,7 +3106,7 @@ Editor::region_fill_track ()
 		}
 
                 pl->clear_changes ();
-		pl->add_region (RegionFactory::create (region), region->last_frame(), times);
+		pl->add_region (RegionFactory::create (region, true), region->last_frame(), times);
 		_session->add_command (new StatefulDiffCommand (pl));
 	}
 
@@ -3150,7 +3150,7 @@ Editor::region_fill_selection ()
 		}
 
                 playlist->clear_changes ();
-		playlist->add_region (RegionFactory::create (region), start, times);
+		playlist->add_region (RegionFactory::create (region, true), start, times);
 		_session->add_command (new StatefulDiffCommand (playlist));
 	}
 

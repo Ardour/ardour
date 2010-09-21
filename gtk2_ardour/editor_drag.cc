@@ -366,7 +366,8 @@ RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Re
 		}
 	}
 
-	assert (!v.empty ());
+        /* the list of views can be empty at this point if this is a region list-insert drag
+         */
 	
 	for (list<RegionView*>::const_iterator i = v.begin(); i != v.end(); ++i) {
 		_views.push_back (DraggingView (*i, this));
@@ -692,7 +693,7 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(rv);
 
 			const boost::shared_ptr<const Region> original = rv->region();
-			boost::shared_ptr<Region> region_copy = RegionFactory::create (original);
+			boost::shared_ptr<Region> region_copy = RegionFactory::create (original, true);
 			region_copy->set_position (original->position(), this);
 			
 			RegionView* nrv;
@@ -915,7 +916,7 @@ RegionMoveDrag::finished_no_copy (
 			/* insert into new playlist */
 
 			RegionView* new_view = insert_region_into_playlist (
-				RegionFactory::create (rv->region ()), dest_rtv, dest_layer, where, modified_playlists
+				RegionFactory::create (rv->region (), true), dest_rtv, dest_layer, where, modified_playlists
 				);
 
 			if (new_view == 0) {

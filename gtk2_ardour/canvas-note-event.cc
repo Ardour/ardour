@@ -239,6 +239,14 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 		_region.note_left (this);
 		break;
 
+        case GDK_MOTION_NOTIFY:
+                double ix, iy;
+                ix = ev->motion.x;
+                iy = ev->motion.y;
+                _item->w2i (ix, iy);
+                cerr << "note motion at " << ix << ',' << iy << endl;
+                break;
+
 	case GDK_BUTTON_PRESS:
 		if (ev->button.button == 3 && Keyboard::no_modifiers_active (ev->button.state)) {
                         show_channel_selector();

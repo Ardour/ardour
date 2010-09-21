@@ -40,16 +40,20 @@ public:
 	void reset_sort_type (Editing::RegionListSortType, bool);
 	void set_selected (RegionSelection &);
 	void selection_mapover (sigc::slot<void,boost::shared_ptr<ARDOUR::Region> >);
+	
 	boost::shared_ptr<ARDOUR::Region> get_dragged_region ();
 	boost::shared_ptr<ARDOUR::Region> get_single_selection ();
+	
 	Editing::RegionListSortType sort_type () const {
 		return _sort_type;
 	}
+	
 	void redisplay ();
 
 	void suspend_redisplay () {
 		_no_redisplay = true;
 	}
+	
 	void resume_redisplay () {
 		_no_redisplay = false;
 		redisplay ();
@@ -108,12 +112,17 @@ private:
 	};
 
 	Columns _columns;
+	
+	Gtk::TreeModel::RowReference last_row;
 
 	void region_changed (boost::shared_ptr<ARDOUR::Region>, PBD::PropertyChange const &);
 	void selection_changed ();
+	
 	sigc::connection _change_connection;
+	
 	bool set_selected_in_subrow (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, int);
 	bool selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
+	
 	void name_edit (const std::string&, const std::string&);
 	void locked_changed (std::string const &);
 	void glued_changed (std::string const &);

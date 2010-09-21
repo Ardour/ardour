@@ -192,6 +192,7 @@ class MidiRegionView : public RegionView
 
 	void   note_entered(ArdourCanvas::CanvasNoteEvent* ev);
 	void   note_left(ArdourCanvas::CanvasNoteEvent* ev);
+	void   note_motion (float fraction);
 	void   unique_select(ArdourCanvas::CanvasNoteEvent* ev);
 	void   note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool extend=false);
 	void   note_deselected(ArdourCanvas::CanvasNoteEvent* ev);

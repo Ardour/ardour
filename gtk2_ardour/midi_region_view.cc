@@ -2664,6 +2664,12 @@ MidiRegionView::note_left (ArdourCanvas::CanvasNoteEvent* note)
 }
 
 void
+MidiRegionView::note_motion (float fraction)
+{
+        cerr << "Now at " << fraction << " within note\n";
+}
+
+void
 MidiRegionView::switch_source(boost::shared_ptr<Source> src)
 {
 	boost::shared_ptr<MidiSource> msrc = boost::dynamic_pointer_cast<MidiSource>(src);
