@@ -462,7 +462,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	static Gdk::Cursor* grabber_cursor;
 	static Gdk::Cursor* grabber_note_cursor;
 	static Gdk::Cursor* grabber_edit_point_cursor;
-	static Gdk::Cursor* zoom_cursor;
+	static Gdk::Cursor* zoom_in_cursor;
+	static Gdk::Cursor* zoom_out_cursor;
 	static Gdk::Cursor* time_fx_cursor;
 	static Gdk::Cursor* fader_cursor;
 	static Gdk::Cursor* speaker_cursor;
@@ -1408,6 +1409,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void track_canvas_allocate (Gtk::Allocation alloc);
 	bool track_canvas_size_allocated ();
 	bool track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const &, int, int, guint);
+	bool track_canvas_key_press (GdkEventKey *);
+	bool track_canvas_key_release (GdkEventKey *);
 
 	void set_playhead_cursor ();
 

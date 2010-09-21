@@ -3561,6 +3561,7 @@ RangeMarkerBarDrag::update_item (Location* location)
 
 MouseZoomDrag::MouseZoomDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
+	, _zoom_out (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MouseZoomDrag\n");
 }
@@ -3568,7 +3569,14 @@ MouseZoomDrag::MouseZoomDrag (Editor* e, ArdourCanvas::Item* i)
 void
 MouseZoomDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
-	Drag::start_grab (event, _editor->zoom_cursor);
+	if (Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
+		Drag::start_grab (event, _editor->zoom_out_cursor);
+		_zoom_out = true;
+	} else {
+		Drag::start_grab (event, _editor->zoom_in_cursor);
+		_zoom_out = false;
+	}
+		
 	_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
 }
 
@@ -3617,11 +3625,7 @@ MouseZoomDrag::finished (GdkEvent* event, bool movement_occurred)
 			_editor->temporal_zoom_by_frame (last_pointer_frame(), grab_frame(), "mouse zoom");
 		}
 	} else {
-		_editor->temporal_zoom_to_frame (false, grab_frame());
-		/*
-		temporal_zoom_step (false);
-		center_screen (grab_frame());
-		*/
+		_editor->temporal_zoom_to_frame (_zoom_out, grab_frame());
 	}
 
 	_editor->zoom_rect->hide();

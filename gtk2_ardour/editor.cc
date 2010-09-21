@@ -220,7 +220,8 @@ Gdk::Cursor* Editor::fade_out_cursor = 0;
 Gdk::Cursor* Editor::grabber_cursor = 0;
 Gdk::Cursor* Editor::grabber_note_cursor = 0;
 Gdk::Cursor* Editor::grabber_edit_point_cursor = 0;
-Gdk::Cursor* Editor::zoom_cursor = 0;
+Gdk::Cursor* Editor::zoom_in_cursor = 0;
+Gdk::Cursor* Editor::zoom_out_cursor = 0;
 Gdk::Cursor* Editor::time_fx_cursor = 0;
 Gdk::Cursor* Editor::fader_cursor = 0;
 Gdk::Cursor* Editor::speaker_cursor = 0;
@@ -1195,16 +1196,16 @@ Editor::build_cursors ()
 {
 	using namespace Gdk;
 
-	Gdk::Color mbg ("#000000" ); /* Black */
-	Gdk::Color mfg ("#0000ff" ); /* Blue. */
-
 	{
-		RefPtr<Bitmap> source, mask;
-		source = Bitmap::create (mag_bits, mag_width, mag_height);
-		mask = Bitmap::create (magmask_bits, mag_width, mag_height);
-		zoom_cursor = new Gdk::Cursor (source, mask, mfg, mbg, mag_x_hot, mag_y_hot);
+		Glib::RefPtr<Gdk::Pixbuf> zoom_in_cursor_pixbuf (::get_icon ("zoom_in_cursor"));
+		zoom_in_cursor = new Gdk::Cursor (Gdk::Display::get_default(), zoom_in_cursor_pixbuf, 5, 5);
 	}
 
+	{
+		Glib::RefPtr<Gdk::Pixbuf> zoom_out_cursor_pixbuf (::get_icon ("zoom_out_cursor"));
+		zoom_out_cursor = new Gdk::Cursor (Gdk::Display::get_default(), zoom_out_cursor_pixbuf, 5, 5);
+	}
+	
 	Gdk::Color fbg ("#ffffff" );
 	Gdk::Color ffg  ("#000000" );
 

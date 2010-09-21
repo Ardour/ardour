@@ -294,7 +294,7 @@ Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, Rou
 	case GDK_LEAVE_NOTIFY:
 		set_entered_track (0);
 		break;
-
+		
 	default:
 		break;
 	}

@@ -807,6 +807,9 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 	void aborted ();
+
+private:
+	bool _zoom_out;
 };
 
 /** Drag of a range of automation data, changing value but not position */

@@ -46,6 +46,7 @@
 #include "editor_group_tabs.h"
 #include "editor_routes.h"
 #include "editor_summary.h"
+#include "keyboard.h"
 
 #include "i18n.h"
 
@@ -282,9 +283,11 @@ Editor::initialize_canvas ()
 	track_canvas->signal_button_press_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_button_press_event));
 	track_canvas->signal_button_release_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_button_release_event));
 	track_canvas->signal_drag_motion().connect (sigc::mem_fun (*this, &Editor::track_canvas_drag_motion));
+	track_canvas->signal_key_press_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_key_press));
+	track_canvas->signal_key_release_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_key_release));
 
 	track_canvas->set_name ("EditorMainCanvas");
-	track_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
+	track_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 	track_canvas->signal_leave_notify_event().connect (sigc::mem_fun(*this, &Editor::left_track_canvas));
 	track_canvas->signal_enter_notify_event().connect (sigc::mem_fun(*this, &Editor::entered_track_canvas));
 	track_canvas->set_flags (CAN_FOCUS);
@@ -913,4 +916,25 @@ double
 Editor::horizontal_position () const
 {
 	return frame_to_unit (leftmost_frame);
+}
+
+bool
+Editor::track_canvas_key_press (GdkEventKey* event)
+{
+	/* XXX: event does not report the modifier key pressed down, AFAICS, so use the Keyboard object instead */
+	if (mouse_mode == Editing::MouseZoom && Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
+		track_canvas->get_window()->set_cursor (*zoom_out_cursor);
+	}
+
+	return false;
+}
+
+bool
+Editor::track_canvas_key_release (GdkEventKey* event)
+{
+	if (mouse_mode == Editing::MouseZoom && !Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
+		track_canvas->get_window()->set_cursor (*zoom_in_cursor);
+	}
+
+	return false;
 }

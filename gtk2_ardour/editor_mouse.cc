@@ -242,7 +242,7 @@ Editor::set_canvas_cursor ()
 			break;
 
 		case MouseZoom:
-			current_canvas_cursor = zoom_cursor;
+			current_canvas_cursor = zoom_in_cursor;
 			break;
 
 		case MouseTimeFX:
@@ -1595,7 +1595,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 				cursor = selector_cursor;
 				break;
 			case MouseZoom:
-	 			cursor = zoom_cursor;
+	 			cursor = zoom_in_cursor;
 				break;
 			default:
 				cursor = cross_hair_cursor;
