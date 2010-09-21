@@ -324,7 +324,7 @@ Playlist::copy_regions (RegionList& newlist) const
 	RegionLock rlock (const_cast<Playlist *> (this));
 
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		newlist.push_back (RegionFactory::RegionFactory::create (*i));
+		newlist.push_back (RegionFactory::RegionFactory::create (*i, true));
 	}
 }
 
@@ -709,7 +709,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, flo
 	*/
 
 	for (int i = 0; i < itimes; ++i) {
-		boost::shared_ptr<Region> copy = RegionFactory::create (region);
+		boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
 		add_region_internal (copy, pos);
 		pos += region->length();
 	}
@@ -1247,7 +1247,7 @@ Playlist::paste (boost::shared_ptr<Playlist> other, framepos_t position, float t
 
 		while (itimes--) {
 			for (RegionList::iterator i = other->regions.begin(); i != other->regions.end(); ++i) {
-				boost::shared_ptr<Region> copy_of_region = RegionFactory::create (*i);
+				boost::shared_ptr<Region> copy_of_region = RegionFactory::create (*i, true);
 
 				/* put these new regions on top of all existing ones, but preserve
 				   the ordering they had in the original playlist.
@@ -1283,7 +1283,7 @@ Playlist::duplicate (boost::shared_ptr<Region> region, framepos_t position, floa
 	framepos_t pos = position + 1;
 
 	while (itimes--) {
-		boost::shared_ptr<Region> copy = RegionFactory::create (region);
+		boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
 		add_region_internal (copy, pos);
 		pos += region->length();
 	}

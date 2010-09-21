@@ -56,7 +56,7 @@ class RegionFactory {
 	static PBD::Signal1<void,boost::shared_ptr<Region> >  CheckNewRegion;
 
 	/** create a "pure copy" of Region @param other */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<const Region> other);
+	static boost::shared_ptr<Region> create (boost::shared_ptr<const Region> other, bool announce = false);
 
 	/** create a region from a single Source */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>, 

@@ -45,7 +45,7 @@ Glib::StaticMutex RegionFactory::region_name_map_lock;
 std::map<std::string, uint32_t> RegionFactory::region_name_map;
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<const Region> region)
+RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 {
 	boost::shared_ptr<Region> ret;
 	boost::shared_ptr<const AudioRegion> ar;
@@ -72,11 +72,16 @@ RegionFactory::create (boost::shared_ptr<const Region> region)
 	}
 
 	if (ret) {
+		ret->set_name (new_region_name(ret->name()));
 		map_add (ret);
 
 		/* pure copy constructor - no property list */
 		/* pure copy constructor - no CheckNewRegion emitted */
+		if (announce) {
+			CheckNewRegion (ret);
+		}
 	}
+
 
 	return ret;
 }

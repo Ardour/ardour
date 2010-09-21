@@ -116,8 +116,10 @@ AudioRegion::init ()
 {
 	register_properties ();
 
+	suspend_property_changes();
 	set_default_fades ();
 	set_default_envelope ();
+	resume_property_changes();
 
 	listen_to_my_curves ();
 	connect_to_analysis_changed ();
@@ -958,6 +960,8 @@ AudioRegion::recompute_at_end ()
 	_envelope->truncate_end (_length);
 	_envelope->set_max_xval (_length);
         _envelope->thaw ();
+	
+	suspend_property_changes();
 
         if (_left_of_split) {
                 set_default_fade_out ();
@@ -971,6 +975,8 @@ AudioRegion::recompute_at_end ()
 		_fade_in->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_in));
 	}
+	
+	resume_property_changes();
 }
 
 void
@@ -979,6 +985,8 @@ AudioRegion::recompute_at_start ()
 	/* as above, but the shift was from the front */
 
 	_envelope->truncate_start (_length);
+	
+	suspend_property_changes();
 
         if (_right_of_split) {
                 set_default_fade_in ();
@@ -992,6 +1000,8 @@ AudioRegion::recompute_at_start ()
 		_fade_out->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_out));
 	}
+	
+	resume_property_changes();
 }
 
 int
