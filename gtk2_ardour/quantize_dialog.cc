@@ -40,6 +40,7 @@ static const gchar *_grid_strings[] = {
 	N_("Beats/8"),
 	N_("Beats/4"),
 	N_("Beats/3"),
+	N_("Beats/2"),
 	N_("Beats"),
 	0
 };
@@ -197,6 +198,8 @@ QuantizeDialog::grid_size_to_musical_time (const string& txt) const
 		return 1.0/4.0;
 	} else if (txt == _("Beats/3")) {
 		return 1.0/3.0;
+	} else if (txt == _("Beats/2")) {
+		return 1.0/2.0;
 	} else if (txt == _("Beats")) {
 		return 1.0;
 	}
