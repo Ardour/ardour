@@ -93,7 +93,6 @@ ARDOUR_UI::goto_editor_window ()
 
 	editor->show_window ();
 	editor->present ();
-	_mixer_on_top = false;
 	flush_pending ();
 }
 
@@ -102,17 +101,51 @@ ARDOUR_UI::goto_mixer_window ()
 {
 	mixer->show_window ();
 	mixer->present ();
-	_mixer_on_top = true;
 	flush_pending ();
 }
 
 void
-ARDOUR_UI::toggle_editor_mixer_on_top ()
+ARDOUR_UI::toggle_mixer_window ()
 {
-	if (_mixer_on_top) {
-		goto_editor_window ();
-	} else {
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-mixer"));
+	if (!act) {
+		return;
+	}
+
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	
+	if (tact->get_active()) {
 		goto_mixer_window ();
+	} else {
+		mixer->hide ();
+	}
+}	
+
+void
+ARDOUR_UI::toggle_mixer_on_top ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-mixer-on-top"));
+	if (!act) {
+		return;
+	}
+
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	
+	if (tact->get_active()) {
+
+		/* Toggle the mixer to `visible' if required */
+		act = ActionManager::get_action (X_("Common"), X_("toggle-mixer"));
+		if (act) {
+			tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	
+			if (!tact->get_active()) {
+				tact->set_active ();
+			}
+		}
+		
+		goto_mixer_window ();
+	} else {
+		goto_editor_window ();
 	}
 }
 

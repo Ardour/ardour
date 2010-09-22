@@ -266,8 +266,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void                goto_editor_window ();
 	void                goto_mixer_window ();
-	void                toggle_editor_mixer_on_top ();
-	bool                _mixer_on_top;
+	void                toggle_mixer_window ();
+	void                toggle_mixer_on_top ();
 
 	Gtk::ToggleButton   preroll_button;
 	Gtk::ToggleButton   postroll_button;

@@ -220,7 +220,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	session_loaded = false;
 	last_speed_displayed = -1.0f;
 	ignore_dual_punch = false;
-	_mixer_on_top = false;
         original_big_clock_width = -1;
         original_big_clock_height = -1;
         original_big_clock_font_size = 0;

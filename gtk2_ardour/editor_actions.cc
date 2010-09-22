@@ -542,7 +542,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "toggle-rhythm-ferret", _("Rhythm Ferret..."), sigc::mem_fun(*this, &Editor::show_rhythm_ferret));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "toggle-log-window", _("Log"),
+	act = ActionManager::register_toggle_action (editor_actions, "toggle-log-window", _("Log"),
 			sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::toggle_errors));
 	ActionManager::session_sensitive_actions.push_back (act);
 

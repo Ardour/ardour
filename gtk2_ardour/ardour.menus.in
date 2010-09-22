@@ -433,9 +433,8 @@
                </menu>
         </menu>
         <menu action = 'WindowMenu'>
-               <menuitem action='goto-editor'/>
-               <menuitem action='goto-mixer'/>
-               <menuitem action='toggle-editor-mixer-on-top'/>
+               <menuitem action='toggle-mixer'/>
+               <menuitem action='toggle-mixer-on-top'/>
 
 	       <separator/>
 

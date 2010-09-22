@@ -96,6 +96,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 	errors = new TextViewer (800,600);
 	errors->text().set_editable (false);
 	errors->text().set_name ("ErrorText");
+	errors->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Editor/toggle-log-window")));
 
 	Glib::set_application_name(namestr);
 
@@ -571,7 +572,14 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 void
 UI::toggle_errors ()
 {
-	if (!errors->is_visible()) {
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
+	if (!act) {
+		return;
+	}
+
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	
+	if (tact->get_active()) {
 		errors->set_position (WIN_POS_MOUSE);
 		errors->show ();
 	} else {
