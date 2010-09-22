@@ -661,8 +661,8 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 			*/
 
 
-			first_frame = entered_regionview->region()->position();
-			last_frame = entered_regionview->region()->last_frame();
+			first_frame = clicked_regionview->region()->position();
+			last_frame = clicked_regionview->region()->last_frame();
 
 			for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 				if ((*i)->region()->position() < first_frame) {
@@ -696,9 +696,9 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 			   any selected ones.
 			*/
 
-			if (!selection->selected (entered_regionview)) {
+			if (!selection->selected (clicked_regionview)) {
 
-				RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&entered_regionview->get_time_axis_view());
+				RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&clicked_regionview->get_time_axis_view());
 
 				if (rtv) {
 
