@@ -31,8 +31,10 @@
 #include "ardour/ardour.h"
 #include "ardour/data_type.h"
 #include "ardour/automatable.h"
+#include "ardour/movable.h"
 #include "ardour/readable.h"
 #include "ardour/session_object.h"
+#include "ardour/trimmable.h"
 
 class XMLNode;
 
@@ -81,6 +83,8 @@ class Region
 	: public SessionObject
 	, public boost::enable_shared_from_this<Region>
 	, public Readable
+        , public Trimmable
+        , public Movable
 {
   public:
 	typedef std::vector<boost::shared_ptr<Source> > SourceList;
@@ -147,6 +151,8 @@ class Region
 	bool sync_marked() const { return _sync_marked; }
 	bool external() const    { return _external; }
 	bool import() const      { return _import; }
+        
+        Trimmable::CanTrim can_trim() const;
 
 	PositionLockStyle position_lock_style() const { return _position_lock_style; }
 	void set_position_lock_style (PositionLockStyle ps);

@@ -509,8 +509,8 @@ Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quali
 	import_status.target_regions = target_regions;
 	import_status.track = track;
 	import_status.replace = replace;
-
-	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
+        
+	set_canvas_cursor (wait_cursor);
 	gdk_flush ();
 
 	/* start import thread for this spec. this will ultimately call Session::import_audiofiles()
@@ -544,7 +544,7 @@ Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quali
 	}
 
 
-	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
+	set_canvas_cursor (current_canvas_cursor);
 	return 0;
 }
 
@@ -560,7 +560,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 	int ret = 0;
 	string path_to_use;
 
-	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
+	set_canvas_cursor (wait_cursor);
 	gdk_flush ();
 
 	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
@@ -671,7 +671,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 			}
 		}
 
-		track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
+		set_canvas_cursor (wait_cursor);
 
 		for (int n = 0; n < finfo.channels; ++n) {
 			try {
@@ -712,7 +712,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 	ret = add_sources (paths, sources, pos, mode, target_regions, target_tracks, track, true);
 
   out:
-	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
+	set_canvas_cursor (current_canvas_cursor);
 	return ret;
 }
 

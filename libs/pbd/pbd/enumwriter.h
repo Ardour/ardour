@@ -71,6 +71,9 @@ class EnumWriter {
 
 	static EnumWriter* _instance;
 	static std::map<std::string,std::string> hack_table;
+
+
+        int validate (EnumRegistration& er, int value);
 };
 
 }

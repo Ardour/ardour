@@ -190,11 +190,9 @@ class MidiRegionView : public RegionView
 	void apply_diff_as_subcommand();
 	void abort_command();
 
-        Gdk::Cursor* pre_enter_cursor;
-
 	void   note_entered(ArdourCanvas::CanvasNoteEvent* ev);
 	void   note_left(ArdourCanvas::CanvasNoteEvent* ev);
-	void   note_mouse_position (float xfraction, float yfraction);
+	void   note_mouse_position (float xfraction, float yfraction, bool can_set_cursor=true);
 	void   unique_select(ArdourCanvas::CanvasNoteEvent* ev);
 	void   note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool extend=false);
 	void   note_deselected(ArdourCanvas::CanvasNoteEvent* ev);
@@ -434,6 +432,8 @@ class MidiRegionView : public RegionView
         void get_events (Events& e, Evoral::Sequence<Evoral::MusicalTime>::NoteOperator op, uint8_t val, int chan_mask = 0);
 
 	void display_program_changes_on_channel (uint8_t);
+
+        Gdk::Cursor* pre_enter_cursor;
 };
 
 

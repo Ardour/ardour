@@ -230,15 +230,18 @@ CanvasNoteEvent::set_mouse_fractions (GdkEvent* ev)
 {
         double ix, iy;
         double bx1, bx2, by1, by2;
+        bool set_cursor = false;
 
 	switch (ev->type) {
         case GDK_MOTION_NOTIFY:
                 ix = ev->motion.x;
                 iy = ev->motion.y;
+                set_cursor = true;
                 break;
         case GDK_ENTER_NOTIFY:
                 ix = ev->crossing.x;
                 iy = ev->crossing.y;
+                set_cursor = true;
                 break;
         case GDK_BUTTON_PRESS:
         case GDK_BUTTON_RELEASE:
@@ -275,7 +278,7 @@ CanvasNoteEvent::set_mouse_fractions (GdkEvent* ev)
         _mouse_y_fraction = yf;
 
         if (notify) {
-                _region.note_mouse_position (_mouse_x_fraction, _mouse_y_fraction);
+                _region.note_mouse_position (_mouse_x_fraction, _mouse_y_fraction, set_cursor);
         }
 }
 

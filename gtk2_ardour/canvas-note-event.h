@@ -100,6 +100,9 @@ class CanvasNoteEvent : virtual public sigc::trackable
 	virtual double x2() = 0;
 	virtual double y2() = 0;
 
+        float mouse_x_fraction() const { return _mouse_x_fraction; }
+        float mouse_y_fraction() const { return _mouse_y_fraction; }
+
 	const boost::shared_ptr<NoteType> note() const { return _note; }
 	MidiRegionView& region_view() const { return _region; }
 

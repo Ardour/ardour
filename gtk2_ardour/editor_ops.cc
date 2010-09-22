@@ -3708,14 +3708,14 @@ Editor::freeze_route ()
 
 	pthread_create_and_store (X_("freezer"), &itt.thread, _freeze_thread, this);
 
-	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
+	set_canvas_cursor (wait_cursor);
 
 	while (!itt.done && !itt.cancel) {
 		gtk_main_iteration ();
 	}
 
 	current_interthread_info = 0;
-	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
+	set_canvas_cursor (current_canvas_cursor);
 }
 
 void
@@ -4585,7 +4585,7 @@ Editor::normalize_region ()
 
 	begin_reversible_command (_("normalize"));
 
-	track_canvas->get_window()->set_cursor (*wait_cursor);
+	set_canvas_cursor (wait_cursor);
 	gdk_flush ();
 
 	double maxamp = 0;
@@ -4613,7 +4613,7 @@ Editor::normalize_region ()
 	}
 
 	commit_reversible_command ();
-	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
+	set_canvas_cursor (current_canvas_cursor);
 
 	_last_normalization_value = spin.get_value ();
 }
@@ -4804,7 +4804,7 @@ Editor::fork_region ()
 
 	begin_reversible_command (_("Fork Region(s)"));
 
-	track_canvas->get_window()->set_cursor (*wait_cursor);
+	set_canvas_cursor (wait_cursor);
 	gdk_flush ();
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
@@ -4828,7 +4828,7 @@ Editor::fork_region ()
 	commit_reversible_command ();
 	rs.clear ();
 
-	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
+	set_canvas_cursor (current_canvas_cursor);
 }
 
 void
@@ -4867,7 +4867,7 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 
 	begin_reversible_command (command);
 
-	track_canvas->get_window()->set_cursor (*wait_cursor);
+	set_canvas_cursor (wait_cursor);
 	gdk_flush ();
 
 	int n = 0;
@@ -4929,7 +4929,7 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 	rs.clear ();
 
   out:
-	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
+	set_canvas_cursor (current_canvas_cursor);
 }
 
 void

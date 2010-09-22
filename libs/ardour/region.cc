@@ -1587,3 +1587,31 @@ Region::use_sources (SourceList const & s)
                 }
 	}
 }
+
+Trimmable::CanTrim
+Region::can_trim () const
+{
+        CanTrim ct = CanTrim (0);
+
+        if (locked()) {
+                return ct;
+        }
+
+        /* if not locked, we can always move the front later, and the end earlier 
+         */
+
+        ct = CanTrim (ct | FrontTrimLater | EndTrimEarlier);
+
+        if (start() != 0) {
+                ct = CanTrim (ct | FrontTrimEarlier);
+        }
+
+        if (!_sources.empty()) {
+                if (last_frame() < _sources.front()->length (0)) {
+                        ct = CanTrim (ct | EndTrimLater);
+                }
+        }
+
+        return ct;
+}
+                      

@@ -1242,6 +1242,9 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 void
 AudioRegionView::entered (bool internal_editing)
 {
+        trackview.editor().set_current_trimmable (_region);
+        trackview.editor().set_current_movable (_region);
+
 	if (gain_line && _flags & EnvelopeVisible) {
 		gain_line->show_all_control_points ();
 	}
@@ -1259,6 +1262,9 @@ AudioRegionView::entered (bool internal_editing)
 void
 AudioRegionView::exited ()
 {
+        trackview.editor().set_current_trimmable (boost::shared_ptr<Trimmable>());
+        trackview.editor().set_current_movable (boost::shared_ptr<Movable>());
+
 	if (gain_line) {
 		gain_line->hide_all_but_selected_control_points ();
 	}

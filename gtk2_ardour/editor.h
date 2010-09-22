@@ -428,7 +428,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
 
-	void show_verbose_canvas_cursor_with (const std::string& txt);
+	void show_verbose_canvas_cursor_with (const std::string& txt, int32_t xoffset = 0, int32_t yoffset = 0);
 	void hide_verbose_canvas_cursor();
 
 	void center_screen (framepos_t);
@@ -477,7 +477,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	static Gdk::Cursor* transparent_cursor;
 
         Gdk::Cursor* get_canvas_cursor () const { return current_canvas_cursor; }
-        void set_canvas_cursor (Gdk::Cursor*);
+        void set_canvas_cursor (Gdk::Cursor*, bool save=false);
+        void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>);
+        void set_current_movable (boost::shared_ptr<ARDOUR::Movable>);
 
   protected:
 	void map_transport_state ();
@@ -1031,6 +1033,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	framepos_t cut_buffer_start;
 	framecnt_t cut_buffer_length;
+
+        Gdk::Cursor* pre_press_cursor;
+        boost::weak_ptr<ARDOUR::Trimmable> _trimmable;
+        boost::weak_ptr<ARDOUR::Movable> _movable;
 
 	bool typed_event (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);

@@ -45,6 +45,8 @@ namespace ARDOUR {
 	class Region;
 	class Playlist;
 	class RouteGroup;
+        class Trimmable;
+        class Movable;
 }
 
 namespace Gtk {
@@ -353,8 +355,11 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	virtual TimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const = 0;
 
-	virtual void show_verbose_canvas_cursor_with (const std::string& txt) = 0;
+	virtual void show_verbose_canvas_cursor_with (const std::string& txt, int32_t xoffset = 0, int32_t yoffset = 0) = 0;
 	virtual void hide_verbose_canvas_cursor() = 0;
+
+        virtual void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>) = 0;
+        virtual void set_current_movable (boost::shared_ptr<ARDOUR::Movable>) = 0;
 
 	virtual void center_screen (framepos_t) = 0;
 

@@ -99,6 +99,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, no_sound_notes (false)
+        , pre_enter_cursor (0)
 {
 	_note_group->raise_to_top();
         PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
@@ -2222,7 +2223,7 @@ MidiRegionView::update_resizing (ArdourCanvas::CanvasNote* primary, bool at_fron
                                         len = 0;
                                 }
                         } else {
-                                if (beats >= canvas_note->note()->end_time()) { 
+                                if (beats >= canvas_note->note()->time()) { 
                                         len = beats - canvas_note->note()->time();
                                 } else {
                                         len = 0;
@@ -2479,7 +2480,7 @@ MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush)
                 char buf[24];
                 snprintf (buf, sizeof (buf), "Vel %d", 
                           (int) (*_selection.begin())->note()->velocity());
-                trackview.editor().show_verbose_canvas_cursor_with (buf);
+                trackview.editor().show_verbose_canvas_cursor_with (buf, 10, 10);
         }
 }
 
@@ -2668,11 +2669,15 @@ MidiRegionView::note_left (ArdourCanvas::CanvasNoteEvent* note)
 	}
 
 	editor->hide_verbose_canvas_cursor ();
-        editor->set_canvas_cursor (pre_enter_cursor);
+
+        if (pre_enter_cursor) {
+                editor->set_canvas_cursor (pre_enter_cursor);
+                pre_enter_cursor = 0;
+        }
 }
 
 void
-MidiRegionView::note_mouse_position (float x_fraction, float y_fraction)
+MidiRegionView::note_mouse_position (float x_fraction, float y_fraction, bool can_set_cursor)
 {
 	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
 
@@ -2681,7 +2686,9 @@ MidiRegionView::note_mouse_position (float x_fraction, float y_fraction)
         } else if (x_fraction >= 0.75 && x_fraction < 1.0) {
                 editor->set_canvas_cursor (editor->right_side_trim_cursor);
         } else {
-                editor->set_canvas_cursor (pre_enter_cursor);
+                if (pre_enter_cursor && can_set_cursor) {
+                        editor->set_canvas_cursor (pre_enter_cursor);
+                }
         }
 }
 
@@ -3001,7 +3008,7 @@ MidiRegionView::show_verbose_canvas_cursor (boost::shared_ptr<NoteType> n) const
                   Evoral::midi_note_name (n->note()).c_str(), 
                   (int) n->note (),
                   (int) n->velocity());
-	trackview.editor().show_verbose_canvas_cursor_with (buf);
+	trackview.editor().show_verbose_canvas_cursor_with (buf, 10, 20);
 }
 
 void

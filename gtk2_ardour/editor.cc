@@ -325,6 +325,7 @@ Editor::Editor ()
 	clicked_crossfadeview = 0;
 	clicked_control_point = 0;
 	last_update_frame = 0;
+        pre_press_cursor = 0;
 	_drags = new DragManager (this);
 	current_mixer_strip = 0;
 	current_bbt_points = 0;
@@ -1240,8 +1241,10 @@ Editor::build_cursors ()
 		transparent_cursor = new Gdk::Cursor (bits, bits, c, c, 0, 0);
 	}
 
-
-	grabber_cursor = new Gdk::Cursor (HAND2);
+	{
+		Glib::RefPtr<Gdk::Pixbuf> grabber_pixbuf (::get_icon ("grabber"));
+		grabber_cursor = new Gdk::Cursor (Gdk::Display::get_default(), grabber_pixbuf, 5, 0);
+	}
 
 	{
 		Glib::RefPtr<Gdk::Pixbuf> grabber_note_pixbuf (::get_icon ("grabber_note"));
@@ -3626,7 +3629,7 @@ Editor::clamp_verbose_cursor_y (double y)
 }
 
 void
-Editor::show_verbose_canvas_cursor_with (const string & txt)
+Editor::show_verbose_canvas_cursor_with (const string & txt, int32_t xoffset, int32_t yoffset)
 {
 	verbose_canvas_cursor->property_text() = txt.c_str();
 
@@ -3635,6 +3638,9 @@ Editor::show_verbose_canvas_cursor_with (const string & txt)
 
 	track_canvas->get_pointer (x, y);
 	track_canvas->window_to_world (x, y, wx, wy);
+
+        wx += xoffset;
+        wy += yoffset;
 
 	/* don't get too close to the edge */
 	verbose_canvas_cursor->property_x() = clamp_verbose_cursor_x (wx);

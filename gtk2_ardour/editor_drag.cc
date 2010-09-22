@@ -94,7 +94,6 @@ DragManager::add (Drag* d)
 void
 DragManager::set (Drag* d, GdkEvent* e, Gdk::Cursor* c)
 {
-	assert (_drags.empty ());
 	d->set_manager (this);
 	_drags.push_back (d);
 	start_grab (e, c);
@@ -1403,8 +1402,15 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 {
 	Gdk::Cursor* cursor;
 	ArdourCanvas::CanvasNote* cnote = dynamic_cast<ArdourCanvas::CanvasNote*>(_item);
+        float x_fraction = cnote->mouse_x_fraction ();
 
-	Drag::start_grab (event);
+        if (x_fraction > 0.0 && x_fraction < 0.25) {
+                cursor = _editor->left_side_trim_cursor;
+        } else  {
+                cursor = _editor->right_side_trim_cursor;
+        }
+
+	Drag::start_grab (event, cursor);
 
 	region = &cnote->region_view();
 

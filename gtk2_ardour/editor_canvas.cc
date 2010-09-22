@@ -426,7 +426,7 @@ bool
 Editor::track_canvas_map_handler (GdkEventAny* /*ev*/)
 {
 	if (current_canvas_cursor) {
-		track_canvas->get_window()->set_cursor (*current_canvas_cursor);
+		set_canvas_cursor (current_canvas_cursor);
 	}
 	return false;
 }
@@ -568,7 +568,7 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert)
 		}
 	}
 
-	if ((autoscroll_x != last_autoscroll_x) || (autoscroll_y != last_autoscroll_y) || (autoscroll_x == 0 && autoscroll_y == 0)) {
+	if (autoscroll_active && ((autoscroll_x != last_autoscroll_x) || (autoscroll_y != last_autoscroll_y) || (autoscroll_x == 0 && autoscroll_y == 0))) {
 		stop_canvas_autoscroll ();
 	}
 
@@ -918,12 +918,15 @@ Editor::horizontal_position () const
 	return frame_to_unit (leftmost_frame);
 }
 void
-Editor::set_canvas_cursor (Gdk::Cursor* cursor)
+Editor::set_canvas_cursor (Gdk::Cursor* cursor, bool save)
 {
-	if (is_drawable()) {
-	        track_canvas->get_window()->set_cursor(*cursor);
-	}
+        if (save) {
+                current_canvas_cursor = cursor;
+        }
 
+	if (is_drawable()) {
+	        track_canvas->get_window()->set_cursor (*cursor);
+	}
 }
 
 bool
@@ -931,7 +934,7 @@ Editor::track_canvas_key_press (GdkEventKey* event)
 {
 	/* XXX: event does not report the modifier key pressed down, AFAICS, so use the Keyboard object instead */
 	if (mouse_mode == Editing::MouseZoom && Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
-		track_canvas->get_window()->set_cursor (*zoom_out_cursor);
+		set_canvas_cursor (zoom_out_cursor);
 	}
 
 	return false;
@@ -941,7 +944,7 @@ bool
 Editor::track_canvas_key_release (GdkEventKey* event)
 {
 	if (mouse_mode == Editing::MouseZoom && !Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
-		track_canvas->get_window()->set_cursor (*zoom_in_cursor);
+		set_canvas_cursor (zoom_in_cursor);
 	}
 
 	return false;
