@@ -27,7 +27,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-/** Read a block of MIDI events from buffer into a MidiBuffer.
+/** Read a block of MIDI events from this buffer into a MidiBuffer.
  *
  * Timestamps of events returned are relative to start (i.e. event with stamp 0
  * occurred at start), with offset added.
@@ -96,9 +96,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 
 		// This event marks a loop end (i.e. the next event's timestamp will be non-monotonic)
 		if (ev_type == LoopEventType) {
-			cerr << "MRB loop boundary @ " << ev_time << endl;
-			
-			assert (ev_size == sizeof (nframes_t));
+			assert (ev_size == sizeof (framepos_t));
 			nframes_t loop_start;
 			read_contents (ev_size, (uint8_t *) &loop_start);
 
