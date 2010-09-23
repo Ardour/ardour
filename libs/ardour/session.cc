@@ -2530,7 +2530,7 @@ Session::get_extent () const
 			continue;
 		}
 
-		pair<nframes_t, nframes_t> e = tr->playlist()->get_extent ();
+		pair<framepos_t, framepos_t> e = tr->playlist()->get_extent ();
 		if (e.first < ext.first) {
 			ext.first = e.first;
 		}
