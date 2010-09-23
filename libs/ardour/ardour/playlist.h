@@ -118,7 +118,7 @@ public:
 	bool hidden() const { return _hidden; }
 	bool empty() const;
 	uint32_t n_regions() const;
-	std::pair<framecnt_t, framecnt_t> get_extent () const;
+	std::pair<framepos_t, framepos_t> get_extent () const;
 	layer_t top_layer() const;
 
 	EditMode get_edit_mode() const { return _edit_mode; }
@@ -340,7 +340,7 @@ public:
 	void copy_regions (RegionList&) const;
 	void partition_internal (framepos_t start, framepos_t end, bool cutting, RegionList& thawlist);
 
-	std::pair<framecnt_t, framecnt_t> _get_extent() const;
+	std::pair<framepos_t, framepos_t> _get_extent() const;
 
 	boost::shared_ptr<Playlist> cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(framepos_t, framecnt_t, bool),
 					      std::list<AudioRange>& ranges, bool result_is_hidden);

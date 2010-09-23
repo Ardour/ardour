@@ -544,7 +544,7 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 	/* the length change might not be true, but we have to act
 	   as though it could be.
 	*/
-        
+
 	if (holding_state()) {
 		pending_adds.insert (r);
 		pending_contents_change = true;
@@ -2308,20 +2308,20 @@ Playlist::n_regions() const
 	return regions.size();
 }
 
-pair<framecnt_t, framecnt_t>
+pair<framepos_t, framepos_t>
 Playlist::get_extent () const
 {
 	RegionLock rlock (const_cast<Playlist *>(this), false);
 	return _get_extent ();
 }
 
-pair<framecnt_t, framecnt_t>
+pair<framepos_t, framepos_t>
 Playlist::_get_extent () const
 {
-	pair<framecnt_t, framecnt_t> ext (max_framepos, 0);
+	pair<framepos_t, framepos_t> ext (max_framepos, 0);
 
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		pair<framecnt_t, framecnt_t> const e ((*i)->position(), (*i)->position() + (*i)->length());
+		pair<framepos_t, framepos_t> const e ((*i)->position(), (*i)->position() + (*i)->length());
 		if (e.first < ext.first) {
 			ext.first = e.first;
 		}
