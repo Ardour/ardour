@@ -237,7 +237,6 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* no
                                 if (event->midi_buffer[2] == 6) { // 6 bytes following
                                         if (event->midi_buffer[3] == 0x1) { // Evoral Note ID
                                                 *note_id = unmidify_note_id  (&event->midi_buffer[4]);
-                                                cerr << "Loaded Event ID " << *note_id << endl;
                                         }
                                 }
                         }
