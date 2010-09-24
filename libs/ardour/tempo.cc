@@ -299,7 +299,21 @@ TempoMap::move_metric_section (MetricSection& section, const BBT_Time& when)
 void
 TempoMap::move_tempo (TempoSection& tempo, const BBT_Time& when)
 {
-	if (move_metric_section (tempo, when) == 0) {
+	/* a new tempo always starts a new bar on the first beat */
+	BBT_Time when_rounded = when;
+	int force_state_changed = 0;
+
+	if (when_rounded.beats != 1) {
+		when_rounded.beats = 1;
+		when_rounded.bars++;
+		force_state_changed = 1;
+	}
+
+	/* new tempo *always* start on a beat. */
+		
+	when_rounded.ticks = 0;
+
+	if ((move_metric_section (tempo, when_rounded) == 0) || force_state_changed) {
 		StateChanged (Change (0));
 	}
 }
@@ -307,7 +321,21 @@ TempoMap::move_tempo (TempoSection& tempo, const BBT_Time& when)
 void
 TempoMap::move_meter (MeterSection& meter, const BBT_Time& when)
 {
-	if (move_metric_section (meter, when) == 0) {
+	/* a new meter always starts a new bar on the first beat */
+	BBT_Time when_rounded = when;
+	int force_state_changed = 0;
+
+	if (when_rounded.beats != 1) {
+		when_rounded.beats = 1;
+		when_rounded.bars++;
+		force_state_changed = 1;
+	}
+
+	/* new meters *always* start on a beat. */
+		
+	when_rounded.ticks = 0;
+
+	if ((move_metric_section (meter, when_rounded) == 0) || force_state_changed) {
 		StateChanged (Change (0));
 	}
 }
