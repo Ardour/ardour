@@ -302,6 +302,27 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 		
 	}
 
+
+	/*
+	 * Sometimes a Crossfade is created that doesn't correspont to a real 
+	 * overlap between regions. Obviously this shouldn't happen, but 
+	 * somehow it does, so check here that the crossfade lies within both
+	 * the _in and _out regions to avoid read_at() below going crazy.
+	 */
+
+	if (_out->coverage(start, start+to_write-1) == OverlapNone) {
+		cerr << "out region is outside crossfade: "
+		     << _out->name() << " => " << _in->name()
+		     << endl;
+		return 0;
+	}
+	if (_in->coverage(start, start+to_write-1) == OverlapNone) {
+		cerr << "in region is outside crossfade: "
+		     << _out->name() << " => " << _in->name()
+		     << endl;
+		return 0;
+	}
+
 	offset = start - _position;
 
 	/* Prevent data from piling up inthe crossfade buffers when reading a transparent region */
@@ -711,10 +732,13 @@ Crossfade::set_state (const XMLNode& node)
 	nframes_t val;
 
 	if ((prop = node.property ("position")) != 0) {
-		sscanf (prop->value().c_str(), "%" PRIu32, &val);
-		if (val != _position) {
-			_position = val;
-			what_changed = Change (what_changed | PositionChanged);
+		if (sscanf (prop->value().c_str(), "%" PRIu32, &val) == 1) {
+			if (val != _position) {
+				_position = val;
+				what_changed = Change (what_changed | PositionChanged);
+			}
+		} else {
+			warning << _("can't read value from crossfade position property") << endmsg;
 		}
 	} else {
 		warning << _("old-style crossfade information - no position information") << endmsg;
@@ -751,12 +775,14 @@ Crossfade::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("length")) != 0) {
 
-		sscanf (prop->value().c_str(), "%" PRIu32, &val);
-		if (val != _length) {
-			_length = atol (prop->value().c_str());
-			what_changed = Change (what_changed | LengthChanged);
+		if (sscanf (prop->value().c_str(), "%" PRIu32, &val) == 1) {
+			if (val != _length) {
+				_length = atol (prop->value().c_str());
+				what_changed = Change (what_changed | LengthChanged);
+			}
+		} else {
+			warning << _("can't read value from crossfade length property") << endmsg;		
 		}
-
 	} else {
 		
 		/* XXX this branch is legacy code from before
