@@ -933,18 +933,39 @@ convert_bgra_to_rgba (guint8 const* src,
 {
 	guint8 const* src_pixel = src;
 	guint8*       dst_pixel = dst;
-
+	
 	for (int y = 0; y < height; y++)
 		for (int x = 0; x < width; x++)
 		{
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+                        /* [ B G R A ] is actually [ B G R A ] in memory SOURCE
+                                                     0 1 2 3
+                           [ R G B A ] is actually [ R G B A ] in memory DEST
+                        */
 			dst_pixel[0] = convert_color_channel (src_pixel[2],
-							      src_pixel[3]);
+							      src_pixel[3]); // R [0] <= [ 2 ]
 			dst_pixel[1] = convert_color_channel (src_pixel[1],
-							      src_pixel[3]);
-			dst_pixel[2] = convert_color_channel (src_pixel[0],
-							      src_pixel[3]);
-			dst_pixel[3] = src_pixel[3];
+							      src_pixel[3]); // G [1] <= [ 1 ]
+			dst_pixel[2] = convert_color_channel (src_pixel[0],  
+							      src_pixel[3]); // B [2] <= [ 0 ]
+			dst_pixel[3] = src_pixel[3]; // alpha
 
+#elif G_BYTE_ORDER == G_BIG_ENDIAN
+                        /* [ B G R A ] is actually [ A R G B ] in memory SOURCE
+                                                     0 1 2 3
+                           [ R G B A ] is actually [ A B G R ] in memory DEST
+                        */
+			dst_pixel[3] = convert_color_channel (src_pixel[1],
+							      src_pixel[0]); // R [3] <= [ 1 ]
+			dst_pixel[2] = convert_color_channel (src_pixel[2],
+							      src_pixel[0]); // G [2] <= [ 2 ]
+			dst_pixel[1] = convert_color_channel (src_pixel[3],
+							      src_pixel[0]); // B [1] <= [ 3 ]
+			dst_pixel[0] = src_pixel[0]; // alpha
+
+#else
+#error ardour does not currently support PDP-endianess
+#endif			
 			dst_pixel += 4;
 			src_pixel += 4;
 		}
