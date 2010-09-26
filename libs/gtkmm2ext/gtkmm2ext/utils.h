@@ -26,6 +26,8 @@
 
 #include <gtkmm/treeview.h>
 #include <gdkmm/window.h> /* for WMDecoration */
+#include <gdkmm/pixbuf.h>
+#include <pangomm/fontdescription.h>
 
 namespace Gtk {
 	class ComboBoxText;
@@ -51,6 +53,12 @@ namespace Gtkmm2ext {
 						     gint hpadding,
 						     gint vpadding);
 
+        Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_string (const std::string& name, 
+                                                      Pango::FontDescription* font, 
+                                                      int clip_width, 
+                                                      int clip_height, 
+                                                      Gdk::Color fg);
+
 	void set_popdown_strings (Gtk::ComboBoxText&, 
 				  const std::vector<std::string>&, 
 				  bool set_size = false,
@@ -75,6 +83,9 @@ namespace Gtkmm2ext {
 
         bool possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval);
         uint32_t possibly_translate_legal_accelerator_to_real_key (uint32_t keyval);
+
+        int physical_screen_height (Glib::RefPtr<Gdk::Window>);
+        int physical_screen_width (Glib::RefPtr<Gdk::Window>);
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */

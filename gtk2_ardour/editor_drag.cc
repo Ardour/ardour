@@ -17,11 +17,14 @@
 
 */
 
-#define __STDC_LIMIT_MACROS 1
 #include <stdint.h>
+
 #include "pbd/memento_command.h"
 #include "pbd/basename.h"
 #include "pbd/stateful_diff_command.h"
+
+#include "gtkmm2ext/utils.h"
+
 #include "ardour/session.h"
 #include "ardour/dB.h"
 #include "ardour/region_factory.h"
@@ -48,6 +51,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace Editing;
 using namespace ArdourCanvas;
 

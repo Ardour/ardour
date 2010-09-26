@@ -916,61 +916,6 @@ reset_dpi ()
 	DPIReset();//Emit Signal
 }
 
-
-
-inline guint8
-convert_color_channel (guint8 src,
-		       guint8 alpha)
-{
-	return alpha ? ((guint (src) << 8) - src) / alpha : 0;
-}
-
-void
-convert_bgra_to_rgba (guint8 const* src,
-		      guint8*       dst,
-		      int           width,
-		      int           height)
-{
-	guint8 const* src_pixel = src;
-	guint8*       dst_pixel = dst;
-	
-	for (int y = 0; y < height; y++)
-		for (int x = 0; x < width; x++)
-		{
-#if G_BYTE_ORDER == G_LITTLE_ENDIAN
-                        /* [ B G R A ] is actually [ B G R A ] in memory SOURCE
-                                                     0 1 2 3
-                           [ R G B A ] is actually [ R G B A ] in memory DEST
-                        */
-			dst_pixel[0] = convert_color_channel (src_pixel[2],
-							      src_pixel[3]); // R [0] <= [ 2 ]
-			dst_pixel[1] = convert_color_channel (src_pixel[1],
-							      src_pixel[3]); // G [1] <= [ 1 ]
-			dst_pixel[2] = convert_color_channel (src_pixel[0],  
-							      src_pixel[3]); // B [2] <= [ 0 ]
-			dst_pixel[3] = src_pixel[3]; // alpha
-
-#elif G_BYTE_ORDER == G_BIG_ENDIAN
-                        /* [ B G R A ] is actually [ A R G B ] in memory SOURCE
-                                                     0 1 2 3
-                           [ R G B A ] is actually [ A B G R ] in memory DEST
-                        */
-			dst_pixel[3] = convert_color_channel (src_pixel[1],
-							      src_pixel[0]); // R [3] <= [ 1 ]
-			dst_pixel[2] = convert_color_channel (src_pixel[2],
-							      src_pixel[0]); // G [2] <= [ 2 ]
-			dst_pixel[1] = convert_color_channel (src_pixel[3],
-							      src_pixel[0]); // B [1] <= [ 3 ]
-			dst_pixel[0] = src_pixel[0]; // alpha
-
-#else
-#error ardour does not currently support PDP-endianess
-#endif			
-			dst_pixel += 4;
-			src_pixel += 4;
-		}
-}
-
 void
 resize_window_to_proportion_of_monitor (Gtk::Window* window, int max_width, int max_height)
 {
@@ -984,41 +929,6 @@ resize_window_to_proportion_of_monitor (Gtk::Window* window, int max_width, int 
 	window->resize (w, h);
 }
 
-Glib::RefPtr<Gdk::Pixbuf>
-pixbuf_from_string(const string& name, Pango::FontDescription* font, int clip_width, int clip_height, Gdk::Color fg)
-{
-	static Glib::RefPtr<Gdk::Pixbuf>* empty_pixbuf = 0;
-
-	if (name.empty()) {
-		if (empty_pixbuf == 0) {
-			empty_pixbuf = new Glib::RefPtr<Gdk::Pixbuf>;
-			*empty_pixbuf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height);
-		}
-		return *empty_pixbuf;
-	}
-
-	Glib::RefPtr<Gdk::Pixbuf> buf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height);
-
-	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, clip_width, clip_height);
-	cairo_t* cr = cairo_create (surface);
-	cairo_text_extents_t te;
-	
-	cairo_set_source_rgba (cr, fg.get_red_p(), fg.get_green_p(), fg.get_blue_p(), 1.0);
-	cairo_select_font_face (cr, font->get_family().c_str(),
-				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (cr,  font->get_size() / Pango::SCALE);
-	cairo_text_extents (cr, name.c_str(), &te);
-	
-	cairo_move_to (cr, 0.5, 0.5 - te.height / 2 - te.y_bearing + clip_height / 2);
-	cairo_show_text (cr, name.c_str());
-	
-	convert_bgra_to_rgba(cairo_image_surface_get_data (surface), buf->get_pixels(), clip_width, clip_height);
-
-	cairo_destroy(cr);
-	cairo_surface_destroy(surface);
-
-	return buf;
-}
 
 /** Replace _ with __ in a string; for use with menu item text to make underscores displayed correctly */
 string
@@ -1075,32 +985,3 @@ control_link (ScopedConnectionList& scl, boost::shared_ptr<Controllable> c, Gtk:
                             gui_context());
 }
                                            
-int
-physical_screen_height (Glib::RefPtr<Gdk::Window> win)
-{
-        GdkScreen* scr = gdk_screen_get_default();
-
-        if (win) {
-                GdkRectangle r;
-                gint monitor = gdk_screen_get_monitor_at_window (scr, win->gobj());
-                gdk_screen_get_monitor_geometry (scr, monitor, &r);
-                return r.height;
-        } else {
-                return gdk_screen_get_height (scr);
-        }
-}
-
-int
-physical_screen_width (Glib::RefPtr<Gdk::Window> win)
-{
-        GdkScreen* scr = gdk_screen_get_default();
-        
-        if (win) {
-                GdkRectangle r;
-                gint monitor = gdk_screen_get_monitor_at_window (scr, win->gobj());
-                gdk_screen_get_monitor_geometry (scr, monitor, &r);
-                return r.width;
-        } else {
-                return gdk_screen_get_width (scr);
-        }
-}

@@ -21,6 +21,7 @@
 #include <gtkmm.h>
 
 #include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/utils.h>
 
 #include "ardour/playlist.h"
 #include "ardour/region.h"
@@ -67,7 +68,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* background_g
 	canvas_rect = new ArdourCanvas::SimpleRect (*_background_group);
 	canvas_rect->property_x1() = 0.0;
 	canvas_rect->property_y1() = 0.0;
-	canvas_rect->property_x2() = physical_screen_width (_trackview.editor().get_window());
+	canvas_rect->property_x2() = Gtkmm2ext::physical_screen_width (_trackview.editor().get_window());
 	canvas_rect->property_y2() = (double) tv.current_height();
 	canvas_rect->raise(1); // raise above tempo lines
 

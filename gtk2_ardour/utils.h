@@ -85,25 +85,10 @@ bool key_is_legal_for_numeric_entry (guint keyval);
 void reset_dpi ();
 void set_pango_fontsize ();
 
-inline guint8 convert_color_channel (guint8 src, guint8 alpha);
-void convert_bgra_to_rgba (guint8 const* src,
-			   guint8*       dst,
-			   int           width,
-			   int           height);
-
-Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_string (const std::string& name,
-                                              Pango::FontDescription* font,
-                                              int clip_width,
-                                              int clip_height,
-                                              Gdk::Color);
-
 void resize_window_to_proportion_of_monitor (Gtk::Window*, int, int);
 
 std::string escape_underscores (std::string const &);
 
 void control_link (PBD::ScopedConnectionList& scl, boost::shared_ptr<PBD::Controllable> c, Gtk::Adjustment& a);
-
-int physical_screen_height (Glib::RefPtr<Gdk::Window>);
-int physical_screen_width (Glib::RefPtr<Gdk::Window>);
 
 #endif /* __ardour_gtk_utils_h__ */

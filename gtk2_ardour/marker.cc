@@ -39,6 +39,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace Gtkmm2ext;
 
 PBD::Signal1<void,Marker*> Marker::CatchDeletion;
 

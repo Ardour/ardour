@@ -47,6 +47,7 @@ using namespace Editing;
 using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace Gtkmm2ext;
 
 Pango::FontDescription* TimeAxisViewItem::NAME_FONT = 0;
 const double TimeAxisViewItem::NAME_X_OFFSET = 15.0;

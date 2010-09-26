@@ -35,6 +35,13 @@
 using namespace std;
 
 void
+Gtkmm2ext::init ()
+{
+	// Necessary for gettext
+	(void) bindtextdomain(PACKAGE, LOCALEDIR);
+}
+
+void
 Gtkmm2ext::get_ink_pixel_size (Glib::RefPtr<Pango::Layout> layout,
 			       int& width,
 			       int& height)
@@ -84,11 +91,112 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w,
 	w.set_size_request(width_max + hpadding, height_max + vpadding);
 }
 
-void
-Gtkmm2ext::init ()
+static inline guint8
+demultiply_alpha (guint8 src,
+                  guint8 alpha)
 {
-	// Necessary for gettext
-	(void) bindtextdomain(PACKAGE, LOCALEDIR);
+        /* cairo pixel buffer data contains RGB values with the alpha
+           values premultiplied.
+
+           GdkPixbuf pixel buffer data contains RGB values without the
+           alpha value applied.
+
+           this removes the alpha component from the cairo version and
+           returns the GdkPixbuf version.
+        */
+	return alpha ? ((guint (src) << 8) - src) / alpha : 0;
+}
+
+static void
+convert_bgra_to_rgba (guint8 const* src,
+		      guint8*       dst,
+		      int           width,
+		      int           height)
+{
+	guint8 const* src_pixel = src;
+	guint8*       dst_pixel = dst;
+	
+        /* cairo pixel data is endian-dependent ARGB with A in the most significant 8 bits,
+           with premultipled alpha values (see preceding function)
+
+           GdkPixbuf pixel data is non-endian-dependent RGBA with R in the lowest addressable
+           8 bits, and non-premultiplied alpha values.
+
+           convert from the cairo values to the GdkPixbuf ones.
+        */
+
+	for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+                        /* Cairo [ B G R A ] is actually  [ B G R A ] in memory SOURCE
+                                                            0 1 2 3
+                           Pixbuf [ R G B A ] is actually [ R G B A ] in memory DEST
+                        */
+                        dst_pixel[0] = demultiply_alpha (src_pixel[2],
+                                                         src_pixel[3]); // R [0] <= [ 2 ]
+                        dst_pixel[1] = demultiply_alpha (src_pixel[1],
+                                                         src_pixel[3]); // G [1] <= [ 1 ]
+                        dst_pixel[2] = demultiply_alpha (src_pixel[0],  
+                                                         src_pixel[3]); // B [2] <= [ 0 ]
+                        dst_pixel[3] = src_pixel[3]; // alpha
+                        
+#elif G_BYTE_ORDER == G_BIG_ENDIAN
+                        /* Cairo [ B G R A ] is actually  [ A R G B ] in memory SOURCE
+                                                            0 1 2 3
+                           Pixbuf [ R G B A ] is actually [ R G B A ] in memory DEST
+                        */
+                        dst_pixel[0] = demultiply_alpha (src_pixel[1],
+                                                         src_pixel[0]); // R [0] <= [ 1 ]
+                        dst_pixel[1] = demultiply_alpha (src_pixel[2],
+                                                         src_pixel[0]); // G [1] <= [ 2 ]
+                        dst_pixel[2] = demultiply_alpha (src_pixel[3],
+                                                         src_pixel[0]); // B [2] <= [ 3 ]
+                        dst_pixel[3] = src_pixel[0]; // alpha
+                        
+#else
+#error ardour does not currently support PDP-endianess
+#endif			
+                        
+                        dst_pixel += 4;
+                        src_pixel += 4;
+                }
+	}
+}
+
+Glib::RefPtr<Gdk::Pixbuf>
+Gtkmm2ext::pixbuf_from_string(const string& name, Pango::FontDescription* font, int clip_width, int clip_height, Gdk::Color fg)
+{
+	static Glib::RefPtr<Gdk::Pixbuf>* empty_pixbuf = 0;
+
+	if (name.empty()) {
+		if (empty_pixbuf == 0) {
+			empty_pixbuf = new Glib::RefPtr<Gdk::Pixbuf>;
+			*empty_pixbuf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height);
+		}
+		return *empty_pixbuf;
+	}
+
+	Glib::RefPtr<Gdk::Pixbuf> buf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height);
+
+	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, clip_width, clip_height);
+	cairo_t* cr = cairo_create (surface);
+	cairo_text_extents_t te;
+	
+	cairo_set_source_rgba (cr, fg.get_red_p(), fg.get_green_p(), fg.get_blue_p(), 1.0);
+	cairo_select_font_face (cr, font->get_family().c_str(),
+				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+	cairo_set_font_size (cr,  font->get_size() / Pango::SCALE);
+	cairo_text_extents (cr, name.c_str(), &te);
+	
+	cairo_move_to (cr, 0.5, 0.5 - te.height / 2 - te.y_bearing + clip_height / 2);
+	cairo_show_text (cr, name.c_str());
+	
+	convert_bgra_to_rgba(cairo_image_surface_get_data (surface), buf->get_pixels(), clip_width, clip_height);
+
+	cairo_destroy(cr);
+	cairo_surface_destroy(surface);
+
+	return buf;
 }
 
 void
@@ -239,3 +347,32 @@ Gtkmm2ext::possibly_translate_legal_accelerator_to_real_key (uint32_t keyval)
 	return keyval;
 }
 
+int
+Gtkmm2ext::physical_screen_height (Glib::RefPtr<Gdk::Window> win)
+{
+        GdkScreen* scr = gdk_screen_get_default();
+
+        if (win) {
+                GdkRectangle r;
+                gint monitor = gdk_screen_get_monitor_at_window (scr, win->gobj());
+                gdk_screen_get_monitor_geometry (scr, monitor, &r);
+                return r.height;
+        } else {
+                return gdk_screen_get_height (scr);
+        }
+}
+
+int
+Gtkmm2ext::physical_screen_width (Glib::RefPtr<Gdk::Window> win)
+{
+        GdkScreen* scr = gdk_screen_get_default();
+        
+        if (win) {
+                GdkRectangle r;
+                gint monitor = gdk_screen_get_monitor_at_window (scr, win->gobj());
+                gdk_screen_get_monitor_geometry (scr, monitor, &r);
+                return r.width;
+        } else {
+                return gdk_screen_get_width (scr);
+        }
+}
