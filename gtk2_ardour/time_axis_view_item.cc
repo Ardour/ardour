@@ -40,6 +40,7 @@ using namespace std;
 using namespace Editing;
 using namespace Glib;
 using namespace PBD;
+using namespace Gtkmm2ext;
 
 //------------------------------------------------------------------------------
 /** Initialize const static memeber data */
