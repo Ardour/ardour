@@ -2391,7 +2391,7 @@ RouteTimeAxisView::create_gain_automation_child (const Evoral::Parameter& param,
 		error << "Route has no gain automation, unable to add automation track view." << endmsg;
 		return;
 	}
-	
+
 	gain_track.reset (new AutomationTimeAxisView (_session,
 						      _route, _route->amp(), c,
 						      _editor,

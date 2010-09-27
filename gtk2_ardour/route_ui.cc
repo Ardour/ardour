@@ -94,6 +94,7 @@ RouteUI::init ()
 {
 	self_destruct = true;
 	xml_node = 0;
+	_xml_node_version = Stateful::current_state_version;
 	mute_menu = 0;
 	solo_menu = 0;
 	sends_menu = 0;
@@ -1266,12 +1267,15 @@ RouteUI::ensure_xml_node ()
 		if ((xml_node = _route->extra_xml ("GUI")) == 0) {
 			xml_node = new XMLNode ("GUI");
 			_route->add_extra_xml (*xml_node);
+		} else {
+			/* the Route has one, so it must have been loaded */
+			_xml_node_version = Stateful::loading_state_version;
 		}
 	}
 }
 
 XMLNode*
-RouteUI::get_automation_child_xml_node (Evoral::Parameter param, int version)
+RouteUI::get_automation_child_xml_node (Evoral::Parameter param)
 {
 	ensure_xml_node ();
 
@@ -1282,15 +1286,16 @@ RouteUI::get_automation_child_xml_node (Evoral::Parameter param, int version)
 
 	for (iter = kids.begin(); iter != kids.end(); ++iter) {
 
-		if (version < 3000) {
+		if (_xml_node_version < 3000) {
 			if ((*iter)->name() == sym) {
 				return *iter;
 			}
 		} else {
 			if ((*iter)->name() == AutomationTimeAxisView::state_node_name) {
 				XMLProperty* type = (*iter)->property("automation-id");
-				if (type && type->value() == sym)
+				if (type && type->value() == sym) {
 					return *iter;
+				}
 			}
 		}
 	}

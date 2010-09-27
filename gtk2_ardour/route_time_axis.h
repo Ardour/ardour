@@ -117,7 +117,7 @@ public:
 
 	/* make sure we get the right version of this */
 
-	XMLNode* get_automation_child_xml_node (Evoral::Parameter param, int version) { return RouteUI::get_automation_child_xml_node (param, version); }
+	XMLNode* get_automation_child_xml_node (Evoral::Parameter param) { return RouteUI::get_automation_child_xml_node (param); }
 
 	typedef std::map<Evoral::Parameter, boost::shared_ptr<AutomationTimeAxisView> > AutomationTracks;
 	AutomationTracks automation_tracks() { return _automation_tracks; }

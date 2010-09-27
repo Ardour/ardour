@@ -193,9 +193,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session* s, boost::shared_ptr<Ro
 	controls_base_unselected_name = X_("AutomationTrackControlsBase");
 	controls_ebox.set_name (controls_base_unselected_name);
 
-	XMLNode* xml_node = get_parent_with_state()->get_automation_child_xml_node (
-		_control->parameter(), Stateful::loading_state_version
-		);
+	XMLNode* xml_node = get_parent_with_state()->get_automation_child_xml_node (_control->parameter());
 
 	if (xml_node) {
 		set_state (*xml_node, Stateful::loading_state_version);
@@ -404,7 +402,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 
 	TimeAxisView* state_parent = get_parent_with_state ();
 	assert(state_parent);
-	XMLNode* xml_node = state_parent->get_automation_child_xml_node (_control->parameter(), Stateful::loading_state_version);
+	XMLNode* xml_node = state_parent->get_automation_child_xml_node (_control->parameter());
 
 	TimeAxisView::set_height (h);
 	_base_rect->property_y2() = h;
@@ -995,7 +993,7 @@ AutomationTimeAxisView::get_state_node ()
 	TimeAxisView* state_parent = get_parent_with_state ();
 
 	if (state_parent) {
-		return state_parent->get_automation_child_xml_node (_control->parameter(), Stateful::loading_state_version);
+		return state_parent->get_automation_child_xml_node (_control->parameter());
 	} else {
 		return 0;
 	}
