@@ -109,7 +109,6 @@ class AudioTimeAxisView : public RouteTimeAxisView
 
 	void add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Processor>);
 	
-	boost::shared_ptr<AutomationTimeAxisView> gain_track;
 	Gtk::CheckMenuItem* gain_automation_item;
 	std::list<boost::shared_ptr<AutomationTimeAxisView> > pan_tracks;
 	Gtk::CheckMenuItem* pan_automation_item;

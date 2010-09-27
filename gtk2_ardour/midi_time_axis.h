@@ -96,6 +96,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
         StepEditor* step_editor() { return _step_editor; }
         void check_step_edit ();
 
+	void first_idle ();
+
   protected:
 	void start_step_editing ();
 	void stop_step_editing ();

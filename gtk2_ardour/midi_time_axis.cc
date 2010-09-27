@@ -164,8 +164,12 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 
 		/* ask for notifications of any new RegionViews */
 		_view->RegionViewAdded.connect (sigc::mem_fun(*this, &MidiTimeAxisView::region_view_added));
-		_view->attach ();
-                
+		
+		if (!_editor.have_idled()) {
+			/* first idle will do what we need */
+		} else {
+			first_idle ();
+		}
 	}
 
 	HBox* midi_controls_hbox = manage(new HBox());
@@ -216,6 +220,14 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 		if (_percussion_mode_item) {
 			_percussion_mode_item->set_active (_note_mode == Percussive);
 		}
+	}
+}
+
+void
+MidiTimeAxisView::first_idle ()
+{
+	if (is_track ()) {
+		_view->attach ();
 	}
 }
 
@@ -807,32 +819,36 @@ MidiTimeAxisView::show_existing_automation ()
 void
 MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool show)
 {
-	/* These controllers are region "automation", so we do not create
-	 * an AutomationList/Line for the track */
-
 	if (param.type() == NullAutomation) {
 		cerr << "WARNING: Attempt to create NullAutomation child, ignoring" << endl;
 		return;
 	}
-
+	
 	AutomationTracks::iterator existing = _automation_tracks.find (param);
 	if (existing != _automation_tracks.end()) {
 		return;
 	}
-
-	boost::shared_ptr<AutomationControl> c = _route->get_control (param);
-
-	assert(c);
-
-	boost::shared_ptr<AutomationTimeAxisView> track(new AutomationTimeAxisView (_session,
-			_route, boost::shared_ptr<ARDOUR::Automatable>(), c,
-			_editor,
-			*this,
-			true,
-			parent_canvas,
-			_route->describe_parameter(param)));
-
-	add_automation_child (param, track, show);
+		
+	if (param.type() == GainAutomation) {
+		create_gain_automation_child (param, show);
+	} else {
+		
+		/* These controllers are region "automation", so we do not create
+		 * an AutomationList/Line for the track */
+		
+		boost::shared_ptr<AutomationControl> c = _route->get_control (param);
+		assert (c);
+		
+		boost::shared_ptr<AutomationTimeAxisView> track(new AutomationTimeAxisView (_session,
+											    _route, boost::shared_ptr<ARDOUR::Automatable>(), c,
+											    _editor,
+											    *this,
+											    true,
+											    parent_canvas,
+											    _route->describe_parameter(param)));
+		
+		add_automation_child (param, track, show);
+	}
 }
 
 

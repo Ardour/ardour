@@ -189,21 +189,7 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 {
 	if (param.type() == GainAutomation) {
 
-		boost::shared_ptr<AutomationControl> c = _route->gain_control();
-		if (!c) {
-			error << "Route has no gain automation, unable to add automation track view." << endmsg;
-			return;
-		}
-
-		gain_track.reset (new AutomationTimeAxisView (_session,
-							      _route, _route->amp(), c,
-							      _editor,
-							      *this,
-							      false,
-							      parent_canvas,
-							      _route->amp()->describe_parameter(param)));
-
-		add_automation_child(Evoral::Parameter(GainAutomation), gain_track, show);
+		create_gain_automation_child (param, show);
 
 	} else if (param.type() == PanAutomation) {
 

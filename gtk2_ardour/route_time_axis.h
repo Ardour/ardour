@@ -241,6 +241,10 @@ protected:
 
 	void region_view_added (RegionView*);
 
+	void create_gain_automation_child (const Evoral::Parameter &, bool);
+
+	boost::shared_ptr<AutomationTimeAxisView> gain_track;
+	
 	StreamView*           _view;
 	ArdourCanvas::Canvas& parent_canvas;
 	bool                  no_redraw;
