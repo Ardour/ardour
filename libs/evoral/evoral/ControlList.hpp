@@ -213,6 +213,7 @@ public:
 
 	bool rt_safe_earliest_event (double start, double& x, double& y, bool start_inclusive=false) const;
 	bool rt_safe_earliest_event_unlocked (double start, double& x, double& y, bool start_inclusive=false) const;
+	bool rt_safe_earliest_event_linear_unlocked (double start, double& x, double& y, bool inclusive) const;
 	bool rt_safe_earliest_event_discrete_unlocked (double start, double& x, double& y, bool inclusive) const;
 
 	void create_curve();
@@ -248,8 +249,6 @@ protected:
 	double multipoint_eval (double x) const;
 
 	void build_search_cache_if_necessary (double start) const;
-
-	bool rt_safe_earliest_event_linear_unlocked (double start, double& x, double& y, bool inclusive) const;
 
 	boost::shared_ptr<ControlList> cut_copy_clear (double, double, int op);
 	bool erase_range_internal (double start, double end, EventList &);

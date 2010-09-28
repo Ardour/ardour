@@ -39,15 +39,14 @@
 using namespace std;
 using namespace PBD;
 
-/** Minimum time between MIDI outputs from a single controller,
+/** Minimum time between MIDI outputs from a single interpolated controller,
     expressed in beats.  This is to limit the rate at which MIDI messages
-    are generated, particularly for quickly-changing controllers which
-    are being interpolated.
+    are generated.  It is only applied to interpolated controllers.
 
     XXX: This is a hack.  The time should probably be expressed in
     seconds rather than beats, and should be configurable etc. etc.
 */
-static double const time_between_controller_outputs = 1.0 / 256;
+static double const time_between_interpolated_controller_outputs = 1.0 / 256;
 
 namespace Evoral {
 
@@ -262,10 +261,14 @@ Sequence<Time>::const_iterator::operator++()
 		break;
 	case CONTROL:
 		// Increment current controller iterator
-		if (_force_discrete) {
-			ret = _control_iter->list->rt_safe_earliest_event_discrete_unlocked (_control_iter->x + time_between_controller_outputs, x, y, false);
+		if (_force_discrete || _control_iter->list->interpolation() == ControlList::Discrete) {
+			ret = _control_iter->list->rt_safe_earliest_event_discrete_unlocked (
+				_control_iter->x, x, y, false
+				);
 		} else {
-			ret = _control_iter->list->rt_safe_earliest_event_unlocked (_control_iter->x + time_between_controller_outputs, x, y, false);
+			ret = _control_iter->list->rt_safe_earliest_event_linear_unlocked (
+				_control_iter->x + time_between_interpolated_controller_outputs, x, y, false
+				);
 		}
 		assert(!ret || x > _control_iter->x);
 		if (ret) {
