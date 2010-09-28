@@ -110,7 +110,7 @@ Source::get_state ()
 }
 
 int
-Source::set_state (const XMLNode& node, int /*version*/)
+Source::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 
@@ -146,12 +146,15 @@ Source::set_state (const XMLNode& node, int /*version*/)
 		_flags = Flag (_flags | Destructive);
 	}
 
-        /* a source with an XML node must necessarily already exist, 
-           and therefore cannot be removable/writable etc. etc.
-        */
-        if (!(_flags & Destructive)) {
-                _flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
-        }
+	if (version < 3000) {
+		/* a source with an XML node must necessarily already exist, 
+		   and therefore cannot be removable/writable etc. etc.; 2.X
+		   sometimes marks sources as removable which shouldn't be.
+		*/
+		if (!(_flags & Destructive)) {
+			_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
+		}
+	}
 
 	return 0;
 }
