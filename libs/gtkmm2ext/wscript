@@ -50,6 +50,7 @@ gtkmm2ext_sources = [
 	'stateful_button.cc',
 	'tearoff.cc',
 	'textviewer.cc',
+        'treeutils.cc',
 	'utils.cc',
 	'version.cc',
 	'window_title.cc'
