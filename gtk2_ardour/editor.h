@@ -2060,10 +2060,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	*/
 	TimeAxisView* _last_cut_copy_source_track;
 
-	/** true if the update of the region list's selection from the current Selection
-	    should be blocked if the Selection is empty.  See EditorRegions::selection_changed.
+	/** true if a change in Selection->regions should change the selection in the region list.
+	    See EditorRegions::selection_changed.
 	*/
-	bool _block_region_list_update_if_empty;
+	bool _region_selection_change_updates_region_list;
 
 	void setup_fade_images ();
 	std::map<ARDOUR::FadeShape, Gtk::Image*> _fade_in_images;

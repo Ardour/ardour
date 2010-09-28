@@ -306,7 +306,7 @@ Editor::Editor ()
 	, _pending_initial_locate (false)
 	, _last_cut_copy_source_track (0)
 
-	, _block_region_list_update_if_empty (false)
+	, _region_selection_change_updates_region_list (true)
 {
 	constructed = false;
 

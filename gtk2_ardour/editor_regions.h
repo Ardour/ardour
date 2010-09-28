@@ -80,6 +80,7 @@ private:
 			add (position);
 			add (end);
 			add (length);
+			add (start);
 			add (sync);
 			add (fadein);
 			add (fadeout);
@@ -98,6 +99,7 @@ private:
 		Gtk::TreeModelColumn<std::string> position;
 		Gtk::TreeModelColumn<std::string> end;
 		Gtk::TreeModelColumn<std::string> length;
+		Gtk::TreeModelColumn<std::string> start;
 		Gtk::TreeModelColumn<std::string> sync;
 		Gtk::TreeModelColumn<std::string> fadein;
 		Gtk::TreeModelColumn<std::string> fadeout;
@@ -143,6 +145,7 @@ private:
         void populate_row_used (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used);
         void populate_row_position (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used);
         void populate_row_end (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used);
+        void populate_row_start (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used);
         void populate_row_sync (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used);
         void populate_row_fade_in (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used, boost::shared_ptr<ARDOUR::AudioRegion>);
         void populate_row_fade_out (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, uint32_t used, boost::shared_ptr<ARDOUR::AudioRegion>);
@@ -186,6 +189,11 @@ private:
 	bool ignore_region_list_selection_change;
 	bool ignore_selected_region_change;
         bool expanded;
+
+        void select_one (Glib::RefPtr<Gtk::TreeSelection>, Glib::RefPtr<Gtk::TreeModel>, Gtk::TreeView&,
+                         Gtk::TreeIter, Gtk::TreePath, Gtk::TreeViewColumn*);
+        void select_next ();
+        void select_previous ();
 };
 
 #endif /* __gtk_ardour_editor_regions_h__ */

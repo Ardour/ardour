@@ -957,7 +957,7 @@ Editor::region_selection_changed ()
 	_regions->block_change_connection (true);
 	editor_regions_selection_changed_connection.block(true);
 
-	if (!_block_region_list_update_if_empty || !selection->regions.empty()) {
+	if (_region_selection_change_updates_region_list) {
 		_regions->unselect_all ();
 	}
 
@@ -965,7 +965,9 @@ Editor::region_selection_changed ()
 		(*i)->set_selected_regionviews (selection->regions);
 	}
 
-	_regions->set_selected (selection->regions);
+        if (_region_selection_change_updates_region_list) {
+                _regions->set_selected (selection->regions);
+        }
 
 	sensitize_the_right_region_actions (!selection->regions.empty());
 
