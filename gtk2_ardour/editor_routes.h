@@ -137,6 +137,8 @@ private:
 	bool _redisplay_does_not_reset_order_keys;
 	
 	Gtk::Menu* _menu;
+
+        bool key_press (GdkEventKey* ev);
 };
 
 #endif /* __ardour_gtk_editor_route_h__ */

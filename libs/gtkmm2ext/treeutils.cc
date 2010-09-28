@@ -17,6 +17,8 @@
 
 */
 
+#include <iostream>
+
 #include "gtkmm2ext/treeutils.h"
 
 using namespace Glib;
@@ -162,13 +164,15 @@ Gtkmm2ext::treeview_select_next (TreeView& view, RefPtr<TreeModel> model, TreeVi
         iter = model->get_iter (start);
 
         TreeRow row = (*iter);
-        bool down_allowed = true;
+        bool down_allowed = false;
 
         if (!row.children().empty()) {
                 TreePath tp = model->get_path (iter);
 
                 if (!view.row_expanded (tp)) {
                         down_allowed = false;
+                } else {
+                        down_allowed = true;
                 }
         }
 

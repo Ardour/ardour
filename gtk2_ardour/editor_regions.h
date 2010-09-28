@@ -189,11 +189,6 @@ private:
 	bool ignore_region_list_selection_change;
 	bool ignore_selected_region_change;
         bool expanded;
-
-        void select_one (Glib::RefPtr<Gtk::TreeSelection>, Glib::RefPtr<Gtk::TreeModel>, Gtk::TreeView&,
-                         Gtk::TreeIter, Gtk::TreePath, Gtk::TreeViewColumn*);
-        void select_next ();
-        void select_previous ();
 };
 
 #endif /* __gtk_ardour_editor_regions_h__ */

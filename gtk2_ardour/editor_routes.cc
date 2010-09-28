@@ -45,6 +45,7 @@
 
 #include "gtkmm2ext/cell_renderer_pixbuf_multi.h"
 #include "gtkmm2ext/cell_renderer_pixbuf_toggle.h"
+#include "gtkmm2ext/treeutils.h"
 
 #include "i18n.h"
 
@@ -161,6 +162,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.set_headers_visible (true);
 	_display.set_name ("TrackListDisplay");
 	_display.get_selection()->set_mode (SELECTION_SINGLE);
+	_display.get_selection()->set_select_function (sigc::mem_fun (*this, &EditorRoutes::selection_filter));
 	_display.set_reorderable (true);
 	_display.set_rules_hint (true);
 	_display.set_size_request (100, -1);
@@ -199,6 +201,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &EditorRoutes::reordered));
 	
 	_display.signal_button_press_event().connect (sigc::mem_fun (*this, &EditorRoutes::button_press), false);
+	_display.signal_key_press_event().connect (sigc::mem_fun(*this, &EditorRoutes::key_press), false);
 
 	Route::SyncOrderKeys.connect (*this, MISSING_INVALIDATOR, ui_bind (&EditorRoutes::sync_order_keys, this, _1), gui_context());
 }
@@ -809,6 +812,32 @@ EditorRoutes::hide_all_miditracks ()
 }
 
 bool
+EditorRoutes::key_press (GdkEventKey* ev)
+{
+        TreeViewColumn *col;
+
+        switch (ev->keyval) {
+        case GDK_Tab:
+        case GDK_ISO_Left_Tab:
+                col = _display.get_column (5); // select&focus on name column
+
+                if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+                        treeview_select_previous (_display, _model, col);
+                } else {
+                        treeview_select_next (_display, _model, col);
+                }
+
+                return true;
+                break;
+
+        default:
+                break;
+        }
+
+	return false;
+}
+
+bool
 EditorRoutes::button_press (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
@@ -848,8 +877,9 @@ EditorRoutes::button_press (GdkEventButton* ev)
 }
 
 bool
-EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const &, TreeModel::Path const &, bool)
+EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const &, TreeModel::Path const &path , bool already_selected)
 {
+        cerr << path.to_string() << " is " << (already_selected ? " already selected " : " not selected ") << endl;
 	return true;
 }
 
