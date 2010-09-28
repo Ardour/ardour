@@ -3268,7 +3268,7 @@ Editor::setup_tooltips ()
 	ARDOUR_UI::instance()->set_tip (mouse_audition_button, _("Listen to Specific Regions"));
 	ARDOUR_UI::instance()->set_tip (join_object_range_button, _("Select/Move Objects or Ranges"));
 	ARDOUR_UI::instance()->set_tip (internal_edit_button, _("Edit Region Contents (e.g. notes)"));
-	ARDOUR_UI::instance()->set_tip (*_group_tabs, _("Groups: context-click for possible operations"));
+	ARDOUR_UI::instance()->set_tip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
 	ARDOUR_UI::instance()->set_tip (nudge_forward_button, _("Nudge Region/Selection Forwards"));
 	ARDOUR_UI::instance()->set_tip (nudge_backward_button, _("Nudge Region/Selection Backwards"));
 	ARDOUR_UI::instance()->set_tip (zoom_in_button, _("Zoom In"));
