@@ -100,6 +100,6 @@ ImportProgressWindow::update ()
 	}
 	
 	_bar.set_text (string_compose (_("Importing file: %1 of %2"), c, _import_status->total));
-	
-	return !(_import_status->done || _import_status->cancel);
+
+	return !(_import_status->all_done || _import_status->cancel);
 }

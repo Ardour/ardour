@@ -335,6 +335,7 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 	current_interthread_info = &import_status;
 	import_status.current = 1;
 	import_status.total = paths.size ();
+	import_status.all_done = false;
 
 	ImportProgressWindow ipw (&import_status, _("Import"), _("Cancel Import"));
 
@@ -423,6 +424,8 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
                         }
                 }
 	}
+
+	import_status.all_done = true;
 }
 
 void
@@ -499,7 +502,6 @@ Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quali
 	import_status.done = false;
 	import_status.cancel = false;
 	import_status.freeze = false;
-	import_status.done = 0.0;
 	import_status.quality = quality;
 	import_status.replace_existing_source = replace;
 
@@ -815,8 +817,6 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
                 boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*r);
                 
                 if (use_timestamp && ar) {
-                        
-                        cerr << "Using timestamp to place region " << (*r)->name() << endl;
                         
                         /* get timestamp for this region */
 
