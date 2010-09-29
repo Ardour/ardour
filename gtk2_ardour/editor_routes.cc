@@ -58,12 +58,15 @@ using namespace Glib;
 using Gtkmm2ext::Keyboard;
 
 EditorRoutes::EditorRoutes (Editor* e)
-	: EditorComponent (e),
-	  _ignore_reorder (false),
-	  _no_redisplay (false),
-	  _redisplay_does_not_sync_order_keys (false),
-	  _redisplay_does_not_reset_order_keys (false),
-	  _menu (0)
+	: EditorComponent (e)
+        , _ignore_reorder (false)
+        , _no_redisplay (false)
+        , _redisplay_does_not_sync_order_keys (false)
+        , _redisplay_does_not_reset_order_keys (false)
+        ,_menu (0)
+        , old_focus (0)
+        , selection_countdown (0)
+        , name_editable (0)
 {
 	_scroller.add (_display);
 	_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
@@ -156,7 +159,9 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.append_column (*solo_isolate_state_column);
 	_display.append_column (*solo_safe_state_column);
 	
-	_display.append_column (_("Name"), _columns.text);
+        int colnum = _display.append_column (_("Name"), _columns.text);
+	TreeViewColumn* c = _display.get_column (colnum-1);
+        c->set_data ("i_am_the_tab_column", (void*) 0xfeedface);
 	_display.append_column (_("V"), _columns.visible);
 	
 	_display.set_headers_visible (true);
@@ -171,6 +176,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	CellRendererText* name_cell = dynamic_cast<CellRendererText*> (_display.get_column_cell_renderer (5));
 
 	assert (name_cell);
+        name_cell->signal_editing_started().connect (sigc::mem_fun (*this, &EditorRoutes::name_edit_started));
 
 	TreeViewColumn* name_column = _display.get_column (5);
 
@@ -201,9 +207,69 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &EditorRoutes::reordered));
 	
 	_display.signal_button_press_event().connect (sigc::mem_fun (*this, &EditorRoutes::button_press), false);
-	_display.signal_key_press_event().connect (sigc::mem_fun(*this, &EditorRoutes::key_press), false);
+	_scroller.signal_key_press_event().connect (sigc::mem_fun(*this, &EditorRoutes::key_press), false);
+
+        _scroller.signal_focus_in_event().connect (sigc::mem_fun (*this, &EditorRoutes::focus_in), false);
+        _scroller.signal_focus_out_event().connect (sigc::mem_fun (*this, &EditorRoutes::focus_out));
+
+        _display.signal_enter_notify_event().connect (sigc::mem_fun (*this, &EditorRoutes::enter_notify), false);
+        _display.signal_leave_notify_event().connect (sigc::mem_fun (*this, &EditorRoutes::leave_notify), false);
+
+        _display.set_enable_search (false);
 
 	Route::SyncOrderKeys.connect (*this, MISSING_INVALIDATOR, ui_bind (&EditorRoutes::sync_order_keys, this, _1), gui_context());
+}
+
+bool
+EditorRoutes::focus_in (GdkEventFocus*)
+{
+        Window* win = dynamic_cast<Window*> (_scroller.get_toplevel ());
+
+        if (win) {
+                old_focus = win->get_focus ();
+        } else {
+                old_focus = 0;
+        }
+
+        /* try to do nothing on focus in (doesn't work, hence selection_count nonsense) */
+        return true;
+}
+
+bool
+EditorRoutes::focus_out (GdkEventFocus*)
+{
+        if (old_focus) {
+                old_focus->grab_focus ();
+                old_focus = 0;
+        }
+
+        return false;
+}
+
+bool
+EditorRoutes::enter_notify (GdkEventCrossing* ev)
+{
+        /* arm counter so that ::selection_filter() will deny selecting anything for the 
+           next two attempts to change selection status.
+        */
+        selection_countdown = 2;
+        _scroller.grab_focus ();
+        Keyboard::magic_widget_grab_focus ();
+        return false;
+}
+
+bool
+EditorRoutes::leave_notify (GdkEventCrossing*)
+{
+        selection_countdown = 0;
+
+        if (old_focus) {
+                old_focus->grab_focus ();
+                old_focus = 0;
+        }
+
+        Keyboard::magic_widget_drop_focus ();
+        return false;
 }
 
 void
@@ -242,12 +308,12 @@ EditorRoutes::on_tv_mute_enable_toggled (std::string const & path_string)
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
 	TimeAxisView *tv = row[_columns.tv];
-	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
-
-	if (atv != 0) {
+	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+        
+	if (rtv != 0) {
 		boost::shared_ptr<RouteList> rl (new RouteList);
-		rl->push_back (atv->route());
-		_session->set_mute (rl, !atv->route()->muted(), Session::rt_cleanup);
+		rl->push_back (rtv->route());
+		_session->set_mute (rl, !rtv->route()->muted(), Session::rt_cleanup);
 	}
 }
 
@@ -815,10 +881,22 @@ bool
 EditorRoutes::key_press (GdkEventKey* ev)
 {
         TreeViewColumn *col;
+        boost::shared_ptr<RouteList> rl (new RouteList);
+        TreePath path;
+
+        cerr << "our key press\n";
 
         switch (ev->keyval) {
         case GDK_Tab:
         case GDK_ISO_Left_Tab:
+
+                /* If we appear to be editing something, leave that cleanly and appropriately.
+                */
+                if (name_editable) {
+                        name_editable->editing_done ();
+                        name_editable = 0;
+                }
+
                 col = _display.get_column (5); // select&focus on name column
 
                 if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
@@ -830,11 +908,74 @@ EditorRoutes::key_press (GdkEventKey* ev)
                 return true;
                 break;
 
+        case 'm':
+                if (get_relevant_routes (rl)) {
+                        _session->set_mute (rl, !rl->front()->muted(), Session::rt_cleanup);
+                }
+                return true;
+                break;
+
+        case 's':
+                if (get_relevant_routes (rl)) {
+                        _session->set_solo (rl, !rl->front()->soloed(), Session::rt_cleanup);
+                }
+                return true;
+                break;
+
+        case 'r':
+                if (get_relevant_routes (rl)) {
+                        _session->set_record_enabled (rl, !rl->front()->record_enabled(), Session::rt_cleanup);
+                }
+                break;
+
         default:
                 break;
         }
 
 	return false;
+}
+
+bool
+EditorRoutes::get_relevant_routes (boost::shared_ptr<RouteList> rl)
+{
+        TimeAxisView* tv;
+        RouteTimeAxisView* rtv;
+	RefPtr<TreeSelection> selection = _display.get_selection();
+        TreePath path;
+        TreeIter iter;
+
+        if (selection->count_selected_rows() != 0) {
+
+                /* use selection */
+
+                RefPtr<TreeModel> tm = RefPtr<TreeModel>::cast_dynamic (_model);
+                iter = selection->get_selected (tm);
+
+        } else {
+                /* use mouse pointer */
+
+                int x, y;
+                int bx, by;
+
+                _display.get_pointer (x, y);
+                _display.convert_widget_to_bin_window_coords (x, y, bx, by);
+
+                if (_display.get_path_at_pos (bx, by, path)) {
+                        iter = _model->get_iter (path);
+                }
+        }
+
+        if (iter) {
+                tv = (*iter)[_columns.tv];
+                if (tv) {
+                        rtv = dynamic_cast<RouteTimeAxisView*>(tv);
+                        if (rtv) {
+                                rl->push_back (rtv->route());
+                        }
+                }
+        }
+
+        return !rl->empty();
 }
 
 bool
@@ -877,9 +1018,16 @@ EditorRoutes::button_press (GdkEventButton* ev)
 }
 
 bool
-EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const &, TreeModel::Path const &path , bool already_selected)
+EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const &, TreeModel::Path const &path , bool selected)
 {
-        cerr << path.to_string() << " is " << (already_selected ? " already selected " : " not selected ") << endl;
+        if (selection_countdown) {
+                if (--selection_countdown == 0) {
+                        return true;
+                } else {
+                        /* no selection yet ... */
+                        return false;
+                }
+        }
 	return true;
 }
 
@@ -1168,9 +1316,18 @@ EditorRoutes::clear ()
 }
 
 void
+EditorRoutes::name_edit_started (CellEditable* ce, const Glib::ustring&)
+{
+        name_editable = ce;
+}
+
+void
 EditorRoutes::name_edit (std::string const & path, std::string const & new_text)
 {
+        name_editable = 0;
+
 	TreeIter iter = _model->get_iter (path);
+
 	if (!iter) {
 		return;
 	}

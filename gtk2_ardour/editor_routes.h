@@ -137,8 +137,18 @@ private:
 	bool _redisplay_does_not_reset_order_keys;
 	
 	Gtk::Menu* _menu;
+        Gtk::Widget* old_focus; 
+        uint32_t selection_countdown;
+        Gtk::CellEditable* name_editable;
 
         bool key_press (GdkEventKey* ev);
+        bool focus_in (GdkEventFocus*);
+        bool focus_out (GdkEventFocus*);
+        bool enter_notify (GdkEventCrossing*);
+        bool leave_notify (GdkEventCrossing*);
+        void name_edit_started (Gtk::CellEditable*, const Glib::ustring&);
+
+        bool get_relevant_routes (boost::shared_ptr<ARDOUR::RouteList> rl);
 };
 
 #endif /* __ardour_gtk_editor_route_h__ */
