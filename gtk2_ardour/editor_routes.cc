@@ -245,7 +245,6 @@ EditorRoutes::focus_out (GdkEventFocus*)
                 old_focus = 0;
         }
 
-        name_editable = 0;
         return false;
 }
 
@@ -262,7 +261,7 @@ EditorRoutes::enter_notify (GdkEventCrossing* ev)
 }
 
 bool
-EditorRoutes::leave_notify (GdkEventCrossing*)
+EditorRoutes::leave_notify (GdkEventCrossing* ev)
 {
         selection_countdown = 0;
 
@@ -271,7 +270,6 @@ EditorRoutes::leave_notify (GdkEventCrossing*)
                 old_focus = 0;
         }
 
-        name_editable = 0;
         Keyboard::magic_widget_drop_focus ();
         return false;
 }
@@ -897,7 +895,7 @@ EditorRoutes::key_press (GdkEventKey* ev)
                 if (name_editable) {
                         name_editable->editing_done ();
                         name_editable = 0;
-                }
+                } 
 
                 col = _display.get_column (5); // select&focus on name column
 
