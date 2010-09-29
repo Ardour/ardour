@@ -339,6 +339,8 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 
 	ImportProgressWindow ipw (&import_status, _("Import"), _("Cancel Import"));
 
+	bool ok = true;
+
 	if (chns == Editing::ImportMergeFiles) {
 
 		/* create 1 region from all paths, add to 1 track,
@@ -354,14 +356,15 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 			}
 		}
 
-		if (!cancel) {
-			import_sndfiles (paths, mode, quality, pos, 1, 1, track, false);
+		if (cancel) {
+			ok = false;
+		} else {
+			ok = (import_sndfiles (paths, mode, quality, pos, 1, 1, track, false) == 0);
 		}
 
 	} else {
 
                 bool replace = false;
-		bool ok = true;
 
 		for (vector<string>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
@@ -423,6 +426,10 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
                                 break;
                         }
                 }
+	}
+
+	if (ok) {
+		_session->save_state ("");
 	}
 
 	import_status.all_done = true;
@@ -529,25 +536,26 @@ Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quali
 
 	import_status.done = true;
 
+	int result = -1;
+
 	if (!import_status.cancel && !import_status.sources.empty()) {
-		if (add_sources (import_status.paths,
-				 import_status.sources,
-				 import_status.pos,
-				 import_status.mode,
-				 import_status.target_regions,
-				 import_status.target_tracks,
-				 track, false) == 0) {
-			_session->save_state ("");
-		}
+		result = add_sources (
+			import_status.paths,
+			import_status.sources,
+			import_status.pos,
+			import_status.mode,
+			import_status.target_regions,
+			import_status.target_tracks,
+			track, false
+			);
 
 		/* update position from results */
 
 		pos = import_status.pos;
 	}
 
-
 	set_canvas_cursor (current_canvas_cursor);
-	return 0;
+	return result;
 }
 
 int
