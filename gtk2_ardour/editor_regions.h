@@ -124,6 +124,10 @@ private:
 	
 	bool set_selected_in_subrow (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, int);
 	bool selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
+
+        Gtk::Widget* old_focus;
+        Gtk::CellEditable* name_editable;
+        void name_editing_started (Gtk::CellEditable*, const Glib::ustring&);
 	
 	void name_edit (const std::string&, const std::string&);
 	void locked_changed (std::string const &);
@@ -133,6 +137,10 @@ private:
 
 	bool key_press (GdkEventKey *);
 	bool button_press (GdkEventButton *);
+        bool focus_in (GdkEventFocus*);
+        bool focus_out (GdkEventFocus*);
+        bool enter_notify (GdkEventCrossing*);
+        bool leave_notify (GdkEventCrossing*);
 	void show_context_menu (int button, int time);
 
 	int sorter (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);

@@ -59,6 +59,8 @@ using Gtkmm2ext::Keyboard;
 
 EditorRegions::EditorRegions (Editor* e)
 	: EditorComponent (e)
+        , old_focus (0)
+        , name_editable (0)
 	, _menu (0)
 	, _show_automatic_regions (true)
 	, _sort_type ((Editing::RegionListSortType) 0)
@@ -104,6 +106,7 @@ EditorRegions::EditorRegions (Editor* e)
 	CellRendererText* region_name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
 	region_name_cell->property_editable() = true;
 	region_name_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorRegions::name_edit));
+        region_name_cell->signal_editing_started().connect (sigc::mem_fun (*this, &EditorRegions::name_editing_started));
 
 	_display.get_selection()->set_select_function (sigc::mem_fun (*this, &EditorRegions::selection_filter));
 
@@ -153,15 +156,76 @@ EditorRegions::EditorRegions (Editor* e)
 	_scroller.add (_display);
 	_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
-	_display.signal_key_press_event().connect (sigc::mem_fun(*this, &EditorRegions::key_press), false);
 	_display.signal_button_press_event().connect (sigc::mem_fun(*this, &EditorRegions::button_press), false);
 	_change_connection = _display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &EditorRegions::selection_changed));
+
+	_scroller.signal_key_press_event().connect (sigc::mem_fun(*this, &EditorRegions::key_press), false);
+        _scroller.signal_focus_in_event().connect (sigc::mem_fun (*this, &EditorRegions::focus_in), false);
+        _scroller.signal_focus_out_event().connect (sigc::mem_fun (*this, &EditorRegions::focus_out));
+
+        _display.signal_enter_notify_event().connect (sigc::mem_fun (*this, &EditorRegions::enter_notify), false);
+        _display.signal_leave_notify_event().connect (sigc::mem_fun (*this, &EditorRegions::leave_notify), false);
+
 	// _display.signal_popup_menu().connect (sigc::bind (sigc::mem_fun (*this, &Editor::show__display_context_menu), 1, 0));
 
 	//ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &Editor::redisplay_regions));
 	ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &EditorRegions::update_all_rows));
 	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::region_changed, this, _1, _2), gui_context());
 	ARDOUR::RegionFactory::CheckNewRegion.connect (check_new_region_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::add_region, this, _1), gui_context());
+}
+
+bool
+EditorRegions::focus_in (GdkEventFocus*)
+{
+        Window* win = dynamic_cast<Window*> (_scroller.get_toplevel ());
+
+        if (win) {
+                old_focus = win->get_focus ();
+        } else {
+                old_focus = 0;
+        }
+
+        name_editable = 0;
+
+        /* try to do nothing on focus in (doesn't work, hence selection_count nonsense) */
+        return true;
+}
+
+bool
+EditorRegions::focus_out (GdkEventFocus*)
+{
+        if (old_focus) {
+                old_focus->grab_focus ();
+                old_focus = 0;
+        }
+
+        name_editable = 0;
+
+        return false;
+}
+
+bool
+EditorRegions::enter_notify (GdkEventCrossing* ev)
+{
+        /* arm counter so that ::selection_filter() will deny selecting anything for the 
+           next two attempts to change selection status.
+        */
+        _scroller.grab_focus ();
+        Keyboard::magic_widget_grab_focus ();
+        return false;
+}
+
+bool
+EditorRegions::leave_notify (GdkEventCrossing*)
+{
+        if (old_focus) {
+                old_focus->grab_focus ();
+                old_focus = 0;
+        }
+
+        name_editable = 0;
+        Keyboard::magic_widget_drop_focus ();
+        return false;
 }
 
 void
@@ -1056,6 +1120,12 @@ EditorRegions::key_press (GdkEventKey* ev)
         switch (ev->keyval) {
         case GDK_Tab:
         case GDK_ISO_Left_Tab:
+                
+                if (name_editable) {
+                        name_editable->editing_done ();
+                        name_editable = 0;
+                }
+
                 col = _display.get_column (0); // select&focus on name column
 
                 if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
@@ -1292,8 +1362,16 @@ EditorRegions::selection_filter (const RefPtr<TreeModel>& model, const TreeModel
 }
 
 void
+EditorRegions::name_editing_started (CellEditable* ce, const Glib::ustring&)
+{
+        name_editable = ce;
+}
+                          
+void
 EditorRegions::name_edit (const std::string& path, const std::string& new_text)
 {
+        name_editable = 0;
+
 	boost::shared_ptr<Region> region;
 	TreeIter iter;
 

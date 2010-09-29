@@ -231,6 +231,8 @@ EditorRoutes::focus_in (GdkEventFocus*)
                 old_focus = 0;
         }
 
+        name_editable = 0;
+
         /* try to do nothing on focus in (doesn't work, hence selection_count nonsense) */
         return true;
 }
@@ -243,6 +245,7 @@ EditorRoutes::focus_out (GdkEventFocus*)
                 old_focus = 0;
         }
 
+        name_editable = 0;
         return false;
 }
 
@@ -268,6 +271,7 @@ EditorRoutes::leave_notify (GdkEventCrossing*)
                 old_focus = 0;
         }
 
+        name_editable = 0;
         Keyboard::magic_widget_drop_focus ();
         return false;
 }
@@ -883,8 +887,6 @@ EditorRoutes::key_press (GdkEventKey* ev)
         TreeViewColumn *col;
         boost::shared_ptr<RouteList> rl (new RouteList);
         TreePath path;
-
-        cerr << "our key press\n";
 
         switch (ev->keyval) {
         case GDK_Tab:
