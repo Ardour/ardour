@@ -92,7 +92,10 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session* s, boost::shared_ptr<Ro
 	_base_rect = new SimpleRect(*_canvas_display);
 	_base_rect->property_x1() = 0.0;
 	_base_rect->property_y1() = 0.0;
-	_base_rect->property_x2() = LONG_MAX - 2;
+	/** gnomecanvas sometimes converts this value to int or adds 2 to it, so it must be
+	    set correctly to avoid overflow.
+	*/
+	_base_rect->property_x2() = INT_MAX - 2;
 	_base_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_AutomationTrackOutline.get();
 
 	/* outline ends and bottom */
