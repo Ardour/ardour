@@ -33,6 +33,40 @@ PBD::trace_twb ()
 #ifdef HAVE_EXECINFO
 
 #include <execinfo.h>
+#include <cxxabi.h>
+
+std::string demangle (std::string const & l)
+{
+	std::string::size_type const b = l.find_first_of ("(");
+	if (b == std::string::npos) {
+		return l;
+	}
+
+	std::string::size_type const p = l.find_last_of ("+");
+	if (p == std::string::npos) {
+		return l;
+	}
+
+	if ((p - b) <= 1) {
+		return l;
+	}
+	
+	std::string const fn = l.substr (b + 1, p - b - 1);
+
+	int status;
+	try {
+		
+		char* realname = abi::__cxa_demangle (fn.c_str(), 0, 0, &status);
+		std::string d (realname);
+		free (realname);
+		return d;
+		
+	} catch (std::exception) {
+		
+	}
+	
+	return l;
+}
 
 void
 PBD::stacktrace (std::ostream& out, int levels)
@@ -47,10 +81,8 @@ PBD::stacktrace (std::ostream& out, int levels)
      
 	if (strings) {
 
-		printf ("Obtained %zd stack frames.\n", size);
-		
 		for (i = 0; i < size && (levels == 0 || i < size_t(levels)); i++) {
-			out << strings[i] << std::endl;
+			out << "  " << demangle (strings[i]) << std::endl;
 		}
 		
 		free (strings);
