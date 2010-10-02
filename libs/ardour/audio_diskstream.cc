@@ -864,7 +864,9 @@ AudioDiskstream::internal_playback_seek (framecnt_t distance)
 		(*chan)->playback_buf->increment_read_ptr (distance);
 	}
 
-	first_recordable_frame += distance;
+	if (first_recordable_frame < max_framepos) {
+		first_recordable_frame += distance;
+	}
 	playback_sample += distance;
 
 	return 0;
