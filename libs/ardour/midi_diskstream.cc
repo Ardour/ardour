@@ -498,7 +498,7 @@ MidiDiskstream::process (framepos_t transport_frame, nframes_t nframes, bool can
 
         playback_distance = 0;
 
-	check_record_status (transport_frame, nframes, can_record);
+	check_record_status (transport_frame, can_record);
 
 	nominally_recording = (can_record && re);
 

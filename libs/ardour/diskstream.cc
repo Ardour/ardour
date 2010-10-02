@@ -506,7 +506,7 @@ Diskstream::move_processor_automation (boost::weak_ptr<Processor> p, list< Evora
 }
 
 void
-Diskstream::check_record_status (framepos_t transport_frame, nframes_t /*nframes*/, bool can_record)
+Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
 {
 	int possibly_recording;
 	int rolling;

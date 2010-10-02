@@ -437,7 +437,7 @@ AudioDiskstream::process (framepos_t transport_frame, nframes_t nframes, bool ca
 		return 0;
 	}
 
-	check_record_status (transport_frame, nframes, can_record);
+	check_record_status (transport_frame, can_record);
 
 	if (nframes == 0) {
 		return 0;
@@ -474,7 +474,7 @@ AudioDiskstream::process (framepos_t transport_frame, nframes_t nframes, bool ca
         }
         
         OverlapType ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
-        
+
         calculate_record_range (ot, transport_frame, nframes, rec_nframes, rec_offset);
         
         if (rec_nframes && !was_recording) {

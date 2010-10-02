@@ -266,7 +266,7 @@ Track::no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		*/
 	}
 
-	_diskstream->check_record_status (start_frame, nframes, can_record);
+	_diskstream->check_record_status (start_frame, can_record);
 
 	bool send_silence;
 
