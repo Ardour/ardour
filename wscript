@@ -108,7 +108,7 @@ def set_compiler_flags (conf,opt):
 	if opt.gprofile:
 		debug_flags = [ '-pg' ]
 	else:
-		debug_flags = [ ] # waf adds -O0 -g itself. thanks waf!
+		debug_flags = [ '-rdynamic' ] # waf adds -O0 -g itself. thanks waf!
 
 	# guess at the platform, used to define compiler flags
 
