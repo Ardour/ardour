@@ -1212,7 +1212,7 @@ AutomationLine::view_to_model_coord_y (double& y) const
 	} else if (alist->parameter().type() == PluginAutomation) {
 		y = y * (double)(alist->get_max_y()- alist->get_min_y()) + alist->get_min_y();
 	} else {
-		y = (int)(y * alist->parameter().max());
+		y = rint (y * alist->parameter().max());
 	}
 }
 
