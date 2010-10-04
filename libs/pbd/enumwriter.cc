@@ -177,18 +177,29 @@ EnumWriter::write_distinct (EnumRegistration& er, int value)
 string
 EnumWriter::validate_string (EnumRegistration& er, const string& str)
 {
+        int val;
+
         if (er.values.empty()) {
                 return str;
         }
 
-        vector<int>::iterator i;
-        int val = atoi (str.c_str());
-        
-        for (i = er.values.begin(); i != er.values.end(); ++i) {
+        if (er.bitwise) {
+                /* Legal values consist of OR-ed masks of zero or more values defined an enum.
+                   Since we only ever check the legal bits, any value is acceptable,
+                   including zero.
+                */
+                return str;
+        } 
+
+        val = atoi (str.c_str());
+
+        /* not bitwise: Legal values consist of discrete values defined by an enum */
+
+        for (vector<int>::iterator i = er.values.begin(); i != er.values.end(); ++i) {
                 if (*i == val) {
-                        return str; /* string is a legal representation of a enumerated value */
+                        return str; /* string is a legal representation of a enumerated single value */
                 }
-        }
+        } 
         
         string enum_name = _("unknown enumeration");
         
@@ -229,15 +240,19 @@ EnumWriter::validate (EnumRegistration& er, int val)
                 return val;
         }
 
+        if (er.bitwise) {
+                return val;
+        }
+
         vector<int>::iterator i;
-                string enum_name = _("unknown enumeration");
-
-                for (Registry::iterator x = registry.begin(); x != registry.end(); ++x) {
-                        if (&er == &(*x).second) {
-                                enum_name = (*x).first;
-                        }
+        string enum_name = _("unknown enumeration");
+        
+        for (Registry::iterator x = registry.begin(); x != registry.end(); ++x) {
+                if (&er == &(*x).second) {
+                        enum_name = (*x).first;
                 }
-
+        }
+        
 
         for (i = er.values.begin(); i != er.values.end(); ++i) {
                 if (*i == val) {
