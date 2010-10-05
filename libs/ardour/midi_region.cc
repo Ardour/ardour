@@ -72,7 +72,6 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 {
         register_properties ();
 
-	// midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
 	model_changed ();
 	assert(_name.val().find("/") == string::npos);
@@ -86,7 +85,6 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t
         register_properties ();
 
 	assert(_name.val().find("/") == string::npos);
-	// midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
 	model_changed ();
 }
@@ -255,29 +253,6 @@ MidiRegion::midi_source (uint32_t n) const
 {
 	// Guaranteed to succeed (use a static cast?)
 	return boost::dynamic_pointer_cast<MidiSource>(source(n));
-}
-
-
-void
-MidiRegion::switch_source(boost::shared_ptr<Source> src)
-{
-	_source_connection.disconnect ();
-	
-	boost::shared_ptr<MidiSource> msrc = boost::dynamic_pointer_cast<MidiSource>(src);
-	if (!msrc) {
-		return;
-	}
-
-	// MIDI regions have only one source
-        SourceList srcs;
-        srcs.push_back (msrc);
-
-        drop_sources ();
-        use_sources (srcs);
-        
-	set_name (msrc->name());
-
-	msrc->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
 }
 
 void

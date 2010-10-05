@@ -84,7 +84,6 @@ class Source : public SessionObject
 	virtual bool length_mutable() const    { return false; }
 
 	static PBD::Signal1<void,Source*>             SourceCreated;
-	PBD::Signal1<void,boost::shared_ptr<Source> > Switched;
 
 	bool has_been_analysed() const;
 	virtual bool can_be_analysed() const { return false; }

@@ -2693,14 +2693,6 @@ MidiRegionView::note_mouse_position (float x_fraction, float y_fraction, bool ca
 }
 
 void
-MidiRegionView::switch_source(boost::shared_ptr<Source> src)
-{
-	boost::shared_ptr<MidiSource> msrc = boost::dynamic_pointer_cast<MidiSource>(src);
-	if (msrc)
-		display_model(msrc->model());
-}
-
-void
 MidiRegionView::set_frame_color()
 {
 	if (frame) {

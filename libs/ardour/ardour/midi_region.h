@@ -128,7 +128,6 @@ class MidiRegion : public Region
 
 	void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
 
-	void switch_source(boost::shared_ptr<Source> source);
 	void model_changed ();
 	void model_automation_state_changed (Evoral::Parameter const &);
         void model_contents_changed ();
