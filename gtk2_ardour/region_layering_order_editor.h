@@ -6,8 +6,8 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/scrolledwindow.h>
 
-#include <ardour/region.h>
-#include <ardour/playlist.h>
+#include "ardour/region.h"
+#include "ardour/playlist.h"
 
 #include "ardour_dialog.h"
 #include "audio_clock.h"

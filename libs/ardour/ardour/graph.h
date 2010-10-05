@@ -34,8 +34,8 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#include <ardour/types.h>
-#include <ardour/session_handle.h>
+#include "ardour/types.h"
+#include "ardour/session_handle.h"
 
 namespace ARDOUR
 {

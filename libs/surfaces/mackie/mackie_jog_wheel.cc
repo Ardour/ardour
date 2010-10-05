@@ -1,6 +1,6 @@
 #include <cmath>
 
-#include <ardour/session.h>
+#include "ardour/session.h"
 
 #include "mackie_jog_wheel.h"
 

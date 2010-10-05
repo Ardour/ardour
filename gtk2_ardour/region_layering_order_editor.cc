@@ -1,7 +1,7 @@
 #include <gtkmm/table.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/alignment.h>
-#include <ardour/region.h>
+#include "ardour/region.h"
 
 #include "gui_thread.h"
 #include "i18n.h"
