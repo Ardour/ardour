@@ -251,6 +251,10 @@ MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, framepos_t source_star
 	}
 }
 
+/** Write data from a MidiRingBuffer to this source.
+ *  @param source Source to read from.
+ *  @param source_start This source's start position in session frames.
+ */
 nframes_t
 MidiSource::midi_write (MidiRingBuffer<nframes_t>& source, framepos_t source_start, nframes_t duration)
 {
@@ -311,7 +315,7 @@ MidiSource::clone (Evoral::MusicalTime begin, Evoral::MusicalTime end)
         boost::shared_ptr<MidiSource> newsrc = boost::dynamic_pointer_cast<MidiSource>(
                 SourceFactory::createWritable(DataType::MIDI, _session,
                                               newpath, false, _session.frame_rate()));
-        
+
         newsrc->set_timeline_position(_timeline_position);
 	newsrc->copy_interpolation_from (this);
 	newsrc->copy_automation_state_from (this);

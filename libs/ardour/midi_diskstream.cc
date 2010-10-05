@@ -1143,7 +1143,7 @@ MidiDiskstream::set_record_enabled (bool yn)
 void
 MidiDiskstream::engage_record_enable ()
 {
-    bool rolling = _session.transport_speed() != 0.0f;
+	bool const rolling = _session.transport_speed() != 0.0f;
 
 	g_atomic_int_set (&_record_enabled, 1);
 

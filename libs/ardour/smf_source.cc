@@ -201,7 +201,10 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, framepos_t 
 	return duration;
 }
 
-/** All stamps in audio frames */
+/** Write data to this source from a MidiRingBuffer.
+ *  @param source Buffer to read from.
+ *  @param position This source's start position in session frames.
+ */
 nframes_t
 SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, framepos_t position, nframes_t duration)
 {
@@ -243,6 +246,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, framepos_t positio
 			break;
 		}
 
+		/* convert from session time to time relative to the source start */
 		assert(time >= position);
 		time -= position;
 
@@ -262,7 +266,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, framepos_t positio
 	Evoral::SMF::flush();
 	free(buf);
 
-	ViewDataRangeReady(position + _last_write_end, duration); /* EMIT SIGNAL */
+	ViewDataRangeReady (_last_write_end, duration); /* EMIT SIGNAL */
 
 	return duration;
 }

@@ -102,19 +102,19 @@ class MidiStreamView : public StreamView
 	void setup_rec_box ();
 
 	void rec_data_range_ready (
-			nframes_t start,
-			nframes_t dur,
-			boost::weak_ptr<ARDOUR::Source> src);
-
+		ARDOUR::framepos_t start,
+		nframes_t dur,
+		boost::weak_ptr<ARDOUR::Source> src);
+	
 	void update_rec_regions (
-			boost::shared_ptr<ARDOUR::MidiModel> data,
-			nframes_t start,
-			nframes_t dur);
-
+		boost::shared_ptr<ARDOUR::MidiModel> data,
+		ARDOUR::framepos_t const start,
+		nframes_t dur);
+	
 	RegionView* add_region_view_internal (
-			boost::shared_ptr<ARDOUR::Region>,
-			bool wait_for_waves,
-			bool recording = false);
+		boost::shared_ptr<ARDOUR::Region>,
+		bool wait_for_waves,
+		bool recording = false);
 
 	void display_region(MidiRegionView* region_view, bool load_model);
 	void display_track (boost::shared_ptr<ARDOUR::Track> tr);

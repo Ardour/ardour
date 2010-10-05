@@ -459,7 +459,6 @@ MidiStreamView::setup_rec_box ()
 								      (RegionFactory::create (sources, plist, false)));
 
 				assert(region);
-				region->suspend_property_changes ();
 				region->set_position (_trackview.session()->transport_frame(), this);
 				rec_regions.push_back (make_pair(region, (RegionView*)0));
 
@@ -553,8 +552,9 @@ MidiStreamView::setup_rec_box ()
 	}
 }
 
+/** @param start Start position to update in session frames */
 void
-MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t start, nframes_t dur)
+MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, framepos_t const start, nframes_t dur)
 {
 	ENSURE_GUI_THREAD (*this, &MidiStreamView::update_rec_regions, data, start, dur)
 
@@ -602,13 +602,8 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 							((MidiRegionView*)iter->second)->begin_write();
 						}
 
-						/* also update rect */
-						ArdourCanvas::SimpleRect * rect = rec_rects[n].rectangle;
-						gdouble xend = _trackview.editor().frame_to_pixel (region->position() + region->length());
-						rect->property_x2() = xend;
-
-						ARDOUR::BeatsFramesConverter tconv(_trackview.session()->tempo_map(), region->position());
-						const MidiModel::TimeType start_beats = tconv.from(start);
+						ARDOUR::BeatsFramesConverter tconv(_trackview.session()->tempo_map(), region->position() - region->start());
+						const MidiModel::TimeType start_beats = tconv.from (start - tconv.origin_b ());
 
 						/* draw events */
 						MidiRegionView* mrv = (MidiRegionView*)iter->second;
@@ -693,8 +688,11 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 	}
 }
 
+/** @param start Start of the range in session frames.
+ *  @param cnd Number of frames in the range.
+ */
 void
-MidiStreamView::rec_data_range_ready (nframes_t start, nframes_t cnt, boost::weak_ptr<Source> weak_src)
+MidiStreamView::rec_data_range_ready (framepos_t start, nframes_t cnt, boost::weak_ptr<Source> weak_src)
 {
 	// this is called from the butler thread for now
 
