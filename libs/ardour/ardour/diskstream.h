@@ -110,6 +110,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	virtual int use_new_playlist () = 0;
 	virtual int use_copy_playlist () = 0;
 
+	/** @return Capture start position in session frames */
 	framepos_t current_capture_start() const { return capture_start_frame; }
 	framepos_t current_capture_end()   const { return capture_start_frame + capture_captured; }
 	framepos_t get_capture_start_frame (uint32_t n=0);
@@ -260,7 +261,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	bool         _seek_required;
 
 	bool          force_refill;
-	framepos_t    capture_start_frame;
+	framepos_t    capture_start_frame; ///< session frames
 	framecnt_t    capture_captured;
 	bool          was_recording;
 	nframes_t     adjust_capture_position;

@@ -631,6 +631,7 @@ SndFileSource::clear_capture_marks ()
 	_capture_end = false;
 }
 
+/** @param pos Capture start position in session frames */
 void
 SndFileSource::mark_capture_start (framepos_t pos)
 {
