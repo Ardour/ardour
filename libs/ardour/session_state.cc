@@ -746,7 +746,7 @@ Session::jack_session_event (jack_session_event_t * event)
 	jack_session_reply (_engine.jack(), event);
 
 	if (event->type == JackSessionSaveAndQuit) {
-                // TODO: make ardour quit.
+		Quit (); /* EMIT SIGNAL */
 	}
 
 	jack_session_event_free( event );

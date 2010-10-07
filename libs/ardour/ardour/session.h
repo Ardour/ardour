@@ -785,6 +785,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void request_resume_timecode_transmission ();
 	bool timecode_transmission_suspended () const;
 
+	/** Emitted when the session wants Ardour to quit */
+	static PBD::Signal0<void> Quit;
+
   protected:
 	friend class AudioEngine;
 	void set_block_size (nframes_t nframes);
