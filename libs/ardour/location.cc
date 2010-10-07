@@ -150,13 +150,16 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 	}
 	
 	if (s != _start) {
+
+		framepos_t const old = _start;
+		
 		_start = s;
 		if (allow_bbt_recompute) {
 			recompute_bbt_from_frames ();
 		}
 		start_changed (this); /* EMIT SIGNAL */
 		if (is_session_range ()) {
-			Session::StartTimeChanged (); /* EMIT SIGNAL */
+			Session::StartTimeChanged (old); /* EMIT SIGNAL */
 			AudioFileSource::set_header_position_offset (s);
 		}
 	}
@@ -196,6 +199,8 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 	}
 
 	if (e != _end) {
+		framepos_t const old = _end;
+		
 		_end = e;
 		if (allow_bbt_recompute) {
 			recompute_bbt_from_frames ();
@@ -203,7 +208,7 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 		end_changed(this); /* EMIT SIGNAL */
 
 		if (is_session_range()) {
-			Session::EndTimeChanged (); /* EMIT SIGNAL */
+			Session::EndTimeChanged (old); /* EMIT SIGNAL */
 		}
 	}
 
@@ -687,6 +692,11 @@ Locations::add (Location *loc, bool make_current)
 
 	if (make_current) {
 		 current_changed (current_location); /* EMIT SIGNAL */
+	}
+
+	if (loc->is_session_range()) {
+		Session::StartTimeChanged (0);
+		Session::EndTimeChanged (1);
 	}
 }
 

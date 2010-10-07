@@ -119,8 +119,8 @@ PBD::Signal2<int,nframes_t,nframes_t> Session::AskAboutSampleRateMismatch;
 PBD::Signal0<void> Session::SendFeedback;
 
 PBD::Signal0<void> Session::TimecodeOffsetChanged;
-PBD::Signal0<void> Session::StartTimeChanged;
-PBD::Signal0<void> Session::EndTimeChanged;
+PBD::Signal1<void, framepos_t> Session::StartTimeChanged;
+PBD::Signal1<void, framepos_t> Session::EndTimeChanged;
 PBD::Signal0<void> Session::AutoBindingOn;
 PBD::Signal0<void> Session::AutoBindingOff;
 PBD::Signal2<void,std::string, std::string> Session::Exported;
@@ -202,6 +202,9 @@ Session::Session (AudioEngine &eng,
 	if (was_dirty) {
 		DirtyChanged (); /* EMIT SIGNAL */
 	}
+
+	StartTimeChanged.connect_same_thread (*this, boost::bind (&Session::start_time_changed, this, _1));
+	EndTimeChanged.connect_same_thread (*this, boost::bind (&Session::end_time_changed, this, _1));
 
         _is_new = false;
 }
@@ -4028,3 +4031,33 @@ Session::step_edit_status_change (bool yn)
 }
 
         
+void
+Session::start_time_changed (framepos_t old)
+{
+	/* Update the auto loop range to match the session range
+	   (unless the auto loop range has been changed by the user)
+	*/
+	
+	Location* s = _locations->session_range_location ();
+	Location* l = _locations->auto_loop_location ();
+
+	if (l->start() == old) {
+		l->set_start (s->start(), true);
+	}
+}
+
+void
+Session::end_time_changed (framepos_t old)
+{
+	/* Update the auto loop range to match the session range
+	   (unless the auto loop range has been changed by the user)
+	*/
+
+	Location* s = _locations->session_range_location ();
+	Location* l = _locations->auto_loop_location ();
+
+	if (l->end() == old) {
+		cout << "set end to " << s->end() << "\n";
+		l->set_end (s->end(), true);
+	}
+}

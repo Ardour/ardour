@@ -463,8 +463,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	nframes_t convert_to_frames_at (nframes_t position, AnyTime const &);
 
-	static PBD::Signal0<void> StartTimeChanged;
-	static PBD::Signal0<void> EndTimeChanged;
+	static PBD::Signal1<void, framepos_t> StartTimeChanged;
+	static PBD::Signal1<void, framepos_t> EndTimeChanged;
 	static PBD::Signal0<void> TimecodeOffsetChanged;
 
         std::vector<SyncSource> get_available_sync_options() const;
@@ -1442,6 +1442,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	mutable gint _suspend_timecode_transmission;
 
 	void update_locations_after_tempo_map_change (Locations::LocationList &);
+
+	void start_time_changed (framepos_t);
+	void end_time_changed (framepos_t);
 };
 
 } // namespace ARDOUR
