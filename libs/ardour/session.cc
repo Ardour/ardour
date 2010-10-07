@@ -4057,7 +4057,6 @@ Session::end_time_changed (framepos_t old)
 	Location* l = _locations->auto_loop_location ();
 
 	if (l->end() == old) {
-		cout << "set end to " << s->end() << "\n";
 		l->set_end (s->end(), true);
 	}
 }
