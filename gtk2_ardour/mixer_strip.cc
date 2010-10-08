@@ -784,6 +784,9 @@ MixerStrip::input_press (GdkEventButton *ev)
 		return true;
 	}
 
+	if (_session->actively_recording() && _route->record_enabled()) 
+		return true;
+
 	switch (ev->button) {
 
 	case 1:
