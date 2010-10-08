@@ -103,6 +103,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 {
 	_note_group->raise_to_top();
         PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
+
+	connect_to_diskstream ();
 }
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
@@ -127,6 +129,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 {
 	_note_group->raise_to_top();
         PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
+
+	connect_to_diskstream ();
 }
 
 MidiRegionView::MidiRegionView (const MidiRegionView& other)
@@ -232,6 +236,14 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 			sigc::mem_fun(this, &MidiRegionView::midi_patch_settings_changed));
 
 	trackview.editor().SnapChanged.connect (snap_changed_connection, invalidator (*this), ui_bind (&MidiRegionView::snap_changed, this), gui_context ());
+
+	connect_to_diskstream ();
+}
+
+void
+MidiRegionView::connect_to_diskstream ()
+{
+	midi_view()->midi_track()->DataRecorded.connect (*this, invalidator (*this), ui_bind (&MidiRegionView::data_recorded, this, _1, _2), gui_context ());
 }
 
 bool
@@ -734,11 +746,11 @@ MidiRegionView::clear_events()
 	_optimization_iterator = _events.end();
 }
 
-
 void
 MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 {
 	_model = model;
+	
 	content_connection.disconnect ();
 	_model->ContentsChanged.connect (content_connection, invalidator (*this), boost::bind (&MidiRegionView::redisplay_model, this), gui_context());
 
@@ -1287,7 +1299,7 @@ MidiRegionView::resolve_note(uint8_t note, double end_time)
 	}
 
 	if (_active_notes && _active_notes[note]) {
-		const framepos_t end_time_frames = beats_to_frames(end_time);
+		const framepos_t end_time_frames = beats_to_frames(end_time) - _region->start();
 		_active_notes[note]->property_x2() = trackview.editor().frame_to_pixel(end_time_frames);
 		_active_notes[note]->property_outline_what() = (guint32) 0xF; // all edges
 		_active_notes[note] = 0;
@@ -3114,3 +3126,50 @@ MidiRegionView::set_step_edit_cursor_width (Evoral::MusicalTime beats)
         }
 }
 
+/** Called when a diskstream on our track has received some data.  Update the view, if applicable.
+ *  @param buf Data that has been recorded.
+ *  @param w Source that this data will end up in.
+ */
+void
+MidiRegionView::data_recorded (boost::shared_ptr<MidiBuffer> buf, boost::weak_ptr<MidiSource> w)
+{
+	if (!_active_notes) {
+		/* we aren't actively being recorded to */
+		return;
+	}
+	
+	boost::shared_ptr<MidiSource> src = w.lock ();
+	if (!src || src != midi_region()->midi_source()) {
+		/* recorded data was not destined for our source */
+		return;
+	}
+
+	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (&trackview);
+	BeatsFramesConverter converter (trackview.session()->tempo_map(), mtv->midi_track()->get_capture_start_frame (0));
+
+	for (MidiBuffer::iterator i = buf->begin(); i != buf->end(); ++i) {
+		Evoral::MIDIEvent<MidiBuffer::TimeType> const ev (*i, false);
+		assert (ev.buffer ());
+
+		Evoral::MusicalTime const time_beats = converter.from (ev.time () - converter.origin_b ());
+
+		if (ev.type() == MIDI_CMD_NOTE_ON) {
+
+			boost::shared_ptr<Evoral::Note<Evoral::MusicalTime> > note (
+				new Evoral::Note<Evoral::MusicalTime> (ev.channel(), time_beats, 0, ev.note(), ev.velocity())
+				);
+
+			add_note (note, true);
+
+			/* fix up our note range */
+			if (ev.note() < _current_range_min) {
+				midi_stream_view()->apply_note_range (ev.note(), _current_range_max, true);
+			} else if (ev.note() > _current_range_max) {
+				midi_stream_view()->apply_note_range (_current_range_min, ev.note(), true);
+			}
+			
+		} else if (ev.type() == MIDI_CMD_NOTE_OFF) {
+			resolve_note (ev.note (), time_beats);
+		}
+	}
+}

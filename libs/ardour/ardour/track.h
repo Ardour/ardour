@@ -122,7 +122,7 @@ class Track : public Route, public PublicDiskstream
 	void non_realtime_locate (framepos_t);
 	void non_realtime_set_speed ();
 	int overwrite_existing_buffers ();
-	framecnt_t get_captured_frames (uint32_t n = 0);
+	framecnt_t get_captured_frames (uint32_t n = 0) const;
 	int set_loop (Location *);
 	void transport_looped (framepos_t);
 	bool realtime_set_speed (double, bool);
@@ -132,7 +132,7 @@ class Track : public Route, public PublicDiskstream
         void prepare_to_stop (framepos_t);
 	void set_slaved (bool);
 	ChanCount n_channels ();
-	framepos_t get_capture_start_frame (uint32_t n = 0);
+	framepos_t get_capture_start_frame (uint32_t n = 0) const;
 	AlignStyle alignment_style () const;
 	framepos_t current_capture_start () const;
 	framepos_t current_capture_end () const;

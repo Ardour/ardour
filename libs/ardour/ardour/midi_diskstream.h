@@ -107,6 +107,12 @@ class MidiDiskstream : public Diskstream
 		return playback_mode;
 	}
 
+	/** Emitted when some MIDI data has been received for recording.
+	 *  First parameter is the data.
+	 *  Second parameter is the source that it is destined for.
+	 */
+	PBD::Signal2<void, boost::shared_ptr<MidiBuffer>, boost::weak_ptr<MidiSource> > DataRecorded;
+
   protected:
 	friend class Session;
 	friend class Butler;

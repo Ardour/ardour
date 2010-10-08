@@ -528,7 +528,7 @@ Track::overwrite_existing_buffers ()
 }
 
 framecnt_t
-Track::get_captured_frames (uint32_t n)
+Track::get_captured_frames (uint32_t n) const
 {
 	return _diskstream->get_captured_frames (n);
 }
@@ -588,7 +588,7 @@ Track::n_channels ()
 }
 
 framepos_t
-Track::get_capture_start_frame (uint32_t n)
+Track::get_capture_start_frame (uint32_t n) const
 {
 	return _diskstream->get_capture_start_frame (n);
 }

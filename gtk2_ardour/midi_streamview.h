@@ -98,19 +98,12 @@ class MidiStreamView : public StreamView
 
 	RegionView* create_region_view (boost::shared_ptr<ARDOUR::Region>, bool, bool);
 
+	void apply_note_range(uint8_t lowest, uint8_t highest, bool to_region_views);
+
   private:
 	void setup_rec_box ();
+	void update_rec_box ();
 
-	void rec_data_range_ready (
-		ARDOUR::framepos_t start,
-		nframes_t dur,
-		boost::weak_ptr<ARDOUR::Source> src);
-	
-	void update_rec_regions (
-		boost::shared_ptr<ARDOUR::MidiModel> data,
-		ARDOUR::framepos_t const start,
-		nframes_t dur);
-	
 	RegionView* add_region_view_internal (
 		boost::shared_ptr<ARDOUR::Region>,
 		bool wait_for_waves,
@@ -122,7 +115,6 @@ class MidiStreamView : public StreamView
 	void update_contents_height ();
 
 	void draw_note_lines();
-	void apply_note_range(uint8_t lowest, uint8_t highest, bool to_region_views);
 	bool update_data_note_range(uint8_t min, uint8_t max);
 	void update_contents_metrics(boost::shared_ptr<ARDOUR::Region> r);
 

@@ -110,11 +110,11 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	virtual int use_new_playlist () = 0;
 	virtual int use_copy_playlist () = 0;
 
-	/** @return Capture start position in session frames */
+	/** @return Start position of currently-running capture (in session frames) */
 	framepos_t current_capture_start() const { return capture_start_frame; }
 	framepos_t current_capture_end()   const { return capture_start_frame + capture_captured; }
-	framepos_t get_capture_start_frame (uint32_t n=0);
-	framecnt_t get_captured_frames (uint32_t n=0);
+	framepos_t get_capture_start_frame (uint32_t n = 0) const;
+	framecnt_t get_captured_frames (uint32_t n = 0) const;
 
 	ChanCount n_channels() { return _n_channels; }
 
@@ -242,8 +242,8 @@ class Diskstream : public SessionObject, public PublicDiskstream
 			nframes_t& rec_nframes, nframes_t& rec_offset);
 
 	static nframes_t disk_io_chunk_frames;
-	std::vector<CaptureInfo*>  capture_info;
-	Glib::Mutex           capture_info_lock;
+	std::vector<CaptureInfo*> capture_info;
+	mutable Glib::Mutex capture_info_lock;
 
 	uint32_t i_am_the_modifier;
 
@@ -261,7 +261,8 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	bool         _seek_required;
 
 	bool          force_refill;
-	framepos_t    capture_start_frame; ///< session frames
+	/** Start of currently running capture in session frames */
+	framepos_t    capture_start_frame;
 	framecnt_t    capture_captured;
 	bool          was_recording;
 	nframes_t     adjust_capture_position;

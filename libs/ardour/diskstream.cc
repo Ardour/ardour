@@ -293,32 +293,35 @@ Diskstream::set_loop (Location *location)
 
 	loop_location = location;
 
-	 LoopSet (location); /* EMIT SIGNAL */
+	LoopSet (location); /* EMIT SIGNAL */
 	return 0;
 }
 
+/** Get the start position (in session frames) of the nth capture in the current pass */
 ARDOUR::framepos_t
-Diskstream::get_capture_start_frame (uint32_t n)
+Diskstream::get_capture_start_frame (uint32_t n) const
 {
 	Glib::Mutex::Lock lm (capture_info_lock);
 
 	if (capture_info.size() > n) {
+		/* this is a completed capture */
 		return capture_info[n]->start;
-	}
-	else {
+	} else {
+		/* this is the currently in-progress capture */
 		return capture_start_frame;
 	}
 }
 
 ARDOUR::framecnt_t
-Diskstream::get_captured_frames (uint32_t n)
+Diskstream::get_captured_frames (uint32_t n) const
 {
 	Glib::Mutex::Lock lm (capture_info_lock);
 
 	if (capture_info.size() > n) {
+		/* this is a completed capture */
 		return capture_info[n]->frames;
-	}
-	else {  
+	} else {  
+		/* this is the currently in-progress capture */
 		return capture_captured;
 	}
 }

@@ -414,7 +414,7 @@ StreamView::update_rec_box ()
 	if (rec_active && rec_rects.size() > 0) {
 		/* only update the last box */
 		RecBoxInfo & rect = rec_rects.back();
-		nframes_t at = _trackview.track()->current_capture_end();
+		framepos_t const at = _trackview.track()->current_capture_end ();
 		double xstart;
 		double xend;
 

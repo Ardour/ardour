@@ -266,8 +266,6 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, framepos_t positio
 	Evoral::SMF::flush();
 	free(buf);
 
-	ViewDataRangeReady (_last_write_end, duration); /* EMIT SIGNAL */
-
 	return duration;
 }
 

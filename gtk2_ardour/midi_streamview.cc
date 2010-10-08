@@ -434,18 +434,17 @@ MidiStreamView::setup_rec_box ()
 
 				sources.push_back (_trackview.midi_track()->write_source());
 
-				_trackview.midi_track()->write_source()->ViewDataRangeReady.connect 
-					(rec_data_ready_connections, 
-                                         invalidator (*this),
-					 ui_bind (&MidiStreamView::rec_data_range_ready, this, _1, _2, boost::weak_ptr<Source>(_trackview.midi_track()->write_source())),
-					 gui_context());
-
 				// handle multi
 
 				nframes_t start = 0;
 				if (rec_regions.size() > 0) {
 					start = rec_regions.back().first->start()
 							+ _trackview.track()->get_captured_frames(rec_regions.size()-1);
+				}
+
+				if (!rec_regions.empty()) {
+					MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rec_regions.back().second);
+					mrv->end_write ();
 				}
 				
 				PropertyList plist; 
@@ -459,8 +458,13 @@ MidiStreamView::setup_rec_box ()
 								      (RegionFactory::create (sources, plist, false)));
 
 				assert(region);
-				region->set_position (_trackview.session()->transport_frame(), this);
-				rec_regions.push_back (make_pair(region, (RegionView*)0));
+				region->set_start (_trackview.track()->current_capture_start() - _trackview.track()->get_capture_start_frame (0), this);
+				region->set_position (_trackview.track()->current_capture_start(), this);
+				RegionView* rv = add_region_view_internal (region, false);
+				MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
+				mrv->begin_write ();
+
+				rec_regions.push_back (make_pair (region, rv));
 
 				// rec regions are destroyed in setup_rec_box
 
@@ -470,14 +474,13 @@ MidiStreamView::setup_rec_box ()
 			/* start a new rec box */
 
 			boost::shared_ptr<MidiTrack> mt = _trackview.midi_track(); /* we know what it is already */
-			nframes_t frame_pos = mt->current_capture_start ();
-			gdouble xstart = _trackview.editor().frame_to_pixel (frame_pos);
-			gdouble xend;
+			framepos_t const frame_pos = mt->current_capture_start ();
+			gdouble const xstart = _trackview.editor().frame_to_pixel (frame_pos);
+			gdouble const xend = xstart;
 			uint32_t fill_color;
 
 			assert(_trackview.midi_track()->mode() == Normal);
 
-			xend = xstart;
 			fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 
 			ArdourCanvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*_canvas_group);
@@ -552,165 +555,6 @@ MidiStreamView::setup_rec_box ()
 	}
 }
 
-/** @param start Start position to update in session frames */
-void
-MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, framepos_t const start, nframes_t dur)
-{
-	ENSURE_GUI_THREAD (*this, &MidiStreamView::update_rec_regions, data, start, dur)
-
-	if (Config->get_show_waveforms_while_recording ()) {
-
-		uint32_t n = 0;
-		bool     update_range = false;
-
-		for (list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin();
-				iter != rec_regions.end(); n++) {
-
-			list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator tmp = iter;
-			++tmp;
-
-			if (!canvas_item_visible (rec_rects[n].rectangle)) {
-				/* rect already hidden, this region is done */
-				iter = tmp;
-				continue;
-			}
-
-			boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion>(iter->first);
-			if (!region) {
-				iter = tmp;
-				continue;
-			}
-
-			nframes_t origlen = region->length();
-
-			if (region == rec_regions.back().first && rec_active) {
-
-				if (start >= region->midi_source(0)->timeline_position()) {
-
-					nframes_t nlen = start + dur - region->position();
-
-					if (nlen != region->length()) {
-
-						region->suspend_property_changes ();
-						region->set_position (_trackview.track()->get_capture_start_frame(n), this);
-						region->set_length (start + dur - region->position(), this);
-						region->resume_property_changes ();
-
-						if (origlen == 1) {
-							/* our special initial length */
-							iter->second = add_region_view_internal (region, false);
-							((MidiRegionView*)iter->second)->begin_write();
-						}
-
-						ARDOUR::BeatsFramesConverter tconv(_trackview.session()->tempo_map(), region->position() - region->start());
-						const MidiModel::TimeType start_beats = tconv.from (start - tconv.origin_b ());
-
-						/* draw events */
-						MidiRegionView* mrv = (MidiRegionView*)iter->second;
-
-						for (MidiModel::Notes::const_iterator i = data->note_lower_bound(start_beats);
-								i != data->notes().end(); ++i) {
-
-							const boost::shared_ptr<MidiRegionView::NoteType>& note = *i;
-
-                                                        cerr << "New note arrived, length = " << note->length()
-                                                             << " num " << note->note()
-                                                             << endl;
-
-                                                        if (note->length() == 0) {
-                                                                /* we got NoteOn but not NoteOff (yet)
-                                                                 */
-                                                                continue;
-                                                        }
-                                                        
-							nframes_t note_start_frames = tconv.to(note->time());
-							nframes_t note_end_frames   = tconv.to(note->end_time());
-
-
-							if (note->length() > 0 && note_end_frames + region->position() > start) {
-								mrv->resolve_note(note->note(), note_end_frames);
-                                                        }
-
-							if (note_start_frames + region->position() < start) {
-								continue;
-							}
-
-							if (note_start_frames + region->position() > start + dur) {
-								break;
-							}
-
-							if (note->note() < _lowest_note) {
-								_lowest_note = note->note();
-								update_range = true;
-							} else if (note->note() > _highest_note) {
-								_highest_note = note->note();
-								update_range = true;
-							}
-
-							mrv->add_note (note, !update_range);
-						}
-
-						mrv->extend_active_notes();
-					}
-				}
-
-			} else {
-
-				nframes_t nlen = _trackview.track()->get_captured_frames(n);
-
-				if (nlen != region->length()) {
-
-					if (region->source_length(0) >= region->position() + nlen) {
-
-						region->suspend_property_changes ();
-						region->set_position (_trackview.track()->get_capture_start_frame(n), this);
-						region->set_length (nlen, this);
-						region->resume_property_changes ();
-
-						if (origlen == 1) {
-							/* our special initial length */
-							iter->second = add_region_view_internal (region, false);
-						}
-
-						/* also hide rect */
-						ArdourCanvas::Item * rect = rec_rects[n].rectangle;
-						rect->hide();
-
-					}
-				}
-			}
-
-			iter = tmp;
-		}
-
-		if (update_range)
-			update_contents_height();
-	}
-}
-
-/** @param start Start of the range in session frames.
- *  @param cnd Number of frames in the range.
- */
-void
-MidiStreamView::rec_data_range_ready (framepos_t start, nframes_t cnt, boost::weak_ptr<Source> weak_src)
-{
-	// this is called from the butler thread for now
-
-	ENSURE_GUI_THREAD (*this, &MidiStreamView::rec_data_range_ready, start, cnt, weak_src)
-
-	boost::shared_ptr<SMFSource> src (boost::dynamic_pointer_cast<SMFSource>(weak_src.lock()));
-
-	if (!src) {
-		return;
-	}
-
-	if (start + cnt > last_rec_data_frame) {
-		last_rec_data_frame = start + cnt;
-	}
-
-	this->update_rec_regions (src->model(), start, cnt);
-}
-
 void
 MidiStreamView::color_handler ()
 {
@@ -751,3 +595,19 @@ MidiStreamView::note_range_adjustment_changed()
 	apply_note_range(lowest, highest, true);
 }
 
+void
+MidiStreamView::update_rec_box ()
+{
+	StreamView::update_rec_box ();
+
+	if (rec_regions.empty()) {
+		return;
+	}
+
+	/* Update the region being recorded to reflect where we currently are */
+	boost::shared_ptr<ARDOUR::Region> region = rec_regions.back().first;
+	region->set_length (_trackview.track()->current_capture_end () - _trackview.track()->current_capture_start(), this);
+
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rec_regions.back().second);
+	mrv->extend_active_notes ();
+}

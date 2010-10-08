@@ -91,12 +91,6 @@ class MidiSource : virtual public Source
 
 	static PBD::Signal1<void,MidiSource*> MidiSourceCreated;
 
-	/** Emitted when a range of recorded data is available for reading from model().
-	 *  First parameter is the start of the range in session frames.
-	 *  Second parameter is the number of frames.
-	 */
-	mutable PBD::Signal2<void,framepos_t,nframes_t> ViewDataRangeReady;
-
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 

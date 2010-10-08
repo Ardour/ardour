@@ -497,7 +497,7 @@ AudioStreamView::setup_rec_box ()
 			boost::shared_ptr<AudioTrack> at;
 
 			at = _trackview.audio_track(); /* we know what it is already */
-			nframes_t frame_pos = at->current_capture_start ();
+			framepos_t const frame_pos = at->current_capture_start ();
 			gdouble xstart = _trackview.editor().frame_to_pixel (frame_pos);
 			gdouble xend;
 			uint32_t fill_color;

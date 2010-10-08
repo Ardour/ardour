@@ -102,6 +102,8 @@ public:
 	uint16_t get_channel_mask ();
 	boost::shared_ptr<MidiPlaylist> midi_playlist ();
 
+	PBD::Signal2<void, boost::shared_ptr<MidiBuffer>, boost::weak_ptr<MidiSource> > DataRecorded;
+
 protected:
 	XMLNode& state (bool full);
 	
@@ -125,6 +127,9 @@ private:
 	int no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			bool state_changing, bool can_record, bool rec_monitors_input);
 	void push_midi_input_to_step_edit_ringbuffer (nframes_t nframes);
+
+	void diskstream_data_recorded (boost::shared_ptr<MidiBuffer>, boost::weak_ptr<MidiSource>);
+	PBD::ScopedConnection _diskstream_data_recorded_connection;
 };
 
 } /* namespace ARDOUR*/

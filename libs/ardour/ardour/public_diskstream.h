@@ -54,7 +54,7 @@ public:
 	virtual void non_realtime_locate (framepos_t) = 0;
 	virtual void non_realtime_set_speed () = 0;
 	virtual int overwrite_existing_buffers () = 0;
-	virtual framecnt_t get_captured_frames (uint32_t n = 0) = 0;
+	virtual framecnt_t get_captured_frames (uint32_t n = 0) const = 0;
 	virtual int set_loop (Location *) = 0;
 	virtual void transport_looped (framepos_t) = 0;
 	virtual bool realtime_set_speed (double, bool) = 0;
@@ -64,7 +64,7 @@ public:
         virtual void prepare_to_stop (framepos_t) = 0;
 	virtual void set_slaved (bool) = 0;
 	virtual ChanCount n_channels () = 0;
-	virtual framepos_t get_capture_start_frame (uint32_t n = 0) = 0;
+	virtual framepos_t get_capture_start_frame (uint32_t n = 0) const = 0;
 	virtual AlignStyle alignment_style () const = 0;
 	virtual framepos_t current_capture_start () const = 0;
 	virtual framepos_t current_capture_end () const = 0;

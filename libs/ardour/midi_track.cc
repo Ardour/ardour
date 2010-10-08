@@ -105,6 +105,10 @@ MidiTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	_diskstream->set_record_enabled (false);
 	//_diskstream->monitor_input (false);
 
+	_diskstream_data_recorded_connection.disconnect ();
+	boost::shared_ptr<MidiDiskstream> mds = boost::dynamic_pointer_cast<MidiDiskstream> (ds);
+	mds->DataRecorded.connect_same_thread (_diskstream_data_recorded_connection, boost::bind (&MidiTrack::diskstream_data_recorded, this, _1, _2));
+
 	DiskstreamChanged (); /* EMIT SIGNAL */
 }
 
@@ -633,3 +637,10 @@ MidiTrack::midi_playlist ()
 {
 	return midi_diskstream()->midi_playlist ();
 }
+
+void
+MidiTrack::diskstream_data_recorded (boost::shared_ptr<MidiBuffer> buf, boost::weak_ptr<MidiSource> src)
+{
+	DataRecorded (buf, src); /* EMIT SIGNAL */
+}
+			       

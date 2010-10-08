@@ -540,6 +540,16 @@ MidiDiskstream::process (framepos_t transport_frame, nframes_t nframes, bool can
 			_capture_buf->write(ev.time() + transport_frame, ev.type(), ev.size(), ev.buffer());
 		}
 
+		if (buf.size() != 0) {
+			/* Make a copy of this data and emit it for the GUI to see */
+			boost::shared_ptr<MidiBuffer> copy (new MidiBuffer (buf.capacity ()));
+			for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
+				copy->push_back ((*i).time() + transport_frame, (*i).size(), (*i).buffer());
+			}
+				
+			DataRecorded (copy, _write_source); /* EMIT SIGNAL */
+		}
+
 	} else {
 
 		if (was_recording) {
@@ -837,8 +847,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 
 	total = _session.transport_frame() - _last_flush_frame;
 
-	if (_last_flush_frame > _session.transport_frame()
-			|| _last_flush_frame < capture_start_frame) {
+	if (_last_flush_frame > _session.transport_frame() || _last_flush_frame < capture_start_frame) {
 		_last_flush_frame = _session.transport_frame();
 	}
 
@@ -869,7 +878,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	if (record_enabled() && 
             ((_session.transport_frame() - _last_flush_frame > disk_io_chunk_frames) || 
              force_flush)) {
-		if ((!_write_source) || _write_source->midi_write (*_capture_buf, capture_start_frame, to_write) != to_write) {
+		if ((!_write_source) || _write_source->midi_write (*_capture_buf, get_capture_start_frame (0), to_write) != to_write) {
 			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), _id) << endmsg;
 			return -1;
 		} else {
@@ -1002,8 +1011,13 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
                         _playlist->clear_changes ();
                         _playlist->freeze ();
 
-                        uint32_t buffer_position = 0;
-                        for (buffer_position = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+			/* Session frame time of the initial capture in this pass, which is where the source starts */
+			framepos_t initial_capture = 0;
+			if (!capture_info.empty()) {
+				initial_capture = capture_info.front()->start;
+			}
+			
+                        for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 
                                 string region_name;
 
@@ -1013,8 +1027,9 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 
                                 try {
                                         PropertyList plist;
-				
-                                        plist.add (Properties::start, buffer_position);
+
+					/* start of this region is the offset between the start of its capture and the start of the whole pass */
+                                        plist.add (Properties::start, (*ci)->start - initial_capture);
                                         plist.add (Properties::length, (*ci)->frames);
                                         plist.add (Properties::name, region_name);
 				
@@ -1032,8 +1047,6 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
                                 i_am_the_modifier++;
                                 _playlist->add_region (region, (*ci)->start);
                                 i_am_the_modifier--;
-
-                                buffer_position += (*ci)->frames;
                         }
 
                         _playlist->thaw ();
@@ -1150,8 +1163,6 @@ MidiDiskstream::engage_record_enable ()
 	if (_source_port && Config->get_monitoring_model() == HardwareMonitoring) {
 		_source_port->request_monitor_input (!(_session.config.get_auto_input() && rolling));
 	}
-
-	_write_source->mark_streaming_midi_write_started (_note_mode, _session.transport_frame());
 
 	RecordEnableChanged (); /* EMIT SIGNAL */
 }

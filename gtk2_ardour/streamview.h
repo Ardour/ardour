@@ -122,7 +122,7 @@ protected:
 	void         rec_enable_changed();
 	void         sess_rec_enable_changed();
 	virtual void setup_rec_box () = 0;
-	void         update_rec_box ();
+	virtual void update_rec_box ();
 
 	virtual RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>,
 		      bool wait_for_waves, bool recording = false) = 0;

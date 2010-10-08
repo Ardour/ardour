@@ -395,7 +395,7 @@ class MidiRegionView : public RegionView
 
 	std::vector<NoteResizeData *> _resize_data;
 
-	/* connection used to connect to model's ContentChanged signal */
+	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnection content_connection;
 
 	ArdourCanvas::CanvasNoteEvent* find_canvas_note (boost::shared_ptr<NoteType>);
@@ -431,6 +431,9 @@ class MidiRegionView : public RegionView
         void get_events (Events& e, Evoral::Sequence<Evoral::MusicalTime>::NoteOperator op, uint8_t val, int chan_mask = 0);
 
 	void display_program_changes_on_channel (uint8_t);
+
+	void connect_to_diskstream ();
+	void data_recorded (boost::shared_ptr<ARDOUR::MidiBuffer>, boost::weak_ptr<ARDOUR::MidiSource>);
 
         Gdk::Cursor* pre_enter_cursor;
 };
