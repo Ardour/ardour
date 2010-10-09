@@ -239,19 +239,14 @@ PluginEqGui::set_buffer_size(uint32_t size, uint32_t signal_size)
 	_buffer_size = size;
 	_signal_buffer_size = signal_size;
 
-	// These are for impulse analysis only, the signal analysis uses the actual
-	// number of I/O's for the plugininsert
-	uint32_t inputs  = _plugin->get_info()->n_inputs.n_audio();
-	uint32_t outputs = _plugin->get_info()->n_outputs.n_audio();
+	ARDOUR::ChanCount count = ARDOUR::ChanCount::max (_plugin->get_info()->n_inputs, _plugin->get_info()->n_outputs);
+	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
+		_bufferset.ensure_buffers (*i, count.get (*i), _buffer_size);
+		_collect_bufferset.ensure_buffers (*i, count.get (*i), _buffer_size);
+	}
 
-	// buffers for the signal analysis are ensured inside PluginInsert
-	uint32_t n_chans = std::max(inputs, outputs);
-	_bufferset.ensure_buffers(ARDOUR::DataType::AUDIO, n_chans, _buffer_size);
-	_collect_bufferset.ensure_buffers(ARDOUR::DataType::AUDIO, n_chans, _buffer_size);
-
-	ARDOUR::ChanCount chanCount(ARDOUR::DataType::AUDIO, n_chans);
-	_bufferset.set_count(chanCount);
-	_collect_bufferset.set_count(chanCount);
+	_bufferset.set_count (count);
+	_collect_bufferset.set_count (count);
 }
 
 void

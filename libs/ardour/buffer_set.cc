@@ -215,6 +215,8 @@ BufferSet::get(DataType type, size_t i) const
 LV2EventBuffer&
 BufferSet::get_lv2_midi(bool input, size_t i)
 {
+	assert (count().get(DataType::MIDI) > i);
+	
 	MidiBuffer& mbuf = get_midi(i);
 	LV2Buffers::value_type b = _lv2_buffers.at(i * 2 + (input ? 0 : 1));
 	LV2EventBuffer* ebuf = b.second;
