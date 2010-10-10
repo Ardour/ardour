@@ -46,7 +46,7 @@
   </Locations>
   <Bundles/>
   <Routes>
-    <Route id="19" name="master" default-type="audio" flags="MasterOut" active="yes" phase-invert="no" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=0:signal=0" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0">
+    <Route id="19" name="master" default-type="audio" flags="MasterOut" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=0:signal=0" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0">
       <IO name="master" id="25" direction="Input" default-type="audio">
         <Port type="audio" name="master/audio_in 1"/>
         <Port type="audio" name="master/audio_in 2"/>
@@ -84,7 +84,7 @@
         </GUI>
       </Extra>
     </Route>
-    <Route id="69" name="Midi 1" default-type="midi" active="yes" phase-invert="no" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=1:signal=1" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" step-editing="no" note-mode="Sustained" midi-thru="yes" default-channel="0">
+    <Route id="69" name="Midi 1" default-type="midi" active="yes" phase-invert="0" denormal-protection="no" meter-point="MeterPostFader" order-keys="editor=1:signal=1" self-solo="no" soloed-by-upstream="0" soloed-by-downstream="0" step-editing="no" note-mode="Sustained" midi-thru="yes" default-channel="0">
       <IO name="Midi 1" id="76" direction="Input" default-type="midi">
         <Port type="midi" name="Midi 1/midi_in 1">
           <Connection other="alsa_pcm:SB-Live--5-1--SB0060-/midi_capture_1"/>

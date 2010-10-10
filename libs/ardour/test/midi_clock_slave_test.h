@@ -28,11 +28,11 @@ namespace ARDOUR {
 
 class TestSlaveSessionProxy : public ISlaveSessionProxy {
   #define FRAME_RATE 44100
-  nframes64_t _period_size;
+  framecnt_t _period_size;
 
   double       transport_speed;
-  nframes64_t _transport_frame;
-  nframes64_t _frame_time;
+  framepos_t _transport_frame;
+  framepos_t _frame_time;
   TempoMap    *_tempo_map;
 
   Tempo     tempo;
@@ -53,8 +53,8 @@ class TestSlaveSessionProxy : public ISlaveSessionProxy {
         }
 
         // Controlling the mock object
-        void        set_period_size (nframes64_t a_size) { _period_size = a_size; }
-        nframes64_t period_size () const                 { return _period_size; }
+        void        set_period_size (framecnt_t a_size) { _period_size = a_size; }
+        framecnt_t period_size () const                 { return _period_size; }
         void next_period ()                       { 
           _transport_frame += double(_period_size) * double(transport_speed); 
           _frame_time += _period_size;
@@ -63,12 +63,12 @@ class TestSlaveSessionProxy : public ISlaveSessionProxy {
         // Implementation
   	TempoMap&   tempo_map ()                const { return *_tempo_map; }
 	nframes_t   frame_rate ()               const { return FRAME_RATE; }
-	nframes64_t audible_frame ()            const { return _transport_frame; }
-	nframes64_t transport_frame ()          const { return _transport_frame; }
-	nframes_t   frames_since_cycle_start () const { return 0; }
-	nframes64_t frame_time ()               const { return _frame_time; }
+	framepos_t audible_frame ()            const { return _transport_frame; }
+	framepos_t transport_frame ()          const { return _transport_frame; }
+	nframes_t  frames_since_cycle_start () const { return 0; }
+	framecnt_t frame_time ()               const { return _frame_time; }
 
-	void request_locate (nframes64_t frame, bool with_roll = false) { 
+	void request_locate (framepos_t frame, bool with_roll = false) { 
           _transport_frame = frame; 
         }
 
