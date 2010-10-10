@@ -528,6 +528,7 @@ void
 PlugUIBase::save_plugin_setting ()
 {
 	ArdourPrompter prompter (true);
+	prompter.set_title(_("New Preset"));
 	prompter.set_prompt(_("Name of New Preset:"));
 	prompter.add_button (Gtk::Stock::ADD, Gtk::RESPONSE_ACCEPT);
 	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
