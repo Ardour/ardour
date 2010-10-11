@@ -29,6 +29,9 @@ namespace ARDOUR {
 
 class TempoMap;
 
+/** Converter between beats and frames.  Takes `distances' in beats or frames
+ *  and converts them using the tempo at the \a origin supplied to the constructor.
+ */
 class BeatsFramesConverter : public Evoral::TimeConverter<double,framepos_t> {
 public:
 	BeatsFramesConverter(const TempoMap& tempo_map, framepos_t origin)
