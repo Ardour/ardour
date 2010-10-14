@@ -400,10 +400,6 @@ int
 Port::create_port ()
 {
 	_jack_port = jack_port_register(_jack_client, _tagname.c_str(), JACK_DEFAULT_MIDI_TYPE, _flags, 0);
-	if (_jack_port) {
-		// jack_midi_clear_buffer (jack_port_get_buffer (_jack_port, jack_get_buffer_size (_jack_client)));
-	}
-
 	return _jack_port == 0 ? -1 : 0;
 }
 
