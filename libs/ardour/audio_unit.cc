@@ -446,17 +446,26 @@ AUPlugin::init ()
 		throw failed_constructor ();
 	}
 	
-	AURenderCallbackStruct renderCallbackInfo;
+	TRACE_API ("count global elements\n");
+	unit->GetElementCount (kAudioUnitScope_Global, global_elements);
+	TRACE_API ("count input elements\n");
+	unit->GetElementCount (kAudioUnitScope_Input, input_elements);
+	TRACE_API ("count output elements\n");
+	unit->GetElementCount (kAudioUnitScope_Output, output_elements);
 
-	renderCallbackInfo.inputProc = _render_callback;
-	renderCallbackInfo.inputProcRefCon = this;
-
-	TRACE_API ("set render callback in input scope\n");
-	if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 
-					 0, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
-		cerr << "cannot install render callback (err = " << err << ')' << endl;
-		throw failed_constructor();
-	}
+        if (input_elements > 0) {
+                AURenderCallbackStruct renderCallbackInfo;
+                
+                renderCallbackInfo.inputProc = _render_callback;
+                renderCallbackInfo.inputProcRefCon = this;
+                
+                TRACE_API ("set render callback in input scope\n");
+                if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 
+                                              0, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
+                        cerr << "cannot install render callback (err = " << err << ')' << endl;
+                        throw failed_constructor();
+                }
+        }
 
 	/* tell the plugin about tempo/meter/transport callbacks in case it wants them */
 
@@ -474,13 +483,6 @@ AUPlugin::init ()
 			   0, //elementID 
 			   &info,
 			   sizeof (HostCallbackInfo));
-
-	TRACE_API ("count global elements\n");
-	unit->GetElementCount (kAudioUnitScope_Global, global_elements);
-	TRACE_API ("count input elements\n");
-	unit->GetElementCount (kAudioUnitScope_Input, input_elements);
-	TRACE_API ("count output elements\n");
-	unit->GetElementCount (kAudioUnitScope_Output, output_elements);
 
 	/* these keep track of *configured* channel set up,
 	   not potential set ups.
