@@ -210,6 +210,7 @@ protected:
 	void set_route_group_from_menu (ARDOUR::RouteGroup *);
 
 	void reset_samples_per_unit ();
+	void horizontal_position_changed ();
 
 	void select_track_color();
 

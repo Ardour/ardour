@@ -4691,7 +4691,19 @@ Editor::idle_visual_changer ()
 	VisualChange::Type p = pending_visual_change.pending;
 	pending_visual_change.pending = (VisualChange::Type) 0;
 
-	double last_time_origin = horizontal_position ();
+	double const last_time_origin = horizontal_position ();
+
+	if (p & VisualChange::TimeOrigin) {
+		/* This is a bit of a hack, but set_frames_per_unit
+		   below will (if called) end up with the
+		   CrossfadeViews looking at Editor::leftmost_frame,
+		   and if we're changing origin and zoom in the same
+		   operation it will be the wrong value unless we
+		   update it here.
+		*/
+
+		leftmost_frame = pending_visual_change.time_origin;
+	}
 
 	if (p & VisualChange::ZoomLevel) {
 		set_frames_per_unit (pending_visual_change.frames_per_unit);

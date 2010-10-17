@@ -826,3 +826,14 @@ AudioStreamView::parameter_changed (string const & p)
 		set_waveform_shape (Config->get_waveform_shape ());
 	}
 }
+
+void
+AudioStreamView::horizontal_position_changed ()
+{
+	/* we only `draw' the bit of the curve that is visible, so we need to update here */
+	
+	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
+		i->second->horizontal_position_changed ();
+	}
+}
+

@@ -792,6 +792,8 @@ Editor::set_horizontal_position (double p)
 		_summary->set_overlays_dirty ();
 	}
 
+	HorizontalPositionChanged (); /* EMIT SIGNAL */
+
 #ifndef GTKOSX
 	if (!autoscroll_active && !_stationary_playhead) {
 		/* force rulers and canvas to move in lock step */

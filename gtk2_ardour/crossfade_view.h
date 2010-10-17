@@ -59,6 +59,7 @@ struct CrossfadeView : public TimeAxisViewItem
     void fake_hide ();
     void hide ();
     void show ();
+    void horizontal_position_changed ();
 
   protected:
     void reset_width_dependent_items (double pixel_width);
@@ -66,6 +67,7 @@ struct CrossfadeView : public TimeAxisViewItem
   private:
     bool _valid;
     bool _visible;
+    bool _all_in_view;   
 
     ArdourCanvas::Line *fade_in;
     ArdourCanvas::Line *fade_out;

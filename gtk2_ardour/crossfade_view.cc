@@ -55,7 +55,8 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 			    xf->length(), false, false, TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowFrame)),
 	  crossfade (xf),
 	  left_view (lview),
-	  right_view (rview)	
+	  right_view (rview),
+	  _all_in_view (false)
 {
 	_valid = true;
 	_visible = true;
@@ -144,13 +145,12 @@ CrossfadeView::crossfade_changed (const PropertyChange& what_changed)
 	}
 }
 
+/** Set up our fade_in and fade_out curves to contain points for the currently visible portion
+ *  of the crossfade.
+ */
 void
 CrossfadeView::redraw_curves ()
 {
-	Points* points;
-	int32_t npoints;
-	float* vec;
-
 	if (!crossfade->following_overlap()) {
 		/* curves should not be visible */
 		fade_in->hide ();
@@ -163,9 +163,22 @@ CrossfadeView::redraw_curves ()
 		return;
 	}
 
-	npoints = get_time_axis_view().editor().frame_to_pixel (crossfade->length());
-	// npoints = std::min (gdk_screen_width(), npoints);
+	PublicEditor& editor = get_time_axis_view().editor ();
 
+	framepos_t const editor_left = editor.leftmost_position ();
+	framepos_t const editor_right = editor_left + editor.current_page_frames ();
+	framepos_t const xfade_left = crossfade->position ();
+	framepos_t const xfade_right = xfade_left + crossfade->length ();
+
+	/* Work out the range of our frames that are visible */
+	framepos_t const min_frames = std::max (editor_left, xfade_left);
+	framepos_t const max_frames = std::min (editor_right, xfade_right);
+
+	_all_in_view = (editor_left <= xfade_left && editor_right >= xfade_right);
+
+	/* Hence the number of points that we will render */
+	int32_t const npoints = editor.frame_to_pixel (max_frames - min_frames);
+	
 	if (!_visible || !crossfade->active() || npoints < 3) {
 		fade_in->hide();
 		fade_out->hide();
@@ -175,24 +188,30 @@ CrossfadeView::redraw_curves ()
 		fade_out->show();
 	}
 
-	points = get_canvas_points ("xfade edit redraw", npoints);
-	vec = new float[npoints];
+	Points* points = get_canvas_points ("xfade edit redraw", npoints);
+	float* vec = new float[npoints];
 
-	crossfade->fade_in().curve().get_vector (0, crossfade->length(), vec, npoints);
+	crossfade->fade_in().curve().get_vector (min_frames - crossfade->position(), max_frames - crossfade->position(), vec, npoints);
+
+	/* Work out the offset from the start of the crossfade to the visible part, in pixels */
+	double xoff = 0;
+	if (crossfade->position() < editor.leftmost_position()) {
+		xoff = editor.frame_to_pixel (min_frames) - editor.frame_to_pixel (crossfade->position ());
+	}
 
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
-		p.set_x (i + 1);
+		p.set_x (xoff + i + 1);
 		p.set_y (_height - ((_height - 2) * vec[i]));
 	}
 
 	fade_in->property_points() = *points;
 
-	crossfade->fade_out().curve().get_vector (0, crossfade->length(), vec, npoints);
+	crossfade->fade_out().curve().get_vector (min_frames - crossfade->position(), max_frames - crossfade->position(), vec, npoints);
 
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
-		p.set_x (i + 1);
+		p.set_x (xoff + i + 1);
 		p.set_y (_height - ((_height - 2) * vec[i]));
 	}
 	
@@ -268,4 +287,18 @@ void
 CrossfadeView::crossfade_fades_changed ()
 {
 	redraw_curves ();
+}
+
+void
+CrossfadeView::horizontal_position_changed ()
+{
+	/* If the crossfade curves are entirely within the editor's visible space, there is
+	   no need to redraw them here as they will be completely drawn (as distinct from
+	   the other case where the horizontal position change will uncover `undrawn'
+	   sections).
+	*/
+	
+	if (!_all_in_view) {
+		redraw_curves ();
+	}
 }

@@ -57,6 +57,7 @@ class AudioStreamView : public StreamView
 	~AudioStreamView ();
 
 	int set_samples_per_unit (gdouble spp);
+	void horizontal_position_changed ();
 
 	int     set_amplitude_above_axis (gdouble app);
 	gdouble get_amplitude_above_axis () { return _amplitude_above_axis; }

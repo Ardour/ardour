@@ -284,6 +284,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	sigc::signal<void> ZoomFocusChanged;
 	sigc::signal<void> ZoomChanged;
+	/** Emitted when the horizontal position of the editor view changes */
+	sigc::signal<void> HorizontalPositionChanged;
 	sigc::signal<void> Resized;
 	sigc::signal<void> Realized;
 	sigc::signal<void,framepos_t> UpdateAllTransportClocks;

@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
-#include  <map>
+#include <map>
 #include <utility>
 
 #include <sigc++/bind.h>
@@ -225,6 +225,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	}
 
 	_editor.ZoomChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
+	_editor.HorizontalPositionChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::horizontal_position_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::color_handler));
 
 	PropertyList* plist = new PropertyList();
@@ -869,6 +870,14 @@ void
 RouteTimeAxisView::reset_samples_per_unit ()
 {
 	set_samples_per_unit (_editor.get_current_zoom());
+}
+
+void
+RouteTimeAxisView::horizontal_position_changed ()
+{
+	if (_view) {
+		_view->horizontal_position_changed ();
+	}
 }
 
 void
