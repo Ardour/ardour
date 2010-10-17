@@ -564,9 +564,9 @@ About::About ()
 	set_translator_credits (t);
 	set_copyright (_("Copyright (C) 1999-2010 Paul Davis\n"));
 	set_license (gpl);
-	set_name (X_("ardour"));
+	set_name (X_("Ardour"));
 	set_website (X_("http://ardour.org/"));
-	set_website_label (_("visit http://ardour.org/"));
+	set_website_label (_("http://ardour.org/"));
 	set_version ((string_compose(_("%1\n(built from revision %2)"),
 				     VERSIONSTRING,
 				     svn_revision)));

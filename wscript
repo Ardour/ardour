@@ -10,7 +10,7 @@ import sys
 
 # Variables for 'waf dist'
 VERSION = '3.0pre0'
-APPNAME = 'ardour'
+APPNAME = 'Ardour'
 
 # Mandatory variables
 srcdir = '.'
