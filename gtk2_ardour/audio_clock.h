@@ -55,6 +55,7 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void locate ();
 	void set_mode (Mode);
 	void set_bbt_reference (framepos_t);
+        void set_is_duration (bool);
 
 	void set_widget_name (std::string);
 

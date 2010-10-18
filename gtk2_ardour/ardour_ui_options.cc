@@ -29,6 +29,7 @@
 #include "ardour/configuration.h"
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
+#include "ardour/rc_configuration.h"
 
 #ifdef HAVE_LIBLO
 #include "ardour/osc.h"
@@ -422,7 +423,12 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 	} else if (p == "show-track-meters") {
 		editor->toggle_meter_updating();
-	}
+	} else if (p == "primary-clock-delta-edit-cursor") {
+                primary_clock.set_is_duration (Config->get_primary_clock_delta_edit_cursor());
+        } else if (p == "secondary-clock-delta-edit-cursor") {
+                secondary_clock.set_is_duration (Config->get_secondary_clock_delta_edit_cursor());
+        }
+
 }
 
 void

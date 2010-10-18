@@ -2126,3 +2126,14 @@ AudioClock::on_style_changed (const Glib::RefPtr<Style>& old_style)
 
 	set_size_requests ();
 }
+
+void
+AudioClock::set_is_duration (bool yn)
+{
+        if (yn == is_duration) {
+                return;
+        }
+        
+        is_duration = yn;
+        set (last_when, true, 0, 's');
+}
