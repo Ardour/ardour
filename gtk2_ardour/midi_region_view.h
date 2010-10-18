@@ -402,7 +402,7 @@ class MidiRegionView : public RegionView
 	Events::iterator _optimization_iterator;
 
 	void update_note (ArdourCanvas::CanvasNote*);
-	void update_hit (ArdourCanvas::CanvasHit*);
+	double update_hit (ArdourCanvas::CanvasHit *);
 	void create_ghost_note (double, double);
 	void update_ghost_note (double, double);
 
