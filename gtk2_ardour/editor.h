@@ -1993,8 +1993,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void get_regions_at (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
 	void get_regions_after (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
 
-	void get_regions_for_action (RegionSelection&, bool allow_entered = false, bool allow_edit_position = true);
-
+	void get_regions_for_action (RegionSelection&, bool check_edit_point = true);
+	
 	void start_updating_meters ();
 	void stop_updating_meters ();
 	bool meters_running;

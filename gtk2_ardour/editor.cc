@@ -4930,46 +4930,64 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
 	}
 }
 
-/** Find all regions which are either:
- *      - selected or
- *      - the entered_regionview (if allow_entered == true) or
- *      - under the preferred edit position AND on a selected track, or on a track
- *        which is in the same active edit-enable route group as a selected region (if allow_edit_position == true)
+/** Get regions using the following conditions:
+ *  If check_edit_position == false, then return the selected regions.
+ *  Otherwise:
+ *    1.  If the edit point is `mouse':
+ *          if the mouse is over a selected region, or no region, return all selected regions.
+ *          if the mouse is over an unselected region, return just that region.
+ *    2.  For all other edit points:
+ *          return the selected regions AND those that are both under the edit position
+ *          AND on a selected track, or on a track which is in the same active edit-enabled route group
+ *          as a selected region.
+ *
+ *  The rationale here is that the mouse edit point is special in that its position describes
+ *  both a time and a track; the other edit modes only describe a time.
+ *
  *  @param rs Returned region list.
- *  @param allow_entered true to include the entered_regionview in the list.
  */
 void
-Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered, bool allow_edit_position)
+Editor::get_regions_for_action (RegionSelection& rs, bool check_edit_point)
 {
+	if (!check_edit_point) {
+		rs = selection->regions;
+		return;
+	}
+
+	if (_edit_point == EditAtMouse) {
+		if (entered_regionview == 0 || selection->regions.contains (entered_regionview)) {
+			rs = selection->regions;
+			return;
+		} else {
+			rs.add (entered_regionview);
+			return;
+		}
+	}
+
+	/* We're using the edit point, but its not EditAtMouse */
+
 	/* Start with selected regions */
 	rs = selection->regions;
 
-	/* Add the entered_regionview, if requested */
-	if (allow_entered && entered_regionview) {
-		rs.add (entered_regionview);
+	TrackViewList tracks = selection->tracks;
+
+	/* Tracks is currently the set of selected tracks; add any other tracks that
+	   have regions that are in the same edit-activated route group as one of
+	   our regions.
+	 */
+	for (RegionSelection::iterator i = rs.begin (); i != rs.end(); ++i) {
+		
+		RouteGroup* g = (*i)->get_time_axis_view().route_group ();
+		if (g && g->is_active() && g->is_edit()) {
+			tracks.add (axis_views_from_routes (g->route_list()));
+		}
+		
 	}
-
-	if (allow_edit_position) {
-
-		TrackViewList tracks = selection->tracks;
-
-		/* tracks is currently the set of selected tracks; add any other tracks that
-		 * have regions that are in the same edit-activated route group as one of
-		 * our regions */
-		for (RegionSelection::iterator i = rs.begin (); i != rs.end(); ++i) {
-
-		 	RouteGroup* g = (*i)->get_time_axis_view().route_group ();
-		 	if (g && g->is_active() && g->is_edit()) {
-		 		tracks.add (axis_views_from_routes (g->route_list()));
-		 	}
-			
-		}
-
-		if (!tracks.empty()) {
-			/* now find regions that are at the edit position on those tracks */
-			framepos_t const where = get_preferred_edit_position ();
-			get_regions_at (rs, where, tracks);
-		}
+	
+	if (!tracks.empty()) {
+		/* now find regions that are at the edit position on those tracks */
+		framepos_t const where = get_preferred_edit_position ();
+		get_regions_at (rs, where, tracks);
 	}
 }
 
