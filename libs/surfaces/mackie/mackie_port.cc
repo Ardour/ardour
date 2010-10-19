@@ -488,6 +488,12 @@ void MackiePort::handle_midi_any (MIDI::Parser & parser, MIDI::byte * raw_bytes,
 				state.sign = ( raw_bytes[2] & 0x40 ) == 0 ? 1 : -1; 
 				// bytes[2] & 0b00111111 (0x3f) gives delta
 				state.ticks = ( raw_bytes[2] & 0x3f);
+                                if (state.ticks == 0) {
+                                        /* euphonix and perhaps other devices send zero
+                                           when they mean 1, we think.
+                                        */
+                                        state.ticks = 1;
+                                }
 				state.delta = float( state.ticks ) / float( 0x3f );
 				
 				/*
