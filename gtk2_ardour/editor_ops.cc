@@ -305,9 +305,8 @@ Editor::nudge_forward (bool next, bool force_playhead)
 {
 	framepos_t distance;
 	framepos_t next_distance;
-	RegionSelection rs;
 
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (!_session) return;
 
@@ -385,9 +384,7 @@ Editor::nudge_backward (bool next, bool force_playhead)
 {
 	framepos_t distance;
 	framepos_t next_distance;
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (!_session) return;
 
@@ -477,9 +474,7 @@ void
 Editor::nudge_forward_capture_offset ()
 {
 	framepos_t distance;
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (!_session) return;
 
@@ -506,11 +501,11 @@ void
 Editor::nudge_backward_capture_offset ()
 {
 	framepos_t distance;
-	RegionSelection rs;
+	RegionSelection rs = get_regions_for_action ();
 
-	get_regions_for_action (rs);
-
-	if (!_session) return;
+	if (!_session) {
+		return;
+	}
 
 	if (!rs.empty()) {
 
@@ -913,9 +908,7 @@ void
 Editor::cursor_to_selection_start (EditorCursor *cursor)
 {
 	framepos_t pos = 0;
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	switch (mouse_mode) {
 	case MouseObject:
@@ -945,9 +938,7 @@ void
 Editor::cursor_to_selection_end (EditorCursor *cursor)
 {
 	framepos_t pos = 0;
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	switch (mouse_mode) {
 	case MouseObject:
@@ -1117,9 +1108,7 @@ Editor::selected_marker_to_selection_start ()
 		return;
 	}
 
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	switch (mouse_mode) {
 	case MouseObject:
@@ -1156,9 +1145,7 @@ Editor::selected_marker_to_selection_end ()
 		return;
 	}
 
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	switch (mouse_mode) {
 	case MouseObject:
@@ -1653,10 +1640,9 @@ Editor::temporal_zoom_region (bool both_axes)
 {
 	framepos_t start = max_framepos;
 	framepos_t end = 0;
-	RegionSelection rs;
 	set<TimeAxisView*> tracks;
 
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -1934,9 +1920,7 @@ Editor::add_location_from_playhead_cursor ()
 void
 Editor::add_locations_from_audio_region ()
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -1962,9 +1946,7 @@ Editor::add_locations_from_audio_region ()
 void
 Editor::add_location_from_audio_region ()
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -2393,9 +2375,7 @@ Editor::play_selection ()
 void
 Editor::loop_selected_region ()
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (!rs.empty()) {
 		RegionView *rv = *(rs.begin());
@@ -2483,9 +2463,7 @@ Editor::show_midi_list_editor ()
 void
 Editor::rename_region()
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -2567,9 +2545,7 @@ Editor::play_selected_region ()
 {
 	framepos_t start = max_framepos;
 	framepos_t end = 0;
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -2681,9 +2657,7 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_re
 void
 Editor::split_multichannel_region ()
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -2907,8 +2881,7 @@ Editor::separate_regions_using_location (Location& loc)
 void
 Editor::separate_under_selected_regions ()
 {
-	RegionSelection rs;
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 	
 	vector<PlaylistState> playlists;
 
@@ -3077,9 +3050,7 @@ void
 Editor::region_fill_track ()
 {
 	framepos_t end;
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (!_session || rs.empty()) {
 		return;
@@ -3161,8 +3132,7 @@ void
 Editor::set_region_sync_from_edit_point ()
 {
 	framepos_t where = get_preferred_edit_position ();
-	RegionSelection rs;
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 	set_sync_point (where, rs);
 }
 
@@ -3198,9 +3168,7 @@ Editor::set_sync_point (framepos_t where, const RegionSelection& rs)
 void
 Editor::remove_region_sync ()
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -3219,9 +3187,7 @@ Editor::remove_region_sync ()
 void
 Editor::naturalize ()
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -3239,9 +3205,7 @@ Editor::naturalize ()
 void
 Editor::align (RegionPoint what)
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 	framepos_t where = get_preferred_edit_position();
 
 	if (!rs.empty()) {
@@ -3258,9 +3222,7 @@ void
 Editor::align_relative (RegionPoint what)
 {
 	framepos_t where = get_preferred_edit_position();
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (!rs.empty()) {
 		align_selection_relative (what, where, rs);
@@ -3421,9 +3383,7 @@ void
 Editor::trim_region (bool front)
 {
 	framepos_t where = get_preferred_edit_position();
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -3472,9 +3432,7 @@ Editor::trim_region_to_punch ()
 void
 Editor::trim_region_to_location (const Location& loc, const char* str)
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	begin_reversible_command (str);
 
@@ -3516,9 +3474,7 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 void
 Editor::trim_region_to_edit_point ()
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	framepos_t where = get_preferred_edit_position();
 
@@ -3554,9 +3510,7 @@ Editor::trim_region_to_edit_point ()
 void
 Editor::trim_region_from_edit_point ()
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	framepos_t where = get_preferred_edit_position();
 
@@ -3604,9 +3558,7 @@ Editor::trim_region_to_next_region_start ()
 void
 Editor::trim_to_region(bool forward)
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	begin_reversible_command (_("trim to region"));
 
@@ -3881,7 +3833,7 @@ Editor::cut_copy (CutCopyOp op)
 		/* we only want to cut regions if some are selected */
 
 		if (!selection->regions.empty()) {
-			get_regions_for_action (rs, false);
+			rs = get_regions_for_action (false);
 		}
 
 		switch (current_mouse_mode()) {
@@ -4009,8 +3961,7 @@ Editor::remove_clicked_region ()
 void
 Editor::remove_selected_regions ()
 {
-	RegionSelection rs;
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (!_session) {
 		return;
@@ -4540,8 +4491,7 @@ Editor::normalize_region ()
 		return;
 	}
 
-	RegionSelection rs;
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -4626,9 +4576,7 @@ Editor::reset_region_scale_amplitude ()
 		return;
 	}
 
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -4655,9 +4603,7 @@ Editor::adjust_region_scale_amplitude (bool up)
 		return;
 	}
 
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -4719,8 +4665,7 @@ Editor::strip_region_silence ()
 		return;
 	}
 
-	RegionSelection rs;
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -4759,10 +4704,9 @@ Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv
 void
 Editor::apply_midi_note_edit_op (MidiOperator& op)
 {
-	RegionSelection rs;
 	Command* cmd;
 
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -4794,9 +4738,7 @@ Editor::apply_midi_note_edit_op (MidiOperator& op)
 void
 Editor::fork_region ()
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -4857,9 +4799,7 @@ Editor::quantize_region ()
 void
 Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress)
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -4970,9 +4910,7 @@ void
 Editor::brush (framepos_t pos)
 {
 	RegionSelection sel;
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	snap_to (pos);
 
@@ -5163,9 +5101,7 @@ Editor::toggle_record_enable ()
 void
 Editor::set_fade_length (bool in)
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs, true);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -5236,9 +5172,7 @@ Editor::set_fade_length (bool in)
 void
 Editor::toggle_fade_active (bool in)
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -5287,9 +5221,7 @@ Editor::toggle_fade_active (bool in)
 void
 Editor::set_fade_in_shape (FadeShape shape)
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -5320,9 +5252,7 @@ Editor::set_fade_in_shape (FadeShape shape)
 void
 Editor::set_fade_out_shape (FadeShape shape)
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -5352,9 +5282,7 @@ Editor::set_fade_out_shape (FadeShape shape)
 void
 Editor::set_fade_in_active (bool yn)
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -5383,9 +5311,7 @@ Editor::set_fade_in_active (bool yn)
 void
 Editor::set_fade_out_active (bool yn)
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -5413,12 +5339,11 @@ Editor::set_fade_out_active (bool yn)
 void
 Editor::toggle_selected_region_fades (int dir)
 {
-	RegionSelection rs;
 	RegionSelection::iterator i;
 	boost::shared_ptr<AudioRegion> ar;
 	bool yn;
 
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -5550,9 +5475,7 @@ Editor::split ()
                 return;
         } 
 
-	RegionSelection rs;
-
-	get_regions_for_action (rs, true);
+	RegionSelection rs = get_regions_for_action ();
 
 	framepos_t where = get_preferred_edit_position();
 
@@ -5727,9 +5650,7 @@ Editor::set_loop_from_region (bool play)
 	framepos_t start = max_framepos;
 	framepos_t end = 0;
 
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -5788,9 +5709,7 @@ Editor::set_punch_from_region ()
 	framepos_t start = max_framepos;
 	framepos_t end = 0;
 
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -5811,9 +5730,7 @@ Editor::set_punch_from_region ()
 void
 Editor::pitch_shift_regions ()
 {
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -5829,9 +5746,7 @@ Editor::use_region_as_bar ()
 		return;
 	}
 
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -5946,9 +5861,7 @@ Editor::split_region_at_transients ()
 		return;
 	}
 
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -6120,9 +6033,7 @@ Editor::place_transient()
 		return;
 	}
 
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -6161,9 +6072,7 @@ Editor::snap_regions_to_grid()
 		return;
 	}
 
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (rs.empty()) {
 		return;
@@ -6187,9 +6096,7 @@ Editor::close_region_gaps()
 		return;
 	}
 
-	RegionSelection rs;
-
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 	
 	if (rs.empty()) {
 		return;
@@ -6306,9 +6213,7 @@ Editor::tab_to_transient (bool forward)
 
 	} else {
 
-		RegionSelection rs;
-
-		get_regions_for_action (rs);
+		RegionSelection rs = get_regions_for_action ();
 
 		if (rs.empty()) {
 			return;

@@ -330,11 +330,7 @@ RhythmFerret::do_action ()
 void
 RhythmFerret::do_split_action ()
 {
-	/* this can/will change the current selection, so work with a copy */
-
-	//RegionSelection& regions (editor.get_selection().regions);
-	RegionSelection regions;
-	editor.get_regions_for_action(regions);
+	RegionSelection regions = editor.get_regions_for_action ();
 
 	if (regions.empty()) {
 		return;

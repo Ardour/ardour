@@ -3531,8 +3531,7 @@ Editor::duplicate_dialog (bool with_dialog)
 		}
 	}
 
-	RegionSelection rs;
-	get_regions_for_action (rs);
+	RegionSelection rs = get_regions_for_action ();
 
 	if (mouse_mode != MouseRange) {
 
@@ -4946,28 +4945,28 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
  *
  *  @param rs Returned region list.
  */
-void
-Editor::get_regions_for_action (RegionSelection& rs, bool check_edit_point)
+
+RegionSelection
+Editor::get_regions_for_action (bool check_edit_point)
 {
 	if (!check_edit_point) {
-		rs = selection->regions;
-		return;
+		return selection->regions;
 	}
 
 	if (_edit_point == EditAtMouse) {
 		if (entered_regionview == 0 || selection->regions.contains (entered_regionview)) {
-			rs = selection->regions;
-			return;
+			return selection->regions;
 		} else {
+			RegionSelection rs;
 			rs.add (entered_regionview);
-			return;
+			return rs;
 		}
 	}
 
 	/* We're using the edit point, but its not EditAtMouse */
 
 	/* Start with selected regions */
-	rs = selection->regions;
+	RegionSelection rs = selection->regions;
 
 	TrackViewList tracks = selection->tracks;
 
@@ -4989,6 +4988,8 @@ Editor::get_regions_for_action (RegionSelection& rs, bool check_edit_point)
 		framepos_t const where = get_preferred_edit_position ();
 		get_regions_at (rs, where, tracks);
 	}
+
+	return rs;
 }
 
 void
