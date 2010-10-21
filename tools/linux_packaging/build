@@ -1,0 +1,421 @@
+#!/bin/bash
+
+# script for pulling together a Linux app bundle.
+
+GTKROOT=
+SAE=
+MIXBUS=
+INTERNAL_JACK=1
+WITH_LADSPA=0
+STRIP=1
+PRINT_SYSDEPS=
+WITH_NLS=
+EXTERNAL_JACK=
+
+while [ $# -gt 0 ] ; do
+    echo "arg = $1"
+    case $1 in
+
+	#
+	# top level build targets
+	#
+
+	--sae) WITH_NLS= ; 
+               SAE=1 ; 
+	       INTERNAL_JACK=1; 
+	       WITH_LADSPA=1; 
+               STRIP= ; 
+	       PRODUCT_PKG_DIR=ArdourSAE.pkg ; 
+	       APPNAME=Ardour ;
+	       shift ;;
+	--mixbus) MIXBUS=1; 
+	          WITH_NLS=1 ; 
+                  SAE= ; 
+                  INTERNAL_JACK=; 
+                  WITH_LADSPA=; 
+                  STRIP= ; 
+		  PRODUCT_PKG_DIR=MixBus.pkg;
+		  APPNAME=Mixbus ;
+                  shift ;;
+	--public) WITH_NLS=1 ; 
+	          SAE= ; 
+		  INTERNAL_JACK=; 
+                  WITH_LADSPA=1; 
+                  STRIP= ; 
+		  PRODUCT_PKG_DIR=Ardour.pkg;
+		  APPNAME=Ardour ;
+		  shift ;;
+	--allinone) SAE= ; 
+	            WITH_NLS= ; 
+		    INTERNAL_JACK=1; 
+		    WITH_LADSPA=1; 
+		    STRIP= ; 
+		    PRODUCT_PKG_DIR=Ardour.pkg ;
+		    shift ;;
+	--test) SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
+
+	#
+	# specific build flags
+	#
+
+	--nojack) INTERNAL_JACK= ; shift ;;
+	--noladspa) WITH_LADSPA= ; shift ;;
+	--nostrip) STRIP= ; shift ;;
+	--sysdeps) PRINT_SYSDEPS=1; shift ;;
+	--nls) WITH_NLS=1 ; shift ;;
+	--external_jack) EXTERNAL_JACK=$2; shift ; shift ;;
+    esac
+done
+
+if [ x$EXTERNAL_JACK != x -a x$INTERNAL_JACK != x ] ; then
+    echo "It makes no sense to package JACK internally and externally. Please pick one."
+fi
+
+release_version=`grep -m 1 '^ardour_version' ../../SConstruct | cut -d' ' -f 3 | sed "s/'//g"`
+svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d' ' -f 6 | sed 's/[";]//g'`
+echo "Version is $release_version / $svn_version"
+info_string="$release_version/$svn_version built on `hostname` by `whoami` on `date`"
+echo "Info string is $info_string"
+
+# setup directory structure
+
+APPDIR=${APPNAME}
+APPBIN=$APPDIR/bin
+APPLIB=$APPDIR/lib
+Libraries=$APPLIB
+Etc=$APPDIR/etc
+Shared=$APPDIR/share
+Plugins=$APPLIB/plugins
+Surfaces=$APPLIB/surfaces
+Panners=$APPLIB/panners
+Locale=$Shared/locale
+Modules=$Libraries/modules
+
+if [ x$PRINT_SYSDEPS != x ] ; then
+#
+# print system dependencies
+#
+
+    for file in $APPBIN/* $Libraries/* $Modules/* $Plugins/*.so ; do 
+	if ! file $file | grep -qs Mach-O ; then
+	    continue
+	fi
+	otool -L $file | awk '{print $1}' | egrep -v "(^@executable_path|^Ardour[0-9][.0-9]*.app)" 
+    done | sort | uniq
+    exit 0
+fi
+
+echo "Removing old $APPDIR tree ..."
+
+rm -rf $APPDIR
+
+echo "Building new app directory structure ..."
+
+# only bother to make the longest paths
+
+mkdir -p $APPDIR
+mkdir -p $APPBIN
+mkdir -p $APPLIB
+mkdir -p $Etc
+mkdir -p $Plugins
+mkdir -p $Modules
+mkdir -p $Shared
+mkdir -p $Locale
+mkdir -p $Surfaces
+mkdir -p $Panners
+mkdir -p $Shared/templates
+
+# maybe set variables
+ENVIRONMENT=environment
+rm -f $ENVIRONMENT
+touch $ENVIRONMENT
+
+if test x$SAE != x ; then
+    appname="Ardour2/SAE"
+    echo "export ARDOUR_SAE=true" >> $ENVIRONMENT
+    #
+    # current default for SAE version is German keyboard layout without a keypad
+    #
+    echo export ARDOUR_KEYBOARD_LAYOUT=de-nokeypad >> $ENVIRONMENT
+    echo export ARDOUR_UI_CONF=ardour2_ui_sae.conf >> $ENVIRONMENT
+    echo export ARDOUR2_UI_RC=ardour2_ui_dark_sae.rc >> $ENVIRONMENT
+elif test x$MIXBUS != x ; then
+    appname="Ardour2/Mixbus"
+    echo export ARDOUR_MIXBUS=true >> $ENVIRONMENT
+    #
+    # current default for MIXBUS version is US keyboard layout without a keypad
+    #
+    echo export ARDOUR_KEYBOARD_LAYOUT=us-nokeypad >> $ENVIRONMENT
+    echo export ARDOUR_UI_CONF=ardour2_ui.conf >> $ENVIRONMENT
+    echo export ARDOUR2_UI_RC=ardour2_ui_dark.rc >> $ENVIRONMENT
+else
+    appname="Ardour2"
+fi
+
+#
+# if we're not going to bundle JACK, make sure we can find
+# jack in the places where it might be
+#
+
+echo export 'PATH=/usr/local/bin:/opt/bin:$PATH' >> $ENVIRONMENT
+
+# create startup helper script
+
+sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' < ardour.sh.in > $APPBIN/ardour2
+chmod 775 $APPBIN/ardour2
+MAIN_EXECUTABLE=ardour-$release_version
+
+echo "Copying ardour executable ...."
+cp ../../gtk2_ardour/$MAIN_EXECUTABLE $APPBIN
+if test x$STRIP != x ; then
+    strip $APPBIN/$MAIN_EXECUTABLE
+fi
+
+# copy locale files
+if test x$WITH_NLS != x ; then
+    echo "NLS support ..."
+    echo "I hope you remembered to run scons msgupdate!"
+    LINGUAS=
+    for file in ../../gtk2_ardour/*.mo 
+    do
+	lang=`basename $file | sed 's/\.mo//'`
+	mkdir -p $Locale/$lang/LC_MESSAGES
+	cp $file $Locale/$lang/LC_MESSAGES/gtk2_ardour.mo
+	LINGUAS="$LINGUAS $lang"
+    done
+    for file in ../../libs/ardour/*.mo 
+    do
+	lang=`basename $file | sed 's/\.mo//'`
+	mkdir -p $Locale/$lang/LC_MESSAGES
+	cp $file $Locale/$lang/LC_MESSAGES/libardour.mo
+    done
+
+    GTK_MESSAGES="gtk20-properties.mo gtk20.mo atk10.mo glib20.mo"
+    LOCALEROOT=/usr/share/locale
+
+    for l in $LINGUAS ; do
+	echo "Copying GTK i18n files for $l..."
+        for MO in $GTK_MESSAGES ; do 
+            if [ -f $LOCALEROOT/$l/LC_MESSAGES/$MO ] ; then
+	        cp $LOCALEROOT/$l/LC_MESSAGES/$MO $Locale/$l/LC_MESSAGES
+            else
+	  # try with just the language spec
+	        just_lang=`echo $l | sed 's/_[A-Z][A-Z]$//'`
+	        if [ -f $LOCALEROOT/$just_lang/LC_MESSAGES/$MO ] ; then
+	            cp $LOCALEROOT/$just_lang/LC_MESSAGES/$MO $Locale/$just_lang/LC_MESSAGES
+	        fi
+            fi
+        done
+    done
+else
+    echo "Skipping NLS support"
+fi
+
+if [ -d /usr/lib64 ] ; then
+    SYSLIB=/usr/lib64
+else 
+    SYSLIB=/usr/lib
+fi
+
+GTKETC=/etc/gtk-2.0
+GTKLIB=$SYSLIB/gtk-2.0/2.10.0/
+PANGO=$SYSLIB/pango/1.6.0/
+
+cp -R $GTKETC/* $Etc
+echo "Copying all Pango modules ..."
+cp -R $PANGO/modules/*.so $Modules
+echo "Copying all GDK Pixbuf loaders ..."
+cp -R $GTKLIB/loaders/*.so $Modules
+
+pwd=`pwd`
+
+if test x$WITH_LADSPA != x ; then
+    if test x$SAE != x ; then
+	plugdir=sae_ladspa
+    elif test x$MIXBUS != x ; then
+	plugdir=mixbus_ladspa
+    else
+	plugdir=ladspa
+    fi
+    echo "Copying `ls $plugdir | wc -l` plugins ..."
+    if [ -d $plugdir ] ; then
+        cp -r $plugdir/* $Plugins
+    fi
+fi
+
+if [ -x `which pango-querymodules-64` ] ; then
+    pango-querymodules-64 | sed "s?$SYSLIB/pango/[0-9][0-9]*\.[0-9][0-9]*.[0-9][0-9]*/?@ROOTDIR@/?" > $Etc/pango.modules.in
+    gdk-pixbuf-query-loaders-64 | sed "s?$SYSLIB/gtk-2.0/[0-9][0-9]*\.[0-9][0-9]*.[0-9][0-9]*/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
+else
+    pango-querymodules | sed "s?$SYSLIB/pango/[0-9][0-9]*\.[0-9][0-9]*.[0-9][0-9]*/?@ROOTDIR@/?" > $Etc/pango.modules.in
+    gdk-pixbuf-query-loaders | sed "s?$SYSLIB/gtk-2.0/[0-9][0-9]*\.[0-9][0-9]*.[0-9][0-9]*/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
+fi
+
+# We sort of rely on clearlooks, so include a version
+# this one is special - we will set GTK_PATH to $Libraries/clearlooks
+cp $GTKLIB/engines/libclearlooks.so $Libraries
+mkdir -p $Libraries/clearlooks/engines
+(cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks.so* )
+
+# XXX STILL NEED TO DO PANNERS FOR TRUNK
+cp ../../libs/surfaces/*/libardour_*.so* $Surfaces
+# hack ... move libardour_cp back into Libraries
+mv $Surfaces/libardour_cp.so* $Libraries
+
+# VAMP plugins that we use
+cp ../../libs/vamp-plugins/libardourvampplugins.so* $Libraries
+
+OURLIBDIR=../../libs
+OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/rubberband:$OURLIBDIR/soundtouch:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/sigc++2:$OURLIBDIR/glibmm2:$OURLIBDIR/gtkmm2/atk:$OURLIBDIR/gtkmm2/pango:$OURLIBDIR/gtkmm2/gdk:$OURLIBDIR/gtkmm2/gtk:$OURLIBDIR/libgnomecanvasmm:$OURLIBDIR/libsndfile
+
+while [ true ] ; do 
+    missing=false
+    for file in $APPBIN/* $Libraries/* $Modules/* $Plugins/*.so ; do 
+	if ! file $file | grep -qs ELF ; then
+	    continue
+	fi
+        # do not include libjack
+	deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}S ldd $file | awk '{print $3}' | egrep "($GTKROOT|/opt/|/local/|libs/|/usr/lib)" | grep -v 'libjack\.'`
+	# LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}S ldd $file | egrep "($GTKROOT|/opt/|/local/|libs/|/usr/lib)" | grep -v 'libjack\.'
+	echo -n "."
+	for dep in $deps ; do
+            if [ "x$dep" = "xnot" ] ; then 
+                  echo "Missing dependant library. Use ldd to find and fix"
+                  exit 1
+            fi
+
+            # don't use anything mapped at a specific address
+            if  echo $dep | grep -qs '0x' ; then continue; fi
+            # don't include any X Window libraries
+            if echo $dep | grep -qs libX ; then continue; fi  
+            # don't include libc
+            if echo $dep | grep -qs 'libc\.' ; then continue; fi
+
+	    base=`basename $dep`
+	    if ! test -f $Libraries/$base; then
+		if echo $dep | grep -sq '^libs' ; then
+                    echo Copying ../../$dep
+		    cp ../../$dep $Libraries
+		else
+                    echo Copying $dep
+		    cp $dep $Libraries
+		fi
+		missing=true
+	    fi
+	done
+    done
+    if test x$missing = xfalse ; then
+	# everything has been found
+	break
+    fi
+done
+echo
+
+# strip libraries
+echo Stripping libraries
+strip $APPLIB/*.so*
+
+echo "Copying other stuff to $APPDIR  ..."
+
+cp ../../gtk2_ardour/ergonomic-us.bindings  $Etc
+cp ../../gtk2_ardour/mnemonic-us.bindings  $Etc
+cp ../../gtk2_ardour/SAE-de-keypad.bindings  $Etc
+cp ../../gtk2_ardour/SAE-de-nokeypad.bindings  $Etc
+cp ../../gtk2_ardour/SAE-us-keypad.bindings  $Etc
+cp ../../gtk2_ardour/SAE-us-nokeypad.bindings  $Etc
+cp ../../gtk2_ardour/ardour.menus $Etc
+cp ../../gtk2_ardour/ardour-sae.menus $Etc
+if test x$SAE != x ; then
+    cp ../../ardour_system_sae.rc $Etc/ardour_system.rc
+    echo cp ../../ardour_system_sae.rc $Etc/ardour_system.rc
+    cp ../../instant.xml.sae $Etc/instant.xml
+    echo cp ../../instant.xml.sae $Etc/instant.xml
+else
+#    cp ../../ardour_system.rc $Etc/ardour_system.rc
+#    echo FOO cp ../../ardour_system.rc $Etc/ardour_system.rc
+    cp ../../instant.xml $Etc/instant.xml
+    echo cp ../../instant.xml $Etc/instant.xml
+fi
+cp ../../gtk2_ardour/ardour2_ui_sae.conf $Etc
+cp ../../gtk2_ardour/ardour2_ui_default.conf $Etc
+cp ../../gtk2_ardour/ardour2_ui_default.conf $Etc/ardour2_ui.conf
+cp ../../gtk2_ardour/ardour2_ui_light.rc $Etc
+cp ../../gtk2_ardour/ardour2_ui_dark.rc $Etc
+cp ../../gtk2_ardour/ardour2_ui_light_sae.rc $Etc
+cp ../../gtk2_ardour/ardour2_ui_dark_sae.rc $Etc
+
+cp -r ../../gtk2_ardour/icons $Etc
+cp -r ../../gtk2_ardour/pixmaps $Etc
+
+#
+# put sooper sekrit ingredients here and they will be copied
+#
+
+if [ -d specialSauce ] ; then
+    cp -r specialSauce $Etc
+fi
+
+# share stuff
+
+cp -R ../../gtk2_ardour/splash.png $Shared
+cp ../../templates/*.template $Shared/templates/
+
+# go through and recursively remove any .svn dirs in the bundle
+for svndir in `find $APPDIR -name .svn -type d`; do
+    rm -rf $svndir
+done
+
+#
+# and now ... the DMG
+# 
+
+rm -rf $PRODUCT_PKG_DIR
+mkdir $PRODUCT_PKG_DIR
+
+if [ x$SAE != x ] ; then
+	
+    # SAE packaging
+    
+    echo "Creating SAE packaging directory"
+    mv $APPDIR $PRODUCT_PKG_DIR/Ardour2-SAE.app
+    cp HowToInstallArdourSAE.pdf "$PRODUCT_PKG_DIR/How To Install Ardour SAE.pdf"
+    cp SAE-de-keypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts (keypad).pdf"
+    cp SAE-de-nokeypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts.pdf"
+    
+elif [ x$MIXBUS != x ] ; then
+
+     # Mixbus packaging
+
+    echo "Creating Mixbus packaging directory"
+    mv $APPDIR $PRODUCT_PKG_DIR/
+    cp MixBus_Install_QuickStart.pdf "$PRODUCT_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
+    
+    if [ -x $EXTERNAL_JACK != x ] ; then
+	cp $EXTERNAL_JACK $PRODUCT_PKG_DIR
+    fi
+    
+	# create dmg
+else 
+
+    echo "Creating $APPNAME packaging directory"
+    mv $APPDIR $PRODUCT_PKG_DIR/
+
+fi
+
+echo "Building DMG ..."
+
+# UC_DMG=$APPNAME-${release_version}-${svn_version}-UC.dmg
+# FINAL_DMG=$APPNAME-${release_version}-${svn_version}.dmg
+UC_DMG=$APPNAME-${release_version}-${svn_version}.dmg
+
+#rm -f $UC_DMG
+#echo hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
+#hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
+
+# compress it
+# echo "Compressing DMG ..."
+# rm -f $FINAL_DMG
+# hdiutil convert $UC_DMG -format UDBZ -o $FINAL_DMG
+
+echo "Done."
+
