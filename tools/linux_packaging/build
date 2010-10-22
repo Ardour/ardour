@@ -25,7 +25,6 @@ while [ $# -gt 0 ] ; do
 	       INTERNAL_JACK=1; 
 	       WITH_LADSPA=1; 
                STRIP= ; 
-	       PRODUCT_PKG_DIR=ArdourSAE.pkg ; 
 	       APPNAME=Ardour ;
 	       shift ;;
 	--mixbus) MIXBUS=1; 
@@ -34,7 +33,6 @@ while [ $# -gt 0 ] ; do
                   INTERNAL_JACK=; 
                   WITH_LADSPA=; 
                   STRIP= ; 
-		  PRODUCT_PKG_DIR=MixBus.pkg;
 		  APPNAME=Mixbus ;
                   shift ;;
 	--public) WITH_NLS=1 ; 
@@ -42,7 +40,6 @@ while [ $# -gt 0 ] ; do
 		  INTERNAL_JACK=; 
                   WITH_LADSPA=1; 
                   STRIP= ; 
-		  PRODUCT_PKG_DIR=Ardour.pkg;
 		  APPNAME=Ardour ;
 		  shift ;;
 	--allinone) SAE= ; 
@@ -50,7 +47,6 @@ while [ $# -gt 0 ] ; do
 		    INTERNAL_JACK=1; 
 		    WITH_LADSPA=1; 
 		    STRIP= ; 
-		    PRODUCT_PKG_DIR=Ardour.pkg ;
 		    shift ;;
 	--test) SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
 
@@ -162,7 +158,7 @@ echo export 'PATH=/usr/local/bin:/opt/bin:$PATH' >> $ENVIRONMENT
 # create startup helper script
 
 sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' < ardour.sh.in > $APPBIN/ardour2
-chmod 775 $APPBIN/ardour2
+rm $ENVIRONMENT && chmod 775 $APPBIN/ardour2
 MAIN_EXECUTABLE=ardour-$release_version
 
 echo "Copying ardour executable ...."
@@ -369,53 +365,33 @@ done
 # and now ... the DMG
 # 
 
-rm -rf $PRODUCT_PKG_DIR
-mkdir $PRODUCT_PKG_DIR
-
 if [ x$SAE != x ] ; then
 	
     # SAE packaging
     
     echo "Creating SAE packaging directory"
-    mv $APPDIR $PRODUCT_PKG_DIR/Ardour2-SAE.app
-    cp HowToInstallArdourSAE.pdf "$PRODUCT_PKG_DIR/How To Install Ardour SAE.pdf"
-    cp SAE-de-keypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts (keypad).pdf"
-    cp SAE-de-nokeypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts.pdf"
+    cp HowToInstallArdourSAE.pdf "$APPDIR/How To Install Ardour SAE.pdf"
+    cp SAE-de-keypad.pdf "$APPDIR/Ardour SAE Shortcuts (keypad).pdf"
+    cp SAE-de-nokeypad.pdf "$APPDIR/Ardour SAE Shortcuts.pdf"
     
 elif [ x$MIXBUS != x ] ; then
 
      # Mixbus packaging
 
     echo "Creating Mixbus packaging directory"
-    mv $APPDIR $PRODUCT_PKG_DIR/
-    cp MixBus_Install_QuickStart.pdf "$PRODUCT_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
+    cp MixBus_Install_QuickStart.pdf "$APPDIR/Mixbus Install & Quick Start Guide.pdf"
     
     if [ -x $EXTERNAL_JACK != x ] ; then
 	cp $EXTERNAL_JACK $PRODUCT_PKG_DIR
     fi
     
 	# create dmg
-else 
-
-    echo "Creating $APPNAME packaging directory"
-    mv $APPDIR $PRODUCT_PKG_DIR/
-
 fi
 
-echo "Building DMG ..."
+echo "Building tarball ..."
 
-# UC_DMG=$APPNAME-${release_version}-${svn_version}-UC.dmg
-# FINAL_DMG=$APPNAME-${release_version}-${svn_version}.dmg
-UC_DMG=$APPNAME-${release_version}-${svn_version}.dmg
-
-#rm -f $UC_DMG
-#echo hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
-#hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
-
-# compress it
-# echo "Compressing DMG ..."
-# rm -f $FINAL_DMG
-# hdiutil convert $UC_DMG -format UDBZ -o $FINAL_DMG
+rm -f $APPNAME-$release_version.tar.bz2
+tar -jcf $APPNAME-$release_version.tar.bz2 $APPDIR
 
 echo "Done."
 

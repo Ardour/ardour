@@ -271,8 +271,7 @@ fixup_bundle_environment (int argc, char* argv[])
 	}
 	
 	Glib::ustring exec_path = argv[0];
-        cerr << "!! EXEC OF " << exec_path << endl;
-	Glib::ustring dir_path = Glib::path_get_dirname (exec_path);
+	Glib::ustring dir_path = Glib::path_get_dirname (Glib::path_get_dirname (exec_path));
 	Glib::ustring path;
 	const char *cstr = getenv ("PATH");
 
@@ -281,34 +280,36 @@ fixup_bundle_environment (int argc, char* argv[])
 	   elsewhere in PATH
 	*/
 
-	path = dir_path;
+        /* note that this function is POSIX/Linux specific, so using / as 
+           a dir separator in this context is just fine.
+        */
 
 	path = dir_path;
-	path += "/../etc:";
+	path += "/etc:";
 	path += dir_path;
-	path += "/../lib/surfaces:";
+	path += "/lib/surfaces:";
 	path += dir_path;
-	path += "/../lib/panners:";
+	path += "/lib/panners:";
 
 	setenv ("ARDOUR_MODULE_PATH", path.c_str(), 1);
 
         path = get_user_ardour_path ();
         path += ':';
 	path += dir_path;
-	path += "/../etc/icons:";
+	path += "/etc/icons:";
 	path += dir_path;
-	path += "/../etc/pixmaps:";
+	path += "/etc/pixmaps:";
 	path += dir_path;
-	path += "/../share:";
+	path += "/share:";
 	path += dir_path;
-	path += "/../etc";
+	path += "/etc";
 
 	setenv ("ARDOUR_PATH", path.c_str(), 1);
 	setenv ("ARDOUR_CONFIG_PATH", path.c_str(), 1);
 	setenv ("ARDOUR_DATA_PATH", path.c_str(), 1);
 
 	path = dir_path;
-	path += "/../etc";
+	path += "/etc";
 	setenv ("ARDOUR_INSTANT_XML_PATH", path.c_str(), 1);
 
 	cstr = getenv ("LADSPA_PATH");
@@ -319,7 +320,7 @@ fixup_bundle_environment (int argc, char* argv[])
 		path = "";
 	}
 	path += dir_path;
-	path += "/../lib/plugins";
+	path += "/lib/plugins";
 	
 	setenv ("LADSPA_PATH", path.c_str(), 1);
 
@@ -331,7 +332,7 @@ fixup_bundle_environment (int argc, char* argv[])
 		path = "";
 	}
 	path += dir_path;
-	path += "/../lib";
+	path += "/lib";
 	
 	setenv ("VAMP_PATH", path.c_str(), 1);
 
@@ -343,7 +344,7 @@ fixup_bundle_environment (int argc, char* argv[])
 		path = "";
 	}
 	path += dir_path;
-	path += "/../lib/surfaces";
+	path += "/lib/surfaces";
 	
 	setenv ("ARDOUR_CONTROL_SURFACE_PATH", path.c_str(), 1);
 
@@ -355,19 +356,19 @@ fixup_bundle_environment (int argc, char* argv[])
 		path = "";
 	}
 	path += dir_path;
-	path += "/../lib/plugins";
+	path += "/lib/plugins";
 	
 	setenv ("LV2_PATH", path.c_str(), 1);
 
 	path = dir_path;
-	path += "/../lib/clearlooks";
+	path += "/lib/clearlooks";
 
 	setenv ("GTK_PATH", path.c_str(), 1);
 
 	if (!ARDOUR::translations_are_disabled ()) {
 
 		path = dir_path;
-		path += "/../shared/locale";
+		path += "/shared/locale";
 		
 		localedir = strdup (path.c_str());
 		setenv ("GTK_LOCALEDIR", localedir, 1);

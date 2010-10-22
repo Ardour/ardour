@@ -711,10 +711,13 @@ Crossfade::set_state (const XMLNode& node)
 	nframes_t val;
 
 	if ((prop = node.property ("position")) != 0) {
-		sscanf (prop->value().c_str(), "%" PRIu32, &val);
-		if (val != _position) {
-			_position = val;
-			what_changed = Change (what_changed | PositionChanged);
+		if (sscanf (prop->value().c_str(), "%" PRIu32, &val) == 1) {
+			if (val != _position) {
+				_position = val;
+				what_changed = Change (what_changed | PositionChanged);
+			}
+		} else {
+			warning << _("can't read value from crossfade position property") << endmsg;
 		}
 	} else {
 		warning << _("old-style crossfade information - no position information") << endmsg;
@@ -751,12 +754,14 @@ Crossfade::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("length")) != 0) {
 
-		sscanf (prop->value().c_str(), "%" PRIu32, &val);
-		if (val != _length) {
-			_length = atol (prop->value().c_str());
-			what_changed = Change (what_changed | LengthChanged);
+		if (sscanf (prop->value().c_str(), "%" PRIu32, &val) == 1) {
+			if (val != _length) {
+				_length = atol (prop->value().c_str());
+				what_changed = Change (what_changed | LengthChanged);
+			}
+		} else {
+			warning << _("can't read value from crossfade length property") << endmsg;		
 		}
-
 	} else {
 		
 		/* XXX this branch is legacy code from before
