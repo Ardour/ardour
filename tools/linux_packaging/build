@@ -362,7 +362,7 @@ for svndir in `find $APPDIR -name .svn -type d`; do
 done
 
 #
-# and now ... the DMG
+# and now ... the final package
 # 
 
 if [ x$SAE != x ] ; then
@@ -384,8 +384,6 @@ elif [ x$MIXBUS != x ] ; then
     if [ -x $EXTERNAL_JACK != x ] ; then
 	cp $EXTERNAL_JACK $PRODUCT_PKG_DIR
     fi
-    
-	# create dmg
 fi
 
 echo "Building tarball ..."
