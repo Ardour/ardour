@@ -1,8 +1,11 @@
 #!/bin/bash
 
+#
+
+. ./buildenv
+
 # script for pulling together a Linux app bundle.
 
-GTKROOT=
 SAE=
 MIXBUS=
 INTERNAL_JACK=1
@@ -38,7 +41,7 @@ while [ $# -gt 0 ] ; do
 	--public) WITH_NLS=1 ; 
 	          SAE= ; 
 		  INTERNAL_JACK=; 
-                  WITH_LADSPA=1; 
+                  WITH_LADSPA=; 
                   STRIP= ; 
 		  APPNAME=Ardour ;
 		  shift ;;
@@ -86,6 +89,7 @@ Surfaces=$APPLIB/surfaces
 Panners=$APPLIB/panners
 Locale=$Shared/locale
 Modules=$Libraries/modules
+Loaders=$Libraries/loaders
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -115,6 +119,7 @@ mkdir -p $APPLIB
 mkdir -p $Etc
 mkdir -p $Plugins
 mkdir -p $Modules
+mkdir -p $Loaders
 mkdir -p $Shared
 mkdir -p $Locale
 mkdir -p $Surfaces
@@ -186,7 +191,7 @@ if test x$WITH_NLS != x ; then
 	cp $file $Locale/$lang/LC_MESSAGES/libardour.mo
     done
 
-    GTK_MESSAGES="gtk20-properties.mo gtk20.mo atk10.mo glib20.mo"
+    GTK_MESSAGES="atk10.mo gdk-pixbuf.mo gtk20-properties.mo gtk20.mo atk10.mo glib20.mo"
     LOCALEROOT=/usr/share/locale
 
     for l in $LINGUAS ; do
@@ -207,21 +212,20 @@ else
     echo "Skipping NLS support"
 fi
 
-if [ -d /usr/lib64 ] ; then
-    SYSLIB=/usr/lib64
-else 
-    SYSLIB=/usr/lib
-fi
+GTKROOT=`pkg-config --libs-only-L gtk+-2.0 | sed s/-L//`
+GTKROOT=`dirname $GTKROOT`
+echo GTK stack root is $GTKROOT
 
-GTKETC=/etc/gtk-2.0
-GTKLIB=$SYSLIB/gtk-2.0/2.10.0/
-PANGO=$SYSLIB/pango/1.6.0/
+GTKETC=${GTKROOT}/etc/gtk-2.0
+GTKLIB=${GTKROOT}/lib/gtk-2.0/2.10.0
+PANGOLIB=${GTKROOT}/lib/pango/1.6.0
+GDKPIXBUFLIB=${GTKROOT}/lib/gdk-pixbuf-2.0/2.10.0
 
 cp -R $GTKETC/* $Etc
 echo "Copying all Pango modules ..."
-cp -R $PANGO/modules/*.so $Modules
+cp -R $PANGOLIB/modules/*.so $Modules
 echo "Copying all GDK Pixbuf loaders ..."
-cp -R $GTKLIB/loaders/*.so $Modules
+cp -R $GDKPIXBUFLIB/loaders/*.so $Loaders
 
 pwd=`pwd`
 
@@ -239,17 +243,12 @@ if test x$WITH_LADSPA != x ; then
     fi
 fi
 
-if [ -x `which pango-querymodules-64` ] ; then
-    pango-querymodules-64 | sed "s?$SYSLIB/pango/[0-9][0-9]*\.[0-9][0-9]*.[0-9][0-9]*/?@ROOTDIR@/?" > $Etc/pango.modules.in
-    gdk-pixbuf-query-loaders-64 | sed "s?$SYSLIB/gtk-2.0/[0-9][0-9]*\.[0-9][0-9]*.[0-9][0-9]*/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
-else
-    pango-querymodules | sed "s?$SYSLIB/pango/[0-9][0-9]*\.[0-9][0-9]*.[0-9][0-9]*/?@ROOTDIR@/?" > $Etc/pango.modules.in
-    gdk-pixbuf-query-loaders | sed "s?$SYSLIB/gtk-2.0/[0-9][0-9]*\.[0-9][0-9]*.[0-9][0-9]*/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
-fi
+pango-querymodules | sed "s?$GTKROOT/lib/pango/[0-9][0-9]*\.[0-9][0-9]*.[0-9][0-9]*/?@ROOTDIR@/?" > $Etc/pango.modules.in
+gdk-pixbuf-query-loaders | sed "s?$GTKROOT/lib/gdk-pixbuf-2.0/[0-9][0-9]*\.[0-9][0-9]*.[0-9][0-9]*/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
 
 # We sort of rely on clearlooks, so include a version
 # this one is special - we will set GTK_PATH to $Libraries/clearlooks
-cp $GTKLIB/engines/libclearlooks.so $Libraries
+cp /usr/lib64/gtk-2.0/2.10.0/engines/libclearlooks.so $Libraries
 mkdir -p $Libraries/clearlooks/engines
 (cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks.so* )
 
@@ -271,8 +270,8 @@ while [ true ] ; do
 	    continue
 	fi
         # do not include libjack
-	deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}S ldd $file | awk '{print $3}' | egrep "($GTKROOT|/opt/|/local/|libs/|/usr/lib)" | grep -v 'libjack\.'`
-	# LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}S ldd $file | egrep "($GTKROOT|/opt/|/local/|libs/|/usr/lib)" | grep -v 'libjack\.'
+	deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | awk '{print $3}' | egrep "(/opt/|/local/|libs/|/usr/lib|/gtk)" | grep -v 'libjack\.'`
+	# LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | egrep "(/opt/|/local/|libs/|/usr/lib|/gtk)" | grep -v 'libjack\.'
 	echo -n "."
 	for dep in $deps ; do
             if [ "x$dep" = "xnot" ] ; then 
@@ -290,10 +289,10 @@ while [ true ] ; do
 	    base=`basename $dep`
 	    if ! test -f $Libraries/$base; then
 		if echo $dep | grep -sq '^libs' ; then
-                    echo Copying ../../$dep
+                    # echo Copying ../../$dep
 		    cp ../../$dep $Libraries
 		else
-                    echo Copying $dep
+                    # echo Copying $dep
 		    cp $dep $Libraries
 		fi
 		missing=true
@@ -386,10 +385,10 @@ elif [ x$MIXBUS != x ] ; then
     fi
 fi
 
-echo "Building tarball ..."
+#echo "Building tarball ..."
 
-rm -f $APPNAME-$release_version.tar.bz2
-tar -jcf $APPNAME-$release_version.tar.bz2 $APPDIR
+#rm -f $APPNAME-$release_version.tar.bz2
+#tar -jcf $APPNAME-$release_version.tar.bz2 $APPDIR
 
 echo "Done."
 

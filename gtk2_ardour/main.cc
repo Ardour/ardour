@@ -366,13 +366,12 @@ fixup_bundle_environment (int argc, char* argv[])
 	setenv ("GTK_PATH", path.c_str(), 1);
 
 	if (!ARDOUR::translations_are_disabled ()) {
-
-		path = dir_path;
-		path += "/shared/locale";
-		
-		localedir = strdup (path.c_str());
-		setenv ("GTK_LOCALEDIR", localedir, 1);
-	}
+                path = dir_path;
+                path += "/share/locale";
+                
+                localedir = strdup (path.c_str());
+                setenv ("GTK_LOCALEDIR", localedir, 1);
+        }
 
 	/* write a pango.rc file and tell pango to use it. we'd love
 	   to put this into the Ardour.app bundle and leave it there,

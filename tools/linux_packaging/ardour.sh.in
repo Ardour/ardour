@@ -26,7 +26,7 @@ export LD_LIBRARY_PATH=$INSTALL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 # We have to do this every time because its possible that BIN_DIR has changed
 
 sed "s?@ROOTDIR@/modules?$LIB_DIR/modules?" < $ETC_DIR/pango.modules.in > $USER_ARDOUR_DIR/pango.modules
-sed "s?@ROOTDIR@/loaders?$LIB_DIR/modules?" < $ETC_DIR/gdk-pixbuf.loaders.in > $USER_ARDOUR_DIR/gdk-pixbuf.loaders
+sed "s?@ROOTDIR@/loaders?$LIB_DIR/loaders?" < $ETC_DIR/gdk-pixbuf.loaders.in > $USER_ARDOUR_DIR/gdk-pixbuf.loaders
 
 exec $INSTALL_DIR/bin/ardour-2.8.11 "$@"
 
