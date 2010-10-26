@@ -735,8 +735,6 @@ Editor::Editor ()
 
 	TimeAxisView::CatchDeletion.connect (*this, invalidator (*this), ui_bind (&Editor::timeaxisview_deleted, this, _1), gui_context());
 
-	_last_normalization_value = 0;
-
 	constructed = true;
 	instant_save ();
 

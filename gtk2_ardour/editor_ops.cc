@@ -81,6 +81,7 @@
 #include "quantize_dialog.h"
 #include "interthread_progress_window.h"
 #include "insert_time_dialog.h"
+#include "normalize_dialog.h"
 
 #include "i18n.h"
 
@@ -4497,37 +4498,7 @@ Editor::normalize_region ()
 		return;
 	}
 
-	Dialog dialog (rs.size() > 1 ? _("Normalize regions") : _("Normalize region"));
-
-	VBox vbox;
-	vbox.set_spacing (6);
-	vbox.set_border_width (6);
-	
-	HBox hbox;
-	hbox.set_spacing (6);
-	hbox.set_border_width (6);
-	hbox.pack_start (*manage (new Label (_("Normalize to:"))));
-	SpinButton spin (0.2, 2);
-	spin.set_range (-112, 0);
-	spin.set_increments (0.1, 1);
-	spin.set_value (0);
-	hbox.pack_start (spin);
-	spin.set_value (_last_normalization_value);
-	hbox.pack_start (*manage (new Label (_("dbFS"))));
-	vbox.pack_start (hbox);
-
-	CheckButton* normalize_across_all = manage (new CheckButton (_("Normalize across all selected regions")));
-	vbox.pack_start (*normalize_across_all);
-	if (rs.size() <= 1) {
-		normalize_across_all->set_sensitive (false);
-	}
-
-	vbox.show_all ();
-	
-	dialog.get_vbox()->set_spacing (12);
-	dialog.get_vbox()->pack_start (vbox);
-	dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	dialog.add_button (_("Normalize"), RESPONSE_ACCEPT);
+	NormalizeDialog dialog (rs.size() > 1);
 
 	if (dialog.run () == RESPONSE_CANCEL) {
 		return;
@@ -4538,14 +4509,23 @@ Editor::normalize_region ()
 	set_canvas_cursor (wait_cursor);
 	gdk_flush ();
 
+	int tasks = rs.size ();
+	if (!dialog.normalize_individually()) {
+		tasks *= 2;
+	}
+
+	int n = 0;
+
 	double maxamp = 0;
-	if (normalize_across_all->get_active ()) {
+	if (!dialog.normalize_individually()) {
 		for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
 			AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (*r);
 			if (!arv) {
 				continue;
 			}
 			maxamp = max (maxamp, arv->audio_region()->maximum_amplitude ());
+			dialog.set_progress (double (n) / tasks);
+			++n;
 		}
 	}
 	
@@ -4556,16 +4536,17 @@ Editor::normalize_region ()
 		}
 		arv->region()->clear_changes ();
 
-		double const amp = normalize_across_all->get_active() ? maxamp : arv->audio_region()->maximum_amplitude ();
+		double const amp = dialog.normalize_individually () ? arv->audio_region()->maximum_amplitude () : maxamp;
 		
-		arv->audio_region()->normalize (amp, spin.get_value ());
+		arv->audio_region()->normalize (amp, dialog.target ());
 		_session->add_command (new StatefulDiffCommand (arv->region()));
+
+		dialog.set_progress (double (n) / tasks);
+		++n;
 	}
 
 	commit_reversible_command ();
 	set_canvas_cursor (current_canvas_cursor);
-
-	_last_normalization_value = spin.get_value ();
 }
 
 
