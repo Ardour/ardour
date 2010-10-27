@@ -157,6 +157,9 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	}
 
 	_sources.set_headers_visible (false);
+	Gtk::CellRendererText* t = dynamic_cast<Gtk::CellRendererText*> (_sources.get_column_cell_renderer(0));
+	assert (t);
+	t->property_ellipsize() = Pango::ELLIPSIZE_END;
 
 	show_all();
 
