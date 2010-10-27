@@ -173,6 +173,8 @@ Port::clock (timestamp_t timestamp)
 void
 Port::cycle_start (nframes_t nframes)
 {
+	assert (_jack_port);
+	
 	_currently_in_cycle = true;
 	_nframes_this_cycle = nframes;
 
