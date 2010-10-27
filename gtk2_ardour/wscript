@@ -286,7 +286,7 @@ def build(bld):
 	obj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
 	obj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
 			os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
-        obj.cxxflags     += ['-DPROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"']
+	obj.cxxflags     += ['-DPROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"']
 
 	if bld.env['HAVE_SLV2']:
 		obj.source += [ 'lv2_plugin_ui.cc' ]
@@ -299,8 +299,8 @@ def build(bld):
 		obj.source += [ 'vst_pluginui.cc' ]
 		obj.cxxflags += [ '-DVST_SUPPORT' ]
 
-        if bld.env['PHONE_HOME']:
-                obj.cxxflags += [ '-DPHONE_HOME' ]
+	if bld.env['PHONE_HOME']:
+		obj.cxxflags += [ '-DPHONE_HOME' ]
 
 	if bld.env['GTKOSX']:
 		TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
@@ -344,13 +344,13 @@ def build(bld):
 	obj              = bld.new_task_gen('subst')
 	obj.source       = 'ardev_common.sh.in'
 	obj.target       = 'ardev_common_waf.sh'
-	obj.chmod        = 0755
+	obj.chmod        = 0o755
 	obj.dict         = wrapper_subst_dict
 
 	obj              = bld.new_task_gen('subst')
 	obj.source       = 'ardour.sh.in'
 	obj.target       = 'ardour3'
-	obj.chmod        = 0755
+	obj.chmod        = 0o755
 	obj.dict         = wrapper_subst_dict
 	obj.install_path = bld.env['BINDIR']
 
@@ -392,7 +392,7 @@ def build(bld):
 
  	# Set up font substitution dictionary
 	for style in ['', 'BOLD', 'ITALIC']:
-		for sizename,points in font_sizes.iteritems():
+		for sizename,points in iter(font_sizes.items()):
 			if (len (style)):
 				key = "_".join (['FONT',style,sizename])
 				fontstyle = " ".join ([basefont,style.lower(),points])

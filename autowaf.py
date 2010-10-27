@@ -212,7 +212,7 @@ def configure(conf):
 	display_msg(conf, "Debuggable build", str(conf.env['DEBUG']))
 	display_msg(conf, "Strict compiler flags", str(conf.env['STRICT']))
 	display_msg(conf, "Build documentation", str(conf.env['DOCS']))
-	print
+	print()
 
 	g_step = 2
 	
@@ -340,11 +340,11 @@ def build_version_files(header_path, source_path, domain, major, minor, micro):
 	text += "int " + domain + "_minor_version = " + str(minor) + ";\n"
 	text += "int " + domain + "_micro_version = " + str(micro) + ";\n"
 	try:
-		o = file(source_path, 'w')
+		o = open(source_path, 'w')
 		o.write(text)
 		o.close()
 	except IOError:
-		print "Could not open", source_path, " for writing\n"
+		print("Could not open %s for writing\n", source_path)
 		sys.exit(-1)
 
 	text  = "#ifndef __" + domain + "_version_h__\n"
@@ -355,11 +355,11 @@ def build_version_files(header_path, source_path, domain, major, minor, micro):
 	text += "extern int " + domain + "_micro_version;\n"
 	text += "#endif /* __" + domain + "_version_h__ */\n"
 	try:
-		o = file(header_path, 'w')
+		o = open(header_path, 'w')
 		o.write(text)
 		o.close()
 	except IOError:
-		print "Could not open", header_path, " for writing\n"
+		print("Could not open %s for writing\n", header_path)
 		sys.exit(-1)
 		
 	return None
@@ -384,12 +384,12 @@ def run_tests(ctx, appname, tests):
 				stdout=lcov_log, stderr=lcov_log)
 	except:
 		lcov = False
-		print "Failed to run lcov, no coverage report will be generated"
+		print("Failed to run lcov, no coverage report will be generated")
 
 
 	# Run all tests
 	for i in tests:
-		print
+		print()
 		Utils.pprint('BOLD', 'Running %s test %s' % (appname, i))
 		if subprocess.call(i) == 0:
 			Utils.pprint('GREEN', 'Passed %s %s' % (appname, i))
@@ -418,7 +418,7 @@ def run_tests(ctx, appname, tests):
 	
 	lcov_log.close()
 
-	print
+	print()
 	Utils.pprint('BOLD', 'Summary:', sep=''),
 	if failures == 0:
 		Utils.pprint('GREEN', 'All ' + appname + ' tests passed')
@@ -426,7 +426,7 @@ def run_tests(ctx, appname, tests):
 		Utils.pprint('RED', str(failures) + ' ' + appname + ' test(s) failed')
 
 	Utils.pprint('BOLD', 'Coverage:', sep='')
-	print os.path.abspath('coverage/index.html')
+	print(os.path.abspath('coverage/index.html'))
 
 	os.chdir(orig_dir)
 

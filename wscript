@@ -2,7 +2,6 @@
 import autowaf
 import Options
 import os
-import commands
 import re
 import string
 import subprocess
@@ -42,18 +41,20 @@ i18n_children = [
 
 def fetch_svn_revision (path):
 	cmd = "LANG= svn info " + path + " | awk '/^Revision:/ { print $2}'"
-	return commands.getoutput(cmd)
+	return subprocess.Popen(cmd, shell=True, stderr=sub.STDOUT, stdout=sub.PIPE).communicate()[0]
 
 def fetch_gcc_version ():
 	cmd = "LANG= gcc --version"
-	output = commands.getoutput(cmd).splitlines()
-        version = output[0].split(' ')[2].split('.')
+	output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
+	o = output[0].decode('utf-8')
+	version = o.split(' ')[2].split('.')
 	return version
 
 def fetch_git_revision (path):
 	cmd = "LANG= git log --abbrev HEAD^..HEAD " + path
-	output = commands.getoutput(cmd).splitlines()
-	rev = output[0].replace ("commit", "git")[0:10]
+	output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
+	o = output[0].decode('utf-8')
+	rev = o.replace ("commit", "git")[0:10]
 	for line in output:
 		try:
 			if "git-svn-id" in line:
@@ -79,23 +80,23 @@ def create_stored_revision():
 		rev = fetch_git_revision('.');
 	elif os.path.exists('.bzr'):
 		rev = fetch_bzr_revision('.');
-		print "Revision: " + rev;
+		print("Revision: %s", rev)
 	elif os.path.exists('libs/ardour/svn_revision.cc'):
-		print "Using packaged svn revision"
+		print("Using packaged svn revision")
 		return
 	else:
-		print "Missing libs/ardour/svn_revision.cc.  Blame the packager."
+		print("Missing libs/ardour/svn_revision.cc.  Blame the packager.")
 		sys.exit(-1)
 
 	try:
 		text =  '#include "ardour/svn_revision.h"\n'
 		text += 'namespace ARDOUR { const char* svn_revision = \"' + rev + '\"; }\n'
-		print 'Writing svn revision info to libs/ardour/svn_revision.cc'
-		o = file('libs/ardour/svn_revision.cc', 'w')
+		print('Writing svn revision info to libs/ardour/svn_revision.cc')
+		o = open('libs/ardour/svn_revision.cc', 'w')
 		o.write(text)
 		o.close()
 	except IOError:
-		print 'Could not open libs/ardour/svn_revision.cc for writing\n'
+		print('Could not open libs/ardour/svn_revision.cc for writing\n')
 		sys.exit(-1)
 
 def set_compiler_flags (conf,opt):
@@ -216,7 +217,7 @@ def set_compiler_flags (conf,opt):
 			optimization_flags.append ("-DUSE_X86_64_ASM")
 			debug_flags.append ("-DUSE_X86_64_ASM")
 		if not build_host_supports_sse:
-			print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
+			print("\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)")
 	
 	# check this even if we aren't using FPU optimization
 	if not conf.env['HAVE_POSIX_MEMALIGN']:
@@ -229,10 +230,10 @@ def set_compiler_flags (conf,opt):
 	#
 	    
 	if conf.env['build_target'] == 'x86_64' and opt.vst:
-		print "\n\n=================================================="
-		print "You cannot use VST plugins with a 64 bit host. Please run waf with --vst=0"
-		print "\nIt is theoretically possible to build a 32 bit host on a 64 bit system."
-		print "However, this is tricky and not recommended for beginners."
+		print("\n\n==================================================")
+		print("You cannot use VST plugins with a 64 bit host. Please run waf with --vst=0")
+		print("\nIt is theoretically possible to build a 32 bit host on a 64 bit system.")
+		print("However, this is tricky and not recommended for beginners.")
 		sys.exit (-1)
 
 	#
@@ -383,16 +384,16 @@ def sub_config_and_use(conf, name, has_objects = True):
 
 def configure(conf):
 	create_stored_revision()
-        conf.env['VERSION'] = VERSION
+	conf.env['VERSION'] = VERSION
 	conf.line_just = 52
 	autowaf.set_recursive()
 	autowaf.configure(conf)
 	autowaf.display_header('Ardour Configuration')
 
 	gcc_versions = fetch_gcc_version()
-        if not Options.options.debug and gcc_versions[0] == '4' and gcc_versions[1] > '4':
-                print 'Version 4.5 of gcc is not ready for use when compiling Ardour with optimization.'
-                print 'Please use a different version or re-configure with --debug'
+	if not Options.options.debug and gcc_versions[0] == '4' and gcc_versions[1] > '4':
+                print('Version 4.5 of gcc is not ready for use when compiling Ardour with optimization.')
+                print('Please use a different version or re-configure with --debug')
                 exit (1)
 
 	if sys.platform == 'darwin':
@@ -519,7 +520,7 @@ def configure(conf):
         # debug builds should not call home
 
 	opts = Options.options
-        if opts.debug:
+	if opts.debug:
                 opts.phone_home = False;
 
 	autowaf.display_msg(conf, 'Build Target', conf.env['build_target'])
@@ -570,14 +571,14 @@ def configure(conf):
 		conf.define('WIIMOTE',1)
 	conf.define('WINDOWS_KEY', opts.windows_key)
 	autowaf.display_msg(conf, 'Windows Key', opts.windows_key)
-        conf.env['PROGRAM_NAME'] = opts.program_name
-        autowaf.display_msg(conf, 'Program Name', opts.program_name)
+	conf.env['PROGRAM_NAME'] = opts.program_name
+	autowaf.display_msg(conf, 'Program Name', opts.program_name)
 
 	set_compiler_flags (conf, Options.options)
 
 	autowaf.display_msg(conf, 'C Compiler flags', conf.env['CCFLAGS'])
 	autowaf.display_msg(conf, 'C++ Compiler flags', conf.env['CXXFLAGS'])
-	print
+	print()
 
 	# and dump the same stuff to a file for use in the build
 

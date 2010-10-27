@@ -91,7 +91,7 @@ def build(bld):
 				os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '"']
 	if bld.env['GTKOSX']:
 		obj.source += ['gtkapplication_quartz.mm']
-        else:
+	else:
                 obj.source += ['gtkapplication_x11.c']
 
 def shutdown():

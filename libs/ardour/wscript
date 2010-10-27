@@ -208,14 +208,14 @@ def flac_supported():
 	cmd = subprocess.Popen ("sndfile-info testfile.flac", 
 				stdout = subprocess.PIPE,
 				stderr = subprocess.STDOUT, shell = True)
-	out = cmd.communicate()[0];
+	out = cmd.communicate()[0].decode('utf-8');
 	return re.search ('unknown format', out) == None
 
 def ogg_supported():
 	cmd = subprocess.Popen ("sndfile-info testfile.ogg", 
 				stdout = subprocess.PIPE,
 				stderr = subprocess.STDOUT, shell = True)
-	out = cmd.communicate()[0];
+	out = cmd.communicate()[0].decode('utf-8');
 	return re.search ('unknown format', out) == None
 
 def set_options(opt):
@@ -293,7 +293,7 @@ def build(bld):
 			os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
 	obj.cxxflags     += ['-DVAMP_DIR="' + os.path.join(
 			os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"']
-        obj.cxxflags     += ['-DPROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"']
+	obj.cxxflags     += ['-DPROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"']
 
 	#obj.source += ' st_stretch.cc st_pitch.cc '
 	#obj.uselib += ' SOUNDTOUCH '

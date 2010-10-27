@@ -51,11 +51,11 @@ def configure(conf):
 	if Options.options.wiimote:
 		conf.check_cc (header_name='cwiid.h',define_name='HAVE_CWIID_H')
 		if not conf.env['HAVE_CWIID_H']:
-			print 'WIIMOTE configured but you are missing libcwiid!'
+			print('WIIMOTE configured but you are missing libcwiid!')
 			sys.exit(1)
 		conf.check_cc (header_name='bluetooth/bluetooth.h',define_name='HAVE_BLUETOOTH_H')
 		if not conf.env['HAVE_BLUETOOTH_H']:
-			print 'WIIMOTE configured but you are missing the libbluetooth headers needed to compile wiimote support!'
+			print('WIIMOTE configured but you are missing the libbluetooth headers needed to compile wiimote support!')
 			sys.exit(1)
 		conf.define ('BUILD_WIIMOTE', 1)
 
