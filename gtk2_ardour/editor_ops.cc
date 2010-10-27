@@ -4509,51 +4509,41 @@ Editor::normalize_region ()
 	set_canvas_cursor (wait_cursor);
 	gdk_flush ();
 
-	/* XXX: this should really count only audio regions */
+	/* XXX: should really only count audio regions here */
+	int const regions = rs.size ();
 
-	int tasks = rs.size ();
-	if (!dialog.normalize_individually()) {
-		tasks *= 2;
-	}
-
-	int n = 1;
-
-	double maxamp = 0;
-	if (!dialog.normalize_individually()) {
-		for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
-			AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (*r);
-			if (!arv) {
-				continue;
-			}
-
-			dialog.descend (1.0 / tasks);
-			maxamp = max (maxamp, arv->audio_region()->maximum_amplitude (&dialog));
+	/* Make a list of the selected audio regions' maximum amplitudes, and also
+	   obtain the maximum amplitude of them all.
+	*/
+	list<double> max_amps;
+	double max_amp = 0;
+	for (RegionSelection::const_iterator i = rs.begin(); i != rs.end(); ++i) {
+		AudioRegionView const * arv = dynamic_cast<AudioRegionView const *> (*i);
+		if (arv) {
+			dialog.descend (1.0 / regions);
+			double const a = arv->audio_region()->maximum_amplitude (&dialog);
+			max_amps.push_back (a);
+			max_amp = max (max_amp, a);
 			dialog.ascend ();
-			
-			dialog.set_progress (float (n) / tasks);
-			++n;
 		}
 	}
+
+	list<double>::const_iterator a = max_amps.begin ();
 	
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (*r);
 		if (!arv) {
 			continue;
 		}
+
 		arv->region()->clear_changes ();
 
-		double amp = maxamp;
-		if (dialog.normalize_individually()) {
-			dialog.descend (1.0 / tasks);
-			amp = arv->audio_region()->maximum_amplitude (&dialog);
-			dialog.ascend ();
-		}
-
+		double const amp = dialog.normalize_individually() ? *a : max_amp;
+		
 		arv->audio_region()->normalize (amp, dialog.target ());
 		_session->add_command (new StatefulDiffCommand (arv->region()));
 
-		dialog.set_progress (float (n) / tasks);
-		++n;
+		++a;
 	}
 
 	commit_reversible_command ();
