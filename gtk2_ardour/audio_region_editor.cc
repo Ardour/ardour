@@ -57,8 +57,8 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 	gain_label.set_name ("AudioRegionEditorLabel");
 	gain_label.set_text (_("Region gain:"));
 	gain_entry.configure (gain_adjustment, 0.0, 1);
-	_table.attach (gain_label, 0, 1, 7, 8, Gtk::FILL, Gtk::FILL);
-	_table.attach (*gb, 1, 2, 7, 8, Gtk::FILL, Gtk::FILL);
+	_table.attach (gain_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (*gb, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 
 	gain_changed ();
 

@@ -25,7 +25,9 @@
 #include "ardour/playlist.h"
 #include "ardour/utils.h"
 #include "ardour/dB.h"
-#include <gtkmm2ext/utils.h>
+#include "ardour/source.h"
+#include "gtkmm2ext/utils.h"
+#include <gtkmm/listviewtext.h>
 #include <cmath>
 
 #include "region_editor.h"
@@ -43,6 +45,7 @@ using namespace Gtkmm2ext;
 RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	: ArdourDialog (_("Region")),
 	  _table (8, 2),
+	  _table_row (0),
 	  _region (r),
 	  name_label (_("Name:")),
 	  audition_button (_("Play")),
@@ -52,7 +55,8 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	  sync_offset_relative_clock (X_("regionsyncoffsetrelative"), true, X_("RegionEditorClock"), true, false),
 	  sync_offset_absolute_clock (X_("regionsyncoffsetabsolute"), true, X_("RegionEditorClock"), true, false),
 	  /* XXX cannot file start yet */
-	  start_clock (X_("regionstart"), true, X_("RegionEditorClock"), false, false)
+	  start_clock (X_("regionstart"), true, X_("RegionEditorClock"), false, false),
+	  _sources (1)
 {
 	set_session (s);
 	
@@ -83,6 +87,8 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	sync_absolute_label.set_text (_("Sync point (absolute):"));
 	start_label.set_name ("RegionEditorLabel");
 	start_label.set_text (_("File start:"));
+	_sources_label.set_name ("RegionEditorLabel");
+	_sources_label.set_text (_("Sources:"));
 
 	_table.set_col_spacings (12);
 	_table.set_row_spacings (6);
@@ -95,32 +101,44 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	sync_relative_label.set_alignment (1, 0.5);
 	sync_absolute_label.set_alignment (1, 0.5);
 	start_label.set_alignment (1, 0.5);
+	_sources_label.set_alignment (1, 0.5);
 
 	Gtk::HBox* nb = Gtk::manage (new Gtk::HBox);
 	nb->set_spacing (6);
 	nb->pack_start (name_entry);
 	nb->pack_start (audition_button);
 
-	_table.attach (name_label, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (*nb, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (name_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (*nb, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	++_table_row;
 
-	_table.attach (position_label, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
-	_table.attach (position_clock, 1, 2, 1, 2, Gtk::FILL, Gtk::FILL);
+	_table.attach (position_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (position_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	++_table_row;
 
- 	_table.attach (end_label, 0, 1, 2, 3, Gtk::FILL, Gtk::FILL);
-	_table.attach (end_clock, 1, 2, 2, 3, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (end_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (end_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	++_table_row;
 	
- 	_table.attach (length_label, 0, 1, 3, 4, Gtk::FILL, Gtk::FILL);
-	_table.attach (length_clock, 1, 2, 3, 4, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (length_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (length_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	++_table_row;
 	
- 	_table.attach (sync_relative_label, 0, 1, 4, 5, Gtk::FILL, Gtk::FILL);
- 	_table.attach (sync_offset_relative_clock, 1, 2, 4, 5, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (sync_relative_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (sync_offset_relative_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	++_table_row;
  
- 	_table.attach (sync_absolute_label, 0, 1, 5, 6, Gtk::FILL, Gtk::FILL);
- 	_table.attach (sync_offset_absolute_clock, 1, 2, 5, 6, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (sync_absolute_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (sync_offset_absolute_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	++_table_row;
 
- 	_table.attach (start_label, 0, 1, 6, 7, Gtk::FILL, Gtk::FILL);
- 	_table.attach (start_clock, 1, 2, 6, 7, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (start_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (start_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	++_table_row;
+
+	_table.attach (_sources_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (_sources, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	++_table_row;
 
 	get_vbox()->pack_start (_table, true, true);
 
@@ -133,6 +151,12 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	signal_response().connect (sigc::mem_fun (*this, &RegionEditor::handle_response));
 
 	set_title (string_compose (_("Region '%1'"), _region->name()));
+
+	for (uint32_t i = 0; i < _region->n_channels(); ++i) {
+		_sources.append_text (_region->source(i)->name());
+	}
+
+	_sources.set_headers_visible (false);
 
 	show_all();
 

@@ -33,6 +33,7 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/spinbutton.h>
+#include <gtkmm/listviewtext.h>
 
 #include <libgnomecanvas/libgnomecanvas.h>
 
@@ -56,6 +57,7 @@ class RegionEditor : public ArdourDialog
 	virtual void region_changed (const PBD::PropertyChange&);
 	
 	Gtk::Table _table;
+	int _table_row;
 
   private:
 	boost::shared_ptr<ARDOUR::Region> _region;
@@ -106,6 +108,9 @@ class RegionEditor : public ArdourDialog
 	void handle_response (int);
 
 	bool spin_arrow_grab;
+
+	Gtk::Label _sources_label;
+	Gtk::ListViewText _sources;
 };
 
 #endif /* __gtk_ardour_region_edit_h__ */
