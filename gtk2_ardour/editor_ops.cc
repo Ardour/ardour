@@ -4509,12 +4509,14 @@ Editor::normalize_region ()
 	set_canvas_cursor (wait_cursor);
 	gdk_flush ();
 
+	/* XXX: this should really count only audio regions */
+
 	int tasks = rs.size ();
 	if (!dialog.normalize_individually()) {
 		tasks *= 2;
 	}
 
-	int n = 0;
+	int n = 1;
 
 	double maxamp = 0;
 	if (!dialog.normalize_individually()) {
@@ -4523,8 +4525,12 @@ Editor::normalize_region ()
 			if (!arv) {
 				continue;
 			}
-			maxamp = max (maxamp, arv->audio_region()->maximum_amplitude ());
-			dialog.set_progress (double (n) / tasks);
+
+			dialog.descend (1.0 / tasks);
+			maxamp = max (maxamp, arv->audio_region()->maximum_amplitude (&dialog));
+			dialog.ascend ();
+			
+			dialog.set_progress (float (n) / tasks);
 			++n;
 		}
 	}
@@ -4536,12 +4542,17 @@ Editor::normalize_region ()
 		}
 		arv->region()->clear_changes ();
 
-		double const amp = dialog.normalize_individually () ? arv->audio_region()->maximum_amplitude () : maxamp;
-		
+		double amp = maxamp;
+		if (dialog.normalize_individually()) {
+			dialog.descend (1.0 / tasks);
+			amp = arv->audio_region()->maximum_amplitude (&dialog);
+			dialog.ascend ();
+		}
+
 		arv->audio_region()->normalize (amp, dialog.target ());
 		_session->add_command (new StatefulDiffCommand (arv->region()));
 
-		dialog.set_progress (double (n) / tasks);
+		dialog.set_progress (float (n) / tasks);
 		++n;
 	}
 

@@ -18,6 +18,7 @@
 */
 
 #include "ardour_dialog.h"
+#include "progress_reporter.h"
 
 namespace Gtk {
 	class RadioButton;
@@ -25,16 +26,17 @@ namespace Gtk {
 	class ProgressBar;
 }
 
-class NormalizeDialog : public ArdourDialog
+class NormalizeDialog : public ArdourDialog, public ProgressReporter
 {
 public:
 	NormalizeDialog (bool);
 
 	bool normalize_individually () const;
 	double target () const;
-	void set_progress (double);
 
 private:
+	void update_progress_gui (float);
+	
 	Gtk::RadioButton* _normalize_individually;
 	Gtk::SpinButton* _spin;
 	Gtk::ProgressBar* _progress_bar;

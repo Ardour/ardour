@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __ardour_progress_h__
+#define __ardour_progress_h__
+
 #include <list>
 
 namespace ARDOUR {
@@ -49,3 +52,5 @@ private:
 };
 
 }
+
+#endif

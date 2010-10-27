@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __ardour_progress_reporter_h__
+#define __ardour_progress_reporter_h__
+
 #include "ardour/progress.h"
 
 /** A parent class for classes which can report progress on something */
@@ -34,3 +37,5 @@ private:
 	 */
 	virtual void update_progress_gui (float p) = 0;
 };
+
+#endif

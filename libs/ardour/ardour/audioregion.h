@@ -83,7 +83,7 @@ class AudioRegion : public Region
 	gain_t scale_amplitude() const { return _scale_amplitude; }
 
 	void normalize (float, float target_in_dB = 0.0f);
-	double maximum_amplitude () const;
+	double maximum_amplitude (Progress *) const;
 
 	bool envelope_active () const { return _envelope_active; }
 	bool fade_in_active ()  const { return _fade_in_active; }

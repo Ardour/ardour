@@ -45,6 +45,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/runtime_functions.h"
 #include "ardour/transient_detector.h"
+#include "ardour/progress.h"
 
 #include "i18n.h"
 #include <locale.h>
@@ -1144,7 +1145,7 @@ AudioRegion::set_scale_amplitude (gain_t g)
 
 /** @return the maximum (linear) amplitude of the region */
 double
-AudioRegion::maximum_amplitude () const
+AudioRegion::maximum_amplitude (Progress* p) const
 {
 	framepos_t fpos = _start;
 	framepos_t const fend = _start + _length;
@@ -1171,6 +1172,7 @@ AudioRegion::maximum_amplitude () const
 		}
 
 		fpos += to_read;
+		p->set_progress (float (fpos - _start) / _length);
 	}
 
 	return maxamp;

@@ -56,10 +56,10 @@ NormalizeDialog::NormalizeDialog (bool more_than_one)
 		vbox->pack_start (*b);
 
 		get_vbox()->pack_start (*vbox);
-
-		_progress_bar = manage (new ProgressBar);
-		get_vbox()->pack_start (*_progress_bar);
 	}
+
+	_progress_bar = manage (new ProgressBar);
+	get_vbox()->pack_start (*_progress_bar);
 
 	show_all ();
 	
@@ -71,7 +71,7 @@ bool
 NormalizeDialog::normalize_individually () const
 {
 	if (_normalize_individually == 0) {
-		return false;
+		return true;
 	}
 
 	return _normalize_individually->get_active ();
@@ -84,11 +84,7 @@ NormalizeDialog::target () const
 }
 
 void
-NormalizeDialog::set_progress (double p)
+NormalizeDialog::update_progress_gui (float p)
 {
 	_progress_bar->set_fraction (p);
-
-	while (gtk_events_pending()) {
-		gtk_main_iteration ();
-	}
 }
