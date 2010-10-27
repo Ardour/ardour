@@ -51,6 +51,10 @@ Port::Port (std::string const & n, DataType t, Flags f)
 
 	assert (_name.find_first_of (':') == std::string::npos);
 
+	if (!_engine->connected()) {
+		throw failed_constructor ();
+	}
+
 	if ((_jack_port = jack_port_register (_engine->jack (), _name.c_str (), t.to_jack_type (), _flags, 0)) == 0) {
 		throw failed_constructor ();
 	}
