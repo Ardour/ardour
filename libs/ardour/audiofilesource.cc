@@ -201,7 +201,7 @@ AudioFileSource::find_broken_peakfile (string peak_path, string audio_path)
 string
 AudioFileSource::broken_peak_path (string audio_path)
 {
-	return _session.peak_path (audio_path);
+	return _session.peak_path (basename_nosuffix (audio_path));
 }
 
 string

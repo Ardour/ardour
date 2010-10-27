@@ -2874,7 +2874,7 @@ string
 Session::peak_path (string base) const
 {
 	sys::path peakfile_path(_session_dir->peak_path());
-	peakfile_path /= basename_nosuffix (base) + peakfile_suffix;
+	peakfile_path /= base + peakfile_suffix;
 	return peakfile_path.to_string();
 }
 
