@@ -41,7 +41,7 @@ i18n_children = [
 
 def fetch_svn_revision (path):
 	cmd = "LANG= svn info " + path + " | awk '/^Revision:/ { print $2}'"
-	return subprocess.Popen(cmd, shell=True, stderr=sub.STDOUT, stdout=sub.PIPE).communicate()[0]
+	return subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0]
 
 def fetch_gcc_version ():
 	cmd = "LANG= gcc --version"
