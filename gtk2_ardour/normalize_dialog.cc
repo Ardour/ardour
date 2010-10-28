@@ -88,3 +88,11 @@ NormalizeDialog::update_progress_gui (float p)
 {
 	_progress_bar->set_fraction (p);
 }
+
+int
+NormalizeDialog::run ()
+{
+	int const r = ArdourDialog::run ();
+	_last_normalization_value = target ();
+	return r;
+}

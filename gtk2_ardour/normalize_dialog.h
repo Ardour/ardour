@@ -33,6 +33,7 @@ public:
 
 	bool normalize_individually () const;
 	double target () const;
+	int run ();
 
 private:
 	void update_progress_gui (float);
