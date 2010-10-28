@@ -4839,7 +4839,6 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 
 			if (progress) {
 				progress->ascend ();
-				progress->set_progress (float (n + 1) / N);
 			}
 		}
 

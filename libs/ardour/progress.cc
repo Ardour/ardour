@@ -46,7 +46,9 @@ void
 ARDOUR::Progress::ascend ()
 {
 	assert (!_stack.empty ());
+	float const a = _stack.back().allocation;
 	_stack.pop_back ();
+	_stack.back().normalised += a;
 }
 
 /** Set the progress of the current task.
