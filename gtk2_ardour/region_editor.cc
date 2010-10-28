@@ -89,7 +89,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	start_label.set_text (_("File start:"));
 	_sources_label.set_name ("RegionEditorLabel");
 
-	if (region->n_channels() > 1) {
+	if (_region->n_channels() > 1) {
 		_sources_label.set_text (_("Sources:"));
 	} else {
 		_sources_label.set_text (_("Source:"));
