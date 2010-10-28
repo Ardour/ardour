@@ -44,7 +44,7 @@ using namespace Gtkmm2ext;
 
 RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	: ArdourDialog (_("Region")),
-	  _table (8, 2),
+	  _table (9, 2),
 	  _table_row (0),
 	  _region (r),
 	  name_label (_("Name:")),
@@ -88,7 +88,12 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	start_label.set_name ("RegionEditorLabel");
 	start_label.set_text (_("File start:"));
 	_sources_label.set_name ("RegionEditorLabel");
-	_sources_label.set_text (_("Sources:"));
+
+	if (region->n_channels() > 1) {
+		_sources_label.set_text (_("Sources:"));
+	} else {
+		_sources_label.set_text (_("Source:"));
+	}
 
 	_table.set_col_spacings (12);
 	_table.set_row_spacings (6);
@@ -139,7 +144,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	_table.attach (_sources_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	_table.attach (_sources, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	++_table_row;
-
+	
 	get_vbox()->pack_start (_table, true, true);
 
 	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);

@@ -1174,9 +1174,11 @@ AudioRegion::maximum_amplitude (Progress* p) const
 		}
 
 		fpos += to_read;
-		p->set_progress (float (fpos - _start) / _length);
-		if (p->cancelled ()) {
-			return -1;
+		if (p) {
+			p->set_progress (float (fpos - _start) / _length);
+			if (p->cancelled ()) {
+				return -1;
+			}
 		}
 	}
 

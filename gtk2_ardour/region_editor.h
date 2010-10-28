@@ -52,6 +52,7 @@ class RegionEditor : public ArdourDialog
 {
   public:
 	RegionEditor (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Region>);
+	virtual ~RegionEditor () {}
 
   protected:	
 	virtual void region_changed (const PBD::PropertyChange&);

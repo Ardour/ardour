@@ -17,8 +17,11 @@
 
 */
 
+#include <boost/lexical_cast.hpp>
+
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
+#include "pbd/pthread_utils.h"
 
 #include "ardour/session.h"
 #include "ardour/audioregion.h"
@@ -41,28 +44,63 @@ using namespace PBD;
 using namespace std;
 using namespace Gtkmm2ext;
 
+static void *
+_peak_amplitude_thread (void* arg)
+{
+	SessionEvent::create_per_thread_pool ("peak amplitude events", 64);
+	static_cast<AudioRegionEditor*>(arg)->peak_amplitude_thread ();
+	return 0;
+}
+
 AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion> r)
 	: RegionEditor (s, r)
 	, _audio_region (r)
 	, gain_adjustment(accurate_coefficient_to_dB(_audio_region->scale_amplitude()), -40.0, +40.0, 0.1, 1.0, 0)	  
-
+	, _peak_amplitude_found (false)
 {
-	gain_label.set_alignment (1, 0.5);
 
-	Gtk::HBox* gb = Gtk::manage (new Gtk::HBox);
-	gb->set_spacing (6);
-	gb->pack_start (gain_entry);
-	gb->pack_start (*Gtk::manage (new Gtk::Label (_("dB"))), false, false);
+	Gtk::HBox* b = Gtk::manage (new Gtk::HBox);
+	b->set_spacing (6);
+	b->pack_start (gain_entry);
+	b->pack_start (*Gtk::manage (new Gtk::Label (_("dB"))), false, false);
 
 	gain_label.set_name ("AudioRegionEditorLabel");
 	gain_label.set_text (_("Region gain:"));
+	gain_label.set_alignment (1, 0.5);
 	gain_entry.configure (gain_adjustment, 0.0, 1);
 	_table.attach (gain_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
-	_table.attach (*gb, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (*b, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	++_table_row;
 
+	b = Gtk::manage (new Gtk::HBox);
+	b->set_spacing (6);
+	b->pack_start (_peak_amplitude);
+	b->pack_start (*Gtk::manage (new Gtk::Label (_("dBFS"))), false, false);
+	
+	_peak_amplitude_label.set_name ("AudioRegionEditorLabel");
+	_peak_amplitude_label.set_text (_("Peak amplitude:"));
+	_peak_amplitude_label.set_alignment (1, 0.5);
+	_table.attach (_peak_amplitude_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (*b, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	++_table_row;
+	
 	gain_changed ();
 
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
+
+	_peak_amplitude.property_editable() = false;
+	_peak_amplitude.set_text (_("Calculating..."));
+
+	PeakAmplitudeFound.connect (_peak_amplitude_connection, invalidator (*this), boost::bind (&AudioRegionEditor::peak_amplitude_found, this, _1), gui_context ());
+	pthread_create_and_store (X_("peak-amplitude"), &_peak_amplitude_thread_handle, _peak_amplitude_thread, this);
+}
+
+AudioRegionEditor::~AudioRegionEditor ()
+{
+	pthread_cancel_one (_peak_amplitude_thread_handle);
+	void* v;
+	int const r = pthread_join (_peak_amplitude_thread_handle, &v);
+	assert (r == 0);
 }
 
 void
@@ -91,3 +129,16 @@ AudioRegionEditor::gain_adjustment_changed ()
 		_audio_region->set_scale_amplitude (gain);
 	}
 }
+
+void
+AudioRegionEditor::peak_amplitude_thread ()
+{
+	PeakAmplitudeFound (accurate_coefficient_to_dB (_audio_region->maximum_amplitude ())); /* EMIT SIGNAL */
+}
+
+void
+AudioRegionEditor::peak_amplitude_found (double p)
+{
+	_peak_amplitude.set_text (boost::lexical_cast<string> (p));
+}
+
