@@ -35,6 +35,11 @@ public:
 	void ascend ();
 	void descend (float);
 
+	bool cancelled () const;
+	
+protected:
+	void cancel ();
+
 private:
 	/** Report overall progress.
 	 *  @param p Current progress (from 0 to 1)
@@ -49,6 +54,7 @@ private:
 	};
 
 	std::list<Level> _stack;
+	bool _cancelled;
 };
 
 }

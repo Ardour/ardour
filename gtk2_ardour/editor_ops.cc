@@ -4504,8 +4504,6 @@ Editor::normalize_region ()
 		return;
 	}
 
-	begin_reversible_command (_("normalize"));
-
 	set_canvas_cursor (wait_cursor);
 	gdk_flush ();
 
@@ -4522,11 +4520,20 @@ Editor::normalize_region ()
 		if (arv) {
 			dialog.descend (1.0 / regions);
 			double const a = arv->audio_region()->maximum_amplitude (&dialog);
+
+			if (a == -1) {
+				/* the user cancelled the operation */
+				set_canvas_cursor (current_canvas_cursor);
+				return;
+			}
+			
 			max_amps.push_back (a);
 			max_amp = max (max_amp, a);
 			dialog.ascend ();
 		}
 	}
+
+	begin_reversible_command (_("normalize"));
 
 	list<double>::const_iterator a = max_amps.begin ();
 	

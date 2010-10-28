@@ -1143,7 +1143,9 @@ AudioRegion::set_scale_amplitude (gain_t g)
 	send_change (PropertyChange (Properties::scale_amplitude));
 }
 
-/** @return the maximum (linear) amplitude of the region */
+/** @return the maximum (linear) amplitude of the region, or a -ve
+ *  number if the Progress object reports that the process was cancelled.
+ */
 double
 AudioRegion::maximum_amplitude (Progress* p) const
 {
@@ -1173,6 +1175,9 @@ AudioRegion::maximum_amplitude (Progress* p) const
 
 		fpos += to_read;
 		p->set_progress (float (fpos - _start) / _length);
+		if (p->cancelled ()) {
+			return -1;
+		}
 	}
 
 	return maxamp;

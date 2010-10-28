@@ -65,6 +65,8 @@ NormalizeDialog::NormalizeDialog (bool more_than_one)
 	
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (_("Normalize"), RESPONSE_ACCEPT);
+
+	signal_response().connect (sigc::mem_fun (*this, &NormalizeDialog::button_clicked));
 }
 
 bool
@@ -95,4 +97,12 @@ NormalizeDialog::run ()
 	int const r = ArdourDialog::run ();
 	_last_normalization_value = target ();
 	return r;
+}
+
+void
+NormalizeDialog::button_clicked (int r)
+{
+	if (r == RESPONSE_CANCEL) {
+		cancel ();
+	}
 }

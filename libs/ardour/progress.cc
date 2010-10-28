@@ -24,6 +24,7 @@
 using namespace std;
 
 ARDOUR::Progress::Progress ()
+	: _cancelled (false)
 {
 	descend (1);
 }
@@ -69,4 +70,16 @@ ARDOUR::Progress::set_progress (float p)
 	}
 
 	set_overall_progress (overall);
+}
+
+void
+ARDOUR::Progress::cancel ()
+{
+	_cancelled = true;
+}
+
+bool
+ARDOUR::Progress::cancelled () const
+{
+	return _cancelled;
 }
