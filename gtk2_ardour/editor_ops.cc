@@ -4492,7 +4492,7 @@ Editor::normalize_region ()
 		return;
 	}
 
-	RegionSelection rs = get_regions_for_action ();
+	RegionSelection rs = get_regions_for_action (false);
 
 	if (rs.empty()) {
 		return;
