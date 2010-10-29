@@ -100,7 +100,9 @@ NormalizeDialog::run ()
 {
 	int const r = ArdourDialog::run ();
 	_last_normalization_value = target ();
-	_last_normalize_individually = _normalize_individually->get_active ();
+	if (_normalize_individually) {
+		_last_normalize_individually = _normalize_individually->get_active ();
+	}
 	return r;
 }
 
