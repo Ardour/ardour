@@ -75,7 +75,7 @@ def fetch_bzr_revision (path):
 def create_stored_revision():
 	rev = ""
 	if os.path.exists('.svn'):
-		rev = fetch_svn_revision('.');
+		rev = fetch_svn_revision('.').splitlines()
 	elif os.path.exists('.git'):
 		rev = fetch_git_revision('.');
 	elif os.path.exists('.bzr'):
