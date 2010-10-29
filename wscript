@@ -41,7 +41,7 @@ i18n_children = [
 
 def fetch_svn_revision (path):
 	cmd = "LANG= svn info " + path + " | awk '/^Revision:/ { print $2}'"
-	return subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0]
+	return subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
 
 def fetch_gcc_version ():
 	cmd = "LANG= gcc --version"
@@ -75,7 +75,7 @@ def fetch_bzr_revision (path):
 def create_stored_revision():
 	rev = ""
 	if os.path.exists('.svn'):
-		rev = fetch_svn_revision('.').splitlines()
+		rev = fetch_svn_revision('.');
 	elif os.path.exists('.git'):
 		rev = fetch_git_revision('.');
 	elif os.path.exists('.bzr'):
