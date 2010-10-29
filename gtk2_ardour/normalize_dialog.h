@@ -44,4 +44,5 @@ private:
 	Gtk::ProgressBar* _progress_bar;
 
 	static double _last_normalization_value;
+	static bool _last_normalize_individually;
 };

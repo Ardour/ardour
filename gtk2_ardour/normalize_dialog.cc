@@ -27,6 +27,7 @@
 using namespace Gtk;
 
 double NormalizeDialog::_last_normalization_value = 0;
+bool NormalizeDialog::_last_normalize_individually = true;
 
 NormalizeDialog::NormalizeDialog (bool more_than_one)
 	: ArdourDialog (more_than_one ? _("Normalize regions") : _("Normalize region"))
@@ -54,6 +55,9 @@ NormalizeDialog::NormalizeDialog (bool more_than_one)
 		vbox->pack_start (*_normalize_individually);
 		RadioButton* b = manage (new RadioButton (group, _("Normalize each region using the peak value of all regions")));
 		vbox->pack_start (*b);
+
+		_normalize_individually->set_active (_last_normalize_individually);
+		b->set_active (!_last_normalize_individually);
 
 		get_vbox()->pack_start (*vbox);
 	}
@@ -96,6 +100,7 @@ NormalizeDialog::run ()
 {
 	int const r = ArdourDialog::run ();
 	_last_normalization_value = target ();
+	_last_normalize_individually = _normalize_individually->get_active ();
 	return r;
 }
 
