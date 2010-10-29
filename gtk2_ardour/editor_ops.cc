@@ -4565,7 +4565,7 @@ Editor::reset_region_scale_amplitude ()
 		return;
 	}
 
-	RegionSelection rs = get_regions_for_action ();
+	RegionSelection rs = get_regions_for_action (false);
 
 	if (rs.empty()) {
 		return;
