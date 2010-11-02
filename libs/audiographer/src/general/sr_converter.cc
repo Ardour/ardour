@@ -113,8 +113,8 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 
 				/* first time, append new data from data_in into the leftover_data buffer */
 
-				TypeUtils<float>::copy (&leftover_data [leftover_frames * channels], in, frames);
-				src_data.input_frames = frames + leftover_frames;
+				TypeUtils<float>::copy (in, &leftover_data [leftover_frames * channels], frames);
+				src_data.input_frames = frames / channels + leftover_frames;
 			} else {
 
 				/* otherwise, just use whatever is still left in leftover_data; the contents
