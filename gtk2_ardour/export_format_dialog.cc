@@ -242,8 +242,12 @@ ExportFormatDialog::load_state (FormatPtr spec)
 	}
 
 	for (Gtk::ListStore::Children::iterator it = format_list->children().begin(); it != format_list->children().end(); ++it) {
-		if (it->get_value (format_cols.ptr)->get_format_id() == spec->format_id()) {
-			it->get_value (format_cols.ptr)->set_selected (true);
+		boost::shared_ptr<ARDOUR::ExportFormat> format_in_list = it->get_value (format_cols.ptr);
+		if (format_in_list->get_format_id() == spec->format_id() &&
+		    // BWF has the same format id with wav, so we need to check this.
+		    format_in_list->has_broadcast_info() == spec->has_broadcast_info()) {
+
+			format_in_list->set_selected (true);
 			break;
 		}
 	}
