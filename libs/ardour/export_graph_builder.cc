@@ -201,8 +201,9 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &, FileSpec const & new_config,
 		int_converter->init (max_frames, config.format->dither_type(), data_width);
 		add_child (config);
 	} else {
+		int actual_data_width = 8 * sizeof(Sample);
 		float_converter = FloatConverterPtr (new SampleFormatConverter<Sample> (channels));
-		float_converter->init (max_frames, config.format->dither_type(), data_width);
+		float_converter->init (max_frames, config.format->dither_type(), actual_data_width);
 		add_child (config);
 	}
 }
