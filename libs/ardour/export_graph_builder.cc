@@ -38,8 +38,10 @@ ExportGraphBuilder::~ExportGraphBuilder ()
 }
 
 int
-ExportGraphBuilder::process (nframes_t /* frames */, bool last_cycle)
+ExportGraphBuilder::process (nframes_t frames, bool last_cycle)
 {
+	assert(frames == process_buffer_frames);
+	
 	for (ChannelMap::iterator it = channels.begin(); it != channels.end(); ++it) {
 		it->first->read (process_buffer, process_buffer_frames);
 		ProcessContext<Sample> context(process_buffer, process_buffer_frames, 1);
