@@ -184,22 +184,6 @@ SMF::seek_to_start() const
 	_smf_track->next_event_number = 1;
 }
 
-static void
-midify_note_id (event_id_t note_id, uint8_t* buf)
-{
-        buf[0] = (note_id & 0xfe000000) >> 25;
-        buf[1] = (note_id & 0x01fc0000) >> 18;
-        buf[2] = (note_id & 0x0003f800) >> 11;
-        buf[3] = (note_id & 0x000007f0) >> 4;
-        buf[4] = (note_id & 0x0000000f);
-}
-
-static event_id_t
-unmidify_note_id (uint8_t* buf)
-{
-        return ((int) buf[0] << 25) | ((int) buf[1] << 18) | ((int) buf[2] << 11) | ((int)buf[3] << 4) | (int) buf[4];
-}
-
 /** Read an event from the current position in file.
  *
  * File position MUST be at the beginning of a delta time, or this will die very messily.
@@ -233,10 +217,24 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* no
 
 		if (smf_event_is_metadata(event)) {
                         *note_id = -1; // "no note id in this meta-event */
-                        if (event->midi_buffer[1] == 0x99) { // Evoral meta-event
-                                if (event->midi_buffer[2] == 6) { // 6 bytes following
-                                        if (event->midi_buffer[3] == 0x1) { // Evoral Note ID
-                                                *note_id = unmidify_note_id  (&event->midi_buffer[4]);
+
+                        if (event->midi_buffer[1] == 0x7f) { // Sequencer-specific
+
+                                uint32_t evsize;
+                                uint32_t lenlen;
+                                
+                                if (smf_extract_vlq (&event->midi_buffer[2], event->midi_buffer_length-2, &evsize, &lenlen) == 0) {
+                                
+                                        if (event->midi_buffer[2+lenlen] == 0x99 &&  // Evoral
+                                            event->midi_buffer[3+lenlen] == 0x1) { // Evoral Note ID
+                                                
+                                                uint32_t id;
+                                                uint32_t idlen;
+                                                
+                                                if (smf_extract_vlq (&event->midi_buffer[4+lenlen], event->midi_buffer_length-(4+lenlen), &id, &idlen) == 0) {
+                                                        *note_id = id;
+                                                        cerr << "Loaded Note ID " << *note_id << endl;
+                                                }
                                         }
                                 }
                         }
@@ -289,17 +287,34 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, eve
          */
 
         if (((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON || ((buf[0] & 0xf0) == MIDI_CMD_NOTE_OFF)) && note_id >= 0) {
+                int idlen;
+                int lenlen;
+                uint8_t idbuf[16];
+                uint8_t lenbuf[16];
+
                 event = smf_event_new ();
                 assert(event != NULL);
 
-                event->midi_buffer = new uint8_t[9];
-                event->midi_buffer_length = 9;
+
+                /* generate VLQ representation of note ID */
+                idlen = smf_format_vlq (idbuf, sizeof(idbuf), note_id);
+                cerr << "Saved Note ID " << note_id << " is " << idlen << " bytes\n";
+
+                /* generate VLQ representation of meta event length,
+                   which is the idlen + 2 bytes (Evoral type ID plus Note ID type)
+                */
+
+                lenlen = smf_format_vlq (lenbuf, sizeof(lenbuf), idlen+2);
+
+                event->midi_buffer_length = 2 + lenlen + 2 + idlen;
+                event->midi_buffer = new uint8_t[event->midi_buffer_length];
 
                 event->midi_buffer[0] = 0xff; // Meta-event
-                event->midi_buffer[1] = 0x99; // Evoral meta-event
-                event->midi_buffer[2] = 6;    // 6 bytes of data follow */
-                event->midi_buffer[3] = 0x1;  // Evoral Note ID
-                midify_note_id (note_id, &event->midi_buffer[4]);
+                event->midi_buffer[1] = 0x7f; // Sequencer-specific
+                memcpy (&event->midi_buffer[2], lenbuf, lenlen);
+                event->midi_buffer[2+lenlen] = 0x99; // Evoral type ID
+                event->midi_buffer[3+lenlen] = 0x1;  // Evoral type Note ID
+                memcpy (&event->midi_buffer[4+lenlen], idbuf, idlen);
 
                 assert(_smf_track);
                 smf_track_add_event_delta_pulses(_smf_track, event, 0);
