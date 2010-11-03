@@ -156,8 +156,8 @@ track_append(smf_track_t *track, const void *buffer, const int buffer_length)
 	return (0);
 }
 
-static int
-format_vlq(unsigned char *buf, int length, unsigned long value)
+int
+smf_format_vlq(unsigned char *buf, int length, unsigned long value)
 {
 	int i;
 	unsigned long buffer;
@@ -212,7 +212,7 @@ smf_event_new_textual(int type, const char *text)
 	event->midi_buffer[0] = 0xFF;
 	event->midi_buffer[1] = type;
 
-	vlq_length = format_vlq(event->midi_buffer + 2, MAX_VLQ_LENGTH - 2, text_length);
+	vlq_length = smf_format_vlq(event->midi_buffer + 2, MAX_VLQ_LENGTH - 2, text_length);
 	copied_length = snprintf((char *)event->midi_buffer + vlq_length + 2, event->midi_buffer_length - vlq_length - 2, "%s", text);
 
 	assert(copied_length == text_length);
@@ -231,7 +231,7 @@ write_vlq(smf_event_t *event, unsigned long value)
 	unsigned char buf[MAX_VLQ_LENGTH];
 	int vlq_length;
 
-	vlq_length = format_vlq(buf, MAX_VLQ_LENGTH, value);
+	vlq_length = smf_format_vlq(buf, MAX_VLQ_LENGTH, value);
 
 	return (track_append(event->track, buf, vlq_length));
 }

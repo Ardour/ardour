@@ -206,8 +206,8 @@ parse_mthd_chunk(smf_t *smf)
  * Explanation of Variable Length Quantities is here: http://www.borg.com/~jglatt/tech/midifile/vari.htm
  * Returns 0 iff everything went OK, different value in case of error.
  */
-static int
-extract_vlq(const unsigned char *buf, const size_t buffer_length, uint32_t *value, uint32_t *len)
+int
+smf_extract_vlq(const unsigned char *buf, const size_t buffer_length, uint32_t *value, uint32_t *len)
 {
 	uint32_t val = 0;
 	const unsigned char *c = buf;
@@ -284,7 +284,7 @@ expected_sysex_length(const unsigned char status, const unsigned char *second_by
 		return (-1);
 	}
 
-	extract_vlq(second_byte, buffer_length, &sysex_length, &len);
+	smf_extract_vlq(second_byte, buffer_length, &sysex_length, &len);
 
 	if (consumed_bytes != NULL)
 		*consumed_bytes = len;
@@ -558,7 +558,7 @@ parse_next_event(smf_track_t *track)
 	assert(buffer_length > 0);
 
 	/* First, extract time offset from previous event. */
-	if (extract_vlq(c, buffer_length, &time, &len))
+	if (smf_extract_vlq(c, buffer_length, &time, &len))
 		goto error;
 
 	c += len;
@@ -655,7 +655,7 @@ smf_event_extract_text(const smf_event_t *event)
 		return (NULL);
 	}
 
-	extract_vlq((void *)&(event->midi_buffer[2]), event->midi_buffer_length - 2, &string_length, &length_length);
+	smf_extract_vlq((void *)&(event->midi_buffer[2]), event->midi_buffer_length - 2, &string_length, &length_length);
 
 	if (string_length <= 0) {
 		g_critical("smf_event_extract_text: truncated MIDI message.");

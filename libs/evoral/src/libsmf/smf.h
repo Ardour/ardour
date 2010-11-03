@@ -386,6 +386,12 @@ int   smf_event_is_textual(const smf_event_t *event) WARN_UNUSED_RESULT;
 char *smf_event_decode(const smf_event_t *event) WARN_UNUSED_RESULT;
 char *smf_event_extract_text(const smf_event_t *event) WARN_UNUSED_RESULT;
 
+/* Routines for dealing with Variable Length Quantities (VLQ's). 
+   Slightly odd names reflect original static names within libsmf
+ */
+int smf_format_vlq (unsigned char *buf, int length, unsigned long value);
+int smf_extract_vlq(const unsigned char *buf, const size_t buffer_length, uint32_t *value, uint32_t *len);
+
 /* Routines for loading SMF files. */
 smf_t *smf_load(FILE *) WARN_UNUSED_RESULT;
 smf_t *smf_load_from_memory(const void *buffer, const size_t buffer_length) WARN_UNUSED_RESULT;
