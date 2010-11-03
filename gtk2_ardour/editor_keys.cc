@@ -91,12 +91,6 @@ Editor::keyboard_paste ()
 	paste (1);
 }
 
-void
-Editor::keyboard_insert_region_list_selection ()
-{
-	insert_region_list_selection (1);
-}
-
 int
 Editor::get_prefix (float& /*val*/, bool& was_floating)
 {

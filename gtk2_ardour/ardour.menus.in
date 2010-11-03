@@ -183,24 +183,11 @@
 		   <menuitem action='align-regions-sync'/>
 		   <menuitem action='align-regions-sync-relative'/>
                </menu>
-	       <menu action="NudgeRegionMenu">
-	           <menuitem action="nudge-forward"/>
-	           <menuitem action="nudge-backward"/>
-               </menu>
-	       <menu action="TrimMenu">
-		   <menuitem action='trim-front'/>
-		   <menuitem action='trim-back'/>
-		   <menuitem action='crop'/>
-		   <menuitem action='trim-region-to-loop'/>
-		   <menuitem action='trim-region-to-punch'/>
-		   <menuitem action='trim-to-previous-region'/>
-		   <menuitem action='trim-to-next-region'/>
-	       </menu>
 	       <menu action="FadeMenu">
 		   <menuitem action='set-fade-in-length'/>
-		   <menuitem action='toggle-fade-in-active'/>
+		   <menuitem action='toggle-region-fade-in'/>
 		   <menuitem action='set-fade-out-length'/>
-		   <menuitem action='toggle-fade-out-active'/>
+		   <menuitem action='toggle-region-fade-out'/>
                </menu>
                <separator/>       
 	       <menuitem action='remove-last-capture'/>
@@ -239,45 +226,80 @@
 #endif
         </menu>         
 
-	<menu action='RegionMenu'>
-	      <menuitem action='insert-region'/>
+	<menu name='RegionMenu' action='RegionMenu'>
+	      <menuitem action='insert-region-from-region-list'/>
 	      <menuitem action='rename-region'/>
-	      <menuitem action='raise-region'/>
-	      <menuitem action='lower-region'/>
-	      <menuitem action='naturalize-region'/>
-	      <menuitem action='lock-region'/>
+	      <menuitem action='show-region-properties'/>
 	      <menuitem action='set-region-sync-position'/>
 	      <menuitem action='remove-region-sync'/>
-              <menuitem action='mute-unmute-region'/>
-	      <separator/>       
-              <menuitem action='reverse-region'/>    
-	      <menuitem action='monoize-region'/>
-	      <menuitem action='normalize-region'/>
-	      <menuitem action='boost-region-gain'/>
-	      <menuitem action='cut-region-gain'/>      		   
-	      <menuitem action='pitch-shift-region'/>
+	      <menuitem action='play-selected-regions'/>
+	      <menuitem action='export-region'/>
+	      <menuitem action='bounce-region'/>
+	      <menuitem action='analyze-region'/>
+	      <menuitem action='toggle-region-lock'/>
+	      <menuitem action='toggle-region-lock-style'/>
 	      <menuitem action='toggle-opaque-region'/>
-	      <menuitem action='toggle-selected-region-fade-in'/>
-	      <menuitem action='toggle-selected-region-fade-out'/>
-	      <menuitem action='toggle-selected-region-fades'/>
-	      <separator/>
-	      <menuitem action='duplicate-region'/>
-	      <menuitem action='multi-duplicate-region'/>
-	      <menuitem action='region-fill-track'/>
-	      <separator/>
+              <menuitem action='toggle-region-mute'/>
+	      <menuitem action='pitch-shift-region'/>
+	      <menuitem action='naturalize-region'/>
+	      <menuitem action='split-region'/>
+	      <menuitem action='split-multichannel-region'/>
+	      <menuitem action='remove-region'/>
 	      <menuitem action='loop-region'/>
-	      <menuitem action='set-loop-from-region'/>
-	      <menuitem action='set-punch-from-region'/>
-	      <menuitem action='add-range-marker-from-region'/>
-	      <menuitem action='add-range-markers-from-region'/>
-
-	      <separator/>
 	      <menuitem action='snap-regions-to-grid'/>
 	      <menuitem action='close-region-gaps'/>
-	      <separator/>
 	      <menuitem action='place-transient' />
-	      <menuitem action='toggle-rhythm-ferret'/>
-	      
+	      <menuitem action='show-rhythm-ferret'/>
+	      <menuitem action='strip-region-silence'/>
+              <menuitem action='reverse-region'/>    
+	      <menu action='RegionMenuLayering'>
+	      	      <menuitem action='raise-region-to-top'/>
+	      	      <menuitem action='raise-region'/>
+		      <menuitem action='lower-region'/>
+		      <menuitem action='lower-region-to-bottom'/>
+              </menu>
+	      <menu action='RegionMenuMIDI'>
+	              <menuitem action='quantize-region'/>
+	              <menuitem action='fork-region'/>
+		      <menuitem action='show-region-list-editor'/>
+              </menu>
+	      <menu action='RegionMenuGain'>
+	      	      <menuitem action='boost-region-gain'/>
+	              <menuitem action='cut-region-gain'/>      		   
+	      	      <menuitem action='reset-region-gain-envelopes'/>
+	      	      <menuitem action='toggle-region-gain-envelope-visible'/>
+		      <menuitem action='toggle-region-gain-envelope-active'/>
+	      	      <menuitem action='normalize-region'/>
+              </menu>
+	      <menu action='RegionMenuNudge'>
+	      	      <menuitem action='nudge-forward'/>
+	      	      <menuitem action='nudge-backward'/>
+	      	      <menuitem action='nudge-forward-by-capture-offset'/>
+	      	      <menuitem action='nudge-backward-by-capture-offset'/>
+	      </menu>
+	      <menu action='RegionMenuTrim'>
+	      	      <menuitem action='trim-front'/>
+	      	      <menuitem action='trim-back'/>
+	      	      <menuitem action='trim-region-to-loop'/>
+	      	      <menuitem action='trim-region-to-punch'/>
+	      </menu>
+	      <menu action='RegionMenuRanges'>
+	              <menuitem action='set-loop-from-region'/>
+	              <menuitem action='set-punch-from-region'/>
+	              <menuitem action='add-range-marker-from-region'/>
+	              <menuitem action='add-range-markers-from-region'/>
+	              <menuitem action='set-selection-from-region'/>
+              </menu>
+	      <menu action='RegionMenuFades'>
+	              <menuitem action='toggle-region-fade-in'/>
+	              <menuitem action='toggle-region-fade-out'/>
+	              <menuitem action='toggle-region-fades'/>
+              </menu>
+	      <menu action='RegionMenuDuplicate'>
+	      	      <menuitem action='duplicate-region'/>
+	      	      <menuitem action='multi-duplicate-region'/>
+	      	      <menuitem action='region-fill-track'/>
+              </menu>
 	</menu>
 
         <menu action='TrackMenu'>
@@ -535,4 +557,81 @@
          <separator/>
          <menuitem action='addExternalAudioToRegionList'/>	       
      </popup>
+
+	<popup name='PopupRegionMenu' action='PopupRegionMenu'>
+	      <menuitem action='rename-region'/>
+	      <menuitem action='show-region-properties'/>
+	      <menuitem action='set-region-sync-position'/>
+	      <menuitem action='remove-region-sync'/>
+	      <menuitem action='play-selected-regions'/>
+	      <menuitem action='export-region'/>
+	      <menuitem action='bounce-region'/>
+	      <menuitem action='analyze-region'/>
+	      <menuitem action='toggle-region-lock'/>
+	      <menuitem action='toggle-region-lock-style'/>
+	      <menuitem action='toggle-opaque-region'/>
+              <menuitem action='toggle-region-mute'/>
+	      <menuitem action='pitch-shift-region'/>
+	      <menuitem action='naturalize-region'/>
+	      <menuitem action='split-region'/>
+	      <menuitem action='split-multichannel-region'/>
+	      <menuitem action='remove-region'/>
+	      <menuitem action='loop-region'/>
+	      <menuitem action='snap-regions-to-grid'/>
+	      <menuitem action='close-region-gaps'/>
+	      <menuitem action='place-transient' />
+	      <menuitem action='show-rhythm-ferret'/>
+	      <menuitem action='strip-region-silence'/>
+              <menuitem action='reverse-region'/>    
+	      <menu action='RegionMenuLayering'>
+	      	      <menuitem action='raise-region-to-top'/>
+	      	      <menuitem action='raise-region'/>
+		      <menuitem action='lower-region'/>
+		      <menuitem action='lower-region-to-bottom'/>
+              </menu>
+	      <menu action='RegionMenuMIDI'>
+	              <menuitem action='quantize-region'/>
+	              <menuitem action='fork-region'/>
+		      <menuitem action='show-region-list-editor'/>
+              </menu>
+	      <menu action='RegionMenuGain'>
+	      	      <menuitem action='boost-region-gain'/>
+	              <menuitem action='cut-region-gain'/>      		   
+	      	      <menuitem action='reset-region-gain-envelopes'/>
+	      	      <menuitem action='toggle-region-gain-envelope-visible'/>
+		      <menuitem action='toggle-region-gain-envelope-active'/>
+	      	      <menuitem action='normalize-region'/>
+              </menu>
+	      <menu action='RegionMenuNudge'>
+	      	      <menuitem action='nudge-forward'/>
+	      	      <menuitem action='nudge-backward'/>
+	      	      <menuitem action='nudge-forward-by-capture-offset'/>
+	      	      <menuitem action='nudge-backward-by-capture-offset'/>
+	      </menu>
+	      <menu action='RegionMenuTrim'>
+	      	      <menuitem action='trim-front'/>
+	      	      <menuitem action='trim-back'/>
+	      	      <menuitem action='trim-region-to-loop'/>
+	      	      <menuitem action='trim-region-to-punch'/>
+	      </menu>
+	      <menu action='RegionMenuRanges'>
+	              <menuitem action='set-loop-from-region'/>
+	              <menuitem action='set-punch-from-region'/>
+	              <menuitem action='add-range-marker-from-region'/>
+	              <menuitem action='add-range-markers-from-region'/>
+	              <menuitem action='set-selection-from-region'/>
+              </menu>
+	      <menu action='RegionMenuFades'>
+	              <menuitem action='toggle-region-fade-in'/>
+	              <menuitem action='toggle-region-fade-out'/>
+	              <menuitem action='toggle-region-fades'/>
+              </menu>
+	      <menu action='RegionMenuDuplicate'>
+	      	      <menuitem action='duplicate-region'/>
+	      	      <menuitem action='multi-duplicate-region'/>
+	      	      <menuitem action='region-fill-track'/>
+              </menu>
+	      
+	</popup>
+
 </ui>

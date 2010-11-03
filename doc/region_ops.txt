@@ -1,0 +1,36 @@
+How to choose what regions to perform operations on
+---------------------------------------------------
+
+Divide region actions into 3 groups:
+
+1. Actions that operate on the selection, and for which the edit point type and location is irrelevant.
+e.g. remove-region, rename-region, boost-region-gain
+
+2. Actions that are not related to the selection, but for which the edit point location is important
+e.g. insert-region-from-region-list
+
+3. Actions that operate on the selection, and for which the edit point location is important
+e.g. set-region-sync-position, place-transient
+
+
+For group 1, Editor::get_regions_from_selection_and_entered() is used to decide which regions to operate
+on.  This method returns the selected regions, unless there are none, in which case it returns the last
+region that the mouse entered.
+
+For group 3, Editor::get_regions_from_selection_and_edit_point() is used to decide which regions to operate
+on.
+
+If the edit point is `mouse':
+     if the mouse is over a selected region, or no region, this method returns all selected regions.
+     if the mouse is over an unselected region, just that region is returned.
+
+For other edit points the method returns the selected regions AND those that are both under the edit position
+AND on a selected track, or on a track which is in the same active edit-enabled route group as a selected
+region.
+
+The action handlers call the appropriate method to decide which regions to operate on.
+
+In addition, Editor::sensitize_the_right_region_actions() is called when a Region menu is about to be displayed,
+and it sensitizes the actions that are appropriate given the current situation.  When selecting things from
+a menu, group 3 operations are disabled if the edit point is `mouse', as the mouse will be positioned over
+the menu and its position is hence meaningless.

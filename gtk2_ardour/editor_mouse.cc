@@ -1188,14 +1188,14 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		were_dragging = true;
 	}
 
-        update_region_layering_order_editor (where);
+        update_region_layering_order_editor ();
 
 	/* edit events get handled here */
 
 	if (!_drags->active () && Keyboard::is_edit_event (&event->button)) {
 		switch (item_type) {
 		case RegionItem:
-			edit_region ();
+			show_region_properties ();
 			break;
 
 		case TempoMarkerItem:

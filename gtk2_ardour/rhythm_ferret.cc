@@ -330,8 +330,8 @@ RhythmFerret::do_action ()
 void
 RhythmFerret::do_split_action ()
 {
-	RegionSelection regions = editor.get_regions_for_action ();
-
+	RegionSelection& regions (editor.get_selection().regions);
+	
 	if (regions.empty()) {
 		return;
 	}

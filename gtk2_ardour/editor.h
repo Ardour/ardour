@@ -371,7 +371,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* fades/xfades */
 
- 	void toggle_selected_region_fades (int dir);
+ 	void toggle_region_fades (int dir);
  	void update_region_fade_visibility ();
 	bool xfade_visibility() const { return _xfade_visibility; }
 	void update_xfade_visibility ();
@@ -678,10 +678,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Menu* build_track_selection_context_menu (framepos_t);
 	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
-	void add_region_context_items (StreamView*, std::list<boost::shared_ptr<ARDOUR::Region> >, Gtk::Menu_Helpers::MenuList&,
-                                       ARDOUR::framepos_t, bool);
+	void add_region_context_items (Gtk::Menu_Helpers::MenuList&, bool);
 	void add_crossfade_context_items (AudioStreamView*, boost::shared_ptr<ARDOUR::Crossfade>, Gtk::Menu_Helpers::MenuList&, bool many);
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
+	Gtk::MenuItem* _popup_region_menu_item;
 
 	void handle_new_route (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView *);
@@ -1050,6 +1050,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* KEYMAP HANDLING */
 
 	void register_actions ();
+	void register_region_actions ();
 
 	int ensure_cursor (framepos_t* pos);
 
@@ -1066,14 +1067,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* EDITING OPERATIONS */
 
 	void reset_point_selection ();
-	void toggle_region_mute ();
 	void toggle_region_lock ();
-	void toggle_region_opaque ();
+	void toggle_opaque_region ();
 	void toggle_record_enable ();
 	void toggle_region_lock_style ();
 	void raise_region ();
 	void raise_region_to_top ();
-        void change_region_layering_order (ARDOUR::framepos_t);
+        void change_region_layering_order ();
 	void lower_region ();
 	void lower_region_to_bottom ();
 	void split_regions_at (framepos_t, RegionSelection&);
@@ -1082,15 +1082,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void crop_region_to_selection ();
 	void crop_region_to (framepos_t start, framepos_t end);
 	void set_sync_point (framepos_t, const RegionSelection&);
-	void set_region_sync_from_edit_point ();
+	void set_region_sync_position ();
 	void remove_region_sync();
-	void align_selection (ARDOUR::RegionPoint, framepos_t position, const RegionSelection&);
-	void align_selection_relative (ARDOUR::RegionPoint point, framepos_t position, const RegionSelection&);
+	void align_regions (ARDOUR::RegionPoint);
+	void align_regions_relative (ARDOUR::RegionPoint point);
 	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, framepos_t position);
 	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, framepos_t position);
 	void remove_selected_regions ();
 	void remove_clicked_region ();
-	void edit_region ();
+	void show_region_properties ();
 	void show_midi_list_editor ();
 	void rename_region ();
 	void duplicate_some_regions (RegionSelection&, float times);
@@ -1105,7 +1105,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void strip_region_silence ();
 	void normalize_region ();
 	void reset_region_scale_amplitude ();
-	void adjust_region_scale_amplitude (bool up);
+	void adjust_region_gain (bool up);
 	void quantize_region ();
 	void fork_region ();
 
@@ -1114,7 +1114,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void tab_to_transient (bool forward);
 
-	void use_region_as_bar ();
+	void set_tempo_from_region ();
 	void use_range_as_bar ();
 
 	void define_one_bar (framepos_t start, framepos_t end);
@@ -1123,13 +1123,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void hide_region_from_region_list ();
 	void show_region_in_region_list ();
 
-	void align (ARDOUR::RegionPoint);
-	void align_relative (ARDOUR::RegionPoint);
-	void naturalize ();
+	void naturalize_region ();
 
 	void reset_focus ();
 
-	void split ();
+	void split_region ();
 
 	void cut ();
 	void copy ();
@@ -1143,7 +1141,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	int  get_prefix (float&, bool&);
 
 	void keyboard_paste ();
-	void keyboard_insert_region_list_selection ();
 
 	void region_from_selection ();
 	void create_region_from_selection (std::vector<boost::shared_ptr<ARDOUR::Region> >&);
@@ -1153,7 +1150,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void play_from_edit_point_and_return ();
 	void play_selected_region ();
 	void play_edit_range ();
-	void loop_selected_region ();
 	void play_location (ARDOUR::Location&);
 	void loop_location (ARDOUR::Location&);
 
@@ -1268,8 +1264,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_selection_from_region ();
 
 	void add_location_mark (framepos_t where);
-	void add_location_from_audio_region ();
-	void add_locations_from_audio_region ();
+	void add_location_from_region ();
+	void add_locations_from_region ();
 	void add_location_from_selection ();
 	void set_loop_from_selection (bool play);
 	void set_punch_from_selection ();
@@ -1322,7 +1318,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_fade_out_shape (ARDOUR::FadeShape);
 
 	void set_fade_length (bool in);
-	void toggle_fade_active (bool in);
 	void set_fade_in_active (bool);
 	void set_fade_out_active (bool);
 
@@ -1423,7 +1418,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_playhead_cursor ();
 
 	void kbd_driver (sigc::slot<void,GdkEvent*>, bool use_track_canvas = true, bool use_time_canvas = true, bool can_select = true);
-	void kbd_mute_unmute_region ();
+	void toggle_region_mute ();
 	void kbd_brush ();
 
 	void kbd_do_brush (GdkEvent*);
@@ -1625,15 +1620,18 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void track_selection_changed ();
 	void region_selection_changed ();
 	sigc::connection editor_regions_selection_changed_connection;
-	void sensitize_the_right_region_actions (bool have_selected_regions);
+	void sensitize_all_region_actions (bool);
+	void sensitize_the_right_region_actions ();
+	bool _all_region_actions_sensitized;
+	/** Flag to block region action handlers from doing what they normally do;
+	 *  I tried Gtk::Action::block_activate() but this doesn't work (ie it doesn't
+	 *  block) when setting a ToggleAction's active state.
+	 */
+	bool _ignore_region_action;
 	void point_selection_changed ();
 	void marker_selection_changed ();
 
 	void cancel_selection ();
-
-	void region_selection_op (void (ARDOUR::Region::*pmf)(void));
-	void region_selection_op (void (ARDOUR::Region::*pmf)(void*), void*);
-	void region_selection_op (void (ARDOUR::Region::*pmf)(bool), bool);
 
 	bool audio_region_selection_covers (framepos_t where);
 
@@ -1717,8 +1715,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void trim_region_back();
 	void trim_region (bool front);
 
-	void trim_region_to_edit_point ();
-	void trim_region_from_edit_point ();
 	void trim_region_to_loop ();
 	void trim_region_to_punch ();
 	void trim_region_to_location (const ARDOUR::Location&, const char* cmd);
@@ -1835,7 +1831,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	int time_stretch (RegionSelection&, float fraction);
 	int pitch_shift (RegionSelection&, float cents);
-	void pitch_shift_regions ();
+	void pitch_shift_region ();
 	int time_fx (RegionSelection&, float val, bool pitching);
 
 	/* editor-mixer strip */
@@ -1992,7 +1988,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void get_regions_at (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
 	void get_regions_after (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
 
-	RegionSelection get_regions_for_action (bool check_edit_point = true);
+	RegionSelection get_regions_from_selection_and_edit_point ();
+	RegionSelection get_regions_from_selection_and_entered ();
 	
 	void start_updating_meters ();
 	void stop_updating_meters ();
@@ -2052,7 +2049,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	double _last_motion_y;
 
         RegionLayeringOrderEditor* layering_order_editor;
-        void update_region_layering_order_editor (ARDOUR::framepos_t);
+        void update_region_layering_order_editor ();
 
 	/** Track that was the source for the last cut/copy operation.  Used as a place
 	    to paste things iff there is no selected track.
@@ -2067,6 +2064,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void setup_fade_images ();
 	std::map<ARDOUR::FadeShape, Gtk::Image*> _fade_in_images;
 	std::map<ARDOUR::FadeShape, Gtk::Image*> _fade_out_images;
+
+	Gtk::MenuItem& action_menu_item (std::string const &);
+	void action_pre_activated (Glib::RefPtr<Gtk::Action> const &);
 
 	friend class Drag;
 	friend class RegionDrag;

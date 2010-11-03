@@ -26,6 +26,7 @@
 #include "ardour/playlist.h"
 #include "ardour/route_group.h"
 #include "ardour/profile.h"
+#include "ardour/midi_region.h"
 
 #include "editor.h"
 #include "actions.h"
@@ -927,27 +928,208 @@ Editor::time_selection_changed ()
 	}
 }
 
+/** Set all region actions to have a given sensitivity */
 void
-Editor::sensitize_the_right_region_actions (bool have_selected_regions)
+Editor::sensitize_all_region_actions (bool s)
 {
-	for (vector<Glib::RefPtr<Action> >::iterator x = ActionManager::region_selection_sensitive_actions.begin();
-	     x != ActionManager::region_selection_sensitive_actions.end(); ++x) {
+	Glib::ListHandle<Glib::RefPtr<Action> > all = _region_actions->get_actions ();
 
-		string accel_path = (*x)->get_accel_path ();
-		AccelKey key;
+	for (Glib::ListHandle<Glib::RefPtr<Action> >::iterator i = all.begin(); i != all.end(); ++i) {
+		(*i)->set_sensitive (s);
+	}
 
-		/* if there is an accelerator, it should always be sensitive
-		   to allow for keyboard ops on entered regions.
-		*/
+	_all_region_actions_sensitized = s;
+}
 
-		bool known = ActionManager::lookup_entry (accel_path, key);
+/** Sensitize region-based actions based on the selection ONLY, ignoring the entered_regionview.
+ *  This method should be called just before displaying a Region menu.  When a Region menu is not
+ *  currently being shown, all region actions are sensitized so that hotkey-triggered actions
+ *  on entered_regionviews work without having to check sensitivity every time the selection or
+ *  entered_regionview changes.
+ *
+ *  This method also sets up toggle action state as appropriate.
+ */
+void
+Editor::sensitize_the_right_region_actions ()
+{
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+	sensitize_all_region_actions (!rs.empty ());
 
-		if (known && ((key.get_key() != GDK_VoidSymbol) && (key.get_key() != 0))) {
-			(*x)->set_sensitive (true);
+	_ignore_region_action = true;
+	
+	/* Look through the regions that are selected and make notes about what we have got */
+	
+	bool have_audio = false;
+	bool have_midi = false;
+	bool have_locked = false;
+	bool have_unlocked = false;
+	bool have_position_lock_style_audio = false;
+	bool have_position_lock_style_music = false;
+	bool have_muted = false;
+	bool have_unmuted = false;
+	bool have_opaque = false;
+	bool have_non_opaque = false;
+	bool have_not_at_natural_position = false;
+	bool have_envelope_visible = false;
+	bool have_envelope_invisible = false;
+	bool have_envelope_active = false;
+	bool have_envelope_inactive = false;
+	bool have_non_unity_scale_amplitude = false;
+
+	for (list<RegionView*>::const_iterator i = rs.begin(); i != rs.end(); ++i) {
+
+		boost::shared_ptr<Region> r = (*i)->region ();
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
+		
+		if (ar) {
+			have_audio = true;
+		}
+		
+		if (boost::dynamic_pointer_cast<MidiRegion> (r)) {
+			have_midi = true;
+		}
+
+		if (r->locked()) {
+			have_locked = true;
 		} else {
-			(*x)->set_sensitive (have_selected_regions);
+			have_unlocked = true;
+		}
+
+		if (r->position_lock_style() == MusicTime) {
+			have_position_lock_style_music = true;
+		} else {
+			have_position_lock_style_audio = true;
+		}
+
+		if (r->muted()) {
+			have_muted = true;
+		} else {
+			have_unmuted = true;
+		}
+
+		if (r->opaque()) {
+			have_opaque = true;
+		} else {
+			have_non_opaque = true;
+		}
+
+		if (!r->at_natural_position()) {
+			have_not_at_natural_position = true;
+		}
+
+		if (ar) {
+                        /* its a bit unfortunate that "envelope visible" is a view-only
+                           property. we have to find the regionview to able to check
+                           its current setting.
+                        */
+
+                        have_envelope_invisible = true;
+
+                        if (*i) {
+                                AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
+                                if (arv && arv->envelope_visible()) {
+                                        have_envelope_visible = true;
+                                }
+			}
+
+			if (ar->envelope_active()) {
+				have_envelope_active = true;
+			} else {
+				have_envelope_inactive = true;
+			}
+
+			if (ar->scale_amplitude() != 1) {
+				have_non_unity_scale_amplitude = true;
+			}
 		}
 	}
+
+	if (rs.size() > 1) {
+		_region_actions->get_action("show-region-list-editor")->set_sensitive (false);
+		_region_actions->get_action("show-region-properties")->set_sensitive (false);
+		_region_actions->get_action("rename-region")->set_sensitive (false);
+	} else if (rs.size() == 1) {
+		_region_actions->get_action("add-range-markers-from-region")->set_sensitive (false);
+		_region_actions->get_action("close-region-gaps")->set_sensitive (false);
+	} 
+
+
+	if (!have_midi) {
+		_region_actions->get_action("show-region-list-editor")->set_sensitive (false);
+		_region_actions->get_action("quantize-region")->set_sensitive (false);
+		_region_actions->get_action("fork-region")->set_sensitive (false);
+	}
+
+	if (_edit_point == EditAtMouse) {
+		_region_actions->get_action("set-region-sync-position")->set_sensitive (false);
+		_region_actions->get_action("trim-front")->set_sensitive (false);
+		_region_actions->get_action("trim-back")->set_sensitive (false);
+		_region_actions->get_action("split-region")->set_sensitive (false);
+		_region_actions->get_action("place-transient")->set_sensitive (false);
+	}
+
+	if (have_audio) {
+		
+		if (have_envelope_visible && !have_envelope_invisible) {
+			Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-gain-envelope-visible"))->set_active ();
+		} else if (have_envelope_visible && have_envelope_invisible) {
+//			_region_actions->get_action("toggle-region-gain-envelope-visible")->set_inconsistent ();
+		}
+		
+		if (have_envelope_active && !have_envelope_inactive) {
+			Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-gain-envelope-active"))->set_active ();
+		} else if (have_envelope_active && have_envelope_inactive) {
+//			_region_actions->get_action("toggle-region-gain-envelope-active")->set_inconsistent ();
+		}
+	
+	} else {
+		
+		_region_actions->get_action("analyze-region")->set_sensitive (false);
+		_region_actions->get_action("reset-region-gain-envelopes")->set_sensitive (false);
+		_region_actions->get_action("toggle-region-gain-envelope-visible")->set_sensitive (false);
+		_region_actions->get_action("toggle-region-gain-envelope-active")->set_sensitive (false);
+		
+	}
+
+	if (!have_non_unity_scale_amplitude || !have_audio) {
+		_region_actions->get_action("reset-region-scale-amplitude")->set_sensitive (false);
+	}
+		
+	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock"))->set_active (have_locked && !have_unlocked);
+	if (have_locked && have_unlocked) {
+//		_region_actions->get_action("toggle-region-lock")->set_inconsistent ();
+	}
+
+	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock-style"))->set_active (have_position_lock_style_music && !have_position_lock_style_audio);
+		
+	if (have_position_lock_style_music && have_position_lock_style_audio) {
+//		_region_actions->get_action("toggle-region-lock-style")->set_inconsistent ();
+	}
+
+	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-mute"))->set_active (have_muted && !have_unmuted);
+	if (have_muted && have_unmuted) {
+//		_region_actions->get_action("toggle-region-mute")->set_inconsistent ();
+	}
+        
+	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-opaque-region"))->set_active (have_opaque && !have_non_opaque);
+	if (have_opaque && have_non_opaque) {
+//			_region_actions->get_action("toggle-opaque-region")->set_inconsistent ();
+	}
+
+	if (!have_not_at_natural_position) {
+		_region_actions->get_action("naturalize-region")->set_sensitive (false);
+	}
+
+	/* XXX: should also check that there is a track of the appropriate type for the selected region */
+	if (_edit_point == EditAtMouse || _regions->get_single_selection() == 0 || selection->tracks.empty()) {
+		_region_actions->get_action("insert-region-from-region-list")->set_sensitive (false);
+	} else {
+		_region_actions->get_action("insert-region-from-region-list")->set_sensitive (true);
+	}
+
+	_ignore_region_action = false;
+	
+	_all_region_actions_sensitized = false;
 }
 
 
@@ -969,10 +1151,15 @@ Editor::region_selection_changed ()
                 _regions->set_selected (selection->regions);
         }
 
-	sensitize_the_right_region_actions (!selection->regions.empty());
-
 	_regions->block_change_connection (false);
 	editor_regions_selection_changed_connection.block(false);
+
+	if (!_all_region_actions_sensitized) {
+		/* This selection change might have changed what region actions
+		   are allowed, so sensitize them all in case a key is pressed.
+		*/
+		sensitize_all_region_actions (true);
+	}
 }
 
 void

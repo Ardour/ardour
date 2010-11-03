@@ -158,9 +158,9 @@
 	       </menu>
 	       <menu action="FadeMenu">
 		   <menuitem action='set-fade-in-length'/>
-		   <menuitem action='toggle-fade-in-active'/>
+		   <menuitem action='toggle-region-fade-in'/>
 		   <menuitem action='set-fade-out-length'/>
-		   <menuitem action='toggle-fade-out-active'/>
+		   <menuitem action='toggle-region-fade-out'/>
    		   <separator/>
 	           <menuitem action='toggle-selected-region-fades'/>
                    <menuitem action='toggle-region-fades'/>
@@ -203,19 +203,19 @@
 	</menu>
 
 	<menu action='RegionMenu'>
-	      <menuitem action='insert-region'/>
+	      <menuitem action='insert-region-from-region-list'/>
 	      <menuitem action='rename-region'/>
 	      <menuitem action='auto-rename-region'/>
 	      <menuitem action='raise-region'/>
 	      <menuitem action='lower-region'/>
 	      <menuitem action='naturalize-region'/>
-	      <menuitem action='lock-region'/>
+	      <menuitem action='toggle-region-lock'/>
 	      <menuitem action='set-region-sync-position'/>
 	      <menuitem action='remove-region-sync'/>
-              <menuitem action='mute-unmute-region'/>
+              <menuitem action='toggle-region-mute'/>
 	      <separator/>       
               <menuitem action='reverse-region'/>    
-	      <menuitem action='monoize-region'/>
+	      <menuitem action='split-multichannel-region'/>
 	      <menuitem action='normalize-region'/>
 	      <menuitem action='boost-region-gain'/>
 	      <menuitem action='cut-region-gain'/>      		   
@@ -278,7 +278,7 @@
 	      <menuitem action='ToggleKeyEditor'/>
 	      <menuitem action='ToggleThemeManager'/>
 	      <menuitem action='ToggleBigClock'/>
-	      <menuitem action='toggle-rhythm-ferret'/>
+	      <menuitem action='show-rhythm-ferret'/>
 	</menu>
 
         <menu name='Options' action='Options'>

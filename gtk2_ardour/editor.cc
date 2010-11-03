@@ -735,6 +735,9 @@ Editor::Editor ()
 
 	TimeAxisView::CatchDeletion.connect (*this, invalidator (*this), ui_bind (&Editor::timeaxisview_deleted, this, _1), gui_context());
 
+	_ignore_region_action = false;
+	_popup_region_menu_item = 0;
+
 	constructed = true;
 	instant_save ();
 
@@ -786,6 +789,10 @@ Editor::catch_vanishing_regionview (RegionView *rv)
 	if (entered_regionview == rv) {
 		set_entered_regionview (0);
 	}
+
+	if (!_all_region_actions_sensitized) {
+		sensitize_all_region_actions (true);
+	}
 }
 
 void
@@ -801,6 +808,13 @@ Editor::set_entered_regionview (RegionView* rv)
 
 	if ((entered_regionview = rv) != 0) {
 		entered_regionview->entered (internal_editing ());
+	}
+
+	if (!_all_region_actions_sensitized) {
+		/* This RegionView entry might have changed what region actions
+		   are allowed, so sensitize them all in case a key is pressed.
+		*/
+		sensitize_all_region_actions (true);
 	}
 }
 
@@ -1079,9 +1093,6 @@ Editor::set_session (Session *t)
 
 	compute_fixed_ruler_scale ();
 
-	/* there are never any selected regions at startup */
-	sensitize_the_right_region_actions (false);
-
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	set_state (*node, Stateful::loading_state_version);
 
@@ -1187,7 +1198,20 @@ Editor::set_session (Session *t)
 	/* register for undo history */
 	_session->register_with_memento_command_factory(_id, this);
 
+	ActionManager::ui_manager->signal_pre_activate().connect (sigc::mem_fun (*this, &Editor::action_pre_activated));
+
 	start_updating_meters ();
+}
+
+void
+Editor::action_pre_activated (Glib::RefPtr<Action> const & a)
+{
+	if (a->get_name() == "RegionMenu") {
+		/* When the region menu is opened, we setup the actions so that they look right
+		   in the menu.
+		*/
+		sensitize_the_right_region_actions ();
+	}
 }
 
 void
@@ -1614,24 +1638,7 @@ Editor::build_track_region_context_menu (framepos_t frame)
 		if ((tr = rtv->track()) && ((pl = tr->playlist())) && !internal_editing()) {
                         framepos_t framepos = (framepos_t) floor ((double)frame * tr->speed());
                         uint32_t regions_at = pl->count_regions_at (framepos);
-                        list<boost::shared_ptr<Region> > regions_for_menu;
-
- 			if (selection->regions.size() > 1) {
- 				// there's already a multiple selection: just add a
- 				// single region context menu that will act on all
- 				// selected regions
-
-				for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-					regions_for_menu.push_back ((*i)->region ());
-				}
-                        } else {
-                                boost::shared_ptr<Region> top_region = pl->top_region_at (framepos);
-                                if (top_region) {
-                                        regions_for_menu.push_back (top_region);
-                                }
-                        }
-
-                        add_region_context_items (rtv->view(), regions_for_menu, edit_items, framepos, regions_at > 1);
+                        add_region_context_items (edit_items, regions_at > 1);
 		}
 	}
 
@@ -1668,24 +1675,7 @@ Editor::build_track_crossfade_context_menu (framepos_t frame)
 
 			framepos_t framepos = (framepos_t) floor ((double)frame * tr->speed());
 			uint32_t regions_at = pl->count_regions_at (framepos);
-                        list<boost::shared_ptr<Region> > regions_for_menu;
-
-			if (selection->regions.size() > 1) {
- 				// there's already a multiple selection: just add a
- 				// single region context menu that will act on all
- 				// selected regions
-
-				for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-					regions_for_menu.push_back ((*i)->region ());
-				}
-                        } else {
-                                boost::shared_ptr<Region> top_region = pl->top_region_at (framepos);
-                                if (top_region) {
-                                        regions_for_menu.push_back (top_region);
-                                }
-                        }
-                        
-                        add_region_context_items (atv->audio_view(), regions_for_menu, edit_items, framepos, regions_at > 1);
+                        add_region_context_items (edit_items, regions_at > 1);
 		}
 	}
 
@@ -1695,7 +1685,7 @@ Editor::build_track_crossfade_context_menu (framepos_t frame)
 }
 
 void
-Editor::analyze_region_selection()
+Editor::analyze_region_selection ()
 {
 	if (analysis_window == 0) {
 		analysis_window = new AnalysisWindow();
@@ -1805,294 +1795,10 @@ Editor::xfade_edit_right_region ()
 }
 
 void
-Editor::add_region_context_items (StreamView* sv, list<boost::shared_ptr<Region> > regions, Menu_Helpers::MenuList& edit_items,
-                                  framepos_t position, bool multiple_regions_at_position)
+Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, bool multiple_regions_at_position)
 {
 	using namespace Menu_Helpers;
-	Gtk::MenuItem* foo_item;
-	Menu     *region_menu = manage (new Menu);
-	MenuList& items       = region_menu->items();
-	region_menu->set_name ("ArdourContextMenu");
-
-	/* Look through the regions that we are handling and make notes about what we have got */
 	
-	bool have_audio = false;
-	bool have_midi = false;
-	bool have_locked = false;
-	bool have_unlocked = false;
-	bool have_position_lock_style_audio = false;
-	bool have_position_lock_style_music = false;
-	bool have_muted = false;
-	bool have_unmuted = false;
-	bool have_opaque = false;
-	bool have_non_opaque = false;
-	bool have_not_at_natural_position = false;
-	bool have_envelope_visible = false;
-	bool have_envelope_invisible = false;
-	bool have_envelope_active = false;
-	bool have_envelope_inactive = false;
-	bool have_non_unity_scale_amplitude = false;
-
-	for (list<boost::shared_ptr<Region> >::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*i);
-		if (ar) {
-			have_audio = true;
-		}
-		if (boost::dynamic_pointer_cast<MidiRegion> (*i)) {
-			have_midi = true;
-		}
-
-		if ((*i)->locked()) {
-			have_locked = true;
-		} else {
-			have_unlocked = true;
-		}
-
-		if ((*i)->position_lock_style() == MusicTime) {
-			have_position_lock_style_music = true;
-		} else {
-			have_position_lock_style_audio = true;
-		}
-
-		if ((*i)->muted()) {
-			have_muted = true;
-		} else {
-			have_unmuted = true;
-		}
-
-		if ((*i)->opaque()) {
-			have_opaque = true;
-		} else {
-			have_non_opaque = true;
-		}
-
-		if (!(*i)->at_natural_position()) {
-			have_not_at_natural_position = true;
-		}
-
-		if (ar) {
-                        /* its a bit unfortunate that "envelope visible" is a view-only
-                           property. we have to find the regionview to able to check
-                           its current setting.
-                        */
-
-			RegionView* rv = sv->find_view (ar);
-                        have_envelope_invisible = true;
-
-                        if (rv) {
-                                AudioRegionView* arv = dynamic_cast<AudioRegionView*> (rv);
-                                if (arv && arv->envelope_visible()) {
-                                        have_envelope_visible = true;
-                                }
-			}
-
-			if (ar->envelope_active()) {
-				have_envelope_active = true;
-			} else {
-				have_envelope_inactive = true;
-			}
-
-			if (ar->scale_amplitude() != 1) {
-				have_non_unity_scale_amplitude = true;
-			}
-		}
-	}
-
-	if (regions.size() == 1) {
-
-		/* when this particular menu pops up, make the relevant region
-		   become selected.
-		*/
-
-		region_menu->signal_map_event().connect (
-			sigc::bind (sigc::mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, boost::weak_ptr<Region> (regions.front()))
-			);
-
-		items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &Editor::rename_region)));
-		
-		if (have_midi) {
-			items.push_back (MenuElem (_("List Editor..."), sigc::mem_fun(*this, &Editor::show_midi_list_editor)));
-		}
-		
-		items.push_back (MenuElem (_("Region Properties..."), sigc::mem_fun(*this, &Editor::edit_region)));
-	}
-
-	items.push_back (MenuElem (_("Raise to Top Layer"), sigc::mem_fun(*this, &Editor::raise_region_to_top)));
-	items.push_back (MenuElem (_("Lower to Bottom Layer"), sigc::mem_fun  (*this, &Editor::lower_region_to_bottom)));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Define Sync Point"), sigc::mem_fun(*this, &Editor::set_region_sync_from_edit_point)));
-	if (_edit_point == EditAtMouse) {
-		items.back ().set_sensitive (false);
-	}
-	items.push_back (MenuElem (_("Remove Sync Point"), sigc::mem_fun(*this, &Editor::remove_region_sync)));
-	items.push_back (SeparatorElem());
-
-	items.push_back (MenuElem (_("Audition"), sigc::mem_fun(*this, &Editor::play_selected_region)));
-	items.push_back (MenuElem (_("Export..."), sigc::mem_fun(*this, &Editor::export_region)));
-	items.push_back (MenuElem (_("Bounce"), sigc::mem_fun(*this, &Editor::bounce_region_selection)));
-
-	if (have_audio) {
-		items.push_back (MenuElem (_("Spectral Analysis..."), sigc::mem_fun(*this, &Editor::analyze_region_selection)));
-	}
-
-	items.push_back (SeparatorElem());
-
-	items.push_back (CheckMenuElem (_("Lock")));
-	CheckMenuItem* region_lock_item = static_cast<CheckMenuItem*>(&items.back());
-	if (have_locked && !have_unlocked) {
-		region_lock_item->set_active();
-	} else if (have_locked && have_unlocked) {
-		region_lock_item->set_inconsistent ();
-	}
-	region_lock_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_region_lock));
-
-	items.push_back (CheckMenuElem (_("Glue to Bars and Beats")));
-	CheckMenuItem* bbt_glue_item = static_cast<CheckMenuItem*>(&items.back());
-
-	if (have_position_lock_style_music && !have_position_lock_style_audio) {
-		bbt_glue_item->set_active ();
-	} else if (have_position_lock_style_music && have_position_lock_style_audio) {
-		bbt_glue_item->set_inconsistent ();
-	}
-
-	bbt_glue_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_region_lock_style));
-
-	items.push_back (CheckMenuElem (_("Mute")));
-	CheckMenuItem* region_mute_item = static_cast<CheckMenuItem*>(&items.back());
-
-	if (have_muted && !have_unmuted) {
-		region_mute_item->set_active();
-	} else if (have_muted && have_unmuted) {
-		region_mute_item->set_inconsistent ();
-	}
-        
-	region_mute_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_region_mute));
-	
-        items.push_back (MenuElem (_("Transpose..."), mem_fun(*this, &Editor::pitch_shift_regions)));
-
-	if (!Profile->get_sae()) {
-		items.push_back (CheckMenuElem (_("Opaque")));
-		CheckMenuItem* region_opaque_item = static_cast<CheckMenuItem*>(&items.back());
-		if (have_opaque && !have_non_opaque) {
-			region_opaque_item->set_active();
-		} else if (have_opaque && have_non_opaque) {
-			region_opaque_item->set_inconsistent ();
-		}
-		region_opaque_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_region_opaque));
-	}
-
-	items.push_back (CheckMenuElem (_("Original Position"), sigc::mem_fun(*this, &Editor::naturalize)));
-	if (!have_not_at_natural_position) {
-		items.back().set_sensitive (false);
-	}
-
-	items.push_back (SeparatorElem());
-
-	if (have_audio) {
-
-		if (!Profile->get_sae()) {
-			items.push_back (MenuElem (_("Reset Envelope"), sigc::mem_fun(*this, &Editor::reset_region_gain_envelopes)));
-
-			items.push_back (CheckMenuElem (_("Envelope Visible")));
-			CheckMenuItem* region_envelope_visible_item = static_cast<CheckMenuItem*> (&items.back());
-			if (have_envelope_visible && !have_envelope_invisible) {
-				region_envelope_visible_item->set_active ();
-			} else if (have_envelope_visible && have_envelope_invisible) {
-				region_envelope_visible_item->set_inconsistent ();
-			}
-			region_envelope_visible_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_gain_envelope_visibility));
-
-			items.push_back (CheckMenuElem (_("Envelope Active")));
-			CheckMenuItem* region_envelope_active_item = static_cast<CheckMenuItem*> (&items.back());
-
-			if (have_envelope_active && !have_envelope_inactive) {
-				region_envelope_active_item->set_active ();
-			} else if (have_envelope_active && have_envelope_inactive) {
-				region_envelope_active_item->set_inconsistent ();
-			}
-
-			region_envelope_active_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_gain_envelope_active));
-			items.push_back (SeparatorElem());
-		}
-
-		items.push_back (MenuElem (_("Normalize..."), sigc::mem_fun(*this, &Editor::normalize_region)));
-		if (have_non_unity_scale_amplitude) {
-			items.push_back (MenuElem (_("Reset Gain"), sigc::mem_fun(*this, &Editor::reset_region_scale_amplitude)));
-		}
-
-	} else if (have_midi) {
-		items.push_back (MenuElem (_("Quantize"), sigc::mem_fun(*this, &Editor::quantize_region)));
-		items.push_back (MenuElem (_("Fork"), sigc::mem_fun(*this, &Editor::fork_region)));
-		items.push_back (SeparatorElem());
-	}
-
-	items.push_back (MenuElem (_("Strip Silence..."), sigc::mem_fun (*this, &Editor::strip_region_silence)));
-	items.push_back (MenuElem (_("Reverse"), sigc::mem_fun(*this, &Editor::reverse_region)));
-	items.push_back (SeparatorElem());
-
-	/* range related stuff */
-
-	items.push_back (MenuElem (_("Add Single Range"), sigc::mem_fun (*this, &Editor::add_location_from_audio_region)));
-	items.push_back (MenuElem (_("Add Range Markers"), sigc::mem_fun (*this, &Editor::add_locations_from_audio_region)));
-	if (selection->regions.size() < 2) {
-		items.back().set_sensitive (false);
-	}
-
-	items.push_back (MenuElem (_("Set Range Selection"), sigc::mem_fun (*this, &Editor::set_selection_from_region)));
-	items.push_back (SeparatorElem());
-
-	/* Nudge region */
-
-	Menu *nudge_menu = manage (new Menu());
-	MenuList& nudge_items = nudge_menu->items();
-	nudge_menu->set_name ("ArdourContextMenu");
-
-	nudge_items.push_back (MenuElem (_("Nudge Forward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_forward), false, false))));
-	nudge_items.push_back (MenuElem (_("Nudge Backward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_backward), false, false))));
-	nudge_items.push_back (MenuElem (_("Nudge Forward by Capture Offset"), (sigc::mem_fun(*this, &Editor::nudge_forward_capture_offset))));
-	nudge_items.push_back (MenuElem (_("Nudge Backward by Capture Offset"), (sigc::mem_fun(*this, &Editor::nudge_backward_capture_offset))));
-
-	items.push_back (MenuElem (_("Nudge"), *nudge_menu));
-	items.push_back (SeparatorElem());
-
-	Menu *trim_menu = manage (new Menu);
-	MenuList& trim_items = trim_menu->items();
-	trim_menu->set_name ("ArdourContextMenu");
-
-	trim_items.push_back (MenuElem (_("Start to Edit Point"), sigc::mem_fun(*this, &Editor::trim_region_from_edit_point)));
-	foo_item = &trim_items.back();
-	if (_edit_point == EditAtMouse) {
-		foo_item->set_sensitive (false);
-	}
-	trim_items.push_back (MenuElem (_("Edit Point to End"), sigc::mem_fun(*this, &Editor::trim_region_to_edit_point)));
-	foo_item = &trim_items.back();
-	if (_edit_point == EditAtMouse) {
-		foo_item->set_sensitive (false);
-	}
-	trim_items.push_back (MenuElem (_("Trim to Loop"), sigc::mem_fun(*this, &Editor::trim_region_to_loop)));
-	trim_items.push_back (MenuElem (_("Trim to Punch"), sigc::mem_fun(*this, &Editor::trim_region_to_punch)));
-
-	items.push_back (MenuElem (_("Trim"), *trim_menu));
-	items.push_back (SeparatorElem());
-
-	items.push_back (MenuElem (_("Split"), (sigc::mem_fun(*this, &Editor::split))));
-	region_edit_menu_split_item = &items.back();
-
-	if (_edit_point == EditAtMouse) {
-		region_edit_menu_split_item->set_sensitive (false);
-	}
-
-	if (have_audio) {
-		items.push_back (MenuElem (_("Make Mono Regions"), (sigc::mem_fun(*this, &Editor::split_multichannel_region))));
-		region_edit_menu_split_multichannel_item = &items.back();
-	}
-
-	items.push_back (MenuElem (_("Duplicate"), (sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), false))));
-	items.push_back (MenuElem (_("Multi-Duplicate..."), (sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), true))));
-	items.push_back (MenuElem (_("Fill Track"), (sigc::mem_fun(*this, &Editor::region_fill_track))));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::remove_selected_regions)));
-
 	/* OK, stick the region submenu at the top of the list, and then add
 	   the standard items.
 	*/
@@ -2101,17 +1807,27 @@ Editor::add_region_context_items (StreamView* sv, list<boost::shared_ptr<Region>
 	   meaning for menu titles.
 	*/
 
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+	
 	string::size_type pos = 0;
-	string menu_item_name = (regions.size() == 1) ? regions.front()->name() : _("Selected Regions");
+	string menu_item_name = (rs.size() == 1) ? rs.front()->region()->name() : _("Selected Regions");
 
 	while ((pos = menu_item_name.find ("_", pos)) != string::npos) {
 		menu_item_name.replace (pos, 1, "__");
 		pos += 2;
 	}
 
-	edit_items.push_back (MenuElem (menu_item_name, *region_menu));
+	if (_popup_region_menu_item == 0) {
+		_popup_region_menu_item = new MenuItem (menu_item_name);
+		_popup_region_menu_item->set_submenu (*dynamic_cast<Menu*> (ActionManager::get_widget (X_("/PopupRegionMenu"))));
+		_popup_region_menu_item->show ();
+	} else {
+		_popup_region_menu_item->set_label (menu_item_name);
+	}
+
+	edit_items.push_back (*_popup_region_menu_item);
 	if (multiple_regions_at_position && (layering_order_editor == 0 || !layering_order_editor->is_visible ())) {
-		edit_items.push_back (MenuElem (_("Choose Top Region..."), (bind (mem_fun(*this, &Editor::change_region_layering_order), position))));
+		edit_items.push_back (action_menu_item ("choose-top-region"));
 	}
 	edit_items.push_back (SeparatorElem());
 }
@@ -2179,7 +1895,7 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	play_items.push_back (MenuElem (_("Play From Start"), sigc::mem_fun(*this, &Editor::play_from_start)));
 	play_items.push_back (MenuElem (_("Play Region"), sigc::mem_fun(*this, &Editor::play_selected_region)));
 	play_items.push_back (SeparatorElem());
-	play_items.push_back (MenuElem (_("Loop Region"), sigc::mem_fun(*this, &Editor::loop_selected_region)));
+	play_items.push_back (MenuElem (_("Loop Region"), sigc::bind (sigc::mem_fun (*this, &Editor::set_loop_from_region), true)));
 
 	edit_items.push_back (MenuElem (_("Play"), *play_menu));
 
@@ -2219,8 +1935,8 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 
 	cutnpaste_items.push_back (SeparatorElem());
 
-	cutnpaste_items.push_back (MenuElem (_("Align"), sigc::bind (sigc::mem_fun(*this, &Editor::align), ARDOUR::SyncPoint)));
-	cutnpaste_items.push_back (MenuElem (_("Align Relative"), sigc::bind (sigc::mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint)));
+	cutnpaste_items.push_back (MenuElem (_("Align"), sigc::bind (sigc::mem_fun (*this, &Editor::align_regions), ARDOUR::SyncPoint)));
+	cutnpaste_items.push_back (MenuElem (_("Align Relative"), sigc::bind (sigc::mem_fun (*this, &Editor::align_regions_relative), ARDOUR::SyncPoint)));
 
 	edit_items.push_back (MenuElem (_("Edit"), *cutnpaste_menu));
 
@@ -3529,13 +3245,10 @@ Editor::duplicate_dialog (bool with_dialog)
 		}
 	}
 
-	RegionSelection rs = get_regions_for_action ();
+	RegionSelection rs = get_regions_from_selection_and_entered ();
 
-	if (mouse_mode != MouseRange) {
-
-		if (rs.empty()) {
-			return;
-		}
+	if (mouse_mode != MouseRange && rs.empty()) {
+		return;
 	}
 
 	if (with_dialog) {
@@ -4928,8 +4641,6 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
 }
 
 /** Get regions using the following conditions:
- *  If check_edit_position == false, then return the selected regions.
- *  Otherwise:
  *    1.  If the edit point is `mouse':
  *          if the mouse is over a selected region, or no region, return all selected regions.
  *          if the mouse is over an unselected region, return just that region.
@@ -4945,12 +4656,8 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
  */
 
 RegionSelection
-Editor::get_regions_for_action (bool check_edit_point)
+Editor::get_regions_from_selection_and_edit_point ()
 {
-	if (!check_edit_point) {
-		return selection->regions;
-	}
-
 	if (_edit_point == EditAtMouse) {
 		if (entered_regionview == 0 || selection->regions.contains (entered_regionview)) {
 			return selection->regions;
@@ -4985,6 +4692,19 @@ Editor::get_regions_for_action (bool check_edit_point)
 		/* now find regions that are at the edit position on those tracks */
 		framepos_t const where = get_preferred_edit_position ();
 		get_regions_at (rs, where, tracks);
+	}
+
+	return rs;
+}
+
+
+RegionSelection
+Editor::get_regions_from_selection_and_entered ()
+{
+	RegionSelection rs = selection->regions;
+	
+	if (rs.empty() && entered_regionview) {
+		rs.add (entered_regionview);
 	}
 
 	return rs;
@@ -5700,8 +5420,10 @@ Editor::show_editor_list (bool yn)
 }
 
 void
-Editor::change_region_layering_order (framepos_t position)
+Editor::change_region_layering_order ()
 {
+	framepos_t const position = get_preferred_edit_position ();
+	
         if (!clicked_routeview) {
                 if (layering_order_editor) {
                         layering_order_editor->hide ();
@@ -5730,10 +5452,10 @@ Editor::change_region_layering_order (framepos_t position)
 }
 
 void
-Editor::update_region_layering_order_editor (framepos_t frame)
+Editor::update_region_layering_order_editor ()
 {
 	if (layering_order_editor && layering_order_editor->is_visible ()) {
-		change_region_layering_order (frame);
+		change_region_layering_order ();
 	}
 }
 
@@ -5753,3 +5475,10 @@ Editor::setup_fade_images ()
 	_fade_out_images[FadeSlow] = new Gtk::Image (get_icon_path (X_("crossfade-out-long-cut")));
 }
 
+
+/** @return Gtk::manage()d menu item for a given action from `editor_actions' */
+Gtk::MenuItem&
+Editor::action_menu_item (std::string const & name)
+{
+	return *manage (editor_actions->get_action(name)->create_menu_item ());
+}

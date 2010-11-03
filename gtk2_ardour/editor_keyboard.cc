@@ -79,38 +79,6 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 }
 
 void
-Editor::kbd_mute_unmute_region ()
-{
-	if (!selection->regions.empty ()) {
-
-		if (selection->regions.size() > 1) {
-			begin_reversible_command (_("mute regions"));
-		} else {
-			begin_reversible_command (_("mute region"));
-		}
-
-		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-
-			(*i)->region()->playlist()->clear_changes ();
-			(*i)->region()->set_muted (!(*i)->region()->muted ());
-			_session->add_command (new StatefulDiffCommand ((*i)->region()->playlist()));
-
-		}
-
-		commit_reversible_command ();
-
-	} else if (entered_regionview) {
-
-		begin_reversible_command (_("mute region"));
-                entered_regionview->region()->playlist()->clear_changes ();
-		entered_regionview->region()->set_muted (!entered_regionview->region()->muted());
-		_session->add_command (new StatefulDiffCommand (entered_regionview->region()->playlist()));
-		commit_reversible_command();
-
-	}
-}
-
-void
 Editor::kbd_do_brush (GdkEvent *ev)
 {
 	brush (event_frame (ev, 0, 0));

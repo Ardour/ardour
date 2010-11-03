@@ -63,7 +63,15 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("EditPointMenu"), _("Edit Point"));
 	ActionManager::register_action (editor_actions, X_("FadeMenu"), _("Fade"));
 	ActionManager::register_action (editor_actions, X_("LatchMenu"), _("Latch"));
-	ActionManager::register_action (editor_actions, X_("Layering"), _("Layering"));
+	ActionManager::register_action (editor_actions, X_("RegionMenu"), _("Region"));
+	ActionManager::register_action (editor_actions, X_("RegionMenuLayering"), _("Layering"));
+	ActionManager::register_action (editor_actions, X_("RegionMenuNudge"), _("Nudge"));
+	ActionManager::register_action (editor_actions, X_("RegionMenuTrim"), _("Trim"));
+	ActionManager::register_action (editor_actions, X_("RegionMenuGain"), _("Gain"));
+	ActionManager::register_action (editor_actions, X_("RegionMenuRanges"), _("Ranges"));
+	ActionManager::register_action (editor_actions, X_("RegionMenuFades"), _("Fades"));
+	ActionManager::register_action (editor_actions, X_("RegionMenuMIDI"), _("MIDI"));
+	ActionManager::register_action (editor_actions, X_("RegionMenuDuplicate"), _("Duplicate"));
 	ActionManager::register_action (editor_actions, X_("Link"), _("Link"));
 	ActionManager::register_action (editor_actions, X_("ZoomFocusMenu"), _("Zoom Focus"));
 	ActionManager::register_action (editor_actions, X_("KeyMouseActions"), _("Key Mouse"));
@@ -75,11 +83,9 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("Monitoring"), _("Monitoring"));
 	ActionManager::register_action (editor_actions, X_("MoveActiveMarkMenu"), _("Active Mark"));
 	ActionManager::register_action (editor_actions, X_("MovePlayHeadMenu"), _("Playhead"));
-	ActionManager::register_action (editor_actions, X_("NudgeRegionMenu"), _("Nudge"));
 	ActionManager::register_action (editor_actions, X_("PlayMenu"), _("Play"));
 	ActionManager::register_action (editor_actions, X_("PrimaryClockMenu"), _("Primary Clock"));
 	ActionManager::register_action (editor_actions, X_("Pullup"), _("Pullup / Pulldown"));
-	ActionManager::register_action (editor_actions, X_("RegionMenu"), _("Region"));
 	ActionManager::register_action (editor_actions, X_("RegionEditOps"), _("Region operations"));
 	ActionManager::register_action (editor_actions, X_("RegionGainMenu"), _("Gain"));
 	ActionManager::register_action (editor_actions, X_("RulerMenu"), _("Rulers"));
@@ -99,10 +105,11 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("TrackHeightMenu"), _("Height"));
 	ActionManager::register_action (editor_actions, X_("TrackMenu"), _("Track"));
 	ActionManager::register_action (editor_actions, X_("Tools"), _("Tools"));
-	ActionManager::register_action (editor_actions, X_("TrimMenu"), _("Trim"));
 	ActionManager::register_action (editor_actions, X_("View"), _("View"));
 	ActionManager::register_action (editor_actions, X_("ZoomFocus"), _("Zoom Focus"));
 	ActionManager::register_action (editor_actions, X_("ZoomMenu"), _("Zoom"));
+
+	register_region_actions ();
 
 	/* add named actions for the editor */
 
@@ -111,13 +118,6 @@ Editor::register_actions ()
 	act = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Editor::editor_list_button_toggled));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "toggle-selected-region-fade-in", _("Toggle Region Fade In"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_selected_region_fades), 1));;
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "toggle-selected-region-fade-out", _("Toggle Region Fade Out"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_selected_region_fades), -1));;
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "toggle-selected-region-fades", _("Toggle Region Fades"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_selected_region_fades), 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "playhead-to-next-region-boundary", _("Playhead to Next Region Boundary"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_to_next_region_boundary), true ));
@@ -237,11 +237,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "nudge-forward", _("Nudge Forward"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_forward), false, false));
-	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "nudge-next-forward", _("Nudge Next Forward"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_forward), true, false));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "nudge-backward", _("Nudge Backward"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_backward), false, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "nudge-next-backward", _("Nudge Next Backward"), sigc::bind (sigc::mem_fun(*this, &Editor::nudge_backward), true, false));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -310,88 +306,15 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "edit-to-playhead", _("Active Mark to Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_align), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "trim-front", _("Trim Start at Edit Point"), sigc::mem_fun(*this, &Editor::trim_region_front));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "trim-back", _("Trim End at Edit Point"), sigc::mem_fun(*this, &Editor::trim_region_back));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "trim-from-start", _("Start to Edit Point"), sigc::mem_fun(*this, &Editor::trim_region_from_edit_point));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "trim-to-end", _("Edit Point to End"), sigc::mem_fun(*this, &Editor::trim_region_to_edit_point));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "trim-region-to-loop", _("Trim to Loop"), sigc::mem_fun(*this, &Editor::trim_region_to_loop));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "trim-region-to-punch", _("Trim to Punch"), sigc::mem_fun(*this, &Editor::trim_region_to_punch));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-
 	act = ActionManager::register_action (editor_actions, "trim-to-previous-region", _("Trim to Previous"), sigc::mem_fun(*this, &Editor::trim_region_to_previous_region_end));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "trim-to-next-region", _("Trim to Next"), sigc::mem_fun(*this, &Editor::trim_region_to_next_region_start));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "set-loop-from-edit-range", _("Set Loop from Edit Range"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_edit_range), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "set-loop-from-region", _("Set Loop from Region"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_region), false));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "loop-region", _("Loop Region"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_region), true));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "set-punch-from-edit-range", _("Set Punch from Edit Range"), sigc::mem_fun(*this, &Editor::set_punch_from_edit_range));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "set-punch-from-region", _("Set Punch From Region"), sigc::mem_fun(*this, &Editor::set_punch_from_region));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "pitch-shift-region", _("Transpose"), sigc::mem_fun(*this, &Editor::pitch_shift_regions));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "toggle-opaque-region", _("Toggle Opaque"), sigc::mem_fun(*this, &Editor::toggle_region_opaque));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "add-range-marker-from-region", _("Add 1 Range Marker"), sigc::mem_fun(*this, &Editor::add_location_from_audio_region));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "add-range-markers-from-region", _("Add Range Marker(s)"), sigc::mem_fun(*this, &Editor::add_locations_from_audio_region));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "set-fade-in-length", _("Set Fade In Length"), sigc::bind (sigc::mem_fun(*this, &Editor::set_fade_length), true));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "toggle-fade-in-active", _("Toggle Fade In Active"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_fade_active), true));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "set-fade-out-length", _("Set Fade Out Length"), sigc::bind (sigc::mem_fun(*this, &Editor::set_fade_length), false));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "toggle-fade-out-active", _("Toggle Fade Out Active"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_fade_active), false));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "align-regions-start", _("Align Regions Start"), sigc::bind (sigc::mem_fun(*this, &Editor::align), ARDOUR::Start));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "align-regions-start-relative", _("Align Regions Start Relative"), sigc::bind (sigc::mem_fun(*this, &Editor::align_relative), ARDOUR::Start));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "align-regions-end", _("Align Regions End"), sigc::bind (sigc::mem_fun(*this, &Editor::align), ARDOUR::End));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "align-regions-end-relative", _("Align Regions End Relative"), sigc::bind (sigc::mem_fun(*this, &Editor::align_relative), ARDOUR::End));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "align-regions-sync", _("Align Regions Sync"), sigc::bind (sigc::mem_fun(*this, &Editor::align), ARDOUR::SyncPoint));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "align-regions-sync-relative", _("Align Regions Sync Relative"), sigc::bind (sigc::mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "play-from-edit-point", _("Play From Edit Point"), sigc::mem_fun(*this, &Editor::play_from_edit_point));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -399,9 +322,6 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "play-edit-range", _("Play Edit Range"), sigc::mem_fun(*this, &Editor::play_edit_range));
-	act = ActionManager::register_action (editor_actions, "play-selected-regions", _("Play Selected Region(s)"), sigc::mem_fun(*this, &Editor::play_selected_region));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "brush-at-mouse", _("Brush at Mouse"), sigc::mem_fun(*this, &Editor::kbd_brush));
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -410,81 +330,8 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "set-edit-point", _("Active Marker to Mouse"), sigc::mem_fun(*this, &Editor::set_edit_point));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "duplicate-region", _("Duplicate Region"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), false));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "multi-duplicate-region", _("Multi-Duplicate Region..."), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), true));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "duplicate-range", _("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "insert-region", _("Insert Region"), sigc::mem_fun(*this, &Editor::keyboard_insert_region_list_selection));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "normalize-region", _("Normalize Region..."), sigc::mem_fun(*this, &Editor::normalize_region));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "rename-region", _("Rename Region..."), sigc::mem_fun(*this, &Editor::rename_region));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "auto-rename-region", _("Auto-Rename Region"), sigc::mem_fun(*this, &Editor::rename_region));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "boost-region-gain", _("Boost Region Gain"), sigc::bind (sigc::mem_fun(*this, &Editor::adjust_region_scale_amplitude), true));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "cut-region-gain", _("Cut Region Gain"), sigc::bind (sigc::mem_fun(*this, &Editor::adjust_region_scale_amplitude), false));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "split-region", _("Split Region"), sigc::mem_fun(*this, &Editor::split));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "set-region-sync-position", _("Set Region Sync Position"), sigc::mem_fun(*this, &Editor::set_region_sync_from_edit_point));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "remove-region-sync", _("Remove Region Sync"), sigc::mem_fun(*this, &Editor::remove_region_sync));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "raise-region", _("Raise Region"), sigc::mem_fun(*this, &Editor::raise_region));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "lower-region", _("Lower Region"), sigc::mem_fun(*this, &Editor::lower_region));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "export-region", _("Export Region"), sigc::mem_fun(*this, &Editor::export_region));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (editor_actions, "lock-region", _("Lock Region"), sigc::mem_fun(*this, &Editor::toggle_region_lock));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (editor_actions, "glue-region", _("Glue Region to Bars and Beats"), sigc::mem_fun (*this, &Editor::toggle_region_lock_style));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "naturalize-region", _("Move to Original Position"), sigc::mem_fun (*this, &Editor::naturalize));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "reverse-region", _("Reverse"), sigc::mem_fun (*this, &Editor::reverse_region));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "monoize-region", _("Make Mono Regions"), (sigc::mem_fun(*this, &Editor::split_multichannel_region)));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "region-fill-track", _("Fill Track"), (sigc::mem_fun(*this, &Editor::region_fill_track)));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "mute-unmute-region", _("Mute/Unmute Region"), sigc::mem_fun(*this, &Editor::kbd_mute_unmute_region));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "snap-regions-to-grid", _("Snap Regions to Grid"), sigc::mem_fun(*this, &Editor::snap_regions_to_grid));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "close-region-gaps", _("Close Region Gaps"), sigc::mem_fun(*this, &Editor::close_region_gaps));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "place-transient", _("Place Transient"), sigc::mem_fun(*this, &Editor::place_transient));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);	
 
 	undo_action = act = ActionManager::register_action (editor_actions, "undo", _("Undo"), sigc::bind (sigc::mem_fun(*this, &Editor::undo), 1U));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -494,9 +341,6 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "export-audio", _("Export Audio"), sigc::mem_fun(*this, &Editor::export_audio));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "export-range", _("Export Range"), sigc::mem_fun(*this, &Editor::export_range));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "separate-under-region", _("Separate Under Selected Regions"), sigc::mem_fun(*this, &Editor::separate_under_selected_regions));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "editor-separate", _("Separate"), sigc::mem_fun(*this, &Editor::separate_region_from_selection));
@@ -526,22 +370,9 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "editor-paste", _("Paste"), sigc::mem_fun(*this, &Editor::keyboard_paste));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "quantize-region", _("Quantize Region"), sigc::mem_fun(*this, &Editor::quantize_region));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (editor_actions, "set-tempo-from-region", _("Set Tempo from Region=Bar"), sigc::mem_fun(*this, &Editor::use_region_as_bar));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "set-tempo-from-edit-range", _("Set Tempo from Edit Range=Bar"), sigc::mem_fun(*this, &Editor::use_range_as_bar));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "split-region-at-transients", _("Split Regions At Percussion Onsets"), sigc::mem_fun(*this, &Editor::split_region_at_transients));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "toggle-rhythm-ferret", _("Rhythm Ferret..."), sigc::mem_fun(*this, &Editor::show_rhythm_ferret));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (editor_actions, "toggle-log-window", _("Log"),
 			sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::toggle_errors));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -1444,3 +1275,281 @@ Editor::toggle_internal_editing ()
 		set_internal_edit (tact->get_active());
 	}
 }
+
+/* Convenience functions to slightly reduce verbosity below */
+
+static void
+reg_sens (RefPtr<ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot)
+{
+	RefPtr<Action> act = ActionManager::register_action (group, name, label, slot);
+	ActionManager::session_sensitive_actions.push_back (act);
+}
+
+static void
+toggle_reg_sens (RefPtr<ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot)
+{
+	RefPtr<Action> act = ActionManager::register_toggle_action (group, name, label, slot);
+	ActionManager::session_sensitive_actions.push_back (act);
+}
+
+void
+Editor::register_region_actions ()
+{
+	_region_actions = ActionGroup::create (X_("Region"));
+	
+	/* PART 1: actions that operate on the selection, and for which the edit point type and location is irrelevant */
+
+	/* Remove selected regions */
+	reg_sens (_region_actions, "remove-region", _("Remove"), sigc::mem_fun (*this, &Editor::remove_selected_regions));
+	
+	/* Offer dialogue box to rename the first selected region */
+	reg_sens (_region_actions, "rename-region", _("Rename..."), sigc::mem_fun (*this, &Editor::rename_region));
+	
+	/* Raise all selected regions by 1 layer */
+	reg_sens (_region_actions, "raise-region", _("Raise"), sigc::mem_fun (*this, &Editor::raise_region));
+
+	/* Raise all selected regions to the top */
+	reg_sens (_region_actions, "raise-region-to-top", _("Raise to Top"), sigc::mem_fun (*this, &Editor::raise_region_to_top));
+	
+	/* Lower all selected regions by 1 layer */
+	reg_sens (_region_actions, "lower-region", _("Lower"), sigc::mem_fun (*this, &Editor::lower_region));
+
+	/* Lower all selected regions to the bottom */
+	reg_sens (_region_actions, "lower-region-to-bottom", _("Lower to Bottom"), sigc::mem_fun (*this, &Editor::lower_region_to_bottom));
+	
+	/* Move selected regions to their original (`natural') position */
+	reg_sens (_region_actions, "naturalize-region", _("Move to Original Position"), sigc::mem_fun (*this, &Editor::naturalize_region));
+	
+	/* Toggle `locked' status of selected regions */
+	toggle_reg_sens (_region_actions, "toggle-region-lock", _("Lock"), sigc::mem_fun(*this, &Editor::toggle_region_lock));
+
+	toggle_reg_sens (
+		_region_actions,
+		"toggle-region-lock-style",
+		_("Glue to Bars and Beats"),
+		sigc::mem_fun (*this, &Editor::toggle_region_lock_style)
+		);
+	
+	/* Remove sync points from selected regions */
+	reg_sens (_region_actions, "remove-region-sync", _("Remove Sync"), sigc::mem_fun(*this, &Editor::remove_region_sync));
+	
+	/* Mute or unmute selected regions */
+	toggle_reg_sens (_region_actions, "toggle-region-mute", _("Mute"), sigc::mem_fun(*this, &Editor::toggle_region_mute));
+	
+	/* Open the normalize dialogue to operate on the selected regions */
+	reg_sens (_region_actions, "normalize-region", _("Normalize..."), sigc::mem_fun(*this, &Editor::normalize_region));
+	
+	/* Reverse selected regions */
+	reg_sens (_region_actions, "reverse-region", _("Reverse"), sigc::mem_fun (*this, &Editor::reverse_region));
+	
+	/* Split selected multi-channel regions into mono regions */
+	reg_sens (_region_actions, "split-multichannel-region", _("Make Mono Regions"), sigc::mem_fun (*this, &Editor::split_multichannel_region));
+	
+	/* Boost selected region gain */
+	reg_sens (_region_actions, "boost-region-gain", _("Boost Gain"), sigc::bind (sigc::mem_fun(*this, &Editor::adjust_region_gain), true));
+	
+	/* Cut selected region gain */
+	reg_sens (_region_actions, "cut-region-gain", _("Cut Gain"), sigc::bind (sigc::mem_fun(*this, &Editor::adjust_region_gain), false));
+	
+	/* Open the pitch shift dialogue for the selected regions */
+	reg_sens (_region_actions, "pitch-shift-region", _("Transpose"), sigc::mem_fun (*this, &Editor::pitch_shift_region));
+	
+	/* Toggle selected region opacity */
+	toggle_reg_sens (_region_actions, "toggle-opaque-region", _("Opaque"), sigc::mem_fun (*this, &Editor::toggle_opaque_region));
+	
+	/* Toggle active status of selected regions' fade in */
+	toggle_reg_sens (
+		_region_actions, "toggle-region-fade-in", _("Fade In"), sigc::bind (sigc::mem_fun (*this, &Editor::toggle_region_fades), 1)
+		);
+	
+	/* Toggle active status of selected regions' fade out */
+	toggle_reg_sens (
+		_region_actions, "toggle-region-fade-out", _("Fade Out"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_region_fades), -1)
+		);
+	
+	/* Toggle active status of selected regions' fade in and out */
+	toggle_reg_sens (
+		_region_actions, "toggle-region-fades", _("Fades"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_region_fades), 0)
+		);
+	
+	/* Open the dialogue to duplicate selected regions */
+	reg_sens (_region_actions, "duplicate-region", _("Duplicate"), sigc::bind (sigc::mem_fun (*this, &Editor::duplicate_dialog), false));
+	
+	/* Open the dialogue to duplicate selected regions multiple times */
+	reg_sens (
+		_region_actions,
+		"multi-duplicate-region",
+		_("Multi-Duplicate..."),
+		sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), true)
+		);
+	
+	/* Fill tracks with selected regions */
+	reg_sens (_region_actions, "region-fill-track", _("Fill Track"), sigc::mem_fun (*this, &Editor::region_fill_track));
+	
+	/* Set up the loop range from the selected regions */
+	reg_sens (
+		_region_actions, "set-loop-from-region", _("Set Loop Range"), sigc::bind (sigc::mem_fun (*this, &Editor::set_loop_from_region), false)
+		);
+	
+	/* Set up the loop range from the selected regions, and start playback of it */
+	reg_sens (_region_actions, "loop-region", _("Loop"), sigc::bind  (sigc::mem_fun(*this, &Editor::set_loop_from_region), true));
+	
+	/* Set the punch range from the selected regions */
+	reg_sens (_region_actions, "set-punch-from-region", _("Set Punch"), sigc::mem_fun (*this, &Editor::set_punch_from_region));
+	
+	/* Add a single range marker around all selected regions */
+	reg_sens (
+		_region_actions, "add-range-marker-from-region", _("Add 1 Range Marker"), sigc::mem_fun (*this, &Editor::add_location_from_region)
+		);
+	
+	/* Add a range marker around each selected region */
+	reg_sens (
+		_region_actions, "add-range-markers-from-region", _("Add Range Marker(s)"), sigc::mem_fun (*this, &Editor::add_locations_from_region)
+		);
+
+	/* Snap selected regions to the grid */
+	reg_sens (_region_actions, "snap-regions-to-grid", _("Snap to Grid"), sigc::mem_fun (*this, &Editor::snap_regions_to_grid));
+
+	/* Close gaps in selected regions */
+	reg_sens (_region_actions, "close-region-gaps", _("Close Gaps"), sigc::mem_fun (*this, &Editor::close_region_gaps));
+
+	/* Open the Rhythm Ferret dialogue for the selected regions */
+	reg_sens (_region_actions, "show-rhythm-ferret", _("Rhythm Ferret..."), sigc::mem_fun (*this, &Editor::show_rhythm_ferret));
+
+	/* Export the first selected region */
+	reg_sens (_region_actions, "export-region", _("Export..."), sigc::mem_fun (*this, &Editor::export_region));
+
+	/* Separate under selected regions: XXX not sure what this does */
+	reg_sens (
+		_region_actions,
+		"separate-under-region",
+		_("Separate Under"),
+		sigc::mem_fun (*this, &Editor::separate_under_selected_regions)
+		);
+
+	reg_sens (_region_actions, "set-fade-in-length", _("Set Fade In Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), true));
+	reg_sens (_region_actions, "set-fade-out-length", _("Set Fade Out Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), false));
+	reg_sens (_region_actions, "set-tempo-from-region", _("Set Tempo from Region = Bar"), sigc::mem_fun (*this, &Editor::set_tempo_from_region));
+
+	reg_sens (
+		_region_actions,
+		"split-region-at-transients",
+		_("Split at Percussion Onsets"),
+		sigc::mem_fun(*this, &Editor::split_region_at_transients)
+		);
+
+	/* Open the list editor dialogue for the selected regions */
+	reg_sens (_region_actions, "show-region-list-editor", _("List Editor..."), sigc::mem_fun (*this, &Editor::show_midi_list_editor));
+
+	/* Open the region properties dialogue for the selected regions */
+	reg_sens (_region_actions, "show-region-properties", _("Properties..."), sigc::mem_fun (*this, &Editor::show_region_properties));
+
+	reg_sens (_region_actions, "play-selected-regions", _("Play"), sigc::mem_fun(*this, &Editor::play_selected_region));
+
+	reg_sens (_region_actions, "bounce-region", _("Bounce"), sigc::mem_fun (*this, &Editor::bounce_region_selection));
+
+	reg_sens (_region_actions, "analyze-region", _("Spectral Analysis..."), sigc::mem_fun (*this, &Editor::analyze_region_selection));
+
+	reg_sens (_region_actions, "reset-region-gain-envelopes", _("Reset Envelope"), sigc::mem_fun (*this, &Editor::reset_region_gain_envelopes));
+
+	reg_sens (_region_actions, "reset-region-scale-amplitude", _("Reset Gain"), sigc::mem_fun (*this, &Editor::reset_region_scale_amplitude));
+
+	toggle_reg_sens (
+		_region_actions,
+		"toggle-region-gain-envelope-visible",
+		_("Envelope Visible"),
+		sigc::mem_fun (*this, &Editor::toggle_gain_envelope_visibility)
+		);
+
+	toggle_reg_sens (
+		_region_actions,
+		"toggle-region-gain-envelope-active",
+		_("Envelope Active"),
+		sigc::mem_fun (*this, &Editor::toggle_gain_envelope_active)
+		);
+
+	reg_sens (_region_actions, "quantize-region", _("Quantize"), sigc::mem_fun (*this, &Editor::quantize_region));
+	reg_sens (_region_actions, "fork-region", _("Fork"), sigc::mem_fun (*this, &Editor::fork_region));
+	reg_sens (_region_actions, "strip-region-silence", _("Strip Silence..."), sigc::mem_fun (*this, &Editor::strip_region_silence));
+	reg_sens (_region_actions, "set-selection-from-region", _("Set Range Selection"), sigc::mem_fun (*this, &Editor::set_selection_from_region));
+
+	reg_sens (_region_actions, "nudge-forward", _("Nudge Forward"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_forward), false, false));
+	reg_sens (_region_actions, "nudge-backward", _("Nudge Backward"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_backward), false, false));
+
+	reg_sens (
+		_region_actions,
+		"nudge-forward-by-capture-offset",
+		_("Nudge Forward by Capture Offset"),
+		sigc::mem_fun (*this, &Editor::nudge_forward_capture_offset)
+		);
+	
+	reg_sens (
+		_region_actions,
+		"nudge-backward-by-capture-offset",
+		_("Nudge Backward by Capture Offset"),
+		sigc::mem_fun (*this, &Editor::nudge_backward_capture_offset)
+		);
+
+	reg_sens (_region_actions, "trim-region-to-loop", _("Trim to Loop"), sigc::mem_fun (*this, &Editor::trim_region_to_loop));
+	reg_sens (_region_actions, "trim-region-to-punch", _("Trim to Punch"), sigc::mem_fun (*this, &Editor::trim_region_to_punch));
+	
+	/* PART 2: actions that are not related to the selection, but for which the edit point type and location is important */
+
+	reg_sens (
+		_region_actions,
+		"insert-region-from-region-list",
+		_("Insert Region From Region List"),
+		sigc::bind (sigc::mem_fun (*this, &Editor::insert_region_list_selection), 1)
+		);
+
+	/* PART 3: actions that operate on the selection and also require the edit point location */
+
+	reg_sens (_region_actions, "set-region-sync-position", _("Set Sync Position"), sigc::mem_fun (*this, &Editor::set_region_sync_position));
+	reg_sens (_region_actions, "place-transient", _("Place Transient"), sigc::mem_fun (*this, &Editor::place_transient));
+	reg_sens (_region_actions, "split-region", _("Split"), sigc::mem_fun (*this, &Editor::split_region));
+	reg_sens (_region_actions, "trim-front", _("Trim Start at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_front));
+	reg_sens (_region_actions, "trim-back", _("Trim End at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_back));
+
+	reg_sens (
+		_region_actions,
+		"align-regions-start",
+		_("Align Start"),
+		sigc::bind (sigc::mem_fun(*this, &Editor::align_regions), ARDOUR::Start)
+		);
+	
+	reg_sens (
+		_region_actions,
+		"align-regions-start-relative",
+		_("Align Start Relative"),
+		sigc::bind (sigc::mem_fun (*this, &Editor::align_regions_relative), ARDOUR::Start)
+		);
+	
+	reg_sens (_region_actions, "align-regions-end", _("Align End"), sigc::bind (sigc::mem_fun (*this, &Editor::align_regions), ARDOUR::End));
+
+	reg_sens (
+		_region_actions,
+		"align-regions-end-relative",
+		_("Align End Relative"),
+		sigc::bind (sigc::mem_fun(*this, &Editor::align_regions_relative), ARDOUR::End)
+		);
+
+	reg_sens (
+		_region_actions,
+		"align-regions-sync",
+		_("Align Sync"),
+		sigc::bind (sigc::mem_fun(*this, &Editor::align_regions), ARDOUR::SyncPoint)
+		);
+	
+	reg_sens (
+		_region_actions,
+		"align-regions-sync-relative",
+		_("Align Sync Relative"),
+		sigc::bind (sigc::mem_fun (*this, &Editor::align_regions_relative), ARDOUR::SyncPoint)
+		);
+
+	reg_sens (_region_actions, "choose-top-region", _("Choose Top..."), mem_fun (*this, &Editor::change_region_layering_order));
+
+	_all_region_actions_sensitized = true;
+
+	ActionManager::add_action_group (_region_actions);
+}		
