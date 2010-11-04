@@ -1053,7 +1053,6 @@ Editor::sensitize_the_right_region_actions ()
 		_region_actions->get_action("close-region-gaps")->set_sensitive (false);
 	} 
 
-
 	if (!have_midi) {
 		_region_actions->get_action("show-region-list-editor")->set_sensitive (false);
 		_region_actions->get_action("quantize-region")->set_sensitive (false);

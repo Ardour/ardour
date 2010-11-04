@@ -736,6 +736,7 @@ Editor::Editor ()
 	TimeAxisView::CatchDeletion.connect (*this, invalidator (*this), ui_bind (&Editor::timeaxisview_deleted, this, _1), gui_context());
 
 	_ignore_region_action = false;
+	_last_region_menu_was_main = false;
 	_popup_region_menu_item = 0;
 
 	constructed = true;
@@ -810,7 +811,7 @@ Editor::set_entered_regionview (RegionView* rv)
 		entered_regionview->entered (internal_editing ());
 	}
 
-	if (!_all_region_actions_sensitized) {
+	if (!_all_region_actions_sensitized && _last_region_menu_was_main) {
 		/* This RegionView entry might have changed what region actions
 		   are allowed, so sensitize them all in case a key is pressed.
 		*/
@@ -1207,10 +1208,16 @@ void
 Editor::action_pre_activated (Glib::RefPtr<Action> const & a)
 {
 	if (a->get_name() == "RegionMenu") {
-		/* When the region menu is opened, we setup the actions so that they look right
-		   in the menu.
+		/* When the main menu's region menu is opened, we setup the actions so that they look right
+		   in the menu.  I can't find a way of getting a signal when this menu is subsequently closed,
+		   so we resensitize all region actions when the entered regionview or the region selection
+		   changes.  HOWEVER we can't always resensitize on entered_regionview change because that
+		   happens after the region context menu is opened.  So we set a flag here, too.
+
+		   What a carry on :(
 		*/
 		sensitize_the_right_region_actions ();
+		_last_region_menu_was_main = true;
 	}
 }
 
@@ -1586,6 +1593,13 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		clicked_routeview->build_underlay_menu(menu);
 	}
 
+	/* When the region menu is opened, we setup the actions so that they look right
+	   in the menu.
+	*/
+	sensitize_the_right_region_actions ();
+	_last_region_menu_was_main = false;
+
+	menu->signal_hide().connect (sigc::bind (sigc::mem_fun (*this, &Editor::sensitize_all_region_actions), true));
 	menu->popup (button, time);
 }
 
