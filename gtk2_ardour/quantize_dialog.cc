@@ -18,6 +18,7 @@
 */
 
 #include <gtkmm/stock.h>
+#include <gtkmm/table.h>
 #include "gtkmm2ext/utils.h"
 
 #include "pbd/convert.h"
@@ -84,72 +85,43 @@ QuantizeDialog::QuantizeDialog (PublicEditor& e)
 	set_popdown_strings (type_combo, type_strings);
 	type_combo.set_active_text (type_strings.front());
 
-	get_vbox()->set_border_width (12);
+	Table* table = manage (new Table (6, 2));
+	table->set_spacings (12);
+	table->set_border_width (12);
 
-	HBox* hbox;
+	int r = 0;
 
-	hbox = manage (new HBox);
-	hbox->set_spacing (12);
-	hbox->set_border_width (6);
-	hbox->pack_start (type_label);
-	hbox->pack_start (type_combo);
-	hbox->show ();
-	type_label.show ();
-	type_combo.show ();
-	get_vbox()->pack_start (*hbox);
+	type_label.set_alignment (0, 0.5);
+	table->attach (type_label, 0, 1, r, r + 1);
+	table->attach (type_combo, 1, 2, r, r + 1);
+	++r;
 
-	hbox = manage (new HBox);
-	hbox->set_spacing (12);
-	hbox->set_border_width (6);
-	hbox->pack_start (snap_start_button);
-	hbox->pack_start (start_grid_combo);
-	hbox->show ();
-	snap_start_button.show ();
-	start_grid_combo.show ();
-	get_vbox()->pack_start (*hbox);
+	table->attach (snap_start_button, 0, 1, r, r + 1);
+	table->attach (start_grid_combo, 1, 2, r, r + 1);
+	++r;
 
-	hbox = manage (new HBox);
-	hbox->set_spacing (12);
-	hbox->set_border_width (6);
-	hbox->pack_start (snap_end_button);
-	hbox->pack_start (end_grid_combo);
-	hbox->show ();
-	snap_end_button.show ();
-	end_grid_combo.show ();
-	get_vbox()->pack_start (*hbox);
+	table->attach (snap_end_button, 0, 1, r, r + 1);
+	table->attach (end_grid_combo, 1, 2, r, r + 1);
+	++r;
 
-	hbox = manage (new HBox);
-	hbox->set_spacing (12);
-	hbox->set_border_width (6);
-	hbox->pack_start (threshold_label);
-	hbox->pack_start (threshold_spinner);
-	hbox->show ();
-	threshold_label.show ();
-	threshold_spinner.show ();
-	get_vbox()->pack_start (*hbox);
+	threshold_label.set_alignment (0, 0.5);
+	table->attach (threshold_label, 0, 1, r, r + 1);
+	table->attach (threshold_spinner, 1, 2, r, r + 1);
+	++r;
 
-	hbox = manage (new HBox);
-	hbox->set_spacing (12);
-	hbox->set_border_width (6);
-	hbox->pack_start (strength_label);
-	hbox->pack_start (strength_spinner);
-	hbox->show ();
-	strength_label.show ();
-	strength_spinner.show ();
-	get_vbox()->pack_start (*hbox);
+	strength_label.set_alignment (0, 0.5);
+	table->attach (strength_label, 0, 1, r, r + 1);
+	table->attach (strength_spinner, 1, 2, r, r + 1);
+	++r;
 
-	hbox = manage (new HBox);
-	hbox->set_spacing (12);
-	hbox->set_border_width (6);
-	hbox->pack_start (swing_button);
-	hbox->pack_start (swing_spinner);
-	hbox->show ();
-	swing_button.show ();
-	swing_spinner.show ();
-	get_vbox()->pack_start (*hbox);
+	table->attach (swing_button, 0, 1, r, r + 1);
+	table->attach (swing_spinner, 1, 2, r, r + 1);
 
 	snap_start_button.set_active (true);
 	snap_end_button.set_active (false);
+
+	get_vbox()->pack_start (*table);
+	show_all ();
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::OK, RESPONSE_OK);
