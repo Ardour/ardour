@@ -87,7 +87,6 @@ EditorRegions::EditorRegions (Editor* e)
 	_display.append_column (_("Position"), _columns.position);
 	_display.append_column (_("End"), _columns.end);
 	_display.append_column (_("Length"), _columns.length);
-	_display.append_column (_("Start"), _columns.start);
 	_display.append_column (_("Sync"), _columns.sync);
 	_display.append_column (_("Fade In"), _columns.fadein);
 	_display.append_column (_("Fade Out"), _columns.fadeout);
@@ -115,28 +114,28 @@ EditorRegions::EditorRegions (Editor* e)
 	tv_col->add_attribute(renderer->property_text(), _columns.name);
 	tv_col->add_attribute(renderer->property_foreground_gdk(), _columns.color_);
 
-	CellRendererToggle* locked_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (8));
+	CellRendererToggle* locked_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (7));
 	locked_cell->property_activatable() = true;
 	locked_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::locked_changed));
-	TreeViewColumn* locked_col = _display.get_column (8);
+	TreeViewColumn* locked_col = _display.get_column (7);
 	locked_col->add_attribute (locked_cell->property_visible(), _columns.property_toggles_visible);
 
-	CellRendererToggle* glued_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (9));
+	CellRendererToggle* glued_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (8));
 	glued_cell->property_activatable() = true;
 	glued_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::glued_changed));
-	TreeViewColumn* glued_col = _display.get_column (9);
+	TreeViewColumn* glued_col = _display.get_column (8);
 	glued_col->add_attribute (glued_cell->property_visible(), _columns.property_toggles_visible);
 
-	CellRendererToggle* muted_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (10));
+	CellRendererToggle* muted_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (9));
 	muted_cell->property_activatable() = true;
 	muted_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::muted_changed));
-	TreeViewColumn* muted_col = _display.get_column (10);
+	TreeViewColumn* muted_col = _display.get_column (9);
 	muted_col->add_attribute (muted_cell->property_visible(), _columns.property_toggles_visible);
 
-	CellRendererToggle* opaque_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (11));
+	CellRendererToggle* opaque_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (10));
 	opaque_cell->property_activatable() = true;
 	opaque_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::opaque_changed));
-	TreeViewColumn* opaque_col = _display.get_column (11);
+	TreeViewColumn* opaque_col = _display.get_column (10);
 	opaque_col->add_attribute (opaque_cell->property_visible(), _columns.property_toggles_visible);
 	
 	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
@@ -478,7 +477,6 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
                                         populate_row_length (r, *j);
                                 }
                                 if (what_changed.contains (ARDOUR::Properties::start)) {
-                                        populate_row_start (r, *j, used);
                                         populate_row_length (r, *j);
                                 }
                                 if (what_changed.contains (ARDOUR::Properties::locked)) {
@@ -817,7 +815,6 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 
         populate_row_position (region, row, used);
         populate_row_end (region, row, used);
-        populate_row_start (region, row, used);
         populate_row_sync (region, row, used);
         populate_row_fade_in (region, row, used, audioregion);
         populate_row_fade_out (region, row, used, audioregion);
@@ -889,20 +886,6 @@ EditorRegions::populate_row_end (boost::shared_ptr<Region> region, TreeModel::Ro
                 char buf[16];
                 format_position (region->last_frame(), buf, sizeof (buf));
                 row[_columns.end] = buf;
-        }
-}
-
-void
-EditorRegions::populate_row_start (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
-{
-        if (region->whole_file()) {
-                row[_columns.start] = "";
-        } else if (used > 1) {
-                row[_columns.start] = _("Mult.");
-        } else {
-                char buf[16];
-                format_position (region->start(), buf, sizeof (buf));
-                row[_columns.start] = buf;
         }
 }
 
