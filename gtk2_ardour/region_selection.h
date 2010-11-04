@@ -47,15 +47,11 @@ class RegionSelection : public std::list<RegionView*>
 
 	void clear_all();
 
-	nframes_t start () const {
-		return _current_start;
-	}
+	framepos_t start () const;
 
 	/* "end" collides with list<>::end */
 
-	nframes_t end_frame () const {
-		return _current_end;
-	}
+	framepos_t end_frame () const;
 
 	const std::list<RegionView *>& by_layer() const { return _bylayer; }
 	void  by_position (std::list<RegionView*>&) const;
@@ -65,9 +61,6 @@ class RegionSelection : public std::list<RegionView*>
 	void remove_it (RegionView*);
 
 	void add_to_layer (RegionView *);
-
-	nframes_t _current_start; ///< start position for the selection
-	nframes_t _current_end; ///< end position for the selection
 
 	std::list<RegionView *> _bylayer; ///< list of regions sorted by layer
 	PBD::ScopedConnection death_connection;

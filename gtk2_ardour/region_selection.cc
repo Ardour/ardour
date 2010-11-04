@@ -34,9 +34,6 @@ using namespace PBD;
 RegionSelection::RegionSelection ()
 {
 	RegionView::RegionViewGoingAway.connect (death_connection, MISSING_INVALIDATOR, ui_bind (&RegionSelection::remove_it, this, _1), gui_context());
-
-	_current_start = 0;
-	_current_end = 0;
 }
 
 /** Copy constructor.
@@ -46,9 +43,6 @@ RegionSelection::RegionSelection (const RegionSelection& other)
 	: std::list<RegionView*>()
 {
 	RegionView::RegionViewGoingAway.connect (death_connection, MISSING_INVALIDATOR, ui_bind (&RegionSelection::remove_it, this, _1), gui_context());
-
-	_current_start = other._current_start;
-	_current_end = other._current_end;
 
 	for (RegionSelection::const_iterator i = other.begin(); i != other.end(); ++i) {
 		add (*i);
@@ -65,9 +59,6 @@ RegionSelection::operator= (const RegionSelection& other)
 
 		clear_all();
 
-		_current_start = other._current_start;
-		_current_end = other._current_end;
-
 		for (RegionSelection::const_iterator i = other.begin(); i != other.end(); ++i) {
 			add (*i);
 		}
@@ -83,8 +74,6 @@ RegionSelection::clear_all()
 {
 	clear();
 	_bylayer.clear();
-	_current_start = 0;
-	_current_end = 0;
 }
 
 /**
@@ -115,14 +104,6 @@ RegionSelection::add (RegionView* rv)
 	if (contains (rv)) {
 		/* we already have it */
 		return false;
-	}
-
-	if (rv->region()->first_frame() < _current_start || empty()) {
-		_current_start = rv->region()->first_frame();
-	}
-
-	if (rv->region()->last_frame() > _current_end || empty()) {
-		_current_end = rv->region()->last_frame();
 	}
 
 	push_back (rv);
@@ -156,54 +137,8 @@ RegionSelection::remove (RegionView* rv)
 
 		// remove from layer sorted list
 		_bylayer.remove (rv);
-
-		if (size() == 1) {
-
-			/* this is the last one, so when we delete it
-			   we will be empty.
-			*/
-
-			_current_start = 0;
-			_current_end = 0;
-
-		} else {
-
-			boost::shared_ptr<Region> region ((*r)->region());
-
-			if (region->first_frame() == _current_start) {
-
-				/* reset current start */
-
-				framepos_t ref = max_framepos;
-
-				for (RegionSelection::iterator i = begin (); i != end(); ++i) {
-					if (region->first_frame() < ref) {
-						ref = region->first_frame();
-					}
-				}
-
-				_current_start = ref;
-
-			}
-
-			if (region->last_frame() == _current_end) {
-
-				/* reset current end */
-
-				nframes_t ref = 0;
-
-				for (RegionSelection::iterator i = begin (); i != end(); ++i) {
-					if (region->first_frame() > ref) {
-						ref = region->first_frame();
-					}
-				}
-
-				_current_end = ref;
-			}
-		}
-
+		
 		erase (r);
-
 		return true;
 	}
 
@@ -314,3 +249,28 @@ RegionSelection::involves (const TimeAxisView& tv) const
 	return false;
 }
 
+framepos_t
+RegionSelection::start () const
+{
+	framepos_t s = max_framepos;
+	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
+		s = min (s, (*i)->region()->position ());
+	}
+
+	if (s == max_framepos) {
+		return 0;
+	}
+	
+	return s;
+}
+
+framepos_t
+RegionSelection::end_frame () const
+{
+	framepos_t e = 0;
+	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
+		e = max (e, (*i)->region()->position () + (*i)->region()->length ());
+	}
+
+	return e;
+}
