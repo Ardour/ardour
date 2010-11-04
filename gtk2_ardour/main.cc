@@ -19,6 +19,8 @@
 
 #include <cstdlib>
 #include <signal.h>
+#include <cerrno>
+#include <fstream>
 
 #include <sigc++/bind.h>
 #include <gtkmm/settings.h>
@@ -99,7 +101,6 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 
 #include <mach-o/dyld.h>
 #include <sys/param.h>
-#include <fstream>
 
 extern void set_language_preference (); // cocoacarbon.mm
 
@@ -296,6 +297,158 @@ fixup_bundle_environment ()
 		path += "/../Frameworks";
 
 		setenv ("JACK_DRIVER_DIR", path.c_str(), 1);
+	}
+}
+
+#else
+
+void
+fixup_bundle_environment (int argc, char* argv[])
+{
+	if (!getenv ("ARDOUR_BUNDLED")) {
+		return;
+	}
+	
+	Glib::ustring exec_path = argv[0];
+	Glib::ustring dir_path = Glib::path_get_dirname (Glib::path_get_dirname (exec_path));
+	Glib::ustring path;
+	const char *cstr = getenv ("PATH");
+        Glib::ustring userconfigdir = user_config_directory().to_string();
+
+	/* ensure that we find any bundled executables (e.g. JACK),
+	   and find them before any instances of the same name
+	   elsewhere in PATH
+	*/
+
+        /* note that this function is POSIX/Linux specific, so using / as 
+           a dir separator in this context is just fine.
+        */
+
+	path = dir_path;
+	path += "/etc:";
+	path += dir_path;
+	path += "/lib/surfaces:";
+	path += dir_path;
+	path += "/lib/panners:";
+
+	setenv ("ARDOUR_MODULE_PATH", path.c_str(), 1);
+
+        path = userconfigdir;
+        path += ':';
+	path += dir_path;
+	path += "/etc/icons:";
+	path += dir_path;
+	path += "/etc/pixmaps:";
+	path += dir_path;
+	path += "/share:";
+	path += dir_path;
+	path += "/etc";
+
+	setenv ("ARDOUR_PATH", path.c_str(), 1);
+	setenv ("ARDOUR_CONFIG_PATH", path.c_str(), 1);
+	setenv ("ARDOUR_DATA_PATH", path.c_str(), 1);
+
+	path = dir_path;
+	path += "/etc";
+	setenv ("ARDOUR_INSTANT_XML_PATH", path.c_str(), 1);
+
+	cstr = getenv ("LADSPA_PATH");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	} else {
+		path = "";
+	}
+	path += dir_path;
+	path += "/lib/plugins";
+	
+	setenv ("LADSPA_PATH", path.c_str(), 1);
+
+	cstr = getenv ("VAMP_PATH");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	} else {
+		path = "";
+	}
+	path += dir_path;
+	path += "/lib";
+	
+	setenv ("VAMP_PATH", path.c_str(), 1);
+
+	cstr = getenv ("ARDOUR_CONTROL_SURFACE_PATH");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	} else {
+		path = "";
+	}
+	path += dir_path;
+	path += "/lib/surfaces";
+	
+	setenv ("ARDOUR_CONTROL_SURFACE_PATH", path.c_str(), 1);
+
+	cstr = getenv ("LV2_PATH");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	} else {
+		path = "";
+	}
+	path += dir_path;
+	path += "/lib/plugins";
+	
+	setenv ("LV2_PATH", path.c_str(), 1);
+
+	path = dir_path;
+	path += "/lib/clearlooks";
+
+	setenv ("GTK_PATH", path.c_str(), 1);
+
+	if (!ARDOUR::translations_are_disabled ()) {
+                path = dir_path;
+                path += "/share/locale";
+                
+                localedir = strdup (path.c_str());
+                setenv ("GTK_LOCALEDIR", localedir, 1);
+        }
+
+	/* write a pango.rc file and tell pango to use it. we'd love
+	   to put this into the Ardour.app bundle and leave it there,
+	   but the user may not have write permission. so ... 
+
+	   we also have to make sure that the user ardour directory
+	   actually exists ...
+	*/
+
+	if (g_mkdir_with_parents (userconfigdir.c_str(), 0755) < 0) {
+		error << string_compose (_("cannot create user ardour folder %1 (%2)"), userconfigdir, strerror (errno))
+		      << endmsg;
+	} else {
+
+                Glib::ustring mpath;
+
+		path = Glib::build_filename (userconfigdir, "pango.rc");
+
+		std::ofstream pangorc (path.c_str());
+		if (!pangorc) {
+			error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
+                } else {
+                        mpath = Glib::build_filename (userconfigdir, "pango.modules");
+                        
+			pangorc << "[Pango]\nModuleFiles=";
+			pangorc << mpath << endl;
+			pangorc.close ();
+                }
+
+                setenv ("PANGO_RC_FILE", path.c_str(), 1);
+
+                /* similar for GDK pixbuf loaders, but there's no RC file required
+                   to specify where it lives.
+                */
+
+                mpath = Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders");
+                setenv ("GDK_PIXBUF_MODULE_FILE", mpath.c_str(), 1);
 	}
 }
 
