@@ -414,6 +414,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 	bool using_alsa = false;
 	bool using_coreaudio = false;
 	bool using_dummy = false;
+	bool using_ffado = false;
 
 	/* first, path to jackd */
 
@@ -422,11 +423,14 @@ EngineControl::build_command_line (vector<string>& cmd)
 	/* now jackd arguments */
 
 	str = timeout_combo.get_active_text ();
+	
 	if (str != _("Ignore")) {
+
 		double secs = 0;
 		uint32_t msecs;
 		secs = atof (str);
 		msecs = (uint32_t) floor (secs * 1000.0);
+		
 		if (msecs > 0) {
 			cmd.push_back ("-t");
 			cmd.push_back (to_string (msecs, std::dec));
@@ -465,6 +469,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 	cmd.push_back ("-d");
 
 	driver = driver_combo.get_active_text ();
+	
 	if (driver == X_("ALSA")) {
 		using_alsa = true;
 		cmd.push_back ("alsa");
@@ -478,6 +483,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 	} else if (driver == X_("FreeBoB")) {
 		cmd.push_back ("freebob");
 	} else if (driver == X_("FFADO")) {
+		using_ffado = true;
 		cmd.push_back ("firewire");
 	} else if ( driver == X_("Dummy")) {
 		using_dummy = true;
@@ -505,6 +511,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 			cmd.push_back ("-C");
 			cmd.push_back (input_device);
+			
 			cmd.push_back ("-P");
 			cmd.push_back (output_device);
 
@@ -525,6 +532,23 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 	cmd.push_back ("-p");
 	cmd.push_back (period_size_combo.get_active_text());
+	
+	if (using_alsa || using_ffado || using_coreaudio) {
+
+		double val = input_latency_adjustment.get_value();
+
+                if (val) {
+                        cmd.push_back ("-I");
+                        cmd.push_back (to_string ((uint32_t) val, std::dec));
+                }
+
+                val = output_latency_adjustment.get_value();
+                
+		if (val) {
+                        cmd.push_back ("-O");
+                        cmd.push_back (to_string ((uint32_t) val, std::dec));
+                }
+	}
 
 	if (using_alsa) {
 
@@ -574,20 +598,6 @@ EngineControl::build_command_line (vector<string>& cmd)
 		} else if (str == _("raw")) {
 			cmd.push_back ("-X raw");
 		}
-
-                double val = input_latency_adjustment.get_value();
-
-                if (val) {
-                        cmd.push_back ("-I");
-                        cmd.push_back (to_string ((uint32_t) val, std::dec));
-                }
-
-                val = output_latency_adjustment.get_value();
-                if (val) {
-                        cmd.push_back ("-O");
-                        cmd.push_back (to_string ((uint32_t) val, std::dec));
-                }
-
 	} else if (using_coreaudio) {
 
 #ifdef __APPLE__
@@ -601,19 +611,6 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 		cmd.push_back ("-d");
 		cmd.push_back (device);
-
-                double val = input_latency_adjustment.get_value();
-
-                if (val) {
-                        cmd.push_back ("-I");
-                        cmd.push_back (to_string ((uint32_t) val, std::dec));
-                }
-
-                double val = output_latency_adjustment.get_value();
-                if (val) {
-                        cmd.push_back ("-O");
-                        cmd.push_back (to_string ((uint32_t) val, std::dec));
-                }
 #endif
 
 	}
@@ -1224,15 +1221,21 @@ EngineControl::set_state (const XMLNode& root)
 	XMLNode* child;
 	XMLProperty* prop = NULL;
 	bool using_dummy = false;
+	bool using_ffado = false;
 
 	int val;
 	string strval;
 
 	if ( (child = root.child ("driver"))){
 		prop = child->property("val");
+		
 		if (prop && (prop->value() == "Dummy") ) {
 			using_dummy = true;
 		}
+		if (prop && (prop->value() == "FFADO") ) {
+			using_ffado = true;
+		}
+
 	}
 
 	clist = root.children();
@@ -1245,9 +1248,15 @@ EngineControl::set_state (const XMLNode& root)
 
 		if (!prop || prop->value().empty()) {
 
-			if ((using_dummy && ( child->name() == "interface" || child->name() == "inputdevice" || child->name() == "outputdevice" )) ||
-				child->name() == "timeout")
+			if (((using_dummy || using_ffado) 
+				&& ( child->name() == "interface" 
+					|| child->name() == "inputdevice" 
+					|| child->name() == "outputdevice")) 
+				|| child->name() == "timeout")
+			{
 				continue;
+			}
+			
 			error << string_compose (_("AudioSetup value for %1 is missing data"), child->name()) << endmsg;
 			continue;
 		}
