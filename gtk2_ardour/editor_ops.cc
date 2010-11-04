@@ -5870,48 +5870,45 @@ Editor::close_region_gaps ()
 		return;
 	}
 
-	Dialog dialog (rs.size() > 1 ? _("Close region gaps") : _("Close region gaps"));
-	
-	HBox hbox_crossfade;
-	hbox_crossfade.set_spacing (10);
-	//hbox_crossfade.set_border_width (3);
-	hbox_crossfade.pack_start (*manage (new Label (_("Crossfade length:"))));
+	Dialog dialog (_("Close Region Gaps"));
+
+	Table table (2, 3);
+	table.set_spacings (12);
+	table.set_border_width (12);
+	Label* l = manage (new Label (_("Crossfade length")));
+	l->set_alignment (0, 0.5);
+	table.attach (*l, 0, 1, 0, 1);
 	
 	SpinButton spin_crossfade (1, 0);
 	spin_crossfade.set_range (0, 15);
 	spin_crossfade.set_increments (1, 1);
 	spin_crossfade.set_value (3);
-	
-	hbox_crossfade.pack_start (spin_crossfade);
-	hbox_crossfade.pack_start (*manage (new Label (_("ms"))));
-	hbox_crossfade.show_all ();
+	table.attach (spin_crossfade, 1, 2, 0, 1);
 
-	HBox hbox_pullback;
-	
-	hbox_pullback.set_spacing (10);
-	//hbox_pullback.set_border_width (3);
-	hbox_pullback.pack_start (*manage (new Label (_("Pull-back length:"))));
+	table.attach (*manage (new Label (_("ms"))), 2, 3, 0, 1);
+
+	l = manage (new Label (_("Pull-back length")));
+	l->set_alignment (0, 0.5);
+	table.attach (*l, 0, 1, 1, 2);
 	
 	SpinButton spin_pullback (1, 0);
 	spin_pullback.set_range (0, 15);
 	spin_pullback.set_increments (1, 1);
 	spin_pullback.set_value (5);
+	table.attach (spin_pullback, 1, 2, 1, 2);
+
+	table.attach (*manage (new Label (_("ms"))), 2, 3, 1, 2);
 	
-	hbox_pullback.pack_start (spin_pullback);
-	hbox_pullback.pack_start (*manage (new Label (_("ms"))));
-	hbox_pullback.show_all ();
-	
-	dialog.get_vbox()->set_spacing (6);
-	dialog.get_vbox()->pack_start (hbox_crossfade);
-	dialog.get_vbox()->pack_start (hbox_pullback);
+	dialog.get_vbox()->pack_start (table);
 	dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	dialog.add_button (_("Ok"), RESPONSE_ACCEPT);
+	dialog.show_all ();
 
 	if (dialog.run () == RESPONSE_CANCEL) {
 		return;
 	}
 
-	framepos_t crossfade_len  = spin_crossfade.get_value(); 
+	framepos_t crossfade_len = spin_crossfade.get_value(); 
 	framepos_t pull_back_frames = spin_pullback.get_value();
 
 	crossfade_len = lrintf (crossfade_len * _session->frame_rate()/1000);
