@@ -118,7 +118,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 
 	set_session (sess);
 
-	// start_hbox.pack_start (start_go_button, false, false);
+	start_hbox.pack_start (start_go_button, false, false);
 	start_hbox.pack_start (start_clock, false, false);
 
 	/* this is always in this location, no matter what the location is */
@@ -129,7 +129,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
  	start_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocStart));
  	start_clock.ChangeAborted.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::change_aborted), LocStart));
 
-	// end_hbox.pack_start (end_go_button, false, false);
+	end_hbox.pack_start (end_go_button, false, false);
 	end_hbox.pack_start (end_clock, false, false);
 
 	end_go_button.signal_clicked().connect(sigc::bind (sigc::mem_fun (*this, &LocationEditRow::go_button_pressed), LocEnd));
@@ -364,14 +364,16 @@ LocationEditRow::composer_entry_changed ()
 void
 LocationEditRow::go_button_pressed (LocationPart part)
 {
-	if (!location) return;
+	if (!location) {
+		return;
+	}
 
 	switch (part) {
 	case LocStart:
-		ARDOUR_UI::instance()->do_transport_locate (location->start());
+		ARDOUR_UI::instance()->do_transport_locate (location->start(), _session->transport_rolling ());
 		break;
 	case LocEnd:
-		ARDOUR_UI::instance()->do_transport_locate (location->end());
+		ARDOUR_UI::instance()->do_transport_locate (location->end(), _session->transport_rolling ());
 		break;
 	default:
 		break;

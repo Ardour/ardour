@@ -1403,7 +1403,7 @@ restart JACK with more ports."), PROGRAM_NAME));
 }
 
 void
-ARDOUR_UI::do_transport_locate (nframes_t new_position)
+ARDOUR_UI::do_transport_locate (nframes_t new_position, bool with_roll)
 {
 	nframes_t _preroll = 0;
 
@@ -1417,7 +1417,7 @@ ARDOUR_UI::do_transport_locate (nframes_t new_position)
 			new_position = 0;
 		}
 
-		_session->request_locate (new_position);
+		_session->request_locate (new_position, with_roll);
 	}
 }
 

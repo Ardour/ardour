@@ -1963,7 +1963,7 @@ AudioClock::build_ops_menu ()
 	if (editable && !is_duration && !_follows_playhead) {
 		ops_items.push_back (SeparatorElem());
 		ops_items.push_back (MenuElem (_("Set From Playhead"), sigc::mem_fun(*this, &AudioClock::set_from_playhead)));
-		ops_items.push_back (MenuElem (_("Locate to this time"), sigc::mem_fun(*this, &AudioClock::locate)));
+		ops_items.push_back (MenuElem (_("Locate to This Time"), sigc::mem_fun(*this, &AudioClock::locate)));
 	}
 }
 
@@ -1984,7 +1984,7 @@ AudioClock::locate ()
 		return;
 	}
 	
-	_session->request_locate (current_time(), false);
+	_session->request_locate (current_time(), _session->transport_rolling ());
 }
 
 void

@@ -187,7 +187,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void save_ardour_state ();
 	gboolean configure_handler (GdkEventConfigure* conf);
 
-	void do_transport_locate (nframes_t position);
+	void do_transport_locate (nframes_t, bool);
 	void halt_on_xrun_message ();
 	void xrun_handler (nframes_t);
 	void create_xrun_marker (nframes_t);
