@@ -1,0 +1,8 @@
+GTK_PREFIX_DIR=/gtk/will/search/here
+
+if ! echo $LD_LIBRARY_PATH | grep -qs $GTK_PREFIX_DIR ; then
+   LD_LIBRARY_PATH=${GTK_PREFIX_DIR}/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+   PATH=${GTK_PREFIX_DIR}/bin:$PATH
+   PKG_CONFIG_PATH=${GTK_PREFIX_DIR}/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
+fi
+
