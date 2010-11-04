@@ -22,6 +22,7 @@
 
 #include "ardour_ui.h"
 
+#include "ardour/tempo.h"
 #include "ardour/location.h"
 #include "ardour/types.h"
 #include "ardour/session.h"
@@ -90,7 +91,7 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 
 	range_list = Gtk::ListStore::create (range_cols);
 	range_view.set_model (range_list);
-	range_view.set_headers_visible (false);
+	range_view.set_headers_visible (true);
 }
 
 ExportTimespanSelector::~ExportTimespanSelector ()
@@ -145,6 +146,7 @@ ExportTimespanSelector::change_time_format ()
 	for (Gtk::ListStore::Children::iterator it = range_list->children().begin(); it != range_list->children().end(); ++it) {
 		Location * location = it->get_value (range_cols.location);
 		it->set_value (range_cols.label, construct_label (location));
+		it->set_value (range_cols.length, construct_length (location));
 	}
 }
 
@@ -155,8 +157,8 @@ ExportTimespanSelector::construct_label (ARDOUR::Location const * location) cons
 	std::string start;
 	std::string end;
 
-	nframes_t start_frame = location->start();
-	nframes_t end_frame = location->end();
+	framepos_t start_frame = location->start();
+	framepos_t end_frame = location->end();
 
 	switch (state->time_format) {
 	  case AudioClock::BBT:
@@ -198,9 +200,46 @@ ExportTimespanSelector::construct_label (ARDOUR::Location const * location) cons
 	return label;
 }
 
+std::string
+ExportTimespanSelector::construct_length (ARDOUR::Location const * location) const
+{
+	if (location->length() == 0) {
+		return "";
+	}
+
+	std::stringstream s;
+	
+	switch (state->time_format) {
+	case AudioClock::BBT:
+		s << bbt_str (location->length ());
+		break;
+
+	case AudioClock::Timecode:
+	{
+		Timecode::Time tc;
+		_session->timecode_duration (location->length(), tc);
+		tc.print (s);
+		break;
+	}
+
+	case AudioClock::MinSec:
+		s << ms_str (location->length ());
+		break;
+		
+	case AudioClock::Frames:
+		s << location->length ();
+		break;
+		
+	case AudioClock::Off:
+		break;
+	}
+
+	return s.str ();
+}
+
 
 std::string
-ExportTimespanSelector::bbt_str (nframes_t frames) const
+ExportTimespanSelector::bbt_str (framepos_t frames) const
 {
 	if (!_session) {
 		return "Error!";
@@ -208,22 +247,14 @@ ExportTimespanSelector::bbt_str (nframes_t frames) const
 
 	std::ostringstream oss;
 	BBT_Time time;
-
 	_session->bbt_time (frames, time);
 
-	oss << std::setfill('0') << std::right <<
-	  std::setw(3) <<
-	  time.bars << "|" <<
-	  std::setw(2) <<
-	  time.beats << "|" <<
-	  std::setw(4) <<
-	  time.ticks;
-
-	return oss.str();
+	print_padded (oss, time);
+	return oss.str ();
 }
 
 std::string
-ExportTimespanSelector::timecode_str (nframes_t frames) const
+ExportTimespanSelector::timecode_str (framecnt_t frames) const
 {
 	if (!_session) {
 		return "Error!";
@@ -248,14 +279,14 @@ ExportTimespanSelector::timecode_str (nframes_t frames) const
 }
 
 std::string
-ExportTimespanSelector::ms_str (nframes_t frames) const
+ExportTimespanSelector::ms_str (framecnt_t frames) const
 {
 	if (!_session) {
 		return "Error!";
 	}
 
 	std::ostringstream oss;
-	nframes_t left;
+	framecnt_t left;
 	int hrs;
 	int mins;
 	int secs;
@@ -263,11 +294,11 @@ ExportTimespanSelector::ms_str (nframes_t frames) const
 
 	left = frames;
 	hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
-	left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
+	left -= (framecnt_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
 	mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-	left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
+	left -= (framecnt_t) floor (mins * _session->frame_rate() * 60.0f);
 	secs = (int) floor (left / (float) _session->frame_rate());
-	left -= (nframes_t) floor (secs * _session->frame_rate());
+	left -= (framecnt_t) floor (secs * _session->frame_rate());
 	sec_promilles = (int) (left * 1000 / (float) _session->frame_rate() + 0.5);
 
 	oss << std::setfill('0') << std::right <<
@@ -299,7 +330,7 @@ ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * se
 	range_id (range_id)
 {
 	range_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
-	range_view.append_column_editable ("", range_cols.name);
+	range_view.append_column_editable ("Range", range_cols.name);
 
 	// Adjust selector height
 	int x_offset, y_offset, width, height;
@@ -312,10 +343,11 @@ ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * se
 	}
 
 	Gtk::CellRendererText * label_render = Gtk::manage (new Gtk::CellRendererText());
-	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column ("", *label_render));
+	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column ("Time Span", *label_render));
 	label_col->add_attribute (label_render->property_markup(), range_cols.label);
 	range_view.append_column (*label_col);
 
+	range_view.append_column ("Length", range_cols.length);
 }
 
 void
@@ -347,6 +379,7 @@ ExportTimespanSelectorSingle::fill_range_list ()
 			row[range_cols.selected] = true;
 			row[range_cols.name] = (*it)->name();
 			row[range_cols.label] = construct_label (*it);
+			row[range_cols.length] = construct_length (*it);
 
 			add_range_to_selection (*it);
 
@@ -364,7 +397,7 @@ ExportTimespanSelectorMultiple::ExportTimespanSelectorMultiple (ARDOUR::Session 
 {
 	range_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	range_view.append_column_editable ("", range_cols.selected);
-	range_view.append_column_editable ("", range_cols.name);
+	range_view.append_column_editable ("Range", range_cols.name);
 
 	if (Gtk::CellRendererToggle * renderer = dynamic_cast<Gtk::CellRendererToggle *> (range_view.get_column_cell_renderer (0))) {
 		renderer->signal_toggled().connect (sigc::hide (sigc::mem_fun (*this, &ExportTimespanSelectorMultiple::update_selection)));
@@ -374,10 +407,11 @@ ExportTimespanSelectorMultiple::ExportTimespanSelectorMultiple (ARDOUR::Session 
 	}
 
 	Gtk::CellRendererText * label_render = Gtk::manage (new Gtk::CellRendererText());
-	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column ("", *label_render));
+	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column ("Time Span", *label_render));
 	label_col->add_attribute (label_render->property_markup(), range_cols.label);
 	range_view.append_column (*label_col);
 
+	range_view.append_column ("Length", range_cols.length);
 }
 
 void
@@ -398,6 +432,7 @@ ExportTimespanSelectorMultiple::fill_range_list ()
 		row[range_cols.selected] = false;
 		row[range_cols.name] = (*it)->name();
 		row[range_cols.label] = construct_label (*it);
+		row[range_cols.length] = construct_length (*it);
 	}
 
 	set_selection_from_state ();

@@ -424,7 +424,7 @@ Session::timecode_time_subframes (nframes_t when, Timecode::Time& timecode)
 }
 
 void
-Session::timecode_duration (nframes_t when, Timecode::Time& timecode) const
+Session::timecode_duration (framecnt_t when, Timecode::Time& timecode) const
 {
 	sample_to_timecode( when, timecode, false /* use_offset */, true /* use_subframes */ );
 }

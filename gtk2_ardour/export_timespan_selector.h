@@ -77,9 +77,10 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void change_time_format ();
 
 	std::string construct_label (ARDOUR::Location const * location) const;
-	std::string bbt_str (nframes_t frames) const;
-	std::string timecode_str (nframes_t frames) const;
-	std::string ms_str (nframes_t frames) const;
+	std::string construct_length (ARDOUR::Location const * location) const;
+	std::string bbt_str (framepos_t frames) const;
+	std::string timecode_str (framecnt_t frames) const;
+	std::string ms_str (framecnt_t frames) const;
 
 	void update_range_name (std::string const & path, std::string const & new_text);
 
@@ -111,10 +112,11 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	  public:
 		Gtk::TreeModelColumn<ARDOUR::Location *>  location;
 		Gtk::TreeModelColumn<std::string>       label;
-		Gtk::TreeModelColumn<bool>                selected;
+		Gtk::TreeModelColumn<bool>              selected;
 		Gtk::TreeModelColumn<std::string>       name;
+		Gtk::TreeModelColumn<std::string>       length;
 
-		RangeCols () { add (location); add(label); add(selected); add(name); }
+		RangeCols () { add (location); add(label); add(selected); add(name); add(length); }
 	};
 	RangeCols                    range_cols;
 

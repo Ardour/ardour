@@ -22,6 +22,7 @@
 
 #include <ostream>
 #include <stdint.h>
+#include <iomanip>
 
 namespace ARDOUR {
 
@@ -56,6 +57,17 @@ inline std::ostream&
 operator<< (std::ostream& o, const ARDOUR::BBT_Time& bbt)
 {
 	o << bbt.bars << '|' << bbt.beats << '|' << bbt.ticks;
+	return o;
+}
+
+inline std::ostream&
+print_padded (std::ostream& o, const ARDOUR::BBT_Time& bbt)
+{
+	o << std::setfill ('0') << std::right
+	  << std::setw (3) << bbt.bars << "|"
+	  << std::setw (2) << bbt.beats << "|"
+	  << std::setw (4) << bbt.ticks;
+
 	return o;
 }
 
