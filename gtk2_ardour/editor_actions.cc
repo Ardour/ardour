@@ -306,11 +306,6 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "edit-to-playhead", _("Active Mark to Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cursor_align), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "trim-to-previous-region", _("Trim to Previous"), sigc::mem_fun(*this, &Editor::trim_region_to_previous_region_end));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "trim-to-next-region", _("Trim to Next"), sigc::mem_fun(*this, &Editor::trim_region_to_next_region_start));
-	ActionManager::session_sensitive_actions.push_back (act);
-
 	act = ActionManager::register_action (editor_actions, "set-loop-from-edit-range", _("Set Loop from Edit Range"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_edit_range), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "set-punch-from-edit-range", _("Set Punch from Edit Range"), sigc::mem_fun(*this, &Editor::set_punch_from_edit_range));
@@ -1493,6 +1488,9 @@ Editor::register_region_actions ()
 	reg_sens (_region_actions, "trim-region-to-loop", _("Trim to Loop"), sigc::mem_fun (*this, &Editor::trim_region_to_loop));
 	reg_sens (_region_actions, "trim-region-to-punch", _("Trim to Punch"), sigc::mem_fun (*this, &Editor::trim_region_to_punch));
 	
+	reg_sens (_region_actions, "trim-to-previous-region", _("Trim to Previous"), sigc::mem_fun(*this, &Editor::trim_region_to_previous_region_end));
+	reg_sens (_region_actions, "trim-to-next-region", _("Trim to Next"), sigc::mem_fun(*this, &Editor::trim_region_to_next_region_start));
+
 	/* PART 2: actions that are not related to the selection, but for which the edit point type and location is important */
 
 	reg_sens (

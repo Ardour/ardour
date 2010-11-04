@@ -282,6 +282,8 @@
 	      	      <menuitem action='trim-back'/>
 	      	      <menuitem action='trim-region-to-loop'/>
 	      	      <menuitem action='trim-region-to-punch'/>
+		      <menuitem action='trim-to-previous-region'/>
+		      <menuitem action='trim-to-next-region'/>
 	      </menu>
 	      <menu action='RegionMenuRanges'>
 	              <menuitem action='set-loop-from-region'/>
@@ -613,6 +615,8 @@
 	      	      <menuitem action='trim-back'/>
 	      	      <menuitem action='trim-region-to-loop'/>
 	      	      <menuitem action='trim-region-to-punch'/>
+		      <menuitem action='trim-to-previous-region'/>
+		      <menuitem action='trim-to-next-region'/>
 	      </menu>
 	      <menu action='RegionMenuRanges'>
 	              <menuitem action='set-loop-from-region'/>
