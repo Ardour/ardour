@@ -233,7 +233,6 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* no
                                                 
                                                 if (smf_extract_vlq (&event->midi_buffer[4+lenlen], event->midi_buffer_length-(4+lenlen), &id, &idlen) == 0) {
                                                         *note_id = id;
-                                                        cerr << "Loaded Note ID " << *note_id << endl;
                                                 }
                                         }
                                 }
@@ -298,7 +297,6 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, eve
 
                 /* generate VLQ representation of note ID */
                 idlen = smf_format_vlq (idbuf, sizeof(idbuf), note_id);
-                cerr << "Saved Note ID " << note_id << " is " << idlen << " bytes\n";
 
                 /* generate VLQ representation of meta event length,
                    which is the idlen + 2 bytes (Evoral type ID plus Note ID type)
