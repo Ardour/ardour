@@ -17,8 +17,6 @@
 
 */
 
-#include <boost/lexical_cast.hpp>
-
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/pthread_utils.h"
@@ -139,6 +137,10 @@ AudioRegionEditor::peak_amplitude_thread ()
 void
 AudioRegionEditor::peak_amplitude_found (double p)
 {
-	_peak_amplitude.set_text (boost::lexical_cast<string> (p));
+	stringstream s;
+	s.precision (2);
+	s.setf (ios::fixed, ios::floatfield);
+	s << p;
+	_peak_amplitude.set_text (s.str ());
 }
 
