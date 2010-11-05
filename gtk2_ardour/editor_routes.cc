@@ -1319,6 +1319,14 @@ void
 EditorRoutes::name_edit_started (CellEditable* ce, const Glib::ustring&)
 {
         name_editable = ce;
+
+        /* give it a special name */
+
+        Gtk::Entry *e = dynamic_cast<Gtk::Entry*> (ce);
+
+        if (e) {
+                e->set_name (X_("RouteNameEditorEntry"));
+        }
 }
 
 void

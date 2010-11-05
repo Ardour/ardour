@@ -1348,6 +1348,14 @@ void
 EditorRegions::name_editing_started (CellEditable* ce, const Glib::ustring&)
 {
         name_editable = ce;
+        
+        /* give it a special name */
+
+        Gtk::Entry *e = dynamic_cast<Gtk::Entry*> (ce);
+
+        if (e) {
+                e->set_name (X_("RegionNameEditorEntry"));
+        }
 }
                           
 void

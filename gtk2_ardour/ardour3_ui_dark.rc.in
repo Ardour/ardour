@@ -103,8 +103,8 @@ style "white_tree_view"
   GtkButton::button_relief = GTK_RELIEF_NONE
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
-#GtkTreeView::even-row-color = { 0.70, 0.70, 0.70 }
-#GtkTreeView::odd-row-color = { 0.64, 0.64, 0.64 }
+  GtkTreeView::even-row-color = { 0.70, 0.70, 0.70 }
+  GtkTreeView::odd-row-color = { 0.64, 0.64, 0.64 }
   
   fg[NORMAL] = { 0.30, 0.30, 0.40 }	
   fg[ACTIVE] = { 0.30, 0.30, 0.40 }	
@@ -144,9 +144,6 @@ style "default_base" = "medium_text"
   GtkButton::button_relief = GTK_RELIEF_NONE
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
-#  GtkTreeView::even-row-color = { 0, 0, 0 }
-#  GtkTreeView::odd-row-color = {  0.08, 0.10, 0.14 }
-#  GtkTreeView::even-row-color = { 0.901, 0.870, 0.976}
   GtkTreeView::even-row-color = {  0.188, 0.208, 0.235}
   GtkTreeView::odd-row-color = {  0.08, 0.10, 0.14 }
   
@@ -243,6 +240,14 @@ style "default_generic"
   bg[PRELIGHT] = { 0.11, 0.15, 0.20 }
   bg[INSENSITIVE] = { 0.11, 0.15, 0.20 }
   bg[SELECTED] = { 0.11, 0.15, 0.20 }	
+}
+
+style "text_cell_entry" 
+{
+	font_name = "@FONT_NORMAL@"
+	GtkWidget::cursor_color =  {0, 0, 0 }
+	text[NORMAL] = { 0.26, 0.26, 0.26 }
+	base[NORMAL] = { 0.89, 0.89, 0.89 }
 }
 
 style "very_small_button" = "default_button"
@@ -1849,3 +1854,6 @@ widget "*MidiTracerTextView" style:highest "midi_tracer_textview"
 widget "*SoloIsolatedLED" style:highest "solo_isolate_led"
 widget "*SoloSafeLED" style:highest "solo_safe_led"
 widget "*SoloLEDLabel" style:highest "very_small_text"
+
+widget "*RouteNameEditorEntry" style:highest "text_cell_entry"
+widget "*RegionNameEditorEntry" style:highest "text_cell_entry"
