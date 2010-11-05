@@ -103,8 +103,8 @@ style "white_tree_view"
   GtkButton::button_relief = GTK_RELIEF_NONE
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
-  GtkTreeView::even-row-color = { 0.70, 0.70, 0.70 }
-  GtkTreeView::odd-row-color = { 0.64, 0.64, 0.64 }
+#GtkTreeView::even-row-color = { 0.70, 0.70, 0.70 }
+#GtkTreeView::odd-row-color = { 0.64, 0.64, 0.64 }
   
   fg[NORMAL] = { 0.30, 0.30, 0.40 }	
   fg[ACTIVE] = { 0.30, 0.30, 0.40 }	
@@ -144,7 +144,10 @@ style "default_base" = "medium_text"
   GtkButton::button_relief = GTK_RELIEF_NONE
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
-  GtkTreeView::even-row-color = { 0, 0, 0 }
+#  GtkTreeView::even-row-color = { 0, 0, 0 }
+#  GtkTreeView::odd-row-color = {  0.08, 0.10, 0.14 }
+#  GtkTreeView::even-row-color = { 0.901, 0.870, 0.976}
+  GtkTreeView::even-row-color = {  0.188, 0.208, 0.235}
   GtkTreeView::odd-row-color = {  0.08, 0.10, 0.14 }
   
   fg[NORMAL] = { 0.80, 0.80, 0.80 }	
@@ -163,13 +166,15 @@ style "default_base" = "medium_text"
   text[ACTIVE] = { 0.80, 0.80, 0.80 }	
   text[PRELIGHT] = { 0.80, 0.80, 0.80 }	
   text[INSENSITIVE] = { 0.80, 0.80, 0.80}	
-  text[SELECTED] = { 1.0, 1.0, 1.0 }
+  text[SELECTED] = { 0.0, 0.0, 1.0 }
   
-  base[ACTIVE]       = "#272a32"
+  base[ACTIVE]       = "#1a1e24"
   base[NORMAL]       = "#1a1e24"
-  base[PRELIGHT]     = { 0.18, 0.20, 0.22 }
+  base[PRELIGHT]     = { 0.0, 0.0, 1.0 }
+  base[INSENSITIVE]  = { 0.0, 1.0, 1.0 }
+
   base[INSENSITIVE]  = "#4c5159"
-  base[SELECTED]     = { 0.23, 0.25, 0.27 }
+  base[SELECTED]     = { 0.776, 0.969, 0.969 }
 
   engine "clearlooks" 
   {
@@ -647,8 +652,9 @@ style "editor_hscrollbar" = "ardour_adjusters"
 
 style "ardour_progressbars" = "default_generic"
 { 
-  bg[NORMAL] = { 0, 0, 0 }
-  bg[PRELIGHT] = { 0.00, 0.36, 0.40 }
+  # Clearlooks always uses black for the advancing bar, sigh
+  # so this is just a contrasting color for the trough
+  bg[NORMAL] = { 0.654, 0.654, 0.654 }
 }
 
 style "preferences"  = "default_base"
@@ -1781,7 +1787,6 @@ widget "*MetricButton.*" style:highest "default_button"
 widget "*MetricLabel" style:highest "medium_text"
 widget "*TimeStretchButton" style:highest "default_button"
 widget "*TimeStretchButton.*" style:highest "default_button"
-widget "*TimeStretchProgress" style:highest "default_generic"
 widget "*ChoiceWindow" style:highest "default_generic"
 widget "*ChoicePrompt" style:highest "default_generic"
 widget "*ChoiceButton" style:highest "default_button"
