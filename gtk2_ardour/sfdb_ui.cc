@@ -144,7 +144,10 @@ SoundFileBox::SoundFileBox (bool persistent)
 	samplerate.set_text (_("Sample rate:"));
 	samplerate.set_alignment (1, 0.5);
 
-	format_text.set_max_width_chars (8);
+        preview_label.set_max_width_chars (50);
+	preview_label.set_ellipsize (Pango::ELLIPSIZE_END);
+
+	format_text.set_max_width_chars (20);
 	format_text.set_ellipsize (Pango::ELLIPSIZE_END);
 	format_text.set_alignment (0, 1);
 
