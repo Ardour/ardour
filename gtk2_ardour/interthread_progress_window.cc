@@ -49,6 +49,7 @@ InterthreadProgressWindow::InterthreadProgressWindow (ARDOUR::InterThreadInfo* i
 
 	set_default_size (200, 100);
 	show_all ();
+        hide ();
 
 	Glib::signal_timeout().connect (sigc::mem_fun (*this, &InterthreadProgressWindow::update), 100);
 }

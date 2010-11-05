@@ -327,13 +327,34 @@ RegionFactory::region_by_id (const PBD::ID& id)
 	RegionMap::iterator i = region_map.find (id);
 
 	if (i == region_map.end()) {
-                cerr << "ID " << id << " not found in region map\n";
 		return boost::shared_ptr<Region>();
 	}
 
 	return i->second;
 }
-	
+
+boost::shared_ptr<Region>
+RegionFactory::wholefile_region_by_name (const std::string& name)
+{
+        for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ++i) {
+                if (i->second->whole_file() && i->second->name() == name) {
+                        return i->second;
+                }
+        }
+        return boost::shared_ptr<Region>();
+}	
+
+boost::shared_ptr<Region>
+RegionFactory::region_by_name (const std::string& name)
+{
+        for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ++i) {
+                if (i->second->name() == name) {
+                        return i->second;
+                }
+        }
+        return boost::shared_ptr<Region>();
+}	
+
 void
 RegionFactory::clear_map ()
 {

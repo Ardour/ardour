@@ -42,7 +42,9 @@ class RegionFactory {
   public:
         typedef std::map<PBD::ID,boost::shared_ptr<Region> > RegionMap;
 
+        static boost::shared_ptr<Region> wholefile_region_by_name (const std::string& name);
 	static boost::shared_ptr<Region> region_by_id (const PBD::ID&);
+	static boost::shared_ptr<Region> region_by_name (const std::string& name);
         static const RegionMap all_regions() { return region_map; }
 	static void clear_map ();
 
