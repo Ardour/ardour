@@ -170,8 +170,6 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	l = manage (new Label (_("<b>Progress</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 
-	progress_bar.set_name (N_("TimeFXProgress"));
-
 	progress_box->pack_start (*l, false, false);
 	progress_box->pack_start (progress_bar, false, true);
 
