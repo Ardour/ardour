@@ -4281,14 +4281,13 @@ Editor::center_edit_point ()
 	center_screen_internal (get_preferred_edit_position(), page);
 }
 
+/** Caller must begin and commit a reversible command */
 void
 Editor::clear_playlist (boost::shared_ptr<Playlist> playlist)
 {
-	begin_reversible_command (_("clear playlist"));
         playlist->clear_changes ();
 	playlist->clear ();
 	_session->add_command (new StatefulDiffCommand (playlist));
-	commit_reversible_command ();
 }
 
 void
