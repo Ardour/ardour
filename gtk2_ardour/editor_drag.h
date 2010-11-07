@@ -808,6 +808,10 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted ();
 
+	std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+		return std::make_pair (4, 4);
+	}
+
 private:
 	bool _zoom_out;
 };

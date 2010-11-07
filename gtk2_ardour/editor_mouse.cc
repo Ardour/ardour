@@ -270,7 +270,11 @@ Editor::set_canvas_cursor ()
 			break;
 
 		case MouseZoom:
-			current_canvas_cursor = zoom_in_cursor;
+			if (Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
+				current_canvas_cursor = zoom_out_cursor;
+			} else {
+				current_canvas_cursor = zoom_in_cursor;
+			}
 			break;
 
 		case MouseTimeFX:
