@@ -668,19 +668,40 @@ LocationUI::LocationUI ()
 {
 	i_am_the_modifier = 0;
 
-	location_vpacker.set_spacing (5);
-	
-	add_location_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
-	add_range_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
+	VBox* vbox = manage (new VBox);
+
+	Table* table = manage (new Table (2, 2));
+	table->set_spacings (4);
+	table->set_col_spacing (0, 32);
+	int table_row = 0;
+
+	Label* l = manage (new Label (_("<b>Loop/Punch Ranges</b>")));
+	l->set_alignment (0, 0.5);
+	l->set_use_markup (true);
+	table->attach (*l, 0, 2, table_row, table_row + 1);
+	++table_row;
 
 	loop_punch_box.pack_start (loop_edit_row, false, false);
 	loop_punch_box.pack_start (punch_edit_row, false, false);
 	
-	loop_punch_scroller.add (loop_punch_box);
-	loop_punch_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
-	loop_punch_scroller.set_shadow_type (Gtk::SHADOW_NONE);
+	table->attach (loop_punch_box, 1, 2, table_row, table_row + 1);
+	++table_row;
+
+	vbox->pack_start (*table, true, true);
 	
-	location_vpacker.pack_start (loop_punch_scroller, false, false);
+ 	table = manage (new Table (3, 2));
+	table->set_spacings (4);
+	table->set_col_spacing (0, 32);
+	table_row = 0;
+
+	table->attach (*manage (new Label ("")), 0, 2, table_row, table_row + 1);
+	++table_row;
+	
+	l = manage (new Label (_("<b>Markers (Including CD Index)</b>")));
+	l->set_alignment (0, 0.5);
+	l->set_use_markup (true);
+	table->attach (*l, 0, 2, table_row, table_row + 1);
+	++table_row;
 
 	location_rows.set_name("LocationLocRows");
 	location_rows_scroller.add (location_rows);
@@ -697,17 +718,25 @@ LocationUI::LocationUI ()
 	loc_frame_box.pack_start (location_rows_scroller, true, true);
 
 	add_location_button.set_name ("LocationAddLocationButton");
+
+	table->attach (loc_frame_box, 1, 2, table_row, table_row + 1);
+	++table_row;
+
+	loc_range_panes.pack1 (*table, true, false);
+
+ 	table = manage (new Table (3, 2));
+	table->set_spacings (4);
+	table->set_col_spacing (0, 32);
+	table_row = 0;
+
+	table->attach (*manage (new Label ("")), 0, 2, table_row, table_row + 1);
+	++table_row;
 	
-	HBox* add_button_box = manage (new HBox);
-
-	// loc_frame_box.pack_start (add_location_button, false, false);
-	add_button_box->pack_start (add_location_button, true, true);
-
-	loc_frame.set_name ("LocationLocEditorFrame");
-	loc_frame.set_label (_("Markers (including CD index)"));
-	loc_frame.add (loc_frame_box);
-	loc_range_panes.pack1(loc_frame, true, false);
-
+	l = manage (new Label (_("<b>Ranges (Including CD Track Ranges)</b>")));
+	l->set_alignment (0, 0.5);
+	l->set_use_markup (true);
+	table->attach (*l, 0, 2, table_row, table_row + 1);
+	++table_row;
 
 	range_rows.set_name("LocationRangeRows");
 	range_rows_scroller.add (range_rows);
@@ -721,18 +750,20 @@ LocationUI::LocationUI ()
 	range_frame_box.pack_start (range_rows_scroller, true, true);
 
 	add_range_button.set_name ("LocationAddRangeButton");
-	//range_frame_box.pack_start (add_range_button, false, false);
 
+	table->attach (range_frame_box, 1, 2, table_row, table_row + 1);
+	++table_row;
+
+	loc_range_panes.pack2 (*table, true, false);
+
+	HBox* add_button_box = manage (new HBox);
+	add_button_box->pack_start (add_location_button, true, true);
 	add_button_box->pack_start (add_range_button, true, true);
 
-	range_frame.set_name ("LocationRangeEditorFrame");
-	range_frame.set_label (_("Ranges (including CD track ranges)"));
-	range_frame.add (range_frame_box);
-	loc_range_panes.pack2(range_frame, true, false);
-	location_vpacker.pack_start (loc_range_panes, true, true);
-	location_vpacker.pack_start (*add_button_box, false, false);
+	vbox->pack_start (loc_range_panes);
+	vbox->pack_start (*add_button_box, false, false);
 
-	pack_start (location_vpacker, true, true);
+	pack_start (*vbox);
 
 	add_location_button.signal_clicked().connect (sigc::mem_fun(*this, &LocationUI::add_new_location));
 	add_range_button.signal_clicked().connect (sigc::mem_fun(*this, &LocationUI::add_new_range));

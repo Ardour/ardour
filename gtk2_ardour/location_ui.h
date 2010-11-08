@@ -158,22 +158,17 @@ class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	void session_going_away ();
 
-	Gtk::VBox  location_vpacker;
-
 	LocationEditRow      loop_edit_row;
 	LocationEditRow      punch_edit_row;
 	Gtk::VBox loop_punch_box;
-	Gtk::ScrolledWindow loop_punch_scroller;
 
 	Gtk::VPaned loc_range_panes;
 
-	Gtk::Frame loc_frame;
 	Gtk::VBox  loc_frame_box;
 	Gtk::Button add_location_button;
 	Gtk::ScrolledWindow  location_rows_scroller;
 	Gtk::VBox            location_rows;
 
-	Gtk::Frame range_frame;
 	Gtk::VBox  range_frame_box;
 	Gtk::Button add_range_button;
 	Gtk::ScrolledWindow  range_rows_scroller;
