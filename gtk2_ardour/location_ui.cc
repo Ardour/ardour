@@ -687,20 +687,20 @@ LocationUI::LocationUI ()
 	table->attach (loop_punch_box, 1, 2, table_row, table_row + 1);
 	++table_row;
 
-	vbox->pack_start (*table, true, true);
+	vbox->pack_start (*table, false, false);
 	
  	table = manage (new Table (3, 2));
 	table->set_spacings (4);
 	table->set_col_spacing (0, 32);
 	table_row = 0;
 
-	table->attach (*manage (new Label ("")), 0, 2, table_row, table_row + 1);
+	table->attach (*manage (new Label ("")), 0, 2, table_row, table_row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	++table_row;
 	
 	l = manage (new Label (_("<b>Markers (Including CD Index)</b>")));
 	l->set_alignment (0, 0.5);
 	l->set_use_markup (true);
-	table->attach (*l, 0, 2, table_row, table_row + 1);
+	table->attach (*l, 0, 2, table_row, table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 	++table_row;
 
 	location_rows.set_name("LocationLocRows");
@@ -729,13 +729,13 @@ LocationUI::LocationUI ()
 	table->set_col_spacing (0, 32);
 	table_row = 0;
 
-	table->attach (*manage (new Label ("")), 0, 2, table_row, table_row + 1);
+	table->attach (*manage (new Label ("")), 0, 2, table_row, table_row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	++table_row;
 	
 	l = manage (new Label (_("<b>Ranges (Including CD Track Ranges)</b>")));
 	l->set_alignment (0, 0.5);
 	l->set_use_markup (true);
-	table->attach (*l, 0, 2, table_row, table_row + 1);
+	table->attach (*l, 0, 2, table_row, table_row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 	++table_row;
 
 	range_rows.set_name("LocationRangeRows");
@@ -760,7 +760,7 @@ LocationUI::LocationUI ()
 	add_button_box->pack_start (add_location_button, true, true);
 	add_button_box->pack_start (add_range_button, true, true);
 
-	vbox->pack_start (loc_range_panes);
+	vbox->pack_start (loc_range_panes, true, true);
 	vbox->pack_start (*add_button_box, false, false);
 
 	pack_start (*vbox);
