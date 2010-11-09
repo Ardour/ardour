@@ -785,6 +785,19 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void request_resume_timecode_transmission ();
 	bool timecode_transmission_suspended () const;
 
+        std::string source_search_path(DataType) const;
+
+        /* handlers can return an integer value:
+           0: config.set_audio_search_path() or config.set_midi_search_path() was used
+              to modify the search path and we should try to find it again.
+           1: quit entire session load
+           2: as 0, but don't ask about other missing files
+           3: don't ask about other missing files, and just mark this one missing
+          -1: just mark this one missing
+          any other value: as -1
+        */
+	static PBD::Signal3<int,Session*,std::string,DataType> MissingFile;
+
 	/** Emitted when the session wants Ardour to quit */
 	static PBD::Signal0<void> Quit;
 
@@ -1309,6 +1322,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::vector<space_and_path>::iterator last_rr_session_dir;
 	uint32_t _total_free_4k_blocks;
 	Glib::Mutex space_lock;
+
+        bool no_questions_about_missing_files;
 
 	std::string get_best_session_directory_for_new_source ();
 

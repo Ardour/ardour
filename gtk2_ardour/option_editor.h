@@ -136,7 +136,7 @@ public:
 		return _id;
 	}
 
-private:
+protected:
 
 	std::string _id;
 	std::string _name;

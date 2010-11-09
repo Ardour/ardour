@@ -102,6 +102,7 @@ typedef uint64_t microseconds_t;
 #include "window_proxy.h"
 #include "global_port_matrix.h"
 #include "location_ui.h"
+#include "missing_file_dialog.h"
 
 #include "i18n.h"
 
@@ -263,6 +264,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	/* handle requests to quit (coming from JACK session) */
 	
 	ARDOUR::Session::Quit.connect (forever_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::finish, this), gui_context ());
+
+        /* handle requests to deal with missing files */
+
+	ARDOUR::Session::MissingFile.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::missing_file, this, _1, _2, _3));
 
 	/* lets get this party started */
 
@@ -3688,4 +3693,27 @@ void
 ARDOUR_UI::remove_window_proxy (WindowProxyBase* p)
 {
 	_window_proxies.remove (p);
+}
+
+int
+ARDOUR_UI::missing_file (Session*s, std::string str, DataType type)
+{
+        MissingFileDialog dialog (s, str, type);
+
+        dialog.show ();
+        dialog.present ();
+
+        int result = dialog.run ();
+        dialog.hide ();
+
+        switch (result) {
+        case RESPONSE_OK:
+                break;
+        default:
+                return 1; // quit entire session load
+        }
+
+        result = dialog.get_action ();
+
+        return result;
 }

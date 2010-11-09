@@ -144,7 +144,6 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 	if (type == DataType::AUDIO) {
 
 		try {
-
 			Source* src = new SndFileSource (s, node);
 			// boost_debug_shared_ptr_mark_interesting (src, "Source");
 			boost::shared_ptr<Source> ret (src);

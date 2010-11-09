@@ -52,7 +52,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
 
-map<DataType, string> FileSource::search_paths;
+PBD::Signal3<int,std::string,std::string,std::vector<std::string> > FileSource::AmbiguousFileName;
 
 FileSource::FileSource (Session& session, DataType type, const string& path, Source::Flag flag)
 	: Source(session, type, path, flag)
@@ -84,8 +84,6 @@ FileSource::removable () const
                  && ((_flags & RemoveAtDestroy) || 
                      ((_flags & RemovableIfEmpty) && empty() == 0)));
 
-        cerr << "is " << _path << " removable ? " << r << endl;
-
         return r;
 }
 
@@ -94,9 +92,15 @@ FileSource::init (const string& pathstr, bool must_exist)
 {
 	_timeline_position = 0;
 
-	if (!find (_type, pathstr, must_exist, _file_is_new, _channel, _path)) {
-		throw MissingSource ();
-	}
+        if (Stateful::loading_state_version < 3000) {
+                if (!find_2X (_session, _type, pathstr, must_exist, _file_is_new, _channel, _path)) {
+                        throw MissingSource (pathstr, _type);
+                }
+        } else {
+                if (!find (_session, _type, pathstr, must_exist, _file_is_new, _channel, _path)) {
+                        throw MissingSource (pathstr, _type);
+                }
+        }
 
 	set_within_session_from_path (pathstr);
 
@@ -204,10 +208,100 @@ FileSource::move_to_trash (const string& trash_dir_name)
  * \return true iff the file was found.
  */
 bool
-FileSource::find (DataType type, const string& path, bool must_exist,
+FileSource::find (Session& s, DataType type, const string& path, bool must_exist,
 		  bool& isnew, uint16_t& chan, string& found_path)
 {
-	string search_path = search_paths[type];
+	string search_path = s.source_search_path (type);
+
+	string pathstr = path;
+	bool ret = false;
+
+        cerr << "Searching along " << search_path << endl;
+
+	isnew = false;
+
+        vector<string> dirs;
+        vector<string> hits;
+        int cnt;
+        string fullpath;
+        string keeppath;
+        
+        if (search_path.length() == 0) {
+                error << _("FileSource: search path not set") << endmsg;
+                goto out;
+        }
+        
+        split (search_path, dirs, ':');
+        
+        cnt = 0;
+        hits.clear ();
+        
+        for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
+                
+                cerr << "Searching in " << *i << " for " << pathstr << endl;
+                
+                fullpath = Glib::build_filename (*i, pathstr);
+                
+                if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
+                        keeppath = fullpath;
+                        hits.push_back (fullpath);
+                        ++cnt;
+                }
+        }
+        
+        if (cnt > 1) {
+                
+                int which = FileSource::AmbiguousFileName (pathstr, search_path, hits).get_value_or (-1);
+
+                if (which < 0) {
+                        goto out;
+                } else {
+                        keeppath = hits[which];
+                }
+                
+        } else if (cnt == 0) {
+                
+                if (must_exist) {
+                        error << string_compose(
+                                _("Filesource: cannot find required file (%1): while searching %2"),
+                                pathstr, search_path) << endmsg;
+                        goto out;
+                } else {
+                        isnew = true;
+                }
+        }
+        
+        /* Current find() is unable to parse relative path names to yet non-existant
+           sources. QuickFix(tm) 
+        */
+        if (keeppath == "") {
+                if (must_exist) {
+                        error << "FileSource::find(), keeppath = \"\", but the file must exist" << endl;
+                } else {
+                        keeppath = pathstr;
+                }
+        }
+        
+        found_path = keeppath;
+        
+        ret = true;
+        
+  out:
+	return ret;
+}
+
+/** Find the actual source file based on \a filename.
+ *
+ * If the source is within the session tree, \a filename should be a simple filename (no slashes).
+ * If the source is external, \a filename should be a full path.
+ * In either case, found_path is set to the complete absolute path of the source file.
+ * \return true iff the file was found.
+ */
+bool
+FileSource::find_2X (Session& s, DataType type, const string& path, bool must_exist,
+                     bool& isnew, uint16_t& chan, string& found_path)
+{
+	string search_path = s.source_search_path (type);
 
 	string pathstr = path;
 	string::size_type pos;
@@ -395,12 +489,6 @@ FileSource::set_source_name (const string& newname, bool destructive)
 	_path = newpath;
 
 	return 0;
-}
-
-void
-FileSource::set_search_path (DataType type, const string& p)
-{
-	search_paths[type] = p;
 }
 
 void

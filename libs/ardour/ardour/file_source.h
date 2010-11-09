@@ -20,15 +20,25 @@
 #ifndef __ardour_filesource_h__
 #define __ardour_filesource_h__
 
+#include <list>
+#include <string>
 #include <exception>
 #include <time.h>
 #include "ardour/source.h"
 
 namespace ARDOUR {
 
-class MissingSource : public std::exception {
-public:
+class MissingSource : public std::exception 
+{
+  public:
+        MissingSource (const std::string& p, DataType t) throw ()
+                : path (p), type (t) {}
+        ~MissingSource() throw() {}
+
 	virtual const char *what() const throw() { return "source file does not exist"; }
+
+        std::string path;
+        DataType type;
 };
 
 /** A source associated with a file on disk somewhere */
@@ -54,14 +64,18 @@ public:
 
 	int set_source_name (const std::string& newname, bool destructive);
 
-	static void set_search_path (DataType type, const std::string& path);
+	static bool find (Session&, DataType type, const std::string& path,
+                          bool must_exist, bool& is_new, uint16_t& chan,
+                          std::string& found_path);
 
-	static bool find (DataType type, const std::string& path,
-			bool must_exist, bool& is_new, uint16_t& chan,
-			std::string& found_path);
+	static bool find_2X (Session&, DataType type, const std::string& path,
+                             bool must_exist, bool& is_new, uint16_t& chan,
+                             std::string& found_path);
 
         void inc_use_count ();
 	bool removable () const;
+
+	static PBD::Signal3<int,std::string,std::string,std::vector<std::string> > AmbiguousFileName;
 
 protected:
 	FileSource (Session& session, DataType type,
@@ -81,8 +95,6 @@ protected:
 	bool          _file_is_new;
 	uint16_t      _channel;
 	bool          _within_session;
-
-	static std::map<DataType, std::string> search_paths;
 };
 
 } // namespace ARDOUR

@@ -25,6 +25,7 @@
 
 #include "gui_thread.h"
 #include "session_option_editor.h"
+#include "search_path_option.h"
 #include "i18n.h"
 
 using namespace std;
@@ -177,9 +178,9 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_region_fades)
 			    ));
 
-	/* MISC */
+	/* Media */
 
-	add_option (_("Misc"), new OptionEditorHeading (_("Audio file format")));
+	add_option (_("Media"), new OptionEditorHeading (_("Audio file format")));
 
 	ComboOption<SampleFormat>* sf = new ComboOption<SampleFormat> (
 		"native-file-data-format",
@@ -192,7 +193,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	sf->add (FormatInt24, _("24-bit integer"));
 	sf->add (FormatInt16, _("16-bit integer"));
 
-	add_option (_("Misc"), sf);
+	add_option (_("Media"), sf);
 
 	ComboOption<HeaderFormat>* hf = new ComboOption<HeaderFormat> (
 		"native-file-header-format",
@@ -206,13 +207,28 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	hf->add (WAVE64, _("WAVE-64"));
 	hf->add (CAF, _("CAF"));
 
-	add_option (_("Misc"), hf);
+	add_option (_("Media"), hf);
+        
+        add_option (_("Media"), new OptionEditorHeading (_("Media Locations")));
 
-	add_option (_("Misc"), new OptionEditorHeading (_("Layering")));
+        SearchPathOption* spo = new SearchPathOption ("audio-search-path", _("Search for audio files in:"),
+                                                      sigc::mem_fun (*_session_config, &SessionConfiguration::get_audio_search_path),
+                                                      sigc::mem_fun (*_session_config, &SessionConfiguration::set_audio_search_path));
+        add_option (_("Media"), spo);
+
+        spo = new SearchPathOption ("midi-search-path", _("Search for MIDI files in:"),
+                                    sigc::mem_fun (*_session_config, &SessionConfiguration::get_midi_search_path),
+                                    sigc::mem_fun (*_session_config, &SessionConfiguration::set_midi_search_path));
+
+        add_option (_("Media"), spo);
+
+        /* Misc */
+
+	add_option (_("Misc"), new OptionEditorHeading (_("Layering (in overlaid mode)")));
 
 	ComboOption<LayerModel>* lm = new ComboOption<LayerModel> (
 		"layer-model",
-		_("Layering model in overlaid mode"),
+		_("Layering model"),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_layer_model),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_layer_model)
 		);
@@ -227,7 +243,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	ComboOption<InsertMergePolicy>* li = new ComboOption<InsertMergePolicy> (
 		"insert-merge-policy",
-		_("Policy for handling same note and channel overlaps"),
+		_("Policy for handling same note\nand channel overlaps"),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_insert_merge_policy),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_insert_merge_policy)
 		);

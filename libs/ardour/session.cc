@@ -44,6 +44,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/file_utils.h"
 #include "pbd/convert.h"
+#include "pbd/strsplit.h"
 
 #include "ardour/amp.h"
 #include "ardour/analyser.h"
@@ -117,6 +118,7 @@ PBD::Signal1<void,std::string> Session::Dialog;
 PBD::Signal0<int> Session::AskAboutPendingState;
 PBD::Signal2<int,nframes_t,nframes_t> Session::AskAboutSampleRateMismatch;
 PBD::Signal0<void> Session::SendFeedback;
+PBD::Signal3<int,Session*,std::string,DataType> Session::MissingFile;
 
 PBD::Signal0<void> Session::TimecodeOffsetChanged;
 PBD::Signal1<void, framepos_t> Session::StartTimeChanged;
@@ -4060,3 +4062,58 @@ Session::end_time_changed (framepos_t old)
 		l->set_end (s->end(), true);
 	}
 }
+
+string
+Session::source_search_path (DataType type) const
+{
+        string search_path;
+
+	if (session_dirs.size() == 1) {
+                switch (type) {
+                case DataType::AUDIO:
+                        search_path = _session_dir->sound_path().to_string();
+                        break;
+                case DataType::MIDI:
+                        search_path = _session_dir->midi_path().to_string();
+                        break;
+                }
+	} else {
+                for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+                        SessionDirectory sdir (i->path);
+                        if (!search_path.empty()) {
+                                search_path += ':';
+                        } 
+                        switch (type) {
+                        case DataType::AUDIO:
+                                search_path += sdir.sound_path().to_string();
+                                break;
+                        case DataType::MIDI:
+                                search_path += sdir.midi_path().to_string();
+                                break;
+                        }
+                }
+        }
+                
+        /* now add user-specified locations
+         */
+
+        vector<string> dirs;
+
+        switch (type) {
+        case DataType::AUDIO:
+                split (config.get_audio_search_path (), dirs, ':');
+                break;
+        case DataType::MIDI:
+                split (config.get_midi_search_path (), dirs, ':');
+                break;
+        }
+
+        for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
+                        search_path += ':';
+                        search_path += *i;
+                        
+        }
+        
+        return search_path;
+}
+

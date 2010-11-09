@@ -1,0 +1,156 @@
+/*
+    Copyright (C) 2010 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+#include "pbd/strsplit.h"
+#include "search_path_option.h"
+
+using namespace std;
+using namespace Gtk;
+
+SearchPathOption::SearchPathOption (const string& pathname, const string& label,
+                                    sigc::slot<std::string> get, sigc::slot<bool, std::string> set)
+        : Option (pathname, label)
+        , _get (get)
+        , _set (set)
+        , add_chooser (_("Select folder to search for media"), FILE_CHOOSER_ACTION_SELECT_FOLDER)
+{
+        add_chooser.signal_file_set().connect (sigc::mem_fun (*this, &SearchPathOption::path_chosen));
+
+        HBox* hbox = manage (new HBox);
+
+        hbox->set_border_width (12);
+        hbox->set_spacing (6);
+        hbox->pack_end (add_chooser, false, false);
+        hbox->pack_end (*manage (new Label ("Click to add a new location")), false, false);
+        hbox->show_all ();
+        
+        vbox.pack_start (path_box);
+        vbox.pack_end (*hbox);
+
+        session_label.set_use_markup (true);
+        session_label.set_markup (string_compose ("<i>%1</i>", _("the session folder")));
+        session_label.set_alignment (0.0, 0.5);
+        session_label.show ();
+}
+
+SearchPathOption::~SearchPathOption()
+{
+        
+
+}
+
+void
+SearchPathOption::path_chosen ()
+{
+        string path = add_chooser.get_filename ();
+        add_path (path);
+}
+
+void
+SearchPathOption::add_to_page (OptionEditorPage* p)
+{
+	int const n = p->table.property_n_rows();
+	p->table.resize (n + 2, 3);
+
+        Label* label = manage (new Label);
+        label->set_alignment (0.0, 0.5);
+        label->set_markup (string_compose ("<b>%1</b>", _name));
+
+	p->table.attach (*label, 0, 1, n, n + 1, FILL | EXPAND);
+	p->table.attach (vbox, 0, 3, n + 1, n + 2, FILL | EXPAND);
+}
+
+void
+SearchPathOption::clear ()
+{
+        path_box.remove (session_label);
+        for (list<PathEntry*>::iterator p = paths.begin(); p != paths.end(); ++p) {
+                path_box.remove ((*p)->box);
+                delete *p;
+        }
+        paths.clear ();
+}
+
+void
+SearchPathOption::set_state_from_config ()
+{
+        string str = _get ();
+        vector<string> dirs;
+
+        clear ();
+        path_box.pack_start (session_label);
+
+        split (str, dirs, ':');
+        
+        for (vector<string>::iterator d = dirs.begin(); d != dirs.end(); ++d) {
+                add_path (*d);
+        }
+}
+
+void
+SearchPathOption::changed ()
+{
+        string str;
+        
+        for (list<PathEntry*>::iterator p = paths.begin(); p != paths.end(); ++p) {
+
+                if (p == paths.begin()) {
+                        /* skip first entry, its always "the session"
+                         */
+                        continue;
+                }
+
+                if (!str.empty()) {
+                        str += ':';
+                }
+                str += (*p)->entry.get_text ();
+        }
+
+        _set (str);
+}
+
+void
+SearchPathOption::add_path (const string& path, bool removable)
+{
+        PathEntry* pe = new PathEntry (path, removable);
+        paths.push_back (pe);
+        path_box.pack_start (pe->box, false, false);
+}
+
+void
+SearchPathOption::remove_path (const string& path)
+{
+}
+
+SearchPathOption::PathEntry::PathEntry (const std::string& path, bool removable)
+        : remove_button (Stock::REMOVE)
+{
+        entry.set_text (path);
+        entry.show ();
+
+        box.set_spacing (6);
+        box.set_homogeneous (false);
+        box.pack_start (entry, true, true);
+        
+        if (removable) {
+                box.pack_start (remove_button, false, false);
+                remove_button.show ();
+        }
+
+        box.show ();
+}

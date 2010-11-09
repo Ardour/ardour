@@ -217,6 +217,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	post_export_sync = false;
 	midi_control_ui = 0;
         _step_editors = 0;
+        no_questions_about_missing_files = false;
 
 	AudioDiskstream::allocate_working_buffers();
 
@@ -422,10 +423,6 @@ Session::setup_raid_path (string path)
 		sound_search_path += sdir.sound_path ();
 		midi_search_path += sdir.midi_path ();
 	}
-
-	// set the search path for each data type
-	FileSource::set_search_path (DataType::AUDIO, sound_search_path.to_string ());
-	SMFSource::set_search_path (DataType::MIDI, midi_search_path.to_string ());
 
 	// reset the round-robin soundfile path thingie
 	last_rr_session_dir = session_dirs.begin();
@@ -1871,13 +1868,47 @@ Session::load_sources (const XMLNode& node)
 	set_dirty();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+          retry:
 		try {
 			if ((source = XMLSourceFactory (**niter)) == 0) {
 				error << _("Session: cannot create Source from XML description.") << endmsg;
 			}
+
 		} catch (MissingSource& err) {
-			warning << _("A sound file is missing. It will be replaced by silence.") << endmsg;
-			source = SourceFactory::createSilent (*this, **niter, max_framecnt, _current_frame_rate);
+
+                        int user_choice;
+
+                        if (!no_questions_about_missing_files) {
+                                user_choice = MissingFile (this, err.path, err.type).get_value_or (-1);
+                        } else {
+                                user_choice = -2;
+                        }
+
+                        switch (user_choice) {
+                        case 0:
+                                /* user added a new search location, so try again */
+                                goto retry;
+                                
+                                
+                        case 1:
+                                /* user asked to quit the entire session load
+                                 */
+                                return -1;
+
+                        case 2:
+                                no_questions_about_missing_files = true;
+                                goto retry;
+
+                        case 3:
+                                no_questions_about_missing_files = true;
+                                /* fallthru */
+
+                        case -1:
+                        default:
+                                warning << _("A sound file is missing. It will be replaced by silence.") << endmsg;
+                                source = SourceFactory::createSilent (*this, **niter, max_framecnt, _current_frame_rate);
+                                break;
+                        }
 		}
 	}
 
@@ -2421,7 +2452,7 @@ Session::find_all_sources (string path, set<string>& result)
 		bool is_new;
 		uint16_t chan;
 
-		if (FileSource::find (type, prop->value(), true, is_new, chan, found_path)) {
+		if (FileSource::find (*this, type, prop->value(), true, is_new, chan, found_path)) {
 			result.insert (found_path);
 		}
 	}
