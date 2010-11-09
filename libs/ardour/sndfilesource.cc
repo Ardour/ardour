@@ -217,6 +217,8 @@ SndFileSource::open ()
 		   so we don't want to see this message.
 		*/
 
+                cerr << "failed to open " << _path << " with name " << _name << endl;
+
 		error << string_compose(_("SndFileSource: cannot open file \"%1\" for %2 (%3)"),
 					_path, (writable() ? "read+write" : "reading"), errbuf) << endmsg;
 #endif

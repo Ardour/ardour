@@ -4117,3 +4117,41 @@ Session::source_search_path (DataType type) const
         return search_path;
 }
 
+void
+Session::ensure_search_path_includes (const string& path, DataType type)
+{
+        string search_path;
+        vector<string> dirs;
+
+        switch (type) {
+        case DataType::AUDIO:
+                search_path = config.get_audio_search_path ();
+                break;
+        case DataType::MIDI:
+                search_path = config.get_midi_search_path ();
+                break;
+        }
+
+        split (search_path, dirs, ':');
+
+        for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
+                if (*i == path) {
+                        return;
+                }
+        }
+
+        if (!search_path.empty()) {
+                search_path += ':';
+        }
+
+        search_path += path;
+        
+        switch (type) {
+        case DataType::AUDIO:
+                config.set_audio_search_path (search_path);
+                break;
+        case DataType::MIDI:
+                config.set_midi_search_path (search_path);
+                break;
+        }
+}

@@ -104,9 +104,11 @@ FileSource::init (const string& pathstr, bool must_exist)
 
 	set_within_session_from_path (pathstr);
 
-	if (_within_session) {
-		_name = Glib::path_get_basename (_name);
-	}
+        if (!within_session()) {
+                _session.ensure_search_path_includes (Glib::path_get_dirname (pathstr), _type);
+        }
+
+        _name = Glib::path_get_basename (pathstr);
 
 	if (_file_is_new && must_exist) {
 		return -1;
@@ -211,64 +213,63 @@ bool
 FileSource::find (Session& s, DataType type, const string& path, bool must_exist,
 		  bool& isnew, uint16_t& chan, string& found_path)
 {
-	string search_path = s.source_search_path (type);
-
-	string pathstr = path;
 	bool ret = false;
-
-        cerr << "Searching along " << search_path << endl;
+        string keeppath;
 
 	isnew = false;
+        
+        if (!Glib::path_is_absolute (path)) {
+                vector<string> dirs;
+                vector<string> hits;
+                int cnt;
+                string fullpath;
 
-        vector<string> dirs;
-        vector<string> hits;
-        int cnt;
-        string fullpath;
-        string keeppath;
-        
-        if (search_path.length() == 0) {
-                error << _("FileSource: search path not set") << endmsg;
-                goto out;
-        }
-        
-        split (search_path, dirs, ':');
-        
-        cnt = 0;
-        hits.clear ();
-        
-        for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
-                
-                cerr << "Searching in " << *i << " for " << pathstr << endl;
-                
-                fullpath = Glib::build_filename (*i, pathstr);
-                
-                if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
-                        keeppath = fullpath;
-                        hits.push_back (fullpath);
-                        ++cnt;
-                }
-        }
-        
-        if (cnt > 1) {
-                
-                int which = FileSource::AmbiguousFileName (pathstr, search_path, hits).get_value_or (-1);
+                string search_path = s.source_search_path (type);
 
-                if (which < 0) {
+                if (search_path.length() == 0) {
+                        error << _("FileSource: search path not set") << endmsg;
                         goto out;
-                } else {
-                        keeppath = hits[which];
+                }
+
+                split (search_path, dirs, ':');
+                
+                cnt = 0;
+                hits.clear ();
+                
+                for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
+                        
+                        fullpath = Glib::build_filename (*i, path);
+                        
+                        if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
+                                keeppath = fullpath;
+                                hits.push_back (fullpath);
+                                ++cnt;
+                        }
                 }
                 
-        } else if (cnt == 0) {
-                
-                if (must_exist) {
-                        error << string_compose(
-                                _("Filesource: cannot find required file (%1): while searching %2"),
-                                pathstr, search_path) << endmsg;
-                        goto out;
-                } else {
-                        isnew = true;
+                if (cnt > 1) {
+                        
+                        int which = FileSource::AmbiguousFileName (path, search_path, hits).get_value_or (-1);
+                        
+                        if (which < 0) {
+                                goto out;
+                        } else {
+                                keeppath = hits[which];
+                        }
+                        
+                } else if (cnt == 0) {
+                        
+                        if (must_exist) {
+                                error << string_compose(
+                                        _("Filesource: cannot find required file (%1): while searching %2"),
+                                        path, search_path) << endmsg;
+                                goto out;
+                        } else {
+                                isnew = true;
+                        }
                 }
+        } else {
+                keeppath = path;
         }
         
         /* Current find() is unable to parse relative path names to yet non-existant
@@ -278,7 +279,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
                 if (must_exist) {
                         error << "FileSource::find(), keeppath = \"\", but the file must exist" << endl;
                 } else {
-                        keeppath = pathstr;
+                        keeppath = path;
                 }
         }
         

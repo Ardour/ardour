@@ -606,7 +606,6 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 	string linked_path;
 	SoundFileInfo finfo;
 	int ret = 0;
-	string path_to_use;
 
 	set_canvas_cursor (wait_cursor);
 	gdk_flush ();
@@ -614,47 +613,9 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
 
 		string path = *p;
-
-		if (Config->get_try_link_for_embed()) {
-
-			/* lets see if we can link it into the session */
-			
-			sys::path tmp = _session->session_directory().sound_path() / Glib::path_get_basename(path);
-			linked_path = tmp.to_string();
-			
-			path_to_use = linked_path;
-			
-			if (link (path.c_str(), linked_path.c_str()) == 0) {
-				
-				/* there are many reasons why link(2) might have failed.
-				   but if it succeeds, we now have a link in the
-				   session sound dir that will protect against
-				   unlinking of the original path. nice.
-				*/
-				
-				path = linked_path;
-				path_to_use = Glib::path_get_basename (path);
-				
-			} else {
-
-				/* one possible reason is that its already linked */
-				
-				if (errno == EEXIST) {
-					struct stat sb;
-					
-					if (stat (linked_path.c_str(), &sb) == 0) {
-						if (sb.st_nlink > 1) { // its a hard link, assume its the one we want
-							path = linked_path;
-							path_to_use = Glib::path_get_basename (path);
-						}
-					}
-				}
-			}
-		}
+		string error_msg;
 
 		/* note that we temporarily truncated _id at the colon */
-
-		string error_msg;
 
 		if (!AudioFileSource::get_soundfile_info (path, finfo, error_msg)) {
 			error << string_compose(_("Editor: cannot open file \"%1\", (%2)"), path, error_msg ) << endmsg;
@@ -732,7 +693,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 
 					source = boost::dynamic_pointer_cast<AudioFileSource> (
 						SourceFactory::createReadable (DataType::AUDIO, *_session,
-									       path_to_use, n,
+									       path, n,
 									       (mode == ImportAsTapeTrack
 										? Source::Destructive
 										: Source::Flag (0)),
