@@ -77,7 +77,7 @@ class ConfigVariable : public ConfigVariableBase
 		return true;
 	}
 
-	void set_from_string (std::string const & s) {
+	virtual void set_from_string (std::string const & s) {
 		std::stringstream ss;
 		ss << s;
 		ss >> value;
@@ -138,6 +138,14 @@ class ConfigVariableWithMutation : public ConfigVariable<T>
 			return ConfigVariable<T>::set (mutator (val));
 		}
 		return false;
+	}
+
+	void set_from_string (std::string const & s) {
+                T v;
+                std::stringstream ss;
+                ss << s;
+		ss >> v;
+                set (v);
 	}
 
   protected:
