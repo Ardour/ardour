@@ -4141,6 +4141,10 @@ Session::ensure_search_path_includes (const string& path, DataType type)
         string search_path;
         vector<string> dirs;
 
+        if (path == ".") {
+                return;
+        }
+
         switch (type) {
         case DataType::AUDIO:
                 search_path = config.get_audio_search_path ();

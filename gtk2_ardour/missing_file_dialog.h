@@ -3,7 +3,7 @@
 
 #include <string>
 #include <gtkmm/label.h>
-#include <gtkmm/filechooserwidget.h>
+#include <gtkmm/filechooserbutton.h>
 #include <gtkmm/radiobutton.h>
 
 #include "ardour/types.h"
@@ -24,7 +24,7 @@ class MissingFileDialog : public ArdourDialog
   private:
         ARDOUR::DataType filetype;
 
-        Gtk::FileChooserWidget chooser;
+        Gtk::FileChooserButton chooser;
         Gtk::RadioButton use_chosen;
         Gtk::RadioButton::Group choice_group;
         Gtk::RadioButton use_chosen_and_no_more_questions;

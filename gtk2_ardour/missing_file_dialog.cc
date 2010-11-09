@@ -32,13 +32,12 @@ using namespace PBD;
 MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataType type)
         : ArdourDialog (_("Missing File!"), true, false)
         , filetype (type)
-        , chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
+        , chooser (_("Select a folder to search"), FILE_CHOOSER_ACTION_SELECT_FOLDER)
         , use_chosen (_("Add chosen folder to search path, and try again"))
         , choice_group (use_chosen.get_group())
-        , use_chosen_and_no_more_questions (choice_group, _("Add chosen folder to search path, try again but don't ask me again"), false)
         , stop_loading_button (choice_group, _("Stop loading this session"), false)
-        , all_missing_ok (choice_group, _("This and all other missing files are OK"), false)
-        , this_missing_ok (choice_group, _("This missing file is OK"), false)
+        , all_missing_ok (choice_group, _("Skip all missing files"), false)
+        , this_missing_ok (choice_group, _("Skip this file"), false)
 {
         set_session (s);
 
@@ -48,22 +47,28 @@ MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataT
 
         switch (type) {
         case DataType::AUDIO:
-                typestr = _("An audio");
+                typestr = _("audio");
                 break;
         case DataType::MIDI:
-                typestr = _("A MIDI");
+                typestr = _("MIDI");
                 break;
         }
 
         string dirstr;
 
         dirstr = s->source_search_path (type);
+        cerr << "Search path = " << dirstr << endl;
         replace_all (dirstr, ":", "\n");
 
-        msg.set_markup (string_compose (_("%1 file (\"%2\") cannot be found.\n\n\
-Currently, Ardour has searched in the following folders for this file:\n\n\
-<tt>%3</tt>\n\n\
-The following options are available:"), typestr, path, dirstr));
+        msg.set_justify (JUSTIFY_CENTER);
+        msg.set_markup (string_compose (_("Ardour cannot find the %1 file\n\n<i>%2</i>\n\nin any of these folders:\n\n\
+<tt>%3</tt>\n\n"), typestr, path, dirstr));
+
+        HBox* hbox = manage (new HBox);
+        hbox->pack_start (msg, false, true);
+        hbox->show ();
+
+        get_vbox()->pack_start (*hbox, false, false);
 
         VBox* button_packer_box = manage (new VBox);
 
@@ -71,7 +76,6 @@ The following options are available:"), typestr, path, dirstr));
         button_packer_box->set_border_width (12);
 
         button_packer_box->pack_start (use_chosen, false, false);
-        button_packer_box->pack_start (use_chosen_and_no_more_questions, false, false);
         button_packer_box->pack_start (this_missing_ok, false, false);
         button_packer_box->pack_start (all_missing_ok, false, false);
         button_packer_box->pack_start (stop_loading_button, false, false);
@@ -79,21 +83,30 @@ The following options are available:"), typestr, path, dirstr));
         button_packer_box->show_all ();
         
         get_vbox()->set_spacing (6);
-        get_vbox()->set_border_width (12);
+        get_vbox()->set_border_width (25);
         get_vbox()->set_homogeneous (false);
 
-        get_vbox()->pack_start (msg, false, false);
 
-        HBox* hbox = manage (new HBox);
+        hbox = manage (new HBox);
         hbox->pack_start (*button_packer_box, false, true);
         hbox->show ();
 
         get_vbox()->pack_start (*hbox, false, false);
-        get_vbox()->pack_start (chooser, true, true);
+
+        hbox = manage (new HBox);
+        Label* label = manage (new Label);
+        label->set_text (_("Click to choose an additional folder"));
+
+        hbox->set_spacing (6);
+        hbox->set_border_width (12);
+        hbox->pack_start (*label, false, false);
+        hbox->pack_start (chooser, true, true);
+        hbox->show_all ();
+
+        get_vbox()->pack_start (*hbox, true, true);
 
         msg.show ();
-        chooser.set_size_request (-1, 300);
-        chooser.show ();
+
         chooser.set_current_folder (Glib::get_home_dir());
         chooser.set_create_folders (false);
 }
@@ -143,15 +156,9 @@ MissingFileDialog::add_chosen ()
 int
 MissingFileDialog::get_action ()
 {
-
         if (use_chosen.get_active ()) {
                 add_chosen ();
                 return 0;
-        }
-
-        if (use_chosen_and_no_more_questions.get_active()) {
-                add_chosen ();
-                return 2;
         }
 
         if (this_missing_ok.get_active()) {
