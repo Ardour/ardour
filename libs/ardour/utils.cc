@@ -290,6 +290,10 @@ path_is_paired (string path, string& pair_base)
 string
 path_expand (string path)
 {
+        if (path.empty()) {
+                return path;
+        }
+
 #ifdef HAVE_WORDEXP
 	/* Handle tilde and environment variable expansion in session path */
 	string ret = path;
