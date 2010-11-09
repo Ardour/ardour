@@ -96,6 +96,11 @@ class RegionView : public TimeAxisViewItem
 		return _time_converter;
 	}
 
+	void trim_start (framepos_t, bool);
+	void trim_end (framepos_t, bool);
+	void trim_contents (framepos_t, bool, bool);
+	virtual void thaw_after_trim ();
+
   protected:
 
 	/** Allows derived types to specify their visibility requirements

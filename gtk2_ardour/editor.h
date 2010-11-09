@@ -1706,11 +1706,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* trimming */
 	void point_trim (GdkEvent *, framepos_t);
-	void single_contents_trim (RegionView&, framepos_t, bool, bool);
-	void single_start_trim (RegionView&, framepos_t, bool);
-	void single_end_trim (RegionView&, framepos_t, bool);
-
-	void thaw_region_after_trim (RegionView& rv);
 
 	void trim_region_front();
 	void trim_region_back();

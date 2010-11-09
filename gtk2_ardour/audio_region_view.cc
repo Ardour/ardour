@@ -1522,3 +1522,11 @@ AudioRegionView::remove_transient(float pos)
 		}
 	}
 }
+
+void
+AudioRegionView::thaw_after_trim ()
+{
+	RegionView::thaw_after_trim ();
+
+	unhide_envelope ();
+}

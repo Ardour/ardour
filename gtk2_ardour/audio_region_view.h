@@ -117,6 +117,8 @@ class AudioRegionView : public RegionView
 	virtual void entered (bool);
 	virtual void exited ();
 
+	void thaw_after_trim ();
+
   protected:
 
     /* this constructor allows derived types

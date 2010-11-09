@@ -1633,13 +1633,13 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	switch (_operation) {
 	case StartTrim:
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			_editor->single_start_trim (*i->view, pf, non_overlap_trim);
+			i->view->trim_start (pf, non_overlap_trim);
 		}
 		break;
 
 	case EndTrim:
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			_editor->single_end_trim (*i->view, pf, non_overlap_trim);
+			i->view->trim_end (pf, non_overlap_trim);
 		}
 		break;
 
@@ -1665,7 +1665,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			}
 
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				_editor->single_contents_trim (*i->view, frame_delta, left_direction, swap_direction);
+				i->view->trim_contents (frame_delta, left_direction, swap_direction);
 			}
 		}
 		break;
@@ -1692,11 +1692,11 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 		motion (event, false);
 
 		if (!_editor->selection->selected (_primary)) {
-			_editor->thaw_region_after_trim (*_primary);
+			_primary->thaw_after_trim ();
 		} else {
 
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				_editor->thaw_region_after_trim (*i->view);
+				i->view->thaw_after_trim ();
 				i->view->enable_display (true);
 				i->view->fake_set_opaque (true);
                                 if (_have_transaction) {

@@ -682,3 +682,116 @@ RegionView::update_coverage_frames (LayerDisplay d)
 		frame_handle_end->raise_to_top ();
 	}
 }
+
+void
+RegionView::trim_start (framepos_t new_bound, bool no_overlap)
+{
+	if (_region->locked()) {
+		return;
+	}
+
+	RouteTimeAxisView& rtv = dynamic_cast<RouteTimeAxisView&> (trackview);
+	double const speed = rtv.track()->speed ();
+
+	framepos_t const pre_trim_first_frame = _region->first_frame();
+
+	_region->trim_front ((framepos_t) (new_bound * speed), this);
+
+	if (no_overlap) {
+		// Get the next region on the left of this region and shrink/expand it.
+		boost::shared_ptr<Playlist> playlist (_region->playlist());
+		boost::shared_ptr<Region> region_left = playlist->find_next_region (pre_trim_first_frame, End, 0);
+
+		bool regions_touching = false;
+
+		if (region_left != 0 && (pre_trim_first_frame == region_left->last_frame() + 1)) {
+			regions_touching = true;
+		}
+
+		// Only trim region on the left if the first frame has gone beyond the left region's last frame.
+		if (region_left != 0 &&	(region_left->last_frame() > _region->first_frame() || regions_touching)) {
+			region_left->trim_end (_region->first_frame() - 1, this);
+		}
+	}
+
+	region_changed (ARDOUR::bounds_change);
+}
+
+void
+RegionView::trim_end (framepos_t new_bound, bool no_overlap)
+{
+	if (_region->locked()) {
+		return;
+	}
+
+	RouteTimeAxisView& rtv = dynamic_cast<RouteTimeAxisView&> (trackview);
+	double const speed = rtv.track()->speed ();
+
+	framepos_t const pre_trim_last_frame = _region->last_frame();
+
+	_region->trim_end ((framepos_t) (new_bound * speed), this);
+
+	if (no_overlap) {
+		// Get the next region on the right of this region and shrink/expand it.
+		boost::shared_ptr<Playlist> playlist (_region->playlist());
+		boost::shared_ptr<Region> region_right = playlist->find_next_region (pre_trim_last_frame, Start, 1);
+
+		bool regions_touching = false;
+
+		if (region_right != 0 && (pre_trim_last_frame == region_right->first_frame() - 1)) {
+			regions_touching = true;
+		}
+
+		// Only trim region on the right if the last frame has gone beyond the right region's first frame.
+		if (region_right != 0 && (region_right->first_frame() < _region->last_frame() || regions_touching)) {
+			region_right->trim_front (_region->last_frame() + 1, this);
+		}
+
+		region_changed (ARDOUR::bounds_change);
+			
+	} else {
+		region_changed (PropertyChange (ARDOUR::Properties::length));
+	}
+}
+
+
+void
+RegionView::thaw_after_trim ()
+{
+	if (_region->locked()) {
+		return;
+	}
+
+	_region->resume_property_changes ();
+}
+
+
+void
+RegionView::trim_contents (framepos_t frame_delta, bool left_direction, bool swap_direction)
+{
+	if (_region->locked()) {
+		return;
+	}
+
+	framepos_t new_bound;
+
+	RouteTimeAxisView& rtv = dynamic_cast<RouteTimeAxisView&> (trackview);
+	double const speed = rtv.track()->speed ();
+
+	if (left_direction) {
+		if (swap_direction) {
+			new_bound = (framepos_t) (_region->position() / speed) + frame_delta;
+		} else {
+			new_bound = (framepos_t) (_region->position() / speed) - frame_delta;
+		}
+	} else {
+		if (swap_direction) {
+			new_bound = (framepos_t) (_region->position() / speed) - frame_delta;
+		} else {
+			new_bound = (framepos_t) (_region->position() / speed) + frame_delta;
+		}
+	}
+
+	_region->trim_start ((framepos_t) (new_bound * speed), this);
+	region_changed (PropertyChange (ARDOUR::Properties::start));
+}
