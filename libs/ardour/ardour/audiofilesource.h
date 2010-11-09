@@ -91,7 +91,7 @@ protected:
 	AudioFileSource (Session&, const std::string& path, Source::Flag flags);
 
 	/** Constructor to be called for new in-session files */
-	AudioFileSource (Session&, const std::string& path, Source::Flag flags,
+	AudioFileSource (Session&, const std::string& path, const std::string& origin, Source::Flag flags,
 			SampleFormat samp_format, HeaderFormat hdr_format);
 
 	/** Constructor to be called for existing in-session files */

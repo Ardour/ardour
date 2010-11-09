@@ -53,13 +53,15 @@ using namespace PBD;
 SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 	: Source(s, DataType::MIDI, path, flags)
 	, MidiSource(s, path)
-	, FileSource(s, DataType::MIDI, path, flags)
+	, FileSource(s, DataType::MIDI, path, string(), flags)
 	, Evoral::SMF()
 	, _last_ev_time_beats(0.0)
 	, _last_ev_time_frames(0)
 	, _smf_last_read_end (0)
 	, _smf_last_read_time (0)
 {
+        /* note that origin remains empty */
+
 	if (init(_path, false)) {
 		throw failed_constructor ();
 	}
@@ -365,7 +367,9 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, fra
 XMLNode&
 SMFSource::get_state ()
 {
-	return MidiSource::get_state();
+        XMLNode& node = MidiSource::get_state();
+        node.add_property (X_("origin"), _origin);
+        return node;
 }
 
 int

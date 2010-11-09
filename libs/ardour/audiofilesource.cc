@@ -91,12 +91,15 @@ struct SizedSampleBuffer {
 
 Glib::StaticPrivate<SizedSampleBuffer> thread_interleave_buffer = GLIBMM_STATIC_PRIVATE_INIT;
 
-/** Constructor used for existing internal-to-session files. */
+/** Constructor used for existing external-to-session files. */
 AudioFileSource::AudioFileSource (Session& s, const string& path, Source::Flag flags)
 	: Source (s, DataType::AUDIO, path, flags)
 	, AudioSource (s, path)
-	, FileSource (s, DataType::AUDIO, path, flags)
+          /* note that external files have their own path as "origin" */
+	, FileSource (s, DataType::AUDIO, path, path, flags)
 {
+        /* note that origin remains empty */
+
 	if (init (_path, true)) {
 		throw failed_constructor ();
 	}
@@ -104,12 +107,14 @@ AudioFileSource::AudioFileSource (Session& s, const string& path, Source::Flag f
 }
 
 /** Constructor used for new internal-to-session files. */
-AudioFileSource::AudioFileSource (Session& s, const string& path, Source::Flag flags,
+AudioFileSource::AudioFileSource (Session& s, const string& path, const string& origin, Source::Flag flags,
 				  SampleFormat /*samp_format*/, HeaderFormat /*hdr_format*/)
 	: Source (s, DataType::AUDIO, path, flags)
 	, AudioSource (s, path)
-	, FileSource (s, DataType::AUDIO, path, flags)
+	, FileSource (s, DataType::AUDIO, path, origin, flags)
 {
+        /* note that origin remains empty */
+
 	if (init (_path, false)) {
 		throw failed_constructor ();
 	}
@@ -258,6 +263,7 @@ AudioFileSource::get_state ()
 	char buf[32];
 	snprintf (buf, sizeof (buf), "%u", _channel);
 	root.add_property (X_("channel"), buf);
+        root.add_property (X_("origin"), _origin);
 	return root;
 }
 

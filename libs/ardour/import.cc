@@ -202,25 +202,27 @@ map_existing_mono_sources (const vector<string>& new_paths, Session& /*sess*/,
 }
 
 static bool
-create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
-				 uint samplerate, vector<boost::shared_ptr<Source> >& newfiles,
+create_mono_sources_for_writing (const string& origin,
+                                 const vector<string>& new_paths, 
+                                 Session& sess, uint samplerate, 
+                                 vector<boost::shared_ptr<Source> >& newfiles,
 				 framepos_t timeline_position)
 {
-	for (vector<string>::const_iterator i = new_paths.begin(); i != new_paths.end(); ++i)
-	{
+	for (vector<string>::const_iterator i = new_paths.begin(); i != new_paths.end(); ++i) {
+
 		boost::shared_ptr<Source> source;
 
-		try
-		{
+		try {
 			const DataType type = SMFSource::safe_midi_file_extension (*i) ? DataType::MIDI : DataType::AUDIO;
 
 			source = SourceFactory::createWritable (type, sess,
-					i->c_str(),
-					false, // destructive
-					samplerate);
+                                                                i->c_str(),
+                                                                origin,
+                                                                false, // destructive
+                                                                samplerate);
 		}
-		catch (const failed_constructor& err)
-		{
+
+		catch (const failed_constructor& err) {
 			error << string_compose (_("Unable to create file %1 during import"), *i) << endmsg;
 			return false;
 		}
@@ -488,7 +490,7 @@ Session::import_audiofiles (ImportStatus& status)
 			fatal << "THIS IS NOT IMPLEMENTED YET, IT SHOULD NEVER GET CALLED!!! DYING!" << endmsg;
 			status.cancel = !map_existing_mono_sources (new_paths, *this, frame_rate(), newfiles, this);
 		} else {
-                        status.cancel = !create_mono_sources_for_writing (new_paths, *this, frame_rate(), newfiles, natural_position);
+                        status.cancel = !create_mono_sources_for_writing (*p, new_paths, *this, frame_rate(), newfiles, natural_position);
 		}
 
 		// copy on cancel/failure so that any files that were created will be removed below

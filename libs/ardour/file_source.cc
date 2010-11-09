@@ -54,11 +54,12 @@ using namespace Glib;
 
 PBD::Signal3<int,std::string,std::string,std::vector<std::string> > FileSource::AmbiguousFileName;
 
-FileSource::FileSource (Session& session, DataType type, const string& path, Source::Flag flag)
+FileSource::FileSource (Session& session, DataType type, const string& path, const string& origin, Source::Flag flag)
 	: Source(session, type, path, flag)
 	, _path(path)
 	, _file_is_new(true)
 	, _channel (0)
+        , _origin (origin)
 {
 	set_within_session_from_path (path);
 }
@@ -127,6 +128,10 @@ FileSource::set_state (const XMLNode& node, int /*version*/)
 	} else {
 		_channel = 0;
 	}
+
+        if ((prop = node.property (X_("origin"))) != 0) {
+                _origin = prop->value();
+        }
 
 	return 0;
 }

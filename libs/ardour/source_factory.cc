@@ -256,13 +256,13 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path,
 }
 
 boost::shared_ptr<Source>
-SourceFactory::createWritable (DataType type, Session& s, const std::string& path, 
+SourceFactory::createWritable (DataType type, Session& s, const std::string& path, const std::string& origin,
 			       bool destructive, nframes_t rate, bool announce, bool defer_peaks)
 {
 	/* this might throw failed_constructor(), which is OK */
 
 	if (type == DataType::AUDIO) {
-		Source* src = new SndFileSource (s, path, 
+		Source* src = new SndFileSource (s, path, origin,
 				s.config.get_native_file_data_format(),
 				s.config.get_native_file_header_format(),
 				rate,

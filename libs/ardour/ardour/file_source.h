@@ -75,12 +75,15 @@ public:
         void inc_use_count ();
 	bool removable () const;
 
+        const std::string& origin() const { return _origin; }
+
 	static PBD::Signal3<int,std::string,std::string,std::vector<std::string> > AmbiguousFileName;
 
 protected:
 	FileSource (Session& session, DataType type,
-			const std::string& path, 
-			Source::Flag flags = Source::Flag(0));
+                    const std::string& path, 
+                    const std::string& origin,
+                    Source::Flag flags = Source::Flag(0));
 
 	FileSource (Session& session, const XMLNode& node, bool must_exist);
 
@@ -92,9 +95,10 @@ protected:
 
 	std::string _path;
 	std::string _take_id;
-	bool          _file_is_new;
-	uint16_t      _channel;
-	bool          _within_session;
+	bool        _file_is_new;
+	uint16_t    _channel;
+	bool        _within_session;
+        std::string _origin;
 };
 
 } // namespace ARDOUR

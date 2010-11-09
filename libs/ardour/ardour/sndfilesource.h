@@ -31,10 +31,10 @@ namespace ARDOUR {
 class SndFileSource : public AudioFileSource {
   public:
 	/** Constructor to be called for existing external-to-session files */
-	SndFileSource (Session&, const std::string& path, int chn, Flag flags);
+        SndFileSource (Session&, const std::string& path, int chn, Flag flags);
 
 	/* Constructor to be called for new in-session files */
-	SndFileSource (Session&, const std::string& path, 
+	SndFileSource (Session&, const std::string& path, const std::string& origin,
 			SampleFormat samp_format, HeaderFormat hdr_format, nframes_t rate,
 			Flag flags = SndFileSource::default_writable_flags);
 

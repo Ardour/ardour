@@ -69,6 +69,7 @@ SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 /** Files created this way are never writable or removable */
 SndFileSource::SndFileSource (Session& s, const string& path, int chn, Flag flags)
 	: Source(s, DataType::AUDIO, path, flags)
+          /* note that the origin of an external file is itself */
 	, AudioFileSource (s, path, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
 	_channel = chn;
@@ -81,10 +82,10 @@ SndFileSource::SndFileSource (Session& s, const string& path, int chn, Flag flag
 }
 
 /** This constructor is used to construct new files, not open existing ones. */
-SndFileSource::SndFileSource (Session& s, const string& path, 
-		SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
+SndFileSource::SndFileSource (Session& s, const string& path, const string& origin,
+                              SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
 	: Source(s, DataType::AUDIO, path, flags)
-	, AudioFileSource (s, path, flags, sfmt, hf)
+	, AudioFileSource (s, path, origin, flags, sfmt, hf)
 {
 	int fmt = 0;
 

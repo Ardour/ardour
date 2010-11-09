@@ -70,7 +70,7 @@ Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, s
 		try {
 			nsrcs.push_back (boost::dynamic_pointer_cast<Source> (
 				SourceFactory::createWritable (region->data_type(), session,
-							       path, false, session.frame_rate())));
+							       path, string(), false, session.frame_rate())));
 		}
 
 		catch (failed_constructor& err) {

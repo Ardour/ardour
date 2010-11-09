@@ -48,7 +48,7 @@ class SourceFactory {
 			int chn, Source::Flag flags, bool announce = true, bool async = false);
 
 	static boost::shared_ptr<Source> createWritable (DataType type, Session&,
-			const std::string& path, 
+                        const std::string& path, const std::string& origin,
 			bool destructive, nframes_t rate, bool announce = true, bool async = false);
 
 	static Glib::Cond*                               PeaksToBuild;
