@@ -42,7 +42,7 @@ class SearchPathOption : public Option
         Gtk::Label session_label;
 
         void add_path (const std::string& path, bool removable=true);
-        void remove_path (const std::string& path);
+        void remove_path (PathEntry*);
         void changed ();
         void path_chosen ();
 };

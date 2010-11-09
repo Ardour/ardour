@@ -46,6 +46,8 @@ SearchPathOption::SearchPathOption (const string& pathname, const string& label,
         session_label.set_markup (string_compose ("<i>%1</i>", _("the session folder")));
         session_label.set_alignment (0.0, 0.5);
         session_label.show ();
+
+        path_box.pack_start (session_label);
 }
 
 SearchPathOption::~SearchPathOption()
@@ -59,6 +61,7 @@ SearchPathOption::path_chosen ()
 {
         string path = add_chooser.get_filename ();
         add_path (path);
+        changed ();
 }
 
 void
@@ -109,12 +112,6 @@ SearchPathOption::changed ()
         
         for (list<PathEntry*>::iterator p = paths.begin(); p != paths.end(); ++p) {
 
-                if (p == paths.begin()) {
-                        /* skip first entry, its always "the session"
-                         */
-                        continue;
-                }
-
                 if (!str.empty()) {
                         str += ':';
                 }
@@ -130,11 +127,16 @@ SearchPathOption::add_path (const string& path, bool removable)
         PathEntry* pe = new PathEntry (path, removable);
         paths.push_back (pe);
         path_box.pack_start (pe->box, false, false);
+        pe->remove_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SearchPathOption::remove_path), pe));
 }
 
 void
-SearchPathOption::remove_path (const string& path)
+SearchPathOption::remove_path (PathEntry* pe)
 {
+        path_box.remove (pe->box);
+        paths.remove (pe);
+        delete pe;
+        changed ();
 }
 
 SearchPathOption::PathEntry::PathEntry (const std::string& path, bool removable)

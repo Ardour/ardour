@@ -2741,6 +2741,24 @@ Session::source_by_path_and_channel (const string& path, uint16_t chn)
 	return boost::shared_ptr<Source>();
 }
 
+uint32_t
+Session::count_sources_by_origin (const string& path)
+{
+        uint32_t cnt = 0;
+	Glib::Mutex::Lock lm (source_lock);
+
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+		boost::shared_ptr<FileSource> fs
+			= boost::dynamic_pointer_cast<FileSource>(i->second);
+
+                if (fs && fs->origin() == path) {
+                        ++cnt;
+                }
+	}
+
+	return cnt;
+}
+
 
 string
 Session::change_source_path_by_name (string path, string oldname, string newname, bool destructive)

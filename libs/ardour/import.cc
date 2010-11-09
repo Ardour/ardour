@@ -121,40 +121,52 @@ get_non_existent_filename (HeaderFormat hf, DataType type, const bool allow_repl
 {
 	char buf[PATH_MAX+1];
 	bool goodfile = false;
-	string base(basename);
+	string base = basename;
 	string ext = native_header_format_extension (hf, type);
+        uint32_t cnt = 1;
 
 	do {
 
 		if (type == DataType::AUDIO && channels == 2) {
 			if (channel == 0) {
-				snprintf (buf, sizeof(buf), "%s-L%s", base.c_str(), ext.c_str());
+                                if (cnt == 1) {
+                                        snprintf (buf, sizeof(buf), "%s-L%s", base.c_str(), ext.c_str());
+                                } else {
+                                        snprintf (buf, sizeof(buf), "%s-%d-L%s", base.c_str(), cnt, ext.c_str());
+                                }
 			} else {
-				snprintf (buf, sizeof(buf), "%s-R%s", base.c_str(), ext.c_str());
+                                if (cnt == 1) {
+                                        snprintf (buf, sizeof(buf), "%s-R%s", base.c_str(), ext.c_str());
+                                } else {
+                                        snprintf (buf, sizeof(buf), "%s-%d-R%s", base.c_str(), cnt, ext.c_str());
+                                }
 			}
 		} else if (channels > 1) {
-			snprintf (buf, sizeof(buf), "%s-c%d%s", base.c_str(), channel, ext.c_str());
+                        if (cnt == 1) {
+                                snprintf (buf, sizeof(buf), "%s-c%d%s", base.c_str(), channel, ext.c_str());
+                        } else {
+                                snprintf (buf, sizeof(buf), "%s-%d-c%d%s", base.c_str(), cnt, channel, ext.c_str());
+                        }
 		} else {
-			snprintf (buf, sizeof(buf), "%s%s", base.c_str(), ext.c_str());
+                        if (cnt == 1) {
+                                snprintf (buf, sizeof(buf), "%s%s", base.c_str(), ext.c_str());
+                        } else {
+                                snprintf (buf, sizeof(buf), "%s-%d%s", base.c_str(), cnt, ext.c_str());
+                        }
 		}
 
-
 		string tempname = destdir + "/" + buf;
+                
 		if (!allow_replacing && Glib::file_test (tempname, Glib::FILE_TEST_EXISTS)) {
-
-			/* if the file already exists, we must come up with
-			 *  a new name for it.  for now we just keep appending
-			 *  _ to basename
-			 */
-
-			base += "_";
+                        
+                        cnt++;
 
 		} else {
 
 			goodfile = true;
 		}
 
-	} while ( !goodfile);
+	} while (!goodfile);
 
 	return buf;
 }

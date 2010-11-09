@@ -218,19 +218,16 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 	string wave_name (Glib::path_get_basename(path));
 
 	SourceMap all_sources = _session->get_sources();
-	bool wave_name_exists = false;
+	bool already_exists = false;
+        uint32_t existing;
 
-	for (SourceMap::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
-		string tmp (Glib::path_get_basename (i->second->path()));
-		if (tmp == wave_name) {
-			wave_name_exists = true;
-			break;
-		}
-	}
+        if ((existing = _session->count_sources_by_origin (path)) > 0) {
+                already_exists = true;
+        }
 
 	int function = 1;
 
-	if (wave_name_exists) {
+	if (already_exists) {
 		string message;
 		if (all_or_nothing) {
 			// updating is still disabled
@@ -508,41 +505,6 @@ int
 Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quality, framepos_t& pos,
 			 int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool replace)
 {
-        /* check for existing wholefile regions of the same name,
-           which can happen when we import foo.wav but end up with foo-L.wav 
-           and foo-R.wav inside the session. this case doesn't trigger
-           source name collisions, so we have to catch it at the region
-           name level.
-        */
-        
-        string region_name = region_name_from_path (paths.front(), true, false);
-        
-        if (RegionFactory::wholefile_region_by_name (region_name)) {
-                string message = string_compose ( _("You appear to have already imported this file, since a region called %1 already exists.\nDo you really want to import it again?"),
-                                                  region_name);
-                MessageDialog dialog (message, false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL, true);
-                int ret;
-                
-                dialog.show ();
-                ret = dialog.run ();
-                dialog.hide ();
-                
-                if (ret != RESPONSE_OK) {
-                        return -1;
-                }
-                
-                int l = 0;
-                
-                while (RegionFactory::region_by_name (region_name) && ++l < 999) {
-                        region_name = bump_name_once (region_name, '.');
-                }
-                
-                if (l == 999) {
-                        error << string_compose (_("Too many regions already named something like \"%1\""), paths.front()) << endmsg;
-                        return -1;
-                }
-        }
-
 	import_status.paths = paths;
 	import_status.done = false;
 	import_status.cancel = false;
