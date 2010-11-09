@@ -1568,11 +1568,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 {
 	RegionView* rv = _primary;
 
-	/* snap modifier works differently here..
-	   its current state has to be passed to the
-	   various trim functions in order to work properly
-	*/
-
 	double speed = 1.0;
 	TimeAxisView* tvp = &_primary->get_time_axis_view ();
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
@@ -1582,7 +1577,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		speed = tv->track()->speed();
 	}
 
-	framepos_t const pf = adjusted_current_frame (event);
+	framecnt_t const dt = adjusted_current_frame (event) - grab_frame ();
 
 	if (first_move) {
 
@@ -1605,13 +1600,13 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 			RegionView* rv = i->view;
-			rv->fake_set_opaque(false);
+			rv->fake_set_opaque (false);
 			rv->enable_display (false);
                         rv->region()->clear_changes ();
 
 			AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (rv);
 
-			if (arv){
+			if (arv) {
 				arv->temporarily_hide_envelope ();
 			}
 
@@ -1633,13 +1628,13 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	switch (_operation) {
 	case StartTrim:
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			i->view->trim_start (pf, non_overlap_trim);
+			i->view->trim_start (i->initial_position + dt, non_overlap_trim);
 		}
 		break;
 
 	case EndTrim:
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			i->view->trim_end (pf, non_overlap_trim);
+			i->view->trim_end (i->initial_end + dt, non_overlap_trim);
 		}
 		break;
 
@@ -1654,14 +1649,14 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			framecnt_t frame_delta = 0;
 			
 			bool left_direction = false;
-			if (last_pointer_frame() > pf) {
+			if (last_pointer_frame() > adjusted_current_frame(event)) {
 				left_direction = true;
 			}
 
 			if (left_direction) {
-				frame_delta = (last_pointer_frame() - pf);
+				frame_delta = (last_pointer_frame() - adjusted_current_frame(event));
 			} else {
-				frame_delta = (pf - last_pointer_frame());
+				frame_delta = (adjusted_current_frame(event) - last_pointer_frame());
 			}
 
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
@@ -1673,13 +1668,13 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	switch (_operation) {
 	case StartTrim:
-		_editor->show_verbose_time_cursor((framepos_t) (rv->region()->position()/speed), 10);
+		_editor->show_verbose_time_cursor ((framepos_t) (rv->region()->position() / speed), 10);
 		break;
 	case EndTrim:
-		_editor->show_verbose_time_cursor((framepos_t) (rv->region()->last_frame()/speed), 10);
+		_editor->show_verbose_time_cursor ((framepos_t) (rv->region()->last_frame() / speed), 10);
 		break;
 	case ContentsTrim:
-		_editor->show_verbose_time_cursor (pf, 10);
+		_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
 		break;
 	}
 }
@@ -4013,4 +4008,6 @@ DraggingView::DraggingView (RegionView* v, RegionDrag* parent)
 	layer = v->region()->layer ();
 	initial_y = v->get_canvas_group()->property_y ();
 	initial_playlist = v->region()->playlist ();
+	initial_position = v->region()->position ();
+	initial_end = v->region()->position () + v->region()->length ();
 }

@@ -239,6 +239,8 @@ struct DraggingView
 	/** layer that this region is currently being displayed on */
 	ARDOUR::layer_t layer;
 	double initial_y; ///< the initial y position of the view before any reparenting
+	framepos_t initial_position; ///< initial position of the region
+	framepos_t initial_end; ///< initial end position of the region
 	boost::shared_ptr<ARDOUR::Playlist> initial_playlist;
 };
 
