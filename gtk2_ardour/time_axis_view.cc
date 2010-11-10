@@ -427,8 +427,12 @@ TimeAxisView::set_height (Height h)
 }
 
 void
-TimeAxisView::set_height(uint32_t h)
+TimeAxisView::set_height (uint32_t h)
 {
+	if (h < preset_height (HeightSmall)) {
+		h = preset_height (HeightSmall);
+	}
+	
 	time_axis_vbox.property_height_request () = h;
 	height = h;
 

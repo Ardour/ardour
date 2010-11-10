@@ -26,6 +26,7 @@
 #include "region_view.h"
 #include "rgb_macros.h"
 #include "keyboard.h"
+#include "editor_routes.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -666,12 +667,15 @@ EditorSummary::set_editor_y (pair<double, double> const & y)
 	pair<double, double> yc = y;
 	double total_height = 0;
 	double scale_height = 0;
+	
+	_editor->_routes->suspend_redisplay ();
+
 	for (TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
 
 		if ((*i)->hidden()) {
 			continue;
 		}
-
+		
 		double const h = (*i)->effective_height ();
 
 		if (yc.first >= 0 && yc.first < _track_height) {
@@ -687,7 +691,7 @@ EditorSummary::set_editor_y (pair<double, double> const & y)
 		yc.first -= _track_height;
 		yc.second -= _track_height;
 	}
-
+	
 	/* hence required scale factor of the complete tracks to fit the required y range */
 	double const scale = ((_editor->canvas_height() - _editor->get_canvas_timebars_vsize()) - (total_height - scale_height)) / scale_height;
 
@@ -702,13 +706,15 @@ EditorSummary::set_editor_y (pair<double, double> const & y)
 		}
 
 		if (yc.first < 0 && yc.second > _track_height) {
-	        	(*i)->set_height ((*i)->effective_height() * scale);
+			(*i)->set_height (max (TimeAxisView::preset_height (HeightSmall), (uint32_t) ((*i)->effective_height() * scale)));
 		}
 
 		yc.first -= _track_height;
 		yc.second -= _track_height;
 	}
 
+	_editor->_routes->resume_redisplay ();
+	
         set_editor_y (y.first);
 }
 
