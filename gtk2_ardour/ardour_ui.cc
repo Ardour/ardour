@@ -2709,24 +2709,26 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		MessageDialog msg (string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name),
 				   true,
 				   Gtk::MESSAGE_INFO,
-				   Gtk::BUTTONS_CLOSE);
+				   BUTTONS_OK);
 
 		msg.set_title (_("Loading Error"));
-		msg.set_secondary_text (_("Click the Close button to try again."));
+                msg.set_secondary_text (_("Click the Refresh button to try again."));
+                msg.add_button (Stock::REFRESH, 1);
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		pop_back_splash ();
 		msg.present ();
 
 		int response = msg.run ();
 
+                switch (response) {
+                case 1:
+                        break;
+                default:
+                        exit (1);
+                }
+
 		msg.hide ();
 
-		switch (response) {
-		case RESPONSE_CANCEL:
-			exit (1);
-		default:
-			break;
-		}
 		goto out;
 	}
 
