@@ -35,7 +35,7 @@ SearchPathOption::SearchPathOption (const string& pathname, const string& label,
 
         hbox->set_border_width (12);
         hbox->set_spacing (6);
-        hbox->pack_end (add_chooser, false, false);
+        hbox->pack_end (add_chooser, true, true);
         hbox->pack_end (*manage (new Label ("Click to add a new location")), false, false);
         hbox->show_all ();
         
@@ -68,14 +68,14 @@ void
 SearchPathOption::add_to_page (OptionEditorPage* p)
 {
 	int const n = p->table.property_n_rows();
-	p->table.resize (n + 2, 3);
+	p->table.resize (n + 1, 3);
 
         Label* label = manage (new Label);
-        label->set_alignment (0.0, 0.5);
-        label->set_markup (string_compose ("<b>%1</b>", _name));
+        label->set_alignment (0.0, 0.0);
+        label->set_markup (string_compose ("%1", _name));
 
-	p->table.attach (*label, 0, 1, n, n + 1, FILL | EXPAND);
-	p->table.attach (vbox, 0, 3, n + 1, n + 2, FILL | EXPAND);
+	p->table.attach (*label, 1, 2, n, n + 1, FILL | EXPAND);
+	p->table.attach (vbox, 2, 3, n, n + 1, FILL | EXPAND);
 }
 
 void

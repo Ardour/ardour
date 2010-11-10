@@ -20,11 +20,9 @@
            <separator/>
            <menuitem action='addExistingAudioFiles'/>
            <menuitem action='importFromSession'/>
-           <separator/>
            <menu name='Export' action='Export'>
                <menuitem action='ExportAudio'/>
            </menu>
-           <separator/>
            <menu name='Cleanup' action='Cleanup'>
                <menuitem action='CleanupUnused'/>
                <menuitem action='FlushWastebasket'/>
@@ -37,6 +35,7 @@
            <menuitem action='ToggleRCOptionsEditor'/>
            <menuitem action='About'/>
 #endif
+           <separator/>
            <menuitem action='Quit'/>
         </menu>
 

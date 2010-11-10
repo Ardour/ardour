@@ -109,7 +109,7 @@ EntryOption::EntryOption (string const & i, string const & n, sigc::slot<string>
 	  _set (s)
 {
 	_label = manage (new Label (n + ":"));
-	_label->set_alignment (1, 0.5);
+	_label->set_alignment (0, 0.5);
 	_entry = manage (new Entry);
 	_entry->signal_activate().connect (sigc::mem_fun (*this, &EntryOption::activated));
 }
