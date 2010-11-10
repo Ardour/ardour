@@ -439,6 +439,7 @@
                <menuitem action='ToggleMeasureVisibility'/>
                <menuitem action='ToggleSummary'/>
                <menuitem action='ToggleGroupTabs'/>
+	       <menuitem action='show-marker-lines'/>
         </menu>
         <menu name='JACK' action='JACK'>
                <menuitem action='JACKDisconnect'/>

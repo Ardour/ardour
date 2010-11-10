@@ -341,8 +341,8 @@ Editor::track_canvas_size_allocated ()
 			playhead_cursor->set_length (_canvas_height);
 		}
 
-		for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
-			(*x)->set_line_vpos (0, _canvas_height);
+		for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+			i->second->set_lines_vpos (0, _canvas_height);
 		}
 
 		vertical_adjustment.set_page_size (_canvas_height);

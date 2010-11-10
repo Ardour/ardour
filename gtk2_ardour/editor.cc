@@ -739,6 +739,8 @@ Editor::Editor ()
 	_last_region_menu_was_main = false;
 	_popup_region_menu_item = 0;
 
+	_show_marker_lines = false;
+
 	constructed = true;
 	instant_save ();
 
@@ -2342,36 +2344,43 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	if ((prop = node.property ("show-editor-mixer"))) {
 
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
-		if (act) {
+		assert (act);
 
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-			bool yn = string_is_affirmative (prop->value());
-
-			/* do it twice to force the change */
-
-			tact->set_active (!yn);
-			tact->set_active (yn);
-		}
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		bool yn = string_is_affirmative (prop->value());
+		
+		/* do it twice to force the change */
+		
+		tact->set_active (!yn);
+		tact->set_active (yn);
 	}
 
 	if ((prop = node.property ("show-editor-list"))) {
 
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-list"));
-		assert(act);
-		if (act) {
+		assert (act);
 
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-			bool yn = string_is_affirmative (prop->value());
-
-			/* do it twice to force the change */
-
-			tact->set_active (!yn);
-			tact->set_active (yn);
-		}
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		bool yn = string_is_affirmative (prop->value());
+		
+		/* do it twice to force the change */
+		
+		tact->set_active (!yn);
+		tact->set_active (yn);
 	}
 
 	if ((prop = node.property (X_("editor-list-page")))) {
 		the_notebook.set_current_page (atoi (prop->value ()));
+	}
+
+	if ((prop = node.property (X_("show-marker-lines")))) {
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-marker-lines"));
+		assert (act);
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+		bool yn = string_is_affirmative (prop->value ());
+
+		tact->set_active (!yn);
+		tact->set_active (yn);
 	}
 
 	XMLNodeList children = node.children ();
@@ -2465,6 +2474,8 @@ Editor::get_state ()
 
 	snprintf (buf, sizeof (buf), "%d", the_notebook.get_current_page ());
 	node->add_property (X_("editor-list-page"), buf);
+
+	node->add_property (X_("show-marker-lines"), _show_marker_lines ? "yes" : "no");
 
 	node->add_child_nocopy (selection->get_state ());
 	node->add_child_nocopy (_regions->get_state ());
@@ -5496,3 +5507,4 @@ Editor::action_menu_item (std::string const & name)
 {
 	return *manage (editor_actions->get_action(name)->create_menu_item ());
 }
+

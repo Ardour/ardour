@@ -145,6 +145,12 @@ Editor::add_new_location (Location *location)
 		selection->set (lam->start);
 		select_new_marker = false;
 	}
+
+	if (_show_marker_lines) {
+		lam->show_lines (cursor_group, _canvas_height);
+	} else {
+		lam->hide_lines ();
+	}
 }
 
 void
@@ -356,14 +362,48 @@ void
 Editor::LocationMarkers::hide()
 {
 	start->hide ();
-	if (end) { end->hide(); }
+	if (end) {
+		end->hide ();
+	}
 }
 
 void
 Editor::LocationMarkers::show()
 {
 	start->show ();
-	if (end) { end->show(); }
+	if (end) {
+		end->show ();
+	}
+}
+
+void
+Editor::LocationMarkers::show_lines (ArdourCanvas::Group* g, double h)
+{
+	/* add_line may be required, and it calls show_line even if it isn't */
+	
+	start->add_line (g, 0, h);
+	
+	if (end) {
+		end->add_line (g, 0, h);
+	}
+}
+
+void
+Editor::LocationMarkers::hide_lines ()
+{
+	start->hide_line ();
+	if (end) {
+		end->hide_line ();
+	}
+}
+
+void
+Editor::LocationMarkers::set_lines_vpos (double y, double h)
+{
+	start->set_line_vpos (y, h);
+	if (end) {
+		end->set_line_vpos (y, h);
+	}
 }
 
 void
@@ -1203,15 +1243,9 @@ Editor::marker_selection_changed ()
 		return;
 	}
 
-	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
-		LocationMarkers* lam = i->second;
-
-		if (lam->start) {
-			lam->start->hide_line();
-		}
-
-		if (lam->end) {
-			lam->end->hide_line();
+	if (!_show_marker_lines) {
+		for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+			i->second->hide_lines ();
 		}
 	}
 
@@ -1276,4 +1310,18 @@ Editor::toggle_marker_menu_glue ()
 		loc->set_position_lock_style (MusicTime);
 	}
 
+}
+
+void
+Editor::toggle_marker_lines ()
+{
+	_show_marker_lines = !_show_marker_lines;
+	
+	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+		if (_show_marker_lines) {
+			i->second->show_lines (cursor_group, _canvas_height);
+		} else {
+			i->second->hide_lines ();
+		}
+	}
 }

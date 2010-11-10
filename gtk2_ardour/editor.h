@@ -576,6 +576,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void remove_marker (ArdourCanvas::Item&, GdkEvent*);
 	gint really_remove_marker (ARDOUR::Location* loc);
 	void goto_nth_marker (int nth);
+	void toggle_marker_lines ();
+	void set_marker_line_visibility (bool);
 
 	uint32_t location_marker_color;
 	uint32_t location_range_color;
@@ -584,24 +586,30 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	uint32_t location_cd_marker_color;
 
 	struct LocationMarkers {
-	    Marker* start;
-	    Marker* end;
-	    bool    valid;
+		Marker* start;
+		Marker* end;
+		bool    valid;
+		
+		LocationMarkers () : start(0), end(0), valid (true) {}
+		
+		~LocationMarkers ();
+		
+		void hide ();
+		void show ();
 
-	    LocationMarkers () : start(0), end(0), valid (true) {}
-
-	    ~LocationMarkers ();
-
-	    void hide();
-	    void show ();
-	    void set_name (const std::string&);
-	    void set_position (framepos_t start, framepos_t end = 0);
-	    void set_color_rgba (uint32_t);
+		void hide_lines ();
+		void show_lines (ArdourCanvas::Group *, double);
+		void set_lines_vpos (double, double);
+		
+		void set_name (const std::string&);
+		void set_position (framepos_t start, framepos_t end = 0);
+		void set_color_rgba (uint32_t);
 	};
 
 	LocationMarkers  *find_location_markers (ARDOUR::Location *) const;
 	ARDOUR::Location* find_location_from_marker (Marker *, bool& is_start) const;
 	Marker* entered_marker;
+	bool _show_marker_lines;
 
 	typedef std::map<ARDOUR::Location*,LocationMarkers *> LocationMarkerMap;
 	LocationMarkerMap location_markers;
