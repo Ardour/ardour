@@ -153,7 +153,7 @@ fixup_bundle_environment ()
 
 	setenv ("ARDOUR_MODULE_PATH", path.c_str(), 1);
 
-        path = user_config_directory.to_string();
+        path = user_config_directory().to_string();
         path += ':';
 	path += dir_path;
 	path += "/../Resources/icons:";
