@@ -1,3 +1,5 @@
+#include "libpbd-config.h"
+
 #define _XOPEN_SOURCE 600
 #include <cstring> // for memset
 #include <cstdlib>

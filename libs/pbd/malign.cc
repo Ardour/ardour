@@ -1,3 +1,5 @@
+#include "libpbd-config.h"
+
 #include <cstring>
 #include <cerrno>
 
