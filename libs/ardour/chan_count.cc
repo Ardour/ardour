@@ -18,7 +18,6 @@
     $Id: insert.cc 712 2006-07-28 01:08:57Z drobilla $
 */
 
-#define __STDC_LIMIT_MACROS 1
 #include <stdint.h>
 #include "ardour/chan_count.h"
 
