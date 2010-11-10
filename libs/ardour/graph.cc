@@ -82,10 +82,15 @@ Graph::Graph (Session & session)
 
         info << string_compose (_("Using %2 threads on %1 CPUs"), num_cpu, num_threads) << endmsg;
 
-        _thread_list.push_back (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::main_thread, this), 100000));
+	pthread_t a_thread;
+
+	if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::main_thread, this), &a_thread, 100000) == 0) {
+		_thread_list.push_back (a_thread);
+	}
 
         for (int i = 1; i < num_threads; ++i) {
-                _thread_list.push_back (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::helper_thread, this), 100000));
+		if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::helper_thread, this), &a_thread, 100000));
+                _thread_list.push_back (a_thread);
         }
 }
 
@@ -317,7 +322,10 @@ Graph::run_one()
                 to_run = 0;
         }
 
-        int wakeup = min ((int) _execution_tokens, (int) _trigger_queue.size());
+	int et = _execution_tokens;
+	int ts = _trigger_queue.size();
+
+        int wakeup = min (et, ts);
         _execution_tokens -= wakeup;
 
         for (int i=0; i<wakeup; i++ ) {

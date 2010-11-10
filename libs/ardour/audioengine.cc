@@ -1477,19 +1477,18 @@ AudioEngine::is_realtime () const
 	return jack_is_realtime (_priv_jack);
 }
 
-pthread_t
-AudioEngine::create_process_thread (boost::function<void()> f, size_t stacksize)
+int
+AudioEngine::create_process_thread (boost::function<void()> f, pthread_t* thread, size_t stacksize)
 {
         GET_PRIVATE_JACK_POINTER_RET (_jack, 0);
-        pthread_t thread;
         ThreadData* td = new ThreadData (this, f, stacksize);
 
-        if (jack_client_create_thread (_priv_jack, &thread, jack_client_real_time_priority (_priv_jack), 
+        if (jack_client_create_thread (_priv_jack, thread, jack_client_real_time_priority (_priv_jack), 
                                        jack_is_realtime (_priv_jack), _start_process_thread, td)) {
                 return -1;
         } 
 
-        return thread;
+        return 0;
 }
 
 void*

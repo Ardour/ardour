@@ -240,7 +240,7 @@ _	   the regular process() call to session->process() is not made.
 	static AudioEngine* instance() { return _instance; }
 	void died ();
 
-        pthread_t create_process_thread (boost::function<void()>, size_t stacksize);
+        int create_process_thread (boost::function<void()>, pthread_t*, size_t stacksize);
 
   private:
 	static AudioEngine*       _instance;
