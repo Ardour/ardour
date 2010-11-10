@@ -275,22 +275,6 @@ MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /
                                 target_gain = 0.0;
                         }
                 }
-
-                DEBUG_TRACE (DEBUG::Monitor, 
-                             string_compose("channel %1 SB %12 sb %2 gc %3 gd %4 cd %5 dl %6 cp %7 cc %8 cs %9 sc %10 TG %11\n", 
-                                            chn, 
-                                            solo_boost,
-                                            global_cut,
-                                            global_dim,
-                                            _channels[chn]->dim,
-                                            dim_level,
-                                            _channels[chn]->polarity,
-                                            _channels[chn]->cut,
-                                            _channels[chn]->soloed,
-                                            solo_cnt,
-                                            target_gain, 
-                                            (float) _solo_boost_level.val()
-                                     ));
                 
                 if (target_gain != _channels[chn]->current_gain || target_gain != 1.0f) {
 
