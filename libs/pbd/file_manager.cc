@@ -116,7 +116,7 @@ FileManager::allocate (FileDescriptor* d)
 	}
 
 #ifdef __APPLE__
-	d->_last_used = get_absolute_time();
+	d->_last_used = mach_absolute_time();
 #else
 	struct timespec t;
 	clock_gettime (CLOCK_MONOTONIC, &t);
