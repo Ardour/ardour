@@ -372,4 +372,4 @@ def shutdown():
 	autowaf.shutdown()
 
 def i18n(bld):
-	autowaf.build_i18n (bld, 'libs/ardour', APPNAME, libardour_sources)
+	autowaf.build_i18n (bld, '..', 'libs/ardour', APPNAME, libardour_sources)

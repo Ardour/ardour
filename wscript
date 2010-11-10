@@ -6,6 +6,7 @@ import re
 import string
 import subprocess
 import sys
+import glob
 
 # Variables for 'waf dist'
 VERSION = '3.0pre0'
@@ -30,7 +31,6 @@ children = [
 	'libs/audiographer',
 	'gtk2_ardour'
 ]
-
 
 i18n_children = [
 	'gtk2_ardour',
