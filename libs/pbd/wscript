@@ -41,6 +41,8 @@ def configure(conf):
 	conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT')
 	conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO')
 	conf.check(header_name='unistd.h', define_name='HAVE_UNISTD')
+	if conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', ccflags='-D_XOPEN_SOURCE=600') == False:
+		conf.define ('NO_POSIX_MEMALIGN',1)
 
 	conf.write_config_header('libpbd-config.h')
 
