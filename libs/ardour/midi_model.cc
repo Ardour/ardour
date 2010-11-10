@@ -18,7 +18,6 @@
 
 */
 
-#define __STDC_LIMIT_MACROS 1
 #include <set>
 #include <iostream>
 #include <algorithm>
