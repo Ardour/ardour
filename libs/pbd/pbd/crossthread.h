@@ -20,6 +20,10 @@
 #ifndef __pbd__crossthread_h__
 #define __pbd__crossthread_h__
 
+#ifdef check
+#undef check
+#endif
+
 #include <glibmm/main.h>
 
 class CrossThreadChannel { 
