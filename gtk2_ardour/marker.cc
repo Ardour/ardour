@@ -53,6 +53,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 	, _type (type)
 	, _selected (false)
 	, _shown (false)
+	, _line_shown (false)
 	, _canvas_height (0)
 	, _color (rgba)
 {
@@ -101,29 +102,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
                \    |
 	       12,12
 
-
-	   TransportStart:
-
-	     0,0
-	      | \
-	      |  \
-	      |   \
-	      |    \
-	      |     \
-	     0,13 --- 13,13
-
-	   TransportEnd:
-
-	            /13,0
-	           /   |
-	          /    |
-	         /     |
-	        /      |
-	       /       |
-	     0,13 ------ 13,13
-
-
-	     PunchIn:
+             PunchIn:
 
 	     0,0 ------> 13,0
 	      |       /
@@ -159,7 +138,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (0.0, 5.0));
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 
-		shift = 3;
+		_shift = 3;
 		label_offset = 8.0;
 		break;
 
@@ -174,7 +153,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (0.0, 5.0));
 		points->push_back (Gnome::Art::Point (3.0, 0.0));
 
-		shift = 3;
+		_shift = 3;
 		label_offset = 8.0;
 		break;
 
@@ -185,7 +164,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (0.0, 13.0));
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 
-		shift = 0;
+		_shift = 0;
 		label_offset = 13.0;
 		break;
 
@@ -196,7 +175,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (13.0, 13.0));
 		points->push_back (Gnome::Art::Point (6.5, 6.5));
 
-		shift = 13;
+		_shift = 13;
 		label_offset = 6.0;
 		break;
 
@@ -207,7 +186,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (0.0, 13.0));
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 
-		shift = 0;
+		_shift = 0;
 		label_offset = 12.0;
 		break;
 
@@ -218,7 +197,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (0.0, 13.0));
 		points->push_back (Gnome::Art::Point (13.0, 0.0));
 
-		shift = 13;
+		_shift = 13;
 		label_offset = 0.0;
 		break;
 
@@ -229,7 +208,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (0.0, 13.0));
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 
-		shift = 0;
+		_shift = 0;
 		label_offset = 13.0;
 		break;
 
@@ -240,7 +219,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (12.0, 12.0));
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 
-		shift = 13;
+		_shift = 13;
 		label_offset = 0.0;
 		break;
 
@@ -251,7 +230,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 
 	/* adjust to properly locate the tip */
 
-	unit_position -= shift;
+	unit_position -= _shift;
 
 	group = new Group (parent, unit_position, 1.0);
 
@@ -316,21 +295,21 @@ Marker::set_selected (bool s)
 void
 Marker::set_show_line (bool s)
 {
-	_shown = s;
+	_line_shown = s;
 	setup_line ();
 }
 
 void
 Marker::setup_line ()
 {
-	if (_selected || _shown) {
+	if (_shown && (_selected || _line_shown)) {
 
 		if (_line == 0) {
 
 			_line = new ArdourCanvas::SimpleLine (*_line_parent);
 			_line->property_color_rgba() = ARDOUR_UI::config()->canvasvar_EditPoint.get();
-			_line->property_x1() = unit_position + shift;
-			_line->property_x2() = unit_position + shift;
+
+			setup_line_x ();
 
 			_line->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
 		}
@@ -343,8 +322,8 @@ Marker::setup_line ()
 			_line_parent->w2i (x, yo);
 		}
 
-		_line->property_y1() = yo;
-		_line->property_y2() = yo + _canvas_height;
+		_line->property_y1() = yo + 10;
+		_line->property_y2() = yo + 10 + _canvas_height;
 
 		_line->property_color_rgba() = _selected ? ARDOUR_UI::config()->canvasvar_EditPoint.get() : _color;
 		_line->raise_to_top ();
@@ -383,18 +362,24 @@ Marker::set_name (const string& new_name)
 }
 
 void
+Marker::setup_line_x ()
+{
+	if (_line) {
+		_line->property_x1() = unit_position + _shift - 0.5;
+		_line->property_x2() = unit_position + _shift - 0.5;
+	}
+}
+
+void
 Marker::set_position (framepos_t frame)
 {
 	double new_unit_position = editor.frame_to_unit (frame);
-	new_unit_position -= shift;
+	new_unit_position -= _shift;
 	group->move (new_unit_position - unit_position, 0.0);
 	frame_position = frame;
 	unit_position = new_unit_position;
 
-	if (_line) {
-		_line->property_x1() = unit_position + shift;
-		_line->property_x2() = unit_position + shift;
-	}
+	setup_line_x ();
 }
 
 void
@@ -406,13 +391,19 @@ Marker::reposition ()
 void
 Marker::show ()
 {
-        group->show();
+	_shown = true;
+	
+        group->show ();
+	setup_line ();
 }
 
 void
 Marker::hide ()
 {
-	group->hide();
+	_shown = false;
+	
+	group->hide ();
+	setup_line ();
 }
 
 void

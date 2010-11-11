@@ -434,6 +434,15 @@ Editor::LocationMarkers::set_selected (bool s)
 }
 
 void
+Editor::LocationMarkers::setup_lines ()
+{
+	start->setup_line ();
+	if (end) {
+		end->setup_line ();
+	}
+}
+
+void
 Editor::mouse_add_new_marker (framepos_t where, bool is_cd, bool is_xrun)
 {
 	string markername, markerprefix;

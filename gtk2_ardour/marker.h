@@ -70,6 +70,7 @@ class Marker : public sigc::trackable
 	void set_position (framepos_t);
 	void set_name (const std::string&);
 	void set_color_rgba (uint32_t rgba);
+	void setup_line ();
 
 	framepos_t position() const { return frame_position; }
 
@@ -97,16 +98,17 @@ class Marker : public sigc::trackable
 
 	double        unit_position;
 	framepos_t    frame_position;
-	unsigned char shift; /* should be double, but its always small and integral */
+	double       _shift;
 	Type         _type;
 	int           name_height;
 	bool         _selected;
 	bool         _shown;
+	bool         _line_shown;
 	double       _canvas_height;
 	uint32_t     _color;
 
 	void reposition ();
-	void setup_line ();
+	void setup_line_x ();
 };
 
 class TempoMarker : public Marker

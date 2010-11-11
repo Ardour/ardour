@@ -600,6 +600,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		void set_show_lines (bool);
 		void set_selected (bool);
 		void canvas_height_set (double);
+		void setup_lines ();
 		
 		void set_name (const std::string&);
 		void set_position (framepos_t start, framepos_t end = 0);
