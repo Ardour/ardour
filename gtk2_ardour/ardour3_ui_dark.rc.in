@@ -1826,6 +1826,8 @@ widget "*LocationEditCdButton" style:highest "small_red_active_and_selected_butt
 widget "*LocationEditCdButton*" style:highest "small_red_active_and_selected_button"
 widget "*LocationEditHideButton" style:highest "small_red_active_and_selected_button"
 widget "*LocationEditHideButton*" style:highest "small_red_active_and_selected_button"
+widget "*LocationEditLockButton*" style:highest "small_red_active_and_selected_button"
+widget "*LocationEditGlueButton*" style:highest "small_red_active_and_selected_button"
 widget "*LocationEditNumberLabel" style:highest "small_text"
 widget "*LocationLocEditorFrame" style:highest "base_frame"
 widget "*LocationRangeEditorFrame" style:highest "base_frame"
