@@ -342,7 +342,7 @@ Editor::track_canvas_size_allocated ()
 		}
 
 		for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
-			i->second->set_lines_vpos (0, _canvas_height);
+			i->second->canvas_height_set (_canvas_height);
 		}
 
 		vertical_adjustment.set_page_size (_canvas_height);

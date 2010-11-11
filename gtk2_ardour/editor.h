@@ -597,9 +597,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		void hide ();
 		void show ();
 
-		void hide_lines ();
-		void show_lines (ArdourCanvas::Group *, double);
-		void set_lines_vpos (double, double);
+		void set_show_lines (bool);
+		void set_selected (bool);
+		void canvas_height_set (double);
 		
 		void set_name (const std::string&);
 		void set_position (framepos_t start, framepos_t end = 0);

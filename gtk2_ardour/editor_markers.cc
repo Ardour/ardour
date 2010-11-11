@@ -80,44 +80,44 @@ Editor::add_new_location (Location *location)
 	if (location->is_mark()) {
 
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
-			lam->start = new Marker (*this, *cd_marker_group, color, location->name(), Marker::Mark, location->start());
+			lam->start = new Marker (*this, *cd_marker_group, *cursor_group, color, location->name(), Marker::Mark, location->start());
 		}
 		else {
-			lam->start = new Marker (*this, *marker_group, color, location->name(), Marker::Mark, location->start());
+			lam->start = new Marker (*this, *marker_group, *cursor_group, color, location->name(), Marker::Mark, location->start());
 		}
 		lam->end   = 0;
 
 	} else if (location->is_auto_loop()) {
 		// transport marker
-		lam->start = new Marker (*this, *transport_marker_group, color,
+		lam->start = new Marker (*this, *transport_marker_group, *cursor_group, color,
 					 location->name(), Marker::LoopStart, location->start());
-		lam->end   = new Marker (*this, *transport_marker_group, color,
+		lam->end   = new Marker (*this, *transport_marker_group, *cursor_group, color,
 					 location->name(), Marker::LoopEnd, location->end());
 
 	} else if (location->is_auto_punch()) {
 		// transport marker
-		lam->start = new Marker (*this, *transport_marker_group, color,
+		lam->start = new Marker (*this, *transport_marker_group, *cursor_group, color,
 					 location->name(), Marker::PunchIn, location->start());
-		lam->end   = new Marker (*this, *transport_marker_group, color,
+		lam->end   = new Marker (*this, *transport_marker_group, *cursor_group, color,
 					 location->name(), Marker::PunchOut, location->end());
 
 	} else if (location->is_session_range()) {
 		// session range
-		lam->start = new Marker (*this, *marker_group, color, _("start"), Marker::Start, location->start());
-		lam->end = new Marker (*this, *marker_group, color, _("end"), Marker::End, location->end());
+		lam->start = new Marker (*this, *marker_group, *cursor_group, color, _("start"), Marker::Start, location->start());
+		lam->end = new Marker (*this, *marker_group, *cursor_group, color, _("end"), Marker::End, location->end());
 		
 	} else {
 		// range marker
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
-			lam->start = new Marker (*this, *cd_marker_group, color,
+			lam->start = new Marker (*this, *cd_marker_group, *cursor_group, color,
 						 location->name(), Marker::Start, location->start());
-			lam->end   = new Marker (*this, *cd_marker_group, color,
+			lam->end   = new Marker (*this, *cd_marker_group, *cursor_group, color,
 						 location->name(), Marker::End, location->end());
 		}
 		else {
-			lam->start = new Marker (*this, *range_marker_group, color,
+			lam->start = new Marker (*this, *range_marker_group, *cursor_group, color,
 						 location->name(), Marker::Start, location->start());
-			lam->end   = new Marker (*this, *range_marker_group, color,
+			lam->end   = new Marker (*this, *range_marker_group, *cursor_group, color,
 						 location->name(), Marker::End, location->end());
 		}
 	}
@@ -146,11 +146,8 @@ Editor::add_new_location (Location *location)
 		select_new_marker = false;
 	}
 
-	if (_show_marker_lines) {
-		lam->show_lines (cursor_group, _canvas_height);
-	} else {
-		lam->hide_lines ();
-	}
+	lam->canvas_height_set (_canvas_height);
+	lam->set_show_lines (_show_marker_lines);
 }
 
 void
@@ -377,32 +374,11 @@ Editor::LocationMarkers::show()
 }
 
 void
-Editor::LocationMarkers::show_lines (ArdourCanvas::Group* g, double h)
+Editor::LocationMarkers::canvas_height_set (double h)
 {
-	/* add_line may be required, and it calls show_line even if it isn't */
-	
-	start->add_line (g, 0, h);
-	
+	start->canvas_height_set (h);
 	if (end) {
-		end->add_line (g, 0, h);
-	}
-}
-
-void
-Editor::LocationMarkers::hide_lines ()
-{
-	start->hide_line ();
-	if (end) {
-		end->hide_line ();
-	}
-}
-
-void
-Editor::LocationMarkers::set_lines_vpos (double y, double h)
-{
-	start->set_line_vpos (y, h);
-	if (end) {
-		end->set_line_vpos (y, h);
+		end->canvas_height_set (h);
 	}
 }
 
@@ -425,14 +401,36 @@ Editor::LocationMarkers::set_position (framepos_t startf,
 				       framepos_t endf)
 {
 	start->set_position (startf);
-	if (end) { end->set_position (endf); }
+	if (end) {
+		end->set_position (endf);
+	}
 }
 
 void
 Editor::LocationMarkers::set_color_rgba (uint32_t rgba)
 {
 	start->set_color_rgba (rgba);
-	if (end) { end->set_color_rgba (rgba); }
+	if (end) {
+		end->set_color_rgba (rgba);
+	}
+}
+
+void
+Editor::LocationMarkers::set_show_lines (bool s)
+{
+	start->set_show_line (s);
+	if (end) {
+		end->set_show_line (s);
+	}
+}
+
+void
+Editor::LocationMarkers::set_selected (bool s)
+{
+	start->set_selected (s);
+	if (end) {
+		end->set_selected (s);
+	}
 }
 
 void
@@ -1243,15 +1241,12 @@ Editor::marker_selection_changed ()
 		return;
 	}
 
-	if (!_show_marker_lines) {
-		for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
-			i->second->hide_lines ();
-		}
+	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
+		i->second->set_selected (false);
 	}
 
 	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
-		(*x)->add_line (cursor_group, 0, _canvas_height);
-		(*x)->show_line ();
+		(*x)->set_selected (true);
 	}
 }
 
@@ -1318,10 +1313,6 @@ Editor::toggle_marker_lines ()
 	_show_marker_lines = !_show_marker_lines;
 	
 	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
-		if (_show_marker_lines) {
-			i->second->show_lines (cursor_group, _canvas_height);
-		} else {
-			i->second->hide_lines ();
-		}
+		i->second->set_show_lines (_show_marker_lines);
 	}
 }

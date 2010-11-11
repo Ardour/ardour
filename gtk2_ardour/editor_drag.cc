@@ -1756,8 +1756,15 @@ MeterMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		// The actual copying is not done before we reach the finish callback.
 		char name[64];
 		snprintf (name, sizeof(name), "%g/%g", _marker->meter().beats_per_bar(), _marker->meter().note_divisor ());
-		MeterMarker* new_marker = new MeterMarker(*_editor, *_editor->meter_group, ARDOUR_UI::config()->canvasvar_MeterMarker.get(), name,
-							  *new MeterSection (_marker->meter()));
+
+		MeterMarker* new_marker = new MeterMarker (
+			*_editor,
+			*_editor->meter_group,
+			*_editor->cursor_group,
+			ARDOUR_UI::config()->canvasvar_MeterMarker.get(),
+			name,
+			*new MeterSection (_marker->meter())
+			);
 
 		_item = &new_marker->the_item ();
 		_marker = new_marker;
@@ -1850,8 +1857,15 @@ TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		// The actual copying is not done before we reach the finish callback.
 		char name[64];
 		snprintf (name, sizeof (name), "%.2f", _marker->tempo().beats_per_minute());
-		TempoMarker* new_marker = new TempoMarker(*_editor, *_editor->tempo_group, ARDOUR_UI::config()->canvasvar_TempoMarker.get(), name,
-							  *new TempoSection (_marker->tempo()));
+
+		TempoMarker* new_marker = new TempoMarker (
+			*_editor,
+			*_editor->tempo_group,
+			*_editor->cursor_group,
+			ARDOUR_UI::config()->canvasvar_TempoMarker.get(),
+			name,
+			*new TempoSection (_marker->tempo())
+			);
 
 		_item = &new_marker->the_item ();
 		_marker = new_marker;
