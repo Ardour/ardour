@@ -352,9 +352,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 #endif
 
 	virtual gdouble get_trackview_group_vertical_offset () const = 0;
-	virtual gdouble get_canvas_timebars_vsize () const = 0;
-	virtual ArdourCanvas::Group* get_background_group () const = 0;
+	virtual double get_canvas_timebars_vsize () const = 0;
 	virtual ArdourCanvas::Group* get_trackview_group () const = 0;
+	virtual ArdourCanvas::Group* get_background_group () const = 0;
 
 	virtual TimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const = 0;
 

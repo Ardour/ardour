@@ -1230,14 +1230,14 @@ TimeAxisView::resizer_motion (GdkEventMotion* ev)
 {
 	if (_resize_drag_start >= 0) {
 		/* (ab)use the DragManager to do autoscrolling; adjust the event coordinates
-		   into the trackview space that DragManager::motion_handler is expecting,
+		   into the world coordinate space that DragManager::motion_handler is expecting,
 		   and then fake a DragManager motion event so that when maybe_autoscroll
 		   asks DragManager for the current pointer position it will get the correct
 		   answers.
 		*/
 		int tx, ty;
 		resizer.translate_coordinates (*control_parent, ev->x, ev->y, tx, ty);
-		ev->y = ty + _editor.get_canvas_timebars_vsize ();
+		ev->y = ty - _editor.get_trackview_group_vertical_offset();
 		_editor.drags()->motion_handler ((GdkEvent *) ev, false);
 		_editor.maybe_autoscroll (false, true);
 
