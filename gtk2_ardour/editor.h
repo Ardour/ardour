@@ -615,6 +615,18 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	typedef std::map<ARDOUR::Location*,LocationMarkers *> LocationMarkerMap;
 	LocationMarkerMap location_markers;
 
+	void update_marker_labels ();
+	void update_marker_labels (ArdourCanvas::Group *);
+	void check_marker_label (Marker *);
+
+	/** A set of lists of Markers that are in each of the canvas groups
+	 *  for the marker sections at the top of the editor.  These lists
+	 *  are kept sorted in time order between marker movements, so that after
+	 *  a marker has moved we can decide whether we need to update the labels
+	 *  for all markers or for just a few.
+	 */
+	std::map<ArdourCanvas::Group *, std::list<Marker *> > _sorted_marker_lists;
+
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
 	void mouse_add_new_marker (framepos_t where, bool is_cd=false, bool is_xrun=false);

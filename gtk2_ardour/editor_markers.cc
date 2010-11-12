@@ -65,6 +65,9 @@ Editor::add_new_location (Location *location)
 	LocationMarkers *lam = new LocationMarkers;
 	uint32_t color;
 
+	/* make a note here of which group this marker ends up in */
+	ArdourCanvas::Group* group = 0;
+
 	if (location->is_cd_marker()) {
 		color = location_cd_marker_color;
 	} else if (location->is_mark()) {
@@ -81,30 +84,38 @@ Editor::add_new_location (Location *location)
 
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
 			lam->start = new Marker (*this, *cd_marker_group, *cursor_group, color, location->name(), Marker::Mark, location->start());
-		}
-		else {
+			group = cd_marker_group;
+		} else {
 			lam->start = new Marker (*this, *marker_group, *cursor_group, color, location->name(), Marker::Mark, location->start());
+			group = marker_group;
 		}
-		lam->end   = 0;
+		
+		lam->end = 0;
 
 	} else if (location->is_auto_loop()) {
+		
 		// transport marker
 		lam->start = new Marker (*this, *transport_marker_group, *cursor_group, color,
 					 location->name(), Marker::LoopStart, location->start());
 		lam->end   = new Marker (*this, *transport_marker_group, *cursor_group, color,
 					 location->name(), Marker::LoopEnd, location->end());
+		group = transport_marker_group;
 
 	} else if (location->is_auto_punch()) {
+		
 		// transport marker
 		lam->start = new Marker (*this, *transport_marker_group, *cursor_group, color,
 					 location->name(), Marker::PunchIn, location->start());
 		lam->end   = new Marker (*this, *transport_marker_group, *cursor_group, color,
 					 location->name(), Marker::PunchOut, location->end());
-
+		group = transport_marker_group;
+		
 	} else if (location->is_session_range()) {
+
 		// session range
 		lam->start = new Marker (*this, *marker_group, *cursor_group, color, _("start"), Marker::SessionStart, location->start());
 		lam->end = new Marker (*this, *marker_group, *cursor_group, color, _("end"), Marker::SessionEnd, location->end());
+		group = marker_group;
 		
 	} else {
 		// range marker
@@ -113,12 +124,13 @@ Editor::add_new_location (Location *location)
 						 location->name(), Marker::RangeStart, location->start());
 			lam->end   = new Marker (*this, *cd_marker_group, *cursor_group, color,
 						 location->name(), Marker::RangeEnd, location->end());
-		}
-		else {
+			group = cd_marker_group;
+		} else {
 			lam->start = new Marker (*this, *range_marker_group, *cursor_group, color,
 						 location->name(), Marker::RangeStart, location->start());
 			lam->end   = new Marker (*this, *range_marker_group, *cursor_group, color,
 						 location->name(), Marker::RangeEnd, location->end());
+			group = range_marker_group;
 		}
 	}
 
@@ -148,6 +160,17 @@ Editor::add_new_location (Location *location)
 
 	lam->canvas_height_set (_canvas_height);
 	lam->set_show_lines (_show_marker_lines);
+
+	/* Add these markers to the appropriate sorted marker lists, which will render
+	   them unsorted until the update_marker_labels() below sorts them out.
+	*/
+	_sorted_marker_lists[group].push_back (lam->start);
+	if (lam->end) {
+		_sorted_marker_lists[group].push_back (lam->end);
+	}
+
+	/* Do a full update of the markers in this group */
+	update_marker_labels (group);
 }
 
 void
@@ -169,6 +192,154 @@ Editor::location_changed (Location *location)
 		update_loop_range_view ();
 	} else if (location->is_auto_punch()) {
 		update_punch_range_view ();
+	}
+
+	check_marker_label (lam->start);
+	if (lam->end) {
+		check_marker_label (lam->end);
+	}
+}
+
+/** Look at a marker and check whether its label, and those of the previous and next markers,
+ *  need to have their labels updated (in case those labels need to be shortened or can be
+ *  lengthened)
+ */
+void
+Editor::check_marker_label (Marker* m)
+{
+	/* Get a time-ordered list of markers from the last time anything changed */
+	std::list<Marker*>& sorted = _sorted_marker_lists[m->get_parent()];
+	
+	list<Marker*>::iterator i = find (sorted.begin(), sorted.end(), m);
+
+	list<Marker*>::iterator prev = sorted.end ();
+	list<Marker*>::iterator next = i;
+	++next;
+
+	/* Look to see if the previous marker is still behind `m' in time */
+	if (i != sorted.begin()) {
+
+		prev = i;
+		--prev;
+
+		if ((*prev)->position() > m->position()) {
+			/* This marker is no longer in the correct order with the previous one, so
+			 * update all the markers in this group.
+			 */
+			update_marker_labels (m->get_parent ());
+			return;
+		}
+	}
+
+	/* Look to see if the next marker is still ahead of `m' in time */
+	if (next != sorted.end() && (*next)->position() < m->position()) {
+		/* This marker is no longer in the correct order with the next one, so
+		 * update all the markers in this group.
+		 */
+		update_marker_labels (m->get_parent ());
+		return;
+	}
+
+	if (prev != sorted.end()) {
+
+		/* Update just the available space between the previous marker and this one */
+		
+		double const p = frame_to_pixel (m->position() - (*prev)->position());
+
+		if (m->label_on_left()) {
+			(*prev)->set_right_label_limit (p / 2);
+		} else {
+			(*prev)->set_right_label_limit (p);
+		}
+		
+		if ((*prev)->label_on_left ()) {
+			m->set_left_label_limit (p);
+		} else {
+			m->set_left_label_limit (p / 2);
+		}
+	}
+
+	if (next != sorted.end()) {
+
+		/* Update just the available space between this marker and the next */
+		
+		double const p = frame_to_pixel ((*next)->position() - m->position());
+
+		if ((*next)->label_on_left()) {
+			m->set_right_label_limit (p / 2);
+		} else {
+			m->set_right_label_limit (p);
+		}
+
+		if (m->label_on_left()) {
+			(*next)->set_left_label_limit (p);
+		} else {
+			(*next)->set_left_label_limit (p / 2);
+		}
+	}
+}
+
+struct MarkerComparator {
+	bool operator() (Marker const * a, Marker const * b) {
+		return a->position() < b->position();
+	}
+};
+
+/** Update all marker labels in all groups */
+void
+Editor::update_marker_labels ()
+{
+	for (std::map<ArdourCanvas::Group *, std::list<Marker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
+		update_marker_labels (i->first);
+	}
+}
+
+/** Look at all markers in a group and update label widths */
+void
+Editor::update_marker_labels (ArdourCanvas::Group* group)
+{
+	list<Marker*>& sorted = _sorted_marker_lists[group];
+
+	if (sorted.empty()) {
+		return;
+	}
+
+	/* We sort the list of markers and then set up the space available between each one */
+	
+	sorted.sort (MarkerComparator ());
+
+	list<Marker*>::iterator i = sorted.begin ();
+
+	list<Marker*>::iterator prev = sorted.end ();
+	list<Marker*>::iterator next = i;
+	++next;
+	
+	while (i != sorted.end()) {
+
+		if (prev != sorted.end()) {
+			double const p = frame_to_pixel ((*i)->position() - (*prev)->position());
+			
+			if ((*prev)->label_on_left()) {
+				(*i)->set_left_label_limit (p);
+			} else {
+				(*i)->set_left_label_limit (p / 2);
+			}
+				
+		}
+
+		if (next != sorted.end()) {
+			double const p = frame_to_pixel ((*next)->position() - (*i)->position());
+
+			if ((*next)->label_on_left()) {
+				(*i)->set_right_label_limit (p / 2);
+			} else {
+				(*i)->set_right_label_limit (p);
+			}
+		}
+
+		prev = i;
+		++i;
+		++next;
 	}
 }
 

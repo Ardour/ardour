@@ -4377,6 +4377,8 @@ Editor::post_zoom ()
 	refresh_location_display();
 	_summary->set_overlays_dirty ();
 
+	update_marker_labels ();
+
 	instant_save ();
 }
 

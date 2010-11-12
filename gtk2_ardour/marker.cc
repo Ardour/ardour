@@ -56,6 +56,9 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 	, _line_shown (false)
 	, _canvas_height (0)
 	, _color (rgba)
+	, _left_label_limit (DBL_MAX)
+	, _right_label_limit (DBL_MAX)
+
 {
 	double label_offset = 0;
 
@@ -355,13 +358,40 @@ Marker::the_item() const
 void
 Marker::set_name (const string& new_name)
 {
-	int name_width = pixel_width (new_name, *name_font) + 2;
+	_name = new_name;
 
-	name_pixbuf->property_pixbuf() = pixbuf_from_string(new_name, name_font, name_width, name_height, Gdk::Color ("#000000"));
+	setup_name_pixbuf ();
+}
 
-	if (_type == SessionEnd || _type == RangeEnd || _type == LoopEnd || _type == PunchOut) {
-		name_pixbuf->property_x() = - (name_width);
+/** @return true if our label is on the left of the mark, otherwise false */
+bool
+Marker::label_on_left () const
+{
+	return (_type == SessionEnd || _type == RangeEnd || _type == LoopEnd || _type == PunchOut);
+}
+
+void
+Marker::setup_name_pixbuf ()
+{
+	double limit = DBL_MAX;
+	
+	if (label_on_left ()) {
+		limit = _left_label_limit;
+	} else {
+		limit = _right_label_limit;
 	}
+
+	/* Work out how wide the name can be */
+	int name_width = min ((double) pixel_width (_name, *name_font) + 2, limit);
+	if (name_width == 0) {
+		name_width = 1;
+	}
+
+	if (label_on_left ()) {
+		name_pixbuf->property_x() = -name_width;
+	}
+
+	name_pixbuf->property_pixbuf() = pixbuf_from_string (_name, name_font, name_width, name_height, Gdk::Color ("#000000"));
 }
 
 void
@@ -417,6 +447,36 @@ Marker::set_color_rgba (uint32_t c)
 	mark->property_outline_color_rgba() = _color;
 	if (_line && !_selected) {
 		_line->property_color_rgba() = _color;
+	}
+}
+
+/** Set the number of pixels that are available for a label to the left of the centre of this marker */
+void
+Marker::set_left_label_limit (double p)
+{
+	/* Account for the size of the marker */
+	_left_label_limit = p - 13;
+	if (_left_label_limit < 0) {
+		_left_label_limit = 0;
+	}
+	
+	if (label_on_left ()) {
+		setup_name_pixbuf ();
+	}
+}
+
+/** Set the number of pixels that are available for a label to the right of the centre of this marker */
+void
+Marker::set_right_label_limit (double p)
+{
+	/* Account for the size of the marker */
+	_right_label_limit = p - 13;
+	if (_right_label_limit < 0) {
+		_right_label_limit = 0;
+	}
+	
+	if (!label_on_left ()) {
+		setup_name_pixbuf ();
 	}
 }
 

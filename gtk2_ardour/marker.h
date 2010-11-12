@@ -84,6 +84,15 @@ class Marker : public sigc::trackable
 
 	Type type () { return _type; }
 
+	void set_left_label_limit (double);
+	void set_right_label_limit (double);
+
+	std::string name () const {
+		return _name;
+	}
+
+	bool label_on_left () const;
+	
   protected:
 	PublicEditor& editor;
 
@@ -98,6 +107,7 @@ class Marker : public sigc::trackable
 	ArdourCanvas::SimpleLine* _line;
 	ArdourCanvas::Points *line_points;
 
+	std::string  _name;
 	double        unit_position;
 	framepos_t    frame_position;
 	double       _shift;
@@ -108,9 +118,12 @@ class Marker : public sigc::trackable
 	bool         _line_shown;
 	double       _canvas_height;
 	uint32_t     _color;
+	double       _left_label_limit; ///< the number of pixels available to the left of this marker for a label
+	double       _right_label_limit; ///< the number of pixels available to the right of this marker for a label
 
 	void reposition ();
 	void setup_line_x ();
+	void setup_name_pixbuf ();
 };
 
 class TempoMarker : public Marker
