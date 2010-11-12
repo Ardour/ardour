@@ -1806,7 +1806,6 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 	XMLNode *child;
-	XMLPropertyList plist;
 	const XMLProperty *prop;
 
 	if (node.name() != "Route"){
@@ -1973,7 +1972,6 @@ Route::_set_state_2X (const XMLNode& node, int version)
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 	XMLNode *child;
-	XMLPropertyList plist;
 	const XMLProperty *prop;
 
 	/* 2X things which still remain to be handled:
