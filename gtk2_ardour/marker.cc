@@ -157,7 +157,9 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		label_offset = 8.0;
 		break;
 
-	case Start:
+	case SessionStart:
+	case RangeStart:
+		
 	        points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 		points->push_back (Gnome::Art::Point (6.5, 6.5));
@@ -168,7 +170,8 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		label_offset = 13.0;
 		break;
 
-	case End:
+	case SessionEnd:
+	case RangeEnd:
 		points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (6.5, 6.5));
 		points->push_back (Gnome::Art::Point (13.0, 0.0));
@@ -356,7 +359,7 @@ Marker::set_name (const string& new_name)
 
 	name_pixbuf->property_pixbuf() = pixbuf_from_string(new_name, name_font, name_width, name_height, Gdk::Color ("#000000"));
 
-	if (_type == End || _type == LoopEnd || _type == PunchOut) {
+	if (_type == SessionEnd || _type == RangeEnd || _type == LoopEnd || _type == PunchOut) {
 		name_pixbuf->property_x() = - (name_width);
 	}
 }

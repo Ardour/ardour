@@ -310,7 +310,10 @@ void
 LocationEditRow::name_entry_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &LocationEditRow::name_entry_changed)
-	if (i_am_the_modifier || !location) return;
+	
+	if (i_am_the_modifier || !location) {
+		return;
+	}
 
 	location->set_name (name_entry.get_text());
 }

@@ -45,8 +45,10 @@ class Marker : public sigc::trackable
 		Mark,
 		Tempo,
 		Meter,
-		Start, ///< session start
-		End,   ///< session end
+		SessionStart, ///< session start
+		SessionEnd,   ///< session end
+		RangeStart,
+		RangeEnd,
 		LoopStart,
 		LoopEnd,
 		PunchIn,

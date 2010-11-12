@@ -103,22 +103,22 @@ Editor::add_new_location (Location *location)
 
 	} else if (location->is_session_range()) {
 		// session range
-		lam->start = new Marker (*this, *marker_group, *cursor_group, color, _("start"), Marker::Start, location->start());
-		lam->end = new Marker (*this, *marker_group, *cursor_group, color, _("end"), Marker::End, location->end());
+		lam->start = new Marker (*this, *marker_group, *cursor_group, color, _("start"), Marker::SessionStart, location->start());
+		lam->end = new Marker (*this, *marker_group, *cursor_group, color, _("end"), Marker::SessionEnd, location->end());
 		
 	} else {
 		// range marker
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
 			lam->start = new Marker (*this, *cd_marker_group, *cursor_group, color,
-						 location->name(), Marker::Start, location->start());
+						 location->name(), Marker::RangeStart, location->start());
 			lam->end   = new Marker (*this, *cd_marker_group, *cursor_group, color,
-						 location->name(), Marker::End, location->end());
+						 location->name(), Marker::RangeEnd, location->end());
 		}
 		else {
 			lam->start = new Marker (*this, *range_marker_group, *cursor_group, color,
-						 location->name(), Marker::Start, location->start());
+						 location->name(), Marker::RangeStart, location->start());
 			lam->end   = new Marker (*this, *range_marker_group, *cursor_group, color,
-						 location->name(), Marker::End, location->end());
+						 location->name(), Marker::RangeEnd, location->end());
 		}
 	}
 
@@ -386,12 +386,12 @@ void
 Editor::LocationMarkers::set_name (const string& str)
 {
 	/* XXX: hack: don't change names of session start/end markers */
-	
-	if (start->type() != Marker::Start) {
+
+	if (start->type() != Marker::SessionStart) {
 		start->set_name (str);
 	}
 	
-	if (end && end->type() != Marker::End) {
+	if (end && end->type() != Marker::SessionEnd) {
 		end->set_name (str);
 	}
 }
