@@ -94,7 +94,6 @@ RouteUI::init ()
 {
 	self_destruct = true;
 	xml_node = 0;
-	_xml_node_version = Stateful::current_state_version;
 	mute_menu = 0;
 	solo_menu = 0;
 	sends_menu = 0;
@@ -1269,7 +1268,32 @@ RouteUI::ensure_xml_node ()
 			_route->add_extra_xml (*xml_node);
 		} else {
 			/* the Route has one, so it must have been loaded */
-			_xml_node_version = Stateful::loading_state_version;
+			if (Stateful::loading_state_version < 3000) {
+				/* the GUI extra XML is in 2.X format; we must convert it to the new
+				   format to avoid problems later
+				*/
+
+				XMLNode* new_xml_node = new XMLNode (X_("GUI"));
+				XMLPropertyList old_gui_props = xml_node->properties ();
+				for (XMLPropertyIterator i = old_gui_props.begin(); i != old_gui_props.end(); ++i) {
+					new_xml_node->add_property ((*i)->name().c_str (), (*i)->value().c_str ());
+				}
+
+				XMLNodeList old_children = xml_node->children ();
+				for (XMLNodeConstIterator i = old_children.begin(); i != old_children.end(); ++i) {
+					XMLNode* new_child = new XMLNode (AutomationTimeAxisView::state_node_name);
+					new_child->add_property (X_("automation-id"), (*i)->name());
+
+					XMLPropertyList old_props = (*i)->properties ();
+					for (XMLPropertyIterator j = old_props.begin(); j != old_props.end(); ++j) {
+						new_child->add_property ((*j)->name().c_str (), (*j)->value().c_str ());
+					}
+
+					new_xml_node->add_child_nocopy (*new_child);
+				}
+
+				_route->add_extra_xml (*new_xml_node);
+			}
 		}
 	}
 }
@@ -1286,16 +1310,10 @@ RouteUI::get_automation_child_xml_node (Evoral::Parameter param)
 
 	for (iter = kids.begin(); iter != kids.end(); ++iter) {
 
-		if (_xml_node_version < 3000) {
-			if ((*iter)->name() == sym) {
+		if ((*iter)->name() == AutomationTimeAxisView::state_node_name) {
+			XMLProperty* type = (*iter)->property("automation-id");
+			if (type && type->value() == sym) {
 				return *iter;
-			}
-		} else {
-			if ((*iter)->name() == AutomationTimeAxisView::state_node_name) {
-				XMLProperty* type = (*iter)->property("automation-id");
-				if (type && type->value() == sym) {
-					return *iter;
-				}
 			}
 		}
 	}

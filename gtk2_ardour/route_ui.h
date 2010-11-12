@@ -110,7 +110,6 @@ class RouteUI : public virtual AxisView
 
 	XMLNode *xml_node;
 	void ensure_xml_node ();
-	int _xml_node_version;
 
 	virtual XMLNode* get_automation_child_xml_node (Evoral::Parameter);
 
