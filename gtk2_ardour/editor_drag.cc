@@ -2424,13 +2424,15 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 
 				switch (marker->type()) {
-				case Marker::Start:
+				case Marker::SessionStart:
+				case Marker::RangeStart:
 				case Marker::LoopStart:
 				case Marker::PunchIn:
 					f_delta = newframe - copy_location->start();
 					break;
 
-				case Marker::End:
+				case Marker::SessionEnd:
+				case Marker::RangeEnd:
 				case Marker::LoopEnd:
 				case Marker::PunchOut:
 					f_delta = newframe - copy_location->end();
