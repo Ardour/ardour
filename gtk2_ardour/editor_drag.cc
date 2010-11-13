@@ -1850,7 +1850,6 @@ TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 void
 TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
-
 	if (_copy) {
 
 		// create a dummy marker for visual representation of moving the copy.
@@ -1870,13 +1869,6 @@ TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		_item = &new_marker->the_item ();
 		_marker = new_marker;
 
-	} else {
-
-		MetricSection& section (_marker->tempo());
-
-		if (!section.movable()) {
-			return;
-		}
 	}
 
 	Drag::start_grab (event, cursor);
