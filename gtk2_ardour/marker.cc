@@ -32,6 +32,8 @@
 #include "utils.h"
 #include "canvas_impl.h"
 #include "simpleline.h"
+#include "simplerect.h"
+#include "rgb_macros.h"
 
 #include <gtkmm2ext/utils.h>
 
@@ -58,10 +60,9 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 	, _color (rgba)
 	, _left_label_limit (DBL_MAX)
 	, _right_label_limit (DBL_MAX)
+	, _label_offset (0)
 
 {
-	double label_offset = 0;
-
 	/* Shapes we use:
 
 	  Mark:
@@ -71,7 +72,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 	     |	      V
            (0,5)    (6,5)
 	       \    /
-               (3,10)
+               (3,13)
 
 
 	   TempoMark:
@@ -137,12 +138,12 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 		points->push_back (Gnome::Art::Point (6.0, 0.0));
 		points->push_back (Gnome::Art::Point (6.0, 5.0));
-		points->push_back (Gnome::Art::Point (3.0, 10.0));
+		points->push_back (Gnome::Art::Point (3.0, 13.0));
 		points->push_back (Gnome::Art::Point (0.0, 5.0));
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 
 		_shift = 3;
-		label_offset = 8.0;
+		_label_offset = 8.0;
 		break;
 
 	case Tempo:
@@ -157,7 +158,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (3.0, 0.0));
 
 		_shift = 3;
-		label_offset = 8.0;
+		_label_offset = 8.0;
 		break;
 
 	case SessionStart:
@@ -170,7 +171,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 
 		_shift = 0;
-		label_offset = 13.0;
+		_label_offset = 13.0;
 		break;
 
 	case SessionEnd:
@@ -182,7 +183,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (6.5, 6.5));
 
 		_shift = 13;
-		label_offset = 6.0;
+		_label_offset = 6.0;
 		break;
 
 	case LoopStart:
@@ -193,7 +194,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 
 		_shift = 0;
-		label_offset = 12.0;
+		_label_offset = 12.0;
 		break;
 
 	case LoopEnd:
@@ -204,7 +205,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (13.0, 0.0));
 
 		_shift = 13;
-		label_offset = 0.0;
+		_label_offset = 0.0;
 		break;
 
 	case  PunchIn:
@@ -215,7 +216,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 
 		_shift = 0;
-		label_offset = 13.0;
+		_label_offset = 13.0;
 		break;
 
 	case  PunchOut:
@@ -226,19 +227,21 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 
 		_shift = 13;
-		label_offset = 0.0;
+		_label_offset = 0.0;
 		break;
 
 	}
 
 	frame_position = frame;
 	unit_position = editor.frame_to_unit (frame);
+	unit_position -= _shift;
+	
+	group = new Group (parent, unit_position, 1.0);
+
+	_name_background = new ArdourCanvas::SimpleRect (*group);
+	_name_background->property_outline_pixels() = 1;
 
 	/* adjust to properly locate the tip */
-
-	unit_position -= _shift;
-
-	group = new Group (parent, unit_position, 1.0);
 
 	mark = new Polygon (*group);
 	mark->property_points() = *points;
@@ -257,7 +260,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 	Gtkmm2ext::get_ink_pixel_size (layout, width, name_height);
 
 	name_pixbuf = new ArdourCanvas::Pixbuf(*group);
-	name_pixbuf->property_x() = label_offset;
+	name_pixbuf->property_x() = _label_offset;
 	name_pixbuf->property_y() = (13/2) - (name_height/2);
 
 	set_name (annotation.c_str());
@@ -360,7 +363,7 @@ Marker::set_name (const string& new_name)
 {
 	_name = new_name;
 
-	setup_name_pixbuf ();
+	setup_name_display ();
 }
 
 /** @return true if our label is on the left of the mark, otherwise false */
@@ -371,7 +374,7 @@ Marker::label_on_left () const
 }
 
 void
-Marker::setup_name_pixbuf ()
+Marker::setup_name_display ()
 {
 	double limit = DBL_MAX;
 	
@@ -392,6 +395,17 @@ Marker::setup_name_pixbuf ()
 	}
 
 	name_pixbuf->property_pixbuf() = pixbuf_from_string (_name, name_font, name_width, name_height, Gdk::Color ("#000000"));
+
+	if (label_on_left ()) {
+		_name_background->property_x1() = name_pixbuf->property_x() - 2;
+		_name_background->property_x2() = name_pixbuf->property_x() + name_width + _shift;
+	} else {
+		_name_background->property_x1() = name_pixbuf->property_x() - _label_offset + 2;
+		_name_background->property_x2() = name_pixbuf->property_x() + name_width;
+	}
+	
+	_name_background->property_y1() = 0;
+	_name_background->property_y2() = 13;
 }
 
 void
@@ -445,9 +459,20 @@ Marker::set_color_rgba (uint32_t c)
 	_color = c;
 	mark->property_fill_color_rgba() = _color;
 	mark->property_outline_color_rgba() = _color;
+
 	if (_line && !_selected) {
 		_line->property_color_rgba() = _color;
+
+		/* For reasons unknown this is necessary to ensure that the line colour
+		   gets updated.
+		*/
+		_line->hide ();
+		_line->show ();
 	}
+
+	_name_background->property_fill() = true;
+	_name_background->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (_color, 0x70);
+	_name_background->property_outline_color_rgba() = _color;
 }
 
 /** Set the number of pixels that are available for a label to the left of the centre of this marker */
@@ -461,7 +486,7 @@ Marker::set_left_label_limit (double p)
 	}
 	
 	if (label_on_left ()) {
-		setup_name_pixbuf ();
+		setup_name_display ();
 	}
 }
 
@@ -476,7 +501,7 @@ Marker::set_right_label_limit (double p)
 	}
 	
 	if (!label_on_left ()) {
-		setup_name_pixbuf ();
+		setup_name_display ();
 	}
 }
 

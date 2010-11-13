@@ -106,6 +106,7 @@ class Marker : public sigc::trackable
 	ArdourCanvas::Points *points;
 	ArdourCanvas::SimpleLine* _line;
 	ArdourCanvas::Points *line_points;
+	ArdourCanvas::SimpleRect* _name_background;
 
 	std::string  _name;
 	double        unit_position;
@@ -120,10 +121,11 @@ class Marker : public sigc::trackable
 	uint32_t     _color;
 	double       _left_label_limit; ///< the number of pixels available to the left of this marker for a label
 	double       _right_label_limit; ///< the number of pixels available to the right of this marker for a label
+	double       _label_offset;
 
 	void reposition ();
 	void setup_line_x ();
-	void setup_name_pixbuf ();
+	void setup_name_display ();
 };
 
 class TempoMarker : public Marker
