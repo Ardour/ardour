@@ -196,6 +196,7 @@ SndfileHandle::SndfileHandle (std::string const & path, int mode, int fmt, int c
 	return ;
 } /* SndfileHandle std::string constructor */
 
+inline
 SndfileHandle::SndfileHandle (int fd, bool close_desc, int mode, int fmt, int chans, int srate)
 : p (NULL)
 {
