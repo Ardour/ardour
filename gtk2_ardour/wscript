@@ -277,9 +277,10 @@ def build(bld):
 		obj.target = 'ardour-3.0'
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	obj.uselib       = 'UUID FLAC GLIBMM GTHREAD GTK GNOMECANVAS OGG ALSA CURL DL'
-	obj.uselib       += ' GTKMM GNOMECANVASMM OSX GTKOSX COREAUDIO'
+	obj.uselib       += ' GTKMM GNOMECANVASMM '
+	obj.uselib       += ' AUDIOUNITS OSX GTKOSX '
 	obj.uselib_local = '''libpbd libmidipp libtaglib libardour libardour_cp
-	                      libgtkmm2ext libtaglib'''
+	                      libgtkmm2ext libappleutility libtaglib'''
 	obj.cflags       = ['-DPACKAGE="gtk2_ardour"']
 	obj.cxxflags     = ['-DPACKAGE="gtk2_ardour"']
 	obj.cxxflags     += ['-DVERSIONSTRING="' + bld.env['VERSION'] + '"']
@@ -289,6 +290,7 @@ def build(bld):
 	obj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
 			os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
 	obj.cxxflags     += ['-DPROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"']
+	obj.cxxflags     += ['-I../libs']
 
 	if bld.env['HAVE_SLV2']:
 		obj.source += [ 'lv2_plugin_ui.cc' ]
@@ -304,14 +306,10 @@ def build(bld):
 	if bld.env['PHONE_HOME']:
 		obj.cxxflags += [ '-DPHONE_HOME' ]
 
-	if bld.env['GTKOSX']:
+	if bld.env['COREAUDIO']:
 		TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
-		obj.source += [ 'cocoacarbon.mm' ]
-
-		if bld.env['AUDIOUNITS']:
-			obj.source += [ 'au_pluginui.mm' ]
-			obj.uselib_local += ' libappleutility '
-
+		obj.source += [ 'cocoacarbon.mm', 'au_pluginui.mm' ]
+		obj.uselib_local += ' libappleutility '
 	else:
 		obj.source += [ 'x11.cc' ]
 
@@ -346,13 +344,13 @@ def build(bld):
 	obj              = bld.new_task_gen('subst')
 	obj.source       = 'ardev_common.sh.in'
 	obj.target       = 'ardev_common_waf.sh'
-	obj.chmod        = 0o755
+	obj.chmod        = 0755
 	obj.dict         = wrapper_subst_dict
 
 	obj              = bld.new_task_gen('subst')
 	obj.source       = 'ardour.sh.in'
 	obj.target       = 'ardour3'
-	obj.chmod        = 0o755
+	obj.chmod        = 0755
 	obj.dict         = wrapper_subst_dict
 	obj.install_path = bld.env['BINDIR']
 

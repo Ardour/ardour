@@ -17,7 +17,6 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#define __STDC_LIMIT_MACROS 1
 #include <stdint.h>
 #include <iostream>
 #include "lv2ext/lv2_event.h"

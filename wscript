@@ -397,25 +397,27 @@ def configure(conf):
 	if sys.platform == 'darwin':
 
 		conf.define ('AUDIOUNITS', 1)
-		conf.define ('AUSTATE', 1)
+		conf.define ('AU_STATE_SUPPORT', 1)
 		conf.define ('COREAUDIO', 1)
 		conf.define ('GTKOSX', 1)
+		conf.define ('TOP_MENUBAR',1)
+		conf.define ('GTKOSX',1)
 
+		conf.env.append_value('CXXFLAGS_APPLEUTILITY', '-I../libs')
 		#
 		#	Define OSX as a uselib to use when compiling
 		#	on Darwin to add all applicable flags at once
 		#
 		conf.env.append_value('CXXFLAGS_OSX', '-DMAC_OS_X_VERSION_MIN_REQUIRED=1040')
 		conf.env.append_value('CCFLAGS_OSX', '-DMAC_OS_X_VERSION_MIN_REQUIRED=1040')
-		#conf.env.append_value('CXXFLAGS_OSX', "-mmacosx-version-min=10.4")
-		#conf.env.append_value('CXXFLAGS_OSX', "-mmacosx-version-min=10.4")
+		conf.env.append_value('CXXFLAGS_OSX', '-mmacosx-version-min=10.4')
+		conf.env.append_value('CCFLAGS_OSX', '-mmacosx-version-min=10.4')
+
 		#conf.env.append_value('CXXFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
 		#conf.env.append_value('CCFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
-		#conf.env.append_value('LINKFLAGS_OSX', "-mmacosx-version-min=10.4")
 		#conf.env.append_value('LINKFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
 
 		#conf.env.append_value('LINKFLAGS_OSX', "-sysroot /Developer/SDKs/MacOSX10.4u.sdk")
-		#conf.env.append_value('LINKFLAGS_OSX', "-F/System/Library/Frameworks")
 
 		conf.env.append_value('CXXFLAGS_OSX', "-msse")
 		conf.env.append_value('CCFLAGS_OSX', "-msse")
@@ -426,60 +428,23 @@ def configure(conf):
 		#	off processor type.  Need to add in a check
 		#	for that.
 		#
+		conf.env.append_value('CXXFLAGS_OSX', '-F/System/LibraryFrameworks')
+		conf.env.append_value('CXXFLAGS_OSX', '-F/Library/Frameworks')
 
-		#conf.env.append_value('CPPPATH_OSX', "/System/Library/Frameworks/")
-		#conf.env.append_value('CPPPATH_OSX', "/usr/include/")
-		#conf.env.append_value('CPPPATH_OSX', "/usr/include/c++/4.0.0")
-		#conf.env.append_value('CPPPATH_OSX', "/usr/include/c++/4.0.0/i686-apple-darwin8/")
-		#
-		#	TODO: Fix the above include path, it needs to be
-		#	defined based off what is read in the configuration
-		#	stage about the machine(PPC, X86, X86_64, etc.)
-		#
-		conf.env.append_value('CPPPATH_OSX', "/usr/lib/gcc/i686-apple-darwin9/4.0.1/include/")
-		#
-		#	TODO: Likewise this needs to be defined not only
-		#	based off the machine characteristics, but also
-		#	based off the version of GCC being used.
-		#
+		conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'AppKit'])
+		conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'CoreAudio'])
+		conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'CoreFoundation'])
+		conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'CoreServices'])
 
-		conf.env.append_value('FRAMEWORK_OSX', ['CoreFoundation'])
+		conf.env.append_value('LINKFLAGS_OSX', ['-undefined', 'suppress' ])
+		conf.env.append_value('LINKFLAGS_OSX', '-flat_namespace')
 
-		#conf.env.append_value('LINKFLAGS_OSX', ['-undefined', 'suppress'])
-		#conf.env.append_value('LINKFLAGS_OSX', "-flat_namespace")
-		#
-		#	The previous 2 flags avoid circular dependencies
-		#	between libardour and libardour_cp on OS X.
-		#	ld reported -undefined suppress as an unknown option
-		#	in one of the tests ran, removing it for the moment
-		#
-		conf.env.append_value('CXXFLAGS_OSX', "-F/System/Library/Frameworks")
-		conf.env.append_value('CCFLAGS_OSX', "-F/System/Library/Frameworks")
-
-		#
-		#	Define Include Paths for GTKOSX
-		#
-		conf.env.append_value('CXXFLAGS_GTKOSX', '-DTOP_MENUBAR')
-		conf.env.append_value('CXXFLAGS_GTKOSX', '-DGTKOSX')
-		conf.env.append_value('LINKFLAGS_GTKOSX', "-framework AppKit")
-		conf.env.append_value('LINKFLAGS_GTKOSX', "-Xlinker -headerpad")
-		conf.env.append_value('LINKFLAGS_GTKOSX', "-Xlinker 2048")
+		conf.env.append_value('LINKFLAGS_GTKOSX', [ '-Xlinker', '-headerpad'])
+		conf.env.append_value('LINKFLAGS_GTKOSX', ['-Xlinker', '2048'])
 		conf.env.append_value('CPPPATH_GTKOSX', "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Headers/")
 	
-		conf.check_cc (header_name = '/System/Library/Frameworks/CoreAudio.framework/Headers/CoreAudio.h',
-		               define_name = 'HAVE_COREAUDIO', linkflags = ['-framework CoreAudio'],
-		               uselib_store="COREAUDIO")
-		conf.check_cxx (header_name = '/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h',
-		                linkflags = [ '-framework AudioToolbox' ], uselib_store="COREAUDIO")
-		conf.check_cc (header_name = '/System/Library/Frameworks/CoreServices.framework/Headers/CoreServices.h',
-		               linkflags = ['-framework CoreServices'], uselib_store="COREAUDIO")
-
-		conf.env.append_value('CXXFLAGS_AUDIOUNIT', "-DHAVE_AUDIOUNITS")
-		conf.env.append_value('FRAMEWORK_AUDIOUNIT', ['AudioToolbox'])
-		conf.env.append_value('FRAMEWORK_AUDIOUNIT', ['CoreServices'])
-		conf.check_cc (header_name = '/System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnit.h',
-			               define_name = 'HAVE_AUDIOUNITS', linkflags = [ '-framework AudioUnit' ],
-			               uselib_store="AUDIOUNIT")
+		conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DHAVE_AUDIOUNITS")
+		conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Audiotoolbox', '-framework', 'AudioUnit'])
 
 	if Options.options.boost_include != '':				       
 		conf.env.append_value('CPPPATH', Options.options.boost_include)
@@ -502,6 +467,7 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
 	autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.2')
 	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
+	autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
 
 	if sys.platform == 'darwin':
 		sub_config_and_use(conf, 'libs/appleutility')

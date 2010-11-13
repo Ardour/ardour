@@ -17,7 +17,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#define __STDC_LIMIT_MACROS 1
 #include <cassert>
 #include <cmath>
 #include <iostream>

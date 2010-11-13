@@ -41,19 +41,20 @@ class CoreAudioSource : public AudioFileSource {
 
 	int flush_header () {return 0;};
 	void set_header_timeline_position () {};
+	bool clamped_at_unity () const { return false; }
 
 	static int get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg);
 
   protected:
-	nframes_t read_unlocked (Sample *dst, framepos_t start, nframes_t cnt) const;
-	nframes_t write_unlocked (Sample *dst, nframes_t cnt) { return 0; }
-
+	framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const;
+	framecnt_t write_unlocked (Sample *, framecnt_t) { return 0; }
+	
   private:
 	mutable CAAudioFile af;
 	uint16_t n_channels;
 
 	void init_cafile ();
-	int safe_read (Sample*, nframes_t start, nframes_t cnt, AudioBufferList&) const;
+	int safe_read (Sample*, nframes_t start, framecnt_t cnt, AudioBufferList&) const;
 };
 
 }; /* namespace ARDOUR */

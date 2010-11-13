@@ -954,7 +954,7 @@ MonitorSection::solo_blink (bool onoff)
 }
 
 bool
-MonitorSection::cancel_solo (GdkEventButton* ev)
+MonitorSection::cancel_solo (GdkEventButton*)
 {
         if (_session) {
                 if (_session->soloing()) {
@@ -968,7 +968,7 @@ MonitorSection::cancel_solo (GdkEventButton* ev)
 }
 
 bool
-MonitorSection::cancel_isolate (GdkEventButton* ev)
+MonitorSection::cancel_isolate (GdkEventButton*)
 {
         if (_session) {
                 boost::shared_ptr<RouteList> rl (_session->get_routes ());
@@ -979,7 +979,7 @@ MonitorSection::cancel_isolate (GdkEventButton* ev)
 }
 
 bool
-MonitorSection::cancel_audition (GdkEventButton* ev)
+MonitorSection::cancel_audition (GdkEventButton*)
 {
 	if (_session) {
 		_session->cancel_audition();

@@ -317,7 +317,7 @@ MidiRegionView::enter_notify (GdkEventCrossing* ev)
 }
 
 bool
-MidiRegionView::leave_notify (GdkEventCrossing* ev)
+MidiRegionView::leave_notify (GdkEventCrossing*)
 {
         trackview.editor().hide_verbose_canvas_cursor ();
         delete _ghost_note;
@@ -2677,7 +2677,7 @@ MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 }
 
 void
-MidiRegionView::note_left (ArdourCanvas::CanvasNoteEvent* note)
+MidiRegionView::note_left (ArdourCanvas::CanvasNoteEvent*)
 {
 	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
 
@@ -2694,7 +2694,7 @@ MidiRegionView::note_left (ArdourCanvas::CanvasNoteEvent* note)
 }
 
 void
-MidiRegionView::note_mouse_position (float x_fraction, float y_fraction, bool can_set_cursor)
+MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, bool can_set_cursor)
 {
 	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
 
@@ -3027,7 +3027,7 @@ MidiRegionView::drop_down_keys ()
 }
 
 void
-MidiRegionView::maybe_select_by_position (GdkEventButton* ev, double x, double y)
+MidiRegionView::maybe_select_by_position (GdkEventButton* ev, double /*x*/, double y)
 {
 	double note = midi_stream_view()->y_to_note(y);
         Events e;

@@ -16,159 +16,44 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <Carbon/Carbon.h>
-#undef check // stupid, stupid carbon
-#undef YES   // stupid, stupid gtkmm and/or NSObjC
-#undef NO    // ditto
-
-#ifdef GTKOSX
-#include <objc/objc.h>
-#ifdef nil
-	/*Stupid OS X defining nil*/
-#undef nil
-#endif
-#endif
+#include <string>
+#include <ctype.h>
+#include <stdlib.h>
+#include <pbd/error.h>
+#include <gtkmm2ext/gtkapplication.h>
+#include <gdk/gdkquartz.h>
+#undef check
+#undef YES
+#undef NO
 
 #include "ardour_ui.h"
 #include "actions.h"
 #include "opts.h"
-#include <gtkmm2ext/sync-menu.h>
 
-#include <Appkit/Appkit.h>
-#include <gdk/gdkquartz.h>
+#include <CoreFoundation/CFLocale.h>
+#import <CoreFoundation/CFString.h>
+#import <Foundation/NSString.h>
+#import <Foundation/NSAutoreleasePool.h>
 
-sigc::signal<void,bool> ApplicationActivationChanged;
-static EventHandlerRef  application_event_handler_ref;
-
-/* Called for clicks on the dock icon. Can be used to unminimize or
- * create a new window for example.
- */
-
-static OSErr
-handle_reopen_application (const AppleEvent *inAppleEvent, 
-                           AppleEvent       *outAppleEvent, 
-                           long              inHandlerRefcon)
-{
-        return noErr;
-}
-
-
-static OSErr
-handle_print_documents (const AppleEvent *inAppleEvent, 
-                           AppleEvent       *outAppleEvent, 
-                           long              inHandlerRefcon)
-{
-        return noErr;
-}
-
-
-static OSErr
-handle_open_documents (const AppleEvent *inAppleEvent, 
-		       AppleEvent       *outAppleEvent, 
-		       long              inHandlerRefcon)
-{
-	AEDescList docs;
-
-        if (AEGetParamDesc(inAppleEvent, keyDirectObject, typeAEList, &docs) == noErr) {
-		long n = 0;
-		AECountItems(&docs, &n);
-		UInt8 strBuffer[PATH_MAX+1];
-
-		/* ardour only opens 1 session at a time */
-
-		FSRef ref;
-
-		if (AEGetNthPtr(&docs, 1, typeFSRef, 0, 0, &ref, sizeof(ref), 0) == noErr) {
-			if (FSRefMakePath(&ref, strBuffer, sizeof(strBuffer)) == noErr) {
-				Glib::ustring utf8_path ((const char*) strBuffer);
-				ARDOUR_UI::instance()->idle_load (utf8_path);
-			}
-		}
-	}
-
-        return noErr;
-}
-
-static OSErr
-handle_open_application (const AppleEvent *inAppleEvent, 
-                         AppleEvent       *outAppleEvent, 
-                         long              inHandlerRefcon)
-{
-        return noErr;
-}
-
-static OSStatus 
-application_event_handler (EventHandlerCallRef nextHandlerRef, EventRef event, void *userData) 
-{
-	UInt32 eventKind = GetEventKind (event);
-	
-	switch (eventKind) {
-	case kEventAppActivated:
-		ApplicationActivationChanged (true); // EMIT SIGNAL
-		return eventNotHandledErr;
-
-	case kEventAppDeactivated:
-		ApplicationActivationChanged (false); // EMIT SIGNAL
-		return eventNotHandledErr;
-		
-	default:
-		// pass-thru all kEventClassApplication events we're not interested in.
-		break;
-	}
-	return eventNotHandledErr;
-}
+using namespace std;
+using namespace PBD;
 
 void
 ARDOUR_UI::platform_specific ()
 {
-	Gtk::Widget* widget = ActionManager::get_widget ("/ui/Main/Session/Quit");
-	if (widget) {
-		ige_mac_menu_set_quit_menu_item ((GtkMenuItem*) widget->gobj());
-	}
+	gtk_application_ready ();
 
-	IgeMacMenuGroup* group = ige_mac_menu_add_app_menu_group ();
-
-	widget = ActionManager::get_widget ("/ui/Main/Session/About");
-	if (widget) {
-		ige_mac_menu_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
-	}
-	widget = ActionManager::get_widget ("/ui/Main/Session/ToggleOptionsEditor");
-
-	if (widget) {
-		ige_mac_menu_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
-	}
-}
-
-void
-ARDOUR_UI::platform_setup ()
-{
-        AEInstallEventHandler (kCoreEventClass, kAEOpenDocuments, 
-                               handle_open_documents, 0, true);
-
-        AEInstallEventHandler (kCoreEventClass, kAEOpenApplication, 
-                               handle_open_application, 0, true);
-
-        AEInstallEventHandler (kCoreEventClass, kAEReopenApplication, 
-                               handle_reopen_application, 0, true);
-
-        AEInstallEventHandler (kCoreEventClass, kAEPrintDocuments, 
-                               handle_print_documents, 0, true);
-
-	EventTypeSpec applicationEventTypes[] = {
-		{kEventClassApplication, kEventAppActivated },
-		{kEventClassApplication, kEventAppDeactivated }
-	};	
-	
-	EventHandlerUPP ehUPP = NewEventHandlerUPP (application_event_handler);
-	
-	InstallApplicationEventHandler (ehUPP, sizeof(applicationEventTypes) / sizeof(EventTypeSpec), 
-					applicationEventTypes, 0, &application_event_handler_ref);
 	if (!ARDOUR_COMMAND_LINE::finder_invoked_ardour) {
 		
 		/* if invoked from the command line, make sure we're visible */
 		
 		[NSApp activateIgnoringOtherApps:1];
 	} 
+}
+
+void
+ARDOUR_UI::platform_setup ()
+{
 }
 
 bool
@@ -183,4 +68,64 @@ cocoa_open_url (const char* uri)
 	[nsurl release];
 
 	return ret;
+}
+
+void
+set_language_preference ()
+{
+	gtk_disable_setlocale ();
+
+	if (g_getenv ("LANGUAGE") || g_getenv ("LC_ALL") || g_getenv ("LANG")) {
+		return;
+	}
+
+	if (g_getenv ("ARDOUR_EN")) {
+		return;
+	}
+
+	/* the gettext manual is potentially misleading about the utility of
+	   LANGUAGE.  It notes that if LANGUAGE is set to include a dialect/region-free
+	   language code, like "it", it will assume that you mean the main
+	   dialect (e.g. "it_IT"). But in reality, it doesn't bother looking for
+	   locale dirs with the full name, only the short code (it doesn't
+	   know any better).
+	   
+	   Since Apple's preferred language list only consists of short language codes,
+	   if we set LANGUAGE then gettext will not look for the relevant long-form
+	   variants.
+	*/
+
+	/* how to get language preferences with CoreFoundation
+	 */
+
+	NSArray* languages = [[NSUserDefaults standardUserDefaults] objectForKey:@"AppleLanguages"];
+	
+	/* push into LANGUAGE */
+
+	if (languages && [languages count] > 0) {
+
+		int i, count = [languages count];
+		for (i = 0; i < count; ++i) {
+			if ([[languages objectAtIndex:i]
+			     isEqualToString:@"en"]) {
+				count = i+1;
+				break;
+			}
+		}
+		NSRange r = { 0, count };
+		setenv ("LANGUAGE", [[[languages subarrayWithRange:r] componentsJoinedByString:@":"] UTF8String], 0);
+		cout << "LANGUAGE set to " << getenv ("LANGUAGE") << endl;
+	}
+
+	/* now get AppleLocale value and use that for LANG */
+
+	CFLocaleRef cflocale = CFLocaleCopyCurrent();
+	NSString* nslocale = (NSString*) CFLocaleGetValue (cflocale, kCFLocaleIdentifier);
+
+	/* the full POSIX locale specification allows for lots of things. that could be an issue. Silly Apple.
+	 */
+
+	cout << "LANG set to " << [nslocale UTF8String] << endl;
+	setenv ("LANG", [nslocale UTF8String], 0);
+	CFRelease (cflocale);
 }

@@ -60,7 +60,7 @@ RBEffect::~RBEffect ()
 }
 
 int
-RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
+RBEffect::run (boost::shared_ptr<Region> r, Progress*)
 {
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
 

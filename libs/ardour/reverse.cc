@@ -42,7 +42,7 @@ Reverse::~Reverse ()
 }
 
 int
-Reverse::run (boost::shared_ptr<Region> r, Progress* progress)
+Reverse::run (boost::shared_ptr<Region> r, Progress*)
 {
 	SourceList nsrcs;
 	SourceList::iterator si;

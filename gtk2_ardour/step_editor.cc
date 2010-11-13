@@ -186,13 +186,13 @@ StepEditor::check_step_edit ()
 }
 
 int
-StepEditor::step_add_bank_change (uint8_t channel, uint8_t bank)
+StepEditor::step_add_bank_change (uint8_t /*channel*/, uint8_t /*bank*/)
 {
         return 0;
 }
 
 int
-StepEditor::step_add_program_change (uint8_t channel, uint8_t program)
+StepEditor::step_add_program_change (uint8_t /*channel*/, uint8_t /*program*/)
 {
         return 0;
 }

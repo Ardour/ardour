@@ -488,7 +488,7 @@ session at this time, because we would lose your connection information.\n"), PR
 }
 
 static void
-sigpipe_handler (int sig)
+sigpipe_handler (int /*signal*/)
 {
         /* XXX fix this so that we do this again after a reconnect to JACK
          */

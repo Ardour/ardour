@@ -27,14 +27,14 @@ def configure(conf):
 	autowaf.configure(conf)
 	
 def build(bld):
-	obj              = bld.new_task_gen('cxx', 'shlib',
-                                            uselib = 'COREAUDIO CORESERVICES COREFOUNDATION AUDIOTOOLBOX AUDIOUNITS OSX GTKOSX')
-	obj.source       = libappleutility_sources
+	obj                = bld.new_task_gen('cxx', 'shlib')
+	obj.uselib         = 'AUDIOUNITS OSX'
+	obj.source         = libappleutility_sources
 	obj.export_incdirs = ['.']
-	obj.includes     = ['.']
-	obj.name         = 'libappleutility'
-	obj.target       = 'appleutility'
-	obj.install_path = os.path.join(bld.env['LIBDIR'], 'appleutility')
+	obj.includes       = ['.']
+	obj.name           = 'libappleutility'
+	obj.target         = 'appleutility'
+	obj.install_path   = os.path.join(bld.env['LIBDIR'], 'appleutility')
 
 
 def shutdown():

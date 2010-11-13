@@ -38,6 +38,8 @@
 #include <gtkmm2ext/gtkapplication.h>
 #include <gtkmm2ext/gtkapplication-private.h>
 
+#define UNUSED_PARAMETER(a) (void) (a)
+
 // #define DEBUG(format, ...) g_printerr ("%s: " format, G_STRFUNC, ## __VA_ARGS__)
 #define DEBUG(format, ...)
 
@@ -567,6 +569,7 @@ idle_call_activate (gpointer data)
 }
 - (void) activate:(id) sender
 {
+	UNUSED_PARAMETER(sender);
 	g_idle_add (idle_call_activate, gtk_menu_item);
 }
 @end
@@ -625,7 +628,7 @@ get_menu_label_text (GtkWidget  *menu_item,
 }
 
 static gboolean
-accel_find_func (GtkAccelKey *key,
+accel_find_func (GtkAccelKey * /*key*/,
 		 GClosure    *closure,
 		 gpointer     data)
 {
@@ -802,8 +805,6 @@ cocoa_menu_item_update_accelerator (NSMenuItem *cocoa_item,
      appear.
   */
   
-  const gchar* ltxt = get_menu_label_text (widget, &label);
-  
   if (GTK_IS_ACCEL_LABEL (label) &&
 	    GTK_ACCEL_LABEL (label)->accel_closure)
 	{
@@ -887,9 +888,9 @@ cocoa_menu_item_update_accelerator (NSMenuItem *cocoa_item,
 }
 
 static void
-cocoa_menu_item_accel_changed (GtkAccelGroup   *accel_group,
-				guint            keyval,
-				GdkModifierType  modifier,
+cocoa_menu_item_accel_changed (GtkAccelGroup*   /*accel_group*/,
+			       guint            /*keyval*/,
+				GdkModifierType /*modifier*/,
 				GClosure        *accel_closure,
 				GtkWidget       *widget)
 {
@@ -948,8 +949,8 @@ cocoa_menu_item_update_accel_closure (GNSMenuItem *cocoa_item,
 
 static void
 cocoa_menu_item_notify_label (GObject    *object,
-			       GParamSpec *pspec,
-			       gpointer    data)
+			      GParamSpec *pspec,
+			      gpointer)
 {
   GNSMenuItem *cocoa_item;
 
@@ -1089,8 +1090,8 @@ add_menu_item (NSMenu* cocoa_menu, GtkWidget* menu_item, int index)
 static void
 push_menu_shell_to_nsmenu (GtkMenuShell *menu_shell,
 			   NSMenu*       cocoa_menu,
-			   gboolean      toplevel,
-			   gboolean      debug)
+			   gboolean      /*toplevel*/,
+			   gboolean      /*debug*/)
 {
   GList         *children;
   GList         *l;
@@ -1117,9 +1118,9 @@ push_menu_shell_to_nsmenu (GtkMenuShell *menu_shell,
 static gulong emission_hook_id = 0;
 
 static gboolean
-parent_set_emission_hook (GSignalInvocationHint *ihint,
-			  guint                  n_param_values,
-			  const GValue          *param_values,
+parent_set_emission_hook (GSignalInvocationHint* /*ihint*/,
+			  guint                  /*n_param_values*/,
+			  const GValue*          param_values,
 			  gpointer               data)
 {
   GtkWidget *instance = (GtkWidget*) g_value_get_object (param_values);
@@ -1156,12 +1157,10 @@ parent_set_emission_hook (GSignalInvocationHint *ihint,
 }
 
 static void
-parent_set_emission_hook_remove (GtkWidget *widget,
-				 gpointer   data)
+parent_set_emission_hook_remove (GtkWidget*, gpointer)
 {
-  g_signal_remove_emission_hook (g_signal_lookup ("parent-set",
-						  GTK_TYPE_WIDGET),
-				 emission_hook_id);
+	g_signal_remove_emission_hook (g_signal_lookup ("parent-set", GTK_TYPE_WIDGET),
+				       emission_hook_id);
 }
 
 /* Building "standard" Cocoa/OS X menus */
@@ -1186,6 +1185,7 @@ add_to_menubar (NSMenu *menu)
 	return 0;
 }
 
+#if 0
 static int
 add_to_app_menu (NSMenu *menu)
 {
@@ -1196,17 +1196,7 @@ add_to_app_menu (NSMenu *menu)
 	[dummyItem release];
 	return 0;
 }
-
-static int
-add_to_window_menu (NSMenu *menu)
-{
-	NSMenuItem *dummyItem = [[NSMenuItem alloc] initWithTitle:@""
-				 action:nil keyEquivalent:@""];
-	[dummyItem setSubmenu:menu];
-	[_window_menu addItem:dummyItem];
-	[dummyItem release];
-	return 0;
-}
+#endif
 
 static int
 create_apple_menu ()
@@ -1253,6 +1243,18 @@ create_apple_menu ()
 	return 0;
 }
 
+#if 0
+static int
+add_to_window_menu (NSMenu *menu)
+{
+	NSMenuItem *dummyItem = [[NSMenuItem alloc] initWithTitle:@""
+				 action:nil keyEquivalent:@""];
+	[dummyItem setSubmenu:menu];
+	[_window_menu addItem:dummyItem];
+	[dummyItem release];
+	return 0;
+}
+
 static int
 create_window_menu ()
 {   
@@ -1269,6 +1271,7 @@ create_window_menu ()
 
 	return 0;
 }  
+#endif
 
 /*
  * public functions
@@ -1402,13 +1405,15 @@ namespace Gtk {
 	return self;
 }
 
-- (void)appDidBecomeActive:(NSNotification *)notification
+- (void)appDidBecomeActive:(NSNotification *) notification
 {
+	UNUSED_PARAMETER(notification);
 	Gtkmm2ext::Application::instance()->ActivationChanged (true);
 }
 
-- (void)appDidBecomeInactive:(NSNotification *)notification
+- (void)appDidBecomeInactive:(NSNotification *) notification
 {
+	UNUSED_PARAMETER(notification);
 	Gtkmm2ext::Application::instance()->ActivationChanged (false);
 }
 
@@ -1418,14 +1423,16 @@ namespace Gtk {
 @end
 
 @implementation GtkApplicationDelegate
--(BOOL) application:(NSApplication*) theApplication openFile:(NSString*) file
+-(BOOL) application:(NSApplication*) app :(NSString*) file
 {
+	UNUSED_PARAMETER(app);
 	Glib::ustring utf8_path ([file UTF8String]);
 	Gtkmm2ext::Application::instance()->ShouldLoad (utf8_path);
 	return 1;
 }
-- (NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication *)sender
+- (NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication *) app
 {
+	UNUSED_PARAMETER(app);
 	Gtkmm2ext::Application::instance()->ShouldQuit ();
 	return NSTerminateCancel;
 }

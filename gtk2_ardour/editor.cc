@@ -19,7 +19,6 @@
 
 /* Note: public Editor methods are documented in public_editor.h */
 
-#define __STDC_LIMIT_MACROS 1
 #include <stdint.h>
 #include <unistd.h>
 #include <cstdlib>

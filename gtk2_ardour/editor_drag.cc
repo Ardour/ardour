@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <stdint.h>
 
 #include "pbd/memento_command.h"
@@ -795,11 +799,7 @@ RegionMoveDrag::finished (GdkEvent *, bool movement_occurred)
 }
 
 void
-RegionMoveDrag::finished_copy (
-	bool const changed_position,
-	bool const changed_tracks,
-	framecnt_t const drag_delta
-	)
+RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed_tracks*/, framecnt_t const drag_delta)
 {
 	RegionSelection new_views;
 	PlaylistSet modified_playlists;
@@ -1362,7 +1362,7 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 }
 
 void
-RegionCreateDrag::finished (GdkEvent* event, bool movement_occurred)
+RegionCreateDrag::finished (GdkEvent*, bool movement_occurred)
 {
 	if (!movement_occurred) {
                 add_region ();
@@ -1514,7 +1514,7 @@ TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Region
 }
 
 void
-TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 {
 	double speed = 1.0;
 	TimeAxisView* tvp = &_primary->get_time_axis_view ();
@@ -2863,7 +2863,7 @@ FeatureLineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 }
 
 void
-FeatureLineDrag::motion (GdkEvent* event, bool)
+FeatureLineDrag::motion (GdkEvent*, bool)
 {
 	double dx = _drags->current_pointer_x() - last_pointer_x();
 	
@@ -2887,7 +2887,7 @@ FeatureLineDrag::motion (GdkEvent* event, bool)
 }
 
 void
-FeatureLineDrag::finished (GdkEvent* event, bool)
+FeatureLineDrag::finished (GdkEvent*, bool)
 {
 	_arv = reinterpret_cast<AudioRegionView*> (_item->get_data ("regionview"));
 	_arv->update_transient(_before, _line->property_x1());
@@ -3978,7 +3978,7 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 }
 
 void
-AutomationRangeDrag::motion (GdkEvent* event, bool first_move)
+AutomationRangeDrag::motion (GdkEvent*, bool /*first_move*/)
 {
 	if (_nothing_to_drag) {
 		return;

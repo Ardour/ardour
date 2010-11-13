@@ -1,3 +1,7 @@
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <gtkmm/liststore.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/scale.h>
@@ -715,7 +719,7 @@ RCOptionEditor::RCOptionEditor ()
         if (hwcpus > 1) {
                 add_option (_("Misc"), new OptionEditorHeading (_("DSP CPU Utilization")));
                 
-                ComboOption<uint32_t>* procs = new ComboOption<uint32_t> (
+                ComboOption<int32_t>* procs = new ComboOption<int32_t> (
                         "processor-usage",
                         _("Signal processing uses"),
                         sigc::mem_fun (*_rc_config, &RCConfiguration::get_processor_usage),

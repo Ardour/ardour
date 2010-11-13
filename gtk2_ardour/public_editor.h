@@ -20,6 +20,10 @@
 #ifndef __gtk_ardour_public_editor_h__
 #define __gtk_ardour_public_editor_h__
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <map>
 
 #include <string>

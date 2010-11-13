@@ -21,7 +21,6 @@
 #include "libardour-config.h"
 #endif
 
-#define __STDC_FORMAT_MACROS 1
 #include <stdint.h>
 
 #include <cstdio> /* for sprintf */
@@ -322,7 +321,7 @@ path_expand (string path)
 #endif
 }
 
-#if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)
+#if __APPLE__
 string
 CFStringRefToStdString(CFStringRef stringRef)
 {
@@ -339,7 +338,7 @@ CFStringRefToStdString(CFStringRef stringRef)
 	delete [] buf;
 	return result;
 }
-#endif // HAVE_COREAUDIO
+#endif // __APPLE__
 
 void
 compute_equal_power_fades (nframes_t nframes, float* in, float* out)

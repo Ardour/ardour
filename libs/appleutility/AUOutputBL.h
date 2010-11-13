@@ -108,8 +108,8 @@ private:
 	UInt32						mFrames;
 
 // don't want to copy these.. can if you want, but more code to write!
-	AUOutputBL (const AUOutputBL &c) {}
-	AUOutputBL& operator= (const AUOutputBL& c) { return *this; }
+	AUOutputBL (const AUOutputBL &) {}
+	AUOutputBL& operator= (const AUOutputBL&) { return *this; }
 };
 
 #endif // __AUOutputBL_h__

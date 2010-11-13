@@ -249,7 +249,7 @@ EditorRoutes::focus_out (GdkEventFocus*)
 }
 
 bool
-EditorRoutes::enter_notify (GdkEventCrossing* ev)
+EditorRoutes::enter_notify (GdkEventCrossing*)
 {
         /* arm counter so that ::selection_filter() will deny selecting anything for the 
            next two attempts to change selection status.
@@ -261,7 +261,7 @@ EditorRoutes::enter_notify (GdkEventCrossing* ev)
 }
 
 bool
-EditorRoutes::leave_notify (GdkEventCrossing* ev)
+EditorRoutes::leave_notify (GdkEventCrossing*)
 {
         selection_countdown = 0;
 
@@ -1018,7 +1018,7 @@ EditorRoutes::button_press (GdkEventButton* ev)
 }
 
 bool
-EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const &, TreeModel::Path const &path , bool selected)
+EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const &, TreeModel::Path const&, bool /*selected*/)
 {
         if (selection_countdown) {
                 if (--selection_countdown == 0) {

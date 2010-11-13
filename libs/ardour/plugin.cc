@@ -62,6 +62,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+PBD::Signal0<bool> Plugin::PresetFileExists;
+
 Plugin::Plugin (AudioEngine& e, Session& s)
 	: _engine (e)
 	, _session (s)

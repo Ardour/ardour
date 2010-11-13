@@ -22,7 +22,6 @@
 #include "libardour-config.h"
 #endif
 
-#define __STDC_FORMAT_MACROS 1
 #include <stdint.h>
 
 #include <algorithm>

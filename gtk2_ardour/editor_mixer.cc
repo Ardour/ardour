@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <glibmm/miscutils.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>

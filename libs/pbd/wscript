@@ -2,6 +2,7 @@
 import autowaf
 import os
 import sys
+import TaskGen
 
 # Version of this package (even if built as a child)
 MAJOR = '4'
@@ -106,7 +107,11 @@ def build(bld):
 	obj.includes     = ['.']
 	obj.name         = 'libpbd'
 	obj.target       = 'pbd'
-	obj.uselib       = 'GLIBMM SIGCPP XML UUID'
+	obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE'
+	if sys.platform == 'darwin':
+		TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
+		obj.source += 'cocoa_open_uri.mm'
+		obj.uselib += ' OSX'
 	obj.vnum         = LIBPBD_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	obj.cxxflags     = ['-DPACKAGE="libpbd"']
@@ -126,6 +131,7 @@ def build(bld):
 		testobj.includes     = obj.includes + ['test', '../pbd']
 		testobj.uselib       = 'CPPUNIT XML SNDFILE'
 		testobj.uselib_local = 'libpbd'
+
 
 def shutdown():
 	autowaf.shutdown()

@@ -28,9 +28,9 @@
 #include <string>
 #include <cmath>
 
-#if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)
+#if __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
-#endif
+#endif /* __APPLE__ */
 
 bool string_is_affirmative (const std::string&);
 
@@ -107,9 +107,9 @@ float meter_falloff_to_db_per_sec (float);
 const char* native_header_format_extension (ARDOUR::HeaderFormat, const ARDOUR::DataType& type);
 bool matching_unsuffixed_filename_exists_in (const std::string& dir, const std::string& name);
 
-#if defined(HAVE_COREAUDIO) || defined(HAVE_AUDIOUNITS)
+#if __APPLE__
 std::string CFStringRefToStdString(CFStringRef stringRef);
-#endif // HAVE_COREAUDIO
+#endif // __APPLE__
 
 #endif /* __ardour_utils_h__ */
 

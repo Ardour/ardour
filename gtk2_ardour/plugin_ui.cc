@@ -277,13 +277,13 @@ PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert>)
 }
 
 bool
-#if defined (HAVE_AUDIOUNITS) && defined (GTKOSX)
+#ifdef GTKOSX
 PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert> insert)
 #else
 PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert>)
 #endif
 {
-#if !defined(HAVE_AUDIOUNITS) || !defined(GTKOSX)
+#ifndef GTKOSX
 	return false;
 #else
 	VBox* box;
@@ -299,13 +299,13 @@ PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert>)
 }
 
 void
-#if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
+#ifdef GTKOSX
 PluginUIWindow::app_activated (bool yn)
 #else
 PluginUIWindow::app_activated (bool)
 #endif
 {
-#if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
+#ifdef GTKOSX
 	cerr << "APP activated ? " << yn << endl;
 	if (_pluginui) {
 		if (yn) {

@@ -1386,7 +1386,7 @@ MixerStrip::route_group_changed ()
 
 
 void
-MixerStrip::route_gui_changed (string what_changed, void* ignored)
+MixerStrip::route_gui_changed (string what_changed, void*)
 {
 	ENSURE_GUI_THREAD (*this, &MixerStrip::route_gui_changed, what_changed, ignored)
 

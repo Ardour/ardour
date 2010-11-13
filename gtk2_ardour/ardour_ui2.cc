@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <fcntl.h>
 #include <signal.h>
 #include <unistd.h>

@@ -150,8 +150,8 @@ private:
 	
 	private:
 		ACLRefCounter () : mLayout(NULL) { }
-		ACLRefCounter(const ACLRefCounter& c) : mLayout(NULL) { }
-		ACLRefCounter& operator=(const ACLRefCounter& c) { return *this; }
+		ACLRefCounter(const ACLRefCounter&) : mLayout(NULL) { }
+		ACLRefCounter& operator=(const ACLRefCounter&) { return *this; }
 	};
 	
 	ACLRefCounter				*mLayoutHolder;

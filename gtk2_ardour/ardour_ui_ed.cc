@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 /* This file contains any ARDOUR_UI methods that require knowledge of
    the editor, and exists so that no compilation dependency exists
    between the main ARDOUR_UI modules and the PublicEditor class. This

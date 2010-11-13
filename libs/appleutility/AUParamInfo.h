@@ -102,6 +102,6 @@ private:
 		
 		// disallow
 	AUParamInfo () {}
-	AUParamInfo (const AUParamInfo &c) {}
-	AUParamInfo& operator= (const AUParamInfo& c) { return *this; }
+	AUParamInfo (const AUParamInfo &) {}
+	AUParamInfo& operator= (const AUParamInfo&) { return *this; }
 };

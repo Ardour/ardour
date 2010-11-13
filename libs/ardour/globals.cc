@@ -16,7 +16,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-
 #ifdef WAF_BUILD
 #include "libardour-config.h"
 #endif

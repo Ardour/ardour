@@ -35,10 +35,11 @@ class CAImportableSource : public ImportableSource {
 
 	nframes_t read (Sample* buffer, nframes_t nframes);
 	uint32_t  channels() const;
-	nframes_t length() const;
+	framecnt_t length() const;
 	nframes_t samplerate() const;
 	void      seek (nframes_t pos);
 	framepos_t natural_position() const { return 0; }
+	bool clamped_at_unity () const { return false; }
 
    protected:
 	mutable CAAudioFile af;

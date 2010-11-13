@@ -17,7 +17,10 @@
 
 */
 
-#define __STDC_FORMAT_MACROS 1
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <stdint.h>
 
 #include <algorithm>

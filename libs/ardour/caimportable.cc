@@ -85,7 +85,7 @@ CAImportableSource::channels () const
 	return af.GetFileDataFormat().NumberChannels();
 }
 
-nframes_t
+framecnt_t
 CAImportableSource::length () const
 {
 	return af.GetNumberFrames();

@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <fstream>
 #include <algorithm>
 
@@ -674,7 +678,7 @@ ArdourStartup::setup_new_session_page ()
 		new_folder_chooser.set_title (_("Select folder for session"));
 
 #ifdef GTKOSX
-                new_folder_chooser->add_shortcut_folder ("/Volumes");
+                new_folder_chooser.add_shortcut_folder ("/Volumes");
 #endif
 
 		vbox1->pack_start (*hbox2, false, false);
@@ -928,7 +932,7 @@ ArdourStartup::setup_existing_session_page ()
 		existing_session_chooser.signal_file_set().connect (sigc::mem_fun (*this, &ArdourStartup::existing_session_selected));
 		
 #ifdef GTKOSX
-		existing_session_chooser->add_shortcut_folder ("/Volumes");
+		existing_session_chooser.add_shortcut_folder ("/Volumes");
 #endif
 		
 		HBox* hbox = manage (new HBox);

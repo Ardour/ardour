@@ -233,7 +233,6 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE', atleast_version='0.1.0')
 	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
 	autowaf.check_pkg(conf, 'slv2', uselib_store='SLV2', atleast_version='0.6.4', mandatory=False)
-	autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
 	autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH', mandatory=False)
 	autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
 	autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
@@ -281,7 +280,7 @@ def build(bld):
 	obj.includes     = ['.', '../surfaces/control_protocol', '..']
 	obj.name         = 'libardour'
 	obj.target       = 'ardour'
-	obj.uselib       = 'GLIBMM GTHREAD AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF OSX COREAUDIO CURL DL'
+	obj.uselib       = 'GLIBMM GTHREAD AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF AUDIOUNIT OSX BOOST CURL DL'
 	obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libvampplugin libtaglib librubberband libaudiographer'
 	obj.vnum         = LIBARDOUR_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
@@ -314,13 +313,9 @@ def build(bld):
 		obj.includes += [ '../fst' ]
 		obj.cxxflags += [ '-DVST_SUPPORT' ]
 
-	if bld.env['HAVE_COREAUDIO'] and bld.env['COREAUDIO']:
+	if bld.env['COREAUDIO']:
 		obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
-
-	if bld.env['HAVE_AUDIOUNITS'] or bld.env['HAVE_COREAUDIO']:
 		obj.uselib_local += ' libappleutility'	
-
-	if bld.env['HAVE_AUDIOUNITS'] and bld.env['AUDIOUNITS']:
 		obj.source += [ 'audio_unit.cc' ]
 
 	if bld.env['FPU_OPTIMIZATION']:

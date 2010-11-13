@@ -167,7 +167,7 @@ Send::set_state (const XMLNode& node, int version)
 }
 
 int
-Send::set_state_2X (const XMLNode& node, int version)
+Send::set_state_2X (const XMLNode& node, int /* version */)
 {
 	/* use the IO's name for the name of the send */
 	XMLNodeList const & children = node.children ();

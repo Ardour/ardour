@@ -254,7 +254,7 @@ IOSelectorWindow::on_show ()
 }
 
 void
-IOSelectorWindow::io_name_changed (void* src)
+IOSelectorWindow::io_name_changed (void*)
 {
 	ENSURE_GUI_THREAD (*this, &IOSelectorWindow::io_name_changed, src)
 

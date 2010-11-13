@@ -973,7 +973,8 @@ AutomationTimeAxisView::set_state (const XMLNode& node, int version)
 }
 
 int
-AutomationTimeAxisView::set_state_2X (const XMLNode& node, int version)
+
+AutomationTimeAxisView::set_state_2X (const XMLNode& node, int /*version*/)
 {
 	if (node.name() == X_("gain") && _control->parameter() == Evoral::Parameter (GainAutomation)) {
 		XMLProperty const * shown = node.property (X_("shown"));

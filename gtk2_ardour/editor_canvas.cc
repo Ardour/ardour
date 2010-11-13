@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <libgnomecanvasmm/init.h>
 #include <libgnomecanvasmm/pixbuf.h>
 #include <jack/types.h>

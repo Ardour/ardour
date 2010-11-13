@@ -19,7 +19,6 @@
 */
 
 #include <algorithm>
-#define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
 #include "pbd/error.h"
@@ -93,16 +92,16 @@ CoreAudioSource::~CoreAudioSource ()
 }
 
 int
-CoreAudioSource::safe_read (Sample* dst, nframes_t start, nframes_t cnt, AudioBufferList& abl) const
+CoreAudioSource::safe_read (Sample* dst, nframes_t start, framecnt_t cnt, AudioBufferList& abl) const
 {
-	nframes_t nread = 0;
+	framecnt_t nread = 0;
 
 	while (nread < cnt) {
 
 		try {
 			af.Seek (start+nread);
 		} catch (CAXException& cax) {
-			error << string_compose("CoreAudioSource: %1 to %2 (%3)", cax.mOperation, start+nread, _name.substr (1)) << endmsg;
+			error << string_compose("CoreAudioSource: %1 to %2 (%3)", cax.mOperation, start+nread, _name.val().substr (1)) << endmsg;
 			return -1;
 		}
 
@@ -138,10 +137,10 @@ CoreAudioSource::safe_read (Sample* dst, nframes_t start, nframes_t cnt, AudioBu
 }
 
 
-nframes_t
-CoreAudioSource::read_unlocked (Sample *dst, framepos_t start, nframes_t cnt) const
+framecnt_t
+CoreAudioSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const
 {
-	nframes_t file_cnt;
+	framecnt_t file_cnt;
 	AudioBufferList abl;
 
 	abl.mNumberBuffers = 1;
@@ -167,7 +166,7 @@ CoreAudioSource::read_unlocked (Sample *dst, framepos_t start, nframes_t cnt) co
 	}
 
 	if (file_cnt != cnt) {
-		nframes_t delta = cnt - file_cnt;
+		frameoffset_t delta = cnt - file_cnt;
 		memset (dst+file_cnt, 0, sizeof (Sample) * delta);
 	}
 
@@ -194,7 +193,7 @@ CoreAudioSource::read_unlocked (Sample *dst, framepos_t start, nframes_t cnt) co
 
 	/* stride through the interleaved data */
 
-	for (uint32_t n = 0; n < file_cnt; ++n) {
+	for (framecnt_t n = 0; n < file_cnt; ++n) {
 		dst[n] = *ptr;
 		ptr += n_channels;
 	}
@@ -218,13 +217,13 @@ CoreAudioSource::sample_rate() const
 }
 
 int
-CoreAudioSource::update_header (framepos_t when, struct tm&, time_t)
+CoreAudioSource::update_header (framepos_t, struct tm&, time_t)
 {
 	return 0;
 }
 
 int
-CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg)
+CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string&)
 {
 	FSRef ref;
 	ExtAudioFileRef af = 0;

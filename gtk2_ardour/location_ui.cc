@@ -557,10 +557,8 @@ LocationEditRow::end_changed (ARDOUR::Location *loc)
 }
 
 void
-LocationEditRow::start_changed (ARDOUR::Location *loc)
+LocationEditRow::start_changed (ARDOUR::Location*)
 {
-	ENSURE_GUI_THREAD (*this, &LocationEditRow::start_changed, loc)
-
 	if (!location) return;
 
 	// update end and length
@@ -578,10 +576,8 @@ LocationEditRow::start_changed (ARDOUR::Location *loc)
 }
 
 void
-LocationEditRow::name_changed (ARDOUR::Location *loc)
+LocationEditRow::name_changed (ARDOUR::Location *)
 {
-	ENSURE_GUI_THREAD (*this, &LocationEditRow::name_changed, loc)
-
 	if (!location) return;
 
 	// update end and length
@@ -595,9 +591,8 @@ LocationEditRow::name_changed (ARDOUR::Location *loc)
 }
 
 void
-LocationEditRow::location_changed (ARDOUR::Location *loc)
+LocationEditRow::location_changed (ARDOUR::Location*)
 {
-	ENSURE_GUI_THREAD (*this, &LocationEditRow::location_changed, loc)
 
 	if (!location) return;
 
@@ -614,7 +609,7 @@ LocationEditRow::location_changed (ARDOUR::Location *loc)
 }
 
 void
-LocationEditRow::flags_changed (ARDOUR::Location *loc, void *src)
+LocationEditRow::flags_changed (ARDOUR::Location*, void *)
 {
 	if (!location) {
 		return;
@@ -630,7 +625,7 @@ LocationEditRow::flags_changed (ARDOUR::Location *loc, void *src)
 }
 
 void
-LocationEditRow::lock_changed (ARDOUR::Location *loc)
+LocationEditRow::lock_changed (ARDOUR::Location*)
 {
 	if (!location) {
 		return;
@@ -646,7 +641,7 @@ LocationEditRow::lock_changed (ARDOUR::Location *loc)
 }
 
 void
-LocationEditRow::position_lock_style_changed (ARDOUR::Location* loc)
+LocationEditRow::position_lock_style_changed (ARDOUR::Location*)
 {
 	if (!location) {
 		return;
@@ -826,8 +821,6 @@ struct LocationSortByStart {
 void
 LocationUI::location_added (Location* location)
 {
-	ENSURE_GUI_THREAD (*this, &LocationUI::location_added, location)
-
 	if (location->is_auto_punch()) {
 		punch_edit_row.set_location(location);
 	} else if (location->is_auto_loop()) {

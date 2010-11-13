@@ -140,6 +140,8 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual std::vector<PresetRecord> get_presets();
 	virtual std::string current_preset() const { return std::string(); }
 
+	static PBD::Signal0<bool> PresetFileExists;
+
 	const PresetRecord* preset_by_label(const std::string& label);
 	const PresetRecord* preset_by_uri(const std::string& uri);
 
@@ -169,7 +171,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual ChanCount output_streams() const;
 	virtual ChanCount input_streams() const;
 
-	PluginInfoPtr get_info() { return _info; }
+	PluginInfoPtr get_info() const { return _info; }
 	void set_info (const PluginInfoPtr inf) { _info = inf; }
 
 	ARDOUR::AudioEngine& engine() const { return _engine; }

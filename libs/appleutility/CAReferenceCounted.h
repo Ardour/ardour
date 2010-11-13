@@ -75,8 +75,8 @@ protected:
 private:
 	SInt32		mRefCount;
 
-	CAReferenceCounted(const CAReferenceCounted &a) : mRefCount(0) { }
-	CAReferenceCounted operator=(const CAReferenceCounted &a) { return *this; }
+	CAReferenceCounted(const CAReferenceCounted &) : mRefCount(0) { }
+	CAReferenceCounted operator=(const CAReferenceCounted &) { return *this; }
 };
 
 

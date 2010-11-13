@@ -1,9 +1,12 @@
+#include <gtkmm/stock.h>
+
 #undef  Marker
 #define Marker FuckYouAppleAndYourLackOfNameSpaces
 
+#include "pbd/convert.h"
 #include "pbd/error.h"
 #include "ardour/audio_unit.h"
-#include "ardour/insert.h"
+#include "ardour/plugin_insert.h"
 
 #undef check // stupid gtk, stupid apple
 
@@ -15,8 +18,8 @@
 #include "au_pluginui.h"
 #include "gui_thread.h"
 
-#include <appleutility/CAAudioUnit.h>
-#include <appleutility/CAComponent.h>
+#include "appleutility/CAAudioUnit.h"
+#include "appleutility/CAComponent.h"
 
 #import <AudioUnit/AUCocoaUIView.h>
 #import <CoreAudioKit/AUGenericView.h>
@@ -45,6 +48,65 @@ static const gchar* _automation_mode_strings[] = {
 	0
 };
 
+@implementation NotificationObject
+
+- (NotificationObject*) initWithPluginUI: (AUPluginUI*) apluginui andCocoaParent: (NSWindow*) cp andTopLevelParent: (NSWindow*) tlp
+{
+	self = [ super init ];
+
+	if (self) {
+		plugin_ui = apluginui;
+		cocoa_parent = cp;
+		top_level_parent = tlp;
+
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		 selector:@selector(cocoaParentActivationHandler:)
+		 name:NSWindowDidBecomeMainNotification
+		 object:nil];
+
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		 selector:@selector(cocoaParentBecameKeyHandler:)
+		 name:NSWindowDidBecomeKeyNotification
+		 object:nil];
+	}
+
+	return self;
+}
+		
+- (void)cocoaParentActivationHandler:(NSNotification *)notification
+{
+	NSWindow* notification_window = (NSWindow *)[notification object];
+
+	if (top_level_parent == notification_window || cocoa_parent == notification_window) {
+		if ([notification_window isMainWindow]) {
+			plugin_ui->activate();
+		} else {
+			plugin_ui->deactivate();
+		}
+	} 
+}
+
+- (void)cocoaParentBecameKeyHandler:(NSNotification *)notification
+{
+	NSWindow* notification_window = (NSWindow *)[notification object];
+
+	if (top_level_parent == notification_window || cocoa_parent == notification_window) {
+		if ([notification_window isKeyWindow]) {
+			plugin_ui->activate();
+		} else {
+			plugin_ui->deactivate();
+		}
+	} 
+}
+
+- (void)auViewResized:(NSNotification *)notification;
+{
+	(void) notification;
+	plugin_ui->cocoa_view_resized();
+}
+
+@end
+
 AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	: PlugUIBase (insert)
 	, automation_mode_label (_("Automation"))
@@ -67,11 +129,15 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	HBox* smaller_hbox = manage (new HBox);
 
-	smaller_hbox->pack_start (preset_label, false, false, 10);
+	smaller_hbox->set_spacing (6);
+	smaller_hbox->pack_start (preset_label, false, false, 4);
 	smaller_hbox->pack_start (preset_combo, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
+#if 0
+	/* one day these might be useful with an AU plugin, but not yet */
 	smaller_hbox->pack_start (automation_mode_label, false, false);
 	smaller_hbox->pack_start (automation_mode_selector, false, false);
+#endif
 	smaller_hbox->pack_start (bypass_button, false, true);
 
 	VBox* v1_box = manage (new VBox);
@@ -101,9 +167,10 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	_activating_from_app = false;
 	cocoa_parent = 0;
+	_notify = 0;
 	cocoa_window = 0;
 	au_view = 0;
-	packView = 0;
+	editView = 0;
 
 	/* prefer cocoa, fall back to cocoa, but use carbon if its there */
 
@@ -122,19 +189,26 @@ AUPluginUI::~AUPluginUI ()
 {
 	if (cocoa_parent) {
 		NSWindow* win = get_nswindow();
-		RemoveEventHandler(carbon_event_handler);
+		[[NSNotificationCenter defaultCenter] removeObserver:_notify];
 		[win removeChildWindow:cocoa_parent];
-	} else if (carbon_window) {
-		/* never parented */
+
+	} 
+
+	if (carbon_window) {
+		/* not parented, just overlaid on top of our window */
 		DisposeWindow (carbon_window);
 	}
 
-	if (packView) {
+	if (editView) {
+		CloseComponent (editView);
+	}
+
+	if (au_view) {
 		/* remove whatever we packed into low_box so that GTK doesn't
 		   mess with it.
 		*/
 
-		[packView removeFromSuperview];
+		[au_view removeFromSuperview];
 	}
 }
 
@@ -288,15 +362,27 @@ AUPluginUI::create_cocoa_view ()
 		[(AUGenericView *)au_view setShowsExpertParameters:YES];
 	}
 
-	packView = au_view;
-	
+	// watch for size changes of the view
+
+	 [[NSNotificationCenter defaultCenter] addObserver:_notify
+	       selector:@selector(auViewResized:) name:NSWindowDidResizeNotification
+	       object:au_view];
+
 	// Get the size of the new AU View's frame 
+	
 	NSRect packFrame;
 	packFrame = [au_view frame];
 	prefwidth = packFrame.size.width;
 	prefheight = packFrame.size.height;
-
+	low_box.set_size_request (prefwidth, prefheight);
+	
 	return 0;
+}
+
+void
+AUPluginUI::cocoa_view_resized ()
+{
+	NSRect packFrame = [au_view frame];
 }
 
 int
@@ -321,11 +407,14 @@ AUPluginUI::create_carbon_view ()
 
 	if ((err = CreateNewWindow(kDocumentWindowClass, attr, &r, &carbon_window)) != noErr) {
 		error << string_compose (_("AUPluginUI: cannot create carbon window (err: %1)"), err) << endmsg;
+	        CloseComponent (editView);
 		return -1;
 	}
 	
 	if ((err = GetRootControl(carbon_window, &root_control)) != noErr) {
 		error << string_compose (_("AUPlugin: cannot get root control of carbon window (err: %1)"), err) << endmsg;
+		DisposeWindow (carbon_window);
+	        CloseComponent (editView);
 		return -1;
 	}
 
@@ -335,6 +424,8 @@ AUPluginUI::create_carbon_view ()
 
 	if ((err = AudioUnitCarbonViewCreate (editView, *au->get_au(), carbon_window, root_control, &location, &size, &viewPane)) != noErr) {
 		error << string_compose (_("AUPluginUI: cannot create carbon plugin view (err: %1)"), err) << endmsg;
+		DisposeWindow (carbon_window);
+	        CloseComponent (editView);
 		return -1;
 	}
 
@@ -377,70 +468,14 @@ AUPluginUI::get_nswindow ()
 void
 AUPluginUI::activate ()
 {
-	if (carbon_window && cocoa_parent) {
-		cerr << "APP activated, activate carbon window " << insert->name() << endl;
-		_activating_from_app = true;
-		ActivateWindow (carbon_window, TRUE);
-		_activating_from_app = false;
-		[cocoa_parent makeKeyAndOrderFront:nil];
-	} 
+	ActivateWindow (carbon_window, TRUE);
+	// [cocoa_parent makeKeyAndOrderFront:nil];
 }
 
 void
 AUPluginUI::deactivate ()
 {
- 	return;
-	cerr << "APP DEactivated, for " << insert->name() << endl;
-	_activating_from_app = true;
 	ActivateWindow (carbon_window, FALSE);
-	_activating_from_app = false;
-}
-
-
-OSStatus 
-_carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event, void *userData) 
-{
-	return ((AUPluginUI*)userData)->carbon_event (nextHandlerRef, event);
-}
-
-OSStatus 
-AUPluginUI::carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event)
-{
-	cerr << "CARBON EVENT\n";
-
-	UInt32 eventKind = GetEventKind(event);
-	ClickActivationResult howToHandleClick;
-	NSWindow* win = get_nswindow ();
-
-	cerr << "window " << win << " carbon event type " << eventKind << endl;
-
-	switch (eventKind) {
-	case kEventWindowHandleActivate:
-		cerr << "carbon window for " << insert->name() << " activated\n";
-		if (_activating_from_app) {
-			cerr << "app activation, ignore window activation\n";
-			return noErr;
-		}
-		[win makeMainWindow];
-		return eventNotHandledErr;
-		break;
-
-	case kEventWindowHandleDeactivate:
-		cerr << "carbon window for " << insert->name() << " would have been deactivated\n";
-		// never deactivate the carbon window
-		return noErr;
-		break;
-		
-	case kEventWindowGetClickActivation:
-		cerr << "carbon window CLICK activated\n";
-		[win makeKeyAndOrderFront:nil];
-		howToHandleClick = kActivateAndHandleClick;
-		SetEventParameter(event, kEventParamClickActivation, typeClickActivationResult, 
-				  sizeof(ClickActivationResult), &howToHandleClick);
-		break;
-	}
-
-	return noErr;
 }
 
 int
@@ -479,18 +514,9 @@ AUPluginUI::parent_carbon_window ()
 	// create the cocoa window for the carbon one and make it visible
 	cocoa_parent = [[NSWindow alloc] initWithWindowRef: carbon_window];
 
-	EventTypeSpec	windowEventTypes[] = {
-		{kEventClassWindow, kEventWindowGetClickActivation },
-		{kEventClassWindow, kEventWindowHandleDeactivate }
-	};
-	
-	EventHandlerUPP   ehUPP = NewEventHandlerUPP(_carbon_event);
-	OSStatus result = InstallWindowEventHandler (carbon_window, ehUPP, 
-						     sizeof(windowEventTypes) / sizeof(EventTypeSpec), 
-						     windowEventTypes, this, &carbon_event_handler);
-	if (result != noErr) {
-		return -1;
-	}
+	SetWindowActivationScope (carbon_window, kWindowActivationScopeNone);
+
+	_notify = [ [NotificationObject alloc] initWithPluginUI:this andCocoaParent:cocoa_parent andTopLevelParent:win ]; 
 
 	[win addChildWindow:cocoa_parent ordered:NSWindowAbove];
 
@@ -501,7 +527,6 @@ int
 AUPluginUI::parent_cocoa_window ()
 {
 	NSWindow* win = get_nswindow ();
-	NSRect packFrame;
 
 	if (!win) {
 		return -1;
@@ -515,19 +540,57 @@ AUPluginUI::parent_cocoa_window ()
 		error << _("AUPluginUI: no top level window!") << endmsg;
 		return -1;
 	}
-	
-	// Get the size of the new AU View's frame 
-	packFrame = [au_view frame];
 
-	NSView* view = gdk_quartz_window_get_nsview (low_box.get_window()->gobj());
-	
+	NSView* view = gdk_quartz_window_get_nsview (get_toplevel()->get_window()->gobj());
+	GtkRequisition a = top_box.size_request ();
 
-	[view setFrame:packFrame];
-	[view addSubview:packView]; 
+	/* move the au_view down so that it doesn't overlap the top_box contents */
 
-	low_box.set_size_request (packFrame.size.width, packFrame.size.height);
+	NSPoint origin = { 0, a.height };
+
+	[au_view setFrameOrigin:origin];
+	[view addSubview:au_view]; 
 
 	return 0;
+}
+
+static void
+dump_view_tree (NSView* view, int depth)
+{
+	NSArray* subviews = [view subviews];
+	unsigned long cnt = [subviews count];
+
+	for (int d = 0; d < depth; d++) {
+		cerr << '\t';
+	}
+	cerr << " view @ " << view << endl;
+	
+	for (unsigned long i = 0; i < cnt; ++i) {
+		NSView* subview = [subviews objectAtIndex:i];
+		dump_view_tree (subview, depth+1);
+	}
+}
+
+void
+AUPluginUI::forward_key_event (GdkEventKey* ev)
+{
+	NSEvent* nsevent = gdk_quartz_event_get_nsevent ((GdkEvent*)ev);
+
+	if (au_view && nsevent) {
+
+		/* filter on nsevent type here because GDK massages FlagsChanged
+		   messages into GDK_KEY_{PRESS,RELEASE} but Cocoa won't
+		   handle a FlagsChanged message as a keyDown or keyUp
+		*/
+
+		if ([nsevent type] == NSKeyDown) {
+			[[[au_view window] firstResponder] keyDown:nsevent];
+		} else if ([nsevent type] == NSKeyUp) {
+			[[[au_view window] firstResponder] keyUp:nsevent];
+		} else if ([nsevent type] == NSFlagsChanged) {
+			[[[au_view window] firstResponder] flagsChanged:nsevent];
+		}
+	}
 }
 
 void
@@ -553,44 +616,48 @@ AUPluginUI::lower_box_realized ()
 	}
 }
 
-void
-AUPluginUI::on_hide ()
-{
-	// VBox::on_hide ();
-	cerr << "AU plugin window hidden\n";
-}
-
 bool
-AUPluginUI::on_map_event (GdkEventAny* ev)
+AUPluginUI::on_map_event (GdkEventAny*)
 {
 	return false;
 }
 
 void
-AUPluginUI::on_show ()
+AUPluginUI::on_window_hide ()
 {
-	cerr << "AU plugin window shown\n";
+	if (carbon_window) {
+		HideWindow (carbon_window);
+		ActivateWindow (carbon_window, FALSE);
+	}
 
-	VBox::on_show ();
+	hide_all ();
+}
+
+bool
+AUPluginUI::on_window_show (const string& /*title*/)
+{
+	/* this is idempotent so just call it every time we show the window */
 
 	gtk_widget_realize (GTK_WIDGET(low_box.gobj()));
 
-	if (au_view) {
-		show_all ();
-	} else if (carbon_window) {
-		[cocoa_parent setIsVisible:YES];
+	show_all ();
+
+	if (carbon_window) {
 		ShowWindow (carbon_window);
+		ActivateWindow (carbon_window, TRUE);
 	}
+
+	return true;
 }
 
 bool
-AUPluginUI::start_updating (GdkEventAny* any)
+AUPluginUI::start_updating (GdkEventAny*)
 {
 	return false;
 }
 
 bool
-AUPluginUI::stop_updating (GdkEventAny* any)
+AUPluginUI::stop_updating (GdkEventAny*)
 {
 	return false;
 }
@@ -604,7 +671,7 @@ create_au_gui (boost::shared_ptr<PluginInsert> plugin_insert, VBox** box)
 }
 
 bool
-AUPluginUI::on_focus_in_event (GdkEventFocus* ev)
+AUPluginUI::on_focus_in_event (GdkEventFocus*)
 {
 	//cerr << "au plugin focus in\n";
 	//Keyboard::magic_widget_grab_focus ();
@@ -612,7 +679,7 @@ AUPluginUI::on_focus_in_event (GdkEventFocus* ev)
 }
 
 bool
-AUPluginUI::on_focus_out_event (GdkEventFocus* ev)
+AUPluginUI::on_focus_out_event (GdkEventFocus*)
 {
 	//cerr << "au plugin focus out\n";
 	//Keyboard::magic_widget_drop_focus ();

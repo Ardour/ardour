@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 /* this file exists solely to break compilation dependencies that
    would connect changes to the mixer or editor objects.
 */

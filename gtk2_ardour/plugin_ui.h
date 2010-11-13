@@ -325,7 +325,7 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 };
 #endif // VST_SUPPORT
 
-#ifdef HAVE_AUDIOUNITS
+#ifdef AUDIOUNITS
 /* this function has to be in a .mm file */
 extern PlugUIBase* create_au_gui (boost::shared_ptr<ARDOUR::PluginInsert>, Gtk::VBox**);
 #endif
