@@ -280,7 +280,9 @@ def build(bld):
 	obj.uselib       += ' GTKMM GNOMECANVASMM '
 	obj.uselib       += ' AUDIOUNITS OSX GTKOSX '
 	obj.uselib_local = '''libpbd libmidipp libtaglib libardour libardour_cp
-	                      libgtkmm2ext libappleutility libtaglib'''
+	                      libgtkmm2ext libtaglib'''
+        if sys.platform == 'darwin':
+                obj.uselib_local + ' libappleutility'
 	obj.cflags       = ['-DPACKAGE="gtk2_ardour"']
 	obj.cxxflags     = ['-DPACKAGE="gtk2_ardour"']
 	obj.cxxflags     += ['-DVERSIONSTRING="' + bld.env['VERSION'] + '"']
