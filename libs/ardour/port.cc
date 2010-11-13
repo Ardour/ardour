@@ -63,7 +63,9 @@ Port::Port (std::string const & n, DataType t, Flags f)
 /** Port destructor */
 Port::~Port ()
 {
-	jack_port_unregister (_engine->jack (), _jack_port);
+	if (_engine->jack ()) {
+		jack_port_unregister (_engine->jack (), _jack_port);
+	}
 }
 
 /** @return true if this port is connected to anything */
