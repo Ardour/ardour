@@ -776,14 +776,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case FadeInHandleItem:
 			{
 				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
-				_drags->set (new FadeInDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s), event);
+				_drags->set (new FadeInDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s), event, fade_in_cursor);
 				return true;
 			}
 
 			case FadeOutHandleItem:
 			{
 				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
-				_drags->set (new FadeOutDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s), event);
+				_drags->set (new FadeOutDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s), event, fade_out_cursor);
 				return true;
 			}
 
