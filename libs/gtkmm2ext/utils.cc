@@ -188,7 +188,7 @@ Gtkmm2ext::pixbuf_from_string(const string& name, Pango::FontDescription* font, 
 	cairo_set_font_size (cr,  font->get_size() / Pango::SCALE);
 	cairo_text_extents (cr, name.c_str(), &te);
 	
-	cairo_move_to (cr, 0.5, 0.5 - te.height / 2 - te.y_bearing + clip_height / 2);
+	cairo_move_to (cr, 0.5, int (0.5 - te.height / 2 - te.y_bearing + clip_height / 2));
 	cairo_show_text (cr, name.c_str());
 	
 	convert_bgra_to_rgba(cairo_image_surface_get_data (surface), buf->get_pixels(), clip_width, clip_height);
