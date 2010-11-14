@@ -510,21 +510,23 @@ ARDOUR_UI::build_menu_bar ()
 	// so use this instead ...
 	gtk_settings_set_long_property (gtk_settings_get_default(), "gtk-can-change-accels", 1, "Ardour:designers");
 
+	/* Set up some size requests here to stop the menu-bar clock jumping around in full-screen mode */
+
+	set_size_request_to_display_given_text (wall_clock_label, _("99:99"), 2, 0);
 	wall_clock_box.add (wall_clock_label);
 	wall_clock_box.set_name ("WallClock");
 	wall_clock_label.set_name ("WallClock");
 
+	set_size_request_to_display_given_text (disk_space_label, _("9999h:999999m:99999999s"), 2, 0);
 	disk_space_box.add (disk_space_label);
 	disk_space_box.set_name ("WallClock");
 	disk_space_label.set_name ("WallClock");
 
+	set_size_request_to_display_given_text (cpu_load_label, _("DSP: 100%"), 2, 0);
 	cpu_load_box.add (cpu_load_label);
 	cpu_load_box.set_name ("CPULoad");
 	cpu_load_label.set_name ("CPULoad");
 
-	/* Set up some size requests here to stop the menu-bar clock jumping around in full-screen mode */
-
-	/* TRANSLATORS: just translate `Buffers' in this string */
 	set_size_request_to_display_given_text (buffer_load_label, _("Buffers p:100% c:100%"), 2, 0);
 	buffer_load_box.add (buffer_load_label);
 	buffer_load_box.set_name ("BufferLoad");
@@ -536,13 +538,13 @@ ARDOUR_UI::build_menu_bar ()
 	sample_rate_label.set_name ("SampleRate");
 
 #ifndef TOP_MENUBAR
- 	menu_hbox.pack_start (*menu_bar, true, true);
+ 	menu_hbox.pack_start (*menu_bar, false, false);
 #else
 	use_menubar_as_top_menubar ();
 #endif
 
 	_menu_bar_clock.ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::menu_bar_clock_value_changed));
-	menu_hbox.pack_start (_menu_bar_clock, false, false);
+	menu_hbox.pack_start (_menu_bar_clock, true, false);
 
  	if (!Profile->get_small_screen()) {
 #ifndef GTKOSX
