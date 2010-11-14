@@ -800,12 +800,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				high_enough_for_name = true;
 			}
                         
-			if (visibility & FullWidthNameHighlight) {
-				name_highlight->property_x2() = pixel_width;
-			} else {
-				name_highlight->property_x2() = pixel_width - 1.0;
-			}
-
+			name_highlight->property_x2() = pixel_width;
 		}
 
 		if (frame) {
