@@ -1842,7 +1842,7 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, bool multi
 
 	edit_items.push_back (*_popup_region_menu_item);
 	if (multiple_regions_at_position && (layering_order_editor == 0 || !layering_order_editor->is_visible ())) {
-		edit_items.push_back (action_menu_item ("choose-top-region"));
+		edit_items.push_back (*manage (_region_actions->get_action ("choose-top-region")->create_menu_item ()));
 	}
 	edit_items.push_back (SeparatorElem());
 }
@@ -5507,6 +5507,9 @@ Editor::setup_fade_images ()
 Gtk::MenuItem&
 Editor::action_menu_item (std::string const & name)
 {
-	return *manage (editor_actions->get_action(name)->create_menu_item ());
+	Glib::RefPtr<Action> a = editor_actions->get_action (name);
+	assert (a);
+	
+	return *manage (a->create_menu_item ());
 }
 
