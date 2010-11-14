@@ -1570,9 +1570,7 @@ EditorRegions::set_state (const XMLNode & node)
                 if (yn != _show_automatic_regions) {
                         _show_automatic_regions = yn;
                         toggle_show_auto_regions_action()->set_active (yn);
-                        /* no need to set changed because the above toggle 
-                           will have triggered a redisplay 
-                        */
+			changed = true;
                 }
         }
         
