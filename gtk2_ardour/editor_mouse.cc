@@ -1249,7 +1249,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 
 			case StreamItem:
-				popup_track_context_menu (1, event->button.time, item_type, false, where);
+				popup_track_context_menu (1, event->button.time, item_type, false);
 				break;
 
 			case RegionItem:
@@ -1257,15 +1257,15 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case LeftFrameHandle:
 			case RightFrameHandle:
 			case RegionViewName:
-				popup_track_context_menu (1, event->button.time, item_type, false, where);
+				popup_track_context_menu (1, event->button.time, item_type, false);
 				break;
 
 			case SelectionItem:
-				popup_track_context_menu (1, event->button.time, item_type, true, where);
+				popup_track_context_menu (1, event->button.time, item_type, true);
 				break;
 
 			case AutomationTrackItem:
-				popup_track_context_menu (1, event->button.time, item_type, false, where);
+				popup_track_context_menu (1, event->button.time, item_type, false);
 				break;
 
 			case MarkerBarItem:
@@ -1290,7 +1290,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 
 			case CrossfadeViewItem:
-				popup_track_context_menu (1, event->button.time, item_type, false, where);
+				popup_track_context_menu (1, event->button.time, item_type, false);
 				break;
 
 #ifdef WITH_CMT

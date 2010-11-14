@@ -691,12 +691,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Menu * track_edit_playlist_submenu;
 	Gtk::Menu * track_selection_edit_playlist_submenu;
 
-	void popup_track_context_menu (int, int, ItemType, bool, framepos_t);
-	Gtk::Menu* build_track_context_menu (framepos_t);
-	Gtk::Menu* build_track_bus_context_menu (framepos_t);
-	Gtk::Menu* build_track_region_context_menu (framepos_t frame);
-	Gtk::Menu* build_track_crossfade_context_menu (framepos_t);
-	Gtk::Menu* build_track_selection_context_menu (framepos_t);
+	void popup_track_context_menu (int, int, ItemType, bool);
+	Gtk::Menu* build_track_context_menu ();
+	Gtk::Menu* build_track_bus_context_menu ();
+	Gtk::Menu* build_track_region_context_menu ();
+	Gtk::Menu* build_track_crossfade_context_menu ();
+	Gtk::Menu* build_track_selection_context_menu ();
 	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_region_context_items (Gtk::Menu_Helpers::MenuList&, bool);

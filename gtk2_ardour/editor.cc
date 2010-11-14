@@ -1478,10 +1478,10 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 }
 
 void
-Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, bool with_selection, framepos_t frame)
+Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, bool with_selection)
 {
 	using namespace Menu_Helpers;
-	Menu* (Editor::*build_menu_function)(framepos_t);
+	Menu* (Editor::*build_menu_function)();
 	Menu *menu;
 
 	switch (item_type) {
@@ -1522,7 +1522,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		return;
 	}
 
-	menu = (this->*build_menu_function)(frame);
+	menu = (this->*build_menu_function)();
 	menu->set_name ("ArdourContextMenu");
 
 	/* now handle specific situations */
@@ -1605,7 +1605,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 }
 
 Menu*
-Editor::build_track_context_menu (framepos_t)
+Editor::build_track_context_menu ()
 {
 	using namespace Menu_Helpers;
 
@@ -1617,7 +1617,7 @@ Editor::build_track_context_menu (framepos_t)
 }
 
 Menu*
-Editor::build_track_bus_context_menu (framepos_t)
+Editor::build_track_bus_context_menu ()
 {
 	using namespace Menu_Helpers;
 
@@ -1629,7 +1629,7 @@ Editor::build_track_bus_context_menu (framepos_t)
 }
 
 Menu*
-Editor::build_track_region_context_menu (framepos_t frame)
+Editor::build_track_region_context_menu ()
 {
 	using namespace Menu_Helpers;
 	MenuList& edit_items  = track_region_context_menu.items();
@@ -1651,7 +1651,7 @@ Editor::build_track_region_context_menu (framepos_t frame)
 		   mode and so offering region context is somewhat confusing.
 		*/
 		if ((tr = rtv->track()) && ((pl = tr->playlist())) && !internal_editing()) {
-                        framepos_t framepos = (framepos_t) floor ((double)frame * tr->speed());
+                        framepos_t const framepos = (framepos_t) floor ((double) get_preferred_edit_position() * tr->speed());
                         uint32_t regions_at = pl->count_regions_at (framepos);
                         add_region_context_items (edit_items, regions_at > 1);
 		}
@@ -1663,7 +1663,7 @@ Editor::build_track_region_context_menu (framepos_t frame)
 }
 
 Menu*
-Editor::build_track_crossfade_context_menu (framepos_t frame)
+Editor::build_track_crossfade_context_menu ()
 {
 	using namespace Menu_Helpers;
 	MenuList& edit_items  = track_crossfade_context_menu.items();
@@ -1680,7 +1680,7 @@ Editor::build_track_crossfade_context_menu (framepos_t frame)
 
 			AudioPlaylist::Crossfades xfades;
 
-			apl->crossfades_at (frame, xfades);
+			apl->crossfades_at (get_preferred_edit_position (), xfades);
 
 			bool many = xfades.size() > 1;
 
@@ -1688,7 +1688,7 @@ Editor::build_track_crossfade_context_menu (framepos_t frame)
 				add_crossfade_context_items (atv->audio_view(), (*i), edit_items, many);
 			}
 
-			framepos_t framepos = (framepos_t) floor ((double)frame * tr->speed());
+			framepos_t framepos = (framepos_t) floor ((double) get_preferred_edit_position() * tr->speed());
 			uint32_t regions_at = pl->count_regions_at (framepos);
                         add_region_context_items (edit_items, regions_at > 1);
 		}
@@ -1736,7 +1736,7 @@ Editor::analyze_range_selection()
 }
 
 Menu*
-Editor::build_track_selection_context_menu (framepos_t)
+Editor::build_track_selection_context_menu ()
 {
 	using namespace Menu_Helpers;
 	MenuList& edit_items  = track_selection_context_menu.items();
