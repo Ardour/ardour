@@ -437,7 +437,6 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 		}
 	}
 
-
         if (what_changed.contains (our_interests)) {
 
 		/* find the region in our model and update its row */
@@ -445,57 +444,71 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 		TreeModel::iterator i = rows.begin ();
 		
 		while (i != rows.end ()) {
-			
+
 			TreeModel::Children children = (*i)->children ();
-			TreeModel::iterator j = children.begin ();
+			TreeModel::iterator found = children.end ();
 			
-			while (j != children.end()) {
+			boost::shared_ptr<Region> c = (*i)[_columns.region];
+
+			if (c == r) {
+
+				/* check this row */
+				last_row = TreeRowReference (_model, TreePath (i));
+				found = i;
+
+			} else {
+
+				/* check its children */
+				
+				found = children.begin ();
+				while (found != children.end()) {
 			  
-				boost::shared_ptr<Region> c = (*j)[_columns.region];
-			
-				if (c == r) {
-					last_row = TreeRowReference(_model, TreePath(j));
-					break;
+					boost::shared_ptr<Region> c = (*found)[_columns.region];
+					
+					if (c == r) {
+						last_row = TreeRowReference(_model, TreePath (found));
+						break;
+					}
+					++found;
 				}
-				++j;
 			}
 
-			if (j != children.end()) {
+			if (found != children.end()) {
 
                                 boost::shared_ptr<AudioRegion> audioregion = boost::dynamic_pointer_cast<AudioRegion>(r);
                                 uint32_t used = _editor->get_regionview_count_from_region_list (r);
 
                                 if (what_changed.contains (ARDOUR::Properties::name)) {
-                                        populate_row_name (r, *j);
+                                        populate_row_name (r, *found);
                                 }
                                 if (what_changed.contains (ARDOUR::Properties::position)) {
-                                        populate_row_position (r, *j, used);
-                                        populate_row_end (r, *j, used);
+                                        populate_row_position (r, *found, used);
+                                        populate_row_end (r, *found, used);
                                 }
                                 if (what_changed.contains (ARDOUR::Properties::length)) {
-                                        populate_row_end (r, *j, used);
-                                        populate_row_length (r, *j);
+                                        populate_row_end (r, *found, used);
+                                        populate_row_length (r, *found);
                                 }
                                 if (what_changed.contains (ARDOUR::Properties::start)) {
-                                        populate_row_length (r, *j);
+                                        populate_row_length (r, *found);
                                 }
                                 if (what_changed.contains (ARDOUR::Properties::locked)) {
-                                        populate_row_locked (r, *j, used);
+                                        populate_row_locked (r, *found, used);
                                 }
                                 if (what_changed.contains (ARDOUR::Properties::position_lock_style)) {
-                                        populate_row_glued (r, *j, used);
+                                        populate_row_glued (r, *found, used);
                                 }
                                 if (what_changed.contains (ARDOUR::Properties::muted)) {
-                                        populate_row_muted (r, *j, used);
+                                        populate_row_muted (r, *found, used);
                                 }
                                 if (what_changed.contains (ARDOUR::Properties::opaque)) {
-                                        populate_row_opaque (r, *j, used);
+                                        populate_row_opaque (r, *found, used);
                                 }
                                 if (what_changed.contains (ARDOUR::Properties::fade_in)) {
-                                        populate_row_fade_in (r, *j, used, audioregion);
+                                        populate_row_fade_in (r, *found, used, audioregion);
                                 }
                                 if (what_changed.contains (ARDOUR::Properties::fade_out)) {
-                                        populate_row_fade_out (r, *j, used, audioregion);
+                                        populate_row_fade_out (r, *found, used, audioregion);
                                 }
 
                                 break;
