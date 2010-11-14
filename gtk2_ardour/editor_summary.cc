@@ -412,31 +412,31 @@ EditorSummary::set_cursor (Position p)
 {
 	switch (p) {
 	case LEFT:
-		get_window()->set_cursor (*_editor->left_side_trim_cursor);
+		get_window()->set_cursor (*_editor->resize_left_cursor);
 		break;
 	case LEFT_TOP:
-		get_window()->set_cursor (Gdk::Cursor (Gdk::TOP_LEFT_CORNER));
+		get_window()->set_cursor (*_editor->resize_top_left_cursor);
 		break;
 	case TOP:
-		get_window()->set_cursor (Gdk::Cursor (Gdk::TOP_SIDE));
+		get_window()->set_cursor (*_editor->resize_top_cursor);
 		break;
 	case RIGHT_TOP:
-		get_window()->set_cursor (Gdk::Cursor (Gdk::TOP_RIGHT_CORNER));
+		get_window()->set_cursor (*_editor->resize_top_right_cursor);
 		break;
 	case RIGHT:
-		get_window()->set_cursor (*_editor->right_side_trim_cursor);
+		get_window()->set_cursor (*_editor->resize_right_cursor);
 		break;
 	case RIGHT_BOTTOM:
-		get_window()->set_cursor (Gdk::Cursor (Gdk::BOTTOM_RIGHT_CORNER));
+		get_window()->set_cursor (*_editor->resize_bottom_right_cursor);
 		break;
 	case BOTTOM:
-		get_window()->set_cursor (Gdk::Cursor (Gdk::BOTTOM_SIDE));
+		get_window()->set_cursor (*_editor->resize_bottom_cursor);
 		break;
 	case LEFT_BOTTOM:
-		get_window()->set_cursor (Gdk::Cursor (Gdk::BOTTOM_LEFT_CORNER));
+		get_window()->set_cursor (*_editor->resize_bottom_left_cursor);
 		break;
 	case INSIDE:
-		get_window()->set_cursor (Gdk::Cursor (Gdk::FLEUR));
+		get_window()->set_cursor (*_editor->move_cursor);
 		break;
 	default:
 		get_window()->set_cursor ();

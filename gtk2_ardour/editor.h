@@ -475,6 +475,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	static Gdk::Cursor* wait_cursor;
 	static Gdk::Cursor* timebar_cursor;
 	static Gdk::Cursor* transparent_cursor;
+	static Gdk::Cursor* resize_left_cursor;
+	static Gdk::Cursor* resize_top_left_cursor;
+	static Gdk::Cursor* resize_top_cursor;
+	static Gdk::Cursor* resize_top_right_cursor;
+	static Gdk::Cursor* resize_right_cursor;
+	static Gdk::Cursor* resize_bottom_right_cursor;
+	static Gdk::Cursor* resize_bottom_cursor;
+	static Gdk::Cursor* resize_bottom_left_cursor;
+	static Gdk::Cursor* move_cursor;
 
         Gdk::Cursor* get_canvas_cursor () const { return current_canvas_cursor; }
         void set_canvas_cursor (Gdk::Cursor*, bool save=false);

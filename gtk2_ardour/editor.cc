@@ -232,6 +232,15 @@ Gdk::Cursor* Editor::wait_cursor = 0;
 Gdk::Cursor* Editor::timebar_cursor = 0;
 Gdk::Cursor* Editor::transparent_cursor = 0;
 Gdk::Cursor* Editor::up_down_cursor = 0;
+Gdk::Cursor* Editor::resize_left_cursor = 0;
+Gdk::Cursor* Editor::resize_top_left_cursor = 0;
+Gdk::Cursor* Editor::resize_top_cursor = 0;
+Gdk::Cursor* Editor::resize_top_right_cursor = 0;
+Gdk::Cursor* Editor::resize_right_cursor = 0;
+Gdk::Cursor* Editor::resize_bottom_right_cursor = 0;
+Gdk::Cursor* Editor::resize_bottom_cursor = 0;
+Gdk::Cursor* Editor::resize_bottom_left_cursor = 0;
+Gdk::Cursor* Editor::move_cursor = 0;
 
 void
 show_me_the_size (Requisition* r, const char* what)
@@ -1309,9 +1318,54 @@ Editor::build_cursors ()
 		fade_out_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 29, 0);
 	}
 
+	{
+		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_left_cursor"));
+		resize_left_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 3, 10);
+	}
+
+	{
+		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_top_left_cursor"));
+		resize_top_left_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 3, 18);
+	}
+
+	{
+		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_top_cursor"));
+		resize_top_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 10, 24);
+	}
+
+	{
+		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_top_right_cursor"));
+		resize_top_right_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 18, 18);
+	}
+
+	{
+		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_right_cursor"));
+		resize_right_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 24, 10);
+	}
+
+	{
+		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_bottom_right_cursor"));
+		resize_bottom_right_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 18, 3);
+	}
+
+	{
+		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_bottom_cursor"));
+		resize_bottom_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 10, 3);
+	}
+
+	{
+		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_bottom_left_cursor"));
+		resize_bottom_left_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 3, 3);
+	}
+
+	{
+		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("move_cursor"));
+		move_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 11, 11);
+	}
+
 	selector_cursor = new Gdk::Cursor (XTERM);
 	time_fx_cursor = new Gdk::Cursor (SIZING);
-	wait_cursor = new Gdk::Cursor  (WATCH);
+	wait_cursor = new Gdk::Cursor (WATCH);
 	timebar_cursor = new Gdk::Cursor(LEFT_PTR);
 	midi_pencil_cursor = new Gdk::Cursor (PENCIL);
 	midi_select_cursor = new Gdk::Cursor (CENTER_PTR);
