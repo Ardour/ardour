@@ -484,6 +484,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	static Gdk::Cursor* resize_bottom_cursor;
 	static Gdk::Cursor* resize_bottom_left_cursor;
 	static Gdk::Cursor* move_cursor;
+	static Gdk::Cursor* expand_left_right_cursor;
+	static Gdk::Cursor* expand_up_down_cursor;
 
         Gdk::Cursor* get_canvas_cursor () const { return current_canvas_cursor; }
         void set_canvas_cursor (Gdk::Cursor*, bool save=false);

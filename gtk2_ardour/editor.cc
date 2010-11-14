@@ -241,6 +241,8 @@ Gdk::Cursor* Editor::resize_bottom_right_cursor = 0;
 Gdk::Cursor* Editor::resize_bottom_cursor = 0;
 Gdk::Cursor* Editor::resize_bottom_left_cursor = 0;
 Gdk::Cursor* Editor::move_cursor = 0;
+Gdk::Cursor* Editor::expand_left_right_cursor = 0;
+Gdk::Cursor* Editor::expand_up_down_cursor = 0;
 
 void
 show_me_the_size (Requisition* r, const char* what)
@@ -1363,6 +1365,16 @@ Editor::build_cursors ()
 		move_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 11, 11);
 	}
 
+	{
+		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("expand_left_right_cursor"));
+		expand_left_right_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 11, 4);
+	}
+
+	{
+		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("expand_up_down_cursor"));
+		expand_up_down_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 4, 11);
+	}
+	
 	selector_cursor = new Gdk::Cursor (XTERM);
 	time_fx_cursor = new Gdk::Cursor (SIZING);
 	wait_cursor = new Gdk::Cursor (WATCH);

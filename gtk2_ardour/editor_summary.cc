@@ -438,6 +438,12 @@ EditorSummary::set_cursor (Position p)
 	case INSIDE:
 		get_window()->set_cursor (*_editor->move_cursor);
 		break;
+	case TO_LEFT_OR_RIGHT:
+		get_window()->set_cursor (*_editor->expand_left_right_cursor);
+		break;
+	case BELOW_OR_ABOVE:
+		get_window()->set_cursor (*_editor->expand_up_down_cursor);
+		break;
 	default:
 		get_window()->set_cursor ();
 		break;
@@ -476,7 +482,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		}
 
 		set_editor (xr, y);
-		set_cursor (INSIDE);
+		set_cursor (_start_position);
 
 	} else if (_zoom_dragging) {
 
