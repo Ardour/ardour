@@ -1327,17 +1327,17 @@ Editor::build_cursors ()
 
 	{
 		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_top_left_cursor"));
-		resize_top_left_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 3, 18);
+		resize_top_left_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 3, 3);
 	}
 
 	{
 		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_top_cursor"));
-		resize_top_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 10, 24);
+		resize_top_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 10, 3);
 	}
 
 	{
 		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_top_right_cursor"));
-		resize_top_right_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 18, 18);
+		resize_top_right_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 18, 3);
 	}
 
 	{
@@ -1347,17 +1347,17 @@ Editor::build_cursors ()
 
 	{
 		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_bottom_right_cursor"));
-		resize_bottom_right_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 18, 3);
+		resize_bottom_right_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 18, 18);
 	}
 
 	{
 		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_bottom_cursor"));
-		resize_bottom_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 10, 3);
+		resize_bottom_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 10, 24);
 	}
 
 	{
 		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_bottom_left_cursor"));
-		resize_bottom_left_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 3, 3);
+		resize_bottom_left_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 3, 18);
 	}
 
 	{
