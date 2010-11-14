@@ -87,6 +87,7 @@ ARDOUR_UI::set_session (Session *s)
 	big_clock.set_session (s);
 	preroll_clock.set_session (s);
 	postroll_clock.set_session (s);
+	_menu_bar_clock.set_session (s);
 	
 	/* sensitize menu bar options that are now valid */
 

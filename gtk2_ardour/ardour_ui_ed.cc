@@ -522,10 +522,15 @@ ARDOUR_UI::build_menu_bar ()
 	cpu_load_box.set_name ("CPULoad");
 	cpu_load_label.set_name ("CPULoad");
 
+	/* Set up some size requests here to stop the menu-bar clock jumping around in full-screen mode */
+
+	/* TRANSLATORS: just translate `Buffers' in this string */
+	set_size_request_to_display_given_text (buffer_load_label, _("Buffers p:100% c:100%"), 2, 0);
 	buffer_load_box.add (buffer_load_label);
 	buffer_load_box.set_name ("BufferLoad");
 	buffer_load_label.set_name ("BufferLoad");
 
+	set_size_request_to_display_given_text (sample_rate_label, X_("384 kHz / 1000 ms"), 2, 0);
 	sample_rate_box.add (sample_rate_label);
 	sample_rate_box.set_name ("SampleRate");
 	sample_rate_label.set_name ("SampleRate");
@@ -535,6 +540,9 @@ ARDOUR_UI::build_menu_bar ()
 #else
 	use_menubar_as_top_menubar ();
 #endif
+
+	_menu_bar_clock.ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::menu_bar_clock_value_changed));
+	menu_hbox.pack_start (_menu_bar_clock, false, false);
 
  	if (!Profile->get_small_screen()) {
 #ifndef GTKOSX
@@ -773,3 +781,25 @@ ARDOUR_UI::toggle_global_port_matrix (ARDOUR::DataType t)
 	}
 }
 
+void
+ARDOUR_UI::show_menu_bar_clock ()
+{
+	_menu_bar_clock.show ();
+	_menu_bar_clock.set (_session->audible_frame (), true);
+	_menu_bar_clock_connection = ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (_menu_bar_clock, &AudioClock::set), 'p'));
+}
+
+void
+ARDOUR_UI::hide_menu_bar_clock ()
+{
+	_menu_bar_clock.hide ();
+	_menu_bar_clock_connection.disconnect ();
+}
+
+void
+ARDOUR_UI::menu_bar_clock_value_changed ()
+{
+	if (_session) {
+		_session->request_locate (_menu_bar_clock.current_time ());
+	}
+}

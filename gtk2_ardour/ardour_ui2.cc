@@ -944,6 +944,8 @@ ARDOUR_UI::editor_realized ()
 
 	set_size_request_to_display_given_text (speed_display_box, _("-0.55"), 2, 2);
 	reset_dpi ();
+
+	hide_menu_bar_clock ();
 }
 
 void
@@ -958,6 +960,8 @@ ARDOUR_UI::maximise_editing_space ()
  	if (Config->get_keep_tearoffs()) {
 		transport_tearoff->set_visible (true);
 	}
+
+	show_menu_bar_clock ();
 }
 
 void
@@ -969,4 +973,6 @@ ARDOUR_UI::restore_editing_space ()
 
 	transport_tearoff->set_visible (true);
 	editor->restore_editing_space ();
+
+	hide_menu_bar_clock ();
 }

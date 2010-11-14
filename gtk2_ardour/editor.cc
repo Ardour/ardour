@@ -4092,6 +4092,7 @@ Editor::maximise_editing_space ()
 		_tools_tearoff->set_visible (true);
 		_zoom_tearoff->set_visible (true);
 	}
+
 }
 
 void
