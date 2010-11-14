@@ -77,7 +77,7 @@ class MidiStreamView : public StreamView
 	void redisplay_track ();
 
 	inline double contents_height() const
-	{ return (_trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
+	{ return (child_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
 
 	inline double note_to_y(uint8_t note) const
 		{ return contents_height()

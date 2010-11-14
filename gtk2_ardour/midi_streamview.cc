@@ -201,7 +201,7 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 			source->model()->highest_note());
 
 	// Display region contents
-	region_view->set_height(height);
+	region_view->set_height (child_height());
 	region_view->display_model(source->model());
 }
 
@@ -294,7 +294,7 @@ void
 MidiStreamView::update_contents_height ()
 {
 	StreamView::update_contents_height();
-	_note_lines->property_y2() = height;
+	_note_lines->property_y2() = child_height ();
 
         apply_note_range (lowest_note(), highest_note(), true);
 }
@@ -312,7 +312,7 @@ MidiStreamView::draw_note_lines()
 
 	_note_lines->clear();
 	
-	if(height < 140){
+	if (child_height() < 140){
 		return;
 	}
 
@@ -364,13 +364,13 @@ MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest, bool to_region
 	_highest_note = highest;
 	_lowest_note = lowest;
 	
-	int range = _highest_note - _lowest_note;  
-	int pixels_per_note = floor (height/range);
+	int const range = _highest_note - _lowest_note;  
+	int const pixels_per_note = floor (child_height () / range);
 	
 	/* do not grow note height beyond 10 pixels */
 	if (pixels_per_note > 10) {
 		
-		int available_note_range = floor ((height)/10);
+		int const available_note_range = floor (child_height() / 10);
 		int additional_notes = available_note_range - range;
 		
 		/* distribute additional notes to higher and lower ranges, clamp at 0 and 127 */
@@ -469,6 +469,8 @@ MidiStreamView::setup_rec_box ()
 				// rec regions are destroyed in setup_rec_box
 
 				/* we add the region later */
+
+				setup_new_rec_layer_time (region);
 			}
 
 			/* start a new rec box */
@@ -611,3 +613,4 @@ MidiStreamView::update_rec_box ()
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rec_regions.back().second);
 	mrv->extend_active_notes ();
 }
+

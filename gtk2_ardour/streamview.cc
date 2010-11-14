@@ -578,7 +578,16 @@ StreamView::update_contents_height ()
 	}
 
 	for (vector<RecBoxInfo>::iterator i = rec_rects.begin(); i != rec_rects.end(); ++i) {
-		i->rectangle->property_y2() = height;
+		switch (_layer_display) {
+		case Overlaid:
+			i->rectangle->property_y2() = height;
+			break;
+		case Stacked:
+			/* In stacked displays, the recregion is always at the top */
+			i->rectangle->property_y1() = 0;
+			i->rectangle->property_y2() = h;
+			break;
+		}
 	}
 }
 
@@ -596,5 +605,43 @@ StreamView::update_coverage_frames ()
 {
 	for (RegionViewList::iterator i = region_views.begin (); i != region_views.end (); ++i) {
 		(*i)->update_coverage_frames (_layer_display);
+	}
+}
+
+void
+StreamView::check_record_layers (boost::shared_ptr<Region> region, framepos_t to)
+{
+	if (_new_rec_layer_time < to) {
+		/* The region being recorded has overlapped the start of a top-layered region, so
+		   `fake' a new visual layer for the recording.  This is only a visual thing for now,
+		   as the proper layering will get sorted out when the recorded region is added to
+		   its playlist.
+		*/
+
+		/* Stop this happening again */
+		_new_rec_layer_time = max_framepos;
+		
+		/* Make space in the view for the new layer */
+		++_layers;
+		
+		/* Set the temporary region to the correct layer so that it gets drawn correctly */
+		region->set_layer (_layers - 1);
+		
+		/* and reset the view */
+		update_contents_height ();
+	}
+}
+
+void
+StreamView::setup_new_rec_layer_time (boost::shared_ptr<Region> region)
+{
+	/* If we are in Stacked mode, we may need to (visually) create a new layer to put the
+	   recorded region in.  To work out where this needs to happen, find the start of the next
+	   top-layered region after the start of the region we are recording and make a note of it.
+	*/
+	if (_layer_display == Stacked) {
+		_new_rec_layer_time = _trackview.track()->playlist()->find_next_top_layer_position (region->start());
+	} else {
+		_new_rec_layer_time = max_framepos;
 	}
 }

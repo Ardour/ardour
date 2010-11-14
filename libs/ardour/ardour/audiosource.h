@@ -119,7 +119,7 @@ class AudioSource : virtual public Source,
 
 	int initialize_peakfile (bool newfile, std::string path);
 	int build_peaks_from_scratch ();
-	int compute_and_write_peaks (Sample* buf, framepos_t first_frame, framecnt_t cnt,
+	int compute_and_write_peaks (Sample* buf, framecnt_t first_frame, framecnt_t cnt,
 	bool force, bool intermediate_peaks_ready_signal);
 	void truncate_peakfile();
 
@@ -135,7 +135,7 @@ class AudioSource : virtual public Source,
 					 framecnt_t npeaks, framepos_t start, framecnt_t cnt,
 					 double samples_per_visual_peak, framecnt_t fpp) const;
 	
-	int compute_and_write_peaks (Sample* buf, framepos_t first_frame, framecnt_t cnt,
+	int compute_and_write_peaks (Sample* buf, framecnt_t first_frame, framecnt_t cnt,
 				     bool force, bool intermediate_peaks_ready_signal, 
 				     framecnt_t frames_per_peak);
 

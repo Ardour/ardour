@@ -216,6 +216,8 @@ public:
 		return boost::shared_ptr<Crossfade> ();
 	}
 
+	framepos_t find_next_top_layer_position (framepos_t) const;	
+
   protected:
 	friend class Session;
 

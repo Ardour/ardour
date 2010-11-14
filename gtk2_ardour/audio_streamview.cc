@@ -619,69 +619,73 @@ AudioStreamView::rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::we
 	rec_data_ready_map[src] = true;
 
 	if (rec_data_ready_map.size() == _trackview.track()->n_channels().n_audio()) {
-		this->update_rec_regions ();
+		update_rec_regions (start, cnt);
 		rec_data_ready_map.clear();
 	}
 }
 
 void
-AudioStreamView::update_rec_regions ()
+AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 {
-	if (Config->get_show_waveforms_while_recording ()) {
-		uint32_t n = 0;
+	if (!Config->get_show_waveforms_while_recording ()) {
+		return;
+	}
+	
+	uint32_t n = 0;
+	
+	for (list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); n++) {
+		
+		list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator tmp = iter;
+		++tmp;
+		
+		if (!canvas_item_visible (rec_rects[n].rectangle)) {
+			/* rect already hidden, this region is done */
+			iter = tmp;
+			continue;
+		}
+		
+		boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(iter->first);
+		
+		if (!region) {
+			iter = tmp;
+			continue;
+		}
+		
+		nframes_t origlen = region->length();
 
-		for (list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin();
-				iter != rec_regions.end(); n++) {
-
-			list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator tmp = iter;
-			++tmp;
-
-			if (!canvas_item_visible (rec_rects[n].rectangle)) {
-				/* rect already hidden, this region is done */
-				iter = tmp;
-				continue;
-			}
-
-			boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(iter->first);
+		if (region == rec_regions.back().first && rec_active) {
 			
-			if (!region) {
-				iter = tmp;
-				continue;
-			}
+			if (last_rec_data_frame > region->start()) {
+				
+				nframes_t nlen = last_rec_data_frame - region->start();
+				
+				if (nlen != region->length()) {
 
-			nframes_t origlen = region->length();
-
-			if (region == rec_regions.back().first && rec_active) {
-
-				if (last_rec_data_frame > region->start()) {
-
-					nframes_t nlen = last_rec_data_frame - region->start();
-
-					if (nlen != region->length()) {
-
-						region->suspend_property_changes ();
-						region->set_position (_trackview.track()->get_capture_start_frame(n), this);
-						region->set_length (nlen, this);
-						region->resume_property_changes ();
-
-						if (origlen == 1) {
-							/* our special initial length */
-							add_region_view_internal (region, false, true);
-						}
-
-						/* also update rect */
-						ArdourCanvas::SimpleRect * rect = rec_rects[n].rectangle;
-						gdouble xend = _trackview.editor().frame_to_pixel (region->position() + region->length());
-						rect->property_x2() = xend;
+					region->suspend_property_changes ();
+					region->set_position (_trackview.track()->get_capture_start_frame(n), this);
+					region->set_length (nlen, this);
+					region->resume_property_changes ();
+					
+					if (origlen == 1) {
+						/* our special initial length */
+						add_region_view_internal (region, false, true);
+						setup_new_rec_layer_time (region);
 					}
+
+					check_record_layers (region, (region->position() - region->start() + start + cnt));
+					
+					/* also update rect */
+					ArdourCanvas::SimpleRect * rect = rec_rects[n].rectangle;
+					gdouble xend = _trackview.editor().frame_to_pixel (region->position() + region->length());
+					rect->property_x2() = xend;
 				}
 
 			} else {
-
+				
 				nframes_t nlen = _trackview.track()->get_captured_frames(n);
-
+				
 				if (nlen != region->length()) {
-
+					
 					if (region->source_length(0) >= region->start() + nlen) {
 
 						region->suspend_property_changes ();

@@ -2981,3 +2981,27 @@ Playlist::remove_region_by_source (boost::shared_ptr<Source> s)
 		i = j;
 	}
 }
+
+/** Look from a session frame time and find the start time of the next region
+ *  which is on the top layer of this playlist.
+ *  @param t Time to look from.
+ *  @return Position of next top-layered region, or max_framepos if there isn't one.
+ */
+framepos_t
+Playlist::find_next_top_layer_position (framepos_t t) const
+{
+	RegionLock rlock (const_cast<Playlist *> (this));
+	
+	layer_t const top = top_layer ();
+
+	RegionList copy = regions.rlist ();
+	copy.sort (RegionSortByPosition ());
+
+	for (RegionList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
+		if ((*i)->position() >= t && (*i)->layer() == top) {
+			return (*i)->position();
+		}
+	}
+
+	return max_framepos;
+}

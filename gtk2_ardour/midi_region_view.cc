@@ -3152,6 +3152,8 @@ MidiRegionView::data_recorded (boost::shared_ptr<MidiBuffer> buf, boost::weak_pt
 	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (&trackview);
 	BeatsFramesConverter converter (trackview.session()->tempo_map(), mtv->midi_track()->get_capture_start_frame (0));
 
+	framepos_t back = max_framepos;
+	
 	for (MidiBuffer::iterator i = buf->begin(); i != buf->end(); ++i) {
 		Evoral::MIDIEvent<MidiBuffer::TimeType> const ev (*i, false);
 		assert (ev.buffer ());
@@ -3176,5 +3178,9 @@ MidiRegionView::data_recorded (boost::shared_ptr<MidiBuffer> buf, boost::weak_pt
 		} else if (ev.type() == MIDI_CMD_NOTE_OFF) {
 			resolve_note (ev.note (), time_beats);
 		}
+
+		back = ev.time ();
 	}
+
+	midi_stream_view()->check_record_layers (region(), back);
 }

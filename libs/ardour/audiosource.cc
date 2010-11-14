@@ -648,7 +648,7 @@ AudioSource::build_peaks_from_scratch ()
 			goto out;
 		}
 
-		framepos_t current_frame = 0;
+		framecnt_t current_frame = 0;
 		framecnt_t cnt = _length;
 
 		_peaks_built = false;
@@ -722,15 +722,16 @@ AudioSource::done_with_peakfile_writes (bool done)
 	_peakfile_descriptor = 0;
 }
 
+/** @param first_frame Offset from the source start of the first frame to process */
 int
-AudioSource::compute_and_write_peaks (Sample* buf, framepos_t first_frame, framecnt_t cnt,
+AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, framecnt_t cnt,
 				      bool force, bool intermediate_peaks_ready)
 {
 	return compute_and_write_peaks (buf, first_frame, cnt, force, intermediate_peaks_ready, _FPP);
 }
 
 int
-AudioSource::compute_and_write_peaks (Sample* buf, framepos_t first_frame, framecnt_t cnt,
+AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, framecnt_t cnt,
 				      bool force, bool intermediate_peaks_ready, framecnt_t fpp)
 {
 	Sample* buf2 = 0;

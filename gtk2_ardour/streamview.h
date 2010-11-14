@@ -113,6 +113,8 @@ public:
 		return 0;
 	}
 
+	void check_record_layers (boost::shared_ptr<ARDOUR::Region>, ARDOUR::framepos_t);
+	
 	sigc::signal<void,RegionView*> RegionViewAdded;
 
 protected:
@@ -171,6 +173,12 @@ protected:
 	PBD::ScopedConnectionList rec_data_ready_connections;
 	nframes_t                 last_rec_data_frame;
 
+	/* When recording, the session time at which a new layer must be created for the region
+	   being recorded, or max_framepos if not applicable.
+	*/
+	framepos_t _new_rec_layer_time;
+	void setup_new_rec_layer_time (boost::shared_ptr<ARDOUR::Region>);
+	
 private:
 	void update_coverage_frames ();
 };

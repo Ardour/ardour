@@ -79,7 +79,7 @@ class AudioStreamView : public StreamView
   private:
 	void setup_rec_box ();
 	void rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::weak_ptr<ARDOUR::Source> src);
-	void update_rec_regions ();
+	void update_rec_regions (ARDOUR::framepos_t, ARDOUR::framecnt_t);
 
 	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves, bool recording = false);
 	void remove_region_view (boost::weak_ptr<ARDOUR::Region> );
