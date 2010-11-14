@@ -226,13 +226,13 @@ LV2Plugin::set_parameter (uint32_t which, float val)
 {
 	if (which < slv2_plugin_get_num_ports(_plugin)) {
 		_shadow_data[which] = val;
-#if 0
 		ParameterChanged (which, val); /* EMIT SIGNAL */
 
+#if 0		
 		if (which < parameter_count() && controls[which]) {
 			controls[which]->Changed ();
 		}
-#endif
+#endif		
 
 	} else {
 		warning << string_compose (_("Illegal parameter number used with plugin \"%1\"."
