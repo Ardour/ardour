@@ -268,6 +268,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Gro
 	editor.ZoomChanged.connect (sigc::mem_fun (*this, &Marker::reposition));
 
 	mark->set_data ("marker", this);
+	_name_background->set_data ("marker", this);
 
 	if (handle_events) {
 		group->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
@@ -281,10 +282,7 @@ Marker::~Marker ()
 	CatchDeletion (this); /* EMIT SIGNAL */
 
 	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
-	delete name_pixbuf;
-	delete mark;
-	delete points;
-
+	delete group;
 	delete _line;
 }
 
