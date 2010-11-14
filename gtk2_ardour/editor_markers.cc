@@ -55,6 +55,7 @@ Editor::clear_marker_display ()
 	}
 
 	location_markers.clear ();
+	_sorted_marker_lists.clear ();
 }
 
 void
@@ -495,6 +496,12 @@ Editor::refresh_location_display_internal (Locations::LocationList& locations)
 		++tmp;
 
 		if (!i->second->valid) {
+
+			remove_sorted_marker (i->second->start);
+			if (i->second->end) {
+				remove_sorted_marker (i->second->end);
+			}
+			
 			delete i->second;
 			location_markers.erase (i);
 		}
@@ -699,8 +706,15 @@ Editor::location_gone (Location *location)
 	}
 
 	for (i = location_markers.begin(); i != location_markers.end(); ++i) {
-		if ((*i).first == location) {
-			delete (*i).second;
+		if (i->first == location) {
+
+			remove_sorted_marker (i->second->start);
+			if (i->second->end) {
+				remove_sorted_marker (i->second->end);
+			}
+			
+			
+			delete i->second;
 			location_markers.erase (i);
 			break;
 		}
@@ -1494,5 +1508,13 @@ Editor::toggle_marker_lines ()
 	
 	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
 		i->second->set_show_lines (_show_marker_lines);
+	}
+}
+
+void
+Editor::remove_sorted_marker (Marker* m)
+{
+	for (std::map<ArdourCanvas::Group *, std::list<Marker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
+		i->second.remove (m);
 	}
 }

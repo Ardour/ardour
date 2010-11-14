@@ -637,6 +637,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	 *  for all markers or for just a few.
 	 */
 	std::map<ArdourCanvas::Group *, std::list<Marker *> > _sorted_marker_lists;
+	void remove_sorted_marker (Marker *);
 
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
