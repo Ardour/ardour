@@ -456,6 +456,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	static Gdk::Cursor* trimmer_cursor;
 	static Gdk::Cursor* right_side_trim_cursor;
 	static Gdk::Cursor* left_side_trim_cursor;
+	static Gdk::Cursor* right_side_trim_left_only_cursor;
+	static Gdk::Cursor* left_side_trim_right_only_cursor;
 	static Gdk::Cursor* fade_in_cursor;
 	static Gdk::Cursor* fade_out_cursor;
 	static Gdk::Cursor* selector_cursor;

@@ -1575,31 +1575,16 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case RegionViewNameHighlight:
-		if (is_drawable() && mouse_mode == MouseObject && !internal_editing()) {
+		if (is_drawable() && mouse_mode == MouseObject && !internal_editing() && entered_regionview) {
 			set_canvas_cursor_for_region_view (event->crossing.x, entered_regionview);
 			_over_region_trim_target = true;
 		}
 		break;
 
 	case LeftFrameHandle:
-		if (is_drawable() && mouse_mode == MouseObject && !internal_editing()) {
-                        if (entered_regionview) {
-                                Trimmable::CanTrim ct = entered_regionview->region()->can_trim();
-                                if ((ct & Trimmable::EndTrimEarlier) || (ct & Trimmable::EndTrimLater)) {
-                                        set_canvas_cursor (left_side_trim_cursor);
-                                }
-                        }
-		}
-                break;
-
 	case RightFrameHandle:
-		if (is_drawable() && mouse_mode == MouseObject && !internal_editing()) {
-                        if (entered_regionview) {
-                                Trimmable::CanTrim ct = entered_regionview->region()->can_trim();
-                                if ((ct & Trimmable::FrontTrimEarlier) || (ct & Trimmable::FrontTrimLater)) {
-                                        set_canvas_cursor (right_side_trim_cursor);
-                                }
-                        }
+		if (is_drawable() && mouse_mode == MouseObject && !internal_editing() && entered_regionview) {
+			set_canvas_cursor_for_region_view (event->crossing.x, entered_regionview);
 		}
                 break;
 
@@ -2728,11 +2713,21 @@ Editor::set_canvas_cursor_for_region_view (double x, RegionView* rv)
 	double x1, x2, y1, y2;
 	g->get_bounds (x1, y1, x2, y2);
 
+	/* Halfway across the region */
 	double const h = (x1 + x2) / 2;
 
-	if (x1 < x && x <= h) {
-		set_canvas_cursor (left_side_trim_cursor);
-	} else if (h < x && x <= x2) {
-		set_canvas_cursor (right_side_trim_cursor);
+	Trimmable::CanTrim ct = rv->region()->can_trim ();
+	if (x <= h) {
+		if (ct & Trimmable::FrontTrimEarlier) {
+			set_canvas_cursor (left_side_trim_cursor);
+		} else {
+			set_canvas_cursor (left_side_trim_right_only_cursor);
+		}
+	} else {
+		if (ct & Trimmable::EndTrimLater) {
+			set_canvas_cursor (right_side_trim_cursor);
+		} else {
+			set_canvas_cursor (right_side_trim_left_only_cursor);
+		}
 	}
 }

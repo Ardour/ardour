@@ -1607,7 +1607,7 @@ Region::can_trim () const
         }
 
         if (!_sources.empty()) {
-                if (last_frame() < _sources.front()->length (0)) {
+                if ((start() + length()) < _sources.front()->length (0)) {
                         ct = CanTrim (ct | EndTrimLater);
                 }
         }

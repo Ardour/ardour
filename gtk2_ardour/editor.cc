@@ -214,6 +214,8 @@ Gdk::Cursor* Editor::selector_cursor = 0;
 Gdk::Cursor* Editor::trimmer_cursor = 0;
 Gdk::Cursor* Editor::left_side_trim_cursor = 0;
 Gdk::Cursor* Editor::right_side_trim_cursor = 0;
+Gdk::Cursor* Editor::left_side_trim_right_only_cursor = 0;
+Gdk::Cursor* Editor::right_side_trim_left_only_cursor = 0;
 Gdk::Cursor* Editor::fade_in_cursor = 0;
 Gdk::Cursor* Editor::fade_out_cursor = 0;
 Gdk::Cursor* Editor::grabber_cursor = 0;
@@ -1311,6 +1313,16 @@ Editor::build_cursors ()
 		right_side_trim_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 23, 11);
 	}
 
+	{
+		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("trim_left_cursor_right_only"));
+		left_side_trim_right_only_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 5, 11);
+	}
+
+	{
+		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("trim_right_cursor_left_only"));
+		right_side_trim_left_only_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 23, 11);
+	}
+	
 	{
 		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("fade_in_cursor"));
 		fade_in_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 0, 0);
