@@ -750,6 +750,7 @@ Editor::Editor ()
 	_popup_region_menu_item = 0;
 
 	_show_marker_lines = false;
+	_over_region_trim_target = false;
 
 	constructed = true;
 	instant_save ();

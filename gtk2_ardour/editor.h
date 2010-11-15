@@ -1430,6 +1430,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         friend class EditorRegions;
 
 	ArdourCanvas::Item *last_item_entered;
+	/** true if the mouse is over a place where region trim can happen */
+	bool _over_region_trim_target;
 
 	/* non-public event handlers */
 
@@ -2097,6 +2099,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::MenuItem& action_menu_item (std::string const &);
 	void action_pre_activated (Glib::RefPtr<Gtk::Action> const &);
 
+        void set_canvas_cursor_for_region_view (double, RegionView *);
+	
 	friend class Drag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;

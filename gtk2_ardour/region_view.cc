@@ -679,7 +679,18 @@ RegionView::update_coverage_frames (LayerDisplay d)
 
 	if (frame_handle_start) {
 		frame_handle_start->raise_to_top ();
+	}
+
+	if (frame_handle_end) {
 		frame_handle_end->raise_to_top ();
+	}
+
+	if (name_highlight) {
+		name_highlight->raise_to_top ();
+	}
+
+	if (name_pixbuf) {
+		name_pixbuf->raise_to_top ();
 	}
 }
 

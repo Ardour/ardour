@@ -1576,7 +1576,8 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case RegionViewNameHighlight:
 		if (is_drawable() && mouse_mode == MouseObject && !internal_editing()) {
-			set_canvas_cursor (trimmer_cursor);
+			set_canvas_cursor_for_region_view (event->crossing.x, entered_regionview);
+			_over_region_trim_target = true;
 		}
 		break;
 
@@ -1636,7 +1637,8 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 		if (!reinterpret_cast<RegionView *> (item->get_data ("regionview"))->name_active()) {
 			if (mouse_mode == MouseObject && is_drawable()) {
-				set_canvas_cursor (trimmer_cursor);
+				set_canvas_cursor_for_region_view (event->crossing.x, entered_regionview);
+				_over_region_trim_target = true;
 			}
 		}
 		break;
@@ -1791,6 +1793,8 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case MarkerViewHandleEndItem:
 #endif
 
+		_over_region_trim_target = false;
+		
 		if (is_drawable()) {
                         set_canvas_cursor (current_canvas_cursor);
 		}
@@ -1811,6 +1815,8 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case RegionViewName:
 		/* see enter_handler() for notes */
+		_over_region_trim_target = false;
+		
 		if (!reinterpret_cast<RegionView *> (item->get_data ("regionview"))->name_active()) {
 			if (is_drawable() && mouse_mode == MouseObject) {
                                 set_canvas_cursor (current_canvas_cursor);
@@ -2005,6 +2011,10 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 	update_join_object_range_location (event->motion.x, event->motion.y);
 	if (_join_object_range_state != old) {
 		set_canvas_cursor ();
+	}
+
+	if (_over_region_trim_target) {
+		set_canvas_cursor_for_region_view (event->motion.x, entered_regionview);
 	}
 
 	bool handled = false;
@@ -2703,4 +2713,26 @@ Editor::remove_midi_note (ArdourCanvas::Item* item, GdkEvent *)
 	assert (e);
 
 	e->region_view().delete_note (e->note ());
+}
+
+void
+Editor::set_canvas_cursor_for_region_view (double x, RegionView* rv)
+{
+	ArdourCanvas::Group* g = rv->get_canvas_group ();
+	ArdourCanvas::Group* p = g->get_parent_group ();
+
+	/* Compute x in region view parent coordinates */
+	double dy = 0;
+	p->w2i (x, dy);
+
+	double x1, x2, y1, y2;
+	g->get_bounds (x1, y1, x2, y2);
+
+	double const h = (x1 + x2) / 2;
+
+	if (x1 < x && x <= h) {
+		set_canvas_cursor (left_side_trim_cursor);
+	} else if (h < x && x <= x2) {
+		set_canvas_cursor (right_side_trim_cursor);
+	}
 }
