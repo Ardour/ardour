@@ -154,6 +154,8 @@ class AUPlugin : public ARDOUR::Plugin
 	nframes_t _last_nframes;
 	bool _requires_fixed_size_buffers;
 	AudioBufferList* buffers;
+	bool _has_midi_input;
+	bool _has_midi_output;
 
 	/* despite all the cool work that apple did on their AU preset
 	   system, they left factory presets and user presets as two
@@ -206,6 +208,12 @@ class AUPluginInfo : public PluginInfo {
 
 	PluginPtr load (Session& session);
 
+	bool needs_midi_input ();
+	bool is_effect () const;
+	bool is_effect_without_midi_input () const;
+	bool is_effect_with_midi_input () const;
+	bool is_instrument () const;
+
 	AUPluginCachedInfo cache;
 
 	static PluginInfoList* discover ();
@@ -221,6 +229,7 @@ class AUPluginInfo : public PluginInfo {
 	static void discover_music (PluginInfoList&);
 	static void discover_fx (PluginInfoList&);
 	static void discover_generators (PluginInfoList&);
+	static void discover_instruments (PluginInfoList&);
 	static void discover_by_description (PluginInfoList&, CAComponentDescription&);
 	static Glib::ustring au_cache_path ();
 

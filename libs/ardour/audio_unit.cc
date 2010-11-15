@@ -38,6 +38,7 @@
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/midi_buffer.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/io.h"
 #include "ardour/audio_unit.h"
@@ -499,6 +500,10 @@ AUPlugin::init ()
 		throw failed_constructor();
 	}
 
+	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
+	_has_midi_input = pinfo->needs_midi_input ();
+	_has_midi_output = false;
+
 	discover_parameters ();
 	discover_factory_presets ();
 
@@ -945,6 +950,14 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 	int32_t plugcnt = -1;
 	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
 
+	/* lets check MIDI first */
+
+	if (in.n_midi() > 0) {
+		if (!_has_midi_input) {
+			return false;
+		}
+	}
+
 	vector<pair<int,int> >& io_configs = pinfo->cache.io_configs;
 
 	if (debug_io_config) {
@@ -1182,7 +1195,38 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 			  UInt32       inNumberFrames,
 			  AudioBufferList*       ioData)
 {
-	/* not much to do - the data is already in the buffers given to us in connect_and_run() */
+	if (_has_midi_input) {
+		assert (current_buffers->count().n_midi() > 0);
+
+		/* deliver the first (and assumed only) MIDI buffer's data
+		   to the plugin
+		*/
+
+		MidiBuffer& mb (current_buffers->get_midi(0));
+
+		for (MidiBuffer::iterator i = mb.begin(); i != mb.end(); ++i) {
+			Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *i;
+			switch (ev.type()) {
+			case MIDI_CMD_NOTE_ON:
+			case MIDI_CMD_NOTE_OFF:
+			case MIDI_CMD_CONTROL:
+			case MIDI_CMD_BENDER:
+			case MIDI_CMD_PGM_CHANGE:
+			case MIDI_CMD_CHANNEL_PRESSURE:
+			{ 
+				const uint8_t* b = ev.buffer();
+				unit->MIDIEvent (b[0], b[1], b[2], ev.time());
+			        break;
+			}
+			
+			default:
+				/* plugins do not get other stuff by default */
+				break;
+			};
+		}
+	}
+
+	/* not much to do with audio - the data is already in the buffers given to us in connect_and_run() */
 
 	if (current_maxbuf == 0) {
 		error << _("AUPlugin: render callback called illegally!") << endmsg;
@@ -2039,6 +2083,7 @@ AUPluginInfo::discover ()
 	discover_fx (*plugs);
 	discover_music (*plugs);
 	discover_generators (*plugs);
+	discover_instruments (*plugs);
 
 	return plugs;
 }
@@ -2078,6 +2123,19 @@ AUPluginInfo::discover_generators (PluginInfoList& plugs)
 	desc.componentSubType = 0;
 	desc.componentManufacturer = 0;
 	desc.componentType = kAudioUnitType_Generator;
+
+	discover_by_description (plugs, desc);
+}
+
+void
+AUPluginInfo::discover_instruments (PluginInfoList& plugs)
+{
+	CAComponentDescription desc;
+	desc.componentFlags = 0;
+	desc.componentFlagsMask = 0;
+	desc.componentSubType = 0;
+	desc.componentManufacturer = 0;
+	desc.componentType = kAudioUnitType_MusicDevice;
 
 	discover_by_description (plugs, desc);
 }
@@ -2466,3 +2524,32 @@ AUPluginInfo::stringify_descriptor (const CAComponentDescription& desc)
 	return s.str();
 }
 
+bool
+AUPluginInfo::needs_midi_input ()
+{
+	return is_effect_with_midi_input () || is_instrument ();
+}
+
+bool
+AUPluginInfo::is_effect () const
+{
+	return is_effect_without_midi_input() || is_effect_with_midi_input();
+}
+
+bool
+AUPluginInfo::is_effect_without_midi_input () const
+{
+	return descriptor->IsAUFX();
+}
+
+bool
+AUPluginInfo::is_effect_with_midi_input () const
+{
+	return descriptor->IsAUFM();
+}
+
+bool
+AUPluginInfo::is_instrument () const
+{
+	return descriptor->IsMusicDevice();
+}
