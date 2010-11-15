@@ -637,6 +637,8 @@ AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 		
 		list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator tmp = iter;
 		++tmp;
+
+		assert (n < rec_rects.size());
 		
 		if (!canvas_item_visible (rec_rects[n].rectangle)) {
 			/* rect already hidden, this region is done */
@@ -705,9 +707,9 @@ AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 					}
 				}
 			}
-
-			iter = tmp;
 		}
+
+		iter = tmp;
 	}
 }
 
