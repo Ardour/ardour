@@ -57,8 +57,6 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	void lower_box_realized ();
 	void cocoa_view_resized ();
 	void on_realize ();
-	void on_show ();
-	void on_hide ();
 	bool on_map_event (GdkEventAny*);
 	bool on_focus_in_event (GdkEventFocus*);
 	bool on_focus_out_event (GdkEventFocus*);
