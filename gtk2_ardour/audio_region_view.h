@@ -121,73 +121,73 @@ class AudioRegionView : public RegionView
 
   protected:
 
-    /* this constructor allows derived types
-       to specify their visibility requirements
-       to the TimeAxisViewItem parent class
-    */
-
-    enum Flags {
-	    EnvelopeVisible = 0x1,
-	    WaveformVisible = 0x4,
-	    WaveformRectified = 0x8,
-	    WaveformLogScaled = 0x10,
-    };
-
-    std::vector<ArdourCanvas::WaveView *> waves;
-    std::vector<ArdourCanvas::WaveView *> tmp_waves; ///< see ::create_waves()
+	/* this constructor allows derived types
+	   to specify their visibility requirements
+	   to the TimeAxisViewItem parent class
+	*/
+	
+	enum Flags {
+		EnvelopeVisible = 0x1,
+		WaveformVisible = 0x4,
+		WaveformRectified = 0x8,
+		WaveformLogScaled = 0x10,
+	};
+	
+	std::vector<ArdourCanvas::WaveView *> waves;
+	std::vector<ArdourCanvas::WaveView *> tmp_waves; ///< see ::create_waves()
+	
+	std::list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> > feature_lines;
     
-    std::list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> > feature_lines;
-    
-    ArdourCanvas::Polygon*           sync_mark; ///< polgyon for sync position
-    ArdourCanvas::SimpleLine*        zero_line;
-    ArdourCanvas::Polygon*           fade_in_shape;
-    ArdourCanvas::Polygon*           fade_out_shape;
-    ArdourCanvas::SimpleRect*        fade_in_handle; ///< fade in handle, or 0
-    ArdourCanvas::SimpleRect*        fade_out_handle; ///< fade out handle, or 0
-    ArdourCanvas::SimpleLine*        fade_position_line;
-
-    AudioRegionGainLine * gain_line;
-
-    double _amplitude_above_axis;
-
-    uint32_t _flags;
-    uint32_t fade_color;
-
-    void reset_fade_shapes ();
-    void reset_fade_in_shape ();
-    void reset_fade_out_shape ();
-    void fade_in_changed ();
-    void fade_out_changed ();
-    void fade_in_active_changed ();
-    void fade_out_active_changed ();
-
-    void region_resized (const PBD::PropertyChange&);
-    void region_muted ();
-    void region_scale_amplitude_changed ();
-    void region_renamed ();
-
-    void create_one_wave (uint32_t, bool);
-    void manage_zero_line ();
-    void peaks_ready_handler (uint32_t);
-    void set_flags (XMLNode *);
-    void store_flags ();
-
-    void set_colors ();
-    void compute_colors (Gdk::Color const &);
-    void reset_width_dependent_items (double pixel_width);
-    void set_waveview_data_src();
-    void set_frame_color ();
-
-    void color_handler ();
-
-    std::vector<GnomeCanvasWaveViewCache*> wave_caches;
-    
-    void transients_changed();
-
-  private:
-
-    void setup_fade_handle_positions ();
-
+	ArdourCanvas::Polygon*           sync_mark; ///< polgyon for sync position
+	ArdourCanvas::SimpleLine*        zero_line;
+	ArdourCanvas::Polygon*           fade_in_shape;
+	ArdourCanvas::Polygon*           fade_out_shape;
+	ArdourCanvas::SimpleRect*        fade_in_handle; ///< fade in handle, or 0
+	ArdourCanvas::SimpleRect*        fade_out_handle; ///< fade out handle, or 0
+	ArdourCanvas::SimpleLine*        fade_position_line;
+	
+	AudioRegionGainLine * gain_line;
+	
+	double _amplitude_above_axis;
+	
+	uint32_t _flags;
+	uint32_t fade_color;
+	
+	void reset_fade_shapes ();
+	void reset_fade_in_shape ();
+	void reset_fade_out_shape ();
+	void fade_in_changed ();
+	void fade_out_changed ();
+	void fade_in_active_changed ();
+	void fade_out_active_changed ();
+	
+	void region_resized (const PBD::PropertyChange&);
+	void region_muted ();
+	void region_scale_amplitude_changed ();
+	void region_renamed ();
+	
+	void create_one_wave (uint32_t, bool);
+	void manage_zero_line ();
+	void peaks_ready_handler (uint32_t);
+	void set_flags (XMLNode *);
+	void store_flags ();
+	
+	void set_colors ();
+	void compute_colors (Gdk::Color const &);
+	void reset_width_dependent_items (double pixel_width);
+	void set_waveview_data_src();
+	void set_frame_color ();
+	
+	void color_handler ();
+	
+	std::vector<GnomeCanvasWaveViewCache*> wave_caches;
+	
+	void transients_changed();
+	
+private:
+	
+	void setup_fade_handle_positions ();
+	
 	/** A ScopedConnection for each PeaksReady callback (one per channel).  Each member
 	 *  may be 0 if no connection exists.
 	 */
