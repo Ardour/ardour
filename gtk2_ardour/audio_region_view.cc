@@ -185,17 +185,14 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	fade_out_shape->set_data ("regionview", this);
 
 	if (!_recregion) {
-		uint32_t r,g,b,a;
-		UINT_TO_RGBA(fill_color,&r,&g,&b,&a);
-
 		fade_in_handle = new ArdourCanvas::SimpleRect (*group);
-		fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,0);
+		fade_in_handle->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (fill_color, 0);
 		fade_in_handle->property_outline_pixels() = 0;
 
 		fade_in_handle->set_data ("regionview", this);
 
 		fade_out_handle = new ArdourCanvas::SimpleRect (*group);
-		fade_out_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,0);
+		fade_out_handle->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (fill_color, 0);
 		fade_out_handle->property_outline_pixels() = 0;
 
 		fade_out_handle->set_data ("regionview", this);
@@ -789,12 +786,9 @@ AudioRegionView::compute_colors (Gdk::Color const & basic_color)
 {
 	RegionView::compute_colors (basic_color);
 
-	uint32_t r, g, b, a;
-
 	/* gain color computed in envelope_active_changed() */
 
-	UINT_TO_RGBA (fill_color, &r, &g, &b, &a);
-	fade_color = RGBA_TO_UINT(r,g,b,120);
+	fade_color = UINT_RGBA_CHANGE_A (fill_color, 120);
 }
 
 void
@@ -1249,13 +1243,9 @@ AudioRegionView::entered (bool internal_editing)
 		gain_line->show_all_control_points ();
 	}
 
-	uint32_t r,g,b,a;
-	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
-	a=255;
-
 	if (fade_in_handle && !internal_editing) {
-		fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
-		fade_out_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
+		fade_in_handle->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (fade_color, 255);
+		fade_out_handle->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (fade_color, 255);
 	}
 }
 
@@ -1269,13 +1259,9 @@ AudioRegionView::exited ()
 		gain_line->hide_all_but_selected_control_points ();
 	}
 
-	uint32_t r,g,b,a;
-	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
-	a=0;
-
 	if (fade_in_handle) {
-		fade_in_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
-		fade_out_handle->property_fill_color_rgba() = RGBA_TO_UINT(r,g,b,a);
+		fade_in_handle->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (fade_color, 0);
+		fade_out_handle->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (fade_color, 0);
 	}
 }
 
@@ -1339,11 +1325,12 @@ AudioRegionView::set_frame_color ()
 		fill_opacity = 0;
 	}
 
-	uint32_t r,g,b,a;
-
 	if (_selected && should_show_selection) {
-		UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get(), &r, &g, &b, &a);
-		frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);
+		if (fill_opacity) {
+			frame->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get(), fill_opacity);
+		} else {
+			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
+		}
 
 		for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
 			if (_region->muted()) {
@@ -1355,8 +1342,7 @@ AudioRegionView::set_frame_color ()
 		}
 	} else {
 		if (_recregion) {
-			UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_RecordingRect.get(), &r, &g, &b, &a);
-			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, a);
+			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 
 			for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
 				if (_region->muted()) {
@@ -1367,8 +1353,11 @@ AudioRegionView::set_frame_color ()
 				}
 			}
 		} else {
-			UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
-			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);
+			if (fill_opacity) {
+				frame->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_FrameBase.get(), fill_opacity);
+			} else {
+				frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_FrameBase.get();
+			}
 
 			for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
 				if (_region->muted()) {
