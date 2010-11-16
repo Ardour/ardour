@@ -87,6 +87,7 @@ def build(bld):
 		pthread_utils.cc
 		receiver.cc
 		search_path.cc
+		semutils.cc
 		shortpath.cc
 		signals.cc
                 sndfile_manager.cc

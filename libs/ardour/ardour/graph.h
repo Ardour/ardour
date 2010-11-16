@@ -32,7 +32,8 @@
 #include <cassert>
 
 #include <pthread.h>
-#include <semaphore.h>
+
+#include "pbd/semutils.h"
 
 #include "ardour/types.h"
 #include "ardour/session_handle.h"
@@ -97,10 +98,11 @@ class Graph : public SessionHandleRef
 	std::vector<GraphNode *> _trigger_queue;
 	pthread_mutex_t _trigger_mutex;
 
-	sem_t _execution_sem;
-	sem_t _callback_start_sem;
-	sem_t _callback_done_sem;
-	sem_t _cleanup_sem;
+	PBD::ProcessSemaphore _execution_sem;
+
+	PBD::ProcessSemaphore _callback_start_sem;
+	PBD::ProcessSemaphore _callback_done_sem;
+	PBD::ProcessSemaphore _cleanup_sem;
 
 	volatile gint _execution_tokens;
 	volatile gint _finished_refcount;

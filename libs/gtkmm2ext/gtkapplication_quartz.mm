@@ -804,7 +804,9 @@ cocoa_menu_item_update_accelerator (NSMenuItem *cocoa_item,
      is still done by GTK, so this is more cosmetic than it may 
      appear.
   */
-  
+
+  get_menu_label_text (widget, &label);  
+
   if (GTK_IS_ACCEL_LABEL (label) &&
 	    GTK_ACCEL_LABEL (label)->accel_closure)
 	{

@@ -42,13 +42,12 @@ using namespace std;
 
 Graph::Graph (Session & session) 
         : SessionHandleRef (session) 
+	, _execution_sem ("graph_execution", 0)
+	, _callback_start_sem ("graph_start", 0)
+	, _callback_done_sem ("graph_done", 0)
+	, _cleanup_sem ("graph_cleanup", 0)
 {
         pthread_mutex_init( &_trigger_mutex, NULL);
-        sem_init( &_execution_sem, 0, 0 );
-
-        sem_init( &_callback_start_sem, 0, 0 );
-        sem_init( &_callback_done_sem,  0, 0 );
-        sem_init( &_cleanup_sem,  0, 0 );
 
         _execution_tokens = 0;
 
@@ -101,10 +100,10 @@ Graph::session_going_away()
         _quit_threads = true;
 
         for (unsigned int i=0; i<_thread_list.size(); i++) {
-                sem_post( &_execution_sem);
+		_execution_sem.signal ();
         }
 
-        sem_post( &_callback_start_sem);
+        _callback_start_sem.signal ();
 
         for (list<pthread_t>::iterator i = _thread_list.begin(); i != _thread_list.end(); i++) {
                 void* status;
@@ -201,10 +200,10 @@ Graph::restart_cycle()
 
         // we are through. wakeup our caller.
   again:
-        sem_post( &_callback_done_sem);
+        _callback_done_sem.signal ();
 
         // block until we are triggered.
-        sem_wait( &_callback_start_sem);
+        _callback_start_sem.wait();
         if (_quit_threads)
                 return;
 
@@ -330,14 +329,14 @@ Graph::run_one()
         _execution_tokens -= wakeup;
 
         for (int i=0; i<wakeup; i++ ) {
-                sem_post (&_execution_sem);
+                _execution_sem.signal ();
         }
 
         while (to_run == 0) {
                 _execution_tokens += 1;
                 pthread_mutex_unlock (&_trigger_mutex);
                 DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 goes to sleep\n", pthread_self()));
-                sem_wait (&_execution_sem);
+                _execution_sem.signal ();
                 if (_quit_threads)
                         return true;
                 DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 is awake\n", pthread_self()));
@@ -399,16 +398,17 @@ Graph::main_thread()
         get_rt();
 
   again:
-        sem_wait (&_callback_start_sem);
-
+        _callback_start_sem.wait ();
+	DEBUG_TRACE(DEBUG::Graph, "main thread is awake\n");
         this->prep();
 
         if (_graph_empty && !_quit_threads) {
-                sem_post (&_callback_done_sem);
+                _callback_done_sem.signal ();
                 goto again;
         }
 
         while (1) {
+		DEBUG_TRACE(DEBUG::Graph, "main thread runs one graph node\n");
                 if (run_one()) {
                         break;
                 }
@@ -460,8 +460,9 @@ Graph::silent_process_routes (nframes_t nframes, framepos_t start_frame, framepo
         _process_need_butler = false;
 
         if (!_graph_empty) {
-                sem_post (&_callback_start_sem);
-                sem_wait (&_callback_done_sem);
+		DEBUG_TRACE(DEBUG::Graph, "wake graph for silent process\n");
+                _callback_start_sem.signal ();
+                _callback_done_sem.wait ();
         }
 
         need_butler = _process_need_butler;
@@ -473,6 +474,8 @@ int
 Graph::process_routes (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
                        bool can_record, bool rec_monitors_input, bool& need_butler)
 {
+	DEBUG_TRACE (DEBUG::Graph, string_compose ("graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
+
         _process_nframes = nframes;
         _process_start_frame = start_frame;
         _process_end_frame = end_frame;
@@ -485,8 +488,11 @@ Graph::process_routes (nframes_t nframes, framepos_t start_frame, framepos_t end
         _process_retval = 0;
         _process_need_butler = false;
 
-        sem_post (&_callback_start_sem);
-        sem_wait (&_callback_done_sem);
+	DEBUG_TRACE(DEBUG::Graph, "wake graph for non-silent process\n");
+        _callback_start_sem.signal ();
+	_callback_done_sem.wait ();
+
+	DEBUG_TRACE (DEBUG::Graph, "graph execution complete\n");
 
         need_butler = _process_need_butler;
 
@@ -497,6 +503,8 @@ int
 Graph::routes_no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, 
                        bool non_rt_pending, bool can_record, int declick)
 {
+	DEBUG_TRACE (DEBUG::Graph, string_compose ("no-roll graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
+
         _process_nframes = nframes;
         _process_start_frame = start_frame;
         _process_end_frame = end_frame;
@@ -509,8 +517,9 @@ Graph::routes_no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end
         _process_retval = 0;
         _process_need_butler = false;
 
-        sem_post (&_callback_start_sem);
-        sem_wait (&_callback_done_sem);
+	DEBUG_TRACE(DEBUG::Graph, "wake graph for no-roll process\n");
+        _callback_start_sem.signal ();
+        _callback_done_sem.wait ();
 
         return _process_retval;
 }
