@@ -50,6 +50,8 @@
 #include "midi_selection.h"
 #include "automation_time_axis.h"
 #include "debug.h"
+#include "editor_cursors.h"
+#include "mouse_cursors.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -1409,9 +1411,9 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
         float x_fraction = cnote->mouse_x_fraction ();
 
         if (x_fraction > 0.0 && x_fraction < 0.25) {
-                cursor = _editor->left_side_trim_cursor;
+                cursor = _editor->cursors()->left_side_trim;
         } else  {
-                cursor = _editor->right_side_trim_cursor;
+                cursor = _editor->cursors()->right_side_trim;
         }
 
 	Drag::start_grab (event, cursor);
@@ -1422,10 +1424,10 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 	double const middle_point = region_start + cnote->x1() + (cnote->x2() - cnote->x1()) / 2.0L;
 
 	if (grab_x() <= middle_point) {
-		cursor = _editor->left_side_trim_cursor;
+		cursor = _editor->cursors()->left_side_trim;
 		at_front = true;
 	} else {
-		cursor = _editor->right_side_trim_cursor;
+		cursor = _editor->cursors()->right_side_trim;
 		at_front = false;
 	}
 
@@ -1532,17 +1534,17 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 		_operation = ContentsTrim;
-                Drag::start_grab (event, _editor->trimmer_cursor);
+                Drag::start_grab (event, _editor->cursors()->trimmer);
 	} else {
 		/* These will get overridden for a point trim.*/
 		if (pf < (region_start + region_length/2)) {
 			/* closer to start */
 			_operation = StartTrim;
-                        Drag::start_grab (event, _editor->left_side_trim_cursor);
+                        Drag::start_grab (event, _editor->cursors()->left_side_trim);
 		} else {
 			/* closer to end */
 			_operation = EndTrim;
-                        Drag::start_grab (event, _editor->right_side_trim_cursor);
+                        Drag::start_grab (event, _editor->cursors()->right_side_trim);
                 }
 	}
 
@@ -2613,7 +2615,7 @@ ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
 void
 ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 {
-	Drag::start_grab (event, _editor->fader_cursor);
+	Drag::start_grab (event, _editor->cursors()->fader);
 
 	// start the grab at the center of the control point so
 	// the point doesn't 'jump' to the mouse after the first drag
@@ -2758,7 +2760,7 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 		return;
 	}
 
-	Drag::start_grab (event, _editor->fader_cursor);
+	Drag::start_grab (event, _editor->cursors()->fader);
 
 	/* store grab start in parent frame */
 
@@ -3138,7 +3140,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		} else {
 			_copy = false;
 		}
-		cursor = _editor->selector_cursor;
+		cursor = _editor->cursors()->selector;
 		Drag::start_grab (event, cursor);
 		break;
 
@@ -3146,7 +3148,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		if (_editor->clicked_axisview) {
 			_editor->clicked_axisview->order_selection_trims (_item, true);
 		}
-		Drag::start_grab (event, _editor->left_side_trim_cursor);
+		Drag::start_grab (event, _editor->cursors()->left_side_trim);
 		start = _editor->selection->time[_editor->clicked_selection].start;
 		_pointer_frame_offset = raw_grab_frame() - start;
 		break;
@@ -3155,7 +3157,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		if (_editor->clicked_axisview) {
 			_editor->clicked_axisview->order_selection_trims (_item, false);
 		}
-		Drag::start_grab (event, _editor->right_side_trim_cursor);
+		Drag::start_grab (event, _editor->cursors()->right_side_trim);
 		end = _editor->selection->time[_editor->clicked_selection].end;
 		_pointer_frame_offset = raw_grab_frame() - end;
 		break;
@@ -3405,7 +3407,7 @@ RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 		} else {
 			_copy = false;
 		}
-		cursor = _editor->selector_cursor;
+		cursor = _editor->cursors()->selector;
 		break;
 	}
 
@@ -3594,10 +3596,10 @@ void
 MouseZoomDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	if (Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
-		Drag::start_grab (event, _editor->zoom_out_cursor);
+		Drag::start_grab (event, _editor->cursors()->zoom_out);
 		_zoom_out = true;
 	} else {
-		Drag::start_grab (event, _editor->zoom_in_cursor);
+		Drag::start_grab (event, _editor->cursors()->zoom_in);
 		_zoom_out = false;
 	}
 		

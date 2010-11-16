@@ -128,6 +128,8 @@ class EditorSnapshots;
 class EditorSummary;
 class RegionLayeringOrderEditor;
 class ProgressReporter;
+class EditorCursor;
+class MouseCursors;
 
 /* <CMT Additions> */
 class ImageFrameView;
@@ -138,23 +140,6 @@ class MarkerView ;
 class ImageFrameSocketHandler ;
 class TimeAxisViewItem ;
 /* </CMT Additions> */
-
-struct EditorCursor {
-	Editor&               editor;
-	ArdourCanvas::Points  points;
-	ArdourCanvas::Line    canvas_item;
-	framepos_t           current_frame;
-	double		  length;
-
-	EditorCursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
-	~EditorCursor ();
-
-	void set_position (framepos_t);
-	void set_length (double units);
-	void set_y_axis (double position);
-
-        PBD::Signal1<void, framepos_t> PositionChanged;
-};
 
 class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
@@ -450,49 +435,14 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void maybe_autoscroll (bool, bool);
 	
-        /* handy cursors for everyone to use */
-
-	static Gdk::Cursor* cross_hair_cursor;
-	static Gdk::Cursor* trimmer_cursor;
-	static Gdk::Cursor* right_side_trim_cursor;
-	static Gdk::Cursor* left_side_trim_cursor;
-	static Gdk::Cursor* right_side_trim_left_only_cursor;
-	static Gdk::Cursor* left_side_trim_right_only_cursor;
-	static Gdk::Cursor* fade_in_cursor;
-	static Gdk::Cursor* fade_out_cursor;
-	static Gdk::Cursor* selector_cursor;
-	static Gdk::Cursor* grabber_cursor;
-	static Gdk::Cursor* grabber_note_cursor;
-	static Gdk::Cursor* grabber_edit_point_cursor;
-	static Gdk::Cursor* zoom_in_cursor;
-	static Gdk::Cursor* zoom_out_cursor;
-	static Gdk::Cursor* time_fx_cursor;
-	static Gdk::Cursor* fader_cursor;
-	static Gdk::Cursor* speaker_cursor;
-	static Gdk::Cursor* midi_pencil_cursor;
-	static Gdk::Cursor* midi_select_cursor;
-	static Gdk::Cursor* midi_resize_cursor;
-	static Gdk::Cursor* midi_erase_cursor;
-	static Gdk::Cursor* up_down_cursor;
-	static Gdk::Cursor* wait_cursor;
-	static Gdk::Cursor* timebar_cursor;
-	static Gdk::Cursor* transparent_cursor;
-	static Gdk::Cursor* resize_left_cursor;
-	static Gdk::Cursor* resize_top_left_cursor;
-	static Gdk::Cursor* resize_top_cursor;
-	static Gdk::Cursor* resize_top_right_cursor;
-	static Gdk::Cursor* resize_right_cursor;
-	static Gdk::Cursor* resize_bottom_right_cursor;
-	static Gdk::Cursor* resize_bottom_cursor;
-	static Gdk::Cursor* resize_bottom_left_cursor;
-	static Gdk::Cursor* move_cursor;
-	static Gdk::Cursor* expand_left_right_cursor;
-	static Gdk::Cursor* expand_up_down_cursor;
-
         Gdk::Cursor* get_canvas_cursor () const { return current_canvas_cursor; }
         void set_canvas_cursor (Gdk::Cursor*, bool save=false);
         void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>);
         void set_current_movable (boost::shared_ptr<ARDOUR::Movable>);
+
+	MouseCursors const * cursors () const {
+		return _cursors;
+	}
 
   protected:
 	void map_transport_state ();
@@ -1055,8 +1005,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	TimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const;
 
 	TrackViewList get_tracks_for_range_action () const;
-
-	static void build_cursors ();
 
 	sigc::connection super_rapid_screen_update_connection;
 	framepos_t last_update_frame;
@@ -2102,6 +2050,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void action_pre_activated (Glib::RefPtr<Gtk::Action> const &);
 
         void set_canvas_cursor_for_region_view (double, RegionView *);
+
+	MouseCursors* _cursors;
 	
 	friend class Drag;
 	friend class RegionDrag;

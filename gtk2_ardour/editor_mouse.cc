@@ -56,6 +56,8 @@
 #include "editor_drag.h"
 #include "automation_region_view.h"
 #include "edit_note_dialog.h"
+#include "mouse_cursors.h"
+#include "editor_cursors.h"
 
 #include "ardour/types.h"
 #include "ardour/profile.h"
@@ -171,20 +173,20 @@ Editor::event_frame (GdkEvent const * event, double* pcx, double* pcy) const
 Gdk::Cursor*
 Editor::which_grabber_cursor ()
 {
-	Gdk::Cursor* c = grabber_cursor;
+	Gdk::Cursor* c = _cursors->grabber;
 
 	if (_internal_editing) {
 		switch (mouse_mode) {
 		case MouseRange:
-			c = midi_pencil_cursor;
+			c = _cursors->midi_pencil;
 			break;
 
 		case MouseObject:
-			c = grabber_note_cursor;
+			c = _cursors->grabber_note;
 			break;
 
 		case MouseTimeFX:
-			c = midi_resize_cursor;
+			c = _cursors->midi_resize;
 			break;
 
 		default:
@@ -195,12 +197,12 @@ Editor::which_grabber_cursor ()
 
 		switch (_edit_point) {
 		case EditAtMouse:
-			c = grabber_edit_point_cursor;
+			c = _cursors->grabber_edit_point;
 			break;
 		default:
                         boost::shared_ptr<Movable> m = _movable.lock();
                         if (m && m->locked()) {
-                                c = speaker_cursor;
+                                c = _cursors->speaker;
                         } 
 			break;
 		}
@@ -239,7 +241,7 @@ Editor::set_canvas_cursor ()
 
 		switch (mouse_mode) {
 		case MouseRange:
-			current_canvas_cursor = midi_pencil_cursor;
+			current_canvas_cursor = _cursors->midi_pencil;
 			break;
 
 		case MouseObject:
@@ -247,7 +249,7 @@ Editor::set_canvas_cursor ()
 			break;
 
 		case MouseTimeFX:
-			current_canvas_cursor = midi_resize_cursor;
+			current_canvas_cursor = _cursors->midi_resize;
 			break;
 
 		default:
@@ -258,7 +260,7 @@ Editor::set_canvas_cursor ()
 
 		switch (mouse_mode) {
 		case MouseRange:
-			current_canvas_cursor = selector_cursor;
+			current_canvas_cursor = _cursors->selector;
 			break;
 
 		case MouseObject:
@@ -266,23 +268,23 @@ Editor::set_canvas_cursor ()
 			break;
 
 		case MouseGain:
-			current_canvas_cursor = cross_hair_cursor;
+			current_canvas_cursor = _cursors->cross_hair;
 			break;
 
 		case MouseZoom:
 			if (Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
-				current_canvas_cursor = zoom_out_cursor;
+				current_canvas_cursor = _cursors->zoom_out;
 			} else {
-				current_canvas_cursor = zoom_in_cursor;
+				current_canvas_cursor = _cursors->zoom_in;
 			}
 			break;
 
 		case MouseTimeFX:
-			current_canvas_cursor = time_fx_cursor; // just use playhead
+			current_canvas_cursor = _cursors->time_fx; // just use playhead
 			break;
 
 		case MouseAudition:
-			current_canvas_cursor = speaker_cursor;
+			current_canvas_cursor = _cursors->speaker;
 			break;
 		}
 	}
@@ -294,7 +296,7 @@ Editor::set_canvas_cursor ()
 		current_canvas_cursor = which_grabber_cursor ();
 		break;
 	case JOIN_OBJECT_RANGE_RANGE:
-		current_canvas_cursor = selector_cursor;
+		current_canvas_cursor = _cursors->selector;
 		break;
 	}
 
@@ -303,7 +305,7 @@ Editor::set_canvas_cursor ()
 		if (last_item_entered->property_parent() && (*last_item_entered->property_parent()).get_data (X_("timeselection"))) {
 			pair<TimeAxisView*, int> tvp = trackview_by_y_position (_last_motion_y + vertical_adjustment.get_value() - canvas_timebars_vsize);
 			if (dynamic_cast<AutomationTimeAxisView*> (tvp.first)) {
-				current_canvas_cursor = up_down_cursor;
+				current_canvas_cursor = _cursors->up_down;
 			}
 		}
 	}
@@ -694,7 +696,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
 					if (join_object_range_button.get_active() && atv) {
 						/* smart "join" mode: drag automation */
-						_drags->set (new AutomationRangeDrag (this, atv->base_item(), selection->time), event, up_down_cursor);
+						_drags->set (new AutomationRangeDrag (this, atv->base_item(), selection->time), event, _cursors->up_down);
 					} else {
 						/* this was debated, but decided the more common action was to
 						   make a new selection */
@@ -776,14 +778,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case FadeInHandleItem:
 			{
 				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
-				_drags->set (new FadeInDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s), event, fade_in_cursor);
+				_drags->set (new FadeInDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s), event, _cursors->fade_in);
 				return true;
 			}
 
 			case FadeOutHandleItem:
 			{
 				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
-				_drags->set (new FadeOutDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s), event, fade_out_cursor);
+				_drags->set (new FadeOutDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s), event, _cursors->fade_out);
 				return true;
 			}
 
@@ -884,7 +886,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 						/* if we're over an automation track, start a drag of its data */
 						AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
 						if (atv) {
-							_drags->set (new AutomationRangeDrag (this, atv->base_item(), selection->time), event, up_down_cursor);
+							_drags->set (new AutomationRangeDrag (this, atv->base_item(), selection->time), event, _cursors->up_down);
 						}
 
 						/* if we're over a track and a region, and in the `object' part of a region,
@@ -1022,7 +1024,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		scrub_reverse_distance = 0;
 		last_scrub_x = event->button.x;
 		scrubbing_direction = 0;
-		set_canvas_cursor (transparent_cursor);
+		set_canvas_cursor (_cursors->transparent);
 		return true;
 		break;
 
@@ -1542,7 +1544,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			fraction = 1.0 - (cp->get_y() / cp->line().height());
 
 			if (is_drawable() && !_drags->active ()) {
-			        set_canvas_cursor (fader_cursor);
+			        set_canvas_cursor (_cursors->fader);
 			}
 
 			set_verbose_canvas_cursor (cp->line().get_verbose_cursor_string (fraction), at_x, at_y);
@@ -1556,7 +1558,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			if (line)
 				line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EnteredGainLine.get();
 			if (is_drawable()) {
-				set_canvas_cursor (fader_cursor);
+				set_canvas_cursor (_cursors->fader);
 			}
 		}
 		break;
@@ -1569,7 +1571,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 					line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_EnteredAutomationLine.get();
 			}
 			if (is_drawable()) {
-				set_canvas_cursor (fader_cursor);
+				set_canvas_cursor (_cursors->fader);
 			}
 		}
 		break;
@@ -1599,7 +1601,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 #endif
 
 		if (is_drawable()) {
-			set_canvas_cursor (trimmer_cursor);
+			set_canvas_cursor (_cursors->trimmer);
 		}
 		break;
 
@@ -1607,10 +1609,10 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if (is_drawable()) {
 			switch (_edit_point) {
 			case EditAtMouse:
-				set_canvas_cursor (grabber_edit_point_cursor);
+				set_canvas_cursor (_cursors->grabber_edit_point);
 				break;
 			default:
-				set_canvas_cursor (grabber_cursor);
+				set_canvas_cursor (_cursors->grabber);
 				break;
 			}
 		}
@@ -1634,13 +1636,13 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			Gdk::Cursor *cursor;
 			switch (mouse_mode) {
 			case MouseRange:
-				cursor = selector_cursor;
+				cursor = _cursors->selector;
 				break;
 			case MouseZoom:
-	 			cursor = zoom_in_cursor;
+	 			cursor = _cursors->zoom_in;
 				break;
 			default:
-				cursor = cross_hair_cursor;
+				cursor = _cursors->cross_hair;
 				break;
 			}
 
@@ -1661,7 +1663,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case MeterBarItem:
 	case TempoBarItem:
 		if (is_drawable()) {
-			set_canvas_cursor (timebar_cursor);
+			set_canvas_cursor (_cursors->timebar);
 		}
 		break;
 
@@ -1675,7 +1677,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case MeterMarkerItem:
 	case TempoMarkerItem:
 		if (is_drawable()) {
-			set_canvas_cursor (timebar_cursor);
+			set_canvas_cursor (_cursors->timebar);
 		}
 		break;
 
@@ -1685,7 +1687,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			if (rect) {
 				rect->property_fill_color_rgba() = 0xBBBBBBAA;
 			}
-			set_canvas_cursor (fade_in_cursor);
+			set_canvas_cursor (_cursors->fade_in);
 		}
                 break;
 
@@ -1695,7 +1697,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			if (rect) {
 				rect->property_fill_color_rgba() = 0xBBBBBBAA;
 			}
-			set_canvas_cursor (fade_out_cursor);
+			set_canvas_cursor (_cursors->fade_out);
 		}
 		break;
 	case FeatureLineItem:
@@ -1833,7 +1835,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case TempoMarkerItem:
 
 		if (is_drawable()) {
-			set_canvas_cursor (timebar_cursor);
+			set_canvas_cursor (_cursors->timebar);
 		}
 
 		break;
@@ -2719,15 +2721,15 @@ Editor::set_canvas_cursor_for_region_view (double x, RegionView* rv)
 	Trimmable::CanTrim ct = rv->region()->can_trim ();
 	if (x <= h) {
 		if (ct & Trimmable::FrontTrimEarlier) {
-			set_canvas_cursor (left_side_trim_cursor);
+			set_canvas_cursor (_cursors->left_side_trim);
 		} else {
-			set_canvas_cursor (left_side_trim_right_only_cursor);
+			set_canvas_cursor (_cursors->left_side_trim_right_only);
 		}
 	} else {
 		if (ct & Trimmable::EndTrimLater) {
-			set_canvas_cursor (right_side_trim_cursor);
+			set_canvas_cursor (_cursors->right_side_trim);
 		} else {
-			set_canvas_cursor (right_side_trim_left_only_cursor);
+			set_canvas_cursor (_cursors->right_side_trim_left_only);
 		}
 	}
 }

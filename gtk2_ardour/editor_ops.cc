@@ -82,6 +82,8 @@
 #include "interthread_progress_window.h"
 #include "insert_time_dialog.h"
 #include "normalize_dialog.h"
+#include "editor_cursors.h"
+#include "mouse_cursors.h"
 
 #include "i18n.h"
 
@@ -3547,7 +3549,7 @@ Editor::freeze_route ()
 
 	pthread_create_and_store (X_("freezer"), &itt.thread, _freeze_thread, this);
 
-	set_canvas_cursor (wait_cursor);
+	set_canvas_cursor (_cursors->wait);
 
 	while (!itt.done && !itt.cancel) {
 		gtk_main_iteration ();
@@ -4385,7 +4387,7 @@ Editor::normalize_region ()
 		return;
 	}
 
-	set_canvas_cursor (wait_cursor);
+	set_canvas_cursor (_cursors->wait);
 	gdk_flush ();
 
 	/* XXX: should really only count audio regions here */
@@ -4611,7 +4613,7 @@ Editor::fork_region ()
 
 	begin_reversible_command (_("Fork Region(s)"));
 
-	set_canvas_cursor (wait_cursor);
+	set_canvas_cursor (_cursors->wait);
 	gdk_flush ();
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
@@ -4671,7 +4673,7 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 
 	begin_reversible_command (command);
 
-	set_canvas_cursor (wait_cursor);
+	set_canvas_cursor (_cursors->wait);
 	gdk_flush ();
 
 	int n = 0;

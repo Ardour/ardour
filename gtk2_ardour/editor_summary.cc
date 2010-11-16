@@ -27,6 +27,8 @@
 #include "rgb_macros.h"
 #include "keyboard.h"
 #include "editor_routes.h"
+#include "editor_cursors.h"
+#include "mouse_cursors.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -412,37 +414,37 @@ EditorSummary::set_cursor (Position p)
 {
 	switch (p) {
 	case LEFT:
-		get_window()->set_cursor (*_editor->resize_left_cursor);
+		get_window()->set_cursor (*_editor->_cursors->resize_left);
 		break;
 	case LEFT_TOP:
-		get_window()->set_cursor (*_editor->resize_top_left_cursor);
+		get_window()->set_cursor (*_editor->_cursors->resize_top_left);
 		break;
 	case TOP:
-		get_window()->set_cursor (*_editor->resize_top_cursor);
+		get_window()->set_cursor (*_editor->_cursors->resize_top);
 		break;
 	case RIGHT_TOP:
-		get_window()->set_cursor (*_editor->resize_top_right_cursor);
+		get_window()->set_cursor (*_editor->_cursors->resize_top_right);
 		break;
 	case RIGHT:
-		get_window()->set_cursor (*_editor->resize_right_cursor);
+		get_window()->set_cursor (*_editor->_cursors->resize_right);
 		break;
 	case RIGHT_BOTTOM:
-		get_window()->set_cursor (*_editor->resize_bottom_right_cursor);
+		get_window()->set_cursor (*_editor->_cursors->resize_bottom_right);
 		break;
 	case BOTTOM:
-		get_window()->set_cursor (*_editor->resize_bottom_cursor);
+		get_window()->set_cursor (*_editor->_cursors->resize_bottom);
 		break;
 	case LEFT_BOTTOM:
-		get_window()->set_cursor (*_editor->resize_bottom_left_cursor);
+		get_window()->set_cursor (*_editor->_cursors->resize_bottom_left);
 		break;
 	case INSIDE:
-		get_window()->set_cursor (*_editor->move_cursor);
+		get_window()->set_cursor (*_editor->_cursors->move);
 		break;
 	case TO_LEFT_OR_RIGHT:
-		get_window()->set_cursor (*_editor->expand_left_right_cursor);
+		get_window()->set_cursor (*_editor->_cursors->expand_left_right);
 		break;
 	case BELOW_OR_ABOVE:
-		get_window()->set_cursor (*_editor->expand_up_down_cursor);
+		get_window()->set_cursor (*_editor->_cursors->expand_up_down);
 		break;
 	default:
 		get_window()->set_cursor ();

@@ -23,6 +23,7 @@
 #include <libgnomecanvas/libgnomecanvas.h>
 
 #include "utils.h"
+#include "editor_cursors.h"
 #include "editor.h"
 
 using namespace ARDOUR;

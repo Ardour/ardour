@@ -51,6 +51,8 @@
 #include "editor_routes.h"
 #include "editor_summary.h"
 #include "keyboard.h"
+#include "editor_cursors.h"
+#include "mouse_cursors.h"
 
 #include "i18n.h"
 
@@ -940,7 +942,7 @@ Editor::track_canvas_key_press (GdkEventKey* event)
 {
 	/* XXX: event does not report the modifier key pressed down, AFAICS, so use the Keyboard object instead */
 	if (mouse_mode == Editing::MouseZoom && Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
-		set_canvas_cursor (zoom_out_cursor);
+		set_canvas_cursor (_cursors->zoom_out);
 	}
 
 	return false;
@@ -950,7 +952,7 @@ bool
 Editor::track_canvas_key_release (GdkEventKey* event)
 {
 	if (mouse_mode == Editing::MouseZoom && !Keyboard::the_keyboard().key_is_down (GDK_Control_L)) {
-		set_canvas_cursor (zoom_in_cursor);
+		set_canvas_cursor (_cursors->zoom_in);
 	}
 
 	return false;

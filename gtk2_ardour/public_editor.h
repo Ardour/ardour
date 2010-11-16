@@ -86,6 +86,7 @@ class ImageFrameView;
 class ImageFrameTimeAxis;
 class MarkerView;
 class DragManager;
+class MouseCursors;
 
 using ARDOUR::framepos_t;
 using ARDOUR::framecnt_t;
@@ -379,6 +380,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual DragManager* drags () const = 0;
 	virtual void maybe_autoscroll (bool, bool) = 0;
 	virtual void stop_canvas_autoscroll () = 0;
+
+	virtual MouseCursors const * cursors () const = 0;
 
 	/// Singleton instance, set up by Editor::Editor()
 

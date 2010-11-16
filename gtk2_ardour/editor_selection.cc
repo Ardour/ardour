@@ -36,6 +36,7 @@
 #include "automation_line.h"
 #include "control_point.h"
 #include "editor_regions.h"
+#include "editor_cursors.h"
 
 #include "i18n.h"
 
@@ -1482,7 +1483,7 @@ Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 
 	if (after) {
 		begin_reversible_command (_("select all after cursor"));
-		start = cursor->current_frame ;
+		start = cursor->current_frame;
 		end = _session->current_end_frame();
 	} else {
 		if (cursor->current_frame > 0) {

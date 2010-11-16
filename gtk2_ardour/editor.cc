@@ -115,6 +115,8 @@
 #include "editor_snapshots.h"
 #include "editor_summary.h"
 #include "region_layering_order_editor.h"
+#include "mouse_cursors.h"
+#include "editor_cursors.h"
 
 #include "i18n.h"
 
@@ -135,8 +137,6 @@ using PBD::atoi;
 using Gtkmm2ext::Keyboard;
 
 const double Editor::timebar_height = 15.0;
-
-#include "editor_xpms"
 
 static const gchar *_snap_type_strings[] = {
 	N_("CD Frames"),
@@ -206,45 +206,6 @@ static const gchar *_rb_opt_strings[] = {
 	0
 };
 #endif
-
-/* Soundfile  drag-n-drop */
-
-Gdk::Cursor* Editor::cross_hair_cursor = 0;
-Gdk::Cursor* Editor::selector_cursor = 0;
-Gdk::Cursor* Editor::trimmer_cursor = 0;
-Gdk::Cursor* Editor::left_side_trim_cursor = 0;
-Gdk::Cursor* Editor::right_side_trim_cursor = 0;
-Gdk::Cursor* Editor::left_side_trim_right_only_cursor = 0;
-Gdk::Cursor* Editor::right_side_trim_left_only_cursor = 0;
-Gdk::Cursor* Editor::fade_in_cursor = 0;
-Gdk::Cursor* Editor::fade_out_cursor = 0;
-Gdk::Cursor* Editor::grabber_cursor = 0;
-Gdk::Cursor* Editor::grabber_note_cursor = 0;
-Gdk::Cursor* Editor::grabber_edit_point_cursor = 0;
-Gdk::Cursor* Editor::zoom_in_cursor = 0;
-Gdk::Cursor* Editor::zoom_out_cursor = 0;
-Gdk::Cursor* Editor::time_fx_cursor = 0;
-Gdk::Cursor* Editor::fader_cursor = 0;
-Gdk::Cursor* Editor::speaker_cursor = 0;
-Gdk::Cursor* Editor::midi_pencil_cursor = 0;
-Gdk::Cursor* Editor::midi_select_cursor = 0;
-Gdk::Cursor* Editor::midi_resize_cursor = 0;
-Gdk::Cursor* Editor::midi_erase_cursor = 0;
-Gdk::Cursor* Editor::wait_cursor = 0;
-Gdk::Cursor* Editor::timebar_cursor = 0;
-Gdk::Cursor* Editor::transparent_cursor = 0;
-Gdk::Cursor* Editor::up_down_cursor = 0;
-Gdk::Cursor* Editor::resize_left_cursor = 0;
-Gdk::Cursor* Editor::resize_top_left_cursor = 0;
-Gdk::Cursor* Editor::resize_top_cursor = 0;
-Gdk::Cursor* Editor::resize_top_right_cursor = 0;
-Gdk::Cursor* Editor::resize_right_cursor = 0;
-Gdk::Cursor* Editor::resize_bottom_right_cursor = 0;
-Gdk::Cursor* Editor::resize_bottom_cursor = 0;
-Gdk::Cursor* Editor::resize_bottom_left_cursor = 0;
-Gdk::Cursor* Editor::move_cursor = 0;
-Gdk::Cursor* Editor::expand_left_right_cursor = 0;
-Gdk::Cursor* Editor::expand_up_down_cursor = 0;
 
 void
 show_me_the_size (Requisition* r, const char* what)
@@ -518,7 +479,7 @@ Editor::Editor ()
 	controls_layout.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::edit_controls_button_release));
 	controls_layout_size_request_connection = controls_layout.signal_size_request().connect (sigc::mem_fun (*this, &Editor::controls_layout_size_request));
 
-	build_cursors ();
+	_cursors = new MouseCursors;
 
 	ArdourCanvas::Canvas* time_pad = manage(new ArdourCanvas::Canvas());
 	ArdourCanvas::SimpleLine* pad_line_1 = manage(new ArdourCanvas::SimpleLine(*time_pad->root(),
@@ -1234,169 +1195,6 @@ Editor::action_pre_activated (Glib::RefPtr<Action> const & a)
 		sensitize_the_right_region_actions ();
 		_last_region_menu_was_main = true;
 	}
-}
-
-void
-Editor::build_cursors ()
-{
-	using namespace Gdk;
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> zoom_in_cursor_pixbuf (::get_icon ("zoom_in_cursor"));
-		zoom_in_cursor = new Gdk::Cursor (Gdk::Display::get_default(), zoom_in_cursor_pixbuf, 5, 5);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> zoom_out_cursor_pixbuf (::get_icon ("zoom_out_cursor"));
-		zoom_out_cursor = new Gdk::Cursor (Gdk::Display::get_default(), zoom_out_cursor_pixbuf, 5, 5);
-	}
-	
-	Gdk::Color fbg ("#ffffff" );
-	Gdk::Color ffg  ("#000000" );
-
-	{
-		RefPtr<Bitmap> source, mask;
-
-		source = Bitmap::create (fader_cursor_bits, fader_cursor_width, fader_cursor_height);
-		mask = Bitmap::create (fader_cursor_mask_bits, fader_cursor_width, fader_cursor_height);
-		fader_cursor = new Gdk::Cursor (source, mask, ffg, fbg, fader_cursor_x_hot, fader_cursor_y_hot);
-	}
-
-	{
-		RefPtr<Bitmap> source, mask;
-		source = Bitmap::create (speaker_cursor_bits, speaker_cursor_width, speaker_cursor_height);
-		mask = Bitmap::create (speaker_cursor_mask_bits, speaker_cursor_width, speaker_cursor_height);
-		speaker_cursor = new Gdk::Cursor (source, mask, ffg, fbg, speaker_cursor_x_hot, speaker_cursor_y_hot);
-	}
-
-	{
-		RefPtr<Bitmap> bits;
-		char pix[4] = { 0, 0, 0, 0 };
-		bits = Bitmap::create (pix, 2, 2);
-		Gdk::Color c;
-		transparent_cursor = new Gdk::Cursor (bits, bits, c, c, 0, 0);
-	}
-
-	{
-		RefPtr<Bitmap> bits;
-		char pix[4] = { 0, 0, 0, 0 };
-		bits = Bitmap::create (pix, 2, 2);
-		Gdk::Color c;
-		transparent_cursor = new Gdk::Cursor (bits, bits, c, c, 0, 0);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> grabber_pixbuf (::get_icon ("grabber"));
-		grabber_cursor = new Gdk::Cursor (Gdk::Display::get_default(), grabber_pixbuf, 5, 0);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> grabber_note_pixbuf (::get_icon ("grabber_note"));
-		grabber_note_cursor = new Gdk::Cursor (Gdk::Display::get_default(), grabber_note_pixbuf, 5, 10);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> grabber_edit_point_pixbuf (::get_icon ("grabber_edit_point"));
-		grabber_edit_point_cursor = new Gdk::Cursor (Gdk::Display::get_default(), grabber_edit_point_pixbuf, 5, 17);
-	}
-
-	cross_hair_cursor = new Gdk::Cursor (CROSSHAIR);
-	trimmer_cursor =  new Gdk::Cursor (SB_H_DOUBLE_ARROW);
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("trim_left_cursor"));
-		left_side_trim_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 5, 11);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("trim_right_cursor"));
-		right_side_trim_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 23, 11);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("trim_left_cursor_right_only"));
-		left_side_trim_right_only_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 5, 11);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("trim_right_cursor_left_only"));
-		right_side_trim_left_only_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 23, 11);
-	}
-	
-	{
-		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("fade_in_cursor"));
-		fade_in_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 0, 0);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("fade_out_cursor"));
-		fade_out_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 29, 0);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_left_cursor"));
-		resize_left_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 3, 10);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_top_left_cursor"));
-		resize_top_left_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 3, 3);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_top_cursor"));
-		resize_top_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 10, 3);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_top_right_cursor"));
-		resize_top_right_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 18, 3);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_right_cursor"));
-		resize_right_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 24, 10);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_bottom_right_cursor"));
-		resize_bottom_right_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 18, 18);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_bottom_cursor"));
-		resize_bottom_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 10, 24);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("resize_bottom_left_cursor"));
-		resize_bottom_left_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 3, 18);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("move_cursor"));
-		move_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 11, 11);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("expand_left_right_cursor"));
-		expand_left_right_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 11, 4);
-	}
-
-	{
-		Glib::RefPtr<Gdk::Pixbuf> p (::get_icon ("expand_up_down_cursor"));
-		expand_up_down_cursor = new Gdk::Cursor (Gdk::Display::get_default(), p, 4, 11);
-	}
-	
-	selector_cursor = new Gdk::Cursor (XTERM);
-	time_fx_cursor = new Gdk::Cursor (SIZING);
-	wait_cursor = new Gdk::Cursor (WATCH);
-	timebar_cursor = new Gdk::Cursor(LEFT_PTR);
-	midi_pencil_cursor = new Gdk::Cursor (PENCIL);
-	midi_select_cursor = new Gdk::Cursor (CENTER_PTR);
-	midi_resize_cursor = new Gdk::Cursor (SIZING);
-	midi_erase_cursor = new Gdk::Cursor (DRAPED_BOX);
-	up_down_cursor = new Gdk::Cursor (Gdk::SB_V_DOUBLE_ARROW);
 }
 
 /** Pop up a context menu for when the user clicks on a fade in or fade out */

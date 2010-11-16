@@ -60,6 +60,8 @@
 #include "utils.h"
 #include "gui_thread.h"
 #include "interthread_progress_window.h"
+#include "mouse_cursors.h"
+#include "editor_cursors.h"
 
 #include "i18n.h"
 
@@ -519,7 +521,7 @@ Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quali
 	import_status.track = track;
 	import_status.replace = replace;
         
-	set_canvas_cursor (wait_cursor);
+	set_canvas_cursor (_cursors->wait);
 	gdk_flush ();
 
 	/* start import thread for this spec. this will ultimately call Session::import_audiofiles()
@@ -569,7 +571,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 	SoundFileInfo finfo;
 	int ret = 0;
 
-	set_canvas_cursor (wait_cursor);
+	set_canvas_cursor (_cursors->wait);
 	gdk_flush ();
 
 	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
@@ -642,7 +644,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 			}
 		}
 
-		set_canvas_cursor (wait_cursor);
+		set_canvas_cursor (_cursors->wait);
 
 		for (int n = 0; n < finfo.channels; ++n) {
 			try {
