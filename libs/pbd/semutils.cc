@@ -35,7 +35,7 @@ ProcessSemaphore::ProcessSemaphore (const char* name, int val)
 	}
 
 #else
-	if (sem_init (&sem, 0, val)) {
+	if (sem_init (&_sem, 0, val)) {
 		throw failed_constructor ();
 	}
 #endif

@@ -29,7 +29,7 @@ class ProcessSemaphore {
 	sem_t* _sem;
 	sem_t* ptr_to_sem() const { return _sem; }
 #else
-	sem_t _sem;
+	mutable sem_t _sem;
 	sem_t* ptr_to_sem() const { return &_sem; }
 #endif
 
