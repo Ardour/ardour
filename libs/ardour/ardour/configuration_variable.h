@@ -154,6 +154,31 @@ class ConfigVariableWithMutation : public ConfigVariable<T>
 	T (*mutator)(T);
 };
 
+template<>
+class ConfigVariableWithMutation<std::string> : public ConfigVariable<std::string>
+{
+  public:
+	ConfigVariableWithMutation (std::string name, std::string val, std::string (*m)(std::string))
+		: ConfigVariable<std::string> (name, val), mutator (m) {}
+
+	bool set (std::string val) {
+		if (unmutated_value != val) {
+			unmutated_value = val;
+			return ConfigVariable<std::string>::set (mutator (val));
+		}
+		return false;
+	}
+
+	void set_from_string (std::string const & s) {
+		set (s);
+	}
+
+  protected:
+	virtual std::string get_for_save() { return unmutated_value; }
+	std::string unmutated_value;
+	std::string (*mutator)(std::string);
+};
+
 }
 
 #endif /* __ardour_configuration_variable_h__ */
