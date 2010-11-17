@@ -97,7 +97,6 @@ ConfigVariableBase::set_from_node (XMLNode const & node)
 
 			if (option->name() == _name) {
 				if ((opt_prop = option->property ("val")) != 0) {
-                                        cerr << "Setting " << _name << " to " << opt_prop->value() << endl;
 					set_from_string (opt_prop->value());
 					return true;
 				}
