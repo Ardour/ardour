@@ -1,3 +1,36 @@
+/* 
+   This software is being provided to you, the licensee, by Ville Pulkki,
+   under the following license. By obtaining, using and/or copying this
+   software, you agree that you have read, understood, and will comply
+   with these terms and conditions: Permission to use, copy, modify and
+   distribute, including the right to grant others rights to distribute
+   at any tier, this software and its documentation for any purpose and
+   without fee or royalty is hereby granted, provided that you agree to
+   comply with the following copyright notice and statements, including
+   the disclaimer, and that the same appear on ALL copies of the software
+   and documentation, including modifications that you make for internal
+   use or for distribution:
+   
+   Copyright 1998 by Ville Pulkki, Helsinki University of Technology.  All
+   rights reserved.  
+   
+   The software may be used, distributed, and included to commercial
+   products without any charges. When included to a commercial product,
+   the method "Vector Base Amplitude Panning" and its developer Ville
+   Pulkki must be referred to in documentation.
+   
+   This software is provided "as is", and Ville Pulkki or Helsinki
+   University of Technology make no representations or warranties,
+   expressed or implied. By way of example, but not limitation, Helsinki
+   University of Technology or Ville Pulkki make no representations or
+   warranties of merchantability or fitness for any particular purpose or
+   that the use of the licensed software or documentation will not
+   infringe any third party patents, copyrights, trademarks or other
+   rights. The name of Ville Pulkki or Helsinki University of Technology
+   may not be used in advertising or publicity pertaining to distribution
+   of the software.
+*/
+
 #include <cmath>
 #include <stdlib.h>
 
