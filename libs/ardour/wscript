@@ -201,6 +201,8 @@ libardour_sources = [
 	'transient_detector.cc',
 	'user_bundle.cc',
 	'utils.cc',
+        'vbap.cc',
+        'vbap_speakers.cc',
 	'version.cc'
 ]
 
