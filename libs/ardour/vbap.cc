@@ -38,14 +38,24 @@
 
 #include <string>
 
-#include "ardour/vbap.h"
+#include "pbd/cartesian.h"
 
+#include "ardour/vbap.h"
+#include "ardour/vbap_speakers.h"
+#include "ardour/audio_buffer.h"
+#include "ardour/buffer_set.h"
+
+using namespace PBD;
 using namespace ARDOUR;
+using namespace std;
 
 VBAPanner::VBAPanner (Panner& parent, Evoral::Parameter param, VBAPSpeakers& s)
         : StreamPanner (parent, param)
+        , _dirty (false)
         , _speakers (s)
+
 {
+         _speakers.Changed.connect_same_thread (speaker_connection, boost::bind (&VBAPanner::mark_dirty, this));
 }
 
 VBAPanner::~VBAPanner ()
@@ -53,21 +63,16 @@ VBAPanner::~VBAPanner ()
 }
 
 void
-VBAPanner::azi_ele_to_cart (int azi, int ele, double* c)
+VBAPanner::mark_dirty ()
 {
-        static const double atorad = (2.0 * M_PI / 360.0) ;
-        c[0] = cos (azi * atorad) * cos (ele * atorad);
-        c[1] = sin (azi * atorad) * cos (ele * atorad);
-        c[2] = sin (ele * atorad);
+        _dirty = true;
 }
 
 void
 VBAPanner::update ()
 {
-        double g[3];
-        int    ls[3];
-
-        compute_gains (g, ls, _azimuth, _elevation);
+        cart_to_azi_ele (_x, _y, _z, _azimuth, _elevation);
+        _dirty = true;
 }
 
 void 
@@ -80,23 +85,33 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
         double small_g;
         double big_sm_g, gtmp[3];
 
-        azi_ele_to_cart (azi,ele, cartdir);  
+        azi_ele_to_cart (azi,ele, cartdir[0], cartdir[1], cartdir[2]);  
         big_sm_g = -100000.0;
 
-        for (i = 0; i < _speakers.n_tuples(); i++){
+        for (i = 0; i < _speakers.n_tuples(); i++) {
+
                 small_g = 10000000.0;
+
                 for (j = 0; j < _speakers.dimension(); j++) {
+
                         gtmp[j]=0.0;
-                        for (k = 0; k < _speakers.dimension(); k++)
-                                gtmp[j]+=cartdir[k]*_speakers.matrix(i)[j*_speakers.dimension()+k]; 
-                        if (gtmp[j] < small_g)
+
+                        for (k = 0; k < _speakers.dimension(); k++) {
+                                gtmp[j] += cartdir[k] * _speakers.matrix(i)[j*_speakers.dimension()+k]; 
+                        }
+
+                        if (gtmp[j] < small_g) {
                                 small_g = gtmp[j];
+                        }
                 }
 
                 if (small_g > big_sm_g) {
+
                         big_sm_g = small_g;
-                        gains[0]=gtmp[0]; 
-                        gains[1]=gtmp[1]; 
+
+                        gains[0] = gtmp[0]; 
+                        gains[1] = gtmp[1]; 
+
                         speaker_ids[0]= _speakers.speaker_for_tuple (i, 0);
                         speaker_ids[1]= _speakers.speaker_for_tuple (i, 1);
 
@@ -105,7 +120,7 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
                                 speaker_ids[2] = _speakers.speaker_for_tuple (i, 2);
                         } else {
                                 gains[2] = 0.0;
-                                speaker_ids[2] = 0;
+                                speaker_ids[2] = -1;
                         }
                 }
         }
@@ -115,9 +130,64 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
         gains[0] /= power; 
         gains[1] /= power;
         gains[2] /= power;
+
+        _dirty = false;
 }
 
 void
-VBAPanner::do_distribute (AudioBuffer& bufs, BufferSet& obufs, gain_t gain_coefficient, nframes_t nframes)
+VBAPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coefficient, nframes_t nframes)
 {
+	if (_muted) {
+		return;
+	}
+
+	Sample* const src = srcbuf.data();
+	Sample* dst;
+        pan_t pan;
+        uint32_t n_audio = obufs.count().n_audio();
+        bool was_dirty;
+
+        if ((was_dirty = _dirty)) {
+                compute_gains (desired_gains, desired_outputs, _azimuth, _elevation);
+        }
+
+        bool todo[n_audio];
+        
+        for (uint32_t o = 0; o < n_audio; ++o) {
+                todo[o] = true;
+        }
+
+        /* VBAP may distribute the signal across up to 3 speakers depending on
+           the configuration of the speakers.
+        */
+
+        for (int o = 0; o < 3; ++o) {
+                if (outputs[o] != -1) {
+
+                        nframes_t n = 0;
+
+                        /* XXX TODO: interpolate across changes in gain and/or outputs
+                         */
+
+                        dst = obufs.get_audio(outputs[o]).data();
+
+                        pan = gain_coefficient * desired_gains[o];
+                        mix_buffers_with_gain (dst+n,src+n,nframes-n,pan);
+
+                        todo[o] = false;
+               }
+        }
+        
+        for (uint32_t o = 0; o < n_audio; ++o) {
+                if (todo[o]) {
+                        /* VBAP decided not to deliver any audio to this output, so we write silence */
+                        dst = obufs.get_audio(o).data();
+                        memset (dst, 0, sizeof (Sample) * nframes);
+                }
+        }
+        
+        if (was_dirty) {
+                memcpy (gains, desired_gains, sizeof (gains));
+                memcpy (outputs, desired_outputs, sizeof (outputs));
+        }
 }

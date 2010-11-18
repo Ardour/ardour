@@ -58,6 +58,7 @@ def build(bld):
 		basename.cc
 		base_ui.cc
                 boost_debug.cc
+                cartesian.cc
 		command.cc
 		convert.cc
 		controllable.cc
