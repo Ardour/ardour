@@ -217,6 +217,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	midi_control_ui = 0;
         _step_editors = 0;
         no_questions_about_missing_files = false;
+        _speakers = 0;
 
 	AudioDiskstream::allocate_working_buffers();
 

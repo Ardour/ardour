@@ -32,6 +32,7 @@
 
 #include <glibmm.h>
 
+#include "pbd/cartesian.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
@@ -47,6 +48,7 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/buffer_set.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/vbap.h"
 
 #include "i18n.h"
 
@@ -947,58 +949,19 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 	case 2: // line
 		outputs.push_back (Output (0, 0));
 		outputs.push_back (Output (1.0, 0));
-
 		for (n = 0; n < npans; ++n) {
 			_streampanners.push_back (new EqualPowerStereoPanner (*this, Evoral::Parameter(PanAutomation, 0, n)));
 		}
-		break;
+                break;
 
-	case 3: // triangle
-		outputs.push_back (Output  (0.5, 0));
-		outputs.push_back (Output  (0, 1.0));
-		outputs.push_back (Output  (1.0, 1.0));
-
+        case 3:
+        case 4:
+        case 5:
+        default:
+                setup_speakers (nouts);
 		for (n = 0; n < npans; ++n) {
-			_streampanners.push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, 0, n)));
+			_streampanners.push_back (new VBAPanner (*this, Evoral::Parameter(PanAutomation, 0, n), _session.get_speakers()));
 		}
-
-		break;
-
-	case 4: // square
-		outputs.push_back (Output  (0, 0));
-		outputs.push_back (Output  (1.0, 0));
-		outputs.push_back (Output  (1.0, 1.0));
-		outputs.push_back (Output  (0, 1.0));
-
-		for (n = 0; n < npans; ++n) {
-			_streampanners.push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, 0, n)));
-		}
-
-		break;
-
-	case 5: //square+offcenter center
-		outputs.push_back (Output  (0, 0));
-		outputs.push_back (Output  (1.0, 0));
-		outputs.push_back (Output  (1.0, 1.0));
-		outputs.push_back (Output  (0, 1.0));
-		outputs.push_back (Output  (0.5, 0.75));
-
-		for (n = 0; n < npans; ++n) {
-			_streampanners.push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, 0, n)));
-		}
-
-		break;
-
-	default:
-		/* XXX horrible placement. FIXME */
-		for (n = 0; n < nouts; ++n) {
-			outputs.push_back (Output (0.1 * n, 0.1 * n));
-		}
-
-		for (n = 0; n < npans; ++n) {
-			_streampanners.push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, 0, n)));
-		}
-
 		break;
 	}
 
@@ -1668,4 +1631,48 @@ Panner::value_as_string (double v)
 	}
 
 	return "";
+}
+
+void
+Panner::setup_speakers (uint32_t nouts)
+{
+        switch (nouts) {
+        case 3:
+		outputs.push_back (Output  (0.5, 0));
+		outputs.push_back (Output  (0, 1.0));
+		outputs.push_back (Output  (1.0, 1.0));
+                break;
+        case 4:
+		outputs.push_back (Output  (0, 0));
+		outputs.push_back (Output  (1.0, 0));
+		outputs.push_back (Output  (1.0, 1.0));
+		outputs.push_back (Output  (0, 1.0));
+                break;
+
+	case 5: //square+offcenter center
+		outputs.push_back (Output  (0, 0));
+		outputs.push_back (Output  (1.0, 0));
+		outputs.push_back (Output  (1.0, 1.0));
+		outputs.push_back (Output  (0, 1.0));
+		outputs.push_back (Output  (0.5, 0.75));
+                break;
+
+	default:
+		/* XXX horrible placement. FIXME */
+		for (uint32_t n = 0; n < nouts; ++n) {
+			outputs.push_back (Output (0.1 * n, 0.1 * n));
+		}
+        }
+
+        VBAPSpeakers& speakers (_session.get_speakers());
+
+        speakers.clear_speakers ();
+
+        for (vector<Output>::iterator o = outputs.begin(); o != outputs.end(); ++o) {
+                double azimuth;
+                double elevation;
+                
+                cart_to_azi_ele ((*o).x + 1.0, (*o).y + 1.0, (*o).z, azimuth, elevation);
+                speakers.add_speaker (azimuth, elevation);
+        }
 }

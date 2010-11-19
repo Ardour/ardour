@@ -16,6 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <iostream>
 #include <cmath>
 #include "pbd/cartesian.h"
 
@@ -39,13 +40,13 @@ PBD::cart_to_azi_ele (double x, double y, double z, double& azimuth, double& ele
         if(x == 0.0) {
                 atan_y_per_x = M_PI / 2;
         } else {
-                atan_y_per_x = atan(y / x);
+                atan_y_per_x = atan (y/x);
         }
 
         azimuth = atan_y_per_x / atorad;
 
         if (x < 0.0) {
-                azimuth +=180.0;
+                azimuth += 180.0;
         }
 
         distance = sqrt (x*x + y*y);
@@ -65,6 +66,8 @@ PBD::cart_to_azi_ele (double x, double y, double z, double& azimuth, double& ele
         }
 
         elevation = atan_x_pl_y_per_z / atorad;
+
+        std::cerr << x << ", " << y << ", " << z << " = " << azimuth << " /= " << elevation << std::endl;
 
         // distance = sqrtf (x*x + y*y + z*z);
 }

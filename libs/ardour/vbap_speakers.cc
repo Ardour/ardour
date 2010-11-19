@@ -63,10 +63,19 @@ VBAPSpeakers::~VBAPSpeakers ()
 {
 }
 
+void
+VBAPSpeakers::clear_speakers ()
+{
+        _speakers.clear ();
+        update ();
+}
+
 int 
 VBAPSpeakers::add_speaker (double azimuth, double elevation)
 {
         int id = _speakers.size();
+
+        cerr << "Added speaker " << id << " at " << azimuth << " /= " << elevation << endl;
 
         _speakers.push_back (Speaker (id, azimuth, elevation));
         update ();
@@ -112,12 +121,22 @@ VBAPSpeakers::update ()
 
         _dimension = dim;
 
+        cerr << "update with dimension = " << dim << " speakers = " << _speakers.size() << endl;
+
+        if (_speakers.size() < 2) {
+                /* nothing to be done with less than two speakers */
+                return;
+        }
+
         if (_dimension == 3)  {
                 ls_triplet_chain *ls_triplets = 0;
-                choose_ls_triplets (&ls_triplets);
-                calculate_3x3_matrixes (ls_triplets);
+                choose_speaker_triplets (&ls_triplets);
+                if (ls_triplets) {
+                        calculate_3x3_matrixes (ls_triplets);
+                        free (ls_triplets);
+                }
         } else {
-                choose_ls_pairs ();
+                choose_speaker_pairs ();
         }
 
         Changed (); /* EMIT SIGNAL */
@@ -138,7 +157,7 @@ VBAPSpeakers::angle_to_cart(ang_vec *from, cart_vec *to)
 }  
 
 void 
-VBAPSpeakers::choose_ls_triplets(struct ls_triplet_chain **ls_triplets) 
+VBAPSpeakers::choose_speaker_triplets(struct ls_triplet_chain **ls_triplets) 
 {
         /* Selects the loudspeaker triplets, and
            calculates the inversion matrices for each selected triplet.
@@ -159,9 +178,9 @@ VBAPSpeakers::choose_ls_triplets(struct ls_triplet_chain **ls_triplets)
         struct ls_triplet_chain *trip_ptr, *prev, *tmp_ptr;
 
         if (n_speakers == 0) {
-                fprintf(stderr,"Number of loudspeakers is zero\nExiting\n");
-                exit(-1);
+                return;
         }
+
         for (i = 0; i < n_speakers; i++) {
                 for (j = i+1; j < n_speakers; j++) {
                         for(k=j+1;k<n_speakers;k++) {
@@ -323,13 +342,15 @@ VBAPSpeakers::add_ldsp_triplet(int i, int j, int k, struct ls_triplet_chain **ls
                 prev = trip_ptr;
                 trip_ptr = trip_ptr->next;
         }
-        trip_ptr = (struct ls_triplet_chain*) 
-                malloc (sizeof (struct ls_triplet_chain));
+
+        trip_ptr = (struct ls_triplet_chain*) malloc (sizeof (struct ls_triplet_chain));
+
         if (prev == 0) {
                 *ls_triplets = trip_ptr;
         } else {
                 prev->next = trip_ptr;
         }
+
         trip_ptr->next = 0;
         trip_ptr->ls_nos[0] = i;
         trip_ptr->ls_nos[1] = j;
@@ -484,8 +505,10 @@ VBAPSpeakers::calculate_3x3_matrixes(struct ls_triplet_chain *ls_triplets)
         _matrices.clear ();
         _speaker_tuples.clear ();
 
-        _matrices.reserve (triplet_count);
-        _speaker_tuples.reserve (triplet_count);
+        for (int n = 0; n < triplet_count; ++n) {
+                _matrices.push_back (threeDmatrix());
+                _speaker_tuples.push_back (tmatrix());
+        }
 
         while (tr_ptr != 0) {
                 lp1 =  &(_speakers[tr_ptr->ls_nos[0]].coords);
@@ -531,7 +554,7 @@ VBAPSpeakers::calculate_3x3_matrixes(struct ls_triplet_chain *ls_triplets)
 }
 
 void 
-VBAPSpeakers::choose_ls_pairs (){
+VBAPSpeakers::choose_speaker_pairs (){
 
         /* selects the loudspeaker pairs, calculates the inversion
            matrices and stores the data to a global array
@@ -539,10 +562,16 @@ VBAPSpeakers::choose_ls_pairs (){
         const int n_speakers = _speakers.size();
         int sorted_speakers[n_speakers];
         bool exists[n_speakers];
-        double inverse_matrix[n_speakers][4];
+        double inverse_matrix[n_speakers][4]; 
         int expected_pairs = 0;
         int pair;
         int speaker;
+
+        cerr << "CHOOSE PAIRS\n";
+
+        if (n_speakers == 0) {
+                return;
+        }
 
         for (speaker = 0; speaker < n_speakers; ++speaker) {
                 exists[speaker] = false;
@@ -579,10 +608,13 @@ VBAPSpeakers::choose_ls_pairs (){
         _matrices.clear ();
         _speaker_tuples.clear ();
 
-        _matrices.reserve (expected_pairs);
-        _speaker_tuples.reserve (expected_pairs);
+        for (int n = 0; n < expected_pairs; ++n) {
+                _matrices.push_back (twoDmatrix());
+                _speaker_tuples.push_back (tmatrix());
+        }
 
         for (speaker = 0; speaker < n_speakers - 1; speaker++) {
+                cerr << "exists[" << speaker << "] = " << exists[speaker] << endl;
                 if (exists[speaker]) {
                         _matrices[pair][0] = inverse_matrix[speaker][0];
                         _matrices[pair][1] = inverse_matrix[speaker][1];
@@ -605,6 +637,8 @@ VBAPSpeakers::choose_ls_pairs (){
                 _speaker_tuples[pair][0] = sorted_speakers[n_speakers-1];
                 _speaker_tuples[pair][1] = sorted_speakers[0];
         }
+
+        cerr << "PAIRS done, tuples == " << n_tuples() << " pair = " << pair << endl;
 }
 
 void 

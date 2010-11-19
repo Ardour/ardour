@@ -43,6 +43,7 @@ class VBAPSpeakers {
         };
 
         static const int MAX_TRIPLET_AMOUNT = 60;
+        typedef std::vector<double> dvector;
 
         VBAPSpeakers ();
         ~VBAPSpeakers ();
@@ -50,8 +51,9 @@ class VBAPSpeakers {
         int  add_speaker (double direction, double elevation = 0.0);
         void remove_speaker (int id);
         void move_speaker (int id, double direction, double elevation = 0.0);
-        
-        const double* matrix (int tuple) const  { return _matrices[tuple]; }
+        void clear_speakers ();
+
+        const dvector matrix (int tuple) const  { return _matrices[tuple]; }
         int speaker_for_tuple (int tuple, int which) const { return _speaker_tuples[tuple][which]; }
 
         int           n_tuples () const  { return _matrices.size(); }
@@ -76,9 +78,21 @@ class VBAPSpeakers {
             void move (double azimuth, double elevation);
         };
 
-        std::vector<Speaker> _speakers;
-        std::vector<double[9]> _matrices;       /* holds matrices for a given speaker combinations */
-        std::vector<int[3]>    _speaker_tuples; /* holds speakers IDs for a given combination */
+        struct twoDmatrix : public dvector {
+          twoDmatrix() : dvector (4, 0.0) {}
+        };
+
+        struct threeDmatrix : public dvector {
+          threeDmatrix() : dvector (9, 0.0) {}
+        };
+        
+        struct tmatrix : public dvector {
+          tmatrix() : dvector (3, 0.0) {}
+        };
+
+        std::vector<Speaker>  _speakers;
+        std::vector<dvector>  _matrices;       /* holds matrices for a given speaker combinations */
+        std::vector<tmatrix>  _speaker_tuples; /* holds speakers IDs for a given combination */
 
         /* A struct for all loudspeakers */
         struct ls_triplet_chain {
@@ -98,8 +112,8 @@ class VBAPSpeakers {
         void add_ldsp_triplet (int i, int j, int k, struct ls_triplet_chain **ls_triplets);
         int  lines_intersect (int i,int j,int k,int l);
         void calculate_3x3_matrixes (struct ls_triplet_chain *ls_triplets);
-        void choose_ls_triplets (struct ls_triplet_chain **ls_triplets);
-        void choose_ls_pairs ();
+        void choose_speaker_triplets (struct ls_triplet_chain **ls_triplets);
+        void choose_speaker_pairs ();
         void sort_2D_lss (int* sorted_lss);
         int  calc_2D_inv_tmatrix (double azi1,double azi2, double* inv_mat);
 };

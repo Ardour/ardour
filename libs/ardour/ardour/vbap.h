@@ -36,8 +36,18 @@ class VBAPanner : public StreamPanner {
         ~VBAPanner ();
 
         void do_distribute (AudioBuffer&, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
+	void do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
+                                      nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
         void set_azimuth_elevation (double azimuth, double elevation);
+
+	XMLNode& state (bool full_state);
+	XMLNode& get_state ();
+	int set_state (const XMLNode&, int version);
+
+        /* there never was any old-school automation */
+
+	int load (std::istream&, std::string path, uint32_t&) { return 0; }
 
   private:
         double _azimuth;   /* direction for the signal source */

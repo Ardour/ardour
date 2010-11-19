@@ -52,6 +52,7 @@
 #include "ardour/location.h"
 #include "ardour/timecode.h"
 #include "ardour/interpolation.h"
+#include "ardour/vbap_speakers.h"
 
 #ifdef HAVE_JACK_SESSION
 #include <jack/session.h>
@@ -722,6 +723,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 			float opt);
 
 	static PBD::Signal0<void> SendFeedback;
+
+        /* Speakers */
+
+        VBAPSpeakers& get_speakers ();
 
 	/* Controllables */
 
@@ -1462,6 +1467,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void start_time_changed (framepos_t);
 	void end_time_changed (framepos_t);
+
+        VBAPSpeakers* _speakers; 
 };
 
 } // namespace ARDOUR

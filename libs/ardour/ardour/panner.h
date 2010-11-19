@@ -203,13 +203,14 @@ class Panner : public SessionObject, public Automatable
 {
 public:
 	struct Output {
-		float x;
-		float y;
-		pan_t current_pan;
-		pan_t desired_pan;
-
-		Output (float xp, float yp)
-			: x (xp), y (yp), current_pan (0), desired_pan (0) {}
+            float x;
+            float y;
+            float z;
+            pan_t current_pan;
+            pan_t desired_pan;
+            
+            Output (float xp, float yp, float zp = 0.0)
+            : x (xp), y (yp), z (zp), current_pan (0), desired_pan (0) {}
 
 	};
 
@@ -320,6 +321,8 @@ public:
 
 	static float current_automation_version_number;
 
+        void setup_speakers (uint32_t nouts);
+        
 	/* old school automation handling */
 
 	std::string automation_path;

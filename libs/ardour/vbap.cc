@@ -36,6 +36,7 @@
 #include <cstdio>
 #include <cstring>
 
+#include <iostream>
 #include <string>
 
 #include "pbd/cartesian.h"
@@ -85,6 +86,8 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
         double small_g;
         double big_sm_g, gtmp[3];
 
+        cerr << "COMPUTE GAINS with " << _speakers.n_tuples() << endl;
+
         azi_ele_to_cart (azi,ele, cartdir[0], cartdir[1], cartdir[2]);  
         big_sm_g = -100000.0;
 
@@ -102,6 +105,7 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 
                         if (gtmp[j] < small_g) {
                                 small_g = gtmp[j];
+                                cerr << "For triplet " << i << " g = " << small_g << endl;
                         }
                 }
 
@@ -111,6 +115,8 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 
                         gains[0] = gtmp[0]; 
                         gains[1] = gtmp[1]; 
+
+                        cerr << "Best triplet = " << i << endl;
 
                         speaker_ids[0]= _speakers.speaker_for_tuple (i, 0);
                         speaker_ids[1]= _speakers.speaker_for_tuple (i, 1);
@@ -149,6 +155,17 @@ VBAPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coe
 
         if ((was_dirty = _dirty)) {
                 compute_gains (desired_gains, desired_outputs, _azimuth, _elevation);
+
+                cerr << " @ " << _azimuth << " /= " << _elevation
+                     << " Outputs: "
+                     << desired_outputs[0] << ' '
+                     << desired_outputs[1] << ' '
+                     << desired_outputs[2] 
+                     << " Gains "
+                     << desired_gains[0] << ' '
+                     << desired_gains[1] << ' '
+                     << desired_gains[2] 
+                     << endl;
         }
 
         bool todo[n_audio];
@@ -157,19 +174,20 @@ VBAPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coe
                 todo[o] = true;
         }
 
+        
         /* VBAP may distribute the signal across up to 3 speakers depending on
            the configuration of the speakers.
         */
 
         for (int o = 0; o < 3; ++o) {
-                if (outputs[o] != -1) {
+                if (desired_outputs[o] != -1) {
 
                         nframes_t n = 0;
 
                         /* XXX TODO: interpolate across changes in gain and/or outputs
                          */
 
-                        dst = obufs.get_audio(outputs[o]).data();
+                        dst = obufs.get_audio(desired_outputs[o]).data();
 
                         pan = gain_coefficient * desired_gains[o];
                         mix_buffers_with_gain (dst+n,src+n,nframes-n,pan);
@@ -190,4 +208,29 @@ VBAPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coe
                 memcpy (gains, desired_gains, sizeof (gains));
                 memcpy (outputs, desired_outputs, sizeof (outputs));
         }
+}
+
+void 
+VBAPanner::do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
+                                    nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers)
+{
+}
+
+XMLNode&
+VBAPanner::get_state ()
+{
+        return state (true);
+}
+
+XMLNode&
+VBAPanner::state (bool full_state)
+{
+        XMLNode* node = new XMLNode (X_("VBAPanner"));
+        return *node;
+}
+
+int
+VBAPanner::set_state (const XMLNode& node, int /*version*/)
+{
+        return 0;
 }

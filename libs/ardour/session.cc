@@ -99,6 +99,7 @@
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
 #include "ardour/graph.h"
+#include "ardour/vbap_speakers.h"
 
 #include "midi++/port.h"
 #include "midi++/mmc.h"
@@ -326,6 +327,7 @@ Session::destroy ()
 	boost_debug_list_ptrs ();
 
 	delete _locations;
+        delete _speakers;
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 }
@@ -4176,4 +4178,13 @@ Session::ensure_search_path_includes (const string& path, DataType type)
                 config.set_midi_search_path (search_path);
                 break;
         }
+}
+
+VBAPSpeakers&
+Session::get_speakers() 
+{
+        if (!_speakers) {
+                _speakers = new VBAPSpeakers;
+        }
+        return *_speakers;
 }
