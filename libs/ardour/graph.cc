@@ -336,7 +336,7 @@ Graph::run_one()
                 _execution_tokens += 1;
                 pthread_mutex_unlock (&_trigger_mutex);
                 DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 goes to sleep\n", pthread_self()));
-                _execution_sem.signal ();
+                _execution_sem.wait ();
                 if (_quit_threads)
                         return true;
                 DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 is awake\n", pthread_self()));
