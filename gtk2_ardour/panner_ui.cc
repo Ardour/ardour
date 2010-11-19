@@ -150,13 +150,11 @@ PannerUI::set_panner (boost::shared_ptr<Panner> p)
 		return;
 	}
 
-	_panner->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::panner_changed, this), gui_context());
+	_panner->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::panner_changed, this, this), gui_context());
 	_panner->LinkStateChanged.connect (connections, invalidator (*this), boost::bind (&PannerUI::update_pan_linkage, this), gui_context());
 	_panner->StateChanged.connect (connections, invalidator (*this), boost::bind (&PannerUI::update_pan_state, this), gui_context());
 
-	setup_pan ();
-
-	pan_changed (0);
+	panner_changed (0);
 	update_pan_sensitive ();
 	update_pan_linkage ();
 	pan_automation_state_changed ();
@@ -301,11 +299,47 @@ PannerUI::~PannerUI ()
 
 
 void
-PannerUI::panner_changed ()
+PannerUI::panner_changed (void* src)
 {
 	ENSURE_GUI_THREAD (*this, &PannerUI::panner_changed)
+
 	setup_pan ();
-	pan_changed (0);
+
+	if (src == this) {
+		return;
+	}
+
+	switch (_panner->npanners()) {
+	case 0:
+		panning_link_direction_button.set_sensitive (false);
+		panning_link_button.set_sensitive (false);
+		return;
+	case 1:
+		panning_link_direction_button.set_sensitive (false);
+		panning_link_button.set_sensitive (false);
+		break;
+	default:
+		panning_link_direction_button.set_sensitive (_panner->linked ());
+		panning_link_button.set_sensitive (true);
+	}
+
+	uint32_t const nouts = _panner->nouts();
+
+	switch (nouts) {
+	case 0:
+	case 1:
+		/* relax */
+		break;
+
+	case 2:
+		/* bring pan bar state up to date */
+		update_pan_bars (false);
+		break;
+
+	default:
+		// panner->move_puck (pan_value (pans[0], pans[1]), 0.5);
+		break;
+	}
 }
 
 void
@@ -586,46 +620,6 @@ PannerUI::effective_pan_display ()
 
 	default:
 		//panner->move_puck (pan_value (v, right), 0.5);
-		break;
-	}
-}
-
-void
-PannerUI::pan_changed (void *src)
-{
-	if (src == this) {
-		return;
-	}
-
-	switch (_panner->npanners()) {
-	case 0:
-		panning_link_direction_button.set_sensitive (false);
-		panning_link_button.set_sensitive (false);
-		return;
-	case 1:
-		panning_link_direction_button.set_sensitive (false);
-		panning_link_button.set_sensitive (false);
-		break;
-	default:
-		panning_link_direction_button.set_sensitive (_panner->linked ());
-		panning_link_button.set_sensitive (true);
-	}
-
-	uint32_t const nouts = _panner->nouts();
-
-	switch (nouts) {
-	case 0:
-	case 1:
-		/* relax */
-		break;
-
-	case 2:
-		/* bring pan bar state up to date */
-		update_pan_bars (false);
-		break;
-
-	default:
-		// panner->move_puck (pan_value (pans[0], pans[1]), 0.5);
 		break;
 	}
 }

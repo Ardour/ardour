@@ -974,7 +974,7 @@ MixerStrip::connect_to_pan ()
 		pan_control->alist()->automation_style_changed.connect (panstyle_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_style_changed, &panners), gui_context());
 	}
 
-	panners.pan_changed (this);
+	panners.panner_changed (this);
 }
 
 

@@ -65,7 +65,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	virtual void set_panner (boost::shared_ptr<ARDOUR::Panner>);
 
-	void pan_changed (void *);
+	void panner_changed (void *);
 
 	void update_pan_sensitive ();
 	void update_gain_sensitive ();
@@ -133,8 +133,6 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void update_pan_state ();
 	void build_astate_menu ();
 	void build_astyle_menu ();
-
-	void panner_changed ();
 
 	void hide_pans ();
 
