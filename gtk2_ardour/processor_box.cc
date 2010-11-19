@@ -940,6 +940,10 @@ ProcessorBox::redisplay_processors ()
 
 	build_processor_tooltip (processor_eventbox, _("Inserts, sends & plugins:"));
 
+	for (list<ProcessorWindowProxy*>::iterator i = _processor_window_proxies.begin(); i != _processor_window_proxies.end(); ++i) {
+		(*i)->marked = false;
+	}
+		
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::maybe_add_processor_to_ui_list));
 
 	/* trim dead wood from the processor window proxy list */
