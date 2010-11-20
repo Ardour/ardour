@@ -49,8 +49,8 @@ class Send : public Delivery
 	bool metering() const { return _metering; }
 	void set_metering (bool yn) { _metering = yn; }
 
-	XMLNode& state(bool full);
-	XMLNode& get_state(void);
+	XMLNode& state (bool full);
+	XMLNode& get_state ();
 	int set_state(const XMLNode&, int version);
 
 	uint32_t pans_required() const { return _configured_input.n_audio(); }

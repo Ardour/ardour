@@ -133,6 +133,8 @@ Send::state (bool full)
 	snprintf (buf, sizeof (buf), "%" PRIu32, _bitslot);
 	node.add_property ("bitslot", buf);
 
+	node.add_child_nocopy (_amp->state (full));
+
 	return node;
 }
 
@@ -143,8 +145,6 @@ Send::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 	
-	XMLNodeList nlist = node.children();
-	XMLNodeIterator niter;
 	const XMLProperty* prop;
 
 	Delivery::set_state (node, version);
@@ -161,7 +161,12 @@ Send::set_state (const XMLNode& node, int version)
                 _session.mark_send_id (_bitslot);
         }
 
-	/* XXX need to load automation state & data for amp */
+	XMLNodeList nlist = node.children();
+	for (XMLNodeIterator i = nlist.begin(); i != nlist.end(); ++i) {
+		if ((*i)->name() == X_("Processor")) {
+			_amp->set_state (**i, version);
+		}
+	}
 
 	return 0;
 }
