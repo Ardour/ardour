@@ -360,6 +360,8 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	/* go there and back to ensure that the toggled handler is called to set up mouse_mode */
 	tact->set_active (false);
 	tact->set_active (true);
+
+	MouseModeChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -396,6 +398,8 @@ Editor::mouse_mode_toggled (MouseMode m)
         }
 
 	set_canvas_cursor ();
+
+	MouseModeChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -2622,7 +2626,7 @@ Editor::set_internal_edit (bool yn)
 		mouse_select_button.set_image (*(manage (new Image (::get_icon("midi_tool_pencil")))));
 		mouse_select_button.get_image ()->show ();
                 ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Draw/Edit MIDI Notes"));
-                set_canvas_cursor ();
+		mouse_mode_toggled (mouse_mode);
 
 		/* deselect everything to avoid confusion when e.g. we can't now cut a previously selected
 		   region because cut means "cut note" rather than "cut region".

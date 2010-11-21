@@ -435,6 +435,13 @@ class MidiRegionView : public RegionView
 	void connect_to_diskstream ();
 	void data_recorded (boost::shared_ptr<ARDOUR::MidiBuffer>, boost::weak_ptr<ARDOUR::MidiSource>);
 
+	void remove_ghost_note ();
+	void mouse_mode_changed ();
+	double _last_event_x;
+	double _last_event_y;
+
+	PBD::ScopedConnection _mouse_mode_connection;
+
         Gdk::Cursor* pre_enter_cursor;
 };
 

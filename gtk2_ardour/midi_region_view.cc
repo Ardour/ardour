@@ -100,6 +100,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, no_sound_notes (false)
+	, _last_event_x (0)
+	, _last_event_y (0)
         , pre_enter_cursor (0)
 {
 	_note_group->raise_to_top();
@@ -130,6 +132,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, no_sound_notes (false)
+	, _last_event_x (0)
+	, _last_event_y (0)
 {
 	_note_group->raise_to_top();
         PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
@@ -158,6 +162,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, no_sound_notes (false)
+	, _last_event_x (0)
+	, _last_event_y (0)
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -188,6 +194,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, no_sound_notes (false)
+	, _last_event_x (0)
+	, _last_event_y (0)
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -259,6 +267,18 @@ MidiRegionView::connect_to_diskstream ()
 bool
 MidiRegionView::canvas_event(GdkEvent* ev)
 {
+	switch (ev->type) {
+	case GDK_ENTER_NOTIFY:
+	case GDK_LEAVE_NOTIFY:
+		_last_event_x = ev->crossing.x;
+		_last_event_y = ev->crossing.y;
+		break;
+	case GDK_MOTION_NOTIFY:
+		_last_event_x = ev->motion.x;
+		_last_event_y = ev->motion.y;
+		break;
+	}
+	
 	if (!trackview.editor().internal_editing()) {
 		return false;
 	}
@@ -302,17 +322,26 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 	return false;
 }
 
+void
+MidiRegionView::remove_ghost_note ()
+{
+        delete _ghost_note;
+        _ghost_note = 0;
+}
+
 bool
 MidiRegionView::enter_notify (GdkEventCrossing* ev)
 {
-        /* FIXME: do this on switch to note tool, too, if the pointer is already in */
+	trackview.editor().MouseModeChanged.connect (
+		_mouse_mode_connection, invalidator (*this), ui_bind (&MidiRegionView::mouse_mode_changed, this), gui_context ()
+		);
 
         Keyboard::magic_widget_grab_focus();
         group->grab_focus();
-        
-        if (trackview.editor().current_mouse_mode() == MouseRange) {
-                create_ghost_note (ev->x, ev->y);
-        }
+
+	if (trackview.editor().current_mouse_mode() == MouseRange) {
+		create_ghost_note (ev->x, ev->y);
+	}
 
         return false;
 }
@@ -320,10 +349,22 @@ MidiRegionView::enter_notify (GdkEventCrossing* ev)
 bool
 MidiRegionView::leave_notify (GdkEventCrossing*)
 {
+	_mouse_mode_connection.disconnect ();
+	
         trackview.editor().hide_verbose_canvas_cursor ();
-        delete _ghost_note;
-        _ghost_note = 0;
+	remove_ghost_note ();
         return false;
+}
+
+void
+MidiRegionView::mouse_mode_changed ()
+{
+	if (trackview.editor().current_mouse_mode() == MouseRange && trackview.editor().internal_editing()) {
+		create_ghost_note (_last_event_x, _last_event_y);
+	} else {
+		remove_ghost_note ();
+		trackview.editor().hide_verbose_canvas_cursor ();
+	}
 }
 
 bool
