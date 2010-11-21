@@ -1298,10 +1298,13 @@ Session::set_default_fade (float /*steepness*/, float /*fade_msecs*/)
 }
 
 struct RouteSorter {
+    /** @return true to run r1 before r2, otherwise false */
     bool operator() (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> r2) {
 	    if (r2->feeds (r1)) {
+		    /* r1 fed by r2; run r2 early */
 		    return false;
 	    } else if (r1->feeds (r2)) {
+		    /* r2 fed by r1; run r1 early */
 		    return true;
 	    } else {
 		    if (r1->not_fed ()) {
@@ -1313,7 +1316,13 @@ struct RouteSorter {
 				    return true;
 			    }
 		    } else {
-			    return r1->order_key(N_("signal")) < r2->order_key(N_("signal"));
+			    if (r2->not_fed()) {
+				    /* r1 has connections, r2 does not; run r2 early */
+				    return false;
+			    } else {
+				    /* both r1 and r2 have connections, but not to each other. just use signal order */
+				    return r1->order_key(N_("signal")) < r2->order_key(N_("signal"));
+			    }
 		    }
 	    }
     }
