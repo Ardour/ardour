@@ -72,7 +72,7 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	dBScaleModel = Gtk::ListStore::create(dBColumns);
 
 	dBScaleCombo = new Gtk::ComboBox(dBScaleModel);
-	dBScaleCombo -> set_title("dB scale");
+	dBScaleCombo->set_title (_("dB scale"));
 
 #define ADD_DB_ROW(MIN,MAX,STEP,NAME) \
 	{ \
@@ -96,14 +96,14 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 
 	dBScaleCombo -> signal_changed().connect( sigc::mem_fun(*this, &PluginEqGui::change_dB_scale) );
 
-	Gtk::Label *dBComboLabel = new Gtk::Label("dB scale");
+	Gtk::Label *dBComboLabel = new Gtk::Label (_("dB scale"));
 
 	Gtk::HBox *dBSelectBin = new Gtk::HBox(false, 5);
 	dBSelectBin->add( *manage(dBComboLabel));
 	dBSelectBin->add( *manage(dBScaleCombo));
 
 	// Phase checkbutton
-	_phase_button = new Gtk::CheckButton("Show phase");
+	_phase_button = new Gtk::CheckButton (_("Show phase"));
 	_phase_button->set_active(true);
 	_phase_button->signal_toggled().connect( sigc::mem_fun(*this, &PluginEqGui::redraw_scales));
 
