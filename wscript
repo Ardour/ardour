@@ -572,6 +572,17 @@ def configure(conf):
 	config_text.close ()
 
 def build(bld):
+        # add directories that contain only headers, to workaround an issue with waf
+
+        bld.path.find_dir ('libs/evoral/evoral')
+        bld.path.find_dir ('libs/vamp-sdk/vamp-sdk')
+        bld.path.find_dir ('libs/surfaces/control_protocol/control_protocol')
+        bld.path.find_dir ('libs/rubberband/rubberband')
+        bld.path.find_dir ('libs/gtkmm2ext/gtkmm2ext')
+        bld.path.find_dir ('libs/ardour/ardour')
+        bld.path.find_dir ('libs/taglib/taglib')
+        bld.path.find_dir ('libs/pbd/pbd')
+
 	autowaf.set_recursive()
 	if sys.platform == 'darwin':
 		bld.add_subdirs('libs/appleutility')
