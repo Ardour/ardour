@@ -43,13 +43,6 @@ using namespace ARDOUR;
 using namespace std;
 using namespace ArdourCanvas;
 
-Glib::StaticMutex StripSilenceDialog::run_lock;
-Glib::Cond*       StripSilenceDialog::thread_waiting = 0;
-Glib::Cond*       StripSilenceDialog::thread_run = 0;
-bool              StripSilenceDialog::thread_should_exit = false;
-InterThreadInfo   StripSilenceDialog::itt;
-StripSilenceDialog* StripSilenceDialog::current = 0;
-
 /** Construct Strip silence dialog box */
 StripSilenceDialog::StripSilenceDialog (Session* s, list<boost::shared_ptr<ARDOUR::AudioRegion> > const & regions)
 	: ArdourDialog (_("Strip Silence"))
@@ -58,15 +51,9 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<boost::shared_ptr<ARDOU
         , _fade_length (X_("silence duration"), true, "SilenceDurationClock", true, false, true, false)
         , _wave_width (640)
         , _wave_height (64)
-        , restart_queued (false)
 	, _peaks_ready_connection (0)
 {
         set_session (s);
-
-        if (thread_waiting == 0) {
-                thread_waiting = new Glib::Cond;
-                thread_run = new Glib::Cond;
-        }
 
 	Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox);
         
@@ -149,18 +136,31 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<boost::shared_ptr<ARDOU
 	show_all ();
 
         _threshold.get_adjustment()->signal_value_changed().connect (sigc::mem_fun (*this, &StripSilenceDialog::threshold_changed));
-        _minimum_length.ValueChanged.connect (sigc::mem_fun (*this, &StripSilenceDialog::maybe_start_silence_detection));
+        _minimum_length.ValueChanged.connect (sigc::mem_fun (*this, &StripSilenceDialog::restart_thread));
 
 	create_waves ();
 	update_silence_rects ();
 	update_threshold_line ();
 
-	maybe_start_silence_detection ();
+	/* Create a thread which runs while the dialogue is open to compute the silence regions */
+	Completed.connect (_completed_connection, MISSING_INVALIDATOR, ui_bind (&StripSilenceDialog::update, this), gui_context ());
+	_thread_should_finish = false;
+	pthread_create (&_thread, 0, StripSilenceDialog::_detection_thread_work, this);
 }
 
 
 StripSilenceDialog::~StripSilenceDialog ()
 {
+	/* Terminate our thread */
+	
+	_lock.lock ();
+	_interthread_info.cancel = true;
+	_thread_should_finish = true;
+	_lock.unlock ();
+	
+	_run_cond.signal ();
+	pthread_join (_thread, 0);
+	
 	for (list<Wave*>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
 		delete *i;
 	}
@@ -240,6 +240,9 @@ StripSilenceDialog::resize_silence_rects ()
 {
 	int n = 0;
 
+	/* Lock so that we don't contend with the detection thread for access to the silence regions */
+	Glib::Mutex::Lock lm (_lock);
+	
 	for (list<Wave*>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
 
                 list<pair<frameoffset_t, framecnt_t> >::const_iterator j;
@@ -263,7 +266,9 @@ void
 StripSilenceDialog::update_threshold_line ()
 {
 	int n = 0;
-	
+
+	/* Don't need to lock here as we're not reading the _waves silence details */
+
 	for (list<Wave*>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
 		(*i)->threshold_line->property_x1() = 0;
 		(*i)->threshold_line->property_x2() = _wave_width;
@@ -278,11 +283,23 @@ StripSilenceDialog::update_threshold_line ()
 }
 
 void
+StripSilenceDialog::update ()
+{
+	update_silence_rects ();
+	update_threshold_line ();
+	/* XXX: first one only?! */
+	update_stats (_waves.front()->silence);
+}
+
+void
 StripSilenceDialog::update_silence_rects ()
 {
 	int n = 0;
         uint32_t max_segments = 0;
         uint32_t sc;
+
+	/* Lock so that we don't contend with the detection thread for access to the silence regions */
+	Glib::Mutex::Lock lm (_lock);
 
 	for (list<Wave*>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
 		for (list<SimpleRect*>::iterator j = (*i)->silence_rects.begin(); j != (*i)->silence_rects.end(); ++j) {
@@ -346,141 +363,69 @@ StripSilenceDialog::update_silence_rects ()
         }
 }
 
-bool
-StripSilenceDialog::_detection_done (void* arg)
-{
-        StripSilenceDialog* ssd = (StripSilenceDialog*) arg;
-        return ssd->detection_done ();
-}
-
-bool
-StripSilenceDialog::detection_done ()
-{
-        get_window()->set_cursor (Gdk::Cursor (Gdk::LEFT_PTR));
-        update_silence_rects ();
-        return false;
-}
-
-void*
+void *
 StripSilenceDialog::_detection_thread_work (void* arg)
 {
-        StripSilenceDialog* ssd = (StripSilenceDialog*) arg;
-        return ssd->detection_thread_work ();
+	StripSilenceDialog* d = reinterpret_cast<StripSilenceDialog*> (arg);
+	return d->detection_thread_work ();
 }
 
-void*
+/** Body of our silence detection thread */
+void *
 StripSilenceDialog::detection_thread_work ()
 {
         ARDOUR_UI::instance()->register_thread ("gui", pthread_self(), "silence", 32);
-        
-        while (1) {
 
-                run_lock.lock ();
-                thread_waiting->signal ();
-                thread_run->wait (run_lock);
+	/* Hold this lock when we are doing work */
+	_lock.lock ();
+	
+	while (1) {
+		for (list<Wave*>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
+			(*i)->silence = (*i)->region->find_silence (dB_to_coefficient (threshold ()), minimum_length (), _interthread_info);
+			if (_interthread_info.cancel) {
+				break;
+			}
+		}
 
-                if (thread_should_exit) {
-                        thread_waiting->signal ();
-                        run_lock.unlock ();
-                        break;
-                }
+		if (!_interthread_info.cancel) {
+			Completed (); /* EMIT SIGNAL */
+		}
 
-                if (current) {
-                        StripSilenceDialog* ssd = current;
-                        run_lock.unlock ();
-                        
-                        for (list<Wave*>::iterator i = ssd->_waves.begin(); i != ssd->_waves.end(); ++i) {
-                                (*i)->silence = (*i)->region->find_silence (dB_to_coefficient (ssd->threshold ()), ssd->minimum_length (), ssd->itt);
-                                ssd->update_stats ((*i)->silence);
-                        }
-                        
-                        if (!ssd->itt.cancel) {
-                                g_idle_add ((gboolean (*)(void*)) StripSilenceDialog::_detection_done, ssd);
-                        }
-                } else {
-                        run_lock.unlock ();
-                }
+		/* Our work is done; sleep until there is more to do.
+		 * The lock is released while we are waiting.
+		 */
+		_run_cond.wait (_lock);
 
-        }
-        
-        return 0;
+		if (_thread_should_finish) {
+			_lock.unlock ();
+			return 0;
+		}
+	}
+
+	return 0;
+}
+
+void
+StripSilenceDialog::restart_thread ()
+{
+	/* Cancel any current run */
+	_interthread_info.cancel = true;
+
+	/* Block until the thread waits() */
+	_lock.lock ();
+	/* Reset the flag */
+	_interthread_info.cancel = false;
+	_lock.unlock ();
+
+	/* And re-awake the thread */
+	_run_cond.signal ();
 }
 
 void
 StripSilenceDialog::threshold_changed ()
 {
 	update_threshold_line ();
-	maybe_start_silence_detection ();
-}
-
-void
-StripSilenceDialog::maybe_start_silence_detection ()
-{
-        if (!restart_queued) {
-                restart_queued = true;
-                Glib::signal_idle().connect (sigc::mem_fun (*this, &StripSilenceDialog::start_silence_detection));
-        }
-}
-
-bool
-StripSilenceDialog::start_silence_detection ()
-{
-        Glib::Mutex::Lock lm (run_lock);
-        restart_queued = false;
-
-        if (!itt.thread) {
-
-                itt.done = false;
-                itt.cancel = false;
-                itt.progress = 0.0;
-                current = this;
-
-                pthread_create (&itt.thread, 0, StripSilenceDialog::_detection_thread_work, this);
-                /* wait for it to get started */
-                thread_waiting->wait (run_lock);
-
-        } else {
-                
-                /* stop whatever the thread is doing */
-
-                itt.cancel = 1;
-                current = 0;
-
-                while (!itt.done) {
-                        thread_run->signal ();
-                        thread_waiting->wait (run_lock);
-                }
-        }
-
-
-        itt.cancel = false;
-        itt.done = false;
-        itt.progress = 0.0;
-        current = this;
-        
-        /* and start it up (again) */
-        
-        thread_run->signal ();
-
-        /* change cursor */
-
-        get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
-
-        /* don't call again until needed */
-        
-        return false;
-}
-
-void
-StripSilenceDialog::stop_thread ()
-{
-        Glib::Mutex::Lock lm (run_lock);
-
-        itt.cancel = true;
-        thread_should_exit = true;
-        thread_run->signal (); 
-        thread_waiting->wait (run_lock);
-        itt.thread = 0;
+	restart_thread ();
 }
 
 void

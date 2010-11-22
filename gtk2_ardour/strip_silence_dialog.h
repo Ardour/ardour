@@ -43,17 +43,21 @@ public:
 
         nframes_t minimum_length () const;
         nframes_t fade_length () const;
-        static void stop_thread ();
 
 private:
+        typedef std::list<std::pair<ARDOUR::frameoffset_t,ARDOUR::framecnt_t> > SilenceResult;
+	
 	void create_waves ();
 	void peaks_ready ();
 	void canvas_allocation (Gtk::Allocation &);
 	void update_silence_rects ();
         void resize_silence_rects ();
+	void update ();
 	void update_threshold_line ();
+	void update_stats (SilenceResult const &);
 	void threshold_changed ();
 	void update_progress_gui (float);
+	void restart_thread ();
 
 	Gtk::SpinButton _threshold;
 	AudioClock      _minimum_length;
@@ -62,32 +66,23 @@ private:
 	Gtk::Label      _shortest_silence_label;
 	Gtk::Label      _shortest_audible_label;
 	Gtk::ProgressBar _progress_bar;
-        typedef std::list<std::pair<ARDOUR::frameoffset_t,ARDOUR::framecnt_t> > SilenceResult;
 
 	struct Wave {
-            boost::shared_ptr<ARDOUR::AudioRegion> region;
-            ArdourCanvas::WaveView* view;
-            std::list<ArdourCanvas::SimpleRect*> silence_rects;
-	    ArdourCanvas::SimpleLine* threshold_line;
-            double samples_per_unit;
-            SilenceResult silence;
-          
-	    Wave (ArdourCanvas::Group *, boost::shared_ptr<ARDOUR::AudioRegion>);
-	    ~Wave ();
+		boost::shared_ptr<ARDOUR::AudioRegion> region;
+		ArdourCanvas::WaveView* view;
+		std::list<ArdourCanvas::SimpleRect*> silence_rects;
+		ArdourCanvas::SimpleLine* threshold_line;
+		double samples_per_unit;
+		SilenceResult silence;
+		
+		Wave (ArdourCanvas::Group *, boost::shared_ptr<ARDOUR::AudioRegion>);
+		~Wave ();
 	};
 
 	ArdourCanvas::Canvas* _canvas;
 	std::list<Wave*> _waves;
 	int _wave_width;
 	int _wave_height;
-        bool restart_queued;
-
-        static ARDOUR::InterThreadInfo itt;
-        static bool thread_should_exit;
-        static Glib::Cond *thread_run;
-        static Glib::Cond *thread_waiting;
-        static Glib::StaticMutex run_lock;
-        static StripSilenceDialog* current;
 
         ARDOUR::framecnt_t max_audible;
         ARDOUR::framecnt_t min_audible;
@@ -95,14 +90,14 @@ private:
         ARDOUR::framecnt_t min_silence;
 
 	PBD::ScopedConnection* _peaks_ready_connection;
-    
-        static bool  _detection_done (void*);
-        static void* _detection_thread_work (void*);
 
-        bool  detection_done ();
-        void* detection_thread_work ();
-        bool  start_silence_detection ();
-        void  maybe_start_silence_detection ();
-
-        void update_stats (const SilenceResult&);
+	pthread_t _thread; ///< thread to compute silence in the background
+	static void * _detection_thread_work (void *);
+	void * detection_thread_work ();
+	Glib::Mutex _lock; ///< lock held while the thread is doing work
+	Glib::Cond _run_cond; ///< condition to wake the thread
+	bool _thread_should_finish; ///< true if the thread should terminate
+	PBD::Signal0<void> Completed; ///< emitted when a silence detection has completed
+	PBD::ScopedConnection _completed_connection;
+	ARDOUR::InterThreadInfo _interthread_info;
 };
