@@ -277,6 +277,8 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		_last_event_x = ev->motion.x;
 		_last_event_y = ev->motion.y;
 		break;
+	default:
+		break;
 	}
 	
 	if (!trackview.editor().internal_editing()) {
