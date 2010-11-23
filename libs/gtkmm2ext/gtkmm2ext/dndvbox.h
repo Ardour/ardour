@@ -252,14 +252,52 @@ private:
 		}
 			
 		if (ev->button == 1 || ev->button == 3) {
+
 			if (!selected (child)) {
-				if ((ev->state & Gdk::CONTROL_MASK) == 0) {
-					clear_selection ();
+
+				if ((ev->state & Gdk::SHIFT_MASK) && !_selection.empty()) {
+
+					/* Shift-click; select all between the clicked child and any existing selections */
+
+					bool selecting = false;
+					bool done = false;
+					for (typename std::list<T*>::const_iterator i = _children.begin(); i != _children.end(); ++i) {
+
+						bool const was_selected = selected (*i);
+
+						if (selecting && !was_selected) {
+							add_to_selection (*i);
+						}
+						
+						if (!selecting && !done) {
+							if (selected (*i)) {
+								selecting = true;
+							} else if (*i == child) {
+								selecting = true;
+								add_to_selection (child);
+							}
+						} else if (selecting) {
+							if (was_selected || *i == child) {
+								selecting = false;
+								done = true;
+							}
+						}
+					}
+
+				} else {
+						
+					if ((ev->state & Gdk::CONTROL_MASK) == 0) {
+						clear_selection ();
+					}
+					
+					if (child) {
+						add_to_selection (child);
+					}
+
 				}
-				if (child) {
-					add_to_selection (child);
-				}
+				
 				SelectionChanged (); /* EMIT SIGNAL */
+				
 			} else {
 				/* XXX THIS NEEDS GENERALIZING FOR OS X */
 				if (ev->button == 1 && (ev->state & Gdk::CONTROL_MASK)) {
