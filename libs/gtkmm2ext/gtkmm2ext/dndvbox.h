@@ -253,7 +253,9 @@ private:
 			
 		if (ev->button == 1 || ev->button == 3) {
 			if (!selected (child)) {
-				clear_selection ();
+				if ((ev->state & Gdk::CONTROL_MASK) == 0) {
+					clear_selection ();
+				}
 				if (child) {
 					add_to_selection (child);
 				}

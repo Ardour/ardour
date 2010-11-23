@@ -29,11 +29,11 @@
 #include <gtkmm/eventbox.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/scrolledwindow.h>
-#include <gtkmm2ext/dndtreeview.h>
-#include <gtkmm2ext/auto_spin.h>
-#include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/dndvbox.h>
-#include <gtkmm2ext/pixfader.h>
+#include "gtkmm2ext/dndtreeview.h"
+#include "gtkmm2ext/auto_spin.h"
+#include "gtkmm2ext/click_box.h"
+#include "gtkmm2ext/dndvbox.h"
+#include "gtkmm2ext/pixfader.h"
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
