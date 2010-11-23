@@ -1763,6 +1763,8 @@ Route::state(bool full_state)
 	node->add_property ("soloed-by-upstream", buf);
 	snprintf (buf, sizeof (buf), "%d", _soloed_by_others_downstream);
 	node->add_property ("soloed-by-downstream", buf);
+	node->add_property ("solo-isolated", solo_isolated() ? "yes" : "no");
+	node->add_property ("solo-safe", _solo_safe ? "yes" : "no");
 
 	node->add_child_nocopy (_input->state (full_state));
 	node->add_child_nocopy (_output->state (full_state));
@@ -1875,6 +1877,10 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 
 	if ((prop = node.property ("solo-isolated")) != 0) {
 		set_solo_isolated (string_is_affirmative (prop->value()), this);
+	}
+
+	if ((prop = node.property ("solo-safe")) != 0) {
+		set_solo_safe (string_is_affirmative (prop->value()), this);
 	}
 
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
