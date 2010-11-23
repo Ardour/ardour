@@ -52,6 +52,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<boost::shared_ptr<ARDOU
         , _wave_width (640)
         , _wave_height (64)
 	, _peaks_ready_connection (0)
+	, _destroying (false)
 {
         set_session (s);
 
@@ -151,13 +152,15 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<boost::shared_ptr<ARDOU
 
 StripSilenceDialog::~StripSilenceDialog ()
 {
+	_destroying = true;
+	
 	/* Terminate our thread */
 	
 	_lock.lock ();
 	_interthread_info.cancel = true;
 	_thread_should_finish = true;
 	_lock.unlock ();
-	
+
 	_run_cond.signal ();
 	pthread_join (_thread, 0);
 	
@@ -408,6 +411,15 @@ StripSilenceDialog::detection_thread_work ()
 void
 StripSilenceDialog::restart_thread ()
 {
+	if (_destroying) {
+		/* I don't know how this happens, but it seems to be possible for this
+		   method to be called after our destructor has finished executing.
+		   If this happens, bad things follow; _lock cannot be locked and
+		   Ardour hangs.  So if we are destroying, just bail early.
+		*/
+		return;
+	}
+	
 	/* Cancel any current run */
 	_interthread_info.cancel = true;
 

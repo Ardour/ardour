@@ -91,6 +91,8 @@ private:
 
 	PBD::ScopedConnection* _peaks_ready_connection;
 
+	bool _destroying;
+
 	pthread_t _thread; ///< thread to compute silence in the background
 	static void * _detection_thread_work (void *);
 	void * detection_thread_work ();
