@@ -131,6 +131,7 @@ This mode provides many different operations on both regions and control points,
 ;; TOP ROW
 
 @sess|Common/Quit|<@PRIMARY@>q|quit
+@rop|Region/quantize-region|q|quantize MIDI notes in selected region(s)
 
 ;; note that ctrl-w is special and consumed by the keyboard snooper
 
