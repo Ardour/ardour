@@ -442,7 +442,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
                         const double length = trackview.editor().pixel_to_frame 
                                 (_drag_rect->property_x2() - _drag_rect->property_x1());
 
-                        create_note_at (x, _drag_rect->property_y1(), frames_to_beats(length), false);
+                        create_note_at (x, _drag_rect->property_y1(), frames_to_beats(length), true);
                 }
 
                 delete _drag_rect;
