@@ -606,7 +606,7 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 
 		if (_session->engine().connected()) {
 			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
-			edit_processor (processor);
+			toggle_edit_processor (processor);
 		}
 		ret = true;
 
@@ -1548,7 +1548,7 @@ ProcessorBox::one_processor_can_be_edited ()
 }
 
 void
-ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
+ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 {
 	boost::shared_ptr<Send> send;
 	boost::shared_ptr<Return> retrn;
@@ -1569,25 +1569,9 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 			return;
 		}
 
-#ifdef OLD_SEND_EDITING
-		SendUIWindow *send_ui;
-
-		Window* w = get_processor_ui (send);
-		if (w == 0) {
-			send_ui = new SendUIWindow (send, _session);
-			send_ui->set_title (send->name());
-			set_processor_ui (send, send_ui);
-
-		} else {
-			send_ui = dynamic_cast<SendUIWindow *> (w);
-		}
-
-		gidget = send_ui;
-#else
 		if (_parent_strip) {
 			_parent_strip->show_send (send);
 		}
-#endif
 
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
 
@@ -1661,7 +1645,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 
 	if (gidget) {
 		if (gidget->is_visible()) {
-			gidget->get_window()->raise ();
+			gidget->hide ();
 		} else {
 			gidget->show_all ();
 			gidget->present ();
@@ -1905,7 +1889,7 @@ ProcessorBox::rb_edit ()
 		return;
 	}
 
-	_current_processor_box->for_selected_processors (&ProcessorBox::edit_processor);
+	_current_processor_box->for_selected_processors (&ProcessorBox::toggle_edit_processor);
 }
 
 void
@@ -2042,5 +2026,5 @@ ProcessorWindowProxy::show ()
 		return;
 	}
 
-	_processor_box->edit_processor (p);
+	_processor_box->toggle_edit_processor (p);
 }

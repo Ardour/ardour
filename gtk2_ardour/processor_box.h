@@ -173,7 +173,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void select_all_sends ();
 
 	Gtk::Window* get_processor_ui (boost::shared_ptr<ARDOUR::Processor>) const;
-	void edit_processor (boost::shared_ptr<ARDOUR::Processor>);
+	void toggle_edit_processor (boost::shared_ptr<ARDOUR::Processor>);
 	
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorSelected;
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorUnselected;
