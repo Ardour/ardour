@@ -3345,9 +3345,14 @@ Editor::trim_region (bool front)
 	framepos_t where = get_preferred_edit_position();
 	RegionSelection rs = get_regions_from_selection_and_edit_point ();
 
+        cerr << "trim regions\n";
+
 	if (rs.empty()) {
+                cerr << " no regions\n";
 		return;
 	}
+
+        cerr << "where = " << where << endl;
 
 	begin_reversible_command (front ? _("trim front") : _("trim back"));
 
@@ -4642,9 +4647,31 @@ Editor::fork_region ()
 void
 Editor::quantize_region ()
 {
+        int selected_midi_region_cnt = 0;
+
 	if (!_session) {
 		return;
 	}
+
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+
+	if (rs.empty()) {
+		return;
+	}
+
+	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
+		RegionSelection::iterator tmp = r;
+		++tmp;
+
+		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*r);
+                if (mrv) {
+                        selected_midi_region_cnt++;
+                }
+        }
+
+        if (selected_midi_region_cnt == 0) {
+                return;
+        }
 
 	QuantizeDialog* qd = new QuantizeDialog (*this);
 

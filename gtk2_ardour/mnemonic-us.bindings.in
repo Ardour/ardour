@@ -186,8 +186,8 @@ This mode provides many different operations on both regions and control points,
 @wvis|Region/show-rhythm-ferret|<@WINDOW@>f|show rhythm ferret window 
 @mmode|MouseMode/set-mouse-mode-gain|g|region gain mode
 @epp|Region/play-selected-regions|h|play selected region(s)
-@eep|Editor/trim-front|j|trim front
-@eep|Editor/trim-back|k|trim back
+@eep|Region/trim-front|j|trim front
+@eep|Region/trim-back|k|trim back
 @wvis|Common/ToggleKeyEditor|<@WINDOW@>k|toggle key bindings editor
 @trans|Transport/Loop|l|loop play (the loop range)
 @select|Editor/select-all-in-loop-range|<@PRIMARY@>l|select all in loop range
