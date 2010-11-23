@@ -72,6 +72,14 @@ VBAPanner::mark_dirty ()
 void
 VBAPanner::update ()
 {
+        /* convert from coordinate space with (0,0) at upper left to (0,0) at center and dimensions of 1 unit */
+        _x -= 0.5;
+        _y -= 0.5;
+
+
+        /* we're 2D for now */
+        _z = 0.0;
+
         cart_to_azi_ele (_x, _y, _z, _azimuth, _elevation);
         _dirty = true;
 }
@@ -85,8 +93,6 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
         int i,j,k;
         double small_g;
         double big_sm_g, gtmp[3];
-
-        cerr << "COMPUTE GAINS with " << _speakers.n_tuples() << endl;
 
         azi_ele_to_cart (azi,ele, cartdir[0], cartdir[1], cartdir[2]);  
         big_sm_g = -100000.0;
@@ -105,7 +111,6 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 
                         if (gtmp[j] < small_g) {
                                 small_g = gtmp[j];
-                                cerr << "For triplet " << i << " g = " << small_g << endl;
                         }
                 }
 
@@ -116,11 +121,9 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
                         gains[0] = gtmp[0]; 
                         gains[1] = gtmp[1]; 
 
-                        cerr << "Best triplet = " << i << endl;
-
-                        speaker_ids[0]= _speakers.speaker_for_tuple (i, 0);
-                        speaker_ids[1]= _speakers.speaker_for_tuple (i, 1);
-
+                        speaker_ids[0] = _speakers.speaker_for_tuple (i, 0);
+                        speaker_ids[1] = _speakers.speaker_for_tuple (i, 1);
+                        
                         if (_speakers.dimension() == 3) {
                                 gains[2] = gtmp[2];
                                 speaker_ids[2] = _speakers.speaker_for_tuple (i, 2);
@@ -155,16 +158,13 @@ VBAPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coe
 
         if ((was_dirty = _dirty)) {
                 compute_gains (desired_gains, desired_outputs, _azimuth, _elevation);
-
                 cerr << " @ " << _azimuth << " /= " << _elevation
                      << " Outputs: "
-                     << desired_outputs[0] << ' '
-                     << desired_outputs[1] << ' '
-                     << desired_outputs[2] 
+                     << desired_outputs[0] + 1 << ' '
+                     << desired_outputs[1] + 1 << ' '
                      << " Gains "
                      << desired_gains[0] << ' '
                      << desired_gains[1] << ' '
-                     << desired_gains[2] 
                      << endl;
         }
 

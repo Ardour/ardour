@@ -32,8 +32,10 @@
 */
 
 #include <cmath>
+#include <algorithm>
 #include <stdlib.h>
 
+#include "pbd/cartesian.h"
 #include "ardour/vbap_speakers.h"
 
 using namespace ARDOUR;
@@ -43,6 +45,7 @@ VBAPSpeakers::Speaker::Speaker (int i, double azimuth, double elevation)
         : id (i)
 {
         move (azimuth, elevation);
+        cerr << setprecision (5) << "%%%%%%%%%% New speaker @ " << angles.azi << ", " << angles.ele << endl;
 }
 
 void
@@ -64,6 +67,19 @@ VBAPSpeakers::~VBAPSpeakers ()
 }
 
 void
+VBAPSpeakers::dump_speakers (ostream& o)
+{
+        for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
+                o << "Speaker " << (*i).id << " @ " 
+                  << (*i).coords.x << ", " << (*i).coords.y << ", " << (*i).coords.z
+                  << " azimuth " << (*i).angles.azi
+                  << " elevation " << (*i).angles.ele
+                  << " distance " << (*i).angles.length
+                  << endl;
+        }
+}
+
+void
 VBAPSpeakers::clear_speakers ()
 {
         _speakers.clear ();
@@ -79,6 +95,8 @@ VBAPSpeakers::add_speaker (double azimuth, double elevation)
 
         _speakers.push_back (Speaker (id, azimuth, elevation));
         update ();
+
+        dump_speakers (cerr);
 
         return id;
 }        
@@ -114,6 +132,7 @@ VBAPSpeakers::update ()
 
         for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
                 if ((*i).angles.ele != 0.0) {
+                        cerr << "\n\n\nSPEAKER " << (*i).id << " has ele = " << (*i).angles.ele << "\n\n\n\n";
                         dim = 3;
                         break;
                 }
@@ -145,15 +164,7 @@ VBAPSpeakers::update ()
 void 
 VBAPSpeakers::angle_to_cart(ang_vec *from, cart_vec *to)
 {
-        /* from angular to cartesian coordinates*/
-
-        float ang2rad = 2 * M_PI / 360;
-
-        to->x = (float) (cos((double)(from->azi * ang2rad)) 
-                        * cos((double) (from->ele * ang2rad)));
-        to->y = (float) (sin((double)(from->azi * ang2rad)) 
-                        * cos((double) (from->ele * ang2rad)));
-        to->z = (float) (sin((double) (from->ele * ang2rad)));
+        PBD::azi_ele_to_cart (from->azi, from->ele, to->x, to->y, to->z);
 }  
 
 void 
@@ -500,6 +511,8 @@ VBAPSpeakers::calculate_3x3_matrixes(struct ls_triplet_chain *ls_triplets)
                 tr_ptr = tr_ptr->next;
         }
 
+        cerr << "@@@ triplets generate " << triplet_count << " of speaker tuples\n";
+
         triplet = 0;
 
         _matrices.clear ();
@@ -547,6 +560,11 @@ VBAPSpeakers::calculate_3x3_matrixes(struct ls_triplet_chain *ls_triplets)
                 _speaker_tuples[triplet][1] = tr_ptr->ls_nos[1];
                 _speaker_tuples[triplet][2] = tr_ptr->ls_nos[2];
 
+                cerr << "Triplet[" << triplet << "] = " 
+                     << tr_ptr->ls_nos[0] << " + " 
+                     << tr_ptr->ls_nos[1] << " + " 
+                     << tr_ptr->ls_nos[2] << endl;
+
                 triplet++;
 
                 tr_ptr = tr_ptr->next;
@@ -560,6 +578,7 @@ VBAPSpeakers::choose_speaker_pairs (){
            matrices and stores the data to a global array
         */
         const int n_speakers = _speakers.size();
+        const double AZIMUTH_DELTA_THRESHOLD_DEGREES = (180.0/M_PI) * (M_PI - 0.175);
         int sorted_speakers[n_speakers];
         bool exists[n_speakers];
         double inverse_matrix[n_speakers][4]; 
@@ -582,8 +601,17 @@ VBAPSpeakers::choose_speaker_pairs (){
         
         /* adjacent loudspeakers are the loudspeaker pairs to be used.*/
         for (speaker = 0; speaker < n_speakers-1; speaker++) {
+
+                cerr << "Looking at " 
+                     << _speakers[sorted_speakers[speaker]].id << " @ " << _speakers[sorted_speakers[speaker]].angles.azi  
+                     << " and "
+                     << _speakers[sorted_speakers[speaker+1]].id << " @ " << _speakers[sorted_speakers[speaker+1]].angles.azi  
+                     << " delta = " 
+                     << _speakers[sorted_speakers[speaker+1]].angles.azi - _speakers[sorted_speakers[speaker]].angles.azi
+                     << endl;
+
                 if ((_speakers[sorted_speakers[speaker+1]].angles.azi - 
-                     _speakers[sorted_speakers[speaker]].angles.azi) <= (M_PI - 0.175)){
+                     _speakers[sorted_speakers[speaker]].angles.azi) <= AZIMUTH_DELTA_THRESHOLD_DEGREES) {
                         if (calc_2D_inv_tmatrix( _speakers[sorted_speakers[speaker]].angles.azi, 
                                                  _speakers[sorted_speakers[speaker+1]].angles.azi, 
                                                  inverse_matrix[speaker]) != 0){
@@ -594,8 +622,8 @@ VBAPSpeakers::choose_speaker_pairs (){
         }
         
         if (((6.283 - _speakers[sorted_speakers[n_speakers-1]].angles.azi) 
-            +_speakers[sorted_speakers[0]].angles.azi) <= (M_PI - 0.175)) {
-                if(calc_2D_inv_tmatrix(_speakers[sorted_speakers[n_speakers-1]].angles.azi, 
+             +_speakers[sorted_speakers[0]].angles.azi) <= AZIMUTH_DELTA_THRESHOLD_DEGREES) {
+                if (calc_2D_inv_tmatrix(_speakers[sorted_speakers[n_speakers-1]].angles.azi, 
                                        _speakers[sorted_speakers[0]].angles.azi, 
                                        inverse_matrix[n_speakers-1]) != 0) { 
                         exists[n_speakers-1] = true;
@@ -614,7 +642,6 @@ VBAPSpeakers::choose_speaker_pairs (){
         }
 
         for (speaker = 0; speaker < n_speakers - 1; speaker++) {
-                cerr << "exists[" << speaker << "] = " << exists[speaker] << endl;
                 if (exists[speaker]) {
                         _matrices[pair][0] = inverse_matrix[speaker][0];
                         _matrices[pair][1] = inverse_matrix[speaker][1];
@@ -623,6 +650,8 @@ VBAPSpeakers::choose_speaker_pairs (){
 
                         _speaker_tuples[pair][0] = sorted_speakers[speaker];
                         _speaker_tuples[pair][1] = sorted_speakers[speaker+1];
+
+                        cerr << "PAIR[" << pair << "] = " << sorted_speakers[speaker] << " + " << sorted_speakers[speaker+1] << endl;
 
                         pair++;
                 }
@@ -636,46 +665,25 @@ VBAPSpeakers::choose_speaker_pairs (){
 
                 _speaker_tuples[pair][0] = sorted_speakers[n_speakers-1];
                 _speaker_tuples[pair][1] = sorted_speakers[0];
-        }
 
-        cerr << "PAIRS done, tuples == " << n_tuples() << " pair = " << pair << endl;
+                cerr << "PAIR[" << pair << "] = " << sorted_speakers[n_speakers-1] << " + " << sorted_speakers[0] << endl;
+
+        }
 }
 
 void 
 VBAPSpeakers::sort_2D_lss (int* sorted_speakers)
 {
-        int speaker, other_speaker, index;
-        float tmp, tmp_azi;
-        int n_speakers = _speakers.size();
+        vector<Speaker> tmp = _speakers;
+        vector<Speaker>::iterator s;
+        azimuth_sorter sorter;
+        int n;
 
-        /* Transforming angles between -180 and 180 */
-        for (speaker = 0; speaker < n_speakers; speaker++) {
-                angle_to_cart(&_speakers[speaker].angles, &_speakers[speaker].coords);
-                _speakers[speaker].angles.azi = (float) acos((double) _speakers[speaker].coords.x);
-                if (fabsf(_speakers[speaker].coords.y) <= 0.001) {
-                        tmp = 1.0;
-                } else {
-                        tmp = _speakers[speaker].coords.y / fabsf(_speakers[speaker].coords.y);
-                }
-                _speakers[speaker].angles.azi *= tmp;
-        }
+        sort (tmp.begin(), tmp.end(), sorter);
 
-        for (speaker = 0; speaker < n_speakers; speaker++){
-                tmp = 2000;
-                for (other_speaker = 0 ; other_speaker < n_speakers; other_speaker++){
-                        if (_speakers[other_speaker].angles.azi <= tmp){
-                                tmp=_speakers[other_speaker].angles.azi;
-                                index = other_speaker;
-                        }
-                }
-                sorted_speakers[speaker] = index;
-                tmp_azi = (_speakers[index].angles.azi);
-                _speakers[index].angles.azi = (tmp_azi + (float) 4000.0);
-        }
-
-        for (speaker = 0 ; speaker < n_speakers; ++speaker) {
-                tmp_azi = _speakers[speaker].angles.azi;
-                _speakers[speaker].angles.azi = (tmp_azi - (float) 4000.0);
+        for (n = 0, s = tmp.begin(); s != tmp.end(); ++s, ++n) {
+                sorted_speakers[n] = (*s).id;
+                cerr << "Sorted[" << n << "] = " << (*s).id << endl;
         }
 }
 

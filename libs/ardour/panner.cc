@@ -1643,10 +1643,11 @@ Panner::setup_speakers (uint32_t nouts)
 		outputs.push_back (Output  (1.0, 1.0));
                 break;
         case 4:
-		outputs.push_back (Output  (0, 0));
-		outputs.push_back (Output  (1.0, 0));
-		outputs.push_back (Output  (1.0, 1.0));
+                /* clockwise from top left */
 		outputs.push_back (Output  (0, 1.0));
+		outputs.push_back (Output  (1.0, 1.0));
+		outputs.push_back (Output  (1.0, 0));
+		outputs.push_back (Output  (0, 0));
                 break;
 
 	case 5: //square+offcenter center
@@ -1671,8 +1672,13 @@ Panner::setup_speakers (uint32_t nouts)
         for (vector<Output>::iterator o = outputs.begin(); o != outputs.end(); ++o) {
                 double azimuth;
                 double elevation;
-                
-                cart_to_azi_ele ((*o).x + 1.0, (*o).y + 1.0, (*o).z, azimuth, elevation);
+                double tx, ty, tz;
+
+                tx = (*o).x - 0.5;
+                ty = (*o).y - 0.5;
+                tz = 0.0; // XXX change this if we ever do actual 3D
+
+                cart_to_azi_ele (tx, ty, tz, azimuth, elevation);
                 speakers.add_speaker (azimuth, elevation);
         }
 }

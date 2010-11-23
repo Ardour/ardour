@@ -25,6 +25,7 @@
 #include <gtkmm/menu.h>
 
 #include "pbd/error.h"
+#include "pbd/cartesian.h"
 #include "ardour/panner.h"
 #include <gtkmm2ext/gtk_ui.h>
 
@@ -44,25 +45,20 @@ Panner2d::Target::Target (float xa, float ya, const char *txt)
 	: x (xa, 0.0, 1.0, 0.01, 0.1)
 	, y (ya, 0.0, 1.0, 0.01, 0.1)
 	, azimuth (M_PI/2.0, 0.0, 2.0 * M_PI, 0.1, 0.5)
-	, text (txt ? strdup (txt) : 0)
+	, text (txt)
+        , _selected (false)
 {
 	azimuth.set_value ((random() / (double) INT_MAX) * (2.0 * M_PI));
 }
 
 Panner2d::Target::~Target ()
 {
-	if (text) {
-		free (text);
-	}
 }
 
 void
 Panner2d::Target::set_text (const char* txt)
 {
-	if (text) {
-		free (text);
-	}
-	text = strdup (txt);
+	text = txt;
 }
 
 Panner2d::Panner2d (boost::shared_ptr<Panner> p, int32_t h)
@@ -125,7 +121,7 @@ Panner2d::reset (uint32_t n_inputs)
 	default:
 		for (uint32_t i = 0; i < n_inputs; ++i) {
 			char buf[64];
-			snprintf (buf, sizeof (buf), "%" PRIu32, i);
+			snprintf (buf, sizeof (buf), "%" PRIu32, i + 1);
 			pucks[i]->set_text (buf);
 		}
 		break;
@@ -133,9 +129,17 @@ Panner2d::reset (uint32_t n_inputs)
 
 	for (uint32_t i = existing_pucks; i < n_inputs; ++i) {
 		float x, y;
+                double dx, dy;
+
 		panner->streampanner (i).get_position (x, y);
-		pucks[i]->x.set_value (x);
-		pucks[i]->y.set_value (y);
+
+                dx = x;
+                dy = y;
+                clamp_to_circle (dx, dy);
+
+		pucks[i]->x.set_value (dx);
+		pucks[i]->y.set_value (dy);
+
 		pucks[i]->visible = true;
 	}
 
@@ -198,7 +202,14 @@ Panner2d::on_size_allocate (Gtk::Allocation& alloc)
 int
 Panner2d::add_puck (const char* text, float x, float y)
 {
-	Target* puck = new Target (x, y, text);
+        double dx, dy;
+        
+        dx = x;
+        dy = y;
+        
+        clamp_to_circle (dx, dy);
+
+	Target* puck = new Target (dx, dy, text);
 	pucks.push_back (puck);
 	puck->visible = true;
 
@@ -258,7 +269,7 @@ Panner2d::move_puck (int which, float x, float y)
 }
 
 Panner2d::Target *
-Panner2d::find_closest_object (gdouble x, gdouble y, int& which, bool& is_puck) const
+Panner2d::find_closest_object (gdouble x, gdouble y, int& which) const
 {
 	gdouble efx, efy;
 	gdouble cx, cy;
@@ -268,26 +279,11 @@ Panner2d::find_closest_object (gdouble x, gdouble y, int& which, bool& is_puck) 
 	float best_distance = FLT_MAX;
 	int pwhich;
 
-	efx = x/width;
-	efy = y/height;
+	efx = x/(width-1.0);
+        efy = 1.0 - (y/(height-1.0)); /* convert from X Window origin */
+
 	which = 0;
 	pwhich = 0;
-	is_puck = false;
-
-	for (Targets::const_iterator i = targets.begin(); i != targets.end(); ++i, ++which) {
-		candidate = *i;
-
-		cx = candidate->x.get_value();
-		cy = candidate->y.get_value();
-
-		distance = sqrt ((cx - efx) * (cx - efx) +
-				 (cy - efy) * (cy - efy));
-
-		if (distance < best_distance) {
-			closest = candidate;
-			best_distance = distance;
-		}
-	}
 
 	for (Targets::const_iterator i = pucks.begin(); i != pucks.end(); ++i, ++pwhich) {
 		candidate = *i;
@@ -301,10 +297,13 @@ Panner2d::find_closest_object (gdouble x, gdouble y, int& which, bool& is_puck) 
 		if (distance < best_distance) {
 			closest = candidate;
 			best_distance = distance;
-			is_puck = true;
 			which = pwhich;
 		}
 	}
+
+        if (best_distance > 0.05) { // arbitrary 
+                return 0;
+        }
 
 	return closest;
 }
@@ -349,16 +348,22 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 		cairo_translate (cr, 10.0, 10.0);
 	}
 
+        /* horizontal line of "crosshairs" */
+
 	cairo_set_source_rgb (cr, 0.0, 0.1, 0.7);
 	cairo_move_to (cr, 0.5, height/2.0+0.5);
-	cairo_line_to (cr, height+0.5, height/2+0.5);
+	cairo_line_to (cr, width+0.5, height/2+0.5);
 	cairo_stroke (cr);
 
-	cairo_move_to (cr, height/2+0.5, 0.5);
-	cairo_line_to (cr, height/2+0.5, height+0.5);
+        /* vertical line of "crosshairs" */
+
+	cairo_move_to (cr, width/2+0.5, 0.5);
+	cairo_line_to (cr, width/2+0.5, height+0.5);
 	cairo_stroke (cr);
 
-	cairo_arc (cr, height/2, height/2, height/2, 0, 2.0 * M_PI);
+        /* the circle on which signals live */
+
+	cairo_arc (cr, width/2, height/2, height/2, 0, 2.0 * M_PI);
 	cairo_stroke (cr);
 
 	if (!panner->bypassed()) {
@@ -385,51 +390,21 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 				fx = max (fx, -1.0f);
 				x = (gint) floor (width * fx - 4);
 
-				fy = min (puck->y.get_value(), 1.0);
+				fy = min (fy, 1.0f);
 				fy = max (fy, -1.0f);
-				y = (gint) floor (height * fy - 4);
 
+                                /* translate back to X Window abomination coordinates */
+                                fy = -(puck->y.get_value() - 1.0);
+
+				y = (gint) floor (height * fy - 4);
+                                
 				cairo_arc (cr, x, y, arc_radius, 0, 2.0 * M_PI);
 				cairo_set_source_rgb (cr, 0.8, 0.2, 0.1);
 				cairo_close_path (cr);
 				cairo_fill (cr);
 
-				/* arrow */
-
-				if (height > 100.0f) {
-
-					float endx, endy;
-					endx = x;
-					endy = y;
-
-					cairo_save (cr);
-					cairo_translate (cr, x, y);
-					cairo_rotate (cr, puck->azimuth.get_value());
-
-					/* horizontal left-to-right line (rotation will rotate it, duh) */
-
-					endx = 30.0;
-					endy = 0.0;
-
-					/* stem */
-					cairo_set_line_width (cr, 4.0);
-					cairo_move_to (cr, 0.0, 0.0);
-					cairo_line_to (cr, endx, endy);
-					cairo_stroke (cr);
-
-					/* arrow head */
-
-					cairo_move_to (cr, endx - 10.0, endy + 10.0);
-					cairo_line_to (cr, endx, endy);
-					cairo_line_to (cr, endx - 10.0, endy - 10.0);
-					cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
-					cairo_stroke (cr);
-
-					cairo_restore (cr);
-				}
-
 				cairo_move_to (cr, x + 6, y + 6);
-				cairo_show_text (cr, puck->text);
+				cairo_show_text (cr, puck->text.c_str());
 			}
 		}
 
@@ -480,7 +455,10 @@ Panner2d::on_button_press_event (GdkEventButton *ev)
 	switch (ev->button) {
 	case 1:
 	case 2:
-		drag_target = find_closest_object (ev->x, ev->y, drag_index, drag_is_puck);
+		if ((drag_target = find_closest_object (ev->x, ev->y, drag_index)) != 0) {
+                        drag_target->set_selected (true);
+                }
+
 		drag_x = (int) floor (ev->x);
 		drag_y = (int) floor (ev->y);
 		state = (GdkModifierType) ev->state;
@@ -508,12 +486,10 @@ Panner2d::on_button_release_event (GdkEventButton *ev)
 		y = (int) floor (ev->y);
 		state = (GdkModifierType) ev->state;
 
-		if (drag_is_puck && (Keyboard::modifier_state_contains (state, Keyboard::TertiaryModifier))) {
-
-
+		if (Keyboard::modifier_state_contains (state, Keyboard::TertiaryModifier)) {
+                        
 			for (Targets::iterator i = pucks.begin(); i != pucks.end(); ++i) {
 				//Target* puck = i->second;
-
 				/* XXX DO SOMETHING TO SET PUCK BACK TO "normal" */
 			}
 
@@ -533,7 +509,7 @@ Panner2d::on_button_release_event (GdkEventButton *ev)
 		y = (int) floor (ev->y);
 		state = (GdkModifierType) ev->state;
 
-		if (drag_is_puck && (Keyboard::modifier_state_contains (state, Keyboard::TertiaryModifier))) {
+		if (Keyboard::modifier_state_contains (state, Keyboard::TertiaryModifier)) {
 			toggle_bypass ();
 			ret = true;
 		} else {
@@ -562,59 +538,28 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 		return false;
 	}
 
-	int x, y;
-	bool need_move = false;
-
-	if (!drag_is_puck && !allow_target) {
-		cerr << "dip = " << drag_is_puck << " at = " << allow_target << endl;
-		return true;
-	}
 
 	if (state & GDK_BUTTON1_MASK && !(state & GDK_BUTTON2_MASK)) {
 
-		if (allow_x || !drag_is_puck) {
-			float new_x;
-			x = min (evx, width - 1);
-			x = max (x, 0);
-			new_x = (float) x / (width - 1);
-			if (new_x != drag_target->x.get_value()) {
-				drag_target->x.set_value (new_x);
-				need_move = true;
-			}
-		}
+                double fx = evx;
+                double fy = evy;
+                bool need_move = false;
 
-		if (allow_y || drag_is_puck) {
-			float new_y;
-			y = min (evy, height - 1);
-			y = max (y, 0);
-			new_y = (float) y / (height - 1);
-			if (new_y != drag_target->y.get_value()) {
-				drag_target->y.set_value (new_y);
-				need_move = true;
-			}
-		}
+                clamp_to_circle (fx, fy);
 
-		if (need_move) {
+                if ((fx != drag_target->x.get_value()) || (fy != drag_target->y.get_value())) {
+                        need_move = true;
+                }
 
-			if (drag_is_puck) {
-
-				panner->streampanner(drag_index).set_position (
-						drag_target->x.get_value(), drag_target->y.get_value(), false);
-
-			} else {
-
-				TargetMoved (drag_index);
-			}
-
+                if (need_move) {
+                        drag_target->x.set_value (fx);
+                        drag_target->y.set_value (fy);
+                        
+                        panner->streampanner (drag_index).set_position (drag_target->x.get_value(), drag_target->y.get_value(), false);
 			queue_draw ();
 		}
 
-
 	} else if ((state & GDK_BUTTON2_MASK) && !(state & GDK_BUTTON1_MASK)) {
-
-		if (!drag_is_puck) {
-			return false;
-		}
 
 		int xdelta = drag_x - evx;
 		int ydelta = drag_x - evy;
@@ -624,6 +569,60 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 	}
 
 	return true;
+}
+
+void
+Panner2d::cart_to_azi_ele (double x, double y, double& azi, double& ele)
+{
+        x = min (x, (double) width);
+        x = max (x, 0.0);
+        x = x / (width-1.0);
+
+        y = min (y, (double) height);
+        y = max (y, 0.0);
+        y = y / (height-1.0);
+
+        /* at this point, new_x and new_y are in the range [ 0.0 .. 1.0 ], with
+           (0,0) at the upper left corner (thank you, X Window)
+           
+           we need to translate to (0,0) at center
+        */
+        
+        x -= 0.5;
+        y  = (1.0 - y) - 0.5;
+
+        PBD::cart_to_azi_ele (x, y, 0.0, azi, ele);
+}
+
+void
+Panner2d::azi_ele_to_cart (double azi, double ele, double& x, double& y)
+{
+        double z;
+
+        PBD::azi_ele_to_cart (azi, ele, x, y, z);
+        
+        /* xp,yp,zp use a (0,0) == center and 2.0 unit dimension. so convert
+           back to (0,0) and 1.0 unit dimension
+        */
+        
+        x /= 2.0;
+        y /= 2.0;
+        z /= 2.0;
+        
+        /* and now convert back to (0,0) == upper left corner */
+        
+        x += 0.5;
+        y += 0.5;
+        z += 0.5;
+}
+
+void
+Panner2d::clamp_to_circle (double& x, double& y)
+{
+        double azi, ele;
+
+        cart_to_azi_ele (x, y, azi, ele);
+        azi_ele_to_cart (azi, ele, x, y);
 }
 
 void

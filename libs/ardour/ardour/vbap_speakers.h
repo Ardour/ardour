@@ -31,15 +31,15 @@ namespace ARDOUR {
 class VBAPSpeakers {
   public:
         struct cart_vec {
-            float x;
-            float y;
-            float z;
+            double x;
+            double y;
+            double z;
         };
         
         struct ang_vec {
-            float azi;
-            float ele;
-            float length;
+            double azi;
+            double ele;
+            double length;
         };
 
         static const int MAX_TRIPLET_AMOUNT = 60;
@@ -76,6 +76,12 @@ class VBAPSpeakers {
             Speaker (int, double azimuth, double elevation);
 
             void move (double azimuth, double elevation);
+        };
+
+        struct azimuth_sorter {
+            bool operator() (const Speaker& s1, const Speaker& s2) {
+                    return s1.angles.azi < s2.angles.azi;
+            }
         };
 
         struct twoDmatrix : public dvector {
@@ -116,6 +122,8 @@ class VBAPSpeakers {
         void choose_speaker_pairs ();
         void sort_2D_lss (int* sorted_lss);
         int  calc_2D_inv_tmatrix (double azi1,double azi2, double* inv_mat);
+        
+        void dump_speakers (std::ostream&);
 };
 
 } /* namespace */

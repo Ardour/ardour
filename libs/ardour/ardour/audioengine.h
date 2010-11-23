@@ -31,7 +31,6 @@
 #include <exception>
 #include <string>
 
-
 #include <glibmm/thread.h>
 
 #include "pbd/rcu.h"
@@ -62,6 +61,11 @@ class AudioEngine : public SessionHandlePtr
 {
    public:
 	typedef std::set<Port*> Ports;
+
+        class disconnected_exception : public std::exception {
+          public:
+                virtual const char *what() const throw() { return "AudioEngine is disconnected"; }
+        };
 
 	AudioEngine (std::string client_name, std::string session_uuid);
 	virtual ~AudioEngine ();

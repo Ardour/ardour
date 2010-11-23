@@ -77,17 +77,27 @@ class Panner2d : public Gtk::DrawingArea
 	void on_size_allocate (Gtk::Allocation& alloc);
 
   private:
-	struct Target {
+	class Target {
+          public:
 	    Gtk::Adjustment x;
 	    Gtk::Adjustment y;
 	    Gtk::Adjustment azimuth;
 	    bool visible;
-	    char* text;
+            std::string text;
 
 	    Target (float xa, float ya, const char* txt = 0);
 	    ~Target ();
 
 	    void set_text (const char*);
+            void set_selected (bool yn) {
+                    _selected = yn;
+            }
+            bool selected() const { 
+                    return _selected;
+            }
+
+          private:
+            bool _selected;
 	};
 
 	boost::shared_ptr<ARDOUR::Panner> panner;
@@ -101,7 +111,6 @@ class Panner2d : public Gtk::DrawingArea
 	int drag_x;
 	int drag_y;
 	int     drag_index;
-	bool    drag_is_puck;
 	bool  allow_x;
 	bool  allow_y;
 	bool  allow_target;
@@ -113,7 +122,7 @@ class Panner2d : public Gtk::DrawingArea
 	gint compute_x (float);
 	gint compute_y (float);
 
-	Target *find_closest_object (gdouble x, gdouble y, int& which, bool& is_puck) const;
+	Target *find_closest_object (gdouble x, gdouble y, int& which) const;
 
 	gint handle_motion (gint, gint, GdkModifierType);
 
@@ -123,6 +132,17 @@ class Panner2d : public Gtk::DrawingArea
 
 	PBD::ScopedConnection state_connection;
 	PBD::ScopedConnection change_connection;
+
+        /* cartesian coordinates in GTK units ; return azimuth & elevation in degrees */
+        void cart_to_azi_ele (double x, double y, double& azi, double& eli);
+
+        /* azimuth & elevation in degrees; return cartesian coordinates in GTK units */
+        void azi_ele_to_cart (double azi, double eli, double& x, double& y);
+
+        /* cartesian coordinates in GTK units ; adjust to same but on a circle of radius 1.0
+           and centered in the middle of our area
+        */
+        void clamp_to_circle (double& x, double& y);
 };
 
 class Panner2dWindow : public Gtk::Window
