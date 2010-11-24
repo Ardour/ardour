@@ -373,6 +373,8 @@ def set_options(opt):
 		       'Multiple modifiers must be separated by \'><\'')
         opt.add_option('--boost-include', type='string', action='store', dest='boost_include', default='',
 			help='directory where Boost header files can be found')		       
+        opt.add_option('--wine-include', type='string', action='store', dest='wine_include', default='/usr/include/wine/windows',
+			help='directory where Wine\'s Windows header files can be found')		       
 	for i in children:
 		opt.sub_options(i)
 
@@ -524,6 +526,8 @@ def configure(conf):
 	autowaf.display_msg(conf, 'VST Support', opts.vst)
 	if opts.vst:
 		conf.define('VST_SUPPORT', 1)
+		conf.env.append_value('CPPPATH', Options.options.wine_include)
+		autowaf.check_header(conf, 'windows.h', mandatory = True)
 	if bool(conf.env['JACK_SESSION']):
 		conf.define ('HAVE_JACK_SESSION', 1)
 	autowaf.display_msg(conf, 'Wiimote Support', opts.wiimote)
