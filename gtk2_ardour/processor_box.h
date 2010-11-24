@@ -244,6 +244,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void redisplay_processors ();
 	void add_processor_to_display (boost::weak_ptr<ARDOUR::Processor>);
 	void reordered ();
+	void report_failed_reorder ();
 	void route_processors_changed (ARDOUR::RouteProcessorChange);
 
 	void processors_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);

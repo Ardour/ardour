@@ -1064,32 +1064,42 @@ ProcessorBox::compute_processor_sort_keys ()
 	}
 
 	if (_route->reorder_processors (our_processors)) {
+		/* Reorder failed, so report this to the user.  As far as I can see this must be done
+		   in an idle handler: it seems that the redisplay_processors() that happens below destroys
+		   widgets that were involved in the drag-and-drop on the processor list, which causes problems
+		   when the drag is torn down after this handler function is finished.
+		*/
+		Glib::signal_idle().connect_once (sigc::mem_fun (*this, &ProcessorBox::report_failed_reorder));
+	}
+}
 
-		/* reorder failed, so redisplay */
-
-		redisplay_processors ();
-
-		/* now tell them about the problem */
-
-		ArdourDialog dialog (_("Plugin Incompatibility"));
-		Label label;
-
-		label.set_text (_("\
+void
+ProcessorBox::report_failed_reorder ()
+{
+	/* reorder failed, so redisplay */
+	
+	redisplay_processors ();
+	
+	/* now tell them about the problem */
+	
+	ArdourDialog dialog (_("Plugin Incompatibility"));
+	Label label;
+	
+	label.set_text (_("\
 You cannot reorder these plugins/sends/inserts\n\
 in that way because the inputs and\n\
 outputs will not work correctly."));
 
-		dialog.get_vbox()->set_border_width (12);
-		dialog.get_vbox()->pack_start (label);
-		dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
-
-		dialog.set_name (X_("PluginIODialog"));
-		dialog.set_position (Gtk::WIN_POS_MOUSE);
-		dialog.set_modal (true);
-		dialog.show_all ();
-
-		dialog.run ();
-	}
+	dialog.get_vbox()->set_border_width (12);
+	dialog.get_vbox()->pack_start (label);
+	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
+	
+	dialog.set_name (X_("PluginIODialog"));
+	dialog.set_position (Gtk::WIN_POS_MOUSE);
+	dialog.set_modal (true);
+	dialog.show_all ();
+	
+	dialog.run ();
 }
 
 void
