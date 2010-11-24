@@ -2323,14 +2323,15 @@ Route::set_processor_state (const XMLNode& node)
                                         continue;
                                 }
 
-                                processor->set_state (**niter, Stateful::current_state_version);
-                                new_order.push_back (processor);
-                                must_configure = true;
+				if (processor->set_state (**niter, Stateful::current_state_version) == 0) {
+					new_order.push_back (processor);
+					must_configure = true;
+				}
                         }
                 }
         }
 
-        { 
+	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
                 _processors = new_order;
                 if (must_configure) {
