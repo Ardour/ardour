@@ -282,6 +282,9 @@ class MidiRegionView : public RegionView
 	void selection_as_notelist (Notes& selected, bool allow_all_if_none_selected = false);
 
 	void enable_display (bool);
+
+	void trim_start_starting ();
+	void trim_start_ending ();
         
   protected:
 	/** Allows derived types to specify their visibility requirements
@@ -372,6 +375,11 @@ class MidiRegionView : public RegionView
         ArdourCanvas::SimpleRect*            _step_edit_cursor;
         Evoral::MusicalTime                  _step_edit_cursor_width;
         Evoral::MusicalTime                  _step_edit_cursor_position;
+
+	/** A group used to temporarily reparent _note_group to during start trims, so
+	 *  that the notes don't move with the parent region view.
+	 */
+	ArdourCanvas::Group*                 _temporary_note_group;
 
 	MouseState _mouse_state;
 	int _pressed_button;

@@ -96,7 +96,14 @@ class RegionView : public TimeAxisViewItem
 		return _time_converter;
 	}
 
+	/** Called when a start trim is about to begin */
+	virtual void trim_start_starting () {}
+
 	void trim_start (framepos_t, bool);
+
+	/** Called when a start trim has finished */
+	virtual void trim_start_ending () {}
+	
 	void trim_end (framepos_t, bool);
 	void trim_contents (framepos_t, bool, bool);
 	virtual void thaw_after_trim ();

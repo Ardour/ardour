@@ -1551,6 +1551,9 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	switch (_operation) {
 	case StartTrim:
 		_editor->show_verbose_time_cursor (region_start, 10);
+		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
+			i->view->trim_start_starting ();
+		}
 		break;
 	case EndTrim:
 		_editor->show_verbose_time_cursor (region_end, 10);
@@ -1717,6 +1720,9 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+		if (_operation == StartTrim) {
+			i->view->trim_start_ending ();
+		}
 		i->view->region()->resume_property_changes ();
 	}
 }
