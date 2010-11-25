@@ -25,6 +25,7 @@
 #include <gtkmm/menushell.h>
 #include <gtkmm/menu_elems.h>
 #include <gtkmm/window.h>
+#include <gtkmm/stock.h>
 #include "ardour/bundle.h"
 #include "ardour/types.h"
 #include "ardour/session.h"
@@ -33,6 +34,7 @@
 #include "port_matrix.h"
 #include "port_matrix_body.h"
 #include "port_matrix_component.h"
+#include "ardour_dialog.h"
 #include "i18n.h"
 #include "gui_thread.h"
 #include "utils.h"
@@ -686,7 +688,16 @@ PortMatrix::remove_channel (ARDOUR::BundleChannel b)
 	if (io) {
 		Port* p = io->nth (b.channel);
 		if (p) {
-			io->remove_port (p, this);
+			int const r = io->remove_port (p, this);
+			if (r == -1) {
+				ArdourDialog d (_("Port removal not allowed"));
+				Label l (_("This port cannot be removed, as the first plugin in the track or buss cannot accept the new number of inputs."));
+				d.get_vbox()->pack_start (l);
+				d.add_button (Stock::OK, RESPONSE_ACCEPT);
+				d.set_modal (true);
+				d.show_all ();
+				d.run ();
+			}
 		}
 	}
 }

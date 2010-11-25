@@ -261,6 +261,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	PBD::Signal0<void>       signal_latency_changed;
 	PBD::Signal0<void>       initial_delay_changed;
 	PBD::Signal0<void>       order_key_changed;
+
+	/** Emitted with the process lock held */
 	PBD::Signal0<void>       io_changed;
 
 	/* gui's call this for their own purposes. */
@@ -473,9 +475,13 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void input_change_handler (IOChange, void *src);
 	void output_change_handler (IOChange, void *src);
 
+	bool input_port_count_changing (ChanCount);
+
 	bool _in_configure_processors;
 
 	int configure_processors_unlocked (ProcessorStreams*);
+	std::list<std::pair<ChanCount, ChanCount> > try_configure_processors (ChanCount, ProcessorStreams *);
+	std::list<std::pair<ChanCount, ChanCount> > try_configure_processors_unlocked (ChanCount, ProcessorStreams *);
 
 	bool add_processor_from_xml_2X (const XMLNode&, int);
 

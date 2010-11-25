@@ -184,38 +184,38 @@ IO::disconnect (Port* our_port, string other_port, void* src)
 
 			check_bundles_connected ();
 		}
+
+		changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
 	}
 
-	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
 	_session.set_dirty ();
 
 	return 0;
 }
 
+/** Caller must hold process lock */
 int
 IO::connect (Port* our_port, string other_port, void* src)
 {
+	assert (!AudioEngine::instance()->process_lock().trylock());
+	
 	if (other_port.length() == 0 || our_port == 0) {
 		return 0;
 	}
 
 	{
-		BLOCK_PROCESS_CALLBACK ();
-
-		{
-			Glib::Mutex::Lock lm (io_lock);
-
-			/* check that our_port is really one of ours */
-
-			if ( ! _ports.contains(our_port) ) {
-				return -1;
-			}
-
-			/* connect it to the source */
-
-			if (our_port->connect (other_port)) {
-				return -1;
-			}
+		Glib::Mutex::Lock lm (io_lock);
+		
+		/* check that our_port is really one of ours */
+		
+		if ( ! _ports.contains(our_port) ) {
+			return -1;
+		}
+		
+		/* connect it to the source */
+		
+		if (our_port->connect (other_port)) {
+			return -1;
 		}
 	}
 
@@ -227,6 +227,15 @@ IO::connect (Port* our_port, string other_port, void* src)
 int
 IO::remove_port (Port* port, void* src)
 {
+	ChanCount before = _ports.count ();
+	ChanCount after = before;
+	after.set (port->type(), after.get (port->type()) - 1);
+
+	bool const r = PortCountChanging (after); /* EMIT SIGNAL */
+	if (r) {
+		return -1;
+	}
+
 	IOChange change;
 
 	{
@@ -234,8 +243,6 @@ IO::remove_port (Port* port, void* src)
 
 		{
 			Glib::Mutex::Lock lm (io_lock);
-
-			ChanCount before = _ports.count ();
 
 			if (_ports.remove(port)) {
 				change.type = IOChange::Type (change.type | IOChange::ConfigurationChanged);
@@ -252,19 +259,22 @@ IO::remove_port (Port* port, void* src)
 		}
 
 		PortCountChanged (n_ports()); /* EMIT SIGNAL */
+
+		if (change.type != IOChange::NoChange) {
+			changed (change, src);
+			_session.set_dirty ();
+		}
 	}
 
 	if (change.type & IOChange::ConfigurationChanged) {
 		setup_bundle ();
 	}
 
-	if (change.type != IOChange::NoChange) {
-		changed (change, src);
-		_session.set_dirty ();
-		return 0;
+	if (change.type == IOChange::NoChange) {
+		return -1;
 	}
 
-	return -1;
+	return 0;
 }
 
 /** Add a port.
@@ -312,6 +322,11 @@ IO::add_port (string destination, void* src, DataType type)
 		}
 
 		PortCountChanged (n_ports()); /* EMIT SIGNAL */
+		
+		// pan_changed (src); /* EMIT SIGNAL */
+		change.type = IOChange::ConfigurationChanged;
+		change.after = _ports.count ();
+		changed (change, src); /* EMIT SIGNAL */
 	}
 
 	if (destination.length()) {
@@ -320,10 +335,6 @@ IO::add_port (string destination, void* src, DataType type)
 		}
 	}
 
-	// pan_changed (src); /* EMIT SIGNAL */
-	change.type = IOChange::ConfigurationChanged;
-	change.after = _ports.count ();
-	changed (change, src); /* EMIT SIGNAL */
 	setup_bundle ();
 	_session.set_dirty ();
 
@@ -333,28 +344,29 @@ IO::add_port (string destination, void* src, DataType type)
 int
 IO::disconnect (void* src)
 {
+	BLOCK_PROCESS_CALLBACK ();
+	
 	{
-		BLOCK_PROCESS_CALLBACK ();
-
-		{
-			Glib::Mutex::Lock lm (io_lock);
-
-			for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
-				i->disconnect_all ();
-			}
-
-			check_bundles_connected ();
+		Glib::Mutex::Lock lm (io_lock);
+		
+		for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
+			i->disconnect_all ();
 		}
+		
+		check_bundles_connected ();
 	}
-
+	
 	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
 
 	return 0;
 }
 
+/** Caller must hold process lock */
 bool
 IO::ensure_ports_locked (ChanCount count, bool clear, void* /*src*/)
 {
+	assert (!AudioEngine::instance()->process_lock().trylock());
+	
 	Port* port = 0;
 	bool  changed    = false;
 
@@ -419,10 +431,12 @@ IO::ensure_ports_locked (ChanCount count, bool clear, void* /*src*/)
 	return changed;
 }
 
-
+/** Caller must hold process lock */
 int
 IO::ensure_ports (ChanCount count, bool clear, void* src)
 {
+	assert (!AudioEngine::instance()->process_lock().trylock());
+	
 	bool changed = false;
 
 	if (count == n_ports() && !clear) {
@@ -434,7 +448,6 @@ IO::ensure_ports (ChanCount count, bool clear, void* src)
 	change.before = _ports.count ();
 	
 	{
-		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock im (io_lock);
 		changed = ensure_ports_locked (count, clear, src);
 	}
@@ -450,9 +463,12 @@ IO::ensure_ports (ChanCount count, bool clear, void* src)
 	return 0;
 }
 
+/** Caller must hold process lock */
 int
 IO::ensure_io (ChanCount count, bool clear, void* src)
 {
+	assert (!AudioEngine::instance()->process_lock().trylock());
+	
 	return ensure_ports (count, clear, src);
 }
 
@@ -830,9 +846,13 @@ IO::create_ports (const XMLNode& node, int version)
 
 	get_port_counts (node, version, n, c);
 
-	if (ensure_ports (n, true, this)) {
-		error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
-		return -1;
+	{
+		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		
+		if (ensure_ports (n, true, this)) {
+			error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
+			return -1;
+		}
 	}
 
 	/* XXX use c */
@@ -1004,9 +1024,13 @@ IO::set_ports (const string& str)
 		return 0;
 	}
 
-	// FIXME: audio-only
-	if (ensure_ports (ChanCount(DataType::AUDIO, nports), true, this)) {
-		return -1;
+	{
+		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		
+		// FIXME: audio-only
+		if (ensure_ports (ChanCount(DataType::AUDIO, nports), true, this)) {
+			return -1;
+		}
 	}
 
 	string::size_type start, end, ostart;
@@ -1158,8 +1182,9 @@ IO::update_port_total_latencies ()
 int
 IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 {
+	BLOCK_PROCESS_CALLBACK ();
+
 	{
-		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock lm2 (io_lock);
 
 		c->connect (_bundle, _session.engine());
@@ -1189,8 +1214,9 @@ IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 int
 IO::disconnect_ports_from_bundle (boost::shared_ptr<Bundle> c, void* src)
 {
+	BLOCK_PROCESS_CALLBACK ();
+
 	{
-		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock lm2 (io_lock);
 
 		c->disconnect (_bundle, _session.engine());

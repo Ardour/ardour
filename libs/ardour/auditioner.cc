@@ -176,11 +176,15 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	}
 
         ProcessorStreams ps;
-        if (configure_processors (&ps)) {
-                error << string_compose (_("Cannot setup auditioner processing flow for %1 channels"), 
-                                         _diskstream->n_channels()) << endmsg;
-                return;
-        }
+	{
+		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+
+		if (configure_processors (&ps)) {
+			error << string_compose (_("Cannot setup auditioner processing flow for %1 channels"), 
+						 _diskstream->n_channels()) << endmsg;
+			return;
+		}
+	}
 
 	/* force a panner reset now that we have all channels */
 

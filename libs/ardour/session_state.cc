@@ -510,6 +510,7 @@ Session::ensure_subdirs ()
 	return 0;
 }
 
+/** Caller must not hold process lock */
 int
 Session::create (const string& mix_template, BusProfile* bus_profile)
 {
@@ -578,8 +579,11 @@ Session::create (const string& mix_template, BusProfile* bus_profile)
                         }
 			boost_debug_shared_ptr_mark_interesting (rt, "Route");
 			boost::shared_ptr<Route> r (rt);
-			r->input()->ensure_io (count, false, this);
-			r->output()->ensure_io (count, false, this);
+			{
+				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				r->input()->ensure_io (count, false, this);
+				r->output()->ensure_io (count, false, this);
+			}
 			r->set_remote_control_id (control_id++);
 
 			rl.push_back (r);
@@ -592,8 +596,11 @@ Session::create (const string& mix_template, BusProfile* bus_profile)
                                 }
                                 boost_debug_shared_ptr_mark_interesting (rt, "Route");
                                 boost::shared_ptr<Route> r (rt);
-                                r->input()->ensure_io (count, false, this);
-                                r->output()->ensure_io (count, false, this);
+				{
+					Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+					r->input()->ensure_io (count, false, this);
+					r->output()->ensure_io (count, false, this);
+				}
                                 r->set_remote_control_id (control_id);
                                 
                                 rl.push_back (r);

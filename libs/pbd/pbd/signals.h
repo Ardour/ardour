@@ -110,11 +110,11 @@ private:
     SignalType _signal;
 };
 
-template<typename R, typename A>
+template<typename R, typename A, typename C = boost::signals2::optional_last_value<R> >
 class Signal1 {
 public:
     Signal1 () {}
-    typedef boost::signals2::signal<R(A)> SignalType;
+    typedef boost::signals2::signal<R(A), C> SignalType;
 
     void connect_same_thread (ScopedConnectionList& clist, 
 		  const typename SignalType::slot_function_type& slot) {

@@ -1504,6 +1504,7 @@ Session::count_existing_route_channels (ChanCount& in, ChanCount& out)
 	}
 }
 
+/** Caller must not hold process lock */
 list<boost::shared_ptr<MidiTrack> >
 Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_many)
 {
@@ -1541,15 +1542,17 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 			boost_debug_shared_ptr_mark_interesting (mt, "Track");
 			track = boost::shared_ptr<MidiTrack>(mt);
 
-			if (track->input()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
-				error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
-				goto failed;
-			}
+			{
+				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				if (track->input()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
+					error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
+					goto failed;
+				}
 
-
-			if (track->output()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
-				error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
-				goto failed;
+				if (track->output()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
+					error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
+					goto failed;
+				}
 			}
 
 			auto_connect_route (track.get(), existing_inputs, existing_outputs);
@@ -1590,7 +1593,8 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 	return ret;
 }
 
-/** @param connect_inputs true to connect inputs as well as outputs, false to connect just outputs.
+/** Caller must hold process lock.
+ *  @param connect_inputs true to connect inputs as well as outputs, false to connect just outputs.
  *  @param input_start Where to start from when auto-connecting inputs; e.g. if this is 0, auto-connect starting from input 0.
  *  @param output_start As \a input_start, but for outputs.
  */
@@ -1669,6 +1673,7 @@ Session::auto_connect_route (
 	existing_outputs += route->n_outputs();
 }
 
+/** Caller must not hold process lock */
 list< boost::shared_ptr<AudioTrack> >
 Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, RouteGroup* route_group, uint32_t how_many)
 {
@@ -1706,23 +1711,27 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			boost_debug_shared_ptr_mark_interesting (at, "Track");
 			track = boost::shared_ptr<AudioTrack>(at);
 
-			if (track->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
-				error << string_compose (
-							_("cannot configure %1 in/%2 out configuration for new audio track"),
-							 input_channels, output_channels)
-				      << endmsg;
-				goto failed;
-			}
+			{
+				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
-			if (track->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
-				error << string_compose (
-							_("cannot configure %1 in/%2 out configuration for new audio track"),
-							 input_channels, output_channels)
-				      << endmsg;
-				goto failed;
-			}
+				if (track->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
+					error << string_compose (
+						_("cannot configure %1 in/%2 out configuration for new audio track"),
+						input_channels, output_channels)
+					      << endmsg;
+					goto failed;
+				}
+				
+				if (track->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
+					error << string_compose (
+						_("cannot configure %1 in/%2 out configuration for new audio track"),
+						input_channels, output_channels)
+					      << endmsg;
+					goto failed;
+				}
 
-			auto_connect_route (track.get(), existing_inputs, existing_outputs);
+				auto_connect_route (track.get(), existing_inputs, existing_outputs);
+			}
 
 			if (route_group) {
 				route_group->add (track);
@@ -1787,7 +1796,7 @@ Session::set_remote_control_ids ()
 	}
 }
 
-
+/** Caller must not hold process lock */
 RouteList
 Session::new_audio_route (bool aux, int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many)
 {
@@ -1820,22 +1829,26 @@ Session::new_audio_route (bool aux, int input_channels, int output_channels, Rou
 			boost_debug_shared_ptr_mark_interesting (rt, "Route");
 			shared_ptr<Route> bus (rt);
 
-			if (bus->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
-				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
-							 input_channels, output_channels)
-				      << endmsg;
-				goto failure;
+			{
+				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+
+				if (bus->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
+					error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
+								 input_channels, output_channels)
+					      << endmsg;
+					goto failure;
+				}
+				
+				
+				if (bus->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
+					error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
+								 input_channels, output_channels)
+					      << endmsg;
+					goto failure;
+				}
+
+				auto_connect_route (bus.get(), existing_inputs, existing_outputs, false);
 			}
-
-
-			if (bus->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
-				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
-							 input_channels, output_channels)
-				      << endmsg;
-				goto failure;
-			}
-
-			auto_connect_route (bus.get(), existing_inputs, existing_outputs, false);
 
 			if (route_group) {
 				route_group->add (bus);

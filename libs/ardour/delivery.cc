@@ -35,6 +35,7 @@
 #include "ardour/panner.h"
 #include "ardour/port.h"
 #include "ardour/session.h"
+#include "ardour/audioengine.h"
 
 #include "i18n.h"
 
@@ -178,9 +179,12 @@ Delivery::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 	return false;
 }
 
+/** Caller must hold process lock */
 bool
 Delivery::configure_io (ChanCount in, ChanCount out)
 {
+	assert (!AudioEngine::instance()->process_lock().trylock());
+
 	/* check configuration by comparison with our I/O port configuration, if appropriate.
 	   see ::can_support_io_configuration() for comments
 	*/

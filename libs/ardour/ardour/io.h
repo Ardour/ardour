@@ -133,6 +133,7 @@ class IO : public SessionObject, public Latent
 
 	const ChanCount& n_ports ()  const { return _ports.count(); }
 
+	/** Emitted with the process lock held */
 	PBD::Signal2<void,IOChange,void*> changed;
 
 	virtual XMLNode& state (bool full);
@@ -140,6 +141,31 @@ class IO : public SessionObject, public Latent
 	int set_state (const XMLNode&, int version);
 	int set_state_2X (const XMLNode&, int, bool);
 
+	class BoolCombiner {
+	public:
+
+		typedef bool result_type;
+
+		template <typename Iter>
+		bool operator() (Iter first, Iter last) const {
+			bool r = false;
+			while (first != last) {
+				if (*first) {
+					r = true;
+				}
+				++first;
+			}
+
+			return r;
+		}
+	};
+
+	/** Emitted when the port count is about to change.  Objects
+	 *  can attach to this, and return `true' if they want to prevent
+	 *  the change from happening.
+	 */
+	PBD::Signal1<bool, ChanCount, BoolCombiner> PortCountChanging;
+	
 	static int  disable_connecting (void);
 	static int  enable_connecting (void);
 	static int  disable_ports (void);

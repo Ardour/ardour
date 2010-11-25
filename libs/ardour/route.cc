@@ -120,6 +120,8 @@ Route::init ()
 	_input->changed.connect_same_thread (*this, boost::bind (&Route::input_change_handler, this, _1, _2));
 	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
 
+	_input->PortCountChanging.connect_same_thread (*this, boost::bind (&Route::input_port_count_changing, this, _1));
+
 	/* add amp processor  */
 
 	_amp.reset (new Amp (_session));
@@ -876,13 +878,17 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 		// Set up processor list channels.  This will set processor->[input|output]_streams(),
 		// configure redirect ports properly, etc.
 
-		if (configure_processors_unlocked (err)) {
-			ProcessorList::iterator ploc = loc;
-			--ploc;
-			_processors.erase(ploc);
-			configure_processors_unlocked (0); // it worked before we tried to add it ...
-			cerr << "configure failed\n";
-			return -1;
+		{
+			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+
+			if (configure_processors_unlocked (err)) {
+				ProcessorList::iterator ploc = loc;
+				--ploc;
+				_processors.erase(ploc);
+				configure_processors_unlocked (0); // it worked before we tried to add it ...
+				cerr << "configure failed\n";
+				return -1;
+			}
 		}
 
 		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(processor)) != 0) {
@@ -1051,10 +1057,13 @@ Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter
 				(*i)->activate ();
 			}
 
-			if (configure_processors_unlocked (err)) {
-				_processors.erase (inserted);
-				configure_processors_unlocked (0); // it worked before we tried to add it ...
-				return -1;
+			{
+				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				if (configure_processors_unlocked (err)) {
+					_processors.erase (inserted);
+					configure_processors_unlocked (0); // it worked before we tried to add it ...
+					return -1;
+				}
 			}
 
 			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false));
@@ -1259,7 +1268,11 @@ Route::clear_processors (Placement p)
 		}
 
 		_processors = new_list;
-		configure_processors_unlocked (&err); // this can't fail
+
+		{
+			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			configure_processors_unlocked (&err); // this can't fail
+		}
 	}
 
 	processor_max_streams.reset();
@@ -1333,12 +1346,16 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 			return 1;
 		}
 
-		if (configure_processors_unlocked (err)) {
-			/* get back to where we where */
-			_processors.insert (i, processor);
-			/* we know this will work, because it worked before :) */
-			configure_processors_unlocked (0);
-			return -1;
+		{
+			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		
+			if (configure_processors_unlocked (err)) {
+				/* get back to where we where */
+				_processors.insert (i, processor);
+				/* we know this will work, because it worked before :) */
+				configure_processors_unlocked (0);
+				return -1;
+			}
 		}
 
 		_have_internal_generator = false;
@@ -1420,12 +1437,16 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 
 		_output->set_user_latency (0);
 
-		if (configure_processors_unlocked (err)) {
-			/* get back to where we where */
-			_processors = as_we_were;
-			/* we know this will work, because it worked before :) */
-			configure_processors_unlocked (0);
-			return -1;
+		{
+			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		
+			if (configure_processors_unlocked (err)) {
+				/* get back to where we where */
+				_processors = as_we_were;
+				/* we know this will work, because it worked before :) */
+				configure_processors_unlocked (0);
+				return -1;
+			}
 		}
 
 		_have_internal_generator = false;
@@ -1454,10 +1475,12 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 	return 0;
 }
 
-
+/** Caller must hold process lock */
 int
 Route::configure_processors (ProcessorStreams* err)
 {
+	assert (!AudioEngine::instance()->process_lock().trylock());
+	
 	if (!_in_configure_processors) {
 		Glib::RWLock::WriterLock lm (_processor_lock);
 		return configure_processors_unlocked (err);
@@ -1471,22 +1494,20 @@ Route::input_streams () const
         return _input->n_ports ();
 }
 
-/** Configure the input/output configuration of each processor in the processors list.
- * Return 0 on success, otherwise configuration is impossible.
- */
-int
-Route::configure_processors_unlocked (ProcessorStreams* err)
+list<pair<ChanCount, ChanCount> >
+Route::try_configure_processors (ChanCount in, ProcessorStreams* err)
 {
-	if (_in_configure_processors) {
-	   return 0;
-	}
+	Glib::RWLock::ReaderLock lm (_processor_lock);
 
-	_in_configure_processors = true;
+	return try_configure_processors_unlocked (in, err);
+}
 
+list<pair<ChanCount, ChanCount> >
+Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
+{
 	// Check each processor in order to see if we can configure as requested
-	ChanCount in = input_streams ();
 	ChanCount out;
-	list< pair<ChanCount,ChanCount> > configuration;
+	list<pair<ChanCount, ChanCount> > configuration;
 	uint32_t index = 0;
 
 	DEBUG_TRACE (DEBUG::Processors, string_compose ("%1: configure processors\n", _name));
@@ -1507,12 +1528,37 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 				err->index = index;
 				err->count = in;
 			}
-			_in_configure_processors = false;
-			return -1;
+			return list<pair<ChanCount, ChanCount> > ();
 		}
 	}
 
-	// We can, so configure everything
+	return configuration;
+}
+
+/** Set the input/output configuration of each processor in the processors list.
+ *  Caller must hold process lock.
+ *  Return 0 on success, otherwise configuration is impossible.
+ */
+int
+Route::configure_processors_unlocked (ProcessorStreams* err)
+{
+	assert (!AudioEngine::instance()->process_lock().trylock());
+
+	if (_in_configure_processors) {
+		return 0;
+	}
+
+	_in_configure_processors = true;
+
+	list<pair<ChanCount, ChanCount> > configuration = try_configure_processors_unlocked (input_streams (), err);
+
+	if (configuration.empty ()) {
+		_in_configure_processors = false;
+		return -1;
+	}
+
+	ChanCount out;
+
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
 		(*p)->configure_io(c->first, c->second);
@@ -1527,10 +1573,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 
 	/* make sure we have sufficient scratch buffers to cope with the new processor
 	   configuration */
-	{
-		Glib::Mutex::Lock em (_session.engine().process_lock ());
-		_session.ensure_buffers (n_process_buffers ());
-	}
+	_session.ensure_buffers (n_process_buffers ());
 
 	DEBUG_TRACE (DEBUG::Processors, string_compose ("%1: configuration complete\n", _name));
 
@@ -1686,10 +1729,14 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 
 		_processors.insert (oiter, as_it_will_be.begin(), as_it_will_be.end());
 
-		if (configure_processors_unlocked (err)) {
-			_processors = as_it_was_before;
-			processor_max_streams = old_pms;
-			return -1;
+		{
+			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		
+			if (configure_processors_unlocked (err)) {
+				_processors = as_it_was_before;
+				processor_max_streams = old_pms;
+				return -1;
+			}
 		}
 	}
 
@@ -2335,6 +2382,7 @@ Route::set_processor_state (const XMLNode& node)
 		Glib::RWLock::WriterLock lm (_processor_lock);
                 _processors = new_order;
                 if (must_configure) {
+			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
                         configure_processors_unlocked (0);
                 }
         }
@@ -2647,6 +2695,7 @@ Route::handle_transport_stopped (bool /*abort_ignored*/, bool did_locate, bool c
 	_roll_delay = _initial_delay;
 }
 
+/** Called with the process lock held */
 void
 Route::input_change_handler (IOChange change, void * /*src*/)
 {
@@ -2657,6 +2706,7 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 	}
 }
 
+/** Called with the process lock held */
 void
 Route::output_change_handler (IOChange change, void * /*src*/)
 {
@@ -2958,10 +3008,14 @@ Route::put_monitor_send_at (Placement p)
 		
 		_processors.insert (loc, _monitor_send);
 
-		if (configure_processors_unlocked (0)) {
-			_processors = as_it_was;
-			configure_processors_unlocked (0); // it worked before we tried to add it ...
-			return;
+		{
+			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			
+			if (configure_processors_unlocked (0)) {
+				_processors = as_it_was;
+				configure_processors_unlocked (0); // it worked before we tried to add it ...
+				return;
+			}
 		}
 	}
 
@@ -3455,4 +3509,21 @@ Route::set_processor_positions ()
 		}
 	}
 }
+
+/** Called when there is a proposed change to the input port count */
+bool
+Route::input_port_count_changing (ChanCount to)
+{
+	list<pair<ChanCount, ChanCount> > c = try_configure_processors (to, 0);
+	if (c.empty()) {
+		/* The processors cannot be configured with the new input arrangement, so
+		   block the change.
+		*/
+		return true;
+	}
+
+	/* The change is ok */
+	return false;
+}
+
 

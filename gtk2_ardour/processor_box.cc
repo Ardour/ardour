@@ -801,6 +801,7 @@ ProcessorBox::choose_insert ()
 	_route->add_processor (processor, _placement);
 }
 
+/* Caller must not hold process lock */
 void
 ProcessorBox::choose_send ()
 {
@@ -813,6 +814,7 @@ ProcessorBox::choose_send ()
 
 	/* XXX need processor lock on route */
 	try {
+		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock());
 		send->output()->ensure_io (outs, false, this);
 	} catch (AudioEngine::PortRegistrationFailure& err) {
 		error << string_compose (_("Cannot set up new send: %1"), err.what()) << endmsg;
