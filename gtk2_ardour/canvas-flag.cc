@@ -12,17 +12,17 @@ CanvasFlag::CanvasFlag (MidiRegionView& region,
                         guint           fill_color_rgba,
                         double          x,
                         double          y)
-        : Group(parent, x, y)
-        , _text(0)
-        , _height(height)
-        , _outline_color_rgba(outline_color_rgba)
-        , _fill_color_rgba(fill_color_rgba)
-        , _region(region)
-        , _line(0)
-        , _rect(0)
+	: Group(parent, x, y)
+	, _text(0)
+	, _height(height)
+	, _outline_color_rgba(outline_color_rgba)
+	, _fill_color_rgba(fill_color_rgba)
+	, _region(region)
+	, _line(0)
+	, _rect(0)
 {
-        /* XXX this connection is needed if ::on_event() is changed to actually do anything */
-        signal_event().connect (sigc::mem_fun (*this, &CanvasFlag::on_event));
+	/* XXX this connection is needed if ::on_event() is changed to actually do anything */
+	signal_event().connect (sigc::mem_fun (*this, &CanvasFlag::on_event));
 }
 
 void
@@ -58,9 +58,9 @@ CanvasFlag::set_text(const string& a_text)
 	_rect->property_fill_color_rgba() = _fill_color_rgba;
 	_text->raise_to_top();
 
-        /* XXX these two connections are needed if ::on_event() is changed to actually do anything */
-        //_rect->signal_event().connect (sigc::mem_fun (*this, &CanvasFlag::on_event));
-        //_text->signal_event().connect (sigc::mem_fun (*this, &CanvasFlag::on_event));
+	/* XXX these two connections are needed if ::on_event() is changed to actually do anything */
+	//_rect->signal_event().connect (sigc::mem_fun (*this, &CanvasFlag::on_event));
+	//_text->signal_event().connect (sigc::mem_fun (*this, &CanvasFlag::on_event));
 }
 
 CanvasFlag::~CanvasFlag()
@@ -71,18 +71,18 @@ CanvasFlag::~CanvasFlag()
 bool
 CanvasFlag::on_event(GdkEvent* /*ev*/)
 {
-        /* XXX if you change this function to actually do anything, be sure
-           to fix the connections commented out elsewhere in this file.
-        */
+	/* XXX if you change this function to actually do anything, be sure
+	   to fix the connections commented out elsewhere in this file.
+	*/
 	return false;
 }
 
 void
 CanvasFlag::set_height (double h)
 {
-        _height = h;
+	_height = h;
 
-        if (_line) {
-                _line->property_y2() = _height;
-        }
+	if (_line) {
+		_line->property_y2() = _height;
+	}
 }

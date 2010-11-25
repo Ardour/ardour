@@ -165,8 +165,8 @@ ArdourStartup::set_load_template( string load_template )
 bool
 ArdourStartup::use_session_template ()
 {
-        if (!load_template_override.empty())
-                return true;
+	if (!load_template_override.empty())
+		return true;
 
 	if (use_template_button.get_active()) {
 		return template_chooser.get_active_row_number() > 0;
@@ -178,10 +178,10 @@ ArdourStartup::use_session_template ()
 std::string
 ArdourStartup::session_template_name ()
 {
-        if (!load_template_override.empty()) {
-            string the_path = (ARDOUR::user_template_directory()/ (load_template_override + ".template")).to_string();
-                return the_path;
-        }
+	if (!load_template_override.empty()) {
+		string the_path = (ARDOUR::user_template_directory()/ (load_template_override + ".template")).to_string();
+		return the_path;
+	}
 
 	if (ic_existing_session_button.get_active()) {
 		return string();
@@ -204,8 +204,8 @@ ArdourStartup::session_name (bool& should_be_new)
 	if (ic_new_session_button.get_active()) {
 		should_be_new = true;
 		string val = new_name_entry.get_text ();
-                strip_whitespace_edges (val);
-                return val;
+		strip_whitespace_edges (val);
+		return val;
 	} else if (_existing_session_chooser_used) {
 		/* existing session chosen from file chooser */
 		should_be_new = false;
@@ -300,7 +300,7 @@ void
 ArdourStartup::default_dir_changed ()
 {
 	Config->set_default_session_parent_dir (default_dir_chooser->get_current_folder());
-        config_changed ();
+	config_changed ();
 }
 
 void
@@ -399,47 +399,47 @@ ArdourStartup::setup_monitor_section_choice_page ()
 	HBox* hbox = manage (new HBox);
 	VBox* main_vbox = manage (new VBox);
 	VBox* vbox;
-        Label* l = manage (new Label);
+	Label* l = manage (new Label);
 
 	main_vbox->set_spacing (32);
 
-        no_monitor_section_button.set_label (_("Use a Master bus directly"));
-        l->set_alignment (0.0, 1.0);
-        l->set_markup(_("Connect the Master bus directly to your hardware outputs.\n\
+	no_monitor_section_button.set_label (_("Use a Master bus directly"));
+	l->set_alignment (0.0, 1.0);
+	l->set_markup(_("Connect the Master bus directly to your hardware outputs.\n\
 <i>Preferable for simple use</i>."));
 
-        vbox = manage (new VBox);
+	vbox = manage (new VBox);
 	vbox->set_spacing (6);
 	vbox->pack_start (no_monitor_section_button, false, true);
 	vbox->pack_start (*l, false, true);
 
-        main_vbox->pack_start (*vbox, false, false);
+	main_vbox->pack_start (*vbox, false, false);
 
-        use_monitor_section_button.set_label (_("Use an additional Monitor bus"));
-        l = manage (new Label);
-        l->set_alignment (0.0, 1.0);
-        l->set_text (_("Use a Monitor bus between Master bus and hardware outputs for \n\
+	use_monitor_section_button.set_label (_("Use an additional Monitor bus"));
+	l = manage (new Label);
+	l->set_alignment (0.0, 1.0);
+	l->set_text (_("Use a Monitor bus between Master bus and hardware outputs for \n\
 greater control in monitoring without affecting the mix."));
 
-        vbox = manage (new VBox);
+	vbox = manage (new VBox);
 	vbox->set_spacing (6);
 	vbox->pack_start (use_monitor_section_button, false, true);
 	vbox->pack_start (*l, false, true);
 
-        main_vbox->pack_start (*vbox, false, false);
+	main_vbox->pack_start (*vbox, false, false);
 
 	RadioButton::Group g (use_monitor_section_button.get_group());
 	no_monitor_section_button.set_group (g);
 
-        if (Config->get_use_monitor_bus()) {
-                use_monitor_section_button.set_active (true);
-        } else {
-                no_monitor_section_button.set_active (true);
-        }
+	if (Config->get_use_monitor_bus()) {
+		use_monitor_section_button.set_active (true);
+	} else {
+		no_monitor_section_button.set_active (true);
+	}
 
-        use_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
-        no_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
-        
+	use_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
+	no_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
+
 	monitor_section_label.set_markup(_("<i><small>(You can change this preference at any time, via the Preferences dialog)</small></i>"));
 	monitor_section_label.set_alignment (0.0, 0.0);
 
@@ -575,7 +575,7 @@ ArdourStartup::on_apply ()
 			Config->set_monitoring_model (SoftwareMonitoring);
 		}
 
-                Config->set_use_monitor_bus (use_monitor_section_button.get_active());
+		Config->set_use_monitor_bus (use_monitor_section_button.get_active());
 
 		Config->save_state ();
 	}
@@ -621,10 +621,10 @@ ArdourStartup::populate_session_templates ()
 static bool
 lost_name_entry_focus (GdkEventFocus*)
 {
-        cerr << "lost focus\n";
-        return false;
+	cerr << "lost focus\n";
+	return false;
 }
-                
+
 void
 ArdourStartup::setup_new_session_page ()
 {
@@ -678,7 +678,7 @@ ArdourStartup::setup_new_session_page ()
 		new_folder_chooser.set_title (_("Select folder for session"));
 
 #ifdef GTKOSX
-                new_folder_chooser.add_shortcut_folder ("/Volumes");
+		new_folder_chooser.add_shortcut_folder ("/Volumes");
 #endif
 
 		vbox1->pack_start (*hbox2, false, false);
@@ -780,13 +780,13 @@ ArdourStartup::setup_new_session_page ()
 	set_page_type (session_vbox, ASSISTANT_PAGE_CONFIRM);
 
 	new_name_entry.signal_map().connect (sigc::mem_fun (*this, &ArdourStartup::new_name_mapped));
-        new_name_entry.signal_focus_out_event().connect (sigc::ptr_fun (lost_name_entry_focus));
+	new_name_entry.signal_focus_out_event().connect (sigc::ptr_fun (lost_name_entry_focus));
 }
 
 void
 ArdourStartup::new_name_mapped ()
 {
-        cerr << "Grab new name focus\n";
+	cerr << "Grab new name focus\n";
 	new_name_entry.grab_focus ();
 }
 
@@ -821,7 +821,7 @@ ArdourStartup::redisplay_recent_sessions ()
 	sort (rs.begin(), rs.end(), cmp);
 
 	for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
-	        session_directories.push_back ((*i).second);
+		session_directories.push_back ((*i).second);
 	}
 
 	for (vector<sys::path>::const_iterator i = session_directories.begin(); i != session_directories.end(); ++i)
@@ -1252,7 +1252,7 @@ ArdourStartup::limit_outputs_clicked ()
 void
 ArdourStartup::master_bus_button_clicked ()
 {
-        bool yn = _create_master_bus.get_active();
+	bool yn = _create_master_bus.get_active();
 
 	_master_bus_channel_count.set_sensitive(yn);
 }

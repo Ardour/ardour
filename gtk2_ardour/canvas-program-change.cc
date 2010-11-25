@@ -20,7 +20,7 @@ CanvasProgramChange::CanvasProgramChange(
 		double          y,
 		string&         model_name,
 		string&         custom_device_mode,
-                double          event_time,
+		double          event_time,
 		uint8_t         channel,
 		uint8_t         program)
 	: CanvasFlag(
@@ -113,27 +113,27 @@ CanvasProgramChange::on_event(GdkEvent* ev)
 				initialize_popup_menus();
 				_popup_initialized = true;
 			}
-                        _popup.popup(ev->button.button, ev->button.time);
+			_popup.popup(ev->button.button, ev->button.time);
 			return true;
 		}
 		break;
 
-        case GDK_KEY_PRESS:
-                switch (ev->key.keyval) {
-                case GDK_Up:
-                case GDK_KP_Up:
-                case GDK_uparrow:
+	case GDK_KEY_PRESS:
+		switch (ev->key.keyval) {
+		case GDK_Up:
+		case GDK_KP_Up:
+		case GDK_uparrow:
 			_region.previous_program(*this);
-                        break;
-                case GDK_Down:
-                case GDK_KP_Down:
-                case GDK_downarrow:
+			break;
+		case GDK_Down:
+		case GDK_KP_Down:
+		case GDK_downarrow:
 			_region.next_program(*this);
-                        break;
-                default:
-                        break;
-                }
-                break;
+			break;
+		default:
+			break;
+		}
+		break;
 
 	case GDK_SCROLL:
 		if (ev->scroll.direction == GDK_SCROLL_UP) {

@@ -221,11 +221,11 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 
 	SourceMap all_sources = _session->get_sources();
 	bool already_exists = false;
-        uint32_t existing;
+	uint32_t existing;
 
-        if ((existing = _session->count_sources_by_origin (path)) > 0) {
-                already_exists = true;
-        }
+	if ((existing = _session->count_sources_by_origin (path)) > 0) {
+		already_exists = true;
+	}
 
 	int function = 1;
 
@@ -329,7 +329,7 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 	boost::shared_ptr<Track> track;
 	vector<string> to_import;
 	int nth = 0;
-        bool use_timestamp = (pos == -1);
+	bool use_timestamp = (pos == -1);
 
 	current_interthread_info = &import_status;
 	import_status.current = 1;
@@ -358,17 +358,17 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 		if (cancel) {
 			ok = false;
 		} else {
-                        ipw.show ();
+			ipw.show ();
 			ok = (import_sndfiles (paths, mode, quality, pos, 1, 1, track, false) == 0);
 		}
 
 	} else {
 
-                bool replace = false;
+		bool replace = false;
 
 		for (vector<string>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
-                        const int check = check_whether_and_how_to_import (*a, true);
+			const int check = check_whether_and_how_to_import (*a, true);
                         
 			switch (check) {
 			case 2:
@@ -386,48 +386,48 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 				/* NOTREACHED*/
 			}
 
-                        /* have to reset this for every file we handle */
+			/* have to reset this for every file we handle */
                         
-                        if (use_timestamp) {
-                                pos = -1;
-                        }
+			if (use_timestamp) {
+				pos = -1;
+			}
 
-                        ipw.show ();
+			ipw.show ();
                                 
-                        switch (chns) {
-                        case Editing::ImportDistinctFiles:
+			switch (chns) {
+			case Editing::ImportDistinctFiles:
                                 
-                                to_import.clear ();
-                                to_import.push_back (*a);
+				to_import.clear ();
+				to_import.push_back (*a);
                                 
-                                if (mode == Editing::ImportToTrack) {
-                                        track = get_nth_selected_audio_track (nth++);
-                                }
+				if (mode == Editing::ImportToTrack) {
+					track = get_nth_selected_audio_track (nth++);
+				}
 			
-                                ok = (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, replace) == 0);
-                                break;
+				ok = (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, replace) == 0);
+				break;
 				
-                        case Editing::ImportDistinctChannels:
+			case Editing::ImportDistinctChannels:
 				
-                                to_import.clear ();
-                                to_import.push_back (*a);
+				to_import.clear ();
+				to_import.push_back (*a);
 				
-                                ok = (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, replace) == 0);
-                                break;
+				ok = (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, replace) == 0);
+				break;
 				
-                        case Editing::ImportSerializeFiles:
+			case Editing::ImportSerializeFiles:
 				
-                                to_import.clear ();
-                                to_import.push_back (*a);
+				to_import.clear ();
+				to_import.push_back (*a);
 
-                                ok = (import_sndfiles (to_import, mode, quality, pos, 1, 1, track, replace) == 0);
-                                break;
+				ok = (import_sndfiles (to_import, mode, quality, pos, 1, 1, track, replace) == 0);
+				break;
 
-                        case Editing::ImportMergeFiles:
-                                // Not entered, handled in earlier if() branch
-                                break;
-                        }
-                }
+			case Editing::ImportMergeFiles:
+				// Not entered, handled in earlier if() branch
+				break;
+			}
+		}
 	}
 
 	if (ok) {
@@ -480,7 +480,7 @@ Editor::do_embed (vector<string> paths, ImportDisposition chns, ImportMode mode,
 		if (embed_sndfiles (paths, multi, check_sample_rate, mode, pos, 1, 1, track) < -1) {
 			goto out;
 		}
-                break;
+		break;
 
 	case Editing::ImportSerializeFiles:
 		for (vector<string>::iterator a = paths.begin(); a != paths.end(); ++a) {
@@ -712,11 +712,11 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 
 		region_name = region_name_from_path (paths.front(), (sources.size() > 1), false);
 
-                /* we checked in import_sndfiles() that there were not too many */
+		/* we checked in import_sndfiles() that there were not too many */
 
-                while (RegionFactory::region_by_name (region_name)) {
-                        region_name = bump_name_once (region_name, '.');
-                }
+		while (RegionFactory::region_by_name (region_name)) {
+			region_name = bump_name_once (region_name, '.');
+		}
 
 		PropertyList plist; 
 		
@@ -787,49 +787,48 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 	}
 
 	int n = 0;
-        framepos_t rlen = 0;
+	framepos_t rlen = 0;
 
-	for (vector<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
+	for (vector<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {                
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*r);
                 
-                boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*r);
-                
-                if (use_timestamp && ar) {
+		if (use_timestamp && ar) {
                         
-                        /* get timestamp for this region */
+			/* get timestamp for this region */
 
-                        const boost::shared_ptr<Source> s (ar->sources().front());
-                        const boost::shared_ptr<AudioSource> as = boost::dynamic_pointer_cast<AudioSource> (s);
+			const boost::shared_ptr<Source> s (ar->sources().front());
+			const boost::shared_ptr<AudioSource> as = boost::dynamic_pointer_cast<AudioSource> (s);
                         
-                        assert (as);
+			assert (as);
                         
-                        if (as->natural_position() != 0) {
-                                pos = as->natural_position();
-                        } else if (target_tracks == 1) {
-                                /* hmm, no timestamp available, put it after the previous region
-                                 */
-                                if (n == 0) {
-                                        pos = get_preferred_edit_position ();
-                                } else {
-                                        pos += rlen;
-                                }
-                        } else {
-                                pos = get_preferred_edit_position ();
-                        }
+			if (as->natural_position() != 0) {
+				pos = as->natural_position();
+			} else if (target_tracks == 1) {
+				/* hmm, no timestamp available, put it after the previous region
+				 */
+				if (n == 0) {
+					pos = get_preferred_edit_position ();
+				} else {
+					pos += rlen;
+				}
+			} else {
+				pos = get_preferred_edit_position ();
+			}
                                 
-                }
+		}
 
 		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track);
 
-                rlen = (*r)->length();
+		rlen = (*r)->length();
                 
-                if (target_tracks != 1) {
-                        track.reset ();
-                } else { 
-                        if (!use_timestamp || !ar) {
-                                /* line each one up right after the other */
-                                pos += (*r)->length();
-                        }
-                }
+		if (target_tracks != 1) {
+			track.reset ();
+		} else { 
+			if (!use_timestamp || !ar) {
+				/* line each one up right after the other */
+				pos += (*r)->length();
+			}
+		}
 	}
 
 	/* setup peak file building in another thread */

@@ -108,7 +108,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 
 	if (_route->panner()) {
 		_route->panner()->Changed.connect (*this, invalidator (*this), 
-                                                   boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
+		                                   boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
 	}
 
 	/* map current state of the route */
@@ -196,9 +196,9 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 		ensure_xml_node ();
 		ensure_pan_views (show);
 
-        } else if (param.type() == PluginAutomation) {
+	} else if (param.type() == PluginAutomation) {
                 
-                /* handled elsewhere */
+		/* handled elsewhere */
 
 	} else {
 		error << "AudioTimeAxisView: unknown automation child " << EventTypeMap::instance().to_symbol(param) << endmsg;

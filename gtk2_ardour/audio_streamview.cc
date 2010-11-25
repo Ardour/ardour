@@ -463,9 +463,9 @@ AudioStreamView::setup_rec_box ()
 					if (src) {
 						sources.push_back (src);
 						src->PeakRangeReady.connect (rec_data_ready_connections,
-                                                                             invalidator (*this),
-									     ui_bind (&AudioStreamView::rec_peak_range_ready, this, _1, _2, boost::weak_ptr<Source>(src)),
-									     gui_context());
+						                             invalidator (*this),
+						                             ui_bind (&AudioStreamView::rec_peak_range_ready, this, _1, _2, boost::weak_ptr<Source>(src)),
+						                             gui_context());
 					}
 				}
 

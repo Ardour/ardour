@@ -53,14 +53,14 @@ CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item, const boost
 	, _note(note)
 	, _selected(false)
 	, _valid (true)
-        , _mouse_x_fraction (-1.0)
-        , _mouse_y_fraction (-1.0)
+	, _mouse_x_fraction (-1.0)
+	, _mouse_y_fraction (-1.0)
 {
 }
 
 CanvasNoteEvent::~CanvasNoteEvent()
 {
-        CanvasNoteEventDeleted (this);
+	CanvasNoteEventDeleted (this);
 
 	if (_text) {
 		_text->hide();
@@ -87,8 +87,8 @@ CanvasNoteEvent::show_velocity()
 {
 	if (!_text) {
 		_text = new NoEventText (*(_item->property_parent()));
-                _text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiNoteVelocityText.get();
-                _text->property_justification() = Gtk::JUSTIFY_CENTER;
+		_text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiNoteVelocityText.get();
+		_text->property_justification() = Gtk::JUSTIFY_CENTER;
 	}
 
 	_text->property_x() = (x1() + x2()) /2;
@@ -143,13 +143,13 @@ CanvasNoteEvent::show_channel_selector(void)
 		_channel_selector->channel_selected.connect(
 			sigc::mem_fun(this, &CanvasNoteEvent::on_channel_change));
 
-                _channel_selector->clicked.connect (
-                        sigc::mem_fun (this, &CanvasNoteEvent::hide_channel_selector));
+		_channel_selector->clicked.connect (
+			sigc::mem_fun (this, &CanvasNoteEvent::hide_channel_selector));
 
 		_channel_selector_widget = new Widget(*(_item->property_parent()),
-				x1(),
-				y2() + 2,
-				(Gtk::Widget &) *_channel_selector);
+		                                      x1(),
+		                                      y2() + 2,
+		                                      (Gtk::Widget &) *_channel_selector);
 
 		_channel_selector_widget->hide();
 		_channel_selector_widget->property_height() = 100;
@@ -176,10 +176,10 @@ CanvasNoteEvent::set_selected(bool selected)
 {
 	if (!_note) {
 		return;
-        }
+	}
 
 	_selected = selected;
-        set_fill_color (base_color ());
+	set_fill_color (base_color ());
         
 	if (_selected) {
 		set_outline_color(calculate_outline(ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get()));
@@ -203,20 +203,20 @@ CanvasNoteEvent::base_color()
 
 	switch (mode) {
 	case TrackColor:
-		{
-			Gdk::Color color = _region.midi_stream_view()->get_region_color();
-			return UINT_INTERPOLATE (RGBA_TO_UINT(
-                                                         SCALE_USHORT_TO_UINT8_T(color.get_red()),
-                                                         SCALE_USHORT_TO_UINT8_T(color.get_green()),
-                                                         SCALE_USHORT_TO_UINT8_T(color.get_blue()),
-                                                         opacity), 
-                                                 ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get(), 0.5);
-		}
+	{
+		Gdk::Color color = _region.midi_stream_view()->get_region_color();
+		return UINT_INTERPOLATE (RGBA_TO_UINT(
+			                         SCALE_USHORT_TO_UINT8_T(color.get_red()),
+			                         SCALE_USHORT_TO_UINT8_T(color.get_green()),
+			                         SCALE_USHORT_TO_UINT8_T(color.get_blue()),
+			                         opacity), 
+		                         ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get(), 0.5);
+	}
 
 	case ChannelColors:
-                 return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (CanvasNoteEvent::midi_channel_colors[_note->channel()],
-                                                              opacity), 
-                                          ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get(), 0.5);
+		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (CanvasNoteEvent::midi_channel_colors[_note->channel()],
+		                                             opacity), 
+		                         ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get(), 0.5);
 
 	default:
 		return meter_style_fill_color(_note->velocity(), selected());
@@ -228,58 +228,58 @@ CanvasNoteEvent::base_color()
 void
 CanvasNoteEvent::set_mouse_fractions (GdkEvent* ev)
 {
-        double ix, iy;
-        double bx1, bx2, by1, by2;
-        bool set_cursor = false;
+	double ix, iy;
+	double bx1, bx2, by1, by2;
+	bool set_cursor = false;
 
 	switch (ev->type) {
-        case GDK_MOTION_NOTIFY:
-                ix = ev->motion.x;
-                iy = ev->motion.y;
-                set_cursor = true;
-                break;
-        case GDK_ENTER_NOTIFY:
-                ix = ev->crossing.x;
-                iy = ev->crossing.y;
-                set_cursor = true;
-                break;
-        case GDK_BUTTON_PRESS:
-        case GDK_BUTTON_RELEASE:
-                ix = ev->button.x;
-                iy = ev->button.y;
-                break;
-        default:
-                _mouse_x_fraction = -1.0;
-                _mouse_y_fraction = -1.0;
-                return;
-        }
+	case GDK_MOTION_NOTIFY:
+		ix = ev->motion.x;
+		iy = ev->motion.y;
+		set_cursor = true;
+		break;
+	case GDK_ENTER_NOTIFY:
+		ix = ev->crossing.x;
+		iy = ev->crossing.y;
+		set_cursor = true;
+		break;
+	case GDK_BUTTON_PRESS:
+	case GDK_BUTTON_RELEASE:
+		ix = ev->button.x;
+		iy = ev->button.y;
+		break;
+	default:
+		_mouse_x_fraction = -1.0;
+		_mouse_y_fraction = -1.0;
+		return;
+	}
 
-        _item->get_bounds (bx1, by1, bx2, by2);
-        _item->w2i (ix, iy);
-        /* hmm, something wrong here. w2i should give item-local coordinates
-           but it doesn't. for now, finesse this.
-        */
-        ix = ix - bx1;
-        iy = iy - by1;
+	_item->get_bounds (bx1, by1, bx2, by2);
+	_item->w2i (ix, iy);
+	/* hmm, something wrong here. w2i should give item-local coordinates
+	   but it doesn't. for now, finesse this.
+	*/
+	ix = ix - bx1;
+	iy = iy - by1;
 
-        /* fraction of width/height */
-        double xf;
-        double yf;
-        bool notify = false;
+	/* fraction of width/height */
+	double xf;
+	double yf;
+	bool notify = false;
 
-        xf = ix / (bx2 - bx1);
-        yf = iy / (by2 - by1);
+	xf = ix / (bx2 - bx1);
+	yf = iy / (by2 - by1);
 
-        if (xf != _mouse_x_fraction || yf != _mouse_y_fraction) {
-                notify = true;
-        }
+	if (xf != _mouse_x_fraction || yf != _mouse_y_fraction) {
+		notify = true;
+	}
 
-        _mouse_x_fraction = xf;
-        _mouse_y_fraction = yf;
+	_mouse_x_fraction = xf;
+	_mouse_y_fraction = yf;
 
-        if (notify) {
-                _region.note_mouse_position (_mouse_x_fraction, _mouse_y_fraction, set_cursor);
-        }
+	if (notify) {
+		_region.note_mouse_position (_mouse_x_fraction, _mouse_y_fraction, set_cursor);
+	}
 }
 
 bool
@@ -291,29 +291,29 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
-                set_mouse_fractions (ev);
+		set_mouse_fractions (ev);
 		_region.note_entered (this);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-                set_mouse_fractions (ev);
+		set_mouse_fractions (ev);
 		_region.note_left (this);
 		break;
 
-        case GDK_MOTION_NOTIFY:
-                set_mouse_fractions (ev);
-                break;
+	case GDK_MOTION_NOTIFY:
+		set_mouse_fractions (ev);
+		break;
 
 	case GDK_BUTTON_PRESS:
-                set_mouse_fractions (ev);
+		set_mouse_fractions (ev);
 		if (ev->button.button == 3 && Keyboard::no_modifiers_active (ev->button.state)) {
-                        show_channel_selector();
+			show_channel_selector();
 			return true;
 		}
 		break;
 
 	case GDK_BUTTON_RELEASE:
-                set_mouse_fractions (ev);
+		set_mouse_fractions (ev);
 		if (ev->button.button == 3 && Keyboard::no_modifiers_active (ev->button.state)) {
 			return true;
 		}
@@ -329,8 +329,8 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 bool
 CanvasNoteEvent::mouse_near_ends () const
 {
-        return (_mouse_x_fraction >= 0.0 && _mouse_x_fraction < 0.25) ||
-                (_mouse_x_fraction >= 0.75 && _mouse_x_fraction < 1.0);
+	return (_mouse_x_fraction >= 0.0 && _mouse_x_fraction < 0.25) ||
+		(_mouse_x_fraction >= 0.75 && _mouse_x_fraction < 1.0);
 }
 
 } // namespace Canvas

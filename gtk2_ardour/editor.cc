@@ -217,20 +217,20 @@ show_me_the_size (Requisition* r, const char* what)
 static void
 pane_size_watcher (Paned* pane)
 {
-       /* if the handle of a pane vanishes into (at least) the tabs of a notebook,
-          it is no longer accessible. so stop that. this doesn't happen on X11,
-          just the quartz backend.
+	/* if the handle of a pane vanishes into (at least) the tabs of a notebook,
+	   it is no longer accessible. so stop that. this doesn't happen on X11,
+	   just the quartz backend.
 
-          ugh.
-       */
+	   ugh.
+	*/
 
-       int max_width_of_lhs = GTK_WIDGET(pane->gobj())->allocation.width - 25;
+	int max_width_of_lhs = GTK_WIDGET(pane->gobj())->allocation.width - 25;
 
-       gint pos = pane->get_position ();
+	gint pos = pane->get_position ();
 
-       if (pos > max_width_of_lhs) {
-               pane->set_position (max_width_of_lhs);
-       }
+	if (pos > max_width_of_lhs) {
+		pane->set_position (max_width_of_lhs);
+	}
 }
 #endif
 
@@ -362,7 +362,7 @@ Editor::Editor ()
 	_dragging_edit_point = false;
 	select_new_marker = false;
 	rhythm_ferret = 0;
-        layering_order_editor = 0;
+	layering_order_editor = 0;
 	_bundle_manager = 0;
 	no_save_visual = false;
 	resize_idle_id = -1;
@@ -609,8 +609,8 @@ Editor::Editor ()
 
 	edit_pane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
 #ifdef GTKOSX
-        Glib::PropertyProxy<int> proxy = edit_pane.property_position();
-        proxy.signal_changed().connect (bind (sigc::ptr_fun (pane_size_watcher), static_cast<Paned*> (&edit_pane)));
+	Glib::PropertyProxy<int> proxy = edit_pane.property_position();
+	proxy.signal_changed().connect (bind (sigc::ptr_fun (pane_size_watcher), static_cast<Paned*> (&edit_pane)));
 #endif
 	top_hbox.pack_start (toolbar_frame, false, true);
 
@@ -1085,7 +1085,7 @@ Editor::set_session (Session *t)
 	   but use Gtkmm2ext::UI::instance()->call_slot();
 	*/
 
-        _session->StepEditStatusChange.connect (_session_connections, invalidator (*this), ui_bind(&Editor::step_edit_status_change, this, _1), gui_context());
+	_session->StepEditStatusChange.connect (_session_connections, invalidator (*this), ui_bind(&Editor::step_edit_status_change, this, _1), gui_context());
 	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&Editor::map_transport_state, this), gui_context());
 	_session->PositionChanged.connect (_session_connections, invalidator (*this), ui_bind (&Editor::map_position_change, this, _1), gui_context());
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), ui_bind (&Editor::handle_new_route, this, _1), gui_context());
@@ -1408,8 +1408,8 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 	case RegionItem:
 	case RegionViewName:
 	case RegionViewNameHighlight:
-        case LeftFrameHandle:
-        case RightFrameHandle:
+	case LeftFrameHandle:
+	case RightFrameHandle:
 		if (!with_selection) {
 			if (region_edit_menu_split_item) {
 				if (clicked_regionview && clicked_regionview->region()->covers (get_preferred_edit_position())) {
@@ -1528,9 +1528,9 @@ Editor::build_track_region_context_menu ()
 		   mode and so offering region context is somewhat confusing.
 		*/
 		if ((tr = rtv->track()) && ((pl = tr->playlist())) && !internal_editing()) {
-                        framepos_t const framepos = (framepos_t) floor ((double) get_preferred_edit_position() * tr->speed());
-                        uint32_t regions_at = pl->count_regions_at (framepos);
-                        add_region_context_items (edit_items, regions_at > 1);
+			framepos_t const framepos = (framepos_t) floor ((double) get_preferred_edit_position() * tr->speed());
+			uint32_t regions_at = pl->count_regions_at (framepos);
+			add_region_context_items (edit_items, regions_at > 1);
 		}
 	}
 
@@ -1567,7 +1567,7 @@ Editor::build_track_crossfade_context_menu ()
 
 			framepos_t framepos = (framepos_t) floor ((double) get_preferred_edit_position() * tr->speed());
 			uint32_t regions_at = pl->count_regions_at (framepos);
-                        add_region_context_items (edit_items, regions_at > 1);
+			add_region_context_items (edit_items, regions_at > 1);
 		}
 	}
 
@@ -2106,7 +2106,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 
 	if (_session && (prop = node.property ("playhead"))) {
 		framepos_t pos;
-                sscanf (prop->value().c_str(), "%" PRIi64, &pos);
+		sscanf (prop->value().c_str(), "%" PRIi64, &pos);
 		playhead_cursor->set_position (pos);
 	} else {
 		playhead_cursor->set_position (0);
@@ -2194,17 +2194,17 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		}
 	}
 
-        if ((prop = node.property ("stationary-playhead"))) {
-                bool yn = (prop->value() == "yes");
-                set_stationary_playhead (yn);
-                RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-stationary-playhead"));
-                if (act) {
-                        RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-                        if (tact->get_active() != yn) {
-                                tact->set_active (yn);
-                        }
-                }
-        }
+	if ((prop = node.property ("stationary-playhead"))) {
+		bool yn = (prop->value() == "yes");
+		set_stationary_playhead (yn);
+		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-stationary-playhead"));
+		if (act) {
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			if (tact->get_active() != yn) {
+				tact->set_active (yn);
+			}
+		}
+	}
         
 	if ((prop = node.property ("region-list-sort-type"))) {
 		RegionListSortType st;
@@ -2329,7 +2329,7 @@ Editor::get_state ()
 
 	node->add_property ("show-measures", _show_measures ? "yes" : "no");
 	node->add_property ("follow-playhead", _follow_playhead ? "yes" : "no");
-        node->add_property ("stationary-playhead", _stationary_playhead ? "yes" : "no");
+	node->add_property ("stationary-playhead", _stationary_playhead ? "yes" : "no");
 	node->add_property ("xfades-visible", _xfade_visibility ? "yes" : "no");
 	node->add_property ("region-list-sort-type", enum_2_string (_regions->sort_type ()));
 	node->add_property ("mouse-mode", enum2str(mouse_mode));
@@ -2711,13 +2711,13 @@ Editor::setup_toolbar ()
 	}
 
 	_mouse_mode_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-                                                         &_mouse_mode_tearoff->tearoff_window()));
+	                                                 &_mouse_mode_tearoff->tearoff_window()));
 	_mouse_mode_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-                                                         &_mouse_mode_tearoff->tearoff_window(), 1));
+	                                                 &_mouse_mode_tearoff->tearoff_window(), 1));
 	_mouse_mode_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-                                                         &_mouse_mode_tearoff->tearoff_window()));
+	                                                 &_mouse_mode_tearoff->tearoff_window()));
 	_mouse_mode_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-                                                          &_mouse_mode_tearoff->tearoff_window(), 1));
+	                                                  &_mouse_mode_tearoff->tearoff_window(), 1));
 
 	mouse_move_button.set_mode (false);
 	mouse_select_button.set_mode (false);
@@ -2844,13 +2844,13 @@ Editor::setup_toolbar ()
 	}
 
 	_tools_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-                                                    &_tools_tearoff->tearoff_window()));
+	                                            &_tools_tearoff->tearoff_window()));
 	_tools_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-                                                    &_tools_tearoff->tearoff_window(), 0));
+	                                            &_tools_tearoff->tearoff_window(), 0));
 	_tools_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-                                                    &_tools_tearoff->tearoff_window()));
+	                                            &_tools_tearoff->tearoff_window()));
 	_tools_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-                                                     &_tools_tearoff->tearoff_window(), 0));
+	                                             &_tools_tearoff->tearoff_window(), 0));
 
 	toolbar_hbox.set_spacing (10);
 	toolbar_hbox.set_border_width (1);
@@ -3250,8 +3250,8 @@ Editor::show_verbose_canvas_cursor_with (const string & txt, int32_t xoffset, in
 	track_canvas->get_pointer (x, y);
 	track_canvas->window_to_world (x, y, wx, wy);
 
-        wx += xoffset;
-        wy += yoffset;
+	wx += xoffset;
+	wy += yoffset;
 
 	/* don't get too close to the edge */
 	verbose_canvas_cursor->property_x() = clamp_verbose_cursor_x (wx);
@@ -3648,24 +3648,24 @@ Editor::set_follow_playhead (bool yn)
 void
 Editor::toggle_stationary_playhead ()
 {
-       RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-stationary-playhead"));
-       if (act) {
-               RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-               set_stationary_playhead (tact->get_active());
-       }
+	RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-stationary-playhead"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+		set_stationary_playhead (tact->get_active());
+	}
 }
 
 void
 Editor::set_stationary_playhead (bool yn)
 {
-       if (_stationary_playhead != yn) {
-               if ((_stationary_playhead = yn) == true) {
-                       /* catch up */
-                       // FIXME need a 3.0 equivalent of this 2.X call
-                       // update_current_screen ();
-               }
-               instant_save ();
-       }
+	if (_stationary_playhead != yn) {
+		if ((_stationary_playhead = yn) == true) {
+			/* catch up */
+			// FIXME need a 3.0 equivalent of this 2.X call
+			// update_current_screen ();
+		}
+		instant_save ();
+	}
 }
 
 void
@@ -4527,7 +4527,7 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
 			if ((tr = rtv->track()) && ((pl = tr->playlist()))) {
 
 				Playlist::RegionList* regions = pl->regions_touched (
-                                        (framepos_t) floor ( (double)where * tr->speed()), max_framepos);
+					(framepos_t) floor ( (double)where * tr->speed()), max_framepos);
 
 				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 
@@ -4742,7 +4742,7 @@ Editor::idle_resize ()
 		}
 	}
 
-        _pending_resize_amount = 0;
+	_pending_resize_amount = 0;
 	flush_canvas ();
 	_group_tabs->set_dirty ();
 	resize_idle_id = -1;
@@ -5023,11 +5023,11 @@ Editor::show_region_in_region_list ()
 void
 Editor::step_edit_status_change (bool yn)
 {
-        if (yn) {
-                start_step_editing ();
-        } else {
-                stop_step_editing ();
-        }
+	if (yn) {
+		start_step_editing ();
+	} else {
+		stop_step_editing ();
+	}
 }
 
 void
@@ -5208,33 +5208,33 @@ Editor::super_rapid_screen_update ()
 			playhead_cursor->set_position (frame);
 		}
 
-                if (!_stationary_playhead) {
+		if (!_stationary_playhead) {
 
-                        if (!_dragging_playhead && _follow_playhead && _session->requested_return_frame() < 0) {
-                                reset_x_origin_to_follow_playhead ();
-                        }
+			if (!_dragging_playhead && _follow_playhead && _session->requested_return_frame() < 0) {
+				reset_x_origin_to_follow_playhead ();
+			}
 
-                } else {
+		} else {
 			
-                        /* don't do continuous scroll till the new position is in the rightmost quarter of the
-                           editor canvas
-                        */
+			/* don't do continuous scroll till the new position is in the rightmost quarter of the
+			   editor canvas
+			*/
 #if 0                        
-                        // FIXME DO SOMETHING THAT WORKS HERE - this is 2.X code                         
-                        double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_unit;
-                        if (target <= 0.0) {
-                                target = 0.0;
-                        }
-                        if (fabs(target - current) < current_page_frames() / frames_per_unit) {
-                                target = (target * 0.15) + (current * 0.85);
-                        } else {
-                                /* relax */
-                        }
+			// FIXME DO SOMETHING THAT WORKS HERE - this is 2.X code                         
+			double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_unit;
+			if (target <= 0.0) {
+				target = 0.0;
+			}
+			if (fabs(target - current) < current_page_frames() / frames_per_unit) {
+				target = (target * 0.15) + (current * 0.85);
+			} else {
+				/* relax */
+			}
                         
-                        current = target;
-                        set_horizontal_position (current);
+			current = target;
+			set_horizontal_position (current);
 #endif
-                }
+		}
 		
 	}
 }
@@ -5328,31 +5328,31 @@ Editor::change_region_layering_order ()
 {
 	framepos_t const position = get_preferred_edit_position ();
 	
-        if (!clicked_routeview) {
-                if (layering_order_editor) {
-                        layering_order_editor->hide ();
-                }
+	if (!clicked_routeview) {
+		if (layering_order_editor) {
+			layering_order_editor->hide ();
+		}
 		return;
 	}
 
-        boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (clicked_routeview->route());
+	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (clicked_routeview->route());
 
-        if (!track) {
-                return;
-        }
+	if (!track) {
+		return;
+	}
 
 	boost::shared_ptr<Playlist> pl = track->playlist();
 
 	if (!pl) {
-                return;
-        }
+		return;
+	}
                 
-        if (layering_order_editor == 0) {
-                layering_order_editor = new RegionLayeringOrderEditor(*this);
-        }
+	if (layering_order_editor == 0) {
+		layering_order_editor = new RegionLayeringOrderEditor(*this);
+	}
 
-        layering_order_editor->set_context (clicked_routeview->name(), _session, pl, position);
-        layering_order_editor->maybe_present ();
+	layering_order_editor->set_context (clicked_routeview->name(), _session, pl, position);
+	layering_order_editor->maybe_present ();
 }
 
 void

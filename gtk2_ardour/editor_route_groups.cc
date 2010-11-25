@@ -52,9 +52,8 @@ using Gtkmm2ext::Keyboard;
 
 EditorRouteGroups::EditorRouteGroups (Editor* e)
 	: EditorComponent (e)
-        , _all_group_active_button (_("No Selection = All Tracks"))
-        , _in_row_change (false)
-
+	, _all_group_active_button (_("No Selection = All Tracks"))
+	, _in_row_change (false)
 {
 	_model = ListStore::create (_columns);
 	_display.set_model (_model);
@@ -162,13 +161,13 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	button_box->pack_start (*add_button);
 	button_box->pack_start (*remove_button);
 
-        _all_group_active_button.show ();
+	_all_group_active_button.show ();
 
 	_display_packer.pack_start (_scroller, true, true);
-        _display_packer.pack_start (_all_group_active_button, false, false);
+	_display_packer.pack_start (_all_group_active_button, false, false);
 	_display_packer.pack_start (*button_box, false, false);
 
-        _all_group_active_button.signal_toggled().connect (sigc::mem_fun (*this, &EditorRouteGroups::all_group_toggled));
+	_all_group_active_button.signal_toggled().connect (sigc::mem_fun (*this, &EditorRouteGroups::all_group_toggled));
 }
 
 void
@@ -207,7 +206,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 {
 	TreeModel::Path path;
 	TreeIter iter;
-        RouteGroup* group = 0;
+	RouteGroup* group = 0;
 	TreeViewColumn* column;
 	int cellx;
 	int celly;
@@ -381,7 +380,7 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 void
 EditorRouteGroups::add (RouteGroup* group)
 {
-        ENSURE_GUI_THREAD (*this, &EditorRouteGroups::add, group)
+	ENSURE_GUI_THREAD (*this, &EditorRouteGroups::add, group)
 	bool focus = false;
 
 	TreeModel::Row row = *(_model->append());
@@ -437,7 +436,7 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange& ch
 {
 	_in_row_change = true;
 
-        Gtk::TreeModel::Children children = _model->children();
+	Gtk::TreeModel::Children children = _model->children();
 
 	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
 		if (group == (*iter)[_columns.routegroup]) {
@@ -492,18 +491,18 @@ EditorRouteGroups::set_session (Session* s)
 
 	if (_session) {
 
-                RouteGroup& arg (_session->all_route_group());
+		RouteGroup& arg (_session->all_route_group());
                 
-                arg.PropertyChanged.connect (property_changed_connection, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::all_group_changed, this, _1), gui_context());
+		arg.PropertyChanged.connect (property_changed_connection, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::all_group_changed, this, _1), gui_context());
 
 		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::add, this, _1), gui_context());
 		_session->route_group_removed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::groups_changed, this), gui_context());
 	}
 
-        PBD::PropertyChange pc;
-        pc.add (Properties::select);
-        pc.add (Properties::active);
-        all_group_changed (pc);
+	PBD::PropertyChange pc;
+	pc.add (Properties::select);
+	pc.add (Properties::active);
+	all_group_changed (pc);
 
 	groups_changed ();
 }
@@ -519,20 +518,19 @@ EditorRouteGroups::run_new_group_dialog ()
 void
 EditorRouteGroups::all_group_toggled ()
 {
-        if (_session) {
-                _session->all_route_group().set_select (_all_group_active_button.get_active());
-        }
+	if (_session) {
+		_session->all_route_group().set_select (_all_group_active_button.get_active());
+	}
 }
 
 void
 EditorRouteGroups::all_group_changed (const PropertyChange&)
 {
-        if (_session) {
-                RouteGroup& arg (_session->all_route_group());
-                _all_group_active_button.set_active (arg.is_active() && arg.is_select());
-        } else {
-                _all_group_active_button.set_active (false);
-        }
-
+	if (_session) {
+		RouteGroup& arg (_session->all_route_group());
+		_all_group_active_button.set_active (arg.is_active() && arg.is_select());
+	} else {
+		_all_group_active_button.set_active (false);
+	}
 }
         

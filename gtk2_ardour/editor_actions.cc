@@ -207,7 +207,7 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), sigc::mem_fun(*this, &Editor::toggle_record_enable));
 	ActionManager::session_sensitive_actions.push_back (act);
-        ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	for (int i = 1; i <= 12; ++i) {
 		string const a = string_compose (X_("save-visual-state-%1"), i);
@@ -267,23 +267,23 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "move-selected-tracks-up", _("Move Selected Tracks Up"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), true));
 	ActionManager::session_sensitive_actions.push_back (act);
-        ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "move-selected-tracks-down", _("Move Selected Tracks Down"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-        ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "scroll-tracks-up", _("Scroll Tracks Up"), sigc::mem_fun(*this, &Editor::scroll_tracks_up));
 	ActionManager::session_sensitive_actions.push_back (act);
-        ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "scroll-tracks-down", _("Scroll Tracks Down"), sigc::mem_fun(*this, &Editor::scroll_tracks_down));
-        ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "step-tracks-up", _("Step Tracks Up"), sigc::mem_fun(*this, &Editor::scroll_tracks_up_line));
-        ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "step-tracks-down", _("Step Tracks Down"), sigc::mem_fun(*this, &Editor::scroll_tracks_down_line));
 	ActionManager::session_sensitive_actions.push_back (act);
-        ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "scroll-backward", _("Scroll Backward"), sigc::bind (sigc::mem_fun(*this, &Editor::scroll_backward), 0.8f));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -397,7 +397,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "remove-last-capture", _("Remove Last Capture"), (sigc::mem_fun(*this, &Editor::remove_last_capture)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-        ActionManager::register_toggle_action (editor_actions, "toggle-stationary-playhead", _("Stationary Playhead"), (mem_fun(*this, &Editor::toggle_stationary_playhead)));
+	ActionManager::register_toggle_action (editor_actions, "toggle-stationary-playhead", _("Stationary Playhead"), (mem_fun(*this, &Editor::toggle_stationary_playhead)));
 
 	act = ActionManager::register_action (editor_actions, "insert-time", _("Insert Time"), (sigc::mem_fun(*this, &Editor::do_insert_time)));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -416,7 +416,7 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "fit-tracks", _("Fit Selected Tracks"), sigc::mem_fun(*this, &Editor::fit_selected_tracks));
 	ActionManager::session_sensitive_actions.push_back (act);
-        ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-largest", _("Largest"), sigc::bind (
 				sigc::mem_fun(*this, &Editor::set_track_height), HeightLargest));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -933,38 +933,38 @@ Editor::cycle_snap_choice()
 		set_snap_to (Editing::SnapToBeatDiv28);
 		break;
 	case Editing::SnapToBeatDiv28:
-                set_snap_to (Editing::SnapToBeatDiv24);
-                break;
+		set_snap_to (Editing::SnapToBeatDiv24);
+		break;
 	case Editing::SnapToBeatDiv24:
-                set_snap_to (Editing::SnapToBeatDiv20);
-                break;
+		set_snap_to (Editing::SnapToBeatDiv20);
+		break;
 	case Editing::SnapToBeatDiv20:
-                set_snap_to (Editing::SnapToBeatDiv16);
-                break;
+		set_snap_to (Editing::SnapToBeatDiv16);
+		break;
 	case Editing::SnapToBeatDiv16:
 		set_snap_to (Editing::SnapToBeatDiv14);
 		break;
 	case Editing::SnapToBeatDiv14:
-                set_snap_to (Editing::SnapToBeatDiv12);
-                break;
+		set_snap_to (Editing::SnapToBeatDiv12);
+		break;
 	case Editing::SnapToBeatDiv12:
-                set_snap_to (Editing::SnapToBeatDiv10);
-                break;
+		set_snap_to (Editing::SnapToBeatDiv10);
+		break;
 	case Editing::SnapToBeatDiv10:
-                set_snap_to (Editing::SnapToBeatDiv8);
-                break;
+		set_snap_to (Editing::SnapToBeatDiv8);
+		break;
 	case Editing::SnapToBeatDiv8:
 		set_snap_to (Editing::SnapToBeatDiv7);
 		break;
 	case Editing::SnapToBeatDiv7:
-                set_snap_to (Editing::SnapToBeatDiv6);
-                break;
+		set_snap_to (Editing::SnapToBeatDiv6);
+		break;
 	case Editing::SnapToBeatDiv6:
-                set_snap_to (Editing::SnapToBeatDiv5);
-                break;
+		set_snap_to (Editing::SnapToBeatDiv5);
+		break;
 	case Editing::SnapToBeatDiv5:
-                set_snap_to (Editing::SnapToBeatDiv4);
-                break;
+		set_snap_to (Editing::SnapToBeatDiv4);
+		break;
 	case Editing::SnapToBeatDiv4:
 		set_snap_to (Editing::SnapToBeatDiv3);
 		break;

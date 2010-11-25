@@ -84,7 +84,7 @@ EditorCursor::set_length (double units)
 void
 EditorCursor::set_y_axis (double position)
 {
-        points.front().set_y (position);
+	points.front().set_y (position);
 	points.back().set_y (position + length);
 	canvas_item.property_points() = points;
 }

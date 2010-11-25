@@ -1203,7 +1203,7 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field /*field*/)
 			ValueChanged (); /* EMIT_SIGNAL */
 					}
 
-                /* make absolutely sure that the pointer is grabbed */
+		/* make absolutely sure that the pointer is grabbed */
 		gdk_pointer_grab(ev->window,false ,
 				 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
 				 NULL,NULL,ev->time);
@@ -1910,10 +1910,10 @@ AudioClock::bbt_frame_from_display (nframes_t pos) const
 	any.bbt.beats = atoi (beats_label.get_text());
 	any.bbt.ticks = atoi (ticks_label.get_text());
 
-       if (is_duration) {
-               any.bbt.bars++;
-               any.bbt.beats++;
-       }
+	if (is_duration) {
+		any.bbt.bars++;
+		any.bbt.beats++;
+	}
 
 	nframes_t ret = _session->convert_to_frames_at (pos, any);
 
@@ -2131,10 +2131,10 @@ AudioClock::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
 void
 AudioClock::set_is_duration (bool yn)
 {
-        if (yn == is_duration) {
-                return;
-        }
+	if (yn == is_duration) {
+		return;
+	}
         
-        is_duration = yn;
-        set (last_when, true, 0, 's');
+	is_duration = yn;
+	set (last_when, true, 0, 's');
 }

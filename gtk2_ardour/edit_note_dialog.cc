@@ -150,7 +150,7 @@ EditNoteDialog::run ()
 
 	_region_view->apply_diff ();
 
-        _event->set_selected (_event->selected()); // change color 
+	_event->set_selected (_event->selected()); // change color 
 	
 	return r;
 }

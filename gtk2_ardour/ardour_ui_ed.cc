@@ -212,7 +212,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("WindowMenu"), _("Window"));
 	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
 
-        /* windows visibility actions */
+	/* windows visibility actions */
 
 	ActionManager::register_toggle_action (common_actions, X_("ToggleMaximalEditor"), _("Maximise Editor Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_editing_space));
 	act = ActionManager::register_toggle_action (common_actions, X_("KeepTearoffs"), _("Toolbars when Maximised"), mem_fun (*this, &ARDOUR_UI::toggle_keep_tearoffs));
@@ -237,8 +237,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_action (common_actions, X_("About"), _("About"),  sigc::mem_fun(*this, &ARDOUR_UI::show_about));
 	ActionManager::register_action (common_actions, X_("Chat"), _("Chat"),  sigc::mem_fun(*this, &ARDOUR_UI::launch_chat));
-        ActionManager::register_action (common_actions, X_("Manual"), _("Manual"),  mem_fun(*this, &ARDOUR_UI::launch_manual));
-        ActionManager::register_action (common_actions, X_("Reference"), _("Reference"),  mem_fun(*this, &ARDOUR_UI::launch_reference));
+	ActionManager::register_action (common_actions, X_("Manual"), _("Manual"),  mem_fun(*this, &ARDOUR_UI::launch_manual));
+	ActionManager::register_action (common_actions, X_("Reference"), _("Reference"),  mem_fun(*this, &ARDOUR_UI::launch_reference));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleThemeManager"), _("Theme Manager"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_theme_manager));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleKeyEditor"), _("Key Bindings"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_key_editor));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleBundleManager"), _("Bundle Manager"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_bundle_manager));
@@ -422,15 +422,15 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 
-        if (getenv ("ARDOUR_BUNDLED")) {
-                act = ActionManager::register_toggle_action (main_actions, X_("EnableTranslation"), _("Enable Translations"), mem_fun (*this, &ARDOUR_UI::toggle_translations));
-                if (act) {
-                        RefPtr<ToggleAction> ract = RefPtr<ToggleAction>::cast_dynamic (act);
-                        if (ract) {
-                                ract->set_active (!ARDOUR::translations_are_disabled());
-                        }
-                }
-        }
+	if (getenv ("ARDOUR_BUNDLED")) {
+		act = ActionManager::register_toggle_action (main_actions, X_("EnableTranslation"), _("Enable Translations"), mem_fun (*this, &ARDOUR_UI::toggle_translations));
+		if (act) {
+			RefPtr<ToggleAction> ract = RefPtr<ToggleAction>::cast_dynamic (act);
+			if (ract) {
+				ract->set_active (!ARDOUR::translations_are_disabled());
+			}
+		}
+	}
 
 	ActionManager::add_action_group (shuttle_actions);
 	ActionManager::add_action_group (option_actions);
@@ -616,15 +616,15 @@ ARDOUR_UI::big_clock_realized ()
 	set_decoration (big_clock_window->get(), (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 	big_clock_window->get()->get_window()->get_geometry (x, y, w, big_clock_height, d);
 
-        original_big_clock_height = big_clock_height;
-        original_big_clock_width = w;
+	original_big_clock_height = big_clock_height;
+	original_big_clock_width = w;
 
-        Pango::FontDescription fd (big_clock.get_style()->get_font());
-        original_big_clock_font_size = fd.get_size ();
+	Pango::FontDescription fd (big_clock.get_style()->get_font());
+	original_big_clock_font_size = fd.get_size ();
         
-        if (!fd.get_size_is_absolute ()) {
-                original_big_clock_font_size /= PANGO_SCALE;
-        }
+	if (!fd.get_size_is_absolute ()) {
+		original_big_clock_font_size /= PANGO_SCALE;
+	}
 
 	big_clock_window->setup ();
 }
@@ -658,7 +658,7 @@ ARDOUR_UI::idle_big_clock_text_resizer (int, int)
 	Glib::RefPtr<Gdk::Window> win = big_clock_window->get()->get_window();
 	Pango::FontDescription fd (big_clock.get_style()->get_font());
 	int current_size = fd.get_size ();
-        int x, y, w, h, d;
+	int x, y, w, h, d;
 
 	if (!fd.get_size_is_absolute ()) {
 		current_size /= PANGO_SCALE;
@@ -666,28 +666,28 @@ ARDOUR_UI::idle_big_clock_text_resizer (int, int)
 
 	win->get_geometry (x, y, w, h, d);
 
-        double scale  = min (((double) w / (double) original_big_clock_width), 
-                             ((double) h / (double) original_big_clock_height));
+	double scale  = min (((double) w / (double) original_big_clock_width), 
+	                     ((double) h / (double) original_big_clock_height));
 
-        int size = (int) lrintf (original_big_clock_font_size * scale);
+	int size = (int) lrintf (original_big_clock_font_size * scale);
 
-        if (size != current_size) {
+	if (size != current_size) {
 
-                string family = fd.get_family();
-                char buf[family.length()+16];
-                snprintf (buf, family.length()+16, "%s %d", family.c_str(), size);
+		string family = fd.get_family();
+		char buf[family.length()+16];
+		snprintf (buf, family.length()+16, "%s %d", family.c_str(), size);
                 
-                try { 
-                        Pango::FontDescription fd (buf);
-                        Glib::RefPtr<Gtk::RcStyle> rcstyle = big_clock.get_modifier_style ();
-                        rcstyle->set_font (fd);
-                        big_clock.modify_style (rcstyle);
-                } 
+		try { 
+			Pango::FontDescription fd (buf);
+			Glib::RefPtr<Gtk::RcStyle> rcstyle = big_clock.get_modifier_style ();
+			rcstyle->set_font (fd);
+			big_clock.modify_style (rcstyle);
+		} 
                 
-                catch (...) {
-                        /* oh well, do nothing */
-                }
-        }
+		catch (...) {
+			/* oh well, do nothing */
+		}
+	}
 
 	return false;
 }
@@ -707,7 +707,7 @@ ARDOUR_UI::save_ardour_state ()
 	Config->add_extra_xml (*node);
 	Config->add_extra_xml (get_transport_controllable_state());
 
-        XMLNode* window_node = new XMLNode (X_("UI"));
+	XMLNode* window_node = new XMLNode (X_("UI"));
 
 	for (list<WindowProxyBase*>::iterator i = _window_proxies.begin(); i != _window_proxies.end(); ++i) {
 		if ((*i)->rc_configured()) {
@@ -715,31 +715,31 @@ ARDOUR_UI::save_ardour_state ()
 		}
 	}
         
-        /* tearoffs */
+	/* tearoffs */
 
-        XMLNode* tearoff_node = new XMLNode (X_("Tearoffs"));
+	XMLNode* tearoff_node = new XMLNode (X_("Tearoffs"));
 
-        if (transport_tearoff) {
-                XMLNode* t = new XMLNode (X_("transport"));
-                transport_tearoff->add_state (*t);
-                tearoff_node->add_child_nocopy (*t);
-        } 
+	if (transport_tearoff) {
+		XMLNode* t = new XMLNode (X_("transport"));
+		transport_tearoff->add_state (*t);
+		tearoff_node->add_child_nocopy (*t);
+	} 
 
-        if (mixer && mixer->monitor_section()) {
-                XMLNode* t = new XMLNode (X_("monitor-section"));
-                mixer->monitor_section()->tearoff().add_state (*t);
-                tearoff_node->add_child_nocopy (*t);
-        } 
+	if (mixer && mixer->monitor_section()) {
+		XMLNode* t = new XMLNode (X_("monitor-section"));
+		mixer->monitor_section()->tearoff().add_state (*t);
+		tearoff_node->add_child_nocopy (*t);
+	} 
 
-        if (editor && editor->mouse_mode_tearoff()) {
-                XMLNode* t = new XMLNode (X_("mouse-mode"));
-                editor->mouse_mode_tearoff ()->add_state (*t);
-                tearoff_node->add_child_nocopy (*t);
-        } 
+	if (editor && editor->mouse_mode_tearoff()) {
+		XMLNode* t = new XMLNode (X_("mouse-mode"));
+		editor->mouse_mode_tearoff ()->add_state (*t);
+		tearoff_node->add_child_nocopy (*t);
+	} 
         
-        window_node->add_child_nocopy (*tearoff_node);
+	window_node->add_child_nocopy (*tearoff_node);
 
-        Config->add_extra_xml (*window_node);
+	Config->add_extra_xml (*window_node);
 
 	if (_startup && _startup->engine_control() && _startup->engine_control()->was_used()) {
 		Config->add_extra_xml (_startup->engine_control()->get_state());

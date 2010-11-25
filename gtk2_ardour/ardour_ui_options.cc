@@ -58,19 +58,19 @@ ARDOUR_UI::toggle_keep_tearoffs ()
 void
 ARDOUR_UI::toggle_external_sync()
 {
-        if (_session) {
-                if (_session->config.get_video_pullup() != 0.0f) {
-                        if (_session->config.get_sync_source() == JACK) {
-                                MessageDialog msg (_(
-"It is not possible to use JACK as the the sync source\n\
+	if (_session) {
+		if (_session->config.get_video_pullup() != 0.0f) {
+			if (_session->config.get_sync_source() == JACK) {
+				MessageDialog msg (
+					_("It is not possible to use JACK as the the sync source\n\
 when the pull up/down setting is non-zero."));
-                                msg.run ();
-                                return;
-                        }
-                }
+				msg.run ();
+				return;
+			}
+		}
                                                                    
-                ActionManager::toggle_config_state_foo ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::set_external_sync), sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
-        }
+		ActionManager::toggle_config_state_foo ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::set_external_sync), sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
+	}
 }
 
 void
@@ -414,21 +414,20 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if (p == "video-pullup" || p == "timecode-format") {
 
-                synchronize_sync_source_and_video_pullup ();
+		synchronize_sync_source_and_video_pullup ();
 		reset_main_clocks ();
 
-        } else if (p == "sync-source") {
+	} else if (p == "sync-source") {
 
-                synchronize_sync_source_and_video_pullup ();
+		synchronize_sync_source_and_video_pullup ();
 
 	} else if (p == "show-track-meters") {
 		editor->toggle_meter_updating();
 	} else if (p == "primary-clock-delta-edit-cursor") {
-                primary_clock.set_is_duration (Config->get_primary_clock_delta_edit_cursor());
-        } else if (p == "secondary-clock-delta-edit-cursor") {
-                secondary_clock.set_is_duration (Config->get_secondary_clock_delta_edit_cursor());
-        }
-
+		primary_clock.set_is_duration (Config->get_primary_clock_delta_edit_cursor());
+	} else if (p == "secondary-clock-delta-edit-cursor") {
+		secondary_clock.set_is_duration (Config->get_secondary_clock_delta_edit_cursor());
+	}
 }
 
 void
@@ -448,39 +447,39 @@ ARDOUR_UI::reset_main_clocks ()
 void
 ARDOUR_UI::synchronize_sync_source_and_video_pullup ()
 {
-        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
 
-        if (!act) {
-                return;
-        }
+	if (!act) {
+		return;
+	}
 
-        if (!_session) {
-                goto just_label;
-        }
+	if (!_session) {
+		goto just_label;
+	}
 
-        if (_session->config.get_video_pullup() == 0.0f) {
-                /* with no video pull up/down, any sync source is OK */
-                act->set_sensitive (true);
-        } else {
-                /* can't sync to JACK if video pullup != 0.0 */
-                if (_session->config.get_sync_source() == JACK) {
-                        act->set_sensitive (false);
-                } else {
-                        act->set_sensitive (true);
-                }
-        }
+	if (_session->config.get_video_pullup() == 0.0f) {
+		/* with no video pull up/down, any sync source is OK */
+		act->set_sensitive (true);
+	} else {
+		/* can't sync to JACK if video pullup != 0.0 */
+		if (_session->config.get_sync_source() == JACK) {
+			act->set_sensitive (false);
+		} else {
+			act->set_sensitive (true);
+		}
+	}
 
-        /* XXX should really be able to set the video pull up
-           action to insensitive/sensitive, but there is no action.
-           FIXME
-        */
+	/* XXX should really be able to set the video pull up
+	   action to insensitive/sensitive, but there is no action.
+	   FIXME
+	*/
 
   just_label:
-        if (act->get_sensitive ()) {
-                set_tip (sync_button, _("Enable/Disable external positional sync"));
-        } else {
-                set_tip (sync_button, _("Sync to JACK is not possible: video pull up/down is set"));
-        }
+	if (act->get_sensitive ()) {
+		set_tip (sync_button, _("Enable/Disable external positional sync"));
+	} else {
+		set_tip (sync_button, _("Sync to JACK is not possible: video pull up/down is set"));
+	}
 
 }
 

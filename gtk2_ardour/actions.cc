@@ -91,7 +91,7 @@ ActionManager::init ()
 
 	if (!loaded) {
 		cerr << string_compose (_("%1 will not work without a valid ardour.menus file"), PROGRAM_NAME) << endl;
-                error << string_compose (_("%1 will not work without a valid ardour.menus file"), PROGRAM_NAME) << endmsg;
+		error << string_compose (_("%1 will not work without a valid ardour.menus file"), PROGRAM_NAME) << endmsg;
 		exit(1);
 	}
 }

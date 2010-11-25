@@ -773,13 +773,13 @@ Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, Re
 	   perspective. XXX change this ??
 	*/
 
-        ItemType type;
+	ItemType type;
 
-        if (item->get_data ("isleft")) {
-                type = LeftFrameHandle;
-        } else {
-                type = RightFrameHandle;
-        }
+	if (item->get_data ("isleft")) {
+		type = LeftFrameHandle;
+	} else {
+		type = RightFrameHandle;
+	}
 
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
@@ -839,7 +839,7 @@ Editor::canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::
 		break;
 	case GDK_MOTION_NOTIFY:
 		motion_handler (item, event);
-                ret = true; // force this to avoid progagating the event into the regionview
+		ret = true; // force this to avoid progagating the event into the regionview
 		break;
 	case GDK_ENTER_NOTIFY:
 		set_entered_regionview (rv);

@@ -185,48 +185,48 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	}
 
 
-        // if this is an automation track, then we shold the mixer strip should
-        // show the parent
+	// if this is an automation track, then we shold the mixer strip should
+	// show the parent
 
-        boost::shared_ptr<ARDOUR::Route> route;
-        AutomationTimeAxisView* atv;
+	boost::shared_ptr<ARDOUR::Route> route;
+	AutomationTimeAxisView* atv;
         
-        if ((atv = dynamic_cast<AutomationTimeAxisView*>(&view)) != 0) {
+	if ((atv = dynamic_cast<AutomationTimeAxisView*>(&view)) != 0) {
 
-                AudioTimeAxisView *parent = dynamic_cast<AudioTimeAxisView*>(view.get_parent());
+		AudioTimeAxisView *parent = dynamic_cast<AudioTimeAxisView*>(view.get_parent());
 
-                if (parent) {
-                        route = parent->route ();
-                }
+		if (parent) {
+			route = parent->route ();
+		}
 
-        } else {
+	} else {
 
-                AudioTimeAxisView* at = dynamic_cast<AudioTimeAxisView*> (&view);
+		AudioTimeAxisView* at = dynamic_cast<AudioTimeAxisView*> (&view);
 
-                if (at) {
-                        route = at->route();
-                } else {
-                        MidiTimeAxisView* mt = dynamic_cast<MidiTimeAxisView*> (&view);
-                        if (mt) {
-                                route = mt->route();
-                        }
-                }
-        }
+		if (at) {
+			route = at->route();
+		} else {
+			MidiTimeAxisView* mt = dynamic_cast<MidiTimeAxisView*> (&view);
+			if (mt) {
+				route = mt->route();
+			}
+		}
+	}
                 
 	if (current_mixer_strip->route() == route) {
 		return;
 	}
 
-        if (route) {
-                current_mixer_strip->set_route (route);
-                current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
-        }
+	if (route) {
+		current_mixer_strip->set_route (route);
+		current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
+	}
 }
 
 void
 Editor::current_mixer_strip_hidden ()
 {
-        Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 	if (act) {
 		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
 		tact->set_active (false);

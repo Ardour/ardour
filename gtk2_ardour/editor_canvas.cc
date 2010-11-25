@@ -747,7 +747,7 @@ Editor::stop_canvas_autoscroll ()
 bool
 Editor::left_track_canvas (GdkEventCrossing */*ev*/)
 {
-        DropDownKeys ();
+	DropDownKeys ();
 	set_entered_track (0);
 	set_entered_regionview (0);
 	reset_canvas_action_sensitivity (false);
@@ -928,9 +928,9 @@ Editor::horizontal_position () const
 void
 Editor::set_canvas_cursor (Gdk::Cursor* cursor, bool save)
 {
-        if (save) {
-                current_canvas_cursor = cursor;
-        }
+	if (save) {
+		current_canvas_cursor = cursor;
+	}
 
 	if (is_drawable()) {
 	        track_canvas->get_window()->set_cursor (*cursor);

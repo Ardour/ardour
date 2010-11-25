@@ -144,7 +144,7 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (primary_clock, _("Primary Clock"));
 	set_tip (secondary_clock, _("Secondary Clock"));
 
-        synchronize_sync_source_and_video_pullup ();
+	synchronize_sync_source_and_video_pullup ();
 
 	editor->setup_tooltips ();
 }
@@ -195,17 +195,17 @@ ARDOUR_UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuff
 XMLNode*
 ARDOUR_UI::tearoff_settings (const char* name) const
 {
-        XMLNode* ui_node = Config->extra_xml(X_("UI"));
+	XMLNode* ui_node = Config->extra_xml(X_("UI"));
         
-        if (ui_node) {
-                XMLNode* tearoff_node = ui_node->child (X_("Tearoffs"));
-                if (tearoff_node) {
-                        XMLNode* mnode = tearoff_node->child (name);
-                        return mnode;
-                }
-        }
+	if (ui_node) {
+		XMLNode* tearoff_node = ui_node->child (X_("Tearoffs"));
+		if (tearoff_node) {
+			XMLNode* mnode = tearoff_node->child (name);
+			return mnode;
+		}
+	}
 
-        return 0;
+	return 0;
 }
 
 void
@@ -470,10 +470,10 @@ ARDOUR_UI::setup_transport ()
 		transport_tearoff_hbox.pack_end (*img, false, false, 6);
 	}
 
-        XMLNode* tnode = tearoff_settings ("transport");
-        if (tnode) {
-                transport_tearoff->set_state (*tnode);
-        }
+	XMLNode* tnode = tearoff_settings ("transport");
+	if (tnode) {
+		transport_tearoff->set_state (*tnode);
+	}
 }
 
 void
@@ -527,20 +527,20 @@ ARDOUR_UI::audition_alert_press (GdkEventButton*)
 	if (_session) {
 		_session->cancel_audition();
 	}
-        return true;
+	return true;
 }
 
 bool
 ARDOUR_UI::solo_alert_press (GdkEventButton*)
 {
-        if (_session) {
-                if (_session->soloing()) {
-                        _session->set_solo (_session->get_routes(), false);
-                } else if (_session->listening()) {
-                        _session->set_listen (_session->get_routes(), false);
-                }
-        }
-        return true;
+	if (_session) {
+		if (_session->soloing()) {
+			_session->set_solo (_session->get_routes(), false);
+		} else if (_session->listening()) {
+			_session->set_listen (_session->get_routes(), false);
+		}
+	}
+	return true;
 }
 
 void

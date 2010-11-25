@@ -116,9 +116,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void show_splash ();
 	void hide_splash ();
 
-        void launch_chat ();
-        void launch_manual ();
-        void launch_reference ();
+	void launch_chat ();
+	void launch_manual ();
+	void launch_reference ();
 	void show_about ();
 	void hide_about ();
 
@@ -182,7 +182,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	XMLNode* editor_settings() const;
 	XMLNode* mixer_settings () const;
 	XMLNode* keyboard_settings () const;
-        XMLNode* tearoff_settings (const char*) const;
+	XMLNode* tearoff_settings (const char*) const;
 
 	void save_ardour_state ();
 	gboolean configure_handler (GdkEventConfigure* conf);
@@ -201,7 +201,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void restore_clock_modes ();
 	void reset_main_clocks ();
 
-        void synchronize_sync_source_and_video_pullup ();
+	void synchronize_sync_source_and_video_pullup ();
 
 	void add_route (Gtk::Window* float_window);
 
@@ -318,9 +318,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	AudioClock   big_clock;
 	ActionWindowProxy<Gtk::Window>* big_clock_window;
-        int original_big_clock_width;
-        int original_big_clock_height;
-        double original_big_clock_font_size;
+	int original_big_clock_width;
+	int original_big_clock_height;
+	double original_big_clock_font_size;
 
 	void big_clock_size_allocate (Gtk::Allocation&);
 	bool idle_big_clock_text_resizer (int width, int height);

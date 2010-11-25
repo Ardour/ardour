@@ -289,7 +289,7 @@ void
 AudioRegionView::region_changed (const PropertyChange& what_changed)
 {
 	ENSURE_GUI_THREAD (*this, &AudioRegionView::region_changed, what_changed);
-        // cerr << "AudioRegionView::region_changed() called" << endl;
+	// cerr << "AudioRegionView::region_changed() called" << endl;
 
 	RegionView::region_changed (what_changed);
 
@@ -297,7 +297,7 @@ AudioRegionView::region_changed (const PropertyChange& what_changed)
 		region_scale_amplitude_changed ();
 	}
 	if (what_changed.contains (ARDOUR::Properties::fade_in)) {
-                fade_in_changed ();
+		fade_in_changed ();
 	}
 	if (what_changed.contains (ARDOUR::Properties::fade_out)) {
 		fade_out_changed ();
@@ -1057,9 +1057,9 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	gain_line->view_to_model_coord (x, y);
 
-        /* XXX STATEFUL: can't convert to stateful diff until we 
-           can represent automation data with it.
-        */
+	/* XXX STATEFUL: can't convert to stateful diff until we 
+	   can represent automation data with it.
+	*/
 
 	trackview.session()->begin_reversible_command (_("add gain control point"));
 	XMLNode &before = audio_region()->envelope()->get_state();
@@ -1236,8 +1236,8 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 void
 AudioRegionView::entered (bool internal_editing)
 {
-        trackview.editor().set_current_trimmable (_region);
-        trackview.editor().set_current_movable (_region);
+	trackview.editor().set_current_trimmable (_region);
+	trackview.editor().set_current_movable (_region);
 
 	if (gain_line && _flags & EnvelopeVisible) {
 		gain_line->show_all_control_points ();
@@ -1252,8 +1252,8 @@ AudioRegionView::entered (bool internal_editing)
 void
 AudioRegionView::exited ()
 {
-        trackview.editor().set_current_trimmable (boost::shared_ptr<Trimmable>());
-        trackview.editor().set_current_movable (boost::shared_ptr<Movable>());
+	trackview.editor().set_current_trimmable (boost::shared_ptr<Trimmable>());
+	trackview.editor().set_current_movable (boost::shared_ptr<Movable>());
 
 	if (gain_line) {
 		gain_line->hide_all_but_selected_control_points ();

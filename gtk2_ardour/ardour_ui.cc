@@ -226,9 +226,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	session_loaded = false;
 	last_speed_displayed = -1.0f;
 	ignore_dual_punch = false;
-        original_big_clock_width = -1;
-        original_big_clock_height = -1;
-        original_big_clock_font_size = 0;
+	original_big_clock_width = -1;
+	original_big_clock_height = -1;
+	original_big_clock_font_size = 0;
 
 	roll_button.unset_flags (Gtk::CAN_FOCUS);
 	stop_button.unset_flags (Gtk::CAN_FOCUS);
@@ -247,7 +247,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	shuttle_style_menu = 0;
 	shuttle_unit_menu = 0;
 
-        // We do not have jack linked in yet so;
+	// We do not have jack linked in yet so;
 
 	last_shuttle_request = last_peak_grab = 0; //  get_microseconds();
 
@@ -270,7 +270,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	
 	ARDOUR::Session::Quit.connect (forever_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::finish, this), gui_context ());
 
-        /* handle requests to deal with missing files */
+	/* handle requests to deal with missing files */
 
 	ARDOUR::Session::MissingFile.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::missing_file, this, _1, _2, _3));
 
@@ -306,7 +306,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	reset_dpi();
 
-        TimeAxisViewItem::set_constant_heights ();
+	TimeAxisViewItem::set_constant_heights ();
 
 	/* The following must happen after ARDOUR::init() so that Config is set up */
 	
@@ -343,9 +343,9 @@ ARDOUR_UI::run_startup (bool should_be_new, string load_template)
 	}
 
 	_startup->set_new_only (should_be_new);
-        if (!load_template.empty()) {
-            _startup->set_load_template( load_template );
-        }
+	if (!load_template.empty()) {
+		_startup->set_load_template( load_template );
+	}
 	_startup->present ();
 
 	main().run();
@@ -385,7 +385,7 @@ ARDOUR_UI::create_engine ()
 
 	engine->Halted.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 
-        ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
+	ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
 
 	post_engine ();
 
@@ -505,7 +505,7 @@ ARDOUR_UI::configure_timeout ()
 		return true;
 	} else {
 		have_configure_timeout = false;
-                cerr << "config event-driven save\n";
+		cerr << "config event-driven save\n";
 		save_ardour_state ();
 		return false;
 	}
@@ -593,13 +593,13 @@ ARDOUR_UI::autosave_session ()
 		return 1;
 	}
 
-        if (!Config->get_periodic_safety_backups()) {
-                return 1;
+	if (!Config->get_periodic_safety_backups()) {
+		return 1;
 	}
 
-        if (_session) {
-                _session->maybe_write_autosave();
-        }
+	if (_session) {
+		_session->maybe_write_autosave();
+	}
 
 	return 1;
 }
@@ -680,16 +680,16 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 void
 ARDOUR_UI::startup ()
 {
-        Application* app = Application::instance ();
+	Application* app = Application::instance ();
 
-        app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
-        app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
+	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
+	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
 
 #ifdef PHONE_HOME
-        call_the_mothership (VERSIONSTRING);
+	call_the_mothership (VERSIONSTRING);
 #endif
 
-        app->ready ();
+	app->ready ();
 
 	if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
 		exit (1);
@@ -749,12 +749,13 @@ ARDOUR_UI::check_memory_locking ()
 			if (ram == 0 || ((double) limits.rlim_cur / ram) < 0.75) {
 
 
-				MessageDialog msg (string_compose (_("WARNING: Your system has a limit for maximum amount of locked memory. "
-                                                                     "This might cause %1 to run out of memory before your system "
-                                                                     "runs out of memory. \n\n"
-                                                                     "You can view the memory limit with 'ulimit -l', "
-                                                                     "and it is normally controlled by /etc/security/limits.conf"),
-                                                                   PROGRAM_NAME).c_str());
+				MessageDialog msg (
+					string_compose (_("WARNING: Your system has a limit for maximum amount of locked memory. "
+					                  "This might cause %1 to run out of memory before your system "
+					                  "runs out of memory. \n\n"
+					                  "You can view the memory limit with 'ulimit -l', "
+					                  "and it is normally controlled by /etc/security/limits.conf"),
+					                PROGRAM_NAME).c_str());
                                                    
 				VBox* vbox = msg.get_vbox();
 				HBox hbox;
@@ -796,7 +797,7 @@ void
 ARDOUR_UI::finish()
 {
 	if (_session) {
-                int tries = 0;
+		int tries = 0;
 
 		if (_session->transport_rolling() && (++tries < 8)) {
 			_session->request_stop (false, true);
@@ -841,7 +842,7 @@ If you still wish to quit, please use the\n\n\
 
 	if (_session) {
 		// _session->set_deletion_in_progress ();
-                _session->set_clean ();
+		_session->set_clean ();
 		_session->remove_pending_capture_state ();
 		delete _session;
 		_session = 0;
@@ -1103,7 +1104,7 @@ ARDOUR_UI::redisplay_recent_sessions ()
 	sort (rs.begin(), rs.end(), cmp);
 
 	for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
-	        session_directories.push_back ((*i).second);
+		session_directories.push_back ((*i).second);
 	}
 
 	for (vector<sys::path>::const_iterator i = session_directories.begin();
@@ -1260,8 +1261,8 @@ ARDOUR_UI::check_audioengine ()
 	if (engine) {
 		if (!engine->connected()) {
 			MessageDialog msg (string_compose (_("%1 is not connected to JACK\n"
-                                                             "You cannot open or close sessions in this condition"),
-                                                           PROGRAM_NAME));
+			                                     "You cannot open or close sessions in this condition"),
+			                                   PROGRAM_NAME));
 			pop_back_splash ();
 			msg.run ();
 			return false;
@@ -1598,9 +1599,9 @@ ARDOUR_UI::transport_roll ()
 		/* XXX it is not possible to just leave seamless loop and keep
 		   playing at present (nov 4th 2009)
 		*/
-                if (!Config->get_seamless_loop()) {
-                        _session->request_play_loop (false, true);
-                }
+		if (!Config->get_seamless_loop()) {
+			_session->request_play_loop (false, true);
+		}
 	} else if (_session->get_play_range () && !join_play_range_button.get_active()) {
 		/* stop playing a range if we currently are */
 		_session->request_play_range (0, true);
@@ -1657,7 +1658,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 			_session->request_play_loop (false, true);
 		} else if (_session->get_play_range ()) {
 			affect_transport = false;
-                        _session->request_play_range (0, true);
+			_session->request_play_range (0, true);
 		} 
 	} 
 
@@ -1909,22 +1910,22 @@ ARDOUR_UI::engine_running ()
 void
 ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
 {
-       if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {
-               /* we can't rely on the original string continuing to exist when we are called
-                  again in the GUI thread, so make a copy and note that we need to
-                  free it later.
-               */
-               char *copy = strdup (reason);
-               Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&ARDOUR_UI::engine_halted, this, copy, true));
-               return;
-       }
+	if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {
+		/* we can't rely on the original string continuing to exist when we are called
+		   again in the GUI thread, so make a copy and note that we need to
+		   free it later.
+		*/
+		char *copy = strdup (reason);
+		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&ARDOUR_UI::engine_halted, this, copy, true));
+		return;
+	}
 
 	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, true);
 
 	update_sample_rate (0);
 
-        string msgstr;
+	string msgstr;
 
 	/* if the reason is a non-empty string, it means that the backend was shutdown
 	   rather than just Ardour.
@@ -1944,9 +1945,9 @@ JACK, reconnect and save the session."), PROGRAM_NAME);
 	pop_back_splash ();
 	msg.run ();
 
-        if (free_reason) {
-                free ((char*) reason);
-        }
+	if (free_reason) {
+		free ((char*) reason);
+	}
 }
 
 int32_t
@@ -2057,16 +2058,16 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 	prompter.set_title (_("Take Snapshot"));
 	prompter.set_prompt (_("Name of new snapshot"));
 
-        if (!switch_to_it) {
-                char timebuf[128];
-                time_t n;
-                struct tm local_time;
+	if (!switch_to_it) {
+		char timebuf[128];
+		time_t n;
+		struct tm local_time;
                 
-                time (&n);
-                localtime_r (&n, &local_time);
-                strftime (timebuf, sizeof(timebuf), "%FT%T", &local_time);
-                prompter.set_initial_text (timebuf);
-        }
+		time (&n);
+		localtime_r (&n, &local_time);
+		strftime (timebuf, sizeof(timebuf), "%FT%T", &local_time);
+		prompter.set_initial_text (timebuf);
+	}
 
   again:
 	switch (prompter.run()) {
@@ -2076,20 +2077,20 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 
 		bool do_save = (snapname.length() != 0);
 
-                if (do_save) {
-                        if (snapname.find ('/') != string::npos) {
-                                MessageDialog msg (_("To ensure compatibility with various systems\n"
-                                                     "snapshot names may not contain a '/' character"));
-                                msg.run ();
-                                goto again;
-                        }
-                        if (snapname.find ('\\') != string::npos) {
-                                MessageDialog msg (_("To ensure compatibility with various systems\n"
-                                                     "snapshot names may not contain a '\\' character"));
-                                msg.run ();
-                                goto again;
-                        }
-                }
+		if (do_save) {
+			if (snapname.find ('/') != string::npos) {
+				MessageDialog msg (_("To ensure compatibility with various systems\n"
+				                     "snapshot names may not contain a '/' character"));
+				msg.run ();
+				goto again;
+			}
+			if (snapname.find ('\\') != string::npos) {
+				MessageDialog msg (_("To ensure compatibility with various systems\n"
+				                     "snapshot names may not contain a '\\' character"));
+				msg.run ();
+				goto again;
+			}
+		}
 
 		vector<sys::path> p;
 		get_state_files_in_directory (_session->session_directory().root_path(), p);
@@ -2149,7 +2150,7 @@ ARDOUR_UI::save_state_canfail (string name, bool switch_to_it)
 			return ret;
 		}
 	}
-        cerr << "SS canfail\n";
+	cerr << "SS canfail\n";
 	save_ardour_state (); /* XXX cannot fail? yeah, right ... */
 	return 0;
 }
@@ -2185,9 +2186,9 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 		return;
 	}
 
-        if (_session->step_editing()) {
-                return;
-        }
+	if (_session->step_editing()) {
+		return;
+	}
 
 	Session::RecordState const r = _session->record_status ();
 	bool const h = _session->have_rec_enabled_track ();
@@ -2265,14 +2266,14 @@ ARDOUR_UI::fontconfig_dialog ()
 
 	if (!Glib::file_test (fontconfig, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
 		MessageDialog msg (*_startup,
-				   string_compose (_("Welcome to %1.\n\n"
-                                                     "The program will take a bit longer to start up\n"
-                                                     "while the system fonts are checked.\n\n"
-                                                     "This will only be done once, and you will\n"
-                                                     "not see this message again\n"), PROGRAM_NAME),
-                                   true,
-				   Gtk::MESSAGE_INFO,
-				   Gtk::BUTTONS_OK);
+		                   string_compose (_("Welcome to %1.\n\n"
+		                                     "The program will take a bit longer to start up\n"
+		                                     "while the system fonts are checked.\n\n"
+		                                     "This will only be done once, and you will\n"
+		                                     "not see this message again\n"), PROGRAM_NAME),
+		                   true,
+		                   Gtk::MESSAGE_INFO,
+		                   Gtk::BUTTONS_OK);
 		pop_back_splash ();
 		msg.show_all ();
 		msg.present ();
@@ -2378,7 +2379,7 @@ ARDOUR_UI::ask_about_loading_existing_session (const std::string& session_path)
 int
 ARDOUR_UI::build_session_from_nsd (const std::string& session_path, const std::string& session_name)
 {
-        BusProfile bus_profile;
+	BusProfile bus_profile;
 
 	if (Profile->get_sae()) {
 
@@ -2486,10 +2487,10 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	int ret = -1;
 	bool likely_new = false;
 
-        if (! load_template.empty()) {
-            should_be_new = true;
-            template_name = load_template;
-        }
+	if (! load_template.empty()) {
+		should_be_new = true;
+		template_name = load_template;
+	}
 
 	while (ret != 0) {
 
@@ -2541,9 +2542,9 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == G_DIR_SEPARATOR) ||
 			    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == G_DIR_SEPARATOR)) {
 
-                                /* absolute path or cwd-relative path specified for session name: infer session folder
-                                   from what was given.
-                                */
+				/* absolute path or cwd-relative path specified for session name: infer session folder
+				   from what was given.
+				*/
                                 
 				session_path = Glib::path_get_dirname (session_name);
 				session_name = Glib::path_get_basename (session_name);
@@ -2552,21 +2553,21 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 				session_path = _startup->session_folder();
 
-                                if (session_name.find ('/') != string::npos) {
-                                        MessageDialog msg (*_startup, _("To ensure compatibility with various systems\n"
-                                                                        "session names may not contain a '/' character"));
-                                        msg.run ();
-                                        ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
-                                        continue;
-                                }
+				if (session_name.find ('/') != string::npos) {
+					MessageDialog msg (*_startup, _("To ensure compatibility with various systems\n"
+					                                "session names may not contain a '/' character"));
+					msg.run ();
+					ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
+					continue;
+				}
                                 
-                                if (session_name.find ('\\') != string::npos) {
-                                        MessageDialog msg (*_startup, _("To ensure compatibility with various systems\n"
-                                                                        "session names may not contain a '\\' character"));
-                                        msg.run ();
-                                        ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
-                                        continue;
-                                }
+				if (session_name.find ('\\') != string::npos) {
+					MessageDialog msg (*_startup, _("To ensure compatibility with various systems\n"
+					                                "session names may not contain a '\\' character"));
+					msg.run ();
+					ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
+					continue;
+				}
 			}
 		}
 
@@ -2597,21 +2598,21 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 				continue;
 			}
 
-                        if (session_name.find ('/') != std::string::npos) {
-                                MessageDialog msg (*_startup, _("To ensure compatibility with various systems\n"
-                                                                          "session names may not contain a '/' character"));
-                                msg.run ();
+			if (session_name.find ('/') != std::string::npos) {
+				MessageDialog msg (*_startup, _("To ensure compatibility with various systems\n"
+				                                "session names may not contain a '/' character"));
+				msg.run ();
 				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
-                                continue;
-                        }
+				continue;
+			}
 
-                        if (session_name.find ('\\') != std::string::npos) {
-                                MessageDialog msg (*_startup, _("To ensure compatibility with various systems\n"
-                                                                          "session names may not contain a '\\' character"));
-                                msg.run ();
+			if (session_name.find ('\\') != std::string::npos) {
+				MessageDialog msg (*_startup, _("To ensure compatibility with various systems\n"
+				                                "session names may not contain a '\\' character"));
+				msg.run ();
 				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
-                                continue;
-                        }
+				continue;
+			}
 
 			_session_is_new = true;
 		}
@@ -2641,8 +2642,8 @@ ARDOUR_UI::close_session()
 	}
 
 	if (unload_session (true)) {
-                return;
-        }
+		return;
+	}
 
 	ARDOUR_COMMAND_LINE::session_name = "";
 
@@ -2711,26 +2712,26 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 
 	catch (...) {
 
-		MessageDialog msg (string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"), path, snap_name),
-				   true,
-				   Gtk::MESSAGE_INFO,
-				   BUTTONS_OK);
+		MessageDialog msg (string_compose(_("Session \"%1 (snapshot %2)\" did not load successfully"),path, snap_name),
+		                   true,
+		                   Gtk::MESSAGE_INFO,
+		                   BUTTONS_OK);
 
 		msg.set_title (_("Loading Error"));
-                msg.set_secondary_text (_("Click the Refresh button to try again."));
-                msg.add_button (Stock::REFRESH, 1);
+		msg.set_secondary_text (_("Click the Refresh button to try again."));
+		msg.add_button (Stock::REFRESH, 1);
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		pop_back_splash ();
 		msg.present ();
 
 		int response = msg.run ();
 
-                switch (response) {
-                case 1:
-                        break;
-                default:
-                        exit (1);
-                }
+		switch (response) {
+		case 1:
+			break;
+		default:
+			exit (1);
+		}
 
 		msg.hide ();
 
@@ -2799,15 +2800,15 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 
 	/* Give the new session the default GUI state, if such things exist */
 
-        XMLNode* n;
-        n = Config->instant_xml (X_("Editor"));
-        if (n) {
-                new_session->add_instant_xml (*n, false);
-        }
-        n = Config->instant_xml (X_("Mixer"));
-        if (n) {
-                new_session->add_instant_xml (*n, false);
-        }
+	XMLNode* n;
+	n = Config->instant_xml (X_("Editor"));
+	if (n) {
+		new_session->add_instant_xml (*n, false);
+	}
+	n = Config->instant_xml (X_("Mixer"));
+	if (n) {
+		new_session->add_instant_xml (*n, false);
+	}
 
 	set_session (new_session);
 
@@ -2822,9 +2823,9 @@ void
 ARDOUR_UI::launch_chat ()
 {
 #ifdef __APPLE__
-        open_uri("http://webchat.freenode.net/?channels=ardour-osx");
+	open_uri("http://webchat.freenode.net/?channels=ardour-osx");
 #else
-        open_uri("http://webchat.freenode.net/?channels=ardour");
+	open_uri("http://webchat.freenode.net/?channels=ardour");
 #endif
 }
 
@@ -2836,7 +2837,7 @@ ARDOUR_UI::show_about ()
 		about->signal_response().connect(sigc::mem_fun (*this, &ARDOUR_UI::about_signal_response) );
 	}
 
-        about->set_transient_for(*editor);
+	about->set_transient_for(*editor);
 	about->show_all ();
 }
 
@@ -2856,7 +2857,7 @@ void
 ARDOUR_UI::hide_about ()
 {
 	if (about) {
-	        about->get_window()->set_cursor ();
+		about->get_window()->set_cursor ();
 		about->hide ();
 	}
 }
@@ -2960,22 +2961,22 @@ require some unused files to continue to exist."));
 	*/
 
 	const char* bprefix;
-        double space_adjusted = 0;
+	double space_adjusted = 0;
 
 	if (rep.space < 100000.0f) {
 		bprefix = X_("kilo");
 	} else if (rep.space < 1000000.0f * 1000) {
 		bprefix = X_("mega");
-                space_adjusted = truncf((float)rep.space / 1000.0);
+		space_adjusted = truncf((float)rep.space / 1000.0);
 	} else {
 		bprefix = X_("giga");
-                space_adjusted = truncf((float)rep.space / (1000000.0 * 1000));
+		space_adjusted = truncf((float)rep.space / (1000000.0 * 1000));
 	}
 
 	if (removed > 1) {
-                txt.set_text (string_compose (plural_msg, removed, _session->path() + "dead_sounds", space_adjusted, bprefix));
+		txt.set_text (string_compose (plural_msg, removed, _session->path() + "dead_sounds", space_adjusted, bprefix));
 	} else {
-                txt.set_text (string_compose (singular_msg, removed, _session->path() + "dead_sounds", space_adjusted, bprefix));
+		txt.set_text (string_compose (singular_msg, removed, _session->path() + "dead_sounds", space_adjusted, bprefix));
 	}
 
 	dhbox.pack_start (*dimage, true, false, 5);
@@ -3304,7 +3305,7 @@ ARDOUR_UI::disk_underrun_handler ()
 	if (!have_disk_speed_dialog_displayed) {
 		have_disk_speed_dialog_displayed = true;
 		MessageDialog* msg = new MessageDialog (*editor,
-                                                        string_compose (_("The disk system on your computer\n\
+		                                        string_compose (_("The disk system on your computer\n\
 was not able to keep up with %1.\n\
 \n\
 Specifically, it failed to read data from disk\n\
@@ -3464,16 +3465,16 @@ ARDOUR_UI::update_transport_clocks (nframes_t pos)
 void
 ARDOUR_UI::step_edit_status_change (bool yn)
 {
-        // XXX should really store pre-step edit status of things
-        // we make insensitive
+	// XXX should really store pre-step edit status of things
+	// we make insensitive
 
-        if (yn) {
-                rec_button.set_visual_state (3);
-                rec_button.set_sensitive (false);
-        } else {
-                rec_button.set_visual_state (0);
-                rec_button.set_sensitive (true);
-        }
+	if (yn) {
+		rec_button.set_visual_state (3);
+		rec_button.set_sensitive (false);
+	} else {
+		rec_button.set_visual_state (0);
+		rec_button.set_sensitive (true);
+	}
 }
 
 void
@@ -3648,38 +3649,38 @@ ARDOUR_UI::setup_profile ()
 void
 ARDOUR_UI::toggle_translations ()
 {
-        using namespace Glib;
+	using namespace Glib;
         
-        RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_("EnableTranslation"));
-        if (act) {
-                RefPtr<ToggleAction> ract = RefPtr<ToggleAction>::cast_dynamic (act);
-                if (ract) {
+	RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_("EnableTranslation"));
+	if (act) {
+		RefPtr<ToggleAction> ract = RefPtr<ToggleAction>::cast_dynamic (act);
+		if (ract) {
                         
-                        string i18n_killer = ARDOUR::translation_kill_path();
+			string i18n_killer = ARDOUR::translation_kill_path();
                         
-                        bool already_enabled = !ARDOUR::translations_are_disabled ();
+			bool already_enabled = !ARDOUR::translations_are_disabled ();
                         
-                        if (ract->get_active ()) {
+			if (ract->get_active ()) {
 /* we don't care about errors */
-                                int fd = ::open (i18n_killer.c_str(), O_RDONLY|O_CREAT, 0644);
-                                close (fd);
-                        } else {
+				int fd = ::open (i18n_killer.c_str(), O_RDONLY|O_CREAT, 0644);
+				close (fd);
+			} else {
 /* we don't care about errors */
-                                unlink (i18n_killer.c_str());
-                        }
+				unlink (i18n_killer.c_str());
+			}
                         
-                        if (already_enabled != ract->get_active()) {
-                                MessageDialog win (already_enabled ? _("Translations disabled") : _("Translations enabled"),
-                                                   false,
-                                                   Gtk::MESSAGE_WARNING,
-                                                   Gtk::BUTTONS_OK);
-                                win.set_secondary_text (string_compose (_("You must restart %1 for this to take effect."), PROGRAM_NAME));
-                                win.set_position (Gtk::WIN_POS_CENTER);
-                                win.present ();
-                                win.run ();
-                        }
-                }
-        }
+			if (already_enabled != ract->get_active()) {
+				MessageDialog win (already_enabled ? _("Translations disabled") : _("Translations enabled"),
+				                   false,
+				                   Gtk::MESSAGE_WARNING,
+				                   Gtk::BUTTONS_OK);
+				win.set_secondary_text (string_compose (_("You must restart %1 for this to take effect."), PROGRAM_NAME));
+				win.set_position (Gtk::WIN_POS_CENTER);
+				win.present ();
+				win.run ();
+			}
+		}
+	}
 }        
 
 /** Add a window proxy to our list, so that its state will be saved.
@@ -3705,22 +3706,22 @@ ARDOUR_UI::remove_window_proxy (WindowProxyBase* p)
 int
 ARDOUR_UI::missing_file (Session*s, std::string str, DataType type)
 {
-        MissingFileDialog dialog (s, str, type);
+	MissingFileDialog dialog (s, str, type);
 
-        dialog.show ();
-        dialog.present ();
+	dialog.show ();
+	dialog.present ();
 
-        int result = dialog.run ();
-        dialog.hide ();
+	int result = dialog.run ();
+	dialog.hide ();
 
-        switch (result) {
-        case RESPONSE_OK:
-                break;
-        default:
-                return 1; // quit entire session load
-        }
+	switch (result) {
+	case RESPONSE_OK:
+		break;
+	default:
+		return 1; // quit entire session load
+	}
 
-        result = dialog.get_action ();
+	result = dialog.get_action ();
 
-        return result;
+	return result;
 }

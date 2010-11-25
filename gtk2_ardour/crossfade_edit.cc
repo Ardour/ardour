@@ -423,10 +423,10 @@ CrossfadeEditor::point_event (GdkEvent* event, Point* point)
 
 			if (point == fade[current].points.front() || point == fade[current].points.back()) {
 				new_x = point->x;
-                                new_y = point->y;
+				new_y = point->y;
 			} else {
 				new_x = (event->motion.x - canvas_border)/effective_width();
-                                new_y = 1.0 - ((event->motion.y - canvas_border)/effective_height());
+				new_y = 1.0 - ((event->motion.y - canvas_border)/effective_height());
 			}
 
 			point->move_to (x_coordinate (new_x), y_coordinate (new_y),
@@ -504,17 +504,17 @@ CrossfadeEditor::add_control_point (double x, double y)
 void
 CrossfadeEditor::Point::move_to (double nx, double ny, double xfract, double yfract)
 {
-        if ( xfract < 0.0 ) {
-                xfract = 0.0;
-        } else if ( xfract > 1.0 ) {
-                xfract = 1.0;
-        }
+	if ( xfract < 0.0 ) {
+		xfract = 0.0;
+	} else if ( xfract > 1.0 ) {
+		xfract = 1.0;
+	}
         
-        if ( yfract < 0.0 ) {
-                yfract = 0.0;
-        } else if ( yfract > 1.0 ) {
-                yfract = 1.0;
-        }
+	if ( yfract < 0.0 ) {
+		yfract = 0.0;
+	} else if ( yfract > 1.0 ) {
+		yfract = 1.0;
+	}
 
 	const double half_size = rint(size/2.0);
 	double x1 = nx - half_size;
@@ -873,7 +873,7 @@ CrossfadeEditor::reset ()
 	set (xfade->fade_in(),  In);
 	set (xfade->fade_out(), Out);
 
-        curve_select_clicked (current);
+	curve_select_clicked (current);
 }
 
 void
