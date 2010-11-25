@@ -42,15 +42,21 @@ template <class T>
 class DnDVBox : public Gtk::EventBox
 {
 public:
-	DnDVBox () : _drag_icon (0), _expecting_unwanted_button_event (false)
+	DnDVBox () : _drag_icon (0), _expecting_unwanted_button_event (false), _drag_placeholder (0)
 	{
 		_targets.push_back (Gtk::TargetEntry ("processor"));
 
 		add (_internal_vbox);
-		add_events (Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
+		add_events (
+			Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK |
+			Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK |
+			Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK
+			);
 
 		signal_button_press_event().connect (bind (mem_fun (*this, &DnDVBox::button_press), (T *) 0));
 		signal_button_release_event().connect (bind (mem_fun (*this, &DnDVBox::button_release), (T *) 0));
+		signal_drag_motion().connect (mem_fun (*this, &DnDVBox::drag_motion));
+		signal_drag_leave().connect (mem_fun (*this, &DnDVBox::drag_leave));
 		
 		drag_dest_set (_targets);
 		signal_drag_data_received().connect (mem_fun (*this, &DnDVBox::drag_data_received));
@@ -102,7 +108,8 @@ public:
 	}
 
 	/** @param Child
-	 *  @return true if the child is selected, otherwise false */
+	 *  @return true if the child is selected, otherwise false.
+	 */
 	bool selected (T* child) const {
 		return (find (_selection.begin(), _selection.end(), child) != _selection.end());
 	}
@@ -119,7 +126,6 @@ public:
 
 		_children.clear ();
 	}
-
 
 	void select_all ()
 	{
@@ -138,32 +144,62 @@ public:
 		SelectionChanged (); /* EMIT SIGNAL */
 	}
 
-	/** @param x x coordinate.
-	 *  @param y y coordinate.
-	 *  @return Pair consisting of the child under (x, y) (or 0) and the index of the child under (x, y) (or -1)
+	/** Look at a y coordinate and find the children below y, and the ones either side.
+	 *  @param y y position.
+	 *  @param before Filled in with the child before, or 0.
+	 *  @param before Filled in with the child under y, or 0.
+	 *  @param after Filled in with the child after, or 0.
+	 *  @return Fractional position in terms of child height.
 	 */
-	std::pair<T*, int> get_child_at_position (int /*x*/, int y) const
+	double get_children_around_position (int y, T** before, T** at, T** after) const
 	{
-		std::list<Gtk::Widget const *> children = _internal_vbox.get_children ();
-		std::list<Gtk::Widget const *>::iterator i = children.begin();
-		
-		int n = 0;
-		while (i != children.end()) {
-			Gdk::Rectangle const a = (*i)->get_allocation ();
-			if (y >= a.get_y() && y <= (a.get_y() + a.get_height())) {
-				break;
-			}
+		if (_children.empty()) {
+			*before = *at = *after = 0;
+			return -1;
+		}
+
+		/* fractional position in terms of children */
+		double const nf = double (y) / _children.front()->widget().get_allocation().get_height ();
+
+		*before = 0;
+
+		int i = 0;
+		typename std::list<T*>::const_iterator j = _children.begin ();
+		while (i < int (nf) && j != _children.end()) {
+			*before = *j;
 			++i;
-			++n;
+			++j;
 		}
+
+		if (j == _children.end()) {
+			*at = 0;
+			*after = 0;
+			return -1;
+		}
+
+		*at = *j;
+
+		++j;
+		*after = j != _children.end() ? *j : 0;
+
+		return nf;
+	}
+
+	/** @param y y coordinate.
+	 *  @return Pair consisting of the child under y (or 0) and the (fractional) index of the child under y (or -1)
+	 */
+	std::pair<T*, double> get_child_at_position (int y) const
+	{
+		T* before;
+		T* after;
+
+		std::pair<T*, double> r;
 		
-		if (i == children.end()) {
-			return std::make_pair ((T *) 0, -1);
-		}
+		r.second = get_children_around_position (y, &before, &r.first, &after);
 
-		return std::make_pair (child_from_widget (*i), n);
-	}	
-
+		return r;
+	}
+ 
 	/** Children have been reordered by a drag */
 	sigc::signal<void> Reordered;
 
@@ -182,19 +218,62 @@ public:
 private:
 	void drag_begin (Glib::RefPtr<Gdk::DragContext> const & context, T* child)
 	{
+		_drag_child = child;
+		
 		/* make up an icon for the drag */
-		Gtk::Window* _drag_icon = new Gtk::Window (Gtk::WINDOW_POPUP);
+		_drag_icon = new Gtk::Window (Gtk::WINDOW_POPUP);
+		
+		Gtk::Allocation a = child->widget().get_allocation ();
+		_drag_icon->set_size_request (a.get_width(), a.get_height());
+		
+		_drag_icon->signal_expose_event().connect (sigc::mem_fun (*this, &DnDVBox::icon_expose));
 		_drag_icon->set_name (get_name ());
-		Gtk::Label* l = new Gtk::Label (child->drag_text ());
-		l->set_padding (4, 4);
-		_drag_icon->add (*Gtk::manage (l));
-		_drag_icon->show_all_children ();
+
+		/* make the icon transparent if possible */
+		Glib::RefPtr<Gdk::Screen const> s = _drag_icon->get_screen ();
+		Glib::RefPtr<Gdk::Colormap const> c = s->get_rgba_colormap ();
+		if (c) {
+			_drag_icon->set_colormap (c);
+			_have_alpha = true;
+		} else {
+			_have_alpha = false;
+		}
+
 		int w, h;
 		_drag_icon->get_size (w, h);
-		_drag_icon->drag_set_as_icon (context, w / 2, h);
+		_drag_icon->drag_set_as_icon (context, w / 2, h / 2);
 		
 		_drag_source = this;
 	}
+
+	/* Draw the drag icon; we go to these lengths so that we can have the icon
+	 * transparent if the window system supports it.
+	 */
+	bool icon_expose (GdkEventExpose *)
+	{
+		cairo_t* cr = gdk_cairo_create (_drag_icon->get_window()->gobj());
+		
+		if (_have_alpha) {
+			cairo_set_source_rgba (cr, 0.2, 0.2, 0.2, 0.5);
+		} else {
+			cairo_set_source_rgba (cr, 0, 0, 0, 1);
+		}
+		
+		cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+		cairo_paint (cr);
+		cairo_set_source_rgba (cr, 1, 1, 1, 0.8);
+
+		cairo_text_extents_t ext;
+		cairo_text_extents (cr, _drag_child->drag_text().c_str(), &ext);
+		
+		cairo_move_to (cr, 0, ext.height);
+		cairo_show_text (cr, _drag_child->drag_text().c_str ());
+		cairo_restore (cr);
+		cairo_destroy (cr);
+
+		return false;
+	}
+	
 	
 	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const &, Gtk::SelectionData & selection_data, guint, guint, T* child)
 	{
@@ -206,7 +285,7 @@ private:
 		)
 	{
 		/* work out where it was dropped */
-		std::pair<T*, int> const drop = get_child_at_position (x, y);
+		std::pair<T*, double> const drop = get_child_at_position (y);
 		
 		if (_drag_source == this) {
 
@@ -218,7 +297,7 @@ private:
 			if (drop.first == 0) {
 				_internal_vbox.reorder_child (child->widget(), -1);
 			} else {
-				_internal_vbox.reorder_child (child->widget(), drop.second);
+				_internal_vbox.reorder_child (child->widget(), int (drop.second));
 			}
 			
 		} else {
@@ -236,10 +315,72 @@ private:
 	{
 		delete _drag_icon;
 		_drag_icon = 0;
+		
+		_drag_child = 0;
+		remove_drag_placeholder ();
 
 		Reordered (); /* EMIT SIGNAL */
 	}
-	
+
+	void remove_drag_placeholder ()
+	{
+		if (_drag_placeholder) {
+			_internal_vbox.remove (*_drag_placeholder);
+			_drag_placeholder = 0;
+		}
+	}
+
+	bool drag_motion (Glib::RefPtr<Gdk::DragContext> const &, int x, int y, guint)
+	{
+		if (_children.empty ()) {
+			return false;
+		}
+
+		T* before;
+		T* at;
+		T* after;
+
+		/* decide where we currently are */
+		double const c = get_children_around_position (y, &before, &at, &after);
+
+		/* whether we're in the top or bottom half of the child that we're over */
+		bool top_half = (c - int (c)) < 0.5;
+
+		if (top_half && (before == _drag_child || at == _drag_child)) {
+			/* dropping here would have no effect, so remove the visual cue */
+			remove_drag_placeholder ();
+			return false;
+		}
+
+		if (!top_half && (at == _drag_child || after == _drag_child)) {
+			/* dropping here would have no effect, so remove the visual cue */
+			remove_drag_placeholder ();
+			return false;
+		}
+
+		/* the index that the placeholder should be put at */
+		int const n = int (c + 0.5);
+		
+		if (_drag_placeholder == 0) {
+			_drag_placeholder = manage (new Gtk::Label (""));
+			_internal_vbox.pack_start (*_drag_placeholder, false, false);
+			_drag_placeholder->show ();
+		}
+
+		if (c < 0) {
+			_internal_vbox.reorder_child (*_drag_placeholder, -1);
+		} else {
+			_internal_vbox.reorder_child (*_drag_placeholder, n);
+		}
+
+		return false;
+	}
+
+	void drag_leave (Glib::RefPtr<Gdk::DragContext> const &, guint)
+	{
+		remove_drag_placeholder ();
+	}
+
 	bool button_press (GdkEventButton* ev, T* child)
 	{
 		if (_expecting_unwanted_button_event == true && child == 0) {
@@ -371,8 +512,17 @@ private:
 	std::list<T*> _selection;
 	Gtk::Window* _drag_icon;
 	bool _expecting_unwanted_button_event;
-
+	/** A blank label used as a placeholder to indicate where a dragged item would
+	 *  go if it were dropped now.
+	 */
+	Gtk::Label* _drag_placeholder;
+	/** Our child being dragged, or 0 */
+	T* _drag_child;
+	/** true if we can have an alpha-blended drag icon */
+	bool _have_alpha;
+	
 	static DnDVBox* _drag_source;
+	
 };
 
 template <class T>

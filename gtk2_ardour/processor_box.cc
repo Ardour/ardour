@@ -514,8 +514,9 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 
 		int x, y;
 		processor_display.get_pointer (x, y);
+		
 
-		pair<ProcessorEntry *, int> const pointer = processor_display.get_child_at_position (x, y);
+		pair<ProcessorEntry *, double> const pointer = processor_display.get_child_at_position (y);
 
 		if (pointer.first) {
 			targets.push_back (pointer.first->processor ());
