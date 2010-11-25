@@ -128,24 +128,24 @@ extern void setup_enum_writer ();
 class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
 {
   public:
-        enum RecordState {
+	enum RecordState {
 		Disabled = 0,
 		Enabled = 1,
 		Recording = 2
 	};
 
-        /* a new session might have non-empty mix_template, an existing session should always have an empty one.
-           the bus profile can be null if no master out bus is required.
-         */
+	/* a new session might have non-empty mix_template, an existing session should always have an empty one.
+	   the bus profile can be null if no master out bus is required.
+	*/
 
 	Session (AudioEngine&,
-                 const std::string& fullpath,
-                 const std::string& snapshot_name,
-                 BusProfile* bus_profile = 0,
-                 std::string mix_template = "");
+	         const std::string& fullpath,
+	         const std::string& snapshot_name,
+	         BusProfile* bus_profile = 0,
+	         std::string mix_template = "");
 
 	virtual ~Session ();
-        
+
 	std::string path() const { return _path; }
 	std::string name() const { return _name; }
 	std::string snap_name() const { return _current_snapshot_name; }
@@ -175,10 +175,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::string dead_sound_dir () const;
 	std::string automation_dir () const;
 	std::string analysis_dir() const;
-
+	std::string plugins_dir() const;
+	
 	int ensure_subdirs ();
 
-        std::string peak_path (std::string) const;
+	std::string peak_path (std::string) const;
 
 	std::string change_source_path_by_name (std::string oldpath, std::string oldname, std::string newname, bool destructive);
 
@@ -233,7 +234,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));
 	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg);
 
-        bool io_name_is_legal (const std::string&);
+	bool io_name_is_legal (const std::string&);
 	boost::shared_ptr<Route> route_by_name (std::string);
 	boost::shared_ptr<Route> route_by_id (PBD::ID);
 	boost::shared_ptr<Route> route_by_remote_id (uint32_t id);
@@ -282,8 +283,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/** Emitted when anything about any of our route groups changes */
 	PBD::Signal0<void> RouteGroupChanged;
 
-        /* Step Editing status changed */
-        PBD::Signal1<void,bool> StepEditStatusChange;
+	/* Step Editing status changed */
+	PBD::Signal1<void,bool> StepEditStatusChange;
 
 	void queue_event (SessionEvent*);
 
@@ -395,7 +396,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void remove_route_group (RouteGroup&);
 
 	RouteGroup* route_group_by_name (std::string);
-        RouteGroup& all_route_group() const;
+	RouteGroup& all_route_group() const;
 
 	PBD::Signal1<void,RouteGroup*> route_group_added;
 	PBD::Signal0<void>             route_group_removed;
@@ -429,7 +430,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* Time */
 
-        framepos_t transport_frame () const {return _transport_frame; }
+	framepos_t transport_frame () const {return _transport_frame; }
 	framepos_t audible_frame () const;
 	framepos_t requested_return_frame() const { return _requested_return_frame; }
 
@@ -468,9 +469,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	static PBD::Signal1<void, framepos_t> EndTimeChanged;
 	static PBD::Signal0<void> TimecodeOffsetChanged;
 
-        std::vector<SyncSource> get_available_sync_options() const;
+	std::vector<SyncSource> get_available_sync_options() const;
 	void   request_sync_source (Slave*);
-        bool   synced_to_jack() const { return config.get_external_sync() && config.get_sync_source() == JACK; }
+	bool   synced_to_jack() const { return config.get_external_sync() && config.get_sync_source() == JACK; }
 
 	double transport_speed() const { return _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0f; }
@@ -535,10 +536,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	*/
 	static PBD::Signal0<int> AskAboutPendingState;
 
-	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (size_t, std::string const &, uint32_t, 
-                                                                            bool destructive, bool as_stub = false);
-        
-	boost::shared_ptr<MidiSource> create_midi_source_for_session (Track*, std::string const &, bool as_stub = false);
+	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (
+		size_t, std::string const &, uint32_t, bool destructive, bool as_stub = false);
+	
+	boost::shared_ptr<MidiSource> create_midi_source_for_session (
+		Track*, std::string const &, bool as_stub = false);
 
 	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
 	boost::shared_ptr<Source> source_by_path_and_channel (const std::string&, uint16_t);
@@ -586,7 +588,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	bool soloing() const { return _non_soloed_outs_muted; }
 	bool listening() const { return _listen_cnt > 0; }
-        bool solo_isolated() const { return _solo_isolated_cnt > 0; }
+	bool solo_isolated() const { return _solo_isolated_cnt > 0; }
 
 	static const SessionEvent::RTeventCallback rt_cleanup;
 
@@ -595,11 +597,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void set_mute (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_listen (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_record_enabled (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
-        void set_solo_isolated (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
+	void set_solo_isolated (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 
 	PBD::Signal1<void,bool> SoloActive;
 	PBD::Signal0<void> SoloChanged;
-        PBD::Signal0<void> IsolatedChanged;
+	PBD::Signal0<void> IsolatedChanged;
 	
 	/* control/master out */
 
@@ -724,9 +726,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	static PBD::Signal0<void> SendFeedback;
 
-        /* Speakers */
+	/* Speakers */
 
-        VBAPSpeakers& get_speakers ();
+	VBAPSpeakers& get_speakers ();
 
 	/* Controllables */
 
@@ -785,24 +787,24 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	PBD::Signal0<void> RouteOrderKeyChanged;
 
-        bool step_editing() const { return (_step_editors > 0); }
+	bool step_editing() const { return (_step_editors > 0); }
 
 	void request_suspend_timecode_transmission ();
 	void request_resume_timecode_transmission ();
 	bool timecode_transmission_suspended () const;
 
-        std::string source_search_path(DataType) const;
-        void ensure_search_path_includes (const std::string& path, DataType type);
+	std::string source_search_path(DataType) const;
+	void ensure_search_path_includes (const std::string& path, DataType type);
 
-        /* handlers can return an integer value:
-           0: config.set_audio_search_path() or config.set_midi_search_path() was used
-              to modify the search path and we should try to find it again.
-           1: quit entire session load
-           2: as 0, but don't ask about other missing files
-           3: don't ask about other missing files, and just mark this one missing
-          -1: just mark this one missing
-          any other value: as -1
-        */
+	/* handlers can return an integer value:
+	   0: config.set_audio_search_path() or config.set_midi_search_path() was used
+	   to modify the search path and we should try to find it again.
+	   1: quit entire session load
+	   2: as 0, but don't ask about other missing files
+	   3: don't ask about other missing files, and just mark this one missing
+	   -1: just mark this one missing
+	   any other value: as -1
+	*/
 	static PBD::Signal3<int,Session*,std::string,DataType> MissingFile;
 
 	/** Emitted when the session wants Ardour to quit */
@@ -893,8 +895,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void unblock_processing() { g_atomic_int_set (&processing_prohibited, 0); }
 	bool processing_blocked() const { return g_atomic_int_get (&processing_prohibited); }
 
-        Glib::Mutex                process_thread_lock;
-        std::list<ProcessThread*>  process_threads;
+	Glib::Mutex                process_thread_lock;
+	std::list<ProcessThread*>  process_threads;
 
 	/* slave tracking */
 
@@ -914,11 +916,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void track_slave_state(float slave_speed, nframes_t slave_transport_frame, nframes_t this_delta);
 	void follow_slave_silently(nframes_t nframes, float slave_speed);
 
-        void switch_to_sync_source (SyncSource); /* !RT context */
-        void drop_sync_source ();  /* !RT context */
-        void use_sync_source (Slave*); /* RT context */
+	void switch_to_sync_source (SyncSource); /* !RT context */
+	void drop_sync_source ();  /* !RT context */
+	void use_sync_source (Slave*); /* RT context */
 
-        bool post_export_sync;
+	bool post_export_sync;
 	nframes_t post_export_position;
 
 	bool _exporting;
@@ -967,7 +969,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	std::string             _path;
 	std::string             _name;
-        bool                    _is_new;
+	bool                    _is_new;
 	bool                     session_send_mtc;
 	bool                     session_midi_feedback;
 	bool                     play_loop;
@@ -1039,8 +1041,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void set_post_transport_work (PostTransportWork ptw) { g_atomic_int_set (&_post_transport_work, (gint) ptw); }
 	void add_post_transport_work (PostTransportWork ptw);
 
-        void schedule_playback_buffering_adjustment ();
-        void schedule_capture_buffering_adjustment ();
+	void schedule_playback_buffering_adjustment ();
+	void schedule_capture_buffering_adjustment ();
 
 	uint32_t    cumulative_rf_motion;
 	uint32_t    rf_scale;
@@ -1170,11 +1172,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void overwrite_some_buffers (Track *);
 	void flush_all_inserts ();
 	int  micro_locate (nframes_t distance);
-        void locate (framepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false, bool with_mmc=true);
-        void start_locate (framepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
+	void locate (framepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false, bool with_mmc=true);
+	void start_locate (framepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
 	void force_locate (framepos_t frame, bool with_roll = false);
 	void set_track_speed (Track *, double speed);
-        void set_transport_speed (double speed, bool abort = false, bool clear_state = false);
+	void set_transport_speed (double speed, bool abort = false, bool clear_state = false);
 	void stop_transport (bool abort = false, bool clear_state = false);
 	void start_transport ();
 	void realtime_stop (bool abort, bool clear_state);
@@ -1195,7 +1197,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int load_route_groups (const XMLNode&, int);
 
 	std::list<RouteGroup *> _route_groups;
-        RouteGroup*             _all_route_group;
+	RouteGroup*             _all_route_group;
 
 	/* routes stuff */
 
@@ -1330,7 +1332,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	uint32_t _total_free_4k_blocks;
 	Glib::Mutex space_lock;
 
-        bool no_questions_about_missing_files;
+	bool no_questions_about_missing_files;
 
 	std::string get_best_session_directory_for_new_source ();
 
@@ -1453,12 +1455,12 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void add_session_range_location (nframes_t, nframes_t);
 
 	void setup_midi_machine_control ();
-        void cleanup_stubfiles ();
+	void cleanup_stubfiles ();
 
 	void route_order_key_changed ();
 
-        void step_edit_status_change (bool);
-        uint32_t _step_editors;
+	void step_edit_status_change (bool);
+	uint32_t _step_editors;
 
 	/** true if timecode transmission by the transport is suspended, otherwise false */
 	mutable gint _suspend_timecode_transmission;
@@ -1468,7 +1470,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void start_time_changed (framepos_t);
 	void end_time_changed (framepos_t);
 
-        VBAPSpeakers* _speakers; 
+	VBAPSpeakers* _speakers; 
 };
 
 } // namespace ARDOUR

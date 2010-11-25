@@ -25,6 +25,8 @@
 #include <cmath>
 #include <cstring>
 
+#include <glibmm.h>
+
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
@@ -41,6 +43,8 @@
 
 #include "i18n.h"
 #include <locale.h>
+
+#include "lv2ext/lv2_persist.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -83,14 +87,21 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 	_latency_control_port = 0;
 	_was_activated = false;
 
+	SLV2Value persist_uri = slv2_value_new_uri(_world.world, "http://lv2plug.in/ns/ext/persist");
+	_supports_persist = slv2_plugin_has_feature(plugin, persist_uri);
+	slv2_value_free(persist_uri);
+
 	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
 	_data_access_feature.URI = "http://lv2plug.in/ns/ext/data-access";
+	_persist_feature.URI = "http://lv2plug.in/ns/ext/persist";
+	_persist_feature.data = NULL;
 
-	_features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 4);
+	_features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 5);
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
-	_features[2] = _uri_map.feature();
-	_features[3] = NULL;
+	_features[2] = &_persist_feature;
+	_features[3] = _uri_map.feature();
+	_features[4] = NULL;
 
 	_instance = slv2_plugin_instantiate(plugin, rate, _features);
 	_name = slv2_plugin_get_name(plugin);
@@ -271,6 +282,19 @@ LV2Plugin::nth_parameter (uint32_t n, bool& ok) const
 	return 0;
 }
 
+struct LV2Value { void* value; uint32_t type; };
+typedef std::map< std::string, LV2Value > LV2State;
+
+static void
+lv2_persist_store_callback(void*       callback_data,
+                           const char* key,
+                           const void* value,
+                           size_t      size,
+                           uint32_t    type)
+{
+	cout << "LV2 PERSIST STORE " << key << " = " << value << " :: " << type << endl;
+}
+
 XMLNode&
 LV2Plugin::get_state()
 {
@@ -296,6 +320,25 @@ LV2Plugin::get_state()
 		}
 	}
 
+	if (_supports_persist) {
+		// Create state directory for this plugin instance
+		const std::string state_path = Glib::build_filename(_session.plugins_dir(), _id.to_s());
+		cout << "LV2 plugin state path " << state_path << endl;
+
+		// Get LV2 Persist extension data from plugin instance
+		LV2_Persist* persist = (LV2_Persist*)slv2_instance_get_extension_data(
+			_instance, "http://lv2plug.in/ns/ext/persist");
+		if (!persist) {
+			warning << string_compose(
+				_("Plugin \"%1\% failed to return LV2 persist data"),
+				unique_id());
+			return *root; // FIXME: Possibly inconsistent state
+		}
+
+		LV2State state;
+		persist->save(_instance, lv2_persist_store_callback, &state);
+	}
+	
 	return *root;
 }
 

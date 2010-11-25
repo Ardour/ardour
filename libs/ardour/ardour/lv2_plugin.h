@@ -136,6 +136,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	float*                   _defaults;
 	float*                   _latency_control_port;
 	bool                     _was_activated;
+	bool                     _supports_persist;
 	std::vector<bool>        _port_is_input;
 	std::map<std::string,uint32_t> _port_indices;
 
@@ -143,6 +144,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	LV2_DataAccess _data_access_extension_data;
 	LV2_Feature _data_access_feature;
 	LV2_Feature _instance_access_feature;
+	LV2_Feature _persist_feature;
 
 	static URIMap   _uri_map;
 	static uint32_t _midi_event_type;
