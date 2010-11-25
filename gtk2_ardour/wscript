@@ -470,6 +470,9 @@ def build(bld):
 
 	# Default UI configuration
 	bld.install_files('${CONFIGDIR}/ardour3', 'ardour3_ui_default.conf')
+	
+	# Default export stuff
+	bld.install_files('${CONFIGDIR}/ardour3/export', 'export/*.format')
 
 	# i18n
 	if bld.env['ENABLE_NLS']:
