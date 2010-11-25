@@ -196,7 +196,7 @@ class IO : public SessionObject, public Latent
 	static int parse_io_string (const std::string&, std::vector<std::string>& chns);
 	static int parse_gain_string (const std::string&, std::vector<std::string>& chns);
 
-	int ensure_ports (ChanCount, bool clear, bool lockit, void *src);
+	int ensure_ports (ChanCount, bool clear, void *src);
 
 	void check_bundles_connected ();
 	void check_bundles (std::vector<UserBundleInfo*>&, const PortSet&);

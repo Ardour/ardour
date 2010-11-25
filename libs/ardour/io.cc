@@ -421,7 +421,7 @@ IO::ensure_ports_locked (ChanCount count, bool clear, void* /*src*/)
 
 
 int
-IO::ensure_ports (ChanCount count, bool clear, bool lockit, void* src)
+IO::ensure_ports (ChanCount count, bool clear, void* src)
 {
 	bool changed = false;
 
@@ -433,11 +433,9 @@ IO::ensure_ports (ChanCount count, bool clear, bool lockit, void* src)
 
 	change.before = _ports.count ();
 	
-	if (lockit) {
+	{
 		BLOCK_PROCESS_CALLBACK ();
 		Glib::Mutex::Lock im (io_lock);
-		changed = ensure_ports_locked (count, clear, src);
-	} else {
 		changed = ensure_ports_locked (count, clear, src);
 	}
 
@@ -455,7 +453,7 @@ IO::ensure_ports (ChanCount count, bool clear, bool lockit, void* src)
 int
 IO::ensure_io (ChanCount count, bool clear, void* src)
 {
-	return ensure_ports (count, clear, true, src);
+	return ensure_ports (count, clear, src);
 }
 
 XMLNode&
@@ -832,7 +830,7 @@ IO::create_ports (const XMLNode& node, int version)
 
 	get_port_counts (node, version, n, c);
 
-	if (ensure_ports (n, true, true, this)) {
+	if (ensure_ports (n, true, this)) {
 		error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
 		return -1;
 	}
@@ -1007,7 +1005,7 @@ IO::set_ports (const string& str)
 	}
 
 	// FIXME: audio-only
-	if (ensure_ports (ChanCount(DataType::AUDIO, nports), true, true, this)) {
+	if (ensure_ports (ChanCount(DataType::AUDIO, nports), true, this)) {
 		return -1;
 	}
 
