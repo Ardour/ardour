@@ -153,8 +153,8 @@ VBAPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coe
         bool was_dirty;
 
         if ((was_dirty = _dirty)) {
-                compute_gains (desired_gains, desired_outputs, _azimuth, _elevation);
-                cerr << " @ " << _azimuth << " /= " << _elevation
+                compute_gains (desired_gains, desired_outputs, _angles.azi, _angles.ele);
+                cerr << " @ " << _angles.azi << " /= " << _angles.ele
                      << " Outputs: "
                      << desired_outputs[0] + 1 << ' '
                      << desired_outputs[1] + 1 << ' '

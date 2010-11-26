@@ -52,8 +52,6 @@ class VBAPanner : public StreamPanner {
 	int load (std::istream&, std::string path, uint32_t&) { return 0; }
 
   private:
-        double _azimuth;   /* direction for the signal source */
-        double _elevation; /* elevation of the signal source */
         bool   _dirty;
         double gains[3];
         double desired_gains[3];
