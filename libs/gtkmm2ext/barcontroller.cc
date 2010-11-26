@@ -398,6 +398,9 @@ BarController::switch_to_bar ()
 	darea.show ();
 
 	switching = false;
+
+	SpinnerActive (false); /* EMIT SIGNAL */
+	
 	return FALSE;
 }
 
@@ -421,6 +424,9 @@ BarController::switch_to_spinner ()
 	spinner.grab_focus ();
 
 	switching = false;
+
+	SpinnerActive (true); /* EMIT SIGNAL */
+
 	return FALSE;
 }
 

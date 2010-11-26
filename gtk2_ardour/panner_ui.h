@@ -170,6 +170,10 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
         void start_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
         void stop_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
+
+	void bar_spinner_activate (bool);
+	/** true if any of our PannerBars are currently using a SpinButton to modify value */
+	bool _bar_spinner_active;
 };
 
 #endif /* __ardour_gtk_panner_ui_h__ */

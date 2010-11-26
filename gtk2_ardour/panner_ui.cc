@@ -58,6 +58,7 @@ PannerUI::PannerUI (Session* s)
 	, panning_link_button (_("link"))
 	, pan_automation_style_button ("")
 	, pan_automation_state_button ("")
+	, _bar_spinner_active (false)
 {
 	set_session (s);
 
@@ -453,6 +454,7 @@ PannerUI::setup_pan ()
 				(sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) asz));
 
 			bc->set_size_request (-1, pan_bar_height);
+			bc->SpinnerActive.connect (sigc::mem_fun (*this, &PannerUI::bar_spinner_activate));
 
 			pan_bars.push_back (bc);
 			pan_bar_packer.pack_start (*bc, false, false);
@@ -920,4 +922,10 @@ PannerUI::connect_to_pan_control (uint32_t i)
 	_panner->pan_control(i)->Changed.connect (
 		_pan_control_connections, invalidator (*this), boost::bind (&PannerUI::pan_value_changed, this, i), gui_context ()
 		);
+}
+
+void
+PannerUI::bar_spinner_activate (bool a)
+{
+	_bar_spinner_active = a;
 }
