@@ -67,8 +67,8 @@ class Panner2d : public Gtk::DrawingArea
 	sigc::signal<void,int> PuckMoved;
 	sigc::signal<void,int> TargetMoved;
 
-        void cart_to_gtk (PBD::CartesianVector&) const;
-        void gtk_to_cart (PBD::CartesianVector&) const;
+	void cart_to_gtk (PBD::CartesianVector&) const;
+	void gtk_to_cart (PBD::CartesianVector&) const;
 
   protected:
 	bool on_expose_event (GdkEventExpose *);
@@ -79,24 +79,24 @@ class Panner2d : public Gtk::DrawingArea
 
   private:
 	class Target {
-          public:
-                PBD::AngularVector position;
-                bool visible;
-                std::string text;
+	public:
+		PBD::AngularVector position;
+		bool visible;
+		std::string text;
                 
-                Target (const PBD::AngularVector&, const char* txt = 0);
-                ~Target ();
+		Target (const PBD::AngularVector&, const char* txt = 0);
+		~Target ();
                 
-                void set_text (const char*);
-                void set_selected (bool yn) {
-                        _selected = yn;
-                }
-                bool selected() const { 
-                        return _selected;
-                }
+		void set_text (const char*);
+		void set_selected (bool yn) {
+			_selected = yn;
+		}
+		bool selected() const { 
+			return _selected;
+		}
                 
-          private:
-                bool _selected;
+	private:
+		bool _selected;
 	};
 
 	boost::shared_ptr<ARDOUR::Panner> panner;
@@ -130,10 +130,10 @@ class Panner2d : public Gtk::DrawingArea
 	PBD::ScopedConnection state_connection;
 	PBD::ScopedConnection change_connection;
 
-        /* cartesian coordinates in GTK units ; adjust to same but on a circle of radius 1.0
-           and centered in the middle of our area
-        */
-        void clamp_to_circle (double& x, double& y);
+	/* cartesian coordinates in GTK units ; adjust to same but on a circle of radius 1.0
+	   and centered in the middle of our area
+	*/
+	void clamp_to_circle (double& x, double& y);
 };
 
 class Panner2dWindow : public Gtk::Window
@@ -146,13 +146,13 @@ class Panner2dWindow : public Gtk::Window
   private:
 	Panner2d widget;
 
-	Gtk::HBox   hpacker;
-	Gtk::VBox   button_box;
-	Gtk::Button reset_button;
+	Gtk::HBox         hpacker;
+	Gtk::VBox         button_box;
+	Gtk::Button       reset_button;
 	Gtk::ToggleButton bypass_button;
 	Gtk::ToggleButton mute_button;
-	Gtk::VBox   spinner_box;
-	Gtk::VBox   left_side;
+	Gtk::VBox         spinner_box;
+	Gtk::VBox         left_side;
 
 	std::vector<Gtk::SpinButton*> spinners;
 };

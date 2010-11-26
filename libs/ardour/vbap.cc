@@ -1,3 +1,4 @@
+
 /* 
    This software is being provided to you, the licensee, by Ville Pulkki,
    under the following license. By obtaining, using and/or copying this
@@ -54,9 +55,9 @@ using namespace std;
 string VBAPanner::name = X_("VBAP");
 
 VBAPanner::VBAPanner (Panner& parent, Evoral::Parameter param, Speakers& s)
-        : StreamPanner (parent, param)
-        , _dirty (false)
-        , _speakers (VBAPSpeakers::instance (s))
+	: StreamPanner (parent, param)
+	, _dirty (false)
+	, _speakers (VBAPSpeakers::instance (s))
 {
 }
 
@@ -67,76 +68,76 @@ VBAPanner::~VBAPanner ()
 void
 VBAPanner::mark_dirty ()
 {
-        _dirty = true;
+	_dirty = true;
 }
 
 void
 VBAPanner::update ()
 {
-        /* force 2D for now */
-        _angles.ele = 0.0;
-        _dirty = true;
+	/* force 2D for now */
+	_angles.ele = 0.0;
+	_dirty = true;
 
-        Changed ();
+	Changed ();
 }
 
 void 
 VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele) 
 {
-        /* calculates gain factors using loudspeaker setup and given direction */
-        double cartdir[3];
-        double power;
-        int i,j,k;
-        double small_g;
-        double big_sm_g, gtmp[3];
+	/* calculates gain factors using loudspeaker setup and given direction */
+	double cartdir[3];
+	double power;
+	int i,j,k;
+	double small_g;
+	double big_sm_g, gtmp[3];
 
-        azi_ele_to_cart (azi,ele, cartdir[0], cartdir[1], cartdir[2]);  
-        big_sm_g = -100000.0;
+	azi_ele_to_cart (azi,ele, cartdir[0], cartdir[1], cartdir[2]);  
+	big_sm_g = -100000.0;
 
-        for (i = 0; i < _speakers.n_tuples(); i++) {
+	for (i = 0; i < _speakers.n_tuples(); i++) {
 
-                small_g = 10000000.0;
+		small_g = 10000000.0;
 
-                for (j = 0; j < _speakers.dimension(); j++) {
+		for (j = 0; j < _speakers.dimension(); j++) {
 
-                        gtmp[j]=0.0;
+			gtmp[j]=0.0;
 
-                        for (k = 0; k < _speakers.dimension(); k++) {
-                                gtmp[j] += cartdir[k] * _speakers.matrix(i)[j*_speakers.dimension()+k]; 
-                        }
+			for (k = 0; k < _speakers.dimension(); k++) {
+				gtmp[j] += cartdir[k] * _speakers.matrix(i)[j*_speakers.dimension()+k]; 
+			}
 
-                        if (gtmp[j] < small_g) {
-                                small_g = gtmp[j];
-                        }
-                }
+			if (gtmp[j] < small_g) {
+				small_g = gtmp[j];
+			}
+		}
 
-                if (small_g > big_sm_g) {
+		if (small_g > big_sm_g) {
 
-                        big_sm_g = small_g;
+			big_sm_g = small_g;
 
-                        gains[0] = gtmp[0]; 
-                        gains[1] = gtmp[1]; 
+			gains[0] = gtmp[0]; 
+			gains[1] = gtmp[1]; 
 
-                        speaker_ids[0] = _speakers.speaker_for_tuple (i, 0);
-                        speaker_ids[1] = _speakers.speaker_for_tuple (i, 1);
+			speaker_ids[0] = _speakers.speaker_for_tuple (i, 0);
+			speaker_ids[1] = _speakers.speaker_for_tuple (i, 1);
                         
-                        if (_speakers.dimension() == 3) {
-                                gains[2] = gtmp[2];
-                                speaker_ids[2] = _speakers.speaker_for_tuple (i, 2);
-                        } else {
-                                gains[2] = 0.0;
-                                speaker_ids[2] = -1;
-                        }
-                }
-        }
+			if (_speakers.dimension() == 3) {
+				gains[2] = gtmp[2];
+				speaker_ids[2] = _speakers.speaker_for_tuple (i, 2);
+			} else {
+				gains[2] = 0.0;
+				speaker_ids[2] = -1;
+			}
+		}
+	}
         
-        power = sqrt (gains[0]*gains[0] + gains[1]*gains[1] + gains[2]*gains[2]);
+	power = sqrt (gains[0]*gains[0] + gains[1]*gains[1] + gains[2]*gains[2]);
 
-        gains[0] /= power; 
-        gains[1] /= power;
-        gains[2] /= power;
+	gains[0] /= power; 
+	gains[1] /= power;
+	gains[2] /= power;
 
-        _dirty = false;
+	_dirty = false;
 }
 
 void
@@ -148,62 +149,62 @@ VBAPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coe
 
 	Sample* const src = srcbuf.data();
 	Sample* dst;
-        pan_t pan;
-        uint32_t n_audio = obufs.count().n_audio();
-        bool was_dirty;
+	pan_t pan;
+	uint32_t n_audio = obufs.count().n_audio();
+	bool was_dirty;
 
-        if ((was_dirty = _dirty)) {
-                compute_gains (desired_gains, desired_outputs, _angles.azi, _angles.ele);
-                cerr << " @ " << _angles.azi << " /= " << _angles.ele
-                     << " Outputs: "
-                     << desired_outputs[0] + 1 << ' '
-                     << desired_outputs[1] + 1 << ' '
-                     << " Gains "
-                     << desired_gains[0] << ' '
-                     << desired_gains[1] << ' '
-                     << endl;
-        }
+	if ((was_dirty = _dirty)) {
+		compute_gains (desired_gains, desired_outputs, _angles.azi, _angles.ele);
+		cerr << " @ " << _angles.azi << " /= " << _angles.ele
+		     << " Outputs: "
+		     << desired_outputs[0] + 1 << ' '
+		     << desired_outputs[1] + 1 << ' '
+		     << " Gains "
+		     << desired_gains[0] << ' '
+		     << desired_gains[1] << ' '
+		     << endl;
+	}
 
-        bool todo[n_audio];
+	bool todo[n_audio];
         
-        for (uint32_t o = 0; o < n_audio; ++o) {
-                todo[o] = true;
-        }
+	for (uint32_t o = 0; o < n_audio; ++o) {
+		todo[o] = true;
+	}
 
         
-        /* VBAP may distribute the signal across up to 3 speakers depending on
-           the configuration of the speakers.
-        */
+	/* VBAP may distribute the signal across up to 3 speakers depending on
+	   the configuration of the speakers.
+	*/
 
-        for (int o = 0; o < 3; ++o) {
-                if (desired_outputs[o] != -1) {
+	for (int o = 0; o < 3; ++o) {
+		if (desired_outputs[o] != -1) {
 
-                        nframes_t n = 0;
+			nframes_t n = 0;
 
-                        /* XXX TODO: interpolate across changes in gain and/or outputs
-                         */
+			/* XXX TODO: interpolate across changes in gain and/or outputs
+			 */
 
-                        dst = obufs.get_audio(desired_outputs[o]).data();
+			dst = obufs.get_audio(desired_outputs[o]).data();
 
-                        pan = gain_coefficient * desired_gains[o];
-                        mix_buffers_with_gain (dst+n,src+n,nframes-n,pan);
+			pan = gain_coefficient * desired_gains[o];
+			mix_buffers_with_gain (dst+n,src+n,nframes-n,pan);
 
-                        todo[o] = false;
-               }
-        }
+			todo[o] = false;
+		}
+	}
         
-        for (uint32_t o = 0; o < n_audio; ++o) {
-                if (todo[o]) {
-                        /* VBAP decided not to deliver any audio to this output, so we write silence */
-                        dst = obufs.get_audio(o).data();
-                        memset (dst, 0, sizeof (Sample) * nframes);
-                }
-        }
+	for (uint32_t o = 0; o < n_audio; ++o) {
+		if (todo[o]) {
+			/* VBAP decided not to deliver any audio to this output, so we write silence */
+			dst = obufs.get_audio(o).data();
+			memset (dst, 0, sizeof (Sample) * nframes);
+		}
+	}
         
-        if (was_dirty) {
-                memcpy (gains, desired_gains, sizeof (gains));
-                memcpy (outputs, desired_outputs, sizeof (outputs));
-        }
+	if (was_dirty) {
+		memcpy (gains, desired_gains, sizeof (gains));
+		memcpy (outputs, desired_outputs, sizeof (outputs));
+	}
 }
 
 void 
@@ -215,20 +216,20 @@ VBAPanner::do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
 XMLNode&
 VBAPanner::get_state ()
 {
-        return state (true);
+	return state (true);
 }
 
 XMLNode&
 VBAPanner::state (bool full_state)
 {
-        XMLNode* node = new XMLNode (X_("VBAPanner"));
-        return *node;
+	XMLNode* node = new XMLNode (X_("VBAPanner"));
+	return *node;
 }
 
 int
 VBAPanner::set_state (const XMLNode& node, int /*version*/)
 {
-        return 0;
+	return 0;
 }
 
 StreamPanner*

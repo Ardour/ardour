@@ -30,40 +30,40 @@ namespace ARDOUR {
 class Speakers;
 
 class VBAPanner : public StreamPanner { 
-  public:
-        VBAPanner (Panner& parent, Evoral::Parameter param, Speakers& s);
-        ~VBAPanner ();
+public:
+	VBAPanner (Panner& parent, Evoral::Parameter param, Speakers& s);
+	~VBAPanner ();
 
-        static StreamPanner* factory (Panner& parent, Evoral::Parameter param, Speakers& s);
-        static std::string name;
+	static StreamPanner* factory (Panner& parent, Evoral::Parameter param, Speakers& s);
+	static std::string name;
 
-        void do_distribute (AudioBuffer&, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
+	void do_distribute (AudioBuffer&, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 	void do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
-                                      nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
+	                              nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
-        void set_azimuth_elevation (double azimuth, double elevation);
+	void set_azimuth_elevation (double azimuth, double elevation);
 
 	XMLNode& state (bool full_state);
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-        /* there never was any old-school automation */
+	/* there never was any old-school automation */
 
 	int load (std::istream&, std::string path, uint32_t&) { return 0; }
 
-  private:
-        bool   _dirty;
-        double gains[3];
-        double desired_gains[3];
-        int    outputs[3];
-        int    desired_outputs[3];
+private:
+	bool   _dirty;
+	double gains[3];
+	double desired_gains[3];
+	int    outputs[3];
+	int    desired_outputs[3];
 
-        VBAPSpeakers& _speakers;
+	VBAPSpeakers& _speakers;
         
-        void compute_gains (double g[3], int ls[3], int azi, int ele);
+	void compute_gains (double g[3], int ls[3], int azi, int ele);
 
-        void update ();
-        void mark_dirty ();
+	void update ();
+	void mark_dirty ();
 };
 
 } /* namespace */

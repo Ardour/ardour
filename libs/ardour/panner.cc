@@ -1,3 +1,4 @@
+
 /*
     Copyright (C) 2004 Paul Davis
 
@@ -125,8 +126,8 @@ StreamPanner::set_position (const AngularVector& av, bool link_call)
 		parent.set_position (av, *this);
 	}
 
-        if (_angles != av) {
-                _angles = av;
+	if (_angles != av) {
+		_angles = av;
 		update ();
 		Changed ();
 		_control->Changed ();
@@ -397,7 +398,7 @@ EqualPowerStereoPanner::update ()
 	   x == 1 => hard right = 0.0 degrees
 	*/
 
-        double _x = BaseStereoPanner::azimuth_to_lr_fract (_angles.azi);
+	double _x = BaseStereoPanner::azimuth_to_lr_fract (_angles.azi);
 
 	float const panR = _x;
 	float const panL = 1 - panR;
@@ -502,7 +503,7 @@ EqualPowerStereoPanner::state (bool /*full_state*/)
 	LocaleGuard lg (X_("POSIX"));
 
 	snprintf (buf, sizeof (buf), "%.12g", _angles.azi);
-        root->add_property (X_("azimuth"), buf);
+	root->add_property (X_("azimuth"), buf);
 	root->add_property (X_("type"), EqualPowerStereoPanner::name);
 
 	// XXX: dont save automation here... its part of the automatable panner now.
@@ -522,13 +523,13 @@ EqualPowerStereoPanner::set_state (const XMLNode& node, int version)
 
 	if ((prop = node.property (X_("azimuth")))) {
 		AngularVector a (atof (prop->value().c_str()), 0.0);
-                set_position (a, true);
-        } else if ((prop = node.property (X_("x")))) {
-                /* old school cartesian positioning */
-                AngularVector a;
-                a.azi = BaseStereoPanner::lr_fract_to_azimuth (atof (prop->value().c_str()));
-                set_position (a, true);
-        }
+		set_position (a, true);
+	} else if ((prop = node.property (X_("x")))) {
+		/* old school cartesian positioning */
+		AngularVector a;
+		a.azi = BaseStereoPanner::lr_fract_to_azimuth (atof (prop->value().c_str()));
+		set_position (a, true);
+	}
 
 	StreamPanner::set_state (node, version);
 
@@ -544,7 +545,7 @@ EqualPowerStereoPanner::set_state (const XMLNode& node, int version)
 			_control->alist()->set_state (*((*iter)->children().front()), version);
 
 			if (_control->alist()->automation_state() != Off) {
-                                double degrees = BaseStereoPanner::lr_fract_to_azimuth (_control->list()->eval (parent.session().transport_frame()));
+				double degrees = BaseStereoPanner::lr_fract_to_azimuth (_control->list()->eval (parent.session().transport_frame()));
 				set_position (AngularVector (degrees, 0.0));
 			}
 		}
@@ -613,19 +614,19 @@ Panner::reset_to_default ()
 	}
 
 	if (outputs.size() == 2) {
-                AngularVector a;
+		AngularVector a;
 		switch (_streampanners.size()) {
 		case 1:
-                        a.azi = 90.0; /* "front" or "top", in degrees */
+			a.azi = 90.0; /* "front" or "top", in degrees */
 			_streampanners.front()->set_position (a);
 			_streampanners.front()->pan_control()->list()->reset_default (0.5);
 			return;
 			break;
 		case 2:
-                        a.azi = 180.0; /* "left", in degrees */
+			a.azi = 180.0; /* "left", in degrees */
 			_streampanners.front()->set_position (a);
 			_streampanners.front()->pan_control()->list()->reset_default (0.0);
-                        a.azi = 0.0; /* "right", in degrees */
+			a.azi = 0.0; /* "right", in degrees */
 			_streampanners.back()->set_position (a);
 			_streampanners.back()->pan_control()->list()->reset_default (1.0);
 			return;
@@ -645,7 +646,7 @@ Panner::reset_to_default ()
 void
 Panner::reset_streampanner (uint32_t which)
 {
-        AngularVector a;
+	AngularVector a;
 
 	if (which >= _streampanners.size() || which >= outputs.size()) {
 		return;
@@ -660,20 +661,20 @@ Panner::reset_streampanner (uint32_t which)
 		switch (_streampanners.size()) {
 		case 1:
 			/* stereo out, 1 stream, default = middle */
-                        a.azi = 90.0; /* "front" or "top", in degrees */
+			a.azi = 90.0; /* "front" or "top", in degrees */
 			_streampanners.front()->set_position (a);
 			_streampanners.front()->pan_control()->list()->reset_default (0.5);
 			break;
 		case 2:
 			/* stereo out, 2 streams, default = hard left/right */
 			if (which == 0) {
-                                a.azi = 180.0; /* "left", in degrees */
-                                _streampanners.front()->set_position (a);
-                                _streampanners.front()->pan_control()->list()->reset_default (0.0);
-                        } else {
-                                a.azi = 0.0; /* "right", in degrees */
-                                _streampanners.back()->set_position (a);
-                                _streampanners.back()->pan_control()->list()->reset_default (1.0);
+				a.azi = 180.0; /* "left", in degrees */
+				_streampanners.front()->set_position (a);
+				_streampanners.front()->pan_control()->list()->reset_default (0.0);
+			} else {
+				a.azi = 0.0; /* "right", in degrees */
+				_streampanners.back()->set_position (a);
+				_streampanners.back()->pan_control()->list()->reset_default (1.0);
 			}
 			break;
 		}
@@ -747,10 +748,10 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		for (n = 0; n < npans; ++n) {
 			_streampanners.push_back (new EqualPowerStereoPanner (*this, Evoral::Parameter(PanAutomation, 0, n)));
 		}
-                break;
+		break;
 
-        default:
-                setup_speakers (nouts);
+	default:
+		setup_speakers (nouts);
 		for (n = 0; n < npans; ++n) {
 			_streampanners.push_back (new VBAPanner (*this, Evoral::Parameter(PanAutomation, 0, n), _session.get_speakers()));
 		}
@@ -784,7 +785,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		left = _streampanners.front()->get_position ();
 		right = _streampanners.back()->get_position ();
 
-                if (changed || ((left.azi == 0.0) && (right.azi == 0.0))) {
+		if (changed || ((left.azi == 0.0) && (right.azi == 0.0))) {
 
 			_streampanners.front()->set_position (AngularVector (180.0, 0.0));
 			_streampanners.front()->pan_control()->list()->reset_default (0.0);
@@ -795,26 +796,26 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 
 	} else if (npans > 1 && outputs.size() > 2) {
 
-                /* 2d panning: spread signals equally around a circle */
+		/* 2d panning: spread signals equally around a circle */
 
-                double degree_step = 360.0 / nouts;
-                double deg;
+		double degree_step = 360.0 / nouts;
+		double deg;
 
-                /* even number of signals? make sure the top two are either side of "top".
-                   otherwise, just start at the "top" (90.0 degrees) and rotate around
-                 */
+		/* even number of signals? make sure the top two are either side of "top".
+		   otherwise, just start at the "top" (90.0 degrees) and rotate around
+		*/
 
-                if (npans % 2) {
-                        deg = 90.0 - degree_step;
-                } else {
-                        deg = 90.0;
-                }
+		if (npans % 2) {
+			deg = 90.0 - degree_step;
+		} else {
+			deg = 90.0;
+		}
 
-                for (std::vector<StreamPanner*>::iterator x = _streampanners.begin(); x != _streampanners.end(); ++x) {
-                        (*x)->set_position (AngularVector (deg, 0.0));
-                        deg += degree_step;
-                }
-        }
+		for (std::vector<StreamPanner*>::iterator x = _streampanners.begin(); x != _streampanners.end(); ++x) {
+			(*x)->set_position (AngularVector (deg, 0.0));
+			deg += degree_step;
+		}
+	}
 }
 
 void
@@ -971,18 +972,18 @@ Panner::set_state (const XMLNode& node, int version)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == X_("Output")) {
 
-                        AngularVector a;
+			AngularVector a;
 
 			if ((prop = (*niter)->property (X_("azimuth")))) {
-                                sscanf (prop->value().c_str(), "%lg", &a.azi);
-                        } else if ((prop = (*niter)->property (X_("x")))) {
-                                /* old school cartesian */
-                                a.azi = BaseStereoPanner::lr_fract_to_azimuth (atof (prop->value().c_str()));
-                        }
+				sscanf (prop->value().c_str(), "%lg", &a.azi);
+			} else if ((prop = (*niter)->property (X_("x")))) {
+				/* old school cartesian */
+				a.azi = BaseStereoPanner::lr_fract_to_azimuth (atof (prop->value().c_str()));
+			}
 
 			if ((prop = (*niter)->property (X_("elevation")))) {
-                                sscanf (prop->value().c_str(), "%lg", &a.ele);
-                        }
+				sscanf (prop->value().c_str(), "%lg", &a.ele);
+			}
 
 			outputs.push_back (Output (a));
 		}
@@ -1064,10 +1065,10 @@ Panner::touching () const
 void
 Panner::set_position (const AngularVector& a, StreamPanner& orig)
 {
-        AngularVector delta;
-        AngularVector new_position;
+	AngularVector delta;
+	AngularVector new_position;
 
-        delta = orig.get_position() - a;
+	delta = orig.get_position() - a;
 
 	if (_link_direction == SameDirection) {
 
@@ -1075,7 +1076,7 @@ Panner::set_position (const AngularVector& a, StreamPanner& orig)
 			if (*i == &orig) {
 				(*i)->set_position (a, true);
 			} else {
-                                new_position = (*i)->get_position() + delta;
+				new_position = (*i)->get_position() + delta;
 				(*i)->set_position (new_position, true);
 			}
 		}
@@ -1086,7 +1087,7 @@ Panner::set_position (const AngularVector& a, StreamPanner& orig)
 			if (*i == &orig) {
 				(*i)->set_position (a, true);
 			} else {
-                                new_position = (*i)->get_position() - delta;
+				new_position = (*i)->get_position() - delta;
 				(*i)->set_position (new_position, true);
 			}
 		}
@@ -1343,47 +1344,47 @@ Panner::value_as_string (double v)
 void
 Panner::setup_speakers (uint32_t nouts)
 {
-        switch (nouts) {
-        case 3:
-                /* top, bottom kind-of-left & bottom kind-of-right */
-                outputs.push_back (AngularVector (90.0, 0.0));
-                outputs.push_back (AngularVector (215.0, 0,0));
-                outputs.push_back (AngularVector (335.0, 0,0));
-                break;
-        case 4:
-                /* clockwise from top left */
-                outputs.push_back (AngularVector (135.0, 0.0));
-                outputs.push_back (AngularVector (45.0, 0.0));
-                outputs.push_back (AngularVector (335.0, 0.0));
-                outputs.push_back (AngularVector (215.0, 0.0));
-                break;
+	switch (nouts) {
+	case 3:
+		/* top, bottom kind-of-left & bottom kind-of-right */
+		outputs.push_back (AngularVector (90.0, 0.0));
+		outputs.push_back (AngularVector (215.0, 0,0));
+		outputs.push_back (AngularVector (335.0, 0,0));
+		break;
+	case 4:
+		/* clockwise from top left */
+		outputs.push_back (AngularVector (135.0, 0.0));
+		outputs.push_back (AngularVector (45.0, 0.0));
+		outputs.push_back (AngularVector (335.0, 0.0));
+		outputs.push_back (AngularVector (215.0, 0.0));
+		break;
 
 	default: 
-        {
-                double degree_step = 360.0 / nouts;
-                double deg;
-                uint32_t n;
+	{
+		double degree_step = 360.0 / nouts;
+		double deg;
+		uint32_t n;
 
-                /* even number of speakers? make sure the top two are either side of "top".
-                   otherwise, just start at the "top" (90.0 degrees) and rotate around
-                 */
+		/* even number of speakers? make sure the top two are either side of "top".
+		   otherwise, just start at the "top" (90.0 degrees) and rotate around
+		*/
 
-                if (nouts % 2) {
-                        deg = 90.0 - degree_step;
-                } else {
-                        deg = 90.0;
-                }
+		if (nouts % 2) {
+			deg = 90.0 - degree_step;
+		} else {
+			deg = 90.0;
+		}
 		for (n = 0; n < nouts; ++n, deg += degree_step) {
 			outputs.push_back (Output (AngularVector (deg, 0.0)));
 		}
-        }
-        }
+	}
+	}
 
-        Speakers& speakers (_session.get_speakers());
+	Speakers& speakers (_session.get_speakers());
                         
-        speakers.clear_speakers ();
+	speakers.clear_speakers ();
 
-        for (vector<Output>::iterator o = outputs.begin(); o != outputs.end(); ++o) {
-                speakers.add_speaker ((*o).position);
-        }
+	for (vector<Output>::iterator o = outputs.begin(); o != outputs.end(); ++o) {
+		speakers.add_speaker ((*o).position);
+	}
 }

@@ -44,7 +44,7 @@ using Gtkmm2ext::Keyboard;
 Panner2d::Target::Target (const AngularVector& a, const char *txt)
 	: position (a)
 	, text (txt)
-        , _selected (false)
+	, _selected (false)
 {
 }
 
@@ -209,7 +209,7 @@ Panner2d::handle_position_change ()
 	}
 
 	for (n = 0; n < targets.size(); ++n) {
-                targets[n]->position = panner->output(n).position;
+		targets[n]->position = panner->output(n).position;
 	}
 
 	queue_draw ();
@@ -238,20 +238,20 @@ Panner2d::find_closest_object (gdouble x, gdouble y, int& which) const
 	which = 0;
 	pwhich = 0;
 
-        cerr << "@ " << x << ", " << y << endl;
+	cerr << "@ " << x << ", " << y << endl;
 
 	for (Targets::const_iterator i = pucks.begin(); i != pucks.end(); ++i, ++pwhich) {
 		candidate = *i;
 
-                CartesianVector c;
+		CartesianVector c;
 
-                candidate->position.cartesian (c);
-                cart_to_gtk (c);
+		candidate->position.cartesian (c);
+		cart_to_gtk (c);
 
 		distance = sqrt ((c.x - x) * (c.x - x) +
-				 (c.y - y) * (c.y - y));
+		                 (c.y - y) * (c.y - y));
 
-                cerr << "\tConsider candiate " << candidate->text << " @ " << c.x << ", " << c.y << ", " << c.z <<  " distance = " << distance << endl;
+		cerr << "\tConsider candiate " << candidate->text << " @ " << c.x << ", " << c.y << ", " << c.z <<  " distance = " << distance << endl;
 
 		if (distance < best_distance) {
 			closest = candidate;
@@ -261,11 +261,11 @@ Panner2d::find_closest_object (gdouble x, gdouble y, int& which) const
 	}
 
 
-        if (best_distance > 20) { // arbitrary 
-                return 0;
-        }
+	if (best_distance > 20) { // arbitrary 
+		return 0;
+	}
 
-        cerr << "the winner is " << closest->text << endl;
+	cerr << "the winner is " << closest->text << endl;
 
 	return closest;
 }
@@ -309,20 +309,20 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 		cairo_translate (cr, 10.0, 10.0);
 	}
 
-        /* horizontal line of "crosshairs" */
+	/* horizontal line of "crosshairs" */
 
 	cairo_set_source_rgb (cr, 0.0, 0.1, 0.7);
 	cairo_move_to (cr, 0.5, height/2.0+0.5);
 	cairo_line_to (cr, width+0.5, height/2+0.5);
 	cairo_stroke (cr);
 
-        /* vertical line of "crosshairs" */
-
+	/* vertical line of "crosshairs" */
+	
 	cairo_move_to (cr, width/2+0.5, 0.5);
 	cairo_line_to (cr, width/2+0.5, height+0.5);
 	cairo_stroke (cr);
 
-        /* the circle on which signals live */
+	/* the circle on which signals live */
 
 	cairo_arc (cr, width/2, height/2, height/2, 0, 2.0 * M_PI);
 	cairo_stroke (cr);
@@ -347,15 +347,15 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 			if (puck->visible) {
 				/* redraw puck */
 
-                                CartesianVector c;
+				CartesianVector c;
                                 
-                                puck->position.cartesian (c);
-                                cart_to_gtk (c);
+				puck->position.cartesian (c);
+				cart_to_gtk (c);
                                 
-                                x = (gint) floor (c.x);
-                                y = (gint) floor (c.y);
+				x = (gint) floor (c.x);
+				y = (gint) floor (c.y);
 
-                                /* XXX need to shift circles so that they are centered on the circle */
+				/* XXX need to shift circles so that they are centered on the circle */
                                         
 				cairo_arc (cr, x, y, arc_radius, 0, 2.0 * M_PI);
 				cairo_set_source_rgb (cr, 0.8, 0.2, 0.1);
@@ -364,8 +364,8 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 				cairo_move_to (cr, x + 6, y + 6);
 
-                                char buf[256];
-                                snprintf (buf, sizeof (buf), "%s:%d", puck->text.c_str(), (int) lrint (puck->position.azi));
+				char buf[256];
+				snprintf (buf, sizeof (buf), "%s:%d", puck->text.c_str(), (int) lrint (puck->position.azi));
 				cairo_show_text (cr, buf);
 			}
 		}
@@ -381,13 +381,13 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 			if (target->visible) {
 
-                                CartesianVector c;
+				CartesianVector c;
                                 
-                                target->position.cartesian (c);
-                                cart_to_gtk (c);
+				target->position.cartesian (c);
+				cart_to_gtk (c);
 
-                                x = (int) floor (c.x);
-                                y = (int) floor (c.y);
+				x = (int) floor (c.x);
+				y = (int) floor (c.y);
                                 
 				snprintf (buf, sizeof (buf), "%d", n);
 
@@ -419,8 +419,8 @@ Panner2d::on_button_press_event (GdkEventButton *ev)
 	case 1:
 	case 2:
 		if ((drag_target = find_closest_object (ev->x, ev->y, drag_index)) != 0) {
-                        drag_target->set_selected (true);
-                }
+			drag_target->set_selected (true);
+		}
 
 		drag_x = (int) floor (ev->x);
 		drag_y = (int) floor (ev->y);
@@ -458,7 +458,7 @@ Panner2d::on_button_release_event (GdkEventButton *ev)
 
 			queue_draw ();
 			PuckMoved (-1);
-		        ret = true;
+			ret = true;
 
 		} else {
 			ret = handle_motion (x, y, state);
@@ -503,33 +503,32 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 
 
 	if (state & GDK_BUTTON1_MASK && !(state & GDK_BUTTON2_MASK)) {
-
-                CartesianVector c;
-                bool need_move = false;
+		CartesianVector c;
+		bool need_move = false;
                 
-                drag_target->position.cartesian (c);
-                cart_to_gtk (c);
+		drag_target->position.cartesian (c);
+		cart_to_gtk (c);
 
-                if ((evx != c.x) || (evy != c.y)) {
-                        need_move = true;
-                }
+		if ((evx != c.x) || (evy != c.y)) {
+			need_move = true;
+		}
 
-                if (need_move) {
-                        CartesianVector cp (evx, evy, 0.0);
+		if (need_move) {
+			CartesianVector cp (evx, evy, 0.0);
 
-                        /* canonicalize position */
+			/* canonicalize position */
 
-                        gtk_to_cart (cp);
+			gtk_to_cart (cp);
 
-                        /* position actual signal on circle */
+			/* position actual signal on circle */
 
-                        clamp_to_circle (cp.x, cp.y);
+			clamp_to_circle (cp.x, cp.y);
                         
-                        /* generate an angular representation and set drag target (GUI) position */
+			/* generate an angular representation and set drag target (GUI) position */
 
-                        cp.angular (drag_target->position); /* sets drag target position */
+			cp.angular (drag_target->position); /* sets drag target position */
 
-                        panner->streampanner (drag_index).set_position (drag_target->position);
+			panner->streampanner (drag_index).set_position (drag_target->position);
                         
 			queue_draw ();
 		}
@@ -541,43 +540,43 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 void
 Panner2d::cart_to_gtk (CartesianVector& c) const
 {
-        /* "c" uses a coordinate space that is:
+	/* "c" uses a coordinate space that is:
             
-               center = 0.0
-               dimension = 2.0 * 2.0
-               so max values along each axis are -1..+1
+	   center = 0.0
+	   dimension = 2.0 * 2.0
+	   so max values along each axis are -1..+1
 
-           GTK uses a coordinate space that is:
+	   GTK uses a coordinate space that is:
 
-               top left = 0.0
-               dimension = width * height
-               so max values along each axis are 0,width and
-                                                 0,height
-        */
+	   top left = 0.0
+	   dimension = width * height
+	   so max values along each axis are 0,width and
+	   0,height
+	*/
 
-        c.x = (width / 2) * (c.x + 1);
-        c.y = (height / 2) * (1 - c.y);
+	c.x = (width / 2) * (c.x + 1);
+	c.y = (height / 2) * (1 - c.y);
 
-        /* XXX z-axis not handled - 2D for now */
+	/* XXX z-axis not handled - 2D for now */
 }
 
 void
 Panner2d::gtk_to_cart (CartesianVector& c) const
 {
-        c.x = (c.x / (width / 2.0)) - 1.0;
-        c.y = -((c.y / (height / 2.0)) - 1.0);
+	c.x = (c.x / (width / 2.0)) - 1.0;
+	c.y = -((c.y / (height / 2.0)) - 1.0);
 
-        /* XXX z-axis not handled - 2D for now */
+	/* XXX z-axis not handled - 2D for now */
 }
 
 void
 Panner2d::clamp_to_circle (double& x, double& y)
 {
-        double azi, ele;
-        double z = 0.0;
+	double azi, ele;
+	double z = 0.0;
         
-        PBD::cart_to_azi_ele (x, y, z, azi, ele);
-        PBD::azi_ele_to_cart (azi, ele, x, y, z);
+	PBD::cart_to_azi_ele (x, y, z, azi, ele);
+	PBD::azi_ele_to_cart (azi, ele, x, y, z);
 }
 
 void

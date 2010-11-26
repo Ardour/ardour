@@ -24,16 +24,16 @@ using namespace PBD;
 using namespace std;
 
 Speaker::Speaker (int i, const AngularVector& position)
-        : id (i)
+	: id (i)
 {
-        move (position);
+	move (position);
 }
 
 void
 Speaker::move (const AngularVector& new_position)
 {
-        _angles = new_position;
-        _angles.cartesian (_coords);
+	_angles = new_position;
+	_angles.cartesian (_coords);
 }
 
 Speakers::Speakers ()
@@ -47,62 +47,59 @@ Speakers::~Speakers ()
 void
 Speakers::dump_speakers (ostream& o)
 {
-        for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
-                o << "Speaker " << (*i).id << " @ " 
-                  << (*i).coords().x << ", " << (*i).coords().y << ", " << (*i).coords().z
-                  << " azimuth " << (*i).angles().azi
-                  << " elevation " << (*i).angles().ele
-                  << " distance " << (*i).angles().length
-                  << endl;
-        }
+	for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
+		o << "Speaker " << (*i).id << " @ " 
+		  << (*i).coords().x << ", " << (*i).coords().y << ", " << (*i).coords().z
+		  << " azimuth " << (*i).angles().azi
+		  << " elevation " << (*i).angles().ele
+		  << " distance " << (*i).angles().length
+		  << endl;
+	}
 }
 
 void
 Speakers::clear_speakers ()
 {
-        _speakers.clear ();
-        update ();
+	_speakers.clear ();
+	update ();
 }
 
 int 
 Speakers::add_speaker (const AngularVector& position)
 {
-        int id = _speakers.size();
+	int id = _speakers.size();
 
-        cerr << "Added speaker " << id << " at " << position.azi << " /= " << position.ele << endl;
+	cerr << "Added speaker " << id << " at " << position.azi << " /= " << position.ele << endl;
 
-        _speakers.push_back (Speaker (id, position));
-        update ();
+	_speakers.push_back (Speaker (id, position));
+	update ();
 
-        dump_speakers (cerr);
-        Changed ();
+	dump_speakers (cerr);
+	Changed ();
 
-        return id;
+	return id;
 }        
 
 void
 Speakers::remove_speaker (int id)
 {
-        for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ) {
-                if ((*i).id == id) {
-                        i = _speakers.erase (i);
-                        update ();
-                        break;
-                } 
-        }
+	for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ) {
+		if ((*i).id == id) {
+			i = _speakers.erase (i);
+			update ();
+			break;
+		} 
+	}
 }
 
 void
 Speakers::move_speaker (int id, const AngularVector& new_position)
 {
-        for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
-                if ((*i).id == id) {
-                        (*i).move (new_position);
-                        update ();
-                        break;
-                }
-        }
+	for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
+		if ((*i).id == id) {
+			(*i).move (new_position);
+			update ();
+			break;
+		}
+	}
 }
-
-
-

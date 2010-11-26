@@ -29,25 +29,25 @@
 namespace ARDOUR  {
 
 class Speakers {
-  public:
-        Speakers ();
-        virtual ~Speakers ();
+public:
+	Speakers ();
+	virtual ~Speakers ();
 
-        virtual int  add_speaker (const PBD::AngularVector&);
-        virtual void remove_speaker (int id);
-        virtual void move_speaker (int id, const PBD::AngularVector& new_position);
-        virtual void clear_speakers ();
+	virtual int  add_speaker (const PBD::AngularVector&);
+	virtual void remove_speaker (int id);
+	virtual void move_speaker (int id, const PBD::AngularVector& new_position);
+	virtual void clear_speakers ();
 
-        std::vector<Speaker>& speakers() { return _speakers; }
+	std::vector<Speaker>& speakers() { return _speakers; }
 
-        void dump_speakers (std::ostream&);
+	void dump_speakers (std::ostream&);
 
-        PBD::Signal0<void> Changed;
+	PBD::Signal0<void> Changed;
 
-  protected:
-        std::vector<Speaker>  _speakers;
+protected:
+	std::vector<Speaker>  _speakers;
 
-        virtual void update () {}  
+	virtual void update () {}  
 };
 
 } /* namespace */

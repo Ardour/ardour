@@ -24,19 +24,19 @@
 namespace ARDOUR { 
 
 class Speaker {
-  public:
-        Speaker (int, const PBD::AngularVector& position);
+public:
+	Speaker (int, const PBD::AngularVector& position);
         
-        void move (const PBD::AngularVector& new_position);
+	void move (const PBD::AngularVector& new_position);
 
-        const PBD::CartesianVector& coords() const { return _coords; }
-        const PBD::AngularVector&   angles() const { return _angles; }
+	const PBD::CartesianVector& coords() const { return _coords; }
+	const PBD::AngularVector&   angles() const { return _angles; }
 
-        int id;
+	int id;
 
-  private:
-        PBD::CartesianVector _coords;
-        PBD::AngularVector   _angles;
+private:
+	PBD::CartesianVector _coords;
+	PBD::AngularVector   _angles;
 };
 
 } /* namespace */

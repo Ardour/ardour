@@ -729,7 +729,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* Speakers */
 
-        Speakers& get_speakers ();
+	Speakers& get_speakers ();
 
 	/* Controllables */
 
@@ -1440,7 +1440,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	static int ask_about_playlist_deletion (boost::shared_ptr<Playlist>);
 
 	/* realtime "apply to set of routes" operations */
-	SessionEvent* get_rt_event (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override, 
+	SessionEvent* get_rt_event (
+		boost::shared_ptr<RouteList> rl, bool yn,
+		SessionEvent::RTeventCallback after, bool group_override, 
 		void (Session::*method) (boost::shared_ptr<RouteList>, bool, bool));
 
 	void rt_set_solo (boost::shared_ptr<RouteList>, bool yn, bool group_override);
@@ -1471,7 +1473,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void start_time_changed (framepos_t);
 	void end_time_changed (framepos_t);
 
-        Speakers* _speakers; 
+	Speakers* _speakers; 
 };
 
 } // namespace ARDOUR

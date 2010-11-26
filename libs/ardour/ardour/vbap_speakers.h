@@ -34,71 +34,71 @@ namespace ARDOUR {
 class Speakers;
 
 class VBAPSpeakers : public boost::noncopyable {
-  public:
-        typedef std::vector<double> dvector;
+public:
+	typedef std::vector<double> dvector;
 
-        const dvector matrix (int tuple) const  { return _matrices[tuple]; }
-        int speaker_for_tuple (int tuple, int which) const { return _speaker_tuples[tuple][which]; }
+	const dvector matrix (int tuple) const  { return _matrices[tuple]; }
+	int speaker_for_tuple (int tuple, int which) const { return _speaker_tuples[tuple][which]; }
 
-        int           n_tuples () const  { return _matrices.size(); }
-        int           dimension() const { return _dimension; }
+	int           n_tuples () const  { return _matrices.size(); }
+	int           dimension() const { return _dimension; }
 
-        static VBAPSpeakers& instance (Speakers&);
+	static VBAPSpeakers& instance (Speakers&);
 
-        ~VBAPSpeakers ();
+	~VBAPSpeakers ();
 
-  private:
-        static VBAPSpeakers* _instance;
-        static const double MIN_VOL_P_SIDE_LGTH = 0.01;
-        int   _dimension;  
-        std::vector<Speaker>& _speakers;
-        PBD::ScopedConnection speaker_connection;
+private:
+	static VBAPSpeakers* _instance;
+	static const double MIN_VOL_P_SIDE_LGTH = 0.01;
+	int   _dimension;  
+	std::vector<Speaker>& _speakers;
+	PBD::ScopedConnection speaker_connection;
 
-        VBAPSpeakers (Speakers&);
+	VBAPSpeakers (Speakers&);
 
-        struct azimuth_sorter {
-            bool operator() (const Speaker& s1, const Speaker& s2) {
-                    return s1.angles().azi < s2.angles().azi;
-            }
-        };
+	struct azimuth_sorter {
+		bool operator() (const Speaker& s1, const Speaker& s2) {
+			return s1.angles().azi < s2.angles().azi;
+		}
+	};
 
-        struct twoDmatrix : public dvector {
-          twoDmatrix() : dvector (4, 0.0) {}
-        };
+	struct twoDmatrix : public dvector {
+	twoDmatrix() : dvector (4, 0.0) {}
+	};
 
-        struct threeDmatrix : public dvector {
-          threeDmatrix() : dvector (9, 0.0) {}
-        };
+	struct threeDmatrix : public dvector {
+	threeDmatrix() : dvector (9, 0.0) {}
+	};
         
-        struct tmatrix : public dvector {
-          tmatrix() : dvector (3, 0.0) {}
-        };
+	struct tmatrix : public dvector {
+	tmatrix() : dvector (3, 0.0) {}
+	};
 
-        std::vector<dvector>  _matrices;       /* holds matrices for a given speaker combinations */
-        std::vector<tmatrix>  _speaker_tuples; /* holds speakers IDs for a given combination */
+	std::vector<dvector>  _matrices;       /* holds matrices for a given speaker combinations */
+	std::vector<tmatrix>  _speaker_tuples; /* holds speakers IDs for a given combination */
 
-        /* A struct for all loudspeakers */
-        struct ls_triplet_chain {
-            int ls_nos[3];
-            float inv_mx[9];
-            struct ls_triplet_chain *next;
-        };
+	/* A struct for all loudspeakers */
+	struct ls_triplet_chain {
+		int ls_nos[3];
+		float inv_mx[9];
+		struct ls_triplet_chain *next;
+	};
 
-        static float vec_angle(PBD::CartesianVector v1, PBD::CartesianVector v2);
-        static float vec_length(PBD::CartesianVector v1);
-        static float vec_prod(PBD::CartesianVector v1, PBD::CartesianVector v2);
-        static float vol_p_side_lgth(int i, int j,int k, const std::vector<Speaker>&);
-        static void  cross_prod(PBD::CartesianVector v1,PBD::CartesianVector v2, PBD::CartesianVector *res);
+	static float vec_angle(PBD::CartesianVector v1, PBD::CartesianVector v2);
+	static float vec_length(PBD::CartesianVector v1);
+	static float vec_prod(PBD::CartesianVector v1, PBD::CartesianVector v2);
+	static float vol_p_side_lgth(int i, int j,int k, const std::vector<Speaker>&);
+	static void  cross_prod(PBD::CartesianVector v1,PBD::CartesianVector v2, PBD::CartesianVector *res);
 
-        void update ();
-        int  any_ls_inside_triplet (int a, int b, int c);
-        void add_ldsp_triplet (int i, int j, int k, struct ls_triplet_chain **ls_triplets);
-        int  lines_intersect (int i,int j,int k,int l);
-        void calculate_3x3_matrixes (struct ls_triplet_chain *ls_triplets);
-        void choose_speaker_triplets (struct ls_triplet_chain **ls_triplets);
-        void choose_speaker_pairs ();
-        void sort_2D_lss (int* sorted_lss);
-        int  calc_2D_inv_tmatrix (double azi1,double azi2, double* inv_mat);
+	void update ();
+	int  any_ls_inside_triplet (int a, int b, int c);
+	void add_ldsp_triplet (int i, int j, int k, struct ls_triplet_chain **ls_triplets);
+	int  lines_intersect (int i,int j,int k,int l);
+	void calculate_3x3_matrixes (struct ls_triplet_chain *ls_triplets);
+	void choose_speaker_triplets (struct ls_triplet_chain **ls_triplets);
+	void choose_speaker_pairs ();
+	void sort_2D_lss (int* sorted_lss);
+	int  calc_2D_inv_tmatrix (double azi1,double azi2, double* inv_mat);
         
 };
 

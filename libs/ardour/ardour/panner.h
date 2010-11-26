@@ -51,10 +51,10 @@ class StreamPanner : public PBD::Stateful
 	void set_muted (bool yn);
 	bool muted() const { return _muted; }
 
-        const PBD::AngularVector& get_position() const { return _angles; }
-        const PBD::AngularVector& get_effective_position() const { return _effective_angles; }
-        void set_position (const PBD::AngularVector&, bool link_call = false);
-        void set_diffusion (double);
+	const PBD::AngularVector& get_position() const { return _angles; }
+	const PBD::AngularVector& get_effective_position() const { return _effective_angles; }
+	void set_position (const PBD::AngularVector&, bool link_call = false);
+	void set_diffusion (double);
 
 	void distribute (AudioBuffer &, BufferSet &, gain_t, nframes_t);
 	void distribute_automated (AudioBuffer &, BufferSet &, nframes_t, nframes_t, nframes_t, pan_t **);
@@ -71,7 +71,8 @@ class StreamPanner : public PBD::Stateful
 	 */
 	virtual void do_distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes) = 0;
 	virtual void do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
-					      nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers) = 0;
+	                                      nframes_t start, nframes_t end, nframes_t nframes,
+	                                      pan_t** buffers) = 0;
 
 	boost::shared_ptr<AutomationControl> pan_control()  { return _control; }
 
@@ -92,9 +93,9 @@ class StreamPanner : public PBD::Stateful
 
 	void set_mono (bool);
 	
-        PBD::AngularVector _angles;
-        PBD::AngularVector _effective_angles;
-        double        _diffusion; 
+	PBD::AngularVector _angles;
+	PBD::AngularVector _effective_angles;
+	double        _diffusion; 
 
 	bool _muted;
 	bool _mono;
@@ -121,19 +122,18 @@ class BaseStereoPanner : public StreamPanner
 
 	void do_distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 
-        static double azimuth_to_lr_fract (double azi) { 
-                /* 180.0 degrees=> left => 0.0 */
-                /* 0.0 degrees => right => 1.0 */
-                return 1.0 - (azi/180.0);
-        }
+	static double azimuth_to_lr_fract (double azi) { 
+		/* 180.0 degrees=> left => 0.0 */
+		/* 0.0 degrees => right => 1.0 */
+		return 1.0 - (azi/180.0);
+	}
 
-        static double lr_fract_to_azimuth (double fract) { 
-                /* fract = 0.0 => degrees = 180.0 => left */
-                /* fract = 1.0 => degrees = 0.0 => right */
-                return 180.0 - (fract * 180.0);
-        }
-                
-
+	static double lr_fract_to_azimuth (double fract) { 
+		/* fract = 0.0 => degrees = 180.0 => left */
+		/* fract = 1.0 => degrees = 0.0 => right */
+		return 180.0 - (fract * 180.0);
+	}
+	
 	/* old school automation loading */
 
 	int load (std::istream&, std::string path, uint32_t&);
@@ -154,7 +154,8 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 	~EqualPowerStereoPanner ();
 
 	void do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
-				      nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
+	                              nframes_t start, nframes_t end, nframes_t nframes,
+	                              pan_t** buffers);
 
 	void get_current_coefficients (pan_t*) const;
 	void get_desired_coefficients (pan_t*) const;
@@ -295,7 +296,7 @@ public:
 
 	static float current_automation_version_number;
 
-        void setup_speakers (uint32_t nouts);
+	void setup_speakers (uint32_t nouts);
         
 	/* old school automation handling */
 
