@@ -106,6 +106,7 @@ typedef uint64_t microseconds_t;
 #include "global_port_matrix.h"
 #include "location_ui.h"
 #include "missing_file_dialog.h"
+#include "missing_plugin_dialog.h"
 
 #include "i18n.h"
 
@@ -2736,6 +2737,14 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		msg.hide ();
 
 		goto out;
+	}
+
+	{
+		list<string> const u = new_session->unknown_processors ();
+		if (!u.empty()) {
+			MissingPluginDialog d (_session, u);
+			d.run ();
+		}
 	}
 
 	/* Now the session been created, add the transport controls */

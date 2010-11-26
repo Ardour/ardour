@@ -46,6 +46,7 @@
 #include "ardour/route_group_member.h"
 #include "ardour/graphnode.h"
 #include "ardour/automatable.h"
+#include "ardour/unknown_processor.h"
 
 namespace ARDOUR {
 
@@ -176,6 +177,9 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void foreach_processor (boost::function<void(boost::weak_ptr<Processor>)> method) {
 		Glib::RWLock::ReaderLock lm (_processor_lock);
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			if (boost::dynamic_pointer_cast<UnknownProcessor> (*i)) {
+				break;
+			}
 			method (boost::weak_ptr<Processor> (*i));
 		}
 	}
@@ -199,6 +203,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
         bool has_io_processor_named (const std::string&);
 	ChanCount max_processor_streams () const { return processor_max_streams; }
 
+	std::list<std::string> unknown_processors () const;
+	
 	/* special processors */
 
 	boost::shared_ptr<Delivery>         monitor_send() const { return _monitor_send; }

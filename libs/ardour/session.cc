@@ -4212,3 +4212,20 @@ Session::get_speakers()
 
         return *_speakers;
 }
+
+list<string>
+Session::unknown_processors () const
+{
+	list<string> p;
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		list<string> t = (*i)->unknown_processors ();
+		copy (t.begin(), t.end(), back_inserter (p));
+	}
+
+	p.sort ();
+	p.unique ();
+
+	return p;
+}

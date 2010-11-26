@@ -59,6 +59,7 @@
 #include "ardour/timestamps.h"
 #include "ardour/utils.h"
 #include "ardour/graph.h"
+#include "ardour/unknown_processor.h"
 
 #include "i18n.h"
 
@@ -479,6 +480,10 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
+		if (boost::dynamic_pointer_cast<UnknownProcessor> (*i)) {
+			break;
+		}
+		
 		if (bufs.count() != (*i)->input_streams()) {
 			cerr << _name << " bufs = " << bufs.count()
 			     << " input for " << (*i)->name() << " = " << (*i)->input_streams()
@@ -1512,15 +1517,16 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 
 	DEBUG_TRACE (DEBUG::Processors, string_compose ("%1: configure processors\n", _name));
 	DEBUG_TRACE (DEBUG::Processors, "{\n");
-	for (list<boost::shared_ptr<Processor> >::const_iterator p = _processors.begin(); p != _processors.end(); ++p) {
-		DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1 ID = %2\n", (*p)->name(), (*p)->id()));
-	}
-	DEBUG_TRACE (DEBUG::Processors, "}\n");
 
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++index) {
 
+		if (boost::dynamic_pointer_cast<UnknownProcessor> (*p)) {
+			DEBUG_TRACE (DEBUG::Processors, "--- CONFIGURE ABORTED due to unknown processor.\n");
+			break;
+		}
+		
 		if ((*p)->can_support_io_configuration(in, out)) {
-			DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1 in = %2 out = %3\n",(*p)->name(), in, out));
+			DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1 ID=%2 in=%3 out=%4\n",(*p)->name(), (*p)->id(), in, out));
 			configuration.push_back(make_pair(in, out));
 			in = out;
 		} else {
@@ -1528,10 +1534,15 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 				err->index = index;
 				err->count = in;
 			}
+			DEBUG_TRACE (DEBUG::Processors, "---- CONFIGURATION FAILED.\n");
+			DEBUG_TRACE (DEBUG::Processors, string_compose ("---- %1 cannot support in=%2 out=%3\n", (*p)->name(), in, out));
+			DEBUG_TRACE (DEBUG::Processors, "}\n");
 			return list<pair<ChanCount, ChanCount> > ();
 		}
 	}
 
+	DEBUG_TRACE (DEBUG::Processors, "}\n");
+	
 	return configuration;
 }
 
@@ -1561,6 +1572,11 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
+
+		if (boost::dynamic_pointer_cast<UnknownProcessor> (*p)) {
+			break;
+		}
+		
 		(*p)->configure_io(c->first, c->second);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->second);
@@ -2370,10 +2386,13 @@ Route::set_processor_state (const XMLNode& node)
                                         continue;
                                 }
 
-				if (processor->set_state (**niter, Stateful::current_state_version) == 0) {
-					new_order.push_back (processor);
-					must_configure = true;
+				if (processor->set_state (**niter, Stateful::current_state_version) != 0) {
+					/* This processor could not be configured.  Turn it into a UnknownProcessor */
+					processor.reset (new UnknownProcessor (_session, **niter));
 				}
+					
+				new_order.push_back (processor);
+				must_configure = true;
                         }
                 }
         }
@@ -3526,4 +3545,17 @@ Route::input_port_count_changing (ChanCount to)
 	return false;
 }
 
+list<string>
+Route::unknown_processors () const
+{
+	list<string> p;
+	
+	Glib::RWLock::ReaderLock lm (_processor_lock);
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if (boost::dynamic_pointer_cast<UnknownProcessor const> (*i)) {
+			p.push_back ((*i)->name ());
+		}
+	}
 
+	return p;
+}

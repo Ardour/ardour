@@ -797,6 +797,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::string source_search_path(DataType) const;
 	void ensure_search_path_includes (const std::string& path, DataType type);
 
+	std::list<std::string> unknown_processors () const;
+
 	/* handlers can return an integer value:
 	   0: config.set_audio_search_path() or config.set_midi_search_path() was used
 	   to modify the search path and we should try to find it again.
