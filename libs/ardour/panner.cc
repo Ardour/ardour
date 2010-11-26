@@ -61,15 +61,14 @@ using namespace PBD;
 float Panner::current_automation_version_number = 1.0;
 
 string EqualPowerStereoPanner::name = "Equal Power Stereo";
-string Multi2dPanner::name = "Multiple (2D)";
 
 /* this is a default mapper of control values to a pan position
    others can be imagined.
 */
 
-static pan_t direct_control_to_pan (double fract)
+static double direct_control_to_stereo_pan (double fract)
 {
-	return fract;
+	return BaseStereoPanner::lr_fract_to_azimuth (fract);
 }
 
 StreamPanner::StreamPanner (Panner& p, Evoral::Parameter param)
@@ -82,10 +81,6 @@ StreamPanner::StreamPanner (Panner& p, Evoral::Parameter param)
 
 	/* get our AutomationControl from our parent Panner, creating it if required */
 	_control = boost::dynamic_pointer_cast<AutomationControl> (parent.control (param, true));
-
-	_x = 0.5;
-	_y = 0.5;
-	_z = 0.5;
 }
 
 StreamPanner::~StreamPanner ()
@@ -104,7 +99,7 @@ StreamPanner::set_mono (bool yn)
 void
 Panner::PanControllable::set_value (double val)
 {
-	panner.streampanner (parameter().id()).set_position (direct_control_to_pan (val));
+	panner.streampanner (parameter().id()).set_position (AngularVector (direct_control_to_stereo_pan (val), 0.0));
 	AutomationControl::set_value(val);
 }
 
@@ -124,47 +119,14 @@ StreamPanner::set_muted (bool yn)
 }
 
 void
-StreamPanner::set_position (float xpos, bool link_call)
+StreamPanner::set_position (const AngularVector& av, bool link_call)
 {
 	if (!link_call && parent.linked()) {
-		parent.set_position (xpos, *this);
+		parent.set_position (av, *this);
 	}
 
-	if (_x != xpos) {
-		_x = xpos;
-		update ();
-		Changed ();
-		_control->Changed ();
-	}
-}
-
-void
-StreamPanner::set_position (float xpos, float ypos, bool link_call)
-{
-	if (!link_call && parent.linked()) {
-		parent.set_position (xpos, ypos, *this);
-	}
-
-	if (_x != xpos || _y != ypos) {
-		_x = xpos;
-		_y = ypos;
-		update ();
-		Changed ();
-		_control->Changed ();
-	}
-}
-
-void
-StreamPanner::set_position (float xpos, float ypos, float zpos, bool link_call)
-{
-	if (!link_call && parent.linked()) {
-		parent.set_position (xpos, ypos, zpos, *this);
-	}
-
-	if (_x != xpos || _y != ypos || _z != zpos) {
-		_x = xpos;
-		_y = ypos;
-		_z = zpos;
+        if (_angles != av) {
+                _angles = av;
 		update ();
 		Changed ();
 		_control->Changed ();
@@ -431,9 +393,11 @@ EqualPowerStereoPanner::update ()
 	   overhead.
 	*/
 
-	/* x == 0 => hard left
-	   x == 1 => hard right
+	/* x == 0 => hard left = 180.0 degrees
+	   x == 1 => hard right = 0.0 degrees
 	*/
+
+        double _x = BaseStereoPanner::azimuth_to_lr_fract (_angles.azi);
 
 	float const panR = _x;
 	float const panL = 1 - panR;
@@ -444,7 +408,7 @@ EqualPowerStereoPanner::update ()
 	desired_left = panL * (scale * panL + 1.0f - scale);
 	desired_right = panR * (scale * panR + 1.0f - scale);
 
-	effective_x = _x;
+	_effective_angles = _angles;
 	//_control->set_value(x);
 }
 
@@ -472,7 +436,7 @@ EqualPowerStereoPanner::do_distribute_automated (AudioBuffer& srcbuf, BufferSet&
 	/* store effective pan position. do this even if we are muted */
 
 	if (nframes > 0) {
-		effective_x = buffers[0][nframes-1];
+		_effective_angles.azi = BaseStereoPanner::lr_fract_to_azimuth (buffers[0][nframes-1]);
 	}
 
 	if (_muted) {
@@ -519,7 +483,7 @@ EqualPowerStereoPanner::do_distribute_automated (AudioBuffer& srcbuf, BufferSet&
 }
 
 StreamPanner*
-EqualPowerStereoPanner::factory (Panner& parent, Evoral::Parameter param)
+EqualPowerStereoPanner::factory (Panner& parent, Evoral::Parameter param, Speakers& /* ignored */)
 {
 	return new EqualPowerStereoPanner (parent, param);
 }
@@ -537,8 +501,8 @@ EqualPowerStereoPanner::state (bool /*full_state*/)
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof (buf), "%.12g", _x);
-	root->add_property (X_("x"), buf);
+	snprintf (buf, sizeof (buf), "%.12g", _angles.azi);
+        root->add_property (X_("azimuth"), buf);
 	root->add_property (X_("type"), EqualPowerStereoPanner::name);
 
 	// XXX: dont save automation here... its part of the automatable panner now.
@@ -556,10 +520,15 @@ EqualPowerStereoPanner::set_state (const XMLNode& node, int version)
 	const XMLProperty* prop;
 	LocaleGuard lg (X_("POSIX"));
 
-	if ((prop = node.property (X_("x")))) {
-		const float pos = atof (prop->value().c_str());
-		set_position (pos, true);
-	}
+	if ((prop = node.property (X_("azimuth")))) {
+		AngularVector a (atof (prop->value().c_str()), 0.0);
+                set_position (a, true);
+        } else if ((prop = node.property (X_("x")))) {
+                /* old school cartesian positioning */
+                AngularVector a;
+                a.azi = BaseStereoPanner::lr_fract_to_azimuth (atof (prop->value().c_str()));
+                set_position (a, true);
+        }
 
 	StreamPanner::set_state (node, version);
 
@@ -575,197 +544,14 @@ EqualPowerStereoPanner::set_state (const XMLNode& node, int version)
 			_control->alist()->set_state (*((*iter)->children().front()), version);
 
 			if (_control->alist()->automation_state() != Off) {
-				set_position (_control->list()->eval (parent.session().transport_frame()));
+                                double degrees = BaseStereoPanner::lr_fract_to_azimuth (_control->list()->eval (parent.session().transport_frame()));
+				set_position (AngularVector (degrees, 0.0));
 			}
 		}
 	}
 
 	return 0;
 }
-
-/*----------------------------------------------------------------------*/
-
-Multi2dPanner::Multi2dPanner (Panner& p, Evoral::Parameter param)
-	: StreamPanner (p, param)
-{
-	update ();
-}
-
-Multi2dPanner::~Multi2dPanner ()
-{
-}
-
-void
-Multi2dPanner::update ()
-{
-	static const float BIAS = FLT_MIN;
-	uint32_t i;
-	uint32_t const nouts = parent.nouts ();
-	float dsq[nouts];
-	float f, fr;
-	vector<pan_t> pans;
-
-	f = 0.0f;
-
-	for (i = 0; i < nouts; i++) {
-		dsq[i] = ((_x - parent.output(i).x) * (_x - parent.output(i).x) + (_y - parent.output(i).y) * (_y - parent.output(i).y) + BIAS);
-		if (dsq[i] < 0.0) {
-			dsq[i] = 0.0;
-		}
-		f += dsq[i] * dsq[i];
-	}
-#ifdef __APPLE__
-	// terrible hack to support OSX < 10.3.9 builds
-	fr = (float) (1.0 / sqrt((double)f));
-#else
-	fr = 1.0 / sqrtf(f);
-#endif
-	for (i = 0; i < nouts; ++i) {
-		parent.output(i).desired_pan = 1.0f - (dsq[i] * fr);
-	}
-
-	effective_x = _x;
-}
-
-void
-Multi2dPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes)
-{
-	Sample* dst;
-	pan_t pan;
-
-	if (_muted) {
-		return;
-	}
-
-	Sample* const src = srcbuf.data();
-
-	uint32_t const N = parent.nouts ();
-	for (uint32_t n = 0; n < N; ++n) {
-		Panner::Output& o = parent.output (n);
-
-		dst = obufs.get_audio(n).data();
-
-#ifdef CAN_INTERP
-		if (fabsf ((delta = (left_interp - desired_left))) > 0.002) { // about 1 degree of arc
-
-			/* interpolate over 64 frames or nframes, whichever is smaller */
-
-			nframes_t limit = min ((nframes_t)64, nframes);
-			nframes_t n;
-
-			delta = -(delta / (float) (limit));
-
-			for (n = 0; n < limit; n++) {
-				left_interp = left_interp + delta;
-				left = left_interp + 0.9 * (left - left_interp);
-				dst[n] += src[n] * left * gain_coeff;
-			}
-
-			pan = left * gain_coeff;
-			mix_buffers_with_gain(dst+n,src+n,nframes-n,pan);
-
-		} else {
-
-#else
-			pan = o.desired_pan;
-
-			if ((pan *= gain_coeff) != 1.0f) {
-
-				if (pan != 0.0f) {
-					mix_buffers_with_gain(dst,src,nframes,pan);
-				}
-				
-			} else {
-					mix_buffers_no_gain(dst,src,nframes);
-			}
-#endif
-#ifdef CAN_INTERP
-		}
-#endif
-	}
-
-	return;
-}
-
-void
-Multi2dPanner::do_distribute_automated (AudioBuffer& /*src*/, BufferSet& /*obufs*/,
-					nframes_t /*start*/, nframes_t /*end*/, nframes_t /*nframes*/,
-					pan_t** /*buffers*/)
-{
-	if (_muted) {
-		return;
-	}
-
-	/* what ? */
-
-	return;
-}
-
-StreamPanner*
-Multi2dPanner::factory (Panner& p, Evoral::Parameter param)
-{
-	return new Multi2dPanner (p, param);
-}
-
-int
-Multi2dPanner::load (istream& /*in*/, string /*path*/, uint32_t& /*linecnt*/)
-{
-	return 0;
-}
-
-XMLNode&
-Multi2dPanner::get_state (void)
-{
-	return state (true);
-}
-
-XMLNode&
-Multi2dPanner::state (bool /*full_state*/)
-{
-	XMLNode* root = new XMLNode ("StreamPanner");
-	char buf[64];
-	LocaleGuard lg (X_("POSIX"));
-
-	snprintf (buf, sizeof (buf), "%.12g", _x);
-	root->add_property (X_("x"), buf);
-	snprintf (buf, sizeof (buf), "%.12g", _y);
-	root->add_property (X_("y"), buf);
-	root->add_property (X_("type"), Multi2dPanner::name);
-
-	/* XXX no meaningful automation yet */
-
-	return *root;
-}
-
-int
-Multi2dPanner::set_state (const XMLNode& node, int /*version*/)
-{
-	const XMLProperty* prop;
-	float newx,newy;
-	LocaleGuard lg (X_("POSIX"));
-
-	newx = -1;
-	newy = -1;
-
-	if ((prop = node.property (X_("x")))) {
-		newx = atof (prop->value().c_str());
-	}
-
-	if ((prop = node.property (X_("y")))) {
-		newy = atof (prop->value().c_str());
-	}
-
-	if (_x < 0 || _y < 0) {
-		error << _("badly-formed positional data for Multi2dPanner - ignored")
-		      << endmsg;
-		return -1;
-	}
-
-	set_position (newx, newy);
-	return 0;
-}
-
-/*---------------------------------------------------------------------- */
 
 Panner::Panner (string name, Session& s)
 	: SessionObject (s, name)
@@ -827,16 +613,20 @@ Panner::reset_to_default ()
 	}
 
 	if (outputs.size() == 2) {
+                AngularVector a;
 		switch (_streampanners.size()) {
 		case 1:
-			_streampanners.front()->set_position (0.5);
+                        a.azi = 90.0; /* "front" or "top", in degrees */
+			_streampanners.front()->set_position (a);
 			_streampanners.front()->pan_control()->list()->reset_default (0.5);
 			return;
 			break;
 		case 2:
-			_streampanners.front()->set_position (0.0);
+                        a.azi = 180.0; /* "left", in degrees */
+			_streampanners.front()->set_position (a);
 			_streampanners.front()->pan_control()->list()->reset_default (0.0);
-			_streampanners.back()->set_position (1.0);
+                        a.azi = 0.0; /* "right", in degrees */
+			_streampanners.back()->set_position (a);
 			_streampanners.back()->pan_control()->list()->reset_default (1.0);
 			return;
 		default:
@@ -848,13 +638,15 @@ Panner::reset_to_default ()
 	vector<StreamPanner*>::iterator p;
 
 	for (o = outputs.begin(), p = _streampanners.begin(); o != outputs.end() && p != _streampanners.end(); ++o, ++p) {
-		(*p)->set_position ((*o).x, (*o).y);
+		(*p)->set_position ((*o).position);
 	}
 }
 
 void
 Panner::reset_streampanner (uint32_t which)
 {
+        AngularVector a;
+
 	if (which >= _streampanners.size() || which >= outputs.size()) {
 		return;
 	}
@@ -868,24 +660,27 @@ Panner::reset_streampanner (uint32_t which)
 		switch (_streampanners.size()) {
 		case 1:
 			/* stereo out, 1 stream, default = middle */
-			_streampanners.front()->set_position (0.5);
+                        a.azi = 90.0; /* "front" or "top", in degrees */
+			_streampanners.front()->set_position (a);
 			_streampanners.front()->pan_control()->list()->reset_default (0.5);
 			break;
 		case 2:
 			/* stereo out, 2 streams, default = hard left/right */
 			if (which == 0) {
-				_streampanners.front()->set_position (0.0);
-				_streampanners.front()->pan_control()->list()->reset_default (0.0);
-			} else {
-				_streampanners.back()->set_position (1.0);
-				_streampanners.back()->pan_control()->list()->reset_default (1.0);
+                                a.azi = 180.0; /* "left", in degrees */
+                                _streampanners.front()->set_position (a);
+                                _streampanners.front()->pan_control()->list()->reset_default (0.0);
+                        } else {
+                                a.azi = 0.0; /* "right", in degrees */
+                                _streampanners.back()->set_position (a);
+                                _streampanners.back()->pan_control()->list()->reset_default (1.0);
 			}
 			break;
 		}
 		return;
 
 	default:
-		_streampanners[which]->set_position (outputs[which].x, outputs[which].y);
+		_streampanners[which]->set_position (outputs[which].position);
 	}
 }
 
@@ -947,16 +742,13 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		break;
 
 	case 2: // line
-		outputs.push_back (Output (0, 0));
-		outputs.push_back (Output (1.0, 0));
+		outputs.push_back (Output (AngularVector (180.0, 0.0)));
+		outputs.push_back (Output (AngularVector (0.0, 0,0)));
 		for (n = 0; n < npans; ++n) {
 			_streampanners.push_back (new EqualPowerStereoPanner (*this, Evoral::Parameter(PanAutomation, 0, n)));
 		}
                 break;
 
-        case 3:
-        case 4:
-        case 5:
         default:
                 setup_speakers (nouts);
 		for (n = 0; n < npans; ++n) {
@@ -983,24 +775,46 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 	if (npans == 2 && outputs.size() == 2) {
 
 		/* Do this only if we changed configuration, or our configuration
-		   appears to be the default set up (center).
+		   appears to be the default set up (zero degrees)
 		*/
 
-		float left;
-		float right;
+		AngularVector left;
+		AngularVector right;
 
-		_streampanners.front()->get_position (left);
-		_streampanners.back()->get_position (right);
+		left = _streampanners.front()->get_position ();
+		right = _streampanners.back()->get_position ();
 
-		if (changed || ((left == 0.5) && (right == 0.5))) {
+                if (changed || ((left.azi == 0.0) && (right.azi == 0.0))) {
 
-			_streampanners.front()->set_position (0.0);
+			_streampanners.front()->set_position (AngularVector (180.0, 0.0));
 			_streampanners.front()->pan_control()->list()->reset_default (0.0);
 
-			_streampanners.back()->set_position (1.0);
+			_streampanners.back()->set_position (AngularVector (0.0, 0.0));
 			_streampanners.back()->pan_control()->list()->reset_default (1.0);
 		}
-	}
+
+	} else if (npans > 1 && outputs.size() > 2) {
+
+                /* 2d panning: spread signals equally around a circle */
+
+                double degree_step = 360.0 / nouts;
+                double deg;
+
+                /* even number of signals? make sure the top two are either side of "top".
+                   otherwise, just start at the "top" (90.0 degrees) and rotate around
+                 */
+
+                if (npans % 2) {
+                        deg = 90.0 - degree_step;
+                } else {
+                        deg = 90.0;
+                }
+
+                for (std::vector<StreamPanner*>::iterator x = _streampanners.begin(); x != _streampanners.end(); ++x) {
+                        (*x)->set_position (AngularVector (deg, 0.0));
+                        deg += degree_step;
+                }
+        }
 }
 
 void
@@ -1076,12 +890,12 @@ Panner::automation_style () const
 struct PanPlugins {
     string name;
     uint32_t nouts;
-    StreamPanner* (*factory)(Panner&, Evoral::Parameter);
+    StreamPanner* (*factory)(Panner&, Evoral::Parameter, Speakers&);
 };
 
 PanPlugins pan_plugins[] = {
 	{ EqualPowerStereoPanner::name, 2, EqualPowerStereoPanner::factory },
-	{ Multi2dPanner::name, 3, Multi2dPanner::factory },
+	{ VBAPanner::name, 3, VBAPanner::factory },
 	{ string (""), 0, 0 }
 };
 
@@ -1104,10 +918,10 @@ Panner::state (bool full)
 
 	for (vector<Panner::Output>::iterator o = outputs.begin(); o != outputs.end(); ++o) {
 		XMLNode* onode = new XMLNode (X_("Output"));
-		snprintf (buf, sizeof (buf), "%.12g", (*o).x);
-		onode->add_property (X_("x"), buf);
-		snprintf (buf, sizeof (buf), "%.12g", (*o).y);
-		onode->add_property (X_("y"), buf);
+		snprintf (buf, sizeof (buf), "%.12g", (*o).position.azi);
+		onode->add_property (X_("azimuth"), buf);
+		snprintf (buf, sizeof (buf), "%.12g", (*o).position.ele);
+		onode->add_property (X_("elevation"), buf);
 		node->add_child_nocopy (*onode);
 	}
 
@@ -1143,7 +957,6 @@ Panner::set_state (const XMLNode& node, int version)
 		set_linked (string_is_affirmative (prop->value()));
 	}
 
-
 	if ((prop = node.property (X_("bypassed"))) != 0) {
 		set_bypassed (string_is_affirmative (prop->value()));
 	}
@@ -1158,15 +971,20 @@ Panner::set_state (const XMLNode& node, int version)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == X_("Output")) {
 
-			float x, y;
+                        AngularVector a;
 
-			prop = (*niter)->property (X_("x"));
-			sscanf (prop->value().c_str(), "%g", &x);
+			if ((prop = (*niter)->property (X_("azimuth")))) {
+                                sscanf (prop->value().c_str(), "%lg", &a.azi);
+                        } else if ((prop = (*niter)->property (X_("x")))) {
+                                /* old school cartesian */
+                                a.azi = BaseStereoPanner::lr_fract_to_azimuth (atof (prop->value().c_str()));
+                        }
 
-			prop = (*niter)->property (X_("y"));
-			sscanf (prop->value().c_str(), "%g", &y);
+			if ((prop = (*niter)->property (X_("elevation")))) {
+                                sscanf (prop->value().c_str(), "%lg", &a.ele);
+                        }
 
-			outputs.push_back (Output (x, y));
+			outputs.push_back (Output (a));
 		}
 	}
 
@@ -1185,7 +1003,7 @@ Panner::set_state (const XMLNode& node, int version)
 						   assumption, but it's still an assumption.
 						*/
 
-						sp = pan_plugins[i].factory (*this, Evoral::Parameter(PanAutomation, 0, num_panners));
+						sp = pan_plugins[i].factory (*this, Evoral::Parameter(PanAutomation, 0, num_panners), _session.get_speakers ());
 						num_panners++;
 
 						if (sp->set_state (**niter, version) == 0) {
@@ -1244,25 +1062,21 @@ Panner::touching () const
 }
 
 void
-Panner::set_position (float xpos, StreamPanner& orig)
+Panner::set_position (const AngularVector& a, StreamPanner& orig)
 {
-	float xnow;
-	float xdelta ;
-	float xnew;
+        AngularVector delta;
+        AngularVector new_position;
 
-	orig.get_position (xnow);
-	xdelta = xpos - xnow;
+        delta = orig.get_position() - a;
 
 	if (_link_direction == SameDirection) {
 
 		for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 			if (*i == &orig) {
-				(*i)->set_position (xpos, true);
+				(*i)->set_position (a, true);
 			} else {
-				(*i)->get_position (xnow);
-				xnew = min (1.0f, xnow + xdelta);
-				xnew = max (0.0f, xnew);
-				(*i)->set_position (xnew, true);
+                                new_position = (*i)->get_position() + delta;
+				(*i)->set_position (new_position, true);
 			}
 		}
 
@@ -1270,117 +1084,10 @@ Panner::set_position (float xpos, StreamPanner& orig)
 
 		for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 			if (*i == &orig) {
-				(*i)->set_position (xpos, true);
+				(*i)->set_position (a, true);
 			} else {
-				(*i)->get_position (xnow);
-				xnew = min (1.0f, xnow - xdelta);
-				xnew = max (0.0f, xnew);
-				(*i)->set_position (xnew, true);
-			}
-		}
-	}
-}
-
-void
-Panner::set_position (float xpos, float ypos, StreamPanner& orig)
-{
-	float xnow, ynow;
-	float xdelta, ydelta;
-	float xnew, ynew;
-
-	orig.get_position (xnow, ynow);
-	xdelta = xpos - xnow;
-	ydelta = ypos - ynow;
-
-	if (_link_direction == SameDirection) {
-
-		for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
-			if (*i == &orig) {
-				(*i)->set_position (xpos, ypos, true);
-			} else {
-				(*i)->get_position (xnow, ynow);
-
-				xnew = min (1.0f, xnow + xdelta);
-				xnew = max (0.0f, xnew);
-
-				ynew = min (1.0f, ynow + ydelta);
-				ynew = max (0.0f, ynew);
-
-				(*i)->set_position (xnew, ynew, true);
-			}
-		}
-
-	} else {
-
-		for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
-			if (*i == &orig) {
-				(*i)->set_position (xpos, ypos, true);
-			} else {
-				(*i)->get_position (xnow, ynow);
-
-				xnew = min (1.0f, xnow - xdelta);
-				xnew = max (0.0f, xnew);
-
-				ynew = min (1.0f, ynow - ydelta);
-				ynew = max (0.0f, ynew);
-
-				(*i)->set_position (xnew, ynew, true);
-			}
-		}
-	}
-}
-
-void
-Panner::set_position (float xpos, float ypos, float zpos, StreamPanner& orig)
-{
-	float xnow, ynow, znow;
-	float xdelta, ydelta, zdelta;
-	float xnew, ynew, znew;
-
-	orig.get_position (xnow, ynow, znow);
-	xdelta = xpos - xnow;
-	ydelta = ypos - ynow;
-	zdelta = zpos - znow;
-
-	if (_link_direction == SameDirection) {
-
-		for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
-			if (*i == &orig) {
-				(*i)->set_position (xpos, ypos, zpos, true);
-			} else {
-				(*i)->get_position (xnow, ynow, znow);
-
-				xnew = min (1.0f, xnow + xdelta);
-				xnew = max (0.0f, xnew);
-
-				ynew = min (1.0f, ynow + ydelta);
-				ynew = max (0.0f, ynew);
-
-				znew = min (1.0f, znow + zdelta);
-				znew = max (0.0f, znew);
-
-				(*i)->set_position (xnew, ynew, znew, true);
-			}
-		}
-
-	} else {
-
-		for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
-			if (*i == &orig) {
-				(*i)->set_position (xpos, ypos, true);
-			} else {
-				(*i)->get_position (xnow, ynow, znow);
-
-				xnew = min (1.0f, xnow - xdelta);
-				xnew = max (0.0f, xnew);
-
-				ynew = min (1.0f, ynow - ydelta);
-				ynew = max (0.0f, ynew);
-
-				znew = min (1.0f, znow + zdelta);
-				znew = max (0.0f, znew);
-
-				(*i)->set_position (xnew, ynew, znew, true);
+                                new_position = (*i)->get_position() - delta;
+				(*i)->set_position (new_position, true);
 			}
 		}
 	}
@@ -1638,47 +1345,45 @@ Panner::setup_speakers (uint32_t nouts)
 {
         switch (nouts) {
         case 3:
-		outputs.push_back (Output  (0.5, 0));
-		outputs.push_back (Output  (0, 1.0));
-		outputs.push_back (Output  (1.0, 1.0));
+                /* top, bottom kind-of-left & bottom kind-of-right */
+                outputs.push_back (AngularVector (90.0, 0.0));
+                outputs.push_back (AngularVector (215.0, 0,0));
+                outputs.push_back (AngularVector (335.0, 0,0));
                 break;
         case 4:
                 /* clockwise from top left */
-		outputs.push_back (Output  (0, 1.0));
-		outputs.push_back (Output  (1.0, 1.0));
-		outputs.push_back (Output  (1.0, 0));
-		outputs.push_back (Output  (0, 0));
+                outputs.push_back (AngularVector (135.0, 0.0));
+                outputs.push_back (AngularVector (45.0, 0.0));
+                outputs.push_back (AngularVector (335.0, 0.0));
+                outputs.push_back (AngularVector (215.0, 0.0));
                 break;
 
-	case 5: //square+offcenter center
-		outputs.push_back (Output  (0, 0));
-		outputs.push_back (Output  (1.0, 0));
-		outputs.push_back (Output  (1.0, 1.0));
-		outputs.push_back (Output  (0, 1.0));
-		outputs.push_back (Output  (0.5, 0.75));
-                break;
+	default: 
+        {
+                double degree_step = 360.0 / nouts;
+                double deg;
+                uint32_t n;
 
-	default:
-		/* XXX horrible placement. FIXME */
-		for (uint32_t n = 0; n < nouts; ++n) {
-			outputs.push_back (Output (0.1 * n, 0.1 * n));
+                /* even number of speakers? make sure the top two are either side of "top".
+                   otherwise, just start at the "top" (90.0 degrees) and rotate around
+                 */
+
+                if (nouts % 2) {
+                        deg = 90.0 - degree_step;
+                } else {
+                        deg = 90.0;
+                }
+		for (n = 0; n < nouts; ++n, deg += degree_step) {
+			outputs.push_back (Output (AngularVector (deg, 0.0)));
 		}
         }
+        }
 
-        VBAPSpeakers& speakers (_session.get_speakers());
-
+        Speakers& speakers (_session.get_speakers());
+                        
         speakers.clear_speakers ();
 
         for (vector<Output>::iterator o = outputs.begin(); o != outputs.end(); ++o) {
-                double azimuth;
-                double elevation;
-                double tx, ty, tz;
-
-                tx = (*o).x - 0.5;
-                ty = (*o).y - 0.5;
-                tz = 0.0; // XXX change this if we ever do actual 3D
-
-                cart_to_azi_ele (tx, ty, tz, azimuth, elevation);
-                speakers.add_speaker (azimuth, elevation);
+                speakers.add_speaker ((*o).position);
         }
 }

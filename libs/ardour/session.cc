@@ -4202,11 +4202,12 @@ Session::ensure_search_path_includes (const string& path, DataType type)
         }
 }
 
-VBAPSpeakers&
+Speakers&
 Session::get_speakers() 
 {
         if (!_speakers) {
-                _speakers = new VBAPSpeakers;
+                _speakers = new Speakers;
         }
+
         return *_speakers;
 }

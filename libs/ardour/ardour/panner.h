@@ -28,6 +28,7 @@
 
 #include "pbd/stateful.h"
 #include "pbd/controllable.h"
+#include "pbd/cartesian.h"
 
 #include "ardour/types.h"
 #include "ardour/automation_control.h"
@@ -39,6 +40,7 @@ class Session;
 class Panner;
 class BufferSet;
 class AudioBuffer;
+class Speakers;
 
 class StreamPanner : public PBD::Stateful
 {
@@ -49,17 +51,10 @@ class StreamPanner : public PBD::Stateful
 	void set_muted (bool yn);
 	bool muted() const { return _muted; }
 
-	void set_position (float x, bool link_call = false);
-	void set_position (float x, float y, bool link_call = false);
-	void set_position (float x, float y, float z, bool link_call = false);
-
-	void get_position (float& xpos) const { xpos = _x; }
-	void get_position (float& xpos, float& ypos) const { xpos = _x; ypos = _y; }
-	void get_position (float& xpos, float& ypos, float& zpos) const { xpos = _x; ypos = _y; zpos = _z; }
-
-	void get_effective_position (float& xpos) const { xpos = effective_x; }
-	void get_effective_position (float& xpos, float& ypos) const { xpos = effective_x; ypos = effective_y; }
-	void get_effective_position (float& xpos, float& ypos, float& zpos) const { xpos = effective_x; ypos = effective_y; zpos = effective_z; }
+        const PBD::AngularVector& get_position() const { return _angles; }
+        const PBD::AngularVector& get_effective_position() const { return _effective_angles; }
+        void set_position (const PBD::AngularVector&, bool link_call = false);
+        void set_diffusion (double);
 
 	void distribute (AudioBuffer &, BufferSet &, gain_t, nframes_t);
 	void distribute_automated (AudioBuffer &, BufferSet &, nframes_t, nframes_t, nframes_t, pan_t **);
@@ -80,7 +75,7 @@ class StreamPanner : public PBD::Stateful
 
 	boost::shared_ptr<AutomationControl> pan_control()  { return _control; }
 
-	PBD::Signal0<void> Changed;      /* for position */
+	PBD::Signal0<void> Changed;      /* for position or diffusion */
 	PBD::Signal0<void> StateChanged; /* for mute, mono */
 
 	int set_state (const XMLNode&, int version);
@@ -97,17 +92,9 @@ class StreamPanner : public PBD::Stateful
 
 	void set_mono (bool);
 	
-	float _x;
-	float _y;
-	float _z;
-
-	/* these are for automation. they store the last value
-	   used by the most recent process() cycle.
-	*/
-
-	float effective_x;
-	float effective_y;
-	float effective_z;
+        PBD::AngularVector _angles;
+        PBD::AngularVector _effective_angles;
+        double        _diffusion; 
 
 	bool _muted;
 	bool _mono;
@@ -116,7 +103,7 @@ class StreamPanner : public PBD::Stateful
 
 	void add_state (XMLNode&);
 
-	/* Update internal parameters based on _x, _y and _z */
+	/* Update internal parameters based on this.angles */
 	virtual void update () = 0;
 };
 
@@ -133,6 +120,19 @@ class BaseStereoPanner : public StreamPanner
 	*/
 
 	void do_distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
+
+        static double azimuth_to_lr_fract (double azi) { 
+                /* 180.0 degrees=> left => 0.0 */
+                /* 0.0 degrees => right => 1.0 */
+                return 1.0 - (azi/180.0);
+        }
+
+        static double lr_fract_to_azimuth (double fract) { 
+                /* fract = 0.0 => degrees = 180.0 => left */
+                /* fract = 1.0 => degrees = 0.0 => right */
+                return 180.0 - (fract * 180.0);
+        }
+                
 
 	/* old school automation loading */
 
@@ -159,7 +159,7 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 	void get_current_coefficients (pan_t*) const;
 	void get_desired_coefficients (pan_t*) const;
 
-	static StreamPanner* factory (Panner&, Evoral::Parameter param);
+	static StreamPanner* factory (Panner&, Evoral::Parameter param, Speakers&);
 	static std::string name;
 
 	XMLNode& state (bool full_state); 
@@ -170,32 +170,6 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 	void update ();
 };
 
-class Multi2dPanner : public StreamPanner
-{
-  public:
-	Multi2dPanner (Panner& parent, Evoral::Parameter);
-	~Multi2dPanner ();
-
-	void do_distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
-	void do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
-				      nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
-
-	static StreamPanner* factory (Panner&, Evoral::Parameter);
-	static std::string name;
-
-	XMLNode& state (bool full_state);
-	XMLNode& get_state (void);
-	int set_state (const XMLNode&, int version);
-
-	/* old school automation loading */
-
-	int load (std::istream&, std::string path, uint32_t&);
-
-  private:
-	void update ();
-};
-
-
 /** Class to pan from some number of inputs to some number of outputs.
  *  This class has a number of StreamPanners, one for each input.
  */
@@ -203,14 +177,12 @@ class Panner : public SessionObject, public Automatable
 {
 public:
 	struct Output {
-            float x;
-            float y;
-            float z;
+            PBD::AngularVector position;
             pan_t current_pan;
             pan_t desired_pan;
             
-            Output (float xp, float yp, float zp = 0.0)
-            : x (xp), y (yp), z (zp), current_pan (0), desired_pan (0) {}
+            Output (const PBD::AngularVector& a) 
+            : position (a), current_pan (0), desired_pan (0) {}
 
 	};
 
@@ -249,6 +221,10 @@ public:
 	static bool equivalent (pan_t a, pan_t b) {
 		return fabsf (a - b) < 0.002; // about 1 degree of arc for a stereo panner
 	}
+	static bool equivalent (const PBD::AngularVector& a, const PBD::AngularVector& b) {
+                /* XXX azimuth only, at present */
+		return fabs (a.azi - b.azi) < 1.0;
+	}
 
 	void move_output (uint32_t, float x, float y);
 	uint32_t nouts() const { return outputs.size(); }
@@ -274,9 +250,7 @@ public:
 
 	/* only StreamPanner should call these */
 
-	void set_position (float x, StreamPanner& orig);
-	void set_position (float x, float y, StreamPanner& orig);
-	void set_position (float x, float y, float z, StreamPanner& orig);
+	void set_position (const PBD::AngularVector&, StreamPanner& orig);
 
 	/* old school automation */
 

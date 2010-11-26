@@ -20,38 +20,22 @@
 #define __libardour_vbap_speakers_h__
 
 #include <string>
-#include <map>
+#include <vector>
+
+#include <boost/utility.hpp>
 
 #include <pbd/signals.h>
 
 #include "ardour/panner.h"
+#include "ardour/speakers.h"
 
 namespace ARDOUR {
 
-class VBAPSpeakers {
+class Speakers;
+
+class VBAPSpeakers : public boost::noncopyable {
   public:
-        struct cart_vec {
-            double x;
-            double y;
-            double z;
-        };
-        
-        struct ang_vec {
-            double azi;
-            double ele;
-            double length;
-        };
-
-        static const int MAX_TRIPLET_AMOUNT = 60;
         typedef std::vector<double> dvector;
-
-        VBAPSpeakers ();
-        ~VBAPSpeakers ();
-        
-        int  add_speaker (double direction, double elevation = 0.0);
-        void remove_speaker (int id);
-        void move_speaker (int id, double direction, double elevation = 0.0);
-        void clear_speakers ();
 
         const dvector matrix (int tuple) const  { return _matrices[tuple]; }
         int speaker_for_tuple (int tuple, int which) const { return _speaker_tuples[tuple][which]; }
@@ -59,28 +43,22 @@ class VBAPSpeakers {
         int           n_tuples () const  { return _matrices.size(); }
         int           dimension() const { return _dimension; }
 
-        static void angle_to_cart(ang_vec *from, cart_vec *to);
+        static VBAPSpeakers& instance (Speakers&);
 
-        PBD::Signal0<void> Changed;
+        ~VBAPSpeakers ();
 
   private:
+        static VBAPSpeakers* _instance;
         static const double MIN_VOL_P_SIDE_LGTH = 0.01;
         int   _dimension;  
+        std::vector<Speaker>& _speakers;
+        PBD::ScopedConnection speaker_connection;
 
-        /* A struct for a loudspeaker instance */
-        struct Speaker { 
-            int id;
-            cart_vec coords;
-            ang_vec angles;
-            
-            Speaker (int, double azimuth, double elevation);
-
-            void move (double azimuth, double elevation);
-        };
+        VBAPSpeakers (Speakers&);
 
         struct azimuth_sorter {
             bool operator() (const Speaker& s1, const Speaker& s2) {
-                    return s1.angles.azi < s2.angles.azi;
+                    return s1.angles().azi < s2.angles().azi;
             }
         };
 
@@ -96,7 +74,6 @@ class VBAPSpeakers {
           tmatrix() : dvector (3, 0.0) {}
         };
 
-        std::vector<Speaker>  _speakers;
         std::vector<dvector>  _matrices;       /* holds matrices for a given speaker combinations */
         std::vector<tmatrix>  _speaker_tuples; /* holds speakers IDs for a given combination */
 
@@ -107,11 +84,11 @@ class VBAPSpeakers {
             struct ls_triplet_chain *next;
         };
 
-        static float vec_angle(cart_vec v1, cart_vec v2);
-        static float vec_length(cart_vec v1);
-        static float vec_prod(cart_vec v1, cart_vec v2);
+        static float vec_angle(PBD::CartesianVector v1, PBD::CartesianVector v2);
+        static float vec_length(PBD::CartesianVector v1);
+        static float vec_prod(PBD::CartesianVector v1, PBD::CartesianVector v2);
         static float vol_p_side_lgth(int i, int j,int k, const std::vector<Speaker>&);
-        static void  cross_prod(cart_vec v1,cart_vec v2, cart_vec *res);
+        static void  cross_prod(PBD::CartesianVector v1,PBD::CartesianVector v2, PBD::CartesianVector *res);
 
         void update ();
         int  any_ls_inside_triplet (int a, int b, int c);
@@ -123,7 +100,6 @@ class VBAPSpeakers {
         void sort_2D_lss (int* sorted_lss);
         int  calc_2D_inv_tmatrix (double azi1,double azi2, double* inv_mat);
         
-        void dump_speakers (std::ostream&);
 };
 
 } /* namespace */

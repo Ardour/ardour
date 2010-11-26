@@ -22,18 +22,20 @@
 #include <string>
 #include <map>
 
-#include <pbd/signals.h>
-
 #include "ardour/panner.h"
+#include "ardour/vbap_speakers.h"
 
 namespace ARDOUR {
 
-class VBAPSpeakers;
+class Speakers;
 
 class VBAPanner : public StreamPanner { 
   public:
-        VBAPanner (Panner& parent, Evoral::Parameter param, VBAPSpeakers& s);
+        VBAPanner (Panner& parent, Evoral::Parameter param, Speakers& s);
         ~VBAPanner ();
+
+        static StreamPanner* factory (Panner& parent, Evoral::Parameter param, Speakers& s);
+        static std::string name;
 
         void do_distribute (AudioBuffer&, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 	void do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
@@ -57,8 +59,6 @@ class VBAPanner : public StreamPanner {
         double desired_gains[3];
         int    outputs[3];
         int    desired_outputs[3];
-
-        PBD::ScopedConnection speaker_connection;
 
         VBAPSpeakers& _speakers;
         

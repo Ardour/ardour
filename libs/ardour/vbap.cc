@@ -41,6 +41,7 @@
 
 #include "pbd/cartesian.h"
 
+#include "ardour/speakers.h"
 #include "ardour/vbap.h"
 #include "ardour/vbap_speakers.h"
 #include "ardour/audio_buffer.h"
@@ -50,13 +51,13 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace std;
 
-VBAPanner::VBAPanner (Panner& parent, Evoral::Parameter param, VBAPSpeakers& s)
+string VBAPanner::name = X_("VBAP");
+
+VBAPanner::VBAPanner (Panner& parent, Evoral::Parameter param, Speakers& s)
         : StreamPanner (parent, param)
         , _dirty (false)
-        , _speakers (s)
-
+        , _speakers (VBAPSpeakers::instance (s))
 {
-         _speakers.Changed.connect_same_thread (speaker_connection, boost::bind (&VBAPanner::mark_dirty, this));
 }
 
 VBAPanner::~VBAPanner ()
@@ -72,16 +73,11 @@ VBAPanner::mark_dirty ()
 void
 VBAPanner::update ()
 {
-        /* convert from coordinate space with (0,0) at upper left to (0,0) at center and dimensions of 1 unit */
-        _x -= 0.5;
-        _y -= 0.5;
-
-
-        /* we're 2D for now */
-        _z = 0.0;
-
-        cart_to_azi_ele (_x, _y, _z, _azimuth, _elevation);
+        /* force 2D for now */
+        _angles.ele = 0.0;
         _dirty = true;
+
+        Changed ();
 }
 
 void 
@@ -234,3 +230,10 @@ VBAPanner::set_state (const XMLNode& node, int /*version*/)
 {
         return 0;
 }
+
+StreamPanner*
+VBAPanner::factory (Panner& parent, Evoral::Parameter param, Speakers& s)
+{
+	return new VBAPanner (parent, param, s);
+}
+

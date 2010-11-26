@@ -840,17 +840,13 @@ MackieControlProtocol::handle_control_event (SurfacePort & port, Control & contr
 					if (route->panner()->npanners() == 1 || (route->panner()->npanners() == 2 && route->panner()->linked()))
 					{
 						// assume pan for now
-						float xpos;
-						route->panner()->streampanner (0).get_effective_position (xpos);
-
-						// calculate new value, and trim
-						xpos += state.delta * state.sign;
-						if (xpos > 1.0)
-							xpos = 1.0;
-						else if (xpos < 0.0)
-							xpos = 0.0;
-
-						route->panner()->streampanner (0).set_position (xpos);
+                                                AngularVector a = route->panner()->streampanner (0).get_effective_position ();
+                                                
+						// calculate new value, and adjust
+						a.azi += 180.0 * state.delta * state.sign;
+                                                a.azi = min (180.0, a.azi);
+                                                a.azi = max (0.0, a.azi);
+						route->panner()->streampanner (0).set_position (a);
 					}
 				}
 				else
@@ -1008,13 +1004,13 @@ MackieControlProtocol::notify_panner_changed (RouteSignal * route_signal, bool f
 		boost::shared_ptr<Panner> panner = route_signal->route()->panner();
 		if ((panner && panner->npanners() == 1) || (panner->npanners() == 2 && panner->linked()))
 		{
-			float pos;
-			route_signal->route()->panner()->streampanner(0).get_effective_position (pos);
+			AngularVector pos = route_signal->route()->panner()->streampanner(0).get_effective_position ();
+                        float fract = 1.0 - (pos.azi / 180.0); /* 1.0 = 0 degrees = right; 0.0 = 180 degrees = left */
 
 			// cache the MidiByteArray here, because the mackie led control is much lower
 			// resolution than the panner control. So we save lots of byte
 			// sends in spite of more work on the comparison
-			MidiByteArray bytes = builder.build_led_ring (pot, ControlState (on, pos), MackieMidiBuilder::midi_pot_mode_dot);
+			MidiByteArray bytes = builder.build_led_ring (pot, ControlState (on, fract), MackieMidiBuilder::midi_pot_mode_dot);
 			// check that something has actually changed
 			if (force_update || bytes != route_signal->last_pan_written())
 			{

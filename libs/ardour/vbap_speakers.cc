@@ -39,27 +39,26 @@
 #include "ardour/vbap_speakers.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace std;
 
-VBAPSpeakers::Speaker::Speaker (int i, double azimuth, double elevation)
-        : id (i)
+VBAPSpeakers* VBAPSpeakers::_instance = 0;
+
+VBAPSpeakers& 
+VBAPSpeakers::instance (Speakers& s)
 {
-        move (azimuth, elevation);
-        cerr << setprecision (5) << "%%%%%%%%%% New speaker @ " << angles.azi << ", " << angles.ele << endl;
+        if (_instance == 0) {
+                _instance = new VBAPSpeakers (s);
+        }
+
+        return *_instance;
 }
 
-void
-VBAPSpeakers::Speaker::move (double azimuth, double elevation)
-{
-        angles.azi = azimuth;
-        angles.ele = elevation;
-        angles.length = 1.0;
-        angle_to_cart (&angles, &coords);
-}
-
-VBAPSpeakers::VBAPSpeakers ()
+VBAPSpeakers::VBAPSpeakers (Speakers& s)
         : _dimension (2)
+        , _speakers (s.speakers())
 {
+        s.Changed.connect_same_thread (speaker_connection, boost::bind (&VBAPSpeakers::update, this));
 }
 
 VBAPSpeakers::~VBAPSpeakers ()
@@ -67,72 +66,13 @@ VBAPSpeakers::~VBAPSpeakers ()
 }
 
 void
-VBAPSpeakers::dump_speakers (ostream& o)
-{
-        for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
-                o << "Speaker " << (*i).id << " @ " 
-                  << (*i).coords.x << ", " << (*i).coords.y << ", " << (*i).coords.z
-                  << " azimuth " << (*i).angles.azi
-                  << " elevation " << (*i).angles.ele
-                  << " distance " << (*i).angles.length
-                  << endl;
-        }
-}
-
-void
-VBAPSpeakers::clear_speakers ()
-{
-        _speakers.clear ();
-        update ();
-}
-
-int 
-VBAPSpeakers::add_speaker (double azimuth, double elevation)
-{
-        int id = _speakers.size();
-
-        cerr << "Added speaker " << id << " at " << azimuth << " /= " << elevation << endl;
-
-        _speakers.push_back (Speaker (id, azimuth, elevation));
-        update ();
-
-        dump_speakers (cerr);
-
-        return id;
-}        
-
-void
-VBAPSpeakers::remove_speaker (int id)
-{
-        for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ) {
-                if ((*i).id == id) {
-                        i = _speakers.erase (i);
-                        update ();
-                        break;
-                } 
-        }
-}
-
-void
-VBAPSpeakers::move_speaker (int id, double direction, double elevation)
-{
-        for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
-                if ((*i).id == id) {
-                        (*i).move (direction, elevation);
-                        update ();
-                        break;
-                }
-        }
-}
-
-void
 VBAPSpeakers::update ()
 {
         int dim = 2;
-
-        for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
-                if ((*i).angles.ele != 0.0) {
-                        cerr << "\n\n\nSPEAKER " << (*i).id << " has ele = " << (*i).angles.ele << "\n\n\n\n";
+        
+        for (vector<Speaker>::const_iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
+                if ((*i).angles().ele != 0.0) {
+                        cerr << "\n\n\nSPEAKER " << (*i).id << " has ele = " << (*i).angles().ele << "\n\n\n\n";
                         dim = 3;
                         break;
                 }
@@ -157,15 +97,7 @@ VBAPSpeakers::update ()
         } else {
                 choose_speaker_pairs ();
         }
-
-        Changed (); /* EMIT SIGNAL */
 }
-
-void 
-VBAPSpeakers::angle_to_cart(ang_vec *from, cart_vec *to)
-{
-        PBD::azi_ele_to_cart (from->azi, from->ele, to->x, to->y, to->z);
-}  
 
 void 
 VBAPSpeakers::choose_speaker_triplets(struct ls_triplet_chain **ls_triplets) 
@@ -217,7 +149,7 @@ VBAPSpeakers::choose_speaker_triplets(struct ls_triplet_chain **ls_triplets)
         for (i = 0;i < n_speakers; i++) { 
                 for (j = i+1; j < n_speakers; j++) { 
                         if (connections[i][j] == 1) {
-                                distance = fabs(vec_angle(_speakers[i].coords,_speakers[j].coords));
+                                distance = fabs(vec_angle(_speakers[i].coords(),_speakers[j].coords()));
                                 k=0;
                                 while(distance_table[k] < distance) {
                                         k++;
@@ -291,7 +223,9 @@ VBAPSpeakers::any_ls_inside_triplet(int a, int b, int c)
 {
         /* returns 1 if there is loudspeaker(s) inside given ls triplet */
         float invdet;
-        cart_vec *lp1, *lp2, *lp3;
+        const CartesianVector* lp1;
+        const CartesianVector* lp2;
+        const CartesianVector* lp3;
         float invmx[9];
         int i,j;
         float tmp;
@@ -299,9 +233,9 @@ VBAPSpeakers::any_ls_inside_triplet(int a, int b, int c)
         bool this_inside;
         int n_speakers = _speakers.size();
 
-        lp1 =  &(_speakers[a].coords);
-        lp2 =  &(_speakers[b].coords);
-        lp3 =  &(_speakers[c].coords);
+        lp1 =  &(_speakers[a].coords());
+        lp2 =  &(_speakers[b].coords());
+        lp3 =  &(_speakers[c].coords());
         
         /* matrix inversion */
         invdet = 1.0 / (  lp1->x * ((lp2->y * lp3->z) - (lp2->z * lp3->y))
@@ -323,9 +257,9 @@ VBAPSpeakers::any_ls_inside_triplet(int a, int b, int c)
                 if (i != a && i!=b && i != c) {
                         this_inside = true;
                         for (j = 0; j < 3; j++) {
-                                tmp = _speakers[i].coords.x * invmx[0 + j*3];
-                                tmp += _speakers[i].coords.y * invmx[1 + j*3];
-                                tmp += _speakers[i].coords.z * invmx[2 + j*3];
+                                tmp = _speakers[i].coords().x * invmx[0 + j*3];
+                                tmp += _speakers[i].coords().y * invmx[1 + j*3];
+                                tmp += _speakers[i].coords().z * invmx[2 + j*3];
                                 if (tmp < -0.001) {
                                         this_inside = false;
                                 }
@@ -369,7 +303,7 @@ VBAPSpeakers::add_ldsp_triplet(int i, int j, int k, struct ls_triplet_chain **ls
 }
 
 float 
-VBAPSpeakers::vec_angle(cart_vec v1, cart_vec v2)
+VBAPSpeakers::vec_angle(CartesianVector v1, CartesianVector v2)
 {
         float inner= ((v1.x*v2.x + v1.y*v2.y + v1.z*v2.z)/
                       (vec_length(v1) * vec_length(v2)));
@@ -386,13 +320,13 @@ VBAPSpeakers::vec_angle(cart_vec v1, cart_vec v2)
 }
 
 float 
-VBAPSpeakers::vec_length(cart_vec v1)
+VBAPSpeakers::vec_length(CartesianVector v1)
 {
         return (sqrt(v1.x*v1.x + v1.y*v1.y + v1.z*v1.z));
 }
 
 float 
-VBAPSpeakers::vec_prod(cart_vec v1, cart_vec v2)
+VBAPSpeakers::vec_prod(CartesianVector v1, CartesianVector v2)
 {
         return (v1.x*v2.x + v1.y*v2.y + v1.z*v2.z);
 }
@@ -405,13 +339,13 @@ VBAPSpeakers::vol_p_side_lgth(int i, int j,int k, const vector<Speaker>& speaker
            This is used when removing too narrow triangles. */
         
         float volper, lgth;
-        cart_vec xprod;
+        CartesianVector xprod;
 
-        cross_prod (speakers[i].coords, speakers[j].coords, &xprod);
-        volper = fabsf (vec_prod(xprod, speakers[k].coords));
-        lgth = (fabsf (vec_angle(speakers[i].coords, speakers[j].coords)) 
-                + fabsf (vec_angle(speakers[i].coords, speakers[k].coords)) 
-                + fabsf (vec_angle(speakers[j].coords, speakers[k].coords)));
+        cross_prod (speakers[i].coords(), speakers[j].coords(), &xprod);
+        volper = fabsf (vec_prod(xprod, speakers[k].coords()));
+        lgth = (fabsf (vec_angle(speakers[i].coords(), speakers[j].coords())) 
+                + fabsf (vec_angle(speakers[i].coords(), speakers[k].coords())) 
+                + fabsf (vec_angle(speakers[j].coords(), speakers[k].coords())));
 
         if (lgth > 0.00001) {
                 return volper / lgth;
@@ -421,7 +355,7 @@ VBAPSpeakers::vol_p_side_lgth(int i, int j,int k, const vector<Speaker>& speaker
 }
 
 void 
-VBAPSpeakers::cross_prod(cart_vec v1,cart_vec v2, cart_vec *res) 
+VBAPSpeakers::cross_prod(CartesianVector v1,CartesianVector v2, CartesianVector *res) 
 {
         float length;
 
@@ -429,7 +363,7 @@ VBAPSpeakers::cross_prod(cart_vec v1,cart_vec v2, cart_vec *res)
         res->y = (v1.z * v2.x ) - (v1.x * v2.z);
         res->z = (v1.x * v2.y ) - (v1.y * v2.x);
         
-        length= vec_length(*res);
+        length = vec_length(*res);
         res->x /= length;
         res->y /= length;
         res->z /= length;
@@ -446,30 +380,30 @@ VBAPSpeakers::lines_intersect (int i, int j, int k, int l)
            if you want to have that paper.
         */
 
-        cart_vec v1;
-        cart_vec v2;
-        cart_vec v3, neg_v3;
+        CartesianVector v1;
+        CartesianVector v2;
+        CartesianVector v3, neg_v3;
         float dist_ij,dist_kl,dist_iv3,dist_jv3,dist_inv3,dist_jnv3;
         float dist_kv3,dist_lv3,dist_knv3,dist_lnv3;
         
-        cross_prod(_speakers[i].coords,_speakers[j].coords,&v1);
-        cross_prod(_speakers[k].coords,_speakers[l].coords,&v2);
+        cross_prod(_speakers[i].coords(),_speakers[j].coords(),&v1);
+        cross_prod(_speakers[k].coords(),_speakers[l].coords(),&v2);
         cross_prod(v1,v2,&v3);
         
         neg_v3.x= 0.0 - v3.x;
         neg_v3.y= 0.0 - v3.y;
         neg_v3.z= 0.0 - v3.z;
 
-        dist_ij = (vec_angle(_speakers[i].coords,_speakers[j].coords));
-        dist_kl = (vec_angle(_speakers[k].coords,_speakers[l].coords));
-        dist_iv3 = (vec_angle(_speakers[i].coords,v3));
-        dist_jv3 = (vec_angle(v3,_speakers[j].coords));
-        dist_inv3 = (vec_angle(_speakers[i].coords,neg_v3));
-        dist_jnv3 = (vec_angle(neg_v3,_speakers[j].coords));
-        dist_kv3 = (vec_angle(_speakers[k].coords,v3));
-        dist_lv3 = (vec_angle(v3,_speakers[l].coords));
-        dist_knv3 = (vec_angle(_speakers[k].coords,neg_v3));
-        dist_lnv3 = (vec_angle(neg_v3,_speakers[l].coords));
+        dist_ij = (vec_angle(_speakers[i].coords(),_speakers[j].coords()));
+        dist_kl = (vec_angle(_speakers[k].coords(),_speakers[l].coords()));
+        dist_iv3 = (vec_angle(_speakers[i].coords(),v3));
+        dist_jv3 = (vec_angle(v3,_speakers[j].coords()));
+        dist_inv3 = (vec_angle(_speakers[i].coords(),neg_v3));
+        dist_jnv3 = (vec_angle(neg_v3,_speakers[j].coords()));
+        dist_kv3 = (vec_angle(_speakers[k].coords(),v3));
+        dist_lv3 = (vec_angle(v3,_speakers[l].coords()));
+        dist_knv3 = (vec_angle(_speakers[k].coords(),neg_v3));
+        dist_lnv3 = (vec_angle(neg_v3,_speakers[l].coords()));
 
         /* if one of loudspeakers is close to crossing point, don't do anything*/
 
@@ -496,7 +430,9 @@ VBAPSpeakers::calculate_3x3_matrixes(struct ls_triplet_chain *ls_triplets)
 {  
         /* Calculates the inverse matrices for 3D */
         float invdet;
-        cart_vec *lp1, *lp2, *lp3;
+        const CartesianVector* lp1;
+        const CartesianVector* lp2;
+        const CartesianVector* lp3;
         float *invmx;
         struct ls_triplet_chain *tr_ptr = ls_triplets;
         int triplet_count = 0;
@@ -524,9 +460,9 @@ VBAPSpeakers::calculate_3x3_matrixes(struct ls_triplet_chain *ls_triplets)
         }
 
         while (tr_ptr != 0) {
-                lp1 =  &(_speakers[tr_ptr->ls_nos[0]].coords);
-                lp2 =  &(_speakers[tr_ptr->ls_nos[1]].coords);
-                lp3 =  &(_speakers[tr_ptr->ls_nos[2]].coords);
+                lp1 =  &(_speakers[tr_ptr->ls_nos[0]].coords());
+                lp2 =  &(_speakers[tr_ptr->ls_nos[1]].coords());
+                lp3 =  &(_speakers[tr_ptr->ls_nos[2]].coords());
                 
                 /* matrix inversion */
                 invmx = tr_ptr->inv_mx;
@@ -603,17 +539,17 @@ VBAPSpeakers::choose_speaker_pairs (){
         for (speaker = 0; speaker < n_speakers-1; speaker++) {
 
                 cerr << "Looking at " 
-                     << _speakers[sorted_speakers[speaker]].id << " @ " << _speakers[sorted_speakers[speaker]].angles.azi  
+                     << _speakers[sorted_speakers[speaker]].id << " @ " << _speakers[sorted_speakers[speaker]].angles().azi  
                      << " and "
-                     << _speakers[sorted_speakers[speaker+1]].id << " @ " << _speakers[sorted_speakers[speaker+1]].angles.azi  
+                     << _speakers[sorted_speakers[speaker+1]].id << " @ " << _speakers[sorted_speakers[speaker+1]].angles().azi  
                      << " delta = " 
-                     << _speakers[sorted_speakers[speaker+1]].angles.azi - _speakers[sorted_speakers[speaker]].angles.azi
+                     << _speakers[sorted_speakers[speaker+1]].angles().azi - _speakers[sorted_speakers[speaker]].angles().azi
                      << endl;
 
-                if ((_speakers[sorted_speakers[speaker+1]].angles.azi - 
-                     _speakers[sorted_speakers[speaker]].angles.azi) <= AZIMUTH_DELTA_THRESHOLD_DEGREES) {
-                        if (calc_2D_inv_tmatrix( _speakers[sorted_speakers[speaker]].angles.azi, 
-                                                 _speakers[sorted_speakers[speaker+1]].angles.azi, 
+                if ((_speakers[sorted_speakers[speaker+1]].angles().azi - 
+                     _speakers[sorted_speakers[speaker]].angles().azi) <= AZIMUTH_DELTA_THRESHOLD_DEGREES) {
+                        if (calc_2D_inv_tmatrix( _speakers[sorted_speakers[speaker]].angles().azi, 
+                                                 _speakers[sorted_speakers[speaker+1]].angles().azi, 
                                                  inverse_matrix[speaker]) != 0){
                                 exists[speaker] = true;
                                 expected_pairs++;
@@ -621,10 +557,10 @@ VBAPSpeakers::choose_speaker_pairs (){
                 }
         }
         
-        if (((6.283 - _speakers[sorted_speakers[n_speakers-1]].angles.azi) 
-             +_speakers[sorted_speakers[0]].angles.azi) <= AZIMUTH_DELTA_THRESHOLD_DEGREES) {
-                if (calc_2D_inv_tmatrix(_speakers[sorted_speakers[n_speakers-1]].angles.azi, 
-                                       _speakers[sorted_speakers[0]].angles.azi, 
+        if (((6.283 - _speakers[sorted_speakers[n_speakers-1]].angles().azi) 
+             +_speakers[sorted_speakers[0]].angles().azi) <= AZIMUTH_DELTA_THRESHOLD_DEGREES) {
+                if (calc_2D_inv_tmatrix(_speakers[sorted_speakers[n_speakers-1]].angles().azi, 
+                                        _speakers[sorted_speakers[0]].angles().azi, 
                                        inverse_matrix[n_speakers-1]) != 0) { 
                         exists[n_speakers-1] = true;
                         expected_pairs++;

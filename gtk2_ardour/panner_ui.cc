@@ -666,23 +666,18 @@ PannerUI::pan_value_changed (uint32_t which)
 
 	if (twod_panner) {
 
-		float x;
-		float y;
-		_panner->streampanner(which).get_position (x, y);
-
 		in_pan_update = true;
-		twod_panner->move_puck (which, x, y);
+		twod_panner->move_puck (which, _panner->streampanner(which).get_position());
 		in_pan_update = false;
 
 	} else if (_panner->npanners() > 0 && which < _panner->npanners()) {
-		float xpos;
-		float val = pan_adjustments[which]->get_value ();
+                AngularVector model = _panner->streampanner(which).get_position();
+                double fract = pan_adjustments[which]->get_value();
+                AngularVector view (BaseStereoPanner::lr_fract_to_azimuth (fract), 0.0);
 
-		_panner->streampanner(which).get_position (xpos);
-
-		if (!Panner::equivalent (val, xpos)) {
+		if (!Panner::equivalent (model, view)) {
 			in_pan_update = true;
-			pan_adjustments[which]->set_value (xpos);
+			pan_adjustments[which]->set_value (BaseStereoPanner::azimuth_to_lr_fract (model.azi));
 			in_pan_update = false;
 		}
 	}
@@ -701,7 +696,6 @@ PannerUI::update_pan_bars (bool only_if_aplay)
 	*/
 
 	for (i = pan_adjustments.begin(), n = 0; i != pan_adjustments.end(); ++i, ++n) {
-		float xpos, val;
 
 		if (only_if_aplay) {
 			boost::shared_ptr<AutomationList> alist (_panner->streampanner(n).pan_control()->alist());
@@ -711,11 +705,12 @@ PannerUI::update_pan_bars (bool only_if_aplay)
 			}
 		}
 
-		_panner->streampanner(n).get_effective_position (xpos);
-		val = (*i)->get_value ();
+                AngularVector model = _panner->streampanner(n).get_effective_position();
+                double fract = (*i)->get_value();
+                AngularVector view (BaseStereoPanner::lr_fract_to_azimuth (fract), 0.0);
 
-		if (!Panner::equivalent (val, xpos)) {
-			(*i)->set_value (xpos);
+		if (!Panner::equivalent (model, view)) {
+			(*i)->set_value (BaseStereoPanner::azimuth_to_lr_fract (model.azi));
 		}
 	}
 
