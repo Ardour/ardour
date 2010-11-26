@@ -308,7 +308,7 @@ def build(bld):
 	#	alltogether.
 	#
 	if bld.env['HAVE_SLV2']:
-		obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc', 'uri_map.cc', 'lv2_persist_file.c' ]
+		obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc', 'uri_map.cc' ]
 		obj.uselib += ' SLV2 '
 		
 	if bld.env['VST_SUPPORT']:
