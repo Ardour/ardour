@@ -50,7 +50,8 @@ Location::Location (Session& s)
 	, _locked (false)
 	, _position_lock_style (AudioTime)
 {
-
+	assert (_start >= 0);
+	assert (_end >= 0);
 }
 
 Location::Location (Session& s, framepos_t sample_start, framepos_t sample_end, const std::string &name, Flags bits)
@@ -63,6 +64,9 @@ Location::Location (Session& s, framepos_t sample_start, framepos_t sample_end, 
 	, _position_lock_style (AudioTime)
 {
 	recompute_bbt_from_frames ();
+
+	assert (_start >= 0);
+	assert (_end >= 0);
 }
 
 Location::Location (const Location& other)
@@ -79,6 +83,9 @@ Location::Location (const Location& other)
 	/* copy is not locked even if original was */
 
 	_locked = false;
+
+	assert (_start >= 0);
+	assert (_end >= 0);
 }
 
 Location::Location (Session& s, const XMLNode& node)
@@ -92,6 +99,9 @@ Location::Location (Session& s, const XMLNode& node)
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
 	}
+
+	assert (_start >= 0);
+	assert (_end >= 0);
 }
 
 Location*
@@ -114,6 +124,9 @@ Location::operator= (const Location& other)
 	_locked = false;
 
 	/* "changed" not emitted on purpose */
+
+	assert (_start >= 0);
+	assert (_end >= 0);
 
 	return this;
 }
@@ -143,9 +156,14 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 			if (allow_bbt_recompute) {
 				recompute_bbt_from_frames ();
 			}
+
 			start_changed (this); /* EMIT SIGNAL */
 			end_changed (this); /* EMIT SIGNAL */
 		}
+
+		assert (_start >= 0);
+		assert (_end >= 0);
+		
 		return 0;
 	}
 	
@@ -164,6 +182,8 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 		}
 	}
 
+	assert (_start >= 0);
+	
 	return 0;
 }
 
@@ -195,6 +215,10 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 			start_changed (this); /* EMIT SIGNAL */
 			end_changed (this); /* EMIT SIGNAL */
 		}
+
+		assert (_start >= 0);
+		assert (_end >= 0);
+		
 		return 0;
 	}
 
@@ -211,6 +235,8 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 			Session::EndTimeChanged (old); /* EMIT SIGNAL */
 		}
 	}
+
+	assert (_end >= 0);
 
 	return 0;
 }
@@ -244,6 +270,9 @@ Location::move_to (framepos_t pos)
 
 		changed (this); /* EMIT SIGNAL */
 	}
+
+	assert (_start >= 0);
+	assert (_end >= 0);
 
 	return 0;
 }
@@ -464,6 +493,9 @@ Location::set_state (const XMLNode& node, int /*version*/)
 	recompute_bbt_from_frames ();
 
 	changed (this); /* EMIT SIGNAL */
+
+	assert (_start >= 0);
+	assert (_end >= 0);
 
 	return 0;
 }
