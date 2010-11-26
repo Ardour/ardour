@@ -548,6 +548,8 @@ Session::when_engine_running ()
 
 	if (_is_new && !no_auto_connect()) {
 
+                Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock());
+                
                 /* don't connect the master bus outputs if there is a monitor bus */
 
 		if (_master_out && Config->get_auto_connect_standard_busses() && !_monitor_out) {
