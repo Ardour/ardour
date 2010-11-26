@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="M-Audio Axiom 25 - Transport Controls">
+
+<!-- 2010-11-26 Chooch Schubert: Map file creation -->
+
+<!-- Transport Controls -->
+  <Binding channel="1" ctl="20" function="loop-toggle"/>
+  <Binding channel="1" ctl="21" function="transport-start"/>
+  <Binding channel="1" ctl="22" function="transport-end"/>
+  <Binding channel="1" ctl="23" function="transport-stop"/>
+  <Binding channel="1" ctl="24" function="transport-roll"/>
+  <Binding channel="1" ctl="25" function="rec-enable"/>
+  <Binding channel="1" ctl="25" function="rec-disable"/>
+
+<!--  Potentiometers:                                                       -->
+<!--  I decided to map the 8 pots as track fader controls. They have a      -->
+<!--  staggered layout, and I decided to make them 1-4 on the top row and   -->
+<!--  5-8 on the bottom row                                                 -->
+  <Binding channel="1" ctl="71" uri="/route/gain 1"/>
+  <Binding channel="1" ctl="74" uri="/route/gain 2"/>
+  <Binding channel="1" ctl="84" uri="/route/gain 3"/>
+  <Binding channel="1" ctl="7" uri="/route/gain 4"/>
+  <Binding channel="1" ctl="91" uri="/route/gain 5"/>
+  <Binding channel="1" ctl="93" uri="/route/gain 6"/>
+  <Binding channel="1" ctl="5" uri="/route/gain 7"/>
+  <Binding channel="1" ctl="10" uri="/route/gain 8"/>
+
+</ArdourMIDIBindings>
