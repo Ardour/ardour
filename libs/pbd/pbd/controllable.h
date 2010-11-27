@@ -82,7 +82,7 @@ class Controllable : public PBD::StatefulDestructible {
 
 	static Controllable* by_id (const PBD::ID&);
 	static Controllable* by_name (const std::string&);
-
+        static const std::string xml_node_name;
   private:
 	std::string _name;
 

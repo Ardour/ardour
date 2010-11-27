@@ -430,9 +430,11 @@ MIDIControllable::get_state ()
 
 	XMLNode* node = new XMLNode ("MIDIControllable");
 
-	if (!_current_uri.empty()) {
+	if (_current_uri.empty()) {
+                node->add_property ("id", controllable->id().to_s());
+	} else {
 		node->add_property ("uri", _current_uri);
-	}
+        }
 
 	if (controllable) {
 		snprintf (buf, sizeof(buf), "0x%x", (int) control_type);

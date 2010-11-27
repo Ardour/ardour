@@ -36,6 +36,7 @@ PBD::Signal1<void,Controllable*> Controllable::DeleteBinding;
 Glib::StaticRWLock Controllable::registry_lock = GLIBMM_STATIC_RW_LOCK_INIT;
 Controllable::Controllables Controllable::registry;
 PBD::ScopedConnectionList registry_connections;
+const std::string Controllable::xml_node_name = X_("Controllable");
 
 Controllable::Controllable (const string& name, Flag f)
 	: _name (name)
@@ -100,13 +101,15 @@ Controllable::by_name (const string& str)
 XMLNode&
 Controllable::get_state ()
 {
-	XMLNode* node = new XMLNode (X_("Controllable"));
+	XMLNode* node = new XMLNode (xml_node_name);
 	char buf[64];
 
 	node->add_property (X_("name"), _name); // not reloaded from XML state, just there to look at
 	_id.print (buf, sizeof (buf));
 	node->add_property (X_("id"), buf);
 	node->add_property (X_("flags"), enum_2_string (_flags));
+	snprintf (buf, sizeof (buf), "%2.12f", get_value());
+        node->add_property (X_("value"), buf);
 
 	return *node;
 }
@@ -126,6 +129,14 @@ Controllable::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property (X_("flags"))) != 0) {
 		_flags = (Flag) string_2_enum (prop->value(), _flags);
+	}
+
+	if ((prop = node.property (X_("value"))) != 0) {
+		float val;
+
+		if (sscanf (prop->value().c_str(), "%f", &val) == 1) {
+			set_value (val);
+		}
 	}
 }
 

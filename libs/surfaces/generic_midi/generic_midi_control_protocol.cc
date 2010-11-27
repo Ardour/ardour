@@ -450,7 +450,7 @@ GenericMidiControlProtocol::get_state ()
 		node->add_property ("binding", _current_binding);
 	}
 
-	XMLNode* children = new XMLNode (X_("controls"));
+	XMLNode* children = new XMLNode (X_("Controls"));
 
 	node->add_child_nocopy (*children);
 
@@ -504,7 +504,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 	{
 		Glib::Mutex::Lock lm2 (controllables_lock);
 		controllables.clear ();
-		nlist = node.children(); // "controls"
+		nlist = node.children(); // "Controls"
 		
 		if (nlist.empty()) {
 			return 0;
@@ -515,13 +515,17 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			
 			if ((prop = (*niter)->property ("id")) != 0) {
+
+                                cerr << "Looking for MIDI Controllable with ID " << prop->value() << endl;
 				
 				ID id = prop->value ();
-				c = session->controllable_by_id (id);
+				Controllable* c = Controllable::by_id (id);
+
+                                cerr << "\tresult = " << c << endl;
 				
 				if (c) {
 					MIDIControllable* mc = new MIDIControllable (*_input_port, *c, false);
-
+                                        
 					if (mc->set_state (**niter, version) == 0) {
 						controllables.push_back (mc);
 					}
