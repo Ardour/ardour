@@ -159,34 +159,33 @@ IO::check_bundles (std::vector<UserBundleInfo*>& list, const PortSet& ports)
 int
 IO::disconnect (Port* our_port, string other_port, void* src)
 {
+	assert (!AudioEngine::instance()->process_lock().trylock());
+
 	if (other_port.length() == 0 || our_port == 0) {
 		return 0;
 	}
 
-	{
-		BLOCK_PROCESS_CALLBACK ();
-
-		{
-			Glib::Mutex::Lock lm (io_lock);
-
-			/* check that our_port is really one of ours */
-
-			if ( ! _ports.contains(our_port)) {
-				return -1;
-			}
-
-			/* disconnect it from the source */
-
-			if (our_port->disconnect (other_port)) {
-				error << string_compose(_("IO: cannot disconnect port %1 from %2"), our_port->name(), other_port) << endmsg;
-				return -1;
-			}
-
-			check_bundles_connected ();
-		}
-
-		changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
-	}
+        
+        {
+                Glib::Mutex::Lock lm (io_lock);
+                
+                /* check that our_port is really one of ours */
+                
+                if ( ! _ports.contains(our_port)) {
+                        return -1;
+                }
+                
+                /* disconnect it from the source */
+                
+                if (our_port->disconnect (other_port)) {
+                        error << string_compose(_("IO: cannot disconnect port %1 from %2"), our_port->name(), other_port) << endmsg;
+                        return -1;
+                }
+                
+                check_bundles_connected ();
+        }
+        
+        changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
 
 	_session.set_dirty ();
 
