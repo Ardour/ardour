@@ -44,6 +44,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/internal_send.h"
+#include "ardour/internal_return.h"
 #include "ardour/ladspa_plugin.h"
 #include "ardour/meter.h"
 #include "ardour/plugin_insert.h"
@@ -1587,6 +1588,11 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 		}
 
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
+
+                if (boost::dynamic_pointer_cast<InternalReturn> (retrn)) {
+                        /* no GUI for these */
+                        return;
+                }
 
 		if (!_session->engine().connected()) {
 			return;
