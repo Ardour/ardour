@@ -34,6 +34,7 @@ InternalReturn::InternalReturn (Session& s)
 	, user_count (0)
 {
 	CycleStart.connect_same_thread (*this, boost::bind (&InternalReturn::cycle_start, this, _1));
+        _display_to_user = false;
 }
 
 void
@@ -137,8 +138,3 @@ InternalReturn::can_support_io_configuration (const ChanCount& in, ChanCount& ou
 	return true;
 }
 
-bool
-InternalReturn::visible () const
-{
-	return false;
-}

@@ -32,9 +32,7 @@ class InternalReturn : public Return
   public:
 	InternalReturn (Session&);
 
-	bool visible() const;
-
-	XMLNode& state(bool full);
+XMLNode& state(bool full);
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&, int version);
 

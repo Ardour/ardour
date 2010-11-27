@@ -64,7 +64,7 @@ class Stateful {
 	XMLNode *extra_xml (const std::string& str);
 
 	const PBD::ID& id() const { return _id; }
-
+        
         /* history management */
 
 	void clear_changes ();
