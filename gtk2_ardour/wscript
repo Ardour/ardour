@@ -242,7 +242,6 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'gthread', uselib_store='GTHREAD', atleast_version='2.10.1')
 	autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.18')
 	autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM', atleast_version='2.18')
-	autowaf.check_pkg(conf, 'libgnomecanvas-2.0', uselib_store='GNOMECANVAS', atleast_version='2.0')
 	autowaf.check_pkg(conf, 'libgnomecanvasmm-2.6', uselib_store='GNOMECANVASMM', atleast_version='2.16')
 	autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
 
@@ -278,11 +277,11 @@ def build(bld):
 	else:
 		obj.target = 'ardour-3.0'
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-	obj.uselib       = 'UUID FLAC GLIBMM GTHREAD GTK GNOMECANVAS OGG ALSA CURL DL'
+	obj.uselib       = 'UUID FLAC GLIBMM GTHREAD GTK OGG ALSA CURL DL'
 	obj.uselib       += ' GTKMM GNOMECANVASMM '
 	obj.uselib       += ' AUDIOUNITS OSX GTKOSX '
 	obj.uselib_local = '''libpbd libmidipp libtaglib libardour libardour_cp
-	                      libgtkmm2ext libtaglib'''
+	                      libgtkmm2ext libtaglib libgnomecanvas-2'''
         if sys.platform == 'darwin':
                 obj.uselib_local + ' libappleutility'
 	obj.cflags       = ['-DPACKAGE="gtk2_ardour"']

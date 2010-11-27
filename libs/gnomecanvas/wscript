@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+import autowaf
+import os
+
+# Version of this package (even if built as a child)
+MAJOR = '2'
+MINOR = '30'
+MICRO = '1'
+LIBGNOMECANVAS_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+LIBGNOMECANVAS_LIB_VERSION = '0.0.0'
+
+# Variables for 'waf dist'
+APPNAME = 'libgnomecanvas'
+VERSION = LIBGNOMECANVAS_VERSION
+
+# Mandatory variables
+srcdir = '.'
+blddir = 'build'
+
+path_prefix = 'libs/gnomecanvas/'
+
+libgnomecanvas_sources = [
+        'libgnomecanvas/gnome-canvas-bpath.c',
+        'libgnomecanvas/gnome-canvas.c',
+        'libgnomecanvas/gnome-canvas-clipgroup.c',
+        'libgnomecanvas/gnome-canvas-line.c',
+        'libgnomecanvas/gnome-canvas-path-def.c',
+        'libgnomecanvas/gnome-canvas-pixbuf.c',
+        'libgnomecanvas/gnome-canvas-polygon.c',
+        'libgnomecanvas/gnome-canvas-rect-ellipse.c',
+        'libgnomecanvas/gnome-canvas-rich-text.c',
+        'libgnomecanvas/gnome-canvas-shape.c',
+        'libgnomecanvas/gnome-canvas-text.c',
+        'libgnomecanvas/gnome-canvas-util.c',
+        'libgnomecanvas/gnome-canvas-widget.c',
+        'libgnomecanvas/libgnomecanvastypes.c'
+        ]
+
+def set_options(opt):
+	autowaf.set_options(opt)
+
+def configure(conf):
+	autowaf.configure(conf)
+	conf.check_tool('compiler_cc')
+	autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.18')
+	autowaf.check_pkg(conf, 'libart-2.0', uselib_store='LIBART', atleast_version='2.3')
+
+def build(bld):
+	# Library
+	obj              = bld.new_task_gen('cc', 'shlib')
+	obj.source       = libgnomecanvas_sources
+        obj.includes     = ['.']
+	obj.name         = 'libgnomecanvas-2'
+	obj.target       = 'gnomecanvas-2'
+	obj.uselib       = 'GLIB GTK LIBART'
+	obj.vnum         = LIBGNOMECANVAS_LIB_VERSION
+	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+
+def shutdown():
+	autowaf.shutdown()
+
