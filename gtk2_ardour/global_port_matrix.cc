@@ -30,8 +30,9 @@
 #include "i18n.h"
 
 using namespace std;
+using namespace ARDOUR;
 
-GlobalPortMatrix::GlobalPortMatrix (Gtk::Window* p, ARDOUR::Session* s, ARDOUR::DataType t)
+GlobalPortMatrix::GlobalPortMatrix (Gtk::Window* p, Session* s, DataType t)
 	: PortMatrix (p, s, t)
 {
 	setup_all_ports ();
@@ -47,16 +48,18 @@ GlobalPortMatrix::setup_ports (int dim)
 }
 
 void
-GlobalPortMatrix::set_state (ARDOUR::BundleChannel c[2], bool s)
+GlobalPortMatrix::set_state (BundleChannel c[2], bool s)
 {
-	ARDOUR::Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
-	ARDOUR::Bundle::PortList const & out_ports = c[OUT].bundle->channel_ports (c[OUT].channel);
+	Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
+	Bundle::PortList const & out_ports = c[OUT].bundle->channel_ports (c[OUT].channel);
 
-	for (ARDOUR::Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
-		for (ARDOUR::Bundle::PortList::const_iterator j = out_ports.begin(); j != out_ports.end(); ++j) {
+        Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock());
 
-			ARDOUR::Port* p = _session->engine().get_port_by_name (*i);
-			ARDOUR::Port* q = _session->engine().get_port_by_name (*j);
+	for (Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
+		for (Bundle::PortList::const_iterator j = out_ports.begin(); j != out_ports.end(); ++j) {
+
+			Port* p = _session->engine().get_port_by_name_locked (*i);
+			Port* q = _session->engine().get_port_by_name_locked (*j);
 
 			if (p) {
 				if (s) {
@@ -83,25 +86,25 @@ GlobalPortMatrix::set_state (ARDOUR::BundleChannel c[2], bool s)
 }
 
 PortMatrixNode::State
-GlobalPortMatrix::get_state (ARDOUR::BundleChannel c[2]) const
+GlobalPortMatrix::get_state (BundleChannel c[2]) const
 {
 	if (_session == 0) {
 		return PortMatrixNode::NOT_ASSOCIATED;
 	}
 	
-	ARDOUR::Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
-	ARDOUR::Bundle::PortList const & out_ports = c[OUT].bundle->channel_ports (c[OUT].channel);
+	Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
+	Bundle::PortList const & out_ports = c[OUT].bundle->channel_ports (c[OUT].channel);
 	if (in_ports.empty() || out_ports.empty()) {
 		/* we're looking at a bundle with no parts associated with this channel,
 		   so nothing to connect */
 		return PortMatrixNode::NOT_ASSOCIATED;
 	}
 
-	for (ARDOUR::Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
-		for (ARDOUR::Bundle::PortList::const_iterator j = out_ports.begin(); j != out_ports.end(); ++j) {
+	for (Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
+		for (Bundle::PortList::const_iterator j = out_ports.begin(); j != out_ports.end(); ++j) {
 
-			ARDOUR::Port* p = _session->engine().get_port_by_name (*i);
-			ARDOUR::Port* q = _session->engine().get_port_by_name (*j);
+			Port* p = _session->engine().get_port_by_name (*i);
+			Port* q = _session->engine().get_port_by_name (*j);
 
 			if (!p && !q) {
 				/* two non-Ardour ports; things are slightly more involved */
@@ -142,14 +145,14 @@ GlobalPortMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 	return PortMatrixNode::ASSOCIATED;
 }
 
-GlobalPortMatrixWindow::GlobalPortMatrixWindow (ARDOUR::Session* s, ARDOUR::DataType t)
+GlobalPortMatrixWindow::GlobalPortMatrixWindow (Session* s, DataType t)
 	: _port_matrix (this, s, t)
 {
 	switch (t) {
-	case ARDOUR::DataType::AUDIO:
+	case DataType::AUDIO:
 		set_title (_("Audio Connection Manager"));
 		break;
-	case ARDOUR::DataType::MIDI:
+	case DataType::MIDI:
 		set_title (_("MIDI Connection Manager"));
 		break;
 	}
@@ -167,7 +170,7 @@ GlobalPortMatrixWindow::on_show ()
 }
 
 void
-GlobalPortMatrixWindow::set_session (ARDOUR::Session* s)
+GlobalPortMatrixWindow::set_session (Session* s)
 {
 	_port_matrix.set_session (s);
 }
