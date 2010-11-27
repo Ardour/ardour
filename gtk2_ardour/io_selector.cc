@@ -136,7 +136,6 @@ IOSelector::set_state (ARDOUR::BundleChannel c[2], bool s)
 	ARDOUR::Bundle::PortList const & our_ports = c[_ours].bundle->channel_ports (c[_ours].channel);
 	ARDOUR::Bundle::PortList const & other_ports = c[_other].bundle->channel_ports (c[_other].channel);
 
-        Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock());
 
 	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
 		for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
@@ -145,12 +144,16 @@ IOSelector::set_state (ARDOUR::BundleChannel c[2], bool s)
 			if (!f) {
 				return;
 			}
-
-			if (s) {
-				_io->connect (f, *j, 0);
-			} else {
-				_io->disconnect (f, *j, 0);
-			}
+                        
+                        {
+                                Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock());
+                                
+                                if (s) {
+                                        _io->connect (f, *j, 0);
+                                } else {
+                                        _io->disconnect (f, *j, 0);
+                                }
+                        }
 		}
 	}
 }
