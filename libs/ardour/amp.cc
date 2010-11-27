@@ -34,6 +34,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 Amp::Amp (Session& s)
 	: Processor(s, "Amp")
@@ -388,10 +389,7 @@ Amp::state (bool full_state)
 {
 	XMLNode& node (Processor::state (full_state));
 	node.add_property("type", "amp");
-
-	char buf[32];
-	snprintf (buf, sizeof (buf), "%2.12f", _gain_control->get_value());
-	node.add_property("gain", buf);
+        node.add_child_nocopy (_gain_control->get_state());
 
 	return node;
 }
@@ -399,19 +397,14 @@ Amp::state (bool full_state)
 int
 Amp::set_state (const XMLNode& node, int version)
 {
-	const XMLProperty* prop;
+        XMLNode* gain_node;
 
 	Processor::set_state (node, version);
-	prop = node.property ("gain");
 
-	if (prop) {
-		gain_t val;
-
-		if (sscanf (prop->value().c_str(), "%f", &val) == 1) {
-			_gain_control->set_value (val);
-		}
-	}
-
+        if ((gain_node = node.child (Controllable::xml_node_name.c_str())) != 0) {
+                _gain_control->set_state (*gain_node, version);
+        }
+        
 	return 0;
 }
 

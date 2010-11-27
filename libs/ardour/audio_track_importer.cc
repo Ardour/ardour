@@ -91,7 +91,7 @@ AudioTrackImporter::AudioTrackImporter (XMLTree const & source,
 		throw failed_constructor();
 	}
 
-	XMLNodeList const & controllables = node.children ("Controllable");
+	XMLNodeList const & controllables = node.children (Controllable::xml_node_name);
 	for (XMLNodeList::const_iterator it = controllables.begin(); it != controllables.end(); ++it) {
 		parse_controllable (**it);
 	}
@@ -197,7 +197,7 @@ AudioTrackImporter::parse_io ()
 		return false;
 	}
 
-	XMLNodeList const & controllables = io->children ("Controllable");
+	XMLNodeList const & controllables = io->children (Controllable::xml_node_name);
 	for (XMLNodeList::const_iterator it = controllables.begin(); it != controllables.end(); ++it) {
 		parse_controllable (**it);
 	}

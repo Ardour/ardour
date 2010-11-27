@@ -159,10 +159,11 @@ MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 		child = *niter;
 
-		if (child->name() == X_("recenable")) {
-			_rec_enable_control->set_state (*child, version);
-			_session.add_controllable (_rec_enable_control);
-		}
+                if (child->name() == Controllable::xml_node_name && (prop = child->property ("name")) != 0) {
+                        if (prop->value() == X_("recenable")) {
+                                _rec_enable_control->set_state (*child, version);
+                        }
+                }
 	}
 
 	if (version >= 3000) {

@@ -535,7 +535,7 @@ EqualPowerStereoPanner::set_state (const XMLNode& node, int version)
 
 	for (XMLNodeConstIterator iter = node.children().begin(); iter != node.children().end(); ++iter) {
 
-		if ((*iter)->name() == X_("Controllable")) {
+		if ((*iter)->name() == Controllable::xml_node_name) {
 			if ((prop = (*iter)->property("name")) != 0 && prop->value() == "panner") {
 				_control->set_state (**iter, version);
 			}
