@@ -1745,7 +1745,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	}
 
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Convert to region in-place"), mem_fun(*this, &Editor::separate_region_from_selection)));
+	edit_items.push_back (MenuElem (_("Convert to Region In-Place"), mem_fun(*this, &Editor::separate_region_from_selection)));
 	edit_items.push_back (MenuElem (_("Convert to Region in Region List"), sigc::mem_fun(*this, &Editor::new_region_from_selection)));
 
 	edit_items.push_back (SeparatorElem());
