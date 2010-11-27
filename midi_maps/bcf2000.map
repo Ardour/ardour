@@ -121,13 +121,13 @@
 <!-- expression pedal to master bus gain -->
 <Binding channel="11" ctl="7"                    uri="/bus/gain master"/>
 <!-- footswitch pedal to rec-enable; this will work for punch-in, but not punch-out -->
-<Binding sysex-"f0 7f 7f 6 6 f7"                 function-"rec-enable"/>
+<Binding sysex-"f0 7f 7f 6 6 f7"                 function="rec-enable"/>
 
 <!-- bottom right soft-keys:  prev-bank       next-bank      -->
 <!--                          transport-stop  transport-roll -->
 <!--                                                         -->
-<Binding sysex-"f0 7f 7f 6 1 f7"                 function-"transport-stop"/>
-<Binding sysex-"f0 7f 7f 6 2 f7"                 function-"transport-roll"/>
-<Binding sysex-"f0 7f 7f 6 44 6 1 20 0 0 0 0 f7" function-"prev-bank"/>
-<Binding sysex-"f0 7f 7f 6 4 f7"                 function-"next-bank"/>
+<Binding sysex-"f0 7f 7f 6 1 f7"                 function="transport-stop"/>
+<Binding sysex-"f0 7f 7f 6 2 f7"                 function="transport-roll"/>
+<Binding sysex-"f0 7f 7f 6 44 6 1 20 0 0 0 0 f7" function="prev-bank"/>
+<Binding sysex-"f0 7f 7f 6 4 f7"                 function="next-bank"/>
 </ArdourMIDIBindings>
