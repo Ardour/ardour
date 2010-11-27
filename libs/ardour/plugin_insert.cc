@@ -198,7 +198,7 @@ PluginInsert::set_automatable ()
 			param.set_range (desc.lower, desc.upper, _plugins.front()->default_value(i->id()), desc.toggled);
 			can_automate (param);
 			boost::shared_ptr<AutomationList> list(new AutomationList(param));
-			add_control (boost::shared_ptr<AutomationControl>(new PluginControl(this, param, list)));
+                        add_control (boost::shared_ptr<AutomationControl> (new PluginControl(this, param, list)));
 		}
 	}
 }
@@ -684,6 +684,13 @@ PluginInsert::state (bool full)
 	node.add_property("unique-id", _plugins[0]->unique_id());
 	node.add_property("count", string_compose("%1", _plugins.size()));
 	node.add_child_nocopy (_plugins[0]->get_state());
+
+	for (Controls::iterator c = controls().begin(); c != controls().end(); ++c) {
+                boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> ((*c).second);
+                if (ac) {
+                        node.add_child_nocopy (ac->get_state());
+                }
+        }
 
 	return node;
 }
