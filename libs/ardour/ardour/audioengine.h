@@ -179,7 +179,6 @@ class AudioEngine : public SessionHandlePtr
 	void update_total_latency (const Port&);
 
 	Port *get_port_by_name (const std::string &);
-	Port *get_port_by_name_locked (const std::string &);
 
 	enum TransportState {
 		TransportStopped = JackTransportStopped,

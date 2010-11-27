@@ -194,10 +194,12 @@ Diskstream::handle_input_change (IOChange change, void * /*src*/)
 {
 	Glib::Mutex::Lock lm (state_lock);
 
-	if (!(input_change_pending.type & change.type)) {
-		input_change_pending.type = IOChange::Type (input_change_pending.type | change.type);
-		_session.request_input_change_handling ();
-	}
+        if (change.type & IOChange::ConfigurationChanged) {
+                if (!(input_change_pending.type & change.type)) {
+                        input_change_pending.type = IOChange::Type (input_change_pending.type | change.type);
+                        _session.request_input_change_handling ();
+                }
+        }
 }
 
 void

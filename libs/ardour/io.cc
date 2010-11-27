@@ -159,12 +159,9 @@ IO::check_bundles (std::vector<UserBundleInfo*>& list, const PortSet& ports)
 int
 IO::disconnect (Port* our_port, string other_port, void* src)
 {
-	assert (!AudioEngine::instance()->process_lock().trylock());
-
 	if (other_port.length() == 0 || our_port == 0) {
 		return 0;
 	}
-
         
         {
                 Glib::Mutex::Lock lm (io_lock);
@@ -196,8 +193,6 @@ IO::disconnect (Port* our_port, string other_port, void* src)
 int
 IO::connect (Port* our_port, string other_port, void* src)
 {
-	assert (!AudioEngine::instance()->process_lock().trylock());
-	
 	if (other_port.length() == 0 || our_port == 0) {
 		return 0;
 	}
@@ -343,8 +338,6 @@ IO::add_port (string destination, void* src, DataType type)
 int
 IO::disconnect (void* src)
 {
-	BLOCK_PROCESS_CALLBACK ();
-	
 	{
 		Glib::Mutex::Lock lm (io_lock);
 		

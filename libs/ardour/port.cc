@@ -122,8 +122,6 @@ Port::get_connections (std::vector<std::string> & c) const
 int
 Port::connect (std::string const & other)
 {
-	/* caller must hold process lock */
-
 	std::string const other_shrt = _engine->make_port_name_non_relative (other);
 	std::string const this_shrt = _engine->make_port_name_non_relative (_name);
 
@@ -149,8 +147,6 @@ Port::connect (std::string const & other)
 int
 Port::disconnect (std::string const & other)
 {
-	/* caller must hold process lock */
-
 	std::string const other_shrt = _engine->make_port_name_non_relative (other);
 	std::string const this_shrt = _engine->make_port_name_non_relative (_name);
 

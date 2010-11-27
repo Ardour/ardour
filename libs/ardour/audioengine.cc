@@ -847,8 +847,6 @@ AudioEngine::unregister_port (Port& port)
 int
 AudioEngine::connect (const string& source, const string& destination)
 {
-	/* caller must hold process lock */
-
 	int ret;
 
 	if (!_running) {
@@ -864,8 +862,8 @@ AudioEngine::connect (const string& source, const string& destination)
 	string d = make_port_name_non_relative (destination);
 
 
-	Port* src = get_port_by_name_locked (s);
-	Port* dst = get_port_by_name_locked (d);
+	Port* src = get_port_by_name (s);
+	Port* dst = get_port_by_name (d);
 
 	if (src) {
 		ret = src->connect (d);
@@ -890,8 +888,6 @@ AudioEngine::connect (const string& source, const string& destination)
 int
 AudioEngine::disconnect (const string& source, const string& destination)
 {
-	/* caller must hold process lock */
-
 	int ret;
 
 	if (!_running) {
@@ -906,8 +902,8 @@ AudioEngine::disconnect (const string& source, const string& destination)
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
 
-	Port* src = get_port_by_name_locked (s);
-	Port* dst = get_port_by_name_locked (d);
+	Port* src = get_port_by_name (s);
+	Port* dst = get_port_by_name (d);
 
 	if (src) {
 			ret = src->disconnect (d);
@@ -974,28 +970,20 @@ Port *
 AudioEngine::get_port_by_name (const string& portname)
 {
 	string s;
-	if (portname.find_first_of (':') == string::npos) {
-		s = make_port_name_non_relative (portname);
-	} else {
-		s = portname;
-	}
-
-	Glib::Mutex::Lock lm (_process_lock);
-	return get_port_by_name_locked (s);
-}
-
-Port *
-AudioEngine::get_port_by_name_locked (const string& portname)
-{
-	/* caller must hold process lock */
 
 	if (!_running) {
 		if (!_has_run) {
-			fatal << _("get_port_by_name_locked() called before engine was started") << endmsg;
+			fatal << _("get_port_by_name() called before engine was started") << endmsg;
 			/*NOTREACHED*/
 		} else {
 			return 0;
 		}
+	}
+
+	if (portname.find_first_of (':') == string::npos) {
+		s = make_port_name_non_relative (portname);
+	} else {
+		s = portname;
 	}
 
 	if (portname.substr (0, jack_client_name.length ()) != jack_client_name) {

@@ -69,6 +69,8 @@ Track::get_state ()
 	return state (true);
 }
 
+
+
 XMLNode&
 Track::get_template ()
 {
