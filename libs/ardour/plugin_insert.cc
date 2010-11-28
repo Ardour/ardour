@@ -26,6 +26,7 @@
 
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
+#include "pbd/convert.h"
 
 #include "ardour/audio_buffer.h"
 #include "ardour/automation_list.h"
@@ -695,6 +696,31 @@ PluginInsert::state (bool full)
 	return node;
 }
 
+void
+PluginInsert::set_control_ids (const XMLNode& node, int version)
+{
+        const XMLNodeList& nlist = node.children();
+        XMLNodeConstIterator iter;
+        set<Evoral::Parameter>::const_iterator p;
+
+        for (iter = nlist.begin(); iter != nlist.end(); ++iter) {
+                if ((*iter)->name() == Controllable::xml_node_name) {
+                        const XMLProperty* prop;
+
+                        if ((prop = (*iter)->property (X_("parameter"))) != 0) {
+                                uint32_t p = atoi (prop->value());
+                                boost::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, p));
+                                if (!c) {
+                                        continue;
+                                }
+                                boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (c);
+                                if (ac) {
+                                        ac->set_state (**iter, version);
+                                }
+                        }
+                }
+        }
+}
 int
 PluginInsert::set_state(const XMLNode& node, int version)
 {
@@ -779,6 +805,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 	if (need_automatables) {
 		set_automatable ();
+                set_control_ids (node, version);
 	}
 
 	/* Handle the node list for this Processor (or Insert if an A2 session) */
@@ -960,6 +987,18 @@ PluginInsert::PluginControl::set_value (double val)
 	}
 
 	AutomationControl::set_value(val);
+}
+
+XMLNode&
+PluginInsert::PluginControl::get_state ()
+{
+        stringstream ss;
+
+        XMLNode& node (AutomationControl::get_state());
+        ss << parameter().id();
+        node.add_property (X_("parameter"), ss.str());
+
+        return node;
 }
 
 double

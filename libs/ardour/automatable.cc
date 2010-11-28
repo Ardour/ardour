@@ -456,9 +456,10 @@ Automatable::control_factory(const Evoral::Parameter& param)
 			warning << "GainAutomation for non-Amp" << endl;
 		}
 	} else if (param.type() == PanAutomation) {
-		Panner* me = dynamic_cast<Panner*>(this);
-		if (me) {
-			control = new Panner::PanControllable(me->session(), X_("panner"), *me, param);
+		Panner* panner = dynamic_cast<Panner*>(this);
+		if (panner) {
+                        StreamPanner& sp (panner->streampanner (param.channel()));
+			control = new StreamPanner::PanControllable (_a_session, X_("direction"), sp, param);
 		} else {
 			warning << "PanAutomation for non-Panner" << endl;
 		}

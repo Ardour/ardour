@@ -34,6 +34,7 @@
 #include <glibmm.h>
 
 #include "pbd/cartesian.h"
+#include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
@@ -74,14 +75,14 @@ static double direct_control_to_stereo_pan (double fract)
 
 StreamPanner::StreamPanner (Panner& p, Evoral::Parameter param)
 	: parent (p)
+        , _control (new PanControllable (parent.session(), _("direction"), *this, param))
 {
 	assert (param.type() != NullAutomation);
 
 	_muted = false;
 	_mono = false;
 
-	/* get our AutomationControl from our parent Panner, creating it if required */
-	_control = boost::dynamic_pointer_cast<AutomationControl> (parent.control (param, true));
+        p.add_control (_control);
 }
 
 StreamPanner::~StreamPanner ()
@@ -98,14 +99,14 @@ StreamPanner::set_mono (bool yn)
 }
 
 void
-Panner::PanControllable::set_value (double val)
+StreamPanner::PanControllable::set_value (double val)
 {
-	panner.streampanner (parameter().id()).set_position (AngularVector (direct_control_to_stereo_pan (val), 0.0));
+	streampanner.set_position (AngularVector (direct_control_to_stereo_pan (val), 0.0));
 	AutomationControl::set_value(val);
 }
 
 double
-Panner::PanControllable::get_value (void) const
+StreamPanner::PanControllable::get_value (void) const
 {
 	return AutomationControl::get_value();
 }
@@ -135,7 +136,7 @@ StreamPanner::set_position (const AngularVector& av, bool link_call)
 }
 
 int
-StreamPanner::set_state (const XMLNode& node, int /*version*/)
+StreamPanner::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 	XMLNodeConstIterator iter;
@@ -148,14 +149,25 @@ StreamPanner::set_state (const XMLNode& node, int /*version*/)
 		set_mono (string_is_affirmative (prop->value()));
 	}
 
+	for (XMLNodeConstIterator iter = node.children().begin(); iter != node.children().end(); ++iter) {		
+                if ((*iter)->name() == Controllable::xml_node_name) {
+			if ((prop = (*iter)->property ("name")) != 0 && prop->value() == "direction") {
+				_control->set_state (**iter, version);
+			} 
+                }
+        }
+
 	return 0;
 }
 
-void
-StreamPanner::add_state (XMLNode& node)
+XMLNode&
+StreamPanner::get_state ()
 {
-	node.add_property (X_("muted"), (muted() ? "yes" : "no"));
-	node.add_property (X_("mono"), (_mono ? "yes" : "no"));
+        XMLNode* node = new XMLNode (X_("StreamPanner"));
+	node->add_property (X_("muted"), (muted() ? "yes" : "no"));
+	node->add_property (X_("mono"), (_mono ? "yes" : "no"));
+	node->add_child_nocopy (_control->get_state ());
+        return *node;
 }
 
 void
@@ -498,52 +510,24 @@ EqualPowerStereoPanner::get_state (void)
 XMLNode&
 EqualPowerStereoPanner::state (bool /*full_state*/)
 {
-	XMLNode* root = new XMLNode ("StreamPanner");
-	char buf[64];
-	LocaleGuard lg (X_("POSIX"));
-
-	snprintf (buf, sizeof (buf), "%.12g", _angles.azi);
-	root->add_property (X_("azimuth"), buf);
-	root->add_property (X_("type"), EqualPowerStereoPanner::name);
-
-	// XXX: dont save automation here... its part of the automatable panner now.
-
-	StreamPanner::add_state (*root);
-
-	root->add_child_nocopy (_control->get_state ());
-
-	return *root;
+	XMLNode& root (StreamPanner::get_state ());
+	root.add_property (X_("type"), EqualPowerStereoPanner::name);
+	return root;
 }
 
 int
 EqualPowerStereoPanner::set_state (const XMLNode& node, int version)
 {
-	const XMLProperty* prop;
 	LocaleGuard lg (X_("POSIX"));
-
-	if ((prop = node.property (X_("azimuth")))) {
-		AngularVector a (atof (prop->value().c_str()), 0.0);
-		set_position (a, true);
-	} else if ((prop = node.property (X_("x")))) {
-		/* old school cartesian positioning */
-		AngularVector a;
-		a.azi = BaseStereoPanner::lr_fract_to_azimuth (atof (prop->value().c_str()));
-		set_position (a, true);
-	}
 
 	StreamPanner::set_state (node, version);
 
 	for (XMLNodeConstIterator iter = node.children().begin(); iter != node.children().end(); ++iter) {
 
-		if ((*iter)->name() == Controllable::xml_node_name) {
-			if ((prop = (*iter)->property("name")) != 0 && prop->value() == "panner") {
-				_control->set_state (**iter, version);
-			}
-
-		} else if ((*iter)->name() == X_("Automation")) {
-
+                if ((*iter)->name() == X_("Automation")) {
+                        
 			_control->alist()->set_state (*((*iter)->children().front()), version);
-
+                        
 			if (_control->alist()->automation_state() != Off) {
 				double degrees = BaseStereoPanner::lr_fract_to_azimuth (_control->list()->eval (parent.session().transport_frame()));
 				set_position (AngularVector (degrees, 0.0));
@@ -556,7 +540,7 @@ EqualPowerStereoPanner::set_state (const XMLNode& node, int version)
 
 Panner::Panner (string name, Session& s)
 	: SessionObject (s, name)
-	, Automatable (s)
+        , Automatable (s)
 {
 	//set_name_old_auto (name);
 	set_name (name);
@@ -916,21 +900,14 @@ Panner::state (bool full)
 	node->add_property (X_("linked"), (_linked ? "yes" : "no"));
 	node->add_property (X_("link_direction"), enum_2_string (_link_direction));
 	node->add_property (X_("bypassed"), (bypassed() ? "yes" : "no"));
-
-	for (vector<Panner::Output>::iterator o = outputs.begin(); o != outputs.end(); ++o) {
-		XMLNode* onode = new XMLNode (X_("Output"));
-		snprintf (buf, sizeof (buf), "%.12g", (*o).position.azi);
-		onode->add_property (X_("azimuth"), buf);
-		snprintf (buf, sizeof (buf), "%.12g", (*o).position.ele);
-		onode->add_property (X_("elevation"), buf);
-		node->add_child_nocopy (*onode);
-	}
+        snprintf (buf, sizeof (buf), "%zd", outputs.size());
+        node->add_property (X_("outputs"), buf);
 
 	for (vector<StreamPanner*>::const_iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 		node->add_child_nocopy ((*i)->state (full));
 	}
 
-	node->add_child_nocopy (get_automation_xml_state ());
+        node->add_child_nocopy (get_automation_xml_state ());
 
 	return *node;
 }
@@ -938,7 +915,7 @@ Panner::state (bool full)
 int
 Panner::set_state (const XMLNode& node, int version)
 {
-	XMLNodeList nlist;
+	XMLNodeList nlist = node.children ();
 	XMLNodeConstIterator niter;
 	const XMLProperty *prop;
 	uint32_t i;
@@ -967,27 +944,38 @@ Panner::set_state (const XMLNode& node, int version)
 		set_link_direction (LinkDirection (string_2_enum (prop->value(), ld)));
 	}
 
-	nlist = node.children();
+        if ((prop = node.property (X_("outputs"))) != 0) {
+                uint32_t n = atoi (prop->value());
 
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == X_("Output")) {
+                while (n--) {
+                        AngularVector a; // value is irrelevant
+                        outputs.push_back (Output (a));
+                }
 
-			AngularVector a;
+        } else {
+                
+                /* old school */
 
-			if ((prop = (*niter)->property (X_("azimuth")))) {
-				sscanf (prop->value().c_str(), "%lg", &a.azi);
-			} else if ((prop = (*niter)->property (X_("x")))) {
-				/* old school cartesian */
-				a.azi = BaseStereoPanner::lr_fract_to_azimuth (atof (prop->value().c_str()));
-			}
-
-			if ((prop = (*niter)->property (X_("elevation")))) {
-				sscanf (prop->value().c_str(), "%lg", &a.ele);
-			}
-
-			outputs.push_back (Output (a));
-		}
-	}
+                for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+                        if ((*niter)->name() == X_("Output")) {
+                                
+                                AngularVector a;
+                                
+                                if ((prop = (*niter)->property (X_("azimuth")))) {
+                                        sscanf (prop->value().c_str(), "%lg", &a.azi);
+                                } else if ((prop = (*niter)->property (X_("x")))) {
+                                        /* old school cartesian */
+                                        a.azi = BaseStereoPanner::lr_fract_to_azimuth (atof (prop->value().c_str()));
+                                }
+                                
+                                if ((prop = (*niter)->property (X_("elevation")))) {
+                                        sscanf (prop->value().c_str(), "%lg", &a.ele);
+                                }
+                                
+                                outputs.push_back (Output (a));
+                        }
+                }
+        }
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
@@ -1041,11 +1029,13 @@ Panner::set_state (const XMLNode& node, int version)
 		automation_path = Glib::build_filename(_session.automation_dir(), prop->value ());
 	}
 
+#ifdef MUST_FIX_PANNER_AUTOMATION
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == X_("Automation")) {
 			set_automation_xml_state (**niter, Evoral::Parameter (PanAutomation));
 		}
 	}
+#endif
 	
 	return 0;
 }

@@ -55,7 +55,7 @@ AutomationControl::set_value(double value)
  
         if (to_list && parameter().toggled()) {
 
-                //store the previous value just before this so any 
+                // store the previous value just before this so any 
                 // interpolation works right
                 
                 _list->add (get_double(), _session.transport_frame()-1);

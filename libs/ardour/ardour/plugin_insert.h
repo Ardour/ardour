@@ -81,7 +81,8 @@ class PluginInsert : public Processor
 
 		void set_value (double val);
 		double get_value (void) const;
-
+                XMLNode& get_state();
+                
 	private:
 		PluginInsert* _plugin;
 		bool _logarithmic;
@@ -136,6 +137,7 @@ class PluginInsert : public Processor
 	void set_automatable ();
 	void control_list_automation_state_changed (Evoral::Parameter, AutoState);
 	void set_parameter_state_2X (const XMLNode& node, int version);
+        void set_control_ids (const XMLNode&, int version);
 
 	int32_t count_for_configuration (ChanCount in, ChanCount out) const;
 

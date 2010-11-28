@@ -209,6 +209,7 @@ AudioTrack::_set_state (const XMLNode& node, int version, bool call_base)
 {
 	const XMLProperty *prop;
 	XMLNodeConstIterator iter;
+	XMLNode *child;
 
 	if (call_base) {
 		if (Route::_set_state (node, version, call_base)) {
@@ -222,9 +223,20 @@ AudioTrack::_set_state (const XMLNode& node, int version, bool call_base)
 		_mode = Normal;
 	}
 
+	if (version >= 3000) {
+		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
+			boost::shared_ptr<AudioDiskstream> ds (new AudioDiskstream (_session, *child));
+			ds->do_refill_with_alloc ();
+			set_diskstream (ds);
+		}
+	}
+
+        /* set rec-enable control *AFTER* setting up diskstream, because it may want to operate
+           on the diskstream as it sets its own state
+        */
+
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
-	XMLNode *child;
 
 	nlist = node.children();
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
@@ -237,13 +249,6 @@ AudioTrack::_set_state (const XMLNode& node, int version, bool call_base)
                 }
 	}
 
-	if (version >= 3000) {
-		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
-			boost::shared_ptr<AudioDiskstream> ds (new AudioDiskstream (_session, *child));
-			ds->do_refill_with_alloc ();
-			set_diskstream (ds);
-		}
-	}
 
 	pending_state = const_cast<XMLNode*> (&node);
 

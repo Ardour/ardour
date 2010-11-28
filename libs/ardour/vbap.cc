@@ -222,8 +222,9 @@ VBAPanner::get_state ()
 XMLNode&
 VBAPanner::state (bool full_state)
 {
-	XMLNode* node = new XMLNode (X_("VBAPanner"));
-	return *node;
+        XMLNode& node (StreamPanner::get_state());
+	node.add_property (X_("type"), VBAPanner::name);
+	return node;
 }
 
 int

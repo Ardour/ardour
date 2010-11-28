@@ -87,6 +87,20 @@ class StreamPanner : public PBD::Stateful
 	/* old school automation loading */
 	virtual int load (std::istream&, std::string path, uint32_t&) = 0;
 
+	struct PanControllable : public AutomationControl {
+		PanControllable (Session& s, std::string name, StreamPanner& p, Evoral::Parameter param)
+			: AutomationControl (s, param,
+                                             boost::shared_ptr<AutomationList>(new AutomationList(param)), name)
+			, streampanner (p)
+		{ assert(param.type() != NullAutomation); }
+                
+		AutomationList* alist() { return (AutomationList*)_list.get(); }
+		StreamPanner& streampanner;
+
+		void set_value (double);
+		double get_value (void) const;
+	};
+
   protected:
 	friend class Panner;
 	Panner& parent;
@@ -99,10 +113,10 @@ class StreamPanner : public PBD::Stateful
 
 	bool _muted;
 	bool _mono;
-
+        
 	boost::shared_ptr<AutomationControl> _control;
 
-	void add_state (XMLNode&);
+	XMLNode& get_state ();
 
 	/* Update internal parameters based on this.angles */
 	virtual void update () = 0;
@@ -257,30 +271,16 @@ public:
 
 	int load ();
 
-	struct PanControllable : public AutomationControl {
-		PanControllable (Session& s, std::string name, Panner& p, Evoral::Parameter param)
-			: AutomationControl (s, param,
-					boost::shared_ptr<AutomationList>(new AutomationList(param)), name)
-			, panner (p)
-		{ assert(param.type() != NullAutomation); }
-
-		AutomationList* alist() { return (AutomationList*)_list.get(); }
-		Panner& panner;
-
-		void set_value (double);
-		double get_value (void) const;
-	};
-
-	boost::shared_ptr<AutomationControl> pan_control (int id, int chan=0) {
+	boost::shared_ptr<AutomationControl> pan_control (int id, uint32_t chan=0) {
 		return automation_control (Evoral::Parameter (PanAutomation, chan, id));
 	}
 
-	boost::shared_ptr<const AutomationControl> pan_control (int id, int chan=0) const {
+	boost::shared_ptr<const AutomationControl> pan_control (int id, uint32_t chan=0) const {
 		return automation_control (Evoral::Parameter (PanAutomation, chan, id));
 	}
 
 	static std::string value_as_string (double);
-
+        
   private:
 	/* disallow copy construction */
 	Panner (Panner const &);

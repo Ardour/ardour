@@ -21,6 +21,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/xml++.h"
 #include "pbd/error.h"
+#include "pbd/locale_guard.h"
 
 #include "i18n.h"
 
@@ -102,6 +103,7 @@ XMLNode&
 Controllable::get_state ()
 {
 	XMLNode* node = new XMLNode (xml_node_name);
+	LocaleGuard lg (X_("POSIX"));
 	char buf[64];
 
 	node->add_property (X_("name"), _name); // not reloaded from XML state, just there to look at
@@ -114,14 +116,15 @@ Controllable::get_state ()
 	return *node;
 }
 
+
 int
 Controllable::set_state (const XMLNode& node, int /*version*/)
 {
+	LocaleGuard lg (X_("POSIX"));
 	const XMLProperty* prop;
 
 	if ((prop = node.property (X_("id"))) != 0) {
 		_id = prop->value();
-		return 0;
 	} else {
 		error << _("Controllable state node has no ID property") << endmsg;
 		return -1;
@@ -136,8 +139,10 @@ Controllable::set_state (const XMLNode& node, int /*version*/)
 
 		if (sscanf (prop->value().c_str(), "%f", &val) == 1) {
 			set_value (val);
-		}
-	}
+		} 
+        }
+
+        return 0;
 }
 
 void
