@@ -494,7 +494,7 @@ LV2Plugin::describe_parameter (Evoral::Parameter which)
 {
 	if (which.type() == PluginAutomation && which.id() < parameter_count()) {
 		SLV2Value name = slv2_port_get_name(_plugin,
-			slv2_plugin_get_port_by_index(_plugin, which));
+                                                    slv2_plugin_get_port_by_index(_plugin, which.id()));
 		string ret(slv2_value_as_string(name));
 		slv2_value_free(name);
 		return ret;
