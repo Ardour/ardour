@@ -527,7 +527,12 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		}
 
 		if (control_ui->logarithmic) {
-			adj->set_value(log(plugin->get_parameter(port_index)));
+                        double val = plugin->get_parameter (port_index);
+                        if (isnan (val) || val <= 0.0) {
+                                adj->set_value (0.0);
+                        } else {
+                                adj->set_value (log(val));
+                        }
 		} else{
 			adj->set_value(plugin->get_parameter(port_index));
 		}
