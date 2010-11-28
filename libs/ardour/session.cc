@@ -757,12 +757,6 @@ Session::hookup_io ()
 }
 
 void
-Session::playlist_length_changed ()
-{
-	update_session_range_location_marker ();
-}
-
-void
 Session::track_playlist_changed (boost::weak_ptr<Track> wp)
 {
 	boost::shared_ptr<Track> track = wp.lock ();
@@ -773,7 +767,8 @@ Session::track_playlist_changed (boost::weak_ptr<Track> wp)
 	boost::shared_ptr<Playlist> playlist;
 
 	if ((playlist = track->playlist()) != 0) {
-		playlist->LengthChanged.connect_same_thread (*this, boost::bind (&Session::playlist_length_changed, this));
+		playlist->LengthChanged.connect_same_thread (*this, boost::bind (&Session::update_session_range_location_marker, this));
+		playlist->RangesMoved.connect_same_thread (*this, boost::bind (&Session::update_session_range_location_marker, this));
 	}
 
 	update_session_range_location_marker ();

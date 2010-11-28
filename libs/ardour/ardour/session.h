@@ -1270,7 +1270,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* PLAYLISTS */
 
 	void remove_playlist (boost::weak_ptr<Playlist>);
-	void playlist_length_changed ();
 	void track_playlist_changed (boost::weak_ptr<Track>);
 
 	/* NAMED SELECTIONS */
