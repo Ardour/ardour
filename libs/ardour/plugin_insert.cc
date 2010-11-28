@@ -191,7 +191,7 @@ PluginInsert::set_automatable ()
 			Evoral::Parameter param(*i);
 
 			_plugins.front()->get_parameter_descriptor(i->id(), desc);
-			
+                        
 			/* the Parameter belonging to the actual plugin doesn't have its range set
 			   but we want the Controllable related to this Parameter to have those limits.
 			*/
@@ -915,8 +915,9 @@ PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 string
 PluginInsert::describe_parameter (Evoral::Parameter param)
 {
-	if (param.type() != PluginAutomation)
+	if (param.type() != PluginAutomation) {
 		return Automatable::describe_parameter(param);
+        }
 
 	return _plugins[0]->describe_parameter (param);
 }

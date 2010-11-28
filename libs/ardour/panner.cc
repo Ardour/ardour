@@ -101,7 +101,19 @@ StreamPanner::set_mono (bool yn)
 void
 StreamPanner::PanControllable::set_value (double val)
 {
-	streampanner.set_position (AngularVector (direct_control_to_stereo_pan (val), 0.0));
+        switch (parameter().id()) {
+        case 100:
+                /* position */
+                streampanner.get_parent().set_stereo_position (val);
+                break;
+        case 200:
+                /* width */
+                streampanner.get_parent().set_stereo_width (val);
+                break;
+        default:
+                streampanner.set_position (AngularVector (direct_control_to_stereo_pan (val), 0.0));
+        }
+
 	AutomationControl::set_value(val);
 }
 
@@ -746,6 +758,8 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		(*x)->update ();
 	}
 
+        setup_meta_controls ();
+
 	/* must emit Changed here, otherwise the changes to the pan_control below raise further
 	   signals which the GUI is not prepared for until it has seen the Changed here.
 	*/
@@ -997,12 +1011,11 @@ Panner::set_state (const XMLNode& node, int version)
 
 						if (sp->set_state (**niter, version) == 0) {
 							_streampanners.push_back (sp);
-						}
+                                                }
 
 						break;
 					}
 				}
-
 
 				if (!pan_plugins[i].factory) {
 					error << string_compose (_("Unknown panner plugin \"%1\" found in pan state - ignored"),
@@ -1019,7 +1032,10 @@ Panner::set_state (const XMLNode& node, int version)
 		}
 	}
 
+        setup_meta_controls ();
+
 	reset (outputs.size (), num_panners);
+
 	/* don't try to do old-school automation loading if it wasn't marked as existing */
 
 	if ((prop = node.property (X_("automation")))) {
@@ -1029,14 +1045,12 @@ Panner::set_state (const XMLNode& node, int version)
 		automation_path = Glib::build_filename(_session.automation_dir(), prop->value ());
 	}
 
-#ifdef MUST_FIX_PANNER_AUTOMATION
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == X_("Automation")) {
 			set_automation_xml_state (**niter, Evoral::Parameter (PanAutomation));
 		}
 	}
-#endif
-	
+
 	return 0;
 }
 
@@ -1377,4 +1391,43 @@ Panner::setup_speakers (uint32_t nouts)
 	for (vector<Output>::iterator o = outputs.begin(); o != outputs.end(); ++o) {
 		speakers.add_speaker ((*o).position);
 	}
+}
+
+void
+Panner::set_stereo_width (double val)
+{
+        cerr << "Set stereo width to " << val << endl;
+}
+
+void
+Panner::set_stereo_position (double val)
+{
+        cerr << "Set stereo position to " << val << endl;
+}
+
+void
+Panner::setup_meta_controls ()
+{
+        if (_streampanners.size() != 2 || outputs.size() != 2) {
+                return;
+        }
+
+        /* 2 signals to 2 outputs: provide "classic" controls for easier manipulation.
+           
+           The ID numbers used here don't really matter that much, because Parameters are scoped by owner,
+           but they keep us out of the ordinary range of pan-related parameters.
+        */
+        
+        Evoral::Parameter lr_param (PanAutomation, 0, 100);
+        Evoral::Parameter width_param (PanAutomation, 0, 200);
+        
+        if (!automation_control (lr_param)) {
+                boost::shared_ptr<AutomationControl> c (new StreamPanner::PanControllable (_session, _("lr"), *_streampanners.front(), lr_param));
+                add_control (c);
+        }
+        
+        if (!automation_control (width_param)) {
+                boost::shared_ptr<AutomationControl> c (new StreamPanner::PanControllable (_session, _("width"), *_streampanners.front(), width_param));
+                add_control (c);
+        }
 }

@@ -42,6 +42,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/dB.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/panner.h"
 
 #include "osc.h"
 #include "osc_controllable.h"
@@ -779,6 +780,42 @@ OSC::route_set_gain_dB (int rid, float dB)
 	}
 	
 	return 0;
+}
+
+int
+OSC::route_set_pan_stereo_position (int rid, float pos)
+{
+	if (!session) return -1;
+
+	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+
+	if (r) {
+                boost::shared_ptr<Panner> panner = r->panner();
+                if (panner) {
+                        panner->set_stereo_position (pos);
+                }
+	}
+	
+	return 0;
+
+}
+
+int
+OSC::route_set_pan_stereo_width (int rid, float pos)
+{
+	if (!session) return -1;
+
+	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
+
+	if (r) {
+                boost::shared_ptr<Panner> panner = r->panner();
+                if (panner) {
+                        panner->set_stereo_width (pos);
+                }
+	}
+	
+	return 0;
+
 }
 
 XMLNode& 

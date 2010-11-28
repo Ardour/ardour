@@ -74,6 +74,7 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/auditioner.h"
+#include "ardour/automation_control.h"
 #include "ardour/buffer.h"
 #include "ardour/butler.h"
 #include "ardour/configuration.h"
@@ -91,6 +92,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
 #include "ardour/named_selection.h"
+#include "ardour/panner.h"
 #include "ardour/processor.h"
 #include "ardour/port.h"
 #include "ardour/region_factory.h"
@@ -2978,9 +2980,27 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 		break;
 	}
 
-	case ControllableDescriptor::Pan:
-		/* XXX pan control */
+	case ControllableDescriptor::PanDirection:
+        {
+                boost::shared_ptr<Panner> p = r->panner();
+                cerr << "Looking at panner for " << r->name() << endl;
+                if (p) {
+                        c = p->direction_control();
+                        cerr << "PAN DIRECTION Bound TO " << c << endl;
+                }
 		break;
+        }
+
+	case ControllableDescriptor::PanWidth:
+        {
+                boost::shared_ptr<Panner> p = r->panner();
+                cerr << "Looking at panner for " << r->name() << endl;
+                if (p) {
+                        c = p->width_control();
+                        cerr << "PAN WIDTH Bound TO " << c << endl;
+                }
+		break;
+        }
 
 	case ControllableDescriptor::Balance:
 		/* XXX simple pan control */

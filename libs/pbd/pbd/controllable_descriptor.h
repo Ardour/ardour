@@ -37,7 +37,8 @@ public:
 	    Solo,
 	    Mute,
 	    Recenable,
-	    Pan,
+	    PanDirection,
+	    PanWidth,
 	    Balance,
 	    SendGain,
 	    PluginParameter

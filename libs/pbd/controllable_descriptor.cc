@@ -84,9 +84,11 @@ ControllableDescriptor::set (const std::string& str)
 	} else if (path[1] == "balance") {
 		_subtype = Balance;
 
-	} else if (path[1] == "pan") {
-		_subtype = Pan;
-		_target.push_back (atoi (rest[1]));
+	} else if (path[1] == "panwidth") {
+		_subtype = PanWidth;
+
+	} else if (path[1] == "pandirection") {
+		_subtype = PanDirection;
 
 	} else if (path[1] == "plugin") {
 		if (path.size() == 3 && rest.size() == 3) {

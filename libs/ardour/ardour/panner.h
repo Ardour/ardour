@@ -279,6 +279,17 @@ public:
 		return automation_control (Evoral::Parameter (PanAutomation, chan, id));
 	}
 
+	boost::shared_ptr<AutomationControl> direction_control () {
+		return automation_control (Evoral::Parameter (PanAutomation, 0, 100));
+	}
+
+	boost::shared_ptr<AutomationControl> width_control () {
+		return automation_control (Evoral::Parameter (PanAutomation, 0, 200));
+	}
+
+        void set_stereo_position (double);
+        void set_stereo_width (double);
+        
 	static std::string value_as_string (double);
         
   private:
@@ -297,7 +308,8 @@ public:
 	static float current_automation_version_number;
 
 	void setup_speakers (uint32_t nouts);
-        
+        void setup_meta_controls ();
+
 	/* old school automation handling */
 
 	std::string automation_path;
