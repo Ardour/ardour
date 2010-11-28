@@ -156,6 +156,19 @@ MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
 	XMLNode *child;
 
 	nlist = node.children();
+
+	if (version >= 3000) {
+		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
+			boost::shared_ptr<MidiDiskstream> ds (new MidiDiskstream (_session, *child));
+			ds->do_refill_with_alloc ();
+			set_diskstream (ds);
+		}
+	}
+
+        /* set rec-enable control *AFTER* setting up diskstream, because it may want to operate
+           on the diskstream as it sets its own state
+        */
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 		child = *niter;
 
@@ -164,14 +177,6 @@ MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
                                 _rec_enable_control->set_state (*child, version);
                         }
                 }
-	}
-
-	if (version >= 3000) {
-		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
-			boost::shared_ptr<MidiDiskstream> ds (new MidiDiskstream (_session, *child));
-			ds->do_refill_with_alloc ();
-			set_diskstream (ds);
-		}
 	}
 
 	pending_state = const_cast<XMLNode*> (&node);
