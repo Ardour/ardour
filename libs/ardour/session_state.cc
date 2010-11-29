@@ -2983,10 +2983,8 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 	case ControllableDescriptor::PanDirection:
         {
                 boost::shared_ptr<Panner> p = r->panner();
-                cerr << "Looking at panner for " << r->name() << endl;
                 if (p) {
                         c = p->direction_control();
-                        cerr << "PAN DIRECTION Bound TO " << c << endl;
                 }
 		break;
         }
@@ -2994,10 +2992,8 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 	case ControllableDescriptor::PanWidth:
         {
                 boost::shared_ptr<Panner> p = r->panner();
-                cerr << "Looking at panner for " << r->name() << endl;
                 if (p) {
                         c = p->width_control();
-                        cerr << "PAN WIDTH Bound TO " << c << endl;
                 }
 		break;
         }

@@ -92,13 +92,14 @@ class StreamPanner : public PBD::Stateful
 			: AutomationControl (s, param,
                                              boost::shared_ptr<AutomationList>(new AutomationList(param)), name)
 			, streampanner (p)
-		{ assert(param.type() != NullAutomation); }
+		{ assert (param.type() == PanAutomation); }
                 
 		AutomationList* alist() { return (AutomationList*)_list.get(); }
 		StreamPanner& streampanner;
 
 		void set_value (double);
 		double get_value (void) const;
+                double lower () const;
 	};
 
   protected:
@@ -213,6 +214,8 @@ public:
 	AutoStyle automation_style() const;
 	bool touching() const;
 
+	std::string describe_parameter (Evoral::Parameter param);
+
 	bool can_support_io_configuration (const ChanCount& /*in*/, ChanCount& /*out*/) const { return true; };
 
 	/// The fundamental Panner function
@@ -289,6 +292,7 @@ public:
 
         void set_stereo_position (double);
         void set_stereo_width (double);
+        bool set_stereo_pan (double pos, double width);
         
 	static std::string value_as_string (double);
         

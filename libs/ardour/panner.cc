@@ -98,20 +98,36 @@ StreamPanner::set_mono (bool yn)
 	}
 }
 
+double
+StreamPanner::PanControllable::lower () const
+{
+        switch (parameter().id()) {
+        case 200: /* width */
+                return -1.0;
+        default:
+                return 0.0;
+        }
+}
+
 void
 StreamPanner::PanControllable::set_value (double val)
 {
+        Panner& p (streampanner.get_parent());
         switch (parameter().id()) {
         case 100:
                 /* position */
-                AutomationControl::set_value(val);
-                streampanner.get_parent().set_stereo_position (val);
+                if (p.set_stereo_pan (val, p.width_control()->get_value())) {
+                        AutomationControl::set_value(val);
+                }
                 break;
+
         case 200:
                 /* width */
-                AutomationControl::set_value(val);
-                streampanner.get_parent().set_stereo_width (val);
+                if (p.set_stereo_pan (p.direction_control()->get_value(), val)) {
+                        AutomationControl::set_value(val);
+                }
                 break;
+
         default:
                 streampanner.set_position (AngularVector (direct_control_to_stereo_pan (val), 0.0));
                 AutomationControl::set_value(val);
@@ -1400,42 +1416,65 @@ void
 Panner::set_stereo_width (double val)
 {
         boost::shared_ptr<AutomationControl> dc = direction_control();
-        
-        if (!dc) {
-                return;
+        if (dc) {
+                dc->set_value (val);
         }
-        
-        double d = dc->get_value ();
-        set_stereo_position (d);
 }
 
 void
 Panner::set_stereo_position (double val)
 {
-        /* val is the range 0..1 */
-        
-        AngularVector p (BaseStereoPanner::lr_fract_to_azimuth (val), 0.0);
         boost::shared_ptr<AutomationControl> wc = width_control();
+        if (wc) {
+                wc->set_value (val);
+        }
+}
+
+bool
+Panner::set_stereo_pan (double direction_as_lr_fract, double width)
+{
+        AngularVector p (BaseStereoPanner::lr_fract_to_azimuth (direction_as_lr_fract), 0.0);
+        /* width parameter ranges from -1..+1 with 0.0 at center. we want 0..+1 plus knowing
+           whether its "reversed" (i.e. left signal pans right and right signal pans left).
+           full width = 180 degrees
+        */
+        double spread = 2.0 * fabs(width/2.0) * 180.0; 
+        double l_pos = p.azi + (spread/2.0);  /* more left is "increasing degrees" */
+        double r_pos = p.azi - (spread/2.0);  /* more right is "decreasing degrees" */
+        bool move_left = true;
+        bool move_right = true;
         
-        if (!wc) {
-                return;
-        }
-
-        double spread = width_control()->get_value () * 180.0;
-        double l_pos = p.azi + (spread/2.0); /* more left is "increasing degrees" */
-        double r_pos = p.azi - (spread/2.0); /* more right is "decreasing degrees" */
-
-        if (l_pos > 180.0 || r_pos < 0.0) {
-                /* already full panned, can't move any more */
-                return;
-        }
-
         assert (_streampanners.size() > 1);
 
-        cerr << "pos = " << BaseStereoPanner::lr_fract_to_azimuth (val) << " spread = " << width_control()->get_value() << " left = " << l_pos << " right = " << r_pos << endl;
+        if (width < 0.0) {
+                swap (l_pos, r_pos);
+        }
 
-        _streampanners[0]->set_position (AngularVector (l_pos, 0.0));
-        _streampanners[1]->set_position (AngularVector (r_pos, 0.0));
+        /* if the new right position is less than or equal to 180 (hard left) and the left panner
+           is already there, we're not moving the left signal. 
+        */
+
+        if (l_pos > 180.0 && _streampanners[0]->get_position().azi == 180.0) {
+                move_left = false;
+        }
+
+        /* if the new right position is less than or equal to zero (hard right) and the right panner
+           is already there, we're not moving the right signal. 
+        */
+        
+        if (r_pos <= 0.0 && _streampanners[1]->get_position().azi == 0.0) {
+                move_right = false;
+        }
+
+        l_pos = max (min (l_pos, 180.0), 0.0);
+        r_pos = max (min (r_pos, 180.0), 0.0);
+
+        if (move_left && move_right) {
+                _streampanners[0]->set_position (AngularVector (l_pos, 0.0));
+                _streampanners[1]->set_position (AngularVector (r_pos, 0.0));
+        }
+
+        return move_left && move_right;
 }
 
 void
@@ -1453,16 +1492,48 @@ Panner::setup_meta_controls ()
         
         Evoral::Parameter lr_param (PanAutomation, 0, 100);
         Evoral::Parameter width_param (PanAutomation, 0, 200);
-        
+        boost::shared_ptr<AutomationControl> wc;
+        boost::shared_ptr<AutomationControl> dc;
+
         if (!automation_control (lr_param)) {
-                boost::shared_ptr<AutomationControl> c (new StreamPanner::PanControllable (_session, _("lr"), *_streampanners.front(), lr_param));
-                c->set_value (0.5);
-                add_control (c);
+                dc.reset (new StreamPanner::PanControllable (_session, _("lr"), *_streampanners.front(), lr_param));
+                add_control (dc);
         }
         
         if (!automation_control (width_param)) {
-                boost::shared_ptr<AutomationControl> c (new StreamPanner::PanControllable (_session, _("width"), *_streampanners.front(), width_param));
-                c->set_value (1.0); // full width
-                add_control (c);
+                wc.reset (new StreamPanner::PanControllable (_session, _("width"), *_streampanners.front(), width_param));
+                add_control (wc);
         }
+
+        dc->set_value (0.5);
+        wc->set_value (1.0); // full width
+
+}
+
+string
+Panner::describe_parameter (Evoral::Parameter param)
+{
+        if (param.type() == PanAutomation) {
+                switch (param.id()) {
+                case 100:
+                        return "Pan:position";
+                case 200:
+                        return "Pan:width";
+                default:
+                        if (_streampanners.size() == 2) {
+                                switch (param.id()) {
+                                case 0:
+                                        return "Pan L";
+                                default:
+                                        return "Pan R";
+                                }
+                        } else {
+                                stringstream ss;
+                                ss << "Pan " << param.id() + 1;
+                                return ss.str ();
+                        }
+                }
+        }
+
+        return Automatable::describe_parameter (param);
 }
