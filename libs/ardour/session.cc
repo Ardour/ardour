@@ -110,8 +110,6 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-using boost::shared_ptr;
-using boost::weak_ptr;
 
 bool Session::_disable_all_loaded_plugins = false;
 
@@ -465,7 +463,7 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
 
-		shared_ptr<Bundle> c (new Bundle (buf, true));
+                boost::shared_ptr<Bundle> c (new Bundle (buf, true));
 		c->add_channel (_("mono"), DataType::AUDIO);
 		c->set_port (0, outputs[DataType::AUDIO][np]);
 
@@ -478,7 +476,7 @@ Session::when_engine_running ()
 		if (np + 1 < outputs[DataType::AUDIO].size()) {
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("out %" PRIu32 "+%" PRIu32), np + 1, np + 2);
-			shared_ptr<Bundle> c (new Bundle (buf, true));
+                        boost::shared_ptr<Bundle> c (new Bundle (buf, true));
 			c->add_channel (_("L"), DataType::AUDIO);
 			c->set_port (0, outputs[DataType::AUDIO][np]);
 			c->add_channel (_("R"), DataType::AUDIO);
@@ -494,7 +492,7 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
 
-		shared_ptr<Bundle> c (new Bundle (buf, false));
+                boost::shared_ptr<Bundle> c (new Bundle (buf, false));
 		c->add_channel (_("mono"), DataType::AUDIO);
 		c->set_port (0, inputs[DataType::AUDIO][np]);
 
@@ -508,7 +506,7 @@ Session::when_engine_running ()
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("in %" PRIu32 "+%" PRIu32), np + 1, np + 2);
 
-			shared_ptr<Bundle> c (new Bundle (buf, false));
+                        boost::shared_ptr<Bundle> c (new Bundle (buf, false));
 			c->add_channel (_("L"), DataType::AUDIO);
 			c->set_port (0, inputs[DataType::AUDIO][np]);
 			c->add_channel (_("R"), DataType::AUDIO);
@@ -524,7 +522,7 @@ Session::when_engine_running ()
 		string n = inputs[DataType::MIDI][np];
 		boost::erase_first (n, X_("alsa_pcm:"));
 		
-		shared_ptr<Bundle> c (new Bundle (n, false));
+                boost::shared_ptr<Bundle> c (new Bundle (n, false));
 		c->add_channel ("", DataType::MIDI);
 		c->set_port (0, inputs[DataType::MIDI][np]);
 		add_bundle (c);
@@ -536,7 +534,7 @@ Session::when_engine_running ()
 		string n = outputs[DataType::MIDI][np];
 		boost::erase_first (n, X_("alsa_pcm:"));
 
-		shared_ptr<Bundle> c (new Bundle (n, true));
+                boost::shared_ptr<Bundle> c (new Bundle (n, true));
 		c->add_channel ("", DataType::MIDI);
 		c->set_port (0, outputs[DataType::MIDI][np]);
 		add_bundle (c);
@@ -1326,9 +1324,9 @@ struct RouteSorter {
 };
 
 static void
-trace_terminal (shared_ptr<Route> r1, shared_ptr<Route> rbase)
+trace_terminal (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> rbase)
 {
-	shared_ptr<Route> r2;
+        boost::shared_ptr<Route> r2;
 
 	if (r1->feeds (rbase) && rbase->feeds (r1)) {
 		info << string_compose(_("feedback loop setup between %1 and %2"), r1->name(), rbase->name()) << endmsg;
@@ -1388,7 +1386,7 @@ Session::resort_routes ()
 
 	{
 		RCUWriter<RouteList> writer (routes);
-		shared_ptr<RouteList> r = writer.get_copy ();
+                boost::shared_ptr<RouteList> r = writer.get_copy ();
 		resort_routes_using (r);
 		/* writer goes out of scope and forces update */
 	}
@@ -1413,7 +1411,7 @@ Session::resort_routes ()
 
 }
 void
-Session::resort_routes_using (shared_ptr<RouteList> r)
+Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 {
 	RouteList::iterator i, j;
 
@@ -1492,7 +1490,7 @@ Session::count_existing_route_channels (ChanCount& in, ChanCount& out)
 {
 	in  = ChanCount::ZERO;
 	out = ChanCount::ZERO;
-	shared_ptr<RouteList> r = routes.reader ();
+        boost::shared_ptr<RouteList> r = routes.reader ();
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->is_hidden()) {
 			in  += (*i)->n_inputs();
@@ -1524,7 +1522,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 			goto failed;
 		}
 
-		shared_ptr<MidiTrack> track;
+                boost::shared_ptr<MidiTrack> track;
                 
 		try {
 			MidiTrack* mt = new MidiTrack (*this, track_name, Route::Flag (0), mode);
@@ -1693,8 +1691,8 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			goto failed;
 		}
 
-		shared_ptr<AudioTrack> track;
-
+                boost::shared_ptr<AudioTrack> track;
+                
 		try {
 			AudioTrack* at = new AudioTrack (*this, track_name, Route::Flag (0), mode);
 
@@ -1772,7 +1770,7 @@ Session::set_remote_control_ids ()
 	RemoteModel m = Config->get_remote_model();
 	bool emit_signal = false;
 
-	shared_ptr<RouteList> r = routes.reader ();
+        boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (MixerOrdered == m) {
@@ -1824,7 +1822,7 @@ Session::new_audio_route (bool aux, int input_channels, int output_channels, Rou
 			}
 
 			boost_debug_shared_ptr_mark_interesting (rt, "Route");
-			shared_ptr<Route> bus (rt);
+                        boost::shared_ptr<Route> bus (rt);
 
 			{
 				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
@@ -1924,7 +1922,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 		Track::zero_diskstream_id_in_xml (node_copy);
 
 		try {
-			shared_ptr<Route> route (XMLRouteFactory (node_copy, 3000));
+                        boost::shared_ptr<Route> route (XMLRouteFactory (node_copy, 3000));
 
 			if (route == 0) {
 				error << _("Session: cannot create track/bus from template description") << endmsg;
@@ -1975,7 +1973,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 {
 	{
 		RCUWriter<RouteList> writer (routes);
-		shared_ptr<RouteList> r = writer.get_copy ();
+                boost::shared_ptr<RouteList> r = writer.get_copy ();
 		r->insert (r->end(), new_routes.begin(), new_routes.end());
 
 
@@ -2143,7 +2141,7 @@ Session::add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::
 }
 
 void
-Session::remove_route (shared_ptr<Route> route)
+Session::remove_route (boost::shared_ptr<Route> route)
 {
 	if (((route == _master_out) || (route == _monitor_out)) && !Config->get_allow_special_bus_removal()) {
 		return;
@@ -2153,7 +2151,7 @@ Session::remove_route (shared_ptr<Route> route)
 
 	{
 		RCUWriter<RouteList> writer (routes);
-		shared_ptr<RouteList> rs = writer.get_copy ();
+                boost::shared_ptr<RouteList> rs = writer.get_copy ();
 
 		rs->remove (route);
 
@@ -2163,7 +2161,7 @@ Session::remove_route (shared_ptr<Route> route)
 		*/
 
 		if (route == _master_out) {
-			_master_out = shared_ptr<Route> ();
+			_master_out = boost::shared_ptr<Route> ();
 		}
 
 		if (route == _monitor_out) {
@@ -2257,7 +2255,7 @@ Session::route_listen_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 
 		if (Config->get_exclusive_solo()) {
 			/* new listen: disable all other listen */
-			shared_ptr<RouteList> r = routes.reader ();
+			boost::shared_ptr<RouteList> r = routes.reader ();
 			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 				if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {
 					continue;
@@ -2324,7 +2322,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 		return;
 	}
         
-	shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> r = routes.reader ();
 	int32_t delta;
 
 	if (route->self_soloed()) {
@@ -2438,7 +2436,7 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 boost::shared_ptr<RouteList> 
 Session::get_routes_with_internal_returns() const
 {
-	shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> r = routes.reader ();
 	boost::shared_ptr<RouteList> rl (new RouteList);
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -2452,7 +2450,7 @@ Session::get_routes_with_internal_returns() const
 bool
 Session::io_name_is_legal (const std::string& name)
 {
-	shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> r = routes.reader ();
         
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->name() == name) {
@@ -2467,10 +2465,10 @@ Session::io_name_is_legal (const std::string& name)
 	return true;
 }
 
-shared_ptr<Route>
+boost::shared_ptr<Route>
 Session::route_by_name (string name)
 {
-	shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->name() == name) {
@@ -2478,13 +2476,13 @@ Session::route_by_name (string name)
 		}
 	}
 
-	return shared_ptr<Route> ((Route*) 0);
+	return boost::shared_ptr<Route> ((Route*) 0);
 }
 
-shared_ptr<Route>
+boost::shared_ptr<Route>
 Session::route_by_id (PBD::ID id)
 {
-	shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->id() == id) {
@@ -2492,13 +2490,13 @@ Session::route_by_id (PBD::ID id)
 		}
 	}
 
-	return shared_ptr<Route> ((Route*) 0);
+	return boost::shared_ptr<Route> ((Route*) 0);
 }
 
-shared_ptr<Route>
+boost::shared_ptr<Route>
 Session::route_by_remote_id (uint32_t id)
 {
-	shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->remote_control_id() == id) {
@@ -2506,7 +2504,7 @@ Session::route_by_remote_id (uint32_t id)
 		}
 	}
 
-	return shared_ptr<Route> ((Route*) 0);
+	return boost::shared_ptr<Route> ((Route*) 0);
 }
 
 /** If either end of the session range location marker lies inside the current
@@ -3270,7 +3268,7 @@ Session::available_capture_duration ()
 }
 
 void
-Session::add_bundle (shared_ptr<Bundle> bundle)
+Session::add_bundle (boost::shared_ptr<Bundle> bundle)
 {
 	{
 		RCUWriter<BundleList> writer (_bundles);
@@ -3284,7 +3282,7 @@ Session::add_bundle (shared_ptr<Bundle> bundle)
 }
 
 void
-Session::remove_bundle (shared_ptr<Bundle> bundle)
+Session::remove_bundle (boost::shared_ptr<Bundle> bundle)
 {
 	bool removed = false;
 
@@ -3306,7 +3304,7 @@ Session::remove_bundle (shared_ptr<Bundle> bundle)
 	set_dirty();
 }
 
-shared_ptr<Bundle>
+boost::shared_ptr<Bundle>
 Session::bundle_by_name (string name) const
 {
 	boost::shared_ptr<BundleList> b = _bundles.reader ();
@@ -3547,7 +3545,7 @@ Session::reset_native_file_format ()
 bool
 Session::route_name_unique (string n) const
 {
-	shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->name() == n) {
@@ -3575,7 +3573,7 @@ Session::route_name_internal (string n) const
 int
 Session::freeze_all (InterThreadInfo& itt)
 {
-	shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
@@ -3832,7 +3830,7 @@ uint32_t
 Session::ntracks () const
 {
 	uint32_t n = 0;
-	shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
 		if (boost::dynamic_pointer_cast<Track> (*i)) {
@@ -3847,7 +3845,7 @@ uint32_t
 Session::nbusses () const
 {
 	uint32_t n = 0;
-	shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
 		if (boost::dynamic_pointer_cast<Track>(*i) == 0) {
@@ -3977,8 +3975,8 @@ Session::get_available_sync_options () const
 boost::shared_ptr<RouteList>
 Session::get_routes_with_regions_at (framepos_t const p) const
 {
-	shared_ptr<RouteList> r = routes.reader ();
-	shared_ptr<RouteList> rl (new RouteList);
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> rl (new RouteList);
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
