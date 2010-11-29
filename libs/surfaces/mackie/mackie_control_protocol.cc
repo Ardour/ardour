@@ -67,8 +67,6 @@ using namespace std;
 using namespace Mackie;
 using namespace PBD;
 
-using boost::shared_ptr;
-
 #include "i18n.h"
 
 MackieMidiBuilder builder;
@@ -187,7 +185,7 @@ MackieControlProtocol::port_for_id (uint32_t index)
 // predicate for sort call in get_sorted_routes
 struct RouteByRemoteId
 {
-	bool operator () (const shared_ptr<Route> & a, const shared_ptr<Route> & b) const
+	bool operator () (const boost::shared_ptr<Route> & a, const boost::shared_ptr<Route> & b) const
 	{
 		return a->remote_control_id() < b->remote_control_id();
 	}
@@ -526,7 +524,7 @@ MackieControlProtocol::update_surface()
 
  boost::shared_ptr<Route> mr = master_route ();
  if (mr) {
- master_route_signal = shared_ptr<RouteSignal> (new RouteSignal (mr, *this, master_strip(), mcu_port()));
+ master_route_signal = boost::shared_ptr<RouteSignal> (new RouteSignal (mr, *this, master_strip(), mcu_port()));
  // update strip from route
  master_route_signal->notify_all();
  }
@@ -628,7 +626,7 @@ MackieControlProtocol::create_ports()
 	}
 }
 
-shared_ptr<Route> 
+boost::shared_ptr<Route> 
 MackieControlProtocol::master_route()
 {
 	return session->master_out ();
