@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="DDX3216">
+
+<!--Map built by Quentin Harley for Behringer DDX3216 -->
+<!--Updated 29 Nov 2010 -->
+
+<!--For this map to function properly the MIDI setup should be   -->
+<!--RX  TX	  -->
+<!--*   *	PROGRAM CHANGE  -->
+<!--*   *	CONTROL CHANGE  -->
+<!--O	*	MACHINE CONTROL  -->
+<!--*	*	DIRECTPARSYSEX  -->
+<!--  -->
+<!--And all the setting under (Rx / Tx only) activated  -->
+<!--  -->
+
+<!-- <DeviceInfo bank-size="128"/>  Possible, but not used by me presently -->
+
+  <Binding channel="1"  ctl="1"  uri="/route/gain B1"  />
+  <Binding channel="1"  ctl="2"  uri="/route/gain B2"  />
+  <Binding channel="1"  ctl="3"  uri="/route/gain B3"  />
+  <Binding channel="1"  ctl="4"  uri="/route/gain B4"  />
+  <Binding channel="1"  ctl="5"  uri="/route/gain B5"  />
+  <Binding channel="1"  ctl="6"  uri="/route/gain B6"  />
+  <Binding channel="1"  ctl="7"  uri="/route/gain B7"  />
+  <Binding channel="1"  ctl="8"  uri="/route/gain B8"  />
+  <Binding channel="1"  ctl="9"  uri="/route/gain B9"  />
+  <Binding channel="1"  ctl="10"  uri="/route/gain B10"  />
+  <Binding channel="1"  ctl="11"  uri="/route/gain B11"  />
+  <Binding channel="1"  ctl="12"  uri="/route/gain B12"  />
+  <Binding channel="1"  ctl="13"  uri="/route/gain B13"  />
+  <Binding channel="1"  ctl="14"  uri="/route/gain B14"  />
+  <Binding channel="1"  ctl="15"  uri="/route/gain B15"  />
+  <Binding channel="1"  ctl="16"  uri="/route/gain B16"  />
+  <Binding channel="1"  ctl="17"  uri="/route/gain B17"  />
+  <Binding channel="1"  ctl="18"  uri="/route/gain B18"  />
+  <Binding channel="1"  ctl="19"  uri="/route/gain B19"  />
+  <Binding channel="1"  ctl="20"  uri="/route/gain B20"  />
+  <Binding channel="1"  ctl="21"  uri="/route/gain B21"  />
+  <Binding channel="1"  ctl="22"  uri="/route/gain B22"  />
+  <Binding channel="1"  ctl="23"  uri="/route/gain B23"  />
+  <Binding channel="1"  ctl="24"  uri="/route/gain B24"  />
+  <Binding channel="1"  ctl="25"  uri="/route/gain B25"  />
+  <Binding channel="1"  ctl="26"  uri="/route/gain B26"  />
+  <Binding channel="1"  ctl="27"  uri="/route/gain B27"  />
+  <Binding channel="1"  ctl="28"  uri="/route/gain B28"  />
+  <Binding channel="1"  ctl="29"  uri="/route/gain B29"  />
+  <Binding channel="1"  ctl="30"  uri="/route/gain B30"  />
+  <Binding channel="1"  ctl="31"  uri="/route/gain B31"  />
+  <Binding channel="1"  ctl="32"  uri="/route/gain B32"  />
+
+<!-- The next section maps the DDX's busses for an extra 16 controllers until busses can be controlled separately -->
+
+  <Binding channel="1"  ctl="33"  uri="/route/gain B33"  />
+  <Binding channel="1"  ctl="34"  uri="/route/gain B34"  />
+  <Binding channel="1"  ctl="35"  uri="/route/gain B35"  />
+  <Binding channel="1"  ctl="36"  uri="/route/gain B36"  />
+  <Binding channel="1"  ctl="37"  uri="/route/gain B37"  />
+  <Binding channel="1"  ctl="38"  uri="/route/gain B38"  />
+  <Binding channel="1"  ctl="39"  uri="/route/gain B39"  />
+  <Binding channel="1"  ctl="40"  uri="/route/gain B40"  />
+  <Binding channel="1"  ctl="41"  uri="/route/gain B41"  />
+  <Binding channel="1"  ctl="42"  uri="/route/gain B42"  />
+  <Binding channel="1"  ctl="43"  uri="/route/gain B43"  />
+  <Binding channel="1"  ctl="44"  uri="/route/gain B44"  />
+  <Binding channel="1"  ctl="45"  uri="/route/gain B45"  />
+  <Binding channel="1"  ctl="46"  uri="/route/gain B46"  />
+  <Binding channel="1"  ctl="47"  uri="/route/gain B47"  />
+  <Binding channel="1"  ctl="48"  uri="/route/gain B48"  />
+
+<!-- Same applies for the Aux send, FX send and FX return bus faders -->
+
+  <Binding channel="1"  ctl="49"  uri="/route/gain B33"  />
+  <Binding channel="1"  ctl="50"  uri="/route/gain B34"  />
+  <Binding channel="1"  ctl="51"  uri="/route/gain B35"  />
+  <Binding channel="1"  ctl="52"  uri="/route/gain B36"  />
+  
+  <Binding channel="1"  ctl="53"  uri="/route/gain B37"  />
+  <Binding channel="1"  ctl="54"  uri="/route/gain B38"  />
+  <Binding channel="1"  ctl="55"  uri="/route/gain B39"  />
+  <Binding channel="1"  ctl="56"  uri="/route/gain B40"  />
+
+  <Binding channel="1"  ctl="57"  uri="/route/gain B41"  />
+  <Binding channel="1"  ctl="58"  uri="/route/gain B42"  />
+  <Binding channel="1"  ctl="59"  uri="/route/gain B43"  />
+  <Binding channel="1"  ctl="60"  uri="/route/gain B44"  />
+
+<!-- Master bus controlled by the "MAIN" fader on the DDX3216 -->
+
+  <Binding channel="1"  ctl="61"  uri="/bus/gain master"  />
+
+<!-- Pan commented out for now --- the 16 Busses have no pan controls on ddx3216 -->
+
+   <!--<Binding channel="1"  ctl="64"  uri="/route/pan B1"  />  -->
+   <!--<Binding channel="1"  ctl="65"  uri="/route/pan B2"  />  -->
+   <!--<Binding channel="1"  ctl="66"  uri="/route/pan B3"  />  -->
+   <!--<Binding channel="1"  ctl="67"  uri="/route/pan B4"  />  -->
+   <!--<Binding channel="1"  ctl="68"  uri="/route/pan B5"  />  -->
+   <!--<Binding channel="1"  ctl="69"  uri="/route/pan B6"  />  -->
+   <!--<Binding channel="1"  ctl="70"  uri="/route/pan B7"  />  -->
+   <!--<Binding channel="1"  ctl="71"  uri="/route/pan B8"  />  -->
+   <!--<Binding channel="1"  ctl="72"  uri="/route/pan B9"  />  -->
+   <!--<Binding channel="1"  ctl="73"  uri="/route/pan B10"  />  -->
+   <!--<Binding channel="1"  ctl="74"  uri="/route/pan B11"  />  -->
+   <!--<Binding channel="1"  ctl="75"  uri="/route/pan B12"  />  -->
+   <!--<Binding channel="1"  ctl="76"  uri="/route/pan B13"  />  -->
+   <!--<Binding channel="1"  ctl="77"  uri="/route/pan B14"  />  -->
+   <!--<Binding channel="1"  ctl="78"  uri="/route/pan B15"  />  -->
+   <!--<Binding channel="1"  ctl="79"  uri="/route/pan B16"  />  -->
+   <!--<Binding channel="1"  ctl="80"  uri="/route/pan B17"  />  -->
+   <!--<Binding channel="1"  ctl="81"  uri="/route/pan B18"  />  -->
+   <!--<Binding channel="1"  ctl="82"  uri="/route/pan B19"  />  -->
+   <!--<Binding channel="1"  ctl="83"  uri="/route/pan B20"  />  -->
+   <!--<Binding channel="1"  ctl="84"  uri="/route/pan B21"  />  -->
+   <!--<Binding channel="1"  ctl="85"  uri="/route/pan B22"  />  -->
+   <!--<Binding channel="1"  ctl="86"  uri="/route/pan B23"  />  -->
+   <!--<Binding channel="1"  ctl="87"  uri="/route/pan B24"  />  -->
+   <!--<Binding channel="1"  ctl="88"  uri="/route/pan B25"  />  -->
+   <!--<Binding channel="1"  ctl="89"  uri="/route/pan B26"  />  -->
+   <!--<Binding channel="1"  ctl="90"  uri="/route/pan B27"  />  -->
+   <!--<Binding channel="1"  ctl="91"  uri="/route/pan B28"  />  -->
+   <!--<Binding channel="1"  ctl="92"  uri="/route/pan B29"  />  -->
+   <!--<Binding channel="1"  ctl="93"  uri="/route/pan B30"  />  -->
+   <!--<Binding channel="1"  ctl="94"  uri="/route/pan B31"  />  -->
+   <!--<Binding channel="1"  ctl="95"  uri="/route/pan B32"  />  -->
+
+
+
+</ArdourMIDIBindings>
+
