@@ -152,17 +152,24 @@ MIDIControllable::control_to_midi (float val)
 float
 MIDIControllable::midi_to_control(float val)
 {
-	const float midi_range = 127.0f; // TODO: NRPN etc.
+        /* fiddle with MIDI value so that we get an odd number of integer steps
+           and can thus represent "middle" precisely as 0.5. this maps to
+           the range 0..+1.0
+
+           TODO: 14bit values
+        */
+
+        val = (val == 0.0f ? 0.0f : (val-1.0f) / 126.0f);
 
         if (controllable->is_gain_like()) {
-                return slider_position_to_gain (val/midi_range);
+                return slider_position_to_gain (val);
         }
 
 	float control_min = controllable->lower ();
 	float control_max = controllable->upper ();
 	const float control_range = control_max - control_min;
 
-	return  val / midi_range * control_range + control_min;
+	return  (val * control_range) + control_min;
 }
 
 void
