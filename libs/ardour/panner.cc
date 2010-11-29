@@ -104,17 +104,20 @@ StreamPanner::PanControllable::set_value (double val)
         switch (parameter().id()) {
         case 100:
                 /* position */
+                AutomationControl::set_value(val);
                 streampanner.get_parent().set_stereo_position (val);
                 break;
         case 200:
                 /* width */
+                AutomationControl::set_value(val);
                 streampanner.get_parent().set_stereo_width (val);
                 break;
         default:
                 streampanner.set_position (AngularVector (direct_control_to_stereo_pan (val), 0.0));
+                AutomationControl::set_value(val);
+                break;
         }
 
-	AutomationControl::set_value(val);
 }
 
 double
@@ -1396,13 +1399,43 @@ Panner::setup_speakers (uint32_t nouts)
 void
 Panner::set_stereo_width (double val)
 {
-        cerr << "Set stereo width to " << val << endl;
+        boost::shared_ptr<AutomationControl> dc = direction_control();
+        
+        if (!dc) {
+                return;
+        }
+        
+        double d = dc->get_value ();
+        set_stereo_position (d);
 }
 
 void
 Panner::set_stereo_position (double val)
 {
-        cerr << "Set stereo position to " << val << endl;
+        /* val is the range 0..1 */
+        
+        AngularVector p (BaseStereoPanner::lr_fract_to_azimuth (val), 0.0);
+        boost::shared_ptr<AutomationControl> wc = width_control();
+        
+        if (!wc) {
+                return;
+        }
+
+        double spread = width_control()->get_value () * 180.0;
+        double l_pos = p.azi + (spread/2.0); /* more left is "increasing degrees" */
+        double r_pos = p.azi - (spread/2.0); /* more right is "decreasing degrees" */
+
+        if (l_pos > 180.0 || r_pos < 0.0) {
+                /* already full panned, can't move any more */
+                return;
+        }
+
+        assert (_streampanners.size() > 1);
+
+        cerr << "pos = " << BaseStereoPanner::lr_fract_to_azimuth (val) << " spread = " << width_control()->get_value() << " left = " << l_pos << " right = " << r_pos << endl;
+
+        _streampanners[0]->set_position (AngularVector (l_pos, 0.0));
+        _streampanners[1]->set_position (AngularVector (r_pos, 0.0));
 }
 
 void
@@ -1423,11 +1456,13 @@ Panner::setup_meta_controls ()
         
         if (!automation_control (lr_param)) {
                 boost::shared_ptr<AutomationControl> c (new StreamPanner::PanControllable (_session, _("lr"), *_streampanners.front(), lr_param));
+                c->set_value (0.5);
                 add_control (c);
         }
         
         if (!automation_control (width_param)) {
                 boost::shared_ptr<AutomationControl> c (new StreamPanner::PanControllable (_session, _("width"), *_streampanners.front(), width_param));
+                c->set_value (1.0); // full width
                 add_control (c);
         }
 }
