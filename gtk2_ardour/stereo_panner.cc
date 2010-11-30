@@ -60,9 +60,8 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
 	Glib::RefPtr<Gdk::GC> gc (get_style()->get_base_gc (get_state()));
 
         cairo_t* cr = gdk_cairo_create (win->gobj());
-        
-        int x1, x2, y1, y2;
-        int h, w;
+       
+        int x1, x2;
         int width, height;
         double pos = position_control->get_value (); /* 0..1 */
         double swidth = width_control->get_value (); /* -1..+1 */
@@ -102,14 +101,27 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
         /* center 8 pixels are for position drag */
 
         int w = get_width();
+        double pos = position_control->get_value ();
 
-        if ((ev->x >= (w/2)-4) && (ev->x <= (w/2)+4)) {
+        if ((ev->x >= (int) floor ((pos * w)-4)) && (ev->x <= (int) floor ((pos * w)+4))) {
                 dragging_position = true;
         } else {
                 dragging_position = false;
         }
 
-        dragging = true;
+        if (ev->type == GDK_2BUTTON_PRESS) {
+                if (dragging_position) {
+                        cerr << "Reset pos\n";
+                        position_control->set_value (0.5); // reset position to center
+                } else {
+                        cerr << "Reset width\n";
+                        width_control->set_value (1.0); // reset position to full, LR
+                }
+                dragging = false;
+        } else {
+                dragging = true;
+        }
+
         return true;
 }
 
@@ -129,7 +141,7 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
         }
 
         int w = get_width();
-        float delta = ((fabs) (ev->x - last_drag_x)) / (double) (w/2);
+        float delta = (abs (ev->x - last_drag_x)) / (double) (w/2);
 
         if (!dragging_position) {
                 double wv = width_control->get_value();        
