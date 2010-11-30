@@ -23,9 +23,12 @@
 
 #include <map>
 #include <string>
+
 #include <boost/utility.hpp>
-#include <slv2/slv2.h>
+
+#include "lv2.h"
 #include "lv2ext/lv2_uri_map.h"
+#include "lv2ext/lv2_uri_unmap.h"
 
 namespace ARDOUR {
 
@@ -41,17 +44,28 @@ public:
 	uint32_t uri_to_id(const char* map,
 	                   const char* uri);
 
-private:
-	typedef std::map<std::string, uint32_t> Map;
+	const char* id_to_uri(const char* map,
+	                      uint32_t id);
 
+private:
 	static uint32_t uri_map_uri_to_id(LV2_URI_Map_Callback_Data callback_data,
 	                                  const char*               map,
 	                                  const char*               uri);
 
-	LV2_Feature         uri_map_feature;
-	LV2_URI_Map_Feature uri_map_feature_data;
-	Map                 uri_map;
-	uint32_t            next_uri_id;
+	static const char* uri_unmap_id_to_uri(LV2_URI_Map_Callback_Data callback_data,
+	                                       const char*               map,
+	                                       const uint32_t            id);
+
+	typedef std::map<uint16_t, uint32_t> EventToGlobal;
+	typedef std::map<uint32_t, uint16_t> GlobalToEvent;
+
+	EventToGlobal _event_to_global;
+	GlobalToEvent _global_to_event;
+
+	LV2_Feature           uri_map_feature;
+	LV2_URI_Map_Feature   uri_map_feature_data;
+	LV2_Feature           uri_unmap_feature;
+	LV2_URI_Unmap_Feature uri_unmap_feature_data;
 };
 
 
