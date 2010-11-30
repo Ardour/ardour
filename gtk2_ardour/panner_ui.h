@@ -40,6 +40,7 @@
 class Panner2d;
 class PannerBar;
 class Panner2dWindow;
+class StereoPanner;
 
 namespace ARDOUR {
 	class Session;
@@ -112,11 +113,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
         Gtk::VBox           poswidth_box;
 	Width              _width;
 
-	Gtk::Adjustment _position_adjustment;
-	Gtk::Adjustment _width_adjustment;
-	Gtkmm2ext::BarController* _position_fader;
-	Gtkmm2ext::BarController* _width_fader;
-	static Glib::RefPtr<Gdk::Pixbuf> _poswidth_slider;
+        StereoPanner*  _stereo_panner;
         bool _ignore_width_change;
         bool _ignore_position_change;
         void width_adjusted ();

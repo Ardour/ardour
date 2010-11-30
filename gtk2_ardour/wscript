@@ -202,6 +202,7 @@ gtk2_ardour_sources = [
 	'startup.cc',
         'step_editor.cc',
         'step_entry.cc',
+        'stereo_panner.cc',
 	'streamview.cc',
 	'strip_silence_dialog.cc',
 	'tape_region_view.cc',
