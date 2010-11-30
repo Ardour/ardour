@@ -1,6 +1,6 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Dave Robillard
+    Copyright (C) 2008-2010 Paul Davis
+    Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -79,24 +79,24 @@ LV2Plugin::LV2Plugin (const LV2Plugin &other)
 void
 LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 {
-	_world = world;
-	_plugin = plugin;
-	_ui = NULL;
-	_control_data = 0;
-	_shadow_data = 0;
+	_world                = world;
+	_plugin               = plugin;
+	_ui                   = NULL;
+	_control_data         = 0;
+	_shadow_data          = 0;
 	_latency_control_port = 0;
-	_was_activated = false;
+	_was_activated        = false;
 
-	SLV2Value persist_uri = slv2_value_new_uri(_world.world, "http://lv2plug.in/ns/ext/persist");
+	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
+	_data_access_feature.URI     = "http://lv2plug.in/ns/ext/data-access";
+	_persist_feature.URI         = "http://lv2plug.in/ns/ext/persist";
+	_persist_feature.data        = NULL;
+
+	SLV2Value persist_uri = slv2_value_new_uri(_world.world, _persist_feature.URI);
 	_supports_persist = slv2_plugin_has_feature(plugin, persist_uri);
 	slv2_value_free(persist_uri);
 
-	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
-	_data_access_feature.URI = "http://lv2plug.in/ns/ext/data-access";
-	_persist_feature.URI = "http://lv2plug.in/ns/ext/persist";
-	_persist_feature.data = NULL;
-
-	_features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 5);
+	_features    = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 5);
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
 	_features[2] = &_persist_feature;
@@ -104,18 +104,17 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 	_features[4] = NULL;
 
 	_instance = slv2_plugin_instantiate(plugin, rate, _features);
-	_name = slv2_plugin_get_name(plugin);
-	assert(_name);
-	_author = slv2_plugin_get_author_name(plugin);
+	_name     = slv2_plugin_get_name(plugin);
+	_author   = slv2_plugin_get_author_name(plugin);
 
 	if (_instance == 0) {
 		error << _("LV2: Failed to instantiate plugin ") << slv2_plugin_get_uri(plugin) << endl;
 		throw failed_constructor();
 	}
 
-	_instance_access_feature.data = (void*)_instance->lv2_handle;
+	_instance_access_feature.data              = (void*)_instance->lv2_handle;
 	_data_access_extension_data.extension_data = _instance->lv2_descriptor->extension_data;
-	_data_access_feature.data = &_data_access_extension_data;
+	_data_access_feature.data                  = &_data_access_extension_data;
 
 	if (slv2_plugin_has_feature(plugin, world.in_place_broken)) {
 		error << string_compose(
@@ -128,18 +127,17 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
 
 	_sample_rate = rate;
 
-	const uint32_t num_ports = slv2_plugin_get_num_ports(plugin);
+	const bool     latent       = slv2_plugin_has_latency(plugin);
+	uint32_t       latency_port = (latent ? slv2_plugin_get_latency_port_index(plugin) : 0);
+	const uint32_t num_ports    = slv2_plugin_get_num_ports(plugin);
 
 	_control_data = new float[num_ports];
-	_shadow_data = new float[num_ports];
-	_defaults = new float[num_ports];
-
-	const bool latent = slv2_plugin_has_latency(plugin);
-	uint32_t latency_port = (latent ? slv2_plugin_get_latency_port_index(plugin) : 0);
+	_shadow_data  = new float[num_ports];
+	_defaults     = new float[num_ports];
 
 	for (uint32_t i = 0; i < num_ports; ++i) {
-		SLV2Port port = slv2_plugin_get_port_by_index(plugin, i);
-		SLV2Value sym = slv2_port_get_symbol(_plugin, port);
+		SLV2Port  port = slv2_plugin_get_port_by_index(plugin, i);
+		SLV2Value sym  = slv2_port_get_symbol(_plugin, port);
 		_port_indices.insert(std::make_pair(slv2_value_as_string(sym), i));
 		if (parameter_is_control(i)) {
 			SLV2Value def;
@@ -247,8 +245,8 @@ LV2Plugin::set_parameter (uint32_t which, float val)
 
 	} else {
 		warning << string_compose (_("Illegal parameter number used with plugin \"%1\"."
-                                             "This is a bug in either %2 or the LV2 plugin (%3)"),
-                                           name(), PROGRAM_NAME, unique_id()) << endmsg;
+		                             "This is a bug in either %2 or the LV2 plugin (%3)"),
+		                           name(), PROGRAM_NAME, unique_id()) << endmsg;
 	}
 }
 
@@ -371,7 +369,7 @@ LV2Plugin::load_preset(const string& uri)
 				" ?port lv2:symbol ?sym ; lv2p:value ?val . }";
 	SLV2Results values = slv2_plugin_query_sparql(_plugin, query.c_str());
 	for (; !slv2_results_finished(values); slv2_results_next(values)) {
-		SLV2Value sym  = slv2_results_get_binding_value(values, 0);
+		SLV2Value sym = slv2_results_get_binding_value(values, 0);
 		SLV2Value val = slv2_results_get_binding_value(values, 1);
 		if (slv2_value_is_float(val)) {
 			uint32_t index = _port_indices[slv2_value_as_string(sym)];
@@ -397,14 +395,14 @@ LV2Plugin::has_editor() const
 int
 LV2Plugin::set_state(const XMLNode& node, int version)
 {
-	XMLNodeList nodes;
-	XMLProperty *prop;
+	XMLNodeList          nodes;
+	XMLProperty*         prop;
 	XMLNodeConstIterator iter;
-	XMLNode *child;
-	const char *sym;
-	const char *value;
-	uint32_t port_id;
-	LocaleGuard lg (X_("POSIX"));
+	XMLNode*             child;
+	const char*          sym;
+	const char*          value;
+	uint32_t             port_id;
+	LocaleGuard          lg(X_("POSIX"));
 
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to LV2Plugin::set_state") << endmsg;
@@ -461,22 +459,22 @@ LV2Plugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 	slv2_port_get_range(_plugin, port, &def, &min, &max);
 
     desc.integer_step = slv2_port_has_property(_plugin, port, _world.integer);
-    desc.toggled = slv2_port_has_property(_plugin, port, _world.toggled);
-    desc.logarithmic = slv2_port_has_property(_plugin, port, _world.logarithmic);
+    desc.toggled      = slv2_port_has_property(_plugin, port, _world.toggled);
+    desc.logarithmic  = slv2_port_has_property(_plugin, port, _world.logarithmic);
     desc.sr_dependent = slv2_port_has_property(_plugin, port, _world.srate);
-    desc.label = slv2_value_as_string(slv2_port_get_name(_plugin, port));
-    desc.lower = min ? slv2_value_as_float(min) : 0.0f;
-    desc.upper = max ? slv2_value_as_float(max) : 1.0f;
-    desc.min_unbound = false; // TODO (LV2 extension)
-    desc.max_unbound = false; // TODO (LV2 extension)
+    desc.label        = slv2_value_as_string(slv2_port_get_name(_plugin, port));
+    desc.lower        = min ? slv2_value_as_float(min) : 0.0f;
+    desc.upper        = max ? slv2_value_as_float(max) : 1.0f;
+    desc.min_unbound  = false; // TODO: LV2 extension required
+    desc.max_unbound  = false; // TODO: LV2 extension required
 
 	if (desc.integer_step) {
-		desc.step = 1.0;
+		desc.step      = 1.0;
 		desc.smallstep = 0.1;
 		desc.largestep = 10.0;
 	} else {
 		const float delta = desc.upper - desc.lower;
-		desc.step = delta / 1000.0f;
+		desc.step      = delta / 1000.0f;
 		desc.smallstep = delta / 10000.0f;
 		desc.largestep = delta/10.0f;
 	}
@@ -494,7 +492,7 @@ LV2Plugin::describe_parameter (Evoral::Parameter which)
 {
 	if (which.type() == PluginAutomation && which.id() < parameter_count()) {
 		SLV2Value name = slv2_port_get_name(_plugin,
-                                                    slv2_plugin_get_port_by_index(_plugin, which.id()));
+		                                    slv2_plugin_get_port_by_index(_plugin, which.id()));
 		string ret(slv2_value_as_string(name));
 		slv2_value_free(name);
 		return ret;
@@ -659,16 +657,15 @@ LV2Plugin::latency_compute_run ()
 	activate ();
 
 	uint32_t port_index = 0;
-	uint32_t in_index = 0;
-	uint32_t out_index = 0;
+	uint32_t in_index   = 0;
+	uint32_t out_index  = 0;
+
 	const nframes_t bufsize = 1024;
 	float buffer[bufsize];
 
-	memset(buffer,0,sizeof(float)*bufsize);
+	memset(buffer, 0, sizeof(float) * bufsize);
 
-	/* Note that we've already required that plugins
-	   be able to handle in-place processing.
-	*/
+	// FIXME: Ensure plugins can handle in-place processing
 
 	port_index = 0;
 
@@ -693,19 +690,19 @@ LV2World::LV2World()
 	: world(slv2_world_new())
 {
 	slv2_world_load_all(world);
-	input_class = slv2_value_new_uri(world, SLV2_PORT_CLASS_INPUT);
-	output_class = slv2_value_new_uri(world, SLV2_PORT_CLASS_OUTPUT);
-	control_class = slv2_value_new_uri(world, SLV2_PORT_CLASS_CONTROL);
-	audio_class = slv2_value_new_uri(world, SLV2_PORT_CLASS_AUDIO);
-	event_class = slv2_value_new_uri(world, SLV2_PORT_CLASS_EVENT);
-	midi_class = slv2_value_new_uri(world, SLV2_EVENT_CLASS_MIDI);
+	input_class     = slv2_value_new_uri(world, SLV2_PORT_CLASS_INPUT);
+	output_class    = slv2_value_new_uri(world, SLV2_PORT_CLASS_OUTPUT);
+	control_class   = slv2_value_new_uri(world, SLV2_PORT_CLASS_CONTROL);
+	audio_class     = slv2_value_new_uri(world, SLV2_PORT_CLASS_AUDIO);
+	event_class     = slv2_value_new_uri(world, SLV2_PORT_CLASS_EVENT);
+	midi_class      = slv2_value_new_uri(world, SLV2_EVENT_CLASS_MIDI);
 	in_place_broken = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "inPlaceBroken");
-	integer = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "integer");
-	toggled = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "toggled");
-	srate = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "sampleRate");
-	gtk_gui = slv2_value_new_uri(world, "http://lv2plug.in/ns/extensions/ui#GtkUI");
-	external_gui = slv2_value_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
-	logarithmic = slv2_value_new_uri(world, "http://lv2plug.in/ns/dev/extportinfo#logarithmic");
+	integer         = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "integer");
+	toggled         = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "toggled");
+	srate           = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "sampleRate");
+	gtk_gui         = slv2_value_new_uri(world, "http://lv2plug.in/ns/extensions/ui#GtkUI");
+	external_gui    = slv2_value_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
+	logarithmic     = slv2_value_new_uri(world, "http: //lv2plug.in/ns/dev/extportinfo#logarithmic");
 }
 
 LV2World::~LV2World()
@@ -723,7 +720,7 @@ LV2PluginInfo::LV2PluginInfo (void* lv2_world, void* slv2_plugin)
 	: _lv2_world(lv2_world)
 	, _slv2_plugin(slv2_plugin)
 {
-        type = ARDOUR::LV2;
+	type = ARDOUR::LV2;
 }
 
 LV2PluginInfo::~LV2PluginInfo()
@@ -753,10 +750,9 @@ LV2PluginInfo::load (Session& session)
 PluginInfoList*
 LV2PluginInfo::discover (void* lv2_world)
 {
-	PluginInfoList* plugs = new PluginInfoList;
-
-	LV2World* world = (LV2World*)lv2_world;
-	SLV2Plugins plugins = slv2_world_get_all_plugins(world->world);
+	PluginInfoList* plugs   = new PluginInfoList;
+	LV2World*       world   = (LV2World*)lv2_world;
+	SLV2Plugins     plugins = slv2_world_get_all_plugins(world->world);
 
 	cerr << "LV2: Discovering " << slv2_plugins_size (plugins) << " plugins" << endl;
 

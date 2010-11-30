@@ -1,6 +1,6 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Dave Robillard
+    Copyright (C) 2008-2010 Paul Davis
+    Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@
 #include <vector>
 #include <string>
 #include <dlfcn.h>
-
 
 #include "pbd/stateful.h"
 
@@ -122,29 +121,30 @@ class LV2Plugin : public ARDOUR::Plugin
 	bool has_editor() const;
 
   private:
-	void*                    _module;
-	LV2World&                _world;
-	LV2_Feature**            _features;
-	SLV2Plugin               _plugin;
-	SLV2UI                   _ui;
-	SLV2Value                _name;
-	SLV2Value                _author;
-	SLV2Instance             _instance;
-	nframes_t                _sample_rate;
-	float*                   _control_data;
-	float*                   _shadow_data;
-	float*                   _defaults;
-	float*                   _latency_control_port;
-	bool                     _was_activated;
-	bool                     _supports_persist;
-	std::vector<bool>        _port_is_input;
+	void*             _module;
+	LV2World&         _world;
+	LV2_Feature**     _features;
+	SLV2Plugin        _plugin;
+	SLV2UI            _ui;
+	SLV2Value         _name;
+	SLV2Value         _author;
+	SLV2Instance      _instance;
+	nframes_t         _sample_rate;
+	float*            _control_data;
+	float*            _shadow_data;
+	float*            _defaults;
+	float*            _latency_control_port;
+	bool              _was_activated;
+	bool              _supports_persist;
+	std::vector<bool> _port_is_input;
+
 	std::map<std::string,uint32_t> _port_indices;
 
 	typedef struct { const void* (*extension_data)(const char* uri); } LV2_DataAccess;
 	LV2_DataAccess _data_access_extension_data;
-	LV2_Feature _data_access_feature;
-	LV2_Feature _instance_access_feature;
-	LV2_Feature _persist_feature;
+	LV2_Feature    _data_access_feature;
+	LV2_Feature    _instance_access_feature;
+	LV2_Feature    _persist_feature;
 
 	static URIMap   _uri_map;
 	static uint32_t _midi_event_type;
@@ -183,8 +183,8 @@ struct LV2World {
 
 class LV2PluginInfo : public PluginInfo {
 public:
-	LV2PluginInfo (void* slv2_world, void* slv2_plugin);;
-	~LV2PluginInfo ();;
+	LV2PluginInfo (void* slv2_world, void* slv2_plugin);
+	~LV2PluginInfo ();
 	static PluginInfoList* discover (void* slv2_world);
 
 	PluginPtr load (Session& session);
