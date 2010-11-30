@@ -45,7 +45,8 @@ using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 
-const int PannerUI::pan_bar_height = 30;
+const int PannerUI::pan_bar_height = 20;
+Glib::RefPtr<Gdk::Pixbuf> PannerUI::_poswidth_slider;
 
 PannerUI::PannerUI (Session* s)
 	: _current_nouts (-1)
@@ -55,6 +56,8 @@ PannerUI::PannerUI (Session* s)
 	, panning_viewport(hAdjustment, vAdjustment)
 	, panning_up_arrow (Gtk::ARROW_UP, Gtk::SHADOW_OUT)
 	, panning_down_arrow (Gtk::ARROW_DOWN, Gtk::SHADOW_OUT)
+        , _position_adjustment (0.5, 0.0, 1.0, 0.01, 0.1)
+        , _width_adjustment (0.0, -1.0, 1.0, 0.01, 0.1)
 	, panning_link_button (_("link"))
 	, pan_automation_style_button ("")
 	, pan_automation_state_button ("")
@@ -67,6 +70,10 @@ PannerUI::PannerUI (Session* s)
 	pan_astate_menu = 0;
 	pan_astyle_menu = 0;
 	in_pan_update = false;
+        _position_fader = 0;
+        _width_fader = 0;
+        _ignore_width_change = false;
+        _ignore_position_change = false;
 
 	pan_automation_style_button.set_name ("MixerAutomationModeButton");
 	pan_automation_state_button.set_name ("MixerAutomationPlaybackButton");
@@ -122,7 +129,7 @@ PannerUI::PannerUI (Session* s)
 	pan_vbox.set_spacing (2);
 	pan_vbox.pack_start (panning_viewport, Gtk::PACK_SHRINK);
 	pan_vbox.pack_start (panning_link_box, Gtk::PACK_SHRINK);
-
+        
 	pack_start (pan_vbox, true, true);
 
 	twod_panner = 0;
@@ -266,6 +273,12 @@ PannerUI::update_pan_linkage ()
 }
 
 void
+PannerUI::on_size_allocate (Allocation& a)
+{
+        HBox::on_size_allocate (a);
+}
+
+void
 PannerUI::set_width (Width w)
 {
 	switch (w) {
@@ -296,6 +309,8 @@ PannerUI::~PannerUI ()
 	delete pan_menu;
 	delete pan_astyle_menu;
 	delete pan_astate_menu;
+        delete _position_fader;
+        delete _width_fader;
 }
 
 
@@ -470,6 +485,39 @@ PannerUI::setup_pan ()
 		panning_viewport.remove ();
 		panning_viewport.add (pan_bar_packer);
 		panning_viewport.show_all ();
+
+                if (npans == 2) {
+                        /* add position and width controls */
+                        if (_position_fader == 0) {
+                                _position_fader = new BarController (_position_adjustment, _panner->direction_control());
+                                _position_fader->set_size_request (-1, pan_bar_height/2);
+                                _position_fader->set_name ("PanSlider");
+                                ARDOUR_UI::instance()->set_tip (_position_fader, _("Pan Position"));                                
+                                _position_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &PannerUI::position_adjusted));
+                                _panner->direction_control()->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::show_position, this), gui_context());
+                                show_position();
+
+                                _width_fader = new BarController (_width_adjustment, _panner->width_control());
+                                _width_fader->set_size_request (-1, pan_bar_height/2);
+                                _width_fader->set_name ("PanSlider");
+                                _width_fader->set_style (BarController::CenterOut);
+                                ARDOUR_UI::instance()->set_tip (_width_fader, _("Stereo Image Width"));                                
+                                _width_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &PannerUI::width_adjusted));
+                                 _panner->width_control()->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::show_width, this), gui_context());
+                                show_width();
+                                
+                                poswidth_box.pack_start (*_position_fader, true, true);
+                                poswidth_box.pack_start (*_width_fader, true, true);
+                        }
+                        pan_vbox.pack_start (poswidth_box, false, false);
+                        poswidth_box.show_all ();
+                        cerr << "Packed poswidth and mde it visible\n";
+                } else {
+                        if (_position_fader) {
+                                pan_vbox.remove (poswidth_box);
+                                cerr << "Hid poswidth\n";
+                        }
+                }
 
 	} else {
 
@@ -923,4 +971,55 @@ void
 PannerUI::bar_spinner_activate (bool a)
 {
 	_bar_spinner_active = a;
+}
+
+void
+PannerUI::setup_slider_pix ()
+{
+	_poswidth_slider = ::get_icon ("fader_belt_h_thin");
+	assert (_poswidth_slider);
+}
+
+void
+PannerUI::show_width ()
+{
+        float const value = _panner->width_control()->get_value ();
+        
+	if (_width_adjustment.get_value() != value) {
+		_ignore_width_change = true;
+		_width_adjustment.set_value (value);
+		_ignore_width_change = false;
+	}
+}
+
+void
+PannerUI::width_adjusted ()
+{
+	if (_ignore_width_change) {
+		return;
+	}
+
+	_panner->width_control()->set_value (_width_adjustment.get_value());
+}
+
+void
+PannerUI::show_position ()
+{
+        float const value = _panner->direction_control()->get_value ();
+        
+	if (_position_adjustment.get_value() != value) {
+		_ignore_position_change = true;
+		_position_adjustment.set_value (value);
+		_ignore_position_change = false;
+	}
+}
+
+void
+PannerUI::position_adjusted ()
+{
+	if (_ignore_position_change) {
+		return;
+	}
+
+	_panner->direction_control()->set_value (_position_adjustment.get_value());
 }

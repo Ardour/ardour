@@ -79,6 +79,9 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	boost::shared_ptr<PBD::Controllable> get_controllable();
 
 	void set_mono (bool);
+	void on_size_allocate (Gtk::Allocation &);
+        
+	static void setup_slider_pix ();
 
   private:
 	friend class MixerStrip;
@@ -106,8 +109,21 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	Gtk::EventBox       panning_down;
 	Gtk::Arrow          panning_down_arrow;
 	Gtk::VBox           pan_vbox;
+        Gtk::VBox           poswidth_box;
 	Width              _width;
 
+	Gtk::Adjustment _position_adjustment;
+	Gtk::Adjustment _width_adjustment;
+	Gtkmm2ext::BarController* _position_fader;
+	Gtkmm2ext::BarController* _width_fader;
+	static Glib::RefPtr<Gdk::Pixbuf> _poswidth_slider;
+        bool _ignore_width_change;
+        bool _ignore_position_change;
+        void width_adjusted ();
+        void show_width ();
+        void position_adjusted ();
+        void show_position ();
+        
 	Gtk::ToggleButton   panning_link_button;
 	Gtk::Button         panning_link_direction_button;
 	Gtk::HBox           panning_link_box;

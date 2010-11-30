@@ -1400,7 +1400,7 @@ style "location_rows_clock" = "default_clock_display"
 
 style "pan_slider" 
 {
- 	font_name = "@FONT_NORMAL@"
+ 	font_name = "@FONT_SMALLER@"
 
 	fg[NORMAL] = { 0.22, 0.73, 0.22 }
 	fg[ACTIVE] = { 0.22, 0.73, 0.22 }
@@ -1840,6 +1840,7 @@ widget "*LocationAddRangeButton*" style:highest "default_button"
 widget "*LocationEditRemoveButton" style:highest "location_row_button"
 widget "*LocationEditRemoveButton*" style:highest "location_row_button"
 widget "*PanSlider" style:highest "pan_slider"
+widget "*PanSlider*" style:highest "pan_slider"
 widget "*PanningLinkButton" style:highest "mixer_red_active_button"
 widget "*PanningLinkButton.*" style:highest "mixer_red_active_button"
 widget "*PanningLinkDirectionButton" style:highest "very_small_button"

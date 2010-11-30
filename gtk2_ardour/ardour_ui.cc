@@ -288,7 +288,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 		GainMeter::setup_slider_pix ();
 		RouteTimeAxisView::setup_slider_pix ();
 		SendProcessorEntry::setup_slider_pix ();
+                PannerUI::setup_slider_pix ();
 		SessionEvent::create_per_thread_pool ("GUI", 512);
+                
 
 	} catch (failed_constructor& err) {
 		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
