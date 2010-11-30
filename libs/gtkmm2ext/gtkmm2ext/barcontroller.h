@@ -37,6 +37,7 @@ class BarController : public Gtk::Frame
 		LeftToRight,
 		RightToLeft,
 		Line,
+                Blob,
 		CenterOut,
 		
 		TopToBottom,

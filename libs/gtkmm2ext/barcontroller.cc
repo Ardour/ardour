@@ -244,9 +244,10 @@ BarController::mouse_control (double x, GdkWindow* window, double scaling)
 
 	delta = x - grab_x;
 	grab_x = x;
-
+        
 	switch (_style) {
 	case Line:
+	case Blob:
 	case LeftToRight:
         case CenterOut:
 		fract = scaling * (delta / (darea.get_width() - 2));
@@ -300,6 +301,31 @@ BarController::expose (GdkEventExpose* /*event*/)
 		}
 		
 		win->draw_line (get_style()->get_fg_gc (get_state()), x1, 0, x1, h);
+		break;
+
+        case Blob:
+		w = darea.get_width() - 1;
+		h = darea.get_height();
+		x1 = (gint) floor (w * fract);
+		x2 = min (w-2,h-2);
+
+		if (use_parent) {
+			parent = get_parent();
+			
+			if (parent) {
+				win->draw_rectangle (parent->get_style()->get_fg_gc (parent->get_state()),
+						     true,
+						     0, 0, darea.get_width(), darea.get_height());
+			}
+
+		} else {
+
+			win->draw_rectangle (get_style()->get_bg_gc (get_state()),
+					     true,
+					     0, 0, darea.get_width() - ((darea.get_width()+1) % 2), darea.get_height());
+		}
+		
+		win->draw_arc (get_style()->get_fg_gc (get_state()), true, x1, ((h-2)/2)-1, x2, x2, 0, 360 * 64);
 		break;
 
 	case CenterOut:
