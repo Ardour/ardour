@@ -336,7 +336,7 @@ LV2Plugin::get_state()
 		}
 
 		LV2State state;
-		persist->save(_instance, lv2_persist_store_callback, &state);
+		persist->save(_instance->lv2_handle, lv2_persist_store_callback, &state);
 	}
 	
 	return *root;
