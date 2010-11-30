@@ -702,7 +702,7 @@ LV2World::LV2World()
 	srate           = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "sampleRate");
 	gtk_gui         = slv2_value_new_uri(world, "http://lv2plug.in/ns/extensions/ui#GtkUI");
 	external_gui    = slv2_value_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
-	logarithmic     = slv2_value_new_uri(world, "http: //lv2plug.in/ns/dev/extportinfo#logarithmic");
+	logarithmic     = slv2_value_new_uri(world, "http://lv2plug.in/ns/dev/extportinfo#logarithmic");
 }
 
 LV2World::~LV2World()
