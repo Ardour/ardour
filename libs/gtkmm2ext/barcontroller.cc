@@ -248,12 +248,12 @@ BarController::mouse_control (double x, GdkWindow* window, double scaling)
 	switch (_style) {
 	case Line:
 	case LeftToRight:
+        case CenterOut:
 		fract = scaling * (delta / (darea.get_width() - 2));
 		fract = min (1.0, fract);
 		fract = max (-1.0, fract);
 		adjustment.set_value (adjustment.get_value() + fract * (adjustment.get_upper() - adjustment.get_lower()));
 		break;
-
 	default:
 		fract = 0.0;
 	}
@@ -303,6 +303,22 @@ BarController::expose (GdkEventExpose* /*event*/)
 		break;
 
 	case CenterOut:
+		w = darea.get_width();
+		h = darea.get_height()-2;
+                if (use_parent) {
+                        parent = get_parent();
+                        if (parent) {
+                                win->draw_rectangle (parent->get_style()->get_fg_gc (parent->get_state()),
+                                                     true,
+                                                     0, 0, darea.get_width(), darea.get_height());
+                        } else {
+                                win->draw_rectangle (parent->get_style()->get_bg_gc (parent->get_state()),
+                                                     true,
+                                                     0, 0, darea.get_width(), darea.get_height());
+                        }
+                }
+                x1 = (w/2) - ((w*fract)/2); // center, back up half the bar width
+                win->draw_rectangle (get_style()->get_fg_gc (get_state()), true, x1, 1, w*fract, h);
 		break;
 
 	case LeftToRight:
