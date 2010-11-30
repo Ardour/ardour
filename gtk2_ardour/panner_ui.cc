@@ -492,6 +492,7 @@ PannerUI::setup_pan ()
                                 _position_fader = new BarController (_position_adjustment, _panner->direction_control());
                                 _position_fader->set_size_request (-1, pan_bar_height/2);
                                 _position_fader->set_name ("PanSlider");
+                                _position_fader->set_style (BarController::Line);
                                 ARDOUR_UI::instance()->set_tip (_position_fader, _("Pan Position"));                                
                                 _position_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &PannerUI::position_adjusted));
                                 _panner->direction_control()->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::show_position, this), gui_context());
