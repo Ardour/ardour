@@ -383,6 +383,13 @@ PannerUI::setup_pan ()
 	_current_nouts = nouts;
 	_current_npans = npans;
 
+        panning_viewport.remove ();
+
+        delete twod_panner;
+        twod_panner = 0;
+        delete _stereo_panner;
+        _stereo_panner = 0;
+
 	if (nouts == 0 || nouts == 1) {
 
 		while (!pan_adjustments.empty()) {
@@ -392,15 +399,10 @@ PannerUI::setup_pan ()
 			pan_adjustments.pop_back ();
 		}
 
-		delete twod_panner;
-		twod_panner = 0;
-
 		/* stick something into the panning viewport so that it redraws */
 
 		EventBox* eb = manage (new EventBox());
-		panning_viewport.remove ();
 		panning_viewport.add (*eb);
-		panning_viewport.show_all ();
 
 	} else if (nouts == 2) {
 
@@ -413,91 +415,84 @@ PannerUI::setup_pan ()
 			pan_adjustments.pop_back ();
 		}
 
-		delete twod_panner;
-		twod_panner = 0;
-
-		while ((asz = pan_adjustments.size()) < npans) {
-
-			float x, rx;
-			PannerBar* bc;
-
-			/* initialize adjustment with 0.0 (L) or 1.0 (R) for the first and second panners,
-			   which serves as a default, otherwise use current value */
-
-			rx = _panner->pan_control( asz)->get_value();
-
-			if (npans == 1) {
-				x = 0.5;
-			} else if (asz == 0) {
-				x = 0.0;
-			} else if (asz == 1) {
-				x = 1.0;
-			} else {
-				x = rx;
-			}
-
-			pan_adjustments.push_back (new Adjustment (x, 0, 1.0, 0.005, 0.05));
-			bc = new PannerBar (*pan_adjustments[asz],
-				boost::static_pointer_cast<PBD::Controllable>( _panner->pan_control( asz )) );
-
-			/* now set adjustment with current value of panner, then connect the signals */
-			pan_adjustments.back()->set_value(rx);
-			pan_adjustments.back()->signal_value_changed().connect (sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_adjustment_changed), (uint32_t) asz));
-			connect_to_pan_control (asz);
-
-			bc->set_name ("PanSlider");
-			bc->set_shadow_type (Gtk::SHADOW_NONE);
-
-			boost::shared_ptr<AutomationControl> ac = _panner->pan_control (asz);
-
-			if (asz) {
-				bc->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
-                                                                      boost::weak_ptr<AutomationControl> (ac)));
-				bc->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
-                                                                     boost::weak_ptr<AutomationControl>(ac)));
-			}
-
-			char buf[64];
-			snprintf (buf, sizeof (buf), _("panner for channel %zu"), asz + 1);
-			ARDOUR_UI::instance()->set_tip (bc->event_widget(), buf);
-
-			bc->event_widget().signal_button_release_event().connect
-				(sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) asz));
-
-			bc->set_size_request (-1, pan_bar_height);
-			bc->SpinnerActive.connect (sigc::mem_fun (*this, &PannerUI::bar_spinner_activate));
-
-			pan_bars.push_back (bc);
-			pan_bar_packer.pack_start (*bc, false, false);
-		}
-
-		/* now that we actually have the pan bars,
-		   set their sensitivity based on current
-		   automation state.
-		*/
-
-		update_pan_sensitive ();
-
-		panning_viewport.remove ();
-		panning_viewport.add (pan_bar_packer);
-		panning_viewport.show_all ();
-
                 if (npans == 2) {
-                        /* add position and width controls */
-                        if (_stereo_panner == 0) {
-                                _stereo_panner = new StereoPanner (_panner->direction_control(), 
-                                                                   _panner->width_control());
-                                poswidth_box.pack_start (*_stereo_panner, true, true);
-                        }
-                        pan_vbox.pack_start (poswidth_box, false, false);
-                        poswidth_box.show_all ();
-                        cerr << "Packed poswidth and mde it visible\n";
+
+                        /* add integrated 2in/2out panner GUI */
+
+                        _stereo_panner = new StereoPanner (_panner->direction_control(), 
+                                                           _panner->width_control());
+                        _stereo_panner->set_size_request (-1, 2 * pan_bar_height);
+                        panning_viewport.add (*_stereo_panner);
+
                 } else {
-                        if (_stereo_panner) {
-                                pan_vbox.remove (poswidth_box);
-                                cerr << "Hid poswidth\n";
+                        
+                        /* N-in/2out - just use a set of single-channel panners */
+
+                        while ((asz = pan_adjustments.size()) < npans) {
+                                
+                                float x, rx;
+                                PannerBar* bc;
+                                
+                                /* initialize adjustment with 0.0 (L) or 1.0 (R) for the first and second panners,
+                                   which serves as a default, otherwise use current value */
+                                
+                                rx = _panner->pan_control( asz)->get_value();
+                                
+                                if (npans == 1) {
+                                        x = 0.5;
+                                } else if (asz == 0) {
+                                        x = 0.0;
+                                } else if (asz == 1) {
+                                        x = 1.0;
+                                } else {
+                                        x = rx;
+                                }
+                                
+                                pan_adjustments.push_back (new Adjustment (x, 0, 1.0, 0.005, 0.05));
+                                bc = new PannerBar (*pan_adjustments[asz],
+                                                    boost::static_pointer_cast<PBD::Controllable>( _panner->pan_control( asz )) );
+                                
+                                /* now set adjustment with current value of panner, then connect the signals */
+                                pan_adjustments.back()->set_value(rx);
+                                pan_adjustments.back()->signal_value_changed().connect (sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_adjustment_changed), (uint32_t) asz));
+                                connect_to_pan_control (asz);
+                                
+                                bc->set_name ("PanSlider");
+                                bc->set_shadow_type (Gtk::SHADOW_NONE);
+                                
+                                boost::shared_ptr<AutomationControl> ac = _panner->pan_control (asz);
+                                
+                                if (asz) {
+                                        bc->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
+                                                                              boost::weak_ptr<AutomationControl> (ac)));
+                                        bc->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
+                                                                             boost::weak_ptr<AutomationControl>(ac)));
+                                }
+                                
+                                char buf[64];
+                                snprintf (buf, sizeof (buf), _("panner for channel %zu"), asz + 1);
+                                ARDOUR_UI::instance()->set_tip (bc->event_widget(), buf);
+                                
+                                bc->event_widget().signal_button_release_event().connect
+                                        (sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) asz));
+                                
+                                bc->set_size_request (-1, pan_bar_height);
+                                bc->SpinnerActive.connect (sigc::mem_fun (*this, &PannerUI::bar_spinner_activate));
+                                
+                                pan_bars.push_back (bc);
+                                pan_bar_packer.pack_start (*bc, false, false);
                         }
+                        
+                        /* now that we actually have the pan bars,
+                           set their sensitivity based on current
+                           automation state.
+                        */
+                        
+
+                        update_pan_sensitive ();
+                        panning_viewport.add (pan_bar_packer);
                 }
+
 
 	} else {
 
@@ -519,10 +514,10 @@ PannerUI::setup_pan ()
 
 		/* and finally, add it to the panner frame */
 
-		panning_viewport.remove ();
 		panning_viewport.add (*twod_panner);
-		panning_viewport.show_all ();
 	}
+
+        panning_viewport.show_all ();
 }
 
 void
@@ -698,7 +693,12 @@ PannerUI::pan_value_changed (uint32_t which)
 		twod_panner->move_puck (which, _panner->streampanner(which).get_position());
 		in_pan_update = false;
 
+        } else if (_stereo_panner) {
+
+                /* its taken care of */
+
 	} else if (_panner->npanners() > 0 && which < _panner->npanners()) {
+
                 AngularVector model = _panner->streampanner(which).get_position();
                 double fract = pan_adjustments[which]->get_value();
                 AngularVector view (BaseStereoPanner::lr_fract_to_azimuth (fract), 0.0);

@@ -22,8 +22,10 @@
 #include <cstring>
 
 #include "pbd/controllable.h"
+#include "pbd/compose.h"
 
 #include "gtkmm2ext/gui_thread.h"
+#include "gtkmm2ext/gtk_ui.h"
 
 #include "ardour/panner.h"
 #include "stereo_panner.h"
@@ -33,6 +35,10 @@
 using namespace std;
 using namespace Gtk;
 
+static const int pos_box_size = 10;
+static const int lr_box_size = 18;
+static const int step_down = 10;
+
 StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost::shared_ptr<PBD::Controllable> width)
         : position_control (position)
         , width_control (width)
@@ -41,16 +47,31 @@ StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost
         , drag_start_x (0)
         , last_drag_x (0)
 {
-        set_size_request (-1, 15);
+        position_control->Changed.connect (connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
+        width_control->Changed.connect (connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
+        set_tooltip ();
 
-        position_control->Changed.connect (connections, invalidator(*this), boost::bind (&DrawingArea::queue_draw, this), gui_context());
-        width_control->Changed.connect (connections, invalidator(*this), boost::bind (&DrawingArea::queue_draw, this), gui_context());
-        
         add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK|Gdk::POINTER_MOTION_MASK);
 }
 
 StereoPanner::~StereoPanner ()
 {
+}
+
+void
+StereoPanner::set_tooltip ()
+{
+        Gtkmm2ext::UI::instance()->set_tip (this, string_compose (_("L:%1 R:%2 Width: %3%%"), 
+                                                                  (int) floor (position_control->get_value() * 100.0),
+                                                                  (int) floor ((1.0 - position_control->get_value() * 100)),
+                                                                  (int) floor (width_control->get_value() * 100.0)).c_str());
+}
+
+void
+StereoPanner::value_change ()
+{
+        set_tooltip ();
+        queue_draw ();
 }
 
 bool
@@ -65,28 +86,90 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         int width, height;
         double pos = position_control->get_value (); /* 0..1 */
         double swidth = width_control->get_value (); /* -1..+1 */
-        const int pos_box_size = 5;
+        const int border_width = 1;
+        const int border = border_width * 2;
+
 
         width = get_width();
         height = get_height ();
 
+        /* background */
+
+        cairo_set_source_rgb (cr, 0.184, 0.172, 0.172);
+        cairo_rectangle (cr, 0, 0, width, height);
+        cairo_fill (cr);
+
+        /* leave a border */
+
+        width -= border_width;
+        height -= border_width;
+
         /* compute where the central box is */
 
-        x1 = (int) floor (width * pos);
-        x1 -= pos_box_size/2;
-
-	cairo_set_source_rgb (cr, 255, 0, 0);
-	cairo_rectangle (cr, x1, 4, pos_box_size, pos_box_size);
-	cairo_fill (cr);
+        x1 = (int) floor (width * pos);                      // center of widget 
+        x2 = x1 - (int) floor ((fabs (swidth) * width)/2.0); // center, then back up half the swidth value
+        x1 -= pos_box_size/2;                                // center, then back up by half width of position box
 
         /* compute & draw the line through the box */
-
-        x2 = x1 - (int) floor ((fabs (swidth) * width)/2.0); // center, then back up half the swidth value
-
-	cairo_set_source_rgb (cr, 0, 255, 0);
-        cairo_move_to (cr, x2, 4+(pos_box_size/2));
-        cairo_line_to (cr, x2 + floor ((fabs (swidth * width))), 4+(pos_box_size/2));
+        
+        cairo_set_line_width (cr, 2);
+	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
+        cairo_move_to (cr, border + x2, 4+(pos_box_size/2)+step_down);
+        cairo_line_to (cr, border + x2, 4+(pos_box_size/2));
+        cairo_line_to (cr, border + x2 + floor ((fabs (swidth * width))), 4+(pos_box_size/2));
+        cairo_line_to (cr, border + x2 + floor ((fabs (swidth * width))), 4+(pos_box_size/2) + step_down);
         cairo_stroke (cr);
+
+        /* left box */
+
+        cairo_rectangle (cr, 
+                         border+ x2 - lr_box_size/2, 
+                         (lr_box_size/2)+step_down, 
+                         lr_box_size, lr_box_size);
+	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
+        cairo_stroke_preserve (cr);
+	cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
+	cairo_fill (cr);
+
+        
+        /* add text */
+
+        cairo_move_to (cr, 
+                       border + x2 - lr_box_size/2 + 4,
+                       (lr_box_size/2) + step_down + 13);
+	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
+        cairo_select_font_face (cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+        cairo_show_text (cr, "L");
+
+        /* right box */
+
+        cairo_rectangle (cr, 
+                         border + x2 + (int) floor ((fabs (swidth * width))) - lr_box_size/2, 
+                         (lr_box_size/2)+step_down, 
+                         lr_box_size, lr_box_size);
+	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
+        cairo_stroke_preserve (cr);
+	cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
+	cairo_fill (cr);
+
+        /* add text */
+
+        cairo_move_to (cr, 
+                       border + x2 + (int) floor ((fabs (swidth * width))) - lr_box_size/2 + 4, 
+                       (lr_box_size/2)+step_down + 13);
+	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
+        cairo_show_text (cr, "R");
+
+        /* draw the central box */
+
+        cairo_set_line_width (cr, 1);
+	cairo_rectangle (cr, border + x1, 4, pos_box_size, pos_box_size);
+	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
+        cairo_stroke_preserve (cr);
+	cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
+	cairo_fill (cr);
+
+        /* done */
 
         cairo_destroy (cr);
 	return true;
@@ -103,7 +186,7 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
         int w = get_width();
         double pos = position_control->get_value ();
 
-        if ((ev->x >= (int) floor ((pos * w)-4)) && (ev->x <= (int) floor ((pos * w)+4))) {
+        if ((ev->x >= (int) floor ((pos * w)-(pos_box_size/2))) && (ev->x <= (int) floor ((pos * w)+(pos_box_size/2)))) {
                 dragging_position = true;
         } else {
                 dragging_position = false;

@@ -49,6 +49,9 @@ class StereoPanner : public Gtk::DrawingArea
         bool dragging_position;
         int drag_start_x;
         int last_drag_x;
+
+        void value_change ();
+        void set_tooltip ();
 };
 
 #endif /* __gtk_ardour_stereo_panner_h__ */
