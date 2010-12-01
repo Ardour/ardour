@@ -844,21 +844,21 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	nframes_t               _nominal_frame_rate;  //ignores audioengine setting, "native" SR
 	int                      transport_sub_state;
 	mutable gint            _record_status;
-	volatile framepos_t    _transport_frame;
+	framepos_t              _transport_frame;
 	Location*               _session_range_location; ///< session range, or 0 if there is nothing in the session yet
 	Slave*                  _slave;
 	bool                    _silent;
-
-    // varispeed playback
-	volatile double             _transport_speed;
-	double                      _last_transport_speed;
-	double                      _target_transport_speed;
-	CubicInterpolation          interpolation;
+	
+	// varispeed playback
+	double                  _transport_speed;
+	double                  _last_transport_speed;
+	double                  _target_transport_speed;
+	CubicInterpolation       interpolation;
 
 	bool                     auto_play_legal;
-	framepos_t             _last_slave_transport_frame;
+	framepos_t              _last_slave_transport_frame;
 	nframes_t                maximum_output_latency;
-	volatile framepos_t    _requested_return_frame;
+	framepos_t              _requested_return_frame;
 	nframes_t                current_block_size;
 	nframes_t               _worst_output_latency;
 	nframes_t               _worst_input_latency;
