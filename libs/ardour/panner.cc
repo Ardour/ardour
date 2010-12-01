@@ -1443,18 +1443,20 @@ Panner::set_stereo_pan (double direction_as_lr_fract, double width)
         double r_pos = p.azi - (spread/2.0);  /* more right is "decreasing degrees" */
         bool move_left = true;
         bool move_right = true;
-        
+        int l_index = 0;
+        int r_index = 1;
+
         assert (_streampanners.size() > 1);
 
         if (width < 0.0) {
-                swap (l_pos, r_pos);
+                swap (l_index, r_index);
         }
 
         /* if the new right position is less than or equal to 180 (hard left) and the left panner
            is already there, we're not moving the left signal. 
         */
 
-        if (l_pos > 180.0 && _streampanners[0]->get_position().azi == 180.0) {
+        if (l_pos > 180.0 && _streampanners[l_index]->get_position().azi == 180.0) {
                 move_left = false;
         }
 
@@ -1462,7 +1464,7 @@ Panner::set_stereo_pan (double direction_as_lr_fract, double width)
            is already there, we're not moving the right signal. 
         */
         
-        if (r_pos <= 0.0 && _streampanners[1]->get_position().azi == 0.0) {
+        if (r_pos <= 0.0 && _streampanners[r_index]->get_position().azi == 0.0) {
                 move_right = false;
         }
 
@@ -1470,8 +1472,10 @@ Panner::set_stereo_pan (double direction_as_lr_fract, double width)
         r_pos = max (min (r_pos, 180.0), 0.0);
 
         if (move_left && move_right) {
-                _streampanners[0]->set_position (AngularVector (l_pos, 0.0));
-                _streampanners[1]->set_position (AngularVector (r_pos, 0.0));
+                _streampanners[l_index]->set_position (AngularVector (l_pos, 0.0));
+                _streampanners[r_index]->set_position (AngularVector (r_pos, 0.0));
+
+                cerr << "left @ " << BaseStereoPanner::azimuth_to_lr_fract (l_pos) << " right @ " << BaseStereoPanner::azimuth_to_lr_fract (r_pos) << endl;
         }
 
         return move_left && move_right;

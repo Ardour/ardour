@@ -82,13 +82,10 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
 
         cairo_t* cr = gdk_cairo_create (win->gobj());
        
-        int x1, x2;
         int width, height;
         double pos = position_control->get_value (); /* 0..1 */
         double swidth = width_control->get_value (); /* -1..+1 */
-        const int border_width = 1;
-        const int border = border_width * 2;
-
+        double fswidth = fabs (swidth);
 
         width = get_width();
         height = get_height ();
@@ -99,43 +96,48 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         cairo_rectangle (cr, 0, 0, width, height);
         cairo_fill (cr);
 
-        /* leave a border */
+        /* compute the outer edges of the L/R boxes based on the current stereo width */
+        
+        int usable_width = width - lr_box_size;
+        int center = lr_box_size/2 + (int) floor (usable_width * pos);
+        int left = center - (int) floor (fswidth * usable_width / 2.0); // center of leftmost box
+        int right = center + (int) floor (fswidth * usable_width / 2.0); // center of rightmost box
 
-        width -= border_width;
-        height -= border_width;
-
-        /* compute where the central box is */
-
-        x1 = (int) floor (width * pos);                      // center of widget 
-        x2 = x1 - (int) floor ((fabs (swidth) * width)/2.0); // center, then back up half the swidth value
-        x1 -= pos_box_size/2;                                // center, then back up by half width of position box
+        cerr << "pos " << pos << " width = " << width << " swidth = " << swidth << " center @ " << center << " L = " << left << " R = " << right << endl;
 
         /* compute & draw the line through the box */
         
         cairo_set_line_width (cr, 2);
 	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
-        cairo_move_to (cr, border + x2, 4+(pos_box_size/2)+step_down);
-        cairo_line_to (cr, border + x2, 4+(pos_box_size/2));
-        cairo_line_to (cr, border + x2 + floor ((fabs (swidth * width))), 4+(pos_box_size/2));
-        cairo_line_to (cr, border + x2 + floor ((fabs (swidth * width))), 4+(pos_box_size/2) + step_down);
+        cairo_move_to (cr, left, 4+(pos_box_size/2)+step_down);
+        cairo_line_to (cr, left, 4+(pos_box_size/2));
+        cairo_line_to (cr, right, 4+(pos_box_size/2));
+        cairo_line_to (cr, right, 4+(pos_box_size/2) + step_down);
         cairo_stroke (cr);
+
+        if (swidth < 0.0) {
+                /* flip where the L/R boxes are drawn */
+                swap (left, right);
+        }
 
         /* left box */
 
+        left -= lr_box_size/2;
+        right -= lr_box_size/2;
+
         cairo_rectangle (cr, 
-                         border+ x2 - lr_box_size/2, 
+                         left,
                          (lr_box_size/2)+step_down, 
                          lr_box_size, lr_box_size);
 	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
         cairo_stroke_preserve (cr);
 	cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
 	cairo_fill (cr);
-
         
         /* add text */
 
         cairo_move_to (cr, 
-                       border + x2 - lr_box_size/2 + 4,
+                       left + 4,
                        (lr_box_size/2) + step_down + 13);
 	cairo_set_source_rgba (cr, 0.129, 0.054, 0.588, 1.0);
         cairo_select_font_face (cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
@@ -144,7 +146,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         /* right box */
 
         cairo_rectangle (cr, 
-                         border + x2 + (int) floor ((fabs (swidth * width))) - lr_box_size/2, 
+                         right,
                          (lr_box_size/2)+step_down, 
                          lr_box_size, lr_box_size);
 	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
@@ -155,7 +157,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         /* add text */
 
         cairo_move_to (cr, 
-                       border + x2 + (int) floor ((fabs (swidth * width))) - lr_box_size/2 + 4, 
+                       right + 4,
                        (lr_box_size/2)+step_down + 13);
 	cairo_set_source_rgba (cr, 0.129, 0.054, 0.588, 1.0);
         cairo_show_text (cr, "R");
@@ -163,7 +165,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         /* draw the central box */
 
         cairo_set_line_width (cr, 1);
-	cairo_rectangle (cr, border + x1, 4, pos_box_size, pos_box_size);
+	cairo_rectangle (cr, center - (pos_box_size/2), 4, pos_box_size, pos_box_size);
 	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
         cairo_stroke_preserve (cr);
 	cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
