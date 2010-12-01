@@ -137,8 +137,8 @@ AudioRegionImporter::get_info () const
 	iss_position >> position;
 
 	// Convert to timecode
-	session.sample_to_timecode(length, length_time, false);
-	session.sample_to_timecode(position, position_time, false);
+	session.sample_to_timecode(length, length_time, true, false);
+	session.sample_to_timecode(position, position_time, true, false);
 
 	// return info
 	oss << _("Length: ") <<

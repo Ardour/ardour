@@ -110,6 +110,9 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
         , in_set_state (false)
         , _persistent_alignment_style (ExistingMaterial)
         , first_input_change (true)
+        , scrub_start (0)
+        , scrub_buffer_size (0)
+        , scrub_offset (0)
         , _flags (flag)
 
 {
@@ -154,6 +157,9 @@ Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
         , in_set_state (false)
         , _persistent_alignment_style (ExistingMaterial)
         , first_input_change (true)
+        , scrub_start (0)
+        , scrub_buffer_size (0)
+        , scrub_offset (0)
         , _flags (Recordable)
 {
 }

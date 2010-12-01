@@ -1009,10 +1009,10 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 	case timecode_show_bits:
 
 		// Find timecode time of this sample (pos) with subframe accuracy
-		_session->sample_to_timecode (pos, timecode, true /* use_subframes */);
+		_session->sample_to_timecode(pos, timecode, true /* use_offset */, true /* use_subframes */ );
 
 		for (n = 0; n < timecode_nmarks; n++) {
-			_session->timecode_to_sample (timecode, pos, true /* use_subframes */);
+			_session->timecode_to_sample(timecode, pos, true /* use_offset */, true /* use_subframes */ );
 			if ((timecode.subframes % timecode_mark_modulo) == 0) {
 				if (timecode.subframes == 0) {
 					(*marks)[n].style = GtkCustomRulerMarkMajor;
@@ -1035,12 +1035,12 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 	  break;
 	case timecode_show_seconds:
 		// Find timecode time of this sample (pos)
-		_session->sample_to_timecode (pos, timecode, false /* use_subframes */);
+		_session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole second down
 		Timecode::seconds_floor( timecode );
 
 		for (n = 0; n < timecode_nmarks; n++) {
-			_session->timecode_to_sample (timecode, pos, false /* use_subframes */);
+			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.seconds % timecode_mark_modulo) == 0) {
 				if (timecode.seconds == 0) {
 					(*marks)[n].style = GtkCustomRulerMarkMajor;
@@ -1062,12 +1062,12 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 	  break;
 	case timecode_show_minutes:
 		// Find timecode time of this sample (pos)
-		_session->sample_to_timecode (pos, timecode, false /* use_subframes */);
+		_session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole minute down
 		Timecode::minutes_floor( timecode );
 
 		for (n = 0; n < timecode_nmarks; n++) {
-			_session->timecode_to_sample (timecode, pos, false /* use_subframes */);
+			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.minutes % timecode_mark_modulo) == 0) {
 				if (timecode.minutes == 0) {
 					(*marks)[n].style = GtkCustomRulerMarkMajor;
@@ -1088,12 +1088,12 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 	  break;
 	case timecode_show_hours:
 		// Find timecode time of this sample (pos)
-		_session->sample_to_timecode (pos, timecode, false /* use_subframes */);
+		_session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole hour down
 		Timecode::hours_floor( timecode );
 
 		for (n = 0; n < timecode_nmarks; n++) {
-			_session->timecode_to_sample (timecode, pos, false /* use_subframes */);
+			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.hours % timecode_mark_modulo) == 0) {
 				(*marks)[n].style = GtkCustomRulerMarkMajor;
 				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
@@ -1110,12 +1110,12 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 	  break;
 	case timecode_show_frames:
 		// Find timecode time of this sample (pos)
-		_session->sample_to_timecode (pos, timecode, false /* use_subframes */);
+		_session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole frame down
 		Timecode::frames_floor( timecode );
 
 		for (n = 0; n < timecode_nmarks; n++) {
-			_session->timecode_to_sample (timecode, pos, false /* use_subframes */);
+			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.frames % timecode_mark_modulo) == 0)  {
 				if (timecode.frames == 0) {
 				  (*marks)[n].style = GtkCustomRulerMarkMajor;

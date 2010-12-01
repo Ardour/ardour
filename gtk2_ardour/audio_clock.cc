@@ -216,6 +216,8 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	clock_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 	clock_base.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &AudioClock::field_button_release_event), Timecode_Hours));
 
+	Session::TimecodeOffsetChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::timecode_offset_changed, this), gui_context());
+
 	if (editable) {
 		setup_events ();
 	}
@@ -470,6 +472,25 @@ AudioClock::set (nframes_t when, bool force, nframes_t offset, char which)
 	}
 
 	last_when = when;
+}
+
+void
+AudioClock::timecode_offset_changed ()
+{
+	nframes_t current;
+
+	switch (_mode) {
+	case Timecode:
+		if (is_duration) {
+			current = current_duration();
+		} else {
+			current = current_time ();
+		}
+		set (current, true);
+		break;
+	default:
+		break;
+	}
 }
 
 void
@@ -1482,7 +1503,7 @@ AudioClock::timecode_frame_from_display () const
 	timecode.rate = _session->timecode_frames_per_second();
 	timecode.drop= _session->timecode_drop_frames();
 
-	_session->timecode_to_sample (timecode, sample, false /* use_subframes */);
+	_session->timecode_to_sample( timecode, sample, false /* use_offset */, false /* use_subframes */ );
 
 
 #if 0

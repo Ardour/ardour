@@ -187,8 +187,27 @@ Session::sync_time_vars ()
 }
 
 void
-Session::timecode_to_sample (Timecode::Time& timecode, framepos_t& sample, bool use_subframes) const
+Session::set_timecode_offset (nframes_t off)
 {
+	_timecode_offset = off;
+	last_timecode_valid = false;
+
+	TimecodeOffsetChanged (); /* EMIT SIGNAL */
+}
+
+void
+Session::set_timecode_offset_negative (bool neg)
+{
+	_timecode_offset_negative = neg;
+	last_timecode_valid = false;
+
+	TimecodeOffsetChanged (); /* EMIT SIGNAL */
+}
+
+void
+Session::timecode_to_sample( Timecode::Time& timecode, framepos_t& sample, bool use_offset, bool use_subframes ) const
+{
+
 	if (timecode.drop) {
 		// The drop frame format was created to better approximate the 30000/1001 = 29.97002997002997....
 		// framerate of NTSC color TV. The used frame rate of drop frame is 29.97, which drifts by about
@@ -252,16 +271,53 @@ Session::timecode_to_sample (Timecode::Time& timecode, framepos_t& sample, bool 
 	if (use_subframes) {
 		sample += (int32_t) (((double)timecode.subframes * _frames_per_timecode_frame) / config.get_subframes_per_frame());
 	}
+
+	if (use_offset) {
+		if (timecode_offset_negative()) {
+			if (sample >= timecode_offset()) {
+				sample -= timecode_offset();
+			} else {
+				/* Prevent song-time from becoming negative */
+				sample = 0;
+			}
+		} else {
+			if (timecode.negative) {
+				if (sample <= timecode_offset()) {
+					sample = timecode_offset() - sample;
+				} else {
+					sample = 0;
+				}
+			} else {
+				sample += timecode_offset();
+			}
+		}
+	}
+
 }
 
 
 void
-Session::sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool use_subframes) const
+Session::sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes ) const
 {
 	framepos_t offset_sample;
 
-	offset_sample = sample;
-	timecode.negative = false;
+	if (!use_offset) {
+		offset_sample = sample;
+		timecode.negative = false;
+	} else {
+		if (_timecode_offset_negative) {
+			offset_sample =  sample + _timecode_offset;
+			timecode.negative = false;
+		} else {
+			if (sample < _timecode_offset) {
+				offset_sample = (_timecode_offset - sample);
+				timecode.negative = true;
+			} else {
+				offset_sample =  sample - _timecode_offset;
+				timecode.negative = false;
+			}
+		}
+	}
 
 	double timecode_frames_left_exact;
 	double timecode_frames_fraction;
@@ -345,7 +401,7 @@ Session::timecode_time (nframes_t when, Timecode::Time& timecode)
 		return;
 	}
 
-	sample_to_timecode (when, timecode, false /* use_subframes */);
+	sample_to_timecode( when, timecode, true /* use_offset */, false /* use_subframes */ );
 
 	last_timecode_when = when;
 	last_timecode = timecode;
@@ -360,7 +416,7 @@ Session::timecode_time_subframes (nframes_t when, Timecode::Time& timecode)
 		return;
 	}
 
-	sample_to_timecode (when, timecode, true /* use_subframes */);
+	sample_to_timecode( when, timecode, true /* use_offset */, true /* use_subframes */ );
 
 	last_timecode_when = when;
 	last_timecode = timecode;
@@ -370,7 +426,7 @@ Session::timecode_time_subframes (nframes_t when, Timecode::Time& timecode)
 void
 Session::timecode_duration (framecnt_t when, Timecode::Time& timecode) const
 {
-	sample_to_timecode (when, timecode, true /* use_subframes */);
+	sample_to_timecode( when, timecode, false /* use_offset */, true /* use_subframes */ );
 }
 
 void
@@ -471,7 +527,7 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 #if 0
 	/* Timecode info */
 
-	pos->timecode_offset = 0;
+	pos->timecode_offset = _timecode_offset;
 	t.timecode_frame_rate = timecode_frames_per_second();
 	pos->valid = jack_position_bits_t (pos->valid | JackPositionTimecode;
 
@@ -524,7 +580,14 @@ Session::convert_to_frames_at (nframes_t /*position*/, AnyTime const & any)
 		secs += any.timecode.minutes * 60;
 		secs += any.timecode.seconds;
 		secs += any.timecode.frames / timecode_frames_per_second();
-		return (nframes_t) floor (secs * frame_rate());
+		if (_timecode_offset_negative)
+		{
+			return (nframes_t) floor (secs * frame_rate()) - _timecode_offset;
+		}
+		else
+		{
+			return (nframes_t) floor (secs * frame_rate()) + _timecode_offset;
+		}
 		break;
 
 	case AnyTime::Seconds:
