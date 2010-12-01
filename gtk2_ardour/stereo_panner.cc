@@ -103,7 +103,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         int left = center - (int) floor (fswidth * usable_width / 2.0); // center of leftmost box
         int right = center + (int) floor (fswidth * usable_width / 2.0); // center of rightmost box
 
-        cerr << "pos " << pos << " width = " << width << " swidth = " << swidth << " center @ " << center << " L = " << left << " R = " << right << endl;
+        // cerr << "pos " << pos << " width = " << width << " swidth = " << swidth << " center @ " << center << " L = " << left << " R = " << right << endl;
 
         /* compute & draw the line through the box */
         
@@ -183,12 +183,8 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
         drag_start_x = ev->x;
         last_drag_x = ev->x;
 
-        /* center 8 pixels are for position drag */
-
-        int w = get_width();
-        double pos = position_control->get_value ();
-
-        if ((ev->x >= (int) floor ((pos * w)-(pos_box_size/2))) && (ev->x <= (int) floor ((pos * w)+(pos_box_size/2)))) {
+        if (ev->y < 20) {
+                /* top section of widget is for position drags */
                 dragging_position = true;
         } else {
                 dragging_position = false;
@@ -219,6 +215,12 @@ StereoPanner::on_button_release_event (GdkEventButton* ev)
 }
 
 bool
+StereoPanner::on_scroll_event (GdkEventScroll* ev)
+{
+        return true;
+}
+
+bool
 StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 {
         if (!dragging) {
@@ -226,18 +228,72 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
         }
 
         int w = get_width();
-        float delta = (abs (ev->x - last_drag_x)) / (double) (w/2);
+        double delta = (abs (ev->x - last_drag_x)) / (w/2.0);
+        int drag_dir = 0;
 
         if (!dragging_position) {
                 double wv = width_control->get_value();        
+                int inc;
+                double old_wv;
+                double opx; // compute the operational x-coordinate given the current pos+width
                 
-                if (((drag_start_x < w/2) && ev->x > last_drag_x) || // start left of center, move towards it
-                    ((drag_start_x > w/2) && ev->x < last_drag_x)) { // start right of center, move towards it
-                        wv = wv  * (1.0 - delta);
+                if (wv > 0) {
+                        /* positive value: increasing width means adding */
+                        inc = 1;
                 } else {
-                        /* moving out, so increase the width */
-                        wv = wv * (1.0 + delta);
+                        /* positive value: increasing width means subtracting */
+                        inc = -1;
                 }
+
+                if (drag_start_x < w/2) {
+                        /* started left of center */
+
+                        opx = position_control->get_value() - (wv/2.0);
+
+                        if (opx < 0.5) {
+                                /* still left */
+                                if (ev->x > last_drag_x) {
+                                        /* motion to left */
+                                        drag_dir = -inc;
+                                } else {
+                                        drag_dir = inc;
+                                }
+                        } else {
+                                /* now right */
+                                if (ev->x > last_drag_x) {
+                                        /* motion to left */
+                                        drag_dir = inc;
+                                } else {
+                                        drag_dir = -inc;
+                                }
+                        }
+                } else {
+                        /* started right of center */
+                        
+                        opx = position_control->get_value() + (wv/2.0);
+
+                        if (opx > 0.5) {
+                                /* still right */
+                                if (ev->x < last_drag_x) {
+                                        /* motion to right */
+                                        drag_dir = -inc;
+                                } else {
+                                        drag_dir = inc;
+                                }
+                        } else {
+                                /* now left */
+                                if (ev->x < last_drag_x) {
+                                        /* motion to right */
+                                        drag_dir = inc;
+                                } else {
+                                        drag_dir = -inc;
+                                }
+                        }
+
+                }
+
+                old_wv = wv;
+                wv = wv + (drag_dir * delta);
                 
                 width_control->set_value (wv);
 

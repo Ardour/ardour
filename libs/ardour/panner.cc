@@ -116,6 +116,7 @@ StreamPanner::PanControllable::set_value (double val)
         switch (parameter().id()) {
         case 100:
                 /* position */
+                val = max (min (val, 1.0), 0.0);
                 if (p.set_stereo_pan (val, p.width_control()->get_value())) {
                         AutomationControl::set_value(val);
                 }
@@ -123,6 +124,7 @@ StreamPanner::PanControllable::set_value (double val)
 
         case 200:
                 /* width */
+                val = max (min (val, 1.0), -1.0);
                 if (p.set_stereo_pan (p.direction_control()->get_value(), val)) {
                         AutomationControl::set_value(val);
                 }
@@ -1475,7 +1477,7 @@ Panner::set_stereo_pan (double direction_as_lr_fract, double width)
                 _streampanners[l_index]->set_position (AngularVector (l_pos, 0.0));
                 _streampanners[r_index]->set_position (AngularVector (r_pos, 0.0));
 
-                cerr << "left @ " << BaseStereoPanner::azimuth_to_lr_fract (l_pos) << " right @ " << BaseStereoPanner::azimuth_to_lr_fract (r_pos) << endl;
+                // cerr << "left @ " << BaseStereoPanner::azimuth_to_lr_fract (l_pos) << " right @ " << BaseStereoPanner::azimuth_to_lr_fract (r_pos) << endl;
         }
 
         return move_left && move_right;
