@@ -20,24 +20,29 @@
 #include <iostream>
 #include <iomanip>
 #include <cstring>
+#include <cmath>
 
 #include "pbd/controllable.h"
 #include "pbd/compose.h"
 
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/keyboard.h"
 
 #include "ardour/panner.h"
 #include "stereo_panner.h"
+#include "utils.h"
 
 #include "i18n.h"
 
 using namespace std;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 
 static const int pos_box_size = 10;
-static const int lr_box_size = 18;
+static const int lr_box_size = 15;
 static const int step_down = 10;
+static const int top_step = 2;
 
 StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost::shared_ptr<PBD::Controllable> width)
         : position_control (position)
@@ -51,7 +56,13 @@ StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost
         width_control->Changed.connect (connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
         set_tooltip ();
 
-        add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK|Gdk::POINTER_MOTION_MASK);
+        set_flags (Gtk::CAN_FOCUS);
+
+        add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|
+                    Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|
+                    Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|
+                    Gdk::SCROLL_MASK|
+                    Gdk::POINTER_MOTION_MASK);
 }
 
 StereoPanner::~StereoPanner ()
@@ -61,10 +72,14 @@ StereoPanner::~StereoPanner ()
 void
 StereoPanner::set_tooltip ()
 {
+        double pos = position_control->get_value(); // 0..1
+        double w = width_control->get_value (); // -1..+1
+        int lpos = (int) lrint ((pos - (w/2.0)) * 100.0);
+        int rpos = (int) lrint ((pos + (w/2.0)) * 100.0);
+                                
         Gtkmm2ext::UI::instance()->set_tip (this, string_compose (_("L:%1 R:%2 Width: %3%%"), 
-                                                                  (int) floor (position_control->get_value() * 100.0),
-                                                                  (int) floor ((1.0 - position_control->get_value() * 100)),
-                                                                  (int) floor (width_control->get_value() * 100.0)).c_str());
+                                                                  lpos, rpos,
+                                                                  (int) floor (w * 100.0)).c_str());
 }
 
 void
@@ -109,10 +124,10 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         
         cairo_set_line_width (cr, 2);
 	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
-        cairo_move_to (cr, left, 4+(pos_box_size/2)+step_down);
-        cairo_line_to (cr, left, 4+(pos_box_size/2));
-        cairo_line_to (cr, right, 4+(pos_box_size/2));
-        cairo_line_to (cr, right, 4+(pos_box_size/2) + step_down);
+        cairo_move_to (cr, left, top_step+(pos_box_size/2)+step_down);
+        cairo_line_to (cr, left, top_step+(pos_box_size/2));
+        cairo_line_to (cr, right, top_step+(pos_box_size/2));
+        cairo_line_to (cr, right, top_step+(pos_box_size/2) + step_down);
         cairo_stroke (cr);
 
         if (swidth < 0.0) {
@@ -137,7 +152,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         /* add text */
 
         cairo_move_to (cr, 
-                       left + 4,
+                       left + 3,
                        (lr_box_size/2) + step_down + 13);
 	cairo_set_source_rgba (cr, 0.129, 0.054, 0.588, 1.0);
         cairo_select_font_face (cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
@@ -157,7 +172,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         /* add text */
 
         cairo_move_to (cr, 
-                       right + 4,
+                       right + 3,
                        (lr_box_size/2)+step_down + 13);
 	cairo_set_source_rgba (cr, 0.129, 0.054, 0.588, 1.0);
         cairo_show_text (cr, "R");
@@ -165,7 +180,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         /* draw the central box */
 
         cairo_set_line_width (cr, 1);
-	cairo_rectangle (cr, center - (pos_box_size/2), 4, pos_box_size, pos_box_size);
+	cairo_rectangle (cr, center - (pos_box_size/2), top_step, pos_box_size, pos_box_size);
 	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
         cairo_stroke_preserve (cr);
 	cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
@@ -217,6 +232,36 @@ StereoPanner::on_button_release_event (GdkEventButton* ev)
 bool
 StereoPanner::on_scroll_event (GdkEventScroll* ev)
 {
+        double one_degree = 1.0/180.0;
+        double pv = position_control->get_value(); // 0..1.0 ; 0 = left
+        double wv = width_control->get_value(); // 0..1.0 ; 0 = left
+        double step;
+        
+        if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
+                step = one_degree;
+        } else {
+                step = one_degree * 5.0;
+        }
+
+        switch (ev->direction) {
+        case GDK_SCROLL_LEFT:
+                wv += step;
+                width_control->set_value (wv);
+                break;
+        case GDK_SCROLL_UP:
+                pv -= step;
+                position_control->set_value (pv);
+                break;
+        case GDK_SCROLL_RIGHT:
+                wv -= step;
+                width_control->set_value (wv);
+                break;
+        case GDK_SCROLL_DOWN:
+                pv += step;
+                position_control->set_value (pv);
+                break;
+        }
+
         return true;
 }
 
@@ -312,4 +357,63 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 
         last_drag_x = ev->x;
         return true;
+}
+
+bool
+StereoPanner::on_key_press_event (GdkEventKey* ev)
+{
+        double one_degree = 1.0/180.0;
+        double pv = position_control->get_value(); // 0..1.0 ; 0 = left
+        double wv = width_control->get_value(); // 0..1.0 ; 0 = left
+        double step;
+
+        if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
+                step = one_degree;
+        } else {
+                step = one_degree * 5.0;
+        }
+
+        switch (ev->keyval) {
+        case GDK_Up:
+                wv += step;
+                width_control->set_value (wv);
+                break;
+        case GDK_Left:
+                pv -= step;
+                position_control->set_value (pv);
+                break;
+        case GDK_Right:
+                pv += step;
+                position_control->set_value (pv);
+                break;
+        case GDK_Down:
+                wv -= step;
+                width_control->set_value (wv);
+                break;
+        default:
+                return forward_key_press (ev);
+        }
+                
+        return true;
+}
+
+bool
+StereoPanner::on_key_release_event (GdkEventKey* ev)
+{
+        return true;
+}
+
+bool
+StereoPanner::on_enter_notify_event (GdkEventCrossing* ev)
+{
+	grab_focus ();
+	Keyboard::magic_widget_grab_focus ();
+	return false;
+}
+
+bool
+StereoPanner::on_leave_notify_event (GdkEventCrossing*)
+{
+	Keyboard::magic_widget_drop_focus ();
+	return false;
 }

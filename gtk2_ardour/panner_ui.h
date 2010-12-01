@@ -120,7 +120,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
         void show_width ();
         void position_adjusted ();
         void show_position ();
-        
+
 	Gtk::ToggleButton   panning_link_button;
 	Gtk::Button         panning_link_direction_button;
 	Gtk::HBox           panning_link_box;

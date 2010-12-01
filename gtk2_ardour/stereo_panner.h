@@ -41,6 +41,10 @@ class StereoPanner : public Gtk::DrawingArea
 	bool on_button_release_event (GdkEventButton*);
 	bool on_motion_notify_event (GdkEventMotion*);
         bool on_scroll_event (GdkEventScroll*);
+        bool on_key_press_event (GdkEventKey*);
+        bool on_key_release_event (GdkEventKey*);
+        bool on_enter_notify_event (GdkEventCrossing* ev);
+        bool on_leave_notify_event (GdkEventCrossing* ev);
 
   private:
         boost::shared_ptr<PBD::Controllable> position_control;
