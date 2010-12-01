@@ -347,9 +347,9 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
                 double pv = position_control->get_value(); // 0..1.0 ; 0 = left
                 
                 if (ev->x > last_drag_x) { // increasing 
-                        pv = pv * (1.0 + delta);
+                        pv = pv + delta;
                 } else {
-                        pv = pv * (1.0 - delta);
+                        pv = pv - delta;
                 }
 
                 position_control->set_value (pv);
@@ -400,7 +400,7 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
 bool
 StereoPanner::on_key_release_event (GdkEventKey* ev)
 {
-        return true;
+        return false;
 }
 
 bool
