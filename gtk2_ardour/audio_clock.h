@@ -212,7 +212,7 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void build_ops_menu ();
 	void setup_events ();
 
-	void timecode_offset_changed ();
+	void session_configuration_changed (std::string);
 	void set_size_requests ();
 
 	static const uint32_t field_length[(int)AudioFrames+1];

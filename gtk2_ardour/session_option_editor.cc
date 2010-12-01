@@ -35,6 +35,8 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	: OptionEditor (&(s->config), _("Session Properties"))
 	, _session_config (&(s->config))
 {
+	set_session (s);
+	
         set_name ("SessionProperties");
 
 	/* SYNC */
@@ -110,6 +112,24 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	vpu->add (-4.1667 - 0.1, _("-4.1667 - 0.1%"));
 
 	add_option (_("Sync"), vpu);
+
+	ClockOption* co = new ClockOption (
+		"timecode-offset",
+		_("Timecode Offset"),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_offset),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_timecode_offset)
+		);
+
+	co->set_session (_session);
+	
+	add_option (_("Sync"), co);
+
+	add_option (_("Sync"), new BoolOption (
+			    "timecode-offset-negative",
+			    _("Timecode Offset Negative"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_offset_negative),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_timecode_offset_negative)
+			    ));
 
 	/* FADES */
 

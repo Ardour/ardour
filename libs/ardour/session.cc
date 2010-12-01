@@ -119,7 +119,6 @@ PBD::Signal2<int,nframes_t,nframes_t> Session::AskAboutSampleRateMismatch;
 PBD::Signal0<void> Session::SendFeedback;
 PBD::Signal3<int,Session*,std::string,DataType> Session::MissingFile;
 
-PBD::Signal0<void> Session::TimecodeOffsetChanged;
 PBD::Signal1<void, framepos_t> Session::StartTimeChanged;
 PBD::Signal1<void, framepos_t> Session::EndTimeChanged;
 PBD::Signal0<void> Session::AutoBindingOn;

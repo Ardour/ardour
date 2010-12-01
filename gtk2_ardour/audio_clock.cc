@@ -216,8 +216,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	clock_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 	clock_base.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &AudioClock::field_button_release_event), Timecode_Hours));
 
-	Session::TimecodeOffsetChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::timecode_offset_changed, this), gui_context());
-
 	if (editable) {
 		setup_events ();
 	}
@@ -475,8 +473,12 @@ AudioClock::set (nframes_t when, bool force, nframes_t offset, char which)
 }
 
 void
-AudioClock::timecode_offset_changed ()
+AudioClock::session_configuration_changed (std::string p)
 {
+	if (p != "timecode-offset" && p != "timecode-offset-negative") {
+		return;
+	}
+	
 	nframes_t current;
 
 	switch (_mode) {
@@ -696,6 +698,8 @@ AudioClock::set_session (Session *s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
+
+		_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
 
 		XMLProperty* prop;
 		XMLNode* node = _session->extra_xml (X_("ClockModes"));

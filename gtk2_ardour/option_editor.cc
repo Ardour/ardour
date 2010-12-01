@@ -191,6 +191,35 @@ FaderOption::add_to_page (OptionEditorPage* p)
 	add_widgets_to_page (p, &_label, &_box);
 }
 
+ClockOption::ClockOption (string const & i, string const & n, sigc::slot<framecnt_t> g, sigc::slot<bool, framecnt_t> s)
+	: Option (i, n)
+	, _clock (X_("timecode-offset"), false, X_("TimecodeOffset"), true, false, true, false)
+	, _get (g)
+	, _set (s)
+{
+	_label.set_text (n + ":");
+	_label.set_alignment (0, 0.5);
+	_label.set_name (X_("OptionsLabel"));
+}
+
+void
+ClockOption::set_state_from_config ()
+{
+	_clock.set (_get ());
+}
+
+void
+ClockOption::add_to_page (OptionEditorPage* p)
+{
+	add_widgets_to_page (p, &_label, &_clock);
+}
+
+void
+ClockOption::set_session (Session* s)
+{
+	_clock.set_session (s);
+}
+	   
 OptionEditorPage::OptionEditorPage (Gtk::Notebook& n, std::string const & t)
 	: table (1, 3)
 {

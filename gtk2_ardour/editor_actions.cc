@@ -1241,6 +1241,8 @@ Editor::parameter_changed (std::string p)
 				tact->set_active (s);
 			}
 		}
+	} else if (p == "timecode-offset" || p == "timecode-offset-negative") {
+		update_just_timecode ();
 	}
 }
 

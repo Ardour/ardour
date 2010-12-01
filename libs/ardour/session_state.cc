@@ -249,8 +249,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	}
 
 	last_timecode_when = 0;
-	_timecode_offset = 0;
-	_timecode_offset_negative = true;
 	last_timecode_valid = false;
 
 	sync_time_vars ();
@@ -3402,8 +3400,9 @@ Session::config_changed (std::string p, bool ours)
 		listen_position_changed ();
 	} else if (p == "solo-control-is-listen-control") {
 		solo_control_mode_changed ();
+	} else if (p == "timecode-offset" || p == "timecode-offset-negative") {
+		last_timecode_valid = false;
 	}
-
 
 	set_dirty ();
 }

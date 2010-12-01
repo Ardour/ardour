@@ -187,24 +187,6 @@ Session::sync_time_vars ()
 }
 
 void
-Session::set_timecode_offset (nframes_t off)
-{
-	_timecode_offset = off;
-	last_timecode_valid = false;
-
-	TimecodeOffsetChanged (); /* EMIT SIGNAL */
-}
-
-void
-Session::set_timecode_offset_negative (bool neg)
-{
-	_timecode_offset_negative = neg;
-	last_timecode_valid = false;
-
-	TimecodeOffsetChanged (); /* EMIT SIGNAL */
-}
-
-void
 Session::timecode_to_sample( Timecode::Time& timecode, framepos_t& sample, bool use_offset, bool use_subframes ) const
 {
 
@@ -273,22 +255,22 @@ Session::timecode_to_sample( Timecode::Time& timecode, framepos_t& sample, bool 
 	}
 
 	if (use_offset) {
-		if (timecode_offset_negative()) {
-			if (sample >= timecode_offset()) {
-				sample -= timecode_offset();
+		if (config.get_timecode_offset_negative()) {
+			if (sample >= config.get_timecode_offset()) {
+				sample -= config.get_timecode_offset();
 			} else {
 				/* Prevent song-time from becoming negative */
 				sample = 0;
 			}
 		} else {
 			if (timecode.negative) {
-				if (sample <= timecode_offset()) {
-					sample = timecode_offset() - sample;
+				if (sample <= config.get_timecode_offset()) {
+					sample = config.get_timecode_offset() - sample;
 				} else {
 					sample = 0;
 				}
 			} else {
-				sample += timecode_offset();
+				sample += config.get_timecode_offset();
 			}
 		}
 	}
@@ -305,15 +287,15 @@ Session::sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool u
 		offset_sample = sample;
 		timecode.negative = false;
 	} else {
-		if (_timecode_offset_negative) {
-			offset_sample =  sample + _timecode_offset;
+		if (config.get_timecode_offset_negative()) {
+			offset_sample = sample + config.get_timecode_offset ();
 			timecode.negative = false;
 		} else {
-			if (sample < _timecode_offset) {
-				offset_sample = (_timecode_offset - sample);
+			if (sample < config.get_timecode_offset()) {
+				offset_sample = (config.get_timecode_offset() - sample);
 				timecode.negative = true;
 			} else {
-				offset_sample =  sample - _timecode_offset;
+				offset_sample =  sample - config.get_timecode_offset();
 				timecode.negative = false;
 			}
 		}
@@ -527,7 +509,7 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 #if 0
 	/* Timecode info */
 
-	pos->timecode_offset = _timecode_offset;
+	pos->timecode_offset = config.get_timecode_offset();
 	t.timecode_frame_rate = timecode_frames_per_second();
 	pos->valid = jack_position_bits_t (pos->valid | JackPositionTimecode;
 
@@ -580,13 +562,10 @@ Session::convert_to_frames_at (nframes_t /*position*/, AnyTime const & any)
 		secs += any.timecode.minutes * 60;
 		secs += any.timecode.seconds;
 		secs += any.timecode.frames / timecode_frames_per_second();
-		if (_timecode_offset_negative)
-		{
-			return (nframes_t) floor (secs * frame_rate()) - _timecode_offset;
-		}
-		else
-		{
-			return (nframes_t) floor (secs * frame_rate()) + _timecode_offset;
+		if (config.get_timecode_offset_negative()) {
+			return (nframes_t) floor (secs * frame_rate()) - config.get_timecode_offset();
+		} else {
+			return (nframes_t) floor (secs * frame_rate()) + config.get_timecode_offset();
 		}
 		break;
 

@@ -27,6 +27,7 @@
 #include <gtkmm/table.h>
 #include "gtkmm2ext/slider_controller.h"
 #include "ardour_dialog.h"
+#include "audio_clock.h"
 #include "ardour/types.h"
 
 /** @file option_editor.h
@@ -355,6 +356,21 @@ private:
 	Gtk::HBox _box;
 	sigc::slot<ARDOUR::gain_t> _get;
 	sigc::slot<bool, ARDOUR::gain_t> _set;
+};
+
+class ClockOption : public Option
+{
+public:
+	ClockOption (std::string const &, std::string const &, sigc::slot<ARDOUR::framecnt_t>, sigc::slot<bool, ARDOUR::framecnt_t>);
+	void set_state_from_config ();
+	void add_to_page (OptionEditorPage *);
+	void set_session (ARDOUR::Session *);
+
+private:
+	Gtk::Label _label;
+	AudioClock _clock;
+	sigc::slot<ARDOUR::framecnt_t> _get;
+	sigc::slot<bool, ARDOUR::framecnt_t> _set;
 };
 
 /** Class to represent a single page in an OptionEditor's notebook.
