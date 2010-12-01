@@ -299,10 +299,6 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	Glib::Mutex state_lock;
 
-	framepos_t scrub_start;
-	nframes_t  scrub_buffer_size;
-	nframes_t  scrub_offset;
-
 	PBD::ScopedConnectionList playlist_connections;
 
 	PBD::ScopedConnection ic_connection;
