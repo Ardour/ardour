@@ -137,7 +137,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         cairo_move_to (cr, 
                        border + x2 - lr_box_size/2 + 4,
                        (lr_box_size/2) + step_down + 13);
-	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
+	cairo_set_source_rgba (cr, 0.129, 0.054, 0.588, 1.0);
         cairo_select_font_face (cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
         cairo_show_text (cr, "L");
 
@@ -157,7 +157,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         cairo_move_to (cr, 
                        border + x2 + (int) floor ((fabs (swidth * width))) - lr_box_size/2 + 4, 
                        (lr_box_size/2)+step_down + 13);
-	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
+	cairo_set_source_rgba (cr, 0.129, 0.054, 0.588, 1.0);
         cairo_show_text (cr, "R");
 
         /* draw the central box */
