@@ -55,12 +55,6 @@ Port::Port (std::string const & n, DataType t, Flags f)
 		throw failed_constructor ();
 	}
 
-        if (jack_port_by_name (_engine->jack(), _name.c_str()) == NULL) {
-                cerr << "Port name " << _name << " does not currently exist\n";
-        } else {
-                cerr << "Port name " << _name << " is already registered\n";
-        }
-
 	if ((_jack_port = jack_port_register (_engine->jack (), _name.c_str (), t.to_jack_type (), _flags, 0)) == 0) {
                 cerr << "Failed to register JACK port, reason is unknown from here\n";
 		throw failed_constructor ();
