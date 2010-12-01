@@ -280,8 +280,7 @@ Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 	timecode.rate = timecode_frames_per_second();
 	timecode.drop = timecode_drop_frames();
 
-	// Also takes timecode offset into account:
-	timecode_to_sample( timecode, target_frame, true /* use_offset */, false /* use_subframes */ );
+	timecode_to_sample (timecode, target_frame, false /* use_subframes */);
 
 	if (target_frame > max_framepos) {
 		target_frame = max_framepos;
@@ -364,7 +363,7 @@ Session::send_full_time_code (framepos_t const t)
 	}
 
 	// Get timecode time for the given time
-	sample_to_timecode (t, timecode, true /* use_offset */, false /* no subframes */);
+	sample_to_timecode (t, timecode, false /* no subframes */);
 
 	transmitting_timecode_time = timecode;
 	outbound_mtc_timecode_frame = t;

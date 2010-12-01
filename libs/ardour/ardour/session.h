@@ -450,8 +450,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void sync_time_vars();
 
 	void bbt_time (nframes_t when, BBT_Time&);
-	void timecode_to_sample(Timecode::Time& timecode, framepos_t& sample, bool use_offset, bool use_subframes) const;
-	void sample_to_timecode(framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
+	void timecode_to_sample (Timecode::Time& timecode, framepos_t& sample, bool use_subframes) const;
+	void sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool use_subframes) const;
 	void timecode_time (Timecode::Time &);
 	void timecode_time (nframes_t when, Timecode::Time&);
 	void timecode_time_subframes (nframes_t when, Timecode::Time&);
@@ -459,16 +459,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void timecode_duration (framecnt_t, Timecode::Time&) const;
 	void timecode_duration_string (char *, framecnt_t) const;
 
-	void           set_timecode_offset (nframes_t);
-	nframes_t      timecode_offset () const { return _timecode_offset; }
-	void           set_timecode_offset_negative (bool);
-	bool           timecode_offset_negative () const { return _timecode_offset_negative; }
-
 	nframes_t convert_to_frames_at (nframes_t position, AnyTime const &);
 
 	static PBD::Signal1<void, framepos_t> StartTimeChanged;
 	static PBD::Signal1<void, framepos_t> EndTimeChanged;
-	static PBD::Signal0<void> TimecodeOffsetChanged;
 
 	std::vector<SyncSource> get_available_sync_options() const;
 	void   request_sync_source (Slave*);
@@ -1142,8 +1136,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	double _frames_per_timecode_frame; /* has to be floating point because of drop frame */
 	nframes_t _frames_per_hour;
 	nframes_t _timecode_frames_per_hour;
-	nframes_t _timecode_offset;
-	bool _timecode_offset_negative;
 
 	/* cache the most-recently requested time conversions. This helps when we
 	 * have multiple clocks showing the same time (e.g. the transport frame) */

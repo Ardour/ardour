@@ -185,7 +185,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 	
 	if (was_full || outside_window (mtc_frame)) {
 
-		session.timecode_to_sample (timecode, mtc_frame, true, false);
+		session.timecode_to_sample (timecode, mtc_frame, false);
 		session.request_locate (mtc_frame, false);
 		session.request_transport_speed (0);
 		update_mtc_status (MIDI::MTC_Stopped);
@@ -204,7 +204,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 		   consideration.
 		*/
 
-		session.timecode_to_sample (timecode, mtc_frame, true, false);
+		session.timecode_to_sample (timecode, mtc_frame, false);
 		
 		/* We received the last quarter frame 7 quarter frames (1.75 mtc
 		   frames) after the instance when the contents of the mtc quarter

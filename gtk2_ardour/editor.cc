@@ -1090,7 +1090,6 @@ Editor::set_session (Session *t)
 	_session->PositionChanged.connect (_session_connections, invalidator (*this), ui_bind (&Editor::map_position_change, this, _1), gui_context());
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), ui_bind (&Editor::handle_new_route, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_title, this), gui_context());
-	_session->TimecodeOffsetChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_just_timecode, this), gui_context());
 	_session->tempo_map().PropertyChanged.connect (_session_connections, invalidator (*this), ui_bind (&Editor::tempo_map_changed, this, _1), gui_context());
 	_session->Located.connect (_session_connections, invalidator (*this), boost::bind (&Editor::located, this), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), ui_bind (&Editor::parameter_changed, this, _1), gui_context());
@@ -2429,43 +2428,18 @@ Editor::timecode_snap_to_internal (framepos_t& start, int32_t direction, bool /*
 		break;
 
 	case SnapToTimecodeSeconds:
-		if (_session->timecode_offset_negative())
-		{
-			start += _session->timecode_offset ();
-		} else {
-			start -= _session->timecode_offset ();
-		}
 		if (((direction == 0) && (start % one_timecode_second > one_timecode_second / 2)) || direction > 0) {
 			start = (framepos_t) ceil ((double) start / one_timecode_second) * one_timecode_second;
 		} else {
 			start = (framepos_t) floor ((double) start / one_timecode_second) * one_timecode_second;
 		}
-
-		if (_session->timecode_offset_negative())
-		{
-			start -= _session->timecode_offset ();
-		} else {
-			start += _session->timecode_offset ();
-		}
 		break;
 
 	case SnapToTimecodeMinutes:
-		if (_session->timecode_offset_negative())
-		{
-			start += _session->timecode_offset ();
-		} else {
-			start -= _session->timecode_offset ();
-		}
 		if (((direction == 0) && (start % one_timecode_minute > one_timecode_minute / 2)) || direction > 0) {
 			start = (framepos_t) ceil ((double) start / one_timecode_minute) * one_timecode_minute;
 		} else {
 			start = (framepos_t) floor ((double) start / one_timecode_minute) * one_timecode_minute;
-		}
-		if (_session->timecode_offset_negative())
-		{
-			start -= _session->timecode_offset ();
-		} else {
-			start += _session->timecode_offset ();
 		}
 		break;
 	default:

@@ -114,8 +114,8 @@ LocationImporter::get_info () const
 	iss_end >> end;
 
 	// Convert to timecode
-	session.sample_to_timecode (start, start_time, true, false);
-	session.sample_to_timecode (end, end_time, true, false);
+	session.sample_to_timecode (start, start_time, false);
+	session.sample_to_timecode (end, end_time, false);
 
 	// return info
 	std::ostringstream oss;

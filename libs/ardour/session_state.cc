@@ -249,8 +249,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	}
 
 	last_timecode_when = 0;
-	_timecode_offset = 0;
-	_timecode_offset_negative = true;
 	last_timecode_valid = false;
 
 	sync_time_vars ();
