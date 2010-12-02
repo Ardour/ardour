@@ -123,7 +123,7 @@ Session::request_stop (bool abort, bool clear_state)
 }
 
 void
-Session::request_locate (nframes_t target_frame, bool with_roll)
+Session::request_locate (framepos_t target_frame, bool with_roll)
 {
 	SessionEvent *ev = new SessionEvent (with_roll ? SessionEvent::LocateRoll : SessionEvent::Locate, SessionEvent::Add, SessionEvent::Immediate, target_frame, 0, false);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request locate to %1\n", target_frame));
@@ -1398,7 +1398,7 @@ Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
 }
 
 void
-Session::request_bounded_roll (nframes_t start, nframes_t end)
+Session::request_bounded_roll (framepos_t start, framepos_t end)
 {
 	AudioRange ar (start, end, 0);
 	list<AudioRange> lar;
@@ -1407,7 +1407,7 @@ Session::request_bounded_roll (nframes_t start, nframes_t end)
 	request_play_range (&lar, true);
 }
 void
-Session::request_roll_at_and_return (nframes_t start, nframes_t return_to)
+Session::request_roll_at_and_return (framepos_t start, framepos_t return_to)
 {
 	SessionEvent *ev = new SessionEvent (SessionEvent::LocateRollLocate, SessionEvent::Add, SessionEvent::Immediate, return_to, 1.0);
 	ev->target2_frame = start;

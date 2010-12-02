@@ -26,6 +26,8 @@
 
 #include "pbd/signals.h"
 
+#include "ardour/types.h"
+
 #include <jack/types.h>
 
 #include "control_protocol/timecode.h"
@@ -58,8 +60,8 @@ class BasicUI {
 	void set_transport_speed (double speed);
 	double get_transport_speed ();
 
-	jack_nframes_t transport_frame ();
-	void locate (jack_nframes_t frame, bool play = false);
+	ARDOUR::framepos_t transport_frame ();
+	void locate (ARDOUR::framepos_t frame, bool play = false);
 	bool locating ();
 	bool locked ();
 
@@ -77,11 +79,11 @@ class BasicUI {
 	void rec_enable_toggle ();
 	void toggle_all_rec_enables ();
 
-	jack_nframes_t timecode_frames_per_hour ();
+	ARDOUR::framecnt_t timecode_frames_per_hour ();
 
-	void timecode_time (jack_nframes_t where, Timecode::Time&);
-	void timecode_to_sample (Timecode::Time& timecode, int64_t& sample, bool use_offset, bool use_subframes) const;
-	void sample_to_timecode (int64_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
+	void timecode_time (framepos_t where, Timecode::Time&);
+	void timecode_to_sample (Timecode::Time& timecode, framepos_t & sample, bool use_offset, bool use_subframes) const;
+	void sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
 
   protected:
 	BasicUI ();

@@ -289,10 +289,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void queue_event (SessionEvent*);
 
-	void request_roll_at_and_return (nframes_t start, nframes_t return_to);
-	void request_bounded_roll (nframes_t start, nframes_t end);
+	void request_roll_at_and_return (framepos_t start, framepos_t return_to);
+	void request_bounded_roll (framepos_t start, framepos_t end);
 	void request_stop (bool abort = false, bool clear_state = false);
-	void request_locate (nframes_t frame, bool with_roll = false);
+	void request_locate (framepos_t frame, bool with_roll = false);
 
 	void request_play_loop (bool yn, bool leave_rolling = false);
 	bool get_play_loop () const { return play_loop; }

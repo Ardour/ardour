@@ -28,7 +28,6 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using ARDOUR::nframes_t;
 
 PBD::Signal2<void,std::string,std::string> BasicUI::AccessAction;
 
@@ -94,7 +93,7 @@ BasicUI::goto_end ()
 void       
 BasicUI::add_marker ()
 {
-	nframes_t when = session->audible_frame();
+	framepos_t when = session->audible_frame();
 	session->locations()->add (new Location (*session, when, when, _("unnamed"), Location::IsMark));
 }
 
@@ -248,14 +247,14 @@ BasicUI::set_record_enable (bool yn)
 	}
 }
 
-nframes_t
+framepos_t
 BasicUI::transport_frame ()
 {
 	return session->transport_frame();
 }
 
 void
-BasicUI::locate (nframes_t where, bool roll_after_locate)
+BasicUI::locate (framepos_t where, bool roll_after_locate)
 {
 	session->request_locate (where, roll_after_locate);
 }
@@ -272,26 +271,26 @@ BasicUI::locked ()
 	return session->transport_locked ();
 }
 
-nframes_t
+ARDOUR::framecnt_t
 BasicUI::timecode_frames_per_hour ()
 {
 	return session->timecode_frames_per_hour ();
 }
 
 void
-BasicUI::timecode_time (nframes_t where, Timecode::Time& timecode)
+BasicUI::timecode_time (framepos_t where, Timecode::Time& timecode)
 {
 	session->timecode_time (where, *((Timecode::Time *) &timecode));
 }
 
 void 
-BasicUI::timecode_to_sample (Timecode::Time& timecode, int64_t& sample, bool use_offset, bool use_subframes) const
+BasicUI::timecode_to_sample (Timecode::Time& timecode, framepos_t & sample, bool use_offset, bool use_subframes) const
 {
 	session->timecode_to_sample (*((Timecode::Time*)&timecode), sample, use_offset, use_subframes);
 }
 
 void 
-BasicUI::sample_to_timecode (int64_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const
+BasicUI::sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const
 {
 	session->sample_to_timecode (sample, *((Timecode::Time*)&timecode), use_offset, use_subframes);
 }

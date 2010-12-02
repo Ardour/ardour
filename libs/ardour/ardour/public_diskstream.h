@@ -48,8 +48,8 @@ public:
 	virtual void set_pending_overwrite (bool) = 0;
 	virtual int seek (framepos_t, bool complete_refill = false) = 0;
 	virtual bool hidden () const = 0;
-	virtual int can_internal_playback_seek (framepos_t) = 0;
-	virtual int internal_playback_seek (framepos_t) = 0;
+	virtual int can_internal_playback_seek (framecnt_t) = 0;
+	virtual int internal_playback_seek (framecnt_t) = 0;
 	virtual void non_realtime_input_change () = 0;
 	virtual void non_realtime_locate (framepos_t) = 0;
 	virtual void non_realtime_set_speed () = 0;

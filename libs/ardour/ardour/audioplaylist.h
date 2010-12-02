@@ -78,7 +78,7 @@ public:
 
 	void clear (bool with_signals=true);
 
-        nframes_t read (Sample *dst, Sample *mixdown, float *gain_buffer, nframes_t start, nframes_t cnt, uint32_t chan_n=0);
+        framecnt_t read (Sample *dst, Sample *mixdown, float *gain_buffer, framepos_t start, framecnt_t cnt, uint32_t chan_n=0);
 
 	int set_state (const XMLNode&, int version);
 

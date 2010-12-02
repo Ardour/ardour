@@ -184,14 +184,11 @@ struct RegionSortByLayer {
     }
 };
 
-ARDOUR::nframes_t
-AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t start,
-		     nframes_t cnt, unsigned chan_n)
+ARDOUR::framecnt_t
+AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, framepos_t start,
+		     framecnt_t cnt, unsigned chan_n)
 {
-	nframes_t ret = cnt;
-	nframes_t end;
-	nframes_t read_frames;
-	nframes_t skip_frames;
+	framecnt_t ret = cnt;
 
 	/* optimizing this memset() away involves a lot of conditionals
 	   that may well cause more of a hit due to cache misses
@@ -214,9 +211,9 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nf
 
 	Glib::RecMutex::Lock rm (region_lock);
 
-	end =  start + cnt - 1;
-	read_frames = 0;
-	skip_frames = 0;
+	framepos_t const end = start + cnt - 1;
+	framecnt_t read_frames = 0;
+	framecnt_t skip_frames = 0;
 	_read_data_count = 0;
 
 	_read_data_count = 0;

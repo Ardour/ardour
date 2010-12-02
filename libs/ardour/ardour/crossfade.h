@@ -114,7 +114,7 @@ class Crossfade : public ARDOUR::AudioRegion
 
 	PBD::Signal1<void,boost::shared_ptr<Region> > Invalidated;
 
-	bool covers (framecnt_t frame) const {
+	bool covers (framepos_t frame) const {
 		return _position <= frame && frame < _position + _length;
 	}
 
