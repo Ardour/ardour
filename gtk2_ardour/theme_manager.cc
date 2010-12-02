@@ -35,6 +35,7 @@
 #include "theme_manager.h"
 #include "rgb_macros.h"
 #include "ardour_ui.h"
+#include "global_signals.h"
 
 #include "i18n.h"
 

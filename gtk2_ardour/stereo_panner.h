@@ -57,6 +57,24 @@ class StereoPanner : public Gtk::DrawingArea
 
         void value_change ();
         void set_tooltip ();
+        
+        struct ColorScheme { 
+            uint32_t outline;
+            uint32_t fill;
+            uint32_t text;
+            uint32_t background;
+        };
+
+        enum State { 
+                Normal,
+                Mono,
+                Inverted
+        };
+
+        static ColorScheme colors[3];
+        static void set_colors ();
+        static bool have_colors;
+        static PBD::Signal0<void> color_change;
 };
 
 #endif /* __gtk_ardour_stereo_panner_h__ */

@@ -28,6 +28,7 @@
 #include "ardour_ui.h"
 #include "automation_time_axis.h"
 #include "automation_streamview.h"
+#include "global_signals.h"
 #include "gui_thread.h"
 #include "route_time_axis.h"
 #include "automation_line.h"

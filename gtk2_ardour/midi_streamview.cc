@@ -35,6 +35,7 @@
 
 #include "ardour_ui.h"
 #include "canvas-simplerect.h"
+#include "global_signals.h"
 #include "gui_thread.h"
 #include "lineset.h"
 #include "midi_region_view.h"

@@ -30,6 +30,7 @@
 #include "ardour/session.h"
 
 #include "streamview.h"
+#include "global_signals.h"
 #include "region_view.h"
 #include "route_time_axis.h"
 #include "canvas-waveview.h"

@@ -30,7 +30,11 @@
 #include "gtkmm2ext/keyboard.h"
 
 #include "ardour/panner.h"
+
+#include "ardour_ui.h"
+#include "global_signals.h"
 #include "stereo_panner.h"
+#include "rgb_macros.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -44,6 +48,10 @@ static const int lr_box_size = 15;
 static const int step_down = 10;
 static const int top_step = 2;
 
+StereoPanner::ColorScheme StereoPanner::colors[3];
+bool StereoPanner::have_colors = false;
+PBD::Signal0<void> StereoPanner::color_change;
+
 StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost::shared_ptr<PBD::Controllable> width)
         : position_control (position)
         , width_control (width)
@@ -52,6 +60,11 @@ StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost
         , drag_start_x (0)
         , last_drag_x (0)
 {
+        if (!have_colors) {
+                set_colors ();
+                have_colors = true;
+        }
+
         position_control->Changed.connect (connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
         width_control->Changed.connect (connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
         set_tooltip ();
@@ -63,6 +76,8 @@ StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost
                     Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|
                     Gdk::SCROLL_MASK|
                     Gdk::POINTER_MOTION_MASK);
+
+        color_change.connect (connections, invalidator (*this), boost::bind (&DrawingArea::queue_draw, this), gui_context());
 }
 
 StereoPanner::~StereoPanner ()
@@ -101,13 +116,29 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         double pos = position_control->get_value (); /* 0..1 */
         double swidth = width_control->get_value (); /* -1..+1 */
         double fswidth = fabs (swidth);
+        uint32_t o, f, t, b;
+        State state;
 
         width = get_width();
         height = get_height ();
 
+        if (swidth == 0.0) {
+                state = Mono;
+        } else if (swidth < 0.0) {
+                state = Inverted;
+        } else { 
+                state = Normal;
+        }
+
+        o = colors[state].outline;
+        f = colors[state].fill;
+        t = colors[state].text;
+        b = colors[state].background;
+
         /* background */
 
-        cairo_set_source_rgb (cr, 0.184, 0.172, 0.172);
+        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
+        // 0.184, 0.172, 0.172);
         cairo_rectangle (cr, 0, 0, width, height);
         cairo_fill (cr);
 
@@ -123,7 +154,8 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         /* compute & draw the line through the box */
         
         cairo_set_line_width (cr, 2);
-	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
+        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
+	// cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
         cairo_move_to (cr, left, top_step+(pos_box_size/2)+step_down);
         cairo_line_to (cr, left, top_step+(pos_box_size/2));
         cairo_line_to (cr, right, top_step+(pos_box_size/2));
@@ -144,9 +176,11 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
                          left,
                          (lr_box_size/2)+step_down, 
                          lr_box_size, lr_box_size);
-	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
+        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
+	// cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
         cairo_stroke_preserve (cr);
-	cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
+        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
+	// cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
 	cairo_fill (cr);
         
         /* add text */
@@ -154,9 +188,12 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         cairo_move_to (cr, 
                        left + 3,
                        (lr_box_size/2) + step_down + 13);
-	cairo_set_source_rgba (cr, 0.129, 0.054, 0.588, 1.0);
+	// cairo_set_source_rgba (cr, 0.129, 0.054, 0.588, 1.0);
         cairo_select_font_face (cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-        cairo_show_text (cr, "L");
+        if (state != Mono) {
+                cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
+                cairo_show_text (cr, "L");
+        }
 
         /* right box */
 
@@ -164,9 +201,11 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
                          right,
                          (lr_box_size/2)+step_down, 
                          lr_box_size, lr_box_size);
-	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
+        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
+	//cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
         cairo_stroke_preserve (cr);
-	cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
+        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
+	// cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
 	cairo_fill (cr);
 
         /* add text */
@@ -174,16 +213,23 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         cairo_move_to (cr, 
                        right + 3,
                        (lr_box_size/2)+step_down + 13);
-	cairo_set_source_rgba (cr, 0.129, 0.054, 0.588, 1.0);
-        cairo_show_text (cr, "R");
+        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
+	// cairo_set_source_rgba (cr, 0.129, 0.054, 0.588, 1.0);
+        if (state == Mono) {
+                cairo_show_text (cr, "M");
+        } else {
+                cairo_show_text (cr, "R");
+        }
 
         /* draw the central box */
 
         cairo_set_line_width (cr, 1);
 	cairo_rectangle (cr, center - (pos_box_size/2), top_step, pos_box_size, pos_box_size);
-	cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
+        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
+	// cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
         cairo_stroke_preserve (cr);
-	cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
+        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
+	// cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
 	cairo_fill (cr);
 
         /* done */
@@ -375,8 +421,12 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
 
         switch (ev->keyval) {
         case GDK_Up:
-                wv += step;
-                width_control->set_value (wv);
+                if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+                        width_control->set_value (1.0);
+                } else {
+                        wv += step;
+                        width_control->set_value (wv);
+                }
                 break;
         case GDK_Left:
                 pv -= step;
@@ -387,11 +437,22 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
                 position_control->set_value (pv);
                 break;
         case GDK_Down:
-                wv -= step;
-                width_control->set_value (wv);
+                if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+                        width_control->set_value (-1.0);
+                } else {
+                        wv -= step;
+                        width_control->set_value (wv);
+                }
+
                 break;
+        case GDK_0:
+        case GDK_KP_0:
+                width_control->set_value (0.0);
+                break;
+
         default:
-                return forward_key_press (ev);
+                // return forward_key_press (ev);
+                break;
         }
                 
         return true;
@@ -416,4 +477,25 @@ StereoPanner::on_leave_notify_event (GdkEventCrossing*)
 {
 	Keyboard::magic_widget_drop_focus ();
 	return false;
+}
+
+void
+StereoPanner::set_colors ()
+{
+        colors[Normal].fill = ARDOUR_UI::config()->canvasvar_StereoPannerFill.get();
+        colors[Normal].outline = ARDOUR_UI::config()->canvasvar_StereoPannerOutline.get();
+        colors[Normal].text = ARDOUR_UI::config()->canvasvar_StereoPannerText.get();
+        colors[Normal].background = ARDOUR_UI::config()->canvasvar_StereoPannerBackground.get();
+
+        colors[Mono].fill = ARDOUR_UI::config()->canvasvar_StereoPannerMonoFill.get();
+        colors[Mono].outline = ARDOUR_UI::config()->canvasvar_StereoPannerMonoOutline.get();
+        colors[Mono].text = ARDOUR_UI::config()->canvasvar_StereoPannerMonoText.get();
+        colors[Mono].background = ARDOUR_UI::config()->canvasvar_StereoPannerMonoBackground.get();
+
+        colors[Inverted].fill = ARDOUR_UI::config()->canvasvar_StereoPannerInvertedFill.get();
+        colors[Inverted].outline = ARDOUR_UI::config()->canvasvar_StereoPannerInvertedOutline.get();
+        colors[Inverted].text = ARDOUR_UI::config()->canvasvar_StereoPannerInvertedText.get();
+        colors[Inverted].background = ARDOUR_UI::config()->canvasvar_StereoPannerInvertedBackground.get();
+
+        color_change (); /* EMIT SIGNAL */
 }

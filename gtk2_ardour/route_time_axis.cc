@@ -61,6 +61,7 @@
 #include "evoral/Parameter.hpp"
 
 #include "ardour_ui.h"
+#include "global_signals.h"
 #include "route_time_axis.h"
 #include "automation_time_axis.h"
 #include "canvas_impl.h"

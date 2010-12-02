@@ -31,6 +31,7 @@
 #include "pbd/fastlog.h"
 
 #include "ardour_ui.h"
+#include "global_signals.h"
 #include "level_meter.h"
 #include "utils.h"
 #include "logmeter.h"

@@ -31,6 +31,7 @@
 
 #include "ardour_ui.h"
 #include "editor.h"
+#include "global_signals.h"
 #include "waveview.h"
 #include "simplerect.h"
 #include "simpleline.h"

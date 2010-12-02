@@ -33,6 +33,7 @@
 #include "ardour/session.h"
 
 #include "ardour_ui.h"
+#include "global_signals.h"
 #include "streamview.h"
 #include "region_view.h"
 #include "automation_region_view.h"

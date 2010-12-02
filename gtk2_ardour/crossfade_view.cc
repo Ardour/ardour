@@ -25,6 +25,7 @@
 #include "canvas-simplerect.h"
 #include "canvas-curve.h"
 #include "crossfade_view.h"
+#include "global_signals.h"
 #include "gui_thread.h"
 #include "rgb_macros.h"
 #include "audio_time_axis.h"

@@ -40,6 +40,7 @@
 #include "ardour/location.h"
 
 #include "ardour_ui.h"
+#include "global_signals.h"
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "time_axis_view.h"

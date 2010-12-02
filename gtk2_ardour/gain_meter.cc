@@ -40,6 +40,7 @@
 
 #include "ardour_ui.h"
 #include "gain_meter.h"
+#include "global_signals.h"
 #include "logmeter.h"
 #include "gui_thread.h"
 #include "keyboard.h"

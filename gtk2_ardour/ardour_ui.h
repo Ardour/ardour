@@ -102,9 +102,6 @@ namespace ARDOUR {
 	class Location;
 }
 
-extern sigc::signal<void>  ColorsChanged;
-extern sigc::signal<void>  DPIReset;
-
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 {
   public:
