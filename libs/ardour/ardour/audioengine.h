@@ -92,7 +92,7 @@ class AudioEngine : public SessionHandlePtr
 	Glib::Mutex& process_lock() { return _process_lock; }
 
 	framecnt_t frame_rate () const;
-	framecnt_t frames_per_cycle () const;
+	pframes_t frames_per_cycle () const;
 
 	size_t raw_buffer_size(DataType t);
 

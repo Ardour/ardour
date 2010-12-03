@@ -84,10 +84,10 @@ public:
 		: _type(type), _capacity(capacity), _size(0), _silent(true)
 	{}
 
-	DataType _type;
-	size_t   _capacity;
-	size_t   _size;
-	bool     _silent;
+	DataType  _type;
+	pframes_t _capacity;
+	pframes_t _size;
+	bool      _silent;
 };
 
 

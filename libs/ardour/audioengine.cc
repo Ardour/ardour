@@ -951,7 +951,7 @@ AudioEngine::raw_buffer_size (DataType t)
 	return (s != _raw_buffer_sizes.end()) ? s->second : 0;
 }
 
-ARDOUR::framecnt_t
+ARDOUR::pframes_t
 AudioEngine::frames_per_cycle () const
 {
 	GET_PRIVATE_JACK_POINTER_RET (_jack,0);

@@ -503,7 +503,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool ca
 
 			chaninfo->capture_buf->get_write_vector (&chaninfo->capture_vector);
 
-			if (rec_nframes <= chaninfo->capture_vector.len[0]) {
+			if (rec_nframes <= (framecnt_t) chaninfo->capture_vector.len[0]) {
 
 				chaninfo->current_capture_buffer = chaninfo->capture_vector.buf[0];
 
@@ -513,7 +513,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool ca
 
 				AudioPort* const ap = _io->audio (n);
 				assert(ap);
-				assert(rec_nframes <= ap->get_audio_buffer(nframes).capacity());
+				assert(rec_nframes <= (framecnt_t) ap->get_audio_buffer(nframes).capacity());
 				memcpy (chaninfo->current_capture_buffer, ap->get_audio_buffer (nframes).data(rec_offset), sizeof (Sample) * rec_nframes);
 
 
@@ -613,7 +613,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool ca
 
 			ChannelInfo* chaninfo (*chan);
 
-			if (necessary_samples <= chaninfo->playback_vector.len[0]) {
+			if (necessary_samples <= (framecnt_t) chaninfo->playback_vector.len[0]) {
 
 				chaninfo->current_playback_buffer = chaninfo->playback_vector.buf[0];
 
@@ -717,10 +717,10 @@ AudioDiskstream::commit (framecnt_t /* nframes */)
 		}
 	} else {
 		if (_io && _io->active()) {
-			need_butler = c->front()->playback_buf->write_space() >= disk_io_chunk_frames
-				|| c->front()->capture_buf->read_space() >= disk_io_chunk_frames;
+			need_butler = ((framecnt_t) c->front()->playback_buf->write_space() >= disk_io_chunk_frames)
+				|| ((framecnt_t) c->front()->capture_buf->read_space() >= disk_io_chunk_frames);
 		} else {
-			need_butler = c->front()->capture_buf->read_space() >= disk_io_chunk_frames;
+			need_butler = ((framecnt_t) c->front()->capture_buf->read_space() >= disk_io_chunk_frames);
 		}
 	}
 
@@ -1041,7 +1041,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	   work with.
 	*/
 
-	if (_slaved && total_space < (c->front()->playback_buf->bufsize() / 2)) {
+	if (_slaved && total_space < (framecnt_t) (c->front()->playback_buf->bufsize() / 2)) {
 		return 0;
 	}
 
@@ -1125,7 +1125,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 		chan->playback_buf->get_write_vector (&vector);
 
-		if (vector.len[0] > disk_io_chunk_frames) {
+		if ((framecnt_t) vector.len[0] > disk_io_chunk_frames) {
 
 			/* we're not going to fill the first chunk, so certainly do not bother with the
 			   other part. it won't be connected with the part we do fill, as in:
