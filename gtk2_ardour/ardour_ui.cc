@@ -971,7 +971,7 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 				  (float) rate/1000.0f,
 				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
 		} else {
-			snprintf (buf, sizeof (buf), _("%u kHz / %4.1f ms"),
+			snprintf (buf, sizeof (buf), _("%" PRId64 " kHz / %4.1f ms"),
 				  rate/1000,
 				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
 		}
