@@ -959,8 +959,8 @@ ProcessorBox::redisplay_processors ()
 
 		if (!(*i)->marked) {
 			ARDOUR_UI::instance()->remove_window_proxy (*i);
-			_processor_window_proxies.erase (i);
 			delete *i;
+			_processor_window_proxies.erase (i);
 		}
 
 		i = j;
