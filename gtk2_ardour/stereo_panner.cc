@@ -411,15 +411,25 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
                 step = one_degree * 5.0;
         }
 
+        /* up/down control width because we consider pan position more "important"
+           (and thus having higher "sense" priority) than width.
+        */
+
         switch (ev->keyval) {
         case GDK_Up:
                 if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
                         width_control->set_value (1.0);
                 } else {
-                        wv += step;
-                        width_control->set_value (wv);
+                        width_control->set_value (wv + step);
                 }
                 break;
+        case GDK_Down:
+                if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+                        width_control->set_value (-1.0);
+                } else {
+                        width_control->set_value (wv - step);
+                }
+
         case GDK_Left:
                 pv -= step;
                 position_control->set_value (pv);
@@ -428,13 +438,6 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
                 pv += step;
                 position_control->set_value (pv);
                 break;
-        case GDK_Down:
-                if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
-                        width_control->set_value (-1.0);
-                } else {
-                        wv -= step;
-                        width_control->set_value (wv);
-                }
 
                 break;
         case GDK_0:
