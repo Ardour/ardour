@@ -22,6 +22,8 @@
 #include <cstring>
 #include <cmath>
 
+#include <gtkmm/window.h>
+
 #include "pbd/controllable.h"
 #include "pbd/compose.h"
 
@@ -138,11 +140,10 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         /* background */
 
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
-        // 0.184, 0.172, 0.172);
         cairo_rectangle (cr, 0, 0, width, height);
         cairo_fill (cr);
 
-        /* compute the outer edges of the L/R boxes based on the current stereo width */
+        /* compute the centers of the L/R boxes based on the current stereo width */
         
         int usable_width = width - lr_box_size;
         int center = lr_box_size/2 + (int) floor (usable_width * pos);
@@ -155,7 +156,6 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         
         cairo_set_line_width (cr, 2);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-	// cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
         cairo_move_to (cr, left, top_step+(pos_box_size/2)+step_down);
         cairo_line_to (cr, left, top_step+(pos_box_size/2));
         cairo_line_to (cr, right, top_step+(pos_box_size/2));
@@ -177,10 +177,8 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
                          (lr_box_size/2)+step_down, 
                          lr_box_size, lr_box_size);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-	// cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
         cairo_stroke_preserve (cr);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
-	// cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
 	cairo_fill (cr);
         
         /* add text */
@@ -188,7 +186,6 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         cairo_move_to (cr, 
                        left + 3,
                        (lr_box_size/2) + step_down + 13);
-	// cairo_set_source_rgba (cr, 0.129, 0.054, 0.588, 1.0);
         cairo_select_font_face (cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
         if (state != Mono) {
                 cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
@@ -202,10 +199,8 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
                          (lr_box_size/2)+step_down, 
                          lr_box_size, lr_box_size);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-	//cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
         cairo_stroke_preserve (cr);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
-	// cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
 	cairo_fill (cr);
 
         /* add text */
@@ -214,7 +209,6 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
                        right + 3,
                        (lr_box_size/2)+step_down + 13);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
-	// cairo_set_source_rgba (cr, 0.129, 0.054, 0.588, 1.0);
         if (state == Mono) {
                 cairo_show_text (cr, "M");
         } else {
@@ -226,10 +220,8 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         cairo_set_line_width (cr, 1);
 	cairo_rectangle (cr, center - (pos_box_size/2), top_step, pos_box_size, pos_box_size);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-	// cairo_set_source_rgba (cr, 0.3137, 0.4431, 0.7843, 1.0);
         cairo_stroke_preserve (cr);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
-	// cairo_set_source_rgba (cr, 0.4509, 0.7686, 0.8627, 0.8);
 	cairo_fill (cr);
 
         /* done */
@@ -450,9 +442,8 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
                 width_control->set_value (0.0);
                 break;
 
-        default:
-                // return forward_key_press (ev);
-                break;
+        default: 
+                return false;
         }
                 
         return true;
