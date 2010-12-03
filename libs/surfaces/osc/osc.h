@@ -167,6 +167,28 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		return 0;						\
 	}
 
+#define PATH_CALLBACK3(name,arg1type,arg2type,arg3type)                \
+        static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+               return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
+        } \
+        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
+                if (argc > 1) {                                                \
+                 name (argv[0]->arg1type, argv[1]->arg2type,argv[2]->arg3type); \
+                }                                                      \
+               return 0;                                               \
+       }
+
+#define PATH_CALLBACK4(name,arg1type,arg2type,arg3type,arg4type)               \
+        static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+               return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
+        } \
+        int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
+                if (argc > 1) {                                                \
+                 name (argv[0]->arg1type, argv[1]->arg2type,argv[2]->arg3type,argv[3]->arg4type); \
+                }                                                      \
+               return 0;                                               \
+       } 
+
         PATH_CALLBACK2(locate,i,i);
 	PATH_CALLBACK2(route_mute,i,i);
 	PATH_CALLBACK2(route_solo,i,i);
@@ -175,6 +197,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2(route_set_gain_dB,i,f);
 	PATH_CALLBACK2(route_set_pan_stereo_position,i,f);
 	PATH_CALLBACK2(route_set_pan_stereo_width,i,f);
+        PATH_CALLBACK4(route_plugin_parameter,i,i,i,f);
+        PATH_CALLBACK3(route_plugin_parameter_print,i,i,i); 
 
 	int route_mute (int rid, int yn);
 	int route_solo (int rid, int yn);
@@ -183,6 +207,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_set_gain_dB (int rid, float dB);
 	int route_set_pan_stereo_position (int rid, float left_right_fraction);
 	int route_set_pan_stereo_width (int rid, float percent);
+	int route_plugin_parameter (int rid, int piid,int par, float val);
+	int route_plugin_parameter_print (int rid, int piid,int par);
 
 	void listen_to_route (boost::shared_ptr<ARDOUR::Route>, lo_address);
 	void end_listen (boost::shared_ptr<ARDOUR::Route>, lo_address);

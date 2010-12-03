@@ -43,6 +43,7 @@
 #include "ardour/dB.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/panner.h"
+#include "ardour/plugin.h"
 
 #include "osc.h"
 #include "osc_controllable.h"
@@ -338,6 +339,10 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/routes/recenable", "ii", route_recenable);
 		REGISTER_CALLBACK (serv, "/ardour/routes/gainabs", "if", route_set_gain_abs);
 		REGISTER_CALLBACK (serv, "/ardour/routes/gaindB", "if", route_set_gain_dB);
+		REGISTER_CALLBACK (serv, "/ardour/routes/pan_stereo_position", "if", route_set_pan_stereo_position);
+		REGISTER_CALLBACK (serv, "/ardour/routes/pan_stereo_width", "if", route_set_pan_stereo_width);
+		REGISTER_CALLBACK (serv, "/ardour/routes/plugin/parameter", "iiif", route_plugin_parameter);
+		REGISTER_CALLBACK (serv, "/ardour/routes/plugin/parameter/print", "iii", route_plugin_parameter_print);
 
 		
 #if 0
@@ -816,6 +821,100 @@ OSC::route_set_pan_stereo_width (int rid, float pos)
 	
 	return 0;
 
+}
+
+int
+OSC::route_plugin_parameter (int rid,int piid,int par, float val)
+{
+        if (!session) { 
+                return -1;
+        }
+
+        boost::shared_ptr<Route> r = session->route_by_remote_id (rid);  
+
+        if (!r) {
+                return -1;
+        }
+
+        boost::shared_ptr<Processor> redi=r->nth_processor (piid);
+        
+        if (!redi) {
+                return -1;
+        }
+
+        boost::shared_ptr<PluginInsert> pi;
+        
+        if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(redi))) {
+                return -1;
+        }
+
+        boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
+        bool ok=false;
+        
+        uint32_t controlid = pip->nth_parameter (par,ok);
+        
+        if (!ok) {
+                return -1;
+        }
+
+        Plugin::ParameterDescriptor pd;
+        pi->plugin()->get_parameter_descriptor (controlid,pd);
+
+        if (val >= pd.lower && val < pd.upper) {
+                
+                boost::shared_ptr<AutomationControl> c = pi->automation_control (Evoral::Parameter(PluginAutomation, 0, controlid));;
+                cerr << "parameter:" << redi->describe_parameter(controlid) << " val:" << val << "\n";
+                c->set_value (val);
+        }  
+
+        return 0;
+}
+
+int
+OSC::route_plugin_parameter_print (int rid,int piid,int par)
+{
+        if (!session) { 
+                return -1;
+        }
+
+        boost::shared_ptr<Route> r = session->route_by_remote_id (rid);  
+
+        if (!r) {
+                return -1;
+        }
+
+        boost::shared_ptr<Processor> redi=r->nth_processor (piid);
+        
+        if (!redi) {
+                return -1;
+        }
+
+        boost::shared_ptr<PluginInsert> pi;
+        
+        if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(redi))) {
+                return -1;
+        }
+        boost::shared_ptr<ARDOUR::Plugin> pip=pi->plugin();
+        bool ok=false;
+        
+        uint32_t controlid = pip->nth_parameter (par,ok);
+        
+        if (!ok) {
+                return -1;
+        }
+
+        Plugin::ParameterDescriptor pd;
+
+        if (pi->plugin()->get_parameter_descriptor (controlid, pd) == 0) {
+                boost::shared_ptr<AutomationControl> c = pi->automation_control (Evoral::Parameter(PluginAutomation, 0, controlid));
+                
+                cerr << "parameter:     " << redi->describe_parameter(controlid)  << "\n";
+                cerr << "current value: " << c->get_value ();
+                cerr << "lower value:   " << pd.lower << "\n";
+                cerr << "upper value:   " << pd.upper << "\n";
+        }
+
+        return 0;
 }
 
 XMLNode& 
