@@ -409,6 +409,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 
 			bool can_add_or_rename = false;
 
+			/* Start off with options for the `natural' port type */
 			for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
 				if (should_show (*i)) {
 					snprintf (buf, sizeof (buf), _("Add %s %s"), (*i).to_i18n_string(), channel_noun().c_str());
@@ -417,6 +418,15 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 				}
 			}
 
+			/* Now add other ones */
+			for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+				if (!should_show (*i)) {
+					snprintf (buf, sizeof (buf), _("Add %s %s"), (*i).to_i18n_string(), channel_noun().c_str());
+					sub.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::add_channel_proxy), w, *i)));
+					can_add_or_rename = true;
+				}
+			}
+			
 			if (can_rename_channels (bc[dim].bundle)) {
 				snprintf (
 					buf, sizeof (buf), _("Rename '%s'..."),
