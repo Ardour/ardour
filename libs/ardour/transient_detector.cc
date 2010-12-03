@@ -49,13 +49,13 @@ TransientDetector::use_features (Plugin::FeatureSet& features, ostream* out)
 
 	for (Plugin::FeatureList::const_iterator f = fl.begin(); f != fl.end(); ++f) {
 
-		if ((*f).hasTimestamp) {
+		if (f->hasTimestamp) {
 
 			if (out) {
 				(*out) << (*f).timestamp.toString() << endl;
 			}
 
-			current_results->push_back (RealTime::realTime2Frame ((*f).timestamp, (nframes_t) floor(sample_rate)));
+			current_results->push_back (RealTime::realTime2Frame (f->timestamp, (framecnt_t) floor(sample_rate)));
 		}
 	}
 

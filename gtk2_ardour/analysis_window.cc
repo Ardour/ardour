@@ -278,9 +278,9 @@ AnalysisWindow::analyze_data (Gtk::Button */*button*/)
 
 					int n;
 					for (int channel = 0; channel < n_inputs; channel++) {
-						nframes_t x = 0;
+						framecnt_t x = 0;
 
-						while ( x < (*j).length() ) {
+						while (x < j->length()) {
 							// TODO: What about stereo+ channels? composite all to one, I guess
 
 							n = fft_graph.windowSize();
@@ -322,11 +322,11 @@ AnalysisWindow::analyze_data (Gtk::Button */*button*/)
 					int n;
 					for (int channel = 0; channel < n_inputs; channel++) {
 
-						nframes_t x = 0;
+						framecnt_t x = 0;
 
-						nframes_t length = arv->region()->length();
+						framecnt_t length = arv->region()->length();
 
-						while ( x < length ) {
+						while (x < length) {
 							// TODO: What about stereo+ channels? composite all to one, I guess
 
 							n = fft_graph.windowSize();

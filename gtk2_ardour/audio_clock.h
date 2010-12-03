@@ -50,7 +50,7 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	void focus ();
 
-	void set (nframes_t, bool force = false, nframes_t offset = 0, char which = 0);
+	void set (framepos_t, bool force = false, ARDOUR::framecnt_t offset = 0, char which = 0);
 	void set_from_playhead ();
 	void locate ();
 	void set_mode (Mode);
@@ -61,8 +61,8 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	std::string name() const { return _name; }
 
-	nframes_t current_time (nframes_t position = 0) const;
-	nframes_t current_duration (nframes_t position = 0) const;
+	framepos_t current_time (framepos_t position = 0) const;
+	framepos_t current_duration (framepos_t position = 0) const;
 	void set_session (ARDOUR::Session *s);
 
 	sigc::signal<void> ValueChanged;
@@ -164,7 +164,7 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	Gtk::Frame     clock_frame;
 
 	framepos_t bbt_reference_time;
-	nframes_t last_when;
+	framepos_t last_when;
 	bool last_pdelta;
 	bool last_sdelta;
 
@@ -195,19 +195,19 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	bool field_focus_out_event (GdkEventFocus *, Field);
 	bool drop_focus_handler (GdkEventFocus*);
 
-	void set_timecode (nframes_t, bool);
-	void set_bbt (nframes_t, bool);
-	void set_minsec (nframes_t, bool);
-	void set_frames (nframes_t, bool);
+	void set_timecode (framepos_t, bool);
+	void set_bbt (framepos_t, bool);
+	void set_minsec (framepos_t, bool);
+	void set_frames (framepos_t, bool);
 
-	nframes_t get_frames (Field,nframes_t pos = 0,int dir=1);
+	framepos_t get_frames (Field, framepos_t pos = 0, int dir = 1);
 
 	void timecode_sanitize_display();
-	nframes_t timecode_frame_from_display () const;
-	nframes_t bbt_frame_from_display (nframes_t) const;
-	nframes_t bbt_frame_duration_from_display (nframes_t) const;
-	nframes_t minsec_frame_from_display () const;
-	nframes_t audio_frame_from_display () const;
+	framepos_t timecode_frame_from_display () const;
+	framepos_t bbt_frame_from_display (framepos_t) const;
+	framepos_t bbt_frame_duration_from_display (framepos_t) const;
+	framepos_t minsec_frame_from_display () const;
+	framepos_t audio_frame_from_display () const;
 
 	void build_ops_menu ();
 	void setup_events ();

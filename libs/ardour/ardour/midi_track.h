@@ -39,7 +39,7 @@ public:
 	MidiTrack (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
 	~MidiTrack ();
 
-	int roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
                   int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
 
 	void handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
@@ -52,16 +52,17 @@ public:
 		return DataType::MIDI;
 	}
 
-	void set_latency_delay (nframes_t);
+	void set_latency_delay (framecnt_t);
 
-	int export_stuff (BufferSet& bufs, nframes_t nframes, framepos_t end_frame);
+	int export_stuff (BufferSet& bufs, framecnt_t nframes, framepos_t end_frame);
 
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
         
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
-	boost::shared_ptr<Region>  bounce_range (
-			nframes_t start, nframes_t end, InterThreadInfo&, bool enable_processing);
+	boost::shared_ptr<Region> bounce_range (
+			framepos_t start, framepos_t end, InterThreadInfo&, bool enable_processing
+		);
 
 	int set_state(const XMLNode&, int version);
 
@@ -86,7 +87,7 @@ public:
 
 	bool step_editing() const { return _step_editing; }
 	void set_step_editing (bool yn);
-	MidiRingBuffer<nframes_t>& step_edit_ring_buffer() { return _step_edit_ring_buffer; }
+	MidiRingBuffer<framepos_t>& step_edit_ring_buffer() { return _step_edit_ring_buffer; }
 
         PBD::Signal1<void,bool> StepEditStatusChange;
 
@@ -112,21 +113,21 @@ protected:
 private:
 	boost::shared_ptr<MidiDiskstream> midi_diskstream () const;
 
-	void write_out_of_band_data (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes);
+	void write_out_of_band_data (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, framecnt_t nframes);
 
 	void set_state_part_two ();
 	void set_state_part_three ();
 
-	MidiRingBuffer<nframes_t> _immediate_events;
-	MidiRingBuffer<nframes_t> _step_edit_ring_buffer;
+	MidiRingBuffer<framepos_t> _immediate_events;
+	MidiRingBuffer<framepos_t> _step_edit_ring_buffer;
 	NoteMode                  _note_mode;
 	bool                      _step_editing;
 	uint8_t                   _default_channel;
 	bool                      _midi_thru;
 
-	int no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			bool state_changing, bool can_record, bool rec_monitors_input);
-	void push_midi_input_to_step_edit_ringbuffer (nframes_t nframes);
+	void push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes);
 
 	void diskstream_data_recorded (boost::shared_ptr<MidiBuffer>, boost::weak_ptr<MidiSource>);
 	PBD::ScopedConnection _diskstream_data_recorded_connection;

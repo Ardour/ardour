@@ -33,7 +33,7 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
 
-TempoDialog::TempoDialog (TempoMap& map, nframes_t frame, const string & action)
+TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string & action)
 	: ArdourDialog (_("New Tempo")),
 	  bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0),
 	  bpm_spinner (bpm_adjustment),
@@ -239,7 +239,7 @@ TempoDialog::note_types_change ()
 }
 
 
-MeterDialog::MeterDialog (TempoMap& map, nframes_t frame, const string & action)
+MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string & action)
 	: ArdourDialog ("New Meter"),
 	  ok_button (action),
 	  cancel_button (_("Cancel"))

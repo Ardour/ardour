@@ -72,7 +72,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	bool set_visibility (bool yn);
 	std::string name() const { return _name; }
 
-	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, nframes_t, double);
+	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, framepos_t, double);
 
 	void clear_lines ();
 
@@ -86,7 +86,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void get_selectables (ARDOUR::framepos_t start, ARDOUR::framepos_t end, double top, double bot, std::list<Selectable *>&);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
-	void show_timestretch (nframes_t /*start*/, nframes_t /*end*/) {}
+	void show_timestretch (framepos_t /*start*/, framepos_t /*end*/) {}
 	void hide_timestretch () {}
 
 	/* editing operations */

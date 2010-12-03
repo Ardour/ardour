@@ -45,7 +45,7 @@ Tempo    TempoMap::_default_tempo (120.0);
 
 const double Meter::ticks_per_beat = 1920.0;
 
-double Tempo::frames_per_beat (nframes_t sr, const Meter& meter) const
+double Tempo::frames_per_beat (framecnt_t sr, const Meter& meter) const
 {
 	return  ((60.0 * sr) / (_beats_per_minute * meter.note_divisor()/_note_type));
 }
@@ -53,7 +53,7 @@ double Tempo::frames_per_beat (nframes_t sr, const Meter& meter) const
 /***********************************************************************/
 
 double
-Meter::frames_per_bar (const Tempo& tempo, nframes_t sr) const
+Meter::frames_per_bar (const Tempo& tempo, framecnt_t sr) const
 {
 	return ((60.0 * sr * _beats_per_bar) / (tempo.beats_per_minute() * _note_type/tempo.note_type()));
 }
@@ -218,7 +218,7 @@ struct MetricSectionSorter {
     }
 };
 
-TempoMap::TempoMap (nframes_t fr)
+TempoMap::TempoMap (framecnt_t fr)
 {
 	metrics = new Metrics;
 	_frame_rate = fr;

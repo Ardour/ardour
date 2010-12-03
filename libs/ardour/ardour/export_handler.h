@@ -119,7 +119,7 @@ class ExportHandler : public ExportElementFactory
 
   private:
 
-	int process (nframes_t frames);
+	int process (framecnt_t frames);
 	
 	Session &          session;
 	GraphBuilderPtr    graph_builder;
@@ -132,7 +132,7 @@ class ExportHandler : public ExportElementFactory
 	/* Timespan management */
 
 	void start_timespan ();
-	int  process_timespan (nframes_t frames);
+	int  process_timespan (framecnt_t frames);
 	int  process_normalize ();
 	void finish_timespan ();
 

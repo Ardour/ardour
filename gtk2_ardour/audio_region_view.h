@@ -100,8 +100,8 @@ class AudioRegionView : public RegionView
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
-	void reset_fade_in_shape_width (nframes_t);
-	void reset_fade_out_shape_width (nframes_t);
+	void reset_fade_in_shape_width (framecnt_t);
+	void reset_fade_out_shape_width (framecnt_t);
 	
 	void show_fade_line(framepos_t pos);
 	void hide_fade_line();

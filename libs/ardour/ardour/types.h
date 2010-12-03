@@ -52,7 +52,7 @@ namespace ARDOUR {
 	typedef float                       gain_t;
 	typedef uint32_t                    layer_t;
 	typedef uint64_t                    microseconds_t;
-	typedef uint32_t                    nframes_t;
+	typedef jack_nframes_t              pframes_t;
 
         /* Any position measured in audio frames.
            Assumed to be non-negative but not enforced.
@@ -213,7 +213,7 @@ namespace ARDOUR {
 		BBT_Time       bbt;
 
 		union {
-			nframes_t      frames;
+			framecnt_t     frames;
 			double         seconds;
 		};
 
@@ -221,13 +221,13 @@ namespace ARDOUR {
 	};
 
 	struct AudioRange {
-		nframes_t start;
-		nframes_t end;
+		framepos_t start;
+		framepos_t end;
 		uint32_t id;
 
-		AudioRange (nframes_t s, nframes_t e, uint32_t i) : start (s), end (e) , id (i) {}
+		AudioRange (framepos_t s, framepos_t e, uint32_t i) : start (s), end (e) , id (i) {}
 
-		nframes_t length() { return end - start + 1; }
+		framecnt_t length() { return end - start + 1; }
 
 		bool operator== (const AudioRange& other) const {
 			return start == other.start && end == other.end && id == other.id;
@@ -237,7 +237,7 @@ namespace ARDOUR {
 			return start == other.start && end == other.end;
 		}
 
-		OverlapType coverage (nframes_t s, nframes_t e) const {
+		OverlapType coverage (framepos_t s, framepos_t e) const {
 			return ARDOUR::coverage (start, end, s, e);
 		}
 	};
@@ -560,9 +560,8 @@ track_frame_to_session_frame (ARDOUR::framepos_t track_frame, double speed)
 	return (ARDOUR::framepos_t)( (double)track_frame / speed );
 }
 
-/* for now, break the rules and use "using" to make these "global" */
+/* for now, break the rules and use "using" to make this "global" */
 
-using ARDOUR::nframes_t;
 using ARDOUR::framepos_t;
 
 

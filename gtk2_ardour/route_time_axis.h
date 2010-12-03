@@ -78,7 +78,7 @@ public:
 
 	void set_samples_per_unit (double);
  	void set_height (uint32_t h);
-	void show_timestretch (nframes_t start, nframes_t end);
+	void show_timestretch (framepos_t start, framepos_t end);
 	void hide_timestretch ();
 	void selection_click (GdkEventButton*);
 	void set_selected_points (PointSelection&);
@@ -88,7 +88,7 @@ public:
 	void set_layer_display (LayerDisplay d);
 	LayerDisplay layer_display () const;
 
-	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
+	boost::shared_ptr<ARDOUR::Region> find_next_region (framepos_t pos, ARDOUR::RegionPoint, int32_t dir);
 	framepos_t find_next_region_boundary (framepos_t pos, int32_t dir);
 
 	/* Editing operations */
@@ -232,7 +232,7 @@ protected:
 	virtual void show_existing_automation ();
 	virtual void hide_all_automation ();
 
-	void timestretch (nframes_t start, nframes_t end);
+	void timestretch (framepos_t start, framepos_t end);
 
 	void speed_changed ();
 

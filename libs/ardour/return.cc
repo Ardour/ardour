@@ -103,7 +103,7 @@ Return::set_state (const XMLNode& node, int version)
 }
 
 void
-Return::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool)
+Return::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool)
 {
 	if ((!_active && !_pending_active) || _input->n_ports() == ChanCount::ZERO) {
 		return;

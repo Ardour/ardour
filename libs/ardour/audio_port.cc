@@ -25,7 +25,7 @@
 using namespace ARDOUR;
 using namespace std;
 
-nframes_t AudioPort::_port_offset = 0;
+framecnt_t AudioPort::_port_offset = 0;
 
 AudioPort::AudioPort (const std::string& name, Flags flags)
 	: Port (name, DataType::AUDIO, flags)
@@ -40,7 +40,7 @@ AudioPort::~AudioPort ()
 }
 
 void
-AudioPort::cycle_start (nframes_t nframes)
+AudioPort::cycle_start (pframes_t nframes)
 {
 	/* caller must hold process lock */
 
@@ -65,7 +65,7 @@ AudioPort::cycle_start (nframes_t nframes)
 }
 
 void
-AudioPort::cycle_end (nframes_t nframes)
+AudioPort::cycle_end (pframes_t nframes)
 {
 	if (sends_output() && !_buffer->written()) {
 		_buffer->silence (nframes);
@@ -78,7 +78,7 @@ AudioPort::cycle_split ()
 }
 
 AudioBuffer&
-AudioPort::get_audio_buffer (nframes_t nframes, nframes_t offset)
+AudioPort::get_audio_buffer (framecnt_t nframes, framecnt_t offset)
 {
 	/* caller must hold process lock */
 
@@ -100,7 +100,7 @@ AudioPort::get_audio_buffer (nframes_t nframes, nframes_t offset)
 }
 
 size_t
-AudioPort::raw_buffer_size (nframes_t nframes) const
+AudioPort::raw_buffer_size (pframes_t nframes) const
 {
 	return nframes * sizeof (Sample);
 }

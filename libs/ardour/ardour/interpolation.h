@@ -39,13 +39,13 @@ class Interpolation {
 };
 
 class LinearInterpolation : public Interpolation {
- public:
-     nframes_t interpolate (int channel, nframes_t nframes, Sample* input, Sample* output);
+public:
+	framecnt_t interpolate (int channel, framecnt_t nframes, Sample* input, Sample* output);
 };
 
 class CubicInterpolation : public Interpolation {
- public:
-     nframes_t interpolate (int channel, nframes_t nframes, Sample* input, Sample* output);
+public:
+	framecnt_t interpolate (int channel, framecnt_t nframes, Sample* input, Sample* output);
 };
 
 } // namespace ARDOUR

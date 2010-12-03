@@ -101,7 +101,7 @@ MTC_Slave::rebind (MIDI::Port& p)
 }
 
 void
-MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, nframes_t now)
+MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, framepos_t now)
 {
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr frame %1 at %2\n", which_qtr, now));
 	maybe_reset ();
@@ -109,7 +109,7 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, nframes_t now)
 }
 
 void
-MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
+MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 {
 	/* "now" can be zero if this is called from a context where we do not have or do not want
 	   to use a timestamp indicating when this MTC time was received. example: when we received
@@ -395,7 +395,7 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 {
 	framepos_t now = session.engine().frame_time();
 	SafeTime last;
-	nframes_t elapsed;
+	framecnt_t elapsed;
 	bool in_control = false;
 
 	read_current (&last);
@@ -450,7 +450,7 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 		/* scale elapsed time by the current MTC speed */
 
 		if (last.timestamp && (now > last.timestamp)) {
-			elapsed = (nframes_t) floor (last.speed * (now - last.timestamp));
+			elapsed = (framecnt_t) floor (last.speed * (now - last.timestamp));
 			DEBUG_TRACE (DEBUG::MTC, string_compose ("last timecode received @ %1, now = %2, elapsed frames = %3 w/speed= %4\n",
 								 last.timestamp, now, elapsed, last.speed));
 		} else {
@@ -476,10 +476,10 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	return true;
 }
 
-ARDOUR::nframes_t
-MTC_Slave::resolution() const
+ARDOUR::framecnt_t
+MTC_Slave::resolution () const
 {
-	return (nframes_t) session.frames_per_timecode_frame();
+	return (framecnt_t) session.frames_per_timecode_frame();
 }
 
 void
@@ -555,7 +555,7 @@ MTC_Slave::reset_window (framepos_t root)
 
 	case MTC_Backward:
 		if (session.slave_state() == Session::Running) {
-			nframes_t d = session.frames_per_timecode_frame() * frame_tolerance;
+			framecnt_t const d = session.frames_per_timecode_frame() * frame_tolerance;
 			if (root > d) {
 				window_begin = root - d;
 				window_end = root;
@@ -563,7 +563,7 @@ MTC_Slave::reset_window (framepos_t root)
 				window_begin = 0;
 			}
 		} else {
-			nframes_t d = seekahead_distance ();
+			framecnt_t const d = seekahead_distance ();
 			if (root > d) {
 				window_begin = root - d;
 			} else {
@@ -581,7 +581,7 @@ MTC_Slave::reset_window (framepos_t root)
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("legal MTC window now %1 .. %2\n", window_begin, window_end));
 }
 
-framecnt_t
+ARDOUR::framecnt_t
 MTC_Slave::seekahead_distance () const
 {
 	/* 1 second */

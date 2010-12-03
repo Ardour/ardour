@@ -54,8 +54,8 @@ class Butler : public SessionHandleRef
 	float read_data_rate() const; ///< in usec
 	float write_data_rate() const;
 
-	nframes_t audio_diskstream_capture_buffer_size() const { return audio_dstream_capture_buffer_size; }
-	nframes_t audio_diskstream_playback_buffer_size() const { return audio_dstream_playback_buffer_size; }
+	framecnt_t audio_diskstream_capture_buffer_size() const { return audio_dstream_capture_buffer_size; }
+	framecnt_t audio_diskstream_playback_buffer_size() const { return audio_dstream_playback_buffer_size; }
 	uint32_t midi_diskstream_buffer_size()  const { return midi_dstream_buffer_size; }
 
 	static void* _thread_work(void *arg);
@@ -76,8 +76,8 @@ class Butler : public SessionHandleRef
 	bool         should_run;
 	mutable gint should_do_transport_work;
 	int          request_pipe[2];
-	nframes_t    audio_dstream_capture_buffer_size;
-	nframes_t    audio_dstream_playback_buffer_size;
+	framecnt_t   audio_dstream_capture_buffer_size;
+	framecnt_t   audio_dstream_playback_buffer_size;
 	uint32_t     midi_dstream_buffer_size;
 	RingBuffer<CrossThreadPool*> pool_trash;
 

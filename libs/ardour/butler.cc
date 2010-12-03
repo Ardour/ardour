@@ -87,7 +87,7 @@ Butler::start_thread()
 	 */
 	midi_dstream_buffer_size = (uint32_t) floor (Config->get_midi_track_buffer_seconds() * rate);
 
-	MidiDiskstream::set_readahead_frames ((nframes_t)(Config->get_midi_readahead() * rate));
+	MidiDiskstream::set_readahead_frames ((framecnt_t) (Config->get_midi_readahead() * rate));
 
 	Crossfade::set_buffer_size (audio_dstream_playback_buffer_size);
 

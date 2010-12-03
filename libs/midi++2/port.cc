@@ -119,7 +119,7 @@ Port::~Port ()
 }
 
 void
-Port::parse (nframes_t timestamp)
+Port::parse (framecnt_t timestamp)
 {
 	byte buf[512];
 
@@ -171,7 +171,7 @@ Port::clock (timestamp_t timestamp)
 }
 
 void
-Port::cycle_start (nframes_t nframes)
+Port::cycle_start (pframes_t nframes)
 {
 	assert (_jack_port);
 	
@@ -190,12 +190,12 @@ Port::cycle_start (nframes_t nframes)
 	
 	if (receives_input()) {
 		void* jack_buffer = jack_port_get_buffer(_jack_port, nframes);
-		const nframes_t event_count = jack_midi_get_event_count(jack_buffer);
+		const pframes_t event_count = jack_midi_get_event_count(jack_buffer);
 
 		jack_midi_event_t ev;
 		timestamp_t cycle_start_frame = jack_last_frame_time (_jack_client);
 
-		for (nframes_t i = 0; i < event_count; ++i) {
+		for (pframes_t i = 0; i < event_count; ++i) {
 			jack_midi_event_get (&ev, jack_buffer, i);
 			input_fifo.write (cycle_start_frame + ev.time, (Evoral::EventType) 0, ev.size, ev.buffer);
 		}	

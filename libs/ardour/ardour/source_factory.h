@@ -49,7 +49,7 @@ class SourceFactory {
 
 	static boost::shared_ptr<Source> createWritable (DataType type, Session&,
                         const std::string& path, const std::string& origin,
-			bool destructive, nframes_t rate, bool announce = true, bool async = false);
+			bool destructive, framecnt_t rate, bool announce = true, bool async = false);
 
 	static Glib::Cond*                               PeaksToBuild;
 	static Glib::StaticMutex                         peak_building_lock;

@@ -115,7 +115,7 @@ bool Session::_disable_all_loaded_plugins = false;
 
 PBD::Signal1<void,std::string> Session::Dialog;
 PBD::Signal0<int> Session::AskAboutPendingState;
-PBD::Signal2<int,nframes_t,nframes_t> Session::AskAboutSampleRateMismatch;
+PBD::Signal2<int, framecnt_t, framecnt_t> Session::AskAboutSampleRateMismatch;
 PBD::Signal0<void> Session::SendFeedback;
 PBD::Signal3<int,Session*,std::string,DataType> Session::MissingFile;
 
@@ -826,7 +826,7 @@ Session::auto_punch_start_changed (Location* location)
 void
 Session::auto_punch_end_changed (Location* location)
 {
-	nframes_t when_to_stop = location->end();
+	framepos_t when_to_stop = location->end();
 	// when_to_stop += _worst_output_latency + _worst_input_latency;
 	replace_event (SessionEvent::PunchOut, when_to_stop);
 }
@@ -834,7 +834,7 @@ Session::auto_punch_end_changed (Location* location)
 void
 Session::auto_punch_changed (Location* location)
 {
-	nframes_t when_to_stop = location->end();
+	framepos_t when_to_stop = location->end();
 
 	replace_event (SessionEvent::PunchIn, location->start());
 	//when_to_stop += _worst_output_latency + _worst_input_latency;
@@ -1122,7 +1122,7 @@ Session::audible_frame () const
 {
 	framepos_t ret;
 	framepos_t tf;
-	nframes_t offset;
+	framecnt_t offset;
 
 	/* the first of these two possible settings for "offset"
 	   mean that the audible frame is stationary until
@@ -1197,9 +1197,9 @@ Session::audible_frame () const
 }
 
 void
-Session::set_frame_rate (nframes_t frames_per_second)
+Session::set_frame_rate (framecnt_t frames_per_second)
 {
-	/** \fn void Session::set_frame_size(nframes_t)
+	/** \fn void Session::set_frame_size(framecnt_t)
 		the AudioEngine object that calls this guarantees
 		that it will not be called while we are also in
 		::process(). Its fine to do things that block
@@ -1210,7 +1210,7 @@ Session::set_frame_rate (nframes_t frames_per_second)
 
 	sync_time_vars();
 
-	Automatable::set_automation_interval ((jack_nframes_t) ceil ((double) frames_per_second * (0.001 * Config->get_automation_interval())));
+	Automatable::set_automation_interval (ceil ((double) frames_per_second * (0.001 * Config->get_automation_interval())));
 
 	clear_clicks ();
 
@@ -1223,7 +1223,7 @@ Session::set_frame_rate (nframes_t frames_per_second)
 }
 
 void
-Session::set_block_size (nframes_t nframes)
+Session::set_block_size (pframes_t nframes)
 {
 	/* the AudioEngine guarantees
 	   that it will not be called while we are also in
@@ -1258,7 +1258,7 @@ void
 Session::set_default_fade (float /*steepness*/, float /*fade_msecs*/)
 {
 #if 0
-	nframes_t fade_frames;
+	framecnt_t fade_frames;
 
 	/* Don't allow fade of less 1 frame */
 
@@ -1269,7 +1269,7 @@ Session::set_default_fade (float /*steepness*/, float /*fade_msecs*/)
 
 	} else {
 
-		fade_frames = (nframes_t) floor (fade_msecs * _current_frame_rate * 0.001);
+		fade_frames = (framecnt_t) floor (fade_msecs * _current_frame_rate * 0.001);
 
 	}
 
@@ -4029,7 +4029,7 @@ Session::current_end_frame () const
 }
 
 void
-Session::add_session_range_location (nframes_t start, nframes_t end)
+Session::add_session_range_location (framepos_t start, framepos_t end)
 {
 	_session_range_location = new Location (*this, start, end, _("session"), Location::IsSessionRange);
 	_locations->add (_session_range_location);

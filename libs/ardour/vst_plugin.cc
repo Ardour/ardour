@@ -107,7 +107,7 @@ VSTPlugin::~VSTPlugin ()
 }
 
 int 
-VSTPlugin::set_block_size (nframes_t nframes)
+VSTPlugin::set_block_size (pframes_t nframes)
 {
 	deactivate ();
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, nframes, NULL, 0.0f);
@@ -357,7 +357,7 @@ VSTPlugin::describe_parameter (Evoral::Parameter param)
 	return name;
 }
 
-nframes_t
+framecnt_t
 VSTPlugin::signal_latency () const
 {
 	if (_user_latency) {
@@ -365,7 +365,7 @@ VSTPlugin::signal_latency () const
 	}
 
 #ifdef VESTIGE_HEADER
-        return *((nframes_t *) (((char *) &_plugin->flags) + 12)); /* initialDelay */
+        return *((framecnt_t *) (((char *) &_plugin->flags) + 12)); /* initialDelay */
 #else
 	return _plugin->initial_delay;
 #endif
@@ -386,7 +386,7 @@ VSTPlugin::automatable () const
 int
 VSTPlugin::connect_and_run (BufferSet& bufs,
 		ChanMapping in_map, ChanMapping out_map,
-		nframes_t nframes, nframes_t offset)
+		pframes_t nframes, framecnt_t offset)
 {
 	float *ins[_plugin->numInputs];
 	float *outs[_plugin->numOutputs];

@@ -25,14 +25,14 @@ namespace ARDOUR {
 class StripSilence : public Filter {
 
 public:
-	StripSilence (Session &, double, nframes_t, nframes_t);
+	StripSilence (Session &, double, framecnt_t, framecnt_t);
 
 	int run (boost::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
 
 private:
 	double _threshold; ///< silence threshold, in dBFS
-	nframes_t _minimum_length; ///< minimum length to be considered silence, in samples
-	nframes_t _fade_length; ///< fade in/out to use on trimmed regions, in samples
+	framecnt_t _minimum_length; ///< minimum length to be considered silence, in samples
+	framecnt_t _fade_length; ///< fade in/out to use on trimmed regions, in samples
 };
 
 }

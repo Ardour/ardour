@@ -169,7 +169,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	virtual void show_selection (TimeSelection&);
 	virtual void hide_selection ();
 	virtual void reshow_selection (TimeSelection&);
-	virtual void show_timestretch (nframes_t start, nframes_t end);
+	virtual void show_timestretch (framepos_t start, framepos_t end);
 	virtual void hide_timestretch ();
 
 	virtual void hide_dependent_views (TimeAxisViewItem&) {}
@@ -183,7 +183,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	virtual void set_selected_regionviews (RegionSelection&) {}
 	virtual void set_selected_points (PointSelection&) {}
 
-	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t /*pos*/, ARDOUR::RegionPoint, int32_t /*dir*/) {
+	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (framepos_t /*pos*/, ARDOUR::RegionPoint, int32_t /*dir*/) {
 		return boost::shared_ptr<ARDOUR::Region> ();
 	}
 

@@ -30,7 +30,7 @@ public:
 	AudioBuffer(size_t capacity);
 	~AudioBuffer();
 
-	void silence (nframes_t len, nframes_t offset = 0) {
+	void silence (framecnt_t len, framecnt_t offset = 0) {
 		if (!_silent) {
 			assert(_capacity > 0);
 			assert(offset + len <= _capacity);
@@ -43,7 +43,7 @@ public:
 	}
 
 	/** Read @a len frames @a src starting at @a src_offset into self starting at @ dst_offset*/
-	void read_from (const Buffer& src, nframes_t len, nframes_t dst_offset = 0, nframes_t src_offset = 0) {
+	void read_from (const Buffer& src, framecnt_t len, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) {
 		assert(&src != this);
 		assert(_capacity > 0);
 		assert(src.type() == DataType::AUDIO);
@@ -58,14 +58,14 @@ public:
 	}
 
 	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @ dst_offset*/
-	void merge_from (const Buffer& src, nframes_t len, nframes_t dst_offset = 0, nframes_t src_offset = 0) {
+	void merge_from (const Buffer& src, framecnt_t len, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) {
 		const AudioBuffer* ab = dynamic_cast<const AudioBuffer*>(&src);
 		assert (ab);
 		accumulate_from (*ab, len, dst_offset, src_offset);
 	}
 
 	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @ dst_offset*/
-	void accumulate_from (const AudioBuffer& src, nframes_t len, nframes_t dst_offset = 0, nframes_t src_offset = 0) {
+	void accumulate_from (const AudioBuffer& src, framecnt_t len, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) {
 		assert(_capacity > 0);
 		assert(len <= _capacity);
 
@@ -80,7 +80,7 @@ public:
 
 	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @ dst_offset
 	 * scaling by @a gain_coeff */
-	void accumulate_with_gain_from (const AudioBuffer& src, nframes_t len, gain_t gain_coeff, nframes_t dst_offset = 0, nframes_t src_offset = 0) {
+	void accumulate_with_gain_from (const AudioBuffer& src, framecnt_t len, gain_t gain_coeff, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) {
 
 		assert(_capacity > 0);
 		assert(len <= _capacity);
@@ -100,7 +100,7 @@ public:
 
 	/** Accumulate (add) @a len frames FROM THE START OF @a src into self
 	 * scaling by @a gain_coeff */
-	void accumulate_with_gain_from (const Sample* src_raw, nframes_t len, gain_t gain_coeff, nframes_t dst_offset = 0) {
+	void accumulate_with_gain_from (const Sample* src_raw, framecnt_t len, gain_t gain_coeff, framecnt_t dst_offset = 0) {
 
 		assert(_capacity > 0);
 		assert(len <= _capacity);
@@ -113,7 +113,7 @@ public:
 		_written = true;
 	}
 
-	void apply_gain (gain_t gain, nframes_t len) {
+	void apply_gain (gain_t gain, framecnt_t len) {
 		apply_gain_to_buffer (_data, len, gain);
 	}
 
@@ -137,12 +137,12 @@ public:
 	void resize (size_t nframes);
 
 
-	const Sample* data (nframes_t offset = 0) const {
+	const Sample* data (framecnt_t offset = 0) const {
 		assert(offset <= _capacity);
 		return _data + offset;
 	}
 
-	Sample* data (nframes_t offset = 0) {
+	Sample* data (framecnt_t offset = 0) {
 		assert(offset <= _capacity);
 		return _data + offset;
 	}

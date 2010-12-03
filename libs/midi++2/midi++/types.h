@@ -20,6 +20,7 @@
 #ifndef __midi_types_h__
 #define __midi_types_h__
 
+#include <jack/jack.h>
 #include <inttypes.h>
 
 namespace MIDI {
@@ -28,8 +29,11 @@ namespace MIDI {
 	typedef float          controller_value_t;
 	typedef unsigned char  byte;
 	typedef unsigned short pitchbend_t;
-	typedef uint32_t       nframes_t;
 	typedef uint32_t       timestamp_t;
+
+	/** XXX: dupes from libardour */
+	typedef int64_t        framecnt_t;
+	typedef jack_nframes_t pframes_t;
 
 	enum eventType {
 	    none = 0x0,

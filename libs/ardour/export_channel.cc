@@ -39,7 +39,7 @@ PortExportChannel::operator< (ExportChannel const & other) const
 }
 
 void
-PortExportChannel::read (Sample * data, nframes_t frames) const
+PortExportChannel::read (Sample * data, framecnt_t frames) const
 {
 	memset (data, 0, frames * sizeof (float));
 
@@ -128,7 +128,7 @@ RegionExportChannelFactory::create (uint32_t channel)
 }
 
 void
-RegionExportChannelFactory::read (uint32_t channel, Sample * data, nframes_t frames_to_read)
+RegionExportChannelFactory::read (uint32_t channel, Sample * data, framecnt_t frames_to_read)
 {
 	assert (channel < n_channels);
 	assert (frames_to_read <= frames_per_cycle);
@@ -142,7 +142,7 @@ RegionExportChannelFactory::read (uint32_t channel, Sample * data, nframes_t fra
 }
 
 void
-RegionExportChannelFactory::update_buffers (nframes_t frames)
+RegionExportChannelFactory::update_buffers (framecnt_t frames)
 {
 	assert (frames <= frames_per_cycle);
 

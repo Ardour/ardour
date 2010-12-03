@@ -55,7 +55,7 @@ uint32_t LV2Plugin::_midi_event_type = _uri_map.uri_to_id(
 		"http://lv2plug.in/ns/ext/event",
 		"http://lv2plug.in/ns/ext/midi#MidiEvent");
 
-LV2Plugin::LV2Plugin (AudioEngine& e, Session& session, LV2World& world, SLV2Plugin plugin, nframes_t rate)
+LV2Plugin::LV2Plugin (AudioEngine& e, Session& session, LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 	: Plugin (e, session)
 	, _world(world)
 	, _features(NULL)
@@ -77,7 +77,7 @@ LV2Plugin::LV2Plugin (const LV2Plugin &other)
 }
 
 void
-LV2Plugin::init (LV2World& world, SLV2Plugin plugin, nframes_t rate)
+LV2Plugin::init (LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 {
 	_world                = world;
 	_plugin               = plugin;
@@ -501,11 +501,11 @@ LV2Plugin::describe_parameter (Evoral::Parameter which)
 	}
 }
 
-nframes_t
+framecnt_t
 LV2Plugin::signal_latency () const
 {
 	if (_latency_control_port) {
-		return (nframes_t) floor (*_latency_control_port);
+		return (framecnt_t) floor (*_latency_control_port);
 	} else {
 		return 0;
 	}
@@ -528,7 +528,7 @@ LV2Plugin::automatable () const
 int
 LV2Plugin::connect_and_run (BufferSet& bufs,
 		ChanMapping in_map, ChanMapping out_map,
-		nframes_t nframes, nframes_t offset)
+		pframes_t nframes, framecnt_t offset)
 {
 	cycles_t then = get_cycles ();
 
@@ -632,7 +632,7 @@ LV2Plugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 }
 
 void
-LV2Plugin::run (nframes_t nframes)
+LV2Plugin::run (pframes_t nframes)
 {
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		if (parameter_is_control(i) && parameter_is_input(i))  {
@@ -660,7 +660,7 @@ LV2Plugin::latency_compute_run ()
 	uint32_t in_index   = 0;
 	uint32_t out_index  = 0;
 
-	const nframes_t bufsize = 1024;
+	const framecnt_t bufsize = 1024;
 	float buffer[bufsize];
 
 	memset(buffer, 0, sizeof(float) * bufsize);

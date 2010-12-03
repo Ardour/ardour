@@ -471,7 +471,7 @@ AudioStreamView::setup_rec_box ()
 
 				// handle multi
 
-				nframes_t start = 0;
+				framepos_t start = 0;
 				if (rec_regions.size() > 0) {
 					start = rec_regions.back().first->start()
 							+ _trackview.track()->get_captured_frames(rec_regions.size()-1);
@@ -600,7 +600,7 @@ AudioStreamView::foreach_crossfadeview (void (CrossfadeView::*pmf)(void))
 }
 
 void
-AudioStreamView::rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::weak_ptr<Source> weak_src)
+AudioStreamView::rec_peak_range_ready (framepos_t start, framecnt_t cnt, boost::weak_ptr<Source> weak_src)
 {
 	ENSURE_GUI_THREAD (*this, &AudioStreamView::rec_peak_range_ready, start, cnt, weak_src)
 
@@ -653,13 +653,13 @@ AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 			continue;
 		}
 		
-		nframes_t origlen = region->length();
+		framecnt_t origlen = region->length();
 
 		if (region == rec_regions.back().first && rec_active) {
 			
 			if (last_rec_data_frame > region->start()) {
 				
-				nframes_t nlen = last_rec_data_frame - region->start();
+				framecnt_t nlen = last_rec_data_frame - region->start();
 				
 				if (nlen != region->length()) {
 
@@ -684,7 +684,7 @@ AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 
 			} else {
 				
-				nframes_t nlen = _trackview.track()->get_captured_frames(n);
+				framecnt_t nlen = _trackview.track()->get_captured_frames(n);
 				
 				if (nlen != region->length()) {
 					

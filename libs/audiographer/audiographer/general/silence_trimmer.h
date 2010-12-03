@@ -22,7 +22,7 @@ class SilenceTrimmer
   public:
 
 	/// Constructor, \see reset() \n Not RT safe
-	SilenceTrimmer(nframes_t silence_buffer_size_ = 1024)
+	SilenceTrimmer(framecnt_t silence_buffer_size_ = 1024)
 	  : silence_buffer_size (0)
 	  , silence_buffer (0)
 	{
@@ -40,7 +40,7 @@ class SilenceTrimmer
 	  * This also defines the maximum length of output process context
 	  * which can be output during long intermediate silence.
 	  */
-	void reset (nframes_t silence_buffer_size_ = 1024)
+	void reset (framecnt_t silence_buffer_size_ = 1024)
 	{
 		if (throw_level (ThrowObject) && silence_buffer_size_ == 0) {
 			throw Exception (*this,
@@ -68,7 +68,7 @@ class SilenceTrimmer
 	  * Needs to be called before starting processing.
 	  * \n RT safe
 	  */
-	void add_silence_to_beginning (nframes_t frames_per_channel)
+	void add_silence_to_beginning (framecnt_t frames_per_channel)
 	{
 		if (throw_level (ThrowObject) && !in_beginning) {
 			throw Exception(*this, "Tried to add silence to beginning after already outputting data");
@@ -80,7 +80,7 @@ class SilenceTrimmer
 	  * Needs to be called before end is reached.
 	  * \n RT safe
 	  */
-	void add_silence_to_end (nframes_t frames_per_channel)
+	void add_silence_to_end (framecnt_t frames_per_channel)
 	{
 		if (throw_level (ThrowObject) && in_end) {
 			throw Exception(*this, "Tried to add silence to end after already reaching end");
@@ -131,7 +131,7 @@ class SilenceTrimmer
 		}
 		in_end = c.has_flag (ProcessContext<T>::EndOfInput);
 		
-		nframes_t frame_index = 0;
+		framecnt_t frame_index = 0;
 		
 		if (in_beginning) {
 			
@@ -223,9 +223,9 @@ class SilenceTrimmer
 
   private:
 
-	bool find_first_non_zero_sample (ProcessContext<T> const & c, nframes_t & result_frame)
+	bool find_first_non_zero_sample (ProcessContext<T> const & c, framecnt_t & result_frame)
 	{
-		for (nframes_t i = 0; i < c.frames(); ++i) {
+		for (framecnt_t i = 0; i < c.frames(); ++i) {
 			if (c.data()[i] != static_cast<T>(0.0)) {
 				result_frame = i;
 				// Round down to nearest interleaved "frame" beginning
@@ -236,13 +236,13 @@ class SilenceTrimmer
 		return false;
 	}
 	
-	void output_silence_frames (ProcessContext<T> const & c, nframes_t & total_frames, bool adding_to_end = false)
+	void output_silence_frames (ProcessContext<T> const & c, framecnt_t & total_frames, bool adding_to_end = false)
 	{
 		bool end_of_input = c.has_flag (ProcessContext<T>::EndOfInput);
 		c.remove_flag (ProcessContext<T>::EndOfInput);
 		
 		while (total_frames > 0) {
-			nframes_t frames = std::min (silence_buffer_size, total_frames);
+			framecnt_t frames = std::min (silence_buffer_size, total_frames);
 			if (max_output_frames) {
 				frames = std::min (frames, max_output_frames);
 			}
@@ -262,20 +262,20 @@ class SilenceTrimmer
 	}
 
 
-	bool      in_beginning;
-	bool      in_end;
+	bool       in_beginning;
+	bool       in_end;
 	
-	bool      trim_beginning;
-	bool      trim_end;
+	bool       trim_beginning;
+	bool       trim_end;
 	
-	nframes_t silence_frames;
-	nframes_t max_output_frames;
+	framecnt_t silence_frames;
+	framecnt_t max_output_frames;
 	
-	nframes_t add_to_beginning;
-	nframes_t add_to_end;
+	framecnt_t add_to_beginning;
+	framecnt_t add_to_end;
 	
-	nframes_t silence_buffer_size;
-	T *       silence_buffer;
+	framecnt_t silence_buffer_size;
+	T *        silence_buffer;
 };
 
 } // namespace

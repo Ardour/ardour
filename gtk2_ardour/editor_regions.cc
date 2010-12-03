@@ -800,9 +800,9 @@ EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize)
 
 		left = pos;
 		hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
-		left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
+		left -= (framecnt_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
 		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-		left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
+		left -= (framecnt_t) floor (mins * _session->frame_rate() * 60.0f);
 		secs = left / (float) _session->frame_rate();
 		snprintf (buf, bufsize, "%02d:%02d:%06.3f", hrs, mins, secs);
 		break;
@@ -844,13 +844,13 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 #if 0
 	if (audioRegion && fades_in_seconds) {
 
-		nframes_t left;
+		framepos_t left;
 		int mins;
 		int millisecs;
 
 		left = audioRegion->fade_in()->back()->when;
 		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-		left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
+		left -= (framepos_t) floor (mins * _session->frame_rate() * 60.0f);
 		millisecs = (int) floor ((left * 1000.0f) / _session->frame_rate());
 
 		if (audioRegion->fade_in()->back()->when >= _session->frame_rate()) {
@@ -861,7 +861,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 
 		left = audioRegion->fade_out()->back()->when;
 		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-		left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
+		left -= (framepos_t) floor (mins * _session->frame_rate() * 60.0f);
 		millisecs = (int) floor ((left * 1000.0f) / _session->frame_rate());
 
 		if (audioRegion->fade_out()->back()->when >= _session->frame_rate()) {

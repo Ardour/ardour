@@ -72,7 +72,7 @@ public:
 	AudioPlaylist (Session&, const XMLNode&, bool hidden = false);
 	AudioPlaylist (Session&, std::string name, bool hidden = false);
 	AudioPlaylist (boost::shared_ptr<const AudioPlaylist>, std::string name, bool hidden = false);
-	AudioPlaylist (boost::shared_ptr<const AudioPlaylist>, nframes_t start, nframes_t cnt, std::string name, bool hidden = false);
+	AudioPlaylist (boost::shared_ptr<const AudioPlaylist>, framepos_t start, framecnt_t cnt, std::string name, bool hidden = false);
 
 	~AudioPlaylist ();
 
@@ -85,7 +85,7 @@ public:
 	PBD::Signal1<void,boost::shared_ptr<Crossfade> >  NewCrossfade;
 	
 	void foreach_crossfade (boost::function<void (boost::shared_ptr<Crossfade>)>);
-	void crossfades_at (nframes_t frame, Crossfades&);
+	void crossfades_at (framepos_t frame, Crossfades&);
 
 	bool destroy_region (boost::shared_ptr<Region>);
 

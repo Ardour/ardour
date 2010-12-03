@@ -355,10 +355,10 @@ MIDIClock_Slave::speed_and_position (double& speed, framepos_t& pos)
 	return true;
 }
 
-ARDOUR::nframes_t
+ARDOUR::framecnt_t
 MIDIClock_Slave::resolution() const
 {
 	// one beat
-	return (nframes_t) one_ppqn_in_frames * ppqn;
+	return (framecnt_t) one_ppqn_in_frames * ppqn;
 }
 

@@ -72,8 +72,8 @@ void MidiClockTicker::transport_state_changed()
 		return;
 	}
 
-	float     speed    = _session->transport_speed();
-	nframes_t position = _session->transport_frame();
+	float      speed    = _session->transport_speed();
+	framepos_t position = _session->transport_frame();
 #ifdef DEBUG_MIDI_CLOCK
 	cerr << "Transport state change, speed:" << speed << "position:" << position<< " play loop " << _session->get_play_loop() << endl;
 #endif
@@ -108,7 +108,7 @@ void MidiClockTicker::transport_state_changed()
 	tick(position, *((ARDOUR::BBT_Time *) 0), *((Timecode::Time *)0));
 }
 
-void MidiClockTicker::position_changed(nframes_t position)
+void MidiClockTicker::position_changed (framepos_t position)
 {
 #ifdef DEBUG_MIDI_CLOCK
 	cerr << "Position changed:" << position << endl;
@@ -131,18 +131,18 @@ void MidiClockTicker::transport_looped()
 
 	// adjust _last_tick, so that the next MIDI clock message is sent
 	// in due time (and the tick interval is still constant)
-	nframes_t elapsed_since_last_tick = loop_location->end() - _last_tick;
+	framecnt_t elapsed_since_last_tick = loop_location->end() - _last_tick;
 	_last_tick = loop_location->start() - elapsed_since_last_tick;
 }
 
-void MidiClockTicker::tick(const nframes_t& transport_frames, const BBT_Time& /*transport_bbt*/, const Timecode::Time& /*transport_smpt*/)
+void MidiClockTicker::tick (const framepos_t& transport_frames, const BBT_Time& /*transport_bbt*/, const Timecode::Time& /*transport_smpt*/)
 {
 	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f || _midi_port == 0)
 		return;
 
 	while (true) {
 		double next_tick = _last_tick + one_ppqn_in_frames(transport_frames);
-		nframes_t next_tick_offset = nframes_t(next_tick) - transport_frames;
+		framecnt_t next_tick_offset = framecnt_t(next_tick) - transport_frames;
 
 #ifdef DEBUG_MIDI_CLOCK
 		cerr << "Transport:" << transport_frames
@@ -162,7 +162,7 @@ void MidiClockTicker::tick(const nframes_t& transport_frames, const BBT_Time& /*
 	}
 }
 
-double MidiClockTicker::one_ppqn_in_frames(nframes_t transport_position)
+double MidiClockTicker::one_ppqn_in_frames (framepos_t transport_position)
 {
 	const Tempo& current_tempo = _session->tempo_map().tempo_at(transport_position);
 	const Meter& current_meter = _session->tempo_map().meter_at(transport_position);
@@ -176,7 +176,7 @@ double MidiClockTicker::one_ppqn_in_frames(nframes_t transport_position)
 	return frames_per_quarter_note / double (_ppqn);
 }
 
-void MidiClockTicker::send_midi_clock_event(nframes_t offset)
+void MidiClockTicker::send_midi_clock_event (framecnt_t offset)
 {
 	if (!_midi_port) {
 		return;
@@ -190,7 +190,7 @@ void MidiClockTicker::send_midi_clock_event(nframes_t offset)
 	_midi_port->write(_midi_clock_tick, 1, offset);
 }
 
-void MidiClockTicker::send_start_event(nframes_t offset)
+void MidiClockTicker::send_start_event (framecnt_t offset)
 {
 	if (!_midi_port) {
 		return;
@@ -200,7 +200,7 @@ void MidiClockTicker::send_start_event(nframes_t offset)
 	_midi_port->write(_midi_clock_tick, 1, offset);
 }
 
-void MidiClockTicker::send_continue_event(nframes_t offset)
+void MidiClockTicker::send_continue_event (framecnt_t offset)
 {
 	if (!_midi_port) {
 		return;
@@ -210,7 +210,7 @@ void MidiClockTicker::send_continue_event(nframes_t offset)
 	_midi_port->write(_midi_clock_tick, 1, offset);
 }
 
-void MidiClockTicker::send_stop_event(nframes_t offset)
+void MidiClockTicker::send_stop_event (framecnt_t offset)
 {
 	if (!_midi_port) {
 		return;

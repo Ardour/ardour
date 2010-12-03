@@ -89,8 +89,8 @@ class PluginEqGui : public Gtk::Table
 		float _log_coeff;
 		float _log_max;
 
-		nframes_t _buffer_size;
-		nframes_t _signal_buffer_size;
+		ARDOUR::framecnt_t _buffer_size;
+		ARDOUR::framecnt_t _signal_buffer_size;
 
 		// buffers
 		ARDOUR::BufferSet _bufferset;

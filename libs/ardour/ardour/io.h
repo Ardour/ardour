@@ -89,7 +89,7 @@ class IO : public SessionObject, public Latent
 
 	bool set_name (const std::string& str);
 
-	virtual void silence  (nframes_t);
+	virtual void silence (framecnt_t);
 
 	int ensure_io (ChanCount cnt, bool clear, void *src);
 
@@ -109,9 +109,9 @@ class IO : public SessionObject, public Latent
         bool connected () const;
         bool physically_connected () const;
         
-	nframes_t signal_latency() const { return _own_latency; }
-	nframes_t latency() const;
-	void      set_port_latency (nframes_t);
+	framecnt_t signal_latency () const { return _own_latency; }
+	framecnt_t latency () const;
+	void set_port_latency (framecnt_t);
 
 	void update_port_total_latencies ();
 
@@ -188,9 +188,9 @@ class IO : public SessionObject, public Latent
 
 	/* three utility functions - this just seems to be simplest place to put them */
 
-	void collect_input (BufferSet& bufs, nframes_t nframes, ChanCount offset);
-	void process_input (boost::shared_ptr<Processor>, framepos_t start_frame, framepos_t end_frame, nframes_t nframes);
-	void copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes, nframes_t offset);
+	void collect_input (BufferSet& bufs, pframes_t nframes, ChanCount offset);
+	void process_input (boost::shared_ptr<Processor>, framepos_t start_frame, framepos_t end_frame, pframes_t nframes);
+	void copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, framecnt_t offset);
 
 	/* AudioTrack::deprecated_use_diskstream_connections() needs these */
 

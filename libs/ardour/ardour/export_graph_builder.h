@@ -62,7 +62,7 @@ class ExportGraphBuilder
 	ExportGraphBuilder (Session const & session);
 	~ExportGraphBuilder ();
 	
-	int process (nframes_t frames, bool last_cycle);
+	int process (framecnt_t frames, bool last_cycle);
 	bool process_normalize (); // returns true when finished
 	
 	void reset ();
@@ -102,7 +102,7 @@ class ExportGraphBuilder
 	class SFC {
 	  public:
 		// This constructor so that this can be constructed like a Normalizer
-		SFC (ExportGraphBuilder &, FileSpec const & new_config, nframes_t max_frames);
+		SFC (ExportGraphBuilder &, FileSpec const & new_config, framecnt_t max_frames);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
@@ -124,7 +124,7 @@ class ExportGraphBuilder
 	
 	class Normalizer {
 	  public:
-		Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, nframes_t max_frames);
+		Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
@@ -144,7 +144,7 @@ class ExportGraphBuilder
 		ExportGraphBuilder & parent;
 		
 		FileSpec        config;
-		nframes_t       max_frames_out;
+		framecnt_t      max_frames_out;
 		
 		BufferPtr       buffer;
 		PeakReaderPtr   peak_reader;
@@ -159,7 +159,7 @@ class ExportGraphBuilder
 	// sample rate converter
 	class SRC {
 	  public:
-		SRC (ExportGraphBuilder & parent, FileSpec const & new_config, nframes_t max_frames);
+		SRC (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
@@ -175,13 +175,13 @@ class ExportGraphBuilder
 		boost::ptr_list<SFC>  children;
 		boost::ptr_list<Normalizer> normalized_children;
 		SRConverterPtr        converter;
-		nframes_t             max_frames_out;
+		framecnt_t            max_frames_out;
 	};
 	
 	// Silence trimmer + adder
 	class SilenceHandler {
 	  public:
-		SilenceHandler (ExportGraphBuilder & parent, FileSpec const & new_config, nframes_t max_frames);
+		SilenceHandler (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
@@ -193,7 +193,7 @@ class ExportGraphBuilder
 		FileSpec             config;
 		boost::ptr_list<SRC> children;
 		SilenceTrimmerPtr    silence_trimmer;
-		nframes_t            max_frames_in;
+		framecnt_t           max_frames_in;
 	};
 	
 	// channel configuration
@@ -210,7 +210,7 @@ class ExportGraphBuilder
 		FileSpec                  config;
 		boost::ptr_list<SilenceHandler> children;
 		InterleaverPtr            interleaver;
-		nframes_t                 max_frames;
+		framecnt_t                max_frames;
 	};
 
 	Session const & session;
@@ -223,7 +223,7 @@ class ExportGraphBuilder
 	ChannelMap channels;
 	
 	Sample *  process_buffer;
-	nframes_t process_buffer_frames;
+	framecnt_t process_buffer_frames;
 	
 	std::list<Normalizer *> normalizers;
 	

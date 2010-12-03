@@ -53,7 +53,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-LadspaPlugin::LadspaPlugin (void *mod, AudioEngine& e, Session& session, uint32_t index, nframes_t rate)
+LadspaPlugin::LadspaPlugin (void *mod, AudioEngine& e, Session& session, uint32_t index, framecnt_t rate)
 	: Plugin (e, session)
 {
 	init (mod, index, rate);
@@ -71,7 +71,7 @@ LadspaPlugin::LadspaPlugin (const LadspaPlugin &other)
 }
 
 void
-LadspaPlugin::init (void *mod, uint32_t index, nframes_t rate)
+LadspaPlugin::init (void *mod, uint32_t index, framecnt_t rate)
 {
 	LADSPA_Descriptor_Function dfunc;
 	uint32_t i, port_cnt;
@@ -530,7 +530,7 @@ LadspaPlugin::describe_parameter (Evoral::Parameter which)
 	}
 }
 
-ARDOUR::nframes_t
+ARDOUR::framecnt_t
 LadspaPlugin::signal_latency () const
 {
 	if (_user_latency) {
@@ -538,7 +538,7 @@ LadspaPlugin::signal_latency () const
 	}
 
 	if (_latency_control_port) {
-		return (nframes_t) floor (*_latency_control_port);
+		return (framecnt_t) floor (*_latency_control_port);
 	} else {
 		return 0;
 	}
@@ -563,7 +563,7 @@ LadspaPlugin::automatable () const
 int
 LadspaPlugin::connect_and_run (BufferSet& bufs,
 		ChanMapping in_map, ChanMapping out_map,
-		nframes_t nframes, nframes_t offset)
+		pframes_t nframes, framecnt_t offset)
 {
 	cycles_t now;
 	cycles_t then = get_cycles ();
@@ -626,7 +626,7 @@ LadspaPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 }
 
 void
-LadspaPlugin::run_in_place (nframes_t nframes)
+LadspaPlugin::run_in_place (pframes_t nframes)
 {
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) && LADSPA_IS_PORT_CONTROL(port_descriptor (i))) {
@@ -655,7 +655,7 @@ LadspaPlugin::latency_compute_run ()
 	uint32_t port_index = 0;
 	uint32_t in_index = 0;
 	uint32_t out_index = 0;
-	const nframes_t bufsize = 1024;
+	const framecnt_t bufsize = 1024;
 	LADSPA_Data buffer[bufsize];
 
 	memset(buffer,0,sizeof(LADSPA_Data)*bufsize);

@@ -50,9 +50,9 @@ class PortInsert : public IOProcessor
 	XMLNode& get_state(void);
 	int set_state (const XMLNode&, int version);
 
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool);
+	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
 
-	nframes_t signal_latency() const;
+	framecnt_t signal_latency () const;
 
 	bool set_name (const std::string& name);
 
@@ -68,8 +68,8 @@ class PortInsert : public IOProcessor
         void stop_latency_detection ();
 
         MTDM* mtdm () const { return _mtdm; }
-        void set_measured_latency (nframes_t);
-        nframes_t latency() const;
+        void set_measured_latency (framecnt_t);
+        framecnt_t latency () const;
 
   private:
 	/* disallow copy construction */
@@ -77,11 +77,12 @@ class PortInsert : public IOProcessor
 
 	boost::shared_ptr<Delivery> _out;
 
-	uint32_t bitslot;
-        MTDM*     _mtdm;
-        bool      _latency_detect;
-        nframes_t _latency_flush_frames;
-        nframes_t _measured_latency;};
+	uint32_t    bitslot;
+        MTDM*      _mtdm;
+        bool       _latency_detect;
+        framecnt_t _latency_flush_frames;
+        framecnt_t _measured_latency;
+};
 
 } // namespace ARDOUR
 

@@ -72,7 +72,7 @@ Manager::add_port (Port* p)
 }
 
 void
-Manager::cycle_start(nframes_t nframes)
+Manager::cycle_start (pframes_t nframes)
 {
 	for (PortList::iterator p = _ports.begin(); p != _ports.end(); ++p) {
 		(*p)->cycle_start (nframes);

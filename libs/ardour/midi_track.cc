@@ -298,7 +298,7 @@ MidiTrack::set_state_part_two ()
 }
 
 int
-MidiTrack::roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
+MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
 		 bool can_record, bool rec_monitors_input, bool& needs_butler)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
@@ -320,8 +320,7 @@ MidiTrack::roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		return 0;
 	}
 
-	nframes_t transport_frame = _session.transport_frame();
-
+	framepos_t transport_frame = _session.transport_frame();
 
 	if ((nframes = check_initial_delay (nframes, transport_frame)) == 0) {
 		/* need to do this so that the diskstream sets its
@@ -391,7 +390,7 @@ MidiTrack::roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame
 }
 
 int
-MidiTrack::no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+MidiTrack::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		    bool state_changing, bool can_record, bool rec_monitors_input)
 {
 	int ret = Track::no_roll (nframes, start_frame, end_frame, state_changing, can_record, rec_monitors_input);
@@ -410,7 +409,7 @@ MidiTrack::handle_transport_stopped (bool abort, bool did_locate, bool flush_pro
 }
 
 void
-MidiTrack::push_midi_input_to_step_edit_ringbuffer (nframes_t nframes)
+MidiTrack::push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes)
 {
 	PortSet& ports (_input->ports());
 
@@ -422,7 +421,7 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (nframes_t nframes)
 
 		for (MidiBuffer::const_iterator e = mb->begin(); e != mb->end(); ++e) {
 
-			const Evoral::MIDIEvent<nframes_t> ev(*e, false);
+			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
 
                         /* note on, since for step edit, note length is determined
                            elsewhere 
@@ -437,7 +436,7 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (nframes_t nframes)
 }
 
 void
-MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framepos_t /*end*/, nframes_t nframes)
+MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framepos_t /*end*/, framecnt_t nframes)
 {
 	// Append immediate events
 	MidiBuffer& buf (bufs.get_midi (0));
@@ -454,13 +453,13 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framep
 }
 
 int
-MidiTrack::export_stuff (BufferSet& /*bufs*/, nframes_t /*nframes*/, framepos_t /*end_frame*/)
+MidiTrack::export_stuff (BufferSet& /*bufs*/, framecnt_t /*nframes*/, framepos_t /*end_frame*/)
 {
 	return -1;
 }
 
 void
-MidiTrack::set_latency_delay (nframes_t longest_session_latency)
+MidiTrack::set_latency_delay (framecnt_t longest_session_latency)
 {
 	Route::set_latency_delay (longest_session_latency);
 	_diskstream->set_roll_delay (_roll_delay);
@@ -477,7 +476,7 @@ MidiTrack::bounce (InterThreadInfo& /*itt*/)
 
 
 boost::shared_ptr<Region>
-MidiTrack::bounce_range (nframes_t /*start*/, nframes_t /*end*/, InterThreadInfo& /*itt*/, bool /*enable_processing*/)
+MidiTrack::bounce_range (framepos_t /*start*/, framepos_t /*end*/, InterThreadInfo& /*itt*/, bool /*enable_processing*/)
 {
 	throw;
 	//vector<MidiSource*> srcs;

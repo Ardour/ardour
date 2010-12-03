@@ -27,7 +27,7 @@
 using namespace std;
 using namespace ARDOUR;
 
-PBD::Signal1<void,nframes_t> InternalReturn::CycleStart;
+PBD::Signal1<void, pframes_t> InternalReturn::CycleStart;
 
 InternalReturn::InternalReturn (Session& s)
 	: Return (s, true)
@@ -38,7 +38,7 @@ InternalReturn::InternalReturn (Session& s)
 }
 
 void
-InternalReturn::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, nframes_t nframes, bool)
+InternalReturn::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t nframes, bool)
 {
 	if (!_active && !_pending_active) {
 		return;
@@ -64,14 +64,14 @@ InternalReturn::configure_io (ChanCount in, ChanCount out)
 }
 
 int
-InternalReturn::set_block_size (nframes_t nframes)
+InternalReturn::set_block_size (pframes_t nframes)
 {
 	allocate_buffers (nframes);
         return 0;
 }
 
 void
-InternalReturn::allocate_buffers (nframes_t nframes)
+InternalReturn::allocate_buffers (pframes_t nframes)
 {
 	buffers.ensure_buffers (_configured_input, nframes);
 	buffers.set_count (_configured_input);
@@ -101,7 +101,7 @@ InternalReturn::release_buffers ()
 }
 
 void
-InternalReturn::cycle_start (nframes_t nframes)
+InternalReturn::cycle_start (pframes_t nframes)
 {
 	/* called from process cycle - no lock necessary */
 	if (user_count) {

@@ -47,7 +47,7 @@ using namespace PBD;
 /* BBT TIME*/
 
 void
-Session::bbt_time (nframes_t when, BBT_Time& bbt)
+Session::bbt_time (framepos_t when, BBT_Time& bbt)
 {
 	_tempo_map->bbt_time (when, bbt);
 }
@@ -155,14 +155,14 @@ Session::timecode_drop_frames() const
 void
 Session::sync_time_vars ()
 {
-	_current_frame_rate = (nframes_t) round (_base_frame_rate * (1.0 + (config.get_video_pullup()/100.0)));
+	_current_frame_rate = (framecnt_t) round (_base_frame_rate * (1.0 + (config.get_video_pullup()/100.0)));
 	_frames_per_timecode_frame = (double) _current_frame_rate / (double) timecode_frames_per_second();
 	if (timecode_drop_frames()) {
 	  _frames_per_hour = (int32_t)(107892 * _frames_per_timecode_frame);
 	} else {
 	  _frames_per_hour = (int32_t)(3600 * rint(timecode_frames_per_second()) * _frames_per_timecode_frame);
 	}
-	_timecode_frames_per_hour = (nframes_t)rint(timecode_frames_per_second() * 3600.0);
+	_timecode_frames_per_hour = rint(timecode_frames_per_second() * 3600.0);
 
 	last_timecode_valid = false;
 	// timecode type bits are the middle two in the upper nibble
@@ -231,13 +231,13 @@ Session::timecode_to_sample( Timecode::Time& timecode, framepos_t& sample, bool 
 		//  Per Sigmond <per@sigmond.no>
 
 		// Samples inside time dividable by 10 minutes (real time accurate)
-		nframes_t base_samples = (nframes_t) (((timecode.hours * 107892) + ((timecode.minutes / 10) * 17982)) * _frames_per_timecode_frame);
+		framecnt_t base_samples = (framecnt_t) (((timecode.hours * 107892) + ((timecode.minutes / 10) * 17982)) * _frames_per_timecode_frame);
 
 		// Samples inside time exceeding the nearest 10 minutes (always offset, see above)
 		int32_t exceeding_df_minutes = timecode.minutes % 10;
 		int32_t exceeding_df_seconds = (exceeding_df_minutes * 60) + timecode.seconds;
 		int32_t exceeding_df_frames = (30 * exceeding_df_seconds) + timecode.frames - (2 * exceeding_df_minutes);
-		nframes_t exceeding_samples = (nframes_t) rint(exceeding_df_frames * _frames_per_timecode_frame);
+		framecnt_t exceeding_samples = (framecnt_t) rint(exceeding_df_frames * _frames_per_timecode_frame);
 		sample = base_samples + exceeding_samples;
 	} else {
 		/*
@@ -247,7 +247,7 @@ Session::timecode_to_sample( Timecode::Time& timecode, framepos_t& sample, bool 
 		   frame_rate() in the non-integer Timecode rate case.
 		*/
 
-		sample = (nframes_t)rint((((timecode.hours * 60 * 60) + (timecode.minutes * 60) + timecode.seconds) * (rint(timecode.rate) * _frames_per_timecode_frame)) + (timecode.frames * _frames_per_timecode_frame));
+		sample = (framecnt_t)rint((((timecode.hours * 60 * 60) + (timecode.minutes * 60) + timecode.seconds) * (rint(timecode.rate) * _frames_per_timecode_frame)) + (timecode.frames * _frames_per_timecode_frame));
 	}
 
 	if (use_subframes) {
@@ -376,7 +376,7 @@ Session::sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool u
 }
 
 void
-Session::timecode_time (nframes_t when, Timecode::Time& timecode)
+Session::timecode_time (framepos_t when, Timecode::Time& timecode)
 {
 	if (last_timecode_valid && when == last_timecode_when) {
 		timecode = last_timecode;
@@ -391,7 +391,7 @@ Session::timecode_time (nframes_t when, Timecode::Time& timecode)
 }
 
 void
-Session::timecode_time_subframes (nframes_t when, Timecode::Time& timecode)
+Session::timecode_time_subframes (framepos_t when, Timecode::Time& timecode)
 {
 	if (last_timecode_valid && when == last_timecode_when) {
 		timecode = last_timecode;
@@ -469,7 +469,7 @@ Session::jack_sync_callback (jack_transport_state_t state,
 
 void
 Session::jack_timebase_callback (jack_transport_state_t /*state*/,
-				 nframes_t /*nframes*/,
+				 pframes_t /*nframes*/,
 				 jack_position_t* pos,
 				 int /*new_position*/)
 {
@@ -546,14 +546,14 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 #endif
 }
 
-ARDOUR::nframes_t
-Session::convert_to_frames_at (nframes_t /*position*/, AnyTime const & any)
+ARDOUR::framecnt_t
+Session::convert_to_frames_at (framepos_t /*position*/, AnyTime const & any)
 {
 	double secs;
 
 	switch (any.type) {
 	case AnyTime::BBT:
-		return _tempo_map->frame_time ( any.bbt);
+		return _tempo_map->frame_time (any.bbt);
 		break;
 
 	case AnyTime::Timecode:
@@ -563,14 +563,14 @@ Session::convert_to_frames_at (nframes_t /*position*/, AnyTime const & any)
 		secs += any.timecode.seconds;
 		secs += any.timecode.frames / timecode_frames_per_second();
 		if (config.get_timecode_offset_negative()) {
-			return (nframes_t) floor (secs * frame_rate()) - config.get_timecode_offset();
+			return (framecnt_t) floor (secs * frame_rate()) - config.get_timecode_offset();
 		} else {
-			return (nframes_t) floor (secs * frame_rate()) + config.get_timecode_offset();
+			return (framecnt_t) floor (secs * frame_rate()) + config.get_timecode_offset();
 		}
 		break;
 
 	case AnyTime::Seconds:
-		return (nframes_t) floor (any.seconds * frame_rate());
+		return (framecnt_t) floor (any.seconds * frame_rate());
 		break;
 
 	case AnyTime::Frames:

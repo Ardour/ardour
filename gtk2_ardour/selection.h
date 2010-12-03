@@ -121,7 +121,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void set (RegionView*, bool also_clear_tracks = true);
 	void set (MidiRegionView*);
 	void set (std::vector<RegionView*>&);
-	long set (nframes_t, nframes_t);
+	long set (framepos_t, framepos_t);
 	void set (boost::shared_ptr<Evoral::ControlList>);
 	void set (boost::shared_ptr<ARDOUR::Playlist>);
 	void set (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
@@ -136,7 +136,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void toggle (MidiRegionView*);
 	void toggle (MidiCutBuffer*);
 	void toggle (std::vector<RegionView*>&);
-	long toggle (nframes_t, nframes_t);
+	long toggle (framepos_t, framepos_t);
 	void toggle (ARDOUR::AutomationList*);
 	void toggle (boost::shared_ptr<ARDOUR::Playlist>);
 	void toggle (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
@@ -151,7 +151,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void add (MidiRegionView*);
 	void add (MidiCutBuffer*);
 	void add (std::vector<RegionView*>&);
-	long add (nframes_t, nframes_t);
+	long add (framepos_t, framepos_t);
 	void add (boost::shared_ptr<Evoral::ControlList>);
 	void add (boost::shared_ptr<ARDOUR::Playlist>);
 	void add (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
@@ -167,14 +167,14 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void remove (MidiRegionView*);
 	void remove (MidiCutBuffer*);
 	void remove (uint32_t selection_id);
-	void remove (nframes_t, nframes_t);
+	void remove (framepos_t, framepos_t);
 	void remove (boost::shared_ptr<ARDOUR::AutomationList>);
 	void remove (boost::shared_ptr<ARDOUR::Playlist>);
 	void remove (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void remove (const std::list<Selectable*>&);
 	void remove (Marker*);
 
-	void replace (uint32_t time_index, nframes_t start, nframes_t end);
+	void replace (uint32_t time_index, framepos_t start, framepos_t end);
 
 	void clear_regions();
 	void clear_tracks ();

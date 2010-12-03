@@ -41,7 +41,7 @@ struct LV2World;
 class LV2Plugin : public ARDOUR::Plugin
 {
   public:
-	LV2Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&, ARDOUR::LV2World&, SLV2Plugin plugin, nframes_t sample_rate);
+	LV2Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&, ARDOUR::LV2World&, SLV2Plugin plugin, framecnt_t sample_rate);
 	LV2Plugin (const LV2Plugin &);
 	~LV2Plugin ();
 
@@ -53,7 +53,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	const char* maker() const           { return _author ? slv2_value_as_string(_author) : "Unknown"; }
 	uint32_t    parameter_count() const { return slv2_plugin_get_num_ports(_plugin); }
 	float       default_value (uint32_t port);
-	nframes_t   signal_latency() const;
+	framecnt_t  signal_latency () const;
 	void        set_parameter (uint32_t port, float val);
 	float       get_parameter (uint32_t port) const;
 	int         get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
@@ -93,11 +93,11 @@ class LV2Plugin : public ARDOUR::Plugin
 		_instance = NULL;
 	}
 
-	int  set_block_size (nframes_t /*nframes*/) { return 0; }
+	int set_block_size (pframes_t /*nframes*/) { return 0; }
 
 	int connect_and_run (BufferSet& bufs,
 			ChanMapping in, ChanMapping out,
-			nframes_t nframes, nframes_t offset);
+			pframes_t nframes, framecnt_t offset);
 
 	std::string describe_parameter (Evoral::Parameter);
 	std::string state_node_name() const { return "lv2"; }
@@ -129,7 +129,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	SLV2Value         _name;
 	SLV2Value         _author;
 	SLV2Instance      _instance;
-	nframes_t         _sample_rate;
+	framecnt_t        _sample_rate;
 	float*            _control_data;
 	float*            _shadow_data;
 	float*            _defaults;
@@ -149,8 +149,8 @@ class LV2Plugin : public ARDOUR::Plugin
 	static URIMap   _uri_map;
 	static uint32_t _midi_event_type;
 
-	void init (LV2World& world, SLV2Plugin plugin, nframes_t rate);
-	void run (nframes_t nsamples);
+	void init (LV2World& world, SLV2Plugin plugin, framecnt_t rate);
+	void run (pframes_t nsamples);
 	void latency_compute_run ();
 };
 

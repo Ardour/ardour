@@ -46,7 +46,7 @@ class Auditioner : public AudioTrack
 	ARDOUR::AudioPlaylist& prepare_playlist ();
 	void audition_current_playlist ();
 
-	int  play_audition (nframes_t nframes);
+	int play_audition (framecnt_t nframes);
 
 	void cancel_audition () {
 		g_atomic_int_set (&_auditioning, 0);
@@ -57,10 +57,10 @@ class Auditioner : public AudioTrack
 
   private:
 	boost::shared_ptr<AudioRegion> the_region;
-	nframes_t current_frame;
+	framepos_t current_frame;
 	mutable gint _auditioning;
 	Glib::Mutex lock;
-	nframes_t length;
+	framecnt_t length;
         bool via_monitor;
 
 	void drop_ports ();

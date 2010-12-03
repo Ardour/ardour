@@ -25,10 +25,10 @@ class SampleRateConverter
 	~SampleRateConverter ();
 
 	/// Init converter \n Not RT safe
-	void init (nframes_t in_rate, nframes_t out_rate, int quality = 0);
+	void init (framecnt_t in_rate, framecnt_t out_rate, int quality = 0);
 	
 	/// Returns max amount of frames that will be output \n RT safe
-	nframes_t allocate_buffers (nframes_t max_frames);
+	framecnt_t allocate_buffers (framecnt_t max_frames);
 	
 	/** Does sample rate conversion.
 	  * Note that outpt size may vary a lot.
@@ -46,14 +46,14 @@ class SampleRateConverter
 
 	bool           active;
 	uint32_t       channels;
-	nframes_t      max_frames_in;
+	framecnt_t     max_frames_in;
 	
 	float *        leftover_data;
-	nframes_t      leftover_frames;
-	nframes_t      max_leftover_frames;
+	framecnt_t     leftover_frames;
+	framecnt_t     max_leftover_frames;
 
 	float *        data_out;
-	nframes_t      data_out_size;
+	framecnt_t     data_out_size;
 
 	SRC_DATA       src_data;
 	SRC_STATE*     src_state;

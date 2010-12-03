@@ -81,7 +81,7 @@ InternalSend::send_to_going_away ()
 }
 
 void
-InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool)
+InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool)
 {
 	if ((!_active && !_pending_active) || !target || !_send_to) {
 		_meter->reset ();
@@ -147,7 +147,7 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 }
 
 int
-InternalSend::set_block_size (nframes_t nframes)
+InternalSend::set_block_size (pframes_t nframes)
 {
 	mixbufs.ensure_buffers (_configured_input, nframes);
 

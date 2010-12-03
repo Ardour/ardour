@@ -42,7 +42,7 @@ public:
 	void add (uint8_t note, uint8_t chn);
 	void remove (uint8_t note, uint8_t chn);
 	void resolve_notes (MidiBuffer& buffer, framepos_t time);
-	void resolve_notes (Evoral::EventSink<nframes_t>& buffer, framepos_t time);
+	void resolve_notes (Evoral::EventSink<framepos_t>& buffer, framepos_t time);
 	void resolve_notes (MidiSource& src, Evoral::MusicalTime time);
 	void dump (std::ostream&);
 	void reset ();

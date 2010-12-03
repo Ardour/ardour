@@ -656,7 +656,7 @@ CrossfadeEditor::redraw ()
 		return;
 	}
 
-	nframes_t len = xfade->length ();
+	framecnt_t len = xfade->length ();
 
 	fade[current].normative_curve.clear ();
 	fade[current].gain_curve.clear ();
@@ -1215,11 +1215,11 @@ void
 CrossfadeEditor::audition (Audition which)
 {
 	AudioPlaylist& pl (_session->the_auditioner()->prepare_playlist());
-	nframes_t preroll;
-	nframes_t postroll;
-	nframes_t left_start_offset;
-	nframes_t right_length;
-	nframes_t left_length;
+	framecnt_t preroll;
+	framecnt_t postroll;
+	framecnt_t left_start_offset;
+	framecnt_t right_length;
+	framecnt_t left_length;
 
 	if (which != Right && preroll_button.get_active()) {
 		preroll = _session->frame_rate() * 2;  //2 second hardcoded preroll for now

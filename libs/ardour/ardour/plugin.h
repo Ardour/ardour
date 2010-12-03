@@ -112,11 +112,11 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual void deactivate () = 0;
         virtual void flush () { deactivate(); activate(); }
 
-	virtual int set_block_size (nframes_t nframes) = 0;
+	virtual int set_block_size (pframes_t nframes) = 0;
 
 	virtual int connect_and_run (BufferSet& bufs,
 			ChanMapping in, ChanMapping out,
-			nframes_t nframes, nframes_t offset) = 0;
+			pframes_t nframes, framecnt_t offset) = 0;
 
 	virtual std::set<Evoral::Parameter> automatable() const = 0;
 	virtual std::string describe_parameter (Evoral::Parameter) = 0;

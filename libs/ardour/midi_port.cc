@@ -39,7 +39,7 @@ MidiPort::~MidiPort()
 }
 
 void
-MidiPort::cycle_start (nframes_t nframes)
+MidiPort::cycle_start (pframes_t nframes)
 {
 	_buffer->clear ();
 	assert (_buffer->size () == 0);
@@ -50,7 +50,7 @@ MidiPort::cycle_start (nframes_t nframes)
 }
 
 MidiBuffer &
-MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
+MidiPort::get_midi_buffer (framecnt_t nframes, framecnt_t offset)
 {
 	if (_has_been_mixed_down) {
 		return *_buffer;
@@ -59,7 +59,7 @@ MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
 	if (receives_input ()) {
 
 		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
-		const nframes_t event_count = jack_midi_get_event_count(jack_buffer);
+		const pframes_t event_count = jack_midi_get_event_count(jack_buffer);
 
 		assert (event_count < _buffer->capacity());
 
@@ -67,7 +67,7 @@ MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
 		   into our MidiBuffer
 		*/
 
-		for (nframes_t i = 0; i < event_count; ++i) {
+		for (pframes_t i = 0; i < event_count; ++i) {
 
 			jack_midi_event_t ev;
 
@@ -102,7 +102,7 @@ MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
 
 
 void
-MidiPort::cycle_end (nframes_t /*nframes*/)
+MidiPort::cycle_end (pframes_t /*nframes*/)
 {
 	_has_been_mixed_down = false;
 }
@@ -114,7 +114,7 @@ MidiPort::cycle_split ()
 }
 
 void
-MidiPort::flush_buffers (nframes_t nframes, framepos_t time, nframes_t offset)
+MidiPort::flush_buffers (pframes_t nframes, framepos_t time, framecnt_t offset)
 {
 	if (sends_output ()) {
 
@@ -133,7 +133,7 @@ MidiPort::flush_buffers (nframes_t nframes, framepos_t time, nframes_t offset)
 		_resolve_in_process = false;
 
 		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
-			const Evoral::Event<nframes_t>& ev = *i;
+			const Evoral::Event<framepos_t>& ev = *i;
 
 			// event times are in frames, relative to cycle start
 
@@ -157,8 +157,8 @@ MidiPort::transport_stopped ()
 }
 
 size_t
-MidiPort::raw_buffer_size (nframes_t nframes) const
+MidiPort::raw_buffer_size (pframes_t nframes) const
 {
-	return jack_midi_max_event_size(jack_port_get_buffer(_jack_port, nframes));
+	return jack_midi_max_event_size (jack_port_get_buffer (_jack_port, nframes));
 }
 

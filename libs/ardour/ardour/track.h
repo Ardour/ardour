@@ -48,13 +48,13 @@ class Track : public Route, public PublicDiskstream
 	virtual bool can_use_mode (TrackMode /*m*/, bool& /*bounce_required*/) { return false; }
 	PBD::Signal0<void> TrackModeChanged;
 
-	virtual int no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			bool state_changing, bool can_record, bool rec_monitors_input);
 
-	int silent_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	int silent_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
                          bool can_record, bool rec_monitors_input, bool& need_butler);
 
-	virtual int roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	virtual int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
                           int declick, bool can_record, bool rec_monitors_input, bool& need_butler) = 0;
 
         bool needs_butler() const { return _needs_butler; }
@@ -67,8 +67,8 @@ class Track : public Route, public PublicDiskstream
         virtual void use_new_diskstream () = 0;
         virtual void set_diskstream (boost::shared_ptr<Diskstream>);
 
-	nframes_t update_total_latency();
-	void           set_latency_delay (nframes_t);
+	framecnt_t update_total_latency();
+	void set_latency_delay (framecnt_t);
 
 	enum FreezeState {
 		NoFreeze,
@@ -82,7 +82,7 @@ class Track : public Route, public PublicDiskstream
 	virtual void unfreeze () = 0;
 
 	virtual boost::shared_ptr<Region> bounce (InterThreadInfo&) = 0;
-	virtual boost::shared_ptr<Region> bounce_range (nframes_t start, nframes_t end, InterThreadInfo&, bool enable_processing = true) = 0;
+	virtual boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, bool enable_processing = true) = 0;
 
 	XMLNode&    get_state();
 	XMLNode&    get_template();
@@ -97,7 +97,7 @@ class Track : public Route, public PublicDiskstream
 	/* XXX: unfortunate that this is exposed */
 	PBD::ID const & diskstream_id () const;
 
-	void set_block_size (nframes_t);
+	void set_block_size (pframes_t);
 
 	/* PublicDiskstream interface */
 	boost::shared_ptr<Playlist> playlist ();

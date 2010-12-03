@@ -31,7 +31,7 @@ class Interleaver
 	~Interleaver() { reset(); }
 	
 	/// Inits the interleaver. Must be called before using. \n Not RT safe
-	void init (unsigned int num_channels, nframes_t max_frames_per_channel)
+	void init (unsigned int num_channels, framecnt_t max_frames_per_channel)
 	{
 		reset();
 		channels = num_channels;
@@ -78,11 +78,11 @@ class Interleaver
 		
 		using Sink<T>::process;
 		
-		nframes_t frames() { return frames_written; }
+		framecnt_t frames() { return frames_written; }
 		void reset() { frames_written = 0; }
 		
 	  private:
-		nframes_t frames_written;
+		framecnt_t frames_written;
 		Interleaver & parent;
 		unsigned int channel;
 	};
@@ -115,7 +115,7 @@ class Interleaver
 			buffer[channel + (channels * i)] = c.data()[i];
 		}
 		
-		nframes_t const ready_frames = ready_to_output();
+		framecnt_t const ready_frames = ready_to_output();
 		if (ready_frames) {
 			ProcessContext<T> c_out (c, buffer, ready_frames, channels);
 			ListedSource<T>::output (c_out);
@@ -123,13 +123,13 @@ class Interleaver
 		}
 	}
 
-	nframes_t ready_to_output()
+	framecnt_t ready_to_output()
 	{
-		nframes_t ready_frames = inputs[0]->frames();
+		framecnt_t ready_frames = inputs[0]->frames();
 		if (!ready_frames) { return 0; }
 
 		for (unsigned int i = 1; i < channels; ++i) {
-			nframes_t const frames = inputs[i]->frames();
+			framecnt_t const frames = inputs[i]->frames();
 			if (!frames) { return 0; }
 			if (throw_level (ThrowProcess) && frames != ready_frames) {
 				init (channels, max_frames);
@@ -143,7 +143,7 @@ class Interleaver
 	std::vector<InputPtr> inputs;
 	
 	unsigned int channels;
-	nframes_t max_frames;
+	framecnt_t max_frames;
 	T * buffer;
 };
 

@@ -52,8 +52,8 @@ MarkerView::MarkerView(ArdourCanvas::Group *parent,
 		       Gdk::Color& basic_color,
 		       std::string mark_type,
 		       std::string mark_id,
-		       nframes_t start,
-		       nframes_t duration)
+		       framepos_t start,
+		       framecnt_t duration)
   : TimeAxisViewItem(mark_id, *parent,*tv,spu,basic_color,start,duration)
 {
 	mark_type_text = mark_type ;

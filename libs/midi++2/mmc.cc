@@ -649,19 +649,19 @@ MachineControl::send (MachineControlCommand const & c)
 }
 
 void
-MachineControl::spp_start (Parser& parser, nframes_t timestamp)
+MachineControl::spp_start (Parser& parser, framecnt_t timestamp)
 {
 	SPPStart (parser, timestamp); /* EMIT SIGNAL */
 }
 
 void
-MachineControl::spp_continue (Parser& parser, nframes_t timestamp)
+MachineControl::spp_continue (Parser& parser, framecnt_t timestamp)
 {
 	SPPContinue (parser, timestamp); /* EMIT SIGNAL */
 }
 
 void
-MachineControl::spp_stop (Parser& parser, nframes_t timestamp)
+MachineControl::spp_stop (Parser& parser, framecnt_t timestamp)
 {
 	SPPStop (parser, timestamp); /* EMIT SIGNAL */
 }

@@ -45,7 +45,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-nframes_t Automatable::_automation_interval = 0;
+framecnt_t Automatable::_automation_interval = 0;
 
 Automatable::Automatable(Session& session)
 	: _a_session(session)
@@ -387,7 +387,7 @@ Automatable::protect_automation ()
 }
 
 void
-Automatable::automation_snapshot (nframes_t now, bool force)
+Automatable::automation_snapshot (framepos_t now, bool force)
 {
 	if (force || _last_automation_snapshot > now || (now - _last_automation_snapshot) > _automation_interval) {
 

@@ -62,7 +62,7 @@ class IOProcessor : public Processor
 	void set_input (boost::shared_ptr<IO>);
 	void set_output (boost::shared_ptr<IO>);
 
-	void silence (nframes_t nframes);
+	void silence (framecnt_t nframes);
 	void disconnect ();
 
 	virtual bool feeds (boost::shared_ptr<Route> other) const;

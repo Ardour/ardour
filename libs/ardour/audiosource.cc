@@ -238,7 +238,7 @@ AudioSource::initialize_peakfile (bool newfile, string audio_path)
 
 		/* we found it in the peaks dir, so check it out */
 
-		if (statbuf.st_size == 0 || ((nframes_t) statbuf.st_size < ((length(_timeline_position) / _FPP) * sizeof (PeakData)))) {
+		if (statbuf.st_size == 0 || ((framecnt_t) statbuf.st_size < ((length(_timeline_position) / _FPP) * sizeof (PeakData)))) {
 			// empty
 			_peaks_built = false;
 		} else {
@@ -938,7 +938,7 @@ AudioSource::available_peaks (double zoom_factor) const
 }
 
 void
-AudioSource::dec_read_data_count (nframes_t cnt)
+AudioSource::dec_read_data_count (framecnt_t cnt)
 {
         uint32_t val = cnt * sizeof (Sample);
 

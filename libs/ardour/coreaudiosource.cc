@@ -92,7 +92,7 @@ CoreAudioSource::~CoreAudioSource ()
 }
 
 int
-CoreAudioSource::safe_read (Sample* dst, nframes_t start, framecnt_t cnt, AudioBufferList& abl) const
+CoreAudioSource::safe_read (Sample* dst, framepos_t start, framecnt_t cnt, AudioBufferList& abl) const
 {
 	framecnt_t nread = 0;
 

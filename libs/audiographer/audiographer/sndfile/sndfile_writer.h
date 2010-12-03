@@ -27,7 +27,7 @@ class SndfileWriter
   , public FlagDebuggable<>
 {
   public:
-	SndfileWriter (std::string const & path, int format, ChannelCount channels, nframes_t samplerate, boost::shared_ptr<BroadcastInfo> broadcast_info)
+	SndfileWriter (std::string const & path, int format, ChannelCount channels, framecnt_t samplerate, boost::shared_ptr<BroadcastInfo> broadcast_info)
 	  : SndfileHandle (path, Write, format, channels, samplerate)
 	  , path (path)
 	{
@@ -54,7 +54,7 @@ class SndfileWriter
 				% c.channels() % channels()));
 		}
 		
-		nframes_t written = write (c.data(), c.frames());
+		framecnt_t const written = write (c.data(), c.frames());
 		if (throw_level (ThrowProcess) && written != c.frames()) {
 			throw Exception (*this, boost::str (boost::format
 				("Could not write data to output file (%1%)")

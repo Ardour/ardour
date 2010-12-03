@@ -44,7 +44,7 @@ class Tempo {
 
 	double beats_per_minute () const { return _beats_per_minute;}
 	double note_type () const { return _note_type;}
-	double frames_per_beat (nframes_t sr, const Meter& meter) const;
+	double frames_per_beat (framecnt_t sr, const Meter& meter) const;
 
   protected:
 	double _beats_per_minute;
@@ -61,7 +61,7 @@ class Meter {
 	double beats_per_bar () const { return _beats_per_bar; }
 	double note_divisor() const { return _note_type; }
 
-	double frames_per_bar (const Tempo&, nframes_t sr) const;
+	double frames_per_bar (const Tempo&, framecnt_t sr) const;
 
   protected:
 	/** The number of beats in a bar.  This is a real value because
@@ -168,7 +168,7 @@ class TempoMetric {
 class TempoMap : public PBD::StatefulDestructible
 {
   public:
-	TempoMap (nframes_t frame_rate);
+	TempoMap (framecnt_t frame_rate);
 	~TempoMap();
 
 	/* measure-based stuff */
@@ -258,15 +258,15 @@ class TempoMap : public PBD::StatefulDestructible
 	int n_tempos () const;
 	int n_meters () const;
 
-	nframes_t frame_rate () const { return _frame_rate; }
+	framecnt_t frame_rate () const { return _frame_rate; }
 
   private:
 	static Tempo    _default_tempo;
 	static Meter    _default_meter;
 
 	Metrics*             metrics;
-	nframes_t           _frame_rate;
-	framepos_t          last_bbt_when;
+	framecnt_t          _frame_rate;
+	framepos_t           last_bbt_when;
 	bool                 last_bbt_valid;
 	BBT_Time             last_bbt;
 	mutable Glib::RWLock lock;

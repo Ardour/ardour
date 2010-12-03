@@ -29,7 +29,7 @@ SlaveSessionProxy::tempo_map() const
 	return session.tempo_map();
 }
 
-nframes_t
+framecnt_t
 SlaveSessionProxy::frame_rate() const
 {
 	return session.frame_rate();
@@ -47,7 +47,7 @@ SlaveSessionProxy::transport_frame() const
 	return session.transport_frame();
 }
 
-nframes_t
+pframes_t
 SlaveSessionProxy::frames_since_cycle_start() const
 {
 	return session.engine().frames_since_cycle_start();

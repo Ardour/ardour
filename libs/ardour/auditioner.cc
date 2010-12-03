@@ -193,7 +193,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	length = the_region->length();
 
 	int dir;
-	nframes_t offset = the_region->sync_offset (dir);
+	framecnt_t offset = the_region->sync_offset (dir);
 
 	/* can't audition from a negative sync point */
 
@@ -208,10 +208,10 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 }
 
 int
-Auditioner::play_audition (nframes_t nframes)
+Auditioner::play_audition (framecnt_t nframes)
 {
 	bool need_butler = false;
-	nframes_t this_nframes;
+	framecnt_t this_nframes;
 	int ret;
 
 	if (g_atomic_int_get (&_auditioning) == 0) {

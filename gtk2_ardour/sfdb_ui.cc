@@ -268,7 +268,7 @@ SoundFileBox::setup_labels (const string& filename)
 		samplerate.set_name ("NewSessionSR2Label");
 	}
 
-	nframes_t const nfr = _session ? _session->nominal_frame_rate() : 25;
+	framecnt_t const nfr = _session ? _session->nominal_frame_rate() : 25;
 	double src_coef = (double) nfr / sf_info.samplerate;
 
 	length_clock.set (sf_info.length * src_coef + 0.5, true);
@@ -1128,7 +1128,7 @@ SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& 
 				}
 			}
 
-			if ((nframes_t) info.samplerate != _session->frame_rate()) {
+			if (info.samplerate != _session->frame_rate()) {
 				src_needed = true;
 			}
 

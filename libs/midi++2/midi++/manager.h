@@ -39,14 +39,14 @@ class Manager {
 	 * This MUST be called before any reading/writing for this cycle.
 	 * Realtime safe.
 	 */
-	void cycle_start(nframes_t nframes);
+	void cycle_start (pframes_t nframes);
 	
 	/** Signal the end of an audio cycle.
 	 * This signifies that the cycle began with @ref cycle_start has ended.
 	 * This MUST be called at the end of each cycle.
 	 * Realtime safe.
 	 */
-	void cycle_end();
+	void cycle_end ();
 
 	MachineControl* mmc () const { return _mmc; }
 	Port *mtc_input_port() const { return _mtc_input_port; }

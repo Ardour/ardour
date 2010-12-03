@@ -421,14 +421,14 @@ AudioDiskstream::prepare_record_status(framepos_t capture_start_frame)
 }
 
 int
-AudioDiskstream::process (framepos_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler)
+AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler)
 {
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	ChannelList::iterator chan;
 	int ret = -1;
-	nframes_t rec_offset = 0;
-	nframes_t rec_nframes = 0;
+	framecnt_t rec_offset = 0;
+	framecnt_t rec_nframes = 0;
 	bool collect_playback = false;
 
         playback_distance = 0;
@@ -519,7 +519,7 @@ AudioDiskstream::process (framepos_t transport_frame, nframes_t nframes, bool ca
 
 			} else {
 
-				nframes_t total = chaninfo->capture_vector.len[0] + chaninfo->capture_vector.len[1];
+				framecnt_t total = chaninfo->capture_vector.len[0] + chaninfo->capture_vector.len[1];
 
 				if (rec_nframes > total) {
 					DiskOverrun ();
@@ -530,7 +530,7 @@ AudioDiskstream::process (framepos_t transport_frame, nframes_t nframes, bool ca
 				assert(ap);
 
 				Sample* buf = ap->get_audio_buffer(nframes).data();
-				nframes_t first = chaninfo->capture_vector.len[0];
+				framecnt_t first = chaninfo->capture_vector.len[0];
 
 				memcpy (chaninfo->capture_wrap_buffer, buf, sizeof (Sample) * first);
 				memcpy (chaninfo->capture_vector.buf[0], buf, sizeof (Sample) * first);
@@ -593,12 +593,12 @@ AudioDiskstream::process (framepos_t transport_frame, nframes_t nframes, bool ca
 
 		/* we're doing playback */
 
-		nframes_t necessary_samples;
+		framecnt_t necessary_samples;
 
 		/* no varispeed playback if we're recording, because the output .... TBD */
 
 		if (rec_nframes == 0 && _actual_speed != 1.0f) {
-			necessary_samples = (nframes_t) floor ((nframes * fabs (_actual_speed))) + 1;
+			necessary_samples = (framecnt_t) floor ((nframes * fabs (_actual_speed))) + 1;
 		} else {
 			necessary_samples = nframes;
 		}
@@ -618,7 +618,7 @@ AudioDiskstream::process (framepos_t transport_frame, nframes_t nframes, bool ca
 				chaninfo->current_playback_buffer = chaninfo->playback_vector.buf[0];
 
 			} else {
-				nframes_t total = chaninfo->playback_vector.len[0] + chaninfo->playback_vector.len[1];
+				framecnt_t total = chaninfo->playback_vector.len[0] + chaninfo->playback_vector.len[1];
 
 				if (necessary_samples > total) {
 					cerr << _name << " Need " << necessary_samples << " total = " << total << endl;
@@ -662,7 +662,7 @@ AudioDiskstream::process (framepos_t transport_frame, nframes_t nframes, bool ca
 }
 
 void
-AudioDiskstream::process_varispeed_playback(nframes_t nframes, boost::shared_ptr<ChannelList> c)
+AudioDiskstream::process_varispeed_playback (pframes_t nframes, boost::shared_ptr<ChannelList> c)
 {
 	ChannelList::iterator chan;
 
@@ -680,7 +680,7 @@ AudioDiskstream::process_varispeed_playback(nframes_t nframes, boost::shared_ptr
 }
 
 bool
-AudioDiskstream::commit (nframes_t /* nframes */)
+AudioDiskstream::commit (framecnt_t /* nframes */)
 {
 	bool need_butler = false;
 
@@ -750,7 +750,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 	overwrite_queued = false;
 
 	/* assume all are the same size */
-	nframes_t size = c->front()->playback_buf->bufsize();
+	framecnt_t size = c->front()->playback_buf->bufsize();
 
 	mixdown_buffer = new Sample[size];
 	gain_buffer = new float[size];
@@ -764,7 +764,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
 		start = overwrite_frame;
-		nframes_t cnt = size;
+		framecnt_t cnt = size;
 
 		/* to fill the buffer without resetting the playback sample, we need to
 		   do it one or two chunks (normally two).
@@ -777,7 +777,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 
 		*/
 
-		nframes_t to_read = size - overwrite_offset;
+		framecnt_t to_read = size - overwrite_offset;
 
 		if (read ((*chan)->playback_buf->buffer() + overwrite_offset, mixdown_buffer, gain_buffer, start, to_read, *chan, n, reversed)) {
 			error << string_compose(_("AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"),
@@ -874,14 +874,14 @@ AudioDiskstream::internal_playback_seek (framecnt_t distance)
 
 int
 AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
-                       framepos_t& start, nframes_t cnt,
+                       framepos_t& start, framecnt_t cnt,
 		       ChannelInfo* /*channel_info*/, int channel, bool reversed)
 {
-	nframes_t this_read = 0;
+	framecnt_t this_read = 0;
 	bool reloop = false;
 	framepos_t loop_end = 0;
 	framepos_t loop_start = 0;
-	nframes_t offset = 0;
+	framecnt_t offset = 0;
 	Location *loc = 0;
 
 	/* XXX we don't currently play loops in reverse. not sure why */
@@ -988,15 +988,15 @@ int
 AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 {
 	int32_t ret = 0;
-	nframes_t to_read;
+	framecnt_t to_read;
 	RingBufferNPT<Sample>::rw_vector vector;
 	bool reversed = (_visible_speed * _session.transport_speed()) < 0.0f;
-	nframes_t total_space;
-	nframes_t zero_fill;
+	framecnt_t total_space;
+	framecnt_t zero_fill;
 	uint32_t chan_n;
 	ChannelList::iterator i;
 	boost::shared_ptr<ChannelList> c = channels.reader();
-	nframes_t ts;
+	framecnt_t ts;
 
 	if (c->empty()) {
 		return 0;
@@ -1121,7 +1121,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 		ChannelInfo* chan (*i);
 		Sample* buf1;
 		Sample* buf2;
-		nframes_t len1, len2;
+		framecnt_t len1, len2;
 
 		chan->playback_buf->get_write_vector (&vector);
 
@@ -1216,7 +1216,7 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	int32_t ret = 0;
 	RingBufferNPT<Sample>::rw_vector vector;
 	RingBufferNPT<CaptureTransition>::rw_vector transvec;
-	nframes_t total;
+	framecnt_t total;
 
 	_write_data_count = 0;
 
@@ -1251,7 +1251,7 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 			ret = 1;
 		}
 
-		to_write = min (disk_io_chunk_frames, (nframes_t) vector.len[0]);
+		to_write = min (disk_io_chunk_frames, (framecnt_t) vector.len[0]);
 
 		// check the transition buffer when recording destructive
 		// important that we get this after the capture buf
@@ -1321,7 +1321,7 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 			   of vector.len[1] to be flushed to disk as well.
 			*/
 
-			to_write = min ((nframes_t)(disk_io_chunk_frames - to_write), (nframes_t) vector.len[1]);
+			to_write = min ((framecnt_t)(disk_io_chunk_frames - to_write), (framecnt_t) vector.len[1]);
 
 			if ((*chan)->write_source->write (vector.buf[1], to_write) != to_write) {
 				error << string_compose(_("AudioDiskstream %1: cannot write to disk"), _id) << endmsg;
@@ -1346,7 +1346,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 	bool more_work = true;
 	int err = 0;
 	boost::shared_ptr<AudioRegion> region;
-	nframes_t total_capture;
+	framecnt_t total_capture;
 	SourceList srcs;
 	SourceList::iterator src;
 	ChannelList::iterator chan;
@@ -2002,7 +2002,7 @@ AudioDiskstream::rename_write_sources ()
 }
 
 void
-AudioDiskstream::set_block_size (nframes_t /*nframes*/)
+AudioDiskstream::set_block_size (pframes_t /*nframes*/)
 {
 	if (_session.get_block_size() > speed_buffer_size) {
 		speed_buffer_size = _session.get_block_size();
@@ -2026,7 +2026,7 @@ AudioDiskstream::allocate_temporary_buffers ()
 	*/
 
 	double const sp = max (fabsf (_actual_speed), 1.2f);
-	nframes_t required_wrap_size = (nframes_t) floor (_session.get_block_size() * sp) + 1;
+	framecnt_t required_wrap_size = (framecnt_t) floor (_session.get_block_size() * sp) + 1;
 
 	if (required_wrap_size > wrap_buffer_size) {
 
@@ -2350,7 +2350,7 @@ AudioDiskstream::adjust_capture_buffering ()
         }
 }
 
-AudioDiskstream::ChannelInfo::ChannelInfo (nframes_t playback_bufsize, nframes_t capture_bufsize, nframes_t speed_size, nframes_t wrap_size)
+AudioDiskstream::ChannelInfo::ChannelInfo (framecnt_t playback_bufsize, framecnt_t capture_bufsize, framecnt_t speed_size, framecnt_t wrap_size)
 {
 	peak_power = 0.0f;
 	source = 0;
@@ -2378,7 +2378,7 @@ AudioDiskstream::ChannelInfo::ChannelInfo (nframes_t playback_bufsize, nframes_t
 }
 
 void
-AudioDiskstream::ChannelInfo::resize_playback (nframes_t playback_bufsize)
+AudioDiskstream::ChannelInfo::resize_playback (framecnt_t playback_bufsize)
 {
         delete playback_buf;
 	playback_buf = new RingBufferNPT<Sample> (playback_bufsize);
@@ -2386,7 +2386,7 @@ AudioDiskstream::ChannelInfo::resize_playback (nframes_t playback_bufsize)
 }
 
 void
-AudioDiskstream::ChannelInfo::resize_capture (nframes_t capture_bufsize)
+AudioDiskstream::ChannelInfo::resize_capture (framecnt_t capture_bufsize)
 {
         delete capture_buf;
 

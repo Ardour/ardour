@@ -46,7 +46,7 @@ using namespace Gtkmm2ext;
 PBD::Signal1<void,Marker*> Marker::CatchDeletion;
 
 Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Group& line_parent, guint32 rgba, const string& annotation,
-		Type type, nframes_t frame, bool handle_events)
+		Type type, framepos_t frame, bool handle_events)
 
 	: editor (ed)
 	, _parent (&parent)

@@ -297,8 +297,8 @@ AudioRegion::set_envelope_active (bool yn)
 	}
 }
 
-ARDOUR::nframes_t
-AudioRegion::read_peaks (PeakData *buf, nframes_t npeaks, nframes_t offset, nframes_t cnt, uint32_t chan_n, double samples_per_unit) const
+ARDOUR::framecnt_t
+AudioRegion::read_peaks (PeakData *buf, framecnt_t npeaks, framecnt_t offset, framecnt_t cnt, uint32_t chan_n, double samples_per_unit) const
 {
 	if (chan_n >= _sources.size()) {
 		return 0;
@@ -308,7 +308,7 @@ AudioRegion::read_peaks (PeakData *buf, nframes_t npeaks, nframes_t offset, nfra
 		return 0;
 	} else {
 		if (_scale_amplitude != 1.0f) {
-			for (nframes_t n = 0; n < npeaks; ++n) {
+			for (framecnt_t n = 0; n < npeaks; ++n) {
 				buf[n].max *= _scale_amplitude;
 				buf[n].min *= _scale_amplitude;
 			}
@@ -438,20 +438,19 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 
 		if (_fade_in_active && _session.config.get_use_region_fades()) {
 
-			nframes_t fade_in_length = (nframes_t) _fade_in->back()->when;
+			framecnt_t fade_in_length = (framecnt_t) _fade_in->back()->when;
 
 			/* see if this read is within the fade in */
 
 			if (internal_offset < fade_in_length) {
 
-				nframes_t fi_limit;
+				framecnt_t fi_limit;
 
 				fi_limit = min (to_read, fade_in_length - internal_offset);
 
-
 				_fade_in->curve().get_vector (internal_offset, internal_offset+fi_limit, gain_buffer, fi_limit);
 
-				for (nframes_t n = 0; n < fi_limit; ++n) {
+				for (framecnt_t n = 0; n < fi_limit; ++n) {
 					mixdown_buffer[n] *= gain_buffer[n];
 				}
 			}
@@ -480,20 +479,20 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 		*/
 
 
-			nframes_t fade_out_length = (nframes_t) _fade_out->back()->when;
-			nframes_t fade_interval_start = max(internal_offset, limit-fade_out_length);
-			nframes_t fade_interval_end   = min(internal_offset + to_read, limit);
+			framecnt_t fade_out_length = (framecnt_t) _fade_out->back()->when;
+			framecnt_t fade_interval_start = max(internal_offset, limit-fade_out_length);
+			framecnt_t fade_interval_end   = min(internal_offset + to_read, limit);
 
 			if (fade_interval_end > fade_interval_start) {
 				/* (part of the) the fade out is  in this buffer */
 
-				nframes_t fo_limit = fade_interval_end - fade_interval_start;
-				nframes_t curve_offset = fade_interval_start - (limit-fade_out_length);
-				nframes_t fade_offset = fade_interval_start - internal_offset;
+				framecnt_t fo_limit = fade_interval_end - fade_interval_start;
+				framecnt_t curve_offset = fade_interval_start - (limit-fade_out_length);
+				framecnt_t fade_offset = fade_interval_start - internal_offset;
 
 				_fade_out->curve().get_vector (curve_offset, curve_offset+fo_limit, gain_buffer, fo_limit);
 
-				for (nframes_t n = 0, m = fade_offset; n < fo_limit; ++n, ++m) {
+				for (framecnt_t n = 0, m = fade_offset; n < fo_limit; ++n, ++m) {
 					mixdown_buffer[m] *= gain_buffer[n];
 				}
 			}
@@ -507,11 +506,11 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 		_envelope->curve().get_vector (internal_offset, internal_offset + to_read, gain_buffer, to_read);
 
 		if ((rops & ReadOpsOwnScaling) && _scale_amplitude != 1.0f) {
-			for (nframes_t n = 0; n < to_read; ++n) {
+			for (framecnt_t n = 0; n < to_read; ++n) {
 				mixdown_buffer[n] *= gain_buffer[n] * _scale_amplitude;
 			}
 		} else {
-			for (nframes_t n = 0; n < to_read; ++n) {
+			for (framecnt_t n = 0; n < to_read; ++n) {
 				mixdown_buffer[n] *= gain_buffer[n];
 			}
 		}
@@ -520,7 +519,7 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 		// XXX this should be using what in 2.0 would have been:
 		// Session::apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
 
-		for (nframes_t n = 0; n < to_read; ++n) {
+		for (framecnt_t n = 0; n < to_read; ++n) {
 			mixdown_buffer[n] *= _scale_amplitude;
 		}
 	}
@@ -532,7 +531,7 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 
 		buf += buf_offset;
 
-		for (nframes_t n = 0; n < to_read; ++n) {
+		for (framecnt_t n = 0; n < to_read; ++n) {
 			buf[n] += mixdown_buffer[n];
 		}
 	}
@@ -713,13 +712,13 @@ AudioRegion::set_state (const XMLNode& node, int version)
 void
 AudioRegion::set_fade_in_shape (FadeShape shape)
 {
-	set_fade_in (shape, (nframes_t) _fade_in->back()->when);
+	set_fade_in (shape, (framecnt_t) _fade_in->back()->when);
 }
 
 void
 AudioRegion::set_fade_out_shape (FadeShape shape)
 {
-	set_fade_out (shape, (nframes_t) _fade_out->back()->when);
+	set_fade_out (shape, (framecnt_t) _fade_out->back()->when);
 }
 
 void
@@ -1063,8 +1062,8 @@ int
 AudioRegion::exportme (Session& /*session*/, ARDOUR::ExportSpecification& /*spec*/)
 {
 	// TODO EXPORT
-//	const nframes_t blocksize = 4096;
-//	nframes_t to_read;
+//	const framecnt_t blocksize = 4096;
+//	framecnt_t to_read;
 //	int status = -1;
 //
 //	spec.channels = _sources.size();
@@ -1099,7 +1098,7 @@ AudioRegion::exportme (Session& /*session*/, ARDOUR::ExportSpecification& /*spec
 //					goto out;
 //				}
 //
-//				for (nframes_t x = 0; x < to_read; ++x) {
+//				for (framecnt_t x = 0; x < to_read; ++x) {
 //					spec.dataF[chan+(x*spec.channels)] = buf[x];
 //				}
 //			}

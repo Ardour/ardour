@@ -468,7 +468,7 @@ void
 RegionView::region_sync_changed ()
 {
 	int sync_dir;
-	nframes_t sync_offset;
+	framecnt_t sync_offset;
 
 	sync_offset = _region->sync_offset (sync_dir);
 
@@ -595,7 +595,7 @@ RegionView::set_height (double h)
 	if (sync_line) {
 		Points points;
 		int sync_dir;
-		nframes_t sync_offset;
+		framecnt_t sync_offset;
 		sync_offset = _region->sync_offset (sync_dir);
 		double offset = sync_offset / samples_per_unit;
 
@@ -631,9 +631,9 @@ RegionView::update_coverage_frames (LayerDisplay d)
 		return;
 	}
 
-	nframes_t const position = _region->first_frame ();
-	nframes_t t = position;
-	nframes_t const end = _region->last_frame ();
+	framepos_t const position = _region->first_frame ();
+	framepos_t t = position;
+	framepos_t const end = _region->last_frame ();
 
 	ArdourCanvas::SimpleRect* cr = 0;
 	bool me = false;

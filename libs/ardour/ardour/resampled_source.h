@@ -30,16 +30,16 @@ namespace ARDOUR {
 class ResampledImportableSource : public ImportableSource
 {
   public:
-	ResampledImportableSource (boost::shared_ptr<ImportableSource>, nframes_t rate, SrcQuality);
+	ResampledImportableSource (boost::shared_ptr<ImportableSource>, framecnt_t rate, SrcQuality);
 
 	~ResampledImportableSource ();
 
-	nframes_t  read (Sample* buffer, nframes_t nframes);
+	framecnt_t read (Sample* buffer, framecnt_t nframes);
 	float      ratio() const { return src_data.src_ratio; }
 	uint32_t   channels() const { return source->channels(); }
 	framecnt_t length() const { return source->length(); }
-	nframes_t  samplerate() const { return source->samplerate(); }
-	void       seek (nframes_t);
+	framecnt_t samplerate() const { return source->samplerate(); }
+	void       seek (framecnt_t);
 	framepos_t natural_position() const;
 
 	bool clamped_at_unity () const {

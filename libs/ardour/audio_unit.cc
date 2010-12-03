@@ -758,7 +758,7 @@ AUPlugin::default_value (uint32_t port)
 	return 0;
 }
 
-nframes_t
+framecnt_t
 AUPlugin::signal_latency () const
 {
 	return unit->Latency() * _session.frame_rate();
@@ -858,7 +858,7 @@ AUPlugin::requires_fixed_size_buffers() const
 
 
 int
-AUPlugin::set_block_size (nframes_t nframes)
+AUPlugin::set_block_size (pframes_t nframes)
 {
 	bool was_initialized = initialized;
 	UInt32 numFrames = nframes;
@@ -1252,7 +1252,7 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 }
 
 int
-AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping, ChanMapping, nframes_t nframes, nframes_t offset)
+AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping, ChanMapping, pframes_t nframes, framecnt_t offset)
 {
 	AudioUnitRenderActionFlags flags = 0;
 	AudioTimeStamp ts;

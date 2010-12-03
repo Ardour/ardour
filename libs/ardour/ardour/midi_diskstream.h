@@ -124,7 +124,7 @@ class MidiDiskstream : public Diskstream
 
 	void set_pending_overwrite(bool);
 	int  overwrite_existing_buffers ();
-	void set_block_size (nframes_t);
+	void set_block_size (pframes_t);
 	int  internal_playback_seek (framecnt_t distance);
 	int  can_internal_playback_seek (framecnt_t distance);
 	int  rename_write_sources ();
@@ -133,7 +133,7 @@ class MidiDiskstream : public Diskstream
 	void non_realtime_input_change ();
 	void non_realtime_locate (framepos_t location);
 
-	static void set_readahead_frames(nframes_t frames_ahead) { midi_readahead = frames_ahead; }
+	static void set_readahead_frames (framecnt_t frames_ahead) { midi_readahead = frames_ahead; }
 
   protected:
 	int seek (framepos_t which_sample, bool complete_refill = false);
@@ -141,9 +141,9 @@ class MidiDiskstream : public Diskstream
   protected:
 	friend class MidiTrack;
 
-	int  process (framepos_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler);
-	bool commit  (nframes_t nframes);
-	static nframes_t midi_readahead;
+	int  process (framepos_t transport_frame, pframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler);
+	bool commit  (framecnt_t nframes);
+	static framecnt_t midi_readahead;
 
   private:
 
@@ -153,7 +153,7 @@ class MidiDiskstream : public Diskstream
 
 	int do_refill_with_alloc();
 
-	int read (framepos_t& start, nframes_t cnt, bool reversed);
+	int read (framepos_t& start, framecnt_t cnt, bool reversed);
 
 	void finish_capture (bool rec_monitors_input);
 	void transport_stopped_wallclock (struct tm&, time_t, bool abort);
@@ -181,11 +181,11 @@ class MidiDiskstream : public Diskstream
 	void engage_record_enable ();
 	void disengage_record_enable ();
 
-	MidiRingBuffer<nframes_t>*   _playback_buf;
-	MidiRingBuffer<nframes_t>*   _capture_buf;
+	MidiRingBuffer<framepos_t>*  _playback_buf;
+	MidiRingBuffer<framepos_t>*  _capture_buf;
 	MidiPort*                    _source_port;
 	boost::shared_ptr<SMFSource> _write_source;
-	nframes_t                    _last_flush_frame;
+	framepos_t                   _last_flush_frame;
 	NoteMode                     _note_mode;
 	volatile gint                _frames_written_to_ringbuffer;
 	volatile gint                _frames_read_from_ringbuffer;

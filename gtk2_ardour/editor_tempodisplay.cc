@@ -138,7 +138,7 @@ Editor::redisplay_tempo (bool immediate_redraw)
 }
 
 void
-Editor::compute_current_bbt_points (nframes_t leftmost, nframes_t rightmost)
+Editor::compute_current_bbt_points (framepos_t leftmost, framepos_t rightmost)
 {
 	if (!_session) {
 		return;

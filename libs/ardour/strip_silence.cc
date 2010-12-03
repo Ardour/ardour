@@ -35,7 +35,7 @@ using namespace ARDOUR;
  *  @param fade_length Length of fade in/out to apply to trimmed regions, in samples.
  */
 
-StripSilence::StripSilence (Session & s, double threshold, nframes_t minimum_length, nframes_t fade_length)
+StripSilence::StripSilence (Session & s, double threshold, framecnt_t minimum_length, framecnt_t fade_length)
 	: Filter (s), _threshold (threshold), _minimum_length (minimum_length), _fade_length (fade_length)
 {
 

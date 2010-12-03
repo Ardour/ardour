@@ -66,21 +66,21 @@ public:
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
 
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool);
+	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
 
 	/* supplemental method used with MIDI */
 
-	void flush_buffers (nframes_t nframes, framepos_t time);
+	void flush_buffers (framecnt_t nframes, framepos_t time);
 	void no_outs_cuz_we_no_monitor(bool);
-	void cycle_start (nframes_t);
-	void increment_output_offset (nframes_t);
+	void cycle_start (pframes_t);
+	void increment_output_offset (framecnt_t);
 	void transport_stopped (framepos_t frame);
 
 	BufferSet& output_buffers() { return *_output_buffers; }
 
 	PBD::Signal0<void> MuteChange;
 
-	static PBD::Signal1<void,nframes_t> CycleStart;
+	static PBD::Signal1<void, pframes_t> CycleStart;
 
 	XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
@@ -104,7 +104,7 @@ public:
 	Role        _role;
 	BufferSet*  _output_buffers;
 	gain_t      _current_gain;
-	nframes_t   _output_offset;
+	framecnt_t  _output_offset;
 	bool        _no_outs_cuz_we_no_monitor;
 	boost::shared_ptr<MuteMaster> _mute_master;
 	bool         no_panner_reset;

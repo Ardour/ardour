@@ -96,7 +96,7 @@ IO::~IO ()
 }
 
 void
-IO::silence (nframes_t nframes)
+IO::silence (framecnt_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
@@ -1133,7 +1133,7 @@ IO::set_name (const string& requested_name)
 }
 
 void
-IO::set_port_latency (nframes_t nframes)
+IO::set_port_latency (framecnt_t nframes)
 {
 	Glib::Mutex::Lock lm (io_lock);
 
@@ -1142,11 +1142,11 @@ IO::set_port_latency (nframes_t nframes)
 	}
 }
 
-nframes_t
+framecnt_t
 IO::latency () const
 {
-	nframes_t max_latency;
-	nframes_t latency;
+	framecnt_t max_latency;
+	framecnt_t latency;
 
 	max_latency = 0;
 
@@ -1521,7 +1521,7 @@ IO::connected_to (boost::shared_ptr<const IO> other) const
 }
 
 void
-IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, framepos_t end_frame, nframes_t nframes)
+IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
 {
 	BufferSet bufs;
 
@@ -1532,7 +1532,7 @@ IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, fr
 }
 
 void
-IO::collect_input (BufferSet& bufs, nframes_t nframes, ChanCount offset)
+IO::collect_input (BufferSet& bufs, pframes_t nframes, ChanCount offset)
 {
 	assert(bufs.available() >= _ports.count());
 
@@ -1560,7 +1560,7 @@ IO::collect_input (BufferSet& bufs, nframes_t nframes, ChanCount offset)
 }
 
 void
-IO::copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes, nframes_t offset)
+IO::copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, framecnt_t offset)
 {
 	// Copy any buffers 1:1 to outputs
 

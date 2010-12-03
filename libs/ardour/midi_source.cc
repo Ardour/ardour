@@ -196,9 +196,9 @@ MidiSource::invalidate ()
 }
 
 /** @param filtered A set of parameters whose MIDI messages will not be returned */
-nframes_t
-MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, framepos_t source_start,
-                       framepos_t start, nframes_t cnt,
+framecnt_t
+MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_start,
+                       framepos_t start, framecnt_t cnt,
                        MidiStateTracker* tracker,
 		       std::set<Evoral::Parameter> const & filtered) const
 {
@@ -255,11 +255,11 @@ MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, framepos_t source_star
  *  @param source Source to read from.
  *  @param source_start This source's start position in session frames.
  */
-nframes_t
-MidiSource::midi_write (MidiRingBuffer<nframes_t>& source, framepos_t source_start, nframes_t duration)
+framecnt_t
+MidiSource::midi_write (MidiRingBuffer<framepos_t>& source, framepos_t source_start, framecnt_t duration)
 {
 	Glib::Mutex::Lock lm (_lock);
-	const nframes_t ret = write_unlocked (source, source_start, duration);
+	const framecnt_t ret = write_unlocked (source, source_start, duration);
 	_last_write_end += duration;
 	return ret;
 }

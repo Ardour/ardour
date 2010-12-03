@@ -471,8 +471,8 @@ void
 PlugUIBase::set_latency_label ()
 {
 	char buf[64];
-	nframes_t l = insert->effective_latency ();
-	nframes_t sr = insert->session().frame_rate();
+	framecnt_t const l = insert->effective_latency ();
+	framecnt_t const sr = insert->session().frame_rate ();
 
 	if (l < sr / 1000) {
 		snprintf (buf, sizeof (buf), "latency (%d samples)", l);

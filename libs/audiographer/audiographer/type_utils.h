@@ -16,11 +16,11 @@ class TypeUtilsBase
   protected:
 	
 	template<typename T, bool b>
-	static void do_zero_fill(T * buffer, nframes_t frames, const boost::integral_constant<bool, b>&)
+	static void do_zero_fill(T * buffer, framecnt_t frames, const boost::integral_constant<bool, b>&)
 		{ std::uninitialized_fill_n (buffer, frames, T()); }
 
 	template<typename T>
-	static void do_zero_fill(T * buffer, nframes_t frames, const boost::true_type&)
+	static void do_zero_fill(T * buffer, framecnt_t frames, const boost::true_type&)
 		{ memset (buffer, 0, frames * sizeof(T)); }
 };
 
@@ -39,21 +39,21 @@ class TypeUtils : private TypeUtilsBase
 	  * if T is not a floating point or signed integer type
 	  * \n RT safe
 	  */
-	inline static void zero_fill (T * buffer, nframes_t frames)
+	inline static void zero_fill (T * buffer, framecnt_t frames)
 		{ do_zero_fill(buffer, frames, zero_fillable()); }
 	
 	/** Copies \a frames frames of data from \a source to \a destination
 	  * The source and destination may NOT overlap.
 	  * \n RT safe
 	  */
-	inline static void copy (T const * source, T * destination, nframes_t frames)
+	inline static void copy (T const * source, T * destination, framecnt_t frames)
 		{ std::uninitialized_copy (source, &source[frames], destination); }
 	
 	/** Moves \a frames frames of data from \a source to \a destination
 	  * The source and destination may overlap in any way.
 	  * \n RT safe
 	  */
-	inline static void move (T const * source, T * destination, nframes_t frames)
+	inline static void move (T const * source, T * destination, framecnt_t frames)
 	{
 		if (destination < source) {
 			std::copy (source, &source[frames], destination);

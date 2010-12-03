@@ -94,7 +94,7 @@ PlaylistFactory::create (boost::shared_ptr<const Playlist> old, string name, boo
 }
 
 boost::shared_ptr<Playlist>
-PlaylistFactory::create (boost::shared_ptr<const Playlist> old, nframes_t start, nframes_t cnt, string name, bool hidden)
+PlaylistFactory::create (boost::shared_ptr<const Playlist> old, framepos_t start, framecnt_t cnt, string name, bool hidden)
 {
 	boost::shared_ptr<Playlist> pl;
 	boost::shared_ptr<const AudioPlaylist> apl;

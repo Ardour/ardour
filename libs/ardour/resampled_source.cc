@@ -28,7 +28,7 @@ using namespace PBD;
 
 const uint32_t ResampledImportableSource::blocksize = 16384U;
 
-ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<ImportableSource> src, nframes_t rate, SrcQuality srcq)
+ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<ImportableSource> src, framecnt_t rate, SrcQuality srcq)
 	: source (src)
 	, src_state (0)
 {
@@ -65,8 +65,8 @@ ResampledImportableSource::~ResampledImportableSource ()
 	delete [] input;
 }
 
-nframes_t
-ResampledImportableSource::read (Sample* output, nframes_t nframes)
+framecnt_t
+ResampledImportableSource::read (Sample* output, framecnt_t nframes)
 {
 	int err;
 
@@ -78,7 +78,7 @@ ResampledImportableSource::read (Sample* output, nframes_t nframes)
 
 		/* The last read will not be a full buffer, so set end_of_input. */
 
-		if ((nframes_t) src_data.input_frames < blocksize) {
+		if ((framecnt_t) src_data.input_frames < blocksize) {
 			src_data.end_of_input = true;
 		}
 
@@ -91,7 +91,7 @@ ResampledImportableSource::read (Sample* output, nframes_t nframes)
 	if (!src_data.end_of_input) {
 		src_data.output_frames = nframes / source->channels();
 	} else {
-		src_data.output_frames = std::min ((nframes_t) src_data.input_frames, nframes / source->channels());
+		src_data.output_frames = std::min ((framecnt_t) src_data.input_frames, nframes / source->channels());
 	}
 
 	if ((err = src_process (src_state, &src_data))) {
@@ -112,7 +112,7 @@ ResampledImportableSource::read (Sample* output, nframes_t nframes)
 }
 
 void
-ResampledImportableSource::seek (nframes_t pos)
+ResampledImportableSource::seek (framepos_t pos)
 {
 	source->seek (pos);
 

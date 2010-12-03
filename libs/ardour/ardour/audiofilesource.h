@@ -82,7 +82,7 @@ public:
 	static bool is_empty (Session&, std::string path);
 
 	static void set_bwf_serial_number (int);
-	static void set_header_position_offset (nframes_t offset );
+	static void set_header_position_offset (framecnt_t offset);
 
 	static PBD::Signal0<void> HeaderPositionOffsetChanged;
 
@@ -104,7 +104,7 @@ protected:
 
 	int move_dependents_to_trash();
 
-	static Sample* get_interleave_buffer (nframes_t size);
+	static Sample* get_interleave_buffer (framecnt_t size);
 
 	static std::string peak_dir;
 

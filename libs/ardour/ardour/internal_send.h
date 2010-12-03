@@ -39,11 +39,11 @@ class InternalSend : public Send
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node, int version);
 	
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool);
+	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
 	bool feeds (boost::shared_ptr<Route> other) const;
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
-	int  set_block_size (nframes_t);
+	int  set_block_size (pframes_t);
 
 	boost::shared_ptr<Route> target_route() const { return _send_to; }
 	const PBD::ID& target_id() const { return _send_to_id; }

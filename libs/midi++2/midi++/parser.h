@@ -33,7 +33,7 @@ class Port;
 class Parser;
 
 typedef PBD::Signal1<void,Parser&>                   ZeroByteSignal;
-typedef PBD::Signal2<void,Parser&,nframes_t>         TimestampedSignal;
+typedef PBD::Signal2<void,Parser&,framecnt_t>        TimestampedSignal;
 typedef PBD::Signal2<void,Parser&, byte>             OneByteSignal;
 typedef PBD::Signal2<void,Parser &, EventTwoBytes *> TwoByteSignal;
 typedef PBD::Signal2<void,Parser &, pitchbend_t>     PitchBendSignal;
@@ -49,8 +49,8 @@ class Parser {
 	   therefore be set before every byte passed into ::scanner().
 	*/
 	
-	nframes_t get_timestamp() const { return _timestamp; }
-	void set_timestamp (const nframes_t timestamp) { _timestamp = timestamp; } 
+	framecnt_t get_timestamp() const { return _timestamp; }
+	void set_timestamp (const framecnt_t timestamp) { _timestamp = timestamp; } 
 
 	/* signals that anyone can connect to */
 	
@@ -124,10 +124,10 @@ class Parser {
 	const byte *mtc_current() const { return _mtc_time; }
 	bool        mtc_locked() const  { return _mtc_locked; }
 	
-	PBD::Signal3<void,Parser&,int,nframes_t>      mtc_qtr;
-	PBD::Signal3<void,const byte*,bool,nframes_t> mtc_time;
-	PBD::Signal1<void,MTC_Status>                 mtc_status;
-	PBD::Signal0<bool>                           mtc_skipped;
+	PBD::Signal3<void, Parser &, int, framecnt_t>      mtc_qtr;
+	PBD::Signal3<void, const byte *, bool, framecnt_t> mtc_time;
+	PBD::Signal1<void, MTC_Status>                     mtc_status;
+	PBD::Signal0<bool>                                 mtc_skipped;
 
 	void set_mtc_forwarding (bool yn) {
 		_mtc_forward = yn;
@@ -172,7 +172,7 @@ class Parser {
 	bool       _mtc_locked;
 	byte last_qtr_frame;
 	
-	nframes_t _timestamp;
+	framecnt_t _timestamp;
 
 	ParseState pre_variable_state;
 	MIDI::eventType pre_variable_msgtype;

@@ -41,8 +41,8 @@ public:
 		return _threshold.get_value ();
 	}
 
-        nframes_t minimum_length () const;
-        nframes_t fade_length () const;
+	ARDOUR::framecnt_t minimum_length () const;
+        ARDOUR::framecnt_t fade_length () const;
 
 private:
         typedef std::list<std::pair<ARDOUR::frameoffset_t,ARDOUR::framecnt_t> > SilenceResult;

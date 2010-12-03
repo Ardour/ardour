@@ -43,13 +43,13 @@ public:
 	MidiPlaylist (Session&, const XMLNode&, bool hidden = false);
 	MidiPlaylist (Session&, std::string name, bool hidden = false);
 	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, std::string name, bool hidden = false);
-	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, nframes_t start, nframes_t cnt,
+	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, framepos_t start, framecnt_t cnt,
 	              std::string name, bool hidden = false);
 
 	~MidiPlaylist ();
 
-	nframes_t read (MidiRingBuffer<nframes_t>& buf,
-			nframes_t start, nframes_t cnt, uint32_t chan_n=0);
+	framecnt_t read (MidiRingBuffer<framepos_t>& buf,
+			 framepos_t start, framecnt_t cnt, uint32_t chan_n = 0);
 
 	int set_state (const XMLNode&, int version);
 

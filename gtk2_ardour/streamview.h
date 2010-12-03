@@ -43,9 +43,9 @@ namespace ARDOUR {
 }
 
 struct RecBoxInfo {
-	ArdourCanvas::SimpleRect* rectangle;
-	nframes_t                 start;
-	nframes_t                 length;
+	ArdourCanvas::SimpleRect*  rectangle;
+	framepos_t                 start;
+	ARDOUR::framecnt_t         length;
 };
 
 class Selectable;
@@ -171,7 +171,7 @@ protected:
 	double height;
 
 	PBD::ScopedConnectionList rec_data_ready_connections;
-	nframes_t                 last_rec_data_frame;
+	framepos_t                last_rec_data_frame;
 
 	/* When recording, the session time at which a new layer must be created for the region
 	   being recorded, or max_framepos if not applicable.

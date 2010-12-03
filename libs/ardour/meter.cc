@@ -39,7 +39,7 @@ PBD::Signal0<void> Metering::Meter;
  * be set to 0.
  */
 void
-PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, nframes_t nframes, bool)
+PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t nframes, bool)
 {
 	if (!_active && !_pending_active) {
 		return;
@@ -54,7 +54,7 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 	for (uint32_t i = 0; i < n_midi; ++i, ++n) {
 		float val = 0.0f;
 		for (MidiBuffer::iterator e = bufs.get_midi(i).begin(); e != bufs.get_midi(i).end(); ++e) {
-			const Evoral::MIDIEvent<nframes_t> ev(*e, false);
+			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
 			if (ev.is_note_on()) {
 				const float this_vel = log(ev.buffer()[2] / 127.0 * (M_E*M_E-M_E) + M_E) - 1.0;
 				if (this_vel > val) {

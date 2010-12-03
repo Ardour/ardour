@@ -70,16 +70,16 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress*)
 	}
 
 	SourceList nsrcs;
-	nframes_t done;
+	framecnt_t done;
 	int ret = -1;
-	const nframes_t bufsize = 256;
+	const framecnt_t bufsize = 256;
 	gain_t* gain_buffer = 0;
 	Sample** buffers = 0;
 	char suffix[32];
 	string new_name;
 	string::size_type at;
-	nframes_t pos = 0;
-	int avail = 0;
+	framepos_t pos = 0;
+	framecnt_t avail = 0;
 	boost::shared_ptr<AudioRegion> result;
 	
 	cerr << "RBEffect: source region: position = " << region->position()
@@ -148,11 +148,11 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress*)
 	double stretch = region->stretch() * tsr.time_fraction;
 	double shift = region->shift() * tsr.pitch_fraction;
 
-	nframes_t read_start = region->ancestral_start() +
-		nframes_t(region->start() / (double)region->stretch());
+	framecnt_t read_start = region->ancestral_start() +
+		framecnt_t(region->start() / (double)region->stretch());
 
-	nframes_t read_duration =
-		nframes_t(region->length() / (double)region->stretch());
+	framecnt_t read_duration =
+		framecnt_t(region->length() / (double)region->stretch());
 
 	uint32_t channels = region->n_channels();
 
@@ -206,16 +206,16 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress*)
 	try {
 		while (pos < read_duration && !tsr.cancel) {
 
-			nframes_t this_read = 0;
+			framecnt_t this_read = 0;
 
 			for (uint32_t i = 0; i < channels; ++i) {
 
 				this_read = 0;
 
-				nframes_t this_time;
+				framepos_t this_time;
 				this_time = min(bufsize, read_duration - pos);
 
-				nframes_t this_position;
+				framepos_t this_position;
 				this_position = read_start + pos -
 					region->start() + region->position();
 
@@ -248,15 +248,15 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress*)
 
 		while (pos < read_duration && !tsr.cancel) {
 
-			nframes_t this_read = 0;
+			framecnt_t this_read = 0;
 
 			for (uint32_t i = 0; i < channels; ++i) {
 
 				this_read = 0;
-				nframes_t this_time;
+				framepos_t this_time;
 				this_time = min(bufsize, read_duration - pos);
 
-				nframes_t this_position;
+				framepos_t this_position;
 				this_position = read_start + pos -
 					region->start() + region->position();
 
@@ -283,11 +283,11 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress*)
 
 			stretcher.process(buffers, this_read, pos == read_duration);
 
-			int avail = 0;
+			framecnt_t avail = 0;
 
 			while ((avail = stretcher.available()) > 0) {
 
-				this_read = min(bufsize, uint32_t(avail));
+				this_read = min (bufsize, avail);
 
 				stretcher.retrieve(buffers, this_read);
 
@@ -308,7 +308,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress*)
 
 		while ((avail = stretcher.available()) >= 0) {
 
-			uint32_t this_read = min(bufsize, uint32_t(avail));
+			framecnt_t this_read = min (bufsize, avail);
 
 			stretcher.retrieve(buffers, this_read);
 

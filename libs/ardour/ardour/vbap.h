@@ -37,9 +37,9 @@ public:
 	static StreamPanner* factory (Panner& parent, Evoral::Parameter param, Speakers& s);
 	static std::string name;
 
-	void do_distribute (AudioBuffer&, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
+	void do_distribute (AudioBuffer&, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes);
 	void do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
-	                              nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
+	                              framepos_t start, framepos_t end, pframes_t nframes, pan_t** buffers);
 
 	void set_azimuth_elevation (double azimuth, double elevation);
 

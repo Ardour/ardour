@@ -38,7 +38,7 @@ using namespace PBD;
 Pool Click::pool ("click", sizeof (Click), 128);
 
 void
-Session::click (nframes_t start, nframes_t nframes)
+Session::click (framepos_t start, framecnt_t nframes)
 {
 	TempoMap::BBTPointList *points;
 	Sample *buf;
@@ -54,7 +54,7 @@ Session::click (nframes_t start, nframes_t nframes)
 		return;
 	}
 
-	const nframes_t end = start + nframes;
+	const framepos_t end = start + nframes;
 
 	BufferSet& bufs = get_scratch_buffers(ChanCount(DataType::AUDIO, 1));
 	buf = bufs.get_audio(0).data();
@@ -90,8 +90,8 @@ Session::click (nframes_t start, nframes_t nframes)
 
 	for (list<Click*>::iterator i = clicks.begin(); i != clicks.end(); ) {
 
-		nframes_t copy;
-		nframes_t internal_offset;
+		framecnt_t copy;
+		framecnt_t internal_offset;
 		Click *clk;
 		list<Click*>::iterator next;
 

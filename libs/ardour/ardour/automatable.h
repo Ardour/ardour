@@ -60,7 +60,7 @@ public:
 	virtual void add_control(boost::shared_ptr<Evoral::Control>);
 	void clear_controls ();
 
-	virtual void automation_snapshot(nframes_t now, bool force);
+	virtual void automation_snapshot (framepos_t now, bool force);
 	virtual void transport_stopped (framepos_t now);
 
 	virtual std::string describe_parameter(Evoral::Parameter param);
@@ -78,16 +78,16 @@ public:
 
 	void mark_automation_visible(Evoral::Parameter, bool);
 
-	inline bool should_snapshot (nframes_t now) {
+	inline bool should_snapshot (framepos_t now) {
 		return (_last_automation_snapshot > now
 				|| (now - _last_automation_snapshot) > _automation_interval);
 	}
 
-	static void set_automation_interval (jack_nframes_t frames) {
+	static void set_automation_interval (framecnt_t frames) {
 		_automation_interval = frames;
 	}
 
-	static jack_nframes_t automation_interval() {
+	static framecnt_t automation_interval() {
 		return _automation_interval;
 	}
 
@@ -109,8 +109,8 @@ public:
 	std::set<Evoral::Parameter> _visible_controls;
 	std::set<Evoral::Parameter> _can_automate_list;
 
-	nframes_t        _last_automation_snapshot;
-	static nframes_t _automation_interval;
+	framepos_t _last_automation_snapshot;
+	static framecnt_t _automation_interval;
 
 private:
 	PBD::ScopedConnectionList _control_connections; ///< connections to our controls' signals

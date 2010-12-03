@@ -33,11 +33,11 @@ class SndFileImportableSource : public ImportableSource {
 	SndFileImportableSource (const std::string& path);
 	virtual ~SndFileImportableSource();
 
-	nframes_t  read (Sample* buffer, nframes_t nframes);
+	framecnt_t read (Sample* buffer, framecnt_t nframes);
 	uint32_t   channels() const;
 	framecnt_t length() const;
-	nframes_t  samplerate() const;
-	void       seek (nframes_t pos);
+	framecnt_t samplerate() const;
+	void       seek (framecnt_t pos);
 	framepos_t natural_position() const;
 	bool       clamped_at_unity () const;
 

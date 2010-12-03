@@ -34,7 +34,7 @@ using namespace PBD;
  */
 template<typename T>
 size_t
-MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset)
+MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, framecnt_t offset)
 {
 	if (this->read_space() == 0) {
 		return 0;
@@ -97,7 +97,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		// This event marks a loop end (i.e. the next event's timestamp will be non-monotonic)
 		if (ev_type == LoopEventType) {
 			assert (ev_size == sizeof (framepos_t));
-			nframes_t loop_start;
+			framepos_t loop_start;
 			read_contents (ev_size, (uint8_t *) &loop_start);
 
 			loop_offset = ev_time - loop_start;
@@ -240,5 +240,5 @@ MidiRingBuffer<T>::dump(ostream& str)
 }
 
 
-template class MidiRingBuffer<nframes_t>;
+template class MidiRingBuffer<framepos_t>;
 

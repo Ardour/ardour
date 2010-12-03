@@ -257,7 +257,7 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path,
 
 boost::shared_ptr<Source>
 SourceFactory::createWritable (DataType type, Session& s, const std::string& path, const std::string& origin,
-			       bool destructive, nframes_t rate, bool announce, bool defer_peaks)
+			       bool destructive, framecnt_t rate, bool announce, bool defer_peaks)
 {
 	/* this might throw failed_constructor(), which is OK */
 

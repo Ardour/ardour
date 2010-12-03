@@ -38,7 +38,7 @@ ExportGraphBuilder::~ExportGraphBuilder ()
 }
 
 int
-ExportGraphBuilder::process (nframes_t frames, bool last_cycle)
+ExportGraphBuilder::process (framecnt_t frames, bool last_cycle)
 {
 	assert(frames <= process_buffer_frames);
 	
@@ -187,7 +187,7 @@ ExportGraphBuilder::Encoder::copy_files (std::string orig_path)
 
 /* SFC */
 
-ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &, FileSpec const & new_config, nframes_t max_frames)
+ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &, FileSpec const & new_config, framecnt_t max_frames)
   : data_width(0)
 {
 	config = new_config;
@@ -252,7 +252,7 @@ ExportGraphBuilder::SFC::operator== (FileSpec const & other_config) const
 
 /* Normalizer */
 
-ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, nframes_t /*max_frames*/)
+ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t /*max_frames*/)
   : parent (parent)
 {
 	config = new_config;
@@ -306,7 +306,7 @@ ExportGraphBuilder::Normalizer::operator== (FileSpec const & other_config) const
 bool
 ExportGraphBuilder::Normalizer::process()
 {
-	nframes_t frames_read = tmp_file->read (*buffer);
+	framecnt_t frames_read = tmp_file->read (*buffer);
 	return frames_read != buffer->frames();
 }
 
@@ -321,7 +321,7 @@ ExportGraphBuilder::Normalizer::start_post_processing()
 
 /* SRC */
 
-ExportGraphBuilder::SRC::SRC (ExportGraphBuilder & parent, FileSpec const & new_config, nframes_t max_frames)
+ExportGraphBuilder::SRC::SRC (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames)
   : parent (parent)
 {
 	config = new_config;
@@ -371,12 +371,12 @@ ExportGraphBuilder::SRC::operator== (FileSpec const & other_config) const
 }
 
 /* SilenceHandler */
-ExportGraphBuilder::SilenceHandler::SilenceHandler (ExportGraphBuilder & parent, FileSpec const & new_config, nframes_t max_frames)
+ExportGraphBuilder::SilenceHandler::SilenceHandler (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames)
   : parent (parent)
 {
 	config = new_config;
 	max_frames_in = max_frames;
-	nframes_t sample_rate = parent.session.nominal_frame_rate();
+	framecnt_t sample_rate = parent.session.nominal_frame_rate();
 	
 	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in));
 	silence_trimmer->set_trim_beginning (config.format->trim_beginning());
@@ -457,7 +457,7 @@ ExportGraphBuilder::ChannelConfig::add_child (FileSpec const & new_config)
 		}
 	}
 	
-	nframes_t max_frames_out = new_config.channel_config->get_n_chans() * max_frames;
+	framecnt_t const max_frames_out = new_config.channel_config->get_n_chans() * max_frames;
 	children.push_back (new SilenceHandler (parent, new_config, max_frames_out));
 	interleaver->add_output (children.back().sink ());
 }

@@ -24,11 +24,11 @@
 
 namespace ARDOUR {
 
-	typedef float (*compute_peak_t)			(const ARDOUR::Sample *, nframes_t, float);
-	typedef void  (*find_peaks_t)                   (const ARDOUR::Sample *, nframes_t, float *, float*);
-	typedef void  (*apply_gain_to_buffer_t)		(ARDOUR::Sample *, nframes_t, float);
-	typedef void  (*mix_buffers_with_gain_t)	(ARDOUR::Sample *, const ARDOUR::Sample *, nframes_t, float);
-	typedef void  (*mix_buffers_no_gain_t)		(ARDOUR::Sample *, const ARDOUR::Sample *, nframes_t);
+	typedef float (*compute_peak_t)			(const ARDOUR::Sample *, pframes_t, float);
+	typedef void  (*find_peaks_t)                   (const ARDOUR::Sample *, pframes_t, float *, float*);
+	typedef void  (*apply_gain_to_buffer_t)		(ARDOUR::Sample *, pframes_t, float);
+	typedef void  (*mix_buffers_with_gain_t)	(ARDOUR::Sample *, const ARDOUR::Sample *, pframes_t, float);
+	typedef void  (*mix_buffers_no_gain_t)		(ARDOUR::Sample *, const ARDOUR::Sample *, pframes_t);
 
 	extern compute_peak_t		compute_peak;
 	extern find_peaks_t             find_peaks;

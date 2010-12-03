@@ -70,14 +70,14 @@ class MidiRegion : public Region
 	virtual framecnt_t read (Sample*, framepos_t /*pos*/, framecnt_t /*cnt*/, int /*channel*/) const { return 0; }
 	virtual framecnt_t readable_length() const { return length(); }
 
-	framecnt_t read_at (Evoral::EventSink<nframes_t>& dst,
+	framecnt_t read_at (Evoral::EventSink<framepos_t>& dst,
 			    framepos_t position,
 			    framecnt_t dur,
 			    uint32_t  chan_n = 0,
 			    NoteMode  mode = Sustained,
 			    MidiStateTracker* tracker = 0) const;
 	
-	framepos_t master_read_at (MidiRingBuffer<nframes_t>& dst,
+	framepos_t master_read_at (MidiRingBuffer<framepos_t>& dst,
 				   framepos_t position,
 				   framecnt_t dur,
 				   uint32_t  chan_n = 0,
@@ -114,7 +114,7 @@ class MidiRegion : public Region
 	MidiRegion (boost::shared_ptr<const MidiRegion>, frameoffset_t offset = 0, bool offset_relative = true);
 
   private:
-	framecnt_t _read_at (const SourceList&, Evoral::EventSink<nframes_t>& dst,
+	framecnt_t _read_at (const SourceList&, Evoral::EventSink<framepos_t>& dst,
 			     framepos_t position,
 			     framecnt_t dur,
 			     uint32_t chan_n = 0,

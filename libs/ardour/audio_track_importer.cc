@@ -357,7 +357,7 @@ AudioTrackImporter::rate_convert_events (XMLNode & node)
 	std::stringstream str (content_node->content());
 	std::ostringstream new_content;
 
-	nframes_t x;
+	framecnt_t x;
 	double y;
 	bool ok = true;
 

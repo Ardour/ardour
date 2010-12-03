@@ -90,7 +90,7 @@ Session::setup_midi_control ()
 }
 
 void
-Session::spp_start (Parser &, nframes_t /*timestamp*/)
+Session::spp_start (Parser &, framepos_t /*timestamp*/)
 {
 	if (Config->get_mmc_control() && (!config.get_external_sync() || config.get_sync_source() != JACK)) {
 		request_transport_speed (1.0);
@@ -98,13 +98,13 @@ Session::spp_start (Parser &, nframes_t /*timestamp*/)
 }
 
 void
-Session::spp_continue (Parser& ignored, nframes_t timestamp)
+Session::spp_continue (Parser& ignored, framepos_t timestamp)
 {
 	spp_start (ignored, timestamp);
 }
 
 void
-Session::spp_stop (Parser&, nframes_t /*timestamp*/)
+Session::spp_stop (Parser&, framepos_t /*timestamp*/)
 {
 	if (Config->get_mmc_control()) {
 		request_stop ();
@@ -373,7 +373,7 @@ Session::send_full_time_code (framepos_t const t)
 	if (((mtc_timecode_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_timecode_time.frames % 2)) {
 		// start MTC quarter frame transmission on an even frame
 		Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
-		outbound_mtc_timecode_frame += (nframes_t) _frames_per_timecode_frame;
+		outbound_mtc_timecode_frame += _frames_per_timecode_frame;
 	}
 
 	// Compensate for audio latency
@@ -410,7 +410,7 @@ Session::send_full_time_code (framepos_t const t)
  * earlier already this cycle by send_full_time_code)
  */
 int
-Session::send_midi_time_code_for_cycle(nframes_t nframes)
+Session::send_midi_time_code_for_cycle (pframes_t nframes)
 {
 	if (_slave || !session_send_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
 		// cerr << "(MTC) Not sending MTC\n";
@@ -421,7 +421,7 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 	assert (next_quarter_frame_to_send <= 7);
 
 	/* Duration of one quarter frame */
-	nframes_t quarter_frame_duration = ((nframes_t) _frames_per_timecode_frame) >> 2;
+	framecnt_t quarter_frame_duration = ((framecnt_t) _frames_per_timecode_frame) >> 2;
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("TF %1 SF %2 NQ %3 FD %4\n",  _transport_frame, outbound_mtc_timecode_frame,
 						 next_quarter_frame_to_send, quarter_frame_duration));
@@ -463,14 +463,14 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 				break;
 		}
 
-		const nframes_t msg_time = (outbound_mtc_timecode_frame
+		const framepos_t msg_time = (outbound_mtc_timecode_frame
 			+ (quarter_frame_duration * next_quarter_frame_to_send));
 
 		// This message must fall within this block or something is broken
 		assert(msg_time >= _transport_frame);
 		assert(msg_time < _transport_frame + nframes);
 
-		nframes_t out_stamp = msg_time - _transport_frame;
+		framepos_t out_stamp = msg_time - _transport_frame;
 		assert(out_stamp < nframes);
 
 		if (MIDI::Manager::instance()->mtc_output_port()->midimsg (mtc_msg, 2, out_stamp)) {

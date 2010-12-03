@@ -751,7 +751,7 @@ Session::start_locate (framepos_t target_frame, bool with_roll, bool with_flush,
 }
 
 int
-Session::micro_locate (nframes_t distance)
+Session::micro_locate (framecnt_t distance)
 {
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
@@ -1182,7 +1182,7 @@ Session::post_transport ()
 }
 
 void
-Session::reset_rf_scale (nframes_t motion)
+Session::reset_rf_scale (framecnt_t motion)
 {
 	cumulative_rf_motion += motion;
 
@@ -1359,7 +1359,7 @@ Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
 			/* locating/stopping is subject to delays for declicking.
 			 */
 			
-			nframes_t requested_frame = (*i).end;
+			framepos_t requested_frame = i->end;
 			
 			if (requested_frame > current_block_size) {
 				requested_frame -= current_block_size;
@@ -1490,8 +1490,8 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 			(*i)->handle_transport_stopped (abort, (ptw & PostTransportLocate), (!(ptw & PostTransportLocate) || pending_locate_flush));
 		}
 
-		nframes_t old_latency = (*i)->output()->signal_latency ();
-		nframes_t track_latency = (*i)->update_total_latency ();
+		framecnt_t old_latency = (*i)->output()->signal_latency ();
+		framecnt_t track_latency = (*i)->update_total_latency ();
 
 		if (old_latency != track_latency) {
 			(*i)->input()->update_port_total_latencies ();
@@ -1547,7 +1547,7 @@ Session::reset_jack_connection (jack_client_t* jack)
 }
 
 bool
-Session::maybe_stop (nframes_t limit)
+Session::maybe_stop (framepos_t limit)
 {
        if ((_transport_speed > 0.0f && _transport_frame >= limit) || (_transport_speed < 0.0f && _transport_frame == 0)) {
                if (synced_to_jack () && config.get_jack_time_master ()) {

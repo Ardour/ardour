@@ -85,11 +85,11 @@ Track::toggle_monitor_input ()
 	}
 }
 
-ARDOUR::nframes_t
+ARDOUR::framecnt_t
 Track::update_total_latency ()
 {
-	nframes_t old = _output->effective_latency();
-	nframes_t own_latency = _output->user_latency();
+	framecnt_t old = _output->effective_latency();
+	framecnt_t own_latency = _output->user_latency();
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->active ()) {
@@ -221,7 +221,7 @@ Track::set_name (const string& str)
 }
 
 void
-Track::set_latency_delay (nframes_t longest_session_latency)
+Track::set_latency_delay (framecnt_t longest_session_latency)
 {
 	Route::set_latency_delay (longest_session_latency);
 	_diskstream->set_roll_delay (_roll_delay);
@@ -236,7 +236,7 @@ Track::zero_diskstream_id_in_xml (XMLNode& node)
 }
 
 int
-Track::no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		bool session_state_changing, bool can_record, bool /*rec_monitors_input*/)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
@@ -336,7 +336,7 @@ Track::no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 }
 
 int
-Track::silent_roll (nframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
+Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 		    bool can_record, bool rec_monitors_input, bool& need_butler)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
@@ -662,7 +662,7 @@ Track::diskstream_id () const
 }
 
 void
-Track::set_block_size (nframes_t n)
+Track::set_block_size (pframes_t n)
 {
 	Route::set_block_size (n);
 	_diskstream->set_block_size (n);

@@ -291,7 +291,7 @@ RegionEditor::end_clock_changed ()
 void
 RegionEditor::length_clock_changed ()
 {
-	nframes_t frames = length_clock.current_time();
+	framecnt_t frames = length_clock.current_time();
 
 	_session->begin_reversible_command (_("change region length"));
 
@@ -343,7 +343,7 @@ RegionEditor::bounds_changed (const PropertyChange& what_changed)
 
 	if (what_changed.contains (ARDOUR::Properties::sync_position) || what_changed.contains (ARDOUR::Properties::position)) {
 		int dir;
-		nframes_t off = _region->sync_offset (dir);
+		frameoffset_t off = _region->sync_offset (dir);
 		if (dir == -1) {
 			off = -off;
 		}

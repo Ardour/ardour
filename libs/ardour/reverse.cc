@@ -90,7 +90,7 @@ Reverse::run (boost::shared_ptr<Region> r, Progress*)
 
 			/* swap memory order */
 
-			for (nframes_t i = 0; i < to_read/2; ++i) {
+			for (framecnt_t i = 0; i < to_read/2; ++i) {
 				swap (buf[i],buf[to_read-1-i]);
 			}
 

@@ -42,7 +42,7 @@ class ExportTimespan
 
   private:
 	friend class ExportElementFactory;
-	ExportTimespan (ExportStatusPtr status, nframes_t frame_rate);
+	ExportTimespan (ExportStatusPtr status, framecnt_t frame_rate);
 
   public:
 	~ExportTimespan ();
@@ -53,19 +53,19 @@ class ExportTimespan
 	std::string range_id () const { return _range_id; }
 	void set_range_id (std::string range_id) { _range_id = range_id; }
 
-	void set_range (nframes_t start, nframes_t end);
-	nframes_t get_length () const { return end_frame - start_frame; }
-	nframes_t get_start () const { return start_frame; }
-	nframes_t get_end () const { return end_frame; }
+	void set_range (framepos_t start, framepos_t end);
+	framecnt_t get_length () const { return end_frame - start_frame; }
+	framepos_t get_start () const { return start_frame; }
+	framepos_t get_end () const { return end_frame; }
 
   private:
 
 	ExportStatusPtr status;
 
-	nframes_t      start_frame;
-	nframes_t      end_frame;
-	nframes_t      position;
-	nframes_t      frame_rate;
+	framepos_t      start_frame;
+	framepos_t      end_frame;
+	framepos_t      position;
+	framecnt_t      frame_rate;
 
 	std::string _name;
 	std::string _range_id;

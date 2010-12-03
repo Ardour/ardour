@@ -109,13 +109,13 @@ class ElementImporter
 	std::string  name;
 
 	/// The sample rate of the session from which we are importing
-	nframes_t sample_rate;
+	framecnt_t sample_rate;
 
 	/// Converts timecode time to a string
 	std::string timecode_to_string (Timecode::Time & time) const;
 
 	/// Converts samples so that times match the sessions sample rate
-	nframes_t rate_convert_samples (nframes_t samples) const;
+	framecnt_t rate_convert_samples (framecnt_t samples) const;
 
 	/// Converts samples so that times match the sessions sample rate (for straight use in XML)
 	std::string rate_convert_samples (std::string const & samples) const;

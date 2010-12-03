@@ -445,7 +445,7 @@ Graph::dump (int chain)
 }
 
 int
-Graph::silent_process_routes (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+Graph::silent_process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
                               bool can_record, bool rec_monitors_input, bool& need_butler)
 {
         _process_nframes = nframes;
@@ -471,7 +471,7 @@ Graph::silent_process_routes (nframes_t nframes, framepos_t start_frame, framepo
 }
 
 int
-Graph::process_routes (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
+Graph::process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
                        bool can_record, bool rec_monitors_input, bool& need_butler)
 {
 	DEBUG_TRACE (DEBUG::Graph, string_compose ("graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
@@ -500,7 +500,7 @@ Graph::process_routes (nframes_t nframes, framepos_t start_frame, framepos_t end
 }
 
 int
-Graph::routes_no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, 
+Graph::routes_no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, 
                        bool non_rt_pending, bool can_record, int declick)
 {
 	DEBUG_TRACE (DEBUG::Graph, string_compose ("no-roll graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));

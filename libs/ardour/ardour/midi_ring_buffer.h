@@ -50,7 +50,7 @@ public:
 	inline bool read_prefix(T* time, Evoral::EventType* type, uint32_t* size);
 	inline bool read_contents(uint32_t size, uint8_t* buf);
 
-	size_t read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset=0);
+	size_t read(MidiBuffer& dst, framepos_t start, framepos_t end, framecnt_t offset=0);
 	void dump(std::ostream& dst);
 
 	/** Set the channel filtering mode.

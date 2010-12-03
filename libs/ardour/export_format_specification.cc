@@ -55,11 +55,11 @@ ExportFormatSpecification::Time::operator= (AnyTime const & other)
 	return *this;
 }
 
-nframes_t
-ExportFormatSpecification::Time::get_frames (nframes_t target_rate) const
+framecnt_t
+ExportFormatSpecification::Time::get_frames (framecnt_t target_rate) const
 {
 	//TODO position
-	nframes_t duration = session.convert_to_frames_at (0, *this);
+	framecnt_t duration = session.convert_to_frames_at (0, *this);
 
 	return ((double) target_rate / session.frame_rate()) * duration + 0.5;
 }

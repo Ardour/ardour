@@ -129,19 +129,19 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 }
 
 framecnt_t
-MidiRegion::read_at (Evoral::EventSink<nframes_t>& out, framepos_t position, framecnt_t dur, uint32_t chan_n, NoteMode mode, MidiStateTracker* tracker) const
+MidiRegion::read_at (Evoral::EventSink<framepos_t>& out, framepos_t position, framecnt_t dur, uint32_t chan_n, NoteMode mode, MidiStateTracker* tracker) const
 {
 	return _read_at (_sources, out, position, dur, chan_n, mode, tracker);
 }
 
 framecnt_t
-MidiRegion::master_read_at (MidiRingBuffer<nframes_t>& out, framepos_t position, framecnt_t dur, uint32_t chan_n, NoteMode mode) const
+MidiRegion::master_read_at (MidiRingBuffer<framepos_t>& out, framepos_t position, framecnt_t dur, uint32_t chan_n, NoteMode mode) const
 {
 	return _read_at (_master_sources, out, position, dur, chan_n, mode); /* no tracker */
 }
 
 framecnt_t
-MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& dst, framepos_t position, framecnt_t dur, uint32_t chan_n, 
+MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<framepos_t>& dst, framepos_t position, framecnt_t dur, uint32_t chan_n, 
 		      NoteMode mode, MidiStateTracker* tracker) const
 {
 	frameoffset_t internal_offset = 0;

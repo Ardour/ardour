@@ -26,7 +26,7 @@ SampleRateConverter::SampleRateConverter (uint32_t channels)
 }
 
 void
-SampleRateConverter::init (nframes_t in_rate, nframes_t out_rate, int quality)
+SampleRateConverter::init (framecnt_t in_rate, framecnt_t out_rate, int quality)
 {
 	reset();
 	
@@ -52,12 +52,12 @@ SampleRateConverter::~SampleRateConverter ()
 	reset();
 }
 
-nframes_t
-SampleRateConverter::allocate_buffers (nframes_t max_frames)
+framecnt_t
+SampleRateConverter::allocate_buffers (framecnt_t max_frames)
 {
 	if (!active) { return max_frames; }
 	
-	nframes_t max_frames_out = (nframes_t) ceil (max_frames * src_data.src_ratio);
+	framecnt_t max_frames_out = (framecnt_t) ceil (max_frames * src_data.src_ratio);
 	if (data_out_size < max_frames_out) {
 
 		delete[] data_out;
@@ -87,7 +87,7 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 		return;
 	}
 
-	nframes_t frames = c.frames();
+	framecnt_t frames = c.frames();
 	float * in = const_cast<float *> (c.data()); // TODO check if this is safe!
 
 	if (throw_level (ThrowProcess) && frames > max_frames_in) {

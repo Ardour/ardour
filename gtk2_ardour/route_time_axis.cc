@@ -672,7 +672,7 @@ RouteTimeAxisView::track_mode_changed ()
 }
 
 void
-RouteTimeAxisView::show_timestretch (nframes_t start, nframes_t end)
+RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end)
 {
 	double x1;
 	double x2;
@@ -1208,8 +1208,8 @@ RouteTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top
 		speed = track()->speed();
 	}
 
-	nframes_t start_adjusted = session_frame_to_track_frame(start, speed);
-	nframes_t end_adjusted   = session_frame_to_track_frame(end, speed);
+	framepos_t const start_adjusted = session_frame_to_track_frame(start, speed);
+	framepos_t const end_adjusted   = session_frame_to_track_frame(end, speed);
 
 	if ((_view && ((top < 0.0 && bot < 0.0))) || touched (top, bot)) {
 		_view->get_selectables (start_adjusted, end_adjusted, top, bot, results);
@@ -1295,7 +1295,7 @@ RouteTimeAxisView::name_entry_changed ()
 }
 
 boost::shared_ptr<Region>
-RouteTimeAxisView::find_next_region (nframes_t pos, RegionPoint point, int32_t dir)
+RouteTimeAxisView::find_next_region (framepos_t pos, RegionPoint point, int32_t dir)
 {
 	boost::shared_ptr<Playlist> pl = playlist ();
 

@@ -147,7 +147,7 @@ EditorSummary::render (cairo_t* cr)
 
 	/* compute start and end points for the summary */
 	
-	nframes_t const session_length = _session->current_end_frame() - _session->current_start_frame ();
+	framecnt_t const session_length = _session->current_end_frame() - _session->current_start_frame ();
 	double const theoretical_start = _session->current_start_frame() - session_length * _overhang_fraction;
 	_start = theoretical_start > 0 ? theoretical_start : 0;
 	_end = _session->current_end_frame() + session_length * _overhang_fraction;

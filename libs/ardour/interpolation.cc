@@ -6,11 +6,11 @@
 using namespace ARDOUR;
 
 
-nframes_t
-LinearInterpolation::interpolate (int channel, nframes_t nframes, Sample *input, Sample *output)
+framecnt_t
+LinearInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input, Sample *output)
 {
 	// index in the input buffers
-	nframes_t   i = 0;
+	framecnt_t   i = 0;
 
 	double acceleration;
 	double distance = 0.0;
@@ -22,7 +22,7 @@ LinearInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
 	}
 
 	distance = phase[channel];
-	for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
+	for (framecnt_t outsample = 0; outsample < nframes; ++outsample) {
 		i = floor(distance);
 		Sample fractional_phase_part = distance - i;
 		if (fractional_phase_part >= 1.0) {
@@ -45,11 +45,11 @@ LinearInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
 	return i;
 }
 
-nframes_t
-CubicInterpolation::interpolate (int channel, nframes_t nframes, Sample *input, Sample *output)
+framecnt_t
+CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input, Sample *output)
 {
     // index in the input buffers
-    nframes_t   i = 0;
+    framecnt_t   i = 0;
 
     double acceleration;
     double distance = 0.0;
@@ -87,7 +87,7 @@ CubicInterpolation::interpolate (int channel, nframes_t nframes, Sample *input, 
 		    inm1 = input[i-1];
 	    }
 
-	    for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
+	    for (framecnt_t outsample = 0; outsample < nframes; ++outsample) {
 
 		    float f = floor (distance);
 		    float fractional_phase_part = distance - f;
@@ -124,7 +124,7 @@ CubicInterpolation::interpolate (int channel, nframes_t nframes, Sample *input, 
 
 	    /* not sure that this is ever utilized - it implies that one of the input/output buffers is missing */
 
-	    for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
+	    for (framecnt_t outsample = 0; outsample < nframes; ++outsample) {
 		    distance += _speed + acceleration;
 	    }
     }

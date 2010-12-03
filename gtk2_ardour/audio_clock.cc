@@ -414,7 +414,7 @@ AudioClock::on_realize ()
 }
 
 void
-AudioClock::set (nframes_t when, bool force, nframes_t offset, char which)
+AudioClock::set (framepos_t when, bool force, framecnt_t offset, char which)
 {
 
  	if ((!force && !is_visible()) || _session == 0) {
@@ -479,12 +479,12 @@ AudioClock::session_configuration_changed (std::string p)
 		return;
 	}
 	
-	nframes_t current;
+	framecnt_t current;
 
 	switch (_mode) {
 	case Timecode:
 		if (is_duration) {
-			current = current_duration();
+			current = current_duration ();
 		} else {
 			current = current_time ();
 		}
@@ -496,17 +496,17 @@ AudioClock::session_configuration_changed (std::string p)
 }
 
 void
-AudioClock::set_frames (nframes_t when, bool /*force*/)
+AudioClock::set_frames (framepos_t when, bool /*force*/)
 {
 	char buf[32];
-	snprintf (buf, sizeof (buf), "%u", when);
+	snprintf (buf, sizeof (buf), "%" PRId64, when);
 	audio_frames_label.set_text (buf);
 
 	if (frames_upper_info_label) {
-		nframes_t rate = _session->frame_rate();
+		framecnt_t rate = _session->frame_rate();
 
 		if (fmod (rate, 1000.0) == 0.000) {
-			sprintf (buf, "%uK", rate/1000);
+			sprintf (buf, "%" PRId64 "K", rate/1000);
 		} else {
 			sprintf (buf, "%.3fK", rate/1000.0f);
 		}
@@ -531,19 +531,19 @@ AudioClock::set_frames (nframes_t when, bool /*force*/)
 }
 
 void
-AudioClock::set_minsec (nframes_t when, bool force)
+AudioClock::set_minsec (framepos_t when, bool force)
 {
 	char buf[32];
-	nframes_t left;
+	framecnt_t left;
 	int hrs;
 	int mins;
 	float secs;
 
 	left = when;
 	hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
-	left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
+	left -= (framecnt_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
 	mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-	left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
+	left -= (framecnt_t) floor (mins * _session->frame_rate() * 60.0f);
 	secs = left / (float) _session->frame_rate();
 
 	if (force || hrs != ms_last_hrs) {
@@ -566,7 +566,7 @@ AudioClock::set_minsec (nframes_t when, bool force)
 }
 
 void
-AudioClock::set_timecode (nframes_t when, bool force)
+AudioClock::set_timecode (framepos_t when, bool force)
 {
 	char buf[32];
 	Timecode::Time timecode;
@@ -637,7 +637,7 @@ AudioClock::set_timecode (nframes_t when, bool force)
 }
 
 void
-AudioClock::set_bbt (nframes_t when, bool force)
+AudioClock::set_bbt (framepos_t when, bool force)
 {
 	char buf[16];
 	BBT_Time bbt;
@@ -1198,7 +1198,7 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field /*field*/)
 		return false;
 	}
 
-	nframes_t frames = 0;
+	framepos_t frames = 0;
 
 	switch (ev->button) {
 	case 1:
@@ -1244,7 +1244,7 @@ AudioClock::field_button_scroll_event (GdkEventScroll *ev, Field field)
 		return false;
 	}
 
-	nframes_t frames = 0;
+	framepos_t frames = 0;
 
 	switch (ev->direction) {
 
@@ -1313,8 +1313,8 @@ AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 
 	if (trunc(drag_accum) != 0) {
 
-		nframes_t frames;
-		nframes_t pos ;
+		framepos_t frames;
+		framepos_t pos;
 		int dir;
 		dir = (drag_accum < 0 ? 1:-1);
 		pos = current_time();
@@ -1322,7 +1322,7 @@ AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 
 		if (frames  != 0 &&  frames * drag_accum < current_time()) {
 
-			set ((nframes_t) floor (pos - drag_accum * frames), false); // minus because up is negative in computer-land
+			set ((framepos_t) floor (pos - drag_accum * frames), false); // minus because up is negative in computer-land
 
 		} else {
 			set (0 , false);
@@ -1338,24 +1338,23 @@ AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 	return true;
 }
 
-nframes_t
-AudioClock::get_frames (Field field,nframes_t pos,int dir)
+framepos_t
+AudioClock::get_frames (Field field, framepos_t pos, int dir)
 {
-
-	nframes_t frames = 0;
+	framecnt_t frames = 0;
 	BBT_Time bbt;
 	switch (field) {
 	case Timecode_Hours:
-		frames = (nframes_t) floor (3600.0 * _session->frame_rate());
+		frames = (framecnt_t) floor (3600.0 * _session->frame_rate());
 		break;
 	case Timecode_Minutes:
-		frames = (nframes_t) floor (60.0 * _session->frame_rate());
+		frames = (framecnt_t) floor (60.0 * _session->frame_rate());
 		break;
 	case Timecode_Seconds:
 		frames = _session->frame_rate();
 		break;
 	case Timecode_Frames:
-		frames = (nframes_t) floor (_session->frame_rate() / _session->timecode_frames_per_second());
+		frames = (framecnt_t) floor (_session->frame_rate() / _session->timecode_frames_per_second());
 		break;
 
 	case AudioFrames:
@@ -1363,10 +1362,10 @@ AudioClock::get_frames (Field field,nframes_t pos,int dir)
 		break;
 
 	case MS_Hours:
-		frames = (nframes_t) floor (3600.0 * _session->frame_rate());
+		frames = (framecnt_t) floor (3600.0 * _session->frame_rate());
 		break;
 	case MS_Minutes:
-		frames = (nframes_t) floor (60.0 * _session->frame_rate());
+		frames = (framecnt_t) floor (60.0 * _session->frame_rate());
 		break;
 	case MS_Seconds:
 		frames = _session->frame_rate();
@@ -1395,10 +1394,10 @@ AudioClock::get_frames (Field field,nframes_t pos,int dir)
 	return frames;
 }
 
-nframes_t
-AudioClock::current_time (nframes_t pos) const
+framepos_t
+AudioClock::current_time (framepos_t pos) const
 {
-	nframes_t ret = 0;
+	framepos_t ret = 0;
 
 	switch (_mode) {
 	case Timecode:
@@ -1423,10 +1422,10 @@ AudioClock::current_time (nframes_t pos) const
 	return ret;
 }
 
-nframes_t
-AudioClock::current_duration (nframes_t pos) const
+framepos_t
+AudioClock::current_duration (framepos_t pos) const
 {
-	nframes_t ret = 0;
+	framepos_t ret = 0;
 
 	switch (_mode) {
 	case Timecode:
@@ -1490,7 +1489,7 @@ AudioClock::timecode_sanitize_display()
 	}
 }
 
-nframes_t
+framepos_t
 AudioClock::timecode_frame_from_display () const
 {
 	if (_session == 0) {
@@ -1883,7 +1882,7 @@ AudioClock::timecode_frame_from_display () const
 	return sample;
 }
 
-nframes_t
+framepos_t
 AudioClock::minsec_frame_from_display () const
 {
 	if (_session == 0) {
@@ -1894,13 +1893,13 @@ AudioClock::minsec_frame_from_display () const
 	int mins = atoi (ms_minutes_label.get_text());
 	float secs = atof (ms_seconds_label.get_text());
 
-	nframes_t sr = _session->frame_rate();
+	framecnt_t sr = _session->frame_rate();
 
-	return (nframes_t) floor ((hrs * 60.0f * 60.0f * sr) + (mins * 60.0f * sr) + (secs * sr));
+	return (framepos_t) floor ((hrs * 60.0f * 60.0f * sr) + (mins * 60.0f * sr) + (secs * sr));
 }
 
-nframes_t
-AudioClock::bbt_frame_from_display (nframes_t pos) const
+framepos_t
+AudioClock::bbt_frame_from_display (framepos_t pos) const
 {
 	if (_session == 0) {
 		error << "AudioClock::current_time() called with BBT mode but without session!" << endmsg;
@@ -1919,14 +1918,12 @@ AudioClock::bbt_frame_from_display (nframes_t pos) const
 		any.bbt.beats++;
 	}
 
-	nframes_t ret = _session->convert_to_frames_at (pos, any);
-
-	return ret;
+	return _session->convert_to_frames_at (pos, any);
 }
 
 
-nframes_t
-AudioClock::bbt_frame_duration_from_display (nframes_t pos) const
+framepos_t
+AudioClock::bbt_frame_duration_from_display (framepos_t pos) const
 {
 	if (_session == 0) {
 		error << "AudioClock::current_time() called with BBT mode but without session!" << endmsg;
@@ -1943,10 +1940,10 @@ AudioClock::bbt_frame_duration_from_display (nframes_t pos) const
 	return _session->tempo_map().bbt_duration_at(pos,bbt,1);
 }
 
-nframes_t
+framepos_t
 AudioClock::audio_frame_from_display () const
 {
-	return (nframes_t) atoi (audio_frames_label.get_text());
+	return (framepos_t) atoi (audio_frames_label.get_text());
 }
 
 void

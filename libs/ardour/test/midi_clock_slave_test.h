@@ -61,11 +61,11 @@ class TestSlaveSessionProxy : public ISlaveSessionProxy {
         }
 
         // Implementation
-  	TempoMap&   tempo_map ()                const { return *_tempo_map; }
-	nframes_t   frame_rate ()               const { return FRAME_RATE; }
+  	TempoMap&  tempo_map ()                const { return *_tempo_map; }
+	framecnt_t frame_rate ()               const { return FRAME_RATE; }
 	framepos_t audible_frame ()            const { return _transport_frame; }
 	framepos_t transport_frame ()          const { return _transport_frame; }
-	nframes_t  frames_since_cycle_start () const { return 0; }
+	pframes_t  frames_since_cycle_start () const { return 0; }
 	framecnt_t frame_time ()               const { return _frame_time; }
 
 	void request_locate (framepos_t frame, bool with_roll = false) { 

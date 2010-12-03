@@ -67,7 +67,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-nframes_t MidiDiskstream::midi_readahead = 4096;
+framecnt_t MidiDiskstream::midi_readahead = 4096;
 
 MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::Flag flag)
 	: Diskstream(sess, name, flag)
@@ -128,8 +128,8 @@ MidiDiskstream::init ()
 	allocate_temporary_buffers ();
 
 	const size_t size = _session.butler()->midi_diskstream_buffer_size();
-	_playback_buf = new MidiRingBuffer<nframes_t>(size);
-	_capture_buf = new MidiRingBuffer<nframes_t>(size);
+	_playback_buf = new MidiRingBuffer<framepos_t>(size);
+	_capture_buf = new MidiRingBuffer<framepos_t>(size);
 
 	_n_channels = ChanCount(DataType::MIDI, 1);
 
@@ -488,11 +488,11 @@ trace_midi (ostream& o, MIDI::byte *msg, size_t len)
 #endif
 
 int
-MidiDiskstream::process (framepos_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler)
+MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler)
 {
 	int       ret = -1;
-	nframes_t rec_offset = 0;
-	nframes_t rec_nframes = 0;
+	framecnt_t rec_offset = 0;
+	framecnt_t rec_nframes = 0;
 	bool      nominally_recording;
 	bool      re = record_enabled ();
 
@@ -588,7 +588,7 @@ MidiDiskstream::process (framepos_t transport_frame, nframes_t nframes, bool can
 }
 
 bool
-MidiDiskstream::commit (nframes_t nframes)
+MidiDiskstream::commit (framecnt_t nframes)
 {
 	bool need_butler = false;
 
@@ -678,9 +678,9 @@ MidiDiskstream::internal_playback_seek (framecnt_t distance)
 
 /** @a start is set to the new frame position (TIME) read up to */
 int
-MidiDiskstream::read (framepos_t& start, nframes_t dur, bool reversed)
+MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 {
-	nframes_t this_read = 0;
+	framecnt_t this_read = 0;
 	bool reloop = false;
 	framepos_t loop_end = 0;
 	framepos_t loop_start = 0;
@@ -812,12 +812,12 @@ MidiDiskstream::do_refill ()
 		return 0;
 	}
 
-	nframes_t to_read = midi_readahead - (frames_written - frames_read);
+	framecnt_t to_read = midi_readahead - (frames_written - frames_read);
 
 	//cout << "MDS read for midi_readahead " << to_read << "  rb_contains: "
 	//	<< frames_written - frames_read << endl;
 
-	to_read = (nframes_t) min ((framecnt_t) to_read, (framecnt_t) (max_framepos - file_frame));
+	to_read = (framecnt_t) min ((framecnt_t) to_read, (framecnt_t) (max_framepos - file_frame));
 
 	if (read (file_frame, to_read, reversed)) {
 		ret = -1;
@@ -841,7 +841,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 {
 	uint32_t to_write;
 	int32_t ret = 0;
-	nframes_t total;
+	framecnt_t total;
 
 	_write_data_count = 0;
 
@@ -941,7 +941,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 
 		assert(_write_source);
 
-		nframes_t total_capture = 0;
+		framecnt_t total_capture = 0;
 		for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 			total_capture += (*ci)->frames;
 		}
@@ -1408,7 +1408,7 @@ MidiDiskstream::rename_write_sources ()
 }
 
 void
-MidiDiskstream::set_block_size (nframes_t /*nframes*/)
+MidiDiskstream::set_block_size (pframes_t /*nframes*/)
 {
 }
 

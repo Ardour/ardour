@@ -1105,7 +1105,7 @@ Editor::set_session (Session *t)
 		bbt.bars = 0;
 		bbt.beats = 0;
 		bbt.ticks = 120;
-		nframes_t pos = _session->tempo_map().bbt_duration_at (0, bbt, 1);
+		framepos_t pos = _session->tempo_map().bbt_duration_at (0, bbt, 1);
 		nudge_clock.set_mode(AudioClock::BBT);
 		nudge_clock.set (pos, true, 0, AudioClock::BBT);
 

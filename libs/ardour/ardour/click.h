@@ -29,34 +29,34 @@
 namespace ARDOUR {
 
 struct Click {
-    nframes_t start;
-    nframes_t duration;
-    nframes_t offset;
-    const Sample *data;
-
-    Click (nframes_t s, nframes_t d, const Sample *b) : start (s), duration (d), offset (0), data (b) {}
+	framepos_t start;
+	framecnt_t duration;
+	framecnt_t offset;
+	const Sample *data;
+	
+	Click (framepos_t s, framecnt_t d, const Sample *b) : start (s), duration (d), offset (0), data (b) {}
     
-    void *operator new (size_t) {
-	    return pool.alloc ();
+	void *operator new (size_t) {
+		return pool.alloc ();
     };
-    
-    void operator delete(void *ptr, size_t /*size*/) {
-	    pool.release (ptr);
-    }
-    
+	
+	void operator delete(void *ptr, size_t /*size*/) {
+		pool.release (ptr);
+	}
+	
 private:
-    static Pool pool;
+	static Pool pool;
 };
 
 typedef std::list<Click*> Clicks;
 
 class ClickIO : public IO
 {
-  public:
+public:
 	ClickIO (Session& s, const std::string& name) : IO (s, name, IO::Output) {}
 	~ClickIO() {}
 	
-  protected:
+protected:
 	uint32_t pans_required () const { return 1; }
 };
 

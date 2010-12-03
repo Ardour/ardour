@@ -52,14 +52,14 @@ class PluginInsert : public Processor
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&, int version);
 
-	void run (BufferSet& in, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool);
-	void silence (nframes_t nframes);
+	void run (BufferSet& in, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
+	void silence (framecnt_t nframes);
 
 	void activate ();
 	void deactivate ();
         void flush ();
 
-	int set_block_size (nframes_t nframes);
+	int set_block_size (pframes_t nframes);
 
 	ChanCount output_streams() const;
 	ChanCount input_streams() const;
@@ -101,11 +101,11 @@ class PluginInsert : public Processor
 
 	std::string describe_parameter (Evoral::Parameter param);
 
-	nframes_t signal_latency() const;
+	framecnt_t signal_latency () const;
 
 	boost::shared_ptr<Plugin> get_impulse_analysis_plugin();
 
-	void collect_signal_for_analysis(nframes_t nframes);
+	void collect_signal_for_analysis (framecnt_t nframes);
 
 	PBD::Signal2<void,BufferSet*, BufferSet*> AnalysisDataGathered;
 
@@ -125,14 +125,14 @@ class PluginInsert : public Processor
 
 	boost::weak_ptr<Plugin> _impulseAnalysisPlugin;
 
-	nframes_t _signal_analysis_collected_nframes;
-	nframes_t _signal_analysis_collect_nframes_max;
+	framecnt_t _signal_analysis_collected_nframes;
+	framecnt_t _signal_analysis_collect_nframes_max;
 
 	BufferSet _signal_analysis_inputs;
 	BufferSet _signal_analysis_outputs;
 
-	void automation_run (BufferSet& bufs, nframes_t nframes);
-	void connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now = 0);
+	void automation_run (BufferSet& bufs, pframes_t nframes);
+	void connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now = 0);
 
 	void set_automatable ();
 	void control_list_automation_state_changed (Evoral::Parameter, AutoState);

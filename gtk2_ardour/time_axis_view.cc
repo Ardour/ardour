@@ -672,7 +672,7 @@ TimeAxisView::set_samples_per_unit (double spu)
 }
 
 void
-TimeAxisView::show_timestretch (nframes_t start, nframes_t end)
+TimeAxisView::show_timestretch (framepos_t start, framepos_t end)
 {
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->show_timestretch (start, end);
@@ -714,7 +714,8 @@ TimeAxisView::show_selection (TimeSelection& ts)
 	selection_group->raise_to_top();
 
 	for (list<AudioRange>::iterator i = ts.begin(); i != ts.end(); ++i) {
-		nframes_t start, end, cnt;
+		framepos_t start, end;
+		framecnt_t cnt;
 
 		start = (*i).start;
 		end = (*i).end;

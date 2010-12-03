@@ -40,7 +40,7 @@ class TmpFileTest : public CppUnit::TestFixture
 	boost::shared_ptr<TmpFile<float> > file;
 
 	float * random_data;
-	nframes_t frames;
+	framecnt_t frames;
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION (TmpFileTest);

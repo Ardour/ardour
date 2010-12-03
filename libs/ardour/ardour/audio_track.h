@@ -39,7 +39,7 @@ class AudioTrack : public Track
 	int set_mode (TrackMode m);
 	bool can_use_mode (TrackMode m, bool& bounce_required);
 
-	int roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
                   int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
 
 	void use_new_diskstream ();
@@ -55,7 +55,7 @@ class AudioTrack : public Track
 	void unfreeze ();
 
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
-	boost::shared_ptr<Region> bounce_range (nframes_t start, nframes_t end, InterThreadInfo&, bool enable_processing);
+	boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, bool enable_processing);
 
 	int set_state(const XMLNode&, int version);
 

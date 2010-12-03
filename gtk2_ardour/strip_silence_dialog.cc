@@ -493,13 +493,13 @@ StripSilenceDialog::update_stats (const SilenceResult& res)
         }
 }
 
-nframes_t
+framecnt_t
 StripSilenceDialog::minimum_length () const
 {
         return _minimum_length.current_duration (_waves.front()->region->position());
 }
 
-nframes_t
+framecnt_t
 StripSilenceDialog::fade_length () const
 {
         return _minimum_length.current_duration (_waves.front()->region->position());

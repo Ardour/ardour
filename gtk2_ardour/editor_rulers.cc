@@ -1002,7 +1002,7 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 		lower = 0;
 	}
 
-	pos = (nframes_t) floor (lower);
+	pos = (framecnt_t) floor (lower);
 
 	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * timecode_nmarks);
 	switch (timecode_ruler_scale) {
@@ -1150,8 +1150,8 @@ Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper)
 	TempoMap::BBTPointList::iterator i;
         BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
 
-        _session->bbt_time((jack_nframes_t) lower, lower_beat);
-        _session->bbt_time((jack_nframes_t) upper, upper_beat);
+        _session->bbt_time (lower, lower_beat);
+        _session->bbt_time (upper, upper_beat);
         uint32_t beats = 0;
 
 	bbt_accent_modulo = 1;

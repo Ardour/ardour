@@ -13,7 +13,7 @@ class TmpFile : public SndfileWriter<T>, public SndfileReader<T>
 {
   public:
 	
-	TmpFile (int format, ChannelCount channels, nframes_t samplerate)
+	TmpFile (int format, ChannelCount channels, framecnt_t samplerate)
 	  : SndfileHandle (fileno (tmpfile()), true, SndfileBase::ReadWrite, format, channels, samplerate)
 	{}
 	

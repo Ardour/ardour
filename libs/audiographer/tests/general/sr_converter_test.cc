@@ -31,8 +31,8 @@ class SampleRateConverterTest : public CppUnit::TestFixture
 	void testNoConversion()
 	{
 		assert (frames % 2 == 0);
-		nframes_t const half_frames = frames / 2;
-		nframes_t frames_output = 0;
+		framecnt_t const half_frames = frames / 2;
+		framecnt_t frames_output = 0;
 		
 		converter->init (44100, 44100);
 		converter->add_output (sink);
@@ -52,8 +52,8 @@ class SampleRateConverterTest : public CppUnit::TestFixture
 	void testUpsampleLength()
 	{
 		assert (frames % 2 == 0);
-		nframes_t const half_frames = frames / 2;
-		nframes_t frames_output = 0;
+		framecnt_t const half_frames = frames / 2;
+		framecnt_t frames_output = 0;
 		
 		converter->init (44100, 88200);
 		converter->allocate_buffers (half_frames);
@@ -66,15 +66,15 @@ class SampleRateConverterTest : public CppUnit::TestFixture
 		converter->process (c2);
 
 		frames_output = sink->get_data().size();
-		nframes_t tolerance = 3;
+		framecnt_t tolerance = 3;
 		CPPUNIT_ASSERT (2 * frames - tolerance < frames_output && frames_output < 2 * frames + tolerance);
 	}
 
 	void testDownsampleLength()
 	{
 		assert (frames % 2 == 0);
-		nframes_t const half_frames = frames / 2;
-		nframes_t frames_output = 0;
+		framecnt_t const half_frames = frames / 2;
+		framecnt_t frames_output = 0;
 		
 		converter->init (88200, 44100);
 		converter->allocate_buffers (half_frames);
@@ -87,14 +87,14 @@ class SampleRateConverterTest : public CppUnit::TestFixture
 		converter->process (c2);
 		
 		frames_output = sink->get_data().size();
-		nframes_t tolerance = 3;
+		framecnt_t tolerance = 3;
 		CPPUNIT_ASSERT (half_frames - tolerance < frames_output && frames_output < half_frames + tolerance);
 	}
 	
 	void testRespectsEndOfInput()
 	{
 		assert (frames % 2 == 0);
-		nframes_t const half_frames = frames / 2;
+		framecnt_t const half_frames = frames / 2;
 		
 		converter->init (44100, 48000);
 		converter->allocate_buffers (half_frames);
@@ -123,7 +123,7 @@ class SampleRateConverterTest : public CppUnit::TestFixture
 	boost::shared_ptr<ProcessContextGrabber<float> > grabber;
 
 	float * random_data;
-	nframes_t frames;
+	framecnt_t frames;
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION (SampleRateConverterTest);

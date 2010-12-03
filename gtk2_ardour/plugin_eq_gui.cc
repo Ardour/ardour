@@ -35,6 +35,8 @@
 #include <iostream>
 #include <cmath>
 
+using namespace ARDOUR;
+
 PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	: _min_dB(-12.0),
 	  _max_dB(+12.0),
@@ -315,8 +317,8 @@ PluginEqGui::run_impulse_analysis()
 	ARDOUR::ChanMapping in_map(_plugin->get_info()->n_inputs);
 	ARDOUR::ChanMapping out_map(_plugin->get_info()->n_outputs);
 
-	_plugin->connect_and_run(_bufferset, in_map, out_map, _buffer_size, (nframes_t)0);
-	nframes_t f = _plugin->signal_latency();
+	_plugin->connect_and_run(_bufferset, in_map, out_map, _buffer_size, 0);
+	framecnt_t f = _plugin->signal_latency ();
 	// Adding user_latency() could be interesting
 
 	// Gather all output, taking latency into account.
@@ -338,8 +340,8 @@ PluginEqGui::run_impulse_analysis()
 	} else {
 		//int C = 0;
 		//std::cerr << (++C) << ": latency is " << f << " frames, doing split processing.." << std::endl;
-		nframes_t target_offset = 0;
-		nframes_t frames_left = _buffer_size; // refaktoroi
+		framecnt_t target_offset = 0;
+		framecnt_t frames_left = _buffer_size; // refaktoroi
 		do {
 			if (f >= _buffer_size) {
 				//std::cerr << (++C) << ": f (=" << f << ") is larger than buffer_size, still trying to reach the actual output" << std::endl;
@@ -351,7 +353,7 @@ PluginEqGui::run_impulse_analysis()
 				//             we start at output offset "f"
 				//             .. and copy "buffer size" - "f" - "offset" frames
 
-				nframes_t length = _buffer_size - f - target_offset;
+				framecnt_t length = _buffer_size - f - target_offset;
 
 				//std::cerr << (++C) << ": copying " << length << " frames to _collect_bufferset.get_audio(i)+" << target_offset << " from bufferset at offset " << f << std::endl;
 				for (uint32_t i = 0; i < outputs; ++i) {
@@ -374,7 +376,7 @@ PluginEqGui::run_impulse_analysis()
 
 				in_map  = ARDOUR::ChanMapping(_plugin->get_info()->n_inputs);
 				out_map = ARDOUR::ChanMapping(_plugin->get_info()->n_outputs);
-				_plugin->connect_and_run(_bufferset, in_map, out_map, _buffer_size, (nframes_t)0);
+				_plugin->connect_and_run(_bufferset, in_map, out_map, _buffer_size, 0);
 			}
 		} while ( frames_left > 0);
 

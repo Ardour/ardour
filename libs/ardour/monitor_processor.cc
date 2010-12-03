@@ -245,7 +245,7 @@ MonitorProcessor::state (bool full)
 }
 
 void
-MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, nframes_t nframes, bool /*result_required*/)
+MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t nframes, bool /*result_required*/)
 {
         uint32_t chn = 0;
         gain_t target_gain;
@@ -297,7 +297,7 @@ MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /
 
                 /* scale the first channel */
 
-                for (nframes_t n = 0; n < nframes; ++n) {
+                for (pframes_t n = 0; n < nframes; ++n) {
                         buf[n] *= scale;
                 }
 
@@ -307,7 +307,7 @@ MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /
                 for (; b != bufs.audio_end(); ++b) {
                         AudioBuffer& ob (*b);
                         Sample* obuf = ob.data ();
-                        for (nframes_t n = 0; n < nframes; ++n) {
+                        for (pframes_t n = 0; n < nframes; ++n) {
                                 buf[n] += obuf[n] * scale;
                         }
                 }

@@ -45,7 +45,7 @@ public:
 
 	virtual ~Port ();
 
-	static void set_buffer_size (nframes_t sz) {
+	static void set_buffer_size (pframes_t sz) {
 		_buffer_size = sz;
 	}
 	static void set_connecting_blocked( bool yn ) { 
@@ -93,24 +93,24 @@ public:
 
 	void ensure_monitor_input (bool);
 	bool monitoring_input () const;
-	nframes_t total_latency () const;
+	framecnt_t total_latency () const;
 	int reestablish ();
 	int reconnect ();
 	void request_monitor_input (bool);
-	void set_latency (nframes_t);
+	void set_latency (framecnt_t);
 
 	virtual void reset ();
 
 	/** @return the size of the raw buffer (bytes) for duration @a nframes (audio frames) */
-	virtual size_t raw_buffer_size(jack_nframes_t nframes) const = 0;
+	virtual size_t raw_buffer_size (pframes_t nframes) const = 0;
 
 	virtual DataType type () const = 0;
-	virtual void cycle_start (nframes_t) = 0;
-	virtual void cycle_end (nframes_t) = 0;
+	virtual void cycle_start (pframes_t) = 0;
+	virtual void cycle_end (pframes_t) = 0;
 	virtual void cycle_split () = 0;
-	virtual Buffer& get_buffer (nframes_t nframes, nframes_t offset = 0) = 0;
-	virtual void flush_buffers (nframes_t nframes, framepos_t /*time*/, nframes_t offset = 0) {
-		assert(offset < nframes);
+	virtual Buffer& get_buffer (framecnt_t nframes, framecnt_t offset = 0) = 0;
+	virtual void flush_buffers (pframes_t nframes, framepos_t /*time*/, framecnt_t offset = 0) {
+		assert (offset < nframes);
 	}
 	virtual void transport_stopped () {}
 
@@ -126,8 +126,8 @@ protected:
 
 	jack_port_t* _jack_port; ///< JACK port
 
-	static nframes_t _buffer_size;
-	static bool	 _connecting_blocked;
+	static pframes_t  _buffer_size;
+	static bool	  _connecting_blocked;
         
 	static AudioEngine* _engine; ///< the AudioEngine
 

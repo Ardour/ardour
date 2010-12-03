@@ -102,13 +102,13 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	/* these are the core of the API of a Route. see the protected sections as well */
 
-	virtual int roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	virtual int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
                           int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
 
-	virtual int no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			bool state_changing, bool can_record, bool rec_monitors_input);
 
-	virtual int silent_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	virtual int silent_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
                                  bool can_record, bool rec_monitors_input, bool& need_butler);
 
 	virtual void toggle_monitor_input ();
@@ -243,10 +243,10 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void all_processors_flip();
 	void all_processors_active (Placement, bool state);
 
-	virtual nframes_t update_total_latency();
-	void set_latency_delay (nframes_t);
-	void set_user_latency (nframes_t);
-	nframes_t initial_delay() const { return _initial_delay; }
+	virtual framecnt_t update_total_latency();
+	void set_latency_delay (framecnt_t);
+	void set_user_latency (framecnt_t);
+	framecnt_t initial_delay() const { return _initial_delay; }
 
 	PBD::Signal0<void>       active_changed;
 	PBD::Signal0<void>       phase_invert_changed;
@@ -365,7 +365,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::shared_ptr<Panner> panner() const;
 	boost::shared_ptr<AutomationControl> gain_control() const;
 
-	void automation_snapshot (nframes_t now, bool force=false);
+	void automation_snapshot (framepos_t now, bool force=false);
 	void protect_automation ();
 
 	void set_remote_control_id (uint32_t id, bool notify_class_listeners = true);
@@ -390,28 +390,28 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void mod_solo_by_others_downstream (int32_t);
 	bool has_external_redirects() const;
 	void curve_reallocate ();
-	void just_meter_input (framepos_t start_frame, framepos_t end_frame, nframes_t nframes);
-	virtual void set_block_size (nframes_t nframes);
+	void just_meter_input (framepos_t start_frame, framepos_t end_frame, pframes_t nframes);
+	virtual void set_block_size (pframes_t nframes);
 
   protected:
-	nframes_t check_initial_delay (nframes_t, nframes_t&);
+	framecnt_t check_initial_delay (framecnt_t, framecnt_t&);
 
 	void passthru (framepos_t start_frame, framepos_t end_frame,
-			nframes_t nframes, int declick);
+			pframes_t nframes, int declick);
 
 	virtual void write_out_of_band_data (BufferSet& /* bufs */, framepos_t /* start_frame */, framepos_t /* end_frame */,
-			nframes_t /* nframes */) {}
+			framecnt_t /* nframes */) {}
 
 	virtual void process_output_buffers (BufferSet& bufs,
 			framepos_t start_frame, framepos_t end_frame,
-			nframes_t nframes, bool with_processors, int declick);
+			pframes_t nframes, bool with_processors, int declick);
 
 	boost::shared_ptr<IO> _input;
 	boost::shared_ptr<IO> _output;
 
 	bool           _active;
-	nframes_t      _initial_delay;
-	nframes_t      _roll_delay;
+	framecnt_t     _initial_delay;
+	framecnt_t     _roll_delay;
 
 	ProcessorList  _processors;
 	mutable Glib::RWLock   _processor_lock;
@@ -453,10 +453,10 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	int configure_processors (ProcessorStreams*);
 
 	void passthru_silence (framepos_t start_frame, framepos_t end_frame,
-	                       nframes_t nframes, int declick);
+	                       pframes_t nframes, int declick);
 
-	void silence (nframes_t);
-	void silence_unlocked (nframes_t);
+	void silence (framecnt_t);
+	void silence_unlocked (framecnt_t);
 
 	ChanCount processor_max_streams;
 	uint32_t _remote_control_id;

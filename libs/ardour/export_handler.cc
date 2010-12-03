@@ -178,7 +178,7 @@ ExportHandler::start_timespan ()
 }
 
 int
-ExportHandler::process (nframes_t frames)
+ExportHandler::process (framecnt_t frames)
 {
 	if (!export_status->running) {
 		return 0;
@@ -190,11 +190,11 @@ ExportHandler::process (nframes_t frames)
 }
 
 int
-ExportHandler::process_timespan (nframes_t frames)
+ExportHandler::process_timespan (framecnt_t frames)
 {
 	/* update position */
 
-	nframes_t frames_to_read = 0;
+	framecnt_t frames_to_read = 0;
 	framepos_t const start = current_timespan->get_start();
 	framepos_t const end = current_timespan->get_end();
 	
@@ -538,7 +538,7 @@ void
 ExportHandler::frames_to_cd_frames_string (char* buf, framepos_t when)
 {
 	framecnt_t remainder;
-	nframes_t fr = session.nominal_frame_rate();
+	framecnt_t fr = session.nominal_frame_rate();
 	int mins, secs, frames;
 
 	mins = when / (60 * fr);

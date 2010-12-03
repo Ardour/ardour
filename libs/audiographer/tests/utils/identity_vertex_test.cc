@@ -37,7 +37,7 @@ class IdentityVertexTest : public CppUnit::TestFixture
 		vertex->add_output (sink_a);
 		vertex->add_output (sink_b);
 		
-		nframes_t frames_output = 0;
+		framecnt_t frames_output = 0;
 		
 		ProcessContext<float> c (random_data, frames, 1);
 		vertex->process (c);
@@ -93,7 +93,7 @@ class IdentityVertexTest : public CppUnit::TestFixture
 
 	float * random_data;
 	float * zero_data;
-	nframes_t frames;
+	framecnt_t frames;
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION (IdentityVertexTest);

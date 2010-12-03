@@ -139,7 +139,7 @@ class AudioDiskstream : public Diskstream
 		}
 	}
 
-	static void swap_by_ptr (Sample *first, Sample *last, nframes_t n) {
+	static void swap_by_ptr (Sample *first, Sample *last, framecnt_t n) {
 		while (n--) {
 			Sample tmp = *first;
 			*first++ = *last;
@@ -161,7 +161,7 @@ class AudioDiskstream : public Diskstream
 
 	void set_pending_overwrite(bool);
 	int  overwrite_existing_buffers ();
-	void set_block_size (nframes_t);
+	void set_block_size (pframes_t);
 	int  internal_playback_seek (framecnt_t distance);
 	int  can_internal_playback_seek (framecnt_t distance);
 	int  rename_write_sources ();
@@ -177,17 +177,17 @@ class AudioDiskstream : public Diskstream
   protected:
 	friend class AudioTrack;
 
-	int  process (framepos_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler);
-	bool commit  (nframes_t nframes);
+	int  process (framepos_t transport_frame, pframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler);
+	bool commit  (framecnt_t nframes);
 
   private:
 
 	struct ChannelInfo : public boost::noncopyable {
 
-		ChannelInfo (nframes_t playback_buffer_size, 
-                             nframes_t capture_buffer_size,
-                             nframes_t speed_buffer_size, 
-                             nframes_t wrap_buffer_size);
+		ChannelInfo (framecnt_t playback_buffer_size, 
+                             framecnt_t capture_buffer_size,
+                             framecnt_t speed_buffer_size, 
+                             framecnt_t wrap_buffer_size);
 		~ChannelInfo ();
 
 		Sample     *playback_wrap_buffer;
@@ -216,15 +216,15 @@ class AudioDiskstream : public Diskstream
 
 		RingBufferNPT<CaptureTransition> * capture_transition_buf;
 		// the following are used in the butler thread only
-		nframes_t                     curr_capture_cnt;
+		framecnt_t                     curr_capture_cnt;
 
-                void resize_playback (nframes_t);
-                void resize_capture (nframes_t);
+                void resize_playback (framecnt_t);
+                void resize_capture (framecnt_t);
 	};
 
 	typedef std::vector<ChannelInfo*> ChannelList;
 
-	void process_varispeed_playback(nframes_t nframes, boost::shared_ptr<ChannelList> c);
+	void process_varispeed_playback (pframes_t nframes, boost::shared_ptr<ChannelList> c);
 
 	/* The two central butler operations */
 	int do_flush (RunContext context, bool force = false);
@@ -233,7 +233,7 @@ class AudioDiskstream : public Diskstream
 	int do_refill_with_alloc ();
 
 	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
-                  framepos_t& start, nframes_t cnt,
+                  framepos_t& start, framecnt_t cnt,
                   ChannelInfo* channel_info, int channel, bool reversed);
 
 	void finish_capture (bool rec_monitors_input, boost::shared_ptr<ChannelList>);

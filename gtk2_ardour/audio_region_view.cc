@@ -573,11 +573,11 @@ AudioRegionView::reset_fade_shapes ()
 void
 AudioRegionView::reset_fade_in_shape ()
 {
-	reset_fade_in_shape_width ((nframes_t) audio_region()->fade_in()->back()->when);
+	reset_fade_in_shape_width ((framecnt_t) audio_region()->fade_in()->back()->when);
 }
 
 void
-AudioRegionView::reset_fade_in_shape_width (nframes_t width)
+AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 {
 	if (fade_in_handle == 0) {
 		return;
@@ -585,7 +585,7 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 
 	/* smallest size for a fade is 64 frames */
 
-	width = std::max ((nframes_t) 64, width);
+	width = std::max ((framecnt_t) 64, width);
 
 	Points* points;
 	
@@ -665,11 +665,11 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 void
 AudioRegionView::reset_fade_out_shape ()
 {
-	reset_fade_out_shape_width ((nframes_t) audio_region()->fade_out()->back()->when);
+	reset_fade_out_shape_width ((framecnt_t) audio_region()->fade_out()->back()->when);
 }
 
 void
-AudioRegionView::reset_fade_out_shape_width (nframes_t width)
+AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 {
 	if (fade_out_handle == 0) {
 		return;
@@ -677,7 +677,7 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 
 	/* smallest size for a fade is 64 frames */
 
-	width = std::max ((nframes_t) 64, width);
+	width = std::max ((framecnt_t) 64, width);
 
 	Points* points;
 	double pwidth = width / samples_per_unit;
@@ -1043,7 +1043,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	item->w2i (x, y);
 
-	nframes_t fx = trackview.editor().pixel_to_frame (x);
+	framepos_t fx = trackview.editor().pixel_to_frame (x);
 
 	if (fx > _region->length()) {
 		return;

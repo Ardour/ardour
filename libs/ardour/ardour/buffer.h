@@ -71,13 +71,13 @@ public:
 	virtual void resize (size_t) = 0;
 
 	/** Clear (eg zero, or empty) buffer */
-	virtual void silence (nframes_t len, nframes_t offset = 0) = 0;
+	virtual void silence (framecnt_t len, framecnt_t offset = 0) = 0;
 
 	/** Clear the entire buffer */
 	virtual void clear() { silence(_capacity, 0); }
 
-	virtual void read_from (const Buffer& src, nframes_t len, nframes_t dst_offset = 0, nframes_t src_offset = 0) = 0;
-	virtual void merge_from (const Buffer& src, nframes_t len, nframes_t dst_offset = 0, nframes_t src_offset = 0) = 0;
+	virtual void read_from (const Buffer& src, framecnt_t len, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) = 0;
+	virtual void merge_from (const Buffer& src, framecnt_t len, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) = 0;
 
   protected:
 	Buffer(DataType type, size_t capacity)

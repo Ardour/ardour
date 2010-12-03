@@ -61,16 +61,16 @@ class Processor : public SessionObject, public Automatable, public Latent
 	bool get_next_ab_is_active () const { return _next_ab_is_active; }
 	void set_next_ab_is_active (bool yn) { _next_ab_is_active = yn; }
 
-	virtual nframes_t signal_latency() const { return 0; }
+	virtual framecnt_t signal_latency() const { return 0; }
 
-	virtual int set_block_size (nframes_t /*nframes*/) { return 0; }
+	virtual int set_block_size (pframes_t /*nframes*/) { return 0; }
         virtual bool requires_fixed_sized_buffers() const { return false; }
 
 	/** @param result_required true if, on return from this method, bufs is required to contain valid data;
 	 *  if false, the method need not bother writing to bufs if it doesn't want to.
 	 */  
-	virtual void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, nframes_t /*nframes*/, bool /*result_required*/) {}
-	virtual void silence (nframes_t /*nframes*/) {}
+	virtual void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t /*nframes*/, bool /*result_required*/) {}
+	virtual void silence (framecnt_t /*nframes*/) {}
 
 	virtual void activate ()   { _pending_active = true; ActiveChanged(); }
 	virtual void deactivate () { _pending_active = false; ActiveChanged(); }

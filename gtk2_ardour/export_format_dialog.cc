@@ -210,7 +210,7 @@ ExportFormatDialog::set_session (ARDOUR::Session* s)
 	if (sample_rate_view.get_selection()->count_selected_rows() == 0) {
 		Gtk::ListStore::Children::iterator it;
 		for (it = sample_rate_list->children().begin(); it != sample_rate_list->children().end(); ++it) {
-			if ((nframes_t) (*it)->get_value (sample_rate_cols.ptr)->rate == _session->nominal_frame_rate()) {
+			if ((framecnt_t) (*it)->get_value (sample_rate_cols.ptr)->rate == _session->nominal_frame_rate()) {
 				sample_rate_view.get_selection()->select (it);
 				break;
 			}
@@ -761,7 +761,7 @@ ExportFormatDialog::update_time (AnyTime & time, AudioClock const & clock)
 		return;
 	}
 
-	nframes_t frames = clock.current_duration();
+	framecnt_t frames = clock.current_duration();
 
 	switch (clock.mode()) {
 	  case AudioClock::Timecode:

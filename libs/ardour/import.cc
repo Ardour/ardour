@@ -73,7 +73,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 static boost::shared_ptr<ImportableSource>
-open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQuality quality)
+open_importable_source (const string& path, framecnt_t samplerate, ARDOUR::SrcQuality quality)
 {
 	/* try libsndfile first, because it can get BWF info from .wav, which ExtAudioFile cannot.
 	   We don't necessarily need that information in an ImportableSource, but it keeps the 
@@ -274,7 +274,7 @@ static void
 write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 			       vector<boost::shared_ptr<Source> >& newfiles)
 {
-	const nframes_t nframes = ResampledImportableSource::blocksize;
+	const framecnt_t nframes = ResampledImportableSource::blocksize;
 	boost::shared_ptr<AudioFileSource> afs;
 	uint channels = source->channels();
 
@@ -305,7 +305,7 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 		uint read_count = 0;
 		
 		while (!status.cancel) {
-			nframes_t const nread = source->read (data.get(), nframes);
+			framecnt_t const nread = source->read (data.get(), nframes);
 			if (nread == 0) {
 				break;
 			}
@@ -330,7 +330,7 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 
 	while (!status.cancel) {
 
-		nframes_t nread, nfread;
+		framecnt_t nread, nfread;
 		uint x;
 		uint chn;
 
@@ -349,7 +349,7 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 
 		for (chn = 0; chn < channels; ++chn) {
 
-			nframes_t n;
+			framecnt_t n;
 			for (x = chn, n = 0; n < nfread; x += channels, ++n) {
 				channel_data[chn][n] = (Sample) data[x];
 			}

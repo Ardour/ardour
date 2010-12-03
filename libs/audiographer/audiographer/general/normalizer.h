@@ -48,7 +48,7 @@ class Normalizer
 	  * non-const ProcessContexts are given to \a process() .
 	  * \n Not RT safe
 	  */
-	void alloc_buffer(nframes_t frames)
+	void alloc_buffer(framecnt_t frames)
 	{
 		delete [] buffer;
 		buffer = new float[frames];
@@ -86,7 +86,7 @@ class Normalizer
 	float     gain;
 	
 	float *   buffer;
-	nframes_t buffer_size;
+	framecnt_t buffer_size;
 };
 
 

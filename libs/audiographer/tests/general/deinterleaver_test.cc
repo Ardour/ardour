@@ -61,9 +61,9 @@ class DeInterleaverTest : public CppUnit::TestFixture
 		CPPUNIT_ASSERT_THROW (deinterleaver->process (c.beginning (total_frames - 1)), Exception);
 	}
 
-	void assert_outputs (nframes_t expected_frames)
+	void assert_outputs (framecnt_t expected_frames)
 	{
-		nframes_t generated_frames = 0;
+		framecnt_t generated_frames = 0;
 		
 		generated_frames = sink_a->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (expected_frames, generated_frames);
@@ -89,7 +89,7 @@ class DeInterleaverTest : public CppUnit::TestFixture
 		assert_outputs (frames_per_channel);
 		
 		// Now with less frames
-		nframes_t const less_frames = frames_per_channel / 4;
+		framecnt_t const less_frames = frames_per_channel / 4;
 		deinterleaver->process (c.beginning (less_frames * channels));
 		assert_outputs (less_frames);
 	}
@@ -120,8 +120,8 @@ class DeInterleaverTest : public CppUnit::TestFixture
 	boost::shared_ptr<VectorSink<float> > sink_c;
 
 	float * random_data;
-	nframes_t frames_per_channel;
-	nframes_t total_frames;
+	framecnt_t frames_per_channel;
+	framecnt_t total_frames;
 	unsigned int channels;
 };
 

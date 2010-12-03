@@ -43,7 +43,7 @@ class ExportChannel : public boost::less_than_comparable<ExportChannel>
 
 	virtual ~ExportChannel () {}
 
-	virtual void read (Sample * data, nframes_t frames) const = 0;
+	virtual void read (Sample * data, framecnt_t frames) const = 0;
 	virtual bool empty () const = 0;
 
 	/// Adds state to node passed
@@ -75,7 +75,7 @@ class PortExportChannel : public ExportChannel
 
 	PortExportChannel () {}
 
-	void read (Sample * data, nframes_t frames) const;
+	void read (Sample * data, framecnt_t frames) const;
 	bool empty () const { return ports.empty(); }
 
 	void get_state (XMLNode * node) const;
@@ -104,23 +104,23 @@ class RegionExportChannelFactory
 	~RegionExportChannelFactory ();
 
 	ExportChannelPtr create (uint32_t channel);
-	void read (uint32_t channel, Sample * data, nframes_t frames_to_read);
+	void read (uint32_t channel, Sample * data, framecnt_t frames_to_read);
 
   private:
 
-	int new_cycle_started (nframes_t) { buffers_up_to_date = false; return 0; }
-	void update_buffers (nframes_t frames);
+	int new_cycle_started (framecnt_t) { buffers_up_to_date = false; return 0; }
+	void update_buffers (framecnt_t frames);
 
 	AudioRegion const & region;
 	AudioTrack & track;
 	Type type;
 
-	nframes_t frames_per_cycle;
+	framecnt_t frames_per_cycle;
 	size_t n_channels;
 	BufferSet buffers;
 	bool buffers_up_to_date;
-	nframes_t region_start;
-	nframes_t position;
+	framecnt_t region_start;
+	framecnt_t position;
 
 	Sample * mixdown_buffer;
 	Sample * gain_buffer;
@@ -134,7 +134,7 @@ class RegionExportChannel : public ExportChannel
 	friend class RegionExportChannelFactory;
 
   public:
-	void read (Sample * data, nframes_t frames_to_read) const { factory.read (channel, data, frames_to_read); }
+	void read (Sample * data, framecnt_t frames_to_read) const { factory.read (channel, data, frames_to_read); }
 	void get_state (XMLNode * /*node*/) const {};
 	void set_state (XMLNode * /*node*/, Session & /*session*/) {};
 	bool empty () const { return false; }

@@ -223,7 +223,7 @@ PluginInsert::parameter_changed (Evoral::Parameter which, float val)
 }
 
 int
-PluginInsert::set_block_size (nframes_t nframes)
+PluginInsert::set_block_size (pframes_t nframes)
 {
         int ret = 0;
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
@@ -263,11 +263,11 @@ PluginInsert::flush ()
 }
 
 void
-PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now)
+PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now)
 {
 	// Calculate if, and how many frames we need to collect for analysis
-	nframes_t collect_signal_nframes = (_signal_analysis_collect_nframes_max -
-                                            _signal_analysis_collected_nframes);
+	framecnt_t collect_signal_nframes = (_signal_analysis_collect_nframes_max -
+					     _signal_analysis_collected_nframes);
 	if (nframes < collect_signal_nframes) { // we might not get all frames now
 		collect_signal_nframes = nframes;
 	}
@@ -355,7 +355,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t off
 }
 
 void
-PluginInsert::silence (nframes_t nframes)
+PluginInsert::silence (framecnt_t nframes)
 {
 	ChanMapping in_map(input_streams());
 	ChanMapping out_map(output_streams());
@@ -368,7 +368,7 @@ PluginInsert::silence (nframes_t nframes)
 }
 
 void
-PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, nframes_t nframes, bool)
+PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t nframes, bool)
 {
 	if (_pending_active) {
 		/* run as normal if we are active or moving from inactive to active */
@@ -437,12 +437,12 @@ PluginInsert::get_parameter (Evoral::Parameter param)
 }
 
 void
-PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes)
+PluginInsert::automation_run (BufferSet& bufs, pframes_t nframes)
 {
 	Evoral::ControlEvent next_event (0, 0.0f);
-	nframes_t now = _session.transport_frame ();
-	nframes_t end = now + nframes;
-	nframes_t offset = 0;
+	framepos_t now = _session.transport_frame ();
+	framepos_t end = now + nframes;
+	framecnt_t offset = 0;
 
 	Glib::Mutex::Lock lm (control_lock(), Glib::TRY_LOCK);
 
@@ -461,7 +461,7 @@ PluginInsert::automation_run (BufferSet& bufs, nframes_t nframes)
 
 	while (nframes) {
 
-		nframes_t cnt = min (((nframes_t) ceil (next_event.when) - now), nframes);
+		framecnt_t cnt = min (((framecnt_t) ceil (next_event.when) - now), (framecnt_t) nframes);
 
 		connect_and_run (bufs, cnt, offset, true, now);
 
@@ -922,7 +922,7 @@ PluginInsert::describe_parameter (Evoral::Parameter param)
 	return _plugins[0]->describe_parameter (param);
 }
 
-ARDOUR::nframes_t
+ARDOUR::framecnt_t
 PluginInsert::signal_latency() const
 {
 	if (_user_latency) {
@@ -1040,7 +1040,7 @@ PluginInsert::get_impulse_analysis_plugin()
 }
 
 void
-PluginInsert::collect_signal_for_analysis(nframes_t nframes)
+PluginInsert::collect_signal_for_analysis (framecnt_t nframes)
 {
 	// called from outside the audio thread, so this should be safe
 	// only do audio as analysis is (currently) only for audio plugins

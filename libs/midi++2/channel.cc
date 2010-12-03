@@ -47,7 +47,7 @@ Channel::connect_signals ()
 }
 
 void
-Channel::reset (timestamp_t timestamp, nframes_t /*nframes*/, bool notes_off)
+Channel::reset (timestamp_t timestamp, framecnt_t /*nframes*/, bool notes_off)
 {
 	_program_number = _channel_number;
 	_bank_number = 0;

@@ -34,7 +34,7 @@ class DeInterleaver
 	typedef boost::shared_ptr<Source<T> > SourcePtr;
 	
 	/// Inits the deinterleaver. Must be called before using. \n Not RT safe
-	void init (unsigned int num_channels, nframes_t max_frames_per_channel)
+	void init (unsigned int num_channels, framecnt_t max_frames_per_channel)
 	{
 		reset();
 		channels = num_channels;
@@ -59,10 +59,10 @@ class DeInterleaver
 	/// Deinterleaves data and outputs it to the outputs. \n RT safe
 	void process (ProcessContext<T> const & c)
 	{
-		nframes_t frames = c.frames();
+		framecnt_t frames = c.frames();
 		T const * data = c.data();
 		
-		nframes_t const  frames_per_channel = frames / channels;
+		framecnt_t const  frames_per_channel = frames / channels;
 		
 		if (throw_level (ThrowProcess) && c.channels() != channels) {
 			throw Exception (*this, "wrong amount of channels given to process()");
@@ -100,7 +100,7 @@ class DeInterleaver
 	
 	std::vector<OutputPtr> outputs;
 	unsigned int channels;
-	nframes_t max_frames;
+	framecnt_t max_frames;
 	T * buffer;
 };
 

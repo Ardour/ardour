@@ -43,8 +43,8 @@ public:
 	Ticker() {};
 	virtual ~Ticker() {}
 
-	virtual void tick(
-		const nframes_t& transport_frames,
+	virtual void tick (
+		const framepos_t& transport_frames,
 		const BBT_Time& transport_bbt,
 		const Timecode::Time& transport_timecode) = 0;
 
@@ -68,7 +68,7 @@ public:
 	}
 
 	void tick(
-		const nframes_t& transport_frames,
+		const framepos_t& transport_frames,
 		const BBT_Time& transport_bbt,
 		const Timecode::Time& transport_timecode);
 
@@ -82,7 +82,7 @@ public:
 	void transport_state_changed();
 
 	/// slot for the signal session::PositionChanged
-	void position_changed(nframes_t position);
+	void position_changed (framepos_t position);
 
 	/// slot for the signal session::TransportLooped
 	void transport_looped();
@@ -95,12 +95,12 @@ private:
 	int          _ppqn;
 	double       _last_tick;
 
-	double one_ppqn_in_frames(nframes_t transport_position);
+	double one_ppqn_in_frames (framepos_t transport_position);
 
-	void send_midi_clock_event(nframes_t offset);
-	void send_start_event(nframes_t offset);
-	void send_continue_event(nframes_t offset);
-	void send_stop_event(nframes_t offset);
+	void send_midi_clock_event (framecnt_t offset);
+	void send_start_event (framecnt_t offset);
+	void send_continue_event (framecnt_t offset);
+	void send_stop_event (framecnt_t offset);
 };
 
 }

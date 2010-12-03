@@ -66,7 +66,7 @@ using namespace PBD;
  * default from configuration_vars.h).  0 is not a good value for
  * allocating buffer sizes..
  */
-ARDOUR::nframes_t Diskstream::disk_io_chunk_frames = 1024 * 256;
+ARDOUR::framecnt_t Diskstream::disk_io_chunk_frames = 1024 * 256;
 
 PBD::Signal0<void>                Diskstream::DiskOverrun;
 PBD::Signal0<void>                Diskstream::DiskUnderrun;
@@ -110,9 +110,6 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
         , in_set_state (false)
         , _persistent_alignment_style (ExistingMaterial)
         , first_input_change (true)
-        , scrub_start (0)
-        , scrub_buffer_size (0)
-        , scrub_offset (0)
         , _flags (flag)
 
 {
@@ -157,9 +154,6 @@ Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
         , in_set_state (false)
         , _persistent_alignment_style (ExistingMaterial)
         , first_input_change (true)
-        , scrub_start (0)
-        , scrub_buffer_size (0)
-        , scrub_offset (0)
         , _flags (Recordable)
 {
 }
@@ -238,7 +232,7 @@ Diskstream::realtime_set_speed (double sp, bool global)
 
 	if (new_speed != _actual_speed) {
 
-		nframes_t required_wrap_size = (nframes_t) floor (_session.get_block_size() *
+		framecnt_t required_wrap_size = (framecnt_t) floor (_session.get_block_size() *
                                                                   fabs (new_speed)) + 1;
 
 		if (required_wrap_size > wrap_buffer_size) {
@@ -329,7 +323,7 @@ Diskstream::get_captured_frames (uint32_t n) const
 }
 
 void
-Diskstream::set_roll_delay (ARDOUR::nframes_t nframes)
+Diskstream::set_roll_delay (ARDOUR::framecnt_t nframes)
 {
 	_roll_delay = nframes;
 }
@@ -639,7 +633,7 @@ Diskstream::route_going_away ()
 
 void
 Diskstream::calculate_record_range(OverlapType ot, framepos_t transport_frame, framecnt_t nframes,
-				   nframes_t& rec_nframes, nframes_t& rec_offset)
+				   framecnt_t & rec_nframes, framecnt_t & rec_offset)
 {
 	switch (ot) {
 	case OverlapNone:

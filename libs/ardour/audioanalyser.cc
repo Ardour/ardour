@@ -111,7 +111,7 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 
 	while (!done) {
 
-		nframes_t to_read;
+		framecnt_t to_read;
 
 		/* read from source */
 

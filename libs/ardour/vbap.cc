@@ -141,7 +141,7 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 }
 
 void
-VBAPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coefficient, nframes_t nframes)
+VBAPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coefficient, pframes_t nframes)
 {
 	if (_muted) {
 		return;
@@ -179,7 +179,7 @@ VBAPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coe
 	for (int o = 0; o < 3; ++o) {
 		if (desired_outputs[o] != -1) {
 
-			nframes_t n = 0;
+			pframes_t n = 0;
 
 			/* XXX TODO: interpolate across changes in gain and/or outputs
 			 */
@@ -209,7 +209,7 @@ VBAPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coe
 
 void 
 VBAPanner::do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
-                                    nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers)
+                                    framepos_t start, framepos_t end, pframes_t nframes, pan_t** buffers)
 {
 }
 

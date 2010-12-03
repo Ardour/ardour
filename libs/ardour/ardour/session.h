@@ -190,7 +190,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::string new_source_path_from_name (DataType type, const std::string&, bool as_stub = false);
 	RouteList new_route_from_template (uint32_t how_many, const std::string& template_path);
 
-	void process (nframes_t nframes);
+	void process (pframes_t nframes);
 
 	BufferSet& get_silent_buffers (ChanCount count = ChanCount::ZERO);
 	BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO);
@@ -297,7 +297,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void request_play_loop (bool yn, bool leave_rolling = false);
 	bool get_play_loop () const { return play_loop; }
 
-	nframes_t  last_transport_start() const { return _last_roll_location; }
+	framepos_t last_transport_start () const { return _last_roll_location; }
 	void goto_end ();
 	void goto_start ();
 	void use_rf_shuttle_speed ();
@@ -317,14 +317,14 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::pair<framepos_t, framepos_t> get_extent () const;
 	framepos_t current_end_frame () const;
 	framepos_t current_start_frame () const;
-	/// "actual" sample rate of session, set by current audioengine rate, pullup/down etc.
-	nframes_t frame_rate() const   { return _current_frame_rate; }
-	/// "native" sample rate of session, regardless of current audioengine rate, pullup/down etc
-	nframes_t nominal_frame_rate() const   { return _nominal_frame_rate; }
-	nframes_t frames_per_hour() const { return _frames_per_hour; }
+	/** "actual" sample rate of session, set by current audioengine rate, pullup/down etc. */
+	framecnt_t frame_rate () const { return _current_frame_rate; }
+	/** "native" sample rate of session, regardless of current audioengine rate, pullup/down etc */
+	framecnt_t nominal_frame_rate () const { return _nominal_frame_rate; }
+	framecnt_t frames_per_hour () const { return _frames_per_hour; }
 
 	double frames_per_timecode_frame() const { return _frames_per_timecode_frame; }
-	nframes_t timecode_frames_per_hour() const { return _timecode_frames_per_hour; }
+	framecnt_t timecode_frames_per_hour() const { return _timecode_frames_per_hour; }
 
 	MIDI::byte get_mtc_timecode_bits() const {
 		return mtc_timecode_bits;   /* encoding of SMTPE type for MTC */
@@ -347,10 +347,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void reset_input_monitor_state ();
 
-	nframes_t get_block_size()        const { return current_block_size; }
-	nframes_t worst_output_latency () const { return _worst_output_latency; }
-	nframes_t worst_input_latency ()  const { return _worst_input_latency; }
-	nframes_t worst_track_latency ()  const { return _worst_track_latency; }
+	pframes_t get_block_size()        const { return current_block_size; }
+	framecnt_t worst_output_latency () const { return _worst_output_latency; }
+	framecnt_t worst_input_latency ()  const { return _worst_input_latency; }
+	framecnt_t worst_track_latency ()  const { return _worst_track_latency; }
 
 #ifdef HAVE_JACK_SESSION 
 	void jack_session_event (jack_session_event_t* event);
@@ -449,17 +449,17 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void sync_time_vars();
 
-	void bbt_time (nframes_t when, BBT_Time&);
+	void bbt_time (framepos_t when, BBT_Time&);
 	void timecode_to_sample(Timecode::Time& timecode, framepos_t& sample, bool use_offset, bool use_subframes) const;
 	void sample_to_timecode(framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
 	void timecode_time (Timecode::Time &);
-	void timecode_time (nframes_t when, Timecode::Time&);
-	void timecode_time_subframes (nframes_t when, Timecode::Time&);
+	void timecode_time (framepos_t when, Timecode::Time&);
+	void timecode_time_subframes (framepos_t when, Timecode::Time&);
 
 	void timecode_duration (framecnt_t, Timecode::Time&) const;
 	void timecode_duration_string (char *, framecnt_t) const;
 
-	nframes_t convert_to_frames_at (nframes_t position, AnyTime const &);
+	framecnt_t convert_to_frames_at (framepos_t position, AnyTime const &);
 
 	static PBD::Signal1<void, framepos_t> StartTimeChanged;
 	static PBD::Signal1<void, framepos_t> EndTimeChanged;
@@ -475,12 +475,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void set_silent (bool yn);
 	bool silent () { return _silent; }
 
-	int jack_slave_sync (nframes_t);
-
 	TempoMap& tempo_map() { return *_tempo_map; }
 
 	/// signals the current transport position in frames, bbt and timecode time (in that order)
-	PBD::Signal3<void,const nframes_t&, const BBT_Time&, const Timecode::Time&> tick;
+	PBD::Signal3<void, const framepos_t &, const BBT_Time&, const Timecode::Time&> tick;
 
 	/* region info  */
 
@@ -501,9 +499,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::shared_ptr<ExportHandler> get_export_handler ();
 	boost::shared_ptr<ExportStatus> get_export_status ();
 
-	int  start_audio_export (nframes_t position, bool realtime);
+	int start_audio_export (framepos_t position, bool realtime);
 
-	PBD::Signal1<int,nframes_t> ProcessExport;
+	PBD::Signal1<int, framecnt_t> ProcessExport;
 	static PBD::Signal2<void,std::string, std::string> Exported;
 
 	void add_source (boost::shared_ptr<Source>);
@@ -525,7 +523,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/** handlers should return 0 for "ignore the rate mismatch",
 	    !0 for "do not use this session"
 	*/
-	static PBD::Signal2<int,nframes_t, nframes_t> AskAboutSampleRateMismatch;
+	static PBD::Signal2<int, framecnt_t, framecnt_t> AskAboutSampleRateMismatch;
 
 	/** handlers should return !0 for use pending state, 0 for ignore it.
 	*/
@@ -640,14 +638,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	PBD::Signal1<void,boost::shared_ptr<Bundle> > BundleRemoved;
 
 	void midi_panic ();
-
-	/* Scrubbing */
-
-	void start_scrub (nframes_t where);
-	void stop_scrub ();
-	void set_scrub_speed (float);
-	nframes_t scrub_buffer_size() const;
-	PBD::Signal0<void> ScrubReady;
 
 	/* History (for editors, mixers, UIs etc.) */
 
@@ -809,8 +799,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
   protected:
 	friend class AudioEngine;
-	void set_block_size (nframes_t nframes);
-	void set_frame_rate (nframes_t nframes);
+	void set_block_size (pframes_t nframes);
+	void set_frame_rate (framecnt_t nframes);
 
   protected:
 	friend class Route;
@@ -832,16 +822,16 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	   maximise cache hits
 	*/
 
-	typedef void (Session::*process_function_type)(nframes_t);
+	typedef void (Session::*process_function_type)(pframes_t);
 
 	AudioEngine&            _engine;
 	mutable gint             processing_prohibited;
 	process_function_type    process_function;
 	process_function_type    last_process_function;
 	bool                     waiting_for_sync_offset;
-	nframes_t               _base_frame_rate;
-	nframes_t               _current_frame_rate;  //this includes video pullup offset
-	nframes_t               _nominal_frame_rate;  //ignores audioengine setting, "native" SR
+	framecnt_t              _base_frame_rate;
+	framecnt_t              _current_frame_rate;  //this includes video pullup offset
+	framecnt_t              _nominal_frame_rate;  //ignores audioengine setting, "native" SR
 	int                      transport_sub_state;
 	mutable gint            _record_status;
 	framepos_t              _transport_frame;
@@ -857,12 +847,12 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	bool                     auto_play_legal;
 	framepos_t              _last_slave_transport_frame;
-	nframes_t                maximum_output_latency;
+	framecnt_t               maximum_output_latency;
 	framepos_t              _requested_return_frame;
-	nframes_t                current_block_size;
-	nframes_t               _worst_output_latency;
-	nframes_t               _worst_input_latency;
-	nframes_t               _worst_track_latency;
+	pframes_t                current_block_size;
+	framecnt_t              _worst_output_latency;
+	framecnt_t              _worst_input_latency;
+	framecnt_t              _worst_track_latency;
 	bool                    _have_captured;
 	float                   _meter_hold;
 	float                   _meter_falloff;
@@ -881,12 +871,12 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void ensure_buffers (ChanCount howmany = ChanCount::ZERO);
 
-	void process_scrub          (nframes_t);
-	void process_without_events (nframes_t);
-	void process_with_events    (nframes_t);
-	void process_audition       (nframes_t);
-	void process_export         (nframes_t);
-	int  process_export_fw      (nframes_t);
+	void process_scrub          (pframes_t);
+	void process_without_events (pframes_t);
+	void process_with_events    (pframes_t);
+	void process_audition       (pframes_t);
+	void process_export         (pframes_t);
+	int  process_export_fw      (pframes_t);
 
 	void block_processing() { g_atomic_int_set (&processing_prohibited, 1); }
 	void unblock_processing() { g_atomic_int_set (&processing_prohibited, 0); }
@@ -905,20 +895,20 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool have_first_delta_accumulator;
 
 	SlaveState _slave_state;
-	nframes_t slave_wait_end;
+	framepos_t slave_wait_end;
 
 	void reset_slave_state ();
-	bool follow_slave (nframes_t);
-	void calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta);
-	void track_slave_state(float slave_speed, nframes_t slave_transport_frame, nframes_t this_delta);
-	void follow_slave_silently(nframes_t nframes, float slave_speed);
+	bool follow_slave (pframes_t);
+	void calculate_moving_average_of_slave_delta (int dir, framecnt_t this_delta);
+	void track_slave_state (float slave_speed, framepos_t slave_transport_frame, framecnt_t this_delta);
+	void follow_slave_silently (pframes_t nframes, float slave_speed);
 
 	void switch_to_sync_source (SyncSource); /* !RT context */
 	void drop_sync_source ();  /* !RT context */
 	void use_sync_source (Slave*); /* RT context */
 
 	bool post_export_sync;
-	nframes_t post_export_position;
+	framepos_t post_export_position;
 
 	bool _exporting;
 	bool _export_rolling;
@@ -933,8 +923,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	PBD::ScopedConnection export_freewheel_connection;
 
 	void get_track_statistics ();
-	int  process_routes (nframes_t, bool& need_butler);
-	int  silent_process_routes (nframes_t, bool& need_butler);
+	int  process_routes (pframes_t, bool& need_butler);
+	int  silent_process_routes (pframes_t, bool& need_butler);
 
 	bool get_rec_monitors_input () {
 		if (actively_recording()) {
@@ -959,8 +949,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		}
 	}
 
-	bool maybe_stop (nframes_t limit);
-	bool maybe_sync_start (nframes_t&);
+	bool maybe_stop (framepos_t limit);
+	bool maybe_sync_start (pframes_t &);
 
 	void check_declick_out ();
 
@@ -971,7 +961,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool                     session_midi_feedback;
 	bool                     play_loop;
 	bool                     loop_changing;
-	nframes_t                last_loopend;
+	framepos_t               last_loopend;
 
 	boost::scoped_ptr<SessionDirectory> _session_dir;
 
@@ -989,12 +979,12 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int      load_options (const XMLNode&);
 	int      load_state (std::string snapshot_name);
 
-	nframes_t _last_roll_location;
-	nframes_t _last_roll_or_reversal_location;
-	nframes_t _last_record_location;
+	framepos_t _last_roll_location;
+	framepos_t _last_roll_or_reversal_location;
+	framepos_t _last_record_location;
 
 	bool              pending_locate_roll;
-	nframes_t         pending_locate_frame;
+	framepos_t        pending_locate_frame;
 	bool              pending_locate_flush;
 	bool              pending_abort;
 	bool              pending_auto_loop;
@@ -1045,7 +1035,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	uint32_t    rf_scale;
 
 	void set_rf_speed (float speed);
-	void reset_rf_scale (nframes_t frames_moved);
+	void reset_rf_scale (framecnt_t frames_moved);
 
 	Locations*       _locations;
 	void              locations_changed ();
@@ -1099,9 +1089,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* MIDI Machine Control */
 
-	void spp_start (MIDI::Parser&, nframes_t timestamp);
-	void spp_continue (MIDI::Parser&, nframes_t timestamp);
-	void spp_stop (MIDI::Parser&, nframes_t timestamp);
+	void spp_start (MIDI::Parser&, framepos_t timestamp);
+	void spp_continue (MIDI::Parser&, framepos_t timestamp);
+	void spp_stop (MIDI::Parser&, framepos_t timestamp);
 
 	void mmc_deferred_play (MIDI::MachineControl &);
 	void mmc_stop (MIDI::MachineControl &);
@@ -1129,30 +1119,28 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	MIDI::byte mtc_msg[16];
 	MIDI::byte mtc_timecode_bits;   /* encoding of SMTPE type for MTC */
 	MIDI::byte midi_msg[16];
-	nframes_t  outbound_mtc_timecode_frame;
+	framepos_t outbound_mtc_timecode_frame;
 	Timecode::Time transmitting_timecode_time;
 	int next_quarter_frame_to_send;
 
 	double _frames_per_timecode_frame; /* has to be floating point because of drop frame */
-	nframes_t _frames_per_hour;
-	nframes_t _timecode_frames_per_hour;
+	framecnt_t _frames_per_hour;
+	framecnt_t _timecode_frames_per_hour;
 
 	/* cache the most-recently requested time conversions. This helps when we
 	 * have multiple clocks showing the same time (e.g. the transport frame) */
-	bool           last_timecode_valid;
-	nframes_t last_timecode_when;
-	Timecode::Time    last_timecode;
+	bool last_timecode_valid;
+	framepos_t last_timecode_when;
+	Timecode::Time last_timecode;
 
 	bool _send_timecode_update; ///< Flag to send a full frame (Timecode) MTC message this cycle
 
-	int send_midi_time_code_for_cycle(nframes_t nframes);
-
-	nframes_t adjust_apparent_position (nframes_t frames);
+	int send_midi_time_code_for_cycle (pframes_t nframes);
 
 	void reset_record_status ();
 
-	int no_roll (nframes_t nframes);
-	int fail_roll (nframes_t nframes);
+	int no_roll (pframes_t nframes);
+	int fail_roll (pframes_t nframes);
 
 	bool non_realtime_work_pending() const { return static_cast<bool>(post_transport_work()); }
 	bool process_can_proceed() const { return !(post_transport_work() & ProcessCannotProceedMask); }
@@ -1166,7 +1154,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void unset_play_loop ();
 	void overwrite_some_buffers (Track *);
 	void flush_all_inserts ();
-	int  micro_locate (nframes_t distance);
+	int  micro_locate (framecnt_t distance);
 	void locate (framepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false, bool with_mmc=true);
 	void start_locate (framepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
 	void force_locate (framepos_t frame, bool with_roll = false);
@@ -1294,7 +1282,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* FLATTEN */
 
-	int flatten_one_track (AudioTrack&, nframes_t start, nframes_t cnt);
+	int flatten_one_track (AudioTrack&, framepos_t start, framecnt_t cnt);
 
 	/* INSERT AND SEND MANAGEMENT */
 
@@ -1344,7 +1332,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	UndoHistory                  _history;
 	std::stack<UndoTransaction*> _current_trans;
 
-	void jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int);
+	void jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int);
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
 	void reset_jack_connection (jack_client_t* jack);
 	void process_rtop (SessionEvent*);
@@ -1358,19 +1346,19 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::shared_ptr<IO> _click_io;
 	Sample*                click_data;
 	Sample*                click_emphasis_data;
-	nframes_t              click_length;
-	nframes_t              click_emphasis_length;
+	framecnt_t             click_length;
+	framecnt_t             click_emphasis_length;
 	mutable Glib::RWLock   click_lock;
 
-	static const Sample    default_click[];
-	static const nframes_t default_click_length;
-	static const Sample    default_click_emphasis[];
-	static const nframes_t default_click_emphasis_length;
+	static const Sample     default_click[];
+	static const framecnt_t default_click_length;
+	static const Sample     default_click_emphasis[];
+	static const framecnt_t default_click_emphasis_length;
 
 	Click *get_click();
 	void   setup_click_sounds (int which);
 	void   clear_clicks ();
-	void   click (nframes_t start, nframes_t nframes);
+	void   click (framepos_t start, framecnt_t nframes);
 
 	std::vector<Route*> master_outs;
 
@@ -1448,7 +1436,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/** temporary list of Diskstreams used only during load of 2.X sessions */
 	std::list<boost::shared_ptr<Diskstream> > _diskstreams_2X;
 
-	void add_session_range_location (nframes_t, nframes_t);
+	void add_session_range_location (framepos_t, framepos_t);
 
 	void setup_midi_machine_control ();
 	void cleanup_stubfiles ();

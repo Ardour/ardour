@@ -33,13 +33,13 @@ class ChunkerTest : public CppUnit::TestFixture
 	void testSynchronousProcess()
 	{
 		chunker->add_output (sink);
-		nframes_t frames_output = 0;
+		framecnt_t frames_output = 0;
 		
 		ProcessContext<float> const context (random_data, frames, 1);
 		
 		chunker->process (context);
 		frames_output = sink->get_data().size();
-		CPPUNIT_ASSERT_EQUAL ((nframes_t) 0, frames_output);
+		CPPUNIT_ASSERT_EQUAL ((framecnt_t) 0, frames_output);
 		
 		chunker->process (context);
 		frames_output = sink->get_data().size();
@@ -51,7 +51,7 @@ class ChunkerTest : public CppUnit::TestFixture
 		
 		chunker->process (context);
 		frames_output = sink->get_data().size();
-		CPPUNIT_ASSERT_EQUAL ((nframes_t) 0, frames_output);
+		CPPUNIT_ASSERT_EQUAL ((framecnt_t) 0, frames_output);
 		
 		chunker->process (context);
 		frames_output = sink->get_data().size();
@@ -65,7 +65,7 @@ class ChunkerTest : public CppUnit::TestFixture
 		assert (frames % 2 == 0);
 		
 		chunker->add_output (sink);
-		nframes_t frames_output = 0;
+		framecnt_t frames_output = 0;
 		
 		ProcessContext<float> const half_context (random_data, frames / 2, 1);
 		ProcessContext<float> const context (random_data, frames, 1);
@@ -73,12 +73,12 @@ class ChunkerTest : public CppUnit::TestFixture
 		// 0.5
 		chunker->process (half_context);
 		frames_output = sink->get_data().size();
-		CPPUNIT_ASSERT_EQUAL ((nframes_t) 0, frames_output);
+		CPPUNIT_ASSERT_EQUAL ((framecnt_t) 0, frames_output);
 		
 		// 1.5
 		chunker->process (context);
 		frames_output = sink->get_data().size();
-		CPPUNIT_ASSERT_EQUAL ((nframes_t) 0, frames_output);
+		CPPUNIT_ASSERT_EQUAL ((framecnt_t) 0, frames_output);
 		
 		// 2.5
 		chunker->process (context);
@@ -93,7 +93,7 @@ class ChunkerTest : public CppUnit::TestFixture
 		// 3.5
 		chunker->process (context);
 		frames_output = sink->get_data().size();
-		CPPUNIT_ASSERT_EQUAL ((nframes_t) 0, frames_output);
+		CPPUNIT_ASSERT_EQUAL ((framecnt_t) 0, frames_output);
 		
 		// 4.0
 		chunker->process (half_context);
@@ -112,7 +112,7 @@ class ChunkerTest : public CppUnit::TestFixture
 		chunker.reset (new Chunker<float>(frames / 4));
 		
 		chunker->add_output (sink);
-		nframes_t frames_output = 0;
+		framecnt_t frames_output = 0;
 		
 		ProcessContext<float> const half_context (random_data, frames / 2, 1);
 		ProcessContext<float> const context (random_data, frames, 1);
@@ -120,12 +120,12 @@ class ChunkerTest : public CppUnit::TestFixture
 		// 0.5
 		chunker->process (half_context);
 		frames_output = sink->get_data().size();
-		CPPUNIT_ASSERT_EQUAL ((nframes_t) frames / 2, frames_output);
+		CPPUNIT_ASSERT_EQUAL ((framecnt_t) frames / 2, frames_output);
 		
 		// 1.5
 		chunker->process (context);
 		frames_output = sink->get_data().size();
-		CPPUNIT_ASSERT_EQUAL ((nframes_t) frames / 2 * 3, frames_output);
+		CPPUNIT_ASSERT_EQUAL ((framecnt_t) frames / 2 * 3, frames_output);
 		
 		// 2.5
 		chunker->process (context);
@@ -141,7 +141,7 @@ class ChunkerTest : public CppUnit::TestFixture
 	boost::shared_ptr<VectorSink<float> > sink;
 
 	float * random_data;
-	nframes_t frames;
+	framecnt_t frames;
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION (ChunkerTest);

@@ -57,9 +57,9 @@ class Port {
 	// FIXME: make Manager a friend of port so these can be hidden?
 
 	/* Only for use by MidiManager.  Don't ever call this. */
-	void cycle_start(nframes_t nframes);
+	void cycle_start (pframes_t nframes);
 	/* Only for use by MidiManager.  Don't ever call this. */
-	void cycle_end();
+	void cycle_end ();
 
 	/** Write a message to port.
 	 * @param msg Raw MIDI message to send
@@ -76,7 +76,7 @@ class Port {
 	 */
 	int read (byte *buf, size_t bufsize);
 
-	void parse (nframes_t timestamp);
+	void parse (framecnt_t timestamp);
 	
 	/** Write a message to port.
 	 * @return true on success.
@@ -124,7 +124,7 @@ class Port {
 	    XMLNode& get_state();
 	};
 
-	nframes_t nframes_this_cycle() const {	return _nframes_this_cycle; }
+	pframes_t nframes_this_cycle() const { return _nframes_this_cycle; }
 
 	void reestablish (jack_client_t *);
 	void reconnect ();
@@ -141,7 +141,7 @@ class Port {
 private:	
 	bool             _ok;
 	bool             _currently_in_cycle;
-	nframes_t        _nframes_this_cycle;
+	pframes_t        _nframes_this_cycle;
 	std::string      _tagname;
 	size_t           _number;
 	Channel          *_channel[16];
@@ -151,7 +151,7 @@ private:
 
 	jack_client_t* _jack_client;
 	jack_port_t*   _jack_port;
-	nframes_t      _last_read_index;
+	framecnt_t     _last_read_index;
 	timestamp_t    _last_write_timestamp;
 
 	/** Channel used to signal to the MidiControlUI that input has arrived */

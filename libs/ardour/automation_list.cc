@@ -392,7 +392,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 		const XMLNodeList& elist = node.children();
 		XMLNodeConstIterator i;
 		XMLProperty* prop;
-		nframes_t x;
+		pframes_t x;
 		double y;
 
                 ControlList::freeze ();

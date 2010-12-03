@@ -774,26 +774,26 @@ Region::trim_front (framepos_t new_position, void *src)
 }
 
 void
-Region::cut_front (nframes_t new_position, void *src)
+Region::cut_front (framepos_t new_position, void *src)
 {
 	modify_front (new_position, true, src);
 }
 
 void
-Region::cut_end (nframes_t new_endpoint, void *src)
+Region::cut_end (framepos_t new_endpoint, void *src)
 {
 	modify_end (new_endpoint, true, src);
 }
 
 void
-Region::modify_front (nframes_t new_position, bool reset_fade, void *src)
+Region::modify_front (framepos_t new_position, bool reset_fade, void *src)
 {
 	if (locked()) {
 		return;
 	}
 
-	nframes_t end = last_frame();
-	nframes_t source_zero;
+	framepos_t end = last_frame();
+	framepos_t source_zero;
 
 	if (_position > _start) {
 		source_zero = _position - _start;
@@ -803,7 +803,7 @@ Region::modify_front (nframes_t new_position, bool reset_fade, void *src)
 
 	if (new_position < end) { /* can't trim it zero or negative length */
 		
-		nframes_t newlen = 0;
+		framecnt_t newlen = 0;
 		framepos_t delta = 0;
 
 		/* can't trim it back passed where source position zero is located */
@@ -835,7 +835,7 @@ Region::modify_front (nframes_t new_position, bool reset_fade, void *src)
 }
 
 void
-Region::modify_end (nframes_t new_endpoint, bool reset_fade, void* /*src*/)
+Region::modify_end (framepos_t new_endpoint, bool reset_fade, void* /*src*/)
 {
 	if (locked()) {
 		return;
@@ -1045,7 +1045,7 @@ Region::clear_sync_position ()
 }
 
 /* @return the sync point relative the first frame of the region */
-framepos_t
+frameoffset_t
 Region::sync_offset (int& dir) const
 {
 	if (sync_marked()) {

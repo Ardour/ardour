@@ -143,7 +143,7 @@ class Slave {
 	 * @return - the timing resolution of the Slave - If the distance of ARDOURs transport
 	 * to the slave becomes greater than the resolution, sound will stop
 	 */
-	virtual nframes_t resolution() const = 0;
+	virtual framecnt_t resolution() const = 0;
 
 	/**
 	 * @return - when returning true, ARDOUR will wait for seekahead_distance() before transport
@@ -174,11 +174,11 @@ class Slave {
 class ISlaveSessionProxy {
   public:
 	virtual ~ISlaveSessionProxy() {}
-	virtual TempoMap& tempo_map()                 const   { return *((TempoMap *) 0); }
-	virtual nframes_t   frame_rate()                const   { return 0; }
+	virtual TempoMap&  tempo_map()                 const   { return *((TempoMap *) 0); }
+	virtual framecnt_t frame_rate()                const   { return 0; }
 	virtual framepos_t audible_frame ()            const   { return 0; }
 	virtual framepos_t transport_frame ()          const   { return 0; }
-	virtual nframes_t   frames_since_cycle_start () const   { return 0; }
+	virtual pframes_t  frames_since_cycle_start () const   { return 0; }
 	virtual framepos_t frame_time ()               const   { return 0; }
 
 	virtual void request_locate (framepos_t /*frame*/, bool with_roll = false) {
@@ -195,11 +195,11 @@ class SlaveSessionProxy : public ISlaveSessionProxy {
   public:
 	SlaveSessionProxy(Session &s) : session(s) {}
 
-	TempoMap&   tempo_map()                 const;
-	nframes_t   frame_rate()                const;
+	TempoMap&  tempo_map()                 const;
+	framecnt_t frame_rate()                const;
 	framepos_t audible_frame ()            const;
 	framepos_t transport_frame ()          const;
-	nframes_t   frames_since_cycle_start () const;
+	pframes_t  frames_since_cycle_start () const;
 	framepos_t frame_time ()               const;
 
 	void request_locate (framepos_t frame, bool with_roll = false);
@@ -234,7 +234,7 @@ class MTC_Slave : public Slave {
 	bool ok() const;
 	void handle_locate (const MIDI::byte*);
 
-	nframes_t resolution() const;
+	framecnt_t resolution () const;
 	bool requires_seekahead () const { return true; }
 	framepos_t seekahead_distance() const;
 	bool give_slave_full_control_over_transport_speed() const;
@@ -271,8 +271,8 @@ class MTC_Slave : public Slave {
 	void queue_reset (bool with_pos);
 	void maybe_reset ();
 
-	void update_mtc_qtr (MIDI::Parser&, int, nframes_t);
-	void update_mtc_time (const MIDI::byte *, bool, nframes_t);
+	void update_mtc_qtr (MIDI::Parser&, int, framepos_t);
+	void update_mtc_time (const MIDI::byte *, bool, framepos_t);
 	void update_mtc_status (MIDI::MTC_Status);
 	void read_current (SafeTime *) const;
 	void reset_window (framepos_t);
@@ -295,7 +295,7 @@ class MIDIClock_Slave : public Slave {
 	bool ok() const;
 	bool starting() const;
 
-	nframes_t resolution() const;
+	framecnt_t resolution () const;
 	bool requires_seekahead () const { return false; }
 	bool give_slave_full_control_over_transport_speed() const { return true; }
 
@@ -313,10 +313,10 @@ class MIDIClock_Slave : public Slave {
 	double      one_ppqn_in_frames;
 
 	/// the timestamp of the first MIDI clock message
-	nframes_t   first_timestamp;
+	framepos_t  first_timestamp;
 
 	/// the time stamp and should-be transport position of the last inbound MIDI clock message
-	nframes_t   last_timestamp;
+	framepos_t  last_timestamp;
 	double      should_be_position;
 
 	/// the number of midi clock messages received (zero-based)
@@ -375,7 +375,7 @@ class JACK_Slave : public Slave
 	bool starting() const { return _starting; }
 	bool locked() const;
 	bool ok() const;
-	nframes_t resolution() const { return 1; }
+	framecnt_t resolution () const { return 1; }
 	bool requires_seekahead () const { return false; }
 	void reset_client (jack_client_t* jack);
 	bool is_always_synced() const { return true; }

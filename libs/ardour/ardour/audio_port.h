@@ -35,25 +35,25 @@ class AudioPort : public Port
 		return DataType::AUDIO;
 	}
 
-	void cycle_start (nframes_t);
-	void cycle_end (nframes_t);
+	void cycle_start (pframes_t);
+	void cycle_end (pframes_t);
 	void cycle_split ();
 
-	size_t raw_buffer_size(jack_nframes_t nframes) const;
+	size_t raw_buffer_size (pframes_t nframes) const;
 
-	Buffer& get_buffer (nframes_t nframes, nframes_t offset = 0) {
+	Buffer& get_buffer (framecnt_t nframes, framecnt_t offset = 0) {
 		return get_audio_buffer (nframes, offset);
 	}
 
-	AudioBuffer& get_audio_buffer (nframes_t nframes, nframes_t offset = 0);
+	AudioBuffer& get_audio_buffer (framecnt_t nframes, framecnt_t offset = 0);
 
-	static nframes_t port_offset() { return _port_offset; }
+	static framecnt_t port_offset() { return _port_offset; }
 
-	static void set_port_offset (nframes_t off) {
+	static void set_port_offset (framecnt_t off) {
 		_port_offset = off;
 	}
 	
-	static void increment_port_offset (nframes_t n) {
+	static void increment_port_offset (framecnt_t n) {
 		_port_offset += n;
 	}
 	
@@ -65,7 +65,7 @@ class AudioPort : public Port
   private:
 	AudioBuffer* _buffer;
 
-	static nframes_t _port_offset;
+	static framecnt_t _port_offset;
 };
 
 } // namespace ARDOUR

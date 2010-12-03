@@ -17,14 +17,14 @@
 #include <cstdlib>
 #include <ctime>
 
-using AudioGrapher::nframes_t;
+using AudioGrapher::framecnt_t;
 
 struct TestUtils
 {
 	template<typename T>
-	static bool array_equals (T const * a, T const * b, nframes_t frames)
+	static bool array_equals (T const * a, T const * b, framecnt_t frames)
 	{
-		for (nframes_t i = 0; i < frames; ++i) {
+		for (framecnt_t i = 0; i < frames; ++i) {
 			if (a[i] != b[i]) {
 				return false;
 			}
@@ -33,9 +33,9 @@ struct TestUtils
 	}
 
 	template<typename T>
-	static bool array_filled (T const * array, nframes_t frames)
+	static bool array_filled (T const * array, framecnt_t frames)
 	{
-		for (nframes_t i = 0; i < frames; ++i) {
+		for (framecnt_t i = 0; i < frames; ++i) {
 			if (array[i] == static_cast<T> (0.0)) {
 				return false;
 			}
@@ -44,13 +44,13 @@ struct TestUtils
 	}
 
 	/// Generate random data, all samples guaranteed not to be 0.0, 1.0 or -1.0
-	static float * init_random_data (nframes_t frames, float range = 1.0)
+	static float * init_random_data (framecnt_t frames, float range = 1.0)
 	{
 		unsigned int const granularity = 4096;
 		float * data = new float[frames];
 		srand (std::time (NULL));
 		
-		for (nframes_t i = 0; i < frames; ++i) {
+		for (framecnt_t i = 0; i < frames; ++i) {
 			do {
 				int biased_int = (rand() % granularity) - (granularity / 2);
 				data[i] = (range * biased_int) / granularity;
@@ -102,7 +102,7 @@ class AppendingVectorSink : public VectorSink<T>
 	}
 
   private:
-	nframes_t total_frames;
+	framecnt_t total_frames;
 };
 
 

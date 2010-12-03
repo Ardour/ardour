@@ -587,7 +587,7 @@ AutomationTimeAxisView::build_display_menu ()
 }
 
 void
-AutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* /*item*/, GdkEvent* /*event*/, nframes_t when, double y)
+AutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* /*item*/, GdkEvent* /*event*/, framepos_t when, double y)
 {
 	if (!_line)
 		return;

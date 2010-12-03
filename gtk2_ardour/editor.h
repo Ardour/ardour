@@ -799,7 +799,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	MinsecRulerScale minsec_ruler_scale;
 
-	nframes_t minsec_mark_interval;
+	framecnt_t minsec_mark_interval;
 	gint minsec_mark_modulo;
 	gint minsec_nmarks;
 	void set_minsec_ruler_scale (gdouble lower, gdouble upper);
@@ -814,7 +814,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	TimecodeRulerScale timecode_ruler_scale;
 
-	nframes_t timecode_mark_interval;
+	framecnt_t timecode_mark_interval;
 	gint timecode_mark_modulo;
 	gint timecode_nmarks;
 	void set_timecode_ruler_scale (gdouble lower, gdouble upper);
@@ -1492,7 +1492,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void remove_metric_marks ();
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
-	void compute_current_bbt_points (nframes_t left, nframes_t right);
+	void compute_current_bbt_points (framepos_t left, framepos_t right);
 	void tempo_map_changed (const PBD::PropertyChange&);
 	void redisplay_tempo (bool immediate_redraw);
 

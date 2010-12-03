@@ -37,20 +37,20 @@ class MidiPort : public Port {
 		return DataType::MIDI;
 	}
 
-	void cycle_start (nframes_t nframes);
-	void cycle_end (nframes_t nframes);
+	void cycle_start (pframes_t nframes);
+	void cycle_end (pframes_t nframes);
 	void cycle_split ();
 
-	void flush_buffers (nframes_t nframes, framepos_t time, nframes_t offset = 0);
+	void flush_buffers (pframes_t nframes, framepos_t time, framecnt_t offset = 0);
 	void transport_stopped ();
 
-	size_t raw_buffer_size(jack_nframes_t nframes) const;
+	size_t raw_buffer_size (pframes_t nframes) const;
 
-	Buffer& get_buffer (nframes_t nframes, nframes_t offset = 0) {
+	Buffer& get_buffer (framecnt_t nframes, framecnt_t offset = 0) {
 		return get_midi_buffer (nframes, offset);
 	}
 
-	MidiBuffer& get_midi_buffer (nframes_t nframes, nframes_t offset = 0);
+	MidiBuffer& get_midi_buffer (framecnt_t nframes, framecnt_t offset = 0);
 
   protected:
 	friend class AudioEngine;

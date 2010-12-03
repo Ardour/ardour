@@ -39,7 +39,7 @@ class Session;
 class LadspaPlugin : public ARDOUR::Plugin
 {
   public:
-	LadspaPlugin (void *module, ARDOUR::AudioEngine&, ARDOUR::Session&, uint32_t index, nframes_t sample_rate);
+	LadspaPlugin (void *module, ARDOUR::AudioEngine&, ARDOUR::Session&, uint32_t index, framecnt_t sample_rate);
 	LadspaPlugin (const LadspaPlugin &);
 	~LadspaPlugin ();
 
@@ -51,7 +51,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	const char* maker() const           { return _descriptor->Maker; }
 	uint32_t    parameter_count() const { return _descriptor->PortCount; }
 	float       default_value (uint32_t port);
-	nframes_t   signal_latency() const;
+	framecnt_t  signal_latency() const;
 	void        set_parameter (uint32_t port, float val);
 	float       get_parameter (uint32_t port) const;
 	int         get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
@@ -81,11 +81,11 @@ class LadspaPlugin : public ARDOUR::Plugin
 			_descriptor->cleanup (_handle);
 	}
 
-	int set_block_size (nframes_t /*nframes*/) { return 0; }
+	int set_block_size (pframes_t /*nframes*/) { return 0; }
 
 	int connect_and_run (BufferSet& bufs,
 			ChanMapping in, ChanMapping out,
-			nframes_t nframes, nframes_t offset);
+			pframes_t nframes, framecnt_t offset);
 
 	std::string describe_parameter (Evoral::Parameter);
 	std::string state_node_name() const { return "ladspa"; }
@@ -122,15 +122,15 @@ class LadspaPlugin : public ARDOUR::Plugin
 	void*                    _module;
 	const LADSPA_Descriptor* _descriptor;
 	LADSPA_Handle            _handle;
-	nframes_t                _sample_rate;
+	framecnt_t               _sample_rate;
 	LADSPA_Data*             _control_data;
 	LADSPA_Data*             _shadow_data;
 	LADSPA_Data*             _latency_control_port;
 	uint32_t                 _index;
 	bool                     _was_activated;
 
-	void init (void *mod, uint32_t index, nframes_t rate);
-	void run_in_place (nframes_t nsamples);
+	void init (void *mod, uint32_t index, framecnt_t rate);
+	void run_in_place (pframes_t nsamples);
 	void latency_compute_run ();
 	int set_state_2X (const XMLNode&, int version);
 };

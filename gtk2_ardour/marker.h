@@ -57,7 +57,7 @@ class Marker : public sigc::trackable
 
 
 	Marker (PublicEditor& editor, ArdourCanvas::Group &, ArdourCanvas::Group &, guint32 rgba, const std::string& text, Type,
-		nframes_t frame = 0, bool handle_events = true);
+		framepos_t frame = 0, bool handle_events = true);
 
 	virtual ~Marker ();
 

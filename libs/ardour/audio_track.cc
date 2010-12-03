@@ -354,7 +354,7 @@ AudioTrack::set_state_part_two ()
 }
 
 int
-AudioTrack::roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
+AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
 		  bool can_record, bool rec_monitors_input, bool& need_butler)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
@@ -365,7 +365,7 @@ AudioTrack::roll (nframes_t nframes, framepos_t start_frame, framepos_t end_fram
 	int dret;
 	Sample* b;
 	Sample* tmpb;
-	nframes_t transport_frame;
+	framepos_t transport_frame;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
         
 	automation_snapshot (start_frame, false);
@@ -453,7 +453,7 @@ AudioTrack::roll (nframes_t nframes, framepos_t start_frame, framepos_t end_fram
 
 				Sample* bb = bufs.get_audio (i).data();
 
-				for (nframes_t xx = 0; xx < nframes; ++xx) {
+				for (pframes_t xx = 0; xx < nframes; ++xx) {
 					bb[xx] = b[xx] * scaling;
 				}
 
@@ -595,7 +595,7 @@ AudioTrack::bounce (InterThreadInfo& itt)
 }
 
 boost::shared_ptr<Region>
-AudioTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt, bool enable_processing)
+AudioTrack::bounce_range (framepos_t start, framepos_t end, InterThreadInfo& itt, bool enable_processing)
 {
 	vector<boost::shared_ptr<Source> > srcs;
 	return _session.write_one_track (*this, start, end, false, srcs, itt, enable_processing);

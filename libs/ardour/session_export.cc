@@ -96,7 +96,7 @@ Session::pre_export ()
 }
 
 int
-Session::start_audio_export (nframes_t position, bool /* realtime */)
+Session::start_audio_export (framepos_t position, bool /* realtime */)
 {
 	if (!_exporting) {
 		pre_export ();
@@ -149,7 +149,7 @@ Session::start_audio_export (nframes_t position, bool /* realtime */)
 }
 
 void
-Session::process_export (nframes_t nframes)
+Session::process_export (pframes_t nframes)
 {
 	if (_export_rolling && export_status->stop) {
 		stop_audio_export ();
@@ -178,7 +178,7 @@ Session::process_export (nframes_t nframes)
 }
 
 int
-Session::process_export_fw (nframes_t nframes)
+Session::process_export_fw (pframes_t nframes)
 {
         _engine.main_thread()->get_buffers ();
 	process_export (nframes);

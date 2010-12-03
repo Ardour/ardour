@@ -1048,7 +1048,7 @@ MackieControlProtocol::update_automation (RouteSignal & rs)
 }
 
 string 
-MackieControlProtocol::format_bbt_timecode (nframes_t now_frame)
+MackieControlProtocol::format_bbt_timecode (framepos_t now_frame)
 {
 	BBT_Time bbt_time;
 	session->bbt_time (now_frame, bbt_time);
@@ -1078,7 +1078,7 @@ MackieControlProtocol::format_bbt_timecode (nframes_t now_frame)
 }
 
 string 
-MackieControlProtocol::format_timecode_timecode (nframes_t now_frame)
+MackieControlProtocol::format_timecode_timecode (framepos_t now_frame)
 {
 	Timecode::Time timecode;
 	session->timecode_time (now_frame, timecode);
@@ -1101,7 +1101,7 @@ MackieControlProtocol::update_timecode_display()
 	if (surface().has_timecode_display())
 	{
 		// do assignment here so current_frame is fixed
-		nframes_t current_frame = session->transport_frame();
+		framepos_t current_frame = session->transport_frame();
 		string timecode;
 
 		switch (_timecode_type)
@@ -1592,7 +1592,7 @@ MackieControlProtocol::marker_press (Button &)
 {
 	// cut'n'paste from LocationUI::add_new_location()
 	string markername;
-	nframes_t where = session->audible_frame();
+	framepos_t where = session->audible_frame();
 	session->locations()->next_available_name(markername,"mcu");
 	Location *location = new Location (*session, where, where, markername, Location::IsMark);
 	session->begin_reversible_command (_("add marker"));

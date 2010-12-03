@@ -85,7 +85,7 @@ BufferSet::clear()
 /** Make this BufferSet a direct mirror of a PortSet's buffers.
  */
 void
-BufferSet::attach_buffers(PortSet& ports, nframes_t nframes, nframes_t offset)
+BufferSet::attach_buffers (PortSet& ports, framecnt_t nframes, framecnt_t offset)
 {
 	clear();
 
@@ -224,7 +224,7 @@ BufferSet::get_lv2_midi(bool input, size_t i)
 	ebuf->reset();
 	if (input) {
 		for (MidiBuffer::iterator e = mbuf.begin(); e != mbuf.end(); ++e) {
-			const Evoral::MIDIEvent<nframes_t> ev(*e, false);
+			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
 			uint32_t type = LV2Plugin::midi_event_type();
 			ebuf->append(ev.time(), 0, type, ev.size(), ev.buffer());
 		}
@@ -299,7 +299,7 @@ BufferSet::VSTBuffer::clear ()
 }
 
 void
-BufferSet::VSTBuffer::push_back (Evoral::MIDIEvent<nframes_t> const & ev)
+BufferSet::VSTBuffer::push_back (Evoral::MIDIEvent<framepos_t> const & ev)
 {
 	if (ev.size() > 3) {
 		/* XXX: this will silently drop MIDI messages longer than 3 bytes, so
@@ -333,7 +333,7 @@ BufferSet::VSTBuffer::push_back (Evoral::MIDIEvent<nframes_t> const & ev)
 #endif /* VST_SUPPORT */
 
 void
-BufferSet::read_from (const BufferSet& in, nframes_t nframes)
+BufferSet::read_from (const BufferSet& in, framecnt_t nframes)
 {
 	assert(available() >= in.count());
 
@@ -349,7 +349,7 @@ BufferSet::read_from (const BufferSet& in, nframes_t nframes)
 }
 
 void
-BufferSet::merge_from (const BufferSet& in, nframes_t nframes)
+BufferSet::merge_from (const BufferSet& in, framecnt_t nframes)
 {
 	/* merge all input buffers into out existing buffers.
 
@@ -367,7 +367,7 @@ BufferSet::merge_from (const BufferSet& in, nframes_t nframes)
 }
 
 void
-BufferSet::silence (nframes_t nframes, nframes_t offset)
+BufferSet::silence (framecnt_t nframes, framecnt_t offset)
 {
 	for (std::vector<BufferVec>::iterator i = _buffers.begin(); i != _buffers.end(); ++i) {
 		for (BufferVec::iterator b = i->begin(); b != i->end(); ++b) {

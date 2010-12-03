@@ -204,7 +204,7 @@ StreamPanner::get_state ()
 }
 
 void
-StreamPanner::distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes)
+StreamPanner::distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes)
 {
 	if (_mono) {
 		/* we're in mono mode, so just pan the input to all outputs equally */
@@ -220,7 +220,7 @@ StreamPanner::distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff,
 
 void
 StreamPanner::distribute_automated (AudioBuffer& src, BufferSet& obufs,
-				    nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers)
+				    framepos_t start, framepos_t end, pframes_t nframes, pan_t** buffers)
 {
 	if (_mono) {
 		/* we're in mono mode, so just pan the input to all outputs equally */
@@ -260,7 +260,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 	_control->list()->clear ();
 
 	while (in.getline (line, sizeof (line), '\n')) {
-		nframes_t when;
+		framepos_t when;
 		double value;
 
 		++linecnt;
@@ -269,7 +269,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 			break;
 		}
 
-		if (sscanf (line, "%" PRIu32 " %lf", &when, &value) != 2) {
+		if (sscanf (line, "%" PRIu64 " %lf", &when, &value) != 2) {
 			warning << string_compose(_("badly formatted pan automation event record at line %1 of %2 (ignored) [%3]"), linecnt, path, line) << endmsg;
 			continue;
 		}
@@ -285,7 +285,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 }
 
 void
-BaseStereoPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes)
+BaseStereoPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes)
 {
 	assert(obufs.count().n_audio() == 2);
 
@@ -308,8 +308,8 @@ BaseStereoPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t g
 		/* we've moving the pan by an appreciable amount, so we must
 		   interpolate over 64 frames or nframes, whichever is smaller */
 
-		nframes_t const limit = min ((nframes_t)64, nframes);
-		nframes_t n;
+		pframes_t const limit = min ((pframes_t) 64, nframes);
+		pframes_t n;
 
 		delta = -(delta / (float) (limit));
 
@@ -365,8 +365,8 @@ BaseStereoPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t g
 		/* we're moving the pan by an appreciable amount, so we must
 		   interpolate over 64 frames or nframes, whichever is smaller */
 
-		nframes_t const limit = min ((nframes_t)64, nframes);
-		nframes_t n;
+		pframes_t const limit = min ((pframes_t) 64, nframes);
+		pframes_t n;
 
 		delta = -(delta / (float) (limit));
 
@@ -460,7 +460,7 @@ EqualPowerStereoPanner::update ()
 
 void
 EqualPowerStereoPanner::do_distribute_automated (AudioBuffer& srcbuf, BufferSet& obufs,
-						 nframes_t start, nframes_t end, nframes_t nframes,
+						 framepos_t start, framepos_t end, pframes_t nframes,
 						 pan_t** buffers)
 {
 	assert (obufs.count().n_audio() == 2);
@@ -496,7 +496,7 @@ EqualPowerStereoPanner::do_distribute_automated (AudioBuffer& srcbuf, BufferSet&
 	const float pan_law_attenuation = -3.0f;
 	const float scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
 
-	for (nframes_t n = 0; n < nframes; ++n) {
+	for (pframes_t n = 0; n < nframes; ++n) {
 
 		float const panR = buffers[0][n];
 		float const panL = 1 - panR;
@@ -510,7 +510,7 @@ EqualPowerStereoPanner::do_distribute_automated (AudioBuffer& srcbuf, BufferSet&
 	dst = obufs.get_audio(0).data();
 	pbuf = buffers[0];
 
-	for (nframes_t n = 0; n < nframes; ++n) {
+	for (pframes_t n = 0; n < nframes; ++n) {
 		dst[n] += src[n] * pbuf[n];
 	}
 
@@ -521,7 +521,7 @@ EqualPowerStereoPanner::do_distribute_automated (AudioBuffer& srcbuf, BufferSet&
 	dst = obufs.get_audio(1).data();
 	pbuf = buffers[1];
 
-	for (nframes_t n = 0; n < nframes; ++n) {
+	for (pframes_t n = 0; n < nframes; ++n) {
 		dst[n] += src[n] * pbuf[n];
 	}
 
@@ -1120,7 +1120,7 @@ Panner::set_position (const AngularVector& a, StreamPanner& orig)
 }
 
 void
-Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes_t nframes, gain_t gain_coeff)
+Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, pframes_t nframes, gain_t gain_coeff)
 {
 	if (outbufs.count().n_audio() == 0) {
 		// Don't want to lose audio...
@@ -1191,7 +1191,7 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 }
 
 void
-Panner::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes)
+Panner::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
 {
 	if (outbufs.count().n_audio() == 0) {
 		// Failing to deliver audio we were asked to deliver is a bug

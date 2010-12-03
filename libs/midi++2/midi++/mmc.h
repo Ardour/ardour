@@ -270,9 +270,9 @@ class MachineControl
 	int  do_shuttle (byte *, size_t len);
 	
 	void write_track_status (byte *, size_t len, byte reg);
-	void spp_start (Parser&, nframes_t);
-	void spp_continue (Parser&, nframes_t);
-	void spp_stop (Parser&, nframes_t);
+	void spp_start (Parser&, framecnt_t);
+	void spp_continue (Parser&, framecnt_t);
+	void spp_stop (Parser&, framecnt_t);
 };
 
 /** Class to describe a MIDI machine control command to be sent.

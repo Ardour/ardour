@@ -106,9 +106,9 @@ SMFSource::~SMFSource ()
 }
 
 /** All stamps in audio frames */
-nframes_t
-SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, framepos_t const source_start,
-			  framepos_t start, nframes_t duration,
+framecnt_t
+SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination, framepos_t const source_start,
+			  framepos_t start, framecnt_t duration,
 			  MidiStateTracker* tracker) const
 {
 	int      ret  = 0;
@@ -207,12 +207,12 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, framepos_t 
  *  @param source Buffer to read from.
  *  @param position This source's start position in session frames.
  */
-nframes_t
-SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, framepos_t position, nframes_t duration)
+framecnt_t
+SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t position, framecnt_t duration)
 {
 	_write_data_count = 0;
 
-	nframes_t         time;
+	framepos_t        time;
 	Evoral::EventType type;
 	uint32_t          size;
 
@@ -223,7 +223,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, framepos_t positio
 		_model->start_write();
 	}
 
-	Evoral::MIDIEvent<nframes_t> ev;
+	Evoral::MIDIEvent<framepos_t> ev;
 
 	while (true) {
 		bool ret = source.peek_time(&time);
@@ -315,9 +315,9 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 
 }
 
-/** Append an event with a timestamp in frames (nframes_t) */
+/** Append an event with a timestamp in frames (framepos_t) */
 void
-SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, framepos_t position)
+SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, framepos_t position)
 {
 	assert(_writing);
 	if (ev.size() == 0)  {

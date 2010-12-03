@@ -54,7 +54,7 @@ class NormalizerTest : public CppUnit::TestFixture
 	boost::shared_ptr<VectorSink<float> > sink;
 
 	float * random_data;
-	nframes_t frames;
+	framecnt_t frames;
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION (NormalizerTest);

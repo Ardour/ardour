@@ -52,7 +52,7 @@ using namespace std;
  * @param nframes Number of frames to process.
  */
 void
-Session::process (nframes_t nframes)
+Session::process (pframes_t nframes)
 {
 	MIDI::Manager::instance()->cycle_start(nframes);
 
@@ -76,8 +76,8 @@ Session::process (nframes_t nframes)
         _engine.main_thread()->drop_buffers ();
 
 	// the ticker is for sending time information like MidiClock
-	nframes_t transport_frames = transport_frame();
-	BBT_Time  transport_bbt;
+	framepos_t transport_frames = transport_frame();
+	BBT_Time transport_bbt;
 	bbt_time(transport_frames, transport_bbt);
 	Timecode::Time transport_timecode;
 	timecode_time(transport_frames, transport_timecode);
@@ -89,15 +89,15 @@ Session::process (nframes_t nframes)
 }
 
 int
-Session::fail_roll (nframes_t nframes)
+Session::fail_roll (pframes_t nframes)
 {
 	return no_roll (nframes);
 }
 
 int
-Session::no_roll (nframes_t nframes)
+Session::no_roll (pframes_t nframes)
 {
-	nframes_t end_frame = _transport_frame + nframes; // FIXME: varispeed + no_roll ??
+	framepos_t end_frame = _transport_frame + nframes; // FIXME: varispeed + no_roll ??
 	int ret = 0;
 	bool declick = get_transport_declick_required();
 	boost::shared_ptr<RouteList> r = routes.reader ();
@@ -130,7 +130,7 @@ Session::no_roll (nframes_t nframes)
 }
 
 int
-Session::process_routes (nframes_t nframes, bool& need_butler)
+Session::process_routes (pframes_t nframes, bool& need_butler)
 {
 	bool record_active;
 	int  declick = get_transport_declick_required();
@@ -144,8 +144,8 @@ Session::process_routes (nframes_t nframes, bool& need_butler)
 
 	record_active = actively_recording(); // || (get_record_enabled() && get_punch_in());
 
-	const nframes_t start_frame = _transport_frame;
-	const nframes_t end_frame = _transport_frame + (nframes_t)floor(nframes * _transport_speed);
+	const framepos_t start_frame = _transport_frame;
+	const framepos_t end_frame = _transport_frame + floor (nframes * _transport_speed);
 
 	DEBUG_TRACE(DEBUG::Graph,"calling graph/process-routes\n");
 	route_graph->process_routes( nframes, start_frame, end_frame, declick, record_active, rec_monitors, need_butler);
@@ -170,7 +170,7 @@ Session::process_routes (nframes_t nframes, bool& need_butler)
 }
 
 int
-Session::silent_process_routes (nframes_t nframes, bool& need_butler)
+Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 {
 	bool record_active = actively_recording();
 	int  declick = get_transport_declick_required();
@@ -182,8 +182,8 @@ Session::silent_process_routes (nframes_t nframes, bool& need_butler)
 		declick = -1;
 	}
 
-	const nframes_t start_frame = _transport_frame;
-	const nframes_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
+	const framepos_t start_frame = _transport_frame;
+	const framepos_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
 
 	route_graph->silent_process_routes( nframes, start_frame, end_frame, record_active, rec_monitors, need_butler);
 /*
@@ -233,10 +233,10 @@ Session::get_track_statistics ()
 
 /** Process callback used when the auditioner is not active */
 void
-Session::process_with_events (nframes_t nframes)
+Session::process_with_events (pframes_t nframes)
 {
 	SessionEvent*  ev;
-	nframes_t      this_nframes;
+	pframes_t      this_nframes;
 	framepos_t     end_frame;
 	bool           session_needs_butler = false;
 	framepos_t     stop_limit;
@@ -291,7 +291,7 @@ Session::process_with_events (nframes_t nframes)
 		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
 	}
 
-	end_frame = _transport_frame + (nframes_t)frames_moved;
+	end_frame = _transport_frame + frames_moved;
 
 	{
 		SessionEvent* this_event;
@@ -350,7 +350,7 @@ Session::process_with_events (nframes_t nframes)
 			if (this_event && this_event->action_frame <= end_frame && this_event->action_frame >= _transport_frame) {
 				/* this isn't quite right for reverse play */
 				frames_moved = (framecnt_t) (this_event->action_frame - _transport_frame);
-				this_nframes = (nframes_t) abs( floor(frames_moved / _transport_speed) );
+				this_nframes = abs (floor(frames_moved / _transport_speed));
 			}
 
 			if (this_nframes) {
@@ -399,7 +399,7 @@ Session::process_with_events (nframes_t nframes)
 			}
 
 			/* this is necessary to handle the case of seamless looping */
-			end_frame = _transport_frame + (nframes_t) floor (nframes * _transport_speed);
+			end_frame = _transport_frame + floor (nframes * _transport_speed);
 
 		}
 
@@ -434,11 +434,11 @@ Session::transport_locked () const
 }
 
 bool
-Session::follow_slave (nframes_t nframes)
+Session::follow_slave (pframes_t nframes)
 {
 	double slave_speed;
 	framepos_t slave_transport_frame;
-	nframes_t this_delta;
+	framecnt_t this_delta;
 	int dir;
 
 	if (!_slave->ok()) {
@@ -538,7 +538,7 @@ Session::follow_slave (nframes_t nframes)
 			}
 			
 #if 1
-			if ((nframes_t) abs(average_slave_delta) > _slave->resolution()) {
+			if ((framecnt_t) abs(average_slave_delta) > _slave->resolution()) {
 				cerr << "average slave delta greater than slave resolution (" << _slave->resolution() << "), going to silent motion\n";
 				goto silent_motion;
 			}
@@ -564,7 +564,7 @@ Session::follow_slave (nframes_t nframes)
 }
 
 void
-Session::calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta)
+Session::calculate_moving_average_of_slave_delta (int dir, framecnt_t this_delta)
 {
 	if (delta_accumulator_cnt >= delta_accumulator_size) {
 		have_first_delta_accumulator = true;
@@ -572,7 +572,7 @@ Session::calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta)
 	}
 
 	if (delta_accumulator_cnt != 0 || this_delta < _current_frame_rate) {
-		delta_accumulator[delta_accumulator_cnt++] = (nframes_t) dir *  (nframes_t) this_delta;
+		delta_accumulator[delta_accumulator_cnt++] = (framecnt_t) dir *  (framecnt_t) this_delta;
 	}
 
 	if (have_first_delta_accumulator) {
@@ -591,7 +591,7 @@ Session::calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta)
 }
 
 void
-Session::track_slave_state (float slave_speed, nframes_t slave_transport_frame, nframes_t this_delta)
+Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame, framecnt_t this_delta)
 {
 	if (slave_speed != 0.0f) {
 
@@ -644,7 +644,7 @@ Session::track_slave_state (float slave_speed, nframes_t slave_transport_frame, 
 
 
 				bool ok = true;
-				nframes_t frame_delta = slave_transport_frame - _transport_frame;
+				framecnt_t frame_delta = slave_transport_frame - _transport_frame;
 
 				boost::shared_ptr<RouteList> rl = routes.reader();
 				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
@@ -699,7 +699,7 @@ Session::track_slave_state (float slave_speed, nframes_t slave_transport_frame, 
 }
 
 void
-Session::follow_slave_silently (nframes_t nframes, float slave_speed)
+Session::follow_slave_silently (pframes_t nframes, float slave_speed)
 {
 	if (slave_speed && _transport_speed) {
 
@@ -742,7 +742,7 @@ Session::follow_slave_silently (nframes_t nframes, float slave_speed)
 }
 
 void
-Session::process_without_events (nframes_t nframes)
+Session::process_without_events (pframes_t nframes)
 {
 	bool session_needs_butler = false;
 	framepos_t stop_limit;
@@ -822,7 +822,7 @@ Session::process_without_events (nframes_t nframes)
  * @param nframes number of frames to process.
  */
 void
-Session::process_audition (nframes_t nframes)
+Session::process_audition (pframes_t nframes)
 {
 	SessionEvent* ev;
 	boost::shared_ptr<RouteList> r = routes.reader ();
@@ -869,9 +869,9 @@ Session::process_audition (nframes_t nframes)
 }
 
 bool
-Session::maybe_sync_start (nframes_t& nframes)
+Session::maybe_sync_start (pframes_t & nframes)
 {
-	nframes_t sync_offset;
+	pframes_t sync_offset;
 
 	if (!waiting_for_sync_offset) {
 		return false;

@@ -29,7 +29,7 @@ class SndfileReader
 	 *  Note that the data read is output to the outputs, as well as read into the context
 	 *  \return number of frames read
 	 */
-	nframes_t read (ProcessContext<T> & context)
+	framecnt_t read (ProcessContext<T> & context)
 	{
 		if (throw_level (ThrowStrict) && context.channels() != channels() ) {
 			throw Exception (*this, boost::str (boost::format
@@ -37,7 +37,7 @@ class SndfileReader
 				% context.channels() % channels()));
 		}
 		
-		nframes_t frames_read = SndfileHandle::read (context.data(), context.frames());
+		framecnt_t const frames_read = SndfileHandle::read (context.data(), context.frames());
 		ProcessContext<T> c_out = context.beginning (frames_read);
 		
 		if (frames_read < context.frames()) {

@@ -21,7 +21,7 @@ SampleFormatConverter<TOut>::SampleFormatConverter (ChannelCount channels) :
 
 template <>
 void
-SampleFormatConverter<float>::init (nframes_t max_frames, int /* type */, int data_width)
+SampleFormatConverter<float>::init (framecnt_t max_frames, int /* type */, int data_width)
 {
 	if (throw_level (ThrowObject) && data_width != 32) {
 		throw Exception (*this, "Unsupported data width");
@@ -32,7 +32,7 @@ SampleFormatConverter<float>::init (nframes_t max_frames, int /* type */, int da
 
 template <>
 void
-SampleFormatConverter<int32_t>::init (nframes_t max_frames, int type, int data_width)
+SampleFormatConverter<int32_t>::init (framecnt_t max_frames, int type, int data_width)
 {
 	if(throw_level (ThrowObject) && data_width < 24) {
 		throw Exception (*this, "Trying to use SampleFormatConverter<int32_t> for data widths < 24");
@@ -51,7 +51,7 @@ SampleFormatConverter<int32_t>::init (nframes_t max_frames, int type, int data_w
 
 template <>
 void
-SampleFormatConverter<int16_t>::init (nframes_t max_frames, int type, int data_width)
+SampleFormatConverter<int16_t>::init (framecnt_t max_frames, int type, int data_width)
 {
 	if (throw_level (ThrowObject) && data_width != 16) {
 		throw Exception (*this, "Unsupported data width");
@@ -62,7 +62,7 @@ SampleFormatConverter<int16_t>::init (nframes_t max_frames, int type, int data_w
 
 template <>
 void
-SampleFormatConverter<uint8_t>::init (nframes_t max_frames, int type, int data_width)
+SampleFormatConverter<uint8_t>::init (framecnt_t max_frames, int type, int data_width)
 {
 	if (throw_level (ThrowObject) && data_width != 8) {
 		throw Exception (*this, "Unsupported data width");
@@ -73,7 +73,7 @@ SampleFormatConverter<uint8_t>::init (nframes_t max_frames, int type, int data_w
 
 template <typename TOut>
 void
-SampleFormatConverter<TOut>::init_common (nframes_t max_frames )
+SampleFormatConverter<TOut>::init_common (framecnt_t max_frames)
 {
 	reset();
 	if (max_frames  > data_out_size) {
@@ -141,11 +141,11 @@ template<>
 void
 SampleFormatConverter<float>::process (ProcessContext<float> & c_in)
 {
-	nframes_t frames = c_in.frames();
+	framecnt_t frames = c_in.frames();
 	float * data = c_in.data();
 	
 	if (clip_floats) {
-		for (nframes_t x = 0; x < frames; ++x) {
+		for (framecnt_t x = 0; x < frames; ++x) {
 			if (data[x] > 1.0f) {
 				data[x] = 1.0f;
 			} else if (data[x] < -1.0f) {
@@ -172,7 +172,7 @@ SampleFormatConverter<float>::process (ProcessContext<float> const & c_in)
 
 template<typename TOut>
 void
-SampleFormatConverter<TOut>::check_frame_and_channel_count(nframes_t frames, ChannelCount channels_)
+SampleFormatConverter<TOut>::check_frame_and_channel_count (framecnt_t frames, ChannelCount channels_)
 {
 	if (throw_level (ThrowStrict) && channels_ != channels) {
 		throw Exception (*this, boost::str (boost::format

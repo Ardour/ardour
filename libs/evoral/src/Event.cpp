@@ -93,7 +93,7 @@ Event<Timestamp>::~Event() {
 #endif // EVORAL_EVENT_ALLOC
 
 template class Event<Evoral::MusicalTime>;
-template class Event<uint32_t>;
+template class Event<int64_t>;
 
 } // namespace Evoral
 

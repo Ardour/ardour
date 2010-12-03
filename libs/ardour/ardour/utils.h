@@ -62,7 +62,7 @@ std::string path_expand (std::string);
 std::string region_name_from_path (std::string path, bool strip_channels, bool add_channel_suffix = false, uint32_t total = 0, uint32_t this_one = 0);
 bool path_is_paired (std::string path, std::string& pair_base);
 
-void compute_equal_power_fades (ARDOUR::nframes_t nframes, float* in, float* out);
+void compute_equal_power_fades (ARDOUR::framecnt_t nframes, float* in, float* out);
 
 const char* sync_source_to_string (ARDOUR::SyncSource src);
 ARDOUR::SyncSource string_to_sync_source (std::string str);

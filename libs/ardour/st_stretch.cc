@@ -67,10 +67,10 @@ int
 STStretch::run (boost::shared_ptr<Region> a_region)
 {
 	SourceList nsrcs;
-	nframes_t total_frames;
-	nframes_t done;
+	framecnt_t total_frames;
+	framecnt_t done;
 	int ret = -1;
-	const nframes_t bufsize = 16384;
+	const framecnt_t bufsize = 16384;
 	gain_t *gain_buffer = 0;
 	Sample *buffer = 0;
 	char suffix[32];
@@ -108,13 +108,13 @@ STStretch::run (boost::shared_ptr<Region> a_region)
 			boost::shared_ptr<AudioSource> asrc
 				= boost::dynamic_pointer_cast<AudioSource>(nsrcs[i]);
 
-			nframes_t pos = 0;
-			nframes_t this_read = 0;
+			framepos_t pos = 0;
+			framecnt_t this_read = 0;
 
 			st.clear();
 
 			while (!tsr.cancel && pos < region->length()) {
-				nframes_t this_time;
+				framecnt_t this_time;
 
 				this_time = min (bufsize, region->length() - pos);
 
@@ -179,16 +179,16 @@ STStretch::run (boost::shared_ptr<Region> a_region)
 	for (vector<boost::shared_ptr<Region> >::iterator x = results.begin(); x != results.end(); ++x) {
 		framepos_t astart = (*x)->ancestral_start();
 		framepos_t alength = (*x)->ancestral_length();
-		nframes_t start;
-		nframes_t length;
+		framepos_t start;
+		framecnt_t length;
 
 		// note: tsr.fraction is a percentage of original length. 100 = no change,
 		// 50 is half as long, 200 is twice as long, etc.
 
 		float stretch = (*x)->stretch() * (tsr.time_fraction/100.0);
 
-		start = (nframes_t) floor (astart + ((astart - (*x)->start()) / stretch));
-		length = (nframes_t) floor (alength / stretch);
+		start = (framepos_t) floor (astart + ((astart - (*x)->start()) / stretch));
+		length = (framecnt_t) floor (alength / stretch);
 
 		(*x)->set_ancestral_data (start, length, stretch, (*x)->shift());
 	}

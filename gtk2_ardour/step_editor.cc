@@ -158,14 +158,14 @@ StepEditor::stop_step_editing ()
 void
 StepEditor::check_step_edit ()
 {
-	MidiRingBuffer<nframes_t>& incoming (_track->step_edit_ring_buffer());
+	MidiRingBuffer<framepos_t>& incoming (_track->step_edit_ring_buffer());
 	uint8_t* buf;
 	uint32_t bufsize = 32;
 
 	buf = new uint8_t[bufsize];
 
 	while (incoming.read_space()) {
-		nframes_t time;
+		framepos_t time;
 		Evoral::EventType type;
 		uint32_t size;
 

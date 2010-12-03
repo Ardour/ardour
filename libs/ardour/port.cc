@@ -34,7 +34,7 @@ using namespace std;
 using namespace ARDOUR;
 
 AudioEngine* Port::_engine = 0;
-nframes_t Port::_buffer_size = 0;
+pframes_t Port::_buffer_size = 0;
 bool Port::_connecting_blocked = false;
 
 /** @param n Port short name */
@@ -220,7 +220,7 @@ Port::recompute_total_latency () const
 #endif
 }
 
-nframes_t
+framecnt_t
 Port::total_latency () const
 {
 	jack_client_t* jack = _engine->jack();
@@ -293,7 +293,7 @@ Port::request_monitor_input (bool yn)
 }
 
 void
-Port::set_latency (nframes_t n)
+Port::set_latency (framecnt_t n)
 {
 	jack_port_set_latency (_jack_port, n);
 }

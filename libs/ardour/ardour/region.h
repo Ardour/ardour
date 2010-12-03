@@ -193,8 +193,8 @@ class Region
 	void trim_end (framepos_t new_position, void *src);
 	void trim_to (framepos_t position, framecnt_t length, void *src);
 
-        void cut_front (nframes_t new_position, void *src);
-        void cut_end (nframes_t new_position, void *src);
+        void cut_front (framepos_t new_position, void *src);
+        void cut_end (framepos_t new_position, void *src);
 
 	void set_layer (layer_t l); /* ONLY Playlist can call this */
 	void raise ();
@@ -321,8 +321,8 @@ class Region
 
 	void trim_to_internal (framepos_t position, framecnt_t length, void *src);
 	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
-        void modify_front (nframes_t new_position, bool reset_fade, void* src);
-        void modify_end (nframes_t new_position, bool reset_fade, void* src);
+        void modify_front (framepos_t new_position, bool reset_fade, void* src);
+        void modify_end (framepos_t new_position, bool reset_fade, void* src);
 
 	void maybe_uncopy ();
 	void first_edit ();

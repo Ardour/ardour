@@ -31,7 +31,7 @@ public:
 	int flush_header () { return 0; }
 	float sample_rate () const { return _sample_rate; }
 
-	void set_length (nframes_t len) { _length = len; }
+	void set_length (framecnt_t len) { _length = len; }
 
 	bool destructive() const { return false; }
 	bool can_be_analysed() const { return false; }

@@ -83,7 +83,7 @@ SndFileSource::SndFileSource (Session& s, const string& path, int chn, Flag flag
 
 /** This constructor is used to construct new files, not open existing ones. */
 SndFileSource::SndFileSource (Session& s, const string& path, const string& origin,
-                              SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
+                              SampleFormat sfmt, HeaderFormat hf, framecnt_t rate, Flag flags)
 	: Source(s, DataType::AUDIO, path, flags)
 	, AudioFileSource (s, path, origin, flags, sfmt, hf)
 {
@@ -321,7 +321,7 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 		}
 
 		if (_info.channels == 1) {
-			nframes_t ret = sf_read_float (sf, dst, file_cnt);
+			framecnt_t ret = sf_read_float (sf, dst, file_cnt);
 			_read_data_count = ret * sizeof(float);
 			if (ret != file_cnt) {
 				char errbuf[256];
@@ -420,8 +420,8 @@ SndFileSource::destructive_write_unlocked (Sample* data, framecnt_t cnt)
 		file_pos = capture_start_frame - _timeline_position;
 
 		// split cnt in half
-		nframes_t subcnt = cnt / 2;
-		nframes_t ofilepos = file_pos;
+		framecnt_t subcnt = cnt / 2;
+		framecnt_t ofilepos = file_pos;
 
 		// fade in
 		if (crossfade (data, subcnt, 1) != subcnt) {
@@ -804,7 +804,7 @@ SndFileSource::handle_header_position_change ()
 }
 
 void
-SndFileSource::setup_standard_crossfades (Session const & s, nframes_t rate)
+SndFileSource::setup_standard_crossfades (Session const & s, framecnt_t rate)
 {
 	/* This static method is assumed to have been called by the Session
 	   before any DFS's are created.

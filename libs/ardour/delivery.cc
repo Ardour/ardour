@@ -43,9 +43,9 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-PBD::Signal1<void,nframes_t> Delivery::CycleStart;
-PBD::Signal0<int>           Delivery::PannersLegal;
-bool                                     Delivery::panners_legal = false;
+PBD::Signal1<void, pframes_t> Delivery::CycleStart;
+PBD::Signal0<int>             Delivery::PannersLegal;
+bool                          Delivery::panners_legal = false;
 
 /* deliver to an existing IO object */
 
@@ -115,14 +115,14 @@ Delivery::display_name () const
 }
 
 void
-Delivery::cycle_start (nframes_t /*nframes*/)
+Delivery::cycle_start (pframes_t /*nframes*/)
 {
 	_output_offset = 0;
 	_no_outs_cuz_we_no_monitor = false;
 }
 
 void
-Delivery::increment_output_offset (nframes_t n)
+Delivery::increment_output_offset (framecnt_t n)
 {
 	_output_offset += n;
 }
@@ -226,7 +226,7 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool result_required)
+Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool result_required)
 {
 	assert (_output);
 
@@ -441,7 +441,7 @@ Delivery::end_pan_touch (uint32_t which, bool mark, double when)
 
 
 void
-Delivery::flush_buffers (nframes_t nframes, framepos_t time)
+Delivery::flush_buffers (framecnt_t nframes, framepos_t time)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 

@@ -66,7 +66,7 @@ ThreadBuffers::ensure_buffers (ChanCount howmany)
 }
 
 void
-ThreadBuffers::allocate_pan_automation_buffers (nframes_t nframes, uint32_t howmany, bool force)
+ThreadBuffers::allocate_pan_automation_buffers (framecnt_t nframes, uint32_t howmany, bool force)
 {
 	if (!force && howmany <= npan_buffers) {
 		return;

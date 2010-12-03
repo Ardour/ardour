@@ -50,14 +50,14 @@ class SilenceTrimmerTest : public CppUnit::TestFixture
 		{
 		ProcessContext<float> c (zero_data, frames, 1);
 		trimmer->process (c);
-		nframes_t frames_processed = sink->get_data().size();
-		CPPUNIT_ASSERT_EQUAL ((nframes_t) 0, frames_processed);
+		framecnt_t frames_processed = sink->get_data().size();
+		CPPUNIT_ASSERT_EQUAL ((framecnt_t) 0, frames_processed);
 		}
 		
 		{
 		ProcessContext<float> c (random_data, frames, 1);
 		trimmer->process (c);
-		nframes_t frames_processed = sink->get_data().size();
+		framecnt_t frames_processed = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (frames, frames_processed);
 		CPPUNIT_ASSERT (TestUtils::array_equals (sink->get_array(), random_data, frames));
 		}
@@ -65,14 +65,14 @@ class SilenceTrimmerTest : public CppUnit::TestFixture
 		{
 		ProcessContext<float> c (zero_data, frames, 1);
 		trimmer->process (c);
-		nframes_t frames_processed = sink->get_data().size();
+		framecnt_t frames_processed = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (frames, frames_processed);
 		}
 		
 		{
 		ProcessContext<float> c (random_data, frames, 1);
 		trimmer->process (c);
-		nframes_t frames_processed = sink->get_data().size();
+		framecnt_t frames_processed = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (3 * frames, frames_processed);
 		CPPUNIT_ASSERT (TestUtils::array_equals (sink->get_array(), random_data, frames));
 		CPPUNIT_ASSERT (TestUtils::array_equals (&sink->get_array()[frames], zero_data, frames));
@@ -82,7 +82,7 @@ class SilenceTrimmerTest : public CppUnit::TestFixture
 		{
 		ProcessContext<float> c (zero_data, frames, 1);
 		trimmer->process (c);
-		nframes_t frames_processed = sink->get_data().size();
+		framecnt_t frames_processed = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (3 * frames, frames_processed);
 		}
 	}
@@ -97,7 +97,7 @@ class SilenceTrimmerTest : public CppUnit::TestFixture
 		{
 		ProcessContext<float> c (half_random_data, frames, 1);
 		trimmer->process (c);
-		nframes_t frames_processed = sink->get_data().size();
+		framecnt_t frames_processed = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (frames / 2, frames_processed);
 		CPPUNIT_ASSERT (TestUtils::array_equals (sink->get_array(), &half_random_data[frames / 2], frames / 2));
 		}
@@ -105,14 +105,14 @@ class SilenceTrimmerTest : public CppUnit::TestFixture
 		{
 		ProcessContext<float> c (zero_data, frames, 1);
 		trimmer->process (c);
-		nframes_t frames_processed = sink->get_data().size();
+		framecnt_t frames_processed = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (frames / 2, frames_processed);
 		}
 		
 		{
 		ProcessContext<float> c (half_random_data, frames, 1);
 		trimmer->process (c);
-		nframes_t frames_processed = sink->get_data().size();
+		framecnt_t frames_processed = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (2 * frames + frames / 2, frames_processed);
 		CPPUNIT_ASSERT (TestUtils::array_equals (&sink->get_array()[frames + frames / 2], half_random_data, frames));
 		}
@@ -129,7 +129,7 @@ class SilenceTrimmerTest : public CppUnit::TestFixture
 	{
 		trimmer->add_output (sink);
 		
- 		nframes_t silence = frames / 2;
+ 		framecnt_t silence = frames / 2;
 		trimmer->add_silence_to_beginning (silence);
 		
 		{
@@ -145,7 +145,7 @@ class SilenceTrimmerTest : public CppUnit::TestFixture
 	{
 		trimmer->add_output (sink);
 		
-		nframes_t silence = frames / 3;
+		framecnt_t silence = frames / 3;
 		trimmer->add_silence_to_end (silence);
 		
 		{
@@ -159,8 +159,8 @@ class SilenceTrimmerTest : public CppUnit::TestFixture
 		trimmer->process (c);
 		}
 		
-		nframes_t frames_processed = sink->get_data().size();
-		nframes_t total_frames = 2 * frames + silence;
+		framecnt_t frames_processed = sink->get_data().size();
+		framecnt_t total_frames = 2 * frames + silence;
 		CPPUNIT_ASSERT_EQUAL (total_frames, frames_processed);
 		CPPUNIT_ASSERT (TestUtils::array_equals (sink->get_array(), random_data, frames));
 		CPPUNIT_ASSERT (TestUtils::array_equals (&sink->get_array()[frames], random_data, frames));
@@ -174,7 +174,7 @@ class SilenceTrimmerTest : public CppUnit::TestFixture
 	float * random_data;
 	float * zero_data;
 	float * half_random_data;
-	nframes_t frames;
+	framecnt_t frames;
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION (SilenceTrimmerTest);

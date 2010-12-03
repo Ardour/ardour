@@ -934,7 +934,7 @@ LocationUI::add_new_location()
 	string markername;
 
 	if (_session) {
-		nframes_t where = _session->audible_frame();
+		framepos_t where = _session->audible_frame();
 		_session->locations()->next_available_name(markername,"mark");
 		Location *location = new Location (*_session, where, where, markername, Location::IsMark);
 		if (Config->get_name_new_markers()) {
@@ -956,7 +956,7 @@ LocationUI::add_new_range()
 	string rangename;
 
 	if (_session) {
-		nframes_t where = _session->audible_frame();
+		framepos_t where = _session->audible_frame();
 		_session->locations()->next_available_name(rangename,"unnamed");
 		Location *location = new Location (*_session, where, where, rangename, Location::IsRangeMarker);
 		_session->begin_reversible_command (_("add range marker"));

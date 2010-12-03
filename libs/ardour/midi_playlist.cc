@@ -68,7 +68,7 @@ MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, string 
 {
 }
 
-MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, nframes_t start, nframes_t dur, string name, bool hidden)
+MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, framepos_t start, framecnt_t dur, string name, bool hidden)
 	: Playlist (other, start, dur, name, hidden)
 	, _note_mode(other->_note_mode)
 {
@@ -87,8 +87,8 @@ struct EventsSortByTime {
 };
 
 /** Returns the number of frames in time duration read (eg could be large when 0 events are read) */
-nframes_t
-MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t dur, unsigned chan_n)
+framecnt_t
+MidiPlaylist::read (MidiRingBuffer<framepos_t>& dst, framepos_t start, framecnt_t dur, unsigned chan_n)
 {
 	/* this function is never called from a realtime thread, so
 	   its OK to block (for short intervals).
@@ -97,7 +97,7 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 	Glib::RecMutex::Lock rm (region_lock);
 	DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("++++++ %1 .. %2  +++++++++++++++++++++++++++++++++++++++++++++++\n", start, start + dur));
 
-	nframes_t end = start + dur - 1;
+	framepos_t end = start + dur - 1;
 
 	_read_data_count = 0;
 
@@ -190,7 +190,7 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("%1 regions to read, plus %2 trackers\n", regs.size(), tracker_info.size()));
 
-		Evoral::EventList<nframes_t> evlist;
+		Evoral::EventList<framepos_t> evlist;
 
 		for (vector<TrackerInfo>::iterator t = tracker_info.begin(); t != tracker_info.end(); ++t) {
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("Resolve %1 notes\n", (*t).first->on()));
@@ -200,7 +200,7 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 
 #ifndef NDEBUG
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("After resolution we now have %1 events\n",  evlist.size()));
-		for (Evoral::EventList<nframes_t>::iterator x = evlist.begin(); x != evlist.end(); ++x) {
+		for (Evoral::EventList<framepos_t>::iterator x = evlist.begin(); x != evlist.end(); ++x) {
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1\n", **x));
 		}
 #endif
@@ -235,7 +235,7 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 
 #ifndef NDEBUG
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("After %1 (%2 .. %3) we now have %4\n", mr->name(), mr->position(), mr->last_frame(), evlist.size()));
-			for (Evoral::EventList<nframes_t>::iterator x = evlist.begin(); x != evlist.end(); ++x) {
+			for (Evoral::EventList<framepos_t>::iterator x = evlist.begin(); x != evlist.end(); ++x) {
 				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1\n", **x));
 			}
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\tAFTER: tracker says there are %1 on notes\n", tracker->on()));
@@ -253,18 +253,18 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 		if (!evlist.empty()) {
 
 			/* sort the event list */
-			EventsSortByTime<nframes_t> time_cmp;
+			EventsSortByTime<framepos_t> time_cmp;
 			evlist.sort (time_cmp);
 
 #ifndef NDEBUG
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("Final we now have %1 events\n",  evlist.size()));
-			for (Evoral::EventList<nframes_t>::iterator x = evlist.begin(); x != evlist.end(); ++x) {
+			for (Evoral::EventList<framepos_t>::iterator x = evlist.begin(); x != evlist.end(); ++x) {
 				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1\n", **x));
 			}
 #endif
 			/* write into dst */
-			for (Evoral::EventList<nframes_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
-				Evoral::Event<nframes_t>* ev (*e);
+			for (Evoral::EventList<framepos_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
+				Evoral::Event<framepos_t>* ev (*e);
 				dst.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
 				delete ev;
 			}

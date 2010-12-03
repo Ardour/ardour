@@ -91,46 +91,57 @@ class AudioEngine : public SessionHandlePtr
 
 	Glib::Mutex& process_lock() { return _process_lock; }
 
-	nframes_t frame_rate() const;
-	nframes_t frames_per_cycle() const;
+	framecnt_t frame_rate () const;
+	framecnt_t frames_per_cycle () const;
 
 	size_t raw_buffer_size(DataType t);
 
 	int usecs_per_cycle () const { return _usecs_per_cycle; }
 
-	bool get_sync_offset (nframes_t& offset) const;
+	bool get_sync_offset (pframes_t & offset) const;
 
-	nframes_t frames_since_cycle_start () {
+	pframes_t frames_since_cycle_start () {
   	        jack_client_t* _priv_jack = _jack;
-		if (!_running || !_priv_jack) return 0;
+		if (!_running || !_priv_jack) {
+			return 0;
+		}
 		return jack_frames_since_cycle_start (_priv_jack);
 	}
-	nframes_t frame_time () {
+	
+	pframes_t frame_time () {
   	        jack_client_t* _priv_jack = _jack;
-		if (!_running || !_priv_jack) return 0;
+		if (!_running || !_priv_jack) {
+			return 0;
+		}
 		return jack_frame_time (_priv_jack);
 	}
 
-	nframes_t frame_time_at_cycle_start () {
+	pframes_t frame_time_at_cycle_start () {
   	        jack_client_t* _priv_jack = _jack;
-		if (!_running || !_priv_jack) return 0;
+		if (!_running || !_priv_jack) {
+			return 0;
+		}
 		return jack_last_frame_time (_priv_jack);
 	}
 
-	nframes_t transport_frame () const {
+	pframes_t transport_frame () const {
   	        const jack_client_t* _priv_jack = _jack;
-		if (!_running || !_priv_jack) return 0;
+		if (!_running || !_priv_jack) {
+			return 0;
+		}
 		return jack_get_current_transport_frame (_priv_jack);
 	}
 
-	int request_buffer_size (nframes_t);
+	int request_buffer_size (pframes_t);
 
-	nframes_t set_monitor_check_interval (nframes_t);
-	nframes_t processed_frames() const { return _processed_frames; }
+	framecnt_t set_monitor_check_interval (framecnt_t);
+	framecnt_t processed_frames() const { return _processed_frames; }
 
 	float get_cpu_load() {
   	        jack_client_t* _priv_jack = _jack;
-		if (!_running || !_priv_jack) return 0;
+		if (!_running || !_priv_jack) {
+			return 0;
+		}
 		return jack_cpu_load (_priv_jack);
 	}
 
@@ -159,7 +170,7 @@ class AudioEngine : public SessionHandlePtr
 	Port *register_output_port (DataType, const std::string& portname);
 	int   unregister_port (Port &);
 
-	void split_cycle (nframes_t offset);
+	void split_cycle (pframes_t offset);
 
 	int connect (const std::string& source, const std::string& destination);
 	int disconnect (const std::string& source, const std::string& destination);
@@ -189,7 +200,7 @@ class AudioEngine : public SessionHandlePtr
 
 	void transport_start ();
 	void transport_stop ();
-	void transport_locate (nframes_t);
+	void transport_locate (framepos_t);
 	TransportState transport_state ();
 
 	int  reset_timebase ();
@@ -203,7 +214,7 @@ class AudioEngine : public SessionHandlePtr
 _	   the regular process() call to session->process() is not made.
 	*/
 
-	PBD::Signal1<int,nframes_t> Freewheel;
+	PBD::Signal1<int, pframes_t> Freewheel;
 
 	PBD::Signal0<void> Xrun;
 
@@ -218,7 +229,7 @@ _	   the regular process() call to session->process() is not made.
 
 	/* this signal is emitted if the sample rate changes */
 
-	PBD::Signal1<void,nframes_t> SampleRateChanged;
+	PBD::Signal1<void, framecnt_t> SampleRateChanged;
 
 	/* this signal is sent if JACK ever disconnects us */
 
@@ -255,18 +266,18 @@ _	   the regular process() call to session->process() is not made.
 	bool                       session_remove_pending;
 	bool                      _running;
 	bool                      _has_run;
-	mutable nframes_t         _buffer_size;
+	mutable framecnt_t        _buffer_size;
 	std::map<DataType,size_t> _raw_buffer_sizes;
-	mutable nframes_t         _frame_rate;
+	mutable framecnt_t        _frame_rate;
 	/// number of frames between each check for changes in monitor input
-	nframes_t                  monitor_check_interval;
+	framecnt_t                 monitor_check_interval;
 	/// time of the last monitor check in frames
-	nframes_t                  last_monitor_check;
+	framecnt_t                 last_monitor_check;
 	/// the number of frames processed since start() was called
-	nframes_t                 _processed_frames;
+	framecnt_t                _processed_frames;
 	bool                      _freewheeling;
 	bool                      _freewheel_pending;
-	boost::function<int(nframes_t)>  freewheel_action;
+	boost::function<int(framecnt_t)>  freewheel_action;
 	bool                       reconnect_on_halt;
 	int                       _usecs_per_cycle;
 
@@ -274,7 +285,7 @@ _	   the regular process() call to session->process() is not made.
 
 	Port *register_port (DataType type, const std::string& portname, bool input);
 
-	int    process_callback (nframes_t nframes);
+	int    process_callback (pframes_t nframes);
 	void*  process_thread ();
         void   finish_process_cycle (int status);
 	void   remove_all_ports ();
@@ -289,20 +300,20 @@ _	   the regular process() call to session->process() is not made.
 	static void _session_callback (jack_session_event_t *event, void *arg);
 #endif
 	static int  _graph_order_callback (void *arg);
-	static int  _process_callback (nframes_t nframes, void *arg);
+	static int  _process_callback (pframes_t nframes, void *arg);
 	static void* _process_thread (void *arg);
-	static int  _sample_rate_callback (nframes_t nframes, void *arg);
-	static int  _bufsize_callback (nframes_t nframes, void *arg);
-	static void _jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int, void*);
+	static int  _sample_rate_callback (pframes_t nframes, void *arg);
+	static int  _bufsize_callback (pframes_t nframes, void *arg);
+	static void _jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int, void*);
 	static int  _jack_sync_callback (jack_transport_state_t, jack_position_t*, void *arg);
 	static void _freewheel_callback (int , void *arg);
 	static void _registration_callback (jack_port_id_t, int, void *);
 	static void _connect_callback (jack_port_id_t, jack_port_id_t, int, void *);
 
-	void jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int);
+	void jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int);
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
-	int  jack_bufsize_callback (nframes_t);
-	int  jack_sample_rate_callback (nframes_t);
+	int  jack_bufsize_callback (pframes_t);
+	int  jack_sample_rate_callback (pframes_t);
 
 	int connect_to_jack (std::string client_name, std::string session_uuid);
 

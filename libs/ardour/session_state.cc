@@ -225,7 +225,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	/* default short fade = 15ms */
 
-	Crossfade::set_short_xfade_length ((nframes_t) floor (config.get_short_xfade_seconds() * frame_rate()));
+	Crossfade::set_short_xfade_length ((framecnt_t) floor (config.get_short_xfade_seconds() * frame_rate()));
 	SndFileSource::setup_standard_crossfades (*this, frame_rate());
 
 	last_mmc_step.tv_sec = 0;
@@ -1017,7 +1017,7 @@ Session::state(bool full_state)
 	if (full_state) {
 
 		node->add_property ("name", _name);
-		snprintf (buf, sizeof (buf), "%" PRId32, _nominal_frame_rate);
+		snprintf (buf, sizeof (buf), "%" PRId64, _nominal_frame_rate);
 		node->add_property ("sample-rate", buf);
 
 		if (session_dirs.size() > 1) {

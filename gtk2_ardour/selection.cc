@@ -304,7 +304,7 @@ Selection::toggle (vector<RegionView*>& r)
 }
 
 long
-Selection::toggle (nframes_t start, nframes_t end)
+Selection::toggle (framepos_t start, framepos_t end)
 {
 	AudioRangeComparator cmp;
 
@@ -462,7 +462,7 @@ Selection::add (MidiRegionView* mrv)
 }
 
 long
-Selection::add (nframes_t start, nframes_t end)
+Selection::add (framepos_t start, framepos_t end)
 {
 	AudioRangeComparator cmp;
 
@@ -478,7 +478,7 @@ Selection::add (nframes_t start, nframes_t end)
 }
 
 void
-Selection::replace (uint32_t sid, nframes_t start, nframes_t end)
+Selection::replace (uint32_t sid, framepos_t start, framepos_t end)
 {
 	for (list<AudioRange>::iterator i = time.begin(); i != time.end(); ++i) {
 		if ((*i).id == sid) {
@@ -654,7 +654,7 @@ Selection::remove (uint32_t selection_id)
 }
 
 void
-Selection::remove (nframes_t /*start*/, nframes_t /*end*/)
+Selection::remove (framepos_t /*start*/, framepos_t /*end*/)
 {
 }
 
@@ -744,7 +744,7 @@ Selection::set (vector<RegionView*>& v)
  *  the list of tracks it applies to.
  */
 long
-Selection::set (nframes_t start, nframes_t end)
+Selection::set (framepos_t start, framepos_t end)
 {
 	if ((start == 0 && end == 0) || end < start) {
 		return 0;

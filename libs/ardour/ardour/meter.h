@@ -68,7 +68,7 @@ public:
 	void reflect_inputs (const ChanCount& in);
 
 	/** Compute peaks */
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool);
+	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
 
 	ChanCount input_streams () const { return current_meters; }
 	ChanCount output_streams () const { return current_meters; }

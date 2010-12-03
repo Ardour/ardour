@@ -58,19 +58,19 @@ class MidiSource : virtual public Source
 	 * \param cnt Length of range to be read (in audio frames)
 	 * \param tracker an optional pointer to MidiStateTracker object, for note on/off tracking
 	 */
-	virtual nframes_t midi_read (Evoral::EventSink<nframes_t>& dst,
-				     framepos_t source_start,
-				     framepos_t start, nframes_t cnt,
-				     MidiStateTracker*,
-				     std::set<Evoral::Parameter> const &) const;
+	virtual framecnt_t midi_read (Evoral::EventSink<framepos_t>& dst,
+				      framepos_t source_start,
+				      framepos_t start, framecnt_t cnt,
+				      MidiStateTracker*,
+				      std::set<Evoral::Parameter> const &) const;
 
-	virtual nframes_t midi_write (MidiRingBuffer<nframes_t>& src,
-	                              framepos_t source_start,
-	                              nframes_t cnt);
+	virtual framecnt_t midi_write (MidiRingBuffer<framepos_t>& src,
+				       framepos_t source_start,
+				       framecnt_t cnt);
 
 	virtual void append_event_unlocked_beats(const Evoral::Event<Evoral::MusicalTime>& ev) = 0;
 
-	virtual void append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev,
+	virtual void append_event_unlocked_frames(const Evoral::Event<framepos_t>& ev,
 			framepos_t source_start) = 0;
 
 	virtual bool       empty () const;
@@ -130,14 +130,14 @@ class MidiSource : virtual public Source
   protected:
 	virtual void flush_midi() = 0;
 
-	virtual nframes_t read_unlocked (Evoral::EventSink<nframes_t>& dst,
-					 framepos_t position,
-					 framepos_t start, nframes_t cnt,
-					 MidiStateTracker* tracker) const = 0;
+	virtual framepos_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
+					  framepos_t position,
+					  framepos_t start, framecnt_t cnt,
+					  MidiStateTracker* tracker) const = 0;
 
-	virtual nframes_t write_unlocked (MidiRingBuffer<nframes_t>& dst,
-			framepos_t position,
-			nframes_t cnt) = 0;
+	virtual framepos_t write_unlocked (MidiRingBuffer<framepos_t>& dst,
+					   framepos_t position,
+					   framecnt_t cnt) = 0;
 
 	std::string      _captured_for;
 	mutable uint32_t _read_data_count;  ///< modified in read()

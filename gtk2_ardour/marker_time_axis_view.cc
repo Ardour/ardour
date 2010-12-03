@@ -192,7 +192,7 @@ MarkerTimeAxisView::apply_color(Gdk::Color& color)
  * @param src the identity of the object that initiated the change
  */
 MarkerView*
-MarkerTimeAxisView::add_marker_view(ImageFrameView* ifv, std::string mark_type, std::string mark_id, nframes_t start, nframes_t dur, void* src)
+MarkerTimeAxisView::add_marker_view(ImageFrameView* ifv, std::string mark_type, std::string mark_id, framepos_t start, framecnt_t dur, void* src)
 {
 	if(ifv->has_marker_view_item(mark_id))
 	{
@@ -335,7 +335,7 @@ MarkerTimeAxisView::set_marker_duration_sec(double sec)
 {
   if(get_selected_time_axis_item() != 0)
   {
-	  get_selected_time_axis_item()->set_duration((nframes_t) (sec * _trackview.editor.session()->frame_rate()), this) ;
+	  get_selected_time_axis_item()->set_duration((sec * _trackview.editor.session()->frame_rate()), this);
   }
 }
 

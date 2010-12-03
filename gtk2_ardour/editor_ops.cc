@@ -1752,13 +1752,13 @@ Editor::temporal_zoom_session ()
 	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_session)
 
 	if (_session) {
-		nframes_t const l = _session->current_end_frame() - _session->current_start_frame();
+		framecnt_t const l = _session->current_end_frame() - _session->current_start_frame();
 		double s = _session->current_start_frame() - l * 0.01;
 		if (s < 0) {
 			s = 0;
 		}
-		nframes_t const e = _session->current_end_frame() + l * 0.01;
-		temporal_zoom_by_frame (nframes_t (s), e, "zoom to _session");
+		framecnt_t const e = _session->current_end_frame() + l * 0.01;
+		temporal_zoom_by_frame (framecnt_t (s), e, "zoom to _session");
 	}
 }
 
@@ -2207,7 +2207,7 @@ Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y)
 {
 	double wx, wy;
 	double cx, cy;
-	nframes_t where;
+	framepos_t where;
 	RouteTimeAxisView *dest_rtv = 0;
 	RouteTimeAxisView *source_rtv = 0;
 
@@ -4188,8 +4188,8 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 	RegionSelection sel = regions; // clear (below) may  clear the argument list if its the current region selection
 	RegionSelection foo;
 
-	nframes_t const start_frame = regions.start ();
-	nframes_t const end_frame = regions.end_frame ();
+	framepos_t const start_frame = regions.start ();
+	framepos_t const end_frame = regions.end_frame ();
 
 	begin_reversible_command (_("duplicate region"));
 

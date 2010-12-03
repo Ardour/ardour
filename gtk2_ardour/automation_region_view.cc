@@ -126,7 +126,7 @@ AutomationRegionView::canvas_event(GdkEvent* ev)
  *  @param y y position, relative to our TimeAxisView.
  */
 void
-AutomationRegionView::add_automation_event (GdkEvent *, nframes_t when, double y)
+AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double y)
 {
 	if (!_line) {
 		boost::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);

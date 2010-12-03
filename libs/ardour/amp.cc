@@ -71,7 +71,7 @@ Amp::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, nframes_t nframes, bool)
+Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t nframes, bool)
 {
 	if (!_active && !_pending_active) {
 		return;
@@ -85,7 +85,7 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 
 			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 				Sample* const sp = i->data();
-				for (nframes_t nx = 0; nx < nframes; ++nx) {
+				for (pframes_t nx = 0; nx < nframes; ++nx) {
 					sp[nx] *= gab[nx];
 				}
 			}
@@ -129,7 +129,7 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 }
 
 void
-Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target)
+Amp::apply_gain (BufferSet& bufs, framecnt_t nframes, gain_t initial, gain_t target)
 {
         /** Apply a (potentially) declicked gain to the buffers of @a bufs
 	 */
@@ -144,7 +144,7 @@ Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t targ
 		return;
 	}
 
-	const nframes_t declick = std::min ((nframes_t)128, nframes);
+	const framecnt_t declick = std::min ((framecnt_t) 128, nframes);
 	gain_t         delta;
 	double         fractional_shift = -1.0/declick;
 	double         fractional_pos;
@@ -180,7 +180,7 @@ Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t targ
 
 		fractional_pos = 1.0;
 
-		for (nframes_t nx = 0; nx < declick; ++nx) {
+		for (pframes_t nx = 0; nx < declick; ++nx) {
 			buffer[nx] *= (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
 			fractional_pos += fractional_shift;
 		}
@@ -199,7 +199,7 @@ Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t targ
 }
 
 void
-Amp::declick (BufferSet& bufs, nframes_t nframes, int dir)
+Amp::declick (BufferSet& bufs, framecnt_t nframes, int dir)
 {
         /* Almost exactly like ::apply_gain() but skips MIDI buffers and has fixed initial+target
            values.
@@ -209,7 +209,7 @@ Amp::declick (BufferSet& bufs, nframes_t nframes, int dir)
 		return;
 	}
 
-	const nframes_t declick = std::min ((nframes_t)128, nframes);
+	const framecnt_t declick = std::min ((framecnt_t) 128, nframes);
 	gain_t         delta, initial, target;
 	double         fractional_shift = -1.0/declick;
 	double         fractional_pos;
@@ -233,7 +233,7 @@ Amp::declick (BufferSet& bufs, nframes_t nframes, int dir)
 
 		fractional_pos = 1.0;
 
-		for (nframes_t nx = 0; nx < declick; ++nx) {
+		for (pframes_t nx = 0; nx < declick; ++nx) {
 			buffer[nx] *= (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
 			fractional_pos += fractional_shift;
 		}
@@ -252,7 +252,7 @@ Amp::declick (BufferSet& bufs, nframes_t nframes, int dir)
 }
 
 void
-Amp::apply_gain (AudioBuffer& buf, nframes_t nframes, gain_t initial, gain_t target)
+Amp::apply_gain (AudioBuffer& buf, framecnt_t nframes, gain_t initial, gain_t target)
 {
         /** Apply a (potentially) declicked gain to the contents of @a buf
 	 */
@@ -267,7 +267,7 @@ Amp::apply_gain (AudioBuffer& buf, nframes_t nframes, gain_t initial, gain_t tar
 		return;
 	}
 
-	const nframes_t declick = std::min ((nframes_t)128, nframes);
+	const framecnt_t declick = std::min ((framecnt_t) 128, nframes);
 	gain_t         delta;
 	double         fractional_shift = -1.0/declick;
 	double         fractional_pos;
@@ -285,7 +285,7 @@ Amp::apply_gain (AudioBuffer& buf, nframes_t nframes, gain_t initial, gain_t tar
         
         fractional_pos = 1.0;
         
-        for (nframes_t nx = 0; nx < declick; ++nx) {
+        for (pframes_t nx = 0; nx < declick; ++nx) {
                 buffer[nx] *= (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
                 fractional_pos += fractional_shift;
         }
@@ -303,7 +303,7 @@ Amp::apply_gain (AudioBuffer& buf, nframes_t nframes, gain_t initial, gain_t tar
 }
 
 void
-Amp::apply_simple_gain (BufferSet& bufs, nframes_t nframes, gain_t target)
+Amp::apply_simple_gain (BufferSet& bufs, framecnt_t nframes, gain_t target)
 {
 	if (target == 0.0) {
 
@@ -342,7 +342,7 @@ Amp::apply_simple_gain (BufferSet& bufs, nframes_t nframes, gain_t target)
 }
 
 void
-Amp::apply_simple_gain (AudioBuffer& buf, nframes_t nframes, gain_t target)
+Amp::apply_simple_gain (AudioBuffer& buf, framecnt_t nframes, gain_t target)
 {
 	if (target == 0.0) {
                 memset (buf.data(), 0, sizeof (Sample) * nframes);
@@ -412,8 +412,9 @@ void
 Amp::GainControl::set_value (double val)
 {
 	// max gain at about +6dB (10.0 ^ ( 6 dB * 0.05))
-	if (val > 1.99526231f)
+	if (val > 1.99526231f) {
 		val = 1.99526231f;
+	}
 
 	_amp->set_gain (val, this);
 
@@ -427,7 +428,7 @@ Amp::GainControl::get_value (void) const
 }
 
 void
-Amp::setup_gain_automation (framepos_t start_frame, framepos_t end_frame, nframes_t nframes)
+Amp::setup_gain_automation (framepos_t start_frame, framepos_t end_frame, framecnt_t nframes)
 {
 	Glib::Mutex::Lock am (control_lock(), Glib::TRY_LOCK);
 

@@ -80,8 +80,8 @@ private:
 	Position get_position (double, double) const;
 	void set_cursor (Position);
 
-	nframes_t _start; ///< start frame of the overview
-	nframes_t _end; ///< end frame of the overview
+	framepos_t _start; ///< start frame of the overview
+	framepos_t _end; ///< end frame of the overview
 
 	/** fraction of the session length by which the overview size should extend past the start and end markers */
 	double _overhang_fraction;

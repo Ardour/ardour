@@ -71,7 +71,7 @@ class AUPlugin : public ARDOUR::Plugin
 	const char * maker () const { return _info->creator.c_str(); }
 	uint32_t parameter_count () const;
 	float default_value (uint32_t port);
-	nframes_t signal_latency() const;
+	framecnt_t signal_latency() const;
 	void set_parameter (uint32_t which, float val);
 	float get_parameter (uint32_t which) const;
     
@@ -80,11 +80,11 @@ class AUPlugin : public ARDOUR::Plugin
 	void activate ();
 	void deactivate ();
 	void flush ();
-	int set_block_size (nframes_t nframes);
+	int set_block_size (pframes_t nframes);
     
 	int connect_and_run (BufferSet& bufs,
 			     ChanMapping in, ChanMapping out,
-			     nframes_t nframes, nframes_t offset);
+			     pframes_t nframes, framecnt_t offset);
 	std::set<Evoral::Parameter> automatable() const;
 	std::string describe_parameter (Evoral::Parameter);
 	std::string state_node_name () const { return "audiounit"; }
@@ -150,8 +150,8 @@ class AUPlugin : public ARDOUR::Plugin
 	int32_t input_channels;
 	int32_t output_channels;
 	std::vector<std::pair<int,int> > io_configs;
-	nframes_t _current_block_size;
-	nframes_t _last_nframes;
+	pframes_t _current_block_size;
+	framecnt_t _last_nframes;
 	bool _requires_fixed_size_buffers;
 	AudioBufferList* buffers;
 	bool _has_midi_input;
@@ -181,10 +181,10 @@ class AUPlugin : public ARDOUR::Plugin
 
 	std::vector<std::pair<uint32_t, uint32_t> > parameter_map;
 	uint32_t current_maxbuf;
-        nframes_t current_offset;
-        nframes_t cb_offset;
+        framecnt_t current_offset;
+        framecnt_t cb_offset;
         BufferSet* current_buffers;
-        nframes_t frames_processed;
+        framecnt_t frames_processed;
 	
 	std::vector<AUParameterDescriptor> descriptors;
 	void init ();

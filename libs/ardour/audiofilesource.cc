@@ -77,16 +77,16 @@ uint64_t           AudioFileSource::header_position_offset = 0;
 char AudioFileSource::bwf_serial_number[13] = "000000000000";
 
 struct SizedSampleBuffer {
-    nframes_t size;
-    Sample* buf;
+	framecnt_t size;
+	Sample* buf;
 
-    SizedSampleBuffer (nframes_t sz) : size (sz) {
-	    buf = new Sample[size];
-    }
+	SizedSampleBuffer (framecnt_t sz) : size (sz) {
+		buf = new Sample[size];
+	}
 
-    ~SizedSampleBuffer() {
-	    delete [] buf;
-    }
+	~SizedSampleBuffer() {
+		delete [] buf;
+	}
 };
 
 Glib::StaticPrivate<SizedSampleBuffer> thread_interleave_buffer = GLIBMM_STATIC_PRIVATE_INIT;
@@ -302,7 +302,7 @@ AudioFileSource::move_dependents_to_trash()
 }
 
 void
-AudioFileSource::set_header_position_offset (nframes_t offset)
+AudioFileSource::set_header_position_offset (framecnt_t offset)
 {
 	header_position_offset = offset;
 	HeaderPositionOffsetChanged ();
@@ -385,7 +385,7 @@ AudioFileSource::safe_audio_file_extension(const string& file)
 }
 
 Sample*
-AudioFileSource::get_interleave_buffer (nframes_t size)
+AudioFileSource::get_interleave_buffer (framecnt_t size)
 {
 	SizedSampleBuffer* ssb;
 

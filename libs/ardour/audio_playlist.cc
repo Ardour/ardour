@@ -164,7 +164,7 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, stri
 	}
 }
 
-AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, nframes_t start, nframes_t cnt, string name, bool hidden)
+AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, framepos_t start, framecnt_t cnt, string name, bool hidden)
 	: Playlist (other, start, cnt, name, hidden)
 	, _crossfades (*this)
 {
@@ -838,15 +838,13 @@ AudioPlaylist::region_changed (const PropertyChange& what_changed, boost::shared
 }
 
 void
-AudioPlaylist::crossfades_at (nframes_t frame, Crossfades& clist)
+AudioPlaylist::crossfades_at (framepos_t frame, Crossfades& clist)
 {
 	RegionLock rlock (this);
 
 	for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
-		nframes_t start, end;
-
-		start = (*i)->position();
-		end = start + (*i)->overlap_length(); // not length(), important difference
+		framepos_t const start = (*i)->position ();
+		framepos_t const end = start + (*i)->overlap_length(); // not length(), important difference
 
 		if (frame >= start && frame <= end) {
 			clist.push_back (*i);

@@ -36,21 +36,21 @@ XMLNode& state(bool full);
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&, int version);
 
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool);
+	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
 	bool configure_io (ChanCount in, ChanCount out);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
-	int  set_block_size (nframes_t);
+	int  set_block_size (pframes_t);
 
 	BufferSet* get_buffers();
 	void release_buffers();
 
-	static PBD::Signal1<void,nframes_t> CycleStart;
+	static PBD::Signal1<void, pframes_t> CycleStart;
 
   private:
 	BufferSet buffers;
 	gint user_count; /* atomic */
-	void allocate_buffers (nframes_t);
-	void cycle_start (nframes_t);
+	void allocate_buffers (pframes_t);
+	void cycle_start (pframes_t);
 };
 
 } // namespace ARDOUR

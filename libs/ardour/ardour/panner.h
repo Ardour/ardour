@@ -56,8 +56,8 @@ class StreamPanner : public PBD::Stateful
 	void set_position (const PBD::AngularVector&, bool link_call = false);
 	void set_diffusion (double);
 
-	void distribute (AudioBuffer &, BufferSet &, gain_t, nframes_t);
-	void distribute_automated (AudioBuffer &, BufferSet &, nframes_t, nframes_t, nframes_t, pan_t **);
+	void distribute (AudioBuffer &, BufferSet &, gain_t, pframes_t);
+	void distribute_automated (AudioBuffer &, BufferSet &, framepos_t, framepos_t, pframes_t, pan_t **);
 
 	/* the basic StreamPanner API */
 
@@ -69,9 +69,9 @@ class StreamPanner : public PBD::Stateful
 	 *  @param gain_coeff Gain coefficient to apply to output samples.
 	 *  @param nframes Number of frames in the input.
 	 */
-	virtual void do_distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes) = 0;
+	virtual void do_distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes) = 0;
 	virtual void do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
-	                                      nframes_t start, nframes_t end, nframes_t nframes,
+	                                      framepos_t start, framepos_t end, pframes_t nframes,
 	                                      pan_t** buffers) = 0;
 
 	boost::shared_ptr<AutomationControl> pan_control()  { return _control; }
@@ -135,7 +135,7 @@ class BaseStereoPanner : public StreamPanner
 	   and a type name. See EqualPowerStereoPanner as an example.
 	*/
 
-	void do_distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
+	void do_distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes);
 
 	static double azimuth_to_lr_fract (double azi) { 
 		/* 180.0 degrees=> left => 0.0 */
@@ -169,7 +169,7 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 	~EqualPowerStereoPanner ();
 
 	void do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
-	                              nframes_t start, nframes_t end, nframes_t nframes,
+	                              framepos_t start, framepos_t end, pframes_t nframes,
 	                              pan_t** buffers);
 
 	void get_current_coefficients (pan_t*) const;
@@ -219,7 +219,7 @@ public:
 	bool can_support_io_configuration (const ChanCount& /*in*/, ChanCount& /*out*/) const { return true; };
 
 	/// The fundamental Panner function
-	void run (BufferSet& src, BufferSet& dest, framepos_t start_frame, framepos_t end_frames, nframes_t nframes);
+	void run (BufferSet& src, BufferSet& dest, framepos_t start_frame, framepos_t end_frames, pframes_t nframes);
 
 	bool bypassed() const { return _bypassed; }
 	void set_bypassed (bool yn);
@@ -300,7 +300,7 @@ public:
 	/* disallow copy construction */
 	Panner (Panner const &);
 
-	void distribute_no_automation(BufferSet& src, BufferSet& dest, nframes_t nframes, gain_t gain_coeff);
+	void distribute_no_automation(BufferSet& src, BufferSet& dest, pframes_t nframes, gain_t gain_coeff);
 	std::vector<StreamPanner*> _streampanners; ///< one StreamPanner per input
 	std::vector<Output> outputs;
 	uint32_t     current_outs;

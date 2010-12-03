@@ -37,7 +37,7 @@ public:
 public:
 
 	/// Basic constructor with data, frame and channel count
-	ProcessContext (T * data, nframes_t frames, ChannelCount channels)
+	ProcessContext (T * data, framecnt_t frames, ChannelCount channels)
 		: _data (data), _frames (frames), _channels (channels)
 	{ validate_data(); }
 	
@@ -48,13 +48,13 @@ public:
 	
 	/// "Copy constructor" with unique data, frame and channel count, but copies flags
 	template<typename Y>
-	ProcessContext (ProcessContext<Y> const & other, T * data, nframes_t frames, ChannelCount channels)
+	ProcessContext (ProcessContext<Y> const & other, T * data, framecnt_t frames, ChannelCount channels)
 		: _data (data), _frames (frames), _channels (channels), _flags (other.flags())
 	{ validate_data(); }
 	
 	/// "Copy constructor" with unique data and frame count, but copies channel count and flags
 	template<typename Y>
-	ProcessContext (ProcessContext<Y> const & other, T * data, nframes_t frames)
+	ProcessContext (ProcessContext<Y> const & other, T * data, framecnt_t frames)
 		: _data (data), _frames (frames), _channels (other.channels()), _flags (other.flags())
 	{ validate_data(); }
 	
@@ -65,7 +65,7 @@ public:
 	{ /* No need to validate data */ }
 	
 	/// Make new Context out of the beginning of this context
-	ProcessContext beginning (nframes_t frames)
+	ProcessContext beginning (framecnt_t frames)
 	{
 		if (throw_level (ThrowProcess) && frames > _frames) {
 			throw Exception (*this, boost::str (boost::format
@@ -84,7 +84,7 @@ public:
 	inline T *                  data()           { return _data; }
 	
 	/// \a frames tells how many frames the array pointed by data contains
-	inline nframes_t const &    frames()   const { return _frames; }
+	inline framecnt_t const &    frames()   const { return _frames; }
 	
 	/** \a channels tells how many interleaved channels \a data contains
 	  * If \a channels is greater than 1, each channel contains \a frames / \a channels frames of data
@@ -92,7 +92,7 @@ public:
 	inline ChannelCount const & channels() const { return _channels; }
 	
 	/// Returns the amount of frames per channel
-	inline nframes_t            frames_per_channel() const { return _frames / _channels; }
+	inline framecnt_t            frames_per_channel() const { return _frames / _channels; }
 
 	/* Flags */
 	
@@ -103,7 +103,7 @@ public:
 	
 protected:
 	T * const              _data;
-	nframes_t              _frames;
+	framecnt_t              _frames;
 	ChannelCount           _channels;
 	
 	mutable FlagField      _flags;
@@ -124,11 +124,11 @@ template <typename T = DefaultSampleType>
 struct AllocatingProcessContext : public ProcessContext<T>
 {
 	/// Allocates uninitialized memory
-	AllocatingProcessContext (nframes_t frames, ChannelCount channels)
+	AllocatingProcessContext (framecnt_t frames, ChannelCount channels)
 		: ProcessContext<T> (new T[frames], frames, channels) {}
 	
 	/// Allocates and copies data from raw buffer
-	AllocatingProcessContext (T const * data, nframes_t frames, ChannelCount channels)
+	AllocatingProcessContext (T const * data, framecnt_t frames, ChannelCount channels)
 		: ProcessContext<T> (new T[frames], frames, channels)
 	{ TypeUtils<float>::copy (data, ProcessContext<T>::_data, frames); }
 	
@@ -139,12 +139,12 @@ struct AllocatingProcessContext : public ProcessContext<T>
 	
 	/// "Copy constructor" with uninitialized data, unique frame and channel count, but copies flags
 	template<typename Y>
-	AllocatingProcessContext (ProcessContext<Y> const & other, nframes_t frames, ChannelCount channels)
+	AllocatingProcessContext (ProcessContext<Y> const & other, framecnt_t frames, ChannelCount channels)
 		: ProcessContext<T> (other, new T[frames], frames, channels) {}
 	
 	/// "Copy constructor" with uninitialized data, unique frame count, but copies channel count and flags
 	template<typename Y>
-	AllocatingProcessContext (ProcessContext<Y> const & other, nframes_t frames)
+	AllocatingProcessContext (ProcessContext<Y> const & other, framecnt_t frames)
 		: ProcessContext<T> (other, new T[frames], frames, other.channels()) {}
 	
 	/// "Copy constructor" uninitialized data, that copies frame and channel count + flags
@@ -161,7 +161,7 @@ class ConstProcessContext
 {
   public:
 	/// Basic constructor with data, frame and channel count
-	ConstProcessContext (T const * data, nframes_t frames, ChannelCount channels)
+	ConstProcessContext (T const * data, framecnt_t frames, ChannelCount channels)
 	  : context (const_cast<T *>(data), frames, channels) {}
 	
 	/// Copy constructor from const ProcessContext
@@ -170,12 +170,12 @@ class ConstProcessContext
 	
 	/// "Copy constructor", with unique data, frame and channel count, but copies flags
 	template<typename ProcessContext>
-	ConstProcessContext (ProcessContext const & other, T const * data, nframes_t frames, ChannelCount channels)
+	ConstProcessContext (ProcessContext const & other, T const * data, framecnt_t frames, ChannelCount channels)
 		: context (other, const_cast<T *>(data), frames, channels) {}
 	
 	/// "Copy constructor", with unique data and frame count, but copies channel count and flags
 	template<typename ProcessContext>
-	ConstProcessContext (ProcessContext const & other, T const * data, nframes_t frames)
+	ConstProcessContext (ProcessContext const & other, T const * data, framecnt_t frames)
 		: context (other, const_cast<T *>(data), frames) {}
 	
 	/// "Copy constructor", with unique data, but copies frame and channel count + flags

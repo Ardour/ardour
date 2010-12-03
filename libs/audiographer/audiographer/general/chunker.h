@@ -20,7 +20,7 @@ class Chunker
 	/** Constructs a new Chunker with a constant chunk size.
 	  * \n NOT RT safe
 	  */
-	Chunker (nframes_t chunk_size)
+	Chunker (framecnt_t chunk_size)
 	  : chunk_size (chunk_size)
 	  , position (0)
 	{
@@ -41,12 +41,12 @@ class Chunker
 	{
 		check_flags (*this, context);
 		
-		nframes_t frames_left = context.frames();
-		nframes_t input_position = 0;
+		framecnt_t frames_left = context.frames();
+		framecnt_t input_position = 0;
 		
 		while (position + frames_left >= chunk_size) {
 			// Copy from context to buffer
-			nframes_t const frames_to_copy = chunk_size - position;
+			framecnt_t const frames_to_copy = chunk_size - position;
 			TypeUtils<T>::copy (&context.data()[input_position], &buffer[position], frames_to_copy);
 			
 			// Output whole buffer
@@ -73,8 +73,8 @@ class Chunker
 	using Sink<T>::process;
 	
   private:
-	nframes_t chunk_size;
-	nframes_t position;
+	framecnt_t chunk_size;
+	framecnt_t position;
 	T * buffer;
 	
 };

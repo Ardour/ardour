@@ -40,7 +40,7 @@ class SampleFormatConverter
 	  * \note If the non-const version of process() is used with floats,
 	  *       there is no need to call this function.
 	  */
-	void init (nframes_t max_frames, int type, int data_width);
+	void init (framecnt_t max_frames, int type, int data_width);
 
 	/// Set whether or not clipping to [-1.0, 1.0] should occur when TOut = float. Clipping is off by default
 	void set_clip_floats (bool yn) { clip_floats = yn; }
@@ -53,12 +53,12 @@ class SampleFormatConverter
 
   private:
 	void reset();
-	void init_common(nframes_t max_frames); // not-template-specialized part of init
-	void check_frame_and_channel_count(nframes_t frames, ChannelCount channels_);
+	void init_common (framecnt_t max_frames); // not-template-specialized part of init
+	void check_frame_and_channel_count (framecnt_t frames, ChannelCount channels_);
 
 	ChannelCount channels;
 	GDither      dither;
-	nframes_t    data_out_size;
+	framecnt_t   data_out_size;
 	TOut *       data_out;
 
 	bool         clip_floats;

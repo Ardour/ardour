@@ -174,7 +174,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	static sigc::signal<void,bool> Blink;
 	static sigc::signal<void>      RapidScreenUpdate;
 	static sigc::signal<void>      SuperRapidScreenUpdate;
-	static sigc::signal<void,nframes_t, bool, nframes_t> Clock;
+	static sigc::signal<void, framepos_t, bool, framepos_t> Clock;
 
 	XMLNode* editor_settings() const;
 	XMLNode* mixer_settings () const;
@@ -184,10 +184,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void save_ardour_state ();
 	gboolean configure_handler (GdkEventConfigure* conf);
 
-	void do_transport_locate (nframes_t, bool);
+	void do_transport_locate (framepos_t, bool);
 	void halt_on_xrun_message ();
-	void xrun_handler (nframes_t);
-	void create_xrun_marker (nframes_t);
+	void xrun_handler (framepos_t);
+	void create_xrun_marker (framepos_t);
 
 	AudioClock primary_clock;
 	AudioClock secondary_clock;
@@ -328,7 +328,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void float_big_clock (Gtk::Window* parent);
 	bool main_window_state_event_handler (GdkEventWindowState*, bool window_was_editor);
 
-	void update_transport_clocks (nframes_t pos);
+	void update_transport_clocks (framepos_t pos);
 	void record_state_changed ();
 
 	std::list<MidiTracer*> _midi_tracer_windows;
@@ -523,7 +523,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	Gtk::Label   sample_rate_label;
 	Gtk::EventBox sample_rate_box;
-	void update_sample_rate (nframes_t);
+	void update_sample_rate (ARDOUR::framecnt_t);
 
 	gint every_second ();
 	gint every_point_one_seconds ();
@@ -659,11 +659,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void session_dialog (std::string);
 	int pending_state_dialog ();
-	int sr_mismatch_dialog (nframes_t, nframes_t);
+	int sr_mismatch_dialog (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
 
 	void disconnect_from_jack ();
 	void reconnect_to_jack ();
-	void set_jack_buffer_size (nframes_t);
+	void set_jack_buffer_size (ARDOUR::pframes_t);
 
 	Gtk::MenuItem* jack_disconnect_item;
 	Gtk::MenuItem* jack_reconnect_item;

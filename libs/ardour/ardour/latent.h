@@ -10,10 +10,10 @@ class Latent {
 	Latent() : _own_latency (0), _user_latency (0) {}
 	virtual ~Latent() {}
 
-	virtual nframes_t signal_latency() const = 0;
-	nframes_t user_latency () const { return _user_latency; }
+	virtual framecnt_t signal_latency() const = 0;
+	framecnt_t user_latency () const { return _user_latency; }
 
-	nframes_t effective_latency() const {
+	framecnt_t effective_latency() const {
 		if (_user_latency) {
 			return _user_latency;
 		} else {
@@ -21,12 +21,12 @@ class Latent {
 		}
 	}
 
-	virtual void set_latency_delay (nframes_t val) { _own_latency = val; }
-	virtual void set_user_latency (nframes_t val) { _user_latency = val; }
+	virtual void set_latency_delay (framecnt_t val) { _own_latency = val; }
+	virtual void set_user_latency (framecnt_t val) { _user_latency = val; }
 
   protected:
-	nframes_t           _own_latency;
-	nframes_t           _user_latency;
+	framecnt_t           _own_latency;
+	framecnt_t           _user_latency;
 };
 
 }

@@ -48,7 +48,7 @@ class PeakReaderTest : public CppUnit::TestFixture
 	boost::shared_ptr<PeakReader> reader;
 
 	float * random_data;
-	nframes_t frames;
+	framecnt_t frames;
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION (PeakReaderTest);

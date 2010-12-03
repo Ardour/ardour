@@ -69,11 +69,11 @@ class InterleaverTest : public CppUnit::TestFixture
 		interleaver->input (1)->process (c);
 		interleaver->input (2)->process (c);
 
-		nframes_t expected_frames = frames * channels;
-		nframes_t generated_frames = sink->get_data().size();
+		framecnt_t expected_frames = frames * channels;
+		framecnt_t generated_frames = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (expected_frames, generated_frames);
 
-		nframes_t less_frames = frames / 2;
+		framecnt_t less_frames = frames / 2;
 		interleaver->input (0)->process (c.beginning (less_frames));
 		interleaver->input (1)->process (c.beginning (less_frames));
 		interleaver->input (2)->process (c.beginning (less_frames));
@@ -100,8 +100,8 @@ class InterleaverTest : public CppUnit::TestFixture
 		interleaver->input (1)->process (c);
 		interleaver->input (2)->process (c);
 
-		nframes_t expected_frames = frames * channels;
-		nframes_t generated_frames = sink->get_data().size();
+		framecnt_t expected_frames = frames * channels;
+		framecnt_t generated_frames = sink->get_data().size();
 		CPPUNIT_ASSERT_EQUAL (expected_frames, generated_frames);
 	}
 
@@ -119,9 +119,9 @@ class InterleaverTest : public CppUnit::TestFixture
 
 	boost::shared_ptr<VectorSink<float> > sink;
 
-	nframes_t channels;
+	framecnt_t channels;
 	float * random_data;
-	nframes_t frames;
+	framecnt_t frames;
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION (InterleaverTest);

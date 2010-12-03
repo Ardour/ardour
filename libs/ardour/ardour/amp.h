@@ -43,12 +43,12 @@ public:
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
 
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool);
+	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
 
-	bool apply_gain() const  { return _apply_gain; }
-	void apply_gain(bool yn) { _apply_gain = yn; }
+	bool apply_gain () const  { return _apply_gain; }
+	void apply_gain (bool yn) { _apply_gain = yn; }
 
-	void setup_gain_automation (framepos_t start_frame, framepos_t end_frame, nframes_t nframes);
+	void setup_gain_automation (framepos_t start_frame, framepos_t end_frame, framecnt_t nframes);
 
 	bool apply_gain_automation() const  { return _apply_gain_automation; }
 	void apply_gain_automation(bool yn) { _apply_gain_automation = yn; }
@@ -56,13 +56,13 @@ public:
 	XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
 
-	static void apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target);
-	static void apply_simple_gain(BufferSet& bufs, nframes_t nframes, gain_t target);
+	static void apply_gain (BufferSet& bufs, framecnt_t nframes, gain_t initial, gain_t target);
+	static void apply_simple_gain(BufferSet& bufs, framecnt_t nframes, gain_t target);
         
-        static void apply_gain (AudioBuffer& buf, nframes_t nframes, gain_t initial, gain_t target);
-	static void apply_simple_gain(AudioBuffer& buf, nframes_t nframes, gain_t target);
+        static void apply_gain (AudioBuffer& buf, framecnt_t nframes, gain_t initial, gain_t target);
+	static void apply_simple_gain(AudioBuffer& buf, framecnt_t nframes, gain_t target);
 
-	static void declick (BufferSet& bufs, nframes_t nframes, int dir);
+	static void declick (BufferSet& bufs, framecnt_t nframes, int dir);
 
 	gain_t         gain () const { return _gain_control->user_double(); }
 

@@ -66,7 +66,7 @@ public:
 
 	void clear();
 
-	void attach_buffers(PortSet& ports, nframes_t nframes, nframes_t offset = 0);
+	void attach_buffers(PortSet& ports, framecnt_t nframes, framecnt_t offset = 0);
 
 	/* the capacity here is a size_t and has a different interpretation depending
 	   on the DataType of the buffers. for audio, its a frame count. for MIDI
@@ -83,7 +83,7 @@ public:
 	ChanCount&       count()       { return _count; }
 
 	void is_silent(bool yn);
-	void silence (nframes_t nframes, nframes_t offset);
+	void silence (framecnt_t nframes, framecnt_t offset);
 	bool is_mirror() const { return _is_mirror; }
 
 	void set_count(const ChanCount& count) { assert(count <= _available); _count = count; }
@@ -115,8 +115,8 @@ public:
 	VstEvents* get_vst_midi (size_t);
 #endif	
 
-	void read_from(const BufferSet& in, nframes_t nframes);
-	void merge_from(const BufferSet& in, nframes_t nframes);
+	void read_from(const BufferSet& in, framecnt_t nframes);
+	void merge_from(const BufferSet& in, framecnt_t nframes);
 
 	template <typename BS, typename B>
 	class iterator_base {
@@ -176,7 +176,7 @@ private:
 		~VSTBuffer ();
 
 		void clear ();
-		void push_back (Evoral::MIDIEvent<nframes_t> const &);
+		void push_back (Evoral::MIDIEvent<framepos_t> const &);
 		VstEvents* events () const {
 			return _events;
 		}

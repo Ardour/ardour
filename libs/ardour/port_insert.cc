@@ -78,12 +78,12 @@ PortInsert::stop_latency_detection ()
 }
 
 void
-PortInsert::set_measured_latency (nframes_t n)
+PortInsert::set_measured_latency (framecnt_t n)
 {
         _measured_latency = n;
 }
 
-nframes_t 
+framecnt_t 
 PortInsert::latency() const 
 {
 	/* because we deliver and collect within the same cycle,
@@ -101,7 +101,7 @@ PortInsert::latency() const
 }
 
 void
-PortInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool)
+PortInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool)
 {
 	if (_output->n_ports().n_total() == 0) {
 		return;
@@ -166,7 +166,7 @@ PortInsert::state (bool full)
 	node.add_property ("type", "port");
 	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
 	node.add_property ("bitslot", buf);
-        snprintf (buf, sizeof (buf), "%u", _measured_latency);
+        snprintf (buf, sizeof (buf), "%" PRId64, _measured_latency);
         node.add_property("latency", buf);
         snprintf (buf, sizeof (buf), "%u", _session.get_block_size());
         node.add_property("block_size", buf);
@@ -227,7 +227,7 @@ PortInsert::set_state (const XMLNode& node, int version)
 	return 0;
 }
 
-ARDOUR::nframes_t
+ARDOUR::framecnt_t
 PortInsert::signal_latency() const
 {
 	/* because we deliver and collect within the same cycle,

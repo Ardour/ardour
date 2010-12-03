@@ -141,7 +141,7 @@ class Channel : public PBD::ScopedConnectionList {
 	bool               _mono;
 	size_t             _notes_on;
 
-	void reset (timestamp_t timestamp, nframes_t nframes, bool notes_off = true);
+	void reset (timestamp_t timestamp, framecnt_t nframes, bool notes_off = true);
 	
 	void process_note_off (Parser &, EventTwoBytes *);
 	void process_note_on (Parser &, EventTwoBytes *);

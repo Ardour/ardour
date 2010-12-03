@@ -79,8 +79,8 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	void       set_align_style (AlignStyle);
 	void       set_persistent_align_style (AlignStyle a) { _persistent_alignment_style = a; }
 
-	nframes_t roll_delay() const { return _roll_delay; }
-	void      set_roll_delay (nframes_t);
+	framecnt_t roll_delay() const { return _roll_delay; }
+	void       set_roll_delay (framecnt_t);
 
 	bool         record_enabled() const { return g_atomic_int_get (&_record_enabled); }
 	virtual void set_record_enabled (bool yn) = 0;
@@ -118,8 +118,8 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	ChanCount n_channels() { return _n_channels; }
 
-	static nframes_t disk_io_frames() { return disk_io_chunk_frames; }
-	static void set_disk_io_chunk_frames (uint32_t n) { disk_io_chunk_frames = n; }
+	static framecnt_t disk_io_frames() { return disk_io_chunk_frames; }
+	static void set_disk_io_chunk_frames (framecnt_t n) { disk_io_chunk_frames = n; }
 
 	/* Stateful */
 	virtual XMLNode& get_state(void) = 0;
@@ -127,7 +127,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	virtual void monitor_input (bool) {}
 
-	nframes_t    capture_offset() const { return _capture_offset; }
+	framecnt_t   capture_offset() const { return _capture_offset; }
 	virtual void set_capture_offset ();
 
 	bool slaved() const      { return _slaved; }
@@ -144,7 +144,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	/** For non-butler contexts (allocates temporary working buffers) */
 	virtual int do_refill_with_alloc() = 0;
-	virtual void set_block_size (nframes_t) = 0;
+	virtual void set_block_size (pframes_t) = 0;
 
 	bool pending_overwrite () const {
 		return _pending_overwrite;
@@ -186,8 +186,8 @@ class Diskstream : public SessionObject, public PublicDiskstream
   protected:
 	friend class Track;
 
-	virtual int  process (framepos_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler) = 0;
-	virtual bool commit  (nframes_t nframes) = 0;
+	virtual int  process (framepos_t transport_frame, pframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler) = 0;
+	virtual bool commit  (framecnt_t nframes) = 0;
 
 	//private:
 
@@ -239,9 +239,9 @@ class Diskstream : public SessionObject, public PublicDiskstream
         virtual void prepare_to_stop (framepos_t pos);
 
 	void calculate_record_range(OverlapType ot, framepos_t transport_frame, framecnt_t nframes,
-			nframes_t& rec_nframes, nframes_t& rec_offset);
+			framecnt_t& rec_nframes, framecnt_t& rec_offset);
 
-	static nframes_t disk_io_chunk_frames;
+	static framecnt_t disk_io_chunk_frames;
 	std::vector<CaptureInfo*> capture_info;
 	mutable Glib::Mutex capture_info_lock;
 
@@ -265,9 +265,9 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	framepos_t    capture_start_frame;
 	framecnt_t    capture_captured;
 	bool          was_recording;
-	nframes_t     adjust_capture_position;
-	nframes_t    _capture_offset;
-	nframes_t    _roll_delay;
+	framecnt_t    adjust_capture_position;
+	framecnt_t   _capture_offset;
+	framecnt_t   _roll_delay;
 	framepos_t    first_recordable_frame;
 	framepos_t    last_recordable_frame;
 	int           last_possibly_recording;
@@ -280,8 +280,8 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	bool          _pending_overwrite;
 	bool          overwrite_queued;
 	IOChange      input_change_pending;
-	nframes_t     wrap_buffer_size;
-	nframes_t     speed_buffer_size;
+	framecnt_t    wrap_buffer_size;
+	framecnt_t    speed_buffer_size;
 
 	double        _speed;
 	double        _target_speed;
@@ -298,10 +298,6 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	bool          first_input_change;
 
 	Glib::Mutex state_lock;
-
-	framepos_t scrub_start;
-	nframes_t  scrub_buffer_size;
-	nframes_t  scrub_offset;
 
 	PBD::ScopedConnectionList playlist_connections;
 

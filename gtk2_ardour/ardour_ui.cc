@@ -121,7 +121,7 @@ UIConfiguration *ARDOUR_UI::ui_config = 0;
 sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
-sigc::signal<void,nframes_t, bool, nframes_t> ARDOUR_UI::Clock;
+sigc::signal<void, framepos_t, bool, framepos_t> ARDOUR_UI::Clock;
 
 bool could_be_a_valid_path (const string& path);
 
@@ -952,7 +952,7 @@ ARDOUR_UI::every_point_zero_one_seconds ()
 }
 
 void
-ARDOUR_UI::update_sample_rate (nframes_t)
+ARDOUR_UI::update_sample_rate (framecnt_t)
 {
 	char buf[32];
 
@@ -964,7 +964,7 @@ ARDOUR_UI::update_sample_rate (nframes_t)
 
 	} else {
 
-		nframes_t rate = engine->frame_rate();
+		framecnt_t rate = engine->frame_rate();
 
 		if (fmod (rate, 1000.0) != 0.0) {
 			snprintf (buf, sizeof (buf), _("%.1f kHz / %4.1f ms"),
@@ -1024,7 +1024,7 @@ ARDOUR_UI::update_disk_space()
 
 	framecnt_t frames = _session->available_capture_duration();
 	char buf[64];
-	nframes_t fr = _session->frame_rate();
+	framecnt_t fr = _session->frame_rate();
 
 	if (frames == max_framecnt) {
 		strcpy (buf, _("Disk: 24hrs+"));
@@ -1415,9 +1415,9 @@ restart JACK with more ports."), PROGRAM_NAME));
 }
 
 void
-ARDOUR_UI::do_transport_locate (nframes_t new_position, bool with_roll)
+ARDOUR_UI::do_transport_locate (framepos_t new_position, bool with_roll)
 {
-	nframes_t _preroll = 0;
+	framecnt_t _preroll = 0;
 
 	if (_session) {
 		// XXX CONFIG_CHANGE FIX - requires AnyTime handling
@@ -1497,7 +1497,7 @@ void
 ARDOUR_UI::transport_goto_end ()
 {
 	if (_session) {
-		nframes_t const frame = _session->current_end_frame();
+		framepos_t const frame = _session->current_end_frame();
 		_session->request_locate (frame);
 
 		/* force displayed area in editor to start no matter
@@ -3257,7 +3257,7 @@ ARDOUR_UI::keyboard_settings () const
 }
 
 void
-ARDOUR_UI::create_xrun_marker(nframes_t where)
+ARDOUR_UI::create_xrun_marker (framepos_t where)
 {
 	editor->mouse_add_new_marker (where, false, true);
 }
@@ -3271,7 +3271,7 @@ ARDOUR_UI::halt_on_xrun_message ()
 }
 
 void
-ARDOUR_UI::xrun_handler(nframes_t where)
+ARDOUR_UI::xrun_handler (framepos_t where)
 {
 	if (!_session) {
 		return;
@@ -3384,7 +3384,7 @@ what you would like to do.\n"));
 }
 
 int
-ARDOUR_UI::sr_mismatch_dialog (nframes_t desired, nframes_t actual)
+ARDOUR_UI::sr_mismatch_dialog (framecnt_t desired, framecnt_t actual)
 {
  	HBox* hbox = new HBox();
 	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
@@ -3451,7 +3451,7 @@ ARDOUR_UI::use_config ()
 }
 
 void
-ARDOUR_UI::update_transport_clocks (nframes_t pos)
+ARDOUR_UI::update_transport_clocks (framepos_t pos)
 {
 	if (Config->get_primary_clock_delta_edit_cursor()) {
 		primary_clock.set (pos, false, editor->get_preferred_edit_position(), 1);

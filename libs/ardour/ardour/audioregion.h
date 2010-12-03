@@ -93,8 +93,8 @@ class AudioRegion : public Region
 	boost::shared_ptr<AutomationList> fade_out() { return _fade_out; }
 	boost::shared_ptr<AutomationList> envelope() { return _envelope; }
 
-	virtual nframes_t read_peaks (PeakData *buf, nframes_t npeaks,
-			nframes_t offset, nframes_t cnt,
+	virtual framecnt_t read_peaks (PeakData *buf, framecnt_t npeaks,
+			framecnt_t offset, framecnt_t cnt,
 			uint32_t chan_n=0, double samples_per_unit= 1.0) const;
 
 	/* Readable interface */

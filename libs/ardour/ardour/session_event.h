@@ -83,7 +83,7 @@ struct SessionEvent {
     
     boost::shared_ptr<Region> region;
 
-    SessionEvent (Type t, Action a, nframes_t when, nframes_t where, double spd, bool yn = false, bool yn2 = false)
+    SessionEvent (Type t, Action a, framepos_t when, framepos_t where, double spd, bool yn = false, bool yn2 = false)
 	    : type (t)
 	    , action (a)
 	    , action_frame (when)
@@ -112,7 +112,7 @@ struct SessionEvent {
     void* operator new (size_t);
     void  operator delete (void *ptr, size_t /*size*/);
     
-    static const nframes_t Immediate = 0;
+    static const framepos_t Immediate = 0;
     
     static void create_per_thread_pool (const std::string& n, uint32_t nitems);
     static void init_event_pool ();

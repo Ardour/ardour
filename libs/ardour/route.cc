@@ -382,7 +382,7 @@ Route::set_gain (gain_t val, void *src)
  */
 void
 Route::process_output_buffers (BufferSet& bufs,
-			       framepos_t start_frame, framepos_t end_frame, nframes_t nframes,
+			       framepos_t start_frame, framepos_t end_frame, pframes_t nframes,
 			       bool /*with_processors*/, int declick)
 {
 	bool monitor;
@@ -436,12 +436,12 @@ Route::process_output_buffers (BufferSet& bufs,
 				Sample* const sp = i->data();
 
 				if (_phase_invert[chn]) {
-					for (nframes_t nx = 0; nx < nframes; ++nx) {
+					for (pframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx]  = -sp[nx];
 						sp[nx] += 1.0e-27f;
 					}
 				} else {
-					for (nframes_t nx = 0; nx < nframes; ++nx) {
+					for (pframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] += 1.0e-27f;
 					}
 				}
@@ -453,7 +453,7 @@ Route::process_output_buffers (BufferSet& bufs,
 				Sample* const sp = i->data();
 
 				if (_phase_invert[chn]) {
-					for (nframes_t nx = 0; nx < nframes; ++nx) {
+					for (pframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] = -sp[nx];
 					}
 				}
@@ -466,7 +466,7 @@ Route::process_output_buffers (BufferSet& bufs,
 
 			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 				Sample* const sp = i->data();
-				for (nframes_t nx = 0; nx < nframes; ++nx) {
+				for (pframes_t nx = 0; nx < nframes; ++nx) {
 					sp[nx] += 1.0e-27f;
 				}
 			}
@@ -507,7 +507,7 @@ Route::n_process_buffers ()
 }
 
 void
-Route::passthru (framepos_t start_frame, framepos_t end_frame, nframes_t nframes, int declick)
+Route::passthru (framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick)
 {
 	BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
 
@@ -547,7 +547,7 @@ Route::passthru (framepos_t start_frame, framepos_t end_frame, nframes_t nframes
 }
 
 void
-Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, nframes_t nframes, int declick)
+Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick)
 {
 	BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
 	bufs.set_count (_input->n_ports());
@@ -2417,7 +2417,7 @@ Route::curve_reallocate ()
 }
 
 void
-Route::silence (nframes_t nframes)
+Route::silence (framecnt_t nframes)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 	if (!lm.locked()) {
@@ -2428,7 +2428,7 @@ Route::silence (nframes_t nframes)
 }
 
 void
-Route::silence_unlocked (nframes_t nframes)
+Route::silence_unlocked (framecnt_t nframes)
 {
 	/* Must be called with the processor lock held */
 	
@@ -2774,7 +2774,7 @@ Route::pans_required () const
 }
 
 int
-Route::no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		bool session_state_changing, bool /*can_record*/, bool /*rec_monitors_input*/)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
@@ -2811,8 +2811,8 @@ Route::no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	return 0;
 }
 
-nframes_t
-Route::check_initial_delay (nframes_t nframes, nframes_t& transport_frame)
+framecnt_t
+Route::check_initial_delay (framecnt_t nframes, framecnt_t& transport_frame)
 {
 	if (_roll_delay > nframes) {
 
@@ -2839,7 +2839,7 @@ Route::check_initial_delay (nframes_t nframes, nframes_t& transport_frame)
 }
 
 int
-Route::roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
+Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
 	     bool /*can_record*/, bool /*rec_monitors_input*/, bool& /* need_butler */)
 {
 	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
@@ -2858,7 +2858,7 @@ Route::roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 		return 0;
 	}
 
-	nframes_t unused = 0;
+	framecnt_t unused = 0;
 
 	if ((nframes = check_initial_delay (nframes, unused)) == 0) {
 		return 0;
@@ -2872,7 +2872,7 @@ Route::roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 }
 
 int
-Route::silent_roll (nframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
+Route::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 		    bool /*can_record*/, bool /*rec_monitors_input*/, bool& /* need_butler */)
 {
 	silence (nframes);
@@ -3041,11 +3041,11 @@ Route::put_monitor_send_at (Placement p)
 	_session.set_dirty ();
 }
 
-nframes_t
+framecnt_t
 Route::update_total_latency ()
 {
-	nframes_t old = _output->effective_latency();
-	nframes_t own_latency = _output->user_latency();
+	framecnt_t old = _output->effective_latency();
+	framecnt_t own_latency = _output->user_latency();
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->active ()) {
@@ -3080,16 +3080,16 @@ Route::update_total_latency ()
 }
 
 void
-Route::set_user_latency (nframes_t nframes)
+Route::set_user_latency (framecnt_t nframes)
 {
 	_output->set_user_latency (nframes);
 	_session.update_latency_compensation (false, false);
 }
 
 void
-Route::set_latency_delay (nframes_t longest_session_latency)
+Route::set_latency_delay (framecnt_t longest_session_latency)
 {
-	nframes_t old = _initial_delay;
+	framecnt_t old = _initial_delay;
 
 	if (_output->effective_latency() < longest_session_latency) {
 		_initial_delay = longest_session_latency - _output->effective_latency();
@@ -3107,7 +3107,7 @@ Route::set_latency_delay (nframes_t longest_session_latency)
 }
 
 void
-Route::automation_snapshot (nframes_t now, bool force)
+Route::automation_snapshot (framepos_t now, bool force)
 {
 	panner()->automation_snapshot (now, force);
 	
@@ -3186,7 +3186,7 @@ Route::MuteControllable::get_value (void) const
 }
 
 void
-Route::set_block_size (nframes_t nframes)
+Route::set_block_size (pframes_t nframes)
 {
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->set_block_size (nframes);

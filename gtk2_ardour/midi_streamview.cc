@@ -437,7 +437,7 @@ MidiStreamView::setup_rec_box ()
 
 				// handle multi
 
-				nframes_t start = 0;
+				framepos_t start = 0;
 				if (rec_regions.size() > 0) {
 					start = rec_regions.back().first->start()
 							+ _trackview.track()->get_captured_frames(rec_regions.size()-1);

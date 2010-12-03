@@ -71,7 +71,7 @@ PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, boost::s
 void
 PortInsertUI::update_latency_display ()
 {
-        nframes_t sample_rate = input_selector.session()->engine().frame_rate();
+        framecnt_t const sample_rate = input_selector.session()->engine().frame_rate();
         if (sample_rate == 0) {
                 latency_display.set_text (_("Disconnected from audio engine"));
         } else {
@@ -98,7 +98,7 @@ PortInsertUI::check_latency_measurement ()
         }
 
         char buf[128];
-        nframes_t sample_rate = AudioEngine::instance()->frame_rate();
+        framecnt_t const sample_rate = AudioEngine::instance()->frame_rate();
 
         if (sample_rate == 0) {
                 latency_display.set_text (_("Disconnected from audio engine"));
@@ -121,7 +121,7 @@ PortInsertUI::check_latency_measurement ()
         }
 
         if (solid) {
-                _pi->set_measured_latency ((nframes_t) rint (mtdm->del()));
+                _pi->set_measured_latency (rint (mtdm->del()));
                 latency_button.set_active (false);
                 strcat (buf, " (set)");
         }

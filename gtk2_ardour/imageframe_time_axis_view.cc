@@ -406,9 +406,8 @@ ImageFrameTimeAxisView::get_selected_imageframe_view() const
 void
 ImageFrameTimeAxisView::set_imageframe_duration_sec(double sec)
 {
-	if(selected_imageframe_group && selected_imageframe_view)
-	{
-		selected_imageframe_view->set_duration((nframes_t) (sec * _trackview.editor.session()->frame_rate()), this) ;
+	if (selected_imageframe_group && selected_imageframe_view) {
+		selected_imageframe_view->set_duration ((sec * _trackview.editor.session()->frame_rate()), this);
 	}
 }
 

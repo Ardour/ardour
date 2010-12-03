@@ -71,7 +71,7 @@ Send::deactivate ()
 }
 
 void
-Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, nframes_t nframes, bool)
+Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool)
 {
 	if (_output->n_ports() == ChanCount::ZERO) {
 		_meter->reset ();

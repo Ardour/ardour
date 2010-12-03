@@ -56,7 +56,7 @@ OnsetDetector::use_features (Plugin::FeatureSet& features, ostream* out)
 				(*out) << (*f).timestamp.toString() << endl;
 			}
 
-			current_results->push_back (RealTime::realTime2Frame ((*f).timestamp, (nframes_t) floor(sample_rate)));
+			current_results->push_back (RealTime::realTime2Frame ((*f).timestamp, (framecnt_t) floor(sample_rate)));
 		}
 	}
 
