@@ -67,7 +67,14 @@ ExportProfileManager::ExportProfileManager (Session & s) :
 	search_path += export_config_dir;
 
 	search_path += ardour_search_path().add_subdirectory_to_paths("export");
-	search_path += system_config_search_path().add_subdirectory_to_paths("export");;
+
+        sys::path sys_export = ardour_module_directory();
+        sys_export /= "export";
+        
+	search_path += sys_export;
+
+        info << string_compose (_("Searching for export formats in %1"), search_path.to_string()) << endmsg;
+        cerr << string_compose (_("Searching for export formats in %1"), search_path.to_string()) << endl;
 
 	/* create export config directory if necessary */
 
