@@ -56,7 +56,7 @@ class VSTPlugin : public ARDOUR::Plugin
 	const char * maker() const;
 	uint32_t parameter_count() const;
 	float default_value (uint32_t port);
-	nframes_t signal_latency() const;
+	framecnt_t signal_latency() const;
 	void set_parameter (uint32_t port, float val);
 	float get_parameter (uint32_t port) const;
 	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
@@ -64,11 +64,11 @@ class VSTPlugin : public ARDOUR::Plugin
 	uint32_t nth_parameter (uint32_t port, bool& ok) const;
 	void activate ();
 	void deactivate ();
-        int set_block_size (nframes_t nframes);
+	int set_block_size (pframes_t);
 
 	int connect_and_run (BufferSet&,
 			ChanMapping in, ChanMapping out,
-			nframes_t nframes, nframes_t offset);
+			pframes_t nframes, framecnt_t offset);
 
 	std::string describe_parameter (Evoral::Parameter);
 	std::string state_node_name() const { return "vst"; }
