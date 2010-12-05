@@ -807,6 +807,7 @@ Crossfade::set_state (const XMLNode& node)
 	_fade_in.front()->value=0.0;
 	_fade_in.back()->value=1.0;
 #endif
+
 	_fade_in.thaw ();
 	
         /* fade out */
