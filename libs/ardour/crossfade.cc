@@ -784,7 +784,9 @@ Crossfade::set_state (const XMLNode& node)
 	/* fade in */
 	
 	_fade_in.freeze ();
+        cerr << "After freeze, frozen = " << _fade_in.frozen();
 	_fade_in.clear ();
+        cerr << "After clear, frozen = " << _fade_in.frozen();
 	
 	children = fi->children();
 	
@@ -800,11 +802,14 @@ Crossfade::set_state (const XMLNode& node)
 			sscanf (prop->value().c_str(), "%f", &y);
 
 			_fade_in.add (x, y);
+                        cerr << "After add, frozen = " << _fade_in.frozen();
 		}
 	}
 
 	_fade_in.front()->value=0.0;
+        cerr << "After front clamp, frozen = " << _fade_in.frozen();
 	_fade_in.back()->value=1.0;
+        cerr << "After back clamp, frozen = " << _fade_in.frozen();
 
 	_fade_in.thaw ();
 	

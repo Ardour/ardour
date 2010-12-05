@@ -83,6 +83,7 @@ class AutomationList : public PBD::StatefulDestructible
 
 	void freeze();
 	void thaw ();
+        int8_t frozen() const { return _frozen; }
 
 	AutomationEventList::size_type size() const { return events.size(); }
 	bool empty() const { return events.empty(); }
