@@ -33,14 +33,15 @@ using namespace ARDOUR;
 
 OSCControllable::OSCControllable (lo_address a, const std::string& p, boost::shared_ptr<Controllable> c)
 	: controllable (c)
-	, addr (a)
 	, path (p)
 {
+	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
 	c->Changed.connect (changed_connection, MISSING_INVALIDATOR, boost::bind (&OSCControllable::send_change_message, this), OSC::instance());
 }
 
 OSCControllable::~OSCControllable ()
 {
+	changed_connection.disconnect();
 	lo_address_free (addr);
 }
 
@@ -93,7 +94,8 @@ OSCRouteControllable::send_change_message ()
 
 	/* XXX thread issues */
 
-	std::cerr << "ORC: send " << path << " = " << controllable->get_value() << std::endl;
+	//std::cerr << "ORC: send " << path << " = " << controllable->get_value() << std::endl;
+
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);
 }

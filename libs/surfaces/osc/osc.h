@@ -37,6 +37,7 @@
 #include "control_protocol/control_protocol.h"
 
 class OSCControllable;
+class OSCRouteObserver;
 
 namespace ARDOUR {
 class Session;
@@ -213,10 +214,17 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void listen_to_route (boost::shared_ptr<ARDOUR::Route>, lo_address);
 	void end_listen (boost::shared_ptr<ARDOUR::Route>, lo_address);
 	void drop_route (boost::weak_ptr<ARDOUR::Route>);
+	
+	void route_name_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route> r, lo_address addr);
+	
+	void update_clock ();
+
 
 	typedef std::list<OSCControllable*> Controllables;
+	typedef std::list<OSCRouteObserver*> Observables;
 	
 	Controllables controllables;
+	Observables observables;
 
 	static OSC* _instance;
 };

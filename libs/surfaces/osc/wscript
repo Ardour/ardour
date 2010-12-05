@@ -24,6 +24,7 @@ def build(bld):
 	obj.source = '''
 		osc.cc
 		osc_controllable.cc
+		osc_route_observer.cc
 		interface.cc
 	'''
 	obj.export_incdirs = ['.']
