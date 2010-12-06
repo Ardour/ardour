@@ -81,6 +81,7 @@ class VSTPlugin : public ARDOUR::Plugin
 
 	bool load_preset (const std::string& preset_label);
 	bool save_preset (std::string name);
+	void remove_preset (std::string name);
 
 	bool has_editor () const;
 

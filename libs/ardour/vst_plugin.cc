@@ -182,7 +182,7 @@ VSTPlugin::get_state()
 		for (int32_t n = 0; n < _plugin->numParams; ++n) {
 			char index[64];
 			char val[32];
-			snprintf (index, sizeof (index), "param_%ld", n);
+			snprintf (index, sizeof (index), "param_%d", n);
 			snprintf (val, sizeof (val), "%.12g", _plugin->getParameter (_plugin, n));
 			parameters->add_property (index, val);
 		}
@@ -347,6 +347,17 @@ VSTPlugin::save_preset (string name)
 		return false;
 	}
 	return Plugin::save_preset (name, "vst");
+}
+
+void
+VSTPlugin::remove_preset (string name)
+{
+	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
+		error << _("no support for presets using chunks at this time")
+		      << endmsg;
+		return;
+	}
+	Plugin::remove_preset (name, "vst");
 }
 
 string
