@@ -67,6 +67,7 @@
 #include "latency_gui.h"
 #include "plugin_eq_gui.h"
 #include "new_plugin_preset_dialog.h"
+#include "edit_plugin_presets_dialog.h"
 
 #include "i18n.h"
 
@@ -412,7 +413,8 @@ PluginUIWindow::plugin_going_away ()
 PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	: insert (pi),
 	  plugin (insert->plugin()),
-	  save_button(_("Add")),
+	  save_button (_("Add")),
+	  edit_button (_("Edit")),
 	  bypass_button (_("Bypass")),
 	  latency_gui (0),
 	  plugin_analysis_expander (_("Plugin analysis"))
@@ -426,6 +428,9 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	save_button.set_name ("PluginSaveButton");
 	save_button.signal_clicked().connect(sigc::mem_fun(*this, &PlugUIBase::save_plugin_setting));
+
+	edit_button.set_name ("PluginEditButton");
+	edit_button.signal_clicked().connect (sigc::mem_fun (*this, &PlugUIBase::edit_plugin_settings));
 
 	insert->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this,  boost::weak_ptr<Processor>(insert)), gui_context());
 
@@ -452,6 +457,9 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	plugin_analysis_expander.set_expanded(false);
 	
 	insert->DropReferences.connect (death_connection, invalidator (*this), boost::bind (&PlugUIBase::plugin_going_away, this), gui_context());
+
+	plugin->PresetAdded.connect (preset_added_connection, invalidator (*this), boost::bind (&PlugUIBase::update_presets, this), gui_context ());
+	plugin->PresetRemoved.connect (preset_removed_connection, invalidator (*this), boost::bind (&PlugUIBase::update_presets, this), gui_context ());
 }
 
 PlugUIBase::~PlugUIBase()
@@ -548,6 +556,13 @@ PlugUIBase::save_plugin_setting ()
 		}
 		break;
 	}
+}
+
+void
+PlugUIBase::edit_plugin_settings ()
+{
+	EditPluginPresetsDialog d (plugin);
+	d.run ();
 }
 
 void

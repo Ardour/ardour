@@ -1783,6 +1783,7 @@ widget "*PluginAutomateButton" style:highest "small_button"
 widget "*PluginAutomateButton*" style:highest "small_button"
 widget "*PluginSaveButton" style:highest "small_button"
 widget "*PluginSaveButton*" style:highest "small_button"
+widget "*PluginEditButton*" style:highest "small_button"
 widget "*PluginLoadButton" style:highest "small_button"
 widget "*PluginLoadButton*" style:highest "small_button"
 

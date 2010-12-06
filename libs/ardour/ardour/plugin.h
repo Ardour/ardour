@@ -148,6 +148,8 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 
 	virtual bool has_editor() const = 0;
 
+	PBD::Signal0<void> PresetAdded;
+	PBD::Signal0<void> PresetRemoved;
 	PBD::Signal2<void,uint32_t,float> ParameterChanged;
 
 	/* NOTE: this block of virtual methods looks like the interface

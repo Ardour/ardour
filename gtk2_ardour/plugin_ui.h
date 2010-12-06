@@ -103,6 +103,7 @@ class PlugUIBase : public virtual sigc::trackable
 	boost::shared_ptr<ARDOUR::Plugin> plugin;
 	Gtk::ComboBoxText preset_combo;
 	Gtk::Button save_button;
+	Gtk::Button edit_button;
 	Gtk::ToggleButton bypass_button;
 	Gtk::EventBox focus_button;
 
@@ -120,7 +121,8 @@ class PlugUIBase : public virtual sigc::trackable
 	bool no_load_preset;
 
 	void setting_selected();
-	void save_plugin_setting (void);
+	void save_plugin_setting ();
+	void edit_plugin_settings ();
 	bool focus_toggled(GdkEventButton*);
 	void bypass_toggled();
 	void toggle_plugin_analysis ();
@@ -129,6 +131,8 @@ class PlugUIBase : public virtual sigc::trackable
 
 	PBD::ScopedConnection death_connection;
 	PBD::ScopedConnection active_connection;
+	PBD::ScopedConnection preset_added_connection;
+	PBD::ScopedConnection preset_removed_connection;
 	PBD::ScopedConnectionList control_connections;
 };
 

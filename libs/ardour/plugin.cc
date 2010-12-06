@@ -221,6 +221,8 @@ Plugin::remove_preset (string name, string domain)
 	presets.erase (p->uri);
 
 	write_preset_file (envvar, domain);
+
+	PresetRemoved (); /* EMIT SIGNAL */
 }
 
 string
@@ -309,7 +311,11 @@ Plugin::save_preset (string name, string domain)
 	presets.insert (make_pair (uri, PresetRecord (uri, name)));
 	free (uri);
 
-	return write_preset_file (envvar, domain);
+	bool const r = write_preset_file (envvar, domain);
+
+	PresetAdded (); /* EMIT SIGNAL */
+
+	return r;
 }
 
 PluginPtr
