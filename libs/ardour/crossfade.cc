@@ -724,8 +724,6 @@ Crossfade::set_state (const XMLNode& node)
 		_position = _in->first_frame();
 	}
 
-        cerr << "Crossfade @ " << _position << endl;
-
 	if ((prop = node.property ("active")) != 0) {
 		bool x = string_is_affirmative (prop->value());
 		if (x != _active) {
@@ -786,14 +784,11 @@ Crossfade::set_state (const XMLNode& node)
 	/* fade in */
 	
 	_fade_in.freeze ();
-        cerr << "After freeze, frozen = " << (int) _fade_in.frozen() << endl;
 	_fade_in.clear ();
-        cerr << "After clear, frozen = " << (int) _fade_in.frozen() << endl;
 	
 	children = fi->children();
 	
 	for (i = children.begin(); i != children.end(); ++i) {
-                cerr << "Crossfade looking at child node called " << (*i)->name() << endl;
 		if ((*i)->name() == "point") {
 			nframes_t x;
 			float y;
@@ -805,14 +800,16 @@ Crossfade::set_state (const XMLNode& node)
 			sscanf (prop->value().c_str(), "%f", &y);
 
 			_fade_in.add (x, y);
-                        cerr << "After add, frozen = " << (int) _fade_in.frozen() << endl;
 		}
 	}
 
+        if (_fade_in.size() < 2) {
+                cerr << "Fade in data missing any points! Crossfade will be lost!\n";
+                return -1;
+        }
+
 	_fade_in.front()->value=0.0;
-        cerr << "After front clamp, frozen = " << (int) _fade_in.frozen() << endl;
 	_fade_in.back()->value=1.0;
-        cerr << "After back clamp, frozen = " << (int) _fade_in.frozen() << endl;
 
 	_fade_in.thaw ();
 	
@@ -838,6 +835,11 @@ Crossfade::set_state (const XMLNode& node)
 			_fade_out.add (x, y);
 		}
 	}
+
+        if (_fade_out.size() < 2) {
+                cerr << "Fade out data missing any points! Crossfade will be lost!\n";
+                return -1;
+        }
 
 	_fade_out.front()->value=1.0;
 	_fade_out.back()->value=0.0;
