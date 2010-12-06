@@ -372,6 +372,12 @@ LadspaPlugin::save_preset (string name)
 	return Plugin::save_preset (name, "ladspa");
 }
 
+void
+LadspaPlugin::remove_preset (string name)
+{
+	return Plugin::remove_preset (name, "ladspa");
+}
+
 int
 LadspaPlugin::set_state (const XMLNode& node, int version)
 {

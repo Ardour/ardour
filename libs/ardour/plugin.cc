@@ -162,6 +162,109 @@ Plugin::load_preset(const string& preset_uri)
 	return true;
 }
 
+/* XXX: should be in liblrdf */
+static void
+lrdf_remove_preset (const char *source, const char *setting_uri)
+{
+	lrdf_statement p;
+	lrdf_statement *q;
+	lrdf_statement *i;
+	char setting_uri_copy[64];
+	char buf[64];
+	
+	strncpy(setting_uri_copy, setting_uri, sizeof(setting_uri_copy));
+
+	p.subject = setting_uri_copy;
+	strncpy(buf, LADSPA_BASE "hasPortValue", sizeof(buf));
+	p.predicate = buf;
+	p.object = NULL;
+	q = lrdf_matches(&p);
+
+	p.predicate = NULL;
+	p.object = NULL;
+	for (i = q; i; i = i->next) {
+		p.subject = i->object;
+		lrdf_remove_matches(&p);
+	}
+
+	lrdf_free_statements(q);
+
+	p.subject = NULL;
+	strncpy(buf, LADSPA_BASE "hasSetting", sizeof(buf));
+	p.predicate = buf;
+	p.object = setting_uri_copy;
+	lrdf_remove_matches(&p);
+
+	p.subject = setting_uri_copy;
+	p.predicate = NULL;
+	p.object = NULL;
+	lrdf_remove_matches (&p);
+}
+
+void
+Plugin::remove_preset (string name, string domain)
+{
+	string const envvar = preset_envvar ();
+	if (envvar.empty()) {
+		warning << _("Could not locate HOME.  Preset not removed.") << endmsg;
+		return;
+	}
+
+	Plugin::PresetRecord const * p = preset_by_label (name);
+	if (!p) {
+		return;
+	}
+	
+	string const source = preset_source (envvar, domain);
+	lrdf_remove_preset (source.c_str(), p->uri.c_str ());
+
+	presets.erase (p->uri);
+
+	write_preset_file (envvar, domain);
+}
+
+string
+Plugin::preset_envvar () const
+{
+	char* envvar;
+	if ((envvar = getenv ("HOME")) == 0) {
+		return "";
+	}
+	
+	return envvar;
+}
+
+string
+Plugin::preset_source (string envvar, string domain) const
+{
+	return string_compose ("file:%1/.%2/rdf/ardour-presets.n3", envvar, domain);
+}
+
+bool
+Plugin::write_preset_file (string envvar, string domain)
+{
+	string path = string_compose("%1/.%2", envvar, domain);
+	if (g_mkdir_with_parents (path.c_str(), 0775)) {
+		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
+		return false;
+	}
+
+	path += "/rdf";
+	if (g_mkdir_with_parents (path.c_str(), 0775)) {
+		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
+		return false;
+	}
+
+	string const source = preset_source (envvar, domain);
+
+	if (lrdf_export_by_source (source.c_str(), source.substr(5).c_str())) {
+		warning << string_compose(_("Error saving presets file %1."), source) << endmsg;
+		return false;
+	}
+
+	return true;
+}
+
 bool
 Plugin::save_preset (string name, string domain)
 {
@@ -191,13 +294,13 @@ Plugin::save_preset (string name, string domain)
 		}
 	}
 
-	char* envvar;
-	if ((envvar = getenv ("HOME")) == 0) {
+	string const envvar = preset_envvar ();
+	if (envvar.empty()) {
 		warning << _("Could not locate HOME.  Preset not saved.") << endmsg;
 		return false;
 	}
 
-	string source(string_compose("file:%1/.%2/rdf/ardour-presets.n3", envvar, domain));
+	string const source = preset_source (envvar, domain);
 
 	char* uri = lrdf_add_preset (source.c_str(), name.c_str(), id, &defaults);
 	
@@ -206,24 +309,7 @@ Plugin::save_preset (string name, string domain)
 	presets.insert (make_pair (uri, PresetRecord (uri, name)));
 	free (uri);
 
-	string path = string_compose("%1/.%2", envvar, domain);
-	if (g_mkdir_with_parents (path.c_str(), 0775)) {
-		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
-		return false;
-	}
-
-	path += "/rdf";
-	if (g_mkdir_with_parents (path.c_str(), 0775)) {
-		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
-		return false;
-	}
-
-	if (lrdf_export_by_source(source.c_str(), source.substr(5).c_str())) {
-		warning << string_compose(_("Error saving presets file %1."), source) << endmsg;
-		return false;
-	}
-
-	return true;
+	return write_preset_file (envvar, domain);
 }
 
 PluginPtr

@@ -99,7 +99,8 @@ class LadspaPlugin : public ARDOUR::Plugin
 
 	XMLNode& get_state();
 	int      set_state (const XMLNode&, int version);
-	bool     save_preset(std::string name);
+	bool     save_preset (std::string name);
+	void     remove_preset (std::string name);
 
 	bool has_editor() const { return false; }
 

@@ -66,6 +66,7 @@
 #include "keyboard.h"
 #include "latency_gui.h"
 #include "plugin_eq_gui.h"
+#include "new_plugin_preset_dialog.h"
 
 #include "i18n.h"
 
@@ -475,7 +476,7 @@ PlugUIBase::set_latency_label ()
 	framecnt_t const sr = insert->session().frame_rate ();
 
 	if (l < sr / 1000) {
-		snprintf (buf, sizeof (buf), "latency (%d samples)", l);
+		snprintf (buf, sizeof (buf), "latency (%" PRId64 " samples)", l);
 	} else {
 		snprintf (buf, sizeof (buf), "latency (%.2f msecs)", (float) l / ((float) sr / 1000.0f));
 	}
@@ -527,27 +528,23 @@ PlugUIBase::setting_selected()
 void
 PlugUIBase::save_plugin_setting ()
 {
-	ArdourPrompter prompter (true);
-	prompter.set_title(_("New Preset"));
-	prompter.set_prompt(_("Name of New Preset:"));
-	prompter.add_button (Gtk::Stock::ADD, Gtk::RESPONSE_ACCEPT);
-	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
-	prompter.set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+	NewPluginPresetDialog d (plugin);
 
-	prompter.show_all();
-	prompter.present ();
-
-	switch (prompter.run ()) {
+	switch (d.run ()) {
 	case Gtk::RESPONSE_ACCEPT:
-		string name;
-		prompter.get_result(name);
-		if (name.length()) {
-			if (plugin->save_preset(name)) {
-				update_presets();
-				no_load_preset = true;
-				preset_combo.set_active_text (name);
-				no_load_preset = false;
-			}
+		if (d.name().empty()) {
+			break;
+		}
+
+		if (d.replace ()) {
+			plugin->remove_preset (d.name ());
+		}
+
+		if (plugin->save_preset (d.name())) {
+			update_presets ();
+			no_load_preset = true;
+			preset_combo.set_active_text (d.name());
+			no_load_preset = false;
 		}
 		break;
 	}

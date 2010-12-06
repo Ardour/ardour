@@ -114,8 +114,9 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	XMLNode& get_state();
 	int      set_state(const XMLNode& node, int version);
-	bool     save_preset(std::string uri);
-	bool     load_preset(const std::string& uri);
+	bool     save_preset (std::string uri);
+	void     remove_preset (std::string uri);
+	bool     load_preset (const std::string& uri);
 	virtual std::vector<Plugin::PresetRecord> get_presets();
 
 	bool has_editor() const;

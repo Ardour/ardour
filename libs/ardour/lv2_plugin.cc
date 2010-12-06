@@ -386,6 +386,12 @@ LV2Plugin::save_preset (string /*name*/)
 	return false;
 }
 
+void
+LV2Plugin::remove_preset (string /*name*/)
+{
+	return;
+}
+
 bool
 LV2Plugin::has_editor() const
 {

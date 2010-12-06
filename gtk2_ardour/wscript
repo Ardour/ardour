@@ -149,6 +149,7 @@ gtk2_ardour_sources = [
         'monitor_section.cc',
 	'mouse_cursors.cc',
 	'nag.cc',
+	'new_plugin_preset_dialog.cc',
 	'normalize_dialog.cc',
         'note_player.cc',
 	'option_editor.cc',
