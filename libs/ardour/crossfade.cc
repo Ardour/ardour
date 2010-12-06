@@ -724,6 +724,8 @@ Crossfade::set_state (const XMLNode& node)
 		_position = _in->first_frame();
 	}
 
+        cerr << "Crossfade @ " << _position << endl;
+
 	if ((prop = node.property ("active")) != 0) {
 		bool x = string_is_affirmative (prop->value());
 		if (x != _active) {
@@ -791,6 +793,7 @@ Crossfade::set_state (const XMLNode& node)
 	children = fi->children();
 	
 	for (i = children.begin(); i != children.end(); ++i) {
+                cerr << "Crossfade looking at child node called " << (*i)->name() << endl;
 		if ((*i)->name() == "point") {
 			nframes_t x;
 			float y;
