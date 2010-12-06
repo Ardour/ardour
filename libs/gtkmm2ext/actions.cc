@@ -237,6 +237,10 @@ ActionManager::get_action (const char* group_name, const char* action_name)
 	   gtkmm2.6, so we fall back to the C level.
 	*/
 
+	if (ui_manager == 0) {
+		return RefPtr<Action> ();
+	}
+
 	GList* list = gtk_ui_manager_get_action_groups (ui_manager->gobj());
 	GList* node;
 	RefPtr<Action> act;
