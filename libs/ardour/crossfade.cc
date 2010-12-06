@@ -868,6 +868,11 @@ Crossfade::set_state (const XMLNode& node, int /*version*/)
 		}
 	}
 
+        if (_fade_in.size() < 2) {
+                /* fade state somehow saved with no points */
+                return -1;
+        }
+
         _fade_in.front()->value = 0.0;
         _fade_in.back()->value = 1.0;
 
@@ -895,6 +900,11 @@ Crossfade::set_state (const XMLNode& node, int /*version*/)
 			_fade_out.add (x, y);
 		}
 	}
+
+        if (_fade_out.size() < 2) {
+                /* fade state somehow saved with no points */
+                return -1;
+        }
 
         _fade_out.front()->value = 1.0;
         _fade_out.back()->value = 0.0;
