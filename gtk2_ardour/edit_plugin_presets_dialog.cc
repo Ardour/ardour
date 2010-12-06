@@ -75,8 +75,6 @@ EditPluginPresetsDialog::delete_presets ()
 	for (ListViewText::SelectionList::const_iterator i = s.begin(); i != s.end(); ++i) {
 		_plugin->remove_preset (_list.get_text (*i));
 	}
-
-	setup_list ();
 }
 
 void
@@ -88,4 +86,6 @@ EditPluginPresetsDialog::setup_list ()
 	for (vector<ARDOUR::Plugin::PresetRecord>::const_iterator i = presets.begin(); i != presets.end(); ++i) {
 		_list.append_text (i->label);
 	}
+
+	update_sensitivity ();
 }
