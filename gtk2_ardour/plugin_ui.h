@@ -304,11 +304,11 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	int package (Gtk::Window&);
 
   private:
-	boost::shared_ptr<ARDOUR::VSTPlugin>  vst;
+	boost::shared_ptr<ARDOUR::VSTPlugin> vst;
 	Gtk::Socket socket;
 	Gtk::HBox   preset_box;
 	Gtk::VBox   vpacker;
-	Gtk::ComboBoxText vst_preset_combo;
+	Gtk::ComboBox vst_preset_combo;
 	Glib::RefPtr<Gtk::ListStore> preset_model;
 
 	struct PresetModelColumns : public Gtk::TreeModel::ColumnRecord {
