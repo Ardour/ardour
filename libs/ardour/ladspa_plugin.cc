@@ -559,6 +559,8 @@ LadspaPlugin::connect_and_run (BufferSet& bufs,
 		ChanMapping in_map, ChanMapping out_map,
 		pframes_t nframes, framecnt_t offset)
 {
+	Plugin::connect_and_run (bufs, in_map, out_map, nframes, offset);
+	
 	cycles_t now;
 	cycles_t then = get_cycles ();
 

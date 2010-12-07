@@ -68,6 +68,7 @@ Plugin::Plugin (AudioEngine& e, Session& s)
 	: _engine (e)
 	, _session (s)
 	, _cycles (0)
+	, _have_pending_stop_events (false)
 {
 }
 
@@ -78,6 +79,7 @@ Plugin::Plugin (const Plugin& other)
 	, _session (other._session)
 	, _info (other._info)
 	, _cycles (0)
+	, _have_pending_stop_events (false)
 {
 	
 }
@@ -205,4 +207,39 @@ Plugin::preset_by_uri (const string& uri)
 	} else {
 		return 0;
 	}
+}
+
+int
+Plugin::connect_and_run (BufferSet& bufs,
+			 ChanMapping in_map, ChanMapping out_map,
+			 pframes_t nframes, framecnt_t offset)
+{
+	if (bufs.count().n_midi() > 0) {
+
+		/* Track notes that we are sending to the plugin */
+		MidiBuffer& b = bufs.get_midi (0);
+		bool looped;
+		_tracker.track (b.begin(), b.end(), looped);
+		
+		if (_have_pending_stop_events) {
+			/* Transmit note-offs that are pending from the last transport stop */
+			bufs.merge_from (_pending_stop_events, 0);
+			_have_pending_stop_events = false;
+		}
+	}
+
+	return 0;
+}
+
+void
+Plugin::realtime_handle_transport_stopped ()
+{
+	/* Create note-offs for any active notes and put them in _pending_stop_events, to be picked
+	   up on the next call to connect_and_run ().
+	*/
+	
+	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
+	_pending_stop_events.get_midi(0).clear ();
+	_tracker.resolve_notes (_pending_stop_events.get_midi (0), 0);
+	_have_pending_stop_events = true;
 }

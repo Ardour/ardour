@@ -29,7 +29,6 @@
 
 #include "pbd/stateful.h"
 #include "ardour/plugin.h"
-#include "ardour/midi_state_tracker.h"
 
 struct _FSTHandle;
 struct _FST;
@@ -79,8 +78,6 @@ class VSTPlugin : public ARDOUR::Plugin
 	bool parameter_is_input(uint32_t i) const { return true; }
 	bool parameter_is_output(uint32_t i) const { return false; }
 
-	void realtime_handle_transport_stopped ();
-	
 	bool load_preset (const std::string& preset_label);
 	virtual std::vector<PresetRecord> get_presets ();
 	int first_user_preset_index () const;
@@ -105,9 +102,6 @@ private:
 	FST*       _fst;
 	AEffect*   _plugin;
 	bool        been_resumed;
-	MidiStateTracker _tracker;
-	BufferSet  _pending_stop_events;
-	bool _have_pending_stop_events;
 };
 
 class VSTPluginInfo : public PluginInfo

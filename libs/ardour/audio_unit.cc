@@ -1252,8 +1252,10 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 }
 
 int
-AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping, ChanMapping, pframes_t nframes, framecnt_t offset)
+AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_map, pframes_t nframes, framecnt_t offset)
 {
+	Plugin::connect_and_run (bufs, in_map, out_map, nframes, offset);
+	
 	AudioUnitRenderActionFlags flags = 0;
 	AudioTimeStamp ts;
 	OSErr err;

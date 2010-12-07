@@ -63,7 +63,6 @@ using std::max;
 
 VSTPlugin::VSTPlugin (AudioEngine& e, Session& session, FSTHandle* h)
 	: Plugin (e, session)
-	, _have_pending_stop_events (false)
 {
 	handle = h;
 
@@ -90,7 +89,6 @@ VSTPlugin::VSTPlugin (AudioEngine& e, Session& session, FSTHandle* h)
 
 VSTPlugin::VSTPlugin (const VSTPlugin &other)
 	: Plugin (other)
-	, _have_pending_stop_events (false)
 {
 	handle = other.handle;
 
@@ -489,6 +487,8 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		ChanMapping in_map, ChanMapping out_map,
 		pframes_t nframes, framecnt_t offset)
 {
+	Plugin::connect_and_run (bufs, in_map, out_map, nframes, offset);
+	
 	float *ins[_plugin->numInputs];
 	float *outs[_plugin->numOutputs];
 	int32_t i;
@@ -516,18 +516,6 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 
 
 	if (bufs.count().n_midi() > 0) {
-
-		/* Track notes that we are sending to the plugin */
-		MidiBuffer& b = bufs.get_midi (0);
-		bool looped;
-		_tracker.track (b.begin(), b.end(), looped);
-		
-		if (_have_pending_stop_events) {
-			/* Transmit note-offs that are pending from the last transport stop */
-			bufs.merge_from (_pending_stop_events, 0);
-			_have_pending_stop_events = false;
-		}
-		
 		VstEvents* v = bufs.get_vst_midi (0);
 		_plugin->dispatcher (_plugin, effProcessEvents, 0, 0, v, 0);
 	}
@@ -733,19 +721,6 @@ int
 VSTPlugin::first_user_preset_index () const
 {
 	return _plugin->numPrograms;
-}
-
-void
-VSTPlugin::realtime_handle_transport_stopped ()
-{
-	/* Create note-offs for any active notes and put them in _pending_stop_events, to be picked
-	   up on the next call to connect_and_run ().
-	*/
-	
-	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
-	_pending_stop_events.get_midi(0).clear ();
-	_tracker.resolve_notes (_pending_stop_events.get_midi (0), 0);
-	_have_pending_stop_events = true;
 }
 
 VSTPluginInfo::VSTPluginInfo()

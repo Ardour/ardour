@@ -33,6 +33,7 @@
 #include "ardour/latent.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/types.h"
+#include "ardour/midi_state_tracker.h"
 
 #include <vector>
 #include <set>
@@ -115,8 +116,8 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual int set_block_size (pframes_t nframes) = 0;
 
 	virtual int connect_and_run (BufferSet& bufs,
-			ChanMapping in, ChanMapping out,
-			pframes_t nframes, framecnt_t offset) = 0;
+				     ChanMapping in, ChanMapping out,
+				     pframes_t nframes, framecnt_t offset);
 
 	virtual std::set<Evoral::Parameter> automatable() const = 0;
 	virtual std::string describe_parameter (Evoral::Parameter) = 0;
@@ -128,7 +129,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool parameter_is_input(uint32_t) const = 0;
 	virtual bool parameter_is_output(uint32_t) const = 0;
 
-	virtual void realtime_handle_transport_stopped () {}
+	void realtime_handle_transport_stopped ();
 
 	bool save_preset (std::string);
 	void remove_preset (std::string);
@@ -208,6 +209,12 @@ protected:
 	PluginInfoPtr            _info;
 	uint32_t                 _cycles;
 	std::map<std::string, PresetRecord> _presets;
+
+private:
+	
+	MidiStateTracker _tracker;
+	BufferSet _pending_stop_events;
+	bool _have_pending_stop_events;
 };
 
 PluginPtr find_plugin(ARDOUR::Session&, std::string unique_id, ARDOUR::PluginType);
