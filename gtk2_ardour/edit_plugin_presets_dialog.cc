@@ -20,6 +20,7 @@
 
 #include <gtkmm/stock.h>
 #include <gtkmm/listviewtext.h>
+#include <gtkmm/scrolledwindow.h>
 #include "gtkmm2ext/gui_thread.h"
 #include "ardour/plugin.h"
 #include "edit_plugin_presets_dialog.h"
@@ -39,7 +40,9 @@ EditPluginPresetsDialog::EditPluginPresetsDialog (boost::shared_ptr<ARDOUR::Plug
 
 	HBox* hbox = manage (new HBox);
 	hbox->set_spacing (6);
-	hbox->pack_start (_list);
+	ScrolledWindow* scr = manage (new ScrolledWindow);
+	scr->add (_list);
+	hbox->pack_start (*scr);
 
 	VBox* vbox = manage (new VBox);
 	vbox->pack_start (_delete, false, false);
@@ -65,7 +68,18 @@ EditPluginPresetsDialog::EditPluginPresetsDialog (boost::shared_ptr<ARDOUR::Plug
 void
 EditPluginPresetsDialog::update_sensitivity ()
 {
-	_delete.set_sensitive (!_list.get_selected().empty());
+	ListViewText::SelectionList s = _list.get_selected ();
+
+	ListViewText::SelectionList::const_iterator i = s.begin();
+	while (i != s.end()) {
+		if (*i >= _plugin->first_user_preset_index()) {
+			break;
+		}
+
+		++i;
+	}
+
+	_delete.set_sensitive (i != s.end ());
 }
 
 void

@@ -148,6 +148,10 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual std::vector<PresetRecord> get_presets () = 0;
 	virtual std::string current_preset () const { return std::string(); }
 
+	virtual int first_user_preset_index () const {
+		return 0;
+	}
+	
 	/** Emitted when a preset is added or removed, respectively */
 	PBD::Signal0<void> PresetAdded;
 	PBD::Signal0<void> PresetRemoved;
