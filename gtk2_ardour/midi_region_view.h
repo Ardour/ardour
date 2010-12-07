@@ -283,8 +283,8 @@ class MidiRegionView : public RegionView
 
 	void enable_display (bool);
 
-	void trim_start_starting ();
-	void trim_start_ending ();
+	void trim_front_starting ();
+	void trim_front_ending ();
         
   protected:
 	/** Allows derived types to specify their visibility requirements

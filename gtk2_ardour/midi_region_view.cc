@@ -3230,7 +3230,7 @@ MidiRegionView::data_recorded (boost::shared_ptr<MidiBuffer> buf, boost::weak_pt
 }
 
 void
-MidiRegionView::trim_start_starting ()
+MidiRegionView::trim_front_starting ()
 {
 	/* Reparent the note group to the region view's parent, so that it doesn't change
 	   when the region view is trimmed.
@@ -3241,7 +3241,7 @@ MidiRegionView::trim_start_starting ()
 }
 
 void
-MidiRegionView::trim_start_ending ()
+MidiRegionView::trim_front_ending ()
 {
 	_note_group->reparent (*group);
 	delete _temporary_note_group;

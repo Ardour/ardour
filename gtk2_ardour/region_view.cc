@@ -696,7 +696,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 }
 
 void
-RegionView::trim_start (framepos_t new_bound, bool no_overlap)
+RegionView::trim_front (framepos_t new_bound, bool no_overlap)
 {
 	if (_region->locked()) {
 		return;

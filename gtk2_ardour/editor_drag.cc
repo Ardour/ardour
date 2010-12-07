@@ -1538,7 +1538,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	} else {
 		/* These will get overridden for a point trim.*/
 		if (pf < (region_start + region_length/2)) {
-			/* closer to start */
+			/* closer to front */
 			_operation = StartTrim;
 			Drag::start_grab (event, _editor->cursors()->left_side_trim);
 		} else {
@@ -1552,7 +1552,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	case StartTrim:
 		_editor->show_verbose_time_cursor (region_start, 10);
 		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
-			i->view->trim_start_starting ();
+			i->view->trim_front_starting ();
 		}
 		break;
 	case EndTrim:
@@ -1633,7 +1633,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	switch (_operation) {
 	case StartTrim:
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			i->view->trim_start (i->initial_position + dt, non_overlap_trim);
+			i->view->trim_front (i->initial_position + dt, non_overlap_trim);
 		}
 		break;
 
@@ -1721,7 +1721,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		if (_operation == StartTrim) {
-			i->view->trim_start_ending ();
+			i->view->trim_front_ending ();
 		}
 		i->view->region()->resume_property_changes ();
 	}
