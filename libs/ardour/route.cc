@@ -383,7 +383,8 @@ Route::set_gain (gain_t val, void *src)
 void
 Route::process_output_buffers (BufferSet& bufs,
 			       framepos_t start_frame, framepos_t end_frame, pframes_t nframes,
-			       bool /*with_processors*/, int declick)
+			       bool /*with_processors*/, int declick,
+                               bool gain_automation_ok)
 {
 	bool monitor;
 
@@ -403,9 +404,12 @@ Route::process_output_buffers (BufferSet& bufs,
 	}
 
 	/* figure out if we're going to use gain automation */
-	_amp->setup_gain_automation (start_frame, end_frame, nframes);
-
-
+        if (gain_automation_ok) {
+                _amp->setup_gain_automation (start_frame, end_frame, nframes);
+        } else {
+                _amp->apply_gain_automation (false);
+        }
+        
 	/* tell main outs what to do about monitoring */
 	_main_outs->no_outs_cuz_we_no_monitor (!monitor);
 
@@ -543,7 +547,7 @@ Route::passthru (framepos_t start_frame, framepos_t end_frame, pframes_t nframes
 	}
 
 	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
-	process_output_buffers (bufs, start_frame, end_frame, nframes, true, declick);
+	process_output_buffers (bufs, start_frame, end_frame, nframes, true, declick, true);
 }
 
 void
@@ -552,7 +556,7 @@ Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, pframes_t
 	BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
 	bufs.set_count (_input->n_ports());
 	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
-	process_output_buffers (bufs, start_frame, end_frame, nframes, true, declick);
+	process_output_buffers (bufs, start_frame, end_frame, nframes, true, declick, false);
 }
 
 void
@@ -3226,44 +3230,52 @@ Route::set_pending_declick (int declick)
  */
 
 void
-Route::shift (framepos_t /*pos*/, framecnt_t /*frames*/)
+Route::shift (framepos_t pos, framecnt_t frames)
 {
-#ifdef THIS_NEEDS_FIXING_FOR_V3
-
 	/* gain automation */
-	XMLNode &before = _gain_control->get_state ();
-	_gain_control->shift (pos, frames);
-	XMLNode &after = _gain_control->get_state ();
-	_session.add_command (new MementoCommand<AutomationList> (_gain_automation_curve, &before, &after));
+        {
+                boost::shared_ptr<AutomationControl> gc = _amp->gain_control();
+                
+                XMLNode &before = gc->alist()->get_state ();
+                gc->alist()->shift (pos, frames);
+                XMLNode &after = gc->alist()->get_state ();
+                _session.add_command (new MementoCommand<AutomationList> (*gc->alist().get(), &before, &after));
+        }
 
 	/* pan automation */
-	for (std::vector<StreamPanner*>::iterator i = _panner->begin (); i != _panner->end (); ++i) {
-		Curve & c = (*i)->automation ();
-		XMLNode &before = c.get_state ();
-		c.shift (pos, frames);
-		XMLNode &after = c.get_state ();
-		_session.add_command (new MementoCommand<AutomationList> (c, &before, &after));
-	}
+        {
+                boost::shared_ptr<AutomationControl> pc;
+                uint32_t npans = _main_outs->panner()->npanners();
+
+                for (uint32_t p = 0; p < npans; ++p) {
+                        pc = _main_outs->panner()->pan_control (0, p);
+                        boost::shared_ptr<AutomationList> al = pc->alist();
+                        XMLNode& before = al->get_state ();
+                        al->shift (pos, frames);
+                        XMLNode& after = al->get_state ();
+                        _session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
+                }
+        }
 
 	/* redirect automation */
 	{
-		Glib::RWLock::ReaderLock lm (redirect_lock);
-		for (RedirectList::iterator i = _redirects.begin (); i != _redirects.end (); ++i) {
+		Glib::RWLock::ReaderLock lm (_processor_lock);
+		for (ProcessorList::iterator i = _processors.begin (); i != _processors.end (); ++i) {
 
-			set<uint32_t> a;
-			(*i)->what_has_automation (a);
+			set<Evoral::Parameter> parameters = (*i)->what_can_be_automated();
 
-			for (set<uint32_t>::const_iterator j = a.begin (); j != a.end (); ++j) {
-				AutomationList & al = (*i)->automation_list (*j);
-				XMLNode &before = al.get_state ();
-				al.shift (pos, frames);
-				XMLNode &after = al.get_state ();
-				_session.add_command (new MementoCommand<AutomationList> (al, &before, &after));
-			}
-		}
+			for (set<Evoral::Parameter>::const_iterator p = parameters.begin (); p != parameters.end (); ++p) {
+                                boost::shared_ptr<AutomationControl> ac = (*i)->automation_control (*p);
+                                if (ac) {
+                                        boost::shared_ptr<AutomationList> al = ac->alist();
+                                        XMLNode &before = al->get_state ();
+                                        al->shift (pos, frames);
+                                        XMLNode &after = al->get_state ();
+                                        _session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
+                                }
+                        }
+                }
 	}
-#endif
-
 }
 
 

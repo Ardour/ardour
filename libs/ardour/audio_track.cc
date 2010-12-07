@@ -503,21 +503,11 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 			bufs.set_count (chn);
 		}
 
-		/* don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
+		/* final argument: don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
 
-		if (!diskstream->record_enabled() && _session.transport_rolling()) {
-#ifdef XXX_MOVE_THIS_TO_AMP
-			Glib::Mutex::Lock am (data().control_lock(), Glib::TRY_LOCK);
+		process_output_buffers (bufs, start_frame, end_frame, nframes, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick,
+                                        (!diskstream->record_enabled() && _session.transport_rolling()));
 
-			if (am.locked() && gain_control()->automation_playback()) {
-				_amp->apply_gain_automation(
-						gain_control()->list()->curve().rt_safe_get_vector (
-							start_frame, end_frame, _session.gain_automation_buffer(), nframes));
-			}
-#endif
-		}
-
-		process_output_buffers (bufs, start_frame, end_frame, nframes, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick);
 
 	} else {
 		/* problem with the diskstream; just be quiet for a bit */
