@@ -440,11 +440,19 @@ VSTPlugin::do_remove_preset (string name)
 {
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
-		/* XXX: TODO */
-		
-		error << _("no support for presets using chunks at this time")
-		      << endmsg;
-		return;
+		XMLTree* t = presets_tree ();
+		if (t == 0) {
+			return;
+		}
+
+		t->root()->remove_nodes_and_delete (X_("label"), name);
+
+		sys::path f = ARDOUR::user_config_directory ();
+		f /= "presets";
+		f /= "vst";
+
+		t->write (f.to_string ());
+		delete t;
 	}
 }
 
