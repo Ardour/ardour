@@ -179,7 +179,6 @@ again:
 					/* did it work? */
 					fst->current_program = fst->plugin->dispatcher (fst->plugin, 3, /* effGetProgram */ 0, 0, NULL, 0);
 					fst->want_program = -1; 
-					printf("old-style leaves CP=%d\n", fst->current_program);
 				}
 
 				if (fst->want_chunk == 1) {

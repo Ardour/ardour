@@ -1533,7 +1533,6 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	framepos_t const pf = adjusted_current_frame (event);
 
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-		/* Move the contents of the region around without changing the region bounds */
 		_operation = ContentsTrim;
 		Drag::start_grab (event, _editor->cursors()->trimmer);
 	} else {
@@ -1724,7 +1723,6 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (_operation == StartTrim) {
 			i->view->trim_front_ending ();
 		}
-		
 		i->view->region()->resume_property_changes ();
 	}
 }

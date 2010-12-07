@@ -315,10 +315,6 @@ class Region
 	/** Constructor for derived types only */
 	Region (Session& s, framepos_t start, framecnt_t length, const std::string& name, DataType);
 
-	virtual bool can_trim_start_before_source_start () const {
-		return false;
-	}
-
   protected:
 	void send_change (const PBD::PropertyChange&);
         void mid_thaw (const PBD::PropertyChange&);
