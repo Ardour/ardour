@@ -534,6 +534,26 @@ ControlList::slide (iterator before, double distance)
 			(*before)->when += distance;
 			++before;
 		}
+
+                mark_dirty ();
+	}
+
+	maybe_signal_changed ();
+}
+
+void
+ControlList::shift (double pos, double frames)
+{
+	{
+		Glib::Mutex::Lock lm (_lock);
+
+                for (iterator i = _events.begin(); i != _events.end(); ++i) {
+			if ((*i)->when >= pos) {
+				(*i)->when += frames;
+			}
+		}
+
+		mark_dirty ();
 	}
 
 	maybe_signal_changed ();

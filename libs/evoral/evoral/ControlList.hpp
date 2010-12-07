@@ -113,6 +113,7 @@ public:
 	void x_scale (double factor);
 	bool extend_to (double);
 	void slide (iterator before, double distance);
+        void shift (double before, double distance);
 
 	void rt_add (double when, double value);
 	void add (double when, double value);
