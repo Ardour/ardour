@@ -49,6 +49,7 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	preset_box.set_spacing (6);
 	preset_box.set_border_width (6);
 	preset_box.pack_end (bypass_button, false, false, 10);
+	preset_box.pack_end (edit_button, false, false);
 	preset_box.pack_end (save_button, false, false);
 	preset_box.pack_end (vst_preset_combo, false, false);
 
