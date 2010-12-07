@@ -4659,10 +4659,7 @@ Editor::quantize_region ()
 		return;
 	}
 
-	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
-		RegionSelection::iterator tmp = r;
-		++tmp;
-
+	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
 		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*r);
 		if (mrv) {
 			selected_midi_region_cnt++;
