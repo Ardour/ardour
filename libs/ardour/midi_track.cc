@@ -403,9 +403,16 @@ MidiTrack::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fr
 }
 
 void
-MidiTrack::handle_transport_stopped (bool abort, bool did_locate, bool flush_processors)
+MidiTrack::realtime_handle_transport_stopped ()
 {
-	Route::handle_transport_stopped (abort, did_locate, flush_processors);
+	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+	if (!lm.locked ()) {
+		return;
+	}
+
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		(*i)->realtime_handle_transport_stopped ();
+	}
 }
 
 void

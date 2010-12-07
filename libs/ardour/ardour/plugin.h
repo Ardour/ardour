@@ -128,6 +128,8 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool parameter_is_input(uint32_t) const = 0;
 	virtual bool parameter_is_output(uint32_t) const = 0;
 
+	virtual void realtime_handle_transport_stopped () {}
+
 	bool save_preset (std::string);
 	void remove_preset (std::string);
 	virtual bool load_preset (const std::string& uri) = 0;

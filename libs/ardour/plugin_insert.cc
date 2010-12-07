@@ -1060,3 +1060,11 @@ PluginInsert::add_plugin_with_activation (boost::shared_ptr<Plugin> plugin)
 		plugin->activate ();
 	}
 }
+
+void
+PluginInsert::realtime_handle_transport_stopped ()
+{
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		(*i)->realtime_handle_transport_stopped ();
+	}
+}

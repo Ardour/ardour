@@ -2686,8 +2686,9 @@ Route::direct_feeds (boost::shared_ptr<Route> other, bool* only_send)
 	return false;
 }
 
+/** Called from the (non-realtime) butler thread when the transport is stopped */
 void
-Route::handle_transport_stopped (bool /*abort_ignored*/, bool did_locate, bool can_flush_processors)
+Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool did_locate, bool can_flush_processors)
 {
 	framepos_t now = _session.transport_frame();
 

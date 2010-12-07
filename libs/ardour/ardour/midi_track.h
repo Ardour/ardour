@@ -42,7 +42,7 @@ public:
 	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
                   int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
 
-	void handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
+	void realtime_handle_transport_stopped ();
 
 	void use_new_diskstream ();
         void set_diskstream (boost::shared_ptr<Diskstream>);

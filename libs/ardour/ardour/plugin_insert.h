@@ -74,6 +74,8 @@ class PluginInsert : public Processor
 
 	bool is_generator() const;
 
+	void realtime_handle_transport_stopped ();
+
 	struct PluginControl : public AutomationControl
 	{
 		PluginControl (PluginInsert* p, const Evoral::Parameter &param,

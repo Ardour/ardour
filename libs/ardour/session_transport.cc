@@ -188,6 +188,14 @@ Session::realtime_stop (bool abort, bool clear_state)
 		todo = PostTransportWork (todo | PostTransportStop);
 	}
 
+	/* call routes */
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin (); i != r->end(); ++i) {
+		(*i)->realtime_handle_transport_stopped ();
+	}
+
 	if (actively_recording()) {
 
 		/* move the transport position back to where the
@@ -1487,7 +1495,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 		if (with_stop) {
-			(*i)->handle_transport_stopped (abort, (ptw & PostTransportLocate), (!(ptw & PostTransportLocate) || pending_locate_flush));
+			(*i)->nonrealtime_handle_transport_stopped (abort, (ptw & PostTransportLocate), (!(ptw & PostTransportLocate) || pending_locate_flush));
 		}
 
 		framecnt_t old_latency = (*i)->output()->signal_latency ();
