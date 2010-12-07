@@ -35,7 +35,14 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	: PlugUIBase (pi),
 	  vst (vp)
 {
-	create_preset_store ();
+	preset_model = ListStore::create (preset_columns);
+
+	CellRenderer* renderer = manage (new CellRendererText());
+	vst_preset_combo.pack_start (*renderer, true);
+	vst_preset_combo.add_attribute (*renderer, "text", 0);
+	vst_preset_combo.set_model (preset_model);
+
+	update_presets ();
 
 	fst_run_editor (vst->fst());
 
@@ -63,8 +70,19 @@ VSTPluginUI::~VSTPluginUI ()
 void
 VSTPluginUI::preset_chosen ()
 {
-	// we can't dispatch directly here, too many plugins only expects one GUI thread.
-	vst->fst()->want_program = vst_preset_combo.get_active_row_number ();
+	int const r = vst_preset_combo.get_active_row_number ();
+
+	if (r < vst->first_user_preset_index()) {
+		/* This is a plugin-provided preset.
+		   We can't dispatch directly here; too many plugins expects only one GUI thread.
+		*/
+		vst->fst()->want_program = r;
+	} else {
+		/* This is a user preset.  This method knows about the direct dispatch restriction, too */
+		TreeModel::iterator i = vst_preset_combo.get_active ();
+		plugin->load_preset ((*i)[preset_columns.name]);
+	}
+	
 	socket.grab_focus ();
 }
 
@@ -138,36 +156,22 @@ VSTPluginUI::configure_handler (GdkEventConfigure* ev, Gtk::Socket *socket)
 }
 
 void
-VSTPluginUI::create_preset_store ()
+VSTPluginUI::update_presets ()
 {
-	FST *fst = vst->fst();
-	int vst_version = fst->plugin->dispatcher (fst->plugin, effGetVstVersion, 0, 0, NULL, 0.0f);
+	std::vector<Plugin::PresetRecord> presets = plugin->get_presets ();
 
-	preset_model = ListStore::create (preset_columns);
+	preset_model->clear ();
 
-	for (int i = 0; i < fst->plugin->numPrograms; ++i) {
-		char buf[100];
-		TreeModel::Row row = *(preset_model->append());
-
-		snprintf (buf, 90, "preset %d", i);
-
-		if (vst_version >= 2) {
-			fst->plugin->dispatcher (fst->plugin, 29, i, 0, buf, 0.0);
-		}
-
-		row[preset_columns.name] = buf;
-		row[preset_columns.number] = i;
+	int j = 0;
+	for (std::vector<Plugin::PresetRecord>::const_iterator i = presets.begin(); i != presets.end(); ++i) {
+		TreeModel::Row row = *(preset_model->append ());
+		row[preset_columns.name] = i->label;
+		row[preset_columns.number] = j++;
 	}
 
-	if (fst->plugin->numPrograms > 0) {
-		fst->plugin->dispatcher( fst->plugin, effSetProgram, 0, 0, NULL, 0.0 );
+	if (presets.size() > 0) {
+		vst->fst()->plugin->dispatcher (vst->fst()->plugin, effSetProgram, 0, 0, NULL, 0);
 	}
-
-	vst_preset_combo.set_model (preset_model);
-
-	CellRenderer* renderer = manage (new CellRendererText());
-	vst_preset_combo.pack_start (*renderer, true);
-	vst_preset_combo.add_attribute (*renderer, "text", 0);
 
 	if (vst->fst()->current_program != -1) {
 		vst_preset_combo.set_active (vst->fst()->current_program);

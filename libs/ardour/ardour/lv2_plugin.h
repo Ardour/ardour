@@ -153,6 +153,8 @@ class LV2Plugin : public ARDOUR::Plugin
 	void init (LV2World& world, SLV2Plugin plugin, framecnt_t rate);
 	void run (pframes_t nsamples);
 	void latency_compute_run ();
+	std::string do_save_preset (std::string);
+	void do_remove_preset (std::string);
 };
 
 

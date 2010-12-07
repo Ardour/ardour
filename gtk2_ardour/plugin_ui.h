@@ -324,8 +324,8 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 
 	bool configure_handler (GdkEventConfigure*, Gtk::Socket*);
 	void save_plugin_setting ();
-	void create_preset_store ();
 	void preset_chosen ();
+	void update_presets ();
 };
 #endif // VST_SUPPORT
 

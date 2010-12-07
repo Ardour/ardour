@@ -83,6 +83,9 @@ struct _FST
     int         vst_version;
 
     int		want_program;
+    int         want_chunk;
+    unsigned char *wanted_chunk;
+    int         wanted_chunk_size;
     int         current_program;
     float      *want_params;
     float      *set_params;

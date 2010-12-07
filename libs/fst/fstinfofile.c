@@ -14,6 +14,8 @@
 #define FALSE 0
 #define TRUE !FALSE
 
+extern char * strdup (const char *);
+
 static char *read_string( FILE *fp ) {
     char buf[MAX_STRING_LEN];
 

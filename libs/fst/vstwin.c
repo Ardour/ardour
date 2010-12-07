@@ -71,6 +71,7 @@ fst_new ()
 	pthread_cond_init (&fst->window_status_change, NULL);
 	pthread_cond_init (&fst->plugin_dispatcher_called, NULL);
 	fst->want_program = -1;
+	fst->want_chunk = 0;
 	fst->current_program = -1;
 	return fst;
 }
@@ -178,6 +179,12 @@ again:
 					/* did it work? */
 					fst->current_program = fst->plugin->dispatcher (fst->plugin, 3, /* effGetProgram */ 0, 0, NULL, 0);
 					fst->want_program = -1; 
+					printf("old-style leaves CP=%d\n", fst->current_program);
+				}
+
+				if (fst->want_chunk == 1) {
+					fst->plugin->dispatcher (fst->plugin, 24 /* effSetChunk */, 1, fst->wanted_chunk_size, fst->wanted_chunk, 0);
+					fst->want_chunk = 0;
 				}
 				
 				if(fst->dispatcher_wantcall) {

@@ -366,18 +366,6 @@ LadspaPlugin::get_state()
 	return *root;
 }
 
-bool
-LadspaPlugin::save_preset (string name)
-{
-	return Plugin::save_preset (name, "ladspa");
-}
-
-void
-LadspaPlugin::remove_preset (string name)
-{
-	return Plugin::remove_preset (name, "ladspa");
-}
-
 int
 LadspaPlugin::set_state (const XMLNode& node, int version)
 {
@@ -717,3 +705,197 @@ LadspaPluginInfo::LadspaPluginInfo()
 {
        type = ARDOUR::LADSPA;
 }
+
+
+vector<Plugin::PresetRecord>
+LadspaPlugin::get_presets ()
+{
+	vector<PresetRecord> result;
+	uint32_t id;
+	std::string unique (unique_id());
+
+	if (!isdigit (unique[0])) {
+		return result;
+	}
+
+	id = atol (unique.c_str());
+
+	lrdf_uris* set_uris = lrdf_get_setting_uris(id);
+
+	if (set_uris) {
+		for (uint32_t i = 0; i < (uint32_t) set_uris->count; ++i) {
+			if (char* label = lrdf_get_label(set_uris->items[i])) {
+				PresetRecord rec(set_uris->items[i], label);
+				result.push_back(rec);
+				_presets.insert (make_pair (set_uris->items[i], rec));
+			}
+		}
+		lrdf_free_uris(set_uris);
+	}
+
+	return result;
+}
+
+
+bool
+LadspaPlugin::load_preset (const string& preset_uri)
+{
+	lrdf_defaults* defs = lrdf_get_setting_values(preset_uri.c_str());
+
+	if (defs) {
+		for (uint32_t i = 0; i < (uint32_t) defs->count; ++i) {
+			// The defs->items[i].pid < defs->count check is to work around
+			// a bug in liblrdf that saves invalid values into the presets file.
+			if (((uint32_t) defs->items[i].pid < (uint32_t) defs->count) && parameter_is_input (defs->items[i].pid)) {
+				set_parameter(defs->items[i].pid, defs->items[i].value);
+			}
+		}
+		lrdf_free_setting_values(defs);
+	}
+
+	return true;
+}
+
+/* XXX: should be in liblrdf */
+static void
+lrdf_remove_preset (const char *source, const char *setting_uri)
+{
+	lrdf_statement p;
+	lrdf_statement *q;
+	lrdf_statement *i;
+	char setting_uri_copy[64];
+	char buf[64];
+	
+	strncpy(setting_uri_copy, setting_uri, sizeof(setting_uri_copy));
+
+	p.subject = setting_uri_copy;
+	strncpy(buf, LADSPA_BASE "hasPortValue", sizeof(buf));
+	p.predicate = buf;
+	p.object = NULL;
+	q = lrdf_matches(&p);
+
+	p.predicate = NULL;
+	p.object = NULL;
+	for (i = q; i; i = i->next) {
+		p.subject = i->object;
+		lrdf_remove_matches(&p);
+	}
+
+	lrdf_free_statements(q);
+
+	p.subject = NULL;
+	strncpy(buf, LADSPA_BASE "hasSetting", sizeof(buf));
+	p.predicate = buf;
+	p.object = setting_uri_copy;
+	lrdf_remove_matches(&p);
+
+	p.subject = setting_uri_copy;
+	p.predicate = NULL;
+	p.object = NULL;
+	lrdf_remove_matches (&p);
+}
+
+void
+LadspaPlugin::do_remove_preset (string name)
+{
+	string const envvar = preset_envvar ();
+	if (envvar.empty()) {
+		warning << _("Could not locate HOME.  Preset not removed.") << endmsg;
+		return;
+	}
+
+	Plugin::PresetRecord const * p = preset_by_label (name);
+	if (!p) {
+		return;
+	}
+	
+	string const source = preset_source (envvar);
+	lrdf_remove_preset (source.c_str(), p->uri.c_str ());
+
+	write_preset_file (envvar);
+}
+
+string
+LadspaPlugin::preset_envvar () const
+{
+	char* envvar;
+	if ((envvar = getenv ("HOME")) == 0) {
+		return "";
+	}
+	
+	return envvar;
+}
+
+string
+LadspaPlugin::preset_source (string envvar) const
+{
+	return string_compose ("file:%1/.ladspa/rdf/ardour-presets.n3", envvar);
+}
+
+bool
+LadspaPlugin::write_preset_file (string envvar)
+{
+	string path = string_compose("%1/.ladspa", envvar);
+	if (g_mkdir_with_parents (path.c_str(), 0775)) {
+		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
+		return false;
+	}
+
+	path += "/rdf";
+	if (g_mkdir_with_parents (path.c_str(), 0775)) {
+		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
+		return false;
+	}
+
+	string const source = preset_source (envvar);
+
+	if (lrdf_export_by_source (source.c_str(), source.substr(5).c_str())) {
+		warning << string_compose(_("Error saving presets file %1."), source) << endmsg;
+		return false;
+	}
+
+	return true;
+}
+
+string
+LadspaPlugin::do_save_preset (string name)
+{
+	lrdf_portvalue portvalues[parameter_count()];
+	lrdf_defaults defaults;
+	std::string unique (unique_id());
+
+	if (!isdigit (unique[0])) {
+		return false;
+	}
+
+	uint32_t const id = atol (unique.c_str());
+
+	defaults.count = parameter_count();
+	defaults.items = portvalues;
+
+	for (uint32_t i = 0; i < parameter_count(); ++i) {
+		if (parameter_is_input (i)) {
+			portvalues[i].pid = i;
+			portvalues[i].value = get_parameter(i);
+		}
+	}
+
+	string const envvar = preset_envvar ();
+	if (envvar.empty()) {
+		warning << _("Could not locate HOME.  Preset not saved.") << endmsg;
+		return false;
+	}
+
+	string const source = preset_source (envvar);
+
+	char* uri_char = lrdf_add_preset (source.c_str(), name.c_str(), id, &defaults);
+	string uri (uri_char);
+	free (uri_char);
+
+	if (!write_preset_file (envvar)) {
+		return "";
+	}
+
+	return uri;
+}
+

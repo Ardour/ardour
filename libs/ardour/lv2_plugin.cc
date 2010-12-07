@@ -353,7 +353,7 @@ LV2Plugin::get_presets()
 		SLV2Value name = slv2_results_get_binding_value(presets, 1);
 		PresetRecord rec(slv2_value_as_string(uri), slv2_value_as_string(name));
 		result.push_back(rec);
-		this->presets.insert(std::make_pair(slv2_value_as_string(uri), rec));
+		_presets.insert(std::make_pair(slv2_value_as_string(uri), rec));
 	}
 	slv2_results_free(presets);
 	return result;
@@ -380,14 +380,14 @@ LV2Plugin::load_preset(const string& uri)
 	return true;
 }
 
-bool
-LV2Plugin::save_preset (string /*name*/)
+std::string
+LV2Plugin::do_save_preset (string /*name*/)
 {
-	return false;
+	return "";
 }
 
 void
-LV2Plugin::remove_preset (string /*name*/)
+LV2Plugin::do_remove_preset (string /*name*/)
 {
 	return;
 }

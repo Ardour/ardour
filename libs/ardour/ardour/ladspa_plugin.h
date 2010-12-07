@@ -99,8 +99,9 @@ class LadspaPlugin : public ARDOUR::Plugin
 
 	XMLNode& get_state();
 	int      set_state (const XMLNode&, int version);
-	bool     save_preset (std::string name);
-	void     remove_preset (std::string name);
+
+	std::vector<PresetRecord> get_presets ();
+	bool load_preset (const std::string& uri);
 
 	bool has_editor() const { return false; }
 
@@ -134,6 +135,11 @@ class LadspaPlugin : public ARDOUR::Plugin
 	void run_in_place (pframes_t nsamples);
 	void latency_compute_run ();
 	int set_state_2X (const XMLNode&, int version);
+	std::string do_save_preset (std::string name);
+	void do_remove_preset (std::string name);
+	std::string preset_envvar () const;
+	std::string preset_source (std::string) const;
+	bool write_preset_file (std::string);
 };
 
 class LadspaPluginInfo : public PluginInfo {

@@ -78,244 +78,34 @@ Plugin::Plugin (const Plugin& other)
 	, _session (other._session)
 	, _info (other._info)
 	, _cycles (0)
-	, presets (other.presets)
 {
+	
 }
 
 Plugin::~Plugin ()
 {
-}
-
-const Plugin::PresetRecord*
-Plugin::preset_by_label(const string& label)
-{
-	// FIXME: O(n)
-	for (map<string,PresetRecord>::const_iterator i = presets.begin(); i != presets.end(); ++i) {
-		if (i->second.label == label) {
-			return &i->second;
-		}
-	}
-	return NULL;
-}
-
-const Plugin::PresetRecord*
-Plugin::preset_by_uri(const string& uri)
-{
-	map<string,PresetRecord>::const_iterator pr = presets.find(uri);
-	if (pr != presets.end()) {
-		return &pr->second;
-	} else {
-		return NULL;
-	}
-}
-
-vector<Plugin::PresetRecord>
-Plugin::get_presets()
-{
-	vector<PresetRecord> result;
-	uint32_t id;
-	std::string unique (unique_id());
-
-	/* XXX problem: AU plugins don't have numeric ID's.
-	   Solution: they have a different method of providing presets.
-	   XXX sub-problem: implement it.
-	*/
-
-	if (!isdigit (unique[0])) {
-		return result;
-	}
-
-	id = atol (unique.c_str());
-
-	lrdf_uris* set_uris = lrdf_get_setting_uris(id);
-
-	if (set_uris) {
-		for (uint32_t i = 0; i < (uint32_t) set_uris->count; ++i) {
-			if (char* label = lrdf_get_label(set_uris->items[i])) {
-				PresetRecord rec(set_uris->items[i], label);
-				result.push_back(rec);
-				presets.insert(std::make_pair(set_uris->items[i], rec));
-			}
-		}
-		lrdf_free_uris(set_uris);
-	}
-
-	return result;
-}
-
-bool
-Plugin::load_preset(const string& preset_uri)
-{
-	lrdf_defaults* defs = lrdf_get_setting_values(preset_uri.c_str());
-
-	if (defs) {
-		for (uint32_t i = 0; i < (uint32_t) defs->count; ++i) {
-			// The defs->items[i].pid < defs->count check is to work around
-			// a bug in liblrdf that saves invalid values into the presets file.
-			if (((uint32_t) defs->items[i].pid < (uint32_t) defs->count) && parameter_is_input (defs->items[i].pid)) {
-				set_parameter(defs->items[i].pid, defs->items[i].value);
-			}
-		}
-		lrdf_free_setting_values(defs);
-	}
-
-	return true;
-}
-
-/* XXX: should be in liblrdf */
-static void
-lrdf_remove_preset (const char *source, const char *setting_uri)
-{
-	lrdf_statement p;
-	lrdf_statement *q;
-	lrdf_statement *i;
-	char setting_uri_copy[64];
-	char buf[64];
 	
-	strncpy(setting_uri_copy, setting_uri, sizeof(setting_uri_copy));
-
-	p.subject = setting_uri_copy;
-	strncpy(buf, LADSPA_BASE "hasPortValue", sizeof(buf));
-	p.predicate = buf;
-	p.object = NULL;
-	q = lrdf_matches(&p);
-
-	p.predicate = NULL;
-	p.object = NULL;
-	for (i = q; i; i = i->next) {
-		p.subject = i->object;
-		lrdf_remove_matches(&p);
-	}
-
-	lrdf_free_statements(q);
-
-	p.subject = NULL;
-	strncpy(buf, LADSPA_BASE "hasSetting", sizeof(buf));
-	p.predicate = buf;
-	p.object = setting_uri_copy;
-	lrdf_remove_matches(&p);
-
-	p.subject = setting_uri_copy;
-	p.predicate = NULL;
-	p.object = NULL;
-	lrdf_remove_matches (&p);
 }
 
 void
-Plugin::remove_preset (string name, string domain)
+Plugin::remove_preset (string name)
 {
-	string const envvar = preset_envvar ();
-	if (envvar.empty()) {
-		warning << _("Could not locate HOME.  Preset not removed.") << endmsg;
-		return;
-	}
-
-	Plugin::PresetRecord const * p = preset_by_label (name);
-	if (!p) {
-		return;
-	}
-	
-	string const source = preset_source (envvar, domain);
-	lrdf_remove_preset (source.c_str(), p->uri.c_str ());
-
-	presets.erase (p->uri);
-
-	write_preset_file (envvar, domain);
-
+	do_remove_preset (name);
+	_presets.erase (preset_by_label (name)->uri);
 	PresetRemoved (); /* EMIT SIGNAL */
 }
 
-string
-Plugin::preset_envvar () const
+bool
+Plugin::save_preset (string name)
 {
-	char* envvar;
-	if ((envvar = getenv ("HOME")) == 0) {
-		return "";
+	string const uri = do_save_preset (name);
+
+	if (!uri.empty()) {
+		_presets.insert (make_pair (uri, PresetRecord (uri, name)));
+		PresetAdded (); /* EMIT SIGNAL */
 	}
 	
-	return envvar;
-}
-
-string
-Plugin::preset_source (string envvar, string domain) const
-{
-	return string_compose ("file:%1/.%2/rdf/ardour-presets.n3", envvar, domain);
-}
-
-bool
-Plugin::write_preset_file (string envvar, string domain)
-{
-	string path = string_compose("%1/.%2", envvar, domain);
-	if (g_mkdir_with_parents (path.c_str(), 0775)) {
-		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
-		return false;
-	}
-
-	path += "/rdf";
-	if (g_mkdir_with_parents (path.c_str(), 0775)) {
-		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
-		return false;
-	}
-
-	string const source = preset_source (envvar, domain);
-
-	if (lrdf_export_by_source (source.c_str(), source.substr(5).c_str())) {
-		warning << string_compose(_("Error saving presets file %1."), source) << endmsg;
-		return false;
-	}
-
-	return true;
-}
-
-bool
-Plugin::save_preset (string name, string domain)
-{
-	lrdf_portvalue portvalues[parameter_count()];
-	lrdf_defaults defaults;
-	uint32_t id;
-	std::string unique (unique_id());
-
-	/* XXX problem: AU plugins don't have numeric ID's.
-	   Solution: they have a different method of providing/saving presets.
-	   XXX sub-problem: implement it.
-	*/
-
-	if (!isdigit (unique[0])) {
-		return false;
-	}
-
-	id = atol (unique.c_str());
-
-	defaults.count = parameter_count();
-	defaults.items = portvalues;
-
-	for (uint32_t i = 0; i < parameter_count(); ++i) {
-		if (parameter_is_input (i)) {
-			portvalues[i].pid = i;
-			portvalues[i].value = get_parameter(i);
-		}
-	}
-
-	string const envvar = preset_envvar ();
-	if (envvar.empty()) {
-		warning << _("Could not locate HOME.  Preset not saved.") << endmsg;
-		return false;
-	}
-
-	string const source = preset_source (envvar, domain);
-
-	char* uri = lrdf_add_preset (source.c_str(), name.c_str(), id, &defaults);
-	
-	/* XXX: why is the uri apparently kept as the key in the `presets' map and also in the PresetRecord? */
-
-	presets.insert (make_pair (uri, PresetRecord (uri, name)));
-	free (uri);
-
-	bool const r = write_preset_file (envvar, domain);
-
-	PresetAdded (); /* EMIT SIGNAL */
-
-	return r;
+	return !uri.empty ();
 }
 
 PluginPtr
@@ -393,4 +183,26 @@ Plugin::input_streams () const
 	return ChanCount::ZERO;
 }
 
+const Plugin::PresetRecord *
+Plugin::preset_by_label (const string& label)
+{
+	// FIXME: O(n)
+	for (map<string, PresetRecord>::const_iterator i = _presets.begin(); i != _presets.end(); ++i) {
+		if (i->second.label == label) {
+			return &i->second;
+		}
+	}
+	
+	return 0;
+}
 
+const Plugin::PresetRecord *
+Plugin::preset_by_uri (const string& uri)
+{
+	map<string, PresetRecord>::const_iterator pr = _presets.find (uri);
+	if (pr != _presets.end()) {
+		return &pr->second;
+	} else {
+		return 0;
+	}
+}

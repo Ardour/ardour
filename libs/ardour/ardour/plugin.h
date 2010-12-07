@@ -128,28 +128,32 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool parameter_is_input(uint32_t) const = 0;
 	virtual bool parameter_is_output(uint32_t) const = 0;
 
-	virtual bool save_preset (std::string) = 0;
-	virtual void remove_preset (std::string) = 0;
-	virtual bool load_preset (const std::string& uri);
+	bool save_preset (std::string);
+	void remove_preset (std::string);
+	virtual bool load_preset (const std::string& uri) = 0;
 
 	struct PresetRecord {
-		PresetRecord(const std::string& u, const std::string& l) : uri(u), label(l) {}
+		PresetRecord (const std::string& u, const std::string& l) : uri(u), label(l) {}
 		std::string uri;
 		std::string label;
 	};
 
-	virtual std::vector<PresetRecord> get_presets();
-	virtual std::string current_preset() const { return std::string(); }
+	const PresetRecord * preset_by_label (const std::string &);
+	const PresetRecord * preset_by_uri (const std::string &);
 
+	/** Return this plugin's presets; should add them to _presets */
+	virtual std::vector<PresetRecord> get_presets () = 0;
+	virtual std::string current_preset () const { return std::string(); }
+
+	/** Emitted when a preset is added or removed, respectively */
+	PBD::Signal0<void> PresetAdded;
+	PBD::Signal0<void> PresetRemoved;
+	
+	/* XXX: no-one listens to this */
 	static PBD::Signal0<bool> PresetFileExists;
-
-	const PresetRecord* preset_by_label(const std::string& label);
-	const PresetRecord* preset_by_uri(const std::string& uri);
 
 	virtual bool has_editor() const = 0;
 
-	PBD::Signal0<void> PresetAdded;
-	PBD::Signal0<void> PresetRemoved;
 	PBD::Signal2<void,uint32_t,float> ParameterChanged;
 
 	/* NOTE: this block of virtual methods looks like the interface
@@ -183,23 +187,25 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	void set_cycles (uint32_t c) { _cycles = c; }
 	cycles_t cycles() const { return _cycles; }
 
-  protected:
+protected:
+	
 	friend class PluginInsert;
 	friend struct PluginInsert::PluginControl;
 
 	virtual void set_parameter (uint32_t which, float val) = 0;
 
-	bool save_preset (std::string, std::string /* vst, ladspa etc. */);
-	void remove_preset (std::string, std::string);
-	bool write_preset_file (std::string, std::string);
-	std::string preset_source (std::string, std::string) const;
-	std::string preset_envvar () const;
+	/** Do the actual saving of the current plugin settings to a preset of the provided name.
+	 *  Should return a URI on success, or an empty string on failure.
+	 */
+	virtual std::string do_save_preset (std::string) = 0;
+	/** Do the actual removal of a preset of the provided name */
+	virtual void do_remove_preset (std::string) = 0;
 
 	ARDOUR::AudioEngine&     _engine;
 	ARDOUR::Session&         _session;
 	PluginInfoPtr            _info;
 	uint32_t                 _cycles;
-	std::map<std::string,PresetRecord>  presets;
+	std::map<std::string, PresetRecord> _presets;
 };
 
 PluginPtr find_plugin(ARDOUR::Session&, std::string unique_id, ARDOUR::PluginType);

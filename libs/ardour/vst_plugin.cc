@@ -142,6 +142,37 @@ VSTPlugin::nth_parameter (uint32_t n, bool& ok) const
 	return n;
 }
 
+/** Get VST chunk as base64-encoded data.
+ *  @param single true for single program, false for all programs.
+ *  @return 0-terminated base64-encoded data; must be passed to g_free () by caller.
+ */
+gchar *
+VSTPlugin::get_chunk (bool single)
+{
+	guchar* data;
+	int32_t data_size = _plugin->dispatcher (_plugin, 23 /* effGetChunk */, single ? 1 : 0, 0, &data, 0);
+	if (data_size == 0) {
+		return 0;
+	}
+	
+	return g_base64_encode (data, data_size);
+}
+
+/** Set VST chunk from base64-encoded data.
+ *  @param 0-terminated base64-encoded data.
+ *  @param single true for single program, false for all programs.
+ *  @return 0 on success, non-0 on failure
+ */
+int
+VSTPlugin::set_chunk (gchar const * data, bool single)
+{
+	gsize size = 0;
+	guchar* raw_data = g_base64_decode (data, &size);
+	int const r = _plugin->dispatcher (_plugin, 24 /* effSetChunk */, single ? 1 : 0, size, raw_data, 0);
+	g_free (raw_data);
+	return r;
+}
+
 XMLNode&
 VSTPlugin::get_state()
 {
@@ -156,12 +187,8 @@ VSTPlugin::get_state()
 
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
-		/* fetch the current chunk */
-
-		guchar* data;
-                int32_t data_size;
-
-		if ((data_size = _plugin->dispatcher (_plugin, 23 /* effGetChunk */, 0, 0, &data, false)) == 0) {
+		gchar* data = get_chunk (false);
+		if (data == 0) {
 			return *root;
 		}
 
@@ -169,9 +196,8 @@ VSTPlugin::get_state()
 
 		XMLNode* chunk_node = new XMLNode (X_("chunk"));
 
-		gchar * encoded_data = g_base64_encode (data, data_size);
-		chunk_node->add_content (encoded_data);
-		g_free (encoded_data);
+		chunk_node->add_content (data);
+		g_free (data);
 
 		root->add_child_nocopy (*chunk_node);
 
@@ -220,11 +246,10 @@ VSTPlugin::set_state(const XMLNode& node, int)
 
 		for (n = child->children ().begin (); n != child->children ().end (); ++n) {
 			if ((*n)->is_content ()) {
-				gsize chunk_size = 0;
-				guchar * data = g_base64_decode ((*n)->content ().c_str (), &chunk_size);
-				//cerr << "Dispatch setChunk for " << name() << endl;
-				ret = _plugin->dispatcher (_plugin, 24 /* effSetChunk */, 0, chunk_size, data, 0);
-				g_free (data);
+				/* XXX: this may be dubious for the same reasons that we delay
+				   execution of load_preset.
+				*/
+				ret = set_chunk ((*n)->content().c_str(), false);
 			}
 		}
 
@@ -331,33 +356,96 @@ bool
 VSTPlugin::load_preset (const string& name)
 {
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
-		error << _("no support for presets using chunks at this time")
-		      << endmsg;
+
+		XMLTree* t = presets_tree ();
+		if (t == 0) {
+			return false;
+		}
+
+		XMLNode* root = t->root ();
+
+		/* Load a user preset chunk from our XML file and send it via a circuitous route to the plugin */
+		
+		for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
+			assert ((*i)->name() == X_("ChunkPreset"));
+			
+			XMLProperty* uri = (*i)->property (X_("uri"));
+			XMLProperty* label = (*i)->property (X_("label"));
+
+			assert (uri);
+			assert (label);
+
+			if (label->value() == name) {
+
+				if (_fst->wanted_chunk) {
+					g_free (_fst->wanted_chunk);
+				}
+				
+				for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
+					if ((*j)->is_content ()) {
+						/* we can't dispatch directly here; too many plugins expect only one GUI thread */
+						gsize size = 0;
+						guchar* raw_data = g_base64_decode ((*j)->content().c_str(), &size);
+						_fst->wanted_chunk = raw_data;
+						_fst->wanted_chunk_size = size;
+						_fst->want_chunk = 1;
+						return true;
+					}
+				}
+			}
+		}
+		
 		return false;
 	}
-	return Plugin::load_preset (name);
+
+	return true;
 }
 
-bool
-VSTPlugin::save_preset (string name)
+string
+VSTPlugin::do_save_preset (string name)
 {
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
-		error << _("no support for presets using chunks at this time")
-		      << endmsg;
-		return false;
+
+		XMLTree* t = presets_tree ();
+		if (t == 0) {
+			return "";
+		}
+
+		/* Add a chunk to our XML file of user presets */
+
+		XMLNode* p = new XMLNode (X_("ChunkPreset"));
+		/* XXX: use of _presets.size() + 1 for the unique ID here is dubious at best */
+		string const uri = string_compose (X_("VST:%1:%2"), unique_id (), _presets.size() + 1);
+		p->add_property (X_("uri"), uri);
+		p->add_property (X_("label"), name);
+		gchar* data = get_chunk (true);
+		p->add_content (string (data));
+		g_free (data);
+		t->root()->add_child_nocopy (*p);
+
+		sys::path f = ARDOUR::user_config_directory ();
+		f /= "presets";
+		f /= "vst";
+
+		t->write (f.to_string ());
+		delete t;
+		return uri;
 	}
-	return Plugin::save_preset (name, "vst");
+
+	return "";
 }
 
 void
-VSTPlugin::remove_preset (string name)
+VSTPlugin::do_remove_preset (string name)
 {
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
+
+		/* XXX: TODO */
+		
 		error << _("no support for presets using chunks at this time")
 		      << endmsg;
 		return;
 	}
-	Plugin::remove_preset (name, "vst");
 }
 
 string
@@ -472,7 +560,7 @@ VSTPlugin::name () const
 const char *
 VSTPlugin::maker () const
 {
-	return "imadeit";
+	return _info->creator.c_str();
 }
 
 const char *
@@ -543,6 +631,94 @@ VSTPluginInfo::load (Session& session)
 	catch (failed_constructor &err) {
 		return PluginPtr ((Plugin*) 0);
 	}
+}
+
+vector<Plugin::PresetRecord>
+VSTPlugin::get_presets ()
+{
+	vector<PresetRecord> p;
+
+	/* Built-in presets */
+	
+	int const vst_version = _plugin->dispatcher (_plugin, effGetVstVersion, 0, 0, NULL, 0);
+	for (int i = 0; i < _plugin->numPrograms; ++i) {
+		PresetRecord r (string_compose (X_("VST:%1:%2"), unique_id (), i), "");
+		
+		if (vst_version >= 2) {
+			char buf[256];
+			_plugin->dispatcher (_plugin, 29, i, 0, buf, 0);
+			r.label = buf;
+		} else {
+			r.label = string_compose (_("Preset %1"), i);
+		}
+
+		p.push_back (r);
+		_presets.insert (make_pair (r.uri, r));
+	}
+
+	/* User presets from our XML file */
+
+	XMLTree* t = presets_tree ();
+
+	if (t) {
+		XMLNode* root = t->root ();
+		for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
+
+			assert ((*i)->name() == X_("ChunkPreset"));
+			
+			XMLProperty* uri = (*i)->property (X_("uri"));
+			XMLProperty* label = (*i)->property (X_("label"));
+
+			assert (uri);
+			assert (label);
+
+			PresetRecord r (uri->value(), label->value());
+			p.push_back (r);
+			_presets.insert (make_pair (r.uri, r));
+		}
+	}
+
+	delete t;
+		
+	return p;
+}
+
+/** @return XMLTree with our user presets; could be a new one if no existing
+ *  one was found, or 0 if one was present but badly-formatted.
+ */
+XMLTree *
+VSTPlugin::presets_tree () const
+{
+	XMLTree* t = new XMLTree;
+
+	sys::path p = ARDOUR::user_config_directory ();
+	p /= "presets";
+
+	if (!is_directory (p)) {
+		create_directory (p);
+	}
+
+	p /= "vst";
+
+	if (!exists (p)) {
+		t->set_root (new XMLNode (X_("VSTPresets")));
+		return t;
+	}
+	
+	t->set_filename (p.to_string ());
+	if (!t->read ()) {
+		delete t;
+		return 0;
+	}
+
+	return t;
+}
+
+/** @return Index of the first user preset in our lists */
+int
+VSTPlugin::first_user_preset_index () const
+{
+	return _plugin->numPrograms;
 }
 
 VSTPluginInfo::VSTPluginInfo()
