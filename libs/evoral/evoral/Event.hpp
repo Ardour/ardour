@@ -170,6 +170,9 @@ struct Event {
 	inline const uint8_t* buffer()             const { return _buf; }
 	inline uint8_t*&      buffer()                   { return _buf; }
 
+	void set_time (Time);
+	void set_original_time (Time);
+
         inline event_id_t id() const { return _id; }
         inline void set_id (event_id_t n) { _id = n; }
 

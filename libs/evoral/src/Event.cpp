@@ -90,6 +90,20 @@ Event<Timestamp>::~Event() {
 	}
 }
 
+template<typename Timestamp>
+void
+Event<Timestamp>::set_time (Timestamp t)
+{
+	_nominal_time = t;
+}
+
+template<typename Timestamp>
+void
+Event<Timestamp>::set_original_time (Timestamp t)
+{
+	_original_time = t;
+}
+	
 #endif // EVORAL_EVENT_ALLOC
 
 template class Event<Evoral::MusicalTime>;

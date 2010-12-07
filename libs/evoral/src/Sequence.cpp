@@ -1076,6 +1076,26 @@ Sequence<Time>::control_list_marked_dirty ()
 	set_edited (true);
 }
 
+template<typename Time>
+void
+Sequence<Time>::insert_silence_at_start (Time t)
+{
+	for (typename Notes::iterator i = _notes.begin(); i != _notes.end(); ++i) {
+		(*i)->set_time ((*i)->time() + t);
+	}
+
+	for (typename SysExes::iterator i = _sysexes.begin (); i != _sysexes.end(); ++i) {
+		(*i)->set_time ((*i)->time() + t);
+		(*i)->set_original_time ((*i)->original_time() + t);
+	}
+
+	for (typename Controls::iterator i = _controls.begin(); i != _controls.end(); ++i) {
+		i->second->list()->shift (0, t);
+	}
+
+	_edited = true;
+}
+
 template class Sequence<Evoral::MusicalTime>;
 
 } // namespace Evoral

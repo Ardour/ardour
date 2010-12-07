@@ -732,13 +732,7 @@ Region::trim_start (framepos_t new_position, void */*src*/)
 		return;
 	}
 	framepos_t new_start;
-	frameoffset_t start_shift;
-
-	if (new_position > _position) {
-		start_shift = new_position - _position;
-	} else {
-		start_shift = -(_position - new_position);
-	}
+	frameoffset_t const start_shift = new_position - _position;
 
 	if (start_shift > 0) {
 
@@ -759,6 +753,7 @@ Region::trim_start (framepos_t new_position, void */*src*/)
 		} else {
 			new_start = _start + start_shift;
 		}
+		
 	} else {
 		return;
 	}
@@ -813,9 +808,10 @@ Region::modify_front (framepos_t new_position, bool reset_fade, void *src)
 		framecnt_t newlen = 0;
 		framepos_t delta = 0;
 
-		/* can't trim it back passed where source position zero is located */
-		
-		new_position = max (new_position, source_zero);
+		if (!can_trim_start_before_source_start ()) {
+			/* can't trim it back past where source position zero is located */
+			new_position = max (new_position, source_zero);
+		}
 		
 		if (new_position > _position) {
 			newlen = _length - (new_position - _position);
@@ -887,18 +883,13 @@ Region::trim_to (framepos_t position, framecnt_t length, void *src)
 void
 Region::trim_to_internal (framepos_t position, framecnt_t length, void */*src*/)
 {
-	frameoffset_t start_shift;
 	framepos_t new_start;
 
 	if (locked()) {
 		return;
 	}
 
-	if (position > _position) {
-		start_shift = position - _position;
-	} else {
-		start_shift = -(_position - position);
-	}
+	frameoffset_t const start_shift = position - _position;
 
 	if (start_shift > 0) {
 
@@ -910,7 +901,7 @@ Region::trim_to_internal (framepos_t position, framecnt_t length, void */*src*/)
 
 	} else if (start_shift < 0) {
 
-		if (_start < -start_shift) {
+		if (_start < -start_shift && !can_trim_start_before_source_start ()) {
 			new_start = 0;
 		} else {
 			new_start = _start + start_shift;
@@ -1609,7 +1600,7 @@ Region::can_trim () const
 
         ct = CanTrim (ct | FrontTrimLater | EndTrimEarlier);
 
-        if (start() != 0) {
+        if (start() != 0 || can_trim_start_before_source_start ()) {
                 ct = CanTrim (ct | FrontTrimEarlier);
         }
 

@@ -3246,4 +3246,9 @@ MidiRegionView::trim_front_ending ()
 	_note_group->reparent (*group);
 	delete _temporary_note_group;
 	_temporary_note_group = 0;
+
+	if (_region->start() < 0) {
+		/* Trim drag made start time -ve; fix this */
+		midi_region()->fix_negative_start ();
+	}
 }
