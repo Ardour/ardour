@@ -577,6 +577,11 @@ Region::update_position_after_tempo_map_change ()
 	TempoMap& map (_session.tempo_map());
 	framepos_t pos = map.frame_time (_bbt_time);
 	set_position_internal (pos, false);
+
+	/* do this even if the position is the same. this helps out
+	   a GUI that has moved its representation already.
+	*/
+	send_change (Properties::position);
 }
 
 void
@@ -587,6 +592,12 @@ Region::set_position (framepos_t pos, void* /*src*/)
 	}
 
 	set_position_internal (pos, true);
+
+	/* do this even if the position is the same. this helps out
+	   a GUI that has moved its representation already.
+	*/
+	send_change (Properties::position);
+	
 }
 
 void
@@ -613,11 +624,6 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 
 		//invalidate_transients ();
 	}
-
-	/* do this even if the position is the same. this helps out
-	   a GUI that has moved its representation already.
-	*/
-	send_change (Properties::position);
 }
 
 void
@@ -628,8 +634,7 @@ Region::set_position_on_top (framepos_t pos, void* /*src*/)
 	}
 
 	if (_position != pos) {
-		_last_position = _position;
-		_position = pos;
+		set_position_internal (pos, true);
 	}
 
 	boost::shared_ptr<Playlist> pl (playlist());
@@ -664,21 +669,23 @@ Region::nudge_position (frameoffset_t n, void* /*src*/)
 		return;
 	}
 
-	_last_position = _position;
+	framepos_t new_position = _position;
 
 	if (n > 0) {
 		if (_position > max_framepos - n) {
-			_position = max_framepos;
+			new_position = max_framepos;
 		} else {
-			_position += n;
+			new_position += n;
 		}
 	} else {
 		if (_position < -n) {
-			_position = 0;
+			new_position = 0;
 		} else {
-			_position += n;
+			new_position += n;
 		}
 	}
+
+	set_position_internal (new_position, true);
 
 	send_change (Properties::position);
 }
@@ -934,7 +941,7 @@ Region::trim_to_internal (framepos_t position, framecnt_t length, void */*src*/)
 		if (!property_changes_suspended()) {
 			_last_position = _position;
 		}
-		_position = position;
+		set_position_internal (position, true);
 		what_changed.add (Properties::position);
 	}
 
