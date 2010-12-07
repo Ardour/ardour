@@ -792,30 +792,35 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 	for (vector<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {                
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*r);
                 
-		if (use_timestamp && ar) {
+		if (use_timestamp) {
+                        if (ar) {
                         
-			/* get timestamp for this region */
-
-			const boost::shared_ptr<Source> s (ar->sources().front());
-			const boost::shared_ptr<AudioSource> as = boost::dynamic_pointer_cast<AudioSource> (s);
-                        
-			assert (as);
-                        
-			if (as->natural_position() != 0) {
-				pos = as->natural_position();
-			} else if (target_tracks == 1) {
-				/* hmm, no timestamp available, put it after the previous region
-				 */
-				if (n == 0) {
-					pos = get_preferred_edit_position ();
-				} else {
-					pos += rlen;
-				}
-			} else {
-				pos = get_preferred_edit_position ();
-			}
+                                /* get timestamp for this region */
                                 
-		}
+                                const boost::shared_ptr<Source> s (ar->sources().front());
+                                const boost::shared_ptr<AudioSource> as = boost::dynamic_pointer_cast<AudioSource> (s);
+                                
+                                assert (as);
+                                
+                                if (as->natural_position() != 0) {
+                                        pos = as->natural_position();
+                                } else if (target_tracks == 1) {
+                                        /* hmm, no timestamp available, put it after the previous region
+                                         */
+                                        if (n == 0) {
+                                                pos = get_preferred_edit_position ();
+                                        } else {
+                                                pos += rlen;
+                                        }
+                                } else {
+                                        pos = get_preferred_edit_position ();
+                                }
+                        } else {
+                                /* should really get first position in MIDI file, but for now, use edit position*/
+                                pos = get_preferred_edit_position ();
+                        }
+                }
+                        
 
 		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track);
 
