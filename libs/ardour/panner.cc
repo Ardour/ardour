@@ -1448,6 +1448,8 @@ Panner::set_stereo_pan (double direction_as_lr_fract, double width)
         int l_index = 0;
         int r_index = 1;
 
+        cerr << "New stereo pan pos = " << direction_as_lr_fract << " w = " << width;
+
         assert (_streampanners.size() > 1);
 
         if (width < 0.0) {
@@ -1472,6 +1474,8 @@ Panner::set_stereo_pan (double direction_as_lr_fract, double width)
 
         l_pos = max (min (l_pos, 180.0), 0.0);
         r_pos = max (min (r_pos, 180.0), 0.0);
+
+        cerr << " left = " << l_pos << " right = " << r_pos << " moving ? " << move_left << '/' << move_right << endl;
 
         if (move_left && move_right) {
                 _streampanners[l_index]->set_position (AngularVector (l_pos, 0.0));
