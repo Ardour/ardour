@@ -102,6 +102,7 @@ StereoPanner::set_tooltip ()
 void
 StereoPanner::value_change ()
 {
+        cerr << this << " Value change, pos = " << position_control->get_value() << " w = " << width_control->get_value() << endl;
         set_tooltip ();
         queue_draw ();
 }
@@ -146,11 +147,11 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         /* compute the centers of the L/R boxes based on the current stereo width */
         
         int usable_width = width - lr_box_size;
-        int center = lr_box_size/2 + (int) floor (usable_width * pos);
-        int left = center - (int) floor (fswidth * usable_width / 2.0); // center of leftmost box
-        int right = center + (int) floor (fswidth * usable_width / 2.0); // center of rightmost box
+        double center = (lr_box_size/2.0) + (usable_width * pos);
+        int left = lrint (center - (fswidth * usable_width / 2.0)); // center of leftmost box
+        int right = lrint (center +  (fswidth * usable_width / 2.0)); // center of rightmost box
 
-        // cerr << "pos " << pos << " width = " << width << " swidth = " << swidth << " center @ " << center << " L = " << left << " R = " << right << endl;
+        cerr << this << " pos " << pos << " width = " << width << " swidth = " << swidth << " center @ " << center << " L = " << left << " R = " << right << endl;
 
         /* compute & draw the line through the box */
         
@@ -218,7 +219,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         /* draw the central box */
 
         cairo_set_line_width (cr, 1);
-	cairo_rectangle (cr, center - (pos_box_size/2), top_step, pos_box_size, pos_box_size);
+	cairo_rectangle (cr, lrint (center - (pos_box_size/2.0)), top_step, pos_box_size, pos_box_size);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
         cairo_stroke_preserve (cr);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
@@ -337,16 +338,20 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
                                 /* still left */
                                 if (ev->x > last_drag_x) {
                                         /* motion to left */
+                                        cerr << "was left, still left, move left\n";
                                         drag_dir = -inc;
                                 } else {
+                                        cerr << "was left, still left, move right\n";
                                         drag_dir = inc;
                                 }
                         } else {
                                 /* now right */
                                 if (ev->x > last_drag_x) {
                                         /* motion to left */
+                                        cerr << "was left, gone right, move left\n";
                                         drag_dir = inc;
                                 } else {
+                                        cerr << "was left, gone right, move right\n";
                                         drag_dir = -inc;
                                 }
                         }
@@ -359,16 +364,20 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
                                 /* still right */
                                 if (ev->x < last_drag_x) {
                                         /* motion to right */
+                                        cerr << "was right, still right, move right\n";
                                         drag_dir = -inc;
                                 } else {
+                                        cerr << "was right, still right, move left\n";
                                         drag_dir = inc;
                                 }
                         } else {
                                 /* now left */
                                 if (ev->x < last_drag_x) {
                                         /* motion to right */
+                                        cerr << "was right, gone left, move right\n";
                                         drag_dir = inc;
                                 } else {
+                                        cerr << "was right, gone left, move left\n";
                                         drag_dir = -inc;
                                 }
                         }
@@ -378,6 +387,7 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
                 old_wv = wv;
                 wv = wv + (drag_dir * delta);
                 
+                cerr << this << " set width to " << wv << endl;
                 width_control->set_value (wv);
 
         } else {
@@ -390,6 +400,7 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
                         pv = pv - delta;
                 }
 
+                cerr << this << " set position to " << pv << endl;
                 position_control->set_value (pv);
         }
 
