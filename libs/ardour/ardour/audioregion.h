@@ -176,7 +176,7 @@ class AudioRegion : public Region
 	int update_transient (framepos_t old_position, framepos_t new_position);
 	int adjust_transients (framepos_t delta);
 
-	std::list<std::pair<frameoffset_t, framecnt_t> > find_silence (Sample, framecnt_t, InterThreadInfo&) const;
+	AudioIntervalResult find_silence (Sample, framecnt_t, InterThreadInfo&) const;
 
   private:
 	friend class RegionFactory;

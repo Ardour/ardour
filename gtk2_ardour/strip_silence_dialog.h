@@ -26,15 +26,16 @@
 #include "progress_reporter.h"
 
 namespace ARDOUR {
-	class AudioRegion;
         class Session;
 }
+
+class RegionView;
 
 /// Dialog box to set options for the `strip silence' filter
 class StripSilenceDialog : public ArdourDialog, public ProgressReporter
 {
 public:
-        StripSilenceDialog (ARDOUR::Session*, std::list<boost::shared_ptr<ARDOUR::AudioRegion> > const &);
+        StripSilenceDialog (ARDOUR::Session*, std::list<RegionView*> const &);
 	~StripSilenceDialog ();
 
 	double threshold () const {
@@ -45,8 +46,6 @@ public:
         ARDOUR::framecnt_t fade_length () const;
 
 private:
-        typedef std::list<std::pair<ARDOUR::frameoffset_t,ARDOUR::framecnt_t> > SilenceResult;
-	
 	void create_waves ();
 	void peaks_ready ();
 	void canvas_allocation (Gtk::Allocation &);
@@ -54,7 +53,7 @@ private:
         void resize_silence_rects ();
 	void update ();
 	void update_threshold_line ();
-	void update_stats (SilenceResult const &);
+	void update_stats (ARDOUR::AudioIntervalResult const &);
 	void threshold_changed ();
 	void update_progress_gui (float);
 	void restart_thread ();
@@ -67,22 +66,14 @@ private:
 	Gtk::Label      _shortest_audible_label;
 	Gtk::ProgressBar _progress_bar;
 
-	struct Wave {
-		boost::shared_ptr<ARDOUR::AudioRegion> region;
-		ArdourCanvas::WaveView* view;
-		std::list<ArdourCanvas::SimpleRect*> silence_rects;
-		ArdourCanvas::SimpleLine* threshold_line;
-		double samples_per_unit;
-		SilenceResult silence;
-		
-		Wave (ArdourCanvas::Group *, boost::shared_ptr<ARDOUR::AudioRegion>);
-		~Wave ();
-	};
+        struct ViewInterval {
+            RegionView* view;
+            ARDOUR::AudioIntervalResult intervals;
 
-	ArdourCanvas::Canvas* _canvas;
-	std::list<Wave*> _waves;
-	int _wave_width;
-	int _wave_height;
+            ViewInterval (RegionView* rv) : view (rv) {}
+        };
+
+        std::list<ViewInterval> views;
 
         ARDOUR::framecnt_t max_audible;
         ARDOUR::framecnt_t min_audible;

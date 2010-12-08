@@ -32,6 +32,7 @@
 #include "gui_thread.h"
 #include "strip_silence_dialog.h"
 #include "canvas_impl.h"
+#include "region_view.h"
 #include "simpleline.h"
 #include "waveview.h"
 #include "simplerect.h"
@@ -44,17 +45,19 @@ using namespace std;
 using namespace ArdourCanvas;
 
 /** Construct Strip silence dialog box */
-StripSilenceDialog::StripSilenceDialog (Session* s, list<boost::shared_ptr<ARDOUR::AudioRegion> > const & regions)
+StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	: ArdourDialog (_("Strip Silence"))
 	, ProgressReporter ()
         , _minimum_length (X_("silence duration"), true, "SilenceDurationClock", true, false, true, false)
         , _fade_length (X_("silence duration"), true, "SilenceDurationClock", true, false, true, false)
-        , _wave_width (640)
-        , _wave_height (64)
 	, _peaks_ready_connection (0)
 	, _destroying (false)
 {
         set_session (s);
+
+        for (list<RegionView*>::const_iterator r = v.begin(); r != v.end(); ++r) {
+                views.push_back (ViewInterval (*r));
+        }
 
 	Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox);
         
@@ -121,17 +124,6 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<boost::shared_ptr<ARDOU
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_OK);
 
-	_canvas = new CanvasAA ();
-	_canvas->signal_size_allocate().connect (sigc::mem_fun (*this, &StripSilenceDialog::canvas_allocation));
-	_canvas->set_size_request (_wave_width, _wave_height * regions.size());
-
-	for (list<boost::shared_ptr<ARDOUR::AudioRegion> >::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		Wave* w = new Wave (_canvas->root(), *i);
-		_waves.push_back (w);
-	}
-
-	get_vbox()->pack_start (*_canvas, true, true);
-
 	get_vbox()->pack_start (_progress_bar, true, true);
 
 	show_all ();
@@ -139,7 +131,6 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<boost::shared_ptr<ARDOU
         _threshold.get_adjustment()->signal_value_changed().connect (sigc::mem_fun (*this, &StripSilenceDialog::threshold_changed));
         _minimum_length.ValueChanged.connect (sigc::mem_fun (*this, &StripSilenceDialog::restart_thread));
 
-	create_waves ();
 	update_silence_rects ();
 	update_threshold_line ();
 
@@ -164,110 +155,17 @@ StripSilenceDialog::~StripSilenceDialog ()
 	_run_cond.signal ();
 	pthread_join (_thread, 0);
 	
-	for (list<Wave*>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
-		delete *i;
-	}
-
-	_waves.clear ();
-	
-	delete _peaks_ready_connection;
-	delete _canvas;
-}
-
-void
-StripSilenceDialog::create_waves ()
-{
-	int n = 0;
-
-	delete _peaks_ready_connection;
-	_peaks_ready_connection = 0;
-
-	for (list<Wave*>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
-		if ((*i)->region->audio_source(0)->peaks_ready (boost::bind (&StripSilenceDialog::peaks_ready, this), &_peaks_ready_connection, gui_context())) {
-			(*i)->view = new WaveView (*(_canvas->root()));
-			(*i)->view->property_data_src() = static_cast<gpointer>((*i)->region.get());
-			(*i)->view->property_cache() = WaveView::create_cache ();
-			(*i)->view->property_cache_updater() = true;
-			(*i)->view->property_channel() = 0;
-			(*i)->view->property_length_function() = (void *) region_length_from_c;
-			(*i)->view->property_sourcefile_length_function() = (void *) sourcefile_length_from_c;
-			(*i)->view->property_peak_function() = (void *) region_read_peaks_from_c;
-			(*i)->view->property_x() = 0;
-			(*i)->view->property_y() = n * _wave_height;
-			(*i)->view->property_height() = _wave_height;
-			(*i)->view->property_samples_per_unit() = (*i)->samples_per_unit;
-			(*i)->view->property_region_start() = (*i)->region->start();
-			(*i)->view->property_wave_color() = ARDOUR_UI::config()->canvasvar_WaveForm.get();
-			(*i)->view->property_fill_color() = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
-			(*i)->view->property_logscaled() = true;
-			(*i)->view->property_rectified() = true;
-		}
-
-		++n;
-	}
-}
-
-void
-StripSilenceDialog::peaks_ready ()
-{
-	delete _peaks_ready_connection;
-	_peaks_ready_connection = 0;
-	create_waves ();
-}
-
-void
-StripSilenceDialog::canvas_allocation (Gtk::Allocation& alloc)
-{
-        int n = 0;
-
-	_canvas->set_scroll_region (0.0, 0.0, alloc.get_width(), alloc.get_height());
-	_wave_width = alloc.get_width ();
-        _wave_height = alloc.get_height ();
-
-	for (list<Wave*>::iterator i = _waves.begin(); i != _waves.end(); ++i, ++n) {
-		(*i)->samples_per_unit = ((double) (*i)->region->length() / _wave_width);
-
-                if ((*i)->view) {
-                        (*i)->view->property_y() = n * _wave_height;
-                        (*i)->view->property_samples_per_unit() = (*i)->samples_per_unit;
-                        (*i)->view->property_height() = _wave_height;
-                }
-	}
-
-        resize_silence_rects ();
-	update_threshold_line ();
-}
-
-void
-StripSilenceDialog::resize_silence_rects ()
-{
-	int n = 0;
-
-	/* Lock so that we don't contend with the detection thread for access to the silence regions */
-	Glib::Mutex::Lock lm (_lock);
-	
-	for (list<Wave*>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
-
-                list<pair<frameoffset_t, framecnt_t> >::const_iterator j;
-                list<SimpleRect*>::iterator r;
-
-		for (j = (*i)->silence.begin(), r = (*i)->silence_rects.begin(); 
-                     j != (*i)->silence.end() && r != (*i)->silence_rects.end(); ++j, ++r) {
-                        (*r)->property_x1() = j->first / (*i)->samples_per_unit;
-                        (*r)->property_x2() = j->second / (*i)->samples_per_unit;
-                        (*r)->property_y1() = n * _wave_height;
-                        (*r)->property_y2() = (n + 1) * _wave_height;
-                        (*r)->property_outline_pixels() = 0;
-                        (*r)->property_fill_color_rgba() = RGBA_TO_UINT (128, 128, 128, 128);
-                }
-
-                ++n;
+        for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
+                (*v).view->drop_silent_frames ();
         }
+	
+	delete _peaks_ready_connection;
 }
 
 void
 StripSilenceDialog::update_threshold_line ()
 {
+#if 0
 	int n = 0;
 
 	/* Don't need to lock here as we're not reading the _waves silence details */
@@ -283,51 +181,36 @@ StripSilenceDialog::update_threshold_line ()
 	}
 
 	++n;
+#endif
 }
 
 void
 StripSilenceDialog::update ()
 {
-	update_silence_rects ();
+        cerr << "UPDATE!\n";
 	update_threshold_line ();
 	/* XXX: first one only?! */
-	update_stats (_waves.front()->silence);
+	// update_stats (_waves.front()->silence);
+
+	update_silence_rects ();
+        cerr << "UPDATE done\n";
 }
 
 void
 StripSilenceDialog::update_silence_rects ()
 {
-	int n = 0;
         uint32_t max_segments = 0;
-        uint32_t sc;
 
 	/* Lock so that we don't contend with the detection thread for access to the silence regions */
 	Glib::Mutex::Lock lm (_lock);
-
-	for (list<Wave*>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
-		for (list<SimpleRect*>::iterator j = (*i)->silence_rects.begin(); j != (*i)->silence_rects.end(); ++j) {
-			delete *j;
-		}
-
-                (*i)->silence_rects.clear ();                
-                sc = 0;
-
-		for (list<pair<frameoffset_t, framecnt_t> >::const_iterator j = (*i)->silence.begin(); j != (*i)->silence.end(); ++j) {
-
-			SimpleRect* r = new SimpleRect (*(_canvas->root()));
-			r->property_x1() = j->first / (*i)->samples_per_unit;
-			r->property_x2() = j->second / (*i)->samples_per_unit;
-			r->property_y1() = n * _wave_height;
-			r->property_y2() = (n + 1) * _wave_height;
-			r->property_outline_pixels() = 0;
-			r->property_fill_color_rgba() = RGBA_TO_UINT (128, 128, 128, 128);
-			(*i)->silence_rects.push_back (r);
-                        sc++;
-		}
-
-                max_segments = max (max_segments, sc);
-		++n;
+        
+        for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
+                (*v).view->set_silent_frames ((*v).intervals);
+                max_segments = max (max_segments, (uint32_t) (*v).intervals.size());
 	}
+
+#if 0
+        cerr << "minaudible in update " << min_audible << " minsilence = " << min_silence << endl;
 
         if (min_audible > 0) {
                 float ms, ma;
@@ -337,14 +220,22 @@ StripSilenceDialog::update_silence_rects ()
                 ma = (float) min_audible/_session->frame_rate();
                 ms = (float) min_silence/_session->frame_rate();
 
-                if (min_audible < _session->frame_rate()) {
-                        aunits = _("ms");
+                /* ma and ms are now in seconds */
+
+                if (ma >= 60.0) {
+                        aunits = _("minutes");
+                        //ma /= 60.0;
+                } else if (min_audible < _session->frame_rate()) {
+                        aunits = _("msecs");
                         ma *= 1000.0;
                 } else {
-                        aunits = _("s");
+                        aunits = _("seconds");
                 }
 
-                if (min_silence < _session->frame_rate()) {
+                if (ms >= 60.0) {
+                        sunits = _("minutes");
+                        //ms /= 60.0;
+                } else if (min_silence < _session->frame_rate()) {
                         sunits = _("ms");
                         ms *= 1000.0;
                 } else {
@@ -364,6 +255,7 @@ StripSilenceDialog::update_silence_rects ()
 		_shortest_silence_label.set_text ("");
 		_shortest_audible_label.set_text ("");
         }
+#endif
 }
 
 void *
@@ -383,8 +275,13 @@ StripSilenceDialog::detection_thread_work ()
 	_lock.lock ();
 	
 	while (1) {
-		for (list<Wave*>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
-			(*i)->silence = (*i)->region->find_silence (dB_to_coefficient (threshold ()), minimum_length (), _interthread_info);
+		for (list<ViewInterval>::iterator i = views.begin(); i != views.end(); ++i) {
+                        boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> ((*i).view->region());
+
+                        if (ar) {
+                                (*i).intervals = ar->find_silence (dB_to_coefficient (threshold ()), minimum_length (), _interthread_info);
+                        }
+
 			if (_interthread_info.cancel) {
 				break;
 			}
@@ -441,7 +338,7 @@ StripSilenceDialog::threshold_changed ()
 }
 
 void
-StripSilenceDialog::update_stats (const SilenceResult& res)
+StripSilenceDialog::update_stats (const AudioIntervalResult& res)
 {
         if (res.empty()) {
                 return;
@@ -452,7 +349,9 @@ StripSilenceDialog::update_stats (const SilenceResult& res)
         max_audible = 0;
         min_audible = max_framepos;
         
-        SilenceResult::const_iterator cur;
+        AudioIntervalResult::const_iterator cur;
+        bool saw_silence = false;
+        bool saw_audible = false;
 
         cur = res.begin();
 
@@ -477,10 +376,14 @@ StripSilenceDialog::update_stats (const SilenceResult& res)
                 interval_duration = end - start;
 
                 if (in_silence) {
+                        saw_silence = true;
+                        cerr << "Silent duration: " << interval_duration << endl;
 
                         max_silence = max (max_silence, interval_duration);
                         min_silence = min (min_silence, interval_duration);
                 } else {
+                        saw_audible = true;
+                        cerr << "Audible duration: " << interval_duration << endl;
 
                         max_audible = max (max_audible, interval_duration);
                         min_audible = min (min_audible, interval_duration);
@@ -491,36 +394,32 @@ StripSilenceDialog::update_stats (const SilenceResult& res)
                 end = cur->first;
                 in_silence = !in_silence;
         }
+
+        if (!saw_silence) {
+                min_silence = 0;
+                max_silence = 0;
+        }
+
+        if (!saw_audible) {
+                min_audible = 0;
+                max_audible = 0;
+        }
+
+        cerr << "max aud: " << max_audible << " min aud: " << min_audible << " max sil: " << max_silence << " min sil: " << min_silence << endl;
 }
 
 framecnt_t
 StripSilenceDialog::minimum_length () const
 {
-        return _minimum_length.current_duration (_waves.front()->region->position());
+        return _minimum_length.current_duration (views.front().view->region()->position());
 }
 
 framecnt_t
 StripSilenceDialog::fade_length () const
 {
-        return _minimum_length.current_duration (_waves.front()->region->position());
+        return _minimum_length.current_duration (views.front().view->region()->position());
 }
 		
-StripSilenceDialog::Wave::Wave (Group* g, boost::shared_ptr<AudioRegion> r)
-	: region (r), view (0), samples_per_unit (1)
-{
-	threshold_line = new ArdourCanvas::SimpleLine (*g);
-	threshold_line->property_color_rgba() = RGBA_TO_UINT (0, 0, 0, 128);
-}
-
-StripSilenceDialog::Wave::~Wave ()
-{
-	delete view;
-	delete threshold_line;
-	for (list<SimpleRect*>::iterator i = silence_rects.begin(); i != silence_rects.end(); ++i) {
-		delete *i;
-	}
-}
-
 void
 StripSilenceDialog::update_progress_gui (float p)
 {

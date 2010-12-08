@@ -34,6 +34,7 @@
 
 #include "ardour_ui.h"
 #include "global_signals.h"
+#include "canvas-noevent-text.h"
 #include "streamview.h"
 #include "region_view.h"
 #include "automation_region_view.h"
@@ -45,6 +46,7 @@
 #include "region_editor.h"
 #include "ghostregion.h"
 #include "route_time_axis.h"
+#include "ui_config.h"
 #include "utils.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
@@ -55,6 +57,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
+using namespace Gtk;
 using namespace ArdourCanvas;
 
 static const int32_t sync_mark_width = 9;
@@ -80,6 +83,7 @@ RegionView::RegionView (ArdourCanvas::Group*              parent,
 	, _pixel_width(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
+        , _silence_text (0)
 	, _time_converter(r->session().tempo_map(), r->position())
 {
 	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), ui_bind (&RegionView::remove_ghost, this, _1), gui_context());
@@ -88,6 +92,7 @@ RegionView::RegionView (ArdourCanvas::Group*              parent,
 RegionView::RegionView (const RegionView& other)
 	: sigc::trackable(other)
 	, TimeAxisViewItem (other)
+        , _silence_text (0)
 	, _time_converter(other._time_converter)
 {
 	/* derived concrete type will call init () */
@@ -103,6 +108,7 @@ RegionView::RegionView (const RegionView& other)
 RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other_region)
 	: sigc::trackable(other)
 	, TimeAxisViewItem (other)
+        , _silence_text (0)
 	, _time_converter(other._time_converter)
 {
 	/* this is a pseudo-copy constructor used when dragging regions
@@ -137,6 +143,7 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 	, _pixel_width(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
+        , _silence_text (0)
 	, _time_converter(r->session().tempo_map(), r->position())
 {
 }
@@ -208,7 +215,100 @@ RegionView::~RegionView ()
 		delete *i;
 	}
 
+        drop_silent_frames ();
+
 	delete editor;
+}
+
+void
+RegionView::set_silent_frames (const AudioIntervalResult& silences)
+{
+        framecnt_t shortest = max_framecnt;
+
+	/* remove old silent frames */
+        drop_silent_frames ();
+
+        if (!silences.empty()) {
+                uint32_t const color = ARDOUR_UI::config()->canvasvar_Silence.get();
+                
+                for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
+                        
+                        
+                        ArdourCanvas::SimpleRect* cr = new ArdourCanvas::SimpleRect (*group);
+                        _silent_frames.push_back (cr);
+                        cr->property_x1() = trackview.editor().frame_to_pixel ((*i).first);
+                        cr->property_y1() = 1;
+                        cr->property_y2() = _height - 2;
+                        cr->property_outline_pixels() = 0;
+                        cr->property_fill_color_rgba () = color;
+                        cr->property_x2() = trackview.editor().frame_to_pixel ((*i).first + (*i).second);
+
+                        if ((*i).second < shortest) {
+                                shortest= (*i).second;
+                        }
+                }
+                
+                _silence_text = new ArdourCanvas::NoEventText (*group);
+                _silence_text->property_font_desc() = *(get_font_for_style (N_("VerboseCanvasCusor")));
+                _silence_text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SilenceText.get();                                                
+                _silence_text->property_anchor() = ANCHOR_NW;
+
+                /* both positions are relative to the RV start */
+                
+                _silence_text->property_x() = trackview.editor().frame_to_pixel (silences.front().first) + 10.0;
+                _silence_text->property_y() = 20.0;
+
+                double ms;
+                char const * sunits;
+                
+                ms = (float) shortest/_region->session().frame_rate();
+                
+                /* ms are now in seconds */
+
+                if (ms >= 60.0) {
+                        sunits = _("minutes");
+                        ms /= 60.0;
+                } else if (ms < 1.0) {
+                        sunits = _("msecs");
+                        ms *= 1000.0;
+                } else {
+                        sunits = _("secs");
+                }
+
+
+                
+                _silence_text->property_text() = string_compose (_("%1 silent segments, shortest = %2 %3"),
+                                                                 silences.size(), ms, sunits).c_str();
+        }
+}
+
+void
+RegionView::hide_silent_frames ()
+{
+	for (list<ArdourCanvas::SimpleRect*>::iterator i = _silent_frames.begin (); i != _silent_frames.end (); ++i) {
+                (*i)->hide ();
+	}
+        _silence_text->hide();
+}
+
+void
+RegionView::drop_silent_frames ()
+{
+	for (list<ArdourCanvas::SimpleRect*>::iterator i = _silent_frames.begin (); i != _silent_frames.end (); ++i) {
+		delete *i;
+	}
+        _silent_frames.clear ();
+        delete _silence_text;
+        _silence_text = 0;
+}
+
+void
+RegionView::show_silent_frames ()
+{
+	for (list<ArdourCanvas::SimpleRect*>::iterator i = _silent_frames.begin (); i != _silent_frames.end (); ++i) {
+                (*i)->show ();
+	}
+        _silence_text->show ();
 }
 
 gint
@@ -607,6 +707,11 @@ RegionView::set_height (double h)
 	for (list<ArdourCanvas::SimpleRect*>::iterator i = _coverage_frames.begin(); i != _coverage_frames.end(); ++i) {
 		(*i)->property_y2() = h + 1;
 	}
+
+	for (list<ArdourCanvas::SimpleRect*>::iterator i = _silent_frames.begin(); i != _silent_frames.end(); ++i) {
+		(*i)->property_y2() = h + 1;
+	}
+
 }
 
 /** Remove old coverage frames and make new ones, if we're in a LayerDisplay mode

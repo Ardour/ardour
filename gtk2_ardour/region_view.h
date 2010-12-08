@@ -38,6 +38,10 @@ class GhostRegion;
 class AutomationTimeAxisView;
 class AutomationRegionView;
 
+namespace Gnome { namespace Canvas {
+	class NoEventText;
+} }
+
 class RegionView : public TimeAxisViewItem
 {
   public:
@@ -108,6 +112,11 @@ class RegionView : public TimeAxisViewItem
 	void trim_contents (framepos_t, bool, bool);
 	virtual void thaw_after_trim ();
 
+        void set_silent_frames (const ARDOUR::AudioIntervalResult&);
+        void drop_silent_frames ();
+        void hide_silent_frames ();
+        void show_silent_frames ();
+
   protected:
 
 	/** Allows derived types to specify their visibility requirements
@@ -164,6 +173,15 @@ class RegionView : public TimeAxisViewItem
 	*/
 	std::list<ArdourCanvas::SimpleRect*> _coverage_frames;
 
+	/** a list of rectangles which are used in stacked display mode to colour
+	    different bits of regions according to whether or not they are the one
+	    that will be played at any given time.
+	*/
+	std::list<ArdourCanvas::SimpleRect*> _silent_frames;
+        /** a text item to display strip silence statistics
+         */
+        ArdourCanvas::NoEventText* _silence_text;
+        
 	ARDOUR::BeatsFramesConverter _time_converter;
 };
 

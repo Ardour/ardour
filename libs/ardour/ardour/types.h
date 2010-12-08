@@ -72,6 +72,9 @@ namespace ARDOUR {
         static const framepos_t max_framepos = INT64_MAX;
         static const framecnt_t max_framecnt = INT64_MAX;
 
+        // a set of (time) intervals: first of pair is the offset within the region, second is the length of the interval
+        typedef std::list<std::pair<frameoffset_t,framecnt_t> > AudioIntervalResult;
+
 	struct IOChange {
 
 		enum Type {

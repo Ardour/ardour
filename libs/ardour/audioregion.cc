@@ -1498,10 +1498,10 @@ in this and future transient-detection operations.\n\
  *
  *  @param threshold Threshold below which signal is considered silence (as a sample value)
  *  @param min_length Minimum length of silent period to be reported.
- *  @return Silent periods; first of pair is the offset within the region, second is the length of the period
+ *  @return Silent intervals
  */
 
-std::list<std::pair<frameoffset_t, framecnt_t> >
+AudioIntervalResult
 AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadInfo& itt) const
 {
 	framecnt_t const block_size = 64 * 1024;
@@ -1510,8 +1510,8 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadI
 
 	framepos_t pos = _start;
 	framepos_t const end = _start + _length - 1;
-
-	std::list<std::pair<frameoffset_t, framecnt_t> > silent_periods;
+        
+	AudioIntervalResult silent_periods;
 
 	bool in_silence = false;
 	frameoffset_t silence_start = 0;
