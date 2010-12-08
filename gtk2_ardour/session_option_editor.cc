@@ -39,23 +39,11 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	
         set_name ("SessionProperties");
 
-	/* SYNC */
-
-	ComboOption<uint32_t>* spf = new ComboOption<uint32_t> (
-		"subframes-per-frame",
-		_("Subframes per frame"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_subframes_per_frame),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_subframes_per_frame)
-		);
-
-	spf->add (80, _("80"));
-	spf->add (100, _("100"));
-
-	add_option (_("Sync"), spf);
+	/* TIMECODE*/
 
 	ComboOption<SyncSource>* ssrc = new ComboOption<SyncSource> (
 		"sync-source",
-		_("External sync source"),
+		_("External timecode source"),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_sync_source),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_sync_source)
 		);
@@ -65,7 +53,10 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	populate_sync_options (s, ssrc);
 	follow_sync_state (string ("external-sync"), s, ssrc);
 
-	add_option (_("Sync"), ssrc);
+	add_option (_("Timecode"), ssrc);
+
+	add_option (_("Timecode"), new OptionEditorHeading (_("Timecode Settings")));
+
 
 	ComboOption<TimecodeFormat>* smf = new ComboOption<TimecodeFormat> (
 		"timecode-format",
@@ -85,9 +76,21 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	smf->add (timecode_5994, _("59.94"));
 	smf->add (timecode_60, _("60"));
 
-	add_option (_("Sync"), smf);
+	add_option (_("Timecode"), smf);
 
-	add_option (_("Sync"), new BoolOption (
+	ComboOption<uint32_t>* spf = new ComboOption<uint32_t> (
+		"subframes-per-frame",
+		_("Subframes per frame"),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_subframes_per_frame),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_subframes_per_frame)
+		);
+
+	spf->add (80, _("80"));
+	spf->add (100, _("100"));
+
+	add_option (_("Timecode"), spf);
+
+	add_option (_("Timecode"), new BoolOption (
 			    "timecode-source-is-synced",
 			    _("Timecode source shares sample clock with audio interface"),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_source_is_synced),
@@ -111,7 +114,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	vpu->add (-4.1667, _("-4.1667"));
 	vpu->add (-4.1667 - 0.1, _("-4.1667 - 0.1%"));
 
-	add_option (_("Sync"), vpu);
+	add_option (_("Timecode"), vpu);
 
 	ClockOption* co = new ClockOption (
 		"timecode-offset",
@@ -122,9 +125,9 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	co->set_session (_session);
 	
-	add_option (_("Sync"), co);
+	add_option (_("Timecode"), co);
 
-	add_option (_("Sync"), new BoolOption (
+	add_option (_("Timecode"), new BoolOption (
 			    "timecode-offset-negative",
 			    _("Timecode Offset Negative"),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_offset_negative),
