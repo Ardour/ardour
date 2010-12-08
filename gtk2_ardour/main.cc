@@ -166,7 +166,6 @@ fixup_bundle_environment ()
 
 	setenv ("ARDOUR_PATH", path.c_str(), 1);
 	setenv ("ARDOUR_CONFIG_PATH", path.c_str(), 1);
-	setenv ("ARDOUR_DATA_PATH", path.c_str(), 1);
 
 	path = dir_path;
 	path += "/../Resources";
@@ -346,7 +345,6 @@ fixup_bundle_environment (int argc, char* argv[])
 
 	setenv ("ARDOUR_PATH", path.c_str(), 1);
 	setenv ("ARDOUR_CONFIG_PATH", path.c_str(), 1);
-	setenv ("ARDOUR_DATA_PATH", path.c_str(), 1);
 
 	path = dir_path;
 	path += "/etc";
