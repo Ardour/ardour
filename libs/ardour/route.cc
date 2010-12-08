@@ -3249,11 +3249,13 @@ Route::shift (framepos_t pos, framecnt_t frames)
 
                 for (uint32_t p = 0; p < npans; ++p) {
                         pc = _main_outs->panner()->pan_control (0, p);
-                        boost::shared_ptr<AutomationList> al = pc->alist();
-                        XMLNode& before = al->get_state ();
-                        al->shift (pos, frames);
-                        XMLNode& after = al->get_state ();
-                        _session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
+                        if (pc) {
+                                boost::shared_ptr<AutomationList> al = pc->alist();
+                                XMLNode& before = al->get_state ();
+                                al->shift (pos, frames);
+                                XMLNode& after = al->get_state ();
+                                _session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
+                        }
                 }
         }
 
