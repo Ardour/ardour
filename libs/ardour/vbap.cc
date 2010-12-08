@@ -56,19 +56,13 @@ string VBAPanner::name = X_("VBAP");
 
 VBAPanner::VBAPanner (Panner& parent, Evoral::Parameter param, Speakers& s)
 	: StreamPanner (parent, param)
-	, _dirty (false)
+	, _dirty (true)
 	, _speakers (VBAPSpeakers::instance (s))
 {
 }
 
 VBAPanner::~VBAPanner ()
 {
-}
-
-void
-VBAPanner::mark_dirty ()
-{
-	_dirty = true;
 }
 
 void
@@ -94,13 +88,16 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 	azi_ele_to_cart (azi,ele, cartdir[0], cartdir[1], cartdir[2]);  
 	big_sm_g = -100000.0;
 
+	gains[0] = gains[1] = gains[2] = 0;
+	speaker_ids[0] = speaker_ids[1] = speaker_ids[2] = 0;
+
 	for (i = 0; i < _speakers.n_tuples(); i++) {
 
 		small_g = 10000000.0;
 
 		for (j = 0; j < _speakers.dimension(); j++) {
 
-			gtmp[j]=0.0;
+			gtmp[j] = 0.0;
 
 			for (k = 0; k < _speakers.dimension(); k++) {
 				gtmp[j] += cartdir[k] * _speakers.matrix(i)[j*_speakers.dimension()+k]; 
@@ -133,9 +130,11 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
         
 	power = sqrt (gains[0]*gains[0] + gains[1]*gains[1] + gains[2]*gains[2]);
 
-	gains[0] /= power; 
-	gains[1] /= power;
-	gains[2] /= power;
+	if (power > 0) {
+		gains[0] /= power; 
+		gains[1] /= power;
+		gains[2] /= power;
+	}
 
 	_dirty = false;
 }
