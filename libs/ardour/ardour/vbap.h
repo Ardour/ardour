@@ -63,7 +63,6 @@ private:
 	void compute_gains (double g[3], int ls[3], int azi, int ele);
 
 	void update ();
-	void mark_dirty ();
 };
 
 } /* namespace */
