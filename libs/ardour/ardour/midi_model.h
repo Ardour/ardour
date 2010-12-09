@@ -141,9 +141,9 @@ public:
 	};
 
 	/* Currently this class only supports changes of sys-ex time, but could be expanded */
-	class SysexDiffCommand : public DiffCommand {
+	class SysExDiffCommand : public DiffCommand {
 	public:
-		SysexDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
+		SysExDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
 		
 		enum Property {
 			Time,
@@ -160,7 +160,7 @@ public:
 	private:
 		struct Change {
 			boost::shared_ptr<Evoral::Event<TimeType> > sysex;
-			SysexDiffCommand::Property property;
+			SysExDiffCommand::Property property;
 			TimeType old_time;
 			TimeType new_time;
 		};
@@ -172,7 +172,8 @@ public:
 		Change unmarshal_change (XMLNode *);
 	};
 
-	MidiModel::NoteDiffCommand* new_note_diff_command (const std::string name="midi edit");
+	MidiModel::NoteDiffCommand* new_note_diff_command (const std::string name = "midi edit");
+	MidiModel::SysExDiffCommand* new_sysex_diff_command (const std::string name = "midi edit");
 	void apply_command (Session& session, Command* cmd);
 	void apply_command_as_subcommand (Session& session, Command* cmd);
 

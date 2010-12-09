@@ -147,6 +147,8 @@ void
 MidiModel::NoteDiffCommand::change (const NotePtr note, Property prop,
 				    uint8_t new_value)
 {
+	assert (note);
+	
         NoteChange change;
         
         switch (prop) {
@@ -191,6 +193,8 @@ void
 MidiModel::NoteDiffCommand::change (const NotePtr note, Property prop,
 				    TimeType new_time)
 {
+	assert (note);
+	
         NoteChange change;
 
         switch (prop) {
@@ -307,8 +311,30 @@ MidiModel::NoteDiffCommand::operator() ()
 
                 for (set<NotePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
                         NoteDiffCommand side_effects (model(), "side effects");
-                        _model->add_note_unlocked (*i, &side_effects);
-                        *this += side_effects;
+			if (_model->add_note_unlocked (*i, &side_effects)) {
+				/* The note was re-added ok */
+				*this += side_effects;
+			} else {
+				/* The note that we removed earlier could not be re-added.  This change record
+				   must say that the note was removed.  It is an un-note.
+				*/
+
+				/* We didn't change it... */
+				for (ChangeList::iterator j = _changes.begin(); j != _changes.end(); ) {
+
+					ChangeList::iterator k = j;
+					++k;
+					
+					if (*i == j->note) {
+						_changes.erase (j);
+					}
+
+					j = k;
+				}
+
+				/* ...in fact, we removed it */
+				_removed_notes.push_back (*i);
+			}
                 }
 
                 if (!side_effect_removals.empty()) {
@@ -1124,14 +1150,13 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
         TimeType note_length = note->length();
 
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 checking overlaps for note %2 @ %3\n", this, (int)note->note(), note->time()));
-
+	
         for (Pitches::const_iterator i = p.lower_bound (search_note); 
              i != p.end() && (*i)->note() == note->note(); ++i) {
 
                 TimeType sb = (*i)->time();
                 TimeType eb = (*i)->end_time();
                 OverlapType overlap = OverlapNone;
-
 
                 if ((sb > sa) && (eb <= ea)) {
                         overlap = OverlapInternal;
@@ -1146,7 +1171,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
                         continue;
                 }
 
-                DEBUG_TRACE (DEBUG::Sequence, string_compose ("\toverlap is %1 for (%2,%3) vs (%4,%5)\n", enum_2_string(overlap), 
+		DEBUG_TRACE (DEBUG::Sequence, string_compose ("\toverlap is %1 for (%2,%3) vs (%4,%5)\n", enum_2_string(overlap), 
                                                               sa, ea, sb, eb));
 
                 if (insert_merge_policy() == InsertMergeReject) {
