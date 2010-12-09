@@ -69,8 +69,6 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 	if (create(path)) {
 		throw failed_constructor ();
 	}
-
-	load_model(true, true); // FIXME
 }
 
 /** Constructor used for existing internal-to-session files. */
@@ -94,8 +92,6 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 	if (open(_path)) {
 		throw failed_constructor ();
 	}
-
-	load_model(true, true); // FIXME
 }
 
 SMFSource::~SMFSource ()
@@ -442,8 +438,8 @@ SMFSource::load_model (bool lock, bool force_reload)
 		return;
 	}
 
-	if (! _model) {
-		_model = boost::shared_ptr<MidiModel>(new MidiModel(this));
+	if (!_model) {
+		_model = boost::shared_ptr<MidiModel> (new MidiModel (shared_from_this ()));
 	} else {
 		_model->clear();
 	}

@@ -51,7 +51,7 @@ class MidiModel : public AutomatableSequence<Evoral::MusicalTime> {
 public:
 	typedef Evoral::MusicalTime TimeType;
 
-	MidiModel(MidiSource* s);
+	MidiModel (boost::shared_ptr<MidiSource>);
 
 	NoteMode note_mode() const { return (percussive() ? Percussive : Sustained); }
 	void set_note_mode(NoteMode mode) { set_percussive(mode == Percussive); };
@@ -140,8 +140,8 @@ public:
 
 	PBD::Signal0<void> ContentsChanged;
 
-	const MidiSource* midi_source() const { return _midi_source; }
-	void set_midi_source (MidiSource *);
+	boost::shared_ptr<const MidiSource> midi_source ();
+	void set_midi_source (boost::shared_ptr<MidiSource>);
 
 	boost::shared_ptr<Evoral::Note<TimeType> > find_note (NotePtr);
 	boost::shared_ptr<Evoral::Note<TimeType> > find_note (gint note_id);
@@ -181,7 +181,7 @@ private:
 	PBD::ScopedConnectionList _midi_source_connections;
 
 	// We cannot use a boost::shared_ptr here to avoid a retain cycle
-	MidiSource* _midi_source;
+	boost::weak_ptr<MidiSource> _midi_source;
         InsertMergePolicy _insert_merge_policy;
 };
 

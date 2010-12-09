@@ -23,6 +23,7 @@
 #include <string>
 #include <time.h>
 #include <glibmm/thread.h>
+#include <boost/enable_shared_from_this.hpp>
 #include "pbd/stateful.h"
 #include "pbd/xml++.h"
 #include "evoral/Sequence.hpp"
@@ -38,7 +39,7 @@ class MidiModel;
 template<typename T> class MidiRingBuffer;
 
 /** Source for MIDI data */
-class MidiSource : virtual public Source
+class MidiSource : virtual public Source, public boost::enable_shared_from_this<MidiSource>
 {
   public:
 	typedef double TimeType;

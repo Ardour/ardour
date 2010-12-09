@@ -178,12 +178,12 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 		}
 
 	} else if (type == DataType::MIDI) {
-		Source* src = new SMFSource (s, node);
+		boost::shared_ptr<SMFSource> src (new SMFSource (s, node));
+		src->load_model (true, true);
 		// boost_debug_shared_ptr_mark_interesting (src, "Source");
-		boost::shared_ptr<Source> ret (src);
-		ret->check_for_analysis_data_on_disk ();
-		SourceCreated (ret);
-		return ret;
+		src->check_for_analysis_data_on_disk ();
+		SourceCreated (src);
+		return src;
 	}
 
 	return boost::shared_ptr<Source>();
@@ -240,7 +240,8 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path,
 
 	} else if (type == DataType::MIDI) {
 		
-		Source* src = new SMFSource (s, path, SMFSource::Flag(0));
+		SMFSource* src = new SMFSource (s, path, SMFSource::Flag(0));
+		src->load_model (true, true);
 		// boost_debug_shared_ptr_mark_interesting (src, "Source");
 		boost::shared_ptr<Source> ret (src);
 
@@ -285,16 +286,16 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 
 	} else if (type == DataType::MIDI) {
                 // XXX writable flags should belong to MidiSource too
-		Source* src = new SMFSource (s, path, SndFileSource::default_writable_flags); 
+		boost::shared_ptr<SMFSource> src (new SMFSource (s, path, SndFileSource::default_writable_flags));
+		src->load_model (true, true);
 		// boost_debug_shared_ptr_mark_interesting (src, "Source");
-		boost::shared_ptr<Source> ret (src);
 
 		// no analysis data - this is a new file
 
 		if (announce) {
-			SourceCreated (ret);
+			SourceCreated (src);
 		}
-		return ret;
+		return src;
 
 	}
 

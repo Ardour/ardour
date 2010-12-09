@@ -38,9 +38,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-MidiModel::MidiModel(MidiSource* s)
+MidiModel::MidiModel (boost::shared_ptr<MidiSource> s)
 	: AutomatableSequence<TimeType>(s->session())
-	, _midi_source (0)
 {
 	set_midi_source (s);
 }
@@ -54,7 +53,10 @@ MidiModel::MidiModel(MidiSource* s)
 MidiModel::DiffCommand*
 MidiModel::new_diff_command(const string name)
 {
-	DiffCommand* cmd = new DiffCommand(_midi_source->model(), name);
+	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
+	assert (ms);
+	
+	DiffCommand* cmd = new DiffCommand (ms->model(), name);
 	return cmd;
 }
 
@@ -696,8 +698,11 @@ MidiModel::write_to (boost::shared_ptr<MidiSource> source)
         const bool old_percussive = percussive();
         set_percussive(false);
 
+	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
+	assert (ms);
+	
         source->drop_model();
-        source->mark_streaming_midi_write_started(note_mode(), _midi_source->timeline_position());
+        source->mark_streaming_midi_write_started (note_mode(), ms->timeline_position ());
 
         for (Evoral::Sequence<TimeType>::const_iterator i = begin(0, true); i != end(); ++i) {
                 source->append_event_unlocked_beats(*i);
@@ -724,14 +729,17 @@ MidiModel::sync_to_source ()
         const bool old_percussive = percussive();
         set_percussive(false);
 
-        _midi_source->mark_streaming_midi_write_started(note_mode(), _midi_source->timeline_position());
+	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
+	assert (ms);
+	
+        ms->mark_streaming_midi_write_started (note_mode(), ms->timeline_position());
 
         for (Evoral::Sequence<TimeType>::const_iterator i = begin(0, true); i != end(); ++i) {
-                _midi_source->append_event_unlocked_beats(*i);
+                ms->append_event_unlocked_beats(*i);
         }
 
         set_percussive (old_percussive);
-        _midi_source->mark_streaming_write_completed ();
+        ms->mark_streaming_write_completed ();
 
         set_edited (false);
         
@@ -755,8 +763,11 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource> source, Evoral::Music
         const bool old_percussive = percussive();
         set_percussive(false);
 
+	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
+	assert (ms);
+	
         source->drop_model();
-        source->mark_streaming_midi_write_started(note_mode(), _midi_source->timeline_position());
+        source->mark_streaming_midi_write_started (note_mode(), ms->timeline_position());
 
         for (Evoral::Sequence<TimeType>::const_iterator i = begin(0, true); i != end(); ++i) {
                 const Evoral::Event<Evoral::MusicalTime>& ev (*i);
@@ -869,8 +880,11 @@ MidiModel::find_note (gint note_id)
 MidiModel::WriteLock
 MidiModel::edit_lock()
 {
-        Glib::Mutex::Lock* source_lock = new Glib::Mutex::Lock(_midi_source->mutex());
-        _midi_source->invalidate(); // Release cached iterator's read lock on model
+	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
+	assert (ms);
+
+        Glib::Mutex::Lock* source_lock = new Glib::Mutex::Lock (ms->mutex());
+        ms->invalidate(); // Release cached iterator's read lock on model
         return WriteLock(new WriteLockImpl(source_lock, _lock, _control_lock));
 }
 
@@ -880,7 +894,10 @@ MidiModel::edit_lock()
 MidiModel::WriteLock
 MidiModel::write_lock()
 {
-        assert(!_midi_source->mutex().trylock());
+	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
+	assert (ms);
+
+        assert (!ms->mutex().trylock ());
         return WriteLock(new WriteLockImpl(NULL, _lock, _control_lock));
 }
 
@@ -1081,25 +1098,30 @@ MidiModel::insert_merge_policy () const
 {
         /* XXX ultimately this should be a per-track or even per-model policy */
 
-        return _midi_source->session().config.get_insert_merge_policy();
+	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
+	assert (ms);
+
+        return ms->session().config.get_insert_merge_policy ();
 }
                         
 void
-MidiModel::set_midi_source (MidiSource* s)
+MidiModel::set_midi_source (boost::shared_ptr<MidiSource> s)
 {
-	if (_midi_source) {
-		_midi_source->invalidate ();
+	boost::shared_ptr<MidiSource> old = _midi_source.lock ();
+	
+	if (old) {
+		old->invalidate ();
 	}
 
 	_midi_source_connections.drop_connections ();
 
 	_midi_source = s;
 
-	_midi_source->InterpolationChanged.connect_same_thread (
+	s->InterpolationChanged.connect_same_thread (
 		_midi_source_connections, boost::bind (&MidiModel::source_interpolation_changed, this, _1, _2)
 		);
 
-	_midi_source->AutomationStateChanged.connect_same_thread (
+	s->AutomationStateChanged.connect_same_thread (
 		_midi_source_connections, boost::bind (&MidiModel::source_automation_state_changed, this, _1, _2)
 		);
 }
@@ -1124,7 +1146,10 @@ MidiModel::source_interpolation_changed (Evoral::Parameter p, Evoral::ControlLis
 void
 MidiModel::control_list_interpolation_changed (Evoral::Parameter p, Evoral::ControlList::InterpolationStyle s)
 {
-	_midi_source->set_interpolation_of (p, s);
+	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
+	assert (ms);
+
+	ms->set_interpolation_of (p, s);
 }
 
 void
@@ -1138,7 +1163,10 @@ MidiModel::source_automation_state_changed (Evoral::Parameter p, AutoState s)
 void
 MidiModel::automation_list_automation_state_changed (Evoral::Parameter p, AutoState s)
 {
-	_midi_source->set_automation_state_of (p, s);
+	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
+	assert (ms);
+
+	ms->set_automation_state_of (p, s);
 }
 
 boost::shared_ptr<Evoral::Control>
@@ -1150,14 +1178,21 @@ MidiModel::control_factory (Evoral::Parameter const & p)
 	   automation state from our source.
 	*/
 
-	assert (_midi_source);
+	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
+	assert (ms);
 
-	c->list()->set_interpolation (_midi_source->interpolation_of (p));
+	c->list()->set_interpolation (ms->interpolation_of (p));
 
 	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (c->list ());
 	assert (al);
 
-	al->set_automation_state (_midi_source->automation_state_of (p));
+	al->set_automation_state (ms->automation_state_of (p));
 
 	return c;
+}
+
+boost::shared_ptr<const MidiSource>
+MidiModel::midi_source ()
+{
+	return _midi_source.lock ();
 }
