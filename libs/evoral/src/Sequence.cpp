@@ -580,6 +580,7 @@ Sequence<Time>::end_write (bool delete_stuck)
                 for (typename Notes::iterator n = _notes.begin(); n != _notes.end() ;) {
                         typename Notes::iterator next = n;
                         ++next;
+			
                         if ((*n)->length() == 0) {
                                 cerr << "WARNING: Stuck note lost: " << (*n)->note() << endl;
                                 _notes.erase(n);
@@ -642,15 +643,20 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 remove note %2 @ %3\n", this, (int)note->note(), note->time()));
 
-	for (typename Sequence<Time>::Notes::iterator i = note_lower_bound(note->time()); 
-             i != _notes.end() && (*i)->time() == note->time(); ++i) {
+	typename Sequence<Time>::Notes::iterator i = note_lower_bound(note->time());
+	while (i != _notes.end() && (*i)->time() == note->time()) {
+
+		typename Sequence<Time>::Notes::iterator tmp = i;
+		++tmp;
 
 		if (*i == note) {
+
+			NotePtr n = *i;
                         
                         DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1\terasing note %2 @ %3\n", this, (int)(*i)->note(), (*i)->time()));
 			_notes.erase (i);
 
-                        if ((*i)->note() == _lowest_note || (*i)->note() == _highest_note) {
+                        if (n->note() == _lowest_note || n->note() == _highest_note) {
 
                                 _lowest_note = 127;
                                 _highest_note = 0;
@@ -665,18 +671,25 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
                         
                         erased = true;
                 }
+
+		i = tmp;
 	}
 
         Pitches& p (pitches (note->channel()));
         
         NotePtr search_note(new Note<Time>(0, 0, 0, note->note(), 0));
 
-        for (typename Pitches::iterator i = p.lower_bound (search_note); 
-             i != p.end() && (*i)->note() == note->note(); ++i) {
-                if (*i == note) {
+        typename Pitches::iterator j = p.lower_bound (search_note);
+	while (j != p.end() && (*j)->note() == note->note()) {
+		typename Pitches::iterator tmp = j;
+		++tmp;
+		
+                if (*j == note) {
                         DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1\terasing pitch %2 @ %3\n", this, (int)(*i)->note(), (*i)->time()));
-                        p.erase (i);
+                        p.erase (j);
                 }
+
+		j = tmp;
         }
         
         if (!erased) {
@@ -806,7 +819,11 @@ Sequence<Time>::append_note_off_unlocked (NotePtr note)
 
         /* XXX use _overlap_pitch_resolution to determine FIFO/LIFO ... */
 
-        for (typename WriteNotes::iterator n = _write_notes[note->channel()].begin(); n != _write_notes[note->channel()].end(); ++n) {
+        for (typename WriteNotes::iterator n = _write_notes[note->channel()].begin(); n != _write_notes[note->channel()].end(); ) {
+
+		typename WriteNotes::iterator tmp = n;
+		++tmp;
+		
                 NotePtr nn = *n;
                 if (note->note() == nn->note() && nn->channel() == note->channel()) {
                         assert(note->time() >= nn->time());
@@ -819,6 +836,8 @@ Sequence<Time>::append_note_off_unlocked (NotePtr note)
                         resolved = true;
                         break;
                 }
+
+		n = tmp;
         }
 
         if (!resolved) {
