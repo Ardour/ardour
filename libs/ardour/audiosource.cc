@@ -238,7 +238,7 @@ AudioSource::initialize_peakfile (bool newfile, string audio_path)
 
 		/* we found it in the peaks dir, so check it out */
 
-		if (statbuf.st_size == 0 || ((framecnt_t) statbuf.st_size < ((length(_timeline_position) / _FPP) * sizeof (PeakData)))) {
+		if (statbuf.st_size == 0 || (statbuf.st_size < (off_t) ((length(_timeline_position) / _FPP) * sizeof (PeakData)))) {
 			// empty
 			_peaks_built = false;
 		} else {

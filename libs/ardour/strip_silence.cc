@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis
+    Copyright (C) 2009-2010 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,8 +35,10 @@ using namespace ARDOUR;
  *  @param fade_length Length of fade in/out to apply to trimmed regions, in samples.
  */
 
-StripSilence::StripSilence (Session & s, double threshold, framecnt_t minimum_length, framecnt_t fade_length)
-	: Filter (s), _threshold (threshold), _minimum_length (minimum_length), _fade_length (fade_length)
+StripSilence::StripSilence (Session & s, const AudioIntervalMap& sm, framecnt_t fade_length)
+	: Filter (s)
+        , _smap (sm)
+        , _fade_length (fade_length)
 {
 
 }
@@ -51,15 +53,19 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
         */
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
         InterThreadInfo itt;
-        
+        AudioIntervalMap::const_iterator sm;
+
 	if (!region) {
 		results.push_back (r);
 		return -1;
 	}
 
-	/* find periods of silence in the region */
-	std::list<std::pair<frameoffset_t, framecnt_t> > const silence =
-		region->find_silence (dB_to_coefficient (_threshold), _minimum_length, itt);
+        if ((sm = _smap.find (r)) == _smap.end()) {
+		results.push_back (r);
+		return -1;
+        }
+
+        const AudioIntervalResult& silence = sm->second;
 
 	if (silence.size () == 1 && silence.front().first == 0 && silence.front().second == region->length() - 1) {
 		/* the region is all silence, so just return with nothing */
@@ -72,19 +78,21 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 		return 0;
 	}
 
-	std::list<std::pair<framepos_t, framecnt_t > >::const_iterator s = silence.begin ();
+        AudioIntervalResult::const_iterator s = silence.begin ();
         PBD::PropertyList plist;
-        framepos_t start = 0;
+        framepos_t start;
         framepos_t end;
         bool in_silence;
         boost::shared_ptr<AudioRegion> copy;
 
-        if (s->first == 0) {
-                /* initial segment, starting at zero, is silent */
+        start = r->start();
+
+        if (s->first == start) {
+                /* segment starting at zero is silent */
                 end = s->second;
                 in_silence = true;
         } else {
-                /* initial segment, starting at zero, is audible */
+                /* segment starting at zero is audible, and begins at the start of the region in the source */
                 end = s->first;
                 in_silence = false;
         }
@@ -92,27 +100,22 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 	int n = 0;
 	int const N = silence.size ();
 
-        while (s != silence.end()) {
+        while (start < r->start() + r->length()) {
 
                 framecnt_t interval_duration;
 
                 interval_duration = end - start;
 
-
                 if (!in_silence && interval_duration > 0) {
 
                         plist.clear ();
                         plist.add (Properties::length, interval_duration);
-                        plist.add (Properties::position, region->position() + start);
+                        plist.add (Properties::position, r->position() + (start - r->start()));
 
                         copy = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create 
-                                                                         (region, start, plist));
+                                                                         (region, (start - r->start()), plist));
 
                         copy->set_name (RegionFactory::new_region_name (region->name ()));
-
-                        std::cerr << "New silent delineated region called " << copy->name()
-                                  << " @ " << copy->start() << " length = " << copy->length() << " pos = " << 
-                                copy->position() << std::endl;
 
                         copy->set_fade_in_active (true);
                         copy->set_fade_in (FadeLinear, _fade_length);
@@ -120,14 +123,21 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
                 }
 
                 start = end;
-                ++s;
-                end = s->first;
                 in_silence = !in_silence;
+                ++s;
 
-		if (progress) {
+                if (s == silence.end()) {
+                        end = r->start() + r->length();
+                } else {
+                        end = s->first;
+                }
+
+		++n;
+
+		if (progress && (n <= N)) {
 			progress->set_progress (float (n) / N);
 		}
-		++n;
+
         }
 
 	return 0;

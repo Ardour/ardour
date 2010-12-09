@@ -22,6 +22,7 @@
 
 #include <istream>
 #include <vector>
+#include <map>
 #include <boost/shared_ptr.hpp>
 #include <sys/types.h>
 #include <stdint.h>
@@ -46,6 +47,7 @@ namespace ARDOUR {
 	class Source;
 	class AudioSource;
 	class Route;
+        class Region;
 
 	typedef jack_default_audio_sample_t Sample;
 	typedef float                       pan_t;
@@ -74,6 +76,8 @@ namespace ARDOUR {
 
         // a set of (time) intervals: first of pair is the offset within the region, second is the length of the interval
         typedef std::list<std::pair<frameoffset_t,framecnt_t> > AudioIntervalResult;
+        // associate a set of intervals with regions (e.g. for silence detection)
+        typedef std::map<boost::shared_ptr<ARDOUR::Region>,AudioIntervalResult> AudioIntervalMap;
 
 	struct IOChange {
 

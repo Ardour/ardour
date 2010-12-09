@@ -94,37 +94,12 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 
 	hbox->pack_start (*table);
 
-	table = Gtk::manage (new Gtk::Table (3, 2));
-	table->set_spacings (6);
-	
-	n = 0;
-	
-	table->attach (*Gtk::manage (new Gtk::Label (_("Silent segments:"), 1, 0.5)), 3, 4, n, n + 1, Gtk::FILL);
-        table->attach (_segment_count_label, 5, 6, n, n + 1, Gtk::FILL);
-	_segment_count_label.set_alignment (0, 0.5);
-	++n;
-
-	table->attach (*Gtk::manage (new Gtk::Label (_("Shortest silence:"), 1, 0.5)), 3, 4, n, n + 1, Gtk::FILL);
-        table->attach (_shortest_silence_label, 5, 6, n, n + 1, Gtk::FILL);
-	_shortest_silence_label.set_alignment (0, 0.5);
-	++n;
-
-	table->attach (*Gtk::manage (new Gtk::Label (_("Shortest audible:"), 1, 0.5)), 3, 4, n, n + 1, Gtk::FILL);
-        table->attach (_shortest_audible_label, 5, 6, n, n + 1, Gtk::FILL);
-	_shortest_audible_label.set_alignment (0, 0.5);
-	++n;
-	
-	hbox->pack_start (*table);
-
-	/* dummy label for padding */
-	hbox->pack_start (*Gtk::manage (new Gtk::Label ("")), true, true);
-
 	get_vbox()->pack_start (*hbox, false, false);
 
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_OK);
 
-	get_vbox()->pack_start (_progress_bar, true, true);
+	get_vbox()->pack_start (_progress_bar, true, true, 12);
 
 	show_all ();
 
@@ -155,11 +130,28 @@ StripSilenceDialog::~StripSilenceDialog ()
 	_run_cond.signal ();
 	pthread_join (_thread, 0);
 	
+	delete _peaks_ready_connection;
+}
+
+AudioIntervalMap
+StripSilenceDialog::silences ()
+{
+        AudioIntervalMap m;
+
+        for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
+                pair<boost::shared_ptr<Region>,AudioIntervalResult> newpair ((*v).view->region(), (*v).intervals);
+                m.insert (newpair);
+        }
+
+        return m;
+}
+
+void
+StripSilenceDialog::drop_rects ()
+{
         for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
                 (*v).view->drop_silent_frames ();
         }
-	
-	delete _peaks_ready_connection;
 }
 
 void
@@ -187,75 +179,18 @@ StripSilenceDialog::update_threshold_line ()
 void
 StripSilenceDialog::update ()
 {
-        cerr << "UPDATE!\n";
 	update_threshold_line ();
-	/* XXX: first one only?! */
-	// update_stats (_waves.front()->silence);
-
 	update_silence_rects ();
-        cerr << "UPDATE done\n";
 }
 
 void
 StripSilenceDialog::update_silence_rects ()
 {
-        uint32_t max_segments = 0;
-
 	/* Lock so that we don't contend with the detection thread for access to the silence regions */
 	Glib::Mutex::Lock lm (_lock);
-        
         for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
                 (*v).view->set_silent_frames ((*v).intervals);
-                max_segments = max (max_segments, (uint32_t) (*v).intervals.size());
 	}
-
-#if 0
-        cerr << "minaudible in update " << min_audible << " minsilence = " << min_silence << endl;
-
-        if (min_audible > 0) {
-                float ms, ma;
-                char const * aunits;
-                char const * sunits;
-
-                ma = (float) min_audible/_session->frame_rate();
-                ms = (float) min_silence/_session->frame_rate();
-
-                /* ma and ms are now in seconds */
-
-                if (ma >= 60.0) {
-                        aunits = _("minutes");
-                        //ma /= 60.0;
-                } else if (min_audible < _session->frame_rate()) {
-                        aunits = _("msecs");
-                        ma *= 1000.0;
-                } else {
-                        aunits = _("seconds");
-                }
-
-                if (ms >= 60.0) {
-                        sunits = _("minutes");
-                        //ms /= 60.0;
-                } else if (min_silence < _session->frame_rate()) {
-                        sunits = _("ms");
-                        ms *= 1000.0;
-                } else {
-                        sunits = _("s");
-                }
-
-                _segment_count_label.set_text (string_compose ("%1", max_segments));
-		if (max_segments > 0) {
-			_shortest_silence_label.set_text (string_compose ("%1 %2", ms, sunits));
-			_shortest_audible_label.set_text (string_compose ("%1 %2", ma, aunits));
-		} else {
-			_shortest_silence_label.set_text ("");
-			_shortest_audible_label.set_text ("");
-		}
-        } else {
-                _segment_count_label.set_text (_("Full silence"));
-		_shortest_silence_label.set_text ("");
-		_shortest_audible_label.set_text ("");
-        }
-#endif
 }
 
 void *
@@ -335,77 +270,6 @@ StripSilenceDialog::threshold_changed ()
 {
 	update_threshold_line ();
 	restart_thread ();
-}
-
-void
-StripSilenceDialog::update_stats (const AudioIntervalResult& res)
-{
-        if (res.empty()) {
-                return;
-        }
-
-        max_silence = 0;
-        min_silence = max_framepos;
-        max_audible = 0;
-        min_audible = max_framepos;
-        
-        AudioIntervalResult::const_iterator cur;
-        bool saw_silence = false;
-        bool saw_audible = false;
-
-        cur = res.begin();
-
-        framepos_t start = 0;
-        framepos_t end;
-        bool in_silence;
-
-        if (cur->first == 0) {
-                /* initial segment, starting at zero, is silent */
-                end = cur->second;
-                in_silence = true;
-        } else {
-                /* initial segment, starting at zero, is audible */
-                end = cur->first;
-                in_silence = false;
-        }
-
-        while (cur != res.end()) {
-
-                framecnt_t interval_duration;
-
-                interval_duration = end - start;
-
-                if (in_silence) {
-                        saw_silence = true;
-                        cerr << "Silent duration: " << interval_duration << endl;
-
-                        max_silence = max (max_silence, interval_duration);
-                        min_silence = min (min_silence, interval_duration);
-                } else {
-                        saw_audible = true;
-                        cerr << "Audible duration: " << interval_duration << endl;
-
-                        max_audible = max (max_audible, interval_duration);
-                        min_audible = min (min_audible, interval_duration);
-                }
-
-                start = end;
-                ++cur;
-                end = cur->first;
-                in_silence = !in_silence;
-        }
-
-        if (!saw_silence) {
-                min_silence = 0;
-                max_silence = 0;
-        }
-
-        if (!saw_audible) {
-                min_audible = 0;
-                max_audible = 0;
-        }
-
-        cerr << "max aud: " << max_audible << " min aud: " << min_audible << " max sil: " << max_silence << " min sil: " << min_silence << endl;
 }
 
 framecnt_t

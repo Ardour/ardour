@@ -24,6 +24,7 @@
 
 #include <set>
 
+#include <boost/scoped_array.hpp>
 
 #include <glibmm/thread.h>
 
@@ -1498,15 +1499,15 @@ in this and future transient-detection operations.\n\
  *
  *  @param threshold Threshold below which signal is considered silence (as a sample value)
  *  @param min_length Minimum length of silent period to be reported.
- *  @return Silent intervals
+ *  @return Silent intervals, measured relative to the region start in the source
  */
 
 AudioIntervalResult
 AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadInfo& itt) const
 {
 	framecnt_t const block_size = 64 * 1024;
-	Sample loudest[block_size];
-	Sample buf[block_size];
+	boost::scoped_array<Sample> loudest (new Sample[block_size]);
+        boost::scoped_array<Sample> buf (new Sample[block_size]);
 
 	framepos_t pos = _start;
 	framepos_t const end = _start + _length - 1;
@@ -1520,10 +1521,10 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadI
 	while (pos < end && !itt.cancel) {
 
 		/* fill `loudest' with the loudest absolute sample at each instant, across all channels */
-		memset (loudest, 0, sizeof (Sample) * block_size);
+		memset (loudest.get(), 0, sizeof (Sample) * block_size);
 		for (uint32_t n = 0; n < n_channels(); ++n) {
 
-			read_raw_internal (buf, pos, block_size, n);
+			read_raw_internal (buf.get(), pos, block_size, n);
 			for (framecnt_t i = 0; i < block_size; ++i) {
 				loudest[i] = max (loudest[i], abs (buf[i]));
 			}

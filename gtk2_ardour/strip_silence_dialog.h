@@ -42,6 +42,10 @@ public:
 		return _threshold.get_value ();
 	}
 
+        void drop_rects ();
+
+        ARDOUR::AudioIntervalMap silences ();
+        
 	ARDOUR::framecnt_t minimum_length () const;
         ARDOUR::framecnt_t fade_length () const;
 
@@ -61,9 +65,6 @@ private:
 	Gtk::SpinButton _threshold;
 	AudioClock      _minimum_length;
         AudioClock      _fade_length;
-        Gtk::Label      _segment_count_label;
-	Gtk::Label      _shortest_silence_label;
-	Gtk::Label      _shortest_audible_label;
 	Gtk::ProgressBar _progress_bar;
 
         struct ViewInterval {
@@ -74,11 +75,6 @@ private:
         };
 
         std::list<ViewInterval> views;
-
-        ARDOUR::framecnt_t max_audible;
-        ARDOUR::framecnt_t min_audible;
-        ARDOUR::framecnt_t max_silence;
-        ARDOUR::framecnt_t min_silence;
 
 	PBD::ScopedConnection* _peaks_ready_connection;
 

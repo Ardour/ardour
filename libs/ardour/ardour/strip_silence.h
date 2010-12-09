@@ -22,16 +22,15 @@
 namespace ARDOUR {
 
 /// A filter to strip silence from regions
-class StripSilence : public Filter {
-
-public:
-	StripSilence (Session &, double, framecnt_t, framecnt_t);
+class StripSilence : public Filter 
+{
+  public:
+	StripSilence (Session &, const AudioIntervalMap&, framecnt_t fade_length);
 
 	int run (boost::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
 
 private:
-	double _threshold; ///< silence threshold, in dBFS
-	framecnt_t _minimum_length; ///< minimum length to be considered silence, in samples
+        AudioIntervalMap _smap;
 	framecnt_t _fade_length; ///< fade in/out to use on trimmed regions, in samples
 };
 

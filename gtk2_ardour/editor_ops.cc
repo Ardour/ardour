@@ -4556,10 +4556,12 @@ Editor::strip_region_silence ()
 	StripSilenceDialog d (_session, audio_only);
 	int const r = d.run ();
 
-	if (r == Gtk::RESPONSE_OK) {
-		StripSilence s (*_session, d.threshold (), d.minimum_length (), d.fade_length ());
+        d.drop_rects ();
+	
+        if (r == Gtk::RESPONSE_OK) {
+		StripSilence s (*_session, d.silences(), d.fade_length());
 		apply_filter (s, _("strip silence"), &d);
-	}
+	} 
 }
 
 Command*
