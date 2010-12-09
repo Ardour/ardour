@@ -60,6 +60,17 @@ MidiModel::new_note_diff_command (const string name)
 	return new NoteDiffCommand (ms->model(), name);
 }
 
+/** Start a new SysExDiff command */
+MidiModel::SysExDiffCommand*
+MidiModel::new_sysex_diff_command (const string name)
+{
+	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
+	assert (ms);
+	
+	return new SysExDiffCommand (ms->model(), name);
+}
+
+
 /** Apply a command.
  *
  * Ownership of cmd is taken, it must not be deleted by the caller.
@@ -94,6 +105,8 @@ MidiModel::apply_command_as_subcommand(Session& session, Command* cmd)
 #define ADDED_NOTES_ELEMENT "AddedNotes"
 #define REMOVED_NOTES_ELEMENT "RemovedNotes"
 #define SIDE_EFFECT_REMOVALS_ELEMENT "SideEffectRemovals"
+#define SYSEX_DIFF_COMMAND_ELEMENT "SysExDiffCommand"
+#define DIFF_SYSEXES_ELEMENT "ChangedSysExes"
 
 MidiModel::DiffCommand::DiffCommand(boost::shared_ptr<MidiModel> m, const std::string& name)
 	: Command (name)
@@ -679,6 +692,177 @@ MidiModel::NoteDiffCommand::get_state ()
         return *diff_command;
 }
 
+MidiModel::SysExDiffCommand::SysExDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node)
+	: DiffCommand (m, "")
+{
+	assert (_model);
+	set_state (node, Stateful::loading_state_version);
+}
+
+void
+MidiModel::SysExDiffCommand::change (boost::shared_ptr<Evoral::Event<TimeType> > s, TimeType new_time)
+{
+	Change change;
+
+	change.sysex = s;
+	change.property = Time;
+	change.old_time = s->time ();
+	change.new_time = new_time;
+
+	_changes.push_back (change);
+}
+
+void
+MidiModel::SysExDiffCommand::operator() ()
+{
+	{
+		MidiModel::WriteLock lock (_model->edit_lock ());
+
+		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+			switch (i->property) {
+			case Time:
+				i->sysex->set_time (i->new_time);
+			}
+		}
+	}
+
+	_model->ContentsChanged (); /* EMIT SIGNAL */
+}
+
+void
+MidiModel::SysExDiffCommand::undo ()
+{
+	{
+		MidiModel::WriteLock lock (_model->edit_lock ());
+
+		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+			switch (i->property) {
+			case Time:
+				i->sysex->set_time (i->old_time);
+				break;
+			}
+		}
+
+	}
+
+        _model->ContentsChanged(); /* EMIT SIGNAL */
+}
+
+XMLNode&
+MidiModel::SysExDiffCommand::marshal_change (const Change& change)
+{
+        XMLNode* xml_change = new XMLNode ("Change");
+
+        /* first, the change itself */
+
+        xml_change->add_property ("property", enum_2_string (change.property));
+
+        {
+                ostringstream old_value_str (ios::ate);
+		old_value_str << change.old_time;
+                xml_change->add_property ("old", old_value_str.str());
+        }
+
+        {
+                ostringstream new_value_str (ios::ate);
+		new_value_str << change.new_time;
+                xml_change->add_property ("new", new_value_str.str());
+        }
+
+        ostringstream id_str;
+        id_str << change.sysex->id();
+        xml_change->add_property ("id", id_str.str());
+
+        return *xml_change;
+}
+
+MidiModel::SysExDiffCommand::Change
+MidiModel::SysExDiffCommand::unmarshal_change (XMLNode *xml_change)
+{
+        XMLProperty* prop;
+        Change change;
+
+        if ((prop = xml_change->property ("property")) != 0) {
+                change.property = (Property) string_2_enum (prop->value(), change.property);
+        } else {
+                fatal << "!!!" << endmsg;
+                /*NOTREACHED*/
+        }
+
+        if ((prop = xml_change->property ("id")) == 0) {
+                error << _("No SysExID found for sys-ex property change - ignored") << endmsg;
+                return change;
+        }
+
+        gint sysex_id = atoi (prop->value().c_str());
+
+        if ((prop = xml_change->property ("old")) != 0) {
+                istringstream old_str (prop->value());
+		old_str >> change.old_time;
+        } else {
+                fatal << "!!!" << endmsg;
+                /*NOTREACHED*/
+        }
+
+        if ((prop = xml_change->property ("new")) != 0) {
+                istringstream new_str (prop->value());
+		new_str >> change.new_time;
+        } else {
+                fatal << "!!!" << endmsg;
+                /*NOTREACHED*/
+        }
+
+        /* we must point at the instance of the sysex that is actually in the model.
+           so go look for it ...
+        */
+
+        change.sysex = _model->find_sysex (sysex_id);
+
+        if (!change.sysex) {
+                warning << "Sys-ex #" << sysex_id << " not found in model - programmers should investigate this" << endmsg;
+                return change;
+        }
+
+        return change;
+}
+
+int
+MidiModel::SysExDiffCommand::set_state (const XMLNode& diff_command, int /*version*/)
+{
+        if (diff_command.name() != string (SYSEX_DIFF_COMMAND_ELEMENT)) {
+                return 1;
+        }
+
+        /* changes */
+
+        _changes.clear();
+
+        XMLNode* changed_sysexes = diff_command.child (DIFF_SYSEXES_ELEMENT);
+
+        if (changed_sysexes) {
+                XMLNodeList sysexes = changed_sysexes->children();
+                transform (sysexes.begin(), sysexes.end(), back_inserter (_changes),
+                           boost::bind (&SysExDiffCommand::unmarshal_change, this, _1));
+
+        }
+
+        return 0;
+}
+
+XMLNode&
+MidiModel::SysExDiffCommand::get_state ()
+{
+        XMLNode* diff_command = new XMLNode (SYSEX_DIFF_COMMAND_ELEMENT);
+        diff_command->add_property ("midi-source", _model->midi_source()->id().to_s());
+
+        XMLNode* changes = diff_command->add_child(DIFF_SYSEXES_ELEMENT);
+        for_each (_changes.begin(), _changes.end(), 
+		  boost::bind (
+			  boost::bind (&XMLNode::add_child_nocopy, changes, _1),
+			  boost::bind (&SysExDiffCommand::marshal_change, this, _1)));
+
+        return *diff_command;
+}
 
 /** Write all of the model to a MidiSource (i.e. save the model).
  * This is different from manually using read to write to a source in that
@@ -872,6 +1056,22 @@ MidiModel::find_note (gint note_id)
         }
 
         return NotePtr();
+}
+
+boost::shared_ptr<Evoral::Event<MidiModel::TimeType> >
+MidiModel::find_sysex (gint sysex_id)
+{
+        /* used only for looking up notes when reloading history from disk,
+           so we don't care about performance *too* much.
+        */
+
+        for (SysExes::iterator l = sysexes().begin(); l != sysexes().end(); ++l) {
+                if ((*l)->id() == sysex_id) {
+                        return *l;
+                }
+        }
+
+        return boost::shared_ptr<Evoral::Event<TimeType> > ();
 }
 
 /** Lock and invalidate the source.
@@ -1201,18 +1401,20 @@ MidiModel::midi_source ()
 void
 MidiModel::insert_silence_at_start (TimeType t)
 {
-	/* Notes */
-	
-	NoteDiffCommand* c = new_note_diff_command ("insert silence");
-
-	for (Notes::const_iterator i = notes().begin(); i != notes().end(); ++i) {
-		c->change (*i, NoteDiffCommand::StartTime, (*i)->time() + t);
-	}
-
 	boost::shared_ptr<MidiSource> s = _midi_source.lock ();
 	assert (s);
 	
-	apply_command_as_subcommand (s->session(), c);
+	/* Notes */
+
+	if (!notes().empty ()) {
+		NoteDiffCommand* c = new_note_diff_command ("insert silence");
+		
+		for (Notes::const_iterator i = notes().begin(); i != notes().end(); ++i) {
+			c->change (*i, NoteDiffCommand::StartTime, (*i)->time() + t);
+		}
+		
+		apply_command_as_subcommand (s->session(), c);
+	}
 
 	/* Controllers */
 
@@ -1226,5 +1428,13 @@ MidiModel::insert_silence_at_start (TimeType t)
 
 	/* Sys-ex */
 
-	/* XXX */
+	if (!sysexes().empty()) {
+		SysExDiffCommand* c = new_sysex_diff_command ("insert silence");
+
+		for (SysExes::iterator i = sysexes().begin(); i != sysexes().end(); ++i) {
+			c->change (*i, (*i)->time() + t);
+		}
+
+		apply_command_as_subcommand (s->session(), c);
+	}
 }

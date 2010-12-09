@@ -140,6 +140,38 @@ public:
 		NotePtr unmarshal_note(XMLNode *xml_note);
 	};
 
+	/* Currently this class only supports changes of sys-ex time, but could be expanded */
+	class SysexDiffCommand : public DiffCommand {
+	public:
+		SysexDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
+		
+		enum Property {
+			Time,
+		};
+
+		int set_state (const XMLNode&, int version);
+		XMLNode & get_state ();
+
+		void operator() ();
+		void undo ();
+		
+		void change (boost::shared_ptr<Evoral::Event<TimeType> >, TimeType);
+
+	private:
+		struct Change {
+			boost::shared_ptr<Evoral::Event<TimeType> > sysex;
+			SysexDiffCommand::Property property;
+			TimeType old_time;
+			TimeType new_time;
+		};
+			
+		typedef std::list<Change> ChangeList;
+		ChangeList _changes;
+
+		XMLNode & marshal_change (const Change &);
+		Change unmarshal_change (XMLNode *);
+	};
+
 	MidiModel::NoteDiffCommand* new_note_diff_command (const std::string name="midi edit");
 	void apply_command (Session& session, Command* cmd);
 	void apply_command_as_subcommand (Session& session, Command* cmd);
@@ -161,6 +193,7 @@ public:
 
 	boost::shared_ptr<Evoral::Note<TimeType> > find_note (NotePtr);
 	boost::shared_ptr<Evoral::Note<TimeType> > find_note (gint note_id);
+	boost::shared_ptr<Evoral::Event<TimeType> > find_sysex (gint);
 
         InsertMergePolicy insert_merge_policy () const;
         void set_insert_merge_policy (InsertMergePolicy);
