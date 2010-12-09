@@ -82,6 +82,7 @@ GainMeterBase::GainMeterBase (Session* s,
 	: gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1)  // 0.781787 is the value needed for gain to be set to 0.
 	, gain_automation_style_button ("")
 	, gain_automation_state_button ("")
+	, style_changed (false)
 	, dpi_changed (false)
 	, _is_midi (false)
 
