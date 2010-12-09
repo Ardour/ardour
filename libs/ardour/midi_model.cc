@@ -33,6 +33,7 @@
 #include "ardour/smf_source.h"
 #include "ardour/types.h"
 #include "ardour/session.h"
+#include "ardour/midi_automation_list_binder.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -44,20 +45,19 @@ MidiModel::MidiModel (boost::shared_ptr<MidiSource> s)
 	set_midi_source (s);
 }
 
-/** Start a new Diff command.
+/** Start a new NoteDiff command.
  *
  * This has no side-effects on the model or Session, the returned command
  * can be held on to for as long as the caller wishes, or discarded without
  * formality, until apply_command is called and ownership is taken.
  */
-MidiModel::DiffCommand*
-MidiModel::new_diff_command(const string name)
+MidiModel::NoteDiffCommand*
+MidiModel::new_note_diff_command (const string name)
 {
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
 	
-	DiffCommand* cmd = new DiffCommand (ms->model(), name);
-	return cmd;
+	return new NoteDiffCommand (ms->model(), name);
 }
 
 /** Apply a command.
@@ -89,50 +89,50 @@ MidiModel::apply_command_as_subcommand(Session& session, Command* cmd)
 
 /************** DIFF COMMAND ********************/
 
-#define DIFF_COMMAND_ELEMENT "DiffCommand"
+#define NOTE_DIFF_COMMAND_ELEMENT "NoteDiffCommand"
 #define DIFF_NOTES_ELEMENT "ChangedNotes"
 #define ADDED_NOTES_ELEMENT "AddedNotes"
 #define REMOVED_NOTES_ELEMENT "RemovedNotes"
 #define SIDE_EFFECT_REMOVALS_ELEMENT "SideEffectRemovals"
 
 MidiModel::DiffCommand::DiffCommand(boost::shared_ptr<MidiModel> m, const std::string& name)
-	: Command(name)
-	, _model(m)
-	, _name(name)
+	: Command (name)
+	, _model (m)
+	, _name (name)
 {
 	assert(_model);
 }
 
-MidiModel::DiffCommand::DiffCommand(boost::shared_ptr<MidiModel> m, const XMLNode& node)
-	: _model(m)
+MidiModel::NoteDiffCommand::NoteDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node)
+	: DiffCommand (m, "")
 {
-	assert(_model);
-	set_state(node, Stateful::loading_state_version);
+	assert (_model);
+	set_state (node, Stateful::loading_state_version);
 }
 
 void
-MidiModel::DiffCommand::add(const NotePtr note)
+MidiModel::NoteDiffCommand::add (const NotePtr note)
 {
 	_removed_notes.remove(note);
 	_added_notes.push_back(note);
 }
 
 void
-MidiModel::DiffCommand::remove(const NotePtr note)
+MidiModel::NoteDiffCommand::remove (const NotePtr note)
 {
 	_added_notes.remove(note);
 	_removed_notes.push_back(note);
 }
 
 void
-MidiModel::DiffCommand::side_effect_remove(const NotePtr note)
+MidiModel::NoteDiffCommand::side_effect_remove (const NotePtr note)
 {
 	side_effect_removals.insert (note);
 }
 
 void
-MidiModel::DiffCommand::change(const NotePtr note, Property prop,
-                               uint8_t new_value)
+MidiModel::NoteDiffCommand::change (const NotePtr note, Property prop,
+				    uint8_t new_value)
 {
         NoteChange change;
         
@@ -175,8 +175,8 @@ MidiModel::DiffCommand::change(const NotePtr note, Property prop,
 }
 
 void
-MidiModel::DiffCommand::change(const NotePtr note, Property prop,
-                               TimeType new_time)
+MidiModel::NoteDiffCommand::change (const NotePtr note, Property prop,
+				    TimeType new_time)
 {
         NoteChange change;
 
@@ -184,7 +184,7 @@ MidiModel::DiffCommand::change(const NotePtr note, Property prop,
         case NoteNumber:
         case Channel:
         case Velocity:
-                fatal << "MidiModel::DiffCommand::change() with time argument called for note, channel or velocity" << endmsg;
+                fatal << "MidiModel::NoteDiffCommand::change() with time argument called for note, channel or velocity" << endmsg;
                 break;
 
         case StartTime:
@@ -208,8 +208,8 @@ MidiModel::DiffCommand::change(const NotePtr note, Property prop,
         _changes.push_back (change);
 }
 
-MidiModel::DiffCommand&
-MidiModel::DiffCommand::operator+= (const DiffCommand& other)
+MidiModel::NoteDiffCommand &
+MidiModel::NoteDiffCommand::operator+= (const NoteDiffCommand& other)
 {
         if (this == &other) {
                 return *this;
@@ -228,7 +228,7 @@ MidiModel::DiffCommand::operator+= (const DiffCommand& other)
 }
 
 void
-MidiModel::DiffCommand::operator()()
+MidiModel::NoteDiffCommand::operator() ()
 {
         {
                 MidiModel::WriteLock lock(_model->edit_lock());
@@ -293,7 +293,7 @@ MidiModel::DiffCommand::operator()()
 
 
                 for (set<NotePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
-                        DiffCommand side_effects (model(), "side effects");
+                        NoteDiffCommand side_effects (model(), "side effects");
                         _model->add_note_unlocked (*i, &side_effects);
                         *this += side_effects;
                 }
@@ -310,7 +310,7 @@ MidiModel::DiffCommand::operator()()
 }
 
 void
-MidiModel::DiffCommand::undo()
+MidiModel::NoteDiffCommand::undo ()
 {
         {
                 MidiModel::WriteLock lock(_model->edit_lock());
@@ -377,7 +377,7 @@ MidiModel::DiffCommand::undo()
 }
 
 XMLNode&
-MidiModel::DiffCommand::marshal_note(const NotePtr note)
+MidiModel::NoteDiffCommand::marshal_note(const NotePtr note)
 {
         XMLNode* xml_note = new XMLNode("note");
 
@@ -421,7 +421,7 @@ MidiModel::DiffCommand::marshal_note(const NotePtr note)
 }
 
 Evoral::Sequence<MidiModel::TimeType>::NotePtr
-MidiModel::DiffCommand::unmarshal_note(XMLNode *xml_note)
+MidiModel::NoteDiffCommand::unmarshal_note (XMLNode *xml_note)
 {
         unsigned int note;
         XMLProperty* prop;
@@ -486,7 +486,7 @@ MidiModel::DiffCommand::unmarshal_note(XMLNode *xml_note)
 }
 
 XMLNode&
-MidiModel::DiffCommand::marshal_change(const NoteChange& change)
+MidiModel::NoteDiffCommand::marshal_change (const NoteChange& change)
 {
         XMLNode* xml_change = new XMLNode("Change");
 
@@ -521,8 +521,8 @@ MidiModel::DiffCommand::marshal_change(const NoteChange& change)
         return *xml_change;
 }
 
-MidiModel::DiffCommand::NoteChange
-MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
+MidiModel::NoteDiffCommand::NoteChange
+MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 {
         XMLProperty* prop;
         NoteChange change;
@@ -584,9 +584,9 @@ MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
 }
 
 int
-MidiModel::DiffCommand::set_state(const XMLNode& diff_command, int /*version*/)
+MidiModel::NoteDiffCommand::set_state (const XMLNode& diff_command, int /*version*/)
 {
-        if (diff_command.name() != string(DIFF_COMMAND_ELEMENT)) {
+        if (diff_command.name() != string (NOTE_DIFF_COMMAND_ELEMENT)) {
                 return 1;
         }
 
@@ -597,7 +597,7 @@ MidiModel::DiffCommand::set_state(const XMLNode& diff_command, int /*version*/)
         if (added_notes) {
                 XMLNodeList notes = added_notes->children();
                 transform(notes.begin(), notes.end(), back_inserter(_added_notes),
-                          boost::bind (&DiffCommand::unmarshal_note, this, _1));
+                          boost::bind (&NoteDiffCommand::unmarshal_note, this, _1));
         }
 
 
@@ -608,7 +608,7 @@ MidiModel::DiffCommand::set_state(const XMLNode& diff_command, int /*version*/)
         if (removed_notes) {
                 XMLNodeList notes = removed_notes->children();
                 transform(notes.begin(), notes.end(), back_inserter(_removed_notes),
-                          boost::bind (&DiffCommand::unmarshal_note, this, _1));
+                          boost::bind (&NoteDiffCommand::unmarshal_note, this, _1));
         }
 
 
@@ -621,7 +621,7 @@ MidiModel::DiffCommand::set_state(const XMLNode& diff_command, int /*version*/)
         if (changed_notes) {
                 XMLNodeList notes = changed_notes->children();
                 transform (notes.begin(), notes.end(), back_inserter(_changes),
-                           boost::bind (&DiffCommand::unmarshal_change, this, _1));
+                           boost::bind (&NoteDiffCommand::unmarshal_change, this, _1));
 
         }
 
@@ -642,28 +642,28 @@ MidiModel::DiffCommand::set_state(const XMLNode& diff_command, int /*version*/)
 }
 
 XMLNode&
-MidiModel::DiffCommand::get_state ()
+MidiModel::NoteDiffCommand::get_state ()
 {
-        XMLNode* diff_command = new XMLNode(DIFF_COMMAND_ELEMENT);
+        XMLNode* diff_command = new XMLNode (NOTE_DIFF_COMMAND_ELEMENT);
         diff_command->add_property("midi-source", _model->midi_source()->id().to_s());
 
         XMLNode* changes = diff_command->add_child(DIFF_NOTES_ELEMENT);
         for_each(_changes.begin(), _changes.end(), 
                  boost::bind (
                          boost::bind (&XMLNode::add_child_nocopy, changes, _1),
-                         boost::bind (&DiffCommand::marshal_change, this, _1)));
+                         boost::bind (&NoteDiffCommand::marshal_change, this, _1)));
 
         XMLNode* added_notes = diff_command->add_child(ADDED_NOTES_ELEMENT);
         for_each(_added_notes.begin(), _added_notes.end(), 
                  boost::bind(
                          boost::bind (&XMLNode::add_child_nocopy, added_notes, _1),
-                         boost::bind (&DiffCommand::marshal_note, this, _1)));
+                         boost::bind (&NoteDiffCommand::marshal_note, this, _1)));
 
         XMLNode* removed_notes = diff_command->add_child(REMOVED_NOTES_ELEMENT);
         for_each(_removed_notes.begin(), _removed_notes.end(), 
                  boost::bind (
                          boost::bind (&XMLNode::add_child_nocopy, removed_notes, _1),
-                         boost::bind (&DiffCommand::marshal_note, this, _1)));
+                         boost::bind (&NoteDiffCommand::marshal_note, this, _1)));
 
         /* if this command had side-effects, store that state too 
          */
@@ -673,7 +673,7 @@ MidiModel::DiffCommand::get_state ()
                 for_each(side_effect_removals.begin(), side_effect_removals.end(), 
                          boost::bind (
                                  boost::bind (&XMLNode::add_child_nocopy, side_effect_notes, _1),
-                                 boost::bind (&DiffCommand::marshal_note, this, _1)));
+                                 boost::bind (&NoteDiffCommand::marshal_note, this, _1)));
         }
 
         return *diff_command;
@@ -910,7 +910,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
                 return 0;
         }
 
-        DiffCommand* cmd = static_cast<DiffCommand*>(arg);
+        NoteDiffCommand* cmd = static_cast<NoteDiffCommand*>(arg);
 
         TimeType sa = note->time();
         TimeType ea  = note->end_time();
@@ -964,7 +964,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
                                 break;
                         case InsertMergeTruncateExisting:
                                 if (cmd) {
-                                        cmd->change (*i, DiffCommand::Length, (note->time() - (*i)->time()));
+                                        cmd->change (*i, NoteDiffCommand::Length, (note->time() - (*i)->time()));
                                 }
                                 (*i)->set_length (note->time() - (*i)->time());
                                 break;
@@ -976,7 +976,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
                                 break;
                         case InsertMergeExtend:
                                 if (cmd) {
-                                        cmd->change ((*i), DiffCommand::Length, note->end_time() - (*i)->time());
+                                        cmd->change ((*i), NoteDiffCommand::Length, note->end_time() - (*i)->time());
                                 } 
                                 (*i)->set_length (note->end_time() - (*i)->time());
                                 return -1; /* do not add the new note */
@@ -1078,14 +1078,14 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 
         if (set_note_time) {
                 if (cmd) {
-                        cmd->change (note, DiffCommand::StartTime, note_time);
+                        cmd->change (note, NoteDiffCommand::StartTime, note_time);
                 } 
                 note->set_time (note_time);
         }
 
         if (set_note_length) {
                 if (cmd) {
-                        cmd->change (note, DiffCommand::Length, note_length);
+                        cmd->change (note, NoteDiffCommand::Length, note_length);
                 } 
                 note->set_length (note_length);
         }
@@ -1097,7 +1097,6 @@ InsertMergePolicy
 MidiModel::insert_merge_policy () const 
 {
         /* XXX ultimately this should be a per-track or even per-model policy */
-
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
 
@@ -1165,7 +1164,6 @@ MidiModel::automation_list_automation_state_changed (Evoral::Parameter p, AutoSt
 {
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
-
 	ms->set_automation_state_of (p, s);
 }
 
@@ -1195,4 +1193,38 @@ boost::shared_ptr<const MidiSource>
 MidiModel::midi_source ()
 {
 	return _midi_source.lock ();
+}
+
+/** Moves notes, controllers and sys-ex to insert silence at the start of the model.
+ *  Adds commands to the session's current undo stack to reflect the movements.
+ */
+void
+MidiModel::insert_silence_at_start (TimeType t)
+{
+	/* Notes */
+	
+	NoteDiffCommand* c = new_note_diff_command ("insert silence");
+
+	for (Notes::const_iterator i = notes().begin(); i != notes().end(); ++i) {
+		c->change (*i, NoteDiffCommand::StartTime, (*i)->time() + t);
+	}
+
+	boost::shared_ptr<MidiSource> s = _midi_source.lock ();
+	assert (s);
+	
+	apply_command_as_subcommand (s->session(), c);
+
+	/* Controllers */
+
+	for (Controls::iterator i = controls().begin(); i != controls().end(); ++i) {
+		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (i->second);
+		XMLNode& before = ac->alist()->get_state ();
+		i->second->list()->shift (0, t);
+		XMLNode& after = ac->alist()->get_state ();
+		s->session().add_command (new MementoCommand<AutomationList> (new MidiAutomationListBinder (s, i->first), &before, &after));
+	}
+
+	/* Sys-ex */
+
+	/* XXX */
 }

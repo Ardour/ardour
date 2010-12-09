@@ -121,7 +121,7 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 	BeatsFramesConverter old_converter(_session.tempo_map(), _position - _start);
 	double length_beats = old_converter.from(_length);
 
-	Region::set_position_internal(pos, allow_bbt_recompute);
+	Region::set_position_internal (pos, allow_bbt_recompute);
 
 	BeatsFramesConverter new_converter(_session.tempo_map(), pos - _start);
 
@@ -306,9 +306,21 @@ MidiRegion::model_automation_state_changed (Evoral::Parameter const & p)
 	}
 
 	/* the source will have an iterator into the model, and that iterator will have been set up
-	   for a given set of filtered_paramters, so now that we've changed that list we must invalidate
+	   for a given set of filtered_parameters, so now that we've changed that list we must invalidate
 	   the iterator.
 	*/
 	Glib::Mutex::Lock lm (midi_source(0)->mutex());
 	midi_source(0)->invalidate ();
+}
+
+/** This is called when a trim drag has resulted in a -ve _start time for this region.
+ *  Fix it up by adding some empty space to the source.
+ */
+void
+MidiRegion::fix_negative_start ()
+{
+        BeatsFramesConverter c (_session.tempo_map(), _position);
+
+	model()->insert_silence_at_start (c.from (-_start));
+	_start = 0;
 }

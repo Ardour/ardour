@@ -58,6 +58,31 @@ public:
 
 	class DiffCommand : public Command {
 	public:
+		
+		DiffCommand (boost::shared_ptr<MidiModel> m, const std::string& name);
+
+		const std::string& name () const { return _name; }
+
+		virtual void operator() () = 0;
+		virtual void undo () = 0;
+
+		virtual int set_state (const XMLNode&, int version) = 0;
+		virtual XMLNode & get_state () = 0;
+
+                boost::shared_ptr<MidiModel> model() const { return _model; }
+
+	protected:
+		boost::shared_ptr<MidiModel> _model;
+		const std::string            _name;
+
+	};
+
+	class NoteDiffCommand : public DiffCommand {
+	public:
+
+		NoteDiffCommand (boost::shared_ptr<MidiModel> m, const std::string& name) : DiffCommand (m, name) {}
+		NoteDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
+		
 		enum Property {
 			NoteNumber,
 			Velocity,
@@ -66,17 +91,12 @@ public:
 			Channel
 		};
 
-		DiffCommand (boost::shared_ptr<MidiModel> m, const std::string& name);
-		DiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
-
-		const std::string& name() const { return _name; }
-
-		void operator()();
-		void undo();
+		void operator() ();
+		void undo ();
 
 		int set_state (const XMLNode&, int version);
-		XMLNode& get_state ();
-
+		XMLNode & get_state ();
+		
 		void add (const NotePtr note);
 		void remove (const NotePtr note);
                 void side_effect_remove (const NotePtr note);
@@ -88,15 +108,11 @@ public:
                         return !_added_notes.empty() || !_removed_notes.empty();
                 }
 
-                DiffCommand& operator+= (const DiffCommand& other);
-                boost::shared_ptr<MidiModel> model() const { return _model; }
-
+                NoteDiffCommand& operator+= (const NoteDiffCommand& other);
+		
           private:
-		boost::shared_ptr<MidiModel> _model;
-		const std::string            _name;
-
 		struct NoteChange {
-			DiffCommand::Property property;
+			NoteDiffCommand::Property property;
 			NotePtr note;
 			union {
 				uint8_t  old_value;
@@ -124,9 +140,9 @@ public:
 		NotePtr unmarshal_note(XMLNode *xml_note);
 	};
 
-	MidiModel::DiffCommand*  new_diff_command(const std::string name="midi edit");
-	void                     apply_command(Session& session, Command* cmd);
-	void                     apply_command_as_subcommand(Session& session, Command* cmd);
+	MidiModel::NoteDiffCommand* new_note_diff_command (const std::string name="midi edit");
+	void apply_command (Session& session, Command* cmd);
+	void apply_command_as_subcommand (Session& session, Command* cmd);
 
 	bool sync_to_source ();
 	bool write_to(boost::shared_ptr<MidiSource> source);
@@ -150,6 +166,8 @@ public:
         void set_insert_merge_policy (InsertMergePolicy);
 
 	boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
+
+	void insert_silence_at_start (TimeType);
 
 protected:
         int resolve_overlaps_unlocked (const NotePtr, void* arg = 0);

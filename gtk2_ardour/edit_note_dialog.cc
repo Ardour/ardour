@@ -111,7 +111,7 @@ EditNoteDialog::run ()
 		return r;
 	}
 
-	_region_view->start_diff_command (_("edit note"));
+	_region_view->start_note_diff_command (_("edit note"));
 	
 	bool had_change = false;
 

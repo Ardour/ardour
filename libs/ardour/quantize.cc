@@ -63,7 +63,7 @@ Command*
 Quantize::operator () (boost::shared_ptr<MidiModel> model, std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>& seqs)
 {
 	bool even;
-	MidiModel::DiffCommand* cmd = new MidiModel::DiffCommand (model, "quantize");
+	MidiModel::NoteDiffCommand* cmd = new MidiModel::NoteDiffCommand (model, "quantize");
 
 	for (std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>::iterator s = seqs.begin(); s != seqs.end(); ++s) {
 
@@ -102,7 +102,7 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model, std::vector<Evoral::S
 			if (fabs (delta) >= _threshold) {
 				if (_snap_start) {
 					delta *= _strength;
-					cmd->change ((*i), MidiModel::DiffCommand::StartTime,
+					cmd->change ((*i), MidiModel::NoteDiffCommand::StartTime,
 						     (*i)->time() + delta);
 				}
 			}
@@ -117,7 +117,7 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model, std::vector<Evoral::S
 						new_dur = _end_grid;
 					}
 
-					cmd->change ((*i), MidiModel::DiffCommand::Length, new_dur);
+					cmd->change ((*i), MidiModel::NoteDiffCommand::Length, new_dur);
 				}
 			}
 

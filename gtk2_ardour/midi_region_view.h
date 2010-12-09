@@ -180,11 +180,11 @@ class MidiRegionView : public RegionView
 
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
-	void start_diff_command(std::string name = "midi edit");
-	void diff_add_change(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::DiffCommand::Property, uint8_t val);
-	void diff_add_change(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::DiffCommand::Property, Evoral::MusicalTime val);
-	void diff_add_note(const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity=false);
-	void diff_remove_note(ArdourCanvas::CanvasNoteEvent* ev);
+	void start_note_diff_command (std::string name = "midi edit");
+	void note_diff_add_change (ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, uint8_t val);
+	void note_diff_add_change (ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, Evoral::MusicalTime val);
+	void note_diff_add_note (const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity = false);
+	void note_diff_remove_note (ArdourCanvas::CanvasNoteEvent* ev);
 
 	void apply_diff();
 	void apply_diff_as_subcommand();
@@ -363,7 +363,7 @@ class MidiRegionView : public RegionView
 	SysExes                              _sys_exes;
 	ArdourCanvas::CanvasNote**           _active_notes;
 	ArdourCanvas::Group*                 _note_group;
-	ARDOUR::MidiModel::DiffCommand*      _diff_command;
+	ARDOUR::MidiModel::NoteDiffCommand*  _note_diff_command;
 	ArdourCanvas::CanvasNote*            _ghost_note;
 	double                               _last_ghost_x;
 	double                               _last_ghost_y;

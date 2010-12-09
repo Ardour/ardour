@@ -107,13 +107,20 @@ class MidiRegion : public Region
 	boost::shared_ptr<MidiModel> model()             { return midi_source()->model(); }
 	boost::shared_ptr<const MidiModel> model() const { return midi_source()->model(); }
 
+	void fix_negative_start ();
+
+  protected:
+	
+	virtual bool can_trim_start_before_source_start () const {
+		return true;
+	}
+
   private:
 	friend class RegionFactory;
 
 	MidiRegion (const SourceList&);
 	MidiRegion (boost::shared_ptr<const MidiRegion>, frameoffset_t offset = 0, bool offset_relative = true);
 
-  private:
 	framecnt_t _read_at (const SourceList&, Evoral::EventSink<framepos_t>& dst,
 			     framepos_t position,
 			     framecnt_t dur,

@@ -3186,14 +3186,14 @@ Session::restore_history (string snapshot_name)
 					ut->add_command(c);
 				}
 
-			} else if (n->name() == "DiffCommand") {
-				PBD::ID  id(n->property("midi-source")->value());
+			} else if (n->name() == "NoteDiffCommand") {
+				PBD::ID id (n->property("midi-source")->value());
 				boost::shared_ptr<MidiSource> midi_source =
 					boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
 				if (midi_source) {
-					ut->add_command(new MidiModel::DiffCommand(midi_source->model(), *n));
+					ut->add_command (new MidiModel::NoteDiffCommand(midi_source->model(), *n));
 				} else {
-					error << _("Failed to downcast MidiSource for DiffCommand") << endmsg;
+					error << _("Failed to downcast MidiSource for NoteDiffCommand") << endmsg;
 				}
 
 			} else if (n->name() == "StatefulDiffCommand") {

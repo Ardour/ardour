@@ -1533,6 +1533,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	framepos_t const pf = adjusted_current_frame (event);
 
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+		/* Move the contents of the region around without changing the region bounds */
 		_operation = ContentsTrim;
 		Drag::start_grab (event, _editor->cursors()->trimmer);
 	} else {
@@ -1691,6 +1692,16 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (movement_occurred) {
 		motion (event, false);
 
+		/* This must happen before the region's StatefulDiffCommand is created, as it may
+		   `correct' (ahem) the region's _start from being negative to being zero.  It
+		   needs to be zero in the undo record.
+		*/
+		if (_operation == StartTrim) {
+			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+				i->view->trim_front_ending ();
+			}
+		}
+		
 		if (!_editor->selection->selected (_primary)) {
 			_primary->thaw_after_trim ();
 		} else {
@@ -1709,7 +1720,6 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 
 		_editor->motion_frozen_playlists.clear ();
-
 		if (_have_transaction) {
 			_editor->commit_reversible_command();
 		}
@@ -1723,6 +1733,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (_operation == StartTrim) {
 			i->view->trim_front_ending ();
 		}
+		
 		i->view->region()->resume_property_changes ();
 	}
 }
