@@ -112,10 +112,9 @@ class RegionView : public TimeAxisViewItem
 	void trim_contents (framepos_t, bool, bool);
 	virtual void thaw_after_trim ();
 
-        void set_silent_frames (const ARDOUR::AudioIntervalResult&);
+        void set_silent_frames (const ARDOUR::AudioIntervalResult&, double threshold);
         void drop_silent_frames ();
         void hide_silent_frames ();
-        void show_silent_frames ();
 
   protected:
 
@@ -173,11 +172,12 @@ class RegionView : public TimeAxisViewItem
 	*/
 	std::list<ArdourCanvas::SimpleRect*> _coverage_frames;
 
-	/** a list of rectangles which are used in stacked display mode to colour
-	    different bits of regions according to whether or not they are the one
-	    that will be played at any given time.
+	/** a list of rectangles used to show silent segments 
 	*/
 	std::list<ArdourCanvas::SimpleRect*> _silent_frames;
+	/** a list of rectangles used to show the current silence threshold
+	*/
+	std::list<ArdourCanvas::SimpleRect*> _silent_threshold_frames;
         /** a text item to display strip silence statistics
          */
         ArdourCanvas::NoEventText* _silence_text;

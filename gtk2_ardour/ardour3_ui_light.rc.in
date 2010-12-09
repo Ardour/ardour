@@ -72,6 +72,11 @@ style "verbose_canvas_cursor"
 	font_name = "@FONT_BOLD_LARGER@"
 }
 
+style "silence_text"
+{
+	font_name = "@FONT_BOLD_NORMAL@"
+}
+
 style "marker_text" 
 {
 	font_name = "@FONT_NORMAL@"
@@ -1264,6 +1269,7 @@ class "GtkProgressBar" style:highest "ardour_progressbars"
 widget "*PaddedButton" style:highest "padded_button"
 widget "*FirstActionMessage" style:highest "first_action_message"
 widget "*VerboseCanvasCursor" style:highest "verbose_canvas_cursor"
+widget "*SilenceText" style:highest "silence_text"
 widget "*MarkerText" style:highest "marker_text"
 widget "*TimeAxisViewItemName*" style:highest "time_axis_view_item_name"
 #widget "*ExportProgress" style:highest "default_generic"

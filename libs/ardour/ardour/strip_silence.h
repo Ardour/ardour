@@ -30,7 +30,7 @@ class StripSilence : public Filter
 	int run (boost::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
 
 private:
-        AudioIntervalMap _smap;
+        const AudioIntervalMap& _smap;
 	framecnt_t _fade_length; ///< fade in/out to use on trimmed regions, in samples
 };
 

@@ -4559,7 +4559,9 @@ Editor::strip_region_silence ()
         d.drop_rects ();
 	
         if (r == Gtk::RESPONSE_OK) {
-		StripSilence s (*_session, d.silences(), d.fade_length());
+                ARDOUR::AudioIntervalMap silences;
+                d.silences (silences);
+		StripSilence s (*_session, silences, d.fade_length());
 		apply_filter (s, _("strip silence"), &d);
 	} 
 }

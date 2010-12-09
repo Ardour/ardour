@@ -84,9 +84,12 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
         _minimum_length.set_mode (AudioClock::Frames);
         _minimum_length.set (1000, true);
 
+        /* Add this back when we finally do something with it */
+        /*
 	table->attach (*Gtk::manage (new Gtk::Label (_("Fade length"), 1, 0.5)), 0, 1, n, n + 1, Gtk::FILL);
         table->attach (_fade_length, 1, 2, n, n + 1, Gtk::FILL);
 	++n;
+        */
 
         _fade_length.set_session (s);
         _fade_length.set_mode (AudioClock::Frames);
@@ -133,17 +136,13 @@ StripSilenceDialog::~StripSilenceDialog ()
 	delete _peaks_ready_connection;
 }
 
-AudioIntervalMap
-StripSilenceDialog::silences ()
+void
+StripSilenceDialog::silences (AudioIntervalMap& m)
 {
-        AudioIntervalMap m;
-
         for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
                 pair<boost::shared_ptr<Region>,AudioIntervalResult> newpair ((*v).view->region(), (*v).intervals);
                 m.insert (newpair);
         }
-
-        return m;
 }
 
 void
@@ -188,8 +187,10 @@ StripSilenceDialog::update_silence_rects ()
 {
 	/* Lock so that we don't contend with the detection thread for access to the silence regions */
 	Glib::Mutex::Lock lm (_lock);
+        double const y = _threshold.get_value();
+
         for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
-                (*v).view->set_silent_frames ((*v).intervals);
+                (*v).view->set_silent_frames ((*v).intervals, y);
 	}
 }
 

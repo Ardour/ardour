@@ -44,7 +44,7 @@ public:
 
         void drop_rects ();
 
-        ARDOUR::AudioIntervalMap silences ();
+        void silences (ARDOUR::AudioIntervalMap&);
         
 	ARDOUR::framecnt_t minimum_length () const;
         ARDOUR::framecnt_t fade_length () const;
