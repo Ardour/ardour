@@ -330,10 +330,10 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		return;
 	}
 
-	boost::shared_ptr<PortGroup> bus (new PortGroup (_("Bus")));
-	boost::shared_ptr<PortGroup> track (new PortGroup (_("Track")));
-	boost::shared_ptr<PortGroup> system (new PortGroup (_("System")));
-	boost::shared_ptr<PortGroup> ardour (new PortGroup (PROGRAM_NAME));
+	boost::shared_ptr<PortGroup> bus (new PortGroup (string_compose (PROGRAM_NAME " %1", _("Busses"))));
+	boost::shared_ptr<PortGroup> track (new PortGroup (string_compose (PROGRAM_NAME " %1", _("Tracks"))));
+	boost::shared_ptr<PortGroup> system (new PortGroup (_("Hardware")));
+	boost::shared_ptr<PortGroup> ardour (new PortGroup (string_compose (PROGRAM_NAME " %1", _("Misc"))));
 	boost::shared_ptr<PortGroup> other (new PortGroup (_("Other")));
 
 	/* Find the IOs which have bundles for routes and their processors.  We store
@@ -346,9 +346,16 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 
+                /* we never show the monitor bus inputs */
+
+                if (inputs && (*i)->is_monitor()) {
+                        continue;
+                }
+
 		/* keep track of IOs that we have taken bundles from,
 		   so that we can avoid taking the same IO from both
-		   Route::output() and the main_outs Delivery */
+		   Route::output() and the main_outs Delivery 
+                */
 
 		set<boost::shared_ptr<IO> > used_io;
 		boost::shared_ptr<IO> io = inputs ? (*i)->input() : (*i)->output();

@@ -1006,7 +1006,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<MonitorModel>* mm = new ComboOption<MonitorModel> (
 		"monitoring-model",
-		_("Monitoring handled by"),
+		_("Record monitoring handled by"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_monitoring_model),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_monitoring_model)
 		);
