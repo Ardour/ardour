@@ -543,9 +543,6 @@ ARDOUR_UI::build_menu_bar ()
 	use_menubar_as_top_menubar ();
 #endif
 
-	_menu_bar_clock.ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::menu_bar_clock_value_changed));
-	menu_hbox.pack_start (_menu_bar_clock, true, false);
-
  	if (!Profile->get_small_screen()) {
 #ifndef GTKOSX
 		// OSX provides its own wallclock, thank you very much
@@ -780,28 +777,5 @@ ARDOUR_UI::toggle_global_port_matrix (ARDOUR::DataType t)
 		} else {
 			_global_port_matrix[t]->get()->hide ();
 		}
-	}
-}
-
-void
-ARDOUR_UI::show_menu_bar_clock ()
-{
-	_menu_bar_clock.show ();
-	_menu_bar_clock.set (_session->audible_frame (), true);
-	_menu_bar_clock_connection = ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (_menu_bar_clock, &AudioClock::set), 'p'));
-}
-
-void
-ARDOUR_UI::hide_menu_bar_clock ()
-{
-	_menu_bar_clock.hide ();
-	_menu_bar_clock_connection.disconnect ();
-}
-
-void
-ARDOUR_UI::menu_bar_clock_value_changed ()
-{
-	if (_session) {
-		_session->request_locate (_menu_bar_clock.current_time ());
 	}
 }

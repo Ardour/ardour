@@ -534,12 +534,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	sigc::connection point_oh_five_second_connection;
 	sigc::connection point_zero_one_second_connection;
 
-	AudioClock _menu_bar_clock;
-	sigc::connection _menu_bar_clock_connection;
-	void menu_bar_clock_value_changed ();
-	void show_menu_bar_clock ();
-	void hide_menu_bar_clock ();
-
 	gint session_menu (GdkEventButton *);
 
 	bool _will_create_new_session_automatically;
