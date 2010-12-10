@@ -729,3 +729,8 @@ AudioTrack::write_source (uint32_t n)
 	return ds->write_source (n);
 }
 
+bool
+AudioTrack::bounceable () const
+{
+	return n_inputs().n_audio() >= n_outputs().n_audio();
+}

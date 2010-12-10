@@ -3599,7 +3599,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	boost::shared_ptr<AudioFileSource> fsource;
 	uint32_t x;
 	char buf[PATH_MAX+1];
-	ChanCount nchans(track.n_channels());
+	ChanCount diskstream_channels (track.n_channels());
 	framepos_t position;
 	framecnt_t this_chunk;
 	framepos_t to_do;
@@ -3609,6 +3609,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	framepos_t len = end - start;
 	bool need_block_size_reset = false;
 	string ext;
+	ChanCount const max_proc = track.max_processor_streams ();
 
 	if (end <= start) {
 		error << string_compose (_("Cannot write a range where end <= start (e.g. %1 <= %2)"),
@@ -3636,7 +3637,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 	ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
 
-	for (uint32_t chan_n=0; chan_n < nchans.n_audio(); ++chan_n) {
+	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n_audio(); ++chan_n) {
 
 		for (x = 0; x < 99999; ++x) {
 			snprintf (buf, sizeof(buf), "%s/%s-%d-bounce-%" PRIu32 "%s", sound_dir.c_str(), playlist->name().c_str(), chan_n, x+1, ext.c_str());
@@ -3674,10 +3675,10 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	to_do = len;
 
 	/* create a set of reasonably-sized buffers */
-	buffers.ensure_buffers(DataType::AUDIO, nchans.n_audio(), chunk_size);
-	buffers.set_count(nchans);
+	buffers.ensure_buffers (DataType::AUDIO, max_proc.n_audio(), chunk_size);
+	buffers.set_count (max_proc);
 
-	for (vector<boost::shared_ptr<Source> >::iterator src=srcs.begin(); src != srcs.end(); ++src) {
+	for (vector<boost::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
 		if (afs)
 			afs->prepare_for_peakfile_writes ();

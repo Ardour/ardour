@@ -99,6 +99,11 @@ class Track : public Route, public PublicDiskstream
 
 	void set_block_size (pframes_t);
 
+	/** @return true if the track can be bounced, or false if it cannot because
+	 *  it has more outputs than diskstream channels.
+	 */
+	virtual bool bounceable () const = 0;
+
 	/* PublicDiskstream interface */
 	boost::shared_ptr<Playlist> playlist ();
 	void monitor_input (bool);

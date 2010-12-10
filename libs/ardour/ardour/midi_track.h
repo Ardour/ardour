@@ -103,6 +103,10 @@ public:
 	uint16_t get_channel_mask ();
 	boost::shared_ptr<MidiPlaylist> midi_playlist ();
 
+	bool bounceable () const {
+		return false;
+	}
+	
 	PBD::Signal2<void, boost::shared_ptr<MidiBuffer>, boost::weak_ptr<MidiSource> > DataRecorded;
 
 protected:

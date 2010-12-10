@@ -61,6 +61,8 @@ class AudioTrack : public Track
 
 	boost::shared_ptr<AudioFileSource> write_source (uint32_t n = 0);
 
+	bool bounceable () const;
+	
   protected:
 	boost::shared_ptr<AudioDiskstream> audio_diskstream () const;
 	XMLNode& state (bool full);

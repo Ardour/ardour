@@ -25,6 +25,8 @@
 
 #include <gtkmm/messagedialog.h>
 
+#include "gtkmm2ext/choice.h"
+
 #include "export_dialog.h"
 #include "editor.h"
 #include "public_editor.h"
@@ -139,9 +141,25 @@ Editor::bounce_region_selection ()
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&(*i)->get_time_axis_view());
+		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (rtv->route());
+
+		if (!track->bounceable()) {
+			MessageDialog d (
+				_("One or more of the selected regions' tracks cannot be bounced because it has more outputs than inputs.  "
+				  "You can fix this by increasing the number of inputs on that track.")
+				);
+			d.set_title (_("Cannot bounce"));
+			d.run ();
+			return;
+		}
+	}
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+
 		boost::shared_ptr<Region> region ((*i)->region());
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&(*i)->get_time_axis_view());
-		Track* track = dynamic_cast<Track*>(rtv->route().get());
+		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (rtv->route());
 
 		InterThreadInfo itt;
 

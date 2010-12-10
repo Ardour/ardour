@@ -3547,6 +3547,19 @@ Editor::freeze_route ()
 		return;
 	}
 
+	if (!clicked_routeview->track()->bounceable()) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (clicked_routeview);
+		if (rtv && !rtv->track()->bounceable()) {
+			MessageDialog d (
+				_("This route cannot be frozen because it has more outputs than inputs.  "
+				  "You can fix this by increasing the number of inputs.")
+				);
+			d.set_title (_("Cannot freeze"));
+			d.run ();
+			return;
+		}
+	}
+
 	InterThreadInfo itt;
 	current_interthread_info = &itt;
 
@@ -3572,6 +3585,19 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 	}
 
 	TrackSelection views = selection->tracks;
+
+	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (rtv && !rtv->track()->bounceable()) {
+			MessageDialog d (
+				_("One or more selected tracks cannot be bounced because it has more outputs than inputs.  "
+				  "You can fix this by increasing the number of inputs on that track.")
+				);
+			d.set_title (_("Cannot bounce"));
+			d.run ();
+			return;
+		}
+	}
 
 	framepos_t start = selection->time[clicked_selection].start;
 	framepos_t end = selection->time[clicked_selection].end;
