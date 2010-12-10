@@ -217,7 +217,7 @@ Send::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 	return true;
 }
 
-/** Caller must not hold process lock */
+/** Caller must hold process lock */
 bool
 Send::configure_io (ChanCount in, ChanCount out)
 {
@@ -226,7 +226,6 @@ Send::configure_io (ChanCount in, ChanCount out)
 	}
 
 	if (_output) {
-		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock());
 		_output->ensure_io (out, false, 0);
 	}
 
