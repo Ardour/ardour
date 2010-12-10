@@ -19,6 +19,7 @@
 
 #include <cstring>
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "midi++/manager.h"
 #include "midi++/mmc.h"
@@ -493,6 +494,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	std::vector<std::string> extra_system[DataType::num_types];
 	std::vector<std::string> extra_other[DataType::num_types];
 
+        string lpn (PROGRAM_NAME);
+        boost::to_lower (lpn);
+        string lpnc = lpn;
+        lpnc += ':';
+
 	const char ** ports = 0;
 	if (type == DataType::NIL) {
 		ports = session->engine().get_ports ("", "", inputs ? JackPortIsInput : JackPortIsOutput);
@@ -524,13 +530,28 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
                                         continue;
                                 }
 
+                                /* special hack: ignore our monitor inputs (which show up here because 
+                                   we excluded them earlier.
+                                */
+                                
+                                string lp = p;
+                                boost::to_lower (lp);
+
+                                if ((lp.find (N_(":monitor")) != string::npos) && 
+                                    (lp.find (lpn) != string::npos)) {
+                                        ++n;
+                                        continue;
+                                }
+
 				/* can't use the audio engine for this as we are looking at non-Ardour ports */
 
 				jack_port_t* jp = jack_port_by_name (session->engine().jack(), p.c_str());
 				if (jp) {
 					DataType t (jack_port_type (jp));
 					if (t != DataType::NIL) {
-						if (port_has_prefix (p, "system:") || port_has_prefix (p, "alsa_pcm") || port_has_prefix (p, "ardour:")) {
+						if (port_has_prefix (p, N_("system:")) || 
+                                                    port_has_prefix (p, N_("alsa_pcm")) || 
+                                                    port_has_prefix (p, lpnc)) {
 							extra_system[t].push_back (p);
 						} else {
 							extra_other[t].push_back (p);
