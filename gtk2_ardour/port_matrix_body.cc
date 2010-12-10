@@ -476,9 +476,12 @@ PortMatrixBody::highlight_associated_channels (int dim, ARDOUR::BundleChannel h)
 			if (!_matrix->should_show ((*i)->bundle->channel_type(j))) {
 				continue;
 			}
-			
+
 			bc[1 - dim] = ARDOUR::BundleChannel ((*i)->bundle, j);
-			if (_matrix->get_state (bc) == PortMatrixNode::ASSOCIATED) {
+
+			PortMatrixNode n (bc[0], bc[1]);
+
+			if (_matrix->get_association(n) != PortMatrixNode::NOT_ASSOCIATED) {
 				if (dim == _matrix->column_index()) {
 					_row_labels->add_channel_highlight (bc[1 - dim]);
 				} else {

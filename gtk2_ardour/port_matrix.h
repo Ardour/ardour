@@ -127,6 +127,8 @@ public:
 	bool should_show (ARDOUR::DataType) const;
 	uint32_t count_of_our_type (ARDOUR::ChanCount) const;
 
+	PortMatrixNode::State get_association (PortMatrixNode) const;
+
 	/** @param c Channels; where c[0] is from _ports[0] and c[1] is from _ports[1].
 	 *  @param s New state.
 	 */

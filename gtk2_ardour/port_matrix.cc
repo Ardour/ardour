@@ -939,3 +939,69 @@ PortMatrix::count_of_our_type (ChanCount c) const
 
 	return c.get (_type);
 }
+
+PortMatrixNode::State
+PortMatrix::get_association (PortMatrixNode node) const
+{
+	if (show_only_bundles ()) {
+
+		bool have_off_diagonal_association = false;
+		bool have_diagonal_association = false;
+		bool have_diagonal_not_association = false;
+
+		for (uint32_t i = 0; i < node.row.bundle->nchannels().n_total(); ++i) {
+
+			for (uint32_t j = 0; j < node.column.bundle->nchannels().n_total(); ++j) {
+
+				if (!should_show (node.row.bundle->channel_type(i)) || !should_show (node.column.bundle->channel_type(j))) {
+					continue;
+				}
+
+				ARDOUR::BundleChannel c[2];
+				c[column_index()] = ARDOUR::BundleChannel (node.row.bundle, i);
+				c[row_index()] = ARDOUR::BundleChannel (node.column.bundle, j);
+
+				PortMatrixNode::State const s = get_state (c);
+
+				switch (s) {
+				case PortMatrixNode::ASSOCIATED:
+					if (i == j) {
+						have_diagonal_association = true;
+					} else {
+						have_off_diagonal_association = true;
+					}
+					break;
+
+				case PortMatrixNode::NOT_ASSOCIATED:
+					if (i == j) {
+						have_diagonal_not_association = true;
+					}
+					break;
+
+				default:
+					break;
+				}
+			}
+		}
+
+		if (have_diagonal_association && !have_off_diagonal_association && !have_diagonal_not_association) {
+			return PortMatrixNode::ASSOCIATED;
+		} else if (!have_diagonal_association && !have_off_diagonal_association) {
+			return PortMatrixNode::NOT_ASSOCIATED;
+		}
+
+		return PortMatrixNode::PARTIAL;
+
+	} else {
+
+		ARDOUR::BundleChannel c[2];
+		c[column_index()] = node.column;
+		c[row_index()] = node.row;
+		return get_state (c);
+
+	}
+
+	/* NOTREACHED */
+	return PortMatrixNode::NOT_ASSOCIATED;
+}
+

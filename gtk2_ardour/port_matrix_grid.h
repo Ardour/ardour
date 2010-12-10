@@ -64,7 +64,6 @@ private:
 	void draw_empty_square (cairo_t *, uint32_t, uint32_t);
 	void draw_non_connectable_indicator (cairo_t *, uint32_t, uint32_t);
 	std::list<PortMatrixNode> nodes_on_line (int, int, int, int) const;
-	PortMatrixNode::State get_association (PortMatrixNode) const;
 	void set_association (PortMatrixNode, bool);
 	bool toggle_state (PortMatrixNode::State) const;
 
