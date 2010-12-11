@@ -459,7 +459,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 		Panner* panner = dynamic_cast<Panner*>(this);
 		if (panner) {
                         StreamPanner& sp (panner->streampanner (param.channel()));
-			control = new StreamPanner::PanControllable (_a_session, X_("direction"), sp, param);
+			control = new StreamPanner::PanControllable (_a_session, X_("direction"), &sp, param);
 		} else {
 			warning << "PanAutomation for non-Panner" << endl;
 		}

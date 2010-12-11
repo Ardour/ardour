@@ -88,14 +88,14 @@ class StreamPanner : public PBD::Stateful
 	virtual int load (std::istream&, std::string path, uint32_t&) = 0;
 
 	struct PanControllable : public AutomationControl {
-		PanControllable (Session& s, std::string name, StreamPanner& p, Evoral::Parameter param)
+		PanControllable (Session& s, std::string name, StreamPanner* p, Evoral::Parameter param)
 			: AutomationControl (s, param,
                                              boost::shared_ptr<AutomationList>(new AutomationList(param)), name)
 			, streampanner (p)
 		{ assert (param.type() == PanAutomation); }
                 
 		AutomationList* alist() { return (AutomationList*)_list.get(); }
-		StreamPanner& streampanner;
+		StreamPanner* streampanner;
 
 		void set_value (double);
 		double get_value (void) const;

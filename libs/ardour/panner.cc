@@ -75,7 +75,7 @@ static double direct_control_to_stereo_pan (double fract)
 
 StreamPanner::StreamPanner (Panner& p, Evoral::Parameter param)
 	: parent (p)
-        , _control (new PanControllable (parent.session(), _("direction"), *this, param))
+        , _control (new PanControllable (parent.session(), _("direction"), this, param))
 {
 	assert (param.type() != NullAutomation);
 
@@ -112,7 +112,7 @@ StreamPanner::PanControllable::lower () const
 void
 StreamPanner::PanControllable::set_value (double val)
 {
-        Panner& p (streampanner.get_parent());
+        Panner& p (streampanner->get_parent());
         switch (parameter().id()) {
         case 100:
                 /* position */
@@ -131,7 +131,7 @@ StreamPanner::PanControllable::set_value (double val)
                 break;
 
         default:
-                streampanner.set_position (AngularVector (direct_control_to_stereo_pan (val), 0.0));
+                streampanner->set_position (AngularVector (direct_control_to_stereo_pan (val), 0.0));
                 AutomationControl::set_value(val);
                 break;
         }
@@ -1505,19 +1505,28 @@ Panner::setup_meta_controls ()
         boost::shared_ptr<AutomationControl> dc = automation_control (lr_param);
         boost::shared_ptr<AutomationControl> wc = automation_control (width_param);
 
-        if (!dc) {
-                dc.reset (new StreamPanner::PanControllable (_session, _("lr"), *_streampanners.front(), lr_param));
+        if (dc) {
+		/* reset parent StreamPanner as the current one may have been deleted */
+		boost::shared_ptr<StreamPanner::PanControllable> p = boost::dynamic_pointer_cast<StreamPanner::PanControllable> (dc);
+		assert (p);
+		p->streampanner = _streampanners.front ();
+	} else {
+                dc.reset (new StreamPanner::PanControllable (_session, _("lr"), _streampanners.front(), lr_param));
                 add_control (dc);
         }
         
-        if (!wc) {
-                wc.reset (new StreamPanner::PanControllable (_session, _("width"), *_streampanners.front(), width_param));
+        if (wc) {
+		/* reset parent as above */
+		boost::shared_ptr<StreamPanner::PanControllable> p = boost::dynamic_pointer_cast<StreamPanner::PanControllable> (wc);
+		assert (p);
+		p->streampanner = _streampanners.front ();
+	} else {
+                wc.reset (new StreamPanner::PanControllable (_session, _("width"), _streampanners.front(), width_param));
                 add_control (wc);
         }
 
         dc->set_value (0.5);
         wc->set_value (1.0); // full width
-
 }
 
 string
