@@ -962,7 +962,7 @@ AudioEngine::frames_per_cycle () const
 	}
 }
 
-/** @param name Full or short name of port (including prefix:)
+/** @param name Full or short name of port
  *  @return Corresponding Port*, or 0.  This object remains the property of the AudioEngine
  *  so must not be deleted.
  */
