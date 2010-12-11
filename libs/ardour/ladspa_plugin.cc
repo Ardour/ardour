@@ -867,7 +867,7 @@ LadspaPlugin::do_save_preset (string name)
 	std::string unique (unique_id());
 
 	if (!isdigit (unique[0])) {
-		return false;
+		return "";
 	}
 
 	uint32_t const id = atol (unique.c_str());
@@ -885,7 +885,7 @@ LadspaPlugin::do_save_preset (string name)
 	string const envvar = preset_envvar ();
 	if (envvar.empty()) {
 		warning << _("Could not locate HOME.  Preset not saved.") << endmsg;
-		return false;
+		return "";
 	}
 
 	string const source = preset_source (envvar);

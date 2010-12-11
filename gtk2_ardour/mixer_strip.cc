@@ -1033,7 +1033,6 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 
 	ostringstream label;
 	string label_string;
-	char * label_cstr;
 
 	bool have_label = false;
 	bool each_io_has_one_connection = true;

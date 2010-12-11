@@ -61,7 +61,7 @@ URIMap::uri_to_id(const char* map,
 		} else {
 			if (_global_to_event.size() + 1 > UINT16_MAX) {
 				PBD::error << "Event URI " << uri << " ID out of range." << endl;
-				return NULL;
+				return 0;
 			}
 			const uint16_t ev_id = _global_to_event.size() + 1;
 			assert(_event_to_global.find(ev_id) == _event_to_global.end());

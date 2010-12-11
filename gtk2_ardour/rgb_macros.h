@@ -133,10 +133,10 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
   gint ph_a0, ph_a1; \
   gint ph_colr=(colr), ph_colg=(colg), ph_colb=(colb); \
 \
-  ph_a0 = MAX(ph_buf->rect.x0, (ptx0)); \
-  ph_a1 = MIN(ph_buf->rect.x1, (ptx1)); \
+  ph_a0 = MAX(ph_buf->rect.x0, (gint)(ptx0)); \
+  ph_a1 = MIN(ph_buf->rect.x1, (gint)(ptx1)); \
 \
-  if (ph_a0 < ph_a1 && BUF_INBOUNDS_Y(ph_buf, pty)) { \
+  if (ph_a0 < ph_a1 && BUF_INBOUNDS_Y(ph_buf, (gint)(pty))) { \
     ph_p = BUF_PTR(ph_buf, ph_a0, pty); \
     while (ph_a0 < ph_a1) { \
       PIXEL_RGB(ph_p, ph_colr, ph_colg, ph_colb); \
@@ -152,10 +152,10 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
   gint ph_a0, ph_a1; \
   gint ph_colr=(colr), ph_colg=(colg), ph_colb=(colb); \
 \
-  ph_a0 = MAX(ph_buf->rect.x0, (ptx0)); \
-  ph_a1 = MIN(ph_buf->rect.x1, (ptx1)); \
+  ph_a0 = MAX(ph_buf->rect.x0, (gint)(ptx0)); \
+  ph_a1 = MIN(ph_buf->rect.x1, (gint)(ptx1)); \
 \
-  if (ph_a0 < ph_a1 && BUF_INBOUNDS_Y(ph_buf, pty)) { \
+  if (ph_a0 < ph_a1 && BUF_INBOUNDS_Y(ph_buf, (gint)(pty))) { \
     ph_p = BUF_PTR(ph_buf, ph_a0, pty); \
     while (ph_a0 < ph_a1) { \
       PIXEL_RGB(ph_p, ph_colr, ph_colg, ph_colb); \
@@ -171,10 +171,10 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
   gint ph_a0, ph_a1; \
   gint ph_colr=(colr), ph_colg=(colg), ph_colb=(colb), ph_cola=(cola); \
 \
-  ph_a0 = MAX(ph_buf->rect.x0, (ptx0)); \
-  ph_a1 = MIN(ph_buf->rect.x1, (ptx1)); \
+  ph_a0 = MAX(ph_buf->rect.x0, (gint)(ptx0)); \
+  ph_a1 = MIN(ph_buf->rect.x1, (gint)(ptx1)); \
 \
-  if (ph_a0 < ph_a1 && BUF_INBOUNDS_Y(ph_buf, pty)) { \
+  if (ph_a0 < ph_a1 && BUF_INBOUNDS_Y(ph_buf, (gint)(pty))) { \
     ph_p = BUF_PTR(ph_buf, ph_a0, pty); \
     while (ph_a0 < ph_a1) { \
       PIXEL_RGBA(ph_p, ph_colr, ph_colg, ph_colb, ph_cola); \
@@ -190,10 +190,10 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
   gint pv_b0, pv_b1; \
   gint pv_colr=(colr), pv_colg=(colg), pv_colb=(colb);\
 \
-  pv_b0 = MAX(pv_buf->rect.y0, (pty0)); \
-  pv_b1 = MIN(pv_buf->rect.y1, (pty1)); \
+  pv_b0 = MAX(pv_buf->rect.y0, (gint)(pty0)); \
+  pv_b1 = MIN(pv_buf->rect.y1, (gint)(pty1)); \
 \
- if (pv_b0 < pv_b1 && BUF_INBOUNDS_X(pv_buf, ptx)) { \
+ if (pv_b0 < pv_b1 && BUF_INBOUNDS_X(pv_buf, (gint)(ptx))) { \
     pv_p = BUF_PTR(pv_buf, ptx, pv_b0); \
     while (pv_b0 < pv_b1) { \
       PIXEL_RGB(pv_p, pv_colr, pv_colg, pv_colb); \
@@ -208,8 +208,8 @@ UINT_TO_RGB((i), ((guchar*)p), ((guchar*)p)+1, ((guchar*)p)+2)
   guchar* fpv_p; \
   gint fpv_b0, fpv_b1; \
 \
-  fpv_b0 = MAX(fpv_buf->rect.y0, (pty0)); \
-  fpv_b1 = MIN(fpv_buf->rect.y1, (pty1)); \
+  fpv_b0 = MAX(fpv_buf->rect.y0, (gint)(pty0)); \
+  fpv_b1 = MIN(fpv_buf->rect.y1, (gint)(pty1)); \
 \
   fpv_p = BUF_PTR(fpv_buf, ptx, fpv_b0); \
 \

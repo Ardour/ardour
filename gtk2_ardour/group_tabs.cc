@@ -279,7 +279,7 @@ GroupTabs::click_to_tab (double c, list<Tab>::iterator* prev, list<Tab>::iterato
 		*next = i;
 
 		if (under) {
-			*next++;
+			(*next)++;
 		}
 	}
 
