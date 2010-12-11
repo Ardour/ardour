@@ -111,6 +111,13 @@ EditNoteDialog::run ()
 		return r;
 	}
 
+	/* These calls mean that if a value is entered using the keyboard
+	   it will be returned by the get_value_as_int()s below.
+	*/
+	_channel.update ();
+	_pitch.update ();
+	_velocity.update ();
+
 	_region_view->start_note_diff_command (_("edit note"));
 	
 	bool had_change = false;
