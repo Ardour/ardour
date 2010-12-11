@@ -2718,7 +2718,7 @@ Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool did_lo
 	_roll_delay = _initial_delay;
 }
 
-/** Called with the process lock held */
+/** Called with the process lock held if change contains ConfigurationChanged */
 void
 Route::input_change_handler (IOChange change, void * /*src*/)
 {
@@ -2729,7 +2729,7 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 	}
 }
 
-/** Called with the process lock held */
+/** Called with the process lock held if change contains ConfigurationChanged */
 void
 Route::output_change_handler (IOChange change, void * /*src*/)
 {

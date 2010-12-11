@@ -189,7 +189,6 @@ IO::disconnect (Port* our_port, string other_port, void* src)
 	return 0;
 }
 
-/** Caller must hold process lock */
 int
 IO::connect (Port* our_port, string other_port, void* src)
 {

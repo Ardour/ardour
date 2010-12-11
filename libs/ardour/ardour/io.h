@@ -133,8 +133,11 @@ class IO : public SessionObject, public Latent
 
 	const ChanCount& n_ports ()  const { return _ports.count(); }
 
-	/** Emitted with the process lock held */
-	PBD::Signal2<void,IOChange,void*> changed;
+	/* The process lock will be held on emission of this signal if
+	 * IOChange contains ConfigurationChanged.  In other cases,
+	 * the process lock status is undefined.
+	 */
+	PBD::Signal2<void, IOChange, void *> changed;
 
 	virtual XMLNode& state (bool full);
 	XMLNode& get_state (void);

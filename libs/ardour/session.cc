@@ -1933,6 +1933,9 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 				   picks up the configuration of the route. During session
 				   loading this normally happens in a different way.
 				*/
+				
+				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				
 				IOChange change (IOChange::Type (IOChange::ConfigurationChanged | IOChange::ConnectionsChanged));
 				change.after = route->input()->n_ports();
 				route->input()->changed (change, this);
