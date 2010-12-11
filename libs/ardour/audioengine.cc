@@ -979,11 +979,11 @@ AudioEngine::get_port_by_name (const string& portname)
 	}
 
 	if (portname.find_first_of (':') != string::npos) {
-                if (portname.substr (0, jack_client_name.length ()) != jack_client_name) {
-                        /* not an ardour: port */
-                        return 0;
-                }
-        }
+		if (portname.substr (0, jack_client_name.length ()) != jack_client_name) {
+			/* not an ardour: port */
+			return 0;
+		}
+	}
 
 	std::string const rel = make_port_name_relative (portname);
 

@@ -26,6 +26,8 @@
 #include "ardour/export_failed.h"
 #include "ardour/session.h"
 
+#include "pbd/error.h"
+
 using namespace ARDOUR;
 
 bool
@@ -72,7 +74,13 @@ PortExportChannel::set_state (XMLNode * node, Session & session)
 	XMLNodeList xml_ports = node->children ("Port");
 	for (XMLNodeList::iterator it = xml_ports.begin(); it != xml_ports.end(); ++it) {
 		if ((prop = (*it)->property ("name"))) {
-			ports.insert (dynamic_cast<AudioPort *> (session.engine().get_port_by_name (prop->value())));
+			std::string const & name = prop->value();
+			AudioPort * port = dynamic_cast<AudioPort *> (session.engine().get_port_by_name (name));
+			if (port) {
+				ports.insert (port);
+			} else {
+				PBD::warning << string_compose (_("Could not get port for export channel \"%1\", dropping the channel"), name) << endmsg;
+			}
 		}
 	}
 }
