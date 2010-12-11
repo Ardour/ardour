@@ -224,9 +224,7 @@ OSC::start ()
 void
 OSC::thread_init ()
 {
-	char* c = new char[4];
-	strcpy (c, X_("OSC"));
-	pthread_set_name (c);
+	pthread_set_name (X_("OSC"));
 
 	if (_osc_unix_server) {
 		Glib::RefPtr<IOSource> src = IOSource::create (lo_server_get_socket_fd (_osc_unix_server), IO_IN|IO_HUP|IO_ERR);

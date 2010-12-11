@@ -210,11 +210,11 @@ ControlProtocolManager::control_protocol_discover (string path)
 
 	if ((descriptor = get_descriptor (path)) != 0) {
 
-		ControlProtocolInfo* cpi = new ControlProtocolInfo ();
-
 		if (!descriptor->probe (descriptor)) {
 			info << string_compose (_("Control protocol %1 not usable"), descriptor->name) << endmsg;
 		} else {
+
+			ControlProtocolInfo* cpi = new ControlProtocolInfo ();
 
 			cpi->descriptor = descriptor;
 			cpi->name = descriptor->name;

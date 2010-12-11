@@ -1180,13 +1180,10 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 		break;
   	}
 
-	label_cstr = new char[label_string.size() + 1];
-	strcpy(label_cstr, label_string.c_str());
-
 	if (for_input) {
-		input_label.set_text (label_cstr);
+		input_label.set_text (label_string);
 	} else {
-		output_label.set_text (label_cstr);
+		output_label.set_text (label_string);
 	}
 }
 

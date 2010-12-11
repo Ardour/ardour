@@ -154,9 +154,7 @@ MidiControlUI::thread_init ()
 {	
 	struct sched_param rtparam;
 
-	char* c = new char[7];
-	strcpy (c, X_("midiUI"));
-	pthread_set_name (c);
+	pthread_set_name (X_("midiUI"));
 
 	PBD::notify_gui_about_thread_creation (X_("gui"), pthread_self(), X_("MIDI"), 2048);
 	SessionEvent::create_per_thread_pool (X_("MIDI I/O"), 128);
