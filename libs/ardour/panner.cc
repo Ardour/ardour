@@ -1502,15 +1502,15 @@ Panner::setup_meta_controls ()
         
         Evoral::Parameter lr_param (PanAutomation, 0, 100);
         Evoral::Parameter width_param (PanAutomation, 0, 200);
-        boost::shared_ptr<AutomationControl> wc;
-        boost::shared_ptr<AutomationControl> dc;
+        boost::shared_ptr<AutomationControl> dc = automation_control (lr_param);
+        boost::shared_ptr<AutomationControl> wc = automation_control (width_param);
 
-        if (!automation_control (lr_param)) {
+        if (!dc) {
                 dc.reset (new StreamPanner::PanControllable (_session, _("lr"), *_streampanners.front(), lr_param));
                 add_control (dc);
         }
         
-        if (!automation_control (width_param)) {
+        if (!wc) {
                 wc.reset (new StreamPanner::PanControllable (_session, _("width"), *_streampanners.front(), width_param));
                 add_control (wc);
         }
