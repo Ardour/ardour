@@ -656,8 +656,11 @@ VSTPlugin::get_presets ()
 		
 		if (vst_version >= 2) {
 			char buf[256];
-			_plugin->dispatcher (_plugin, 29, i, 0, buf, 0);
-			r.label = buf;
+			if (_plugin->dispatcher (_plugin, 29, i, 0, buf, 0) == 1) {
+				r.label = buf;
+			} else {
+				r.label = string_compose (_("Preset %1"), i);
+			}
 		} else {
 			r.label = string_compose (_("Preset %1"), i);
 		}
