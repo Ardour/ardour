@@ -99,8 +99,8 @@ boost::shared_ptr<MidiRegion>
 MidiRegion::clone ()
 {
         BeatsFramesConverter bfc (_session.tempo_map(), _position);
-        double bbegin = bfc.from (_position);
-        double bend = bfc.from (last_frame() + 1);
+	Evoral::MusicalTime const bbegin = bfc.from (_start);
+	Evoral::MusicalTime const bend = bfc.from (_start + _length);
 
         boost::shared_ptr<MidiSource> ms = midi_source(0)->clone (bbegin, bend);
 
@@ -108,7 +108,7 @@ MidiRegion::clone ()
 
         plist.add (Properties::name, ms->name());
         plist.add (Properties::whole_file, true);
-        plist.add (Properties::start, 0);
+        plist.add (Properties::start, _start);
         plist.add (Properties::length, _length);
         plist.add (Properties::layer, 0);
 
