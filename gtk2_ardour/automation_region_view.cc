@@ -67,8 +67,6 @@ AutomationRegionView::init (Gdk::Color const & basic_color, bool /*wfd*/)
 
 	set_height (trackview.current_height());
 
-	_region->PropertyChanged.connect (*this, invalidator (*this), ui_bind (&RegionView::region_changed, this, _1), gui_context());
-
 	set_colors ();
 
 	_enable_display = true;
@@ -88,6 +86,7 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 	_line->show();
 	_line->show_all_control_points();
 	_line->set_maximum_time (_region->length());
+	_line->set_offset (_region->start ());
 }
 
 bool
@@ -203,10 +202,17 @@ AutomationRegionView::reset_width_dependent_items (double pixel_width)
 void
 AutomationRegionView::region_resized (const PBD::PropertyChange& what_changed)
 {
-	RegionView::region_resized(what_changed);
+	RegionView::region_resized (what_changed);
 
-	if (_line) {
-		_line->reset();
+	if (!_line) {
+		return;
+	}
+
+	if (what_changed.contains (ARDOUR::Properties::start)) {
+		_line->set_offset (_region->start ());
+	}
+
+	if (what_changed.contains (ARDOUR::Properties::length)) {
 		_line->set_maximum_time (_region->length());
 	}
 }
@@ -226,4 +232,3 @@ AutomationRegionView::exited()
 	if (_line)
 		_line->track_exited();
 }
-

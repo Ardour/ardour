@@ -64,6 +64,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	, _name (name)
 	, alist (al)
 	, _parent_group (parent)
+	, _offset (0)
 	, _time_converter (converter ? (*converter) : default_converter)
 	, _maximum_time (max_framepos)
 {
@@ -226,7 +227,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	y = min (1.0, y);
 	y = _height - (y * _height);
 
-	double const x = trackview.editor().frame_to_unit (_time_converter.to((*cp.model())->when));
+	double const x = trackview.editor().frame_to_unit (_time_converter.to((*cp.model())->when) - _offset);
 
 	trackview.editor().session()->begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (
@@ -287,11 +288,11 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 
 	/* if xval has not changed, set it directly from the model to avoid rounding errors */
 
-	if (mr.xval == trackview.editor().frame_to_unit(_time_converter.to((*cp.model())->when))) {
-		mr.xval = (*cp.model())->when;
+	if (mr.xval == trackview.editor().frame_to_unit(_time_converter.to((*cp.model())->when)) - _offset) {
+		mr.xval = (*cp.model())->when - _offset;
 	} else {
 		mr.xval = trackview.editor().unit_to_frame (mr.xval);
-		mr.xval = _time_converter.from (mr.xval);
+		mr.xval = _time_converter.from (mr.xval + _offset);
 	}
 
 	/* convert y to model units; the x was already done above
@@ -302,7 +303,7 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 	/* part 2: find out where the model point is now
 	 */
 
-	mr.xpos = (*cp.model())->when;
+	mr.xpos = (*cp.model())->when - _offset;
 	mr.ypos = (*cp.model())->value;
 
 	/* part 3: get the position of the visual control
@@ -975,7 +976,7 @@ AutomationLine::get_selectables (
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		double const model_when = (*(*i)->model())->when;
-		framepos_t const session_frames_when = _time_converter.to (model_when) + _time_converter.origin_b ();
+		framepos_t const session_frames_when = _time_converter.to (model_when - _offset) + _time_converter.origin_b ();
 
 		if (session_frames_when >= start && session_frames_when <= end && (*i)->get_y() >= bot_track && (*i)->get_y() <= top_track) {
 			results.push_back (*i);
@@ -1074,11 +1075,13 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		double translated_x = (*ai)->when;
 		double translated_y = (*ai)->value;
 		model_to_view_coord (translated_x, translated_y);
-		
-		tmp_points.push_back (ALPoint (
-					      trackview.editor().frame_to_unit (_time_converter.to ((*ai)->when)),
-					      _height - (translated_y * _height))
-			);
+
+		if (translated_x >= 0 && translated_x < _maximum_time) {
+			tmp_points.push_back (ALPoint (
+						      trackview.editor().frame_to_unit (translated_x),
+						      _height - (translated_y * _height))
+				);
+		}
 	}
 
 	determine_visible_control_points (tmp_points);
@@ -1227,7 +1230,7 @@ AutomationLine::model_to_view_coord (double& x, double& y) const
 		y = y / (double)alist->parameter().max(); /* ... like this */
 	}
 
-	x = _time_converter.to(x);
+	x = _time_converter.to (x) - _offset;
 }
 
 /** Called when our list has announced that its interpolation style has changed */
@@ -1328,9 +1331,14 @@ AutomationLine::memento_command_binder ()
  *  to the start of the track or region that it is on.
  */
 void
-AutomationLine::set_maximum_time (framepos_t t)
+AutomationLine::set_maximum_time (framecnt_t t)
 {
+	if (_maximum_time == t) {
+		return;
+	}
+
 	_maximum_time = t;
+	reset ();
 }
 
 
@@ -1341,9 +1349,20 @@ AutomationLine::get_point_x_range () const
 	pair<framepos_t, framepos_t> r (max_framepos, 0);
 
 	for (AutomationList::const_iterator i = the_list()->begin(); i != the_list()->end(); ++i) {
-		r.first = min (r.first, _time_converter.to ((*i)->when) + _time_converter.origin_b ());
-		r.second = max (r.second, _time_converter.to ((*i)->when) + _time_converter.origin_b ());
+		r.first = min (r.first, _time_converter.to ((*i)->when) + _offset + _time_converter.origin_b ());
+		r.second = max (r.second, _time_converter.to ((*i)->when) + _offset + _time_converter.origin_b ());
 	}
 
 	return r;
+}
+
+void
+AutomationLine::set_offset (framepos_t off)
+{
+	if (_offset == off) {
+		return;
+	}
+	
+	_offset = off;
+	reset ();
 }

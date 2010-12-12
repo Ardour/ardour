@@ -140,10 +140,13 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	std::pair<ARDOUR::framepos_t, ARDOUR::framepos_t> get_point_x_range () const;
 
-	void set_maximum_time (ARDOUR::framepos_t);
- 	ARDOUR::framepos_t maximum_time () const {
+	void set_maximum_time (ARDOUR::framecnt_t);
+ 	ARDOUR::framecnt_t maximum_time () const {
 		return _maximum_time;
 	}
+
+	void set_offset (ARDOUR::framecnt_t);
+	void set_width (ARDOUR::framecnt_t);
 	
   protected:
 
@@ -199,6 +202,10 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	double _drag_distance; ///< total x movement of the drag, in units
 	double _last_drag_fraction; ///< last y position of the drag, as a fraction
 	std::list<double> _always_in_view;
+	/** offset from the start of the automation list to the start of the line, so that
+	 *  a +ve offset means that the 0 on the line is at _offset in the list
+	 */
+	ARDOUR::framecnt_t _offset;
 
 	const Evoral::TimeConverter<double, ARDOUR::framepos_t>& _time_converter;
 
@@ -225,7 +232,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	PBD::ScopedConnectionList _list_connections;
 
-	/** maximum time that a point on this line can be at, relative to the start of its region or track */
+	/** maximum time that a point on this line can be at, relative to the position of its region or start of its track */
 	ARDOUR::framecnt_t _maximum_time;
 	
 	friend class AudioRegionGainLine;
