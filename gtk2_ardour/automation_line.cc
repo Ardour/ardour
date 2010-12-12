@@ -1074,19 +1074,14 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		double translated_x = (*ai)->when;
 		double translated_y = (*ai)->value;
 		model_to_view_coord (translated_x, translated_y);
-
-		add_model_point (tmp_points, (*ai)->when, translated_y);
+		
+		tmp_points.push_back (ALPoint (
+					      trackview.editor().frame_to_unit (_time_converter.to ((*ai)->when)),
+					      _height - (translated_y * _height))
+			);
 	}
 
 	determine_visible_control_points (tmp_points);
-}
-
-
-void
-AutomationLine::add_model_point (ALPoints& tmp_points, double frame, double yfract)
-{
-	tmp_points.push_back (ALPoint (trackview.editor().frame_to_unit (_time_converter.to(frame)),
-				       _height - (yfract * _height)));
 }
 
 void

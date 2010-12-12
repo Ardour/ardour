@@ -190,7 +190,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	void list_changed ();
 
 	virtual bool event_handler (GdkEvent*);
-	virtual void add_model_point (ALPoints& tmp_points, double frame, double yfract);
 
   private:
 	std::list<ControlPoint*> _drag_points; ///< points we are dragging

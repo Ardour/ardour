@@ -24,12 +24,8 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 
-#include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
-#include "ardour/midi_diskstream.h"
-#include "ardour/midi_track.h"
-#include "ardour/smf_source.h"
 #include "ardour/region_factory.h"
 
 #include "automation_streamview.h"
@@ -79,8 +75,9 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 
 	if (wfd) {
 		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
-		if (mr)
+		if (mr) {
 			mr->midi_source()->load_model();
+		}
 	}
 
 	const boost::shared_ptr<AutomationControl> control = boost::dynamic_pointer_cast<AutomationControl> (
