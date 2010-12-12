@@ -393,7 +393,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleTimeMaster"), _("Time Master"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_time_master));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleExternalSync"), _(""), sigc::mem_fun(*this, &ARDOUR_UI::toggle_external_sync));
+	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleExternalSync"), "", sigc::mem_fun(*this, &ARDOUR_UI::toggle_external_sync));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	for (int i = 1; i <= 32; ++i) {

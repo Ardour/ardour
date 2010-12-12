@@ -57,7 +57,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
   sample_rate_label (_("Sample rate"), Gtk::ALIGN_LEFT),
   src_quality_label (_("Sample rate conversion quality:"), Gtk::ALIGN_RIGHT),
 
-  encoding_options_label (_(""), Gtk::ALIGN_LEFT),
+  encoding_options_label ("", Gtk::ALIGN_LEFT),
 
   /* Changing encoding options from here on */
 
