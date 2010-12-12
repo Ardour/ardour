@@ -629,6 +629,12 @@ MidiDiskstream::set_pending_overwrite (bool yn)
 int
 MidiDiskstream::overwrite_existing_buffers ()
 {
+	/* This is safe as long as the butler thread is suspended, which it should be */
+	_playback_buf->reset ();
+
+	g_atomic_int_set (&_frames_read_from_ringbuffer, 0);
+	g_atomic_int_set (&_frames_written_to_ringbuffer, 0);
+	
 	read (overwrite_frame, disk_io_chunk_frames, false);
 	overwrite_queued = false;
 	_pending_overwrite = false;
