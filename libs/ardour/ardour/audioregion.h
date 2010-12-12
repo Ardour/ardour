@@ -44,7 +44,6 @@ namespace Properties {
 	extern PBD::PropertyDescriptor<bool> fade_in_active;
 	extern PBD::PropertyDescriptor<bool> fade_out_active;
 	extern PBD::PropertyDescriptor<float> scale_amplitude;
-	extern PBD::PropertyDescriptor<float> scale_amplitude;
 
 	/* the envelope and fades are not scalar items and so
 	   currently (2010/02) are not stored using Property.
@@ -194,6 +193,7 @@ class AudioRegion : public Region
 	PBD::Property<bool>     _default_fade_out;
 	PBD::Property<bool>     _fade_in_active;
 	PBD::Property<bool>     _fade_out_active;
+	/** linear gain to apply to the whole region */
 	PBD::Property<gain_t>   _scale_amplitude;
 	
 	void register_properties ();
