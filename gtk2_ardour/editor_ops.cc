@@ -4517,28 +4517,16 @@ Editor::adjust_region_gain (bool up)
 		}
 
 		arv->region()->clear_changes ();
-                
-		double fraction = gain_to_slider_position (arv->audio_region()->scale_amplitude ());
+
+		double dB = accurate_coefficient_to_dB (arv->audio_region()->scale_amplitude ());
 
 		if (up) {
-			fraction += 0.05;
-			fraction = min (fraction, 1.0);
+			dB += 1;
 		} else {
-			fraction -= 0.05;
-			fraction = max (fraction, 0.0);
+			dB -= 1;
 		}
 
-		if (!up && fraction <= 0) {
-			continue;
-		}
-
-		fraction = slider_position_to_gain (fraction);
-
-		if (up && fraction >= 2.0) {
-			continue;
-		}
-
-		arv->audio_region()->set_scale_amplitude (fraction);
+		arv->audio_region()->set_scale_amplitude (dB_to_coefficient (dB));
 		_session->add_command (new StatefulDiffCommand (arv->region()));
 	}
 
