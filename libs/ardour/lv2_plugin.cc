@@ -45,6 +45,7 @@
 #include <locale.h>
 
 #include "lv2ext/lv2_persist.h"
+#include "lv2_pfile.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -280,17 +281,30 @@ LV2Plugin::nth_parameter (uint32_t n, bool& ok) const
 	return 0;
 }
 
-struct LV2Value { void* value; uint32_t type; };
-typedef std::map< std::string, LV2Value > LV2State;
-
-static void
-lv2_persist_store_callback(void*       callback_data,
-                           const char* key,
-                           const void* value,
-                           size_t      size,
-                           uint32_t    type)
+void
+LV2Plugin::lv2_persist_store_callback(void*       callback_data,
+                                      const char* key,
+                                      const void* value,
+                                      size_t      size,
+                                      uint32_t    type)
 {
-	cout << "LV2 PERSIST STORE " << key << " = " << value << " :: " << type << endl;
+	LV2PFile file = (LV2PFile)callback_data;
+
+	// FIXME: assumes URIs are mapped in the default context (or not event, at least)
+	const char* type_uri = LV2Plugin::_uri_map.id_to_uri(NULL, type);
+	cout << "LV2 PERSIST STORE " << key << " = " << value << " :: " << type_uri << endl;
+	lv2_pfile_write(file, key, value, size, type_uri);
+}
+
+const void*
+LV2Plugin::lv2_persist_retrieve_callback(void*       callback_data,
+                                         const char* key,
+                                         size_t*     size,
+                                         uint32_t*   type)
+{
+	//LV2PFile file = (LV2PFile)callback_data;
+	cout << "LV2 PERSIST RETRIEVE " << key << endl;
+	return NULL;
 }
 
 XMLNode&
@@ -320,8 +334,11 @@ LV2Plugin::get_state()
 
 	if (_supports_persist) {
 		// Create state directory for this plugin instance
-		const std::string state_path = Glib::build_filename(_session.plugins_dir(), _id.to_s());
-		cout << "LV2 plugin state path " << state_path << endl;
+		const std::string state_filename = _id.to_s() + ".lv2pfile";
+		const std::string state_path = Glib::build_filename(
+			_session.plugins_dir(), state_filename);
+
+		cout << "Saving LV2 plugin state to " << state_path << endl;
 
 		// Get LV2 Persist extension data from plugin instance
 		LV2_Persist* persist = (LV2_Persist*)slv2_instance_get_extension_data(
@@ -333,8 +350,11 @@ LV2Plugin::get_state()
 			return *root; // FIXME: Possibly inconsistent state
 		}
 
-		LV2State state;
-		persist->save(_instance->lv2_handle, lv2_persist_store_callback, &state);
+		LV2PFile file = lv2_pfile_open(state_path.c_str(), true);
+		persist->save(_instance->lv2_handle, &LV2Plugin::lv2_persist_store_callback, file);
+		lv2_pfile_close(file);
+
+		root->add_property("state-file", state_filename);
 	}
 	
 	return *root;
@@ -402,7 +422,7 @@ int
 LV2Plugin::set_state(const XMLNode& node, int version)
 {
 	XMLNodeList          nodes;
-	XMLProperty*         prop;
+	const XMLProperty*   prop;
 	XMLNodeConstIterator iter;
 	XMLNode*             child;
 	const char*          sym;
@@ -449,6 +469,24 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 		}
 
 		set_parameter (port_id, atof(value));
+	}
+
+	if ((prop = node.property("state-file")) != 0) {
+		std::string state_path = Glib::build_filename(_session.plugins_dir(), prop->value());
+
+		// Get LV2 Persist extension data from plugin instance
+		LV2_Persist* persist = (LV2_Persist*)slv2_instance_get_extension_data(
+			_instance, "http://lv2plug.in/ns/ext/persist");
+		if (persist) {
+			cout << "Loading LV2 state from " << state_path << endl;
+			LV2PFile file = lv2_pfile_open(state_path.c_str(), false);
+			persist->restore(_instance->lv2_handle, &LV2Plugin::lv2_persist_retrieve_callback, file);
+			lv2_pfile_close(file);
+		} else {
+			warning << string_compose(
+				_("Plugin \"%1\% failed to return LV2 persist data"),
+				unique_id());
+		}
 	}
 
 	latency_compute_run ();

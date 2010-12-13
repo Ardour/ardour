@@ -150,8 +150,20 @@ class LV2Plugin : public ARDOUR::Plugin
 	static URIMap   _uri_map;
 	static uint32_t _midi_event_type;
 
+	static void lv2_persist_store_callback(void*       callback_data,
+	                                       const char* key,
+	                                       const void* value,
+	                                       size_t      size,
+	                                       uint32_t    type);
+
+	static const void* lv2_persist_retrieve_callback(void*       callback_data,
+	                                                 const char* key,
+	                                                 size_t*     size,
+	                                                 uint32_t*   type);
+
 	void init (LV2World& world, SLV2Plugin plugin, framecnt_t rate);
 	void run (pframes_t nsamples);
+
 	void latency_compute_run ();
 	std::string do_save_preset (std::string);
 	void do_remove_preset (std::string);
