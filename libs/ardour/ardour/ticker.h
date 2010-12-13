@@ -97,10 +97,10 @@ private:
 
 	double one_ppqn_in_frames (framepos_t transport_position);
 
-	void send_midi_clock_event (framecnt_t offset);
-	void send_start_event (framecnt_t offset);
-	void send_continue_event (framecnt_t offset);
-	void send_stop_event (framecnt_t offset);
+	void send_midi_clock_event (pframes_t offset);
+	void send_start_event (pframes_t offset);
+	void send_continue_event (pframes_t offset);
+	void send_stop_event (pframes_t offset);
 };
 
 }

@@ -176,48 +176,46 @@ double MidiClockTicker::one_ppqn_in_frames (framepos_t transport_position)
 	return frames_per_quarter_note / double (_ppqn);
 }
 
-void MidiClockTicker::send_midi_clock_event (framecnt_t offset)
+void MidiClockTicker::send_midi_clock_event (pframes_t offset)
 {
 	if (!_midi_port) {
 		return;
 	}
 
-	assert (MIDI::Port::is_process_thread());
-#ifdef DEBUG_MIDI_CLOCK
-	cerr << "Tick with offset " << offset << endl;
-#endif // DEBUG_MIDI_CLOCK
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Tick with offset %1", offset));
+
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CLOCK };
-	_midi_port->write(_midi_clock_tick, 1, offset);
+	_midi_port->write (_midi_clock_tick, 1, offset);
 }
 
-void MidiClockTicker::send_start_event (framecnt_t offset)
+void MidiClockTicker::send_start_event (pframes_t offset)
 {
 	if (!_midi_port) {
 		return;
 	}
 	
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_START };
-	_midi_port->write(_midi_clock_tick, 1, offset);
+	_midi_port->write (_midi_clock_tick, 1, offset);
 }
 
-void MidiClockTicker::send_continue_event (framecnt_t offset)
+void MidiClockTicker::send_continue_event (pframes_t offset)
 {
 	if (!_midi_port) {
 		return;
 	}
 	
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CONTINUE };
-	_midi_port->write(_midi_clock_tick, 1, offset);
+	_midi_port->write (_midi_clock_tick, 1, offset);
 }
 
-void MidiClockTicker::send_stop_event (framecnt_t offset)
+void MidiClockTicker::send_stop_event (pframes_t offset)
 {
 	if (!_midi_port) {
 		return;
 	}
 	
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_STOP };
-	_midi_port->write(_midi_clock_tick, 1, offset);
+	_midi_port->write (_midi_clock_tick, 1, offset);
 }
 
 
