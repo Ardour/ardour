@@ -1,4 +1,3 @@
-
 /*
   Copyright (C) 1999-2002 Paul Davis
 
@@ -403,7 +402,7 @@ Session::send_full_time_code (framepos_t const t)
 }
 
 /** Send MTC (quarter-frame) messages for this cycle.
- * Must be called exactly once per cycle from the audio thread.  Realtime safe.
+ * Must be called exactly once per cycle from the process thread.  Realtime safe.
  * This function assumes the state of full Timecode is sane, eg. the slave is
  * expecting quarter frame messages and has the right frame of reference (any
  * full MTC Timecode time messages that needed to be sent should have been sent
