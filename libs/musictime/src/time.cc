@@ -19,8 +19,9 @@
 #define Timecode_IS_AROUND_ZERO( sm ) (!(sm).frames && !(sm).seconds && !(sm).minutes && !(sm).hours)
 #define Timecode_IS_ZERO( sm ) (!(sm).frames && !(sm).seconds && !(sm).minutes && !(sm).hours && !(sm.subframes))
 
-#include "control_protocol/timecode.h"
-#include "ardour/rc_configuration.h"
+#include <math.h>
+
+#include "musictime/time.h"
 
 namespace Timecode {
 

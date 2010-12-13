@@ -30,7 +30,7 @@
 
 #include <jack/types.h>
 
-#include "control_protocol/timecode.h"
+#include "musictime/time.h"
 
 namespace ARDOUR {
 	class Session;

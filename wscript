@@ -25,6 +25,7 @@ children = [
 	'libs/taglib',
 	'libs/rubberband',
 	'libs/surfaces',
+	'libs/musictime',
 	'libs/ardour',
 	'libs/gtkmm2ext',
 	'libs/clearlooks-newer',
@@ -582,6 +583,7 @@ def build(bld):
         bld.path.find_dir ('libs/evoral/evoral')
         bld.path.find_dir ('libs/vamp-sdk/vamp-sdk')
         bld.path.find_dir ('libs/surfaces/control_protocol/control_protocol')
+	bld.path.find_dir ('libs/musictime/musictime')
         bld.path.find_dir ('libs/rubberband/rubberband')
         bld.path.find_dir ('libs/gtkmm2ext/gtkmm2ext')
         bld.path.find_dir ('libs/ardour/ardour')

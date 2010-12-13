@@ -24,14 +24,13 @@ def build(bld):
 	obj.source = '''
 		basic_ui.cc
 		control_protocol.cc
-		smpte.cc
 	'''
 	obj.export_incdirs = ['.', './control_protocol' ]
 	obj.cxxflags     = '-DPACKAGE="ardour_cp"'
 	obj.includes     = ['.', './control_protocol']
 	obj.name         = 'libardour_cp'
 	obj.target       = 'ardourcp'
-	obj.uselib_local = 'libardour'
+	obj.uselib_local = 'libardour libmusictime'
 	obj.vnum         = LIBARDOUR_CP_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 

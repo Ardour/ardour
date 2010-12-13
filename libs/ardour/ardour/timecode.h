@@ -19,6 +19,6 @@
 #ifndef __libardour_timecode_h__
 #define __libardour_timecode_h__
 
-#include "control_protocol/timecode.h"
+#include "musictime/time.h"
 
 #endif  // __libardour_timecode_h__

@@ -302,12 +302,6 @@ def build(bld):
 	#obj.uselib += ' SOUNDTOUCH '
 	#obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
 	
-	obj.env.append_value('LINKFLAGS', 'default/libs/surfaces/control_protocol/smpte_1.o')
-	#
-	#	TODO: The above is an ugly hack that shouldn't be needed.  We really need
-	#	to refactor SMPTE out of libardour_cp to get rid of that circular dependency
-	#	alltogether.
-	#
 	if bld.env['HAVE_SLV2']:
 		obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc', 'uri_map.cc', 'lv2_pfile.c' ]
 		obj.uselib += ' SLV2 '

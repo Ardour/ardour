@@ -30,7 +30,7 @@
 #include <inttypes.h>
 #include <jack/types.h>
 #include <jack/midiport.h>
-#include "control_protocol/timecode.h"
+#include "musictime/time.h"
 #include "pbd/id.h"
 
 #include "ardour/bbt_time.h"

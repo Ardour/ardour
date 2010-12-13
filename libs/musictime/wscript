@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+import autowaf
+import Options
+import os
+
+# Version of this package (even if built as a child)
+MUSICTIME_VERSION = '0.0.0'
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+# Version history:
+#   0.0.0 = 0,0,0
+MUSICTIME_LIB_VERSION = '0.0.0'
+
+# Variables for 'waf dist'
+APPNAME = 'musictime'
+VERSION = MUSICTIME_VERSION
+
+# Mandatory variables
+srcdir = '.'
+blddir = 'build'
+
+def set_options(opt):
+	autowaf.set_options(opt)
+
+def configure(conf):
+	autowaf.configure(conf)
+
+	conf.check_tool('compiler_cxx')
+
+def build(bld):
+	# Library
+	obj = bld.new_task_gen('cxx', 'shlib')
+	obj.source         = 'src/time.cc'
+	obj.export_incdirs = ['.']
+	obj.includes       = ['.', './src']
+	obj.name           = 'libmusictime'
+	obj.target         = 'musictime'
+	obj.vnum           = MUSICTIME_LIB_VERSION
+	obj.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
+
+def shutdown():
+	autowaf.shutdown()
+
