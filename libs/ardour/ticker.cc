@@ -24,6 +24,7 @@
 #include "ardour/ticker.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
+#include "ardour/debug.h"
 
 #ifdef DEBUG_MIDI_CLOCK
 #include <iostream>
@@ -182,7 +183,7 @@ void MidiClockTicker::send_midi_clock_event (pframes_t offset)
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Tick with offset %1", offset));
+	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Tick with offset %1", offset));
 
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CLOCK };
 	_midi_port->write (_midi_clock_tick, 1, offset);
