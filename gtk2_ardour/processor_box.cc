@@ -767,18 +767,22 @@ ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams)
 
 	text += _("\nThis plugin has:\n");
 	if (has_midi) {
-		text += string_compose("\t%1 ", p.get_info()->n_inputs.n_midi()) + _("MIDI input(s)\n");
+		uint32_t const n = p.get_info()->n_inputs.n_midi ();
+		text += string_compose (ngettext ("\t%1 MIDI input", "\t%1 MIDI inputs", n), n);
 	}
 	if (has_audio) {
-		text += string_compose("\t%1 ", p.get_info()->n_inputs.n_audio()) + _("audio input(s)\n");
+		uint32_t const n = p.get_info()->n_inputs.n_audio ();
+		text += string_compose (ngettext ("\t%1 audio input", "\t%1 audio inputs", n), n);
 	}
 
 	text += _("\nBut at the insertion point, there are:\n");
 	if (has_midi) {
-		text += string_compose("\t%1 ", streams.count.n_midi()) + _("MIDI channel(s)\n");
+		uint32_t const n = streams.count.n_midi ();
+		text += string_compose (ngettext ("\t%1 MIDI channel\n", "\t%1 MIDI channels\n", n), n);
 	}
 	if (has_audio) {
-		text += string_compose("\t%1 ", streams.count.n_audio()) + _("audio channel(s)\n");
+		uint32_t const n = streams.count.n_audio ();
+		text += string_compose (ngettext ("\t%1 audio channel\n", "\t%1 audio channels\n", n), n);
 	}
 
 	text += string_compose (_("\n%1 is unable to insert this plugin here.\n"), PROGRAM_NAME);

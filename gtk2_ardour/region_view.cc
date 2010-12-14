@@ -305,19 +305,11 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double thres
         _silence_text->property_x() = trackview.editor().frame_to_pixel (silences.front().first - _region->start()) + 10.0;
         _silence_text->property_y() = 20.0;
         
-        double ms;
-        char const * sunits;
-        char const * noun;
-        
-        if (silences.size() > 1) {
-                noun = _("silent segments");
-        } else {
-                noun = _("silent segment");
-        }
-        
-        ms = (float) shortest/_region->session().frame_rate();
+        double ms = (float) shortest/_region->session().frame_rate();
         
         /* ms are now in seconds */
+
+        char const * sunits;
         
         if (ms >= 60.0) {
                 sunits = _("minutes");
@@ -328,7 +320,11 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double thres
         } else {
                 sunits = _("secs");
         }
-        
+
+	string text = string_compose (ngettext ("%1 silent segment", "%1 silent segments", silences.size()), silences.size())
+		+ ", "
+		+ string_compose (_("shortest = %1 %2"), ms, sunits);
+
         if (seen_audible) {
                 /* ms are now in seconds */
                 double ma = shortest_audible / _region->session().frame_rate();
@@ -343,14 +339,11 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double thres
                 } else {
                         aunits = _("secs");
                 }
-                
-                _silence_text->property_text() = string_compose (_("%1 %2, shortest = %3 %4\n  (shortest audible segment = %5 %6)"),
-                                                                 silences.size(), noun, 
-                                                                 ms, sunits, ma, aunits).c_str();
-        } else {
-                _silence_text->property_text() = string_compose (_("%1 %2, shortest = %3 %4"),
-                                                                 silences.size(), noun, ms, sunits).c_str();
-        }
+
+		text += string_compose (_("\n  (shortest audible segment = %1 %2)"), ma, aunits);
+	}
+
+	_silence_text->property_text() = text.c_str ();
 } 
 
 void
