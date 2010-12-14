@@ -714,6 +714,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	std::list<WindowProxyBase*> _window_proxies;
 
         int missing_file (ARDOUR::Session*s, std::string str, ARDOUR::DataType type);
+        int ambiguous_file (std::string file, std::string path, std::vector<std::string> hits);
 };
 
 #endif /* __ardour_gui_h__ */

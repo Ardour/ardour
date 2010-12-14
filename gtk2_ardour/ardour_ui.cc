@@ -107,6 +107,7 @@ typedef uint64_t microseconds_t;
 #include "location_ui.h"
 #include "missing_file_dialog.h"
 #include "missing_plugin_dialog.h"
+#include "ambiguous_file_dialog.h"
 
 #include "i18n.h"
 
@@ -273,6 +274,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	/* handle requests to deal with missing files */
 
 	ARDOUR::Session::MissingFile.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::missing_file, this, _1, _2, _3));
+
+	/* and ambiguous files */
+
+	ARDOUR::FileSource::AmbiguousFileName.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::ambiguous_file, this, _1, _2, _3));
 
 	/* lets get this party started */
 
@@ -3732,4 +3737,16 @@ ARDOUR_UI::missing_file (Session*s, std::string str, DataType type)
 	result = dialog.get_action ();
 
 	return result;
+}
+
+int
+ARDOUR_UI::ambiguous_file (std::string file, std::string path, std::vector<std::string> hits)
+{
+	AmbiguousFileDialog dialog (file, hits);
+
+	dialog.show ();
+	dialog.present ();
+
+	dialog.run ();
+	return dialog.get_which ();
 }
