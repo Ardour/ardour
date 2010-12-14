@@ -34,7 +34,7 @@ lv2_pfile_open(const char* path, bool write)
 {
 	FILE* fd = fopen(path, (write ? "w" : "r"));
 	if (!fd) {
-		fprintf(stderr, strerror(errno));
+		fprintf(stderr, "%s", strerror(errno));
 		return NULL;
 	}
 
