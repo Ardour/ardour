@@ -44,8 +44,6 @@ using namespace ARDOUR;
 using namespace MIDI;
 using namespace PBD;
 
-#define DEBUG_MIDI_CLOCK 1
-
 MIDIClock_Slave::MIDIClock_Slave (Session& s, MIDI::Port& p, int ppqn)
 	: ppqn (ppqn)
 	, bandwidth (1.0 / 60.0) // 1 BpM = 1 / 60 Hz

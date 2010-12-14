@@ -26,11 +26,6 @@
 #include "ardour/tempo.h"
 #include "ardour/debug.h"
 
-#ifdef DEBUG_MIDI_CLOCK
-#include <iostream>
-using namespace std;
-#endif
-
 using namespace ARDOUR;
 
 void Ticker::set_session (Session* s)
@@ -75,9 +70,11 @@ void MidiClockTicker::transport_state_changed()
 
 	float      speed    = _session->transport_speed();
 	framepos_t position = _session->transport_frame();
-#ifdef DEBUG_MIDI_CLOCK
-	cerr << "Transport state change, speed:" << speed << "position:" << position<< " play loop " << _session->get_play_loop() << endl;
-#endif
+
+	DEBUG_TRACE (PBD::DEBUG::MidiClock,
+		     string_compose ("Transport state change, speed: %1 position: %2 play loop: %3\n", speed, position, _session->get_play_loop())
+		);
+	
 	if (speed == 1.0f) {
 		_last_tick = position;
 
@@ -111,9 +108,8 @@ void MidiClockTicker::transport_state_changed()
 
 void MidiClockTicker::position_changed (framepos_t position)
 {
-#ifdef DEBUG_MIDI_CLOCK
-	cerr << "Position changed:" << position << endl;
-#endif
+	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Position change: %1\n", position));
+
 	_last_tick = position;
 }
 
@@ -122,13 +118,10 @@ void MidiClockTicker::transport_looped()
 	Location* loop_location = _session->locations()->auto_loop_location();
 	assert(loop_location);
 
-#ifdef DEBUG_MIDI_CLOCK
-	cerr << "Transport looped, position:" <<  _session->transport_frame()
-	     << " loop start " << loop_location->start( )
-	     << " loop end " << loop_location->end( )
-	     << " play loop " << _session->get_play_loop()
-	     <<  endl;
-#endif
+	DEBUG_TRACE (PBD::DEBUG::MidiClock,
+		     string_compose ("Transport looped, position: %1, loop start: %2, loop end: %3, play loop: %4\n",
+				     _session->transport_frame(), loop_location->start(), loop_location->end(), _session->get_play_loop())
+		);
 
 	// adjust _last_tick, so that the next MIDI clock message is sent
 	// in due time (and the tick interval is still constant)
@@ -145,14 +138,11 @@ void MidiClockTicker::tick (const framepos_t& transport_frames, const BBT_Time& 
 		double next_tick = _last_tick + one_ppqn_in_frames(transport_frames);
 		framecnt_t next_tick_offset = framecnt_t(next_tick) - transport_frames;
 
-#ifdef DEBUG_MIDI_CLOCK
-		cerr << "Transport:" << transport_frames
-			 << ":Last tick time:" << _last_tick << ":"
-			 << ":Next tick time:" << next_tick << ":"
-			 << "Offset:" << next_tick_offset << ":"
-		         << "cycle length:" << _midi_port->nframes_this_cycle()
-			 << endl;
-#endif
+		DEBUG_TRACE (PBD::DEBUG::MidiClock,
+			     string_compose ("Transport: %1, last tick time: %2, next tick time: %3, offset: %4, cycle length: %5\n",
+					     transport_frames, _last_tick, next_tick, next_tick_offset, _midi_port->nframes_this_cycle()
+				     )
+			);
 
 		if (next_tick_offset >= _midi_port->nframes_this_cycle())
 			return;
@@ -183,7 +173,7 @@ void MidiClockTicker::send_midi_clock_event (pframes_t offset)
 		return;
 	}
 
-	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Tick with offset %1", offset));
+	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Tick with offset %1\n", offset));
 
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CLOCK };
 	_midi_port->write (_midi_clock_tick, 1, offset);
