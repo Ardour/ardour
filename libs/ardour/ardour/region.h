@@ -325,6 +325,7 @@ class Region
 
 	void trim_to_internal (framepos_t position, framecnt_t length, void *src);
 	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
+	virtual void set_length_internal (framepos_t pos);
         void modify_front (framepos_t new_position, bool reset_fade, void* src);
         void modify_end (framepos_t new_position, bool reset_fade, void* src);
 

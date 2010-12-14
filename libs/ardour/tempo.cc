@@ -1510,10 +1510,10 @@ TempoMap::get_points (framepos_t lower, framepos_t upper) const
 }
 
 const TempoSection&
-TempoMap::tempo_section_at (framepos_t frame)
+TempoMap::tempo_section_at (framepos_t frame) const
 {
 	Glib::RWLock::ReaderLock lm (lock);
-	Metrics::iterator i;
+	Metrics::const_iterator i;
 	TempoSection* prev = 0;
 
 	for (i = metrics->begin(); i != metrics->end(); ++i) {
@@ -1903,6 +1903,206 @@ TempoMap::bbt_subtract (const BBT_Time& start, const BBT_Time& decrement) const
 	result.bars -= op.bars;
 	return result;
 }
+
+/**
+ * add the BBT interval @param increment to  @param start and return the result
+ */
+framepos_t
+TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
+{
+	Metrics::const_iterator i;
+	const MeterSection* meter;
+	const MeterSection* m;
+	const TempoSection* tempo;
+	const TempoSection* t;
+        framecnt_t frames_per_beat;
+
+	meter = &first_meter ();
+	tempo = &first_tempo ();
+
+        assert (meter);
+        assert (tempo);
+
+	/* find the starting metrics for tempo & meter */
+
+	for (i = metrics->begin(); i != metrics->end(); ++i) {
+                
+		if ((*i)->frame() > pos) {
+			break;
+		}
+                
+		if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
+			tempo = t;
+		} else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {
+			meter = m;
+		}
+	}
+
+	/* We now have:
+
+	   meter -> the Meter for "pos"
+	   tempo -> the Tempo for "pos"
+	   i     -> for first new metric after "pos", possibly metrics->end()
+	*/
+
+	/* now comes the complicated part. we have to add one beat a time,
+	   checking for a new metric on every beat.
+	*/
+	
+        frames_per_beat = tempo->frames_per_beat (_frame_rate, *meter);
+
+        while (op.bars) {
+
+                pos += llrint (frames_per_beat * meter->beats_per_bar());
+		op.bars--;
+		
+		/* check if we need to use a new metric section: has adding frames moved us
+		   to or after the start of the next metric section? in which case, use it.
+		*/
+                
+                if (i != metrics->end()) {
+                        if ((*i)->frame() <= pos) {
+
+                                if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
+                                        tempo = t;
+                                } else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {
+                                        meter = m;
+                                }
+                                ++i;
+                                frames_per_beat = tempo->frames_per_beat (_frame_rate, *meter);
+
+                        }
+		}
+
+        }
+
+	while (op.beats) {
+		
+		/* given the current meter, have we gone past the end of the bar ? */
+                
+                pos += frames_per_beat;
+		op.beats--;
+		
+		/* check if we need to use a new metric section: has adding frames moved us
+		   to or after the start of the next metric section? in which case, use it.
+		*/
+                
+                if (i != metrics->end()) {
+                        if ((*i)->frame() <= pos) {
+
+                                if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
+                                        tempo = t;
+                                } else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {
+                                        meter = m;
+                                }
+                                ++i;
+                                frames_per_beat = tempo->frames_per_beat (_frame_rate, *meter); 
+                       }
+		}
+	}
+
+        if (op.ticks) {
+                if (op.ticks >= Meter::ticks_per_beat) {
+                        pos += frames_per_beat;
+                        pos += llrint (frames_per_beat * ((op.ticks % (uint32_t) Meter::ticks_per_beat) / (double) Meter::ticks_per_beat));
+                } else {
+                        pos += llrint (frames_per_beat * (op.ticks / (double) Meter::ticks_per_beat));
+                }
+        }
+
+	return pos;
+}
+
+/**
+ * add the BBT interval @param increment to  @param start and return the result
+ */
+double
+TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
+{
+	Metrics::const_iterator i;
+        double beats = 0;
+	const MeterSection* meter;
+	const MeterSection* m;
+	const TempoSection* tempo;
+	const TempoSection* t;
+        double frames_per_beat;
+
+        double ddist = distance;
+        double dpos = pos;
+
+	meter = &first_meter ();
+	tempo = &first_tempo ();
+
+        assert (meter);
+        assert (tempo);
+
+	/* find the starting metrics for tempo & meter */
+
+	for (i = metrics->begin(); i != metrics->end(); ++i) {
+                
+		if ((*i)->frame() > pos) {
+			break;
+		}
+                
+		if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
+			tempo = t;
+		} else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {
+			meter = m;
+		}
+	}
+
+	/* We now have:
+
+	   meter -> the Meter for "pos"
+	   tempo -> the Tempo for "pos"
+	   i     -> for first new metric after "pos", possibly metrics->end()
+	*/
+
+	/* now comes the complicated part. we have to add one beat a time,
+	   checking for a new metric on every beat.
+	*/
+	
+        frames_per_beat = tempo->frames_per_beat (_frame_rate, *meter);
+        
+        while (ddist > 0) {
+
+                /* if we're nearly at the end, but have a fractional beat left,
+                   compute the fraction and then its all over
+                */
+
+                if (ddist < frames_per_beat) {
+                        beats += Meter::ticks_per_beat * (ddist/frames_per_beat);
+                        break;
+                }
+
+                /* walk one beat */
+
+                ddist -= frames_per_beat;
+                dpos += frames_per_beat;
+                beats += 1.0;
+		
+		/* check if we need to use a new metric section: has adding frames moved us
+		   to or after the start of the next metric section? in which case, use it.
+		*/
+                
+                if (i != metrics->end()) {
+                        if ((*i)->frame() <= (framepos_t) dpos) {
+
+                                if ((t = dynamic_cast<const TempoSection*>(*i)) != 0) {
+                                        tempo = t;
+                                } else if ((m = dynamic_cast<const MeterSection*>(*i)) != 0) {
+                                        meter = m;
+                                }
+                                ++i;
+                                frames_per_beat = tempo->frames_per_beat (_frame_rate, *meter);
+                        }
+		}
+
+        }
+
+	return beats;
+}
+
 
 /** Compare the time of this with that of another MetricSection.
  *  @param with_bbt True to compare using ::start(), false to use ::frame().

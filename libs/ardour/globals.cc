@@ -67,6 +67,7 @@
 #include "ardour/control_protocol_manager.h"
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/midi_region.h"
 #include "ardour/mix.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/plugin_manager.h"
@@ -247,6 +248,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	make_property_quarks ();
 	SessionObject::make_property_quarks ();
 	Region::make_property_quarks ();
+	MidiRegion::make_property_quarks ();
 	AudioRegion::make_property_quarks ();
 	RouteGroup::make_property_quarks ();
         Playlist::make_property_quarks ();

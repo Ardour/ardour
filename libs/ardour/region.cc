@@ -462,7 +462,7 @@ Region::set_length (framecnt_t len, void */*src*/)
 
 
 		_last_length = _length;
-		_length = len;
+		set_length_internal (len);
 		_whole_file = false;
 		first_edit ();
 		maybe_uncopy ();
@@ -474,6 +474,12 @@ Region::set_length (framecnt_t len, void */*src*/)
 
 		send_change (Properties::length);
 	}
+}
+
+void
+Region::set_length_internal (framecnt_t len)
+{
+        _length = len;
 }
 
 void
@@ -925,7 +931,7 @@ Region::trim_to_internal (framepos_t position, framecnt_t length, void */*src*/)
 		if (!property_changes_suspended()) {
 			_last_length = _length;
 		}
-		_length = length;
+		set_length_internal (length);
 		what_changed.add (Properties::length);
 	}
 	if (_position != position) {

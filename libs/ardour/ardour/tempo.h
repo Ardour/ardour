@@ -204,15 +204,13 @@ class TempoMap : public PBD::StatefulDestructible
 	framecnt_t frame_time (const Timecode::BBT_Time&) const;
 	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir) const;
 
-	void bbt_time_add (framepos_t origin, Timecode::BBT_Time& start, const Timecode::BBT_Time& shift);
-
 	static const Tempo& default_tempo() { return _default_tempo; }
 	static const Meter& default_meter() { return _default_meter; }
 
 	const Tempo& tempo_at (framepos_t) const;
 	const Meter& meter_at (framepos_t) const;
 
-	const TempoSection& tempo_section_at (framepos_t);
+	const TempoSection& tempo_section_at (framepos_t) const;
 
 	void add_tempo(const Tempo&, Timecode::BBT_Time where);
 	void add_meter(const Meter&, Timecode::BBT_Time where);
@@ -249,6 +247,9 @@ class TempoMap : public PBD::StatefulDestructible
 	Timecode::BBT_Time bbt_add (const Timecode::BBT_Time&, const Timecode::BBT_Time&, const TempoMetric&) const;
 	Timecode::BBT_Time bbt_add (const Timecode::BBT_Time& a, const Timecode::BBT_Time& b) const;
 	Timecode::BBT_Time bbt_subtract (const Timecode::BBT_Time&, const Timecode::BBT_Time&) const;
+
+        framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
+        double framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
 
 	void change_existing_tempo_at (framepos_t, double bpm, double note_type);
 	void change_initial_tempo (double bpm, double note_type);

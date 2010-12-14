@@ -49,7 +49,8 @@ using namespace PBD;
 
 namespace ARDOUR {
 	namespace Properties {
-		PBD::PropertyDescriptor<void*> midi_data;
+		PBD::PropertyDescriptor<void*>                midi_data;
+		PBD::PropertyDescriptor<Evoral::MusicalTime>  length_beats;
         }
 }
 
@@ -58,18 +59,22 @@ MidiRegion::make_property_quarks ()
 {
         Properties::midi_data.property_id = g_quark_from_static_string (X_("midi-data"));
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for midi-data = %1\n", Properties::midi_data.property_id));
+        Properties::length_beats.property_id = g_quark_from_static_string (X_("length-beats"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for length-beats = %1\n", Properties::length_beats.property_id));
 }
 
 void
 MidiRegion::register_properties ()
 {
-        /* none yet, but its only a matter of time */
+	add_property (_length_beats);
 }
 
 /* Basic MidiRegion constructor (many channels) */
 MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
+        , _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
 {
+        update_length_beats ();
         register_properties ();
 
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
@@ -81,7 +86,9 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 /** Create a new MidiRegion, that is part of an existing one */
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset, bool offset_relative)
 	: Region (other, offset, offset_relative)
+        , _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
 {
+        update_length_beats ();
         register_properties ();
 
 	assert(_name.val().find("/") == string::npos);
@@ -110,22 +117,43 @@ MidiRegion::clone ()
         plist.add (Properties::whole_file, true);
         plist.add (Properties::start, _start);
         plist.add (Properties::length, _length);
+        plist.add (Properties::length_beats, _length_beats);
         plist.add (Properties::layer, 0);
 
         return boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (ms, plist, true));
 }
 
 void
+MidiRegion::set_length_internal (framecnt_t len)
+{
+        Region::set_length_internal (len);
+        update_length_beats ();
+}
+
+void
+MidiRegion::update_length_beats ()
+{
+        cerr << name() << " Updating length beats, currently = " << _length_beats << " w/length = " << _length << endl;
+	BeatsFramesConverter converter (_session.tempo_map(), _position - _start);
+        _length_beats = converter.from (_length);
+        cerr << "\tnew value: " << _length_beats << endl;
+}
+
+void
 MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 {
-	BeatsFramesConverter old_converter(_session.tempo_map(), _position - _start);
-	double length_beats = old_converter.from(_length);
-
 	Region::set_position_internal (pos, allow_bbt_recompute);
-
-	BeatsFramesConverter new_converter(_session.tempo_map(), pos - _start);
-
-	set_length(new_converter.to(length_beats), 0);
+        /* zero length regions don't exist - so if _length_beats is zero, this object
+           is under construction.
+        */
+        if (_length_beats) {
+                /* leave _length_beats alone, and change _length to reflect the state of things
+                   at the new position (tempo map may dictate a different number of frames
+                */
+                BeatsFramesConverter converter (_session.tempo_map(), _position - _start);
+                cerr << name() << " change frame length to " << converter.to (_length_beats) << endl;
+                Region::set_length_internal (converter.to (_length_beats));
+        }
 }
 
 framecnt_t
@@ -212,7 +240,13 @@ MidiRegion::state ()
 int
 MidiRegion::set_state (const XMLNode& node, int version)
 {
-	return Region::set_state (node, version);
+	int ret = Region::set_state (node, version);
+
+        if (ret == 0) {
+                update_length_beats ();
+        }
+
+        return ret;
 }
 
 void

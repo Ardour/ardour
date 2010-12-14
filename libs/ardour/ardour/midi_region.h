@@ -117,6 +117,7 @@ class MidiRegion : public Region
 
   private:
 	friend class RegionFactory;
+        PBD::Property<Evoral::MusicalTime> _length_beats;
 
 	MidiRegion (const SourceList&);
 	MidiRegion (boost::shared_ptr<const MidiRegion>, frameoffset_t offset = 0, bool offset_relative = true);
@@ -134,6 +135,8 @@ class MidiRegion : public Region
 	void recompute_at_end ();
 
 	void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
+        void set_length_internal (framecnt_t len);
+        void update_length_beats ();
 
 	void model_changed ();
 	void model_automation_state_changed (Evoral::Parameter const &);
@@ -143,6 +146,8 @@ class MidiRegion : public Region
 	PBD::ScopedConnection _model_connection;
 	PBD::ScopedConnection _source_connection;
         PBD::ScopedConnection _model_contents_connection;
+
+        double _last_length_beats;
 };
 
 } /* namespace ARDOUR */

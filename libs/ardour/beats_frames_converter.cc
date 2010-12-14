@@ -27,25 +27,19 @@ namespace ARDOUR {
 framecnt_t
 BeatsFramesConverter::to(double beats) const
 {
-	// FIXME: assumes tempo never changes after origin
-	const Tempo& tempo = _tempo_map.tempo_at (_origin_b);
-	const double frames_per_beat = tempo.frames_per_beat(
-			_tempo_map.frame_rate(),
-			_tempo_map.meter_at (_origin_b));
+        Timecode::BBT_Time delta;
 
-	return llrint (beats * frames_per_beat);
+        delta.bars = 0;
+        delta.beats = rint (floor (beats));
+        delta.ticks = rint (floor (Meter::ticks_per_beat * fmod (beats, 1.0)));
+
+        return _tempo_map.framepos_plus_bbt (_origin_b, delta);
 }
 
 double
 BeatsFramesConverter::from (framecnt_t frames) const
 {
-	// FIXME: assumes tempo never changes after origin
-	const Tempo& tempo = _tempo_map.tempo_at (_origin_b);
-	const double frames_per_beat = tempo.frames_per_beat(
-			_tempo_map.frame_rate(),
-			_tempo_map.meter_at (_origin_b));
-
-	return frames / frames_per_beat;
+        return _tempo_map.framewalk_to_beats (_origin_b, frames);
 }
 
 } /* namespace ARDOUR */
