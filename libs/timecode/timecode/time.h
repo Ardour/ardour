@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2006 Paul Davis
+	Copyright (C) 2006-2010 Paul Davis
 	
 	This program is free software; you can redistribute it and/or modify it
 	under the terms of the GNU Lesser General Public License as published
@@ -16,8 +16,8 @@
 	675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __ardour_timecode_h__
-#define __ardour_timecode_h__
+#ifndef __timecode_time_h__
+#define __timecode_time_h__
 
 #include <ostream>
 #include <inttypes.h>
@@ -33,17 +33,17 @@ enum Wrap {
 };
 
 struct Time {
-	bool       negative;
-	uint32_t   hours;
-	uint32_t   minutes;
-	uint32_t   seconds;
-	uint32_t   frames;        ///< Timecode frames (not audio samples)
-	uint32_t   subframes;     ///< Typically unused
-	float      rate;          ///< Frame rate of this Time
-	static float default_rate;///< Rate to use for default constructor
-	bool       drop;          ///< Whether this Time uses dropframe Timecode
+	bool         negative;
+	uint32_t     hours;
+	uint32_t     minutes;
+	uint32_t     seconds;
+	uint32_t     frames;        ///< Timecode frames (not audio samples)
+	uint32_t     subframes;     ///< Typically unused
+	float        rate;          ///< Frame rate of this Time
+	static float default_rate;  ///< Rate to use for default constructor
+	bool         drop;          ///< Whether this Time uses dropframe Timecode
 
-	Time(float a_rate = default_rate) {
+	Time (float a_rate = default_rate) {
 		negative = false;
 		hours = 0;
 		minutes = 0;
@@ -53,30 +53,32 @@ struct Time {
 		rate = a_rate;
 	}
 
-        std::ostream& print (std::ostream& ostr) const {
+	std::ostream& print (std::ostream& ostr) const {
 		if (negative) {
 			ostr << '-';
 		}
-		ostr << hours << ':' << minutes << ':' << seconds << ':' << frames << '.' << subframes << " @" << rate << (drop ? " drop" : " nondrop");
+		ostr << hours << ':' << minutes << ':' << seconds << ':'
+		     << frames << '.' << subframes
+		     << " @" << rate << (drop ? " drop" : " nondrop");
 		return ostr;
 	}
 
 };
 
-Wrap increment( Time& timecode, uint32_t );
-Wrap decrement( Time& timecode, uint32_t );
-Wrap increment_subframes( Time& timecode, uint32_t );
-Wrap decrement_subframes( Time& timecode, uint32_t );
-Wrap increment_seconds( Time& timecode, uint32_t );
-Wrap increment_minutes( Time& timecode, uint32_t );
-Wrap increment_hours( Time& timecode, uint32_t );
-void frames_floor( Time& timecode );
-void seconds_floor( Time& timecode );
-void minutes_floor( Time& timecode );
-void hours_floor( Time& timecode );
+Wrap increment (Time& timecode, uint32_t);
+Wrap decrement (Time& timecode, uint32_t);
+Wrap increment_subframes (Time& timecode, uint32_t);
+Wrap decrement_subframes (Time& timecode, uint32_t);
+Wrap increment_seconds (Time& timecode, uint32_t);
+Wrap increment_minutes (Time& timecode, uint32_t);
+Wrap increment_hours (Time& timecode, uint32_t);
+void frames_floor (Time& timecode);
+void seconds_floor (Time& timecode);
+void minutes_floor (Time& timecode);
+void hours_floor (Time& timecode);
 
 } // namespace Timecode
 
-std::ostream& operator<<(std::ostream& ostr, const Timecode::Time& t);
+std::ostream& operator<< (std::ostream& ostr, const Timecode::Time& t);
 
-#endif  // __ardour_timecode_h__
+#endif  // __timecode_time_h__
