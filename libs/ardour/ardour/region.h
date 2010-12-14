@@ -369,7 +369,7 @@ class Region
 	framecnt_t              _last_length;
 	framepos_t              _last_position;
 	mutable RegionEditState _first_edit;
-	BBT_Time                _bbt_time;
+	Timecode::BBT_Time      _bbt_time;
 	AnalysisFeatureList     _transients;
 	
 	mutable uint64_t        _read_data_count;  ///< modified in read()

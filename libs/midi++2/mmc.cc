@@ -21,7 +21,7 @@
 #include <fcntl.h>
 #include <map>
 
-#include "musictime/time.h"
+#include "timecode/time.h"
 #include "pbd/error.h"
 #include "midi++/mmc.h"
 #include "midi++/port.h"

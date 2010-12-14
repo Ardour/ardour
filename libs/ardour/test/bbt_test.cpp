@@ -7,6 +7,8 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BBTTest);
 using namespace std;
 using namespace ARDOUR;
 
+using Timecode::BBT_Time;
+
 void
 BBTTest::addTest ()
 {

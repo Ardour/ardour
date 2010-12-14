@@ -640,7 +640,7 @@ void
 AudioClock::set_bbt (framepos_t when, bool force)
 {
 	char buf[16];
-	BBT_Time bbt;
+	Timecode::BBT_Time bbt;
 
 	/* handle a common case */
 	if (is_duration) {
@@ -1342,7 +1342,7 @@ framepos_t
 AudioClock::get_frames (Field field, framepos_t pos, int dir)
 {
 	framecnt_t frames = 0;
-	BBT_Time bbt;
+	Timecode::BBT_Time bbt;
 	switch (field) {
 	case Timecode_Hours:
 		frames = (framecnt_t) floor (3600.0 * _session->frame_rate());
@@ -1930,7 +1930,7 @@ AudioClock::bbt_frame_duration_from_display (framepos_t pos) const
 		return 0;
 	}
 
-	BBT_Time bbt;
+	Timecode::BBT_Time bbt;
 
 
 	bbt.bars = atoi (bars_label.get_text());

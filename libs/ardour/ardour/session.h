@@ -43,6 +43,8 @@
 
 #include "midi++/types.h"
 
+#include "timecode/time.h"
+
 #include "ardour/ardour.h"
 #include "ardour/click.h"
 #include "ardour/chan_count.h"
@@ -50,7 +52,6 @@
 #include "ardour/session_configuration.h"
 #include "ardour/session_event.h"
 #include "ardour/location.h"
-#include "ardour/timecode.h"
 #include "ardour/interpolation.h"
 #include "ardour/speakers.h"
 
@@ -449,7 +450,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void sync_time_vars();
 
-	void bbt_time (framepos_t when, BBT_Time&);
+	void bbt_time (framepos_t when, Timecode::BBT_Time&);
 	void timecode_to_sample(Timecode::Time& timecode, framepos_t& sample, bool use_offset, bool use_subframes) const;
 	void sample_to_timecode(framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
 	void timecode_time (Timecode::Time &);
@@ -478,7 +479,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	TempoMap& tempo_map() { return *_tempo_map; }
 
 	/// signals the current transport position in frames, bbt and timecode time (in that order)
-	PBD::Signal3<void, const framepos_t &, const BBT_Time&, const Timecode::Time&> tick;
+	PBD::Signal3<void, const framepos_t &, const Timecode::BBT_Time&, const Timecode::Time&> tick;
 
 	/* region info  */
 

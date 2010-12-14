@@ -69,15 +69,15 @@ Session::process (pframes_t nframes)
 		}
 	}
 
-        _engine.main_thread()->get_buffers ();
+	_engine.main_thread()->get_buffers ();
 
 	(this->*process_function) (nframes);
 
-        _engine.main_thread()->drop_buffers ();
+	_engine.main_thread()->drop_buffers ();
 
 	// the ticker is for sending time information like MidiClock
 	framepos_t transport_frames = transport_frame();
-	BBT_Time transport_bbt;
+	Timecode::BBT_Time transport_bbt;
 	bbt_time(transport_frames, transport_bbt);
 	Timecode::Time transport_timecode;
 	timecode_time(transport_frames, transport_timecode);

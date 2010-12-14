@@ -1050,7 +1050,7 @@ MackieControlProtocol::update_automation (RouteSignal & rs)
 string 
 MackieControlProtocol::format_bbt_timecode (framepos_t now_frame)
 {
-	BBT_Time bbt_time;
+	Timecode::BBT_Time bbt_time;
 	session->bbt_time (now_frame, bbt_time);
 
 	// According to the Logic docs

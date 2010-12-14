@@ -1101,7 +1101,7 @@ Editor::set_session (Session *t)
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
 
 	if (Profile->get_sae()) {
-		BBT_Time bbt;
+		Timecode::BBT_Time bbt;
 		bbt.bars = 0;
 		bbt.beats = 0;
 		bbt.ticks = 120;

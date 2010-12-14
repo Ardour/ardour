@@ -32,8 +32,11 @@
 #include "midi++/mmc.h"
 #include "midi++/port.h"
 #include "midi++/manager.h"
+
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
+
+#include "timecode/time.h"
 
 #include "ardour/configuration.h"
 #include "ardour/debug.h"
@@ -45,7 +48,6 @@
 #include "ardour/audio_diskstream.h"
 #include "ardour/slave.h"
 #include "ardour/cycles.h"
-#include "ardour/timecode.h"
 
 #include "i18n.h"
 

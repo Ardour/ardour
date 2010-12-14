@@ -559,7 +559,7 @@ TranzportControlProtocol::show_bbt (framepos_t where)
 { 
 	if ((where != last_where) || lcd_isdamaged(1,9,8)) {
 		char buf[16];
-		BBT_Time bbt;
+		Timecode::BBT_Time bbt;
 		session->tempo_map().bbt_time (where, bbt);
 		sprintf (buf, "%03" PRIu32 "|%02" PRIu32 "|%04" PRIu32, bbt.bars,bbt.beats,bbt.ticks);
 		last_bars = bbt.bars;

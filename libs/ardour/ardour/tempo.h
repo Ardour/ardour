@@ -78,15 +78,15 @@ class Meter {
 
 class MetricSection {
   public:
-	MetricSection (const BBT_Time& start)
+	MetricSection (const Timecode::BBT_Time& start)
 		: _start (start), _frame (0), _movable (true) {}
 	MetricSection (framepos_t start)
 		: _frame (start), _movable (true) {}
 
 	virtual ~MetricSection() {}
 
-	const BBT_Time& start() const { return _start; }
-	framepos_t     frame() const { return _frame; }
+	const Timecode::BBT_Time& start() const { return _start; }
+	framepos_t                frame() const { return _frame; }
 
 	void set_movable (bool yn) { _movable = yn; }
 	bool movable() const { return _movable; }
@@ -95,7 +95,7 @@ class MetricSection {
 		_frame = f;
 	}
 
-	virtual void set_start (const BBT_Time& w) {
+	virtual void set_start (const Timecode::BBT_Time& w) {
 		_start = w;
 	}
 
@@ -108,14 +108,14 @@ class MetricSection {
 	int compare (MetricSection *, bool) const;
 
   private:
-	BBT_Time       _start;
-	framepos_t    _frame;
-	bool           _movable;
+	Timecode::BBT_Time _start;
+	framepos_t         _frame;
+	bool               _movable;
 };
 
 class MeterSection : public MetricSection, public Meter {
   public:
-	MeterSection (const BBT_Time& start, double bpb, double note_type)
+	MeterSection (const Timecode::BBT_Time& start, double bpb, double note_type)
 		: MetricSection (start), Meter (bpb, note_type) {}
 	MeterSection (framepos_t start, double bpb, double note_type)
 		: MetricSection (start), Meter (bpb, note_type) {}
@@ -128,7 +128,7 @@ class MeterSection : public MetricSection, public Meter {
 
 class TempoSection : public MetricSection, public Tempo {
   public:
-	TempoSection (const BBT_Time& start, double qpm, double note_type)
+	TempoSection (const Timecode::BBT_Time& start, double qpm, double note_type)
 		: MetricSection (start), Tempo (qpm, note_type) {}
 	TempoSection (framepos_t start, double qpm, double note_type)
 		: MetricSection (start), Tempo (qpm, note_type) {}
@@ -151,18 +151,18 @@ class TempoMetric {
 	void set_tempo (const Tempo& t)    { _tempo = &t; }
 	void set_meter (const Meter& m)    { _meter = &m; }
 	void set_frame (framepos_t f)      { _frame = f; }
-	void set_start (const BBT_Time& t) { _start = t; }
+	void set_start (const Timecode::BBT_Time& t) { _start = t; }
 	
 	const Meter&    meter() const { return *_meter; }
 	const Tempo&    tempo() const { return *_tempo; }
 	framepos_t      frame() const { return _frame; }
-	const BBT_Time& start() const { return _start; }
+	const Timecode::BBT_Time& start() const { return _start; }
 	
   private:
-	const Meter*   _meter;
-	const Tempo*   _tempo;
-	framepos_t     _frame;
-	BBT_Time       _start;
+	const Meter*       _meter;
+	const Tempo*       _tempo;
+	framepos_t         _frame;
+	Timecode::BBT_Time _start;
 };
 
 class TempoMap : public PBD::StatefulDestructible
@@ -200,11 +200,11 @@ class TempoMap : public PBD::StatefulDestructible
 
 	BBTPointList *get_points (framepos_t start, framepos_t end) const;
 
-	void      bbt_time (framepos_t when, BBT_Time&) const;
-	framecnt_t frame_time (const BBT_Time&) const;
-	framecnt_t bbt_duration_at (framepos_t, const BBT_Time&, int dir) const;
+	void      bbt_time (framepos_t when, Timecode::BBT_Time&) const;
+	framecnt_t frame_time (const Timecode::BBT_Time&) const;
+	framecnt_t bbt_duration_at (framepos_t, const Timecode::BBT_Time&, int dir) const;
 
-	void bbt_time_add (framepos_t origin, BBT_Time& start, const BBT_Time& shift);
+	void bbt_time_add (framepos_t origin, Timecode::BBT_Time& start, const Timecode::BBT_Time& shift);
 
 	static const Tempo& default_tempo() { return _default_tempo; }
 	static const Meter& default_meter() { return _default_meter; }
@@ -214,14 +214,14 @@ class TempoMap : public PBD::StatefulDestructible
 
 	const TempoSection& tempo_section_at (framepos_t);
 
-	void add_tempo(const Tempo&, BBT_Time where);
-	void add_meter(const Meter&, BBT_Time where);
+	void add_tempo(const Tempo&, Timecode::BBT_Time where);
+	void add_meter(const Meter&, Timecode::BBT_Time where);
 
 	void add_tempo(const Tempo&, framepos_t where);
 	void add_meter(const Meter&, framepos_t where);
 
-	void move_tempo (TempoSection&, const BBT_Time& to);
-	void move_meter (MeterSection&, const BBT_Time& to);
+	void move_tempo (TempoSection&, const Timecode::BBT_Time& to);
+	void move_meter (MeterSection&, const Timecode::BBT_Time& to);
 
 	void remove_tempo(const TempoSection&);
 	void remove_meter(const MeterSection&);
@@ -242,13 +242,13 @@ class TempoMap : public PBD::StatefulDestructible
 	void dump (std::ostream&) const;
 	void clear ();
 
-	TempoMetric metric_at (BBT_Time bbt) const;
+	TempoMetric metric_at (Timecode::BBT_Time bbt) const;
 	TempoMetric metric_at (framepos_t) const;
-	void bbt_time_with_metric (framepos_t, BBT_Time&, const TempoMetric&) const;
+	void bbt_time_with_metric (framepos_t, Timecode::BBT_Time&, const TempoMetric&) const;
 
-	BBT_Time bbt_add (const BBT_Time&, const BBT_Time&, const TempoMetric&) const;
-	BBT_Time bbt_add (const BBT_Time& a, const BBT_Time& b) const;
-	BBT_Time bbt_subtract (const BBT_Time&, const BBT_Time&) const;
+	Timecode::BBT_Time bbt_add (const Timecode::BBT_Time&, const Timecode::BBT_Time&, const TempoMetric&) const;
+	Timecode::BBT_Time bbt_add (const Timecode::BBT_Time& a, const Timecode::BBT_Time& b) const;
+	Timecode::BBT_Time bbt_subtract (const Timecode::BBT_Time&, const Timecode::BBT_Time&) const;
 
 	void change_existing_tempo_at (framepos_t, double bpm, double note_type);
 	void change_initial_tempo (double bpm, double note_type);
@@ -265,30 +265,30 @@ class TempoMap : public PBD::StatefulDestructible
 	static Meter    _default_meter;
 
 	Metrics*             metrics;
-	framecnt_t          _frame_rate;
+	framecnt_t           _frame_rate;
 	framepos_t           last_bbt_when;
 	bool                 last_bbt_valid;
-	BBT_Time             last_bbt;
+	Timecode::BBT_Time   last_bbt;
 	mutable Glib::RWLock lock;
 
 	void timestamp_metrics (bool use_bbt);
 
 	framepos_t round_to_type (framepos_t fr, int dir, BBTPointType);
 
-	framepos_t frame_time_unlocked (const BBT_Time&) const;
+	framepos_t frame_time_unlocked (const Timecode::BBT_Time&) const;
 
-	void bbt_time_unlocked (framepos_t, BBT_Time&) const;
+	void bbt_time_unlocked (framepos_t, Timecode::BBT_Time&) const;
 
-	framecnt_t bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, int dir) const;
+	framecnt_t bbt_duration_at_unlocked (const Timecode::BBT_Time& when, const Timecode::BBT_Time& bbt, int dir) const;
 
 	const MeterSection& first_meter() const;
 	const TempoSection& first_tempo() const;
 
-	framecnt_t count_frames_between (const BBT_Time&, const BBT_Time&) const;
+	framecnt_t count_frames_between (const Timecode::BBT_Time&, const Timecode::BBT_Time&) const;
 	framecnt_t count_frames_between_metrics (const Meter&, const Tempo&,
-                                                 const BBT_Time&, const BBT_Time&) const;
+	                                         const Timecode::BBT_Time&, const Timecode::BBT_Time&) const;
 
-	int move_metric_section (MetricSection&, const BBT_Time& to);
+	int move_metric_section (MetricSection&, const Timecode::BBT_Time& to);
 	void do_insert (MetricSection* section, bool with_bbt);
 };
 

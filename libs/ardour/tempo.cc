@@ -38,6 +38,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+using Timecode::BBT_Time;
+
 /* _default tempo is 4/4 qtr=120 */
 
 Meter    TempoMap::_default_meter (4.0, 4.0);

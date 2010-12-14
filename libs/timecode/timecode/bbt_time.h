@@ -17,25 +17,23 @@
 
 */
 
-#ifndef __ardour_bbt_time_h__
-#define __ardour_bbt_time_h__
+#ifndef __timecode_bbt_time_h__
+#define __timecode_bbt_time_h__
 
 #include <ostream>
 #include <stdint.h>
 #include <iomanip>
 
-namespace ARDOUR {
+namespace Timecode {
 
+/** Bar, Beat, Tick Time (i.e. Tempo-Based Time) */
 struct BBT_Time {
 	uint32_t bars;
 	uint32_t beats;
 	uint32_t ticks;
 	
-	BBT_Time() {
-		bars = 1;
-		beats = 1;
-		ticks = 0;
-	}
+	BBT_Time ()
+		: bars (1), beats (1), ticks (0) {}
 	
 	BBT_Time (uint32_t ba, uint32_t be, uint32_t t)
 		: bars (ba), beats (be), ticks (t) {}
@@ -54,14 +52,14 @@ struct BBT_Time {
 }
 
 inline std::ostream&
-operator<< (std::ostream& o, const ARDOUR::BBT_Time& bbt)
+operator<< (std::ostream& o, const Timecode::BBT_Time& bbt)
 {
 	o << bbt.bars << '|' << bbt.beats << '|' << bbt.ticks;
 	return o;
 }
 
 inline std::ostream&
-print_padded (std::ostream& o, const ARDOUR::BBT_Time& bbt)
+print_padded (std::ostream& o, const Timecode::BBT_Time& bbt)
 {
 	o << std::setfill ('0') << std::right
 	  << std::setw (3) << bbt.bars << "|"
@@ -71,4 +69,4 @@ print_padded (std::ostream& o, const ARDOUR::BBT_Time& bbt)
 	return o;
 }
 
-#endif /* __ardour_bbt_time_h__ */
+#endif /* __timecode_bbt_time_h__ */

@@ -47,7 +47,7 @@ using namespace PBD;
 /* BBT TIME*/
 
 void
-Session::bbt_time (framepos_t when, BBT_Time& bbt)
+Session::bbt_time (framepos_t when, Timecode::BBT_Time& bbt)
 {
 	_tempo_map->bbt_time (when, bbt);
 }
@@ -473,11 +473,11 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 				 jack_position_t* pos,
 				 int /*new_position*/)
 {
-	BBT_Time bbt;
+	Timecode::BBT_Time bbt;
 
-        if (pos->frame != _transport_frame) {
-                cerr << "ARDOUR says " << _transport_frame << " JACK says " << pos->frame << endl;
-        }
+	if (pos->frame != _transport_frame) {
+		cerr << "ARDOUR says " << _transport_frame << " JACK says " << pos->frame << endl;
+	}
 
 	/* BBT info */
 

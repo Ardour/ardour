@@ -30,10 +30,12 @@
 #include <inttypes.h>
 #include <jack/types.h>
 #include <jack/midiport.h>
-#include "musictime/time.h"
+
+#include "timecode/bbt_time.h"
+#include "timecode/time.h"
+
 #include "pbd/id.h"
 
-#include "ardour/bbt_time.h"
 #include "ardour/chan_count.h"
 
 #include <map>
@@ -47,7 +49,7 @@ namespace ARDOUR {
 	class Source;
 	class AudioSource;
 	class Route;
-        class Region;
+	class Region;
 
 	typedef jack_default_audio_sample_t Sample;
 	typedef float                       pan_t;
@@ -56,28 +58,28 @@ namespace ARDOUR {
 	typedef uint64_t                    microseconds_t;
 	typedef jack_nframes_t              pframes_t;
 
-        /* Any position measured in audio frames.
-           Assumed to be non-negative but not enforced.
-         */
+	/* Any position measured in audio frames.
+	   Assumed to be non-negative but not enforced.
+	*/
 	typedef int64_t framepos_t;
 
-        /* Any distance from a given framepos_t.
-           Maybe positive or negative.
-        */
+	/* Any distance from a given framepos_t.
+	   Maybe positive or negative.
+	*/
 	typedef int64_t frameoffset_t;
 
 	/* Any count of audio frames. 
-           Assumed to be positive but not enforced.
-        */
+	   Assumed to be positive but not enforced.
+	*/
 	typedef int64_t framecnt_t;
 
-        static const framepos_t max_framepos = INT64_MAX;
-        static const framecnt_t max_framecnt = INT64_MAX;
+	static const framepos_t max_framepos = INT64_MAX;
+	static const framecnt_t max_framecnt = INT64_MAX;
 
-        // a set of (time) intervals: first of pair is the offset within the region, second is the length of the interval
-        typedef std::list<std::pair<frameoffset_t,framecnt_t> > AudioIntervalResult;
-        // associate a set of intervals with regions (e.g. for silence detection)
-        typedef std::map<boost::shared_ptr<ARDOUR::Region>,AudioIntervalResult> AudioIntervalMap;
+	// a set of (time) intervals: first of pair is the offset within the region, second is the length of the interval
+	typedef std::list<std::pair<frameoffset_t,framecnt_t> > AudioIntervalResult;
+	// associate a set of intervals with regions (e.g. for silence detection)
+	typedef std::map<boost::shared_ptr<ARDOUR::Region>,AudioIntervalResult> AudioIntervalMap;
 
 	struct IOChange {
 
@@ -216,8 +218,8 @@ namespace ARDOUR {
 
 		Type type;
 
-		Timecode::Time    timecode;
-		BBT_Time       bbt;
+		Timecode::Time     timecode;
+		Timecode::BBT_Time bbt;
 
 		union {
 			framecnt_t     frames;
@@ -250,11 +252,11 @@ namespace ARDOUR {
 	};
 
 	struct MusicRange {
-		BBT_Time start;
-		BBT_Time end;
+		Timecode::BBT_Time start;
+		Timecode::BBT_Time end;
 		uint32_t id;
 
-		MusicRange (BBT_Time& s, BBT_Time& e, uint32_t i)
+		MusicRange (Timecode::BBT_Time& s, Timecode::BBT_Time& e, uint32_t i)
 			: start (s), end (e), id (i) {}
 
 		bool operator== (const MusicRange& other) const {

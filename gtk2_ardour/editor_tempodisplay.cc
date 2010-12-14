@@ -144,7 +144,7 @@ Editor::compute_current_bbt_points (framepos_t leftmost, framepos_t rightmost)
 		return;
 	}
 
-	BBT_Time previous_beat, next_beat; // the beats previous to the leftmost frame and after the rightmost frame
+	Timecode::BBT_Time previous_beat, next_beat; // the beats previous to the leftmost frame and after the rightmost frame
 
 	_session->bbt_time(leftmost, previous_beat);
 	_session->bbt_time(rightmost, next_beat);
@@ -224,7 +224,7 @@ Editor::mouse_add_new_tempo_event (framepos_t frame)
 	}
 
 	double bpm = 0;
-	BBT_Time requested;
+	Timecode::BBT_Time requested;
 
 	bpm = tempo_dialog.get_bpm ();
 	double nt = tempo_dialog.get_note_type();
@@ -271,7 +271,7 @@ Editor::mouse_add_new_meter_event (framepos_t frame)
 	bpb = max (1.0, bpb); // XXX is this a reasonable limit?
 
 	double note_type = meter_dialog.get_note_type ();
-	BBT_Time requested;
+	Timecode::BBT_Time requested;
 
 	meter_dialog.get_bbt_time (requested);
 
@@ -352,7 +352,7 @@ Editor::edit_tempo_section (TempoSection* section)
 
 	double bpm = tempo_dialog.get_bpm ();
 	double nt = tempo_dialog.get_note_type ();
-	BBT_Time when;
+	Timecode::BBT_Time when;
 	tempo_dialog.get_bbt_time(when);
 	bpm = max (0.01, bpm);
 

@@ -4,7 +4,7 @@ import Options
 import os
 
 # Version of this package (even if built as a child)
-MUSICTIME_VERSION = '0.0.0'
+TIMECODE_VERSION = '0.0.0'
 
 # Library version (UNIX style major, minor, micro)
 # major increment <=> incompatible changes
@@ -12,11 +12,11 @@ MUSICTIME_VERSION = '0.0.0'
 # micro increment <=> no interface changes
 # Version history:
 #   0.0.0 = 0,0,0
-MUSICTIME_LIB_VERSION = '0.0.0'
+TIMECODE_LIB_VERSION = '0.0.0'
 
 # Variables for 'waf dist'
-APPNAME = 'musictime'
-VERSION = MUSICTIME_VERSION
+APPNAME = 'timecode'
+VERSION = TIMECODE_VERSION
 
 # Mandatory variables
 srcdir = '.'
@@ -36,9 +36,9 @@ def build(bld):
 	obj.source         = 'src/time.cc'
 	obj.export_incdirs = ['.']
 	obj.includes       = ['.', './src']
-	obj.name           = 'libmusictime'
-	obj.target         = 'musictime'
-	obj.vnum           = MUSICTIME_LIB_VERSION
+	obj.name           = 'libtimecode'
+	obj.target         = 'timecode'
+	obj.vnum           = TIMECODE_LIB_VERSION
 	obj.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 def shutdown():

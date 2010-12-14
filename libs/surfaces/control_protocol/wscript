@@ -30,7 +30,7 @@ def build(bld):
 	obj.includes     = ['.', './control_protocol']
 	obj.name         = 'libardour_cp'
 	obj.target       = 'ardourcp'
-	obj.uselib_local = 'libardour libmusictime'
+	obj.uselib_local = 'libardour libtimecode'
 	obj.vnum         = LIBARDOUR_CP_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 

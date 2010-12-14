@@ -1144,20 +1144,20 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 void
 Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper)
 {
-        if (_session == 0) {
-                return;
-        }
+	if (_session == 0) {
+		return;
+	}
 	TempoMap::BBTPointList::iterator i;
-        BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
+	Timecode::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
 
-        _session->bbt_time (lower, lower_beat);
-        _session->bbt_time (upper, upper_beat);
-        uint32_t beats = 0;
+	_session->bbt_time (lower, lower_beat);
+	_session->bbt_time (upper, upper_beat);
+	uint32_t beats = 0;
 
 	bbt_accent_modulo = 1;
 	bbt_bar_helper_on = false;
-        bbt_bars = 0;
-        bbt_nmarks = 1;
+	bbt_bars = 0;
+	bbt_nmarks = 1;
 
 	bbt_ruler_scale =  bbt_over;
 
@@ -1268,18 +1268,18 @@ Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper)
 gint
 Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
 {
-        if (_session == 0) {
-                return 0;
-        }
+	if (_session == 0) {
+		return 0;
+	}
 
 	TempoMap::BBTPointList::iterator i;
 
-        char buf[64];
-        gint  n = 0;
+	char buf[64];
+	gint  n = 0;
 	framepos_t pos;
-	BBT_Time next_beat;
+	Timecode::BBT_Time next_beat;
 	framepos_t next_beat_pos;
-        uint32_t beats = 0;
+	uint32_t beats = 0;
 
 	uint32_t tick = 0;
 	uint32_t skip;

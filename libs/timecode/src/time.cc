@@ -21,7 +21,7 @@
 
 #include <math.h>
 
-#include "musictime/time.h"
+#include "timecode/time.h"
 
 namespace Timecode {
 

@@ -783,7 +783,7 @@ EditorRegions::update_all_subrows (TreeModel::Row const &parent_row, int level)
 void
 EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize)
 {
-	BBT_Time bbt;
+	Timecode::BBT_Time bbt;
 	Timecode::Time timecode;
 
 	switch (ARDOUR_UI::instance()->secondary_clock.mode ()) {

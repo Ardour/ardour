@@ -246,7 +246,7 @@ ExportTimespanSelector::bbt_str (framepos_t frames) const
 	}
 
 	std::ostringstream oss;
-	BBT_Time time;
+	Timecode::BBT_Time time;
 	_session->bbt_time (frames, time);
 
 	print_padded (oss, time);

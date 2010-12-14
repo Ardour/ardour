@@ -1331,7 +1331,7 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 		return kAudioUnitErr_CannotDoInCurrentContext;
 	}
 
-	BBT_Time bbt;
+	Timecode::BBT_Time bbt;
 	TempoMetric metric = tmap.metric_at (_session.transport_frame() + current_offset);
 	tmap.bbt_time_with_metric (_session.transport_frame() + current_offset, bbt, metric);
 
@@ -1370,7 +1370,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 		return kAudioUnitErr_CannotDoInCurrentContext;
 	}
 
-	BBT_Time bbt;
+	Timecode::BBT_Time bbt;
 	TempoMetric metric = tmap.metric_at (_session.transport_frame() + current_offset);
 	tmap.bbt_time_with_metric (_session.transport_frame() + current_offset, bbt, metric);
 
@@ -1462,7 +1462,7 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 					return kAudioUnitErr_CannotDoInCurrentContext;
 				}
 				
-				BBT_Time bbt;
+				Timecode::BBT_Time bbt;
 
 				if (outCycleStartBeat) {
 					TempoMetric metric = tmap.metric_at (loc->start() + current_offset);

@@ -44,9 +44,9 @@ public:
 	virtual ~Ticker() {}
 
 	virtual void tick (
-		const framepos_t& transport_frames,
-		const BBT_Time& transport_bbt,
-		const Timecode::Time& transport_timecode) = 0;
+		const framepos_t&         transport_frames,
+		const Timecode::BBT_Time& transport_bbt,
+		const Timecode::Time&     transport_timecode) = 0;
 
 	void set_session (Session* s);
 };
@@ -68,9 +68,9 @@ public:
 	}
 
 	void tick(
-		const framepos_t& transport_frames,
-		const BBT_Time& transport_bbt,
-		const Timecode::Time& transport_timecode);
+		const framepos_t&         transport_frames,
+		const Timecode::BBT_Time& transport_bbt,
+		const Timecode::Time&     transport_timecode);
 
 	void set_session (Session* s);
 	void session_going_away();

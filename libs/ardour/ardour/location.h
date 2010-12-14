@@ -115,14 +115,14 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 	void recompute_frames_from_bbt ();
 
   private:
-	std::string   _name;
-	framepos_t   _start;
-	BBT_Time      _bbt_start;
-	framepos_t   _end;
-	BBT_Time      _bbt_end;
-	Flags         _flags;
-	bool          _locked;
-	PositionLockStyle _position_lock_style;
+	std::string        _name;
+	framepos_t         _start;
+	Timecode::BBT_Time _bbt_start;
+	framepos_t         _end;
+	Timecode::BBT_Time _bbt_end;
+	Flags              _flags;
+	bool               _locked;
+	PositionLockStyle  _position_lock_style;
 
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);

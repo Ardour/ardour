@@ -2150,7 +2150,7 @@ Editor::show_verbose_time_cursor (framepos_t frame, double offset, double xpos, 
 {
 	char buf[128];
 	Timecode::Time timecode;
-	BBT_Time bbt;
+	Timecode::BBT_Time bbt;
 	int hours, mins;
 	framepos_t frame_rate;
 	float secs;
@@ -2207,8 +2207,8 @@ Editor::show_verbose_duration_cursor (framepos_t start, framepos_t end, double o
 {
 	char buf[128];
 	Timecode::Time timecode;
-	BBT_Time sbbt;
-	BBT_Time ebbt;
+	Timecode::BBT_Time sbbt;
+	Timecode::BBT_Time ebbt;
 	int hours, mins;
 	framepos_t distance, frame_rate;
 	float secs;

@@ -21,7 +21,7 @@
 #define __midipp_mmc_h_h__
 
 #include <jack/types.h>
-#include "musictime/time.h"
+#include "timecode/time.h"
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
 #include "midi++/types.h"

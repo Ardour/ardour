@@ -42,7 +42,7 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string & action
 	  when_bar_label (_("bar:"), ALIGN_LEFT, ALIGN_CENTER),
 	  when_beat_label (_("beat:"), ALIGN_LEFT, ALIGN_CENTER)
 {
-	BBT_Time when;
+	Timecode::BBT_Time when;
 	Tempo tempo (map.tempo_at (frame));
 	map.bbt_time (frame, when);
 
@@ -62,7 +62,7 @@ TempoDialog::TempoDialog (TempoSection& section, const string & action)
 }
 
 void
-TempoDialog::init (const BBT_Time& when, double bpm, double note_type, bool movable)
+TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type, bool movable)
 {
 	bpm_spinner.set_numeric (true);
 	bpm_spinner.set_digits (2);
@@ -189,7 +189,7 @@ TempoDialog::get_bpm ()
 }
 
 bool
-TempoDialog::get_bbt_time (BBT_Time& requested)
+TempoDialog::get_bbt_time (Timecode::BBT_Time& requested)
 {
 	if (sscanf (when_bar_entry.get_text().c_str(), "%" PRIu32, &requested.bars) != 1) {
 		return false;
@@ -244,7 +244,7 @@ MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string & action
 	  ok_button (action),
 	  cancel_button (_("Cancel"))
 {
-	BBT_Time when;
+	Timecode::BBT_Time when;
 	frame = map.round_to_bar(frame,0);
 	Meter meter (map.meter_at(frame));
 
@@ -261,7 +261,7 @@ MeterDialog::MeterDialog (MeterSection& section, const string & action)
 }
 
 void
-MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool movable)
+MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double note_type, bool movable)
 {
 	snprintf (buf, sizeof (buf), "%.2f", bpb);
 	bpb_entry.set_text (buf);
@@ -447,9 +447,8 @@ MeterDialog::get_note_type ()
 }
 
 bool
-MeterDialog::get_bbt_time (BBT_Time& requested)
+MeterDialog::get_bbt_time (Timecode::BBT_Time& requested)
 {
-
 	if (sscanf (when_bar_entry.get_text().c_str(), "%" PRIu32, &requested.bars) != 1) {
 		return false;
 	}

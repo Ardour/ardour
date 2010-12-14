@@ -1824,7 +1824,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	motion (event, false);
 
-	BBT_Time when;
+	Timecode::BBT_Time when;
 
 	TempoMap& map (_editor->session()->tempo_map());
 	map.bbt_time (last_pointer_frame(), when);
@@ -1913,7 +1913,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	motion (event, false);
 
-	BBT_Time when;
+	Timecode::BBT_Time when;
 
 	TempoMap& map (_editor->session()->tempo_map());
 	map.bbt_time (last_pointer_frame(), when);

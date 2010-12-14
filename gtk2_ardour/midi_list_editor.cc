@@ -200,7 +200,7 @@ MidiListEditor::redisplay_model ()
 			row[columns.note] = (*i)->note();
 			row[columns.velocity] = (*i)->velocity();
 			
-			BBT_Time bbt;
+			Timecode::BBT_Time bbt;
 			double dur;
 
 			_session->tempo_map().bbt_time (conv.to ((*i)->time()), bbt);

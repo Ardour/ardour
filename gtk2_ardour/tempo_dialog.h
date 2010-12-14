@@ -43,10 +43,10 @@ public:
 
 	double get_bpm ();
 	double get_note_type ();
-	bool   get_bbt_time (ARDOUR::BBT_Time&);
+	bool   get_bbt_time (Timecode::BBT_Time&);
 
 private:
-	void init (const ARDOUR::BBT_Time& start, double, double, bool);
+	void init (const Timecode::BBT_Time& start, double, double, bool);
 	void bpm_changed ();
 	bool bpm_button_press (GdkEventButton* );
 	bool bpm_button_release (GdkEventButton* );
@@ -75,10 +75,10 @@ public:
 
 	double get_bpb ();
 	double get_note_type ();
-	bool   get_bbt_time (ARDOUR::BBT_Time&);
+	bool   get_bbt_time (Timecode::BBT_Time&);
 
 private:
-	void init (const ARDOUR::BBT_Time&, double, double, bool);
+	void init (const Timecode::BBT_Time&, double, double, bool);
 	bool entry_key_press (GdkEventKey* );
 	bool entry_key_release (GdkEventKey* );
 	void note_types_change ();
