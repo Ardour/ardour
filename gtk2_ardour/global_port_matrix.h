@@ -50,8 +50,7 @@ private:
 	};
 };
 
-
-class GlobalPortMatrixWindow : public Gtk::Window
+class GlobalPortMatrixWindow : public ArdourDialog
 {
 public:
 	GlobalPortMatrixWindow (ARDOUR::Session *, ARDOUR::DataType);

@@ -144,7 +144,8 @@ GlobalPortMatrix::get_state (BundleChannel c[2]) const
 }
 
 GlobalPortMatrixWindow::GlobalPortMatrixWindow (Session* s, DataType t)
-	: _port_matrix (this, s, t)
+	: ArdourDialog (X_("reset me soon"))
+        , _port_matrix (this, s, t)
 {
 	switch (t) {
 	case DataType::AUDIO:
@@ -155,7 +156,7 @@ GlobalPortMatrixWindow::GlobalPortMatrixWindow (Session* s, DataType t)
 		break;
 	}
 
-	add (_port_matrix);
+	get_vbox()->pack_start (_port_matrix, true, true);
 	_port_matrix.show ();
 }
 
