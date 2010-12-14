@@ -367,15 +367,23 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 		}
 		return true;
 	} else {
-                if (_pluginui->non_gtk_gui()) {
-                        /* pass editor window as the window for the event
-                           to be handled in, not this one, because there are
-                           no widgets in this window that we want to have
-                           key focus.
-                        */
-                        return relay_key_press (event, &PublicEditor::instance());
+                /* for us to be getting key press events, there really
+                   MUST be a _pluginui, but just to be safe, check ...
+                */
+
+                if (_pluginui) {
+                        if (_pluginui->non_gtk_gui()) {
+                                /* pass editor window as the window for the event
+                                   to be handled in, not this one, because there are
+                                   no widgets in this window that we want to have
+                                   key focus.
+                                */
+                                return relay_key_press (event, &PublicEditor::instance());
+                        } else {
+                                return relay_key_press (event, this);
+                        }
                 } else {
-                        return relay_key_press (event, this);
+                        return false;
                 }
 	}
 }
