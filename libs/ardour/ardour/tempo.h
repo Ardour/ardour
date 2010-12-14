@@ -53,8 +53,6 @@ class Tempo {
 
 class Meter {
   public:
-	static const double ticks_per_beat;
-
 	Meter (double bpb, double bt)
 		: _beats_per_bar (bpb), _note_type (bt) {}
 

@@ -33,7 +33,7 @@ def configure(conf):
 def build(bld):
 	# Library
 	obj = bld.new_task_gen('cxx', 'shlib')
-	obj.source         = 'src/time.cc'
+	obj.source         = [ 'src/time.cc', 'src/bbt_time.cc' ]
 	obj.export_incdirs = ['.']
 	obj.includes       = ['.', './src']
 	obj.name           = 'libtimecode'

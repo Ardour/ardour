@@ -45,8 +45,6 @@ using Timecode::BBT_Time;
 Meter    TempoMap::_default_meter (4.0, 4.0);
 Tempo    TempoMap::_default_tempo (120.0);
 
-const double Meter::ticks_per_beat = 1920.0;
-
 double Tempo::frames_per_beat (framecnt_t sr, const Meter& meter) const
 {
 	return  ((60.0 * sr) / (_beats_per_minute * meter.note_divisor()/_note_type));
@@ -707,7 +705,7 @@ TempoMap::timestamp_metrics (bool use_bbt)
 				first = false;
 			} else {
 
-				if (bbt.ticks > Meter::ticks_per_beat/2) {
+				if (bbt.ticks > BBT_Time::ticks_per_beat/2) {
 					/* round up to next beat */
 					bbt.beats += 1;
 				}
@@ -836,15 +834,15 @@ TempoMap::bbt_time_with_metric (framepos_t frame, BBT_Time& bbt, const TempoMetr
 	// cerr << "---- BBT time for " << frame << " using metric @ " << metric.frame() << " BBT " << metric.start() << endl;
 
 	const double beats_per_bar = metric.meter().beats_per_bar();
-	const double ticks_per_frame = metric.tempo().frames_per_beat (_frame_rate, metric.meter()) / Meter::ticks_per_beat;
+	const double ticks_per_frame = metric.tempo().frames_per_beat (_frame_rate, metric.meter()) / BBT_Time::ticks_per_beat;
 
 	/* now compute how far beyond that point we actually are. */
 
 	frame_diff = frame - metric.frame();
 
         bbt.ticks = metric.start().ticks + (uint32_t)round((double)frame_diff / ticks_per_frame);
-        uint32_t xtra_beats = bbt.ticks / (uint32_t)Meter::ticks_per_beat;
-        bbt.ticks %= (uint32_t)Meter::ticks_per_beat;
+        uint32_t xtra_beats = bbt.ticks / (uint32_t)BBT_Time::ticks_per_beat;
+        bbt.ticks %= (uint32_t)BBT_Time::ticks_per_beat;
 
         bbt.beats = metric.start().beats + xtra_beats - 1; // correction for 1-based counting, see below for matching operation.
         bbt.bars = metric.start().bars + (uint32_t)floor((double)bbt.beats / beats_per_bar);
@@ -861,7 +859,7 @@ TempoMap::bbt_time_with_metric (framepos_t frame, BBT_Time& bbt, const TempoMetr
            this will also behave badly in the case of meters like
            0.1/4, but I can't be bothered to test that.
         */
-        uint32_t ticks_on_last_beat = (uint32_t)floor(Meter::ticks_per_beat * beat_fraction);
+        uint32_t ticks_on_last_beat = (uint32_t)floor(BBT_Time::ticks_per_beat * beat_fraction);
 
         if (bbt.beats > (uint32_t)floor(beats_per_bar) && bbt.ticks >= ticks_on_last_beat) {
 		bbt.ticks -= ticks_on_last_beat;
@@ -890,7 +888,7 @@ TempoMap::count_frames_between (const BBT_Time& start, const BBT_Time& end) cons
 	uint32_t bar_offset = start.bars - m.start().bars;
 
 	double  beat_offset = bar_offset*m.meter().beats_per_bar() - (m.start().beats-1) + (start.beats -1)
-		+ start.ticks/Meter::ticks_per_beat;
+		+ start.ticks/BBT_Time::ticks_per_beat;
 
 
 	start_frame = m.frame() + (framepos_t) rint( beat_offset * m.tempo().frames_per_beat(_frame_rate, m.meter()));
@@ -900,7 +898,7 @@ TempoMap::count_frames_between (const BBT_Time& start, const BBT_Time& end) cons
 	bar_offset = end.bars - m.start().bars;
 
 	beat_offset = bar_offset * m.meter().beats_per_bar() - (m.start().beats -1) + (end.beats - 1)
-		+ end.ticks/Meter::ticks_per_beat;
+		+ end.ticks/BBT_Time::ticks_per_beat;
 
 	end_frame = m.frame() + (framepos_t) rint(beat_offset * m.tempo().frames_per_beat(_frame_rate, m.meter()));
 
@@ -1028,8 +1026,8 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 		 */
 
 		uint32_t ticks_at_beat = (uint32_t) ( result.beats == ceil(beats_per_bar) ?
-					(1 - (ceil(beats_per_bar) - beats_per_bar))* Meter::ticks_per_beat
-					   : Meter::ticks_per_beat );
+					(1 - (ceil(beats_per_bar) - beats_per_bar))* BBT_Time::ticks_per_beat
+					   : BBT_Time::ticks_per_beat );
 
 		while (result.ticks >= ticks_at_beat) {
 			result.beats++;
@@ -1041,8 +1039,8 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 				beats_per_bar = metric.meter().beats_per_bar();
 			}
 			ticks_at_beat= (uint32_t) ( result.beats == ceil(beats_per_bar) ?
-				       (1 - (ceil(beats_per_bar) - beats_per_bar) ) * Meter::ticks_per_beat
-				       : Meter::ticks_per_beat);
+				       (1 - (ceil(beats_per_bar) - beats_per_bar) ) * BBT_Time::ticks_per_beat
+				       : BBT_Time::ticks_per_beat);
 
 		}
 
@@ -1071,7 +1069,7 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 			result.ticks = when.ticks - bbt.ticks;
 		} else {
 
-			uint32_t ticks_at_beat= (uint32_t) Meter::ticks_per_beat;
+			uint32_t ticks_at_beat= (uint32_t) BBT_Time::ticks_per_beat;
 			uint32_t t = bbt.ticks - when.ticks;
 
 			do {
@@ -1081,10 +1079,10 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 					metric = metric_at(result); // maybe there is a meter change
 					beats_per_bar = metric.meter().beats_per_bar();
 					result.beats = (uint32_t) ceil(beats_per_bar);
-					ticks_at_beat = (uint32_t) ((1 - (ceil(beats_per_bar) - beats_per_bar)) * Meter::ticks_per_beat) ;
+					ticks_at_beat = (uint32_t) ((1 - (ceil(beats_per_bar) - beats_per_bar)) * BBT_Time::ticks_per_beat) ;
 				} else {
 					result.beats --;
-					ticks_at_beat = (uint32_t) Meter::ticks_per_beat;
+					ticks_at_beat = (uint32_t) BBT_Time::ticks_per_beat;
 				}
 
 				if (t <= ticks_at_beat) {
@@ -1139,7 +1137,7 @@ TempoMap::round_to_beat_subdivision (framepos_t fr, int sub_num, int dir)
 
 	bbt_time(fr, the_beat);
 
-	ticks_one_subdivisions_worth = (uint32_t)Meter::ticks_per_beat / sub_num;
+	ticks_one_subdivisions_worth = (uint32_t)BBT_Time::ticks_per_beat / sub_num;
 	ticks_one_half_subdivisions_worth = ticks_one_subdivisions_worth / 2;
 
 	if (dir > 0) {
@@ -1247,7 +1245,7 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 			float midbar_ticks;
 
 			midbar_beats = metric.meter().beats_per_bar() / 2 + 1;
-			midbar_ticks = Meter::ticks_per_beat * fmod (midbar_beats, 1.0f);
+			midbar_ticks = BBT_Time::ticks_per_beat * fmod (midbar_beats, 1.0f);
 			midbar_beats = floor (midbar_beats);
 			
 			BBT_Time midbar (bbt.bars, lrintf (midbar_beats), lrintf (midbar_ticks));
@@ -1300,7 +1298,7 @@ TempoMap::round_to_type (framepos_t frame, int dir, BBTPointType type)
 			/* "true" rounding */
 
 			/* round to nearest beat */
-			if (bbt.ticks >= (Meter::ticks_per_beat/2)) {
+			if (bbt.ticks >= (BBT_Time::ticks_per_beat/2)) {
 
 				try {
 					bbt = bbt_add (bbt, one_beat, metric);
@@ -1702,9 +1700,9 @@ TempoMap::bbt_add (const BBT_Time& start, const BBT_Time& increment, const Tempo
 	BBT_Time op = increment; /* argument is const, but we need to modify it */
 	uint32_t ticks = result.ticks + op.ticks;
 
-	if (ticks >= Meter::ticks_per_beat) {
+	if (ticks >= BBT_Time::ticks_per_beat) {
 		op.beats++;
-		result.ticks = ticks % (uint32_t) Meter::ticks_per_beat;
+		result.ticks = ticks % (uint32_t) BBT_Time::ticks_per_beat;
 	} else {
 		result.ticks += op.ticks;
 	}
@@ -1805,7 +1803,7 @@ TempoMap::bbt_subtract (const BBT_Time& start, const BBT_Time& decrement) const
 	if (op.ticks > result.ticks) {
 		/* subtract an extra beat later; meanwhile set ticks to the right "carry" value */
 		op.beats++;
-		result.ticks = Meter::ticks_per_beat - (op.ticks - result.ticks);
+		result.ticks = BBT_Time::ticks_per_beat - (op.ticks - result.ticks);
 	} else {
 		result.ticks -= op.ticks;
 	}
@@ -2002,11 +2000,11 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 	}
 
         if (op.ticks) {
-                if (op.ticks >= Meter::ticks_per_beat) {
+                if (op.ticks >= BBT_Time::ticks_per_beat) {
                         pos += frames_per_beat;
-                        pos += llrint (frames_per_beat * ((op.ticks % (uint32_t) Meter::ticks_per_beat) / (double) Meter::ticks_per_beat));
+                        pos += llrint (frames_per_beat * ((op.ticks % (uint32_t) BBT_Time::ticks_per_beat) / (double) BBT_Time::ticks_per_beat));
                 } else {
-                        pos += llrint (frames_per_beat * (op.ticks / (double) Meter::ticks_per_beat));
+                        pos += llrint (frames_per_beat * (op.ticks / (double) BBT_Time::ticks_per_beat));
                 }
         }
 
@@ -2071,7 +2069,7 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
                 */
 
                 if (ddist < frames_per_beat) {
-                        beats += Meter::ticks_per_beat * (ddist/frames_per_beat);
+                        beats += BBT_Time::ticks_per_beat * (ddist/frames_per_beat);
                         break;
                 }
 

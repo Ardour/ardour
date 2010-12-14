@@ -2247,7 +2247,7 @@ Editor::show_verbose_duration_cursor (framepos_t start, framepos_t end, double o
 			ebbt.ticks -= sbbt.ticks;
 		} else {
 			ebbt.beats--;
-			ebbt.ticks = int(Meter::ticks_per_beat) + ebbt.ticks - sbbt.ticks;
+			ebbt.ticks = int(Timecode::BBT_Time::ticks_per_beat) + ebbt.ticks - sbbt.ticks;
 		}
 
 		snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32, ebbt.bars, ebbt.beats, ebbt.ticks);

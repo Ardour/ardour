@@ -27,6 +27,8 @@ namespace Timecode {
 
 /** Bar, Beat, Tick Time (i.e. Tempo-Based Time) */
 struct BBT_Time {
+	static const double ticks_per_beat;
+
 	uint32_t bars;
 	uint32_t beats;
 	uint32_t ticks;
@@ -36,6 +38,8 @@ struct BBT_Time {
 	
 	BBT_Time (uint32_t ba, uint32_t be, uint32_t t)
 		: bars (ba), beats (be), ticks (t) {}
+
+        BBT_Time (double beats);
 	
 	bool operator< (const BBT_Time& other) const {
 		return bars < other.bars ||

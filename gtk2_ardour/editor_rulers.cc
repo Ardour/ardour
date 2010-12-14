@@ -1260,7 +1260,7 @@ Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper)
 	  bbt_ruler_scale =  bbt_show_ticks_detail;
 	}
 
-	if ((bbt_ruler_scale == bbt_show_ticks_detail) && (lower_beat.beats == upper_beat.beats) && (upper_beat.ticks - lower_beat.ticks <= Meter::ticks_per_beat / 4)) {
+	if ((bbt_ruler_scale == bbt_show_ticks_detail) && (lower_beat.beats == upper_beat.beats) && (upper_beat.ticks - lower_beat.ticks <= Timecode::BBT_Time::ticks_per_beat / 4)) {
 		bbt_ruler_scale =  bbt_show_ticks_super_detail;
 	}
 }
@@ -1389,14 +1389,14 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 
 			frame_skip = (framepos_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
 			frame_skip_error -= frame_skip;
-			skip = (uint32_t) (Meter::ticks_per_beat / bbt_beat_subdivision);
+			skip = (uint32_t) (Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision);
 
 			pos = (*i).frame + frame_skip;
 			accumulated_error = frame_skip_error;
 
 			tick = skip;
 
-			for (t = 0; (tick < Meter::ticks_per_beat) && (n < bbt_nmarks) && (pos < next_beat_pos) ; pos += frame_skip, tick += skip, ++t) {
+			for (t = 0; (tick < Timecode::BBT_Time::ticks_per_beat) && (n < bbt_nmarks) && (pos < next_beat_pos) ; pos += frame_skip, tick += skip, ++t) {
 
 			        if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
 					i_am_accented = true;
@@ -1481,14 +1481,14 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 
 			frame_skip = (framepos_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
 			frame_skip_error -= frame_skip;
-			skip = (uint32_t) (Meter::ticks_per_beat / bbt_beat_subdivision);
+			skip = (uint32_t) (Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision);
 
 			pos = (*i).frame + frame_skip;
 			accumulated_error = frame_skip_error;
 
 			tick = skip;
 
-			for (t = 0; (tick < Meter::ticks_per_beat) && (n < bbt_nmarks) && (pos < next_beat_pos) ; pos += frame_skip, tick += skip, ++t) {
+			for (t = 0; (tick < Timecode::BBT_Time::ticks_per_beat) && (n < bbt_nmarks) && (pos < next_beat_pos) ; pos += frame_skip, tick += skip, ++t) {
 
 			        if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
 				        i_am_accented = true;
@@ -1578,14 +1578,14 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 
 			frame_skip = (framepos_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
 			frame_skip_error -= frame_skip;
-			skip = (uint32_t) (Meter::ticks_per_beat / bbt_beat_subdivision);
+			skip = (uint32_t) (Timecode::BBT_Time::ticks_per_beat / bbt_beat_subdivision);
 
 			pos = (*i).frame + frame_skip;
 			accumulated_error = frame_skip_error;
 
 			tick = skip;
 
-			for (t = 0; (tick < Meter::ticks_per_beat) && (n < bbt_nmarks) && (pos < next_beat_pos) ; pos += frame_skip, tick += skip, ++t) {
+			for (t = 0; (tick < Timecode::BBT_Time::ticks_per_beat) && (n < bbt_nmarks) && (pos < next_beat_pos) ; pos += frame_skip, tick += skip, ++t) {
 
 				  if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
 					  i_am_accented = true;

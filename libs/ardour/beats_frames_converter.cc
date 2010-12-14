@@ -27,13 +27,7 @@ namespace ARDOUR {
 framecnt_t
 BeatsFramesConverter::to(double beats) const
 {
-        Timecode::BBT_Time delta;
-
-        delta.bars = 0;
-        delta.beats = rint (floor (beats));
-        delta.ticks = rint (floor (Meter::ticks_per_beat * fmod (beats, 1.0)));
-
-        return _tempo_map.framepos_plus_bbt (_origin_b, delta);
+        return _tempo_map.framepos_plus_bbt (_origin_b, Timecode::BBT_Time(beats));
 }
 
 double
