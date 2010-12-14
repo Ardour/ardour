@@ -2237,7 +2237,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
  * as the \a primary note.
  */
 void
-MidiRegionView::update_resizing (ArdourCanvas::CanvasNote* primary, bool at_front, double delta_x, bool relative)
+MidiRegionView::update_resizing (ArdourCanvas::CanvasNoteEvent* primary, bool at_front, double delta_x, bool relative)
 {
         bool cursor_set = false;
 
@@ -2306,7 +2306,7 @@ MidiRegionView::update_resizing (ArdourCanvas::CanvasNote* primary, bool at_fron
  *  Parameters the same as for \a update_resizing().
  */
 void
-MidiRegionView::commit_resizing (ArdourCanvas::CanvasNote* primary, bool at_front, double delta_x, bool relative)
+MidiRegionView::commit_resizing (ArdourCanvas::CanvasNoteEvent* primary, bool at_front, double delta_x, bool relative)
 {
 	start_note_diff_command (_("resize notes"));
 

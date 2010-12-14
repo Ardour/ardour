@@ -223,8 +223,8 @@ class MidiRegionView : public RegionView
 	 */
 	void begin_resizing(bool at_front);
 
-	void update_resizing (ArdourCanvas::CanvasNote *, bool, double, bool);
-	void commit_resizing (ArdourCanvas::CanvasNote *, bool, double, bool);
+	void update_resizing (ArdourCanvas::CanvasNoteEvent*, bool, double, bool);
+	void commit_resizing (ArdourCanvas::CanvasNoteEvent*, bool, double, bool);
 
 	/** Change the channel of the selection.
 	 * @param channel - the channel number of the new channel, zero-based
