@@ -23,7 +23,7 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/vst_plugin.h"
 
-#include "plugin_ui.h"
+#include "vst_pluginui.h"
 
 #include <gdk/gdkx.h>
 

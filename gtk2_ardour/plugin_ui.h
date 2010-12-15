@@ -292,32 +292,6 @@ class PluginUIWindow : public Gtk::Window
 	bool create_lv2_editor (boost::shared_ptr<ARDOUR::PluginInsert>);
 };
 
-#ifdef VST_SUPPORT
-class VSTPluginUI : public PlugUIBase, public Gtk::VBox
-{
-  public:
-	VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VSTPlugin>);
-	~VSTPluginUI ();
-
-	gint get_preferred_height ();
-	gint get_preferred_width ();
-	bool start_updating(GdkEventAny*) {return false;}
-	bool stop_updating(GdkEventAny*) {return false;}
-
-	int package (Gtk::Window&);
-
-  private:
-	boost::shared_ptr<ARDOUR::VSTPlugin> vst;
-	Gtk::Socket socket;
-	Gtk::HBox   preset_box;
-	Gtk::VBox   vpacker;
-
-	bool configure_handler (GdkEventConfigure*, Gtk::Socket*);
-	void save_plugin_setting ();
-	void setting_selected ();
-};
-#endif // VST_SUPPORT
-
 #ifdef AUDIOUNITS
 /* this function has to be in a .mm file */
 extern PlugUIBase* create_au_gui (boost::shared_ptr<ARDOUR::PluginInsert>, Gtk::VBox**);

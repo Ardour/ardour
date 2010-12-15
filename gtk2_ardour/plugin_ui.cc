@@ -48,6 +48,7 @@
 #include "ardour/ladspa_plugin.h"
 #ifdef VST_SUPPORT
 #include "ardour/vst_plugin.h"
+#include "vst_pluginui.h"
 #endif
 #ifdef HAVE_SLV2
 #include "ardour/lv2_plugin.h"
