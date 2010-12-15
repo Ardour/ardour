@@ -355,7 +355,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 bool
 VSTPlugin::load_preset (const string& name)
 {
-	XMLTree* t = presets_tree ();
+	boost::shared_ptr<XMLTree> t (presets_tree ());
 	if (t == 0) {
 		return false;
 	}
@@ -421,7 +421,7 @@ VSTPlugin::load_preset (const string& name)
 string
 VSTPlugin::do_save_preset (string name)
 {
-	XMLTree* t = presets_tree ();
+	boost::shared_ptr<XMLTree> t (presets_tree ());
 	if (t == 0) {
 		return "";
 	}
@@ -463,14 +463,13 @@ VSTPlugin::do_save_preset (string name)
 	f /= presets_file ();
 	
 	t->write (f.to_string ());
-	delete t;
 	return uri;
 }
 
 void
 VSTPlugin::do_remove_preset (string name)
 {
-	XMLTree* t = presets_tree ();
+	boost::shared_ptr<XMLTree> t (presets_tree ());
 	if (t == 0) {
 		return;
 	}
@@ -482,7 +481,6 @@ VSTPlugin::do_remove_preset (string name)
 	f /= presets_file ();
 	
 	t->write (f.to_string ());
-	delete t;
 }
 
 string
@@ -700,7 +698,7 @@ VSTPlugin::get_presets ()
 
 	/* User presets from our XML file */
 
-	XMLTree* t = presets_tree ();
+	boost::shared_ptr<XMLTree> t (presets_tree ());
 
 	if (t) {
 		XMLNode* root = t->root ();
@@ -718,8 +716,6 @@ VSTPlugin::get_presets ()
 		}
 	}
 
-	delete t;
-		
 	return p;
 }
 
