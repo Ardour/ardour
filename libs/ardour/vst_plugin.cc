@@ -425,8 +425,9 @@ VSTPlugin::do_save_preset (string name)
 
 		sys::path f = ARDOUR::user_config_directory ();
 		f /= "presets";
-		f /= "vst";
+		f /= presets_file ();
 
+		cout << "Write presets to " << f.to_string () << "\n";
 		t->write (f.to_string ());
 		delete t;
 		return uri;
@@ -449,8 +450,9 @@ VSTPlugin::do_remove_preset (string name)
 
 		sys::path f = ARDOUR::user_config_directory ();
 		f /= "presets";
-		f /= "vst";
+		f /= presets_file ();
 
+		cout << "Write presets to " << f.to_string () << "\n";
 		t->write (f.to_string ());
 		delete t;
 	}
@@ -711,7 +713,7 @@ VSTPlugin::presets_tree () const
 		create_directory (p);
 	}
 
-	p /= "vst";
+	p /= presets_file ();
 
 	if (!exists (p)) {
 		t->set_root (new XMLNode (X_("VSTPresets")));
@@ -734,7 +736,14 @@ VSTPlugin::first_user_preset_index () const
 	return _plugin->numPrograms;
 }
 
+string
+VSTPlugin::presets_file () const
+{
+	return string_compose ("vst-%1", unique_id ());
+}
+
 VSTPluginInfo::VSTPluginInfo()
 {
        type = ARDOUR::VST;
 }
+

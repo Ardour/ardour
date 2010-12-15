@@ -687,7 +687,9 @@ PlugUIBase::update_presets ()
 void
 PlugUIBase::update_sensitivity ()
 {
-	bool const have_preset = !preset_combo.get_model()->children().empty();
-	save_button.set_sensitive (have_preset);
-	delete_button.set_sensitive (have_preset);
+	bool const have_user_preset =
+		!preset_combo.get_model()->children().empty() && preset_combo.get_active_row_number() >= plugin->first_user_preset_index();
+	
+	save_button.set_sensitive (have_user_preset);
+	delete_button.set_sensitive (have_user_preset);
 }

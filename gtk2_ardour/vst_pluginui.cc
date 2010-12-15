@@ -35,13 +35,6 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	: PlugUIBase (pi),
 	  vst (vp)
 {
-	preset_model = ListStore::create (preset_columns);
-
-	CellRenderer* renderer = manage (new CellRendererText());
-	vst_preset_combo.pack_start (*renderer, true);
-	vst_preset_combo.add_attribute (*renderer, "text", 0);
-	vst_preset_combo.set_model (preset_model);
-
 	update_presets ();
 
 	fst_run_editor (vst->fst());
@@ -49,12 +42,10 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	preset_box.set_spacing (6);
 	preset_box.set_border_width (6);
 	preset_box.pack_end (bypass_button, false, false, 10);
-	preset_box.pack_end (edit_button, false, false);
+	preset_box.pack_end (delete_button, false, false);
 	preset_box.pack_end (save_button, false, false);
 	preset_box.pack_end (add_button, false, false);
-	preset_box.pack_end (vst_preset_combo, false, false);
-
-	vst_preset_combo.signal_changed().connect (sigc::mem_fun (*this, &VSTPluginUI::preset_chosen));
+	preset_box.pack_end (preset_combo, false, false);
 
 	bypass_button.set_active (!insert->active());
 
@@ -70,9 +61,9 @@ VSTPluginUI::~VSTPluginUI ()
 }
 
 void
-VSTPluginUI::preset_chosen ()
+VSTPluginUI::setting_selected ()
 {
-	int const r = vst_preset_combo.get_active_row_number ();
+	int const r = preset_combo.get_active_row_number ();
 
 	if (r < vst->first_user_preset_index()) {
 		/* This is a plugin-provided preset.
@@ -81,11 +72,11 @@ VSTPluginUI::preset_chosen ()
 		vst->fst()->want_program = r;
 	} else {
 		/* This is a user preset.  This method knows about the direct dispatch restriction, too */
-		TreeModel::iterator i = vst_preset_combo.get_active ();
-		plugin->load_preset ((*i)[preset_columns.name]);
+		plugin->load_preset (preset_combo.get_active_text());
 	}
 	
 	socket.grab_focus ();
+	update_sensitivity ();
 }
 
 int
@@ -155,31 +146,6 @@ VSTPluginUI::configure_handler (GdkEventConfigure* ev, Gtk::Socket *socket)
 	gdk_error_trap_pop ();
 
 	return false;
-}
-
-void
-VSTPluginUI::update_presets ()
-{
-	std::vector<Plugin::PresetRecord> presets = plugin->get_presets ();
-
-	preset_model->clear ();
-
-	int j = 0;
-	for (std::vector<Plugin::PresetRecord>::const_iterator i = presets.begin(); i != presets.end(); ++i) {
-		TreeModel::Row row = *(preset_model->append ());
-		row[preset_columns.name] = i->label;
-		row[preset_columns.number] = j++;
-	}
-
-	if (presets.size() > 0) {
-		vst->fst()->plugin->dispatcher (vst->fst()->plugin, effSetProgram, 0, 0, NULL, 0);
-	}
-
-	if (vst->fst()->current_program != -1) {
-		vst_preset_combo.set_active (vst->fst()->current_program);
-	} else {
-		vst_preset_combo.set_active (0);
-	}
 }
 
 typedef int (*error_handler_t)( Display *, XErrorEvent *);

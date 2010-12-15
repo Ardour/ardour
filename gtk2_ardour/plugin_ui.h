@@ -121,7 +121,7 @@ class PlugUIBase : public virtual sigc::trackable
 	Gtk::Image* focus_in_image;
 	bool no_load_preset;
 
-	void setting_selected();
+	virtual void setting_selected ();
 	void add_plugin_setting ();
 	void save_plugin_setting ();
 	void delete_plugin_setting ();
@@ -311,24 +311,10 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	Gtk::Socket socket;
 	Gtk::HBox   preset_box;
 	Gtk::VBox   vpacker;
-	Gtk::ComboBox vst_preset_combo;
-	Glib::RefPtr<Gtk::ListStore> preset_model;
-
-	struct PresetModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    PresetModelColumns() { 
-		    add (name);
-		    add (number);
-	    }
-	    Gtk::TreeModelColumn<std::string> name;
-	    Gtk::TreeModelColumn<int> number;
-	};
-
-	PresetModelColumns preset_columns;
 
 	bool configure_handler (GdkEventConfigure*, Gtk::Socket*);
 	void save_plugin_setting ();
-	void preset_chosen ();
-	void update_presets ();
+	void setting_selected ();
 };
 #endif // VST_SUPPORT
 

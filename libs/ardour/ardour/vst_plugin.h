@@ -97,6 +97,7 @@ private:
 	gchar* get_chunk (bool);
 	int set_chunk (gchar const *, bool);
 	XMLTree * presets_tree () const;
+	std::string presets_file () const;
 	
 	FSTHandle* handle;
 	FST*       _fst;
