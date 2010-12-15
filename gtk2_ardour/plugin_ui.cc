@@ -67,7 +67,6 @@
 #include "latency_gui.h"
 #include "plugin_eq_gui.h"
 #include "new_plugin_preset_dialog.h"
-#include "edit_plugin_presets_dialog.h"
 
 #include "i18n.h"
 
@@ -244,7 +243,6 @@ PluginUIWindow::on_hide ()
 void
 PluginUIWindow::set_title(const std::string& title)
 {
-	//cout << "PluginUIWindow::set_title(\"" << title << "\"" << endl;
 	Gtk::Window::set_title(title);
 	_title = title;
 }
@@ -421,24 +419,30 @@ PluginUIWindow::plugin_going_away ()
 PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	: insert (pi),
 	  plugin (insert->plugin()),
-	  save_button (_("Add")),
-	  edit_button (_("Edit")),
+	  add_button (_("Add")),
+	  save_button (_("Save")),
+	  delete_button (_("Delete")),
 	  bypass_button (_("Bypass")),
 	  latency_gui (0),
 	  plugin_analysis_expander (_("Plugin analysis"))
 {
 	//preset_combo.set_use_arrows_always(true);
-	update_presets();
+	update_presets ();
+	update_sensitivity ();
+	
 	preset_combo.set_size_request (100, -1);
 	preset_combo.set_active_text ("");
 	preset_combo.signal_changed().connect(sigc::mem_fun(*this, &PlugUIBase::setting_selected));
 	no_load_preset = false;
 
+	add_button.set_name ("PluginAddButton");
+	add_button.signal_clicked().connect (sigc::mem_fun (*this, &PlugUIBase::add_plugin_setting));
+
 	save_button.set_name ("PluginSaveButton");
 	save_button.signal_clicked().connect(sigc::mem_fun(*this, &PlugUIBase::save_plugin_setting));
 
-	edit_button.set_name ("PluginEditButton");
-	edit_button.signal_clicked().connect (sigc::mem_fun (*this, &PlugUIBase::edit_plugin_settings));
+	delete_button.set_name ("PluginDeleteButton");
+	delete_button.signal_clicked().connect (sigc::mem_fun (*this, &PlugUIBase::delete_plugin_setting));
 
 	insert->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this,  boost::weak_ptr<Processor>(insert)), gui_context());
 
@@ -524,7 +528,7 @@ PlugUIBase::processor_active_changed (boost::weak_ptr<Processor> weak_p)
 }
 
 void
-PlugUIBase::setting_selected()
+PlugUIBase::setting_selected ()
 {
 	if (no_load_preset) {
 		return;
@@ -533,7 +537,8 @@ PlugUIBase::setting_selected()
 	if (preset_combo.get_active_text().length() > 0) {
 		const Plugin::PresetRecord* pr = plugin->preset_by_label(preset_combo.get_active_text());
 		if (pr) {
-			plugin->load_preset(pr->uri);
+			plugin->load_preset (pr->uri);
+			update_sensitivity ();
 		} else {
 			warning << string_compose(_("Plugin preset %1 not found"),
 					preset_combo.get_active_text()) << endmsg;
@@ -542,7 +547,7 @@ PlugUIBase::setting_selected()
 }
 
 void
-PlugUIBase::save_plugin_setting ()
+PlugUIBase::add_plugin_setting ()
 {
 	NewPluginPresetDialog d (plugin);
 
@@ -557,20 +562,32 @@ PlugUIBase::save_plugin_setting ()
 		}
 
 		if (plugin->save_preset (d.name())) {
-			update_presets ();
-			no_load_preset = true;
 			preset_combo.set_active_text (d.name());
-			no_load_preset = false;
 		}
 		break;
 	}
 }
 
 void
-PlugUIBase::edit_plugin_settings ()
+PlugUIBase::save_plugin_setting ()
 {
-	EditPluginPresetsDialog d (plugin);
-	d.run ();
+	string const name = preset_combo.get_active_text ();
+	plugin->remove_preset (name);
+	plugin->save_preset (name);
+	preset_combo.set_active_text (name);
+}
+
+void
+PlugUIBase::delete_plugin_setting ()
+{
+	plugin->remove_preset (preset_combo.get_active_text ());
+
+	vector<ARDOUR::Plugin::PresetRecord> presets = plugin->get_presets();
+	if (presets.empty ()) {
+		preset_combo.set_active_text ("");
+	} else {
+		preset_combo.set_active_text (presets.front().label);
+	}
 }
 
 void
@@ -663,4 +680,14 @@ PlugUIBase::update_presets ()
 	set_popdown_strings (preset_combo, preset_labels);
 	
 	no_load_preset = false;
+
+	update_sensitivity ();
+}
+
+void
+PlugUIBase::update_sensitivity ()
+{
+	bool const have_preset = !preset_combo.get_model()->children().empty();
+	save_button.set_sensitive (have_preset);
+	delete_button.set_sensitive (have_preset);
 }

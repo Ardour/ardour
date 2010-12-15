@@ -121,3 +121,8 @@ build
 tags
 BROWSE
 core
+gtk2_ardour/po/*.mo
+libs/ardour/po/*.mo
+gtk2_ardour/*.pot
+libs/ardour/libardour.pot
+

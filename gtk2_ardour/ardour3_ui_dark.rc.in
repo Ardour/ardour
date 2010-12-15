@@ -1787,9 +1787,10 @@ widget "*PluginAutomatePlayButton" style:highest "small_red_active_and_selected_
 widget "*PluginAutomatePlayButton*" style:highest "small_red_active_and_selected_button"
 widget "*PluginAutomateButton" style:highest "small_button"
 widget "*PluginAutomateButton*" style:highest "small_button"
+widget "*PluginAddButton*" style:highest "small_button"
 widget "*PluginSaveButton" style:highest "small_button"
 widget "*PluginSaveButton*" style:highest "small_button"
-widget "*PluginEditButton*" style:highest "small_button"
+widget "*PluginDeleteButton*" style:highest "small_button"
 widget "*PluginLoadButton" style:highest "small_button"
 widget "*PluginLoadButton*" style:highest "small_button"
 

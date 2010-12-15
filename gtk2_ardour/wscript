@@ -69,7 +69,6 @@ gtk2_ardour_sources = [
 	'debug.cc',
 	'diamond.cc',
 	'edit_note_dialog.cc',
-	'edit_plugin_presets_dialog.cc',
 	'editing.cc',
 	'editor.cc',
 	'editor_actions.cc',

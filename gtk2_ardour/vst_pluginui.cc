@@ -51,6 +51,7 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	preset_box.pack_end (bypass_button, false, false, 10);
 	preset_box.pack_end (edit_button, false, false);
 	preset_box.pack_end (save_button, false, false);
+	preset_box.pack_end (add_button, false, false);
 	preset_box.pack_end (vst_preset_combo, false, false);
 
 	vst_preset_combo.signal_changed().connect (sigc::mem_fun (*this, &VSTPluginUI::preset_chosen));

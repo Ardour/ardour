@@ -102,8 +102,9 @@ class PlugUIBase : public virtual sigc::trackable
 	boost::shared_ptr<ARDOUR::PluginInsert> insert;
 	boost::shared_ptr<ARDOUR::Plugin> plugin;
 	Gtk::ComboBoxText preset_combo;
+	Gtk::Button add_button;
 	Gtk::Button save_button;
-	Gtk::Button edit_button;
+	Gtk::Button delete_button;
 	Gtk::ToggleButton bypass_button;
 	Gtk::EventBox focus_button;
 
@@ -121,13 +122,15 @@ class PlugUIBase : public virtual sigc::trackable
 	bool no_load_preset;
 
 	void setting_selected();
+	void add_plugin_setting ();
 	void save_plugin_setting ();
-	void edit_plugin_settings ();
+	void delete_plugin_setting ();
 	bool focus_toggled(GdkEventButton*);
 	void bypass_toggled();
 	void toggle_plugin_analysis ();
 	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor> p);
 	void plugin_going_away ();
+	void update_sensitivity ();
 
 	PBD::ScopedConnection death_connection;
 	PBD::ScopedConnection active_connection;
