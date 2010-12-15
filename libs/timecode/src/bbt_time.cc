@@ -24,7 +24,7 @@ using namespace Timecode;
 
 const double BBT_Time::ticks_per_beat = 1920.0;
 
-BBT_Time::BBT_Time (double beats)
+BBT_Time::BBT_Time (double dbeats)
 {
         /* NOTE: this does not construct a BBT time in a canonical form,
            in that beats may be a very large number, and bars will
@@ -32,6 +32,6 @@ BBT_Time::BBT_Time (double beats)
         */
 
         bars = 0;
-        beats = rint (floor (beats));
-        ticks = rint (floor (BBT_Time::ticks_per_beat * fmod (beats, 1.0)));
+        beats = rint (floor (dbeats));
+        ticks = rint (floor (BBT_Time::ticks_per_beat * fmod (dbeats, 1.0)));
 }
