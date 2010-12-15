@@ -355,107 +355,134 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 bool
 VSTPlugin::load_preset (const string& name)
 {
-	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
-
-		XMLTree* t = presets_tree ();
-		if (t == 0) {
-			return false;
-		}
-
-		XMLNode* root = t->root ();
-
-		/* Load a user preset chunk from our XML file and send it via a circuitous route to the plugin */
-		
-		for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
-			assert ((*i)->name() == X_("ChunkPreset"));
-			
-			XMLProperty* uri = (*i)->property (X_("uri"));
-			XMLProperty* label = (*i)->property (X_("label"));
-
-			assert (uri);
-			assert (label);
-
-			if (label->value() == name) {
-
-				if (_fst->wanted_chunk) {
-					g_free (_fst->wanted_chunk);
-				}
-				
-				for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
-					if ((*j)->is_content ()) {
-						/* we can't dispatch directly here; too many plugins expect only one GUI thread */
-						gsize size = 0;
-						guchar* raw_data = g_base64_decode ((*j)->content().c_str(), &size);
-						_fst->wanted_chunk = raw_data;
-						_fst->wanted_chunk_size = size;
-						_fst->want_chunk = 1;
-						return true;
-					}
-				}
-			}
-		}
-		
+	XMLTree* t = presets_tree ();
+	if (t == 0) {
 		return false;
 	}
+	
+	XMLNode* root = t->root ();
 
-	return true;
+	for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
+		
+		XMLProperty* uri = (*i)->property (X_("uri"));
+		XMLProperty* label = (*i)->property (X_("label"));
+		
+		assert (uri);
+		assert (label);
+
+		if (label->value() != name) {
+			continue;
+		}
+		
+		if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
+			
+			/* Load a user preset chunk from our XML file and send it via a circuitous route to the plugin */
+			
+			if (_fst->wanted_chunk) {
+				g_free (_fst->wanted_chunk);
+			}
+			
+			for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
+				if ((*j)->is_content ()) {
+					/* we can't dispatch directly here; too many plugins expect only one GUI thread */
+					gsize size = 0;
+					guchar* raw_data = g_base64_decode ((*j)->content().c_str(), &size);
+					_fst->wanted_chunk = raw_data;
+					_fst->wanted_chunk_size = size;
+					_fst->want_chunk = 1;
+					return true;
+				}
+			}
+			
+			return false;
+			
+		} else {
+			
+			for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
+				if ((*j)->name() == X_("Parameter")) {
+
+					XMLProperty* index = (*j)->property (X_("index"));
+					XMLProperty* value = (*j)->property (X_("value"));
+
+					assert (index);
+					assert (value);
+
+					set_parameter (atoi (index->value().c_str()), atof (value->value().c_str ()));
+				}
+			}
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 string
 VSTPlugin::do_save_preset (string name)
 {
+	XMLTree* t = presets_tree ();
+	if (t == 0) {
+		return "";
+	}
+
+	XMLNode* p = 0;
+	/* XXX: use of _presets.size() + 1 for the unique ID here is dubious at best */
+	string const uri = string_compose (X_("VST:%1:%2"), unique_id (), _presets.size() + 1);
+
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
-		XMLTree* t = presets_tree ();
-		if (t == 0) {
-			return "";
-		}
-
-		/* Add a chunk to our XML file of user presets */
-
-		XMLNode* p = new XMLNode (X_("ChunkPreset"));
-		/* XXX: use of _presets.size() + 1 for the unique ID here is dubious at best */
-		string const uri = string_compose (X_("VST:%1:%2"), unique_id (), _presets.size() + 1);
+		p = new XMLNode (X_("ChunkPreset"));
 		p->add_property (X_("uri"), uri);
 		p->add_property (X_("label"), name);
 		gchar* data = get_chunk (true);
 		p->add_content (string (data));
 		g_free (data);
-		t->root()->add_child_nocopy (*p);
+		
+	} else {
 
-		sys::path f = ARDOUR::user_config_directory ();
-		f /= "presets";
-		f /= presets_file ();
+		p = new XMLNode (X_("Preset"));
+		p->add_property (X_("uri"), uri);
+		p->add_property (X_("label"), name);
 
-		cout << "Write presets to " << f.to_string () << "\n";
-		t->write (f.to_string ());
-		delete t;
-		return uri;
+		for (uint32_t i = 0; i < parameter_count(); ++i) {
+			if (parameter_is_input (i)) {
+				XMLNode* c = new XMLNode (X_("Parameter"));
+				c->add_property (X_("index"), string_compose ("%1", i));
+				c->add_property (X_("value"), string_compose ("%1", get_parameter (i)));
+				p->add_child_nocopy (*c);
+			}
+		}
+		
 	}
 
-	return "";
+	t->root()->add_child_nocopy (*p);
+	
+	sys::path f = ARDOUR::user_config_directory ();
+	f /= "presets";
+	f /= presets_file ();
+	
+	t->write (f.to_string ());
+	delete t;
+	return uri;
 }
 
 void
 VSTPlugin::do_remove_preset (string name)
 {
-	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
-
-		XMLTree* t = presets_tree ();
-		if (t == 0) {
-			return;
-		}
-
-		t->root()->remove_nodes_and_delete (X_("label"), name);
-
-		sys::path f = ARDOUR::user_config_directory ();
-		f /= "presets";
-		f /= presets_file ();
-
-		cout << "Write presets to " << f.to_string () << "\n";
-		t->write (f.to_string ());
-		delete t;
+	XMLTree* t = presets_tree ();
+	if (t == 0) {
+		return;
 	}
+	
+	t->root()->remove_nodes_and_delete (X_("label"), name);
+	
+	sys::path f = ARDOUR::user_config_directory ();
+	f /= "presets";
+	f /= presets_file ();
+	
+	t->write (f.to_string ());
+	delete t;
 }
 
 string
@@ -679,8 +706,6 @@ VSTPlugin::get_presets ()
 		XMLNode* root = t->root ();
 		for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
 
-			assert ((*i)->name() == X_("ChunkPreset"));
-			
 			XMLProperty* uri = (*i)->property (X_("uri"));
 			XMLProperty* label = (*i)->property (X_("label"));
 
