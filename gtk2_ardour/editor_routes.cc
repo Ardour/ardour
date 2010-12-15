@@ -137,7 +137,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	solo_isolate_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	solo_isolate_state_column->set_alignment(ALIGN_CENTER);
 	solo_isolate_state_column->set_expand(false);
-	solo_isolate_state_column->set_fixed_width(15);
+	solo_isolate_state_column->set_fixed_width(22);
 
 	// Solo safe toggle
 	CellRendererPixbufMulti* solo_safe_renderer = manage (new CellRendererPixbufMulti ());
