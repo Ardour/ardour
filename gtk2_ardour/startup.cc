@@ -360,13 +360,13 @@ ArdourStartup::setup_monitoring_choice_page ()
 	RadioButton::Group g (monitor_via_hardware_button.get_group());
 	monitor_via_ardour_button.set_group (g);
 
-	monitor_label.set_markup("\
+	monitor_label.set_markup(_("\
 While recording instruments or vocals, you probably want to listen to the\n\
 signal as well as record it. This is called \"monitoring\". There are\n\
 different ways to do this depending on the equipment you have and the\n\
 configuration of that equipment. The two most common are presented here.\n\
 Please choose whichever one is right for your setup.\n\n\
-<i>(You can change this preference at any time, via the Preferences dialog)</i>");
+<i>(You can change this preference at any time, via the Preferences dialog)</i>"));
 	monitor_label.set_alignment (0.0, 0.0);
 
 	vbox->set_spacing (6);
