@@ -184,9 +184,9 @@ PortInsert::set_state (const XMLNode& node, int version)
 
 	const XMLNode* insert_node = &node;
 
-	// legacy sessions: search for child IOProcessor node
+	// legacy sessions: search for child Redirect node
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == "IOProcessor") {
+		if ((*niter)->name() == "Redirect") {
 			insert_node = *niter;
 			break;
 		}
