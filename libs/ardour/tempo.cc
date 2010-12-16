@@ -1902,9 +1902,7 @@ TempoMap::bbt_subtract (const BBT_Time& start, const BBT_Time& decrement) const
 	return result;
 }
 
-/**
- * add the BBT interval @param increment to  @param start and return the result
- */
+/** Add the BBT interval op to pos and return the result */
 framepos_t
 TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 {
