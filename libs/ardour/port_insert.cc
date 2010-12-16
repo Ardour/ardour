@@ -244,22 +244,20 @@ PortInsert::signal_latency() const
         }
 }
 
-/** Caller must not hold process lock */
+/** Caller must hold process lock */
 bool
 PortInsert::configure_io (ChanCount in, ChanCount out)
 {
+	assert (!AudioEngine::instance()->process_lock().trylock());
+	
 	/* for an insert, processor input corresponds to IO output, and vice versa */
 
-	{
-		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-		
-		if (_input->ensure_io (in, false, this) != 0) {
-			return false;
-		}
-		
-		if (_output->ensure_io (out, false, this) != 0) {
-			return false;
-		}
+	if (_input->ensure_io (in, false, this) != 0) {
+		return false;
+	}
+	
+	if (_output->ensure_io (out, false, this) != 0) {
+		return false;
 	}
 
 	return Processor::configure_io (in, out);
