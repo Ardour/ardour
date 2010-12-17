@@ -2009,9 +2009,7 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 	return pos;
 }
 
-/**
- * add the BBT interval @param increment to  @param start and return the result
- */
+/** Count the number of beats that are equivalent to distance when starting at pos */
 double
 TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 {
@@ -2067,7 +2065,7 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
                 */
 
                 if (ddist < frames_per_beat) {
-                        beats += (1.0/BBT_Time::ticks_per_beat) * (ddist/frames_per_beat);
+                        beats += ddist / frames_per_beat;
                         break;
                 }
 
