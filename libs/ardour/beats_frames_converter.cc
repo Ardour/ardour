@@ -25,9 +25,9 @@
 namespace ARDOUR {
 
 framecnt_t
-BeatsFramesConverter::to(double beats) const
+BeatsFramesConverter::to (double beats) const
 {
-        return _tempo_map.framepos_plus_bbt (_origin_b, Timecode::BBT_Time(beats));
+        return _tempo_map.framepos_plus_bbt (_origin_b, Timecode::BBT_Time(beats)) - _origin_b;
 }
 
 double

@@ -134,7 +134,7 @@ void
 MidiRegion::update_length_beats ()
 {
         cerr << name() << " Updating length beats, currently = " << _length_beats << " w/length = " << _length << endl;
-	BeatsFramesConverter converter (_session.tempo_map(), _position - _start);
+	BeatsFramesConverter converter (_session.tempo_map(), _position);
         _length_beats = converter.from (_length);
         cerr << "\tnew value: " << _length_beats << endl;
 }
@@ -151,7 +151,6 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
                    at the new position (tempo map may dictate a different number of frames
                 */
                 BeatsFramesConverter converter (_session.tempo_map(), _position - _start);
-                cerr << name() << " change frame length to " << converter.to (_length_beats) << endl;
                 Region::set_length_internal (converter.to (_length_beats));
         }
 }

@@ -2067,7 +2067,7 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
                 */
 
                 if (ddist < frames_per_beat) {
-                        beats += BBT_Time::ticks_per_beat * (ddist/frames_per_beat);
+                        beats += (1.0/BBT_Time::ticks_per_beat) * (ddist/frames_per_beat);
                         break;
                 }
 
@@ -2076,7 +2076,7 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
                 ddist -= frames_per_beat;
                 dpos += frames_per_beat;
                 beats += 1.0;
-		
+
 		/* check if we need to use a new metric section: has adding frames moved us
 		   to or after the start of the next metric section? in which case, use it.
 		*/
