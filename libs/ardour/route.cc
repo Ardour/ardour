@@ -108,7 +108,7 @@ Route::init ()
 	/* add standard controls */
 
 	_solo_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
-	_mute_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
+	_mute_control->set_flags (Controllable::Flag (_mute_control->flags() | Controllable::Toggle));
 
 	add_control (_solo_control);
 	add_control (_mute_control);
@@ -784,6 +784,7 @@ Route::set_mute_points (MuteMaster::MutePoint mp)
         
         if (_mute_master->muted_by_self()) {
                 mute_changed (this); /* EMIT SIGNAL */
+		_mute_control->Changed (); /* EMIT SIGNAL */
         }
 }
 
@@ -798,6 +799,7 @@ Route::set_mute (bool yn, void *src)
 	if (muted() != yn) {
                 _mute_master->set_muted_by_self (yn);
 		mute_changed (src); /* EMIT SIGNAL */
+		_mute_control->Changed (); /* EMIT SIGNAL */
 	}
 }
 
