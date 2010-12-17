@@ -14,6 +14,14 @@ STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
 EXTERNAL_JACK=
+LIBCLEARLOOKS=
+
+if [ $# -eq 0 ] ; then
+    echo ""	 
+    echo "ERROR - Please specify build type"
+    echo ""	 
+    exit 1
+fi
 
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
@@ -63,6 +71,7 @@ while [ $# -gt 0 ] ; do
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
 	--external_jack) EXTERNAL_JACK=$2; shift ; shift ;;
+	--clearlooks) LIBCLEARLOOKS=$2; shift ; shift ;;
     esac
 done
 
@@ -76,9 +85,30 @@ echo "Version is $release_version / $svn_version"
 info_string="$release_version/$svn_version built on `hostname` by `whoami` on `date`"
 echo "Info string is $info_string"
 
+# Figure out our CPU type
+case `uname -m` in
+	i[3456789]86|x86|i86pc)
+		echo "Architecture is x86"
+		ARCH='x86'
+		ARCH_BITS='32-bit'
+		;;
+	x86_64|amd64|AMD64)
+		echo "Architecture is x86_64"
+		ARCH='x86_64'
+		ARCH_BITS='64-bit'
+		;;
+	*)
+		echo ""
+		echo "ERROR - Unknown architecture `uname -m`"
+		echo "$PGM_NAME Installer will exit."
+		echo ""
+		exit 1
+		;;
+esac
+
 # setup directory structure
 
-APPDIR=${APPNAME}
+APPDIR=${APPNAME}_${ARCH}
 APPBIN=$APPDIR/bin
 APPLIB=$APPDIR/lib
 Libraries=$APPLIB
@@ -90,6 +120,7 @@ Panners=$APPLIB/panners
 Locale=$Shared/locale
 Modules=$Libraries/modules
 Loaders=$Libraries/loaders
+
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -132,7 +163,6 @@ rm -f $ENVIRONMENT
 touch $ENVIRONMENT
 
 if test x$SAE != x ; then
-    appname="Ardour2/SAE"
     echo "export ARDOUR_SAE=true" >> $ENVIRONMENT
     #
     # current default for SAE version is German keyboard layout without a keypad
@@ -141,7 +171,6 @@ if test x$SAE != x ; then
     echo export ARDOUR_UI_CONF=ardour2_ui_sae.conf >> $ENVIRONMENT
     echo export ARDOUR2_UI_RC=ardour2_ui_dark_sae.rc >> $ENVIRONMENT
 elif test x$MIXBUS != x ; then
-    appname="Ardour2/Mixbus"
     echo export ARDOUR_MIXBUS=true >> $ENVIRONMENT
     #
     # current default for MIXBUS version is US keyboard layout without a keypad
@@ -149,8 +178,6 @@ elif test x$MIXBUS != x ; then
     echo export ARDOUR_KEYBOARD_LAYOUT=us-nokeypad >> $ENVIRONMENT
     echo export ARDOUR_UI_CONF=ardour2_ui.conf >> $ENVIRONMENT
     echo export ARDOUR2_UI_RC=ardour2_ui_dark.rc >> $ENVIRONMENT
-else
-    appname="Ardour2"
 fi
 
 #
@@ -177,15 +204,34 @@ if test x$WITH_NLS != x ; then
     echo "NLS support ..."
     echo "I hope you remembered to run scons msgupdate!"
     LINGUAS=
-    for file in ../../gtk2_ardour/*.mo 
+    files=`find ../../gtk2_ardour/ -name "*.mo"`
+
+    if [ -z "$files" ]; then
+        echo ""
+        echo "!!!! WARNING !!!! - Did not find any .mo files in ../../gtk2_ardour"
+        echo ""
+    fi
+ 
+    for file in $files 
     do
+	echo $file
 	lang=`basename $file | sed 's/\.mo//'`
 	mkdir -p $Locale/$lang/LC_MESSAGES
 	cp $file $Locale/$lang/LC_MESSAGES/gtk2_ardour.mo
 	LINGUAS="$LINGUAS $lang"
     done
-    for file in ../../libs/ardour/*.mo 
+
+    files=`find ../../libs/ardour/ -name "*.mo"`
+
+    if [ -z "$files" ]; then
+        echo ""
+        echo "!!!! WARNING !!!! - Did not find any .mo files in ../../libs/ardour"
+        echo ""
+    fi
+
+    for file in $files 
     do
+	echo $file
 	lang=`basename $file | sed 's/\.mo//'`
 	mkdir -p $Locale/$lang/LC_MESSAGES
 	cp $file $Locale/$lang/LC_MESSAGES/libardour.mo
@@ -213,13 +259,85 @@ else
 fi
 
 GTKROOT=`pkg-config --libs-only-L gtk+-2.0 | sed s/-L//`
-GTKROOT=`dirname $GTKROOT`
-echo GTK stack root is $GTKROOT
+if [ "" = "$GTKROOT" ]; then
+    echo "Found gtk using pkg-config"
+    GTKROOT=`dirname $GTKROOT`
+    gtkModVer=`pkg-config --modversion gtk+-2.0`
 
-GTKETC=${GTKROOT}/etc/gtk-2.0
-GTKLIB=${GTKROOT}/lib/gtk-2.0/2.10.0
-PANGOLIB=${GTKROOT}/lib/pango/1.6.0
-GDKPIXBUFLIB=${GTKROOT}/lib/gdk-pixbuf-2.0/2.10.0
+    GTKETC=${GTKROOT}/etc/gtk-2.0
+    GTKLIB=${GTKROOT}/lib/gtk-2.0/$gtkModVer
+    PANGOLIB=${GTKROOT}/lib/pango/1.6.0
+    GDKPIXBUFLIB=${GTKROOT}/lib/gdk-pixbuf-2.0/$gtkModVer
+else
+    echo "Looking for gtk and pango in other known locations"
+ 
+    ## GTKETC
+    if [ -d /etc/gtk-2.0 ]; then
+        GTKETC=/etc/gtk-2.0
+    else
+        echo ""
+        echo "!!! ERROR !!! - Can't find GTK etc directory. Packager will exit"
+        echo ""
+	exit 1
+    fi
+
+    ## GTKLIB
+    if [ -d /usr/lib/gtk-2.0 ]; then
+        versionDir=`ls /usr/lib/gtk-2.0/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
+
+        num=0
+        for name in $versionDir ; do
+            let "num += 1"
+        done
+
+        if [ $num -eq 1 ]; then
+            GTKLIB=/usr/lib/gtk-2.0/$versionDir
+        else
+            echo ""
+            echo "!!! ERROR !!! - More than one gtk-2.0 version found  ( $versionDir ). Packager will exit"
+            echo ""
+	    exit 1
+        fi
+    else
+        echo ""
+        echo "!!! ERROR !!! - Can't find GTK lib directory. Packager will exit"
+        echo ""
+	exit 1
+    fi
+
+    ## PANGOLIB
+    if [ -d /usr/lib/pango ]; then
+        versionDir=`ls /usr/lib/pango/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
+
+        num=0
+        for name in $versionDir ; do
+            let "num += 1"
+        done
+
+        if [ $num -eq 1 ]; then
+            PANGOLIB=/usr/lib/pango/$versionDir
+        else
+            echo ""
+            echo "!!! ERROR !!! - More than one pango version found  ( $versionDir ). Packager will exit"
+            echo ""
+	    exit 1
+        fi
+    else
+        echo ""
+        echo "!!! ERROR !!! - Can't find pango lib directory. Packager will exit"
+        echo ""
+	exit 1
+    fi
+
+
+    ## GDKPIXBUFLIB        
+    if [ -d $GTKLIB ]; then
+        GDKPIXBUFLIB=$GTKLIB
+    fi
+
+fi
+
+
 
 cp -R $GTKETC/* $Etc
 echo "Copying all Pango modules ..."
@@ -227,8 +345,60 @@ cp -R $PANGOLIB/modules/*.so $Modules
 echo "Copying all GDK Pixbuf loaders ..."
 cp -R $GDKPIXBUFLIB/loaders/*.so $Loaders
 
-pwd=`pwd`
+pango-querymodules | sed "s?$PANGOLIB/?@ROOTDIR@/?" > $Etc/pango.modules.in
+gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUFLIB/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
 
+# We sort of rely on clearlooks, so include a version
+# this one is special - we will set GTK_PATH to $Libraries/clearlooks
+
+if [ -z $LIBCLEARLOOKS ]; then
+    #clearlooks_paths=$(sudo find / -name "libclearlooks*")
+    clearlooks_paths=$(sudo find / -name "libclearlooks*" | grep "gtk")
+
+    if [ $? -ne 0 ]; then
+        echo "Not able to search for libclearlooks (not able to sudo?). Please try again"
+        exit 1
+    fi
+else
+    clearlooks_paths=$LIBCLEARLOOKS
+fi
+
+num=0
+for path in $clearlooks_paths ; do
+    let "num += 1"
+done
+
+if [ $num -eq 1 ]; then
+    clearlooks=$clearlooks_paths
+    if file -L $clearlooks | grep -q $ARCH_BITS; then
+        echo "Using libclearlooks: $clearlooks"
+    else
+	echo ""
+	echo "!!! ERROR !!! - clearlooks lib is not build for $ARCH_BITS"
+	echo ""
+	echo "Packager with exit"
+	exit 1
+    fi
+else
+    echo ""
+    echo "!!! ERROR  !!! - Not able to determine which libclearlooks to use. run again with --clearlooks /path/to/libclearlooks"
+    echo "Here are the possible choices for libclearlooks"
+    echo ""
+
+    for path in $clearlooks_paths ; do
+        echo $path
+    done
+
+    echo ""
+    echo "Packager will exit"
+    exit 1
+fi
+
+cp $clearlooks $Libraries
+mkdir -p $Libraries/clearlooks/engines
+(cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks* libclearlooks.so )
+
+# LADSPA
 if test x$WITH_LADSPA != x ; then
     if test x$SAE != x ; then
 	plugdir=sae_ladspa
@@ -243,15 +413,6 @@ if test x$WITH_LADSPA != x ; then
     fi
 fi
 
-pango-querymodules | sed "s?$GTKROOT/lib/pango/[0-9][0-9]*\.[0-9][0-9]*.[0-9][0-9]*/?@ROOTDIR@/?" > $Etc/pango.modules.in
-gdk-pixbuf-query-loaders | sed "s?$GTKROOT/lib/gdk-pixbuf-2.0/[0-9][0-9]*\.[0-9][0-9]*.[0-9][0-9]*/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
-
-# We sort of rely on clearlooks, so include a version
-# this one is special - we will set GTK_PATH to $Libraries/clearlooks
-cp /usr/lib64/gtk-2.0/2.10.0/engines/libclearlooks.so $Libraries
-mkdir -p $Libraries/clearlooks/engines
-(cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks.so* )
-
 # XXX STILL NEED TO DO PANNERS FOR TRUNK
 cp ../../libs/surfaces/*/libardour_*.so* $Surfaces
 # hack ... move libardour_cp back into Libraries
@@ -260,15 +421,19 @@ mv $Surfaces/libardour_cp.so* $Libraries
 # VAMP plugins that we use
 cp ../../libs/vamp-plugins/libardourvampplugins.so* $Libraries
 
-OURLIBDIR=../../libs
+OURLIBDIR=libs
 OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/rubberband:$OURLIBDIR/soundtouch:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/sigc++2:$OURLIBDIR/glibmm2:$OURLIBDIR/gtkmm2/atk:$OURLIBDIR/gtkmm2/pango:$OURLIBDIR/gtkmm2/gdk:$OURLIBDIR/gtkmm2/gtk:$OURLIBDIR/libgnomecanvasmm:$OURLIBDIR/libsndfile
+
+echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 while [ true ] ; do 
     missing=false
-    for file in $APPBIN/* $Libraries/* $Modules/* $Plugins/*.so ; do 
+    filelist=`find $APPLIB/ -type f`
+    for file in $filelist  ; do 
 	if ! file $file | grep -qs ELF ; then
 	    continue
 	fi
+
         # do not include libjack
 	deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | awk '{print $3}' | egrep "(/opt/|/local/|libs/|/usr/lib|/gtk)" | grep -v 'libjack\.'`
 	# LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | egrep "(/opt/|/local/|libs/|/usr/lib|/gtk)" | grep -v 'libjack\.'
@@ -287,12 +452,12 @@ while [ true ] ; do
             if echo $dep | grep -qs 'libc\.' ; then continue; fi
 
 	    base=`basename $dep`
-	    if ! test -f $Libraries/$base; then
+ 	    if ! test -f $Libraries/$base; then
 		if echo $dep | grep -sq '^libs' ; then
-                    # echo Copying ../../$dep
+                    echo "Copying dependant lib ../../$dep"
 		    cp ../../$dep $Libraries
 		else
-                    # echo Copying $dep
+                    echo "Copying dependant lib $dep"
 		    cp $dep $Libraries
 		fi
 		missing=true
@@ -308,7 +473,8 @@ echo
 
 # strip libraries
 echo Stripping libraries
-strip $APPLIB/*.so*
+find $APPLIB/ -name "*.so*" | xargs strip
+find $APPLIB/ -name "*.so*" | xargs chmod a+rx
 
 echo "Copying other stuff to $APPDIR  ..."
 

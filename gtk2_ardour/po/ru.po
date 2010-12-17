@@ -6,7 +6,7 @@
 # Alexandre Prokoudine <alexandre.prokoudine@gmail.com>, 2006, 2007, 2009
 msgid ""
 msgstr ""
-"Project-Id-Version: ru_RU\n"
+"Project-Id-Version: gtk2_ardour\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-01-20 01:34+0300\n"
 "PO-Revision-Date: 2010-01-20 04:25+0300\n"

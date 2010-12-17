@@ -5,7 +5,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gtk2_ardour rev.1702\n"
+"Project-Id-Version: gtk2_ardour\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-04-08 13:00+0100\n"
 "PO-Revision-Date: 2007-04-15 19:00+0100\n"

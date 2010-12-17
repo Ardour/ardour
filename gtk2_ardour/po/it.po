@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 2.8.1\n"
+"Project-Id-Version: gtk2_ardour\n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
 "Last-Translator: Emanuele Costantini <sound@ecciproduzioni.com>\n"
