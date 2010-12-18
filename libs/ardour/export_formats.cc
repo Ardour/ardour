@@ -192,6 +192,7 @@ ExportFormatLinear::ExportFormatLinear (string name, FormatId format_id) :
 	add_sample_rate (SR_88_2);
 	add_sample_rate (SR_96);
 	add_sample_rate (SR_192);
+	add_sample_rate (SR_Session);
 
 	add_endianness (E_FileDefault);
 
@@ -262,6 +263,7 @@ ExportFormatOggVorbis::ExportFormatOggVorbis ()
 	add_sample_rate (SR_88_2);
 	add_sample_rate (SR_96);
 	add_sample_rate (SR_192);
+	add_sample_rate (SR_Session);
 
 	add_endianness (E_FileDefault);
 
@@ -301,6 +303,7 @@ ExportFormatFLAC::ExportFormatFLAC () :
 	add_sample_rate (SR_88_2);
 	add_sample_rate (SR_96);
 	add_sample_rate (SR_192);
+	add_sample_rate (SR_Session);
 
 	add_sample_format (SF_8);
 	add_sample_format (SF_16);
@@ -334,6 +337,7 @@ ExportFormatBWF::ExportFormatBWF () :
 	add_sample_rate (SR_88_2);
 	add_sample_rate (SR_96);
 	add_sample_rate (SR_192);
+	add_sample_rate (SR_Session);
 
 	add_sample_format (SF_U8);
 	add_sample_format (SF_16);

@@ -156,7 +156,7 @@ class HasSampleFormat : public PBD::ScopedConnectionList {
 class ExportFormatLinear : public ExportFormat, public HasSampleFormat {
   public:
 
-        ExportFormatLinear (std::string name, FormatId format_id);
+	ExportFormatLinear (std::string name, FormatId format_id);
 	~ExportFormatLinear () {};
 
 	bool set_compatibility_state (ExportFormatCompatibility const & compatibility);

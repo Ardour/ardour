@@ -198,4 +198,30 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 	return result;
 }
 
+ExportFormatBase::SampleRate
+ExportFormatBase::nearest_sample_rate (framecnt_t sample_rate)
+{
+	int diff = 0;
+	int smallest_diff = INT_MAX;
+	SampleRate best_match = SR_None;
+	
+	#define DO_SR_COMPARISON(rate) \
+	diff = std::abs((rate) - sample_rate); \
+	if(diff < smallest_diff) { \
+		smallest_diff = diff; \
+		best_match = (rate); \
+	}
+
+	DO_SR_COMPARISON(SR_22_05);
+	DO_SR_COMPARISON(SR_22_05);
+	DO_SR_COMPARISON(SR_44_1);
+	DO_SR_COMPARISON(SR_48);
+	DO_SR_COMPARISON(SR_88_2);
+	DO_SR_COMPARISON(SR_96);
+	DO_SR_COMPARISON(SR_192);
+	
+	return best_match;
+	#undef DO_SR_COMPARISON
+}
+
 }; // namespace ARDOUR

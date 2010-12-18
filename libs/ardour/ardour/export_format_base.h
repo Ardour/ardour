@@ -94,6 +94,7 @@ class ExportFormatBase {
 
 	enum SampleRate {
 		SR_None = 0,
+		SR_Session = 1,
 		SR_22_05 = 220500,
 		SR_44_1 = 44100,
 		SR_48 = 48000,
@@ -162,6 +163,8 @@ class ExportFormatBase {
 
 	void set_extension (std::string const & extension) { _extension = extension; }
 	std::string const & extension () const { return _extension; }
+	
+	static SampleRate nearest_sample_rate (framecnt_t sample_rate);
 
   protected:
 

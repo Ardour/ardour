@@ -203,6 +203,7 @@ ExportFormatManager::init_formats ()
 void
 ExportFormatManager::init_sample_rates ()
 {
+	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_Session, _("Session rate"))));
 	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_22_05, "22,05 kHz")));
 	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_44_1, "44,1 kHz")));
 	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_48, "48 kHz")));

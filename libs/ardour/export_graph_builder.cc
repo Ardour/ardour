@@ -77,8 +77,18 @@ ExportGraphBuilder::reset ()
 void
 ExportGraphBuilder::add_config (FileSpec const & config)
 {
-	if (!config.channel_config->get_split ()) {
-		add_split_config (config);
+	// If the sample rate is "session rate", change it to the real value.
+	// However, we need to copy it to not change the config which is saved...
+	FileSpec new_config (config);
+	new_config.format.reset(new ExportFormatSpecification(*new_config.format));
+	if(new_config.format->sample_rate() == ExportFormatBase::SR_Session) {
+		framecnt_t session_rate = session.nominal_frame_rate();
+		new_config.format->set_sample_rate(ExportFormatBase::nearest_sample_rate(session_rate));
+	}
+	
+	
+	if (!new_config.channel_config->get_split ()) {
+		add_split_config (new_config);
 		return;
 	}
 	
@@ -86,11 +96,11 @@ ExportGraphBuilder::add_config (FileSpec const & config)
 	// each corresponding to a file, at this stage
 	typedef std::list<boost::shared_ptr<ExportChannelConfiguration> > ConfigList;
 	ConfigList file_configs;
-	config.channel_config->configurations_for_files (file_configs);
+	new_config.channel_config->configurations_for_files (file_configs);
 	
 	unsigned chan = 1;
 	for (ConfigList::iterator it = file_configs.begin(); it != file_configs.end(); ++it, ++chan) {
-		FileSpec copy = config;
+		FileSpec copy = new_config;
 		copy.channel_config = *it;
 		
 		copy.filename.reset (new ExportFilename (*copy.filename));

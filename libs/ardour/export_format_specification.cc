@@ -230,6 +230,8 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 
 	set_silence_beginning (other.silence_beginning_time());
 	set_silence_end (other.silence_end_time());
+	
+	set_extension(other.extension());
 }
 
 ExportFormatSpecification::~ExportFormatSpecification ()
@@ -555,6 +557,9 @@ ExportFormatSpecification::description ()
 		break;
 	  case SR_192:
 		desc += "192 kHz";
+		break;
+	  case SR_Session:
+		desc += _("Session rate");
 		break;
 	  case SR_None:
 		break;
