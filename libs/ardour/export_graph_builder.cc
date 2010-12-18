@@ -15,6 +15,7 @@
 #include "ardour/export_channel_configuration.h"
 #include "ardour/export_filename.h"
 #include "ardour/export_format_specification.h"
+#include "ardour/export_timespan.h"
 #include "ardour/sndfile_helpers.h"
 
 #include "pbd/filesystem.h"
@@ -69,9 +70,16 @@ ExportGraphBuilder::process_normalize ()
 void
 ExportGraphBuilder::reset ()
 {
+	timespan.reset();
 	channel_configs.clear ();
 	channels.clear ();
 	normalizers.clear ();
+}
+
+void
+ExportGraphBuilder::set_current_timespan (boost::shared_ptr<ExportTimespan> span)
+{
+	timespan = span;
 }
 
 void
@@ -391,8 +399,12 @@ ExportGraphBuilder::SilenceHandler::SilenceHandler (ExportGraphBuilder & parent,
 	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in));
 	silence_trimmer->set_trim_beginning (config.format->trim_beginning());
 	silence_trimmer->set_trim_end (config.format->trim_end());
-	silence_trimmer->add_silence_to_beginning (config.format->silence_beginning(sample_rate));
-	silence_trimmer->add_silence_to_end (config.format->silence_end(sample_rate));
+	
+	framecnt_t sb = config.format->silence_beginning_at (parent.timespan->get_start(), sample_rate);
+	framecnt_t se = config.format->silence_end_at (parent.timespan->get_end(), sample_rate);
+	
+	silence_trimmer->add_silence_to_beginning (sb);
+	silence_trimmer->add_silence_to_end (se);
 	
 	add_child (new_config);
 }
@@ -424,8 +436,8 @@ ExportGraphBuilder::SilenceHandler::operator== (FileSpec const & other_config) c
 	ExportFormatSpecification & other_format = *other_config.format;
 	return (format.trim_beginning() == other_format.trim_beginning()) &&
 	       (format.trim_end() == other_format.trim_end()) &&
-	       (format.silence_beginning() == other_format.silence_beginning()) &&
-	       (format.silence_end() == other_format.silence_end());
+	       (format.silence_beginning_time() == other_format.silence_beginning_time()) &&
+	       (format.silence_end_time() == other_format.silence_end_time());
 }
 
 /* ChannelConfig */

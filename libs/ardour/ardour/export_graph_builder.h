@@ -66,6 +66,7 @@ class ExportGraphBuilder
 	bool process_normalize (); // returns true when finished
 	
 	void reset ();
+	void set_current_timespan (boost::shared_ptr<ExportTimespan> span);
 	void add_config (FileSpec const & config);
 	
   private:
@@ -214,6 +215,7 @@ class ExportGraphBuilder
 	};
 
 	Session const & session;
+	boost::shared_ptr<ExportTimespan> timespan;
 	
 	// Roots for export processor trees
 	typedef boost::ptr_list<ChannelConfig> ChannelConfigList;

@@ -42,25 +42,14 @@ using std::string;
 ExportFormatSpecification::Time &
 ExportFormatSpecification::Time::operator= (AnyTime const & other)
 {
-	type = other.type;
-	timecode = other.timecode;
-	bbt = other.bbt;
-
-	if (type == Frames) {
-		frames = other.frames;
-	} else {
-		seconds = other.seconds;
-	}
-
+	static_cast<AnyTime &>(*this) = other;
 	return *this;
 }
 
 framecnt_t
-ExportFormatSpecification::Time::get_frames (framecnt_t target_rate) const
+ExportFormatSpecification::Time::get_frames_at (framepos_t position, framecnt_t target_rate) const
 {
-	//TODO position
-	framecnt_t duration = session.convert_to_frames_at (0, *this);
-
+	framecnt_t duration = session.convert_to_frames_at (position, *this);
 	return ((double) target_rate / session.frame_rate()) * duration + 0.5;
 }
 
@@ -283,14 +272,14 @@ ExportFormatSpecification::get_state ()
 	node->add_property ("enabled", trim_beginning() ? "true" : "false");
 
 	node = start->add_child ("Add");
-	node->add_property ("enabled", silence_beginning() > 0 ? "true" : "false");
+	node->add_property ("enabled", _silence_beginning.not_zero() ? "true" : "false");
 	node->add_child_nocopy (_silence_beginning.get_state());
 
 	node = end->add_child ("Trim");
 	node->add_property ("enabled", trim_end() ? "true" : "false");
 
 	node = end->add_child ("Add");
-	node->add_property ("enabled", silence_end() > 0 ? "true" : "false");
+	node->add_property ("enabled", _silence_end.not_zero() ? "true" : "false");
 	node->add_child_nocopy (_silence_end.get_state());
 
 	return *root;

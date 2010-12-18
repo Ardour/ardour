@@ -47,7 +47,7 @@ class ExportFormatSpecification : public ExportFormatBase {
 		Time (Session & session) : AnyTime (), session (session) {}
 		Time & operator= (AnyTime const & other);
 
-		framecnt_t get_frames (framecnt_t target_rate) const;
+		framecnt_t get_frames_at (framepos_t position, framecnt_t target_rate) const;
 
 		/* Serialization */
 
@@ -123,11 +123,10 @@ class ExportFormatSpecification : public ExportFormatBase {
 
 	bool tag () const { return _tag && supports_tagging; }
 
-	framecnt_t silence_beginning () const { return _silence_beginning.get_frames (sample_rate()); }
-	framecnt_t silence_end () const { return _silence_end.get_frames (sample_rate()); }
-
-	framecnt_t silence_beginning (framecnt_t samplerate) const { return _silence_beginning.get_frames (samplerate); }
-	framecnt_t silence_end (framecnt_t samplerate) const { return _silence_end.get_frames (samplerate); }
+	framecnt_t silence_beginning_at (framepos_t position, framecnt_t samplerate) const
+		{ return _silence_beginning.get_frames_at (position, samplerate); }
+	framecnt_t silence_end_at (framepos_t position, framecnt_t samplerate) const
+		{ return _silence_end.get_frames_at (position, samplerate); }
 
 	AnyTime silence_beginning_time () const { return _silence_beginning; }
 	AnyTime silence_end_time () const { return _silence_end; }

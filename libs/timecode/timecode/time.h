@@ -52,6 +52,13 @@ struct Time {
 		subframes = 0;
 		rate = a_rate;
 	}
+	
+	bool operator== (const Time& other) const {
+		return negative == other.negative && hours == other.hours &&
+		       minutes == other.minutes && seconds == other.seconds &&
+		       frames == other.frames && subframes == other.subframes &&
+		       rate == other.rate && drop == other.drop;
+	}
 
 	std::ostream& print (std::ostream& ostr) const {
 		if (negative) {

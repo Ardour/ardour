@@ -227,6 +227,36 @@ namespace ARDOUR {
 		};
 
 		AnyTime() { type = Frames; frames = 0; }
+		
+		bool operator== (AnyTime const & other) const {
+			if (type != other.type) { return false; }
+			
+			switch (type) {
+			  case Timecode:
+				return timecode == other.timecode;
+			  case BBT:
+				return bbt == other.bbt;
+			  case Frames:
+				return frames == other.frames;
+			  case Seconds:
+				return seconds == other.seconds;
+			}
+		}
+		
+		bool not_zero() const
+		{
+			switch (type) {
+			  case Timecode:
+				return timecode.hours != 0 || timecode.minutes != 0 ||
+				       timecode.seconds != 0 || timecode.frames != 0;
+			  case BBT:
+				return bbt.bars != 0 || bbt.beats != 0 || bbt.ticks != 0;
+			  case Frames:
+				return frames != 0;
+			  case Seconds:
+				return seconds != 0;
+			}
+		}
 	};
 
 	struct AudioRange {

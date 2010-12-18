@@ -228,11 +228,11 @@ ExportFormatDialog::load_state (FormatPtr spec)
 
 	trim_start_checkbox.set_active (spec->trim_beginning());
 	silence_start = spec->silence_beginning_time();
-	silence_start_checkbox.set_active (spec->silence_beginning() > 0);
+	silence_start_checkbox.set_active (spec->silence_beginning_time().not_zero());
 
 	trim_end_checkbox.set_active (spec->trim_end());
 	silence_end = spec->silence_end_time();
-	silence_end_checkbox.set_active (spec->silence_end() > 0);
+	silence_end_checkbox.set_active (spec->silence_end_time().not_zero());
 
 	for (Gtk::ListStore::Children::iterator it = src_quality_list->children().begin(); it != src_quality_list->children().end(); ++it) {
 		if (it->get_value (src_quality_cols.id) == spec->src_quality()) {

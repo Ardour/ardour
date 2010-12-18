@@ -162,6 +162,7 @@ ExportHandler::start_timespan ()
 
 	timespan_bounds = config_map.equal_range (current_timespan);
 	graph_builder->reset ();
+	graph_builder->set_current_timespan (current_timespan);
 	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
 		// Filenames can be shared across timespans
 		FileSpec & spec = it->second;
