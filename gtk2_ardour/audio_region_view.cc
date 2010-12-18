@@ -601,6 +601,7 @@ AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 
 	double const handle_center = pwidth;
 
+	/* Put the fade in handle so that its left side is at the end-of-fade line */
 	fade_in_handle->property_x1() = handle_center;
 	fade_in_handle->property_x2() = handle_center + 6;
 
@@ -685,8 +686,11 @@ AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 
 	double const handle_center = (_region->length() - width) / samples_per_unit;
 
-	fade_out_handle->property_x1() = handle_center - 6;
-	fade_out_handle->property_x2() = handle_center;
+	/* Put the fade out handle so that its right side is at the end-of-fade line;
+	 * it's `one out' for precise pixel accuracy.
+	 */
+	fade_out_handle->property_x1() = handle_center - 5;
+	fade_out_handle->property_x2() = handle_center + 1;
 
 	/* don't show shape if its too small */
 
