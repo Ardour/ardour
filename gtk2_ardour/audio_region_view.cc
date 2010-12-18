@@ -588,8 +588,9 @@ AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 	width = std::max ((framecnt_t) 64, width);
 
 	Points* points;
-	
-	double pwidth = width / samples_per_unit;
+
+	/* round here to prevent little visual glitches with sub-pixel placement */
+	double const pwidth = rint (width / samples_per_unit);
 	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
 	double h;
 
@@ -674,7 +675,9 @@ AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 	width = std::max ((framecnt_t) 64, width);
 
 	Points* points;
-	double pwidth = width / samples_per_unit;
+
+	/* round here to prevent little visual glitches with sub-pixel placement */
+	double const pwidth = rint (width / samples_per_unit);
 	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
 	double h;
 
