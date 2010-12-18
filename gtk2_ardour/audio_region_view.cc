@@ -599,17 +599,10 @@ AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 		return;
 	}
 
-	double handle_center;
-	handle_center = pwidth;
+	double const handle_center = pwidth;
 
-	if (handle_center > 7.0) {
-		handle_center -= 2.0;
-	} else {
-		handle_center = 3.0;
-	}
-
-	fade_in_handle->property_x1() =  handle_center - 3.0;
-	fade_in_handle->property_x2() =  handle_center + 3.0;
+	fade_in_handle->property_x1() = handle_center;
+	fade_in_handle->property_x2() = handle_center + 6;
 
 	if (pwidth < 5) {
 		fade_in_shape->hide();
@@ -690,17 +683,10 @@ AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 		return;
 	}
 
-	double handle_center;
-	handle_center = (_region->length() - width) / samples_per_unit;
+	double const handle_center = (_region->length() - width) / samples_per_unit;
 
-	if (handle_center > 7.0) {
-		handle_center -= 2.0;
-	} else {
-		handle_center = 3.0;
-	}
-
-	fade_out_handle->property_x1() =  handle_center - 3.0;
-	fade_out_handle->property_x2() =  handle_center + 3.0;
+	fade_out_handle->property_x1() = handle_center - 6;
+	fade_out_handle->property_x2() = handle_center;
 
 	/* don't show shape if its too small */
 
