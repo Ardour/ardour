@@ -31,6 +31,12 @@
 #include "canvas-waveview.h"
 #include "rgb_macros.h"
 
+/* POSIX guarantees casting between void* and function pointers, ISO C doesn't
+ * We can work around warnings by going one step deeper in our casts
+ */
+#ifdef _POSIX_VERSION
+#define POSIX_FUNC_PTR_CAST(type, object) *((type*) &(object))
+#endif // _POSIX_VERSION
 
 extern void c_stacktrace();
 
@@ -751,6 +757,7 @@ gnome_canvas_waveview_set_property (GObject      *object,
 	item = GNOME_CANVAS_ITEM (object);
 	waveview = GNOME_CANVAS_WAVEVIEW (object);
 
+	void * ptr;
 	switch (prop_id) {
 	case PROP_DATA_SRC:
 		gnome_canvas_waveview_set_data_src (waveview, g_value_get_pointer(value));
@@ -763,22 +770,26 @@ gnome_canvas_waveview_set_property (GObject      *object,
 		break;
 
 	case PROP_LENGTH_FUNCTION:
-		waveview->length_function = (waveview_length_function_t) g_value_get_pointer(value);
+		ptr = g_value_get_pointer(value);
+		waveview->length_function = POSIX_FUNC_PTR_CAST(waveview_length_function_t, ptr);
 		redraw = TRUE;
 		break;
 
 	case PROP_SOURCEFILE_LENGTH_FUNCTION:
-		waveview->sourcefile_length_function = (waveview_sourcefile_length_function_t) g_value_get_pointer(value);
+		ptr = g_value_get_pointer(value);
+		waveview->sourcefile_length_function = POSIX_FUNC_PTR_CAST(waveview_sourcefile_length_function_t, ptr);
 		redraw = TRUE;
 		break;
 
 	case PROP_PEAK_FUNCTION:
-		waveview->peak_function = (waveview_peak_function_t) g_value_get_pointer(value);
+		ptr = g_value_get_pointer(value);
+		waveview->peak_function = POSIX_FUNC_PTR_CAST(waveview_peak_function_t, ptr);
 		redraw = TRUE;
 		break;
 
 	case PROP_GAIN_FUNCTION:
-		waveview->gain_curve_function = (waveview_gain_curve_function_t) g_value_get_pointer(value);
+		ptr = g_value_get_pointer(value);
+		waveview->gain_curve_function = POSIX_FUNC_PTR_CAST(waveview_gain_curve_function_t, ptr);
 			 redraw = TRUE;
 		break;
 
@@ -946,19 +957,19 @@ gnome_canvas_waveview_get_property (
 		break;
 
 	case PROP_LENGTH_FUNCTION:
-		g_value_set_pointer(value, (void*) waveview->length_function);
+		g_value_set_pointer(value, POSIX_FUNC_PTR_CAST(void*, waveview->length_function));
 		break;
 
 	case PROP_SOURCEFILE_LENGTH_FUNCTION:
-		g_value_set_pointer(value, (void*) waveview->sourcefile_length_function);
+		g_value_set_pointer(value, POSIX_FUNC_PTR_CAST(void*, waveview->sourcefile_length_function));
 		break;
 
 	case PROP_PEAK_FUNCTION:
-		g_value_set_pointer(value, (void*) waveview->peak_function);
+		g_value_set_pointer(value, POSIX_FUNC_PTR_CAST(void*, waveview->peak_function));
 		break;
 
 	case PROP_GAIN_FUNCTION:
-		g_value_set_pointer(value, (void*) waveview->gain_curve_function);
+		g_value_set_pointer(value, POSIX_FUNC_PTR_CAST(void*, waveview->gain_curve_function));
 		break;
 
 	case PROP_GAIN_SRC:
