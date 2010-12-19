@@ -371,11 +371,11 @@ def set_options(opt):
 	opt.add_option('--wiimote', action='store_true', default=False, dest='wiimote',
 			help='Build the wiimote control surface')
 	opt.add_option('--windows-key', type='string', action='store', dest='windows_key', default='Mod4><Super',
-		       help='X Modifier(s) (Mod1,Mod2, etc) for the Windows key (X11 builds only). ' +
-		       'Multiple modifiers must be separated by \'><\'')
-        opt.add_option('--boost-include', type='string', action='store', dest='boost_include', default='',
+			help='X Modifier(s) (Mod1,Mod2, etc) for the Windows key (X11 builds only). ' +
+			'Multiple modifiers must be separated by \'><\'')
+	opt.add_option('--boost-include', type='string', action='store', dest='boost_include', default='',
 			help='directory where Boost header files can be found')		       
-        opt.add_option('--wine-include', type='string', action='store', dest='wine_include', default='/usr/include/wine/windows',
+	opt.add_option('--wine-include', type='string', action='store', dest='wine_include', default='/usr/include/wine/windows',
 			help='directory where Wine\'s Windows header files can be found')		       
 	for i in children:
 		opt.sub_options(i)
