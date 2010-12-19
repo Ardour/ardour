@@ -125,7 +125,15 @@ void
 VSTPlugin::set_parameter (uint32_t which, float val)
 {
 	_plugin->setParameter (_plugin, which, val);
-	//ParameterChanged (which, val); /* EMIT SIGNAL */
+
+	if (_fst->want_program == -1 && _fst->want_chunk == 0) {
+		/* Heinous hack: Plugin::set_parameter below updates the `modified' status of the
+		   current preset, but if _fst->want_program is not -1 then there is a preset
+		   setup pending or in progress, which we don't want any `modified' updates
+		   to happen for.  So we only do this if _fst->want_program is -1.
+		*/
+		Plugin::set_parameter (which, val);
+	}
 }
 
 float
@@ -147,7 +155,7 @@ VSTPlugin::nth_parameter (uint32_t n, bool& ok) const
  *  @return 0-terminated base64-encoded data; must be passed to g_free () by caller.
  */
 gchar *
-VSTPlugin::get_chunk (bool single)
+VSTPlugin::get_chunk (bool single) const
 {
 	guchar* data;
 	int32_t data_size = _plugin->dispatcher (_plugin, 23 /* effGetChunk */, single ? 1 : 0, 0, &data, 0);
@@ -173,10 +181,9 @@ VSTPlugin::set_chunk (gchar const * data, bool single)
 	return r;
 }
 
-XMLNode&
-VSTPlugin::get_state()
+void
+VSTPlugin::add_state (XMLNode* root) const
 {
-	XMLNode *root = new XMLNode (state_node_name());
 	LocaleGuard lg (X_("POSIX"));
 
 	if (_fst->current_program != -1) {
@@ -189,7 +196,7 @@ VSTPlugin::get_state()
 
 		gchar* data = get_chunk (false);
 		if (data == 0) {
-			return *root;
+			return;
 		}
 
 		/* store information */
@@ -215,12 +222,10 @@ VSTPlugin::get_state()
 
 		root->add_child_nocopy (*parameters);
 	}
-
-	return *root;
 }
 
 int
-VSTPlugin::set_state(const XMLNode& node, int)
+VSTPlugin::set_state (const XMLNode& node, int version)
 {
 	LocaleGuard lg (X_("POSIX"));
 
@@ -275,6 +280,7 @@ VSTPlugin::set_state(const XMLNode& node, int)
 
 	}
 
+	Plugin::set_state (node, version);
 	return ret;
 }
 
@@ -353,15 +359,54 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 }
 
 bool
-VSTPlugin::load_preset (const string& name)
+VSTPlugin::load_preset (PresetRecord r)
 {
+	bool s;
+
+	if (r.user) {
+		s = load_user_preset (r);
+	} else {
+		s = load_plugin_preset (r);
+	}
+
+	if (s) {
+		Plugin::load_preset (r);
+	}
+
+	return s;
+}
+
+bool
+VSTPlugin::load_plugin_preset (PresetRecord r)
+{
+	/* This is a plugin-provided preset.
+	   We can't dispatch directly here; too many plugins expects only one GUI thread.
+	*/
+
+	/* Extract the index of this preset from the URI */
+	int id;
+	int index;
+	int const p = sscanf (r.uri.c_str(), "VST:%d:%d", &id, &index);
+	assert (p == 2);
+
+	_fst->want_program = index;
+	return true;
+}
+
+bool
+VSTPlugin::load_user_preset (PresetRecord r)
+{
+	/* This is a user preset; we load it, and this code also knows about the
+	   non-direct-dispatch thing.
+	*/
+	
 	boost::shared_ptr<XMLTree> t (presets_tree ());
 	if (t == 0) {
 		return false;
 	}
 	
 	XMLNode* root = t->root ();
-
+	
 	for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
 		
 		XMLProperty* uri = (*i)->property (X_("uri"));
@@ -369,11 +414,11 @@ VSTPlugin::load_preset (const string& name)
 		
 		assert (uri);
 		assert (label);
-
-		if (label->value() != name) {
+		
+		if (label->value() != r.label) {
 			continue;
 		}
-		
+			
 		if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 			
 			/* Load a user preset chunk from our XML file and send it via a circuitous route to the plugin */
@@ -395,26 +440,26 @@ VSTPlugin::load_preset (const string& name)
 			}
 			
 			return false;
-			
+				
 		} else {
 			
 			for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
 				if ((*j)->name() == X_("Parameter")) {
-
-					XMLProperty* index = (*j)->property (X_("index"));
-					XMLProperty* value = (*j)->property (X_("value"));
-
-					assert (index);
-					assert (value);
-
-					set_parameter (atoi (index->value().c_str()), atof (value->value().c_str ()));
+					
+						XMLProperty* index = (*j)->property (X_("index"));
+						XMLProperty* value = (*j)->property (X_("value"));
+						
+						assert (index);
+						assert (value);
+						
+						set_parameter (atoi (index->value().c_str()), atof (value->value().c_str ()));
 				}
 			}
-
+			
 			return true;
 		}
 	}
-
+		
 	return false;
 }
 
@@ -556,7 +601,6 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	}
 
 	/* we already know it can support processReplacing */
-
 	_plugin->processReplacing (_plugin, ins, outs, nframes);
 
 	return 0;
@@ -670,16 +714,14 @@ VSTPluginInfo::load (Session& session)
 	}
 }
 
-vector<Plugin::PresetRecord>
-VSTPlugin::get_presets ()
+void
+VSTPlugin::find_presets ()
 {
-	vector<PresetRecord> p;
-
 	/* Built-in presets */
 	
 	int const vst_version = _plugin->dispatcher (_plugin, effGetVstVersion, 0, 0, NULL, 0);
 	for (int i = 0; i < _plugin->numPrograms; ++i) {
-		PresetRecord r (string_compose (X_("VST:%1:%2"), unique_id (), i), "");
+		PresetRecord r (string_compose (X_("VST:%1:%2"), unique_id (), i), "", false);
 		
 		if (vst_version >= 2) {
 			char buf[256];
@@ -692,7 +734,6 @@ VSTPlugin::get_presets ()
 			r.label = string_compose (_("Preset %1"), i);
 		}
 
-		p.push_back (r);
 		_presets.insert (make_pair (r.uri, r));
 	}
 
@@ -710,13 +751,11 @@ VSTPlugin::get_presets ()
 			assert (uri);
 			assert (label);
 
-			PresetRecord r (uri->value(), label->value());
-			p.push_back (r);
+			PresetRecord r (uri->value(), label->value(), true);
 			_presets.insert (make_pair (r.uri, r));
 		}
 	}
 
-	return p;
 }
 
 /** @return XMLTree with our user presets; could be a new one if no existing

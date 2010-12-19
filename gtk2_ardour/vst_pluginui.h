@@ -40,5 +40,5 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 
 	bool configure_handler (GdkEventConfigure*, Gtk::Socket*);
 	void save_plugin_setting ();
-	void setting_selected ();
+	void preset_selected ();
 };

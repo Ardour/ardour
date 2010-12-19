@@ -219,7 +219,7 @@ LV2Plugin::default_value (uint32_t port)
 }
 
 const char*
-LV2Plugin::port_symbol (uint32_t index)
+LV2Plugin::port_symbol (uint32_t index) const
 {
 	SLV2Port port = slv2_plugin_get_port_by_index(_plugin, index);
 	if (!port) {
@@ -236,7 +236,6 @@ LV2Plugin::set_parameter (uint32_t which, float val)
 {
 	if (which < slv2_plugin_get_num_ports(_plugin)) {
 		_shadow_data[which] = val;
-		ParameterChanged (which, val); /* EMIT SIGNAL */
 
 #if 0		
 		if (which < parameter_count() && controls[which]) {
@@ -249,6 +248,8 @@ LV2Plugin::set_parameter (uint32_t which, float val)
 		                             "This is a bug in either %2 or the LV2 plugin (%3)"),
 		                           name(), PROGRAM_NAME, unique_id()) << endmsg;
 	}
+
+	Plugin::set_parameter (which, val);
 }
 
 float
@@ -307,10 +308,9 @@ LV2Plugin::lv2_persist_retrieve_callback(void*       callback_data,
 	return NULL;
 }
 
-XMLNode&
-LV2Plugin::get_state()
+void
+LV2Plugin::add_state (XMLNode* root) const
 {
-	XMLNode *root = new XMLNode(state_node_name());
 	XMLNode *child;
 	char buf[16];
 	LocaleGuard lg (X_("POSIX"));
@@ -347,7 +347,7 @@ LV2Plugin::get_state()
 			warning << string_compose(
 				_("Plugin \"%1\% failed to return LV2 persist data"),
 				unique_id());
-			return *root; // FIXME: Possibly inconsistent state
+			return;
 		}
 
 		LV2PFile file = lv2_pfile_open(state_path.c_str(), true);
@@ -356,36 +356,35 @@ LV2Plugin::get_state()
 
 		root->add_property("state-file", state_filename);
 	}
-	
-	return *root;
 }
 
-vector<Plugin::PresetRecord>
-LV2Plugin::get_presets()
+void
+LV2Plugin::find_presets ()
 {
-	vector<PresetRecord> result;
 	SLV2Results presets = slv2_plugin_query_sparql(_plugin,
 			"PREFIX lv2p: <http://lv2plug.in/ns/dev/presets#>\n"
 			"PREFIX dc:  <http://dublincore.org/documents/dcmi-namespace/>\n"
 			"SELECT ?p ?name WHERE { <> lv2p:hasPreset ?p . ?p dc:title ?name }\n");
+
 	for (; !slv2_results_finished(presets); slv2_results_next(presets)) {
 		SLV2Value uri  = slv2_results_get_binding_value(presets, 0);
 		SLV2Value name = slv2_results_get_binding_value(presets, 1);
 		PresetRecord rec(slv2_value_as_string(uri), slv2_value_as_string(name));
-		result.push_back(rec);
 		_presets.insert(std::make_pair(slv2_value_as_string(uri), rec));
 	}
+
 	slv2_results_free(presets);
-	return result;
 }
 
 bool
-LV2Plugin::load_preset(const string& uri)
+LV2Plugin::load_preset (PresetRecord r)
 {
+	Plugin::load_preset (r);
+	
 	const string query = string(
 			"PREFIX lv2p: <http://lv2plug.in/ns/dev/presets#>\n"
 			"PREFIX dc:  <http://dublincore.org/documents/dcmi-namespace/>\n"
-			"SELECT ?sym ?val WHERE { <") + uri + "> lv2:port ?port . "
+			"SELECT ?sym ?val WHERE { <") + r.uri + "> lv2:port ?port . "
 				" ?port lv2:symbol ?sym ; lv2p:value ?val . }";
 	SLV2Results values = slv2_plugin_query_sparql(_plugin, query.c_str());
 	for (; !slv2_results_finished(values); slv2_results_next(values)) {
@@ -491,7 +490,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 
 	latency_compute_run ();
 
-	return 0;
+	return Plugin::set_state (node, version);
 }
 
 int

@@ -78,13 +78,11 @@ class VSTPlugin : public ARDOUR::Plugin
 	bool parameter_is_input(uint32_t i) const { return true; }
 	bool parameter_is_output(uint32_t i) const { return false; }
 
-	bool load_preset (const std::string& preset_label);
-	virtual std::vector<PresetRecord> get_presets ();
+	bool load_preset (PresetRecord);
 	int first_user_preset_index () const;
 
 	bool has_editor () const;
 
-	XMLNode& get_state();
 	int set_state (XMLNode const &, int);
 
 	AEffect * plugin () const { return _plugin; }
@@ -94,10 +92,14 @@ private:
 
 	void do_remove_preset (std::string name);
 	std::string do_save_preset (std::string name);
-	gchar* get_chunk (bool);
+	gchar* get_chunk (bool) const;
 	int set_chunk (gchar const *, bool);
 	XMLTree * presets_tree () const;
 	std::string presets_file () const;
+	void find_presets ();
+	bool load_user_preset (PresetRecord);
+	bool load_plugin_preset (PresetRecord);
+	void add_state (XMLNode *) const;
 	
 	FSTHandle* handle;
 	FST*       _fst;

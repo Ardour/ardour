@@ -66,7 +66,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	bool       is_external_ui() const;
 	SLV2Port   slv2_port(uint32_t i) { return slv2_plugin_get_port_by_index(_plugin, i); }
 
-	const char* port_symbol(uint32_t port);
+	const char* port_symbol (uint32_t port) const;
 
 	const LV2_Feature* const* features() { return _features; }
 
@@ -112,12 +112,11 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	static uint32_t midi_event_type() { return _midi_event_type; }
 
-	XMLNode& get_state();
 	int      set_state(const XMLNode& node, int version);
 	bool     save_preset (std::string uri);
 	void     remove_preset (std::string uri);
-	bool     load_preset (const std::string& uri);
-	virtual std::vector<Plugin::PresetRecord> get_presets();
+	bool     load_preset (PresetRecord);
+	std::string current_preset () const;
 
 	bool has_editor() const;
 
@@ -167,6 +166,8 @@ class LV2Plugin : public ARDOUR::Plugin
 	void latency_compute_run ();
 	std::string do_save_preset (std::string);
 	void do_remove_preset (std::string);
+	void find_presets ();
+	void add_state (XMLNode *) const;
 };
 
 

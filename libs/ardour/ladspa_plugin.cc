@@ -297,9 +297,8 @@ LadspaPlugin::set_parameter (uint32_t which, float val)
 {
 	if (which < _descriptor->PortCount) {
 		_shadow_data[which] = (LADSPA_Data) val;
-#if 0
-		ParameterChanged (Parameter(PluginAutomation, 0, which), val); /* EMIT SIGNAL */
 
+#if 0		
 		if (which < parameter_count() && controls[which]) {
 			controls[which]->Changed ();
 		}
@@ -311,6 +310,8 @@ LadspaPlugin::set_parameter (uint32_t which, float val)
 					     "invalid"), name())
 			<< endmsg;
 	}
+
+	Plugin::set_parameter (which, val);
 }
 
 float
@@ -341,10 +342,9 @@ LadspaPlugin::nth_parameter (uint32_t n, bool& ok) const
 	return 0;
 }
 
-XMLNode&
-LadspaPlugin::get_state()
+void
+LadspaPlugin::add_state (XMLNode* root) const
 {
-	XMLNode *root = new XMLNode(state_node_name());
 	XMLNode *child;
 	char buf[16];
 	LocaleGuard lg (X_("POSIX"));
@@ -362,8 +362,6 @@ LadspaPlugin::get_state()
 			root->add_child_nocopy (*child);
 		}
 	}
-
-	return *root;
 }
 
 int
@@ -372,7 +370,7 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 	if (version < 3000) {
 		return set_state_2X (node, version);
 	}
-	
+
 	XMLNodeList nodes;
 	XMLProperty *prop;
 	XMLNodeConstIterator iter;
@@ -389,7 +387,7 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 
 	nodes = node.children ("Port");
 
-	for(iter = nodes.begin(); iter != nodes.end(); ++iter){
+	for (iter = nodes.begin(); iter != nodes.end(); ++iter) {
 
 		child = *iter;
 
@@ -412,7 +410,7 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 
 	latency_compute_run ();
 
-	return 0;
+	return Plugin::set_state (node, version);
 }
 
 int
@@ -709,15 +707,14 @@ LadspaPluginInfo::LadspaPluginInfo()
 }
 
 
-vector<Plugin::PresetRecord>
-LadspaPlugin::get_presets ()
+void
+LadspaPlugin::find_presets ()
 {
-	vector<PresetRecord> result;
 	uint32_t id;
 	std::string unique (unique_id());
 
 	if (!isdigit (unique[0])) {
-		return result;
+		return;
 	}
 
 	id = atol (unique.c_str());
@@ -727,22 +724,19 @@ LadspaPlugin::get_presets ()
 	if (set_uris) {
 		for (uint32_t i = 0; i < (uint32_t) set_uris->count; ++i) {
 			if (char* label = lrdf_get_label(set_uris->items[i])) {
-				PresetRecord rec(set_uris->items[i], label);
-				result.push_back(rec);
+				PresetRecord rec (set_uris->items[i], label);
 				_presets.insert (make_pair (set_uris->items[i], rec));
 			}
 		}
 		lrdf_free_uris(set_uris);
 	}
-
-	return result;
 }
 
 
 bool
-LadspaPlugin::load_preset (const string& preset_uri)
+LadspaPlugin::load_preset (PresetRecord r)
 {
-	lrdf_defaults* defs = lrdf_get_setting_values(preset_uri.c_str());
+	lrdf_defaults* defs = lrdf_get_setting_values (r.uri.c_str());
 
 	if (defs) {
 		for (uint32_t i = 0; i < (uint32_t) defs->count; ++i) {
@@ -755,6 +749,7 @@ LadspaPlugin::load_preset (const string& preset_uri)
 		lrdf_free_setting_values(defs);
 	}
 
+	Plugin::load_preset (r);
 	return true;
 }
 

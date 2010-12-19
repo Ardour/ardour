@@ -162,16 +162,10 @@ save_property_list (CFPropertyListRef propertyList, Glib::ustring path)
 	fd = open (path.c_str(), O_WRONLY|O_CREAT|O_EXCL, 0664);
 	while (fd < 0) {
 		if (errno == EEXIST) {
-			/* tell any UI's that this file already exists and ask them what to do */
-			bool overwrite = Plugin::PresetFileExists(); // EMIT SIGNAL
-			if (overwrite) {
-				fd = open (path.c_str(), O_WRONLY, 0664);
-				continue;
-			} else {
-				return 0;
-			}
+			error << string_compose (_("Preset file %1 exists; not overwriting"), path);
+		} else {
+			error << string_compose (_("Cannot open preset file %1 (%2)"), path, strerror (errno)) << endmsg;
 		}
-		error << string_compose (_("Cannot open preset file %1 (%2)"), path, strerror (errno)) << endmsg;
 		CFRelease (xmlData);
 		return -1;
 	}
@@ -767,24 +761,28 @@ AUPlugin::signal_latency () const
 void
 AUPlugin::set_parameter (uint32_t which, float val)
 {
-	if (which < descriptors.size()) {
-		const AUParameterDescriptor& d (descriptors[which]);
-		TRACE_API ("set parameter %d in scope %d element %d to %f\n", d.id, d.scope, d.element, val);
-		unit->SetParameter (d.id, d.scope, d.element, val);
-
-		/* tell the world what we did */
-
-		AudioUnitEvent theEvent;
-		
-		theEvent.mEventType = kAudioUnitEvent_ParameterValueChange;
-		theEvent.mArgument.mParameter.mAudioUnit = unit->AU();
-		theEvent.mArgument.mParameter.mParameterID = d.id;
-		theEvent.mArgument.mParameter.mScope = d.scope;
-		theEvent.mArgument.mParameter.mElement = d.element;
-
-		TRACE_API ("notify about parameter change\n");
-		AUEventListenerNotify (NULL, NULL, &theEvent);
+	if (which >= descriptors.size()) {
+		return;
 	}
+	
+	const AUParameterDescriptor& d (descriptors[which]);
+	TRACE_API ("set parameter %d in scope %d element %d to %f\n", d.id, d.scope, d.element, val);
+	unit->SetParameter (d.id, d.scope, d.element, val);
+	
+	/* tell the world what we did */
+	
+	AudioUnitEvent theEvent;
+	
+	theEvent.mEventType = kAudioUnitEvent_ParameterValueChange;
+	theEvent.mArgument.mParameter.mAudioUnit = unit->AU();
+	theEvent.mArgument.mParameter.mParameterID = d.id;
+	theEvent.mArgument.mParameter.mScope = d.scope;
+	theEvent.mArgument.mParameter.mElement = d.element;
+	
+	TRACE_API ("notify about parameter change\n");
+	AUEventListenerNotify (NULL, NULL, &theEvent);
+	
+	Plugin::set_parameter (which, val);
 }
 
 float
@@ -1551,11 +1549,10 @@ AUPlugin::parameter_is_output (uint32_t) const
 	return false;
 }
 
-XMLNode&
-AUPlugin::get_state()
+void
+AUPlugin::add_state (XMLNode* root)
 {
 	LocaleGuard lg (X_("POSIX"));
-	XMLNode *root = new XMLNode (state_node_name());
 
 #ifdef AU_STATE_SUPPORT
 	CFDataRef xmlData;
@@ -1563,7 +1560,7 @@ AUPlugin::get_state()
 
 	TRACE_API ("get preset state\n");
 	if (unit->GetAUPreset (propertyList) != noErr) {
-		return *root;
+		return;
 	}
 
 	// Convert the property list into XML data.
@@ -1597,12 +1594,10 @@ AUPlugin::get_state()
 		seen_get_state_message = true;
 	}
 #endif
-	
-	return *root;
 }
 
 int
-AUPlugin::set_state(const XMLNode& node, int /* version*/)
+AUPlugin::set_state(const XMLNode& node, int version)
 {
 #ifdef AU_STATE_SUPPORT
 	int ret = -1;
@@ -1650,6 +1645,7 @@ AUPlugin::set_state(const XMLNode& node, int /* version*/)
 		CFRelease (propertyList);
 	}
 	
+	Plugin::set_state (node, version);
 	return ret;
 #else
 	if (!seen_set_state_message) {
@@ -1657,13 +1653,15 @@ AUPlugin::set_state(const XMLNode& node, int /* version*/)
 					PROGRAM_NAME)
 		     << endmsg;
 	}
-	return 0;
+	return Plugin::set_state (node, version);
 #endif
 }
 
 bool
-AUPlugin::load_preset (const string& preset_label)
+AUPlugin::load_preset (PluginRecord r)
 {
+	Plugin::load_preset (r);
+	
 #ifdef AU_STATE_SUPPORT
 	bool ret = false;
 	CFPropertyListRef propertyList;
@@ -1962,11 +1960,9 @@ AUPlugin::current_preset() const
 	return preset_name;
 }
 
-vector<Plugin::PresetRecord>
-AUPlugin::get_presets ()
+void
+AUPlugin::find_presets ()
 {
-	vector<Plugin::PresetRecord> presets;
-
 #ifdef AU_STATE_SUPPORT
 	vector<string*>* preset_files;
 	PathScanner scanner;
@@ -1976,7 +1972,7 @@ AUPlugin::get_presets ()
 	preset_files = scanner (preset_search_path, au_preset_filter, this, true, true, -1, true);
 	
 	if (!preset_files) {
-		return presets;
+		return;
 	}
 
 	for (vector<string*>::iterator x = preset_files->begin(); x != preset_files->end(); ++x) {
@@ -2006,18 +2002,18 @@ AUPlugin::get_presets ()
         /* now fill the vector<string> with the names we have */
 
 	for (UserPresetMap::iterator i = user_preset_map.begin(); i != user_preset_map.end(); ++i) {
-		presets.push_back (Plugin::PresetRecord (i->second, i->first));
+		_presets.insert (i->second, Plugin::PresetRecord (i->second, i->first));
 	}
 
         /* add factory presets */
 
 	for (FactoryPresetMap::iterator i = factory_preset_map.begin(); i != factory_preset_map.end(); ++i) {
-		presets.push_back (Plugin::PresetRecord ("", i->first));
+		/* XXX: dubious */
+		string const uri = string_compose ("%1", _presets.size ());
+		_presets.push_back (uri, Plugin::PresetRecord (uri, i->first));
 	}
 
 #endif
-	
-	return presets;
 }
 
 bool

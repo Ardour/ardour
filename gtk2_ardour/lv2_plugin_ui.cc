@@ -55,7 +55,8 @@ void LV2PluginUI::on_external_ui_closed(LV2UI_Controller controller)
 void
 LV2PluginUI::parameter_changed (uint32_t port_index, float val)
 {
-	//cout << "parameter_changed" << endl;
+	PlugUIBase::parameter_changed (port_index, val);
+	
 	if (val != _values[port_index]) {
 		parameter_update(port_index, val);
 	}
@@ -199,8 +200,6 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 			}
 		}
 	}
-
-	_lv2->ParameterChanged.connect (parameter_connection, invalidator (*this), ui_bind (&LV2PluginUI::parameter_changed, this, _1, _2), gui_context());
 }
 
 LV2PluginUI::~LV2PluginUI ()

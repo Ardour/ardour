@@ -92,7 +92,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	set_latency_label ();
 
 	smaller_hbox->pack_start (latency_button, false, false, 10);
-	smaller_hbox->pack_start (preset_combo, false, false);
+	smaller_hbox->pack_start (_preset_box, false, false);
 	smaller_hbox->pack_start (add_button, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 	smaller_hbox->pack_start (delete_button, false, false);
@@ -425,7 +425,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 				//control_ui->combo->set_value_in_list(true, false);
 				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
 				control_ui->combo->signal_changed().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::control_combo_changed), control_ui));
-				mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::parameter_changed, this, control_ui), gui_context());
+				mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::ui_parameter_changed, this, control_ui), gui_context());
 				control_ui->pack_start(control_ui->label, true, true);
 				control_ui->pack_start(*control_ui->combo, false, true);
 
@@ -446,7 +446,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 				//control_ui->combo->set_value_in_list(true, false);
 				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
 				control_ui->combo->signal_changed().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::control_combo_changed), control_ui));
-				mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::parameter_changed, this, control_ui), gui_context());
+				mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::ui_parameter_changed, this, control_ui), gui_context());
 				control_ui->pack_start(control_ui->label, true, true);
 				control_ui->pack_start(*control_ui->combo, false, true);
 
@@ -557,7 +557,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 		automation_state_changed (control_ui);
 
-		mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::parameter_changed, this, control_ui), gui_context());
+		mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::ui_parameter_changed, this, control_ui), gui_context());
 		mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
 
 		input_controls.push_back (control_ui);
@@ -609,7 +609,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		output_controls.push_back (control_ui);
 	}
 
-	mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::parameter_changed, this, control_ui), gui_context());
+	mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::ui_parameter_changed, this, control_ui), gui_context());
 
 	return control_ui;
 }
@@ -672,7 +672,7 @@ GenericPluginUI::toggle_parameter_changed (ControlUI* cui)
 }
 
 void
-GenericPluginUI::parameter_changed (ControlUI* cui)
+GenericPluginUI::ui_parameter_changed (ControlUI* cui)
 {
 	if (!cui->update_pending) {
 		cui->update_pending = true;

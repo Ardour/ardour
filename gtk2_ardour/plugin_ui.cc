@@ -217,7 +217,8 @@ PluginUIWindow::on_show ()
 	set_role("plugin_ui");
 
 	if (_pluginui) {
-		_pluginui->update_presets ();
+		_pluginui->update_preset_list ();
+		_pluginui->update_preset ();
 	}
 
 	if (_pluginui) {
@@ -427,15 +428,17 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	  latency_gui (0),
 	  plugin_analysis_expander (_("Plugin analysis"))
 {
-	//preset_combo.set_use_arrows_always(true);
-	update_presets ();
-	update_sensitivity ();
-	
-	preset_combo.set_size_request (100, -1);
-	preset_combo.set_active_text ("");
-	preset_combo.signal_changed().connect(sigc::mem_fun(*this, &PlugUIBase::setting_selected));
-	no_load_preset = false;
+	_preset_combo.set_size_request (100, -1);
+	_preset_modified.set_size_request (16, -1);
+	_preset_combo.signal_changed().connect(sigc::mem_fun(*this, &PlugUIBase::preset_selected));
+	_no_load_preset = 0;
 
+	_preset_box.pack_start (_preset_combo);
+	_preset_box.pack_start (_preset_modified);
+
+	update_preset_list ();
+	update_preset ();
+	
 	add_button.set_name ("PluginAddButton");
 	add_button.signal_clicked().connect (sigc::mem_fun (*this, &PlugUIBase::add_plugin_setting));
 
@@ -471,8 +474,10 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	
 	insert->DropReferences.connect (death_connection, invalidator (*this), boost::bind (&PlugUIBase::plugin_going_away, this), gui_context());
 
-	plugin->PresetAdded.connect (preset_added_connection, invalidator (*this), boost::bind (&PlugUIBase::update_presets, this), gui_context ());
-	plugin->PresetRemoved.connect (preset_removed_connection, invalidator (*this), boost::bind (&PlugUIBase::update_presets, this), gui_context ());
+	plugin->PresetAdded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
+	plugin->PresetRemoved.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());	
+	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::update_preset, this), gui_context ());
+	plugin->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::parameter_changed, this, _1, _2), gui_context ());
 }
 
 PlugUIBase::~PlugUIBase()
@@ -529,20 +534,19 @@ PlugUIBase::processor_active_changed (boost::weak_ptr<Processor> weak_p)
 }
 
 void
-PlugUIBase::setting_selected ()
+PlugUIBase::preset_selected ()
 {
-	if (no_load_preset) {
+	if (_no_load_preset) {
 		return;
 	}
 
-	if (preset_combo.get_active_text().length() > 0) {
-		const Plugin::PresetRecord* pr = plugin->preset_by_label(preset_combo.get_active_text());
+	if (_preset_combo.get_active_text().length() > 0) {
+		const Plugin::PresetRecord* pr = plugin->preset_by_label (_preset_combo.get_active_text());
 		if (pr) {
-			plugin->load_preset (pr->uri);
-			update_sensitivity ();
+			plugin->load_preset (*pr);
 		} else {
 			warning << string_compose(_("Plugin preset %1 not found"),
-					preset_combo.get_active_text()) << endmsg;
+						  _preset_combo.get_active_text()) << endmsg;
 		}
 	}
 }
@@ -562,8 +566,9 @@ PlugUIBase::add_plugin_setting ()
 			plugin->remove_preset (d.name ());
 		}
 
-		if (plugin->save_preset (d.name())) {
-			preset_combo.set_active_text (d.name());
+		Plugin::PresetRecord const r = plugin->save_preset (d.name());
+		if (!r.uri.empty ()) {
+			plugin->load_preset (r);
 		}
 		break;
 	}
@@ -572,23 +577,18 @@ PlugUIBase::add_plugin_setting ()
 void
 PlugUIBase::save_plugin_setting ()
 {
-	string const name = preset_combo.get_active_text ();
+	string const name = _preset_combo.get_active_text ();
 	plugin->remove_preset (name);
-	plugin->save_preset (name);
-	preset_combo.set_active_text (name);
+	Plugin::PresetRecord const r = plugin->save_preset (name);
+	if (!r.uri.empty ()) {
+		plugin->load_preset (r);
+	}
 }
 
 void
 PlugUIBase::delete_plugin_setting ()
 {
-	plugin->remove_preset (preset_combo.get_active_text ());
-
-	vector<ARDOUR::Plugin::PresetRecord> presets = plugin->get_presets();
-	if (presets.empty ()) {
-		preset_combo.set_active_text ("");
-	} else {
-		preset_combo.set_active_text (presets.front().label);
-	}
+	plugin->remove_preset (_preset_combo.get_active_text ());
 }
 
 void
@@ -667,30 +667,61 @@ PlugUIBase::toggle_plugin_analysis()
 }
 
 void
-PlugUIBase::update_presets ()
+PlugUIBase::update_preset_list ()
 {
 	vector<string> preset_labels;
 	vector<ARDOUR::Plugin::PresetRecord> presets = plugin->get_presets();
 
-	no_load_preset = true;
+	++_no_load_preset;
 
 	for (vector<ARDOUR::Plugin::PresetRecord>::const_iterator i = presets.begin(); i != presets.end(); ++i) {
-		preset_labels.push_back(i->label);
+		preset_labels.push_back (i->label);
 	}
 
-	set_popdown_strings (preset_combo, preset_labels);
+	set_popdown_strings (_preset_combo, preset_labels);
 	
-	no_load_preset = false;
-
-	update_sensitivity ();
+	--_no_load_preset;
 }
 
 void
-PlugUIBase::update_sensitivity ()
+PlugUIBase::update_preset ()
 {
-	bool const have_user_preset =
-		!preset_combo.get_model()->children().empty() && preset_combo.get_active_row_number() >= plugin->first_user_preset_index();
+	Plugin::PresetRecord p = plugin->last_preset();
+
+	++_no_load_preset;
+	_preset_combo.set_active_text (p.label);
+	--_no_load_preset;
+
+	save_button.set_sensitive (!p.uri.empty() && p.user);
+	delete_button.set_sensitive (!p.uri.empty() && p.user);
+
+	update_preset_modified ();
+}
+
+void
+PlugUIBase::update_preset_modified ()
+{
+	if (plugin->last_preset().uri.empty()) {
+		_preset_modified.set_text ("");
+		return;
+	}
 	
-	save_button.set_sensitive (have_user_preset);
-	delete_button.set_sensitive (have_user_preset);
+	bool const c = plugin->parameter_changed_since_last_preset ();
+	if (_preset_modified.get_text().empty() == c) {
+		_preset_modified.set_text (c ? "*" : "");
+	}
+}
+
+void
+PlugUIBase::parameter_changed (uint32_t, float)
+{
+	update_preset_modified ();
+}
+
+void
+PlugUIBase::preset_added_or_removed ()
+{
+	/* Update both the list and the currently-displayed preset */
+	update_preset_list ();
+	update_preset ();
 }

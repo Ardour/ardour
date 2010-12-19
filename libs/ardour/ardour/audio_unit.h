@@ -95,12 +95,10 @@ class AUPlugin : public ARDOUR::Plugin
 	bool parameter_is_input (uint32_t) const;
 	bool parameter_is_output (uint32_t) const;
     
-	XMLNode& get_state();
 	int set_state(const XMLNode& node, int);
 	
 	bool save_preset (std::string name);
 	bool load_preset (const std::string& preset_label);
-	std::vector<PresetRecord> get_presets ();
 	std::string current_preset() const;
 
 	bool has_editor () const;
@@ -143,6 +141,8 @@ class AUPlugin : public ARDOUR::Plugin
 	static std::string maybe_fix_broken_au_id (const std::string&);
 
   private:
+	void find_presets ();
+	
         boost::shared_ptr<CAComponent> comp;
         boost::shared_ptr<CAAudioUnit> unit;
 	
@@ -178,6 +178,7 @@ class AUPlugin : public ARDOUR::Plugin
 	int set_input_format (AudioStreamBasicDescription&);
 	int set_stream_format (int scope, uint32_t cnt, AudioStreamBasicDescription&);
 	void discover_parameters ();
+	void add_state (XMLNode *) const;
 
 	std::vector<std::pair<uint32_t, uint32_t> > parameter_map;
 	uint32_t current_maxbuf;

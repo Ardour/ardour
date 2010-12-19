@@ -70,8 +70,8 @@ long Session::vst_callback (AEffect* effect,
 	case audioMasterAutomate:
 		SHOW_CALLBACK ("amc: audioMasterAutomate\n");
 		// index, value, returns 0
-		if (effect) {
-			effect->setParameter (effect, index, opt);
+		if (plug) {
+			plug->set_parameter (index, opt);
 		}
 		return 0;
 

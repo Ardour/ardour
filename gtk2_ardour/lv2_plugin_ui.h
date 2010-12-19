@@ -59,6 +59,9 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	int package (Gtk::Window&);
 
   private:
+
+	void parameter_changed (uint32_t, float);
+	
 	boost::shared_ptr<ARDOUR::LV2Plugin> _lv2;
 	std::vector<int> _output_ports;
 	sigc::connection _screen_update_connection;
@@ -83,7 +86,6 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 
 	void lv2ui_instantiate(const std::string& title);
 
-	void parameter_changed(uint32_t, float);
 	void parameter_update(uint32_t, float);
 	bool configure_handler (GdkEventConfigure*);
 	void save_plugin_setting ();
@@ -92,8 +94,6 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 
 	virtual bool on_window_show(const std::string& title);
 	virtual void on_window_hide();
-
-	PBD::ScopedConnection parameter_connection;
 };
 
 #endif // HAVE_SLV2

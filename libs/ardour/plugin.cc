@@ -62,13 +62,13 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal0<bool> Plugin::PresetFileExists;
-
 Plugin::Plugin (AudioEngine& e, Session& s)
 	: _engine (e)
 	, _session (s)
 	, _cycles (0)
+	, _have_presets (false)
 	, _have_pending_stop_events (false)
+	, _parameter_changed_since_last_preset (false)
 {
 }
 
@@ -79,7 +79,9 @@ Plugin::Plugin (const Plugin& other)
 	, _session (other._session)
 	, _info (other._info)
 	, _cycles (0)
+	, _have_presets (false)
 	, _have_pending_stop_events (false)
+	, _parameter_changed_since_last_preset (false)
 {
 	
 }
@@ -94,10 +96,14 @@ Plugin::remove_preset (string name)
 {
 	do_remove_preset (name);
 	_presets.erase (preset_by_label (name)->uri);
+
+	_last_preset.uri = "";
+	_parameter_changed_since_last_preset = false;
 	PresetRemoved (); /* EMIT SIGNAL */
 }
 
-bool
+/** @return PresetRecord with empty URI on failure */
+Plugin::PresetRecord
 Plugin::save_preset (string name)
 {
 	string const uri = do_save_preset (name);
@@ -106,8 +112,8 @@ Plugin::save_preset (string name)
 		_presets.insert (make_pair (uri, PresetRecord (uri, name)));
 		PresetAdded (); /* EMIT SIGNAL */
 	}
-	
-	return !uri.empty ();
+
+	return PresetRecord (uri, name);
 }
 
 PluginPtr
@@ -242,4 +248,73 @@ Plugin::realtime_handle_transport_stopped ()
 	_pending_stop_events.get_midi(0).clear ();
 	_tracker.resolve_notes (_pending_stop_events.get_midi (0), 0);
 	_have_pending_stop_events = true;
+}
+
+vector<Plugin::PresetRecord>
+Plugin::get_presets ()
+{
+	if (!_have_presets) {
+		find_presets ();
+		_have_presets = true;
+	}
+
+	vector<PresetRecord> p;
+	for (map<string, PresetRecord>::const_iterator i = _presets.begin(); i != _presets.end(); ++i) {
+		p.push_back (i->second);
+	}
+	
+	return p;
+}
+
+/** Set parameters using a preset */
+bool
+Plugin::load_preset (PresetRecord r)
+{
+	_last_preset = r;
+	_parameter_changed_since_last_preset = false;
+
+	PresetLoaded (); /* EMIT SIGNAL */
+	return true;
+}
+
+void
+Plugin::set_parameter (uint32_t which, float val)
+{
+	_parameter_changed_since_last_preset = true;
+	ParameterChanged (Evoral::Parameter (PluginAutomation, 0, which), val); /* EMIT SIGNAL */
+}
+
+int
+Plugin::set_state (const XMLNode& node, int version)
+{
+	XMLProperty const * p = node.property (X_("last-preset-uri"));
+	if (p) {
+		_last_preset.uri = p->value ();
+	}
+
+	p = node.property (X_("last-preset-label"));
+	if (p) {
+		_last_preset.label = p->value ();
+	}
+
+	p = node.property (X_("parameter-changed-since-last-preset"));
+	if (p) {
+		_parameter_changed_since_last_preset = string_is_affirmative (p->value ());
+	}
+
+	return 0;
+}
+
+XMLNode &
+Plugin::get_state ()
+{
+	XMLNode* root = new XMLNode (state_node_name ());
+	LocaleGuard lg (X_("POSIX"));
+
+	root->add_property (X_("last-preset-uri"), _last_preset.uri);
+	root->add_property (X_("last-preset-label"), _last_preset.label);
+	root->add_property (X_("parameter-changed-since-last-preset"), _parameter_changed_since_last_preset ? X_("yes") : X_("no"));
+
+	add_state (root);
+	return *root;
 }

@@ -72,7 +72,7 @@ namespace Gtkmm2ext {
 class LatencyGUI;
 class ArdourDialog;
 
-class PlugUIBase : public virtual sigc::trackable
+class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionList
 {
   public:
 	PlugUIBase (boost::shared_ptr<ARDOUR::PluginInsert>);
@@ -86,7 +86,8 @@ class PlugUIBase : public virtual sigc::trackable
 	virtual void activate () {}
 	virtual void deactivate () {}
 
-	virtual void update_presets ();
+	void update_preset_list ();
+	void update_preset ();
 
 	void latency_button_clicked ();
 
@@ -101,7 +102,9 @@ class PlugUIBase : public virtual sigc::trackable
   protected:
 	boost::shared_ptr<ARDOUR::PluginInsert> insert;
 	boost::shared_ptr<ARDOUR::Plugin> plugin;
-	Gtk::ComboBoxText preset_combo;
+	Gtk::HBox _preset_box;
+	Gtk::ComboBoxText _preset_combo;
+	Gtk::Label _preset_modified;
 	Gtk::Button add_button;
 	Gtk::Button save_button;
 	Gtk::Button delete_button;
@@ -119,9 +122,9 @@ class PlugUIBase : public virtual sigc::trackable
 
 	Gtk::Image* focus_out_image;
 	Gtk::Image* focus_in_image;
-	bool no_load_preset;
+	int _no_load_preset;
 
-	virtual void setting_selected ();
+	virtual void preset_selected ();
 	void add_plugin_setting ();
 	void save_plugin_setting ();
 	void delete_plugin_setting ();
@@ -130,7 +133,9 @@ class PlugUIBase : public virtual sigc::trackable
 	void toggle_plugin_analysis ();
 	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor> p);
 	void plugin_going_away ();
-	void update_sensitivity ();
+	virtual void parameter_changed (uint32_t, float);
+	void preset_added_or_removed ();
+	void update_preset_modified ();
 
 	PBD::ScopedConnection death_connection;
 	PBD::ScopedConnection active_connection;
@@ -234,7 +239,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	void build ();
 	ControlUI* build_control_ui (guint32 port_index, boost::shared_ptr<ARDOUR::AutomationControl>);
 	std::vector<std::string> setup_scale_values(guint32 port_index, ControlUI* cui);
-	void parameter_changed (ControlUI* cui);
+	void ui_parameter_changed (ControlUI* cui);
 	void toggle_parameter_changed (ControlUI* cui);
 	void update_control_display (ControlUI* cui);
 	void control_port_toggled (ControlUI* cui);

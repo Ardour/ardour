@@ -99,6 +99,9 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 		bool max_unbound;
 	};
 
+	XMLNode& get_state ();
+	virtual int set_state (const XMLNode &, int version);
+
 	virtual std::string unique_id() const = 0;
 	virtual const char * label() const = 0;
 	virtual const char * name() const = 0;
@@ -131,23 +134,40 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 
 	void realtime_handle_transport_stopped ();
 
-	bool save_preset (std::string);
-	void remove_preset (std::string);
-	virtual bool load_preset (const std::string& uri) = 0;
-
 	struct PresetRecord {
-		PresetRecord (const std::string& u, const std::string& l) : uri(u), label(l) {}
+		PresetRecord () : user (true) {}
+		PresetRecord (const std::string& u, const std::string& l, bool s = true) : uri (u), label (l), user (s)  {}
+
+		bool operator!= (PresetRecord const & a) const {
+			return uri != a.uri || label != a.label;
+		}
+		
 		std::string uri;
 		std::string label;
+		bool user;
 	};
 
+	PresetRecord save_preset (std::string);
+	void remove_preset (std::string);
+
+	virtual bool load_preset (PresetRecord);
+	
 	const PresetRecord * preset_by_label (const std::string &);
 	const PresetRecord * preset_by_uri (const std::string &);
 
-	/** Return this plugin's presets; should add them to _presets */
-	virtual std::vector<PresetRecord> get_presets () = 0;
-	virtual std::string current_preset () const { return std::string(); }
+	std::vector<PresetRecord> get_presets ();
 
+	/** @return Last preset to be requested; the settings may have
+	 * been changed since; find out with parameter_changed_since_last_preset.
+	 */
+	PresetRecord last_preset () const {
+		return _last_preset;
+	}
+	
+	bool parameter_changed_since_last_preset () const {
+		return _parameter_changed_since_last_preset;
+	}
+	
 	virtual int first_user_preset_index () const {
 		return 0;
 	}
@@ -155,13 +175,14 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	/** Emitted when a preset is added or removed, respectively */
 	PBD::Signal0<void> PresetAdded;
 	PBD::Signal0<void> PresetRemoved;
-	
-	/* XXX: no-one listens to this */
-	static PBD::Signal0<bool> PresetFileExists;
 
-	virtual bool has_editor() const = 0;
+	/** Emitted when a preset has been loaded */
+	PBD::Signal0<void> PresetLoaded;
 
-	PBD::Signal2<void,uint32_t,float> ParameterChanged;
+	virtual bool has_editor () const = 0;
+
+	/** Emitted when any parameter changes */
+	PBD::Signal2<void, uint32_t, float> ParameterChanged;
 
 	/* NOTE: this block of virtual methods looks like the interface
 	   to a Processor, but Plugin does not inherit from Processor.
@@ -199,7 +220,7 @@ protected:
 	friend class PluginInsert;
 	friend struct PluginInsert::PluginControl;
 
-	virtual void set_parameter (uint32_t which, float val) = 0;
+	virtual void set_parameter (uint32_t which, float val);
 
 	/** Do the actual saving of the current plugin settings to a preset of the provided name.
 	 *  Should return a URI on success, or an empty string on failure.
@@ -215,10 +236,19 @@ protected:
 	std::map<std::string, PresetRecord> _presets;
 
 private:
-	
+
+	/** Fill _presets with our presets */
+	virtual void find_presets () = 0;
+
+	/** Add state to an existing XMLNode */
+	virtual void add_state (XMLNode *) const = 0;
+
+	bool _have_presets;
 	MidiStateTracker _tracker;
 	BufferSet _pending_stop_events;
 	bool _have_pending_stop_events;
+	PresetRecord _last_preset;
+	bool _parameter_changed_since_last_preset;
 };
 
 PluginPtr find_plugin(ARDOUR::Session&, std::string unique_id, ARDOUR::PluginType);

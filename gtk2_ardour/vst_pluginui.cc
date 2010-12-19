@@ -35,8 +35,6 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	: PlugUIBase (pi),
 	  vst (vp)
 {
-	update_presets ();
-
 	fst_run_editor (vst->fst());
 
 	preset_box.set_spacing (6);
@@ -45,7 +43,7 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	preset_box.pack_end (delete_button, false, false);
 	preset_box.pack_end (save_button, false, false);
 	preset_box.pack_end (add_button, false, false);
-	preset_box.pack_end (preset_combo, false, false);
+	preset_box.pack_end (_preset_box, false, false);
 
 	bypass_button.set_active (!insert->active());
 
@@ -61,22 +59,10 @@ VSTPluginUI::~VSTPluginUI ()
 }
 
 void
-VSTPluginUI::setting_selected ()
+VSTPluginUI::preset_selected ()
 {
-	int const r = preset_combo.get_active_row_number ();
-
-	if (r < vst->first_user_preset_index()) {
-		/* This is a plugin-provided preset.
-		   We can't dispatch directly here; too many plugins expects only one GUI thread.
-		*/
-		vst->fst()->want_program = r;
-	} else {
-		/* This is a user preset.  This method knows about the direct dispatch restriction, too */
-		plugin->load_preset (preset_combo.get_active_text());
-	}
-	
 	socket.grab_focus ();
-	update_sensitivity ();
+	PlugUIBase::preset_selected ();
 }
 
 int

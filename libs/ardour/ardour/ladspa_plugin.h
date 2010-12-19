@@ -97,11 +97,9 @@ class LadspaPlugin : public ARDOUR::Plugin
 	bool parameter_is_output(uint32_t) const;
 	bool parameter_is_toggled(uint32_t) const;
 
-	XMLNode& get_state();
 	int      set_state (const XMLNode&, int version);
 
-	std::vector<PresetRecord> get_presets ();
-	bool load_preset (const std::string& uri);
+	bool load_preset (PresetRecord);
 
 	bool has_editor() const { return false; }
 
@@ -131,6 +129,8 @@ class LadspaPlugin : public ARDOUR::Plugin
 	uint32_t                 _index;
 	bool                     _was_activated;
 
+	void find_presets ();
+	
 	void init (void *mod, uint32_t index, framecnt_t rate);
 	void run_in_place (pframes_t nsamples);
 	void latency_compute_run ();
@@ -140,6 +140,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	std::string preset_envvar () const;
 	std::string preset_source (std::string) const;
 	bool write_preset_file (std::string);
+	void add_state (XMLNode *) const;
 };
 
 class LadspaPluginInfo : public PluginInfo {
