@@ -85,7 +85,7 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 
 	init ();
 	use_new_playlist ();
-        use_new_write_source (0);
+	use_new_write_source (0);
 
 	in_set_state = false;
 
@@ -111,7 +111,7 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-        use_new_write_source (0);
+	use_new_write_source (0);
 
 	in_set_state = false;
 }
@@ -184,10 +184,10 @@ MidiDiskstream::non_realtime_input_change ()
 		/* implicit unlock */
 	}
 
-        /* unlike with audio, there is never any need to reset write sources
-           based on input configuration changes because ... a MIDI track 
-           has just 1 MIDI port as input, always. 
-        */
+	/* unlike with audio, there is never any need to reset write sources
+	   based on input configuration changes because ... a MIDI track
+	   has just 1 MIDI port as input, always.
+	*/
 
 	/* now refill channel buffers */
 
@@ -496,7 +496,7 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can
 	bool      nominally_recording;
 	bool      re = record_enabled ();
 
-        playback_distance = 0;
+	playback_distance = 0;
 
 	check_record_status (transport_frame, can_record);
 
@@ -506,9 +506,9 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can
 		return 0;
 	}
 
-        Glib::Mutex::Lock sm (state_lock, Glib::TRY_LOCK);
+	Glib::Mutex::Lock sm (state_lock, Glib::TRY_LOCK);
 
-        if (!sm.locked()) {
+	if (!sm.locked()) {
 		return 1;
 	}
 
@@ -546,7 +546,7 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can
 			for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 				copy->push_back ((*i).time() + transport_frame, (*i).size(), (*i).buffer());
 			}
-				
+
 			DataRecorded (copy, _write_source); /* EMIT SIGNAL */
 		}
 
@@ -580,9 +580,9 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can
 
 	ret = 0;
 
-        if (commit (nframes)) {
-                need_butler = true;
-        }
+	if (commit (nframes)) {
+		need_butler = true;
+	}
 
 	return ret;
 }
@@ -634,7 +634,7 @@ MidiDiskstream::overwrite_existing_buffers ()
 
 	g_atomic_int_set (&_frames_read_from_ringbuffer, 0);
 	g_atomic_int_set (&_frames_written_to_ringbuffer, 0);
-	
+
 	read (overwrite_frame, disk_io_chunk_frames, false);
 	overwrite_queued = false;
 	_pending_overwrite = false;
@@ -881,8 +881,8 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 
 	assert(!destructive());
 
-	if (record_enabled() && 
-            ((_session.transport_frame() - _last_flush_frame > disk_io_chunk_frames) || 
+	if (record_enabled() &&
+            ((_session.transport_frame() - _last_flush_frame > disk_io_chunk_frames) ||
              force_flush)) {
 		if ((!_write_source) || _write_source->midi_write (*_capture_buf, get_capture_start_frame (0), to_write) != to_write) {
 			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), _id) << endmsg;
@@ -915,14 +915,14 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 
 	while (more_work && !err) {
 		switch (do_flush (TransportContext, true)) {
-			case 0:
-				more_work = false;
-				break;
-			case 1:
-				break;
-			case -1:
-				error << string_compose(_("MidiDiskstream \"%1\": cannot flush captured data to disk!"), _name) << endmsg;
-				err++;
+		case 0:
+			more_work = false;
+			break;
+		case 1:
+			break;
+		case -1:
+			error << string_compose(_("MidiDiskstream \"%1\": cannot flush captured data to disk!"), _name) << endmsg;
+			err++;
 		}
 	}
 
@@ -936,7 +936,6 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 	if (abort_capture) {
 
 		if (_write_source) {
-
 			_write_source->mark_for_remove ();
 			_write_source.reset();
 		}
@@ -952,117 +951,117 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 			total_capture += (*ci)->frames;
 		}
 
-                if (_write_source->length (capture_info.front()->start) != 0) {
-                        
-                        /* phew, we have data */
-                        
-                        /* figure out the name for this take */
-                        
-                        srcs.push_back (_write_source);
+		if (_write_source->length (capture_info.front()->start) != 0) {
 
-                        _write_source->set_timeline_position (capture_info.front()->start);
-                        _write_source->set_captured_for (_name);
+			/* phew, we have data */
 
-                        /* flush to disk: this step differs from the audio path, 
-                           where all the data is already on disk.
-                         */
+			/* figure out the name for this take */
 
-                        _write_source->mark_streaming_write_completed ();
-                        
-                        /* make it not a stub anymore */
+			srcs.push_back (_write_source);
 
-                        _write_source->unstubify ();
+			_write_source->set_timeline_position (capture_info.front()->start);
+			_write_source->set_captured_for (_name);
 
-                        /* we will want to be able to keep (over)writing the source
-                           but we don't want it to be removable. this also differs
-                           from the audio situation, where the source at this point
-                           must be considered immutable. luckily, we can rely on
-                           MidiSource::mark_streaming_write_completed() to have 
-                           already done the necessary work for that.
-                        */
+			/* flush to disk: this step differs from the audio path,
+			   where all the data is already on disk.
+			*/
 
-                        string whole_file_region_name;
-                        whole_file_region_name = region_name_from_path (_write_source->name(), true);
-                        
-                        /* Register a new region with the Session that
-                           describes the entire source. Do this first
-                           so that any sub-regions will obviously be
-                           children of this one (later!)
-                        */
-                        
-                        try {
-                                PropertyList plist;
+			_write_source->mark_streaming_write_completed ();
 
-                                plist.add (Properties::name, whole_file_region_name);
-                                plist.add (Properties::whole_file, true);
-                                plist.add (Properties::automatic, true);
-                                plist.add (Properties::start, 0);
-                                plist.add (Properties::length, total_capture);
-                                plist.add (Properties::layer, 0);
+			/* make it not a stub anymore */
 
-                                boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
+			_write_source->unstubify ();
 
-                                region = boost::dynamic_pointer_cast<MidiRegion> (rx);
-                                region->special_set_position (capture_info.front()->start);
-                        }
+			/* we will want to be able to keep (over)writing the source
+			   but we don't want it to be removable. this also differs
+			   from the audio situation, where the source at this point
+			   must be considered immutable. luckily, we can rely on
+			   MidiSource::mark_streaming_write_completed() to have
+			   already done the necessary work for that.
+			*/
+
+			string whole_file_region_name;
+			whole_file_region_name = region_name_from_path (_write_source->name(), true);
+
+			/* Register a new region with the Session that
+			   describes the entire source. Do this first
+			   so that any sub-regions will obviously be
+			   children of this one (later!)
+			*/
+
+			try {
+				PropertyList plist;
+
+				plist.add (Properties::name, whole_file_region_name);
+				plist.add (Properties::whole_file, true);
+				plist.add (Properties::automatic, true);
+				plist.add (Properties::start, 0);
+				plist.add (Properties::length, total_capture);
+				plist.add (Properties::layer, 0);
+
+				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
+
+				region = boost::dynamic_pointer_cast<MidiRegion> (rx);
+				region->special_set_position (capture_info.front()->start);
+			}
 
 
-                        catch (failed_constructor& err) {
-                                error << string_compose(_("%1: could not create region for complete midi file"), _name) << endmsg;
-                                /* XXX what now? */
-                        }
+			catch (failed_constructor& err) {
+				error << string_compose(_("%1: could not create region for complete midi file"), _name) << endmsg;
+				/* XXX what now? */
+			}
 
-                        _last_capture_sources.insert (_last_capture_sources.end(), srcs.begin(), srcs.end());
+			_last_capture_sources.insert (_last_capture_sources.end(), srcs.begin(), srcs.end());
 
-                        _playlist->clear_changes ();
-                        _playlist->freeze ();
+			_playlist->clear_changes ();
+			_playlist->freeze ();
 
 			/* Session frame time of the initial capture in this pass, which is where the source starts */
 			framepos_t initial_capture = 0;
 			if (!capture_info.empty()) {
 				initial_capture = capture_info.front()->start;
 			}
-			
-                        for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 
-                                string region_name;
+			for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 
-                                RegionFactory::region_name (region_name, _write_source->name(), false);
+				string region_name;
 
-                                // cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
+				RegionFactory::region_name (region_name, _write_source->name(), false);
 
-                                try {
-                                        PropertyList plist;
+				// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
+
+				try {
+					PropertyList plist;
 
 					/* start of this region is the offset between the start of its capture and the start of the whole pass */
-                                        plist.add (Properties::start, (*ci)->start - initial_capture);
-                                        plist.add (Properties::length, (*ci)->frames);
-                                        plist.add (Properties::name, region_name);
-				
-                                        boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
-                                        region = boost::dynamic_pointer_cast<MidiRegion> (rx);
-                                }
+					plist.add (Properties::start, (*ci)->start - initial_capture);
+					plist.add (Properties::length, (*ci)->frames);
+					plist.add (Properties::name, region_name);
 
-                                catch (failed_constructor& err) {
-                                        error << _("MidiDiskstream: could not create region for captured midi!") << endmsg;
-                                        continue; /* XXX is this OK? */
-                                }
+					boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
+					region = boost::dynamic_pointer_cast<MidiRegion> (rx);
+				}
 
-                                // cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
+				catch (failed_constructor& err) {
+					error << _("MidiDiskstream: could not create region for captured midi!") << endmsg;
+					continue; /* XXX is this OK? */
+				}
 
-                                i_am_the_modifier++;
-                                _playlist->add_region (region, (*ci)->start);
-                                i_am_the_modifier--;
-                        }
+				// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
 
-                        _playlist->thaw ();
-                        _session.add_command (new StatefulDiffCommand(_playlist));
-                }
+				i_am_the_modifier++;
+				_playlist->add_region (region, (*ci)->start);
+				i_am_the_modifier--;
+			}
 
-                mark_write_completed = true;
+			_playlist->thaw ();
+			_session.add_command (new StatefulDiffCommand(_playlist));
+		}
+
+		mark_write_completed = true;
 	}
 
-        use_new_write_source (0);
+	use_new_write_source (0);
 
 	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 		delete *ci;
@@ -1336,16 +1335,16 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 
 	assert(n == 0);
 
-        _write_source.reset();
+	_write_source.reset();
 
 	try {
-                /* file starts off as a stub file, it will be converted
-                   when we're done with a capture pass, or when "stolen"
-                   by the GUI.
-                */
+		/* file starts off as a stub file, it will be converted
+		   when we're done with a capture pass, or when "stolen"
+		   by the GUI.
+		*/
 
 		_write_source = boost::dynamic_pointer_cast<SMFSource>(
-                        _session.create_midi_source_for_session (0, name (), true));
+			_session.create_midi_source_for_session (0, name (), true));
 
 		if (!_write_source) {
 			throw failed_constructor();
@@ -1363,31 +1362,31 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 	return 0;
 }
 
-list<boost::shared_ptr<Source> > 
+list<boost::shared_ptr<Source> >
 MidiDiskstream::steal_write_sources()
 {
-        list<boost::shared_ptr<Source> > ret;
+	list<boost::shared_ptr<Source> > ret;
 
-        /* put some data on the disk, even if its just a header for an empty file.
-           XXX should we not have a more direct method for doing this? Maybe not
-           since we don't want to mess around with the model/disk relationship
-           that the Source has to pay attention to.
-         */
-        
-        boost::dynamic_pointer_cast<MidiSource>(_write_source)->session_saved ();
+	/* put some data on the disk, even if its just a header for an empty file.
+	   XXX should we not have a more direct method for doing this? Maybe not
+	   since we don't want to mess around with the model/disk relationship
+	   that the Source has to pay attention to.
+	*/
 
-        /* make it visible/present */
-        _write_source->unstubify ();
-        /* never let it go away */
-        _write_source->mark_nonremovable ();
+	boost::dynamic_pointer_cast<MidiSource>(_write_source)->session_saved ();
 
-        ret.push_back (_write_source);
+	/* make it visible/present */
+	_write_source->unstubify ();
+	/* never let it go away */
+	_write_source->mark_nonremovable ();
 
-        /* get a new one */
+	ret.push_back (_write_source);
 
-        use_new_write_source (0);
+	/* get a new one */
 
-        return ret;
+	use_new_write_source (0);
+
+	return ret;
 }
 
 void
@@ -1399,8 +1398,8 @@ MidiDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 
 	if (_write_source && mark_write_complete) {
 		_write_source->mark_streaming_write_completed ();
-        }
-        use_new_write_source (0);
+	}
+	use_new_write_source (0);
 }
 
 int

@@ -38,11 +38,11 @@ using namespace ARDOUR;
 using namespace PBD;
 
 PBD::Signal1<void,boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
-Glib::StaticMutex RegionFactory::region_map_lock;
-RegionFactory::RegionMap RegionFactory::region_map;
-PBD::ScopedConnectionList RegionFactory::region_list_connections;
-Glib::StaticMutex RegionFactory::region_name_map_lock;
-std::map<std::string, uint32_t> RegionFactory::region_name_map;
+Glib::StaticMutex                             RegionFactory::region_map_lock;
+RegionFactory::RegionMap                      RegionFactory::region_map;
+PBD::ScopedConnectionList                     RegionFactory::region_list_connections;
+Glib::StaticMutex                             RegionFactory::region_name_map_lock;
+std::map<std::string, uint32_t>               RegionFactory::region_name_map;
 
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
@@ -273,12 +273,12 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
 	p.first = r->id();
 	p.second = r;
 
-        { 
-                Glib::Mutex::Lock lm (region_map_lock);
-                region_map.insert (p);
-        }
+	{ 
+		Glib::Mutex::Lock lm (region_map_lock);
+		region_map.insert (p);
+	}
 
-        r->DropReferences.connect_same_thread (region_list_connections, boost::bind (&RegionFactory::map_remove, r));
+	r->DropReferences.connect_same_thread (region_list_connections, boost::bind (&RegionFactory::map_remove, r));
 
 	r->PropertyChanged.connect_same_thread (
 		region_list_connections,
@@ -291,34 +291,31 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
 void
 RegionFactory::map_remove (boost::shared_ptr<Region> r)
 {
-        Glib::Mutex::Lock lm (region_map_lock);
-        RegionMap::iterator i = region_map.find (r->id());
+	Glib::Mutex::Lock lm (region_map_lock);
+	RegionMap::iterator i = region_map.find (r->id());
 
-        if (i != region_map.end()) {
-                region_map.erase (i);
-        }
-
+	if (i != region_map.end()) {
+		region_map.erase (i);
+	}
 }
 
 void
 RegionFactory::map_remove_with_equivalents (boost::shared_ptr<Region> r)
 {
-        Glib::Mutex::Lock lm (region_map_lock);
+	Glib::Mutex::Lock lm (region_map_lock);
 
-        for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ) {
-                RegionMap::iterator tmp = i;
-                ++tmp;
+	for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ) {
+		RegionMap::iterator tmp = i;
+		++tmp;
 
-                if (r->region_list_equivalent (i->second)) {
-                        region_map.erase (i);
-                } else if (r == i->second) {
-                        region_map.erase (i);
-                } 
+		if (r->region_list_equivalent (i->second)) {
+			region_map.erase (i);
+		} else if (r == i->second) {
+			region_map.erase (i);
+		} 
 
-                i = tmp;
-        }
-
-
+		i = tmp;
+	}
 }
 
 boost::shared_ptr<Region>
@@ -336,66 +333,66 @@ RegionFactory::region_by_id (const PBD::ID& id)
 boost::shared_ptr<Region>
 RegionFactory::wholefile_region_by_name (const std::string& name)
 {
-        for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ++i) {
-                if (i->second->whole_file() && i->second->name() == name) {
-                        return i->second;
-                }
-        }
-        return boost::shared_ptr<Region>();
+	for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ++i) {
+		if (i->second->whole_file() && i->second->name() == name) {
+			return i->second;
+		}
+	}
+	return boost::shared_ptr<Region>();
 }	
 
 boost::shared_ptr<Region>
 RegionFactory::region_by_name (const std::string& name)
 {
-        for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ++i) {
-                if (i->second->name() == name) {
-                        return i->second;
-                }
-        }
-        return boost::shared_ptr<Region>();
+	for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ++i) {
+		if (i->second->name() == name) {
+			return i->second;
+		}
+	}
+	return boost::shared_ptr<Region>();
 }	
 
 void
 RegionFactory::clear_map ()
 {
-        region_list_connections.drop_connections ();
+	region_list_connections.drop_connections ();
 
-        {
-                Glib::Mutex::Lock lm (region_map_lock);
-                region_map.clear ();
-        }
+	{
+		Glib::Mutex::Lock lm (region_map_lock);
+		region_map.clear ();
+	}
 
 }
 
 void
 RegionFactory::delete_all_regions ()
 {
-        RegionMap copy;
+	RegionMap copy;
 
-        /* copy region list */
-        {
-                Glib::Mutex::Lock lm (region_map_lock);
-                copy = region_map;
-        }
+	/* copy region list */
+	{
+		Glib::Mutex::Lock lm (region_map_lock);
+		copy = region_map;
+	}
 
-        /* clear existing map */
-        clear_map ();
+	/* clear existing map */
+	clear_map ();
 
-        /* tell everyone to drop references */
-        for (RegionMap::iterator i = copy.begin(); i != copy.end(); ++i) {
-                i->second->drop_references ();
-        }
+	/* tell everyone to drop references */
+	for (RegionMap::iterator i = copy.begin(); i != copy.end(); ++i) {
+		i->second->drop_references ();
+	}
 
-        /* the copy should now hold the only references, which will
-           vanish as we leave this scope, thus calling all destructors.
-        */
+	/* the copy should now hold the only references, which will
+	   vanish as we leave this scope, thus calling all destructors.
+	*/
 }
         
 uint32_t
 RegionFactory::nregions ()
 {
-        Glib::Mutex::Lock lm (region_map_lock);
-        return region_map.size ();
+	Glib::Mutex::Lock lm (region_map_lock);
+	return region_map.size ();
 }
 
 void
@@ -538,11 +535,11 @@ RegionFactory::new_region_name (string old)
 void 
 RegionFactory::get_regions_using_source (boost::shared_ptr<Source> s, std::set<boost::shared_ptr<Region> >& r)
 {
-        Glib::Mutex::Lock lm (region_map_lock);
+	Glib::Mutex::Lock lm (region_map_lock);
 
-        for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ++i) {
-                if (i->second->uses_source (s)) {
-                        r.insert (i->second);
-                }
-        }
+	for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ++i) {
+		if (i->second->uses_source (s)) {
+			r.insert (i->second);
+		}
+	}
 }

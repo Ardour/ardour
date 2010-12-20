@@ -70,17 +70,17 @@ void
 AudioRegion::make_property_quarks ()
 {
 	Properties::envelope_active.property_id = g_quark_from_static_string (X_("envelope-active"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for envelope-active = %1\n", 	Properties::envelope_active.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for envelope-active = %1\n", 	Properties::envelope_active.property_id));
 	Properties::default_fade_in.property_id = g_quark_from_static_string (X_("default-fade-in"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for default-fade-in = %1\n", 	Properties::default_fade_in.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for default-fade-in = %1\n", 	Properties::default_fade_in.property_id));
 	Properties::default_fade_out.property_id = g_quark_from_static_string (X_("default-fade-out"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for default-fade-out = %1\n", 	Properties::default_fade_out.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for default-fade-out = %1\n", 	Properties::default_fade_out.property_id));
 	Properties::fade_in_active.property_id = g_quark_from_static_string (X_("fade-in-active"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-in-active = %1\n", 	Properties::fade_in_active.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-in-active = %1\n", 	Properties::fade_in_active.property_id));
 	Properties::fade_out_active.property_id = g_quark_from_static_string (X_("fade-out-active"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-out-active = %1\n", 	Properties::fade_out_active.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-out-active = %1\n", 	Properties::fade_out_active.property_id));
 	Properties::scale_amplitude.property_id = g_quark_from_static_string (X_("scale-amplitude"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for scale-amplitude = %1\n", 	Properties::scale_amplitude.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for scale-amplitude = %1\n", 	Properties::scale_amplitude.property_id));
 }
 
 void
@@ -268,8 +268,8 @@ AudioRegion::connect_to_header_position_offset_changed ()
 
 	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
 
-                /* connect only once to HeaderPositionOffsetChanged, even if sources are replicated
-                 */
+		/* connect only once to HeaderPositionOffsetChanged, even if sources are replicated
+		 */
 
 		if (unique_srcs.find (*i) == unique_srcs.end ()) {
 			unique_srcs.insert (*i);
@@ -360,9 +360,9 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 	framecnt_t to_read;
 	bool raw = (rops == ReadOpsNone);
 
-        if (n_channels() == 0) {
-                return 0;
-        }
+	if (n_channels() == 0) {
+		return 0;
+	}
 
 	if (muted() && !raw) {
 		return 0; /* read nothing */
@@ -415,22 +415,22 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 		   we don't have.
 		*/
 
-                if (Config->get_replicate_missing_region_channels()) {
-                       /* track is N-channel, this region has less channels, so use a relevant channel
-                        */
-                        
-                        uint32_t channel = n_channels() % chan_n;
-                        boost::shared_ptr<AudioSource> src = audio_source (channel);
+		if (Config->get_replicate_missing_region_channels()) {
+			/* track is N-channel, this region has less channels, so use a relevant channel
+			 */
+			
+			uint32_t channel = n_channels() % chan_n;
+			boost::shared_ptr<AudioSource> src = audio_source (channel);
 
-                        if (src->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
-                                return 0; /* "read nothing" */
-                        }
+			if (src->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
+				return 0; /* "read nothing" */
+			}
 
-                        /* adjust read data count appropriately since this was a duplicate read */
-                        src->dec_read_data_count (to_read);
-                } else {
-                        memset (mixdown_buffer, 0, sizeof (Sample) * cnt);
-                }
+			/* adjust read data count appropriately since this was a duplicate read */
+			src->dec_read_data_count (to_read);
+		} else {
+			memset (mixdown_buffer, 0, sizeof (Sample) * cnt);
+		}
 	}
 
 	if (rops & ReadOpsFades) {
@@ -480,7 +480,7 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 		*/
 
 
-			framecnt_t fade_out_length = (framecnt_t) _fade_out->back()->when;
+			framecnt_t fade_out_length     = (framecnt_t) _fade_out->back()->when;
 			framecnt_t fade_interval_start = max(internal_offset, limit-fade_out_length);
 			framecnt_t fade_interval_end   = min(internal_offset + to_read, limit);
 
@@ -624,7 +624,7 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 
 	/* Now find envelope description and other related child items */
 
-        _envelope->freeze ();
+	_envelope->freeze ();
 
 	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		XMLNode *child;
@@ -689,9 +689,9 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 		}
 	}
 
-        _envelope->thaw ();
+	_envelope->thaw ();
 	resume_property_changes ();
-        
+
 	if (send) {
 		send_change (what_changed);
 	}
@@ -725,9 +725,9 @@ AudioRegion::set_fade_out_shape (FadeShape shape)
 void
 AudioRegion::set_fade_in (boost::shared_ptr<AutomationList> f)
 {
-        _fade_in->freeze ();
+	_fade_in->freeze ();
 	*_fade_in = *f;
-        _fade_in->thaw ();
+	_fade_in->thaw ();
 	
 	send_change (PropertyChange (Properties::fade_in));
 }
@@ -735,7 +735,7 @@ AudioRegion::set_fade_in (boost::shared_ptr<AutomationList> f)
 void
 AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 {
-        _fade_in->freeze ();
+	_fade_in->freeze ();
 	_fade_in->clear ();
 
 	switch (shape) {
@@ -786,16 +786,16 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		break;
 	}
 
-        _fade_in->thaw ();
+	_fade_in->thaw ();
 	send_change (PropertyChange (Properties::fade_in));
 }
 
 void
 AudioRegion::set_fade_out (boost::shared_ptr<AutomationList> f)
 {
-        _fade_out->freeze ();
+	_fade_out->freeze ();
 	*_fade_out = *f;
-        _fade_out->thaw ();
+	_fade_out->thaw ();
 
 	send_change (PropertyChange (Properties::fade_in));
 }
@@ -803,7 +803,7 @@ AudioRegion::set_fade_out (boost::shared_ptr<AutomationList> f)
 void
 AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 {
-        _fade_out->freeze ();
+	_fade_out->freeze ();
 	_fade_out->clear ();
 
 	switch (shape) {
@@ -852,7 +852,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		break;
 	}
 
-        _fade_out->thaw ();
+	_fade_out->thaw ();
 	send_change (PropertyChange (Properties::fade_in));
 }
 
@@ -943,11 +943,11 @@ AudioRegion::set_default_fades ()
 void
 AudioRegion::set_default_envelope ()
 {
-        _envelope->freeze ();
+	_envelope->freeze ();
 	_envelope->clear ();
 	_envelope->fast_simple_add (0, 1.0f);
 	_envelope->fast_simple_add (_length, 1.0f);
-        _envelope->thaw ();
+	_envelope->thaw ();
 }
 
 void
@@ -957,21 +957,21 @@ AudioRegion::recompute_at_end ()
 	   based on the the existing curve.
 	*/
 
-        _envelope->freeze ();
+	_envelope->freeze ();
 	_envelope->truncate_end (_length);
 	_envelope->set_max_xval (_length);
-        _envelope->thaw ();
+	_envelope->thaw ();
 	
 	suspend_property_changes();
 
-        if (_left_of_split) {
-                set_default_fade_out ();
-                _left_of_split = false;
-        } else if (_fade_out->back()->when > _length) {
-                _fade_out->extend_to (_length);
-                send_change (PropertyChange (Properties::fade_out));
-        }
-        
+	if (_left_of_split) {
+		set_default_fade_out ();
+		_left_of_split = false;
+	} else if (_fade_out->back()->when > _length) {
+		_fade_out->extend_to (_length);
+		send_change (PropertyChange (Properties::fade_out));
+	}
+
 	if (_fade_in->back()->when > _length) {
 		_fade_in->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_in));
@@ -989,10 +989,10 @@ AudioRegion::recompute_at_start ()
 	
 	suspend_property_changes();
 
-        if (_right_of_split) {
-                set_default_fade_in ();
-                _right_of_split = false;
-        } else if (_fade_in->back()->when > _length) {
+	if (_right_of_split) {
+		set_default_fade_in ();
+		_right_of_split = false;
+	} else if (_fade_in->back()->when > _length) {
 		_fade_in->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_in));
 	}
@@ -1424,11 +1424,11 @@ AudioRegion::get_transients (AnalysisFeatureList& results, bool force_new)
 
 	/* no existing/complete transient info */
 
-        static bool analyse_dialog_shown = false; /* global per instance of Ardour */
+	static bool analyse_dialog_shown = false; /* global per instance of Ardour */
 
 	if (!Config->get_auto_analyse_audio()) {
-                if (!analyse_dialog_shown) {
-                        pl->session().Dialog (_("\
+		if (!analyse_dialog_shown) {
+			pl->session().Dialog (_("\
 You have requested an operation that requires audio analysis.\n\n\
 You currently have \"auto-analyse-audio\" disabled, which means \
 that transient data must be generated every time it is required.\n\n\
@@ -1438,8 +1438,8 @@ then quit ardour and restart.\n\n\
 This dialog will not display again.  But you may notice a slight delay \
 in this and future transient-detection operations.\n\
 "));
-                        analyse_dialog_shown = true;
-                }
+			analyse_dialog_shown = true;
+		}
 	}
 
 	TransientDetector t (pl->session().frame_rate());
@@ -1507,11 +1507,11 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadI
 {
 	framecnt_t const block_size = 64 * 1024;
 	boost::scoped_array<Sample> loudest (new Sample[block_size]);
-        boost::scoped_array<Sample> buf (new Sample[block_size]);
+	boost::scoped_array<Sample> buf (new Sample[block_size]);
 
 	framepos_t pos = _start;
 	framepos_t const end = _start + _length - 1;
-        
+
 	AudioIntervalResult silent_periods;
 
 	bool in_silence = false;
@@ -1547,7 +1547,7 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadI
 		}
 
 		pos += block_size;
-                itt.progress = (end-pos)/(double)_length;
+		itt.progress = (end-pos)/(double)_length;
 	}
 
 	if (in_silence && end - 1 - silence_start >= min_length) {
@@ -1555,7 +1555,7 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadI
 		silent_periods.push_back (std::make_pair (silence_start, end));
 	}
 
-        itt.done = true;
+	itt.done = true;
 
 	return silent_periods;
 }
