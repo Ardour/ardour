@@ -1,3 +1,4 @@
+#include <cmath>
 #include "ardour/transient_detector.h"
 
 #include "i18n.h"

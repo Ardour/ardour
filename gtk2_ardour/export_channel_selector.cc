@@ -27,6 +27,7 @@
 #include "ardour/audio_port.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
+#include "ardour/audioregion.h"
 #include "ardour/export_channel_configuration.h"
 #include "ardour/export_handler.h"
 #include "ardour/io.h"

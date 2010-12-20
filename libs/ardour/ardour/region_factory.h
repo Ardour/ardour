@@ -28,7 +28,6 @@
 #include "pbd/signals.h"
 
 #include "ardour/types.h"
-#include "ardour/region.h"
 
 class XMLNode;
 
@@ -38,14 +37,13 @@ class Session;
 class AudioRegion;
 
 class RegionFactory {
+public:
+	typedef std::map<PBD::ID,boost::shared_ptr<Region> > RegionMap;
 
-  public:
-        typedef std::map<PBD::ID,boost::shared_ptr<Region> > RegionMap;
-
-        static boost::shared_ptr<Region> wholefile_region_by_name (const std::string& name);
+	static boost::shared_ptr<Region> wholefile_region_by_name (const std::string& name);
 	static boost::shared_ptr<Region> region_by_id (const PBD::ID&);
 	static boost::shared_ptr<Region> region_by_name (const std::string& name);
-        static const RegionMap all_regions() { return region_map; }
+	static const RegionMap all_regions() { return region_map; }
 	static void clear_map ();
 
 	/** This is emitted only when a new id is assigned. Therefore,
@@ -62,32 +60,32 @@ class RegionFactory {
 
 	/** create a region from a single Source */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>, 
-						 const PBD::PropertyList&, bool announce = true);
+	                                         const PBD::PropertyList&, bool announce = true);
 	/** create a region from a multiple sources */
 	static boost::shared_ptr<Region> create (const SourceList &, 
-						 const PBD::PropertyList&, bool announce = true);
+	                                         const PBD::PropertyList&, bool announce = true);
 	/** create a copy of @other starting at zero within @param other's sources */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, 
-						 const PBD::PropertyList&, bool announce = true);
+	                                         const PBD::PropertyList&, bool announce = true);
 	/** create a copy of @param other starting at @param offset within @param other */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, frameoffset_t offset, 
-						 const PBD::PropertyList&, bool announce = true);
+	                                         const PBD::PropertyList&, bool announce = true);
 	/** create a "copy" of @param other but using a different set of sources @param srcs */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, const SourceList& srcs, 
-						 const PBD::PropertyList&, bool announce = true);
+	                                         const PBD::PropertyList&, bool announce = true);
 	
 	/** create a region with no sources, using XML state */
 	static boost::shared_ptr<Region> create (Session&, XMLNode&, bool);
 	/** create a region with specified sources @param srcs and XML state */
 	static boost::shared_ptr<Region> create (SourceList& srcs, const XMLNode&);
 
-        static void get_regions_using_source (boost::shared_ptr<Source>, std::set<boost::shared_ptr<Region> >& );
+	static void get_regions_using_source (boost::shared_ptr<Source>, std::set<boost::shared_ptr<Region> >& );
 
 	static void map_remove (boost::shared_ptr<Region>);
 	static void map_remove_with_equivalents (boost::shared_ptr<Region>);
-        static void delete_all_regions ();
-        static const RegionMap& regions() { return region_map; }
-        static uint32_t nregions ();
+	static void delete_all_regions ();
+	static const RegionMap& regions() { return region_map; }
+	static uint32_t nregions ();
 
 	static int region_name (std::string &, std::string, bool new_level = false);
 	static std::string new_region_name (std::string);
@@ -95,12 +93,12 @@ class RegionFactory {
   private:
 
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, frameoffset_t offset,
-						 bool offset_relative,
-						 const PBD::PropertyList&, bool announce = true);
+	                                         bool offset_relative,
+	                                         const PBD::PropertyList&, bool announce = true);
 
 	static void region_changed (PBD::PropertyChange const &, boost::weak_ptr<Region>);
 	
-        static Glib::StaticMutex region_map_lock;
+	static Glib::StaticMutex region_map_lock;
 	
 	static RegionMap region_map;
 	static void map_add (boost::shared_ptr<Region>);
@@ -110,7 +108,7 @@ class RegionFactory {
 	static std::map<std::string, uint32_t> region_name_map;
 	static void update_region_name_map (boost::shared_ptr<Region>);
 
-        static PBD::ScopedConnectionList region_list_connections;
+	static PBD::ScopedConnectionList region_list_connections;
 };
 
 }

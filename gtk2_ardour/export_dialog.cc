@@ -23,6 +23,7 @@
 
 #include "pbd/filesystem.h"
 
+#include "ardour/audioregion.h"
 #include "ardour/export_status.h"
 #include "ardour/export_handler.h"
 

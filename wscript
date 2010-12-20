@@ -458,7 +458,7 @@ def configure(conf):
 	if Options.options.boost_sp_debug:
 		conf.env.append_value('CXXFLAGS_BOOST', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
 
-	autowaf.check_header(conf, 'jack/session.h', define="JACK_SESSION")
+	autowaf.check_header(conf, 'jack/session.h', define="JACK_SESSION", mandatory = False)
 
 	conf.check_cc(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
 		      execute = "1",

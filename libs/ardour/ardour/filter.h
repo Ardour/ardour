@@ -22,13 +22,14 @@
 #define __ardour_filter_h__
 
 #include <vector>
-#include "ardour/region.h"
+
+#include "ardour/types.h"
 
 namespace ARDOUR {
 
 class Region;
 class Session;
-class Progress;	
+class Progress;
 
 class Filter {
 

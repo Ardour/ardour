@@ -24,9 +24,9 @@
 #include <string>
 #include <ostream>
 #include <fstream>
-#include "vamp-sdk/Plugin.h"
 #include <boost/utility.hpp>
-#include "ardour/audioregion.h"
+#include "vamp-sdk/Plugin.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 

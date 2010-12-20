@@ -40,7 +40,6 @@ namespace ARDOUR {
 		extern PBD::PropertyDescriptor<bool> follow_overlap;
 	}
 
-class AudioRegion;
 class Playlist;
 
 class Crossfade : public ARDOUR::AudioRegion

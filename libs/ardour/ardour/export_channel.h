@@ -27,7 +27,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/operators.hpp>
 
-#include "ardour/audioregion.h"
+#include "pbd/signals.h"
+
 #include "ardour/buffer_set.h"
 
 namespace ARDOUR {
@@ -35,6 +36,7 @@ namespace ARDOUR {
 class Session;
 class AudioTrack;
 class AudioPort;
+class AudioRegion;
 
 /// Export channel base class interface for different source types
 class ExportChannel : public boost::less_than_comparable<ExportChannel>

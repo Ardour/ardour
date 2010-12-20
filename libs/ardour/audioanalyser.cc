@@ -7,9 +7,9 @@
 #include <glib/gstdio.h> // for g_remove()
 
 #include "pbd/error.h"
+#include "pbd/failed_constructor.h"
 
 #include "ardour/audioanalyser.h"
-#include "ardour/readable.h"
 #include "ardour/readable.h"
 
 #include <cstring>
