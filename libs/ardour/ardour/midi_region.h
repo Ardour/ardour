@@ -130,6 +130,7 @@ class MidiRegion : public Region
 			     MidiStateTracker* tracker = 0) const;
 
 	void register_properties ();
+        void post_set (const PBD::PropertyChange&);
 
 	void recompute_at_start ();
 	void recompute_at_end ();

@@ -124,6 +124,14 @@ MidiRegion::clone ()
 }
 
 void
+MidiRegion::post_set (const PropertyChange& pc)
+{
+        if (pc.contains (Properties::length) || pc.contains (Properties::position)) {
+                update_length_beats ();
+        }
+}
+
+void
 MidiRegion::set_length_internal (framecnt_t len)
 {
         Region::set_length_internal (len);

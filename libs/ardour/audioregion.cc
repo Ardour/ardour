@@ -224,7 +224,7 @@ AudioRegion::~AudioRegion ()
 }
 
 void
-AudioRegion::post_set ()
+AudioRegion::post_set (const PropertyChange& /*ignored*/)
 {
 	if (!_sync_marked) {
 		_sync_position = _start;
