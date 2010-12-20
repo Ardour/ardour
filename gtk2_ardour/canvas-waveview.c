@@ -24,6 +24,7 @@
 #include <cairo.h>
 #include <string.h>
 #include <limits.h>
+#include <unistd.h>
 
 #include "ardour/dB.h"
 
