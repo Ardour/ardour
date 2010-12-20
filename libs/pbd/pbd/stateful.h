@@ -101,7 +101,7 @@ class Stateful {
 	   of property values after either a PropertyList or XML 
 	   driven property change.
 	*/
-	virtual void post_set () { };
+	virtual void post_set (const PropertyChange&) { };
 
 	XMLNode *_extra_xml;
 	XMLNode *_instant_xml;

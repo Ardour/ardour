@@ -193,7 +193,7 @@ Stateful::set_values (XMLNode const & node)
 		}
 	}
 
-	post_set ();
+	post_set (c);
 
 	return c;
 }
@@ -227,7 +227,7 @@ Stateful::apply_changes (const PropertyList& property_list)
                 }
 	}
 	
-	post_set ();
+	post_set (c);
 
 	send_change (c);
 
