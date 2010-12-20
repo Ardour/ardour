@@ -79,51 +79,51 @@ void
 Region::make_property_quarks ()
 {
 	Properties::muted.property_id = g_quark_from_static_string (X_("muted"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for muted = %1\n", 	Properties::muted.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for muted = %1\n", 	Properties::muted.property_id));
 	Properties::opaque.property_id = g_quark_from_static_string (X_("opaque"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for opaque = %1\n", 	Properties::opaque.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for opaque = %1\n", 	Properties::opaque.property_id));
 	Properties::locked.property_id = g_quark_from_static_string (X_("locked"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for locked = %1\n", 	Properties::locked.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for locked = %1\n", 	Properties::locked.property_id));
 	Properties::automatic.property_id = g_quark_from_static_string (X_("automatic"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for automatic = %1\n", 	Properties::automatic.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for automatic = %1\n", 	Properties::automatic.property_id));
 	Properties::whole_file.property_id = g_quark_from_static_string (X_("whole-file"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for whole-file = %1\n", 	Properties::whole_file.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for whole-file = %1\n", 	Properties::whole_file.property_id));
 	Properties::import.property_id = g_quark_from_static_string (X_("import"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for import = %1\n", 	Properties::import.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for import = %1\n", 	Properties::import.property_id));
 	Properties::external.property_id = g_quark_from_static_string (X_("external"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for external = %1\n", 	Properties::external.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for external = %1\n", 	Properties::external.property_id));
 	Properties::sync_marked.property_id = g_quark_from_static_string (X_("sync-marked"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for sync-marked = %1\n", 	Properties::sync_marked.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for sync-marked = %1\n", 	Properties::sync_marked.property_id));
 	Properties::left_of_split.property_id = g_quark_from_static_string (X_("left-of-split"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for left-of-split = %1\n", 	Properties::left_of_split.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for left-of-split = %1\n", 	Properties::left_of_split.property_id));
 	Properties::right_of_split.property_id = g_quark_from_static_string (X_("right-of-split"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for right-of-split = %1\n", 	Properties::right_of_split.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for right-of-split = %1\n", 	Properties::right_of_split.property_id));
 	Properties::hidden.property_id = g_quark_from_static_string (X_("hidden"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for hidden = %1\n", 	Properties::hidden.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for hidden = %1\n", 	Properties::hidden.property_id));
 	Properties::position_locked.property_id = g_quark_from_static_string (X_("position-locked"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position-locked = %1\n", 	Properties::position_locked.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position-locked = %1\n", 	Properties::position_locked.property_id));
 	Properties::valid_transients.property_id = g_quark_from_static_string (X_("valid-transients"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for valid-transients = %1\n", 	Properties::valid_transients.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for valid-transients = %1\n", 	Properties::valid_transients.property_id));
 	Properties::start.property_id = g_quark_from_static_string (X_("start"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for start = %1\n", 	Properties::start.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for start = %1\n", 	Properties::start.property_id));
 	Properties::length.property_id = g_quark_from_static_string (X_("length"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for length = %1\n", 	Properties::length.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for length = %1\n", 	Properties::length.property_id));
 	Properties::position.property_id = g_quark_from_static_string (X_("position"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position = %1\n", 	Properties::position.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position = %1\n", 	Properties::position.property_id));
 	Properties::sync_position.property_id = g_quark_from_static_string (X_("sync-position"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for sync-position = %1\n", 	Properties::sync_position.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for sync-position = %1\n", 	Properties::sync_position.property_id));
 	Properties::layer.property_id = g_quark_from_static_string (X_("layer"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for layer = %1\n", 	Properties::layer.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for layer = %1\n", 	Properties::layer.property_id));
 	Properties::ancestral_start.property_id = g_quark_from_static_string (X_("ancestral-start"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for ancestral-start = %1\n", 	Properties::ancestral_start.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for ancestral-start = %1\n", 	Properties::ancestral_start.property_id));
 	Properties::ancestral_length.property_id = g_quark_from_static_string (X_("ancestral-length"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for ancestral-length = %1\n", 	Properties::ancestral_length.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for ancestral-length = %1\n", 	Properties::ancestral_length.property_id));
 	Properties::stretch.property_id = g_quark_from_static_string (X_("stretch"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretch = %1\n", 	Properties::stretch.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretch = %1\n", 	Properties::stretch.property_id));
 	Properties::shift.property_id = g_quark_from_static_string (X_("shift"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for shift = %1\n", 	Properties::shift.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for shift = %1\n", 	Properties::shift.property_id));
 	Properties::position_lock_style.property_id = g_quark_from_static_string (X_("positional-lock-style"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position_lock_style = %1\n", 	Properties::position_lock_style.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position_lock_style = %1\n", 	Properties::position_lock_style.property_id));
 }
 
 void
@@ -479,7 +479,7 @@ Region::set_length (framecnt_t len, void */*src*/)
 void
 Region::set_length_internal (framecnt_t len)
 {
-        _length = len;
+	_length = len;
 }
 
 void
@@ -830,10 +830,10 @@ Region::modify_front (framepos_t new_position, bool reset_fade, void *src)
 		trim_to_internal (new_position, newlen, src);
 		
 		if (reset_fade) {
-                        _right_of_split = true;
+			_right_of_split = true;
 		}
 	
-                if (!property_changes_suspended()) {
+		if (!property_changes_suspended()) {
 			recompute_at_start ();
 		}
 		
@@ -853,7 +853,7 @@ Region::modify_end (framepos_t new_endpoint, bool reset_fade, void* /*src*/)
 	if (new_endpoint > _position) {
 		trim_to_internal (_position, new_endpoint - _position +1, this);
 		if (reset_fade) {
-                        _left_of_split = true;
+			_left_of_split = true;
 		}
 		if (!property_changes_suspended()) {
 			recompute_at_end ();
@@ -1289,7 +1289,7 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 void
 Region::suspend_property_changes ()
 {
-        Stateful::suspend_property_changes ();
+	Stateful::suspend_property_changes ();
 	_last_length = _length;
 	_last_position = _position;
 }
@@ -1312,7 +1312,7 @@ Region::send_change (const PropertyChange& what_changed)
 		return;
 	}
 
-        Stateful::send_change (what_changed);
+	Stateful::send_change (what_changed);
 
 	if (!Stateful::frozen()) {
 		
@@ -1365,7 +1365,7 @@ Region::region_list_equivalent (boost::shared_ptr<const Region> other) const
 void
 Region::source_deleted (boost::weak_ptr<Source>)
 {
-        drop_sources ();
+	drop_sources ();
 
 	if (!_session.deletion_in_progress()) {
 		/* this is a very special case: at least one of the region's
@@ -1396,16 +1396,16 @@ Region::master_source_names ()
 void
 Region::set_master_sources (const SourceList& srcs)
 {
-        for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
-                (*i)->dec_use_count ();
-        }
+	for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
+		(*i)->dec_use_count ();
+	}
 
 	_master_sources = srcs;
 	assert (_sources.size() == _master_sources.size());
 
-        for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
-                (*i)->inc_use_count ();
-        }
+	for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
+		(*i)->inc_use_count ();
+	}
 }
 
 bool
@@ -1413,11 +1413,11 @@ Region::source_equivalent (boost::shared_ptr<const Region> other) const
 {
 	if (!other)
 		return false;
-        
-        if ((_sources.size() != other->_sources.size()) ||
-            (_master_sources.size() != other->_master_sources.size())) {
-                return false;
-        }
+	
+	if ((_sources.size() != other->_sources.size()) ||
+	    (_master_sources.size() != other->_master_sources.size())) {
+		return false;
+	}
 
 	SourceList::const_iterator i;
 	SourceList::const_iterator io;
@@ -1451,7 +1451,7 @@ Region::uses_source (boost::shared_ptr<const Source> source) const
 framecnt_t
 Region::source_length(uint32_t n) const
 {
-        assert (n < _sources.size());
+	assert (n < _sources.size());
 	return _sources[n]->length (_position - _start);
 }
 
@@ -1557,17 +1557,17 @@ Region::invalidate_transients ()
 void
 Region::drop_sources ()
 {
-        for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {
-                (*i)->dec_use_count ();
-        }
+	for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {
+		(*i)->dec_use_count ();
+	}
 
 	_sources.clear ();
 
-        for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
-                (*i)->dec_use_count ();
-        }
+	for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
+		(*i)->dec_use_count ();
+	}
 
-        _master_sources.clear ();
+	_master_sources.clear ();
 }
 
 void
@@ -1578,44 +1578,44 @@ Region::use_sources (SourceList const & s)
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
 
 		_sources.push_back (*i);
-                (*i)->inc_use_count ();
+		(*i)->inc_use_count ();
 		_master_sources.push_back (*i);
-                (*i)->inc_use_count ();
+		(*i)->inc_use_count ();
 
-                /* connect only once to DropReferences, even if sources are replicated
-                 */
+		/* connect only once to DropReferences, even if sources are replicated
+		 */
 
 		if (unique_srcs.find (*i) == unique_srcs.end ()) {
 			unique_srcs.insert (*i);
-                        (*i)->DropReferences.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
-                }
+			(*i)->DropReferences.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
+		}
 	}
 }
 
 Trimmable::CanTrim
 Region::can_trim () const
 {
-        CanTrim ct = CanTrim (0);
+	CanTrim ct = CanTrim (0);
 
-        if (locked()) {
-                return ct;
-        }
+	if (locked()) {
+		return ct;
+	}
 
-        /* if not locked, we can always move the front later, and the end earlier 
-         */
+	/* if not locked, we can always move the front later, and the end earlier 
+	 */
 
-        ct = CanTrim (ct | FrontTrimLater | EndTrimEarlier);
+	ct = CanTrim (ct | FrontTrimLater | EndTrimEarlier);
 
-        if (start() != 0 || can_trim_start_before_source_start ()) {
-                ct = CanTrim (ct | FrontTrimEarlier);
-        }
+	if (start() != 0 || can_trim_start_before_source_start ()) {
+		ct = CanTrim (ct | FrontTrimEarlier);
+	}
 
-        if (!_sources.empty()) {
-                if ((start() + length()) < _sources.front()->length (0)) {
-                        ct = CanTrim (ct | EndTrimLater);
-                }
-        }
+	if (!_sources.empty()) {
+		if ((start() + length()) < _sources.front()->length (0)) {
+			ct = CanTrim (ct | EndTrimLater);
+		}
+	}
 
-        return ct;
+	return ct;
 }
                       
