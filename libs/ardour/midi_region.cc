@@ -141,10 +141,8 @@ MidiRegion::set_length_internal (framecnt_t len)
 void
 MidiRegion::update_length_beats ()
 {
-        cerr << name() << " Updating length beats, currently = " << _length_beats << " w/length = " << _length << endl;
-	BeatsFramesConverter converter (_session.tempo_map(), _position);
+	BeatsFramesConverter converter (_session.tempo_map(), _position - _start);
         _length_beats = converter.from (_length);
-        cerr << "\tnew value: " << _length_beats << endl;
 }
 
 void
