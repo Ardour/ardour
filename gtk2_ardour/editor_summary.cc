@@ -612,7 +612,7 @@ EditorSummary::set_editor (pair<double,double> const & x, pair<double, double> c
 		/* see comment in other set_editor () */
 		return;
 	}
-	
+
 	set_editor_x (x);
 	set_editor_y (y);
 }
@@ -672,8 +672,14 @@ EditorSummary::set_editor_y (pair<double, double> const & y)
 	   the total height into `total_height' and the height of complete tracks into
 	   `scale height'.
 	*/
+
+	/* Copy of target range for use below */
 	pair<double, double> yc = y;
+	/* Total height of all tracks */
 	double total_height = 0;
+	/* Height of any parts of tracks that aren't fully in the desired range */
+	double partial_height = 0;
+	/* Height of any tracks that are fully in the desired range */
 	double scale_height = 0;
 	
 	_editor->_routes->suspend_redisplay ();
@@ -685,23 +691,30 @@ EditorSummary::set_editor_y (pair<double, double> const & y)
 		}
 		
 		double const h = (*i)->effective_height ();
+		total_height += h;
 
-		if (yc.first >= 0 && yc.first < _track_height) {
-			total_height += (_track_height - yc.first) * h / _track_height;
-		} else if (yc.first < 0 && yc.second > _track_height) {
-			total_height += h;
+		if (yc.first > 0 && yc.first < _track_height) {
+			partial_height += (_track_height - yc.first) * h / _track_height;
+		} else if (yc.first <= 0 && yc.second >= _track_height) {
 			scale_height += h;
-		} else if (yc.second >= 0 && yc.second < _track_height) {
-			total_height += yc.second * h / _track_height;
+		} else if (yc.second > 0 && yc.second < _track_height) {
+			partial_height += yc.second * h / _track_height;
 			break;
 		}
 
 		yc.first -= _track_height;
 		yc.second -= _track_height;
 	}
+
+	/* Height that we will use for scaling; use the whole editor height unless there are not
+	   enough tracks to fill it.
+	*/
+	double const ch = min (total_height, _editor->canvas_height() - _editor->get_canvas_timebars_vsize());
 	
-	/* hence required scale factor of the complete tracks to fit the required y range */
-	double const scale = ((_editor->canvas_height() - _editor->get_canvas_timebars_vsize()) - (total_height - scale_height)) / scale_height;
+	/* hence required scale factor of the complete tracks to fit the required y range;
+	   the amount of space they should take up divided by the amount they currently take up.
+	*/
+	double const scale = (ch - partial_height) / scale_height;
 
 	yc = y;
 
@@ -713,7 +726,7 @@ EditorSummary::set_editor_y (pair<double, double> const & y)
 			continue;
 		}
 
-		if (yc.first < 0 && yc.second > _track_height) {
+		if (yc.first <= 0 && yc.second >= _track_height) {
 			(*i)->set_height (max (TimeAxisView::preset_height (HeightSmall), (uint32_t) ((*i)->effective_height() * scale)));
 		}
 
