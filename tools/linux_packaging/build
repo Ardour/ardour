@@ -352,7 +352,7 @@ gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUFLIB/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.
 # this one is special - we will set GTK_PATH to $Libraries/clearlooks
 
 if [ -z $LIBCLEARLOOKS ]; then
-    #clearlooks_paths=$(sudo find / -name "libclearlooks*")
+	echo "Searching for libclearlooks"
     clearlooks_paths=$(sudo find / -name "libclearlooks*" | grep "gtk")
 
     if [ $? -ne 0 ]; then
@@ -421,7 +421,7 @@ mv $Surfaces/libardour_cp.so* $Libraries
 # VAMP plugins that we use
 cp ../../libs/vamp-plugins/libardourvampplugins.so* $Libraries
 
-OURLIBDIR=libs
+OURLIBDIR=../../libs
 OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/rubberband:$OURLIBDIR/soundtouch:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/sigc++2:$OURLIBDIR/glibmm2:$OURLIBDIR/gtkmm2/atk:$OURLIBDIR/gtkmm2/pango:$OURLIBDIR/gtkmm2/gdk:$OURLIBDIR/gtkmm2/gtk:$OURLIBDIR/libgnomecanvasmm:$OURLIBDIR/libsndfile
 
 echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
@@ -450,6 +450,8 @@ while [ true ] ; do
             if echo $dep | grep -qs libX ; then continue; fi  
             # don't include libc
             if echo $dep | grep -qs 'libc\.' ; then continue; fi
+            # don't include libstdc++
+            if echo $dep | grep -qs libstdc++ ; then continue; fi
 
 	    base=`basename $dep`
  	    if ! test -f $Libraries/$base; then
