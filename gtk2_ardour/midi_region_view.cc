@@ -1669,6 +1669,31 @@ MidiRegionView::alter_program_change(PCEvent& old_program, const MIDI::Name::Pat
 }
 
 void
+MidiRegionView::move_program_change (PCEvent pc, double t)
+{
+	boost::shared_ptr<Evoral::Control> control = _model->control (Evoral::Parameter (MidiPgmChangeAutomation, pc.channel, 0));
+	assert (control);
+
+	/* XXX: seems that these events should have IDs, or that this code should
+	   at least be in ControlList.
+	*/
+
+	boost::shared_ptr<Evoral::ControlList> list = control->list ();
+	Evoral::ControlList::iterator i = list->begin ();
+	while (i != list->end() && ((*i)->when != pc.time || (*i)->value != pc.value)) {
+		++i;
+	}
+
+	assert (i != list->end ());
+
+	list->erase (i);
+	list->add (t, pc.value);
+
+	_pgm_changes.clear ();
+	display_program_changes ();
+}
+
+void
 MidiRegionView::program_selected(CanvasProgramChange& program, const MIDI::Name::PatchPrimaryKey& new_patch)
 {
 	PCEvent program_change_event(program.event_time(), program.program(), program.channel());

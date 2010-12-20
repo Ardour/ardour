@@ -35,20 +35,11 @@ public:
 
 	virtual bool on_event(GdkEvent* ev);
 
-	string model_name() const { return _model_name; }
-	void set_model_name(string model_name) { _model_name = model_name; }
-
-	string custom_device_mode() const { return _custom_device_mode; }
-	void set_custom_device_mode(string custom_device_mode) { _custom_device_mode = custom_device_mode; }
-
-	double event_time() const { return _event_time; }
-	void set_event_time(double new_time) { _event_time = new_time; };
-
-	uint8_t program() const { return _program; }
-	void set_program(uint8_t new_program) { _program = new_program; };
-
-	uint8_t channel() const { return _channel; }
-	void set_channel(uint8_t new_channel) { _channel = new_channel; };
+	string model_name () const { return _model_name; }
+	string custom_device_mode () const { return _custom_device_mode; }
+	double event_time () const { return _event_time; }
+	uint8_t program () const { return _program; }
+	uint8_t channel () const { return _channel; }
 
 	void initialize_popup_menus();
 

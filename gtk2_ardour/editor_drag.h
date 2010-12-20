@@ -42,6 +42,7 @@ namespace PBD {
 namespace Gnome {
 	namespace Canvas {
 		class CanvasNoteEvent;
+		class CanvasProgramChange;
 	}
 }
 
@@ -173,6 +174,11 @@ public:
 	/** @return true if y movement matters to this drag */
 	virtual bool y_movement_matters () const {
 		return true;
+	}
+
+	/** Set up the _pointer_frame_offset */
+	virtual void setup_pointer_frame_offset () {
+		_pointer_frame_offset = 0;
 	}
 
 protected:
@@ -312,7 +318,6 @@ public:
 	RegionMoveDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, bool, bool);
 	virtual ~RegionMoveDrag () {}
 
-	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 	void aborted ();
@@ -324,6 +329,8 @@ public:
 	std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
 		return std::make_pair (4, 4);
 	}
+
+	void setup_pointer_frame_offset ();
 
 private:
 	typedef std::set<boost::shared_ptr<ARDOUR::Playlist> > PlaylistSet;
@@ -444,6 +451,28 @@ class NoteDrag : public Drag
 	double _note_height;
 };
 
+/** Drag to move MIDI program changes */
+class ProgramChangeDrag : public Drag
+{
+public:
+	ProgramChangeDrag (Editor *, ArdourCanvas::CanvasProgramChange *, MidiRegionView *);
+
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted ();
+
+	bool y_movement_matters () const {
+		return false;
+	}
+
+	void setup_pointer_frame_offset ();
+
+private:
+	MidiRegionView* _region_view;
+	ArdourCanvas::CanvasProgramChange* _program_change;
+	double _cumulative_dx;
+};
+
 /** Drag of region gain */
 class RegionGainDrag : public Drag
 {
@@ -504,6 +533,8 @@ public:
 	bool y_movement_matters () const {
 		return false;
 	}
+
+	void setup_pointer_frame_offset ();
 	
 private:
 	MeterMarker* _marker;
@@ -529,6 +560,8 @@ public:
 		return false;
 	}
 
+	void setup_pointer_frame_offset ();
+	
 private:
 	TempoMarker* _marker;
 	bool _copy;
@@ -558,6 +591,8 @@ public:
 		return false;
 	}
 
+	void setup_pointer_frame_offset ();
+	
 private:
 	EditorCursor* _cursor; ///< cursor being dragged
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
@@ -578,6 +613,8 @@ public:
 	bool y_movement_matters () const {
 		return false;
 	}
+
+	void setup_pointer_frame_offset ();
 };
 
 /** Region fade-out drag */
@@ -594,6 +631,8 @@ public:
 	bool y_movement_matters () const {
 		return false;
 	}
+
+	void setup_pointer_frame_offset ();
 };
 
 /** Marker drag */
@@ -615,6 +654,8 @@ public:
 	bool y_movement_matters () const {
 		return false;
 	}
+
+	void setup_pointer_frame_offset ();
 	
 private:
 	void update_item (ARDOUR::Location *);
@@ -757,6 +798,8 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 	void aborted ();
+
+	void setup_pointer_frame_offset ();
 
 private:
 	Operation _operation;

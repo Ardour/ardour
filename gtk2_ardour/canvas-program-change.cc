@@ -6,11 +6,16 @@
 #include "ardour_ui.h"
 #include "midi_region_view.h"
 #include "canvas-program-change.h"
+#include "editor.h"
+#include "editor_drag.h"
 
 using namespace Gnome::Canvas;
 using namespace MIDI::Name;
 using namespace std;
 
+/** @param x x position in pixels.
+ *  @param event_time PC time in beats, with respect to the start of the source.
+ */
 CanvasProgramChange::CanvasProgramChange(
 		MidiRegionView& region,
 		Group&          parent,
@@ -107,7 +112,17 @@ CanvasProgramChange::on_event(GdkEvent* ev)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		if (ev->button.button == 3) {
+		switch (ev->button.button) {
+		case 1:
+		{
+			/* XXX: icky dcast */
+			Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
+			if (e->current_mouse_mode() == Editing::MouseObject && e->internal_editing()) {
+				e->drags()->set (new ProgramChangeDrag (e, this, &_region), ev);
+				return true;
+			}
+		}
+		case 3:
 			// lazy init
 			if (!_popup_initialized) {
 				initialize_popup_menus();
