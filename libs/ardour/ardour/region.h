@@ -312,9 +312,6 @@ class Region
 	/** Construct a region as a copy of another region, but with different sources */
 	Region (boost::shared_ptr<const Region>, const SourceList&);
 
-	/** Normal Region copy constructor */
-	Region (boost::shared_ptr<const Region>);
-
 	/** Constructor for derived types only */
 	Region (Session& s, framepos_t start, framecnt_t length, const std::string& name, DataType);
 

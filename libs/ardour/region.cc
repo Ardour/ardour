@@ -333,7 +333,7 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, boo
 			if (other->_sync_position < _start) {
 				_sync_marked = false;
 				_sync_position = _start;
-		} else {
+			} else {
 				_sync_position = other->_sync_position;
 			}
 		} else {
@@ -382,35 +382,6 @@ Region::Region (boost::shared_ptr<const Region> other, const SourceList& srcs)
 	}
 
 	use_sources (srcs);
-	assert(_sources.size() > 0);
-}
-
-/** Simple "copy" constructor */
-Region::Region (boost::shared_ptr<const Region> other)
-	: SessionObject(other->session(), other->name())
-	, _type(other->data_type())
-	, REGION_COPY_STATE (other)
-	, _last_length (other->_last_length)
-	, _last_position (other->_last_position)
-	, _first_edit (EditChangesID)
-	, _read_data_count(0)
-	, _last_layer_op(other->_last_layer_op)
-	, _pending_explicit_relayer (false)
-{
-	register_properties ();
-
-	_locked = false;
-	_position_locked = false;
-
-	other->_first_edit = EditChangesName;
-
-	if (other->_extra_xml) {
-		_extra_xml = new XMLNode (*other->_extra_xml);
-	} else {
-		_extra_xml = 0;
-	}
-
-	use_sources (other->_sources);
 	assert(_sources.size() > 0);
 }
 
