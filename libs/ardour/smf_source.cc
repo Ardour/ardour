@@ -60,7 +60,7 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 	, _smf_last_read_end (0)
 	, _smf_last_read_time (0)
 {
-        /* note that origin remains empty */
+	/* note that origin remains empty */
 
 	if (init(_path, false)) {
 		throw failed_constructor ();
@@ -131,7 +131,7 @@ SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination, framepos_t
 		DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: seek to %1\n", start));
 		Evoral::SMF::seek_to_start();
 		while (time < start_ticks) {
-                        gint ignored;
+			gint ignored;
 
 			ret = read_event(&ev_delta_t, &ev_size, &ev_buffer, &ignored);
 			if (ret == -1) { // EOF
@@ -148,7 +148,7 @@ SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination, framepos_t
 	_smf_last_read_end = start + duration;
 
 	while (true) {
-                gint ignored; /* XXX don't ignore note id's ??*/
+		gint ignored; /* XXX don't ignore note id's ??*/
 
 		ret = read_event(&ev_delta_t, &ev_size, &ev_buffer, &ignored);
 		if (ret == -1) { // EOF
@@ -250,7 +250,7 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t positi
 
 		ev.set(buf, size, time);
 		ev.set_event_type(EventTypeMap::instance().midi_event_type(ev.buffer()[0]));
-                ev.set_id (Evoral::next_event_id());
+		ev.set_id (Evoral::next_event_id());
 
 		if (!(ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex())) {
 			/*cerr << "SMFSource: WARNING: caller tried to write non SMF-Event of type "
@@ -287,13 +287,13 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 		return;
 	}
 
-        Evoral::event_id_t event_id;
+	Evoral::event_id_t event_id;
 
-        if (ev.id() < 0) {
-                event_id  = Evoral::next_event_id();
-        } else {
-                event_id = ev.id();
-        }
+	if (ev.id() < 0) {
+		event_id  = Evoral::next_event_id();
+	} else {
+		event_id = ev.id();
+	}
 
 	if (_model) {
 		_model->append (ev, event_id);
@@ -330,28 +330,28 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 	}
         
 	BeatsFramesConverter converter(_session.tempo_map(), position);
-        const double ev_time_beats = converter.from(ev.time());
-        Evoral::event_id_t event_id;
+	const double ev_time_beats = converter.from(ev.time());
+	Evoral::event_id_t event_id;
 
-        if (ev.id() < 0) {
-                event_id  = Evoral::next_event_id();
-        } else {
-                event_id = ev.id();
-        }
+	if (ev.id() < 0) {
+		event_id  = Evoral::next_event_id();
+	} else {
+		event_id = ev.id();
+	}
 
 	if (_model) {
 		const Evoral::Event<double> beat_ev (ev.event_type(), 
-                                                     ev_time_beats, 
-                                                     ev.size(), 
-                                                     (uint8_t*)ev.buffer());
+		                                     ev_time_beats, 
+		                                     ev.size(), 
+		                                     (uint8_t*)ev.buffer());
 		_model->append (beat_ev, event_id);
 	} 
 
 	_length_beats = max(_length_beats, ev_time_beats);
 
 	const framepos_t delta_time_frames = ev.time() - _last_ev_time_frames;
-	const double    delta_time_beats  = converter.from(delta_time_frames);
-	const uint32_t  delta_time_ticks  = (uint32_t)(lrint(delta_time_beats * (double)ppqn()));
+	const double     delta_time_beats  = converter.from(delta_time_frames);
+	const uint32_t   delta_time_ticks  = (uint32_t)(lrint(delta_time_beats * (double)ppqn()));
 
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_frames = ev.time();
@@ -363,9 +363,9 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 XMLNode&
 SMFSource::get_state ()
 {
-        XMLNode& node = MidiSource::get_state();
-        node.add_property (X_("origin"), _origin);
-        return node;
+	XMLNode& node = MidiSource::get_state();
+	node.add_property (X_("origin"), _origin);
+	return node;
 }
 
 int
@@ -412,9 +412,9 @@ SMFSource::mark_streaming_write_completed ()
 	
 	Evoral::SMF::end_write ();
 
-        /* data in the file now, not removable */
+	/* data in the file now, not removable */
 
-        mark_nonremovable (); 
+	mark_nonremovable (); 
 }
 
 bool
@@ -456,63 +456,63 @@ SMFSource::load_model (bool lock, bool force_reload)
 	uint32_t size    = 0;
 	uint8_t* buf     = NULL;
 	int ret;
-        gint event_id;
-        bool have_event_id = false;
+	gint event_id;
+	bool have_event_id = false;
 
 	while ((ret = read_event (&delta_t, &size, &buf, &event_id)) >= 0) {
 
 		time += delta_t;
                 
-                if (ret == 0) {
+		if (ret == 0) {
 
-                        /* meta-event : did we get an event ID ?
-                         */
+			/* meta-event : did we get an event ID ?
+			 */
 
-                        if (event_id >= 0) {
-                                have_event_id = true;
-                        }
+			if (event_id >= 0) {
+				have_event_id = true;
+			}
 
-                        continue;
-                } 
+			continue;
+		} 
                         
 		if (ret > 0) { 
 
-                        /* not a meta-event */
+			/* not a meta-event */
 
-                        ev.set (buf, size, time / (double)ppqn());
+			ev.set (buf, size, time / (double)ppqn());
 			ev.set_event_type(EventTypeMap::instance().midi_event_type(buf[0]));
 
-                        if (!have_event_id) {
-                                event_id = Evoral::next_event_id();   
-                        }
+			if (!have_event_id) {
+				event_id = Evoral::next_event_id();   
+			}
 #ifndef NDEBUG
-                        std::string ss;
+			std::string ss;
                         
-                        for (uint32_t xx = 0; xx < size; ++xx) {
-                                char b[8];
-                                snprintf (b, sizeof (b), "0x%x ", buf[xx]);
-                                ss += b;
-                        }
+			for (uint32_t xx = 0; xx < size; ++xx) {
+				char b[8];
+				snprintf (b, sizeof (b), "0x%x ", buf[xx]);
+				ss += b;
+			}
 
-                        DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF %6 load model delta %1, time %2, size %3 buf %4, type %5\n",
-                                                                          delta_t, time, size, ss , ev.event_type(), name()));
+			DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF %6 load model delta %1, time %2, size %3 buf %4, type %5\n",
+			                                                  delta_t, time, size, ss , ev.event_type(), name()));
 #endif
                         
 			_model->append (ev, event_id);
 
-                        if (ev.size() > scratch_size) {
-                                scratch_size = ev.size();
-                        }
+			if (ev.size() > scratch_size) {
+				scratch_size = ev.size();
+			}
                         
-                        ev.size() = scratch_size; // ensure read_event only allocates if necessary
+			ev.size() = scratch_size; // ensure read_event only allocates if necessary
                         
-                        _length_beats = max(_length_beats, ev.time());
-                }
+			_length_beats = max(_length_beats, ev.time());
+		}
 
-                /* event ID's must immediately precede the event they are for
-                 */
+		/* event ID's must immediately precede the event they are for
+		 */
                    
-                have_event_id = false;
+		have_event_id = false;
 	}
 
 	_model->end_write(false);
@@ -533,18 +533,18 @@ SMFSource::destroy_model ()
 void
 SMFSource::flush_midi ()
 {
-        if (!writable()) {
-                return;
-        }
+	if (!writable()) {
+		return;
+	}
 
 	Evoral::SMF::end_write();
-        /* data in the file means its no longer removable */
-        mark_nonremovable (); 
+	/* data in the file means its no longer removable */
+	mark_nonremovable (); 
 }
 
 void
 SMFSource::set_path (const string& p)
 {
-        FileSource::set_path (p);
-        SMF::set_path (_path);
+	FileSource::set_path (p);
+	SMF::set_path (_path);
 }

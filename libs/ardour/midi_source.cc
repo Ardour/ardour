@@ -168,15 +168,15 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 bool
 MidiSource::empty () const
 {
-        return _length_beats == 0;
+	return _length_beats == 0;
 }
 
 framecnt_t
 MidiSource::length (framepos_t pos) const
 {
-        if (_length_beats == 0) {
-                return 0;
-        }
+	if (_length_beats == 0) {
+		return 0;
+	}
 
 	BeatsFramesConverter converter(_session.tempo_map(), pos);
 	return converter.to(_length_beats);
@@ -200,7 +200,7 @@ framecnt_t
 MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_start,
                        framepos_t start, framecnt_t cnt,
                        MidiStateTracker* tracker,
-		       std::set<Evoral::Parameter> const & filtered) const
+                       std::set<Evoral::Parameter> const & filtered) const
 {
 	Glib::Mutex::Lock lm (_lock);
 
@@ -298,86 +298,84 @@ MidiSource::mark_streaming_write_completed ()
 boost::shared_ptr<MidiSource>
 MidiSource::clone (Evoral::MusicalTime begin, Evoral::MusicalTime end)
 {
-        string newname = PBD::basename_nosuffix(_name.val());
-        string newpath;
+	string newname = PBD::basename_nosuffix(_name.val());
+	string newpath;
 
-        /* get a new name for the MIDI file we're going to write to
-         */
+	/* get a new name for the MIDI file we're going to write to
+	 */
 
-        do { 
+	do { 
 
-                newname = bump_name_once (newname, '-');
-                /* XXX build path safely */
-                newpath = _session.session_directory().midi_path().to_string() +"/"+ newname + ".mid";
+		newname = bump_name_once (newname, '-');
+		/* XXX build path safely */
+		newpath = _session.session_directory().midi_path().to_string() +"/"+ newname + ".mid";
 
-        } while (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS));
+	} while (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS));
         
-        boost::shared_ptr<MidiSource> newsrc = boost::dynamic_pointer_cast<MidiSource>(
-                SourceFactory::createWritable(DataType::MIDI, _session,
-                                              newpath, string(), false, _session.frame_rate()));
+	boost::shared_ptr<MidiSource> newsrc = boost::dynamic_pointer_cast<MidiSource>(
+		SourceFactory::createWritable(DataType::MIDI, _session,
+		                              newpath, string(), false, _session.frame_rate()));
 
-        newsrc->set_timeline_position(_timeline_position);
+	newsrc->set_timeline_position(_timeline_position);
 	newsrc->copy_interpolation_from (this);
 	newsrc->copy_automation_state_from (this);
 
-        if (_model) {
-                if (begin == Evoral::MinMusicalTime && end == Evoral::MaxMusicalTime) {
-                        _model->write_to (newsrc);
-                } else {
-                        _model->write_section_to (newsrc, begin, end);
-                }
-        } else {
-                error << string_compose (_("programming error: %1"), X_("no model for MidiSource during ::clone()"));
-                return boost::shared_ptr<MidiSource>();
-        }
+	if (_model) {
+		if (begin == Evoral::MinMusicalTime && end == Evoral::MaxMusicalTime) {
+			_model->write_to (newsrc);
+		} else {
+			_model->write_section_to (newsrc, begin, end);
+		}
+	} else {
+		error << string_compose (_("programming error: %1"), X_("no model for MidiSource during ::clone()"));
+		return boost::shared_ptr<MidiSource>();
+	}
 
-        newsrc->flush_midi();
+	newsrc->flush_midi();
 
-        /* force a reload of the model if the range is partial */
+	/* force a reload of the model if the range is partial */
         
-        if (begin != Evoral::MinMusicalTime || end != Evoral::MaxMusicalTime) {
-                newsrc->load_model (true, true);
-        } else {
+	if (begin != Evoral::MinMusicalTime || end != Evoral::MaxMusicalTime) {
+		newsrc->load_model (true, true);
+	} else {
 		newsrc->set_model (_model);
 	}
         
-        return newsrc;
+	return newsrc;
 }
 
 void
 MidiSource::session_saved()
 {
-        /* this writes a copy of the data to disk. 
-           XXX do we need to do this every time?
-        */
+	/* this writes a copy of the data to disk. 
+	   XXX do we need to do this every time?
+	*/
 
 	if (_model && _model->edited()) {
 
+		// if the model is edited, write its contents into
+		// the current source file (overwiting previous contents.
 
+		/* temporarily drop our reference to the model so that
+		   as the model pushes its current state to us, we don't
+		   try to update it.
+		*/
 
-                // if the model is edited, write its contents into
-                // the current source file (overwiting previous contents.
+		boost::shared_ptr<MidiModel> mm = _model ;
+		_model.reset ();   
 
-                /* temporarily drop our reference to the model so that
-                   as the model pushes its current state to us, we don't
-                   try to update it.
-                */
+		/* flush model contents to disk
+		 */
 
-                boost::shared_ptr<MidiModel> mm = _model ;
-                _model.reset ();   
+		mm->sync_to_source ();
 
-                /* flush model contents to disk
-                 */
+		/* reacquire model */
 
-                mm->sync_to_source ();
+		_model = mm;
 
-                /* reacquire model */
-
-                _model = mm;
-
-        } else {
-                flush_midi();
-        }
+	} else {
+		flush_midi();
+	}
 }
 
 void
@@ -391,7 +389,7 @@ MidiSource::set_note_mode(NoteMode mode)
 void
 MidiSource::drop_model ()
 {
-        _model.reset(); 
+	_model.reset(); 
 	ModelChanged (); /* EMIT SIGNAL */
 }
 

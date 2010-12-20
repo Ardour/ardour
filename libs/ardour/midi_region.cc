@@ -51,16 +51,16 @@ namespace ARDOUR {
 	namespace Properties {
 		PBD::PropertyDescriptor<void*>                midi_data;
 		PBD::PropertyDescriptor<Evoral::MusicalTime>  length_beats;
-        }
+	}
 }
 
 void
 MidiRegion::make_property_quarks ()
 {
-        Properties::midi_data.property_id = g_quark_from_static_string (X_("midi-data"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for midi-data = %1\n", Properties::midi_data.property_id));
-        Properties::length_beats.property_id = g_quark_from_static_string (X_("length-beats"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for length-beats = %1\n", Properties::length_beats.property_id));
+	Properties::midi_data.property_id = g_quark_from_static_string (X_("midi-data"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for midi-data = %1\n", Properties::midi_data.property_id));
+	Properties::length_beats.property_id = g_quark_from_static_string (X_("length-beats"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for length-beats = %1\n", Properties::length_beats.property_id));
 }
 
 void
@@ -72,10 +72,12 @@ MidiRegion::register_properties ()
 /* Basic MidiRegion constructor (many channels) */
 MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
-        , _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
+	, _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
 {
-        update_length_beats ();
-        register_properties ();
+	_length_beats = midi_source(0)->length_beats();
+	cout << "NEW MIDI REGION LENGTH BEATS: " << _length_beats << endl;
+
+	register_properties ();
 
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
 	model_changed ();
@@ -86,10 +88,10 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 /** Create a new MidiRegion, that is part of an existing one */
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset, bool offset_relative)
 	: Region (other, offset, offset_relative)
-        , _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
+	, _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
 {
-        update_length_beats ();
-        register_properties ();
+	update_length_beats ();
+	register_properties ();
 
 	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
@@ -105,60 +107,60 @@ MidiRegion::~MidiRegion ()
 boost::shared_ptr<MidiRegion>
 MidiRegion::clone ()
 {
-        BeatsFramesConverter bfc (_session.tempo_map(), _position);
+	BeatsFramesConverter bfc (_session.tempo_map(), _position);
 	Evoral::MusicalTime const bbegin = bfc.from (_start);
 	Evoral::MusicalTime const bend = bfc.from (_start + _length);
 
-        boost::shared_ptr<MidiSource> ms = midi_source(0)->clone (bbegin, bend);
+	boost::shared_ptr<MidiSource> ms = midi_source(0)->clone (bbegin, bend);
 
-        PropertyList plist;
+	PropertyList plist;
 
-        plist.add (Properties::name, ms->name());
-        plist.add (Properties::whole_file, true);
-        plist.add (Properties::start, _start);
-        plist.add (Properties::length, _length);
-        plist.add (Properties::length_beats, _length_beats);
-        plist.add (Properties::layer, 0);
+	plist.add (Properties::name, ms->name());
+	plist.add (Properties::whole_file, true);
+	plist.add (Properties::start, _start);
+	plist.add (Properties::length, _length);
+	plist.add (Properties::length_beats, _length_beats);
+	plist.add (Properties::layer, 0);
 
-        return boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (ms, plist, true));
+	return boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (ms, plist, true));
 }
 
 void
 MidiRegion::post_set (const PropertyChange& pc)
 {
-        if (pc.contains (Properties::length) || pc.contains (Properties::position)) {
-                update_length_beats ();
-        }
+	if (pc.contains (Properties::length) || pc.contains (Properties::position)) {
+		update_length_beats ();
+	}
 }
 
 void
 MidiRegion::set_length_internal (framecnt_t len)
 {
-        Region::set_length_internal (len);
-        update_length_beats ();
+	Region::set_length_internal (len);
+	update_length_beats ();
 }
 
 void
 MidiRegion::update_length_beats ()
 {
 	BeatsFramesConverter converter (_session.tempo_map(), _position);
-        _length_beats = converter.from (_length);
+	_length_beats = converter.from (_length);
 }
 
 void
 MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 {
 	Region::set_position_internal (pos, allow_bbt_recompute);
-        /* zero length regions don't exist - so if _length_beats is zero, this object
-           is under construction.
-        */
-        if (_length_beats) {
-                /* leave _length_beats alone, and change _length to reflect the state of things
-                   at the new position (tempo map may dictate a different number of frames
-                */
-                BeatsFramesConverter converter (_session.tempo_map(), _position);
-                Region::set_length_internal (converter.to (_length_beats));
-        }
+	/* zero length regions don't exist - so if _length_beats is zero, this object
+	   is under construction.
+	*/
+	if (_length_beats) {
+		/* leave _length_beats alone, and change _length to reflect the state of things
+		   at the new position (tempo map may dictate a different number of frames
+		*/
+		BeatsFramesConverter converter (_session.tempo_map(), _position);
+		Region::set_length_internal (converter.to (_length_beats));
+	}
 }
 
 framecnt_t
@@ -247,11 +249,11 @@ MidiRegion::set_state (const XMLNode& node, int version)
 {
 	int ret = Region::set_state (node, version);
 
-        if (ret == 0) {
-                update_length_beats ();
-        }
+	if (ret == 0) {
+		update_length_beats ();
+	}
 
-        return ret;
+	return ret;
 }
 
 void
@@ -327,7 +329,7 @@ MidiRegion::model_changed ()
 void
 MidiRegion::model_contents_changed ()
 {
-        send_change (PropertyChange (Properties::midi_data));        
+	send_change (PropertyChange (Properties::midi_data));        
 }
 
 void
@@ -358,7 +360,7 @@ MidiRegion::model_automation_state_changed (Evoral::Parameter const & p)
 void
 MidiRegion::fix_negative_start ()
 {
-        BeatsFramesConverter c (_session.tempo_map(), _position);
+	BeatsFramesConverter c (_session.tempo_map(), _position);
 
 	model()->insert_silence_at_start (c.from (-_start));
 	_start = 0;

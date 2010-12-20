@@ -27,13 +27,13 @@ namespace ARDOUR {
 framecnt_t
 BeatsFramesConverter::to (double beats) const
 {
-        return _tempo_map.framepos_plus_bbt (_origin_b, Timecode::BBT_Time(beats)) - _origin_b;
+	return _tempo_map.framepos_plus_bbt (_origin_b, Timecode::BBT_Time(beats)) - _origin_b;
 }
 
 double
 BeatsFramesConverter::from (framecnt_t frames) const
 {
-        return _tempo_map.framewalk_to_beats (_origin_b, frames);
+	return _tempo_map.framewalk_to_beats (_origin_b, frames);
 }
 
 } /* namespace ARDOUR */

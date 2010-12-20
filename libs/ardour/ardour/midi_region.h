@@ -62,7 +62,7 @@ class MidiRegion : public Region
 
 	~MidiRegion();
 
-        boost::shared_ptr<MidiRegion> clone ();
+	boost::shared_ptr<MidiRegion> clone ();
         
 	boost::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
 
@@ -71,17 +71,17 @@ class MidiRegion : public Region
 	virtual framecnt_t readable_length() const { return length(); }
 
 	framecnt_t read_at (Evoral::EventSink<framepos_t>& dst,
-			    framepos_t position,
-			    framecnt_t dur,
-			    uint32_t  chan_n = 0,
-			    NoteMode  mode = Sustained,
-			    MidiStateTracker* tracker = 0) const;
+	                    framepos_t position,
+	                    framecnt_t dur,
+	                    uint32_t  chan_n = 0,
+	                    NoteMode  mode = Sustained,
+	                    MidiStateTracker* tracker = 0) const;
 	
 	framepos_t master_read_at (MidiRingBuffer<framepos_t>& dst,
-				   framepos_t position,
-				   framecnt_t dur,
-				   uint32_t  chan_n = 0,
-				   NoteMode  mode = Sustained) const;
+	                           framepos_t position,
+	                           framecnt_t dur,
+	                           uint32_t  chan_n = 0,
+	                           NoteMode  mode = Sustained) const;
 
 	XMLNode& state ();
 	int      set_state (const XMLNode&, int version);
@@ -117,38 +117,38 @@ class MidiRegion : public Region
 
   private:
 	friend class RegionFactory;
-        PBD::Property<Evoral::MusicalTime> _length_beats;
+	PBD::Property<Evoral::MusicalTime> _length_beats;
 
 	MidiRegion (const SourceList&);
 	MidiRegion (boost::shared_ptr<const MidiRegion>, frameoffset_t offset = 0, bool offset_relative = true);
 
 	framecnt_t _read_at (const SourceList&, Evoral::EventSink<framepos_t>& dst,
-			     framepos_t position,
-			     framecnt_t dur,
-			     uint32_t chan_n = 0,
-			     NoteMode mode = Sustained, 
-			     MidiStateTracker* tracker = 0) const;
+	                     framepos_t position,
+	                     framecnt_t dur,
+	                     uint32_t chan_n = 0,
+	                     NoteMode mode = Sustained, 
+	                     MidiStateTracker* tracker = 0) const;
 
 	void register_properties ();
-        void post_set (const PBD::PropertyChange&);
+	void post_set (const PBD::PropertyChange&);
 
 	void recompute_at_start ();
 	void recompute_at_end ();
 
 	void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
-        void set_length_internal (framecnt_t len);
-        void update_length_beats ();
+	void set_length_internal (framecnt_t len);
+	void update_length_beats ();
 
 	void model_changed ();
 	void model_automation_state_changed (Evoral::Parameter const &);
-        void model_contents_changed ();
+	void model_contents_changed ();
 
 	std::set<Evoral::Parameter> _filtered_parameters; ///< parameters that we ask our source not to return when reading
 	PBD::ScopedConnection _model_connection;
 	PBD::ScopedConnection _source_connection;
-        PBD::ScopedConnection _model_contents_connection;
+	PBD::ScopedConnection _model_contents_connection;
 
-        double _last_length_beats;
+	double _last_length_beats;
 };
 
 } /* namespace ARDOUR */

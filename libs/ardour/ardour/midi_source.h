@@ -96,6 +96,7 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	int set_state (const XMLNode&, int version);
 
 	bool length_mutable() const { return true; }
+	double length_beats() const { return _length_beats; }
 
 	virtual void load_model(bool lock=true, bool force_reload=false) = 0;
 	virtual void destroy_model() = 0;
@@ -150,7 +151,7 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	mutable Evoral::Sequence<Evoral::MusicalTime>::const_iterator _model_iter;
 	mutable bool                                                  _model_iter_valid;
 
-	mutable double    _length_beats;
+	mutable double     _length_beats;
 	mutable framepos_t _last_read_end;
 	framepos_t         _last_write_end;
 

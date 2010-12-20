@@ -35,12 +35,12 @@ class TempoMap;
  */
 class BeatsFramesConverter : public Evoral::TimeConverter<double,framepos_t> {
 public:
-        BeatsFramesConverter (const TempoMap& tempo_map, framepos_t origin)
-                : Evoral::TimeConverter<double, framepos_t> (origin)
-                , _tempo_map(tempo_map)
-        {}
+	BeatsFramesConverter (const TempoMap& tempo_map, framepos_t origin)
+		: Evoral::TimeConverter<double, framepos_t> (origin)
+		, _tempo_map(tempo_map)
+	{}
 
-	framepos_t to (double beats)       const;
+	framepos_t to (double beats)        const;
 	double     from (framepos_t frames) const;
 
 private:

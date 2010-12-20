@@ -140,21 +140,20 @@ MidiStateTracker::resolve_notes (MidiSource& src, Evoral::MusicalTime time)
 		return;
 	}
 
-        /* NOTE: the src must be locked */
+	/* NOTE: the src must be locked */
 
 	for (int channel = 0; channel < 16; ++channel) {
 		for (int note = 0; note < 128; ++note) {
 			while (_active_notes[note + 128 * channel]) {
-                                Evoral::MIDIEvent<Evoral::MusicalTime> ev ((MIDI_CMD_NOTE_OFF|channel), time, 3, 0, true);
-                                ev.set_type (MIDI_CMD_NOTE_OFF);
-                                ev.set_channel (channel);
-                                ev.set_note (note);
-                                ev.set_velocity (0);
-                                src.append_event_unlocked_beats (ev);
+				Evoral::MIDIEvent<Evoral::MusicalTime> ev ((MIDI_CMD_NOTE_OFF|channel), time, 3, 0, true);
+				ev.set_type (MIDI_CMD_NOTE_OFF);
+				ev.set_channel (channel);
+				ev.set_note (note);
+				ev.set_velocity (0);
+				src.append_event_unlocked_beats (ev);
 				_active_notes[note + 128 * channel]--;
-                                /* don't stack events up at the same time
-                                 */
-                                time += 1.0/128.0;
+				/* don't stack events up at the same time */
+				time += 1.0/128.0;
 			}
 		}
 	}
