@@ -150,6 +150,7 @@ class MidiRegionView : public RegionView
 	void alter_program_change(PCEvent& old_program, const MIDI::Name::PatchPrimaryKey& new_patch);
 
 	void move_program_change (PCEvent, double);
+	void delete_program_change (ArdourCanvas::CanvasProgramChange *);
 
 	/** Alter a given program to the new given one.
 	 * (Called on context menu select on CanvasProgramChange)

@@ -449,6 +449,28 @@ ControlList::erase (iterator start, iterator end)
 	maybe_signal_changed ();
 }
 
+/** Erase the first event which matches the given time and value */
+void
+ControlList::erase (double when, double value)
+{
+	{
+		Glib::Mutex::Lock lm (_lock);
+
+		iterator i = begin ();
+		while (i != end() && ((*i)->when != when || (*i)->value != value)) {
+			++i;
+		}
+
+		if (i != end ()) {
+			_events.erase (i);
+		}
+		
+		mark_dirty ();
+	}
+
+	maybe_signal_changed ();
+}
+
 void
 ControlList::reset_range (double start, double endt)
 {

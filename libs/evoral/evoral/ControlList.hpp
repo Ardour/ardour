@@ -124,6 +124,7 @@ public:
 	void erase_range (double start, double end);
 	void erase (iterator);
 	void erase (iterator, iterator);
+	void erase (double, double);
 	bool move_ranges (std::list< RangeMove<double> > const &);
 	void modify (iterator, double, double);
 

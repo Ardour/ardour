@@ -2,6 +2,7 @@
 
 #include <glibmm/regex.h>
 
+#include "gtkmm2ext/keyboard.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour_ui.h"
 #include "midi_region_view.h"
@@ -108,22 +109,27 @@ CanvasProgramChange::on_patch_menu_selected(const PatchPrimaryKey& key)
 }
 
 bool
-CanvasProgramChange::on_event(GdkEvent* ev)
+CanvasProgramChange::on_event (GdkEvent* ev)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		switch (ev->button.button) {
-		case 1:
-		{
-			/* XXX: icky dcast */
-			Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
-			if (e->current_mouse_mode() == Editing::MouseObject && e->internal_editing()) {
+	{
+		/* XXX: icky dcast */
+		Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
+		if (e->current_mouse_mode() == Editing::MouseObject && e->internal_editing()) {
+
+			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
+
+				_region.delete_program_change (this);
+				return true;
+				
+			} else if (ev->button.button == 1) {
 				e->drags()->set (new ProgramChangeDrag (e, this, &_region), ev);
 				return true;
 			}
 		}
-		case 3:
-			// lazy init
+
+		if (ev->button.button == 3) {
 			if (!_popup_initialized) {
 				initialize_popup_menus();
 				_popup_initialized = true;
@@ -132,6 +138,7 @@ CanvasProgramChange::on_event(GdkEvent* ev)
 			return true;
 		}
 		break;
+	}
 
 	case GDK_KEY_PRESS:
 		switch (ev->key.keyval) {

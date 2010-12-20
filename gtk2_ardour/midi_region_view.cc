@@ -1674,21 +1674,20 @@ MidiRegionView::move_program_change (PCEvent pc, double t)
 	boost::shared_ptr<Evoral::Control> control = _model->control (Evoral::Parameter (MidiPgmChangeAutomation, pc.channel, 0));
 	assert (control);
 
-	/* XXX: seems that these events should have IDs, or that this code should
-	   at least be in ControlList.
-	*/
+	control->list()->erase (pc.time, pc.value);
+	control->list()->add (t, pc.value);
 
-	boost::shared_ptr<Evoral::ControlList> list = control->list ();
-	Evoral::ControlList::iterator i = list->begin ();
-	while (i != list->end() && ((*i)->when != pc.time || (*i)->value != pc.value)) {
-		++i;
-	}
+	_pgm_changes.clear ();
+	display_program_changes ();
+}
 
-	assert (i != list->end ());
+void
+MidiRegionView::delete_program_change (CanvasProgramChange* pc)
+{
+	boost::shared_ptr<Evoral::Control> control = _model->control (Evoral::Parameter (MidiPgmChangeAutomation, pc->channel(), 0));
+	assert (control);
 
-	list->erase (i);
-	list->add (t, pc.value);
-
+	control->list()->erase (pc->event_time(), pc->program());
 	_pgm_changes.clear ();
 	display_program_changes ();
 }
