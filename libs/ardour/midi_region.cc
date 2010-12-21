@@ -83,8 +83,21 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 }
 
 /** Create a new MidiRegion, that is part of an existing one */
-MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset, bool offset_relative)
-	: Region (other, offset, offset_relative)
+MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
+	: Region (other)
+	, _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
+{
+	update_length_beats ();
+	register_properties ();
+
+	assert(_name.val().find("/") == string::npos);
+	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));
+	model_changed ();
+}
+
+/** Create a new MidiRegion, that is part of an existing one */
+MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset)
+	: Region (other, offset)
 	, _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
 {
 	update_length_beats ();

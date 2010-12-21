@@ -183,7 +183,8 @@ class AudioRegion : public Region
 
 	AudioRegion (boost::shared_ptr<AudioSource>);
 	AudioRegion (const SourceList &);
-	AudioRegion (boost::shared_ptr<const AudioRegion>, frameoffset_t offset = 0, bool offset_relative = true);
+	AudioRegion (boost::shared_ptr<const AudioRegion>);
+	AudioRegion (boost::shared_ptr<const AudioRegion>, frameoffset_t offset);
 	AudioRegion (boost::shared_ptr<const AudioRegion>, const SourceList&);
 	AudioRegion (SourceList &);
 

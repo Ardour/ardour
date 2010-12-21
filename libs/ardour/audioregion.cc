@@ -158,8 +158,32 @@ AudioRegion::AudioRegion (const SourceList& srcs)
 	assert (_sources.size() == _master_sources.size());
 }
 
-AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, framecnt_t offset, bool offset_relative)
-	: Region (other, offset, offset_relative)
+AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
+	: Region (other)
+	, AUDIOREGION_COPY_STATE (other)
+	, _automatable (other->session())
+	, _fade_in (new AutomationList (*other->_fade_in))
+	, _fade_out (new AutomationList (*other->_fade_out))
+	  /* As far as I can see, the _envelope's times are relative to region position, and have nothing
+	     to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
+	  */
+	, _envelope (new AutomationList (*other->_envelope, 0, other->_length))
+	, _fade_in_suspended (0)
+	, _fade_out_suspended (0)
+{
+	/* don't use init here, because we got fade in/out from the other region
+	*/
+	register_properties ();
+	listen_to_my_curves ();
+	connect_to_analysis_changed ();
+	connect_to_header_position_offset_changed ();
+
+	assert(_type == DataType::AUDIO);
+	assert (_sources.size() == _master_sources.size());
+}
+
+AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, framecnt_t offset)
+	: Region (other, offset)
 	, AUDIOREGION_COPY_STATE (other)
 	, _automatable (other->session())
 	, _fade_in (new AutomationList (*other->_fade_in))

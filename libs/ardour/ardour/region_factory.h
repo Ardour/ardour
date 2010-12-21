@@ -92,10 +92,6 @@ public:
   
   private:
 
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, frameoffset_t offset,
-	                                         bool offset_relative,
-	                                         const PBD::PropertyList&, bool announce = true);
-
 	static void region_changed (PBD::PropertyChange const &, boost::weak_ptr<Region>);
 	
 	static Glib::StaticMutex region_map_lock;

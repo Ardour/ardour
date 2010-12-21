@@ -307,8 +307,12 @@ class Region
 	/** Construct a region from multiple sources*/
 	Region (const SourceList& srcs);
 
+	/** Construct a region from another region */
+	Region (boost::shared_ptr<const Region>);
+
 	/** Construct a region from another region, at an offset within that region */
-	Region (boost::shared_ptr<const Region>, frameoffset_t start_offset = 0, bool start_relative = true);
+	Region (boost::shared_ptr<const Region>, frameoffset_t start_offset);
+	
 	/** Construct a region as a copy of another region, but with different sources */
 	Region (boost::shared_ptr<const Region>, const SourceList&);
 

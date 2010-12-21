@@ -245,14 +245,8 @@ Region::Region (const SourceList& srcs)
 	assert (_type == srcs.front()->type());
 }
 
-/** Create a new Region from part of an existing one, starting at one of two places:
-
-    if \a offset_relative is true, then the start within \a other is given by \a offset
-    (i.e. relative to the start of \a other's sources, the start is \a offset + \a other.start()
-
-    if @param offset_relative is false, then the start within the source is given \a offset.
-*/
-Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, bool offset_relative)
+/** Create a new Region from an existing one */
+Region::Region (boost::shared_ptr<const Region> other)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
 	, REGION_COPY_STATE (other)
@@ -276,70 +270,96 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, boo
 
 	use_sources (other->_sources);
 
-	if (!offset_relative) {
+	_position_lock_style = other->_position_lock_style;
+	_first_edit = other->_first_edit;
 
-		/* not sure why we do this, but its a hangover from ardour before
-		   property lists. this would be nice to remove.
-		*/
+	_start = 0; // It seems strange _start is not inherited here?
 
-		_position_lock_style = other->_position_lock_style;
-		_first_edit = other->_first_edit;
-
-		if (offset == 0) {
-
-			_start = 0;
-
-			/* sync pos is relative to start of file. our start-in-file is now zero,
-			   so set our sync position to whatever the the difference between
-			   _start and _sync_pos was in the other region.
+	/* sync pos is relative to start of file. our start-in-file is now zero,
+	   so set our sync position to whatever the the difference between
+	   _start and _sync_pos was in the other region.
 			   
-			   result is that our new sync pos points to the same point in our source(s)
-			   as the sync in the other region did in its source(s).
+	   result is that our new sync pos points to the same point in our source(s)
+	   as the sync in the other region did in its source(s).
 			   
-			   since we start at zero in our source(s), it is not possible to use a sync point that
-			   is before the start. reset it to _start if that was true in the other region.
-			*/
+	   since we start at zero in our source(s), it is not possible to use a sync point that
+	   is before the start. reset it to _start if that was true in the other region.
+	*/
 			
-			if (other->sync_marked()) {
-				if (other->_start < other->_sync_position) {
-					/* sync pos was after the start point of the other region */
-					_sync_position = other->_sync_position - other->_start;
-				} else {
-					/* sync pos was before the start point of the other region. not possible here. */
-					_sync_marked = false;
-					_sync_position = _start;
-				}
-			} else {
-				_sync_marked = false;
-				_sync_position = _start;
-			}
+	if (other->sync_marked()) {
+		if (other->_start < other->_sync_position) {
+			/* sync pos was after the start point of the other region */
+			_sync_position = other->_sync_position - other->_start;
 		} else {
-			/* XXX do something else ! */
-			fatal << string_compose (_("programming error: %1"), X_("Region+offset constructor used with illegal combination of offset+relative"))
-			      << endmsg;
-			/*NOTREACHED*/
-		}
-
-	} else {
-
-		_start = other->_start + offset;
-		
-		/* if the other region had a distinct sync point
-		   set, then continue to use it as best we can.
-		   otherwise, reset sync point back to start.
-		*/
-		
-		if (other->sync_marked()) {
-			if (other->_sync_position < _start) {
-				_sync_marked = false;
-				_sync_position = _start;
-			} else {
-				_sync_position = other->_sync_position;
-			}
-		} else {
+			/* sync pos was before the start point of the other region. not possible here. */
 			_sync_marked = false;
 			_sync_position = _start;
 		}
+	} else {
+		_sync_marked = false;
+		_sync_position = _start;
+	}
+
+	if (Profile->get_sae()) {
+		/* reset sync point to start if its ended up
+		   outside region bounds.
+		*/
+
+		if (_sync_position < _start || _sync_position >= _start + _length) {
+			_sync_marked = false;
+			_sync_position = _start;
+		}
+	}
+
+	assert (_type == other->data_type());
+}
+
+/** Create a new Region from part of an existing one.
+
+    the start within \a other is given by \a offset
+    (i.e. relative to the start of \a other's sources, the start is \a offset + \a other.start()
+*/
+Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset)
+	: SessionObject(other->session(), other->name())
+	, _type (other->data_type())
+	, REGION_COPY_STATE (other)
+	, _last_length (other->_last_length)
+	, _last_position(other->_last_position) \
+	, _first_edit (EditChangesNothing)
+	, _read_data_count(0)
+	, _last_layer_op (0)
+	, _pending_explicit_relayer (false)
+
+{
+	register_properties ();
+
+	/* override state that may have been incorrectly inherited from the other region
+	 */
+
+	_position = 0;
+	_locked = false;
+	_whole_file = false;
+	_hidden = false;
+
+	use_sources (other->_sources);
+
+	_start = other->_start + offset;
+		
+	/* if the other region had a distinct sync point
+	   set, then continue to use it as best we can.
+	   otherwise, reset sync point back to start.
+	*/
+		
+	if (other->sync_marked()) {
+		if (other->_sync_position < _start) {
+			_sync_marked = false;
+			_sync_position = _start;
+		} else {
+			_sync_position = other->_sync_position;
+		}
+	} else {
+		_sync_marked = false;
+		_sync_position = _start;
 	}
 
 	if (Profile->get_sae()) {

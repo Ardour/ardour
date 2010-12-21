@@ -121,7 +121,8 @@ class MidiRegion : public Region
 	PBD::Property<Evoral::MusicalTime> _length_beats;
 
 	MidiRegion (const SourceList&);
-	MidiRegion (boost::shared_ptr<const MidiRegion>, frameoffset_t offset = 0, bool offset_relative = true);
+	MidiRegion (boost::shared_ptr<const MidiRegion>);
+	MidiRegion (boost::shared_ptr<const MidiRegion>, frameoffset_t offset);
 
 	framecnt_t _read_at (const SourceList&, Evoral::EventSink<framepos_t>& dst,
 	                     framepos_t position,

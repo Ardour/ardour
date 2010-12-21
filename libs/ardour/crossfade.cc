@@ -197,7 +197,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode const & node)
 }
 
 Crossfade::Crossfade (boost::shared_ptr<Crossfade> orig, boost::shared_ptr<AudioRegion> newin, boost::shared_ptr<AudioRegion> newout)
-	: AudioRegion (boost::dynamic_pointer_cast<const AudioRegion> (orig), 0, true)
+	: AudioRegion (boost::dynamic_pointer_cast<const AudioRegion> (orig), 0)
 	, CROSSFADE_DEFAULT_PROPERTIES
 	, _fade_in (orig->_fade_in)
 	, _fade_out (orig->_fade_out)

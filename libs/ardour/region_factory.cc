@@ -53,7 +53,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 
 	if ((ar = boost::dynamic_pointer_cast<const AudioRegion>(region)) != 0) {
 
-		AudioRegion* arn = new AudioRegion (ar, 0, true);
+		AudioRegion* arn = new AudioRegion (ar, 0);
 		boost_debug_shared_ptr_mark_interesting (arn, "Region");
 
 		boost::shared_ptr<AudioRegion> arp (arn);
@@ -61,7 +61,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 
 	} else if ((mr = boost::dynamic_pointer_cast<const MidiRegion>(region)) != 0) {
 
-		MidiRegion* mrn = new MidiRegion (mr, 0, true);
+		MidiRegion* mrn = new MidiRegion (mr, 0);
 		boost::shared_ptr<MidiRegion> mrp (mrn);
 		ret = boost::static_pointer_cast<Region> (mrp);
 
@@ -87,19 +87,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 }
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, const PropertyList& plist, bool announce)
-{
-	return create (region, offset, true, plist, announce);
-}
-
-boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& plist, bool announce)
-{
-	return create (region, 0, false, plist, announce);
-}
-
-boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, bool offset_relative, const PropertyList& plist, bool announce)
 {
 	boost::shared_ptr<Region> ret;
 	boost::shared_ptr<const AudioRegion> other_a;
@@ -107,7 +95,45 @@ RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, b
 
 	if ((other_a = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
 
-		AudioRegion* ar = new AudioRegion (other_a, offset, offset_relative);
+		AudioRegion* ar = new AudioRegion (other_a);
+		boost::shared_ptr<AudioRegion> arp (ar);
+		ret = boost::static_pointer_cast<Region> (arp);
+
+	} else if ((other_m = boost::dynamic_pointer_cast<MidiRegion>(region)) != 0) {
+
+		MidiRegion* mr = new MidiRegion (other_m);
+		boost::shared_ptr<MidiRegion> mrp (mr);
+		ret = boost::static_pointer_cast<Region> (mrp);
+
+	} else {
+		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
+		      << endmsg;
+		/*NOTREACHED*/
+		return boost::shared_ptr<Region>();
+	}
+
+	if (ret) {
+		ret->apply_changes (plist);
+		map_add (ret);
+
+		if (announce) {
+			CheckNewRegion (ret);
+		}
+	}
+
+	return ret;
+}
+
+boost::shared_ptr<Region>
+RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, const PropertyList& plist, bool announce)
+{
+	boost::shared_ptr<Region> ret;
+	boost::shared_ptr<const AudioRegion> other_a;
+	boost::shared_ptr<const MidiRegion> other_m;
+
+	if ((other_a = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
+
+		AudioRegion* ar = new AudioRegion (other_a, offset);
 		boost_debug_shared_ptr_mark_interesting (ar, "Region");
 
 		boost::shared_ptr<AudioRegion> arp (ar);
@@ -115,7 +141,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, b
 
 	} else if ((other_m = boost::dynamic_pointer_cast<MidiRegion>(region)) != 0) {
 
-		MidiRegion* mr = new MidiRegion (other_m, offset, offset_relative);
+		MidiRegion* mr = new MidiRegion (other_m, offset);
 		boost::shared_ptr<MidiRegion> mrp (mr);
 		ret = boost::static_pointer_cast<Region> (mrp);
 
