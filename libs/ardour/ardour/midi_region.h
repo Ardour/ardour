@@ -36,13 +36,14 @@
 class XMLNode;
 
 namespace ARDOUR {
-        namespace Properties {
-                /* this is pseudo-property: nothing has this as an actual
-                   property, but it allows us to signal changes to the
-                   MidiModel used by the MidiRegion 
-                */
-                extern PBD::PropertyDescriptor<void*> midi_data; 
-        }
+	namespace Properties {
+		/* this is pseudo-property: nothing has this as an actual
+		   property, but it allows us to signal changes to the
+		   MidiModel used by the MidiRegion 
+		*/
+		extern PBD::PropertyDescriptor<void*> midi_data;
+		extern PBD::PropertyDescriptor<Evoral::MusicalTime> length_beats;
+	}
 }
 
 namespace ARDOUR {

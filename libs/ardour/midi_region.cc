@@ -125,7 +125,7 @@ MidiRegion::clone ()
 void
 MidiRegion::post_set (const PropertyChange& pc)
 {
-	if (pc.contains (Properties::length) || pc.contains (Properties::position)) {
+	if (pc.contains (Properties::length) && !pc.contains (Properties::length_beats)) {
 		update_length_beats ();
 	}
 }

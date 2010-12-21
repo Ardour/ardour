@@ -1042,6 +1042,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 					/* start of this region is the offset between the start of its capture and the start of the whole pass */
 					plist.add (Properties::start, (*ci)->start - initial_capture);
 					plist.add (Properties::length, (*ci)->frames);
+					plist.add (Properties::length_beats, converter.from((*ci)->frames));
 					plist.add (Properties::name, region_name);
 
 					boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
