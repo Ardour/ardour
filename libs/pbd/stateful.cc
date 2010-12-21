@@ -39,8 +39,8 @@ int Stateful::current_state_version = 0;
 int Stateful::loading_state_version = 0;
 
 Stateful::Stateful ()
-        : _frozen (0)
-        , _properties (new OwnedPropertyList)
+	: _frozen (0)
+	, _properties (new OwnedPropertyList)
 {
 	_extra_xml = 0;
 	_instant_xml = 0;
@@ -48,7 +48,7 @@ Stateful::Stateful ()
 
 Stateful::~Stateful ()
 {
-        delete _properties;
+	delete _properties;
 
 	// Do not delete _extra_xml.  The use of add_child_nocopy() 
 	// means it needs to live on indefinately.
@@ -186,7 +186,7 @@ PropertyChange
 Stateful::set_values (XMLNode const & node)
 {
 	PropertyChange c;
-        
+	
 	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
 		if (i->second->set_value (node)) {
 			c.add (i->first);
@@ -204,16 +204,16 @@ Stateful::apply_changes (const PropertyList& property_list)
 	PropertyChange c;
 	PropertyList::const_iterator p;
 
-        DEBUG_TRACE (DEBUG::Stateful, string_compose ("Stateful %1 setting properties from list of %2\n", this, property_list.size()));
+	DEBUG_TRACE (DEBUG::Stateful, string_compose ("Stateful %1 setting properties from list of %2\n", this, property_list.size()));
 
-        for (PropertyList::const_iterator pp = property_list.begin(); pp != property_list.end(); ++pp) {
-                DEBUG_TRACE (DEBUG::Stateful, string_compose ("in plist: %1\n", pp->second->property_name()));
-        }
-        
-        for (PropertyList::const_iterator i = property_list.begin(); i != property_list.end(); ++i) {
-                if ((p = _properties->find (i->first)) != _properties->end()) {
+	for (PropertyList::const_iterator pp = property_list.begin(); pp != property_list.end(); ++pp) {
+		DEBUG_TRACE (DEBUG::Stateful, string_compose ("in plist: %1\n", pp->second->property_name()));
+	}
+	
+	for (PropertyList::const_iterator i = property_list.begin(); i != property_list.end(); ++i) {
+		if ((p = _properties->find (i->first)) != _properties->end()) {
 
-                        DEBUG_TRACE (
+			DEBUG_TRACE (
 				DEBUG::Stateful,
 				string_compose ("actually setting property %1 using %2\n", p->second->property_name(), i->second->property_name())
 				);
@@ -222,9 +222,9 @@ Stateful::apply_changes (const PropertyList& property_list)
 				c.add (i->first);
 			}
 		} else {
-                        DEBUG_TRACE (DEBUG::Stateful, string_compose ("passed in property %1 not found in own property list\n",
-                                                                      i->second->property_name()));
-                }
+			DEBUG_TRACE (DEBUG::Stateful, string_compose ("passed in property %1 not found in own property list\n",
+			                                              i->second->property_name()));
+		}
 	}
 	
 	post_set (c);
@@ -248,7 +248,7 @@ Stateful::add_properties (XMLNode& owner_state)
 void
 Stateful::add_property (PropertyBase& s)
 {
-        _properties->add (s);
+	_properties->add (s);
 }
 
 void
@@ -272,7 +272,7 @@ Stateful::send_change (const PropertyChange& what_changed)
 void
 Stateful::suspend_property_changes ()
 {
-        _frozen++;
+	_frozen++;
 }
 
 void
@@ -293,21 +293,21 @@ Stateful::resume_property_changes ()
 		}
 	}
 
-        mid_thaw (what_changed);
+	mid_thaw (what_changed);
 
-        send_change (what_changed);
+	send_change (what_changed);
 }
 
 bool
 Stateful::changed() const  
 {
 	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
-                if (i->second->changed()) {
-                        return true;
-                }
-        }
+		if (i->second->changed()) {
+			return true;
+		}
+	}
 
-        return false;
+	return false;
 }
 
 bool
@@ -325,17 +325,17 @@ Stateful::apply_changes (const PropertyBase& prop)
 PropertyList*
 Stateful::property_factory (const XMLNode& history_node) const
 {
-        PropertyList* prop_list = new PropertyList;
+	PropertyList* prop_list = new PropertyList;
 
-        for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
-                PropertyBase* prop = i->second->clone_from_xml (history_node);
+	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
+		PropertyBase* prop = i->second->clone_from_xml (history_node);
 
-                if (prop) {
-                        prop_list->add (prop);
-                }
-        }
+		if (prop) {
+			prop_list->add (prop);
+		}
+	}
 
-        return prop_list;
+	return prop_list;
 }
 
 void

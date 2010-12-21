@@ -138,33 +138,33 @@ public:
 		_old = tmp;
 	}
 
-        void get_changes_as_properties (PropertyList& changes, Command *) const {
-                if (this->_have_old) {
+	void get_changes_as_properties (PropertyList& changes, Command *) const {
+		if (this->_have_old) {
 			changes.add (clone ());
-                }
-        }
+		}
+	}
 
 protected:
 
 	void set (T const& v) {
-                if (v != _current) {
-                        if (!_have_old) {
-                                _old = _current;
-                                _have_old = true;
-                        } else {
-                                if (v == _old) {
-                                        /* value has been reset to the value
-                                           at the start of a history transaction,
-                                           before clear_changes() is called.
-                                           thus there is effectively no apparent
-                                           history for this property.
-                                        */
-                                        _have_old = false;
-                                }
-                        }
+		if (v != _current) {
+			if (!_have_old) {
+				_old = _current;
+				_have_old = true;
+			} else {
+				if (v == _old) {
+					/* value has been reset to the value
+					   at the start of a history transaction,
+					   before clear_changes() is called.
+					   thus there is effectively no apparent
+					   history for this property.
+					*/
+					_have_old = false;
+				}
+			}
 
-                        _current  = v;
-                } 
+			_current  = v;
+		} 
 	}
 
 	virtual std::string to_string (T const& v) const             = 0;
@@ -210,7 +210,7 @@ public:
 		return new Property<T> (this->property_id(), this->_old, this->_current);
 	}
 	
-        Property<T>* clone_from_xml (const XMLNode& node) const {
+	Property<T>* clone_from_xml (const XMLNode& node) const {
 		XMLNodeList const & children = node.children ();
 		XMLNodeList::const_iterator i = children.begin();
 		while (i != children.end() && (*i)->name() != this->property_name()) {
@@ -228,7 +228,7 @@ public:
 		}
 			
 		return new Property<T> (this->property_id(), from_string (from->value()), from_string (to->value ()));
-        }
+	}
 
 	T & operator=(T const& v) {
 		this->set (v);
