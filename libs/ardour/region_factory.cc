@@ -54,8 +54,6 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 	if ((ar = boost::dynamic_pointer_cast<const AudioRegion>(region)) != 0) {
 
 		AudioRegion* arn = new AudioRegion (ar, 0);
-		boost_debug_shared_ptr_mark_interesting (arn, "Region");
-
 		boost::shared_ptr<AudioRegion> arp (arn);
 		ret = boost::static_pointer_cast<Region> (arp);
 
@@ -82,7 +80,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 		}
 	}
 
-
+	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
 	return ret;
 }
 
@@ -121,6 +119,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 		}
 	}
 
+	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
 	return ret;
 }
 
@@ -134,8 +133,6 @@ RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, c
 	if ((other_a = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
 
 		AudioRegion* ar = new AudioRegion (other_a, offset);
-		boost_debug_shared_ptr_mark_interesting (ar, "Region");
-
 		boost::shared_ptr<AudioRegion> arp (ar);
 		ret = boost::static_pointer_cast<Region> (arp);
 
@@ -161,6 +158,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, c
 		}
 	}
 
+	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
 	return ret;
 }
 
@@ -179,8 +177,6 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 		// XXX use me in caller where plist is setup, this is start i think srcs.front()->length (srcs.front()->timeline_position())
 		
 		AudioRegion* ar = new AudioRegion (other, srcs);
-		boost_debug_shared_ptr_mark_interesting (ar, "Region");
-
 		boost::shared_ptr<AudioRegion> arp (ar);
 		ret = boost::static_pointer_cast<Region> (arp);
 
@@ -191,7 +187,6 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 	}
 
 	if (ret) {
-
 		ret->apply_changes (plist);
 		map_add (ret);
 
@@ -200,8 +195,8 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 		}
 	}
 
+	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
 	return ret;
-
 }
 
 boost::shared_ptr<Region>
@@ -222,21 +217,18 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 	if ((as = boost::dynamic_pointer_cast<AudioSource>(srcs[0])) != 0) {
 
 		AudioRegion* ar = new AudioRegion (srcs);
-		boost_debug_shared_ptr_mark_interesting (ar, "Region");
-
 		boost::shared_ptr<AudioRegion> arp (ar);
 		ret = boost::static_pointer_cast<Region> (arp);
 
 	} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(srcs[0])) != 0) {
-		MidiRegion* mr = new MidiRegion (srcs);
-		boost_debug_shared_ptr_mark_interesting (mr, "Region");
 
+		MidiRegion* mr = new MidiRegion (srcs);
 		boost::shared_ptr<MidiRegion> mrp (mr);
 		ret = boost::static_pointer_cast<Region> (mrp);
+
 	}
 
 	if (ret) {
-
 		ret->apply_changes (plist);
 		map_add (ret);
 
@@ -245,6 +237,7 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 		}
 	}
 
+	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
 	return ret;
 }
 
@@ -266,17 +259,15 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 	if (srcs[0]->type() == DataType::AUDIO) {
 
 		AudioRegion* ar = new AudioRegion (srcs);
-		boost_debug_shared_ptr_mark_interesting (ar, "Region");
-
 		boost::shared_ptr<AudioRegion> arp (ar);
 		ret = boost::static_pointer_cast<Region> (arp);
 
 	} else if (srcs[0]->type() == DataType::MIDI) {
 		
 		MidiRegion* mr = new MidiRegion (srcs);
-
 		boost::shared_ptr<MidiRegion> mrp (mr);
 		ret = boost::static_pointer_cast<Region> (mrp);
+
 	}
 
 	if (ret) {
@@ -289,6 +280,7 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 		}
 	}
 
+	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
 	return ret;
 }
 
