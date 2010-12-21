@@ -72,11 +72,8 @@ MidiRegion::register_properties ()
 /* Basic MidiRegion constructor (many channels) */
 MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
-	, _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
+	, _length_beats (Properties::length_beats, midi_source(0)->length_beats())
 {
-	_length_beats = midi_source(0)->length_beats();
-	cout << "NEW MIDI REGION LENGTH BEATS: " << _length_beats << endl;
-
 	register_properties ();
 
 	midi_source(0)->ModelChanged.connect_same_thread (_source_connection, boost::bind (&MidiRegion::model_changed, this));

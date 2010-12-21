@@ -96,6 +96,8 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	int set_state (const XMLNode&, int version);
 
 	bool length_mutable() const { return true; }
+
+	void set_length_beats(double l) { _length_beats = l; }
 	double length_beats() const { return _length_beats; }
 
 	virtual void load_model(bool lock=true, bool force_reload=false) = 0;

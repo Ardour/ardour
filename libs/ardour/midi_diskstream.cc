@@ -968,6 +968,12 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 
 			_write_source->mark_streaming_write_completed ();
 
+			/* set length in beats to entire capture length */
+
+			BeatsFramesConverter converter (_session.tempo_map(), capture_info.front()->start);
+			const double total_capture_beats = converter.from(total_capture);
+			_write_source->set_length_beats(total_capture_beats);
+
 			/* make it not a stub anymore */
 
 			_write_source->unstubify ();
