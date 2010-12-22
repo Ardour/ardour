@@ -570,7 +570,7 @@ private:
 };
 
 
-/** Drag of a cursor */
+/** Drag of the playhead cursor */
 class CursorDrag : public Drag
 {
 public:
@@ -592,13 +592,9 @@ public:
 	bool y_movement_matters () const {
 		return false;
 	}
-
-	void setup_pointer_frame_offset ();
 	
 private:
-	EditorCursor* _cursor; ///< cursor being dragged
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
-
 };
 
 /** Region fade-in drag */

@@ -1981,9 +1981,6 @@ CursorDrag::CursorDrag (Editor* e, ArdourCanvas::Item* i, bool s)
 	  _stop (s)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New CursorDrag\n");
-	
-	_cursor = reinterpret_cast<EditorCursor*> (_item->get_data ("cursor"));
-	assert (_cursor);
 }
 
 void
@@ -1992,46 +1989,36 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 	Drag::start_grab (event, c);
 
 	if (!_stop) {
-
 		framepos_t where = _editor->event_frame (event, 0, 0);
 
 		_editor->snap_to_with_modifier (where, event);
 		_editor->playhead_cursor->set_position (where);
-
 	}
 
-	if (_cursor == _editor->playhead_cursor) {
-		_editor->_dragging_playhead = true;
+	_editor->_dragging_playhead = true;
+	
+	Session* s = _editor->session ();
+	
+	if (s) {
+		if (_was_rolling && _stop) {
+			s->request_stop ();
+		}
+		
+		if (s->is_auditioning()) {
+			s->cancel_audition ();
+		}
+		
+		s->request_suspend_timecode_transmission ();
 
-		Session* s = _editor->session ();
-
-		if (s) {
-			if (_was_rolling && _stop) {
-				s->request_stop ();
-			}
-
-			if (s->is_auditioning()) {
-				s->cancel_audition ();
-			}
-
-			s->request_suspend_timecode_transmission ();
-
-			if (s->timecode_transmission_suspended ()) {
-				framepos_t const f = _editor->playhead_cursor->current_frame;
-				s->send_mmc_locate (f);
-				s->send_full_time_code (f);
-			}
+		if (s->timecode_transmission_suspended ()) {
+			framepos_t const f = _editor->playhead_cursor->current_frame;
+			s->send_mmc_locate (f);
+			s->send_full_time_code (f);
 		}
 	}
 
-	_editor->show_verbose_time_cursor (_cursor->current_frame, 10);
+	_editor->show_verbose_time_cursor (_editor->playhead_cursor->current_frame, 10);
 }
-
-void
-CursorDrag::setup_pointer_frame_offset ()
-{
-	_pointer_frame_offset = raw_grab_frame() - _cursor->current_frame;
-}	
 
 void
 CursorDrag::motion (GdkEvent* event, bool)
@@ -2042,12 +2029,12 @@ CursorDrag::motion (GdkEvent* event, bool)
 		return;
 	}
 
-	_cursor->set_position (adjusted_frame);
+	_editor->playhead_cursor->set_position (adjusted_frame);
 
-	_editor->show_verbose_time_cursor (_cursor->current_frame, 10);
+	_editor->show_verbose_time_cursor (_editor->playhead_cursor->current_frame, 10);
 
 	Session* s = _editor->session ();
-	if (s && _item == &_editor->playhead_cursor->canvas_item && s->timecode_transmission_suspended ()) {
+	if (s && s->timecode_transmission_suspended ()) {
 		framepos_t const f = _editor->playhead_cursor->current_frame;
 		s->send_mmc_locate (f);
 		s->send_full_time_code (f);
@@ -2057,7 +2044,7 @@ CursorDrag::motion (GdkEvent* event, bool)
 #ifdef GTKOSX
 	_editor->update_canvas_now ();
 #endif
-	_editor->UpdateAllTransportClocks (_cursor->current_frame);
+	_editor->UpdateAllTransportClocks (_editor->playhead_cursor->current_frame);
 }
 
 void
@@ -2071,13 +2058,11 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	motion (event, false);
 
-	if (_item == &_editor->playhead_cursor->canvas_item) {
-		Session* s = _editor->session ();
-		if (s) {
-			s->request_locate (_editor->playhead_cursor->current_frame, _was_rolling);
-			_editor->_pending_locate_request = true;
-			s->request_resume_timecode_transmission ();
-		}
+	Session* s = _editor->session ();
+	if (s) {
+		s->request_locate (_editor->playhead_cursor->current_frame, _was_rolling);
+		_editor->_pending_locate_request = true;
+		s->request_resume_timecode_transmission ();
 	}
 }
 
@@ -2089,7 +2074,7 @@ CursorDrag::aborted ()
 		_editor->_dragging_playhead = false;
 	}
 	
-	_cursor->set_position (adjusted_frame (grab_frame (), 0, false));
+	_editor->playhead_cursor->set_position (adjusted_frame (grab_frame (), 0, false));
 }
 
 FadeInDrag::FadeInDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
