@@ -594,6 +594,8 @@ public:
 	}
 	
 private:
+	void fake_locate (framepos_t);
+	
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
 };
 

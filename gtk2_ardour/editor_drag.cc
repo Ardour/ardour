@@ -1983,17 +1983,33 @@ CursorDrag::CursorDrag (Editor* e, ArdourCanvas::Item* i, bool s)
 	DEBUG_TRACE (DEBUG::Drags, "New CursorDrag\n");
 }
 
+/** Do all the things we do when dragging the playhead to make it look as though
+ *  we have located, without actually doing the locate (because that would cause
+ *  the diskstream buffers to be refilled, which is too slow).
+ */
+void
+CursorDrag::fake_locate (framepos_t t)
+{
+	_editor->playhead_cursor->set_position (t);
+	
+	Session* s = _editor->session ();
+	if (s->timecode_transmission_suspended ()) {
+		framepos_t const f = _editor->playhead_cursor->current_frame;
+		s->send_mmc_locate (f);
+		s->send_full_time_code (f);
+	}
+
+	_editor->show_verbose_time_cursor (t, 10);
+	_editor->UpdateAllTransportClocks (t);
+}
+
 void
 CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 {
 	Drag::start_grab (event, c);
 
-	if (!_stop) {
-		framepos_t where = _editor->event_frame (event, 0, 0);
-
-		_editor->snap_to_with_modifier (where, event);
-		_editor->playhead_cursor->set_position (where);
-	}
+	framepos_t where = _editor->event_frame (event, 0, 0);
+	_editor->snap_to_with_modifier (where, event);
 
 	_editor->_dragging_playhead = true;
 	
@@ -2009,16 +2025,12 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 		}
 		
 		s->request_suspend_timecode_transmission ();
-
-		if (s->timecode_transmission_suspended ()) {
-			framepos_t const f = _editor->playhead_cursor->current_frame;
-			s->send_mmc_locate (f);
-			s->send_full_time_code (f);
+		while (!s->timecode_transmission_suspended ()) {
+			/* twiddle our thumbs */
 		}
 	}
-
-	_editor->show_verbose_time_cursor (_editor->playhead_cursor->current_frame, 10);
-	_editor->UpdateAllTransportClocks (_editor->playhead_cursor->current_frame);
+	
+	fake_locate (where);
 }
 
 void
@@ -2030,22 +2042,11 @@ CursorDrag::motion (GdkEvent* event, bool)
 		return;
 	}
 
-	_editor->playhead_cursor->set_position (adjusted_frame);
-
-	_editor->show_verbose_time_cursor (_editor->playhead_cursor->current_frame, 10);
-
-	Session* s = _editor->session ();
-	if (s && s->timecode_transmission_suspended ()) {
-		framepos_t const f = _editor->playhead_cursor->current_frame;
-		s->send_mmc_locate (f);
-		s->send_full_time_code (f);
-	}
+	fake_locate (adjusted_frame);
 	
-
 #ifdef GTKOSX
 	_editor->update_canvas_now ();
 #endif
-	_editor->UpdateAllTransportClocks (_editor->playhead_cursor->current_frame);
 }
 
 void
