@@ -509,6 +509,8 @@ public:
 		return false;
 	}
 
+	void setup_pointer_frame_offset ();
+	
 private:
 
 	Operation _operation;

@@ -294,8 +294,9 @@ bool
 Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 {
 	/* check to see if we have moved in any way that matters since the last motion event */
-	if ( (!x_movement_matters() || _last_pointer_frame == adjusted_current_frame (event)) &&
-	     (!y_movement_matters() || _last_pointer_y == _drags->current_pointer_y ()) ) {
+	if (_move_threshold_passed &&
+	    (!x_movement_matters() || _last_pointer_frame == adjusted_current_frame (event)) &&
+	    (!y_movement_matters() || _last_pointer_y == _drags->current_pointer_y ()) ) {
 		return false;
 	}
 
@@ -305,7 +306,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 
 	if (!from_autoscroll && !_move_threshold_passed) {
 
-		bool const xp = (::llabs (adjusted_current_frame (event) - _grab_frame) >= threshold.first);
+		bool const xp = (::llabs (_drags->current_pointer_frame () - _grab_frame) >= threshold.first);
 		bool const yp = (::fabs ((_drags->current_pointer_y () - _grab_y)) >= threshold.second);
 
 		_move_threshold_passed = ((xp && x_movement_matters()) || (yp && y_movement_matters()));
@@ -1582,7 +1583,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		speed = tv->track()->speed();
 	}
 
-	framecnt_t const dt = adjusted_current_frame (event) - grab_frame ();
+	framecnt_t const dt = adjusted_current_frame (event) - raw_grab_frame () + _pointer_frame_offset;
 
 	if (first_move) {
 
@@ -1753,6 +1754,28 @@ TrimDrag::aborted ()
 
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		i->view->region()->resume_property_changes ();
+	}
+}
+
+void
+TrimDrag::setup_pointer_frame_offset ()
+{
+	list<DraggingView>::iterator i = _views.begin ();
+	while (i != _views.end() && i->view != _primary) {
+		++i;
+	}
+
+	if (i == _views.end()) {
+		return;
+	}
+
+	switch (_operation) {
+	case StartTrim:
+		_pointer_frame_offset = raw_grab_frame() - i->initial_position;
+		break;
+	case EndTrim:
+		_pointer_frame_offset = raw_grab_frame() - i->initial_end;
+		break;
 	}
 }
 
