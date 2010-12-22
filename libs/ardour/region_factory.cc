@@ -53,15 +53,11 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 
 	if ((ar = boost::dynamic_pointer_cast<const AudioRegion>(region)) != 0) {
 
-		AudioRegion* arn = new AudioRegion (ar, 0);
-		boost::shared_ptr<AudioRegion> arp (arn);
-		ret = boost::static_pointer_cast<Region> (arp);
+		ret = boost::shared_ptr<Region> (new AudioRegion (ar, 0));
 
 	} else if ((mr = boost::dynamic_pointer_cast<const MidiRegion>(region)) != 0) {
 
-		MidiRegion* mrn = new MidiRegion (mr, 0);
-		boost::shared_ptr<MidiRegion> mrp (mrn);
-		ret = boost::static_pointer_cast<Region> (mrp);
+		ret = boost::shared_ptr<Region> (new MidiRegion (mr, 0));
 
 	} else {
 		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
@@ -93,15 +89,11 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 
 	if ((other_a = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
 
-		AudioRegion* ar = new AudioRegion (other_a);
-		boost::shared_ptr<AudioRegion> arp (ar);
-		ret = boost::static_pointer_cast<Region> (arp);
+		ret = boost::shared_ptr<Region> (new AudioRegion (other_a));
 
 	} else if ((other_m = boost::dynamic_pointer_cast<MidiRegion>(region)) != 0) {
 
-		MidiRegion* mr = new MidiRegion (other_m);
-		boost::shared_ptr<MidiRegion> mrp (mr);
-		ret = boost::static_pointer_cast<Region> (mrp);
+		ret = boost::shared_ptr<Region> (new MidiRegion (other_m));
 
 	} else {
 		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
@@ -132,15 +124,11 @@ RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, c
 
 	if ((other_a = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
 
-		AudioRegion* ar = new AudioRegion (other_a, offset);
-		boost::shared_ptr<AudioRegion> arp (ar);
-		ret = boost::static_pointer_cast<Region> (arp);
-
+		ret = boost::shared_ptr<Region> (new AudioRegion (other_a, offset));
+		
 	} else if ((other_m = boost::dynamic_pointer_cast<MidiRegion>(region)) != 0) {
 
-		MidiRegion* mr = new MidiRegion (other_m, offset);
-		boost::shared_ptr<MidiRegion> mrp (mr);
-		ret = boost::static_pointer_cast<Region> (mrp);
+		ret = boost::shared_ptr<Region> (new MidiRegion (other_m, offset));
 
 	} else {
 		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
@@ -176,9 +164,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 
 		// XXX use me in caller where plist is setup, this is start i think srcs.front()->length (srcs.front()->timeline_position())
 		
-		AudioRegion* ar = new AudioRegion (other, srcs);
-		boost::shared_ptr<AudioRegion> arp (ar);
-		ret = boost::static_pointer_cast<Region> (arp);
+		ret = boost::shared_ptr<Region> (new AudioRegion (other, srcs));
 
 	} else {
 		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
@@ -216,15 +202,11 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 
 	if ((as = boost::dynamic_pointer_cast<AudioSource>(srcs[0])) != 0) {
 
-		AudioRegion* ar = new AudioRegion (srcs);
-		boost::shared_ptr<AudioRegion> arp (ar);
-		ret = boost::static_pointer_cast<Region> (arp);
+		ret = boost::shared_ptr<Region> (new AudioRegion (srcs));
 
 	} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(srcs[0])) != 0) {
 
-		MidiRegion* mr = new MidiRegion (srcs);
-		boost::shared_ptr<MidiRegion> mrp (mr);
-		ret = boost::static_pointer_cast<Region> (mrp);
+		ret = boost::shared_ptr<Region> (new MidiRegion (srcs));
 
 	}
 
@@ -258,20 +240,15 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 
 	if (srcs[0]->type() == DataType::AUDIO) {
 
-		AudioRegion* ar = new AudioRegion (srcs);
-		boost::shared_ptr<AudioRegion> arp (ar);
-		ret = boost::static_pointer_cast<Region> (arp);
+		ret = boost::shared_ptr<Region> (new AudioRegion (srcs));
 
 	} else if (srcs[0]->type() == DataType::MIDI) {
 		
-		MidiRegion* mr = new MidiRegion (srcs);
-		boost::shared_ptr<MidiRegion> mrp (mr);
-		ret = boost::static_pointer_cast<Region> (mrp);
+		ret = boost::shared_ptr<Region> (new MidiRegion (srcs));
 
 	}
 
 	if (ret) {
-
 		if (ret->set_state (node, Stateful::loading_state_version)) {
 			ret.reset ();
 		} else {
