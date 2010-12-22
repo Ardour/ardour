@@ -70,7 +70,6 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 		map_add (ret);
 
 		/* pure copy constructor - no property list */
-		/* pure copy constructor - no CheckNewRegion emitted */
 		if (announce) {
 			CheckNewRegion (ret);
 		}
