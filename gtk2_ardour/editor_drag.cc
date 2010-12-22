@@ -2018,6 +2018,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 	}
 
 	_editor->show_verbose_time_cursor (_editor->playhead_cursor->current_frame, 10);
+	_editor->UpdateAllTransportClocks (_editor->playhead_cursor->current_frame);
 }
 
 void
