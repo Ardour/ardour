@@ -82,7 +82,6 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 	assert(_type == DataType::MIDI);
 }
 
-/** Create a new MidiRegion, that is part of an existing one */
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	: Region (other)
 	, _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
@@ -100,7 +99,11 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t
 	: Region (other, offset)
 	, _length_beats (Properties::length_beats, (Evoral::MusicalTime) 0)
 {
-	update_length_beats ();
+	BeatsFramesConverter bfc (_session.tempo_map(), _position);
+	Evoral::MusicalTime const offset_beats = bfc.from (offset);
+
+	_length_beats = other->_length_beats - offset_beats;
+
 	register_properties ();
 
 	assert(_name.val().find("/") == string::npos);
@@ -222,13 +225,13 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<framepos_t>&
 	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
 	src->set_note_mode(mode);
         
-        /*
-          cerr << "MR read @ " << position << " * " << to_read
-          << " _position = " << _position
-          << " _start = " << _start
-          << " intoffset = " << internal_offset
-          << endl;
-        */
+	/*
+	  cerr << "MR read @ " << position << " * " << to_read
+	  << " _position = " << _position
+	  << " _start = " << _start
+	  << " intoffset = " << internal_offset
+	  << endl;
+	*/
 
 	/* This call reads events from a source and writes them to `dst' timed in session frames */
 
@@ -270,7 +273,7 @@ void
 MidiRegion::recompute_at_end ()
 {
 	/* our length has changed
-         * so what? stuck notes are dealt with via a note state tracker
+	 * so what? stuck notes are dealt with via a note state tracker
 	 */
 }
 
@@ -332,8 +335,8 @@ MidiRegion::model_changed ()
 		_model_connection, boost::bind (&MidiRegion::model_automation_state_changed, this, _1)
 		);
 
-        model()->ContentsChanged.connect_same_thread (
-                _model_contents_connection, boost::bind (&MidiRegion::model_contents_changed, this));
+	model()->ContentsChanged.connect_same_thread (
+	        _model_contents_connection, boost::bind (&MidiRegion::model_contents_changed, this));
 }
 
 void
