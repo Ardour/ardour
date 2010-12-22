@@ -497,17 +497,18 @@ PlugUIBase::plugin_going_away ()
 void
 PlugUIBase::set_latency_label ()
 {
-	char buf[64];
 	framecnt_t const l = insert->effective_latency ();
 	framecnt_t const sr = insert->session().frame_rate ();
 
+	string t;
+
 	if (l < sr / 1000) {
-		snprintf (buf, sizeof (buf), "latency (%" PRId64 " samples)", l);
+		t = string_compose (_("latency (%1 samples)"), l);
 	} else {
-		snprintf (buf, sizeof (buf), "latency (%.2f msecs)", (float) l / ((float) sr / 1000.0f));
+		t = string_compose (_("latency (%1 ms)"), (float) l / ((float) sr / 1000.0f));
 	}
 
-	latency_label.set_text (buf);
+	latency_label.set_text (t);
 }
 
 void

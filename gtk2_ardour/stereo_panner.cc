@@ -190,7 +190,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         cairo_select_font_face (cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
         if (state != Mono) {
                 cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
-                cairo_show_text (cr, "L");
+                cairo_show_text (cr, _("L"));
         }
 
         /* right box */
@@ -211,9 +211,9 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
                        (lr_box_size/2)+step_down + 13);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
         if (state == Mono) {
-                cairo_show_text (cr, "M");
+                cairo_show_text (cr, _("M"));
         } else {
-                cairo_show_text (cr, "R");
+                cairo_show_text (cr, _("R"));
         }
 
         /* draw the central box */
