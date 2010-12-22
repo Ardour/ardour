@@ -133,7 +133,7 @@ class MidiRegionView : public RegionView
 	 * @param program the MidiRegionView::PCEvent to add
 	 * @param the text to display in the flag
 	 */
-	void add_pgm_change(PCEvent& program, const std::string& displaytext);
+	void add_canvas_program_change (PCEvent& program, const std::string& displaytext);
 
 	/** Look up the given time and channel in the 'automation' and set keys accordingly.
 	 * @param time the time of the program change event
@@ -149,7 +149,8 @@ class MidiRegionView : public RegionView
 	 */
 	void alter_program_change(PCEvent& old_program, const MIDI::Name::PatchPrimaryKey& new_patch);
 
-	void move_program_change (PCEvent, double);
+	void add_program_change (framecnt_t, uint8_t, uint8_t);
+	void move_program_change (PCEvent, Evoral::MusicalTime);
 	void delete_program_change (ArdourCanvas::CanvasProgramChange *);
 
 	/** Alter a given program to the new given one.

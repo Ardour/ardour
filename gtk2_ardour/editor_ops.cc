@@ -84,6 +84,7 @@
 #include "normalize_dialog.h"
 #include "editor_cursors.h"
 #include "mouse_cursors.h"
+#include "program_change_dialog.h"
 
 #include "i18n.h"
 
@@ -4701,6 +4702,31 @@ Editor::quantize_region ()
 				qd->strength(), qd->swing(), qd->threshold());
 
 		apply_midi_note_edit_op (quant);
+	}
+}
+
+void
+Editor::insert_program_change ()
+{
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+	if (rs.empty ()) {
+		return;
+	}
+
+	ProgramChangeDialog d;
+	if (d.run() == RESPONSE_CANCEL) {
+		return;
+	}
+
+	framepos_t const p = get_preferred_edit_position (false);
+
+	for (RegionSelection::iterator i = rs.begin (); i != rs.end(); ++i) {
+		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*i);
+		if (mrv) {
+			if (p >= mrv->region()->first_frame() && p <= mrv->region()->last_frame()) {
+				mrv->add_program_change (p - mrv->region()->position(), d.channel (), d.program ());
+			}
+		}
 	}
 }
 

@@ -173,6 +173,7 @@ gtk2_ardour_sources = [
 	'port_matrix_labels.cc',
 	'port_matrix_row_labels.cc',
 	'processor_box.cc',
+	'program_change_dialog.cc',
 	'progress_reporter.cc',
 	'prompter.cc',
 	'public_editor.cc',

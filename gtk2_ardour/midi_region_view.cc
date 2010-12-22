@@ -1111,12 +1111,12 @@ MidiRegionView::display_program_changes_on_channel(uint8_t channel)
 		PCEvent program_change(event_time, uint8_t(program_number), channel);
 
 		if (patch != 0) {
-			add_pgm_change(program_change, patch->name());
+			add_canvas_program_change (program_change, patch->name());
 		} else {
 			char buf[4];
                         // program_number is zero-based: convert to one-based
 			snprintf(buf, 4, "%d", int(program_number+1));
-			add_pgm_change(program_change, buf);
+			add_canvas_program_change (program_change, buf);
 		}
 	}
 }
@@ -1583,7 +1583,7 @@ MidiRegionView::step_sustain (Evoral::MusicalTime beats)
 }
 
 void
-MidiRegionView::add_pgm_change(PCEvent& program, const string& displaytext)
+MidiRegionView::add_canvas_program_change (PCEvent& program, const string& displaytext)
 {
 	assert(program.time >= 0);
 
@@ -1668,8 +1668,26 @@ MidiRegionView::alter_program_change(PCEvent& old_program, const MIDI::Name::Pat
         display_program_changes (); // XXX would be nice to limit to just old_program.channel
 }
 
+/** @param t Time in frames relative to region position */
 void
-MidiRegionView::move_program_change (PCEvent pc, double t)
+MidiRegionView::add_program_change (framecnt_t t, uint8_t channel, uint8_t value)
+{
+	boost::shared_ptr<Evoral::Control> control = midi_region()->model()->control (
+		Evoral::Parameter (MidiPgmChangeAutomation, channel, 0), true
+		);
+	
+	assert (control);
+
+	Evoral::MusicalTime const b = frames_to_beats (t + midi_region()->start());
+
+	control->list()->add (b, value);
+
+	_pgm_changes.clear ();
+	display_program_changes ();
+}
+
+void
+MidiRegionView::move_program_change (PCEvent pc, Evoral::MusicalTime t)
 {
 	boost::shared_ptr<Evoral::Control> control = _model->control (Evoral::Parameter (MidiPgmChangeAutomation, pc.channel, 0));
 	assert (control);

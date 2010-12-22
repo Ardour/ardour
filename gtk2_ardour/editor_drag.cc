@@ -1776,6 +1776,8 @@ TrimDrag::setup_pointer_frame_offset ()
 	case EndTrim:
 		_pointer_frame_offset = raw_grab_frame() - i->initial_end;
 		break;
+	case ContentsTrim:
+		break;
 	}
 }
 
