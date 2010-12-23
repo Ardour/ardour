@@ -420,13 +420,12 @@ MidiTimeAxisView::build_automation_action_menu ()
 
 		automation_items.push_back (SeparatorElem());
 
-		/* these 3 MIDI "command" types are semantically more like automation than note data,
+		/* these 2 MIDI "command" types are semantically more like automation than note data,
 		   but they are not MIDI controllers. We give them special status in this menu, since
 		   they will not show up in the controller list and anyone who actually knows
 		   something about MIDI (!) would not expect to find them there.
 		*/
 
-		add_channel_command_menu_item (automation_items, _("Program Change"), MidiPgmChangeAutomation, 0);
 		add_channel_command_menu_item (automation_items, _("Bender"), MidiPitchBenderAutomation, 0);
 		add_channel_command_menu_item (automation_items, _("Pressure"), MidiChannelPressureAutomation, 0);
 		
