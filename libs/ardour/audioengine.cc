@@ -1125,12 +1125,14 @@ AudioEngine::connect_to_jack (string client_name)
 	const char *server_name = NULL;
 
         EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
-        EnvironmentalProtectionAgency current_epa; // saves current settings and restores on exit from this scope
+        EnvironmentalProtectionAgency current_epa (false);
 
         /* revert all environment settings back to whatever they were when ardour started
          */
 
         if (global_epa) {
+                current_epa.arm ();
+                current_epa.save ();
                 global_epa->restore ();
         }
 	

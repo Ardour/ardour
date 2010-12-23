@@ -27,16 +27,18 @@ namespace PBD {
 
 class EnvironmentalProtectionAgency {
   public:
-    EnvironmentalProtectionAgency ();
+    EnvironmentalProtectionAgency (bool arm=true);
     ~EnvironmentalProtectionAgency ();
 
-    void restore ();
+    void arm ();
     void save ();
+    void restore () const;
 
     static EnvironmentalProtectionAgency* get_global_epa () { return _global_epa; }
     static void set_global_epa (EnvironmentalProtectionAgency* epa) { _global_epa = epa; }
 
   private:
+    bool _armed;
     std::map<std::string,std::string> e;
     static EnvironmentalProtectionAgency* _global_epa;
 };

@@ -29,14 +29,25 @@ using namespace std;
 
 EnvironmentalProtectionAgency* EnvironmentalProtectionAgency::_global_epa = 0;
 
-EnvironmentalProtectionAgency::EnvironmentalProtectionAgency ()
+EnvironmentalProtectionAgency::EnvironmentalProtectionAgency (bool arm)
+        : _armed (arm)
 {
-        save ();
+        if (_armed) {
+                save ();
+        }
 }
 
 EnvironmentalProtectionAgency::~EnvironmentalProtectionAgency()
 {
-        restore ();
+        if (_armed) {
+                restore ();
+        }
+}
+
+void
+EnvironmentalProtectionAgency::arm ()
+{
+        _armed = true;
 }
 
 void
@@ -63,9 +74,9 @@ EnvironmentalProtectionAgency::save ()
         }
 }                         
 void
-EnvironmentalProtectionAgency::restore ()
+EnvironmentalProtectionAgency::restore () const
 {
-        for (map<string,string>::iterator i = e.begin(); i != e.end(); ++i) {
+        for (map<string,string>::const_iterator i = e.begin(); i != e.end(); ++i) {
                 cerr << "Restore [" << i->first << "] = " << i->second << endl;
                 setenv (i->first.c_str(), i->second.c_str(), 1);
         }
