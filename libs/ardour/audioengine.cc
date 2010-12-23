@@ -672,16 +672,6 @@ AudioEngine::connect (const string& source, const string& destination)
 {
         GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
 
-        EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
-        EnvironmentalProtectionAgency current_epa; // saves current settings and restores on exit from this scope
-
-        /* revert all environment settings back to whatever they were when ardour started
-         */
-
-        if (global_epa) {
-                global_epa->restore ();
-        }
-	
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
 
@@ -1134,6 +1124,16 @@ AudioEngine::connect_to_jack (string client_name)
 	jack_status_t status;
 	const char *server_name = NULL;
 
+        EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
+        EnvironmentalProtectionAgency current_epa; // saves current settings and restores on exit from this scope
+
+        /* revert all environment settings back to whatever they were when ardour started
+         */
+
+        if (global_epa) {
+                global_epa->restore ();
+        }
+	
 	jack_client_name = client_name; /* might be reset below */
 	_jack = jack_client_open (jack_client_name.c_str(), options, &status, server_name);
 
@@ -1291,13 +1291,6 @@ AudioEngine::reconnect_to_jack ()
 			return -1;
 		}
 
-                EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
-                EnvironmentalProtectionAgency current_epa; // saves current settings and restores on exit from this scope
-
-                if (global_epa) {
-                        global_epa->restore ();
-                }
-		
 		if ((err = jack_connect (_priv_jack, (*i).first.c_str(), (*i).second.c_str())) != 0) {
 			if (err != EEXIST) {
 				error << string_compose (_("could not reconnect %1 and %2 (err = %3)"),
