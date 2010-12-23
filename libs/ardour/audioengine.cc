@@ -31,6 +31,7 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
 #include "pbd/unknown_type.h"
+#include "pbd/epa.h"
 
 #include "midi++/port.h"
 #include "midi++/mmc.h"
@@ -1260,6 +1261,16 @@ AudioEngine::connect_to_jack (string client_name, string session_uuid)
 	jack_options_t options = JackNullOption;
 	jack_status_t status;
 	const char *server_name = NULL;
+
+        EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
+        EnvironmentalProtectionAgency current_epa; // saves current settings and restores on exit from this scope
+
+        /* revert all environment settings back to whatever they were when ardour started
+         */
+
+        if (global_epa) {
+                global_epa->restore ();
+        }
 
 	jack_client_name = client_name; /* might be reset below */
 #ifdef HAVE_JACK_SESSION

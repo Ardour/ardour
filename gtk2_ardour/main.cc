@@ -26,6 +26,7 @@
 #include <gtkmm/settings.h>
 
 #include "pbd/error.h"
+#include "pbd/epa.h"
 #include "pbd/file_utils.h"
 #include "pbd/textreceiver.h"
 #include "pbd/failed_constructor.h"
@@ -308,6 +309,8 @@ fixup_bundle_environment (int argc, char* argv[])
 		return;
 	}
 	
+        EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency);
+
 	Glib::ustring exec_path = argv[0];
 	Glib::ustring dir_path = Glib::path_get_dirname (Glib::path_get_dirname (exec_path));
 	Glib::ustring path;
