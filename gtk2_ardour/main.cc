@@ -30,6 +30,7 @@
 #include <pbd/textreceiver.h>
 #include <pbd/failed_constructor.h>
 #include <pbd/pthread_utils.h>
+#include <pbd/epa.h>
 
 #include <jack/jack.h>
 
@@ -78,6 +79,8 @@ fixup_bundle_environment (int argc, char* argv[])
 		return;
 	}
 	
+        EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency);
+
 	set_language_preference ();
 
 	char execpath[MAXPATHLEN+1];
@@ -269,6 +272,8 @@ fixup_bundle_environment (int argc, char* argv[])
 	if (!getenv ("ARDOUR_BUNDLED")) {
 		return;
 	}
+
+        global_epa = new EnvironmentalProtectionAgency;
 	
 	Glib::ustring exec_path = argv[0];
 	Glib::ustring dir_path = Glib::path_get_dirname (Glib::path_get_dirname (exec_path));
@@ -475,7 +480,7 @@ int main (int argc, char* argv[])
 #endif
 {
 	vector<Glib::ustring> null_file_list;
-	
+
 	fixup_bundle_environment (argc, argv);
 
         Glib::thread_init();
