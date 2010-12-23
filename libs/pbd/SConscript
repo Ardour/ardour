@@ -26,6 +26,7 @@ copyfile.cc
 controllable.cc
 enumwriter.cc
 dmalloc.cc
+epa.cc
 error.cc
 fpu.cc
 id.cc

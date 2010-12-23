@@ -25,6 +25,7 @@
 #include <glibmm/timer.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/stacktrace.h>
+#include <pbd/epa.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/buffer.h>
@@ -670,6 +671,16 @@ int
 AudioEngine::connect (const string& source, const string& destination)
 {
         GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+
+        EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
+        EnvironmentalProtectionAgency current_epa; // saves current settings and restores on exit from this scope
+
+        /* revert all environment settings back to whatever they were when ardour started
+         */
+
+        if (global_epa) {
+                global_epa->restore ();
+        }
 	
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
@@ -1279,6 +1290,13 @@ AudioEngine::reconnect_to_jack ()
 			error << string_compose (_("Disconnected from JACK while reconnecting. You should quit %1 now."), PROGRAM_NAME) << endmsg;
 			return -1;
 		}
+
+                EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
+                EnvironmentalProtectionAgency current_epa; // saves current settings and restores on exit from this scope
+
+                if (global_epa) {
+                        global_epa->restore ();
+                }
 		
 		if ((err = jack_connect (_priv_jack, (*i).first.c_str(), (*i).second.c_str())) != 0) {
 			if (err != EEXIST) {
