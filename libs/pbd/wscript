@@ -71,6 +71,7 @@ def build(bld):
                 event_loop.cc
 		dmalloc.cc
                 enums.cc
+                epa.cc
 		error.cc
 		filesystem.cc
 		filesystem_paths.cc
