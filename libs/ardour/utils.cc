@@ -400,7 +400,7 @@ edit_mode_to_string (EditMode mode)
 SyncSource
 string_to_sync_source (string str)
 {
-	if (str == _("MIDI Timecode")) {
+	if (str == _("MIDI Timecode") || str == _("MTC")) {
 		return MTC;
 	}
 
@@ -417,15 +417,20 @@ string_to_sync_source (string str)
 	return JACK;
 }
 
+/** @param sh Return a short version of the string */
 const char*
-sync_source_to_string (SyncSource src)
+sync_source_to_string (SyncSource src, bool sh)
 {
 	switch (src) {
 	case JACK:
 		return _("JACK");
 
 	case MTC:
-		return _("MIDI Timecode");
+		if (sh) {
+			return _("MTC");
+		} else {
+			return _("MIDI Timecode");
+		}
 
 	case MIDIClock:
 		return _("MIDI Clock");

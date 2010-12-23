@@ -64,7 +64,7 @@ bool path_is_paired (std::string path, std::string& pair_base);
 
 void compute_equal_power_fades (ARDOUR::framecnt_t nframes, float* in, float* out);
 
-const char* sync_source_to_string (ARDOUR::SyncSource src);
+const char* sync_source_to_string (ARDOUR::SyncSource src, bool sh = false);
 ARDOUR::SyncSource string_to_sync_source (std::string str);
 
 const char* edit_mode_to_string (ARDOUR::EditMode);
