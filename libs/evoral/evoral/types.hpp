@@ -52,17 +52,17 @@ template<typename T>
 struct RangeMove {
 	RangeMove (T f, double l, T t) : from (f), length (l), to (t) {}
 	T         from;   ///< start of the range
-        double    length; ///< length of the range
+	double    length; ///< length of the range
 	T         to;     ///< new start of the range
 };
 
 } // namespace Evoral
 
 namespace PBD {
-        namespace DEBUG {
-                extern uint64_t Sequence;
-                extern uint64_t Note;
-        }
+	namespace DEBUG {
+		extern uint64_t Sequence;
+		extern uint64_t Note;
+	}
 }
 
 #endif // EVORAL_TYPES_HPP

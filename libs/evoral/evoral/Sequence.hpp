@@ -62,7 +62,7 @@ template<typename Time>
 class Sequence : virtual public ControlSet {
 public:
 	Sequence(const TypeMap& type_map);
-        Sequence(const Sequence<Time>& other);
+	Sequence(const Sequence<Time>& other);
 
 protected:
 	struct WriteLockImpl {
@@ -80,8 +80,8 @@ protected:
 
 public:
 
-        typedef typename boost::shared_ptr<Evoral::Note<Time> >  NotePtr;
-        typedef typename boost::shared_ptr<const Evoral::Note<Time> >  constNotePtr;
+	typedef typename boost::shared_ptr<Evoral::Note<Time> >  NotePtr;
+	typedef typename boost::shared_ptr<const Evoral::Note<Time> >  constNotePtr;
 
 	typedef boost::shared_ptr<Glib::RWLock::ReaderLock> ReadLock;
 	typedef boost::shared_ptr<WriteLockImpl>            WriteLock;
@@ -98,7 +98,7 @@ public:
 	bool writing() const { return _writing; }
 	void end_write(bool delete_stuck=false);
 
-        void append(const Event<Time>& ev, Evoral::event_id_t evid);
+	void append(const Event<Time>& ev, Evoral::event_id_t evid);
 
 	inline size_t n_notes() const { return _notes.size(); }
 	inline bool   empty()   const { return _notes.size() == 0 && ControlSet::controls_empty(); }
@@ -142,34 +142,34 @@ public:
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
-        enum NoteOperator { 
-                PitchEqual,
-                PitchLessThan,
-                PitchLessThanOrEqual,
-                PitchGreater,
-                PitchGreaterThanOrEqual,
-                VelocityEqual,
-                VelocityLessThan,
-                VelocityLessThanOrEqual,
-                VelocityGreater,
-                VelocityGreaterThanOrEqual,
-        };
+	enum NoteOperator { 
+		PitchEqual,
+		PitchLessThan,
+		PitchLessThanOrEqual,
+		PitchGreater,
+		PitchGreaterThanOrEqual,
+		VelocityEqual,
+		VelocityLessThan,
+		VelocityLessThanOrEqual,
+		VelocityGreater,
+		VelocityGreaterThanOrEqual,
+	};
 
-        void get_notes (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
+	void get_notes (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
 
-        void remove_overlapping_notes ();
-        void trim_overlapping_notes ();
-        void remove_duplicate_notes ();
+	void remove_overlapping_notes ();
+	void trim_overlapping_notes ();
+	void remove_duplicate_notes ();
 
-        enum OverlapPitchResolution { 
-                LastOnFirstOff,
-                FirstOnFirstOff
-        };
+	enum OverlapPitchResolution { 
+		LastOnFirstOff,
+		FirstOnFirstOff
+	};
 
-        bool overlapping_pitches_accepted() const { return _overlapping_pitches_accepted; }
-        void overlapping_pitches_accepted(bool yn)  { _overlapping_pitches_accepted = yn; }
-        OverlapPitchResolution overlap_pitch_resolution() const { return _overlap_pitch_resolution; }
-        void set_overlap_pitch_resolution(OverlapPitchResolution opr);
+	bool overlapping_pitches_accepted() const { return _overlapping_pitches_accepted; }
+	void overlapping_pitches_accepted(bool yn)  { _overlapping_pitches_accepted = yn; }
+	OverlapPitchResolution overlap_pitch_resolution() const { return _overlap_pitch_resolution; }
+	void set_overlap_pitch_resolution(OverlapPitchResolution opr);
 
 	void set_notes (const Sequence<Time>::Notes& n);
 
@@ -223,10 +223,14 @@ public:
 		bool                             _force_discrete;
 	};
 
-	const_iterator begin (Time t = 0, bool force_discrete = false, std::set<Evoral::Parameter> const & f = std::set<Evoral::Parameter> ()) const {
+	const_iterator begin (
+		Time t = 0,
+		bool force_discrete = false,
+		std::set<Evoral::Parameter> const & f = std::set<Evoral::Parameter> ()) const {
 		return const_iterator (*this, t, force_discrete, f);
 	}
-	const const_iterator& end()           const { return _end_iter; }
+	
+	const const_iterator& end() const { return _end_iter; }
 
 	typename Notes::const_iterator note_lower_bound (Time t) const;
 
@@ -236,11 +240,11 @@ public:
 	bool edited() const      { return _edited; }
 	void set_edited(bool yn) { _edited = yn; }
 
-        bool overlaps (const NotePtr& ev, 
-                       const NotePtr& ignore_this_note) const;
-        bool contains (const NotePtr& ev) const;
+	bool overlaps (const NotePtr& ev, 
+	               const NotePtr& ignore_this_note) const;
+	bool contains (const NotePtr& ev) const;
 
-        bool add_note_unlocked (const NotePtr note, void* arg = 0);
+	bool add_note_unlocked (const NotePtr note, void* arg = 0);
 	void remove_note_unlocked(const constNotePtr note);
 
 	uint8_t lowest_note()  const { return _lowest_note; }
@@ -249,39 +253,39 @@ public:
 
 protected:
 	bool                   _edited;
-        bool                   _overlapping_pitches_accepted;
-        OverlapPitchResolution _overlap_pitch_resolution;
+	bool                   _overlapping_pitches_accepted;
+	OverlapPitchResolution _overlap_pitch_resolution;
 	mutable Glib::RWLock   _lock;
 	bool                   _writing;
 
-        virtual int resolve_overlaps_unlocked (const NotePtr, void* /* arg */ = 0) {
-                return 0;
-        }
+	virtual int resolve_overlaps_unlocked (const NotePtr, void* /* arg */ = 0) {
+		return 0;
+	}
 
 	typedef std::multiset<NotePtr, NoteNumberComparator>  Pitches;
 	inline       Pitches& pitches(uint8_t chan)       { return _pitches[chan&0xf]; }
-        inline const Pitches& pitches(uint8_t chan) const { return _pitches[chan&0xf]; }
+	inline const Pitches& pitches(uint8_t chan) const { return _pitches[chan&0xf]; }
 
 private:
 	friend class const_iterator;
 
-        bool overlaps_unlocked (const NotePtr& ev, const NotePtr& ignore_this_note) const;
-        bool contains_unlocked (const NotePtr& ev) const;
+	bool overlaps_unlocked (const NotePtr& ev, const NotePtr& ignore_this_note) const;
+	bool contains_unlocked (const NotePtr& ev) const;
 
-        void append_note_on_unlocked (NotePtr, Evoral::event_id_t);
-        void append_note_off_unlocked(NotePtr);
-        void append_control_unlocked(const Parameter& param, Time time, double value, Evoral::event_id_t);
-        void append_sysex_unlocked(const MIDIEvent<Time>& ev, Evoral::event_id_t);
+	void append_note_on_unlocked (NotePtr, Evoral::event_id_t);
+	void append_note_off_unlocked(NotePtr);
+	void append_control_unlocked(const Parameter& param, Time time, double value, Evoral::event_id_t);
+	void append_sysex_unlocked(const MIDIEvent<Time>& ev, Evoral::event_id_t);
 
-        void get_notes_by_pitch (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
-        void get_notes_by_velocity (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
+	void get_notes_by_pitch (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
+	void get_notes_by_velocity (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
 
 	void control_list_marked_dirty ();
 
 	const TypeMap& _type_map;
 
-        Notes   _notes;       // notes indexed by time
-        Pitches _pitches[16]; // notes indexed by channel+pitch
+	Notes   _notes;       // notes indexed by time
+	Pitches _pitches[16]; // notes indexed by channel+pitch
 	SysExes _sysexes;
 
 	typedef std::multiset<NotePtr, EarlierNoteComparator> WriteNotes;

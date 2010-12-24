@@ -30,7 +30,7 @@ template<typename Time>
 class EventSink {
 public:
 	virtual ~EventSink() {}
-        virtual uint32_t write(Time time, EventType type, uint32_t size, const uint8_t* buf) = 0;
+	virtual uint32_t write(Time time, EventType type, uint32_t size, const uint8_t* buf) = 0;
 };
 
 

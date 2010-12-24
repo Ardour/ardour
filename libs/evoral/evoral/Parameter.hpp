@@ -79,21 +79,21 @@ public:
 
 	/** Not used in indentity/comparison */
 	struct Metadata {
-                Metadata(double low=0.0, double high=1.0, double mid=0.0, bool tog=false)
-                        : min(low), max(high), normal(mid), toggled(tog)
+		Metadata(double low=0.0, double high=1.0, double mid=0.0, bool tog=false)
+			: min(low), max(high), normal(mid), toggled(tog)
 		{}
 		double min;
 		double max;
 		double normal;
-                bool   toggled;
+		bool   toggled;
 	};
 
-        inline static void set_range(uint32_t type, double min, double max, double normal, bool toggled) {
+	inline static void set_range(uint32_t type, double min, double max, double normal, bool toggled) {
 		_type_metadata[type] = Metadata(min, max, normal, toggled);
 	}
 
-        inline void set_range(double min, double max, double normal, bool toggled) {
-                _metadata = boost::shared_ptr<Metadata>(new Metadata(min, max, normal, toggled));
+	inline void set_range(double min, double max, double normal, bool toggled) {
+		_metadata = boost::shared_ptr<Metadata>(new Metadata(min, max, normal, toggled));
 	}
     
 	inline Metadata& metadata() const {

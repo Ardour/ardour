@@ -96,8 +96,8 @@ public:
 	bool operator== (const ControlList&);
 
 	virtual void freeze();
-        virtual void thaw ();
-        bool frozen() const { return _frozen; }
+	virtual void thaw ();
+	bool frozen() const { return _frozen; }
 
 	const Parameter& parameter() const                 { return _parameter; }
 	void             set_parameter(const Parameter& p) { _parameter = p; }
@@ -113,12 +113,12 @@ public:
 	void x_scale (double factor);
 	bool extend_to (double);
 	void slide (iterator before, double distance);
-        void shift (double before, double distance);
+	void shift (double before, double distance);
 
 	void rt_add (double when, double value);
 	void add (double when, double value);
 	void fast_simple_add (double when, double value);
-        void merge_nascent (double when);
+	void merge_nascent (double when);
 
 	void reset_range (double start, double end);
 	void erase_range (double start, double end);
@@ -235,10 +235,10 @@ public:
 	InterpolationStyle interpolation() const { return _interpolation; }
 	void set_interpolation (InterpolationStyle);
 
-        virtual bool touching() const { return false; }
-        virtual bool writing() const { return false; }
-        virtual bool touch_enabled() const { return false; }
-        void write_pass_finished (double when);
+	virtual bool touching() const { return false; }
+	virtual bool writing() const { return false; }
+	virtual bool touch_enabled() const { return false; }
+	void write_pass_finished (double when);
 
 	/** Emitted when mark_dirty() is called on this object */
 	mutable PBD::Signal0<void> Dirty;
@@ -276,20 +276,20 @@ protected:
 
 	Curve* _curve;
 
-        struct NascentInfo {
-            EventList events;
-            bool   is_touch;
-            double start_time;
-            double end_time;
+	struct NascentInfo {
+		EventList events;
+		bool   is_touch;
+		double start_time;
+		double end_time;
             
-            NascentInfo (bool touching, double start = -1.0)
-                    : is_touch (touching)
-                    , start_time (start)
-                    , end_time (-1.0) 
-            {}
-        };
+		NascentInfo (bool touching, double start = -1.0)
+			: is_touch (touching)
+			, start_time (start)
+			, end_time (-1.0) 
+			{}
+	};
     
-        std::list<NascentInfo*> nascent;
+	std::list<NascentInfo*> nascent;
 };
 
 } // namespace Evoral

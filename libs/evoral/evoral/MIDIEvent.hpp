@@ -37,8 +37,8 @@ namespace Evoral {
  */
 template<typename Time>
 struct MIDIEvent : public Event<Time> {
-        MIDIEvent(EventType type=0, Time time=0, uint32_t size=0, uint8_t* buf=NULL, bool alloc=false)
-                : Event<Time>(type, time, size, buf, alloc)
+	MIDIEvent(EventType type=0, Time time=0, uint32_t size=0, uint8_t* buf=NULL, bool alloc=false)
+		: Event<Time>(type, time, size, buf, alloc)
 	{}
 
 	MIDIEvent(const Event<Time>& copy, bool alloc)
@@ -68,7 +68,7 @@ struct MIDIEvent : public Event<Time> {
 	inline bool     is_aftertouch()         const { return (type() == MIDI_CMD_NOTE_PRESSURE); }
 	inline bool     is_channel_pressure()   const { return (type() == MIDI_CMD_CHANNEL_PRESSURE); }
 	inline uint8_t  note()                  const { return (this->_buf[1]); }
-        inline void     set_note(uint8_t n)           { this->_buf[1] = n; }
+	inline void     set_note(uint8_t n)           { this->_buf[1] = n; }
 	inline uint8_t  velocity()              const { return (this->_buf[2]); }
 	inline void     set_velocity(uint8_t value)   { this->_buf[2] = value; }
 	inline void     scale_velocity(float factor)  {

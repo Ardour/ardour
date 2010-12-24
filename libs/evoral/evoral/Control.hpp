@@ -47,7 +47,7 @@ public:
 	 * Automation write/touch works by periodically sampling this value
 	 * and adding it to the ControlList.
 	 */
-        double user_double() const { return _user_value; }
+	double user_double() const { return _user_value; }
 
 	void set_list(boost::shared_ptr<ControlList>);
 
@@ -63,7 +63,7 @@ public:
 protected:
 	Parameter                      _parameter;
 	boost::shared_ptr<ControlList> _list;
-        double                         _user_value;
+	double                         _user_value;
 	PBD::ScopedConnection          _list_marked_dirty_connection;
 
 private:

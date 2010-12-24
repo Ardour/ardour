@@ -45,7 +45,7 @@ void init_event_id_counter (event_id_t n);
 template<typename Time>
 struct Event {
 #ifdef EVORAL_EVENT_ALLOC
-         Event (EventType type=0, Time time=0, uint32_t size=0, uint8_t* buf=NULL, bool alloc=false);
+	Event (EventType type=0, Time time=0, uint32_t size=0, uint8_t* buf=NULL, bool alloc=false);
 
 	/** Copy \a copy.
 	 *
@@ -58,7 +58,7 @@ struct Event {
 	~Event();
 
 	inline const Event& operator=(const Event& copy) {
-                _id = copy.id(); // XXX is this right? do we want ID copy semantics?
+		_id = copy.id(); // XXX is this right? do we want ID copy semantics?
 		_type = copy._type;
 		_original_time = copy._original_time;
 		_nominal_time = copy._nominal_time;
@@ -173,8 +173,8 @@ struct Event {
 	void set_time (Time);
 	void set_original_time (Time);
 
-        inline event_id_t id() const { return _id; }
-        inline void set_id (event_id_t n) { _id = n; }
+	inline event_id_t id() const { return _id; }
+	inline void set_id (event_id_t n) { _id = n; }
 
 protected:
 	EventType _type; /**< Type of event (application relative, NOT MIDI 'type') */
@@ -186,7 +186,7 @@ protected:
 #ifdef EVORAL_EVENT_ALLOC
 	bool      _owns_buf; /**< Whether buffer is locally allocated */
 #endif
-        event_id_t  _id; /** UUID for each event, should probably be 64bit or at least unsigned */
+	event_id_t  _id; /** UUID for each event, should probably be 64bit or at least unsigned */
 };
 
 } // namespace Evoral
