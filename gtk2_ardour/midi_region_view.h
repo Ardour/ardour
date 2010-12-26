@@ -149,7 +149,7 @@ class MidiRegionView : public RegionView
 	 */
 	void alter_program_change(PCEvent& old_program, const MIDI::Name::PatchPrimaryKey& new_patch);
 
-	void add_program_change (framecnt_t, uint8_t, uint8_t);
+	void add_program_change (framecnt_t, uint8_t);
 	void move_program_change (PCEvent, Evoral::MusicalTime);
 	void delete_program_change (ArdourCanvas::CanvasProgramChange *);
 
@@ -345,6 +345,8 @@ class MidiRegionView : public RegionView
 
 	void add_to_selection (ArdourCanvas::CanvasNoteEvent*);
 	void remove_from_selection (ArdourCanvas::CanvasNoteEvent*);
+
+	uint8_t get_channel_for_add () const;
 
 	int8_t   _force_channel;
 	uint16_t _last_channel_selection;

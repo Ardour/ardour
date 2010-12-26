@@ -4724,7 +4724,7 @@ Editor::insert_program_change ()
 		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*i);
 		if (mrv) {
 			if (p >= mrv->region()->first_frame() && p <= mrv->region()->last_frame()) {
-				mrv->add_program_change (p - mrv->region()->position(), d.channel (), d.program ());
+				mrv->add_program_change (p - mrv->region()->position(), d.program ());
 			}
 		}
 	}

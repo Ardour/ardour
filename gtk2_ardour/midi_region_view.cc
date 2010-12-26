@@ -58,7 +58,6 @@
 #include "midi_region_view.h"
 #include "midi_streamview.h"
 #include "midi_time_axis.h"
-#include "midi_time_axis.h"
 #include "midi_util.h"
 #include "note_player.h"
 #include "public_editor.h"
@@ -726,7 +725,7 @@ MidiRegionView::create_note_at(double x, double y, double length, bool sh)
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const view = mtv->midi_view();
 
-	double note = midi_stream_view()->y_to_note(y);
+	double note = view->y_to_note(y);
 
 	assert(note >= 0.0);
 	assert(note <= 127.0);
@@ -745,26 +744,7 @@ MidiRegionView::create_note_at(double x, double y, double length, bool sh)
 		length = frames_to_beats (beats_to_frames (length) - 1);
 	}
 
-	uint16_t chn_mask = mtv->channel_selector().get_selected_channels();
-        int chn_cnt = 0;
-        uint8_t channel = 0;
-
-        /* pick the highest selected channel, unless all channels are selected,
-           which is interpreted to mean channel 1 (zero)
-        */
-
-        for (uint16_t i = 0; i < 16; ++i) {
-                if (chn_mask & (1<<i)) {
-                        channel = i;
-                        chn_cnt++;
-                }
-        }
-
-        if (chn_cnt == 16) {
-                channel = 0;
-        }
-
-	const boost::shared_ptr<NoteType> new_note (new NoteType (channel,
+	const boost::shared_ptr<NoteType> new_note (new NoteType (get_channel_for_add (),
                                                                   frames_to_beats(start_frames + _region->start()), length,
                                                                   (uint8_t)note, 0x40));
 
@@ -1670,10 +1650,10 @@ MidiRegionView::alter_program_change(PCEvent& old_program, const MIDI::Name::Pat
 
 /** @param t Time in frames relative to region position */
 void
-MidiRegionView::add_program_change (framecnt_t t, uint8_t channel, uint8_t value)
+MidiRegionView::add_program_change (framecnt_t t, uint8_t value)
 {
 	boost::shared_ptr<Evoral::Control> control = midi_region()->model()->control (
-		Evoral::Parameter (MidiPgmChangeAutomation, channel, 0), true
+		Evoral::Parameter (MidiPgmChangeAutomation, get_channel_for_add (), 0), true
 		);
 	
 	assert (control);
@@ -3293,4 +3273,33 @@ MidiRegionView::trim_front_ending ()
 		/* Trim drag made start time -ve; fix this */
 		midi_region()->fix_negative_start ();
 	}
+}
+
+/** @return channel (counted from 0) to add an event to, based on the current setting
+ *  of the channel selector.
+ */
+uint8_t
+MidiRegionView::get_channel_for_add () const
+{
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	uint16_t const chn_mask = mtv->channel_selector().get_selected_channels();
+	int chn_cnt = 0;
+	uint8_t channel = 0;
+
+	/* pick the highest selected channel, unless all channels are selected,
+	   which is interpreted to mean channel 1 (zero)
+	*/
+
+        for (uint16_t i = 0; i < 16; ++i) {
+                if (chn_mask & (1<<i)) {
+                        channel = i;
+                        chn_cnt++;
+                }
+        }
+
+        if (chn_cnt == 16) {
+                channel = 0;
+        }
+
+	return channel;
 }

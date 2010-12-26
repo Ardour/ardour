@@ -26,10 +26,8 @@ class ProgramChangeDialog : public ArdourDialog
 public:
 	ProgramChangeDialog ();
 
-	uint8_t channel () const;
 	uint8_t program () const;
 
 private:
-	Gtk::SpinButton _channel;
 	Gtk::SpinButton _program;
 };
