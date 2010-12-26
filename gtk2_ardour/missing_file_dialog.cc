@@ -61,8 +61,8 @@ MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataT
         replace_all (dirstr, ":", "\n");
 
         msg.set_justify (JUSTIFY_CENTER);
-        msg.set_markup (string_compose (_("Ardour cannot find the %1 file\n\n<i>%2</i>\n\nin any of these folders:\n\n\
-<tt>%3</tt>\n\n"), typestr, path, dirstr));
+        msg.set_markup (string_compose (_("%1 cannot find the %2 file\n\n<i>%3</i>\n\nin any of these folders:\n\n\
+<tt>%4</tt>\n\n"), PROGRAM_NAME, typestr, path, dirstr));
 
         HBox* hbox = manage (new HBox);
         hbox->pack_start (msg, false, true);
