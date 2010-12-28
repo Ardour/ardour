@@ -156,6 +156,7 @@ Editor::create_editor_mixer ()
 					      _session,
 					      false);
 	current_mixer_strip->Hiding.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_hidden));
+	current_mixer_strip->WidthChanged.connect (sigc::mem_fun (*this, &Editor::mixer_strip_width_changed));
 
 #ifdef GTKOSX
 	current_mixer_strip->WidthChanged.connect (sigc::mem_fun(*this, &Editor::ensure_all_elements_drawn));
@@ -237,7 +238,16 @@ void
 Editor::maybe_add_mixer_strip_width (XMLNode& node)
 {
 	if (current_mixer_strip) {
-		node.add_property ("mixer-width", enum_2_string (current_mixer_strip->get_width_enum()));
+		node.add_property ("mixer-width", enum_2_string (editor_mixer_strip_width));
 	}
 }
 
+void
+Editor::mixer_strip_width_changed ()
+{
+#ifdef GTKOSX
+	ensure_all_elements_drawn ();
+#endif
+
+	editor_mixer_strip_width = current_mixer_strip->get_width_enum ();
+}
