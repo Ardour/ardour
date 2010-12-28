@@ -46,13 +46,10 @@ struct _GnomeCanvasSimpleLine
     GnomeCanvasItem item;
     double x1, y1, x2, y2;
     uint32_t color;
-    gboolean horizontal;
 
     /* cached values set during update/used during render */
 
     unsigned char r, b, g, a;
-    gint32 bbox_ulx, bbox_uly;
-    gint32 bbox_lrx, bbox_lry;
 };
 
 struct _GnomeCanvasSimpleLineClass {

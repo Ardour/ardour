@@ -172,7 +172,6 @@ gnome_canvas_simpleline_init (GnomeCanvasSimpleLine *simpleline)
 	simpleline->x2 = 0.0;
 	simpleline->y2 = 0.0;
 	simpleline->color = RGBA_TO_UINT(98,123,174,241);
-	simpleline->horizontal = TRUE; /* reset in the _update() method */
 }
 
 static void
@@ -187,51 +186,6 @@ gnome_canvas_simpleline_destroy (GtkObject *object)
 
 	if (GTK_OBJECT_CLASS (parent_class)->destroy)
 		(* GTK_OBJECT_CLASS (parent_class)->destroy) (object);
-}
-
-static void
-gnome_canvas_simpleline_bounds_world (GnomeCanvasItem *item, int* ix1, int* iy1, int* ix2, int* iy2)
-{
-	double x1, x2, y1, y2;
-	ArtPoint i1, i2;
-	ArtPoint w1, w2;
-	double i2w[6];
-	GnomeCanvasSimpleLine *simpleline = GNOME_CANVAS_SIMPLELINE(item);
-
-	gnome_canvas_simpleline_bounds (item, &x1, &y1, &x2, &y2);
-
-	i1.x = x1;
-	i1.y = y1;
-	i2.x = x2;
-	i2.y = y2;
-
-	gnome_canvas_item_i2w_affine (item, i2w);
-	art_affine_point (&w1, &i1, i2w);
-	art_affine_point (&w2, &i2, i2w);
-
-	*ix1 = (int) rint(w1.x);
-	*ix2 = (int) rint(w2.x);
-	*iy1 = (int) rint(w1.y);
-	*iy2 = (int) rint(w2.y);
-
-	/* the update rect has to be of non-zero width and height */
-
-	if (x1 == x2) {
-		simpleline->horizontal = FALSE;
-		*ix2 += 1;
-	} else {
-		simpleline->horizontal = TRUE;
-		*iy2 += 1;
-	}
-}
-
-static void
-gnome_canvas_simpleline_reset_bounds (GnomeCanvasItem *item)
-{
-	int Ix1, Ix2, Iy1, Iy2;
-
-	gnome_canvas_simpleline_bounds_world (item, &Ix1, &Iy1, &Ix2, &Iy2);
-	gnome_canvas_update_bbox (item, Ix1, Iy1, Ix2, Iy2);
 }
 
 /*
@@ -250,6 +204,7 @@ gnome_canvas_simpleline_set_property (GObject      *object,
 	GnomeCanvasSimpleLine *simpleline;
 	int update = FALSE;
 	int bounds_changed = FALSE;
+        double d;
 
 	g_return_if_fail (object != NULL);
 	g_return_if_fail (GNOME_IS_CANVAS_SIMPLELINE (object));
@@ -258,29 +213,33 @@ gnome_canvas_simpleline_set_property (GObject      *object,
 
 	switch (prop_id) {
 	case PROP_X1:
-	        if (simpleline->x1 != g_value_get_double (value)) {
-		        simpleline->x1 = g_value_get_double (value);
+                d = g_value_get_double (value);
+	        if (simpleline->x1 != d) {
+		        simpleline->x1 = d;
 			bounds_changed = TRUE;
 		}
 		break;
 
 	case PROP_Y1:
-	        if (simpleline->y1 != g_value_get_double (value)) {
-		        simpleline->y1 = g_value_get_double (value);
+                d = g_value_get_double (value);
+	        if (simpleline->y1 != d) {
+		        simpleline->y1 = d; 
 			bounds_changed = TRUE;
 		}
 		break;
 
 	case PROP_X2:
-	        if (simpleline->x2 != g_value_get_double (value)) {
-		        simpleline->x2 = g_value_get_double (value);
+                d = g_value_get_double (value);
+	        if (simpleline->x2 != d) {
+		        simpleline->x2 = d;
 			bounds_changed = TRUE;
 		}
 		break;
 
 	case PROP_Y2:
-	        if (simpleline->y2 != g_value_get_double (value)) {
-		        simpleline->y2 = g_value_get_double (value);
+                d = g_value_get_double (value);
+	        if (simpleline->y2 != d) {
+		        simpleline->y2 = d;
 			bounds_changed = TRUE;
 		}
 		break;
@@ -338,119 +297,58 @@ static void
 gnome_canvas_simpleline_update (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags)
 {
 	GnomeCanvasSimpleLine *simpleline;
-	double x;
-	double y;
+        double x1, x2, y1, y2;
 
 	simpleline = GNOME_CANVAS_SIMPLELINE (item);
 
 	if (parent_class->update)
 		(* parent_class->update) (item, affine, clip_path, flags);
 
-	gnome_canvas_simpleline_reset_bounds (item);
-
-	x = simpleline->x1;
-	y = simpleline->y1;
-
-	gnome_canvas_item_i2w (item, &x, &y);
-	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x, y, &simpleline->bbox_ulx, &simpleline->bbox_uly);
-
-	x = simpleline->x2;
-	y = simpleline->y2;
-
-	gnome_canvas_item_i2w (item, &x, &y);
-	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x, y, &simpleline->bbox_lrx, &simpleline->bbox_lry);
+        gnome_canvas_simpleline_bounds (item, &x1, &y1, &x2, &y2);
+	gnome_canvas_update_bbox (item, x1, y1, x2, y2);
 }
 
 static void
 gnome_canvas_simpleline_render (GnomeCanvasItem *item,
-			      GnomeCanvasBuf *buf)
+                                GnomeCanvasBuf *buf)
 {
 	GnomeCanvasSimpleLine *simpleline;
-	int end, begin;
+	int x1, x2;
+        int y1, y2;
 
 	simpleline = GNOME_CANVAS_SIMPLELINE (item);
 
-	if (parent_class->render) {
-		(*parent_class->render) (item, buf);
-	}
+	x1 = rint (simpleline->x1);
+	x2 = rint (simpleline->x2);
+        y1 = (int) rint (simpleline->y1);
 
 	if (buf->is_bg) {
 		gnome_canvas_buf_ensure_buf (buf);
 		buf->is_bg = FALSE;
 	}
-
-	//begin = MAX(simpleline->bbox_ulx,buf->rect.x0);
-	//end = MIN(simpleline->bbox_lrx,buf->rect.x1);
-
-	begin = simpleline->bbox_ulx;
-	end = simpleline->bbox_lrx;
-
-	if (simpleline->color != 0) {
-		if (simpleline->horizontal) {
-			PAINT_HORIZA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
-				     begin, end, simpleline->bbox_uly);
-		} else {
-			PAINT_VERTA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
-				    begin, simpleline->bbox_uly, simpleline->bbox_lry);
-		}
-	}
+        
+        if (simpleline->x1 != simpleline->x2) {
+                PAINT_HORIZA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
+                             x1, x2, y1);
+        } else {
+                y2 = (int) rint (simpleline->y2);
+                PAINT_VERTA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
+                            x1, y1, y2);
+                
+        }
 }
 
 static void
 gnome_canvas_simpleline_draw (GnomeCanvasItem *item,
-			    GdkDrawable *drawable,
-			    int x, int y,
-			    int width, int height)
+                              GdkDrawable *drawable,
+                              int x, int y,
+                              int width, int height)
 {
 	GnomeCanvasSimpleLine *simpleline;
-	cairo_t* cr;
-	double ulx;
-	double uly;
-	double lrx;
-	double lry;
 
 	simpleline = GNOME_CANVAS_SIMPLELINE (item);
 
-	cr = gdk_cairo_create (drawable);
-
-	if (x > simpleline->bbox_ulx) {
-		ulx = x;
-	} else {
-		ulx = simpleline->bbox_ulx;
-	}
-
-	if (y > simpleline->bbox_uly) {
-		uly = y;
-	} else {
-		uly = simpleline->bbox_uly;
-	}
-
-	if (x + width > simpleline->bbox_lrx) {
-		lrx = simpleline->bbox_lrx;
-	} else {
-		lrx = x + width;
-	}
-
-	if (y + height > simpleline->bbox_lry) {
-		lry = simpleline->bbox_lry;
-	} else {
-		lry = y + height;
-	}
-
-	ulx -= x;
-	uly -= y;
-	lrx -= x;
-	lry -= y;
-
-	cairo_set_source_rgba (cr,
-			       simpleline->r/255.0,
-			       simpleline->g/255.0,
-			       simpleline->b/255.0,
-			       simpleline->a/255.0);
-	cairo_set_line_width (cr, 1);
-	cairo_move_to (cr, ulx+0.5, uly+0.5);
-	cairo_line_to (cr, lrx+0.5, lry+0.5);
-	cairo_stroke (cr);
+        /* XXX not implemented */
 }
 
 static void
@@ -458,10 +356,19 @@ gnome_canvas_simpleline_bounds (GnomeCanvasItem *item, double *x1, double *y1, d
 {
 	GnomeCanvasSimpleLine *simpleline = GNOME_CANVAS_SIMPLELINE (item);
 
-	*x1 = simpleline->x1;
-	*y1 = simpleline->y1;
-	*x2 = simpleline->x2;
-	*y2 = simpleline->y2;
+        if (simpleline->x1 != simpleline->x2) {
+                /* horizontal */
+                *x1 = floor (simpleline->x1);
+                *y1 = floor (simpleline->y1);
+                *x2 = ceil (simpleline->x2);
+                *y2 = ceil (simpleline->y1 + 1);
+        } else {
+                /* vertical */
+                *x1 = floor (simpleline->x1);
+                *y1 = floor (simpleline->y1);
+                *x2 = ceil (simpleline->x1 + 1);
+                *y2 = ceil (simpleline->y2);
+        }
 }
 
 static double
@@ -478,7 +385,7 @@ gnome_canvas_simpleline_point (GnomeCanvasItem *item, double x, double y, int cx
 
 	*actual_item = item;
 
-	/* Find the bounds for the line plus its outline width */
+	/* Find the bounds for the line */
 
 	gnome_canvas_simpleline_bounds (item, &x1, &y1, &x2, &y2);
 
@@ -487,7 +394,6 @@ gnome_canvas_simpleline_point (GnomeCanvasItem *item, double x, double y, int cx
 	if ((x >= x1) && (y >= y1) && (x <= x2) && (y <= y2)) {
 		return 0.0;
 	}
-
 	/* Point is outside line */
 
 	if (x < x1)
