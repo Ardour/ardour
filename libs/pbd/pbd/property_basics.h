@@ -38,11 +38,11 @@ typedef GQuark PropertyID;
 
 template<typename T>
 struct PropertyDescriptor {
-    PropertyDescriptor () : property_id (0) {}
-    PropertyDescriptor (PropertyID pid) : property_id (pid) {}
-
-    PropertyID property_id;
-    typedef T value_type;
+	PropertyDescriptor () : property_id (0) {}
+	PropertyDescriptor (PropertyID pid) : property_id (pid) {}
+	
+	PropertyID property_id;
+	typedef T value_type;
 };
 
 /** A list of IDs of Properties that have changed in some situation or other */
@@ -78,7 +78,11 @@ public:
 	template<typename T> void add (PropertyDescriptor<T> p);
 };
 
-/** Base (non template) part of Property */
+/** Base (non template) part of Property
+ *  Properties are used for two main reasons:
+ *    - to handle current state (when serializing Stateful objects)
+ *    - to handle history since some operation was started (when making StatefulDiffCommands for undo)
+ */
 class PropertyBase
 {
 public:
@@ -88,18 +92,45 @@ public:
 
 	virtual ~PropertyBase () {}
 
-	virtual PropertyBase* clone () const = 0;
-        
+
+	/* MANAGEMENT OF Stateful STATE */
+
+	/** Set the value of this property from a Stateful node.
+	 *  @return true if the value was set.
+	 */
+	virtual bool set_value (XMLNode const &) = 0;
+
+	/** Get this property's value and put it into a Stateful node */
+	virtual void get_value (XMLNode& node) const = 0;
+
+
+	/* MANAGEMENT OF HISTORY */
+
 	/** Forget about any old changes to this property's value */
 	virtual void clear_changes () = 0;
 
 	/** Tell any things we own to forget about their old values */
 	virtual void clear_owned_changes () {}
 
-        /** Get any changes in this property as XML and add them to a node */
+	/** @return true if this property has changed in value since construction or since
+	 *  the last call to clear_changes (), whichever was more recent.
+	 */
+	virtual bool changed () const = 0;
+
+	/** Invert the changes in this property */
+	virtual void invert () = 0;
+	
+
+	/* TRANSFERRING HISTORY TO / FROM A StatefulDiffCommand */
+
+        /** Get any changes in this property as XML and add them to a
+	 *  StatefulDiffCommand node.
+	 */
 	virtual void get_changes_as_xml (XMLNode *) const = 0;
 	
-        /** Get any changes in this property as Properties and add them to a list */
+        /** If this Property has changed, clone it and add it to a given list.
+	 *  Used for making StatefulDiffCommands.
+	 */
 	virtual void get_changes_as_properties (PropertyList& changes, Command *) const = 0;
 
 	/** Collect StatefulDiffCommands for changes to anything that we own */
@@ -110,24 +141,13 @@ public:
 	 */
         virtual PropertyBase* clone_from_xml (const XMLNode &) const { return 0; }
 
-	/** Set our value from an XML node.
-	 *  @return true if the value was set.
-	 */
-	virtual bool set_value (XMLNode const &) = 0;
 
-	/** Get our value and put it into an XML node */
-	virtual void get_value (XMLNode& node) const = 0;
+	/* VARIOUS */
+	
+	virtual PropertyBase* clone () const = 0;
 
-	/** @return true if this property has changed in value since construction or since
-	 *  the last call to clear_changes (), whichever was more recent.
-	 */
-	virtual bool changed() const = 0;
-
-	/** Apply changes contained in another Property to this one */
+	/** Set this property's current state from another */
 	virtual void apply_changes (PropertyBase const *) = 0;
-
-	/** Invert the changes in this property */
-	virtual void invert () = 0;
 
 	const gchar* property_name () const { return g_quark_to_string (_property_id); }
 	PropertyID   property_id () const   { return _property_id; }

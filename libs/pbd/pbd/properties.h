@@ -33,8 +33,7 @@
 
 namespace PBD {
 
-/** Parent class for classes which represent a single scalar property in a Stateful object 
- */
+/** Parent class for classes which represent a single scalar property in a Stateful object */
 template<class T>
 class PropertyTemplate : public PropertyBase
 {
@@ -57,6 +56,9 @@ public:
 		, _have_old (false)
 		, _current (s._current)
 	{}
+
+
+	/* OPERATORS / ACCESSORS */
 
 	T & operator=(T const& v) {
 		set (v);
@@ -93,16 +95,9 @@ public:
 		return _current;
 	}
 
-	void clear_changes () {
-		_have_old = false;
-	}
 
-	void get_changes_as_xml (XMLNode* history_node) const {
-		XMLNode* node = history_node->add_child (property_name());
-                node->add_property ("from", to_string (_old));
-                node->add_property ("to", to_string (_current));
-	}
-
+	/* MANAGEMENT OF Stateful State */
+	
 	bool set_value (XMLNode const & node) {
 
 		XMLProperty const* p = node.property (property_name());
@@ -123,14 +118,14 @@ public:
                 node.add_property (property_name(), to_string (_current));
 	}
 
-	bool changed () const { return _have_old; }
 	
-	void apply_changes (PropertyBase const * p) {
-		T v = dynamic_cast<const PropertyTemplate<T>* > (p)->val ();
-		if (v != _current) {
-			set (v);
-		}
+	/* MANAGEMENT OF HISTORY */
+	
+	void clear_changes () {
+		_have_old = false;
 	}
+
+	bool changed () const { return _have_old; }
 
 	void invert () {
 		T const tmp = _current;
@@ -138,9 +133,28 @@ public:
 		_old = tmp;
 	}
 
+
+	/* TRANSFERRING HISTORY TO / FROM A StatefulDiffCommand */
+	
+	void get_changes_as_xml (XMLNode* history_node) const {
+		XMLNode* node = history_node->add_child (property_name());
+                node->add_property ("from", to_string (_old));
+                node->add_property ("to", to_string (_current));
+	}
+
 	void get_changes_as_properties (PropertyList& changes, Command *) const {
 		if (this->_have_old) {
 			changes.add (clone ());
+		}
+	}
+
+
+	/* VARIOUS */
+
+	void apply_changes (PropertyBase const * p) {
+		T v = dynamic_cast<const PropertyTemplate<T>* > (p)->val ();
+		if (v != _current) {
+			set (v);
 		}
 	}
 
