@@ -41,9 +41,9 @@ TempoLines::tempo_map_changed()
 	_clean_left = DBL_MAX;
 	_clean_right = 0.0;
 
-	size_t d = 1;
+	double_t d = 1.0;
 	// TODO: Dirty/slow, but 'needed' for zoom :(
-	for (Lines::iterator i = _lines.begin(); i != _lines.end(); ++d) {
+	for (Lines::iterator i = _lines.begin(); i != _lines.end(); d += 1.0) {
 		Lines::iterator next = i;
 		++next;
 		i->second->property_x1() = - d;
