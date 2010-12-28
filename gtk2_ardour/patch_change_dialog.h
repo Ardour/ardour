@@ -19,15 +19,31 @@
 */
 
 #include <gtkmm/spinbutton.h>
+#include "evoral/PatchChange.hpp"
 #include "ardour_dialog.h"
+#include "audio_clock.h"
 
-class ProgramChangeDialog : public ArdourDialog
+namespace ARDOUR {
+	class BeatsFramesConverter;
+	class Session;
+}
+
+class PatchChangeDialog : public ArdourDialog
 {
 public:
-	ProgramChangeDialog ();
+	PatchChangeDialog (
+		const ARDOUR::BeatsFramesConverter *,
+		ARDOUR::Session *,
+		Evoral::PatchChange<Evoral::MusicalTime> const &,
+		const Gtk::BuiltinStockID &
+		);
 
-	uint8_t program () const;
+	Evoral::PatchChange<Evoral::MusicalTime> patch () const;
 
 private:
+	const ARDOUR::BeatsFramesConverter* _time_converter;
+	AudioClock _time;
+	Gtk::SpinButton _channel;
 	Gtk::SpinButton _program;
+	Gtk::SpinButton _bank;
 };

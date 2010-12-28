@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2000-2010 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #include <iostream>
 
 #include <glibmm/regex.h>
@@ -6,7 +25,7 @@
 #include "ardour/midi_patch_manager.h"
 #include "ardour_ui.h"
 #include "midi_region_view.h"
-#include "canvas-program-change.h"
+#include "canvas_patch_change.h"
 #include "editor.h"
 #include "editor_drag.h"
 
@@ -15,9 +34,8 @@ using namespace MIDI::Name;
 using namespace std;
 
 /** @param x x position in pixels.
- *  @param event_time PC time in beats, with respect to the start of the source.
  */
-CanvasProgramChange::CanvasProgramChange(
+CanvasPatchChange::CanvasPatchChange(
 		MidiRegionView& region,
 		Group&          parent,
 		const string&   text,
@@ -26,37 +44,33 @@ CanvasProgramChange::CanvasProgramChange(
 		double          y,
 		string&         model_name,
 		string&         custom_device_mode,
-		double          event_time,
-		uint8_t         channel,
-		uint8_t         program)
+		ARDOUR::MidiModel::PatchChangePtr patch)
 	: CanvasFlag(
 			region,
 			parent,
 			height,
-			ARDOUR_UI::config()->canvasvar_MidiProgramChangeOutline.get(),
-			ARDOUR_UI::config()->canvasvar_MidiProgramChangeFill.get(),
+			ARDOUR_UI::config()->canvasvar_MidiPatchChangeOutline.get(),
+			ARDOUR_UI::config()->canvasvar_MidiPatchChangeFill.get(),
 			x,
 			y)
-	 , _model_name(model_name)
-	 , _custom_device_mode(custom_device_mode)
-	 , _event_time(event_time)
-	 , _channel(channel)
-	 , _program(program)
-	 , _popup_initialized(false)
+	, _model_name(model_name)
+	, _custom_device_mode(custom_device_mode)
+	, _patch (patch)
+	, _popup_initialized(false)
 {
 	set_text(text);
 }
 
-CanvasProgramChange::~CanvasProgramChange()
+CanvasPatchChange::~CanvasPatchChange()
 {
 }
 
 void
-CanvasProgramChange::initialize_popup_menus()
+CanvasPatchChange::initialize_popup_menus()
 {
 	boost::shared_ptr<ChannelNameSet> channel_name_set =
 		MidiPatchManager::instance()
-			.find_channel_name_set(_model_name, _custom_device_mode, _channel);
+		.find_channel_name_set(_model_name, _custom_device_mode, _patch->channel());
 
 	if (!channel_name_set) {
 		return;
@@ -87,7 +101,7 @@ CanvasProgramChange::initialize_popup_menus()
 				Gtk::Menu_Helpers::MenuElem(
 					name,
 					sigc::bind(
-						sigc::mem_fun(*this, &CanvasProgramChange::on_patch_menu_selected),
+						sigc::mem_fun(*this, &CanvasPatchChange::on_patch_menu_selected),
 						(*patch)->patch_primary_key())) );
 		}
 
@@ -102,14 +116,14 @@ CanvasProgramChange::initialize_popup_menus()
 }
 
 void
-CanvasProgramChange::on_patch_menu_selected(const PatchPrimaryKey& key)
+CanvasPatchChange::on_patch_menu_selected(const PatchPrimaryKey& key)
 {
 	cerr << " got patch program number " << key.program_number << endl;
-	_region.program_selected(*this, key);
+	_region.change_patch_change (*this, key);
 }
 
 bool
-CanvasProgramChange::on_event (GdkEvent* ev)
+CanvasPatchChange::on_event (GdkEvent* ev)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
@@ -120,11 +134,16 @@ CanvasProgramChange::on_event (GdkEvent* ev)
 
 			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
 
-				_region.delete_program_change (this);
+				_region.delete_patch_change (this);
+				return true;
+
+			} else if (Gtkmm2ext::Keyboard::is_edit_event (&ev->button)) {
+
+				_region.edit_patch_change (this);
 				return true;
 				
 			} else if (ev->button.button == 1) {
-				e->drags()->set (new ProgramChangeDrag (e, this, &_region), ev);
+				e->drags()->set (new PatchChangeDrag (e, this, &_region), ev);
 				return true;
 			}
 		}
@@ -145,12 +164,12 @@ CanvasProgramChange::on_event (GdkEvent* ev)
 		case GDK_Up:
 		case GDK_KP_Up:
 		case GDK_uparrow:
-			_region.previous_program(*this);
+			_region.previous_patch (*this);
 			break;
 		case GDK_Down:
 		case GDK_KP_Down:
 		case GDK_downarrow:
-			_region.next_program(*this);
+			_region.next_patch (*this);
 			break;
 		default:
 			break;
@@ -159,12 +178,20 @@ CanvasProgramChange::on_event (GdkEvent* ev)
 
 	case GDK_SCROLL:
 		if (ev->scroll.direction == GDK_SCROLL_UP) {
-			_region.previous_program(*this);
+			_region.previous_patch (*this);
 			return true;
 		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
-			_region.next_program(*this);
+			_region.next_patch (*this);
 			return true;
 		}
+		break;
+
+	case GDK_ENTER_NOTIFY:
+		_region.patch_entered (this);
+		break;
+
+	case GDK_LEAVE_NOTIFY:
+		_region.patch_left (this);
 		break;
 
 	default:
