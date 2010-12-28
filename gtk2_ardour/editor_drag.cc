@@ -1707,7 +1707,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 			set<boost::shared_ptr<Playlist> > diffed_playlists;
 
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				i->view->thaw_after_trim ();
+                                i->view->thaw_after_trim ();
 				i->view->enable_display (true);
 				i->view->fake_set_opaque (true);
 
@@ -2341,13 +2341,6 @@ MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
 
 	_points.push_back (Gnome::Art::Point (0, 0));
 	_points.push_back (Gnome::Art::Point (0, physical_screen_height (_editor->get_window())));
-
-	_line = new ArdourCanvas::Line (*_editor->timebar_group);
-	_line->property_width_pixels() = 1;
-	_line->property_points () = _points;
-	_line->hide ();
-
-	_line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerDragLine.get();
 }
 
 MarkerDrag::~MarkerDrag ()
@@ -2551,7 +2544,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 					copy_location->set_end (new_end);
 				} else 	if (new_start < copy_location->end()) {
 					copy_location->set_start (new_start);
-				} else {
+				} else if (newframe > 0) {
 					_editor->snap_to (next, 1, true);
 					copy_location->set_end (next);
 					copy_location->set_start (newframe);
@@ -2649,8 +2642,6 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	XMLNode &after = _editor->session()->locations()->get_state();
 	_editor->session()->add_command(new MementoCommand<Locations>(*(_editor->session()->locations()), &before, &after));
 	_editor->commit_reversible_command ();
-
-	_line->hide();
 }
 
 void
@@ -2662,11 +2653,7 @@ MarkerDrag::aborted (bool)
 void
 MarkerDrag::update_item (Location* location)
 {
-	double const x1 = _editor->frame_to_pixel (location->start());
-
-	_points.front().set_x(x1);
-	_points.back().set_x(x1);
-	_line->property_points() = _points;
+        /* noop */
 }
 
 ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)

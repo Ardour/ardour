@@ -662,7 +662,6 @@ private:
 
 	Marker* _marker; ///< marker being dragged
 	std::list<ARDOUR::Location*> _copied_locations;
-	ArdourCanvas::Line* _line;
  	ArdourCanvas::Points _points;
 };
 
