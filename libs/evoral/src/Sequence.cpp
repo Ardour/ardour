@@ -64,10 +64,12 @@ Sequence<Time>::const_iterator::const_iterator()
 template<typename Time>
 Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t, bool force_discrete, std::set<Evoral::Parameter> const & filtered)
 	: _seq(&seq)
+	, _active_patch_change_message (0)
 	, _type(NIL)
 	, _is_end((t == DBL_MAX) || seq.empty())
 	, _note_iter(seq.notes().end())
 	, _sysex_iter(seq.sysexes().end())
+	, _patch_change_iter(seq.patch_changes().end())
 	, _control_iter(_control_iters.end())
 	, _force_discrete (force_discrete)
 {
@@ -93,6 +95,15 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		}
 	}
 	assert(_sysex_iter == seq.sysexes().end() || (*_sysex_iter)->time() >= t);
+
+	// Find first patch event at or after t
+	for (typename Sequence<Time>::PatchChanges::const_iterator i = seq.patch_changes().begin(); i != seq.patch_changes().end(); ++i) {
+		if ((*i)->time() >= t) {
+			_patch_change_iter = i;
+			break;
+		}
+	}
+	assert (_patch_change_iter == seq.patch_changes().end() || (*_patch_change_iter)->time() >= t);
 
 	// Find first control event after t
 	ControlIterator earliest_control(boost::shared_ptr<ControlList>(), DBL_MAX, 0.0);
@@ -163,6 +174,11 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		earliest_t = (*_sysex_iter)->time();
 	}
 
+	if (_patch_change_iter != seq.patch_changes().end() && ((*_patch_change_iter)->time() < earliest_t || _type == NIL)) {
+		_type = PATCH_CHANGE;
+		earliest_t = (*_patch_change_iter)->time ();
+	}
+
 	if (_control_iter != _control_iters.end()
 			&& earliest_control.list && earliest_control.x >= t
 			&& (earliest_control.x < earliest_t || _type == NIL)) {
@@ -185,6 +201,10 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Starting at control event @ %1\n", earliest_t));
 		seq.control_to_midi_event(_event, earliest_control);
 		break;
+	case PATCH_CHANGE:
+		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Starting at patch change event @ %1\n", earliest_t));
+		_event = boost::shared_ptr<Event<Time> > (new Event<Time> ((*_patch_change_iter)->message (_active_patch_change_message), true));
+		break;
 	default:
 		break;
 	}
@@ -194,12 +214,14 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		_type   = NIL;
 		_is_end = true;
 	} else {
-		DEBUG_TRACE (DEBUG::Sequence, string_compose ("New iterator = 0x%x : 0x%x @ %f\n",
+		DEBUG_TRACE (DEBUG::Sequence, string_compose ("New iterator = 0x%1 : 0x%2 @ %3\n",
                                                               (int)_event->event_type(),
                                                               (int)((MIDIEvent<Time>*)_event.get())->type(),
                                                               _event->time()));
+		
 		assert(midi_event_is_valid(_event->buffer(), _event->size()));
 	}
+
 }
 
 template<typename Time>
@@ -219,6 +241,8 @@ Sequence<Time>::const_iterator::invalidate()
 	if (_seq) {
 		_note_iter = _seq->notes().end();
 		_sysex_iter = _seq->sysexes().end();
+		_patch_change_iter = _seq->patch_changes().end();
+		_active_patch_change_message = 0;
 	}
 	_control_iter = _control_iters.end();
 	_lock.reset();
@@ -291,6 +315,13 @@ Sequence<Time>::const_iterator::operator++()
 	case SYSEX:
 		++_sysex_iter;
 		break;
+	case PATCH_CHANGE:
+		++_active_patch_change_message;
+		if (_active_patch_change_message == (*_patch_change_iter)->messages()) {
+			++_patch_change_iter;
+			_active_patch_change_message = 0;
+		}
+		break;
 	default:
 		assert(false);
 	}
@@ -329,6 +360,14 @@ Sequence<Time>::const_iterator::operator++()
 		}
 	}
 
+	// Use the next earliest patch change iff it's earlier than the SysEx
+	if (_patch_change_iter != _seq->patch_changes().end()) {
+		if (_type == NIL || (*_patch_change_iter)->time() < earliest_t) {
+			_type = PATCH_CHANGE;
+			earliest_t = (*_patch_change_iter)->time();
+		}
+	}
+
 	// Set event to reflect new position
 	switch (_type) {
 	case NOTE_ON:
@@ -349,6 +388,10 @@ Sequence<Time>::const_iterator::operator++()
 	case SYSEX:
                 DEBUG_TRACE(DEBUG::Sequence, "iterator = sysex\n");
 		*_event = *(*_sysex_iter);
+		break;
+	case PATCH_CHANGE:
+		DEBUG_TRACE(DEBUG::Sequence, "iterator = patch change\n");
+		*_event = (*_patch_change_iter)->message (_active_patch_change_message);
 		break;
 	default:
                 DEBUG_TRACE(DEBUG::Sequence, "iterator = end\n");
@@ -386,8 +429,10 @@ Sequence<Time>::const_iterator::operator=(const const_iterator& other)
 	_is_end        = other._is_end;
 	_note_iter     = other._note_iter;
 	_sysex_iter    = other._sysex_iter;
+	_patch_change_iter = other._patch_change_iter;
 	_control_iters = other._control_iters;
 	_force_discrete = other._force_discrete;
+	_active_patch_change_message = other._active_patch_change_message;
 
 	if (other._lock)
 		_lock = _seq->read_lock();
@@ -421,6 +466,10 @@ Sequence<Time>::Sequence(const TypeMap& type_map)
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("Sequence constructed: %1\n", this));
 	assert(_end_iter._is_end);
 	assert( ! _end_iter._lock);
+
+	for (int i = 0; i < 16; ++i) {
+		_bank[i] = 0;
+	}
 }
 
 template<typename Time>
@@ -445,6 +494,15 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
                 boost::shared_ptr<Event<Time> > n (new Event<Time> (**i, true));
                 _sysexes.push_back (n);
         }
+
+	for (typename PatchChanges::const_iterator i = other._patch_changes.begin(); i != other._patch_changes.end(); ++i) {
+		PatchChangePtr n (new PatchChange<Time> (**i));
+		_patch_changes.insert (n);
+	}
+
+	for (int i = 0; i < 16; ++i) {
+		_bank[i] = other._bank[i];
+	}
 
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("Sequence copied: %1\n", this));
 	assert(_end_iter._is_end);
@@ -697,6 +755,34 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
         }
 }
 
+template<typename Time>
+void
+Sequence<Time>::add_patch_change_unlocked (PatchChangePtr p)
+{
+	_patch_changes.insert (p);
+	if (p->id () < 0) {
+		p->set_id (Evoral::next_event_id ());
+	}
+}
+
+template<typename Time>
+void
+Sequence<Time>::remove_patch_change_unlocked (const constPatchChangePtr p)
+{
+	typename Sequence<Time>::PatchChanges::iterator i = patch_change_lower_bound (p->time ());
+	while (i != _patch_changes.end() && (*i)->time() == p->time()) {
+
+		typename Sequence<Time>::PatchChanges::iterator tmp = i;
+		++tmp;
+
+		if (*i == p) {
+			_patch_changes.erase (i);
+		}
+
+		i = tmp;
+	}
+}
+
 /** Append \a ev to model.  NOT realtime safe.
  *
  * The timestamp of event is expected to be relative to
@@ -730,14 +816,22 @@ Sequence<Time>::append(const Event<Time>& event, event_id_t evid)
                 append_note_off_unlocked (note);
         } else if (ev.is_sysex()) {
                 append_sysex_unlocked(ev, evid);
+	} else if (ev.is_cc() && (ev.cc_number() == MIDI_CTL_MSB_BANK || ev.cc_number() == MIDI_CTL_LSB_BANK)) {
+		/* note bank numbers in our _bank[] array, so that we can write an event when the program change arrives */
+		if (ev.cc_number() == MIDI_CTL_MSB_BANK) {
+			_bank[ev.channel()] &= (0x7f << 7);
+			_bank[ev.channel()] |= ev.cc_value() << 7;
+		} else {
+			_bank[ev.channel()] &= 0x7f;
+			_bank[ev.channel()] |= ev.cc_value();
+		}
         } else if (ev.is_cc()) {
                 append_control_unlocked(
                         Evoral::MIDI::ContinuousController(ev.event_type(), ev.channel(), ev.cc_number()),
                         ev.time(), ev.cc_value(), evid);
         } else if (ev.is_pgm_change()) {
-                append_control_unlocked(
-                        Evoral::MIDI::ProgramChange(ev.event_type(), ev.channel()),
-                        ev.time(), ev.pgm_number(), evid);
+		/* write a patch change with this program change and any previously set-up bank number */
+		append_patch_change_unlocked (PatchChange<Time> (ev.time(), ev.channel(), ev.pgm_number(), _bank[ev.channel()]), evid);
         } else if (ev.is_pitch_bender()) {
                 append_control_unlocked(
                         Evoral::MIDI::PitchBender(ev.event_type(), ev.channel()),
@@ -874,6 +968,19 @@ Sequence<Time>::append_sysex_unlocked(const MIDIEvent<Time>& ev, event_id_t /* e
 }
 
 template<typename Time>
+void
+Sequence<Time>::append_patch_change_unlocked (const PatchChange<Time>& ev, event_id_t id)
+{
+	PatchChangePtr p (new PatchChange<Time> (ev));
+	
+	if (p->id() < 0) {
+		p->set_id (id);
+	}
+	
+	_patch_changes.insert (p);
+}
+
+template<typename Time>
 bool
 Sequence<Time>::contains (const NotePtr& note) const
 {
@@ -953,6 +1060,17 @@ Sequence<Time>::note_lower_bound (Time t) const
         NotePtr search_note(new Note<Time>(0, t, 0, 0, 0));
         typename Sequence<Time>::Notes::const_iterator i = _notes.lower_bound(search_note);
         assert(i == _notes.end() || (*i)->time() >= t);
+        return i;
+}
+
+/** Return the earliest patch change with time >= t */
+template<typename Time>
+typename Sequence<Time>::PatchChanges::const_iterator
+Sequence<Time>::patch_change_lower_bound (Time t) const
+{
+        PatchChangePtr search (new PatchChange<Time> (t, 0, 0, 0));
+        typename Sequence<Time>::PatchChanges::const_iterator i = _patch_changes.lower_bound (search);
+        assert (i == _patch_changes.end() || (*i)->time() >= t);
         return i;
 }
 

@@ -281,10 +281,18 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, eve
 
 	smf_event_t* event;
 
-        /* XXX july 2010: currently only store event ID's for notes
+        /* XXX july 2010: currently only store event ID's for notes, program changes and bank changes
          */
 
-        if (((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON || ((buf[0] & 0xf0) == MIDI_CMD_NOTE_OFF)) && note_id >= 0) {
+	uint8_t const c = buf[0] & 0xf0;
+	bool const store_id = (
+		c == MIDI_CMD_NOTE_ON ||
+		c == MIDI_CMD_NOTE_OFF ||
+		c == MIDI_CMD_PGM_CHANGE ||
+		(c == MIDI_CMD_CONTROL && (buf[1] == MIDI_CTL_MSB_BANK || buf[1] == MIDI_CTL_LSB_BANK))
+		);
+
+	if (store_id && note_id >= 0) {
                 int idlen;
                 int lenlen;
                 uint8_t idbuf[16];
@@ -292,7 +300,6 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, eve
 
                 event = smf_event_new ();
                 assert(event != NULL);
-
 
                 /* generate VLQ representation of note ID */
                 idlen = smf_format_vlq (idbuf, sizeof(idbuf), note_id);

@@ -4093,17 +4093,17 @@ DraggingView::DraggingView (RegionView* v, RegionDrag* parent)
 	initial_end = v->region()->position () + v->region()->length ();
 }
 
-ProgramChangeDrag::ProgramChangeDrag (Editor* e, CanvasProgramChange* i, MidiRegionView* r)
+PatchChangeDrag::PatchChangeDrag (Editor* e, CanvasPatchChange* i, MidiRegionView* r)
 	: Drag (e, i)
 	, _region_view (r)
-	, _program_change (i)
+	, _patch_change (i)
 	, _cumulative_dx (0)
 {
-	DEBUG_TRACE (DEBUG::Drags, "New ProgramChangeDrag\n");
+	DEBUG_TRACE (DEBUG::Drags, "New PatchChangeDrag\n");
 }
 
 void
-ProgramChangeDrag::motion (GdkEvent* ev, bool)
+PatchChangeDrag::motion (GdkEvent* ev, bool)
 {
 	framepos_t f = adjusted_current_frame (ev);
 	boost::shared_ptr<Region> r = _region_view->region ();
@@ -4112,12 +4112,12 @@ ProgramChangeDrag::motion (GdkEvent* ev, bool)
 	
 	framecnt_t const dxf = f - grab_frame();
 	double const dxu = _editor->frame_to_unit (dxf);
-	_program_change->move (dxu - _cumulative_dx, 0);
+	_patch_change->move (dxu - _cumulative_dx, 0);
 	_cumulative_dx = dxu;
 }
 
 void
-ProgramChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
+PatchChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
 {
 	if (!movement_occurred) {
 		return;
@@ -4129,22 +4129,22 @@ ProgramChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
 	f = max (f, r->position ());
 	f = min (f, r->last_frame ());
 	
-	_region_view->move_program_change (
-		MidiRegionView::PCEvent (_program_change->event_time(), _program_change->program(), _program_change->channel()),
+	_region_view->move_patch_change (
+		*_patch_change,
 		_region_view->frames_to_beats (f - r->position() - r->start())
 		);
 }
 
 void
-ProgramChangeDrag::aborted ()
+PatchChangeDrag::aborted ()
 {
-	_program_change->move (-_cumulative_dx, 0);
+	_patch_change->move (-_cumulative_dx, 0);
 }
 
 void
-ProgramChangeDrag::setup_pointer_frame_offset ()
+PatchChangeDrag::setup_pointer_frame_offset ()
 {
 	boost::shared_ptr<Region> region = _region_view->region ();
-	_pointer_frame_offset = raw_grab_frame() - _region_view->beats_to_frames (_program_change->event_time()) - region->position() + region->start();
+	_pointer_frame_offset = raw_grab_frame() - _region_view->beats_to_frames (_patch_change->patch()->time()) - region->position() + region->start();
 }
 

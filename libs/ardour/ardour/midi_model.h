@@ -172,8 +172,66 @@ public:
 		Change unmarshal_change (XMLNode *);
 	};
 
+	class PatchChangeDiffCommand : public DiffCommand {
+	public:
+		PatchChangeDiffCommand (boost::shared_ptr<MidiModel>, const std::string &);
+		PatchChangeDiffCommand (boost::shared_ptr<MidiModel>, const XMLNode &);
+
+		int set_state (const XMLNode &, int version);
+		XMLNode & get_state ();
+
+		void operator() ();
+		void undo ();
+
+		void add (PatchChangePtr);
+		void remove (PatchChangePtr);
+		void change_time (PatchChangePtr, TimeType);
+		void change_channel (PatchChangePtr, uint8_t);
+		void change_program (PatchChangePtr, uint8_t);
+		void change_bank (PatchChangePtr, int);
+
+		enum Property {
+			Time,
+			Channel,
+			Program,
+			Bank
+		};
+		
+	private:
+		
+		struct Change {
+			PatchChangePtr patch;
+			Property property;
+			union {
+				TimeType old_time;
+				uint8_t old_channel;
+				int old_bank;
+				uint8_t old_program;
+			};
+			union {
+				uint8_t new_channel;
+				TimeType new_time;
+				uint8_t new_program;
+				int new_bank;
+			};
+		};
+			
+		typedef std::list<Change> ChangeList;
+		ChangeList _changes;
+		
+		std::list<PatchChangePtr> _added;
+		std::list<PatchChangePtr> _removed;
+
+		XMLNode & marshal_change (const Change &);
+		Change unmarshal_change (XMLNode *);
+
+		XMLNode & marshal_patch_change (constPatchChangePtr);
+		PatchChangePtr unmarshal_patch_change (XMLNode *);
+	};
+
 	MidiModel::NoteDiffCommand* new_note_diff_command (const std::string name = "midi edit");
 	MidiModel::SysExDiffCommand* new_sysex_diff_command (const std::string name = "midi edit");
+	MidiModel::PatchChangeDiffCommand* new_patch_change_diff_command (const std::string name = "midi edit");
 	void apply_command (Session& session, Command* cmd);
 	void apply_command_as_subcommand (Session& session, Command* cmd);
 
@@ -193,6 +251,7 @@ public:
 	void set_midi_source (boost::shared_ptr<MidiSource>);
 
 	boost::shared_ptr<Evoral::Note<TimeType> > find_note (NotePtr);
+	PatchChangePtr find_patch_change (Evoral::event_id_t);
 	boost::shared_ptr<Evoral::Note<TimeType> > find_note (gint note_id);
 	boost::shared_ptr<Evoral::Event<TimeType> > find_sysex (gint);
 

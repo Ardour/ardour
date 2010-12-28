@@ -70,6 +70,16 @@ MidiModel::new_sysex_diff_command (const string name)
 	return new SysExDiffCommand (ms->model(), name);
 }
 
+/** Start a new PatchChangeDiff command */
+MidiModel::PatchChangeDiffCommand*
+MidiModel::new_patch_change_diff_command (const string name)
+{
+	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
+	assert (ms);
+	
+	return new PatchChangeDiffCommand (ms->model(), name);
+}
+
 
 /** Apply a command.
  *
@@ -107,6 +117,10 @@ MidiModel::apply_command_as_subcommand(Session& session, Command* cmd)
 #define SIDE_EFFECT_REMOVALS_ELEMENT "SideEffectRemovals"
 #define SYSEX_DIFF_COMMAND_ELEMENT "SysExDiffCommand"
 #define DIFF_SYSEXES_ELEMENT "ChangedSysExes"
+#define PATCH_CHANGE_DIFF_COMMAND_ELEMENT "PatchChangeDiffCommand"
+#define ADDED_PATCH_CHANGES_ELEMENT "AddedPatchChanges"
+#define REMOVED_PATCH_CHANGES_ELEMENT "RemovedPatchChanges"
+#define DIFF_PATCH_CHANGES_ELEMENT "ChangedPatchChanges"
 
 MidiModel::DiffCommand::DiffCommand(boost::shared_ptr<MidiModel> m, const std::string& name)
 	: Command (name)
@@ -890,6 +904,415 @@ MidiModel::SysExDiffCommand::get_state ()
 	return *diff_command;
 }
 
+MidiModel::PatchChangeDiffCommand::PatchChangeDiffCommand (boost::shared_ptr<MidiModel> m, const string& name)
+	: DiffCommand (m, name)
+{
+	assert (_model);
+}
+
+MidiModel::PatchChangeDiffCommand::PatchChangeDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode & node)
+	: DiffCommand (m, "")
+{
+	assert (_model);
+	set_state (node, Stateful::loading_state_version);
+}
+
+void
+MidiModel::PatchChangeDiffCommand::add (PatchChangePtr p)
+{
+	_added.push_back (p);
+}
+
+void
+MidiModel::PatchChangeDiffCommand::remove (PatchChangePtr p)
+{
+	_removed.push_back (p);
+}
+
+void
+MidiModel::PatchChangeDiffCommand::change_time (PatchChangePtr patch, TimeType t)
+{
+	Change c;
+	c.property = Time;
+	c.patch = patch;
+	c.old_time = patch->time ();
+	c.new_time = t;
+
+	_changes.push_back (c);
+}
+
+void
+MidiModel::PatchChangeDiffCommand::change_channel (PatchChangePtr patch, uint8_t channel)
+{
+	Change c;
+	c.property = Channel;
+	c.patch = patch;
+	c.old_channel = patch->channel ();
+	c.new_channel = channel;
+
+	_changes.push_back (c);
+}
+
+void
+MidiModel::PatchChangeDiffCommand::change_program (PatchChangePtr patch, uint8_t program)
+{
+	Change c;
+	c.property = Program;
+	c.patch = patch;
+	c.old_program = patch->program ();
+	c.new_program = program;
+
+	_changes.push_back (c);
+}
+
+void
+MidiModel::PatchChangeDiffCommand::change_bank (PatchChangePtr patch, int bank)
+{
+	Change c;
+	c.property = Bank;
+	c.patch = patch;
+	c.old_bank = patch->bank ();
+	c.new_bank = bank;
+	
+	_changes.push_back (c);
+}
+
+void
+MidiModel::PatchChangeDiffCommand::operator() ()
+{
+	{
+		MidiModel::WriteLock lock (_model->edit_lock ());
+		
+		for (list<PatchChangePtr>::iterator i = _added.begin(); i != _added.end(); ++i) {
+			_model->add_patch_change_unlocked (*i);
+		}
+
+		for (list<PatchChangePtr>::iterator i = _removed.begin(); i != _removed.end(); ++i) {
+			_model->remove_patch_change_unlocked (*i);
+		}
+		
+		set<PatchChangePtr> temporary_removals;
+
+		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+			switch (i->property) {
+			case Time:
+				if (temporary_removals.find (i->patch) == temporary_removals.end()) {
+					_model->remove_patch_change_unlocked (i->patch);
+					temporary_removals.insert (i->patch);
+				}
+				i->patch->set_time (i->new_time);
+				break;
+
+			case Channel:
+				i->patch->set_channel (i->new_channel);
+				break;
+
+			case Program:
+				i->patch->set_program (i->new_program);
+				break;
+
+			case Bank:
+				i->patch->set_bank (i->new_bank);
+				break;
+			}
+		}
+
+		for (set<PatchChangePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
+			_model->add_patch_change_unlocked (*i);
+		}
+	}
+
+	_model->ContentsChanged (); /* EMIT SIGNAL */
+}
+
+void
+MidiModel::PatchChangeDiffCommand::undo ()
+{
+	{
+		MidiModel::WriteLock lock (_model->edit_lock());
+
+		for (list<PatchChangePtr>::iterator i = _added.begin(); i != _added.end(); ++i) {
+			_model->remove_patch_change_unlocked (*i);
+		}
+
+		for (list<PatchChangePtr>::iterator i = _removed.begin(); i != _removed.end(); ++i) {
+			_model->add_patch_change_unlocked (*i);
+		}
+		
+		set<PatchChangePtr> temporary_removals;
+
+		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+			switch (i->property) {
+			case Time:
+				if (temporary_removals.find (i->patch) == temporary_removals.end()) {
+					_model->remove_patch_change_unlocked (i->patch);
+					temporary_removals.insert (i->patch);
+				}
+				i->patch->set_time (i->old_time);
+				break;
+
+			case Channel:
+				i->patch->set_channel (i->old_channel);
+				break;
+
+			case Program:
+				i->patch->set_program (i->old_program);
+				break;
+
+			case Bank:
+				i->patch->set_bank (i->old_bank);
+				break;
+			}
+		}
+
+		for (set<PatchChangePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
+			_model->add_patch_change_unlocked (*i);
+		}
+		
+	}
+
+	_model->ContentsChanged (); /* EMIT SIGNAL */
+}
+
+XMLNode &
+MidiModel::PatchChangeDiffCommand::marshal_patch_change (constPatchChangePtr p)
+{
+	XMLNode* n = new XMLNode ("patch-change");
+
+	{
+		ostringstream s (ios::ate);
+		s << int (p->id ());
+		n->add_property ("id", s.str());
+	}
+
+	{
+		ostringstream s (ios::ate);
+		s << p->time ();
+		n->add_property ("time", s.str ());
+	}
+
+	{
+		ostringstream s (ios::ate);
+		s << int (p->channel ());
+		n->add_property ("channel", s.str ());
+	}
+
+	{
+		ostringstream s (ios::ate);
+		s << int (p->program ());
+		n->add_property ("program", s.str ());
+	}
+
+	{
+		ostringstream s (ios::ate);
+		s << int (p->bank ());
+		n->add_property ("bank", s.str ());
+	}
+
+	return *n;
+}
+
+XMLNode&
+MidiModel::PatchChangeDiffCommand::marshal_change (const Change& c)
+{
+	XMLNode* n = new XMLNode (X_("Change"));
+
+	n->add_property (X_("property"), enum_2_string (c.property));
+
+	{
+		ostringstream s (ios::ate);
+		if (c.property == Time) {
+			s << c.old_time;
+		} else if (c.property == Channel) {
+			s << c.old_channel;
+		} else if (c.property == Program) {
+			s << int (c.old_program);
+		} else if (c.property == Bank) {
+			s << c.old_bank;
+		}
+
+		n->add_property (X_("old"), s.str ());
+	}
+
+	{
+		ostringstream s (ios::ate);
+
+		if (c.property == Time) {
+			s << c.new_time;
+		} else if (c.property == Channel) {
+			s << c.new_channel;
+		} else if (c.property == Program) {
+			s << int (c.new_program);
+		} else if (c.property == Bank) {
+			s << c.new_bank;
+		}
+
+		n->add_property (X_("new"), s.str ());
+	}
+
+	{
+		ostringstream s;
+		s << c.patch->id ();
+		n->add_property ("id", s.str ());
+	}
+	
+	return *n;
+}
+
+MidiModel::PatchChangePtr
+MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
+{
+	XMLProperty* prop;
+	Evoral::event_id_t id;
+	Evoral::MusicalTime time = 0;
+	uint8_t channel = 0;
+	uint8_t program = 0;
+	int bank = 0;
+
+	if ((prop = n->property ("id")) != 0) {
+		istringstream s (prop->value());
+		s >> id;
+	}
+	
+	if ((prop = n->property ("time")) != 0) {
+		istringstream s (prop->value ());
+		s >> time;
+	}
+
+	if ((prop = n->property ("channel")) != 0) {
+		istringstream s (prop->value ());
+		s >> channel;
+	}
+
+	if ((prop = n->property ("program")) != 0) {
+		istringstream s (prop->value ());
+		s >> program;
+	}
+
+	if ((prop = n->property ("bank")) != 0) {
+		istringstream s (prop->value ());
+		s >> bank;
+	}
+
+	PatchChangePtr p (new Evoral::PatchChange<TimeType> (time, channel, program, bank));
+	p->set_id (id);
+	return p;
+}
+
+MidiModel::PatchChangeDiffCommand::Change
+MidiModel::PatchChangeDiffCommand::unmarshal_change (XMLNode* n)
+{
+	XMLProperty* prop;
+	Change c;
+
+	prop = n->property ("property");
+	assert (prop);
+	c.property = (Property) string_2_enum (prop->value(), c.property);
+
+	prop = n->property ("id");
+	assert (prop);
+	Evoral::event_id_t const id = atoi (prop->value().c_str());
+	
+	prop = n->property ("old");
+	assert (prop);
+	{
+		istringstream s (prop->value ());
+		if (c.property == Time) {
+			s >> c.old_time;
+		} else if (c.property == Channel) {
+			s >> c.old_channel;
+		} else if (c.property == Program) {
+			s >> c.old_program;
+		} else if (c.property == Bank) {
+			s >> c.old_bank;
+		}
+	}
+
+	prop = n->property ("new");
+	assert (prop);
+	{
+		istringstream s (prop->value ());
+		if (c.property == Time) {
+			s >> c.new_time;
+		} else if (c.property == Channel) {
+			s >> c.new_channel;
+		} else if (c.property == Program) {
+			s >> c.new_program;
+		} else if (c.property == Bank) {
+			s >> c.new_bank;
+		}
+	}
+
+	c.patch = _model->find_patch_change (id);
+	assert (c.patch);
+
+	return c;
+}
+
+int
+MidiModel::PatchChangeDiffCommand::set_state (const XMLNode& diff_command, int /*version*/)
+{
+	if (diff_command.name() != PATCH_CHANGE_DIFF_COMMAND_ELEMENT) {
+		return 1;
+	}
+
+	_added.clear ();
+	XMLNode* added = diff_command.child (ADDED_PATCH_CHANGES_ELEMENT);
+	if (added) {
+		XMLNodeList p = added->children ();
+		transform (p.begin(), p.end(), back_inserter (_added), boost::bind (&PatchChangeDiffCommand::unmarshal_patch_change, this, _1));
+	}
+
+	_removed.clear ();
+	XMLNode* removed = diff_command.child (REMOVED_PATCH_CHANGES_ELEMENT);
+	if (removed) {
+		XMLNodeList p = removed->children ();
+		transform (p.begin(), p.end(), back_inserter (_removed), boost::bind (&PatchChangeDiffCommand::unmarshal_patch_change, this, _1));
+	}
+
+	_changes.clear ();
+	XMLNode* changed = diff_command.child (DIFF_PATCH_CHANGES_ELEMENT);
+	if (changed) {
+		XMLNodeList p = changed->children ();
+		transform (p.begin(), p.end(), back_inserter (_changes), boost::bind (&PatchChangeDiffCommand::unmarshal_change, this, _1));
+	}
+
+	return 0;
+}
+
+XMLNode &
+MidiModel::PatchChangeDiffCommand::get_state ()
+{
+	XMLNode* diff_command = new XMLNode (PATCH_CHANGE_DIFF_COMMAND_ELEMENT);
+	diff_command->add_property("midi-source", _model->midi_source()->id().to_s());
+
+	XMLNode* added = diff_command->add_child (ADDED_PATCH_CHANGES_ELEMENT);
+	for_each (_added.begin(), _added.end(), 
+		  boost::bind (
+			  boost::bind (&XMLNode::add_child_nocopy, added, _1),
+			  boost::bind (&PatchChangeDiffCommand::marshal_patch_change, this, _1)
+			  )
+		);
+
+	XMLNode* removed = diff_command->add_child (REMOVED_PATCH_CHANGES_ELEMENT);
+	for_each (_removed.begin(), _removed.end(), 
+		  boost::bind (
+			  boost::bind (&XMLNode::add_child_nocopy, removed, _1),
+			  boost::bind (&PatchChangeDiffCommand::marshal_patch_change, this, _1)
+			  )
+		);
+	
+	XMLNode* changes = diff_command->add_child (DIFF_PATCH_CHANGES_ELEMENT);
+	for_each (_changes.begin(), _changes.end(),
+		  boost::bind (
+			  boost::bind (&XMLNode::add_child_nocopy, changes, _1),
+			  boost::bind (&PatchChangeDiffCommand::marshal_change, this, _1)
+			  )
+		);
+
+	return *diff_command;
+}
+
 /** Write all of the model to a MidiSource (i.e. save the model).
  * This is different from manually using read to write to a source in that
  * note off events are written regardless of the track mode.  This is so the
@@ -1082,6 +1505,18 @@ MidiModel::find_note (gint note_id)
 	}
 
 	return NotePtr();
+}
+
+MidiModel::PatchChangePtr
+MidiModel::find_patch_change (Evoral::event_id_t id)
+{
+	for (PatchChanges::iterator i = patch_changes().begin(); i != patch_changes().end(); ++i) {
+		if ((*i)->id() == id) {
+			return *i;
+		}
+	}
+
+	return PatchChangePtr ();
 }
 
 boost::shared_ptr<Evoral::Event<MidiModel::TimeType> >

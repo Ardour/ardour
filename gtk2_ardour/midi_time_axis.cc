@@ -591,7 +591,8 @@ MidiTimeAxisView::build_controller_menu ()
 		}
 	}
 	
-	/* loop over all 127 MIDI controllers, in groups of 16 */
+	/* loop over all 127 MIDI controllers, in groups of 16; except don't offer
+	   bank select controllers, as they are handled by the `patch' code */
 
 	for (int i = 0; i < 127; i += 16) {
 
@@ -602,6 +603,10 @@ MidiTimeAxisView::build_controller_menu ()
 		/* for each controller, consider whether to create a submenu or a single item */
 
 		for (int ctl = i; ctl < i+16; ++ctl) {
+
+			if (ctl == MIDI_CTL_MSB_BANK || ctl == MIDI_CTL_LSB_BANK) {
+				continue;
+			}
 
 			if (chn_cnt > 1) {
 
@@ -985,7 +990,7 @@ MidiTimeAxisView::set_channel_mode (ChannelMode, uint16_t)
 
 	no_redraw = false;
 
-	/* TODO: Bender, PgmChange, Pressure */
+	/* TODO: Bender, Pressure */
 
 	/* invalidate the controller menu, so that we rebuilt it next time */
 	_controller_menu_map.clear ();

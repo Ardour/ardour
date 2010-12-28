@@ -43,7 +43,7 @@
 #include "canvas-hit.h"
 #include "canvas-note.h"
 #include "canvas-note-event.h"
-#include "canvas-program-change.h"
+#include "canvas_patch_change.h"
 #include "canvas-sysex.h"
 
 namespace ARDOUR {
@@ -120,57 +120,43 @@ class MidiRegionView : public RegionView
 	void cut_copy_clear (Editing::CutCopyOp);
 	void paste (framepos_t pos, float times, const MidiCutBuffer&);
 
-	struct PCEvent {
-		PCEvent(double a_time, uint8_t a_value, uint8_t a_channel)
-			: time(a_time), value(a_value), channel(a_channel) {}
-
-		double  time;
-		uint8_t value;
-		uint8_t channel;
-	};
-
-	/** Add a new program change flag to the canvas.
-	 * @param program the MidiRegionView::PCEvent to add
+	/** Add a new patch change flag to the canvas.
+	 * @param patch the patch change to add
 	 * @param the text to display in the flag
 	 */
-	void add_canvas_program_change (PCEvent& program, const std::string& displaytext);
+	void add_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr patch, const std::string& displaytext);
 
 	/** Look up the given time and channel in the 'automation' and set keys accordingly.
-	 * @param time the time of the program change event
+	 * @param time the time of the patch change event
 	 * @param channel the MIDI channel of the event
 	 * @key a reference to an instance of MIDI::Name::PatchPrimaryKey whose fields will
 	 *        will be set according to the result of the lookup
 	 */
 	void get_patch_key_at(double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key);
 
-	/** Change the 'automation' data of old_program to new values which correspond to new_patch.
-	 * @param old_program the program change event which is to be altered
-	 * @param new_patch the new lsb, msb and program number which are to be set
+	/** Change old_patch to new_patch.
+	 * @param old_patch the canvas patch change which is to be altered
+	 * @param new_patch new patch
 	 */
-	void alter_program_change(PCEvent& old_program, const MIDI::Name::PatchPrimaryKey& new_patch);
+	void change_patch_change (ArdourCanvas::CanvasPatchChange& old_patch, const MIDI::Name::PatchPrimaryKey& new_patch);
+	void change_patch_change (ARDOUR::MidiModel::PatchChangePtr, Evoral::PatchChange<Evoral::MusicalTime> const &);
 
-	void add_program_change (framecnt_t, uint8_t);
-	void move_program_change (PCEvent, Evoral::MusicalTime);
-	void delete_program_change (ArdourCanvas::CanvasProgramChange *);
+	void add_patch_change (framecnt_t, Evoral::PatchChange<Evoral::MusicalTime> const &);
+	void move_patch_change (ArdourCanvas::CanvasPatchChange &, Evoral::MusicalTime);
+	void delete_patch_change (ArdourCanvas::CanvasPatchChange *);
+	void edit_patch_change (ArdourCanvas::CanvasPatchChange *);
 
-	/** Alter a given program to the new given one.
-	 * (Called on context menu select on CanvasProgramChange)
+	/** Alter a given patch to be its predecessor in the MIDNAM file.
 	 */
-	void program_selected(
-		ArdourCanvas::CanvasProgramChange& program,
-		const MIDI::Name::PatchPrimaryKey& new_patch);
+	void previous_patch (ArdourCanvas::CanvasPatchChange &);
 
-	/** Alter a given program to be its predecessor in the MIDNAM file.
+	/** Alters a given patch to be its successor in the MIDNAM file.
 	 */
-	void previous_program(ArdourCanvas::CanvasProgramChange& program);
+	void next_patch (ArdourCanvas::CanvasPatchChange &);
 
-	/** Alters a given program to be its successor in the MIDNAM file.
+	/** Displays all patch change events in the region as flags on the canvas.
 	 */
-	void next_program(ArdourCanvas::CanvasProgramChange& program);
-
-	/** Displays all program change events in the region as flags on the canvas.
-	 */
-	void display_program_changes();
+	void display_patch_changes();
 
 	/** Displays all system exclusive events in the region as flags on the canvas.
 	 */
@@ -196,6 +182,8 @@ class MidiRegionView : public RegionView
 
 	void   note_entered(ArdourCanvas::CanvasNoteEvent* ev);
 	void   note_left(ArdourCanvas::CanvasNoteEvent* ev);
+	void   patch_entered (ArdourCanvas::CanvasPatchChange *);
+	void   patch_left (ArdourCanvas::CanvasPatchChange *);
 	void   note_mouse_position (float xfraction, float yfraction, bool can_set_cursor=true);
 	void   unique_select(ArdourCanvas::CanvasNoteEvent* ev);
 	void   note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool extend=false);
@@ -360,12 +348,12 @@ class MidiRegionView : public RegionView
 	std::string _custom_device_mode;
 
 	typedef std::list<ArdourCanvas::CanvasNoteEvent*> Events;
-	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasProgramChange> > PgmChanges;
+	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasPatchChange> > PatchChanges;
 	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasSysEx> > SysExes;
 
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
 	Events                               _events;
-	PgmChanges                           _pgm_changes;
+	PatchChanges                         _patch_changes;
 	SysExes                              _sys_exes;
 	ArdourCanvas::CanvasNote**           _active_notes;
 	ArdourCanvas::Group*                 _note_group;
@@ -444,7 +432,7 @@ class MidiRegionView : public RegionView
         void maybe_select_by_position (GdkEventButton* ev, double x, double y);
         void get_events (Events& e, Evoral::Sequence<Evoral::MusicalTime>::NoteOperator op, uint8_t val, int chan_mask = 0);
 
-	void display_program_changes_on_channel (uint8_t);
+	void display_patch_changes_on_channel (uint8_t);
 
 	void connect_to_diskstream ();
 	void data_recorded (boost::shared_ptr<ARDOUR::MidiBuffer>, boost::weak_ptr<ARDOUR::MidiSource>);

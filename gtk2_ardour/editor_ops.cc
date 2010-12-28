@@ -84,7 +84,7 @@
 #include "normalize_dialog.h"
 #include "editor_cursors.h"
 #include "mouse_cursors.h"
-#include "program_change_dialog.h"
+#include "patch_change_dialog.h"
 
 #include "i18n.h"
 
@@ -4706,25 +4706,27 @@ Editor::quantize_region ()
 }
 
 void
-Editor::insert_program_change ()
+Editor::insert_patch_change ()
 {
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 	if (rs.empty ()) {
 		return;
 	}
 
-	ProgramChangeDialog d;
+	framepos_t const p = get_preferred_edit_position (false);
+
+	Evoral::PatchChange<Evoral::MusicalTime> empty (0, 0, 0, 0);
+	PatchChangeDialog d (0, _session, empty, Gtk::Stock::ADD);
+	
 	if (d.run() == RESPONSE_CANCEL) {
 		return;
 	}
-
-	framepos_t const p = get_preferred_edit_position (false);
 
 	for (RegionSelection::iterator i = rs.begin (); i != rs.end(); ++i) {
 		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*i);
 		if (mrv) {
 			if (p >= mrv->region()->first_frame() && p <= mrv->region()->last_frame()) {
-				mrv->add_program_change (p - mrv->region()->position(), d.program ());
+				mrv->add_patch_change (p - mrv->region()->position(), d.patch ());
 			}
 		}
 	}

@@ -42,7 +42,7 @@ namespace PBD {
 namespace Gnome {
 	namespace Canvas {
 		class CanvasNoteEvent;
-		class CanvasProgramChange;
+		class CanvasPatchChange;
 	}
 }
 
@@ -451,11 +451,11 @@ class NoteDrag : public Drag
 	double _note_height;
 };
 
-/** Drag to move MIDI program changes */
-class ProgramChangeDrag : public Drag
+/** Drag to move MIDI patch changes */
+class PatchChangeDrag : public Drag
 {
 public:
-	ProgramChangeDrag (Editor *, ArdourCanvas::CanvasProgramChange *, MidiRegionView *);
+	PatchChangeDrag (Editor *, ArdourCanvas::CanvasPatchChange *, MidiRegionView *);
 
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
@@ -469,7 +469,7 @@ public:
 
 private:
 	MidiRegionView* _region_view;
-	ArdourCanvas::CanvasProgramChange* _program_change;
+	ArdourCanvas::CanvasPatchChange* _patch_change;
 	double _cumulative_dx;
 };
 

@@ -3196,6 +3196,28 @@ Session::restore_history (string snapshot_name)
 					error << _("Failed to downcast MidiSource for NoteDiffCommand") << endmsg;
 				}
 
+			} else if (n->name() == "SysExDiffCommand") {
+
+				PBD::ID id (n->property("midi-source")->value());
+				boost::shared_ptr<MidiSource> midi_source =
+					boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
+				if (midi_source) {
+					ut->add_command (new MidiModel::SysExDiffCommand (midi_source->model(), *n));
+				} else {
+					error << _("Failed to downcast MidiSource for SysExDiffCommand") << endmsg;
+				}
+				
+			} else if (n->name() == "PatchChangeDiffCommand") {
+
+				PBD::ID id (n->property("midi-source")->value());
+				boost::shared_ptr<MidiSource> midi_source =
+					boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
+				if (midi_source) {
+					ut->add_command (new MidiModel::PatchChangeDiffCommand (midi_source->model(), *n));
+				} else {
+					error << _("Failed to downcast MidiSource for PatchChangeDiffCommand") << endmsg;
+				}
+
 			} else if (n->name() == "StatefulDiffCommand") {
 				if ((c = stateful_diff_command_factory (n))) {
 					ut->add_command (c);

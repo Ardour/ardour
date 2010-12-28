@@ -31,6 +31,7 @@
 #include "evoral/Parameter.hpp"
 #include "evoral/ControlSet.hpp"
 #include "evoral/ControlList.hpp"
+#include "evoral/PatchChange.hpp"
 
 namespace Evoral {
 
@@ -101,7 +102,7 @@ public:
 	void append(const Event<Time>& ev, Evoral::event_id_t evid);
 
 	inline size_t n_notes() const { return _notes.size(); }
-	inline bool   empty()   const { return _notes.size() == 0 && ControlSet::controls_empty(); }
+	inline bool   empty()   const { return _notes.empty() && _sysexes.empty() && _patch_changes.empty() && ControlSet::controls_empty(); }
 
 	inline static bool note_time_comparator(const boost::shared_ptr< const Note<Time> >& a,
 	                                        const boost::shared_ptr< const Note<Time> >& b) {
@@ -177,6 +178,19 @@ public:
 	inline       SysExes& sysexes()       { return _sysexes; }
 	inline const SysExes& sysexes() const { return _sysexes; }
 
+	typedef boost::shared_ptr<PatchChange<Time> > PatchChangePtr;
+	typedef boost::shared_ptr<const PatchChange<Time> > constPatchChangePtr;
+	
+	struct EarlierPatchChangeComparator {
+		inline bool operator() (constPatchChangePtr a, constPatchChangePtr b) const {
+			return a->time() < b->time();
+		}
+	};
+
+	typedef std::multiset<PatchChangePtr, EarlierPatchChangeComparator> PatchChanges;
+	inline       PatchChanges& patch_changes ()       { return _patch_changes; }
+	inline const PatchChanges& patch_changes () const { return _patch_changes; }
+
 private:
 	typedef std::priority_queue<NotePtr, std::deque<NotePtr>, LaterNoteEndComparator> ActiveNotes;
 public:
@@ -208,19 +222,24 @@ public:
 		friend class Sequence<Time>;
 
 		typedef std::vector<ControlIterator> ControlIterators;
-		enum MIDIMessageType { NIL, NOTE_ON, NOTE_OFF, CONTROL, SYSEX };
+		enum MIDIMessageType { NIL, NOTE_ON, NOTE_OFF, CONTROL, SYSEX, PATCH_CHANGE };
 
-		const Sequence<Time>*            _seq;
-		boost::shared_ptr< Event<Time> > _event;
-		mutable ActiveNotes              _active_notes;
-		MIDIMessageType                  _type;
-		bool                             _is_end;
-		typename Sequence::ReadLock      _lock;
-		typename Notes::const_iterator   _note_iter;
-		typename SysExes::const_iterator _sysex_iter;
-		ControlIterators                 _control_iters;
-		ControlIterators::iterator       _control_iter;
-		bool                             _force_discrete;
+		const Sequence<Time>*                 _seq;
+		boost::shared_ptr< Event<Time> >      _event;
+		mutable ActiveNotes                   _active_notes;
+		/** If the iterator is pointing at a patch change, this is the index of the
+		 *  sub-message within that change.
+		 */
+		int                                   _active_patch_change_message;
+		MIDIMessageType                       _type;
+		bool                                  _is_end;
+		typename Sequence::ReadLock           _lock;
+		typename Notes::const_iterator        _note_iter;
+		typename SysExes::const_iterator      _sysex_iter;
+		typename PatchChanges::const_iterator _patch_change_iter;
+		ControlIterators                      _control_iters;
+		ControlIterators::iterator            _control_iter;
+		bool                                  _force_discrete;
 	};
 
 	const_iterator begin (
@@ -233,6 +252,7 @@ public:
 	const const_iterator& end() const { return _end_iter; }
 
 	typename Notes::const_iterator note_lower_bound (Time t) const;
+	typename PatchChanges::const_iterator patch_change_lower_bound (Time t) const;
 
 	bool control_to_midi_event(boost::shared_ptr< Event<Time> >& ev,
 	                           const ControlIterator&            iter) const;
@@ -246,6 +266,9 @@ public:
 
 	bool add_note_unlocked (const NotePtr note, void* arg = 0);
 	void remove_note_unlocked(const constNotePtr note);
+
+	void add_patch_change_unlocked (const PatchChangePtr);
+	void remove_patch_change_unlocked (const constPatchChangePtr);
 
 	uint8_t lowest_note()  const { return _lowest_note; }
 	uint8_t highest_note() const { return _highest_note; }
@@ -276,6 +299,7 @@ private:
 	void append_note_off_unlocked(NotePtr);
 	void append_control_unlocked(const Parameter& param, Time time, double value, Evoral::event_id_t);
 	void append_sysex_unlocked(const MIDIEvent<Time>& ev, Evoral::event_id_t);
+	void append_patch_change_unlocked (const PatchChange<Time>&, Evoral::event_id_t);
 
 	void get_notes_by_pitch (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
 	void get_notes_by_velocity (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
@@ -284,12 +308,19 @@ private:
 
 	const TypeMap& _type_map;
 
-	Notes   _notes;       // notes indexed by time
-	Pitches _pitches[16]; // notes indexed by channel+pitch
-	SysExes _sysexes;
+	Notes        _notes;       // notes indexed by time
+	Pitches      _pitches[16]; // notes indexed by channel+pitch
+	SysExes      _sysexes;
+	PatchChanges _patch_changes;
 
 	typedef std::multiset<NotePtr, EarlierNoteComparator> WriteNotes;
 	WriteNotes _write_notes[16];
+
+	/** Current bank number on each channel so that we know what
+	 *  to put in PatchChange events when program changes are
+	 *  seen.
+	 */
+	int _bank[16];
 
 	const   const_iterator _end_iter;
 	bool                   _percussive;

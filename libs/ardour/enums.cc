@@ -114,6 +114,7 @@ setup_enum_writer ()
 	MuteMaster::MutePoint _MuteMaster_MutePoint;
 	MidiModel::NoteDiffCommand::Property _MidiModel_NoteDiffCommand_Property;
 	MidiModel::SysExDiffCommand::Property _MidiModel_SysExDiffCommand_Property;
+	MidiModel::PatchChangeDiffCommand::Property _MidiModel_PatchChangeDiffCommand_Property;
 	WaveformScale _WaveformScale;
 	WaveformShape _WaveformShape;
 	QuantizeType _QuantizeType;
@@ -536,6 +537,11 @@ setup_enum_writer ()
 
 	REGISTER_CLASS_ENUM (MidiModel::SysExDiffCommand, Time);
 	REGISTER (_MidiModel_SysExDiffCommand_Property);
+
+	REGISTER_CLASS_ENUM (MidiModel::PatchChangeDiffCommand, Time);
+	REGISTER_CLASS_ENUM (MidiModel::PatchChangeDiffCommand, Program);
+	REGISTER_CLASS_ENUM (MidiModel::PatchChangeDiffCommand, Bank);
+	REGISTER (_MidiModel_PatchChangeDiffCommand_Property);
 	
 	REGISTER_ENUM(Linear);
 	REGISTER_ENUM(Logarithmic);

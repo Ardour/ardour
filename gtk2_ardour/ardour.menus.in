@@ -258,7 +258,7 @@
 		      <menuitem action='lower-region-to-bottom'/>
               </menu>
 	      <menu action='RegionMenuMIDI'>
-	              <menuitem action='insert-program-change'/>
+	              <menuitem action='insert-patch-change'/>
 	              <menuitem action='quantize-region'/>
 	              <menuitem action='fork-region'/>
 		      <menuitem action='show-region-list-editor'/>
@@ -593,7 +593,7 @@
 		      <menuitem action='lower-region-to-bottom'/>
               </menu>
 	      <menu action='RegionMenuMIDI'>
-	              <menuitem action='insert-program-change'/>
+	              <menuitem action='insert-patch-change'/>
 	              <menuitem action='quantize-region'/>
 	              <menuitem action='fork-region'/>
 		      <menuitem action='show-region-list-editor'/>
