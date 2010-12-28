@@ -339,7 +339,7 @@ Drag::abort ()
 		_item->ungrab (0);
 	}
 
-	aborted ();
+	aborted (_move_threshold_passed);
 
 	_editor->stop_canvas_autoscroll ();
 	_editor->hide_verbose_canvas_cursor ();
@@ -1133,7 +1133,7 @@ RegionMoveDrag::add_stateful_diff_commands_for_playlists (PlaylistSet const & pl
 
 
 void
-RegionMoveDrag::aborted ()
+RegionMoveDrag::aborted (bool movement_occurred)
 {
 	if (_copy) {
 
@@ -1144,12 +1144,12 @@ RegionMoveDrag::aborted ()
 		_views.clear ();
 
 	} else {
-		RegionMotionDrag::aborted ();
+		RegionMotionDrag::aborted (movement_occurred);
 	}
 }
 
 void
-RegionMotionDrag::aborted ()
+RegionMotionDrag::aborted (bool)
 {
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		RegionView* rv = i->view;
@@ -1231,7 +1231,7 @@ RegionInsertDrag::finished (GdkEvent *, bool)
 }
 
 void
-RegionInsertDrag::aborted ()
+RegionInsertDrag::aborted (bool)
 {
 	delete _primary;
 	_primary = 0;
@@ -1330,7 +1330,7 @@ RegionSpliceDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-RegionSpliceDrag::aborted ()
+RegionSpliceDrag::aborted (bool)
 {
 	/* XXX: TODO */
 }
@@ -1391,7 +1391,7 @@ RegionCreateDrag::add_region ()
 }
 
 void
-RegionCreateDrag::aborted ()
+RegionCreateDrag::aborted (bool)
 {
 	/* XXX */
 }
@@ -1479,7 +1479,7 @@ NoteResizeDrag::finished (GdkEvent*, bool /*movement_occurred*/)
 }
 
 void
-NoteResizeDrag::aborted ()
+NoteResizeDrag::aborted (bool)
 {
 	/* XXX: TODO */
 }
@@ -1503,14 +1503,13 @@ RegionGainDrag::finished (GdkEvent *, bool)
 }
 
 void
-RegionGainDrag::aborted ()
+RegionGainDrag::aborted (bool)
 {
 	/* XXX: TODO */
 }
 
 TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
 	: RegionDrag (e, i, p, v)
-	, _have_transaction (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TrimDrag\n");
 }
@@ -1602,13 +1601,12 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		}
 
 		_editor->begin_reversible_command (trim_type);
-		_have_transaction = true;
 
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 			RegionView* rv = i->view;
 			rv->fake_set_opaque (false);
 			rv->enable_display (false);
-			rv->region()->clear_changes ();
+			rv->region()->playlist()->clear_owned_changes ();
 
 			AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (rv);
 
@@ -1706,12 +1704,24 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 			_primary->thaw_after_trim ();
 		} else {
 
+			set<boost::shared_ptr<Playlist> > diffed_playlists;
+
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 				i->view->thaw_after_trim ();
 				i->view->enable_display (true);
 				i->view->fake_set_opaque (true);
-				if (_have_transaction) {
-					_editor->session()->add_command (new StatefulDiffCommand (i->view->region()));
+
+				/* Trimming one region may affect others on the playlist, so we need
+				   to get undo Commands from the whole playlist rather than just the
+				   region.  Use diffed_playlists to make sure we don't diff a given
+				   playlist more than once.
+				*/
+				boost::shared_ptr<Playlist> p = i->view->region()->playlist ();
+				if (diffed_playlists.find (p) == diffed_playlists.end()) {
+					vector<Command*> cmds;
+					p->rdiff (cmds);
+					_editor->session()->add_commands (cmds);
+					diffed_playlists.insert (p);
 				}
 			}
 		}
@@ -1720,9 +1730,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 
 		_editor->motion_frozen_playlists.clear ();
-		if (_have_transaction) {
-			_editor->commit_reversible_command();
-		}
+		_editor->commit_reversible_command();
 
 	} else {
 		/* no mouse movement */
@@ -1739,7 +1747,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-TrimDrag::aborted ()
+TrimDrag::aborted (bool movement_occurred)
 {
 	/* Our motion method is changing model state, so use the Undo system
 	   to cancel.  Perhaps not ideal, as this will leave an Undo point
@@ -1748,7 +1756,7 @@ TrimDrag::aborted ()
 
 	finished (0, true);
 	
-	if (_have_transaction) {
+	if (movement_occurred) {
 		_editor->undo ();
 	}
 
@@ -1879,7 +1887,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-MeterMarkerDrag::aborted ()
+MeterMarkerDrag::aborted (bool)
 {
 	_marker->set_position (_marker->meter().frame ());
 }
@@ -1973,7 +1981,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-TempoMarkerDrag::aborted ()
+TempoMarkerDrag::aborted (bool)
 {
 	_marker->set_position (_marker->tempo().frame());
 }
@@ -2071,7 +2079,7 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-CursorDrag::aborted ()
+CursorDrag::aborted (bool)
 {
 	if (_editor->_dragging_playhead) {
 		_editor->session()->request_resume_timecode_transmission ();
@@ -2186,7 +2194,7 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-FadeInDrag::aborted ()
+FadeInDrag::aborted (bool)
 {
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (i->view);
@@ -2309,7 +2317,7 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-FadeOutDrag::aborted ()
+FadeOutDrag::aborted (bool)
 {
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (i->view);
@@ -2646,7 +2654,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-MarkerDrag::aborted ()
+MarkerDrag::aborted (bool)
 {
 	/* XXX: TODO */
 }
@@ -2769,7 +2777,7 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-ControlPointDrag::aborted ()
+ControlPointDrag::aborted (bool)
 {
 	_point->line().reset ();
 }
@@ -2879,7 +2887,7 @@ LineDrag::finished (GdkEvent* event, bool)
 }
 
 void
-LineDrag::aborted ()
+LineDrag::aborted (bool)
 {
 	_line->reset ();
 }
@@ -2949,7 +2957,7 @@ FeatureLineDrag::finished (GdkEvent*, bool)
 }
 
 void
-FeatureLineDrag::aborted ()
+FeatureLineDrag::aborted (bool)
 {
 	//_line->reset ();
 }
@@ -3063,7 +3071,7 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-RubberbandSelectDrag::aborted ()
+RubberbandSelectDrag::aborted (bool)
 {
 	_editor->rubberband_rect->hide ();
 }
@@ -3134,7 +3142,7 @@ TimeFXDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 }
 
 void
-TimeFXDrag::aborted ()
+TimeFXDrag::aborted (bool)
 {
 	_primary->get_time_axis_view().hide_timestretch ();
 }
@@ -3167,7 +3175,7 @@ ScrubDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 }
 
 void
-ScrubDrag::aborted ()
+ScrubDrag::aborted (bool)
 {
 	/* XXX: TODO */
 }
@@ -3435,7 +3443,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-SelectionDrag::aborted ()
+SelectionDrag::aborted (bool)
 {
 	/* XXX: TODO */
 }
@@ -3641,7 +3649,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-RangeMarkerBarDrag::aborted ()
+RangeMarkerBarDrag::aborted (bool)
 {
 	/* XXX: TODO */
 }
@@ -3729,7 +3737,7 @@ MouseZoomDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-MouseZoomDrag::aborted ()
+MouseZoomDrag::aborted (bool)
 {
 	_editor->zoom_rect->hide ();
 }
@@ -3871,7 +3879,7 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 }
 
 void
-NoteDrag::aborted ()
+NoteDrag::aborted (bool)
 {
 	/* XXX: TODO */
 }
@@ -4074,7 +4082,7 @@ AutomationRangeDrag::finished (GdkEvent* event, bool)
 }
 
 void
-AutomationRangeDrag::aborted ()
+AutomationRangeDrag::aborted (bool)
 {
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
 		i->line->clear_always_in_view ();
@@ -4136,7 +4144,7 @@ PatchChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
 }
 
 void
-PatchChangeDrag::aborted ()
+PatchChangeDrag::aborted (bool)
 {
 	_patch_change->move (-_cumulative_dx, 0);
 }
