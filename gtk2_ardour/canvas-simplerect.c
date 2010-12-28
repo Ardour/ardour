@@ -542,10 +542,10 @@ gnome_canvas_simplerect_update (GnomeCanvasItem *item, double *affine, ArtSVP *c
 
 	if (simplerect->full_draw_on_update) {
 		gnome_canvas_request_redraw (item->canvas,
-					   simplerect->bbox_ulx,
-					   simplerect->bbox_uly,
-					   simplerect->bbox_lrx+0.5,
-					   simplerect->bbox_lry+0.5);
+                                             simplerect->bbox_ulx,
+                                             simplerect->bbox_uly,
+                                             simplerect->bbox_lrx+0.5,
+                                             simplerect->bbox_lry+0.5);
 		simplerect->full_draw_on_update = FALSE;
 	}
 
