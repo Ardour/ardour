@@ -1610,6 +1610,7 @@ RouteUI::save_as_template ()
 
 	p.set_title (_("Save As Template"));
 	p.set_prompt (_("Template name:"));
+	p.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	switch (p.run()) {
 	case RESPONSE_ACCEPT:
 		break;
