@@ -2057,13 +2057,9 @@ Session::globally_set_send_gains_to_zero (boost::shared_ptr<Route> dest)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	boost::shared_ptr<Send> s;
 
-	/* only tracks */
-
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (boost::dynamic_pointer_cast<Track>(*i)) {
-			if ((s = (*i)->internal_send_for (dest)) != 0) {
-				s->amp()->gain_control()->set_value (0.0);
-			}
+		if ((s = (*i)->internal_send_for (dest)) != 0) {
+			s->amp()->gain_control()->set_value (0.0);
 		}
 	}
 }
@@ -2074,13 +2070,9 @@ Session::globally_set_send_gains_to_unity (boost::shared_ptr<Route> dest)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	boost::shared_ptr<Send> s;
 
-	/* only tracks */
-
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (boost::dynamic_pointer_cast<Track>(*i)) {
-			if ((s = (*i)->internal_send_for (dest)) != 0) {
-				s->amp()->gain_control()->set_value (1.0);
-			}
+		if ((s = (*i)->internal_send_for (dest)) != 0) {
+			s->amp()->gain_control()->set_value (1.0);
 		}
 	}
 }
@@ -2091,13 +2083,9 @@ Session::globally_set_send_gains_from_track(boost::shared_ptr<Route> dest)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	boost::shared_ptr<Send> s;
 
-	/* only tracks */
-
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (boost::dynamic_pointer_cast<Track>(*i)) {
-			if ((s = (*i)->internal_send_for (dest)) != 0) {
-				s->amp()->gain_control()->set_value ((*i)->gain_control()->get_value());
-			}
+		if ((s = (*i)->internal_send_for (dest)) != 0) {
+			s->amp()->gain_control()->set_value ((*i)->gain_control()->get_value());
 		}
 	}
 }
