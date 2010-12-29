@@ -218,9 +218,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void new_send ();
 	void show_send_controls ();
 
-	void input_changed (ARDOUR::IOChange, void *);
-	void output_changed (ARDOUR::IOChange, void *);
-
 	PBD::ScopedConnection panstate_connection;
 	PBD::ScopedConnection panstyle_connection;
 	void connect_to_pan ();
@@ -279,6 +276,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	static int scrollbar_height;
 
 	void update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width width, bool input_button);
+	void port_connected_or_disconnected (ARDOUR::Port *, ARDOUR::Port *);
 };
 
 #endif /* __ardour_mixer_strip__ */

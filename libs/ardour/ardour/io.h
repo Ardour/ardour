@@ -118,6 +118,8 @@ class IO : public SessionObject, public Latent
 	PortSet& ports() { return _ports; }
 	const PortSet& ports() const { return _ports; }
 
+	bool has_port (Port *) const;
+
 	Port *nth (uint32_t n) const {
 		if (n < _ports.num_ports()) {
 			return _ports.port(n);

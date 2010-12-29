@@ -162,7 +162,7 @@ IO::disconnect (Port* our_port, string other_port, void* src)
 	if (other_port.length() == 0 || our_port == 0) {
 		return 0;
 	}
-        
+
         {
                 Glib::Mutex::Lock lm (io_lock);
                 
@@ -1611,4 +1611,11 @@ IO::physically_connected () const
         }
 
         return false;
+}
+
+bool
+IO::has_port (Port* p) const
+{
+	Glib::Mutex::Lock lm (io_lock);
+	return _ports.contains (p);
 }

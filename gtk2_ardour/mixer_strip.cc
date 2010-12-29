@@ -341,6 +341,10 @@ MixerStrip::init ()
 	set_flags (get_flags() | Gtk::CAN_FOCUS);
 
 	SwitchIO.connect (sigc::mem_fun (*this, &MixerStrip::switch_io));
+
+	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
+		*this, invalidator (*this), boost::bind (&MixerStrip::port_connected_or_disconnected, this, _1, _2), gui_context ()
+		);
 }
 
 MixerStrip::~MixerStrip ()
@@ -460,8 +464,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 						   _route->comment());
 
 	_route->meter_change.connect (route_connections, invalidator (*this), bind (&MixerStrip::meter_changed, this), gui_context());
-	_route->input()->changed.connect (route_connections, invalidator (*this), ui_bind (&MixerStrip::input_changed, this, _1, _2), gui_context());
-	_route->output()->changed.connect (route_connections, invalidator (*this), ui_bind (&MixerStrip::output_changed, this, _1, _2), gui_context());
 	_route->route_group_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::route_group_changed, this), gui_context());
 
 	if (_route->panner()) {
@@ -1214,19 +1216,18 @@ MixerStrip::diskstream_changed ()
 }
 
 void
-MixerStrip::input_changed (IOChange /*change*/, void */*src*/)
+MixerStrip::port_connected_or_disconnected (Port* a, Port* b)
 {
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&MixerStrip::update_input_display, this));
-	set_width_enum (_width, this);
-}
+	if (_route->input()->has_port (a) || _route->input()->has_port (b)) {
+		update_input_display ();
+		set_width_enum (_width, this);
+	}
 
-void
-MixerStrip::output_changed (IOChange /*change*/, void */*src*/)
-{
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&MixerStrip::update_output_display, this));
-	set_width_enum (_width, this);
+	if (_route->output()->has_port (a) || _route->output()->has_port (b)) {
+		update_output_display ();
+		set_width_enum (_width, this);
+	}
 }
-
 
 void
 MixerStrip::comment_editor_done_editing()

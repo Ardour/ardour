@@ -394,10 +394,30 @@ AudioEngine::_registration_callback (jack_port_id_t /*id*/, int /*reg*/, void* a
 }
 
 void
-AudioEngine::_connect_callback (jack_port_id_t /*id_a*/, jack_port_id_t /*id_b*/, int /*conn*/, void* arg)
+AudioEngine::_connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int conn, void* arg)
 {
 	AudioEngine* ae = static_cast<AudioEngine*> (arg);
-	ae->PortConnectedOrDisconnected (); /* EMIT SIGNAL */
+
+	GET_PRIVATE_JACK_POINTER (ae->_jack);
+
+	jack_port_t* jack_port_a = jack_port_by_id (_priv_jack, id_a);
+	jack_port_t* jack_port_b = jack_port_by_id (_priv_jack, id_b);
+
+	Port* port_a = 0;
+	Port* port_b = 0;
+
+	boost::shared_ptr<Ports> pr = ae->ports.reader ();
+	Ports::iterator i = pr->begin ();
+	while (i != pr->end() && (port_a == 0 || port_b == 0)) {
+		if (jack_port_a == (*i)->_jack_port) {
+			port_a = *i;
+		} else if (jack_port_b == (*i)->_jack_port) {
+			port_b = *i;
+		}
+		++i;
+	}
+	
+	ae->PortConnectedOrDisconnected (port_a, port_b, conn == 0 ? false : true); /* EMIT SIGNAL */
 }
 
 void
