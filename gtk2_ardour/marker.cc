@@ -45,12 +45,11 @@ using namespace Gtkmm2ext;
 
 PBD::Signal1<void,Marker*> Marker::CatchDeletion;
 
-Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, ArdourCanvas::Group& line_parent, guint32 rgba, const string& annotation,
+Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, const string& annotation,
 		Type type, framepos_t frame, bool handle_events)
 
 	: editor (ed)
 	, _parent (&parent)
-	, _line_parent (&line_parent)
 	, _line (0)
 	, _type (type)
 	, _selected (false)
@@ -288,7 +287,7 @@ Marker::~Marker ()
 
 void Marker::reparent(ArdourCanvas::Group & parent)
 {
-	group->reparent(parent);
+	group->reparent (parent);
 	_parent = &parent;
 }
 
@@ -313,24 +312,22 @@ Marker::setup_line ()
 
 		if (_line == 0) {
 
-			_line = new ArdourCanvas::SimpleLine (*_line_parent);
+			_line = new ArdourCanvas::SimpleLine (*group);
 			_line->property_color_rgba() = ARDOUR_UI::config()->canvasvar_EditPoint.get();
-
-			setup_line_x ();
 
 			_line->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
 		}
 		
+                /* work out where to start the line from so that it extends from the top of the canvas */
 		double yo = 0;
-		if (!_selected) {
-			/* work out where to start the line from so that it extends only as far as the mark */
-			double x = 0;
-			_parent->i2w (x, yo);
-			_line_parent->w2i (x, yo);
-		}
+                double xo = 0;
 
-		_line->property_y1() = yo + 10;
-		_line->property_y2() = yo + 10 + _canvas_height;
+                _line->i2w (xo, yo);
+
+                _line->property_x1() = _shift;
+                _line->property_x2() = _shift;
+		_line->property_y1() = -yo; // zero in world coordinates, negative in item/parent coordinate space
+		_line->property_y2() = -yo + _canvas_height;
 
 		_line->property_color_rgba() = _selected ? ARDOUR_UI::config()->canvasvar_EditPoint.get() : _color;
 		_line->raise_to_top ();
@@ -407,15 +404,6 @@ Marker::setup_name_display ()
 }
 
 void
-Marker::setup_line_x ()
-{
-	if (_line) {
-		_line->property_x1() = unit_position + _shift - 0.5;
-		_line->property_x2() = unit_position + _shift - 0.5;
-	}
-}
-
-void
 Marker::set_position (framepos_t frame)
 {
 	double new_unit_position = editor.frame_to_unit (frame);
@@ -423,8 +411,6 @@ Marker::set_position (framepos_t frame)
 	group->move (new_unit_position - unit_position, 0.0);
 	frame_position = frame;
 	unit_position = new_unit_position;
-
-	setup_line_x ();
 }
 
 void
@@ -460,12 +446,6 @@ Marker::set_color_rgba (uint32_t c)
 
 	if (_line && !_selected) {
 		_line->property_color_rgba() = _color;
-
-		/* For reasons unknown this is necessary to ensure that the line colour
-		   gets updated.
-		*/
-		_line->hide ();
-		_line->show ();
 	}
 
 	_name_background->property_fill() = true;
@@ -505,9 +485,9 @@ Marker::set_right_label_limit (double p)
 
 /***********************************************************************/
 
-TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Group& parent, ArdourCanvas::Group& line_parent, guint32 rgba, const string& text,
+TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text,
 			  ARDOUR::TempoSection& temp)
-	: Marker (editor, parent, line_parent, rgba, text, Tempo, 0, false),
+	: Marker (editor, parent, rgba, text, Tempo, 0, false),
 	  _tempo (temp)
 {
 	set_position (_tempo.frame());
@@ -520,9 +500,9 @@ TempoMarker::~TempoMarker ()
 
 /***********************************************************************/
 
-MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Group& parent, ArdourCanvas::Group& line_parent, guint32 rgba, const string& text,
+MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text,
 			  ARDOUR::MeterSection& m)
-	: Marker (editor, parent, line_parent, rgba, text, Meter, 0, false),
+	: Marker (editor, parent, rgba, text, Meter, 0, false),
 	  _meter (m)
 {
 	set_position (_meter.frame());
