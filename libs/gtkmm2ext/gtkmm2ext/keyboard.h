@@ -57,6 +57,13 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	static uint32_t CopyModifier;
 	static uint32_t RangeSelectModifier;
 
+	static const char* primary_modifier_name ();
+	static const char* secondary_modifier_name ();
+	static const char* tertiary_modifier_name ();
+	static const char* level4_modifier_name ();
+	static const char* copy_modifier_name ();
+	static const char* rangeselect_modifier_name ();
+
 	static void set_primary_modifier (uint32_t newval) {
 		set_modifier (newval, PrimaryModifier);
 	}
@@ -110,8 +117,14 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	static guint delete_modifier() { return delete_mod; }
 	static void set_delete_modifier(guint);
 
+	static guint insert_note_button() { return insert_note_but; }
+	static void set_insert_note_button (guint);
+	static guint insert_note_modifier() { return insert_note_mod; }
+	static void set_insert_note_modifier(guint);
+	
 	static bool is_edit_event (GdkEventButton*);
 	static bool is_delete_event (GdkEventButton*);
+	static bool is_insert_note_event (GdkEventButton*);
 	static bool is_context_menu_event (GdkEventButton*);
 	static bool is_button2_event (GdkEventButton*);
 
@@ -148,6 +161,8 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	static guint     edit_mod;
 	static guint     delete_but;
 	static guint     delete_mod;
+	static guint     insert_note_but;
+	static guint     insert_note_mod;
 	static guint     snap_mod;
 	static guint     button2_modifiers;
 	static Gtk::Window* current_window;

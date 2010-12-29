@@ -52,9 +52,12 @@ guint Keyboard::edit_but = 3;
 guint Keyboard::edit_mod = GDK_CONTROL_MASK;
 guint Keyboard::delete_but = 3;
 guint Keyboard::delete_mod = GDK_SHIFT_MASK;
+guint Keyboard::insert_note_but = 3;
+guint Keyboard::insert_note_mod = GDK_CONTROL_MASK;
 guint Keyboard::snap_mod = GDK_MOD3_MASK;
 
 #ifdef GTKOSX
+
 guint Keyboard::PrimaryModifier = GDK_META_MASK;   // Command
 guint Keyboard::SecondaryModifier = GDK_MOD1_MASK; // Alt/Option
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
@@ -62,7 +65,16 @@ guint Keyboard::Level4Modifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::CopyModifier = GDK_MOD1_MASK;      // Alt/Option
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
+
+const char* Keyboard::primary_modifier_name() { return _("Command"); }
+const char* Keyboard::secondary_modifier_name() { return _("Option"); }
+const char* Keyboard::tertiary_modifier_name() { return _("Shift"); }
+const char* Keyboard::level4_modifier_name() { return _("Control"); }
+const char* Keyboard::copy_modifier_name() { return _("Mod1";    ); }
+const char* Keyboard::rangeselect_modifier_name() { return _("Shift"); }
+
 #else
+
 guint Keyboard::PrimaryModifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::SecondaryModifier = GDK_MOD1_MASK;  // Alt/Option
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK;  // Shift
@@ -70,8 +82,15 @@ guint Keyboard::Level4Modifier = GDK_MOD4_MASK;     // Mod4/Windows
 guint Keyboard::CopyModifier = GDK_CONTROL_MASK;
 guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers = 0; /* not used */
-#endif
 
+const char* Keyboard::primary_modifier_name() { return _("Control"); }
+const char* Keyboard::secondary_modifier_name() { return _("Alt"); }
+const char* Keyboard::tertiary_modifier_name() { return _("Shift"); }
+const char* Keyboard::level4_modifier_name() { return _("Meta"); }
+const char* Keyboard::copy_modifier_name() { return _("Control"); }
+const char* Keyboard::rangeselect_modifier_name() { return _("Shift"); }
+
+#endif
 
 Keyboard*    Keyboard::_the_keyboard = 0;
 Gtk::Window* Keyboard::current_window = 0;
@@ -148,6 +167,10 @@ Keyboard::get_state (void)
 	node->add_property ("delete-modifier", buf);
 	snprintf (buf, sizeof (buf), "%d", snap_mod);
 	node->add_property ("snap-modifier", buf);
+	snprintf (buf, sizeof (buf), "%d", insert_note_but);
+	node->add_property ("insert-note-button", buf);
+	snprintf (buf, sizeof (buf), "%d", insert_note_mod);
+	node->add_property ("insert-note-modifier", buf);
 
 	return *node;
 }
@@ -175,6 +198,14 @@ Keyboard::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("snap-modifier")) != 0) {
 		sscanf (prop->value().c_str(), "%d", &snap_mod);
+	}
+
+	if ((prop = node.property ("insert-note-button")) != 0) {
+		sscanf (prop->value().c_str(), "%d", &insert_note_but);
+	}
+
+	if ((prop = node.property ("insert-note-modifier")) != 0) {
+		sscanf (prop->value().c_str(), "%d", &insert_note_mod);
 	}
 
 	return 0;
@@ -360,6 +391,21 @@ Keyboard::set_delete_modifier (guint mod)
 }
 
 void
+Keyboard::set_insert_note_button (guint but)
+{
+	insert_note_but = but;
+}
+
+void
+Keyboard::set_insert_note_modifier (guint mod)
+{
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~insert_note_mod);
+	insert_note_mod = mod;
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | insert_note_mod);
+}
+
+
+void
 Keyboard::set_modifier (uint32_t newval, uint32_t& var)
 {
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~var);
@@ -381,6 +427,14 @@ Keyboard::is_edit_event (GdkEventButton *ev)
 	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) &&
 		(ev->button == Keyboard::edit_button()) &&
 		((ev->state & RelevantModifierKeyMask) == Keyboard::edit_modifier());
+}
+
+bool
+Keyboard::is_insert_note_event (GdkEventButton *ev)
+{
+	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) &&
+		(ev->button == Keyboard::insert_note_button()) &&
+		((ev->state & RelevantModifierKeyMask) == Keyboard::insert_note_modifier());
 }
 
 bool
