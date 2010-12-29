@@ -90,13 +90,18 @@ void
 StereoPanner::set_tooltip ()
 {
         double pos = position_control->get_value(); // 0..1
-        double w = width_control->get_value (); // -1..+1
-        int lpos = (int) lrint ((pos - (w/2.0)) * 100.0);
-        int rpos = (int) lrint ((pos + (w/2.0)) * 100.0);
-                                
-        Gtkmm2ext::UI::instance()->set_tip (this, string_compose (_("L:%1 R:%2 Width: %3%%"), 
-                                                                  lpos, rpos,
-                                                                  (int) floor (w * 100.0)).c_str());
+        
+        /* the values displayed show the position of the center of the image, expressed as a stereo pair
+           that ranges from (100,0) (hard left) through (50,50) (hard center) to (0,100) (hard right).
+           the center of the image is halfway between the left and right positions.
+        */
+
+        Gtkmm2ext::UI::instance()->set_tip (this, 
+                                            string_compose (_("L:%1 R:%2 Width: %3%%\n\n0 -> set width to zero\n%4-uparrow -> set width to 1.0\n%4-downarrow -> set width to -1.0"), 
+                                                            (int) floor (100.0 * (1.0 - pos)),
+                                                            (int) floor (100.0 * pos),
+                                                            (int) floor (width_control->get_value()),
+                                                            Keyboard::secondary_modifier_name()).c_str());
 }
 
 void
@@ -151,16 +156,17 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         int left = lrint (center - (fswidth * usable_width / 2.0)); // center of leftmost box
         int right = lrint (center +  (fswidth * usable_width / 2.0)); // center of rightmost box
 
+
         cerr << this << " pos " << pos << " width = " << width << " swidth = " << swidth << " center @ " << center << " L = " << left << " R = " << right << endl;
 
         /* compute & draw the line through the box */
         
         cairo_set_line_width (cr, 2);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-        cairo_move_to (cr, left, top_step+(pos_box_size/2)+step_down);
-        cairo_line_to (cr, left, top_step+(pos_box_size/2));
-        cairo_line_to (cr, right, top_step+(pos_box_size/2));
-        cairo_line_to (cr, right, top_step+(pos_box_size/2) + step_down);
+        cairo_move_to (cr, left-(lr_box_size/2), top_step+(pos_box_size/2)+step_down);
+        cairo_line_to (cr, left-(lr_box_size/2), top_step+(pos_box_size/2));
+        cairo_line_to (cr, right+(lr_box_size/2)+1, top_step+(pos_box_size/2));
+        cairo_line_to (cr, right+(lr_box_size/2)+1, top_step+(pos_box_size/2) + step_down);
         cairo_stroke (cr);
 
         if (swidth < 0.0) {
@@ -168,10 +174,11 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
                 swap (left, right);
         }
 
-        /* left box */
-
+        /* make left/right be the left edge of each box */
         left -= lr_box_size/2;
         right -= lr_box_size/2;
+
+        /* left box */
 
         cairo_rectangle (cr, 
                          left,
