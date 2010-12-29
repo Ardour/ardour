@@ -98,16 +98,15 @@ StereoPanner::set_tooltip ()
 
         Gtkmm2ext::UI::instance()->set_tip (this, 
                                             string_compose (_("L:%1 R:%2 Width: %3%%\n\n0 -> set width to zero\n%4-uparrow -> set width to 1.0\n%4-downarrow -> set width to -1.0"), 
-                                                            (int) floor (100.0 * (1.0 - pos)),
-                                                            (int) floor (100.0 * pos),
-                                                            (int) floor (width_control->get_value()),
+                                                            (int) rint (100.0 * (1.0 - pos)),
+                                                            (int) rint (100.0 * pos),
+                                                            (int) floor (100.0 * width_control->get_value()),
                                                             Keyboard::secondary_modifier_name()).c_str());
 }
 
 void
 StereoPanner::value_change ()
 {
-        cerr << this << " Value change, pos = " << position_control->get_value() << " w = " << width_control->get_value() << endl;
         set_tooltip ();
         queue_draw ();
 }
@@ -155,9 +154,6 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         double center = (lr_box_size/2.0) + (usable_width * pos);
         int left = lrint (center - (fswidth * usable_width / 2.0)); // center of leftmost box
         int right = lrint (center +  (fswidth * usable_width / 2.0)); // center of rightmost box
-
-
-        cerr << this << " pos " << pos << " width = " << width << " swidth = " << swidth << " center @ " << center << " L = " << left << " R = " << right << endl;
 
         /* compute & draw the line through the box */
         
@@ -253,10 +249,8 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 
         if (ev->type == GDK_2BUTTON_PRESS) {
                 if (dragging_position) {
-                        cerr << "Reset pos\n";
                         position_control->set_value (0.5); // reset position to center
                 } else {
-                        cerr << "Reset width\n";
                         width_control->set_value (1.0); // reset position to full, LR
                 }
                 dragging = false;
