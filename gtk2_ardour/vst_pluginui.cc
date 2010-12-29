@@ -139,7 +139,45 @@ void
 VSTPluginUI::forward_key_event (GdkEventKey* ev)
 {
 	if (ev->type == GDK_KEY_PRESS) {
-		vst->fst()->pending_key = ev->keyval;
+
+		FST* fst = vst->fst ();
+		pthread_mutex_lock (&fst->lock);
+
+		if (fst->n_pending_keys == (sizeof (fst->pending_keys) * sizeof (FSTKey))) {
+			/* buffer full */
+			return;
+		}
+
+		int special_windows_key = 0;
+		int character_windows_key = 0;
+		
+		switch (ev->keyval) {
+		case GDK_Left:
+			special_windows_key = 0x25;
+			break;
+		case GDK_Right:
+			special_windows_key = 0x27;
+			break;
+		case GDK_Up:
+			special_windows_key = 0x26;
+			break;
+		case GDK_Down:
+			special_windows_key = 0x28;
+			break;
+		case GDK_Return:
+		case GDK_KP_Enter:
+			special_windows_key = 0xd;
+			break;
+		default:
+			character_windows_key = ev->keyval;
+			break;
+		}
+
+		fst->pending_keys[fst->n_pending_keys].special = special_windows_key;
+		fst->pending_keys[fst->n_pending_keys].character = character_windows_key;
+		fst->n_pending_keys++;
+		
+		pthread_mutex_unlock (&fst->lock);
 	}
 }
 

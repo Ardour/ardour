@@ -14,6 +14,8 @@
 #include <X11/X.h>
 #include <X11/Xlib.h>
 
+extern char * strdup (const char *);
+
 struct ERect{
     short top;
     short left;
@@ -73,7 +75,7 @@ fst_new ()
 	fst->want_program = -1;
 	fst->want_chunk = 0;
 	fst->current_program = -1;
-	fst->pending_key = 0;
+	fst->n_pending_keys = 0;
 	return fst;
 }
 
@@ -211,19 +213,38 @@ again:
 
 		}
 
+		pthread_mutex_lock (&plugin_mutex);
 
 		for (fst = fst_first; fst; fst = fst->next) {
 			
-			if (fst->pending_key) {
-				msg.message = WM_CHAR;
+			pthread_mutex_lock (&fst->lock);
+
+			/* Dispatch messages to send keypresses to the plugin */
+			
+			for (int i = 0; i < fst->n_pending_keys; ++i) {
+				/* I'm not quite sure what is going on here; it seems
+				   `special' keys must be delivered with WM_KEYDOWN,
+				   but that alphanumerics etc. must use WM_CHAR or
+				   they will be ignored.  Ours is not to reason why ...
+				*/
+				if (fst->pending_keys[i].special != 0) {
+					msg.message = WM_KEYDOWN;
+					msg.wParam = fst->pending_keys[i].special;
+				} else {
+					msg.message = WM_CHAR;
+					msg.wParam = fst->pending_keys[i].character;
+				}
 				msg.hwnd = GetFocus ();
-				msg.wParam = fst->pending_key;
 				msg.lParam = 0;
 				DispatchMessageA (&msg);
-				fst->pending_key = 0;
 			}
 
+			fst->n_pending_keys = 0;
+			pthread_mutex_unlock (&fst->lock);
+
 		}
+
+		pthread_mutex_unlock (&plugin_mutex);
 
 	}
 
@@ -752,7 +773,6 @@ int fst_save_state (FST * fst, char * filename)
 	if (f) {
 		int bytelen;
 		int numParams = fst->plugin->numParams;
-		unsigned i;
 		char productString[64];
 		char effectName[64];
 		char vendorString[64];
@@ -789,13 +809,13 @@ int fst_save_state (FST * fst, char * filename)
 			numParams = 0;
 		}
 
-		for( i=0; i<numParams; i++ ) {
+		for (int j = 0; j < numParams; ++j) {
 			float val;
 			
 			pthread_mutex_lock( &fst->lock );
-			val = fst->plugin->getParameter( fst->plugin, i );
+			val = fst->plugin->getParameter (fst->plugin, j);
 			pthread_mutex_unlock( &fst->lock );
-			fprintf( f, "  <param index=\"%d\" value=\"%f\"/>\n", i, val );
+			fprintf( f, "  <param index=\"%d\" value=\"%f\"/>\n", j, val );
 		}
 
 		if( fst->plugin->flags & 32 ) {
