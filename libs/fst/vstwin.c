@@ -34,11 +34,11 @@ static int gui_quit = 0;
 static LRESULT WINAPI 
 my_window_proc (HWND w, UINT msg, WPARAM wp, LPARAM lp)
 {
-#if 0
+#if 0	
 	if (msg != WM_TIMER) {
 		fst_error ("window callback handler, msg = 0x%x win=%p\n", msg, w);
 	}
-#endif
+#endif	
 
 	switch (msg) {
 	case WM_KEYUP:
@@ -73,6 +73,7 @@ fst_new ()
 	fst->want_program = -1;
 	fst->want_chunk = 0;
 	fst->current_program = -1;
+	fst->pending_key = 0;
 	return fst;
 }
 
@@ -204,10 +205,26 @@ again:
 				}
 
 				pthread_mutex_unlock (&fst->lock);
+				
 			}
 			pthread_mutex_unlock (&plugin_mutex);
-			
+
 		}
+
+
+		for (fst = fst_first; fst; fst = fst->next) {
+			
+			if (fst->pending_key) {
+				msg.message = WM_CHAR;
+				msg.hwnd = GetFocus ();
+				msg.wParam = fst->pending_key;
+				msg.lParam = 0;
+				DispatchMessageA (&msg);
+				fst->pending_key = 0;
+			}
+
+		}
+
 	}
 
 	return 0;

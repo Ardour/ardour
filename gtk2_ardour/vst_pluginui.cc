@@ -39,6 +39,7 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 
 	preset_box.set_spacing (6);
 	preset_box.set_border_width (6);
+	preset_box.pack_end (focus_button, false, false);
 	preset_box.pack_end (bypass_button, false, false, 10);
 	preset_box.pack_end (delete_button, false, false);
 	preset_box.pack_end (save_button, false, false);
@@ -132,6 +133,14 @@ VSTPluginUI::configure_handler (GdkEventConfigure* ev, Gtk::Socket *socket)
 	gdk_error_trap_pop ();
 
 	return false;
+}
+
+void
+VSTPluginUI::forward_key_event (GdkEventKey* ev)
+{
+	if (ev->type == GDK_KEY_PRESS) {
+		vst->fst()->pending_key = ev->keyval;
+	}
 }
 
 typedef int (*error_handler_t)( Display *, XErrorEvent *);

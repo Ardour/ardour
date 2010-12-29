@@ -89,6 +89,7 @@ struct _FST
     int         current_program;
     float      *want_params;
     float      *set_params;
+    int         pending_key;
 
     int         dispatcher_wantcall;
     int         dispatcher_opcode;
