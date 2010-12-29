@@ -183,15 +183,17 @@ RhythmFerret::run_analysis ()
 		return;
 	}
 
-	RegionSelection& regions (editor.get_selection().regions);
+	clear_transients ();
+
+	regions_with_transients = editor.get_selection().regions;
 
 	current_results.clear ();
 
-	if (regions.empty()) {
+	if (regions_with_transients.empty()) {
 		return;
 	}
 
-	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
+	for (RegionSelection::iterator i = regions_with_transients.begin(); i != regions_with_transients.end(); ++i) {
 
 		boost::shared_ptr<Readable> rd = boost::static_pointer_cast<AudioRegion> ((*i)->region());
 
@@ -382,5 +384,17 @@ void
 RhythmFerret::on_hide ()
 {
 	ArdourDialog::on_hide ();
+	clear_transients ();
+}
+
+/* Clear any transients that we have added */
+void
+RhythmFerret::clear_transients ()
+{
+	current_results.clear ();
+	for (RegionSelection::iterator i = regions_with_transients.begin(); i != regions_with_transients.end(); ++i) {
+		(*i)->region()->set_transients (current_results);
+	}
+	regions_with_transients.clear ();
 }
 

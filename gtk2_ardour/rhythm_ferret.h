@@ -12,6 +12,7 @@
 #include <gtkmm/button.h>
 
 #include "ardour_dialog.h"
+#include "region_selection.h"
 
 namespace ARDOUR {
 	class Readable;
@@ -78,6 +79,10 @@ class RhythmFerret : public ArdourDialog {
 	std::vector<std::string> operation_strings;
 
 	ARDOUR::AnalysisFeatureList current_results;
+
+	void clear_transients ();
+	/** Regions that we have added transient marks to */
+	RegionSelection regions_with_transients;
 
 	AnalysisMode get_analysis_mode () const;
 	Action get_action() const;
