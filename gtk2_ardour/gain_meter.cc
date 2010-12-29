@@ -797,7 +797,7 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	gain_display_box.pack_start (gain_display, true, true);
 
 	meter_metric_area.set_name ("AudioTrackMetrics");
-	set_size_request_to_display_given_text (meter_metric_area, "-50", 0, 0);
+	set_size_request_to_display_given_text (meter_metric_area, "-127", 0, 0);
 
 	gain_automation_style_button.set_name ("MixerAutomationModeButton");
 	gain_automation_state_button.set_name ("MixerAutomationPlaybackButton");
@@ -848,6 +848,15 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 
 	GainMeterBase::set_controls (r, meter, amp);
 
+	if (_meter) {
+		_meter->ConfigurationChanged.connect (
+			model_connections, invalidator (*this), ui_bind (&GainMeter::meter_configuration_changed, this, _1), gui_context()
+			);
+		
+		meter_configuration_changed (_meter->input_streams ());
+	}
+
+	
 	/*
 	   if we have a non-hidden route (ie. we're not the click or the auditioner),
 	   pack some route-dependent stuff.
@@ -873,15 +882,12 @@ GainMeter::get_gm_width ()
 }
 
 Glib::RefPtr<Gdk::Pixmap>
-GainMeter::render_metrics (Gtk::Widget& w)
+GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 {
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
-	Glib::RefPtr<Gdk::GC> fg_gc (w.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
 	Glib::RefPtr<Gdk::GC> bg_gc (w.get_style()->get_bg_gc (Gtk::STATE_NORMAL));
-	gint width, height;
-	int  db_points[] = { -50, -40, -20, -30, -10, -3, 0, 4 };
-	char buf[32];
 
+	gint width, height;
 	win->get_size (width, height);
 
 	Glib::RefPtr<Gdk::Pixmap> pixmap = Gdk::Pixmap::create (win, width, height);
@@ -890,24 +896,88 @@ GainMeter::render_metrics (Gtk::Widget& w)
 
 	pixmap->draw_rectangle (bg_gc, true, 0, 0, width, height);
 
-	Glib::RefPtr<Pango::Layout> layout = w.create_pango_layout("");
+	Glib::RefPtr<Pango::Layout> layout = w.create_pango_layout ("");
 
-	for (uint32_t i = 0; i < sizeof (db_points)/sizeof (db_points[0]); ++i) {
+	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
 
-		float fraction = log_meter (db_points[i]);
-		gint pos = height - (gint) floor (height * fraction);
+		Glib::RefPtr<Gdk::GC> fg_gc (w.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
+		
+		if (types.size() > 1) {
+			/* we're overlaying more than 1 set of marks, so use different colours */
+			Gdk::Color c;
+			switch (*i) {
+			case DataType::AUDIO:
+				c.set_rgb_p (1, 1, 1);
+				break;
+			case DataType::MIDI:
+				c.set_rgb_p (0.2, 0.2, 0.5);
+				break;
+			}
+			
+			fg_gc->set_rgb_fg_color (c);
+		}
 
-		snprintf (buf, sizeof (buf), "%d", abs (db_points[i]));
-
-		layout->set_text (buf);
-
-		/* we want logical extents, not ink extents here */
-
-		int width, height;
-		layout->get_pixel_size (width, height);
-
-		pixmap->draw_line (fg_gc, 0, pos, 4, pos);
-		pixmap->draw_layout (fg_gc, 6, pos - (height/2), layout);
+		vector<int> points;
+		
+		switch (*i) {
+		case DataType::AUDIO:
+			points.push_back (-50);
+			points.push_back (-40);
+			points.push_back (-30);
+			points.push_back (-20);
+			points.push_back (-10);
+			points.push_back (-3);
+			points.push_back (0);
+			points.push_back (4);
+			break;
+			
+		case DataType::MIDI:
+			points.push_back (0);
+			if (types.size() == 1) {
+				points.push_back (32);
+			} else {
+				/* tweak so as not to overlay the -30dB mark */				
+				points.push_back (48);
+			}
+			points.push_back (64);
+			points.push_back (96);
+			points.push_back (127);
+			break;
+		}
+		
+		char buf[32];
+		
+		for (vector<int>::const_iterator j = points.begin(); j != points.end(); ++j) {
+			
+			float fraction = 0;
+			switch (*i) {
+			case DataType::AUDIO:
+				fraction = log_meter (*j);
+				break;
+			case DataType::MIDI:
+				fraction = *j / 127.0;
+				break;
+			}
+			
+			gint const pos = height - (gint) floor (height * fraction);
+			
+			snprintf (buf, sizeof (buf), "%d", abs (*j));
+			
+			layout->set_text (buf);
+			
+			/* we want logical extents, not ink extents here */
+			
+			int tw, th;
+			layout->get_pixel_size (tw, th);
+			
+			pixmap->draw_line (fg_gc, 0, pos, 4, pos);
+			
+			int p = pos - (th / 2);
+			p = min (p, height - th);
+			p = max (p, 0);
+			
+			pixmap->draw_layout (fg_gc, 6, p, layout);
+		}
 	}
 
 	return pixmap;
@@ -933,7 +1003,7 @@ GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 	std::map<string,Glib::RefPtr<Gdk::Pixmap> >::iterator i = metric_pixmaps.find (meter_metric_area.get_name());
 
 	if (i == metric_pixmaps.end() || style_changed || dpi_changed) {
-		pixmap = render_metrics (meter_metric_area);
+		pixmap = render_metrics (meter_metric_area, _types);
 	} else {
 		pixmap = i->second;
 	}
@@ -954,4 +1024,17 @@ GainMeterBase::get_controllable()
 	}
 }
 
+void
+GainMeter::meter_configuration_changed (ChanCount c)
+{
+	_types.clear ();
 
+	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+		if (c.get (*i) > 0) {
+			_types.push_back (*i);
+		}
+	}
+
+	style_changed = true;
+	meter_metric_area.queue_draw ();
+}

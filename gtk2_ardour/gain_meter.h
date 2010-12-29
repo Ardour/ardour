@@ -202,13 +202,17 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	gint meter_metrics_expose (GdkEventExpose *);
 
 	static std::map<std::string,Glib::RefPtr<Gdk::Pixmap> > metric_pixmaps;
-	static Glib::RefPtr<Gdk::Pixmap> render_metrics (Gtk::Widget&);
+	static Glib::RefPtr<Gdk::Pixmap> render_metrics (Gtk::Widget &, std::vector<ARDOUR::DataType>);
 
   private:
+
+	void meter_configuration_changed (ARDOUR::ChanCount);
+	
 	Gtk::HBox  gain_display_box;
 	Gtk::HBox  fader_box;
 	Gtk::VBox* fader_vbox;
 	Gtk::HBox  hbox;
+	std::vector<ARDOUR::DataType> _types;
 
 	static Glib::RefPtr<Gdk::Pixbuf> slider;
 };
