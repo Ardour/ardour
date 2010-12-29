@@ -237,7 +237,7 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 	const XMLProperty* prop;
 
 	if ((prop = node.property ("current-program")) != 0) {
-		_fst->current_program = atoi (prop->value().c_str());
+		_fst->want_program = atoi (prop->value().c_str());
 	}
 
 	XMLNode* child;
