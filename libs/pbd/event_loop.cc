@@ -31,7 +31,6 @@ EventLoop::invalidate_request (void* data)
         if (ir->event_loop) {
 		Glib::Mutex::Lock lm (ir->event_loop->slot_invalidation_mutex());
 		for (list<BaseRequestObject*>::iterator i = ir->requests.begin(); i != ir->requests.end(); ++i) {
-			cerr << "Object deleted had outstanding event loop request, IR created @ "
 			     << ir->file << ':' << ir->line
 			     << endl;
 			(*i)->valid = false;
