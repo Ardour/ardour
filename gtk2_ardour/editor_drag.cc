@@ -1811,7 +1811,6 @@ MeterMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		MeterMarker* new_marker = new MeterMarker (
 			*_editor,
 			*_editor->meter_group,
-			*_editor->cursor_group,
 			ARDOUR_UI::config()->canvasvar_MeterMarker.get(),
 			name,
 			*new MeterSection (_marker->meter())
@@ -1915,7 +1914,6 @@ TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		TempoMarker* new_marker = new TempoMarker (
 			*_editor,
 			*_editor->tempo_group,
-			*_editor->cursor_group,
 			ARDOUR_UI::config()->canvasvar_TempoMarker.get(),
 			name,
 			*new TempoSection (_marker->tempo())
