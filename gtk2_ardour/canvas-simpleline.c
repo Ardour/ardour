@@ -317,27 +317,27 @@ gnome_canvas_simpleline_update (GnomeCanvasItem *item, double *affine, ArtSVP *c
         gnome_canvas_item_i2w (item, &x1, &y1);
         gnome_canvas_item_i2w (item, &x2, &y2);
 
+        /* don't suffer from rounding errors */
+
+        x1 = floor (x1);
+        y1 = floor (y1);
+        x2 = ceil (x2);
+        y2 = ceil (y2);
+
+        /* force non-zero dimensionality for both axes */
+        
+        if (x1 == x2) {
+                x2 += 1.0;
+        }
+
+        if (y1 == y2) {
+                y2 += 1.0;
+        }
+
         /* reset item bounding box (canvas coordinates, so integral. but stored in doubles) */
 
         gnome_canvas_w2c_d (GNOME_CANVAS(item->canvas), x1, y1, &item->x1, &item->y1);
         gnome_canvas_w2c_d (GNOME_CANVAS(item->canvas), x2, y2, &item->x2, &item->y2);
-
-        /* don't suffer from rounding errors */
-
-        item->x1 = floor (item->x1);
-        item->y1 = floor (item->y1);
-        item->x2 = ceil (item->x2);
-        item->y2 = ceil (item->y2);
-
-        /* force non-zero dimensionality for both axes */
-
-        if (item->x1 == item->x2) {
-                item->x2 += 1.0;
-        }
-
-        if (item->y1 == item->y2) {
-                item->y2 += 1.0;
-        }
 
         /* redraw new location */
 
