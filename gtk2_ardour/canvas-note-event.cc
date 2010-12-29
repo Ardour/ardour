@@ -138,6 +138,12 @@ void
 CanvasNoteEvent::show_channel_selector(void)
 {
 	if (_channel_selector_widget == 0) {
+	  
+	  	if(_region.channel_selector_scoped_note() != 0){
+		    _region.channel_selector_scoped_note()->hide_channel_selector();
+		    _region.set_channel_selector_scoped_note(0);
+		}
+
 		SingleMidiChannelSelector* _channel_selector = new SingleMidiChannelSelector(_note->channel());
 		_channel_selector->show_all();
 		_channel_selector->channel_selected.connect(
@@ -156,6 +162,8 @@ CanvasNoteEvent::show_channel_selector(void)
 		_channel_selector_widget->property_width() = 100;
 		_channel_selector_widget->raise_to_top();
 		_channel_selector_widget->show();
+		
+		_region.set_channel_selector_scoped_note(this);
 	} else {
 		hide_channel_selector();
 	}
@@ -183,8 +191,14 @@ CanvasNoteEvent::set_selected(bool selected)
         
 	if (_selected) {
 		set_outline_color(calculate_outline(ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get()));
+		
+		if(_region.channel_selector_scoped_note() != 0){
+		    _region.channel_selector_scoped_note()->hide_channel_selector();
+		    _region.set_channel_selector_scoped_note(0);
+		}
 	} else {
 		set_outline_color(calculate_outline(base_color()));
+		hide_channel_selector();
 	}
 
 }
@@ -306,7 +320,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 
 	case GDK_BUTTON_PRESS:
 		set_mouse_fractions (ev);
-		if (ev->button.button == 3 && Keyboard::no_modifiers_active (ev->button.state)) {
+		if (ev->button.button == 3 && Keyboard::no_modifiers_active (ev->button.state) && _selected) {
 			show_channel_selector();
 			return true;
 		}

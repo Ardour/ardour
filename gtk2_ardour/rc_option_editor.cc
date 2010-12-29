@@ -260,7 +260,10 @@ public:
 		  _delete_button_adjustment (3, 1, 12),
 		  _delete_button_spin (_delete_button_adjustment),
 		  _edit_button_adjustment (3, 1, 5),
-		  _edit_button_spin (_edit_button_adjustment)
+		  _edit_button_spin (_edit_button_adjustment),
+		  _insert_note_button_adjustment (3, 1, 5),
+		  _insert_note_button_spin (_insert_note_button_adjustment)
+
 
 	{
 		/* internationalize and prepare for use with combos */
@@ -327,6 +330,35 @@ public:
 		_delete_button_adjustment.set_value (Keyboard::delete_button());
 		_delete_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::delete_button_changed));
 
+		
+		set_popdown_strings (_insert_note_modifier_combo, dumb);
+		_insert_note_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::insert_note_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == Keyboard::insert_note_modifier ()) {
+				_insert_note_modifier_combo.set_active_text (_(modifiers[x].name));
+				break;
+			}
+		}
+		
+		l = manage (new Label (_("Insert note using:")));
+		l->set_name ("OptionsLabel");
+		l->set_alignment (0, 0.5);
+
+		t->attach (*l, 0, 1, 2, 3, FILL | EXPAND, FILL);
+		t->attach (_insert_note_modifier_combo, 1, 2, 2, 3, FILL | EXPAND, FILL);
+
+		l = manage (new Label (_("+ button")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, 3, 4, 2, 3, FILL | EXPAND, FILL);
+		t->attach (_insert_note_button_spin, 4, 5, 2, 3, FILL | EXPAND, FILL);
+
+		_insert_note_button_spin.set_name ("OptionsEntry");
+		_insert_note_button_adjustment.set_value (Keyboard::insert_note_button());
+		_insert_note_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::insert_note_button_changed));
+		
+		
 		set_popdown_strings (_snap_modifier_combo, dumb);
 		_snap_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::snap_modifier_chosen));
 
@@ -341,8 +373,8 @@ public:
 		l->set_name ("OptionsLabel");
 		l->set_alignment (0, 0.5);
 
-		t->attach (*l, 0, 1, 2, 3, FILL | EXPAND, FILL);
-		t->attach (_snap_modifier_combo, 1, 2, 2, 3, FILL | EXPAND, FILL);
+		t->attach (*l, 0, 1, 3, 4, FILL | EXPAND, FILL);
+		t->attach (_snap_modifier_combo, 1, 2, 3, 4, FILL | EXPAND, FILL);
 
 		vector<string> strs;
 
@@ -358,8 +390,8 @@ public:
 		l->set_name ("OptionsLabel");
 		l->set_alignment (0, 0.5);
 
-		t->attach (*l, 0, 1, 3, 4, FILL | EXPAND, FILL);
-		t->attach (_keyboard_layout_selector, 1, 2, 3, 4, FILL | EXPAND, FILL);
+		t->attach (*l, 0, 1, 4, 5, FILL | EXPAND, FILL);
+		t->attach (_keyboard_layout_selector, 1, 2, 4, 5, FILL | EXPAND, FILL);
 
 		_box->pack_start (*t, false, false);
 	}
@@ -415,6 +447,18 @@ private:
 		}
 	}
 
+	void insert_note_modifier_chosen ()
+	{
+		string const txt = _insert_note_modifier_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				Keyboard::set_insert_note_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
 	void snap_modifier_chosen ()
 	{
 		string const txt = _snap_modifier_combo.get_active_text();
@@ -437,14 +481,23 @@ private:
 		Keyboard::set_edit_button (_edit_button_spin.get_value_as_int());
 	}
 
+	void insert_note_button_changed ()
+	{
+		Keyboard::set_insert_note_button (_insert_note_button_spin.get_value_as_int());
+	}
+
 	ComboBoxText _keyboard_layout_selector;
 	ComboBoxText _edit_modifier_combo;
 	ComboBoxText _delete_modifier_combo;
+	ComboBoxText _insert_note_modifier_combo;
 	ComboBoxText _snap_modifier_combo;
 	Adjustment _delete_button_adjustment;
 	SpinButton _delete_button_spin;
 	Adjustment _edit_button_adjustment;
 	SpinButton _edit_button_spin;
+	Adjustment _insert_note_button_adjustment;
+	SpinButton _insert_note_button_spin;
+
 };
 
 class FontScalingOptions : public OptionEditorBox

@@ -94,6 +94,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
         , _step_edit_cursor (0)
         , _step_edit_cursor_width (1.0)
         , _step_edit_cursor_position (0.0)
+        , _channel_selection_scoped_note (0)
 	, _temporary_note_group (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
@@ -127,6 +128,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
         , _step_edit_cursor (0)
         , _step_edit_cursor_width (1.0)
         , _step_edit_cursor_position (0.0)
+	, _channel_selection_scoped_note (0)
 	, _temporary_note_group (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
@@ -158,6 +160,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
         , _step_edit_cursor (0)
         , _step_edit_cursor_width (1.0)
         , _step_edit_cursor_position (0.0)
+        , _channel_selection_scoped_note (0)
 	, _temporary_note_group (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
@@ -191,6 +194,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
         , _step_edit_cursor (0)
         , _step_edit_cursor_width (1.0)
         , _step_edit_cursor_position (0.0)
+        , _channel_selection_scoped_note (0)
 	, _temporary_note_group (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
@@ -378,11 +382,14 @@ MidiRegionView::button_press (GdkEventButton* ev)
 {
         _last_x = ev->x;
         _last_y = ev->y;
+	
         group->w2i (_last_x, _last_y);
         
-        if (_mouse_state != SelectTouchDragging && ev->button == 1) {
+        if (_mouse_state != SelectTouchDragging) {
+	  
                 _pressed_button = ev->button;
                 _mouse_state = Pressed;
+
                 return true;
         }
         
@@ -399,61 +406,88 @@ MidiRegionView::button_release (GdkEventButton* ev)
 
         event_x = ev->x;
         event_y = ev->y;
+	
         group->w2i(event_x, event_y);
         group->ungrab(ev->time);
-        event_frame = trackview.editor().pixel_to_frame(event_x);
-
-        if (ev->button == 3) {
-                return false;
-        } else if (_pressed_button != 1) {
-                return false;
-        }
+        
+	event_frame = trackview.editor().pixel_to_frame(event_x);
 
         switch (_mouse_state) {
-        case Pressed: // Clicked
+        case Pressed: // Clicked 
+
                 switch (trackview.editor().current_mouse_mode()) {
                 case MouseObject:
                 case MouseTimeFX:
+		{
                         clear_selection();
-                        maybe_select_by_position (ev, event_x, event_y);
-                        break;
+			
+			if (Keyboard::is_insert_note_event(ev)){
+				
+				double event_x, event_y;
+				
+				event_x = ev->x;
+				event_y = ev->y;
+				group->w2i(event_x, event_y);
 
+				bool success;
+				Evoral::MusicalTime beats = trackview.editor().get_grid_type_as_beats (success, trackview.editor().pixel_to_frame (event_x));
+				
+				if (!success) {
+					beats = 1;
+				}
+				
+				create_note_at (event_x, event_y, beats, true);
+			}
+
+                        break;
+		}
                 case MouseRange:
                 {
                         bool success;
                         Evoral::MusicalTime beats = trackview.editor().get_grid_type_as_beats (success, trackview.editor().pixel_to_frame (event_x));
-                        if (!success) {
+                        
+			if (!success) {
                                 beats = 1;
                         }
+                        
                         create_note_at (event_x, event_y, beats, true);
-                        break;
+                        
+			break;
                 }
                 default:
                         break;
                 }
+                
                 _mouse_state = None;
                 break;
+		
         case SelectRectDragging: // Select drag done
+	  
                 _mouse_state = None;
                 delete _drag_rect;
                 _drag_rect = 0;
                 break;
 
         case AddDragging: // Add drag done
-                _mouse_state = None;
-                if (_drag_rect->property_x2() > _drag_rect->property_x1() + 2) {
-                        const double x      = _drag_rect->property_x1();
-                        const double length = trackview.editor().pixel_to_frame 
-                                (_drag_rect->property_x2() - _drag_rect->property_x1());
 
-                        create_note_at (x, _drag_rect->property_y1(), frames_to_beats(length), true);
+                _mouse_state = None;
+		
+		if (Keyboard::is_insert_note_event(ev) || trackview.editor().current_mouse_mode() == MouseRange){
+		
+			if (_drag_rect->property_x2() > _drag_rect->property_x1() + 2) {
+
+				const double x  = _drag_rect->property_x1();
+				const double length = trackview.editor().pixel_to_frame (_drag_rect->property_x2() - _drag_rect->property_x1());
+
+				create_note_at (x, _drag_rect->property_y1(), frames_to_beats(length), true);
+			}
                 }
 
                 delete _drag_rect;
                 _drag_rect = 0;
 
                 create_ghost_note (ev->x, ev->y);
-
+		
         default:
                 break;
         }
@@ -474,10 +508,29 @@ MidiRegionView::motion (GdkEventMotion* ev)
         // convert event_x to global frame
         event_frame = trackview.editor().pixel_to_frame(event_x) + _region->position();
         trackview.editor().snap_to(event_frame);
-        // convert event_frame back to local coordinates relative to position
+        
+	// convert event_frame back to local coordinates relative to position
         event_frame -= _region->position();
 
-        if (_ghost_note) {
+        if (!_ghost_note && trackview.editor().current_mouse_mode() != MouseRange 
+			&& Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())  
+			&& _mouse_state != AddDragging){
+	  
+		create_ghost_note (ev->x, ev->y);
+	}
+        else if (_ghost_note && trackview.editor().current_mouse_mode() != MouseRange 
+			&& Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())){
+	  
+		update_ghost_note (ev->x, ev->y);
+	}
+        else if (_ghost_note && trackview.editor().current_mouse_mode() != MouseRange){
+		
+		delete _ghost_note;
+                _ghost_note = 0;
+		
+		trackview.editor().hide_verbose_canvas_cursor ();
+	}
+	else if (_ghost_note && trackview.editor().current_mouse_mode() == MouseRange) {
                 update_ghost_note (ev->x, ev->y);
         }
 
@@ -489,16 +542,19 @@ MidiRegionView::motion (GdkEventMotion* ev)
 
         switch (_mouse_state) {
         case Pressed: // Maybe start a drag, if we've moved a bit
-
+	  
                 if (fabs (event_x - _last_x) < 1 && fabs (event_y - _last_y) < 1) {
                         /* no appreciable movement since the button was pressed */
                         return false;
                 }
 
                 // Select drag start
-                if (_pressed_button == 1 && trackview.editor().current_mouse_mode() == MouseObject) {
-                        group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
+                if (_pressed_button == 1 && trackview.editor().current_mouse_mode() == MouseObject 
+			&& !Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
+                        
+			group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
                                     Gdk::Cursor(Gdk::FLEUR), ev->time);
+				    
                         _last_x = event_x;
                         _last_y = event_y;
                         _drag_start_x = event_x;
@@ -526,6 +582,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 				
                         group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
                                     Gdk::Cursor(Gdk::FLEUR), ev->time);
+				    
                         _last_x = event_x;
                         _last_y = event_y;
                         _drag_start_x = event_x;
@@ -544,6 +601,15 @@ MidiRegionView::motion (GdkEventMotion* ev)
                         _drag_rect->property_fill_color_rgba()    = 0xFFFFFF66;
 
                         _mouse_state = AddDragging;
+
+			if (_ghost_note){
+		
+				delete _ghost_note;
+				_ghost_note = 0;
+		
+				trackview.editor().hide_verbose_canvas_cursor ();
+			}
+
                         return true;
                 }
 
@@ -551,6 +617,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 
         case SelectRectDragging: // Select drag motion
         case AddDragging: // Add note drag motion
+
                 if (ev->is_hint) {
                         int t_x;
                         int t_y;
@@ -560,23 +627,30 @@ MidiRegionView::motion (GdkEventMotion* ev)
                         event_y = t_y;
                 }
 
-                if (_mouse_state == AddDragging)
+                if (_mouse_state == AddDragging){
                         event_x = trackview.editor().frame_to_pixel(event_frame);
+		}
 
                 if (_drag_rect) {
-                        if (event_x > _drag_start_x)
+		  
+                        if (event_x > _drag_start_x){
                                 _drag_rect->property_x2() = event_x;
-                        else
+			}
+                        else {
                                 _drag_rect->property_x1() = event_x;
+			}
                 }
 
                 if (_drag_rect && _mouse_state == SelectRectDragging) {
-                        if (event_y > _drag_start_y)
+                        
+		  if (event_y > _drag_start_y){
                                 _drag_rect->property_y2() = event_y;
-                        else
+			}
+                        else {
                                 _drag_rect->property_y1() = event_y;
+			}
 
-                        update_drag_selection(_drag_start_x, event_x, _drag_start_y, event_y);
+			update_drag_selection(_drag_start_x, event_x, _drag_start_y, event_y);
                 }
 
                 _last_x = event_x;
@@ -1304,7 +1378,9 @@ MidiRegionView::resolve_note(uint8_t note, double end_time)
 	}
 
 	if (_active_notes && _active_notes[note]) {
-		const framepos_t end_time_frames = beats_to_frames(end_time) - _region->start();
+
+		const framepos_t end_time_frames = beats_to_frames(end_time);
+
 		_active_notes[note]->property_x2() = trackview.editor().frame_to_pixel(end_time_frames);
 		_active_notes[note]->property_outline_what() = (guint32) 0xF; // all edges
 		_active_notes[note] = 0;
@@ -1400,11 +1476,13 @@ MidiRegionView::update_note (CanvasNote* ev)
 
 	ev->property_x1() = x;
 	ev->property_y1() = y1;
+	
 	if (note->length() > 0) {
 		ev->property_x2() = note_endpixel;
 	} else {
 		ev->property_x2() = trackview.editor().frame_to_pixel(_region->length());
 	}
+	
 	ev->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
 	if (note->length() == 0) {
@@ -1457,6 +1535,8 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 	assert(note->time() >= 0);
 	assert(midi_view()->note_mode() == Sustained || midi_view()->note_mode() == Percussive);
 
+	//ArdourCanvas::Group* const group = (ArdourCanvas::Group*) get_canvas_group();
+
 	if (midi_view()->note_mode() == Sustained) {
 
 		CanvasNote* ev_rect = new CanvasNote(*this, *_note_group, note);
@@ -1495,6 +1575,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 		if (_marked_for_velocity.find(note) != _marked_for_velocity.end()) {
 			event->show_velocity();
 		}
+		
 		event->on_channel_selection_change(_last_channel_selection);
 		_events.push_back(event);
 
@@ -1504,6 +1585,11 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 			event->hide ();
 		}
 	}
+	
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	MidiStreamView* const view = mtv->midi_view();
+
+	view->update_note_range(note->note());
 }
 
 void
@@ -1520,6 +1606,11 @@ MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity
 	if (end_frame > region_end) {
 		_region->set_length (end_frame - _region->position(), this);
 	}
+	
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	MidiStreamView* const view = mtv->midi_view();
+
+	view->update_note_range(new_note->note());
 
         _marked_for_selection.clear ();
         clear_selection ();
@@ -3025,6 +3116,7 @@ MidiRegionView::update_ghost_note (double x, double y)
 
 	bool success;
 	Evoral::MusicalTime beats = trackview.editor().get_grid_type_as_beats (success, f);
+
 	if (!success) {
 		beats = 1;
 	}
@@ -3090,8 +3182,6 @@ MidiRegionView::maybe_select_by_position (GdkEventButton* ev, double /*x*/, doub
 	double note = midi_stream_view()->y_to_note(y);
         Events e;
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
-        
-        cerr << "Selecting by position\n";
 
 	uint16_t chn_mask = mtv->channel_selector().get_selected_channels();
 

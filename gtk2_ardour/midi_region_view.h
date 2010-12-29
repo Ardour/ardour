@@ -274,6 +274,9 @@ class MidiRegionView : public RegionView
 	void selection_as_notelist (Notes& selected, bool allow_all_if_none_selected = false);
 
 	void enable_display (bool);
+	
+	void set_channel_selector_scoped_note(ArdourCanvas::CanvasNoteEvent* note){ _channel_selection_scoped_note = note; }
+	ArdourCanvas::CanvasNoteEvent* channel_selector_scoped_note(){  return _channel_selection_scoped_note; }
 
 	void trim_front_starting ();
 	void trim_front_ending ();
@@ -369,6 +372,8 @@ class MidiRegionView : public RegionView
         ArdourCanvas::SimpleRect*            _step_edit_cursor;
         Evoral::MusicalTime                  _step_edit_cursor_width;
         Evoral::MusicalTime                  _step_edit_cursor_position;
+	ArdourCanvas::CanvasNoteEvent*	     _channel_selection_scoped_note;
+	
 
 	/** A group used to temporarily reparent _note_group to during start trims, so
 	 *  that the notes don't move with the parent region view.
