@@ -281,7 +281,7 @@ void
 Plugin::set_parameter (uint32_t which, float val)
 {
 	_parameter_changed_since_last_preset = true;
-	ParameterChanged (Evoral::Parameter (PluginAutomation, 0, which), val); /* EMIT SIGNAL */
+	ParameterChanged (which, val); /* EMIT SIGNAL */
 }
 
 int
