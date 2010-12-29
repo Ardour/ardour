@@ -4065,8 +4065,12 @@ Session::start_time_changed (framepos_t old)
 	/* Update the auto loop range to match the session range
 	   (unless the auto loop range has been changed by the user)
 	*/
-	
+
 	Location* s = _locations->session_range_location ();
+	if (s == 0) {
+		return;
+	}
+	
 	Location* l = _locations->auto_loop_location ();
 
 	if (l->start() == old) {
@@ -4082,6 +4086,10 @@ Session::end_time_changed (framepos_t old)
 	*/
 
 	Location* s = _locations->session_range_location ();
+	if (s == 0) {
+		return;
+	}
+	
 	Location* l = _locations->auto_loop_location ();
 
 	if (l->end() == old) {
