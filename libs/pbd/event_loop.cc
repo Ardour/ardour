@@ -31,8 +31,6 @@ EventLoop::invalidate_request (void* data)
         if (ir->event_loop) {
 		Glib::Mutex::Lock lm (ir->event_loop->slot_invalidation_mutex());
 		for (list<BaseRequestObject*>::iterator i = ir->requests.begin(); i != ir->requests.end(); ++i) {
-			     << ir->file << ':' << ir->line
-			     << endl;
 			(*i)->valid = false;
 			(*i)->invalidation = 0;
 		}
