@@ -304,8 +304,62 @@ gnome_canvas_simpleline_update (GnomeCanvasItem *item, double *affine, ArtSVP *c
 	if (parent_class->update)
 		(* parent_class->update) (item, affine, clip_path, flags);
 
-        gnome_canvas_simpleline_bounds (item, &x1, &y1, &x2, &y2);
-	gnome_canvas_update_bbox (item, x1, y1, x2, y2);
+        /* redraw old location */
+
+        gnome_canvas_request_redraw (item->canvas, item->x1, item->y1, item->x2, item->y2);
+
+        /* get current bounding box in parent-relative world coordinates */
+
+        gnome_canvas_simpleline_bounds (item, &x1, &y1, &x2, &y2); 
+
+        /* convert parent-relative item coordinates to world coordinates */
+
+        gnome_canvas_item_i2w (item, &x1, &y1);
+        gnome_canvas_item_i2w (item, &x2, &y2);
+
+        /* reset item bounding box (canvas coordinates, so integral. but stored in doubles) */
+
+        gnome_canvas_w2c_d (GNOME_CANVAS(item->canvas), x1, y1, &item->x1, &item->y1);
+        gnome_canvas_w2c_d (GNOME_CANVAS(item->canvas), x2, y2, &item->x2, &item->y2);
+
+        /* don't suffer from rounding errors */
+
+        item->x1 = floor (item->x1);
+        item->y1 = floor (item->y1);
+        item->x2 = ceil (item->x2);
+        item->y2 = ceil (item->y2);
+
+        /* force non-zero dimensionality for both axes */
+
+        if (item->x1 == item->x2) {
+                item->x2 += 1.0;
+        }
+
+        if (item->y1 == item->y2) {
+                item->y2 += 1.0;
+        }
+
+        /* redraw new location */
+
+        gnome_canvas_request_redraw (item->canvas, item->x1, item->y1, item->x2, item->y2);
+
+        /* store actual line coords as canvas coordinates for use in render() */
+
+        x1 = simpleline->x1;
+        y1 = simpleline->y1;
+        x2 = simpleline->x2;
+        y2 = simpleline->y2;
+        /* convert to world */
+        gnome_canvas_item_i2w (item, &x1, &y1);
+        gnome_canvas_item_i2w (item, &x2, &y2);
+        /* avoid rounding errors */
+        x1 = (int) floor (item->x1);
+        y1 = (int) floor (item->y1);
+        x2 = (int) ceil (item->x2);
+        y2 = (int) ceil (item->y2);
+        /* convert to canvas coordinates, integral, stored in integers */
+        gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x1, y1, &simpleline->cx1, &simpleline->cy1);
+        gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x2, y2, &simpleline->cx2, &simpleline->cy2);
 }
 
 static void
@@ -318,10 +372,10 @@ gnome_canvas_simpleline_render (GnomeCanvasItem *item,
 
 	simpleline = GNOME_CANVAS_SIMPLELINE (item);
 
-	x1 = rint (simpleline->x1);
-	x2 = rint (simpleline->x2);
-        y1 = (int) rint (simpleline->y1);
-
+	x1 = simpleline->cx1;
+	x2 = simpleline->cx2;
+        y1 = simpleline->cy1;
+        
 	if (buf->is_bg) {
 		gnome_canvas_buf_ensure_buf (buf);
 		buf->is_bg = FALSE;
@@ -331,9 +385,9 @@ gnome_canvas_simpleline_render (GnomeCanvasItem *item,
                 PAINT_HORIZA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
                              x1, x2, y1);
         } else {
-                y2 = (int) rint (simpleline->y2);
-                PAINT_VERTA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
-                            x1, y1, y2);
+                y2 = simpleline->cy2;
+                PAINT_VERTA (buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
+                             x1, y1, y2);
                 
         }
 }
@@ -356,19 +410,10 @@ gnome_canvas_simpleline_bounds (GnomeCanvasItem *item, double *x1, double *y1, d
 {
 	GnomeCanvasSimpleLine *simpleline = GNOME_CANVAS_SIMPLELINE (item);
 
-        if (simpleline->x1 != simpleline->x2) {
-                /* horizontal */
-                *x1 = floor (simpleline->x1);
-                *y1 = floor (simpleline->y1);
-                *x2 = ceil (simpleline->x2);
-                *y2 = ceil (simpleline->y1 + 1);
-        } else {
-                /* vertical */
-                *x1 = floor (simpleline->x1);
-                *y1 = floor (simpleline->y1);
-                *x2 = ceil (simpleline->x1 + 1);
-                *y2 = ceil (simpleline->y2);
-        }
+        *x1 = simpleline->x1;
+        *y1 = simpleline->y1;
+        *x2 = simpleline->x1;
+        *y2 = simpleline->y2;
 }
 
 static double

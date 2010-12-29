@@ -44,7 +44,8 @@ typedef struct _GnomeCanvasSimpleLineClass       GnomeCanvasSimpleLineClass;
 struct _GnomeCanvasSimpleLine
 {
     GnomeCanvasItem item;
-    double x1, y1, x2, y2;
+    double x1, y1, x2, y2;  /* parent-relative, world coordinates */
+    gint32 cx1, cy1, cx2, cy2;  /* global, canvas coordinates */
     uint32_t color;
 
     /* cached values set during update/used during render */
