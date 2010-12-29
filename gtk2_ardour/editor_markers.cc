@@ -84,10 +84,10 @@ Editor::add_new_location (Location *location)
 	if (location->is_mark()) {
 
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
-			lam->start = new Marker (*this, *cd_marker_group, *cursor_group, color, location->name(), Marker::Mark, location->start());
+			lam->start = new Marker (*this, *cd_marker_group, color, location->name(), Marker::Mark, location->start());
 			group = cd_marker_group;
 		} else {
-			lam->start = new Marker (*this, *marker_group, *cursor_group, color, location->name(), Marker::Mark, location->start());
+			lam->start = new Marker (*this, *marker_group, color, location->name(), Marker::Mark, location->start());
 			group = marker_group;
 		}
 		
@@ -96,40 +96,40 @@ Editor::add_new_location (Location *location)
 	} else if (location->is_auto_loop()) {
 		
 		// transport marker
-		lam->start = new Marker (*this, *transport_marker_group, *cursor_group, color,
+		lam->start = new Marker (*this, *transport_marker_group, color,
 					 location->name(), Marker::LoopStart, location->start());
-		lam->end   = new Marker (*this, *transport_marker_group, *cursor_group, color,
+		lam->end   = new Marker (*this, *transport_marker_group, color,
 					 location->name(), Marker::LoopEnd, location->end());
 		group = transport_marker_group;
 
 	} else if (location->is_auto_punch()) {
 		
 		// transport marker
-		lam->start = new Marker (*this, *transport_marker_group, *cursor_group, color,
+		lam->start = new Marker (*this, *transport_marker_group, color,
 					 location->name(), Marker::PunchIn, location->start());
-		lam->end   = new Marker (*this, *transport_marker_group, *cursor_group, color,
+		lam->end   = new Marker (*this, *transport_marker_group, color,
 					 location->name(), Marker::PunchOut, location->end());
 		group = transport_marker_group;
 		
 	} else if (location->is_session_range()) {
 
 		// session range
-		lam->start = new Marker (*this, *marker_group, *cursor_group, color, _("start"), Marker::SessionStart, location->start());
-		lam->end = new Marker (*this, *marker_group, *cursor_group, color, _("end"), Marker::SessionEnd, location->end());
+		lam->start = new Marker (*this, *marker_group, color, _("start"), Marker::SessionStart, location->start());
+		lam->end = new Marker (*this, *marker_group, color, _("end"), Marker::SessionEnd, location->end());
 		group = marker_group;
 		
 	} else {
 		// range marker
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
-			lam->start = new Marker (*this, *cd_marker_group, *cursor_group, color,
+			lam->start = new Marker (*this, *cd_marker_group, color,
 						 location->name(), Marker::RangeStart, location->start());
-			lam->end   = new Marker (*this, *cd_marker_group, *cursor_group, color,
+			lam->end   = new Marker (*this, *cd_marker_group, color,
 						 location->name(), Marker::RangeEnd, location->end());
 			group = cd_marker_group;
 		} else {
-			lam->start = new Marker (*this, *range_marker_group, *cursor_group, color,
+			lam->start = new Marker (*this, *range_marker_group, color,
 						 location->name(), Marker::RangeStart, location->start());
-			lam->end   = new Marker (*this, *range_marker_group, *cursor_group, color,
+			lam->end   = new Marker (*this, *range_marker_group, color,
 						 location->name(), Marker::RangeEnd, location->end());
 			group = range_marker_group;
 		}
