@@ -602,7 +602,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::shared_ptr<Route> monitor_out() const { return _monitor_out; }
 	boost::shared_ptr<Route> master_out() const { return _master_out; }
 
-	void globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p);
+	void globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p, bool);
 	void globally_set_send_gains_from_track (boost::shared_ptr<Route> dest);
 	void globally_set_send_gains_to_zero (boost::shared_ptr<Route> dest);
 	void globally_set_send_gains_to_unity (boost::shared_ptr<Route> dest);

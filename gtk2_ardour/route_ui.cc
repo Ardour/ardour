@@ -659,10 +659,37 @@ RouteUI::build_sends_menu ()
 	sends_menu->set_name ("ArdourContextMenu");
 	MenuList& items = sends_menu->items();
 
-	items.push_back (MenuElem(_("Assign all tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader)));
-	items.push_back (MenuElem(_("Assign all tracks (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PostFader)));
-	items.push_back (MenuElem(_("Assign selected tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PreFader)));
-	items.push_back (MenuElem(_("Assign selected tracks (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader)));
+	items.push_back (
+		MenuElem(_("Assign all tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader, false))
+		);
+	
+	items.push_back (
+		MenuElem(_("Assign all tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader, true))
+		);
+	
+	items.push_back (
+		MenuElem(_("Assign all tracks (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PostFader, false))
+		);
+	
+	items.push_back (
+		MenuElem(_("Assign all tracks and buses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PostFader, true))
+		);
+
+	items.push_back (
+		MenuElem(_("Assign selected tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PreFader, false))
+		);
+
+	items.push_back (
+		MenuElem(_("Assign selected tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PreFader, true)));
+	
+	items.push_back (
+		MenuElem(_("Assign selected tracks (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader, false))
+		);
+
+	items.push_back (
+		MenuElem(_("Assign selected tracks and buses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader, true))
+		);
+	
 	items.push_back (MenuElem(_("Copy track/bus gains to sends"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
 	items.push_back (MenuElem(_("Set sends gain to -inf"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
 	items.push_back (MenuElem(_("Set sends gain to 0dB"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_unity)));
@@ -670,13 +697,13 @@ RouteUI::build_sends_menu ()
 }
 
 void
-RouteUI::create_sends (Placement p)
+RouteUI::create_sends (Placement p, bool include_buses)
 {
-	_session->globally_add_internal_sends (_route, p);
+	_session->globally_add_internal_sends (_route, p, include_buses);
 }
 
 void
-RouteUI::create_selected_sends (Placement p)
+RouteUI::create_selected_sends (Placement p, bool include_buses)
 {
 	boost::shared_ptr<RouteList> rlist (new RouteList);
 	TrackSelection& selected_tracks (ARDOUR_UI::instance()->the_editor().get_selection().tracks);
@@ -686,7 +713,7 @@ RouteUI::create_selected_sends (Placement p)
 		RouteUI* rui;
 		if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
 			if ((rui = dynamic_cast<RouteUI*>(rtv)) != 0) {
-				if (boost::dynamic_pointer_cast<AudioTrack>(rui->route())) {
+				if (include_buses || boost::dynamic_pointer_cast<AudioTrack>(rui->route())) {
 					rlist->push_back (rui->route());
 				}
 			}

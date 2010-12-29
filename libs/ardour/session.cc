@@ -2090,16 +2090,15 @@ Session::globally_set_send_gains_from_track(boost::shared_ptr<Route> dest)
 	}
 }
 
+/** @param include_buses true to add sends to buses and tracks, false for just tracks */
 void
-Session::globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p)
+Session::globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p, bool include_buses)
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	boost::shared_ptr<RouteList> t (new RouteList);
 
-	/* only send tracks */
-
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (boost::dynamic_pointer_cast<Track>(*i)) {
+		if (include_buses || boost::dynamic_pointer_cast<Track>(*i)) {
 			t->push_back (*i);
 		}
 	}
