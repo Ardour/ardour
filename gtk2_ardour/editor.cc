@@ -4539,46 +4539,53 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
 	}
 }
 
-/** Get regions using the following conditions:
- *    1.  If the edit point is `mouse':
- *          if the mouse is over a selected region, or no region, return all selected regions.
- *          if the mouse is over an unselected region, return just that region.
- *    2.  For all other edit points:
- *          return the selected regions AND those that are both under the edit position
- *          AND on a selected track, or on a track which is in the same active edit-enabled route group
- *          as a selected region.
+/** Get regions using the following method:
  *
- *  The rationale here is that the mouse edit point is special in that its position describes
- *  both a time and a track; the other edit modes only describe a time.
+ *  Make an initial region list using the selected regions, unless
+ *  the edit point is `mouse' and the mouse is over an unselected
+ *  region.  In this case, start with just that region.
  *
- *  @param rs Returned region list.
+ *  Then, make an initial track list of the tracks that these
+ *  regions are on, and if the edit point is not `mouse', add the
+ *  selected tracks.
+ *
+ *  Look at this track list and add any other tracks that are on the
+ *  same active edit-enabled route group as one of the initial tracks.
+ *
+ *  Finally take the initial region list and add any regions that are
+ *  under the edit point on one of the tracks on the track list to get
+ *  the returned region list.
+ *
+ *  The rationale here is that the mouse edit point is special in that
+ *  its position describes both a time and a track; the other edit
+ *  modes only describe a time.  Hence if the edit point is `mouse' we
+ *  ignore selected tracks, as we assume the user means something by
+ *  pointing at a particular track.  Also in this case we take note of
+ *  the region directly under the edit point, as there is always just one
+ *  (rather than possibly several with non-mouse edit points).
  */
 
 RegionSelection
 Editor::get_regions_from_selection_and_edit_point ()
 {
-	if (_edit_point == EditAtMouse) {
-		if (entered_regionview == 0 || selection->regions.contains (entered_regionview)) {
-			return selection->regions;
-		} else {
-			RegionSelection rs;
-			rs.add (entered_regionview);
-			return rs;
-		}
+	RegionSelection regions;
+	
+	if (_edit_point == EditAtMouse && entered_regionview && !selection->regions.contains (entered_regionview)) {
+		regions.add (entered_regionview);
+	} else {
+		regions = selection->regions;
 	}
 
-	/* We're using the edit point, but its not EditAtMouse */
+	TrackViewList tracks;
 
-	/* Start with selected regions */
-	RegionSelection rs = selection->regions;
+	if (_edit_point != EditAtMouse) {
+		tracks = selection->tracks;
+	}
 
-	TrackViewList tracks = selection->tracks;
-
-	/* Tracks is currently the set of selected tracks; add any other tracks that
-	   have regions that are in the same edit-activated route group as one of
-	   our regions.
+	/* Add any other tracks that have regions that are in the same
+	   edit-activated route group as one of our regions.
 	 */
-	for (RegionSelection::iterator i = rs.begin (); i != rs.end(); ++i) {
+	for (RegionSelection::iterator i = regions.begin (); i != regions.end(); ++i) {
 		
 		RouteGroup* g = (*i)->get_time_axis_view().route_group ();
 		if (g && g->is_active() && g->is_edit()) {
@@ -4590,10 +4597,10 @@ Editor::get_regions_from_selection_and_edit_point ()
 	if (!tracks.empty()) {
 		/* now find regions that are at the edit position on those tracks */
 		framepos_t const where = get_preferred_edit_position ();
-		get_regions_at (rs, where, tracks);
+		get_regions_at (regions, where, tracks);
 	}
 
-	return rs;
+	return regions;
 }
 
 
