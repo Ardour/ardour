@@ -331,10 +331,10 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		return;
 	}
 
-	boost::shared_ptr<PortGroup> bus (new PortGroup (string_compose (PROGRAM_NAME " %1", _("Busses"))));
-	boost::shared_ptr<PortGroup> track (new PortGroup (string_compose (PROGRAM_NAME " %1", _("Tracks"))));
+	boost::shared_ptr<PortGroup> bus (new PortGroup (string_compose (_("%1 Busses"), PROGRAM_NAME)));
+	boost::shared_ptr<PortGroup> track (new PortGroup (string_compose (_("%1 Tracks"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> system (new PortGroup (_("Hardware")));
-	boost::shared_ptr<PortGroup> ardour (new PortGroup (string_compose (PROGRAM_NAME " %1", _("Misc"))));
+	boost::shared_ptr<PortGroup> ardour (new PortGroup (string_compose (_("%1 Misc"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> other (new PortGroup (_("Other")));
 
 	/* Find the IOs which have bundles for routes and their processors.  We store
