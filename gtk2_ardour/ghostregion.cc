@@ -90,22 +90,22 @@ GhostRegion::set_colors ()
 }
 
 guint
-GhostRegion::source_track_color(unsigned char alpha) {
+GhostRegion::source_track_color(unsigned char alpha)
+{
 	Gdk::Color color = source_trackview.color();
-	unsigned char r,g,b ;
-	r = color.get_red()/256;
-	g = color.get_green()/256;
-	b = color.get_blue()/256;
-	return RGBA_TO_UINT(r, g, b, alpha);
+	return RGBA_TO_UINT (color.get_red() / 256, color.get_green() / 256, color.get_blue() / 256, alpha);
 }
 
 bool
-GhostRegion::is_automation_ghost() {
+GhostRegion::is_automation_ghost()
+{
 	return (dynamic_cast<AutomationTimeAxisView*>(&trackview)) != 0;
 }
 
 AudioGhostRegion::AudioGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
-	: GhostRegion(tv.ghost_group(), tv, source_tv, initial_unit_pos) {
+	: GhostRegion(tv.ghost_group(), tv, source_tv, initial_unit_pos)
+{
+	
 }
 
 void
@@ -155,22 +155,32 @@ AudioGhostRegion::set_colors ()
 	}
 }
 
-/*
- * This is the general constructor, and is called when the destination timeaxisview doesn't have
- * a midistreamview. But what to do when positioning the midi ghost here? For example, there is
- * no range controller in these tracks. maybe show the whole range.
+/** The general constructor; called when the destination timeaxisview doesn't have
+ *  a midistreamview.
+ *
+ *  @param tv TimeAxisView that this ghost region is on.
+ *  @param source_tv TimeAxisView that we are the ghost for.
  */
 MidiGhostRegion::MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
 	: GhostRegion(tv.ghost_group(), tv, source_tv, initial_unit_pos)
 {
-
 	base_rect->lower_to_bottom();
+	update_range ();
+
+	midi_view()->NoteRangeChanged.connect (sigc::mem_fun (*this, &MidiGhostRegion::update_range));
 }
 
+/**
+ *  @param msv MidiStreamView that this ghost region is on.
+ *  @param source_tv TimeAxisView that we are the ghost for.
+ */
 MidiGhostRegion::MidiGhostRegion(MidiStreamView& msv, TimeAxisView& source_tv, double initial_unit_pos)
 	: GhostRegion(msv.midi_underlay_group, msv.trackview(), source_tv, initial_unit_pos)
 {
 	base_rect->lower_to_bottom();
+	update_range ();
+
+	midi_view()->NoteRangeChanged.connect (sigc::mem_fun (*this, &MidiGhostRegion::update_range));
 }
 
 MidiGhostRegion::~MidiGhostRegion()
@@ -221,21 +231,20 @@ MidiGhostRegion::set_samples_per_unit (double /*spu*/)
 {
 }
 
+/** @return MidiStreamView that we are providing a ghost for */
 MidiStreamView*
-MidiGhostRegion::midi_view()
+MidiGhostRegion::midi_view ()
 {
-	MidiTimeAxisView* mtv;
+	StreamView* sv = source_trackview.view ();
+	assert (sv);
+	MidiStreamView* msv = dynamic_cast<MidiStreamView*> (sv);
+	assert (msv);
 
-	if ((mtv = dynamic_cast<MidiTimeAxisView*>(&trackview)) != 0) {
-		return mtv->midi_view();
-	}
-	else {
-		return 0;
-	}
+	return msv;
 }
 
 void
-MidiGhostRegion::set_height()
+MidiGhostRegion::set_height ()
 {
 	GhostRegion::set_height();
 	update_range();
@@ -258,7 +267,7 @@ MidiGhostRegion::set_colors()
 }
 
 void
-MidiGhostRegion::update_range()
+MidiGhostRegion::update_range ()
 {
 	MidiStreamView* mv = midi_view();
 
@@ -267,21 +276,19 @@ MidiGhostRegion::update_range()
 	}
 
 	MidiGhostRegion::Note* note;
-	uint8_t note_num;
-	double y;
+	double const h = trackview.current_height() / double (mv->contents_note_range ());
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
 		if ((note = dynamic_cast<MidiGhostRegion::Note*>(*it)) != 0) {
-			note_num = note->event->note()->note();
+			uint8_t const note_num = note->event->note()->note();
 
 			if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
 				note->rect->hide();
-			}
-			else {
+			} else {
 				note->rect->show();
-				y = mv->note_to_y(note_num);
+				double const y = trackview.current_height() - (note_num + 1 - mv->lowest_note()) * h + 1;
 				note->rect->property_y1() = y;
-				note->rect->property_y2() = y + mv->note_height();
+				note->rect->property_y2() = y + h;
 			}
 		}
 	}

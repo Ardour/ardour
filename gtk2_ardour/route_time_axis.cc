@@ -1751,13 +1751,11 @@ void
 RouteTimeAxisView::region_view_added (RegionView* rv)
 {
 	/* XXX need to find out if automation children have automationstreamviews. If yes, no ghosts */
-	if (is_audio_track()) {
-		for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-			boost::shared_ptr<AutomationTimeAxisView> atv;
-
-			if ((atv = boost::dynamic_pointer_cast<AutomationTimeAxisView> (*i)) != 0) {
-				atv->add_ghost(rv);
-			}
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		boost::shared_ptr<AutomationTimeAxisView> atv;
+		
+		if ((atv = boost::dynamic_pointer_cast<AutomationTimeAxisView> (*i)) != 0) {
+			atv->add_ghost(rv);
 		}
 	}
 

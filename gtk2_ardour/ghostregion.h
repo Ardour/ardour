@@ -52,7 +52,9 @@ public:
 	guint source_track_color(unsigned char alpha = 0xff);
 	bool is_automation_ghost();
 
+	/** TimeAxisView that is the AutomationTimeAxisView that we are on */
 	TimeAxisView& trackview;
+	/** TimeAxisView that we are a ghost for */
 	TimeAxisView& source_trackview;
 	ArdourCanvas::Group* group;
 	ArdourCanvas::SimpleRect* base_rect;
