@@ -121,6 +121,7 @@ DWORD WINAPI gui_event_loop (LPVOID param)
 	FST* fst;
 	HMODULE hInst;
 	HWND window;
+        int i;
 
 	gui_thread_id = GetCurrentThreadId ();
 
@@ -223,7 +224,7 @@ again:
 				
 				/* Dispatch messages to send keypresses to the plugin */
 				
-				for (int i = 0; i < fst->n_pending_keys; ++i) {
+				for (i = 0; i < fst->n_pending_keys; ++i) {
 					/* I'm not quite sure what is going on here; it seems
 					   `special' keys must be delivered with WM_KEYDOWN,
 					   but that alphanumerics etc. must use WM_CHAR or
@@ -793,6 +794,8 @@ int fst_load_state (FST * fst, char * filename)
 int fst_save_state (FST * fst, char * filename)
 {
 	FILE * f = fopen (filename, "wb");
+        int j;
+
 	if (f) {
 		int bytelen;
 		int numParams = fst->plugin->numParams;
@@ -832,7 +835,7 @@ int fst_save_state (FST * fst, char * filename)
 			numParams = 0;
 		}
 
-		for (int j = 0; j < numParams; ++j) {
+		for (j = 0; j < numParams; ++j) {
 			float val;
 			
 			pthread_mutex_lock( &fst->lock );
