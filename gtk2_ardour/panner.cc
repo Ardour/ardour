@@ -32,7 +32,7 @@ static const int triangle_size = 5;
 PannerBar::PannerBar (Adjustment& adj, boost::shared_ptr<PBD::Controllable> c)
 	: BarController (adj, c)
 {
-	set_style (BarController::Blob);
+	set_style (BarController::Line);
 }
 
 PannerBar::~PannerBar ()
