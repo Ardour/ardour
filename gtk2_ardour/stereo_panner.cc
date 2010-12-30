@@ -64,6 +64,7 @@ StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost
         , drag_start_x (0)
         , last_drag_x (0)
         , accumulated_delta (0)
+        , detented (false)
         , drag_data_window (0)
         , drag_data_label (0)
 {
@@ -289,34 +290,21 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
         dragging_position = false;
         dragging_left = false;
         dragging_right = false;
+        dragging = false;
         accumulated_delta = 0;
-
-        if (ev->y < 20) {
-                /* top section of widget is for position drags */
-                dragging_position = true;
-        } else {
-                /* lower section is for dragging width */
-
-                double pos = position_control->get_value (); /* 0..1 */
-                double swidth = width_control->get_value (); /* -1..+1 */
-                double fswidth = fabs (swidth);
-                int usable_width = get_width() - lr_box_size;
-                double center = (lr_box_size/2.0) + (usable_width * pos);
-                int left = lrint (center - (fswidth * usable_width / 2.0)); // center of leftmost box
-                int right = lrint (center +  (fswidth * usable_width / 2.0)); // center of rightmost box
-                const int half_box = lr_box_size/2;
-
-                if (ev->x >= (left - half_box) && ev->x < (left + half_box)) {
-                        dragging_left = true;
-                } else if (ev->x >= (right - half_box) && ev->x < (right + half_box)) {
-                        dragging_right = true;
-                }
-
-        }
+        detented = false;
 
         if (ev->type == GDK_2BUTTON_PRESS) {
-                if (dragging_position) {
-                        int width = get_width();
+                int width = get_width();
+
+                if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
+                        /* handled by button release */
+                        return true;
+                }
+
+                if (ev->y < 20) {
+                        /* lower section: adjusts position, constrained by width */
+
                         if (ev->x >= width/2 - 10 && ev->x <= width/2 + 10) {
                                 /* double click near center, reset position to center */
                                 position_control->set_value (0.5); 
@@ -331,20 +319,54 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
                                         position_control->set_value (1.0);
                                 }
                         }
+
                 } else {
-                        if (dragging_left) {
+                        /* lower section: adjusts width, constrained by position */
+
+                        if (ev->x <= width/3) {
+                                /* left side dbl click */
                                 width_control->set_value (1.0); // reset width to 100%
-                        } else if (dragging_right) {
+                        } else if (ev->x > 2*width/3) {
+                                /* right side dbl click */
                                 width_control->set_value (-1.0); // reset width to inverted 100%
                         } else {
+                                /* center dbl click */
                                 width_control->set_value (0); // collapse width to 0%
                         }
-                                
                 }
 
                 dragging = false;
 
-        } else {
+        } else if (ev->type == GDK_BUTTON_PRESS) {
+
+                if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
+                        /* handled by button release */
+                        return true;
+                }
+
+                if (ev->y < 20) {
+                        /* top section of widget is for position drags */
+                        dragging_position = true;
+                } else {
+                        /* lower section is for dragging width */
+                        
+                        double pos = position_control->get_value (); /* 0..1 */
+                        double swidth = width_control->get_value (); /* -1..+1 */
+                        double fswidth = fabs (swidth);
+                        int usable_width = get_width() - lr_box_size;
+                        double center = (lr_box_size/2.0) + (usable_width * pos);
+                        int left = lrint (center - (fswidth * usable_width / 2.0)); // center of leftmost box
+                        int right = lrint (center +  (fswidth * usable_width / 2.0)); // center of rightmost box
+                        const int half_box = lr_box_size/2;
+                        
+                        if (ev->x >= (left - half_box) && ev->x < (left + half_box)) {
+                                dragging_left = true;
+                        } else if (ev->x >= (right - half_box) && ev->x < (right + half_box)) {
+                                dragging_right = true;
+                        }
+                        
+                }
+
                 dragging = true;
         }
 
@@ -359,9 +381,16 @@ StereoPanner::on_button_release_event (GdkEventButton* ev)
         dragging_left = false;
         dragging_right = false;
         accumulated_delta = 0;
+        detented = false;
 
         if (drag_data_window) {
                 drag_data_window->hide ();
+        }
+        
+        if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
+                /* reset to default */
+                position_control->set_value (0.5);
+                width_control->set_value (1.0);
         }
 
         set_tooltip ();
@@ -452,16 +481,24 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 
                 /* create a detent close to the center */
 
-                if (fabs (current_width) < 0.1) {
+                if (!detented && fabs (current_width) < 0.02) {
+                        detented = true;
+                        /* snap to zero */
+                        width_control->set_value (0);
+                }
+                
+                if (detented) {
+
                         accumulated_delta += delta;
-                        /* in the detent - have we pulled far enough to escape ? */
+
+                        /* have we pulled far enough to escape ? */
+
                         if (fabs (accumulated_delta) >= 0.1) {
                                 width_control->set_value (current_width + accumulated_delta);
-                                accumulated_delta = 0;
-                        } else {
-                                /* snap to zero */
-                                width_control->set_value (0);
+                                detented = false;
+                                accumulated_delta = false;
                         }
+                                
                 } else {
                         width_control->set_value (current_width + delta);
                 }
