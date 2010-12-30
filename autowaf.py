@@ -471,6 +471,7 @@ def build_i18n(bld,srcdir,dir,name,sources):
 		mo_file = po_file.replace ('.po', '.mo')
 		args = [ 'msgfmt',
 			 '-c',
+			 '-f',
 			 '-o',
 			 mo_file,
 			 po_file ]
