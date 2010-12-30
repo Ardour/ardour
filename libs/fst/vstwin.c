@@ -24,7 +24,10 @@ struct ERect{
 };
 
 static pthread_mutex_t plugin_mutex;
+
+/** Head of linked list of all FSTs */
 static FST* fst_first = NULL;
+
 const char magic[] = "FST Plugin State v002";
 
 DWORD  gui_thread_id = 0;
@@ -76,6 +79,8 @@ fst_new ()
 	fst->want_chunk = 0;
 	fst->current_program = -1;
 	fst->n_pending_keys = 0;
+	fst->has_editor = 0;
+	fst->program_set_without_editor = 0;
 	return fst;
 }
 
@@ -84,6 +89,30 @@ fst_handle_new ()
 {
 	FSTHandle* fst = (FSTHandle*) calloc (1, sizeof (FSTHandle));
 	return fst;
+}
+
+void
+maybe_set_program (FST* fst)
+{
+	if (fst->want_program != -1) {
+		if (fst->vst_version >= 2) {
+			fst->plugin->dispatcher (fst->plugin, 67 /* effBeginSetProgram */, 0, 0, NULL, 0);
+		}
+		
+		fst->plugin->dispatcher (fst->plugin, effSetProgram, 0, fst->want_program, NULL, 0);
+		
+		if (fst->vst_version >= 2) {
+			fst->plugin->dispatcher (fst->plugin, 68 /* effEndSetProgram */, 0, 0, NULL, 0);
+		}
+		/* did it work? */
+		fst->current_program = fst->plugin->dispatcher (fst->plugin, 3, /* effGetProgram */ 0, 0, NULL, 0);
+		fst->want_program = -1; 
+	}
+	
+	if (fst->want_chunk == 1) {
+		fst->plugin->dispatcher (fst->plugin, 24 /* effSetChunk */, 1, fst->wanted_chunk_size, fst->wanted_chunk, 0);
+		fst->want_chunk = 0;
+	}
 }
 
 DWORD WINAPI gui_event_loop (LPVOID param)
@@ -130,18 +159,24 @@ DWORD WINAPI gui_event_loop (LPVOID param)
 		TranslateMessage( &msg );
 		DispatchMessageA (&msg);
 
-		/* handle window creation requests, destroy requests, 
+		if (msg.message != WM_TIMER) {
+			continue;
+		}
+
+		pthread_mutex_lock (&plugin_mutex);
+
+		/* Do things that are appropriate for plugins which have open editor windows:
+		   handle window creation requests, destroy requests, 
 		   and run idle callbacks 
 		*/
-
-		if (msg.message == WM_TIMER) {
-			pthread_mutex_lock (&plugin_mutex);
-		    
+		
 again:
-			for (fst = fst_first; fst; fst = fst->next) {
+		for (fst = fst_first; fst; fst = fst->next) {
+			
+			pthread_mutex_lock (&fst->lock);
+			
+			if (fst->has_editor == 1) {
 				
-				pthread_mutex_lock (&fst->lock);
-
 				if (fst->destroy) {
 					fprintf (stderr, "%s scheduled for destroy\n", fst->handle->name);
 					if (fst->window) {
@@ -168,28 +203,8 @@ again:
 						/* condition/unlock: it was signalled & unlocked in fst_create_editor()   */
 					}
 				}
-
-				if (fst->want_program != -1 ) {
-					if (fst->vst_version >= 2) {
-						fst->plugin->dispatcher (fst->plugin, 67 /* effBeginSetProgram */, 0, 0, NULL, 0);
-					}
-
-					fst->plugin->dispatcher (fst->plugin, effSetProgram, 0, fst->want_program, NULL, 0);
-
-					if (fst->vst_version >= 2) {
-						fst->plugin->dispatcher (fst->plugin, 68 /* effEndSetProgram */, 0, 0, NULL, 0);
-					}
-					/* did it work? */
-					fst->current_program = fst->plugin->dispatcher (fst->plugin, 3, /* effGetProgram */ 0, 0, NULL, 0);
-					fst->want_program = -1; 
-				}
-
-				if (fst->want_chunk == 1) {
-					fst->plugin->dispatcher (fst->plugin, 24 /* effSetChunk */, 1, fst->wanted_chunk_size, fst->wanted_chunk, 0);
-					fst->want_chunk = 0;
-				}
 				
-				if(fst->dispatcher_wantcall) {
+				if (fst->dispatcher_wantcall) {
 					fst->dispatcher_retval = fst->plugin->dispatcher( fst->plugin, 
 											  fst->dispatcher_opcode,
 											  fst->dispatcher_index,
@@ -201,51 +216,56 @@ again:
 				}
 				
 				fst->plugin->dispatcher (fst->plugin, effEditIdle, 0, 0, NULL, 0);
-
-				if( fst->wantIdle ) {
+				
+				if (fst->wantIdle) {
 					fst->plugin->dispatcher (fst->plugin, 53, 0, 0, NULL, 0);
 				}
-
-				pthread_mutex_unlock (&fst->lock);
 				
-			}
-			pthread_mutex_unlock (&plugin_mutex);
-
-		}
-
-		pthread_mutex_lock (&plugin_mutex);
-
-		for (fst = fst_first; fst; fst = fst->next) {
-			
-			pthread_mutex_lock (&fst->lock);
-
-			/* Dispatch messages to send keypresses to the plugin */
-			
-			for (int i = 0; i < fst->n_pending_keys; ++i) {
-				/* I'm not quite sure what is going on here; it seems
-				   `special' keys must be delivered with WM_KEYDOWN,
-				   but that alphanumerics etc. must use WM_CHAR or
-				   they will be ignored.  Ours is not to reason why ...
-				*/
-				if (fst->pending_keys[i].special != 0) {
-					msg.message = WM_KEYDOWN;
-					msg.wParam = fst->pending_keys[i].special;
-				} else {
-					msg.message = WM_CHAR;
-					msg.wParam = fst->pending_keys[i].character;
+				/* Dispatch messages to send keypresses to the plugin */
+				
+				for (int i = 0; i < fst->n_pending_keys; ++i) {
+					/* I'm not quite sure what is going on here; it seems
+					   `special' keys must be delivered with WM_KEYDOWN,
+					   but that alphanumerics etc. must use WM_CHAR or
+					   they will be ignored.  Ours is not to reason why ...
+					*/
+					if (fst->pending_keys[i].special != 0) {
+						msg.message = WM_KEYDOWN;
+						msg.wParam = fst->pending_keys[i].special;
+					} else {
+						msg.message = WM_CHAR;
+						msg.wParam = fst->pending_keys[i].character;
+					}
+					msg.hwnd = GetFocus ();
+					msg.lParam = 0;
+					DispatchMessageA (&msg);
 				}
-				msg.hwnd = GetFocus ();
-				msg.lParam = 0;
-				DispatchMessageA (&msg);
+				
+				fst->n_pending_keys = 0;
+
+				/* See comment for maybe_set_program call below */
+				maybe_set_program (fst);
+				fst->want_program = -1;
+				fst->want_chunk = 0;
 			}
 
-			fst->n_pending_keys = 0;
-			pthread_mutex_unlock (&fst->lock);
+			/* If we don't have an editor window yet, we still need to
+			 * set up the program, otherwise when we load a plugin without
+			 * opening its window it will sound wrong.  However, it seems
+			 * that if you don't also load the program after opening the GUI,
+			 * the GUI does not reflect the program properly.  So we'll not
+			 * mark that we've done this (ie we won't set want_program to -1)
+			 * and so it will be done again if and when the GUI arrives.
+			 */
+			if (fst->program_set_without_editor == 0) {
+				maybe_set_program (fst);
+				fst->program_set_without_editor = 1;
+			}
 
+			pthread_mutex_unlock (&fst->lock);
 		}
 
 		pthread_mutex_unlock (&plugin_mutex);
-
 	}
 
 	return 0;
@@ -307,26 +327,15 @@ fst_exit ()
 int
 fst_run_editor (FST* fst)
 {
-	pthread_mutex_lock (&plugin_mutex);
-
-	if (fst_first == NULL) {
-		fst_first = fst;
-	} else {
-		FST* p = fst_first;
-		while (p->next) {
-			p = p->next;
-		}
-		p->next = fst;
-	}
-
-	pthread_mutex_unlock (&plugin_mutex);
-
 	/* wait for the plugin editor window to be created (or not) */
 
 	pthread_mutex_lock (&fst->lock);
+
+	fst->has_editor = 1;
+	
 	if (!fst->window) {
 		pthread_cond_wait (&fst->window_status_change, &fst->lock);
-	} 
+	}
 	pthread_mutex_unlock (&fst->lock);
 
 	if (!fst->window) {
@@ -438,7 +447,7 @@ fst_destroy_editor (FST* fst)
 		//}
 		pthread_cond_wait (&fst->window_status_change, &fst->lock);
 		fprintf (stderr, "%s editor destroyed\n", fst->handle->name);
-
+		fst->has_editor = 0;
 	}
 	pthread_mutex_unlock (&fst->lock);
 }
@@ -596,6 +605,20 @@ fst_instantiate (FSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 {
 	FST* fst = fst_new ();
 
+	pthread_mutex_lock (&plugin_mutex);
+
+	if (fst_first == NULL) {
+		fst_first = fst;
+	} else {
+		FST* p = fst_first;
+		while (p->next) {
+			p = p->next;
+		}
+		p->next = fst;
+	}
+
+	pthread_mutex_unlock (&plugin_mutex);
+	
 	if( fhandle == NULL ) {
 	    fst_error( "the handle was NULL\n" );
 	    return NULL;

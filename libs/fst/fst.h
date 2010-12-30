@@ -90,7 +90,9 @@ struct _FST
     int		wantIdle;
     int         destroy;
     int         vst_version;
+    int         has_editor;
 
+    int         program_set_without_editor;
     int		want_program;
     int         want_chunk;
     unsigned char *wanted_chunk;
