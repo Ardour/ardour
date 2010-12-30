@@ -294,6 +294,10 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
         accumulated_delta = 0;
         detented = false;
 
+        if (ev->button != 1) {
+                return false;
+        }
+
         if (ev->type == GDK_2BUTTON_PRESS) {
                 int width = get_width();
 
@@ -303,32 +307,46 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
                 }
 
                 if (ev->y < 20) {
-                        /* lower section: adjusts position, constrained by width */
+                        
+                        /* upper section: adjusts position, constrained by width */
 
-                        if (ev->x >= width/2 - 10 && ev->x <= width/2 + 10) {
-                                /* double click near center, reset position to center */
-                                position_control->set_value (0.5); 
-                        } else {
-                                if (ev->x < width/2) {
-                                        /* double click on left, collapse to hard left */
-                                        width_control->set_value (0);
-                                        position_control->set_value (0);
-                                } else {
-                                        /* double click on right, collapse to hard right */
-                                        width_control->set_value (0);
-                                        position_control->set_value (1.0);
-                                }
-                        }
-
-                } else {
-                        /* lower section: adjusts width, constrained by position */
+                        const double w = width_control->get_value ();
+                        const double max_pos = 1.0 - (w/2.0);
+                        const double min_pos = w/2.0;
 
                         if (ev->x <= width/3) {
                                 /* left side dbl click */
-                                width_control->set_value (1.0); // reset width to 100%
+                                if (Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier)) {
+                                        /* 2ndary-double click on left, collapse to hard left */
+                                        width_control->set_value (0);
+                                        position_control->set_value (0);
+                                } else {
+                                        position_control->set_value (min_pos);
+                                }
+                        } else if (ev->x > 2*width/3) {
+                                if (Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier)) {
+                                        /* 2ndary-double click on right, collapse to hard right */
+                                        width_control->set_value (0);
+                                        position_control->set_value (1.0);
+                                }
+                                position_control->set_value (max_pos);
+                        } else {
+                                position_control->set_value (0.5);
+                        }
+
+                } else {
+
+                        /* lower section: adjusts width, constrained by position */
+
+                        const double p = position_control->get_value ();
+                        const double max_width = 2.0 * min ((1.0 - p), p);
+
+                        if (ev->x <= width/3) {
+                                /* left side dbl click */
+                                width_control->set_value (max_width); // reset width to 100%
                         } else if (ev->x > 2*width/3) {
                                 /* right side dbl click */
-                                width_control->set_value (-1.0); // reset width to inverted 100%
+                                width_control->set_value (-max_width); // reset width to inverted 100%
                         } else {
                                 /* center dbl click */
                                 width_control->set_value (0); // collapse width to 0%
@@ -376,6 +394,10 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 bool
 StereoPanner::on_button_release_event (GdkEventButton* ev)
 {
+        if (ev->button != 1) {
+                return false;
+        }
+
         dragging = false;
         dragging_position = false;
         dragging_left = false;
@@ -493,7 +515,7 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 
                         /* have we pulled far enough to escape ? */
 
-                        if (fabs (accumulated_delta) >= 0.1) {
+                        if (fabs (accumulated_delta) >= 0.025) {
                                 width_control->set_value (current_width + accumulated_delta);
                                 detented = false;
                                 accumulated_delta = false;
