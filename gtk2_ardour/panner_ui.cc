@@ -151,6 +151,9 @@ PannerUI::set_panner (boost::shared_ptr<Panner> p)
 	delete twod_panner;
 	twod_panner = 0;
 
+        delete _stereo_panner;
+        _stereo_panner = 0;
+
 	if (!_panner) {
 		return;
 	}
@@ -159,10 +162,17 @@ PannerUI::set_panner (boost::shared_ptr<Panner> p)
 	_panner->LinkStateChanged.connect (connections, invalidator (*this), boost::bind (&PannerUI::update_pan_linkage, this), gui_context());
 	_panner->StateChanged.connect (connections, invalidator (*this), boost::bind (&PannerUI::update_pan_state, this), gui_context());
 
+        /* new panner object, force complete reset of panner GUI
+         */
+
+        _current_nouts = 0;
+        _current_npans = 0;
+
 	panner_changed (0);
 	update_pan_sensitive ();
 	update_pan_linkage ();
 	pan_automation_state_changed ();
+
 }
 
 void
