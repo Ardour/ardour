@@ -96,7 +96,8 @@ void
 StereoPanner::set_tooltip ()
 {
         Gtkmm2ext::UI::instance()->set_tip (this, 
-                                            string_compose (_("0 -> set width to zero\n%4-uparrow -> set width to 100\n%4-downarrow -> set width to -100"), 
+                                            string_compose (_("0 -> set width to zero (mono)\n%1-uparrow -> set width to 100\n%1-downarrow -> set width to -100"), 
+                                                            
                                                             Keyboard::secondary_modifier_name()).c_str());
 }
 
@@ -173,6 +174,11 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         cairo_rectangle (cr, 0, 0, width, height);
         cairo_fill (cr);
 
+        /* the usable width is reduced from the real width, because we need space for 
+           the two halves of LR boxes that will extend past the actual left/right
+           positions (indicated by the vertical line segment above them).
+        */
+
         double usable_width = width - lr_box_size;
 
         /* compute the centers of the L/R boxes based on the current stereo width */
@@ -192,7 +198,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         int right;
 
         left = center - pan_spread;  // center of left box
-        right = center + pan_spread; // right of right box
+        right = center + pan_spread; // center of right box
 
         /* compute & draw the line through the box */
         
@@ -208,7 +214,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
 
         cairo_rectangle (cr, 
                          left - half_lr_box,
-                         (lr_box_size/2)+step_down, 
+                         half_lr_box+step_down, 
                          lr_box_size, lr_box_size);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
         cairo_stroke_preserve (cr);
@@ -235,7 +241,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
 
         cairo_rectangle (cr, 
                          right - half_lr_box,
-                         (lr_box_size/2)+step_down, 
+                         half_lr_box+step_down, 
                          lr_box_size, lr_box_size);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
         cairo_stroke_preserve (cr);
@@ -326,13 +332,18 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
                                 }
                         }
                 } else {
-                        if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-                                width_control->set_value (-1.0); // reset position to reversed full, LR
+                        if (dragging_left) {
+                                width_control->set_value (1.0); // reset width to 100%
+                        } else if (dragging_right) {
+                                width_control->set_value (-1.0); // reset width to inverted 100%
                         } else {
-                                width_control->set_value (1.0); // reset position to full, LR
+                                width_control->set_value (0); // collapse width to 0%
                         }
+                                
                 }
+
                 dragging = false;
+
         } else {
                 dragging = true;
         }
@@ -439,12 +450,17 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 
                 double current_width = width_control->get_value ();
 
+                /* create a detent close to the center */
+
                 if (fabs (current_width) < 0.1) {
                         accumulated_delta += delta;
                         /* in the detent - have we pulled far enough to escape ? */
                         if (fabs (accumulated_delta) >= 0.1) {
                                 width_control->set_value (current_width + accumulated_delta);
                                 accumulated_delta = 0;
+                        } else {
+                                /* snap to zero */
+                                width_control->set_value (0);
                         }
                 } else {
                         width_control->set_value (current_width + delta);
