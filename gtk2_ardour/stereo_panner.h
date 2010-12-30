@@ -25,6 +25,8 @@
 #include <gtkmm/drawingarea.h>
 #include <boost/shared_ptr.hpp>
 
+#include "gtkmm2ext/binding_proxy.h"
+
 namespace PBD {
         class Controllable;
 }
@@ -61,6 +63,9 @@ class StereoPanner : public Gtk::DrawingArea
 
         Gtk::Window* drag_data_window;
         Gtk::Label* drag_data_label;
+
+        BindingProxy position_binder;
+        BindingProxy width_binder;
 
         void value_change ();
         void set_drag_data ();

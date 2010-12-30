@@ -67,6 +67,8 @@ StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost
         , detented (false)
         , drag_data_window (0)
         , drag_data_label (0)
+        , position_binder (position)
+        , width_binder (width)
 {
         if (!have_colors) {
                 set_colors ();
@@ -294,6 +296,19 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
         accumulated_delta = 0;
         detented = false;
 
+        /* Let the binding proxies get first crack at the press event
+         */
+
+        if (ev->y < 20) {
+                if (position_binder.button_press_handler (ev)) {
+                        return true;
+                }
+        } else {
+                if (width_binder.button_press_handler (ev)) {
+                        return true;
+                }
+        }
+        
         if (ev->button != 1) {
                 return false;
         }
