@@ -516,7 +516,7 @@ PlugUIBase::latency_button_clicked ()
 {
 	if (!latency_gui) {
 		latency_gui = new LatencyGUI (*(insert.get()), insert->session().frame_rate(), insert->session().get_block_size());
-		latency_dialog = new ArdourDialog ("Edit Latency", false, false);
+		latency_dialog = new ArdourDialog (_("Edit Latency"), false, false);
 		latency_dialog->get_vbox()->pack_start (*latency_gui);
 		latency_dialog->signal_hide().connect (sigc::mem_fun (*this, &PlugUIBase::set_latency_label));
 	}
