@@ -64,6 +64,8 @@ StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost
         , drag_start_x (0)
         , last_drag_x (0)
         , accumulated_delta (0)
+        , drag_data_window (0)
+        , drag_data_label (0)
 {
         if (!have_colors) {
                 set_colors ();
@@ -72,8 +74,8 @@ StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost
 
         position_control->Changed.connect (connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
         width_control->Changed.connect (connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
-        set_tooltip ();
 
+        set_tooltip ();
         set_flags (Gtk::CAN_FOCUS);
 
         add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|
@@ -87,11 +89,30 @@ StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost
 
 StereoPanner::~StereoPanner ()
 {
+        delete drag_data_window;
 }
 
 void
 StereoPanner::set_tooltip ()
 {
+        Gtkmm2ext::UI::instance()->set_tip (this, 
+                                            string_compose (_("0 -> set width to zero\n%4-uparrow -> set width to 100\n%4-downarrow -> set width to -100"), 
+                                                            Keyboard::secondary_modifier_name()).c_str());
+}
+
+void
+StereoPanner::unset_tooltip ()
+{
+        Gtkmm2ext::UI::instance()->set_tip (this, "");
+}
+
+void
+StereoPanner::set_drag_data ()
+{
+        if (!drag_data_label) {
+                return;
+        }
+
         double pos = position_control->get_value(); // 0..1
         
         /* We show the position of the center of the image relative to the left & right.
@@ -102,18 +123,16 @@ StereoPanner::set_tooltip ()
            the center of the USA isn't Kansas, its (50LA, 50NY) and it will all make sense.
         */
 
-        Gtkmm2ext::UI::instance()->set_tip (this, 
-                                            string_compose (_("L:%1 R:%2 Width: %3%%\n\n0 -> set width to zero\n%4-uparrow -> set width to 100\n%4-downarrow -> set width to -100"), 
-                                                            (int) rint (100.0 * (1.0 - pos)),
-                                                            (int) rint (100.0 * pos),
-                                                            (int) floor (100.0 * width_control->get_value()),
-                                                            Keyboard::secondary_modifier_name()).c_str());
+        drag_data_label->set_markup (string_compose (_("L:%1 R:%2 Width: %3%%"),
+                                                     (int) rint (100.0 * (1.0 - pos)),
+                                                     (int) rint (100.0 * pos),
+                                                     (int) floor (100.0 * width_control->get_value())));
 }
 
 void
 StereoPanner::value_change ()
 {
-        set_tooltip ();
+        set_drag_data ();
         queue_draw ();
 }
 
@@ -329,6 +348,13 @@ StereoPanner::on_button_release_event (GdkEventButton* ev)
         dragging_left = false;
         dragging_right = false;
         accumulated_delta = 0;
+
+        if (drag_data_window) {
+                drag_data_window->hide ();
+        }
+
+        set_tooltip ();
+
         return true;
 }
 
@@ -373,6 +399,31 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 {
         if (!dragging) {
                 return false;
+        }
+
+        if (!drag_data_window) {
+                drag_data_window = new Window (WINDOW_POPUP);
+                drag_data_window->set_position (WIN_POS_MOUSE);
+                drag_data_window->set_decorated (false);
+                
+                drag_data_label = manage (new Label);
+                drag_data_label->set_use_markup (true);
+
+                drag_data_window->set_border_width (6);
+                drag_data_window->add (*drag_data_label);
+                drag_data_label->show ();
+                
+                Window* toplevel = dynamic_cast<Window*> (get_toplevel());
+                if (toplevel) {
+                        drag_data_window->set_transient_for (*toplevel);
+                }
+        }
+
+        if (!drag_data_window->is_visible ()) {
+                /* move the window a little away from the mouse */
+                drag_data_window->move (ev->x_root+30, ev->y_root+30);
+                drag_data_window->present ();
+                unset_tooltip ();
         }
 
         int w = get_width();

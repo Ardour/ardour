@@ -58,9 +58,14 @@ class StereoPanner : public Gtk::DrawingArea
         int last_drag_x;
         double accumulated_delta;
 
+        Gtk::Window* drag_data_window;
+        Gtk::Label* drag_data_label;
+
         void value_change ();
+        void set_drag_data ();
         void set_tooltip ();
-        
+        void unset_tooltip ();
+
         struct ColorScheme { 
             uint32_t outline;
             uint32_t fill;
