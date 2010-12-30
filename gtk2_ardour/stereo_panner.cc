@@ -59,8 +59,11 @@ StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost
         , width_control (width)
         , dragging (false)
         , dragging_position (false)
+        , dragging_left (false)
+        , dragging_right (false)
         , drag_start_x (0)
         , last_drag_x (0)
+        , accumulated_delta (0)
 {
         if (!have_colors) {
                 set_colors ();
@@ -91,13 +94,16 @@ StereoPanner::set_tooltip ()
 {
         double pos = position_control->get_value(); // 0..1
         
-        /* the values displayed show the position of the center of the image, expressed as a stereo pair
-           that ranges from (100,0) (hard left) through (50,50) (hard center) to (0,100) (hard right).
-           the center of the image is halfway between the left and right positions.
+        /* We show the position of the center of the image relative to the left & right.
+           This is expressed as a pair of percentage values that ranges from (100,0) 
+           (hard left) through (50,50) (hard center) to (0,100) (hard right).
+
+           This is pretty wierd, but its the way audio engineers expect it. Just remember that
+           the center of the USA isn't Kansas, its (50LA, 50NY) and it will all make sense.
         */
 
         Gtkmm2ext::UI::instance()->set_tip (this, 
-                                            string_compose (_("L:%1 R:%2 Width: %3%%\n\n0 -> set width to zero\n%4-uparrow -> set width to 1.0\n%4-downarrow -> set width to -1.0"), 
+                                            string_compose (_("L:%1 R:%2 Width: %3%%\n\n0 -> set width to zero\n%4-uparrow -> set width to 100\n%4-downarrow -> set width to -100"), 
                                                             (int) rint (100.0 * (1.0 - pos)),
                                                             (int) rint (100.0 * pos),
                                                             (int) floor (100.0 * width_control->get_value()),
@@ -148,36 +154,41 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         cairo_rectangle (cr, 0, 0, width, height);
         cairo_fill (cr);
 
+        double usable_width = width - lr_box_size;
+
         /* compute the centers of the L/R boxes based on the current stereo width */
-        
-        int usable_width = width - lr_box_size;
+
+        if (fmod (usable_width,2.0) == 0) {
+                /* even width, but we need odd, so that there is an exact center.
+                   So, offset cairo by 1, and reduce effective width by 1 
+                */
+                usable_width -= 1.0;
+                cairo_translate (cr, 1.0, 0.0);
+        }
+
         double center = (lr_box_size/2.0) + (usable_width * pos);
-        int left = lrint (center - (fswidth * usable_width / 2.0)); // center of leftmost box
-        int right = lrint (center +  (fswidth * usable_width / 2.0)); // center of rightmost box
+        const double pan_spread = (fswidth * usable_width)/2.0;
+        const double half_lr_box = lr_box_size/2.0;
+        int left;
+        int right;
+
+        left = center - pan_spread;  // center of left box
+        right = center + pan_spread; // right of right box
 
         /* compute & draw the line through the box */
         
         cairo_set_line_width (cr, 2);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-        cairo_move_to (cr, left-(lr_box_size/2), top_step+(pos_box_size/2)+step_down);
-        cairo_line_to (cr, left-(lr_box_size/2), top_step+(pos_box_size/2));
-        cairo_line_to (cr, right+(lr_box_size/2)+1, top_step+(pos_box_size/2));
-        cairo_line_to (cr, right+(lr_box_size/2)+1, top_step+(pos_box_size/2) + step_down);
+        cairo_move_to (cr, left, top_step+(pos_box_size/2)+step_down);
+        cairo_line_to (cr, left, top_step+(pos_box_size/2));
+        cairo_line_to (cr, right, top_step+(pos_box_size/2));
+        cairo_line_to (cr, right, top_step+(pos_box_size/2) + step_down);
         cairo_stroke (cr);
-
-        if (swidth < 0.0) {
-                /* flip where the L/R boxes are drawn */
-                swap (left, right);
-        }
-
-        /* make left/right be the left edge of each box */
-        left -= lr_box_size/2;
-        right -= lr_box_size/2;
 
         /* left box */
 
         cairo_rectangle (cr, 
-                         left,
+                         left - half_lr_box,
                          (lr_box_size/2)+step_down, 
                          lr_box_size, lr_box_size);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
@@ -188,18 +199,23 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         /* add text */
 
         cairo_move_to (cr, 
-                       left + 3,
+                       left - half_lr_box + 3,
                        (lr_box_size/2) + step_down + 13);
         cairo_select_font_face (cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+
         if (state != Mono) {
                 cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
-                cairo_show_text (cr, _("L"));
+                if (swidth < 0.0) {
+                        cairo_show_text (cr, _("R"));
+                } else {
+                        cairo_show_text (cr, _("L"));
+                }
         }
 
         /* right box */
 
         cairo_rectangle (cr, 
-                         right,
+                         right - half_lr_box,
                          (lr_box_size/2)+step_down, 
                          lr_box_size, lr_box_size);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
@@ -210,13 +226,18 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         /* add text */
 
         cairo_move_to (cr, 
-                       right + 3,
+                       right - half_lr_box + 3,
                        (lr_box_size/2)+step_down + 13);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
+
         if (state == Mono) {
                 cairo_show_text (cr, _("M"));
         } else {
-                cairo_show_text (cr, _("R"));
+                if (swidth < 0.0) {
+                        cairo_show_text (cr, _("L"));
+                } else {
+                        cairo_show_text (cr, _("R"));
+                }
         }
 
         /* draw the central box */
@@ -239,19 +260,58 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 {
         drag_start_x = ev->x;
         last_drag_x = ev->x;
+        
+        dragging_position = false;
+        dragging_left = false;
+        dragging_right = false;
+        accumulated_delta = 0;
 
         if (ev->y < 20) {
                 /* top section of widget is for position drags */
                 dragging_position = true;
         } else {
-                dragging_position = false;
+                /* lower section is for dragging width */
+
+                double pos = position_control->get_value (); /* 0..1 */
+                double swidth = width_control->get_value (); /* -1..+1 */
+                double fswidth = fabs (swidth);
+                int usable_width = get_width() - lr_box_size;
+                double center = (lr_box_size/2.0) + (usable_width * pos);
+                int left = lrint (center - (fswidth * usable_width / 2.0)); // center of leftmost box
+                int right = lrint (center +  (fswidth * usable_width / 2.0)); // center of rightmost box
+                const int half_box = lr_box_size/2;
+
+                if (ev->x >= (left - half_box) && ev->x < (left + half_box)) {
+                        dragging_left = true;
+                } else if (ev->x >= (right - half_box) && ev->x < (right + half_box)) {
+                        dragging_right = true;
+                }
+
         }
 
         if (ev->type == GDK_2BUTTON_PRESS) {
                 if (dragging_position) {
-                        position_control->set_value (0.5); // reset position to center
+                        int width = get_width();
+                        if (ev->x >= width/2 - 10 && ev->x <= width/2 + 10) {
+                                /* double click near center, reset position to center */
+                                position_control->set_value (0.5); 
+                        } else {
+                                if (ev->x < width/2) {
+                                        /* double click on left, collapse to hard left */
+                                        width_control->set_value (0);
+                                        position_control->set_value (0);
+                                } else {
+                                        /* double click on right, collapse to hard right */
+                                        width_control->set_value (0);
+                                        position_control->set_value (1.0);
+                                }
+                        }
                 } else {
-                        width_control->set_value (1.0); // reset position to full, LR
+                        if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+                                width_control->set_value (-1.0); // reset position to reversed full, LR
+                        } else {
+                                width_control->set_value (1.0); // reset position to full, LR
+                        }
                 }
                 dragging = false;
         } else {
@@ -266,13 +326,16 @@ StereoPanner::on_button_release_event (GdkEventButton* ev)
 {
         dragging = false;
         dragging_position = false;
+        dragging_left = false;
+        dragging_right = false;
+        accumulated_delta = 0;
         return true;
 }
 
 bool
 StereoPanner::on_scroll_event (GdkEventScroll* ev)
 {
-        double one_degree = 1.0/180.0;
+        double one_degree = 1.0/180.0; // one degree as a number from 0..1, since 180 degrees is the full L/R axis
         double pv = position_control->get_value(); // 0..1.0 ; 0 = left
         double wv = width_control->get_value(); // 0..1.0 ; 0 = left
         double step;
@@ -313,96 +376,33 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
         }
 
         int w = get_width();
-        double delta = (abs (ev->x - last_drag_x)) / (w/2.0);
-        int drag_dir = 0;
+        double delta = (ev->x - last_drag_x) / (double) w;
+        
+        if (dragging_left) {
+                delta = -delta;
+        }
 
-        if (!dragging_position) {
-                double wv = width_control->get_value();        
-                int inc;
-                double old_wv;
-                double opx; // compute the operational x-coordinate given the current pos+width
-                
-                if (wv > 0) {
-                        /* positive value: increasing width means adding */
-                        inc = 1;
-                } else {
-                        /* positive value: increasing width means subtracting */
-                        inc = -1;
-                }
+        if (dragging_left || dragging_right) {
 
-                if (drag_start_x < w/2) {
-                        /* started left of center */
+                /* maintain position as invariant as we change the width */
 
-                        opx = position_control->get_value() - (wv/2.0);
+                double current_width = width_control->get_value ();
 
-                        if (opx < 0.5) {
-                                /* still left */
-                                if (ev->x > last_drag_x) {
-                                        /* motion to left */
-                                        cerr << "was left, still left, move left\n";
-                                        drag_dir = -inc;
-                                } else {
-                                        cerr << "was left, still left, move right\n";
-                                        drag_dir = inc;
-                                }
-                        } else {
-                                /* now right */
-                                if (ev->x > last_drag_x) {
-                                        /* motion to left */
-                                        cerr << "was left, gone right, move left\n";
-                                        drag_dir = inc;
-                                } else {
-                                        cerr << "was left, gone right, move right\n";
-                                        drag_dir = -inc;
-                                }
+                if (fabs (current_width) < 0.1) {
+                        accumulated_delta += delta;
+                        /* in the detent - have we pulled far enough to escape ? */
+                        if (fabs (accumulated_delta) >= 0.1) {
+                                width_control->set_value (current_width + accumulated_delta);
+                                accumulated_delta = 0;
                         }
                 } else {
-                        /* started right of center */
-                        
-                        opx = position_control->get_value() + (wv/2.0);
-
-                        if (opx > 0.5) {
-                                /* still right */
-                                if (ev->x < last_drag_x) {
-                                        /* motion to right */
-                                        cerr << "was right, still right, move right\n";
-                                        drag_dir = -inc;
-                                } else {
-                                        cerr << "was right, still right, move left\n";
-                                        drag_dir = inc;
-                                }
-                        } else {
-                                /* now left */
-                                if (ev->x < last_drag_x) {
-                                        /* motion to right */
-                                        cerr << "was right, gone left, move right\n";
-                                        drag_dir = inc;
-                                } else {
-                                        cerr << "was right, gone left, move left\n";
-                                        drag_dir = -inc;
-                                }
-                        }
-
+                        width_control->set_value (current_width + delta);
                 }
 
-                old_wv = wv;
-                wv = wv + (drag_dir * delta);
-                
-                cerr << this << " set width to " << wv << endl;
-                width_control->set_value (wv);
-
-        } else {
+        } else if (dragging_position) {
 
                 double pv = position_control->get_value(); // 0..1.0 ; 0 = left
-                
-                if (ev->x > last_drag_x) { // increasing 
-                        pv = pv + delta;
-                } else {
-                        pv = pv - delta;
-                }
-
-                cerr << this << " set position to " << pv << endl;
-                position_control->set_value (pv);
+                position_control->set_value (pv + delta);
         }
 
         last_drag_x = ev->x;

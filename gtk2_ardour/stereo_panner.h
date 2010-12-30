@@ -52,8 +52,11 @@ class StereoPanner : public Gtk::DrawingArea
         PBD::ScopedConnectionList connections;
         bool dragging;
         bool dragging_position;
+        bool dragging_left;
+        bool dragging_right;
         int drag_start_x;
         int last_drag_x;
+        double accumulated_delta;
 
         void value_change ();
         void set_tooltip ();
