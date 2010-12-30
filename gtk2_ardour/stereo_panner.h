@@ -57,6 +57,7 @@ class StereoPanner : public Gtk::DrawingArea
         int drag_start_x;
         int last_drag_x;
         double accumulated_delta;
+        bool detented;
 
         Gtk::Window* drag_data_window;
         Gtk::Label* drag_data_label;
