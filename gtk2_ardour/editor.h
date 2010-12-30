@@ -1545,6 +1545,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gtk::ComboBoxText edit_mode_selector;
 	Gtk::VBox         edit_mode_box;
+        std::vector<std::string> edit_mode_strings;
 
 	void set_edit_mode (ARDOUR::EditMode);
 	void cycle_edit_mode ();
@@ -2054,6 +2055,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         void set_canvas_cursor_for_region_view (double, RegionView *);
 
 	MouseCursors* _cursors;
+
+        void resize_text_widgets ();
 	
 	friend class Drag;
 	friend class RegionDrag;

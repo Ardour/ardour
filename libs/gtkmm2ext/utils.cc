@@ -82,12 +82,32 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w,
 	int width_max = 0;
 	int height_max = 0;
 	w.ensure_style ();
+        vector<string> copy;
+        const vector<string>* to_use;
+        vector<string>::const_iterator i;
+
+        for (i = strings.begin(); i != strings.end(); ++i) {
+                if ((*i).find_first_of ("gy") != string::npos) {
+                        /* contains a descender */
+                        break;
+                }
+        }
 	
-	for (vector<string>::const_iterator i = strings.begin(); i != strings.end(); ++i) {
+        if (i == strings.end()) {
+                /* make a copy of the strings then add one that has a descener */
+                copy = strings;
+                copy.push_back ("g");
+                to_use = &copy;
+        } else {
+                to_use = &strings;
+        }
+	
+	for (vector<string>::const_iterator i = to_use->begin(); i != to_use->end(); ++i) {
 		get_pixel_size (w.create_pango_layout (*i), width, height);
 		width_max = max(width_max,width);
 		height_max = max(height_max, height);
 	}
+
 	w.set_size_request(width_max + hpadding, height_max + vpadding);
 }
 
@@ -207,26 +227,7 @@ Gtkmm2ext::set_popdown_strings (Gtk::ComboBoxText& cr, const vector<string>& str
 	cr.clear ();
 
 	if (set_size) {
-		vector<string> copy;
-
-		for (i = strings.begin(); i != strings.end(); ++i) {
-			if ((*i).find_first_of ("gy") != string::npos) {
-				/* contains a descender */
-				break;
-			}
-		}
-		
-		if (i == strings.end()) {
-			
-			/* make a copy of the strings then add one that has a descener */
-			
-			copy = strings;
-			copy.push_back ("g");
-			set_size_request_to_display_given_text (cr, copy, COMBO_FUDGE+10+hpadding, 15+vpadding); 
-
-		} else {
-			set_size_request_to_display_given_text (cr, strings, COMBO_FUDGE+10+hpadding, 15+vpadding); 
-		}
+                set_size_request_to_display_given_text (cr, strings, COMBO_FUDGE+10+hpadding, 15+vpadding); 
 	}
 
 	for (i = strings.begin(); i != strings.end(); ++i) {

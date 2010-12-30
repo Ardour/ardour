@@ -2683,7 +2683,6 @@ Editor::setup_toolbar ()
 	mouse_mode_button_box->pack_start (mouse_audition_button);
 	mouse_mode_button_box->pack_start (internal_edit_button);
 
-	vector<string> edit_mode_strings;
 	edit_mode_strings.push_back (edit_mode_to_string (Slide));
 	if (!Profile->get_sae()) {
 		edit_mode_strings.push_back (edit_mode_to_string (Splice));
@@ -2866,6 +2865,8 @@ Editor::setup_toolbar ()
 	toolbar_frame.set_shadow_type (SHADOW_OUT);
 	toolbar_frame.set_name ("BaseFrame");
 	toolbar_frame.add (toolbar_base);
+        
+        DPIReset.connect (sigc::mem_fun (*this, &Editor::resize_text_widgets));
 }
 
 void
@@ -3299,7 +3300,11 @@ Editor::cycle_edit_mode ()
 void
 Editor::edit_mode_selection_done ()
 {
-	Config->set_edit_mode (string_to_edit_mode (edit_mode_selector.get_active_text ()));
+        string s = edit_mode_selector.get_active_text ();
+
+        if (!s.empty()) {
+                Config->set_edit_mode (string_to_edit_mode (s));
+        }
 }
 
 void
@@ -5392,3 +5397,13 @@ Editor::action_menu_item (std::string const & name)
 	return *manage (a->create_menu_item ());
 }
 
+void
+Editor::resize_text_widgets ()
+{
+        set_size_request_to_display_given_text (edit_mode_selector, edit_mode_strings, COMBO_FUDGE+10, 15);
+        set_size_request_to_display_given_text (zoom_focus_selector, zoom_focus_strings, COMBO_FUDGE+10, 15);
+        set_size_request_to_display_given_text (snap_type_selector, snap_type_strings, COMBO_FUDGE+10, 15);
+        set_size_request_to_display_given_text (snap_mode_selector, snap_mode_strings, COMBO_FUDGE+10, 15);
+        set_size_request_to_display_given_text (edit_point_selector, edit_point_strings, COMBO_FUDGE+10, 15);
+}
+        
