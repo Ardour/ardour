@@ -2086,7 +2086,7 @@ gnome_canvas_class_init (GnomeCanvasClass *klass)
 static void
 panic_root_destroyed (GtkObject *object, gpointer data)
 {
-	g_error ("Eeeek, root item %p of canvas %p was destroyed!", object, data);
+	g_error ("Eeeek, root item %p of canvas %p was destroyed!", (void*) object, data);
 }
 
 /* Object initialization function for GnomeCanvas */
