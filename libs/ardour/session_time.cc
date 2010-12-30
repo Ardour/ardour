@@ -547,21 +547,21 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 }
 
 ARDOUR::framecnt_t
-Session::convert_to_frames_at (framepos_t /*position*/, AnyTime const & any)
+Session::convert_to_frames (AnyTime const & position)
 {
 	double secs;
 
-	switch (any.type) {
+	switch (position.type) {
 	case AnyTime::BBT:
-		return _tempo_map->frame_time (any.bbt);
+		return _tempo_map->frame_time (position.bbt);
 		break;
 
 	case AnyTime::Timecode:
 		/* XXX need to handle negative values */
-		secs = any.timecode.hours * 60 * 60;
-		secs += any.timecode.minutes * 60;
-		secs += any.timecode.seconds;
-		secs += any.timecode.frames / timecode_frames_per_second();
+		secs = position.timecode.hours * 60 * 60;
+		secs += position.timecode.minutes * 60;
+		secs += position.timecode.seconds;
+		secs += position.timecode.frames / timecode_frames_per_second();
 		if (config.get_timecode_offset_negative()) {
 			return (framecnt_t) floor (secs * frame_rate()) - config.get_timecode_offset();
 		} else {
@@ -570,13 +570,48 @@ Session::convert_to_frames_at (framepos_t /*position*/, AnyTime const & any)
 		break;
 
 	case AnyTime::Seconds:
-		return (framecnt_t) floor (any.seconds * frame_rate());
+		return (framecnt_t) floor (position.seconds * frame_rate());
 		break;
 
 	case AnyTime::Frames:
-		return any.frames;
+		return position.frames;
 		break;
 	}
 
-	return any.frames;
+	return position.frames;
+}
+
+ARDOUR::framecnt_t
+Session::any_duration_to_frames (framepos_t position, AnyTime const & duration)
+{
+	double secs;
+
+	switch (duration.type) {
+	case AnyTime::BBT:
+		return (framecnt_t) ( _tempo_map->framepos_plus_bbt (position, duration.bbt) - position);
+		break;
+
+	case AnyTime::Timecode:
+		/* XXX need to handle negative values */
+		secs = duration.timecode.hours * 60 * 60;
+		secs += duration.timecode.minutes * 60;
+		secs += duration.timecode.seconds;
+		secs += duration.timecode.frames / timecode_frames_per_second();
+		if (config.get_timecode_offset_negative()) {
+			return (framecnt_t) floor (secs * frame_rate()) - config.get_timecode_offset();
+		} else {
+			return (framecnt_t) floor (secs * frame_rate()) + config.get_timecode_offset();
+		}
+		break;
+
+	case AnyTime::Seconds:
+                return (framecnt_t) floor (duration.seconds * frame_rate());
+		break;
+
+	case AnyTime::Frames:
+		return duration.frames;
+		break;
+	}
+
+	return duration.frames;
 }

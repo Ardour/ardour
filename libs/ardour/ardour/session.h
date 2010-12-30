@@ -460,7 +460,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void timecode_duration (framecnt_t, Timecode::Time&) const;
 	void timecode_duration_string (char *, framecnt_t) const;
 
-	framecnt_t convert_to_frames_at (framepos_t position, AnyTime const &);
+	framecnt_t convert_to_frames (AnyTime const & position);
+        framecnt_t any_duration_to_frames (framepos_t position, AnyTime const & duration);
 
 	static PBD::Signal1<void, framepos_t> StartTimeChanged;
 	static PBD::Signal1<void, framepos_t> EndTimeChanged;

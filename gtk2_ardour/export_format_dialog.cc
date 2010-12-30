@@ -732,7 +732,7 @@ void
 ExportFormatDialog::update_clock (AudioClock & clock, ARDOUR::AnyTime const & time)
 {
 	// TODO position
-	clock.set (_session->convert_to_frames_at (0, time), true);
+	clock.set (_session->convert_to_frames (time), true);
 
 	AudioClock::Mode mode(AudioClock::Timecode);
 

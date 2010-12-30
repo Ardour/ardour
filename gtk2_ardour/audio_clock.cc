@@ -1916,9 +1916,10 @@ AudioClock::bbt_frame_from_display (framepos_t pos) const
 	if (is_duration) {
 		any.bbt.bars++;
 		any.bbt.beats++;
-	}
-
-	return _session->convert_to_frames_at (pos, any);
+                return _session->any_duration_to_frames (pos, any);
+	} else {
+                return _session->convert_to_frames (any);
+        }
 }
 
 

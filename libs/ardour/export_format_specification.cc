@@ -49,7 +49,7 @@ ExportFormatSpecification::Time::operator= (AnyTime const & other)
 framecnt_t
 ExportFormatSpecification::Time::get_frames_at (framepos_t position, framecnt_t target_rate) const
 {
-	framecnt_t duration = session.convert_to_frames_at (position, *this);
+	framecnt_t duration = session.any_duration_to_frames (position, *this);
 	return ((double) target_rate / session.frame_rate()) * duration + 0.5;
 }
 
