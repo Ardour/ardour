@@ -316,7 +316,7 @@ AddRouteDialog::refill_channel_setups ()
 	chn.name = "separator";
 	channel_setups.push_back (chn);
 
-	chn.name = X_("MIDI");
+	chn.name = _("MIDI");
 	chn.channels = 0;
 	channel_setups.push_back (chn);
 
