@@ -251,6 +251,10 @@ EditorRoutes::focus_out (GdkEventFocus*)
 bool
 EditorRoutes::enter_notify (GdkEventCrossing*)
 {
+	if (name_editable) {
+		return true;
+	}
+	
         /* arm counter so that ::selection_filter() will deny selecting anything for the 
            next two attempts to change selection status.
         */
