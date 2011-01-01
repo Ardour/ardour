@@ -23,8 +23,8 @@ def build(bld):
     for t in templates:
         b = os.path.basename(t)
         obj = bld.new_task_gen('subst')
-        obj.source = b
-        obj.target = b.replace('.in', '')
+        obj.source = [ b ]
+        obj.target = [ b.replace('.in', '') ]
         obj.dict = subst_dict
         obj.install_path = os.path.join(bld.env['DATADIR'], 'ardour3', 'templates')
 
