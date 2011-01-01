@@ -393,11 +393,18 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
                         const int half_box = lr_box_size/2;
                         
                         if (ev->x >= (left - half_box) && ev->x < (left + half_box)) {
-                                dragging_left = true;
+                                if (swidth < 0.0) {
+                                        dragging_right = true;
+                                } else {
+                                        dragging_left = true;
+                                }
                         } else if (ev->x >= (right - half_box) && ev->x < (right + half_box)) {
-                                dragging_right = true;
+                                if (swidth < 0.0) {
+                                        dragging_left = true;
+                                } else {
+                                        dragging_right = true;
+                                }
                         }
-                        
                 }
 
                 dragging = true;
@@ -505,6 +512,7 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 
         int w = get_width();
         double delta = (ev->x - last_drag_x) / (double) w;
+        double current_width = width_control->get_value ();
         
         if (dragging_left) {
                 delta = -delta;
@@ -514,7 +522,6 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 
                 /* maintain position as invariant as we change the width */
 
-                double current_width = width_control->get_value ();
 
                 /* create a detent close to the center */
 
