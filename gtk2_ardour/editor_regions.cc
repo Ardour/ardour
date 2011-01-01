@@ -206,6 +206,10 @@ EditorRegions::focus_out (GdkEventFocus*)
 bool
 EditorRegions::enter_notify (GdkEventCrossing* ev)
 {
+	if (name_editable) {
+		return true;
+	}
+	
 	/* arm counter so that ::selection_filter() will deny selecting anything for the 
 	   next two attempts to change selection status.
 	*/
@@ -222,7 +226,6 @@ EditorRegions::leave_notify (GdkEventCrossing*)
 		old_focus = 0;
 	}
 
-	name_editable = 0;
 	Keyboard::magic_widget_drop_focus ();
 	return false;
 }
