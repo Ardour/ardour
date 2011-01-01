@@ -6,6 +6,9 @@ import glob
 srcdir = '.'
 blddir = 'build'
 
+def configure(conf):
+    pass
+
 def build(bld):
     
     subst_dict = {}

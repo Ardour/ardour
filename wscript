@@ -31,8 +31,7 @@ children = [
 	'libs/clearlooks-newer',
 	'libs/audiographer',
 	'libs/gnomecanvas',
-	'gtk2_ardour',
-	'templates'
+	'gtk2_ardour'
 ]
 
 i18n_children = [
