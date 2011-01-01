@@ -297,13 +297,13 @@ EditorRoutes::on_tv_rec_enable_changed (std::string const & path_string)
 	// Get the model row that has been toggled.
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
-	TimeAxisView *tv = row[_columns.tv];
-	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
+	TimeAxisView* tv = row[_columns.tv];
+	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
-	if (atv != 0 && atv->is_audio_track()){
+	if (rtv && rtv->track()) {
 		boost::shared_ptr<RouteList> rl (new RouteList);
-		rl->push_back (atv->route());
-		_session->set_record_enabled (rl, !atv->track()->record_enabled(), Session::rt_cleanup);
+		rl->push_back (rtv->route());
+		_session->set_record_enabled (rl, !rtv->track()->record_enabled(), Session::rt_cleanup);
 	}
 }
 
