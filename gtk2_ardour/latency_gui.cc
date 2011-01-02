@@ -52,7 +52,7 @@ LatencyGUI::LatencyGUI (Latent& l, framepos_t sr, framepos_t psz)
 {
 	Widget* w;
 
-	if (!unit_strings.empty()) {
+	if (unit_strings.empty()) {
 		unit_strings = I18N (_unit_strings);
 	}
 
