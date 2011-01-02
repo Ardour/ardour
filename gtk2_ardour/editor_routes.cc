@@ -330,12 +330,16 @@ EditorRoutes::on_tv_solo_enable_toggled (std::string const & path_string)
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
 	TimeAxisView *tv = row[_columns.tv];
-	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
-	if (atv != 0) {
+	if (rtv != 0) {
 		boost::shared_ptr<RouteList> rl (new RouteList);
-		rl->push_back (atv->route());
-		_session->set_solo (rl, !atv->route()->soloed(), Session::rt_cleanup);
+		rl->push_back (rtv->route());
+		if (Config->get_solo_control_is_listen_control()) {
+			_session->set_listen (rl, !rtv->route()->listening(), Session::rt_cleanup);
+		} else {
+			_session->set_solo (rl, !rtv->route()->self_soloed(), Session::rt_cleanup);
+		}
 	}
 }
 
@@ -346,10 +350,10 @@ EditorRoutes::on_tv_solo_isolate_toggled (std::string const & path_string)
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
 	TimeAxisView *tv = row[_columns.tv];
-	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
-	if (atv != 0) {
-		atv->route()->set_solo_isolated (!atv->route()->solo_isolated(), this);
+	if (rtv) {
+		rtv->route()->set_solo_isolated (!rtv->route()->solo_isolated(), this);
 	}
 }
 
@@ -360,10 +364,10 @@ EditorRoutes::on_tv_solo_safe_toggled (std::string const & path_string)
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
 	TimeAxisView *tv = row[_columns.tv];
-	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
-	if (atv != 0) {
-		atv->route()->set_solo_safe (!atv->route()->solo_safe(), this);
+	if (rtv) {
+		rtv->route()->set_solo_safe (!rtv->route()->solo_safe(), this);
 	}
 }
 
@@ -519,7 +523,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		row[_columns.route] = (*x)->route ();
 		row[_columns.is_track] = (boost::dynamic_pointer_cast<Track> ((*x)->route()) != 0);
 		row[_columns.mute_state] = (*x)->route()->muted();
-		row[_columns.solo_state] = (*x)->route()->soloed();
+		row[_columns.solo_state] = RouteUI::solo_visual_state ((*x)->route());
 		row[_columns.solo_isolate_state] = (*x)->route()->solo_isolated();
 		row[_columns.solo_safe_state] = (*x)->route()->solo_safe();
 		row[_columns.name_editable] = true;
@@ -550,6 +554,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 
 		(*x)->route()->mute_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_mute_display, this), gui_context());
 		(*x)->route()->solo_changed.connect (*this, MISSING_INVALIDATOR, ui_bind (&EditorRoutes::update_solo_display, this, _1), gui_context());
+		(*x)->route()->listen_changed.connect (*this, MISSING_INVALIDATOR, ui_bind (&EditorRoutes::update_solo_display, this, _1), gui_context());
 		(*x)->route()->solo_isolated_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_isolate_display, this), gui_context());
 		(*x)->route()->solo_safe_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_safe_display, this), gui_context());
 	}
@@ -920,9 +925,11 @@ EditorRoutes::key_press (GdkEventKey* ev)
                 break;
 
         case 's':
-                if (get_relevant_routes (rl)) {
-                        _session->set_solo (rl, !rl->front()->soloed(), Session::rt_cleanup);
-                }
+		if (Config->get_solo_control_is_listen_control()) {
+			_session->set_listen (rl, !rl->front()->listening(), Session::rt_cleanup);
+		} else {
+			_session->set_solo (rl, !rl->front()->self_soloed(), Session::rt_cleanup);
+		}
                 return true;
                 break;
 
