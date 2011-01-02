@@ -114,9 +114,6 @@ AudioDiskstream::init ()
 
 	set_block_size (_session.get_block_size());
 	allocate_temporary_buffers ();
-
-	add_channel (1);
-	assert(_n_channels == ChanCount(DataType::AUDIO, 1));
 }
 
 AudioDiskstream::~AudioDiskstream ()
@@ -410,8 +407,7 @@ AudioDiskstream::prepare_record_status(framepos_t capture_start_frame)
 				transvec.buf[0]->type = CaptureStart;
 				transvec.buf[0]->capture_val = capture_start_frame;
 				(*chan)->capture_transition_buf->increment_write_ptr(1);
-			}
-			else {
+			} else {
 				// bad!
 				fatal << X_("programming error: capture_transition_buf is full on rec start!  inconceivable!")
 					<< endmsg;
@@ -708,7 +704,11 @@ AudioDiskstream::commit (framecnt_t /* nframes */)
 		capture_captured += adjust_capture_position;
 		adjust_capture_position = 0;
 	}
-
+	
+	if (c->empty()) {
+		return false;
+	}
+	
 	if (_slaved) {
 		if (_io && _io->active()) {
 			need_butler = c->front()->playback_buf->write_space() >= c->front()->playback_buf->bufsize() / 2;
@@ -735,13 +735,22 @@ AudioDiskstream::set_pending_overwrite (bool yn)
 	_pending_overwrite = yn;
 
 	overwrite_frame = playback_sample;
-	overwrite_offset = channels.reader()->front()->playback_buf->get_read_ptr();
+
+	boost::shared_ptr<ChannelList> c = channels.reader ();
+	if (!c->empty ()) {
+		overwrite_offset = c->front()->playback_buf->get_read_ptr();
+	}
 }
 
 int
 AudioDiskstream::overwrite_existing_buffers ()
 {
 	boost::shared_ptr<ChannelList> c = channels.reader();
+	if (c->empty ()) {
+		_pending_overwrite = false;
+		return 0;
+	}
+	
 	Sample* mixdown_buffer;
 	float* gain_buffer;
 	int ret = -1;
@@ -2137,6 +2146,10 @@ AudioDiskstream::playback_buffer_load () const
 {
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
+	if (c->empty ()) {
+		return 0;
+	}
+
 	return (float) ((double) c->front()->playback_buf->read_space()/
 			(double) c->front()->playback_buf->bufsize());
 }
@@ -2146,6 +2159,10 @@ AudioDiskstream::capture_buffer_load () const
 {
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
+	if (c->empty ()) {
+		return 0;
+	}
+	
 	return (float) ((double) c->front()->capture_buf->write_space()/
 			(double) c->front()->capture_buf->bufsize());
 }
