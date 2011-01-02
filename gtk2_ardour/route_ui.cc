@@ -1294,8 +1294,8 @@ RouteUI::ensure_xml_node ()
 			xml_node = new XMLNode ("GUI");
 			_route->add_extra_xml (*xml_node);
 		} else {
-			/* the Route has one, so it must have been loaded */
-			if (Stateful::loading_state_version < 3000) {
+			/* the Route has one; it may have been loaded */
+			if (Stateful::loading_state_version != 0 && Stateful::loading_state_version < 3000) {
 				/* the GUI extra XML is in 2.X format; we must convert it to the new
 				   format to avoid problems later
 				*/
@@ -1320,6 +1320,7 @@ RouteUI::ensure_xml_node ()
 				}
 
 				_route->add_extra_xml (*new_xml_node);
+				xml_node = new_xml_node;
 			}
 		}
 	}
