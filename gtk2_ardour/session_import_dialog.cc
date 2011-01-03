@@ -104,7 +104,10 @@ void
 SessionImportDialog::load_session (const string& filename)
 {
 	if (_session) {
-		tree.read (filename);
+		if (tree.read (filename)) {
+                        error << string_compose (_("Cannot load XML for session from %1", filename)) << endmsg;
+                        return;
+                }
 		boost::shared_ptr<AudioRegionImportHandler> region_handler (new AudioRegionImportHandler (tree, *_session));
 		boost::shared_ptr<AudioPlaylistImportHandler> pl_handler (new AudioPlaylistImportHandler (tree, *_session, *region_handler));
 		
