@@ -612,7 +612,7 @@ Editor::Editor ()
 	Glib::PropertyProxy<int> proxy = edit_pane.property_position();
 	proxy.signal_changed().connect (bind (sigc::ptr_fun (pane_size_watcher), static_cast<Paned*> (&edit_pane)));
 #endif
-	top_hbox.pack_start (toolbar_frame, false, true);
+	top_hbox.pack_start (toolbar_frame);
 
 	HBox *hbox = manage (new HBox);
 	hbox->pack_start (edit_pane, true, true);
@@ -2862,9 +2862,11 @@ Editor::setup_toolbar ()
 	toolbar_base.set_name ("ToolBarBase");
 	toolbar_base.add (toolbar_hbox);
 
+	_toolbar_trimmer.add (toolbar_base);
+
 	toolbar_frame.set_shadow_type (SHADOW_OUT);
 	toolbar_frame.set_name ("BaseFrame");
-	toolbar_frame.add (toolbar_base);
+	toolbar_frame.add (_toolbar_trimmer);
         
         DPIReset.connect (sigc::mem_fun (*this, &Editor::resize_text_widgets));
 }

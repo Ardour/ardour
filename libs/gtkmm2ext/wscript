@@ -51,6 +51,7 @@ gtkmm2ext_sources = [
 	'tearoff.cc',
 	'textviewer.cc',
         'treeutils.cc',
+	'trimming_bin.cc',
 	'utils.cc',
 	'version.cc',
 	'window_title.cc'
