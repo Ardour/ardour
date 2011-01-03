@@ -19,6 +19,8 @@ LIBCLEARLOOKS=
 if [ $# -eq 0 ] ; then
     echo ""	 
     echo "ERROR - Please specify build type"
+	echo "    --public"
+	echo "    --sae"
     echo ""	 
     exit 1
 fi
@@ -72,6 +74,14 @@ while [ $# -gt 0 ] ; do
 	--nls) WITH_NLS=1 ; shift ;;
 	--external_jack) EXTERNAL_JACK=$2; shift ; shift ;;
 	--clearlooks) LIBCLEARLOOKS=$2; shift ; shift ;;
+
+	*)
+		#catch all for unknown arguments
+		echo ""
+		echo "!!! ERROR !!! - Unknown argument $1"
+		echo ""
+		exit 1
+		;;
     esac
 done
 
@@ -100,7 +110,6 @@ case `uname -m` in
 	*)
 		echo ""
 		echo "ERROR - Unknown architecture `uname -m`"
-		echo "$PGM_NAME Installer will exit."
 		echo ""
 		exit 1
 		;;
@@ -246,7 +255,7 @@ if test x$WITH_NLS != x ; then
             if [ -f $LOCALEROOT/$l/LC_MESSAGES/$MO ] ; then
 	        cp $LOCALEROOT/$l/LC_MESSAGES/$MO $Locale/$l/LC_MESSAGES
             else
-	  # try with just the language spec
+			# try with just the language spec
 	        just_lang=`echo $l | sed 's/_[A-Z][A-Z]$//'`
 	        if [ -f $LOCALEROOT/$just_lang/LC_MESSAGES/$MO ] ; then
 	            cp $LOCALEROOT/$just_lang/LC_MESSAGES/$MO $Locale/$just_lang/LC_MESSAGES
@@ -264,22 +273,11 @@ if [ "" = "$GTKROOT" ]; then
     GTKROOT=`dirname $GTKROOT`
     gtkModVer=`pkg-config --modversion gtk+-2.0`
 
-    GTKETC=${GTKROOT}/etc/gtk-2.0
     GTKLIB=${GTKROOT}/lib/gtk-2.0/$gtkModVer
     PANGOLIB=${GTKROOT}/lib/pango/1.6.0
     GDKPIXBUFLIB=${GTKROOT}/lib/gdk-pixbuf-2.0/$gtkModVer
 else
     echo "Looking for gtk and pango in other known locations"
- 
-    ## GTKETC
-    if [ -d /etc/gtk-2.0 ]; then
-        GTKETC=/etc/gtk-2.0
-    else
-        echo ""
-        echo "!!! ERROR !!! - Can't find GTK etc directory. Packager will exit"
-        echo ""
-	exit 1
-    fi
 
     ## GTKLIB
     if [ -d /usr/lib/gtk-2.0 ]; then
@@ -338,8 +336,6 @@ else
 fi
 
 
-
-cp -R $GTKETC/* $Etc
 echo "Copying all Pango modules ..."
 cp -R $PANGOLIB/modules/*.so $Modules
 echo "Copying all GDK Pixbuf loaders ..."
@@ -429,6 +425,8 @@ echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 while [ true ] ; do 
     missing=false
     filelist=`find $APPLIB/ -type f`
+	filelist="$APPBIN/$MAIN_EXECUTABLE $filelist"
+
     for file in $filelist  ; do 
 	if ! file $file | grep -qs ELF ; then
 	    continue
