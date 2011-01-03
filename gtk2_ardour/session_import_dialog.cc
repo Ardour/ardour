@@ -36,6 +36,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 SessionImportDialog::SessionImportDialog (ARDOUR::Session* target) :
   ArdourDialog (_("Import From Session")),
@@ -105,7 +106,7 @@ SessionImportDialog::load_session (const string& filename)
 {
 	if (_session) {
 		if (tree.read (filename)) {
-                        error << string_compose (_("Cannot load XML for session from %1", filename)) << endmsg;
+                        error << string_compose (_("Cannot load XML for session from %1"), filename) << endmsg;
                         return;
                 }
 		boost::shared_ptr<AudioRegionImportHandler> region_handler (new AudioRegionImportHandler (tree, *_session));
