@@ -78,7 +78,6 @@ StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost
         position_control->Changed.connect (connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
         width_control->Changed.connect (connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
 
-        set_tooltip ();
         set_flags (Gtk::CAN_FOCUS);
 
         add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|
@@ -93,21 +92,6 @@ StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost
 StereoPanner::~StereoPanner ()
 {
         delete drag_data_window;
-}
-
-void
-StereoPanner::set_tooltip ()
-{
-        Gtkmm2ext::UI::instance()->set_tip (this, 
-                                            string_compose (_("0 -> set width to zero (mono)\n%1-uparrow -> set width to 100\n%1-downarrow -> set width to -100"), 
-                                                            
-                                                            Keyboard::secondary_modifier_name()).c_str());
-}
-
-void
-StereoPanner::unset_tooltip ()
-{
-        Gtkmm2ext::UI::instance()->set_tip (this, "");
 }
 
 void
@@ -437,8 +421,6 @@ StereoPanner::on_button_release_event (GdkEventButton* ev)
                 width_control->set_value (1.0);
         }
 
-        set_tooltip ();
-
         return true;
 }
 
@@ -507,7 +489,6 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
                 /* move the window a little away from the mouse */
                 drag_data_window->move (ev->x_root+30, ev->y_root+30);
                 drag_data_window->present ();
-                unset_tooltip ();
         }
 
         int w = get_width();

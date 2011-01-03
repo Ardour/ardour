@@ -69,8 +69,6 @@ class StereoPanner : public Gtk::DrawingArea
 
         void value_change ();
         void set_drag_data ();
-        void set_tooltip ();
-        void unset_tooltip ();
 
         struct ColorScheme { 
             uint32_t outline;
