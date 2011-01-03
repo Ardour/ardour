@@ -265,6 +265,7 @@ Editor::Editor ()
 	, automation_mode_button (_("mode"))
 	, global_automation_button (_("automation"))
 
+	, _toolbar_viewport (*manage (new Gtk::Adjustment (0, 0, 1e10)), *manage (new Gtk::Adjustment (0, 0, 1e10)))
 	, midi_panic_button (_("Panic"))
 
 #ifdef WITH_CMT
@@ -2860,11 +2861,13 @@ Editor::setup_toolbar ()
 	toolbar_base.set_name ("ToolBarBase");
 	toolbar_base.add (toolbar_hbox);
 
-	_toolbar_trimmer.add (toolbar_base);
+	_toolbar_viewport.add (toolbar_base);
+	/* stick to the required height but allow width to vary if there's not enough room */
+	_toolbar_viewport.set_size_request (1, -1);
 
 	toolbar_frame.set_shadow_type (SHADOW_OUT);
 	toolbar_frame.set_name ("BaseFrame");
-	toolbar_frame.add (_toolbar_trimmer);
+	toolbar_frame.add (_toolbar_viewport);
         
         DPIReset.connect (sigc::mem_fun (*this, &Editor::resize_text_widgets));
 }

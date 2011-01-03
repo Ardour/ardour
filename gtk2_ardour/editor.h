@@ -42,7 +42,6 @@
 #include "gtkmm2ext/selector.h"
 #include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/dndtreeview.h"
-#include "gtkmm2ext/trimming_bin.h"
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
@@ -1589,7 +1588,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::HBox                toolbar_hbox;
 	Gtk::EventBox            toolbar_base;
 	Gtk::Frame               toolbar_frame;
-	Gtkmm2ext::TrimmingBin  _toolbar_trimmer;
+	Gtk::Viewport           _toolbar_viewport;
 	
 	/* midi toolbar */
 
