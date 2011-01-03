@@ -169,12 +169,12 @@ This mode provides many different operations on both regions and control points,
 
 ;; MIDDLE ROW
 
-@aep|Editor/align-regions-sync-relative|a|align sync points (relative)
+@aep|Region/align-regions-sync-relative|a|align sync points (relative)
 @select|Editor/select-all|<@PRIMARY@>a|select everything
-@aep|Editor/align-regions-end|<@SECONDARY@>a|align end(s)
-@aep|Editor/align-regions-sync|<@TERTIARY@>a|align sync points
-@aep|Editor/align-regions-start|<@PRIMARY@><@LEVEL4@>a|align start(s)
-@aep|Editor/align-regions-start-relative|<@LEVEL4@>a|align start(s) relative
+@aep|Region/align-regions-end|<@SECONDARY@>a|align end(s)
+@aep|Region/align-regions-sync|<@TERTIARY@>a|align sync points
+@aep|Region/align-regions-start|<@PRIMARY@><@LEVEL4@>a|align start(s)
+@aep|Region/align-regions-start-relative|<@LEVEL4@>a|align start(s) relative
 @rop|Region/split-region|s|split
 @sess|Common/Save|<@PRIMARY@>s|save session
 @sess|Main/Snapshot|<@PRIMARY@><@TERTIARY@>s|snapshot session
