@@ -1308,13 +1308,21 @@ RCOptionEditor::RCOptionEditor ()
 			    ));
 
 	add_option (_("MIDI control"),
+		    new SpinOption<int> (
+			    "mtc-qf-speed-tolerance",
+			    _("Percentage either side of normal transport speed to transmit MTC"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mtc_qf_speed_tolerance),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mtc_qf_speed_tolerance),
+			    0, 20, 1, 5
+			    ));
+
+	add_option (_("MIDI control"),
 		    new BoolOption (
 			    "mmc-control",
 			    _("Obey MIDI Machine Control commands"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_control),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
 			    ));
-
 
 	add_option (_("MIDI control"),
 		    new BoolOption (

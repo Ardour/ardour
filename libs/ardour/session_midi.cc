@@ -360,7 +360,7 @@ Session::send_full_time_code (framepos_t const t)
 
 	_send_timecode_update = false;
 
-	if (!session_send_mtc || _slave) {
+	if (!Config->get_send_mtc() || _slave) {
 		return 0;
 	}
 
@@ -413,7 +413,7 @@ Session::send_full_time_code (framepos_t const t)
 int
 Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
 {
-	if (_slave || !session_send_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
+	if (_slave || !_send_qf_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
 		// cerr << "(MTC) Not sending MTC\n";
 		return 0;
 	}
@@ -462,7 +462,6 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 		}
 
 		const framepos_t msg_time = outbound_mtc_timecode_frame	+ (quarter_frame_duration * next_quarter_frame_to_send);
-		cout << "  " << msg_time << "\n";
 
 		// This message must fall within this block or something is broken
 		assert (msg_time >= start_frame);

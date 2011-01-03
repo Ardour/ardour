@@ -35,6 +35,7 @@ CONFIG_VARIABLE (bool, midi_feedback, "midi-feedback", false)
 CONFIG_VARIABLE (uint8_t, mmc_receive_device_id, "mmc-receive-device-id", 0x7f)
 CONFIG_VARIABLE (uint8_t, mmc_send_device_id, "mmc-send-device-id", 0)
 CONFIG_VARIABLE (int32_t, initial_program_change, "initial-program-change", -1)
+CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc_qf_speed_tolerance", 5)
 
 /* control surfaces */
 

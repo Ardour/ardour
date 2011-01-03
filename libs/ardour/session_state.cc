@@ -206,7 +206,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading);
 	_was_seamless = Config->get_seamless_loop ();
 	_slave = 0;
-	session_send_mtc = false;
+	_send_qf_mtc = false;
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);
 	_play_range = false;
@@ -3358,8 +3358,7 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "send-mtc") {
 
-		session_send_mtc = Config->get_send_mtc();
-		if (session_send_mtc) {
+		if (Config->get_send_mtc ()) {
 			/* mark us ready to send */
 			next_quarter_frame_to_send = 0;
 		}

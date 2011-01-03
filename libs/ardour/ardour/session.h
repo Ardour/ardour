@@ -959,7 +959,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::string             _path;
 	std::string             _name;
 	bool                    _is_new;
-	bool                     session_send_mtc;
+	bool                    _send_qf_mtc;
 	bool                     session_midi_feedback;
 	bool                     play_loop;
 	bool                     loop_changing;

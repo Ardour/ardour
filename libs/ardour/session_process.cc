@@ -265,9 +265,27 @@ Session::process_with_events (pframes_t nframes)
 		process_event (ev);
 	}
 
-	/* Events caused a transport change, send an MTC Full Frame (Timecode) message.
-	 * This is sent whether rolling or not, to give slaves an idea of ardour time
-	 * on locates (and allow slow slaves to position and prepare for rolling)
+	/* Decide on what to do with quarter-frame MTC during this cycle */
+
+	bool const was_sending_qf_mtc = _send_qf_mtc;
+	double const tolerance = Config->get_mtc_qf_speed_tolerance() / 100.0;
+
+	_send_qf_mtc = (
+		Config->get_send_mtc () &&
+		_transport_speed >= (1 - tolerance) &&
+		_transport_speed <= (1 + tolerance)
+		);
+
+	if (_send_qf_mtc && !was_sending_qf_mtc) {
+		/* we will re-start quarter-frame MTC this cycle, so send a full update to set things up */
+		_send_timecode_update = true;
+	}
+	
+	/* Events caused a transport change (or we re-started sending
+	 * MTC), so send an MTC Full Frame (Timecode) message.  This
+	 * is sent whether rolling or not, to give slaves an idea of
+	 * ardour time on locates (and allow slow slaves to position
+	 * and prepare for rolling)
 	 */
 	if (_send_timecode_update) {
 		send_full_time_code (_transport_frame);
