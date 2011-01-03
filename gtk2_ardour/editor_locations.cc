@@ -28,18 +28,20 @@ using namespace Gtk;
 EditorLocations::EditorLocations (Editor* e)
 	: EditorComponent (e)
 {
-	locations = new LocationUI;
+	_locations = new LocationUI;
+	_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
+	_scroller.add (*_locations);
 }
 
 void
 EditorLocations::set_session (ARDOUR::Session* s)
 {
 	SessionHandlePtr::set_session (s);
-	locations->set_session (s);
+	_locations->set_session (s);
 }
 
 Widget&
 EditorLocations::widget() 
 {
-	return *locations;
+	return _scroller;
 }
