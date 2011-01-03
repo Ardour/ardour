@@ -1041,6 +1041,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_waveforms_while_recording)
 		     ));
 
+	add_option (_("Editor"),
+		    new BoolOption (
+			    "show-zoom-tools",
+			    _("Show zoom toolbar"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_zoom_tools),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_zoom_tools)
+			    ));
+
 	/* AUDIO */
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Buffering")));

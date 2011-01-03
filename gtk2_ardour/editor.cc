@@ -810,16 +810,14 @@ Editor::set_entered_track (TimeAxisView* tav)
 void
 Editor::show_window ()
 {
-	if (! is_visible ()) {
+	if (!is_visible ()) {
 		show_all ();
 
-		/* re-hide editor list if necessary */
+		/* re-hide stuff if necessary */
 		editor_list_button_toggled ();
-
-		/* re-hide summary widget if necessary */
 		parameter_changed ("show-summary");
-
 		parameter_changed ("show-edit-group-tabs");
+		parameter_changed ("show-zoom-tools");
 
 		/* now reset all audio_time_axis heights, because widgets might need
 		   to be re-hidden
@@ -3969,7 +3967,9 @@ Editor::maximise_editing_space ()
 	if (Config->get_keep_tearoffs()) {
 		_mouse_mode_tearoff->set_visible (true);
 		_tools_tearoff->set_visible (true);
-		_zoom_tearoff->set_visible (true);
+		if (Config->get_show_zoom_tools ()) {
+			_zoom_tearoff->set_visible (true);
+		}
 	}
 
 }
@@ -3991,7 +3991,9 @@ Editor::restore_editing_space ()
 
 	_mouse_mode_tearoff->set_visible (true);
 	_tools_tearoff->set_visible (true);
-	_zoom_tearoff->set_visible (true);
+	if (Config->get_show_zoom_tools ()) {
+		_zoom_tearoff->set_visible (true);
+	}
 	post_maximal_editor_width = this->get_width();
 	post_maximal_editor_height = this->get_height();
 

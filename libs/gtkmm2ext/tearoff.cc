@@ -112,7 +112,7 @@ TearOff::set_can_be_torn_off (bool yn)
 }
 
 void
-TearOff::set_visible (bool yn)
+TearOff::set_visible (bool yn, bool force)
 {
 	/* don't change visibility if torn off */
 
@@ -120,7 +120,7 @@ TearOff::set_visible (bool yn)
 		return;
 	}
 
-	if (_visible != yn) {
+	if (_visible != yn || force) {
 		_visible = yn;
 		if (yn) {
 			show_all();

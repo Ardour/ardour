@@ -35,7 +35,7 @@ class TearOff : public Gtk::HBox
 	TearOff (Gtk::Widget& contents, bool allow_resize = false);
 	virtual ~TearOff ();
 
-	void set_visible (bool yn);
+	void set_visible (bool yn, bool force = false);
 	void set_can_be_torn_off (bool);
 	bool can_be_torn_off () const { return _can_be_torn_off; }
 

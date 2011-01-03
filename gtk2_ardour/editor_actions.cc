@@ -20,6 +20,8 @@
 #include <gio/gio.h>
 #include <gtk/gtkiconfactory.h>
 
+#include "gtkmm2ext/tearoff.h"
+
 #include "ardour/ardour.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
@@ -1243,6 +1245,8 @@ Editor::parameter_changed (std::string p)
 		}
 	} else if (p == "timecode-offset" || p == "timecode-offset-negative") {
 		update_just_timecode ();
+	} else if (p == "show-zoom-tools") {
+		_zoom_tearoff->set_visible (Config->get_show_zoom_tools(), true);
 	}
 }
 

@@ -157,3 +157,6 @@ CONFIG_VARIABLE (int32_t, processor_usage, "processor-usage", -1)
 CONFIG_VARIABLE (bool, denormal_protection, "denormal-protection", false)
 CONFIG_VARIABLE (DenormalModel, denormal_model, "denormal-model", DenormalNone)
 
+/* visibility of toolbar components */
+
+CONFIG_VARIABLE (bool, show_zoom_tools, "show-zoom-tools", true)
