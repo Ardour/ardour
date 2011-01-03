@@ -314,7 +314,7 @@ Session::process_with_events (pframes_t nframes)
 		}
 
 		if (!_exporting && !timecode_transmission_suspended()) {
-			send_midi_time_code_for_cycle (nframes);
+			send_midi_time_code_for_cycle (_transport_frame, end_frame, nframes);
 		}
 
 		if (actively_recording()) {
@@ -764,8 +764,16 @@ Session::process_without_events (pframes_t nframes)
 		return;
 	}
 
+	if (_transport_speed == 1.0) {
+		frames_moved = (framecnt_t) nframes;
+	} else {
+		interpolation.set_target_speed (fabs(_target_transport_speed));
+		interpolation.set_speed (fabs(_transport_speed));
+		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
+	}
+	
 	if (!_exporting && !timecode_transmission_suspended()) {
-		send_midi_time_code_for_cycle (nframes);
+		send_midi_time_code_for_cycle (_transport_frame, _transport_frame + frames_moved, nframes);
 	}
 
 	if (actively_recording()) {
@@ -788,14 +796,6 @@ Session::process_without_events (pframes_t nframes)
 	}
 
 	click (_transport_frame, nframes);
-
-	if (_transport_speed == 1.0) {
-		frames_moved = (framecnt_t) nframes;
-	} else {
-		interpolation.set_target_speed (fabs(_target_transport_speed));
-		interpolation.set_speed (fabs(_transport_speed));
-		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
-	}
 
 	if (process_routes (nframes, session_needs_butler)) {
 		fail_roll (nframes);

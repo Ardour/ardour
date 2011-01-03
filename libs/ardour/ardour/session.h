@@ -1137,7 +1137,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	bool _send_timecode_update; ///< Flag to send a full frame (Timecode) MTC message this cycle
 
-	int send_midi_time_code_for_cycle (pframes_t nframes);
+	int send_midi_time_code_for_cycle (framepos_t, framepos_t, pframes_t nframes);
 
 	void reset_record_status ();
 

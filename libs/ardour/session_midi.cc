@@ -411,7 +411,7 @@ Session::send_full_time_code (framepos_t const t)
  * earlier already this cycle by send_full_time_code)
  */
 int
-Session::send_midi_time_code_for_cycle (pframes_t nframes)
+Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
 {
 	if (_slave || !session_send_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
 		// cerr << "(MTC) Not sending MTC\n";
@@ -422,57 +422,55 @@ Session::send_midi_time_code_for_cycle (pframes_t nframes)
 	assert (next_quarter_frame_to_send <= 7);
 
 	/* Duration of one quarter frame */
-	framecnt_t quarter_frame_duration = ((framecnt_t) _frames_per_timecode_frame) >> 2;
+	framecnt_t const quarter_frame_duration = ((framecnt_t) _frames_per_timecode_frame) >> 2;
 
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("TF %1 SF %2 NQ %3 FD %4\n",  _transport_frame, outbound_mtc_timecode_frame,
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("TF %1 SF %2 NQ %3 FD %4\n", start_frame, outbound_mtc_timecode_frame,
 						 next_quarter_frame_to_send, quarter_frame_duration));
 
-	assert((outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration))
-			>= _transport_frame);
+	assert ((outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration)) >= _transport_frame);
 
-
-	// Send quarter frames for this cycle
-	while (_transport_frame + nframes > (outbound_mtc_timecode_frame +
-				(next_quarter_frame_to_send * quarter_frame_duration))) {
+	/* Send quarter frames for this cycle */
+	while (end_frame > (outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration))) {
 
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("next frame to send: %1\n", next_quarter_frame_to_send));
 
 		switch (next_quarter_frame_to_send) {
 			case 0:
-				mtc_msg[1] =  0x00 | (transmitting_timecode_time.frames & 0xf);
+				mtc_msg[1] = 0x00 | (transmitting_timecode_time.frames & 0xf);
 				break;
 			case 1:
-				mtc_msg[1] =  0x10 | ((transmitting_timecode_time.frames & 0xf0) >> 4);
+				mtc_msg[1] = 0x10 | ((transmitting_timecode_time.frames & 0xf0) >> 4);
 				break;
 			case 2:
-				mtc_msg[1] =  0x20 | (transmitting_timecode_time.seconds & 0xf);
+				mtc_msg[1] = 0x20 | (transmitting_timecode_time.seconds & 0xf);
 				break;
 			case 3:
-				mtc_msg[1] =  0x30 | ((transmitting_timecode_time.seconds & 0xf0) >> 4);
+				mtc_msg[1] = 0x30 | ((transmitting_timecode_time.seconds & 0xf0) >> 4);
 				break;
 			case 4:
-				mtc_msg[1] =  0x40 | (transmitting_timecode_time.minutes & 0xf);
+				mtc_msg[1] = 0x40 | (transmitting_timecode_time.minutes & 0xf);
 				break;
 			case 5:
 				mtc_msg[1] = 0x50 | ((transmitting_timecode_time.minutes & 0xf0) >> 4);
 				break;
 			case 6:
-				mtc_msg[1] = 0x60 | ((mtc_timecode_bits|transmitting_timecode_time.hours) & 0xf);
+				mtc_msg[1] = 0x60 | ((mtc_timecode_bits | transmitting_timecode_time.hours) & 0xf);
 				break;
 			case 7:
-				mtc_msg[1] = 0x70 | (((mtc_timecode_bits|transmitting_timecode_time.hours) & 0xf0) >> 4);
+				mtc_msg[1] = 0x70 | (((mtc_timecode_bits | transmitting_timecode_time.hours) & 0xf0) >> 4);
 				break;
 		}
 
-		const framepos_t msg_time = (outbound_mtc_timecode_frame
-			+ (quarter_frame_duration * next_quarter_frame_to_send));
+		const framepos_t msg_time = outbound_mtc_timecode_frame	+ (quarter_frame_duration * next_quarter_frame_to_send);
+		cout << "  " << msg_time << "\n";
 
 		// This message must fall within this block or something is broken
-		assert(msg_time >= _transport_frame);
-		assert(msg_time < _transport_frame + nframes);
+		assert (msg_time >= start_frame);
+		assert (msg_time < end_frame);
 
-		framepos_t out_stamp = msg_time - _transport_frame;
-		assert(out_stamp < nframes);
+		/* convert from session frames back to JACK frames using the transport speed */
+		pframes_t const out_stamp = (msg_time - start_frame) / _transport_speed;
+		assert (out_stamp < nframes);
 
 		if (MIDI::Manager::instance()->mtc_output_port()->midimsg (mtc_msg, 2, out_stamp)) {
 			error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno))
@@ -495,8 +493,8 @@ Session::send_midi_time_code_for_cycle (pframes_t nframes)
 			// Wrap quarter frame counter
 			next_quarter_frame_to_send = 0;
 			// Increment timecode time twice
-			Timecode::increment( transmitting_timecode_time, config.get_subframes_per_frame() );
-			Timecode::increment( transmitting_timecode_time, config.get_subframes_per_frame() );
+			Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
+			Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
 			// Re-calculate timing of first quarter frame
 			//timecode_to_sample( transmitting_timecode_time, outbound_mtc_timecode_frame, true /* use_offset */, false );
 			outbound_mtc_timecode_frame += 8 * quarter_frame_duration;
