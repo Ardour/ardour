@@ -756,52 +756,44 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 
 	bool is_start;
 	Location * loc = find_location_from_marker (marker, is_start);
-	if (loc == transport_loop_location() || loc == transport_punch_location()) {
+
+	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range ()) {
+
 		if (transport_marker_menu == 0) {
 			build_range_marker_menu (true);
 		}
+		
 		marker_menu_item = item;
 		transport_marker_menu->popup (1, ev->time);
-	} else {
 
-		if (loc->is_mark()) {
-			Menu *markerMenu;
-			if (loc->is_session_range ()) {
-				delete session_range_marker_menu;
-				build_marker_menu (true, loc);
-				markerMenu = session_range_marker_menu;
-			} else {
-				delete marker_menu;
-				build_marker_menu (false, loc);
-				markerMenu = marker_menu;
-			}
-
+	} else if (loc->is_mark()) {
+		
+			delete marker_menu;
+			build_marker_menu (loc);
 
 		// GTK2FIX use action group sensitivity
 #ifdef GTK2FIX
-		if (children.size() >= 3) {
-			MenuItem * loopitem = &children[2];
-			if (loopitem) {
-				if (loc->is_mark()) {
-					loopitem->set_sensitive(false);
-				}
-				else {
-					loopitem->set_sensitive(true);
+			if (children.size() >= 3) {
+				MenuItem * loopitem = &children[2];
+				if (loopitem) {
+					if (loc->is_mark()) {
+						loopitem->set_sensitive(false);
+					}
+					else {
+						loopitem->set_sensitive(true);
+					}
 				}
 			}
-		}
 #endif
-		marker_menu_item = item;
-		markerMenu->popup (1, ev->time);
+			marker_menu_item = item;
+			marker_menu->popup (1, ev->time);
+			
+	} else if (loc->is_range_marker()) {
+		if (range_marker_menu == 0) {
+			build_range_marker_menu (false);
 		}
-
-	        if (loc->is_range_marker()) {
-		       if (range_marker_menu == 0){
-			      build_range_marker_menu (false);
-		       }
-		       marker_menu_item = item;
-		       range_marker_menu->popup (1, ev->time);
-	        }
+		marker_menu_item = item;
+		range_marker_menu->popup (1, ev->time);
 	}
 }
 
@@ -827,18 +819,13 @@ Editor::transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item*)
 }
 
 void
-Editor::build_marker_menu (bool session_range, Location* loc)
+Editor::build_marker_menu (Location* loc)
 {
 	using namespace Menu_Helpers;
 
-	Menu *markerMenu = new Menu;
-	if (session_range) {
-		session_range_marker_menu = markerMenu;
-	} else {
-		marker_menu = markerMenu;
-	}
-	MenuList& items = markerMenu->items();
-	markerMenu->set_name ("ArdourContextMenu");
+	marker_menu = new Menu;
+	MenuList& items = marker_menu->items();
+	marker_menu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Locate to Here"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
 	items.push_back (MenuElem (_("Play from Here"), sigc::mem_fun(*this, &Editor::marker_menu_play_from)));
@@ -849,9 +836,6 @@ Editor::build_marker_menu (bool session_range, Location* loc)
 	items.push_back (MenuElem (_("Create Range to Next Marker"), sigc::mem_fun(*this, &Editor::marker_menu_range_to_next)));
 
 	items.push_back (MenuElem (_("Hide"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
-	if (session_range) {
-		return;
-	}
 	items.push_back (MenuElem (_("Rename"), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
 
 	items.push_back (CheckMenuElem (_("Lock")));
@@ -874,12 +858,12 @@ Editor::build_marker_menu (bool session_range, Location* loc)
 }
 
 void
-Editor::build_range_marker_menu (bool loop_or_punch)
+Editor::build_range_marker_menu (bool loop_or_punch_or_session)
 {
 	using namespace Menu_Helpers;
 
 	Menu *markerMenu = new Menu;
-	if (loop_or_punch) {
+	if (loop_or_punch_or_session) {
 		transport_marker_menu = markerMenu;
 	} else {
 		range_marker_menu = markerMenu;
@@ -890,7 +874,7 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 	items.push_back (MenuElem (_("Play Range"), sigc::mem_fun(*this, &Editor::marker_menu_play_range)));
 	items.push_back (MenuElem (_("Locate to Range Mark"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
 	items.push_back (MenuElem (_("Play from Range Mark"), sigc::mem_fun(*this, &Editor::marker_menu_play_from)));
-	if (! loop_or_punch) {
+	if (!loop_or_punch_or_session) {
 		items.push_back (MenuElem (_("Loop Range"), sigc::mem_fun(*this, &Editor::marker_menu_loop_range)));
 	}
 	items.push_back (MenuElem (_("Set Range Mark from Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
@@ -902,7 +886,7 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 	items.push_back (MenuElem (_("Export Range"), sigc::mem_fun(*this, &Editor::export_range)));
 	items.push_back (SeparatorElem());
 
-	if (!loop_or_punch) {
+	if (!loop_or_punch_or_session) {
 		items.push_back (MenuElem (_("Hide Range"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
 		items.push_back (MenuElem (_("Rename Range"), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
 		items.push_back (MenuElem (_("Remove Range"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));

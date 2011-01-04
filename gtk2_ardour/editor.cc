@@ -339,7 +339,6 @@ Editor::Editor ()
 	editor_ruler_menu = 0;
 	no_ruler_shown_update = false;
 	marker_menu = 0;
-	session_range_marker_menu = 0;
 	range_marker_menu = 0;
 	marker_menu_item = 0;
 	tempo_or_meter_marker_menu = 0;
