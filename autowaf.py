@@ -41,7 +41,7 @@ def set_options(opt):
 	opt.tool_options('compiler_cxx')
 	opt.add_option('--debug', action='store_true', default=True, dest='debug',
 			help="Build debuggable binaries [Default: True]")
-	opt.add_option('--optimize', action='store_false', default=False, dest='debug',
+	opt.add_option('--optimize', action='store_false', default=True, dest='debug',
 			help="Build optimized binaries [Default: False]")
 	opt.add_option('--strict', action='store_true', default=False, dest='strict',
 			help="Use strict compiler flags and show all warnings [Default: False]")
