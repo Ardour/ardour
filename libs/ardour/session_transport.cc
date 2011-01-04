@@ -941,7 +941,6 @@ Session::set_transport_speed (float speed, bool abort, bool clear_state)
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if ((*i)->realtime_set_speed ((*i)->speed(), true)) {
 				todo = PostTransportWork (todo | PostTransportSpeed);
-				break;
 			}
 		}
 		
