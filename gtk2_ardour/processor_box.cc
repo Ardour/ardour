@@ -228,6 +228,7 @@ SendProcessorEntry::SendProcessorEntry (boost::shared_ptr<Send> s, Width w)
 	  _fader (_slider, &_adjustment, 0, false),
 	  _ignore_gain_change (false)
 {
+	_fader.set_name ("SendFader");
 	_fader.set_controllable (_send->amp()->gain_control ());
 	_vbox.pack_start (_fader);
 
@@ -310,6 +311,12 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	processor_display.Reordered.connect (sigc::mem_fun (*this, &ProcessorBox::reordered));
 	processor_display.DropFromAnotherBox.connect (sigc::mem_fun (*this, &ProcessorBox::object_drop));
 	processor_display.SelectionChanged.connect (sigc::mem_fun (*this, &ProcessorBox::selection_changed));
+
+	if (parent) {
+		parent->DeliveryChanged.connect (
+			_mixer_strip_connections, invalidator (*this), ui_bind (&ProcessorBox::mixer_strip_delivery_changed, this, _1), gui_context ()
+			);
+	}
 }
 
 ProcessorBox::~ProcessorBox ()
@@ -323,15 +330,23 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 		return;
 	}
 	
-	connections.drop_connections();
+	_route_connections.drop_connections();
 
 	/* new route: any existing block on processor redisplay must be meaningless */
 	no_processor_redisplay = false;
 	_route = r;
 
-	_route->processors_changed.connect (connections, invalidator (*this), ui_bind (&ProcessorBox::route_processors_changed, this, _1), gui_context());
-	_route->DropReferences.connect (connections, invalidator (*this), boost::bind (&ProcessorBox::route_going_away, this), gui_context());
-	_route->PropertyChanged.connect (connections, invalidator (*this), ui_bind (&ProcessorBox::route_property_changed, this, _1), gui_context());
+	_route->processors_changed.connect (
+		_route_connections, invalidator (*this), ui_bind (&ProcessorBox::route_processors_changed, this, _1), gui_context()
+		);
+	
+	_route->DropReferences.connect (
+		_route_connections, invalidator (*this), boost::bind (&ProcessorBox::route_going_away, this), gui_context()
+		);
+	
+	_route->PropertyChanged.connect (
+		_route_connections, invalidator (*this), ui_bind (&ProcessorBox::route_property_changed, this, _1), gui_context()
+		);
 
 	redisplay_processors ();
 }
@@ -2031,6 +2046,27 @@ ProcessorBox::set_processor_ui (boost::shared_ptr<Processor> p, Gtk::Window* w)
 	assert (false);
 }
 
+void
+ProcessorBox::mixer_strip_delivery_changed (boost::weak_ptr<Delivery> w)
+{
+	boost::shared_ptr<Delivery> d = w.lock ();
+	if (!d) {
+		return;
+	}
+
+	list<ProcessorEntry*> children = processor_display.children ();
+	list<ProcessorEntry*>::const_iterator i = children.begin();
+	while (i != children.end() && (*i)->processor() != d) {
+		++i;
+	}
+
+	if (i == children.end()) {
+		processor_display.set_active (0);
+	} else {
+		processor_display.set_active (*i);
+	}
+}
+
 ProcessorWindowProxy::ProcessorWindowProxy (
 	string const & name,
 	XMLNode const * node,
@@ -2056,3 +2092,4 @@ ProcessorWindowProxy::show ()
 
 	_processor_box->toggle_edit_processor (p);
 }
+

@@ -189,7 +189,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	MixerStrip*         _parent_strip; // null if in RouteParamsUI
 	bool                _owner_is_mixer;
 	bool                 ab_direction;
-	PBD::ScopedConnectionList connections;
+	PBD::ScopedConnectionList _mixer_strip_connections;
+	PBD::ScopedConnectionList _route_connections;
 
 	boost::function<PluginSelector*()> _get_plugin_selector;
 
@@ -321,6 +322,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	bool one_processor_can_be_edited ();
 	bool processor_can_be_edited (boost::shared_ptr<ARDOUR::Processor>);
+
+	void mixer_strip_delivery_changed (boost::weak_ptr<ARDOUR::Delivery>);
 };
 
 #endif /* __ardour_gtk_processor_box__ */

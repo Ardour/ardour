@@ -1717,13 +1717,20 @@ MixerStrip::drop_send ()
 }
 
 void
+MixerStrip::set_current_delivery (boost::shared_ptr<Delivery> d)
+{
+	_current_delivery = d;
+	DeliveryChanged (_current_delivery);
+}
+
+void
 MixerStrip::show_send (boost::shared_ptr<Send> send)
 {
 	assert (send != 0);
 
 	drop_send ();
 
-	_current_delivery = send;
+	set_current_delivery (send);
 
 	send->set_metering (true);
 	_current_delivery->DropReferences.connect (send_gone_connection, invalidator (*this), boost::bind (&MixerStrip::revert_to_default_display, this), gui_context());
@@ -1752,7 +1759,7 @@ MixerStrip::revert_to_default_display ()
 
 	drop_send ();
 
-	_current_delivery = _route->main_outs();
+	set_current_delivery (_route->main_outs ());
 
 	gain_meter().set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gain_meter().setup_meters ();

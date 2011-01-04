@@ -1141,6 +1141,13 @@ style "automation_track_controls_base"
 	bg[PRELIGHT] = { 0.22, 0.22, 0.29 }
 }
 
+# Fader used for sends in processor boxes
+style "send_fader"
+{
+	bg[NORMAL] = { 0.0, 0.0, 0.0 }
+	bg[ACTIVE] = { 0.0, 0.0, 0.0 }
+}
+
 # Plugin Editors
 style "plugin_slider" 
 {
@@ -1216,13 +1223,13 @@ style "processor_list_display"
 
 	font_name = "@FONT_SMALLER@"
 	bg[NORMAL] = { 0, 0, 0 }
+	# A selected processor
+	bg[SELECTED] = { 0, 0.5, 0.9 }
+	# A send processor whose level is being controlled by the fader
+	bg[ACTIVE] = { 0.19, 0.97, 0.69 }
+	fg[ACTIVE] = { 0.0, 0.0, 0.0 }
 	GtkCheckButton::indicator-size = 10
 	GtkCheckButton::indicator-spacing = 0
-}
-
-style "inspector_processor_list_display" = "processor_list_display"
-{
- 	base[SELECTED] = { 0.3, 0.3, 0.3 }
 }
 
 # MixerPanZone:
@@ -1776,8 +1783,6 @@ widget "*ConnectionEditorNotebook" style:highest "io_selector_notebook"
 widget "*ConnectionEditorNotebookTab" style:highest "io_selector_notebook"
 widget "*ConnectionEditorFrame" style:highest "base_frame"
 widget "*RouteParamsListDisplay" style:highest "inspector_track_list_display"
-widget "*RouteParamsPreListDisplay" style:highest "inspector_processor_list_display"
-widget "*RouteParamsPostListDisplay" style:highest "inspector_processor_list_display"
 widget "*TearOffArrow" style:highest "tearoff_arrow"
 widget "*RouteParamsTitleButton" style:highest "medium_text"
 widget "*RouteParamsTitleLabel" style:highest "medium_text"
@@ -1869,3 +1874,4 @@ widget "*SoloLEDLabel" style:highest "very_small_text"
 
 widget "*RouteNameEditorEntry" style:highest "text_cell_entry"
 widget "*RegionNameEditorEntry" style:highest "text_cell_entry"
+widget "*SendFader*" style:highest "send_fader"

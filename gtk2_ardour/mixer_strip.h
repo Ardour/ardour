@@ -103,7 +103,10 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 		return _mixer_owned;
 	}
 
-	sigc::signal<void>      WidthChanged;
+	sigc::signal<void> WidthChanged;
+
+	/** The delivery that we are handling the level for with our fader has changed */
+	PBD::Signal1<void, boost::weak_ptr<ARDOUR::Delivery> > DeliveryChanged;
 
 	static sigc::signal<void,boost::shared_ptr<ARDOUR::Route> > SwitchIO;
 	static PBD::Signal1<void,MixerStrip*> CatchDeletion;
@@ -265,7 +268,10 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void engine_stopped();
 
 	void switch_io (boost::shared_ptr<ARDOUR::Route>);
+	
+	void set_current_delivery (boost::shared_ptr<ARDOUR::Delivery>);
 	boost::shared_ptr<ARDOUR::Delivery> _current_delivery;
+	
 	void revert_to_default_display ();
 
 	void drop_send ();

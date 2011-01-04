@@ -42,7 +42,7 @@ template <class T>
 class DnDVBox : public Gtk::EventBox
 {
 public:
-	DnDVBox () : _drag_icon (0), _expecting_unwanted_button_event (false), _drag_placeholder (0)
+	DnDVBox () : _active (0), _drag_icon (0), _expecting_unwanted_button_event (false), _drag_placeholder (0)
 	{
 		_targets.push_back (Gtk::TargetEntry ("processor"));
 
@@ -105,6 +105,21 @@ public:
 	/** @return Selected children */
 	std::list<T*> selection () const {
 		return _selection;
+	}
+
+	/** Set the `active' child; this is simply a child which is set to have the Gtk
+	 *  STATE_ACTIVE for whatever purposes the client may have.
+	 *  @param c Child, or 0 for none.
+	 */
+	void set_active (T* c) {
+		T* old_active = _active;
+		_active = c;
+		if (old_active) {
+			setup_child_state (old_active);
+		}
+		if (_active) {
+			setup_child_state (_active);
+		}
 	}
 
 	/** @param Child
@@ -468,27 +483,41 @@ private:
 		return ButtonRelease (ev, child); /* EMIT SIGNAL */
 	}
 
+	/** Setup a child's GTK state correctly */
+	void setup_child_state (T* c)
+	{
+		assert (c);
+		
+		if (c == _active) {
+			c->action_widget().set_state (Gtk::STATE_ACTIVE);
+		} else if (selected (c)) {
+			c->action_widget().set_state (Gtk::STATE_SELECTED);
+		} else {
+			c->action_widget().set_state (Gtk::STATE_NORMAL);
+		}
+	}
+
 	void clear_selection ()
 	{
-		for (typename std::list<T*>::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-			(*i)->action_widget().set_state (Gtk::STATE_NORMAL);
-		}
+		std::list<T*> old_selection = _selection;
 		_selection.clear ();
+		for (typename std::list<T*>::iterator i = old_selection.begin(); i != old_selection.end(); ++i) {
+			setup_child_state (*i);
+		}
 	}
 	
 	void add_to_selection (T* child)
 	{
-		child->action_widget().set_state (Gtk::STATE_SELECTED);
 		_selection.push_back (child);
+		setup_child_state (child);
 	}
-		
-	
+
 	void remove_from_selection (T* child)
 	{
 		typename std::list<T*>::iterator x = find (_selection.begin(), _selection.end(), child);
 		if (x != _selection.end()) {
-			child->action_widget().set_state (Gtk::STATE_NORMAL);
 			_selection.erase (x);
+			setup_child_state (*x);
 		}
 	}
 		
@@ -510,6 +539,7 @@ private:
 	std::list<Gtk::TargetEntry> _targets;
 	std::list<T*> _children;
 	std::list<T*> _selection;
+	T* _active;
 	Gtk::Window* _drag_icon;
 	bool _expecting_unwanted_button_event;
 	/** A blank label used as a placeholder to indicate where a dragged item would
