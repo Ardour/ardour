@@ -17,6 +17,14 @@
 
 */
 
+/*****************************************************
+    DO NOT USE uint8_t or any other type that resolves
+    to a single char, because the value will be
+    stored incorrectly when serialized. Use int32_t
+    instead and ensure that code correctly limits
+    the value of the variable.
+*****************************************************/
+
 /* IO connection */
 
 CONFIG_VARIABLE (bool, auto_connect_standard_busses, "auto-connect-standard-busses", true)
@@ -32,8 +40,8 @@ CONFIG_VARIABLE (bool, send_mmc, "send-mmc", true)
 CONFIG_VARIABLE (bool, send_midi_clock, "send-midi-clock", false)
 CONFIG_VARIABLE (bool, mmc_control, "mmc-control", true)
 CONFIG_VARIABLE (bool, midi_feedback, "midi-feedback", false)
-CONFIG_VARIABLE (uint8_t, mmc_receive_device_id, "mmc-receive-device-id", 0x7f)
-CONFIG_VARIABLE (uint8_t, mmc_send_device_id, "mmc-send-device-id", 0)
+CONFIG_VARIABLE (int32_t, mmc_receive_device_id, "mmc-receive-device-id", 0x7f)
+CONFIG_VARIABLE (int32_t, mmc_send_device_id, "mmc-send-device-id", 0)
 CONFIG_VARIABLE (int32_t, initial_program_change, "initial-program-change", -1)
 CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
 
