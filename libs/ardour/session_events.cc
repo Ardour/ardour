@@ -60,6 +60,7 @@ SessionEvent::operator new (size_t)
 {
 	CrossThreadPool* p = pool->per_thread_pool ();
 	SessionEvent* ev = static_cast<SessionEvent*> (p->alloc ());
+        cerr << "Allocating SessionEvent from " << p->name() << " ev @ " << ev << endl;
 	ev->own_pool = p;
 	return ev;
 }
@@ -70,6 +71,7 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 	Pool* p = pool->per_thread_pool ();
 	SessionEvent* ev = static_cast<SessionEvent*> (ptr);
 
+        cerr << "Deleting SessionEvent @ " << ev << " thread pool =  " << p->name() << " ev pool = " << ev->own_pool->name() << endl;
 	if (p == ev->own_pool) {
 		p->release (ptr);
 	} else {
