@@ -387,7 +387,7 @@ RouteGroup::audio_track_group (set<boost::shared_ptr<AudioTrack> >& ats)
 }
 
 void
-RouteGroup::make_subgroup ()
+RouteGroup::make_subgroup (bool aux, Placement placement)
 {
 	RouteList rl;
 	uint32_t nin = 0;
@@ -407,7 +407,7 @@ RouteGroup::make_subgroup ()
 
 	try {
 		/* use master bus etc. to determine default nouts */
-		rl = _session.new_audio_route (false, nin, 2, 0, 1);
+		rl = _session.new_audio_route (aux, nin, 2, 0, 1);
 	} catch (...) {
 		return;
 	}
@@ -415,11 +415,18 @@ RouteGroup::make_subgroup ()
 	subgroup_bus = rl.front();
 	subgroup_bus->set_name (_name);
 
-	boost::shared_ptr<Bundle> bundle = subgroup_bus->input()->bundle ();
+	if (aux) {
 
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		(*i)->output()->disconnect (this);
-		(*i)->output()->connect_ports_to_bundle (bundle, this);
+		_session.add_internal_sends (subgroup_bus, placement, routes);
+
+	} else {
+
+		boost::shared_ptr<Bundle> bundle = subgroup_bus->input()->bundle ();
+		
+		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+			(*i)->output()->disconnect (this);
+			(*i)->output()->connect_ports_to_bundle (bundle, this);
+		}
 	}
 }
 

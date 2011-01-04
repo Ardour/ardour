@@ -308,7 +308,9 @@ GroupTabs::get_menu (RouteGroup* g)
 	
 	if (g) {
 		items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::edit_group), g)));
-		items.push_back (MenuElem (_("Subgroup"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g)));
+		items.push_back (MenuElem (_("Subgroup using Direct Bus"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, false, PreFader)));
+		items.push_back (MenuElem (_("Subgroup using Aux Bus (pre-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PreFader)));
+		items.push_back (MenuElem (_("Subgroup using Aux Bus (post-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PostFader)));
 		items.push_back (MenuElem (_("Collect"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::collect), g)));
 		items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::remove_group), g)));
 	}
@@ -424,9 +426,9 @@ GroupTabs::edit_group (RouteGroup* g)
 }
 
 void
-GroupTabs::subgroup (RouteGroup* g)
+GroupTabs::subgroup (RouteGroup* g, bool aux, Placement placement)
 {
-	g->make_subgroup ();
+	g->make_subgroup (aux, placement);
 }
 
 struct CollectSorter {

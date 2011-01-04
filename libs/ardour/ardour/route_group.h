@@ -135,7 +135,7 @@ class RouteGroup : public SessionObject
 		changed();
 	}
 
-	void make_subgroup ();
+	void make_subgroup (bool, Placement);
 	void destroy_subgroup ();
 
 	boost::shared_ptr<RouteList> route_list() { return routes; }
