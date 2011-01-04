@@ -17,6 +17,14 @@
 
 */
 
+/*****************************************************
+    DO NOT USE uint8_t or any other type that resolves
+    to a single char, because the value will be
+    stored incorrectly when serialized. Use int32_t
+    instead and ensure that code correctly limits
+    the value of the variable.
+*****************************************************/
+
 CONFIG_VARIABLE (CrossfadeModel, xfade_model, "xfade-model", FullCrossfade)
 CONFIG_VARIABLE (bool, auto_xfade, "auto-xfade", true)
 CONFIG_VARIABLE (float, short_xfade_seconds, "short-xfade-seconds", 0.015)
