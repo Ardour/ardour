@@ -105,7 +105,13 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	_name.set_alignment (0, 0.5);
 	_name.set_text (name ());
 	_name.set_padding (2, 2);
-	
+
+	if (boost::dynamic_pointer_cast<Amp> (p)) {
+		/* Highlight the fader processor so that pre- and post-fader processors are more obvious */
+		_event_box.modify_bg (STATE_NORMAL, Gdk::Color ("#4f4f4f"));
+		_name.set_padding (2, 4);
+	}
+
 	_active.set_active (_processor->active ());
 	_active.signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::active_toggled));
 	
@@ -515,7 +521,6 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 
 		int x, y;
 		processor_display.get_pointer (x, y);
-		
 
 		pair<ProcessorEntry *, double> const pointer = processor_display.get_child_at_position (y);
 
