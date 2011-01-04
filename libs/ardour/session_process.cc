@@ -270,17 +270,29 @@ Session::process_with_events (pframes_t nframes)
 	bool const was_sending_qf_mtc = _send_qf_mtc;
 	double const tolerance = Config->get_mtc_qf_speed_tolerance() / 100.0;
 
-	_send_qf_mtc = (
-		Config->get_send_mtc () &&
-		_transport_speed >= (1 - tolerance) &&
-		_transport_speed <= (1 + tolerance)
-		);
-
-	if (_send_qf_mtc && !was_sending_qf_mtc) {
-		/* we will re-start quarter-frame MTC this cycle, so send a full update to set things up */
-		_send_timecode_update = true;
+	if (_transport_speed != 0) {
+		_send_qf_mtc = (
+			Config->get_send_mtc () &&
+			_transport_speed >= (1 - tolerance) &&
+			_transport_speed <= (1 + tolerance)
+			);
+		
+		if (_send_qf_mtc && !was_sending_qf_mtc) {
+			/* we will re-start quarter-frame MTC this cycle, so send a full update to set things up */
+			_send_timecode_update = true;
+		}
+		
+		if (Config->get_send_mtc() && !_send_qf_mtc && _pframes_since_last_mtc > (frame_rate () / 4)) {
+			/* we're sending MTC, but we're not sending QF MTC at the moment, and it's been
+			   a quarter of a second since we sent anything at all, so send a full MTC update
+			   this cycle.
+			*/
+			_send_timecode_update = true;
+		}
+		
+		_pframes_since_last_mtc += nframes;
 	}
-	
+		
 	/* Events caused a transport change (or we re-started sending
 	 * MTC), so send an MTC Full Frame (Timecode) message.  This
 	 * is sent whether rolling or not, to give slaves an idea of

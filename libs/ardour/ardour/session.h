@@ -960,6 +960,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::string             _name;
 	bool                    _is_new;
 	bool                    _send_qf_mtc;
+	/** Number of process frames since the last MTC output (when sending MTC); used to
+	 *  know when to send full MTC messages every so often.
+	 */
+	pframes_t               _pframes_since_last_mtc;
 	bool                     session_midi_feedback;
 	bool                     play_loop;
 	bool                     loop_changing;

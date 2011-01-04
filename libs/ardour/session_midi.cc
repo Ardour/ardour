@@ -400,6 +400,7 @@ Session::send_full_time_code (framepos_t const t)
 		return -1;
 	}
 
+	_pframes_since_last_mtc = 0;
 	return 0;
 }
 

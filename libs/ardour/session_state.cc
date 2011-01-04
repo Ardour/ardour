@@ -207,6 +207,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_was_seamless = Config->get_seamless_loop ();
 	_slave = 0;
 	_send_qf_mtc = false;
+	_pframes_since_last_mtc = 0;
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);
 	_play_range = false;
