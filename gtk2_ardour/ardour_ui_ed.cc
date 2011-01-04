@@ -522,7 +522,7 @@ ARDOUR_UI::build_menu_bar ()
 	disk_space_box.set_name ("WallClock");
 	disk_space_label.set_name ("WallClock");
 
-	set_size_request_to_display_given_text (cpu_load_label, _("DSP: 100%"), 2, 0);
+	set_size_request_to_display_given_text (cpu_load_label, _("DSP: 100.0%"), 2, 0);
 	cpu_load_box.add (cpu_load_label);
 	cpu_load_box.set_name ("CPULoad");
 	cpu_load_label.set_name ("CPULoad");
