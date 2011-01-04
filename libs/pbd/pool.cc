@@ -247,6 +247,7 @@ CrossThreadPool::alloc ()
 {
 	void* ptr;
 	while (pending.read (&ptr, 1) == 1) {
+                cerr << name() << " pushes back a pending free list entry before allocating\n";
 		free_list.write (&ptr, 1);
 	}
 	return Pool::alloc ();
