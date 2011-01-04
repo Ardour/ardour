@@ -152,6 +152,10 @@ public:
 	void set_state_from_config ();
 	void add_to_page (OptionEditorPage*);
 
+	void set_sensitive (bool yn) {
+		_button->set_sensitive (yn);
+	}
+	
 private:
 
 	void toggled ();
@@ -398,11 +402,12 @@ public:
 
 protected:
 
+	virtual void parameter_changed (std::string const &);
+	
 	ARDOUR::Configuration* _config;
 
 private:
 
-	void parameter_changed (std::string const &);
 	PBD::ScopedConnection config_connection;
 
 	Gtk::Notebook _notebook;

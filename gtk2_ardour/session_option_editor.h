@@ -30,7 +30,9 @@ public:
 	SessionOptionEditor (ARDOUR::Session* s);
 
 private:
+	void parameter_changed (std::string const &);
+	void populate_sync_options ();
+	
 	ARDOUR::SessionConfiguration* _session_config;
-	void populate_sync_options (ARDOUR::Session*, Option*);
-	void follow_sync_state (std::string, ARDOUR::Session*, Option*);
+	ComboOption<ARDOUR::SyncSource>* _sync_source;
 };

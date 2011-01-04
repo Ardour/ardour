@@ -1645,9 +1645,7 @@ RouteUI::parameter_changed (string const & p)
 {
 	if (p == "disable-disarm-during-roll") {
 		check_rec_enable_sensitivity ();
-	} else if (p == "solo-control-is-listen-control") {
-		set_button_names ();
-	} else if (p == "listen-position") {
+	} else if (p == "use-monitor-bus" || p == "solo-control-is-listen-control" || p == "listen-position") {
 		set_button_names ();
 	}
 }

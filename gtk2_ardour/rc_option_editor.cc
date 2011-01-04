@@ -1212,26 +1212,29 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_gain),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_gain)
 		     ));
-		     
-	add_option (_("Solo / mute"),
-	     new BoolOption (
-		     "solo-control-is-listen-control",
-		     _("Solo controls are Listen controls"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_control_is_listen_control),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
-		     ));
 
-	ComboOption<ListenPosition>* lp = new ComboOption<ListenPosition> (
+	_solo_control_is_listen_control = new BoolOption (
+		"solo-control-is-listen-control",
+		_("Solo controls are Listen controls"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_control_is_listen_control),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
+		);
+
+	add_option (_("Solo / mute"), _solo_control_is_listen_control);
+
+	_listen_position = new ComboOption<ListenPosition> (
 		"listen-position",
 		_("Listen Position"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_listen_position),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_listen_position)
 		);
 
-	lp->add (AfterFaderListen, _("after-fader listen"));
-	lp->add (PreFaderListen, _("pre-fader listen"));
+	_listen_position->add (AfterFaderListen, _("after-fader listen"));
+	_listen_position->add (PreFaderListen, _("pre-fader listen"));
 
-	add_option (_("Solo / mute"), lp);
+	add_option (_("Solo / mute"), _listen_position);
+
+	parameter_changed ("use-monitor-bus");
 
 	add_option (_("Solo / mute"),
 	     new BoolOption (
@@ -1389,4 +1392,18 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Keyboard"), new KeyboardOptions);
 }
 
-
+void
+RCOptionEditor::parameter_changed (string const & p)
+{
+	OptionEditor::parameter_changed (p);
+	
+	if (p == "use-monitor-bus") {
+		bool const s = Config->get_use_monitor_bus ();
+		if (!s) {
+			/* we can't use this if we don't have a monitor bus */
+			Config->set_solo_control_is_listen_control (false);
+		}
+		_solo_control_is_listen_control->set_sensitive (s);
+		_listen_position->set_sensitive (s);
+	}
+}

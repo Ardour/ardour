@@ -41,19 +41,17 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	/* TIMECODE*/
 
-	ComboOption<SyncSource>* ssrc = new ComboOption<SyncSource> (
+	_sync_source = new ComboOption<SyncSource> (
 		"sync-source",
 		_("External timecode source"),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_sync_source),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_sync_source)
 		);
 	
-	s->config.ParameterChanged.connect (_session_connections, invalidator (*this), ui_bind (&SessionOptionEditor::follow_sync_state, this, _1, s, ssrc), gui_context());
+	populate_sync_options ();
+	parameter_changed (string ("external-sync"));
 
-	populate_sync_options (s, ssrc);
-	follow_sync_state (string ("external-sync"), s, ssrc);
-
-	add_option (_("Timecode"), ssrc);
+	add_option (_("Timecode"), _sync_source);
 
 	add_option (_("Timecode"), new OptionEditorHeading (_("Timecode Settings")));
 
@@ -298,28 +296,23 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 }
 
 void
-SessionOptionEditor::populate_sync_options (Session* s, Option* opt)
+SessionOptionEditor::populate_sync_options ()
 {
-	ComboOption<SyncSource>* sync_opt = dynamic_cast<ComboOption<SyncSource>* > (opt);
+	vector<SyncSource> sync_opts = _session->get_available_sync_options ();
 
-	vector<SyncSource> sync_opts = s->get_available_sync_options ();
-
-	sync_opt->clear ();
+	_sync_source->clear ();
 
 	for (vector<SyncSource>::iterator i = sync_opts.begin(); i != sync_opts.end(); ++i) {
-		sync_opt->add (*i, sync_source_to_string (*i));
+		_sync_source->add (*i, sync_source_to_string (*i));
 	}
 }
 
 void
-SessionOptionEditor::follow_sync_state (std::string p, Session* s, Option* opt)
+SessionOptionEditor::parameter_changed (std::string const & p)
 {
-	ComboOption<SyncSource>* sync_opt = dynamic_cast<ComboOption<SyncSource>* > (opt);
+	OptionEditor::parameter_changed (p);
+	
 	if (p == "external-sync") {
-		if (s->config.get_external_sync()) {
-			sync_opt->set_sensitive (false);
-		} else {
-			sync_opt->set_sensitive (true);
-		}
+		_sync_source->set_sensitive (!_session->config.get_external_sync ());
 	}
 }
