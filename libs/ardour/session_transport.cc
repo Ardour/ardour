@@ -1030,7 +1030,6 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr && tr->realtime_set_speed (tr->speed(), true)) {
 				todo = PostTransportWork (todo | PostTransportSpeed);
-				break;
 			}
 		}
 
