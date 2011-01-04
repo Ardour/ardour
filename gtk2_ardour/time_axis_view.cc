@@ -372,8 +372,9 @@ TimeAxisView::hide ()
 	}
 
 	/* if its hidden, it cannot be selected */
-
 	_editor.get_selection().remove (this);
+	/* and neither can its regions */
+	_editor.get_selection().remove_regions (this);
 
 	Hiding ();
 }

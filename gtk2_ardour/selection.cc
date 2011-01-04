@@ -1163,3 +1163,19 @@ Selection::set_state (XMLNode const & node, int)
 
 	return 0;
 }
+
+void
+Selection::remove_regions (TimeAxisView* t)
+{
+	RegionSelection::iterator i = regions.begin();
+	while (i != regions.end ()) {
+		RegionSelection::iterator tmp = i;
+		++tmp;
+
+		if (&(*i)->get_time_axis_view() == t) {
+			remove (*i);
+		}
+
+		i = tmp;
+	}
+}

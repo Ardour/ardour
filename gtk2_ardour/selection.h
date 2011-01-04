@@ -174,6 +174,8 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void remove (const std::list<Selectable*>&);
 	void remove (Marker*);
 
+	void remove_regions (TimeAxisView *);
+
 	void replace (uint32_t time_index, framepos_t start, framepos_t end);
 
 	void clear_regions();
