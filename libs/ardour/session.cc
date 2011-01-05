@@ -1792,7 +1792,7 @@ Session::set_remote_control_ids ()
 
 /** Caller must not hold process lock */
 RouteList
-Session::new_audio_route (bool aux, int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many)
+Session::new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many)
 {
 	char bus_name[32];
 	uint32_t bus_id = 0;
@@ -1850,9 +1850,7 @@ Session::new_audio_route (bool aux, int input_channels, int output_channels, Rou
 			bus->set_remote_control_id (control_id);
 			++control_id;
 
-			if (aux) {
-				bus->add_internal_return ();
-			}
+			bus->add_internal_return ();
 
 			ret.push_back (bus);
 		}

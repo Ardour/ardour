@@ -415,7 +415,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		int input_channels, int output_channels, TrackMode mode = Normal, RouteGroup* route_group = 0, uint32_t how_many = 1
 		);
 
-	RouteList new_audio_route (bool aux, int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many);
+	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
 		TrackMode mode = Normal, RouteGroup* route_group = 0, uint32_t how_many = 1

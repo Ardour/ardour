@@ -51,15 +51,8 @@ static const char* track_mode_names[] = {
 	0
 };
 
-static const char* bus_mode_names[] = {
-	N_("Aux"),
-	N_("Direct"),
-	0
-};
-
 std::vector<std::string> AddRouteDialog::channel_combo_strings;
 std::vector<std::string> AddRouteDialog::track_mode_strings;
-std::vector<std::string> AddRouteDialog::bus_mode_strings;
 
 AddRouteDialog::AddRouteDialog (Session* s)
 	: ArdourDialog (_("Add Track or Bus"))
@@ -79,10 +72,6 @@ AddRouteDialog::AddRouteDialog (Session* s)
 				track_mode_strings.pop_back();
 			}
 		}
-	}
-
-	if (bus_mode_strings.empty()) {
-		bus_mode_strings = I18N (bus_mode_names);
 	}
 
 	set_name ("AddRouteDialog");
@@ -195,25 +184,17 @@ AddRouteDialog::track_type_chosen ()
 	if (track()) {
 		mode_label.set_text (_("Track mode:"));
 		set_popdown_strings (mode_combo, track_mode_strings);
+		mode_combo.set_sensitive (true);
 		mode_combo.set_active_text (track_mode_strings.front());
 	} else {
-		mode_label.set_text (_("Bus type:"));
-		set_popdown_strings (mode_combo, bus_mode_strings);
-		mode_combo.set_active_text (bus_mode_strings.front());
+		mode_combo.set_sensitive (false);
 	}
-
 }
 
 bool
 AddRouteDialog::track ()
 {
 	return track_bus_combo.get_active_row_number () == 0;
-}
-
-bool
-AddRouteDialog::aux ()
-{
-	return !track() && mode_combo.get_active_row_number () == 0;
 }
 
 ARDOUR::DataType

@@ -48,7 +48,6 @@ class AddRouteDialog : public ArdourDialog
 	bool track ();
 	int channels ();
 	int count ();
-	bool aux ();
 
 	std::string name_template ();
 	std::string track_template ();
