@@ -344,7 +344,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         void toggle_stationary_playhead ();
         bool stationary_playhead() const { return _stationary_playhead; }
         
-	void set_follow_playhead (bool yn);
+	void set_follow_playhead (bool yn, bool catch_up = true);
 	void toggle_follow_playhead ();
 	bool follow_playhead() const { return _follow_playhead; }
 	bool dragging_playhead () const { return _dragging_playhead; }

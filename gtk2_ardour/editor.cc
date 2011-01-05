@@ -3637,11 +3637,14 @@ Editor::toggle_follow_playhead ()
 	}
 }
 
+/** @param yn true to follow playhead, otherwise false.
+ *  @param catch_up true to reset the editor view to show the playhead (if yn == true), otherwise false.
+ */
 void
-Editor::set_follow_playhead (bool yn)
+Editor::set_follow_playhead (bool yn, bool catch_up)
 {
 	if (_follow_playhead != yn) {
-		if ((_follow_playhead = yn) == true) {
+		if ((_follow_playhead = yn) == true && catch_up) {
 			/* catch up */
 			reset_x_origin_to_follow_playhead ();
 		}

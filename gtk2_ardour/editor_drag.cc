@@ -91,6 +91,8 @@ DragManager::abort ()
 
 	_drags.clear ();
 
+	_editor->set_follow_playhead (_old_follow_playhead);
+	
 	_ending = false;
 }
 
@@ -112,6 +114,10 @@ DragManager::set (Drag* d, GdkEvent* e, Gdk::Cursor* c)
 void
 DragManager::start_grab (GdkEvent* e, Gdk::Cursor* c)
 {
+	/* Prevent follow playhead during the drag to be nice to the user */
+	_old_follow_playhead = _editor->follow_playhead ();
+	_editor->set_follow_playhead (false);
+		
 	_current_pointer_frame = _editor->event_frame (e, &_current_pointer_x, &_current_pointer_y);
 	
 	for (list<Drag*>::const_iterator i = _drags.begin(); i != _drags.end(); ++i) {
@@ -139,6 +145,8 @@ DragManager::end_grab (GdkEvent* e)
 	_drags.clear ();
 
 	_ending = false;
+
+	_editor->set_follow_playhead (_old_follow_playhead, false);
 	
 	return r;
 }

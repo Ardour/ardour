@@ -100,6 +100,7 @@ private:
 	double _current_pointer_x; ///< trackview x of the current pointer
 	double _current_pointer_y; ///< trackview y of the current pointer
 	ARDOUR::framepos_t _current_pointer_frame; ///< frame that the pointer is now at
+	bool _old_follow_playhead; ///< state of Editor::follow_playhead() before the drags started
 };
 
 /** Abstract base class for dragging of things within the editor */

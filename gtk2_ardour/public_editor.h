@@ -238,8 +238,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	/** Set whether the editor should follow the playhead.
 	 * @param yn true to follow playhead, otherwise false.
+	 * @param catch_up true to reset the editor view to show the playhead (if yn == true), otherwise false.
 	 */
-	virtual void set_follow_playhead (bool yn) = 0;
+	virtual void set_follow_playhead (bool yn, bool catch_up = false) = 0;
 
 	/** Toggle whether the editor is following the playhead */
 	virtual void toggle_follow_playhead () = 0;
