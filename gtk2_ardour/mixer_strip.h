@@ -98,6 +98,14 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void set_button_names ();
 	void show_send (boost::shared_ptr<ARDOUR::Send>);
+	void revert_to_default_display ();
+
+	/** @return the delivery that is being edited using our fader; it will be the
+	 *  last send passed to ::show_send, or our route's main out delivery.
+	 */
+	boost::shared_ptr<ARDOUR::Delivery> current_delivery () const {
+		return _current_delivery;
+	}
 
 	bool mixer_owned () const {
 		return _mixer_owned;
@@ -272,8 +280,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void set_current_delivery (boost::shared_ptr<ARDOUR::Delivery>);
 	boost::shared_ptr<ARDOUR::Delivery> _current_delivery;
 	
-	void revert_to_default_display ();
-
 	void drop_send ();
 	PBD::ScopedConnection send_gone_connection;
 
