@@ -2631,7 +2631,7 @@ Session::find_current_end ()
 
 	nframes_t max = get_maximum_extent ();
 
-	if (max > end_location->end()) {
+	if ( (max > end_location->end() ) && _end_location_is_free ) {
 		end_location->set_end (max);
 		set_dirty();
 		DurationChanged(); /* EMIT SIGNAL */
