@@ -34,9 +34,10 @@
 #include <gtkmm/textview.h>
 #include <gtkmm/adjustment.h>
 
-#include <gtkmm2ext/auto_spin.h>
-#include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/slider_controller.h>
+#include "gtkmm2ext/auto_spin.h"
+#include "gtkmm2ext/click_box.h"
+#include "gtkmm2ext/slider_controller.h"
+#include "gtkmm2ext/bindable_button.h"
 
 #include "pbd/stateful.h"
 
@@ -160,7 +161,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	ProcessorBox processor_box;
 	GainMeter   gpm;
 	PannerUI    panners;
-	Gtk::ToggleButton _mono_button;
+	BindableToggleButton _mono_button;
 
 	Gtk::Table button_table;
         Gtk::Table solo_led_table;

@@ -418,8 +418,11 @@ style "solo_button_active" = "small_button"
 	fg[PRELIGHT] = { 0, 0, 0 }
 }
 
-style "mixer_invert_button" = "small_button"
+style "mixer_toggle_button" = "small_button"
 {
+	font_name = "@FONT_SMALLER@"
+	ythickness = 0
+	xthickness = 0
 	bg[ACTIVE] = { 1.0, 0.749, 0.247 }
 	fg[ACTIVE] = { 0, 0, 0 }
 }
@@ -1550,8 +1553,8 @@ widget "*MixerSoloButton-active" style:highest "mixer_solo_button_active"
 widget "*TrackLoopButton*" style:highest "track_loop_button"
 widget "*PanAutomationLineSelector*" style:highest "multiline_combo"
 widget "*EditorTimeButton*" style:highest "time_button"
-widget "*MixerInvertButton*" style:highest "mixer_invert_button"
-widget "*MixerInvertButton.*" style:highest "mixer_invert_button"
+widget "*MixerInvertButton*" style:highest "mixer_toggle_button"
+widget "*MixerInvertButton.*" style:highest "mixer_toggle_button"
 widget "*MixerAutomationRecordingButton*" style:highest "very_small_button"
 widget "*MixerAutomationRecordingButton.*" style:highest "very_small_button"
 widget "*MixerAutomationModeButton*" style:highest "very_small_button"
@@ -1564,7 +1567,7 @@ widget "*MixerGroupButton" style:highest "very_small_button"
 widget "*MixerGroupButtonLabel" style:highest "very_small_button"
 widget "*MixerCommentButton" style:highest "very_small_button"
 widget "*MixerCommentButton*" style:highest "very_small_button"
-widget "*MixerMonoButton*" style:highest "very_small_button"
+widget "*MixerMonoButton*" style:highest "mixer_toggle_button"
 widget "*EditGroupButton" style:highest "very_small_button"
 widget "*EditGroupButtonLabel" style:highest "very_small_button"
 widget "*TransportButton" style:highest "transport_button"
