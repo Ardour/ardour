@@ -1,0 +1,487 @@
+#!/bin/sh
+
+####################################
+#
+#	stage2.run
+#	Ardour/Mixbus bundle installer
+#	Todd Naugle
+#
+###################################
+
+
+
+PGM_NAME="Ardour"
+PGM_VENDOR="Ardour"
+PGM_EXEC_FILE="ardour2"
+
+INSTALL_DEST_BASE="/usr/local/bin"
+
+#### Derived Variables ####
+PGM_NAME_LOWER=$(echo $PGM_NAME | tr '[:upper:]' '[:lower:]')
+ICON_NAME="${PGM_VENDOR}-${PGM_NAME}"
+MENU_FILE="${PGM_VENDOR}-${PGM_NAME}.desktop"
+DESKTOP_LINK_FILE="${PGM_NAME}.desktop"
+
+PGM_EXEC_PATH="${INSTALL_DEST_BASE}/${PGM_NAME}/bin/${PGM_EXEC_FILE}"
+ICON_PATH="${INSTALL_DEST_BASE}/${PGM_NAME}/etc/icons"
+MENU_FILE_PATH="${INSTALL_DEST_BASE}/${PGM_NAME}/${MENU_FILE}"
+
+#### Global Variables ####
+HAS_XDG="T"
+
+########################
+# Function Definitions
+########################
+
+VaildateYesNoQuestion ()
+{
+	# $1 = Question Text
+	
+	local INPUT_OK="n"
+	local USER_INPUT=""
+
+	until test "y" = $INPUT_OK;
+	do
+		echo ""
+		read -p "$1 [y/n]: " USER_INPUT
+		echo ""
+
+		if [ ! -z $USER_INPUT ]; 
+		then		
+			if [ "Y" = $USER_INPUT -o "y" = $USER_INPUT -o "n" = $USER_INPUT -o "N" = $USER_INPUT ];
+			then
+				INPUT_OK="y"
+			fi
+		fi
+	done
+	
+	echo $USER_INPUT | tr '[:upper:]' '[:lower:]'
+	
+}
+
+SystemInstall ()
+{
+
+	# Determine which software install app to use and then install requested package
+	# $1 = Package Name
+
+	if which yum > /dev/null;
+	then
+		sudo yum -y install $1
+		rtrn=$?
+
+		if [ $rtrn -ne 0 ];
+		then
+			echo ""
+			echo "!!! ERROR !!! yum install failed for an unknown reason."
+			echo "Please install package $1 after this installer completes."
+			echo ""
+		fi
+
+	elif which apt-get > /dev/null;
+	then
+		sudo apt-get -y install $1
+		rtrn=$?
+
+		if [ $rtrn -ne 0 ];
+		then
+			echo ""
+			echo "!!! ERROR !!! apt-get install failed for an unknown reason."
+			echo "Please install package $1 after this installer completes."
+			echo ""
+		fi
+
+	else
+		echo ""
+		echo "!!! ERROR !!! - Not able to detect which software install tool to use (yum or apt-get)."
+		echo "Please install package $1 using the system software install tool."
+		echo ""
+		rtrn=1
+	fi
+	
+	return $rtrn
+
+}
+
+########################################################################
+#                                 Main
+########################################################################
+
+##############
+# Check sudo
+##############
+
+if ! sudo date;
+then
+	echo ""
+	echo "!!! ERROR !!!"
+	echo ""
+	echo "Either you don't know the root password or the user is not allowed to sudo"
+	echo "Please correct this and run the installer again (hint: use visudo to edit sudoers file)"
+	echo ""
+	read -p "Press ENTER to exit installer:" BLAH
+	exit 1
+fi
+
+############################
+# Determine processor type
+############################
+
+case `uname -m` in
+	i[3456789]86|x86|i86pc)
+		echo "Architecture is x86"
+		ARCH='x86'
+		BUNDLE_DIR=${PGM_NAME}_${ARCH}
+		;;
+	x86_64|amd64|AMD64)
+		echo "Architecture is x86_64"
+		ARCH='x86_64'
+		BUNDLE_DIR=${PGM_NAME}_${ARCH}
+		;;
+	*)
+		echo ""
+		echo "!!! ERROR !!! - Unknown architecture `uname -m`"
+		echo ""
+		read -p "Press ENTER to exit installer:" BLAH
+		exit 1
+		;;
+esac
+
+
+#######################
+# Check for xdg utils
+#######################
+
+XDG_MENU_VER=$(xdg-desktop-menu --version 2> /dev/null)
+if [ -z "$XDG_MENU_VER" ];
+then
+	echo "System does not have xdg-desktop-menu installed"
+	HAS_XDG="F"
+fi
+
+XDG_ICON_VER=$(xdg-icon-resource --version 2> /dev/null)
+if [ -z "$XDG_ICON_VER" ];
+then
+	echo "System does not have xdg-icon-resource installed"
+	HAS_XDG="F"
+fi
+
+#################################################
+# Check if system libs are OK (libc, etc)
+#################################################
+
+echo ""
+echo "Checking system libs to see if they are compatible with ${PGM_NAME}."
+echo ""
+
+LIB_ERROR="F"
+LD_PATH=`pwd`/${BUNDLE_DIR}/lib
+
+# check the main App
+LDD_RESULT=$(LD_LIBRARY_PATH=${LD_PATH} ldd ${BUNDLE_DIR}/bin/${PGM_NAME_LOWER}-* 2>&1 > /dev/null)
+
+if [ -n "$LDD_RESULT" ];
+then
+	echo "$LDD_RESULT"
+	LIB_ERROR="T"
+fi
+	
+# check the libs
+LIB_FILES=$(find ${BUNDLE_DIR}/lib -name "*.so")
+
+for path in $LIB_FILES
+do
+	LDD_RESULT=$(LD_LIBRARY_PATH=${LD_PATH} ldd $path 2>&1 > /dev/null)
+	if [ -n "$LDD_RESULT" ];
+	then
+		echo "$LDD_RESULT"
+		LIB_ERROR="T"
+	fi
+done
+
+if test "T" = $LIB_ERROR;
+then
+	echo ""
+	echo "!!! ERROR !!! - Missing library detected!"
+	echo "This system does not have the correct libs to run ${PGM_NAME}."
+	echo "Installation will not complete. Please use a compatible distro."
+	echo ""
+	read -p "Press ENTER to exit installer:" BLAH
+	exit 1
+fi
+
+	
+
+################################
+# Install bundle and Menu/Link
+################################
+
+# uninstall any older versions
+if [ -d ${INSTALL_DEST_BASE}/${PGM_NAME} ];
+then
+	echo ""
+	echo "Removing existing ${PGM_NAME} installation from ${INSTALL_DEST_BASE}"
+	echo ""
+
+	if [ "T" = ${HAS_XDG} ];
+	then
+		sudo xdg-desktop-menu uninstall ${MENU_FILE_PATH}
+		sudo xdg-icon-resource uninstall --size 16 ${ICON_NAME}
+		sudo xdg-icon-resource uninstall --size 22 ${ICON_NAME}
+		sudo xdg-icon-resource uninstall --size 32 ${ICON_NAME}
+		sudo xdg-icon-resource uninstall --size 48 ${ICON_NAME}
+
+		if [ -e /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg ]; 
+		then
+			sudo rm -f /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg
+		fi
+	fi
+
+	if [ -e ~/Desktop/${DESKTOP_LINK_FILE} ];
+	then
+		sudo rm -f ~/Desktop/${DESKTOP_LINK_FILE}
+	fi
+
+	# delete the old package
+	sudo rm -rf ${INSTALL_DEST_BASE}/${PGM_NAME}
+fi
+
+echo ""
+echo "Installing ${PGM_NAME} in ${INSTALL_DEST_BASE}"
+echo ""
+
+# Copy the new version in the install directory
+sudo mkdir ${INSTALL_DEST_BASE}/${PGM_NAME} 
+sudo cp -Rf	${BUNDLE_DIR}/* ${INSTALL_DEST_BASE}/${PGM_NAME}
+
+# write the desktop/menu file
+echo "[Desktop Entry]" > /tmp/${MENU_FILE}
+echo "Encoding=UTF-8" >> /tmp/${MENU_FILE}
+echo "Version=1.0" >> /tmp/${MENU_FILE}
+echo "Type=Application" >> /tmp/${MENU_FILE}
+echo "Terminal=false" >> /tmp/${MENU_FILE}
+echo "Exec=${PGM_EXEC_PATH}" >> /tmp/${MENU_FILE}
+echo "Name=${PGM_NAME}" >> /tmp/${MENU_FILE}
+echo "Icon=${ICON_NAME}" >> /tmp/${MENU_FILE}
+echo "Comment=Digital Audio Workstation" >> /tmp/${MENU_FILE}
+echo "Categories=AudioVideo;Audio;Recorder;" >> /tmp/${MENU_FILE}
+
+chmod ugo+rx /tmp/${MENU_FILE}
+sudo mv /tmp/${MENU_FILE} ${MENU_FILE_PATH}
+
+# install the Menu, Link, and Icon(s)
+if [ "T" = ${HAS_XDG} ];
+then
+	echo "Adding ${PGM_NAME} to the applications menu"
+	sudo xdg-icon-resource install --context apps --size 16 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_16px.png ${ICON_NAME}
+	sudo xdg-icon-resource install --context apps --size 22 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_22px.png ${ICON_NAME}
+	sudo xdg-icon-resource install --context apps --size 32 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_32px.png ${ICON_NAME}
+	sudo xdg-icon-resource install --context apps --size 48 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_48px.png ${ICON_NAME}
+
+	if [ -e ${ICON_PATH}/${PGM_NAME_LOWER}_icon.svg -a -d /usr/share/icons/hicolor/scalable/apps ]; 
+	then
+		sudo cp -f ${ICON_PATH}/${PGM_NAME_LOWER}_icon.svg  /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg
+	fi
+
+	sudo xdg-desktop-menu install ${MENU_FILE_PATH}
+
+	echo "Creating a desktop link for ${PGM_NAME}"
+	cp ${MENU_FILE_PATH} ~/Desktop/${DESKTOP_LINK_FILE}
+	chmod ugo+rx ~/Desktop/${DESKTOP_LINK_FILE}
+else
+	echo "Creating a desktop link for ${PGM_NAME}"
+	cp ${MENU_FILE_PATH} ~/Desktop/${DESKTOP_LINK_FILE}
+	chmod ugo+rx ~/Desktop/${DESKTOP_LINK_FILE}
+fi
+
+
+###########################
+# Check Jack and qjackctl
+###########################
+
+echo ""
+echo "Checking to see if Jack is installed"
+
+if ! which jackd > /dev/null;
+then
+	echo ""
+	echo "The program Jack is missing from this system. Jack is a required component of $PGM_NAME."
+	echo ""
+
+	ANSWER=$(VaildateYesNoQuestion "Install jack using system software repository?")
+
+	if test "y" = $ANSWER;
+	then
+		echo "Attempting to install Jack"
+		SystemInstall "jackd"
+
+		if [ $? -ne 0 ];
+		then
+			echo ""
+			read -p "Press ENTER to continue:" BLAH
+		fi
+	fi
+else
+	echo "Jack OK"
+fi
+
+
+if ! which qjackctl > /dev/null;
+then
+	echo ""
+	echo "The program QjackCtl is missing from this system. QjackCtl is an OPTIONAL component of $PGM_NAME."
+	echo ""
+
+	ANSWER=$(VaildateYesNoQuestion "Install QjackCtl using system software repository?")
+
+	if test "y" = $ANSWER;
+	then
+		echo "Attempting to install QjackCtl"
+		SystemInstall "qjackctl"
+
+		if [ $? -ne 0 ];
+		then
+			echo ""
+			read -p "Press ENTER to continue:" BLAH
+		fi
+	fi
+fi
+
+
+########################
+# Run Sanity Check
+########################
+
+USER_GROUP_ADJUSTED="f"
+
+if ! ./sanityCheck -a > /dev/null;
+then
+	echo ""
+	echo "System failed the quick sanity check... Looking for the cause"
+
+	if ! ./sanityCheck -rt > /dev/null;
+	then
+		echo ""
+		echo "System does not allow realtime for the current user... Looking for a solution"		
+		
+		if ./sanityCheck -hasaudiogroup > /dev/null;
+		then
+			if ./sanityCheck -memberaudiogroup > /dev/null 2>&1;
+			then
+				## This is an odd case. We have an audio group and are a member.
+				echo ""
+				echo "!!! WARNING !!! - The current user can not execute realtime processes."
+				echo "This will adversely affect audio latency."
+				echo "This system has an audio group and the user is a member. If jack was"
+				echo "just installed, a simple log out/in may fix this."
+				echo ""
+				echo "For best results, please correct this on your system."
+				echo "(Hint: check /etc/security/limits.conf or /etc/security/limits.d/)" 
+				echo ""
+				read -p "Press ENTER to continue:" BLAH
+			else
+				# Not a member of an audio group. Try to fix it.
+				
+				if ./sanityCheck -hasgroup audio > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@audio.*rtprio";
+				then
+					# add user to audio group
+					echo ""
+					echo "Adding user `whoami` to the audio group."
+					echo "This should allow you to run realtime tasks. Please re-login for this change to take affect."
+					echo ""
+					read -p "Press ENTER to continue:" BLAH
+
+					user=`whoami`
+					if sudo usermod -a -G audio $user;
+					then
+						USER_GROUP_ADJUSTED="t"
+					else
+						echo ""
+						echo "!!! ERROR !!! - Not able to add user to the audio group (usermod failed)!"
+						echo ""
+						echo "Please add yourself to the audio group and re-login"
+						echo ""
+						read -p "Press ENTER to continue:" BLAH
+					fi
+
+				elif ./sanityCheck -hasgroup jackuser > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@jackuser.*rtprio";
+				then
+					# add user to jackuser group
+					echo ""
+					echo "Adding user `whoami` to the jackuser group."
+					echo "This should allow you to run realtime tasks. Please re-login for this change to take affect."
+					echo ""
+					read -p "Press ENTER to continue:" BLAH
+
+					user=`whoami`
+					if sudo usermod -a -G jackuser $user;
+					then
+						USER_GROUP_ADJUSTED="t"
+					else
+						echo ""
+						echo "!!! ERROR !!! - Not able to add user to the jackuser group."
+						echo ""
+						echo "Please add yourself to the audio group and re-login"
+						echo ""
+						read -p "Press ENTER to continue:" BLAH
+					fi
+					
+
+				fi
+			fi
+		else
+			# No audio group found on this system!
+			echo ""
+			echo "!!! WARNING !!! - The system does not seem to have an audio group (audio or jackuser)."
+			echo ""
+			echo "We will not attempt to fix this. Please configure your system to allow"
+			echo "non-root users to execute realtime tasks."
+			echo ""
+			read -p "Press ENTER to continue:" BLAH
+		fi
+	fi
+
+	if ! ./sanityCheck -freqscaling > /dev/null;
+	then
+		echo ""
+		echo "!!! WARNING !!! - Your system seems to use frequency scaling."
+		echo "This can have a serious impact on audio latency. You have two choices:"
+		echo "(1) turn it off, e.g. by chosing the 'performance' governor."
+		echo "(2) Use the HPET clocksource by passing \"-c h\" to JACK"
+		echo "(this second option only works on relatively recent computers)"
+		echo ""
+		read -p "Press ENTER to continue:" BLAH
+	fi
+
+	if [ "f" = $USER_GROUP_ADJUSTED ];
+	then
+		if ! ./sanityCheck -memlock > /dev/null;
+		then
+			echo ""
+			echo "!!! WARNING !!! - You are not allowed to lock memory."
+			echo ""
+			echo "We will not attempt to fix this. Please configure your system to allow"
+			echo "non-root users to execute lock memory."
+			echo ""
+			read -p "Press ENTER to continue:" BLAH
+		fi
+	fi
+fi
+
+
+########################
+# Install Complete
+########################
+
+echo ""
+echo "!!! Install Complete !!!"
+
+if [ "t" = $USER_GROUP_ADJUSTED ];
+then
+	echo "You will need to logout and then login again for all changes to be complete"
+fi
+
+echo ""
+read -p "Press ENTER to close this window:" BLAH
+
+

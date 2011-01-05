@@ -1,0 +1,12 @@
+# -*- python -*-
+
+import os
+import os.path
+import glob
+
+Import('env')
+sanitycheck = env.Clone()
+sc = sanitycheck.Program('sanityCheck', ['main.cpp', 'systemtest.cpp'])
+
+Default(sc)
+
