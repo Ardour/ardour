@@ -520,7 +520,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	int  pre_maximal_editor_height;
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
 
-	Gtk::Notebook the_notebook;
+	Gtk::Notebook _the_notebook;
+	bool _notebook_shrunk;
+	void add_notebook_page (std::string const &, Gtk::Widget &);
+	bool notebook_tab_clicked (GdkEventButton *, Gtk::Widget *);
+	
 	Gtk::HPaned   edit_pane;
 	Gtk::VPaned   editor_summary_pane;
 

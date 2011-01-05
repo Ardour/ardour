@@ -534,34 +534,23 @@ Editor::Editor ()
 	_snapshots = new EditorSnapshots (this);
 	_locations = new EditorLocations (this);
 
-	Gtk::Label* nlabel;
+	add_notebook_page (_("Regions"), _regions->widget ());
+	add_notebook_page (_("Tracks & Busses"), _routes->widget ());
+	add_notebook_page (_("Snapshots"), _snapshots->widget ());
+	add_notebook_page (_("Route Groups"), _route_groups->widget ());
+	add_notebook_page (_("Ranges & Marks"), _locations->widget ());
 
-	nlabel = manage (new Label (_("Regions")));
-	nlabel->set_angle (-90);
-	the_notebook.append_page (_regions->widget (), *nlabel);
-	nlabel = manage (new Label (_("Tracks & Busses")));
-	nlabel->set_angle (-90);
-	the_notebook.append_page (_routes->widget (), *nlabel);
-	nlabel = manage (new Label (_("Snapshots")));
-	nlabel->set_angle (-90);
-	the_notebook.append_page (_snapshots->widget (), *nlabel);
-	nlabel = manage (new Label (_("Route Groups")));
-	nlabel->set_angle (-90);
-	the_notebook.append_page (_route_groups->widget (), *nlabel);
-	nlabel = manage (new Label (_("Ranges & Marks")));
-	nlabel->set_angle (-90);
-	the_notebook.append_page (_locations->widget (), *nlabel);
+	_the_notebook.set_show_tabs (true);
+	_the_notebook.set_scrollable (true);
+	_the_notebook.popup_disable ();
+	_the_notebook.set_tab_pos (Gtk::POS_RIGHT);
+	_the_notebook.show_all ();
 
-	the_notebook.set_show_tabs (true);
-	the_notebook.set_scrollable (true);
-	the_notebook.popup_disable ();
-	the_notebook.set_tab_pos (Gtk::POS_RIGHT);
-	the_notebook.show_all ();
-	
 	post_maximal_editor_width = 0;
 	post_maximal_horizontal_pane_position = 0;
 	post_maximal_editor_height = 0;
 	post_maximal_vertical_pane_position = 0;
+	_notebook_shrunk = false;
 
 	editor_summary_pane.pack1(edit_packer);
 
@@ -601,7 +590,7 @@ Editor::Editor ()
 	editor_summary_pane.pack2 (_summary_hbox);
 
 	edit_pane.pack1 (editor_summary_pane, true, true);
-	edit_pane.pack2 (the_notebook, false, true);
+	edit_pane.pack2 (_the_notebook, false, true);
 
 	editor_summary_pane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun (*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&editor_summary_pane)));
 
@@ -2243,7 +2232,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if ((prop = node.property (X_("editor-list-page")))) {
-		the_notebook.set_current_page (atoi (prop->value ()));
+		_the_notebook.set_current_page (atoi (prop->value ()));
 	}
 
 	if ((prop = node.property (X_("show-marker-lines")))) {
@@ -2298,6 +2287,9 @@ Editor::get_state ()
 		geometry->add_property("y-off", string(buf));
 		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&edit_pane)->gobj()));
 		geometry->add_property("edit-horizontal-pane-pos", string(buf));
+		geometry->add_property("notebook-shrunk", _notebook_shrunk ? "1" : "0");
+		snprintf(buf,sizeof(buf), "%d",pre_maximal_horizontal_pane_position);
+		geometry->add_property("pre-maximal-horizontal-pane-position", string(buf));
 		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&editor_summary_pane)->gobj()));
 		geometry->add_property("edit-vertical-pane-pos", string(buf));
 
@@ -2345,7 +2337,7 @@ Editor::get_state ()
 		node->add_property (X_("show-editor-list"), tact->get_active() ? "yes" : "no");
 	}
 
-	snprintf (buf, sizeof (buf), "%d", the_notebook.get_current_page ());
+	snprintf (buf, sizeof (buf), "%d", _the_notebook.get_current_page ());
 	node->add_property (X_("editor-list-page"), buf);
 
 	node->add_property (X_("show-marker-lines"), _show_marker_lines ? "yes" : "no");
@@ -3556,6 +3548,14 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 			return;
 		}
 
+		if (geometry && (prop = geometry->property ("notebook-shrunk"))) {
+			_notebook_shrunk = string_is_affirmative (prop->value ());
+		}
+
+		if (geometry && (prop = geometry->property ("pre-maximal-horizontal-pane-position"))) {
+			pre_maximal_horizontal_pane_position = atoi (prop->value ());
+		}
+
 		if (!geometry || (prop = geometry->property ("edit-horizontal-pane-pos")) == 0) {
 			/* initial allocation is 90% to canvas, 10% to notebook */
 			pos = (int) floor (alloc.get_width() * 0.90f);
@@ -3566,7 +3566,9 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 
 		if (GTK_WIDGET(edit_pane.gobj())->allocation.width > pos) {
 			edit_pane.set_position (pos);
-			pre_maximal_horizontal_pane_position = pos;
+			if (pre_maximal_horizontal_pane_position == 0) {
+				pre_maximal_horizontal_pane_position = pos;
+			}
 		}
 
 		done = (Pane) (done | Horizontal);
@@ -5330,9 +5332,9 @@ void
 Editor::show_editor_list (bool yn)
 {
 	if (yn) {
-		the_notebook.show();
+		_the_notebook.show ();
 	} else {
-		the_notebook.hide();
+		_the_notebook.hide ();
 	}
 }
 
@@ -5413,3 +5415,38 @@ Editor::resize_text_widgets ()
         set_size_request_to_display_given_text (edit_point_selector, edit_point_strings, COMBO_FUDGE+10, 15);
 }
         
+void
+Editor::add_notebook_page (string const & name, Gtk::Widget& widget)
+{
+	EventBox* b = manage (new EventBox);
+	b->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::notebook_tab_clicked), &widget));
+	Label* l = manage (new Label (name));
+	l->set_angle (-90);
+	b->add (*l);
+	b->show_all ();
+	_the_notebook.append_page (widget, *b);
+}
+
+bool
+Editor::notebook_tab_clicked (GdkEventButton* ev, Gtk::Widget* page)
+{
+	if (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_2BUTTON_PRESS) {
+		_the_notebook.set_current_page (_the_notebook.page_num (*page));
+	}
+
+	if (ev->type == GDK_2BUTTON_PRESS) {
+
+		/* double-click on a notebook tab shrinks or expands the notebook */
+
+		if (_notebook_shrunk) {
+			edit_pane.set_position (pre_maximal_horizontal_pane_position);
+			_notebook_shrunk = false;
+		} else {
+			pre_maximal_horizontal_pane_position = edit_pane.get_position ();
+			edit_pane.set_position (edit_pane.get_position() + page->get_width());
+			_notebook_shrunk = true;
+		}
+	}
+
+	return true;
+}
