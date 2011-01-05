@@ -109,7 +109,7 @@ CONFIG_VARIABLE (bool, plugins_stop_with_transport, "plugins-stop-with-transport
 CONFIG_VARIABLE (bool, do_not_record_plugins, "do-not-record-plugins", false)
 CONFIG_VARIABLE (bool, stop_recording_on_xrun, "stop-recording-on-xrun", false)
 CONFIG_VARIABLE (bool, create_xrun_marker, "create-xrun-marker", true)
-CONFIG_VARIABLE (bool, stop_at_session_end, "stop-at-session-end", true)
+CONFIG_VARIABLE (bool, stop_at_session_end, "stop-at-session-end", false)
 CONFIG_VARIABLE (bool, seamless_loop, "seamless-loop", false)
 CONFIG_VARIABLE (framecnt_t, preroll, "preroll", 0)
 CONFIG_VARIABLE (framecnt_t, postroll, "postroll", 0)
