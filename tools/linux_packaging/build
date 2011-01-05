@@ -17,50 +17,54 @@ EXTERNAL_JACK=
 LIBCLEARLOOKS=
 
 if [ $# -eq 0 ] ; then
-    echo ""	 
-    echo "ERROR - Please specify build type"
-	echo "    --public"
-	echo "    --sae"
-    echo ""	 
-    exit 1
+	echo ""	 
+	echo "ERROR - Please specify build type"
+	echo "	  --public"
+	echo "	  --sae"
+	echo ""	 
+	exit 1
 fi
 
 while [ $# -gt 0 ] ; do
-    echo "arg = $1"
-    case $1 in
+	echo "arg = $1"
+	case $1 in
 
 	#
 	# top level build targets
 	#
 
-	--sae) WITH_NLS= ; 
-               SAE=1 ; 
-	       INTERNAL_JACK=1; 
-	       WITH_LADSPA=1; 
-               STRIP= ; 
-	       APPNAME=Ardour ;
-	       shift ;;
-	--mixbus) MIXBUS=1; 
-	          WITH_NLS=1 ; 
-                  SAE= ; 
-                  INTERNAL_JACK=; 
-                  WITH_LADSPA=; 
-                  STRIP= ; 
-		  APPNAME=Mixbus ;
-                  shift ;;
-	--public) WITH_NLS=1 ; 
-	          SAE= ; 
-		  INTERNAL_JACK=; 
-                  WITH_LADSPA=; 
-                  STRIP= ; 
-		  APPNAME=Ardour ;
-		  shift ;;
-	--allinone) SAE= ; 
-	            WITH_NLS= ; 
-		    INTERNAL_JACK=1; 
-		    WITH_LADSPA=1; 
-		    STRIP= ; 
-		    shift ;;
+	--sae)
+		WITH_NLS= ; 
+		SAE=1 ; 
+		INTERNAL_JACK=1; 
+		WITH_LADSPA=1; 
+		STRIP= ; 
+		APPNAME=Ardour ;
+		shift ;;
+	--mixbus)
+		MIXBUS=1; 
+		WITH_NLS=1 ; 
+		SAE= ; 
+		INTERNAL_JACK=; 
+		WITH_LADSPA=; 
+		STRIP= ; 
+		APPNAME=Mixbus ;
+		shift ;;
+	--public)
+		WITH_NLS=1 ; 
+		SAE= ; 
+		INTERNAL_JACK=; 
+		WITH_LADSPA=; 
+		STRIP= ; 
+		APPNAME=Ardour ;
+		shift ;;
+	--allinone)
+		SAE= ; 
+		WITH_NLS= ; 
+		INTERNAL_JACK=1; 
+		WITH_LADSPA=1; 
+		STRIP= ; 
+		shift ;;
 	--test) SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
 
 	#
@@ -82,11 +86,11 @@ while [ $# -gt 0 ] ; do
 		echo ""
 		exit 1
 		;;
-    esac
+	esac
 done
 
 if [ x$EXTERNAL_JACK != x -a x$INTERNAL_JACK != x ] ; then
-    echo "It makes no sense to package JACK internally and externally. Please pick one."
+	echo "It makes no sense to package JACK internally and externally. Please pick one."
 fi
 
 release_version=`grep -m 1 '^ardour_version' ../../SConstruct | cut -d' ' -f 3 | sed "s/'//g"`
@@ -136,13 +140,13 @@ if [ x$PRINT_SYSDEPS != x ] ; then
 # print system dependencies
 #
 
-    for file in $APPBIN/* $Libraries/* $Modules/* $Plugins/*.so ; do 
-	if ! file $file | grep -qs Mach-O ; then
-	    continue
-	fi
-	otool -L $file | awk '{print $1}' | egrep -v "(^@executable_path|^Ardour[0-9][.0-9]*.app)" 
-    done | sort | uniq
-    exit 0
+	for file in $APPBIN/* $Libraries/* $Modules/* $Plugins/*.so ; do 
+		if ! file $file | grep -qs Mach-O ; then
+			continue
+		fi
+		otool -L $file | awk '{print $1}' | egrep -v "(^@executable_path|^Ardour[0-9][.0-9]*.app)" 
+	done | sort | uniq
+	exit 0
 fi
 
 echo "Removing old $APPDIR tree ..."
@@ -172,21 +176,21 @@ rm -f $ENVIRONMENT
 touch $ENVIRONMENT
 
 if test x$SAE != x ; then
-    echo "export ARDOUR_SAE=true" >> $ENVIRONMENT
-    #
-    # current default for SAE version is German keyboard layout without a keypad
-    #
-    echo export ARDOUR_KEYBOARD_LAYOUT=de-nokeypad >> $ENVIRONMENT
-    echo export ARDOUR_UI_CONF=ardour2_ui_sae.conf >> $ENVIRONMENT
-    echo export ARDOUR2_UI_RC=ardour2_ui_dark_sae.rc >> $ENVIRONMENT
+	echo "export ARDOUR_SAE=true" >> $ENVIRONMENT
+	#
+	# current default for SAE version is German keyboard layout without a keypad
+	#
+	echo export ARDOUR_KEYBOARD_LAYOUT=de-nokeypad >> $ENVIRONMENT
+	echo export ARDOUR_UI_CONF=ardour2_ui_sae.conf >> $ENVIRONMENT
+	echo export ARDOUR2_UI_RC=ardour2_ui_dark_sae.rc >> $ENVIRONMENT
 elif test x$MIXBUS != x ; then
-    echo export ARDOUR_MIXBUS=true >> $ENVIRONMENT
-    #
-    # current default for MIXBUS version is US keyboard layout without a keypad
-    #
-    echo export ARDOUR_KEYBOARD_LAYOUT=us-nokeypad >> $ENVIRONMENT
-    echo export ARDOUR_UI_CONF=ardour2_ui.conf >> $ENVIRONMENT
-    echo export ARDOUR2_UI_RC=ardour2_ui_dark.rc >> $ENVIRONMENT
+	echo export ARDOUR_MIXBUS=true >> $ENVIRONMENT
+	#
+	# current default for MIXBUS version is US keyboard layout without a keypad
+	#
+	echo export ARDOUR_KEYBOARD_LAYOUT=us-nokeypad >> $ENVIRONMENT
+	echo export ARDOUR_UI_CONF=ardour2_ui.conf >> $ENVIRONMENT
+	echo export ARDOUR2_UI_RC=ardour2_ui_dark.rc >> $ENVIRONMENT
 fi
 
 #
@@ -205,133 +209,133 @@ MAIN_EXECUTABLE=ardour-$release_version
 echo "Copying ardour executable ...."
 cp ../../gtk2_ardour/$MAIN_EXECUTABLE $APPBIN
 if test x$STRIP != x ; then
-    strip $APPBIN/$MAIN_EXECUTABLE
+	strip $APPBIN/$MAIN_EXECUTABLE
 fi
 
 # copy locale files
 if test x$WITH_NLS != x ; then
-    echo "NLS support ..."
-    echo "I hope you remembered to run scons msgupdate!"
-    LINGUAS=
-    files=`find ../../gtk2_ardour/ -name "*.mo"`
+	echo "NLS support ..."
+	echo "I hope you remembered to run scons msgupdate!"
+	LINGUAS=
+	files=`find ../../gtk2_ardour/ -name "*.mo"`
 
-    if [ -z "$files" ]; then
-        echo ""
-        echo "!!!! WARNING !!!! - Did not find any .mo files in ../../gtk2_ardour"
-        echo ""
-    fi
+	if [ -z "$files" ]; then
+		echo ""
+		echo "!!!! WARNING !!!! - Did not find any .mo files in ../../gtk2_ardour"
+		echo ""
+	fi
  
-    for file in $files 
-    do
-	echo $file
-	lang=`basename $file | sed 's/\.mo//'`
-	mkdir -p $Locale/$lang/LC_MESSAGES
-	cp $file $Locale/$lang/LC_MESSAGES/gtk2_ardour.mo
-	LINGUAS="$LINGUAS $lang"
-    done
+	for file in $files 
+	do
+		echo $file
+		lang=`basename $file | sed 's/\.mo//'`
+		mkdir -p $Locale/$lang/LC_MESSAGES
+		cp $file $Locale/$lang/LC_MESSAGES/gtk2_ardour.mo
+		LINGUAS="$LINGUAS $lang"
+	done
 
-    files=`find ../../libs/ardour/ -name "*.mo"`
+	files=`find ../../libs/ardour/ -name "*.mo"`
 
-    if [ -z "$files" ]; then
-        echo ""
-        echo "!!!! WARNING !!!! - Did not find any .mo files in ../../libs/ardour"
-        echo ""
-    fi
+	if [ -z "$files" ]; then
+		echo ""
+		echo "!!!! WARNING !!!! - Did not find any .mo files in ../../libs/ardour"
+		echo ""
+	fi
 
-    for file in $files 
-    do
-	echo $file
-	lang=`basename $file | sed 's/\.mo//'`
-	mkdir -p $Locale/$lang/LC_MESSAGES
-	cp $file $Locale/$lang/LC_MESSAGES/libardour.mo
-    done
+	for file in $files 
+	do
+		echo $file
+		lang=`basename $file | sed 's/\.mo//'`
+		mkdir -p $Locale/$lang/LC_MESSAGES
+		cp $file $Locale/$lang/LC_MESSAGES/libardour.mo
+	done
 
-    GTK_MESSAGES="atk10.mo gdk-pixbuf.mo gtk20-properties.mo gtk20.mo atk10.mo glib20.mo"
-    LOCALEROOT=/usr/share/locale
+	GTK_MESSAGES="atk10.mo gdk-pixbuf.mo gtk20-properties.mo gtk20.mo atk10.mo glib20.mo"
+	LOCALEROOT=/usr/share/locale
 
-    for l in $LINGUAS ; do
-	echo "Copying GTK i18n files for $l..."
-        for MO in $GTK_MESSAGES ; do 
-            if [ -f $LOCALEROOT/$l/LC_MESSAGES/$MO ] ; then
-	        cp $LOCALEROOT/$l/LC_MESSAGES/$MO $Locale/$l/LC_MESSAGES
-            else
-			# try with just the language spec
-	        just_lang=`echo $l | sed 's/_[A-Z][A-Z]$//'`
-	        if [ -f $LOCALEROOT/$just_lang/LC_MESSAGES/$MO ] ; then
-	            cp $LOCALEROOT/$just_lang/LC_MESSAGES/$MO $Locale/$just_lang/LC_MESSAGES
-	        fi
-            fi
-        done
-    done
+	for l in $LINGUAS ; do
+		echo "Copying GTK i18n files for $l..."
+		for MO in $GTK_MESSAGES ; do 
+			if [ -f $LOCALEROOT/$l/LC_MESSAGES/$MO ] ; then
+				cp $LOCALEROOT/$l/LC_MESSAGES/$MO $Locale/$l/LC_MESSAGES
+			else
+				# try with just the language spec
+				just_lang=`echo $l | sed 's/_[A-Z][A-Z]$//'`
+				if [ -f $LOCALEROOT/$just_lang/LC_MESSAGES/$MO ] ; then
+					cp $LOCALEROOT/$just_lang/LC_MESSAGES/$MO $Locale/$just_lang/LC_MESSAGES
+				fi
+			fi
+		done
+	done
 else
-    echo "Skipping NLS support"
+	echo "Skipping NLS support"
 fi
 
 GTKROOT=`pkg-config --libs-only-L gtk+-2.0 | sed s/-L//`
 if [ "" = "$GTKROOT" ]; then
-    echo "Found gtk using pkg-config"
-    GTKROOT=`dirname $GTKROOT`
-    gtkModVer=`pkg-config --modversion gtk+-2.0`
+	echo "Found gtk using pkg-config"
+	GTKROOT=`dirname $GTKROOT`
+	gtkModVer=`pkg-config --modversion gtk+-2.0`
 
-    GTKLIB=${GTKROOT}/lib/gtk-2.0/$gtkModVer
-    PANGOLIB=${GTKROOT}/lib/pango/1.6.0
-    GDKPIXBUFLIB=${GTKROOT}/lib/gdk-pixbuf-2.0/$gtkModVer
+	GTKLIB=${GTKROOT}/lib/gtk-2.0/$gtkModVer
+	PANGOLIB=${GTKROOT}/lib/pango/1.6.0
+	GDKPIXBUFLIB=${GTKROOT}/lib/gdk-pixbuf-2.0/$gtkModVer
 else
-    echo "Looking for gtk and pango in other known locations"
+	echo "Looking for gtk and pango in other known locations"
 
-    ## GTKLIB
-    if [ -d /usr/lib/gtk-2.0 ]; then
-        versionDir=`ls /usr/lib/gtk-2.0/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
+	## GTKLIB
+	if [ -d /usr/lib/gtk-2.0 ]; then
+		versionDir=`ls /usr/lib/gtk-2.0/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
 
-        num=0
-        for name in $versionDir ; do
-            let "num += 1"
-        done
+		num=0
+		for name in $versionDir ; do
+			let "num += 1"
+		done
 
-        if [ $num -eq 1 ]; then
-            GTKLIB=/usr/lib/gtk-2.0/$versionDir
-        else
-            echo ""
-            echo "!!! ERROR !!! - More than one gtk-2.0 version found  ( $versionDir ). Packager will exit"
-            echo ""
-	    exit 1
-        fi
-    else
-        echo ""
-        echo "!!! ERROR !!! - Can't find GTK lib directory. Packager will exit"
-        echo ""
-	exit 1
-    fi
+		if [ $num -eq 1 ]; then
+			GTKLIB=/usr/lib/gtk-2.0/$versionDir
+		else
+			echo ""
+			echo "!!! ERROR !!! - More than one gtk-2.0 version found  ( $versionDir ). Packager will exit"
+			echo ""
+			exit 1
+		fi
+	else
+		echo ""
+		echo "!!! ERROR !!! - Can't find GTK lib directory. Packager will exit"
+		echo ""
+		exit 1
+	fi
 
-    ## PANGOLIB
-    if [ -d /usr/lib/pango ]; then
-        versionDir=`ls /usr/lib/pango/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
+	## PANGOLIB
+	if [ -d /usr/lib/pango ]; then
+		versionDir=`ls /usr/lib/pango/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
 
-        num=0
-        for name in $versionDir ; do
-            let "num += 1"
-        done
+		num=0
+		for name in $versionDir ; do
+			let "num += 1"
+		done
 
-        if [ $num -eq 1 ]; then
-            PANGOLIB=/usr/lib/pango/$versionDir
-        else
-            echo ""
-            echo "!!! ERROR !!! - More than one pango version found  ( $versionDir ). Packager will exit"
-            echo ""
-	    exit 1
-        fi
-    else
-        echo ""
-        echo "!!! ERROR !!! - Can't find pango lib directory. Packager will exit"
-        echo ""
-	exit 1
-    fi
+		if [ $num -eq 1 ]; then
+			PANGOLIB=/usr/lib/pango/$versionDir
+		else
+			echo ""
+			echo "!!! ERROR !!! - More than one pango version found  ( $versionDir ). Packager will exit"
+			echo ""
+			exit 1
+		fi
+	else
+		echo ""
+		echo "!!! ERROR !!! - Can't find pango lib directory. Packager will exit"
+		echo ""
+		exit 1
+	fi
 
 
-    ## GDKPIXBUFLIB        
-    if [ -d $GTKLIB ]; then
-        GDKPIXBUFLIB=$GTKLIB
-    fi
+	## GDKPIXBUFLIB		   
+	if [ -d $GTKLIB ]; then
+		GDKPIXBUFLIB=$GTKLIB
+	fi
 
 fi
 
@@ -349,45 +353,45 @@ gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUFLIB/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.
 
 if [ -z $LIBCLEARLOOKS ]; then
 	echo "Searching for libclearlooks"
-    clearlooks_paths=$(sudo find / -name "libclearlooks*" | grep "gtk")
+	clearlooks_paths=$(sudo find / -name "libclearlooks*" | grep "gtk")
 
-    if [ $? -ne 0 ]; then
-        echo "Not able to search for libclearlooks (not able to sudo?). Please try again"
-        exit 1
-    fi
+	if [ $? -ne 0 ]; then
+		echo "Not able to search for libclearlooks (not able to sudo?). Please try again"
+		exit 1
+	fi
 else
-    clearlooks_paths=$LIBCLEARLOOKS
+	clearlooks_paths=$LIBCLEARLOOKS
 fi
 
 num=0
 for path in $clearlooks_paths ; do
-    let "num += 1"
+	let "num += 1"
 done
 
 if [ $num -eq 1 ]; then
-    clearlooks=$clearlooks_paths
-    if file -L $clearlooks | grep -q $ARCH_BITS; then
-        echo "Using libclearlooks: $clearlooks"
-    else
-	echo ""
-	echo "!!! ERROR !!! - clearlooks lib is not build for $ARCH_BITS"
-	echo ""
-	echo "Packager with exit"
-	exit 1
-    fi
+	clearlooks=$clearlooks_paths
+	if file -L $clearlooks | grep -q $ARCH_BITS; then
+		echo "Using libclearlooks: $clearlooks"
+	else
+		echo ""
+		echo "!!! ERROR !!! - clearlooks lib is not build for $ARCH_BITS"
+		echo ""
+		echo "Packager with exit"
+		exit 1
+	fi
 else
-    echo ""
-    echo "!!! ERROR  !!! - Not able to determine which libclearlooks to use. run again with --clearlooks /path/to/libclearlooks"
-    echo "Here are the possible choices for libclearlooks"
-    echo ""
+	echo ""
+	echo "!!! ERROR  !!! - Not able to determine which libclearlooks to use. run again with --clearlooks /path/to/libclearlooks"
+	echo "Here are the possible choices for libclearlooks"
+	echo ""
 
-    for path in $clearlooks_paths ; do
-        echo $path
-    done
+	for path in $clearlooks_paths ; do
+		echo $path
+	done
 
-    echo ""
-    echo "Packager will exit"
-    exit 1
+	echo ""
+	echo "Packager will exit"
+	exit 1
 fi
 
 cp $clearlooks $Libraries
@@ -396,17 +400,17 @@ mkdir -p $Libraries/clearlooks/engines
 
 # LADSPA
 if test x$WITH_LADSPA != x ; then
-    if test x$SAE != x ; then
-	plugdir=sae_ladspa
-    elif test x$MIXBUS != x ; then
-	plugdir=mixbus_ladspa
-    else
-	plugdir=ladspa
-    fi
-    echo "Copying `ls $plugdir | wc -l` plugins ..."
-    if [ -d $plugdir ] ; then
-        cp -r $plugdir/* $Plugins
-    fi
+	if test x$SAE != x ; then
+		plugdir=sae_ladspa
+	elif test x$MIXBUS != x ; then
+		plugdir=mixbus_ladspa
+	else
+		plugdir=ladspa
+	fi
+	echo "Copying `ls $plugdir | wc -l` plugins ..."
+	if [ -d $plugdir ] ; then
+		cp -r $plugdir/* $Plugins
+	fi
 fi
 
 # XXX STILL NEED TO DO PANNERS FOR TRUNK
@@ -423,51 +427,51 @@ OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardo
 echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 while [ true ] ; do 
-    missing=false
-    filelist=`find $APPLIB/ -type f`
+	missing=false
+	filelist=`find $APPLIB/ -type f`
 	filelist="$APPBIN/$MAIN_EXECUTABLE $filelist"
 
-    for file in $filelist  ; do 
-	if ! file $file | grep -qs ELF ; then
-	    continue
-	fi
-
-        # do not include libjack
-	deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | awk '{print $3}' | egrep "(/opt/|/local/|libs/|/usr/lib|/gtk)" | grep -v 'libjack\.'`
-	# LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | egrep "(/opt/|/local/|libs/|/usr/lib|/gtk)" | grep -v 'libjack\.'
-	echo -n "."
-	for dep in $deps ; do
-            if [ "x$dep" = "xnot" ] ; then 
-                  echo "Missing dependant library. Use ldd to find and fix"
-                  exit 1
-            fi
-
-            # don't use anything mapped at a specific address
-            if  echo $dep | grep -qs '0x' ; then continue; fi
-            # don't include any X Window libraries
-            if echo $dep | grep -qs libX ; then continue; fi  
-            # don't include libc
-            if echo $dep | grep -qs 'libc\.' ; then continue; fi
-            # don't include libstdc++
-            if echo $dep | grep -qs libstdc++ ; then continue; fi
-
-	    base=`basename $dep`
- 	    if ! test -f $Libraries/$base; then
-		if echo $dep | grep -sq '^libs' ; then
-                    echo "Copying dependant lib ../../$dep"
-		    cp ../../$dep $Libraries
-		else
-                    echo "Copying dependant lib $dep"
-		    cp $dep $Libraries
+	for file in $filelist  ; do 
+		if ! file $file | grep -qs ELF ; then
+			continue
 		fi
-		missing=true
-	    fi
+
+		# do not include libjack
+		deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | awk '{print $3}' | egrep "(/opt/|/local/|libs/|/usr/lib|/gtk)" | grep -v 'libjack\.'`
+		# LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | egrep "(/opt/|/local/|libs/|/usr/lib|/gtk)" | grep -v 'libjack\.'
+		echo -n "."
+		for dep in $deps ; do
+			if [ "x$dep" = "xnot" ] ; then 
+				echo "Missing dependant library. Use ldd to find and fix"
+				exit 1
+			fi
+
+			# don't use anything mapped at a specific address
+			if	echo $dep | grep -qs '0x' ; then continue; fi
+			# don't include any X Window libraries
+			if echo $dep | grep -qs libX ; then continue; fi  
+			# don't include libc
+			if echo $dep | grep -qs 'libc\.' ; then continue; fi
+			# don't include libstdc++
+			if echo $dep | grep -qs libstdc++ ; then continue; fi
+
+			base=`basename $dep`
+			if ! test -f $Libraries/$base; then
+				if echo $dep | grep -sq '^libs' ; then
+					echo "Copying dependant lib ../../$dep"
+					cp ../../$dep $Libraries
+				else
+					echo "Copying dependant lib $dep"
+					cp $dep $Libraries
+				fi
+				missing=true
+			fi
+		done
 	done
-    done
-    if test x$missing = xfalse ; then
-	# everything has been found
-	break
-    fi
+	if test x$missing = xfalse ; then
+		# everything has been found
+		break
+	fi
 done
 echo
 
@@ -478,7 +482,7 @@ find $APPLIB/ -name "*.so*" | xargs chmod a+rx
 
 echo "Copying other stuff to $APPDIR  ..."
 
-cp ../../gtk2_ardour/ergonomic-us.bindings  $Etc
+cp ../../gtk2_ardour/ergonomic-us.bindings	$Etc
 cp ../../gtk2_ardour/mnemonic-us.bindings  $Etc
 cp ../../gtk2_ardour/SAE-de-keypad.bindings  $Etc
 cp ../../gtk2_ardour/SAE-de-nokeypad.bindings  $Etc
@@ -487,15 +491,15 @@ cp ../../gtk2_ardour/SAE-us-nokeypad.bindings  $Etc
 cp ../../gtk2_ardour/ardour.menus $Etc
 cp ../../gtk2_ardour/ardour-sae.menus $Etc
 if test x$SAE != x ; then
-    cp ../../ardour_system_sae.rc $Etc/ardour_system.rc
-    echo cp ../../ardour_system_sae.rc $Etc/ardour_system.rc
-    cp ../../instant.xml.sae $Etc/instant.xml
-    echo cp ../../instant.xml.sae $Etc/instant.xml
+	cp ../../ardour_system_sae.rc $Etc/ardour_system.rc
+	echo cp ../../ardour_system_sae.rc $Etc/ardour_system.rc
+	cp ../../instant.xml.sae $Etc/instant.xml
+	echo cp ../../instant.xml.sae $Etc/instant.xml
 else
-    cp ../../ardour_system.rc $Etc/ardour_system.rc
-    echo cp ../../ardour_system.rc $Etc/ardour_system.rc
-    cp ../../instant.xml $Etc/instant.xml
-    echo cp ../../instant.xml $Etc/instant.xml
+	cp ../../ardour_system.rc $Etc/ardour_system.rc
+	echo cp ../../ardour_system.rc $Etc/ardour_system.rc
+	cp ../../instant.xml $Etc/instant.xml
+	echo cp ../../instant.xml $Etc/instant.xml
 fi
 cp ../../gtk2_ardour/ardour2_ui_sae.conf $Etc
 cp ../../gtk2_ardour/ardour2_ui_default.conf $Etc
@@ -513,7 +517,7 @@ cp -r ../../gtk2_ardour/pixmaps $Etc
 #
 
 if [ -d specialSauce ] ; then
-    cp -r specialSauce $Etc
+	cp -r specialSauce $Etc
 fi
 
 # share stuff
@@ -523,7 +527,7 @@ cp ../../templates/*.template $Shared/templates/
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type d`; do
-    rm -rf $svndir
+	rm -rf $svndir
 done
 
 #
@@ -532,23 +536,23 @@ done
 
 if [ x$SAE != x ] ; then
 	
-    # SAE packaging
-    
-    echo "Creating SAE packaging directory"
-    cp HowToInstallArdourSAE.pdf "$APPDIR/How To Install Ardour SAE.pdf"
-    cp SAE-de-keypad.pdf "$APPDIR/Ardour SAE Shortcuts (keypad).pdf"
-    cp SAE-de-nokeypad.pdf "$APPDIR/Ardour SAE Shortcuts.pdf"
-    
+	# SAE packaging
+	
+	echo "Creating SAE packaging directory"
+	cp HowToInstallArdourSAE.pdf "$APPDIR/How To Install Ardour SAE.pdf"
+	cp SAE-de-keypad.pdf "$APPDIR/Ardour SAE Shortcuts (keypad).pdf"
+	cp SAE-de-nokeypad.pdf "$APPDIR/Ardour SAE Shortcuts.pdf"
+	
 elif [ x$MIXBUS != x ] ; then
 
-     # Mixbus packaging
+	# Mixbus packaging
 
-    echo "Creating Mixbus packaging directory"
-    cp MixBus_Install_QuickStart.pdf "$APPDIR/Mixbus Install & Quick Start Guide.pdf"
-    
-    if [ -x $EXTERNAL_JACK != x ] ; then
-	cp $EXTERNAL_JACK $PRODUCT_PKG_DIR
-    fi
+	echo "Creating Mixbus packaging directory"
+	cp MixBus_Install_QuickStart.pdf "$APPDIR/Mixbus Install & Quick Start Guide.pdf"
+	
+	if [ -x $EXTERNAL_JACK != x ] ; then
+		cp $EXTERNAL_JACK $PRODUCT_PKG_DIR
+	fi
 fi
 
 #echo "Building tarball ..."
