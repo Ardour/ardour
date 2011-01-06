@@ -140,6 +140,7 @@ public:
 		}
 
 		_children.clear ();
+		_active = 0;
 	}
 
 	void select_all ()
