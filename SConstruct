@@ -1226,6 +1226,12 @@ timefx_subdirs = ['libs/soundtouch']
 if env['RUBBERBAND']:
     timefx_subdirs += ['libs/rubberband']
 
+#
+# Tools
+#
+tools_subdirs = [ 'tools/sanity_check' ]
+
+
 opts.Save('scache.conf', env)
 Help(opts.GenerateHelpText(env))
 
@@ -1403,7 +1409,7 @@ create_stored_revision()
 for subdir in coredirs:
     SConscript (subdir + '/SConscript')
 
-for sublistdir in [ subdirs, timefx_subdirs, gtk_subdirs, surface_subdirs ]:
+for sublistdir in [ subdirs, timefx_subdirs, gtk_subdirs, surface_subdirs, tools_subdirs ]:
     for subdir in sublistdir:
         SConscript (subdir + '/SConscript')
 
