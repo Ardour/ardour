@@ -1226,19 +1226,19 @@ style "processor_list"
 # Colour of the frame of the fader in the processor list
 style "processor_fader_frame"
 {
-	bg[NORMAL] = { 0.6, 0.6, 0.6 }
+	bg[NORMAL] = { 0.5, 0.5, 0.5 }
 }
 
 # A pre-fader processor's background
 style "processor_prefader"
 {
-	bg[NORMAL] = { 0.2, 0.0, 0.0 }
+	bg[NORMAL] = { 0.3, 0.0, 0.0 }
 }
 
 # A pre-fader processor's frame
 style "processor_prefader_frame"
 {
-	bg[NORMAL] = { 0.0, 0.0, 0.99 }
+	bg[NORMAL] = { 0.5, 0.0, 0.0 }
 }
 
 # The fader processor
@@ -1250,13 +1250,13 @@ style "processor_fader"
 # A post-fader processor's background
 style "processor_postfader"
 {
-	bg[NORMAL] = { 0.0, 0.2, 0.0 }
+	bg[NORMAL] = { 0.1, 0.3, 0.1 }
 }
 
 # A post-fader processor's frame
 style "processor_postfader_frame"
 {
-	bg[NORMAL] = { 0.0, 0.99, 0.99 }
+	bg[NORMAL] = { 0.1, 0.5, 0.1 }
 }
 
 # MixerPanZone:
