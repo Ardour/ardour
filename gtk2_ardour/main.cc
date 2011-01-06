@@ -79,7 +79,7 @@ fixup_bundle_environment (int argc, char* argv[])
 		return;
 	}
 	
-        EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency);
+        EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true));
 
 	set_language_preference ();
 
@@ -273,7 +273,7 @@ fixup_bundle_environment (int argc, char* argv[])
 		return;
 	}
 
-        EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency);
+        EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true));
 	
 	Glib::ustring exec_path = argv[0];
 	Glib::ustring dir_path = Glib::path_get_dirname (Glib::path_get_dirname (exec_path));
