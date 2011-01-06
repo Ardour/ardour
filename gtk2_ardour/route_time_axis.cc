@@ -321,6 +321,10 @@ RouteTimeAxisView::label_view ()
 		name_entry.set_text (x);
 	}
 
+	if (x != name_label.get_text()) {
+		name_label.set_text (x);
+	}
+
 	ARDOUR_UI::instance()->set_tip (name_entry, x);
 }
 
@@ -334,7 +338,6 @@ RouteTimeAxisView::route_property_changed (const PropertyChange& what_changed)
 
 void
 RouteTimeAxisView::take_name_changed (void *src)
-
 {
 	if (src != this) {
 		label_view ();
