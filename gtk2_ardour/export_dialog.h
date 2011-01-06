@@ -47,7 +47,7 @@ class ExportDialog : public ArdourDialog {
 
   public:
 
-	explicit ExportDialog (PublicEditor & editor, std::string title);
+	ExportDialog (PublicEditor & editor, std::string title, std::string xml_node_name);
 	~ExportDialog ();
 
 	void set_session (ARDOUR::Session* s);
@@ -65,6 +65,7 @@ class ExportDialog : public ArdourDialog {
 	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
 
+	std::string     xml_node_name;
 	HandlerPtr      handler;
 	ManagerPtr      profile_manager;
 
@@ -160,7 +161,7 @@ class ExportSelectionDialog : public ExportDialog
 
 class ExportRegionDialog : public ExportDialog
 {
-	public:
+  public:
 	ExportRegionDialog (PublicEditor & editor, ARDOUR::AudioRegion const & region, ARDOUR::AudioTrack & track);
 
   private:
@@ -169,6 +170,15 @@ class ExportRegionDialog : public ExportDialog
 
 	ARDOUR::AudioRegion const & region;
 	ARDOUR::AudioTrack & track;
+};
+
+class StemExportDialog : public ExportDialog
+{
+  public:
+	StemExportDialog (PublicEditor & editor);
+	
+  private:
+	void init_components ();
 };
 
 #endif /* __ardour_export_dialog_h__ */

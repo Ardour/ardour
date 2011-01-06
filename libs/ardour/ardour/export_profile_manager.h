@@ -55,7 +55,7 @@ class ExportProfileManager
 {
   public:
 
-	ExportProfileManager (Session & s);
+	ExportProfileManager (Session & s, std::string xml_node_name);
 	~ExportProfileManager ();
 
 	void load_profile ();
@@ -75,6 +75,7 @@ class ExportProfileManager
 	typedef std::pair<PBD::UUID, PBD::sys::path> FilePair;
 	typedef std::map<PBD::UUID, PBD::sys::path> FileMap;
 
+	std::string const xml_node_name;
 	HandlerPtr  handler;
 	Session &   session;
 
@@ -174,6 +175,8 @@ class ExportProfileManager
 	typedef std::list<ChannelConfigStatePtr> ChannelConfigStateList;
 
 	ChannelConfigStateList const & get_channel_configs () { return check_list (channel_configs); }
+	void clear_channel_configs () { channel_configs.clear(); }
+	ChannelConfigStatePtr add_channel_config ();
 
   private:
 

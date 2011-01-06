@@ -502,3 +502,96 @@ RegionExportChannelSelector::handle_selection ()
 
 	CriticalSelectionChanged ();
 }
+
+TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager)
+  : ExportChannelSelector(session, manager)
+{
+	track_scroller.add (track_view);
+	track_scroller.set_size_request (-1, 130);
+	track_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	pack_start(track_scroller);
+	
+	// Track list
+	track_list = Gtk::ListStore::create (track_cols);
+	track_view.set_model (track_list);
+	track_view.set_headers_visible (true);
+	
+	track_view.append_column_editable (_("Track"), track_cols.selected);
+	Gtk::CellRendererToggle *toggle = dynamic_cast<Gtk::CellRendererToggle *>(track_view.get_column_cell_renderer (0));
+	toggle->signal_toggled().connect (sigc::hide (sigc::mem_fun (*this, &TrackExportChannelSelector::update_config)));
+
+	Gtk::CellRendererText* text_renderer = Gtk::manage (new Gtk::CellRendererText);
+	text_renderer->property_editable() = false;
+
+	Gtk::TreeView::Column* column = track_view.get_column (0);
+	column->pack_start (*text_renderer);
+	column->add_attribute (text_renderer->property_text(), track_cols.label);
+	
+	fill_list();
+	
+	show_all_children ();
+}
+
+void
+TrackExportChannelSelector::sync_with_manager ()
+{
+	// TODO implement properly
+	update_config();
+}
+
+void
+TrackExportChannelSelector::fill_list()
+{
+	track_list->clear();
+	RouteList routes = *_session->get_routes();
+
+	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
+		Route * route = it->get();
+		if(dynamic_cast<AudioTrack *>(route)) {
+			add_track(route->output().get());
+		}
+	}
+}
+
+void
+TrackExportChannelSelector::add_track(IO * io)
+{
+	Gtk::TreeModel::iterator iter = track_list->append();
+	Gtk::TreeModel::Row row = *iter;
+
+	row[track_cols.selected] = true;
+	row[track_cols.label] = io->name();
+	row[track_cols.track] = io;
+}
+
+void
+TrackExportChannelSelector::update_config()
+{
+	manager->clear_channel_configs();
+
+	for (Gtk::ListStore::Children::iterator it = track_list->children().begin(); it != track_list->children().end(); ++it) {
+		Gtk::TreeModel::Row row = *it;
+
+		if (!row[track_cols.selected]) {
+			continue;
+		}
+		
+		ExportProfileManager::ChannelConfigStatePtr state = manager->add_channel_config();
+		
+		IO * track = row[track_cols.track];
+		uint32_t outs = track->n_ports().n_audio();
+		for (uint32_t i = 0; i < outs; ++i) {
+			AudioPort * port = track->audio (i);
+			if(port) {
+				ExportChannelPtr channel (new PortExportChannel ());
+				PortExportChannel * pec = static_cast<PortExportChannel *> (channel.get());
+				pec->add_port(port);
+				state->config->register_channel(channel);
+			}
+		}
+		
+		state->config->set_name(track->name());
+	}
+
+	CriticalSelectionChanged ();
+}

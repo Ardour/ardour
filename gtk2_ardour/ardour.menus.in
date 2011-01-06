@@ -22,6 +22,7 @@
            <menuitem action='importFromSession'/>
            <menu name='Export' action='Export'>
                <menuitem action='ExportAudio'/>
+               <menuitem action='StemExport'/>
            </menu>
            <menu name='Cleanup' action='Cleanup'>
                <menuitem action='CleanupUnused'/>

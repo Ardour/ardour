@@ -291,6 +291,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* export */
 
 	void export_audio ();
+	void stem_export ();
 	void export_selection ();
 	void export_range ();
 	void export_region ();

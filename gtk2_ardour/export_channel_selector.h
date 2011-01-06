@@ -47,6 +47,7 @@ class ExportChannelSelector : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
   protected:
 	typedef boost::shared_ptr<ARDOUR::ExportChannelConfiguration> ChannelConfigPtr;
+	typedef std::list<ChannelConfigPtr> ChannelConfigList;
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ProfileManagerPtr;
 
 	ProfileManagerPtr manager;
@@ -223,6 +224,39 @@ class RegionExportChannelSelector : public ExportChannelSelector
 	Gtk::RadioButton      raw_button;
 	Gtk::RadioButton      fades_button;
 	Gtk::RadioButton      processed_button;
+};
+
+class TrackExportChannelSelector : public ExportChannelSelector
+{
+  public:
+	TrackExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager);
+	
+	virtual void sync_with_manager ();
+	
+  private:
+
+	void fill_list();
+	void add_track(ARDOUR::IO * io);
+	void update_config();
+	
+	ChannelConfigList configs;
+	
+	struct TrackCols : public Gtk::TreeModelColumnRecord
+	{
+	  public:
+		Gtk::TreeModelColumn<ARDOUR::IO *>  track;
+		Gtk::TreeModelColumn<std::string>   label;
+		Gtk::TreeModelColumn<bool>          selected;
+
+		TrackCols () { add (track); add(label); add(selected); }
+	};
+	TrackCols                    track_cols;
+
+	Glib::RefPtr<Gtk::ListStore> track_list;
+	Gtk::TreeView                track_view;
+
+	Gtk::ScrolledWindow          track_scroller;
+	
 };
 
 #endif /* __export_channel_selector_h__ */

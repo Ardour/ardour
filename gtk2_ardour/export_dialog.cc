@@ -36,13 +36,14 @@ using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 
-ExportDialog::ExportDialog (PublicEditor & editor, std::string title) :
-  ArdourDialog (title),
-  editor (editor),
+ExportDialog::ExportDialog (PublicEditor & editor, std::string title, std::string xml_node_name)
+  : ArdourDialog (title)
+  , xml_node_name (xml_node_name)
+  , editor (editor)
 
-  warn_label ("", Gtk::ALIGN_LEFT),
-  list_files_label (_("<span color=\"#ffa755\">Some already existing files will be overwritten.</span>"), Gtk::ALIGN_RIGHT),
-  list_files_button (_("List files"))
+  , warn_label ("", Gtk::ALIGN_LEFT)
+  , list_files_label (_("<span color=\"#ffa755\">Some already existing files will be overwritten.</span>"), Gtk::ALIGN_RIGHT)
+  , list_files_button (_("List files"))
 { }
 
 ExportDialog::~ExportDialog ()
@@ -61,7 +62,7 @@ ExportDialog::set_session (ARDOUR::Session* s)
 
 	handler = _session->get_export_handler ();
 	status = _session->get_export_status ();
-	profile_manager.reset (new ExportProfileManager (*_session));
+	profile_manager.reset (new ExportProfileManager (*_session, xml_node_name));
 
 	/* Possibly init stuff in derived classes */
 
@@ -381,7 +382,7 @@ ExportDialog::add_warning (string const & text)
 /*** Dialog specializations ***/
 
 ExportRangeDialog::ExportRangeDialog (PublicEditor & editor, string range_id) :
-  ExportDialog (editor, _("Export Range")),
+  ExportDialog (editor, _("Export Range"), X_("RangeExportProfile")),
   range_id (range_id)
 {}
 
@@ -395,7 +396,7 @@ ExportRangeDialog::init_components ()
 }
 
 ExportSelectionDialog::ExportSelectionDialog (PublicEditor & editor) :
-  ExportDialog (editor, _("Export Selection"))
+  ExportDialog (editor, _("Export Selection"), X_("SelectionExportProfile"))
 {}
 
 void
@@ -408,7 +409,7 @@ ExportSelectionDialog::init_components ()
 }
 
 ExportRegionDialog::ExportRegionDialog (PublicEditor & editor, ARDOUR::AudioRegion const & region, ARDOUR::AudioTrack & track) :
-  ExportDialog (editor, _("Export Region")),
+  ExportDialog (editor, _("Export Region"), X_("RegionExportProfile")),
   region (region),
   track (track)
 {}
@@ -431,3 +432,19 @@ ExportRegionDialog::init_components ()
 	channel_selector.reset (new RegionExportChannelSelector (_session, profile_manager, region, track));
 	file_notebook.reset (new ExportFileNotebook ());
 }
+
+StemExportDialog::StemExportDialog (PublicEditor & editor)
+  : ExportDialog(editor, _("Stem Export"), X_("StemExportProfile"))
+{
+	
+}
+
+void
+StemExportDialog::init_components ()
+{
+	preset_selector.reset (new ExportPresetSelector ());
+	timespan_selector.reset (new ExportTimespanSelectorMultiple (_session, profile_manager));
+	channel_selector.reset (new TrackExportChannelSelector (_session, profile_manager));
+	file_notebook.reset (new ExportFileNotebook ());
+}
+

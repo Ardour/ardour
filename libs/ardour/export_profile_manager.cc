@@ -49,15 +49,16 @@ using namespace PBD;
 namespace ARDOUR
 {
 
-ExportProfileManager::ExportProfileManager (Session & s) :
-  handler (s.get_export_handler()),
-  session (s),
+ExportProfileManager::ExportProfileManager (Session & s, std::string xml_node_name)
+  : xml_node_name (xml_node_name)
+  , handler (s.get_export_handler())
+  , session (s)
 
-  session_range (new Location (s)),
-  ranges (new LocationList ()),
-  single_range_mode (false),
+  , session_range (new Location (s))
+  , ranges (new LocationList ())
+  , single_range_mode (false)
 
-  format_list (new FormatList ())
+  , format_list (new FormatList ())
 {
 
 	/* Initialize path variables */
@@ -68,13 +69,13 @@ ExportProfileManager::ExportProfileManager (Session & s) :
 
 	search_path += ardour_search_path().add_subdirectory_to_paths("export");
 
-        sys::path sys_export = ardour_module_directory();
-        sys_export /= "export";
-        
+	sys::path sys_export = ardour_module_directory();
+	sys_export /= "export";
+
 	search_path += sys_export;
 
-        info << string_compose (_("Searching for export formats in %1"), search_path.to_string()) << endmsg;
-        cerr << string_compose (_("Searching for export formats in %1"), search_path.to_string()) << endl;
+	info << string_compose (_("Searching for export formats in %1"), search_path.to_string()) << endmsg;
+	cerr << string_compose (_("Searching for export formats in %1"), search_path.to_string()) << endl;
 
 	/* create export config directory if necessary */
 
@@ -98,7 +99,7 @@ ExportProfileManager::~ExportProfileManager ()
 {
 	if (single_range_mode) { return; }
 
-	XMLNode * instant_xml (new XMLNode ("ExportProfile"));
+	XMLNode * instant_xml (new XMLNode (xml_node_name));
 	serialize_profile (*instant_xml);
 	session.add_instant_xml (*instant_xml, false);
 }
@@ -106,11 +107,11 @@ ExportProfileManager::~ExportProfileManager ()
 void
 ExportProfileManager::load_profile ()
 {
-	XMLNode * instant_node = session.instant_xml ("ExportProfile");
+	XMLNode * instant_node = session.instant_xml (xml_node_name);
 	if (instant_node) {
 		set_state (*instant_node);
 	} else {
-		XMLNode empty_node ("ExportProfile");
+		XMLNode empty_node (xml_node_name);
 		set_state (empty_node);
 	}
 }
@@ -118,17 +119,19 @@ ExportProfileManager::load_profile ()
 void
 ExportProfileManager::prepare_for_export ()
 {
-	ChannelConfigPtr channel_config = channel_configs.front()->config;
 	TimespanListPtr ts_list = timespans.front()->timespans;
 
 	FormatStateList::const_iterator format_it;
 	FilenameStateList::const_iterator filename_it;
 
+	// For each timespan
 	for (TimespanList::iterator ts_it = ts_list->begin(); ts_it != ts_list->end(); ++ts_it) {
+		// ..., each format-filename pair
 		for (format_it = formats.begin(), filename_it = filenames.begin();
 		     format_it != formats.end() && filename_it != filenames.end();
 		     ++format_it, ++filename_it) {
 
+			FilenamePtr filename = (*filename_it)->filename;
 //			filename->include_timespan = (ts_list->size() > 1); Disabled for now...
 
 			boost::shared_ptr<BroadcastInfo> b;
@@ -136,8 +139,12 @@ ExportProfileManager::prepare_for_export ()
 				b.reset (new BroadcastInfo);
 				b->set_from_session (session, (*ts_it)->get_start());
 			}
-			
-			handler->add_export_config (*ts_it, channel_config, (*format_it)->format, (*filename_it)->filename, b);
+
+			// ...and each channel config
+			filename->include_channel_config = (channel_configs.size() > 1);
+			for(ChannelConfigStateList::iterator cc_it = channel_configs.begin(); cc_it != channel_configs.end(); ++cc_it) {
+				handler->add_export_config (*ts_it, (*cc_it)->config, (*format_it)->format, filename, b);
+			}
 		}
 	}
 }
@@ -438,6 +445,14 @@ ExportProfileManager::update_ranges () {
 			ranges->push_back (*it);
 		}
 	}
+}
+
+ExportProfileManager::ChannelConfigStatePtr
+ExportProfileManager::add_channel_config ()
+{
+	ChannelConfigStatePtr ptr(new ChannelConfigState(handler->add_channel_config()));
+	channel_configs.push_back(ptr);
+	return ptr;
 }
 
 bool

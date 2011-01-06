@@ -187,6 +187,7 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::Sndfil
 {
 	unsigned channels = config.channel_config->get_n_chans();
 	int format = get_real_format (config);
+	config.filename->set_channel_config(config.channel_config);
 	string filename = config.filename->get_path (config.format);
 	
 	writer.reset (new AudioGrapher::SndfileWriter<T> (filename, format, channels, config.format->sample_rate(), config.broadcast_info));

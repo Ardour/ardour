@@ -210,6 +210,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	/** Open main export dialog */
 	virtual void export_audio () = 0;
+	
+	/** Open stem export dialog */
+	virtual void stem_export () = 0;
 
 	/** Open export dialog with current selection pre-selected */
 	virtual void export_selection () = 0;

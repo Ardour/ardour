@@ -62,7 +62,7 @@ class ExportChannelConfiguration : public boost::enable_shared_from_this<ExportC
 	ChannelList const & get_channels () const { return channels; }
 	bool all_channels_have_ports () const;
 
-        std::string name () const { return _name; }
+	std::string name () const { return _name; }
 	void set_name (std::string name) { _name = name; }
 	void set_split (bool value) { split = value; }
 
