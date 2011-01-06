@@ -83,6 +83,9 @@ RouteGroupMenu::add_item (RouteGroup* rg, RouteGroup* curr, RadioMenuItem::Group
 	}
 }
 
+/** Called when a group is selected from the menu.
+ *  @param Group, or 0 for none.
+ */
 void
 RouteGroupMenu::set_group (RouteGroup* g)
 {
