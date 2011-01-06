@@ -21,6 +21,7 @@
 #include <iostream>
 
 #include "pbd/epa.h"
+#include "pbd/strsplit.h"
 
 extern char** environ;
 
@@ -29,8 +30,9 @@ using namespace std;
 
 EnvironmentalProtectionAgency* EnvironmentalProtectionAgency::_global_epa = 0;
 
-EnvironmentalProtectionAgency::EnvironmentalProtectionAgency (bool arm)
+EnvironmentalProtectionAgency::EnvironmentalProtectionAgency (bool arm, const std::string& envname)
         : _armed (arm)
+        , _envname (envname)
 {
         if (_armed) {
                 save ();
@@ -55,22 +57,69 @@ EnvironmentalProtectionAgency::save ()
 {
         e.clear ();
 
-        for (size_t i = 0; environ[i]; ++i) {
+        if (!_envname.empty()) {
+                
+                /* fetch environment from named environment string
+                 */
 
-                string estring = environ[i];
-                string::size_type equal = estring.find_first_of ('=');
+                cerr << "Look for " << _envname << endl;
 
-                if (equal == string::npos) {
-                        /* say what? an environ value without = ? */
-                        continue;
+                const char* estr = getenv (_envname.c_str());
+
+                cerr << " result = [" << estr << ']' << endl;
+
+                if (!estr) {
+                        return;
                 }
+                
+                /* parse line by line, and save into "e" 
+                 */
 
-                string before = estring.substr (0, equal);
-                string after = estring.substr (equal+1);
+                vector<string> lines;
+                split (estr, lines, '\n');
 
-                cerr << "Save [" << before << "] = " << after << endl;
+                cerr << "Parsed to " << lines.size() << " lines\n";
+                
+                for (vector<string>::iterator i = lines.begin(); i != lines.end(); ++i) {
 
-                e.insert (pair<string,string>(before,after));
+                        string estring = *i;
+                        string::size_type equal = estring.find_first_of ('=');
+                        
+                        if (equal == string::npos) {
+                                /* say what? an environ value without = ? */
+                                continue;
+                        }
+                        
+                        string before = estring.substr (0, equal);
+                        string after = estring.substr (equal+1);
+                        
+                        cerr << "EN:Save [" << before << "] = " << after << endl;
+                        
+                        e.insert (pair<string,string>(before,after));
+                }
+                
+        } else {
+
+                /* fetch environment from "environ"
+                 */
+
+                for (size_t i = 0; environ[i]; ++i) {
+                        
+                        string estring = environ[i];
+                        string::size_type equal = estring.find_first_of ('=');
+                        
+                        if (equal == string::npos) {
+                                /* say what? an environ value without = ? */
+                                continue;
+                        }
+                        
+                        string before = estring.substr (0, equal);
+                        string after = estring.substr (equal+1);
+                        
+                        cerr << "Save [" << before << "] = " << after << endl;
+                        
+                        e.insert (pair<string,string>(before,after));
+                }
         }
 }                         
 void

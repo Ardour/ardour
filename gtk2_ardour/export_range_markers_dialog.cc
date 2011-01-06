@@ -111,7 +111,6 @@ string
 ExportRangeMarkersDialog::get_target_filepath(string path, string filename, string postfix)
 {
 	string target_filepath = Glib::build_filename (path, filename + postfix);
-	struct stat statbuf;
 	
 	for (int counter=1; Glib::file_test (target_filepath, Glib::FILE_TEST_EXISTS); counter++) {
 		// while file exists	

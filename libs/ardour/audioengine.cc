@@ -1130,6 +1130,8 @@ AudioEngine::connect_to_jack (string client_name)
         /* revert all environment settings back to whatever they were when ardour started
          */
 
+        cerr << "STarting JACK, global EPA = " << global_epa << endl;
+
         if (global_epa) {
                 global_epa->restore ();
         }
