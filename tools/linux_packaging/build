@@ -202,7 +202,7 @@ echo export 'PATH=/usr/local/bin:/opt/bin:$PATH' >> $ENVIRONMENT
 
 # create startup helper script
 
-sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' < ardour.sh.in > $APPBIN/ardour2
+sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/' < ardour.sh.in > $APPBIN/ardour2
 rm $ENVIRONMENT && chmod 775 $APPBIN/ardour2
 MAIN_EXECUTABLE=ardour-$release_version
 

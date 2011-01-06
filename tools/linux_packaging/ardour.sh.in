@@ -1,5 +1,8 @@
 #!/bin/sh
 
+export LD_LIBRARY_PATH=""	#This needs to be set empty so that epa can swap between empty and the bundled version
+export PREBUNDLE_ENV="$(env)"
+
 BIN_DIR=$(dirname $(readlink -f $0))
 INSTALL_DIR=$(dirname $BIN_DIR)
 LIB_DIR=$INSTALL_DIR/lib
@@ -29,7 +32,7 @@ export LD_LIBRARY_PATH=$INSTALL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 sed "s?@ROOTDIR@/modules?$LIB_DIR/modules?" < $ETC_DIR/pango.modules.in > $USER_ARDOUR_DIR/pango.modules
 sed "s?@ROOTDIR@/loaders?$LIB_DIR/loaders?" < $ETC_DIR/gdk-pixbuf.loaders.in > $USER_ARDOUR_DIR/gdk-pixbuf.loaders
 
-exec $INSTALL_DIR/bin/ardour-2.8.11 "$@"
+exec $INSTALL_DIR/bin/ardour-%VER% "$@"
 
 
 
