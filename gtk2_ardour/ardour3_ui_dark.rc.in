@@ -1223,16 +1223,22 @@ style "processor_list"
 	GtkCheckButton::indicator-spacing = 0
 }
 
-style "processor_frame"
+# Colour of the frame of the fader in the processor list
+style "processor_fader_frame"
 {
-	# Colour of the frame of a processor in the processor list
 	bg[NORMAL] = { 0.6, 0.6, 0.6 }
 }
 
-# A pre-fader processor
+# A pre-fader processor's background
 style "processor_prefader"
 {
 	bg[NORMAL] = { 0.2, 0.0, 0.0 }
+}
+
+# A pre-fader processor's frame
+style "processor_prefader_frame"
+{
+	bg[NORMAL] = { 0.0, 0.0, 0.99 }
 }
 
 # The fader processor
@@ -1241,10 +1247,16 @@ style "processor_fader"
 	bg[NORMAL] = { 0.4, 0.4, 0.4 }
 }
 
-# A post-fader processor
+# A post-fader processor's background
 style "processor_postfader"
 {
 	bg[NORMAL] = { 0.0, 0.2, 0.0 }
+}
+
+# A post-fader processor's frame
+style "processor_postfader_frame"
+{
+	bg[NORMAL] = { 0.0, 0.99, 0.99 }
 }
 
 # MixerPanZone:
@@ -1881,10 +1893,12 @@ widget "*OddPortGroups" style:highest "odd_port_groups"
 widget "*EvenPortGroups" style:highest "even_port_groups"
 widget "*MidiListView*" style:highest "white_tree_view"
 widget "*ProcessorList*" style:highest "processor_list"
-widget "*ProcessorFrame*" style:highest "processor_frame"
+widget "*ProcessorFaderFrame*" style:highest "processor_fader_frame"
 widget "*ProcessorPreFader" style:highest "processor_prefader"
+widget "*ProcessorPreFaderFrame" style:highest "processor_prefader_frame"
 widget "*ProcessorFader" style:highest "processor_fader"
 widget "*ProcessorPostFader" style:highest "processor_postfader"
+widget "*ProcessorPostFaderFrame" style:highest "processor_postfader_frame"
 widget "*PortMatrixLabel*" style:highest "small_text"
 widget "*MidiTracerTextView" style:highest "midi_tracer_textview"
 widget "*SoloIsolatedLED" style:highest "solo_isolate_led"

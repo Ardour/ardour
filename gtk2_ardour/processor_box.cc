@@ -103,8 +103,6 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	_vbox.pack_start (_hbox);
 	_frame.add (_vbox);
 
-	_frame.set_name ("ProcessorFrame");
-
 	_name.set_alignment (0, 0.5);
 	_name.set_text (name ());
 	_name.set_padding (2, 2);
@@ -112,6 +110,7 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	if (boost::dynamic_pointer_cast<Amp> (p)) {
 		/* Fader processor gets a special look */
 		_event_box.set_name ("ProcessorFader");
+		_frame.set_name ("ProcessorFaderFrame");
 		_name.set_padding (2, 4);
 	}
 
@@ -1092,6 +1091,10 @@ ProcessorBox::reordered ()
 void
 ProcessorBox::setup_entry_widget_names ()
 {
+	/* It just so happens that the action_widget() is the event box (which gives the background
+	 * colour) and the widget() is the frame, more by good luck than good judgement.
+	 */
+	
 	list<ProcessorEntry*> children = processor_display.children ();
 	bool pre_fader = true;
 	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
@@ -1100,8 +1103,10 @@ ProcessorBox::setup_entry_widget_names ()
 		} else {
 			if (pre_fader) {
 				(*i)->action_widget().set_name ("ProcessorPreFader");
+				(*i)->widget().set_name ("ProcessorPreFaderFrame");
 			} else {
 				(*i)->action_widget().set_name ("ProcessorPostFader");
+				(*i)->widget().set_name ("ProcessorPostFaderFrame");
 			}
 		}
 	}
