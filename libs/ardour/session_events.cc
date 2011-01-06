@@ -24,6 +24,7 @@
 
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audio_diskstream.h"
@@ -60,7 +61,7 @@ SessionEvent::operator new (size_t)
 {
 	CrossThreadPool* p = pool->per_thread_pool ();
 	SessionEvent* ev = static_cast<SessionEvent*> (p->alloc ());
-        cerr << "Allocating SessionEvent from " << p->name() << " ev @ " << ev << endl;
+        cerr << pthread_self() << " Allocating SessionEvent from " << p->name() << " ev @ " << ev << endl;
 	ev->own_pool = p;
 	return ev;
 }
@@ -71,7 +72,8 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 	Pool* p = pool->per_thread_pool ();
 	SessionEvent* ev = static_cast<SessionEvent*> (ptr);
 
-        cerr << "Deleting SessionEvent @ " << ev << " thread pool =  " << p->name() << " ev pool = " << ev->own_pool->name() << endl;
+        cerr << pthread_self() << " Deleting SessionEvent @ " << ev << " thread pool =  " << p->name() << " ev pool = " << ev->own_pool->name() << endl;
+        stacktrace (cerr, 20);
 	if (p == ev->own_pool) {
 		p->release (ptr);
 	} else {

@@ -246,9 +246,9 @@ void*
 CrossThreadPool::alloc () 
 {
 	void* ptr;
-        cerr << name() << " has " << pending.read_space() << " pending free entries waiting\n";
+        cerr << pthread_self() << ' ' << name() << " has " << pending.read_space() << " pending free entries waiting\n";
 	while (pending.read (&ptr, 1) == 1) {
-                cerr << name() << " pushes back a pending free list entry before allocating\n";
+                cerr << pthread_self() << ' ' << name() << " pushes back a pending free list entry before allocating\n";
 		free_list.write (&ptr, 1);
 	}
 	return Pool::alloc ();
