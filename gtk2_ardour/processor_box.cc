@@ -101,14 +101,17 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	_event_box.add (_name);
 	_hbox.pack_start (_event_box, true, true);
 	_vbox.pack_start (_hbox);
+	_frame.add (_vbox);
+
+	_frame.set_name ("ProcessorFrame");
 
 	_name.set_alignment (0, 0.5);
 	_name.set_text (name ());
 	_name.set_padding (2, 2);
 
 	if (boost::dynamic_pointer_cast<Amp> (p)) {
-		/* Highlight the fader processor so that pre- and post-fader processors are more obvious */
-		_event_box.modify_bg (STATE_NORMAL, Gdk::Color ("#4f4f4f"));
+		/* Fader processor gets a special look */
+		_event_box.set_name ("ProcessorFader");
 		_name.set_padding (2, 4);
 	}
 
@@ -128,7 +131,7 @@ ProcessorEntry::action_widget ()
 Gtk::Widget&
 ProcessorEntry::widget ()
 {
-	return _vbox;
+	return _frame;
 }
 
 string
@@ -295,9 +298,10 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	pack_start (processor_scroller, true, true);
 
 	processor_display.set_flags (CAN_FOCUS);
-	processor_display.set_name ("ProcessorSelector");
+	processor_display.set_name ("ProcessorList");
 	processor_display.set_size_request (48, -1);
 	processor_display.set_data ("processorbox", this);
+	processor_display.set_spacing (2);
 
 	processor_display.signal_enter_notify_event().connect (sigc::mem_fun(*this, &ProcessorBox::enter_notify), false);
 	processor_display.signal_leave_notify_event().connect (sigc::mem_fun(*this, &ProcessorBox::leave_notify), false);
@@ -989,6 +993,8 @@ ProcessorBox::redisplay_processors ()
 
 		i = j;
 	}
+
+	setup_entry_widget_names ();
 }
 
 /** Add a ProcessorWindowProxy for a processor to our list, if that processor does
@@ -1079,6 +1085,26 @@ void
 ProcessorBox::reordered ()
 {
 	compute_processor_sort_keys ();
+	setup_entry_widget_names ();
+}
+
+/* Name the Entry widgets according to pre- or post-fader so that they get coloured right */
+void
+ProcessorBox::setup_entry_widget_names ()
+{
+	list<ProcessorEntry*> children = processor_display.children ();
+	bool pre_fader = true;
+	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
+		if (boost::dynamic_pointer_cast<Amp>((*i)->processor())) {
+			pre_fader = false;
+		} else {
+			if (pre_fader) {
+				(*i)->action_widget().set_name ("ProcessorPreFader");
+			} else {
+				(*i)->action_widget().set_name ("ProcessorPostFader");
+			}
+		}
+	}
 }
 
 void

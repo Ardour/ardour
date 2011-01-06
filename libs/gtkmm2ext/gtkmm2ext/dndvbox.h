@@ -162,9 +162,9 @@ public:
 	/** Look at a y coordinate and find the children below y, and the ones either side.
 	 *  @param y y position.
 	 *  @param before Filled in with the child before, or 0.
-	 *  @param before Filled in with the child under y, or 0.
+	 *  @param at Filled in with the child under y, or 0.
 	 *  @param after Filled in with the child after, or 0.
-	 *  @return Fractional position in terms of child height.
+	 *  @return Fractional position in terms of child height, or -1 if not over a child.
 	 */
 	double get_children_around_position (int y, T** before, T** at, T** after) const
 	{
@@ -173,17 +173,28 @@ public:
 			return -1;
 		}
 
-		/* fractional position in terms of children */
-		double const nf = double (y) / _children.front()->widget().get_allocation().get_height ();
-
 		*before = 0;
 
-		int i = 0;
 		typename std::list<T*>::const_iterator j = _children.begin ();
-		while (i < int (nf) && j != _children.end()) {
+
+		/* index of current child */
+		int i = 0;
+		/* top of current child */
+		double top = 0;
+		/* bottom of current child */
+		double bottom = (*j)->widget().get_allocation().get_height ();
+
+		while (y >= bottom && j != _children.end()) {
+
+			top = bottom;
+			
 			*before = *j;
 			++i;
 			++j;
+
+			if (j != _children.end()) {
+				bottom += (*j)->widget().get_allocation().get_height ();
+			}
 		}
 
 		if (j == _children.end()) {
@@ -197,7 +208,7 @@ public:
 		++j;
 		*after = j != _children.end() ? *j : 0;
 
-		return nf;
+		return i + ((y - top) / (*at)->widget().get_allocation().get_height());
 	}
 
 	/** @param y y coordinate.
@@ -213,6 +224,10 @@ public:
 		r.second = get_children_around_position (y, &before, &r.first, &after);
 
 		return r;
+	}
+
+	void set_spacing (int s) {
+		_internal_vbox.set_spacing (s);
 	}
  
 	/** Children have been reordered by a drag */

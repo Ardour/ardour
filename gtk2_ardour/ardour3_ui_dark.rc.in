@@ -1205,34 +1205,46 @@ style "inspector_track_list_display" = "track_list_display"
  	base[SELECTED] = { 0.3, 0.3, 0.4 }
 }
 
-style "processor_list_display"
+style "processor_list"
 {
-	# font_name = "@FONT_SMALL@"
-	# text[NORMAL] = { 0.80, 0.80, 0.80 }
- 	# text[ACTIVE] = { 0.70, 0.70, 0.70 }
- 	# text[INSENSITIVE] = { 0, 0, 0 }
- 	# text[SELECTED] = { 0.9, 0.3, 0.3 }
-
-	# base[NORMAL] = { 0, 0, 0 }
- 	# base[ACTIVE] = { 0, 0, 0 }
- 	# base[INSENSITIVE] = { 0, 0, 0 }
- 	# base[SELECTED] = { 0, 0, 0 }
-
-	# # these two are explicitly used by the cell renderer for the
-        # # text
-
-	# fg[NORMAL] = { 0.5, 0.5, 0.5 }  # used for inactive
-	# fg[ACTIVE] = { 1.0, 1.0, 1.0 }  # used for active
-
 	font_name = "@FONT_SMALLER@"
+
+	# Basic background colour
 	bg[NORMAL] = { 0, 0, 0 }
+
 	# A selected processor
 	bg[SELECTED] = { 0, 0.5, 0.9 }
+
 	# A send processor whose level is being controlled by the fader
 	bg[ACTIVE] = { 0.19, 0.97, 0.69 }
 	fg[ACTIVE] = { 0.0, 0.0, 0.0 }
+
 	GtkCheckButton::indicator-size = 10
 	GtkCheckButton::indicator-spacing = 0
+}
+
+style "processor_frame"
+{
+	# Colour of the frame of a processor in the processor list
+	bg[NORMAL] = { 0.6, 0.6, 0.6 }
+}
+
+# A pre-fader processor
+style "processor_prefader"
+{
+	bg[NORMAL] = { 0.2, 0.0, 0.0 }
+}
+
+# The fader processor
+style "processor_fader"
+{
+	bg[NORMAL] = { 0.4, 0.4, 0.4 }
+}
+
+# A post-fader processor
+style "processor_postfader"
+{
+	bg[NORMAL] = { 0.0, 0.2, 0.0 }
 }
 
 # MixerPanZone:
@@ -1868,7 +1880,11 @@ widget "*EditorHScrollbar" style:highest "editor_hscrollbar"
 widget "*OddPortGroups" style:highest "odd_port_groups"
 widget "*EvenPortGroups" style:highest "even_port_groups"
 widget "*MidiListView*" style:highest "white_tree_view"
-widget "*ProcessorSelector*" style:highest "processor_list_display"
+widget "*ProcessorList*" style:highest "processor_list"
+widget "*ProcessorFrame*" style:highest "processor_frame"
+widget "*ProcessorPreFader" style:highest "processor_prefader"
+widget "*ProcessorFader" style:highest "processor_fader"
+widget "*ProcessorPostFader" style:highest "processor_postfader"
 widget "*PortMatrixLabel*" style:highest "small_text"
 widget "*MidiTracerTextView" style:highest "midi_tracer_textview"
 widget "*SoloIsolatedLED" style:highest "solo_isolate_led"

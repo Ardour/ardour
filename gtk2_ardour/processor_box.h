@@ -120,7 +120,8 @@ private:
 	void processor_active_changed ();
 	void processor_property_changed (const PBD::PropertyChange&);
 	std::string name () const;
-	
+
+	Gtk::Frame _frame;
 	Gtk::EventBox _event_box;
 	Gtk::Label _name;
 	Gtk::HBox _hbox;
@@ -292,6 +293,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void weird_plugin_dialog (ARDOUR::Plugin& p, ARDOUR::Route::ProcessorStreams streams);
 	void on_size_allocate (Gtk::Allocation &);
 
+	void setup_entry_widget_names ();
+	
 	static ProcessorBox* _current_processor_box;
 
 	static void rb_choose_aux (boost::weak_ptr<ARDOUR::Route>);
