@@ -226,7 +226,8 @@ ProcessorEntry::name () const
 SendProcessorEntry::SendProcessorEntry (boost::shared_ptr<Send> s, Width w)
 	: ProcessorEntry (s, w),
 	  _send (s),
-	  _adjustment (0, 0, 1, 0.01, 0.1),
+	  /* set the adjustment to a gain of 0dB so that the fader's default value is right */
+	  _adjustment (0.781787, 0, 1, 0.01, 0.1),
 	  _fader (_slider, &_adjustment, 0, false),
 	  _ignore_gain_change (false)
 {
