@@ -1,6 +1,8 @@
 #!/bin/sh
 
-export LD_LIBRARY_PATH=""	#This needs to be set empty so that epa can swap between empty and the bundled version
+#LD_LIBRARY_PATH needs to be set (empty) so that epa can swap between the original and the bundled version
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+
 export PREBUNDLE_ENV="$(env)"
 
 BIN_DIR=$(dirname $(readlink -f $0))

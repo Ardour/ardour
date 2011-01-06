@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# bundle
+
+if [ $# -eq 0 ] ; then
+	echo ""	 
+	echo "ERROR - Please specify build type"
+	echo "	  --public"
+	echo "	  --sae"
+	echo ""	 
+	exit 1
+fi
+
+while [ $# -gt 0 ] ; do
+	echo "arg = $1"
+	case $1 in
+
+	#
+	# top level build targets
+	#
+
+	--sae)
+		APPNAME=Ardour ;
+		shift ;;
+	--mixbus)
+		APPNAME=Mixbus ;
+		shift ;;
+	--public)
+		APPNAME=Ardour ;
+		shift ;;
+
+	*)
+		#catch all for unknown arguments
+		echo ""
+		echo "!!! ERROR !!! - Unknown argument $1"
+		echo ""
+		exit 1
+		;;
+	esac
+done
+
+
+release_version=`grep -m 1 '^ardour_version' ../../SConstruct | cut -d' ' -f 3 | sed "s/'//g"`
+svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d' ' -f 6 | sed 's/[";]//g'`
+
+X86_BUILD="${APPNAME}_x86-${release_version}_${svn_version}.tar.bz2"
+X86_64_BUILD="${APPNAME}_x86_64-${release_version}_${svn_version}.tar.bz2"
+PACKAGE="${APPNAME}-${release_version}_${svn_version}"
+
+if [ ! -e ${X86_BUILD} ]; then
+	echo ""
+	echo "!!! ERROR !!! - Can't locate x86 build file ${X86_BUILD}"
+	echo ""
+	exit 1
+fi
+
+if [ ! -e ${X86_64_BUILD} ]; then
+	echo ""
+	echo "!!! ERROR !!! - Can't locate x86_64 build file ${X86_64_BUILD}"
+	echo ""
+	exit 1
+fi
+
+echo "Cleaning up old files"
+
+#Get rid of any old packages of this same name.
+echo "Cleaning up old files"
+rm -f ${PACKAGE}.tar.bz2
+rm -rf ${PACKAGE}
+
+
+echo "Creating new package dir..."
+mkdir ${PACKAGE}
+cp ${X86_BUILD} ${PACKAGE}
+cp ${X86_64_BUILD} ${PACKAGE}
+cp install.sh ${PACKAGE}
+cp stage2.run ${PACKAGE}
+
+echo "Creating tarball..."
+tar -cjf ${PACKAGE}.tar.bz2 ${PACKAGE}

@@ -121,7 +121,7 @@ esac
 
 # setup directory structure
 
-APPDIR=${APPNAME}_${ARCH}
+APPDIR=${APPNAME}_${ARCH}-${release_version}_${svn_version}
 APPBIN=$APPDIR/bin
 APPLIB=$APPDIR/lib
 Libraries=$APPLIB
@@ -530,6 +530,14 @@ for svndir in `find $APPDIR -name .svn -type d`; do
 	rm -rf $svndir
 done
 
+#Sanity Check file
+if [ -e ../sanity_check/sanityCheck ]; then
+	cp ../sanity_check/sanityCheck $APPDIR
+else
+	echo "!!!ERROR !!! sanityCheck program is missing. packager will exit without being complete"
+	exit 1
+fi
+
 #
 # and now ... the final package
 # 
@@ -555,10 +563,10 @@ elif [ x$MIXBUS != x ] ; then
 	fi
 fi
 
-#echo "Building tarball ..."
+echo "Building tarball ..."
 
-#rm -f $APPNAME-$release_version.tar.bz2
-#tar -jcf $APPNAME-$release_version.tar.bz2 $APPDIR
+rm -f $APPDIR.tar.bz2
+tar -cjf $APPDIR.tar.bz2 $APPDIR
 
 echo "Done."
 

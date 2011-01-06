@@ -131,12 +131,12 @@ case `uname -m` in
 	i[3456789]86|x86|i86pc)
 		echo "Architecture is x86"
 		ARCH='x86'
-		BUNDLE_DIR=${PGM_NAME}_${ARCH}
+		BUNDLE_DIR=${PGM_NAME}_${ARCH}-*
 		;;
 	x86_64|amd64|AMD64)
 		echo "Architecture is x86_64"
 		ARCH='x86_64'
-		BUNDLE_DIR=${PGM_NAME}_${ARCH}
+		BUNDLE_DIR=${PGM_NAME}_${ARCH}-*
 		;;
 	*)
 		echo ""
@@ -146,6 +146,10 @@ case `uname -m` in
 		exit 1
 		;;
 esac
+
+# untar the correct bundle for us to install
+echo "Unpacking bundle for $ARCH"
+tar -xjf ${BUNDLE_DIR}.tar.bz2
 
 
 #######################
@@ -354,19 +358,19 @@ fi
 
 USER_GROUP_ADJUSTED="f"
 
-if ! ./sanityCheck -a > /dev/null;
+if ! ./${BUNDLE_DIR}/sanityCheck -a > /dev/null;
 then
 	echo ""
 	echo "System failed the quick sanity check... Looking for the cause"
 
-	if ! ./sanityCheck -rt > /dev/null;
+	if ! ./${BUNDLE_DIR}/sanityCheck -rt > /dev/null;
 	then
 		echo ""
 		echo "System does not allow realtime for the current user... Looking for a solution"		
 		
-		if ./sanityCheck -hasaudiogroup > /dev/null;
+		if ./${BUNDLE_DIR}/sanityCheck -hasaudiogroup > /dev/null;
 		then
-			if ./sanityCheck -memberaudiogroup > /dev/null 2>&1;
+			if ./${BUNDLE_DIR}/sanityCheck -memberaudiogroup > /dev/null 2>&1;
 			then
 				## This is an odd case. We have an audio group and are a member.
 				echo ""
@@ -382,7 +386,7 @@ then
 			else
 				# Not a member of an audio group. Try to fix it.
 				
-				if ./sanityCheck -hasgroup audio > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@audio.*rtprio";
+				if ./${BUNDLE_DIR}/sanityCheck -hasgroup audio > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@audio.*rtprio";
 				then
 					# add user to audio group
 					echo ""
@@ -404,7 +408,7 @@ then
 						read -p "Press ENTER to continue:" BLAH
 					fi
 
-				elif ./sanityCheck -hasgroup jackuser > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@jackuser.*rtprio";
+				elif ./${BUNDLE_DIR}/sanityCheck -hasgroup jackuser > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@jackuser.*rtprio";
 				then
 					# add user to jackuser group
 					echo ""
@@ -441,7 +445,7 @@ then
 		fi
 	fi
 
-	if ! ./sanityCheck -freqscaling > /dev/null;
+	if ! ./${BUNDLE_DIR}/sanityCheck -freqscaling > /dev/null;
 	then
 		echo ""
 		echo "!!! WARNING !!! - Your system seems to use frequency scaling."
@@ -455,7 +459,7 @@ then
 
 	if [ "f" = $USER_GROUP_ADJUSTED ];
 	then
-		if ! ./sanityCheck -memlock > /dev/null;
+		if ! ./${BUNDLE_DIR}/sanityCheck -memlock > /dev/null;
 		then
 			echo ""
 			echo "!!! WARNING !!! - You are not allowed to lock memory."
@@ -472,6 +476,10 @@ fi
 ########################
 # Install Complete
 ########################
+
+echo ""
+echo "Cleaning up"
+rm -rf ${BUNDLE_DIR}
 
 echo ""
 echo "!!! Install Complete !!!"
