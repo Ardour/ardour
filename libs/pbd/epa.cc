@@ -59,14 +59,10 @@ EnvironmentalProtectionAgency::save ()
 
         if (!_envname.empty()) {
                 
-                /* fetch environment from named environment string
+                /* fetch environment from named environment variable, rather than "environ"
                  */
 
-                cerr << "Look for " << _envname << endl;
-
                 const char* estr = getenv (_envname.c_str());
-
-                cerr << " result = [" << estr << ']' << endl;
 
                 if (!estr) {
                         return;
@@ -78,8 +74,6 @@ EnvironmentalProtectionAgency::save ()
                 vector<string> lines;
                 split (estr, lines, '\n');
 
-                cerr << "Parsed to " << lines.size() << " lines\n";
-                
                 for (vector<string>::iterator i = lines.begin(); i != lines.end(); ++i) {
 
                         string estring = *i;
@@ -92,8 +86,6 @@ EnvironmentalProtectionAgency::save ()
                         
                         string before = estring.substr (0, equal);
                         string after = estring.substr (equal+1);
-                        
-                        cerr << "EN:Save [" << before << "] = " << after << endl;
                         
                         e.insert (pair<string,string>(before,after));
                 }
@@ -116,8 +108,6 @@ EnvironmentalProtectionAgency::save ()
                         string before = estring.substr (0, equal);
                         string after = estring.substr (equal+1);
                         
-                        cerr << "Save [" << before << "] = " << after << endl;
-                        
                         e.insert (pair<string,string>(before,after));
                 }
         }
@@ -126,7 +116,6 @@ void
 EnvironmentalProtectionAgency::restore () const
 {
         for (map<string,string>::const_iterator i = e.begin(); i != e.end(); ++i) {
-                cerr << "Restore [" << i->first << "] = " << i->second << endl;
                 setenv (i->first.c_str(), i->second.c_str(), 1);
         }
 }                         

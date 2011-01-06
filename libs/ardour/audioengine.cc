@@ -22,6 +22,8 @@
 #include <vector>
 #include <sstream>
 
+#include <boost/scoped_ptr.hpp>
+
 #include <glibmm/timer.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/stacktrace.h>
@@ -1120,22 +1122,20 @@ AudioEngine::remove_connections_for (Port* port)
 int
 AudioEngine::connect_to_jack (string client_name)
 {
+        EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
+        boost::scoped_ptr<EnvironmentalProtectionAgency> current_epa;
 	jack_options_t options = JackNullOption;
 	jack_status_t status;
 	const char *server_name = NULL;
 
-        EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
-        EnvironmentalProtectionAgency current_epa (true); /* will restore settings when we leave scope */
-
         /* revert all environment settings back to whatever they were when ardour started
          */
 
-        cerr << "STarting JACK, global EPA = " << global_epa << endl;
-
         if (global_epa) {
+                current_epa.reset (new EnvironmentalProtectionAgency(true)); /* will restore settings when we leave scope */
                 global_epa->restore ();
         }
-	
+
 	jack_client_name = client_name; /* might be reset below */
 	_jack = jack_client_open (jack_client_name.c_str(), options, &status, server_name);
 

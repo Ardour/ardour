@@ -3,6 +3,7 @@
 #include <fstream>
 #include <map>
 
+#include <boost/scoped_ptr.hpp>
 #include <glibmm.h>
 #include <gtkmm/messagedialog.h>
 #include <pbd/xml++.h>
@@ -562,14 +563,13 @@ bool
 EngineControl::engine_running ()
 {
         EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
-        EnvironmentalProtectionAgency current_epa (true); /* will restore settings when we leave scope */
+        boost::scoped_ptr<EnvironmentalProtectionAgency> current_epa;
 
         /* revert all environment settings back to whatever they were when ardour started
          */
 
-        cerr << "STarting JACK, global EPA = " << global_epa << endl;
-
         if (global_epa) {
+                current_epa.reset (new EnvironmentalProtectionAgency(true)); /* will restore settings when we leave scope */
                 global_epa->restore ();
         }
 	
