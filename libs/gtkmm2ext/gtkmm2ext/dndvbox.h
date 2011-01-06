@@ -277,34 +277,24 @@ private:
 		_drag_source = this;
 	}
 
-	/* Draw the drag icon; we go to these lengths so that we can have the icon
-	 * transparent if the window system supports it.
-	 */
-	bool icon_expose (GdkEventExpose *)
+	/* Draw the drag icon */
+	bool icon_expose (GdkEventExpose* ev)
 	{
-		cairo_t* cr = gdk_cairo_create (_drag_icon->get_window()->gobj());
-		
-		if (_have_alpha) {
-			cairo_set_source_rgba (cr, 0.2, 0.2, 0.2, 0.5);
-		} else {
-			cairo_set_source_rgba (cr, 0, 0, 0, 1);
-		}
-		
-		cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
-		cairo_paint (cr);
-		cairo_set_source_rgba (cr, 1, 1, 1, 0.8);
+		/* Just grab the child's widget and use that */
 
-		cairo_text_extents_t ext;
-		cairo_text_extents (cr, _drag_child->drag_text().c_str(), &ext);
-		
-		cairo_move_to (cr, 0, ext.height);
-		cairo_show_text (cr, _drag_child->drag_text().c_str ());
-		cairo_restore (cr);
+		int w, h;
+		_drag_icon->get_size (w, h);
+
+		cairo_t* cr = gdk_cairo_create (_drag_icon->get_window()->gobj ());
+
+		Glib::RefPtr<Gdk::Pixmap> p = _drag_child->widget().get_snapshot();
+		gdk_cairo_set_source_pixmap (cr, p->gobj(), 0, 0);
+		cairo_rectangle (cr, 0, 0, w, h);
+		cairo_fill (cr);
 		cairo_destroy (cr);
-
+		
 		return false;
 	}
-	
 	
 	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const &, Gtk::SelectionData & selection_data, guint, guint, T* child)
 	{
