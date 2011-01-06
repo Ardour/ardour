@@ -1329,10 +1329,17 @@ MixerStrip::comment_changed (void *src)
 	}
 }
 
+/** Set the route group for this strip's route, or remove it from its current group.
+ *  @param rg New RouteGroup, or 0.
+ */
 void
 MixerStrip::set_route_group (RouteGroup *rg)
 {
-	rg->add (_route);
+	if (rg) {
+		rg->add (_route);
+	} else if (_route->route_group ()) {
+		_route->route_group()->remove (_route);
+	}
 }
 
 bool
