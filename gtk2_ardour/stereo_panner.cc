@@ -363,6 +363,7 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
                 if (ev->y < 20) {
                         /* top section of widget is for position drags */
                         dragging_position = true;
+                        StartPositionGesture ();
                 } else {
                         /* lower section is for dragging width */
                         
@@ -388,6 +389,7 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
                                         dragging_right = true;
                                 }
                         }
+                        StartWidthGesture ();
                 }
 
                 dragging = true;
@@ -402,6 +404,8 @@ StereoPanner::on_button_release_event (GdkEventButton* ev)
         if (ev->button != 1) {
                 return false;
         }
+
+        bool dp = dragging_position;
 
         dragging = false;
         dragging_position = false;
@@ -418,6 +422,12 @@ StereoPanner::on_button_release_event (GdkEventButton* ev)
                 /* reset to default */
                 position_control->set_value (0.5);
                 width_control->set_value (1.0);
+        } else {
+                if (dp) {
+                        StopPositionGesture ();
+                } else {
+                        StopWidthGesture ();
+                }
         }
 
         return true;

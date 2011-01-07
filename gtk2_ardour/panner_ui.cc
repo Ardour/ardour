@@ -375,8 +375,6 @@ PannerUI::setup_pan ()
 	uint32_t const nouts = _panner->nouts();
 	uint32_t const npans = _panner->npanners();
 
-        cerr << "Pan setup, outs == " << nouts << " pans = " << npans << endl;
-
 	if (int32_t (nouts) == _current_nouts && int32_t (npans) == _current_npans) {
 		return;
 	}
@@ -420,6 +418,20 @@ PannerUI::setup_pan ()
                                                            _panner->width_control());
                         _stereo_panner->set_size_request (-1, pan_bar_height);
                         panning_viewport.add (*_stereo_panner);
+
+                        boost::shared_ptr<AutomationControl> ac;
+
+                        ac = _panner->direction_control();
+                        _stereo_panner->StartPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
+                                                              boost::weak_ptr<AutomationControl> (ac)));
+                        _stereo_panner->StopPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
+                                                             boost::weak_ptr<AutomationControl>(ac)));
+
+                        ac = _panner->width_control();
+                        _stereo_panner->StartWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
+                                                              boost::weak_ptr<AutomationControl> (ac)));
+                        _stereo_panner->StopWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
+                                                             boost::weak_ptr<AutomationControl>(ac)));
 
                 } else {
                         

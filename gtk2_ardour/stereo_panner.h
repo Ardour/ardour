@@ -37,6 +37,11 @@ class StereoPanner : public Gtk::DrawingArea
 	StereoPanner (boost::shared_ptr<PBD::Controllable> pos, boost::shared_ptr<PBD::Controllable> width);
 	~StereoPanner ();
 
+	sigc::signal<void> StartPositionGesture;
+	sigc::signal<void> StopPositionGesture;
+	sigc::signal<void> StartWidthGesture;
+	sigc::signal<void> StopWidthGesture;
+
   protected:
 	bool on_expose_event (GdkEventExpose*);
 	bool on_button_press_event (GdkEventButton*);
