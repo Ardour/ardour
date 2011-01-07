@@ -21,6 +21,7 @@
 #include <iostream>
 
 #include "pbd/epa.h"
+#include "pbd/strsplit.h"
 
 extern char** environ;
 
@@ -29,8 +30,9 @@ using namespace std;
 
 EnvironmentalProtectionAgency* EnvironmentalProtectionAgency::_global_epa = 0;
 
-EnvironmentalProtectionAgency::EnvironmentalProtectionAgency (bool arm)
+EnvironmentalProtectionAgency::EnvironmentalProtectionAgency (bool arm, const std::string& envname)
         : _armed (arm)
+        , _envname (envname)
 {
         if (_armed) {
                 save ();
@@ -55,29 +57,65 @@ EnvironmentalProtectionAgency::save ()
 {
         e.clear ();
 
-        for (size_t i = 0; environ[i]; ++i) {
+        if (!_envname.empty()) {
+                
+                /* fetch environment from named environment variable, rather than "environ"
+                 */
 
-                string estring = environ[i];
-                string::size_type equal = estring.find_first_of ('=');
+                const char* estr = getenv (_envname.c_str());
 
-                if (equal == string::npos) {
-                        /* say what? an environ value without = ? */
-                        continue;
+                if (!estr) {
+                        return;
                 }
+                
+                /* parse line by line, and save into "e" 
+                 */
 
-                string before = estring.substr (0, equal);
-                string after = estring.substr (equal+1);
+                vector<string> lines;
+                split (estr, lines, '\n');
 
-                cerr << "Save [" << before << "] = " << after << endl;
+                for (vector<string>::iterator i = lines.begin(); i != lines.end(); ++i) {
 
-                e.insert (pair<string,string>(before,after));
+                        string estring = *i;
+                        string::size_type equal = estring.find_first_of ('=');
+                        
+                        if (equal == string::npos) {
+                                /* say what? an environ value without = ? */
+                                continue;
+                        }
+                        
+                        string before = estring.substr (0, equal);
+                        string after = estring.substr (equal+1);
+                        
+                        e.insert (pair<string,string>(before,after));
+                }
+                
+        } else {
+
+                /* fetch environment from "environ"
+                 */
+
+                for (size_t i = 0; environ[i]; ++i) {
+                        
+                        string estring = environ[i];
+                        string::size_type equal = estring.find_first_of ('=');
+                        
+                        if (equal == string::npos) {
+                                /* say what? an environ value without = ? */
+                                continue;
+                        }
+                        
+                        string before = estring.substr (0, equal);
+                        string after = estring.substr (equal+1);
+                        
+                        e.insert (pair<string,string>(before,after));
+                }
         }
 }                         
 void
 EnvironmentalProtectionAgency::restore () const
 {
         for (map<string,string>::const_iterator i = e.begin(); i != e.end(); ++i) {
-                cerr << "Restore [" << i->first << "] = " << i->second << endl;
                 setenv (i->first.c_str(), i->second.c_str(), 1);
         }
 }                         

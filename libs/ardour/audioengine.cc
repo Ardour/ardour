@@ -1278,19 +1278,17 @@ AudioEngine::remove_all_ports ()
 int
 AudioEngine::connect_to_jack (string client_name, string session_uuid)
 {
+        EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
+        boost::scoped_ptr<EnvironmentalProtectionAgency> current_epa;
 	jack_options_t options = JackNullOption;
 	jack_status_t status;
 	const char *server_name = NULL;
-
-        EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
-        EnvironmentalProtectionAgency current_epa (false);
 
         /* revert all environment settings back to whatever they were when ardour started
          */
 
         if (global_epa) {
-                current_epa.arm ();
-                current_epa.save ();
+                current_epa.reset (new EnvironmentalProtectionAgency(true)); /* will restore settings when we leave scope */
                 global_epa->restore ();
         }
 
