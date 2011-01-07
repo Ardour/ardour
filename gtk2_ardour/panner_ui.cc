@@ -608,58 +608,15 @@ PannerUI::pan_reset_all ()
 void
 PannerUI::effective_pan_display ()
 {
-	if (_panner->empty()) {
-		return;
+        if (_stereo_panner) {
+                _stereo_panner->queue_draw ();
+        } else if (twod_panner) {
+                twod_panner->queue_draw ();
+        } else {
+                for (vector<MonoPanner*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
+                        (*i)->queue_draw ();
+                }
 	}
-
-	switch (_panner->nouts()) {
-	case 0:
-	case 1:
-		/* relax: no panning */
-		break;
-
-	case 2:
-		update_pan_bars (true);
-		break;
-
-	default:
-		//panner->move_puck (pan_value (v, right), 0.5);
-		break;
-	}
-}
-
-void
-PannerUI::update_pan_bars (bool only_if_aplay)
-{
-	uint32_t n;
-
-	in_pan_update = true;
-
-#if 0
-	/* this runs during automation playback, and moves the bar controllers
-	   and/or pucks around.
-	*/
-
-	for (i = pan_bars.begin(), n = 0; i != pan_bars.end(); ++i, ++n) {
-
-		if (only_if_aplay) {
-			boost::shared_ptr<AutomationList> alist (_panner->streampanner(n).pan_control()->alist());
-			if (!alist->automation_playback()) {
-				continue;
-			}
-		}
-
-                AngularVector model = _panner->streampanner(n).get_effective_position();
-                double fract = (*i)->get_value();
-                AngularVector view (BaseStereoPanner::lr_fract_to_azimuth (fract), 0.0);
-
-		if (!Panner::equivalent (model, view)) {
-			(*i)->set_value (BaseStereoPanner::azimuth_to_lr_fract (model.azi));
-		}
-	}
-#endif
-
-	in_pan_update = false;
 }
 
 void
