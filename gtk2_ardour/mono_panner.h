@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __gtk_ardour_stereo_panner_h__
-#define __gtk_ardour_stereo_panner_h__
+#ifndef __gtk_ardour_mono_panner_h__
+#define __gtk_ardour_mono_panner_h__
 
 #include "pbd/signals.h"
 
@@ -31,11 +31,13 @@ namespace PBD {
         class Controllable;
 }
 
-class StereoPanner : public Gtk::DrawingArea
+class MonoPanner : public Gtk::DrawingArea
 {
   public:
-	StereoPanner (boost::shared_ptr<PBD::Controllable> pos, boost::shared_ptr<PBD::Controllable> width);
-	~StereoPanner ();
+	MonoPanner (boost::shared_ptr<PBD::Controllable> pos);
+	~MonoPanner ();
+
+        boost::shared_ptr<PBD::Controllable> get_controllable() const { return position_control; }
 
   protected:
 	bool on_expose_event (GdkEventExpose*);
@@ -50,12 +52,8 @@ class StereoPanner : public Gtk::DrawingArea
 
   private:
         boost::shared_ptr<PBD::Controllable> position_control;
-        boost::shared_ptr<PBD::Controllable> width_control;
         PBD::ScopedConnectionList connections;
         bool dragging;
-        bool dragging_position;
-        bool dragging_left;
-        bool dragging_right;
         int drag_start_x;
         int last_drag_x;
         double accumulated_delta;
@@ -65,7 +63,6 @@ class StereoPanner : public Gtk::DrawingArea
         Gtk::Label* drag_data_label;
 
         BindingProxy position_binder;
-        BindingProxy width_binder;
 
         void value_change ();
         void set_drag_data ();
@@ -75,19 +72,14 @@ class StereoPanner : public Gtk::DrawingArea
             uint32_t fill;
             uint32_t text;
             uint32_t background;
-            uint32_t rule;
+            uint32_t pos_outline;
+            uint32_t pos_fill;
         };
 
-        enum State { 
-                Normal,
-                Mono,
-                Inverted
-        };
-
-        static ColorScheme colors[3];
+        static ColorScheme colors;
         static void set_colors ();
         static bool have_colors;
         void color_handler ();
 };
 
-#endif /* __gtk_ardour_stereo_panner_h__ */
+#endif /* __gtk_ardour_mono_panner_h__ */

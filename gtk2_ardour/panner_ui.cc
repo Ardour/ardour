@@ -29,9 +29,9 @@
 #include "panner_ui.h"
 #include "panner2d.h"
 #include "utils.h"
-#include "panner.h"
 #include "gui_thread.h"
 #include "stereo_panner.h"
+#include "mono_panner.h"
 
 #include "ardour/delivery.h"
 #include "ardour/session.h"
@@ -46,7 +46,7 @@ using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 
-const int PannerUI::pan_bar_height = 20;
+const int PannerUI::pan_bar_height = 40;
 
 PannerUI::PannerUI (Session* s)
 	: _current_nouts (-1)
@@ -307,7 +307,7 @@ PannerUI::~PannerUI ()
 		delete (*i);
 	}
 
-	for (vector<PannerBar*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
+	for (vector<MonoPanner*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
 		delete (*i);
 	}
 
@@ -431,7 +431,7 @@ PannerUI::setup_pan ()
 
                         _stereo_panner = new StereoPanner (_panner->direction_control(), 
                                                            _panner->width_control());
-                        _stereo_panner->set_size_request (-1, 2 * pan_bar_height);
+                        _stereo_panner->set_size_request (-1, pan_bar_height);
                         panning_viewport.add (*_stereo_panner);
 
                 } else {
@@ -441,8 +441,8 @@ PannerUI::setup_pan ()
                         while ((asz = pan_adjustments.size()) < npans) {
                                 
                                 float x, rx;
-                                PannerBar* bc;
-                                
+                                MonoPanner* mp;
+
                                 /* initialize adjustment with 0.0 (L) or 1.0 (R) for the first and second panners,
                                    which serves as a default, otherwise use current value */
                                 
@@ -459,38 +459,29 @@ PannerUI::setup_pan ()
                                 }
                                 
                                 pan_adjustments.push_back (new Adjustment (x, 0, 1.0, 0.005, 0.05));
-                                bc = new PannerBar (*pan_adjustments[asz],
-                                                    boost::static_pointer_cast<PBD::Controllable>( _panner->pan_control( asz )) );
+                                mp = new MonoPanner (_panner->pan_control (asz));
                                 
                                 /* now set adjustment with current value of panner, then connect the signals */
                                 pan_adjustments.back()->set_value(rx);
                                 pan_adjustments.back()->signal_value_changed().connect (sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_adjustment_changed), (uint32_t) asz));
-                                connect_to_pan_control (asz);
-                                
-                                bc->set_name ("PanSlider");
-                                bc->set_shadow_type (Gtk::SHADOW_NONE);
                                 
                                 boost::shared_ptr<AutomationControl> ac = _panner->pan_control (asz);
                                 
+#if 0
                                 if (asz) {
                                         bc->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
                                                                               boost::weak_ptr<AutomationControl> (ac)));
                                         bc->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
                                                                              boost::weak_ptr<AutomationControl>(ac)));
                                 }
-                                
-                                char buf[64];
-                                snprintf (buf, sizeof (buf), _("panner for channel %zu"), asz + 1);
-                                ARDOUR_UI::instance()->set_tip (bc->event_widget(), buf);
-                                
-                                bc->event_widget().signal_button_release_event().connect
+#endif                                
+                                mp->signal_button_release_event().connect
                                         (sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) asz));
                                 
-                                bc->set_size_request (-1, pan_bar_height);
-                                bc->SpinnerActive.connect (sigc::mem_fun (*this, &PannerUI::bar_spinner_activate));
+                                mp->set_size_request (-1, pan_bar_height);
                                 
-                                pan_bars.push_back (bc);
-                                pan_bar_packer.pack_start (*bc, false, false);
+                                pan_bars.push_back (mp);
+                                pan_bar_packer.pack_start (*mp, false, false);
                         }
                         
                         /* now that we actually have the pan bars,
@@ -703,22 +694,7 @@ PannerUI::pan_value_changed (uint32_t which)
 		twod_panner->move_puck (which, _panner->streampanner(which).get_position());
 		in_pan_update = false;
 
-        } else if (_stereo_panner) {
-
-                /* its taken care of */
-
-	} else if (_panner->npanners() > 0 && which < _panner->npanners()) {
-
-                AngularVector model = _panner->streampanner(which).get_position();
-                double fract = pan_adjustments[which]->get_value();
-                AngularVector view (BaseStereoPanner::lr_fract_to_azimuth (fract), 0.0);
-
-		if (!Panner::equivalent (model, view)) {
-			in_pan_update = true;
-			pan_adjustments[which]->set_value (BaseStereoPanner::azimuth_to_lr_fract (model.azi));
-			in_pan_update = false;
-		}
-	}
+        } 
 }
 
 void
@@ -765,7 +741,7 @@ PannerUI::update_pan_sensitive ()
 	case 1:
 		break;
 	case 2:
-		for (vector<PannerBar*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
+		for (vector<MonoPanner*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
 			(*i)->set_sensitive (sensitive);
 		}
 		break;

@@ -130,7 +130,8 @@ StreamPanner::PanControllable::set_value (double val)
                 }
                 break;
 
-        default:
+        default: /* positional */
+                val = max (min (val, 1.0), 0.0);
                 streampanner->set_position (AngularVector (direct_control_to_stereo_pan (val), 0.0));
                 AutomationControl::set_value(val);
                 break;

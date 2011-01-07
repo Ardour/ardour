@@ -37,6 +37,7 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+using namespace Gtk;
 
 SessionImportDialog::SessionImportDialog (ARDOUR::Session* target) :
   ArdourDialog (_("Import From Session")),
@@ -65,7 +66,7 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session* target) :
 	get_vbox()->pack_start (file_frame, false, false);
 
 	// Session browser
-	session_tree = Gtk::TreeStore::create (sb_cols);
+	session_tree = TreeStore::create (sb_cols);
 	session_browser.set_model (session_tree);
 
 	session_browser.set_name ("SessionBrowser");
@@ -74,23 +75,23 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session* target) :
 	session_browser.set_tooltip_column (3);
 	session_browser.get_column(0)->set_min_width (180);
 	session_browser.get_column(1)->set_min_width (40);
-	session_browser.get_column(1)->set_sizing (Gtk::TREE_VIEW_COLUMN_AUTOSIZE);
+	session_browser.get_column(1)->set_sizing (TREE_VIEW_COLUMN_AUTOSIZE);
 
-	session_scroll.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	session_scroll.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	session_scroll.add (session_browser);
 	session_scroll.set_size_request (220, 400);
 
 	// Connect signals
-	Gtk::CellRendererToggle *toggle = dynamic_cast<Gtk::CellRendererToggle *> (session_browser.get_column_cell_renderer (1));
+	CellRendererToggle *toggle = dynamic_cast<CellRendererToggle *> (session_browser.get_column_cell_renderer (1));
 	toggle->signal_toggled().connect(sigc::mem_fun (*this, &SessionImportDialog::update));
 	session_browser.signal_row_activated().connect(sigc::mem_fun (*this, &SessionImportDialog::show_info));
 
 	get_vbox()->pack_start (session_scroll, false, false);
 
 	// Buttons
-	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	cancel_button = add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	cancel_button->signal_clicked().connect (sigc::mem_fun (*this, &SessionImportDialog::end_dialog));
-	ok_button = add_button (_("Import"), Gtk::RESPONSE_ACCEPT);
+	ok_button = add_button (_("Import"), RESPONSE_ACCEPT);
 	ok_button->signal_clicked().connect (sigc::mem_fun (*this, &SessionImportDialog::do_merge));
 
 	// prompt signals XXX: problem - handlers to be in the same thread since they return values
@@ -124,7 +125,7 @@ SessionImportDialog::load_session (const string& filename)
 		if (ElementImportHandler::dirty()) {
 			// Warn user
 			string txt = _("Some elements had errors in them. Please see the log for details");
-			Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+			MessageDialog msg (txt, false, MESSAGE_WARNING, BUTTONS_OK, true);
 			msg.run();
 		}
 	}
@@ -137,8 +138,8 @@ SessionImportDialog::fill_list ()
 
 	// Loop through element types
 	for (HandlerList::iterator handler = handlers.begin(); handler != handlers.end(); ++handler) {
-		Gtk::TreeModel::iterator iter = session_tree->append();
-		Gtk::TreeModel::Row row = *iter;
+		TreeModel::iterator iter = session_tree->append();
+		TreeModel::Row row = *iter;
 		row[sb_cols.name] = (*handler)->get_info();
 		row[sb_cols.queued] = false;
 		row[sb_cols.element] = ElementPtr(); // "Null" pointer
@@ -147,7 +148,7 @@ SessionImportDialog::fill_list ()
 		ElementList &elements = (*handler)->elements;
 		for (ElementList::iterator element = elements.begin(); element != elements.end(); ++element) {
 			iter = session_tree->append(row.children());
-			Gtk::TreeModel::Row child = *iter;
+			TreeModel::Row child = *iter;
 			child[sb_cols.name] = (*element)->get_name();
 			child[sb_cols.queued] = false;
 			child[sb_cols.element] = *element;
@@ -159,16 +160,22 @@ SessionImportDialog::fill_list ()
 void
 SessionImportDialog::browse ()
 {
-	Gtk::FileChooserDialog dialog(_("Import from session"), browse_action());
+	FileChooserDialog dialog(_("Import from session"), browse_action());
 	dialog.set_transient_for(*this);
 	dialog.set_filename (file_entry.get_text());
 
-	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+        FileFilter session_filter;
+        session_filter.add_pattern ("*.ardour");
+        session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
+        dialog.add_filter (session_filter);
+        dialog.set_filter (session_filter);
+
+	dialog.add_button(Stock::CANCEL, RESPONSE_CANCEL);
+	dialog.add_button(Stock::OK, RESPONSE_OK);
 
 	int result = dialog.run();
 
-	if (result == Gtk::RESPONSE_OK) {
+	if (result == RESPONSE_OK) {
 		string filename = dialog.get_filename();
 
 		if (filename.length()) {
@@ -183,12 +190,12 @@ SessionImportDialog::do_merge ()
 {
 
 	// element types
-	Gtk::TreeModel::Children types = session_browser.get_model()->children();
-	Gtk::TreeModel::Children::iterator ti;
+	TreeModel::Children types = session_browser.get_model()->children();
+	TreeModel::Children::iterator ti;
 	for (ti = types.begin(); ti != types.end(); ++ti) {
 		// elements
-		Gtk::TreeModel::Children elements = ti->children();
-		Gtk::TreeModel::Children::iterator ei;
+		TreeModel::Children elements = ti->children();
+		TreeModel::Children::iterator ei;
 		for (ei = elements.begin(); ei != elements.end(); ++ei) {
 			if ((*ei)[sb_cols.queued]) {
 				ElementPtr element = (*ei)[sb_cols.element];
@@ -202,7 +209,7 @@ SessionImportDialog::do_merge ()
 	if (ElementImportHandler::errors()) {
 		// Warn user
 		string txt = _("Some elements had errors in them. Please see the log for details");
-		Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+		MessageDialog msg (txt, false, MESSAGE_WARNING, BUTTONS_OK, true);
 		msg.run();
 	}
 }
@@ -211,22 +218,22 @@ SessionImportDialog::do_merge ()
 void
 SessionImportDialog::update (string path)
 {
-	Gtk::TreeModel::iterator cell = session_browser.get_model()->get_iter (path);
+	TreeModel::iterator cell = session_browser.get_model()->get_iter (path);
 
 	// Select all elements if element type is selected
 	if (path.size() == 1) {
 		{
 			// Prompt user for verification
 			string txt = _("This will select all elements of this type!");
-			Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL, true);
-			if (msg.run() == Gtk::RESPONSE_CANCEL) {
+			MessageDialog msg (txt, false, MESSAGE_QUESTION, BUTTONS_OK_CANCEL, true);
+			if (msg.run() == RESPONSE_CANCEL) {
 				(*cell)[sb_cols.queued] = false;
 				return;
 			}
 		}
 
-		Gtk::TreeModel::Children elements = cell->children();
-		Gtk::TreeModel::Children::iterator ei;
+		TreeModel::Children elements = cell->children();
+		TreeModel::Children::iterator ei;
 		for (ei = elements.begin(); ei != elements.end(); ++ei) {
 			ElementPtr element = (*ei)[sb_cols.element];
 			if (element->prepare_move()) {
@@ -249,16 +256,16 @@ SessionImportDialog::update (string path)
 }
 
 void
-SessionImportDialog::show_info(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*)
+SessionImportDialog::show_info(const TreeModel::Path& path, TreeViewColumn*)
 {
 	if (path.size() == 1) {
 		return;
 	}
 
-	Gtk::TreeModel::iterator cell = session_browser.get_model()->get_iter (path);
+	TreeModel::iterator cell = session_browser.get_model()->get_iter (path);
 	string info = (*cell)[sb_cols.info];
 
-	Gtk::MessageDialog msg (info, false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true);
+	MessageDialog msg (info, false, MESSAGE_INFO, BUTTONS_OK, true);
 	msg.run();
 }
 
@@ -278,11 +285,11 @@ SessionImportDialog::open_rename_dialog (string text, string name)
 	string new_name;
 
 	prompter.set_name ("Prompter");
-	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	prompter.add_button (Stock::SAVE, RESPONSE_ACCEPT);
 	prompter.set_prompt (text);
 	prompter.set_initial_text (name);
 
-	if (prompter.run() == Gtk::RESPONSE_ACCEPT) {
+	if (prompter.run() == RESPONSE_ACCEPT) {
 		prompter.get_result (new_name);
 		if (new_name.length()) {
 			name = new_name;
@@ -295,8 +302,8 @@ SessionImportDialog::open_rename_dialog (string text, string name)
 bool
 SessionImportDialog::open_prompt_dialog (string text)
 {
-	Gtk::MessageDialog msg (text, false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL, true);
-	if (msg.run() == Gtk::RESPONSE_OK) {
+	MessageDialog msg (text, false, MESSAGE_QUESTION, BUTTONS_OK_CANCEL, true);
+	if (msg.run() == RESPONSE_OK) {
 		return true;
 	}
 	return false;

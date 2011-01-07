@@ -148,6 +148,7 @@ gtk2_ardour_sources = [
 	'mixer_strip.cc',
 	'mixer_ui.cc',
         'monitor_section.cc',
+        'mono_panner.cc',
 	'mouse_cursors.cc',
 	'nag.cc',
 	'new_plugin_preset_dialog.cc',

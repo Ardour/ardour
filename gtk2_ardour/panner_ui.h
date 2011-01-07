@@ -41,6 +41,7 @@ class Panner2d;
 class PannerBar;
 class Panner2dWindow;
 class StereoPanner;
+class MonoPanner;
 
 namespace ARDOUR {
 	class Session;
@@ -137,7 +138,8 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void panning_link_direction_clicked ();
 
 	std::vector<Gtk::Adjustment*> pan_adjustments;
-	std::vector<PannerBar*> pan_bars;
+	//std::vector<PannerBar*> pan_bars;
+	std::vector<MonoPanner*> pan_bars;
 
 	void pan_adjustment_changed (uint32_t which);
 	void pan_value_changed (uint32_t which);

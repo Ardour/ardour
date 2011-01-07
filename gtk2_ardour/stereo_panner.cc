@@ -52,7 +52,6 @@ static const int top_step = 2;
 
 StereoPanner::ColorScheme StereoPanner::colors[3];
 bool StereoPanner::have_colors = false;
-PBD::Signal0<void> StereoPanner::color_change;
 
 StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost::shared_ptr<PBD::Controllable> width)
         : position_control (position)
@@ -86,7 +85,7 @@ StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost
                     Gdk::SCROLL_MASK|
                     Gdk::POINTER_MOTION_MASK);
 
-        color_change.connect (connections, invalidator (*this), boost::bind (&DrawingArea::queue_draw, this), gui_context());
+        ColorsChanged.connect (sigc::mem_fun (*this, &StereoPanner::color_handler));
 }
 
 StereoPanner::~StereoPanner ()
@@ -621,16 +620,24 @@ StereoPanner::set_colors ()
         colors[Normal].outline = ARDOUR_UI::config()->canvasvar_StereoPannerOutline.get();
         colors[Normal].text = ARDOUR_UI::config()->canvasvar_StereoPannerText.get();
         colors[Normal].background = ARDOUR_UI::config()->canvasvar_StereoPannerBackground.get();
+        colors[Normal].rule = ARDOUR_UI::config()->canvasvar_StereoPannerRule.get();
 
         colors[Mono].fill = ARDOUR_UI::config()->canvasvar_StereoPannerMonoFill.get();
         colors[Mono].outline = ARDOUR_UI::config()->canvasvar_StereoPannerMonoOutline.get();
         colors[Mono].text = ARDOUR_UI::config()->canvasvar_StereoPannerMonoText.get();
         colors[Mono].background = ARDOUR_UI::config()->canvasvar_StereoPannerMonoBackground.get();
+        colors[Mono].rule = ARDOUR_UI::config()->canvasvar_StereoPannerRule.get();
 
         colors[Inverted].fill = ARDOUR_UI::config()->canvasvar_StereoPannerInvertedFill.get();
         colors[Inverted].outline = ARDOUR_UI::config()->canvasvar_StereoPannerInvertedOutline.get();
         colors[Inverted].text = ARDOUR_UI::config()->canvasvar_StereoPannerInvertedText.get();
         colors[Inverted].background = ARDOUR_UI::config()->canvasvar_StereoPannerInvertedBackground.get();
+        colors[Inverted].rule = ARDOUR_UI::config()->canvasvar_StereoPannerRule.get();
+}
 
-        color_change (); /* EMIT SIGNAL */
+void
+StereoPanner::color_handler ()
+{
+        set_colors ();
+        queue_draw ();
 }
