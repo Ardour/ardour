@@ -45,7 +45,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-static const int pos_box_size = 10;
+static const int pos_box_size = 9;
 static const int lr_box_size = 15;
 static const int step_down = 10;
 static const int top_step = 2;
@@ -144,12 +144,7 @@ MonoPanner::on_expose_event (GdkEventExpose* ev)
         cairo_rectangle (cr, 0, 0, width, height);
         cairo_fill (cr);
 
-        /* the usable width is reduced from the real width, because we need space for 
-           the two halves of LR boxes that will extend past the actual left/right
-           positions (indicated by the vertical line segment above them).
-        */
-
-        double usable_width = width - lr_box_size;
+        double usable_width = width - pos_box_size;
 
         /* compute the centers of the L/R boxes based on the current stereo width */
 
@@ -161,7 +156,6 @@ MonoPanner::on_expose_event (GdkEventExpose* ev)
                 cairo_translate (cr, 1.0, 0.0);
         }
 
-        double center = (lr_box_size/2.0) + (usable_width * pos);
         const double half_lr_box = lr_box_size/2.0;
         double left;
         double right;
@@ -172,10 +166,10 @@ MonoPanner::on_expose_event (GdkEventExpose* ev)
         /* center line */
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
         cairo_set_line_width (cr, 1.0);
-        cairo_move_to (cr, width/2.0, 0);
-        cairo_line_to (cr, width/2.0, height);
+        cairo_move_to (cr, (pos_box_size/2.0) + (usable_width/2.0), 0);
+        cairo_line_to (cr, (pos_box_size/2.0) + (usable_width/2.0), height);
         cairo_stroke (cr);
-
+        
         /* left box */
 
         cairo_rectangle (cr, 
@@ -229,12 +223,29 @@ MonoPanner::on_expose_event (GdkEventExpose* ev)
 
         /* draw the position indicator */
 
+        double spos = (pos_box_size/2.0) + (usable_width * pos);
+
         cairo_set_line_width (cr, 2.0);
-	cairo_rectangle (cr, lrint (center - (pos_box_size/2.0)), top_step, pos_box_size, pos_box_size);
+	cairo_move_to (cr, spos + (pos_box_size/2.0), top_step); /* top right */
+        cairo_rel_line_to (cr, 0.0, pos_box_size); /* lower right */
+        cairo_rel_line_to (cr, -pos_box_size/2.0, 4.0); /* bottom point */
+        cairo_rel_line_to (cr, -pos_box_size/2.0, -4.0); /* lower left */
+        cairo_rel_line_to (cr, 0.0, -pos_box_size); /* upper left */
+        cairo_close_path (cr);
+
+
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(po), UINT_RGBA_G_FLT(po), UINT_RGBA_B_FLT(po), UINT_RGBA_A_FLT(po));
         cairo_stroke_preserve (cr);
         cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(pf), UINT_RGBA_G_FLT(pf), UINT_RGBA_B_FLT(pf), UINT_RGBA_A_FLT(pf));
 	cairo_fill (cr);
+
+        /* marker line */
+
+        cairo_set_line_width (cr, 1.0);
+        cairo_move_to (cr, spos, pos_box_size+4);
+        cairo_rel_line_to (cr, 0, height - (pos_box_size+4));
+        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(po), UINT_RGBA_G_FLT(po), UINT_RGBA_B_FLT(po), UINT_RGBA_A_FLT(po));
+        cairo_stroke (cr);
 
         /* done */
 

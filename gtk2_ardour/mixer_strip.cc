@@ -1922,17 +1922,7 @@ MixerStrip::on_key_release_event (GdkEventKey* ev)
 bool
 MixerStrip::on_enter_notify_event (GdkEventCrossing*)
 {
-	Keyboard::magic_widget_grab_focus ();
-
-	if (!panners._bar_spinner_active) {
-		/* This next grab_focus() causes a focus-out event to be sent to, amongst
-		 * other things, panner BarControllers.  When they receive it, they abort
-		 * the use of any SpinButton that might be in use to change pan settings.
-		 * Hence we have this horrific hack which stops the grab_focus () call
-		 * happening if a bar spinner is active.
-		 */
-		grab_focus ();
-	}
+        Keyboard::magic_widget_grab_focus ();
 	return false;
 }
 
