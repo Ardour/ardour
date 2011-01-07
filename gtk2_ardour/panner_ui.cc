@@ -59,7 +59,6 @@ PannerUI::PannerUI (Session* s)
 	, panning_link_button (_("link"))
 	, pan_automation_style_button ("")
 	, pan_automation_state_button ("")
-	, _bar_spinner_active (false)
 {
 	set_session (s);
 
@@ -303,10 +302,6 @@ PannerUI::set_width (Width w)
 
 PannerUI::~PannerUI ()
 {
-	for (vector<Adjustment*>::iterator i = pan_adjustments.begin(); i != pan_adjustments.end(); ++i) {
-		delete (*i);
-	}
-
 	for (vector<MonoPanner*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
 		delete (*i);
 	}
@@ -354,8 +349,6 @@ PannerUI::panner_changed (void* src)
 		break;
 
 	case 2:
-		/* bring pan bar state up to date */
-		update_pan_bars (false);
 		break;
 
 	default:
@@ -385,11 +378,6 @@ PannerUI::setup_pan ()
 		return;
 	}
 
-	_pan_control_connections.drop_connections ();
-	for (uint32_t i = 0; i < _panner->npanners(); ++i) {
-		connect_to_pan_control (i);
-	}
-
 	_current_nouts = nouts;
 	_current_npans = npans;
 
@@ -402,11 +390,9 @@ PannerUI::setup_pan ()
 
 	if (nouts == 0 || nouts == 1) {
 
-		while (!pan_adjustments.empty()) {
+		while (!pan_bars.empty()) {
 			delete pan_bars.back();
 			pan_bars.pop_back ();
-			delete pan_adjustments.back();
-			pan_adjustments.pop_back ();
 		}
 
 		/* stick something into the panning viewport so that it redraws */
@@ -416,13 +402,11 @@ PannerUI::setup_pan ()
 
 	} else if (nouts == 2) {
 
-		vector<Adjustment*>::size_type asz;
+		vector<Adjustment*>::size_type p;
 
-		while (!pan_adjustments.empty()) {
+		while (!pan_bars.empty()) {
 			delete pan_bars.back();
 			pan_bars.pop_back ();
-			delete pan_adjustments.back();
-			pan_adjustments.pop_back ();
 		}
 
                 if (npans == 2) {
@@ -438,34 +422,28 @@ PannerUI::setup_pan ()
                         
                         /* N-in/2out - just use a set of single-channel panners */
 
-                        while ((asz = pan_adjustments.size()) < npans) {
+                        while ((p = pan_bars.size()) < npans) {
                                 
                                 float x, rx;
                                 MonoPanner* mp;
 
                                 /* initialize adjustment with 0.0 (L) or 1.0 (R) for the first and second panners,
-                                   which serves as a default, otherwise use current value */
+                                   which serves as a default, otherwise use current value 
+                                */
                                 
-                                rx = _panner->pan_control( asz)->get_value();
+                                rx = _panner->pan_control (p)->get_value();
                                 
                                 if (npans == 1) {
                                         x = 0.5;
-                                } else if (asz == 0) {
+                                } else if (p == 0) {
                                         x = 0.0;
-                                } else if (asz == 1) {
+                                } else if (p == 1) {
                                         x = 1.0;
                                 } else {
                                         x = rx;
                                 }
                                 
-                                pan_adjustments.push_back (new Adjustment (x, 0, 1.0, 0.005, 0.05));
-                                mp = new MonoPanner (_panner->pan_control (asz));
-                                
-                                /* now set adjustment with current value of panner, then connect the signals */
-                                pan_adjustments.back()->set_value(rx);
-                                pan_adjustments.back()->signal_value_changed().connect (sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_adjustment_changed), (uint32_t) asz));
-                                
-                                boost::shared_ptr<AutomationControl> ac = _panner->pan_control (asz);
+                                mp = new MonoPanner (_panner->pan_control (p));
                                 
 #if 0
                                 if (asz) {
@@ -476,7 +454,7 @@ PannerUI::setup_pan ()
                                 }
 #endif                                
                                 mp->signal_button_release_event().connect
-                                        (sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) asz));
+                                        (sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) p));
                                 
                                 mp->set_size_request (-1, pan_bar_height);
                                 
@@ -637,7 +615,7 @@ PannerUI::effective_pan_display ()
 	switch (_panner->nouts()) {
 	case 0:
 	case 1:
-		/* relax */
+		/* relax: no panning */
 		break;
 
 	case 2:
@@ -651,69 +629,21 @@ PannerUI::effective_pan_display ()
 }
 
 void
-PannerUI::pan_adjustment_changed (uint32_t which)
-{
-	if (!in_pan_update && which < _panner->npanners()) {
-
-		float val = pan_adjustments[which]->get_value ();
-		float const xpos = _panner->pan_control(which)->get_value();
-
-		/* add a kinda-sorta detent for the middle */
-
-		if (val != 0.5 && Panner::equivalent (val, 0.5)) {
-			/* this is going to be reentrant, so just
-			   return after it.
-			*/
-
-			in_pan_update = true;
-			pan_adjustments[which]->set_value (0.5);
-			in_pan_update = false;
-			return;
-		}
-
-		if (!Panner::equivalent (val, xpos)) {
-
-			_panner->pan_control(which)->set_value (val);
-			/* XXX
-			   the panner objects have no access to the session,
-			   so do this here. ick.
-			*/
-			_session->set_dirty();
-		}
-	}
-}
-
-void
-PannerUI::pan_value_changed (uint32_t which)
-{
-	ENSURE_GUI_THREAD (*this, &PannerUI::pan_value_changed, which)
-
-	if (twod_panner) {
-
-		in_pan_update = true;
-		twod_panner->move_puck (which, _panner->streampanner(which).get_position());
-		in_pan_update = false;
-
-        } 
-}
-
-void
 PannerUI::update_pan_bars (bool only_if_aplay)
 {
 	uint32_t n;
-	vector<Adjustment*>::iterator i;
 
 	in_pan_update = true;
 
+#if 0
 	/* this runs during automation playback, and moves the bar controllers
 	   and/or pucks around.
 	*/
 
-	for (i = pan_adjustments.begin(), n = 0; i != pan_adjustments.end(); ++i, ++n) {
+	for (i = pan_bars.begin(), n = 0; i != pan_bars.end(); ++i, ++n) {
 
 		if (only_if_aplay) {
 			boost::shared_ptr<AutomationList> alist (_panner->streampanner(n).pan_control()->alist());
-
 			if (!alist->automation_playback()) {
 				continue;
 			}
@@ -727,6 +657,7 @@ PannerUI::update_pan_bars (bool only_if_aplay)
 			(*i)->set_value (BaseStereoPanner::azimuth_to_lr_fract (model.azi));
 		}
 	}
+#endif
 
 	in_pan_update = false;
 }
@@ -922,21 +853,6 @@ PannerUI::set_mono (bool yn)
 {
 	_panner->set_mono (yn);
 	update_pan_sensitive ();
-}
-
-
-void
-PannerUI::connect_to_pan_control (uint32_t i)
-{
-	_panner->pan_control(i)->Changed.connect (
-		_pan_control_connections, invalidator (*this), boost::bind (&PannerUI::pan_value_changed, this, i), gui_context ()
-		);
-}
-
-void
-PannerUI::bar_spinner_activate (bool a)
-{
-	_bar_spinner_active = a;
 }
 
 void

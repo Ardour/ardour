@@ -137,13 +137,10 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	void panning_link_direction_clicked ();
 
-	std::vector<Gtk::Adjustment*> pan_adjustments;
-	//std::vector<PannerBar*> pan_bars;
 	std::vector<MonoPanner*> pan_bars;
 
-	void pan_adjustment_changed (uint32_t which);
 	void pan_value_changed (uint32_t which);
-	void update_pan_bars (bool only_if_aplay);
+        void update_pan_bars (bool);
 	void update_pan_linkage ();
 	void update_pan_state ();
 	void build_astate_menu ();
@@ -158,8 +155,6 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	gint end_pan_touch (GdkEventButton*);
 
 	bool pan_button_event (GdkEventButton*, uint32_t which);
-
-	void connect_to_pan_control (uint32_t);
 
 	Gtk::Menu* pan_menu;
 	Gtk::CheckMenuItem* bypass_menu_item;
@@ -185,10 +180,6 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
         void start_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
         void stop_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
-
-	void bar_spinner_activate (bool);
-	/** true if any of our PannerBars are currently using a SpinButton to modify value */
-	bool _bar_spinner_active;
 };
 
 #endif /* __ardour_gtk_panner_ui_h__ */
