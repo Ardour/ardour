@@ -220,6 +220,7 @@ PannerUI::build_astyle_menu ()
 boost::shared_ptr<PBD::Controllable>
 PannerUI::get_controllable()
 {
+        assert (!pan_bars.empty());
 	return pan_bars[0]->get_controllable();
 }
 
@@ -374,6 +375,8 @@ PannerUI::setup_pan ()
 	uint32_t const nouts = _panner->nouts();
 	uint32_t const npans = _panner->npanners();
 
+        cerr << "Pan setup, outs == " << nouts << " pans = " << npans << endl;
+
 	if (int32_t (nouts) == _current_nouts && int32_t (npans) == _current_npans) {
 		return;
 	}
@@ -424,35 +427,16 @@ PannerUI::setup_pan ()
 
                         while ((p = pan_bars.size()) < npans) {
                                 
-                                float x, rx;
                                 MonoPanner* mp;
+                                boost::shared_ptr<AutomationControl> ac = _panner->pan_control (p);
 
-                                /* initialize adjustment with 0.0 (L) or 1.0 (R) for the first and second panners,
-                                   which serves as a default, otherwise use current value 
-                                */
-                                
-                                rx = _panner->pan_control (p)->get_value();
-                                
-                                if (npans == 1) {
-                                        x = 0.5;
-                                } else if (p == 0) {
-                                        x = 0.0;
-                                } else if (p == 1) {
-                                        x = 1.0;
-                                } else {
-                                        x = rx;
-                                }
-                                
                                 mp = new MonoPanner (_panner->pan_control (p));
                                 
-#if 0
-                                if (asz) {
-                                        bc->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
-                                                                              boost::weak_ptr<AutomationControl> (ac)));
-                                        bc->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
-                                                                             boost::weak_ptr<AutomationControl>(ac)));
-                                }
-#endif                                
+                                mp->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
+                                                                      boost::weak_ptr<AutomationControl> (ac)));
+                                mp->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
+                                                                     boost::weak_ptr<AutomationControl>(ac)));
+
                                 mp->signal_button_release_event().connect
                                         (sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) p));
                                 
@@ -467,7 +451,6 @@ PannerUI::setup_pan ()
                            automation state.
                         */
                         
-
                         update_pan_sensitive ();
                         panning_viewport.add (pan_bar_packer);
                 }

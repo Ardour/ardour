@@ -301,9 +301,10 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
                 if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
                         /* handled by button release */
                         return true;
-                }
+                } 
 
                 dragging = true;
+                StartGesture ();
         }
 
         return true;
@@ -319,7 +320,7 @@ MonoPanner::on_button_release_event (GdkEventButton* ev)
         dragging = false;
         accumulated_delta = 0;
         detented = false;
-
+        
         if (drag_data_window) {
                 drag_data_window->hide ();
         }
@@ -327,6 +328,8 @@ MonoPanner::on_button_release_event (GdkEventButton* ev)
         if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
                 /* reset to default */
                 position_control->set_value (0.5);
+        } else {
+                StopGesture ();
         }
 
         return true;
