@@ -29,6 +29,7 @@
 #include "editor_routes.h"
 #include "editor_cursors.h"
 #include "mouse_cursors.h"
+#include "route_time_axis.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -791,4 +792,23 @@ EditorSummary::editor_y_to_summary (double y) const
 	}
 
 	return sy;
+}
+
+void
+EditorSummary::routes_added (list<RouteTimeAxisView*> const & r)
+{
+	/* Connect to gui_changed() on the routes so that we know when their colour has changed */
+	for (list<RouteTimeAxisView*>::const_iterator i = r.begin(); i != r.end(); ++i) {
+		(*i)->route()->gui_changed.connect (*this, invalidator (*this), ui_bind (&EditorSummary::route_gui_changed, this, _1), gui_context ());
+	}
+
+	set_dirty ();
+}
+
+void
+EditorSummary::route_gui_changed (string c)
+{
+	if (c == "color") {
+		set_dirty ();
+	}
 }

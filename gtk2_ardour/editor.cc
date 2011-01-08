@@ -4854,14 +4854,13 @@ Editor::handle_new_route (RouteList& routes)
 	}
 
 	_routes->routes_added (new_views);
+	_summary->routes_added (new_views);
 
 	if (show_editor_mixer_when_tracks_arrive) {
 		show_editor_mixer (true);
 	}
 
 	editor_list_button.set_sensitive (true);
-
-	_summary->set_dirty ();
 }
 
 void

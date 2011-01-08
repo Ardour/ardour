@@ -1,4 +1,3 @@
-
 /*
     Copyright (C) 2009 Paul Davis
 
@@ -33,13 +32,14 @@ class Editor;
 /** Class to provide a visual summary of the contents of an editor window; represents
  *  the whole session as a set of lines, one per region view.
  */
-class EditorSummary : public CairoWidget, public EditorComponent, public ARDOUR::SessionHandlePtr
+class EditorSummary : public CairoWidget, public EditorComponent, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
 {
 public:
 	EditorSummary (Editor *);
 
 	void set_session (ARDOUR::Session *);
 	void set_overlays_dirty ();
+	void routes_added (std::list<RouteTimeAxisView*> const &);
 
 private:
 
@@ -79,6 +79,7 @@ private:
 	double editor_y_to_summary (double) const;
 	Position get_position (double, double) const;
 	void set_cursor (Position);
+	void route_gui_changed (std::string);
 
 	framepos_t _start; ///< start frame of the overview
 	framepos_t _end; ///< end frame of the overview
