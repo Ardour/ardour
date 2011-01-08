@@ -40,6 +40,7 @@ namespace PBD {
                 extern uint64_t Stateful;
                 extern uint64_t Properties;
 		extern uint64_t FileManager;
+		extern uint64_t Pool;
 	}
 }
 

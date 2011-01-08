@@ -33,6 +33,7 @@ static std::map<const char*,uint64_t> _debug_bit_map;
 uint64_t PBD::DEBUG::Stateful = PBD::new_debug_bit ("stateful");
 uint64_t PBD::DEBUG::Properties = PBD::new_debug_bit ("properties");
 uint64_t PBD::DEBUG::FileManager = PBD::new_debug_bit ("filemanager");
+uint64_t PBD::DEBUG::Pool = PBD::new_debug_bit ("pool");
 
 uint64_t PBD::debug_bits = 0x0;
 

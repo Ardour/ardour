@@ -61,7 +61,7 @@ SessionEvent::operator new (size_t)
 {
 	CrossThreadPool* p = pool->per_thread_pool ();
 	SessionEvent* ev = static_cast<SessionEvent*> (p->alloc ());
-        cerr << pthread_self() << " Allocating SessionEvent from " << p->name() << " ev @ " << ev << endl;
+	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("%1 Allocating SessionEvent from %2 ev @ %3\n", pthread_self(), p->name(), ev));
 	ev->own_pool = p;
 	return ev;
 }
@@ -72,8 +72,17 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 	Pool* p = pool->per_thread_pool ();
 	SessionEvent* ev = static_cast<SessionEvent*> (ptr);
 
-        cerr << pthread_self() << " Deleting SessionEvent @ " << ev << " thread pool =  " << p->name() << " ev pool = " << ev->own_pool->name() << endl;
-        stacktrace (cerr, 20);
+        DEBUG_TRACE (DEBUG::SessionEvents, string_compose (
+			     "%1 Deleting SessionEvent @ %2 ev thread pool = %3 ev pool = %4\n",
+			     pthread_self(), ev, p->name(), ev->own_pool->name()
+			     ));
+
+#ifdef NDEBUG
+	if (DEBUG::SessionEvents & PBD::debug_bits) {
+		stacktrace (cerr, 20);
+	}
+#endif
+	
 	if (p == ev->own_pool) {
 		p->release (ptr);
 	} else {

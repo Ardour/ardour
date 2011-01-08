@@ -26,6 +26,8 @@
 
 #include "pbd/pool.h"
 #include "pbd/error.h"
+#include "pbd/debug.h"
+#include "pbd/compose.h"
 
 using namespace std;
 using namespace PBD;
@@ -246,9 +248,10 @@ void*
 CrossThreadPool::alloc () 
 {
 	void* ptr;
-        cerr << pthread_self() << ' ' << name() << " has " << pending.read_space() << " pending free entries waiting\n";
+
+	DEBUG_TRACE (DEBUG::Pool, string_compose ("%1 %2 has %3 pending free entries waiting\n", pthread_self(), name(), pending.read_space()));
 	while (pending.read (&ptr, 1) == 1) {
-                cerr << pthread_self() << ' ' << name() << " pushes back a pending free list entry before allocating\n";
+		DEBUG_TRACE (DEBUG::Pool, string_compose ("%1 %2 pushes back a pending free list entry before allocating\n", pthread_self(), name()));
 		free_list.write (&ptr, 1);
 	}
 	return Pool::alloc ();
