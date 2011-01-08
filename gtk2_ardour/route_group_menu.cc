@@ -113,13 +113,12 @@ RouteGroupMenu::new_group ()
 	RouteGroup* g = new RouteGroup (*_session, "");
 	g->apply_changes (*_default_properties);
 
-	RouteGroupDialog d (g, Gtk::Stock::NEW);
-	int const r = d.do_run ();
+	RouteGroupDialog d (g, true);
 
-	if (r == Gtk::RESPONSE_OK) {
+	if (d.do_run ()) {
+		delete g;
+	} else {
 		_session->add_route_group (g);
 		set_group (g);
-	} else {
-		delete g;
 	}
 }

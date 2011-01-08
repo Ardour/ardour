@@ -399,17 +399,15 @@ AddRouteDialog::group_changed ()
 		plist.add (Properties::active, true);
 		g->apply_changes (plist);
 
-		RouteGroupDialog d (g, Gtk::Stock::NEW);
-		int const r = d.do_run ();
+		RouteGroupDialog d (g, true);
 
-		if (r == Gtk::RESPONSE_OK) {
+		if (d.do_run ()) {
+			delete g;
+			route_group_combo.set_active (2);
+		} else {
 			_session->add_route_group (g);
 			add_route_group (g);
 			route_group_combo.set_active (3);
-		} else {
-			delete g;
-
-			route_group_combo.set_active (2);
 		}
 	}
 }

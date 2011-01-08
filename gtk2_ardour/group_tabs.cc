@@ -173,7 +173,7 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				
 				/* edit */
-				RouteGroupDialog d (_dragging->group, Gtk::Stock::APPLY);
+				RouteGroupDialog d (_dragging->group, false);
 				d.do_run ();
 				
 			} else {
@@ -374,7 +374,6 @@ GroupTabs::new_from_soloed ()
 	}
 
 	run_new_group_dialog (soloed);
-
 }
 
 void
@@ -383,19 +382,15 @@ GroupTabs::run_new_group_dialog (RouteList const & rl)
 	RouteGroup* g = new RouteGroup (*_session, "");
 	g->apply_changes (default_properties ());
 
-	RouteGroupDialog d (g, Gtk::Stock::NEW);
-	int const r = d.do_run ();
+	RouteGroupDialog d (g, true);
 
-	switch (r) {
-	case Gtk::RESPONSE_OK:
-	case Gtk::RESPONSE_ACCEPT:
+	if (d.do_run ()) {
+		delete g;
+	} else {
 		_session->add_route_group (g);
 		for (RouteList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
 			g->add (*i);
 		}
-		break;
-	default:
-		delete g;
 	}
 }
 
@@ -406,10 +401,9 @@ GroupTabs::create_and_add_group () const
 
 	g->apply_changes (default_properties ());
 
-	RouteGroupDialog d (g, Gtk::Stock::NEW);
-	int const r = d.do_run ();
+	RouteGroupDialog d (g, true);
 
-	if (r != Gtk::RESPONSE_OK) {
+	if (d.do_run ()) {
 		delete g;
 		return 0;
 	}
@@ -421,7 +415,7 @@ GroupTabs::create_and_add_group () const
 void
 GroupTabs::edit_group (RouteGroup* g)
 {
-	RouteGroupDialog d (g, Gtk::Stock::APPLY);
+	RouteGroupDialog d (g, false);
 	d.do_run ();
 }
 

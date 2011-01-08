@@ -409,6 +409,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		}
 	}
 
+	std::list<RouteGroup*> const & route_groups () const {
+		return _route_groups;
+	}
+
 	/* fundamental operations. duh. */
 
 	std::list<boost::shared_ptr<AudioTrack> > new_audio_track (

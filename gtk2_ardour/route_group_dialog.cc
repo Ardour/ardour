@@ -19,7 +19,9 @@
 
 #include <gtkmm/table.h>
 #include <gtkmm/stock.h>
+#include <gtkmm/messagedialog.h>
 #include "ardour/route_group.h"
+#include "ardour/session.h"
 #include "route_group_dialog.h"
 #include "i18n.h"
 #include <iostream>
@@ -29,17 +31,18 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
-	: ArdourDialog (_("Route Group")),
-	  _group (g),
-	  _active (_("Active")),
-	  _gain (_("Gain")),
-	  _relative (_("Relative")),
-	  _mute (_("Muting")),
-	  _solo (_("Soloing")),
-	  _rec_enable (_("Record enable")),
-	  _select (_("Selection")),
-	  _edit (_("Editing"))
+RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
+	: ArdourDialog (_("Route Group"))
+	, _group (g)
+	, _initial_name (g->name ())
+	, _active (_("Active"))
+	, _gain (_("Gain"))
+	, _relative (_("Relative"))
+	, _mute (_("Muting"))
+	, _solo (_("Soloing"))
+	, _rec_enable (_("Record enable"))
+	, _select (_("Selection"))
+	, _edit (_("Editing"))
 {
 	set_modal (true);
 	set_skip_taskbar_hint (true);
@@ -84,6 +87,16 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 	_select.set_active (_group->is_select());
 	_edit.set_active (_group->is_edit());
 
+	_name.signal_changed().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+	_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+	_gain.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+ 	_relative.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+ 	_mute.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+ 	_solo.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+ 	_rec_enable.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+ 	_select.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+ 	_edit.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+
 	gain_toggled ();
 
 	Table* table = manage (new Table (8, 3, false));
@@ -114,36 +127,61 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 
 	_gain.signal_toggled().connect(sigc::mem_fun (*this, &RouteGroupDialog::gain_toggled));
 
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	add_button (s, RESPONSE_OK);
-	set_default_response (RESPONSE_OK);
-
+	if (creating_new) {
+		add_button (Stock::CANCEL, RESPONSE_CANCEL);
+		add_button (Stock::NEW, RESPONSE_OK);
+		set_default_response (RESPONSE_OK);
+	} else {
+		add_button (Stock::CLOSE, RESPONSE_CLOSE);
+		set_default_response (RESPONSE_CLOSE);
+	}
+	
 	show_all_children ();
 }
 
-int
+/** @return true if the route group edit was cancelled, otherwise false */
+bool
 RouteGroupDialog::do_run ()
 {
-	int const r = run ();
+	while (1) {
+		int const r = run ();
 
-	if (r == Gtk::RESPONSE_OK || r == Gtk::RESPONSE_ACCEPT) {
-
-		PropertyList plist;
-
-		plist.add (Properties::gain, _gain.get_active());
-		plist.add (Properties::recenable, _rec_enable.get_active());
-		plist.add (Properties::mute, _mute.get_active());
-		plist.add (Properties::solo, _solo.get_active ());
-		plist.add (Properties::select, _select.get_active());
-		plist.add (Properties::edit, _edit.get_active());
-		plist.add (Properties::relative, _relative.get_active());
-		plist.add (Properties::active, _active.get_active());
-		plist.add (Properties::name, string (_name.get_text()));
-
-		_group->apply_changes (plist);
+		if (unique_name ()) {
+			return (r == Gtk::RESPONSE_CANCEL);
+		}
+	
+		_group->set_name (_initial_name);
+		MessageDialog msg (
+			_("A route group of this name already exists.  Please use a different name."),
+			false,
+			Gtk::MESSAGE_ERROR,
+			Gtk::BUTTONS_OK,
+			true
+			);
+		
+		msg.run ();
 	}
 
-	return r;
+	/* NOTREACHED */
+	return false;
+}
+
+void
+RouteGroupDialog::update ()
+{
+	PropertyList plist;
+
+	plist.add (Properties::gain, _gain.get_active());
+	plist.add (Properties::recenable, _rec_enable.get_active());
+	plist.add (Properties::mute, _mute.get_active());
+	plist.add (Properties::solo, _solo.get_active ());
+	plist.add (Properties::select, _select.get_active());
+	plist.add (Properties::edit, _edit.get_active());
+	plist.add (Properties::relative, _relative.get_active());
+	plist.add (Properties::active, _active.get_active());
+	plist.add (Properties::name, string (_name.get_text()));
+
+	_group->apply_changes (plist);
 }
 
 void
@@ -152,3 +190,15 @@ RouteGroupDialog::gain_toggled ()
 	_relative.set_sensitive (_gain.get_active ());
 }
 
+/** @return true if the current group's name is unique accross the session */
+bool
+RouteGroupDialog::unique_name () const
+{
+	list<RouteGroup*> route_groups = _group->session().route_groups ();
+	list<RouteGroup*>::iterator i = route_groups.begin ();
+	while (i != route_groups.end() && ((*i)->name() != _name.get_text() || *i == _group)) {
+		++i;
+	}
+
+	return (i == route_groups.end ());
+}

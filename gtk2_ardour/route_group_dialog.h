@@ -29,12 +29,13 @@
 class RouteGroupDialog : public ArdourDialog
 {
 public:
-	RouteGroupDialog (ARDOUR::RouteGroup *, Gtk::StockID const &);
+	RouteGroupDialog (ARDOUR::RouteGroup *, bool);
 
-	int do_run ();
-
+	bool do_run ();
+	
 private:
 	ARDOUR::RouteGroup* _group;
+	std::string _initial_name;
 
 	Gtk::Entry _name;
 	Gtk::CheckButton _active;
@@ -45,8 +46,11 @@ private:
 	Gtk::CheckButton _rec_enable;
 	Gtk::CheckButton _select;
 	Gtk::CheckButton _edit;
+	Gtk::Button* _ok;
 
 	void gain_toggled ();
+	void update ();
+	bool unique_name () const;
 };
 
 
