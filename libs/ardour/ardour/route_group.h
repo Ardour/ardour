@@ -92,33 +92,10 @@ class RouteGroup : public SessionObject
 	int add (boost::shared_ptr<Route>);
 	int remove (boost::shared_ptr<Route>);
 
-	void apply (void (Route::*func)(void *), void *src) {
+	template<typename Function>
+	void foreach_route (Function f) {
 		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-			((*i).get()->*func)(src);
-		}
-	}
-
-	void apply (void (Route::*func)()) {
-		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-			((*i).get()->*func)();
-		}
-	}
-
-	template<class T> void apply (void (Route::*func)(T, void *), T val, void *src) {
-		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-			((*i).get()->*func)(val, src);
-		}
-	}
-
-	template<class T> void apply (void (Route::*func)(T), T val) {
-		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-			((*i).get()->*func)(val);
-		}
-	}
-
-	template<class T> void foreach_route (T *obj, void (T::*func)(Route&)) {
-		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-			(obj->*func)(**i);
+			f (i->get());
 		}
 	}
 

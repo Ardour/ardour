@@ -353,11 +353,11 @@ Route::set_gain (gain_t val, void *src)
 				}
 			}
 
-			_route_group->apply (&Route::inc_gain, factor, _route_group);
+			_route_group->foreach_route (boost::bind (&Route::inc_gain, _1, factor, _route_group));
 
 		} else {
 
-			_route_group->apply (&Route::set_gain, val, _route_group);
+			_route_group->foreach_route (boost::bind (&Route::set_gain, _1, val, _route_group));
 		}
 
 		return;
@@ -614,7 +614,7 @@ Route::set_solo (bool yn, void *src)
 	}
 
 	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_solo()) {
-		_route_group->apply (&Route::set_solo, yn, _route_group);
+		_route_group->foreach_route (boost::bind (&Route::set_solo, _1, yn, _route_group));
 		return;
 	}
 
@@ -724,7 +724,7 @@ Route::set_solo_isolated (bool yn, void *src)
 	}
 
 	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_solo()) {
-		_route_group->apply (&Route::set_solo_isolated, yn, _route_group);
+		_route_group->foreach_route (boost::bind (&Route::set_solo_isolated, _1, yn, _route_group));
 		return;
 	}
 	
@@ -792,7 +792,7 @@ void
 Route::set_mute (bool yn, void *src)
 {
 	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_mute()) {
-		_route_group->apply (&Route::set_mute, yn, _route_group);
+		_route_group->foreach_route (boost::bind (&Route::set_mute, _1, yn, _route_group));
 		return;
 	}
 
