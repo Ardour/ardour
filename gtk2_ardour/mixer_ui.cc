@@ -95,31 +95,7 @@ Mixer_UI::Mixer_UI ()
 	scroller.add (*b);
 	scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
 
-	track_model = ListStore::create (track_columns);
-	track_display.set_model (track_model);
-	track_display.append_column (_("Strips"), track_columns.text);
-	track_display.append_column (_("Show"), track_columns.visible);
-	track_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
-	track_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
-	track_display.get_column (0)->set_expand(true);
-	track_display.get_column (1)->set_expand(false);
-	track_display.set_name (X_("MixerTrackDisplayList"));
-	track_display.get_selection()->set_mode (Gtk::SELECTION_NONE);
-	track_display.set_reorderable (true);
-	track_display.set_headers_visible (true);
-
-	track_model->signal_row_deleted().connect (sigc::mem_fun (*this, &Mixer_UI::track_list_delete));
-	track_model->signal_row_changed().connect (sigc::mem_fun (*this, &Mixer_UI::track_list_change));
-	track_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &Mixer_UI::track_list_reorder));
-
-	CellRendererToggle* track_list_visible_cell = dynamic_cast<CellRendererToggle*>(track_display.get_column_cell_renderer (1));
-	track_list_visible_cell->property_activatable() = true;
-	track_list_visible_cell->property_radio() = false;
-
-	track_display.signal_button_press_event().connect (sigc::mem_fun (*this, &Mixer_UI::track_display_button_press), false);
-
-	track_display_scroller.add (track_display);
-	track_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	setup_track_display ();
 
 	group_model = ListStore::create (group_columns);
 	group_display.set_model (group_model);
@@ -180,10 +156,6 @@ Mixer_UI::Mixer_UI ()
 	group_display_vbox.pack_start (group_display_scroller, true, true);
 	group_display_vbox.pack_start (*route_group_display_button_box, false, false);
 
-	track_display_frame.set_name("BaseFrame");
-	track_display_frame.set_shadow_type (Gtk::SHADOW_IN);
-	track_display_frame.add(track_display_scroller);
-
 	group_display_frame.set_name ("BaseFrame");
 	group_display_frame.set_shadow_type (Gtk::SHADOW_IN);
 	group_display_frame.add (group_display_vbox);
@@ -241,16 +213,13 @@ Mixer_UI::Mixer_UI ()
 	list_vpacker.show();
 	group_display_button_label.show();
 	group_display_button.show();
-	track_display_scroller.show();
 	group_display_scroller.show();
 	group_display_vbox.show();
-	track_display_frame.show();
 	group_display_frame.show();
 	rhs_pane1.show();
 	strip_packer.show();
 	out_packer.show();
 	list_hpane.show();
-	track_display.show();
 	group_display.show();
 
 	auto_rebinding = FALSE;
@@ -1616,4 +1585,42 @@ Mixer_UI::plugin_selector()
 #endif
 
 	return _plugin_selector;
+}
+
+void
+Mixer_UI::setup_track_display ()
+{
+	track_model = ListStore::create (track_columns);
+	track_display.set_model (track_model);
+	track_display.append_column (_("Strips"), track_columns.text);
+	track_display.append_column (_("Show"), track_columns.visible);
+	track_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
+	track_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
+	track_display.get_column (0)->set_expand(true);
+	track_display.get_column (1)->set_expand(false);
+	track_display.set_name (X_("MixerTrackDisplayList"));
+	track_display.get_selection()->set_mode (Gtk::SELECTION_NONE);
+	track_display.set_reorderable (true);
+	track_display.set_headers_visible (true);
+
+	track_model->signal_row_deleted().connect (sigc::mem_fun (*this, &Mixer_UI::track_list_delete));
+	track_model->signal_row_changed().connect (sigc::mem_fun (*this, &Mixer_UI::track_list_change));
+	track_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &Mixer_UI::track_list_reorder));
+
+	CellRendererToggle* track_list_visible_cell = dynamic_cast<CellRendererToggle*>(track_display.get_column_cell_renderer (1));
+	track_list_visible_cell->property_activatable() = true;
+	track_list_visible_cell->property_radio() = false;
+
+	track_display.signal_button_press_event().connect (sigc::mem_fun (*this, &Mixer_UI::track_display_button_press), false);
+
+	track_display_scroller.add (track_display);
+	track_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+
+	track_display_frame.set_name("BaseFrame");
+	track_display_frame.set_shadow_type (Gtk::SHADOW_IN);
+	track_display_frame.add(track_display_scroller);
+
+	track_display_scroller.show();
+	track_display_frame.show();
+	track_display.show();
 }
