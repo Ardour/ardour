@@ -253,6 +253,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void set_route_group_activation (ARDOUR::RouteGroup *, bool);
 
 	void setup_track_display ();
+	void new_track_or_bus ();
 
 	static const int32_t default_width = 478;
 	static const int32_t default_height = 765;

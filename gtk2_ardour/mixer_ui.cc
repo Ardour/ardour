@@ -1616,11 +1616,31 @@ Mixer_UI::setup_track_display ()
 	track_display_scroller.add (track_display);
 	track_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
+	VBox* v = manage (new VBox);
+	v->show ();
+	v->pack_start (track_display_scroller, true, true);
+
+	Button* b = manage (new Button);
+	b->show ();
+	Widget* w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
+	w->show ();
+	b->add (*w);
+
+	b->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
+	
+	v->pack_start (*b, false, false);
+
 	track_display_frame.set_name("BaseFrame");
 	track_display_frame.set_shadow_type (Gtk::SHADOW_IN);
-	track_display_frame.add(track_display_scroller);
+	track_display_frame.add (*v);
 
 	track_display_scroller.show();
 	track_display_frame.show();
 	track_display.show();
+}
+
+void
+Mixer_UI::new_track_or_bus ()
+{
+	ARDOUR_UI::instance()->add_route (this);
 }
