@@ -1796,11 +1796,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void freeze_route ();
 	void unfreeze_route ();
 
-	/* route-group solo + mute */
-
-	void set_route_group_solo (ARDOUR::Route&, bool);
-	void set_route_group_mute (ARDOUR::Route&, bool);
-
 	/* duplication */
 
 	void duplicate_dialog (bool with_dialog);

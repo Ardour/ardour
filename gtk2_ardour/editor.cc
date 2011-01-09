@@ -3078,30 +3078,6 @@ Editor::commit_reversible_command ()
 }
 
 void
-Editor::set_route_group_solo (Route& route, bool yn)
-{
-	RouteGroup *route_group;
-
-	if ((route_group = route.route_group()) != 0) {
-		route_group->apply (&Route::set_solo, yn, this);
-	} else {
-		route.set_solo (yn, this);
-	}
-}
-
-void
-Editor::set_route_group_mute (Route& route, bool yn)
-{
-	RouteGroup *route_group = 0;
-
-	if ((route_group = route.route_group()) != 0) {
-		route_group->apply (&Route::set_mute, yn, this);
-	} else {
-		route.set_mute (yn, this);
-	}
-}
-
-void
 Editor::history_changed ()
 {
 	string label;
