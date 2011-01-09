@@ -93,7 +93,11 @@ public:
 	
 private:
 	friend class IO;
-	
+
+	/** The number of meters that we are currently handling;
+	 *  may be different to _configured_input and _configured_output
+	 *  as it can be altered outside a ::configure_io by ::reflect_inputs.
+	 */
 	ChanCount current_meters;
 	
 	std::vector<float> _peak_power;

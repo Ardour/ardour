@@ -530,7 +530,7 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 					*/
 
 					if (ev->button == 1) {
-						set_mix_group_meter_point (*_route, next_meter_point (_route->meter_point()));
+						set_route_group_meter_point (*_route, next_meter_point (_route->meter_point()));
 					}
 
 				} else {
@@ -572,12 +572,12 @@ GainMeterBase::set_meter_point (Route& route, MeterPoint mp)
 }
 
 void
-GainMeterBase::set_mix_group_meter_point (Route& route, MeterPoint mp)
+GainMeterBase::set_route_group_meter_point (Route& route, MeterPoint mp)
 {
-	RouteGroup* mix_group;
+	RouteGroup* route_group;
 
-	if((mix_group = route.route_group()) != 0){
-		mix_group->foreach_route (boost::bind (&Route::set_meter_point, _1, mp));
+	if ((route_group = route.route_group ()) != 0) {
+		route_group->foreach_route (boost::bind (&Route::set_meter_point, _1, mp, false));
 	} else {
 		route.set_meter_point (mp);
 	}

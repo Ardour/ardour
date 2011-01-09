@@ -158,7 +158,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	gint start_gain_touch (GdkEventButton*);
 	gint end_gain_touch (GdkEventButton*);
 
-	void set_mix_group_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
+	void set_route_group_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
 	void set_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
 	gint meter_release (GdkEventButton*);
 	gint meter_press (GdkEventButton*);

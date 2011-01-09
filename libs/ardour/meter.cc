@@ -45,8 +45,8 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 		return;
 	}
 
-	const uint32_t n_audio = min(_configured_input.n_audio(), bufs.count().n_audio());
-	const uint32_t n_midi  = min(_configured_input.n_midi(), bufs.count().n_midi());
+	const uint32_t n_audio = min (current_meters.n_audio(), bufs.count().n_audio());
+	const uint32_t n_midi  = min (current_meters.n_midi(), bufs.count().n_midi());
 
 	uint32_t n = 0;
 
@@ -129,7 +129,7 @@ PeakMeter::reflect_inputs (const ChanCount& in)
 void
 PeakMeter::reset_max_channels (const ChanCount& chn)
 {
-	uint32_t limit = chn.n_total();
+	uint32_t const limit = chn.n_total();
 
 	while (_peak_power.size() > limit) {
 		_peak_power.pop_back();

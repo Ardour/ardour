@@ -1969,7 +1969,7 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 
 	if ((prop = node.property (X_("meter-point"))) != 0) {
 		MeterPoint mp = MeterPoint (string_2_enum (prop->value (), _meter_point));
-                set_meter_point (mp);
+                set_meter_point (mp, true);
 		if (_meter) {
 			_meter->set_display_to_user (_meter_point == MeterCustom);
 		}
@@ -2937,11 +2937,11 @@ Route::flush_processors ()
 }
 
 void
-Route::set_meter_point (MeterPoint p)
+Route::set_meter_point (MeterPoint p, bool force)
 {
 	/* CAN BE CALLED FROM PROCESS CONTEXT */
 
-	if (_meter_point == p) {
+	if (_meter_point == p && !force) {
 		return;
 	}
 
@@ -2981,7 +2981,7 @@ Route::set_meter_point (MeterPoint p)
 			_meter->reflect_inputs (m_in);
 			
 			_processors.insert (loc, _meter);
-			
+
 			/* we do not need to reconfigure the processors, because the meter
 			   (a) is always ready to handle processor_max_streams
 			   (b) is always an N-in/N-out processor, and thus moving

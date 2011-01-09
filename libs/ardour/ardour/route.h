@@ -161,7 +161,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void set_denormal_protection (bool yn);
 	bool denormal_protection() const;
 
-	void         set_meter_point (MeterPoint);
+	void         set_meter_point (MeterPoint, bool force = false);
 	void         infer_meter_point () const;
 	MeterPoint   meter_point() const { return _meter_point; }
 	void         meter ();
