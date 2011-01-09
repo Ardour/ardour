@@ -944,6 +944,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 		if (Config->get_monitoring_model() == HardwareMonitoring)
 		{
 			boost::shared_ptr<RouteList> rl = routes.reader();
+			
 			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 				if (tr && tr->record_enabled ()) {
@@ -965,6 +966,8 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 		} else {
 			stop_transport (abort);
 		}
+		
+		unset_play_loop ();
 
 	} else if (transport_stopped() && speed == 1.0) {
 

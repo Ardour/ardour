@@ -1687,21 +1687,30 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 void
 ARDOUR_UI::toggle_session_auto_loop ()
 {
-	if (_session) {
-		if (_session->get_play_loop()) {
-			if (_session->transport_rolling()) {
-				Location * looploc = _session->locations()->auto_loop_location();
-				if (looploc) {
-					_session->request_locate (looploc->start(), true);
-				}
-			} else {
+	if (!_session) {
+		return;
+	}
+	
+	if (_session->get_play_loop()) {
+
+		if (_session->transport_rolling()) {
+		  
+			Location * looploc = _session->locations()->auto_loop_location();
+			
+			if (looploc) {
+				_session->request_locate (looploc->start(), true);
 				_session->request_play_loop (false);
 			}
+			
 		} else {
-			Location * looploc = _session->locations()->auto_loop_location();
-			if (looploc) {
-				_session->request_play_loop (true);
-			}
+			_session->request_play_loop (false);
+		}
+	} else {
+		
+	  Location * looploc = _session->locations()->auto_loop_location();
+		
+		if (looploc) {
+			_session->request_play_loop (true);
 		}
 	}
 }

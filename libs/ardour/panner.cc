@@ -119,6 +119,7 @@ StreamPanner::PanControllable::set_value (double val)
                 val = max (min (val, 1.0), 0.0);
                 if (p.set_stereo_pan (val, p.width_control()->get_value())) {
                         AutomationControl::set_value(val);
+                        p.session().set_dirty ();
                 }
                 break;
 
@@ -127,6 +128,7 @@ StreamPanner::PanControllable::set_value (double val)
                 val = max (min (val, 1.0), -1.0);
                 if (p.set_stereo_pan (p.direction_control()->get_value(), val)) {
                         AutomationControl::set_value(val);
+                        p.session().set_dirty ();
                 }
                 break;
 
@@ -134,6 +136,7 @@ StreamPanner::PanControllable::set_value (double val)
                 val = max (min (val, 1.0), 0.0);
                 streampanner->set_position (AngularVector (direct_control_to_stereo_pan (val), 0.0));
                 AutomationControl::set_value(val);
+                p.session().set_dirty ();
                 break;
         }
 
