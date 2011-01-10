@@ -155,8 +155,8 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	Gtk::Menu* meter_menu;
 	void popup_meter_menu (GdkEventButton*);
 
-	gint start_gain_touch (GdkEventButton*);
-	gint end_gain_touch (GdkEventButton*);
+	bool gain_slider_button_press (GdkEventButton *);
+	bool gain_slider_button_release (GdkEventButton *);
 
 	void set_route_group_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
 	void set_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
@@ -169,6 +169,9 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 
 	void reset_peak_display ();
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
+
+	/** Emitted when our slider is double-clicked */
+	PBD::Signal0<void> SliderDoubleClicked;
 
 	static sigc::signal<void> ResetAllPeakDisplays;
 	static sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;

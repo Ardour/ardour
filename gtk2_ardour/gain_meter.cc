@@ -110,8 +110,8 @@ GainMeterBase::GainMeterBase (Session* s,
 
 	level_meter = new LevelMeter(_session);
 
-	gain_slider->signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeter::start_gain_touch));
-	gain_slider->signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::end_gain_touch));
+	gain_slider->signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_press));
+	gain_slider->signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_release));
 	gain_slider->set_name ("GainFader");
 
 	gain_display.set_name ("MixerStripGainDisplay");
@@ -591,18 +591,28 @@ GainMeterBase::meter_point_clicked ()
 	}
 }
 
-gint
-GainMeterBase::start_gain_touch (GdkEventButton*)
+bool
+GainMeterBase::gain_slider_button_press (GdkEventButton* ev)
 {
-	_amp->gain_control()->start_touch (_amp->session().transport_frame());
-	return FALSE;
+	switch (ev->type) {
+	case GDK_BUTTON_PRESS:
+		_amp->gain_control()->start_touch (_amp->session().transport_frame());
+		break;
+	case GDK_2BUTTON_PRESS:
+		SliderDoubleClicked (); /* EMIT SIGNAL */
+		break;
+	default:
+		return false;
+	}
+
+	return true;
 }
 
-gint
-GainMeterBase::end_gain_touch (GdkEventButton*)
+bool
+GainMeterBase::gain_slider_button_release (GdkEventButton* ev)
 {
 	_amp->gain_control()->stop_touch (false, _amp->session().transport_frame());
-	return FALSE;
+	return true;
 }
 
 gint
