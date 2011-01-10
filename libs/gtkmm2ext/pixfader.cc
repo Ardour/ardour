@@ -123,6 +123,7 @@ bool
 PixFader::on_button_press_event (GdkEventButton* ev)
 {
 	switch (ev->button) {
+	case 1:
 	case 2:
 		add_modal_grab();
 		grab_loc = (_orien == VERT) ? ev->y : ev->x;
