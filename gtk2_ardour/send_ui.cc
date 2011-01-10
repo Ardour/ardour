@@ -41,6 +41,8 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 	, _gpm (session, 250)
 	, _panners (session)
 {
+	assert (_send);
+
  	_panners.set_panner (s->panner());
  	_gpm.set_controls (boost::shared_ptr<Route>(), s->meter(), s->amp());
 
@@ -63,7 +65,6 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 
 	_send->set_metering (true);
 
-	_send->input()->changed.connect (connections, invalidator (*this), ui_bind (&SendUI::ins_changed, this, _1, _2), gui_context());
 	_send->output()->changed.connect (connections, invalidator (*this), ui_bind (&SendUI::outs_changed, this, _1, _2), gui_context());
 
 	_panners.set_width (Wide);
@@ -86,15 +87,6 @@ SendUI::~SendUI ()
 
 	screen_update_connection.disconnect();
 	fast_screen_update_connection.disconnect();
-}
-
-void
-SendUI::ins_changed (IOChange change, void* /*ignored*/)
-{
-	ENSURE_GUI_THREAD (*this, &SendUI::ins_changed, change, ignored)
-	if (change.type & IOChange::ConfigurationChanged) {
-		_panners.setup_pan ();
-	}
 }
 
 void

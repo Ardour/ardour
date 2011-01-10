@@ -54,7 +54,6 @@ class SendUI : public Gtk::HBox
 	sigc::connection screen_update_connection;
 	sigc::connection fast_screen_update_connection;
 
-	void ins_changed (ARDOUR::IOChange, void*);
 	void outs_changed (ARDOUR::IOChange, void*);
 	PBD::ScopedConnectionList connections;
 };
