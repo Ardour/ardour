@@ -93,7 +93,7 @@ Session::setup_midi_control ()
 void
 Session::spp_start (Parser &, framepos_t /*timestamp*/)
 {
-	if (Config->get_mmc_control() && (!config.get_external_sync() || config.get_sync_source() != JACK)) {
+	if (Config->get_mmc_control ()) {
 		request_transport_speed (1.0);
 	}
 }
@@ -107,7 +107,7 @@ Session::spp_continue (Parser& ignored, framepos_t timestamp)
 void
 Session::spp_stop (Parser&, framepos_t /*timestamp*/)
 {
-	if (Config->get_mmc_control()) {
+	if (Config->get_mmc_control ()) {
 		request_stop ();
 	}
 }
@@ -115,7 +115,7 @@ Session::spp_stop (Parser&, framepos_t /*timestamp*/)
 void
 Session::mmc_deferred_play (MIDI::MachineControl &/*mmc*/)
 {
-	if (Config->get_mmc_control() && (!config.get_external_sync() || (config.get_sync_source() != JACK))) {
+	if (Config->get_mmc_control ()) {
 		request_transport_speed (1.0);
 	}
 }
@@ -123,7 +123,7 @@ Session::mmc_deferred_play (MIDI::MachineControl &/*mmc*/)
 void
 Session::mmc_record_pause (MIDI::MachineControl &/*mmc*/)
 {
-	if (Config->get_mmc_control()) {
+	if (Config->get_mmc_control ()) {
 		maybe_enable_record();
 	}
 }
@@ -160,7 +160,7 @@ Session::mmc_record_strobe (MIDI::MachineControl &/*mmc*/)
 void
 Session::mmc_record_exit (MIDI::MachineControl &/*mmc*/)
 {
-	if (Config->get_mmc_control()) {
+	if (Config->get_mmc_control ()) {
 		disable_record (false);
 	}
 }
@@ -168,7 +168,7 @@ Session::mmc_record_exit (MIDI::MachineControl &/*mmc*/)
 void
 Session::mmc_stop (MIDI::MachineControl &/*mmc*/)
 {
-	if (Config->get_mmc_control()) {
+	if (Config->get_mmc_control ()) {
 		request_stop ();
 	}
 }
@@ -176,7 +176,7 @@ Session::mmc_stop (MIDI::MachineControl &/*mmc*/)
 void
 Session::mmc_pause (MIDI::MachineControl &/*mmc*/)
 {
-	if (Config->get_mmc_control()) {
+	if (Config->get_mmc_control ()) {
 
 		/* We support RECORD_PAUSE, so the spec says that
 		   we must interpret PAUSE like RECORD_PAUSE if
@@ -196,7 +196,7 @@ static bool step_queued = false;
 void
 Session::mmc_step (MIDI::MachineControl &/*mmc*/, int steps)
 {
-	if (!Config->get_mmc_control()) {
+	if (!Config->get_mmc_control ()) {
 		return;
 	}
 
@@ -251,7 +251,7 @@ Session::mmc_step (MIDI::MachineControl &/*mmc*/, int steps)
 void
 Session::mmc_rewind (MIDI::MachineControl &/*mmc*/)
 {
-	if (Config->get_mmc_control()) {
+	if (Config->get_mmc_control ()) {
 		request_transport_speed(-8.0f);
 	}
 }
@@ -259,7 +259,7 @@ Session::mmc_rewind (MIDI::MachineControl &/*mmc*/)
 void
 Session::mmc_fast_forward (MIDI::MachineControl &/*mmc*/)
 {
-	if (Config->get_mmc_control()) {
+	if (Config->get_mmc_control ()) {
 		request_transport_speed(8.0f);
 	}
 }
@@ -267,7 +267,7 @@ Session::mmc_fast_forward (MIDI::MachineControl &/*mmc*/)
 void
 Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 {
-	if (!Config->get_mmc_control()) {
+	if (!Config->get_mmc_control ()) {
 		return;
 	}
 
@@ -308,7 +308,7 @@ Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 void
 Session::mmc_shuttle (MIDI::MachineControl &/*mmc*/, float speed, bool forw)
 {
-	if (!Config->get_mmc_control()) {
+	if (!Config->get_mmc_control ()) {
 		return;
 	}
 
@@ -326,19 +326,20 @@ Session::mmc_shuttle (MIDI::MachineControl &/*mmc*/, float speed, bool forw)
 void
 Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 {
-	if (Config->get_mmc_control()) {
+	if (!Config->get_mmc_control ()) {
+		return;
+	}
 
-		RouteList::iterator i;
-		boost::shared_ptr<RouteList> r = routes.reader();
-
-		for (i = r->begin(); i != r->end(); ++i) {
-			AudioTrack *at;
-
-			if ((at = dynamic_cast<AudioTrack*>((*i).get())) != 0) {
-				if (trk == at->remote_control_id()) {
-					at->set_record_enabled (enabled, &mmc);
-					break;
-				}
+	RouteList::iterator i;
+	boost::shared_ptr<RouteList> r = routes.reader();
+	
+	for (i = r->begin(); i != r->end(); ++i) {
+		AudioTrack *at;
+		
+		if ((at = dynamic_cast<AudioTrack*>((*i).get())) != 0) {
+			if (trk == at->remote_control_id()) {
+				at->set_record_enabled (enabled, &mmc);
+				break;
 			}
 		}
 	}
