@@ -447,6 +447,7 @@ IO::ensure_ports (ChanCount count, bool clear, void* src)
 		change.after = _ports.count ();
 		change.type = IOChange::ConfigurationChanged;
 		this->changed (change, src); /* EMIT SIGNAL */
+		_buffers.attach_buffers (_ports);
 		setup_bundle ();
 		_session.set_dirty ();
 	}
@@ -1522,12 +1523,10 @@ IO::connected_to (boost::shared_ptr<const IO> other) const
 void
 IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
 {
-	BufferSet bufs;
-
 	/* don't read the data into new buffers - just use the port buffers directly */
 
-	bufs.attach_buffers (_ports, nframes, 0);
-	proc->run (bufs, start_frame, end_frame, nframes, true);
+	_buffers.get_jack_port_addresses (_ports, nframes, 0);
+	proc->run (_buffers, start_frame, end_frame, nframes, true);
 }
 
 void

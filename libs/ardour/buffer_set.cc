@@ -82,10 +82,12 @@ BufferSet::clear()
 #endif	
 }
 
-/** Make this BufferSet a direct mirror of a PortSet's buffers.
+/** Set up this BufferSet so that its data structures mirror a PortSet's buffers.
+ *  This is quite expensive and not RT-safe, so it should not be called in a process context;
+ *  get_jack_port_addresses() will fill in a structure set up by this method.
  */
 void
-BufferSet::attach_buffers (PortSet& ports, framecnt_t nframes, framecnt_t offset)
+BufferSet::attach_buffers (PortSet& ports)
 {
 	clear();
 
@@ -95,7 +97,7 @@ BufferSet::attach_buffers (PortSet& ports, framecnt_t nframes, framecnt_t offset
 
 		for (PortSet::iterator p = ports.begin(*t); p != ports.end(*t); ++p) {
 			assert(p->type() == *t);
-			v.push_back(&(p->get_buffer(nframes, offset)));
+			v.push_back (0);
 		}
 	}
 
@@ -103,6 +105,32 @@ BufferSet::attach_buffers (PortSet& ports, framecnt_t nframes, framecnt_t offset
 	_available = ports.count();
 
 	_is_mirror = true;
+}
+
+/** Write the JACK port addresses from a PortSet into our data structures.  This
+ *  call assumes that attach_buffers() has already been called for the same PortSet.
+ *  Does not allocate, so RT-safe.
+ */
+void
+BufferSet::get_jack_port_addresses (PortSet& ports, framecnt_t nframes, framecnt_t offset)
+{
+	assert (_count == ports.count ());
+	assert (_available == ports.count ());
+	assert (_is_mirror);
+
+	assert (_buffers.size() == DataType::num_types);
+
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		BufferVec& v = _buffers[*t];
+
+		assert (v.size() == ports.num_ports (*t));
+
+		int i = 0;
+		for (PortSet::iterator p = ports.begin(*t); p != ports.end(*t); ++p) {
+			v[i] = &p->get_buffer (nframes, offset);
+			++i;
+		}
+	}
 }
 
 /** Ensure that there are @a num_buffers buffers of type @a type available,

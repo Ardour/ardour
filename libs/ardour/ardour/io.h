@@ -42,6 +42,7 @@
 #include "ardour/session_object.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
+#include "ardour/buffer_set.h"
 
 class XMLNode;
 
@@ -50,7 +51,6 @@ namespace ARDOUR {
 class Amp;
 class AudioEngine;
 class AudioPort;
-class BufferSet;
 class Bundle;
 class MidiPort;
 class PeakMeter;
@@ -249,6 +249,8 @@ class IO : public SessionObject, public Latent
 
 	void setup_bundle ();
 	std::string bundle_channel_name (uint32_t, uint32_t, DataType) const;
+
+	BufferSet _buffers;
 };
 
 } // namespace ARDOUR
