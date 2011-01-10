@@ -46,6 +46,7 @@ private:
 	Gtk::CheckButton _rec_enable;
 	Gtk::CheckButton _select;
 	Gtk::CheckButton _edit;
+	Gtk::CheckButton _route_active;
 	Gtk::Button* _ok;
 
 	void gain_toggled ();

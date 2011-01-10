@@ -84,7 +84,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	ChanCount n_outputs() const { return _output->n_ports(); }
 
 	bool active() const { return _active; }
-	void set_active (bool yn);
+	void set_active (bool yn, void *);
 
 	static std::string ensure_track_or_route_name(std::string, Session &);
 

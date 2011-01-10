@@ -50,6 +50,7 @@ namespace ARDOUR {
 		PropertyDescriptor<bool> recenable;
 		PropertyDescriptor<bool> select;
 		PropertyDescriptor<bool> edit;
+		PropertyDescriptor<bool> route_active;
 	}	
 }
 
@@ -74,6 +75,8 @@ RouteGroup::make_property_quarks ()
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for select = %1\n", 	Properties::select.property_id));
 	Properties::edit.property_id = g_quark_from_static_string (X_("edit"));
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for edit = %1\n", 	Properties::edit.property_id));
+	Properties::route_active.property_id = g_quark_from_static_string (X_("route-active"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for route-active = %1\n", Properties::route_active.property_id));
 }
 
 #define ROUTE_GROUP_DEFAULT_PROPERTIES  _relative (Properties::relative, false) \
@@ -84,7 +87,8 @@ RouteGroup::make_property_quarks ()
 	, _solo (Properties::solo, false) \
 	, _recenable (Properties::recenable, false) \
 	, _select (Properties::select, false) \
-	, _edit (Properties::edit, false)
+	, _edit (Properties::edit, false) \
+	, _route_active (Properties::route_active, false)
 
 RouteGroup::RouteGroup (Session& s, const string &n)
 	: SessionObject (s, n)
@@ -102,6 +106,7 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 	add_property (_recenable);
 	add_property (_select);
 	add_property (_edit);
+	add_property (_route_active);
 }
 
 RouteGroup::~RouteGroup ()
@@ -267,12 +272,14 @@ RouteGroup::set_state_2X (const XMLNode& node, int /*version*/)
 		_solo = true;
 		_recenable = true;
 		_edit = false;
+		_route_active = true;
 	} else if (node.name() == "EditGroup") {
 		_gain = false;
 		_mute = false;
 		_solo = false;
 		_recenable = false;
 		_edit = true;
+		_route_active = false;
 	}
 
 	return 0;
@@ -330,6 +337,15 @@ RouteGroup::set_edit (bool yn)
 		return;
 	}
 	_edit = yn;
+}
+
+void
+RouteGroup::set_route_active (bool yn)
+{
+	if (is_route_active() == yn) {
+		return;
+	}
+	_route_active = yn;
 }
 
 void

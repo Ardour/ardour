@@ -1964,7 +1964,7 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 	if ((prop = node.property (X_("active"))) != 0) {
 		bool yn = string_is_affirmative (prop->value());
 		_active = !yn; // force switch
-		set_active (yn);
+		set_active (yn, this);
 	}
 
 	if ((prop = node.property (X_("meter-point"))) != 0) {
@@ -2210,7 +2210,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 			if ((prop = child->property (X_("active"))) != 0) {
 				bool yn = string_is_affirmative (prop->value());
 				_active = !yn; // force switch
-				set_active (yn);
+				set_active (yn, this);
 			}
 			
 			if ((prop = child->property (X_("gain"))) != 0) {
@@ -3399,8 +3399,13 @@ Route::denormal_protection () const
 }
 
 void
-Route::set_active (bool yn)
+Route::set_active (bool yn, void* src)
 {
+	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_route_active()) {
+		_route_group->foreach_route (boost::bind (&Route::set_active, _1, yn, _route_group));
+		return;
+	}
+	
 	if (_active != yn) {
 		_active = yn;
 		_input->set_active (yn);

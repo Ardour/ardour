@@ -6144,7 +6144,7 @@ Editor::toggle_tracks_active ()
 				target = !rtv->_route->active();
 				first = false;
 			}
-			rtv->_route->set_active (target);
+			rtv->_route->set_active (target, this);
 		}
 	}
 }

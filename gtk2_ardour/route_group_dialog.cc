@@ -43,6 +43,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	, _rec_enable (_("Record enable"))
 	, _select (_("Selection"))
 	, _edit (_("Editing"))
+	, _route_active (_("Route active state"))
 {
 	set_modal (true);
 	set_skip_taskbar_hint (true);
@@ -86,6 +87,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	_rec_enable.set_active (_group->is_recenable());
 	_select.set_active (_group->is_select());
 	_edit.set_active (_group->is_edit());
+	_route_active.set_active (_group->is_route_active());
 
 	_name.signal_changed().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
@@ -96,6 +98,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
  	_rec_enable.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
  	_select.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
  	_edit.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
+ 	_route_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 
 	gain_toggled ();
 
@@ -119,6 +122,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	table->attach (_rec_enable, 1, 3, 5, 6, Gtk::FILL, Gtk::FILL, 0, 0);
 	table->attach (_select, 1, 3, 6, 7, Gtk::FILL, Gtk::FILL, 0, 0);
 	table->attach (_edit, 1, 3, 7, 8, Gtk::FILL, Gtk::FILL, 0, 0);
+	table->attach (_route_active, 1, 3, 8, 9, Gtk::FILL, Gtk::FILL, 0, 0);
 
 	options_box->pack_start (*table, false, true);
 	vbox->pack_start (*options_box, false, true);
@@ -182,6 +186,7 @@ RouteGroupDialog::update ()
 	plist.add (Properties::solo, _solo.get_active ());
 	plist.add (Properties::select, _select.get_active());
 	plist.add (Properties::edit, _edit.get_active());
+	plist.add (Properties::route_active, _route_active.get_active());
 	plist.add (Properties::relative, _relative.get_active());
 	plist.add (Properties::active, _active.get_active());
 	plist.add (Properties::name, string (_name.get_text()));

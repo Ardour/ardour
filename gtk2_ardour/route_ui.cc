@@ -1471,7 +1471,7 @@ RouteUI::toggle_route_active ()
 
 	if (route_active_menu_item) {
 		if (route_active_menu_item->get_active() != (yn = _route->active())) {
-			_route->set_active (!yn);
+			_route->set_active (!yn, this);
 		}
 	}
 }
