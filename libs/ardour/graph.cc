@@ -49,6 +49,11 @@ Graph::Graph (Session & session)
 {
         pthread_mutex_init( &_trigger_mutex, NULL);
 
+	/* XXX: rather hacky `fix' to stop _trigger_queue.push_back() allocating
+	   memory in the RT thread.
+	*/
+	_trigger_queue.reserve (8192);
+
         _execution_tokens = 0;
 
         _current_chain = 0;
