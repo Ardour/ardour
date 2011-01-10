@@ -30,12 +30,10 @@ ExportGraphBuilder::ExportGraphBuilder (Session const & session)
   , thread_pool (4) // FIXME thread amount to cores amount
 {
 	process_buffer_frames = session.engine().frames_per_cycle();
-	process_buffer = new Sample[process_buffer_frames];
 }
 
 ExportGraphBuilder::~ExportGraphBuilder ()
 {
-	delete [] process_buffer;
 }
 
 int
@@ -44,6 +42,7 @@ ExportGraphBuilder::process (framecnt_t frames, bool last_cycle)
 	assert(frames <= process_buffer_frames);
 	
 	for (ChannelMap::iterator it = channels.begin(); it != channels.end(); ++it) {
+		Sample * process_buffer = 0;
 		it->first->read (process_buffer, frames);
 		ProcessContext<Sample> context(process_buffer, frames, 1);
 		if (last_cycle) { context.set_flag (ProcessContext<Sample>::EndOfInput); }
@@ -85,6 +84,13 @@ ExportGraphBuilder::set_current_timespan (boost::shared_ptr<ExportTimespan> span
 void
 ExportGraphBuilder::add_config (FileSpec const & config)
 {
+	ExportChannelConfiguration::ChannelList const & channels =
+		config.channel_config->get_channels();
+	for(ExportChannelConfiguration::ChannelList::const_iterator it = channels.begin();
+	    it != channels.end(); ++it) {
+		(*it)->set_max_buffer_size(process_buffer_frames);
+	}
+
 	// If the sample rate is "session rate", change it to the real value.
 	// However, we need to copy it to not change the config which is saved...
 	FileSpec new_config (config);

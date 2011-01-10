@@ -224,7 +224,6 @@ class ExportGraphBuilder
 	// The sources of all data, each channel is read only once
 	ChannelMap channels;
 	
-	Sample *  process_buffer;
 	framecnt_t process_buffer_frames;
 	
 	std::list<Normalizer *> normalizers;

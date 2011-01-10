@@ -25,6 +25,7 @@
 
 #include <boost/signals2.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_array.hpp>
 #include <boost/operators.hpp>
 
 #include "pbd/signals.h"
@@ -45,7 +46,9 @@ class ExportChannel : public boost::less_than_comparable<ExportChannel>
 
 	virtual ~ExportChannel () {}
 
-	virtual void read (Sample * data, framecnt_t frames) const = 0;
+	virtual void set_max_buffer_size(framecnt_t frames) { }
+
+	virtual void read (Sample *& data, framecnt_t frames) const = 0;
 	virtual bool empty () const = 0;
 
 	/// Adds state to node passed
@@ -75,9 +78,10 @@ class PortExportChannel : public ExportChannel
   public:
 	typedef std::set<AudioPort *> PortSet;
 
-	PortExportChannel () {}
+	PortExportChannel ();
+	void set_max_buffer_size(framecnt_t frames);
 
-	void read (Sample * data, framecnt_t frames) const;
+	void read (Sample *& data, framecnt_t frames) const;
 	bool empty () const { return ports.empty(); }
 
 	void get_state (XMLNode * node) const;
@@ -90,6 +94,8 @@ class PortExportChannel : public ExportChannel
 
   private:
 	PortSet ports;
+	boost::scoped_array<Sample> buffer;
+	framecnt_t buffer_size;
 };
 
 /// Handles RegionExportChannels and does actual reading from region
@@ -106,7 +112,7 @@ class RegionExportChannelFactory
 	~RegionExportChannelFactory ();
 
 	ExportChannelPtr create (uint32_t channel);
-	void read (uint32_t channel, Sample * data, framecnt_t frames_to_read);
+	void read (uint32_t channel, Sample *& data, framecnt_t frames_to_read);
 
   private:
 
@@ -124,8 +130,8 @@ class RegionExportChannelFactory
 	framecnt_t region_start;
 	framecnt_t position;
 
-	Sample * mixdown_buffer;
-	Sample * gain_buffer;
+	boost::scoped_array<Sample> mixdown_buffer;
+	boost::scoped_array<Sample> gain_buffer;
 
 	PBD::ScopedConnection export_connection;
 };
@@ -136,7 +142,7 @@ class RegionExportChannel : public ExportChannel
 	friend class RegionExportChannelFactory;
 
   public:
-	void read (Sample * data, framecnt_t frames_to_read) const { factory.read (channel, data, frames_to_read); }
+	void read (Sample *& data, framecnt_t frames_to_read) const { factory.read (channel, data, frames_to_read); }
 	void get_state (XMLNode * /*node*/) const {};
 	void set_state (XMLNode * /*node*/, Session & /*session*/) {};
 	bool empty () const { return false; }

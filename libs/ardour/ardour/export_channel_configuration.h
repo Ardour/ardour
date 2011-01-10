@@ -82,7 +82,7 @@ class ExportChannelConfiguration : public boost::enable_shared_from_this<ExportC
 
 	ChannelList     channels;
 	bool            split; // Split to mono files
-        std::string  _name;
+	std::string  _name;
 };
 
 } // namespace ARDOUR

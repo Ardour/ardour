@@ -31,6 +31,17 @@
 
 using namespace ARDOUR;
 
+PortExportChannel::PortExportChannel ()
+	: buffer_size(0)
+{
+}
+
+void PortExportChannel::set_max_buffer_size(framecnt_t frames)
+{
+	buffer_size = frames;
+	buffer.reset (new Sample[frames]);
+}
+
 bool
 PortExportChannel::operator< (ExportChannel const & other) const
 {
@@ -42,19 +53,29 @@ PortExportChannel::operator< (ExportChannel const & other) const
 }
 
 void
-PortExportChannel::read (Sample * data, framecnt_t frames) const
+PortExportChannel::read (Sample *& data, framecnt_t frames) const
 {
-	memset (data, 0, frames * sizeof (float));
+	assert(buffer);
+	assert(frames <= buffer_size);
+
+	if (ports.size() == 1) {
+		data = (*ports.begin())->get_audio_buffer(frames).data();
+		return;
+	}
+	
+	memset (buffer.get(), 0, frames * sizeof (Sample));
 
 	for (PortSet::const_iterator it = ports.begin(); it != ports.end(); ++it) {
 		if (*it != 0) {
 			Sample* port_buffer = (*it)->get_audio_buffer(frames).data();
 
 			for (uint32_t i = 0; i < frames; ++i) {
-				data[i] += (float) port_buffer[i];
+				buffer[i] += (float) port_buffer[i];
 			}
 		}
 	}
+
+	data = buffer.get();
 }
 
 void
@@ -93,10 +114,7 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
   frames_per_cycle (session->engine().frames_per_cycle ()),
   buffers_up_to_date (false),
   region_start (region.position()),
-  position (region_start),
-
-  mixdown_buffer (0),
-  gain_buffer (0)
+  position (region_start)
 {
 	switch (type) {
 	  case Raw:
@@ -105,9 +123,9 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
 	  case Fades:
 		n_channels = region.n_channels();
 
-		mixdown_buffer = new Sample [frames_per_cycle];
-		gain_buffer = new Sample [frames_per_cycle];
-		memset (gain_buffer, 1.0, sizeof (Sample) * frames_per_cycle);
+		mixdown_buffer.reset (new Sample [frames_per_cycle]);
+		gain_buffer.reset (new Sample [frames_per_cycle]);
+		memset (gain_buffer.get(), 1.0, sizeof (Sample) * frames_per_cycle);
 
 		break;
 	  case Processed:
@@ -125,8 +143,6 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
 
 RegionExportChannelFactory::~RegionExportChannelFactory ()
 {
-	delete[] mixdown_buffer;
-	delete[] gain_buffer;
 }
 
 ExportChannelPtr
@@ -137,7 +153,7 @@ RegionExportChannelFactory::create (uint32_t channel)
 }
 
 void
-RegionExportChannelFactory::read (uint32_t channel, Sample * data, framecnt_t frames_to_read)
+RegionExportChannelFactory::read (uint32_t channel, Sample *& data, framecnt_t frames_to_read)
 {
 	assert (channel < n_channels);
 	assert (frames_to_read <= frames_per_cycle);
@@ -147,7 +163,7 @@ RegionExportChannelFactory::read (uint32_t channel, Sample * data, framecnt_t fr
 		buffers_up_to_date = true;
 	}
 
-	memcpy (data, buffers.get_audio (channel).data(), frames_to_read * sizeof (Sample));
+	data = buffers.get_audio (channel).data();
 }
 
 void
@@ -164,8 +180,8 @@ RegionExportChannelFactory::update_buffers (framecnt_t frames)
 	  case Fades:
 		assert (mixdown_buffer && gain_buffer);
 		for (size_t channel = 0; channel < n_channels; ++channel) {
-			memset (mixdown_buffer, 0, sizeof (Sample) * frames);
-			region.read_at (buffers.get_audio (channel).data(), mixdown_buffer, gain_buffer, position, frames, channel);
+			memset (mixdown_buffer.get(), 0, sizeof (Sample) * frames);
+			region.read_at (buffers.get_audio (channel).data(), mixdown_buffer.get(), gain_buffer.get(), position, frames, channel);
 		}
 		break;
 	  case Processed:
@@ -177,3 +193,4 @@ RegionExportChannelFactory::update_buffers (framecnt_t frames)
 
 	position += frames;
 }
+
