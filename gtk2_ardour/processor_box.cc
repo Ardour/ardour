@@ -1621,6 +1621,7 @@ void
 ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 {
 	boost::shared_ptr<Send> send;
+	boost::shared_ptr<InternalSend> internal_send;
 	boost::shared_ptr<Return> retrn;
 	boost::shared_ptr<PluginInsert> plugin_insert;
 	boost::shared_ptr<PortInsert> port_insert;
@@ -1633,7 +1634,7 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 		}
 	}
 
-	if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0) {
+	if ((internal_send = boost::dynamic_pointer_cast<InternalSend> (processor)) != 0) {
 
 		if (!_session->engine().connected()) {
 			return;
@@ -1646,6 +1647,15 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 				_parent_strip->show_send (send);
 			}
 		}
+
+	} else if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0) {
+
+		if (!_session->engine().connected()) {
+			return;
+		}
+
+		SendUIWindow* w = new SendUIWindow (send, _session);
+		w->show_all ();
 
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
 
