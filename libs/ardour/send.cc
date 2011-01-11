@@ -225,10 +225,6 @@ Send::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
-	if (_output) {
-		_output->ensure_io (out, false, 0);
-	}
-
 	if (!Processor::configure_io (in, out)) {
 		return false;
 	}
