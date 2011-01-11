@@ -2554,13 +2554,22 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*a
 		_monitor_send = listener;
 	}
 
-        if (placement == PostFader) {
-                /* put it *really* at the end, not just after the panner (main outs)
-                 */
-                add_processor (listener, _processors.end());
-        } else {
-                add_processor (listener, PreFader);
-        }
+
+	if (aux) {
+
+		add_processor (listener, placement);
+
+	} else {
+		
+		if (placement == PostFader) {
+			/* put it *really* at the end, not just after the panner (main outs)
+			 */
+			add_processor (listener, _processors.end());
+		} else {
+			add_processor (listener, PreFader);
+		}
+		
+	}
 
 	return 0;
 }
