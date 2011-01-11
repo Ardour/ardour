@@ -177,7 +177,10 @@ Processor::set_state (const XMLNode& node, int version)
 
 	// may not exist for legacy 3.0 sessions
 	if ((prop = node.property ("name")) != 0) {
-		set_name(prop->value());
+		/* don't let derived classes have a crack at set_name,
+		   as some (like Send) will screw with the one we suggest.
+		*/
+		Processor::set_name (prop->value());
 	}
 
 	// may not exist for legacy 3.0 sessions
