@@ -1634,7 +1634,11 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 		}
 	}
 
-	if ((internal_send = boost::dynamic_pointer_cast<InternalSend> (processor)) != 0) {
+	if (boost::dynamic_pointer_cast<Amp> (processor)) {
+
+		_parent_strip->revert_to_default_display ();
+		
+	} else if ((internal_send = boost::dynamic_pointer_cast<InternalSend> (processor)) != 0) {
 
 		if (!_session->engine().connected()) {
 			return;

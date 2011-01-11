@@ -598,9 +598,6 @@ GainMeterBase::gain_slider_button_press (GdkEventButton* ev)
 	case GDK_BUTTON_PRESS:
 		_amp->gain_control()->start_touch (_amp->session().transport_frame());
 		break;
-	case GDK_2BUTTON_PRESS:
-		SliderDoubleClicked (); /* EMIT SIGNAL */
-		break;
 	default:
 		return false;
 	}

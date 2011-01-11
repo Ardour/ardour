@@ -170,9 +170,6 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	void reset_peak_display ();
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
-	/** Emitted when our slider is double-clicked */
-	PBD::Signal0<void> SliderDoubleClicked;
-
 	static sigc::signal<void> ResetAllPeakDisplays;
 	static sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
 

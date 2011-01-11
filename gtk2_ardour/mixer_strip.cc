@@ -306,9 +306,6 @@ MixerStrip::init ()
 	input_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::input_press), false);
 	output_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::output_press), false);
 
-	/* Go back to displaying our route's gain in the slider if it is double-clicked */
-	gain_meter().SliderDoubleClicked.connect (*this, invalidator (*this), boost::bind (&MixerStrip::revert_to_default_display, this), gui_context ());
-
 	/* we don't need this if its not an audio track, but we don't know that yet and it doesn't
 	   hurt (much).
 	*/
