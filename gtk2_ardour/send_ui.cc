@@ -61,7 +61,11 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 
 	pack_start (*io, true, true);
 
-	show_all ();
+	io->show ();
+	_gpm.show_all ();
+	_panners.show_all ();
+	_vbox.show ();
+	_hbox.show ();
 
 	_send->set_metering (true);
 
@@ -123,6 +127,9 @@ SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session* session)
 	get_vbox()->pack_start (hpacker);
 
 	set_name ("SendUIWindow");
+
+	ui->show ();
+	hpacker.show ();
 
 	s->DropReferences.connect (going_away_connection, invalidator (*this), boost::bind (&SendUIWindow::send_going_away, this), gui_context());
 

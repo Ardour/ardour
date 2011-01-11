@@ -858,7 +858,7 @@ ProcessorBox::choose_send ()
 	 */
 
 	IOSelectorWindow *ios = new IOSelectorWindow (_session, send->output(), true);
-	ios->show_all ();
+	ios->show ();
 
 	/* keep a reference to the send so it doesn't get deleted while
 	   the IOSelectorWindow is doing its stuff
@@ -1659,7 +1659,7 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 		}
 
 		SendUIWindow* w = new SendUIWindow (send, _session);
-		w->show_all ();
+		w->show ();
 
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
 
