@@ -1641,10 +1641,10 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 		}
 
 		if (_parent_strip) {
-			if (boost::dynamic_pointer_cast<Send> (_parent_strip->current_delivery()) == send) {
+			if (boost::dynamic_pointer_cast<Send> (_parent_strip->current_delivery()) == internal_send) {
 				_parent_strip->revert_to_default_display ();
 			} else {
-				_parent_strip->show_send (send);
+				_parent_strip->show_send (internal_send);
 			}
 		}
 

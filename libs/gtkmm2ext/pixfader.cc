@@ -122,6 +122,10 @@ PixFader::on_size_request (GtkRequisition* req)
 bool
 PixFader::on_button_press_event (GdkEventButton* ev)
 {
+	if (ev->type != GDK_BUTTON_PRESS) {
+		return false;
+	}
+	
 	switch (ev->button) {
 	case 1:
 	case 2:
