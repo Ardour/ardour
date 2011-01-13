@@ -398,16 +398,14 @@ void
 GainMeterBase::gain_adjusted ()
 {
 	if (!ignore_toggle) {
-		if (_route) {
-			if (_route->amp() == _amp) {
-				if (_is_midi) {
-					_route->set_gain (gain_adjustment.get_value(), this);
-				} else {
-					_route->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
-				}
+		if (_route && _route->amp() == _amp) {
+			if (_is_midi) {
+				_route->set_gain (gain_adjustment.get_value(), this);
 			} else {
-				_amp->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
+				_route->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
 			}
+		} else {
+			_amp->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
 		}
 	}
 
