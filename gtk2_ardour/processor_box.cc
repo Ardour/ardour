@@ -96,6 +96,8 @@ Glib::RefPtr<Gdk::Pixbuf> SendProcessorEntry::_slider;
 ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	: _processor (p)
 	, _width (w)
+	, _visual_state (Gtk::STATE_NORMAL)
+	, _position (PreFader)
 {
 	_hbox.pack_start (_active, false, false);
 	_event_box.add (_name);
@@ -138,6 +140,64 @@ ProcessorEntry::drag_text () const
 {
 	return name ();
 }
+
+void
+ProcessorEntry::set_visual_state (Gtk::StateType t)
+{
+	_visual_state = t;
+	setup_visuals ();
+}
+
+void
+ProcessorEntry::set_position (Position p)
+{
+	_position = p;
+	setup_visuals ();
+}
+
+void
+ProcessorEntry::setup_visuals ()
+{
+	switch (_position) {
+	case PreFader:
+		_event_box.set_name ("ProcessorPreFader");
+		if (_visual_state == Gtk::STATE_NORMAL) {
+			_frame.set_name ("ProcessorPreFaderFrame");
+		}
+		break;
+
+	case Fader:
+		_event_box.set_name ("ProcessorFader");
+		if (_visual_state == Gtk::STATE_NORMAL) {
+			_frame.set_name ("ProcessorFaderFrame");
+		}
+		break;
+
+	case PostFader:
+		_event_box.set_name ("ProcessorPostFader");
+		if (_visual_state == Gtk::STATE_NORMAL) {
+			_frame.set_name ("ProcessorPostFaderFrame");
+		}
+		break;
+	}
+
+	switch (_visual_state) {
+	case Gtk::STATE_NORMAL:
+		/* _frame has been set up above */
+		_event_box.set_state (Gtk::STATE_NORMAL);
+		break;
+	case Gtk::STATE_SELECTED:
+		_frame.set_name ("ProcessorFrameSelected");
+		/* don't change the background of the box when it is selected */
+		_event_box.set_state (Gtk::STATE_NORMAL);
+		break;
+	case Gtk::STATE_ACTIVE:
+		_frame.set_name ("ProcessorFrameActiveSend");
+		_event_box.set_state (Gtk::STATE_ACTIVE);
+		break;
+	}
+}
+	
 
 boost::shared_ptr<Processor>
 ProcessorEntry::processor () const
@@ -994,7 +1054,7 @@ ProcessorBox::redisplay_processors ()
 		i = j;
 	}
 
-	setup_entry_widget_names ();
+	setup_entry_positions ();
 }
 
 /** Add a ProcessorWindowProxy for a processor to our list, if that processor does
@@ -1085,29 +1145,24 @@ void
 ProcessorBox::reordered ()
 {
 	compute_processor_sort_keys ();
-	setup_entry_widget_names ();
+	setup_entry_positions ();
 }
 
-/* Name the Entry widgets according to pre- or post-fader so that they get coloured right */
 void
-ProcessorBox::setup_entry_widget_names ()
+ProcessorBox::setup_entry_positions ()
 {
-	/* It just so happens that the action_widget() is the event box (which gives the background
-	 * colour) and the widget() is the frame, more by good luck than good judgement.
-	 */
-	
 	list<ProcessorEntry*> children = processor_display.children ();
 	bool pre_fader = true;
+	
 	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
 		if (boost::dynamic_pointer_cast<Amp>((*i)->processor())) {
 			pre_fader = false;
+			(*i)->set_position (ProcessorEntry::Fader);
 		} else {
 			if (pre_fader) {
-				(*i)->action_widget().set_name ("ProcessorPreFader");
-				(*i)->widget().set_name ("ProcessorPreFaderFrame");
+				(*i)->set_position (ProcessorEntry::PreFader);
 			} else {
-				(*i)->action_widget().set_name ("ProcessorPostFader");
-				(*i)->widget().set_name ("ProcessorPostFaderFrame");
+				(*i)->set_position (ProcessorEntry::PostFader);
 			}
 		}
 	}

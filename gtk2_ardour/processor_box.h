@@ -106,6 +106,15 @@ public:
 	Gtk::EventBox& action_widget ();
 	Gtk::Widget& widget ();
 	std::string drag_text () const;
+	void set_visual_state (Gtk::StateType);
+
+	enum Position {
+		PreFader,
+		Fader,
+		PostFader
+	};
+	
+	void set_position (Position);
 	boost::shared_ptr<ARDOUR::Processor> processor () const;
 	void set_enum_width (Width);
 	virtual void set_pixel_width (int) {}
@@ -120,6 +129,7 @@ private:
 	void processor_active_changed ();
 	void processor_property_changed (const PBD::PropertyChange&);
 	std::string name () const;
+	void setup_visuals ();
 
 	Gtk::Frame _frame;
 	Gtk::EventBox _event_box;
@@ -128,6 +138,8 @@ private:
 	Gtk::CheckButton _active;
 	boost::shared_ptr<ARDOUR::Processor> _processor;
 	Width _width;
+	Gtk::StateType _visual_state;
+	Position _position;
 	PBD::ScopedConnection active_connection;
 	PBD::ScopedConnection name_connection;
 };
@@ -293,7 +305,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void weird_plugin_dialog (ARDOUR::Plugin& p, ARDOUR::Route::ProcessorStreams streams);
 	void on_size_allocate (Gtk::Allocation &);
 
-	void setup_entry_widget_names ();
+	void setup_entry_positions ();
 	
 	static ProcessorBox* _current_processor_box;
 

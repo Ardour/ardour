@@ -1212,10 +1212,7 @@ style "processor_list"
 	# Basic background colour
 	bg[NORMAL] = { 0, 0, 0 }
 
-	# A selected processor
-	bg[SELECTED] = { 0, 0.5, 0.9 }
-
-	# A send processor whose level is being controlled by the fader
+	# Colours for sends whose level is being controller by the fader
 	bg[ACTIVE] = { 0.19, 0.97, 0.69 }
 	fg[ACTIVE] = { 0.0, 0.0, 0.0 }
 
@@ -1223,37 +1220,49 @@ style "processor_list"
 	GtkCheckButton::indicator-spacing = 0
 }
 
-# Colour of the frame of the fader in the processor list
-style "processor_fader_frame"
+# Colour of a processor frame when it is selected
+style "processor_frame_selected"
 {
-	bg[NORMAL] = { 0.5, 0.5, 0.5 }
+	bg[NORMAL] = { 0.9, 0.8, 0.2 }
 }
 
-# A pre-fader processor's background
-style "processor_prefader"
+# Colour of a processor frame when it is a send whose level is being controller by the fader
+style "processor_frame_active_send"
 {
-	bg[NORMAL] = { 0.3, 0.0, 0.0 }
+	bg[NORMAL] = { 0.19, 0.97, 0.69 }
 }
 
-# A pre-fader processor's frame
-style "processor_prefader_frame"
-{
-	bg[NORMAL] = { 0.5, 0.0, 0.0 }
-}
-
-# The fader processor
+# Fader processor's background
 style "processor_fader"
 {
 	bg[NORMAL] = { 0.4, 0.4, 0.4 }
 }
 
-# A post-fader processor's background
+# Fader processor's frame
+style "processor_fader_frame"
+{
+	bg[NORMAL] = { 0.5, 0.5, 0.5 }
+}
+
+# Pre-fader processor's background
+style "processor_prefader"
+{
+	bg[NORMAL] = { 0.3, 0.0, 0.0 }
+}
+
+# Pre-fader processor's frame
+style "processor_prefader_frame"
+{
+	bg[NORMAL] = { 0.5, 0.0, 0.0 }
+}
+
+# Post-fader processor's background
 style "processor_postfader"
 {
 	bg[NORMAL] = { 0.1, 0.3, 0.1 }
 }
 
-# A post-fader processor's frame
+# Post-fader processor's frame
 style "processor_postfader_frame"
 {
 	bg[NORMAL] = { 0.1, 0.5, 0.1 }
@@ -1893,7 +1902,9 @@ widget "*OddPortGroups" style:highest "odd_port_groups"
 widget "*EvenPortGroups" style:highest "even_port_groups"
 widget "*MidiListView*" style:highest "white_tree_view"
 widget "*ProcessorList*" style:highest "processor_list"
-widget "*ProcessorFaderFrame*" style:highest "processor_fader_frame"
+widget "*ProcessorFrameSelected" style:highest "processor_frame_selected"
+widget "*ProcessorFrameActiveSend" style:highest "processor_frame_active_send"
+widget "*ProcessorFaderFrame" style:highest "processor_fader_frame"
 widget "*ProcessorPreFader" style:highest "processor_prefader"
 widget "*ProcessorPreFaderFrame" style:highest "processor_prefader_frame"
 widget "*ProcessorFader" style:highest "processor_fader"

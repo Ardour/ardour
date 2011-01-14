@@ -35,6 +35,9 @@ public:
 
 	/** @return Text to use in the icon that is dragged */
 	virtual std::string drag_text () const = 0;
+
+	/** Set the child's visual state */
+	virtual void set_visual_state (Gtk::StateType) = 0;
 };
 
 /** A VBox whose contents can be dragged and dropped */
@@ -495,11 +498,11 @@ private:
 		assert (c);
 		
 		if (c == _active) {
-			c->action_widget().set_state (Gtk::STATE_ACTIVE);
+			c->set_visual_state (Gtk::STATE_ACTIVE);
 		} else if (selected (c)) {
-			c->action_widget().set_state (Gtk::STATE_SELECTED);
+			c->set_visual_state (Gtk::STATE_SELECTED);
 		} else {
-			c->action_widget().set_state (Gtk::STATE_NORMAL);
+			c->set_visual_state (Gtk::STATE_NORMAL);
 		}
 	}
 
