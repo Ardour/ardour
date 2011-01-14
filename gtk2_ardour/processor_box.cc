@@ -105,6 +105,9 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	_vbox.pack_start (_hbox);
 	_frame.add (_vbox);
 
+	/* without this, the border is mis-drawn on some systems */
+	_vbox.set_border_width (1);
+
 	_name.set_alignment (0, 0.5);
 	_name.set_text (name ());
 	_name.set_padding (2, 2);
