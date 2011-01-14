@@ -195,6 +195,8 @@ ProcessorEntry::setup_visuals ()
 		_frame.set_name ("ProcessorFrameActiveSend");
 		_event_box.set_state (Gtk::STATE_ACTIVE);
 		break;
+	default:
+		break;
 	}
 }
 	
