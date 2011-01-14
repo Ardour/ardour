@@ -164,8 +164,6 @@ class Track : public Route, public PublicDiskstream
 	TrackMode   _mode;
         bool        _needs_butler;
 
-        ChanCount input_streams () const;
-
 	//private: (FIXME)
 	struct FreezeRecordProcessorInfo {
 		FreezeRecordProcessorInfo(XMLNode& st, boost::shared_ptr<Processor> proc)

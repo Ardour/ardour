@@ -361,18 +361,6 @@ Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*
 	return _diskstream->process (_session.transport_frame(), nframes, can_record, rec_monitors_input, need_butler);
 }
 
-ChanCount
-Track::input_streams () const
-{
-        ChanCount cc = _input->n_ports ();
-
-        if (cc.n_total() == 0 && _diskstream) {
-                return cc = _diskstream->n_channels();
-        }
-
-        return cc;
-}
-
 void
 Track::set_diskstream (boost::shared_ptr<Diskstream> ds)
 {
