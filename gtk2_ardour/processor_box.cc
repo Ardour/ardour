@@ -54,6 +54,7 @@
 #include "ardour/route.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
+#include "ardour/dB.h"
 
 #include "actions.h"
 #include "ardour_dialog.h"
@@ -323,6 +324,12 @@ SendProcessorEntry::show_gain ()
 		_ignore_gain_change = true;
 		_adjustment.set_value (value);
 		_ignore_gain_change = false;
+
+		stringstream s;
+		s.precision (1);
+		s.setf (ios::fixed, ios::floatfield);
+		s << accurate_coefficient_to_dB (_send->amp()->gain ()) << _("dB");
+		_fader.set_tooltip_text (s.str ());
 	}
 }
 
