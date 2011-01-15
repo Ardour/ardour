@@ -765,6 +765,7 @@ Editor::update_ruler_visibility ()
 	ruler_label_vbox.set_size_request (-1, (int)(timebar_height * visible_rulers));
 	time_canvas_vbox.set_size_request (-1,-1);
 
+	compute_fixed_ruler_scale ();
 	update_fixed_rulers();
 	redisplay_tempo (false);
 
