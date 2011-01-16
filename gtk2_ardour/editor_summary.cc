@@ -50,7 +50,8 @@ EditorSummary::EditorSummary (Editor* e)
 	  _moved (false),
 	  _view_rectangle_x (0, 0),
 	  _view_rectangle_y (0, 0),
-	  _zoom_dragging (false)
+	  _zoom_dragging (false),
+	  _old_follow_playhead (false)
 {
 	Region::RegionPropertyChanged.connect (region_property_connection, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
 	_editor->playhead_cursor->PositionChanged.connect (position_connection, invalidator (*this), ui_bind (&EditorSummary::playhead_position_changed, this, _1), gui_context());
@@ -322,6 +323,8 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 			_zoom_position = get_position (ev->x, ev->y);
 			_zoom_dragging = true;
 			_editor->_dragging_playhead = true;
+			_old_follow_playhead = _editor->follow_playhead ();
+			_editor->set_follow_playhead (false);
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 
@@ -341,6 +344,8 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 			_move_dragging = true;
 			_moved = false;
 			_editor->_dragging_playhead = true;
+			_old_follow_playhead = _editor->follow_playhead ();
+			_editor->set_follow_playhead (false);
 		}
 	}
 
@@ -523,6 +528,8 @@ EditorSummary::on_button_release_event (GdkEventButton*)
 	_move_dragging = false;
 	_zoom_dragging = false;
 	_editor->_dragging_playhead = false;
+	_editor->set_follow_playhead (_old_follow_playhead);
+	
 	return true;
 }
 

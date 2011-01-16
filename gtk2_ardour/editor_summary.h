@@ -106,6 +106,8 @@ private:
 	bool _zoom_dragging;
 	Position _zoom_position;
 
+	bool _old_follow_playhead;
+
 	PBD::ScopedConnectionList position_connection;
 	PBD::ScopedConnectionList region_property_connection;
 };
