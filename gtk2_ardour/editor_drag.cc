@@ -1132,7 +1132,7 @@ RegionMoveDrag::add_stateful_diff_commands_for_playlists (PlaylistSet const & pl
 	for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		StatefulDiffCommand* c = new StatefulDiffCommand (*i);
 		if (!c->empty()) {
-			_editor->session()->add_command (new StatefulDiffCommand (*i));
+			_editor->session()->add_command (c);
 		} else {
 			delete c;
 		}
