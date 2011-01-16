@@ -17,6 +17,7 @@
 
 */
 
+#include "pbd/demangle.h"
 #include "pbd/error.h"
 #include "pbd/boost_debug.h"
 
@@ -82,5 +83,9 @@ SessionHandleRef::session_going_away ()
 void
 SessionHandleRef::insanity_check ()
 {
-	cerr << string_compose (_("programming error: %1"), "SessionHandleRef exists across sesssion deletion!") << endl;
+	cerr << string_compose (
+	        _("programming error: %1"),
+	        string_compose("SessionHandleRef exists across sesssion deletion! Dynamic type: %1",
+	                       PBD::demangled_name (*this)))
+	     << endl;
 }
