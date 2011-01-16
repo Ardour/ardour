@@ -38,6 +38,7 @@ class Session;
 class AudioTrack;
 class AudioPort;
 class AudioRegion;
+class CapturingProcessor;
 
 /// Export channel base class interface for different source types
 class ExportChannel : public boost::less_than_comparable<ExportChannel>
@@ -48,7 +49,7 @@ class ExportChannel : public boost::less_than_comparable<ExportChannel>
 
 	virtual void set_max_buffer_size(framecnt_t frames) { }
 
-	virtual void read (Sample *& data, framecnt_t frames) const = 0;
+	virtual void read (Sample const *& data, framecnt_t frames) const = 0;
 	virtual bool empty () const = 0;
 
 	/// Adds state to node passed
@@ -81,7 +82,7 @@ class PortExportChannel : public ExportChannel
 	PortExportChannel ();
 	void set_max_buffer_size(framecnt_t frames);
 
-	void read (Sample *& data, framecnt_t frames) const;
+	void read (Sample const *& data, framecnt_t frames) const;
 	bool empty () const { return ports.empty(); }
 
 	void get_state (XMLNode * node) const;
@@ -112,7 +113,7 @@ class RegionExportChannelFactory
 	~RegionExportChannelFactory ();
 
 	ExportChannelPtr create (uint32_t channel);
-	void read (uint32_t channel, Sample *& data, framecnt_t frames_to_read);
+	void read (uint32_t channel, Sample const *& data, framecnt_t frames_to_read);
 
   private:
 
@@ -142,7 +143,7 @@ class RegionExportChannel : public ExportChannel
 	friend class RegionExportChannelFactory;
 
   public:
-	void read (Sample *& data, framecnt_t frames_to_read) const { factory.read (channel, data, frames_to_read); }
+	void read (Sample const *& data, framecnt_t frames_to_read) const { factory.read (channel, data, frames_to_read); }
 	void get_state (XMLNode * /*node*/) const {};
 	void set_state (XMLNode * /*node*/, Session & /*session*/) {};
 	bool empty () const { return false; }
@@ -158,6 +159,49 @@ class RegionExportChannel : public ExportChannel
 
 	RegionExportChannelFactory & factory;
 	uint32_t channel;
+};
+
+/// Export channel for exporting from different positions in a route
+class RouteExportChannel : public ExportChannel
+{
+	class ProcessorRemover; // fwd declaration
+
+  public:
+	RouteExportChannel(boost::shared_ptr<CapturingProcessor> processor, size_t channel,
+	                   boost::shared_ptr<ProcessorRemover> remover);
+	~RouteExportChannel();
+
+	static void create_from_route(std::list<ExportChannelPtr> & result, Route & route);
+
+  public: // ExportChannel interface
+	void set_max_buffer_size(framecnt_t frames);
+
+	void read (Sample const *& data, framecnt_t frames) const;
+	bool empty () const { return false; }
+
+	void get_state (XMLNode * node) const;
+	void set_state (XMLNode * node, Session & session);
+
+	bool operator< (ExportChannel const & other) const;
+
+  private:
+
+	// Removes the processor from the track when deleted
+	class ProcessorRemover {
+	  public:
+		ProcessorRemover (Route & route, boost::shared_ptr<CapturingProcessor> processor)
+			: route (route), processor (processor) {}
+		~ProcessorRemover();
+	  private:
+		Route & route;
+		boost::shared_ptr<CapturingProcessor> processor;
+	};
+
+	boost::shared_ptr<CapturingProcessor> processor;
+	size_t channel;
+	// Each channel keeps a ref to the remover. Last one alive
+	// will cause the processor to be removed on deletion.
+	boost::shared_ptr<ProcessorRemover> remover;
 };
 
 } // namespace ARDOUR

@@ -59,6 +59,7 @@ class RouteGroup;
 class Send;
 class InternalReturn;
 class MonitorProcessor;
+class CapturingProcessor;
 
 class Route : public SessionObject, public Automatable, public RouteGroupMember, public GraphNode
 {
@@ -217,6 +218,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	BufferSet* get_return_buffer () const;
 	void release_return_buffer () const;
 	void put_monitor_send_at (Placement);
+	boost::shared_ptr<CapturingProcessor> add_export_point(/* Add some argument for placement later */);
 
 	/** A record of the stream configuration at some point in the processor list.
 	 * Used to return where and why an processor list configuration request failed.

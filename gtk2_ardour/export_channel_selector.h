@@ -230,23 +230,23 @@ class TrackExportChannelSelector : public ExportChannelSelector
 {
   public:
 	TrackExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager);
-	
+
 	virtual void sync_with_manager ();
-	
+
   private:
 
 	void fill_list();
-	void add_track(ARDOUR::IO * io);
+	void add_track(ARDOUR::Route * route);
 	void update_config();
-	
+
 	ChannelConfigList configs;
-	
+
 	struct TrackCols : public Gtk::TreeModelColumnRecord
 	{
 	  public:
-		Gtk::TreeModelColumn<ARDOUR::IO *>  track;
-		Gtk::TreeModelColumn<std::string>   label;
-		Gtk::TreeModelColumn<bool>          selected;
+		Gtk::TreeModelColumn<ARDOUR::Route *> track;
+		Gtk::TreeModelColumn<std::string>     label;
+		Gtk::TreeModelColumn<bool>            selected;
 
 		TrackCols () { add (track); add(label); add(selected); }
 	};

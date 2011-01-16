@@ -548,20 +548,20 @@ TrackExportChannelSelector::fill_list()
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
 		Route * route = it->get();
 		if(dynamic_cast<AudioTrack *>(route)) {
-			add_track(route->output().get());
+			add_track(route);
 		}
 	}
 }
 
 void
-TrackExportChannelSelector::add_track(IO * io)
+TrackExportChannelSelector::add_track(Route * route)
 {
 	Gtk::TreeModel::iterator iter = track_list->append();
 	Gtk::TreeModel::Row row = *iter;
 
 	row[track_cols.selected] = true;
-	row[track_cols.label] = io->name();
-	row[track_cols.track] = io;
+	row[track_cols.label] = route->name();
+	row[track_cols.track] = route;
 }
 
 void
@@ -577,8 +577,10 @@ TrackExportChannelSelector::update_config()
 		}
 		
 		ExportProfileManager::ChannelConfigStatePtr state = manager->add_channel_config();
-		
-		IO * track = row[track_cols.track];
+
+		Route * track = row[track_cols.track];
+
+		/* Output of track code. TODO make this an option also
 		uint32_t outs = track->n_ports().n_audio();
 		for (uint32_t i = 0; i < outs; ++i) {
 			AudioPort * port = track->audio (i);
@@ -589,7 +591,11 @@ TrackExportChannelSelector::update_config()
 				state->config->register_channel(channel);
 			}
 		}
-		
+		*/
+
+		std::list<ExportChannelPtr> list;
+		RouteExportChannel::create_from_route (list, *track);
+		state->config->register_channels (list);
 		state->config->set_name(track->name());
 	}
 

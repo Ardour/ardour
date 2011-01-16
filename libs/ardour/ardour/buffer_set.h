@@ -97,9 +97,15 @@ public:
 	AudioBuffer& get_audio(size_t i) {
 		return (AudioBuffer&)get(DataType::AUDIO, i);
 	}
+	const AudioBuffer& get_audio(size_t i) const {
+		return (const AudioBuffer&)get(DataType::AUDIO, i);
+	}
 
 	MidiBuffer& get_midi(size_t i) {
 		return (MidiBuffer&)get(DataType::MIDI, i);
+	}
+	const MidiBuffer& get_midi(size_t i) const {
+		return (const MidiBuffer&)get(DataType::MIDI, i);
 	}
 
 #ifdef HAVE_SLV2

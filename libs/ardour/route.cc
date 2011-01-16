@@ -60,6 +60,7 @@
 #include "ardour/utils.h"
 #include "ardour/graph.h"
 #include "ardour/unknown_processor.h"
+#include "ardour/capturing_processor.h"
 
 #include "i18n.h"
 
@@ -3055,6 +3056,21 @@ Route::put_monitor_send_at (Placement p)
 
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	_session.set_dirty ();
+}
+
+boost::shared_ptr<CapturingProcessor>
+Route::add_export_point()
+{
+	// Check if it exists already
+	boost::shared_ptr<CapturingProcessor> processor;
+	if ((processor = boost::dynamic_pointer_cast<CapturingProcessor> (*_processors.begin()))) {
+		return processor;
+	}
+
+	// ...else add it
+	processor.reset (new CapturingProcessor (_session));
+	add_processor (processor, _processors.begin());
+	return processor;
 }
 
 framecnt_t

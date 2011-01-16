@@ -23,6 +23,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
+#include "ardour/capturing_processor.h"
 #include "ardour/export_channel.h"
 #include "ardour/export_failed.h"
 #include "ardour/session.h"
@@ -53,7 +54,7 @@ PortExportChannel::operator< (ExportChannel const & other) const
 }
 
 void
-PortExportChannel::read (Sample *& data, framecnt_t frames) const
+PortExportChannel::read (Sample const *& data, framecnt_t frames) const
 {
 	assert(buffer);
 	assert(frames <= buffer_size);
@@ -153,7 +154,7 @@ RegionExportChannelFactory::create (uint32_t channel)
 }
 
 void
-RegionExportChannelFactory::read (uint32_t channel, Sample *& data, framecnt_t frames_to_read)
+RegionExportChannelFactory::read (uint32_t channel, Sample const *& data, framecnt_t frames_to_read)
 {
 	assert (channel < n_channels);
 	assert (frames_to_read <= frames_per_cycle);
@@ -194,3 +195,76 @@ RegionExportChannelFactory::update_buffers (framecnt_t frames)
 	position += frames;
 }
 
+
+RouteExportChannel::RouteExportChannel(boost::shared_ptr<CapturingProcessor> processor, size_t channel,
+                                       boost::shared_ptr<ProcessorRemover> remover)
+  : processor (processor)
+  , channel (channel)
+  , remover (remover)
+{
+}
+
+RouteExportChannel::~RouteExportChannel()
+{
+}
+
+void
+RouteExportChannel::create_from_route(std::list<ExportChannelPtr> & result, Route & route)
+{
+	boost::shared_ptr<CapturingProcessor> processor = route.add_export_point();
+	uint32_t channels = processor->input_streams().n_audio();
+
+	boost::shared_ptr<ProcessorRemover> remover (new ProcessorRemover (route, processor));
+	result.clear();
+	for (uint32_t i = 0; i < channels; ++i) {
+		result.push_back (ExportChannelPtr (new RouteExportChannel (processor, i, remover)));
+	}
+}
+
+void
+RouteExportChannel::set_max_buffer_size(framecnt_t frames)
+{
+	if (processor) {
+		processor->set_block_size (frames);
+	}
+}
+
+void
+RouteExportChannel::read (Sample const *& data, framecnt_t frames) const
+{
+	assert(processor);
+	AudioBuffer const & buffer = processor->get_capture_buffers().get_audio (channel);
+	assert (frames <= (framecnt_t) buffer.size());
+	data = buffer.data();
+}
+
+void
+RouteExportChannel::get_state (XMLNode * node) const
+{
+	// TODO
+}
+
+void
+RouteExportChannel::set_state (XMLNode * node, Session & session)
+{
+	// TODO
+}
+
+bool
+RouteExportChannel::operator< (ExportChannel const & other) const
+{
+	RouteExportChannel const * rec;
+	if ((rec = dynamic_cast<RouteExportChannel const *>(&other)) == 0) {
+		return this < &other;
+	}
+
+	if (processor.get() == rec->processor.get()) {
+		return channel < rec->channel;
+	}
+	return processor.get() < rec->processor.get();
+}
+
+RouteExportChannel::ProcessorRemover::~ProcessorRemover()
+{
+	route.remove_processor (processor);
+}

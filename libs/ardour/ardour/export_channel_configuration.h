@@ -23,6 +23,8 @@
 
 #include <list>
 #include <string>
+#include <algorithm>
+
 #include <boost/enable_shared_from_this.hpp>
 
 #include "ardour/export_channel.h"
@@ -70,6 +72,9 @@ class ExportChannelConfiguration : public boost::enable_shared_from_this<ExportC
 	uint32_t get_n_chans () const { return channels.size(); }
 
 	void register_channel (ExportChannelPtr channel) { channels.push_back (channel); }
+	void register_channels (ChannelList const & new_channels) {
+		std::copy (new_channels.begin(), new_channels.end(), std::back_inserter(channels));
+	}
 	void clear_channels () { channels.clear (); }
 	
 	/** Returns a list of channel configurations that match the files created.

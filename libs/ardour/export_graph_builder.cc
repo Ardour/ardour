@@ -42,10 +42,10 @@ ExportGraphBuilder::process (framecnt_t frames, bool last_cycle)
 	assert(frames <= process_buffer_frames);
 	
 	for (ChannelMap::iterator it = channels.begin(); it != channels.end(); ++it) {
-		Sample * process_buffer = 0;
+		Sample const * process_buffer = 0;
 		it->first->read (process_buffer, frames);
-		ProcessContext<Sample> context(process_buffer, frames, 1);
-		if (last_cycle) { context.set_flag (ProcessContext<Sample>::EndOfInput); }
+		ConstProcessContext<Sample> context(process_buffer, frames, 1);
+		if (last_cycle) { context().set_flag (ProcessContext<Sample>::EndOfInput); }
 		it->second->process (context);
 	}
 	
