@@ -23,7 +23,6 @@
 #include "ardour/debug.h"
 #include "ardour/types.h"
 #include "ardour/crossfade.h"
-#include "ardour/crossfade_compare.h"
 #include "ardour/audioregion.h"
 #include "ardour/playlist.h"
 #include "ardour/utils.h"

@@ -27,7 +27,6 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/crossfade.h"
-#include "ardour/crossfade_compare.h"
 #include "ardour/session.h"
 #include "pbd/enumwriter.h"
 
