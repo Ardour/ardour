@@ -30,7 +30,6 @@
 
 #include "ardour/ardour.h"
 #include "ardour/audioregion.h"
-#include "ardour/crossfade_compare.h"
 #include "evoral/Curve.hpp"
 
 namespace ARDOUR {
@@ -40,6 +39,12 @@ namespace ARDOUR {
 		extern PBD::PropertyDescriptor<bool> follow_overlap;
 	}
 
+enum AnchorPoint {
+	StartOfIn,
+	EndOfIn,
+	EndOfOut
+};
+	
 class Playlist;
 
 class Crossfade : public ARDOUR::AudioRegion
@@ -76,8 +81,6 @@ class Crossfade : public ARDOUR::AudioRegion
 	virtual ~Crossfade();
 
 	static void make_property_quarks ();
-
-	bool operator== (const ARDOUR::Crossfade&);
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
@@ -171,6 +174,8 @@ class Crossfade : public ARDOUR::AudioRegion
 	int  compute (boost::shared_ptr<ARDOUR::AudioRegion>, boost::shared_ptr<ARDOUR::AudioRegion>, CrossfadeModel);
 	bool update ();
 
+	bool operator== (const ARDOUR::Crossfade&);
+	
   protected:
 	framecnt_t read_raw_internal (Sample*, framepos_t, framecnt_t, int) const;
 };
