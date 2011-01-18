@@ -760,7 +760,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	static GtkCustomMetric ruler_metrics[4];
 	Glib::RefPtr<Gtk::ToggleAction> ruler_timecode_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_bbt_action;
-	Glib::RefPtr<Gtk::ToggleAction> ruler_samples_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_frames_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_minsec_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_tempo_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_meter_action;
@@ -808,7 +808,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	framecnt_t minsec_mark_interval;
 	gint minsec_mark_modulo;
 	gint minsec_nmarks;
-	void set_minsec_ruler_scale (gdouble lower, gdouble upper);
+	void set_minsec_ruler_scale (framepos_t, framepos_t);
 
 	enum TimecodeRulerScale {
 		timecode_show_bits,
@@ -820,10 +820,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	TimecodeRulerScale timecode_ruler_scale;
 
-	framecnt_t timecode_mark_interval;
 	gint timecode_mark_modulo;
 	gint timecode_nmarks;
-	void set_timecode_ruler_scale (gdouble lower, gdouble upper);
+	void set_timecode_ruler_scale (framepos_t, framepos_t);
 
 	framecnt_t _frames_ruler_interval;
 	void set_frames_ruler_scale (framepos_t, framepos_t);

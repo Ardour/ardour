@@ -387,7 +387,7 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 			ruler_items.push_back (MenuElem (*action->create_menu_item()));
 		}
 	}
-	action = ActionManager::get_action ("Rulers", "toggle-samples-ruler");
+	action = ActionManager::get_action ("Rulers", "toggle-frames-ruler");
 	if (action) {
 		ruler_items.push_back (MenuElem (*action->create_menu_item()));
 	}
@@ -434,7 +434,7 @@ Editor::store_ruler_visibility ()
 
 	node->add_property (X_("timecode"), ruler_timecode_action->get_active() ? "yes": "no");
 	node->add_property (X_("bbt"), ruler_bbt_action->get_active() ? "yes": "no");
-	node->add_property (X_("frames"), ruler_samples_action->get_active() ? "yes": "no");
+	node->add_property (X_("frames"), ruler_frames_action->get_active() ? "yes": "no");
 	node->add_property (X_("minsec"), ruler_minsec_action->get_active() ? "yes": "no");
 	node->add_property (X_("tempo"), ruler_tempo_action->get_active() ? "yes": "no");
 	node->add_property (X_("meter"), ruler_meter_action->get_active() ? "yes": "no");
@@ -472,9 +472,9 @@ Editor::restore_ruler_visibility ()
 		}
 		if ((prop = node->property ("frames")) != 0) {
 			if (string_is_affirmative (prop->value())) {
-				ruler_samples_action->set_active (true);
+				ruler_frames_action->set_active (true);
 			} else {
-				ruler_samples_action->set_active (false);
+				ruler_frames_action->set_active (false);
 			}
 		}
 		if ((prop = node->property ("minsec")) != 0) {
@@ -577,7 +577,7 @@ Editor::update_ruler_visibility ()
 		timecode_ruler->hide ();
 	}
 
-	if (ruler_samples_action->get_active()) {
+	if (ruler_frames_action->get_active()) {
 		visible_rulers++;
 		frame_label.show ();
 		frames_ruler->show ();
@@ -800,14 +800,14 @@ Editor::compute_fixed_ruler_scale ()
 	}
 
 	if (ruler_timecode_action->get_active()) {
-		set_timecode_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames() );
+		set_timecode_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames());
 	}
 
 	if (ruler_minsec_action->get_active()) {
-		set_minsec_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames() );
+		set_minsec_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames());
 	}
 
-	if (ruler_samples_action->get_active()) {
+	if (ruler_frames_action->get_active()) {
 		set_frames_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames());
 	}
 }
@@ -836,7 +836,7 @@ Editor::update_fixed_rulers ()
 					    leftmost_frame, _session->current_end_frame());
 	}
 
-	if (ruler_samples_action->get_active()) {
+	if (ruler_frames_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_frames_ruler), leftmost_frame, rightmost_frame,
 					    leftmost_frame, _session->current_end_frame());
 	}
@@ -889,9 +889,8 @@ Editor::_metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble u
 }
 
 void
-Editor::set_timecode_ruler_scale (gdouble lower, gdouble upper)
+Editor::set_timecode_ruler_scale (framepos_t lower, framepos_t upper)
 {
-	framepos_t range;
 	framepos_t spacer;
 	framepos_t fr;
 
@@ -901,13 +900,13 @@ Editor::set_timecode_ruler_scale (gdouble lower, gdouble upper)
 
 	fr = _session->frame_rate();
 
-	if (lower > (spacer = (framepos_t)(128 * Editor::get_current_zoom ()))) {
+	if (lower > (spacer = (framepos_t) (128 * Editor::get_current_zoom ()))) {
 		lower = lower - spacer;
 	} else {
 		lower = 0;
 	}
 	upper = upper + spacer;
-	range = (framepos_t) floor (upper - lower);
+	framecnt_t const range = upper - lower;
 
 	if (range < (2 * _session->frames_per_timecode_frame())) { /* 0 - 2 frames */
 		timecode_ruler_scale = timecode_show_bits;
@@ -1236,33 +1235,33 @@ Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper)
 	i = current_bbt_points->end();
 	i--;
 	if ((*i).beat >= (*current_bbt_points->begin()).beat) {
-	  bbt_bars = (*i).bar - (*current_bbt_points->begin()).bar;
+		bbt_bars = (*i).bar - (*current_bbt_points->begin()).bar;
 	} else {
-	  bbt_bars = (*i).bar - (*current_bbt_points->begin()).bar - 1;
+		bbt_bars = (*i).bar - (*current_bbt_points->begin()).bar - 1;
 	}
 	beats = current_bbt_points->size() - bbt_bars;
 
-	/*Only show the bar helper if there aren't many bars on the screen */
+	/* Only show the bar helper if there aren't many bars on the screen */
 	if ((bbt_bars < 2) || (beats < 5)) {
 	        bbt_bar_helper_on = true;
 	}
 
 	if (bbt_bars > 8192) {
-	  bbt_ruler_scale =  bbt_over;
+		bbt_ruler_scale =  bbt_over;
 	} else if (bbt_bars > 1024) {
-	  bbt_ruler_scale = bbt_show_64;
+		bbt_ruler_scale = bbt_show_64;
 	} else if (bbt_bars > 256) {
-	  bbt_ruler_scale = bbt_show_16;
+		bbt_ruler_scale = bbt_show_16;
 	} else if (bbt_bars > 64) {
-	  bbt_ruler_scale = bbt_show_4;
+		bbt_ruler_scale = bbt_show_4;
 	} else if (bbt_bars > 10) {
-	  bbt_ruler_scale =  bbt_show_1;
+		bbt_ruler_scale =  bbt_show_1;
 	} else if (bbt_bars > 2) {
-	  bbt_ruler_scale =  bbt_show_beats;
+		bbt_ruler_scale =  bbt_show_beats;
 	} else  if (bbt_bars > 0) {
-	  bbt_ruler_scale =  bbt_show_ticks;
+		bbt_ruler_scale =  bbt_show_ticks;
 	} else {
-	  bbt_ruler_scale =  bbt_show_ticks_detail;
+		bbt_ruler_scale =  bbt_show_ticks_detail;
 	}
 
 	if ((bbt_ruler_scale == bbt_show_ticks_detail) && (lower_beat.beats == upper_beat.beats) && (upper_beat.ticks - lower_beat.ticks <= Timecode::BBT_Time::ticks_per_beat / 4)) {
@@ -1806,9 +1805,8 @@ sample_to_clock_parts ( framepos_t sample,
 }
 
 void
-Editor::set_minsec_ruler_scale (gdouble lower, gdouble upper)
+Editor::set_minsec_ruler_scale (framepos_t lower, framepos_t upper)
 {
-	framepos_t range;
 	framepos_t fr;
 	framepos_t spacer;
 
@@ -1825,7 +1823,7 @@ Editor::set_minsec_ruler_scale (gdouble lower, gdouble upper)
 		lower = 0;
 	}
 	upper += spacer;
-	range = (framepos_t) (upper - lower);
+	framecnt_t const range = upper - lower;
 
 	if (range <  (fr / 50)) {
 		minsec_mark_interval =  fr / 1000; /* show 1/1000 seconds */
@@ -1918,7 +1916,7 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
 	}
 
 	/* to prevent 'flashing' */
-	if (lower > (spacer = (framepos_t)(128 * Editor::get_current_zoom ()))) {
+	if (lower > (spacer = (framepos_t) (128 * Editor::get_current_zoom ()))) {
 		lower = lower - spacer;
 	} else {
 		lower = 0;
