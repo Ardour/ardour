@@ -392,7 +392,7 @@
 
 	       <menu action="RulerMenu">
 	       	     <menuitem action="toggle-minsec-ruler"/>
-	       	     <menuitem action="toggle-frames-ruler"/>
+	       	     <menuitem action="toggle-samples-ruler"/>
 	       	     <menuitem action="toggle-bbt-ruler"/>
 		     <separator/>
 	       	     <menuitem action="toggle-meter-ruler"/>
@@ -492,7 +492,7 @@
      <popup action="RulerMenuPopup">
 	   <menuitem action="toggle-minsec-ruler"/>
 	   <menuitem action="toggle-timecode-ruler"/>
-	   <menuitem action="toggle-frames-ruler"/>
+	   <menuitem action="toggle-samples-ruler"/>
      	   <menuitem action="toggle-bbt-ruler"/>
 	   <separator/>
 	   <menuitem action="toggle-meter-ruler"/>

@@ -241,7 +241,7 @@ Editor::Editor ()
 	, minsec_label (_("Mins:Secs"))
 	, bbt_label (_("Bars:Beats"))
 	, timecode_label (_("Timecode"))
-	, frame_label (_("Frames"))
+	, samples_label (_("Samples"))
 	, tempo_label (_("Tempo"))
 	, meter_label (_("Meter"))
 	, mark_label (_("Location Markers"))
@@ -407,12 +407,12 @@ Editor::Editor ()
 	timecode_label.set_padding (5,0);
 	timecode_label.hide ();
 	timecode_label.set_no_show_all();
-	frame_label.set_name ("EditorTimeButton");
-	frame_label.set_size_request (-1, (int)timebar_height);
-	frame_label.set_alignment (1.0, 0.5);
-	frame_label.set_padding (5,0);
-	frame_label.hide ();
-	frame_label.set_no_show_all();
+	samples_label.set_name ("EditorTimeButton");
+	samples_label.set_size_request (-1, (int)timebar_height);
+	samples_label.set_alignment (1.0, 0.5);
+	samples_label.set_padding (5,0);
+	samples_label.hide ();
+	samples_label.set_no_show_all();
 
 	tempo_label.set_name ("EditorTimeButton");
 	tempo_label.set_size_request (-1, (int)timebar_height);

@@ -746,7 +746,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	enum RulerType {
 		ruler_metric_timecode = 0,
 		ruler_metric_bbt = 1,
-		ruler_metric_frames = 2,
+		ruler_metric_samples = 2,
 		ruler_metric_minsec = 3,
 
 		ruler_time_tempo = 4,
@@ -760,7 +760,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	static GtkCustomMetric ruler_metrics[4];
 	Glib::RefPtr<Gtk::ToggleAction> ruler_timecode_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_bbt_action;
-	Glib::RefPtr<Gtk::ToggleAction> ruler_frames_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_samples_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_minsec_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_tempo_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_meter_action;
@@ -793,7 +793,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	static gint _metric_get_timecode (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	static gint _metric_get_bbt (GtkCustomRulerMark **, gdouble, gdouble, gint);
-	static gint _metric_get_frames (GtkCustomRulerMark **, gdouble, gdouble, gint);
+	static gint _metric_get_samples (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	static gint _metric_get_minsec (GtkCustomRulerMark **, gdouble, gdouble, gint);
 
 	enum MinsecRulerScale {
@@ -824,8 +824,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	gint timecode_nmarks;
 	void set_timecode_ruler_scale (framepos_t, framepos_t);
 
-	framecnt_t _frames_ruler_interval;
-	void set_frames_ruler_scale (framepos_t, framepos_t);
+	framecnt_t _samples_ruler_interval;
+	void set_samples_ruler_scale (framepos_t, framepos_t);
 
 	enum BBTRulerScale {
 		bbt_over,
@@ -849,17 +849,17 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	gint metric_get_timecode (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	gint metric_get_bbt (GtkCustomRulerMark **, gdouble, gdouble, gint);
-	gint metric_get_frames (GtkCustomRulerMark **, gdouble, gdouble, gint);
+	gint metric_get_samples (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	gint metric_get_minsec (GtkCustomRulerMark **, gdouble, gdouble, gint);
 
 	Gtk::Widget        *_ruler_separator;
 	GtkWidget          *_timecode_ruler;
 	GtkWidget          *_bbt_ruler;
-	GtkWidget          *_frames_ruler;
+	GtkWidget          *_samples_ruler;
 	GtkWidget          *_minsec_ruler;
 	Gtk::Widget        *timecode_ruler;
 	Gtk::Widget        *bbt_ruler;
-	Gtk::Widget        *frames_ruler;
+	Gtk::Widget        *samples_ruler;
 	Gtk::Widget        *minsec_ruler;
 	static Editor      *ruler_editor;
 
@@ -879,7 +879,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Label  minsec_label;
 	Gtk::Label  bbt_label;
 	Gtk::Label  timecode_label;
-	Gtk::Label  frame_label;
+	Gtk::Label  samples_label;
 	Gtk::Label  tempo_label;
 	Gtk::Label  meter_label;
 	Gtk::Label  mark_label;

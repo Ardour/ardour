@@ -57,7 +57,7 @@ Editor *Editor::ruler_editor;
 GtkCustomMetric Editor::ruler_metrics[4] = {
 	{1, Editor::_metric_get_timecode },
 	{1, Editor::_metric_get_bbt },
-	{1, Editor::_metric_get_frames },
+	{1, Editor::_metric_get_samples },
 	{1, Editor::_metric_get_minsec }
 };
 
@@ -98,13 +98,13 @@ Editor::initialize_rulers ()
 	bbt_ruler->set_no_show_all();
 	bbt_nmarks = 0;
 
-	_frames_ruler = gtk_custom_hruler_new ();
-	frames_ruler = Glib::wrap (_frames_ruler);
-	frames_ruler->set_name ("FramesRuler");
-	frames_ruler->set_size_request (-1, (int)timebar_height);
-	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_frames_ruler), &ruler_metrics[ruler_metric_frames]);
-	frames_ruler->hide ();
-	frames_ruler->set_no_show_all();
+	_samples_ruler = gtk_custom_hruler_new ();
+	samples_ruler = Glib::wrap (_samples_ruler);
+	samples_ruler->set_name ("SamplesRuler");
+	samples_ruler->set_size_request (-1, (int) timebar_height);
+	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER (_samples_ruler), &ruler_metrics[ruler_metric_samples]);
+	samples_ruler->hide ();
+	samples_ruler->set_no_show_all ();
 
 	_bbt_ruler = gtk_custom_hruler_new ();
 	bbt_ruler = Glib::wrap (_bbt_ruler);
@@ -135,34 +135,34 @@ Editor::initialize_rulers ()
 	ruler_children.insert (canvaspos, Element(*minsec_ruler, PACK_SHRINK, PACK_START));
 	ruler_lab_children.push_back (Element(timecode_label, PACK_SHRINK, PACK_START));
 	ruler_children.insert (canvaspos, Element(*timecode_ruler, PACK_SHRINK, PACK_START));
-	ruler_lab_children.push_back (Element(frame_label, PACK_SHRINK, PACK_START));
-	ruler_children.insert (canvaspos, Element(*frames_ruler, PACK_SHRINK, PACK_START));
+	ruler_lab_children.push_back (Element(samples_label, PACK_SHRINK, PACK_START));
+	ruler_children.insert (canvaspos, Element (*samples_ruler, PACK_SHRINK, PACK_START));
 	ruler_lab_children.push_back (Element(bbt_label, PACK_SHRINK, PACK_START));
 	ruler_children.insert (canvaspos, Element(*bbt_ruler, PACK_SHRINK, PACK_START));
 
 	timecode_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 	bbt_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
-	frames_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
+	samples_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 	minsec_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 
 	timecode_ruler->signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_release));
 	bbt_ruler->signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_release));
-	frames_ruler->signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_release));
+	samples_ruler->signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_release));
 	minsec_ruler->signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_release));
 
 	timecode_ruler->signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_press));
 	bbt_ruler->signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_press));
-	frames_ruler->signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_press));
+	samples_ruler->signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_press));
 	minsec_ruler->signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_press));
 
 	timecode_ruler->signal_motion_notify_event().connect (sigc::mem_fun(*this, &Editor::ruler_mouse_motion));
 	bbt_ruler->signal_motion_notify_event().connect (sigc::mem_fun(*this, &Editor::ruler_mouse_motion));
-	frames_ruler->signal_motion_notify_event().connect (sigc::mem_fun(*this, &Editor::ruler_mouse_motion));
+	samples_ruler->signal_motion_notify_event().connect (sigc::mem_fun(*this, &Editor::ruler_mouse_motion));
 	minsec_ruler->signal_motion_notify_event().connect (sigc::mem_fun(*this, &Editor::ruler_mouse_motion));
 
 	timecode_ruler->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::ruler_scroll));
 	bbt_ruler->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::ruler_scroll));
-	frames_ruler->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::ruler_scroll));
+	samples_ruler->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::ruler_scroll));
 	minsec_ruler->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::ruler_scroll));
 
 	visible_timebars = 0; /*this will be changed below */
@@ -231,8 +231,8 @@ Editor::ruler_button_press (GdkEventButton* ev)
 		grab_widget = timecode_ruler;
 	} else if (bbt_ruler->is_realized() && ev->window == bbt_ruler->get_window()->gobj()) {
 		grab_widget = bbt_ruler;
-	} else if (frames_ruler->is_realized() && ev->window == frames_ruler->get_window()->gobj()) {
-		grab_widget = frames_ruler;
+	} else if (samples_ruler->is_realized() && ev->window == samples_ruler->get_window()->gobj()) {
+		grab_widget = samples_ruler;
 	} else if (minsec_ruler->is_realized() && ev->window == minsec_ruler->get_window()->gobj()) {
 		grab_widget = minsec_ruler;
 	}
@@ -387,7 +387,7 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 			ruler_items.push_back (MenuElem (*action->create_menu_item()));
 		}
 	}
-	action = ActionManager::get_action ("Rulers", "toggle-frames-ruler");
+	action = ActionManager::get_action ("Rulers", "toggle-samples-ruler");
 	if (action) {
 		ruler_items.push_back (MenuElem (*action->create_menu_item()));
 	}
@@ -434,7 +434,7 @@ Editor::store_ruler_visibility ()
 
 	node->add_property (X_("timecode"), ruler_timecode_action->get_active() ? "yes": "no");
 	node->add_property (X_("bbt"), ruler_bbt_action->get_active() ? "yes": "no");
-	node->add_property (X_("frames"), ruler_frames_action->get_active() ? "yes": "no");
+	node->add_property (X_("samples"), ruler_samples_action->get_active() ? "yes": "no");
 	node->add_property (X_("minsec"), ruler_minsec_action->get_active() ? "yes": "no");
 	node->add_property (X_("tempo"), ruler_tempo_action->get_active() ? "yes": "no");
 	node->add_property (X_("meter"), ruler_meter_action->get_active() ? "yes": "no");
@@ -470,11 +470,11 @@ Editor::restore_ruler_visibility ()
 				ruler_bbt_action->set_active (false);
 			}
 		}
-		if ((prop = node->property ("frames")) != 0) {
+		if ((prop = node->property ("samples")) != 0) {
 			if (string_is_affirmative (prop->value())) {
-				ruler_frames_action->set_active (true);
+				ruler_samples_action->set_active (true);
 			} else {
-				ruler_frames_action->set_active (false);
+				ruler_samples_action->set_active (false);
 			}
 		}
 		if ((prop = node->property ("minsec")) != 0) {
@@ -577,13 +577,13 @@ Editor::update_ruler_visibility ()
 		timecode_ruler->hide ();
 	}
 
-	if (ruler_frames_action->get_active()) {
+	if (ruler_samples_action->get_active()) {
 		visible_rulers++;
-		frame_label.show ();
-		frames_ruler->show ();
+		samples_label.show ();
+		samples_ruler->show ();
 	} else {
-		frame_label.hide ();
-		frames_ruler->hide ();
+		samples_label.hide ();
+		samples_ruler->hide ();
 	}
 
 	if (ruler_bbt_action->get_active()) {
@@ -807,8 +807,8 @@ Editor::compute_fixed_ruler_scale ()
 		set_minsec_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames());
 	}
 
-	if (ruler_frames_action->get_active()) {
-		set_frames_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames());
+	if (ruler_samples_action->get_active()) {
+		set_samples_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames());
 	}
 }
 
@@ -822,7 +822,7 @@ Editor::update_fixed_rulers ()
 	}
 
 	ruler_metrics[ruler_metric_timecode].units_per_pixel = frames_per_unit;
-	ruler_metrics[ruler_metric_frames].units_per_pixel = frames_per_unit;
+	ruler_metrics[ruler_metric_samples].units_per_pixel = frames_per_unit;
 	ruler_metrics[ruler_metric_minsec].units_per_pixel = frames_per_unit;
 
 	rightmost_frame = leftmost_frame + current_page_frames();
@@ -836,8 +836,8 @@ Editor::update_fixed_rulers ()
 					    leftmost_frame, _session->current_end_frame());
 	}
 
-	if (ruler_frames_action->get_active()) {
-		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_frames_ruler), leftmost_frame, rightmost_frame,
+	if (ruler_samples_action->get_active()) {
+		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER (_samples_ruler), leftmost_frame, rightmost_frame,
 					    leftmost_frame, _session->current_end_frame());
 	}
 
@@ -877,9 +877,9 @@ Editor::_metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble uppe
 }
 
 gint
-Editor::_metric_get_frames (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
+Editor::_metric_get_samples (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
 {
-	return ruler_editor->metric_get_frames (marks, lower, upper, maxchars);
+	return ruler_editor->metric_get_samples (marks, lower, upper, maxchars);
 }
 
 gint
@@ -1742,13 +1742,13 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 }
 
 void
-Editor::set_frames_ruler_scale (framepos_t lower, framepos_t upper)
+Editor::set_samples_ruler_scale (framepos_t lower, framepos_t upper)
 {
-	_frames_ruler_interval = (upper - lower) / 5;
+	_samples_ruler_interval = (upper - lower) / 5;
 }
 
 gint
-Editor::metric_get_frames (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint /*maxchars*/)
+Editor::metric_get_samples (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint /*maxchars*/)
 {
 	framepos_t pos;
 	framepos_t const ilower = (framepos_t) floor (lower);
@@ -1762,7 +1762,7 @@ Editor::metric_get_frames (GtkCustomRulerMark **marks, gdouble lower, gdouble up
 
 	nmarks = 5;
 	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);
-	for (n = 0, pos = ilower; n < nmarks; pos += _frames_ruler_interval, ++n) {
+	for (n = 0, pos = ilower; n < nmarks; pos += _samples_ruler_interval, ++n) {
 		snprintf (buf, sizeof(buf), "%" PRIi64, pos);
 		(*marks)[n].label = g_strdup (buf);
 		(*marks)[n].position = pos;
