@@ -825,6 +825,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	gint timecode_nmarks;
 	void set_timecode_ruler_scale (gdouble lower, gdouble upper);
 
+	framecnt_t _frames_ruler_interval;
+	void set_frames_ruler_scale (framepos_t, framepos_t);
+
 	enum BBTRulerScale {
 		bbt_over,
 		bbt_show_64,

@@ -806,6 +806,10 @@ Editor::compute_fixed_ruler_scale ()
 	if (ruler_minsec_action->get_active()) {
 		set_minsec_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames() );
 	}
+
+	if (ruler_samples_action->get_active()) {
+		set_frames_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames());
+	}
 }
 
 void
@@ -1738,13 +1742,17 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 
 }
 
+void
+Editor::set_frames_ruler_scale (framepos_t lower, framepos_t upper)
+{
+	_frames_ruler_interval = (upper - lower) / 5;
+}
+
 gint
 Editor::metric_get_frames (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint /*maxchars*/)
 {
-	framepos_t mark_interval;
 	framepos_t pos;
-	framepos_t ilower = (framepos_t) floor (lower);
-	framepos_t iupper = (framepos_t) floor (upper);
+	framepos_t const ilower = (framepos_t) floor (lower);
 	gchar buf[16];
 	gint nmarks;
 	gint n;
@@ -1753,15 +1761,9 @@ Editor::metric_get_frames (GtkCustomRulerMark **marks, gdouble lower, gdouble up
 		return 0;
 	}
 
-	mark_interval = (iupper - ilower) / 5;
-	if (mark_interval > _session->frame_rate()) {
-		mark_interval -= mark_interval % _session->frame_rate();
-	} else {
-		mark_interval = _session->frame_rate() / (_session->frame_rate() / mark_interval ) ;
-	}
 	nmarks = 5;
 	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);
-	for (n = 0, pos = ilower; n < nmarks; pos += mark_interval, ++n) {
+	for (n = 0, pos = ilower; n < nmarks; pos += _frames_ruler_interval, ++n) {
 		snprintf (buf, sizeof(buf), "%" PRIi64, pos);
 		(*marks)[n].label = g_strdup (buf);
 		(*marks)[n].position = pos;
