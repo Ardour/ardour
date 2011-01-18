@@ -545,6 +545,14 @@ if env['LV2']:
 	else:
 		print 'LV2 support is not enabled (SLV2 not found or older than 0.6.0)'
 		env['LV2'] = 0
+
+	if conf.CheckPKGVersion('rasqal', '0.9.14'):
+		libraries['rasqal'] = LibraryInfo()
+		libraries['rasqal'].ParseConfig('pkg-config --cflags --libs rasqal')
+	else:
+		print 'LV2 support is not enabled (Rasqal, required by SLV2, not found)'
+		env['LV2'] = 0
+
 	conf.Finish()
 else:
 	print 'LV2 support is not enabled.  Build with \'scons LV2=1\' to enable.'

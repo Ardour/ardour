@@ -291,6 +291,7 @@ if env['LV2']:
 	extra_sources += lv2_files
 	gtkardour.Append (CCFLAGS="-DHAVE_LV2")
 	gtkardour.Merge ([libraries['slv2']])
+	gtkardour.Merge ([libraries['rasqal']])
 
 
 if gtkardour['GTKOSX']:

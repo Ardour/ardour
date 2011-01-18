@@ -320,6 +320,7 @@ else:
 	
 if ardour['LV2']:
 	ardour.Merge ([ libraries['slv2'] ])
+	ardour.Merge ([ libraries['rasqal'] ])
 
 if ardour['LIBLO']:
 	ardour.Merge ([ libraries['lo'] ])
