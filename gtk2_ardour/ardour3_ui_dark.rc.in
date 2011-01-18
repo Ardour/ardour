@@ -1672,6 +1672,7 @@ widget "*SMPTERuler" style:highest "editor_time_ruler"
 widget "*BBTRuler" style:highest "editor_time_ruler"
 widget "*FramesRuler" style:highest "editor_time_ruler"
 widget "*MinSecRuler" style:highest "editor_time_ruler"
+widget "*TimecodeRuler" style:highest "editor_time_ruler"
 widget "*BaseFrame" style:highest "base_frame"
 
 widget "*SendStripBase" style:highest "send_strip_base"
