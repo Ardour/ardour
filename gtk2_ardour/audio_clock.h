@@ -183,6 +183,13 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	double drag_y;
 	double drag_accum;
 
+	/** true if the time of this clock is the one displayed in its widgets.
+	 *  if false, the time in the widgets is an approximation of _canonical_time,
+	 *  and _canonical_time should be returned as the `current' time of the clock.
+	 */
+	bool _canonical_time_is_displayed;
+	framepos_t _canonical_time;
+
 	void on_realize ();
 
 	bool field_motion_notify_event (GdkEventMotion *ev, Field);

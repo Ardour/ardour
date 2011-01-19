@@ -80,7 +80,9 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	  colon5 (":"),
 	  b1 ("|"),
 	  b2 ("|"),
-	  last_when(0)
+	  last_when(0),
+	  _canonical_time_is_displayed (true),
+	  _canonical_time (0)
 {
 	last_when = 0;
 	last_pdelta = 0;
@@ -416,22 +418,21 @@ AudioClock::on_realize ()
 void
 AudioClock::set (framepos_t when, bool force, framecnt_t offset, char which)
 {
-
  	if ((!force && !is_visible()) || _session == 0) {
 		return;
 	}
 
-	if (when == last_when && !offset && !force) {
-		return;
-	}
-
-	bool pdelta = Config->get_primary_clock_delta_edit_cursor();
-	bool sdelta = Config->get_secondary_clock_delta_edit_cursor();
+	bool const pdelta = Config->get_primary_clock_delta_edit_cursor ();
+	bool const sdelta = Config->get_secondary_clock_delta_edit_cursor ();
 
 	if (offset && which == 'p' && pdelta) {
 		when = (when > offset) ? when - offset : offset - when;
 	} else if (offset && which == 's' && sdelta) {
 		when = (when > offset) ? when - offset : offset - when;
+	}
+
+	if (when == last_when && !force) {
+		return;
 	}
 
 	if (which == 'p' && pdelta && !last_pdelta) {
@@ -440,7 +441,7 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset, char which)
 	} else if (which == 'p' && !pdelta && last_pdelta) {
 		set_widget_name("TransportClockDisplay");
 		last_pdelta = false;
-	} else if (which == 's'  && sdelta && !last_sdelta) {
+	} else if (which == 's' && sdelta && !last_sdelta) {
 		set_widget_name("SecondaryClockDisplayDelta");
 		last_sdelta = true;
 	} else if (which == 's' && !sdelta && last_sdelta) {
@@ -470,6 +471,10 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset, char which)
 	}
 
 	last_when = when;
+
+	/* we're setting the time from a frames value, so keep it as the canonical value */
+	_canonical_time = when;
+	_canonical_time_is_displayed = false;
 }
 
 void
@@ -891,6 +896,7 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 
 		new_text += new_char;
 		label->set_text (new_text);
+		_canonical_time_is_displayed = true;
 		key_entry_state++;
 	}
 
@@ -916,10 +922,12 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 				// Bars should never be, unless this clock is for a duration
 				if (atoi(bars_label.get_text()) == 0 && !is_duration) {
 					bars_label.set_text("001");
+					_canonical_time_is_displayed = true;
 				}
 				//  beats should never be 0, unless this clock is for a duration
 				if (atoi(beats_label.get_text()) == 0 && !is_duration) {
 					beats_label.set_text("01");
+					_canonical_time_is_displayed = true;
 				}
 				break;
 			default:
@@ -1134,7 +1142,6 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		cerr << "Context menu event on clock\n";
 		if (ops_menu == 0) {
 			build_ops_menu ();
 		}
@@ -1397,6 +1404,10 @@ AudioClock::get_frames (Field field, framepos_t pos, int dir)
 framepos_t
 AudioClock::current_time (framepos_t pos) const
 {
+	if (!_canonical_time_is_displayed) {
+		return _canonical_time;
+	}
+	
 	framepos_t ret = 0;
 
 	switch (_mode) {
@@ -1456,26 +1467,31 @@ AudioClock::timecode_sanitize_display()
 	// Check Timecode fields for sanity, possibly adjusting values
 	if (atoi(minutes_label.get_text()) > 59) {
 		minutes_label.set_text("59");
+		_canonical_time_is_displayed = true;
 	}
 
 	if (atoi(seconds_label.get_text()) > 59) {
 		seconds_label.set_text("59");
+		_canonical_time_is_displayed = true;
 	}
 
 	switch ((long)rint(_session->timecode_frames_per_second())) {
 	case 24:
 		if (atoi(frames_label.get_text()) > 23) {
 			frames_label.set_text("23");
+			_canonical_time_is_displayed = true;
 		}
 		break;
 	case 25:
 		if (atoi(frames_label.get_text()) > 24) {
 			frames_label.set_text("24");
+			_canonical_time_is_displayed = true;
 		}
 		break;
 	case 30:
 		if (atoi(frames_label.get_text()) > 29) {
 			frames_label.set_text("29");
+			_canonical_time_is_displayed = true;
 		}
 		break;
 	default:
@@ -1485,6 +1501,7 @@ AudioClock::timecode_sanitize_display()
 	if (_session->timecode_drop_frames()) {
 		if ((atoi(minutes_label.get_text()) % 10) && (atoi(seconds_label.get_text()) == 0) && (atoi(frames_label.get_text()) < 2)) {
 			frames_label.set_text("02");
+			_canonical_time_is_displayed = true;
 		}
 	}
 }
@@ -1976,8 +1993,9 @@ AudioClock::set_from_playhead ()
 	if (!_session) {
 		return;
 	}
-	
+
 	set (_session->transport_frame());
+	ValueChanged ();
 }
 
 void

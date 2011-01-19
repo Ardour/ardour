@@ -174,6 +174,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	static sigc::signal<void,bool> Blink;
 	static sigc::signal<void>      RapidScreenUpdate;
 	static sigc::signal<void>      SuperRapidScreenUpdate;
+	/** Emitted frequently with the audible frame, false, and the edit point as
+	 *  parameters respectively.
+	 */
 	static sigc::signal<void, framepos_t, bool, framepos_t> Clock;
 
 	XMLNode* editor_settings() const;
