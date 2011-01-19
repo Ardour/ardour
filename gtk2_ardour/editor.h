@@ -1978,7 +1978,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	RegionSelection get_regions_from_selection ();
 	RegionSelection get_regions_from_selection_and_edit_point ();
 	RegionSelection get_regions_from_selection_and_entered ();
-	RegionSelection add_route_group_regions_to_selection (RegionSelection regions);
 	
 	void start_updating_meters ();
 	void stop_updating_meters ();

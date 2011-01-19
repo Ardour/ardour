@@ -4569,7 +4569,7 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
 RegionSelection
 Editor::get_regions_from_selection ()
 {
-	return add_route_group_regions_to_selection (selection->regions);
+	return get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
 }
 
 /** Get regions using the following method:
@@ -4650,63 +4650,7 @@ Editor::get_regions_from_selection_and_entered ()
 		regions.add (entered_regionview);
 	}
 
-	regions = add_route_group_regions_to_selection (regions);
-
-	return regions;
-}
-
-RegionSelection
-Editor::add_route_group_regions_to_selection (RegionSelection regions)
-{
-	TrackViewList tracks;
-	
-	vector<boost::shared_ptr<Region> > equivalent_regions;
-	RegionSelection edit_group_regions;
-		
-	/* Add any other tracks that have regions that are in the same
-	   edit-activated route group as one of our regions.
-	 */
-	for (RegionSelection::iterator i = regions.begin (); i != regions.end(); ++i) {
-		
-		RouteGroup* g = (*i)->get_time_axis_view().route_group ();
-		
-		if (g && g->is_active() && g->is_edit()) {
-			/* get tracks in the group */
-			tracks.add (axis_views_from_routes (g->route_list()));
-		}
-		
-		/* iterate over the track list and get the equivalent regions for the current region */
-		for (TrackViewList::iterator tr = tracks.begin (); tr != tracks.end(); ++tr) {
-		  
-			if ( (*tr) == &(*i)->get_time_axis_view()) {
-				/* looking in same track as the original */
-				continue;
-			}
-		  
-			boost::shared_ptr<Playlist> pl;
-			
-			if ((pl = (*tr)->playlist()) != 0) {
-				pl->get_equivalent_regions ((*i)->region(), equivalent_regions);
-			}
-			
-			/* convert the regions to region views */
-			for (vector<boost::shared_ptr<Region> >::iterator r = equivalent_regions.begin(); r != equivalent_regions.end(); ++r) {
-				
-				RegionView* rv;
-				
-				if ((rv = (*tr)->view()->find_view (*r)) != 0) {
-					edit_group_regions.add (rv);
-				}
-			}
-		}
-		
-		equivalent_regions.clear();
-		tracks.clear();
-	}
-	
-	regions.merge(edit_group_regions);
-	
-	return regions;
+	return get_equivalent_regions (regions, ARDOUR::Properties::edit.property_id);
 }
 
 void
