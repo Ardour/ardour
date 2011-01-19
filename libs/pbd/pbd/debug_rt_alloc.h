@@ -41,8 +41,8 @@ extern void resume_rt_malloc_checks ();
 
 #else
 
-#define suspend_rt_malloc_checks () {}
-#define resume_rt_malloc_checks () {}
+#define suspend_rt_malloc_checks() {}
+#define resume_rt_malloc_checks() {}
 
 #endif
 
