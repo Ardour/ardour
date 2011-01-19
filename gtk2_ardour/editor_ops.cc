@@ -863,7 +863,7 @@ Editor::cursor_to_region_point (EditorCursor* cursor, RegionPoint point, int32_t
 		return;
 	}
 
-	switch (point){
+	switch (point) {
 	case Start:
 		pos = r->first_frame ();
 		break;
@@ -1054,7 +1054,7 @@ Editor::selected_marker_to_region_point (RegionPoint point, int32_t dir)
 		return;
 	}
 
-	switch (point){
+	switch (point) {
 	case Start:
 		pos = r->first_frame ();
 		break;
@@ -2863,7 +2863,9 @@ Editor::separate_under_selected_regions ()
 {
 	vector<PlaylistState> playlists;
 
-	RegionSelection rs = get_regions_from_selection_and_entered ();
+	RegionSelection rs;
+	
+	rs = get_regions_from_selection_and_entered();
 
 	if (!_session || rs.empty()) {
 		return;
@@ -3486,11 +3488,11 @@ Editor::trim_to_region(bool forward)
 
 		region->clear_changes ();
 
-		if(forward){
+		if (forward) {
 
 		    next_region = playlist->find_next_region (region->first_frame(), Start, 1);
 
-		    if(!next_region){
+		    if (!next_region) {
 			continue;
 		    }
 
@@ -5739,11 +5741,13 @@ Editor::split_region_at_transients ()
 }
 
 void
-Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList& positions, bool can_ferret)
+Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList& positions, bool can_ferret, bool select_new)
 {
 	bool use_rhythmic_rodent = false;
-
+	
 	boost::shared_ptr<Playlist> pl = r->playlist();
+	
+	list<boost::shared_ptr<Region> > new_regions;
 
 	if (!pl) {
 		return;
@@ -5754,7 +5758,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	}
 
 
-	if (positions.size() > 20) {
+	if (positions.size() > 20 && can_ferret) {
 		std::string msgstr = string_compose (_("You are about to split\n%1\ninto %2 pieces.\nThis could take a long time."), r->name(), positions.size() + 1);
 		MessageDialog msg (msgstr,
 				   false,
@@ -5808,7 +5812,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	while (x != positions.end()) {
 	  
 		/* deal with positons that are out of scope of present region bounds */
-		if (*x <= 0 || *x > r->length()){
+		if (*x <= 0 || *x > r->length()) {
 			++x;
 			continue;
 		}
@@ -5848,6 +5852,10 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 		boost::shared_ptr<Region> nr = RegionFactory::create (r->sources(), plist, false);
 		pl->add_region (nr, r->position() + pos);
+		
+		if (select_new) {
+			new_regions.push_front(nr);
+		}
 
 		pos += len;
 		++x;
@@ -5867,11 +5875,21 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 	boost::shared_ptr<Region> nr = RegionFactory::create (r->sources(), plist, false);
 	pl->add_region (nr, r->position() + pos);
-
 	
+	if (select_new) {
+		new_regions.push_front(nr);
+	}
+
 	pl->thaw ();
 
 	_session->add_command (new StatefulDiffCommand (pl));
+	
+	if (select_new) {
+
+		for (list<boost::shared_ptr<Region> >::iterator i = new_regions.begin(); i != new_regions.end(); ++i){
+			set_selected_regionview_from_region_list ((*i), Selection::Add);
+		}
+	}
 }
 
 void
@@ -5954,7 +5972,7 @@ Editor::close_region_gaps ()
 	SpinButton spin_crossfade (1, 0);
 	spin_crossfade.set_range (0, 15);
 	spin_crossfade.set_increments (1, 1);
-	spin_crossfade.set_value (3);
+	spin_crossfade.set_value (5);
 	table.attach (spin_crossfade, 1, 2, 0, 1);
 
 	table.attach (*manage (new Label (_("ms"))), 2, 3, 0, 1);
@@ -5964,9 +5982,9 @@ Editor::close_region_gaps ()
 	table.attach (*l, 0, 1, 1, 2);
 	
 	SpinButton spin_pullback (1, 0);
-	spin_pullback.set_range (0, 15);
+	spin_pullback.set_range (0, 100);
 	spin_pullback.set_increments (1, 1);
-	spin_pullback.set_value (5);
+	spin_pullback.set_value(30);
 	table.attach (spin_pullback, 1, 2, 1, 2);
 
 	table.attach (*manage (new Label (_("ms"))), 2, 3, 1, 2);
@@ -6201,9 +6219,9 @@ edit your ardour.rc file to set the\n\
 		msg.run ();
 		return;
 	}
-                
+
 	if (ntracks + nbusses == 0) {
- 		return;
+		return;
 	}
 
 	if (ntracks > 1) {

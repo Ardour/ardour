@@ -1070,7 +1070,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void lower_region_to_bottom ();
 	void split_regions_at (framepos_t, RegionSelection&);
 	void split_region_at_transients ();
-	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret);
+	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
 	void crop_region_to_selection ();
 	void crop_region_to (framepos_t start, framepos_t end);
 	void set_sync_point (framepos_t, const RegionSelection&);
@@ -1975,8 +1975,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void get_regions_at (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
 	void get_regions_after (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
 
+	RegionSelection get_regions_from_selection ();
 	RegionSelection get_regions_from_selection_and_edit_point ();
 	RegionSelection get_regions_from_selection_and_entered ();
+	RegionSelection add_route_group_regions_to_selection (RegionSelection regions);
 	
 	void start_updating_meters ();
 	void stop_updating_meters ();
@@ -2020,6 +2022,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gtk::HBox _summary_hbox;
 	EditorSummary* _summary;
+
 	void region_view_added (RegionView *);
 
 	void update_canvas_now ();

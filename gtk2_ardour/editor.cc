@@ -420,30 +420,35 @@ Editor::Editor ()
 	tempo_label.set_padding (5,0);
 	tempo_label.hide();
 	tempo_label.set_no_show_all();
+	
 	meter_label.set_name ("EditorTimeButton");
 	meter_label.set_size_request (-1, (int)timebar_height);
 	meter_label.set_alignment (1.0, 0.5);
 	meter_label.set_padding (5,0);
 	meter_label.hide();
 	meter_label.set_no_show_all();
+	
 	mark_label.set_name ("EditorTimeButton");
 	mark_label.set_size_request (-1, (int)timebar_height);
 	mark_label.set_alignment (1.0, 0.5);
 	mark_label.set_padding (5,0);
 	mark_label.hide();
 	mark_label.set_no_show_all();
+	
 	cd_mark_label.set_name ("EditorTimeButton");
 	cd_mark_label.set_size_request (-1, (int)timebar_height);
 	cd_mark_label.set_alignment (1.0, 0.5);
 	cd_mark_label.set_padding (5,0);
 	cd_mark_label.hide();
 	cd_mark_label.set_no_show_all();
+	
 	range_mark_label.set_name ("EditorTimeButton");
 	range_mark_label.set_size_request (-1, (int)timebar_height);
 	range_mark_label.set_alignment (1.0, 0.5);
 	range_mark_label.set_padding (5,0);
 	range_mark_label.hide();
 	range_mark_label.set_no_show_all();
+	
 	transport_mark_label.set_name ("EditorTimeButton");
 	transport_mark_label.set_size_request (-1, (int)timebar_height);
 	transport_mark_label.set_alignment (1.0, 0.5);
@@ -453,11 +458,14 @@ Editor::Editor ()
 
 	initialize_rulers ();
 	initialize_canvas ();
+	
 	_summary = new EditorSummary (this);
 
 	selection->TimeChanged.connect (sigc::mem_fun(*this, &Editor::time_selection_changed));
 	selection->TracksChanged.connect (sigc::mem_fun(*this, &Editor::track_selection_changed));
+	
 	editor_regions_selection_changed_connection = selection->RegionsChanged.connect (sigc::mem_fun(*this, &Editor::region_selection_changed));
+	
 	selection->PointsChanged.connect (sigc::mem_fun(*this, &Editor::point_selection_changed));
 	selection->MarkersChanged.connect (sigc::mem_fun(*this, &Editor::marker_selection_changed));
 
@@ -484,8 +492,10 @@ Editor::Editor ()
 	ArdourCanvas::Canvas* time_pad = manage(new ArdourCanvas::Canvas());
 	ArdourCanvas::SimpleLine* pad_line_1 = manage(new ArdourCanvas::SimpleLine(*time_pad->root(),
 			0.0, 1.0, 100.0, 1.0));
+	
 	pad_line_1->property_color_rgba() = 0xFF0000FF;
 	pad_line_1->show();
+	
 	time_pad->show();
 
 	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
@@ -558,10 +568,12 @@ Editor::Editor ()
 	summary_arrows_left_left->add (*manage (new Arrow (ARROW_LEFT, SHADOW_NONE)));
 	summary_arrows_left_left->signal_pressed().connect (sigc::hide_return (sigc::mem_fun (*this, &Editor::horizontal_scroll_left_press)));
 	summary_arrows_left_left->signal_released().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_left_release));
+	
 	Button* summary_arrows_left_right = manage (new Button);
 	summary_arrows_left_right->add (*manage (new Arrow (ARROW_RIGHT, SHADOW_NONE)));
 	summary_arrows_left_right->signal_pressed().connect (sigc::hide_return (sigc::mem_fun (*this, &Editor::horizontal_scroll_right_press)));
 	summary_arrows_left_right->signal_released().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_right_release));
+	
 	VBox* summary_arrows_left = manage (new VBox);
 	summary_arrows_left->pack_start (*summary_arrows_left_left);
 	summary_arrows_left->pack_start (*summary_arrows_left_right);
@@ -570,16 +582,19 @@ Editor::Editor ()
 	summary_arrows_right_left->add (*manage (new Arrow (ARROW_LEFT, SHADOW_NONE)));
 	summary_arrows_right_left->signal_pressed().connect (sigc::hide_return (sigc::mem_fun (*this, &Editor::horizontal_scroll_left_press)));
 	summary_arrows_right_left->signal_released().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_left_release));
+	
 	Button* summary_arrows_right_right = manage (new Button);
 	summary_arrows_right_right->add (*manage (new Arrow (ARROW_RIGHT, SHADOW_NONE)));
 	summary_arrows_right_right->signal_pressed().connect (sigc::hide_return (sigc::mem_fun (*this, &Editor::horizontal_scroll_right_press)));
 	summary_arrows_right_right->signal_released().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_right_release));
+	
 	VBox* summary_arrows_right = manage (new VBox);
 	summary_arrows_right->pack_start (*summary_arrows_right_left);
 	summary_arrows_right->pack_start (*summary_arrows_right_right);
 
 	Frame* summary_frame = manage (new Frame);
 	summary_frame->set_shadow_type (Gtk::SHADOW_ETCHED_IN);
+	
 	summary_frame->add (*_summary);
 	summary_frame->show ();
 
@@ -1105,9 +1120,11 @@ Editor::set_session (Session *t)
 	Location* loc = _session->locations()->auto_loop_location();
 	if (loc == 0) {
 		loc = new Location (*_session, 0, _session->current_end_frame(), _("Loop"),(Location::Flags) (Location::IsAutoLoop | Location::IsHidden));
+		
 		if (loc->start() == loc->end()) {
 			loc->set_end (loc->start() + 1);
 		}
+		
 		_session->locations()->add (loc, false);
 		_session->set_auto_loop_location (loc);
 	} else {
@@ -1116,11 +1133,14 @@ Editor::set_session (Session *t)
 	}
 
 	loc = _session->locations()->auto_punch_location();
+	
 	if (loc == 0) {
 		loc = new Location (*_session, 0, _session->current_end_frame(), _("Punch"), (Location::Flags) (Location::IsAutoPunch | Location::IsHidden));
+		
 		if (loc->start() == loc->end()) {
 			loc->set_end (loc->start() + 1);
 		}
+		
 		_session->locations()->add (loc, false);
 		_session->set_auto_punch_location (loc);
 	} else {
@@ -2127,7 +2147,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		set_mouse_mode (MouseObject, true);
 	}
 
-	if ((prop = node.property ("left-frame")) != 0){
+	if ((prop = node.property ("left-frame")) != 0) {
 		framepos_t pos;
 		if (sscanf (prop->value().c_str(), "%" PRId64, &pos) == 1) {
 			reset_x_origin (pos);
@@ -4479,7 +4499,9 @@ Editor::get_regions_at (RegionSelection& rs, framepos_t where, const TrackViewLi
 	}
 
 	for (TrackViewList::const_iterator t = tracks->begin(); t != tracks->end(); ++t) {
+
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*t);
+
 		if (rtv) {
 			boost::shared_ptr<Track> tr;
 			boost::shared_ptr<Playlist> pl;
@@ -4487,7 +4509,7 @@ Editor::get_regions_at (RegionSelection& rs, framepos_t where, const TrackViewLi
 			if ((tr = rtv->track()) && ((pl = tr->playlist()))) {
 
 				Playlist::RegionList* regions = pl->regions_at (
-						(framepos_t) floor ( (double)where * tr->speed()));
+						(framepos_t) floor ( (double) where * tr->speed()));
 
 				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 					RegionView* rv = rtv->view()->find_view (*i);
@@ -4539,6 +4561,17 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
 	}
 }
 
+/** Start with regions that are selected.  Then add equivalent regions
+ *  on tracks in the same active edit-enabled route group as any of
+ *  the regions that we started with.
+ */
+
+RegionSelection
+Editor::get_regions_from_selection ()
+{
+	return add_route_group_regions_to_selection (selection->regions);
+}
+
 /** Get regions using the following method:
  *
  *  Make an initial region list using the selected regions, unless
@@ -4588,10 +4621,10 @@ Editor::get_regions_from_selection_and_edit_point ()
 	for (RegionSelection::iterator i = regions.begin (); i != regions.end(); ++i) {
 		
 		RouteGroup* g = (*i)->get_time_axis_view().route_group ();
+		
 		if (g && g->is_active() && g->is_edit()) {
 			tracks.add (axis_views_from_routes (g->route_list()));
 		}
-		
 	}
 	
 	if (!tracks.empty()) {
@@ -4603,17 +4636,77 @@ Editor::get_regions_from_selection_and_edit_point ()
 	return regions;
 }
 
+/** Start with regions that are selected, or the entered regionview if none are selected.
+ *  Then add equivalent regions on tracks in the same active edit-enabled route group as any
+ *  of the regions that we started with.
+ */
 
 RegionSelection
 Editor::get_regions_from_selection_and_entered ()
 {
-	RegionSelection rs = selection->regions;
+	RegionSelection regions = selection->regions;
 	
-	if (rs.empty() && entered_regionview) {
-		rs.add (entered_regionview);
+	if (regions.empty() && entered_regionview) {
+		regions.add (entered_regionview);
 	}
 
-	return rs;
+	regions = add_route_group_regions_to_selection (regions);
+
+	return regions;
+}
+
+RegionSelection
+Editor::add_route_group_regions_to_selection (RegionSelection regions)
+{
+	TrackViewList tracks;
+	
+	vector<boost::shared_ptr<Region> > equivalent_regions;
+	RegionSelection edit_group_regions;
+		
+	/* Add any other tracks that have regions that are in the same
+	   edit-activated route group as one of our regions.
+	 */
+	for (RegionSelection::iterator i = regions.begin (); i != regions.end(); ++i) {
+		
+		RouteGroup* g = (*i)->get_time_axis_view().route_group ();
+		
+		if (g && g->is_active() && g->is_edit()) {
+			/* get tracks in the group */
+			tracks.add (axis_views_from_routes (g->route_list()));
+		}
+		
+		/* iterate over the track list and get the equivalent regions for the current region */
+		for (TrackViewList::iterator tr = tracks.begin (); tr != tracks.end(); ++tr) {
+		  
+			if ( (*tr) == &(*i)->get_time_axis_view()) {
+				/* looking in same track as the original */
+				continue;
+			}
+		  
+			boost::shared_ptr<Playlist> pl;
+			
+			if ((pl = (*tr)->playlist()) != 0) {
+				pl->get_equivalent_regions ((*i)->region(), equivalent_regions);
+			}
+			
+			/* convert the regions to region views */
+			for (vector<boost::shared_ptr<Region> >::iterator r = equivalent_regions.begin(); r != equivalent_regions.end(); ++r) {
+				
+				RegionView* rv;
+				
+				if ((rv = (*tr)->view()->find_view (*r)) != 0) {
+					edit_group_regions.add (rv);
+				}
+			}
+		}
+		
+		equivalent_regions.clear();
+		tracks.clear();
+	}
+	
+	regions.merge(edit_group_regions);
+	
+	return regions;
 }
 
 void

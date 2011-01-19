@@ -48,8 +48,8 @@ static const gchar * _onset_function_strings[] = {
 
 static const gchar * _operation_strings[] = {
 	N_("Split region"),
-	N_("Set tempo map"),
-	N_("Conform region"),
+	N_("Snap regions"),
+	N_("Conform regions"),
 	0
 };
 
@@ -168,7 +168,7 @@ RhythmFerret::Action
 RhythmFerret::get_action () const
 {
 	if (operation_selector.get_active_row_number() == 1) {
-		return DefineTempoMap;
+		return SnapRegionsToGrid;
 	} else if (operation_selector.get_active_row_number() == 2) {
 		return ConformRegion;
 	}
@@ -321,6 +321,9 @@ RhythmFerret::do_action ()
 	case SplitRegion:
 		do_split_action ();
 		break;
+	case SnapRegionsToGrid:
+		editor.snap_regions_to_grid();
+		break;
 	case ConformRegion:
 		editor.close_region_gaps();
 		break;
@@ -332,7 +335,11 @@ RhythmFerret::do_action ()
 void
 RhythmFerret::do_split_action ()
 {
-	RegionSelection& regions (editor.get_selection().regions);
+	/* XXX: this is quite a special-case; (currently) the only operation which is
+	   performed on the selection only (without entered_regionview or the edit point
+	   being considered)
+	*/
+	RegionSelection regions = editor.get_regions_from_selection();
 	
 	if (regions.empty()) {
 		return;
@@ -348,7 +355,7 @@ RhythmFerret::do_split_action ()
 		AnalysisFeatureList features;
 		features = (*i)->region()->transients();
 		
-		merged_features.insert (merged_features.end(), features.begin(), features.end());		
+		merged_features.insert (merged_features.end(), features.begin(), features.end());
 	}
 	
 	merged_features.sort();
@@ -363,7 +370,7 @@ RhythmFerret::do_split_action ()
 
 		AnalysisFeatureList features;
 		features = (*i)->region()->transients();
-		editor.split_region_at_points ((*i)->region(), merged_features, false);
+		editor.split_region_at_points ((*i)->region(), merged_features, false, true);
 
 		/* i is invalid at this point */
 

@@ -33,7 +33,7 @@ class RhythmFerret : public ArdourDialog {
 
 	enum Action {
 		SplitRegion,
-		DefineTempoMap,
+		SnapRegionsToGrid,
 		ConformRegion
 	};
 
