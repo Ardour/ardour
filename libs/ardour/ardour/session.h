@@ -668,9 +668,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void begin_reversible_command (const std::string& cmd_name);
 	void commit_reversible_command (Command* cmd = 0);
 
-	UndoTransaction* start_reversible_command (const std::string& cmd_name);
-	void finish_reversible_command (UndoTransaction&);
-
 	void add_command (Command *const cmd) {
 		assert(!_current_trans.empty ());
 		_current_trans.top()->add_command (cmd);
