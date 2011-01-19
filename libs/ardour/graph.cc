@@ -22,6 +22,7 @@
 
 #include "pbd/compose.h"
 #include "pbd/cpus.h"
+#include "pbd/debug_rt_alloc.h"
 
 #include "ardour/debug.h"
 #include "ardour/graph.h"
@@ -39,6 +40,17 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
+#ifdef DEBUG_RT_ALLOC
+static Graph* graph = 0;
+extern "C" {
+
+int alloc_allowed ()
+{
+	return !graph->in_process_thread ();
+}
+
+}
+#endif
 
 Graph::Graph (Session & session) 
         : SessionHandleRef (session) 
@@ -97,6 +109,11 @@ Graph::Graph (Session & session)
 			_thread_list.push_back (a_thread);
 		}
         }
+
+#ifdef DEBUG_RT_ALLOC	
+	graph = this;
+	pbd_alloc_allowed = &::alloc_allowed;
+#endif	
 }
 
 void
@@ -380,7 +397,7 @@ static void get_rt()
 void
 Graph::helper_thread()
 {
-        ProcessThread *pt = new ProcessThread;
+	ProcessThread* pt = new ProcessThread ();
 
         pt->get_buffers();
         get_rt();
@@ -397,7 +414,7 @@ Graph::helper_thread()
 void
 Graph::main_thread()
 {
-        ProcessThread *pt = new ProcessThread;
+	ProcessThread* pt = new ProcessThread ();
 
         pt->get_buffers();
         get_rt();
@@ -557,5 +574,13 @@ Graph::process_one_route (Route* route)
         }
 }
 
+bool
+Graph::in_process_thread () const
+{
+	list<pthread_t>::const_iterator i = _thread_list.begin ();
+	while (i != _thread_list.end() && *i != pthread_self ()) {
+		++i;
+	}
 
-
+	return i != _thread_list.end ();
+}

@@ -84,6 +84,8 @@ class Graph : public SessionHandleRef
 
         void clear_other_chain ();
 
+	bool in_process_thread () const;
+
     protected:
         virtual void session_going_away ();
 

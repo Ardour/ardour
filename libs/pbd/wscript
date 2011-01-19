@@ -106,6 +106,10 @@ def build(bld):
 		whitespace.cc
 		xml++.cc
 	'''
+
+	if bld.env['DEBUG_RT_ALLOC']:
+		obj.source += 'debug_rt_alloc.c'
+
 	obj.export_incdirs = ['.']
 	obj.includes     = ['.']
 	obj.name         = 'libpbd'

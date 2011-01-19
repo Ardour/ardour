@@ -291,6 +291,11 @@ def set_compiler_flags (conf,opt):
 	if opt.stl_debug:
 		conf.env.append_value('CXXFLAGS', "-D_GLIBCXX_DEBUG")
 
+	if conf.env['DEBUG_RT_ALLOC']:
+		conf.env.append_value('CCFLAGS', '-DDEBUG_RT_ALLOC')
+		conf.env.append_value('CXXFLAGS', '-DDEBUG_RT_ALLOC')
+		conf.env.append_value('LINKFLAGS', '-ldl')
+
 	if opt.universal:
 		conf.env.append_value('CCFLAGS', "-arch i386 -arch ppc")
 		conf.env.append_value('CXXFLAGS', "-arch i386 -arch ppc")
@@ -325,7 +330,6 @@ def set_compiler_flags (conf,opt):
 		conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
 		conf.env.append_value('CCFLAGS', '-DENABLE_NLS')
 
-
 #----------------------------------------------------------------
 
 # Waf stages
@@ -359,6 +363,8 @@ def set_options(opt):
 	opt.add_option('--phone-home', action='store_false', default=True, dest='phone_home')
 	opt.add_option('--stl-debug', action='store_true', default=False, dest='stl_debug',
 			help='Build with debugging for the STL')
+	opt.add_option('--rt-alloc-debug', action='store_true', default=False, dest='rt_alloc_debug',
+			help='Build with debugging for memory allocation in the real-time thread')
 	opt.add_option('--test', action='store_true', default=False, dest='build_tests', 
 			help="Build unit tests")
 	opt.add_option('--tranzport', action='store_true', default=False, dest='tranzport',
@@ -540,6 +546,8 @@ def configure(conf):
 	autowaf.display_msg(conf, 'Windows Key', opts.windows_key)
 	conf.env['PROGRAM_NAME'] = opts.program_name
 	autowaf.display_msg(conf, 'Program Name', opts.program_name)
+	if opts.rt_alloc_debug:
+		conf.define('DEBUG_RT_ALLOC', 1)
 
 	set_compiler_flags (conf, Options.options)
 
