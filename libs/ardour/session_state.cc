@@ -2362,38 +2362,55 @@ Session::add_commands (vector<Command*> const & cmds)
 }
 
 void
-Session::begin_reversible_command(const string& name)
+Session::begin_reversible_command (const string& name)
 {
-	UndoTransaction* trans = new UndoTransaction();
-	trans->set_name(name);
-
-	if (!_current_trans.empty()) {
-		_current_trans.top()->add_command (trans);
+	/* If nested begin/commit pairs are used, we create just one UndoTransaction
+	   to hold all the commands that are committed.  This keeps the order of
+	   commands correct in the history.
+	*/
+	
+	if (_current_trans == 0) {
+		/* start a new transaction */
+		assert (_current_trans_depth == 0);
+		_current_trans = new UndoTransaction();
+		_current_trans->set_name (name);
 	} else {
-		_current_trans.push(trans);
+		/* use the existing transaction */
+		++_current_trans_depth;
 	}
 }
 
 void
-Session::commit_reversible_command(Command *cmd)
+Session::commit_reversible_command (Command *cmd)
 {
-	assert(!_current_trans.empty());
+	assert (_current_trans);
+	assert (_current_trans_depth > 0);
+	
 	struct timeval now;
 
 	if (cmd) {
-		_current_trans.top()->add_command(cmd);
+		_current_trans->add_command (cmd);
 	}
 
-	if (_current_trans.top()->empty()) {
-		_current_trans.pop();
+	--_current_trans_depth;
+
+	if (_current_trans_depth > 0) {
+		/* the transaction we're committing is not the top-level one */
 		return;
 	}
 
-	gettimeofday(&now, 0);
-	_current_trans.top()->set_timestamp(now);
+	if (_current_trans->empty()) {
+		/* no commands were added to the transaction, so just get rid of it */
+		delete _current_trans;
+		_current_trans = 0;
+		return;
+	}
 
-	_history.add(_current_trans.top());
-	_current_trans.pop();
+	gettimeofday (&now, 0);
+	_current_trans->set_timestamp (now);
+
+	_history.add (_current_trans);
+	_current_trans = 0;
 }
 
 static bool

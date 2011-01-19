@@ -669,8 +669,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void commit_reversible_command (Command* cmd = 0);
 
 	void add_command (Command *const cmd) {
-		assert(!_current_trans.empty ());
-		_current_trans.top()->add_command (cmd);
+		assert (_current_trans);
+		_current_trans->add_command (cmd);
 	}
 
 	void add_commands (std::vector<Command*> const & cmds);
@@ -1336,8 +1336,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void reverse_track_buffers ();
 
-	UndoHistory                  _history;
-	std::stack<UndoTransaction*> _current_trans;
+	UndoHistory      _history;
+	/** current undo transaction, or 0 */
+	UndoTransaction* _current_trans;
+	/** number of times that begin_reversible_command has been called without commit_reversible_command */
+	int              _current_trans_depth;
 
 	void jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int);
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);

@@ -151,6 +151,8 @@ Session::Session (AudioEngine &eng,
 	, _total_free_4k_blocks (0)
 	, _bundles (new BundleList)
 	, _bundle_xml_node (0)
+	, _current_trans (0)
+	, _current_trans_depth (0)
 	, _click_io ((IO*) 0)
 	, click_data (0)
 	, click_emphasis_data (0)

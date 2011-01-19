@@ -37,6 +37,7 @@ class UndoTransaction : public Command
 	UndoTransaction ();
 	UndoTransaction (const UndoTransaction&);
 	UndoTransaction& operator= (const UndoTransaction&);
+	~UndoTransaction ();
 
 	void clear ();
 	bool empty() const;
@@ -66,9 +67,6 @@ class UndoTransaction : public Command
 
 	friend void command_death (UndoTransaction*, Command *);
 	
-	friend class UndoHistory;
-
-	~UndoTransaction ();
 	void about_to_explicitly_delete ();
 };
 
