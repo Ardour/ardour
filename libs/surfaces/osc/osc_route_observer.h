@@ -29,27 +29,31 @@
 #include "pbd/stateful.h"
 #include "ardour/types.h"
 
-namespace ARDOUR {
-	class Route;
-}
-
 class OSCRouteObserver
 {
 
   public:
-	OSCRouteObserver (lo_address addr, const std::string& path, boost::shared_ptr<ARDOUR::Route>);
+	OSCRouteObserver (boost::shared_ptr<ARDOUR::Route>, lo_address addr);
 	~OSCRouteObserver ();
 
-	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }
+	boost::shared_ptr<ARDOUR::Route> route () const { return _route; }
+	lo_address address() const { return addr; };
 
   private:
 	boost::shared_ptr<ARDOUR::Route> _route;
+	//boost::shared_ptr<Controllable> _controllable;
 	
-	PBD::ScopedConnection changed_connection;
+	PBD::ScopedConnection name_changed_connection;
+	PBD::ScopedConnection rec_changed_connection;
+	PBD::ScopedConnection mute_changed_connection;
+	PBD::ScopedConnection solo_changed_connection;
+	PBD::ScopedConnection gain_changed_connection;
+	
 	lo_address addr;
 	std::string path;
 
 	void name_changed (const PBD::PropertyChange& what_changed);
+	void send_change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 };
 
 #endif /* __osc_oscrouteobserver_h__ */

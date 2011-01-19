@@ -20,7 +20,7 @@ XPathTest::testMisc ()
 	
 	cout << "Found " << result->size() << " banks" << endl;
 	assert(result->size() == 8);
-	int counter = 1;
+//	int counter = 1;
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
 		assert((*i)->name() == "bank");
 		assert((*i)->property("name"));

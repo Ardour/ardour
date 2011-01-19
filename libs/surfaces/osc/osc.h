@@ -111,11 +111,27 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	void send_current_value (const char* path, lo_arg** argv, int argc, lo_message msg);
 	void current_value_query (const char* path, size_t len, lo_arg **argv, int argc, lo_message msg);
+	
+	int current_value (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
+	
 	int catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data);
 	static int _catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
 
-	int current_value (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
+	void routes_list (lo_message msg);
+	void transport_frame(lo_message msg);
 
+#define PATH_CALLBACK_MSG(name)					\
+        static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
+        } \
+        int cb_ ## name (const char *, const char *, lo_arg **argv, int argc, void *data) { \
+		name (data);		\
+		return 0;		\
+	}
+	
+	PATH_CALLBACK_MSG(routes_list);
+	PATH_CALLBACK_MSG(transport_frame);
+	
 #define PATH_CALLBACK(name) \
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
@@ -210,7 +226,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_set_pan_stereo_width (int rid, float percent);
 	int route_plugin_parameter (int rid, int piid,int par, float val);
 	int route_plugin_parameter_print (int rid, int piid,int par);
-
+	
 	void listen_to_route (boost::shared_ptr<ARDOUR::Route>, lo_address);
 	void end_listen (boost::shared_ptr<ARDOUR::Route>, lo_address);
 	void drop_route (boost::weak_ptr<ARDOUR::Route>);
@@ -220,11 +236,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void update_clock ();
 
 
-	typedef std::list<OSCControllable*> Controllables;
-	typedef std::list<OSCRouteObserver*> Observables;
+	typedef std::list<OSCRouteObserver*> RouteObservers;
 	
-	Controllables controllables;
-	Observables observables;
+	RouteObservers route_observers;
 
 	static OSC* _instance;
 };

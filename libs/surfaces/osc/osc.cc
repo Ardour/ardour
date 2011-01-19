@@ -201,11 +201,10 @@ OSC::start ()
 		ofstream urlfile;
 		urlfile.open(_osc_url_file.c_str(), ios::trunc);
 		
-		if ( urlfile ){
+		if (urlfile) {
 			urlfile << get_server_url () << endl;
 			urlfile.close();
-		}
-		else {  
+		} else {  
 			cerr << "Couldn't write '" <<  _osc_url_file << "'" <<endl;
 		}
 	}
@@ -248,7 +247,7 @@ OSC::thread_init ()
 
 int
 OSC::stop ()
-{	
+{
 	/* stop main loop */
 
 	if (local_server) {
@@ -291,6 +290,19 @@ OSC::stop ()
 		unlink (_osc_url_file.c_str() );
 	}
 
+	// Delete any active route observers
+	for (RouteObservers::iterator x = route_observers.begin(); x != route_observers.end();) {
+
+		OSCRouteObserver* rc;
+		
+		if ((rc = dynamic_cast<OSCRouteObserver*>(*x)) != 0) {
+			delete *x;
+			x = route_observers.erase (x);
+		} else {
+			++x;
+		}
+	}
+	
 	return 0;
 }
 
@@ -314,9 +326,10 @@ OSC::register_callbacks()
 		/* this is a special catchall handler */
 		
 		lo_server_add_method (serv, 0, 0, _catchall, this);
-
+		
 #define REGISTER_CALLBACK(serv,path,types, function) lo_server_add_method (serv, path, types, OSC::_ ## function, this)
 		
+		REGISTER_CALLBACK (serv, "/routes/list", "", routes_list);
 		REGISTER_CALLBACK (serv, "/ardour/add_marker", "", add_marker);
 		REGISTER_CALLBACK (serv, "/ardour/access_action", "s", access_action);
 		REGISTER_CALLBACK (serv, "/ardour/loop_toggle", "", loop_toggle);
@@ -326,7 +339,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/ffwd", "", ffwd);
 		REGISTER_CALLBACK (serv, "/ardour/transport_stop", "", transport_stop);
 		REGISTER_CALLBACK (serv, "/ardour/transport_play", "", transport_play);
-		//REGISTER_CALLBACK (serv, "/ardour/transport_frame", "", transport_frame);
+		REGISTER_CALLBACK (serv, "/ardour/transport_frame", "", transport_frame);
 		REGISTER_CALLBACK (serv, "/ardour/set_transport_speed", "f", set_transport_speed);
                 REGISTER_CALLBACK (serv, "/ardour/locate", "ii", locate);
 		REGISTER_CALLBACK (serv, "/ardour/save_state", "", save_state);
@@ -408,6 +421,85 @@ OSC::get_unix_server_url()
 	return url;
 }
 
+void
+OSC::listen_to_route (boost::shared_ptr<Route> route, lo_address addr)
+{
+	/* avoid duplicate listens */
+	
+	for (RouteObservers::iterator x = route_observers.begin(); x != route_observers.end(); ++x) {
+		
+		OSCRouteObserver* ro;
+
+		if ((ro = dynamic_cast<OSCRouteObserver*>(*x)) != 0) {
+
+			int res = strcmp(lo_address_get_hostname(ro->address()), lo_address_get_hostname(addr));
+			
+			if (ro->route() == route && res == 0) {
+				return;
+			}
+		}
+	}
+
+	OSCRouteObserver* o = new OSCRouteObserver (route, addr);
+	route_observers.push_back (o);
+
+	route->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::drop_route, this, boost::weak_ptr<Route> (route)), this);
+}
+
+void
+OSC::drop_route (boost::weak_ptr<Route> wr)
+{
+	boost::shared_ptr<Route> r = wr.lock ();
+
+	if (!r) {
+		return;
+	}
+
+	for (RouteObservers::iterator x = route_observers.begin(); x != route_observers.end();) {
+
+		OSCRouteObserver* rc;
+		
+		if ((rc = dynamic_cast<OSCRouteObserver*>(*x)) != 0) {
+		  
+			if (rc->route() == r) {
+				delete *x;
+				x = route_observers.erase (x);
+			} else {
+				++x;
+			}
+		} else {
+			++x;
+		}
+	}
+}
+
+void
+OSC::end_listen (boost::shared_ptr<Route> r, lo_address addr)
+{
+	RouteObservers::iterator x;
+	
+	// Remove the route observers
+	for (x = route_observers.begin(); x != route_observers.end();) {
+
+		OSCRouteObserver* ro;
+		
+		if ((ro = dynamic_cast<OSCRouteObserver*>(*x)) != 0) {
+		  
+			int res = strcmp(lo_address_get_hostname(ro->address()), lo_address_get_hostname(addr));
+
+			if (ro->route() == r && res == 0) {
+				delete *x;
+				x = route_observers.erase (x);
+			}
+			else {
+				++x;
+			}
+		}
+		else {
+			++x;
+		}
+	}
+}
 
 void
 OSC::current_value_query (const char* path, size_t len, lo_arg **argv, int argc, lo_message msg)
@@ -499,19 +591,7 @@ OSC::catchall (const char *path, const char *types, lo_arg **argv, int argc, lo_
 	if (len >= 17 && !strcmp (&path[len-15], "/#current_value")) {
 		current_value_query (path, len, argv, argc, msg);
 		ret = 0;
-	} else if (strcmp (path, "/ardour/transport_frame") == 0) {
-		
-		framepos_t pos = transport_frame ();
-		
-		lo_message reply = lo_message_new ();
-		lo_message_add_int64 (reply, pos);
-		
-		lo_send_message (lo_message_get_source (msg), "/ardour/transport_frame", reply);
-		
-		lo_message_free (reply);
-		
-		ret = 0;
-		
+
 	} else if (strcmp (path, "/routes/listen") == 0) {
 		
 		cerr << "set up listener\n";
@@ -553,229 +633,31 @@ OSC::catchall (const char *path, const char *types, lo_arg **argv, int argc, lo_
 			}
 		}
 		
-		ret = 0;
-		
-	} else if (strcmp (path, "/routes/list") == 0) {
-
-		for (int n = 0; n < (int) session->nroutes(); ++n) {
-
-			boost::shared_ptr<Route> r = session->route_by_remote_id (n);
-			
-			if (r) {
-
-				lo_message reply = lo_message_new ();
-			
-				if (boost::dynamic_pointer_cast<AudioTrack>(r)) {
-					lo_message_add_string (reply, "AT");
-				} else if (boost::dynamic_pointer_cast<MidiTrack>(r)) {
-					lo_message_add_string (reply, "MT");
-				} else {
-					lo_message_add_string (reply, "B");
-				}
-				
-				lo_message_add_string (reply, r->name().c_str());
-				lo_message_add_int32 (reply, r->n_inputs().n_audio());
-				lo_message_add_int32 (reply, r->n_outputs().n_audio());
-				lo_message_add_int32 (reply, r->muted());
-				lo_message_add_int32 (reply, r->soloed());
-				lo_message_add_int32 (reply, r->remote_control_id());
-				
-				if (boost::dynamic_pointer_cast<AudioTrack>(r) 
-					|| boost::dynamic_pointer_cast<MidiTrack>(r)) {
-		
-					boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(r);
-					lo_message_add_int32 (reply, t->record_enabled());
-				}
-				
-				lo_send_message (lo_message_get_source (msg), "#reply", reply);
-				lo_message_free (reply);
-				
-				//Automatically listen to routes listed
-				listen_to_route(r, lo_message_get_source (msg));
-			}
-		}
-	
-		// Send end of listing message
-		lo_message reply = lo_message_new ();
-
-		lo_message_add_string (reply, "end_route_list");
-		lo_message_add_int64 (reply, session->frame_rate());
-		lo_message_add_int64 (reply, session->current_end_frame());
-		
-		lo_send_message (lo_message_get_source (msg), "#reply", reply);
-		
-		lo_message_free (reply);
-		
-		ret = 0;
-	}
+		ret = 0;	
+	} 
 
 	return ret;
 }
 
 void
-OSC::update_clock (){
+OSC::update_clock ()
+{
   
 }
 
-void
-OSC::listen_to_route (boost::shared_ptr<Route> route, lo_address addr)
-{
-	Controllables::iterator x;
-	bool route_exists = false;
-
-	cerr << "listen to route\n";
-
-	/* avoid duplicate listens */
-	
-	for (x = controllables.begin(); x != controllables.end(); ++x) {
-		
-		OSCRouteControllable* rc;
-
-		if ((rc = dynamic_cast<OSCRouteControllable*>(*x)) != 0) {
-			
-			if (rc->route() == route) {
-				route_exists = true;
-				
-				/* XXX NEED lo_address_equal() */
-				int res = strcmp(lo_address_get_hostname(rc->address()), lo_address_get_hostname(addr));
-				
-				if (res == 0) {
-					cerr << "already listening to route" << endl;
-					return;
-				}
-			}
-		}
-	}
-
-	cerr << "listener binding to signals\n";
-
-	OSCControllable* c;
-	string path;
-	
-	if (boost::dynamic_pointer_cast<AudioTrack>(route) || boost::dynamic_pointer_cast<MidiTrack>(route)) {
-		
-		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track>(route);
-		
-		path = X_("/route/rec");
-		c = new OSCRouteControllable (addr, path, track->rec_enable_control(), track);
-		controllables.push_back (c);
-	}
-
-	path = X_("/route/solo");
-	c = new OSCRouteControllable (addr, path, route->solo_control(), route);
-	controllables.push_back (c);
-
-	path = X_("/route/mute");
-	c = new OSCRouteControllable (addr, path, route->mute_control(), route);
-	controllables.push_back (c);
-
-	path = X_("/route/gain");
-	c = new OSCRouteControllable (addr, path, route->gain_control(), route);
-	controllables.push_back (c);
-	
-	cerr << "Now have " << controllables.size() << " controllables\n";
-
-	OSCRouteObserver* o;
-	
-	o = new OSCRouteObserver (addr, path, route);
-	observables.push_back (o);
-	
-	/* if there is no existing controllable related to this route, make sure we clean up
-	   if it is ever deleted.
-	*/
-	
-	if (!route_exists) {
-		route->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::drop_route, this, boost::weak_ptr<Route> (route)), this);
-	}
-}
-
-void
-OSC::drop_route (boost::weak_ptr<Route> wr)
-{
-	boost::shared_ptr<Route> r = wr.lock ();
-
-	if (!r) {
-		return;
-	}
-
-	for (Controllables::iterator x = controllables.begin(); x != controllables.end();) {
-
-		OSCRouteControllable* rc;
-		
-		if ((rc = dynamic_cast<OSCRouteControllable*>(*x)) != 0) {
-			if (rc->route() == r) {
-				delete *x;
-				x = controllables.erase (x);
-			} else {
-				++x;
-			}
-		} else {
-			++x;
-		}
-	}
-}
-
-void
-OSC::end_listen (boost::shared_ptr<Route> r, lo_address addr)
-{
-	Controllables::iterator x;
-
-	for (x = controllables.begin(); x != controllables.end();) {
-
-		OSCRouteControllable* rc;
-		
-		if ((rc = dynamic_cast<OSCRouteControllable*>(*x)) != 0) {
-
-			/* XXX NEED lo_address_equal () */
-			if (rc->route() == r && (0 == strcmp(lo_address_get_hostname(rc->address()), lo_address_get_hostname(addr)))){
-				delete *x;
-				x = controllables.erase (x);
-			}
-			else {
-				++x;
-			}
-		}
-		else {
-			++x;
-		}
-	}
-	
-	Observables::iterator z;
-	
-	// Remove the route observers
-	for (z = observables.begin(); z != observables.end();) {
-
-		OSCRouteObserver* ro;
-		
-		if ((ro = dynamic_cast<OSCRouteObserver*>(*z)) != 0) {
-
-			/* XXX NEED lo_address_equal () */
-			if (ro->route() == r){
-				delete *z;
-				z = observables.erase (z);
-			}
-			else {
-				++z;
-			}
-		}
-		else {
-			++z;
-		}
-	}
-}
-
-
 // "Application Hook" Handlers //
 void
-OSC::session_loaded( Session& s ) {
-	lo_address listener = lo_address_new( NULL, "7770" );
-	lo_send( listener, "/session/loaded", "ss", s.path().c_str(), s.name().c_str() );
+OSC::session_loaded (Session& s)
+{
+	lo_address listener = lo_address_new (NULL, "7770");
+	lo_send (listener, "/session/loaded", "ss", s.path().c_str(), s.name().c_str());
 }
 
 void
-OSC::session_exported( std::string path, std::string name ) {
-	lo_address listener = lo_address_new( NULL, "7770" );
-	lo_send( listener, "/session/exported", "ss", path.c_str(), name.c_str() );
+OSC::session_exported (std::string path, std::string name)
+{
+	lo_address listener = lo_address_new (NULL, "7770");
+	lo_send (listener, "/session/exported", "ss", path.c_str(), name.c_str());
 }
 
 // end "Application Hook" Handlers //
@@ -842,6 +724,72 @@ OSC::current_value (const char */*path*/, const char */*types*/, lo_arg **/*argv
 	return 0;
 }
 
+void
+OSC::routes_list (lo_message msg)
+{
+	for (int n = 0; n < (int) session->nroutes(); ++n) {
+
+		boost::shared_ptr<Route> r = session->route_by_remote_id (n);
+		
+		if (r) {
+
+			lo_message reply = lo_message_new ();
+		
+			if (boost::dynamic_pointer_cast<AudioTrack>(r)) {
+				lo_message_add_string (reply, "AT");
+			} else if (boost::dynamic_pointer_cast<MidiTrack>(r)) {
+				lo_message_add_string (reply, "MT");
+			} else {
+				lo_message_add_string (reply, "B");
+			}
+			
+			lo_message_add_string (reply, r->name().c_str());
+			lo_message_add_int32 (reply, r->n_inputs().n_audio());
+			lo_message_add_int32 (reply, r->n_outputs().n_audio());
+			lo_message_add_int32 (reply, r->muted());
+			lo_message_add_int32 (reply, r->soloed());
+			lo_message_add_int32 (reply, r->remote_control_id());
+			
+			if (boost::dynamic_pointer_cast<AudioTrack>(r) 
+				|| boost::dynamic_pointer_cast<MidiTrack>(r)) {
+	
+				boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(r);
+				lo_message_add_int32 (reply, t->record_enabled());
+			}
+
+			//Automatically listen to routes listed
+			listen_to_route(r, lo_message_get_source (msg));
+
+			lo_send_message (lo_message_get_source (msg), "#reply", reply);
+			lo_message_free (reply);
+		}
+	}
+	
+	// Send end of listing message
+	lo_message reply = lo_message_new ();
+
+	lo_message_add_string (reply, "end_route_list");
+	lo_message_add_int64 (reply, session->frame_rate());
+	lo_message_add_int64 (reply, session->current_end_frame());
+	
+	lo_send_message (lo_message_get_source (msg), "#reply", reply);
+	
+	lo_message_free (reply);
+}
+
+void
+OSC::transport_frame (lo_message msg)
+{
+		framepos_t pos = session->transport_frame ();
+		
+		lo_message reply = lo_message_new ();
+		lo_message_add_int64 (reply, pos);
+		
+		lo_send_message (lo_message_get_source (msg), "/ardour/transport_frame", reply);
+		
+		lo_message_free (reply);
+}
+
 int
 OSC::route_mute (int rid, int yn)
 {
@@ -852,6 +800,7 @@ OSC::route_mute (int rid, int yn)
 	if (r) {
 		r->set_mute (yn, this);
 	}
+	
 	return 0;
 }
 
@@ -865,6 +814,7 @@ OSC::route_solo (int rid, int yn)
 	if (r) {
 		r->set_solo (yn, this);
 	}
+	
 	return 0;
 }
 
@@ -878,6 +828,7 @@ OSC::route_recenable (int rid, int yn)
 	if (r) {
 		r->set_record_enabled (yn, this);
 	}
+	
 	return 0;
 }
 
@@ -946,7 +897,7 @@ OSC::route_set_pan_stereo_width (int rid, float pos)
 }
 
 int
-OSC::route_plugin_parameter (int rid,int piid,int par, float val)
+OSC::route_plugin_parameter (int rid, int piid, int par, float val)
 {
         if (!session) { 
                 return -1;
@@ -993,7 +944,7 @@ OSC::route_plugin_parameter (int rid,int piid,int par, float val)
 }
 
 int
-OSC::route_plugin_parameter_print (int rid,int piid,int par)
+OSC::route_plugin_parameter_print (int rid, int piid, int par)
 {
         if (!session) { 
                 return -1;
@@ -1016,7 +967,8 @@ OSC::route_plugin_parameter_print (int rid,int piid,int par)
         if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(redi))) {
                 return -1;
         }
-        boost::shared_ptr<ARDOUR::Plugin> pip=pi->plugin();
+        
+        boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
         bool ok=false;
         
         uint32_t controlid = pip->nth_parameter (par,ok);
@@ -1044,7 +996,7 @@ OSC::get_state ()
 {
 	return *(new XMLNode ("OSC"));
 }
-		
+
 int 
 OSC::set_state (const XMLNode&, int /*version*/)
 {
