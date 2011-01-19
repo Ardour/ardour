@@ -91,6 +91,14 @@ Port::disconnect_all ()
 bool
 Port::connected_to (std::string const & o) const
 {
+        if (!_engine->connected()) {
+                /* in some senses, this answer isn't the right one all the time, 
+                   because we know about our connections and will re-establish
+                   them when we reconnect to JACK.
+                */
+                return false;
+        }
+
 	return jack_port_connected_to (_jack_port, _engine->make_port_name_non_relative(o).c_str ());
 }
 
@@ -100,15 +108,17 @@ Port::get_connections (std::vector<std::string> & c) const
 {
 	int n = 0;
 
-	const char** jc = jack_port_get_connections (_jack_port);
-	if (jc) {
-		for (int i = 0; jc[i]; ++i) {
-			c.push_back (jc[i]);
-			++n;
-		}
-
-		jack_free (jc);
-	}
+        if (_engine->connected()) {
+                const char** jc = jack_port_get_connections (_jack_port);
+                if (jc) {
+                        for (int i = 0; jc[i]; ++i) {
+                                c.push_back (jc[i]);
+                                ++n;
+                        }
+                        
+                        jack_free (jc);
+                }
+        }
 
 	return n;
 }
