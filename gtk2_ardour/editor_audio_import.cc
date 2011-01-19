@@ -48,6 +48,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
+#include "ardour/operations.h"
 #include "pbd/memento_command.h"
 
 #include "ardour_ui.h"
@@ -874,7 +875,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 
 		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
 		boost::shared_ptr<Region> copy (RegionFactory::create (region, region->properties()));
-		begin_reversible_command (_("insert file"));
+		begin_reversible_command (Operations::insert_file);
                 playlist->clear_changes ();
 		playlist->add_region (copy, pos);
 		_session->add_command (new StatefulDiffCommand (playlist));

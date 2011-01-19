@@ -100,6 +100,7 @@
 #include "ardour/utils.h"
 #include "ardour/graph.h"
 #include "ardour/vbap_speakers.h"
+#include "ardour/operations.h"
 
 #include "midi++/port.h"
 #include "midi++/mmc.h"
@@ -152,7 +153,6 @@ Session::Session (AudioEngine &eng,
 	, _bundles (new BundleList)
 	, _bundle_xml_node (0)
 	, _current_trans (0)
-	, _current_trans_depth (0)
 	, _click_io ((IO*) 0)
 	, click_data (0)
 	, click_emphasis_data (0)
@@ -766,11 +766,9 @@ Session::track_playlist_changed (boost::weak_ptr<Track> wp)
 	boost::shared_ptr<Playlist> playlist;
 
 	if ((playlist = track->playlist()) != 0) {
-		playlist->LengthChanged.connect_same_thread (*this, boost::bind (&Session::update_session_range_location_marker, this));
-		playlist->RangesMoved.connect_same_thread (*this, boost::bind (&Session::update_session_range_location_marker, this));
+		playlist->RegionAdded.connect_same_thread (*this, boost::bind (&Session::playlist_region_added, this, _1));
+		playlist->RangesMoved.connect_same_thread (*this, boost::bind (&Session::playlist_ranges_moved, this, _1));
 	}
-
-	update_session_range_location_marker ();
 }
 
 bool
@@ -2168,7 +2166,6 @@ Session::remove_route (boost::shared_ptr<Route> route)
 	}
 
 	update_route_solo_state ();
-	update_session_range_location_marker ();
 
 	// We need to disconnect the route's inputs and outputs
 
@@ -2496,64 +2493,77 @@ Session::route_by_remote_id (uint32_t id)
 	return boost::shared_ptr<Route> ((Route*) 0);
 }
 
-/** If either end of the session range location marker lies inside the current
- *  session extent, move it to the corresponding session extent.
+void
+Session::playlist_region_added (boost::weak_ptr<Region> w)
+{
+	boost::shared_ptr<Region> r = w.lock ();
+	if (!r) {
+		return;
+	}
+
+	/* These are the operations that are currently in progress... */
+	list<GQuark> curr = _current_trans_quarks;
+	curr.sort ();
+
+	/* ...and these are the operations during which we want to update
+	   the session range location markers.
+	*/
+	list<GQuark> ops;
+	ops.push_back (Operations::capture);
+	ops.push_back (Operations::paste);
+	ops.push_back (Operations::duplicate_region);
+	ops.push_back (Operations::insert_file);
+	ops.push_back (Operations::insert_region);
+	ops.push_back (Operations::drag_region_brush);
+	ops.push_back (Operations::region_drag);
+	ops.push_back (Operations::selection_grab);
+	ops.push_back (Operations::region_fill);
+	ops.push_back (Operations::fill_selection);
+	ops.push_back (Operations::create_region);
+	ops.sort ();
+
+	/* See if any of the current operations match the ones that we want */
+	list<GQuark> in;
+	set_intersection (_current_trans_quarks.begin(), _current_trans_quarks.end(), ops.begin(), ops.end(), back_inserter (in));
+
+	/* If so, update the session range markers */
+	if (!in.empty ()) {
+		maybe_update_session_range (r->position (), r->last_frame ());
+	}
+}
+
+/** Update the session range markers if a is before the current start or
+ *  b is after the current end.
  */
 void
-Session::update_session_range_location_marker ()
+Session::maybe_update_session_range (framepos_t a, framepos_t b)
 {
 	if (_state_of_the_state & Loading) {
 		return;
 	}
 
-	pair<framepos_t, framepos_t> const ext = get_extent ();
-
 	if (_session_range_location == 0) {
-		/* we don't have a session range yet; use this one (provided it is valid) */
-		if (ext.first != max_framepos) {
-			add_session_range_location (ext.first, ext.second);
-		}
+		
+		add_session_range_location (a, b);
+		
 	} else {
-		/* update the existing session range */
-		if (ext.first < _session_range_location->start()) {
-			_session_range_location->set_start (ext.first);
-			set_dirty ();
+		
+		if (a < _session_range_location->start()) {
+			_session_range_location->set_start (a);
 		}
 		
-		if (ext.second > _session_range_location->end()) {
-			_session_range_location->set_end (ext.second);
-			set_dirty ();
+		if (b > _session_range_location->end()) {
+			_session_range_location->set_end (b);
 		}
-		
 	}
 }
 
-/** @return Extent of the session's contents; if the session is empty, the first value of
- *  the pair will equal max_framepos.
- */
-pair<framepos_t, framepos_t>
-Session::get_extent () const
+void
+Session::playlist_ranges_moved (list<Evoral::RangeMove<framepos_t> > const & ranges)
 {
-	pair<framepos_t, framepos_t> ext (max_framepos, 0);
-	
-	boost::shared_ptr<RouteList> rl = routes.reader ();
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (!tr || tr->destructive()) {
-			// ignore tape tracks when getting extents
-			continue;
-		}
-
-		pair<framepos_t, framepos_t> e = tr->playlist()->get_extent ();
-		if (e.first < ext.first) {
-			ext.first = e.first;
-		}
-		if (e.second > ext.second) {
-			ext.second = e.second;
-		}
+	for (list<Evoral::RangeMove<framepos_t> >::const_iterator i = ranges.begin(); i != ranges.end(); ++i) {
+		maybe_update_session_range (i->to, i->to + i->length);
 	}
-
-	return ext;
 }
 
 /* Region management */

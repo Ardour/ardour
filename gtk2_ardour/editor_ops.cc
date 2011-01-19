@@ -55,6 +55,7 @@
 #include "ardour/quantize.h"
 #include "ardour/strip_silence.h"
 #include "ardour/route_group.h"
+#include "ardour/operations.h"
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -3032,7 +3033,7 @@ Editor::region_fill_track ()
 
 	framepos_t const end = _session->current_end_frame ();
 
-	begin_reversible_command (_("region fill"));
+	begin_reversible_command (Operations::region_fill);
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 
@@ -3086,7 +3087,7 @@ Editor::region_fill_selection ()
 	framepos_t selection_length = end - start;
 	float times = (float)selection_length / region->length();
 
-	begin_reversible_command (_("fill selection"));
+	begin_reversible_command (Operations::fill_selection);
 
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 
@@ -4155,7 +4156,7 @@ Editor::paste_internal (framepos_t position, float times)
 		position = get_preferred_edit_position();
 	}
 
-	begin_reversible_command (_("paste"));
+	begin_reversible_command (Operations::paste);
 
 	TrackViewList ts;
 	TrackViewList::iterator i;
@@ -4218,7 +4219,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 	framepos_t const start_frame = regions.start ();
 	framepos_t const end_frame = regions.end_frame ();
 
-	begin_reversible_command (_("duplicate region"));
+	begin_reversible_command (Operations::duplicate_region);
 
 	selection->clear_regions ();
 

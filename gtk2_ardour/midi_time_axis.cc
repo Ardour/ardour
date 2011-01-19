@@ -52,6 +52,7 @@
 #include "ardour/session_playlist.h"
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
+#include "ardour/operations.h"
 
 #include "midi++/names.h"
 
@@ -1028,7 +1029,7 @@ MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit)
 {
 	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
 
-	real_editor->begin_reversible_command (_("create region"));
+	real_editor->begin_reversible_command (Operations::create_region);
         playlist()->clear_changes ();
 
 	real_editor->snap_to (pos, 0);

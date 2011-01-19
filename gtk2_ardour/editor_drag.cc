@@ -32,6 +32,8 @@
 #include "ardour/session.h"
 #include "ardour/dB.h"
 #include "ardour/region_factory.h"
+#include "ardour/operations.h"
+
 #include "editor.h"
 #include "i18n.h"
 #include "keyboard.h"
@@ -905,7 +907,7 @@ RegionMoveDrag::finished_no_copy (
 	if (_x_constrained) {
 		_editor->begin_reversible_command (_("fixed time region drag"));
 	} else {
-		_editor->begin_reversible_command (_("region drag"));
+		_editor->begin_reversible_command (Operations::region_drag);
 	}
 
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ) {
@@ -1227,7 +1229,7 @@ RegionInsertDrag::finished (GdkEvent *, bool)
 
 	boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
 
-	_editor->begin_reversible_command (_("insert region"));
+	_editor->begin_reversible_command (Operations::insert_region);
 	playlist->clear_changes ();
 	playlist->add_region (_primary->region (), _last_frame_position);
 	_editor->session()->add_command (new StatefulDiffCommand (playlist));

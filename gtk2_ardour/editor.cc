@@ -3070,6 +3070,14 @@ Editor::begin_reversible_command (string name)
 }
 
 void
+Editor::begin_reversible_command (GQuark q)
+{
+	if (_session) {
+		_session->begin_reversible_command (q);
+	}
+}
+
+void
 Editor::commit_reversible_command ()
 {
 	if (_session) {

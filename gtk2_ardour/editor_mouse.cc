@@ -74,6 +74,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/source_factory.h"
 #include "ardour/session.h"
+#include "ardour/operations.h"
 
 #include <bitset>
 
@@ -2540,7 +2541,7 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent* event, Region
 	RegionSelection s = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
 	_drags->add (new RegionMoveDrag (this, item, region_view, s.by_layer(), true, false));
 
-	begin_reversible_command (_("Drag region brush"));
+	begin_reversible_command (Operations::drag_region_brush);
 }
 
 /** Start a grab where a time range is selected, track(s) are selected, and the
@@ -2581,7 +2582,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 	   creating the new region and another for moving it.
 	*/
 
-	begin_reversible_command (_("selection grab"));
+	begin_reversible_command (Operations::selection_grab);
 
 	boost::shared_ptr<Playlist> playlist = clicked_axisview->playlist();
 

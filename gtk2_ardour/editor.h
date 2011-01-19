@@ -429,6 +429,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void snap_to (framepos_t& first, framepos_t& last, int32_t direction = 0, bool for_mark = false);
 
 	void begin_reversible_command (std::string cmd_name);
+	void begin_reversible_command (GQuark);
 	void commit_reversible_command ();
 
 	DragManager* drags () const {

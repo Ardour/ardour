@@ -2364,6 +2364,16 @@ Session::add_commands (vector<Command*> const & cmds)
 void
 Session::begin_reversible_command (const string& name)
 {
+	begin_reversible_command (g_quark_from_string (name.c_str ()));
+}
+
+/** Begin a reversible command using a GQuark to identify it.
+ *  begin_reversible_command() and commit_reversible_command() calls may be nested,
+ *  but there must be as many begin...()s as there are commit...()s.
+ */
+void
+Session::begin_reversible_command (GQuark q)
+{
 	/* If nested begin/commit pairs are used, we create just one UndoTransaction
 	   to hold all the commands that are committed.  This keeps the order of
 	   commands correct in the history.
@@ -2371,20 +2381,19 @@ Session::begin_reversible_command (const string& name)
 	
 	if (_current_trans == 0) {
 		/* start a new transaction */
-		assert (_current_trans_depth == 0);
+		assert (_current_trans_quarks.empty ());
 		_current_trans = new UndoTransaction();
-		_current_trans->set_name (name);
-	} else {
-		/* use the existing transaction */
-		++_current_trans_depth;
+		_current_trans->set_name (g_quark_to_string (q));
 	}
+	
+	_current_trans_quarks.push_front (q);
 }
 
 void
 Session::commit_reversible_command (Command *cmd)
 {
 	assert (_current_trans);
-	assert (_current_trans_depth > 0);
+	assert (!_current_trans_quarks.empty ());
 	
 	struct timeval now;
 
@@ -2392,9 +2401,9 @@ Session::commit_reversible_command (Command *cmd)
 		_current_trans->add_command (cmd);
 	}
 
-	--_current_trans_depth;
+	_current_trans_quarks.pop_front ();
 
-	if (_current_trans_depth > 0) {
+	if (!_current_trans_quarks.empty ()) {
 		/* the transaction we're committing is not the top-level one */
 		return;
 	}

@@ -23,7 +23,6 @@
 #include <list>
 #include <map>
 #include <set>
-#include <stack>
 #include <string>
 #include <vector>
 #include <stdint.h>
@@ -315,7 +314,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	int wipe ();
 
-	std::pair<framepos_t, framepos_t> get_extent () const;
 	framepos_t current_end_frame () const;
 	framepos_t current_start_frame () const;
 	/** "actual" sample rate of session, set by current audioengine rate, pullup/down etc. */
@@ -666,11 +664,17 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::string next_redo() const { return _history.next_redo(); }
 
 	void begin_reversible_command (const std::string& cmd_name);
+	void begin_reversible_command (GQuark);
 	void commit_reversible_command (Command* cmd = 0);
 
 	void add_command (Command *const cmd) {
 		assert (_current_trans);
 		_current_trans->add_command (cmd);
+	}
+
+	/** @return The list of operations that are currently in progress */
+	std::list<GQuark> const & current_operations () {
+		return _current_trans_quarks;
 	}
 
 	void add_commands (std::vector<Command*> const & cmds);
@@ -841,6 +845,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	Location*               _session_range_location; ///< session range, or 0 if there is nothing in the session yet
 	Slave*                  _slave;
 	bool                    _silent;
+
+	void maybe_update_session_range (framepos_t, framepos_t);
 	
 	// varispeed playback
 	double                  _transport_speed;
@@ -1059,7 +1065,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void first_stage_init (std::string path, std::string snapshot_name);
 	int  second_stage_init ();
-	void update_session_range_location_marker ();
 	void remove_empty_sounds ();
 
 	void setup_midi_control ();
@@ -1258,6 +1263,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void remove_playlist (boost::weak_ptr<Playlist>);
 	void track_playlist_changed (boost::weak_ptr<Track>);
+	void playlist_region_added (boost::weak_ptr<Region>);
+	void playlist_ranges_moved (std::list<Evoral::RangeMove<framepos_t> > const &);
 
 	/* NAMED SELECTIONS */
 
@@ -1339,8 +1346,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	UndoHistory      _history;
 	/** current undo transaction, or 0 */
 	UndoTransaction* _current_trans;
-	/** number of times that begin_reversible_command has been called without commit_reversible_command */
-	int              _current_trans_depth;
+	/** GQuarks to describe the reversible commands that are currently in progress.
+	 *  These may be nested, in which case more recently-started commands are toward
+	 *  the front of the list.
+	 */
+	std::list<GQuark> _current_trans_quarks;
 
 	void jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int);
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);

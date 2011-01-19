@@ -136,6 +136,7 @@ libardour_sources = [
 	'mute_master.cc',
 	'named_selection.cc',
 	'onset_detector.cc',
+	'operations.cc',
 	'panner.cc',
 	'pcm_utils.cc',
 	'pi_controller.cc',

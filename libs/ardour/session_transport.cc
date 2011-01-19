@@ -40,6 +40,7 @@
 #include "ardour/location.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
+#include "ardour/operations.h"
 
 #include "i18n.h"
 
@@ -435,7 +436,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	reset_rf_scale (0);
 
 	if (did_record) {
-		begin_reversible_command ("capture");
+		begin_reversible_command (Operations::capture);
 		_have_captured = true;
 	}
 
