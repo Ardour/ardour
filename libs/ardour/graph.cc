@@ -397,7 +397,9 @@ static void get_rt()
 void
 Graph::helper_thread()
 {
+	suspend_rt_malloc_checks ();
 	ProcessThread* pt = new ProcessThread ();
+	resume_rt_malloc_checks ();
 
         pt->get_buffers();
         get_rt();
@@ -414,7 +416,9 @@ Graph::helper_thread()
 void
 Graph::main_thread()
 {
+	suspend_rt_malloc_checks ();
 	ProcessThread* pt = new ProcessThread ();
+	resume_rt_malloc_checks ();
 
         pt->get_buffers();
         get_rt();
