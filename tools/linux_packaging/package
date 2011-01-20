@@ -61,20 +61,25 @@ if [ ! -e ${X86_64_BUILD} ]; then
 	exit 1
 fi
 
-echo "Cleaning up old files"
-
+echo "Cleaning up any old package files for this build"
 #Get rid of any old packages of this same name.
-echo "Cleaning up old files"
 rm -f ${PACKAGE}.tar.bz2
 rm -rf ${PACKAGE}
 
 
 echo "Creating new package dir..."
 mkdir ${PACKAGE}
-cp ${X86_BUILD} ${PACKAGE}
-cp ${X86_64_BUILD} ${PACKAGE}
+mv ${X86_BUILD} ${PACKAGE}
+mv ${X86_64_BUILD} ${PACKAGE}
 cp install.sh ${PACKAGE}
 cp stage2.run ${PACKAGE}
 
 echo "Creating tarball..."
 tar -cjf ${PACKAGE}.tar.bz2 ${PACKAGE}
+
+echo "Clean up"
+rm -rf ${PACKAGE}
+
+echo ""
+echo "Done"
+echo ""

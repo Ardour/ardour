@@ -450,6 +450,7 @@ while [ true ] ; do
 			if	echo $dep | grep -qs '0x' ; then continue; fi
 			# don't include any X Window libraries
 			if echo $dep | grep -qs libX ; then continue; fi  
+			if echo $dep | grep -qs libxcb ; then continue; fi  
 			# don't include libc
 			if echo $dep | grep -qs 'libc\.' ; then continue; fi
 			# don't include libstdc++
@@ -457,11 +458,12 @@ while [ true ] ; do
 
 			base=`basename $dep`
 			if ! test -f $Libraries/$base; then
+				parent=$(basename ${file})
 				if echo $dep | grep -sq '^libs' ; then
-					echo "Copying dependant lib ../../$dep"
+					echo "Copying dependant lib ../../$dep    (required by ${parent})"
 					cp ../../$dep $Libraries
 				else
-					echo "Copying dependant lib $dep"
+					echo "Copying dependant lib $dep    (required by ${parent})"
 					cp $dep $Libraries
 				fi
 				missing=true
