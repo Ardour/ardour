@@ -84,7 +84,8 @@ SndFileImportableSource::natural_position () const
 bool
 SndFileImportableSource::clamped_at_unity () const
 {
+	int const type = sf_info.format & SF_FORMAT_TYPEMASK;
 	int const sub = sf_info.format & SF_FORMAT_SUBMASK;
 	/* XXX: this may not be the full list of formats that are unclamped */
-	return (sub != SF_FORMAT_FLOAT && sub != SF_FORMAT_DOUBLE && sub != SF_FORMAT_OGG);
+	return (sub != SF_FORMAT_FLOAT && sub != SF_FORMAT_DOUBLE && type != SF_FORMAT_OGG);
 }
