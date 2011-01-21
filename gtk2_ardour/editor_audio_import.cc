@@ -876,7 +876,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
 		boost::shared_ptr<Region> copy (RegionFactory::create (region, region->properties()));
 		begin_reversible_command (Operations::insert_file);
-                playlist->clear_changes ();
+		playlist->clear_changes ();
 		playlist->add_region (copy, pos);
 		_session->add_command (new StatefulDiffCommand (playlist));
 		commit_reversible_command ();
@@ -907,22 +907,33 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 			existing_track->set_name (region->name());
 		}
 
+
+		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
 		boost::shared_ptr<Region> copy (RegionFactory::create (region));
-		existing_track->playlist()->add_region (copy, pos);
+		begin_reversible_command (Operations::insert_file);
+		playlist->clear_changes ();
+		playlist->add_region (copy, pos);
+		_session->add_command (new StatefulDiffCommand (playlist));
+		commit_reversible_command ();
 		break;
 	}
 
 
 	case ImportAsTapeTrack:
 	{
-		if (!ar)
+		if (!ar) {
 			return -1;
+		}
 
 		list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (in_chans, out_chans, Destructive));
 		if (!at.empty()) {
+			boost::shared_ptr<Playlist> playlist = at.front()->playlist();
 			boost::shared_ptr<Region> copy (RegionFactory::create (region));
-			at.front()->set_name (basename_nosuffix (copy->name()));
-			at.front()->playlist()->add_region (copy, pos);
+			begin_reversible_command (Operations::insert_file);
+			playlist->clear_changes ();
+			playlist->add_region (copy, pos);
+			_session->add_command (new StatefulDiffCommand (playlist));
+			commit_reversible_command ();
 		}
 		break;
 	}
