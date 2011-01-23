@@ -3044,15 +3044,12 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->begin_reversible_command (_("rubberband selection"));
 
 		if (grab_frame() < last_pointer_frame()) {
-			committed = _editor->select_all_within (grab_frame(), last_pointer_frame() - 1, y1, y2, _editor->track_views, op, false);
+			_editor->select_all_within (grab_frame(), last_pointer_frame() - 1, y1, y2, _editor->track_views, op, false);
 		} else {
-			committed = _editor->select_all_within (last_pointer_frame(), grab_frame() - 1, y1, y2, _editor->track_views, op, false);
+			_editor->select_all_within (last_pointer_frame(), grab_frame() - 1, y1, y2, _editor->track_views, op, false);
 		}
 
-		if (!committed) {
-			_editor->commit_reversible_command ();
-		}
-
+		_editor->commit_reversible_command ();
 	} else {
 		if (!getenv("ARDOUR_SAE")) {
 			_editor->selection->clear_tracks();

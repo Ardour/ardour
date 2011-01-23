@@ -1275,7 +1275,7 @@ Editor::invert_selection ()
  *  @param preserve_if_selected true to leave the current selection alone if we're adding to the selection and all of the selectables
  *  within the region are already selected.
  */
-bool
+void
 Editor::select_all_within (
 	framepos_t start, framepos_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op, bool preserve_if_selected
 	)
@@ -1292,7 +1292,7 @@ Editor::select_all_within (
 	}
 
 	if (found.empty()) {
-		return false;
+		return;
 	}
 
 	if (preserve_if_selected && op != Selection::Toggle) {
@@ -1302,7 +1302,7 @@ Editor::select_all_within (
 		}
 
 		if (i == found.end()) {
-			return false;
+			return;
 		}
 	}
 
@@ -1323,8 +1323,6 @@ Editor::select_all_within (
 	}
 
 	commit_reversible_command ();
-
-	return !found.empty();
 }
 
 void

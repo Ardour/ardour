@@ -1658,7 +1658,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* object rubberband select process */
 
-	bool select_all_within (framepos_t, framepos_t, double, double, TrackViewList const &, Selection::Operation, bool);
+	void select_all_within (framepos_t, framepos_t, double, double, TrackViewList const &, Selection::Operation, bool);
 
 	ArdourCanvas::SimpleRect   *rubberband_rect;
 
