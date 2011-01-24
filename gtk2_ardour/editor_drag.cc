@@ -3039,7 +3039,6 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 
 
 		Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
-		bool committed;
 
 		_editor->begin_reversible_command (_("rubberband selection"));
 
