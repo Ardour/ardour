@@ -23,7 +23,12 @@
 #include "pbd/epa.h"
 #include "pbd/strsplit.h"
 
+#ifdef __APPLE__
+#include <crt_externs.h>
+#define environ (*_NSGetEnviron())
+#else
 extern char** environ;
+#endif
 
 using namespace PBD;
 using namespace std;
@@ -55,14 +60,26 @@ EnvironmentalProtectionAgency::arm ()
 void
 EnvironmentalProtectionAgency::save ()
 {
+	/* do this to avoid lots of calls to _NSGetEnviron() on OS X */
+	char** the_environ = environ;
+
         e.clear ();
 
+<<<<<<< .mine
+        for (size_t i = 0; the_environ[i]; ++i) {
+=======
         if (!_envname.empty()) {
                 
                 /* fetch environment from named environment variable, rather than "environ"
                  */
+>>>>>>> .r8570
 
+<<<<<<< .mine
+                string estring = the_environ[i];
+                string::size_type equal = estring.find_first_of ('=');
+=======
                 const char* estr = getenv (_envname.c_str());
+>>>>>>> .r8570
 
                 if (!estr) {
                         return;
