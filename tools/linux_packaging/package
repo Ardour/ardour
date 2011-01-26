@@ -75,7 +75,7 @@ cp install.sh ${PACKAGE}
 cp stage2.run ${PACKAGE}
 
 echo "Creating tarball..."
-tar -cjf ${PACKAGE}.tar.bz2 ${PACKAGE}
+tar -czf ${PACKAGE}.tar.gz ${PACKAGE}
 
 echo "Clean up"
 rm -rf ${PACKAGE}
