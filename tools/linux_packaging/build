@@ -14,7 +14,6 @@ STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
 EXTERNAL_JACK=
-LIBCLEARLOOKS=
 
 if [ $# -eq 0 ] ; then
 	echo ""	 
@@ -77,7 +76,6 @@ while [ $# -gt 0 ] ; do
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
 	--external_jack) EXTERNAL_JACK=$2; shift ; shift ;;
-	--clearlooks) LIBCLEARLOOKS=$2; shift ; shift ;;
 
 	*)
 		#catch all for unknown arguments
@@ -271,77 +269,118 @@ else
 	echo "Skipping NLS support"
 fi
 
-GTKROOT=`pkg-config --libs-only-L gtk+-2.0 | sed s/-L//`
-if [ "" = "$GTKROOT" ]; then
-	echo "Found gtk using pkg-config"
-	GTKROOT=`dirname $GTKROOT`
-	gtkModVer=`pkg-config --modversion gtk+-2.0`
-
-	GTKLIB=${GTKROOT}/lib/gtk-2.0/$gtkModVer
-	PANGOLIB=${GTKROOT}/lib/pango/1.6.0
-	GDKPIXBUFLIB=${GTKROOT}/lib/gdk-pixbuf-2.0/$gtkModVer
+### Find gtk ###
+GTKROOT=`pkg-config --libs-only-L gtk+-2.0 | sed -e "s/-L//" -e "s/[[:space:]]//g"`
+if [ ! -z "$GTKROOT" ]; then
+	echo "Found GTKROOT using pkg-config"
+elif [ -d /usr/lib/gtk-2.0 ]; then
+	GTKROOT="/usr/lib/gtk-2.0"
+elif [ -d /usr/local/lib/gtk-2.0 ]; then
+	GTKROOT="/usr/local/lib/gtk-2.0"
 else
-	echo "Looking for gtk and pango in other known locations"
-
-	## GTKLIB
-	if [ -d /usr/lib/gtk-2.0 ]; then
-		versionDir=`ls /usr/lib/gtk-2.0/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
-
-		num=0
-		for name in $versionDir ; do
-			let "num += 1"
-		done
-
-		if [ $num -eq 1 ]; then
-			GTKLIB=/usr/lib/gtk-2.0/$versionDir
-		else
-			echo ""
-			echo "!!! ERROR !!! - More than one gtk-2.0 version found  ( $versionDir ). Packager will exit"
-			echo ""
-			exit 1
-		fi
-	else
-		echo ""
-		echo "!!! ERROR !!! - Can't find GTK lib directory. Packager will exit"
-		echo ""
-		exit 1
-	fi
-
-	## PANGOLIB
-	if [ -d /usr/lib/pango ]; then
-		versionDir=`ls /usr/lib/pango/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
-
-		num=0
-		for name in $versionDir ; do
-			let "num += 1"
-		done
-
-		if [ $num -eq 1 ]; then
-			PANGOLIB=/usr/lib/pango/$versionDir
-		else
-			echo ""
-			echo "!!! ERROR !!! - More than one pango version found  ( $versionDir ). Packager will exit"
-			echo ""
-			exit 1
-		fi
-	else
-		echo ""
-		echo "!!! ERROR !!! - Can't find pango lib directory. Packager will exit"
-		echo ""
-		exit 1
-	fi
-
-
-	## GDKPIXBUFLIB		   
-	if [ -d $GTKLIB ]; then
-		GDKPIXBUFLIB=$GTKLIB
-	fi
-
+	echo ""
+	echo "!!! ERROR !!! - Unable to locate gtk-2.0 directory. Packager will exit"
+	echo ""
+	exit 1
 fi
+
+echo "GTKROOT is ${GTKROOT}"
+versionDir=`ls ${GTKROOT}/gtk-2.0/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
+
+num=0
+for name in $versionDir ; do
+	let "num += 1"
+done
+
+if [ $num -eq 1 ]; then
+	GTKLIB=${GTKROOT}/gtk-2.0/$versionDir
+	echo "GTKLIB is ${GTKLIB}"
+else
+	echo ""
+	echo "!!! ERROR !!! - More than one gtk-2.0 version found in ${GTKROOT}/gtk-2.0/  ( $versionDir ). Packager will exit"
+	echo ""
+	exit 1
+fi
+
+
+### Find pango ###
+PANGOROOT=`pkg-config --libs-only-L pango | sed -e "s/-L//" -e "s/[[:space:]]//g"`
+if [ ! -z "$PANGOROOT" ]; then
+	echo "Found PANGOROOT using pkg-config"
+elif [ -d /usr/lib/pango ]; then
+	PANGOROOT="/usr/lib/pango"
+elif [ -d /usr/local/lib/pango ]; then
+	PANGOROOT="/usr/local/lib/pango"
+else
+	echo ""
+	echo "!!! ERROR !!! - Unable to locate pango directory. Packager will exit"
+	echo ""
+	exit 1
+fi
+
+echo "PANGOROOT is ${PANGOROOT}"
+versionDir=`ls ${PANGOROOT}/pango/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
+
+num=0
+for name in $versionDir ; do
+	let "num += 1"
+done
+
+if [ $num -eq 1 ]; then
+	PANGOLIB=${PANGOROOT}/pango/$versionDir
+	echo "PANGOLIB is ${PANGOLIB}"
+else
+	echo ""
+	echo "!!! ERROR !!! - More than one pango version found in ${PANGOROOT}/pango/  ( $versionDir ). Packager will exit"
+	echo ""
+	exit 1
+fi
+
+
+### Find gdk-pixbuf ###
+GDKPIXBUFROOT=`pkg-config --libs-only-L gdk-pixbuf-2.0 | sed -e "s/-L//" -e "s/[[:space:]]//g"`
+if [ ! -z "$GDKPIXBUFROOT" ]; then
+	echo "Found GDKPIXBUFROOT using pkg-config"
+elif [ -d /usr/lib/gdk-pixbuf-2.0 ]; then
+	GDKPIXBUFROOT="/usr/lib/gdk-pixbuf-2.0"
+elif [ -d /usr/local/lib/gdk-pixbuf-2.0 ]; then
+	GDKPIXBUFROOT="/usr/local/lib/gdk-pixbuf-2.0"
+elif [ -d ${GTKLIB}/loaders ]; then  #odd ball case
+	GDKPIXBUFROOT=${GTKROOT}
+	GDKPIXBUFLIB=${GTKLIB}
+else
+	echo ""
+	echo "!!! ERROR !!! - Unable to locate gdk-pixbuf-2.0 directory. Packager will exit"
+	echo ""
+	exit 1
+fi
+
+echo "GDKPIXBUFROOT is ${GDKPIXBUFROOT}"
+
+if [ -z ${GDKPIXBUFLIB} ]; then
+	versionDir=`ls ${GDKPIXBUFROOT}/gdk-pixbuf-2.0/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
+
+	num=0
+	for name in $versionDir ; do
+		let "num += 1"
+	done
+
+	if [ $num -eq 1 ]; then
+		GDKPIXBUFLIB=${GDKPIXBUFROOT}/gdk-pixbuf-2.0/$versionDir
+		echo "GDKPIXBUFLIB is ${GDKPIXBUFLIB}"
+	else
+		echo ""
+		echo "!!! ERROR !!! - More than one gdk-pixbuf-2.0 version found in ${GDKPIXBUFROOT}/pango/  ( $versionDir ). Packager will exit"
+		echo ""
+		exit 1
+	fi
+fi
+
 
 
 echo "Copying all Pango modules ..."
 cp -R $PANGOLIB/modules/*.so $Modules
+
 echo "Copying all GDK Pixbuf loaders ..."
 cp -R $GDKPIXBUFLIB/loaders/*.so $Loaders
 
@@ -351,50 +390,16 @@ gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUFLIB/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.
 # We sort of rely on clearlooks, so include a version
 # this one is special - we will set GTK_PATH to $Libraries/clearlooks
 
-if [ -z $LIBCLEARLOOKS ]; then
-	echo "Searching for libclearlooks"
-	clearlooks_paths=$(sudo find / -name "libclearlooks*" | grep "gtk")
-
-	if [ $? -ne 0 ]; then
-		echo "Not able to search for libclearlooks (not able to sudo?). Please try again"
-		exit 1
-	fi
-else
-	clearlooks_paths=$LIBCLEARLOOKS
-fi
-
-num=0
-for path in $clearlooks_paths ; do
-	let "num += 1"
-done
-
-if [ $num -eq 1 ]; then
-	clearlooks=$clearlooks_paths
-	if file -L $clearlooks | grep -q $ARCH_BITS; then
-		echo "Using libclearlooks: $clearlooks"
-	else
-		echo ""
-		echo "!!! ERROR !!! - clearlooks lib is not build for $ARCH_BITS"
-		echo ""
-		echo "Packager with exit"
-		exit 1
-	fi
-else
+if [ ! -e ${GTKLIB}/engines/libclearlooks.so ]; then
 	echo ""
-	echo "!!! ERROR  !!! - Not able to determine which libclearlooks to use. run again with --clearlooks /path/to/libclearlooks"
-	echo "Here are the possible choices for libclearlooks"
+	echo "!!! ERROR !!! - not able to locate libclearlooks.so"
 	echo ""
-
-	for path in $clearlooks_paths ; do
-		echo $path
-	done
-
-	echo ""
-	echo "Packager will exit"
+	echo "Packager with exit"
 	exit 1
 fi
 
-cp $clearlooks $Libraries
+echo "Copying clearlooks ..."
+cp ${GTKLIB}/engines/libclearlooks.so $Libraries
 mkdir -p $Libraries/clearlooks/engines
 (cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks* libclearlooks.so )
 
@@ -437,17 +442,27 @@ while [ true ] ; do
 		fi
 
 		# do not include libjack
-		deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | awk '{print $3}' | egrep "(/opt/|/local/|libs/|/usr/lib|/gtk)" | grep -v 'libjack\.'`
+		deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | awk '{print $3}'`
+
 		# LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | egrep "(/opt/|/local/|libs/|/usr/lib|/gtk)" | grep -v 'libjack\.'
 		echo -n "."
 		for dep in $deps ; do
-			if [ "x$dep" = "xnot" ] ; then 
-				echo "Missing dependant library. Use ldd to find and fix"
+			if test "not" = ${dep}; then 
+				echo ""
+				echo "!!! ERROR !!! - Missing dependant library for $file."
+				echo ""
+				(LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file)
+				echo ""
+				echo "!!! ERROR !!! - See Above"
 				exit 1
 			fi
 
 			# don't use anything mapped at a specific address
-			if	echo $dep | grep -qs '0x' ; then continue; fi
+			if echo $dep | grep -qs '0x' ; then continue; fi
+			# don't include /lib
+			if echo $dep | grep -qs "^/lib/" ; then continue; fi
+			# don't include jack
+			if echo $dep | grep -qs libjack ; then continue; fi
 			# don't include any X Window libraries
 			if echo $dep | grep -qs libX ; then continue; fi  
 			if echo $dep | grep -qs libxcb ; then continue; fi  
