@@ -1237,7 +1237,8 @@ if env['RUBBERBAND']:
 #
 # Tools
 #
-tools_subdirs = [ 'tools/sanity_check' ]
+if env['IS_OSX'] == 0 :
+	tools_subdirs = [ 'tools/sanity_check' ]
 
 
 opts.Save('scache.conf', env)
