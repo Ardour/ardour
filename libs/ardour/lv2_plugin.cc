@@ -358,28 +358,74 @@ LV2Plugin::add_state (XMLNode* root) const
 	}
 }
 
+#define NS_DC   "http://dublincore.org/documents/dcmi-namespace/"
+#define NS_LV2  "http://lv2plug.in/ns/lv2core#"
+#define NS_PSET "http://lv2plug.in/ns/dev/presets#"
+
+static inline SLV2Value
+get_value(SLV2Plugin p, SLV2Value subject, SLV2Value predicate)
+{
+	SLV2Values vs = slv2_plugin_get_value_for_subject(p, subject, predicate);
+	return vs ? slv2_values_get_at(vs, 0) : NULL;
+}
+
 void
 LV2Plugin::find_presets ()
 {
-	SLV2Results presets = slv2_plugin_query_sparql(_plugin,
-			"PREFIX lv2p: <http://lv2plug.in/ns/dev/presets#>\n"
-			"PREFIX dc:  <http://dublincore.org/documents/dcmi-namespace/>\n"
-			"SELECT ?p ?name WHERE { <> lv2p:hasPreset ?p . ?p dc:title ?name }\n");
+	SLV2Value dc_title       = slv2_value_new_uri(_world.world, NS_DC   "title");
+	SLV2Value pset_hasPreset = slv2_value_new_uri(_world.world, NS_PSET "hasPreset");
 
-	for (; !slv2_results_finished(presets); slv2_results_next(presets)) {
-		SLV2Value uri  = slv2_results_get_binding_value(presets, 0);
-		SLV2Value name = slv2_results_get_binding_value(presets, 1);
-		PresetRecord rec(slv2_value_as_string(uri), slv2_value_as_string(name));
-		_presets.insert(std::make_pair(slv2_value_as_string(uri), rec));
+	SLV2Values presets = slv2_plugin_get_value(_plugin, pset_hasPreset);
+	for (unsigned i = 0; i < slv2_values_size(presets); ++i) {
+		// TODO: Choose which name to use based on locale?
+		SLV2Value preset = slv2_values_get_at(presets, i);
+		SLV2Value name   = get_value(_plugin, preset, dc_title);
+		if (name) {
+			_presets.insert(std::make_pair(slv2_value_as_string(preset),
+			                               PresetRecord(
+				                               slv2_value_as_string(preset),
+				                               slv2_value_as_string(name))));
+		} else {
+			warning << string_compose(
+				_("Plugin \"%1\% preset \"%2%\" is missing a dc:title\n"),
+				unique_id(), slv2_value_as_string(preset));
+		}
 	}
+	slv2_values_free(presets);
 
-	slv2_results_free(presets);
+	slv2_value_free(pset_hasPreset);
+	slv2_value_free(dc_title);
 }
 
 bool
 LV2Plugin::load_preset (PresetRecord r)
 {
 	Plugin::load_preset (r);
+
+#if 0
+	// TODO: SLV2 needs blank nodes in the API for this to be possible...
+	SLV2Value  lv2_port   = slv2_value_new_uri(_world.world, NS_LV2 "port");
+	SLV2Value  lv2_symbol = slv2_value_new_uri(_world.world, NS_LV2 "symbol");
+	SLV2Value  pset_value = slv2_value_new_uri(_world.world, NS_PSET "value");
+	SLV2Value  preset     = slv2_value_new_uri(_world.world, r.uri.c_str());
+
+	SLV2Values ports = slv2_plugin_get_value_for_subject(_plugin, preset, lv2_port);
+	for (unsigned i = 0; i < slv2_values_size(ports); ++i) {
+		SLV2Value port   = slv2_values_get_at(ports, i); // ... because of this
+		SLV2Value symbol = get_value(_plugin, port, lv2_symbol);
+		SLV2Value value  = get_value(_plugin, port, pset_value);
+		if (value && slv2_value_is_float(value)) {
+			set_parameter(_port_indices[slv2_value_as_string(symbol)],
+			              slv2_value_as_float(value));
+		}
+	}
+	slv2_values_free(ports);
+
+	slv2_value_free(preset);
+	slv2_value_free(pset_value);
+	slv2_value_free(lv2_symbol);
+	slv2_value_free(lv2_port);
+#endif
 	
 	const string query = string(
 			"PREFIX lv2p: <http://lv2plug.in/ns/dev/presets#>\n"
