@@ -364,6 +364,11 @@ Delivery::set_state (const XMLNode& node, int version)
 void
 Delivery::reset_panner ()
 {
+        if (_role == Listen) {
+                /* monitor out gets no panner */
+                return;
+        }
+
 	if (panners_legal) {
 		if (!no_panner_reset) {
 
@@ -395,9 +400,6 @@ Delivery::panners_became_legal ()
 	}
 
 	_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, ntargets));
-#ifdef PANNER_HACKS
-	_panner->load (); // automation
-#endif
 	panner_legal_c.disconnect ();
 	return 0;
 }

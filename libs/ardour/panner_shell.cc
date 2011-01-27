@@ -104,11 +104,6 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
         _panner.reset (pi->descriptor.factory (_pannable, _session.get_speakers()));
         _panner->configure_io (in, out);
 
-        /* PANNER_HACKS: only the real owner should be able to claim the pannable
-         */
-
-        _pannable->set_panner (_panner);
-
         Changed (); /* EMIT SIGNAL */
 }
 
