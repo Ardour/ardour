@@ -23,9 +23,11 @@
 #include "ardour/automation_control.h"
 #include "ardour/automation_list.h"
 #include "ardour/pannable.h"
+#include "ardour/panner.h"
 #include "ardour/pan_controllable.h"
 #include "ardour/session.h"
 
+using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
@@ -245,6 +247,12 @@ Pannable::set_state (const XMLNode& root, int /*version - not used*/)
         return 0;
 }
 
+string 
+Pannable::value_as_string (boost::shared_ptr<AutomationControl> ac) const
+{
+        if (_panner) {
+                return _panner->value_as_string (ac);
+        } 
 
-
-        
+        return Automatable::value_as_string (ac);
+}

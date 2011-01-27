@@ -313,3 +313,21 @@ VBAPanner::describe_parameter (Evoral::Parameter p)
                 return _pannable->describe_parameter (p);
         }
 }
+
+string 
+VBAPanner::value_as_string (boost::shared_ptr<AutomationControl> ac) const
+{
+        /* DO NOT USE LocaleGuard HERE */
+        double val = ac->get_value();
+
+        switch (ac->parameter().type()) {
+        case PanAzimuthAutomation: /* direction */
+                return string_compose (_("%1"), val * 360.0);
+                
+        case PanWidthAutomation: /* diffusion */
+                return string_compose (_("%1%%"), (int) floor (100.0 * fabs(val)));
+                
+        default:
+                return _pannable->value_as_string (ac);
+        }
+}

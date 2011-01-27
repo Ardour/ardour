@@ -53,6 +53,7 @@ public:
 	void set_azimuth_elevation (double azimuth, double elevation);
 
         std::string describe_parameter (Evoral::Parameter);
+        std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
 
 	XMLNode& state (bool full_state);
 	XMLNode& get_state ();

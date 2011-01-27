@@ -82,6 +82,8 @@ class BarController : public Gtk::Frame
 	Gtk::SpinButton     spinner;
 	bool                use_parent;
 	bool                logarithmic;
+        sigc::slot<std::string> _label_slot;
+        bool                    _use_slot;
 
 	virtual std::string get_label (int& /*x*/) {
 		return "";

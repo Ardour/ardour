@@ -473,3 +473,30 @@ Panner2in2out::describe_parameter (Evoral::Parameter p)
                 return _pannable->describe_parameter (p);
         }
 }
+
+string 
+Panner2in2out::value_as_string (boost::shared_ptr<AutomationControl> ac) const
+{
+        /* DO NOT USE LocaleGuard HERE */
+        double val = ac->get_value();
+
+        switch (ac->parameter().type()) {
+        case PanAzimuthAutomation:
+                /* We show the position of the center of the image relative to the left & right.
+                   This is expressed as a pair of percentage values that ranges from (100,0) 
+                   (hard left) through (50,50) (hard center) to (0,100) (hard right).
+                   
+                   This is pretty wierd, but its the way audio engineers expect it. Just remember that
+                   the center of the USA isn't Kansas, its (50LA, 50NY) and it will all make sense.
+                */
+                
+                return string_compose (_("L:%1 R:%2"), (int) rint (100.0 * (1.0 - val)),
+                                       (int) rint (100.0 * val));
+                
+        case PanWidthAutomation:
+                return string_compose (_("Width: %1%%"), (int) floor (100.0 * val));
+                
+        default:
+                return _pannable->value_as_string (ac);
+        }
+}

@@ -492,3 +492,23 @@ Automatable::clear_controls ()
 	_control_connections.drop_connections ();
 	ControlSet::clear_controls ();
 }
+
+string
+Automatable::value_as_string (boost::shared_ptr<AutomationControl> ac) const
+{
+	std::stringstream s;
+
+        /* this is a the default fallback for this virtual method. Derived Automatables
+           are free to override this to display the values of their parameters/controls
+           in different ways.
+        */
+
+	// Hack to display CC as integer value, rather than double
+	if (ac->parameter().type() == MidiCCAutomation) {
+		s << lrint (ac->get_value());
+	} else {
+		s << std::fixed << std::setprecision(3) << ac->get_value();
+	}
+
+	return s.str ();
+}

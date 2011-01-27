@@ -54,7 +54,7 @@ public:
 	void stop_updating ();
 
 private:
-	AutomationController (boost::shared_ptr<ARDOUR::AutomationControl> ac, Gtk::Adjustment* adj);
+	AutomationController (boost::shared_ptr<ARDOUR::Automatable> parent, boost::shared_ptr<ARDOUR::AutomationControl> ac, Gtk::Adjustment* adj);
 	std::string get_label (int&);
 
 	void start_touch();
@@ -64,6 +64,7 @@ private:
 	void automation_state_changed();
 
 	bool                                         _ignore_change;
+        boost::shared_ptr<ARDOUR::Automatable>       _owner;
 	boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
 	Gtk::Adjustment*                             _adjustment;
 	sigc::connection                             _screen_update_connection;

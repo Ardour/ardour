@@ -65,6 +65,8 @@ struct Pannable : public PBD::Stateful, public Automatable, public SessionHandle
                 return ((_auto_state & Write) || ((_auto_state & Touch) && touching()));
         }
 
+        std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
+
 	void start_touch (double when);
 	void stop_touch (bool mark, double when);
 	bool touching() const { return g_atomic_int_get (&_touching); }

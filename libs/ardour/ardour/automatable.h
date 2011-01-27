@@ -63,6 +63,7 @@ public:
 	virtual void transport_stopped (framepos_t now);
 
 	virtual std::string describe_parameter(Evoral::Parameter param);
+        virtual std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
 
 	AutoState get_parameter_automation_state (Evoral::Parameter param);
 	virtual void set_parameter_automation_state (Evoral::Parameter param, AutoState);

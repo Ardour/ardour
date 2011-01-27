@@ -19,6 +19,7 @@
 */
 
 #include <iomanip>
+#include <cmath>
 
 #include "pbd/error.h"
 
@@ -40,10 +41,10 @@
 using namespace ARDOUR;
 using namespace Gtk;
 
-
-AutomationController::AutomationController(boost::shared_ptr<AutomationControl> ac, Adjustment* adj)
+AutomationController::AutomationController(boost::shared_ptr<Automatable> owner, boost::shared_ptr<AutomationControl> ac, Adjustment* adj)
 	: BarController (*adj, ac)
 	, _ignore_change(false)
+        , _owner (owner)
 	, _controllable(ac)
 	, _adjustment(adj)
 {
@@ -80,30 +81,18 @@ AutomationController::create(
 	} else {
 		assert(ac->parameter() == param);
 	}
-	return boost::shared_ptr<AutomationController>(new AutomationController(ac, adjustment));
+	return boost::shared_ptr<AutomationController>(new AutomationController(parent, ac, adjustment));
 }
 
 std::string
 AutomationController::get_label (int&)
 {
-	std::stringstream s;
-
-	// Hack to display CC rounded to int
-	if (_controllable->parameter().type() == MidiCCAutomation) {
-		s << (int)_controllable->get_value();
-	} else {
-		s << std::fixed << std::setprecision(3) << _controllable->get_value();
-	}
-
-	return s.str ();
+        return _owner->value_as_string (_controllable);
 }
 
 void
 AutomationController::display_effective_value()
 {
-	//if ( ! _controllable->list()->automation_playback())
-	//	return;
-
 	float value = _controllable->get_value();
 
 	if (_adjustment->get_value() != value) {
