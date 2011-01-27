@@ -32,6 +32,7 @@
 #include "gtkmm2ext/keyboard.h"
 
 #include "ardour/panner.h"
+#include "ardour/panner.h"
 
 #include "ardour_ui.h"
 #include "global_signals.h"

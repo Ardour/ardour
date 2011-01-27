@@ -43,16 +43,17 @@
 
 #include "ardour/session.h"
 #include "ardour/panner.h"
-#include "ardour/panner_1in2out.h"
 #include "ardour/utils.h"
 #include "ardour/audio_buffer.h"
 
+#include "ardour/debug.h"
 #include "ardour/runtime_functions.h"
 #include "ardour/buffer_set.h"
 #include "ardour/audio_buffer.h"
-#include "ardour/vbap.h"
+#include "ardour/pannable.h"
 
 #include "i18n.h"
+#include "panner_1in2out.h"
 
 #include "pbd/mathfix.h"
 
@@ -62,22 +63,27 @@ using namespace PBD;
 
 static PanPluginDescriptor _descriptor = {
         "Mono to Stereo Panner",
-        1, 1, 2, 2,
+        1, 2, 
         Panner1in2out::factory
 };
 
-extern "C" { PanPluginDescriptor* panner_descriptor () { return &_descriptor; }
+extern "C" { PanPluginDescriptor* panner_descriptor () { return &_descriptor; } }
 
-Panner1in2out::Panner1in2out (PannerShell& p)
+Panner1in2out::Panner1in2out (boost::shared_ptr<Pannable> p)
 	: Panner (p)
-        , _position (new PanControllable (parent.session(), _("position"), this, Evoral::Parameter(PanAzimuthAutomation, 0, 0)))
-	, left (0.5)
-	, right (0.5)
-	, left_interp (left)
-	, right_interp (right)
 {
-        desired_left = left;
-        desired_right = right;
+        if (!_pannable->has_state()) {
+                _pannable->pan_azimuth_control->set_value (0.5);
+        }
+        
+        update ();
+
+        left = desired_left;
+        right = desired_right;
+        left_interp = left;
+        right_interp = right;
+
+        _pannable->pan_azimuth_control->Changed.connect_same_thread (*this, boost::bind (&Panner1in2out::update, this));
 }
 
 Panner1in2out::~Panner1in2out ()
@@ -85,14 +91,44 @@ Panner1in2out::~Panner1in2out ()
 }
 
 void
-Panner1in2out::set_position (double p)
+Panner1in2out::update ()
 {
-        _desired_right = p;
-        _desired_left = 1 - p;
+        float panR, panL;
+        float const pan_law_attenuation = -3.0f;
+        float const scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
+
+        panR = _pannable->pan_azimuth_control->get_value();
+        panL = 1 - panR;
+
+        desired_left = panL * (scale * panL + 1.0f - scale);
+        desired_right = panR * (scale * panR + 1.0f - scale);
 }
 
 void
-Panner1in2out::do_distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t /* not used */)
+Panner1in2out::set_position (double p)
+{
+        if (clamp_position (p)) {
+                _pannable->pan_azimuth_control->set_value (p);
+        }
+}
+
+bool
+Panner1in2out::clamp_position (double& p)
+{
+        /* any position between 0.0 and 1.0 is legal */
+        DEBUG_TRACE (DEBUG::Panning, string_compose ("want to move panner to %1 - always allowed in 0.0-1.0 range\n", p));
+        p = max (min (p, 1.0), 0.0);
+        return true;
+}
+
+double 
+Panner1in2out::position () const
+{
+        return _pannable->pan_azimuth_control->get_value ();
+}
+
+void
+Panner1in2out::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t /* not used */)
 {
 	assert (obufs.count().n_audio() == 2);
 
@@ -100,17 +136,13 @@ Panner1in2out::do_distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t 
 	Sample* dst;
 	pan_t pan;
 
-	if (_muted) {
-		return;
-	}
-
 	Sample* const src = srcbuf.data();
         
 	/* LEFT OUTPUT */
 
 	dst = obufs.get_audio(0).data();
 
-	if (fabsf ((delta = (left[which] - desired_left[which]))) > 0.002) { // about 1 degree of arc
+	if (fabsf ((delta = (left - desired_left))) > 0.002) { // about 1 degree of arc
 
 		/* we've moving the pan by an appreciable amount, so we must
 		   interpolate over 64 frames or nframes, whichever is smaller */
@@ -121,23 +153,23 @@ Panner1in2out::do_distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t 
 		delta = -(delta / (float) (limit));
 
 		for (n = 0; n < limit; n++) {
-			left_interp[which] = left_interp[which] + delta;
-			left = left_interp[which] + 0.9 * (left[which] - left_interp[which]);
-			dst[n] += src[n] * left[which] * gain_coeff;
+			left_interp = left_interp + delta;
+			left = left_interp + 0.9 * (left - left_interp);
+			dst[n] += src[n] * left * gain_coeff;
 		}
 
 		/* then pan the rest of the buffer; no need for interpolation for this bit */
 
-		pan = left[which] * gain_coeff;
+		pan = left * gain_coeff;
 
 		mix_buffers_with_gain (dst+n,src+n,nframes-n,pan);
 
 	} else {
 
-		left[which] = desired_left[which];
-		left_interp[which] = left[which];
+		left = desired_left;
+		left_interp = left;
 
-		if ((pan = (left[which] * gain_coeff)) != 1.0f) {
+		if ((pan = (left * gain_coeff)) != 1.0f) {
 
 			if (pan != 0.0f) {
 
@@ -165,7 +197,7 @@ Panner1in2out::do_distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t 
 
 	dst = obufs.get_audio(1).data();
 
-	if (fabsf ((delta = (right[which] - desired_right[which]))) > 0.002) { // about 1 degree of arc
+	if (fabsf ((delta = (right - desired_right))) > 0.002) { // about 1 degree of arc
 
 		/* we're moving the pan by an appreciable amount, so we must
 		   interpolate over 64 frames or nframes, whichever is smaller */
@@ -176,14 +208,14 @@ Panner1in2out::do_distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t 
 		delta = -(delta / (float) (limit));
 
 		for (n = 0; n < limit; n++) {
-			right_interp[which] = right_interp[which] + delta;
-			right[which] = right_interp[which] + 0.9 * (right[which] - right_interp[which]);
-			dst[n] += src[n] * right[which] * gain_coeff;
+			right_interp = right_interp + delta;
+			right = right_interp + 0.9 * (right - right_interp);
+			dst[n] += src[n] * right * gain_coeff;
 		}
 
 		/* then pan the rest of the buffer, no need for interpolation for this bit */
 
-		pan = right[which] * gain_coeff;
+		pan = right * gain_coeff;
 
 		mix_buffers_with_gain(dst+n,src+n,nframes-n,pan);
 
@@ -191,10 +223,10 @@ Panner1in2out::do_distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t 
 
 	} else {
 
-		right[which] = desired_right[which];
-		right_interp[which] = right[which];
+		right = desired_right;
+		right_interp = right;
 
-		if ((pan = (right[which] * gain_coeff)) != 1.0f) {
+		if ((pan = (right * gain_coeff)) != 1.0f) {
 
 			if (pan != 0.0f) {
 
@@ -217,19 +249,116 @@ Panner1in2out::do_distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t 
 
 }
 
-string
-Panner1in2out::describe_parameter (Evoral::Parameter param)
+void
+Panner1in2out::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
+                                         framepos_t start, framepos_t end, pframes_t nframes,
+                                         pan_t** buffers, uint32_t which)
 {
-        switch (param.type()) {
-        case PanWidthAutomation:
-                return "Pan:width";
-        case PanAzimuthAutomation:
-                return "Pan:position";
-        case PanElevationAutomation: 
-                error << X_("stereo panner should not have elevation control") << endmsg;
-                return "Pan:elevation";
-        } 
-        
-        return Automatable::describe_parameter (param);
+	assert (obufs.count().n_audio() == 2);
+
+	Sample* dst;
+	pan_t* pbuf;
+	Sample* const src = srcbuf.data();
+        pan_t* const position = buffers[0];
+
+	/* fetch positional data */
+
+	if (!_pannable->pan_azimuth_control->list()->curve().rt_safe_get_vector (start, end, position, nframes)) {
+		/* fallback */
+                distribute_one (srcbuf, obufs, 1.0, nframes, which);
+		return;
+	}
+
+	/* apply pan law to convert positional data into pan coefficients for
+	   each buffer (output)
+	*/
+
+	const float pan_law_attenuation = -3.0f;
+	const float scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
+
+	for (pframes_t n = 0; n < nframes; ++n) {
+
+                float panR = position[n];
+                const float panL = 1 - panR;
+
+                /* note that are overwriting buffers, but its OK
+                   because we're finished with their old contents
+                   (position automation data) and are
+                   replacing it with panning/gain coefficients 
+                   that we need to actually process the data.
+                */
+                
+                buffers[0][n] = panL * (scale * panL + 1.0f - scale);
+                buffers[1][n] = panR * (scale * panR + 1.0f - scale);
+        }
+
+	/* LEFT OUTPUT */
+
+	dst = obufs.get_audio(0).data();
+	pbuf = buffers[0];
+
+	for (pframes_t n = 0; n < nframes; ++n) {
+		dst[n] += src[n] * pbuf[n];
+	}
+
+	/* XXX it would be nice to mark the buffer as written to */
+
+	/* RIGHT OUTPUT */
+
+	dst = obufs.get_audio(1).data();
+	pbuf = buffers[1];
+
+	for (pframes_t n = 0; n < nframes; ++n) {
+		dst[n] += src[n] * pbuf[n];
+	}
+
+	/* XXX it would be nice to mark the buffer as written to */
 }
 
+
+Panner*
+Panner1in2out::factory (boost::shared_ptr<Pannable> p, Speakers& /* ignored */)
+{
+	return new Panner1in2out (p);
+}
+
+XMLNode&
+Panner1in2out::get_state (void)
+{
+	return state (true);
+}
+
+XMLNode&
+Panner1in2out::state (bool /*full_state*/)
+{
+	XMLNode& root (Panner::get_state ());
+	root.add_property (X_("type"), _descriptor.name);
+	return root;
+}
+
+int
+Panner1in2out::set_state (const XMLNode& node, int version)
+{
+	LocaleGuard lg (X_("POSIX"));
+	Panner::set_state (node, version);
+	return 0;
+}
+
+std::set<Evoral::Parameter> 
+Panner1in2out::what_can_be_automated() const
+{
+        set<Evoral::Parameter> s;
+        s.insert (Evoral::Parameter (PanAzimuthAutomation));
+        return s;
+}
+
+string
+Panner1in2out::describe_parameter (Evoral::Parameter p)
+{
+        switch (p.type()) {
+        case PanAzimuthAutomation:
+                return _("L/R");
+        default:
+                return _pannable->describe_parameter (p);
+        }
+}

@@ -46,7 +46,9 @@
 #include "ardour/meter.h"
 #include "ardour/mix.h"
 #include "ardour/monitor_processor.h"
+#include "ardour/pannable.h"
 #include "ardour/panner.h"
+#include "ardour/panner_shell.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/port.h"
 #include "ardour/port_insert.h"
@@ -106,13 +108,17 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 int
 Route::init ()
 {
-	/* add standard controls */
+        /* add standard controls */
 
 	_solo_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
 	_mute_control->set_flags (Controllable::Flag (_mute_control->flags() | Controllable::Toggle));
 
 	add_control (_solo_control);
 	add_control (_mute_control);
+
+        /* panning */
+        
+        _pannable.reset (new Pannable (_session));
 
 	/* input and output objects */
 
@@ -136,7 +142,7 @@ Route::init ()
 
 	add_processor (_meter, PostFader);
 
-	_main_outs.reset (new Delivery (_session, _output, _mute_master, _name, Delivery::Main));
+	_main_outs.reset (new Delivery (_session, _output, _pannable, _mute_master, _name, Delivery::Main));
 
         add_processor (_main_outs, PostFader);
 
@@ -163,7 +169,9 @@ Route::init ()
 
                 /* no panning on the monitor main outs */
 
+#ifdef PANNER_HACKS
                 _main_outs->panner()->set_bypassed (true);
+#endif
 	}
 
         if (is_master() || is_monitor() || is_hidden()) {
@@ -975,14 +983,14 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 
 				} else {
 
-					processor.reset (new PortInsert (_session, _mute_master));
+					processor.reset (new PortInsert (_session, _pannable, _mute_master));
 				}
 
 			}
 
 		} else if (node.name() == "Send") {
 
-			processor.reset (new Send (_session, _mute_master));
+			processor.reset (new Send (_session, _pannable, _mute_master));
 
 		} else {
 
@@ -1852,6 +1860,8 @@ Route::state(bool full_state)
 		cmt->add_content (_comment);
 	}
 
+        node->add_child_nocopy (_pannable->state (full_state));
+
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
 		node->add_child_nocopy((*i)->state (full_state));
 	}
@@ -1928,6 +1938,11 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 		if (child->name() == X_("Processor")) {
 			processor_state.add_child_copy (*child);
 		}
+
+
+                if (child->name() == X_("Pannable")) {
+                        _pannable->set_state (*child, version);
+                }
 	}
 
 	set_processor_state (processor_state);
@@ -2233,7 +2248,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 				io_child = *io_niter;
 				
 				if (io_child->name() == X_("Panner")) {
-					_main_outs->panner()->set_state(*io_child, version);
+					_main_outs->panner_shell()->set_state(*io_child, version);
 				} else if (io_child->name() == X_("Automation")) {
 					/* IO's automation is for the fader */
 					_amp->set_automation_xml_state (*io_child, Evoral::Parameter (GainAutomation));
@@ -2370,7 +2385,7 @@ Route::set_processor_state (const XMLNode& node)
 
                                 if (prop->value() == "intsend") {
                                         
-                                        processor.reset (new InternalSend (_session, _mute_master, boost::shared_ptr<Route>(), Delivery::Role (0)));
+                                        processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<Route>(), Delivery::Role (0)));
                                         
                                 } else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
                                            prop->value() == "lv2" ||
@@ -2381,11 +2396,11 @@ Route::set_processor_state (const XMLNode& node)
                                         
                                 } else if (prop->value() == "port") {
                                         
-                                        processor.reset (new PortInsert (_session, _mute_master));
+                                        processor.reset (new PortInsert (_session, _pannable, _mute_master));
                                         
                                 } else if (prop->value() == "send") {
                                         
-                                        processor.reset (new Send (_session, _mute_master));
+                                        processor.reset (new Send (_session, _pannable, _mute_master));
                                         
                                 } else {
                                         error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
@@ -2540,11 +2555,11 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*a
                                 /* master never sends to control outs */
                                 return 0;
                         } else {
-                                listener.reset (new InternalSend (_session, _mute_master, route, (aux ? Delivery::Aux : Delivery::Listen)));
+                                listener.reset (new InternalSend (_session, _pannable, _mute_master, route, (aux ? Delivery::Aux : Delivery::Listen)));
                         }
 
                 } else {
-                        listener.reset (new InternalSend (_session, _mute_master, route, (aux ? Delivery::Aux : Delivery::Listen)));
+                        listener.reset (new InternalSend (_session, _pannable, _mute_master, route, (aux ? Delivery::Aux : Delivery::Listen)));
                 }
 
 	} catch (failed_constructor& err) {
@@ -3141,8 +3156,7 @@ Route::set_latency_delay (framecnt_t longest_session_latency)
 void
 Route::automation_snapshot (framepos_t now, bool force)
 {
-	panner()->automation_snapshot (now, force);
-	
+        _pannable->automation_snapshot (now, force);
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->automation_snapshot (now, force);
 	}
@@ -3271,11 +3285,10 @@ Route::shift (framepos_t pos, framecnt_t frames)
 
 	/* pan automation */
         {
-                boost::shared_ptr<AutomationControl> pc;
-                uint32_t npans = _main_outs->panner()->npanners();
-
-                for (uint32_t p = 0; p < npans; ++p) {
-                        pc = _main_outs->panner()->pan_control (0, p);
+                ControlSet::Controls& c (_pannable->controls());
+                
+                for (ControlSet::Controls::const_iterator ci = c.begin(); ci != c.end(); ++ci) {
+                        boost::shared_ptr<AutomationControl> pc = boost::dynamic_pointer_cast<AutomationControl> (ci->second);
                         if (pc) {
                                 boost::shared_ptr<AutomationList> al = pc->alist();
                                 XMLNode& before = al->get_state ();
@@ -3461,10 +3474,23 @@ Route::meter ()
 	}
 }
 
+boost::shared_ptr<Pannable>
+Route::pannable() const
+{
+	return _pannable;
+}
+
 boost::shared_ptr<Panner>
 Route::panner() const
 {
-	return _main_outs->panner();
+        /* may be null ! */
+	return _main_outs->panner_shell()->panner();
+}
+
+boost::shared_ptr<PannerShell>
+Route::panner_shell() const
+{
+	return _main_outs->panner_shell();
 }
 
 boost::shared_ptr<AutomationControl>

@@ -30,7 +30,9 @@ namespace ARDOUR {
 class BufferSet;
 class IO;
 class MuteMaster;
+class PannerShell;
 class Panner;
+class Pannable;
 
 class Delivery : public IOProcessor
 {
@@ -52,11 +54,11 @@ public:
 
 	/* Delivery to an existing output */
 
-	Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<MuteMaster> mm, const std::string& name, Role);
+	Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster> mm, const std::string& name, Role);
 
 	/* Delivery to a new output owned by this object */
 
-	Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const std::string& name, Role);
+	Delivery (Session& s, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster> mm, const std::string& name, Role);
 	~Delivery ();
 
 	bool set_name (const std::string& name);
@@ -90,15 +92,14 @@ public:
 	static int  disable_panners (void);
 	static int  reset_panners (void);
 
-	boost::shared_ptr<Panner> panner() const { return _panner; }
+	boost::shared_ptr<PannerShell> panner_shell() const { return _panshell; }
+	boost::shared_ptr<Panner> panner() const;
 
 	void reset_panner ();
 	void defer_pan_reset ();
 	void allow_pan_reset ();
 
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
-	void start_pan_touch (uint32_t which, double when);
-	void end_pan_touch (uint32_t which, bool mark, double when);
 
   protected:
 	Role        _role;
@@ -108,7 +109,7 @@ public:
 	bool        _no_outs_cuz_we_no_monitor;
 	boost::shared_ptr<MuteMaster> _mute_master;
 	bool         no_panner_reset;
-	boost::shared_ptr<Panner> _panner;
+	boost::shared_ptr<PannerShell> _panshell;
 
 	static bool panners_legal;
 	static PBD::Signal0<int>            PannersLegal;

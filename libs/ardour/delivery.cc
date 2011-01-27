@@ -33,6 +33,8 @@
 #include "ardour/meter.h"
 #include "ardour/mute_master.h"
 #include "ardour/panner.h"
+#include "ardour/panner_shell.h"
+#include "ardour/pannable.h"
 #include "ardour/port.h"
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
@@ -49,7 +51,8 @@ bool                          Delivery::panners_legal = false;
 
 /* deliver to an existing IO object */
 
-Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
+Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pannable> pannable, 
+                    boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
 	: IOProcessor(s, boost::shared_ptr<IO>(), (role_requires_output_ports (r) ? io : boost::shared_ptr<IO>()), name)
 	, _role (r)
 	, _output_buffers (new BufferSet())
@@ -59,7 +62,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Mute
 	, _mute_master (mm)
 	, no_panner_reset (false)
 {
-	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
+	_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
 	_display_to_user = false;
 
 	if (_output) {
@@ -71,7 +74,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Mute
 
 /* deliver to a new IO object */
 
-Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
+Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
 	: IOProcessor(s, false, (role_requires_output_ports (r) ? true : false), name)
 	, _role (r)
 	, _output_buffers (new BufferSet())
@@ -81,7 +84,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& 
 	, _mute_master (mm)
 	, no_panner_reset (false)
 {
-	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
+	_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
 	_display_to_user = false;
 
 	if (_output) {
@@ -228,6 +231,8 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 void
 Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool result_required)
 {
+        boost::shared_ptr<Panner> panner;
+
 	assert (_output);
 
 	PortSet& ports (_output->ports());
@@ -279,11 +284,13 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 		Amp::apply_simple_gain (bufs, nframes, tgain);
 	}
 
-	if (_panner && _panner->npanners() && !_panner->bypassed()) {
+        panner = _panshell->panner();
+
+	if (panner && !panner->bypassed()) {
 
 		// Use the panner to distribute audio to output port buffers
 
-		_panner->run (bufs, output_buffers(), start_frame, end_frame, nframes);
+		_panshell->run (bufs, output_buffers(), start_frame, end_frame, nframes);
 
 		if (result_required) {
 			bufs.read_from (output_buffers (), nframes);
@@ -322,7 +329,7 @@ Delivery::state (bool full_state)
 	}
 
 	node.add_property("role", enum_2_string(_role));
-	node.add_child_nocopy (_panner->state (full_state));
+	node.add_child_nocopy (_panshell->state (full_state));
 
 	return node;
 }
@@ -346,7 +353,7 @@ Delivery::set_state (const XMLNode& node, int version)
 	XMLNode* pan_node = node.child (X_("Panner"));
 
 	if (pan_node) {
-		_panner->set_state (*pan_node, version);
+		_panshell->set_state (*pan_node, version);
 	}
 
 	reset_panner ();
@@ -368,7 +375,7 @@ Delivery::reset_panner ()
 				ntargets = _configured_output.n_audio();
 			}
 
-			_panner->reset (ntargets, pans_required());
+			_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, ntargets));
 		}
 	} else {
 		panner_legal_c.disconnect ();
@@ -387,8 +394,10 @@ Delivery::panners_became_legal ()
 		ntargets = _configured_output.n_audio();
 	}
 
-	_panner->reset (ntargets, pans_required());
+	_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, ntargets));
+#ifdef PANNER_HACKS
 	_panner->load (); // automation
+#endif
 	panner_legal_c.disconnect ();
 	return 0;
 }
@@ -421,25 +430,6 @@ Delivery::reset_panners ()
 	return *PannersLegal ();
 }
 
-
-void
-Delivery::start_pan_touch (uint32_t which, double when)
-{
-	if (which < _panner->npanners()) {
-		_panner->pan_control(which)->start_touch(when);
-	}
-}
-
-void
-Delivery::end_pan_touch (uint32_t which, bool mark, double when)
-{
-	if (which < _panner->npanners()) {
-		_panner->pan_control(which)->stop_touch(mark, when);
-	}
-
-}
-
-
 void
 Delivery::flush_buffers (framecnt_t nframes, framepos_t time)
 {
@@ -456,8 +446,7 @@ void
 Delivery::transport_stopped (framepos_t now)
 {
         Processor::transport_stopped (now);
-
-	_panner->transport_stopped (now);
+        _panshell->pannable()->transport_stopped (now);
 
         if (_output) {
                 PortSet& ports (_output->ports());
@@ -533,7 +522,7 @@ Delivery::set_name (const std::string& name)
 	bool ret = IOProcessor::set_name (name);
 
 	if (ret) {
-		ret = _panner->set_name (name);
+		ret = _panshell->set_name (name);
 	}
 
 	return ret;
@@ -546,4 +535,10 @@ Delivery::output_changed (IOChange change, void* /*src*/)
 		reset_panner ();
 		_output_buffers->attach_buffers (_output->ports ());
 	}
+}
+
+boost::shared_ptr<Panner>
+Delivery::panner () const
+{
+        return _panshell->panner();
 }

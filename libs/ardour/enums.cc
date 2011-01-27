@@ -83,7 +83,6 @@ setup_enum_writer ()
 	TimecodeFormat _Session_TimecodeFormat;
 	Session::PullupFormat _Session_PullupFormat;
 	FadeShape _FadeShape;
-	Panner::LinkDirection _Panner_LinkDirection;
 	IOChange _IOChange;
 	AutomationType _AutomationType;
 	AutoState _AutoState;
@@ -135,7 +134,9 @@ setup_enum_writer ()
 	REGISTER (_OverlapType);
 
 	REGISTER_ENUM (GainAutomation);
-	REGISTER_ENUM (PanAutomation);
+	REGISTER_ENUM (PanAzimuthAutomation);
+	REGISTER_ENUM (PanElevationAutomation);
+	REGISTER_ENUM (PanWidthAutomation);
 	REGISTER_ENUM (PluginAutomation);
 	REGISTER_ENUM (SoloAutomation);
 	REGISTER_ENUM (MuteAutomation);
@@ -409,10 +410,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Location, IsSessionRange);
 	REGISTER_CLASS_ENUM (Location, IsRangeMarker);
 	REGISTER_BITS (_Location_Flags);
-
-	REGISTER_CLASS_ENUM (Panner, SameDirection);
-	REGISTER_CLASS_ENUM (Panner, OppositeDirection);
-	REGISTER (_Panner_LinkDirection);
 
 	REGISTER_CLASS_ENUM (Track, NoFreeze);
 	REGISTER_CLASS_ENUM (Track, Frozen);

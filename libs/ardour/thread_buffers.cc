@@ -18,6 +18,7 @@
 */
 
 #include <iostream>
+#include <algorithm>
 
 #include "ardour/audioengine.h"
 #include "ardour/buffer_set.h"
@@ -68,6 +69,10 @@ ThreadBuffers::ensure_buffers (ChanCount howmany)
 void
 ThreadBuffers::allocate_pan_automation_buffers (framecnt_t nframes, uint32_t howmany, bool force)
 {
+        /* we always need at least 2 pan buffers */
+
+        howmany = max (2U, howmany);
+
 	if (!force && howmany <= npan_buffers) {
 		return;
 	}

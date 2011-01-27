@@ -27,6 +27,7 @@
 #include "ardour/event_type_map.h"
 #include "ardour/automatable.h"
 #include "ardour/panner.h"
+#include "ardour/pan_controllable.h"
 #include "ardour/session.h"
 
 #include "ardour_ui.h"
@@ -90,8 +91,6 @@ AutomationController::get_label (int&)
 	// Hack to display CC rounded to int
 	if (_controllable->parameter().type() == MidiCCAutomation) {
 		s << (int)_controllable->get_value();
-	} else if (_controllable->parameter().type() == PanAutomation) {
-		s << Panner::value_as_string (_controllable->get_value ());
 	} else {
 		s << std::fixed << std::setprecision(3) << _controllable->get_value();
 	}

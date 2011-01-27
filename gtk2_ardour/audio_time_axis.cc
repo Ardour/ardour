@@ -40,6 +40,7 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/event_type_map.h"
 #include "ardour/location.h"
+#include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/playlist.h"
 #include "ardour/processor.h"
@@ -191,7 +192,9 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 
 		create_gain_automation_child (param, show);
 
-	} else if (param.type() == PanAutomation) {
+	} else if (param.type() == PanWidthAutomation ||
+                   param.type() == PanElevationAutomation ||
+                   param.type() == PanAzimuthAutomation) {
 
 		ensure_xml_node ();
 		ensure_pan_views (show);
@@ -217,13 +220,11 @@ AudioTimeAxisView::ensure_pan_views (bool show)
 		return;
 	}
 
-	const set<Evoral::Parameter>& params = _route->panner()->what_can_be_automated();
+	set<Evoral::Parameter> params = _route->panner()->what_can_be_automated();
 	set<Evoral::Parameter>::iterator p;
 
 	for (p = params.begin(); p != params.end(); ++p) {
-		boost::shared_ptr<ARDOUR::AutomationControl> pan_control
-			= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
-				_route->panner()->control(*p));
+		boost::shared_ptr<ARDOUR::AutomationControl> pan_control = _route->pannable()->automation_control(*p);
 
 		if (pan_control->parameter().type() == NullAutomation) {
 			error << "Pan control has NULL automation type!" << endmsg;
@@ -238,7 +239,9 @@ AudioTimeAxisView::ensure_pan_views (bool show)
 
 			boost::shared_ptr<AutomationTimeAxisView> t (
 				new AutomationTimeAxisView (_session,
-							    _route, _route->panner(), pan_control,
+							    _route, 
+                                                            _route->pannable(), 
+                                                            pan_control,
 							    _editor,
 							    *this,
 							    false,
@@ -442,7 +445,7 @@ AudioTimeAxisView::build_automation_action_menu ()
 	pan_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
 	pan_automation_item->set_active (pan_tracks.front()->marked_for_display ());
 
-	set<Evoral::Parameter> const & params = _route->panner()->what_can_be_automated ();
+	set<Evoral::Parameter> const & params = _route->pannable()->what_can_be_automated ();
 	for (set<Evoral::Parameter>::iterator p = params.begin(); p != params.end(); ++p) {
 		_main_automation_menu_map[*p] = pan_automation_item;
 	}

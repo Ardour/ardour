@@ -46,6 +46,8 @@
 #include "ardour/configuration.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/send.h"
+#include "ardour/pannable.h"
+#include "ardour/panner_shell.h"
 #include "ardour/playlist.h"
 #include "ardour/cycle_timer.h"
 #include "ardour/region.h"
@@ -458,18 +460,23 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const &
 	}
 
 	/* move panner automation */
-	boost::shared_ptr<Panner> p = _track->main_outs()->panner ();
-	if (p) {
-		for (uint32_t i = 0; i < p->npanners (); ++i) {
-			boost::shared_ptr<AutomationList> pan_alist = p->streampanner(i).pan_control()->alist();
-			XMLNode & before = pan_alist->get_state ();
-			bool const things_moved = pan_alist->move_ranges (movements);
-			if (things_moved) {
-				_session.add_command (new MementoCommand<AutomationList> (
-							      *pan_alist.get(), &before, &pan_alist->get_state ()));
-			}
-		}
-	}
+	boost::shared_ptr<Pannable> pannable = _track->pannable();
+        Evoral::ControlSet::Controls& c (pannable->controls());
+        
+        for (Evoral::ControlSet::Controls::iterator ci = c.begin(); ci != c.end(); ++ci) {
+                boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl>(ci->second);
+                if (!ac) {
+                        continue;
+                }
+                boost::shared_ptr<AutomationList> alist = ac->alist();
+                
+                XMLNode & before = alist->get_state ();
+                bool const things_moved = alist->move_ranges (movements);
+                if (things_moved) {
+                        _session.add_command (new MementoCommand<AutomationList> (
+                                                      *alist.get(), &before, &alist->get_state ()));
+                }
+        }
 
 	/* move processor automation */
 	_track->foreach_processor (boost::bind (&Diskstream::move_processor_automation, this, _1, movements_frames));

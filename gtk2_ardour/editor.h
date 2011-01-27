@@ -639,6 +639,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void select_all_tracks ();
+        void select_all_internal_edit (Selection::Operation);
 
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
 	void set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);

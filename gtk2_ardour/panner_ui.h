@@ -24,7 +24,6 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/adjustment.h>
-#include <gtkmm/viewport.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/arrow.h>
 #include <gtkmm/togglebutton.h>
@@ -95,7 +94,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	bool ignore_toggle;
 	bool in_pan_update;
 	int _current_nouts;
-	int _current_npans;
+	int _current_nins;
 
 	static const int pan_bar_height;
 
@@ -103,13 +102,6 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	Panner2dWindow* big_window;
 
 	Gtk::VBox           pan_bar_packer;
-	Gtk::Adjustment	    hAdjustment;
-	Gtk::Adjustment     vAdjustment;
-	Gtk::Viewport       panning_viewport;
-	Gtk::EventBox       panning_up;
-	Gtk::Arrow          panning_up_arrow;
-	Gtk::EventBox       panning_down;
-	Gtk::Arrow          panning_down_arrow;
 	Gtk::VBox           pan_vbox;
         Gtk::VBox           poswidth_box;
 	Width              _width;
@@ -122,25 +114,15 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
         void position_adjusted ();
         void show_position ();
 
-	Gtk::ToggleButton   panning_link_button;
-	Gtk::Button         panning_link_direction_button;
-	Gtk::HBox           panning_link_box;
-
-	bool panning_link_button_press (GdkEventButton*);
-	bool panning_link_button_release (GdkEventButton*);
-
 	Gtk::Menu* pan_astate_menu;
 	Gtk::Menu* pan_astyle_menu;
 
 	Gtk::Button pan_automation_style_button;
 	Gtk::ToggleButton pan_automation_state_button;
 
-	void panning_link_direction_clicked ();
-
 	std::vector<MonoPanner*> pan_bars;
 
 	void pan_value_changed (uint32_t which);
-	void update_pan_linkage ();
 	void update_pan_state ();
 	void build_astate_menu ();
 	void build_astyle_menu ();
@@ -153,14 +135,12 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	gint start_pan_touch (GdkEventButton*);
 	gint end_pan_touch (GdkEventButton*);
 
-	bool pan_button_event (GdkEventButton*, uint32_t which);
+	bool pan_button_event (GdkEventButton*);
 
 	Gtk::Menu* pan_menu;
 	Gtk::CheckMenuItem* bypass_menu_item;
-	void build_pan_menu (uint32_t which);
-	void pan_mute (uint32_t which);
-	void pan_reset (uint32_t);
-	void pan_reset_all ();
+	void build_pan_menu ();
+	void pan_reset ();
 	void pan_bypass_toggle ();
 
 	void pan_automation_state_changed();

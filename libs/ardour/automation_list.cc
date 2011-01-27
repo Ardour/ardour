@@ -124,7 +124,9 @@ AutomationList::create_curve_if_necessary()
 {
 	switch (_parameter.type()) {
 	case GainAutomation:
-	case PanAutomation:
+	case PanAzimuthAutomation:
+	case PanElevationAutomation:
+	case PanWidthAutomation:
 	case FadeInAutomation:
 	case FadeOutAutomation:
 	case EnvelopeAutomation:
@@ -184,7 +186,6 @@ AutomationList::set_automation_state (AutoState s)
                         Glib::Mutex::Lock lm (ControlList::_lock);
                         nascent.push_back (new NascentInfo (false));
                 }
-
 		automation_state_changed (s); /* EMIT SIGNAL */
 	}
 }

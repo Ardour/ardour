@@ -898,7 +898,7 @@ ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams)
 void
 ProcessorBox::choose_insert ()
 {
-	boost::shared_ptr<Processor> processor (new PortInsert (*_session, _route->mute_master()));
+	boost::shared_ptr<Processor> processor (new PortInsert (*_session, _route->pannable(), _route->mute_master()));
 	_route->add_processor (processor, _placement);
 }
 
@@ -906,7 +906,7 @@ ProcessorBox::choose_insert ()
 void
 ProcessorBox::choose_send ()
 {
-	boost::shared_ptr<Send> send (new Send (*_session, _route->mute_master()));
+	boost::shared_ptr<Send> send (new Send (*_session, _route->pannable(), _route->mute_master()));
 
 	/* make an educated guess at the initial number of outputs for the send */
 	ChanCount outs = (_session->master_out())
@@ -1510,7 +1510,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 				XMLNode n (**niter);
 				Send::make_unique (n, *_session);
-                                Send* s = new Send (*_session, _route->mute_master());
+                                Send* s = new Send (*_session, _route->pannable(), _route->mute_master());
                                 if (s->set_state (n, Stateful::loading_state_version)) {
                                         delete s;
                                         return;

@@ -39,6 +39,7 @@ public:
 	    Recenable,
 	    PanDirection,
 	    PanWidth,
+	    PanElevation,
 	    Balance,
 	    SendGain,
 	    PluginParameter

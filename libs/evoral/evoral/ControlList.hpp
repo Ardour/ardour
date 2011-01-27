@@ -115,6 +115,8 @@ public:
 	void slide (iterator before, double distance);
 	void shift (double before, double distance);
 
+        virtual bool clamp_value (double& when, double& value) const { return true; }
+
 	void rt_add (double when, double value);
 	void add (double when, double value);
 	void fast_simple_add (double when, double value);

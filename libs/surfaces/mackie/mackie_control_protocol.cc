@@ -45,6 +45,7 @@
 #include "ardour/location.h"
 #include "ardour/midi_ui.h"
 #include "ardour/panner.h"
+#include "ardour/panner_shell.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -832,19 +833,17 @@ MackieControlProtocol::handle_control_event (SurfacePort & port, Control & contr
 		// pot (jog wheel, external control)
 		case Control::type_pot:
 			if (control.group().is_strip()) {
-				if (route != 0 && route->panner())
-				{
+				if (route) {
+                                        boost::shared_ptr<Panner> panner = route->panner_shell()->panner();
 					// pan for mono input routes, or stereo linked panners
-					if (route->panner()->npanners() == 1 || (route->panner()->npanners() == 2 && route->panner()->linked()))
-					{
-						// assume pan for now
-						AngularVector a = route->panner()->streampanner (0).get_effective_position ();
+                                        if (panner) {
+						double p = panner->position ();
                                                 
 						// calculate new value, and adjust
-						a.azi += 180.0 * state.delta * state.sign;
-						a.azi = min (180.0, a.azi);
-						a.azi = max (0.0, a.azi);
-						route->panner()->streampanner (0).set_position (a);
+						p += state.delta * state.sign;
+						p = min (1.0, p);
+						p = max (0.0, p);
+						panner->set_position (p);
 					}
 				}
 				else
@@ -1000,15 +999,13 @@ MackieControlProtocol::notify_panner_changed (RouteSignal * route_signal, bool f
 	{
 		Pot & pot = route_signal->strip().vpot();
 		boost::shared_ptr<Panner> panner = route_signal->route()->panner();
-		if ((panner && panner->npanners() == 1) || (panner->npanners() == 2 && panner->linked()))
-		{
-			AngularVector pos = route_signal->route()->panner()->streampanner(0).get_effective_position ();
-			float fract = 1.0 - (pos.azi / 180.0); /* 1.0 = 0 degrees = right; 0.0 = 180 degrees = left */
+		if (panner) {
+			double pos = panner->position ();
 
 			// cache the MidiByteArray here, because the mackie led control is much lower
 			// resolution than the panner control. So we save lots of byte
 			// sends in spite of more work on the comparison
-			MidiByteArray bytes = builder.build_led_ring (pot, ControlState (on, fract), MackieMidiBuilder::midi_pot_mode_dot);
+			MidiByteArray bytes = builder.build_led_ring (pot, ControlState (on, pos), MackieMidiBuilder::midi_pot_mode_dot);
 			// check that something has actually changed
 			if (force_update || bytes != route_signal->last_pan_written())
 			{

@@ -70,6 +70,7 @@
 #include "ardour/midi_region.h"
 #include "ardour/mix.h"
 #include "ardour/audioplaylist.h"
+#include "ardour/panner_manager.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
@@ -322,6 +323,8 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
         ProcessThread::init ();
         BufferManager::init (10); // XX should be num_processors_for_dsp
+
+        PannerManager::instance().discover_panners();
 
 	return 0;
 }

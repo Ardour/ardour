@@ -24,6 +24,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "pbd/stateful.h"
 #include "evoral/Parameter.hpp"
 
 #include "ardour/automatable.h"
@@ -33,8 +34,9 @@ namespace ARDOUR {
 
 class Session;
 class AutomationControl;
+class Panner;
 
-struct Pannable : public Automatable, public SessionHandleRef {
+struct Pannable : public PBD::Stateful, public Automatable, public SessionHandleRef {
         Pannable (Session& s);
 
         boost::shared_ptr<AutomationControl> pan_azimuth_control;
@@ -42,6 +44,9 @@ struct Pannable : public Automatable, public SessionHandleRef {
         boost::shared_ptr<AutomationControl> pan_width_control;
         boost::shared_ptr<AutomationControl> pan_frontback_control;
         boost::shared_ptr<AutomationControl> pan_lfe_control;
+        
+        boost::shared_ptr<Panner> panner() const { return _panner; }
+        void set_panner(boost::shared_ptr<Panner>);
 
         Session& session() { return _session; }
 
@@ -66,10 +71,21 @@ struct Pannable : public Automatable, public SessionHandleRef {
 	bool writing() const { return _auto_state == Write; }
         bool touch_enabled() const { return _auto_state == Touch; }
 
+        XMLNode& get_state ();
+        XMLNode& state (bool full_state);
+        int set_state (const XMLNode&, int version);
+
+        bool has_state() const { return _has_state; }
+
   protected:
+        boost::shared_ptr<Panner> _panner;
         AutoState _auto_state;
         AutoStyle _auto_style;
         gint      _touching;
+        bool      _has_state;
+        uint32_t  _responding_to_control_auto_state_change;
+
+        void control_auto_state_changed (AutoState);
 };
 
 } // namespace 

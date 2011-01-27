@@ -40,6 +40,7 @@
 #include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/audio_track.h"
+#include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/send.h"
 #include "ardour/processor.h"
@@ -967,14 +968,10 @@ MixerStrip::connect_to_pan ()
 		return;
 	}
 
-	boost::shared_ptr<ARDOUR::AutomationControl> pan_control
-		= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
-				_route->panner()->control(Evoral::Parameter(PanAutomation)));
+        boost::shared_ptr<Pannable> p = _route->pannable ();
 
-	if (pan_control) {
-		pan_control->alist()->automation_state_changed.connect (panstate_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_state_changed, &panners), gui_context());
-		pan_control->alist()->automation_style_changed.connect (panstyle_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_style_changed, &panners), gui_context());
-	}
+        p->automation_state_changed.connect (panstate_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_state_changed, &panners), gui_context());
+        p->automation_style_changed.connect (panstyle_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_style_changed, &panners), gui_context());
 
 	panners.panner_changed (this);
 }
@@ -1598,10 +1595,10 @@ MixerStrip::reset_strip_style ()
 		if (is_midi_track()) {
 			if (_route->active()) {
 				set_name ("MidiTrackStripBase");
-				gpm.set_meter_strip_name ("MidiTrackStripBase");
+				gpm.set_meter_strip_name ("MidiTrackMetrics");
 			} else {
 				set_name ("MidiTrackStripBaseInactive");
-				gpm.set_meter_strip_name ("MidiTrackStripBaseInactive");
+				gpm.set_meter_strip_name ("MidiTrackMetricsInactive");
 			}
 			gpm.set_fader_name ("MidiTrackFader");
 		} else if (is_audio_track()) {

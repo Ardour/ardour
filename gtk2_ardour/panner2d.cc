@@ -78,7 +78,7 @@ Panner2d::~Panner2d()
 void
 Panner2d::reset (uint32_t n_inputs)
 {
-	Targets::size_type existing_pucks = pucks.size();
+        uint32_t nouts = panner->out().n_audio();
 
 	/* pucks */
 
@@ -120,36 +120,40 @@ Panner2d::reset (uint32_t n_inputs)
 		break;
 	}
 
+#ifdef PANNER_HACKS
 	for (uint32_t i = existing_pucks; i < n_inputs; ++i) {
 		pucks[i]->position = panner->streampanner (i).get_position ();
 		pucks[i]->visible = true;
 	}
+#endif
 
 	/* add all outputs */
 
-	while (targets.size() < panner->nouts()) {
+	while (targets.size() < nouts) {
 		add_target (AngularVector());
 	}
 
-	if (targets.size() > panner->nouts()) {
-		for (uint32_t i = panner->nouts(); i < targets.size(); ++i) {
+	if (targets.size() > nouts) {
+		for (uint32_t i = nouts; i < targets.size(); ++i) {
 			delete targets[i];
 		}
 
-		targets.resize (panner->nouts ());
+		targets.resize (nouts);
 	}
 
 	for (Targets::iterator x = targets.begin(); x != targets.end(); ++x) {
 		(*x)->visible = false;
 	}
 
-	for (uint32_t n = 0; n < panner->nouts(); ++n) {
+	for (uint32_t n = 0; n < nouts; ++n) {
 		char buf[16];
 
 		snprintf (buf, sizeof (buf), "%d", n+1);
 		targets[n]->set_text (buf);
+#ifdef PANNER_HACKS
 		targets[n]->position = panner->output(n).position;
 		targets[n]->visible = true;
+#endif
 	}
 
 	queue_draw ();
@@ -201,6 +205,7 @@ Panner2d::handle_state_change ()
 void
 Panner2d::handle_position_change ()
 {
+#ifdef PANNER_HACKS 
 	uint32_t n;
 	ENSURE_GUI_THREAD (*this, &Panner2d::handle_position_change)
 
@@ -213,6 +218,7 @@ Panner2d::handle_position_change ()
 	}
 
 	queue_draw ();
+#endif
 }
 
 void
@@ -528,7 +534,9 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 
 			cp.angular (drag_target->position); /* sets drag target position */
 
+#ifdef PANNER_HACKS
 			panner->streampanner (drag_index).set_position (drag_target->position);
+#endif 
                         
 			queue_draw ();
 		}

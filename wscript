@@ -25,6 +25,7 @@ children = [
 	'libs/taglib',
 	'libs/rubberband',
 	'libs/surfaces',
+	'libs/panners',
 	'libs/timecode',
 	'libs/ardour',
 	'libs/gtkmm2ext',

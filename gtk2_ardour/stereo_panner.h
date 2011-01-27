@@ -31,10 +31,14 @@ namespace PBD {
         class Controllable;
 }
 
+namespace ARDOUR { 
+        class Panner;
+}
+
 class StereoPanner : public Gtk::DrawingArea
 {
   public:
-	StereoPanner (boost::shared_ptr<PBD::Controllable> pos, boost::shared_ptr<PBD::Controllable> width);
+	StereoPanner (boost::shared_ptr<ARDOUR::Panner>);
 	~StereoPanner ();
 
 	sigc::signal<void> StartPositionGesture;
@@ -54,6 +58,7 @@ class StereoPanner : public Gtk::DrawingArea
         bool on_leave_notify_event (GdkEventCrossing* ev);
 
   private:
+        boost::shared_ptr<ARDOUR::Panner> _panner;
         boost::shared_ptr<PBD::Controllable> position_control;
         boost::shared_ptr<PBD::Controllable> width_control;
         PBD::ScopedConnectionList connections;

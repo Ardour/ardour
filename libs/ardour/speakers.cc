@@ -16,8 +16,14 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "pbd/error.h"
+#include "pbd/convert.h"
+#include "pbd/locale_guard.h"
+
 #include "ardour/speaker.h"
 #include "ardour/speakers.h"
+
+#include "i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -102,4 +108,120 @@ Speakers::move_speaker (int id, const AngularVector& new_position)
 			break;
 		}
 	}
+}
+
+void
+Speakers::setup_default_speakers (uint32_t n)
+{
+        /* default assignment of speaker position for n speakers */
+
+        assert (n>0);
+
+	switch (n) {
+        case 1:
+                add_speaker (AngularVector (0.0, 0.0));
+                break;
+
+        case 2:
+                add_speaker (AngularVector (0.0, 0.0));
+                add_speaker (AngularVector (180.0, 0,0));
+                break;
+
+	case 3:
+		/* top, bottom kind-of-left & bottom kind-of-right */
+                add_speaker (AngularVector (90.0, 0.0));
+                add_speaker (AngularVector (215.0, 0,0));
+                add_speaker (AngularVector (335.0, 0,0));
+		break;
+	case 4:
+		/* clockwise from top left */
+                add_speaker (AngularVector (135.0, 0.0));
+                add_speaker (AngularVector (45.0, 0.0));
+                add_speaker (AngularVector (335.0, 0.0));
+                add_speaker (AngularVector (215.0, 0.0));
+		break;
+
+	default: 
+	{
+		double degree_step = 360.0 / n;
+		double deg;
+		uint32_t i;
+
+		/* even number of speakers? make sure the top two are either side of "top".
+		   otherwise, just start at the "top" (90.0 degrees) and rotate around
+		*/
+
+		if (n % 2) {
+			deg = 90.0 - degree_step;
+		} else {
+			deg = 90.0;
+		}
+		for (i = 0; i < n; ++i, deg += degree_step) {
+			add_speaker (AngularVector (deg, 0.0));
+		}
+	}
+        }
+}
+        
+XMLNode&
+Speakers::get_state ()
+{
+        XMLNode* node = new XMLNode (X_("Speakers"));
+        char buf[32];
+        LocaleGuard lg (X_("POSIX"));
+
+        for (vector<Speaker>::const_iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
+                XMLNode* speaker = new XMLNode (X_("Speaker"));
+
+                snprintf (buf, sizeof (buf), "%.12g", (*i).angles().azi);
+                speaker->add_property (X_("azimuth"), buf);
+                snprintf (buf, sizeof (buf), "%.12g", (*i).angles().ele);
+                speaker->add_property (X_("elevation"), buf);
+                snprintf (buf, sizeof (buf), "%.12g", (*i).angles().length);
+                speaker->add_property (X_("distance"), buf);
+
+                node->add_child_nocopy (*speaker);
+        }
+        
+        return *node;
+}
+
+int
+Speakers::set_state (const XMLNode& node, int /*version*/)
+{
+        XMLNodeConstIterator i;
+        const XMLProperty* prop;
+        double a, e, d;
+        LocaleGuard lg (X_("POSIX"));
+        int n = 0;
+
+        _speakers.clear ();
+
+        for (i = node.children().begin(); i != node.children().end(); ++i, ++n) {
+                if ((*i)->name() == X_("Speaker")) {
+                        if ((prop = (*i)->property (X_("azimuth"))) == 0) {
+                                warning << _("Speaker information is missing azimuth - speaker ignored") << endmsg;
+                                continue;
+                        }
+                        a = atof (prop->value());
+
+                        if ((prop = (*i)->property (X_("elevation"))) == 0) {
+                                warning << _("Speaker information is missing elevation - speaker ignored") << endmsg;
+                                continue;
+                        }
+                        e = atof (prop->value());
+                                            
+                        if ((prop = (*i)->property (X_("distance"))) == 0) {
+                                warning << _("Speaker information is missing distance - speaker ignored") << endmsg;
+                                continue;
+                        }
+                        d = atof (prop->value());
+
+                        add_speaker (AngularVector (a, e, d));
+                }
+        }
+
+        update ();
+        
+        return 0;
 }

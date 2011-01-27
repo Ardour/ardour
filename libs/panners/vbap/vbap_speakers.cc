@@ -36,7 +36,8 @@
 #include <stdlib.h>
 
 #include "pbd/cartesian.h"
-#include "ardour/vbap_speakers.h"
+
+#include "vbap_speakers.h"
 
 using namespace ARDOUR;
 using namespace PBD;

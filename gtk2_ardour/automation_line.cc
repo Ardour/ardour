@@ -1204,8 +1204,9 @@ AutomationLine::view_to_model_coord_y (double& y) const
 		y = slider_position_to_gain (y);
 		y = max (0.0, y);
 		y = min (2.0, y);
-	} else if (alist->parameter().type() == PanAutomation) {
-		// vertical coordinate axis reversal
+	} else if (alist->parameter().type() == PanAzimuthAutomation ||
+                   alist->parameter().type() == PanElevationAutomation ||
+                   alist->parameter().type() == PanWidthAutomation) {
 		y = 1.0 - y;
 	} else if (alist->parameter().type() == PluginAutomation) {
 		y = y * (double)(alist->get_max_y()- alist->get_min_y()) + alist->get_min_y();
@@ -1221,7 +1222,9 @@ AutomationLine::model_to_view_coord (double& x, double& y) const
 	if (alist->parameter().type() == GainAutomation ||
 	    alist->parameter().type() == EnvelopeAutomation) {
 		y = gain_to_slider_position (y);
-	} else if (alist->parameter().type() == PanAutomation) {
+	} else if (alist->parameter().type() == PanAzimuthAutomation ||
+                   alist->parameter().type() == PanElevationAutomation ||
+                   alist->parameter().type() == PanWidthAutomation) {
 		// vertical coordinate axis reversal
 		y = 1.0 - y;
 	} else if (alist->parameter().type() == PluginAutomation) {

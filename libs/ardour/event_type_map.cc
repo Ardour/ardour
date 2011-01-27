@@ -140,15 +140,25 @@ EventTypeMap::new_parameter(uint32_t type, uint8_t channel, uint32_t id) const
 	double min    = 0.0f;
 	double max    = 1.0f;
 	double normal = 0.0f;
+
 	switch((AutomationType)type) {
 	case NullAutomation:
 	case GainAutomation:
 		max = 2.0f;
 		normal = 1.0f;
 		break;
-	case PanAutomation:
-		normal = 0.5f;
-		break;
+	case PanAzimuthAutomation:
+		normal = 0.5f; // there really is no normal but this works for stereo, sort of
+                break;
+	case PanWidthAutomation:
+                min = -1.0;
+                max = 1.0;
+		normal = 0.0f;
+                break;
+        case PanElevationAutomation:
+        case PanFrontBackAutomation:
+        case PanLFEAutomation:
+                break;
 	case PluginAutomation:
 	case SoloAutomation:
 	case MuteAutomation:
@@ -191,11 +201,16 @@ EventTypeMap::new_parameter(const string& str) const
 		p_type = FadeOutAutomation;
 	} else if (str == "envelope") {
 		p_type = EnvelopeAutomation;
-	} else if (str == "pan") {
-		p_type = PanAutomation;
-	} else if (str.length() > 4 && str.substr(0, 4) == "pan-") {
-		p_type = PanAutomation;
-		p_id = atoi(str.c_str()+4);
+	} else if (str == "pan-azimuth") {
+		p_type = PanAzimuthAutomation;
+	} else if (str == "pan-width") {
+		p_type = PanWidthAutomation;
+	} else if (str == "pan-elevation") {
+		p_type = PanElevationAutomation;
+	} else if (str == "pan-frontback") {
+		p_type = PanFrontBackAutomation;
+	} else if (str == "pan-lfe") {
+		p_type = PanLFEAutomation;
 	} else if (str.length() > 10 && str.substr(0, 10) == "parameter-") {
 		p_type = PluginAutomation;
 		p_id = atoi(str.c_str()+10);
@@ -243,8 +258,16 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 
 	if (t == GainAutomation) {
 		return "gain";
-	} else if (t == PanAutomation) {
-		return string_compose("pan-%1", param.id());
+	} else if (t == PanAzimuthAutomation) {
+                return "pan-azimuth";
+	} else if (t == PanElevationAutomation) {
+                return "pan-elevation";
+	} else if (t == PanWidthAutomation) {
+                return "pan-width";
+	} else if (t == PanFrontBackAutomation) {
+                return "pan-frontback";
+	} else if (t == PanLFEAutomation) {
+                return "pan-lfe";
 	} else if (t == SoloAutomation) {
 		return "solo";
 	} else if (t == MuteAutomation) {

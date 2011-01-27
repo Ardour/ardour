@@ -92,7 +92,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
 #include "ardour/named_selection.h"
-#include "ardour/panner.h"
+#include "ardour/pannable.h"
 #include "ardour/processor.h"
 #include "ardour/port.h"
 #include "ardour/region_factory.h"
@@ -220,7 +220,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	midi_control_ui = 0;
         _step_editors = 0;
         no_questions_about_missing_files = false;
-        _speakers = 0;
+        _speakers = new Speakers;
 
 	AudioDiskstream::allocate_working_buffers();
 
@@ -1174,6 +1174,8 @@ Session::state(bool full_state)
 		}
 	}
 
+        node->add_child_nocopy (_speakers->get_state());
+
 	node->add_child_nocopy (_tempo_map->get_state());
 
 	node->add_child_nocopy (get_control_protocol_state());
@@ -1293,6 +1295,13 @@ Session::set_state (const XMLNode& node, int version)
 	} else if (_locations->set_state (*child, version)) {
 		goto out;
 	}
+
+        if ((child = find_named_node (node, X_("Speakers"))) == 0) {
+		warning << _("Session: XML state has no speakers section - assuming simple stereo") << endmsg;
+                _speakers->setup_default_speakers (2);
+        } else {
+                _speakers->set_state (*child, version);
+        }
 
 	Location* location;
 
@@ -2990,19 +2999,19 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 
 	case ControllableDescriptor::PanDirection:
         {
-                boost::shared_ptr<Panner> p = r->panner();
-                if (p) {
-                        c = p->direction_control();
-                }
+                c = r->pannable()->pan_azimuth_control;
 		break;
         }
 
 	case ControllableDescriptor::PanWidth:
         {
-                boost::shared_ptr<Panner> p = r->panner();
-                if (p) {
-                        c = p->width_control();
-                }
+                c = r->pannable()->pan_width_control;
+		break;
+        }
+
+	case ControllableDescriptor::PanElevation:
+        {
+                c = r->pannable()->pan_elevation_control;
 		break;
         }
 

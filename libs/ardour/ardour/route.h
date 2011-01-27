@@ -54,11 +54,13 @@ class Amp;
 class Delivery;
 class IOProcessor;
 class Panner;
+class PannerShell;
 class Processor;
 class RouteGroup;
 class Send;
 class InternalReturn;
 class MonitorProcessor;
+class Pannable;
 class CapturingProcessor;
 
 class Route : public SessionObject, public Automatable, public RouteGroupMember, public GraphNode
@@ -365,8 +367,10 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	   here.
 	*/
 
-	boost::shared_ptr<Panner> panner() const;
+	boost::shared_ptr<Panner> panner() const;  /* may return null */
+	boost::shared_ptr<PannerShell> panner_shell() const;
 	boost::shared_ptr<AutomationControl> gain_control() const;
+        boost::shared_ptr<Pannable> pannable() const;
 
 	void automation_snapshot (framepos_t now, bool force=false);
 	void protect_automation ();
@@ -423,6 +427,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::shared_ptr<Delivery> _monitor_send;
 	boost::shared_ptr<InternalReturn> _intreturn;
 	boost::shared_ptr<MonitorProcessor> _monitor_control;
+        boost::shared_ptr<Pannable> _pannable;
 
 	Flag           _flags;
 	int            _pending_declick;

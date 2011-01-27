@@ -37,6 +37,7 @@
 #include "control_point.h"
 #include "editor_regions.h"
 #include "editor_cursors.h"
+#include "midi_region_view.h"
 
 #include "i18n.h"
 
@@ -1213,9 +1214,25 @@ Editor::select_all_in_track (Selection::Operation op)
 }
 
 void
+Editor::select_all_internal_edit (Selection::Operation op)
+{
+        /* currently limited to MIDI only */
+
+	for (MidiRegionSelection::iterator i = selection->midi_regions.begin(); i != selection->midi_regions.end(); ++i) {
+		MidiRegionView* mrv = *i;
+		mrv->select_all_notes ();
+	}
+}
+
+void
 Editor::select_all (Selection::Operation op)
 {
 	list<Selectable *> touched;
+
+        if (_internal_editing) {
+                select_all_internal_edit (op);
+                return;
+        }
 
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		if ((*iter)->hidden()) {

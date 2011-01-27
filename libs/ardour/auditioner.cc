@@ -30,6 +30,7 @@
 #include "ardour/auditioner.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audio_port.h"
+#include "ardour/panner_shell.h"
 #include "ardour/panner.h"
 #include "ardour/data_type.h"
 #include "ardour/region_factory.h"
@@ -139,7 +140,8 @@ Auditioner::audition_current_playlist ()
 
 	/* force a panner reset now that we have all channels */
 
-	_main_outs->panner()->reset (n_outputs().n_audio(), _diskstream->n_channels().n_audio());
+	_main_outs->panner_shell()->configure_io (ChanCount (DataType::AUDIO, _diskstream->n_channels().n_audio()), 
+                                                  ChanCount (DataType::AUDIO, n_outputs().n_audio()));
 
 	g_atomic_int_set (&_auditioning, 1);
 }

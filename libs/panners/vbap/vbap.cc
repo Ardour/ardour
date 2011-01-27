@@ -10,11 +10,12 @@
 
 #include "ardour/pannable.h"
 #include "ardour/speakers.h"
-#include "ardour/vbap.h"
-#include "ardour/vbap_speakers.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/buffer_set.h"
 #include "ardour/pan_controllable.h"
+
+#include "vbap.h"
+#include "vbap_speakers.h"
 
 using namespace PBD;
 using namespace ARDOUR;
@@ -22,15 +23,13 @@ using namespace std;
 
 static PanPluginDescriptor _descriptor = {
         "VBAP 2D panner",
-        1, -1, 2, -1,
+        -1, -1,
         VBAPanner::factory
 };
 
 extern "C" { PanPluginDescriptor* panner_descriptor () { return &_descriptor; } }
 
 VBAPanner::Signal::Signal (Session& session, VBAPanner& p, uint32_t n)
-        : azimuth_control (new PanControllable (session, string_compose (_("azimuth %1"), n+1), &p, Evoral::Parameter (PanAzimuthAutomation, 0, n)))
-        , elevation_control (new PanControllable (session, string_compose (_("elevation %1"), n+1), &p, Evoral::Parameter (PanElevationAutomation, 0, n)))
 {
         gains[0] = gains[1] = gains[2] = 0;
         desired_gains[0] = desired_gains[1] = desired_gains[2] = 0;
@@ -40,44 +39,86 @@ VBAPanner::Signal::Signal (Session& session, VBAPanner& p, uint32_t n)
 
 VBAPanner::VBAPanner (boost::shared_ptr<Pannable> p, Speakers& s)
 	: Panner (p)
-	, _dirty (true)
 	, _speakers (VBAPSpeakers::instance (s))
 {
+        _pannable->pan_azimuth_control->Changed.connect_same_thread (*this, boost::bind (&VBAPanner::update, this));
+        _pannable->pan_width_control->Changed.connect_same_thread (*this, boost::bind (&VBAPanner::update, this));
+
+        update ();
 }
 
 VBAPanner::~VBAPanner ()
 {
-        for (vector<Signal*>::iterator i = _signals.begin(); i != _signals.end(); ++i) {
-                delete *i;
-        }
+        clear_signals ();
 }
 
 void
-VBAPanner::configure_io (const ChanCount& in, const ChanCount& /* ignored - we use Speakers */)
+VBAPanner::clear_signals ()
+{
+        for (vector<Signal*>::iterator i = _signals.begin(); i != _signals.end(); ++i) {
+                delete *i;
+        }
+        _signals.clear ();
+}
+
+void
+VBAPanner::configure_io (ChanCount in, ChanCount /* ignored - we use Speakers */)
 {
         uint32_t n = in.n_audio();
 
-        /* 2d panning: spread signals equally around a circle */
-        
-        double degree_step = 360.0 / _speakers.n_speakers();
-        double deg;
-        
-        /* even number of signals? make sure the top two are either side of "top".
-           otherwise, just start at the "top" (90.0 degrees) and rotate around
-        */
-        
-        if (n % 2) {
-                deg = 90.0 - degree_step;
-        } else {
-                deg = 90.0;
-        }
+        clear_signals ();
 
-        _signals.clear ();
-        
         for (uint32_t i = 0; i < n; ++i) {
                 _signals.push_back (new Signal (_pannable->session(), *this, i));
-                _signals[i]->direction = AngularVector (deg, 0.0);
-                deg += degree_step;
+        }
+
+        update ();
+}
+
+void
+VBAPanner::update ()
+{
+        /* recompute signal directions based on panner azimuth and width (diffusion) parameters)
+         */
+
+        /* panner azimuth control is [0 .. 1.0] which we interpret as [0 .. 360] degrees
+         */
+
+        double center = _pannable->pan_azimuth_control->get_value() * 360.0;
+
+        /* panner width control is [-1.0 .. 1.0]; we ignore sign, and map to [0 .. 360] degrees
+           so that a width of 1 corresponds to a signal equally present from all directions, 
+           and a width of zero corresponds to a point source from the "center" (above)
+        */
+
+        double w = fabs (_pannable->pan_width_control->get_value()) * 360.0;
+
+        double min_dir = center - w;
+        min_dir = max (min (min_dir, 360.0), 0.0);
+
+        double max_dir = center + w;
+        max_dir = max (min (max_dir, 360.0), 0.0);
+
+        double degree_step_per_signal = (max_dir - min_dir) / _signals.size();
+        double signal_direction = min_dir;
+
+        for (vector<Signal*>::iterator s = _signals.begin(); s != _signals.end(); ++s) {
+
+                Signal* signal = *s;
+
+                signal->direction = AngularVector (signal_direction, 0.0);
+
+                compute_gains (signal->desired_gains, signal->desired_outputs, signal->direction.azi, signal->direction.ele);
+                        cerr << " @ " << signal->direction.azi << " /= " << signal->direction.ele
+                             << " Outputs: "
+                             << signal->desired_outputs[0] + 1 << ' '
+                             << signal->desired_outputs[1] + 1 << ' '
+                             << " Gains "
+                             << signal->desired_gains[0] << ' '
+                             << signal->desired_gains[1] << ' '
+                             << endl;
+
+                signal_direction += degree_step_per_signal;
         }
 }
 
@@ -141,49 +182,29 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 		gains[1] /= power;
 		gains[2] /= power;
 	}
-
-	_dirty = false;
 }
 
 void
-VBAPanner::do_distribute (BufferSet& inbufs, BufferSet& obufs, gain_t gain_coefficient, pframes_t nframes)
+VBAPanner::distribute (BufferSet& inbufs, BufferSet& obufs, gain_t gain_coefficient, pframes_t nframes)
 {
-	bool was_dirty = _dirty;
         uint32_t n;
         vector<Signal*>::iterator s;
 
         assert (inbufs.count().n_audio() == _signals.size());
 
-        /* XXX need to handle mono case */
-
         for (s = _signals.begin(), n = 0; s != _signals.end(); ++s, ++n) {
 
                 Signal* signal (*s);
 
-                if (was_dirty) {
-                        compute_gains (signal->desired_gains, signal->desired_outputs, signal->direction.azi, signal->direction.ele);
-                        cerr << " @ " << signal->direction.azi << " /= " << signal->direction.ele
-                             << " Outputs: "
-                             << signal->desired_outputs[0] + 1 << ' '
-                             << signal->desired_outputs[1] + 1 << ' '
-                             << " Gains "
-                             << signal->desired_gains[0] << ' '
-                             << signal->desired_gains[1] << ' '
-                             << endl;
-                }
-                
-                do_distribute_one (inbufs.get_audio (n), obufs, gain_coefficient, nframes, n);
+                distribute_one (inbufs.get_audio (n), obufs, gain_coefficient, nframes, n);
 
-                if (was_dirty) {
-                        memcpy (signal->gains, signal->desired_gains, sizeof (signal->gains));
-                        memcpy (signal->outputs, signal->desired_outputs, sizeof (signal->outputs));
-                }
+                memcpy (signal->gains, signal->desired_gains, sizeof (signal->gains));
+                memcpy (signal->outputs, signal->desired_outputs, sizeof (signal->outputs));
         }
 }
 
-
 void
-VBAPanner::do_distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coefficient, pframes_t nframes, uint32_t which)
+VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coefficient, pframes_t nframes, uint32_t which)
 {
 	Sample* const src = srcbuf.data();
 	Sample* dst;
@@ -228,8 +249,8 @@ VBAPanner::do_distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 }
 
 void 
-VBAPanner::do_distribute_one_automated (AudioBuffer& src, BufferSet& obufs,
-                                        framepos_t start, framepos_t end, pframes_t nframes, pan_t** buffers, uint32_t which)
+VBAPanner::distribute_one_automated (AudioBuffer& src, BufferSet& obufs,
+                                     framepos_t start, framepos_t end, pframes_t nframes, pan_t** buffers, uint32_t which)
 {
 }
 
@@ -253,44 +274,10 @@ VBAPanner::set_state (const XMLNode& node, int /*version*/)
 	return 0;
 }
 
-boost::shared_ptr<AutomationControl>
-VBAPanner::azimuth_control (uint32_t n)
-{
-        if (n >= _signals.size()) {
-                return boost::shared_ptr<AutomationControl>();
-        }
-        return _signals[n]->azimuth_control;
-}
-
-boost::shared_ptr<AutomationControl>
-VBAPanner::evelation_control (uint32_t n)
-{
-        if (n >= _signals.size()) {
-                return boost::shared_ptr<AutomationControl>();
-        }
-        return _signals[n]->elevation_control;
-}
-
 Panner*
 VBAPanner::factory (boost::shared_ptr<Pannable> p, Speakers& s)
 {
 	return new VBAPanner (p, s);
-}
-
-string
-VBAPanner::describe_parameter (Evoral::Parameter param)
-{
-        stringstream ss;
-        switch (param.type()) {
-        case PanElevationAutomation:
-                return string_compose ( _("Pan:elevation %1"), param.id() + 1);
-        case PanWidthAutomation:
-                return string_compose ( _("Pan:diffusion %1"), param.id() + 1);
-        case PanAzimuthAutomation:
-                return string_compose ( _("Pan:azimuth %1"), param.id() + 1);
-        }
-
-        return Automatable::describe_parameter (param);
 }
 
 ChanCount
@@ -303,4 +290,26 @@ ChanCount
 VBAPanner::out() const
 {
         return ChanCount (DataType::AUDIO, _speakers.n_speakers());
+}
+
+std::set<Evoral::Parameter> 
+VBAPanner::what_can_be_automated() const
+{
+        set<Evoral::Parameter> s;
+        s.insert (Evoral::Parameter (PanAzimuthAutomation));
+        s.insert (Evoral::Parameter (PanWidthAutomation));
+        return s;
+}
+        
+string
+VBAPanner::describe_parameter (Evoral::Parameter p)
+{
+        switch (p.type()) {
+        case PanAzimuthAutomation:
+                return _("Direction");
+        case PanWidthAutomation:
+                return _("Diffusion");
+        default:
+                return _pannable->describe_parameter (p);
+        }
 }

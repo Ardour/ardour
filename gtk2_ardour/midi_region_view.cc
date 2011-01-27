@@ -1874,6 +1874,16 @@ MidiRegionView::unique_select(ArdourCanvas::CanvasNoteEvent* ev)
 }
 
 void
+MidiRegionView::select_all_notes ()
+{
+        clear_selection ();
+
+	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+                add_to_selection (*i);
+        }
+}
+
+void
 MidiRegionView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend)
 {
 	uint8_t low_note = 127;

@@ -165,6 +165,7 @@ static const char* authors[] = {
 	N_("Petter Sundlöf"),
 	N_("Mike Täht"),
 	N_("Thorsten Wilms"),
+        N_("Robin Gareus"),
 	0
 };
 

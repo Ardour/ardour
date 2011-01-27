@@ -31,6 +31,7 @@
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/keyboard.h"
 
+#include "ardour/pannable.h"
 #include "ardour/panner.h"
 
 #include "ardour_ui.h"
@@ -53,9 +54,12 @@ static const int top_step = 2;
 StereoPanner::ColorScheme StereoPanner::colors[3];
 bool StereoPanner::have_colors = false;
 
-StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost::shared_ptr<PBD::Controllable> width)
-        : position_control (position)
-        , width_control (width)
+using namespace ARDOUR;
+
+StereoPanner::StereoPanner (boost::shared_ptr<Panner> panner)
+        : _panner (panner)
+        , position_control (_panner->pannable()->pan_azimuth_control)
+        , width_control (_panner->pannable()->pan_width_control)
         , dragging (false)
         , dragging_position (false)
         , dragging_left (false)
@@ -66,8 +70,8 @@ StereoPanner::StereoPanner (boost::shared_ptr<PBD::Controllable> position, boost
         , detented (false)
         , drag_data_window (0)
         , drag_data_label (0)
-        , position_binder (position)
-        , width_binder (width)
+        , position_binder (position_control)
+        , width_binder (width_control)
 {
         if (!have_colors) {
                 set_colors ();
@@ -326,8 +330,9 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
                                         /* 2ndary-double click on right, collapse to hard right */
                                         width_control->set_value (0);
                                         position_control->set_value (1.0);
+                                } else {
+                                        position_control->set_value (max_pos);
                                 }
-                                position_control->set_value (max_pos);
                         } else {
                                 position_control->set_value (0.5);
                         }

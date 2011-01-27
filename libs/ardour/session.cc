@@ -99,7 +99,7 @@
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
 #include "ardour/graph.h"
-#include "ardour/vbap_speakers.h"
+#include "ardour/speakers.h"
 #include "ardour/operations.h"
 
 #include "midi++/port.h"
@@ -4207,10 +4207,6 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 Speakers&
 Session::get_speakers() 
 {
-        if (!_speakers) {
-                _speakers = new Speakers;
-        }
-
         return *_speakers;
 }
 

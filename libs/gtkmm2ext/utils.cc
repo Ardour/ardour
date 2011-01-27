@@ -377,3 +377,12 @@ Gtkmm2ext::physical_screen_width (Glib::RefPtr<Gdk::Window> win)
                 return gdk_screen_get_width (scr);
         }
 }
+
+void
+Gtkmm2ext::container_clear (Gtk::Container& c)
+{
+        list<Gtk::Widget*> children = c.get_children();
+        for (list<Gtk::Widget*>::iterator child = children.begin(); child != children.end(); ++child) {
+                c.remove (**child);
+        }
+}

@@ -26,7 +26,8 @@
 
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
-#include "ardour/vbap_speakers.h"
+
+#include "vbap_speakers.h"
 
 namespace ARDOUR {
 
@@ -39,26 +40,24 @@ public:
 	VBAPanner (boost::shared_ptr<Pannable>, Speakers& s);
 	~VBAPanner ();
 
-        void configure_io (const ChanCount& in, const ChanCount& /* ignored - we use Speakers */);
+        void configure_io (ChanCount in, ChanCount /* ignored - we use Speakers */);
         ChanCount in() const;
         ChanCount out() const;
 
+        std::set<Evoral::Parameter> what_can_be_automated() const;
+
 	static Panner* factory (boost::shared_ptr<Pannable>, Speakers& s);
 
-	void do_distribute (BufferSet& ibufs, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes);
-	void do_distribute_automated (BufferSet& ibufs, BufferSet& obufs,
-	                              framepos_t start, framepos_t end, pframes_t nframes, pan_t** buffers);
+	void distribute (BufferSet& ibufs, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes);
 
 	void set_azimuth_elevation (double azimuth, double elevation);
+
+        std::string describe_parameter (Evoral::Parameter);
 
 	XMLNode& state (bool full_state);
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-        boost::shared_ptr<AutomationControl> azimuth_control (uint32_t signal);
-        boost::shared_ptr<AutomationControl> evelation_control (uint32_t signal);
-
-        std::string describe_parameter (Evoral::Parameter param);
 
 private:
         struct Signal {
@@ -67,20 +66,19 @@ private:
             double desired_gains[3];
             int    outputs[3];
             int    desired_outputs[3];
-            boost::shared_ptr<AutomationControl> azimuth_control;
-            boost::shared_ptr<AutomationControl> elevation_control;
 
             Signal (Session&, VBAPanner&, uint32_t which);
         };
 
         std::vector<Signal*> _signals;
-	bool                _dirty;
         VBAPSpeakers&       _speakers;
         
 	void compute_gains (double g[3], int ls[3], int azi, int ele);
+        void update ();
+        void clear_signals ();
 
-	void do_distribute_one (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which);
-	void do_distribute_one_automated (AudioBuffer& src, BufferSet& obufs,
+	void distribute_one (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which);
+	void distribute_one_automated (AudioBuffer& src, BufferSet& obufs,
                                           framepos_t start, framepos_t end, pframes_t nframes, 
                                           pan_t** buffers, uint32_t which);
 };

@@ -394,6 +394,10 @@ ControlList::add (double when, double value)
            control surface (GUI, MIDI, OSC etc) 
         */
 
+        if (!clamp_value (when, value)) {
+                return;
+        }
+
 	{
 		Glib::Mutex::Lock lm (_lock);
 		ControlEvent cp (when, 0.0f);

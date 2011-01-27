@@ -38,8 +38,8 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, Role r)
-	: Delivery (s, mm, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1), r)
+Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, Role r)
+	: Delivery (s, p, mm, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1), r)
 	, _metering (false)
 {
 	_amp.reset (new Amp (_session));

@@ -45,4 +45,5 @@ uint64_t PBD::DEBUG::MidiClock = PBD::new_debug_bit ("midiclock");
 uint64_t PBD::DEBUG::Monitor = PBD::new_debug_bit ("monitor");
 uint64_t PBD::DEBUG::Solo = PBD::new_debug_bit ("solo");
 uint64_t PBD::DEBUG::AudioPlayback = PBD::new_debug_bit ("audioplayback");
+uint64_t PBD::DEBUG::Panning = PBD::new_debug_bit ("panning");
 

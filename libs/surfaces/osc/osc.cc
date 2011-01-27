@@ -870,7 +870,7 @@ OSC::route_set_pan_stereo_position (int rid, float pos)
 	if (r) {
                 boost::shared_ptr<Panner> panner = r->panner();
                 if (panner) {
-                        panner->set_stereo_position (pos);
+                        panner->set_position (pos);
                 }
 	}
 	
@@ -888,7 +888,7 @@ OSC::route_set_pan_stereo_width (int rid, float pos)
 	if (r) {
                 boost::shared_ptr<Panner> panner = r->panner();
                 if (panner) {
-                        panner->set_stereo_width (pos);
+                        panner->set_width (pos);
                 }
 	}
 	

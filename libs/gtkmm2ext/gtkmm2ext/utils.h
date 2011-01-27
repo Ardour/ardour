@@ -24,6 +24,7 @@
 #include <string>
 #include <stdint.h>
 
+#include <gtkmm/container.h>
 #include <gtkmm/treeview.h>
 #include <gdkmm/window.h> /* for WMDecoration */
 #include <gdkmm/pixbuf.h>
@@ -86,6 +87,8 @@ namespace Gtkmm2ext {
 
         int physical_screen_height (Glib::RefPtr<Gdk::Window>);
         int physical_screen_width (Glib::RefPtr<Gdk::Window>);
+
+        void container_clear (Gtk::Container&);
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */

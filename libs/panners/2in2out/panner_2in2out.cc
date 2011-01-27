@@ -71,21 +71,21 @@ extern "C" { PanPluginDescriptor* panner_descriptor () { return &_descriptor; } 
 Panner2in2out::Panner2in2out (boost::shared_ptr<Pannable> p)
 	: Panner (p)
 {
-        _pannable->pan_azimuth_control->set_value (0.5);
-        _pannable->pan_width_control->set_value (1.0);
-
-        /* LEFT SIGNAL, panned hard left */
-        left[0] = 1.0;
-        right[0] = 0.0;
-        desired_left[0] = left_interp[0] = left[0];
-        desired_right[0] = right_interp[0] = right[0];
-
-        /* RIGHT SIGNAL, panned hard right */
-        left[1] = 0;
-        right[1] = 1.0;
-        desired_left[1] = left_interp[1] = left[1];
-        desired_right[1] = right_interp[1] = right[1];
-
+        if (!_pannable->has_state()) {
+                _pannable->pan_azimuth_control->set_value (0.5);
+                _pannable->pan_width_control->set_value (1.0);
+        } 
+        
+        update ();
+        
+        /* LEFT SIGNAL */
+        left_interp[0] = left[0] = desired_left[0];
+        right_interp[0] = right[0] = desired_right[0]; 
+        
+        /* RIGHT SIGNAL */
+        left_interp[1] = left[1] = desired_left[1];
+        right_interp[1] = right[1] = desired_right[1];
+        
         _pannable->pan_azimuth_control->Changed.connect_same_thread (*this, boost::bind (&Panner2in2out::update, this));
         _pannable->pan_width_control->Changed.connect_same_thread (*this, boost::bind (&Panner2in2out::update, this));
 }
@@ -141,8 +141,6 @@ Panner2in2out::update ()
         const double width = _pannable->pan_width_control->get_value();
         const double direction_as_lr_fract = _pannable->pan_azimuth_control->get_value();
 
-        cerr << "new pan values width=" << width << " LR = " << direction_as_lr_fract << endl;
-
         if (width < 0.0) {
                 pos[0] = direction_as_lr_fract + (width/2.0); // left signal lr_fract
                 pos[1] = direction_as_lr_fract - (width/2.0); // right signal lr_fract
@@ -190,20 +188,14 @@ Panner2in2out::clamp_width (double& w)
 bool
 Panner2in2out::clamp_stereo_pan (double& direction_as_lr_fract, double& width)
 {
-        double r_pos = direction_as_lr_fract + (width/2.0);
-        double l_pos = direction_as_lr_fract - (width/2.0);
-        bool can_move_left = true;
-        bool can_move_right = true;
+        double r_pos;
+        double l_pos;
 
-        cerr << "Clamp pos = " << direction_as_lr_fract << " w = " << width << endl;
+        width = max (min (width, 1.0), -1.0);
+        direction_as_lr_fract = max (min (direction_as_lr_fract, 1.0), 0.0);
 
-        if (width > 1.0 || width < 1.0) {
-                return false;
-        }
-
-        if (direction_as_lr_fract > 1.0 || direction_as_lr_fract < 0.0) {
-                return false;
-        }
+        r_pos = direction_as_lr_fract + (width/2.0);
+        l_pos = direction_as_lr_fract - (width/2.0);
 
         if (width < 0.0) {
                 swap (r_pos, l_pos);
@@ -213,19 +205,20 @@ Panner2in2out::clamp_stereo_pan (double& direction_as_lr_fract, double& width)
            is already there, we're not moving the left signal. 
         */
         
-        if (l_pos <= 0.0 && desired_left[0] <= 0.0) {
-                can_move_left = false;
+        if (l_pos < 0.0) {
+                return false;
         }
 
         /* if the new right position is less than or equal to 1.0 (hard right) and the right panner
            is already there, we're not moving the right signal. 
         */
         
-        if (r_pos >= 1.0 && desired_right[1] >= 1.0) {
-                can_move_right = false;
+        if (r_pos > 1.0) {
+                return false;
+                
         }
 
-        return can_move_left && can_move_right;
+        return true;
 }
 
 void
@@ -459,3 +452,24 @@ Panner2in2out::set_state (const XMLNode& node, int version)
 	return 0;
 }
 
+std::set<Evoral::Parameter> 
+Panner2in2out::what_can_be_automated() const
+{
+        set<Evoral::Parameter> s;
+        s.insert (Evoral::Parameter (PanAzimuthAutomation));
+        s.insert (Evoral::Parameter (PanWidthAutomation));
+        return s;
+}
+
+string
+Panner2in2out::describe_parameter (Evoral::Parameter p)
+{
+        switch (p.type()) {
+        case PanAzimuthAutomation:
+                return _("L/R");
+        case PanWidthAutomation:
+                return _("Width");
+        default:
+                return _pannable->describe_parameter (p);
+        }
+}

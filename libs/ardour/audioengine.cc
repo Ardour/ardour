@@ -99,7 +99,9 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 	Evoral::Parameter p(NullAutomation);
 	p = EventTypeMap::instance().new_parameter(NullAutomation);
 	p = EventTypeMap::instance().new_parameter(GainAutomation);
-	p = EventTypeMap::instance().new_parameter(PanAutomation);
+	p = EventTypeMap::instance().new_parameter(PanAzimuthAutomation);
+	p = EventTypeMap::instance().new_parameter(PanElevationAutomation);
+	p = EventTypeMap::instance().new_parameter(PanWidthAutomation);
 	p = EventTypeMap::instance().new_parameter(PluginAutomation);
 	p = EventTypeMap::instance().new_parameter(SoloAutomation);
 	p = EventTypeMap::instance().new_parameter(MuteAutomation);

@@ -35,7 +35,9 @@
 #include "ardour/amp.h"
 #include "ardour/event_type_map.h"
 #include "ardour/midi_track.h"
+#include "ardour/pannable.h"
 #include "ardour/panner.h"
+#include "ardour/pan_controllable.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"
 
@@ -46,6 +48,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 framecnt_t Automatable::_automation_interval = 0;
+const string Automatable::xml_node_name = X_("Automation");
 
 Automatable::Automatable(Session& session)
 	: _a_session(session)
@@ -182,9 +185,6 @@ Automatable::describe_parameter (Evoral::Parameter param)
 
 	if (param == Evoral::Parameter(GainAutomation)) {
 		return _("Fader");
-	} else if (param.type() == PanAutomation) {
-		/* ID's are zero-based, present them as 1-based */
-		return (string_compose(_("Pan %1"), param.id() + 1));
 	} else if (param.type() == MidiCCAutomation) {
 		return string_compose("%1: %2 [%3]",
 				param.id() + 1, midi_name(param.id()), int(param.channel()) + 1);
@@ -255,19 +255,21 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 				continue;
                         }
 
-			boost::shared_ptr<AutomationList> al (new AutomationList(**niter, param));
 
+			
 			if (!id_prop) {
 				warning << "AutomationList node without automation-id property, "
 					<< "using default: " << EventTypeMap::instance().to_symbol(legacy_param) << endmsg;
 			}
 
-			boost::shared_ptr<Evoral::Control> existing = control(param);
+			boost::shared_ptr<AutomationControl> existing = automation_control (param);
+
 			if (existing) {
-				existing->set_list(al);
+                                existing->alist()->set_state (**niter, 3000);
 			} else {
-			    boost::shared_ptr<Evoral::Control> newcontrol = control_factory(param);
-				add_control(newcontrol);
+                                boost::shared_ptr<Evoral::Control> newcontrol = control_factory(param);
+				add_control (newcontrol);
+                                boost::shared_ptr<AutomationList> al (new AutomationList(**niter, param));
 				newcontrol->set_list(al);
 			}
 
@@ -285,7 +287,7 @@ XMLNode&
 Automatable::get_automation_xml_state ()
 {
 	Glib::Mutex::Lock lm (control_lock());
-	XMLNode* node = new XMLNode (X_("Automation"));
+	XMLNode* node = new XMLNode (Automatable::xml_node_name);
 
 	if (controls().empty()) {
 		return *node;
@@ -455,13 +457,12 @@ Automatable::control_factory(const Evoral::Parameter& param)
 		} else {
 			warning << "GainAutomation for non-Amp" << endl;
 		}
-	} else if (param.type() == PanAutomation) {
-		Panner* panner = dynamic_cast<Panner*>(this);
-		if (panner) {
-                        StreamPanner& sp (panner->streampanner (param.channel()));
-			control = new StreamPanner::PanControllable (_a_session, X_("direction"), &sp, param);
+	} else if (param.type() == PanAzimuthAutomation || param.type() == PanWidthAutomation || param.type() == PanElevationAutomation) {
+		Pannable* pannable = dynamic_cast<Pannable*>(this);
+		if (pannable) {
+			control = new PanControllable (_a_session, pannable->describe_parameter (param), pannable, param);
 		} else {
-			warning << "PanAutomation for non-Panner" << endl;
+			warning << "PanAutomation for non-Pannable" << endl;
 		}
 	}
 

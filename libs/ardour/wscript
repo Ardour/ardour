@@ -137,7 +137,12 @@ libardour_sources = [
 	'named_selection.cc',
 	'onset_detector.cc',
 	'operations.cc',
-	'panner.cc',
+        'pan_controllable.cc',
+        'pannable.cc',
+        'panner.cc',
+        'panner_manager.cc',
+        'panner_search_path.cc',
+        'panner_shell.cc',
 	'pcm_utils.cc',
 	'pi_controller.cc',
 	'playlist.cc',
@@ -205,8 +210,6 @@ libardour_sources = [
 	'unknown_processor.cc',
 	'user_bundle.cc',
 	'utils.cc',
-        'vbap.cc',
-        'vbap_speakers.cc',
 	'version.cc'
 ]
 

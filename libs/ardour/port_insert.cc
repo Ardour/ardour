@@ -41,9 +41,9 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PortInsert::PortInsert (Session& s, boost::shared_ptr<MuteMaster> mm)
+PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster> mm)
 	: IOProcessor (s, true, true, string_compose (_("insert %1"), (bitslot = s.next_insert_id()) + 1), "")
-	, _out (new Delivery (s, _output, mm, _name, Delivery::Insert))
+	, _out (new Delivery (s, _output, pannable, mm, _name, Delivery::Insert))
 {
         _mtdm = 0;
         _latency_detect = false;

@@ -52,10 +52,6 @@ void RouteSignal::connect()
 	
 	if (_route->panner()) {
 		_route->panner()->Changed.connect(connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false), midi_ui_context());
-		
-		for ( unsigned int i = 0; i < _route->panner()->npanners(); ++i ) {
-			_route->panner()->streampanner(i).Changed.connect (connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false), midi_ui_context());
-		}
 	}
 	
 	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);

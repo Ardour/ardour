@@ -32,8 +32,8 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace std;
 
-InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost::shared_ptr<Route> sendto, Delivery::Role role)
-	: Send (s, mm, role)
+InternalSend::InternalSend (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, boost::shared_ptr<Route> sendto, Delivery::Role role)
+	: Send (s, p, mm, role)
 	, target (0)
 {
         if (sendto) {

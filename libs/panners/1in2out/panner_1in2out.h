@@ -31,21 +31,25 @@
 #include "pbd/cartesian.h"
 
 #include "ardour/types.h"
-#include "ardour/automation_control.h"
-#include "ardour/automatable.h"
+#include "ardour/panner.h"
 
 namespace ARDOUR {
 
-class PannerStereoBase : public class Panner
+class Panner1in2out : public Panner
 {
   public:
-	PannerStereoBase (Panner&);
-	~PannerStereoBase ();
+	Panner1in2out (boost::shared_ptr<Pannable>);
+	~Panner1in2out ();
 
         void set_position (double);
+        bool clamp_position (double&);
+
+        double position() const;
 
         ChanCount in() const { return ChanCount (DataType::AUDIO, 1); }
         ChanCount out() const { return ChanCount (DataType::AUDIO, 2); }
+
+        std::set<Evoral::Parameter> what_can_be_automated() const;
 
 	/* this class just leaves the pan law itself to be defined
 	   by the update(), do_distribute_automated()
@@ -53,18 +57,30 @@ class PannerStereoBase : public class Panner
 	   and a type name. See EqualPowerStereoPanner as an example.
 	*/
 
-	void do_distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes);
+        static Panner* factory (boost::shared_ptr<Pannable>, Speakers&);
+
+        std::string describe_parameter (Evoral::Parameter);
+
+	XMLNode& state (bool full_state); 
+	XMLNode& get_state (void); 
+	int      set_state (const XMLNode&, int version);
 
   protected:
-        boost::shared_ptr<AutomationControl> _position;
 	float left;
 	float right;
 	float desired_left;
 	float desired_right;
 	float left_interp;
 	float right_interp;
+
+	void distribute_one (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which);
+        void distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
+                                       framepos_t start, framepos_t end, pframes_t nframes,
+                                       pan_t** buffers, uint32_t which);
+
+        void update ();
 };
 
-}
+} // namespace
 
 #endif /* __ardour_panner_1in2out_h__ */

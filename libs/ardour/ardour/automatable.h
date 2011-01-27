@@ -44,7 +44,6 @@ class Automatable : virtual public Evoral::ControlSet
 public:
 	Automatable(Session&);
         Automatable (const Automatable& other);
-	Automatable();
 
 	virtual ~Automatable() {}
 
@@ -92,6 +91,8 @@ public:
 	}
 
 	typedef Evoral::ControlSet::Controls Controls;
+
+        static const std::string xml_node_name;
 
 	int set_automation_xml_state (const XMLNode&, Evoral::Parameter default_param);
 	XMLNode& get_automation_xml_state();

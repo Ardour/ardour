@@ -2628,11 +2628,6 @@ Editor::set_internal_edit (bool yn)
 		ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Draw/Edit MIDI Notes"));
 		mouse_mode_toggled (mouse_mode);
 
-		/* deselect everything to avoid confusion when e.g. we can't now cut a previously selected
-		   region because cut means "cut note" rather than "cut region".
-		*/
-		selection->clear ();
-
 	} else {
 
 		mouse_select_button.set_image (*(manage (new Image (::get_icon("tool_range")))));

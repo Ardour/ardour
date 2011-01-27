@@ -36,6 +36,7 @@
 #include "ardour/delivery.h"
 #include "ardour/session.h"
 #include "ardour/panner.h"
+#include "ardour/pannable.h"
 #include "ardour/route.h"
 
 #include "i18n.h"
@@ -50,13 +51,7 @@ const int PannerUI::pan_bar_height = 40;
 
 PannerUI::PannerUI (Session* s)
 	: _current_nouts (-1)
-	, _current_npans (-1)
-	, hAdjustment(0.0, 0.0, 0.0)
-	, vAdjustment(0.0, 0.0, 0.0)
-	, panning_viewport(hAdjustment, vAdjustment)
-	, panning_up_arrow (Gtk::ARROW_UP, Gtk::SHADOW_OUT)
-	, panning_down_arrow (Gtk::ARROW_DOWN, Gtk::SHADOW_OUT)
-	, panning_link_button (_("link"))
+	, _current_nins (-1)
 	, pan_automation_style_button ("")
 	, pan_automation_state_button ("")
 {
@@ -80,52 +75,13 @@ PannerUI::PannerUI (Session* s)
 	//set_size_request_to_display_given_text (pan_automation_state_button, X_("O"), 2, 2);
 	//set_size_request_to_display_given_text (pan_automation_style_button, X_("0"), 2, 2);
 
-	panning_viewport.set_name (X_("BaseFrame"));
-
-	ARDOUR_UI::instance()->set_tip (panning_link_button,
-						   _("panning link control"));
-	ARDOUR_UI::instance()->set_tip (panning_link_direction_button,
-						   _("panning link direction"));
-
 	pan_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	pan_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
 	pan_automation_style_button.signal_button_press_event().connect (sigc::mem_fun(*this, &PannerUI::pan_automation_style_button_event), false);
 	pan_automation_state_button.signal_button_press_event().connect (sigc::mem_fun(*this, &PannerUI::pan_automation_state_button_event), false);
 
-	panning_link_button.set_name (X_("PanningLinkButton"));
-	panning_link_direction_button.set_name (X_("PanningLinkDirectionButton"));
-
-	panning_link_box.pack_start (panning_link_button, true, true);
-	panning_link_box.pack_start (panning_link_direction_button, true, true);
-	panning_link_box.pack_start (pan_automation_state_button, true, true);
-
-	/* the pixmap will be reset at some point, but the key thing is that
-	   we need a pixmap in the button just to get started.
-	*/
-	panning_link_direction_button.add (*(manage (new Image (get_xpm("forwardblarrow.xpm")))));
-
-	panning_link_direction_button.signal_clicked().connect
-		(sigc::mem_fun(*this, &PannerUI::panning_link_direction_clicked));
-
-	panning_link_button.signal_button_press_event().connect
-		(sigc::mem_fun(*this, &PannerUI::panning_link_button_press), false);
-	panning_link_button.signal_button_release_event().connect
-		(sigc::mem_fun(*this, &PannerUI::panning_link_button_release), false);
-
-	panning_up.set_border_width (3);
-	panning_down.set_border_width (3);
-	panning_up.add (panning_up_arrow);
-	panning_down.add (panning_down_arrow);
-	panning_up.set_name (X_("PanScrollerBase"));
-	panning_down.set_name (X_("PanScrollerBase"));
-	panning_up_arrow.set_name (X_("PanScrollerArrow"));
-	panning_down_arrow.set_name (X_("PanScrollerArrow"));
-
 	pan_vbox.set_spacing (2);
-	pan_vbox.pack_start (panning_viewport, Gtk::PACK_SHRINK);
-	pan_vbox.pack_start (panning_link_box, Gtk::PACK_SHRINK);
-        
 	pack_start (pan_vbox, true, true);
 
 	twod_panner = 0;
@@ -158,18 +114,16 @@ PannerUI::set_panner (boost::shared_ptr<Panner> p)
 	}
 
 	_panner->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::panner_changed, this, this), gui_context());
-	_panner->LinkStateChanged.connect (connections, invalidator (*this), boost::bind (&PannerUI::update_pan_linkage, this), gui_context());
 	_panner->StateChanged.connect (connections, invalidator (*this), boost::bind (&PannerUI::update_pan_state, this), gui_context());
 
         /* new panner object, force complete reset of panner GUI
          */
 
         _current_nouts = 0;
-        _current_npans = 0;
+        _current_nins = 0;
 
 	panner_changed (0);
 	update_pan_sensitive ();
-	update_pan_linkage ();
 	pan_automation_state_changed ();
 
 }
@@ -224,61 +178,6 @@ PannerUI::get_controllable()
 	return pan_bars[0]->get_controllable();
 }
 
-bool
-PannerUI::panning_link_button_press (GdkEventButton*)
-{
-	return true;
-}
-
-bool
-PannerUI::panning_link_button_release (GdkEventButton*)
-{
-	if (!ignore_toggle) {
-		_panner->set_linked (!_panner->linked());
-	}
-	return true;
-}
-
-void
-PannerUI::panning_link_direction_clicked()
-{
-	switch (_panner->link_direction()) {
-	case Panner::SameDirection:
-		_panner->set_link_direction (Panner::OppositeDirection);
-		break;
-	default:
-		_panner->set_link_direction (Panner::SameDirection);
-		break;
-	}
-}
-
-void
-PannerUI::update_pan_linkage ()
-{
-	ENSURE_GUI_THREAD (*this, &PannerUI::update_pan_linkage)
-
-	bool const x = _panner->linked();
-	bool const bx = panning_link_button.get_active();
-
-	if (x != bx) {
-
-		ignore_toggle = true;
-		panning_link_button.set_active (x);
-		ignore_toggle = false;
-	}
-
-	panning_link_direction_button.set_sensitive (x);
-
-	switch (_panner->link_direction()) {
-	case Panner::SameDirection:
-	        panning_link_direction_button.set_image (*(manage (new Image (get_xpm ("forwardblarrow.xpm")))));
-		break;
-	default:
-	        panning_link_direction_button.set_image (*(manage (new Image (get_xpm("revdblarrow.xpm")))));
-		break;
-	}
-}
-
 void
 PannerUI::on_size_allocate (Allocation& a)
 {
@@ -288,18 +187,8 @@ PannerUI::on_size_allocate (Allocation& a)
 void
 PannerUI::set_width (Width w)
 {
-	switch (w) {
-	case Wide:
-		panning_link_button.set_label (_("link"));
-		break;
-	case Narrow:
-		panning_link_button.set_label (_("L"));
-		break;
-	}
-
 	_width = w;
 }
-
 
 PannerUI::~PannerUI ()
 {
@@ -319,50 +208,13 @@ PannerUI::~PannerUI ()
 void
 PannerUI::panner_changed (void* src)
 {
-	ENSURE_GUI_THREAD (*this, &PannerUI::panner_changed)
-
 	setup_pan ();
-
-	if (src == this) {
-		return;
-	}
-
-	switch (_panner->npanners()) {
-	case 0:
-		panning_link_direction_button.set_sensitive (false);
-		panning_link_button.set_sensitive (false);
-		return;
-	case 1:
-		panning_link_direction_button.set_sensitive (false);
-		panning_link_button.set_sensitive (false);
-		break;
-	default:
-		panning_link_direction_button.set_sensitive (_panner->linked ());
-		panning_link_button.set_sensitive (true);
-	}
-
-	uint32_t const nouts = _panner->nouts();
-
-	switch (nouts) {
-	case 0:
-	case 1:
-		/* relax */
-		break;
-
-	case 2:
-		break;
-
-	default:
-		// panner->move_puck (pan_value (pans[0], pans[1]), 0.5);
-		break;
-	}
 }
 
 void
 PannerUI::update_pan_state ()
 {
 	/* currently nothing to do */
-	// ENSURE_GUI_THREAD (*this, &PannerUI::update_panner_state)
 }
 
 void
@@ -370,101 +222,81 @@ PannerUI::setup_pan ()
 {
 	if (!_panner) {
 		return;
-	}
+	} 
+	uint32_t const nouts = _panner->out().n_audio();
+	uint32_t const nins = _panner->in().n_audio();
 
-	uint32_t const nouts = _panner->nouts();
-	uint32_t const npans = _panner->npanners();
-
-	if (int32_t (nouts) == _current_nouts && int32_t (npans) == _current_npans) {
+	if (int32_t (nouts) == _current_nouts && int32_t (nins) == _current_nins) {
 		return;
 	}
 
-	_current_nouts = nouts;
-	_current_npans = npans;
-
-        panning_viewport.remove ();
+        container_clear (pan_vbox);
 
         delete twod_panner;
         twod_panner = 0;
         delete _stereo_panner;
         _stereo_panner = 0;
-
+        
 	if (nouts == 0 || nouts == 1) {
 
-		while (!pan_bars.empty()) {
-			delete pan_bars.back();
-			pan_bars.pop_back ();
-		}
+                delete _stereo_panner;
+                delete twod_panner;
 
 		/* stick something into the panning viewport so that it redraws */
 
 		EventBox* eb = manage (new EventBox());
-		panning_viewport.add (*eb);
+		pan_vbox.pack_start (*eb, false, false);
 
 	} else if (nouts == 2) {
 
-		vector<Adjustment*>::size_type p;
-
-		while (!pan_bars.empty()) {
-			delete pan_bars.back();
-			pan_bars.pop_back ();
-		}
-
-                if (npans == 2) {
+                if (nins == 2) {
 
                         /* add integrated 2in/2out panner GUI */
 
-                        _stereo_panner = new StereoPanner (_panner->direction_control(), 
-                                                           _panner->width_control());
+                        boost::shared_ptr<Pannable> pannable = _panner->pannable();
+
+                        _stereo_panner = new StereoPanner (_panner);
                         _stereo_panner->set_size_request (-1, pan_bar_height);
-                        panning_viewport.add (*_stereo_panner);
+                        pan_vbox.pack_start (*_stereo_panner, false, false);
 
                         boost::shared_ptr<AutomationControl> ac;
 
-                        ac = _panner->direction_control();
+                        ac = pannable->pan_azimuth_control;
                         _stereo_panner->StartPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
                                                               boost::weak_ptr<AutomationControl> (ac)));
                         _stereo_panner->StopPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
                                                              boost::weak_ptr<AutomationControl>(ac)));
 
-                        ac = _panner->width_control();
+                        ac = pannable->pan_width_control;
                         _stereo_panner->StartWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
                                                               boost::weak_ptr<AutomationControl> (ac)));
                         _stereo_panner->StopWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
                                                              boost::weak_ptr<AutomationControl>(ac)));
 
-                } else {
+                } else if (nins == 1) {
+                        /* 1-in/2out */
                         
-                        /* N-in/2out - just use a set of single-channel panners */
-
-                        while ((p = pan_bars.size()) < npans) {
-                                
-                                MonoPanner* mp;
-                                boost::shared_ptr<AutomationControl> ac = _panner->pan_control (p);
-
-                                mp = new MonoPanner (_panner->pan_control (p));
-                                
-                                mp->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
+                        MonoPanner* mp;
+                        boost::shared_ptr<Pannable> pannable = _panner->pannable();
+                        boost::shared_ptr<AutomationControl> ac = pannable->pan_azimuth_control;
+                        
+                        mp = new MonoPanner (ac);
+                        
+                        mp->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
                                                                       boost::weak_ptr<AutomationControl> (ac)));
-                                mp->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
-                                                                     boost::weak_ptr<AutomationControl>(ac)));
-
-                                mp->signal_button_release_event().connect
-                                        (sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) p));
-                                
-                                mp->set_size_request (-1, pan_bar_height);
-                                
-                                pan_bars.push_back (mp);
-                                pan_bar_packer.pack_start (*mp, false, false);
-                        }
+                        mp->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
+                                                             boost::weak_ptr<AutomationControl>(ac)));
                         
-                        /* now that we actually have the pan bars,
-                           set their sensitivity based on current
-                           automation state.
-                        */
+                        mp->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
+                        
+                        mp->set_size_request (-1, pan_bar_height);
                         
                         update_pan_sensitive ();
-                        panning_viewport.add (pan_bar_packer);
+                        pan_vbox.pack_start (*mp, false, false);
+
+                } else {
+                        warning << string_compose (_("No panner user interface is currently available for %1-in/2out tracks/busses"),
+                                                   nins) << endmsg;
                 }
 
 
@@ -474,24 +306,22 @@ PannerUI::setup_pan ()
 			twod_panner = new Panner2d (_panner, 61);
 			twod_panner->set_name ("MixerPanZone");
 			twod_panner->show ();
-
-			twod_panner->signal_button_press_event().connect
-				(sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) 0), false);
+			twod_panner->signal_button_press_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event), false);
 		}
 
 		update_pan_sensitive ();
-		twod_panner->reset (npans);
+		twod_panner->reset (nins);
  		if (big_window) {
- 			big_window->reset (npans);
+ 			big_window->reset (nins);
  		}
 		twod_panner->set_size_request (-1, 61);
 
 		/* and finally, add it to the panner frame */
 
-		panning_viewport.add (*twod_panner);
+                pan_vbox.pack_start (*twod_panner, false, false);
 	}
 
-        panning_viewport.show_all ();
+        pan_vbox.show_all ();
 }
 
 void
@@ -515,13 +345,13 @@ PannerUI::stop_touch (boost::weak_ptr<AutomationControl> wac)
 }
 
 bool
-PannerUI::pan_button_event (GdkEventButton* ev, uint32_t which)
+PannerUI::pan_button_event (GdkEventButton* ev)
 {
 	switch (ev->button) {
 	case 1:
 		if (twod_panner && ev->type == GDK_2BUTTON_PRESS) {
 			if (!big_window) {
-				big_window = new Panner2dWindow (_panner, 400, _panner->npanners());
+				big_window = new Panner2dWindow (_panner, 400, _panner->in().n_audio());
 			}
 			big_window->show ();
 			return true;
@@ -533,7 +363,7 @@ PannerUI::pan_button_event (GdkEventButton* ev, uint32_t which)
 			pan_menu = manage (new Menu);
 			pan_menu->set_name ("ArdourContextMenu");
 		}
-		build_pan_menu (which);
+		build_pan_menu ();
 		pan_menu->popup (1, ev->time);
 		return true;
 		break;
@@ -545,20 +375,12 @@ PannerUI::pan_button_event (GdkEventButton* ev, uint32_t which)
 }
 
 void
-PannerUI::build_pan_menu (uint32_t which)
+PannerUI::build_pan_menu ()
 {
 	using namespace Menu_Helpers;
 	MenuList& items (pan_menu->items());
 
 	items.clear ();
-
-	items.push_back (CheckMenuElem (_("Mute")));
-
-	/* set state first, connect second */
-
-	(dynamic_cast<CheckMenuItem*> (&items.back()))->set_active (_panner->streampanner(which).muted());
-	(dynamic_cast<CheckMenuItem*> (&items.back()))->signal_toggled().connect
-		(sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_mute), which));
 
 	items.push_back (CheckMenuElem (_("Bypass"), sigc::mem_fun(*this, &PannerUI::pan_bypass_toggle)));
 	bypass_menu_item = static_cast<CheckMenuItem*> (&items.back());
@@ -568,16 +390,7 @@ PannerUI::build_pan_menu (uint32_t which)
 	bypass_menu_item->set_active (_panner->bypassed());
 	bypass_menu_item->signal_toggled().connect (sigc::mem_fun(*this, &PannerUI::pan_bypass_toggle));
 
-	items.push_back (MenuElem (_("Reset"), sigc::bind (sigc::mem_fun (*this, &PannerUI::pan_reset), which)));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Reset all"), sigc::mem_fun (*this, &PannerUI::pan_reset_all)));
-}
-
-void
-PannerUI::pan_mute (uint32_t which)
-{
-	StreamPanner& sp = _panner->streampanner(which);
-	sp.set_muted (!sp.muted());
+	items.push_back (MenuElem (_("Reset"), sigc::mem_fun (*this, &PannerUI::pan_reset)));
 }
 
 void
@@ -589,15 +402,9 @@ PannerUI::pan_bypass_toggle ()
 }
 
 void
-PannerUI::pan_reset (uint32_t which)
+PannerUI::pan_reset ()
 {
-	_panner->reset_streampanner (which);
-}
-
-void
-PannerUI::pan_reset_all ()
-{
-	_panner->reset_to_default ();
+	_panner->reset ();
 }
 
 void
@@ -617,26 +424,14 @@ PannerUI::effective_pan_display ()
 void
 PannerUI::update_pan_sensitive ()
 {
-	bool const sensitive = !(_panner->mono()) && !(_panner->automation_state() & Play);
+	bool const sensitive = !(_panner->is_mono()) && !(_panner->pannable()->automation_state() & Play);
 
-	switch (_panner->nouts()) {
-	case 0:
-	case 1:
-		break;
-	case 2:
-		for (vector<MonoPanner*>::iterator i = pan_bars.begin(); i != pan_bars.end(); ++i) {
-			(*i)->set_sensitive (sensitive);
-		}
-		break;
-	default:
-		if (twod_panner) {
-			twod_panner->set_sensitive (sensitive);
-		}
-		if (big_window) {
-			big_window->set_sensitive (sensitive);
-		}
-		break;
-	}
+#ifdef PANNER_HACKS
+        pan_vbox.set_sensitive (sensitive);
+#endif
+        if (big_window) {
+                big_window->set_sensitive (sensitive);
+        }
 }
 
 gint
@@ -700,42 +495,31 @@ PannerUI::pan_automation_style_changed ()
 void
 PannerUI::pan_automation_state_changed ()
 {
-	ENSURE_GUI_THREAD (*this, &PannerUI::pan_automation_state_changed)
-
-	bool x;
+        boost::shared_ptr<Pannable> pannable (_panner->pannable());
 
 	switch (_width) {
 	case Wide:
-	  pan_automation_state_button.set_label (astate_string(_panner->automation_state()));
+                pan_automation_state_button.set_label (astate_string(pannable->automation_state()));
 		break;
 	case Narrow:
-	  pan_automation_state_button.set_label (short_astate_string(_panner->automation_state()));
+                pan_automation_state_button.set_label (short_astate_string(pannable->automation_state()));
 		break;
 	}
 
-	/* when creating a new session, we get to create busses (and
-	   sometimes tracks) with no outputs by the time they get
-	   here.
-	*/
-
-	if (_panner->empty()) {
-		return;
-	}
-
-	x = (_panner->streampanner(0).pan_control()->alist()->automation_state() != Off);
-
+	bool x = (pannable->automation_state() != Off);
+        
 	if (pan_automation_state_button.get_active() != x) {
-	ignore_toggle = true;
+                ignore_toggle = true;
 		pan_automation_state_button.set_active (x);
 		ignore_toggle = false;
 	}
 
 	update_pan_sensitive ();
-
+        
 	/* start watching automation so that things move */
-
+        
 	pan_watching.disconnect();
-
+        
 	if (x) {
 		pan_watching = ARDOUR_UI::RapidScreenUpdate.connect (sigc::mem_fun (*this, &PannerUI::effective_pan_display));
 	}

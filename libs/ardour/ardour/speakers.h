@@ -23,12 +23,15 @@
 #include <iostream>
 
 #include <pbd/signals.h>
+#include <pbd/stateful.h>
 
 #include "ardour/speaker.h"
 
+class XMLNode;
+
 namespace ARDOUR  {
 
-class Speakers {
+class Speakers : public PBD::Stateful {
 public:
 	Speakers ();
 	virtual ~Speakers ();
@@ -38,12 +41,17 @@ public:
 	virtual void move_speaker (int id, const PBD::AngularVector& new_position);
 	virtual void clear_speakers ();
 
+        void setup_default_speakers (uint32_t nspeakers);
+
 	std::vector<Speaker>& speakers() { return _speakers; }
 
 	void dump_speakers (std::ostream&);
 
-	PBD::Signal0<void> Changed;
+        XMLNode& get_state ();
+        int set_state (const XMLNode&, int version);
 
+	PBD::Signal0<void> Changed;
+        
 protected:
 	std::vector<Speaker>  _speakers;
 
