@@ -264,6 +264,23 @@ def set_winegcc(self):
 	self.env.LINK_CXX = self.env.LINK_CC = 'wineg++'
 	self.env.CC = 'winegcc'
 
+def build_color_scheme(path):
+        f = open (path, 'r')
+        color_scheme = ''
+        for line in f:
+                if re.search ('^#@color', line):
+                        line.strip() # remove newline
+                        words = line.split()
+                        if len(color_scheme):
+                                color_scheme += ';'
+                        color_scheme += 'A_' # prefix for color name
+                        color_scheme += words[1]
+                        color_scheme += ':'
+                        color_scheme += words[2]
+        f.close()
+        return color_scheme
+                        
+
 def build(bld):
 	# GTK front-end; if we're using VST we build this as a shared library, otherwise
 	# it's a normal executabale
@@ -412,29 +429,14 @@ def build(bld):
 	# add normal monospace to font dict
 	font_subst_dict['FONT_MONOSPACE_NORMAL'] = 'monospace 10'
 
+        dark_rc_subst_dict = font_subst_dict
+        dark_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme ('gtk2_ardour/ardour3_ui_dark.rc.in')
+
 	# RC files
 	obj              = bld.new_task_gen('subst')
 	obj.source       = 'ardour3_ui_dark.rc.in'
 	obj.target       = 'ardour3_ui_dark.rc'
-	obj.dict         = font_subst_dict
-	obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
-
-	obj              = bld.new_task_gen('subst')
-	obj.source       = 'ardour3_ui_light.rc.in'
-	obj.target       = 'ardour3_ui_light.rc'
-	obj.dict         = font_subst_dict
-	obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
-
-	obj              = bld.new_task_gen('subst')
-	obj.source       = 'ardour3_ui_dark_sae.rc.in'
-	obj.target       = 'ardour3_ui_dark_sae.rc'
-	obj.dict         = font_subst_dict
-	obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
-
-	obj              = bld.new_task_gen('subst')
-	obj.source       = 'ardour3_ui_light_sae.rc.in'
-	obj.target       = 'ardour3_ui_light_sae.rc'
-	obj.dict         = font_subst_dict
+	obj.dict         = dark_rc_subst_dict
 	obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
 
 	# Menus
