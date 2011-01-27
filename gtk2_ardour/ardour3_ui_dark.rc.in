@@ -34,7 +34,9 @@
 #@color midi_track #445033
 #@color audio_bus #262c35
 
-#@color processor_frame_active_send #30F7B0
+#@color send_fg #30F7B0
+#@color send_bg #C4C4B8
+
 #@color processor_frame_selected #E2CC33
 #@color processor_fader_bg #666666
 #@color processor_fader_frame #7F7F7F
@@ -1020,12 +1022,12 @@ style "audio_bus_base" = "very_small_text"
 style "send_strip_base" = "default_base"
 {
   font_name = "@FONT_SMALLER@"
-  fg[NORMAL] = @A_fg
-  bg[NORMAL] = { 0.19, 0.97, 0.69 }	
-  bg[ACTIVE] = { 0.19, 0.97, 0.69 }	
-  bg[PRELIGHT] = { 0.19, 0.97, 0.69 }	
-  bg[INSENSITIVE] = { 0.19, 0.97, 0.69 }	
-  bg[SELECTED] = { 0.19, 0.97, 0.69 }	
+  fg[NORMAL] = @A_send_fg
+  bg[NORMAL] = @A_send_bg
+  bg[ACTIVE] = @A_send_bg
+  bg[PRELIGHT] = @A_send_bg
+  bg[INSENSITIVE] = @A_send_bg
+  bg[SELECTED] = @A_send_bg
 }
 
 style "audio_track_base" = "default_base"
@@ -1299,43 +1301,43 @@ style "processor_frame_selected"
 # Colour of a processor frame when it is a send whose level is being controller by the fader
 style "processor_frame_active_send"
 {
-	bg[NORMAL] = @A_fg_selected
+	bg[NORMAL] = @A_send_fg
 }
 
 # Fader processor's background
 style "processor_fader"
 {
-	bg[NORMAL] = @A_red
+	bg[NORMAL] = @A_processor_fader_bg
 }
 
 # Fader processor's frame
 style "processor_fader_frame"
 {
-	bg[NORMAL] = @A_bg
+	bg[NORMAL] = @A_processor_fader_frame
 }
 
 # Pre-fader processor's background
 style "processor_prefader"
 {
-	bg[NORMAL] = lighter(lighter (@A_fg))
+	bg[NORMAL] = @A_processor_prefader
 }
 
 # Pre-fader processor's frame
 style "processor_prefader_frame"
 {
-	bg[NORMAL] = darker (@A_fg)
+	bg[NORMAL] = @A_processor_prefader_frame
 }
 
 # Post-fader processor's background
 style "processor_postfader"
 {
-	bg[NORMAL] = darker(darker (@A_fg))
+	bg[NORMAL] = @A_processor_postfader
 }
 
 # Post-fader processor's frame
 style "processor_postfader_frame"
 {
-	bg[NORMAL] = lighter (@A_fg)
+	bg[NORMAL] = @A_processor_postfader_frame
 }
 
 # MixerPanZone:
