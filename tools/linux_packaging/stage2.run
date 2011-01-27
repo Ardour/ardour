@@ -479,7 +479,7 @@ fi
 
 echo ""
 echo "Cleaning up"
-rm -rf ${BUNDLE_DIR}
+rm -rf ${BUNDLE_DIR}/
 
 echo ""
 echo "!!! Install Complete !!!"
