@@ -1,0 +1,23 @@
+#!/usr/bin/perl
+
+%colors;
+
+while (<>) {
+    if (/^#\@define/) {
+        @words = split;
+        $colors{$words[1]} = $words[2];
+        next;
+    } elsif (/\@COLOR_SCHEME\@/) {
+        $scheme_string="";
+        foreach $key (sort keys %colors) {
+            $scheme_string .= "A_$key:$colors{$key};"
+        }
+        chop $scheme_string;
+        s/\@COLOR_SCHEME\@/$scheme_string/;
+        print;
+        next;
+    } else {
+        print;
+    }
+}
+    
