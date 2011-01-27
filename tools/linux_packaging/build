@@ -148,8 +148,7 @@ if [ x$PRINT_SYSDEPS != x ] ; then
 fi
 
 echo "Removing old $APPDIR tree ..."
-
-rm -rf $APPDIR
+rm -rf $APPDIR/
 
 echo "Building new app directory structure ..."
 
@@ -431,6 +430,8 @@ OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardo
 
 echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
+checkedIdx=0
+
 while [ true ] ; do 
 	missing=false
 	filelist=`find $APPLIB/ -type f`
@@ -441,6 +442,15 @@ while [ true ] ; do
 			continue
 		fi
 
+		# speed this up a bit by not checking things multiple times.
+		for i in "${depCheckedList[@]}"; do
+			if [ $i == $file ]; then
+				continue 2
+			fi
+		done
+		depCheckedList[$checkIdx]=$file
+		let "checkIdx += 1"
+		
 		# do not include libjack
 		deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | awk '{print $3}'`
 
