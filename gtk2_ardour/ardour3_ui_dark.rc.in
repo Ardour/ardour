@@ -956,6 +956,8 @@ style "recording_big_clock_display" = "non_recording_big_clock_display"
 
 style "transport_clock_display"
 {
+	font_name = "@FONT_BOLD_BIGGER@"
+
 	fg[NORMAL] = @A_control_text
 	fg[ACTIVE] = darker(@A_red)
 	fg[SELECTED] = darker(@A_red)
