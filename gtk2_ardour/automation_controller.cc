@@ -85,8 +85,9 @@ AutomationController::create(
 }
 
 std::string
-AutomationController::get_label (int&)
+AutomationController::get_label (double& xpos)
 {
+        xpos = 0.5;
         return _owner->value_as_string (_controllable);
 }
 

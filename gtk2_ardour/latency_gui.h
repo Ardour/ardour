@@ -32,7 +32,7 @@ public:
 private:
 	LatencyGUI* _latency_gui;
 
-	std::string get_label (int&);
+	std::string get_label (double&);
 };
 
 class LatencyGUI : public Gtk::VBox

@@ -391,23 +391,25 @@ BarController::expose (GdkEventExpose* /*event*/)
 
 	/* draw label */
 
-	int xpos = -1;
+	double xpos = -1;
 	std::string const label = get_label (xpos);
 
 	if (!label.empty()) {
 		
 		layout->set_text (label);
 		
-		int width, height;
+		int width, height, x;
 		layout->get_pixel_size (width, height);
 
 		if (xpos == -1) {
-			xpos = max (3, 1 + (x2 - (width/2)));
-			xpos = min (darea.get_width() - width - 3, xpos);
-		}
-		
+			x = max (3, 1 + (x2 - (width/2)));
+			x = min (darea.get_width() - width - 3, (int) lrint (xpos));
+		} else {
+                        x = lrint (darea.get_width() * xpos);
+                }
+
 		win->draw_layout (get_style()->get_text_gc (get_state()),
-				  xpos,
+				  x,
 				  (darea.get_height()/2) - (height/2),
 				  layout);
 	}

@@ -85,7 +85,7 @@ class BarController : public Gtk::Frame
         sigc::slot<std::string> _label_slot;
         bool                    _use_slot;
 
-	virtual std::string get_label (int& /*x*/) {
+	virtual std::string get_label (double& /*x*/) {
 		return "";
 	}
 	

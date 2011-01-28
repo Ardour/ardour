@@ -25,7 +25,7 @@ static const gchar *_unit_strings[] = {
 std::vector<std::string> LatencyGUI::unit_strings;
 
 std::string
-LatencyBarController::get_label (int&)
+LatencyBarController::get_label (double&)
 {
 	double const nframes = _latency_gui->adjustment.get_value();
 	std::stringstream s;

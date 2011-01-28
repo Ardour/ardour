@@ -55,7 +55,7 @@ public:
 
 private:
 	AutomationController (boost::shared_ptr<ARDOUR::Automatable> parent, boost::shared_ptr<ARDOUR::AutomationControl> ac, Gtk::Adjustment* adj);
-	std::string get_label (int&);
+	std::string get_label (double&);
 
 	void start_touch();
 	void end_touch();
