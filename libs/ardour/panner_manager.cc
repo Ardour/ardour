@@ -107,14 +107,10 @@ PannerManager::select_panner (ChanCount in, ChanCount out)
         int32_t nin = in.n_audio();
         int32_t nout = out.n_audio();
         
-        cerr << "Need match for in = " << nin << " out = " << nout << endl;
-
         /* look for exact match first */
 
         for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
                 d = &(*p)->descriptor;
-
-                cerr << "\t1. Check panner with in=" << d->in << " out=" << d->out << endl;
 
                 if (d->in == nin && d->out == nout) {
                         return *p;
@@ -126,8 +122,6 @@ PannerManager::select_panner (ChanCount in, ChanCount out)
         for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
                 d = &(*p)->descriptor;
          
-                cerr << "\t2. Check panner with in=" << d->in << " out=" << d->out << endl;
-
                 if (d->in == nin && d->out == -1) {
                         return *p;
                 }
@@ -138,8 +132,6 @@ PannerManager::select_panner (ChanCount in, ChanCount out)
         for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
                 d = &(*p)->descriptor;
          
-                cerr << "\t3. Check panner with in=" << d->in << " out=" << d->out << endl;
-
                 if (d->in == -1 && d->out == nout) {
                         return *p;
                 }
@@ -150,8 +142,6 @@ PannerManager::select_panner (ChanCount in, ChanCount out)
         for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
                 d = &(*p)->descriptor;
          
-                cerr << "\t4. Check panner with in=" << d->in << " out=" << d->out << endl;
-
                 if (d->in == -1 && d->out == -1) {
                         return *p;
                 }
