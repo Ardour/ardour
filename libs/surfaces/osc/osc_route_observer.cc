@@ -35,7 +35,7 @@ using namespace ARDOUR;
 using namespace boost;
 
 
-OSCRouteObserver::OSCRouteObserver (shared_ptr<Route> r, lo_address a)
+OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Route> r, lo_address a)
 	: _route (r)
 {
 	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
@@ -44,19 +44,19 @@ OSCRouteObserver::OSCRouteObserver (shared_ptr<Route> r, lo_address a)
 
 	if (dynamic_pointer_cast<AudioTrack>(_route) || dynamic_pointer_cast<MidiTrack>(_route)) {
 
-		shared_ptr<Track> track = dynamic_pointer_cast<Track>(r);
-		shared_ptr<Controllable> rec_controllable = dynamic_pointer_cast<Controllable>(track->rec_enable_control());
+		boost::shared_ptr<Track> track = dynamic_pointer_cast<Track>(r);
+		boost::shared_ptr<Controllable> rec_controllable = dynamic_pointer_cast<Controllable>(track->rec_enable_control());
 
 		rec_controllable->Changed.connect (rec_changed_connection, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/route/rec"), track->rec_enable_control()), OSC::instance());
 	}
 	
-	shared_ptr<Controllable> mute_controllable = dynamic_pointer_cast<Controllable>(_route->mute_control());
+	boost::shared_ptr<Controllable> mute_controllable = dynamic_pointer_cast<Controllable>(_route->mute_control());
 	mute_controllable->Changed.connect (mute_changed_connection, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/route/mute"), _route->mute_control()), OSC::instance());
 
-	shared_ptr<Controllable> solo_controllable = dynamic_pointer_cast<Controllable>(_route->solo_control());
+	boost::shared_ptr<Controllable> solo_controllable = dynamic_pointer_cast<Controllable>(_route->solo_control());
 	solo_controllable->Changed.connect (solo_changed_connection, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/route/solo"), _route->solo_control()), OSC::instance());
 
-	shared_ptr<Controllable> gain_controllable = dynamic_pointer_cast<Controllable>(_route->gain_control());
+	boost::shared_ptr<Controllable> gain_controllable = dynamic_pointer_cast<Controllable>(_route->gain_control());
 	gain_controllable->Changed.connect (gain_changed_connection, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/route/gain"), _route->gain_control()), OSC::instance());
 }
 
@@ -92,7 +92,7 @@ OSCRouteObserver::name_changed (const PBD::PropertyChange& what_changed)
 }
 
 void
-OSCRouteObserver::send_change_message (string path, shared_ptr<Controllable> controllable)
+OSCRouteObserver::send_change_message (string path, boost::shared_ptr<Controllable> controllable)
 {
 	lo_message msg = lo_message_new ();
 
