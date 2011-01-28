@@ -15,6 +15,7 @@
 #@color fg_tooltip #1F1F1F
 #@color bg_tooltip #FCF5B8
 
+#@color lightest #FFFFFF
 #@color darkest #222
 #@color bright_indicator #F11
 #@color contrasting_indicator #9f3
@@ -145,50 +146,10 @@ style "time_axis_view_item_name" = "very small text"
 {
 }
 
-style "white_tree_view" 
-{
-  GtkButton::default_border = { 0, 0, 0, 0 }
-  GtkButton::default_outside_border = { 0, 0, 0, 0 }
-  GtkButton::button_relief = GTK_RELIEF_NONE
-  GtkTreeView::vertical-padding = 0
-  GtkTreeView::horizontal-padding = 0
-  GtkTreeView::even-row-color = { 0.70, 0.70, 0.70 }
-  GtkTreeView::odd-row-color = { 0.64, 0.64, 0.64 }
-  
-  fg[NORMAL] = { 0.30, 0.30, 0.40 }	
-  fg[ACTIVE] = { 0.30, 0.30, 0.40 }	
-  fg[PRELIGHT] = { 1.0, 1.0, 1.0 }
-  fg[INSENSITIVE] = { 0.30, 0.30, 0.40 }	
-  fg[SELECTED] = { 0.30, 0.30, 0.40 }	
-  
-  bg[NORMAL] = { 0.80, 0.80, 0.80 }
-  bg[ACTIVE] = { 0.80, 0.80, 0.80 }
-  bg[PRELIGHT] = { 0.80, 0.80, 0.80 }
-  bg[INSENSITIVE] = { 0.80, 0.80, 0.80 }
-  bg[SELECTED] = { 0.80, 0.80, 0.80 }
-  
-  text[NORMAL] = { 0.30, 0.30, 0.40 }
-  text[ACTIVE] = { 0.30, 0.30, 0.40 }
-  text[PRELIGHT] = { 0.30, 0.30, 0.40 }
-  text[INSENSITIVE] = { 0.30, 0.30, 0.40 }
-  text[SELECTED] = { 0, 0, 0 }
-  
-  base[ACTIVE]       = { 0.80, 0.80, 0.80 }
-  base[NORMAL]       = { 0.80, 0.80, 0.80 }
-  base[PRELIGHT]     = { 0.90, 0.90, 0.90 }
-  base[INSENSITIVE]  = "#4c5159"
-  base[SELECTED]     = { 0.60, 0.60, 0.80 }
-
-  engine "clearlooks" 
-  {
-    #menubarstyle = 0 # 0 = flat, 1 = sunken, 2 = flat gradient
-  }
-}
-
-style "default_base" = "medium_text"
+style "default" = "medium_text"
 {
   #Original values for reference
-  GtkWidget::cursor_color =  {1.0, 1.0, 1.0 }
+  GtkWidget::cursor_color =  @A_lightest
   GtkButton::default_border = { 0, 0, 0, 0 }
   GtkButton::default_outside_border = { 0, 0, 0, 0 }
   GtkButton::button_relief = GTK_RELIEF_NONE
@@ -623,10 +584,10 @@ style "mute_button_fullylit" = "small_button"
 
 style "mute_button_halflit" = "small_button"
 {
-	bg[NORMAL] = shade(0.6,@A_mute)
-	bg[ACTIVE] = shade(0.6,@A_mute)
-	bg[SELECTED] = shade(0.6,@A_mute)
-  	bg[PRELIGHT] = shade(1.1, shade(0.6,@A_mute))
+ 	bg[NORMAL] = mix(0.5,@A_lightest,@A_mute)
+ 	bg[SELECTED] = mix(0.5,@A_lightest,@A_mute)
+ 	bg[ACTIVE] = mix(0.5,@A_lightest,@A_mute)
+ 	bg[PRELIGHT] = mix(0.5,@A_lightest,@A_mute)
 
 	fg[SELECTED] = @A_darkest
 	fg[ACTIVE] = @A_darkest
@@ -778,12 +739,12 @@ style "ardour_progressbars" = "default_generic"
   bg[NORMAL] = @A_bright_color
 }
 
-style "preferences"  = "default_base"
+style "preferences"  = "default"
 {
 	fg[PRELIGHT] = lighter(@A_fg)
 }
 
-style "option_entry"  = "default_base"
+style "option_entry"  = "default"
 {
 
 }
@@ -811,7 +772,7 @@ style "xrun_warn"  = "larger_bold_text"
 	bg[ACTIVE] = @A_contrasting_indicator
 }
 /*
-style "menu_bar_base" = "default_base"
+style "menu_bar_base" = "default"
 {
 
 }
@@ -960,7 +921,7 @@ style "transport_clock_display"
 {
 	font_name = "@FONT_BOLD_BIGGER@"
 
-	fg[NORMAL] = @A_control_text
+	fg[NORMAL] = darker (@A_contrasting_indicator)
 	fg[ACTIVE] = darker(@A_bright_indicator)
 	fg[SELECTED] = darker(@A_bright_indicator)
 	fg[PRELIGHT] = darker(@A_bright_indicator)
@@ -1023,7 +984,7 @@ style "audio_bus_base" = "very_small_text"
   bg[NORMAL] = @A_audio_bus
 }
 
-style "send_strip_base" = "default_base"
+style "send_strip_base" = "default"
 {
   font_name = "@FONT_SMALLER@"
   fg[NORMAL] = @A_send_fg
@@ -1034,7 +995,7 @@ style "send_strip_base" = "default_base"
   bg[SELECTED] = @A_send_bg
 }
 
-style "audio_track_base" = "default_base"
+style "audio_track_base" = "default"
 {
   font_name = "@FONT_SMALLER@"
   fg[NORMAL] = @A_fg
@@ -1045,7 +1006,7 @@ style "audio_track_base" = "default_base"
   bg[SELECTED] = @A_bg
 }
 
-style "midi_track_base" = "default_base"
+style "midi_track_base" = "default"
 {
   font_name = "@FONT_SMALLER@"
   fg[NORMAL] = @A_fg
@@ -1243,7 +1204,7 @@ style "plugin_slider"
 
 	fg[NORMAL] = @A_bright_color
 	fg[ACTIVE] = @A_bright_color
-	fg[INSENSITIVE] = @A_base # matches default_base
+	fg[INSENSITIVE] = @A_base # matches default
 	fg[SELECTED] = @A_bright_color
 	fg[PRELIGHT] = @A_bright_color
 
@@ -1349,7 +1310,7 @@ style "processor_postfader_frame"
 # the NORMAL fg color is used for the pan puck
 # the ACTIVE fg color is used for the speaker boxes
 
-style "pan_zone" = "default_base"
+style "pan_zone" = "default"
 {
 	fg[NORMAL] = @A_contrasting_indicator
 	fg[ACTIVE] = darker(@A_bright_color)
@@ -1468,7 +1429,7 @@ style "padded_button" = "default_button"
 
 #---------------------------------------------------------------
 
-class "GtkWidget" style:highest "default_base"
+class "GtkWidget" style:highest "default"
 class "GtkScrollbar" style:highest "ardour_adjusters"
 class "GtkLabel" style:highest "default_generic"
 class "GtkButton" style:highest "ardour_button"
@@ -1836,7 +1797,7 @@ widget "*ChannelCountSelector" style:highest "medium_bold_entry"
 widget "*ChannelCountSelector.GtkArrow" style:highest "default_generic"
 widget "*RegionListWholeFile" style:highest "treeview_parent_node"
 widget "*EditorHScrollbar" style:highest "editor_hscrollbar"
-widget "*MidiListView*" style:highest "white_tree_view"
+widget "*MidiListView*" style:highest "treeview_display"
 widget "*ProcessorList*" style:highest "processor_list"
 widget "*ProcessorFrameSelected" style:highest "processor_frame_selected"
 widget "*ProcessorFrameActiveSend" style:highest "processor_frame_active_send"
