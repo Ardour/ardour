@@ -15,17 +15,17 @@
 #@color fg_tooltip #1F1F1F
 #@color bg_tooltip #FCF5B8
 
-#@color black #222
-#@color red #F11
-#@color blue #729FCF
-#@color orange #CEF
-#@color green #9f3
-#@color light_orange #FC4
-#@color pale_blue #CFE 
+#@color darkest #222
+#@color bright_indicator #F11
+#@color contrasting_indicator #9f3
+#@color somewhat_bright_indicator #CEF
+#@color not_so_bright_indicator #FC4
+#@color bright_color #729FCF
 
 #@color arm #F33
-#@color solo #9E3
-#@color mute #CC4
+#@color solo #A8F730
+#@color isolate #B9ECF2
+#@color mute #FFFA87
 #@color mono #DEC
 #@color control_text2 #8D2B1B
 #@color control_base #26292D
@@ -93,9 +93,9 @@ style "medium_monospace_text"
 
 style "red_medium_text" = "medium_text"
 {	
-	fg[NORMAL] = @A_red
-	fg[ACTIVE] = @A_red
-	fg[SELECTED] = @A_red
+	fg[NORMAL] = @A_bright_indicator
+	fg[ACTIVE] = @A_bright_indicator
+	fg[SELECTED] = @A_bright_indicator
 }
 
 style "large_bold_text"
@@ -204,8 +204,8 @@ style "default_base" = "medium_text"
   GtkWidget           :: scroll-arrow-hlength             = 16                # [              16 ] ( >= 1 ) Length of horizontal scroll arrows.
   GtkWidget           :: scroll-arrow-vlength             = 16                # [              16 ] ( >= 1 ) Length of vertical scroll arrows.
 
-  GtkWidget           :: link-color                       = shade(1.25, @A_blue)
-  GtkWidget           :: visited-link-color               = @A_blue
+  GtkWidget           :: link-color                       = shade(1.25, @A_bright_color)
+  GtkWidget           :: visited-link-color               = @A_bright_color
   
 #Window Properties
   GtkDialog           :: action-area-border               = 4                 # [               5 ] ( >= 0 ) Width of border around the button area at the bottom of the dialog.
@@ -357,7 +357,7 @@ style "default_generic" = "medium_text"
 
 style "text_cell_entry" = "medium_text"
 {
-	GtkWidget::cursor_color =  @A_black
+	GtkWidget::cursor_color =  @A_darkest
 }
 
 style "very_small_button" = "default_button" 
@@ -372,16 +372,16 @@ style "small_button" = "default_button"
 
 style "very_small_red_active_and_selected_button" = "very_small_button"
 {
-	fg[ACTIVE] = @A_black
-	bg[ACTIVE] = @A_red
-	bg[SELECTED] = @A_red
+	fg[ACTIVE] = @A_darkest
+	bg[ACTIVE] = @A_bright_indicator
+	bg[SELECTED] = @A_bright_indicator
 }
 
 style "small_red_active_and_selected_button" = "small_button"
 {
-	fg[ACTIVE] = @A_black
-	bg[ACTIVE] = @A_red
-	bg[SELECTED] = @A_red
+	fg[ACTIVE] = @A_darkest
+	bg[ACTIVE] = @A_bright_indicator
+	bg[SELECTED] = @A_bright_indicator
 }
 
 style "gain_fader"
@@ -396,17 +396,17 @@ style "gain_fader"
 
 style "track_rec_enable_button" = "small_button"
 {
-	fg[ACTIVE] =   @A_black
+	fg[ACTIVE] =   @A_darkest
         bg[NORMAL] =   mix(0.08,@A_arm,@A_bg)
         bg[PRELIGHT] = shade(1.1,mix(0.08,@A_arm,@A_bg))
 }
 
 style "track_rec_enable_button_active" = "small_button"
 {
-	#fg[ACTIVE] =   @A_black
-	#fg[SELECTED] = @A_black
-	#fg[PRELIGHT] = @A_black
-	#fg[NORMAL] = @A_black
+	#fg[ACTIVE] =   @A_darkest
+	#fg[SELECTED] = @A_darkest
+	#fg[PRELIGHT] = @A_darkest
+	#fg[NORMAL] = @A_darkest
 
 	bg[NORMAL] =   @A_arm
 	bg[ACTIVE] =   @A_arm
@@ -416,10 +416,10 @@ style "track_rec_enable_button_active" = "small_button"
 
 style "track_rec_enable_button_alternate" = "small_button"
 {
-	fg[SELECTED] = @A_black
-	fg[ACTIVE] =   @A_black
-	fg[PRELIGHT] = @A_black
-	fg[NORMAL] = @A_black
+	fg[SELECTED] = @A_darkest
+	fg[ACTIVE] =   @A_darkest
+	fg[PRELIGHT] = @A_darkest
+	fg[NORMAL] = @A_darkest
 
 	bg[NORMAL] =   lighter(@A_arm)
 	bg[ACTIVE] =   lighter(@A_arm)
@@ -429,10 +429,10 @@ style "track_rec_enable_button_alternate" = "small_button"
 
 style "track_rec_enable_button_alternate_two" = "small_button"
 {
-	fg[SELECTED] = @A_black
-	fg[ACTIVE] =   @A_black
-	fg[PRELIGHT] = @A_black
-	fg[NORMAL] = @A_black
+	fg[SELECTED] = @A_darkest
+	fg[ACTIVE] =   @A_darkest
+	fg[PRELIGHT] = @A_darkest
+	fg[NORMAL] = @A_darkest
 
 	bg[NORMAL] =   darker(@A_arm)
 	bg[ACTIVE] =   darker(@A_arm)
@@ -463,19 +463,19 @@ style "solo_button" = "small_button"
 {
   bg[NORMAL] = mix(0.1,@A_solo,@A_bg)
   bg[ACTIVE] = @A_solo
-  fg[ACTIVE] = @A_black
+  fg[ACTIVE] = @A_darkest
 }
 
 style "solo_isolate_led"
 {
-  fg[NORMAL] = mix(0.2,@A_orange, @A_black)
-  fg[ACTIVE] = @A_orange
+  fg[NORMAL] = mix(0.2,@A_isolate, @A_darkest)
+  fg[ACTIVE] = @A_isolate
 }
 
 style "solo_safe_led"
 {
-  fg[NORMAL] = mix(0.2,@A_pale_blue, @A_black)
-  fg[ACTIVE] = @A_pale_blue
+  fg[NORMAL] = mix(0.2,@A_isolate, @A_darkest)
+  fg[ACTIVE] = @A_isolate
 }
 
 style "solo_button_alternate" = "small_button"
@@ -486,10 +486,10 @@ style "solo_button_alternate" = "small_button"
 
 	bg[ACTIVE] = lighter(@A_solo)
 
-	fg[ACTIVE] = @A_red
-	fg[SELECTED] = @A_red
-	fg[NORMAL] = @A_red
-	fg[PRELIGHT] = shade(1.1, @A_red)
+	fg[ACTIVE] = @A_bright_indicator
+	fg[SELECTED] = @A_bright_indicator
+	fg[NORMAL] = @A_bright_indicator
+	fg[PRELIGHT] = shade(1.1, @A_bright_indicator)
 }
 
 style "solo_button_alternate2" = "small_button"
@@ -503,10 +503,10 @@ style "solo_button_alternate2" = "small_button"
 	bg[SELECTED] = darker(@A_solo)
 	bg[PRELIGHT] = shade(1.1, darker(@A_solo))
 
-	fg[ACTIVE] = @A_black
-	fg[SELECTED] = @A_black
-	fg[NORMAL] = @A_black
-	fg[PRELIGHT] = @A_black
+	fg[ACTIVE] = @A_darkest
+	fg[SELECTED] = @A_darkest
+	fg[NORMAL] = @A_darkest
+	fg[PRELIGHT] = @A_darkest
 }
 
 style "solo_button_active" = "small_button"
@@ -520,16 +520,16 @@ style "solo_button_active" = "small_button"
 	bg[SELECTED] = @A_solo
 	bg[PRELIGHT] = shade(1.1, @A_solo)
 
-	fg[ACTIVE] = @A_black
-	fg[SELECTED] = @A_black
-	fg[NORMAL] = @A_black
-	fg[PRELIGHT] = @A_black
+	fg[ACTIVE] = @A_darkest
+	fg[SELECTED] = @A_darkest
+	fg[NORMAL] = @A_darkest
+	fg[PRELIGHT] = @A_darkest
 }
 
 style "mixer_invert_button" = "small_button"
 {
-	bg[ACTIVE] = @A_light_orange
-	fg[ACTIVE] = @A_black
+	bg[ACTIVE] = @A_not_so_bright_indicator
+	fg[ACTIVE] = @A_darkest
 }
 
 style "mixer_solo_button" = "solo_button"
@@ -559,77 +559,79 @@ style "mixer_solo_button_active" = "solo_button_active"
 
 style "monitor_opt_button" = "small_button"
 {
-        bg[NORMAL] = mix(0.1,@A_light_orange,@A_bg)
-	bg[ACTIVE] = @A_light_orange
-	fg[ACTIVE] = @A_black
+        bg[NORMAL] = mix(0.1,@A_not_so_bright_indicator,@A_bg)
+	bg[ACTIVE] = @A_not_so_bright_indicator
+	fg[ACTIVE] = @A_darkest
 }
 
 style "monitor_mono_button" = "small_button"
 {
 	bg[NORMAL] = mix(0.1,@A_mono,@A_bg)
-  bg[ACTIVE] = @A_mono
-	fg[ACTIVE] = @A_black
+        bg[ACTIVE] = @A_mono
+	fg[ACTIVE] = @A_darkest
 }
 
 style "monitor_invert_button" = "small_button"
 {
-	bg[NORMAL] = mix(0.1,@A_light_orange,@A_bg)
-        bg[ACTIVE] = @A_light_orange
-	fg[ACTIVE] = @A_black
+	bg[NORMAL] = mix(0.1,@A_not_so_bright_indicator,@A_bg)
+        bg[ACTIVE] = @A_not_so_bright_indicator
+	fg[ACTIVE] = @A_darkest
 }
 
 style "monitor_mute_button" = "small_button"
 {
 	bg[NORMAL] = mix(0.1,@A_mute,@A_bg)
         bg[ACTIVE] = @A_mute
-	fg[ACTIVE] = @A_black
+	fg[ACTIVE] = @A_darkest
 }
 
 style "monitor_dim_button" = "small_button"
 {
 	bg[NORMAL] = mix(0.1,lighter(@A_mute),@A_bg)
         bg[ACTIVE] = lighter(@A_mute)
-	fg[ACTIVE] = @A_black
+	fg[ACTIVE] = @A_darkest
 }
 
 style "monitor_iso_button" = "small_button"
 {
-	bg[NORMAL] = mix(0.1,@A_orange,@A_bg)
-        bg[ACTIVE] = @A_orange
-	fg[ACTIVE] = @A_black
+	bg[NORMAL] = mix(0.1,@A_somewhat_bright_indicator,@A_bg)
+        bg[ACTIVE] = @A_somewhat_bright_indicator
+	fg[ACTIVE] = @A_darkest
 }
 
 style "mute_button" = "small_button"
 {
 	bg[NORMAL] = mix(0.1,@A_mute,@A_bg)
         bg[ACTIVE] = @A_mute
-	fg[ACTIVE] = @A_black
+	fg[ACTIVE] = @A_darkest
 }
 
-style "mute_button_alternate" = "small_button"
+style "mute_button_fullylit" = "small_button"
 {
+        # this is the normal "active" state for a mute button
+
 	bg[ACTIVE] = @A_mute
 	bg[NORMAL] = @A_mute
 	bg[SELECTED] = @A_mute
-	bg[PRELIGHT] = shade(1.1, @A_mute)
+	bg[PRELIGHT] = lighter (@A_mute)
 
-	fg[SELECTED] = @A_black
-	fg[ACTIVE] = @A_black
-	fg[NORMAL] = @A_black
-	fg[PRELIGHT] = @A_black
+	fg[SELECTED] = @A_darkest
+	fg[ACTIVE] = @A_darkest
+	fg[NORMAL] = @A_darkest
+	fg[PRELIGHT] = @A_darkest
 }
 
-style "mute_button_active" = "small_button"
+style "mute_button_halflit" = "small_button"
 {
-	bg[NORMAL] = darker(@A_mute)
-	bg[ACTIVE] = darker(@A_mute)
-	bg[SELECTED] = darker(@A_mute)
-  	bg[PRELIGHT] = shade(1.1, darker(@A_mute))
+	bg[NORMAL] = shade(0.6,@A_mute)
+	bg[ACTIVE] = shade(0.6,@A_mute)
+	bg[SELECTED] = shade(0.6,@A_mute)
+  	bg[PRELIGHT] = shade(1.1, shade(0.6,@A_mute))
 
-	fg[SELECTED] = @A_black
-	fg[ACTIVE] = @A_black
-	fg[NORMAL] = @A_black
-	fg[PRELIGHT] = @A_black
+	fg[SELECTED] = @A_darkest
+	fg[ACTIVE] = @A_darkest
+	fg[NORMAL] = @A_darkest
+	fg[PRELIGHT] = @A_darkest
 }
 
 style "mixer_mute_button" = "mute_button"
@@ -638,13 +640,13 @@ style "mixer_mute_button" = "mute_button"
 	ythickness = 0
 }
 
-style "mixer_mute_button_alternate" = "mute_button_alternate"
+style "mixer_mute_button_fullylit" = "mute_button_fullylit"
 {
 	xthickness = 0
 	ythickness = 0
 }
 
-style "mixer_mute_button_active" = "mute_button_active"
+style "mixer_mute_button_halflit" = "mute_button_halflit"
 {
 	xthickness = 0
 	ythickness = 0
@@ -658,14 +660,14 @@ style "multiline_combo" = "small_button"
 
 style "track_loop_button" = "small_button"
 {
-	bg[ACTIVE] = @A_orange
-	bg[PRELIGHT] = lighter(@A_orange)
+	bg[ACTIVE] = @A_somewhat_bright_indicator
+	bg[PRELIGHT] = lighter(@A_somewhat_bright_indicator)
 
 }
 
 style "mixer_red_active_button" = "very_small_button"
 {
-	bg[ACTIVE] = @A_red
+	bg[ACTIVE] = @A_bright_indicator
 
  	base[INSENSITIVE] = { 0.16, 0.16, 0.21 }
  	bg[INSENSITIVE] = { 0.16, 0.16, 0.21 }
@@ -678,35 +680,35 @@ style "time_button" = "default_button"
 
 style "transport_button"
 {
-  #bg[NORMAL] = mix(0.05,@A_green,@A_bg)   #turns out this is kind of yucky looking, but it's there if you want to try it
-	bg[ACTIVE] = @A_green
-	fg[ACTIVE] = @A_black
+  #bg[NORMAL] = mix(0.05,@A_contrasting_indicator,@A_bg)   #turns out this is kind of yucky looking, but it's there if you want to try it
+	bg[ACTIVE] = @A_contrasting_indicator
+	fg[ACTIVE] = @A_darkest
 }
 
 style "transport_button_active"
 {
-	bg[NORMAL] = @A_green
-	bg[ACTIVE] = @A_green
-	bg[SELECTED] = @A_green
-	bg[PRELIGHT] = @A_green
+	bg[NORMAL] = @A_contrasting_indicator
+	bg[ACTIVE] = @A_contrasting_indicator
+	bg[SELECTED] = @A_contrasting_indicator
+	bg[PRELIGHT] = @A_contrasting_indicator
 
-	fg[NORMAL] = @A_black
-	fg[PRELIGHT] = @A_black
-	fg[SELECTED] = @A_black
-	fg[ACTIVE] = @A_black
+	fg[NORMAL] = @A_darkest
+	fg[PRELIGHT] = @A_darkest
+	fg[SELECTED] = @A_darkest
+	fg[ACTIVE] = @A_darkest
 }
 
 style "transport_button_alternate_two"
 {
-	fg[SELECTED] = @A_black
-	fg[ACTIVE] =   @A_black
-	fg[PRELIGHT] = @A_black
-	fg[NORMAL] = @A_black
+	fg[SELECTED] = @A_darkest
+	fg[ACTIVE] =   @A_darkest
+	fg[PRELIGHT] = @A_darkest
+	fg[NORMAL] = @A_darkest
 
-	bg[NORMAL] =   shade(0.2,@A_red)
-	bg[ACTIVE] =   shade(0.2,@A_red)
-	bg[SELECTED] =   shade(0.2,@A_red)
-	bg[PRELIGHT] =   shade(0.2,@A_red)
+	bg[NORMAL] =   shade(0.2,@A_bright_indicator)
+	bg[ACTIVE] =   shade(0.2,@A_bright_indicator)
+	bg[SELECTED] =   shade(0.2,@A_bright_indicator)
+	bg[PRELIGHT] =   shade(0.2,@A_bright_indicator)
 }
 
 style "transport_rec_button"
@@ -716,7 +718,7 @@ style "transport_rec_button"
 	#bg[SELECTED] = darker(@A_arm)
 	#bg[PRELIGHT] = lighter(mix(0.05,@A_arm,@A_bg))
   
-  fg[ACTIVE] = @A_black
+  fg[ACTIVE] = @A_darkest
 }
 
 style "transport_rec_button_active"
@@ -743,18 +745,18 @@ style "shuttle_control" = "very_small_text"
 	fg[SELECTED] = @A_control_text2
 	fg[INSENSITIVE] = @A_control_text2
 
-	bg[NORMAL] = @A_black
-	bg[PRELIGHT] = @A_black
-	bg[INSENSITIVE] = @A_black
-	bg[ACTIVE] = @A_blue
-	bg[SELECTED] = @A_blue
+	bg[NORMAL] = @A_darkest
+	bg[PRELIGHT] = @A_darkest
+	bg[INSENSITIVE] = @A_darkest
+	bg[ACTIVE] = @A_bright_color
+	bg[SELECTED] = @A_bright_color
 }
 
 style "ardour_adjusters" = "default_generic"
 {
 	bg[NORMAL] = @A_bg
 	bg[PRELIGHT] = lighter(@A_bg)
-	bg[ACTIVE] = @A_black
+	bg[ACTIVE] = @A_darkest
 }
 
 style "editor_hscrollbar" = "ardour_adjusters"
@@ -771,9 +773,9 @@ style "editor_hscrollbar" = "ardour_adjusters"
 
 style "ardour_progressbars" = "default_generic"
 { 
-  # Clearlooks always uses black for the advancing bar, sigh
+  # Clearlooks always uses darkest for the advancing bar, sigh
   # so this is just a contrasting color for the trough
-  bg[NORMAL] = @A_blue
+  bg[NORMAL] = @A_bright_color
 }
 
 style "preferences"  = "default_base"
@@ -793,8 +795,8 @@ style "red_when_active" = "medium_text"
   bg[PRELIGHT] = @A_bg
 
 	fg[ACTIVE] = @A_fg
-	bg[ACTIVE] = @A_red
-  bg[PRELIGHT] = @A_red
+	bg[ACTIVE] = @A_bright_indicator
+  bg[PRELIGHT] = @A_bright_indicator
 }
 
 style "xrun_warn"  = "larger_bold_text"
@@ -805,8 +807,8 @@ style "xrun_warn"  = "larger_bold_text"
 	text[ACTIVE] = @A_fg
 	base[NORMAL] = @A_base
 	base[ACTIVE] = @A_base
-	bg[NORMAL] = @A_red
-	bg[ACTIVE] = @A_green
+	bg[NORMAL] = @A_bright_indicator
+	bg[ACTIVE] = @A_contrasting_indicator
 }
 /*
 style "menu_bar_base" = "default_base"
@@ -816,8 +818,8 @@ style "menu_bar_base" = "default_base"
 */
 style "fatal_message" = "medium_text"
 {
-   fg[ACTIVE] = @A_red
-   fg[NORMAL] = @A_red
+   fg[ACTIVE] = @A_bright_indicator
+   fg[NORMAL] = @A_bright_indicator
    bg[ACTIVE]   = @A_base
    bg[NORMAL]   = @A_base
    base[NORMAL] = @A_base
@@ -826,8 +828,8 @@ style "fatal_message" = "medium_text"
 
 style "error_message" = "medium_text"
 {
-   fg[ACTIVE] = @A_red
-   fg[NORMAL] = @A_red
+   fg[ACTIVE] = @A_bright_indicator
+   fg[NORMAL] = @A_bright_indicator
    bg[ACTIVE]   = @A_base
    bg[NORMAL]   = @A_base
    base[NORMAL] = @A_base
@@ -836,8 +838,8 @@ style "error_message" = "medium_text"
 
 style "info_message" = "medium_text"
 {
-   fg[ACTIVE]   = @A_green
-   fg[NORMAL]   = @A_green
+   fg[ACTIVE]   = @A_contrasting_indicator
+   fg[NORMAL]   = @A_contrasting_indicator
    bg[ACTIVE]   = @A_base
    bg[NORMAL]   = @A_base
    base[NORMAL] = @A_base
@@ -846,8 +848,8 @@ style "info_message" = "medium_text"
 
 style "warning_message" = "medium_text"
 {
-   fg[ACTIVE] = @A_orange
-   fg[NORMAL] = @A_orange
+   fg[ACTIVE] = @A_somewhat_bright_indicator
+   fg[NORMAL] = @A_somewhat_bright_indicator
    bg[ACTIVE]   = @A_base
    bg[NORMAL]   = @A_base
    base[NORMAL] = @A_base
@@ -869,7 +871,7 @@ style "medium_entry" = "medium_text"
 
 style "medium_entry_noselection_fg" = "medium_entry"
 {
-	fg[SELECTED] = @A_green
+	fg[SELECTED] = @A_contrasting_indicator
 }
 
 style "medium_entry_noselection_bg" = "medium_entry"
@@ -892,10 +894,10 @@ style "medium_bold_entry"  = "medium_bold_text"
 style "small_entry" = "small_text"
 {
 	fg[NORMAL] = @A_text
-	fg[ACTIVE] = @A_green
-	fg[SELECTED] = @A_green
+	fg[ACTIVE] = @A_contrasting_indicator
+	fg[SELECTED] = @A_contrasting_indicator
 	text[NORMAL] = @A_text
-	text[ACTIVE] = @A_green
+	text[ACTIVE] = @A_contrasting_indicator
 	text[SELECTED] = @A_fg_selected
 	bg[NORMAL] = @A_base
 	bg[SELECTED] = @A_base
@@ -907,8 +909,8 @@ style "small_entry" = "small_text"
 
 style "red_active_small_entry" = "small_entry"
 {
-	fg[ACTIVE] = @A_red
-	fg[SELECTED] = @A_red
+	fg[ACTIVE] = @A_bright_indicator
+	fg[SELECTED] = @A_bright_indicator
 }
 
 style "small_bold_entry" = "small_bold_text"
@@ -925,8 +927,8 @@ style "small_bold_entry" = "small_bold_text"
 
 style "small_red_on_black_entry"  = "small_bold_text"
 {
-       fg[NORMAL] = @A_red
-       fg[ACTIVE] = @A_red
+       fg[NORMAL] = @A_bright_indicator
+       fg[ACTIVE] = @A_bright_indicator
        base[NORMAL] = @A_base
        base[ACTIVE] = @A_base
        bg[NORMAL] = @A_base
@@ -938,15 +940,15 @@ style "non_recording_big_clock_display" = "medium_entry"
 	font_name = "@FONT_MASSIVE@"
 
 	fg[NORMAL] = @A_control_text
-	fg[ACTIVE] = @A_red
-	fg[SELECTED] = @A_red
-	fg[PRELIGHT] = @A_red
-	fg[INSENSITIVE] = @A_red
+	fg[ACTIVE] = @A_bright_indicator
+	fg[SELECTED] = @A_bright_indicator
+	fg[PRELIGHT] = @A_bright_indicator
+	fg[INSENSITIVE] = @A_bright_indicator
 	
 	base[NORMAL] = @A_base
 	base[ACTIVE] = @A_base
 	bg[NORMAL] = @A_base
-	bg[ACTIVE] = shade(0.5,@A_red)
+	bg[ACTIVE] = shade(0.5,@A_bright_indicator)
 }
 
 style "recording_big_clock_display" = "non_recording_big_clock_display"
@@ -959,54 +961,54 @@ style "transport_clock_display"
 	font_name = "@FONT_BOLD_BIGGER@"
 
 	fg[NORMAL] = @A_control_text
-	fg[ACTIVE] = darker(@A_red)
-	fg[SELECTED] = darker(@A_red)
-	fg[PRELIGHT] = darker(@A_red)
-	fg[INSENSITIVE] = darker(@A_red)
+	fg[ACTIVE] = darker(@A_bright_indicator)
+	fg[SELECTED] = darker(@A_bright_indicator)
+	fg[PRELIGHT] = darker(@A_bright_indicator)
+	fg[INSENSITIVE] = darker(@A_bright_indicator)
 
-	base[NORMAL] = @A_black
-	base[ACTIVE] = @A_black
-	bg[NORMAL] = @A_black
-	bg[ACTIVE] = @A_black
+	base[NORMAL] = @A_darkest
+	base[ACTIVE] = @A_darkest
+	bg[NORMAL] = @A_darkest
+	bg[ACTIVE] = @A_darkest
 }
 
 style "transport_clock_display_delta" = "transport_clock_display"
 {
-	fg[NORMAL] = @A_blue
+	fg[NORMAL] = @A_bright_color
 }
 
 style "tempo_meter_clock_display" = "very_small_text"
 {
 	fg[NORMAL] = @A_fg
-	fg[ACTIVE] = @A_orange
-	fg[SELECTED] = @A_red
+	fg[ACTIVE] = @A_somewhat_bright_indicator
+	fg[SELECTED] = @A_bright_indicator
 	base[NORMAL] = @A_base
-	base[ACTIVE] = @A_green
-	bg[NORMAL] = @A_blue
-	bg[ACTIVE] = @A_green
+	base[ACTIVE] = @A_contrasting_indicator
+	bg[NORMAL] = @A_bright_color
+	bg[ACTIVE] = @A_contrasting_indicator
 }
 
 style "default_clock_display" = "medium_text"
 {
-	fg[NORMAL] = @A_green
-	fg[ACTIVE] = @A_red
-	fg[SELECTED] = @A_red
-	base[NORMAL] = @A_black
-	base[ACTIVE] = @A_black
-	bg[NORMAL] = @A_black
-	bg[ACTIVE] = @A_black
+	fg[NORMAL] = @A_contrasting_indicator
+	fg[ACTIVE] = @A_bright_indicator
+	fg[SELECTED] = @A_bright_indicator
+	base[NORMAL] = @A_darkest
+	base[ACTIVE] = @A_darkest
+	bg[NORMAL] = @A_darkest
+	bg[ACTIVE] = @A_darkest
 }
 
 
 style "white_on_black_clock_display" = "medium_text"
 {
 	fg[NORMAL] = @A_fg
-	fg[ACTIVE] = @A_red
-	fg[SELECTED] = @A_red
-	base[NORMAL] = @A_black
-	base[ACTIVE] = @A_black
-	bg[NORMAL] = @A_black
-	bg[ACTIVE] = @A_black
+	fg[ACTIVE] = @A_bright_indicator
+	fg[SELECTED] = @A_bright_indicator
+	base[NORMAL] = @A_darkest
+	base[ACTIVE] = @A_darkest
+	bg[NORMAL] = @A_darkest
+	bg[ACTIVE] = @A_darkest
 }
 
 style "editor_time_ruler" = "small_text"
@@ -1239,11 +1241,11 @@ style "plugin_slider"
 	# the slider itself. the inactive part is INSENSITIVE,
 	# the active part is something else.
 
-	fg[NORMAL] = @A_blue
-	fg[ACTIVE] = @A_blue
+	fg[NORMAL] = @A_bright_color
+	fg[ACTIVE] = @A_bright_color
 	fg[INSENSITIVE] = @A_base # matches default_base
-	fg[SELECTED] = @A_blue
-	fg[PRELIGHT] = @A_blue
+	fg[SELECTED] = @A_bright_color
+	fg[PRELIGHT] = @A_bright_color
 
 	# draws the outer rectangle around the slider
 
@@ -1284,7 +1286,7 @@ style "processor_list" = "very_small_text"
 {
 	bg[NORMAL] = { 0, 0, 0 }
         bg[ACTIVE] = shade (1.8, @A_fg_selected)
-        fg[ACTIVE] = @A_black
+        fg[ACTIVE] = @A_darkest
 	GtkCheckButton::indicator-size = 10
 	GtkCheckButton::indicator-spacing = 0
 }
@@ -1349,8 +1351,8 @@ style "processor_postfader_frame"
 
 style "pan_zone" = "default_base"
 {
-	fg[NORMAL] = @A_green
-	fg[ACTIVE] = darker(@A_blue)
+	fg[NORMAL] = @A_contrasting_indicator
+	fg[ACTIVE] = darker(@A_bright_color)
 }
 
 style "paler_red_when_active" = "medium_text"
@@ -1361,7 +1363,7 @@ style "paler_red_when_active" = "medium_text"
 	bg[PRELIGHT] = @A_bg
 
 	fg[ACTIVE] = @A_fg
-	bg[ACTIVE] = lighter(@A_red)
+	bg[ACTIVE] = lighter(@A_bright_indicator)
 }
 
 style "peak_display_peaked_entry" = "small_text"
@@ -1370,22 +1372,22 @@ style "peak_display_peaked_entry" = "small_text"
 	fg[ACTIVE] = @A_text
 	fg[SELECTED] = @A_text
 
-        bg[NORMAL] = @A_red
-        bg[ACTIVE] = @A_red
-        bg[PRELIGHT] = @A_red
-        bg[INSENSITIVE] = @A_red
-        bg[SELECTED] = @A_red
-        base[NORMAL] = @A_red
-        base[ACTIVE] = @A_red
-        base[PRELIGHT] = @A_red
-        base[INSENSITIVE] = @A_red
-        base[SELECTED] = @A_red
+        bg[NORMAL] = @A_bright_indicator
+        bg[ACTIVE] = @A_bright_indicator
+        bg[PRELIGHT] = @A_bright_indicator
+        bg[INSENSITIVE] = @A_bright_indicator
+        bg[SELECTED] = @A_bright_indicator
+        base[NORMAL] = @A_bright_indicator
+        base[ACTIVE] = @A_bright_indicator
+        base[PRELIGHT] = @A_bright_indicator
+        base[INSENSITIVE] = @A_bright_indicator
+        base[SELECTED] = @A_bright_indicator
 }
 
 style "selected_strip_frame"
 {
-	fg[NORMAL] = @A_red
-	bg[NORMAL] = darker(@A_red)
+	fg[NORMAL] = @A_bright_indicator
+	bg[NORMAL] = darker(@A_bright_indicator)
 }
 
 style "flashing_alert" = "very_small_text"
@@ -1395,11 +1397,11 @@ style "flashing_alert" = "very_small_text"
   
         fg[NORMAL] = darker(@A_fg)
         fg[PRELIGHT] = darker(@A_fg)
-        bg[NORMAL] = mix(0.1,@A_red,darker(@A_bg))
-        bg[PRELIGHT] = mix(0.1,@A_red,darker(@A_bg))
+        bg[NORMAL] = mix(0.1,@A_bright_indicator,darker(@A_bg))
+        bg[PRELIGHT] = mix(0.1,@A_bright_indicator,darker(@A_bg))
         
 	fg[ACTIVE] = @A_fg
-	bg[ACTIVE] = @A_red
+	bg[ACTIVE] = @A_bright_indicator
 }
 
 
@@ -1410,11 +1412,11 @@ style "green_flashing_alert" = "very_small_text"
 
 	fg[NORMAL] = darker(@A_fg)
         fg[PRELIGHT] = darker(@A_fg)
-	bg[NORMAL] = mix(0.1,@A_green,darker(@A_bg))
-        bg[PRELIGHT] = mix(0.1,@A_green,darker(@A_bg))
+	bg[NORMAL] = mix(0.1,@A_contrasting_indicator,darker(@A_bg))
+        bg[PRELIGHT] = mix(0.1,@A_contrasting_indicator,darker(@A_bg))
 
 	fg[ACTIVE] = @A_fg
-	bg[ACTIVE] = @A_green
+	bg[ACTIVE] = @A_contrasting_indicator
 }
 
 style "sync_alert"
@@ -1424,15 +1426,15 @@ style "sync_alert"
 	# active, and alternates with another style if sync is active
 	# but we are not locked
 	#
-	bg[ACTIVE] = @A_orange
-	bg[PRELIGHT] = @A_orange
-	bg[SELECTED] = @A_orange
-	bg[NORMAL] = @A_orange
+	bg[ACTIVE] = @A_somewhat_bright_indicator
+	bg[PRELIGHT] = @A_somewhat_bright_indicator
+	bg[SELECTED] = @A_somewhat_bright_indicator
+	bg[NORMAL] = @A_somewhat_bright_indicator
 	
-	fg[NORMAL] = @A_black
-	fg[PRELIGHT] = @A_black
-	fg[SELECTED] = @A_black
-	fg[ACTIVE] = @A_black
+	fg[NORMAL] = @A_darkest
+	fg[PRELIGHT] = @A_darkest
+	fg[SELECTED] = @A_darkest
+	fg[ACTIVE] = @A_darkest
 }
 
 style "tearoff_arrow" = "medium_bold_entry"
@@ -1533,11 +1535,11 @@ widget "*MixerRecordEnableButton" style:highest "mixer_track_rec_enable_button"
 widget "*MixerRecordEnableButton-active" style:highest "mixer_track_rec_enable_button_active"
 widget "*MixerRecordEnableButton-alternate" style:highest "mixer_track_rec_enable_button_alternate"
 widget "*MuteButton" style:highest "mute_button"
-widget "*MuteButton-alternate" style:highest "mute_button_alternate"
-widget "*MuteButton-active" style:highest "mute_button_active"
+widget "*MuteButton-alternate" style:highest "mute_button_fullylit"
+widget "*MuteButton-active" style:highest "mute_button_halflit"
 widget "*MixerMuteButton" style:highest "mixer_mute_button"
-widget "*MixerMuteButton-alternate" style:highest "mixer_mute_button_alternate"
-widget "*MixerMuteButton-active" style:highest "mixer_mute_button_active"
+widget "*MixerMuteButton-alternate" style:highest "mixer_mute_button_fullylit"
+widget "*MixerMuteButton-active" style:highest "mixer_mute_button_halflit"
 widget "*SoloButton" style:highest "solo_button"
 widget "*SoloButton-alternate" style:highest "solo_button_alternate"
 widget "*SoloButton-alternate2" style:highest "solo_button_alternate2"

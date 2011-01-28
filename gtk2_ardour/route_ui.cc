@@ -1011,7 +1011,7 @@ RouteUI::update_mute_display ()
 		--_i_am_the_modifier;
 	}
 
-	mute_button->set_visual_state (mute_visual_state (_session, _route));
+        mute_button->set_visual_state (mute_visual_state (_session, _route));
 }
 
 void
