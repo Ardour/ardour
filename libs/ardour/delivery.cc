@@ -381,7 +381,10 @@ Delivery::reset_panner ()
 			}
 
 			_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, ntargets));
+
 		}
+
+
 	} else {
 		panner_legal_c.disconnect ();
 		PannersLegal.connect_same_thread (panner_legal_c, boost::bind (&Delivery::panners_became_legal, this));
@@ -400,6 +403,11 @@ Delivery::panners_became_legal ()
 	}
 
 	_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, ntargets));
+
+        if (_role == Main) {
+                _panshell->pannable()->set_panner (_panshell->panner());
+        }
+
 	panner_legal_c.disconnect ();
 	return 0;
 }

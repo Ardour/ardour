@@ -1602,13 +1602,6 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 		_meter->reset_max_channels (processor_max_streams);
 	}
 
-        /* if we haven't bound the main outs panner & our pannable together yet, do it now ..
-         */
-
-        if (_main_outs && !_pannable->panner()) {
-                _pannable->set_panner (_main_outs->panner_shell()->panner());
-        }
-
 	/* make sure we have sufficient scratch buffers to cope with the new processor
 	   configuration */
 	_session.ensure_buffers (n_process_buffers ());
