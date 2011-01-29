@@ -55,6 +55,8 @@ class Auditioner : public AudioTrack
 	bool auditioning() const { return g_atomic_int_get (&_auditioning); }
         bool needs_monitor() const { return via_monitor; }
 
+        virtual ChanCount input_streams () const;
+
   private:
 	boost::shared_ptr<AudioRegion> the_region;
 	framepos_t current_frame;

@@ -454,7 +454,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	DataType       _default_type;
         FedBy          _fed_by;
 
-        ChanCount input_streams () const;
+        virtual ChanCount input_streams () const;
 
   protected:
 	virtual XMLNode& state(bool);

@@ -275,3 +275,17 @@ Auditioner::output_changed (IOChange change, void* /*src*/)
 		}
 	}
 }
+
+ChanCount 
+Auditioner::input_streams () const
+{
+        /* auditioner never has any inputs - its channel configuration
+           depends solely on the region we are auditioning.
+        */
+
+        if (audio_diskstream()) {
+                return audio_diskstream()->n_channels();
+        } 
+
+        return ChanCount ();
+}
