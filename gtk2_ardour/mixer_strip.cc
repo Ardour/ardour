@@ -1718,6 +1718,16 @@ MixerStrip::drop_send ()
 	send_gone_connection.disconnect ();
 	input_button.set_sensitive (true);
 	output_button.set_sensitive (true);
+        group_button.set_sensitive (true);
+        set_invert_sensitive (true);
+        meter_point_button.set_sensitive (true);
+        mute_button->set_sensitive (true);
+        solo_button->set_sensitive (true);
+        rec_enable_button->set_sensitive (true);
+        _mono_button.set_sensitive (true);
+        comment_button.set_sensitive (true);
+        solo_isolated_led->set_sensitive (true);
+        solo_safe_led->set_sensitive (true);
 }
 
 void
@@ -1746,6 +1756,16 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	panner_ui().setup_pan ();
 
 	input_button.set_sensitive (false);
+        group_button.set_sensitive (false);
+        set_invert_sensitive (false);
+        meter_point_button.set_sensitive (false);
+        mute_button->set_sensitive (false);
+        solo_button->set_sensitive (false);
+        rec_enable_button->set_sensitive (false);
+        _mono_button.set_sensitive (false);
+        comment_button.set_sensitive (false);
+        solo_isolated_led->set_sensitive (false);
+        solo_safe_led->set_sensitive (false);
 
 	if (boost::dynamic_pointer_cast<InternalSend>(send)) {
 		output_button.set_sensitive (false);

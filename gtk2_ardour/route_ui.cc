@@ -1822,3 +1822,11 @@ RouteUI::invert_menu_toggled (uint32_t c)
 	
 	_route->set_phase_invert (c, !_route->phase_invert (c));
 }
+
+void
+RouteUI::set_invert_sensitive (bool yn)
+{
+        for (list<BindableToggleButton*>::iterator b = _invert_buttons.begin(); b != _invert_buttons.end(); ++b) {
+                (*b)->set_sensitive (yn);
+        }
+}

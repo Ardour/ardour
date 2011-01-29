@@ -223,6 +223,8 @@ class RouteUI : public virtual AxisView
         virtual void start_step_editing () {}
         virtual void stop_step_editing() {}
 
+        void set_invert_sensitive (bool);
+
   private:
 	void check_rec_enable_sensitivity ();
 	void parameter_changed (std::string const &);
