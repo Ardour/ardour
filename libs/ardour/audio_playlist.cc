@@ -446,6 +446,10 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 			continue;
 		}
 
+                if (other->position() == r->position() && other->length() == r->length()) {
+                        /* precise overlay of two regions - no xfade */
+                        continue;
+                }
 
 		if (other->layer() < region->layer()) {
 			top = region;

@@ -441,6 +441,13 @@ Crossfade::refresh ()
 		Invalidated (shared_from_this());
 		return false;
 	}
+        
+        /* regions must cannot be identically sized and placed */
+
+        if (_in->position() == _out->position() && _in->length() == _out->length()) {
+		Invalidated (shared_from_this());
+                return false;
+        }
 
 	/* layer ordering cannot change */
 
