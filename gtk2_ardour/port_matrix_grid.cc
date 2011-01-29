@@ -144,8 +144,8 @@ PortMatrixGrid::render (cairo_t* cr)
 			for (PortGroup::BundleList::const_iterator j = row_bundles.begin(); j != row_bundles.end(); ++j) {
 
 				PortMatrixNode::State s = _matrix->get_association (PortMatrixNode (
-										   ARDOUR::BundleChannel ((*i)->bundle, 0),
-										   ARDOUR::BundleChannel ((*j)->bundle, 0)
+										   ARDOUR::BundleChannel ((*j)->bundle, 0),
+										   ARDOUR::BundleChannel ((*i)->bundle, 0)
 										   ));
 				switch (s) {
 				case PortMatrixNode::ASSOCIATED:

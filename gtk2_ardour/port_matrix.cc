@@ -958,8 +958,8 @@ PortMatrix::get_association (PortMatrixNode node) const
 				}
 
 				ARDOUR::BundleChannel c[2];
-				c[column_index()] = ARDOUR::BundleChannel (node.row.bundle, i);
-				c[row_index()] = ARDOUR::BundleChannel (node.column.bundle, j);
+				c[row_index()] = ARDOUR::BundleChannel (node.row.bundle, i);
+				c[column_index()] = ARDOUR::BundleChannel (node.column.bundle, j);
 
 				PortMatrixNode::State const s = get_state (c);
 
