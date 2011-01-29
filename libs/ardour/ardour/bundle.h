@@ -144,8 +144,6 @@ class Bundle : public PBD::ScopedConnectionList
 	Change _pending_change;
 };
 
-
-
 struct BundleChannel
 {
 	BundleChannel () : channel (-1) {}
@@ -166,5 +164,7 @@ struct BundleChannel
 };
 
 }
+
+std::ostream & operator<< (std::ostream & o, ARDOUR::Bundle const &);
 
 #endif /* __ardour_bundle_h__ */

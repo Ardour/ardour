@@ -496,3 +496,18 @@ Bundle::channel_type (uint32_t c) const
 	return _channel[c].type;
 }	
 
+ostream &
+operator<< (ostream& os, Bundle const & b)
+{
+	os << "BUNDLE " << b.nchannels() << " channels: ";
+	for (uint32_t i = 0; i < b.nchannels().n_total(); ++i) {
+		os << "( ";
+		Bundle::PortList const & pl = b.channel_ports (i);
+		for (Bundle::PortList::const_iterator j = pl.begin(); j != pl.end(); ++j) {
+			os << *j << " ";
+		}
+		os << ") ";
+	}
+
+	return os;
+}
