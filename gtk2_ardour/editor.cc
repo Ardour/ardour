@@ -1534,10 +1534,7 @@ Editor::build_track_region_context_menu ()
 		boost::shared_ptr<Track> tr;
 		boost::shared_ptr<Playlist> pl;
 
-		/* Don't offer a region submenu if we are in internal edit mode, as we don't select regions in this
-		   mode and so offering region context is somewhat confusing.
-		*/
-		if ((tr = rtv->track()) && ((pl = tr->playlist())) && !internal_editing()) {
+		if ((tr = rtv->track()) && ((pl = tr->playlist()))) {
 			framepos_t const framepos = (framepos_t) floor ((double) get_preferred_edit_position() * tr->speed());
 			uint32_t regions_at = pl->count_regions_at (framepos);
 			add_region_context_items (edit_items, regions_at > 1);
