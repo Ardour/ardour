@@ -934,11 +934,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Table          edit_packer;
 
 	Gtk::Adjustment     vertical_adjustment;
-
+        
 	Gtk::Layout         controls_layout;
 	bool control_layout_scroll (GdkEventScroll* ev);
-	void controls_layout_size_request (Gtk::Requisition*);
-	sigc::connection controls_layout_size_request_connection;
+        void reset_controls_layout_width ();
+        void reset_controls_layout_height (int32_t height);
 
 	bool horizontal_scroll_left_press ();
 	void horizontal_scroll_left_release ();

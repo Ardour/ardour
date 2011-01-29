@@ -343,62 +343,33 @@ Editor::track_canvas_size_allocated ()
 }
 
 void
-Editor::controls_layout_size_request (Requisition* req)
+Editor::reset_controls_layout_width ()
 {
-	double pos = 0;
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		pos += (*i)->effective_height ();
-	}
+        gint w = edit_controls_vbox.get_width();
 
-	gint height = min ((gint) pos, (gint) (physical_screen_height(get_window()) - 600));
+        if (_group_tabs->is_mapped()) {
+                w += _group_tabs->get_width();
+        }
 
-	bool changed = false;
+        /* the controls layout has no horizontal scrolling, its visible
+           width is always equal to the total width of its contents. 
+        */
 
-	gint w = edit_controls_vbox.get_width();
-	if (_group_tabs->is_mapped()) {
-		w += _group_tabs->get_width ();
-	}
-
-	gint width = max (w, controls_layout.get_width());
-
-	/* don't get too big. the fudge factors here are just guesses */
-
-	width =  min (width, (gint) (physical_screen_width(get_window()) - 300));
-
-	if ((req->width != width) || (req->height != height)) {
-		changed = true;
-		controls_layout_size_request_connection.disconnect ();
-	}
-
-	if (req->width != width) {
-		gint vbox_width = edit_controls_vbox.get_width();
-		if (_group_tabs->is_mapped()) {
-			vbox_width += _group_tabs->get_width();
-		}
-		req->width = width;
-
-		/* this one is important: it determines how big the layout thinks it really is, as
-		   opposed to what it displays on the screen
-		*/
-		controls_layout.property_width () = vbox_width;
-		controls_layout.property_width_request () = vbox_width;
-
-		// time_button_event_box.property_width_request () = vbox_width;
-		// zoom_box.property_width_request () = vbox_width;
-	}
-
-	if (req->height != height) {
-		req->height = height;
-		controls_layout.property_height () = (guint) floor (pos);
-		controls_layout.property_height_request () = height;
-	}
-
-	if (changed) {
-		controls_layout_size_request_connection = controls_layout.signal_size_request().connect (sigc::mem_fun (*this, &Editor::controls_layout_size_request));
-	}
-	//cerr << "sizes = " << req->width << " " << edit_controls_vbox.get_width() << " " << controls_layout.get_width() << " " << zoom_box.get_width() << " " << time_button_frame.get_width() << endl;//DEBUG
+        controls_layout.property_width() = w;
+        controls_layout.property_width_request() = w;
 }
 
+void
+Editor::reset_controls_layout_height (int32_t h)
+{
+        /* set the height of the scrollable area (i.e. the sum of all contained widgets)
+         */
+
+        controls_layout.property_height() = h;
+        
+        /* size request is set elsewhere, see ::track_canvas_allocate() */
+}
+        
 bool
 Editor::track_canvas_map_handler (GdkEventAny* /*ev*/)
 {

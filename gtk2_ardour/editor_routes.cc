@@ -446,12 +446,15 @@ EditorRoutes::redisplay ()
 		n++;
 	}
 
+
 	/* whenever we go idle, update the track view list to reflect the new order.
 	   we can't do this here, because we could mess up something that is traversing
 	   the track order and has caused a redisplay of the list.
 	*/
 	Glib::signal_idle().connect (sigc::mem_fun (*_editor, &Editor::sync_track_view_list_and_routes));
 
+        _editor->reset_controls_layout_height (position);
+        _editor->reset_controls_layout_width ();
 	_editor->full_canvas_height = position + _editor->canvas_timebars_vsize;
 	_editor->vertical_adjustment.set_upper (_editor->full_canvas_height);
 

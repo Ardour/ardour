@@ -485,7 +485,6 @@ Editor::Editor ()
 
 	controls_layout.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 	controls_layout.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::edit_controls_button_release));
-	controls_layout_size_request_connection = controls_layout.signal_size_request().connect (sigc::mem_fun (*this, &Editor::controls_layout_size_request));
 
 	_cursors = new MouseCursors;
 
@@ -2107,9 +2106,9 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		}
 	}
 
-	set_default_size (g.base_width, g.base_height);
+	//set_default_size (g.base_width, g.base_height);
 	move (x, y);
-
+        
 	if (_session && (prop = node.property ("playhead"))) {
 		framepos_t pos;
 		sscanf (prop->value().c_str(), "%" PRIi64, &pos);
@@ -4849,6 +4848,8 @@ Editor::handle_new_route (RouteList& routes)
 	RouteTimeAxisView *rtv;
 	list<RouteTimeAxisView*> new_views;
 
+        cerr << "Handle new route\n";
+
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
@@ -5473,3 +5474,4 @@ Editor::notebook_tab_clicked (GdkEventButton* ev, Gtk::Widget* page)
 
 	return true;
 }
+

@@ -1236,6 +1236,8 @@ Editor::parameter_changed (std::string p)
 			_group_tabs->hide ();
 		}
 
+                reset_controls_layout_width ();
+
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleGroupTabs"));
 		if (act) {
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
