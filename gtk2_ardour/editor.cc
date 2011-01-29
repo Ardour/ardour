@@ -1523,6 +1523,11 @@ Editor::build_track_region_context_menu ()
 	region_edit_menu_split_item = 0;
 	region_edit_menu_split_multichannel_item = 0;
 
+	/* we might try to use items that are currently attached to a crossfade menu,
+	   so clear that, too.
+	*/
+	track_crossfade_context_menu.items().clear ();
+
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (clicked_axisview);
 
 	if (rtv) {
@@ -1550,6 +1555,11 @@ Editor::build_track_crossfade_context_menu ()
 	using namespace Menu_Helpers;
 	MenuList& edit_items  = track_crossfade_context_menu.items();
 	edit_items.clear ();
+
+	/* we might try to use items that are currently attached to a crossfade menu,
+	   so clear that, too.
+	*/
+	track_region_context_menu.items().clear ();
 
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_axisview);
 
@@ -1715,7 +1725,7 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, bool multi
 	}
 
 	if (_popup_region_menu_item == 0) {
-		_popup_region_menu_item = new MenuItem (menu_item_name);
+		_popup_region_menu_item = manage (new MenuItem (menu_item_name));
 		_popup_region_menu_item->set_submenu (*dynamic_cast<Menu*> (ActionManager::get_widget (X_("/PopupRegionMenu"))));
 		_popup_region_menu_item->show ();
 	} else {
