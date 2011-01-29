@@ -743,7 +743,7 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 		++tmp;
 		
                 if (*j == note) {
-                        DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1\terasing pitch %2 @ %3\n", this, (int)(*i)->note(), (*i)->time()));
+                        DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1\terasing pitch %2 @ %3\n", this, (int)(*j)->note(), (*j)->time()));
                         p.erase (j);
                 }
 
