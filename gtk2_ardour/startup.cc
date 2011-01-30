@@ -156,17 +156,18 @@ ArdourStartup::set_new_only (bool yn)
 }
 
 void
-ArdourStartup::set_load_template( string load_template )
+ArdourStartup::set_load_template (string load_template)
 {
-    use_template_button.set_active( false );
-    load_template_override = load_template;
+	use_template_button.set_active (false);
+	load_template_override = load_template;
 }
 
 bool
 ArdourStartup::use_session_template ()
 {
-	if (!load_template_override.empty())
+	if (!load_template_override.empty()) {
 		return true;
+	}
 
 	if (use_template_button.get_active()) {
 		return template_chooser.get_active_row_number() > 0;
