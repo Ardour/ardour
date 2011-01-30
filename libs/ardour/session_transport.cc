@@ -578,8 +578,11 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	have_looped = false;
 
 	send_full_time_code (_transport_frame);
-	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
-	send_mmc_locate (_transport_frame);
+
+        if (!dynamic_cast<MTC_Slave*>(_slave)) {
+                MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
+                send_mmc_locate (_transport_frame);
+        }
 
 	if ((ptw & PostTransportLocate) && get_record_enabled()) {
 		/* capture start has been changed, so save pending state */
@@ -1147,9 +1150,11 @@ Session::start_transport ()
                 (*i)->automation_snapshot (_transport_frame, true);
 	}
 
-	Timecode::Time time;
-	timecode_time_subframes (_transport_frame, time);
-	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
+        Timecode::Time time;
+        timecode_time_subframes (_transport_frame, time);
+        if (!dynamic_cast<MTC_Slave*>(_slave)) {
+                MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
+        }
 
 	TransportStateChange (); /* EMIT SIGNAL */
 }
