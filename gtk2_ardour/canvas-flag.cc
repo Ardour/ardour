@@ -43,7 +43,7 @@ CanvasFlag::set_text(const string& a_text)
 {
 	delete_allocated_objects();
 
-	_text = new Text (*this, 0.0, 0.0, std::string(a_text));
+	_text = new Text (*this, 0.0, 0.0, a_text);
 	_text->property_justification() = Gtk::JUSTIFY_CENTER;
 	_text->property_fill_color_rgba() = _outline_color_rgba;
 	double flagwidth  = _text->property_text_width()  + 10.0;
