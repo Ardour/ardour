@@ -258,9 +258,9 @@ bool
 PixFader::on_motion_notify_event (GdkEventMotion* ev)
 {
 	if (dragging) {
-		double fract, delta, scale, ev_pos;
-		 ev_pos = (_orien == VERT) ? ev->y : ev->x;
-		//cerr << "PixFader::on_motion_notify_event() called x:y = " << ev->x << ":" << ev->y;
+		double scale = 1.0;
+		double const ev_pos = (_orien == VERT) ? ev->y : ev->x;
+		
 		if (ev->window != grab_window) {
 			grab_loc = ev_pos;
 			grab_window = ev->window;
@@ -273,14 +273,12 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 			} else {
 				scale = 0.1;
 			}
-		} else {
-			scale = 1.0;
 		}
-		//cerr << " ev_pos=" << ev_pos << " grab_loc=" << grab_loc;
-		delta = ev_pos - grab_loc;
+
+		double const delta = ev_pos - grab_loc;
 		grab_loc = ev_pos;
 
-		fract = (delta / span);
+		double fract = (delta / span);
 
 		fract = min (1.0, fract);
 		fract = max (-1.0, fract);
@@ -292,7 +290,6 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 		}
 
 		adjustment.set_value (adjustment.get_value() + scale * fract * (adjustment.get_upper() - adjustment.get_lower()));
-		//cerr << " adj=" << adjustment.get_value() << " fract=" << fract << " delta=" << delta << " scale=" << scale << endl;
 	}
 
 	return true;
