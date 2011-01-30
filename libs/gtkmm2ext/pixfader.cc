@@ -125,30 +125,28 @@ PixFader::on_button_press_event (GdkEventButton* ev)
 	if (ev->type != GDK_BUTTON_PRESS) {
 		return false;
 	}
-	
-	switch (ev->button) {
-	case 1:
-	case 2:
-		add_modal_grab();
-		grab_loc = (_orien == VERT) ? ev->y : ev->x;
-		grab_start = (_orien == VERT) ? ev->y : ev->x;
-		grab_window = ev->window;
-		dragging = true;
-		return true;
-	default:
-		break;
-	} 
-			       
 
-	return false;
+	if (ev->button != 1 && ev->button != 2) {
+		return false;
+	}
+
+	add_modal_grab ();
+	grab_loc = (_orien == VERT) ? ev->y : ev->x;
+	grab_start = (_orien == VERT) ? ev->y : ev->x;
+	grab_window = ev->window;
+	dragging = true;
+
+	if (ev->button == 2) {
+		set_adjustment_from_event (ev);
+	}
+	
+	return true;
 }
 
 bool
 PixFader::on_button_release_event (GdkEventButton* ev)
 {
-	double fract, ev_pos;
-
-	ev_pos = (_orien == VERT) ? ev->y : ev->x;
+	double const ev_pos = (_orien == VERT) ? ev->y : ev->x;
 	
 	switch (ev->button) {
 	case 1:
@@ -179,13 +177,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 		if (dragging) {
 			remove_modal_grab();
 			dragging = false;
-			
-			fract = 1.0 - (ev_pos / span); // inverted X Window coordinates, grrr
-			
-			fract = min (1.0, fract);
-			fract = max (0.0, fract);
-			
-			adjustment.set_value (fract * (adjustment.get_upper() - adjustment.get_lower()));
+			set_adjustment_from_event (ev);
 		}
 		break;
 
@@ -337,4 +329,15 @@ PixFader::on_leave_notify_event (GdkEventCrossing*)
 {
 	Keyboard::magic_widget_drop_focus();
 	return false;
+}
+
+void
+PixFader::set_adjustment_from_event (GdkEventButton* ev)
+{
+	double fract = (_orien == VERT) ? (1.0 - (ev->y / span)) : (ev->x / span);
+
+	fract = min (1.0, fract);
+	fract = max (0.0, fract);
+
+	adjustment.set_value (fract * (adjustment.get_upper () - adjustment.get_lower ()));
 }

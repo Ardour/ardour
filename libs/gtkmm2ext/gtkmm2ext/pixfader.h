@@ -70,8 +70,8 @@ class PixFader : public Gtk::DrawingArea
 	int unity_loc;
 
 	void adjustment_changed ();
-
 	int display_span ();
+	void set_adjustment_from_event (GdkEventButton *);
 
 	static int fine_scale_modifier;
 	static int extra_fine_scale_modifier;
