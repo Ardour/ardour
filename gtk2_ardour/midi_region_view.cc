@@ -1142,9 +1142,9 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel)
 		if (patch != 0) {
 			add_canvas_patch_change (*i, patch->name());
 		} else {
-			char buf[4];
-                        // program_number is zero-based: convert to one-based
-			snprintf (buf, 4, "%d", (*i)->program() + 1);
+			char buf[16];
+                        /* program and bank numbers are zero-based: convert to one-based */
+			snprintf (buf, 16, "%d\n%d", (*i)->program() + 1, (*i)->bank() + 1);
 			add_canvas_patch_change (*i, buf);
 		}
 	}
