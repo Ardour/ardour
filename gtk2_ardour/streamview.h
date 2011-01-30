@@ -115,7 +115,8 @@ public:
 
 	void check_record_layers (boost::shared_ptr<ARDOUR::Region>, ARDOUR::framepos_t);
 	
-	sigc::signal<void,RegionView*> RegionViewAdded;
+	sigc::signal<void, RegionView*> RegionViewAdded;
+	sigc::signal<void> RegionViewRemoved;
 
 protected:
 	StreamView (RouteTimeAxisView&, ArdourCanvas::Group* background_group = 0, ArdourCanvas::Group* canvas_group = 0);

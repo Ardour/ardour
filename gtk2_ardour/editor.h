@@ -2024,6 +2024,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	EditorSummary* _summary;
 
 	void region_view_added (RegionView *);
+	void region_view_removed ();
 
 	void update_canvas_now ();
 

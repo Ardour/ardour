@@ -4815,6 +4815,12 @@ Editor::region_view_added (RegionView *)
 	_summary->set_dirty ();
 }
 
+void
+Editor::region_view_removed ()
+{
+	_summary->set_dirty ();
+}
+
 TimeAxisView*
 Editor::axis_view_from_route (boost::shared_ptr<Route> r) const
 {
@@ -4880,6 +4886,7 @@ Editor::handle_new_route (RouteList& routes)
 		rtv->effective_gain_display ();
 
 		rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
+		rtv->view()->RegionViewRemoved.connect (sigc::mem_fun (*this, &Editor::region_view_removed));
 	}
 
 	_routes->routes_added (new_views);
