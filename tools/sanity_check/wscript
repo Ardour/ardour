@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+import autowaf
+import Options
+import os
+
+# Mandatory variables
+srcdir = '.'
+blddir = 'build'
+
+def set_options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    autowaf.configure (conf)
+    conf.check_tool('compiler_cxx')
+
+def build(bld):
+    obj = bld.new_task_gen(features = 'cxx cprogram')
+    obj.includes = [ '.' ]
+    obj.source = [ 'main.cpp', 'systemtest.cpp' ]
+    obj.target = 'sanityCheck'
+    obj.name = 'sanityCheck'
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    
