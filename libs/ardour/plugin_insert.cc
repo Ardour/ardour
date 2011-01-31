@@ -66,6 +66,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	: Processor (s, (plug ? plug->name() : string ("toBeRenamed")))
 	, _signal_analysis_collected_nframes(0)
 	, _signal_analysis_collect_nframes_max(0)
+	, _splitting (false)
 {
 	/* the first is the master */
 
@@ -147,7 +148,19 @@ PluginInsert::input_streams() const
 {
 	ChanCount in = _plugins[0]->get_info()->n_inputs;
 
-	if (in == ChanCount::INFINITE) {
+	if (_splitting) {
+
+		/* we are splitting 1 processor input to multiple plugin inputs,
+		   so we have a maximum of 1 stream of each type.
+		*/
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			if (in.get (*t) > 1) {
+				in.set (*t, 1);
+			}
+		}
+		return in;
+
+	} else if (in == ChanCount::INFINITE) {
 		return _plugins[0]->input_streams ();
 	} else {
 		in.set_audio (in.n_audio() * _plugins.size());
@@ -275,6 +288,18 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 	ChanMapping in_map(input_streams());
 	ChanMapping out_map(output_streams());
 
+	if (_splitting) {
+		/* fix the input mapping so that we have maps for each of the plugin's inputs */
+		in_map = ChanMapping (natural_input_streams ());
+
+		/* copy the first stream's buffer contents to the others */
+		/* XXX: audio only */
+		Sample const * mono = bufs.get_audio (in_map.get (DataType::AUDIO, 0)).data (offset);
+		for (uint32_t i = input_streams().n_audio(); i < natural_input_streams().n_audio(); ++i) {
+			memcpy (bufs.get_audio (in_map.get (DataType::AUDIO, i)).data() + offset, mono + offset, sizeof (Sample) * (nframes - offset));
+		}
+	}
+
 	/* Note that we've already required that plugins
 	   be able to handle in-place processing.
 	*/
@@ -357,13 +382,20 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 void
 PluginInsert::silence (framecnt_t nframes)
 {
+	if (!active ()) {
+		return;
+	}
+	
 	ChanMapping in_map(input_streams());
 	ChanMapping out_map(output_streams());
 
-	if (active()) {
-		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-			(*i)->connect_and_run (_session.get_silent_buffers ((*i)->get_info()->n_inputs), in_map, out_map, nframes, 0);
-		}
+	if (_splitting) {
+		/* fix the input mapping so that we have maps for each of the plugin's inputs */
+		in_map = ChanMapping (natural_input_streams ());
+	}
+	
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		(*i)->connect_and_run (_session.get_silent_buffers ((*i)->get_info()->n_inputs), in_map, out_map, nframes, 0);
 	}
 }
 
@@ -540,15 +572,16 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
-	/* if we're running replicated plugins, each plugin has
-	   the same i/o configuration and we may need to announce how many
-	   output streams there are.
-
-	   if we running a single plugin, we need to configure it.
-	*/
-
-	if (_plugins.front()->configure_io (in, out) == false) {
-		return false;
+	if (_plugins.front()->get_info()->n_inputs <= in) {
+		if (_plugins.front()->configure_io (in, out) == false) {
+			return false;
+		}
+	} else {
+		/* we must be splitting a single processor input to
+		   multiple plugin inputs
+		*/
+		_plugins.front()->configure_io (_plugins.front()->get_info()->n_inputs, out);
+		_splitting = true;
 	}
 
 	// we don't know the analysis window size, so we must work with the
@@ -620,9 +653,33 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 			out.set (*t, outputs.get(*t) * f);
 		}
 		return true;
-	} else {
-		return false;
 	}
+
+	/* If the processor has exactly one input of a given type, and
+	   the plugin has more, we can feed the single processor input
+	   to some or all of the plugin inputs.  This is rather
+	   special-case-y, but the 1-to-many case is by far the
+	   simplest.  How do I split thy 2 processor inputs to 3
+	   plugin inputs?  Let me count the ways ...
+	*/
+
+	bool can_split = true;
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+
+		bool const can_split_type = (in.get (*t) == 1 && inputs.get (*t) > 1);
+		bool const nothing_to_do_for_type = (in.get (*t) == 0 && inputs.get (*t) == 0);
+
+		if (!can_split_type && !nothing_to_do_for_type) {
+			can_split = false;
+		}
+	}
+
+	if (can_split) {
+		out = outputs;
+		return true;
+	}
+
+	return false;
 }
 
 /* Number of plugin instances required to support a given channel configuration.
@@ -656,6 +713,11 @@ PluginInsert::count_for_configuration (ChanCount in, ChanCount /*out*/) const
 
 	if (inputs == in) {
 		/* exact match */
+		return 1;
+	}
+
+	if (inputs > in) {
+		/* more plugin inputs than processor inputs, so we are splitting */
 		return 1;
 	}
 

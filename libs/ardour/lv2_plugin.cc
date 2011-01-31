@@ -620,7 +620,7 @@ LV2Plugin::connect_and_run (BufferSet& bufs,
 		pframes_t nframes, framecnt_t offset)
 {
 	Plugin::connect_and_run (bufs, in_map, out_map, nframes, offset);
-	
+
 	cycles_t then = get_cycles ();
 
 	uint32_t audio_in_index  = 0;

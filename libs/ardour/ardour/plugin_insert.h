@@ -133,6 +133,9 @@ class PluginInsert : public Processor
 	BufferSet _signal_analysis_inputs;
 	BufferSet _signal_analysis_outputs;
 
+	/** true if we are splitting one processor input to >1 plugin inputs */
+	bool _splitting;
+
 	void automation_run (BufferSet& bufs, pframes_t nframes);
 	void connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now = 0);
 
