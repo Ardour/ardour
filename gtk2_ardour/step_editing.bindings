@@ -10,9 +10,9 @@
      <Binding key="7" action="StepEditing/octave-7"/>
      <Binding key="8" action="StepEditing/octave-8"/>
      <Binding key="9" action="StepEditing/octave-9"/>
-     <Binding key="-" action="StepEditing/octave-10"/>
-     <Binding key="=" action="StepEditing/octave-11"/>
-
+     <Binding key="0" action="StepEditing/octave-10"/>
+     <Binding key="-" action="StepEditing/octave-11"/>
+     
      <Binding key="F1" action="StepEditing/note-length-whole"/>
      <Binding key="F2" action="StepEditing/note-length-half"/>
      <Binding key="F3" action="StepEditing/note-length-third"/>

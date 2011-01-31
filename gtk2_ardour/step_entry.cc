@@ -71,7 +71,7 @@ StepEntry::StepEntry (StepEditor& seditor)
 	, back_button (_("back"))
 	, channel_adjustment (1, 1, 16, 1, 4) 
 	, channel_spinner (channel_adjustment)
-        , octave_adjustment (4, 1, 11, 1, 4) // start in octave 4
+        , octave_adjustment (4, 0, 10, 1, 4) // start in octave 4
         , octave_spinner (octave_adjustment)
         , length_divisor_adjustment (1.0, 1.0, 128, 1.0, 4.0)
         , length_divisor_spinner (length_divisor_adjustment)
@@ -614,18 +614,17 @@ StepEntry::register_actions ()
 	myactions.register_action ("StepEditing", "inc-note-velocity", _("Increase Note Velocity"), sigc::mem_fun (*this, &StepEntry::inc_note_velocity));
 	myactions.register_action ("StepEditing", "dec-note-velocity", _("Decrease Note Velocity"), sigc::mem_fun (*this, &StepEntry::dec_note_velocity));
 
-	myactions.register_action ("StepEditing", "octave-0", _("Switch to the 1st octave"), sigc::mem_fun (*this, &StepEntry::octave_0));
-	myactions.register_action ("StepEditing", "octave-1", _("Switch to the 2nd octave"), sigc::mem_fun (*this, &StepEntry::octave_1));
-	myactions.register_action ("StepEditing", "octave-2", _("Switch to the 3rd octave"), sigc::mem_fun (*this, &StepEntry::octave_2));
-	myactions.register_action ("StepEditing", "octave-3", _("Switch to the 4th octave"), sigc::mem_fun (*this, &StepEntry::octave_3));
-	myactions.register_action ("StepEditing", "octave-4", _("Switch to the 5th octave"), sigc::mem_fun (*this, &StepEntry::octave_4));
-	myactions.register_action ("StepEditing", "octave-5", _("Switch to the 6th octave"), sigc::mem_fun (*this, &StepEntry::octave_5));
-	myactions.register_action ("StepEditing", "octave-6", _("Switch to the 7th octave"), sigc::mem_fun (*this, &StepEntry::octave_6));
-	myactions.register_action ("StepEditing", "octave-7", _("Switch to the 8th octave"), sigc::mem_fun (*this, &StepEntry::octave_7));
-	myactions.register_action ("StepEditing", "octave-8", _("Switch to the 9th octave"), sigc::mem_fun (*this, &StepEntry::octave_8));
-	myactions.register_action ("StepEditing", "octave-9", _("Switch to the 10th octave"), sigc::mem_fun (*this, &StepEntry::octave_9));
-	myactions.register_action ("StepEditing", "octave-10", _("Switch to the 11th octave"), sigc::mem_fun (*this, &StepEntry::octave_10));
-
+	myactions.register_action ("StepEditing", "octave-1", _("Switch to the 1st octave"), sigc::mem_fun (*this, &StepEntry::octave_0));
+	myactions.register_action ("StepEditing", "octave-2", _("Switch to the 2nd octave"), sigc::mem_fun (*this, &StepEntry::octave_1));
+	myactions.register_action ("StepEditing", "octave-3", _("Switch to the 3rd octave"), sigc::mem_fun (*this, &StepEntry::octave_2));
+	myactions.register_action ("StepEditing", "octave-4", _("Switch to the 4th octave"), sigc::mem_fun (*this, &StepEntry::octave_3));
+	myactions.register_action ("StepEditing", "octave-5", _("Switch to the 5th octave"), sigc::mem_fun (*this, &StepEntry::octave_4));
+	myactions.register_action ("StepEditing", "octave-6", _("Switch to the 6th octave"), sigc::mem_fun (*this, &StepEntry::octave_5));
+	myactions.register_action ("StepEditing", "octave-7", _("Switch to the 7th octave"), sigc::mem_fun (*this, &StepEntry::octave_6));
+	myactions.register_action ("StepEditing", "octave-8", _("Switch to the 8th octave"), sigc::mem_fun (*this, &StepEntry::octave_7));
+	myactions.register_action ("StepEditing", "octave-9", _("Switch to the 9th octave"), sigc::mem_fun (*this, &StepEntry::octave_8));
+	myactions.register_action ("StepEditing", "octave-10", _("Switch to the 10th octave"), sigc::mem_fun (*this, &StepEntry::octave_9));
+	myactions.register_action ("StepEditing", "octave-11", _("Switch to the 11th octave"), sigc::mem_fun (*this, &StepEntry::octave_10));
 
         RadioAction::Group note_length_group;
 
@@ -633,6 +632,8 @@ StepEntry::register_actions ()
                                          _("Set Note Length to Whole"), sigc::mem_fun (*this, &StepEntry::note_length_change), 1);
         myactions.register_radio_action ("StepEditing", note_length_group, "note-length-half", 
                                          _("Set Note Length to 1/2"), sigc::mem_fun (*this, &StepEntry::note_length_change), 2);
+        myactions.register_radio_action ("StepEditing", note_length_group, "note-length-third", 
+                                         _("Set Note Length to 1/3"), sigc::mem_fun (*this, &StepEntry::note_length_change), 3);
         myactions.register_radio_action ("StepEditing", note_length_group, "note-length-quarter",
                                          _("Set Note Length to 1/4"), sigc::mem_fun (*this, &StepEntry::note_length_change), 4);
         myactions.register_radio_action ("StepEditing", note_length_group, "note-length-eighth",
