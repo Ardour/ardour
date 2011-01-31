@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 0.664.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-11-10 17:43-0500\n"
+"POT-Creation-Date: 2011-01-31 10:22-0500\n"
 "PO-Revision-Date: 2007-04-16 00:38+0200\n"
 "Last-Translator: Klearchos Gourgourinis <muadib@in.gr>\n"
 "Language-Team: Hellenic(Greek)\n"
@@ -16,77 +16,77 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: amp.cc:52 automatable.cc:184
+#: amp.cc:53 automatable.cc:187
 msgid "Fader"
 msgstr ""
 
-#: audio_diskstream.cc:263
+#: audio_diskstream.cc:260
 msgid "AudioDiskstream: Playlist \"%1\" isn't an audio playlist"
 msgstr "AudioDiskStream: Η Λίστα \"%1\" δεν είναι ηχητική λίστα αναπαρ/γής"
 
-#: audio_diskstream.cc:316
+#: audio_diskstream.cc:313
 msgid "AudioDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr ""
 "AudioDiskstream %1: δεν υπάρχει λίστα αναπαρ/γής για να γίνει αντιγραφή!"
 
-#: audio_diskstream.cc:783 audio_diskstream.cc:794
+#: audio_diskstream.cc:792 audio_diskstream.cc:803
 msgid ""
 "AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"
 msgstr ""
 "AudioDiskstream %1: κατα την αναγόμωση, δεν μπόρεσα να διαβάσω %2 από τη "
 "λίστα αναπαρ/γής στο frame %3"
 
-#: audio_diskstream.cc:944
+#: audio_diskstream.cc:953
 msgid "AudioDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr ""
 "AudioDiskstream %1: δεν μπόρεσα να διαβάσω %2 από τη λίστα αναπαρ/γής στο "
 "frame %3"
 
-#: audio_diskstream.cc:1310 audio_diskstream.cc:1327
+#: audio_diskstream.cc:1319 audio_diskstream.cc:1336
 msgid "AudioDiskstream %1: cannot write to disk"
 msgstr "AudioDiskstream %1: δεν μπορώ να γράψω στο δίσκο"
 
-#: audio_diskstream.cc:1372
+#: audio_diskstream.cc:1381
 msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr ""
 "AudioDiskstream \"%1\": αδύνατη η εκκαθάριση δειγματοληπτικών δεδομένων στο "
 "δίσκο!"
 
-#: audio_diskstream.cc:1419
+#: audio_diskstream.cc:1428
 #, fuzzy
 msgid "Could not move capture file from %1"
 msgstr "αδύνατη η επαναφορά του state file από backup %1"
 
-#: audio_diskstream.cc:1470
+#: audio_diskstream.cc:1479
 msgid "%1: could not create region for complete audio file"
 msgstr "%1: δεν μπόρεσα να δημιουργήσω περιοχή για ολόκληρο audio file"
 
-#: audio_diskstream.cc:1502
+#: audio_diskstream.cc:1511
 msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr ""
 "AudioDiskstream: δεν μπόρεσα να δημιουργήσω περιοχή για δειγματοληψίες!"
 
-#: audio_diskstream.cc:1607
+#: audio_diskstream.cc:1625
 msgid "programmer error: %1"
 msgstr "σφάλμα προγραμματιστή: %1"
 
-#: audio_diskstream.cc:1880
+#: audio_diskstream.cc:1898
 msgid "AudioDiskstream: channel %1 out of range"
 msgstr "AudioDiskstream: κανάλι %1 εκτός διαστήματος"
 
-#: audio_diskstream.cc:1899 midi_diskstream.cc:1350
+#: audio_diskstream.cc:1917 midi_diskstream.cc:1362
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr "%1:%2 νέα δειγματοληψία δεν εκκινήθη σωστά"
 
-#: audio_diskstream.cc:2183
+#: audio_diskstream.cc:2209
 msgid "%1: cannot restore pending capture source file %2"
 msgstr "%1: δεν μπορώ να ανοίξω το αρχείο %2 από την απαιτούμενη πηγή"
 
-#: audio_diskstream.cc:2205
+#: audio_diskstream.cc:2231
 msgid "%1: incorrect number of pending sources listed - ignoring them all"
 msgstr "%1: ετυπώθη λανθασμένος αριθμός απαιτούμενων πηγών - αγνοήθηκαν όλες"
 
-#: audio_diskstream.cc:2229
+#: audio_diskstream.cc:2255
 msgid "%1: cannot create whole-file region from pending capture sources"
 msgstr ""
 "%1: αδύνατη η δημιουργία ακέραιας περιοχής από τις απαιτούμενες πηγές "
@@ -96,7 +96,7 @@ msgstr ""
 msgid "Could not open %1.  Audio Library not saved"
 msgstr "Δεν μπόρεσα να ανοίξω το %1.  Η Audio Library δεν αποθηκεύθηκε"
 
-#: audio_playlist.cc:297
+#: audio_playlist.cc:293
 msgid ""
 "programming error: non-audio Region passed to remove_overlap in audio "
 "playlist"
@@ -104,7 +104,7 @@ msgstr ""
 "σφάλμα προγραμματισμού: μη-ηχητική Περιοχή πέρασε σε remove_overlap στην "
 "audio playlist"
 
-#: audio_playlist.cc:428
+#: audio_playlist.cc:424
 msgid ""
 "programming error: non-audio Region tested for overlap in audio playlist"
 msgstr ""
@@ -149,11 +149,10 @@ msgid ""
 msgstr ""
 
 #: audio_region_importer.cc:148
-#, fuzzy
 msgid ""
 "\n"
 "Channels: "
-msgstr "κανάλια"
+msgstr ""
 
 #: audio_track.cc:177
 #, fuzzy
@@ -195,61 +194,61 @@ msgstr ""
 msgid "VAMP Plugin \"%1\" could not be loaded"
 msgstr ""
 
-#: audioengine.cc:182
+#: audioengine.cc:185
 msgid "Connect session to engine"
 msgstr ""
 
-#: audioengine.cc:243
+#: audioengine.cc:246
 msgid "Cannot create temporary MIDI port to determine MIDI buffer size"
 msgstr ""
 
-#: audioengine.cc:758
+#: audioengine.cc:781
 msgid ""
 "a port with the name \"%1\" already exists: check for duplicated track/bus "
 "names"
 msgstr ""
 
-#: audioengine.cc:760 session.cc:1566
+#: audioengine.cc:783 session.cc:1574
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with ports if you need this many tracks."
 msgstr ""
 
-#: audioengine.cc:763
+#: audioengine.cc:786
 #, fuzzy
 msgid "AudioEngine: cannot register port \"%1\": %2"
 msgstr "IO: δεν μπορεί να καταχώρηθεί η θύρα εισόδου %1"
 
-#: audioengine.cc:799
+#: audioengine.cc:822
 msgid "unable to create port: %1"
 msgstr ""
 
-#: audioengine.cc:856
+#: audioengine.cc:877
 msgid "connect called before engine was started"
 msgstr "η σύνδεση εκλήθη πριν να εκκινηθεί η engine"
 
-#: audioengine.cc:882
+#: audioengine.cc:903
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr "AudioEngine: αδύνατη η σύνδεση %1 (%2) σε %3 (%4)"
 
-#: audioengine.cc:899 audioengine.cc:930
+#: audioengine.cc:918 audioengine.cc:949
 msgid "disconnect called before engine was started"
 msgstr "η αποσύνδεση εκλήθη πριν να εκκινηθεί η engine"
 
-#: audioengine.cc:994
+#: audioengine.cc:997
 #, fuzzy
-msgid "get_port_by_name_locked() called before engine was started"
+msgid "get_port_by_name() called before engine was started"
 msgstr "η ρουτίνα get_port_by_name() εκλήθη πριν να εκκινηθεί η engine"
 
-#: audioengine.cc:1025
+#: audioengine.cc:1030
 msgid "get_ports called before engine was started"
 msgstr "η ρουτίνα get_ports εκλήθη πριν να εκκινηθεί η engine"
 
-#: audioengine.cc:1342
+#: audioengine.cc:1357
 msgid "failed to connect to JACK"
 msgstr "Αποτυχία συνδέσεως με τον JACK"
 
-#: audioregion.cc:1431
+#: audioregion.cc:1455
 msgid ""
 "You have requested an operation that requires audio analysis.\n"
 "\n"
@@ -306,69 +305,65 @@ msgstr ""
 msgid "AudioSource: cannot open peakpath (c) \"%1\" (%2)"
 msgstr "AudioSource: δεν μπορώ να ανοίξω το peakpath \"%1\" (%2)"
 
-#: audiosource.cc:768 audiosource.cc:880
+#: audiosource.cc:769 audiosource.cc:881
 msgid "%1: could not write peak file data (%2)"
 msgstr "%1: δεν μπόρεσα να γράψω δεδομένα του αρχείου peak (%2)"
 
-#: audiosource.cc:907 file_source.cc:479 midi_source.cc:330
-#: plugin_insert.cc:528 region.cc:318 session.cc:2231 session.cc:2262
-#: session.cc:2302 session.cc:3237 session_handle.cc:85 sndfilesource.cc:123
+#: audiosource.cc:908 file_source.cc:479 midi_source.cc:330
+#: plugin_insert.cc:529 session.cc:2236 session.cc:2267 session.cc:2307
+#: session.cc:3254 session_handle.cc:87 sndfilesource.cc:123
 msgid "programming error: %1"
 msgstr "σφάλμα προγραμματισμού: %1"
 
-#: auditioner.cc:88
+#: auditioner.cc:89
 msgid "no outputs available for auditioner - manual connection required"
 msgstr ""
 
-#: auditioner.cc:158
+#: auditioner.cc:160
 msgid "Auditioning of non-audio regions not yet supported"
 msgstr ""
 
-#: auditioner.cc:180
+#: auditioner.cc:185
 msgid "Cannot setup auditioner processing flow for %1 channels"
 msgstr ""
 
-#: automatable.cc:76
+#: automatable.cc:79
 #, fuzzy
 msgid "Automation node has no path property"
 msgstr "%1: Ο Κόμβος αυτοματισμού δεν έχει ορισμένο path"
 
-#: automatable.cc:114
+#: automatable.cc:117
 #, fuzzy
 msgid "cannot open %2 to load automation data (%3)"
 msgstr "%1: δεν μπορώ να ανοίξω %2 για ανάκληση δεδομένων αυτοματισμού (%3)"
 
-#: automatable.cc:144
+#: automatable.cc:147
 #, fuzzy
 msgid "cannot load automation data from %2"
 msgstr "%1: δεν μπορούν να ανακληθούν δεδομένα αυτοματισμού από %2"
 
-#: automatable.cc:187
-msgid "Pan %1"
-msgstr ""
-
-#: automation_list.cc:359
+#: automation_list.cc:360
 #, fuzzy
 msgid "automation list: cannot load coordinates from XML, all points ignored"
 msgstr ""
 "λίστα αυτοματισμού: καμία x-συντεταγμένη αποθηκευμένη για σημείο ελέγχου (το "
 "σημείο αγνοήθηκε)"
 
-#: automation_list.cc:404
+#: automation_list.cc:405
 msgid ""
 "automation list: no x-coordinate stored for control point (point ignored)"
 msgstr ""
 "λίστα αυτοματισμού: καμία x-συντεταγμένη αποθηκευμένη για σημείο ελέγχου (το "
 "σημείο αγνοήθηκε)"
 
-#: automation_list.cc:410
+#: automation_list.cc:411
 msgid ""
 "automation list: no y-coordinate stored for control point (point ignored)"
 msgstr ""
 "λίστα αυτοματισμού: καμία y-συντεταγμένη αποθηκευμένη για σημείο ελέγχου (το "
 "σημείο αγνοήθηκε)"
 
-#: automation_list.cc:424
+#: automation_list.cc:425
 msgid ""
 "AutomationList: passed XML node called %1, not \"AutomationList\" - ignored"
 msgstr ""
@@ -422,7 +417,7 @@ msgstr ""
 msgid "looking for control protocols in %1"
 msgstr ""
 
-#: control_protocol_manager.cc:216
+#: control_protocol_manager.cc:214
 msgid "Control protocol %1 not usable"
 msgstr "Πρωτόκολλο ελέγχου %1 μη χρησιμοποιήσιμο"
 
@@ -448,25 +443,25 @@ msgstr "Το όνομα πρωτοκόλλου ελέγχου \"%1\" δεν έχ
 msgid "control protocol \"%1\" is not known. Ignored"
 msgstr "Το όνομα πρωτοκόλλου ελέγχου \"%1\" δεν έχει descriptor"
 
-#: crossfade.cc:142
+#: crossfade.cc:141
 msgid "Crossfade: no \"in\" region in state"
 msgstr "Crossfade: χωρίς \"in\" περιοχή σε κατάσταση"
 
-#: crossfade.cc:158
+#: crossfade.cc:157
 #, fuzzy
 msgid "Crossfade: no \"in\" region %1 found in playlist %2 nor in region map"
 msgstr "Crossfade: no \"in\" περιοχή  %1 δεν ευρέθη στη λίστα αναπαρ/γής %2"
 
-#: crossfade.cc:168
+#: crossfade.cc:167
 msgid "Crossfade: no \"out\" region in state"
 msgstr "Crossfade: χωρίς \"out\" περιοχή σε κατάσταση"
 
-#: crossfade.cc:181
+#: crossfade.cc:180
 #, fuzzy
 msgid "Crossfade: no \"out\" region %1 found in playlist %2 nor in region map"
 msgstr "Crossfade: no \"out\" περιοχή  %1 δεν ευρέθη στη λίστα αναπαρ/γής %2"
 
-#: crossfade.cc:790
+#: crossfade.cc:796
 msgid "old-style crossfade information - no position information"
 msgstr "παλαιού-τύπου crossfade πληροφορία - καμία πληροφορία θέσεως"
 
@@ -482,17 +477,21 @@ msgstr "CycleTimer::get_mhz(): δεν ευρέθη το cpu MHz στο /proc/cpu
 msgid "cannot locate cpu MHz in /proc/cpuinfo"
 msgstr "δεν ευρέθη το cpu MHz στο /proc/cpuinfo"
 
-#: delivery.cc:104
+#: delivery.cc:110
 msgid "main outs"
 msgstr ""
 
-#: delivery.cc:107
+#: delivery.cc:113
 msgid "listen"
 msgstr ""
 
-#: diskstream.cc:289
+#: diskstream.cc:287
 msgid "Location \"%1\" not valid for track loop (start >= end)"
 msgstr "Η Τοποθεσία \"%1\" δεν είναι ικανή για track loop (αρχή >= τέλος)"
+
+#: export_channel.cc:105
+msgid "Could not get port for export channel \"%1\", dropping the channel"
+msgstr ""
 
 #: export_failed.cc:32
 #, fuzzy
@@ -547,16 +546,20 @@ msgstr ""
 msgid "Lossless compression"
 msgstr ""
 
-#: export_format_specification.cc:523
+#: export_format_manager.cc:206 export_format_specification.cc:551
+msgid "Session rate"
+msgstr ""
+
+#: export_format_specification.cc:514
 #, fuzzy
 msgid "normalize, "
 msgstr "εξομαλύνθηκε στα %.2fdB"
 
-#: export_format_specification.cc:527
+#: export_format_specification.cc:518
 msgid "trim, "
 msgstr ""
 
-#: export_format_specification.cc:529
+#: export_format_specification.cc:520
 msgid "trim start, "
 msgstr ""
 
@@ -612,46 +615,50 @@ msgstr ""
 msgid "No sample format"
 msgstr ""
 
-#: export_handler.cc:282
+#: export_handler.cc:283
 msgid "Editor: cannot open \"%1\" as export file for CD marker file"
 msgstr ""
 
-#: export_profile_manager.cc:298
+#: export_profile_manager.cc:77 export_profile_manager.cc:78
+msgid "Searching for export formats in %1"
+msgstr ""
+
+#: export_profile_manager.cc:312
 #, fuzzy
 msgid "Selection"
 msgstr "ανάλυση"
 
-#: export_profile_manager.cc:416
+#: export_profile_manager.cc:430
 msgid "Session"
 msgstr ""
 
-#: export_profile_manager.cc:716
+#: export_profile_manager.cc:738
 msgid "No timespan has been selected!"
 msgstr ""
 
-#: export_profile_manager.cc:722
+#: export_profile_manager.cc:744
 msgid "Some channels are empty"
 msgstr ""
 
-#: export_profile_manager.cc:752
+#: export_profile_manager.cc:774
 msgid "No format selected!"
 msgstr ""
 
-#: export_profile_manager.cc:754
+#: export_profile_manager.cc:776
 msgid "All channels are empty!"
 msgstr ""
 
-#: export_profile_manager.cc:756
+#: export_profile_manager.cc:778
 msgid "One or more of the selected formats is not compatible with this system!"
 msgstr ""
 
-#: export_profile_manager.cc:759
+#: export_profile_manager.cc:781
 msgid ""
 "%1 supports only %2 channels, but you have %3 channels in your channel "
 "configuration"
 msgstr ""
 
-#: file_source.cc:182 session_state.cc:2708
+#: file_source.cc:182 session_state.cc:2747
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
 msgstr "Υπάρχουν ήδη 1000 αρχεία με ονόματα όπως %1; μη-συνεχές versioning"
@@ -738,34 +745,34 @@ msgstr "δεν μπορώ να καθορίσω τον τρέχοντα ενερ
 msgid "unknown file type for session %1"
 msgstr "άγνωστος τύπος αρχείου για την συνεδρία %1"
 
-#: globals.cc:220
+#: globals.cc:221
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr ""
 
-#: globals.cc:222
+#: globals.cc:223
 #, fuzzy
 msgid "Could not set system open files limit to %1"
 msgstr "αδύνατη η επαναφορά του state file από backup %1"
 
-#: globals.cc:226
+#: globals.cc:227
 msgid "Removed open file count limit. Excellent!"
 msgstr ""
 
-#: globals.cc:228
+#: globals.cc:229
 msgid "%1 will be limited to %2 open files"
 msgstr ""
 
-#: globals.cc:232
+#: globals.cc:233
 #, fuzzy
 msgid "Could not get system open files limit (%1)"
 msgstr "%1: δεν μπόρεσα να γράψω δεδομένα του αρχείου peak (%2)"
 
-#: globals.cc:280
+#: globals.cc:282
 #, fuzzy
 msgid "Loading configuration"
 msgstr "Ανάκληση αρχείου ρυθμίσεων χρήστη %1"
 
-#: graph.cc:83
+#: graph.cc:99
 msgid "Using %2 threads on %1 CPUs"
 msgstr ""
 
@@ -798,131 +805,131 @@ msgstr "Εισαγωγή: σφάλμα κατά την τροποποίηση α
 msgid "Loading MIDI file %1"
 msgstr ""
 
-#: io.cc:181
+#: io.cc:178
 #, fuzzy
 msgid "IO: cannot disconnect port %1 from %2"
 msgstr "IO: δεν μπορει να αποσυνδεθεί η θύρα εισόδου %1 από %2"
 
-#: io.cc:300 io.cc:385
+#: io.cc:303 io.cc:388
 msgid "IO: cannot register input port %1"
 msgstr "IO: δεν μπορεί να καταχώρηθεί η θύρα εισόδου %1"
 
-#: io.cc:305 io.cc:390
+#: io.cc:308 io.cc:393
 msgid "IO: cannot register output port %1"
 msgstr "IO: δεν μπορει να καταχώρηθεί η θύρα εξόδου %1"
 
-#: io.cc:540 io.cc:595
+#: io.cc:546 io.cc:601
 msgid "incorrect XML node \"%1\" passed to IO object"
 msgstr "μη-σωστός κόμβος XML \"%1\" πέρασε στο IO αντικείμενο"
 
-#: io.cc:656
+#: io.cc:662
 msgid "in"
 msgstr ""
 
-#: io.cc:656
+#: io.cc:662
 #, fuzzy
 msgid "out"
 msgstr "κοπή"
 
-#: io.cc:657
+#: io.cc:663
 msgid "input"
 msgstr ""
 
-#: io.cc:657
+#: io.cc:663
 msgid "output"
 msgstr ""
 
-#: io.cc:667
+#: io.cc:673
 #, fuzzy
 msgid "Unknown bundle \"%1\" listed for %2 of %3"
 msgstr "Άγνωστη σύνδεση \"%1\" στη λίστα εισόδου του %2"
 
-#: io.cc:733
+#: io.cc:739
 #, fuzzy
 msgid "Bundle %1 was not available - \"%2\" used instead"
 msgstr ""
 "Η Σύνδεση %1 δεν ήταν διαθέσιμη - Αντ'αυτής χρησιμοποιήθηκε η \"in 1\"  "
 
-#: io.cc:736
+#: io.cc:742
 #, fuzzy
 msgid "No %1 bundles available as a replacement"
 msgstr "Καμία διαθέσιμη input σύνδεση ως εναλλακτική"
 
-#: io.cc:836
+#: io.cc:845
 msgid "%1: cannot create I/O ports"
 msgstr "%1: θύρες I/O δεν μπορούν να δημιουργηθούν"
 
-#: io.cc:925 io.cc:1025
+#: io.cc:935 io.cc:1039
 msgid "IO: badly formed string in XML node for inputs \"%1\""
 msgstr "IO: κακοφτιαγμένη γραμμή στον XML κόμβο για εισόδους \"%1\""
 
-#: io.cc:930 io.cc:1030
+#: io.cc:940 io.cc:1044
 msgid "bad input string in XML node \"%1\""
 msgstr "κακή γραμμή εισόδου στον XML κόμβο \"%1\""
 
-#: io.cc:968
+#: io.cc:978
 msgid "IO: badly formed string in XML node for outputs \"%1\""
 msgstr "IO: δύσμορφη γραμμή στον κόμβο XML για τις εξόδους \"%1\""
 
-#: io.cc:973
+#: io.cc:983
 msgid "IO: bad output string in XML node \"%1\""
 msgstr "IO: κακή γραμμή εξόδουστον κόμβο XML \"%1\""
 
-#: io.cc:1253
+#: io.cc:1269
 msgid "audio"
 msgstr ""
 
-#: io.cc:1255
+#: io.cc:1271
 msgid "midi"
 msgstr ""
 
-#: io.cc:1305
+#: io.cc:1321
 #, c-format
 msgid "%s %u"
 msgstr ""
 
-#: io.cc:1352
+#: io.cc:1368
 #, c-format
 msgid "%s in"
 msgstr ""
 
-#: io.cc:1354
+#: io.cc:1370
 #, c-format
 msgid "%s out"
 msgstr ""
 
-#: io.cc:1429 session.cc:467 session.cc:496
+#: io.cc:1445 session.cc:468 session.cc:497
 msgid "mono"
 msgstr ""
 
-#: io.cc:1431 panner.cc:1658 panner.cc:1663 session.cc:480 session.cc:510
+#: io.cc:1447 session.cc:481 session.cc:511
 msgid "L"
 msgstr ""
 
-#: io.cc:1431 panner.cc:1660 panner.cc:1667 session.cc:482 session.cc:512
+#: io.cc:1447 session.cc:483 session.cc:513
 msgid "R"
 msgstr ""
 
-#: io.cc:1433 io.cc:1439
+#: io.cc:1449 io.cc:1455
 #, c-format
 msgid "%d"
 msgstr ""
 
-#: ladspa_plugin.cc:90
+#: ladspa_plugin.cc:89
 msgid "LADSPA: module has no descriptor function."
 msgstr "LADSPA: το module δεν έχει ενδεικτική λειτουργία."
 
-#: ladspa_plugin.cc:95
+#: ladspa_plugin.cc:94
 msgid "LADSPA: plugin has gone away since discovery!"
 msgstr "LADSPA: το plugin την 'κοπάνισε' μετά την ανακάλυψη του!"
 
-#: ladspa_plugin.cc:102
+#: ladspa_plugin.cc:101
 msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
 msgstr ""
 "LADSPA: \"%1\" δεν μπορεί να χρησιμοποιηθεί, εφ'όσον δεν μπορεί να κάνει επι "
 "τόπου επεξεργασία"
 
-#: ladspa_plugin.cc:310
+#: ladspa_plugin.cc:308
 msgid ""
 "illegal parameter number used with plugin \"%1\". This mayindicate a change "
 "in the plugin design, and presets may beinvalid"
@@ -931,66 +938,83 @@ msgstr ""
 "ενδείκνυται αλλαγή στο σχεδιασμό του plugin, και οι ρυθμίσεις ίσως να είναι "
 "άκυρες"
 
-#: ladspa_plugin.cc:393 ladspa_plugin.cc:438
+#: ladspa_plugin.cc:384 ladspa_plugin.cc:429
 msgid "Bad node sent to LadspaPlugin::set_state"
 msgstr "Κακός κόμβος εστάλη στο LadspaPlugin::set_state"
 
-#: ladspa_plugin.cc:406 ladspa_plugin.cc:451
+#: ladspa_plugin.cc:397 ladspa_plugin.cc:442
 msgid "LADSPA: no ladspa port number"
 msgstr "LADSPA: κανείς αριθμός θύρας ladspa"
 
-#: ladspa_plugin.cc:412 ladspa_plugin.cc:457
+#: ladspa_plugin.cc:403 ladspa_plugin.cc:448
 msgid "LADSPA: no ladspa port data"
 msgstr "LADSPA: κανένα δεδομένο θύρας ladspa"
 
-#: ladspa_plugin.cc:695
+#: ladspa_plugin.cc:688
 msgid "LADSPA: cannot load module from \"%1\""
 msgstr "LADSPA: δεν μπορώ να φορτώσω module από \"%1\""
 
-#: location.cc:266
+#: ladspa_plugin.cc:800
+#, fuzzy
+msgid "Could not locate HOME.  Preset not removed."
+msgstr "Δεν μπόρεσα να βρώ το HOME.  Προ-ρύθμιση δεν αποθηκεύθηκε."
+
+#: ladspa_plugin.cc:837 ladspa_plugin.cc:843
+msgid "Could not create %1.  Preset not saved. (%2)"
+msgstr "Δεν μπόρεσα να δημιουργήσω το %1.  Προ-ρύθμιση δεν αποθηκεύθηκε. (%2)"
+
+#: ladspa_plugin.cc:850
+msgid "Error saving presets file %1."
+msgstr "Σφάλμα στην αποθήκευση αρχείου προ-ρυθμίσεων %1."
+
+#: ladspa_plugin.cc:882
+msgid "Could not locate HOME.  Preset not saved."
+msgstr "Δεν μπόρεσα να βρώ το HOME.  Προ-ρύθμιση δεν αποθηκεύθηκε."
+
+#: location.cc:295
 msgid "You cannot put a CD marker at this position"
 msgstr ""
 
-#: location.cc:388
+#: location.cc:417
 msgid "incorrect XML node passed to Location::set_state"
 msgstr "λανθασμένος κόμβος XML πέρασε στην Τοποθεσία::set_state"
 
-#: location.cc:393
+#: location.cc:422
 #, fuzzy
 msgid "XML node for Location has no ID information"
 msgstr "Ο κόμβος XML για την Τοποθεσία δεν έχει πληροφορίες τέλους"
 
-#: location.cc:399
+#: location.cc:428
 msgid "XML node for Location has no name information"
 msgstr "Ο κόμβος XML για την Τοποθεσία δεν έχει πληροφορίες ονόματος"
 
-#: location.cc:406
+#: location.cc:435
 msgid "XML node for Location has no start information"
 msgstr "Ο κόμβος XML για την Τοποθεσία δεν έχει πληροφορίες ενάρξεως"
 
-#: location.cc:417
+#: location.cc:446
 msgid "XML node for Location has no end information"
 msgstr "Ο κόμβος XML για την Τοποθεσία δεν έχει πληροφορίες τέλους"
 
-#: location.cc:424
+#: location.cc:453
 msgid "XML node for Location has no flags information"
 msgstr "Ο κόμβος XML για την Τοποθεσία δεν έχει πληροφορίες για σημαίες(flags)"
 
-#: location.cc:595
+#: location.cc:627
 msgid "Locations: attempt to use unknown location as selected location"
 msgstr ""
 "Τοποθεσίες: απόπειρα να χρησιμοποιηθεί άγνωστη τοποθεσία σαν επιλεγμένη "
 "τοποθεσία"
 
-#: location.cc:766
+#: location.cc:798
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "λανθασμένο XML mode πέρασε στις Τοποθεσίες::set_state"
 
-#: location.cc:777 session.cc:2209 session.cc:4017 session_state.cc:1099
+#: location.cc:809 session.cc:2214 session.cc:4035 session_state.cc:1114
 msgid "session"
 msgstr ""
 
-#: location.cc:826
+#: location.cc:858
 msgid "could not load location from session file - ignored"
 msgstr ""
 
@@ -1043,43 +1067,47 @@ msgid "MidiDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr ""
 "AudioDiskstream %1: δεν υπάρχει λίστα αναπαρ/γής για να γίνει αντιγραφή!"
 
-#: midi_diskstream.cc:740
+#: midi_diskstream.cc:746
 #, fuzzy
 msgid "MidiDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr ""
 "AudioDiskstream %1: δεν μπόρεσα να διαβάσω %2 από τη λίστα αναπαρ/γής στο "
 "frame %3"
 
-#: midi_diskstream.cc:882
+#: midi_diskstream.cc:888
 #, fuzzy
 msgid "MidiDiskstream %1: cannot write to disk"
 msgstr "AudioDiskstream %1: δεν μπορώ να γράψω στο δίσκο"
 
-#: midi_diskstream.cc:918
+#: midi_diskstream.cc:924
 #, fuzzy
 msgid "MidiDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr ""
 "AudioDiskstream \"%1\": αδύνατη η εκκαθάριση δειγματοληπτικών δεδομένων στο "
 "δίσκο!"
 
-#: midi_diskstream.cc:1005
+#: midi_diskstream.cc:1016
 #, fuzzy
 msgid "%1: could not create region for complete midi file"
 msgstr "%1: δεν μπόρεσα να δημιουργήσω περιοχή για ολόκληρο audio file"
 
-#: midi_diskstream.cc:1041
+#: midi_diskstream.cc:1053
 #, fuzzy
 msgid "MidiDiskstream: could not create region for captured midi!"
 msgstr ""
 "AudioDiskstream: δεν μπόρεσα να δημιουργήσω περιοχή για δειγματοληψίες!"
 
-#: midi_diskstream.cc:1284
+#: midi_diskstream.cc:1296
 #, fuzzy
 msgid "MidiDiskstream: XML property channel-mask out of range"
 msgstr "AudioDiskstream: κανάλι %1 εκτός διαστήματος"
 
-#: midi_model.cc:537
+#: midi_model.cc:591
 msgid "No NoteID found for note property change - ignored"
+msgstr ""
+
+#: midi_model.cc:833
+msgid "No SysExID found for sys-ex property change - ignored"
 msgstr ""
 
 #: midi_source.cc:130
@@ -1117,21 +1145,21 @@ msgstr "monitor"
 msgid "monitor mono"
 msgstr "monitor"
 
-#: monitor_processor.cc:516
+#: monitor_processor.cc:500
 #, fuzzy
 msgid "cut control %1"
 msgstr "[έλεγχος]"
 
-#: monitor_processor.cc:517
+#: monitor_processor.cc:501
 #, fuzzy
 msgid "dim control"
 msgstr "[έλεγχος]"
 
-#: monitor_processor.cc:518
+#: monitor_processor.cc:502
 msgid "polarity control"
 msgstr ""
 
-#: monitor_processor.cc:519
+#: monitor_processor.cc:503
 #, fuzzy
 msgid "solo control"
 msgstr "[έλεγχος]"
@@ -1155,93 +1183,118 @@ msgstr "Το κομμάτι %1 χρησιμοποιεί άγνωστη λίστ�
 msgid "Chunk %1 contains misformed playlist information"
 msgstr "Το κομμάτι %1 περιέχει δύσμορφες πληροφορίες για τη λίστα αναπαρ/γής"
 
-#: panner.cc:264
-msgid ""
-"badly formatted pan automation event record at line %1 of %2 (ignored) [%3]"
+#: operations.cc:24
+msgid "capture"
 msgstr ""
-"δύσμορφη εγγραφή συμβάντος pan αυτοματισμού στη γραμμή %1 of %2 (αγνοήθηκε) "
-"[%3]"
 
-#: panner.cc:758
-msgid "badly-formed positional data for Multi2dPanner - ignored"
-msgstr "δύσμορφα δεδομένα θέσεως για το Multi2dPanner - αγνοήθηκε"
+#: operations.cc:25
+msgid "paste"
+msgstr "επικόλληση"
 
-#: panner.cc:942
-msgid "programming error:"
-msgstr "σφάλμα προγραμματισμού:"
+#: operations.cc:26
+#, fuzzy
+msgid "duplicate region"
+msgstr "αντικατάσταση περιοχής"
 
-#: panner.cc:1239
+#: operations.cc:27
+msgid "insert file"
+msgstr ""
+
+#: operations.cc:28
+#, fuzzy
+msgid "insert region"
+msgstr "χτίσιμο περιοχής"
+
+#: operations.cc:29
+msgid "drag region brush"
+msgstr ""
+
+#: operations.cc:30
+#, fuzzy
+msgid "region drag"
+msgstr "πρόσθεση περιοχής"
+
+#: operations.cc:31
+#, fuzzy
+msgid "selection grab"
+msgstr "ανάλυση"
+
+#: operations.cc:32
+#, fuzzy
+msgid "region fill"
+msgstr "πρόσθεση περιοχής"
+
+#: operations.cc:33
+#, fuzzy
+msgid "fill selection"
+msgstr "ανάλυση"
+
+#: operations.cc:34
+#, fuzzy
+msgid "create region"
+msgstr "αντικατάσταση περιοχής"
+
+#: pannable.cc:210
+msgid "Pannable given XML data for %1 - ignored"
+msgstr ""
+
+#: panner_manager.cc:51
+msgid "looking for panners in %1"
+msgstr ""
+
+#: panner_manager.cc:64
+msgid "Panner discovered: \"%1\""
+msgstr ""
+
+#: panner_manager.cc:80
+#, fuzzy
+msgid "PannerManager: cannot load module \"%1\" (%2)"
+msgstr "ControlProtocolManager: δεν μπορώ να φορτώσω το module \"%1\" (%2)"
+
+#: panner_manager.cc:87
+#, fuzzy
+msgid "PannerManager: module \"%1\" has no descriptor function."
+msgstr "ControlProtocolManager: το module \"%1\" δεν έχει descriptor function."
+
+#: panner_manager.cc:150
+msgid "no panner discovered for in/out = %1/%2"
+msgstr ""
+
+#: panner_shell.cc:166
 msgid "Unknown panner plugin \"%1\" found in pan state - ignored"
 msgstr "Άγνωστο plugin για panner \"%1\" ευρέθη στην κατάσταση pan - αγνοήθηκε"
 
-#: panner.cc:1245
+#: panner_shell.cc:172
 msgid "panner plugin node has no type information!"
 msgstr "ο κόμβος για τα plugin του panner δεν  έχει πληροφορίες τύπου!"
 
-#: panner.cc:1590
-msgid "cannot open pan automation file %1 (%2)"
-msgstr "δεν μπορώ να ανοίξω αρχείο αυτοματισμού του pan %1 (%2)"
-
-#: panner.cc:1603
-msgid "badly formed version number in pan automation event file \"%1\""
-msgstr ""
-"δύσμορφος αριθμός εκδόσεως στο αρχείο συμβάντων αυτοματισμού του pan \"%1\""
-
-#: panner.cc:1607
-msgid ""
-"no version information in pan automation event file \"%1\" (first line = %2)"
-msgstr ""
-"καμία πληροφορία εκδόσεως στο αρχείο συμβάντων αυτοματισμού του pan "
-"\"%1\" (πρώτη γραμμή = %2)"
-
-#: panner.cc:1622
-msgid "too many panner states found in pan automation file %1"
-msgstr ""
-"πάρα πολλές καταστάσεις panner ευρέθησαν στο αρχείο των αυτοματισμών pan %1"
-
-#: panner.cc:1656
-msgid "C"
-msgstr ""
-
-#: playlist.cc:2208
+#: playlist.cc:2210
 msgid "region state node has no ID, ignored"
 msgstr ""
 
-#: playlist.cc:2226
+#: playlist.cc:2228
 #, fuzzy
 msgid "Playlist: cannot create region from XML"
 msgstr "Playlist: αδύνατη η δημιουργία Περιοχής από αρχείο καταστάσεως"
 
-#: plugin.cc:194
-msgid "Could not locate HOME.  Preset not saved."
-msgstr "Δεν μπόρεσα να βρώ το HOME.  Προ-ρύθμιση δεν αποθηκεύθηκε."
-
-#: plugin.cc:209 plugin.cc:215
-msgid "Could not create %1.  Preset not saved. (%2)"
-msgstr "Δεν μπόρεσα να δημιουργήσω το %1.  Προ-ρύθμιση δεν αποθηκεύθηκε. (%2)"
-
-#: plugin.cc:220
-msgid "Error saving presets file %1."
-msgstr "Σφάλμα στην αποθήκευση αρχείου προ-ρυθμίσεων %1."
-
-#: plugin_insert.cc:490
+#: plugin_insert.cc:491
 msgid "programming error: "
 msgstr "σφάλμα προγραμματισμού: "
 
-#: plugin_insert.cc:701
+#: plugin_insert.cc:734
 #, fuzzy
 msgid "XML node describing plugin is missing the `type' field"
 msgstr "Στον κόμβο XML που περιγράφει το insert λείπει το πεδίο `type'"
 
-#: plugin_insert.cc:714
+#: plugin_insert.cc:747
 msgid "unknown plugin type %1 in plugin insert state"
 msgstr "άγνωστος τύπος plugin %1 στην κατάσταση εισαχθέντων plugins"
 
-#: plugin_insert.cc:734
+#: plugin_insert.cc:767
 msgid "Plugin has no unique ID field"
 msgstr ""
 
-#: plugin_insert.cc:744
+#: plugin_insert.cc:777
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
@@ -1249,41 +1302,41 @@ msgstr ""
 "Ευρέθη μια αναφορά σε plugin (\"%1\") που είναι άγνωστο.\n"
 "Ίσως έχει διαγραφεί ή μετακινηθεί από την τελευταία του χρήση."
 
-#: plugin_insert.cc:851
+#: plugin_insert.cc:885
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr "PluginInsert: Auto: χωρίς αριθμό θύρας ladspa"
 
-#: plugin_insert.cc:858
+#: plugin_insert.cc:892
 msgid "PluginInsert: Auto: port id out of range"
 msgstr "PluginInsert: Auto: το id θύρας είναι εκτός πεδίου"
 
-#: plugin_insert.cc:870
+#: plugin_insert.cc:904
 #, fuzzy
 msgid "PluginInsert: automatable control %1 not found - ignored"
 msgstr "αβέβαιο συμβάν αυτοματισμού ευρέθηκε (και αγνοήθηκε)"
 
-#: plugin_manager.cc:92
+#: plugin_manager.cc:91
 msgid "Cannot become GUI app"
 msgstr ""
 
-#: plugin_manager.cc:142
+#: plugin_manager.cc:141
 #, fuzzy
 msgid "Discovering Plugins"
 msgstr "μετατροπή ήχου"
 
-#: plugin_manager.cc:300
+#: plugin_manager.cc:299
 msgid "Could not parse rdf file: %1"
 msgstr "Δεν μπόρεσα να αναλύσω το αρχείο rdf: %1"
 
-#: plugin_manager.cc:339
+#: plugin_manager.cc:338
 msgid "LADSPA: cannot load module \"%1\" (%2)"
 msgstr "LADSPA: δεν μπορώ να φορτώσω το module \"%1\" (%2)"
 
-#: plugin_manager.cc:346
+#: plugin_manager.cc:345
 msgid "LADSPA: module \"%1\" has no descriptor function."
 msgstr "LADSPA: το module \"%1\" δεν έχει λειτουργία περιγραφής."
 
-#: plugin_manager.cc:537
+#: plugin_manager.cc:536
 msgid ""
 "VST plugin %1 does not support processReplacing, and so cannot be used in "
 "ardour at this time"
@@ -1291,17 +1344,17 @@ msgstr ""
 "Το VST plugin %1 δεν υποστηρίζει processReplacing, και έτσι δεν μπορεί να "
 "χρησιμοποιηθεί στον ardour αυτή τη φορά"
 
-#: plugin_manager.cc:681
+#: plugin_manager.cc:680
 #, fuzzy
 msgid "unknown plugin status type \"%1\" - all entries ignored"
 msgstr "άγνωστος τύπος Λήψης(Insert) \"%1\"... αγνοήθηκε"
 
-#: plugin_manager.cc:696
+#: plugin_manager.cc:695
 #, fuzzy
 msgid "unknown plugin type \"%1\" - ignored"
 msgstr "άγνωστος τύπος Λήψης(Insert) \"%1\"... αγνοήθηκε"
 
-#: port.cc:249
+#: port.cc:258
 msgid "could not reregister %1"
 msgstr "αδύνατη η επανακαταγραφή %1"
 
@@ -1318,11 +1371,11 @@ msgstr "Στον κόμβο XML που περιγράφει το insert λείπ
 msgid "non-port insert XML used for port plugin insert"
 msgstr "εισαγωγή μη-θύρας XML για χρήση σε εισαγωγή  plugin θύρας"
 
-#: processor.cc:224
+#: processor.cc:227
 msgid "No %1 property flag in element %2"
 msgstr ""
 
-#: processor.cc:233
+#: processor.cc:236
 msgid "No child node with active property"
 msgstr ""
 
@@ -1379,14 +1432,15 @@ msgstr "Αρχείο ρυθμίσεων %1 δεν αποθηκεύθηκε"
 msgid "cannot open recent session file %1 (%2)"
 msgstr "δεν μπορώ να ανοίξω το πρόσφατο αρχείο συνεδρίας %1 (%2)"
 
-#: region_factory.cc:69 region_factory.cc:123 region_factory.cc:162
+#: region_factory.cc:63 region_factory.cc:98 region_factory.cc:133
+#: region_factory.cc:169
 #, fuzzy
 msgid ""
 "programming error: RegionFactory::create() called with unknown Region type"
 msgstr ""
 "σφάλμα προγραμματισμού: Playlist::createRegion εκλήθη με άγνωστο τύπο Πε"
 
-#: region_factory.cc:534
+#: region_factory.cc:525
 msgid "cannot create new name for region \"%1\""
 msgstr "δεν μπορώ να δημιουργήσω νέο όνομα για την περιοχή \"%1\""
 
@@ -1402,32 +1456,32 @@ msgstr "Εισαγωγή: src_new() απέτυχε : %1"
 msgid "return %1"
 msgstr ""
 
-#: route.cc:101 session.cc:1308 session.cc:1314 session.cc:1762
-#: session.cc:3171
+#: route.cc:105 session.cc:1307 session.cc:1318 session.cc:1776
+#: session.cc:3188
 msgid "signal"
 msgstr "σήμα"
 
-#: route.cc:971 route.cc:2318
+#: route.cc:1000 route.cc:2410
 #, fuzzy
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "άγνωστος τύπος Λήψης(Insert) \"%1\"... αγνοήθηκε"
 
-#: route.cc:983
+#: route.cc:1012
 #, fuzzy
 msgid "processor could not be created. Ignored."
 msgstr "εισαγωγή δεν μπόρεσε να δημιουργηθεί. Αγνοήθηκε."
 
-#: route.cc:1813 route.cc:1986
+#: route.cc:1899 route.cc:2078
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr "Κακός κόμβος εστάλη στο Route::set_state() [%1]"
 
-#: route.cc:1913 route.cc:1917 route.cc:2093 route.cc:2097
+#: route.cc:2008 route.cc:2012 route.cc:2185 route.cc:2189
 msgid "badly formed order key string in state file! [%1] ... ignored."
 msgstr ""
 "δύσμορφη γραμμή κλειδιού ταξινομήσεως στο αρχείο καταστάσεως ! [%1] ... "
 "αγνοήθηκε."
 
-#: route_group.cc:399
+#: route_group.cc:415
 msgid "You cannot subgroup MIDI tracks at this time"
 msgstr ""
 
@@ -1445,166 +1499,166 @@ msgid "timefx code failure. please notify ardour-developers."
 msgstr ""
 "αποτυχία κώδικα timefx. παρακαλώ ειδοποιήστε τους προγραμματιστές του ardour."
 
-#: send.cc:42 send.cc:248
+#: send.cc:42 send.cc:250
 msgid "send %1"
 msgstr ""
 
-#: session.cc:356
+#: session.cc:357
 msgid "Set block size and sample rate"
 msgstr ""
 
-#: session.cc:361
+#: session.cc:362
 #, fuzzy
 msgid "Using configuration"
 msgstr "Ανάκληση αρχείου ρυθμίσεων χρήστη %1"
 
-#: session.cc:405
+#: session.cc:406
 msgid "could not setup Click I/O"
 msgstr "Δεν μπόρεσα να διαμορφώσω το I/O του Μετρονόμου(click)"
 
-#: session.cc:432
+#: session.cc:433
 msgid "cannot setup Click I/O"
 msgstr "Δεν μπορώ να διαμορφώσω το I/O του Μετρονόμου(click)"
 
-#: session.cc:435
+#: session.cc:436
 msgid "Compute I/O Latencies"
 msgstr ""
 
-#: session.cc:443
+#: session.cc:444
 msgid "Set up standard connections"
 msgstr ""
 
-#: session.cc:464
+#: session.cc:465
 #, c-format
 msgid "out %<PRIu32>"
 msgstr ""
 
-#: session.cc:478
+#: session.cc:479
 #, c-format
 msgid "out %<PRIu32>+%<PRIu32>"
 msgstr ""
 
-#: session.cc:493
+#: session.cc:494
 #, c-format
 msgid "in %<PRIu32>"
 msgstr ""
 
-#: session.cc:507
+#: session.cc:508
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
 msgstr ""
 
-#: session.cc:543
+#: session.cc:544
 msgid "Setup signal flow and plugins"
 msgstr ""
 
-#: session.cc:567
+#: session.cc:570
 #, fuzzy
 msgid "cannot connect master output %1 to %2"
 msgstr "IO: δεν μπορεί να συνδεθεί η θύρα εξόδου %1 στο %2"
 
-#: session.cc:595
+#: session.cc:598
 #, fuzzy
 msgid "cannot connect control input %1 to %2"
 msgstr "IO: δεν μπορεί να συνδεθεί η θύρα εισόδου %1 στο %2"
 
-#: session.cc:615
+#: session.cc:618
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr ""
 
-#: session.cc:637
+#: session.cc:640
 #, fuzzy
 msgid "cannot connect control output %1 to %2"
 msgstr "IO: δεν μπορεί να συνδεθεί η θύρα εξόδου %1 στο %2"
 
-#: session.cc:656
+#: session.cc:659
 msgid "Connect to engine"
 msgstr ""
 
-#: session.cc:688
+#: session.cc:691
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr "δεν μπορώ να δημιουργήσω τον Ακροατή: καμία ακρόαση περιοχών δυνατή"
 
-#: session.cc:903
+#: session.cc:899
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr ""
 "Συνεδρία: δεν μπορείτε να χρησιμοποιήσετε αυτήν την τοποθεσία για auto punch "
 "(αρχή <= τέλος)"
 
-#: session.cc:939
+#: session.cc:935
 msgid "Session: you can't use a mark for auto loop"
 msgstr "Συνεδρία: δεν μπορείτε να χρησιμοποιήσετε στίγμα για auto loop"
 
-#: session.cc:1326
+#: session.cc:1331
 msgid "feedback loop setup between %1 and %2"
 msgstr "διαμόρφωση feedback loop ανάμεσα σε %1 και %2"
 
-#: session.cc:1560
+#: session.cc:1568
 #, fuzzy
 msgid "Session: could not create new midi track."
 msgstr "Συνεδρία: δεν μπόρεσα να δημιουργήσω νέο κανάλι ήχου."
 
-#: session.cc:1700 session.cc:1708 session.cc:1813 session.cc:1821
+#: session.cc:1713 session.cc:1721 session.cc:1830 session.cc:1838
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr "δεν μπορώ να διαμορφώσω %1 in/%2 out διάταξη για νέο κανάλι ήχου"
 
-#: session.cc:1731
+#: session.cc:1745
 msgid "Session: could not create new audio track."
 msgstr "Συνεδρία: δεν μπόρεσα να δημιουργήσω νέο κανάλι ήχου."
 
-#: session.cc:1766
+#: session.cc:1780
 #, fuzzy
 msgid "editor"
 msgstr "monitor"
 
-#: session.cc:1844
+#: session.cc:1860
 #, fuzzy
 msgid "Session: could not create new audio route."
 msgstr "Συνεδρία: δεν μπόρεσα να δημιουργήσω διαδρομή."
 
-#: session.cc:1891
+#: session.cc:1907
 msgid "Session: UINT_MAX routes? impossible!"
 msgstr ""
 
-#: session.cc:1909
+#: session.cc:1925
 #, fuzzy
 msgid "Session: cannot create track/bus from template description"
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω Πηγή από XML περιγραφή."
 
-#: session.cc:1932
+#: session.cc:1951
 #, fuzzy
 msgid "Session: could not create new route from template"
 msgstr "Συνεδρία: δεν μπόρεσα να δημιουργήσω διαδρομή."
 
-#: session.cc:2859
+#: session.cc:2876
 msgid "FATAL ERROR! Could not find a suitable version of %1 for a rename"
 msgstr ""
 
-#: session.cc:2984 session.cc:3043
+#: session.cc:3001 session.cc:3060
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "Υπάρχουν ήδη %1 εγγραφές για %2, τις οποίες θεωρώ πάρα πολλές."
 
-#: session.cc:3407
+#: session.cc:3424
 msgid "send ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:3419
+#: session.cc:3436
 msgid "return ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:3431
+#: session.cc:3448
 msgid "insert ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:3597
+#: session.cc:3615
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr ""
 
-#: session.cc:3632
+#: session.cc:3650
 msgid "too many bounced versions of playlist \"%1\""
 msgstr "πάρα πολλές bounced εκδόσεις της Playlist \"%1\""
 
-#: session.cc:3642
+#: session.cc:3660
 msgid "cannot create new audio file \"%1\" for %2"
 msgstr "δεν μπορώ να δημιουργήσω νέο αρχείο ήχου \"%1\" για %2"
 
@@ -1648,7 +1702,7 @@ msgstr "δεν μπορώ να δημιουργήσω φάκελο συνεδρ�
 msgid "Session subdirectory does not exist at path %1"
 msgstr ""
 
-#: session_events.cc:170
+#: session_events.cc:183
 msgid "Session: cannot have two events of type %1 at the same frame (%2)."
 msgstr ""
 "Συνεδρία: δεν γίνεται να υπάρχουν δύο συμβάντα του τύπου %1 στο ίδιο frame "
@@ -1658,7 +1712,7 @@ msgstr ""
 msgid "%1: cannot seek to %2 for export"
 msgstr "%1: δεν μπορώ να αναζητήσω στο %2 για εξαγωγή"
 
-#: session_midi.cc:398
+#: session_midi.cc:400
 msgid "Session: could not send full MIDI time code"
 msgstr "Συνεδρία: δεν μπόρεσα να στείλω ολόκληρο MIDI time code"
 
@@ -1670,238 +1724,248 @@ msgstr "Συνεδρία: δεν μπορώ να στείλω τέταρτο-fra
 msgid "Session: cannot create Playlist from XML description."
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω την Playlist από την XML περιγραφή."
 
-#: session_process.cc:1107
+#: session_process.cc:1139
 msgid "Programming error: illegal event type in process_event (%1)"
 msgstr ""
 "Σφάλμα προγραμματισμού: παράνομος τύπος συμβάντος στο process_event (%1)"
 
-#: session_state.cc:140
+#: session_state.cc:141
 msgid "Could not use path %1 (%s)"
 msgstr "Αδύνατη η χρήση του path %1 (%s)"
 
-#: session_state.cc:354
+#: session_state.cc:355
 msgid "Reset Remote Controls"
 msgstr ""
 
-#: session_state.cc:367
+#: session_state.cc:368
 #, fuzzy
 msgid "Reset Control Protocols"
 msgstr "Πρωτόκολλο ελέγχου %1 μη χρησιμοποιήσιμο"
 
-#: session_state.cc:383
+#: session_state.cc:384
 msgid "Session loading complete"
 msgstr ""
 
-#: session_state.cc:450 session_state.cc:2685
+#: session_state.cc:451 session_state.cc:2724
 #, fuzzy
 msgid "Session: cannot create session peakfile folder \"%1\" (%2)"
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω peakfile dir συνεδρίας \"%1\" (%2)"
 
-#: session_state.cc:457
+#: session_state.cc:458
 msgid "Session: cannot create session sounds dir \"%1\" (%2)"
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο ήχων συνεδρίας \"%1\" (%2)"
 
-#: session_state.cc:464
+#: session_state.cc:465
 #, fuzzy
 msgid "Session: cannot create session stub sounds dir \"%1\" (%2)"
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο ήχων συνεδρίας \"%1\" (%2)"
 
-#: session_state.cc:471
+#: session_state.cc:472
 #, fuzzy
 msgid "Session: cannot create session midi dir \"%1\" (%2)"
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο συνεδρίας \"%1\" (%2)"
 
-#: session_state.cc:478
+#: session_state.cc:479
 #, fuzzy
 msgid "Session: cannot create session stub midi dir \"%1\" (%2)"
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο ήχων συνεδρίας \"%1\" (%2)"
 
-#: session_state.cc:485
+#: session_state.cc:486
 #, fuzzy
 msgid "Session: cannot create session dead sounds folder \"%1\" (%2)"
 msgstr ""
 "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο 'νεκρών' ήχων συνεδρίας \"%1\" (%2)"
 
-#: session_state.cc:492
+#: session_state.cc:493
 #, fuzzy
 msgid "Session: cannot create session export folder \"%1\" (%2)"
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο συνεδρίας \"%1\" (%2)"
 
-#: session_state.cc:499
+#: session_state.cc:500
 #, fuzzy
 msgid "Session: cannot create session analysis folder \"%1\" (%2)"
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο συνεδρίας \"%1\" (%2)"
 
-#: session_state.cc:511
+#: session_state.cc:507
+#, fuzzy
+msgid "Session: cannot create session plugins folder \"%1\" (%2)"
+msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο συνεδρίας \"%1\" (%2)"
+
+#: session_state.cc:520
 #, fuzzy
 msgid "Session: cannot create session folder \"%1\" (%2)"
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω φάκελο συνεδρίας \"%1\" (%2)"
 
-#: session_state.cc:537
+#: session_state.cc:546
 msgid "Could not open %1 for writing mix template"
 msgstr "Δεν μπόρεσα να ανοίξω %1 για γράψιμο του προσχεδίου μίξεως"
 
-#: session_state.cc:543
+#: session_state.cc:552
 msgid "Could not open mix template %1 for reading"
 msgstr "Δεν μπόρεσα να ανοίξω προσχέδιο μίξεως %1 για ανάγνωση"
 
-#: session_state.cc:567
+#: session_state.cc:576
 msgid "master"
 msgstr "master"
 
-#: session_state.cc:581
+#: session_state.cc:593
 msgid "monitor"
 msgstr "monitor"
 
-#: session_state.cc:642
+#: session_state.cc:657
 #, fuzzy
 msgid "Could remove pending capture state at path \"%1\" (%2)"
 msgstr "Αδύνατη η εύρεση path: %1 (%2)"
 
-#: session_state.cc:670
+#: session_state.cc:685
 #, fuzzy
 msgid "could not rename snapshot %1 to %2 (%3)"
 msgstr "Αδύνατη η επανασύνδεση %1 και %2 (err = %3)"
 
-#: session_state.cc:764
+#: session_state.cc:779
 msgid ""
 "the %1 audio engine is not connected and state saving would lose all I/O "
 "connections. Session not saved"
 msgstr ""
 
-#: session_state.cc:810
+#: session_state.cc:825
 msgid "state could not be saved to %1"
 msgstr "η κατάσταση δεν μπορούσε να σωθεί στο %1"
 
-#: session_state.cc:817
+#: session_state.cc:832
 #, fuzzy
 msgid "could not rename temporary session file %1 to %2"
 msgstr "δεν μπορώ να μετονομάσω το audio file για το %1 σε %2"
 
-#: session_state.cc:884
+#: session_state.cc:899
 msgid "%1: session state information file \"%2\" doesn't exist!"
 msgstr "%1: το αρχείο πληροφοριών καταστάσεως συνεδρίας \"%2\" δεν υπάρχει!"
 
-#: session_state.cc:903
+#: session_state.cc:918
 msgid "Could not understand ardour file %1"
 msgstr "Δεν μπόρεσα να κατανοήσω το ardour αρχείο %1"
 
-#: session_state.cc:912
+#: session_state.cc:927
 #, fuzzy
 msgid "Session file %1 is not a session"
 msgstr "Αρχείο ρυθμίσεων %1 δεν αποθηκεύθηκε"
 
-#: session_state.cc:943
+#: session_state.cc:958
 msgid ""
 "Copying old session file %1 to %2\n"
 "Use %2 with %3 versions before 2.0 from now on"
 msgstr ""
 
-#: session_state.cc:953
+#: session_state.cc:968
 #, fuzzy
 msgid "Unable to make backup of state file %1 (%2)"
 msgstr "δεν μπορώ να ελέγξω το αρχείο κατάστασεως %1 (%2)"
 
-#: session_state.cc:1191
+#: session_state.cc:1208
 msgid "programming error: Session: incorrect XML node sent to set_state()"
 msgstr ""
 "σφάλμα προγραμματισμού: Συνεδρία: λανθασμένος κόμβος XML εστάλη στην "
 "set_state()"
 
-#: session_state.cc:1264
+#: session_state.cc:1281
 msgid "Session: XML state has no options section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα επιλογών(options)"
 
-#: session_state.cc:1269
+#: session_state.cc:1286
 #, fuzzy
 msgid "Session: XML state has no metadata section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα διαδρομών"
 
-#: session_state.cc:1276
+#: session_state.cc:1293
 msgid "Session: XML state has no locations section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα τοποθεσιών"
 
-#: session_state.cc:1302
+#: session_state.cc:1300
+#, fuzzy
+msgid "Session: XML state has no speakers section - assuming simple stereo"
+msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα πηγών"
+
+#: session_state.cc:1326
 msgid "Session: XML state has no sources section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα πηγών"
 
-#: session_state.cc:1309
+#: session_state.cc:1333
 msgid "Session: XML state has no Regions section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα Περιοχών"
 
-#: session_state.cc:1316
+#: session_state.cc:1340
 msgid "Session: XML state has no playlists section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα playlists"
 
-#: session_state.cc:1336
+#: session_state.cc:1360
 #, fuzzy
 msgid "Session: XML state has no bundles section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα διαδρομών"
 
-#: session_state.cc:1347
+#: session_state.cc:1371
 msgid "Session: XML state has no Tempo Map section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα Tempo Map"
 
-#: session_state.cc:1355
+#: session_state.cc:1379
 msgid "Session: XML state has no diskstreams section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα diskstreams"
 
-#: session_state.cc:1363
+#: session_state.cc:1387
 msgid "Session: XML state has no routes section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα διαδρομών"
 
-#: session_state.cc:1375
+#: session_state.cc:1399
 #, fuzzy
 msgid "Session: XML state has no route groups section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα διαδρομών"
 
-#: session_state.cc:1384
+#: session_state.cc:1408
 msgid "Session: XML state has no edit groups section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα επεξερ/σίας ομάδων"
 
-#: session_state.cc:1391
+#: session_state.cc:1415
 msgid "Session: XML state has no mix groups section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα μίξεως ομάδων"
 
-#: session_state.cc:1399
+#: session_state.cc:1423
 msgid "Session: XML state has no click section"
 msgstr "Συνεδρία: η XML κατάσταση δεν έχει τομέα μετρονόμου"
 
-#: session_state.cc:1439
+#: session_state.cc:1463
 msgid "Session: cannot create Route from XML description."
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω Διαδρομή από XML περιγραφή."
 
-#: session_state.cc:1443
+#: session_state.cc:1467
 msgid "Loaded track/bus %1"
 msgstr ""
 
-#: session_state.cc:1542
+#: session_state.cc:1566
 #, fuzzy
 msgid "Could not find diskstream for route"
 msgstr "Δεν ευρέθη το αρχείο μέλους"
 
-#: session_state.cc:1597
+#: session_state.cc:1621
 msgid "Session: cannot create Region from XML description."
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω Περιοχή από XML περιγραφή."
 
-#: session_state.cc:1601
+#: session_state.cc:1625
 #, fuzzy
 msgid "Can not load state for region '%1'"
 msgstr "δεν μπορώ να δημιουργήσω νέο όνομα για την περιοχή \"%1\""
 
-#: session_state.cc:1657
+#: session_state.cc:1681
 msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
 msgstr ""
 "Συνεδρία: Ο XMLΚόμβος που περιγράφει AudioΠεριοχή είναι ημιτελής (δίχως πηγή)"
 
-#: session_state.cc:1665 session_state.cc:1686 session_state.cc:1706
+#: session_state.cc:1689 session_state.cc:1710 session_state.cc:1730
 msgid ""
 "Session: XMLNode describing a AudioRegion references an unknown source id =%1"
 msgstr ""
 "Συνεδρία: Ο XMLΚόμβος που περιγράφει AudioΠεριοχή αναφέρει άγνωστο id πηγής ="
 "%1"
 
-#: session_state.cc:1671 session_state.cc:1692 session_state.cc:1712
+#: session_state.cc:1695 session_state.cc:1716 session_state.cc:1736
 msgid ""
 "Session: XMLNode describing a AudioRegion references a non-audio source id ="
 "%1"
@@ -1909,7 +1973,7 @@ msgstr ""
 "Συνεδρία: Ο XMLNode που περιγράφει AudioRegion αναφέρει μη-ηχητική πηγή με "
 "id =%1"
 
-#: session_state.cc:1735
+#: session_state.cc:1759
 #, fuzzy
 msgid ""
 "Session: XMLNode describing an AudioRegion is missing some master sources; "
@@ -1917,13 +1981,13 @@ msgid ""
 msgstr ""
 "Συνεδρία: Ο XMLΚόμβος που περιγράφει AudioΠεριοχή είναι ημιτελής (δίχως πηγή)"
 
-#: session_state.cc:1769
+#: session_state.cc:1793
 #, fuzzy
 msgid "Session: XMLNode describing a MidiRegion is incomplete (no source)"
 msgstr ""
 "Συνεδρία: Ο XMLΚόμβος που περιγράφει AudioΠεριοχή είναι ημιτελής (δίχως πηγή)"
 
-#: session_state.cc:1777
+#: session_state.cc:1801
 #, fuzzy
 msgid ""
 "Session: XMLNode describing a MidiRegion references an unknown source id =%1"
@@ -1931,7 +1995,7 @@ msgstr ""
 "Συνεδρία: Ο XMLΚόμβος που περιγράφει AudioΠεριοχή αναφέρει άγνωστο id πηγής ="
 "%1"
 
-#: session_state.cc:1783
+#: session_state.cc:1807
 #, fuzzy
 msgid ""
 "Session: XMLNode describing a MidiRegion references a non-midi source id =%1"
@@ -1939,109 +2003,117 @@ msgstr ""
 "Συνεδρία: Ο XMLNode που περιγράφει AudioRegion αναφέρει μη-ηχητική πηγή με "
 "id =%1"
 
-#: session_state.cc:1851
+#: session_state.cc:1875
 msgid ""
 "cannot create new file from region name \"%1\" with ident = \"%2\": too many "
 "existing files with similar names"
 msgstr ""
 
-#: session_state.cc:1874
+#: session_state.cc:1898
 msgid "Session: cannot create Source from XML description."
 msgstr "Συνεδρία: δεν μπορώ να δημιουργήσω Πηγή από XML περιγραφή."
 
-#: session_state.cc:1908
+#: session_state.cc:1932
 msgid "A sound file is missing. It will be replaced by silence."
 msgstr ""
 
-#: session_state.cc:1931
+#: session_state.cc:1955
 #, fuzzy
 msgid "Found a sound file that cannot be used by %1. Talk to the progammers."
 msgstr ""
 "Ευρέθη sound file που δεν μπορεί να χρησιμοποιηθεί από τον Ardour. "
 "Επικοινωνήστε με τους προγραμματιστές."
 
-#: session_state.cc:1953
+#: session_state.cc:1977
 msgid "Could not create mix templates directory \"%1\" (%2)"
 msgstr "Δεν μπόρεσα να δημιουργήσω φάκελο προσχεδίων μίξεως \"%1\" (%2)"
 
-#: session_state.cc:1965
+#: session_state.cc:1989
 msgid "Template \"%1\" already exists - new version not created"
 msgstr "Το προσχέδιο \"%1\" ήδη υπάρχει - νέα έκδοση δεν δημιουργήθηκε"
 
-#: session_state.cc:1971
+#: session_state.cc:1995
 msgid "mix template not saved"
 msgstr "προσχέδιο μίξεως δεν αποθηκεύτηκε"
 
-#: session_state.cc:1988
+#: session_state.cc:2012
 #, fuzzy
 msgid "Template \"%1\" already exists - template not renamed"
 msgstr "Το προσχέδιο \"%1\" ήδη υπάρχει - νέα έκδοση δεν δημιουργήθηκε"
 
-#: session_state.cc:2149
+#: session_state.cc:2173
 msgid "Session: cannot create Named Selection from XML description."
 msgstr ""
 "Συνεδρία: δεν μπορώ να δημιουργήσω την ονομασμένη επιλογή από την XML "
 "περιγραφή."
 
-#: session_state.cc:2194
+#: session_state.cc:2224
 #, fuzzy
 msgid "Unknown node \"%1\" found in Bundles list from state file"
 msgstr ""
 "Άγνωστος κόμβος \"%1\" ευρέθη στη λίστα 'Συνδέσεις' από το αρχείο καταστάσεως"
 
-#: session_state.cc:2626 session_state.cc:2632
+#: session_state.cc:2665 session_state.cc:2671
 #, fuzzy
 msgid "Cannot expand path %1 (%2)"
 msgstr "δεν μπορώ να ελέγξω το μονοπάτι συνεδρίας %1 (%2)"
 
-#: session_state.cc:2722
+#: session_state.cc:2761
 msgid "cannot rename audio file source from %1 to %2 (%3)"
 msgstr "δεν μπορώ να μετονομάσω την πηγή του audio file από %1 σε %2 (%3)"
 
-#: session_state.cc:2736
+#: session_state.cc:2775
 msgid "cannot remove peakfile %1 for %2 (%3)"
 msgstr "δεν μπορώ να απαλοίψω το peakfile %1 για %2 (%3)"
 
-#: session_state.cc:3067
+#: session_state.cc:3120
 #, fuzzy
 msgid "could not backup old history file, current history not saved"
 msgstr ""
 "δεν μπόρεσα να διασώσω το παλαιό αρχείο καταστάσεως, η τρέχουσα κατάσταση "
 "δεν αποθηκεύτηκε."
 
-#: session_state.cc:3080
+#: session_state.cc:3133
 #, fuzzy
 msgid "history could not be saved to %1"
 msgstr "η κατάσταση δεν μπορούσε να σωθεί στο %1"
 
-#: session_state.cc:3089
+#: session_state.cc:3142
 #, fuzzy
 msgid "could not restore history file from backup %1 (%2)"
 msgstr "αδύνατη η επαναφορά του state file από backup %1"
 
-#: session_state.cc:3114
+#: session_state.cc:3167
 msgid "%1: no history file \"%2\" for this session."
 msgstr ""
 
-#: session_state.cc:3120
+#: session_state.cc:3173
 #, fuzzy
 msgid "Could not understand session history file \"%1\""
 msgstr "Δεν μπόρεσα να κατανοήσω το ardour αρχείο %1"
 
-#: session_state.cc:3162
-msgid "Failed to downcast MidiSource for DiffCommand"
+#: session_state.cc:3215
+msgid "Failed to downcast MidiSource for NoteDiffCommand"
 msgstr ""
 
-#: session_state.cc:3170
+#: session_state.cc:3226
+msgid "Failed to downcast MidiSource for SysExDiffCommand"
+msgstr ""
+
+#: session_state.cc:3237
+msgid "Failed to downcast MidiSource for PatchChangeDiffCommand"
+msgstr ""
+
+#: session_state.cc:3245
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
 msgstr ""
 
-#: session_state.cc:3397
+#: session_state.cc:3472
 #, fuzzy
 msgid "Session: unknown diskstream type in XML"
 msgstr "Συνεδρία: δεν μπόρεσα να φορτώσω diskstream μέσω καταστάσεως XML"
 
-#: session_state.cc:3402
+#: session_state.cc:3477
 msgid "Session: could not load diskstream via XML state"
 msgstr "Συνεδρία: δεν μπόρεσα να φορτώσω diskstream μέσω καταστάσεως XML"
 
@@ -2050,15 +2122,15 @@ msgstr "Συνεδρία: δεν μπόρεσα να φορτώσω diskstream �
 msgid "Unable to create a backup copy of file %1 (%2)"
 msgstr "audiofilter: σφάλμα στη δημιουργία νέου audio file %1 (%2)"
 
-#: session_time.cc:481
+#: session_time.cc:463
 msgid "Unknown JACK transport state %1 in sync callback"
 msgstr "Άγνωστη κατάσταση του JACK transport %1 στην ανάκληση sync"
 
-#: session_transport.cc:148
+#: session_transport.cc:149
 msgid "Cannot loop - no loop range defined"
 msgstr "Δεν γίνεται loop - κανένα διάστημα loop δεν προσδιορίστηκε"
 
-#: session_transport.cc:662
+#: session_transport.cc:672
 #, fuzzy
 msgid ""
 "Seamless looping cannot be supported while %1 is using JACK transport.\n"
@@ -2068,7 +2140,7 @@ msgstr ""
 "transport.\n"
 "Συνιστούμε την αλλαγή των διαμορφωμένων ρυθμίσεων"
 
-#: session_transport.cc:988
+#: session_transport.cc:1001
 #, fuzzy
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
@@ -2211,7 +2283,7 @@ msgstr "SndFileSource: δεν μπορούσα να αναζητήσω στο fr
 msgid "attempt to write a non-writable audio file source (%1)"
 msgstr ""
 
-#: sndfilesource.cc:376 utils.cc:500 utils.cc:524 utils.cc:538 utils.cc:557
+#: sndfilesource.cc:376 utils.cc:504 utils.cc:528 utils.cc:542 utils.cc:561
 msgid "programming error: %1 %2"
 msgstr "σφάλμα προγραμματισμού: %1 %2"
 
@@ -2248,6 +2320,18 @@ msgstr "FileSource: \"%1\" κακή εγγραφή (%2)"
 msgid ""
 "Filesource: start time is already set for existing file (%1): Cannot change "
 "start time."
+msgstr ""
+
+#: speakers.cc:203
+msgid "Speaker information is missing azimuth - speaker ignored"
+msgstr ""
+
+#: speakers.cc:209
+msgid "Speaker information is missing elevation - speaker ignored"
+msgstr ""
+
+#: speakers.cc:215
+msgid "Speaker information is missing distance - speaker ignored"
 msgstr ""
 
 #: tape_file_matcher.cc:46
@@ -2373,58 +2457,95 @@ msgstr "Κόμβος προς Σύνδεση δεν έχει \"όνομα\" ιδ
 msgid "Node for Port has no \"name\" property"
 msgstr "Κόμβος προς Σύνδεση δεν έχει \"όνομα\" ιδιότητα"
 
-#: utils.cc:306
+#: utils.cc:305
 msgid "illegal or badly-formed string used for path (%1)"
 msgstr "αθέμιτη ή κακοσχηματισμένη γραμμή για το μονοπάτι (%1)"
 
-#: utils.cc:311
+#: utils.cc:310
 msgid "path (%1) is ambiguous"
 msgstr "Το μονοπάτι (%1) είναι αμφίβολο"
 
-#: utils.cc:373 utils.cc:397
+#: utils.cc:372 utils.cc:396
 #, fuzzy
 msgid "Splice"
 msgstr "αντιγραφή"
 
-#: utils.cc:375 utils.cc:390
+#: utils.cc:374 utils.cc:389
 msgid "Slide"
 msgstr ""
 
-#: utils.cc:377 utils.cc:393
+#: utils.cc:376 utils.cc:392
 msgid "Lock"
 msgstr ""
 
-#: utils.cc:380
+#: utils.cc:379
 #, fuzzy
 msgid "programming error: unknown edit mode string \"%1\""
 msgstr "σφάλμα προγραμματισμού: άγνωστος τύπος of Redirect διεγράφη!"
 
-#: utils.cc:404 utils.cc:429
+#: utils.cc:403 utils.cc:432
 msgid "MIDI Timecode"
 msgstr ""
 
-#: utils.cc:408 utils.cc:432
+#: utils.cc:403 utils.cc:430
+msgid "MTC"
+msgstr ""
+
+#: utils.cc:407 utils.cc:436
 msgid "MIDI Clock"
 msgstr ""
 
-#: utils.cc:412 utils.cc:426 utils.cc:435
+#: utils.cc:411 utils.cc:426 utils.cc:439
 msgid "JACK"
 msgstr ""
 
-#: utils.cc:416
+#: utils.cc:415
 #, fuzzy
 msgid "programming error: unknown sync source string \"%1\""
 msgstr "σφάλμα προγραμματισμού: άγνωστος τύπος Εισόδου εδημιουργήθη!"
 
-#: utils.cc:600
+#: utils.cc:604
 #, fuzzy
 msgid "programming error: unknown native header format: %1"
 msgstr "σφάλμα προγραμματισμού: άγνωστος τύπος Redirect εδημιουργήθη!"
 
-#: utils.cc:615
+#: utils.cc:619
 #, fuzzy
 msgid "cannot open directory %1 (%2)"
 msgstr "δεν μπορώ να ανοίξω το πρόσφατο αρχείο συνεδρίας %1 (%2)"
+
+#~ msgid ""
+#~ "badly formatted pan automation event record at line %1 of %2 (ignored) "
+#~ "[%3]"
+#~ msgstr ""
+#~ "δύσμορφη εγγραφή συμβάντος pan αυτοματισμού στη γραμμή %1 of %2 "
+#~ "(αγνοήθηκε) [%3]"
+
+#~ msgid "badly-formed positional data for Multi2dPanner - ignored"
+#~ msgstr "δύσμορφα δεδομένα θέσεως για το Multi2dPanner - αγνοήθηκε"
+
+#~ msgid "programming error:"
+#~ msgstr "σφάλμα προγραμματισμού:"
+
+#~ msgid "cannot open pan automation file %1 (%2)"
+#~ msgstr "δεν μπορώ να ανοίξω αρχείο αυτοματισμού του pan %1 (%2)"
+
+#~ msgid "badly formed version number in pan automation event file \"%1\""
+#~ msgstr ""
+#~ "δύσμορφος αριθμός εκδόσεως στο αρχείο συμβάντων αυτοματισμού του pan "
+#~ "\"%1\""
+
+#~ msgid ""
+#~ "no version information in pan automation event file \"%1\" (first line = "
+#~ "%2)"
+#~ msgstr ""
+#~ "καμία πληροφορία εκδόσεως στο αρχείο συμβάντων αυτοματισμού του pan "
+#~ "\"%1\" (πρώτη γραμμή = %2)"
+
+#~ msgid "too many panner states found in pan automation file %1"
+#~ msgstr ""
+#~ "πάρα πολλές καταστάσεις panner ευρέθησαν στο αρχείο των αυτοματισμών pan "
+#~ "%1"
 
 #~ msgid "AudioDiskstream: Session doesn't know about a Playlist called \"%1\""
 #~ msgstr ""
@@ -2539,9 +2660,6 @@ msgstr "δεν μπορώ να ανοίξω το πρόσφατο αρχείο �
 #~ msgid "copy"
 #~ msgstr "αντιγραφή"
 
-#~ msgid "paste"
-#~ msgstr "επικόλληση"
-
 #~ msgid "ill-formed MIDI port specification in ardour rcfile (ignored)"
 #~ msgstr ""
 #~ "κακοσχηματισμένος καθορισμός MIDI θύρας στο ardour rcfile (αγνοήθηκε)"
@@ -2584,9 +2702,6 @@ msgstr "δεν μπορώ να ανοίξω το πρόσφατο αρχείο �
 #~ msgstr ""
 #~ "Συνεδρία::εισαγωγή_αρχείου: δεν μπορώ να ανοίξω νέα πηγή αρχείου για το "
 #~ "κανάλι %1"
-
-#~ msgid "building region"
-#~ msgstr "χτίσιμο περιοχής"
 
 #~ msgid "Import: could not open temp file: %1"
 #~ msgstr "Εισαγωγή: δεν μπόρεσα να ανοίξω το temp αρχείο: %1"
@@ -2729,9 +2844,6 @@ msgstr "δεν μπορώ να ανοίξω το πρόσφατο αρχείο �
 
 #~ msgid "playlist non-const copy constructor called"
 #~ msgstr "λίστα αναπαρ/γής non-const εκλήθη από κατασκευαστή αντιγράφου"
-
-#~ msgid "replace region"
-#~ msgstr "αντικατάσταση περιοχής"
 
 #~ msgid "remove region"
 #~ msgstr "απαλοιφή περιοχής"
