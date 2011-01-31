@@ -536,7 +536,7 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 bool
 PluginInsert::configure_io (ChanCount in, ChanCount out)
 {
-	if (set_count (count_for_configuration (in, out)) < 0) {
+	if (set_count (count_for_configuration (in, out)) == false) {
 		return false;
 	}
 
@@ -547,7 +547,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	   if we running a single plugin, we need to configure it.
 	*/
 
-	if (_plugins.front()->configure_io (in, out) < 0) {
+	if (_plugins.front()->configure_io (in, out) == false) {
 		return false;
 	}
 
