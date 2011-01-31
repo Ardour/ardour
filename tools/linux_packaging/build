@@ -6,7 +6,6 @@
 
 # script for pulling together a Linux app bundle.
 
-SAE=
 MIXBUS=
 INTERNAL_JACK=1
 WITH_LADSPA=0
@@ -19,7 +18,7 @@ if [ $# -eq 0 ] ; then
 	echo ""	 
 	echo "ERROR - Please specify build type"
 	echo "	  --public"
-	echo "	  --sae"
+	echo "	  --mixbus"
 	echo ""	 
 	exit 1
 fi
@@ -32,18 +31,9 @@ while [ $# -gt 0 ] ; do
 	# top level build targets
 	#
 
-	--sae)
-		WITH_NLS= ; 
-		SAE=1 ; 
-		INTERNAL_JACK=1; 
-		WITH_LADSPA=1; 
-		STRIP= ; 
-		APPNAME=Ardour ;
-		shift ;;
 	--mixbus)
 		MIXBUS=1; 
 		WITH_NLS=1 ; 
-		SAE= ; 
 		INTERNAL_JACK=; 
 		WITH_LADSPA=; 
 		STRIP= ; 
@@ -51,20 +41,18 @@ while [ $# -gt 0 ] ; do
 		shift ;;
 	--public)
 		WITH_NLS=1 ; 
-		SAE= ; 
 		INTERNAL_JACK=; 
 		WITH_LADSPA=; 
 		STRIP= ; 
 		APPNAME=Ardour ;
 		shift ;;
 	--allinone)
-		SAE= ; 
 		WITH_NLS= ; 
 		INTERNAL_JACK=1; 
 		WITH_LADSPA=1; 
 		STRIP= ; 
 		shift ;;
-	--test) SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
+	--test) INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
 
 	#
 	# specific build flags
@@ -91,8 +79,8 @@ if [ x$EXTERNAL_JACK != x -a x$INTERNAL_JACK != x ] ; then
 	echo "It makes no sense to package JACK internally and externally. Please pick one."
 fi
 
-release_version=`grep -m 1 '^ardour_version' ../../SConstruct | cut -d' ' -f 3 | sed "s/'//g"`
-svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d' ' -f 6 | sed 's/[";]//g'`
+release_version=`grep -m 1 '^VERSION' ../../wscript | awk '{print $3}' | sed "s/'//g"`
+svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d"'" -f 2`
 echo "Version is $release_version / $svn_version"
 info_string="$release_version/$svn_version built on `hostname` by `whoami` on `date`"
 echo "Info string is $info_string"
@@ -116,6 +104,10 @@ case `uname -m` in
 		exit 1
 		;;
 esac
+
+# the waf build tree to use when copying built/generated files
+
+BUILD_ROOT=../../build/default
 
 # setup directory structure
 
@@ -172,15 +164,7 @@ ENVIRONMENT=environment
 rm -f $ENVIRONMENT
 touch $ENVIRONMENT
 
-if test x$SAE != x ; then
-	echo "export ARDOUR_SAE=true" >> $ENVIRONMENT
-	#
-	# current default for SAE version is German keyboard layout without a keypad
-	#
-	echo export ARDOUR_KEYBOARD_LAYOUT=de-nokeypad >> $ENVIRONMENT
-	echo export ARDOUR_UI_CONF=ardour2_ui_sae.conf >> $ENVIRONMENT
-	echo export ARDOUR2_UI_RC=ardour2_ui_dark_sae.rc >> $ENVIRONMENT
-elif test x$MIXBUS != x ; then
+if test x$MIXBUS != x ; then
 	echo export ARDOUR_MIXBUS=true >> $ENVIRONMENT
 	#
 	# current default for MIXBUS version is US keyboard layout without a keypad
@@ -389,24 +373,22 @@ gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUFLIB/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.
 # We sort of rely on clearlooks, so include a version
 # this one is special - we will set GTK_PATH to $Libraries/clearlooks
 
-if [ ! -e ${GTKLIB}/engines/libclearlooks.so ]; then
-	echo ""
-	echo "!!! ERROR !!! - not able to locate libclearlooks.so"
-	echo ""
-	echo "Packager with exit"
-	exit 1
-fi
+#if [ ! -e ${GTKLIB}/engines/libclearlooks.so ]; then
+#	echo ""
+#	echo "!!! ERROR !!! - not able to locate libclearlooks.so"
+#	echo ""
+#	echo "Packager with exit"
+#	exit 1
+#fi
 
-echo "Copying clearlooks ..."
-cp ${GTKLIB}/engines/libclearlooks.so $Libraries
-mkdir -p $Libraries/clearlooks/engines
-(cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks* libclearlooks.so )
+#echo "Copying clearlooks ..."
+#cp ${GTKLIB}/engines/libclearlooks.so $Libraries
+#mkdir -p $Libraries/clearlooks/engines
+#(cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks* libclearlooks.so )
 
 # LADSPA
 if test x$WITH_LADSPA != x ; then
-	if test x$SAE != x ; then
-		plugdir=sae_ladspa
-	elif test x$MIXBUS != x ; then
+	if test x$MIXBUS != x ; then
 		plugdir=mixbus_ladspa
 	else
 		plugdir=ladspa
@@ -509,33 +491,18 @@ find $APPLIB/ -name "*.so*" | xargs chmod a+rx
 
 echo "Copying other stuff to $APPDIR  ..."
 
-cp ../../gtk2_ardour/ergonomic-us.bindings	$Etc
-cp ../../gtk2_ardour/mnemonic-us.bindings  $Etc
-cp ../../gtk2_ardour/SAE-de-keypad.bindings  $Etc
-cp ../../gtk2_ardour/SAE-de-nokeypad.bindings  $Etc
-cp ../../gtk2_ardour/SAE-us-keypad.bindings  $Etc
-cp ../../gtk2_ardour/SAE-us-nokeypad.bindings  $Etc
-cp ../../gtk2_ardour/ardour.menus $Etc
-cp ../../gtk2_ardour/ardour-sae.menus $Etc
-if test x$SAE != x ; then
-	cp ../../ardour_system_sae.rc $Etc/ardour_system.rc
-	echo cp ../../ardour_system_sae.rc $Etc/ardour_system.rc
-	cp ../../instant.xml.sae $Etc/instant.xml
-	echo cp ../../instant.xml.sae $Etc/instant.xml
-else
-	cp ../../ardour_system.rc $Etc/ardour_system.rc
-	echo cp ../../ardour_system.rc $Etc/ardour_system.rc
-	cp ../../instant.xml $Etc/instant.xml
-	echo cp ../../instant.xml $Etc/instant.xml
-fi
-cp ../../gtk2_ardour/ardour2_ui_sae.conf $Etc
-cp ../../gtk2_ardour/ardour2_ui_default.conf $Etc
-cp ../../gtk2_ardour/ardour2_ui_default.conf $Etc/ardour2_ui.conf
-cp ../../gtk2_ardour/ardour2_ui_light.rc $Etc
-cp ../../gtk2_ardour/ardour2_ui_dark.rc $Etc
-cp ../../gtk2_ardour/ardour2_ui_light_sae.rc $Etc
-cp ../../gtk2_ardour/ardour2_ui_dark_sae.rc $Etc
+# these are all generated by waf
+#cp $BUILD_ROOT/gtk2_ardour/ergonomic-us.bindings	$Etc
+cp $BUILD_ROOT/gtk2_ardour/mnemonic-us.bindings  $Etc
+cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Etc
+cp $BUILD_ROOT/ardour_system.rc $Etc/ardour_system.rc
+cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_light.rc $Etc
+cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_dark.rc $Etc
 
+# these are copied straight from the source tree
+
+cp ../../gtk2_ardour/ardour3_ui_default.conf $Etc/ardour3_ui.conf
+cp ../../instant.xml $Etc/instant.xml
 cp -r ../../gtk2_ardour/icons $Etc
 cp -r ../../gtk2_ardour/pixmaps $Etc
 
@@ -558,8 +525,8 @@ for svndir in `find $APPDIR -name .svn -type d`; do
 done
 
 #Sanity Check file
-if [ -e ../sanity_check/sanityCheck ]; then
-	cp ../sanity_check/sanityCheck $APPDIR
+if [ -e $BUILD_ROOT/tools/sanity_check/sanityCheck ]; then
+	cp $BUILD_ROOT/tools/sanity_check/sanityCheck $APPDIR
 else
 	echo "!!!ERROR !!! sanityCheck program is missing. packager will exit without being complete"
 	exit 1
@@ -569,16 +536,7 @@ fi
 # and now ... the final package
 # 
 
-if [ x$SAE != x ] ; then
-	
-	# SAE packaging
-	
-	echo "Creating SAE packaging directory"
-	cp HowToInstallArdourSAE.pdf "$APPDIR/How To Install Ardour SAE.pdf"
-	cp SAE-de-keypad.pdf "$APPDIR/Ardour SAE Shortcuts (keypad).pdf"
-	cp SAE-de-nokeypad.pdf "$APPDIR/Ardour SAE Shortcuts.pdf"
-	
-elif [ x$MIXBUS != x ] ; then
+if [ x$MIXBUS != x ] ; then
 
 	# Mixbus packaging
 
