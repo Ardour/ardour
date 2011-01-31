@@ -302,3 +302,9 @@ Source::dec_use_count ()
         g_atomic_int_exchange_and_add (&_use_count, -1);
 #endif
 }
+
+bool
+Source::writable () const
+{
+        return (_flags & Writable) && _session.writable();
+}

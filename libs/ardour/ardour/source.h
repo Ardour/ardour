@@ -79,7 +79,7 @@ class Source : public SessionObject
 	int set_state (const XMLNode&, int version);
 
 	bool         destructive() const       { return (_flags & Destructive); }
-	bool         writable () const         { return (_flags & Writable); }
+	bool         writable () const;
 	virtual bool set_destructive (bool /*yn*/) { return false; }
 	virtual bool length_mutable() const    { return false; }
 
