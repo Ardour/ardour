@@ -95,10 +95,10 @@ RefPtr<Action> ProcessorBox::edit_action;
 Glib::RefPtr<Gdk::Pixbuf> SendProcessorEntry::_slider;
 
 ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
-	: _processor (p)
+	: _position (PreFader)
+	, _processor (p)
 	, _width (w)
 	, _visual_state (Gtk::STATE_NORMAL)
-	, _position (PreFader)
 {
 	_hbox.pack_start (_active, false, false);
 	_event_box.add (_name);
@@ -122,6 +122,13 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 
 	_active.set_active (_processor->active ());
 	_active.signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::active_toggled));
+
+	_frame.show ();
+	_vbox.show ();
+	_hbox.show ();
+	_event_box.show ();
+	_name.show ();
+	_active.show ();
 	
 	_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
 	_processor->PropertyChanged.connect (name_connection, invalidator (*this), ui_bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
@@ -349,6 +356,82 @@ SendProcessorEntry::set_pixel_width (int p)
 	_fader.set_fader_length (p);
 }
 
+PluginInsertProcessorEntry::PluginInsertProcessorEntry (boost::shared_ptr<ARDOUR::PluginInsert> p, Width w)
+	: ProcessorEntry (p, w)
+	, _plugin_insert (p)
+{
+	p->SplittingChanged.connect (
+		_splitting_connection, invalidator (*this), ui_bind (&PluginInsertProcessorEntry::plugin_insert_splitting_changed, this), gui_context()
+		);
+
+	_splitting_icon.set_size_request (-1, 12);
+
+	_vbox.pack_start (_splitting_icon);
+	_vbox.reorder_child (_splitting_icon, 0);
+
+	plugin_insert_splitting_changed ();
+}
+
+void
+PluginInsertProcessorEntry::plugin_insert_splitting_changed ()
+{
+	if (_plugin_insert->splitting ()) {
+		_splitting_icon.show ();
+	} else {
+		_splitting_icon.hide ();
+	}
+}
+
+void
+PluginInsertProcessorEntry::setup_visuals ()
+{
+	switch (_position) {
+	case PreFader:
+		_splitting_icon.set_name ("ProcessorPreFader");
+		break;
+
+	case Fader:
+		_splitting_icon.set_name ("ProcessorFader");
+		break;
+
+	case PostFader:
+		_splitting_icon.set_name ("ProcessorPostFader");
+		break;
+	}
+
+	ProcessorEntry::setup_visuals ();
+}
+
+bool
+PluginInsertProcessorEntry::SplittingIcon::on_expose_event (GdkEventExpose* ev)
+{
+	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
+
+	cairo_set_line_width (cr, 1);
+
+	double const width = ev->area.width;
+	double const height = ev->area.height;
+
+	Gdk::Color const bg = get_style()->get_bg (STATE_NORMAL);
+	cairo_set_source_rgb (cr, bg.get_red_p (), bg.get_green_p (), bg.get_blue_p ());
+	
+	cairo_rectangle (cr, 0, 0, width, height);
+	cairo_fill (cr);
+
+	Gdk::Color const fg = get_style()->get_fg (STATE_NORMAL);
+	cairo_set_source_rgb (cr, fg.get_red_p (), fg.get_green_p (), fg.get_blue_p ());
+
+	cairo_move_to (cr, width * 0.3, height);
+	cairo_line_to (cr, width * 0.3, height * 0.5);
+	cairo_line_to (cr, width * 0.7, height * 0.5);
+	cairo_line_to (cr, width * 0.7, height);
+	cairo_move_to (cr, width * 0.5, height * 0.5);
+	cairo_line_to (cr, width * 0.5, 0);
+	cairo_stroke (cr);
+
+	return true;
+}
+
 ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelector*()> get_plugin_selector,
 			    RouteRedirectSelection& rsel, MixerStrip* parent, bool owner_is_mixer)
 	: _parent_strip (parent)
@@ -387,6 +470,9 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	processor_display.Reordered.connect (sigc::mem_fun (*this, &ProcessorBox::reordered));
 	processor_display.DropFromAnotherBox.connect (sigc::mem_fun (*this, &ProcessorBox::object_drop));
 	processor_display.SelectionChanged.connect (sigc::mem_fun (*this, &ProcessorBox::selection_changed));
+
+	processor_scroller.show ();
+	processor_display.show ();
 
 	if (parent) {
 		parent->DeliveryChanged.connect (
@@ -1042,8 +1128,6 @@ ProcessorBox::redisplay_processors ()
 
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::add_processor_to_display));
 
-	build_processor_tooltip (processor_eventbox, _("Inserts, sends & plugins:"));
-
 	for (list<ProcessorWindowProxy*>::iterator i = _processor_window_proxies.begin(); i != _processor_window_proxies.end(); ++i) {
 		(*i)->marked = false;
 	}
@@ -1128,12 +1212,16 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	}
 
 	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
+	boost::shared_ptr<PluginInsert> plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (processor);
 	ProcessorEntry* e = 0;
 	if (send) {
 		e = new SendProcessorEntry (send, _width);
+	} else if (plugin_insert) {
+		e = new PluginInsertProcessorEntry (plugin_insert, _width);
 	} else {
 		e = new ProcessorEntry (processor, _width);
 	}
+	
 	e->set_pixel_width (get_allocation().get_width());
 	processor_display.add_child (e);
 }

@@ -109,7 +109,13 @@ class PluginInsert : public Processor
 
 	void collect_signal_for_analysis (framecnt_t nframes);
 
+	bool splitting () const {
+		return _splitting;
+	}
+
 	PBD::Signal2<void,BufferSet*, BufferSet*> AnalysisDataGathered;
+	/** Emitted when the return value of splitting () has changed */
+	PBD::Signal0<void> SplittingChanged;
 
   private:
 	/* disallow copy construction */
@@ -135,6 +141,8 @@ class PluginInsert : public Processor
 
 	/** true if we are splitting one processor input to >1 plugin inputs */
 	bool _splitting;
+
+	void set_splitting (bool);
 
 	void automation_run (BufferSet& bufs, pframes_t nframes);
 	void connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now = 0);

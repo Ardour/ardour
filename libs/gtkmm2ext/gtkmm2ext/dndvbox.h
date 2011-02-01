@@ -60,6 +60,8 @@ public:
 		signal_button_release_event().connect (bind (mem_fun (*this, &DnDVBox::button_release), (T *) 0));
 		signal_drag_motion().connect (mem_fun (*this, &DnDVBox::drag_motion));
 		signal_drag_leave().connect (mem_fun (*this, &DnDVBox::drag_leave));
+
+		_internal_vbox.show ();
 		
 		drag_dest_set (_targets);
 		signal_drag_data_received().connect (mem_fun (*this, &DnDVBox::drag_data_received));
@@ -85,7 +87,7 @@ public:
 		_internal_vbox.pack_start (child->widget(), false, false);
 		
 		_children.push_back (child);
-		child->widget().show_all ();
+		child->widget().show ();
 	}
 
 	/** @return Children, sorted into the order that they are currently being displayed in the widget */

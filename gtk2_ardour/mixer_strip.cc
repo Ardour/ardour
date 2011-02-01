@@ -498,7 +498,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	add_events (Gdk::BUTTON_RELEASE_MASK);
 
-	processor_box.show();
+	processor_box.show ();
 
 	if (!route()->is_master() && !route()->is_monitor()) {
 		/* we don't allow master or control routes to be hidden */
@@ -513,7 +513,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	button_table.show();
 	middle_button_table.show();
 	bottom_button_table.show();
-	processor_box.show_all ();
 	gpm.show_all ();
 	gain_meter_alignment.show ();
 	gain_unit_button.show();

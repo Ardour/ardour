@@ -121,7 +121,10 @@ public:
 
 protected:
 	
+	virtual void setup_visuals ();
+	
 	Gtk::VBox _vbox;
+	Position _position;
 	
 private:
 
@@ -129,7 +132,6 @@ private:
 	void processor_active_changed ();
 	void processor_property_changed (const PBD::PropertyChange&);
 	std::string name () const;
-	void setup_visuals ();
 
 	Gtk::Frame _frame;
 	Gtk::EventBox _event_box;
@@ -139,7 +141,6 @@ private:
 	boost::shared_ptr<ARDOUR::Processor> _processor;
 	Width _width;
 	Gtk::StateType _visual_state;
-	Position _position;
 	PBD::ScopedConnection active_connection;
 	PBD::ScopedConnection name_connection;
 };
@@ -165,6 +166,26 @@ private:
 	PBD::ScopedConnection send_gain_connection;
 
 	static Glib::RefPtr<Gdk::Pixbuf> _slider;
+};
+
+class PluginInsertProcessorEntry : public ProcessorEntry
+{
+public:
+	PluginInsertProcessorEntry (boost::shared_ptr<ARDOUR::PluginInsert>, Width);
+
+private:
+	void setup_visuals ();
+	void plugin_insert_splitting_changed ();
+
+	/* XXX: this seems a little ridiculous just for a simple scaleable icon */
+	class SplittingIcon : public Gtk::DrawingArea {
+	private:
+		bool on_expose_event (GdkEventExpose *);
+	};
+
+	boost::shared_ptr<ARDOUR::PluginInsert> _plugin_insert;
+	SplittingIcon _splitting_icon;
+	PBD::ScopedConnection _splitting_connection;
 };
 
 class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARDOUR::SessionHandlePtr
@@ -217,8 +238,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	void selection_changed ();
 
-	Gtk::EventBox	       processor_eventbox;
-	Gtk::HBox              processor_hpacker;
 	Gtkmm2ext::DnDVBox<ProcessorEntry> processor_display;
 	Gtk::ScrolledWindow    processor_scroller;
 

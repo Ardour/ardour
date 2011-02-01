@@ -569,10 +569,12 @@ bool
 PluginInsert::configure_io (ChanCount in, ChanCount out)
 {
 	if (set_count (count_for_configuration (in, out)) == false) {
+		set_splitting (false);
 		return false;
 	}
 
 	if (_plugins.front()->get_info()->n_inputs <= in) {
+		set_splitting (false);
 		if (_plugins.front()->configure_io (in, out) == false) {
 			return false;
 		}
@@ -580,8 +582,8 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		/* we must be splitting a single processor input to
 		   multiple plugin inputs
 		*/
+		set_splitting (true);
 		_plugins.front()->configure_io (_plugins.front()->get_info()->n_inputs, out);
-		_splitting = true;
 	}
 
 	// we don't know the analysis window size, so we must work with the
@@ -1153,4 +1155,15 @@ PluginInsert::realtime_handle_transport_stopped ()
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->realtime_handle_transport_stopped ();
 	}
+}
+
+void
+PluginInsert::set_splitting (bool s)
+{
+	if (_splitting == s) {
+		return;
+	}
+			
+	_splitting = s;
+	SplittingChanged (); /* EMIT SIGNAL */
 }
