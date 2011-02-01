@@ -210,6 +210,18 @@ fixup_bundle_environment (int, char* [])
 
 	setenv ("ARDOUR_CONTROL_SURFACE_PATH", path.c_str(), 1);
 
+	cstr = getenv ("ARDOUR_PANNER_PATH");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	} else {
+		path = "";
+	}
+	path += dir_path;
+	path += "/lib/panners";
+	
+	setenv ("ARDOUR_PANNER_PATH", path.c_str(), 1);
+
 	cstr = getenv ("LV2_PATH");
 	if (cstr) {
 		path = cstr;
@@ -390,6 +402,18 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	path += "/lib/surfaces";
 	
 	setenv ("ARDOUR_CONTROL_SURFACE_PATH", path.c_str(), 1);
+
+	cstr = getenv ("ARDOUR_PANNER_PATH");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	} else {
+		path = "";
+	}
+	path += dir_path;
+	path += "/lib/panners";
+	
+	setenv ("ARDOUR_PANNER_PATH", path.c_str(), 1);
 
 	cstr = getenv ("LV2_PATH");
 	if (cstr) {
