@@ -305,7 +305,7 @@ fixup_bundle_environment (int, char* [])
 #else
 
 void
-fixup_bundle_environment (int argc, char* argv[])
+fixup_bundle_environment (int /*argc*/, char* argv[])
 {
 	if (!getenv ("ARDOUR_BUNDLED")) {
 		return;
@@ -318,8 +318,6 @@ fixup_bundle_environment (int argc, char* argv[])
 	Glib::ustring path;
 	const char *cstr = getenv ("PATH");
         Glib::ustring userconfigdir = user_config_directory().to_string();
-
-        cerr << "Ardour: bundle root = " << dir_path << endl;
 
 	/* ensure that we find any bundled executables (e.g. JACK),
 	   and find them before any instances of the same name
