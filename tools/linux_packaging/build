@@ -400,10 +400,13 @@ if test x$WITH_LADSPA != x ; then
 	fi
 fi
 
-# XXX STILL NEED TO DO PANNERS FOR TRUNK
-cp $BUILD_ROOT/libs/surfaces/*/libardour_*.so* $Surfaces
+# Control Surfaces
+cp $BUILD_ROOT/libs/surfaces/*/libardour*.so* $Surfaces
 # hack ... move libardour_cp back into Libraries
-mv $Surfaces/libardour_cp.so* $Libraries
+mv $Surfaces/libardourcp.so* $Libraries
+
+# Panners
+cp $BUILD_ROOT/libs/panners/*/lib*.so* $Panners
 
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.so* $Libraries
