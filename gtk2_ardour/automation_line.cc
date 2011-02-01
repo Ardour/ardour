@@ -526,8 +526,7 @@ AutomationLine::fraction_to_string (double fraction) const
 			snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain (fraction)));
 		}
 	} else {
-		double dummy = 0.0;
-		view_to_model_coord (dummy, fraction);
+		view_to_model_coord_y (fraction);
 		if (EventTypeMap::instance().is_integer (alist->parameter())) {
 			snprintf (buf, sizeof (buf), "%d", (int)fraction);
 		} else {
