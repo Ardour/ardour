@@ -83,13 +83,11 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
-	, _mono_button (_("Mono"))
 	, button_table (4, 2)
 	, solo_led_table (2, 2)
 	, middle_button_table (1, 2)
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
-	, comment_button (_("Comments"))
 {
 	init ();
 
@@ -110,12 +108,10 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, processor_box (sess, sigc::mem_fun(*this, &MixerStrip::plugin_selector), mx.selection(), this, in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
-	, _mono_button (_("Mono"))
 	, button_table (3, 2)
 	, middle_button_table (1, 2)
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
-	, comment_button (_("Comments"))
 {
 	init ();
 	set_route (rt);
@@ -251,12 +247,6 @@ MixerStrip::init ()
         Gtkmm2ext::set_size_request_to_display_given_text (group_button, "Group", 2, 2);
 	group_label.set_name ("MixerGroupButtonLabel");
 
-	comment_button.set_name ("MixerCommentButton");
-	comment_button.signal_clicked().connect (sigc::mem_fun(*this, &MixerStrip::comment_button_clicked));
-
-	_mono_button.set_name ("MixerMonoButton");
-	_mono_button.signal_clicked().connect (sigc::mem_fun (*this, &MixerStrip::mono_button_clicked));
-
 	global_vpacker.set_border_width (0);
 	global_vpacker.set_spacing (0);
 
@@ -283,9 +273,7 @@ MixerStrip::init ()
 	global_vpacker.pack_start (middle_button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (gain_meter_alignment,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table,Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (_mono_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (comment_button, Gtk::PACK_SHRINK);
 
 	global_frame.add (global_vpacker);
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -416,10 +404,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	if (has_audio_outputs ()) {
-		_mono_button.show ();
 		panners.show_all ();
 	} else {
-		_mono_button.hide ();
 		panners.hide_all ();
 	}
 
@@ -459,10 +445,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	delete route_ops_menu;
 	route_ops_menu = 0;
-
-	ARDOUR_UI::instance()->set_tip (comment_button, _route->comment().empty() ?
-						   _("Click to Add/Edit Comments"):
-						   _route->comment());
 
 	_route->meter_change.connect (route_connections, invalidator (*this), bind (&MixerStrip::meter_changed, this), gui_context());
 	_route->route_group_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::route_group_changed, this), gui_context());
@@ -527,7 +509,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	output_label.show();
 	name_label.show();
 	name_button.show();
-	comment_button.show();
 	group_button.show();
 	group_label.show();
 
@@ -587,14 +568,6 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			((Gtk::Label*)show_sends_button->get_child())->set_text (_("Sends"));
 		}
 
-		if (_route->comment() == "") {
-			comment_button.unset_bg (STATE_NORMAL);
-			((Gtk::Label*)comment_button.get_child())->set_text (_("Comments"));
-		} else {
-			comment_button.modify_bg (STATE_NORMAL, color());
-			((Gtk::Label*)comment_button.get_child())->set_text (_("*Comments*"));
-		}
-
 		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (
 				gpm.astyle_string(gain_automation->automation_style()));
 		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (
@@ -614,14 +587,6 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	case Narrow:
 		if (show_sends_button) {
 			((Gtk::Label*)show_sends_button->get_child())->set_text (_("Snd"));
-		}
-
-		if (_route->comment() == "") {
-		       comment_button.unset_bg (STATE_NORMAL);
-		       ((Gtk::Label*)comment_button.get_child())->set_text (_("Cmt"));
-		} else {
-		       comment_button.modify_bg (STATE_NORMAL, color());
-		       ((Gtk::Label*)comment_button.get_child())->set_text (_("*Cmt*"));
 		}
 
 		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (
@@ -1226,62 +1191,35 @@ MixerStrip::port_connected_or_disconnected (Port* a, Port* b)
 }
 
 void
-MixerStrip::comment_editor_done_editing()
+MixerStrip::comment_editor_done_editing ()
 {
-	string str =  comment_area->get_buffer()->get_text();
-	if (_route->comment() != str) {
-		_route->set_comment (str, this);
-
-		switch (_width) {
-
-		case Wide:
-			if (! str.empty()) {
-			        comment_button.modify_bg (STATE_NORMAL, color());
-				((Gtk::Label*)comment_button.get_child())->set_text (_("*Comments*"));
-			} else {
-			        comment_button.unset_bg (STATE_NORMAL);
-				((Gtk::Label*)comment_button.get_child())->set_text (_("Comments"));
-			}
-			break;
-
-		case Narrow:
-			if (! str.empty()) {
-			        comment_button.modify_bg (STATE_NORMAL, color());
-				((Gtk::Label*)comment_button.get_child())->set_text (_("*Cmt*"));
-			} else {
-			        comment_button.unset_bg (STATE_NORMAL);
-				((Gtk::Label*)comment_button.get_child())->set_text (_("Cmt"));
-			}
-			break;
-		}
-
-		ARDOUR_UI::instance()->set_tip (comment_button,
-				str.empty() ? _("Click to Add/Edit Comments") : str);
+	ignore_toggle = true;
+	_comment_menu_item->set_active (false);
+	ignore_toggle = false;
+	
+	string const str = comment_area->get_buffer()->get_text();
+	if (str == _route->comment ()) {
+		return;
 	}
-
+	
+	_route->set_comment (str, this);
 }
 
 void
-MixerStrip::comment_button_clicked ()
+MixerStrip::toggle_comment ()
 {
+	if (ignore_toggle) {
+		return;
+	}
+	
 	if (comment_window == 0) {
 		setup_comment_editor ();
 	}
 
-    int x, y, cw_width, cw_height;
-
-	if (comment_window->is_visible()) {
+	if (comment_window->is_visible ()) {
 		comment_window->hide ();
 		return;
 	}
-
-	comment_window->get_size (cw_width, cw_height);
-	comment_window->get_position(x, y);
-	comment_window->move(x, y - (cw_height / 2) - 45);
-	/*
-	   half the dialog height minus the comments button height
-	   with some window decoration fudge thrown in.
-	*/
 
 	comment_window->show();
 	comment_window->present();
@@ -1420,6 +1358,10 @@ MixerStrip::build_route_ops_menu ()
 
 	MenuList& items = route_ops_menu->items();
 
+	items.push_back (CheckMenuElem (_("Mono"), sigc::mem_fun (*this, &MixerStrip::toggle_mono)));
+	_mono_menu_item = dynamic_cast<CheckMenuItem*> (&items.back ());
+	items.push_back (CheckMenuElem (_("Comments..."), sigc::mem_fun (*this, &MixerStrip::toggle_comment)));
+	_comment_menu_item = dynamic_cast<CheckMenuItem*> (&items.back ());
 	items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
 	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
 	rename_menu_item = &items.back();
@@ -1723,8 +1665,6 @@ MixerStrip::drop_send ()
         mute_button->set_sensitive (true);
         solo_button->set_sensitive (true);
         rec_enable_button->set_sensitive (true);
-        _mono_button.set_sensitive (true);
-        comment_button.set_sensitive (true);
         solo_isolated_led->set_sensitive (true);
         solo_safe_led->set_sensitive (true);
 }
@@ -1761,8 +1701,6 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
         mute_button->set_sensitive (false);
         solo_button->set_sensitive (false);
         rec_enable_button->set_sensitive (false);
-        _mono_button.set_sensitive (false);
-        comment_button.set_sensitive (false);
         solo_isolated_led->set_sensitive (false);
         solo_safe_led->set_sensitive (false);
 
@@ -1956,9 +1894,9 @@ MixerStrip::on_leave_notify_event (GdkEventCrossing* ev)
 }
 
 void
-MixerStrip::mono_button_clicked ()
+MixerStrip::toggle_mono ()
 {
-	panners.set_mono (_mono_button.get_active ());
+	panners.set_mono (_mono_menu_item->get_active ());
 }
 
 PluginSelector*

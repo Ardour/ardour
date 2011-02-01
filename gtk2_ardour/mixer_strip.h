@@ -156,7 +156,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	ProcessorBox processor_box;
 	GainMeter   gpm;
 	PannerUI    panners;
-	BindableToggleButton _mono_button;
 
 	Gtk::Table button_table;
         Gtk::Table solo_led_table;
@@ -188,12 +187,11 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	ArdourDialog*  comment_window;
 	Gtk::TextView* comment_area;
-	Gtk::Button    comment_button;
 
-	void comment_editor_done_editing();
+	void comment_editor_done_editing ();
 	void setup_comment_editor ();
-	void comment_button_clicked ();
-	void mono_button_clicked ();
+	void toggle_comment ();
+	void toggle_mono ();
 
 	Gtk::Button   group_button;
 	Gtk::Label    group_label;
@@ -219,6 +217,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void diskstream_changed ();
 
 	Gtk::Menu *send_action_menu;
+	Gtk::CheckMenuItem* _mono_menu_item;
+	Gtk::CheckMenuItem* _comment_menu_item;
 	Gtk::MenuItem* rename_menu_item;
 	void build_send_action_menu ();
 
