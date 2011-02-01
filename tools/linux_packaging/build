@@ -5,6 +5,11 @@
 . ./buildenv
 
 # script for pulling together a Linux app bundle.
+#
+# This will create a bundle for a single architecture.
+# Execute this scirpt on both x86 and x86_64 and then use
+# package to merge the 2 bundles into a final package with the
+# installer.
 
 SAE=
 MIXBUS=
@@ -14,6 +19,7 @@ STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
 EXTERNAL_JACK=
+VENDOR=Ardour ;
 
 if [ $# -eq 0 ] ; then
 	echo ""	 
@@ -48,6 +54,7 @@ while [ $# -gt 0 ] ; do
 		WITH_LADSPA=; 
 		STRIP= ; 
 		APPNAME=Mixbus ;
+		VENDOR=Harrison ;
 		shift ;;
 	--public)
 		WITH_NLS=1 ; 
@@ -166,6 +173,7 @@ mkdir -p $Locale
 mkdir -p $Surfaces
 mkdir -p $Panners
 mkdir -p $Shared/templates
+mkdir -p $Shared/doc
 
 # maybe set variables
 ENVIRONMENT=environment
@@ -273,9 +281,9 @@ GTKROOT=`pkg-config --libs-only-L gtk+-2.0 | sed -e "s/-L//" -e "s/[[:space:]]//
 if [ ! -z "$GTKROOT" ]; then
 	echo "Found GTKROOT using pkg-config"
 elif [ -d /usr/lib/gtk-2.0 ]; then
-	GTKROOT="/usr/lib/gtk-2.0"
+	GTKROOT="/usr/lib"
 elif [ -d /usr/local/lib/gtk-2.0 ]; then
-	GTKROOT="/usr/local/lib/gtk-2.0"
+	GTKROOT="/usr/local/lib"
 else
 	echo ""
 	echo "!!! ERROR !!! - Unable to locate gtk-2.0 directory. Packager will exit"
@@ -288,7 +296,7 @@ versionDir=`ls ${GTKROOT}/gtk-2.0/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
 
 num=0
 for name in $versionDir ; do
-	let "num += 1"
+	num=$(($num + 1))
 done
 
 if [ $num -eq 1 ]; then
@@ -307,9 +315,9 @@ PANGOROOT=`pkg-config --libs-only-L pango | sed -e "s/-L//" -e "s/[[:space:]]//g
 if [ ! -z "$PANGOROOT" ]; then
 	echo "Found PANGOROOT using pkg-config"
 elif [ -d /usr/lib/pango ]; then
-	PANGOROOT="/usr/lib/pango"
+	PANGOROOT="/usr/lib"
 elif [ -d /usr/local/lib/pango ]; then
-	PANGOROOT="/usr/local/lib/pango"
+	PANGOROOT="/usr/local/lib"
 else
 	echo ""
 	echo "!!! ERROR !!! - Unable to locate pango directory. Packager will exit"
@@ -322,7 +330,7 @@ versionDir=`ls ${PANGOROOT}/pango/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
 
 num=0
 for name in $versionDir ; do
-	let "num += 1"
+	num=$(($num + 1))
 done
 
 if [ $num -eq 1 ]; then
@@ -361,7 +369,7 @@ if [ -z ${GDKPIXBUFLIB} ]; then
 
 	num=0
 	for name in $versionDir ; do
-		let "num += 1"
+		num=$(($num + 1))
 	done
 
 	if [ $num -eq 1 ]; then
@@ -449,7 +457,7 @@ while [ true ] ; do
 			fi
 		done
 		depCheckedList[$checkIdx]=$file
-		let "checkIdx += 1"
+		checkIdx=$(($checkIdx + 1))
 		
 		# do not include libjack
 		deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | awk '{print $3}'`
@@ -557,37 +565,44 @@ for svndir in `find $APPDIR -name .svn -type d`; do
 	rm -rf $svndir
 done
 
-#Sanity Check file
-if [ -e ../sanity_check/sanityCheck ]; then
-	cp ../sanity_check/sanityCheck $APPDIR
-else
-	echo "!!!ERROR !!! sanityCheck program is missing. packager will exit without being complete"
-	exit 1
-fi
-
 #
-# and now ... the final package
+# Add any documentation to the top level of the package
 # 
 
 if [ x$SAE != x ] ; then
 	
 	# SAE packaging
 	
-	echo "Creating SAE packaging directory"
-	cp HowToInstallArdourSAE.pdf "$APPDIR/How To Install Ardour SAE.pdf"
-	cp SAE-de-keypad.pdf "$APPDIR/Ardour SAE Shortcuts (keypad).pdf"
-	cp SAE-de-nokeypad.pdf "$APPDIR/Ardour SAE Shortcuts.pdf"
+	echo "Adding SAE documentation"
+	cp HowToInstallArdourSAE.pdf "$Shared/doc/How To Install Ardour SAE.pdf"
+	cp SAE-de-keypad.pdf "$Shared/doc/Ardour SAE Shortcuts (keypad).pdf"
+	cp SAE-de-nokeypad.pdf "$Shared/doc/Ardour SAE Shortcuts.pdf"
 	
 elif [ x$MIXBUS != x ] ; then
 
 	# Mixbus packaging
 
-	echo "Creating Mixbus packaging directory"
-	cp MixBus_Install_QuickStart.pdf "$APPDIR/Mixbus Install & Quick Start Guide.pdf"
+	echo "Adding Mixbus documentation"
+	cp MixBus_Install_QuickStart.pdf "$Shared/doc/Mixbus Install & Quick Start Guide.pdf"
 	
 	if [ -x $EXTERNAL_JACK != x ] ; then
 		cp $EXTERNAL_JACK $PRODUCT_PKG_DIR
 	fi
+fi
+
+#
+# Add the uninstaller
+#
+APP_VER_NAME=${APPNAME}-${release_version}_${svn_version}
+sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_VERSION%/${release_version}/" -e "s/%REPLACE_BUILD%/${svn_version}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
+chmod a+x $APPBIN/${APP_VER_NAME}.uninstall.sh
+
+#Sanity Check file
+if [ -e ../sanity_check/sanityCheck ]; then
+	cp ../sanity_check/sanityCheck $APPBIN
+else
+	echo "!!!ERROR !!! sanityCheck program is missing. packager will exit without being complete"
+	exit 1
 fi
 
 echo "Building tarball ..."
