@@ -308,6 +308,8 @@ SendProcessorEntry::SendProcessorEntry (boost::shared_ptr<Send> s, Width w)
 	_fader.set_controllable (_send->amp()->gain_control ());
 	_vbox.pack_start (_fader);
 
+	_fader.show ();
+
 	_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &SendProcessorEntry::gain_adjusted));
 	_send->amp()->gain_control()->Changed.connect (send_gain_connection, invalidator (*this), boost::bind (&SendProcessorEntry::show_gain, this), gui_context());
 	show_gain ();
@@ -869,9 +871,6 @@ ProcessorBox::build_processor_menu ()
 {
 	processor_menu = dynamic_cast<Gtk::Menu*>(ActionManager::get_widget("/processormenu") );
 	processor_menu->set_name ("ArdourContextMenu");
-
-	show_all_children();
-
 	return processor_menu;
 }
 
