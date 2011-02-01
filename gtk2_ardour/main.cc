@@ -525,9 +525,7 @@ int ardour_main (int argc, char *argv[])
 int main (int argc, char *argv[])
 #endif
 {
-#ifdef __APPLE__
 	fixup_bundle_environment ();
-#endif
 
 	if (!Glib::thread_supported())
 		Glib::thread_init();
