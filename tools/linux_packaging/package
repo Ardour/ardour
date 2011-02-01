@@ -1,6 +1,10 @@
 #!/bin/bash
 
-# bundle
+# package
+
+# This will collect up the x86 and x86_64 bundles created by build
+# and package them together with an installer script.
+
 
 if [ $# -eq 0 ] ; then
 	echo ""	 
