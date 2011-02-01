@@ -106,7 +106,7 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 extern void set_language_preference (); // cocoacarbon.mm
 
 void
-fixup_bundle_environment ()
+fixup_bundle_environment (int, char* [])
 {
 	if (!getenv ("ARDOUR_BUNDLED")) {
 		return;
@@ -525,7 +525,7 @@ int ardour_main (int argc, char *argv[])
 int main (int argc, char *argv[])
 #endif
 {
-	fixup_bundle_environment ();
+	fixup_bundle_environment (argc, argv);
 
 	if (!Glib::thread_supported())
 		Glib::thread_init();
