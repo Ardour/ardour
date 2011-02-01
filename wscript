@@ -33,7 +33,10 @@ children = [
 	'libs/audiographer',
 	'libs/gnomecanvas',
 	'gtk2_ardour',
-	'templates'
+	'templates',
+# this needs to be conditional at some point, since
+# we will not build it or use it on OS X
+        'tools/sanity_check'
 ]
 
 i18n_children = [
