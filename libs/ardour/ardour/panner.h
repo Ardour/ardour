@@ -51,7 +51,7 @@ class Panner : public PBD::Stateful, public PBD::ScopedConnectionList
         virtual ChanCount in() const = 0;
         virtual ChanCount out() const = 0;
 
-        virtual void configure_io (ARDOUR::ChanCount in, ARDOUR::ChanCount out) {}
+        virtual void configure_io (ARDOUR::ChanCount /*in*/, ARDOUR::ChanCount /*out*/) {}
         
         /* derived implementations of these methods must indicate
            whether it is legal for a Controllable to use the
