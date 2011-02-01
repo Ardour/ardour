@@ -9,7 +9,7 @@ BIN_DIR=$(dirname $(readlink -f $0))
 INSTALL_DIR=$(dirname $BIN_DIR)
 LIB_DIR=$INSTALL_DIR/lib
 ETC_DIR=$INSTALL_DIR/etc
-USER_ARDOUR_DIR=$HOME/.ardour2
+USER_ARDOUR_DIR=$HOME/.config/ardour3
 
 if [ ! -d $USER_ARDOUR_DIR ] ; then
     mkdir -p $USER_ARDOUR_DIR || exit 1
