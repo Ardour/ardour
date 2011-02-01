@@ -1014,6 +1014,11 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 int
 Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor> before, ProcessorStreams* err)
 {
+	/* NOTE: this is intended to be used ONLY when copying
+	   processors from another Route. Hence the subtle
+	   differences between this and ::add_processor()
+	*/
+
 	ProcessorList::iterator loc;
 
 	if (before) {
@@ -1022,17 +1027,6 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 		/* nothing specified - at end but before main outs */
 		loc = find (_processors.begin(), _processors.end(), _main_outs);
 	}
-
-	return add_processors (others, loc, err);
-}
-
-int
-Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter, ProcessorStreams* err)
-{
-	/* NOTE: this is intended to be used ONLY when copying
-	   processors from another Route. Hence the subtle
-	   differences between this and ::add_processor()
-	*/
 
 	ChanCount old_pms = processor_max_streams;
 
@@ -1071,7 +1065,7 @@ Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter
 				}
 			}
 
-			ProcessorList::iterator inserted = _processors.insert (iter, *i);
+			ProcessorList::iterator inserted = _processors.insert (loc, *i);
 
 			if ((*i)->active()) {
 				(*i)->activate ();
