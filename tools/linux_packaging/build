@@ -170,8 +170,8 @@ if test x$MIXBUS != x ; then
 	# current default for MIXBUS version is US keyboard layout without a keypad
 	#
 	echo export ARDOUR_KEYBOARD_LAYOUT=us-nokeypad >> $ENVIRONMENT
-	echo export ARDOUR_UI_CONF=ardour2_ui.conf >> $ENVIRONMENT
-	echo export ARDOUR2_UI_RC=ardour2_ui_dark.rc >> $ENVIRONMENT
+	echo export ARDOUR_UI_CONF=ardour3_ui.conf >> $ENVIRONMENT
+	echo export ARDOUR3_UI_RC=ardour3_ui_dark.rc >> $ENVIRONMENT
 fi
 
 #
@@ -183,12 +183,12 @@ echo export 'PATH=/usr/local/bin:/opt/bin:$PATH' >> $ENVIRONMENT
 
 # create startup helper script
 
-sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/' < ardour.sh.in > $APPBIN/ardour2
-rm $ENVIRONMENT && chmod 775 $APPBIN/ardour2
+sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/' < ardour.sh.in > $APPBIN/ardour3
+rm $ENVIRONMENT && chmod 775 $APPBIN/ardour3
 MAIN_EXECUTABLE=ardour-$release_version
 
 echo "Copying ardour executable ...."
-cp ../../gtk2_ardour/$MAIN_EXECUTABLE $APPBIN
+cp $BUILD_ROOT/gtk2_ardour/$MAIN_EXECUTABLE $APPBIN
 if test x$STRIP != x ; then
 	strip $APPBIN/$MAIN_EXECUTABLE
 fi
@@ -198,11 +198,11 @@ if test x$WITH_NLS != x ; then
 	echo "NLS support ..."
 	echo "I hope you remembered to run scons msgupdate!"
 	LINGUAS=
-	files=`find ../../gtk2_ardour/ -name "*.mo"`
+	files=`find $BUILD_ROOT/gtk2_ardour/ -name "*.mo"`
 
 	if [ -z "$files" ]; then
 		echo ""
-		echo "!!!! WARNING !!!! - Did not find any .mo files in ../../gtk2_ardour"
+		echo "!!!! WARNING !!!! - Did not find any .mo files in $BUILD_ROOT/gtk2_ardour"
 		echo ""
 	fi
  
