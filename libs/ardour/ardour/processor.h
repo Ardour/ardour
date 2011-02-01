@@ -48,6 +48,7 @@ class Processor : public SessionObject, public Automatable, public Latent
 	static const std::string state_node_name;
 
 	Processor(Session&, const std::string& name);
+        Processor (const Processor& other);
 
 	virtual ~Processor() { }
 
@@ -99,6 +100,9 @@ class Processor : public SessionObject, public Automatable, public Latent
 
 	PBD::Signal0<void>                     ActiveChanged;
 	PBD::Signal2<void,ChanCount,ChanCount> ConfigurationChanged;
+        
+        void  set_ui (void*);
+        void* get_ui () const { return _ui_pointer; }
 
 protected:
 	virtual int set_state_2X (const XMLNode&, int version);
@@ -111,6 +115,7 @@ protected:
 	ChanCount _configured_output;
 	bool      _display_to_user;
 	bool      _pre_fader;
+        void*     _ui_pointer;
 };
 
 } // namespace ARDOUR

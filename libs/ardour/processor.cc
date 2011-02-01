@@ -68,6 +68,20 @@ Processor::Processor(Session& session, const string& name)
 	, _configured(false)
 	, _display_to_user (true)
 	, _pre_fader (false)
+        , _ui_pointer (0)
+{
+}
+
+Processor::Processor (const Processor& other)
+	: SessionObject(other.session(), other.name())
+	, Automatable (other.session())
+	, _pending_active(other._pending_active)
+	, _active(other._active)
+	, _next_ab_is_active(false)
+	, _configured(false)
+	, _display_to_user (true)
+	, _pre_fader (false)
+        , _ui_pointer (0)
 {
 }
 
@@ -278,4 +292,10 @@ void
 Processor::set_pre_fader (bool p)
 {
 	_pre_fader = p;
+}
+
+void
+Processor::set_ui (void* p)
+{
+        _ui_pointer = p;
 }

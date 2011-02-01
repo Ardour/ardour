@@ -1197,6 +1197,17 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 		w);
 	
 	wp->marked = true;
+
+        /* if the processor already has an existing UI, 
+           note that so that we don't recreate it
+        */
+        
+        void* existing_ui = p->get_ui ();
+
+        if (existing_ui) {
+                wp->set (static_cast<Gtk::Window*>(existing_ui));
+        }
+
 	_processor_window_proxies.push_back (wp);
 	ARDOUR_UI::instance()->add_window_proxy (wp);
 }
@@ -2234,6 +2245,9 @@ void
 ProcessorBox::set_processor_ui (boost::shared_ptr<Processor> p, Gtk::Window* w)
 {
  	list<ProcessorWindowProxy*>::iterator i = _processor_window_proxies.begin ();
+        
+        p->set_ui (w);
+        
 	while (i != _processor_window_proxies.end()) {
 		boost::shared_ptr<Processor> t = (*i)->processor().lock ();
 		if (t && t == p) {
