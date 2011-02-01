@@ -312,18 +312,36 @@ private:
 	{
 		/* work out where it was dropped */
 		std::pair<T*, double> const drop = get_child_at_position (y);
+
+		
 		
 		if (_drag_source == this) {
 
 			/* dropped from ourselves onto ourselves */
-			
+
 			T* child = *((T **) selection_data.get_data());
-			
-			/* reorder child widgets accordingly */
+
 			if (drop.first == 0) {
 				_internal_vbox.reorder_child (child->widget(), -1);
 			} else {
-				_internal_vbox.reorder_child (child->widget(), int (drop.second));
+
+				/* where in the list this child should be dropped */
+				int target = drop.second + 0.5;
+				
+				/* find out whether the child was `picked up' from before the drop position */
+				int n = 0;
+				typename std::list<T*>::const_iterator i = _children.begin ();
+				while (i != _children.end() && *i != child && n < target) {
+					++i;
+					++n;
+				}
+				
+				/* if so, adjust the drop position to account for this */
+				if (n < target) {
+					--target;
+				}
+				
+				_internal_vbox.reorder_child (child->widget(), target);
 			}
 			
 		} else {
