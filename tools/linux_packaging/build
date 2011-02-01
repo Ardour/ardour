@@ -346,7 +346,7 @@ if [ -z ${GDKPIXBUFLIB} ]; then
 
 	num=0
 	for name in $versionDir ; do
-		let "num += 1"
+	    num=$(($num + 1))
 	done
 
 	if [ $num -eq 1 ]; then
@@ -432,7 +432,7 @@ while [ true ] ; do
 			fi
 		done
 		depCheckedList[$checkIdx]=$file
-		let "checkIdx += 1"
+		checkIdx=$(($checkIdx + 1))
 		
 		# do not include libjack
 		deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | awk '{print $3}'`
