@@ -272,7 +272,7 @@ versionDir=`ls ${GTKROOT}/gtk-2.0/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
 
 num=0
 for name in $versionDir ; do
-	let "num += 1"
+    $num=$(($num + 1))
 done
 
 if [ $num -eq 1 ]; then
@@ -306,7 +306,7 @@ versionDir=`ls ${PANGOROOT}/pango/ | grep "[0-9]*\.[0-9]*\.[0-9]*"`
 
 num=0
 for name in $versionDir ; do
-	let "num += 1"
+	$num=$(($num + 1))
 done
 
 if [ $num -eq 1 ]; then
