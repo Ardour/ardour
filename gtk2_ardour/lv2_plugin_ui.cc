@@ -23,6 +23,7 @@
 
 #include "ardour_ui.h"
 #include "lv2_plugin_ui.h"
+#include "gui_thread.h"
 
 using namespace Gtk;
 using namespace ARDOUR;
