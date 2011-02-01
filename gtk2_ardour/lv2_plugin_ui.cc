@@ -66,6 +66,8 @@ LV2PluginUI::parameter_update (uint32_t port_index, float val)
 		return;
 	}
 
+        ENSURE_GUI_THREAD(bind (mem_fun (*this, &LV2PluginUI::parameter_update), port_index, val));
+
 	const LV2UI_Descriptor* ui_desc = slv2_ui_instance_get_descriptor(_inst);
 	LV2UI_Handle ui_handle = slv2_ui_instance_get_handle(_inst);
 	if (ui_desc->port_event) {
