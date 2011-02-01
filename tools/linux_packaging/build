@@ -518,7 +518,8 @@ fi
 # share stuff
 
 cp -R ../../gtk2_ardour/splash.png $Shared
-cp ../../templates/*.template $Shared/templates/
+# currently no templates
+#cp ../../templates/*.template $Shared/templates/
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type d`; do
