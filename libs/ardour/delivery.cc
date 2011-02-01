@@ -24,6 +24,7 @@
 
 #include "ardour/midi_buffer.h"
 
+#include "ardour/debug.h"
 #include "ardour/delivery.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/amp.h"
@@ -97,6 +98,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 
 Delivery::~Delivery()
 {
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("delivery %1 destructor\n", _name));        
 	delete _output_buffers;
 }
 
@@ -307,8 +309,6 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 		if (bufs.count().n_midi() > 0 && ports.count().n_midi () > 0) {
 			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, _output_offset);
 		}
-                
-                        
 	}
 
   out:
@@ -382,8 +382,10 @@ Delivery::reset_panner ()
 
 			_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, ntargets));
 
+                        if (_role == Main) {
+                                _panshell->pannable()->set_panner (_panshell->panner());
+                        }
 		}
-
 
 	} else {
 		panner_legal_c.disconnect ();
