@@ -239,6 +239,11 @@ fixup_bundle_environment (int, char* [])
 
 	setenv ("GTK_PATH", path.c_str(), 1);
 
+        /* unset GTK_RC_FILES so that we only load the RC files that we define
+         */
+
+        unsetenv ("GTK_RC_FILES");
+
 	if (!ARDOUR::translations_are_disabled ()) {
 
 		path = dir_path;
@@ -431,6 +436,11 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	path += "/lib/clearlooks";
 
 	setenv ("GTK_PATH", path.c_str(), 1);
+
+        /* unset GTK_RC_FILES so that we only load the RC files that we define
+         */
+
+        unsetenv ("GTK_RC_FILES");
 
 	if (!ARDOUR::translations_are_disabled ()) {
                 path = dir_path;
