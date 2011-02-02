@@ -3,14 +3,22 @@
 # Make sure we have a terminal for the user to see and then run
 # the real install script.
 
-if [ -z $WINDOWID ]; then
+# Some systems don't correctly set the PWD when a script is double-clicked,
+# so go ahead and figure out our path and make sure we are in that directory.
+
+PKG_PATH=$(dirname $(readlink -f $0))
+pushd ${PKG_PATH}
+
+if [ -z "$TERM" ] || [ "$TERM" == "dumb" ]; then
 	if which xterm > /dev/null; then
-		exec xterm -e ./stage2.run
+		exec xterm -e ${PKG_PATH}/stage2.run
 	elif which gnome-terminal > /dev/null; then
-		exec gnome-terminal -e ./stage2.run
+		exec gnome-terminal -e ${PKG_PATH}/stage2.run
 	elif which konsole > /dev/null; then
-		exec konsole -e ./stage2.run
+		exec konsole -e ${PKG_PATH}/stage2.run
 	fi
 else
-	./stage2.run
+	${PKG_PATH}/stage2.run
 fi
+
+popd
