@@ -374,18 +374,18 @@ gdk-pixbuf-query-loaders | sed "s?$GDKPIXBUFLIB/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.
 # We sort of rely on clearlooks, so include a version
 # this one is special - we will set GTK_PATH to $Libraries/clearlooks
 
-#if [ ! -e ${GTKLIB}/engines/libclearlooks.so ]; then
-#	echo ""
-#	echo "!!! ERROR !!! - not able to locate libclearlooks.so"
-#	echo ""
-#	echo "Packager with exit"
-#	exit 1
-#fi
+if [ ! -e ${GTKLIB}/engines/libclearlooks.so ]; then
+	echo ""
+	echo "!!! ERROR !!! - not able to locate libclearlooks.so"
+	echo ""
+	echo "Packager with exit"
+	exit 1
+fi
 
-#echo "Copying clearlooks ..."
-#cp ${GTKLIB}/engines/libclearlooks.so $Libraries
-#mkdir -p $Libraries/clearlooks/engines
-#(cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks* libclearlooks.so )
+echo "Copying clearlooks ..."
+cp ${GTKLIB}/engines/libclearlooks.so $Libraries
+mkdir -p $Libraries/clearlooks/engines
+(cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks* libclearlooks.so )
 
 # LADSPA
 if test x$WITH_LADSPA != x ; then
