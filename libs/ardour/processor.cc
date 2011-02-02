@@ -74,6 +74,7 @@ Processor::Processor(Session& session, const string& name)
 
 Processor::Processor (const Processor& other)
 	: SessionObject(other.session(), other.name())
+	, Evoral::ControlSet (other)
 	, Automatable (other.session())
 	, _pending_active(other._pending_active)
 	, _active(other._active)
