@@ -1358,8 +1358,6 @@ MixerStrip::build_route_ops_menu ()
 
 	MenuList& items = route_ops_menu->items();
 
-	items.push_back (CheckMenuElem (_("Mono"), sigc::mem_fun (*this, &MixerStrip::toggle_mono)));
-	_mono_menu_item = dynamic_cast<CheckMenuItem*> (&items.back ());
 	items.push_back (CheckMenuElem (_("Comments..."), sigc::mem_fun (*this, &MixerStrip::toggle_comment)));
 	_comment_menu_item = dynamic_cast<CheckMenuItem*> (&items.back ());
 	items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
@@ -1891,12 +1889,6 @@ MixerStrip::on_leave_notify_event (GdkEventCrossing* ev)
 	}
 
 	return false;
-}
-
-void
-MixerStrip::toggle_mono ()
-{
-	panners.set_mono (_mono_menu_item->get_active ());
 }
 
 PluginSelector*

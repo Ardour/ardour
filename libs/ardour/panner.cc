@@ -29,7 +29,6 @@ using namespace ARDOUR;
 
 Panner::Panner (boost::shared_ptr<Pannable> p)
 	: _pannable (p)
-        , _mono (0)
 {
 }
 
@@ -46,24 +45,11 @@ Panner::set_bypassed (bool yn)
 	}
 }
 
-void
-Panner::set_mono (bool yn)
-{
-	if (yn != _mono) {
-		_mono = yn;
-		StateChanged ();
-	}
-}
-
 int
 Panner::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 	XMLNodeConstIterator iter;
-
-	if ((prop = node.property (X_("mono")))) {
-		set_mono (string_is_affirmative (prop->value()));
-	}
 
 	if ((prop = node.property (X_("bypassed"))) != 0) {
 		set_bypassed (string_is_affirmative (prop->value()));
@@ -77,7 +63,6 @@ Panner::get_state ()
 {
         XMLNode* node = new XMLNode (X_("Panner"));
 
-	node->add_property (X_("mono"), (_mono ? "yes" : "no"));
 	node->add_property (X_("bypassed"), (bypassed() ? "yes" : "no"));
 
         return *node;
@@ -89,15 +74,7 @@ Panner::distribute (BufferSet& ibufs, BufferSet& obufs, gain_t gain_coeff, pfram
         uint32_t which = 0;
 
 	for (BufferSet::audio_iterator src = ibufs.audio_begin(); src != ibufs.audio_end(); ++src, ++which) {
-                if (_mono) {
-                        /* we're in mono mode, so just pan the input to all outputs equally (XXX should we scale?) */
-                        for (BufferSet::audio_iterator o = obufs.audio_begin(); o != obufs.audio_end(); ++o) {
-                                mix_buffers_with_gain ((*o).data(), (*src).data(), nframes, gain_coeff);
-                        }
-                } else {
-                        /* normal mode, call the `real' distribute method */
-                        distribute_one (*src, obufs, gain_coeff, nframes, which);
-                }
+		distribute_one (*src, obufs, gain_coeff, nframes, which);
         }
 }
 
@@ -108,15 +85,7 @@ Panner::distribute_automated (BufferSet& ibufs, BufferSet& obufs,
         uint32_t which = 0;
 
 	for (BufferSet::audio_iterator src = ibufs.audio_begin(); src != ibufs.audio_end(); ++src, ++which) {
-                if (_mono) {
-                        /* we're in mono mode, so just pan the input to all outputs equally (XXX should we scale?) */
-                        for (BufferSet::audio_iterator o = obufs.audio_begin(); o != obufs.audio_end(); ++o) {
-                                mix_buffers_with_gain ((*o).data(), (*src).data(), nframes, 1.0);
-                        }
-                } else {
-                        /* normal mode, call the `real' distribute method */
-                        distribute_one_automated (*src, obufs, start, end, nframes, buffers, which);
-                }
+		distribute_one_automated (*src, obufs, start, end, nframes, buffers, which);
         }
 }
 

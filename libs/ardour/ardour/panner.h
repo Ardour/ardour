@@ -83,9 +83,6 @@ class Panner : public PBD::Stateful, public PBD::ScopedConnectionList
 	virtual bool bypassed() const { return _bypassed; }
 	virtual void set_bypassed (bool yn);
 
-	virtual bool is_mono () const { return _mono; }
-	virtual void set_mono (bool);
-
 	void      set_automation_state (AutoState);
 	AutoState automation_state() const;
 	void      set_automation_style (AutoStyle);
@@ -128,8 +125,7 @@ class Panner : public PBD::Stateful, public PBD::ScopedConnectionList
 	 *  @param nframes Number of frames in the input.
          *
          *  Derived panners can choose to implement these if they need to gain more control over the panning algorithm.
-         *  the default is to (1) check if _mono is true, and if so, just deliver .. (2) otherwise, call
-         *  distribute_one() or distribute_one_automated() on each input buffer to deliver it to each output 
+         *  the default is to call distribute_one() or distribute_one_automated() on each input buffer to deliver it to each output 
          *  buffer.
          * 
          *  If a panner does not need to override this default behaviour, it can just implement
@@ -141,7 +137,7 @@ class Panner : public PBD::Stateful, public PBD::ScopedConnectionList
                                            pan_t** buffers);
 
 	PBD::Signal0<void> Changed;      /* for positional info */
-	PBD::Signal0<void> StateChanged; /* for mute, mono */
+	PBD::Signal0<void> StateChanged; /* for mute */
 
 	int set_state (const XMLNode&, int version);
 	virtual XMLNode& state (bool full_state) = 0;
@@ -162,7 +158,6 @@ class Panner : public PBD::Stateful, public PBD::ScopedConnectionList
 
   protected:
         boost::shared_ptr<Pannable> _pannable;
-        bool        _mono;
         bool        _bypassed;
 
 	XMLNode& get_state ();

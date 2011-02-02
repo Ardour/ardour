@@ -191,7 +191,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void comment_editor_done_editing ();
 	void setup_comment_editor ();
 	void toggle_comment ();
-	void toggle_mono ();
 
 	Gtk::Button   group_button;
 	Gtk::Label    group_label;
@@ -217,7 +216,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void diskstream_changed ();
 
 	Gtk::Menu *send_action_menu;
-	Gtk::CheckMenuItem* _mono_menu_item;
 	Gtk::CheckMenuItem* _comment_menu_item;
 	Gtk::MenuItem* rename_menu_item;
 	void build_send_action_menu ();

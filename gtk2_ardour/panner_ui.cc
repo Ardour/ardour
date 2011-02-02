@@ -424,7 +424,7 @@ PannerUI::effective_pan_display ()
 void
 PannerUI::update_pan_sensitive ()
 {
-	bool const sensitive = !(_panner->is_mono()) && !(_panner->pannable()->automation_state() & Play);
+	bool const sensitive = !(_panner->pannable()->automation_state() & Play);
 
 #ifdef PANNER_HACKS
         pan_vbox.set_sensitive (sensitive);
@@ -582,13 +582,6 @@ PannerUI::_astyle_string (AutoStyle style, bool shrt)
 
 		return (shrt ? _("Abs") : _("Abs"));
 	}
-}
-
-void
-PannerUI::set_mono (bool yn)
-{
-	_panner->set_mono (yn);
-	update_pan_sensitive ();
 }
 
 void

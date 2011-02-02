@@ -79,7 +79,6 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void set_meter_strip_name (std::string name);
 	boost::shared_ptr<PBD::Controllable> get_controllable();
 
-	void set_mono (bool);
 	void on_size_allocate (Gtk::Allocation &);
         
 	static void setup_slider_pix ();
