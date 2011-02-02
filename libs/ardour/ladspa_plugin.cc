@@ -740,9 +740,7 @@ LadspaPlugin::load_preset (PresetRecord r)
 
 	if (defs) {
 		for (uint32_t i = 0; i < (uint32_t) defs->count; ++i) {
-			// The defs->items[i].pid < defs->count check is to work around
-			// a bug in liblrdf that saves invalid values into the presets file.
-			if (((uint32_t) defs->items[i].pid < (uint32_t) defs->count) && parameter_is_input (defs->items[i].pid)) {
+			if (parameter_is_input (defs->items[i].pid)) {
 				set_parameter(defs->items[i].pid, defs->items[i].value);
 			}
 		}
@@ -857,8 +855,14 @@ LadspaPlugin::write_preset_file (string envvar)
 string
 LadspaPlugin::do_save_preset (string name)
 {
-	lrdf_portvalue portvalues[parameter_count()];
-	lrdf_defaults defaults;
+	/* make a vector of pids that are input parameters */
+	vector<int> input_parameter_pids;
+	for (uint32_t i = 0; i < parameter_count(); ++i) {
+		if (parameter_is_input (i)) {
+			input_parameter_pids.push_back (i);
+		}
+	}
+	
 	std::string unique (unique_id());
 
 	if (!isdigit (unique[0])) {
@@ -867,14 +871,14 @@ LadspaPlugin::do_save_preset (string name)
 
 	uint32_t const id = atol (unique.c_str());
 
-	defaults.count = parameter_count();
+	lrdf_defaults defaults;
+	defaults.count = input_parameter_pids.size ();
+	lrdf_portvalue portvalues[input_parameter_pids.size()];
 	defaults.items = portvalues;
 
-	for (uint32_t i = 0; i < parameter_count(); ++i) {
-		if (parameter_is_input (i)) {
-			portvalues[i].pid = i;
-			portvalues[i].value = get_parameter(i);
-		}
+	for (vector<int>::size_type i = 0; i < input_parameter_pids.size(); ++i) {
+		portvalues[i].pid = input_parameter_pids[i];
+		portvalues[i].value = get_parameter (input_parameter_pids[i]);
 	}
 
 	string const envvar = preset_envvar ();
