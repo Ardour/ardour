@@ -256,7 +256,7 @@ then
 			echo "Running uninstaller $i"
 			
 			${i}
-			sudo rm -rf ${i}
+			sudo rm -f ${i}
 		fi
 	done
 fi
@@ -282,7 +282,7 @@ echo "Exec=${PGM_EXEC_PATH}" >> /tmp/${MENU_FILE}
 echo "Name=${PGM_NAME}-${PGM_VERSION}" >> /tmp/${MENU_FILE}
 echo "Icon=${ICON_NAME}" >> /tmp/${MENU_FILE}
 echo "Comment=Digital Audio Workstation" >> /tmp/${MENU_FILE}
-echo "Categories=AudioVideo;Audio;Recorder;" >> /tmp/${MENU_FILE}
+echo "Categories=AudioVideo;AudioEditing;Audio;Recorder;" >> /tmp/${MENU_FILE}
 
 chmod ugo+rx /tmp/${MENU_FILE}
 sudo mv /tmp/${MENU_FILE} ${MENU_FILE_PATH}/.
@@ -302,7 +302,8 @@ then
 	fi
 
 	sudo xdg-desktop-menu install ${MENU_FILE_PATH}/${MENU_FILE}
-
+	sudo xdg-desktop-menu forceupdate --mode system			# Some systems need an extra kick
+	
 	echo ""
 	echo "Creating a desktop link for ${PGM_NAME}"
 	cp ${MENU_FILE_PATH}/${MENU_FILE} ~/Desktop/${DESKTOP_LINK_FILE}

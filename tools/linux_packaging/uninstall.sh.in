@@ -76,6 +76,7 @@ then
 
 	# delete the old package
 	sudo rm -rf ${PGM_PATH}
+	sudo rm -f $0
 else
 	echo ""
 	echo "!!! FAILURE !!! - install path ${PGM_PATH} does not exist."
