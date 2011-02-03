@@ -247,6 +247,7 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
 	autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
 	autowaf.check_pkg(conf, 'flac', uselib_store='FLAC', atleast_version='1.2.1')
+	autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.21.0')
 
 	# we don't try to detect this, since its part of our source tree
 
