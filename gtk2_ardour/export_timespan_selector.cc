@@ -70,7 +70,7 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 	iter = time_format_list->append();
 	row = *iter;
 	row[time_format_cols.format] = ExportProfileManager::Timecode;
-	row[time_format_cols.label] = X_("Timecode");
+	row[time_format_cols.label] = _("Timecode");
 
 	iter = time_format_list->append();
 	row = *iter;
