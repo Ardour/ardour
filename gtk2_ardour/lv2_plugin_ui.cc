@@ -18,8 +18,12 @@
 
 */
 
+#include <pbd/pthread_utils.h>
+
 #include <ardour/insert.h>
 #include <ardour/lv2_plugin.h>
+
+#include <gtkmm2ext/gtk_ui.h>
 
 #include "ardour_ui.h"
 #include "lv2_plugin_ui.h"
@@ -36,10 +40,18 @@ LV2PluginUI::lv2_ui_write(LV2UI_Controller controller,
              uint32_t         format,
              const void*      buffer)
 {
-	//cout << "lv2_ui_write" << endl;
 	LV2PluginUI* me = (LV2PluginUI*)controller;
+
+	cout << "lv2_ui_write, thread registered ? " << me->_thread_registered << endl;
+
+        if (!me->_thread_registered && !Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {
+                cerr << "Registering LV2 external thread " << pthread_self() << endl;
+                PBD::notify_gui_about_thread_creation (pthread_self(), me->_lv2->name());
+                me->_thread_registered = true;
+        }
+
 	if (*(float*)buffer != me->_values[port_index]) {
-		//cout << "set_parameter " << port_index << ":"  << *(float*)buffer << endl;
+		cout << "set_parameter " << port_index << ":"  << *(float*)buffer << endl;
 		me->_lv2->set_parameter(port_index, *(float*)buffer);
   }
 }
@@ -123,6 +135,7 @@ LV2PluginUI::output_update()
 LV2PluginUI::LV2PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<LV2Plugin> lv2p)
 	: PlugUIBase (pi)
 	, _lv2(lv2p)
+        , _thread_registered (false)
 	, _inst(NULL)
 	, _values(NULL)
 	, _external_ui_ptr(NULL)

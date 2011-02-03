@@ -58,11 +58,11 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	boost::shared_ptr<ARDOUR::LV2Plugin> _lv2;
 	std::vector<int> _output_ports;
 	sigc::connection _screen_update_connection;
-	
+	bool             _thread_registered;
 	Gtk::Widget*   _gui_widget;
 	SLV2UIInstance _inst;
 	float*         _values;
-
+        
 	struct lv2_external_ui_host _external_ui_host;
 	LV2_Feature _external_ui_feature;
 	struct lv2_external_ui* _external_ui_ptr;
