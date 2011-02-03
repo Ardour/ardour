@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <cstdlib>
 
 #include <pbd/abstract_ui.h>
 #include <pbd/pthread_utils.h>
@@ -30,10 +31,24 @@ AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string name)
 template <typename RequestObject> void
 AbstractUI<RequestObject>::register_thread_with_request_count (pthread_t thread_id, string thread_name, uint32_t num_requests)
 {
+	RequestBuffer* rbuf = static_cast<RequestBuffer*>(pthread_getspecific (thread_request_buffer_key));
+
+        /* we require that the thread being registered is the caller */
+
+        if (thread_id != pthread_self()) {
+                cerr << "thread attempts to register some other thread with the UI named " << name() << endl;
+                abort ();
+        }
+
+        if (rbuf) {
+                /* this thread is already registered with this AbstractUI */
+                return;
+        }
+
 	RequestBuffer* b = new RequestBuffer (num_requests);
 
 	{
-        Glib::Mutex::Lock lm (request_buffer_map_lock);
+                Glib::Mutex::Lock lm (request_buffer_map_lock);
 		request_buffers[thread_id] = b;
 	}
 

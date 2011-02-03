@@ -42,16 +42,22 @@ LV2PluginUI::lv2_ui_write(LV2UI_Controller controller,
 {
 	LV2PluginUI* me = (LV2PluginUI*)controller;
 
-	cout << "lv2_ui_write, thread registered ? " << me->_thread_registered << endl;
+	cout << "lv2_ui_write, caller = " << pthread_self() << " current registered UI thread " << me->_current_ui_thread << endl;
 
-        if (!me->_thread_registered && !Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {
-                cerr << "Registering LV2 external thread " << pthread_self() << endl;
-                PBD::notify_gui_about_thread_creation (pthread_self(), me->_lv2->name());
-                me->_thread_registered = true;
+        if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {
+                if (pthread_self() != me->_current_ui_thread) {
+                        if (me->_current_ui_thread != (pthread_t) 0) {
+                                cerr << "Unregistering LV2 external thread " << me->_current_ui_thread << endl;
+                                PBD::ThreadLeaving (me->_current_ui_thread);
+                        }
+                        cerr << "Registering new LV2 UI external thread " << pthread_self() << endl;
+                        PBD::notify_gui_about_thread_creation (pthread_self(), me->_lv2->name());
+                        me->_current_ui_thread = pthread_self();
+                }
         }
 
 	if (*(float*)buffer != me->_values[port_index]) {
-		cout << "set_parameter " << port_index << ":"  << *(float*)buffer << endl;
+		// cout << "set_parameter " << port_index << ":"  << *(float*)buffer << endl;
 		me->_lv2->set_parameter(port_index, *(float*)buffer);
   }
 }
@@ -135,7 +141,7 @@ LV2PluginUI::output_update()
 LV2PluginUI::LV2PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<LV2Plugin> lv2p)
 	: PlugUIBase (pi)
 	, _lv2(lv2p)
-        , _thread_registered (false)
+        , _current_ui_thread ((pthread_t) 0)
 	, _inst(NULL)
 	, _values(NULL)
 	, _external_ui_ptr(NULL)
