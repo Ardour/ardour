@@ -29,6 +29,7 @@ using namespace ARDOUR;
 
 Panner::Panner (boost::shared_ptr<Pannable> p)
 	: _pannable (p)
+	, _bypassed (false)
 {
 }
 
