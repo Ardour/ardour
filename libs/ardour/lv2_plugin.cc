@@ -402,12 +402,13 @@ LV2Plugin::load_preset (PresetRecord r)
 {
 	Plugin::load_preset (r);
 
-#if 0
-	// TODO: SLV2 needs blank nodes in the API for this to be possible...
-	SLV2Value  lv2_port   = slv2_value_new_uri(_world.world, NS_LV2 "port");
-	SLV2Value  lv2_symbol = slv2_value_new_uri(_world.world, NS_LV2 "symbol");
-	SLV2Value  pset_value = slv2_value_new_uri(_world.world, NS_PSET "value");
-	SLV2Value  preset     = slv2_value_new_uri(_world.world, r.uri.c_str());
+#ifdef HAVE_NEW_SLV2
+	// New (>= 0.7.0) slv2 no longer supports SPARQL, but exposes blank nodes
+	// so querying ports is possible with the simple API
+	SLV2Value lv2_port   = slv2_value_new_uri(_world.world, NS_LV2 "port");
+	SLV2Value lv2_symbol = slv2_value_new_uri(_world.world, NS_LV2 "symbol");
+	SLV2Value pset_value = slv2_value_new_uri(_world.world, NS_PSET "value");
+	SLV2Value preset     = slv2_value_new_uri(_world.world, r.uri.c_str());
 
 	SLV2Values ports = slv2_plugin_get_value_for_subject(_plugin, preset, lv2_port);
 	for (unsigned i = 0; i < slv2_values_size(ports); ++i) {
@@ -425,8 +426,7 @@ LV2Plugin::load_preset (PresetRecord r)
 	slv2_value_free(pset_value);
 	slv2_value_free(lv2_symbol);
 	slv2_value_free(lv2_port);
-#endif
-	
+#else
 	const string query = string(
 			"PREFIX lv2p: <http://lv2plug.in/ns/dev/presets#>\n"
 			"PREFIX dc:  <http://dublincore.org/documents/dcmi-namespace/>\n"
@@ -442,6 +442,7 @@ LV2Plugin::load_preset (PresetRecord r)
 		}
 	}
 	slv2_results_free(values);
+#endif
 	return true;
 }
 

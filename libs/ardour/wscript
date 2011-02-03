@@ -242,6 +242,7 @@ def configure(conf):
 	autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE', atleast_version='0.1.0')
 	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
 	autowaf.check_pkg(conf, 'slv2', uselib_store='SLV2', atleast_version='0.6.4', mandatory=False)
+	autowaf.check_pkg(conf, 'slv2', uselib_store='NEW_SLV2', atleast_version='0.7.0', mandatory=False)
 	autowaf.check_pkg(conf, 'rasqal', uselib_store='RASQAL', atleast_version='0.9.14', mandatory=False)
 	autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH', mandatory=False)
 	autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
