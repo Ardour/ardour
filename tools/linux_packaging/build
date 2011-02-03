@@ -195,15 +195,17 @@ if test x$STRIP != x ; then
 fi
 
 # copy locale files
+# note that at present(feb 2011), the .mo files end up in the source tree which is
+# not really as it should be.
 if test x$WITH_NLS != x ; then
 	echo "NLS support ..."
 	echo "I hope you remembered to run scons msgupdate!"
 	LINGUAS=
-	files=`find $BUILD_ROOT/gtk2_ardour/ -name "*.mo"`
+	files=`find ../../gtk2_ardour/ -name "*.mo"`
 
 	if [ -z "$files" ]; then
 		echo ""
-		echo "!!!! WARNING !!!! - Did not find any .mo files in $BUILD_ROOT/gtk2_ardour"
+		echo "!!!! WARNING !!!! - Did not find any .mo files in ../../gtk2_ardour"
 		echo ""
 	fi
  
