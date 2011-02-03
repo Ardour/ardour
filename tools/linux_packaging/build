@@ -491,9 +491,11 @@ done
 echo
 
 # strip libraries
-echo Stripping libraries
-find $APPLIB/ -name "*.so*" | xargs strip
-find $APPLIB/ -name "*.so*" | xargs chmod a+rx
+if test x$STRIP != x ; then
+    echo Stripping libraries
+    find $APPLIB/ -name "*.so*" | xargs strip
+    find $APPLIB/ -name "*.so*" | xargs chmod a+rx
+fi
 
 echo "Copying other stuff to $APPDIR  ..."
 
