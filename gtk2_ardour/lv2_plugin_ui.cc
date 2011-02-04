@@ -43,7 +43,6 @@ LV2PluginUI::lv2_ui_write(LV2UI_Controller controller,
 	LV2PluginUI* me = (LV2PluginUI*)controller;
 
         if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {
-                cerr << "Registering new LV2 UI external thread " << pthread_self() << endl;
                 PBD::notify_gui_about_thread_creation (pthread_self(), me->_lv2->name());
         }
 

@@ -9,11 +9,18 @@
 
 using namespace std;
 
+template<typename RequestBuffer> void 
+cleanup_request_buffer (void* ptr)
+{
+        RequestBuffer* rb = (RequestBuffer*) ptr;
+        delete rb;
+}
+
 template <typename RequestObject>
 AbstractUI<RequestObject>::AbstractUI (string name, bool with_signal_pipes)
 	: BaseUI (name, with_signal_pipes)
 {
-	if (pthread_key_create (&thread_request_buffer_key, 0)) {
+	if (pthread_key_create (&thread_request_buffer_key, cleanup_request_buffer<RequestBuffer>)) {
 		cerr << _("cannot create thread request buffer key") << endl;
 		throw failed_constructor();
 	}
@@ -46,7 +53,7 @@ AbstractUI<RequestObject>::register_thread_with_request_count (pthread_t thread_
         }
 
 	RequestBuffer* b = new RequestBuffer (num_requests);
-
+        
 	{
                 Glib::Mutex::Lock lm (request_buffer_map_lock);
 		request_buffers[thread_id] = b;
