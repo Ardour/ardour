@@ -58,12 +58,21 @@ class AbstractUI : public BaseUI
 	void register_thread_with_request_count (pthread_t, std::string, uint32_t num_requests);
 	void unregister_thread (pthread_t);
 
+        Glib::Mutex request_buffer_map_lock;
+
   protected:
-	typedef RingBufferNPT<RequestObject> RequestBuffer;
+        struct RequestBuffer : public RingBufferNPT<RequestObject> {
+                bool dead;
+                AbstractUI<RequestObject>& ui;
+                RequestBuffer (uint32_t size, AbstractUI<RequestObject>& uir) 
+                        : RingBufferNPT<RequestObject> (size)
+                        , dead (false) 
+                        , ui (uir) {}
+        };
+
 	typedef typename RequestBuffer::rw_vector RequestBufferVector;
 	typedef typename std::map<pthread_t,RequestBuffer*>::iterator RequestBufferMapIterator;
 
-    Glib::Mutex request_buffer_map_lock;
 	typedef std::map<pthread_t,RequestBuffer*> RequestBufferMap;
 	RequestBufferMap request_buffers;
 	pthread_key_t thread_request_buffer_key;

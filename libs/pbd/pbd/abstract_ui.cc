@@ -13,7 +13,12 @@ template<typename RequestBuffer> void
 cleanup_request_buffer (void* ptr)
 {
         RequestBuffer* rb = (RequestBuffer*) ptr;
-        delete rb;
+
+        {
+                cerr << "Thread dies with a per-thread buffer for ui " << rb->ui.name() << endl;
+                Glib::Mutex::Lock lm (rb->ui.request_buffer_map_lock);
+                rb->dead = true;
+        }
 }
 
 template <typename RequestObject>
@@ -52,7 +57,7 @@ AbstractUI<RequestObject>::register_thread_with_request_count (pthread_t thread_
                 return;
         }
 
-	RequestBuffer* b = new RequestBuffer (num_requests);
+	RequestBuffer* b = new RequestBuffer (num_requests, *this);
         
 	{
                 Glib::Mutex::Lock lm (request_buffer_map_lock);
@@ -115,33 +120,43 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 	request_buffer_map_lock.lock ();
 
-	for (i = request_buffers.begin(); i != request_buffers.end(); ++i) {
+	for (i = request_buffers.begin(); i != request_buffers.end(); ) {
 
 		RequestBufferVector vec;
 
-		while (true) {
-
-			/* we must process requests 1 by 1 because
-			   the request may run a recursive main
-			   event loop that will itself call
-			   handle_ui_requests. when we return
-			   from the request handler, we cannot
-			   expect that the state of queued requests
-			   is even remotely consistent with
-			   the condition before we called it.
-			*/
-
-			i->second->get_read_vector (&vec);
-
-			if (vec.len[0] == 0) {
-				break;
-			} else {
-				request_buffer_map_lock.unlock ();
-				do_request (vec.buf[0]);
-				request_buffer_map_lock.lock ();
-				i->second->increment_read_ptr (1);
-			} 
-		}
+                if ((*i).second->dead) {
+                        cerr << "Seen a dead request buffer - cleaning it up ..\n";
+                        delete (*i).second;
+                        RequestBufferMapIterator tmp = i;
+                        ++tmp;
+                        request_buffers.erase (i);
+                        i = tmp;
+                } else {
+                        while (true) {
+                                
+                                /* we must process requests 1 by 1 because
+                                   the request may run a recursive main
+                                   event loop that will itself call
+                                   handle_ui_requests. when we return
+                                   from the request handler, we cannot
+                                   expect that the state of queued requests
+                                   is even remotely consistent with
+                                   the condition before we called it.
+                                */
+                                
+                                i->second->get_read_vector (&vec);
+                                
+                                if (vec.len[0] == 0) {
+                                        break;
+                                } else {
+                                        request_buffer_map_lock.unlock ();
+                                        do_request (vec.buf[0]);
+                                        request_buffer_map_lock.lock ();
+                                        i->second->increment_read_ptr (1);
+                                } 
+                        }
+                        ++i;
+                }
 	}
 
 	request_buffer_map_lock.unlock ();
