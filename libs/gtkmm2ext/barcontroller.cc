@@ -146,7 +146,6 @@ BarController::entry_output ()
 	
 	stringstream stream;
 	string str;
-	size_t found;
 
 	char buf[128];
 
