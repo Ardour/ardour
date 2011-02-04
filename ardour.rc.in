@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Ardour>
-  <MIDI-port tag="%MIDITAG%" device="ardour" type="%MIDITYPE%" mode="duplex"/>
-  <MIDI-port tag="control" device="ardour" type="%MIDITYPE%" mode="duplex"/>
-  <MIDI-port tag="mcu" device="ardour" type="%MIDITYPE%" mode="duplex"/>
+  <MIDI-port tag="%MIDITAG%" device="%MIDI_DEVICE_NAME%" type="%MIDITYPE%" mode="duplex"/>
+  <MIDI-port tag="control" device="%MIDI_DEVICE_NAME%" type="%MIDITYPE%" mode="duplex"/>
+  <MIDI-port tag="mcu" device="%MIDI_DEVICE_NAME%" type="%MIDITYPE%" mode="duplex"/>
   <Config>
     <Option name="minimum-disk-io-bytes" value="262144"/>
     <Option name="track-buffer-seconds" value="5.000000"/>

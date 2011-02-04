@@ -1035,6 +1035,9 @@ else:
     print "It appears you don't have the required MIDI libraries installed. For Linux this means you are missing the development package for ALSA libraries."
     sys.exit (1)
 
+pname = env['PROGRAM_NAME']
+subst_dict['%MIDI_DEVICE_NAME%'] = pname.lower()
+
 env = conf.Finish()
 
 if env['GTKOSX']:
