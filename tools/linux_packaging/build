@@ -43,7 +43,7 @@ while [ $# -gt 0 ] ; do
 		SAE=1 ; 
 		INTERNAL_JACK=1; 
 		WITH_LADSPA=1; 
-		STRIP= ; 
+		STRIP=1; 
 		APPNAME=Ardour ;
 		shift ;;
 	--mixbus)
@@ -52,7 +52,7 @@ while [ $# -gt 0 ] ; do
 		SAE= ; 
 		INTERNAL_JACK=; 
 		WITH_LADSPA=; 
-		STRIP= ; 
+		STRIP=1; 
 		APPNAME=Mixbus ;
 		VENDOR=Harrison ;
 		shift ;;
@@ -61,7 +61,7 @@ while [ $# -gt 0 ] ; do
 		SAE= ; 
 		INTERNAL_JACK=; 
 		WITH_LADSPA=; 
-		STRIP= ; 
+		STRIP=1; 
 		APPNAME=Ardour ;
 		shift ;;
 	--allinone)
@@ -69,7 +69,7 @@ while [ $# -gt 0 ] ; do
 		WITH_NLS= ; 
 		INTERNAL_JACK=1; 
 		WITH_LADSPA=1; 
-		STRIP= ; 
+		STRIP=1; 
 		shift ;;
 	--test) SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
 
