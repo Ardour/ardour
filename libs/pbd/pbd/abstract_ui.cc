@@ -15,7 +15,6 @@ cleanup_request_buffer (void* ptr)
         RequestBuffer* rb = (RequestBuffer*) ptr;
 
         {
-                cerr << "Thread dies with a per-thread buffer for ui " << rb->ui.name() << endl;
                 Glib::Mutex::Lock lm (rb->ui.request_buffer_map_lock);
                 rb->dead = true;
         }
@@ -125,7 +124,6 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 		RequestBufferVector vec;
 
                 if ((*i).second->dead) {
-                        cerr << "Seen a dead request buffer - cleaning it up ..\n";
                         delete (*i).second;
                         RequestBufferMapIterator tmp = i;
                         ++tmp;
