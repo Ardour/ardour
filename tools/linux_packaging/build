@@ -43,7 +43,7 @@ while [ $# -gt 0 ] ; do
 		WITH_NLS=1 ; 
 		INTERNAL_JACK=; 
 		WITH_LADSPA=; 
-		STRIP= ; 
+		STRIP=1 ; 
 		APPNAME=Ardour ;
 		shift ;;
 	--allinone)
