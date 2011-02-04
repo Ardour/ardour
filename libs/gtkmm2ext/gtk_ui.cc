@@ -52,6 +52,7 @@ using std::map;
 pthread_t UI::gui_thread;
 UI       *UI::theGtkUI = 0;
 
+BaseUI::RequestType Gtkmm2ext::NullRequest = BaseUI::new_request_type();
 BaseUI::RequestType Gtkmm2ext::ErrorMessage = BaseUI::new_request_type();
 BaseUI::RequestType Gtkmm2ext::Quit = BaseUI::new_request_type();
 BaseUI::RequestType Gtkmm2ext::TouchDisplay = BaseUI::new_request_type();

@@ -51,6 +51,7 @@ namespace Gtkmm2ext {
 
 class TextViewer;
 
+extern BaseUI::RequestType NullRequest;
 extern BaseUI::RequestType ErrorMessage;
 extern BaseUI::RequestType Quit;
 extern BaseUI::RequestType CallSlot;
@@ -77,6 +78,10 @@ struct UIRequest : public BaseUI::BaseRequestObject {
     void *arg;
     const char *msg2;
     sigc::slot<void> slot;
+
+    UIRequest () {
+            type = NullRequest;
+    }
     
     ~UIRequest () { 
 	    if (type == ErrorMessage && msg) {
