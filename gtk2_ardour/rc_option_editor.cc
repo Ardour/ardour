@@ -782,8 +782,8 @@ RCOptionEditor::RCOptionEditor ()
                 procs->add (-1, _("all but one processor"));
                 procs->add (0, _("all available processors"));
                 
-                for (uint32_t i = 2; i < hwcpus; ++i) {
-                        procs->add (1, string_compose (_("%1 processors"), i));
+                for (uint32_t i = 1; i <= hwcpus; ++i) {
+                        procs->add (i, string_compose (_("%1 processors"), i));
                 }
                 
                 add_option (_("Misc"), procs);
