@@ -71,7 +71,7 @@ StepEntry::StepEntry (StepEditor& seditor)
 	, back_button (_("back"))
 	, channel_adjustment (1, 1, 16, 1, 4) 
 	, channel_spinner (channel_adjustment)
-        , octave_adjustment (4, 0, 10, 1, 4) // start in octave 4
+        , octave_adjustment (4, 1, 11, 1, 4) // start in octave 4
         , octave_spinner (octave_adjustment)
         , length_divisor_adjustment (1.0, 1.0, 128, 1.0, 4.0)
         , length_divisor_spinner (length_divisor_adjustment)
@@ -614,17 +614,17 @@ StepEntry::register_actions ()
 	myactions.register_action ("StepEditing", "inc-note-velocity", _("Increase Note Velocity"), sigc::mem_fun (*this, &StepEntry::inc_note_velocity));
 	myactions.register_action ("StepEditing", "dec-note-velocity", _("Decrease Note Velocity"), sigc::mem_fun (*this, &StepEntry::dec_note_velocity));
 
-	myactions.register_action ("StepEditing", "octave-1", _("Switch to the 1st octave"), sigc::mem_fun (*this, &StepEntry::octave_0));
-	myactions.register_action ("StepEditing", "octave-2", _("Switch to the 2nd octave"), sigc::mem_fun (*this, &StepEntry::octave_1));
-	myactions.register_action ("StepEditing", "octave-3", _("Switch to the 3rd octave"), sigc::mem_fun (*this, &StepEntry::octave_2));
-	myactions.register_action ("StepEditing", "octave-4", _("Switch to the 4th octave"), sigc::mem_fun (*this, &StepEntry::octave_3));
-	myactions.register_action ("StepEditing", "octave-5", _("Switch to the 5th octave"), sigc::mem_fun (*this, &StepEntry::octave_4));
-	myactions.register_action ("StepEditing", "octave-6", _("Switch to the 6th octave"), sigc::mem_fun (*this, &StepEntry::octave_5));
-	myactions.register_action ("StepEditing", "octave-7", _("Switch to the 7th octave"), sigc::mem_fun (*this, &StepEntry::octave_6));
-	myactions.register_action ("StepEditing", "octave-8", _("Switch to the 8th octave"), sigc::mem_fun (*this, &StepEntry::octave_7));
-	myactions.register_action ("StepEditing", "octave-9", _("Switch to the 9th octave"), sigc::mem_fun (*this, &StepEntry::octave_8));
-	myactions.register_action ("StepEditing", "octave-10", _("Switch to the 10th octave"), sigc::mem_fun (*this, &StepEntry::octave_9));
-	myactions.register_action ("StepEditing", "octave-11", _("Switch to the 11th octave"), sigc::mem_fun (*this, &StepEntry::octave_10));
+	myactions.register_action ("StepEditing", "octave-1", _("Switch to the 1st octave"), sigc::mem_fun (*this, &StepEntry::octave_1));
+	myactions.register_action ("StepEditing", "octave-2", _("Switch to the 2nd octave"), sigc::mem_fun (*this, &StepEntry::octave_2));
+	myactions.register_action ("StepEditing", "octave-3", _("Switch to the 3rd octave"), sigc::mem_fun (*this, &StepEntry::octave_3));
+	myactions.register_action ("StepEditing", "octave-4", _("Switch to the 4th octave"), sigc::mem_fun (*this, &StepEntry::octave_4));
+	myactions.register_action ("StepEditing", "octave-5", _("Switch to the 5th octave"), sigc::mem_fun (*this, &StepEntry::octave_5));
+	myactions.register_action ("StepEditing", "octave-6", _("Switch to the 6th octave"), sigc::mem_fun (*this, &StepEntry::octave_6));
+	myactions.register_action ("StepEditing", "octave-7", _("Switch to the 7th octave"), sigc::mem_fun (*this, &StepEntry::octave_7));
+	myactions.register_action ("StepEditing", "octave-8", _("Switch to the 8th octave"), sigc::mem_fun (*this, &StepEntry::octave_8));
+	myactions.register_action ("StepEditing", "octave-9", _("Switch to the 9th octave"), sigc::mem_fun (*this, &StepEntry::octave_9));
+	myactions.register_action ("StepEditing", "octave-10", _("Switch to the 10th octave"), sigc::mem_fun (*this, &StepEntry::octave_10));
+	myactions.register_action ("StepEditing", "octave-11", _("Switch to the 11th octave"), sigc::mem_fun (*this, &StepEntry::octave_11));
 
         RadioAction::Group note_length_group;
 
@@ -796,64 +796,64 @@ StepEntry::insert_note (uint8_t note)
 void
 StepEntry::insert_c ()
 {
-        insert_note (0 + (current_octave() * 12));
+        insert_note (0 + ((current_octave() - 1) * 12));
 }
 void
 StepEntry::insert_csharp ()
 {
-        insert_note (1 + (current_octave() * 12));
+        insert_note (1 + ((current_octave() - 1) * 12));
 }
 void
 StepEntry::insert_d ()
 {
-        insert_note (2 + (current_octave() * 12));
+        insert_note (2 + ((current_octave() - 1) * 12));
 }
 void
 StepEntry::insert_dsharp ()
 {
-        insert_note (3 + (current_octave() * 12));
+        insert_note (3 + ((current_octave() - 1) * 12));
 }
 void
 StepEntry::insert_e ()
 {
-        insert_note (4 + (current_octave() * 12));
+        insert_note (4 + ((current_octave() - 1) * 12));
 }
 void
 StepEntry::insert_f ()
 {
-        insert_note (5 + (current_octave() * 12));
+        insert_note (5 + ((current_octave() - 1) * 12));
 }
 void
 StepEntry::insert_fsharp ()
 {
-        insert_note (6 + (current_octave() * 12));
+        insert_note (6 + ((current_octave() - 1) * 12));
 }
 void
 StepEntry::insert_g ()
 {
-        insert_note (7 + (current_octave() * 12));
+        insert_note (7 + ((current_octave() - 1) * 12));
 }
 void
 StepEntry::insert_gsharp ()
 {
-        insert_note (8 + (current_octave() * 12));
+        insert_note (8 + ((current_octave() - 1) * 12));
 }
 
 void
 StepEntry::insert_a ()
 {
-        insert_note (9 + (current_octave() * 12));
+        insert_note (9 + ((current_octave() - 1) * 12));
 }
 
 void
 StepEntry::insert_asharp ()
 {
-        insert_note (10 + (current_octave() * 12));
+        insert_note (10 + ((current_octave() - 1) * 12));
 }
 void
 StepEntry::insert_b ()
 {
-        insert_note (11 + (current_octave() * 12));
+        insert_note (11 + ((current_octave() - 1) * 12));
 }
 
 void
