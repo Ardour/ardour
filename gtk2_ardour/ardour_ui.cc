@@ -2837,8 +2837,11 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	}
 
 	/* Put the playhead at 0 and scroll fully left */
-	new_session->instant_xml(X_("Editor"))->add_property (X_("playhead"), X_("0"));
-	new_session->instant_xml(X_("Editor"))->add_property (X_("left-frame"), X_("0"));
+	n = new_session->instant_xml (X_("Editor"));
+	if (n) {
+		n->add_property (X_("playhead"), X_("0"));
+		n->add_property (X_("left-frame"), X_("0"));
+	}
 
 	set_session (new_session);
 
