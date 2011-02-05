@@ -140,6 +140,7 @@ static const char* authors[] = {
 	N_("Jeremy Hall"),
 	N_("Audun Halland"),
 	N_("Steve Harris"),
+	N_("Melvin Ray Herr"),
 	N_("Carl Hetherington"),
 	N_("Rob Holland"),
 	N_("Robert Jordens"),
