@@ -1722,7 +1722,7 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, bool multi
 	}
 
 	if (_popup_region_menu_item == 0) {
-		_popup_region_menu_item = manage (new MenuItem (menu_item_name));
+		_popup_region_menu_item = new MenuItem (menu_item_name);
 		_popup_region_menu_item->set_submenu (*dynamic_cast<Menu*> (ActionManager::get_widget (X_("/PopupRegionMenu"))));
 		_popup_region_menu_item->show ();
 	} else {
