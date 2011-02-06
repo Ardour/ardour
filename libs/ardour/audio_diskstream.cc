@@ -1085,7 +1085,6 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 			zero_fill = total_space - file_frame;
 			total_space = file_frame;
-			file_frame = 0;
 
 		} else {
 
