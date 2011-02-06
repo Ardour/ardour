@@ -926,11 +926,11 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 		//cerr << "start is " << start << "  loopstart: " << loop_start << "  loopend: " << loop_end << endl;
 	}
 
+	if (reversed) {
+		start -= cnt;
+	}
+	
 	while (cnt) {
-
-		if (reversed) {
-			start -= cnt;
-		}
 
 		/* take any loop into account. we can't read past the end of the loop. */
 
