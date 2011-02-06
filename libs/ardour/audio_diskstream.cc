@@ -1167,6 +1167,8 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 		to_read = min (ts, len1);
 		to_read = min (to_read, disk_io_chunk_frames);
 
+		assert (to_read >= 0);
+
 		if (to_read) {
 
 			if (read (buf1, mixdown_buffer, gain_buffer, file_frame_tmp, to_read, chan, chan_n, reversed)) {
@@ -1201,7 +1203,8 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	}
 
 	file_frame = file_frame_tmp;
-
+	assert (file_frame >= 0);
+	
   out:
 
 	return ret;
