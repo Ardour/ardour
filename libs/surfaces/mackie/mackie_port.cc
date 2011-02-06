@@ -335,7 +335,7 @@ Control & MackiePort::lookup_control( MIDI::byte * bytes, size_t count )
 			{
 				MidiByteArray mba( count, bytes );
 				ostringstream os;
-				os << "control for fader" << bytes << " id " << midi_id << " is null";
+				os << "Control for fader" << bytes << " id " << midi_id << " is null";
 				throw MackieControlException( os.str() );
 			}
 			break;
@@ -348,7 +348,7 @@ Control & MackiePort::lookup_control( MIDI::byte * bytes, size_t count )
 			{
 				MidiByteArray mba( count, bytes );
 				ostringstream os;
-				os << "control for button " << bytes << " is null";
+				os << "Control for button " << mba << " is null";
 				throw MackieControlException( os.str() );
 			}
 			break;
@@ -360,7 +360,7 @@ Control & MackiePort::lookup_control( MIDI::byte * bytes, size_t count )
 			{
 				MidiByteArray mba( count, bytes );
 				ostringstream os;
-				os << "control for rotary " << mba << " is null";
+				os << "Control for rotary " << mba << " is null";
 				throw MackieControlException( os.str() );
 			}
 			break;
@@ -368,7 +368,7 @@ Control & MackiePort::lookup_control( MIDI::byte * bytes, size_t count )
 		default:
 			MidiByteArray mba( count, bytes );
 			ostringstream os;
-			os << "Cannot find control for " << bytes;
+			os << "Cannot find control for " << mba;
 			throw MackieControlException( os.str() );
 	}
 	return *control;
