@@ -159,9 +159,12 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	Gtk::Table button_table;
         Gtk::Table solo_led_table;
-        Gtk::HBox  solo_led_box;
+	Gtk::HBox  below_panner_box;
 	Gtk::Table middle_button_table;
 	Gtk::Table bottom_button_table;
+
+	Gtk::Label* _iso_label;
+	Gtk::Label* _safe_label;
 
 	Gtk::Button                  gain_unit_button;
 	Gtk::Label                   gain_unit_label;

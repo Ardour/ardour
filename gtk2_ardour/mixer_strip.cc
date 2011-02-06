@@ -83,7 +83,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
-	, button_table (4, 2)
+	, button_table (3, 1)
 	, solo_led_table (2, 2)
 	, middle_button_table (1, 2)
 	, bottom_button_table (1, 2)
@@ -108,7 +108,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, processor_box (sess, sigc::mem_fun(*this, &MixerStrip::plugin_selector), mx.selection(), this, in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
-	, button_table (3, 2)
+	, button_table (3, 1)
 	, middle_button_table (1, 2)
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
@@ -200,32 +200,34 @@ MixerStrip::init ()
         solo_safe_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_safe_button_release));
 	UI::instance()->set_tip (solo_safe_led, _("Lock Solo Status"), "");
 
-        Label* iso_label = manage (new Label (_("iso")));
-        Label* safe_label = manage (new Label (_("lock")));
+	_iso_label = manage (new Label (_("iso")));
+	_safe_label = manage (new Label (_("lock")));
         
-        iso_label->set_name (X_("SoloLEDLabel"));
-        safe_label->set_name (X_("SoloLEDLabel"));
+	_iso_label->set_name (X_("SoloLEDLabel"));
+	_safe_label->set_name (X_("SoloLEDLabel"));
 
-        iso_label->show ();
-        safe_label->show (); 
+	_iso_label->show ();
+	_safe_label->show (); 
 
         solo_led_table.set_spacings (0);
         solo_led_table.set_border_width (1);
-        solo_led_table.attach (*iso_label, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
+	solo_led_table.attach (*_iso_label, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
         solo_led_table.attach (*solo_isolated_led, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
-        solo_led_table.attach (*safe_label, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
+	solo_led_table.attach (*_safe_label, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
         solo_led_table.attach (*solo_safe_led, 1, 2, 1, 2, Gtk::FILL, Gtk::FILL);
 
         solo_led_table.show ();
-        solo_led_box.pack_end (solo_led_table, false, false);
-        solo_led_box.show ();
+	below_panner_box.set_border_width (2);
+	below_panner_box.set_spacing (2);
+        below_panner_box.pack_end (solo_led_table, false, false);
+        below_panner_box.show ();
 
 	button_table.set_homogeneous (true);
 	button_table.set_spacings (0);
 
-	button_table.attach (name_button, 0, 2, 0, 1);
-	button_table.attach (input_button, 0, 2, 1, 2);
-	button_table.attach (_invert_button_box, 0, 2, 3, 4);
+	button_table.attach (name_button, 0, 1, 0, 1);
+	button_table.attach (input_button, 0, 1, 1, 2);
+	button_table.attach (_invert_button_box, 0, 1, 2, 3);
 
 	middle_button_table.set_homogeneous (true);
 	middle_button_table.set_spacings (0);
@@ -269,7 +271,7 @@ MixerStrip::init ()
 	global_vpacker.pack_start (button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (processor_box, true, true);
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (solo_led_box,Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (below_panner_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (middle_button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (gain_meter_alignment,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table,Gtk::PACK_SHRINK);
@@ -349,11 +351,11 @@ void
 MixerStrip::set_route (boost::shared_ptr<Route> rt)
 {
 	if (rec_enable_button->get_parent()) {
-		button_table.remove (*rec_enable_button);
+		below_panner_box.remove (*rec_enable_button);
 	}
 
 	if (show_sends_button->get_parent()) {
-		button_table.remove (*show_sends_button);
+		below_panner_box.remove (*show_sends_button);
 	}
 
 	processor_box.set_route (rt);
@@ -379,10 +381,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
         if (route()->is_master()) {
                 solo_button->hide ();
-                solo_led_box.hide ();
+                below_panner_box.hide ();
         } else {
                 solo_button->show ();
-                solo_led_box.show ();
+                below_panner_box.show ();
         }
 
 	if (_mixer_owned && (route()->is_master() || route()->is_monitor())) {
@@ -411,7 +413,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	if (is_track ()) {
 		
-		button_table.attach (*rec_enable_button, 0, 2, 2, 3);
+		below_panner_box.pack_start (*rec_enable_button);
 		rec_enable_button->set_sensitive (_session->writable());
 		rec_enable_button->show();
 
@@ -420,7 +422,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		/* non-master bus */
 
 		if (!_route->is_master()) {
-			button_table.attach (*show_sends_button, 0, 2, 2, 3);
+			below_panner_box.pack_start (*show_sends_button);
 			show_sends_button->show();
 		}
 	}
@@ -580,6 +582,9 @@ MixerStrip::set_width_enum (Width w, void* owner)
 					panners.astate_string(_route->panner()->automation_state()));
 		}
 
+		_iso_label->show ();
+		_safe_label->show ();
+
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
 		set_size_request (-1, -1);
 		break;
@@ -601,6 +606,9 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			panners.short_astate_string(_route->panner()->automation_state()));
 		}
 
+		_iso_label->hide ();
+		_safe_label->hide ();
+		
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, longest_label.c_str(), 2, 2);
 		set_size_request (max (50, gpm.get_gm_width()), -1);
 		break;
