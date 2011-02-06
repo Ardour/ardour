@@ -940,7 +940,7 @@ ArdourStartup::setup_existing_session_page ()
 		hbox->set_spacing (4);
 		hbox->pack_start (*manage (new Label (_("Browse:"))), PACK_SHRINK);
 		hbox->pack_start (existing_session_chooser);
-		session_existing_vbox.pack_start (*hbox);
+		session_existing_vbox.pack_start (*hbox, false, false);
 		hbox->show_all ();
 	}
 	
