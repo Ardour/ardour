@@ -236,19 +236,12 @@ LV2Plugin::set_parameter (uint32_t which, float val)
 {
 	if (which < slv2_plugin_get_num_ports(_plugin)) {
 		_shadow_data[which] = val;
-
-#if 0		
-		if (which < parameter_count() && controls[which]) {
-			controls[which]->Changed ();
-		}
-#endif		
-
 	} else {
 		warning << string_compose (_("Illegal parameter number used with plugin \"%1\"."
 		                             "This is a bug in either %2 or the LV2 plugin (%3)"),
 		                           name(), PROGRAM_NAME, unique_id()) << endmsg;
 	}
-
+        
 	Plugin::set_parameter (which, val);
 }
 
@@ -325,11 +318,7 @@ LV2Plugin::add_state (XMLNode* root) const
 			snprintf(buf, sizeof(buf), "%+f", _shadow_data[i]);
 			child->add_property("value", string(buf));
 			root->add_child_nocopy (*child);
-
-			/*if (i < controls.size() && controls[i]) {
-				root->add_child_nocopy (controls[i]->get_state());
-			}*/
-		}
+                }
 	}
 
 	if (_supports_persist) {
