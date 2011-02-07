@@ -138,10 +138,11 @@ Panner2in2out::update ()
         */
         
         float pos[2];
-        const double width = _pannable->pan_width_control->get_value();
+        double width = _pannable->pan_width_control->get_value();
         const double direction_as_lr_fract = _pannable->pan_azimuth_control->get_value();
 
         if (width < 0.0) {
+                width = fabs (width);
                 pos[0] = direction_as_lr_fract + (width/2.0); // left signal lr_fract
                 pos[1] = direction_as_lr_fract - (width/2.0); // right signal lr_fract
         } else {
