@@ -12,19 +12,11 @@
 
 PGM_NAME="Ardour"
 PGM_VENDOR="Ardour"
-PGM_EXEC_FILE="ardour2"
+PGM_EXEC_FILE="ardour3"
 
-INSTALL_DEST_BASE="/usr/local/bin"
+INSTALL_DEST_BASE="/opt"
 
-#### Derived Variables ####
 PGM_NAME_LOWER=$(echo $PGM_NAME | tr '[:upper:]' '[:lower:]')
-ICON_NAME="${PGM_VENDOR}-${PGM_NAME}"
-MENU_FILE="${PGM_VENDOR}-${PGM_NAME}.desktop"
-DESKTOP_LINK_FILE="${PGM_NAME}.desktop"
-
-PGM_EXEC_PATH="${INSTALL_DEST_BASE}/${PGM_NAME}/bin/${PGM_EXEC_FILE}"
-ICON_PATH="${INSTALL_DEST_BASE}/${PGM_NAME}/etc/icons"
-MENU_FILE_PATH="${INSTALL_DEST_BASE}/${PGM_NAME}/${MENU_FILE}"
 
 #### Global Variables ####
 HAS_XDG="T"
@@ -107,6 +99,10 @@ SystemInstall ()
 #                                 Main
 ########################################################################
 
+echo ""
+echo "Welcome to the ${PGM_NAME} installer"
+echo ""
+
 ##############
 # Check sudo
 ##############
@@ -131,12 +127,10 @@ case `uname -m` in
 	i[3456789]86|x86|i86pc)
 		echo "Architecture is x86"
 		ARCH='x86'
-		BUNDLE_DIR=${PGM_NAME}_${ARCH}-*
 		;;
 	x86_64|amd64|AMD64)
 		echo "Architecture is x86_64"
 		ARCH='x86_64'
-		BUNDLE_DIR=${PGM_NAME}_${ARCH}-*
 		;;
 	*)
 		echo ""
@@ -149,7 +143,8 @@ esac
 
 # untar the correct bundle for us to install
 echo "Unpacking bundle for $ARCH"
-tar -xjf ${BUNDLE_DIR}.tar.bz2
+tar -xjf ${PGM_NAME}_${ARCH}-*.tar.bz2
+BUNDLE_DIR=$(basename `find -maxdepth 1 -type d -name "${PGM_NAME}_${ARCH}-*"`)
 
 
 #######################
@@ -214,49 +209,67 @@ then
 	exit 1
 fi
 
+################################
+# Setup derived variables
+################################
+PGM_VERSION=$(echo ${BUNDLE_DIR} | awk 'BEGIN { FS = "-" } ; { print $2 }' | awk 'BEGIN { FS = "_"} ; { print $1}')
+PGM_BUILD=$(echo ${BUNDLE_DIR} | awk 'BEGIN { FS = "-" } ; { print $2 }' | awk 'BEGIN { FS = "_"} ; { print $2}')
+PGM_FULL_NAME="${PGM_NAME}-${PGM_VERSION}_${PGM_BUILD}"
+
+ICON_NAME="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}"			#no dash since it seperates vendor from program
+MENU_FILE="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}.desktop"	#no dash since it seperates vendor from program
+DESKTOP_LINK_FILE="${PGM_NAME}_${PGM_VERSION}.desktop"
+
+PGM_EXEC_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/${PGM_EXEC_FILE}"
+ICON_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/etc/icons"
+MENU_FILE_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/share"
+
 	
 
 ################################
 # Install bundle and Menu/Link
 ################################
 
-# uninstall any older versions
-if [ -d ${INSTALL_DEST_BASE}/${PGM_NAME} ];
+if [ ! -d ${INSTALL_DEST_BASE} ];
 then
 	echo ""
-	echo "Removing existing ${PGM_NAME} installation from ${INSTALL_DEST_BASE}"
+	echo "!!! ERROR !!! - Installation location ${INSTALL_DEST_BASE} does not exist!"
+	echo "Installation will not complete."
 	echo ""
-
-	if [ "T" = ${HAS_XDG} ];
-	then
-		sudo xdg-desktop-menu uninstall ${MENU_FILE_PATH}
-		sudo xdg-icon-resource uninstall --size 16 ${ICON_NAME}
-		sudo xdg-icon-resource uninstall --size 22 ${ICON_NAME}
-		sudo xdg-icon-resource uninstall --size 32 ${ICON_NAME}
-		sudo xdg-icon-resource uninstall --size 48 ${ICON_NAME}
-
-		if [ -e /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg ]; 
-		then
-			sudo rm -f /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg
-		fi
-	fi
-
-	if [ -e ~/Desktop/${DESKTOP_LINK_FILE} ];
-	then
-		sudo rm -f ~/Desktop/${DESKTOP_LINK_FILE}
-	fi
-
-	# delete the old package
-	sudo rm -rf ${INSTALL_DEST_BASE}/${PGM_NAME}
+	read -p "Press ENTER to exit installer:" BLAH
+	exit 1
 fi
 
+# uninstall any older versions
+UNINSTALLERS=$(find ${INSTALL_DEST_BASE} -maxdepth 1 -type f -name "${PGM_NAME}*.uninstall.sh")
+if [ ! -z "$UNINSTALLERS" ];
+then
+	for i in $UNINSTALLERS; do
+		echo ""
+		echo "Found existing ${PGM_NAME} installation."
+		
+		ANSWER=$(VaildateYesNoQuestion "Do you want to run the uninstaller ${i} ?")
+
+		if test "y" = $ANSWER;
+		then
+			echo ""
+			echo "Running uninstaller $i"
+			
+			${i}
+		fi
+	done
+fi
+
+
+# install 
+
 echo ""
-echo "Installing ${PGM_NAME} in ${INSTALL_DEST_BASE}"
+echo "Installing ${PGM_NAME} ${PGM_VERSION} built from ${PGM_BUILD} in ${INSTALL_DEST_BASE}"
 echo ""
 
 # Copy the new version in the install directory
-sudo mkdir ${INSTALL_DEST_BASE}/${PGM_NAME} 
-sudo cp -Rf	${BUNDLE_DIR}/* ${INSTALL_DEST_BASE}/${PGM_NAME}
+sudo mkdir ${INSTALL_DEST_BASE}/${PGM_FULL_NAME} 
+sudo cp -Rf	${BUNDLE_DIR}/* ${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/
 
 # write the desktop/menu file
 echo "[Desktop Entry]" > /tmp/${MENU_FILE}
@@ -265,13 +278,13 @@ echo "Version=1.0" >> /tmp/${MENU_FILE}
 echo "Type=Application" >> /tmp/${MENU_FILE}
 echo "Terminal=false" >> /tmp/${MENU_FILE}
 echo "Exec=${PGM_EXEC_PATH}" >> /tmp/${MENU_FILE}
-echo "Name=${PGM_NAME}" >> /tmp/${MENU_FILE}
+echo "Name=${PGM_NAME}-${PGM_VERSION}" >> /tmp/${MENU_FILE}
 echo "Icon=${ICON_NAME}" >> /tmp/${MENU_FILE}
 echo "Comment=Digital Audio Workstation" >> /tmp/${MENU_FILE}
 echo "Categories=AudioVideo;Audio;Recorder;" >> /tmp/${MENU_FILE}
 
 chmod ugo+rx /tmp/${MENU_FILE}
-sudo mv /tmp/${MENU_FILE} ${MENU_FILE_PATH}
+sudo mv /tmp/${MENU_FILE} ${MENU_FILE_PATH}/.
 
 # install the Menu, Link, and Icon(s)
 if [ "T" = ${HAS_XDG} ];
@@ -287,17 +300,24 @@ then
 		sudo cp -f ${ICON_PATH}/${PGM_NAME_LOWER}_icon.svg  /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg
 	fi
 
-	sudo xdg-desktop-menu install ${MENU_FILE_PATH}
+	sudo xdg-desktop-menu install ${MENU_FILE_PATH}/${MENU_FILE}
 
+	echo ""
 	echo "Creating a desktop link for ${PGM_NAME}"
-	cp ${MENU_FILE_PATH} ~/Desktop/${DESKTOP_LINK_FILE}
+	cp ${MENU_FILE_PATH}/${MENU_FILE} ~/Desktop/${DESKTOP_LINK_FILE}
 	chmod ugo+rx ~/Desktop/${DESKTOP_LINK_FILE}
 else
+	echo ""
 	echo "Creating a desktop link for ${PGM_NAME}"
-	cp ${MENU_FILE_PATH} ~/Desktop/${DESKTOP_LINK_FILE}
+	cp ${MENU_FILE_PATH}/${MENU_FILE} ~/Desktop/${DESKTOP_LINK_FILE}
 	chmod ugo+rx ~/Desktop/${DESKTOP_LINK_FILE}
 fi
 
+echo ""
+echo "Copying uninstall script to ${INSTALL_DEST_BASE}"
+echo ""
+
+sudo cp -f ${BUNDLE_DIR}/bin/*.uninstall.sh ${INSTALL_DEST_BASE}/.
 
 ###########################
 # Check Jack and qjackctl
@@ -305,6 +325,7 @@ fi
 
 echo ""
 echo "Checking to see if Jack is installed"
+echo ""
 
 if ! which jackd > /dev/null;
 then
@@ -358,19 +379,19 @@ fi
 
 USER_GROUP_ADJUSTED="f"
 
-if ! ./${BUNDLE_DIR}/sanityCheck -a > /dev/null;
+if ! ./${BUNDLE_DIR}/bin/sanityCheck -a > /dev/null;
 then
 	echo ""
 	echo "System failed the quick sanity check... Looking for the cause"
 
-	if ! ./${BUNDLE_DIR}/sanityCheck -rt > /dev/null;
+	if ! ./${BUNDLE_DIR}/bin/sanityCheck -rt > /dev/null;
 	then
 		echo ""
 		echo "System does not allow realtime for the current user... Looking for a solution"		
 		
-		if ./${BUNDLE_DIR}/sanityCheck -hasaudiogroup > /dev/null;
+		if ./${BUNDLE_DIR}/bin/sanityCheck -hasaudiogroup > /dev/null;
 		then
-			if ./${BUNDLE_DIR}/sanityCheck -memberaudiogroup > /dev/null 2>&1;
+			if ./${BUNDLE_DIR}/bin/sanityCheck -memberaudiogroup > /dev/null 2>&1;
 			then
 				## This is an odd case. We have an audio group and are a member.
 				echo ""
@@ -386,7 +407,7 @@ then
 			else
 				# Not a member of an audio group. Try to fix it.
 				
-				if ./${BUNDLE_DIR}/sanityCheck -hasgroup audio > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@audio.*rtprio";
+				if ./${BUNDLE_DIR}/bin/sanityCheck -hasgroup audio > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@audio.*rtprio";
 				then
 					# add user to audio group
 					echo ""
@@ -408,7 +429,7 @@ then
 						read -p "Press ENTER to continue:" BLAH
 					fi
 
-				elif ./${BUNDLE_DIR}/sanityCheck -hasgroup jackuser > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@jackuser.*rtprio";
+				elif ./${BUNDLE_DIR}/bin/sanityCheck -hasgroup jackuser > /dev/null && find /etc/security -type f -name "*.conf" | xargs grep -q "^@jackuser.*rtprio";
 				then
 					# add user to jackuser group
 					echo ""
@@ -445,7 +466,7 @@ then
 		fi
 	fi
 
-	if ! ./${BUNDLE_DIR}/sanityCheck -freqscaling > /dev/null;
+	if ! ./${BUNDLE_DIR}/bin/sanityCheck -freqscaling > /dev/null;
 	then
 		echo ""
 		echo "!!! WARNING !!! - Your system seems to use frequency scaling."
@@ -459,7 +480,7 @@ then
 
 	if [ "f" = $USER_GROUP_ADJUSTED ];
 	then
-		if ! ./${BUNDLE_DIR}/sanityCheck -memlock > /dev/null;
+		if ! ./${BUNDLE_DIR}/bin/sanityCheck -memlock > /dev/null;
 		then
 			echo ""
 			echo "!!! WARNING !!! - You are not allowed to lock memory."
