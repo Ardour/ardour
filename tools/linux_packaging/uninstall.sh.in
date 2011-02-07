@@ -1,0 +1,83 @@
+#!/bin/sh
+
+######################################
+#
+#	Ardour/Mixbus bundle uninstaller
+#	Todd Naugle
+#
+#####################################
+
+
+PGM_NAME="%REPLACE_PGM%"
+PGM_VENDOR="%REPLACE_VENDOR%"
+PGM_VERSION="%REPLACE_VERSION%"
+PGM_BUILD="%REPLACE_BUILD%"
+
+INSTALL_DEST_BASE=/opt
+
+
+#### Derived Variables ####
+PGM_PATH=${INSTALL_DEST_BASE}/${PGM_NAME}-${PGM_VERSION}_${PGM_BUILD}
+
+ICON_NAME="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}"			#no dash between name and version since seperates vendor from program
+MENU_FILE="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}.desktop"	#no dash between name and version since seperates vendor from program
+DESKTOP_LINK_FILE="${PGM_NAME}_${PGM_VERSION}.desktop"
+MENU_FILE_PATH="${PGM_PATH}/share/${MENU_FILE}"
+
+
+#######################
+# Check for xdg utils
+#######################
+HAS_XDG="T"
+
+XDG_MENU_VER=$(xdg-desktop-menu --version 2> /dev/null)
+if [ -z "$XDG_MENU_VER" ];
+then
+	echo "System does not have xdg-desktop-menu installed"
+	HAS_XDG="F"
+fi
+
+XDG_ICON_VER=$(xdg-icon-resource --version 2> /dev/null)
+if [ -z "$XDG_ICON_VER" ];
+then
+	echo "System does not have xdg-icon-resource installed"
+	HAS_XDG="F"
+fi
+
+
+#############
+# Uninstall
+#############
+
+if [ -d ${PGM_PATH} ];
+then
+	echo ""
+	echo "Removing existing ${PGM_NAME} installation at ${PGM_PATH}"
+	echo ""
+
+	if [ "T" = ${HAS_XDG} ];
+	then
+		sudo xdg-desktop-menu uninstall ${MENU_FILE_PATH}
+		sudo xdg-icon-resource uninstall --size 16 ${ICON_NAME}
+		sudo xdg-icon-resource uninstall --size 22 ${ICON_NAME}
+		sudo xdg-icon-resource uninstall --size 32 ${ICON_NAME}
+		sudo xdg-icon-resource uninstall --size 48 ${ICON_NAME}
+
+		if [ -e /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg ]; 
+		then
+			sudo rm -f /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg
+		fi
+	fi
+
+	if [ -e ~/Desktop/${DESKTOP_LINK_FILE} ];
+	then
+		sudo rm -f ~/Desktop/${DESKTOP_LINK_FILE}
+	fi
+
+	# delete the old package
+	sudo rm -rf ${PGM_PATH}
+else
+	echo ""
+	echo "!!! FAILURE !!! - install path ${PGM_PATH} does not exist."
+	echo ""
+fi
