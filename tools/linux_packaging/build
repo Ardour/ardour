@@ -7,12 +7,12 @@
 # script for pulling together a Linux app bundle.
 
 MIXBUS=
-INTERNAL_JACK=1
 WITH_LADSPA=0
 STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
 EXTERNAL_JACK=
+VENDOR=Ardour
 
 if [ $# -eq 0 ] ; then
 	echo ""	 
@@ -34,25 +34,23 @@ while [ $# -gt 0 ] ; do
 	--mixbus)
 		MIXBUS=1; 
 		WITH_NLS=1 ; 
-		INTERNAL_JACK=; 
 		WITH_LADSPA=; 
 		STRIP= ; 
 		APPNAME=Mixbus ;
+                VENDOR=Harrison ;
 		shift ;;
 	--public)
 		WITH_NLS=1 ; 
-		INTERNAL_JACK=; 
 		WITH_LADSPA=; 
 		STRIP=1 ; 
 		APPNAME=Ardour ;
 		shift ;;
 	--allinone)
 		WITH_NLS= ; 
-		INTERNAL_JACK=1; 
 		WITH_LADSPA=1; 
 		STRIP= ; 
 		shift ;;
-	--test) INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
+	--test) WITH_LADSPA=; STRIP= ; shift ;;
 
 	#
 	# specific build flags
@@ -63,7 +61,6 @@ while [ $# -gt 0 ] ; do
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
-	--external_jack) EXTERNAL_JACK=$2; shift ; shift ;;
 
 	*)
 		#catch all for unknown arguments
@@ -74,10 +71,6 @@ while [ $# -gt 0 ] ; do
 		;;
 	esac
 done
-
-if [ x$EXTERNAL_JACK != x -a x$INTERNAL_JACK != x ] ; then
-	echo "It makes no sense to package JACK internally and externally. Please pick one."
-fi
 
 release_version=`grep -m 1 '^VERSION' ../../wscript | awk '{print $3}' | sed "s/'//g"`
 svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d"'" -f 2`
@@ -534,6 +527,13 @@ for svndir in `find $APPDIR -name .svn -type d`; do
 	rm -rf $svndir
 done
 
+#
+# Add the uninstaller
+#
+APP_VER_NAME=${APPNAME}-${release_version}_${svn_version}
+sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_VERSION%/${release_version}/" -e "s/%REPLACE_BUILD%/${svn_version}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
+chmod a+x $APPBIN/${APP_VER_NAME}.uninstall.sh
+
 #Sanity Check file
 if [ -e $BUILD_ROOT/tools/sanity_check/sanityCheck ]; then
 	cp $BUILD_ROOT/tools/sanity_check/sanityCheck $APPBIN
@@ -552,10 +552,6 @@ if [ x$MIXBUS != x ] ; then
 
 	echo "Creating Mixbus packaging directory"
 	cp MixBus_Install_QuickStart.pdf "$APPDIR/Mixbus Install & Quick Start Guide.pdf"
-	
-	if [ -x $EXTERNAL_JACK != x ] ; then
-		cp $EXTERNAL_JACK $PRODUCT_PKG_DIR
-	fi
 fi
 
 echo "Building tarball ..."
