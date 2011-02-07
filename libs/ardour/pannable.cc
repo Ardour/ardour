@@ -20,6 +20,7 @@
 #include "pbd/error.h"
 #include "pbd/convert.h"
 
+#include "ardour/debug.h"
 #include "ardour/automation_control.h"
 #include "ardour/automation_list.h"
 #include "ardour/pannable.h"
@@ -57,6 +58,11 @@ Pannable::Pannable (Session& s)
         pan_width_control->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&Pannable::control_auto_state_changed, this, _1));
         pan_frontback_control->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&Pannable::control_auto_state_changed, this, _1));
         pan_lfe_control->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&Pannable::control_auto_state_changed, this, _1));
+}
+
+Pannable::~Pannable ()
+{
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("pannable @ %1 destructor\n", this));
 }
 
 void

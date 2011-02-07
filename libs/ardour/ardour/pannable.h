@@ -36,8 +36,11 @@ class Session;
 class AutomationControl;
 class Panner;
 
-struct Pannable : public PBD::Stateful, public Automatable, public SessionHandleRef {
+class Pannable : public PBD::Stateful, public Automatable, public SessionHandleRef 
+{
+  public:
         Pannable (Session& s);
+        ~Pannable ();
 
         boost::shared_ptr<AutomationControl> pan_azimuth_control;
         boost::shared_ptr<AutomationControl> pan_elevation_control;
