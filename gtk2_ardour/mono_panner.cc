@@ -374,6 +374,7 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 
         if (!drag_data_window) {
                 drag_data_window = new Window (WINDOW_POPUP);
+                drag_data_window->set_name (X_("ContrastingPopup"));
                 drag_data_window->set_position (WIN_POS_MOUSE);
                 drag_data_window->set_decorated (false);
                 
@@ -392,7 +393,9 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 
         if (!drag_data_window->is_visible ()) {
                 /* move the window a little away from the mouse */
-                drag_data_window->move (ev->x_root+30, ev->y_root+30);
+                int rx, ry;
+                get_window()->get_origin (rx, ry);
+                drag_data_window->move (rx, ry+get_height());
                 drag_data_window->present ();
         }
 

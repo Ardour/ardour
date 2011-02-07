@@ -292,6 +292,16 @@ style "default" = "medium_text"
   }
 }
 
+style "contrasting_popup" = "medium_text"
+{
+  bg[NORMAL]          = @A_lightest
+  fg[NORMAL]          = @A_darkest
+  base[NORMAL]        = @A_lightest
+  text[NORMAL]        = @A_darkest
+  text[ACTIVE]        = @A_darkest
+  text[SELECTED]      = @A_darkest
+}
+
 style "base_frame"
 {
 	fg[NORMAL] = @A_bg
@@ -1427,6 +1437,7 @@ style "padded_button" = "default_button"
 	xthickness = 8
 }
 
+
 #---------------------------------------------------------------
 
 class "GtkWidget" style:highest "default"
@@ -1812,6 +1823,8 @@ widget "*MidiTracerTextView" style:highest "midi_tracer_textview"
 widget "*SoloIsolatedLED" style:highest "solo_isolate_led"
 widget "*SoloSafeLED" style:highest "solo_safe_led"
 widget "*SoloLEDLabel" style:highest "very_small_text"
+widget "*ContrastingPopup" style:highest "contrasting_popup"
+widget "*ContrastingPopup*" style:highest "contrasting_popup"
 
 widget "*RouteNameEditorEntry" style:highest "text_cell_entry"
 widget "*RegionNameEditorEntry" style:highest "text_cell_entry"
