@@ -10,10 +10,19 @@
 
 using namespace std;
 
-static void do_not_delete_the_request_buffer (void*) { }
-
 template<typename R>
 Glib::StaticPrivate<typename AbstractUI<R>::RequestBuffer> AbstractUI<R>::per_thread_request_buffer;
+
+template<typename RequestBuffer> void 
+cleanup_request_buffer (void* ptr)
+{
+        RequestBuffer* rb = (RequestBuffer*) ptr;
+
+        {
+                Glib::Mutex::Lock lm (rb->ui.request_buffer_map_lock);
+                rb->dead = true;
+        }
+}
 
 template <typename RequestObject>
 AbstractUI<RequestObject>::AbstractUI (const string& name)
@@ -35,14 +44,22 @@ AbstractUI<RequestObject>::register_thread (string target_gui, pthread_t thread_
 		return;
 	}
 
-	RequestBuffer* b = new RequestBuffer (num_requests);
+	RequestBuffer* b = per_thread_request_buffer.get();
+
+        if (b) {
+                /* thread already registered with this UI
+                 */
+                return;
+        }
+
+        b = new RequestBuffer (num_requests, *this);
 
 	{
 		Glib::Mutex::Lock lm (request_buffer_map_lock);
 		request_buffers[thread_id] = b;
 	}
 
-	per_thread_request_buffer.set (b, do_not_delete_the_request_buffer);
+	per_thread_request_buffer.set (b, cleanup_request_buffer<RequestBuffer>);
 }
 
 template <typename RequestObject> RequestObject*
@@ -83,23 +100,23 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 	for (i = request_buffers.begin(); i != request_buffers.end(); ++i) {
 
-		while (true) {
-
-			/* we must process requests 1 by 1 because
-			   the request may run a recursive main
-			   event loop that will itself call
-			   handle_ui_requests. when we return
-			   from the request handler, we cannot
-			   expect that the state of queued requests
-			   is even remotely consistent with
-			   the condition before we called it.
-			*/
-
-			i->second->get_read_vector (&vec);
-
-			if (vec.len[0] == 0) {
-				break;
-			} else {
+                while (true) {
+                        
+                        /* we must process requests 1 by 1 because
+                           the request may run a recursive main
+                           event loop that will itself call
+                           handle_ui_requests. when we return
+                           from the request handler, we cannot
+                           expect that the state of queued requests
+                           is even remotely consistent with
+                           the condition before we called it.
+                        */
+                        
+                        i->second->get_read_vector (&vec);
+                        
+                        if (vec.len[0] == 0) {
+                                break;
+                        } else {
                                 if (vec.buf[0]->valid) {
                                         request_buffer_map_lock.unlock ();
                                         do_request (vec.buf[0]);
@@ -109,9 +126,23 @@ AbstractUI<RequestObject>::handle_ui_requests ()
                                         }
                                         i->second->increment_read_ptr (1);
                                 }
-			} 
-		}
-	}
+                        } 
+                }
+        }
+
+        /* clean up any dead request buffers (their thread has exited) */
+
+	for (i = request_buffers.begin(); i != request_buffers.end(); ) {
+             if ((*i).second->dead) {
+                     delete (*i).second;
+                     RequestBufferMapIterator tmp = i;
+                     ++tmp;
+                     request_buffers.erase (i);
+                     i = tmp;
+             } else {		
+                     ++i;
+             }
+        }
 
 	request_buffer_map_lock.unlock ();
 

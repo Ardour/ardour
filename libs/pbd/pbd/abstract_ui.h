@@ -44,13 +44,21 @@ class AbstractUI : public BaseUI
 	void call_slot (EventLoop::InvalidationRecord*, const boost::function<void()>&);
         Glib::Mutex& slot_invalidation_mutex() { return request_buffer_map_lock; }
 
+	Glib::Mutex request_buffer_map_lock;
+
   protected:
-	typedef RingBufferNPT<RequestObject> RequestBuffer;
+       struct RequestBuffer : public RingBufferNPT<RequestObject> {
+                bool dead;
+                AbstractUI<RequestObject>& ui;
+                RequestBuffer (uint32_t size, AbstractUI<RequestObject>& uir) 
+                        : RingBufferNPT<RequestObject> (size)
+                        , dead (false) 
+                        , ui (uir) {}
+        };
 	typedef typename RequestBuffer::rw_vector RequestBufferVector;
 	typedef typename std::map<pthread_t,RequestBuffer*>::iterator RequestBufferMapIterator;
 	typedef std::map<pthread_t,RequestBuffer*> RequestBufferMap;
 
-	Glib::Mutex request_buffer_map_lock;
 	RequestBufferMap request_buffers;
 	static Glib::StaticPrivate<RequestBuffer> per_thread_request_buffer;
 	
