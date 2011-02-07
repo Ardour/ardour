@@ -91,8 +91,13 @@ class Graph : public SessionHandleRef
 
     private:
         std::list<pthread_t> _thread_list;
-        volatile bool _quit_threads;
-        
+        volatile bool        _quit_threads;
+        PBD::ScopedConnection processor_usage_connection;
+
+        void parameter_changed (std::string);
+        void reset_thread_list ();
+        void drop_threads ();
+
 	node_list_t _nodes_rt[2];
 
 	node_list_t _init_trigger_list[2];
