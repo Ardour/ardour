@@ -105,9 +105,11 @@ MonoPanner::set_drag_data ()
            the center of the USA isn't Kansas, its (50LA, 50NY) and it will all make sense.
         */
 
-        drag_data_label->set_markup (string_compose (_("L:%1 R:%2"),
-                                                     (int) rint (100.0 * (1.0 - pos)),
-                                                     (int) rint (100.0 * pos)));
+        char buf[64];
+        snprintf (buf, sizeof (buf), "L:%3d R:%3d",
+                  (int) rint (100.0 * (1.0 - pos)),
+                  (int) rint (100.0 * pos));
+        drag_data_label->set_markup (buf);
 }
 
 void

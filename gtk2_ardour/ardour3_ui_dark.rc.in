@@ -84,12 +84,12 @@ style "medium_bold_text"
 
 style "medium_text"
 {
- 	font_name = "@FONT_NORMAL"
+ 	font_name = "@FONT_NORMAL@"
 }
 
 style "medium_monospace_text"
 {
- 	#font_name = "monospace @FONT_NORMAL@"
+        font_name = "monospace @FONT_NORMAL@"
 }
 
 style "red_medium_text" = "medium_text"
@@ -292,7 +292,7 @@ style "default" = "medium_text"
   }
 }
 
-style "contrasting_popup" = "medium_text"
+style "contrasting_popup" = "medium_monospace_text"
 {
   bg[NORMAL]          = @A_lightest
   fg[NORMAL]          = @A_darkest

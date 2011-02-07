@@ -114,10 +114,11 @@ StereoPanner::set_drag_data ()
            the center of the USA isn't Kansas, its (50LA, 50NY) and it will all make sense.
         */
 
-        drag_data_label->set_markup (string_compose (_("L:%1 R:%2 Width: %3%%"),
-                                                     (int) rint (100.0 * (1.0 - pos)),
-                                                     (int) rint (100.0 * pos),
-                                                     (int) floor (100.0 * width_control->get_value())));
+        char buf[64];
+        snprintf (buf, sizeof (buf), "L:%3d R:%3d Width:%d%%", (int) rint (100.0 * (1.0 - pos)),
+                  (int) rint (100.0 * pos),
+                  (int) floor (100.0 * width_control->get_value()));
+        drag_data_label->set_markup (buf);
 }
 
 void
@@ -312,7 +313,7 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
                         
                         /* upper section: adjusts position, constrained by width */
 
-                        const double w = width_control->get_value ();
+                        const double w = fabs (width_control->get_value ());
                         const double max_pos = 1.0 - (w/2.0);
                         const double min_pos = w/2.0;
 
