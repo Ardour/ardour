@@ -780,7 +780,7 @@ ARDOUR_UI::shuttle_box_motion (GdkEventMotion* ev)
 gint
 ARDOUR_UI::mouse_shuttle (double x, bool force)
 {
-	double half_width = shuttle_box.get_width() / 2.0;
+	double const half_width = shuttle_box.get_width() / 2.0;
 	double distance = x - half_width;
 
 	if (distance > 0) {
@@ -820,20 +820,14 @@ ARDOUR_UI::use_shuttle_fract (bool force)
 
 	if (Config->get_shuttle_units() == Semitones) {
 
-		const double step = 1.0 / 24.0; // range is 24 semitones up & down
-		double semitones;
-
-		semitones = round (shuttle_fract / step);
+		double const step = 1.0 / 24.0; // range is 24 semitones up & down
+		double const semitones = round (shuttle_fract / step);
 		speed = pow (2.0, (semitones / 12.0));
 
 	} else {
 
-		bool neg;
-		double fract;
-
-		neg = (shuttle_fract < 0.0);
-
-		fract = 1 - sqrt (1 - (shuttle_fract * shuttle_fract)); // Formula A1
+		bool const neg = (shuttle_fract < 0.0);
+		double fract = 1 - sqrt (1 - (shuttle_fract * shuttle_fract)); // Formula A1
 
 		if (neg) {
 			fract = -fract;
