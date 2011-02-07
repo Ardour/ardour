@@ -816,15 +816,12 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	gain_automation_state_button.set_size_request(15, 15);
 	gain_automation_style_button.set_size_request(15, 15);
 
-	HBox* fader_centering_box = manage (new HBox);
-	fader_centering_box->pack_start (*gain_slider, true, false);
-
 	fader_vbox = manage (new Gtk::VBox());
 	fader_vbox->set_spacing (0);
-	fader_vbox->pack_start (*fader_centering_box, false, false, 0);
+	fader_vbox->pack_start (*gain_slider, false, false, 0);
 
 	hbox.set_spacing (2);
-	hbox.pack_start (*fader_vbox, true, true);
+        hbox.pack_start (*fader_vbox, false, false, 4);
 
 	set_spacing (2);
 
@@ -868,7 +865,7 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 	*/
 
 	gain_display_box.pack_end (peak_display, true, true);
-	hbox.pack_end (*level_meter, true, true);
+	hbox.pack_start (*level_meter, true, true);
 
 	if (r && !r->is_hidden()) {
 		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
