@@ -536,7 +536,7 @@ done
 
 #Sanity Check file
 if [ -e $BUILD_ROOT/tools/sanity_check/sanityCheck ]; then
-	cp $BUILD_ROOT/tools/sanity_check/sanityCheck $APPDIR
+	cp $BUILD_ROOT/tools/sanity_check/sanityCheck $APPBIN
 else
 	echo "!!!ERROR !!! sanityCheck program is missing. packager will exit without being complete"
 	exit 1
