@@ -400,7 +400,7 @@ def build(bld):
 			'MASSIVE' : '60'
 		}
 	else: # Linux/X11 fonts
-		basefont = "sans"
+		basefont = '' # unspecified - use system defaults
 		font_sizes = {
 			'TINY' : '6',
 			'SMALLER' : '8',
@@ -425,9 +425,6 @@ def build(bld):
 				fontstyle = " ".join ([basefont,points])
 				
 			font_subst_dict[key] = fontstyle
-
-	# add normal monospace to font dict
-	font_subst_dict['FONT_MONOSPACE_NORMAL'] = 'monospace 10'
 
         dark_rc_subst_dict = font_subst_dict
         dark_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme ('gtk2_ardour/ardour3_ui_dark.rc.in')
