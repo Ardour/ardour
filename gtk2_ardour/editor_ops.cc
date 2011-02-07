@@ -6415,6 +6415,7 @@ Editor::fit_tracks (TrackViewList & tracks)
 	}
 
 	uint32_t child_heights = 0;
+	int visible_tracks = 0;
 
 	for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
 
@@ -6423,9 +6424,10 @@ Editor::fit_tracks (TrackViewList & tracks)
 		}
 
 		child_heights += (*t)->effective_height() - (*t)->current_height();
+		++visible_tracks;
 	}
 
-	uint32_t h = (uint32_t) floor ((_canvas_height - child_heights - canvas_timebars_vsize) / tracks.size());
+	uint32_t h = (uint32_t) floor ((_canvas_height - child_heights - canvas_timebars_vsize) / visible_tracks);
 	double first_y_pos = DBL_MAX;
 
 	if (h < TimeAxisView::preset_height (HeightSmall)) {
@@ -6466,12 +6468,14 @@ Editor::fit_tracks (TrackViewList & tracks)
 			next_is_selected = false;
 		}
 
-		if (is_selected) {
-			(*t)->set_height (h);
-			first_y_pos = std::min ((*t)->y_position (), first_y_pos);
-		} else {
-			if (prev_was_selected && next_is_selected) {
-				hide_track_in_display (*t);
+		if ((*t)->marked_for_display ()) {
+			if (is_selected) {
+				(*t)->set_height (h);
+				first_y_pos = std::min ((*t)->y_position (), first_y_pos);
+			} else {
+				if (prev_was_selected && next_is_selected) {
+					hide_track_in_display (*t);
+				}
 			}
 		}
 
