@@ -1708,13 +1708,13 @@ TranzportControlProtocol::shuttle ()
 		if (session->transport_speed() < 0) {
 			session->request_transport_speed (1.0);
 		} else {
-			session->request_transport_speed (session->transport_speed() + 0.1);
+			session->request_transport_speed_nonzero (session->transport_speed() + 0.1);
 		}
 	} else {
 		if (session->transport_speed() > 0) {
 			session->request_transport_speed (-1.0);
 		} else {
-			session->request_transport_speed (session->transport_speed() - 0.1);
+			session->request_transport_speed_nonzero (session->transport_speed() - 0.1);
 		}
 	}
 }

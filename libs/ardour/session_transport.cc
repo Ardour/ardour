@@ -107,6 +107,20 @@ Session::request_transport_speed (double speed)
 	queue_event (ev);
 }
 
+/** Request a new transport speed, but if the speed parameter is exactly zero then use
+ *  a very small +ve value to prevent the transport actually stopping.  This method should
+ *  be used by callers who are varying transport speed but don't ever want to stop it.
+ */
+void
+Session::request_transport_speed_nonzero (double speed)
+{
+	if (speed == 0) {
+		speed = DBL_EPSILON;
+	}
+
+	request_transport_speed (speed);
+}
+
 void
 Session::request_track_speed (Track* tr, double speed)
 {

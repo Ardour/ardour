@@ -76,7 +76,7 @@ void JogWheel::jog_event (SurfacePort &, Control &, const ControlState & state)
 		}
 		
 		// translate _transport_speed speed to a signed transport velocity
-		_mcp.get_session().request_transport_speed( transport_speed() * transport_direction() );
+		_mcp.get_session().request_transport_speed_nonzero (transport_speed() * transport_direction());
 		break;
 	
 	case scrub:
@@ -86,7 +86,7 @@ void JogWheel::jog_event (SurfacePort &, Control &, const ControlState & state)
 			add_scrub_interval( _scrub_timer.restart() );
 			// x clicks per second => speed == 1.0
 			float speed = _mcp.surface().scrub_scaling_factor() / average_scrub_interval() * state.ticks;
-			_mcp.get_session().request_transport_speed( speed * state.sign );
+			_mcp.get_session().request_transport_speed_nonzero (speed * state.sign);
 		}
 		else
 		{
@@ -99,7 +99,7 @@ void JogWheel::jog_event (SurfacePort &, Control &, const ControlState & state)
 	case shuttle:
 		_shuttle_speed = _mcp.get_session().transport_speed();
 		_shuttle_speed += _mcp.surface().scaled_delta( state, _mcp.get_session().transport_speed() );
-		_mcp.get_session().request_transport_speed( _shuttle_speed );
+		_mcp.get_session().request_transport_speed_nonzero (_shuttle_speed);
 		break;
 	
 	case select:

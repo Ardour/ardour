@@ -816,16 +816,15 @@ ARDOUR_UI::use_shuttle_fract (bool force)
 
 	last_shuttle_request = now;
 
+	double speed = 0;
+
 	if (Config->get_shuttle_units() == Semitones) {
 
 		const double step = 1.0 / 24.0; // range is 24 semitones up & down
 		double semitones;
-		double speed;
 
 		semitones = round (shuttle_fract / step);
 		speed = pow (2.0, (semitones / 12.0));
-
-		_session->request_transport_speed (speed);
 
 	} else {
 
@@ -840,9 +839,11 @@ ARDOUR_UI::use_shuttle_fract (bool force)
 			fract = -fract;
 		}
 
-		_session->request_transport_speed (shuttle_max_speed * fract);
+		speed = shuttle_max_speed * fract;
 	}
-
+	
+	_session->request_transport_speed_nonzero (speed);
+	
 	shuttle_box.queue_draw ();
 }
 

@@ -1920,7 +1920,7 @@ Editor::scrub (framepos_t frame, double current_x)
 				scrub_reverse_distance = 0;
 
 				delta = 0.01 * (last_scrub_x - current_x);
-				_session->request_transport_speed (_session->transport_speed() - delta);
+				_session->request_transport_speed_nonzero (_session->transport_speed() - delta);
 			}
 
 		} else {
@@ -1939,7 +1939,7 @@ Editor::scrub (framepos_t frame, double current_x)
 				scrub_reverse_distance = 0;
 
 				delta = 0.01 * (current_x - last_scrub_x);
-				_session->request_transport_speed (_session->transport_speed() + delta);
+				_session->request_transport_speed_nonzero (_session->transport_speed() + delta);
 			}
 		}
 

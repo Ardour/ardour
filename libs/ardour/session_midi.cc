@@ -235,7 +235,7 @@ Session::mmc_step (MIDI::MachineControl &/*mmc*/, int steps)
 	     << endl;
 #endif
 
-	request_transport_speed (step_speed);
+	request_transport_speed_nonzero (step_speed);
 	last_mmc_step = now;
 
 	if (!step_queued) {
@@ -317,9 +317,9 @@ Session::mmc_shuttle (MIDI::MachineControl &/*mmc*/, float speed, bool forw)
 	}
 
 	if (forw) {
-		request_transport_speed (speed);
+		request_transport_speed_nonzero (speed);
 	} else {
-		request_transport_speed (-speed);
+		request_transport_speed_nonzero (-speed);
 	}
 }
 
@@ -535,7 +535,7 @@ Session::mmc_step_timeout ()
 
 	/* slow it down */
 
-	request_transport_speed (_transport_speed * 0.75);
+	request_transport_speed_nonzero (_transport_speed * 0.75);
 	return true;
 }
 
