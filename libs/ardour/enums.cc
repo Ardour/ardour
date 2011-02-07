@@ -202,6 +202,7 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (Slide);
 	REGISTER_ENUM (Splice);
+	REGISTER_ENUM (Lock);
 	REGISTER (_EditMode);
 
 	REGISTER_ENUM (Start);
