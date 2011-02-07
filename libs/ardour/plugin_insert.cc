@@ -619,35 +619,20 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	}
 
 	// See if replication is possible
-	// We can replicate if there exists a single factor f such that, for every type,
-	// the number of plugin inputs * f = the requested number of inputs
-	uint32_t f             = 0;
+        // We allow replication only for plugins with either zero or 1 inputs and outputs
+        // for every valid data type.
+	uint32_t f             = 1;
 	bool     can_replicate = true;
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		// No inputs of this type
 		if (inputs.get(*t) == 0 && in.get(*t) == 0) {
 			continue;
+                }
 
-		// Plugin has more inputs than requested, can not replicate
-		} else if (inputs.get(*t) >= in.get(*t)) {
-			can_replicate = false;
-			break;
-
-		// Plugin inputs is not a factor of requested inputs, can not replicate
-		} else if (inputs.get(*t) == 0 || in.get(*t) % inputs.get(*t) != 0) {
-			can_replicate = false;
-			break;
-
-		// Potential factor not set yet
-		} else if (f == 0) {
-			f = in.get(*t) / inputs.get(*t);;
-		}
-
-		// Factor for this type does not match another type, can not replicate
-		if (f != (in.get(*t) / inputs.get(*t))) {
-			can_replicate = false;
-			break;
-		}
+                if (inputs.get(*t) != 1 || outputs.get (*t) != 1) {
+                        can_replicate = false;
+                        break;
+                }
 	}
 
 	if (can_replicate) {
