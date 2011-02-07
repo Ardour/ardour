@@ -106,25 +106,26 @@ Session::no_roll (pframes_t nframes)
 		_click_io->silence (nframes);
 	}
 
-	DEBUG_TRACE(DEBUG::Graph,"calling graph/no-roll\n");
-	route_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), actively_recording(), declick);
-        /*
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-
-		if ((*i)->is_hidden()) {
-			continue;
-		}
-
-		(*i)->set_pending_declick (declick);
-
-		if ((*i)->no_roll (nframes, _transport_frame, end_frame, non_realtime_work_pending(),
-				   actively_recording(), declick)) {
-			error << string_compose(_("Session: error in no roll for %1"), (*i)->name()) << endmsg;
-			ret = -1;
-			break;
-		}
-	}
-        */
+        if (Config->get_processor_usage() != 1) {
+                DEBUG_TRACE(DEBUG::Graph,"calling graph/no-roll\n");
+                route_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), actively_recording(), declick);
+        } else {
+                for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                        
+                        if ((*i)->is_hidden()) {
+                                continue;
+                        }
+                        
+                        (*i)->set_pending_declick (declick);
+                        
+                        if ((*i)->no_roll (nframes, _transport_frame, end_frame, non_realtime_work_pending(),
+                                           actively_recording(), declick)) {
+                                error << string_compose(_("Session: error in no roll for %1"), (*i)->name()) << endmsg;
+                                ret = -1;
+                                break;
+                        }
+                }
+        }
 
 	return ret;
 }
@@ -132,40 +133,44 @@ Session::no_roll (pframes_t nframes)
 int
 Session::process_routes (pframes_t nframes, bool& need_butler)
 {
-	bool record_active;
-	int  declick = get_transport_declick_required();
-	bool rec_monitors = get_rec_monitors_input();
-	boost::shared_ptr<RouteList> r = routes.reader ();
+        bool record_active;
+        int  declick = get_transport_declick_required();
+        bool rec_monitors = get_rec_monitors_input();
+        boost::shared_ptr<RouteList> r = routes.reader ();
 
-	if (transport_sub_state & StopPendingCapture) {
-		/* force a declick out */
-		declick = -1;
-	}
+        if (transport_sub_state & StopPendingCapture) {
+                /* force a declick out */
+                declick = -1;
+        }
+        
+        record_active = actively_recording(); // || (get_record_enabled() && get_punch_in());
+        
+        const framepos_t start_frame = _transport_frame;
+        const framepos_t end_frame = _transport_frame + floor (nframes * _transport_speed);
+        
+        if (Config->get_processor_usage() != 1) {
+                DEBUG_TRACE(DEBUG::Graph,"calling graph/process-routes\n");
+                route_graph->process_routes( nframes, start_frame, end_frame, declick, record_active, rec_monitors, need_butler);
 
-	record_active = actively_recording(); // || (get_record_enabled() && get_punch_in());
+        } else {
 
-	const framepos_t start_frame = _transport_frame;
-	const framepos_t end_frame = _transport_frame + floor (nframes * _transport_speed);
+                for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                        
+                        int ret;
+                        
+                        if ((*i)->is_hidden()) {
+                                continue;
+                        }
+                        
+                        (*i)->set_pending_declick (declick);
+                        
+                        if ((ret = (*i)->roll (nframes, start_frame, end_frame, declick, record_active, rec_monitors, need_butler)) < 0) {
+                                stop_transport ();
+                                return -1;
+                        }
+                }
+        }
 
-	DEBUG_TRACE(DEBUG::Graph,"calling graph/process-routes\n");
-	route_graph->process_routes( nframes, start_frame, end_frame, declick, record_active, rec_monitors, need_butler);
-/*
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-
-		int ret;
-
-		if ((*i)->is_hidden()) {
-			continue;
-		}
-
-		(*i)->set_pending_declick (declick);
-
-		if ((ret = (*i)->roll (nframes, start_frame, end_frame, declick, record_active, rec_monitors, need_butler)) < 0) {
-			stop_transport ();
-			return -1;
-		}
-	}
-*/
 	return 0;
 }
 
@@ -185,22 +190,25 @@ Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 	const framepos_t start_frame = _transport_frame;
 	const framepos_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
 
-	route_graph->silent_process_routes( nframes, start_frame, end_frame, record_active, rec_monitors, need_butler);
-/*
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+        if (Config->get_processor_usage() != 1) {
+                cerr << "GRAPH PROCESS\n";
+                route_graph->silent_process_routes( nframes, start_frame, end_frame, record_active, rec_monitors, need_butler);
+        } else {
+                for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                        
+                        int ret;
+                        
+                        if ((*i)->is_hidden()) {
+                                continue;
+                        }
+                        
+                        if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, record_active, rec_monitors, need_butler)) < 0) {
+                                stop_transport ();
+                                return -1;
+                        }
+                }
+        }
 
-		int ret;
-
-		if ((*i)->is_hidden()) {
-			continue;
-		}
-
-		if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, record_active, rec_monitors, need_butler)) < 0) {
-			stop_transport ();
-			return -1;
-		}
-	}
-*/
 	return 0;
 }
 
@@ -716,7 +724,7 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 
 		if (_transport_speed != 0.0f) {
 			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stops transport: %1 frame %2 tf %3\n", slave_speed, slave_transport_frame, _transport_frame));
-			stop_transport();
+			stop_transport ();
 		}
 
 		if (slave_transport_frame != _transport_frame) {
