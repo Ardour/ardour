@@ -99,6 +99,11 @@ SystemInstall ()
 #                                 Main
 ########################################################################
 
+# If you double click a script, some systems don't get the PWD correct.
+# Force it to be correct
+PKG_PATH=$(dirname $(readlink -f $0))
+cd ${PKG_PATH}
+
 echo ""
 echo "Welcome to the ${PGM_NAME} installer"
 echo ""
@@ -356,7 +361,9 @@ fi
 if ! which qjackctl > /dev/null;
 then
 	echo ""
-	echo "The program QjackCtl is missing from this system. QjackCtl is an OPTIONAL component of $PGM_NAME."
+	echo "The program QjackCtl is missing from this system."
+	echo "QjackCtl is an extremely useful tool for any system that runs JACK applications like $PGM_NAME.
+	echo "We recommend that you install it."
 	echo ""
 
 	ANSWER=$(VaildateYesNoQuestion "Install QjackCtl using system software repository?")
@@ -513,6 +520,6 @@ then
 fi
 
 echo ""
-read -p "Press ENTER to close this window:" BLAH
+read -p "Press ENTER to exit installer:" BLAH
 
 
