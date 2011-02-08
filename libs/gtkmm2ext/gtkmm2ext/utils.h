@@ -24,11 +24,17 @@
 #include <string>
 #include <stdint.h>
 
+#include <cairomm/refptr.h>
+
 #include <gtkmm/container.h>
 #include <gtkmm/treeview.h>
 #include <gdkmm/window.h> /* for WMDecoration */
 #include <gdkmm/pixbuf.h>
 #include <pangomm/fontdescription.h>
+
+namespace Cairo {
+        class Context;
+}
 
 namespace Gtk {
 	class ComboBoxText;
@@ -89,6 +95,7 @@ namespace Gtkmm2ext {
         int physical_screen_width (Glib::RefPtr<Gdk::Window>);
 
         void container_clear (Gtk::Container&);
+        void rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */

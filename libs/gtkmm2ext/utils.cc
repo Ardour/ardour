@@ -386,3 +386,85 @@ Gtkmm2ext::container_clear (Gtk::Container& c)
                 c.remove (**child);
         }
 }
+
+#if 1
+void
+Gtkmm2ext::rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
+{
+        /* renders small shapes better than most others */
+
+/*    A****BQ
+      H    C
+      *    *
+      G    D
+      F****E
+*/
+        context->move_to(x+r,y); // Move to A
+        context->line_to(x+w-r,y); // Straight line to B
+        context->curve_to(x+w,y,x+w,y,x+w,y+r); // Curve to C, Control points are both at Q
+        context->line_to(x+w,y+h-r); // Move to D
+        context->curve_to(x+w,y+h,x+w,y+h,x+w-r,y+h); // Curve to E
+        context->line_to(x+r,y+h); // Line to F
+        context->curve_to(x,y+h,x,y+h,x,y+h-r); // Curve to G
+        context->line_to(x,y+r); // Line to H
+        context->curve_to(x,y,x,y,x+r,y); // Curve to A
+}
+
+#else
+
+void
+Gtkmm2ext::rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double width, double height, double radius)
+{
+        /* doesn't render small shapes well at all, and does not absolutely honor width & height */
+
+        double x0          = x+radius/2.0;
+        double y0          = y+radius/2.0;
+        double rect_width  = width - radius;
+        double rect_height = height - radius;
+
+        context->save();
+
+        double x1=x0+rect_width;
+        double y1=y0+rect_height;
+
+        if (rect_width/2<radius) {
+                if (rect_height/2<radius) {
+                        context->move_to  (x0, (y0 + y1)/2);
+                        context->curve_to (x0 ,y0, x0, y0, (x0 + x1)/2, y0);
+                        context->curve_to (x1, y0, x1, y0, x1, (y0 + y1)/2);
+                        context->curve_to (x1, y1, x1, y1, (x1 + x0)/2, y1);
+                        context->curve_to (x0, y1, x0, y1, x0, (y0 + y1)/2);
+                } else {
+                        context->move_to  (x0, y0 + radius);
+                        context->curve_to (x0 ,y0, x0, y0, (x0 + x1)/2, y0);
+                        context->curve_to (x1, y0, x1, y0, x1, y0 + radius);
+                        context->line_to (x1 , y1 - radius);
+                        context->curve_to (x1, y1, x1, y1, (x1 + x0)/2, y1);
+                        context->curve_to (x0, y1, x0, y1, x0, y1- radius);
+                }
+        } else {
+                if (rect_height/2<radius) {
+                        context->move_to  (x0, (y0 + y1)/2);
+                        context->curve_to (x0 , y0, x0 , y0, x0 + radius, y0);
+                        context->line_to (x1 - radius, y0);
+                        context->curve_to (x1, y0, x1, y0, x1, (y0 + y1)/2);
+                        context->curve_to (x1, y1, x1, y1, x1 - radius, y1);
+                        context->line_to (x0 + radius, y1);
+                        context->curve_to (x0, y1, x0, y1, x0, (y0 + y1)/2);
+                } else {
+                        context->move_to  (x0, y0 + radius);
+                        context->curve_to (x0 , y0, x0 , y0, x0 + radius, y0);
+                        context->line_to (x1 - radius, y0);
+                        context->curve_to (x1, y0, x1, y0, x1, y0 + radius);
+                        context->line_to (x1 , y1 - radius);
+                        context->curve_to (x1, y1, x1, y1, x1 - radius, y1);
+                        context->line_to (x0 + radius, y1);
+                        context->curve_to (x0, y1, x0, y1, x0, y1- radius);
+                }
+        }
+
+        context->close_path ();
+        context->restore();
+}
+
+#endif
