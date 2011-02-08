@@ -613,5 +613,7 @@ echo "Building tarball ..."
 rm -f $APPDIR.tar.bz2
 tar -cjf $APPDIR.tar.bz2 $APPDIR
 
+rm -rf $APPDIR/
+
 echo "Done."
 
