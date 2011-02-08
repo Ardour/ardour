@@ -267,10 +267,13 @@ bool
 BarController::expose (GdkEventExpose* /*event*/)
 {
 	Glib::RefPtr<Gdk::Window> win (darea.get_window());
+        Cairo::RefPtr<Cairo::Context> context = win->create_cairo_context();
+        Gdk::Color c;
 	Widget* parent;
 	gint x1=0, x2=0, y1=0, y2=0;
 	gint w, h;
 	double fract;
+        float r, g, b;
 
 	fract = ((adjustment.get_value() - adjustment.get_lower()) /
 		 (adjustment.get_upper() - adjustment.get_lower()));
@@ -286,21 +289,36 @@ BarController::expose (GdkEventExpose* /*event*/)
 
 		if (use_parent) {
 			parent = get_parent();
-			
+                        
 			if (parent) {
-				win->draw_rectangle (parent->get_style()->get_fg_gc (parent->get_state()),
-						     true,
-						     0, 0, darea.get_width(), darea.get_height());
+                                c = parent->get_style()->get_fg (parent->get_state());
+                                r = c.get_red_p ();
+                                g = c.get_green_p ();
+                                b = c.get_blue_p ();
+                                context->set_source_rgb (r, g, b);
+                                context->rectangle (0, 0, darea.get_width(), darea.get_height());
+                                context->fill ();
 			}
 
 		} else {
 
-			win->draw_rectangle (get_style()->get_bg_gc (get_state()),
-					     true,
-					     0, 0, darea.get_width() - ((darea.get_width()+1) % 2), darea.get_height());
+                        c = get_style()->get_bg (get_state());
+                        r = c.get_red_p ();
+                        g = c.get_green_p ();
+                        b = c.get_blue_p ();
+                        context->set_source_rgb (r, g, b);
+                        context->rectangle (0, 0, darea.get_width() - ((darea.get_width()+1) % 2), darea.get_height());
+                        context->fill ();
 		}
-		
-		win->draw_line (get_style()->get_fg_gc (get_state()), x1, 0, x1, h);
+                
+                c = get_style()->get_fg (get_state());
+                r = c.get_red_p ();
+                g = c.get_green_p ();
+                b = c.get_blue_p ();
+                context->set_source_rgb (r, g, b);
+                context->move_to (x1, 0);
+                context->line_to (x1, h);
+                context->stroke ();
 		break;
 
         case Blob:
@@ -313,19 +331,31 @@ BarController::expose (GdkEventExpose* /*event*/)
 			parent = get_parent();
 			
 			if (parent) {
-				win->draw_rectangle (parent->get_style()->get_fg_gc (parent->get_state()),
-						     true,
-						     0, 0, darea.get_width(), darea.get_height());
+                                c = parent->get_style()->get_fg (parent->get_state());
+                                r = c.get_red_p ();
+                                g = c.get_green_p ();
+                                b = c.get_blue_p ();
+                                context->set_source_rgb (r, g, b);
+                                context->rectangle (0, 0, darea.get_width(), darea.get_height());
+                                context->fill ();
 			}
 
 		} else {
 
-			win->draw_rectangle (get_style()->get_bg_gc (get_state()),
-					     true,
-					     0, 0, darea.get_width() - ((darea.get_width()+1) % 2), darea.get_height());
+                        c = get_style()->get_bg (get_state());
+                        r = c.get_red_p ();
+                        g = c.get_green_p ();
+                        b = c.get_blue_p ();
+                        context->set_source_rgb (r, g, b);
+                        context->rectangle (0, 0, darea.get_width() - ((darea.get_width()+1) % 2), darea.get_height());
+                        context->fill ();
 		}
 		
-		win->draw_arc (get_style()->get_fg_gc (get_state()), true, x1, ((h-2)/2)-1, x2, x2, 0, 360 * 64);
+                c = get_style()->get_fg (get_state());
+                r = c.get_red_p ();
+                g = c.get_green_p ();
+                b = c.get_blue_p ();
+                context->arc (x1, ((h-2)/2)-1, x2, 0, 2*M_PI);
 		break;
 
 	case CenterOut:
@@ -334,17 +364,31 @@ BarController::expose (GdkEventExpose* /*event*/)
                 if (use_parent) {
                         parent = get_parent();
                         if (parent) {
-                                win->draw_rectangle (parent->get_style()->get_fg_gc (parent->get_state()),
-                                                     true,
-                                                     0, 0, darea.get_width(), darea.get_height());
-                        } else {
-                                win->draw_rectangle (parent->get_style()->get_bg_gc (parent->get_state()),
-                                                     true,
-                                                     0, 0, darea.get_width(), darea.get_height());
+                                c = parent->get_style()->get_fg (parent->get_state());
+                                r = c.get_red_p ();
+                                g = c.get_green_p ();
+                                b = c.get_blue_p ();
+                                context->set_source_rgb (r, g, b);
+                                context->rectangle (0, 0, darea.get_width(), darea.get_height());
+                                context->fill ();
                         }
+                } else {
+                        c = get_style()->get_bg (get_state());
+                        r = c.get_red_p ();
+                        g = c.get_green_p ();
+                        b = c.get_blue_p ();
+                        context->set_source_rgb (r, g, b);
+                        context->rectangle (0, 0, darea.get_width(), darea.get_height());
+                        context->fill ();
                 }
+                c = get_style()->get_fg (get_state());
+                r = c.get_red_p ();
+                g = c.get_green_p ();
+                b = c.get_blue_p ();
                 x1 = (w/2) - ((w*fract)/2); // center, back up half the bar width
-                win->draw_rectangle (get_style()->get_fg_gc (get_state()), true, x1, 1, w*fract, h);
+                context->set_source_rgb (r, g, b);
+                context->rectangle (x1, 1, w*fract, h);
+                context->fill ();
 		break;
 
 	case LeftToRight:
@@ -355,29 +399,37 @@ BarController::expose (GdkEventExpose* /*event*/)
 		x1 = 0;
 		x2 = (gint) floor (w * fract);
 		y1 = 0;
-		y2 = h - 1;
+		y2 = h;
 
-		win->draw_rectangle (get_style()->get_bg_gc (get_state()),
-				    false,
-				    0, 0, darea.get_width() - 1, darea.get_height() - 1);
+                /* bounding box */
+
+                c = get_style()->get_bg (get_state());
+                r = c.get_red_p ();
+                g = c.get_green_p ();
+                b = c.get_blue_p ();
+                context->set_source_rgb (r, g, b);
+                rounded_rectangle (context, 0, 0, darea.get_width(), darea.get_height());
+                context->stroke ();
 
 		/* draw active box */
 
-		win->draw_rectangle (get_style()->get_fg_gc (get_state()),
-				    true,
-				    1 + x1,
-				    1 + y1,
-				    x2,
-				    1 + y2);
-		
+                c = get_style()->get_fg (get_state());
+                r = c.get_red_p ();
+                g = c.get_green_p ();
+                b = c.get_blue_p ();
+                context->set_source_rgb (r, g, b);
+                rounded_rectangle (context, 1 + x1, 1 + y1, x2, y2);
+                context->fill ();
+
 		/* draw inactive box */
 
-		win->draw_rectangle (get_style()->get_fg_gc (STATE_INSENSITIVE),
-				    true,
-				    1 + x2,
-				    1 + y1,
-				    w - x2,
-				    1 + y2);
+                c = get_style()->get_fg (STATE_INSENSITIVE);
+                r = c.get_red_p ();
+                g = c.get_green_p ();
+                b = c.get_blue_p ();
+                context->set_source_rgb (r, g, b);
+                rounded_rectangle (context, 1 + x2, 1 + y1, w - x2, y2);
+                context->fill ();
 
 		break;
 
@@ -408,10 +460,13 @@ BarController::expose (GdkEventExpose* /*event*/)
                         x = lrint (darea.get_width() * xpos);
                 }
 
-		win->draw_layout (get_style()->get_text_gc (get_state()),
-				  x,
-				  (darea.get_height()/2) - (height/2),
-				  layout);
+                c = get_style()->get_text (get_state());
+                r = c.get_red_p ();
+                g = c.get_green_p ();
+                b = c.get_blue_p ();
+                context->set_source_rgb (r, g, b);
+                context->move_to (x, (darea.get_height()/2) - (height/2));
+                layout->show_in_cairo_context (context);
 	}
 	
 	return true;
