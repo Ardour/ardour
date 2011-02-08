@@ -354,7 +354,8 @@ fi
 if ! which qjackctl > /dev/null;
 then
 	echo ""
-	echo "The program QjackCtl is missing from this system. QjackCtl is an OPTIONAL component of $PGM_NAME."
+	echo "The program QjackCtl is missing from this system. QjackCtl is an extremely useful tool"
+	echo "for any system that runs JACK applications like Ardour. We recommend that you install it."
 	echo ""
 
 	ANSWER=$(VaildateYesNoQuestion "Install QjackCtl using system software repository?")
