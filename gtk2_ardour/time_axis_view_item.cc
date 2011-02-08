@@ -694,19 +694,20 @@ TimeAxisViewItem::set_colors()
 void
 TimeAxisViewItem::set_frame_color()
 {
-	if (frame) {
-		uint32_t r,g,b,a;
-
-		if (_selected && should_show_selection) {
-			UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get(), &r, &g, &b, &a);
-			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, a);
+	if (!frame) {
+		return;
+	}
+	
+	if (_selected && should_show_selection) {
+		frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
+	} else {
+		if (_recregion) {
+			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 		} else {
-			if (_recregion) {
-				UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_RecordingRect.get(), &r, &g, &b, &a);
-				frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, a);
+			if (fill_opacity) {
+				frame->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_FrameBase.get(), fill_opacity);
 			} else {
-				UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_FrameBase.get(), &r, &g, &b, &a);
-				frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, fill_opacity ? fill_opacity : a);
+				frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_FrameBase.get();
 			}
 		}
 	}
