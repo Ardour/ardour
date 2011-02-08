@@ -528,7 +528,7 @@ EditorSummary::on_button_release_event (GdkEventButton*)
 	_move_dragging = false;
 	_zoom_dragging = false;
 	_editor->_dragging_playhead = false;
-	_editor->set_follow_playhead (_old_follow_playhead);
+	_editor->set_follow_playhead (_old_follow_playhead, false);
 	
 	return true;
 }
