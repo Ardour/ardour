@@ -108,27 +108,27 @@ int system_uses_frequencyscaling() {
   char filename[256], buf[256];
 
   while (!done) {
-    (void) snprintf(filename, 256, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor", cpu);
-    if (0<read_string(filename, buf, 256)) {
-      if ((0!=strcmp("performance", buf)) && 
-					(0!=strcmp("powersafe", buf))) {
-				// So it's neither the "performance" nor the "powersafe" governor
-				(void) snprintf(filename, 256, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq", cpu);
-				if (read_int(filename, &min)) {
-					(void) snprintf(filename, 256, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq", cpu);
-					if (read_int(filename, &max)) {
-						if (min!=max) {
-							// wrong governor AND different frequency limits -> scaling
-							return 1;
-						}
-					} 
-				}
-      }
-    } else {
-      // couldn't open file -> no more cores
-      done = 1;
-    }
-    cpu++;
+          (void) snprintf(filename, 256, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor", cpu);
+          if (0<read_string(filename, buf, 256)) {
+                  if ((0!=strncmp("performance", buf, 11)) && 
+                      (0!=strncmp("powersafe", buf, 9))) {
+                          // So it's neither the "performance" nor the "powersafe" governor
+                          (void) snprintf(filename, 256, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq", cpu);
+                          if (read_int(filename, &min)) {
+                                  (void) snprintf(filename, 256, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq", cpu);
+                                  if (read_int(filename, &max)) {
+                                          if (min!=max) {
+                                                  // wrong governor AND different frequency limits -> scaling
+                                                  return 1;
+                                          }
+                                  } 
+                          }
+                  }
+          } else {
+                  // couldn't open file -> no more cores
+                  done = 1;
+          }
+          cpu++;
   }
   
   // couldn't find anything that points to scaling
