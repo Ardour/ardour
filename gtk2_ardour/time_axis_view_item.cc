@@ -23,7 +23,8 @@
 #include "ardour/types.h"
 #include "ardour/ardour.h"
 
-#include <gtkmm2ext/utils.h>
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/gui_thread.h"
 
 #include "ardour_ui.h"
 /*
@@ -224,6 +225,8 @@ TimeAxisViewItem::init (
 
 	set_duration (item_duration, this);
 	set_position (start, this);
+
+	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&TimeAxisViewItem::parameter_changed, this, _1), gui_context ());
 }
 
 TimeAxisViewItem::~TimeAxisViewItem()
@@ -692,19 +695,20 @@ TimeAxisViewItem::set_frame_color()
 	} else {
 		if (_recregion) {
 			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
-		} else if (high_enough_for_name) {
-			if (fill_opacity) {
-				frame->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_FrameBase.get(), fill_opacity);
-			} else {
-				frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_FrameBase.get();
-			}
 		} else {
-			if (fill_opacity) {
-				frame->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (fill_color, fill_opacity);
+			uint32_t f = 0;
+			if (high_enough_for_name && !Config->get_color_regions_using_track_color()) {
+				f = ARDOUR_UI::config()->canvasvar_FrameBase.get();
 			} else {
-				frame->property_fill_color_rgba() = fill_color;
+				f = fill_color;
 			}
-		}			
+
+			if (fill_opacity) {
+				f = UINT_RGBA_CHANGE_A (f, fill_opacity);
+			}
+
+			frame->property_fill_color_rgba() = f;
+		}
 	}
 }
 
@@ -900,3 +904,10 @@ TimeAxisViewItem::update_name_pixbuf_visibility ()
 	}
 }
 
+void
+TimeAxisViewItem::parameter_changed (string p)
+{
+	if (p == "color-regions-using-track-color") {
+		set_frame_color ();
+	}
+}

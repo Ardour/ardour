@@ -160,6 +160,7 @@ CONFIG_VARIABLE (WaveformScale, waveform_scale, "waveform-scale", Linear)
 CONFIG_VARIABLE (WaveformShape, waveform_shape, "waveform-shape", Traditional)
 CONFIG_VARIABLE (bool, allow_special_bus_removal, "allow-special-bus-removal", false)
 CONFIG_VARIABLE (int32_t, processor_usage, "processor-usage", -1)
+CONFIG_VARIABLE (bool, color_regions_using_track_color, "color-regions-using-track-color", false)
 
 /* denormal management */
 

@@ -1049,6 +1049,14 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_zoom_tools)
 			    ));
 
+	add_option (_("Editor"),
+		    new BoolOption (
+			    "color-regions-using-track-color",
+			    _("Color regions using their track's color"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_color_regions_using_track_color),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_color_regions_using_track_color)
+			    ));
+
 	/* AUDIO */
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Buffering")));

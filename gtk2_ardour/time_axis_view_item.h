@@ -235,6 +235,10 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	Visibility visibility;
 	bool _recregion;
 	bool _automation; ///< true if this is an automation region view
+
+private:
+	
+	void parameter_changed (std::string);
 	
 }; /* class TimeAxisViewItem */
 
