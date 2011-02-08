@@ -358,7 +358,7 @@ style "small_red_active_and_selected_button" = "small_button"
 style "gain_fader"
 {
         bg[NORMAL] = shade (0.7, @A_lightest)
-	bg[ACTIVE] = shade (0.72, @A_lightest)
+	bg[ACTIVE] = shade (0.705, @A_lightest)
 }
 
 #MSR and related buttons
@@ -1208,7 +1208,7 @@ style "plugin_slider"
 	#font_name ="bold @FONT_BIG@"
 
 	# the slider itself. the inactive part is INSENSITIVE,
-	# the active part is something else.
+	# the active part is taken from some other state.
 
 	fg[NORMAL] = @A_bright_color
 	fg[ACTIVE] = @A_bright_color
@@ -1218,11 +1218,11 @@ style "plugin_slider"
 
 	# draws the outer rectangle around the slider
 
-	bg[NORMAL] = @A_base
-	bg[ACTIVE] = @A_base
-	bg[INSENSITIVE] = @A_base
-	bg[SELECTED] = @A_base
-	bg[PRELIGHT] = @A_base
+	bg[NORMAL] = shade (0.6, @A_lightest)
+	bg[ACTIVE] = shade (0.6, @A_lightest)
+	bg[INSENSITIVE] = shade (0.6, @A_lightest)
+	bg[SELECTED] = shade (0.6, @A_lightest)
+	bg[PRELIGHT] = shade (0.6, @A_lightest)
 
 	# the numeric display
 
@@ -1253,7 +1253,7 @@ style "inspector_track_list_display" = "track_list_display"
 
 style "processor_list" = "very_small_text"
 {
-	bg[NORMAL] = { 0, 0, 0 }
+	bg[NORMAL] = @A_darkest
         bg[ACTIVE] = shade (1.8, @A_fg_selected)
         fg[ACTIVE] = @A_darkest
 	GtkCheckButton::indicator-size = 10
