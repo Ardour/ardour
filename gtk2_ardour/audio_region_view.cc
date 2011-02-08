@@ -1318,7 +1318,7 @@ AudioRegionView::set_frame_color ()
 		fill_opacity = 0;
 	}
 
-	if (_selected && should_show_selection) {
+	if (_selected) {
 		if (fill_opacity) {
 			frame->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get(), fill_opacity);
 		} else {

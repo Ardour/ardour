@@ -141,7 +141,6 @@ TimeAxisViewItem::init (
 {
 	item_name = it_name;
 	samples_per_unit = spu;
-	should_show_selection = true;
 	frame_position = start;
 	item_duration = duration;
 	name_connected = false;
@@ -459,21 +458,6 @@ TimeAxisViewItem::set_selected(bool yn)
 	}
 }
 
-/**
- * Set whether an item should show its selection status.
- *
- * @param yn true if this item should show its selected status
- */
-
-void
-TimeAxisViewItem::set_should_show_selection (bool yn)
-{
-	if (should_show_selection != yn) {
-		should_show_selection = yn;
-		set_frame_color ();
-	}
-}
-
 /** @return the TimeAxisView that this item is on */
 TimeAxisView&
 TimeAxisViewItem::get_time_axis_view () const
@@ -698,7 +682,7 @@ TimeAxisViewItem::set_frame_color()
 		return;
 	}
 	
-	if (_selected && should_show_selection) {
+	if (_selected) {
 		frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
 	} else {
 		if (_recregion) {

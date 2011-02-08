@@ -61,7 +61,6 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	void set_item_name(std::string, void*);
 	virtual std::string get_item_name() const;
 	virtual void set_selected(bool yn);
-	virtual void set_should_show_selection (bool yn);
 	void set_sensitive (bool yn) { _sensitive = yn; }
 	bool sensitive () const { return _sensitive; }
 	TimeAxisView& get_time_axis_view () const;
@@ -186,9 +185,6 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	/** samples per canvas unit */
 	double samples_per_unit;
 
-	/** should the item show its selected status */
-	bool should_show_selection;
-	
 	/** should the item respond to events */
 	bool _sensitive;
 	

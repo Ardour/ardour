@@ -378,9 +378,6 @@ Editor::mouse_mode_toggled (MouseMode m)
 			   show the object (region) selection.
 			*/
                         
-			for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-				(*i)->set_should_show_selection (true);
-			}
 			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 				(*i)->hide_selection ();
 			}

@@ -2869,7 +2869,7 @@ void
 MidiRegionView::set_frame_color()
 {
 	if (frame) {
-		if (_selected && should_show_selection) {
+		if (_selected) {
 			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
 		} else {
 			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiFrameBase.get();
