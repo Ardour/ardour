@@ -182,6 +182,7 @@ class StepEntry : public ArdourDialog
         void prev_octave ();
 
         void octave_n (int n);
+        void octave_0 () { octave_n (0); }
         void octave_1 () { octave_n (1); }
         void octave_2 () { octave_n (2); }
         void octave_3 () { octave_n (3); }
@@ -192,7 +193,6 @@ class StepEntry : public ArdourDialog
         void octave_8 () { octave_n (8); }
         void octave_9 () { octave_n (9); }
         void octave_10 () { octave_n (10); }
-        void octave_11 () { octave_n (11); }
 
         void dot_change (GtkAction*);
         void dot_value_change ();
