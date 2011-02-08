@@ -683,7 +683,11 @@ TimeAxisViewItem::set_frame_color()
 	}
 	
 	if (_selected) {
-		frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
+		if (fill_opacity) {
+			frame->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get(), fill_opacity);
+		} else {
+			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
+		}
 	} else {
 		if (_recregion) {
 			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();

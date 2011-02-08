@@ -1318,13 +1318,9 @@ AudioRegionView::set_frame_color ()
 		fill_opacity = 0;
 	}
 
-	if (_selected) {
-		if (fill_opacity) {
-			frame->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get(), fill_opacity);
-		} else {
-			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
-		}
+	TimeAxisViewItem::set_frame_color ();
 
+	if (_selected) {
 		for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
 			if (_region->muted()) {
 				(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_SelectedWaveForm.get(), MUTED_ALPHA);
@@ -1335,8 +1331,6 @@ AudioRegionView::set_frame_color ()
 		}
 	} else {
 		if (_recregion) {
-			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
-
 			for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
 				if (_region->muted()) {
 					(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_RecWaveForm.get(), MUTED_ALPHA);
@@ -1346,12 +1340,6 @@ AudioRegionView::set_frame_color ()
 				}
 			}
 		} else {
-			if (fill_opacity) {
-				frame->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_FrameBase.get(), fill_opacity);
-			} else {
-				frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_FrameBase.get();
-			}
-
 			for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
 				if (_region->muted()) {
 					(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA);
