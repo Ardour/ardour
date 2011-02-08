@@ -76,7 +76,8 @@ mkdir ${PACKAGE}
 mv ${X86_BUILD} ${PACKAGE}
 mv ${X86_64_BUILD} ${PACKAGE}
 cp install.sh ${PACKAGE}
-cp stage2.run ${PACKAGE}
+cp stage2.run ${PACKAGE}/.stage2.run
+cp README ${PACKAGE}
 
 echo "Creating tarball..."
 tar -czf ${PACKAGE}.tar.gz ${PACKAGE}
