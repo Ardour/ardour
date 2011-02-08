@@ -357,11 +357,9 @@ style "small_red_active_and_selected_button" = "small_button"
 
 style "gain_fader"
 {
-	bg[NORMAL] =   { 0.269, 0.269, 0.300}
-	bg[ACTIVE] =   { 0.152, 0.152, 0.168 }
+        bg[NORMAL] = shade (0.7, @A_lightest)
+	bg[ACTIVE] = shade (0.72, @A_lightest)
 }
-
-
 
 #MSR and related buttons
 
@@ -1286,9 +1284,9 @@ style "processor_fader"
 }
 
 # Fader processor's frame
-style "processor_fader_frame"
+style "processor_fader_frame" 
 {
-	bg[NORMAL] = @A_processor_fader_frame
+bg[NORMAL] = @A_processor_fader_frame
 }
 
 # Pre-fader processor's background

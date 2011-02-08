@@ -449,7 +449,10 @@ GainMeterBase::set_meter_strip_name (const char * name)
 void
 GainMeterBase::set_fader_name (const char * name)
 {
-	gain_slider->set_name (name);
+        uint32_t rgb_active = rgba_from_style (name, 0xff, 0, 0xff, 0, "bg", STATE_ACTIVE, false);
+        uint32_t rgb_normal = rgba_from_style (name, 0xff, 0xff, 0, 0, "bg", STATE_NORMAL, false);
+
+	gain_slider->set_border_colors (rgb_normal, rgb_active);
 }
 
 void

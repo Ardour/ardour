@@ -21,10 +21,11 @@
 #define __gtkmm2ext_pixfader_h__
 
 #include <cmath>
+#include <stdint.h>
 
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/adjustment.h>
-#include <gdkmm/pixbuf.h>
+#include <gdkmm.h>
 
 namespace Gtkmm2ext {
 
@@ -35,7 +36,8 @@ class PixFader : public Gtk::DrawingArea
 	virtual ~PixFader ();
 
 	void set_fader_length (int);
-	
+        void set_border_colors (uint32_t rgba_left, uint32_t rgba_right);
+
   protected:
 	Gtk::Adjustment& adjustment;
 
@@ -54,10 +56,18 @@ class PixFader : public Gtk::DrawingArea
 		HORIZ=2,
 	};
 
-  private:
-	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+  private:	
+        Cairo::RefPtr<Cairo::Context> belt_context;
+        Cairo::RefPtr<Cairo::ImageSurface> belt_surface;
+        Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 	int span, girth;
 	int _orien;
+        float left_r;
+        float left_g;
+        float left_b;
+        float right_r;
+        float right_g;
+        float right_b;
 
 	GdkRectangle view;
 

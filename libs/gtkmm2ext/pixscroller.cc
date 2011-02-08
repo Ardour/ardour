@@ -37,6 +37,8 @@ PixScroller::PixScroller (Adjustment& a,
 	  rail (r),
 	  slider (s)
 {
+        Cairo::Format format;
+
 	dragging = false;
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 
@@ -55,6 +57,26 @@ PixScroller::PixScroller (Adjustment& a,
 
 	sliderrect.set_y((int) rint ((overall_height - sliderrect.get_height()) * (adj.get_upper() - adj.get_value())));
 	railrect.set_x((sliderrect.get_width() / 2) - 2);
+
+        if (rail->get_has_alpha()) {
+                format = Cairo::FORMAT_ARGB32;
+        } else {
+                format = Cairo::FORMAT_RGB24;
+        }
+        rail_surface = Cairo::ImageSurface::create  (format, rail->get_width(), rail->get_height());
+        rail_context = Cairo::Context::create (rail_surface);
+        Gdk::Cairo::set_source_pixbuf (rail_context, rail, 0.0, 0.0);
+        rail_context->paint();        
+
+        if (slider->get_has_alpha()) {
+                format = Cairo::FORMAT_ARGB32;
+        } else {
+                format = Cairo::FORMAT_RGB24;
+        }
+        slider_surface = Cairo::ImageSurface::create  (format, slider->get_width(), slider->get_height());
+        slider_context = Cairo::Context::create (slider_surface);
+        Gdk::Cairo::set_source_pixbuf (slider_context, slider, 0.0, 0.0);
+        slider_context->paint();        
 }
 
 void
@@ -69,45 +91,31 @@ PixScroller::on_expose_event (GdkEventExpose* ev)
 {
 	GdkRectangle intersect;
 	Glib::RefPtr<Gdk::Window> win (get_window());
-
-	win->draw_rectangle (get_style()->get_bg_gc(get_state()), TRUE, 
-			    ev->area.x,
-			    ev->area.y,
-			    ev->area.width,
-			    ev->area.height);
-
+        Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
+        
 	if (gdk_rectangle_intersect (railrect.gobj(), &ev->area, &intersect)) {
-		Glib::RefPtr<Gdk::GC> gc(get_style()->get_bg_gc(get_state()));
-		win->draw_pixbuf (gc, rail, 
-				  intersect.x - railrect.get_x(),
-				  intersect.y - railrect.get_y(),
-				  intersect.x, 
-				  intersect.y, 
-				  intersect.width,
-				  intersect.height,
-				  Gdk::RGB_DITHER_NONE, 0, 0);
+
+                context->save();
+                context->rectangle (intersect.x, intersect.y, intersect.width, intersect.height);
+                context->clip();
+                context->set_source (rail_surface, intersect.x - railrect.get_x(), intersect.y - railrect.get_y());
+                context->rectangle (intersect.x, intersect.y, intersect.width, intersect.height);
+                context->clip();
+                context->paint();
+                context->restore();
 	}
 	
 	if (gdk_rectangle_intersect (sliderrect.gobj(), &ev->area, &intersect)) {
-		Glib::RefPtr<Gdk::GC> gc(get_style()->get_fg_gc(get_state()));
-		// Glib::RefPtr<Gdk::Bitmap> mask (slider_mask);
 
-		GdkGCValues values;
-		gdk_gc_get_values(gc->gobj(), &values);
-		gc->set_clip_origin (sliderrect.get_x(), sliderrect.get_y());
-		// gc->set_clip_mask (mask);
-		win->draw_pixbuf (gc, slider, 
-				  intersect.x - sliderrect.get_x(),
-				  intersect.y - sliderrect.get_y(),
-				  intersect.x, 
-				  intersect.y, 
-				  intersect.width,
-				  intersect.height,
-				  Gdk::RGB_DITHER_NONE, 0, 0);
-		gc->set_clip_origin (values.clip_x_origin, values.clip_y_origin);
-		// gdk_gc_set_clip_mask (gc->gobj(), values.clip_mask);
+                context->save();
+                context->rectangle (intersect.x, intersect.y, intersect.width, intersect.height);
+                context->clip();
+                context->set_source (rail_surface, intersect.x - sliderrect.get_x(), intersect.y - sliderrect.get_y());
+                context->rectangle (intersect.x, intersect.y, intersect.width, intersect.height);
+                context->clip();
+                context->paint();
+                context->restore();
 	}
-
 
 	return true;
 }

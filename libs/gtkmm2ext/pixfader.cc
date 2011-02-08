@@ -22,22 +22,23 @@
 #include <iostream>
 #include "gtkmm2ext/pixfader.h"
 #include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/rgb_macros.h"
 
 using namespace Gtkmm2ext;
 using namespace Gtk;
-using namespace Gdk;
 using namespace std;
-
 
 int PixFader::fine_scale_modifier = Keyboard::PrimaryModifier;
 int PixFader::extra_fine_scale_modifier = Keyboard::SecondaryModifier;
 
-PixFader::PixFader (Glib::RefPtr<Pixbuf> belt, Gtk::Adjustment& adj, int orientation, int fader_length)
+PixFader::PixFader (Glib::RefPtr<Gdk::Pixbuf> belt, Gtk::Adjustment& adj, int orientation, int fader_length)
 
 	: adjustment (adj),
 	  pixbuf (belt),
 	  _orien(orientation)
 {
+        Cairo::Format format;
+
 	dragging = false;
 	default_value = adjustment.get_value();
 	last_drawn = -1;
@@ -57,20 +58,50 @@ PixFader::PixFader (Glib::RefPtr<Pixbuf> belt, Gtk::Adjustment& adj, int orienta
 
 	adjustment.signal_value_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
 	adjustment.signal_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
+
+        if (pixbuf->get_has_alpha()) {
+                format = Cairo::FORMAT_ARGB32;
+        } else {
+                format = Cairo::FORMAT_RGB24;
+        }
+        belt_surface = Cairo::ImageSurface::create  (format, pixbuf->get_width(), pixbuf->get_height());
+        belt_context = Cairo::Context::create (belt_surface);
+        Gdk::Cairo::set_source_pixbuf (belt_context, pixbuf, 0.0, 0.0);
+        belt_context->paint();        
+
+        left_r = 0;
+        left_g = 0;
+        left_b = 0;
+
+        right_r = 0;
+        right_g = 0;
+        right_b = 0;
 }
 
 PixFader::~PixFader ()
 {
 }
 
+void
+PixFader::set_border_colors (uint32_t left, uint32_t right)
+{
+        int r, g, b;
+        UINT_TO_RGB(left, &r, &g, &b);
+        left_r = r/255.0;
+        left_g = g/255.0;
+        left_b = b/255.0;
+        UINT_TO_RGB(right, &r, &g, &b);
+        right_r = r/255.0;
+        right_g = g/255.0;
+        right_b = b/255.0;
+}
+
 bool
 PixFader::on_expose_event (GdkEventExpose* ev)
 {
-	GdkRectangle intersection;
+        Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
 	int srcx, srcy;
-
 	int const ds = display_span ();
-
 	int offset_into_pixbuf = (int) floor (span / ((float) span / ds));
 
 	/* account for fader lengths that are shorter than the fader pixbuf */
@@ -79,36 +110,66 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	} else {
 		offset_into_pixbuf += pixbuf->get_width() / 2 - view.width;
 	}
+
+        context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+        context->clip ();
 	
-	Glib::RefPtr<Gdk::GC> fg_gc (get_style()->get_fg_gc(get_state()));
+        if (_orien == VERT) {
+                srcx = 0;
+                srcy = offset_into_pixbuf;
+        } else {
+                srcx = offset_into_pixbuf;
+                srcy = 0;
+        }
 
-	if (gdk_rectangle_intersect (&view, &ev->area, &intersection)) {
-		if (_orien == VERT) {
-			srcx = intersection.x;
-			srcy = offset_into_pixbuf + intersection.y;
-		} else {
-			srcx = offset_into_pixbuf + intersection.x;
-			srcy = intersection.y;
-		}
-		get_window()->draw_pixbuf (fg_gc, pixbuf, 
-					   srcx, srcy,
-					   intersection.x, intersection.y,
-					   intersection.width, intersection.height,
-					   Gdk::RGB_DITHER_NONE, 0, 0);
-		
-		get_window()->draw_line (get_style()->get_bg_gc(STATE_ACTIVE), 0, 0, view.width - 1, 0); /* top */
-		get_window()->draw_line (get_style()->get_bg_gc(STATE_ACTIVE), 0, 0, 0, view.height - 1); /* left */
-		get_window()->draw_line (get_style()->get_bg_gc(STATE_NORMAL), view.width - 1, 0, view.width - 1, view.height - 1); /* right */
-		get_window()->draw_line (get_style()->get_bg_gc(STATE_NORMAL), 0, view.height - 1, view.width - 1, view.height - 1); /* bottom */
-	}
+        /* fader */
 
-	/* always draw the line */
+        context->save();
+        context->set_source (belt_surface, -srcx, -srcy);
+        context->rectangle (0, 0, get_width(), get_height());
+        context->clip();
+        context->paint();
+        context->restore();
+
+        /* bounding box lines (2 colors for nicer visuals) */
+        
+        /* top and left side */
+
+        context->set_line_width (1);
+        context->set_source_rgb (left_r, left_g, left_b);
+        context->move_to (view.width - 1, 0); /* upper right */
+        context->line_to (0, 0);              /* upper left */
+        context->line_to (0, view.height - 1);/* lower left */
+        context->stroke ();
+
+        /* bottom & right side */
+
+        context->set_line_width (1);
+        context->set_source_rgb (right_r, right_g, right_b);
+        context->move_to (0, view.height - 1 + 0.5); /* lower left */
+        context->line_to (view.width - 1, view.height - 1 + 0.5); /* lower right */
+        context->line_to (view.width - 1 + 0.5, 0); /* upper right */
+        context->stroke ();
+
+	/* always draw the unity-position line */
+
+
 	if (_orien == VERT) {
-		get_window()->draw_line (fg_gc, 1, unity_loc, girth - 2, unity_loc);
+                context->set_line_width (1); 
+                context->set_source_rgb (0.0, 1.0, 0.0);
+                context->move_to (1, unity_loc);
+                context->line_to (girth - 2, unity_loc);
+                context->stroke ();
 	} else {
-		get_window()->draw_line (fg_gc, unity_loc, 1, unity_loc, girth - 2);
+                context->set_line_width (1); 
+                context->set_source_rgb (0.0, 1.0, 0.0);
+                context->move_to (unity_loc, 1.5);
+                context->line_to (unity_loc, girth - 1.5);
+                context->stroke ();
 	}
+
 	last_drawn = ds;
+
 	return true;
 }
 
@@ -299,8 +360,8 @@ PixFader::adjustment_changed ()
 int
 PixFader::display_span ()
 {
-	float fract = (adjustment.get_upper() - adjustment.get_value ()) / ((adjustment.get_upper() - adjustment.get_lower()));
-	return (_orien == VERT) ? (int)floor (span * (1.0 - fract)) : (int)floor (span * fract);
+	float fract = (adjustment.get_value () - adjustment.get_lower()) / ((adjustment.get_upper() - adjustment.get_lower()));
+	return (_orien != VERT) ? (int)floor (span * (1.0 - fract)) : (int)floor (span * fract);
 }
 
 void

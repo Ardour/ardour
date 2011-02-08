@@ -44,7 +44,12 @@ class PixScroller : public Gtk::DrawingArea
 	Gtk::Adjustment& adj;
 
   private:
+
+        Cairo::RefPtr< Cairo::Context > rail_context;
+        Cairo::RefPtr< Cairo::ImageSurface > rail_surface;
 	Glib::RefPtr<Gdk::Pixbuf> rail;
+        Cairo::RefPtr< Cairo::Context > slider_context;
+        Cairo::RefPtr< Cairo::ImageSurface > slider_surface;
 	Glib::RefPtr<Gdk::Pixbuf> slider;
 	Gdk::Rectangle sliderrect;
 	Gdk::Rectangle railrect;

@@ -351,31 +351,31 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, s
 	foo.set_name (style);
 	foo.ensure_style ();
 
-	GtkRcStyle* waverc = foo.get_style()->gobj()->rc_style;
+	GtkRcStyle* rc = foo.get_style()->gobj()->rc_style;
 
-	if (waverc) {
+	if (rc) {
 		if (attr == "fg") {
-			r = waverc->fg[state].red / 257;
-			g = waverc->fg[state].green / 257;
-			b = waverc->fg[state].blue / 257;
+			r = rc->fg[state].red / 257;
+			g = rc->fg[state].green / 257;
+			b = rc->fg[state].blue / 257;
 
 			/* what a hack ... "a" is for "active" */
 			if (state == Gtk::STATE_NORMAL && rgba) {
-				a = waverc->fg[GTK_STATE_ACTIVE].red / 257;
+				a = rc->fg[GTK_STATE_ACTIVE].red / 257;
 			}
 		} else if (attr == "bg") {
 			r = g = b = 0;
-			r = waverc->bg[state].red / 257;
-			g = waverc->bg[state].green / 257;
-			b = waverc->bg[state].blue / 257;
+			r = rc->bg[state].red / 257;
+			g = rc->bg[state].green / 257;
+			b = rc->bg[state].blue / 257;
 		} else if (attr == "base") {
-			r = waverc->base[state].red / 257;
-			g = waverc->base[state].green / 257;
-			b = waverc->base[state].blue / 257;
+			r = rc->base[state].red / 257;
+			g = rc->base[state].green / 257;
+			b = rc->base[state].blue / 257;
 		} else if (attr == "text") {
-			r = waverc->text[state].red / 257;
-			g = waverc->text[state].green / 257;
-			b = waverc->text[state].blue / 257;
+			r = rc->text[state].red / 257;
+			g = rc->text[state].green / 257;
+			b = rc->text[state].blue / 257;
 		}
 	} else {
 		warning << string_compose (_("missing RGBA style for \"%1\""), style) << endl;
