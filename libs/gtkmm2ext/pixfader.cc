@@ -127,7 +127,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
         context->save();
         context->set_source (belt_surface, -srcx, -srcy);
         context->rectangle (0, 0, get_width(), get_height());
-        context->clip();
+        context->clip ();
         context->paint();
         context->restore();
 
@@ -146,9 +146,9 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 
         context->set_line_width (1);
         context->set_source_rgb (right_r, right_g, right_b);
-        context->move_to (0, view.height - 1 + 0.5); /* lower left */
-        context->line_to (view.width - 1, view.height - 1 + 0.5); /* lower right */
-        context->line_to (view.width - 1 + 0.5, 0); /* upper right */
+        context->move_to (0, view.height - 0.5); /* lower left */
+        context->line_to (view.width - 0.5, view.height - 0.5); /* lower right */
+        context->line_to (view.width - 0.5, 0); /* upper right */
         context->stroke ();
 
 	/* always draw the unity-position line */
@@ -158,13 +158,13 @@ PixFader::on_expose_event (GdkEventExpose* ev)
                 context->set_line_width (1); 
                 context->set_source_rgb (0.0, 1.0, 0.0);
                 context->move_to (1, unity_loc);
-                context->line_to (girth - 2, unity_loc);
+                context->line_to (girth, unity_loc);
                 context->stroke ();
 	} else {
                 context->set_line_width (1); 
                 context->set_source_rgb (0.0, 1.0, 0.0);
-                context->move_to (unity_loc, 1.5);
-                context->line_to (unity_loc, girth - 1.5);
+                context->move_to (unity_loc, 1);
+                context->line_to (unity_loc, girth - 1);
                 context->stroke ();
 	}
 
@@ -372,7 +372,7 @@ PixFader::set_fader_length (int l)
 		unity_loc = (int) rint (view.height - (default_value * view.height)) - 1;
 	} else {
 		view.width = span = l;
-		unity_loc = (int) rint (default_value * view.width) - 1;
+		unity_loc = (int) rint (default_value * view.width);
 	}
 
 	queue_draw ();
