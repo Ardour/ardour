@@ -30,6 +30,7 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/utils.h"
 
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
@@ -46,7 +47,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-static const int pos_box_size = 10;
+static const int pos_box_size = 9;
 static const int lr_box_size = 15;
 static const int step_down = 10;
 static const int top_step = 2;
@@ -133,8 +134,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
 {
 	Glib::RefPtr<Gdk::Window> win (get_window());
 	Glib::RefPtr<Gdk::GC> gc (get_style()->get_base_gc (get_state()));
-
-        cairo_t* cr = gdk_cairo_create (win->gobj());
+        Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
        
         int width, height;
         double pos = position_control->get_value (); /* 0..1 */
@@ -142,6 +142,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         double fswidth = fabs (swidth);
         uint32_t o, f, t, b;
         State state;
+        const double corner_radius = 5.0;
 
         width = get_width();
         height = get_height ();
@@ -161,9 +162,9 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
 
         /* background */
 
-        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
-        cairo_rectangle (cr, 0, 0, width, height);
-        cairo_fill (cr);
+        context->set_source_rgba (UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
+        rounded_rectangle (context, 0, 0, width, height, corner_radius);
+        context->fill ();
 
         /* the usable width is reduced from the real width, because we need space for 
            the two halves of LR boxes that will extend past the actual left/right
@@ -179,7 +180,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
                    So, offset cairo by 1, and reduce effective width by 1 
                 */
                 usable_width -= 1.0;
-                cairo_translate (cr, 1.0, 0.0);
+                context->translate (1.0, 0.0);
         }
 
         double center = (lr_box_size/2.0) + (usable_width * pos);
@@ -193,81 +194,81 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
 
         /* compute & draw the line through the box */
         
-        cairo_set_line_width (cr, 2);
-        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-        cairo_move_to (cr, left, top_step+(pos_box_size/2)+step_down);
-        cairo_line_to (cr, left, top_step+(pos_box_size/2));
-        cairo_line_to (cr, right, top_step+(pos_box_size/2));
-        cairo_line_to (cr, right, top_step+(pos_box_size/2) + step_down);
-        cairo_stroke (cr);
+        context->set_line_width (2);
+        context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
+        context->move_to (left, top_step+(pos_box_size/2.0)+step_down);
+        context->line_to (left, top_step+(pos_box_size/2.0));
+        context->line_to (right, top_step+(pos_box_size/2.0));
+        context->line_to (right, top_step+(pos_box_size/2.0) + step_down);
+        context->stroke ();
 
         /* left box */
 
-        cairo_rectangle (cr, 
-                         left - half_lr_box,
-                         half_lr_box+step_down, 
-                         lr_box_size, lr_box_size);
-        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-        cairo_stroke_preserve (cr);
-        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
-	cairo_fill (cr);
+        rounded_rectangle (context, left - half_lr_box,
+                           half_lr_box+step_down, 
+                           lr_box_size, lr_box_size, corner_radius);
+        context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
+        context->stroke_preserve ();
+        context->set_source_rgba (UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
+	context->fill ();
         
         /* add text */
 
-        cairo_move_to (cr, 
-                       left - half_lr_box + 3,
-                       (lr_box_size/2) + step_down + 13);
-        cairo_select_font_face (cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+        context->move_to (left - half_lr_box + 3,
+                          (lr_box_size/2) + step_down + 13);
+        context->select_font_face ("sans-serif", Cairo::FONT_SLANT_NORMAL, Cairo::FONT_WEIGHT_BOLD);
 
         if (state != Mono) {
-                cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
+                context->set_source_rgba (UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
                 if (swidth < 0.0) {
-                        cairo_show_text (cr, _("R"));
+                        context->show_text (_("R"));
                 } else {
-                        cairo_show_text (cr, _("L"));
+                        context->show_text (_("L"));
                 }
         }
 
         /* right box */
 
-        cairo_rectangle (cr, 
-                         right - half_lr_box,
-                         half_lr_box+step_down, 
-                         lr_box_size, lr_box_size);
-        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-        cairo_stroke_preserve (cr);
-        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
-	cairo_fill (cr);
+        rounded_rectangle (context, right - half_lr_box,
+                           half_lr_box+step_down, 
+                           lr_box_size, lr_box_size, corner_radius);
+        context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
+        context->stroke_preserve ();
+        context->set_source_rgba (UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
+	context->fill ();
 
         /* add text */
 
-        cairo_move_to (cr, 
-                       right - half_lr_box + 3,
-                       (lr_box_size/2)+step_down + 13);
-        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
-
+        context->move_to (right - half_lr_box + 3, (lr_box_size/2)+step_down + 13);
+        context->set_source_rgba (UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
+        
         if (state == Mono) {
-                cairo_show_text (cr, _("M"));
+                context->show_text (_("M"));
         } else {
                 if (swidth < 0.0) {
-                        cairo_show_text (cr, _("L"));
+                        context->show_text (_("L"));
                 } else {
-                        cairo_show_text (cr, _("R"));
+                        context->show_text (_("R"));
                 }
         }
-
+        
         /* draw the central box */
 
-        cairo_set_line_width (cr, 1);
-	cairo_rectangle (cr, lrint (center - (pos_box_size/2.0)), top_step, pos_box_size, pos_box_size);
-        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-        cairo_stroke_preserve (cr);
-        cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
-	cairo_fill (cr);
+        double spos = (pos_box_size/2.0) + (usable_width * pos);
 
-        /* done */
+        context->set_line_width (2.0);
+	context->move_to (spos + (pos_box_size/2.0), top_step); /* top right */
+        context->rel_line_to (0.0, pos_box_size); /* lower right */
+        context->rel_line_to (-pos_box_size/2.0, 4.0); /* bottom point */
+        context->rel_line_to (-pos_box_size/2.0, -4.0); /* lower left */
+        context->rel_line_to (0.0, -pos_box_size); /* upper left */
+        context->close_path ();
 
-        cairo_destroy (cr);
+        context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
+        context->stroke_preserve ();
+        context->set_source_rgba (UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
+	context->fill ();
+
 	return true;
 }
 
