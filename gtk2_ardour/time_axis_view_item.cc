@@ -531,6 +531,7 @@ TimeAxisViewItem::set_height (double height)
 	vestigial_frame->property_y2() = height - 1;
 
 	update_name_pixbuf_visibility ();
+	set_colors ();
 }
 
 void
@@ -691,13 +692,19 @@ TimeAxisViewItem::set_frame_color()
 	} else {
 		if (_recregion) {
 			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
-		} else {
+		} else if (high_enough_for_name) {
 			if (fill_opacity) {
 				frame->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_FrameBase.get(), fill_opacity);
 			} else {
 				frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_FrameBase.get();
 			}
-		}
+		} else {
+			if (fill_opacity) {
+				frame->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (fill_color, fill_opacity);
+			} else {
+				frame->property_fill_color_rgba() = fill_color;
+			}
+		}			
 	}
 }
 

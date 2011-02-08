@@ -2868,12 +2868,16 @@ MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, boo
 void
 MidiRegionView::set_frame_color()
 {
-	if (frame) {
-		if (_selected) {
-			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
-		} else {
-			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiFrameBase.get();
-		}
+	if (!frame) {
+		return;
+	}
+
+	if (_selected) {
+		frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
+	} else if (high_enough_for_name) {
+		frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiFrameBase.get();
+	} else {
+		frame->property_fill_color_rgba() = fill_color;
 	}
 }
 
