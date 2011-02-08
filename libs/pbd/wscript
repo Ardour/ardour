@@ -36,6 +36,8 @@ def configure(conf):
 	conf.check_tool('compiler_cxx')
 	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
 	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
+        if sys.platform != 'darwin':
+                autowaf.check_pkg(conf, 'uuid', uselib_store='UUID')
 
 	conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT')
 	conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO')
@@ -48,7 +50,7 @@ def configure(conf):
 	# Boost headers
 	autowaf.check_header(conf, 'boost/shared_ptr.hpp')
 	autowaf.check_header(conf, 'boost/weak_ptr.hpp')
-	autowaf.check_header(conf, 'boost/uuid/uuid.hpp')
+	# autowaf.check_header(conf, 'boost/uuid/uuid.hpp')
 
 def build(bld):
 	# Library
@@ -113,7 +115,7 @@ def build(bld):
 	obj.includes     = ['.']
 	obj.name         = 'libpbd'
 	obj.target       = 'pbd'
-	obj.uselib       = 'GLIBMM SIGCPP XML SNDFILE'
+	obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE'
 	if sys.platform == 'darwin':
 		TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
 		obj.source += 'cocoa_open_uri.mm'
