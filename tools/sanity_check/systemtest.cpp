@@ -249,13 +249,13 @@ int system_user_can_rtprio() {
 
   memset(&schparam, 0, sizeof(struct sched_param));
 
-  if (-1 == (min_prio = sched_get_priority_min(SCHED_RR))) {
+  if (-1 == (min_prio = sched_get_priority_min(SCHED_FIFO))) {
     perror("sched_get_priority");
     exit(EXIT_FAILURE);
   }
   schparam.sched_priority = min_prio;  
 
-  if (0 == sched_setscheduler(0, SCHED_RR, &schparam)) {
+  if (0 == sched_setscheduler(0, SCHED_FIFO, &schparam)) {
     // TODO: restore previous state
     schparam.sched_priority = 0;
     if (0 != sched_setscheduler(0, SCHED_OTHER, &schparam)) {
