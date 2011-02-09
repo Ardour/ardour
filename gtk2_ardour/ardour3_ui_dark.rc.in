@@ -317,6 +317,12 @@ style "default_button" = "small_text"
 {
 }
 
+style "mouse_mode_button" = "default_button"
+{
+        bg[ACTIVE] = @A_contrasting_indicator
+        fg[ACTIVE] = @A_darkest
+}
+
 style "default_menu" = "medium_text"
 {
   #bg[NORMAL] = darker(@A_bg)
@@ -1650,7 +1656,7 @@ widget "*CrossfadeEditCurveButton" style:highest "red_when_active"
 widget "*CrossfadeEditCurveButton*" style:highest "red_when_active"
 widget "*CrossfadeEditLabel" style:highest "medium_text"
 widget "*CrossfadeEditFrame" style:highest "base_frame"
-widget "*MouseModeButton" style:highest "default_button"
+widget "*MouseModeButton" style:highest "mouse_mode_button"
 widget "*MouseModeButton*" style:highest "default_button"
 widget "*EditorMainCanvas" style:highest "main_canvas_area"
 widget "*AudioTrackControlsBaseInactiveUnselected" style:highest "track_controls_inactive"
