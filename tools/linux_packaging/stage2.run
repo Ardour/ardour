@@ -362,7 +362,7 @@ if ! which qjackctl > /dev/null;
 then
 	echo ""
 	echo "The program QjackCtl is missing from this system."
-	echo "QjackCtl is an extremely useful tool for any system that runs JACK applications like $PGM_NAME.
+	echo "QjackCtl is an extremely useful tool for any system that runs JACK applications like $PGM_NAME."
 	echo "We recommend that you install it."
 	echo ""
 

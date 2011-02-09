@@ -10,7 +10,7 @@ SAVED_PWD=$PWD
 PKG_PATH=$(dirname $(readlink -f $0))
 cd ${PKG_PATH}
 
-if [ -z "$TERM" ] || [ "$TERM" == "dumb" ]; then
+if [ -z "$TERM" ] || [ "$TERM" = "dumb" ]; then
 	if which gnome-terminal > /dev/null; then
 		exec gnome-terminal -e ${PKG_PATH}/.stage2.run
 	elif which konsole > /dev/null; then
