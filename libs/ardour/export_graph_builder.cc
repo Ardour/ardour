@@ -17,6 +17,7 @@
 #include "ardour/export_format_specification.h"
 #include "ardour/export_timespan.h"
 #include "ardour/sndfile_helpers.h"
+#include "ardour/utils.h"
 
 #include "pbd/filesystem.h"
 
@@ -27,7 +28,7 @@ namespace ARDOUR {
 
 ExportGraphBuilder::ExportGraphBuilder (Session const & session)
   : session (session)
-  , thread_pool (4) // FIXME thread amount to cores amount
+  , thread_pool (how_many_dsp_threads()) 
 {
 	process_buffer_frames = session.engine().frames_per_cycle();
 }
