@@ -259,6 +259,10 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	// set_default_fade (0.2, 5.0); /* steepness, millisecs */
 
+        /* default: assume simple stereo speaker configuration */
+
+        _speakers->setup_default_speakers (2);
+
 	/* slave stuff */
 
 	average_slave_delta = 1800; // !!! why 1800 ????
@@ -1296,10 +1300,7 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	}
 
-        if ((child = find_named_node (node, X_("Speakers"))) == 0) {
-		warning << _("Session: XML state has no speakers section - assuming simple stereo") << endmsg;
-                _speakers->setup_default_speakers (2);
-        } else {
+        if ((child = find_named_node (node, X_("Speakers"))) != 0) {
                 _speakers->set_state (*child, version);
         }
 
