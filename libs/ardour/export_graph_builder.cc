@@ -20,6 +20,7 @@
 #include "ardour/utils.h"
 
 #include "pbd/filesystem.h"
+#include "pbd/cpus.h"
 
 using namespace AudioGrapher;
 using std::string;
@@ -28,7 +29,7 @@ namespace ARDOUR {
 
 ExportGraphBuilder::ExportGraphBuilder (Session const & session)
   : session (session)
-  , thread_pool (how_many_dsp_threads()) 
+  , thread_pool (hardware_concurrency())
 {
 	process_buffer_frames = session.engine().frames_per_cycle();
 }
