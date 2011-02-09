@@ -293,10 +293,6 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		return false;
 	}
 
-	/* XXX: note that until version 2.30, the GnomeCanvas did not propagate scroll events
-	   to its items, which means that ev->type == GDK_SCROLL will never be seen
-	*/
-
 	switch (ev->type) {
 	case GDK_SCROLL:
                 return scroll (&ev->scroll);
