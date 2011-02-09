@@ -47,7 +47,7 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-static const int pos_box_size = 9;
+static const int pos_box_size = 8;
 static const int lr_box_size = 15;
 static const int step_down = 10;
 static const int top_step = 2;
@@ -254,10 +254,8 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         
         /* draw the central box */
 
-        double spos = (pos_box_size/2.0) + (usable_width * pos);
-
         context->set_line_width (2.0);
-	context->move_to (spos + (pos_box_size/2.0), top_step); /* top right */
+	context->move_to (center + (pos_box_size/2.0), top_step); /* top right */
         context->rel_line_to (0.0, pos_box_size); /* lower right */
         context->rel_line_to (-pos_box_size/2.0, 4.0); /* bottom point */
         context->rel_line_to (-pos_box_size/2.0, -4.0); /* lower left */
