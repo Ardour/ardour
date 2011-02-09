@@ -657,6 +657,8 @@ matching_unsuffixed_filename_exists_in (const string& dir, const string& path)
 uint32_t
 how_many_dsp_threads ()
 {
+        /* CALLER MUST HOLD PROCESS LOCK */
+
         int num_cpu = hardware_concurrency();
         int pu = Config->get_processor_usage ();
         uint32_t num_threads = max (num_cpu - 1, 2); // default to number of cpus minus one, or 2, whichever is larger
