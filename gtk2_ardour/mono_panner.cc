@@ -216,13 +216,17 @@ MonoPanner::on_expose_event (GdkEventExpose* ev)
         /* 2 lines that connect them both */
         context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
         context->set_line_width (1.0);
-        context->move_to (left + half_lr_box, half_lr_box+step_down);
-        context->line_to (right - half_lr_box, half_lr_box+step_down);
+
+        /* make the lines a little longer than they need to be, because the corners of
+           the boxes are rounded and we don't want a gap
+        */
+        context->move_to (left + half_lr_box - corner_radius, half_lr_box+step_down);
+        context->line_to (right - half_lr_box + corner_radius, half_lr_box+step_down);
         context->stroke ();
 
 
-        context->move_to (left + half_lr_box, half_lr_box+step_down+lr_box_size);
-        context->line_to (right - half_lr_box, half_lr_box+step_down+lr_box_size);
+        context->move_to (left + half_lr_box - corner_radius, half_lr_box+step_down+lr_box_size);
+        context->line_to (right - half_lr_box + corner_radius, half_lr_box+step_down+lr_box_size);
         context->stroke ();
 
         /* draw the position indicator */

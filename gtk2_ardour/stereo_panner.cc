@@ -192,6 +192,14 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         left = center - pan_spread;  // center of left box
         right = center + pan_spread; // center of right box
 
+        /* center line */
+
+        context->set_line_width (1.0);
+        context->move_to ((usable_width + lr_box_size)/2.0, 0);
+        context->rel_line_to (0, height);
+        context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
+        context->stroke ();
+
         /* compute & draw the line through the box */
         
         context->set_line_width (2);

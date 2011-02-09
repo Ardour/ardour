@@ -47,7 +47,7 @@ using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 
-const int PannerUI::pan_bar_height = 40;
+const int PannerUI::pan_bar_height = 35;
 
 PannerUI::PannerUI (Session* s)
 	: _current_nouts (-1)
