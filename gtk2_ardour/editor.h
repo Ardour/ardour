@@ -42,6 +42,7 @@
 #include "gtkmm2ext/selector.h"
 #include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/dndtreeview.h"
+#include "gtkmm2ext/stateful_button.h"
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
@@ -1530,19 +1531,19 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Label               toolbar_selection_cursor_label;
 
 	Gtkmm2ext::TearOff*      _mouse_mode_tearoff;
-	Gtk::ToggleButton         mouse_select_button;
-	Gtk::ToggleButton         mouse_move_button;
-	Gtk::ToggleButton         mouse_gain_button;
-	Gtk::ToggleButton         mouse_zoom_button;
-	Gtk::ToggleButton         mouse_timefx_button;
-	Gtk::ToggleButton         mouse_audition_button;
-	Gtk::ToggleButton         join_object_range_button;
+	Gtkmm2ext::StatefulToggleButton mouse_select_button;
+	Gtkmm2ext::StatefulToggleButton mouse_move_button;
+	Gtkmm2ext::StatefulToggleButton mouse_gain_button;
+	Gtkmm2ext::StatefulToggleButton mouse_zoom_button;
+	Gtkmm2ext::StatefulToggleButton mouse_timefx_button;
+	Gtkmm2ext::StatefulToggleButton mouse_audition_button;
+	Gtkmm2ext::StatefulToggleButton join_object_range_button;
 
 	void                     mouse_mode_toggled (Editing::MouseMode m);
 	void			 mouse_mode_object_range_toggled () {}
 	bool                     ignore_mouse_mode_toggle;
 
-	Gtk::ToggleButton        internal_edit_button;
+	Gtkmm2ext::StatefulToggleButton internal_edit_button;
 	void                     toggle_internal_editing ();
 
 	gint                     mouse_select_button_release (GdkEventButton*);
