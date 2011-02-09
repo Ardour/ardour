@@ -733,9 +733,16 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case RegionViewNameHighlight:
+			if (!clicked_regionview->region()->locked()) {
+				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
+				_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
+				return true;
+			}
+			break;
+
 		case LeftFrameHandle:
 		case RightFrameHandle:
-			if (!clicked_regionview->region()->locked()) {
+			if (!internal_editing() && !clicked_regionview->region()->locked()) {
 				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
 				_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
 				return true;
@@ -835,7 +842,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case RegionViewNameHighlight:
 			case LeftFrameHandle:
                         case RightFrameHandle:
-				if (!internal_editing () && !clicked_regionview->region()->locked()) {
+				if (!clicked_regionview->region()->locked()) {
 					RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
 					_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
 					return true;
@@ -1063,6 +1070,10 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		switch (item_type) {
 		case RegionViewNameHighlight:
+                        _drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
+                        return true;
+                        break;
+
                 case LeftFrameHandle:
                 case RightFrameHandle:
 			if (!internal_editing ()) {
@@ -1578,7 +1589,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case RegionViewNameHighlight:
-		if (is_drawable() && mouse_mode == MouseObject && !internal_editing() && entered_regionview) {
+		if (is_drawable() && mouse_mode == MouseObject && entered_regionview) {
 			set_canvas_cursor_for_region_view (event->crossing.x, entered_regionview);
 			_over_region_trim_target = true;
 		}
