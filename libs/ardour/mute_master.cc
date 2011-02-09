@@ -88,22 +88,22 @@ MuteMaster::mute_gain_at (MutePoint mp) const
                 if (_soloed) {
                         gain = 1.0;
                 } else if (muted_by_self_at (mp)) {
-                        gain = Config->get_solo_mute_gain ();
+                        gain = 0.0;
                 } else {
                         if (muted_by_others_at (mp)) {
-                                gain = 0.0;
+                                gain = Config->get_solo_mute_gain ();
                         } else {
                                 gain = 1.0;
                         }
                 }
         } else {
                 if (muted_by_self_at (mp)) {
-                        gain = Config->get_solo_mute_gain ();
+                        gain = 0.0;
                 } else if (_soloed) {
                         gain = 1.0;
                 } else {
                         if (muted_by_others_at (mp)) {
-                                gain = 0.0;
+                                gain = Config->get_solo_mute_gain ();
                         } else {
                                 gain = 1.0;
                         }
