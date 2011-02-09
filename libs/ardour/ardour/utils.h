@@ -107,6 +107,8 @@ float meter_falloff_to_db_per_sec (float);
 const char* native_header_format_extension (ARDOUR::HeaderFormat, const ARDOUR::DataType& type);
 bool matching_unsuffixed_filename_exists_in (const std::string& dir, const std::string& name);
 
+uint32_t how_many_dsp_threads ();
+
 #if __APPLE__
 std::string CFStringRefToStdString(CFStringRef stringRef);
 #endif // __APPLE__

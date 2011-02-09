@@ -21,7 +21,6 @@
 #include <cmath>
 
 #include "pbd/compose.h"
-#include "pbd/cpus.h"
 #include "pbd/debug_rt_alloc.h"
 
 #include "ardour/debug.h"
@@ -96,38 +95,27 @@ Graph::parameter_changed (std::string param)
 void
 Graph::reset_thread_list ()
 {
-        int num_cpu = hardware_concurrency();
-        int pu = Config->get_processor_usage ();
-	pthread_t a_thread;
-        uint32_t num_threads = max (num_cpu - 1, 2); // default to number of cpus minus one, or 2, whichever is larger
+        uint32_t num_threads = how_many_dsp_threads ();
 
-        if (pu < 0) {
-                /* pu is negative: use "pu" less cores for DSP than appear to be available
-                 */
-
-                if (-pu < num_cpu) {
-                        num_threads = num_cpu + pu;
-                }
-
-        } else if (pu == 0) {
-
-                num_threads = num_cpu;
-
-        } else {
-                /* use "pu" cores, if available
-                 */
-                
-                num_threads = min (num_cpu, pu);
-        }
+        /* don't bother doing anything here if we already have the right
+           number of threads.
+        */
 
         if (_thread_list.size() == num_threads) {
                 return;
         }
 
         Glib::Mutex::Lock lm (_session.engine().process_lock());
+	pthread_t a_thread;
 
         if (!_thread_list.empty()) {
                 drop_threads ();
+        }
+
+        if (num_threads <= 1) {
+                /* no point creating 1 thread - the AudioEngine already gives us one
+                 */
+                return;
         }
 
 	if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::main_thread, this), &a_thread, 100000) == 0) {
@@ -139,9 +127,6 @@ Graph::reset_thread_list ()
 			_thread_list.push_back (a_thread);
 		}
         }
-
-        info << string_compose (_("Using %1 threads for DSP on %2 CPUs"), _thread_list.size(), num_cpu) << endmsg;
-        cerr << string_compose (_("Using %1 threads for DSP on %2 CPUs"), _thread_list.size(), num_cpu) << endl;
 }
 
 void

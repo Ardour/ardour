@@ -44,12 +44,15 @@
 #include <wordexp.h>
 #endif
 
+#include "pbd/cpus.h"
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
 #include "pbd/basename.h"
 #include "pbd/strsplit.h"
+
 #include "ardour/utils.h"
+#include "ardour/rc_configuration.h"
 
 #include "i18n.h"
 
@@ -649,6 +652,38 @@ matching_unsuffixed_filename_exists_in (const string& dir, const string& path)
 
         ::closedir (dead);
         return ret;
+}
+
+uint32_t
+how_many_dsp_threads ()
+{
+        int num_cpu = hardware_concurrency();
+        int pu = Config->get_processor_usage ();
+        uint32_t num_threads = max (num_cpu - 1, 2); // default to number of cpus minus one, or 2, whichever is larger
+
+        if (pu < 0) {
+                /* pu is negative: use "pu" less cores for DSP than appear to be available
+                 */
+
+                if (-pu < num_cpu) {
+                        num_threads = num_cpu + pu;
+                }
+
+        } else if (pu == 0) {
+
+                /* use all available CPUs 
+                 */
+                
+                num_threads = num_cpu;
+
+        } else {
+                /* use "pu" cores, if available
+                 */
+                
+                num_threads = min (num_cpu, pu);
+        }
+
+        return num_threads;
 }
 
 extern "C" {

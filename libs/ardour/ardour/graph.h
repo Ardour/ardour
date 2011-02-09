@@ -58,6 +58,8 @@ class Graph : public SessionHandleRef
     public:
 	Graph (Session & session);
 
+        uint32_t threads_in_use () const { return _thread_list.size(); }
+
 	void prep();
 	void trigger (GraphNode * n);
 	void rechain (boost::shared_ptr<RouteList> r);
