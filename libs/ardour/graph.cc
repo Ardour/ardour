@@ -97,32 +97,37 @@ void
 Graph::reset_thread_list ()
 {
         int num_cpu = hardware_concurrency();
-        uint32_t num_threads = num_cpu;
         int pu = Config->get_processor_usage ();
 	pthread_t a_thread;
-
-        Glib::Mutex::Lock lm (_session.engine().process_lock());
-
-        if (!_thread_list.empty()) {
-                drop_threads ();
-        }
+        uint32_t num_threads = max (num_cpu - 1, 2); // default to number of cpus minus one, or 2, whichever is larger
 
         if (pu < 0) {
                 /* pu is negative: use "pu" less cores for DSP than appear to be available
                  */
 
-                if ((uint32_t) -pu < num_threads) {
-                        num_threads += pu; 
-                } else {
-                        num_threads = 1;
+                if (-pu < num_cpu) {
+                        num_threads = num_cpu + pu;
                 }
+
+        } else if (pu == 0) {
+
+                num_threads = num_cpu;
+
         } else {
                 /* use "pu" cores, if available
                  */
                 
-                if ((uint32_t) pu <= num_threads) {
-                        num_threads = pu;
-                } 
+                num_threads = min (num_cpu, pu);
+        }
+
+        if (_thread_list.size() == num_threads) {
+                return;
+        }
+
+        Glib::Mutex::Lock lm (_session.engine().process_lock());
+
+        if (!_thread_list.empty()) {
+                drop_threads ();
         }
 
 	if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::main_thread, this), &a_thread, 100000) == 0) {
@@ -135,8 +140,8 @@ Graph::reset_thread_list ()
 		}
         }
 
-        info << string_compose (_("Using %2 threads on %1 CPUs"), _thread_list.size(), num_threads) << endmsg;
-        cerr << string_compose (_("Using %2 threads on %1 CPUs"), _thread_list.size(), num_threads) << endl;
+        info << string_compose (_("Using %1 threads for DSP on %2 CPUs"), _thread_list.size(), num_cpu) << endmsg;
+        cerr << string_compose (_("Using %1 threads for DSP on %2 CPUs"), _thread_list.size(), num_cpu) << endl;
 }
 
 void
