@@ -33,6 +33,7 @@
 #include <glibmm.h>
 
 #include "pbd/cartesian.h"
+#include "pbd/boost_debug.h"
 #include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
@@ -45,6 +46,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/automatable.h"
 #include "ardour/buffer_set.h"
+#include "ardour/debug.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_manager.h"
@@ -70,6 +72,7 @@ PannerShell::PannerShell (string name, Session& s, boost::shared_ptr<Pannable> p
 
 PannerShell::~PannerShell ()
 {
+        DEBUG_TRACE(DEBUG::Destruction, string_compose ("panner shell for %1 destructor, pannable is %2\n", _name, _pannable));
 }
 
 void
@@ -101,7 +104,9 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
                 abort ();
         }
 
-        _panner.reset (pi->descriptor.factory (_pannable, _session.get_speakers()));
+        Panner* p = pi->descriptor.factory (_pannable, _session.get_speakers());
+        boost_debug_shared_ptr_mark_interesting (p, "Panner");
+        _panner.reset (p);
         _panner->configure_io (in, out);
 
         Changed (); /* EMIT SIGNAL */

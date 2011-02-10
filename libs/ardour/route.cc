@@ -27,6 +27,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
 #include "pbd/convert.h"
+#include "pbd/boost_debug.h"
 
 #include "evoral/Curve.hpp"
 
@@ -118,7 +119,9 @@ Route::init ()
 
         /* panning */
         
-        _pannable.reset (new Pannable (_session));
+        Pannable* p = new Pannable (_session);
+	boost_debug_shared_ptr_mark_interesting (p, "Pannable");
+        _pannable.reset (p);
 
 	/* input and output objects */
 

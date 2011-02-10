@@ -256,8 +256,10 @@ Pannable::set_state (const XMLNode& root, int /*version - not used*/)
 string 
 Pannable::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 {
-        if (_panner) {
-                return _panner->value_as_string (ac);
+        boost::shared_ptr<Panner> p = panner ();
+
+        if (p) {
+                return p->value_as_string (ac);
         } 
 
         return Automatable::value_as_string (ac);

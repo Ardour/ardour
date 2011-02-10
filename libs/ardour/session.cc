@@ -323,12 +323,12 @@ Session::destroy ()
 	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
 	playlists.reset ();
 
-	boost_debug_list_ptrs ();
-
 	delete _locations;
         delete _speakers;
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
+
+	boost_debug_list_ptrs ();
 }
 
 void

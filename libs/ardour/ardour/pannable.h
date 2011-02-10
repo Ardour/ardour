@@ -48,7 +48,7 @@ class Pannable : public PBD::Stateful, public Automatable, public SessionHandleR
         boost::shared_ptr<AutomationControl> pan_frontback_control;
         boost::shared_ptr<AutomationControl> pan_lfe_control;
         
-        boost::shared_ptr<Panner> panner() const { return _panner; }
+        boost::shared_ptr<Panner> panner() const { return _panner.lock(); }
         void set_panner(boost::shared_ptr<Panner>);
 
         Session& session() { return _session; }
@@ -83,7 +83,7 @@ class Pannable : public PBD::Stateful, public Automatable, public SessionHandleR
         bool has_state() const { return _has_state; }
 
   protected:
-        boost::shared_ptr<Panner> _panner;
+        boost::weak_ptr<Panner> _panner;
         AutoState _auto_state;
         AutoStyle _auto_style;
         gint      _touching;

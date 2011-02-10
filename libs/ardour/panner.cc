@@ -19,6 +19,7 @@
 
 #include "ardour/audio_buffer.h"
 #include "ardour/buffer_set.h"
+#include "ardour/debug.h"
 #include "ardour/panner.h"
 #include "ardour/pannable.h"
 #include "ardour/session.h"
@@ -35,6 +36,7 @@ Panner::Panner (boost::shared_ptr<Pannable> p)
 
 Panner::~Panner ()
 {
+        DEBUG_TRACE(PBD::DEBUG::Destruction, string_compose ("panner @ %1 destructor, pannable is %2\n", this, _pannable));
 }
 
 void
