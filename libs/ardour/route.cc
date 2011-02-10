@@ -1765,10 +1765,8 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 		}
 	}
 
-        if (true) {
-                processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
-		set_processor_positions ();
-        }
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	set_processor_positions ();
 
 	return 0;
 }
