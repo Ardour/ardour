@@ -31,6 +31,9 @@
 #include "pbd/textreceiver.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/pthread_utils.h"
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
+#include "pbd/boost_debug.h"
+#endif
 
 #include <jack/jack.h>
 
@@ -535,8 +538,9 @@ int main (int argc, char *argv[])
 {
 	fixup_bundle_environment (argc, argv);
 
-	if (!Glib::thread_supported())
+	if (!Glib::thread_supported()) {
 		Glib::thread_init();
+        }
 
 	gtk_set_locale ();
 
@@ -563,6 +567,12 @@ int main (int argc, char *argv[])
 	text_receiver.listen_to (info);
 	text_receiver.listen_to (fatal);
 	text_receiver.listen_to (warning);
+
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
+        if (getenv ("BOOST_DEBUG")) {
+                boost_debug_shared_ptr_show_live_debugging (true);
+        }
+#endif
 
 	if (parse_opts (argc, argv)) {
 		exit (1);
