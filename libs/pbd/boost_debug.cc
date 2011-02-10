@@ -119,10 +119,30 @@ typedef std::map<void const*,const char*> IPointerMap;
 
 using namespace std;
 
-PointerMap sptrs;
-IPointerMap interesting_pointers;
+static PointerMap* _sptrs;
+PointerMap& sptrs() { 
+        if (_sptrs == 0) {
+                _sptrs = new PointerMap;
+        }
+        return *_sptrs;
+}
 
-static Glib::StaticMutex the_lock;
+static IPointerMap* _interesting_pointers;
+IPointerMap& interesting_pointers() { 
+        if (_interesting_pointers == 0) {
+                _interesting_pointers = new IPointerMap;
+        }
+        return *_interesting_pointers;
+}
+
+static Glib::Mutex* _the_lock;
+static Glib::Mutex& the_lock() {
+        if (_the_lock == 0) {
+                _the_lock = new Glib::Mutex;
+        }
+        return *_the_lock;
+}
+
 
 static bool
 is_interesting_object (void const* ptr)
@@ -131,7 +151,7 @@ is_interesting_object (void const* ptr)
 		return false;
 	}
 	
-	return interesting_pointers.find (ptr) != interesting_pointers.end();
+	return interesting_pointers().find (ptr) != interesting_pointers().end();
 }
 
 /* ------------------------------- */
@@ -147,9 +167,9 @@ boost_debug_shared_ptr_show_live_debugging (bool yn)
 void
 boost_debug_shared_ptr_mark_interesting (void* ptr, const char* type)
 {
-	Glib::Mutex::Lock guard (the_lock);
+	Glib::Mutex::Lock guard (the_lock());
  	pair<void*,const char*> newpair (ptr, type);
-	interesting_pointers.insert (newpair);
+	interesting_pointers().insert (newpair);
 	if (debug_out) {
 		cerr << "Interesting object @ " << ptr << " of type " << type << endl;
 	}
@@ -162,7 +182,7 @@ boost_debug_shared_ptr_operator_equals (void const *sp, void const *old_obj, int
 		return;
 	}
 
-	Glib::Mutex::Lock guard (the_lock);
+	Glib::Mutex::Lock guard (the_lock());
 
 	if (is_interesting_object  (old_obj) || is_interesting_object (obj)) {
 		if (debug_out) {
@@ -173,14 +193,14 @@ boost_debug_shared_ptr_operator_equals (void const *sp, void const *old_obj, int
 	if (is_interesting_object (old_obj)) {
 		if (debug_out) {
 			cerr << "\tlost old sp @ " << sp << " for " << old_obj << " UC = " << old_use_count << " now for " << obj << " UC = " << new_use_count 
-			     << " (total sp's = " << sptrs.size() << ')' << endl;			
+			     << " (total sp's = " << sptrs().size() << ')' << endl;			
 		}
-		PointerMap::iterator x = sptrs.find (sp);
+		PointerMap::iterator x = sptrs().find (sp);
 		
-		if (x != sptrs.end()) {
-			sptrs.erase (x);
+		if (x != sptrs().end()) {
+			sptrs().erase (x);
 			if (debug_out) {
-				cerr << "\tRemoved (by assigment) sp for " << old_obj << " @ " << sp << " UC = " << old_use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+				cerr << "\tRemoved (by assigment) sp for " << old_obj << " @ " << sp << " UC = " << old_use_count << " (total sp's = " << sptrs().size() << ')' << endl;
 			}
 		}
 	}
@@ -192,12 +212,12 @@ boost_debug_shared_ptr_operator_equals (void const *sp, void const *old_obj, int
 		newpair.first = sp;
 		newpair.second = new SPDebug (new Backtrace());
 
-		sptrs.insert (newpair);
+		sptrs().insert (newpair);
 		
 		if (debug_out) {
 			cerr << "assignment created sp for " << obj << " @ " << sp << " used to point to " << old_obj << " UC = " << old_use_count 
 			     << " UC = " << new_use_count 
-			     << " (total sp's = " << sptrs.size() << ')' << endl;			
+			     << " (total sp's = " << sptrs().size() << ')' << endl;			
 			cerr << *newpair.second << endl;
 		}
 	} 
@@ -210,7 +230,7 @@ boost_debug_shared_ptr_reset (void const *sp, void const *old_obj, int old_use_c
 		return;
 	}
 
-	Glib::Mutex::Lock guard (the_lock);
+	Glib::Mutex::Lock guard (the_lock());
 
 	if (is_interesting_object  (old_obj) || is_interesting_object (obj)) {
 		if (debug_out) {
@@ -221,14 +241,14 @@ boost_debug_shared_ptr_reset (void const *sp, void const *old_obj, int old_use_c
 	if (is_interesting_object (old_obj)) {
 		if (debug_out) {
 			cerr << "\tlost old sp @ " << sp << " for " << old_obj << " UC = " << old_use_count << " now for " << obj << " UC = " << new_use_count 
-			     << " (total sp's = " << sptrs.size() << ')' << endl;			
+			     << " (total sp's = " << sptrs().size() << ')' << endl;			
 		}
-		PointerMap::iterator x = sptrs.find (sp);
+		PointerMap::iterator x = sptrs().find (sp);
 		
-		if (x != sptrs.end()) {
-			sptrs.erase (x);
+		if (x != sptrs().end()) {
+			sptrs().erase (x);
 			if (debug_out) {
-				cerr << "\tRemoved (by reset) sp for " << old_obj << " @ " << sp << " UC = " << old_use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+				cerr << "\tRemoved (by reset) sp for " << old_obj << " @ " << sp << " UC = " << old_use_count << " (total sp's = " << sptrs().size() << ')' << endl;
 			}
 		}
 	}
@@ -240,12 +260,12 @@ boost_debug_shared_ptr_reset (void const *sp, void const *old_obj, int old_use_c
 		newpair.first = sp;
 		newpair.second = new SPDebug (new Backtrace());
 
-		sptrs.insert (newpair);
+		sptrs().insert (newpair);
 		
 		if (debug_out) {
 			cerr << "reset created sp for " << obj << " @ " << sp << " used to point to " << old_obj << " UC = " << old_use_count 
 			     << " UC = " << new_use_count 
-			     << " (total sp's = " << sptrs.size() << ')' << endl;			
+			     << " (total sp's = " << sptrs().size() << ')' << endl;			
 			cerr << *newpair.second << endl;
 		}
 	} 
@@ -254,13 +274,13 @@ boost_debug_shared_ptr_reset (void const *sp, void const *old_obj, int old_use_c
 void
 boost_debug_shared_ptr_destructor (void const *sp, void const *obj, int use_count)
 {
-	Glib::Mutex::Lock guard (the_lock);
-	PointerMap::iterator x = sptrs.find (sp);
+	Glib::Mutex::Lock guard (the_lock());
+	PointerMap::iterator x = sptrs().find (sp);
 
-	if (x != sptrs.end()) {
-		sptrs.erase (x);
+	if (x != sptrs().end()) {
+		sptrs().erase (x);
 		if (debug_out) {
-			cerr << "Removed sp for " << obj << " @ " << sp << " UC = " << use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+			cerr << "Removed sp for " << obj << " @ " << sp << " UC = " << use_count << " (total sp's = " << sptrs().size() << ')' << endl;
 		}
 	}
 }
@@ -269,15 +289,15 @@ void
 boost_debug_shared_ptr_constructor (void const *sp, void const *obj, int use_count)
 {
 	if (is_interesting_object (obj)) {
-		Glib::Mutex::Lock guard (the_lock);
+		Glib::Mutex::Lock guard (the_lock());
 		pair<void const*, SPDebug*> newpair;
 
 		newpair.first = sp;
 		newpair.second = new SPDebug (new Backtrace());
 
-		sptrs.insert (newpair);
+		sptrs().insert (newpair);
 		if (debug_out) {
-			cerr << "Stored constructor for " << obj << " @ " << sp << " UC = " << use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+			cerr << "Stored constructor for " << obj << " @ " << sp << " UC = " << use_count << " (total sp's = " << sptrs().size() << ')' << endl;
 			cerr << *newpair.second << endl;
 		}
 	}
@@ -286,19 +306,19 @@ boost_debug_shared_ptr_constructor (void const *sp, void const *obj, int use_cou
 void
 boost_debug_count_ptrs ()
 {
-	Glib::Mutex::Lock guard (the_lock);
-	// cerr << "Tracking " << interesting_pointers.size() << " interesting objects with " << sptrs.size () << " shared ptrs\n";
+	Glib::Mutex::Lock guard (the_lock());
+	// cerr << "Tracking " << interesting_pointers().size() << " interesting objects with " << sptrs().size () << " shared ptrs\n";
 }
 
 void
 boost_debug_list_ptrs ()
 {
-	Glib::Mutex::Lock guard (the_lock);
+	Glib::Mutex::Lock guard (the_lock());
 
-	if (sptrs.empty()) {
+	if (sptrs().empty()) {
 		cerr << "There are no dangling shared ptrs\n";
 	} else {
-		for (PointerMap::iterator x = sptrs.begin(); x != sptrs.end(); ++x) {
+		for (PointerMap::iterator x = sptrs().begin(); x != sptrs().end(); ++x) {
 			cerr << "Shared ptr @ " << x->first << " history: "
 			     << *x->second
 			     << endl;

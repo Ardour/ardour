@@ -467,7 +467,7 @@ def configure(conf):
 	autowaf.check_header(conf, 'boost/signals2.hpp', mandatory = True)
 
 	if Options.options.boost_sp_debug:
-		conf.env.append_value('CXXFLAGS_BOOST', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
+		conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
 
 	autowaf.check_header(conf, 'jack/session.h', define="JACK_SESSION", mandatory = False)
 
