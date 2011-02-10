@@ -75,7 +75,9 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 		}
 	}
 
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
+#endif
 	return ret;
 }
 
@@ -110,7 +112,9 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 		}
 	}
 
-	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS	
+        boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
+#endif
 	return ret;
 }
 
@@ -145,7 +149,9 @@ RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, c
 		}
 	}
 
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
+#endif
 	return ret;
 }
 
@@ -180,7 +186,9 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 		}
 	}
 
-	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS	
+        boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
+#endif
 	return ret;
 }
 
@@ -218,7 +226,9 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 		}
 	}
 
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
+#endif
 	return ret;
 }
 
@@ -256,7 +266,9 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 		}
 	}
 
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
+#endif
 	return ret;
 }
 

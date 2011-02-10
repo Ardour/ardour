@@ -328,7 +328,9 @@ Session::destroy ()
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 	boost_debug_list_ptrs ();
+#endif
 }
 
 void
@@ -1533,7 +1535,9 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 
 			mt->use_new_diskstream();
 
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 			boost_debug_shared_ptr_mark_interesting (mt, "Track");
+#endif
 			track = boost::shared_ptr<MidiTrack>(mt);
 
 			{
@@ -1702,7 +1706,9 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 			at->use_new_diskstream();
 
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 			boost_debug_shared_ptr_mark_interesting (at, "Track");
+#endif
 			track = boost::shared_ptr<AudioTrack>(at);
 
 			{
@@ -1820,7 +1826,9 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 				goto failure;
 			}
 
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 			boost_debug_shared_ptr_mark_interesting (rt, "Route");
+#endif
                         boost::shared_ptr<Route> bus (rt);
 
 			{

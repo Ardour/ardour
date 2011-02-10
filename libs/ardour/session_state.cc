@@ -582,7 +582,9 @@ Session::create (const string& mix_template, BusProfile* bus_profile)
                                 delete rt;
                                 return -1;
                         }
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 			boost_debug_shared_ptr_mark_interesting (rt, "Route");
+#endif
 			boost::shared_ptr<Route> r (rt);
 			{
 				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
@@ -599,7 +601,9 @@ Session::create (const string& mix_template, BusProfile* bus_profile)
                                         delete rt;
                                         return -1;
                                 }
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
                                 boost_debug_shared_ptr_mark_interesting (rt, "Route");
+#endif
                                 boost::shared_ptr<Route> r (rt);
 				{
 					Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
@@ -1516,14 +1520,18 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
                         return ret;
                 }
                 
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
                 boost_debug_shared_ptr_mark_interesting (track, "Track");
+#endif
                 ret.reset (track);
                 
 	} else {
 		Route* rt = new Route (*this, X_("toBeResetFroXML"));
 
                 if (rt->init () == 0 && rt->set_state (node, version) == 0) {
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
                         boost_debug_shared_ptr_mark_interesting (rt, "Route");
+#endif
                         ret.reset (rt);
                 } else {
                         delete rt;
@@ -1589,14 +1597,18 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 
 		track->set_diskstream (*i);
                 
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS                
                 boost_debug_shared_ptr_mark_interesting (track, "Track");
+#endif
                 ret.reset (track);
                 
 	} else {
 		Route* rt = new Route (*this, X_("toBeResetFroXML"));
 
                 if (rt->init () == 0 && rt->set_state (node, version) == 0) {
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
                         boost_debug_shared_ptr_mark_interesting (rt, "Route");
+#endif
                         ret.reset (rt);
                 } else {
                         delete rt;

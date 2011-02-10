@@ -28,6 +28,7 @@
 
 namespace Gtkmm2ext {
         class TearOff;
+        class MotionFeedback;
 }
 
 class VolumeController;
@@ -64,11 +65,11 @@ class MonitorSection : public RouteUI
         ChannelButtons _channel_buttons;
 
         Gtk::Adjustment   gain_adjustment;
-        VolumeController* gain_control;
+        Gtkmm2ext::MotionFeedback* gain_control;
         Gtk::Adjustment   dim_adjustment;
-        VolumeController* dim_control;
+        Gtkmm2ext::MotionFeedback* dim_control;
         Gtk::Adjustment   solo_boost_adjustment;
-        VolumeController* solo_boost_control;
+        Gtkmm2ext::MotionFeedback* solo_boost_control;
         Gtk::Adjustment   solo_cut_adjustment;
         VolumeController* solo_cut_control;
 

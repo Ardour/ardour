@@ -43,7 +43,7 @@ MonitorSection::MonitorSection (Session* s)
         , dim_control (0)
         , solo_boost_adjustment (1.0, 1.0, 3.0, 0.01, 0.1)  // upper and lower will be reset to match model
         , solo_boost_control (0)
-        , solo_cut_adjustment (0.0, 0.0, 1.0, 0.01, 0.1) // upper and lower will be reset to match model
+        , solo_cut_adjustment (0.0, 0.0, 1.0, 0.01, 0.1) 
         , solo_cut_control (0)
         , solo_in_place_button (solo_model_group, _("SiP"))
         , afl_button (solo_model_group, _("AFL"))
@@ -74,7 +74,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Dim */
 
-        dim_control = new VolumeController (little_knob_pixbuf, &dim_adjustment, false, 30, 30);
+        dim_control = new MotionFeedback (little_knob_pixbuf,  MotionFeedback::Rotary, "", &dim_adjustment, false, 30, 30);
 
         HBox* dim_packer = manage (new HBox);
         dim_packer->show ();
@@ -138,7 +138,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Solo Boost */
 
-        solo_boost_control = new VolumeController (little_knob_pixbuf, &solo_boost_adjustment, false, 30, 30);
+        solo_boost_control = new MotionFeedback (little_knob_pixbuf,  MotionFeedback::Rotary, "", &solo_boost_adjustment, false, 30, 30);
 
         HBox* solo_packer = manage (new HBox);
         solo_packer->set_spacing (12);
@@ -238,7 +238,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Gain */
 
-        gain_control = new VolumeController (big_knob_pixbuf, &gain_adjustment, false, 80, 80);
+        gain_control = new MotionFeedback (big_knob_pixbuf,  MotionFeedback::Rotary, "", &gain_adjustment, false, 80, 80);
 
         spin_label = manage (new Label (_("Gain")));
         spin_packer = manage (new VBox);

@@ -120,7 +120,9 @@ Route::init ()
         /* panning */
         
         Pannable* p = new Pannable (_session);
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 	boost_debug_shared_ptr_mark_interesting (p, "Pannable");
+#endif
         _pannable.reset (p);
 
 	/* input and output objects */
