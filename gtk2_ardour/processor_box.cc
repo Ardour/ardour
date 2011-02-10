@@ -949,14 +949,14 @@ ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams)
 	text += _("\nThis plugin has:\n");
 	if (has_midi) {
 		uint32_t const n = p.get_info()->n_inputs.n_midi ();
-		text += string_compose (ngettext ("\t%1 MIDI input", "\t%1 MIDI inputs", n), n);
+		text += string_compose (ngettext ("\t%1 MIDI input\n", "\t%1 MIDI inputs\n", n), n);
 	}
 	if (has_audio) {
 		uint32_t const n = p.get_info()->n_inputs.n_audio ();
-		text += string_compose (ngettext ("\t%1 audio input", "\t%1 audio inputs", n), n);
+		text += string_compose (ngettext ("\t%1 audio input\n", "\t%1 audio inputs\n", n), n);
 	}
 
-	text += _("\nBut at the insertion point, there are:\n");
+	text += _("\nbut at the insertion point, there are:\n");
 	if (has_midi) {
 		uint32_t const n = streams.count.n_midi ();
 		text += string_compose (ngettext ("\t%1 MIDI channel\n", "\t%1 MIDI channels\n", n), n);
