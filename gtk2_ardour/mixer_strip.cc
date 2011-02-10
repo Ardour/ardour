@@ -1904,3 +1904,9 @@ MixerStrip::plugin_selector()
 {
 	return _mixer.plugin_selector();
 }
+
+void
+MixerStrip::hide_things ()
+{
+	processor_box.hide_things ();
+}

@@ -107,6 +107,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 		return _mixer_owned;
 	}
 
+	void hide_things ();
+
 	sigc::signal<void> WidthChanged;
 
 	/** The delivery that we are handling the level for with our fader has changed */

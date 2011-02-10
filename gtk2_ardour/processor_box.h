@@ -119,6 +119,9 @@ public:
 	void set_enum_width (Width);
 	virtual void set_pixel_width (int) {}
 
+	/** Hide any widgets that should be hidden */
+	virtual void hide_things () {}
+
 protected:
 	
 	virtual void setup_visuals ();
@@ -173,6 +176,8 @@ class PluginInsertProcessorEntry : public ProcessorEntry
 public:
 	PluginInsertProcessorEntry (boost::shared_ptr<ARDOUR::PluginInsert>, Width);
 
+	void hide_things ();
+	
 private:
 	void setup_visuals ();
 	void plugin_insert_splitting_changed ();
@@ -205,6 +210,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void select_all_plugins ();
 	void select_all_inserts ();
 	void select_all_sends ();
+
+	void hide_things ();
 
 	Gtk::Window* get_processor_ui (boost::shared_ptr<ARDOUR::Processor>) const;
 	void toggle_edit_processor (boost::shared_ptr<ARDOUR::Processor>);

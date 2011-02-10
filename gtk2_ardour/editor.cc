@@ -816,6 +816,11 @@ Editor::show_window ()
 	if (!is_visible ()) {
 		show_all ();
 
+		/* XXX: this is a bit unfortunate; it would probably
+		   be nicer if we could just call show () above rather
+		   than needing the show_all ()
+		*/
+		
 		/* re-hide stuff if necessary */
 		editor_list_button_toggled ();
 		parameter_changed ("show-summary");
@@ -831,6 +836,10 @@ Editor::show_window ()
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			tv = (static_cast<TimeAxisView*>(*i));
 			tv->reset_height ();
+		}
+
+		if (current_mixer_strip) {
+			current_mixer_strip->hide_things ();
 		}
 	}
 

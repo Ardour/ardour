@@ -385,6 +385,12 @@ PluginInsertProcessorEntry::plugin_insert_splitting_changed ()
 }
 
 void
+PluginInsertProcessorEntry::hide_things ()
+{
+	plugin_insert_splitting_changed ();
+}
+
+void
 PluginInsertProcessorEntry::setup_visuals ()
 {
 	switch (_position) {
@@ -2282,6 +2288,15 @@ ProcessorBox::mixer_strip_delivery_changed (boost::weak_ptr<Delivery> w)
 		processor_display.set_active (0);
 	} else {
 		processor_display.set_active (*i);
+	}
+}
+
+void
+ProcessorBox::hide_things ()
+{
+	list<ProcessorEntry*> c = processor_display.children ();
+	for (list<ProcessorEntry*>::iterator i = c.begin(); i != c.end(); ++i) {
+		(*i)->hide_things ();
 	}
 }
 

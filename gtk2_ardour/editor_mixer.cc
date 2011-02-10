@@ -121,7 +121,7 @@ Editor::show_editor_mixer (bool yn)
 		if (current_mixer_strip->get_parent() == 0) {
 			global_hpacker.pack_start (*current_mixer_strip, Gtk::PACK_SHRINK );
  			global_hpacker.reorder_child (*current_mixer_strip, 0);
-			current_mixer_strip->show_all ();
+			current_mixer_strip->show ();
 		}
 
 	} else {
