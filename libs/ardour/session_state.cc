@@ -274,6 +274,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
         _solo_cut_control.reset (new ProxyControllable (_("solo cut control (dB)"), PBD::Controllable::GainLike,
                                                         boost::bind (&RCConfiguration::set_solo_mute_gain, Config, _1),
                                                         boost::bind (&RCConfiguration::get_solo_mute_gain, Config)));
+        add_controllable (_solo_cut_control);
 
 	_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this));
 
