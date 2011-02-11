@@ -95,6 +95,7 @@
 #include "ardour/pannable.h"
 #include "ardour/processor.h"
 #include "ardour/port.h"
+#include "ardour/proxy_controllable.h"
 #include "ardour/region_factory.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
@@ -269,6 +270,10 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	have_first_delta_accumulator = false;
 	delta_accumulator_cnt = 0;
 	_slave_state = Stopped;
+
+        _solo_cut_control.reset (new ProxyControllable (_("solo cut control (dB)"), PBD::Controllable::GainLike,
+                                                        boost::bind (&RCConfiguration::set_solo_mute_gain, Config, _1),
+                                                        boost::bind (&RCConfiguration::get_solo_mute_gain, Config)));
 
 	_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this));
 
@@ -3520,4 +3525,19 @@ Session::setup_midi_machine_control ()
 	mmc->SPPStart.connect_same_thread (*this, boost::bind (&Session::spp_start, this, _1, _2));
 	mmc->SPPContinue.connect_same_thread (*this, boost::bind (&Session::spp_continue, this, _1, _2));
 	mmc->SPPStop.connect_same_thread (*this, boost::bind (&Session::spp_stop, this, _1, _2));
+}
+
+boost::shared_ptr<Controllable>
+Session::solo_cut_control() const
+{
+        /* the solo cut control is a bit of an anomaly, at least as of Febrary 2011. There are no other
+           controls in Ardour that currently get presented to the user in the GUI that require
+           access as a Controllable and are also NOT owned by some SessionObject (e.g. Route, or MonitorProcessor).
+
+           its actually an RCConfiguration parameter, so we use a ProxyControllable to wrap
+           it up as a Controllable. Changes to the Controllable will just map back to the RCConfiguration
+           parameter.
+        */
+        
+        return _solo_cut_control;
 }

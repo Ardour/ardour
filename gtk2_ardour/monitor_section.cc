@@ -18,7 +18,6 @@
 #include "monitor_section.h"
 #include "public_editor.h"
 #include "utils.h"
-#include "volume_controller.h"
 
 #include "i18n.h"
 
@@ -155,7 +154,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Solo (SiP) cut */
 
-        solo_cut_control = new VolumeController (little_knob_pixbuf, &solo_cut_adjustment, false, 30, 30);
+        solo_cut_control = new MotionFeedback (little_knob_pixbuf, MotionFeedback::Rotary, "", &solo_cut_adjustment, false, 30, 30);
 
         spin_label = manage (new Label (_("SiP Cut")));
         spin_packer = manage (new VBox);
@@ -310,25 +309,26 @@ MonitorSection::set_session (Session* s)
                 _route = _session->monitor_out ();
 
                 if (_route) {
-                        /* session with control outs */
+                        /* session with monitor section */
                         _monitor = _route->monitor_control ();
                         assign_controllables ();
                 } else { 
-                        /* session with no control outs */
+                        /* session with no monitor section */
                         _monitor.reset ();
                         _route.reset ();
                 }
                 
         } else {
                 /* no session */
+
                 _monitor.reset ();
                 _route.reset ();
                 control_connections.drop_connections ();
                 rude_iso_button.set_active (false);
                 rude_solo_button.set_active (false);
-        }
 
-        /* both might be null */
+                assign_controllables ();
+        }
 }
 
 MonitorSection::ChannelButtonSet::ChannelButtonSet ()
@@ -627,9 +627,6 @@ MonitorSection::register_actions ()
         
         tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
         tact->set_active (Config->get_solo_mute_override());
-
-        /* map from RC config */
-
 
 
         /* note the 1-based counting (for naming - backend uses 0-based) */
@@ -1012,6 +1009,12 @@ MonitorSection::assign_controllables ()
         if (!gain_control) {
                 /* too early - GUI controls not set up yet */
                 return;
+        }
+
+        if (_session) {
+                solo_cut_control->set_controllable (_session->solo_cut_control());
+        } else {
+                solo_cut_control->set_controllable (none);
         }
 
         if (_route) {

@@ -31,8 +31,6 @@ namespace Gtkmm2ext {
         class MotionFeedback;
 }
 
-class VolumeController;
-
 class MonitorSection : public RouteUI
 {
   public:
@@ -71,7 +69,7 @@ class MonitorSection : public RouteUI
         Gtk::Adjustment   solo_boost_adjustment;
         Gtkmm2ext::MotionFeedback* solo_boost_control;
         Gtk::Adjustment   solo_cut_adjustment;
-        VolumeController* solo_cut_control;
+        Gtkmm2ext::MotionFeedback* solo_cut_control;
 
         void populate_buttons ();
 	void set_button_names ();

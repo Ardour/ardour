@@ -136,8 +136,7 @@ Session::Session (AudioEngine &eng,
 		  const string& snapshot_name,
                   BusProfile* bus_profile,
 		  string mix_template)
-
-	: _engine (eng)
+        : _engine (eng)
 	, _target_transport_speed (0.0)
 	, _requested_return_frame (-1)
 	, _session_dir (new SessionDirectory(fullpath))
@@ -4234,3 +4233,4 @@ Session::unknown_processors () const
 
 	return p;
 }
+

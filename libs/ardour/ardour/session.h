@@ -731,6 +731,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void add_controllable (boost::shared_ptr<PBD::Controllable>);
 	void remove_controllable (PBD::Controllable*);
 
+        boost::shared_ptr<PBD::Controllable> solo_cut_control() const;
+
 	SessionMetadata & metadata () { return *_metadata; }
 
 	SessionConfiguration config;
@@ -1418,6 +1420,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	typedef std::set<boost::shared_ptr<PBD::Controllable> > Controllables;
 	Glib::Mutex controllables_lock;
 	Controllables controllables;
+
+        boost::shared_ptr<PBD::Controllable> _solo_cut_control;
 
 	void reset_native_file_format();
 	bool first_file_data_format_reset;

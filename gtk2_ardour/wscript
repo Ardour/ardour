@@ -221,7 +221,6 @@ gtk2_ardour_sources = [
 	'ui_config.cc',
 	'utils.cc',
 	'version.cc',
-        'volume_controller.cc',
 	'waveview.cc',
 	'window_proxy.cc'
 ]
