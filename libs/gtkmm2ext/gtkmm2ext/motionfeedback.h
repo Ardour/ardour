@@ -61,8 +61,9 @@ class MotionFeedback : public Gtk::VBox
 	gfloat lower () { return _lower; }
 	gfloat upper () { return _upper; }
 	gfloat range () { return _range; }
-
-	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { binding_proxy.set_controllable (c); }
+        
+        boost::shared_ptr<PBD::Controllable> controllable() const;
+	virtual void set_controllable (boost::shared_ptr<PBD::Controllable> c);
         void set_lamp_color (const Gdk::Color&);
         
         static Glib::RefPtr<Gdk::Pixbuf> render_pixbuf (int size);

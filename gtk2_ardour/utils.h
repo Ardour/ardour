@@ -91,6 +91,4 @@ void resize_window_to_proportion_of_monitor (Gtk::Window*, int, int);
 
 std::string escape_underscores (std::string const &);
 
-void control_link (PBD::ScopedConnectionList& scl, boost::shared_ptr<PBD::Controllable> c, Gtk::Adjustment& a);
-
 #endif /* __ardour_gtk_utils_h__ */

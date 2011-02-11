@@ -952,40 +952,4 @@ escape_underscores (string const & s)
 	return o;
 }
 
-static void
-adjustment_to_controllable (Gtk::Adjustment* adj, boost::weak_ptr<Controllable> wcont)
-{
-        boost::shared_ptr<Controllable> cont = wcont.lock();
-
-        if (cont) {
-                double val = adj->get_value();
-                if (val != cont->get_value()) {
-                        cont->set_value (val);
-                }
-        }
-}
-
-static void
-controllable_to_adjustment (Gtk::Adjustment* adj, boost::weak_ptr<Controllable> wcont)
-{
-        boost::shared_ptr<Controllable> cont = wcont.lock();
-
-        if (cont) {
-                float val = cont->get_value();
-                
-                if (val != adj->get_value()) {
-                        adj->set_value (val);
-                }
-        }
-}
-
-void
-control_link (ScopedConnectionList& scl, boost::shared_ptr<Controllable> c, Gtk::Adjustment& a)
-{
-        boost::weak_ptr<Controllable> wc (c);
-
-        a.signal_value_changed().connect (sigc::bind (sigc::ptr_fun (adjustment_to_controllable), &a, wc));
-        c->Changed.connect (scl, MISSING_INVALIDATOR, boost::bind (controllable_to_adjustment, &a, wc),
-                            gui_context());
-}
                                            

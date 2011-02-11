@@ -42,7 +42,7 @@ class BindingProxy : public sigc::trackable
 
 	bool button_press_handler (GdkEventButton *);
 
-	boost::shared_ptr<PBD::Controllable> get_controllable() { return controllable; }
+	boost::shared_ptr<PBD::Controllable> get_controllable() const { return controllable; }
  	void set_controllable (boost::shared_ptr<PBD::Controllable>);
 
   protected:

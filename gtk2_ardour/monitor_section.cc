@@ -17,6 +17,7 @@
 #include "gui_thread.h"
 #include "monitor_section.h"
 #include "public_editor.h"
+#include "volume_controller.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -73,7 +74,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Dim */
 
-        dim_control = new MotionFeedback (little_knob_pixbuf,  MotionFeedback::Rotary, "", &dim_adjustment, false, 30, 30);
+        dim_control = new VolumeController (little_knob_pixbuf,  &dim_adjustment, false, 30, 30);
 
         HBox* dim_packer = manage (new HBox);
         dim_packer->show ();
@@ -137,7 +138,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Solo Boost */
 
-        solo_boost_control = new MotionFeedback (little_knob_pixbuf,  MotionFeedback::Rotary, "", &solo_boost_adjustment, false, 30, 30);
+        solo_boost_control = new VolumeController (little_knob_pixbuf, &solo_boost_adjustment, false, 30, 30);
 
         HBox* solo_packer = manage (new HBox);
         solo_packer->set_spacing (12);
@@ -154,7 +155,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Solo (SiP) cut */
 
-        solo_cut_control = new MotionFeedback (little_knob_pixbuf, MotionFeedback::Rotary, "", &solo_cut_adjustment, false, 30, 30);
+        solo_cut_control = new VolumeController (little_knob_pixbuf, &solo_cut_adjustment, false, 30, 30);
 
         spin_label = manage (new Label (_("SiP Cut")));
         spin_packer = manage (new VBox);
@@ -237,7 +238,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Gain */
 
-        gain_control = new MotionFeedback (big_knob_pixbuf,  MotionFeedback::Rotary, "", &gain_adjustment, false, 80, 80);
+        gain_control = new VolumeController (big_knob_pixbuf,  &gain_adjustment, false, 80, 80);
 
         spin_label = manage (new Label (_("Gain")));
         spin_packer = manage (new VBox);
@@ -1012,14 +1013,15 @@ MonitorSection::assign_controllables ()
         }
 
         if (_session) {
-                solo_cut_control->set_controllable (_session->solo_cut_control());
+                boost::shared_ptr<Controllable> c = _session->solo_cut_control();
+                solo_cut_control->set_controllable (c);
+                solo_cut_control->get_adjustment()->set_value (c->get_value());
         } else {
                 solo_cut_control->set_controllable (none);
         }
 
         if (_route) {
                 gain_control->set_controllable (_route->gain_control());
-                control_link (control_connections, _route->gain_control(), gain_adjustment);
         } else {
                 gain_control->set_controllable (none);
         }
@@ -1038,13 +1040,11 @@ MonitorSection::assign_controllables ()
                 dim_control->set_controllable (c);
                 dim_adjustment.set_lower (c->lower());
                 dim_adjustment.set_upper (c->upper());
-                control_link (control_connections, c, dim_adjustment);
                 
                 c = _monitor->solo_boost_control ();
                 solo_boost_control->set_controllable (c);
                 solo_boost_adjustment.set_lower (c->lower());
                 solo_boost_adjustment.set_upper (c->upper());
-                control_link (control_connections, c, solo_boost_adjustment);
 
         } else {
 

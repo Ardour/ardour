@@ -704,3 +704,16 @@ MotionFeedback::render_pixbuf (int size)
 
         return pixbuf;
 } 
+
+void
+MotionFeedback::set_controllable (boost::shared_ptr<PBD::Controllable> c)
+{
+        binding_proxy.set_controllable (c);
+}
+
+boost::shared_ptr<PBD::Controllable>
+MotionFeedback::controllable () const 
+{
+        return binding_proxy.get_controllable ();
+}
+       
