@@ -150,9 +150,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	int  save_state_canfail (std::string state_name = "", bool switch_to_it = false);
 	void save_state (const std::string & state_name = "", bool switch_to_it = false);
 
-	static double gain_to_slider_position (ARDOUR::gain_t g);
-	static ARDOUR::gain_t slider_position_to_gain (double pos);
-
 	static ARDOUR_UI *instance () { return theArdourUI; }
 	static UIConfiguration *config () { return ui_config; }
 
