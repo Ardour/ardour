@@ -295,6 +295,9 @@ void
 UndoHistory::clear_redo ()
 {
 	_clearing = true;
+        for (std::list<UndoTransaction*>::iterator i = RedoList.begin(); i != RedoList.end(); ++i) {
+                delete *i;
+        }
 	RedoList.clear ();
 	_clearing = false;
 
@@ -306,6 +309,9 @@ void
 UndoHistory::clear_undo ()
 {
 	_clearing = true;
+        for (std::list<UndoTransaction*>::iterator i = UndoList.begin(); i != UndoList.end(); ++i) {
+                delete *i;
+        }
 	UndoList.clear ();
 	_clearing = false;
 
