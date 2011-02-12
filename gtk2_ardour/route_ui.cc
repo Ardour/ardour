@@ -587,7 +587,7 @@ RouteUI::build_record_menu ()
                 using namespace Menu_Helpers;
                 MenuList& items = record_menu->items();
                 
-                items.push_back (CheckMenuElem (_("Step Edit"), sigc::mem_fun (*this, &RouteUI::toggle_step_edit)));
+                items.push_back (CheckMenuElem (_("Step Entry"), sigc::mem_fun (*this, &RouteUI::toggle_step_edit)));
                 step_edit_item = dynamic_cast<CheckMenuItem*> (&items.back());
 
                 if (_route->record_enabled()) {

@@ -247,6 +247,7 @@ MidiTimeAxisView::~MidiTimeAxisView ()
 void
 MidiTimeAxisView::check_step_edit ()
 {
+	ensure_step_editor ();
         _step_editor->check_step_edit ();
 }
 
@@ -1054,13 +1055,18 @@ MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit)
 	return boost::dynamic_pointer_cast<MidiRegion>(region);
 }
 
+void
+MidiTimeAxisView::ensure_step_editor ()
+{
+	if (!_step_editor) {
+		_step_editor = new StepEditor (_editor, midi_track(), *this);
+	}
+}
+
 void 
 MidiTimeAxisView::start_step_editing ()
 {
-        if (!_step_editor) {
-                _step_editor = new StepEditor (_editor, midi_track(), *this);
-        }
-
+	ensure_step_editor ();
         _step_editor->start_step_editing ();
 
 }

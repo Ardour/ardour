@@ -158,6 +158,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void extend_note_selection_region_view (RegionView*, uint8_t note, uint16_t chn_mask);
 	void toggle_note_selection_region_view (RegionView*, uint8_t note, uint16_t chn_mask);
 
+	void ensure_step_editor ();
+
 	/** parameter -> menu item map for the channel command items */
 	ParameterMenuMap _channel_command_menu_map;
 	/** parameter -> menu item map for the controller menu */
