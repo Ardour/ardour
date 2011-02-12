@@ -36,7 +36,7 @@ SearchPathOption::SearchPathOption (const string& pathname, const string& label,
         hbox->set_border_width (12);
         hbox->set_spacing (6);
         hbox->pack_end (add_chooser, true, true);
-        hbox->pack_end (*manage (new Label ("Click to add a new location")), false, false);
+        hbox->pack_end (*manage (new Label (_("Click to add a new location"))), false, false);
         hbox->show_all ();
         
         vbox.pack_start (path_box);
