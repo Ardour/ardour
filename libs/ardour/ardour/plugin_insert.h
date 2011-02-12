@@ -84,6 +84,10 @@ class PluginInsert : public Processor
 		void set_value (double val);
 		double get_value (void) const;
                 XMLNode& get_state();
+
+		bool logarithmic () const {
+			return _logarithmic;
+		}
                 
 	private:
 		PluginInsert* _plugin;
@@ -112,6 +116,8 @@ class PluginInsert : public Processor
 	bool splitting () const {
 		return _splitting;
 	}
+
+        std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
 
 	PBD::Signal2<void,BufferSet*, BufferSet*> AnalysisDataGathered;
 	/** Emitted when the return value of splitting () has changed */

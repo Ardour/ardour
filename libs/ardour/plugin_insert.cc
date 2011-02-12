@@ -1164,3 +1164,19 @@ PluginInsert::set_splitting (bool s)
 	_splitting = s;
 	SplittingChanged (); /* EMIT SIGNAL */
 }
+
+string
+PluginInsert::value_as_string (boost::shared_ptr<AutomationControl> ac) const
+{
+	boost::shared_ptr<PluginControl> pc = boost::dynamic_pointer_cast<PluginControl> (ac);
+	assert (pc);
+
+	stringstream s;
+	if (pc->logarithmic ()) {
+		s << exp (pc->get_value ());
+	} else {
+		s << pc->get_value ();
+	}
+
+	return s.str ();
+}
