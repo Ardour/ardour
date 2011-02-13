@@ -205,30 +205,30 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
 		Evoral::Parameter parameter() { return control->parameter(); }
 
-	    /* input */
+		/* input */
+		
+		Gtk::ComboBoxText*	                combo;
+		std::map<std::string, float>*           combo_map;
+		Gtk::ToggleButton*                      button;
+		boost::shared_ptr<AutomationController> controller;
+		Gtkmm2ext::ClickBox*                    clickbox;
+		Gtk::Label                              label;
+		bool                                    logarithmic;
+		bool                                    update_pending;
+		char                                    ignore_change;
+		Gtk::Button                             automate_button;
+		
+		/* output */
+		
+		Gtk::EventBox* display;
+		Gtk::Label*    display_label;
 
-	    Gtk::ComboBoxText*	                    combo;
-	    std::map<std::string, float>*           combo_map;
-	    Gtk::ToggleButton*                      button;
-	    boost::shared_ptr<AutomationController> controller;
-	    Gtkmm2ext::ClickBox*                    clickbox;
-	    Gtk::Label                              label;
-	    bool                                    logarithmic;
-	    bool                                    update_pending;
-	    char                                    ignore_change;
-	    Gtk::Button                             automate_button;
+		Gtk::HBox*     hbox;
+		Gtk::VBox*     vbox;
+		MeterInfo*     meterinfo;
 
-	    /* output */
-
-	    Gtk::EventBox *display;
-	    Gtk::Label*    display_label;
-
-		Gtk::HBox  *    hbox;
-		Gtk::VBox  *    vbox;
-	    MeterInfo  *    meterinfo;
-
-	    ControlUI ();
-	    ~ControlUI();
+		ControlUI ();
+		~ControlUI ();
 	};
 
 	std::vector<ControlUI*>   input_controls;
