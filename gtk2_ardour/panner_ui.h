@@ -37,7 +37,6 @@
 #include "enums.h"
 
 class Panner2d;
-class PannerBar;
 class Panner2dWindow;
 class StereoPanner;
 class MonoPanner;
