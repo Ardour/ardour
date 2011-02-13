@@ -178,7 +178,7 @@ wiimote_discovery:
 	std::cerr << "Wiimote: discovering, press 1+2" << std::endl;
 
  	while (!wiimote_handle && !main_thread_quit) {
-		bdaddr = *BDADDR_ANY;
+		bdaddr = (bdaddr_t) {{0, 0, 0, 0, 0, 0}};
 		callback_thread_registered_for_ardour = false;
 		wiimote_handle = cwiid_open(&bdaddr, 0);
 

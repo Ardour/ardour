@@ -19,6 +19,7 @@
 #define RUBBERBAND_API_MAJOR_VERSION 2
 #define RUBBERBAND_API_MINOR_VERSION 0
 
+#include <cstddef>
 #include <vector>
 
 /**
