@@ -1385,6 +1385,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool canvas_markerview_item_view_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*);
 	bool canvas_markerview_start_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*);
 	bool canvas_markerview_end_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*);
+	
+	PBD::Signal0<void> EditorFreeze;
+	PBD::Signal0<void> EditorThaw;
 
   private:
         friend class DragManager;

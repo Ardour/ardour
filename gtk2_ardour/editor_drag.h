@@ -731,13 +731,13 @@ public:
 
 private:
 
-	ArdourCanvas::SimpleLine* _line;
+	ArdourCanvas::Line* _line;
 	AudioRegionView* _arv;
 	
 	double _region_view_grab_x;
 	double _cumulative_x_drag;
 	
-	uint32_t _before;
+	float _before;
 	uint32_t _max_x;
 };
 

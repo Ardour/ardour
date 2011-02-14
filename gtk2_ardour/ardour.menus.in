@@ -540,7 +540,7 @@
          <menuitem action='rlAudition'/>
          <menuitem action='rlHide'/>
          <menuitem action='rlShow'/>
-	  <separator/>
+	 <separator/>
          <menuitem action='rlShowAll'/>
          <menuitem action='rlShowAuto'/>
          <menu name='Sort' action='RegionListSort'>
@@ -559,7 +559,9 @@
                <menuitem action='SortBySourceFilesystem'/>
          </menu>
          <separator/>
-         <menuitem action='addExternalAudioToRegionList'/>	       
+         <menuitem action='addExternalAudioToRegionList'/>
+         <separator/>
+         <menuitem action='removeUnusedRegions'/>    
      </popup>
 
 	<popup name='PopupRegionMenu' action='PopupRegionMenu'>

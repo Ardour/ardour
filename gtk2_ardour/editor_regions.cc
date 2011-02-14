@@ -34,6 +34,7 @@
 #include "ardour/silentfilesource.h"
 #include "ardour/profile.h"
 
+#include "gtkmm2ext/choice.h"
 #include "gtkmm2ext/treeutils.h"
 
 #include "editor.h"
@@ -72,6 +73,7 @@ EditorRegions::EditorRegions (Editor* e)
 	_display.set_size_request (100, -1);
 	_display.set_name ("RegionListDisplay");
 	_display.set_rules_hint (true);
+	
 	/* Try to prevent single mouse presses from initiating edits.
 	   This relies on a hack in gtktreeview.c:gtk_treeview_button_press()
 	*/
@@ -117,24 +119,28 @@ EditorRegions::EditorRegions (Editor* e)
 	CellRendererToggle* locked_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (7));
 	locked_cell->property_activatable() = true;
 	locked_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::locked_changed));
+	
 	TreeViewColumn* locked_col = _display.get_column (7);
 	locked_col->add_attribute (locked_cell->property_visible(), _columns.property_toggles_visible);
 
 	CellRendererToggle* glued_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (8));
 	glued_cell->property_activatable() = true;
 	glued_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::glued_changed));
+	
 	TreeViewColumn* glued_col = _display.get_column (8);
 	glued_col->add_attribute (glued_cell->property_visible(), _columns.property_toggles_visible);
 
 	CellRendererToggle* muted_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (9));
 	muted_cell->property_activatable() = true;
 	muted_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::muted_changed));
+	
 	TreeViewColumn* muted_col = _display.get_column (9);
 	muted_col->add_attribute (muted_cell->property_visible(), _columns.property_toggles_visible);
 
 	CellRendererToggle* opaque_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (10));
 	opaque_cell->property_activatable() = true;
 	opaque_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::opaque_changed));
+	
 	TreeViewColumn* opaque_col = _display.get_column (10);
 	opaque_col->add_attribute (opaque_cell->property_visible(), _columns.property_toggles_visible);
 	
@@ -171,6 +177,9 @@ EditorRegions::EditorRegions (Editor* e)
 	ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &EditorRegions::update_all_rows));
 	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::region_changed, this, _1, _2), gui_context());
 	ARDOUR::RegionFactory::CheckNewRegion.connect (check_new_region_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::add_region, this, _1), gui_context());
+	
+	e->EditorFreeze.connect (editor_freeze_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::freeze_tree_model, this), gui_context());
+	e->EditorThaw.connect (editor_thaw_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::thaw_tree_model, this), gui_context());
 }
 
 bool
@@ -238,14 +247,6 @@ EditorRegions::set_session (ARDOUR::Session* s)
 }
 
 void
-EditorRegions::add_regions (vector<boost::shared_ptr<Region> >& regions)
-{
-	for (vector<boost::shared_ptr<Region> >::iterator x = regions.begin(); x != regions.end(); ++x) {
-		add_region (*x);
-	}
-}
-
-void
 EditorRegions::add_region (boost::shared_ptr<Region> region)
 {
 	if (!region || !_session) {
@@ -262,6 +263,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 	}
 
 	if (region->hidden()) {
+
 		TreeModel::iterator iter = _model->get_iter ("0");
 		TreeModel::Row parent;
 		TreeModel::Row child;
@@ -282,6 +284,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 				parent = *iter;
 			}
 		}
+
 		row = *(_model->append (parent.children()));
 
 	} else if (region->whole_file()) {
@@ -357,31 +360,29 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 			}
 		}
 
-		if (region->automatic()) {
-			return;
-		}
+		region_row_map.insert(pair<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::RowReference>(region, TreeRowReference(_model, TreePath (row))) );
+		parent_regions_sources_map.insert(pair<string, Gtk::TreeModel::RowReference>(region->source_string(), TreeRowReference(_model, TreePath (row))) );
+
+		return;
 
 	} else {
-
-		/* find parent node, add as new child */
-
+		// find parent node, add as new child
 		TreeModel::iterator i;
 		TreeModel::Children rows = _model->children();
-		bool found_parent = false;
-
-		for (i = rows.begin(); i != rows.end(); ++i) {
-			boost::shared_ptr<Region> r = (*i)[_columns.region];
-
-			if (r && r->whole_file()) {
-
-				if (region->source_equivalent (r)) {
-					found_parent = true;
-				}
-			}
                         
-			TreeModel::iterator ii;
-			TreeModel::Children subrows = (*i).children();
+		boost::unordered_map<string, Gtk::TreeModel::RowReference>::iterator it;
+		
+		it = parent_regions_sources_map.find (region->source_string());
+		
+		if (it != parent_regions_sources_map.end()){
 
+			TreeModel::iterator j = _model->get_iter ((*it).second.get_path());
+		
+			TreeModel::iterator ii;
+			TreeModel::Children subrows = (*j).children();
+
+			/* XXXX: should we be accounting for all regions? */
+			/*
 			for (ii = subrows.begin(); ii != subrows.end(); ++ii) {
 				boost::shared_ptr<Region> rr = (*ii)[_columns.region];
 
@@ -389,15 +390,12 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 					return;
 				}
 			}
-
-			if (found_parent) {
-				row = *(_model->append ((*i).children()));
-				break;
-			}
+			*/
+			
+			row = *(_model->insert (subrows.end()));
 		}
-
-		if (!found_parent) {
-			row = *(_model->append());
+		else {
+		  row = *(_model->append());
 		}
 
 		row[_columns.property_toggles_visible] = true;
@@ -405,7 +403,35 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 
 	row[_columns.region] = region;
 
+	region_row_map.insert(pair<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::RowReference>(region, TreeRowReference(_model, TreePath (row))) );
+
 	populate_row(region, (*row));
+}
+
+void
+EditorRegions::delete_unused_regions ()
+{
+	vector<string> choices;
+	string prompt;
+
+	if (!_session) {
+		return;
+	}
+
+	prompt  = _("Do you really want to remove unused regions?"
+		    "\n(This is destructive and cannot be undone)");
+
+	choices.push_back (_("No, do nothing."));
+	choices.push_back (_("Yes, remove."));
+
+	Gtkmm2ext::Choice prompter (_("Remove unused regions"), prompt, choices);
+
+	if (prompter.run () == 1) {
+		_no_redisplay = true;
+		_session->cleanup_regions ();
+		_no_redisplay = false;
+		redisplay ();
+	}
 }
 
 void
@@ -424,101 +450,48 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 	our_interests.add (ARDOUR::Properties::fade_in);
 	our_interests.add (ARDOUR::Properties::fade_out);
 	
-	if (last_row != 0) {
-
-		TreeModel::iterator j = _model->get_iter (last_row.get_path());
-		boost::shared_ptr<Region> c = (*j)[_columns.region];
-
-		if (c == r) {
-			populate_row (r, (*j));
-			
-			if (what_changed.contains (ARDOUR::Properties::hidden)) {
-				redisplay ();
-			}
-			
-			return;
-		}
-	}
-
 	if (what_changed.contains (our_interests)) {
+
+		if (last_row != 0) {
+
+			TreeModel::iterator j = _model->get_iter (last_row.get_path());
+			boost::shared_ptr<Region> c = (*j)[_columns.region];
+
+			if (c == r) {
+				populate_row (r, (*j));
+				
+				if (what_changed.contains (ARDOUR::Properties::hidden)) {
+					redisplay ();
+				}
+				
+				return;
+			}
+		}
+		
+		RegionRowMap::iterator it;
+		
+		it = region_row_map.find (r);
+		
+		if (it != region_row_map.end()){
+
+			TreeModel::iterator j = _model->get_iter ((*it).second.get_path());
+			boost::shared_ptr<Region> c = (*j)[_columns.region];
+
+			if (c == r) {
+				populate_row (r, (*j));
+				
+				if (what_changed.contains (ARDOUR::Properties::hidden)) {
+					redisplay ();
+				}
+				
+				return;
+			}    
+		}
 
 		/* find the region in our model and update its row */
 		TreeModel::Children rows = _model->children ();
 		TreeModel::iterator i = rows.begin ();
-		
-		while (i != rows.end ()) {
 
-			TreeModel::Children children = (*i)->children ();
-			TreeModel::iterator found = children.end ();
-			
-			boost::shared_ptr<Region> c = (*i)[_columns.region];
-
-			if (c == r) {
-
-				/* check this row */
-				last_row = TreeRowReference (_model, TreePath (i));
-				found = i;
-
-			} else {
-
-				/* check its children */
-				
-				found = children.begin ();
-				while (found != children.end()) {
-			  
-					boost::shared_ptr<Region> c = (*found)[_columns.region];
-					
-					if (c == r) {
-						last_row = TreeRowReference(_model, TreePath (found));
-						break;
-					}
-					++found;
-				}
-			}
-
-			if (found != children.end()) {
-
-				boost::shared_ptr<AudioRegion> audioregion = boost::dynamic_pointer_cast<AudioRegion>(r);
-				uint32_t used = _editor->get_regionview_count_from_region_list (r);
-
-				if (what_changed.contains (ARDOUR::Properties::name)) {
-					populate_row_name (r, *found);
-				}
-				if (what_changed.contains (ARDOUR::Properties::position)) {
-					populate_row_position (r, *found, used);
-					populate_row_end (r, *found, used);
-				}
-				if (what_changed.contains (ARDOUR::Properties::length)) {
-					populate_row_end (r, *found, used);
-					populate_row_length (r, *found);
-				}
-				if (what_changed.contains (ARDOUR::Properties::start)) {
-					populate_row_length (r, *found);
-				}
-				if (what_changed.contains (ARDOUR::Properties::locked)) {
-					populate_row_locked (r, *found, used);
-				}
-				if (what_changed.contains (ARDOUR::Properties::position_lock_style)) {
-					populate_row_glued (r, *found, used);
-				}
-				if (what_changed.contains (ARDOUR::Properties::muted)) {
-					populate_row_muted (r, *found, used);
-				}
-				if (what_changed.contains (ARDOUR::Properties::opaque)) {
-					populate_row_opaque (r, *found, used);
-				}
-				if (what_changed.contains (ARDOUR::Properties::fade_in)) {
-					populate_row_fade_in (r, *found, used, audioregion);
-				}
-				if (what_changed.contains (ARDOUR::Properties::fade_out)) {
-					populate_row_fade_out (r, *found, used, audioregion);
-				}
-
-				break;
-			}
-
-			++i;
-		}
 	}
 
 	if (what_changed.contains (ARDOUR::Properties::hidden)) {
@@ -576,66 +549,18 @@ EditorRegions::selection_changed ()
 void
 EditorRegions::set_selected (RegionSelection& regions)
 {
-	TreeModel::Children rows = _model->children();
+	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
 
-	for (RegionSelection::iterator iter = regions.begin(); iter != regions.end(); ++iter) {
-
-		TreeModel::iterator i;
+		boost::shared_ptr<Region> r ((*i)->region());
 		
-		boost::shared_ptr<Region> r ((*iter)->region());
+		RegionRowMap::iterator it;
+		
+		it = region_row_map.find (r);
 
-		for (i = rows.begin(); i != rows.end(); ++i) {
-
-			boost::shared_ptr<Region> compared_region = (*i)[_columns.region];
-
-			if (r == compared_region) {
-				_display.get_selection()->select(*i);
-				break;
-			}
-
-			if (!(*i).children().empty()) {
-				if (set_selected_in_subrow(r, (*i), 2)) {
-					break;
-				}
-			}
+		if (it != region_row_map.end()){
+			TreeModel::iterator j = _model->get_iter ((*it).second.get_path());
+			_display.get_selection()->select(*j);
 		}
-	}
-}
-
-bool
-EditorRegions::set_selected_in_subrow (boost::shared_ptr<Region> region, TreeModel::Row const &parent_row, int level)
-{
-	TreeModel::iterator i;
-	TreeModel::Children subrows = (*parent_row).children();
-
-	for (i = subrows.begin(); i != subrows.end(); ++i) {
-
-		boost::shared_ptr<Region> compared_region = (*i)[_columns.region];
-
-		if (region == compared_region) {
-			_display.get_selection()->select(*i);
-			return true;
-		}
-
-		if (!(*i).children().empty()) {
-			if (set_selected_in_subrow (region, (*i), level + 1)) {
-				return true;
-			}
-		}
-	}
-	
-	return false;
-}
-
-void
-EditorRegions::insert_into_tmp_regionlist(boost::shared_ptr<Region> region)
-{
-	/* keep all whole files at the beginning */
-
-	if (region->whole_file()) {
-		tmp_region_list.push_front (region);
-	} else {
-		tmp_region_list.push_back (region);
 	}
 }
 
@@ -655,22 +580,35 @@ EditorRegions::redisplay ()
 
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	_model->clear ();
+	_model->set_sort_column (-2, SORT_ASCENDING); //Disable sorting to gain performance
+	
 
+	region_row_map.clear();
+	parent_regions_sources_map.clear();
+	
 	/* now add everything we have, via a temporary list used to help with sorting */
 
-	tmp_region_list.clear();
-
 	const RegionFactory::RegionMap& regions (RegionFactory::regions());
+
 	for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		insert_into_tmp_regionlist (i->second);
+		
+		if ( i->second->whole_file()) {
+			/* add automatic regions first so that children can find their parents as we add them */
+			add_region (i->second);
+			continue;
+		}
+
+		tmp_region_list.push_front (i->second);
 	}
 
 	for (list<boost::shared_ptr<Region> >::iterator r = tmp_region_list.begin(); r != tmp_region_list.end(); ++r) {
 		add_region (*r);
 	}
-	tmp_region_list.clear();
-
+	
+	_model->set_sort_column (0, SORT_ASCENDING); // renabale sorting
 	_display.set_model (_model);
+
+	tmp_region_list.clear();
 
 	if (tree_expanded) {
 		_display.expand_all();
@@ -684,59 +622,15 @@ EditorRegions::update_row (boost::shared_ptr<Region> region)
 		return;
 	}
 
-	TreeModel::iterator i;
-	TreeModel::Children rows = _model->children();
+	RegionRowMap::iterator it;
 	
-	return;
+	it = region_row_map.find (region);
 
-	for (i = rows.begin(); i != rows.end(); ++i) {
+	if (it != region_row_map.end()){
 
-//		cerr << "Level 1: Compare " << region->name() << " with parent " << (*i)[_columns.name] << "\n";
-
-		boost::shared_ptr<Region> compared_region = (*i)[_columns.region];
-
-		if (region == compared_region) {
-//			cerr << "Matched\n";
-			populate_row(region, (*i));
-			return;
-		}
-
-		if (!(*i).children().empty()) {
-			if (update_subrows(region, (*i), 2)) {
-				return;
-			}
-		}
+		TreeModel::iterator j = _model->get_iter ((*it).second.get_path());
+		populate_row(region, (*j));
 	}
-
-//	cerr << "Returning - No match\n";
-}
-
-bool
-EditorRegions::update_subrows (boost::shared_ptr<Region> region, TreeModel::Row const &parent_row, int level)
-{
-	TreeModel::iterator i;
-	TreeModel::Children subrows = (*parent_row).children();
-
-	for (i = subrows.begin(); i != subrows.end(); ++i) {
-
-//		cerr << "Level " << level << ": Compare " << region->name() << " with child " << (*i)[_columns.name] << "\n";
-
-		boost::shared_ptr<Region> compared_region = (*i)[_columns.region];
-
-		if (region == compared_region) {
-			populate_row(region, (*i));
-//			cerr << "Matched\n";
-			return true;
-		}
-
-		if (!(*i).children().empty()) {
-			if (update_subrows (region, (*i), level + 1)) {
-				return true;
-			}
-		}
-	}
-
-	return false;
 }
 
 void
@@ -745,40 +639,17 @@ EditorRegions::update_all_rows ()
 	if (!_session) {
 		return;
 	}
-	
-	TreeModel::iterator i;
-	TreeModel::Children rows = _model->children();
 
-	for (i = rows.begin(); i != rows.end(); ++i) {
+	RegionRowMap::iterator i;
 
-		boost::shared_ptr<Region> region = (*i)[_columns.region];
+	for (i = region_row_map.begin(); i != region_row_map.end(); ++i) {
 
+		TreeModel::iterator j = _model->get_iter ((*i).second.get_path());
+		
+		boost::shared_ptr<Region> region = (*j)[_columns.region];
+		
 		if (!region->automatic()) {
-			populate_row(region, (*i));
-		}
-
-		if (!(*i).children().empty()) {
-			update_all_subrows ((*i), 2);
-		}
-	}
-}
-
-void
-EditorRegions::update_all_subrows (TreeModel::Row const &parent_row, int level)
-{
-	TreeModel::iterator i;
-	TreeModel::Children subrows = (*parent_row).children();
-
-	for (i = subrows.begin(); i != subrows.end(); ++i) {
-
-		boost::shared_ptr<Region> region = (*i)[_columns.region];
-
-		if (!region->automatic()) {
-			populate_row(region, (*i));
-		}
-
-		if (!(*i).children().empty()) {
-			update_all_subrows ((*i), level + 1);
+			populate_row(region, (*j));
 		}
 	}
 }
@@ -827,8 +698,10 @@ void
 EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
 	boost::shared_ptr<AudioRegion> audioregion = boost::dynamic_pointer_cast<AudioRegion>(region);
-	uint32_t used = _session->playlists->region_use_count (region);
-
+	//uint32_t used = _session->playlists->region_use_count (region);
+	/* Presently a region is only used once so let's save on the sequential scan to determine use count */
+	uint32_t used = 1;
+	
 	populate_row_position (region, row, used);
 	populate_row_end (region, row, used);
 	populate_row_sync (region, row, used);
@@ -1448,6 +1321,25 @@ EditorRegions::get_single_selection ()
 	return (*iter)[_columns.region];
 }
 
+void 
+EditorRegions::freeze_tree_model (){
+ 
+	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+	_model->set_sort_column (-2, SORT_ASCENDING); //Disable sorting to gain performance
+
+}
+
+void 
+EditorRegions::thaw_tree_model (){
+
+	_model->set_sort_column (0, SORT_ASCENDING); // renabale sorting
+	_display.set_model (_model);
+
+	if (toggle_full_action()->get_active()) {
+		_display.expand_all();
+	}
+}
+
 void
 EditorRegions::locked_changed (std::string const & path)
 {
@@ -1515,7 +1407,7 @@ EditorRegions::get_state () const
 
 	return *node;
 }
-		
+
 void
 EditorRegions::set_state (const XMLNode & node)
 {
@@ -1526,28 +1418,35 @@ EditorRegions::set_state (const XMLNode & node)
 	}
 
 	XMLProperty const * p = node.property (X_("sort-type"));
+	
 	if (p) {
 		Editing::RegionListSortType const t = static_cast<Editing::RegionListSortType> (string_2_enum (p->value(), _sort_type));
+
 		if (_sort_type != t) {
 			changed = true;
 		}
+
 		reset_sort_type (t, true);
 		RefPtr<RadioAction> ract = sort_type_action (t);
 		ract->set_active ();
 	}
 
 	p = node.property (X_("sort-ascending"));
+	
 	if (p) {
 		bool const yn = string_is_affirmative (p->value ());
 		SortType old_sort_type;
 		int old_sort_column;
 
 		_model->get_sort_column_id (old_sort_column, old_sort_type);
+		
 		if (old_sort_type != (yn ? SORT_ASCENDING : SORT_DESCENDING)) {
 			changed = true;
 		}
+
 		reset_sort_direction (yn);
 		RefPtr<Action> act;
+		
 		if (yn) {
 			act = ActionManager::get_action (X_("RegionList"), X_("SortAscending"));
 		} else {
@@ -1560,9 +1459,11 @@ EditorRegions::set_state (const XMLNode & node)
 	p = node.property (X_("show-all"));
 	if (p) {
 		bool const yn = string_is_affirmative (p->value ());
+
 		if (expanded != yn) {
 			changed = true;
 		}
+		
 		set_full (yn);
 		toggle_full_action()->set_active (yn);
 	}
@@ -1570,6 +1471,7 @@ EditorRegions::set_state (const XMLNode & node)
 	p = node.property (X_("show-automatic-regions"));
 	if (p) {
 		bool const yn = string_is_affirmative (p->value ());
+
 		if (yn != _show_automatic_regions) {
 			_show_automatic_regions = yn;
 			toggle_show_auto_regions_action()->set_active (yn);
@@ -1640,6 +1542,12 @@ RefPtr<Action>
 EditorRegions::show_action () const
 {
 	return ActionManager::get_action (X_("RegionList"), X_("rlShow"));
+}
+
+RefPtr<Action>
+EditorRegions::delete_unused_regions_action () const
+{
+	return ActionManager::get_action (X_("RegionList"), X_("removeUnusedRegions"));
 }
 
 RefPtr<ToggleAction>

@@ -135,9 +135,9 @@ class AudioRegionView : public RegionView
 	
 	std::vector<ArdourCanvas::WaveView *> waves;
 	std::vector<ArdourCanvas::WaveView *> tmp_waves; ///< see ::create_waves()
+
+	std::list<std::pair<framepos_t, ArdourCanvas::Line*> > feature_lines;
 	
-	std::list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> > feature_lines;
-    
 	ArdourCanvas::Polygon*           sync_mark; ///< polgyon for sync position
 	ArdourCanvas::SimpleLine*        zero_line;
 	ArdourCanvas::Polygon*           fade_in_shape;

@@ -139,23 +139,24 @@ class Region
 	framepos_t first_frame () const { return _position; }
 	framepos_t last_frame ()  const { return _position + _length - 1; }
 
-	bool hidden ()           const { return _hidden; }
-	bool muted ()            const { return _muted; }
-	bool opaque ()           const { return _opaque; }
-	bool locked ()           const { return _locked; }
-	bool position_locked ()  const { return _position_locked; }
-	bool valid_transients () const { return _valid_transients; }
-	bool automatic ()        const { return _automatic; }
-	bool whole_file ()       const { return _whole_file; }
-	bool captured ()         const { return !(_import || _external); }
-	bool can_move ()         const { return !_position_locked; }
-	bool sync_marked ()      const { return _sync_marked; }
-	bool external ()         const { return _external; }
-	bool import ()           const { return _import; }
-	
-	Trimmable::CanTrim can_trim () const;
+	bool hidden()     const  { return _hidden; }
+	bool muted()      const  { return _muted; }
+	bool opaque ()    const  { return _opaque; }
+	bool locked()     const  { return _locked; }
+	bool position_locked() const { return _position_locked; }
+	bool valid_transients() const { return _valid_transients; }
+	bool automatic()  const  { return _automatic; }
+	bool whole_file() const  { return _whole_file; }
+	bool captured()   const  { return !(_import || _external); }
+	bool can_move()   const  { return !_position_locked; }
+	bool sync_marked() const { return _sync_marked; }
+	bool external()   const    { return _external; }
+	bool import()     const      { return _import; }
+        
+        Trimmable::CanTrim can_trim() const;
 
 	PositionLockStyle position_lock_style () const { return _position_lock_style; }
+	
 	void set_position_lock_style (PositionLockStyle ps);
 	void recompute_position_from_lock_style ();
 
@@ -175,6 +176,9 @@ class Region
 	bool region_list_equivalent (boost::shared_ptr<const Region>) const;
 	bool source_equivalent (boost::shared_ptr<const Region>) const;
 	bool uses_source (boost::shared_ptr<const Source>) const;
+	
+	std::string source_string () const;
+
 
 	/* EDITING OPERATIONS */
 
@@ -223,7 +227,7 @@ class Region
 	void source_deleted (boost::weak_ptr<Source>);
 
 	boost::shared_ptr<Source> source (uint32_t n=0) const { return _sources[ (n < _sources.size()) ? n : 0 ]; }
-	uint32_t                  n_channels()          const { return _sources.size(); }
+	uint32_t n_channels() const { return _sources.size(); }
 
 	const SourceList& sources ()        const { return _sources; }
 	const SourceList& master_sources () const { return _master_sources; }

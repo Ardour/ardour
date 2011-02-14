@@ -423,6 +423,7 @@ Region::set_name (const std::string& str)
 	if (_name != str) {
 		SessionObject::set_name(str); // EMIT SIGNAL NameChanged()
 		assert(_name == str);
+
 		send_change (Properties::name);
 	}
 
@@ -490,6 +491,7 @@ Region::first_edit ()
 		_first_edit = EditChangesNothing;
 
 		send_change (Properties::name);
+
 		RegionFactory::CheckNewRegion (shared_from_this());
 	}
 }
@@ -559,6 +561,7 @@ Region::set_position_lock_style (PositionLockStyle ps)
 		}
 
 		send_change (Properties::position_lock_style);
+		
 	}
 }
 
@@ -643,7 +646,6 @@ Region::set_position_on_top (framepos_t pos, void* /*src*/)
 	/* do this even if the position is the same. this helps out
 	   a GUI that has moved its representation already.
 	*/
-
 	send_change (Properties::position);
 }
 
@@ -1023,6 +1025,7 @@ Region::set_sync_position (framepos_t absolute_pos)
 		if (!property_changes_suspended()) {
 			maybe_uncopy ();
 		}
+
 		send_change (Properties::sync_position);
 	}
 }
@@ -1035,6 +1038,7 @@ Region::clear_sync_position ()
 		if (!property_changes_suspended()) {
 			maybe_uncopy ();
 		}
+
 		send_change (Properties::sync_position);
 	}
 }
@@ -1426,6 +1430,29 @@ Region::source_equivalent (boost::shared_ptr<const Region> other) const
 	}
 
 	return true;
+}
+
+std::string
+Region::source_string () const
+{
+	//string res = itos(_sources.size());
+
+	char buf[64];
+
+	stringstream res;
+	res << _sources.size() << ":";
+	
+	SourceList::const_iterator i;
+
+	for (i = _sources.begin(); i != _sources.end(); ++i) {
+		res << (*i)->id() << ":";
+	}
+
+	for (i = _master_sources.begin(); i != _master_sources.end(); ++i) {
+		res << (*i)->id() << ":";
+	}
+
+	return res.str();
 }
 
 bool

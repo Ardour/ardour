@@ -1462,7 +1462,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case MouseAudition:
-                        set_canvas_cursor (current_canvas_cursor);
+			set_canvas_cursor (current_canvas_cursor);
 			if (scrubbing_direction == 0) {
 				/* no drag, just a click */
 				switch (item_type) {
@@ -1714,8 +1714,8 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 	case FeatureLineItem:
 		{
-			ArdourCanvas::SimpleLine *line = dynamic_cast<ArdourCanvas::SimpleLine *> (item);
-			line->property_color_rgba() = 0xFF0000FF;
+			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
+			line->property_fill_color_rgba() = 0xFF0000FF;
 		}
 		break;
 	case SelectionItem:
@@ -1874,8 +1874,8 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 	case FeatureLineItem:
 		{
-			ArdourCanvas::SimpleLine *line = dynamic_cast<ArdourCanvas::SimpleLine *> (item);
-			line->property_color_rgba() = (guint) ARDOUR_UI::config()->canvasvar_ZeroLine.get();;
+			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
+			line->property_fill_color_rgba() = (guint) ARDOUR_UI::config()->canvasvar_ZeroLine.get();;
 		}
 		break;
 
@@ -2477,7 +2477,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, framepos_t pos)
 	double speed = rtv->track()->speed();
 
 	playlist->clear_changes ();
-	boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region()));
+	boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region(), true));
 	playlist->add_region (new_region, (framepos_t) (pos * speed));
 	_session->add_command (new StatefulDiffCommand (playlist));
 

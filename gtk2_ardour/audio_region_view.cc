@@ -269,10 +269,10 @@ AudioRegionView::~AudioRegionView ()
 		delete *i;
 	}
 
-	for (list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> >::iterator i = feature_lines.begin(); i != feature_lines.end(); ++i) {
+	for (list<std::pair<framepos_t, ArdourCanvas::Line*> >::iterator i = feature_lines.begin(); i != feature_lines.end(); ++i) {
 		delete ((*i).second);
 	}
-	
+
 	/* all waveviews etc will be destroyed when the group is destroyed */
 
 	delete gain_line;
@@ -407,8 +407,8 @@ AudioRegionView::region_resized (const PropertyChange& what_changed)
 		}
 		
 		/* hide transient lines that extend beyond the region end */
-		
-		list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> >::iterator l;
+
+		list<std::pair<framepos_t, ArdourCanvas::Line*> >::iterator l;
 		
 		for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
 			if ((*l).first > _region->length()- 1){
@@ -444,11 +444,19 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 
 	AnalysisFeatureList analysis_features = _region->transients();
 	AnalysisFeatureList::const_iterator i;
-	list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> >::iterator l;
+
+	list<std::pair<framepos_t, ArdourCanvas::Line*> >::iterator l;
 
 	for (i = analysis_features.begin(), l = feature_lines.begin(); i != analysis_features.end() && l != feature_lines.end(); ++i, ++l) {
-		(*l).second->property_x1() = trackview.editor().frame_to_pixel (*i);
-		(*l).second->property_x2() = trackview.editor().frame_to_pixel (*i);
+	  
+		float x_pos = trackview.editor().frame_to_pixel (*i);
+		
+		ArdourCanvas::Points points;
+		points.push_back(Gnome::Art::Point(x_pos, 2.0)); // first x-coord needs to be a non-normal value
+		points.push_back(Gnome::Art::Point(x_pos, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1));
+
+		(*l).first = *i;
+		(*l).second->property_points() = points;
 	}
 	
 	reset_fade_shapes ();
@@ -526,13 +534,22 @@ AudioRegionView::set_height (gdouble height)
 	reset_fade_shapes ();
 	
 	/* Update hights for any active feature lines */
-	list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> >::iterator l;
-
+	list<std::pair<framepos_t, ArdourCanvas::Line*> >::iterator l;
+	
 	for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
-		(*l).second->property_y2() = _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1;
-	}	
+
+		float pos_x = trackview.editor().frame_to_pixel((*l).first);
+
+		ArdourCanvas::Points points;
+		
+		points.push_back(Gnome::Art::Point(pos_x, 2.0)); // first x-coord needs to be a non-normal value
+		points.push_back(Gnome::Art::Point(pos_x, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1));
+
+		(*l).second->property_points() = points;
+	}
 
 	if (fade_position_line) {
+
 		if (height < NAME_HIGHLIGHT_THRESH) {
 			fade_position_line->property_y2() = _height - 1;
 		}
@@ -1430,31 +1447,55 @@ AudioRegionView::transients_changed ()
 	AnalysisFeatureList analysis_features = _region->transients();
 
 	while (feature_lines.size() < analysis_features.size()) {
-		ArdourCanvas::SimpleLine* l = new ArdourCanvas::SimpleLine (*group);
-		l->property_color_rgba() = (guint) ARDOUR_UI::config()->canvasvar_ZeroLine.get();
-		feature_lines.push_back (make_pair(0, l));
+
+		ArdourCanvas::Line* canvas_item = new ArdourCanvas::Line(*group);
+	
+		ArdourCanvas::Points points;
+		
+		points.push_back(Gnome::Art::Point(-1.0, 2.0)); // first x-coord needs to be a non-normal value
+		points.push_back(Gnome::Art::Point(1.0, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1));
+
+		canvas_item->property_points() = points;
+		canvas_item->property_width_pixels() = 1;
+		canvas_item->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_ZeroLine.get();
+		canvas_item->property_first_arrowhead() = TRUE;
+		canvas_item->property_last_arrowhead() = TRUE;
+		canvas_item->property_arrow_shape_a() = 11.0;
+		canvas_item->property_arrow_shape_b() = 0.0;
+		canvas_item->property_arrow_shape_c() = 4.0;
+
+		canvas_item->raise_to_top ();
+		canvas_item->show ();
+		
+		canvas_item->set_data ("regionview", this);
+		canvas_item->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_feature_line_event), canvas_item, this));
+		
+		feature_lines.push_back (make_pair(0, canvas_item));		
 	}
 
 	while (feature_lines.size() > analysis_features.size()) {
-		ArdourCanvas::SimpleLine *line = feature_lines.back().second;
+		ArdourCanvas::Line* line = feature_lines.back().second;
 		feature_lines.pop_back ();
 		delete line;
 	}
 
 	AnalysisFeatureList::const_iterator i;
-	list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> >::iterator l;
-
+	list<std::pair<framepos_t, ArdourCanvas::Line*> >::iterator l;
+	
 	for (i = analysis_features.begin(), l = feature_lines.begin(); i != analysis_features.end() && l != feature_lines.end(); ++i, ++l) {
-		(*l).first = *i;
-		(*l).second->property_x1() = trackview.editor().frame_to_pixel (*i);
-		(*l).second->property_x2() = trackview.editor().frame_to_pixel (*i);		
-		(*l).second->property_y1() = 2;
-		(*l).second->property_y2() = _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1;
-		(*l).second->set_data("regionview", this);
-		(*l).second->show ();
-		(*l).second->raise_to_top ();
+
+		ArdourCanvas::Points points;
+
+		float *pos = new float;
+		*pos = trackview.editor().frame_to_pixel (*i);
 		
-		(*l).second->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_feature_line_event), (*l).second, this));
+		points.push_back(Gnome::Art::Point(*pos, 2.0)); // first x-coord needs to be a non-normal value
+		points.push_back(Gnome::Art::Point(*pos, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1));
+
+		(*l).second->property_points() = points;
+		(*l).second->set_data ("position", pos);
+		
+		(*l).first = *i;
 	}
 }
 
@@ -1462,12 +1503,16 @@ void
 AudioRegionView::update_transient(float /*old_pos*/, float new_pos)
 {
 	/* Find frame at old pos, calulate new frame then update region transients*/
-	list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> >::iterator l;
+	list<std::pair<framepos_t, ArdourCanvas::Line*> >::iterator l;
 
 	for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
-		/* Simple line x1 has been updated in drag so we compare to new_pos */
-		if (rint(new_pos) == rint((*l).second->property_x1())) {
-		    
+
+		/* Line has been updated in drag so we compare to new_pos */
+		
+		float* pos = (float*) (*l).second->get_data ("position");
+		
+		if (rint(new_pos) == rint(*pos)) { 
+		  
 		    framepos_t old_frame = (*l).first;
 		    framepos_t new_frame = trackview.editor().pixel_to_frame (new_pos);
 
@@ -1482,12 +1527,15 @@ void
 AudioRegionView::remove_transient(float pos)
 {
 	/* Find frame at old pos, calulate new frame then update region transients*/
-	list<std::pair<framepos_t, ArdourCanvas::SimpleLine*> >::iterator l;
+	list<std::pair<framepos_t, ArdourCanvas::Line*> >::iterator l;
 
 	for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
-		/* Simple line x1 has been updated in drag so we compare to new_pos */
-		if (rint(pos) == rint((*l).second->property_x1())) {
-		    _region->remove_transient ((*l).first);		    
+
+		/* Line has been updated in drag so we compare to new_pos */
+		float *line_pos = (float*) (*l).second->get_data ("position");
+
+		if (rint(pos) == rint(*line_pos)) {
+		    _region->remove_transient ((*l).first);   
 		    break;
 		}
 	}

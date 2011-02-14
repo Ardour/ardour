@@ -2900,7 +2900,7 @@ FeatureLineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 {
 	Drag::start_grab (event);
 	
-	_line = reinterpret_cast<SimpleLine*> (_item);
+	_line = reinterpret_cast<Line*> (_item);
 	assert (_line);
 
 	/* need to get x coordinate in terms of parent (AudioRegionView) origin. */
@@ -2913,10 +2913,10 @@ FeatureLineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	/* store grab start in parent frame */
 	_region_view_grab_x = cx;
 	
-	_before = _line->property_x1();
+	_before = *(float*) _item->get_data ("position");
 	
 	_arv = reinterpret_cast<AudioRegionView*> (_item->get_data ("regionview"));
-		
+
 	_max_x = _editor->frame_to_pixel(_arv->get_duration());
 }
 
@@ -2938,17 +2938,30 @@ FeatureLineDrag::motion (GdkEvent*, bool)
 		cx = 0;
 	}
 	
-	_line->property_x1() = cx; 
-	_line->property_x2() = cx;
+	ArdourCanvas::Points points;
+	
+	double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
 
-	_before = _line->property_x1();
+	_line->get_bounds(x1, y2, x2, y2);
+	
+	points.push_back(Gnome::Art::Point(cx, 2.0)); // first x-coord needs to be a non-normal value
+	points.push_back(Gnome::Art::Point(cx, y2 - y1));
+
+	_line->property_points() = points;
+	
+	float *pos = new float;
+	*pos = cx;
+	
+	_line->set_data ("position", pos);
+
+	_before = cx;
 }
 
 void
 FeatureLineDrag::finished (GdkEvent*, bool)
 {
 	_arv = reinterpret_cast<AudioRegionView*> (_item->get_data ("regionview"));
-	_arv->update_transient(_before, _line->property_x1());
+	_arv->update_transient(_before, _before);
 }
 
 void
@@ -3049,6 +3062,7 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 
 		_editor->commit_reversible_command ();
+
 	} else {
 		if (!getenv("ARDOUR_SAE")) {
 			_editor->selection->clear_tracks();

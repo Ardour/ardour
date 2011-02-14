@@ -147,7 +147,7 @@ UI::load_rcfile (string path, bool themechange)
 		return -1;
 	}
 
-	if (access (path.c_str(), R_OK)) {
+	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 		error << "UI: couldn't find rc file \""
 		      << path
 		      << '"'
@@ -155,12 +155,11 @@ UI::load_rcfile (string path, bool themechange)
 		return -1;
 	}
 
-	RC rc (path.c_str());
-	gtk_rc_reset_styles (gtk_settings_get_default());
-	//vector<string> files;
-	//files.push_back(path.c_str());
-	//RC::set_default_files(files);
-	//RC::reparse_all (Gtk::Settings::get_default(), true);
+        RC rc (path.c_str());
+        //this is buggy in gtkmm for some reason, so use C
+        //RC::reset_styles (Gtk::Settings::get_default());
+        gtk_rc_reset_styles (gtk_settings_get_default());
+
 	theme_changed.emit();
 
 	if (themechange) {

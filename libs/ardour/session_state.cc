@@ -2575,6 +2575,32 @@ Session::ask_about_playlist_deletion (boost::shared_ptr<Playlist> p)
 	return r.get_value_or (1);
 }
 
+void
+Session::cleanup_regions ()
+{
+	const RegionFactory::RegionMap& regions (RegionFactory::regions());
+
+	for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+
+		boost::shared_ptr<AudioRegion> audio_region = boost::dynamic_pointer_cast<AudioRegion>( i->second);
+		
+		if (!audio_region) {
+			continue;
+		}
+		
+		uint32_t used = playlists->region_use_count (audio_region);
+
+		if (used == 0 && !audio_region->automatic()){
+			RegionFactory::map_remove(i->second);
+		}
+	}
+
+	/* dump the history list */
+	_history.clear ();
+
+	save_state ("");
+}
+
 int
 Session::cleanup_sources (CleanupReport& rep)
 {
@@ -2999,7 +3025,7 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 		break;
 
 	case ControllableDescriptor::Solo:
-		c = r->solo_control();
+                c = r->solo_control();
 		break;
 
 	case ControllableDescriptor::Mute:

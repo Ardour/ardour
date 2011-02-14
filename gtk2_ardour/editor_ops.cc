@@ -120,6 +120,8 @@ Editor::redo (uint32_t n)
 void
 Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 {
+	bool frozen = false;
+
 	list <boost::shared_ptr<Playlist > > used_playlists;
 
 	if (regions.empty()) {
@@ -142,6 +144,9 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 		}
 	} else {
 		snap_to (where);
+		
+		frozen = true;
+		EditorFreeze(); /* Emit Signal */
 	}
 
 	for (RegionSelection::iterator a = regions.begin(); a != regions.end(); ) {
@@ -191,6 +196,10 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 	}
 
 	commit_reversible_command ();
+	
+	if (frozen){
+		EditorThaw(); /* Emit Signal */
+	}
 }
 
 boost::shared_ptr<Region>
@@ -5851,8 +5860,9 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 		plist.add (ARDOUR::Properties::layer, 0);
 
 		boost::shared_ptr<Region> nr = RegionFactory::create (r->sources(), plist, false);
+
 		pl->add_region (nr, r->position() + pos);
-		
+
 		if (select_new) {
 			new_regions.push_front(nr);
 		}
@@ -5924,16 +5934,18 @@ Editor::remove_transient(ArdourCanvas::Item* item)
 		return;
 	}
 
-	ArdourCanvas::SimpleLine* _line = reinterpret_cast<ArdourCanvas::SimpleLine*> (item);
+	ArdourCanvas::Line* _line = reinterpret_cast<ArdourCanvas::Line*> (item);
 	assert (_line);
 
 	AudioRegionView* _arv = reinterpret_cast<AudioRegionView*> (item->get_data ("regionview"));
-	_arv->remove_transient(_line->property_x1());
+	_arv->remove_transient (*(float*) _line->get_data ("position"));
 }
 
 void
 Editor::snap_regions_to_grid ()
 {
+	list <boost::shared_ptr<Playlist > > used_playlists;
+	
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 
 	if (!_session || rs.empty()) {
@@ -5943,17 +5955,36 @@ Editor::snap_regions_to_grid ()
 	_session->begin_reversible_command (_("snap regions to grid"));
 	
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
+	  
+		boost::shared_ptr<Playlist> pl = (*r)->region()->playlist();
+	  
+		if (!pl->frozen()) {
+			/* we haven't seen this playlist before */
+
+			/* remember used playlists so we can thaw them later */
+			used_playlists.push_back(pl);
+			pl->freeze();
+		}
+
 		framepos_t start_frame = (*r)->region()->first_frame ();
 		snap_to (start_frame);
 		(*r)->region()->set_position (start_frame, this);
 	}
 	
+	while (used_playlists.size() > 0) {
+		list <boost::shared_ptr<Playlist > >::iterator i = used_playlists.begin();
+		(*i)->thaw();
+		used_playlists.pop_front();
+	}
+
 	_session->commit_reversible_command ();
 }
 
 void
 Editor::close_region_gaps ()
-{	
+{
+	list <boost::shared_ptr<Playlist > > used_playlists;
+	
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 
 	if (!_session || rs.empty()) {
@@ -6007,13 +6038,23 @@ Editor::close_region_gaps ()
 	/* Iterate over the region list and make adjacent regions overlap by crossfade_len_ms */
 	
 	_session->begin_reversible_command (_("close region gaps"));
-		
+
 	int idx = 0;
 	boost::shared_ptr<Region> last_region;
 	
 	rs.sort_by_position_and_track();
 	
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
+	  
+		boost::shared_ptr<Playlist> pl = (*r)->region()->playlist();
+		
+		if (!pl->frozen()) {
+			/* we haven't seen this playlist before */
+
+			/* remember used playlists so we can thaw them later */
+			used_playlists.push_back(pl);
+			pl->freeze();
+		}
 
 		framepos_t position = (*r)->region()->position();
 	  
@@ -6031,6 +6072,12 @@ Editor::close_region_gaps ()
 		idx++;
 	}
 	
+	while (used_playlists.size() > 0) {
+		list <boost::shared_ptr<Playlist > >::iterator i = used_playlists.begin();
+		(*i)->thaw();
+		used_playlists.pop_front();
+	}
+
 	_session->commit_reversible_command ();
 }
 

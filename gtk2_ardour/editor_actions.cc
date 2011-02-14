@@ -631,13 +631,16 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (rl_actions, X_("rlAudition"), _("Audition"), sigc::mem_fun(*this, &Editor::audition_region_from_region_list));
 	ActionManager::region_list_selection_sensitive_actions.push_back (act);
+	
 	act = ActionManager::register_action (rl_actions, X_("rlHide"), _("Hide"), sigc::mem_fun(*this, &Editor::hide_region_from_region_list));
 	ActionManager::region_list_selection_sensitive_actions.push_back (act);
+	
 	act = ActionManager::register_action (rl_actions, X_("rlShow"), _("Show"), sigc::mem_fun(*this, &Editor::show_region_in_region_list));
 	ActionManager::region_list_selection_sensitive_actions.push_back (act);
+	
 	ActionManager::register_toggle_action (rl_actions, X_("rlShowAll"), _("Show All"), sigc::mem_fun(*_regions, &EditorRegions::toggle_full));
 	ActionManager::register_toggle_action (rl_actions, X_("rlShowAuto"), _("Show Automatic Regions"), sigc::mem_fun (*_regions, &EditorRegions::toggle_show_auto_regions));
-
+	
 	ActionManager::register_radio_action (rl_actions, sort_order_group, X_("SortAscending"),  _("Ascending"),
 			sigc::bind (sigc::mem_fun (*_regions, &EditorRegions::reset_sort_direction), true));
 	ActionManager::register_radio_action (rl_actions, sort_order_group, X_("SortDescending"),   _("Descending"),
@@ -664,6 +667,7 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortBySourceFilesystem"),  _("By Source Filesystem"),
 			sigc::bind (sigc::mem_fun (*_regions, &EditorRegions::reset_sort_type), BySourceFileFS, false));
 
+	ActionManager::register_action (rl_actions, X_("removeUnusedRegions"), _("Delete Unused"), sigc::mem_fun(*_regions, &EditorRegions::delete_unused_regions));
 
 	/* the next two are duplicate items with different names for use in two different contexts */
 
@@ -747,6 +751,7 @@ Editor::toggle_ruler_visibility (RulerType rt)
 	}
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Rulers"), action);
+	
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		update_ruler_visibility ();
