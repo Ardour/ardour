@@ -153,9 +153,10 @@ UI::load_rcfile (string path, bool themechange)
 		return -1;
 	}
 
-	RC rc (path.c_str());
-	//RC::reset_styles (Gtk::Settings::get_default());
-	gtk_rc_reset_styles (gtk_settings_get_default());
+	vector<string> files;
+	files.push_back(path.c_str());
+	RC::set_default_files(files);
+	RC::reparse_all (Gtk::Settings::get_default(), true);
 	theme_changed.emit();
 
 	if (themechange) {
