@@ -178,6 +178,7 @@ class AudioFileSource : public AudioSource {
 	Glib::ustring broken_peak_path (Glib::ustring audio_path);
 
 	void fix_writable_flags ();
+	void prevent_deletion ();
 };
 
 } // namespace ARDOUR

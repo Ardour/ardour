@@ -96,6 +96,7 @@ AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags)
 		throw failed_constructor ();
 	}
 
+        prevent_deletion ();
 	fix_writable_flags ();
 }
 
@@ -110,6 +111,7 @@ AudioFileSource::AudioFileSource (Session& s, ustring path, Flag flags, SampleFo
 		throw failed_constructor ();
 	}
 
+        prevent_deletion ();
 	fix_writable_flags ();
 }
 
@@ -129,6 +131,7 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exi
 		throw failed_constructor ();
 	}
 
+        prevent_deletion ();
 	fix_writable_flags ();
 }
 
@@ -141,8 +144,25 @@ AudioFileSource::~AudioFileSource ()
 }
 
 void
+AudioFileSource::prevent_deletion ()
+{
+        /* if this file already exists, it cannot be removed, ever
+         */
+
+        if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS)) {
+                if (!(_flags & Destructive)) {
+                        mark_immutable ();
+                } else {
+                        _flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
+                }
+        }
+}
+
+void
 AudioFileSource::fix_writable_flags ()
 {
+        /* if the session is not writable, neither is this file 
+         */
 	if (!_session.writable()) {
 		_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
 	}
@@ -354,6 +374,7 @@ AudioFileSource::mark_for_remove ()
 	}
 
 	_flags = Flag (_flags | Removable | RemoveAtDestroy);
+
 }
 
 void
@@ -465,6 +486,7 @@ AudioFileSource::move_to_trash (const ustring& trash_dir_name)
 	/* file can not be removed twice, since the operation is not idempotent */
 
 	_flags = Flag (_flags & ~(RemoveAtDestroy|Removable|RemovableIfEmpty));
+
 
 	return 0;
 }
@@ -774,7 +796,6 @@ AudioFileSource::mark_immutable ()
 		_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
 	}
 }
-
 
 Sample*
 AudioFileSource::get_interleave_buffer (nframes_t size)

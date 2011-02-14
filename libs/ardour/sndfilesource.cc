@@ -633,7 +633,7 @@ bool
 SndFileSource::set_destructive (bool yn)
 {
 	if (yn) {
-		_flags = Flag (_flags | Destructive);
+		_flags = Flag (_flags | Writable | Destructive);
 		if (!xfade_buf) {
 			xfade_buf = new Sample[xfade_frames];
 		}
@@ -644,7 +644,7 @@ SndFileSource::set_destructive (bool yn)
 		timeline_position = 0;
 		/* leave xfade buf alone in case we need it again later */
 	}
-
+        
 	return true;
 }
 
