@@ -99,6 +99,8 @@ protected:
 	uint16_t    _channel;
 	bool        _within_session;
         std::string _origin;
+
+        void prevent_deletion ();
 };
 
 } // namespace ARDOUR
