@@ -94,9 +94,9 @@ style "medium_monospace_text"
 
 style "red_medium_text" = "medium_text"
 {	
-	fg[NORMAL] = @ARDOUR_DARK_bright_indicator
-	fg[ACTIVE] = @ARDOUR_DARK_bright_indicator
-	fg[SELECTED] = @ARDOUR_DARK_bright_indicator
+	fg[NORMAL] = @@COLPREFIX@_bright_indicator
+	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
+	fg[SELECTED] = @@COLPREFIX@_bright_indicator
 }
 
 style "large_bold_text"
@@ -121,12 +121,12 @@ style "big_bold_text"
 
 style "plugin_name_text" = "big_bold_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_text
+	fg[NORMAL] = @@COLPREFIX@_text
 }
 
 style "plugin_maker_text" = "larger_bold_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_text
+	fg[NORMAL] = @@COLPREFIX@_text
 }
 
 style "verbose_canvas_cursor" = "big_bold_text"
@@ -149,14 +149,14 @@ style "time_axis_view_item_name" = "very small text"
 style "default" = "medium_text"
 {
   #Original values for reference
-  GtkWidget::cursor_color =  @ARDOUR_DARK_lightest
+  GtkWidget::cursor_color =  @@COLPREFIX@_lightest
   GtkButton::default_border = { 0, 0, 0, 0 }
   GtkButton::default_outside_border = { 0, 0, 0, 0 }
   GtkButton::button_relief = GTK_RELIEF_NONE
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
-  GtkTreeView::even-row-color = @ARDOUR_DARK_base
-  GtkTreeView::odd-row-color = darker(@ARDOUR_DARK_base)
+  GtkTreeView::even-row-color = @@COLPREFIX@_base
+  GtkTreeView::odd-row-color = darker(@@COLPREFIX@_base)
   
   GtkWidget           :: focus-line-pattern               = "\001\001"        #                              Dash pattern used to draw the focus indicator.
   GtkWidget           :: focus-line-width                 = 1                 # [               1 ] ( >= 0 ) Width, in pixels, of the focus indicator line.
@@ -165,8 +165,8 @@ style "default" = "medium_text"
   GtkWidget           :: scroll-arrow-hlength             = 16                # [              16 ] ( >= 1 ) Length of horizontal scroll arrows.
   GtkWidget           :: scroll-arrow-vlength             = 16                # [              16 ] ( >= 1 ) Length of vertical scroll arrows.
 
-  GtkWidget           :: link-color                       = shade(1.25, @ARDOUR_DARK_bright_color)
-  GtkWidget           :: visited-link-color               = @ARDOUR_DARK_bright_color
+  GtkWidget           :: link-color                       = shade(1.25, @@COLPREFIX@_bright_color)
+  GtkWidget           :: visited-link-color               = @@COLPREFIX@_bright_color
   
 #Window Properties
   GtkDialog           :: action-area-border               = 4                 # [               5 ] ( >= 0 ) Width of border around the button area at the bottom of the dialog.
@@ -257,29 +257,29 @@ style "default" = "medium_text"
   #ythickness = 0
 
 #Base Colors
-  bg[NORMAL]          = @ARDOUR_DARK_bg
-  bg[PRELIGHT]        = shade(1.1, @ARDOUR_DARK_bg)
-  bg[ACTIVE]          = shade(0.9, @ARDOUR_DARK_bg)
-  bg[INSENSITIVE]     = @ARDOUR_DARK_bg
-  bg[SELECTED]        = @ARDOUR_DARK_bg_selected
+  bg[NORMAL]          = @@COLPREFIX@_bg
+  bg[PRELIGHT]        = shade(1.1, @@COLPREFIX@_bg)
+  bg[ACTIVE]          = shade(0.9, @@COLPREFIX@_bg)
+  bg[INSENSITIVE]     = @@COLPREFIX@_bg
+  bg[SELECTED]        = @@COLPREFIX@_bg_selected
 
-  fg[NORMAL]          = @ARDOUR_DARK_fg
-  fg[PRELIGHT]        = @ARDOUR_DARK_fg
-  fg[ACTIVE]          = shade(0.9, @ARDOUR_DARK_fg)
-  fg[INSENSITIVE]     = shade(0.7, @ARDOUR_DARK_bg)
-  fg[SELECTED]        = @ARDOUR_DARK_fg_selected
+  fg[NORMAL]          = @@COLPREFIX@_fg
+  fg[PRELIGHT]        = @@COLPREFIX@_fg
+  fg[ACTIVE]          = shade(0.9, @@COLPREFIX@_fg)
+  fg[INSENSITIVE]     = shade(0.7, @@COLPREFIX@_bg)
+  fg[SELECTED]        = @@COLPREFIX@_fg_selected
 
-  base[NORMAL]        = @ARDOUR_DARK_base
-  base[PRELIGHT]      = @ARDOUR_DARK_base
-  base[INSENSITIVE]   = shade(1.0, @ARDOUR_DARK_bg)
-  base[ACTIVE]        = shade(0.9, @ARDOUR_DARK_bg_selected)
-  base[SELECTED]      = @ARDOUR_DARK_bg_selected
+  base[NORMAL]        = @@COLPREFIX@_base
+  base[PRELIGHT]      = @@COLPREFIX@_base
+  base[INSENSITIVE]   = shade(1.0, @@COLPREFIX@_bg)
+  base[ACTIVE]        = shade(0.9, @@COLPREFIX@_bg_selected)
+  base[SELECTED]      = @@COLPREFIX@_bg_selected
 
-  text[NORMAL]        = @ARDOUR_DARK_text
-  text[PRELIGHT]      = @ARDOUR_DARK_text
-  text[ACTIVE]        = @ARDOUR_DARK_fg_selected
-  text[INSENSITIVE]   = shade(0.7, @ARDOUR_DARK_bg)
-  text[SELECTED]      = @ARDOUR_DARK_fg_selected
+  text[NORMAL]        = @@COLPREFIX@_text
+  text[PRELIGHT]      = @@COLPREFIX@_text
+  text[ACTIVE]        = @@COLPREFIX@_fg_selected
+  text[INSENSITIVE]   = shade(0.7, @@COLPREFIX@_bg)
+  text[SELECTED]      = @@COLPREFIX@_fg_selected
 
 #engine specific tweaks
 
@@ -294,18 +294,18 @@ style "default" = "medium_text"
 
 style "contrasting_popup" = "medium_monospace_text"
 {
-  bg[NORMAL]          = @ARDOUR_DARK_lightest
-  fg[NORMAL]          = @ARDOUR_DARK_darkest
-  base[NORMAL]        = @ARDOUR_DARK_lightest
-  text[NORMAL]        = @ARDOUR_DARK_darkest
-  text[ACTIVE]        = @ARDOUR_DARK_darkest
-  text[SELECTED]      = @ARDOUR_DARK_darkest
+  bg[NORMAL]          = @@COLPREFIX@_lightest
+  fg[NORMAL]          = @@COLPREFIX@_darkest
+  base[NORMAL]        = @@COLPREFIX@_lightest
+  text[NORMAL]        = @@COLPREFIX@_darkest
+  text[ACTIVE]        = @@COLPREFIX@_darkest
+  text[SELECTED]      = @@COLPREFIX@_darkest
 }
 
 style "base_frame"
 {
-	fg[NORMAL] = @ARDOUR_DARK_bg
-	bg[NORMAL] = @ARDOUR_DARK_bg
+	fg[NORMAL] = @@COLPREFIX@_bg
+	bg[NORMAL] = @@COLPREFIX@_bg
 }
 
 style "transport_base" = "medium_bold_text"
@@ -319,13 +319,13 @@ style "default_button" = "small_text"
 
 style "mouse_mode_button" = "default_button"
 {
-        bg[ACTIVE] = @ARDOUR_DARK_contrasting_indicator
-        fg[ACTIVE] = @ARDOUR_DARK_darkest
+        bg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
+        fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "default_menu" = "medium_text"
 {
-  #bg[NORMAL] = darker(@ARDOUR_DARK_bg)
+  #bg[NORMAL] = darker(@@COLPREFIX@_bg)
 }
 
 style "default_generic" = "medium_text"
@@ -334,7 +334,7 @@ style "default_generic" = "medium_text"
 
 style "text_cell_entry" = "medium_text"
 {
-	GtkWidget::cursor_color =  @ARDOUR_DARK_darkest
+	GtkWidget::cursor_color =  @@COLPREFIX@_darkest
 }
 
 style "very_small_button" = "default_button" 
@@ -349,70 +349,70 @@ style "small_button" = "default_button"
 
 style "very_small_red_active_and_selected_button" = "very_small_button"
 {
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
-	bg[ACTIVE] = @ARDOUR_DARK_bright_indicator
-	bg[SELECTED] = @ARDOUR_DARK_bright_indicator
+	fg[ACTIVE] = @@COLPREFIX@_darkest
+	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
+	bg[SELECTED] = @@COLPREFIX@_bright_indicator
 }
 
 style "small_red_active_and_selected_button" = "small_button"
 {
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
-	bg[ACTIVE] = @ARDOUR_DARK_bright_indicator
-	bg[SELECTED] = @ARDOUR_DARK_bright_indicator
+	fg[ACTIVE] = @@COLPREFIX@_darkest
+	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
+	bg[SELECTED] = @@COLPREFIX@_bright_indicator
 }
 
 style "gain_fader"
 {
-        bg[NORMAL] = shade (0.7, @ARDOUR_DARK_lightest)
-	bg[ACTIVE] = shade (0.705, @ARDOUR_DARK_lightest)
+        bg[NORMAL] = shade (0.7, @@COLPREFIX@_lightest)
+	bg[ACTIVE] = shade (0.705, @@COLPREFIX@_lightest)
 }
 
 #MSR and related buttons
 
 style "track_rec_enable_button" = "small_button"
 {
-	fg[ACTIVE] =   @ARDOUR_DARK_darkest
-        bg[NORMAL] =   mix(0.08,@ARDOUR_DARK_arm,@ARDOUR_DARK_bg)
-        bg[PRELIGHT] = shade(1.1,mix(0.08,@ARDOUR_DARK_arm,@ARDOUR_DARK_bg))
+	fg[ACTIVE] =   @@COLPREFIX@_darkest
+        bg[NORMAL] =   mix(0.08,@@COLPREFIX@_arm,@@COLPREFIX@_bg)
+        bg[PRELIGHT] = shade(1.1,mix(0.08,@@COLPREFIX@_arm,@@COLPREFIX@_bg))
 }
 
 style "track_rec_enable_button_active" = "small_button"
 {
-	#fg[ACTIVE] =   @ARDOUR_DARK_darkest
-	#fg[SELECTED] = @ARDOUR_DARK_darkest
-	#fg[PRELIGHT] = @ARDOUR_DARK_darkest
-	#fg[NORMAL] = @ARDOUR_DARK_darkest
+	#fg[ACTIVE] =   @@COLPREFIX@_darkest
+	#fg[SELECTED] = @@COLPREFIX@_darkest
+	#fg[PRELIGHT] = @@COLPREFIX@_darkest
+	#fg[NORMAL] = @@COLPREFIX@_darkest
 
-	bg[NORMAL] =   @ARDOUR_DARK_arm
-	bg[ACTIVE] =   @ARDOUR_DARK_arm
-	bg[SELECTED] =   @ARDOUR_DARK_arm
-	bg[PRELIGHT] =   shade(1.1, @ARDOUR_DARK_arm)
+	bg[NORMAL] =   @@COLPREFIX@_arm
+	bg[ACTIVE] =   @@COLPREFIX@_arm
+	bg[SELECTED] =   @@COLPREFIX@_arm
+	bg[PRELIGHT] =   shade(1.1, @@COLPREFIX@_arm)
 }
 
 style "track_rec_enable_button_alternate" = "small_button"
 {
-	fg[SELECTED] = @ARDOUR_DARK_darkest
-	fg[ACTIVE] =   @ARDOUR_DARK_darkest
-	fg[PRELIGHT] = @ARDOUR_DARK_darkest
-	fg[NORMAL] = @ARDOUR_DARK_darkest
+	fg[SELECTED] = @@COLPREFIX@_darkest
+	fg[ACTIVE] =   @@COLPREFIX@_darkest
+	fg[PRELIGHT] = @@COLPREFIX@_darkest
+	fg[NORMAL] = @@COLPREFIX@_darkest
 
-	bg[NORMAL] =   lighter(@ARDOUR_DARK_arm)
-	bg[ACTIVE] =   lighter(@ARDOUR_DARK_arm)
-	bg[SELECTED] =   lighter(@ARDOUR_DARK_arm)
-	bg[PRELIGHT] =   shade(1.1, lighter(@ARDOUR_DARK_arm))
+	bg[NORMAL] =   lighter(@@COLPREFIX@_arm)
+	bg[ACTIVE] =   lighter(@@COLPREFIX@_arm)
+	bg[SELECTED] =   lighter(@@COLPREFIX@_arm)
+	bg[PRELIGHT] =   shade(1.1, lighter(@@COLPREFIX@_arm))
 }
 
 style "track_rec_enable_button_alternate_two" = "small_button"
 {
-	fg[SELECTED] = @ARDOUR_DARK_darkest
-	fg[ACTIVE] =   @ARDOUR_DARK_darkest
-	fg[PRELIGHT] = @ARDOUR_DARK_darkest
-	fg[NORMAL] = @ARDOUR_DARK_darkest
+	fg[SELECTED] = @@COLPREFIX@_darkest
+	fg[ACTIVE] =   @@COLPREFIX@_darkest
+	fg[PRELIGHT] = @@COLPREFIX@_darkest
+	fg[NORMAL] = @@COLPREFIX@_darkest
 
-	bg[NORMAL] =   darker(@ARDOUR_DARK_arm)
-	bg[ACTIVE] =   darker(@ARDOUR_DARK_arm)
-	bg[SELECTED] =   darker(@ARDOUR_DARK_arm)
-	bg[PRELIGHT] =   shade(1.1, darker(@ARDOUR_DARK_arm))
+	bg[NORMAL] =   darker(@@COLPREFIX@_arm)
+	bg[ACTIVE] =   darker(@@COLPREFIX@_arm)
+	bg[SELECTED] =   darker(@@COLPREFIX@_arm)
+	bg[PRELIGHT] =   shade(1.1, darker(@@COLPREFIX@_arm))
 }
 
 style "mixer_track_rec_enable_button" = "track_rec_enable_button"
@@ -436,21 +436,21 @@ style "mixer_track_rec_enable_button_active" = "track_rec_enable_button_active"
 
 style "solo_button" = "small_button"
 {
-  bg[NORMAL] = mix(0.1,@ARDOUR_DARK_solo,@ARDOUR_DARK_bg)
-  bg[ACTIVE] = @ARDOUR_DARK_solo
-  fg[ACTIVE] = @ARDOUR_DARK_darkest
+  bg[NORMAL] = mix(0.1,@@COLPREFIX@_solo,@@COLPREFIX@_bg)
+  bg[ACTIVE] = @@COLPREFIX@_solo
+  fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "solo_isolate_led"
 {
-  fg[NORMAL] = mix(0.2,@ARDOUR_DARK_isolate, @ARDOUR_DARK_darkest)
-  fg[ACTIVE] = @ARDOUR_DARK_isolate
+  fg[NORMAL] = mix(0.2,@@COLPREFIX@_isolate, @@COLPREFIX@_darkest)
+  fg[ACTIVE] = @@COLPREFIX@_isolate
 }
 
 style "solo_safe_led"
 {
-  fg[NORMAL] = mix(0.2,@ARDOUR_DARK_isolate, @ARDOUR_DARK_darkest)
-  fg[ACTIVE] = @ARDOUR_DARK_isolate
+  fg[NORMAL] = mix(0.2,@@COLPREFIX@_isolate, @@COLPREFIX@_darkest)
+  fg[ACTIVE] = @@COLPREFIX@_isolate
 }
 
 style "solo_button_alternate" = "small_button"
@@ -459,12 +459,12 @@ style "solo_button_alternate" = "small_button"
         # this is the "solo-isolated" solo theme
         #
 
-	bg[ACTIVE] = lighter(@ARDOUR_DARK_solo)
+	bg[ACTIVE] = lighter(@@COLPREFIX@_solo)
 
-	fg[ACTIVE] = @ARDOUR_DARK_bright_indicator
-	fg[SELECTED] = @ARDOUR_DARK_bright_indicator
-	fg[NORMAL] = @ARDOUR_DARK_bright_indicator
-	fg[PRELIGHT] = shade(1.1, @ARDOUR_DARK_bright_indicator)
+	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
+	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+	fg[NORMAL] = @@COLPREFIX@_bright_indicator
+	fg[PRELIGHT] = shade(1.1, @@COLPREFIX@_bright_indicator)
 }
 
 style "solo_button_alternate2" = "small_button"
@@ -473,15 +473,15 @@ style "solo_button_alternate2" = "small_button"
         # this is the "half-bright" solo theme
         #
 
-	bg[NORMAL] = darker(@ARDOUR_DARK_solo) 
-	bg[ACTIVE] = darker(@ARDOUR_DARK_solo)
-	bg[SELECTED] = darker(@ARDOUR_DARK_solo)
-	bg[PRELIGHT] = shade(1.1, darker(@ARDOUR_DARK_solo))
+	bg[NORMAL] = darker(@@COLPREFIX@_solo) 
+	bg[ACTIVE] = darker(@@COLPREFIX@_solo)
+	bg[SELECTED] = darker(@@COLPREFIX@_solo)
+	bg[PRELIGHT] = shade(1.1, darker(@@COLPREFIX@_solo))
 
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
-	fg[SELECTED] = @ARDOUR_DARK_darkest
-	fg[NORMAL] = @ARDOUR_DARK_darkest
-	fg[PRELIGHT] = @ARDOUR_DARK_darkest
+	fg[ACTIVE] = @@COLPREFIX@_darkest
+	fg[SELECTED] = @@COLPREFIX@_darkest
+	fg[NORMAL] = @@COLPREFIX@_darkest
+	fg[PRELIGHT] = @@COLPREFIX@_darkest
 }
 
 style "solo_button_active" = "small_button"
@@ -490,21 +490,21 @@ style "solo_button_active" = "small_button"
         # this is the "full-bright" solo theme
         #
 
-	bg[NORMAL] = @ARDOUR_DARK_solo
-	bg[ACTIVE] = @ARDOUR_DARK_solo
-	bg[SELECTED] = @ARDOUR_DARK_solo
-	bg[PRELIGHT] = shade(1.1, @ARDOUR_DARK_solo)
+	bg[NORMAL] = @@COLPREFIX@_solo
+	bg[ACTIVE] = @@COLPREFIX@_solo
+	bg[SELECTED] = @@COLPREFIX@_solo
+	bg[PRELIGHT] = shade(1.1, @@COLPREFIX@_solo)
 
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
-	fg[SELECTED] = @ARDOUR_DARK_darkest
-	fg[NORMAL] = @ARDOUR_DARK_darkest
-	fg[PRELIGHT] = @ARDOUR_DARK_darkest
+	fg[ACTIVE] = @@COLPREFIX@_darkest
+	fg[SELECTED] = @@COLPREFIX@_darkest
+	fg[NORMAL] = @@COLPREFIX@_darkest
+	fg[PRELIGHT] = @@COLPREFIX@_darkest
 }
 
 style "mixer_invert_button" = "small_button"
 {
-	bg[ACTIVE] = @ARDOUR_DARK_not_so_bright_indicator
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
+	bg[ACTIVE] = @@COLPREFIX@_not_so_bright_indicator
+	fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "mixer_solo_button" = "solo_button"
@@ -534,79 +534,79 @@ style "mixer_solo_button_active" = "solo_button_active"
 
 style "monitor_opt_button" = "small_button"
 {
-        bg[NORMAL] = mix(0.1,@ARDOUR_DARK_not_so_bright_indicator,@ARDOUR_DARK_bg)
-	bg[ACTIVE] = @ARDOUR_DARK_not_so_bright_indicator
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
+        bg[NORMAL] = mix(0.1,@@COLPREFIX@_not_so_bright_indicator,@@COLPREFIX@_bg)
+	bg[ACTIVE] = @@COLPREFIX@_not_so_bright_indicator
+	fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "monitor_mono_button" = "small_button"
 {
-	bg[NORMAL] = mix(0.1,@ARDOUR_DARK_mono,@ARDOUR_DARK_bg)
-        bg[ACTIVE] = @ARDOUR_DARK_mono
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
+	bg[NORMAL] = mix(0.1,@@COLPREFIX@_mono,@@COLPREFIX@_bg)
+        bg[ACTIVE] = @@COLPREFIX@_mono
+	fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "monitor_invert_button" = "small_button"
 {
-	bg[NORMAL] = mix(0.1,@ARDOUR_DARK_not_so_bright_indicator,@ARDOUR_DARK_bg)
-        bg[ACTIVE] = @ARDOUR_DARK_not_so_bright_indicator
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
+	bg[NORMAL] = mix(0.1,@@COLPREFIX@_not_so_bright_indicator,@@COLPREFIX@_bg)
+        bg[ACTIVE] = @@COLPREFIX@_not_so_bright_indicator
+	fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "monitor_mute_button" = "small_button"
 {
-	bg[NORMAL] = mix(0.1,@ARDOUR_DARK_mute,@ARDOUR_DARK_bg)
-        bg[ACTIVE] = @ARDOUR_DARK_mute
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
+	bg[NORMAL] = mix(0.1,@@COLPREFIX@_mute,@@COLPREFIX@_bg)
+        bg[ACTIVE] = @@COLPREFIX@_mute
+	fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "monitor_dim_button" = "small_button"
 {
-	bg[NORMAL] = mix(0.1,lighter(@ARDOUR_DARK_mute),@ARDOUR_DARK_bg)
-        bg[ACTIVE] = lighter(@ARDOUR_DARK_mute)
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
+	bg[NORMAL] = mix(0.1,lighter(@@COLPREFIX@_mute),@@COLPREFIX@_bg)
+        bg[ACTIVE] = lighter(@@COLPREFIX@_mute)
+	fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "monitor_iso_button" = "small_button"
 {
-	bg[NORMAL] = mix(0.1,@ARDOUR_DARK_somewhat_bright_indicator,@ARDOUR_DARK_bg)
-        bg[ACTIVE] = @ARDOUR_DARK_somewhat_bright_indicator
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
+	bg[NORMAL] = mix(0.1,@@COLPREFIX@_somewhat_bright_indicator,@@COLPREFIX@_bg)
+        bg[ACTIVE] = @@COLPREFIX@_somewhat_bright_indicator
+	fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "mute_button" = "small_button"
 {
-	bg[NORMAL] = mix(0.1,@ARDOUR_DARK_mute,@ARDOUR_DARK_bg)
-        bg[ACTIVE] = @ARDOUR_DARK_mute
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
+	bg[NORMAL] = mix(0.1,@@COLPREFIX@_mute,@@COLPREFIX@_bg)
+        bg[ACTIVE] = @@COLPREFIX@_mute
+	fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "mute_button_fullylit" = "small_button"
 {
         # this is the normal "active" state for a mute button
 
-	bg[ACTIVE] = @ARDOUR_DARK_mute
-	bg[NORMAL] = @ARDOUR_DARK_mute
-	bg[SELECTED] = @ARDOUR_DARK_mute
-	bg[PRELIGHT] = lighter (@ARDOUR_DARK_mute)
+	bg[ACTIVE] = @@COLPREFIX@_mute
+	bg[NORMAL] = @@COLPREFIX@_mute
+	bg[SELECTED] = @@COLPREFIX@_mute
+	bg[PRELIGHT] = lighter (@@COLPREFIX@_mute)
 
-	fg[SELECTED] = @ARDOUR_DARK_darkest
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
-	fg[NORMAL] = @ARDOUR_DARK_darkest
-	fg[PRELIGHT] = @ARDOUR_DARK_darkest
+	fg[SELECTED] = @@COLPREFIX@_darkest
+	fg[ACTIVE] = @@COLPREFIX@_darkest
+	fg[NORMAL] = @@COLPREFIX@_darkest
+	fg[PRELIGHT] = @@COLPREFIX@_darkest
 }
 
 style "mute_button_halflit" = "small_button"
 {
- 	bg[NORMAL] = mix(0.5,@ARDOUR_DARK_lightest,@ARDOUR_DARK_mute)
- 	bg[SELECTED] = mix(0.5,@ARDOUR_DARK_lightest,@ARDOUR_DARK_mute)
- 	bg[ACTIVE] = mix(0.5,@ARDOUR_DARK_lightest,@ARDOUR_DARK_mute)
- 	bg[PRELIGHT] = mix(0.5,@ARDOUR_DARK_lightest,@ARDOUR_DARK_mute)
+ 	bg[NORMAL] = mix(0.5,@@COLPREFIX@_lightest,@@COLPREFIX@_mute)
+ 	bg[SELECTED] = mix(0.5,@@COLPREFIX@_lightest,@@COLPREFIX@_mute)
+ 	bg[ACTIVE] = mix(0.5,@@COLPREFIX@_lightest,@@COLPREFIX@_mute)
+ 	bg[PRELIGHT] = mix(0.5,@@COLPREFIX@_lightest,@@COLPREFIX@_mute)
 
-	fg[SELECTED] = @ARDOUR_DARK_darkest
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
-	fg[NORMAL] = @ARDOUR_DARK_darkest
-	fg[PRELIGHT] = @ARDOUR_DARK_darkest
+	fg[SELECTED] = @@COLPREFIX@_darkest
+	fg[ACTIVE] = @@COLPREFIX@_darkest
+	fg[NORMAL] = @@COLPREFIX@_darkest
+	fg[PRELIGHT] = @@COLPREFIX@_darkest
 }
 
 style "mixer_mute_button" = "mute_button"
@@ -635,14 +635,14 @@ style "multiline_combo" = "small_button"
 
 style "track_loop_button" = "small_button"
 {
-	bg[ACTIVE] = @ARDOUR_DARK_somewhat_bright_indicator
-	bg[PRELIGHT] = lighter(@ARDOUR_DARK_somewhat_bright_indicator)
+	bg[ACTIVE] = @@COLPREFIX@_somewhat_bright_indicator
+	bg[PRELIGHT] = lighter(@@COLPREFIX@_somewhat_bright_indicator)
 
 }
 
 style "mixer_red_active_button" = "very_small_button"
 {
-	bg[ACTIVE] = @ARDOUR_DARK_bright_indicator
+	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
 
  	base[INSENSITIVE] = { 0.16, 0.16, 0.21 }
  	bg[INSENSITIVE] = { 0.16, 0.16, 0.21 }
@@ -655,83 +655,83 @@ style "time_button" = "default_button"
 
 style "transport_button"
 {
-  #bg[NORMAL] = mix(0.05,@ARDOUR_DARK_contrasting_indicator,@ARDOUR_DARK_bg)   #turns out this is kind of yucky looking, but it's there if you want to try it
-	bg[ACTIVE] = @ARDOUR_DARK_contrasting_indicator
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
+  #bg[NORMAL] = mix(0.05,@@COLPREFIX@_contrasting_indicator,@@COLPREFIX@_bg)   #turns out this is kind of yucky looking, but it's there if you want to try it
+	bg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
+	fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "transport_button_active"
 {
-	bg[NORMAL] = @ARDOUR_DARK_contrasting_indicator
-	bg[ACTIVE] = @ARDOUR_DARK_contrasting_indicator
-	bg[SELECTED] = @ARDOUR_DARK_contrasting_indicator
-	bg[PRELIGHT] = @ARDOUR_DARK_contrasting_indicator
+	bg[NORMAL] = @@COLPREFIX@_contrasting_indicator
+	bg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
+	bg[SELECTED] = @@COLPREFIX@_contrasting_indicator
+	bg[PRELIGHT] = @@COLPREFIX@_contrasting_indicator
 
-	fg[NORMAL] = @ARDOUR_DARK_darkest
-	fg[PRELIGHT] = @ARDOUR_DARK_darkest
-	fg[SELECTED] = @ARDOUR_DARK_darkest
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
+	fg[NORMAL] = @@COLPREFIX@_darkest
+	fg[PRELIGHT] = @@COLPREFIX@_darkest
+	fg[SELECTED] = @@COLPREFIX@_darkest
+	fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "transport_button_alternate_two"
 {
-	fg[SELECTED] = @ARDOUR_DARK_darkest
-	fg[ACTIVE] =   @ARDOUR_DARK_darkest
-	fg[PRELIGHT] = @ARDOUR_DARK_darkest
-	fg[NORMAL] = @ARDOUR_DARK_darkest
+	fg[SELECTED] = @@COLPREFIX@_darkest
+	fg[ACTIVE] =   @@COLPREFIX@_darkest
+	fg[PRELIGHT] = @@COLPREFIX@_darkest
+	fg[NORMAL] = @@COLPREFIX@_darkest
 
-	bg[NORMAL] =   shade(0.2,@ARDOUR_DARK_bright_indicator)
-	bg[ACTIVE] =   shade(0.2,@ARDOUR_DARK_bright_indicator)
-	bg[SELECTED] =   shade(0.2,@ARDOUR_DARK_bright_indicator)
-	bg[PRELIGHT] =   shade(0.2,@ARDOUR_DARK_bright_indicator)
+	bg[NORMAL] =   shade(0.2,@@COLPREFIX@_bright_indicator)
+	bg[ACTIVE] =   shade(0.2,@@COLPREFIX@_bright_indicator)
+	bg[SELECTED] =   shade(0.2,@@COLPREFIX@_bright_indicator)
+	bg[PRELIGHT] =   shade(0.2,@@COLPREFIX@_bright_indicator)
 }
 
 style "transport_rec_button"
 {
-	bg[ACTIVE] = darker(@ARDOUR_DARK_arm)         #the rest of these don't quite do what I expected
-  #bg[NORMAL] = mix(0.05,@ARDOUR_DARK_arm,@ARDOUR_DARK_bg)
-	#bg[SELECTED] = darker(@ARDOUR_DARK_arm)
-	#bg[PRELIGHT] = lighter(mix(0.05,@ARDOUR_DARK_arm,@ARDOUR_DARK_bg))
+	bg[ACTIVE] = darker(@@COLPREFIX@_arm)         #the rest of these don't quite do what I expected
+  #bg[NORMAL] = mix(0.05,@@COLPREFIX@_arm,@@COLPREFIX@_bg)
+	#bg[SELECTED] = darker(@@COLPREFIX@_arm)
+	#bg[PRELIGHT] = lighter(mix(0.05,@@COLPREFIX@_arm,@@COLPREFIX@_bg))
   
-  fg[ACTIVE] = @ARDOUR_DARK_darkest
+  fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "transport_rec_button_active"
 {
-	bg[ACTIVE] = darker(@ARDOUR_DARK_arm)
-	bg[NORMAL] = darker(@ARDOUR_DARK_arm)
-	bg[SELECTED] = darker(@ARDOUR_DARK_arm)
-	bg[PRELIGHT] = darker(@ARDOUR_DARK_arm)
+	bg[ACTIVE] = darker(@@COLPREFIX@_arm)
+	bg[NORMAL] = darker(@@COLPREFIX@_arm)
+	bg[SELECTED] = darker(@@COLPREFIX@_arm)
+	bg[PRELIGHT] = darker(@@COLPREFIX@_arm)
 }
 
 style "transport_rec_button_alternate"
 {
-	bg[PRELIGHT] = @ARDOUR_DARK_arm
-	bg[NORMAL] = @ARDOUR_DARK_arm
-	bg[SELECTED] = @ARDOUR_DARK_arm
-	bg[ACTIVE] = @ARDOUR_DARK_arm
+	bg[PRELIGHT] = @@COLPREFIX@_arm
+	bg[NORMAL] = @@COLPREFIX@_arm
+	bg[SELECTED] = @@COLPREFIX@_arm
+	bg[ACTIVE] = @@COLPREFIX@_arm
 }
 
 style "shuttle_control" = "very_small_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_control_text2
-	fg[ACTIVE] = @ARDOUR_DARK_control_text2
-	fg[PRELIGHT] = @ARDOUR_DARK_control_text2
-	fg[SELECTED] = @ARDOUR_DARK_control_text2
-	fg[INSENSITIVE] = @ARDOUR_DARK_control_text2
+	fg[NORMAL] = @@COLPREFIX@_control_text2
+	fg[ACTIVE] = @@COLPREFIX@_control_text2
+	fg[PRELIGHT] = @@COLPREFIX@_control_text2
+	fg[SELECTED] = @@COLPREFIX@_control_text2
+	fg[INSENSITIVE] = @@COLPREFIX@_control_text2
 
-	bg[NORMAL] = @ARDOUR_DARK_darkest
-	bg[PRELIGHT] = @ARDOUR_DARK_darkest
-	bg[INSENSITIVE] = @ARDOUR_DARK_darkest
-	bg[ACTIVE] = @ARDOUR_DARK_bright_color
-	bg[SELECTED] = @ARDOUR_DARK_bright_color
+	bg[NORMAL] = @@COLPREFIX@_darkest
+	bg[PRELIGHT] = @@COLPREFIX@_darkest
+	bg[INSENSITIVE] = @@COLPREFIX@_darkest
+	bg[ACTIVE] = @@COLPREFIX@_bright_color
+	bg[SELECTED] = @@COLPREFIX@_bright_color
 }
 
 style "ardour_adjusters" = "default_generic"
 {
-	bg[NORMAL] = @ARDOUR_DARK_bg
-	bg[PRELIGHT] = lighter(@ARDOUR_DARK_bg)
-	bg[ACTIVE] = @ARDOUR_DARK_darkest
+	bg[NORMAL] = @@COLPREFIX@_bg
+	bg[PRELIGHT] = lighter(@@COLPREFIX@_bg)
+	bg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "editor_hscrollbar" = "ardour_adjusters"
@@ -750,12 +750,12 @@ style "ardour_progressbars" = "default_generic"
 { 
   # Clearlooks always uses darkest for the advancing bar, sigh
   # so this is just a contrasting color for the trough
-  bg[NORMAL] = @ARDOUR_DARK_bright_color
+  bg[NORMAL] = @@COLPREFIX@_bright_color
 }
 
 style "preferences"  = "default"
 {
-	fg[PRELIGHT] = lighter(@ARDOUR_DARK_fg)
+	fg[PRELIGHT] = lighter(@@COLPREFIX@_fg)
 }
 
 style "option_entry"  = "default"
@@ -765,25 +765,25 @@ style "option_entry"  = "default"
 
 style "red_when_active" = "medium_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_fg
-	bg[NORMAL] = @ARDOUR_DARK_bg
-  bg[PRELIGHT] = @ARDOUR_DARK_bg
+	fg[NORMAL] = @@COLPREFIX@_fg
+	bg[NORMAL] = @@COLPREFIX@_bg
+  bg[PRELIGHT] = @@COLPREFIX@_bg
 
-	fg[ACTIVE] = @ARDOUR_DARK_fg
-	bg[ACTIVE] = @ARDOUR_DARK_bright_indicator
-  bg[PRELIGHT] = @ARDOUR_DARK_bright_indicator
+	fg[ACTIVE] = @@COLPREFIX@_fg
+	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
+  bg[PRELIGHT] = @@COLPREFIX@_bright_indicator
 }
 
 style "xrun_warn"  = "larger_bold_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_fg
-	fg[ACTIVE] = @ARDOUR_DARK_fg
-	text[NORMAL] = @ARDOUR_DARK_fg
-	text[ACTIVE] = @ARDOUR_DARK_fg
-	base[NORMAL] = @ARDOUR_DARK_base
-	base[ACTIVE] = @ARDOUR_DARK_base
-	bg[NORMAL] = @ARDOUR_DARK_bright_indicator
-	bg[ACTIVE] = @ARDOUR_DARK_contrasting_indicator
+	fg[NORMAL] = @@COLPREFIX@_fg
+	fg[ACTIVE] = @@COLPREFIX@_fg
+	text[NORMAL] = @@COLPREFIX@_fg
+	text[ACTIVE] = @@COLPREFIX@_fg
+	base[NORMAL] = @@COLPREFIX@_base
+	base[ACTIVE] = @@COLPREFIX@_base
+	bg[NORMAL] = @@COLPREFIX@_bright_indicator
+	bg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
 }
 /*
 style "menu_bar_base" = "default"
@@ -793,242 +793,242 @@ style "menu_bar_base" = "default"
 */
 style "fatal_message" = "medium_text"
 {
-   fg[ACTIVE] = @ARDOUR_DARK_bright_indicator
-   fg[NORMAL] = @ARDOUR_DARK_bright_indicator
-   bg[ACTIVE]   = @ARDOUR_DARK_base
-   bg[NORMAL]   = @ARDOUR_DARK_base
-   base[NORMAL] = @ARDOUR_DARK_base
-   base[NORMAL] = @ARDOUR_DARK_base
+   fg[ACTIVE] = @@COLPREFIX@_bright_indicator
+   fg[NORMAL] = @@COLPREFIX@_bright_indicator
+   bg[ACTIVE]   = @@COLPREFIX@_base
+   bg[NORMAL]   = @@COLPREFIX@_base
+   base[NORMAL] = @@COLPREFIX@_base
+   base[NORMAL] = @@COLPREFIX@_base
 }
 
 style "error_message" = "medium_text"
 {
-   fg[ACTIVE] = @ARDOUR_DARK_bright_indicator
-   fg[NORMAL] = @ARDOUR_DARK_bright_indicator
-   bg[ACTIVE]   = @ARDOUR_DARK_base
-   bg[NORMAL]   = @ARDOUR_DARK_base
-   base[NORMAL] = @ARDOUR_DARK_base
-   base[NORMAL] = @ARDOUR_DARK_base
+   fg[ACTIVE] = @@COLPREFIX@_bright_indicator
+   fg[NORMAL] = @@COLPREFIX@_bright_indicator
+   bg[ACTIVE]   = @@COLPREFIX@_base
+   bg[NORMAL]   = @@COLPREFIX@_base
+   base[NORMAL] = @@COLPREFIX@_base
+   base[NORMAL] = @@COLPREFIX@_base
 }
 
 style "info_message" = "medium_text"
 {
-   fg[ACTIVE]   = @ARDOUR_DARK_contrasting_indicator
-   fg[NORMAL]   = @ARDOUR_DARK_contrasting_indicator
-   bg[ACTIVE]   = @ARDOUR_DARK_base
-   bg[NORMAL]   = @ARDOUR_DARK_base
-   base[NORMAL] = @ARDOUR_DARK_base
-   base[NORMAL] = @ARDOUR_DARK_base
+   fg[ACTIVE]   = @@COLPREFIX@_contrasting_indicator
+   fg[NORMAL]   = @@COLPREFIX@_contrasting_indicator
+   bg[ACTIVE]   = @@COLPREFIX@_base
+   bg[NORMAL]   = @@COLPREFIX@_base
+   base[NORMAL] = @@COLPREFIX@_base
+   base[NORMAL] = @@COLPREFIX@_base
 }
 
 style "warning_message" = "medium_text"
 {
-   fg[ACTIVE] = @ARDOUR_DARK_somewhat_bright_indicator
-   fg[NORMAL] = @ARDOUR_DARK_somewhat_bright_indicator
-   bg[ACTIVE]   = @ARDOUR_DARK_base
-   bg[NORMAL]   = @ARDOUR_DARK_base
-   base[NORMAL] = @ARDOUR_DARK_base
-   base[NORMAL] = @ARDOUR_DARK_base
+   fg[ACTIVE] = @@COLPREFIX@_somewhat_bright_indicator
+   fg[NORMAL] = @@COLPREFIX@_somewhat_bright_indicator
+   bg[ACTIVE]   = @@COLPREFIX@_base
+   bg[NORMAL]   = @@COLPREFIX@_base
+   base[NORMAL] = @@COLPREFIX@_base
+   base[NORMAL] = @@COLPREFIX@_base
 }
 
 style "medium_entry" = "medium_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_text
-	fg[ACTIVE] = @ARDOUR_DARK_text
-	fg[SELECTED] = @ARDOUR_DARK_fg_selected
+	fg[NORMAL] = @@COLPREFIX@_text
+	fg[ACTIVE] = @@COLPREFIX@_text
+	fg[SELECTED] = @@COLPREFIX@_fg_selected
 	
-	bg[NORMAL] = @ARDOUR_DARK_bg
+	bg[NORMAL] = @@COLPREFIX@_bg
 	
-	base[NORMAL] = @ARDOUR_DARK_base
-	base[ACTIVE] = @ARDOUR_DARK_base
-	base[SELECTED] = @ARDOUR_DARK_bg_selected
+	base[NORMAL] = @@COLPREFIX@_base
+	base[ACTIVE] = @@COLPREFIX@_base
+	base[SELECTED] = @@COLPREFIX@_bg_selected
 }
 
 style "medium_entry_noselection_fg" = "medium_entry"
 {
-	fg[SELECTED] = @ARDOUR_DARK_contrasting_indicator
+	fg[SELECTED] = @@COLPREFIX@_contrasting_indicator
 }
 
 style "medium_entry_noselection_bg" = "medium_entry"
 {
-	bg[SELECTED] = @ARDOUR_DARK_text
+	bg[SELECTED] = @@COLPREFIX@_text
 }
 
 style "medium_bold_entry"  = "medium_bold_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_text
-	fg[ACTIVE] = @ARDOUR_DARK_text
+	fg[NORMAL] = @@COLPREFIX@_text
+	fg[ACTIVE] = @@COLPREFIX@_text
 	
-	bg[NORMAL] = @ARDOUR_DARK_bg
+	bg[NORMAL] = @@COLPREFIX@_bg
 	
-	base[NORMAL] = @ARDOUR_DARK_base
-	base[ACTIVE] = @ARDOUR_DARK_base
-	base[SELECTED] = @ARDOUR_DARK_base
+	base[NORMAL] = @@COLPREFIX@_base
+	base[ACTIVE] = @@COLPREFIX@_base
+	base[SELECTED] = @@COLPREFIX@_base
 }
 
 style "small_entry" = "small_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_text
-	fg[ACTIVE] = @ARDOUR_DARK_contrasting_indicator
-	fg[SELECTED] = @ARDOUR_DARK_contrasting_indicator
-	text[NORMAL] = @ARDOUR_DARK_text
-	text[ACTIVE] = @ARDOUR_DARK_contrasting_indicator
-	text[SELECTED] = @ARDOUR_DARK_fg_selected
-	bg[NORMAL] = @ARDOUR_DARK_base
-	bg[SELECTED] = @ARDOUR_DARK_base
-	bg[SELECTED] = @ARDOUR_DARK_base
-	base[NORMAL] = @ARDOUR_DARK_base
-	base[ACTIVE] = @ARDOUR_DARK_base
-	base[SELECTED] = @ARDOUR_DARK_base
+	fg[NORMAL] = @@COLPREFIX@_text
+	fg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
+	fg[SELECTED] = @@COLPREFIX@_contrasting_indicator
+	text[NORMAL] = @@COLPREFIX@_text
+	text[ACTIVE] = @@COLPREFIX@_contrasting_indicator
+	text[SELECTED] = @@COLPREFIX@_fg_selected
+	bg[NORMAL] = @@COLPREFIX@_base
+	bg[SELECTED] = @@COLPREFIX@_base
+	bg[SELECTED] = @@COLPREFIX@_base
+	base[NORMAL] = @@COLPREFIX@_base
+	base[ACTIVE] = @@COLPREFIX@_base
+	base[SELECTED] = @@COLPREFIX@_base
 }
 
 style "red_active_small_entry" = "small_entry"
 {
-	fg[ACTIVE] = @ARDOUR_DARK_bright_indicator
-	fg[SELECTED] = @ARDOUR_DARK_bright_indicator
+	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
+	fg[SELECTED] = @@COLPREFIX@_bright_indicator
 }
 
 style "small_bold_entry" = "small_bold_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_text
-	fg[ACTIVE] = @ARDOUR_DARK_text
+	fg[NORMAL] = @@COLPREFIX@_text
+	fg[ACTIVE] = @@COLPREFIX@_text
 	
-	bg[NORMAL] = @ARDOUR_DARK_bg
+	bg[NORMAL] = @@COLPREFIX@_bg
 	
-	base[NORMAL] = @ARDOUR_DARK_base
-	base[ACTIVE] = @ARDOUR_DARK_base
-	base[SELECTED] = @ARDOUR_DARK_base
+	base[NORMAL] = @@COLPREFIX@_base
+	base[ACTIVE] = @@COLPREFIX@_base
+	base[SELECTED] = @@COLPREFIX@_base
 }
 
 style "small_red_on_black_entry"  = "small_bold_text"
 {
-       fg[NORMAL] = @ARDOUR_DARK_bright_indicator
-       fg[ACTIVE] = @ARDOUR_DARK_bright_indicator
-       base[NORMAL] = @ARDOUR_DARK_base
-       base[ACTIVE] = @ARDOUR_DARK_base
-       bg[NORMAL] = @ARDOUR_DARK_base
-       bg[ACTIVE] = @ARDOUR_DARK_base
+       fg[NORMAL] = @@COLPREFIX@_bright_indicator
+       fg[ACTIVE] = @@COLPREFIX@_bright_indicator
+       base[NORMAL] = @@COLPREFIX@_base
+       base[ACTIVE] = @@COLPREFIX@_base
+       bg[NORMAL] = @@COLPREFIX@_base
+       bg[ACTIVE] = @@COLPREFIX@_base
 }
 
 style "non_recording_big_clock_display" = "medium_entry"
 {
 	font_name = "@FONT_MASSIVE@"
 
-	fg[NORMAL] = @ARDOUR_DARK_control_text
-	fg[ACTIVE] = @ARDOUR_DARK_bright_indicator
-	fg[SELECTED] = @ARDOUR_DARK_bright_indicator
-	fg[PRELIGHT] = @ARDOUR_DARK_bright_indicator
-	fg[INSENSITIVE] = @ARDOUR_DARK_bright_indicator
+	fg[NORMAL] = @@COLPREFIX@_control_text
+	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
+	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+	fg[PRELIGHT] = @@COLPREFIX@_bright_indicator
+	fg[INSENSITIVE] = @@COLPREFIX@_bright_indicator
 	
-	base[NORMAL] = @ARDOUR_DARK_base
-	base[ACTIVE] = @ARDOUR_DARK_base
-	bg[NORMAL] = @ARDOUR_DARK_base
-	bg[ACTIVE] = shade(0.5,@ARDOUR_DARK_bright_indicator)
+	base[NORMAL] = @@COLPREFIX@_base
+	base[ACTIVE] = @@COLPREFIX@_base
+	bg[NORMAL] = @@COLPREFIX@_base
+	bg[ACTIVE] = shade(0.5,@@COLPREFIX@_bright_indicator)
 }
 
 style "recording_big_clock_display" = "non_recording_big_clock_display"
 {
-	fg[NORMAL] = darker(@ARDOUR_DARK_arm)
+	fg[NORMAL] = darker(@@COLPREFIX@_arm)
 }
 
 style "transport_clock_display"
 {
 	font_name = "@FONT_BOLD_BIGGER@"
 
-	fg[NORMAL] = darker (@ARDOUR_DARK_contrasting_indicator)
-	fg[ACTIVE] = darker(@ARDOUR_DARK_bright_indicator)
-	fg[SELECTED] = darker(@ARDOUR_DARK_bright_indicator)
-	fg[PRELIGHT] = darker(@ARDOUR_DARK_bright_indicator)
-	fg[INSENSITIVE] = darker(@ARDOUR_DARK_bright_indicator)
+	fg[NORMAL] = darker (@@COLPREFIX@_contrasting_indicator)
+	fg[ACTIVE] = darker(@@COLPREFIX@_bright_indicator)
+	fg[SELECTED] = darker(@@COLPREFIX@_bright_indicator)
+	fg[PRELIGHT] = darker(@@COLPREFIX@_bright_indicator)
+	fg[INSENSITIVE] = darker(@@COLPREFIX@_bright_indicator)
 
-	base[NORMAL] = @ARDOUR_DARK_darkest
-	base[ACTIVE] = @ARDOUR_DARK_darkest
-	bg[NORMAL] = @ARDOUR_DARK_darkest
-	bg[ACTIVE] = @ARDOUR_DARK_darkest
+	base[NORMAL] = @@COLPREFIX@_darkest
+	base[ACTIVE] = @@COLPREFIX@_darkest
+	bg[NORMAL] = @@COLPREFIX@_darkest
+	bg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "transport_clock_display_delta" = "transport_clock_display"
 {
-	fg[NORMAL] = @ARDOUR_DARK_bright_color
+	fg[NORMAL] = @@COLPREFIX@_bright_color
 }
 
 style "tempo_meter_clock_display" = "very_small_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_fg
-	fg[ACTIVE] = @ARDOUR_DARK_somewhat_bright_indicator
-	fg[SELECTED] = @ARDOUR_DARK_bright_indicator
-	base[NORMAL] = @ARDOUR_DARK_base
-	base[ACTIVE] = @ARDOUR_DARK_contrasting_indicator
-	bg[NORMAL] = @ARDOUR_DARK_bright_color
-	bg[ACTIVE] = @ARDOUR_DARK_contrasting_indicator
+	fg[NORMAL] = @@COLPREFIX@_fg
+	fg[ACTIVE] = @@COLPREFIX@_somewhat_bright_indicator
+	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+	base[NORMAL] = @@COLPREFIX@_base
+	base[ACTIVE] = @@COLPREFIX@_contrasting_indicator
+	bg[NORMAL] = @@COLPREFIX@_bright_color
+	bg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
 }
 
 style "default_clock_display" = "medium_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_contrasting_indicator
-	fg[ACTIVE] = @ARDOUR_DARK_bright_indicator
-	fg[SELECTED] = @ARDOUR_DARK_bright_indicator
-	base[NORMAL] = @ARDOUR_DARK_darkest
-	base[ACTIVE] = @ARDOUR_DARK_darkest
-	bg[NORMAL] = @ARDOUR_DARK_darkest
-	bg[ACTIVE] = @ARDOUR_DARK_darkest
+	fg[NORMAL] = @@COLPREFIX@_contrasting_indicator
+	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
+	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+	base[NORMAL] = @@COLPREFIX@_darkest
+	base[ACTIVE] = @@COLPREFIX@_darkest
+	bg[NORMAL] = @@COLPREFIX@_darkest
+	bg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 
 style "white_on_black_clock_display" = "medium_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_fg
-	fg[ACTIVE] = @ARDOUR_DARK_bright_indicator
-	fg[SELECTED] = @ARDOUR_DARK_bright_indicator
-	base[NORMAL] = @ARDOUR_DARK_darkest
-	base[ACTIVE] = @ARDOUR_DARK_darkest
-	bg[NORMAL] = @ARDOUR_DARK_darkest
-	bg[ACTIVE] = @ARDOUR_DARK_darkest
+	fg[NORMAL] = @@COLPREFIX@_fg
+	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
+	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+	base[NORMAL] = @@COLPREFIX@_darkest
+	base[ACTIVE] = @@COLPREFIX@_darkest
+	bg[NORMAL] = @@COLPREFIX@_darkest
+	bg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "editor_time_ruler" = "small_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_fg
-	bg[NORMAL] = @ARDOUR_DARK_base
+	fg[NORMAL] = @@COLPREFIX@_fg
+	bg[NORMAL] = @@COLPREFIX@_base
 }
 
 style "audio_bus_base" = "very_small_text"
 {
-  fg[NORMAL] = @ARDOUR_DARK_fg
-  bg[NORMAL] = @ARDOUR_DARK_audio_bus
+  fg[NORMAL] = @@COLPREFIX@_fg
+  bg[NORMAL] = @@COLPREFIX@_audio_bus
 }
 
 style "send_strip_base" = "default"
 {
   font_name = "@FONT_SMALLER@"
-  fg[NORMAL] = @ARDOUR_DARK_send_fg
-  bg[NORMAL] = @ARDOUR_DARK_send_bg
-  bg[ACTIVE] = @ARDOUR_DARK_send_bg
-  bg[PRELIGHT] = @ARDOUR_DARK_send_bg
-  bg[INSENSITIVE] = @ARDOUR_DARK_send_bg
-  bg[SELECTED] = @ARDOUR_DARK_send_bg
+  fg[NORMAL] = @@COLPREFIX@_send_fg
+  bg[NORMAL] = @@COLPREFIX@_send_bg
+  bg[ACTIVE] = @@COLPREFIX@_send_bg
+  bg[PRELIGHT] = @@COLPREFIX@_send_bg
+  bg[INSENSITIVE] = @@COLPREFIX@_send_bg
+  bg[SELECTED] = @@COLPREFIX@_send_bg
 }
 
 style "audio_track_base" = "default"
 {
   font_name = "@FONT_SMALLER@"
-  fg[NORMAL] = @ARDOUR_DARK_fg
-  bg[NORMAL] = @ARDOUR_DARK_audio_track
-  bg[ACTIVE] = @ARDOUR_DARK_bg
-  bg[PRELIGHT] = @ARDOUR_DARK_bg
-  bg[INSENSITIVE] = @ARDOUR_DARK_bg
-  bg[SELECTED] = @ARDOUR_DARK_bg
+  fg[NORMAL] = @@COLPREFIX@_fg
+  bg[NORMAL] = @@COLPREFIX@_audio_track
+  bg[ACTIVE] = @@COLPREFIX@_bg
+  bg[PRELIGHT] = @@COLPREFIX@_bg
+  bg[INSENSITIVE] = @@COLPREFIX@_bg
+  bg[SELECTED] = @@COLPREFIX@_bg
 }
 
 style "midi_track_base" = "default"
 {
   font_name = "@FONT_SMALLER@"
-  fg[NORMAL] = @ARDOUR_DARK_fg
-  bg[NORMAL] = @ARDOUR_DARK_midi_track
-  bg[ACTIVE] = @ARDOUR_DARK_bg
-  bg[PRELIGHT] = @ARDOUR_DARK_bg
-  bg[INSENSITIVE] = @ARDOUR_DARK_bg
-  bg[SELECTED] = @ARDOUR_DARK_bg
+  fg[NORMAL] = @@COLPREFIX@_fg
+  bg[NORMAL] = @@COLPREFIX@_midi_track
+  bg[ACTIVE] = @@COLPREFIX@_bg
+  bg[PRELIGHT] = @@COLPREFIX@_bg
+  bg[INSENSITIVE] = @@COLPREFIX@_bg
+  bg[SELECTED] = @@COLPREFIX@_bg
 }
 
 style "track_controls_inactive" 
@@ -1064,25 +1064,25 @@ style "audio_bus_metrics_inactive" = "track_controls_inactive"
 
 style "track_name_display" = "medium_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_fg
-	fg[ACTIVE] = @ARDOUR_DARK_fg
+	fg[NORMAL] = @@COLPREFIX@_fg
+	fg[ACTIVE] = @@COLPREFIX@_fg
 
-	base[NORMAL] = @ARDOUR_DARK_base
-	base[ACTIVE] = lighter(@ARDOUR_DARK_base)
-	bg[NORMAL] = lighter(@ARDOUR_DARK_base)
-	bg[ACTIVE] = lighter(@ARDOUR_DARK_base)
+	base[NORMAL] = @@COLPREFIX@_base
+	base[ACTIVE] = lighter(@@COLPREFIX@_base)
+	bg[NORMAL] = lighter(@@COLPREFIX@_base)
+	bg[ACTIVE] = lighter(@@COLPREFIX@_base)
 }
 
 style "active_track_name_display" = "medium_text"
 {
-	GtkWidget::cursor_color =  @ARDOUR_DARK_base
-	text[NORMAL] = @ARDOUR_DARK_base
-	base[NORMAL] = @ARDOUR_DARK_text
+	GtkWidget::cursor_color =  @@COLPREFIX@_base
+	text[NORMAL] = @@COLPREFIX@_base
+	base[NORMAL] = @@COLPREFIX@_text
 }
 
 style "track_separator"
 {
-	bg[NORMAL] = @ARDOUR_DARK_fg
+	bg[NORMAL] = @@COLPREFIX@_fg
 }
 
 #
@@ -1216,40 +1216,40 @@ style "plugin_slider"
 	# the slider itself. the inactive part is INSENSITIVE,
 	# the active part is taken from some other state.
 
-	fg[NORMAL] = @ARDOUR_DARK_bright_color
-	fg[ACTIVE] = @ARDOUR_DARK_bright_color
-	fg[INSENSITIVE] = @ARDOUR_DARK_base # matches default
-	fg[SELECTED] = @ARDOUR_DARK_bright_color
-	fg[PRELIGHT] = @ARDOUR_DARK_bright_color
+	fg[NORMAL] = @@COLPREFIX@_bright_color
+	fg[ACTIVE] = @@COLPREFIX@_bright_color
+	fg[INSENSITIVE] = @@COLPREFIX@_base # matches default
+	fg[SELECTED] = @@COLPREFIX@_bright_color
+	fg[PRELIGHT] = @@COLPREFIX@_bright_color
 
 	# draws the outer rectangle around the slider
 
-	bg[NORMAL] = shade (0.6, @ARDOUR_DARK_lightest)
-	bg[ACTIVE] = shade (0.6, @ARDOUR_DARK_lightest)
-	bg[INSENSITIVE] = shade (0.6, @ARDOUR_DARK_lightest)
-	bg[SELECTED] = shade (0.6, @ARDOUR_DARK_lightest)
-	bg[PRELIGHT] = shade (0.6, @ARDOUR_DARK_lightest)
+	bg[NORMAL] = shade (0.6, @@COLPREFIX@_lightest)
+	bg[ACTIVE] = shade (0.6, @@COLPREFIX@_lightest)
+	bg[INSENSITIVE] = shade (0.6, @@COLPREFIX@_lightest)
+	bg[SELECTED] = shade (0.6, @@COLPREFIX@_lightest)
+	bg[PRELIGHT] = shade (0.6, @@COLPREFIX@_lightest)
 
 	# the numeric display
 
-	text[NORMAL] = @ARDOUR_DARK_text
-	text[ACTIVE] = @ARDOUR_DARK_text
-	text[INSENSITIVE] = @ARDOUR_DARK_text
-	text[SELECTED] = @ARDOUR_DARK_text
-	text[PRELIGHT] = @ARDOUR_DARK_text
+	text[NORMAL] = @@COLPREFIX@_text
+	text[ACTIVE] = @@COLPREFIX@_text
+	text[INSENSITIVE] = @@COLPREFIX@_text
+	text[SELECTED] = @@COLPREFIX@_text
+	text[PRELIGHT] = @@COLPREFIX@_text
 }
 
 style "track_list_display" = "small_bold_text"
 {
- 	text[NORMAL] = @ARDOUR_DARK_text
-  text[ACTIVE] = darker(@ARDOUR_DARK_text)
-  text[INSENSITIVE] = @ARDOUR_DARK_base
-  text[SELECTED] = @ARDOUR_DARK_fg_selected
+ 	text[NORMAL] = @@COLPREFIX@_text
+  text[ACTIVE] = darker(@@COLPREFIX@_text)
+  text[INSENSITIVE] = @@COLPREFIX@_base
+  text[SELECTED] = @@COLPREFIX@_fg_selected
 
-  base[NORMAL] = @ARDOUR_DARK_base
-  base[ACTIVE] = lighter(@ARDOUR_DARK_base)
-  base[INSENSITIVE] = darker(@ARDOUR_DARK_base)
-  base[SELECTED] = @ARDOUR_DARK_bg_selected
+  base[NORMAL] = @@COLPREFIX@_base
+  base[ACTIVE] = lighter(@@COLPREFIX@_base)
+  base[INSENSITIVE] = darker(@@COLPREFIX@_base)
+  base[SELECTED] = @@COLPREFIX@_bg_selected
 }
 
 style "inspector_track_list_display" = "track_list_display"
@@ -1259,9 +1259,9 @@ style "inspector_track_list_display" = "track_list_display"
 
 style "processor_list" = "very_small_text"
 {
-	bg[NORMAL] = @ARDOUR_DARK_darkest
-        bg[ACTIVE] = shade (1.8, @ARDOUR_DARK_fg_selected)
-        fg[ACTIVE] = @ARDOUR_DARK_darkest
+	bg[NORMAL] = @@COLPREFIX@_darkest
+        bg[ACTIVE] = shade (1.8, @@COLPREFIX@_fg_selected)
+        fg[ACTIVE] = @@COLPREFIX@_darkest
 	GtkCheckButton::indicator-size = 10
 	GtkCheckButton::indicator-spacing = 0
 }
@@ -1274,49 +1274,49 @@ style "inspector_processor_list" = "processor_list"
 # Colour of a processor frame when it is selected
 style "processor_frame_selected"
 {
-	bg[NORMAL] = @ARDOUR_DARK_fg_selected
+	bg[NORMAL] = @@COLPREFIX@_fg_selected
 }
 
 # Colour of a processor frame when it is a send whose level is being controller by the fader
 style "processor_frame_active_send"
 {
-	bg[NORMAL] = @ARDOUR_DARK_send_fg
+	bg[NORMAL] = @@COLPREFIX@_send_fg
 }
 
 # Fader processor's background
 style "processor_fader"
 {
-	bg[NORMAL] = @ARDOUR_DARK_processor_fader_bg
+	bg[NORMAL] = @@COLPREFIX@_processor_fader_bg
 }
 
 # Fader processor's frame
 style "processor_fader_frame" 
 {
-bg[NORMAL] = @ARDOUR_DARK_processor_fader_frame
+bg[NORMAL] = @@COLPREFIX@_processor_fader_frame
 }
 
 # Pre-fader processor's background
 style "processor_prefader"
 {
-	bg[NORMAL] = @ARDOUR_DARK_processor_prefader
+	bg[NORMAL] = @@COLPREFIX@_processor_prefader
 }
 
 # Pre-fader processor's frame
 style "processor_prefader_frame"
 {
-	bg[NORMAL] = @ARDOUR_DARK_processor_prefader_frame
+	bg[NORMAL] = @@COLPREFIX@_processor_prefader_frame
 }
 
 # Post-fader processor's background
 style "processor_postfader"
 {
-	bg[NORMAL] = @ARDOUR_DARK_processor_postfader
+	bg[NORMAL] = @@COLPREFIX@_processor_postfader
 }
 
 # Post-fader processor's frame
 style "processor_postfader_frame"
 {
-	bg[NORMAL] = @ARDOUR_DARK_processor_postfader_frame
+	bg[NORMAL] = @@COLPREFIX@_processor_postfader_frame
 }
 
 # MixerPanZone:
@@ -1326,43 +1326,43 @@ style "processor_postfader_frame"
 
 style "pan_zone" = "default"
 {
-	fg[NORMAL] = @ARDOUR_DARK_contrasting_indicator
-	fg[ACTIVE] = darker(@ARDOUR_DARK_bright_color)
+	fg[NORMAL] = @@COLPREFIX@_contrasting_indicator
+	fg[ACTIVE] = darker(@@COLPREFIX@_bright_color)
 }
 
 style "paler_red_when_active" = "medium_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_fg
-	fg[PRELIGHT] = @ARDOUR_DARK_fg
-	bg[NORMAL] = @ARDOUR_DARK_bg
-	bg[PRELIGHT] = @ARDOUR_DARK_bg
+	fg[NORMAL] = @@COLPREFIX@_fg
+	fg[PRELIGHT] = @@COLPREFIX@_fg
+	bg[NORMAL] = @@COLPREFIX@_bg
+	bg[PRELIGHT] = @@COLPREFIX@_bg
 
-	fg[ACTIVE] = @ARDOUR_DARK_fg
-	bg[ACTIVE] = lighter(@ARDOUR_DARK_bright_indicator)
+	fg[ACTIVE] = @@COLPREFIX@_fg
+	bg[ACTIVE] = lighter(@@COLPREFIX@_bright_indicator)
 }
 
 style "peak_display_peaked_entry" = "small_text"
 {
-	fg[NORMAL] = @ARDOUR_DARK_text
-	fg[ACTIVE] = @ARDOUR_DARK_text
-	fg[SELECTED] = @ARDOUR_DARK_text
+	fg[NORMAL] = @@COLPREFIX@_text
+	fg[ACTIVE] = @@COLPREFIX@_text
+	fg[SELECTED] = @@COLPREFIX@_text
 
-        bg[NORMAL] = @ARDOUR_DARK_bright_indicator
-        bg[ACTIVE] = @ARDOUR_DARK_bright_indicator
-        bg[PRELIGHT] = @ARDOUR_DARK_bright_indicator
-        bg[INSENSITIVE] = @ARDOUR_DARK_bright_indicator
-        bg[SELECTED] = @ARDOUR_DARK_bright_indicator
-        base[NORMAL] = @ARDOUR_DARK_bright_indicator
-        base[ACTIVE] = @ARDOUR_DARK_bright_indicator
-        base[PRELIGHT] = @ARDOUR_DARK_bright_indicator
-        base[INSENSITIVE] = @ARDOUR_DARK_bright_indicator
-        base[SELECTED] = @ARDOUR_DARK_bright_indicator
+        bg[NORMAL] = @@COLPREFIX@_bright_indicator
+        bg[ACTIVE] = @@COLPREFIX@_bright_indicator
+        bg[PRELIGHT] = @@COLPREFIX@_bright_indicator
+        bg[INSENSITIVE] = @@COLPREFIX@_bright_indicator
+        bg[SELECTED] = @@COLPREFIX@_bright_indicator
+        base[NORMAL] = @@COLPREFIX@_bright_indicator
+        base[ACTIVE] = @@COLPREFIX@_bright_indicator
+        base[PRELIGHT] = @@COLPREFIX@_bright_indicator
+        base[INSENSITIVE] = @@COLPREFIX@_bright_indicator
+        base[SELECTED] = @@COLPREFIX@_bright_indicator
 }
 
 style "selected_strip_frame"
 {
-	fg[NORMAL] = @ARDOUR_DARK_bright_indicator
-	bg[NORMAL] = darker(@ARDOUR_DARK_bright_indicator)
+	fg[NORMAL] = @@COLPREFIX@_bright_indicator
+	bg[NORMAL] = darker(@@COLPREFIX@_bright_indicator)
 }
 
 style "flashing_alert" = "very_small_text"
@@ -1370,13 +1370,13 @@ style "flashing_alert" = "very_small_text"
 	GtkButton::child-displacement-x = 0
         GtkButton::child-displacement-y = 0
   
-        fg[NORMAL] = darker(@ARDOUR_DARK_fg)
-        fg[PRELIGHT] = darker(@ARDOUR_DARK_fg)
-        bg[NORMAL] = mix(0.1,@ARDOUR_DARK_bright_indicator,darker(@ARDOUR_DARK_bg))
-        bg[PRELIGHT] = mix(0.1,@ARDOUR_DARK_bright_indicator,darker(@ARDOUR_DARK_bg))
+        fg[NORMAL] = darker(@@COLPREFIX@_fg)
+        fg[PRELIGHT] = darker(@@COLPREFIX@_fg)
+        bg[NORMAL] = mix(0.1,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
+        bg[PRELIGHT] = mix(0.1,@@COLPREFIX@_bright_indicator,darker(@@COLPREFIX@_bg))
         
-	fg[ACTIVE] = @ARDOUR_DARK_fg
-	bg[ACTIVE] = @ARDOUR_DARK_bright_indicator
+	fg[ACTIVE] = @@COLPREFIX@_fg
+	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
 }
 
 
@@ -1385,13 +1385,13 @@ style "green_flashing_alert" = "very_small_text"
 	GtkButton::child-displacement-x = 0
         GtkButton::child-displacement-y = 0
 
-	fg[NORMAL] = darker(@ARDOUR_DARK_fg)
-        fg[PRELIGHT] = darker(@ARDOUR_DARK_fg)
-	bg[NORMAL] = mix(0.1,@ARDOUR_DARK_contrasting_indicator,darker(@ARDOUR_DARK_bg))
-        bg[PRELIGHT] = mix(0.1,@ARDOUR_DARK_contrasting_indicator,darker(@ARDOUR_DARK_bg))
+	fg[NORMAL] = darker(@@COLPREFIX@_fg)
+        fg[PRELIGHT] = darker(@@COLPREFIX@_fg)
+	bg[NORMAL] = mix(0.1,@@COLPREFIX@_contrasting_indicator,darker(@@COLPREFIX@_bg))
+        bg[PRELIGHT] = mix(0.1,@@COLPREFIX@_contrasting_indicator,darker(@@COLPREFIX@_bg))
 
-	fg[ACTIVE] = @ARDOUR_DARK_fg
-	bg[ACTIVE] = @ARDOUR_DARK_contrasting_indicator
+	fg[ACTIVE] = @@COLPREFIX@_fg
+	bg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
 }
 
 style "sync_alert"
@@ -1401,23 +1401,23 @@ style "sync_alert"
 	# active, and alternates with another style if sync is active
 	# but we are not locked
 	#
-	bg[ACTIVE] = @ARDOUR_DARK_somewhat_bright_indicator
-	bg[PRELIGHT] = @ARDOUR_DARK_somewhat_bright_indicator
-	bg[SELECTED] = @ARDOUR_DARK_somewhat_bright_indicator
-	bg[NORMAL] = @ARDOUR_DARK_somewhat_bright_indicator
+	bg[ACTIVE] = @@COLPREFIX@_somewhat_bright_indicator
+	bg[PRELIGHT] = @@COLPREFIX@_somewhat_bright_indicator
+	bg[SELECTED] = @@COLPREFIX@_somewhat_bright_indicator
+	bg[NORMAL] = @@COLPREFIX@_somewhat_bright_indicator
 	
-	fg[NORMAL] = @ARDOUR_DARK_darkest
-	fg[PRELIGHT] = @ARDOUR_DARK_darkest
-	fg[SELECTED] = @ARDOUR_DARK_darkest
-	fg[ACTIVE] = @ARDOUR_DARK_darkest
+	fg[NORMAL] = @@COLPREFIX@_darkest
+	fg[PRELIGHT] = @@COLPREFIX@_darkest
+	fg[SELECTED] = @@COLPREFIX@_darkest
+	fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "tearoff_arrow" = "medium_bold_entry"
 {
-	fg[NORMAL] = darker(@ARDOUR_DARK_fg)
-	fg[PRELIGHT] = darker(@ARDOUR_DARK_fg)
-	bg[NORMAL] = darker(@ARDOUR_DARK_fg)
-	bg[PRELIGHT] = darker(@ARDOUR_DARK_fg)
+	fg[NORMAL] = darker(@@COLPREFIX@_fg)
+	fg[PRELIGHT] = darker(@@COLPREFIX@_fg)
+	bg[NORMAL] = darker(@@COLPREFIX@_fg)
+	bg[PRELIGHT] = darker(@@COLPREFIX@_fg)
 }
 
 style "location_row_button" = "default_button"

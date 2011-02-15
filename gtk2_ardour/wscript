@@ -431,7 +431,9 @@ def build(bld):
 
 	# RC files
 	dark_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme ('gtk2_ardour/ardour3_ui_dark.rc.in', 'ARDOUR_DARK')
+        dark_rc_subst_dict['COLPREFIX'] = 'ARDOUR_DARK'
 	light_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme ('gtk2_ardour/ardour3_ui_light.rc.in', 'ARDOUR_LIGHT')
+        light_rc_subst_dict['COLPREFIX'] = 'ARDOUR_LIGHT'
 
 	obj              = bld.new_task_gen('subst')
 	obj.source       = 'ardour3_ui_dark.rc.in'
