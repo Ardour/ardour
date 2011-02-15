@@ -1297,6 +1297,10 @@ EditorRegions::clear ()
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore> (0));
 	_model->clear ();
 	_display.set_model (_model);
+	
+	/* Clean up the maps */
+	region_row_map.clear();
+	parent_regions_sources_map.clear();
 }
 
 boost::shared_ptr<Region>
