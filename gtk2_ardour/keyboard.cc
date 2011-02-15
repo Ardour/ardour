@@ -59,11 +59,10 @@ ArdourKeyboard::setup_keybindings ()
 
 	/* set up the per-user bindings path */
 
-	strs.push_back (Glib::get_home_dir());
-	strs.push_back (".ardour3");
-	strs.push_back ("ardour.bindings");
+	sys::path p (user_config_directory ());
+	p /= "ardour.bindings";
 
-	user_keybindings_path = Glib::build_filename (strs);
+	user_keybindings_path = p.to_string ();
 
 	if (Glib::file_test (user_keybindings_path, Glib::FILE_TEST_EXISTS)) {
 		std::pair<string,string> newpair;
