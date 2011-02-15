@@ -292,7 +292,7 @@ This mode provides many different operations on both regions and control points,
 @-group|Editor/edit-cursor-to-range-start|F1|some text
 @-group|Editor/edit-cursor-to-range-end|F2|some text
 @-group|Editor/crop|F3|some text
-@-group|Editor/separate|F4|some text
+@-group|Editor/editor-separate|F4|some text
 @-group|Editor/pitch-shift-region|F5|some text
 @select|Editor/select-range-between-cursors|F6|convert edit range to range
 @wvis|Common/ToggleMaximalEditor|F11|toggle fullscreen editor window
