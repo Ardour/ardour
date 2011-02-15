@@ -99,8 +99,10 @@ public:
 	void request_monitor_input (bool);
 	void set_latency (framecnt_t);
         
+#ifdef HAVE_JACK_NEW_LATENCY
         void get_connected_latency_range (jack_latency_range_t& range, jack_latency_callback_mode_t mode) const;
         void set_latency_range (jack_latency_range_t& range, jack_latency_callback_mode_t mode) const;
+#endif
 
 	virtual void reset ();
 

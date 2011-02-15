@@ -221,8 +221,8 @@ Port::reset ()
 void
 Port::recompute_total_latency () const
 {
-#if !HAVE_JACK_NEW_LATENCY
-#ifdef HAVE_JACK_RECOMPUTE_LATENCY
+#ifndef HAVE_JACK_NEW_LATENCY
+#ifdef  HAVE_JACK_RECOMPUTE_LATENCY
 	jack_client_t* jack = _engine->jack();
 
 	if (!jack) {
@@ -237,7 +237,7 @@ Port::recompute_total_latency () const
 void
 Port::set_latency_range (jack_latency_range_t& range, jack_latency_callback_mode_t mode) const
 {
-#if HAVE_JACK_NEW_LATENCY
+#ifdef HAVE_JACK_NEW_LATENCY
         if (!jack_port_set_latency_range) {
                 return;
         }
@@ -249,7 +249,7 @@ Port::set_latency_range (jack_latency_range_t& range, jack_latency_callback_mode
 void
 Port::get_connected_latency_range (jack_latency_range_t& range, jack_latency_callback_mode_t mode) const
 {
-#if HAVE_JACK_NEW_LATENCY
+#ifdef HAVE_JACK_NEW_LATENCY
         if (!jack_port_get_latency_range) {
                 return;
         }
@@ -293,7 +293,7 @@ Port::get_connected_latency_range (jack_latency_range_t& range, jack_latency_cal
 framecnt_t
 Port::total_latency () const
 {
-#if !HAVE_JACK_NEW_LATENCY
+#ifndef HAVE_JACK_NEW_LATENCY
 	jack_client_t* jack = _engine->jack();
 
 	if (!jack) {
@@ -369,7 +369,7 @@ Port::request_monitor_input (bool yn)
 void
 Port::set_latency (framecnt_t n)
 {
-#if !HAVE_JACK_NEW_LATENCY
+#ifndef HAVE_JACK_NEW_LATENCY
 	jack_port_set_latency (_jack_port, n);
 #endif
 }

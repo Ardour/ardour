@@ -25,6 +25,7 @@
 #include <sstream>
 
 #include <glibmm/timer.h>
+#include <jack/weakjack.h>
 #include <jack/jack.h>
 #include <jack/thread.h>
 
@@ -153,19 +154,6 @@ _thread_init_callback (void * /*arg*/)
 	MIDI::Port::set_process_thread (pthread_self());
 }
 
-typedef void (*_JackInfoShutdownCallback)(jack_status_t code, const char* reason, void *arg);
-
-static void (*on_info_shutdown)(jack_client_t*, _JackInfoShutdownCallback, void *);
-extern void jack_on_info_shutdown (jack_client_t*, _JackInfoShutdownCallback, void *) __attribute__((weak));
-
-static void check_jack_symbols () __attribute__((constructor));
-
-void check_jack_symbols ()
-{
-       /* use weak linking to see if we really have various late-model JACK function */
-       on_info_shutdown = jack_on_info_shutdown;
-}
-
 static void
 ardour_jack_error (const char* msg)
 {
@@ -204,7 +192,7 @@ AudioEngine::start ()
 		_processed_frames = 0;
 		last_monitor_check = 0;
 
-                if (on_info_shutdown) {
+                if (jack_on_info_shutdown) {
                         jack_on_info_shutdown (_priv_jack, halted_info, this);
                 } else {
                         jack_on_shutdown (_priv_jack, halted, this);
@@ -219,6 +207,11 @@ AudioEngine::start ()
 #ifdef HAVE_JACK_SESSION 
 		if( jack_set_session_callback )
 		    jack_set_session_callback (_priv_jack, _session_callback, this);
+#endif
+#if HAVE_JACK_NEW_LATENCY
+                if (jack_set_latency_callback) {
+                        jack_set_latency_callback (_priv_jack, _latency_callback, this);
+                }
 #endif
 		jack_set_sync_callback (_priv_jack, _jack_sync_callback, this);
 		jack_set_freewheel_callback (_priv_jack, _freewheel_callback, this);
@@ -393,6 +386,12 @@ AudioEngine::_registration_callback (jack_port_id_t /*id*/, int /*reg*/, void* a
 {
 	AudioEngine* ae = static_cast<AudioEngine*> (arg);
 	ae->PortRegisteredOrUnregistered (); /* EMIT SIGNAL */
+}
+
+void
+AudioEngine::_latency_callback (jack_latency_callback_mode_t mode, void* arg)
+{
+	return static_cast<AudioEngine *> (arg)->jack_latency_callback (mode);
 }
 
 void
@@ -617,6 +616,17 @@ AudioEngine::jack_sample_rate_callback (pframes_t nframes)
 	SampleRateChanged (nframes); /* EMIT SIGNAL */
 
 	return 0;
+}
+
+void
+AudioEngine::jack_latency_callback (jack_latency_callback_mode_t mode)
+{
+        cerr << "JACK LATENCY CALLBACK\n";
+        if (_session) {
+                _session->update_latency (mode == JackPlaybackLatency);
+        } else {
+                cerr << "NO SESSION\n";
+        }
 }
 
 int

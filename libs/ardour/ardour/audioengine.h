@@ -318,6 +318,11 @@ _	   the regular process() call to session->process() is not made.
 	int  jack_bufsize_callback (pframes_t);
 	int  jack_sample_rate_callback (pframes_t);
 
+#ifdef HAVE_JACK_NEW_LATENCY
+        static void _latency_callback (jack_latency_callback_mode_t, void*);
+        void jack_latency_callback (jack_latency_callback_mode_t);
+#endif
+
 	int connect_to_jack (std::string client_name, std::string session_uuid);
 
 	static void halted (void *);

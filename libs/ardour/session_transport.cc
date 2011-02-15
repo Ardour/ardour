@@ -1525,7 +1525,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 		framecnt_t track_latency = (*i)->update_total_latency ();
 
 		if (old_latency != track_latency) {
-#if !HAVE_JACK_NEW_LATENCY
+#ifndef HAVE_JACK_NEW_LATENCY
 			(*i)->input()->update_port_total_latencies ();
 			(*i)->output()->update_port_total_latencies ();
 #endif

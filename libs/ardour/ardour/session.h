@@ -1361,6 +1361,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void reset_jack_connection (jack_client_t* jack);
 	void process_rtop (SessionEvent*);
 
+#ifdef HAVE_JACK_NEW_LATENCY
+        void  update_latency (bool playback);
+#endif
+
 	XMLNode& state(bool);
 
 	/* click track */

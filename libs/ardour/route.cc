@@ -3643,6 +3643,7 @@ Route::set_latency_ranges (jack_latency_callback_mode_t mode) const
 void
 Route::update_port_latencies (const PortSet& ports, jack_latency_callback_mode_t mode, framecnt_t our_latency) const
 {
+#ifdef HAVE_JACK_NEW_LATENCY
         /* iterate over all connected ports and get the latency range
            they represent
         */
@@ -3661,4 +3662,5 @@ Route::update_port_latencies (const PortSet& ports, jack_latency_callback_mode_t
                 
                 p->set_latency_range (range, mode);
         }
+#endif
 }

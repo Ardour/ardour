@@ -274,8 +274,9 @@ def configure(conf):
                       linkflags = ['-ljack'],
 		      msg = 'Checking for new JACK latency API',
                       define_name = 'HAVE_JACK_NEW_LATENCY',
+                      uselib_store = "JACK_NEW_LATENCY",
 		      okmsg = 'present')
-                      
+        
 	if flac_supported():
 		conf.define ('HAVE_FLAC', 1)
 	if ogg_supported():

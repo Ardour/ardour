@@ -4234,3 +4234,10 @@ Session::unknown_processors () const
 	return p;
 }
 
+#ifdef HAVE_JACK_NEW_LATENCY
+void
+Session::update_latency (bool playback)
+{
+        DEBUG_TRACE (DEBUG::Latency, "JACK latency callback\n");
+}
+#endif
