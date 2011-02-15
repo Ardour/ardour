@@ -98,6 +98,9 @@ public:
 	int reconnect ();
 	void request_monitor_input (bool);
 	void set_latency (framecnt_t);
+        
+        void get_connected_latency_range (jack_latency_range_t& range, jack_latency_callback_mode_t mode) const;
+        void set_latency_range (jack_latency_range_t& range, jack_latency_callback_mode_t mode) const;
 
 	virtual void reset ();
 

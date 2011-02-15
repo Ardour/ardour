@@ -21,6 +21,8 @@
 #include "libardour-config.h"
 #endif
 
+#include <jack/weakjack.h> // so that we can test for new functions at runtime
+
 #include "ardour/port.h"
 #include "ardour/audioengine.h"
 #include "pbd/failed_constructor.h"
@@ -219,6 +221,7 @@ Port::reset ()
 void
 Port::recompute_total_latency () const
 {
+#if !HAVE_JACK_NEW_LATENCY
 #ifdef HAVE_JACK_RECOMPUTE_LATENCY
 	jack_client_t* jack = _engine->jack();
 
@@ -228,11 +231,69 @@ Port::recompute_total_latency () const
 
 	jack_recompute_total_latency (jack, _jack_port);
 #endif
+#endif
+}
+
+void
+Port::set_latency_range (jack_latency_range_t& range, jack_latency_callback_mode_t mode) const
+{
+#if HAVE_JACK_NEW_LATENCY
+        if (!jack_port_set_latency_range) {
+                return;
+        }
+
+        jack_port_set_latency_range (_jack_port, mode, &range);
+#endif
+}
+
+void
+Port::get_connected_latency_range (jack_latency_range_t& range, jack_latency_callback_mode_t mode) const
+{
+#if HAVE_JACK_NEW_LATENCY
+        if (!jack_port_get_latency_range) {
+                return;
+        }
+
+        vector<string> connections;
+        jack_client_t* jack = _engine->jack();
+        
+        if (!jack) {
+                range.min = 0;
+                range.max = 0;
+                PBD::warning << _("get_connected_latency_range() called while disconnected from JACK") << endmsg;
+                return;
+        }
+
+        get_connections (connections);
+
+        if (!connections.empty()) {
+                
+                range.min = ~((jack_nframes_t) 0);
+                range.max = 0;
+
+                for (vector<string>::iterator c = connections.begin(); c != connections.end(); ++c) {
+                        jack_port_t* remote_port = jack_port_by_name (_engine->jack(), (*c).c_str());
+                        jack_latency_range_t lr;
+
+                        if (remote_port) {
+                                jack_port_get_latency_range (remote_port, mode, &lr);
+                                range.min = min (range.min, lr.min);
+                                range.min = max (range.max, lr.max);
+                        }
+                }
+
+        } else {
+
+                range.min = 0;
+                range.max = 0;
+        }
+#endif /* HAVE_JACK_NEW_LATENCY */
 }
 
 framecnt_t
 Port::total_latency () const
 {
+#if !HAVE_JACK_NEW_LATENCY
 	jack_client_t* jack = _engine->jack();
 
 	if (!jack) {
@@ -240,6 +301,9 @@ Port::total_latency () const
 	}
 
 	return jack_port_get_total_latency (jack, _jack_port);
+#else
+        return 0;
+#endif
 }
 
 int
@@ -305,7 +369,9 @@ Port::request_monitor_input (bool yn)
 void
 Port::set_latency (framecnt_t n)
 {
+#if !HAVE_JACK_NEW_LATENCY
 	jack_port_set_latency (_jack_port, n);
+#endif
 }
 
 bool

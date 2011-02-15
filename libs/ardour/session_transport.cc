@@ -21,6 +21,10 @@
 #include <cerrno>
 #include <unistd.h>
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 
 #include "pbd/undo.h"
 #include "pbd/error.h"
@@ -1507,10 +1511,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 	_worst_track_latency = 0;
 	ptw = post_transport_work();
 
-#undef DEBUG_LATENCY
-#ifdef DEBUG_LATENCY
-	cerr << "\n---------------------------------\nUPDATE LATENCY\n";
-#endif
+	DEBUG_TRACE(DEBUG::Latency, "---------------------------- update latency\n\n")
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
@@ -1524,8 +1525,10 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 		framecnt_t track_latency = (*i)->update_total_latency ();
 
 		if (old_latency != track_latency) {
+#if !HAVE_JACK_NEW_LATENCY
 			(*i)->input()->update_port_total_latencies ();
 			(*i)->output()->update_port_total_latencies ();
+#endif
 			update_jack = true;
 		}
 
@@ -1538,9 +1541,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 		_engine.update_total_latencies ();
 	}
 
-#ifdef DEBUG_LATENCY
-	cerr << "\tworst was " << _worst_track_latency << endl;
-#endif
+	DEBUG_TRACE(DEBUG::Latency, string_compose("worst case latency was %1\n", _worst_track_latency));
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		(*i)->set_latency_delay (_worst_track_latency);

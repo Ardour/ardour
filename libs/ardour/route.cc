@@ -3628,3 +3628,37 @@ Route::unknown_processors () const
 
 	return p;
 }
+
+void
+Route::set_latency_ranges (jack_latency_callback_mode_t mode) const
+{
+        if (mode == JackPlaybackLatency) {
+                update_port_latencies (_input->ports (), mode, _input->effective_latency());
+        } else {
+                update_port_latencies (_output->ports (), mode, _output->effective_latency());
+        }
+
+}
+
+void
+Route::update_port_latencies (const PortSet& ports, jack_latency_callback_mode_t mode, framecnt_t our_latency) const
+{
+        /* iterate over all connected ports and get the latency range
+           they represent
+        */
+
+        for (PortSet::const_iterator p = ports.begin(); p != ports.end(); ++p) {
+
+                jack_latency_range_t range;
+
+                p->get_connected_latency_range (range, mode);
+
+                /* add the latency created within this route
+                 */
+
+                range.min += our_latency;
+                range.max += our_latency;
+                
+                p->set_latency_range (range, mode);
+        }
+}
