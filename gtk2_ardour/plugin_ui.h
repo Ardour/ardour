@@ -213,7 +213,6 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 		boost::shared_ptr<AutomationController> controller;
 		Gtkmm2ext::ClickBox*                    clickbox;
 		Gtk::Label                              label;
-		bool                                    logarithmic;
 		bool                                    update_pending;
 		char                                    ignore_change;
 		Gtk::Button                             automate_button;

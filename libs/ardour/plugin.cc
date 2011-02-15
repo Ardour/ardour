@@ -277,6 +277,7 @@ Plugin::load_preset (PresetRecord r)
 	return true;
 }
 
+/** @param val `plugin' value */
 void
 Plugin::set_parameter (uint32_t which, float val)
 {

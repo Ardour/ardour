@@ -1030,49 +1030,73 @@ PluginInsert::PluginControl::PluginControl (PluginInsert* p, const Evoral::Param
 	Plugin::ParameterDescriptor desc;
 	p->plugin(0)->get_parameter_descriptor (param.id(), desc);
 	_logarithmic = desc.logarithmic;
+	_sr_dependent = desc.sr_dependent;
 	_toggled = desc.toggled;
 }
 
+/** @param val `user' value */
 void
-PluginInsert::PluginControl::set_value (double val)
+PluginInsert::PluginControl::set_value (double user_val)
 {
 	/* FIXME: probably should be taking out some lock here.. */
 
-	if (_toggled) {
-		if (val > 0.5) {
-			val = 1.0;
-		} else {
-			val = 0.0;
-		}
-	} else {
+	double const plugin_val = user_to_plugin (user_val);
 
-		/*const float range = _list->get_max_y() - _list->get_min_y();
-		const float lower = _list->get_min_y();
-
-		if (!_logarithmic) {
-			val = lower + (range * val);
-		} else {
-			float log_lower = 0.0f;
-			if (lower > 0.0f) {
-				log_lower = log(lower);
-			}
-
-			val = exp(log_lower + log(range) * val);
-		}*/
-
-	}
-
-	for (Plugins::iterator i = _plugin->_plugins.begin();
-			i != _plugin->_plugins.end(); ++i) {
-		(*i)->set_parameter (_list->parameter().id(), val);
+	for (Plugins::iterator i = _plugin->_plugins.begin(); i != _plugin->_plugins.end(); ++i) {
+		(*i)->set_parameter (_list->parameter().id(), plugin_val);
 	}
 
 	boost::shared_ptr<Plugin> iasp = _plugin->_impulseAnalysisPlugin.lock();
 	if (iasp) {
-		iasp->set_parameter (_list->parameter().id(), val);
+		iasp->set_parameter (_list->parameter().id(), plugin_val);
 	}
 
-	AutomationControl::set_value(val);
+	AutomationControl::set_value (user_val);
+}
+
+double
+PluginInsert::PluginControl::user_to_plugin (double val) const
+{
+	if (_sr_dependent) {
+		val /= _session.frame_rate ();
+	}
+	
+	return val;
+}
+
+double
+PluginInsert::PluginControl::user_to_ui (double val) const
+{
+	if (_logarithmic) {
+		if (val > 0) {
+			val = log (val);
+		} else {
+			val = 0;
+		}
+	}
+
+	return val;
+}
+
+double
+PluginInsert::PluginControl::ui_to_user (double val) const
+{
+	if (_logarithmic) {
+		val = exp (val);
+	}
+
+	return val;
+}
+
+/** Convert plugin values to UI values.  See pbd/controllable.h */
+double
+PluginInsert::PluginControl::plugin_to_ui (double val) const
+{
+	if (_sr_dependent) {
+		val = val * _session.frame_rate ();
+	}
+
+	return user_to_ui (val);
 }
 
 XMLNode&
@@ -1163,20 +1187,4 @@ PluginInsert::set_splitting (bool s)
 			
 	_splitting = s;
 	SplittingChanged (); /* EMIT SIGNAL */
-}
-
-string
-PluginInsert::value_as_string (boost::shared_ptr<AutomationControl> ac) const
-{
-	boost::shared_ptr<PluginControl> pc = boost::dynamic_pointer_cast<PluginControl> (ac);
-	assert (pc);
-
-	stringstream s;
-	if (pc->logarithmic ()) {
-		s << exp (pc->get_value ());
-	} else {
-		s << pc->get_value ();
-	}
-
-	return s.str ();
 }

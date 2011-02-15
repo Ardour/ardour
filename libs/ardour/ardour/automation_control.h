@@ -74,21 +74,26 @@ public:
 		return ((ARDOUR::AutomationList*)_list.get())->stop_touch(mark, when);
 	}
 
-	/** Set the value and do the right thing based on automation state
-	 * (e.g. record if necessary, etc.)
-	 */
-	void set_value(double val);
-
-	/** Get the current effective value based on automation state.
-	 */
-	double get_value() const;
+	void set_value (double);
+	double get_value () const;
 
         double lower() const { return parameter().min(); }
         double upper() const { return parameter().max(); }
 
         const ARDOUR::Session& session() const { return _session; }
 
+	/** Convert user values to UI values.  See pbd/controllable.h */
+	virtual double user_to_ui (double val) const {
+		return val;
+	}
+
+	/** Convert UI values to user values.  See pbd/controllable.h */
+	virtual double ui_to_user (double val) const {
+		return val;
+	}
+	
 protected:
+	
 	ARDOUR::Session& _session;
 };
 

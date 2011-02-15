@@ -94,20 +94,20 @@ AutomationController::get_label (double& xpos)
 void
 AutomationController::display_effective_value()
 {
-	float value = _controllable->get_value();
+	double const ui_value = _controllable->user_to_ui (_controllable->get_value());
 
-	if (_adjustment->get_value() != value) {
+	if (_adjustment->get_value() != ui_value) {
 		_ignore_change = true;
-		_adjustment->set_value (value);
+		_adjustment->set_value (ui_value);
 		_ignore_change = false;
 	}
 }
 
 void
-AutomationController::value_adjusted()
+AutomationController::value_adjusted ()
 {
 	if (!_ignore_change) {
-		_controllable->set_value(_adjustment->get_value());
+		_controllable->set_value (_controllable->ui_to_user (_adjustment->get_value()));
 	}
 }
 

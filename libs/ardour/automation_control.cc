@@ -40,6 +40,7 @@ AutomationControl::AutomationControl(
 {
 }
 
+/** Get the current effective `user' value based on automation state */
 double
 AutomationControl::get_value() const
 {
@@ -47,6 +48,10 @@ AutomationControl::get_value() const
 	return Control::get_double (from_list, _session.transport_frame());
 }
 
+/** Set the value and do the right thing based on automation state
+ *  (e.g. record if necessary, etc.)
+ *  @param value `user' value
+ */
 void
 AutomationControl::set_value(double value)
 {

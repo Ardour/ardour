@@ -90,8 +90,8 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 		bool logarithmic;
 		bool sr_dependent;
 		std::string label;
-		float lower;
-		float upper;
+		float lower; ///< if this is a frequency, it will be in Hz (not a fraction of the sample rate)
+		float upper; ///< if this is a frequency, it will be in Hz (not a fraction of the sample rate)
 		float step;
 		float smallstep;
 		float largestep;

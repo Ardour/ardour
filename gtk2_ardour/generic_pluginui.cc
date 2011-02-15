@@ -494,19 +494,10 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		*/
 
                 Adjustment* adj = control_ui->controller->adjustment();
+		boost::shared_ptr<PluginInsert::PluginControl> pc = boost::dynamic_pointer_cast<PluginInsert::PluginControl> (control_ui->control);
 
-		adj->set_lower (desc.lower);
-		adj->set_upper (desc.upper);
-
-		control_ui->logarithmic = desc.logarithmic;
-
-		if (control_ui->logarithmic) {
-			if (adj->get_lower() == 0.0) {
-				adj->set_lower (adj->get_upper()/10000);
-			}
-			adj->set_upper (log(adj->get_upper()));
-			adj->set_lower (log(adj->get_lower()));
-		}
+		adj->set_lower (pc->user_to_ui (desc.lower));
+		adj->set_upper (pc->user_to_ui (desc.upper));
 
 		adj->set_step_increment (desc.step);
 		adj->set_page_increment (desc.largestep);
@@ -522,23 +513,14 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 			control_ui->controller->set_name (X_("PluginSlider"));
 			control_ui->controller->set_style (BarController::LeftToRight);
 			control_ui->controller->set_use_parent (true);
-                        control_ui->controller->set_logarithmic (control_ui->logarithmic);
+                        control_ui->controller->set_logarithmic (desc.logarithmic);
 
 			control_ui->controller->StartGesture.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::start_touch), control_ui));
 			control_ui->controller->StopGesture.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::stop_touch), control_ui));
 
 		}
 
-		if (control_ui->logarithmic) {
-                        double val = plugin->get_parameter (port_index);
-                        if (isnan (val) || val <= 0.0) {
-                                adj->set_value (0.0);
-                        } else {
-                                adj->set_value (log(val));
-                        }
-		} else{
-			adj->set_value(plugin->get_parameter(port_index));
-		}
+		adj->set_value (pc->plugin_to_ui (plugin->get_parameter (port_index)));
 
 		/* XXX memory leak: SliderController not destroyed by ControlUI
 		   destructor, and manage() reports object hierarchy
