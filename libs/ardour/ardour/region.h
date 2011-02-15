@@ -139,21 +139,21 @@ class Region
 	framepos_t first_frame () const { return _position; }
 	framepos_t last_frame ()  const { return _position + _length - 1; }
 
-	bool hidden()     const  { return _hidden; }
-	bool muted()      const  { return _muted; }
-	bool opaque ()    const  { return _opaque; }
-	bool locked()     const  { return _locked; }
-	bool position_locked() const { return _position_locked; }
-	bool valid_transients() const { return _valid_transients; }
-	bool automatic()  const  { return _automatic; }
-	bool whole_file() const  { return _whole_file; }
-	bool captured()   const  { return !(_import || _external); }
-	bool can_move()   const  { return !_position_locked; }
-	bool sync_marked() const { return _sync_marked; }
-	bool external()   const    { return _external; }
-	bool import()     const      { return _import; }
+	bool hidden ()           const { return _hidden; }
+	bool muted ()            const { return _muted; }
+	bool opaque ()           const { return _opaque; }
+	bool locked ()           const { return _locked; }
+	bool position_locked ()  const { return _position_locked; }
+	bool valid_transients () const { return _valid_transients; }
+	bool automatic ()        const { return _automatic; }
+	bool whole_file ()       const { return _whole_file; }
+	bool captured ()         const { return !(_import || _external); }
+	bool can_move ()         const { return !_position_locked; }
+	bool sync_marked ()      const { return _sync_marked; }
+	bool external ()         const { return _external; }
+	bool import ()           const { return _import; }
         
-        Trimmable::CanTrim can_trim() const;
+        Trimmable::CanTrim can_trim () const;
 
 	PositionLockStyle position_lock_style () const { return _position_lock_style; }
 	
