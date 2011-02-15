@@ -135,9 +135,7 @@ UI::load_rcfile (string path, bool themechange)
 	 * This does not occur if wiget.get_style is used instead of rc.get_style below,
 	 * except that doesn't actually work... 
 	 */
-	if (themechange) {
-		return 0; //Disable theme change completely till we figure this out...
-	}
+	
 	static Glib::RefPtr<Style>* fatal_style   = 0;
 	static Glib::RefPtr<Style>* error_style   = 0;
 	static Glib::RefPtr<Style>* warning_style = 0;
@@ -155,10 +153,10 @@ UI::load_rcfile (string path, bool themechange)
 		return -1;
 	}
 
-        RC rc (path.c_str());
-        //this is buggy in gtkmm for some reason, so use C
-        //RC::reset_styles (Gtk::Settings::get_default());
-        gtk_rc_reset_styles (gtk_settings_get_default());
+	RC rc (path.c_str());
+	//this is buggy in gtkmm for some reason, so use C
+	//RC::reset_styles (Gtk::Settings::get_default());
+	gtk_rc_reset_styles (gtk_settings_get_default());
 
 	theme_changed.emit();
 

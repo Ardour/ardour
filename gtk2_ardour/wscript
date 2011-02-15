@@ -264,7 +264,7 @@ def set_winegcc(self):
 	self.env.LINK_CXX = self.env.LINK_CC = 'wineg++'
 	self.env.CC = 'winegcc'
 
-def build_color_scheme(path):
+def build_color_scheme(path, prefix):
         f = open (path, 'r')
         color_scheme = ''
         for line in f:
@@ -273,7 +273,8 @@ def build_color_scheme(path):
                         words = line.split()
                         if len(color_scheme):
                                 color_scheme += ';'
-                        color_scheme += 'A_' # prefix for color name
+                        color_scheme += prefix
+                        color_scheme += '_'
                         color_scheme += words[1]
                         color_scheme += ':'
                         color_scheme += words[2]
@@ -429,8 +430,8 @@ def build(bld):
 			light_rc_subst_dict[key] = fontstyle
 
 	# RC files
-	dark_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme ('gtk2_ardour/ardour3_ui_dark.rc.in')
-	light_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme ('gtk2_ardour/ardour3_ui_light.rc.in')
+	dark_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme ('gtk2_ardour/ardour3_ui_dark.rc.in', 'ARDOUR_DARK')
+	light_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme ('gtk2_ardour/ardour3_ui_light.rc.in', 'ARDOUR_LIGHT')
 
 	obj              = bld.new_task_gen('subst')
 	obj.source       = 'ardour3_ui_dark.rc.in'
