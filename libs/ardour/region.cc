@@ -1437,8 +1437,6 @@ Region::source_string () const
 {
 	//string res = itos(_sources.size());
 
-	char buf[64];
-
 	stringstream res;
 	res << _sources.size() << ":";
 	

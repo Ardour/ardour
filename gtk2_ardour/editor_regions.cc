@@ -64,10 +64,10 @@ EditorRegions::EditorRegions (Editor* e)
 	, name_editable (0)
 	, _menu (0)
 	, _show_automatic_regions (true)
-	, _sort_type ((Editing::RegionListSortType) 0)
- 	, _no_redisplay (false) 
 	, ignore_region_list_selection_change (false)
 	, ignore_selected_region_change (false)
+ 	, _no_redisplay (false) 
+	, _sort_type ((Editing::RegionListSortType) 0)
 	, expanded (false)
 {
 	_display.set_size_request (100, -1);
