@@ -64,7 +64,7 @@ private:
 	void automation_state_changed();
 
 	bool                                         _ignore_change;
-        boost::shared_ptr<ARDOUR::Automatable>       _owner;
+        boost::shared_ptr<ARDOUR::Automatable>       _printer;
 	boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
 	Gtk::Adjustment*                             _adjustment;
 	sigc::connection                             _screen_update_connection;

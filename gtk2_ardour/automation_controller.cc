@@ -41,13 +41,15 @@
 using namespace ARDOUR;
 using namespace Gtk;
 
-AutomationController::AutomationController(boost::shared_ptr<Automatable> owner, boost::shared_ptr<AutomationControl> ac, Adjustment* adj)
+AutomationController::AutomationController(boost::shared_ptr<Automatable> printer, boost::shared_ptr<AutomationControl> ac, Adjustment* adj)
 	: BarController (*adj, ac)
 	, _ignore_change(false)
-        , _owner (owner)
+        , _printer (printer)
 	, _controllable(ac)
 	, _adjustment(adj)
 {
+        assert (_printer);
+
 	set_name (X_("PluginSlider")); // FIXME: get yer own name!
 	set_style (BarController::LeftToRight);
 	set_use_parent (true);
@@ -88,7 +90,7 @@ std::string
 AutomationController::get_label (double& xpos)
 {
         xpos = 0.5;
-        return _owner->value_as_string (_controllable);
+        return _printer->value_as_string (_controllable);
 }
 
 void
