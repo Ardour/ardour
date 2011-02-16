@@ -715,8 +715,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
         int missing_file (ARDOUR::Session*s, std::string str, ARDOUR::DataType type);
         int ambiguous_file (std::string file, std::string path, std::vector<std::string> hits);
-
-	void resize_text_widgets ();
 };
 
 #endif /* __ardour_gui_h__ */
