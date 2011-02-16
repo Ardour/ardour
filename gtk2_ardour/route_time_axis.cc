@@ -442,6 +442,9 @@ RouteTimeAxisView::build_display_menu ()
 
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun(*this, &RouteTimeAxisView::select_track_color)));
 
+	build_size_menu ();
+	items.push_back (MenuElem (_("Height"), *_size_menu));
+
 	items.push_back (SeparatorElem());
 
 	if (!Profile->get_sae()) {

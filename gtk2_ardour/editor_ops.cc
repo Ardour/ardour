@@ -6187,7 +6187,7 @@ Editor::set_track_height (Height h)
 	TrackSelection& ts (selection->tracks);
 
 	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
-		(*x)->set_height (h);
+		(*x)->set_height_enum (h);
 	}
 }
 

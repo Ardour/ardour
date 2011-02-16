@@ -75,6 +75,7 @@ PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess),
 	  controls_table (2, 8),
+	  _size_menu (0),
 	  _y_position (0),
 	  _editor (ed),
 	  _order (0)
@@ -216,6 +217,8 @@ TimeAxisView::~TimeAxisView()
 
 	delete display_menu;
 	display_menu = 0;
+
+	delete _size_menu;
 }
 
 /** Display this TimeAxisView as the nth component of the parent box, at y.
@@ -386,25 +389,25 @@ TimeAxisView::step_height (bool bigger)
 
 	if (bigger) {
 		if (height == preset_height(HeightSmall)) {
-			set_height (preset_height(HeightSmaller));
+			set_height_enum (HeightSmaller);
 		} 
 		else if (height == preset_height(HeightSmaller)) {
-			set_height (preset_height(HeightNormal));
+			set_height_enum (HeightNormal);
 		} 
 		else {
 			set_height (height + step);
 		}
 
 	} else {
-		if ( height == preset_height(HeightSmall)){
+		if (height == preset_height (HeightSmall)) {
 			return;
 		}
 		
 		if (height <= preset_height (HeightSmaller) && height > preset_height (HeightSmall)) {
-			set_height (preset_height(HeightSmall));
+			set_height_enum (HeightSmall);
 		}
-		else if ( height <= preset_height (HeightNormal) && height > preset_height (HeightSmaller)){
-			set_height (preset_height(HeightSmaller));
+		else if (height <= preset_height (HeightNormal) && height > preset_height (HeightSmaller)) {
+			set_height_enum (HeightSmaller);
 		}
 		else {
 			set_height (height - step);
@@ -423,7 +426,7 @@ TimeAxisView::set_heights (uint32_t h)
 }
 
 void
-TimeAxisView::set_height (Height h)
+TimeAxisView::set_height_enum (Height h)
 {
 	set_height (preset_height (h));
 }
@@ -493,7 +496,7 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 		/* resize to show editable name display */
 		
 		if ((*i)->current_height() <= preset_height (HeightSmaller)) {
-			(*i)->set_height (HeightSmaller);
+			(*i)->set_height_enum (HeightSmaller);
 		}
 		
 		(*i)->name_entry.grab_focus();
@@ -1016,20 +1019,20 @@ TimeAxisView::set_state (const XMLNode& node, int /*version*/)
 	if ((prop = node.property ("track-height")) != 0) {
 
 		if (prop->value() == "largest") {
-			set_height (HeightLargest);
+			set_height_enum (HeightLargest);
 		} else if (prop->value() == "large") {
-			set_height (HeightLarge);
+			set_height_enum (HeightLarge);
 		} else if (prop->value() == "larger") {
-			set_height (HeightLarger);
+			set_height_enum (HeightLarger);
 		} else if (prop->value() == "normal") {
-			set_height (HeightNormal);
+			set_height_enum (HeightNormal);
 		} else if (prop->value() == "smaller") {
-			set_height (HeightSmaller);
+			set_height_enum (HeightSmaller);
 		} else if (prop->value() == "small") {
-			set_height (HeightSmall);
+			set_height_enum (HeightSmall);
 		} else {
 			error << string_compose(_("unknown track height name \"%1\" in XML GUI information"), prop->value()) << endmsg;
-			set_height (HeightNormal);
+			set_height_enum (HeightNormal);
 		}
 
 	} else if ((prop = node.property ("height")) != 0) {
@@ -1038,14 +1041,14 @@ TimeAxisView::set_state (const XMLNode& node, int /*version*/)
 
 	} else {
 
-		set_height (HeightNormal);
+		set_height_enum (HeightNormal);
 	}
 
 	return 0;
 }
 
 void
-TimeAxisView::reset_height()
+TimeAxisView::reset_height ()
 {
 	set_height (height);
 
@@ -1344,4 +1347,23 @@ TimeAxisView::get_child_list ()
 	return c;
 }
 
+void
+TimeAxisView::build_size_menu ()
+{
+	if (_size_menu) {
+		return;
+	}
+	
+	using namespace Menu_Helpers;
 
+	_size_menu = new Menu;
+	_size_menu->set_name ("ArdourContextMenu");
+	MenuList& items = _size_menu->items();
+	
+	items.push_back (MenuElem (_("Largest"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLargest)));
+	items.push_back (MenuElem (_("Larger"),  sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarger)));
+	items.push_back (MenuElem (_("Large"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarge)));
+	items.push_back (MenuElem (_("Normal"),  sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightNormal)));
+	items.push_back (MenuElem (_("Smaller"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightSmaller)));
+	items.push_back (MenuElem (_("Small"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightSmall)));
+}

@@ -149,7 +149,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	virtual void exited () {}
 
 	virtual void set_height (uint32_t h);
-	void set_height (Height);
+	void set_height_enum (Height);
 	void reset_height();
 
 	std::pair<TimeAxisView*, ARDOUR::layer_t> covers_y_position (double);
@@ -309,6 +309,9 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	void color_handler ();
 
 	void conditionally_add_to_selection ();
+
+	void build_size_menu ();
+	Gtk::Menu* _size_menu;
 
 	ArdourCanvas::Group* _canvas_display;
 	double _y_position;
