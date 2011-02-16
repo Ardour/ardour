@@ -73,12 +73,12 @@ int const TimeAxisView::_max_order = 512;
 PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
-	: AxisView (sess),
-	  controls_table (2, 8),
-	  _size_menu (0),
-	  _y_position (0),
-	  _editor (ed),
-	  _order (0)
+	: AxisView (sess)
+	, controls_table (2, 8)
+	, _size_menu (0)
+	, _y_position (0)
+	, _editor (ed)
+	, _order (0)
 {
 	if (extra_height == 0) {
 		compute_heights ();
@@ -390,11 +390,9 @@ TimeAxisView::step_height (bool bigger)
 	if (bigger) {
 		if (height == preset_height(HeightSmall)) {
 			set_height_enum (HeightSmaller);
-		} 
-		else if (height == preset_height(HeightSmaller)) {
+		} else if (height == preset_height(HeightSmaller)) {
 			set_height_enum (HeightNormal);
-		} 
-		else {
+		} else {
 			set_height (height + step);
 		}
 
@@ -405,11 +403,9 @@ TimeAxisView::step_height (bool bigger)
 		
 		if (height <= preset_height (HeightSmaller) && height > preset_height (HeightSmall)) {
 			set_height_enum (HeightSmall);
-		}
-		else if (height <= preset_height (HeightNormal) && height > preset_height (HeightSmaller)) {
+		} else if (height <= preset_height (HeightNormal) && height > preset_height (HeightSmaller)) {
 			set_height_enum (HeightSmaller);
-		}
-		else {
+		} else {
 			set_height (height - step);
 		} 
 	}
@@ -921,7 +917,7 @@ TimeAxisView::add_ghost (RegionView* rv)
 {
 	GhostRegion* gr = rv->add_ghost (*this);
 
-	if(gr) {
+	if (gr) {
 		ghosts.push_back(gr);
 	}
 }
@@ -1179,7 +1175,7 @@ std::pair<TimeAxisView*, layer_t>
 TimeAxisView::covers_y_position (double y)
 {
 	if (hidden()) {
-		return std::make_pair ( (TimeAxisView *) 0, 0);
+		return std::make_pair ((TimeAxisView *) 0, 0);
 	}
 
 	if (_y_position <= y && y < (_y_position + height)) {
@@ -1207,7 +1203,7 @@ TimeAxisView::covers_y_position (double y)
 		}
 	}
 
-	return std::make_pair ( (TimeAxisView *) 0, 0);
+	return std::make_pair ((TimeAxisView *) 0, 0);
 }
 
 bool
