@@ -238,22 +238,22 @@ Port::recompute_total_latency () const
 #endif
 }
 
+#ifdef HAVE_JACK_NEW_LATENCY
 void
 Port::set_latency_range (jack_latency_range_t& range, bool playback) const
 {
-#ifdef HAVE_JACK_NEW_LATENCY
         if (!jack_port_set_latency_range) {
                 return;
         }
 
         jack_port_set_latency_range (_jack_port, (playback ? JackPlaybackLatency : JackCaptureLatency), &range);
-#endif
 }
+#endif
 
+#ifdef HAVE_JACK_NEW_LATENCY
 void
 Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) const
 {
-#ifdef HAVE_JACK_NEW_LATENCY
         if (!jack_port_get_latency_range) {
                 return;
         }
@@ -294,8 +294,8 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
                 range.min = 0;
                 range.max = 0;
         }
-#endif /* HAVE_JACK_NEW_LATENCY */
 }
+#endif /* HAVE_JACK_NEW_LATENCY */
 
 framecnt_t
 Port::total_latency () const
