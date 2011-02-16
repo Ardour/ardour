@@ -227,10 +227,6 @@ PannerUI::setup_pan ()
 	uint32_t const nouts = _panner->out().n_audio();
 	uint32_t const nins = _panner->in().n_audio();
 
-        cerr << "GUI Panner for " << _panner << " setup with " << nins << " feeding " << nouts 
-             << " current = " << _current_nins << " feeding " << _current_nouts
-             << endl;
-
 	if (int32_t (nouts) == _current_nouts && int32_t (nins) == _current_nins) {
 		return;
 	}
