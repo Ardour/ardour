@@ -3690,7 +3690,7 @@ Route::update_port_latencies (const PortSet& operands, const PortSet& feeders, b
                 
                 p->set_latency_range (all_connections, playback);
                 
-                DEBUG_TRACE (DEBUG::Latency, string_compose ("Port %1 %5 latency range %2 .. %3 + %4\n",
+                DEBUG_TRACE (DEBUG::Latency, string_compose ("Port %1 %5 latency range %2 .. %3 (including route latency of %4)\n",
                                                              p->name(),
                                                              all_connections.min,
                                                              all_connections.max,

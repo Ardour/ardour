@@ -388,11 +388,13 @@ AudioEngine::_registration_callback (jack_port_id_t /*id*/, int /*reg*/, void* a
 	ae->PortRegisteredOrUnregistered (); /* EMIT SIGNAL */
 }
 
+#ifdef HAVE_JACK_NEW_LATENCY
 void
 AudioEngine::_latency_callback (jack_latency_callback_mode_t mode, void* arg)
 {
 	return static_cast<AudioEngine *> (arg)->jack_latency_callback (mode);
 }
+#endif
 
 void
 AudioEngine::_connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int conn, void* arg)
@@ -618,6 +620,7 @@ AudioEngine::jack_sample_rate_callback (pframes_t nframes)
 	return 0;
 }
 
+#ifdef HAVE_JACK_NEW_LATENCY
 void
 AudioEngine::jack_latency_callback (jack_latency_callback_mode_t mode)
 {
@@ -625,6 +628,7 @@ AudioEngine::jack_latency_callback (jack_latency_callback_mode_t mode)
                 _session->update_latency (mode == JackPlaybackLatency);
         }
 }
+#endif
 
 int
 AudioEngine::_bufsize_callback (pframes_t nframes, void *arg)
