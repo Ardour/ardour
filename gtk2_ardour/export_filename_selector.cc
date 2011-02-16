@@ -50,9 +50,13 @@ ExportFilenameSelector::ExportFilenameSelector () :
 	include_hbox.pack_start (revision_checkbox, false, false, 3);
 	include_hbox.pack_start (revision_spinbutton, false, false, 3);
 
+	label_entry.set_activates_default ();
+
 	path_hbox.pack_start (path_label, false, false, 3);
 	path_hbox.pack_start (path_entry, true, true, 3);
 	path_hbox.pack_start (browse_button, false, false, 3);
+
+	path_entry.set_activates_default ();
 
 	date_format_combo.set_name ("PaddedButton");
 	time_format_combo.set_name ("PaddedButton");

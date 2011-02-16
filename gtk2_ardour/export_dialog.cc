@@ -131,6 +131,7 @@ ExportDialog::init ()
 	//rt_export_button = add_button (_("Realtime Export"), RESPONSE_RT);
 	//fast_export_button = add_button (_("Fast Export"), RESPONSE_FAST);
 	fast_export_button = add_button (_("Export"), RESPONSE_FAST);
+	set_default_response (RESPONSE_FAST);
 
 	list_files_button.set_name ("PaddedButton");
 
