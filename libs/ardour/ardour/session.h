@@ -560,12 +560,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* Curves and AutomationLists (TODO when they go away) */
 	void add_automation_list(AutomationList*);
 
-	/* fade curves */
-
-	float get_default_fade_length () const { return default_fade_msecs; }
-	float get_default_fade_steepness () const { return default_fade_steepness; }
-	void set_default_fade (float steepness, float msecs);
-
 	/* auditioning */
 
 	boost::shared_ptr<Auditioner> the_auditioner() { return auditioner; }

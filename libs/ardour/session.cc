@@ -1256,43 +1256,6 @@ Session::set_block_size (pframes_t nframes)
 	}
 }
 
-void
-Session::set_default_fade (float /*steepness*/, float /*fade_msecs*/)
-{
-#if 0
-	framecnt_t fade_frames;
-
-	/* Don't allow fade of less 1 frame */
-
-	if (fade_msecs < (1000.0 * (1.0/_current_frame_rate))) {
-
-		fade_msecs = 0;
-		fade_frames = 0;
-
-	} else {
-
-		fade_frames = (framecnt_t) floor (fade_msecs * _current_frame_rate * 0.001);
-
-	}
-
-	default_fade_msecs = fade_msecs;
-	default_fade_steepness = steepness;
-
-	{
-		// jlc, WTF is this!
-		Glib::RWLock::ReaderLock lm (route_lock);
-		AudioRegion::set_default_fade (steepness, fade_frames);
-	}
-
-	set_dirty();
-
-	/* XXX have to do this at some point */
-	/* foreach region using default fade, reset, then
-	   refill_all_diskstream_buffers ();
-	*/
-#endif
-}
-
 struct RouteSorter {
     /** @return true to run r1 before r2, otherwise false */
     bool operator() (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> r2) {

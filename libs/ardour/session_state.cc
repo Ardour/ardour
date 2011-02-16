@@ -258,8 +258,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	last_rr_session_dir = session_dirs.begin();
 	refresh_disk_space ();
 
-	// set_default_fade (0.2, 5.0); /* steepness, millisecs */
-
         /* default: assume simple stereo speaker configuration */
 
         _speakers->setup_default_speakers (2);
