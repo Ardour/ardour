@@ -248,7 +248,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void all_processors_flip();
 	void all_processors_active (Placement, bool state);
 
-        void set_latency_ranges (jack_latency_callback_mode_t mode) const;
+        void set_latency_ranges (bool playback) const;
 	virtual framecnt_t update_total_latency();
 	void set_latency_delay (framecnt_t);
 	void set_user_latency (framecnt_t);
@@ -507,7 +507,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void set_mute_master_solo ();
 
 	void set_processor_positions ();
-        void update_port_latencies (const PortSet& ports, jack_latency_callback_mode_t mode, framecnt_t) const;
+        void update_port_latencies (const PortSet& ports, const PortSet& feeders, bool playback, framecnt_t) const;
 };
 
 } // namespace ARDOUR

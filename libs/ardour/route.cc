@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include <cmath>
 #include <fstream>
 #include <cassert>
@@ -3630,37 +3634,68 @@ Route::unknown_processors () const
 }
 
 void
-Route::set_latency_ranges (jack_latency_callback_mode_t mode) const
+Route::set_latency_ranges (bool playback) const
 {
-        if (mode == JackPlaybackLatency) {
-                update_port_latencies (_input->ports (), mode, _input->effective_latency());
-        } else {
-                update_port_latencies (_output->ports (), mode, _output->effective_latency());
-        }
+	framecnt_t own_latency = 0;
 
+        /* Processor list not protected by lock: MUST BE CALLED FROM PROCESS THREAD OR
+           LATENCY CALLBACK
+        */
+
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if ((*i)->active ()) {
+			own_latency += (*i)->signal_latency ();
+		}
+	}
+
+        if (playback) {
+                update_port_latencies (_input->ports (), _output->ports (), true, own_latency);
+        } else {
+                update_port_latencies (_output->ports (), _input->ports (), false, own_latency);
+        }
 }
 
 void
-Route::update_port_latencies (const PortSet& ports, jack_latency_callback_mode_t mode, framecnt_t our_latency) const
+Route::update_port_latencies (const PortSet& operands, const PortSet& feeders, bool playback, framecnt_t our_latency) const
 {
 #ifdef HAVE_JACK_NEW_LATENCY
-        /* iterate over all connected ports and get the latency range
-           they represent
+
+        /* we assume that all our input ports feed all our output ports. its not
+           universally true, but the alternative is way too corner-case to worry about.
         */
-
-        for (PortSet::const_iterator p = ports.begin(); p != ports.end(); ++p) {
-
-                jack_latency_range_t range;
-
-                p->get_connected_latency_range (range, mode);
-
-                /* add the latency created within this route
-                 */
-
-                range.min += our_latency;
-                range.max += our_latency;
+        
+        jack_latency_range_t all_connections;
+        
+        all_connections.min = ~((jack_nframes_t) 0);
+        all_connections.max = 0;
+        
+        /* iterate over all feeder ports and determine their relevant latency, taking
+           the maximum and minimum across all of them.
+        */
+        
+        for (PortSet::const_iterator p = feeders.begin(); p != feeders.end(); ++p) {
                 
-                p->set_latency_range (range, mode);
+                jack_latency_range_t range;
+                
+                p->get_connected_latency_range (range, playback);
+                
+                all_connections.min = min (all_connections.min, range.min);
+                all_connections.max = max (all_connections.max, range.max);
+        }
+        
+        all_connections.min += our_latency;
+        all_connections.max += our_latency;
+
+        for (PortSet::const_iterator p = operands.begin(); p != operands.end(); ++p) {
+                
+                p->set_latency_range (all_connections, playback);
+                
+                DEBUG_TRACE (DEBUG::Latency, string_compose ("Port %1 %5 latency range %2 .. %3 + %4\n",
+                                                             p->name(),
+                                                             all_connections.min,
+                                                             all_connections.max,
+                                                             our_latency,
+                                                             (playback ? "PLAYBACK" : "CAPTURE")));
         }
 #endif
 }

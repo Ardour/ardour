@@ -621,11 +621,8 @@ AudioEngine::jack_sample_rate_callback (pframes_t nframes)
 void
 AudioEngine::jack_latency_callback (jack_latency_callback_mode_t mode)
 {
-        cerr << "JACK LATENCY CALLBACK\n";
         if (_session) {
                 _session->update_latency (mode == JackPlaybackLatency);
-        } else {
-                cerr << "NO SESSION\n";
         }
 }
 
@@ -1452,10 +1449,8 @@ AudioEngine::request_buffer_size (pframes_t nframes)
 void
 AudioEngine::update_total_latencies ()
 {
-#ifdef HAVE_JACK_RECOMPUTE_LATENCIES
 	GET_PRIVATE_JACK_POINTER (_jack);
 	jack_recompute_total_latencies (_priv_jack);
-#endif
 }
 
 string

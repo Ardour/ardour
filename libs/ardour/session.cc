@@ -660,6 +660,7 @@ Session::when_engine_running ()
 	BootMessage (_("Connect to engine"));
 
 	_engine.set_session (this);
+        _engine.update_total_latencies ();
 }
 
 void
@@ -4239,5 +4240,18 @@ void
 Session::update_latency (bool playback)
 {
         DEBUG_TRACE (DEBUG::Latency, "JACK latency callback\n");
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+        if (playback) {
+                /* reverse the list so that we work backwards from the last route to run to the first */
+                reverse (r->begin(), r->end());
+        }
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                DEBUG_TRACE (DEBUG::Latency, string_compose ("------------- Working on latency for %1\n", (*i)->name()));
+                (*i)->set_latency_ranges (playback);
+                DEBUG_TRACE (DEBUG::Latency, string_compose ("------------- Done working on latency for %1\n\n", (*i)->name()));
+        }
 }
 #endif

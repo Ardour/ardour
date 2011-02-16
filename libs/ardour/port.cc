@@ -21,19 +21,23 @@
 #include "libardour-config.h"
 #endif
 
+#include <stdexcept>
+
 #include <jack/weakjack.h> // so that we can test for new functions at runtime
 
+#include "pbd/error.h"
+#include "pbd/compose.h"
+
+#include "ardour/debug.h"
 #include "ardour/port.h"
 #include "ardour/audioengine.h"
 #include "pbd/failed_constructor.h"
-#include "pbd/error.h"
-#include "pbd/compose.h"
-#include <stdexcept>
 
 #include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 AudioEngine* Port::_engine = 0;
 pframes_t Port::_buffer_size = 0;
@@ -235,19 +239,19 @@ Port::recompute_total_latency () const
 }
 
 void
-Port::set_latency_range (jack_latency_range_t& range, jack_latency_callback_mode_t mode) const
+Port::set_latency_range (jack_latency_range_t& range, bool playback) const
 {
 #ifdef HAVE_JACK_NEW_LATENCY
         if (!jack_port_set_latency_range) {
                 return;
         }
 
-        jack_port_set_latency_range (_jack_port, mode, &range);
+        jack_port_set_latency_range (_jack_port, (playback ? JackPlaybackLatency : JackCaptureLatency), &range);
 #endif
 }
 
 void
-Port::get_connected_latency_range (jack_latency_range_t& range, jack_latency_callback_mode_t mode) const
+Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) const
 {
 #ifdef HAVE_JACK_NEW_LATENCY
         if (!jack_port_get_latency_range) {
@@ -275,10 +279,13 @@ Port::get_connected_latency_range (jack_latency_range_t& range, jack_latency_cal
                         jack_port_t* remote_port = jack_port_by_name (_engine->jack(), (*c).c_str());
                         jack_latency_range_t lr;
 
+                        DEBUG_TRACE (DEBUG::Latency, string_compose ("\t%1 connected to %2\n", name(), *c));
+
                         if (remote_port) {
-                                jack_port_get_latency_range (remote_port, mode, &lr);
+                                jack_port_get_latency_range (remote_port, (playback ? JackPlaybackLatency : JackCaptureLatency), &lr);
+                                DEBUG_TRACE (DEBUG::Latency, string_compose ("\t\tremote has latency range %1 .. %2\n", lr.min, lr.max));
                                 range.min = min (range.min, lr.min);
-                                range.min = max (range.max, lr.max);
+                                range.max = max (range.max, lr.max);
                         }
                 }
 
