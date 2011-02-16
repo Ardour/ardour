@@ -513,29 +513,25 @@ ARDOUR_UI::build_menu_bar ()
 	// so use this instead ...
 	gtk_settings_set_long_property (gtk_settings_get_default(), "gtk-can-change-accels", 1, "Ardour:designers");
 
-	/* Set up some size requests here to stop the menu-bar clock jumping around in full-screen mode */
+	resize_text_widgets ();
+	DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
 
-	set_size_request_to_display_given_text (wall_clock_label, _("99:99"), 2, 0);
 	wall_clock_box.add (wall_clock_label);
 	wall_clock_box.set_name ("WallClock");
 	wall_clock_label.set_name ("WallClock");
 
-	set_size_request_to_display_given_text (disk_space_label, _("9999h:999999m:99999999s"), 2, 0);
 	disk_space_box.add (disk_space_label);
 	disk_space_box.set_name ("WallClock");
 	disk_space_label.set_name ("WallClock");
 
-	set_size_request_to_display_given_text (cpu_load_label, _("DSP: 100.0%"), 2, 0);
 	cpu_load_box.add (cpu_load_label);
 	cpu_load_box.set_name ("CPULoad");
 	cpu_load_label.set_name ("CPULoad");
 
-	set_size_request_to_display_given_text (buffer_load_label, _("Buffers p:100% c:100%"), 2, 0);
 	buffer_load_box.add (buffer_load_label);
 	buffer_load_box.set_name ("BufferLoad");
 	buffer_load_label.set_name ("BufferLoad");
 
-	set_size_request_to_display_given_text (sample_rate_label, X_("384 kHz / 1000 ms"), 2, 0);
 	sample_rate_box.add (sample_rate_label);
 	sample_rate_box.set_name ("SampleRate");
 	sample_rate_label.set_name ("SampleRate");
@@ -560,6 +556,18 @@ ARDOUR_UI::build_menu_bar ()
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
+}
+
+void
+ARDOUR_UI::resize_text_widgets ()
+{
+	/* Set up some size requests here to stop the menu-bar clock jumping around in full-screen mode */
+
+	set_size_request_to_display_given_text (wall_clock_label, _("99:99"), 2, 0);
+	set_size_request_to_display_given_text (disk_space_label, _("9999h:999999m:99999999s"), 2, 0);
+	set_size_request_to_display_given_text (cpu_load_label, _("DSP: 100.0%"), 2, 0);
+	set_size_request_to_display_given_text (buffer_load_label, _("Buffers p:100% c:100%"), 2, 0);
+	set_size_request_to_display_given_text (sample_rate_label, X_("384 kHz / 1000 ms"), 2, 0);
 }
 
 void
