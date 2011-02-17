@@ -2238,8 +2238,8 @@ ARDOUR_UI::save_template ()
 	}
 
 	prompter.set_name (X_("Prompter"));
-	prompter.set_title (_("Save Mix Template"));
-	prompter.set_prompt (_("Name for mix template:"));
+	prompter.set_title (_("Save Template"));
+	prompter.set_prompt (_("Name for template:"));
 	prompter.set_initial_text(_session->name() + _("-template"));
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 
