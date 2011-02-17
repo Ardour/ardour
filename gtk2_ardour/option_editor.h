@@ -400,6 +400,8 @@ public:
 
 	void add_option (std::string const &, OptionEditorComponent *);
 
+	void set_current_page (std::string const &);
+
 protected:
 
 	virtual void parameter_changed (std::string const &);

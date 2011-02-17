@@ -719,6 +719,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
         int missing_file (ARDOUR::Session*s, std::string str, ARDOUR::DataType type);
         int ambiguous_file (std::string file, std::string path, std::vector<std::string> hits);
+
+	bool click_button_clicked (GdkEventButton *);
 };
 
 #endif /* __ardour_gui_h__ */

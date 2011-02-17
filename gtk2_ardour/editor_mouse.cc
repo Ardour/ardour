@@ -1101,7 +1101,7 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case MouseZoom:
 		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			temporal_zoom_session();
+			temporal_zoom_to_frame (false, event_frame (event));
 		} else {
 			temporal_zoom_to_frame (true, event_frame(event));
 		}

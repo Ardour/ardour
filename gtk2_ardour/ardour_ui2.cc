@@ -52,6 +52,7 @@
 #include "midi_tracer.h"
 #include "global_port_matrix.h"
 #include "location_ui.h"
+#include "rc_option_editor.h"
 
 #include "i18n.h"
 
@@ -339,6 +340,8 @@ ARDOUR_UI::setup_transport ()
 	ActionManager::get_action ("Transport", "ToggleClick")->connect_proxy (click_button);
 	ActionManager::get_action ("Transport", "TogglePunchIn")->connect_proxy (punch_in_button);
 	ActionManager::get_action ("Transport", "TogglePunchOut")->connect_proxy (punch_out_button);
+
+	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
 
 	preroll_button.set_name ("TransportButton");
 	postroll_button.set_name ("TransportButton");
@@ -964,4 +967,22 @@ ARDOUR_UI::restore_editing_space ()
 
 	transport_tearoff->set_visible (true);
 	editor->restore_editing_space ();
+}
+
+bool
+ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
+{
+	if (ev->button != 3) {
+		/* this handler is just for button-3 clicks */
+		return false;
+	}
+
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleRCOptionsEditor"));
+	assert (act);
+
+	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
+	tact->set_active ();
+
+	rc_option_editor->set_current_page (_("Misc"));
+	return true;
 }

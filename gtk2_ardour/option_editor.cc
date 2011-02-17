@@ -302,3 +302,20 @@ OptionEditor::add_option (std::string const & pn, OptionEditorComponent* o)
 	o->add_to_page (p);
 	o->set_state_from_config ();
 }
+
+void
+OptionEditor::set_current_page (string const & p)
+{
+	int i = 0;
+	while (i < _notebook.get_n_pages ()) {
+		if (_notebook.get_tab_label_text (*_notebook.get_nth_page (i)) == p) {
+			_notebook.set_current_page (i);
+			return;
+		}
+
+		++i;
+	}
+}
+
+
+	
