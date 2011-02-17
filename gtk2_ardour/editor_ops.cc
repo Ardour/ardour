@@ -1825,10 +1825,10 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 	if (new_leftmost > frame) {
 		new_leftmost = 0;
 	}
-//	begin_reversible_command (_("zoom to frame"));
-//	_session->add_undo (sigc::bind (sigc::mem_fun(*this, &Editor::reposition_and_zoom), leftmost_frame, frames_per_unit));
-//	_session->add_redo (sigc::bind (sigc::mem_fun(*this, &Editor::reposition_and_zoom), new_leftmost, new_fpu));
-//	commit_reversible_command ();
+
+	if (new_leftmost < 0) {
+		new_leftmost = 0;
+	}
 
 	reposition_and_zoom (new_leftmost, new_fpu);
 }
