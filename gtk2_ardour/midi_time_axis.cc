@@ -846,7 +846,7 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 			new AutomationTimeAxisView (
 				_session,
 				_route, 
-				_route,
+				boost::shared_ptr<Automatable> (),
 				boost::shared_ptr<AutomationControl> (),
 				param,
 				_editor,

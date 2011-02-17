@@ -88,7 +88,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		have_name_font = true;
 	}
 
-	if (_control) {
+	if (_automatable && _control) {
 		_controller = AutomationController::create (_automatable, _control->parameter(), _control);
 	}
 
