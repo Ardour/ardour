@@ -27,21 +27,22 @@
 #include "ardour/audioengine.h"
 
 #include "actions.h"
+#include "add_route_dialog.h"
 #include "ardour_ui.h"
+#include "bundle_manager.h"
+#include "global_port_matrix.h"
+#include "gui_thread.h"
+#include "keyeditor.h"
 #include "location_ui.h"
+#include "midi_tracer.h"
 #include "mixer_ui.h"
-#include "rc_option_editor.h"
-#include "session_option_editor.h"
 #include "public_editor.h"
+#include "rc_option_editor.h"
 #include "route_params_ui.h"
+#include "session_option_editor.h"
+#include "speaker_dialog.h"
 #include "sfdb_ui.h"
 #include "theme_manager.h"
-#include "bundle_manager.h"
-#include "keyeditor.h"
-#include "gui_thread.h"
-#include "midi_tracer.h"
-#include "add_route_dialog.h"
-#include "global_port_matrix.h"
 
 #include "i18n.h"
 
@@ -63,6 +64,10 @@ ARDOUR_UI::set_session (Session *s)
 	if (location_ui->get()) {
 		location_ui->get()->set_session(s);
 	}
+
+        if (speaker_config_window->get()) {
+                speaker_config_window->get()->set_speakers (s->get_speakers());
+        }
 
 	if (route_params) {
 		route_params->set_session (s);
@@ -228,6 +233,22 @@ ARDOUR_UI::toggle_big_clock_window ()
 			big_clock_window->get()->present ();
 		} else {
 			big_clock_window->get()->hide ();
+		}
+	}
+}
+
+void
+ARDOUR_UI::toggle_speaker_config_window ()
+{
+	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-speaker-config"));
+	if (act) {
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact->get_active()) {
+			speaker_config_window->get()->show_all ();
+			speaker_config_window->get()->present ();
+		} else {
+			speaker_config_window->get()->hide ();
 		}
 	}
 }

@@ -232,6 +232,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleBigClock"), _("Big Clock"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_big_clock_window));
 	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_toggle_action (common_actions, X_("toggle-speaker-config"), _("Speaker Config"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_speaker_config_window));
+	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (common_actions, X_("toggle-audio-connection-manager"), _("Audio Connection Manager"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_global_port_matrix), ARDOUR::DataType::AUDIO));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (common_actions, X_("toggle-midi-connection-manager"), _("MIDI Connection Manager"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_global_port_matrix), ARDOUR::DataType::MIDI));

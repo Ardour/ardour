@@ -80,34 +80,35 @@
 
 typedef uint64_t microseconds_t;
 
-#include "actions.h"
-#include "ardour_ui.h"
-#include "public_editor.h"
-#include "audio_clock.h"
-#include "keyboard.h"
-#include "mixer_ui.h"
-#include "prompter.h"
-#include "opts.h"
-#include "add_route_dialog.h"
 #include "about.h"
-#include "splash.h"
-#include "utils.h"
-#include "gui_thread.h"
-#include "theme_manager.h"
+#include "actions.h"
+#include "add_route_dialog.h"
+#include "ambiguous_file_dialog.h"
+#include "ardour_ui.h"
+#include "audio_clock.h"
 #include "bundle_manager.h"
-#include "session_metadata_dialog.h"
-#include "gain_meter.h"
-#include "route_time_axis.h"
-#include "startup.h"
 #include "engine_dialog.h"
-#include "processor_box.h"
-#include "time_axis_view_item.h"
-#include "window_proxy.h"
+#include "gain_meter.h"
 #include "global_port_matrix.h"
+#include "gui_thread.h"
+#include "keyboard.h"
 #include "location_ui.h"
 #include "missing_file_dialog.h"
 #include "missing_plugin_dialog.h"
-#include "ambiguous_file_dialog.h"
+#include "mixer_ui.h"
+#include "opts.h"
+#include "processor_box.h"
+#include "prompter.h"
+#include "public_editor.h"
+#include "route_time_axis.h"
+#include "session_metadata_dialog.h"
+#include "speaker_dialog.h"
+#include "splash.h"
+#include "startup.h"
+#include "theme_manager.h"
+#include "time_axis_view_item.h"
+#include "utils.h"
+#include "window_proxy.h"
 
 #include "i18n.h"
 
@@ -317,6 +318,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	
 	location_ui = new ActionWindowProxy<LocationUIWindow> (X_("locations"), Config->extra_xml (X_("UI")), X_("ToggleLocations"));
 	big_clock_window = new ActionWindowProxy<Gtk::Window> (X_("bigclock"), Config->extra_xml (X_("UI")), X_("ToggleBigClock"));
+	speaker_config_window = new ActionWindowProxy<SpeakerDialog> (X_("speakerconf"), Config->extra_xml (X_("UI")), X_("toggle-speaker-config"));
 	
 	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
 		_global_port_matrix[*i] = new ActionWindowProxy<GlobalPortMatrixWindow> (
@@ -327,6 +329,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	}
 
 	setup_clock ();
+        speaker_config_window->set (new SpeakerDialog);
 
 	starting.connect (sigc::mem_fun(*this, &ARDOUR_UI::startup));
 	stopping.connect (sigc::mem_fun(*this, &ARDOUR_UI::shutdown));

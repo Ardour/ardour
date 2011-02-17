@@ -409,7 +409,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 	cairo_destroy (cr);
 
-	return TRUE;
+	return true;
 }
 
 bool
@@ -439,7 +439,7 @@ Panner2d::on_button_press_event (GdkEventButton *ev)
 		break;
 	}
 
-	return FALSE;
+	return false;
 }
 
 bool

@@ -46,8 +46,22 @@ Speakers::Speakers ()
 {
 }
 
+Speakers::Speakers (const Speakers& s)
+{
+        _speakers = s._speakers;
+}
+
 Speakers::~Speakers ()
 {
+}
+
+Speakers&
+Speakers::operator= (const Speakers& s)
+{
+        if (&s != this) {
+                _speakers = s._speakers;
+        }
+        return *this;
 }
 
 void

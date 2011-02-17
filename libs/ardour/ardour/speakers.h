@@ -34,7 +34,10 @@ namespace ARDOUR  {
 class Speakers : public PBD::Stateful {
 public:
 	Speakers ();
+        Speakers (const Speakers&);
 	virtual ~Speakers ();
+
+        Speakers& operator= (const Speakers&);
 
 	virtual int  add_speaker (const PBD::AngularVector&);
 	virtual void remove_speaker (int id);

@@ -470,6 +470,7 @@
                <menuitem action='ToggleBundleManager'/>
                <menuitem action='ToggleThemeManager'/>
                <menuitem action='ToggleBigClock'/>
+               <menuitem action='toggle-speaker-config'/>
 
 	       <separator/>
 

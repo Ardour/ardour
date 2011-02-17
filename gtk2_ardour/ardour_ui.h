@@ -84,6 +84,7 @@ class RCOptionEditor;
 class RouteParams_UI;
 class SessionOptionEditor;
 class Splash;
+class SpeakerDialog;
 class ThemeManager;
 class MidiTracer;
 class WindowProxyBase;
@@ -161,6 +162,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_theme_manager ();
 	void toggle_bundle_manager ();
 	void toggle_big_clock_window ();
+	void toggle_speaker_config_window ();
 	void new_midi_tracer_window ();
 	void toggle_route_params_window ();
 	void toggle_editing_space();
@@ -327,6 +329,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void float_big_clock (Gtk::Window* parent);
 	bool main_window_state_event_handler (GdkEventWindowState*, bool window_was_editor);
+
+	ActionWindowProxy<SpeakerDialog>* speaker_config_window;
 
 	void update_transport_clocks (framepos_t pos);
 	void record_state_changed ();
