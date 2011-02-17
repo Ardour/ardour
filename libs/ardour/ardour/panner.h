@@ -48,6 +48,8 @@ class Panner : public PBD::Stateful, public PBD::ScopedConnectionList
 	Panner (boost::shared_ptr<Pannable>);
 	~Panner ();
 
+        virtual boost::shared_ptr<Speakers> get_speakers() const { return boost::shared_ptr<Speakers>(); }
+
         virtual ChanCount in() const = 0;
         virtual ChanCount out() const = 0;
 

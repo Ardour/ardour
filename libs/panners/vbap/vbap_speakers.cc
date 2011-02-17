@@ -45,9 +45,9 @@ using namespace std;
 
 VBAPSpeakers::VBAPSpeakers (boost::shared_ptr<Speakers> s)
 	: _dimension (2)
-        , parent (s)
+        , _parent (s)
 {
-	parent->Changed.connect_same_thread (speaker_connection, boost::bind (&VBAPSpeakers::update, this));
+	_parent->Changed.connect_same_thread (speaker_connection, boost::bind (&VBAPSpeakers::update, this));
         update ();
 }
 
@@ -60,7 +60,7 @@ VBAPSpeakers::update ()
 {
 	int dim = 2;
 
-        _speakers = parent->speakers();
+        _speakers = _parent->speakers();
 
 	for (vector<Speaker>::const_iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
 		if ((*i).angles().ele != 0.0) {

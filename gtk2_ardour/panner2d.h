@@ -34,6 +34,8 @@
 
 #include "pbd/cartesian.h"
 
+#include "ardour_dialog.h"
+
 namespace ARDOUR {
 	class Panner;
 }
@@ -137,7 +139,7 @@ class Panner2d : public Gtk::DrawingArea
 	void clamp_to_circle (double& x, double& y);
 };
 
-class Panner2dWindow : public Gtk::Window
+class Panner2dWindow : public ArdourDialog
 {
   public:
 	Panner2dWindow (boost::shared_ptr<ARDOUR::Panner>, int32_t height, uint32_t inputs);

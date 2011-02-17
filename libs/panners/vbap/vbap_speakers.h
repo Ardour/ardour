@@ -35,23 +35,24 @@ class Speakers;
 
 class VBAPSpeakers : public boost::noncopyable {
 public:
-	typedef std::vector<double> dvector;
+	VBAPSpeakers (boost::shared_ptr<Speakers>);
 
+	typedef std::vector<double> dvector;
 	const dvector matrix (int tuple) const  { return _matrices[tuple]; }
 	int speaker_for_tuple (int tuple, int which) const { return _speaker_tuples[tuple][which]; }
 
 	int           n_tuples () const  { return _matrices.size(); }
 	int           dimension() const { return _dimension; }
 
-	VBAPSpeakers (boost::shared_ptr<Speakers>);
         uint32_t n_speakers() const { return _speakers.size(); }
+        boost::shared_ptr<Speakers> parent() const { return _parent; }
 
 	~VBAPSpeakers ();
 
 private:
 	static const double MIN_VOL_P_SIDE_LGTH = 0.01;
 	int   _dimension;  
-        boost::shared_ptr<Speakers> parent;
+        boost::shared_ptr<Speakers> _parent;
 	std::vector<Speaker> _speakers;
 	PBD::ScopedConnection speaker_connection;
 

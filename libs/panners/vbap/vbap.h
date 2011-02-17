@@ -60,6 +60,7 @@ public:
 	int set_state (const XMLNode&, int version);
 
         PBD::AngularVector signal_position (uint32_t n) const;
+        boost::shared_ptr<Speakers> get_speakers() const;
 
 private:
         struct Signal {

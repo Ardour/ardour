@@ -341,3 +341,9 @@ VBAPanner::signal_position (uint32_t n) const
 
         return AngularVector();
 }
+
+boost::shared_ptr<Speakers>
+VBAPanner::get_speakers () const 
+{
+        return _speakers->parent();
+}

@@ -29,6 +29,7 @@
 #include "pbd/error.h"
 #include "pbd/cartesian.h"
 #include "ardour/panner.h"
+#include "ardour/speakers.h"
 
 #include "panner2d.h"
 #include "keyboard.h"
@@ -139,15 +140,15 @@ Panner2d::reset (uint32_t n_inputs)
 		(*x)->visible = false;
 	}
 
+        vector<Speaker>& speakers (panner->get_speakers()->speakers());
+
 	for (uint32_t n = 0; n < nouts; ++n) {
 		char buf[16];
 
 		snprintf (buf, sizeof (buf), "%d", n+1);
 		targets[n]->set_text (buf);
-#ifdef PANNER_HACKS
-		targets[n]->position = panner->output(n).position;
+		targets[n]->position = speakers[n].angles();
 		targets[n]->visible = true;
-#endif
 	}
 
 	queue_draw ();
@@ -590,7 +591,8 @@ Panner2d::toggle_bypass ()
 }
 
 Panner2dWindow::Panner2dWindow (boost::shared_ptr<Panner> p, int32_t h, uint32_t inputs)
-	: widget (p, h)
+	: ArdourDialog (_("Panner (2D)"))
+        , widget (p, h)
 	, reset_button (_("Reset"))
 	, bypass_button (_("Bypass"))
 	, mute_button (_("Mute"))
@@ -624,7 +626,7 @@ Panner2dWindow::Panner2dWindow (boost::shared_ptr<Panner> p, int32_t h, uint32_t
 	hpacker.pack_start (left_side, false, false);
 	hpacker.show ();
 
-	add (hpacker);
+	get_vbox()->pack_start (hpacker);
 	reset (inputs);
 	widget.show ();
 }
