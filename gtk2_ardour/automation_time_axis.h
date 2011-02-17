@@ -58,6 +58,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 				boost::shared_ptr<ARDOUR::Route>,
 				boost::shared_ptr<ARDOUR::Automatable>,
 				boost::shared_ptr<ARDOUR::AutomationControl>,
+				Evoral::Parameter,
 				PublicEditor&,
 				TimeAxisView& parent,
 				bool show_regions,
@@ -117,14 +118,18 @@ class AutomationTimeAxisView : public TimeAxisView {
 	}
 
   protected:
-	boost::shared_ptr<ARDOUR::Route> _route; ///< Parent route
+	/** parent route *
+	boost::shared_ptr<ARDOUR::Route> _route;
+	/** control; 0 if we are editing region-based automation */
 	boost::shared_ptr<ARDOUR::AutomationControl> _control; ///< Control
-	boost::shared_ptr<ARDOUR::Automatable> _automatable; ///< Control owner, maybe = _route
-
+	/** control owner; may be _route, or 0 if we are editing region-based automation */
+	boost::shared_ptr<ARDOUR::Automatable> _automatable;
+	/** controller owner; 0 if we are editing region-based automation */
 	boost::shared_ptr<AutomationController> _controller;
 
 	ArdourCanvas::SimpleRect* _base_rect;
 	boost::shared_ptr<AutomationLine> _line;
+
 	/** AutomationStreamView if we are editing region-based automation (for MIDI), otherwise 0 */
 	AutomationStreamView* _view;
 

@@ -59,20 +59,28 @@ const string AutomationTimeAxisView::state_node_name = "AutomationChild";
  * For route child (e.g. plugin) automation, pass the child for \a.
  * For region automation (e.g. MIDI CC), pass null for \a.
  */
-AutomationTimeAxisView::AutomationTimeAxisView (Session* s, boost::shared_ptr<Route> r,
-		boost::shared_ptr<Automatable> a, boost::shared_ptr<AutomationControl> c,
-		PublicEditor& e, TimeAxisView& parent, bool show_regions,
-		ArdourCanvas::Canvas& canvas, const string & nom, const string & nomparent)
-	: AxisView (s),
-	  TimeAxisView (s, e, &parent, canvas),
-	  _route (r),
-	  _control (c),
-	  _automatable (a),
-	  _controller(AutomationController::create(a, c->parameter(), c)),
-	  _base_rect (0),
-	  _view (show_regions ? new AutomationStreamView(*this) : NULL),
-	  _name (nom),
-	  auto_button (X_("")) /* force addition of a label */
+AutomationTimeAxisView::AutomationTimeAxisView (
+	Session* s,
+	boost::shared_ptr<Route> r,
+	boost::shared_ptr<Automatable> a,
+	boost::shared_ptr<AutomationControl> c,
+	PublicEditor& e,
+	TimeAxisView& parent,
+	bool show_regions,
+	ArdourCanvas::Canvas& canvas,
+	const string & nom,
+	const string & nomparent
+	)
+	: AxisView (s)
+	, TimeAxisView (s, e, &parent, canvas)
+	, _route (r)
+	, _control (c)
+	, _automatable (a)
+	, _controller (AutomationController::create (a, c->parameter(), c))
+	, _base_rect (0)
+	, _view (show_regions ? new AutomationStreamView (*this) : 0)
+	, _name (nom)
+	, auto_button (X_("")) /* force addition of a label */
 {
 	if (!have_name_font) {
 		name_font = get_font_for_style (X_("AutomationTrackName"));
@@ -209,13 +217,17 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session* s, boost::shared_ptr<Ro
 		assert(_view);
 		_view->attach ();
 
-	/* no regions, just a single line for the entire track (e.g. bus gain) */
 	} else {
-		boost::shared_ptr<AutomationLine> line(new AutomationLine (
-					ARDOUR::EventTypeMap::instance().to_symbol(_control->parameter()),
-					*this,
-					*_canvas_display,
-					_control->alist()));
+		/* no regions, just a single line for the entire track (e.g. bus gain) */
+		
+		boost::shared_ptr<AutomationLine> line (
+			new AutomationLine (
+				ARDOUR::EventTypeMap::instance().to_symbol(_control->parameter()),
+				*this,
+				*_canvas_display,
+				_control->alist()
+				)
+			);
 
 		line->set_line_color (ARDOUR_UI::config()->canvasvar_ProcessorAutomationLine.get());
 		line->queue_reset ();
@@ -589,8 +601,9 @@ AutomationTimeAxisView::build_display_menu ()
 void
 AutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* /*item*/, GdkEvent* /*event*/, framepos_t when, double y)
 {
-	if (!_line)
+	if (!_line) {
 		return;
+	}
 
 	double x = 0;
 
@@ -929,15 +942,17 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 void
 AutomationTimeAxisView::entered()
 {
-	if (_line)
+	if (_line) {
 		_line->track_entered();
+	}
 }
 
 void
 AutomationTimeAxisView::exited ()
 {
-	if (_line)
+	if (_line) {
 		_line->track_exited();
+	}
 }
 
 void

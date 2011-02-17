@@ -68,10 +68,7 @@ AutomationStreamView::~AutomationStreamView ()
 RegionView*
 AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region, bool wfd, bool /*recording*/)
 {
-	if ( ! region) {
-		cerr << "No region" << endl;
-		return NULL;
-	}
+	assert (region);
 
 	if (wfd) {
 		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
@@ -105,7 +102,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 			(*i)->enable_display(wfd);
 			display_region(arv);
 
-			return NULL;
+			return 0;
 		}
 	}
 
@@ -166,10 +163,8 @@ AutomationStreamView::set_automation_state (AutoState state)
 void
 AutomationStreamView::redisplay_track ()
 {
-	list<RegionView *>::iterator i, tmp;
-
 	// Flag region views as invalid and disable drawing
-	for (i = region_views.begin(); i != region_views.end(); ++i) {
+	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid (false);
 		(*i)->enable_display(false);
 	}
