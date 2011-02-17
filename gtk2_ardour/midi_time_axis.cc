@@ -442,6 +442,7 @@ MidiTimeAxisView::build_automation_action_menu ()
 		automation_items.push_back (MenuElem (_("Controllers"), *controller_menu));
 	} else {
 		automation_items.push_back (MenuElem (string_compose ("<i>%1</i>", _("No MIDI Channels selected"))));
+		dynamic_cast<Label*> (automation_items.back().get_child())->set_use_markup (true);
 	}
 		
 }
@@ -664,9 +665,14 @@ MidiTimeAxisView::build_controller_menu ()
 					if (selected_channels & (0x0001 << chn)) {
 						
 						Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
-						ctl_items.push_back (CheckMenuElem (_route->describe_parameter (fully_qualified_param),
-										    sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
-												fully_qualified_param)));
+						ctl_items.push_back (
+							CheckMenuElem (
+								string_compose ("<b>%1</b>: %2 [%3]", ctl, midi_name (ctl), int (chn)),
+								sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
+									    fully_qualified_param)
+								)
+							);
+						dynamic_cast<Label*> (ctl_items.back().get_child())->set_use_markup (true);
 						
 						boost::shared_ptr<AutomationTimeAxisView> track = automation_child (fully_qualified_param);
 						bool visible = false;
@@ -998,7 +1004,7 @@ MidiTimeAxisView::set_channel_mode (ChannelMode, uint16_t)
 
 	/* TODO: Bender, Pressure */
 
-	/* invalidate the controller menu, so that we rebuilt it next time */
+	/* invalidate the controller menu, so that we rebuild it next time */
 	_controller_menu_map.clear ();
 	delete controller_menu;
 	controller_menu = 0;
