@@ -106,6 +106,9 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	boost::shared_ptr<ARDOUR::AutomationControl> control()    { return _control; }
 	boost::shared_ptr<AutomationController>      controller() { return _controller; }
+	Evoral::Parameter parameter () const {
+		return _parameter;
+	}
 
 	ArdourCanvas::Item* base_item () const {
 		return _base_rect;
@@ -118,14 +121,15 @@ class AutomationTimeAxisView : public TimeAxisView {
 	}
 
   protected:
-	/** parent route *
+	/** parent route */
 	boost::shared_ptr<ARDOUR::Route> _route;
 	/** control; 0 if we are editing region-based automation */
-	boost::shared_ptr<ARDOUR::AutomationControl> _control; ///< Control
+	boost::shared_ptr<ARDOUR::AutomationControl> _control;
 	/** control owner; may be _route, or 0 if we are editing region-based automation */
 	boost::shared_ptr<ARDOUR::Automatable> _automatable;
 	/** controller owner; 0 if we are editing region-based automation */
 	boost::shared_ptr<AutomationController> _controller;
+	Evoral::Parameter _parameter;
 
 	ArdourCanvas::SimpleRect* _base_rect;
 	boost::shared_ptr<AutomationLine> _line;

@@ -1861,8 +1861,8 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 			= boost::dynamic_pointer_cast<AutomationControl>(processor->control(what, true));
 
 	pan->view = boost::shared_ptr<AutomationTimeAxisView>(
-			new AutomationTimeAxisView (_session, _route, processor, control,
-				_editor, *this, false, parent_canvas, name, state_name));
+		new AutomationTimeAxisView (_session, _route, processor, control, control->parameter (),
+					    _editor, *this, false, parent_canvas, name, state_name));
 
 	pan->view->Hiding.connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::processor_automation_track_hidden), pan, processor));
 
@@ -2407,7 +2407,7 @@ RouteTimeAxisView::create_gain_automation_child (const Evoral::Parameter& param,
 	}
 
 	gain_track.reset (new AutomationTimeAxisView (_session,
-						      _route, _route->amp(), c,
+						      _route, _route->amp(), c, param,
 						      _editor,
 						      *this,
 						      false,

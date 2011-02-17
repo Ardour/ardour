@@ -52,7 +52,6 @@ AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
 	: StreamView (*dynamic_cast<RouteTimeAxisView*>(tv.get_parent()),
 		      new ArdourCanvas::Group(*tv.canvas_background()),
 		      new ArdourCanvas::Group(*tv.canvas_display()))
-	, _controller(tv.controller())
 	, _automation_view(tv)
 	, _pending_automation_state (Off)
 {
@@ -78,7 +77,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 	}
 
 	const boost::shared_ptr<AutomationControl> control = boost::dynamic_pointer_cast<AutomationControl> (
-		region->control (_controller->controllable()->parameter(), true)
+		region->control (_automation_view.parameter(), true)
 		);
 
 	boost::shared_ptr<AutomationList> list;
@@ -106,9 +105,11 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 		}
 	}
 
-	region_view = new AutomationRegionView (_canvas_group, _automation_view, region,
-			_controller->controllable()->parameter(), list,
-			_samples_per_unit, region_color);
+	region_view = new AutomationRegionView (
+		_canvas_group, _automation_view, region,
+		_automation_view.parameter (), list,
+		_samples_per_unit, region_color
+		);
 
 	region_view->init (region_color, false);
 	region_views.push_front (region_view);

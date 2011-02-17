@@ -75,8 +75,6 @@ class AutomationStreamView : public StreamView
 
 	void color_handler ();
 
-	boost::shared_ptr<AutomationController> _controller;
-
 	AutomationTimeAxisView& _automation_view;
 	/** automation state that should be applied when this view gets its first RegionView */
 	ARDOUR::AutoState _pending_automation_state;

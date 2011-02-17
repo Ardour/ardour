@@ -842,15 +842,13 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 		/* These controllers are region "automation", so we do not create
 		 * an AutomationList/Line for the track */
 		
-		boost::shared_ptr<AutomationControl> c = _route->get_control (param);
-		assert (c);
-		
 		boost::shared_ptr<AutomationTimeAxisView> track (
 			new AutomationTimeAxisView (
 				_session,
 				_route, 
 				_route,
-				c,
+				boost::shared_ptr<AutomationControl> (),
+				param,
 				_editor,
 				*this,
 				true,

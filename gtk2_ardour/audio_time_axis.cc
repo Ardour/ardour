@@ -242,6 +242,7 @@ AudioTimeAxisView::ensure_pan_views (bool show)
 							    _route, 
                                                             _route->pannable(), 
                                                             pan_control,
+							    pan_control->parameter (),
 							    _editor,
 							    *this,
 							    false,

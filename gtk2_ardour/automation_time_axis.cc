@@ -64,6 +64,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	boost::shared_ptr<Route> r,
 	boost::shared_ptr<Automatable> a,
 	boost::shared_ptr<AutomationControl> c,
+	Evoral::Parameter p,
 	PublicEditor& e,
 	TimeAxisView& parent,
 	bool show_regions,
@@ -76,7 +77,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	, _route (r)
 	, _control (c)
 	, _automatable (a)
-	, _controller (AutomationController::create (a, c->parameter(), c))
+	, _parameter (p)
 	, _base_rect (0)
 	, _view (show_regions ? new AutomationStreamView (*this) : 0)
 	, _name (nom)
@@ -85,6 +86,10 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	if (!have_name_font) {
 		name_font = get_font_for_style (X_("AutomationTrackName"));
 		have_name_font = true;
+	}
+
+	if (_control) {
+		_controller = AutomationController::create (_automatable, _control->parameter(), _control);
 	}
 
 	automation_menu = 0;
@@ -193,8 +198,10 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	controls_table.attach (auto_button, 5, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
-	/* add bar controller */
-	controls_table.attach (*_controller.get(), 0, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	if (_controller) {
+		/* add bar controller */
+		controls_table.attach (*_controller.get(), 0, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	}
 
 	controls_table.show_all ();
 
@@ -205,7 +212,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	controls_base_unselected_name = X_("AutomationTrackControlsBase");
 	controls_ebox.set_name (controls_base_unselected_name);
 
-	XMLNode* xml_node = get_parent_with_state()->get_automation_child_xml_node (_control->parameter());
+	XMLNode* xml_node = get_parent_with_state()->get_automation_child_xml_node (_parameter);
 
 	if (xml_node) {
 		set_state (*xml_node, Stateful::loading_state_version);
@@ -222,7 +229,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		
 		boost::shared_ptr<AutomationLine> line (
 			new AutomationLine (
-				ARDOUR::EventTypeMap::instance().to_symbol(_control->parameter()),
+				ARDOUR::EventTypeMap::instance().to_symbol(_parameter),
 				*this,
 				*_canvas_display,
 				_control->alist()
@@ -275,11 +282,11 @@ AutomationTimeAxisView::set_automation_state (AutoState state)
 	}
 
 	if (_automatable) {
-		_automatable->set_parameter_automation_state (_control->parameter(), state);
+		_automatable->set_parameter_automation_state (_parameter, state);
 	}
 #if 0
 	if (_route == _automatable) { // This is a time axis for route (not region) automation
-		_route->set_parameter_automation_state (_control->parameter(), state);
+		_route->set_parameter_automation_state (_parameter, state);
 	}
 	
 	if (_control->list()) {
@@ -418,7 +425,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 
 	TimeAxisView* state_parent = get_parent_with_state ();
 	assert(state_parent);
-	XMLNode* xml_node = state_parent->get_automation_child_xml_node (_control->parameter());
+	XMLNode* xml_node = state_parent->get_automation_child_xml_node (_parameter);
 
 	TimeAxisView::set_height (h);
 	_base_rect->property_y2() = h;
@@ -569,7 +576,7 @@ AutomationTimeAxisView::build_display_menu ()
 	/* current interpolation state */
 	AutomationList::InterpolationStyle const s = _view ? _view->interpolation() : _control->list()->interpolation ();
 
-	if (EventTypeMap::instance().is_midi_parameter(_control->parameter())) {
+	if (EventTypeMap::instance().is_midi_parameter(_parameter)) {
 
 		Menu* auto_mode_menu = manage (new Menu);
 		auto_mode_menu->set_name ("ArdourContextMenu");
@@ -973,7 +980,7 @@ AutomationTimeAxisView::set_state (const XMLNode& node, int version)
 	}
 	
 	XMLProperty const * type = node.property ("automation-id");
-	if (type && type->value () == ARDOUR::EventTypeMap::instance().to_symbol (_control->parameter())) {
+	if (type && type->value () == ARDOUR::EventTypeMap::instance().to_symbol (_parameter)) {
 		XMLProperty const * shown = node.property ("shown");
 		if (shown && shown->value () == "yes") {
 			set_marked_for_display (true);
@@ -992,7 +999,7 @@ int
 
 AutomationTimeAxisView::set_state_2X (const XMLNode& node, int /*version*/)
 {
-	if (node.name() == X_("gain") && _control->parameter() == Evoral::Parameter (GainAutomation)) {
+	if (node.name() == X_("gain") && _parameter == Evoral::Parameter (GainAutomation)) {
 		XMLProperty const * shown = node.property (X_("shown"));
 		if (shown && string_is_affirmative (shown->value ())) {
 			set_marked_for_display (true);
@@ -1013,7 +1020,7 @@ AutomationTimeAxisView::get_state_node ()
 	TimeAxisView* state_parent = get_parent_with_state ();
 
 	if (state_parent) {
-		return state_parent->get_automation_child_xml_node (_control->parameter());
+		return state_parent->get_automation_child_xml_node (_parameter);
 	} else {
 		return 0;
 	}
