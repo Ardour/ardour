@@ -748,9 +748,9 @@ ArdourStartup::setup_new_session_page ()
 			use_session_as_template_button.show ();
 			session_template_chooser.show ();
 
-			Gtk::FileFilter* template_filter = manage (new (Gtk::FileFilter));
-			template_filter->add_pattern(X_("*.template"));
-			session_template_chooser.set_filter (*template_filter);
+			Gtk::FileFilter* session_filter = manage (new (Gtk::FileFilter));
+			session_filter->add_pattern (X_("*.ardour"));
+			session_template_chooser.set_filter (*session_filter);
 			session_template_chooser.set_title (_("Select template"));
 
 			vbox3->pack_start (*hbox4b, false, false);
