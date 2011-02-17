@@ -154,13 +154,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	std::pair<TimeAxisView*, ARDOUR::layer_t> covers_y_position (double);
 
-	/**
-	 * Steps through the defined heights for this TrackView.
-	 * Sets bigger to true to step up in size, set to fals eot step smaller.
-	 *
-	 * @param bigger true if stepping should increase in size, false otherwise
-	 */
-	virtual void step_height (bool bigger);
+	virtual void step_height (bool);
 
 	virtual ARDOUR::RouteGroup* route_group() const { return 0; }
 	virtual boost::shared_ptr<ARDOUR::Playlist> playlist() const { return boost::shared_ptr<ARDOUR::Playlist> (); }

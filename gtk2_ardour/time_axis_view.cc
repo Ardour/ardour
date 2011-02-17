@@ -301,7 +301,7 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-			step_height (true);
+			step_height (false);
 			return true;
 		} else if (Keyboard::no_modifiers_active (ev->state)) {
 			_editor.scroll_tracks_up_line();
@@ -311,7 +311,7 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 
 	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-			step_height (false);
+			step_height (true);
 			return true;
 		} else if (Keyboard::no_modifiers_active (ev->state)) {
 			_editor.scroll_tracks_down_line();
@@ -382,21 +382,16 @@ TimeAxisView::hide ()
 	Hiding ();
 }
 
+/** Steps through the defined heights for this TrackView.
+ *  @param coarser true if stepping should decrease in size, otherwise false.
+ */
 void
-TimeAxisView::step_height (bool bigger)
+TimeAxisView::step_height (bool coarser)
 {
 	static const uint32_t step = 25;
 
-	if (bigger) {
-		if (height == preset_height(HeightSmall)) {
-			set_height_enum (HeightSmaller);
-		} else if (height == preset_height(HeightSmaller)) {
-			set_height_enum (HeightNormal);
-		} else {
-			set_height (height + step);
-		}
-
-	} else {
+	if (coarser) {
+		
 		if (height == preset_height (HeightSmall)) {
 			return;
 		}
@@ -407,7 +402,18 @@ TimeAxisView::step_height (bool bigger)
 			set_height_enum (HeightSmaller);
 		} else {
 			set_height (height - step);
-		} 
+		}
+		
+	} else {
+		
+		if (height == preset_height(HeightSmall)) {
+			set_height_enum (HeightSmaller);
+		} else if (height == preset_height(HeightSmaller)) {
+			set_height_enum (HeightNormal);
+		} else {
+			set_height (height + step);
+		}
+		
 	}
 }
 

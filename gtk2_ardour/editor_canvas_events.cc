@@ -83,7 +83,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 				}
 			}
 			last_track_height_step_timestamp = get_microseconds();
-			current_stepping_trackview->step_height (true);
+			current_stepping_trackview->step_height (false);
 			return true;
 		} else {
 			scroll_tracks_up_line ();
@@ -108,7 +108,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 				}
 			}
 			last_track_height_step_timestamp = get_microseconds();
-			current_stepping_trackview->step_height (false);
+			current_stepping_trackview->step_height (true);
 			return true;
 		} else {
 			scroll_tracks_down_line ();
