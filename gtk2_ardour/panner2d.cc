@@ -24,10 +24,11 @@
 #include <cairo.h>
 #include <gtkmm/menu.h>
 
+#include "gtkmm2ext/gtk_ui.h"
+
 #include "pbd/error.h"
 #include "pbd/cartesian.h"
 #include "ardour/panner.h"
-#include <gtkmm2ext/gtk_ui.h>
 
 #include "panner2d.h"
 #include "keyboard.h"
@@ -94,10 +95,6 @@ Panner2d::reset (uint32_t n_inputs)
 		pucks.resize (n_inputs);
 	}
 						
-	for (Targets::iterator x = pucks.begin(); x != pucks.end(); ++x) {
-		(*x)->visible = false;
-	}
-
 	switch (n_inputs) {
 	case 0:
 		break;
@@ -120,12 +117,9 @@ Panner2d::reset (uint32_t n_inputs)
 		break;
 	}
 
-#ifdef PANNER_HACKS
-	for (uint32_t i = existing_pucks; i < n_inputs; ++i) {
-		pucks[i]->position = panner->streampanner (i).get_position ();
-		pucks[i]->visible = true;
-	}
-#endif
+        for (uint32_t i = 0; i < n_inputs; ++i) {
+                pucks[i]->position = panner->signal_position (i);
+        }
 
 	/* add all outputs */
 
@@ -165,11 +159,16 @@ Panner2d::on_size_allocate (Gtk::Allocation& alloc)
   	width = alloc.get_width();
   	height = alloc.get_height();
 
+        /* our idea of our width/height must be "square
+         */
+
 	if (height > 100) {
 		width -= 20;
 		height -= 20;
 	}
 
+        dimen = min (width, height);
+        
 	DrawingArea::on_size_allocate (alloc);
 }
 
@@ -244,8 +243,6 @@ Panner2d::find_closest_object (gdouble x, gdouble y, int& which) const
 	which = 0;
 	pwhich = 0;
 
-	cerr << "@ " << x << ", " << y << endl;
-
 	for (Targets::const_iterator i = pucks.begin(); i != pucks.end(); ++i, ++pwhich) {
 		candidate = *i;
 
@@ -256,8 +253,6 @@ Panner2d::find_closest_object (gdouble x, gdouble y, int& which) const
 
 		distance = sqrt ((c.x - x) * (c.x - x) +
 		                 (c.y - y) * (c.y - y));
-
-		cerr << "\tConsider candiate " << candidate->text << " @ " << c.x << ", " << c.y << ", " << c.z <<  " distance = " << distance << endl;
 
 		if (distance < best_distance) {
 			closest = candidate;
@@ -270,8 +265,6 @@ Panner2d::find_closest_object (gdouble x, gdouble y, int& which) const
 	if (best_distance > 20) { // arbitrary 
 		return 0;
 	}
-
-	cerr << "the winner is " << closest->text << endl;
 
 	return closest;
 }
@@ -330,7 +323,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 	/* the circle on which signals live */
 
-	cairo_arc (cr, width/2, height/2, height/2, 0, 2.0 * M_PI);
+	cairo_arc (cr, width/2, height/2, dimen/2, 0, 2.0 * M_PI);
 	cairo_stroke (cr);
 
 	if (!panner->bypassed()) {
@@ -357,7 +350,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
                                 
 				puck->position.cartesian (c);
 				cart_to_gtk (c);
-                                
+
 				x = (gint) floor (c.x);
 				y = (gint) floor (c.y);
 
@@ -561,9 +554,12 @@ Panner2d::cart_to_gtk (CartesianVector& c) const
 	   so max values along each axis are 0,width and
 	   0,height
 	*/
+        
+        const uint32_t hoffset = (width - dimen)/2;
+        const uint32_t voffset = (height - dimen)/2;
 
-	c.x = (width / 2) * (c.x + 1);
-	c.y = (height / 2) * (1 - c.y);
+	c.x = hoffset + ((dimen / 2) * (c.x + 1));
+	c.y = voffset + ((dimen / 2) * (1 - c.y));
 
 	/* XXX z-axis not handled - 2D for now */
 }
@@ -571,8 +567,8 @@ Panner2d::cart_to_gtk (CartesianVector& c) const
 void
 Panner2d::gtk_to_cart (CartesianVector& c) const
 {
-	c.x = (c.x / (width / 2.0)) - 1.0;
-	c.y = -((c.y / (height / 2.0)) - 1.0);
+	c.x = ((c.x / (dimen / 2.0)) - 1.0);
+	c.y = -((c.y / (dimen / 2.0)) - 1.0);
 
 	/* XXX z-axis not handled - 2D for now */
 }

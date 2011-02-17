@@ -59,6 +59,7 @@ public:
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
+        PBD::AngularVector signal_position (uint32_t n) const;
 
 private:
         struct Signal {

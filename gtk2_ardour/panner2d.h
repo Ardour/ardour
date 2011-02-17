@@ -113,6 +113,7 @@ class Panner2d : public Gtk::DrawingArea
 	bool    allow_target;
 	int     width;
 	int     height;
+        int     dimen; 
 
 	bool bypassflag;
 

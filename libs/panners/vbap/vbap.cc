@@ -331,3 +331,13 @@ VBAPanner::value_as_string (boost::shared_ptr<AutomationControl> ac) const
                 return _pannable->value_as_string (ac);
         }
 }
+
+AngularVector
+VBAPanner::signal_position (uint32_t n) const
+{
+        if (n < _signals.size()) {
+                return _signals[n]->direction;
+        }
+
+        return AngularVector();
+}

@@ -78,8 +78,10 @@ class Panner : public PBD::Stateful, public PBD::ScopedConnectionList
         virtual double width () const { return 0.0; }
         virtual double elevation () const { return 0.0; }
 
-        virtual void reset() {}
+        virtual PBD::AngularVector signal_position (uint32_t) const { return PBD::AngularVector(); }
 
+        virtual void reset() {}
+        
 	virtual bool bypassed() const { return _bypassed; }
 	virtual void set_bypassed (bool yn);
 
