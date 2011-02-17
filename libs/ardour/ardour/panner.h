@@ -162,7 +162,6 @@ class Panner : public PBD::Stateful, public PBD::ScopedConnectionList
 
 	XMLNode& get_state ();
 
-
 	virtual void distribute_one (AudioBuffer&, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which) = 0;
 	virtual void distribute_one_automated (AudioBuffer&, BufferSet& obufs,
                                                framepos_t start, framepos_t end, pframes_t nframes,
@@ -176,7 +175,7 @@ extern "C" {
             std::string name;
             int32_t in;
             int32_t out;
-            ARDOUR::Panner* (*factory)(boost::shared_ptr<ARDOUR::Pannable>, ARDOUR::Speakers&);
+            ARDOUR::Panner* (*factory)(boost::shared_ptr<ARDOUR::Pannable>, boost::shared_ptr<ARDOUR::Speakers>);
         };
 }
 

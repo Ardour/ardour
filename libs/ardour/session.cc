@@ -323,7 +323,6 @@ Session::destroy ()
 	playlists.reset ();
 
 	delete _locations;
-        delete _speakers;
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 
@@ -4175,10 +4174,10 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 	}
 }
 
-Speakers&
+boost::shared_ptr<Speakers>
 Session::get_speakers() 
 {
-        return *_speakers;
+        return _speakers;
 }
 
 list<string>

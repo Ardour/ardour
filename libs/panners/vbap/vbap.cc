@@ -37,9 +37,9 @@ VBAPanner::Signal::Signal (Session& session, VBAPanner& p, uint32_t n)
         desired_outputs[0] = desired_outputs[1] = desired_outputs[2] = -1;
 };
 
-VBAPanner::VBAPanner (boost::shared_ptr<Pannable> p, Speakers& s)
+VBAPanner::VBAPanner (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speakers> s)
 	: Panner (p)
-	, _speakers (VBAPSpeakers::instance (s))
+	, _speakers (new VBAPSpeakers (s))
 {
         _pannable->pan_azimuth_control->Changed.connect_same_thread (*this, boost::bind (&VBAPanner::update, this));
         _pannable->pan_width_control->Changed.connect_same_thread (*this, boost::bind (&VBAPanner::update, this));
@@ -138,16 +138,16 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 	gains[0] = gains[1] = gains[2] = 0;
 	speaker_ids[0] = speaker_ids[1] = speaker_ids[2] = 0;
 
-	for (i = 0; i < _speakers.n_tuples(); i++) {
+	for (i = 0; i < _speakers->n_tuples(); i++) {
 
 		small_g = 10000000.0;
 
-		for (j = 0; j < _speakers.dimension(); j++) {
+		for (j = 0; j < _speakers->dimension(); j++) {
 
 			gtmp[j] = 0.0;
 
-			for (k = 0; k < _speakers.dimension(); k++) {
-				gtmp[j] += cartdir[k] * _speakers.matrix(i)[j*_speakers.dimension()+k]; 
+			for (k = 0; k < _speakers->dimension(); k++) {
+				gtmp[j] += cartdir[k] * _speakers->matrix(i)[j*_speakers->dimension()+k]; 
 			}
 
 			if (gtmp[j] < small_g) {
@@ -162,12 +162,12 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 			gains[0] = gtmp[0]; 
 			gains[1] = gtmp[1]; 
 
-			speaker_ids[0] = _speakers.speaker_for_tuple (i, 0);
-			speaker_ids[1] = _speakers.speaker_for_tuple (i, 1);
+			speaker_ids[0] = _speakers->speaker_for_tuple (i, 0);
+			speaker_ids[1] = _speakers->speaker_for_tuple (i, 1);
                         
-			if (_speakers.dimension() == 3) {
+			if (_speakers->dimension() == 3) {
 				gains[2] = gtmp[2];
-				speaker_ids[2] = _speakers.speaker_for_tuple (i, 2);
+				speaker_ids[2] = _speakers->speaker_for_tuple (i, 2);
 			} else {
 				gains[2] = 0.0;
 				speaker_ids[2] = -1;
@@ -275,7 +275,7 @@ VBAPanner::set_state (const XMLNode& node, int /*version*/)
 }
 
 Panner*
-VBAPanner::factory (boost::shared_ptr<Pannable> p, Speakers& s)
+VBAPanner::factory (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speakers> s)
 {
 	return new VBAPanner (p, s);
 }
@@ -289,7 +289,7 @@ VBAPanner::in() const
 ChanCount
 VBAPanner::out() const
 {
-        return ChanCount (DataType::AUDIO, _speakers.n_speakers());
+        return ChanCount (DataType::AUDIO, _speakers->n_speakers());
 }
 
 std::set<Evoral::Parameter> 

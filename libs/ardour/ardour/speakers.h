@@ -43,6 +43,7 @@ public:
 	virtual void remove_speaker (int id);
 	virtual void move_speaker (int id, const PBD::AngularVector& new_position);
 	virtual void clear_speakers ();
+        uint32_t size() const { return _speakers.size(); } 
 
         void setup_default_speakers (uint32_t nspeakers);
 

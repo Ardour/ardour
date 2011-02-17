@@ -43,23 +43,12 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-VBAPSpeakers* VBAPSpeakers::_instance = 0;
-
-VBAPSpeakers& 
-VBAPSpeakers::instance (Speakers& s)
-{
-	if (_instance == 0) {
-		_instance = new VBAPSpeakers (s);
-	}
-
-	return *_instance;
-}
-
-VBAPSpeakers::VBAPSpeakers (Speakers& s)
+VBAPSpeakers::VBAPSpeakers (boost::shared_ptr<Speakers> s)
 	: _dimension (2)
-	, _speakers (s.speakers())
+	, _speakers (s->speakers())
 {
-	s.Changed.connect_same_thread (speaker_connection, boost::bind (&VBAPSpeakers::update, this));
+	// s.Changed.connect_same_thread (speaker_connection, boost::bind (&VBAPSpeakers::update, this));
+        update ();
 }
 
 VBAPSpeakers::~VBAPSpeakers ()

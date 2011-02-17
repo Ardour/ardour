@@ -43,19 +43,16 @@ public:
 	int           n_tuples () const  { return _matrices.size(); }
 	int           dimension() const { return _dimension; }
 
-	static VBAPSpeakers& instance (Speakers&);
+	VBAPSpeakers (boost::shared_ptr<Speakers>);
         uint32_t n_speakers() const { return _speakers.size(); }
 
 	~VBAPSpeakers ();
 
 private:
-	static VBAPSpeakers* _instance;
 	static const double MIN_VOL_P_SIDE_LGTH = 0.01;
 	int   _dimension;  
-	std::vector<Speaker>& _speakers;
+	std::vector<Speaker> _speakers;
 	PBD::ScopedConnection speaker_connection;
-
-	VBAPSpeakers (Speakers&);
 
 	struct azimuth_sorter {
 		bool operator() (const Speaker& s1, const Speaker& s2) {

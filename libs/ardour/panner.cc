@@ -25,6 +25,8 @@
 #include "ardour/session.h"
 #include "ardour/utils.h"
 
+#include "pbd/stacktrace.h"
+
 using namespace std;
 using namespace ARDOUR;
 

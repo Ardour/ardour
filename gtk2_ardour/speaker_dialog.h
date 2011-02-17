@@ -24,6 +24,7 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/box.h>
 #include <gtkmm/adjustment.h>
+#include <gtkmm/aspectframe.h>
 
 #include "ardour/speakers.h"
 
@@ -35,12 +36,13 @@ class SpeakerDialog  : public ArdourDialog
     SpeakerDialog ();
     
     ARDOUR::Speakers get_speakers() const;
-    void set_speakers (const ARDOUR::Speakers&);
+    void set_speakers (boost::shared_ptr<ARDOUR::Speakers>);
 
   private:
     ARDOUR::Speakers speakers;
     Gtk::HBox        hbox;
     Gtk::VBox        side_vbox;
+    Gtk::AspectFrame aspect_frame;
     Gtk::DrawingArea darea;
     Gtk::Adjustment  azimuth_adjustment;
     Gtk::SpinButton  azimuth_spinner;
@@ -63,7 +65,7 @@ class SpeakerDialog  : public ArdourDialog
     void clamp_to_circle (double& x, double& y);
     void gtk_to_cart (PBD::CartesianVector& c) const;
     void cart_to_gtk (PBD::CartesianVector& c) const;
-    int find_closest_object (gdouble x, gdouble y, int& which);
+    int find_closest_object (gdouble x, gdouble y);
 };
 
 #endif /* __ardour_gtk_speaker_dialog_h__ */

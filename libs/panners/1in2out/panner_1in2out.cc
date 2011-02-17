@@ -317,7 +317,7 @@ Panner1in2out::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
 
 
 Panner*
-Panner1in2out::factory (boost::shared_ptr<Pannable> p, Speakers& /* ignored */)
+Panner1in2out::factory (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speakers> /* ignored */)
 {
 	return new Panner1in2out (p);
 }

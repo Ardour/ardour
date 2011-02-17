@@ -104,7 +104,18 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
                 abort ();
         }
 
-        Panner* p = pi->descriptor.factory (_pannable, _session.get_speakers());
+        boost::shared_ptr<Speakers> speakers = _session.get_speakers ();
+
+        if (nouts != speakers->size()) {
+                /* hmm, output count doesn't match session speaker count so
+                   create a new speaker set.
+                */
+                Speakers* s = new Speakers ();
+                s->setup_default_speakers (nouts);
+                speakers.reset (s);
+        }
+
+        Panner* p = pi->descriptor.factory (_pannable, speakers);
         boost_debug_shared_ptr_mark_interesting (p, "Panner");
         _panner.reset (p);
         _panner->configure_io (in, out);

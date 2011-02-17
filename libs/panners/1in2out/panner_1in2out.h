@@ -51,13 +51,7 @@ class Panner1in2out : public Panner
 
         std::set<Evoral::Parameter> what_can_be_automated() const;
 
-	/* this class just leaves the pan law itself to be defined
-	   by the update(), do_distribute_automated()
-	   methods. derived classes also need a factory method
-	   and a type name. See EqualPowerStereoPanner as an example.
-	*/
-
-        static Panner* factory (boost::shared_ptr<Pannable>, Speakers&);
+        static Panner* factory (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
 
         std::string describe_parameter (Evoral::Parameter);
         std::string value_as_string (boost::shared_ptr<AutomationControl>) const;

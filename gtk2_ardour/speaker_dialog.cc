@@ -33,13 +33,13 @@ using namespace Gtkmm2ext;
 
 SpeakerDialog::SpeakerDialog ()
         : ArdourDialog (_("Speaker Configuration"))
+        , aspect_frame ("", 0.5, 0.5, 1.0, false)
         , azimuth_adjustment (0, 0.0, 360.0, 10.0, 1.0)
         , azimuth_spinner (azimuth_adjustment)
         , add_speaker_button (_("Add Speaker"))
         , use_system_button (_("Use System"))
                               
 {
-        set_size_request (400, 200);
         
         side_vbox.set_homogeneous (false);
         side_vbox.set_border_width (9);
@@ -48,13 +48,19 @@ SpeakerDialog::SpeakerDialog ()
         side_vbox.pack_start (add_speaker_button, false, false);
         side_vbox.pack_start (use_system_button, false, false);
 
+        aspect_frame.set_size_request (200, 200);
+        aspect_frame.set_shadow_type (SHADOW_NONE);
+        aspect_frame.add (darea);
+
         hbox.set_spacing (6);
         hbox.set_border_width (6);
-        hbox.pack_start (darea, true, true);
+        hbox.pack_start (aspect_frame, true, true);
         hbox.pack_start (side_vbox, false, false);
 
         get_vbox()->pack_start (hbox);
         get_vbox()->show_all ();
+
+        darea.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 
         darea.signal_size_allocate().connect (sigc::mem_fun (*this, &SpeakerDialog::darea_size_allocate));
         darea.signal_expose_event().connect (sigc::mem_fun (*this, &SpeakerDialog::darea_expose_event));
@@ -66,9 +72,9 @@ SpeakerDialog::SpeakerDialog ()
 }
 
 void
-SpeakerDialog::set_speakers (const Speakers& s) 
+SpeakerDialog::set_speakers (boost::shared_ptr<Speakers> s) 
 {
-        speakers = s;
+        speakers = *s;
 }
 
 Speakers
@@ -226,7 +232,7 @@ SpeakerDialog::darea_button_press_event (GdkEventButton *ev)
 	switch (ev->button) {
 	case 1:
 	case 2:
-		find_closest_object (ev->x, ev->y, drag_index);
+		drag_index = find_closest_object (ev->x, ev->y);
 		drag_x = (int) floor (ev->x);
 		drag_y = (int) floor (ev->y);
 		state = (GdkModifierType) ev->state;
@@ -288,39 +294,36 @@ SpeakerDialog::darea_button_release_event (GdkEventButton *ev)
 }
 
 int
-SpeakerDialog::find_closest_object (gdouble x, gdouble y, int& which) 
+SpeakerDialog::find_closest_object (gdouble x, gdouble y) 
 {
 	float distance;
 	float best_distance = FLT_MAX;
-	int pwhich = -1;
+	int n = 0;
+        int which = -1;
 
-	which = 0;
-	pwhich = 0;
-
-	for (vector<Speaker>::iterator i = speakers.speakers().begin(); i != speakers.speakers().end(); ++i, ++pwhich) {
+	for (vector<Speaker>::iterator i = speakers.speakers().begin(); i != speakers.speakers().end(); ++i, ++n) {
 
 		Speaker& candidate (*i);
-
 		CartesianVector c;
-
+        
 		candidate.angles().cartesian (c);
 		cart_to_gtk (c);
 
 		distance = sqrt ((c.x - x) * (c.x - x) +
 		                 (c.y - y) * (c.y - y));
 
+
 		if (distance < best_distance) {
 			best_distance = distance;
-			which = pwhich;
+			which = n;
 		}
 	}
 
-
 	if (best_distance > 20) { // arbitrary 
-		return 0;
+                return -1;
 	}
 
-	return 1;
+        return which;
 }
 
 bool

@@ -37,7 +37,7 @@ class Pannable;
 class VBAPanner : public Panner 
 { 
 public:
-	VBAPanner (boost::shared_ptr<Pannable>, Speakers& s);
+	VBAPanner (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
 	~VBAPanner ();
 
         void configure_io (ChanCount in, ChanCount /* ignored - we use Speakers */);
@@ -46,7 +46,7 @@ public:
 
         std::set<Evoral::Parameter> what_can_be_automated() const;
 
-	static Panner* factory (boost::shared_ptr<Pannable>, Speakers& s);
+	static Panner* factory (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
 
 	void distribute (BufferSet& ibufs, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes);
 
@@ -72,7 +72,7 @@ private:
         };
 
         std::vector<Signal*> _signals;
-        VBAPSpeakers&       _speakers;
+        boost::shared_ptr<VBAPSpeakers>  _speakers;
         
 	void compute_gains (double g[3], int ls[3], int azi, int ele);
         void update ();

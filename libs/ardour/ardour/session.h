@@ -716,7 +716,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* Speakers */
 
-	Speakers& get_speakers ();
+        boost::shared_ptr<Speakers> get_speakers ();
 
 	/* Controllables */
 
@@ -1478,7 +1478,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void start_time_changed (framepos_t);
 	void end_time_changed (framepos_t);
 
-	Speakers* _speakers; 
+        boost::shared_ptr<Speakers> _speakers; 
 };
 
 } // namespace ARDOUR

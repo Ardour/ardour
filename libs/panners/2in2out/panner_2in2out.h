@@ -57,7 +57,7 @@ class Panner2in2out : public Panner
 
 	std::set<Evoral::Parameter> what_can_be_automated() const;
 
-	static Panner* factory (boost::shared_ptr<Pannable>, Speakers&);
+	static Panner* factory (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
 
         std::string describe_parameter (Evoral::Parameter);
         std::string value_as_string (boost::shared_ptr<AutomationControl>) const;

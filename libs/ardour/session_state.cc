@@ -221,7 +221,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	midi_control_ui = 0;
         _step_editors = 0;
         no_questions_about_missing_files = false;
-        _speakers = new Speakers;
+        _speakers.reset (new Speakers);
 
 	AudioDiskstream::allocate_working_buffers();
 
@@ -1186,9 +1186,7 @@ Session::state(bool full_state)
 	}
 
         node->add_child_nocopy (_speakers->get_state());
-
 	node->add_child_nocopy (_tempo_map->get_state());
-
 	node->add_child_nocopy (get_control_protocol_state());
 
 	if (_extra_xml) {
