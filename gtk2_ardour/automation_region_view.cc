@@ -35,13 +35,13 @@
 
 #include "i18n.h"
 
-AutomationRegionView::AutomationRegionView(ArdourCanvas::Group*                      parent,
-                                           AutomationTimeAxisView&                   time_axis,
-                                           boost::shared_ptr<ARDOUR::Region>         region,
-                                           const Evoral::Parameter&                  param,
-                                           boost::shared_ptr<ARDOUR::AutomationList> list,
-                                           double                                    spu,
-                                           Gdk::Color const &                        basic_color)
+AutomationRegionView::AutomationRegionView (ArdourCanvas::Group*                      parent,
+					    AutomationTimeAxisView&                   time_axis,
+					    boost::shared_ptr<ARDOUR::Region>         region,
+					    const Evoral::Parameter&                  param,
+					    boost::shared_ptr<ARDOUR::AutomationList> list,
+					    double                                    spu,
+					    Gdk::Color const &                        basic_color)
 	: RegionView(parent, time_axis, region, spu, basic_color, true)
 	, _parameter(param)
 {
@@ -90,7 +90,7 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 }
 
 bool
-AutomationRegionView::canvas_event(GdkEvent* ev)
+AutomationRegionView::canvas_event (GdkEvent* ev)
 {
 	PublicEditor& e = trackview.editor ();
 
@@ -221,14 +221,16 @@ AutomationRegionView::region_resized (const PBD::PropertyChange& what_changed)
 void
 AutomationRegionView::entered (bool)
 {
-	if (_line)
+	if (_line) {
 		_line->track_entered();
+	}
 }
 
 
 void
-AutomationRegionView::exited()
+AutomationRegionView::exited ()
 {
-	if (_line)
+	if (_line) {
 		_line->track_exited();
+	}
 }
