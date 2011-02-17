@@ -157,16 +157,35 @@ Session::setup_click_sounds (Sample** data, Sample const * default_data, framecn
 			return;
 		}
 
-		*data = new Sample[info.frames];
-		*length = info.frames;
+		/* read the (possibly multi-channel) click data into a temporary buffer */
 		
-		if (sf_read_float (sndfile, *data, info.frames) != info.frames) {
+		sf_count_t const samples = info.frames * info.channels;
+
+		Sample* tmp = new Sample[samples];
+
+		if (sf_readf_float (sndfile, tmp, info.frames) != info.frames) {
+
 			warning << _("cannot read data from click soundfile") << endmsg;
-			delete *data;
 			*data = 0;
 			_clicking = false;
+			
+		} else {
+
+			*data = new Sample[info.frames];
+			*length = info.frames;
+			
+			/* mix down to mono */
+			
+			for (int i = 0; i < info.frames; ++i) {
+				(*data)[i] = 0;
+				for (int j = 0; j < info.channels; ++j) {
+					(*data)[i] = tmp[i * info.channels + j];
+				}
+				(*data)[i] /= info.channels;
+			}
 		}
-		
+
+		delete[] tmp;
 		sf_close (sndfile);
 	}
 }
