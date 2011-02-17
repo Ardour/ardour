@@ -64,15 +64,12 @@ VBAPSpeakers::update ()
 
 	for (vector<Speaker>::const_iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
 		if ((*i).angles().ele != 0.0) {
-			cerr << "\n\n\nSPEAKER " << (*i).id << " has ele = " << (*i).angles().ele << "\n\n\n\n";
 			dim = 3;
 			break;
 		}
 	}
 
 	_dimension = dim;
-
-	cerr << "update with dimension = " << dim << " speakers = " << _speakers.size() << endl;
 
 	if (_speakers.size() < 2) {
 		/* nothing to be done with less than two speakers */
@@ -514,7 +511,6 @@ VBAPSpeakers::choose_speaker_pairs (){
 	int pair;
 	int speaker;
 
-	cerr << "CHOOSE PAIRS\n";
 
 	if (n_speakers == 0) {
 		return;
@@ -529,14 +525,6 @@ VBAPSpeakers::choose_speaker_pairs (){
         
 	/* adjacent loudspeakers are the loudspeaker pairs to be used.*/
 	for (speaker = 0; speaker < n_speakers-1; speaker++) {
-
-		cerr << "Looking at " 
-		     << _speakers[sorted_speakers[speaker]].id << " @ " << _speakers[sorted_speakers[speaker]].angles().azi  
-		     << " and "
-		     << _speakers[sorted_speakers[speaker+1]].id << " @ " << _speakers[sorted_speakers[speaker+1]].angles().azi  
-		     << " delta = " 
-		     << _speakers[sorted_speakers[speaker+1]].angles().azi - _speakers[sorted_speakers[speaker]].angles().azi
-		     << endl;
 
 		if ((_speakers[sorted_speakers[speaker+1]].angles().azi - 
 		     _speakers[sorted_speakers[speaker]].angles().azi) <= AZIMUTH_DELTA_THRESHOLD_DEGREES) {
@@ -579,8 +567,6 @@ VBAPSpeakers::choose_speaker_pairs (){
 			_speaker_tuples[pair][0] = sorted_speakers[speaker];
 			_speaker_tuples[pair][1] = sorted_speakers[speaker+1];
 
-			cerr << "PAIR[" << pair << "] = " << sorted_speakers[speaker] << " + " << sorted_speakers[speaker+1] << endl;
-
 			pair++;
 		}
 	}
@@ -593,9 +579,6 @@ VBAPSpeakers::choose_speaker_pairs (){
 
 		_speaker_tuples[pair][0] = sorted_speakers[n_speakers-1];
 		_speaker_tuples[pair][1] = sorted_speakers[0];
-
-		cerr << "PAIR[" << pair << "] = " << sorted_speakers[n_speakers-1] << " + " << sorted_speakers[0] << endl;
-
 	}
 }
 
@@ -611,7 +594,6 @@ VBAPSpeakers::sort_2D_lss (int* sorted_speakers)
 
 	for (n = 0, s = tmp.begin(); s != tmp.end(); ++s, ++n) {
 		sorted_speakers[n] = (*s).id;
-		cerr << "Sorted[" << n << "] = " << (*s).id << endl;
 	}
 }
 
@@ -621,10 +603,10 @@ VBAPSpeakers::calc_2D_inv_tmatrix (double azi1, double azi2, double* inverse_mat
 	double x1,x2,x3,x4;
 	double det;
 
-	x1 = cos (azi1);
-	x2 = sin (azi1);
-	x3 = cos (azi2);
-	x4 = sin (azi2);
+	x1 = cos (azi1 * (M_PI/180.0));
+        x2 = sin (azi1 * (M_PI/180.0));
+	x3 = cos (azi2 * (M_PI/180.0));
+	x4 = sin (azi2 * (M_PI/180.0));
 	det = (x1 * x4) - ( x3 * x2 );
 
 	if (fabs(det) <= 0.001) {

@@ -89,12 +89,9 @@ Speakers::add_speaker (const AngularVector& position)
 {
 	int id = _speakers.size();
 
-	cerr << "Added speaker " << id << " at " << position.azi << " /= " << position.ele << endl;
-
 	_speakers.push_back (Speaker (id, position));
 	update ();
 
-	dump_speakers (cerr);
 	Changed ();
 
 	return id;

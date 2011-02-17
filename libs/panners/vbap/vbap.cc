@@ -107,17 +107,7 @@ VBAPanner::update ()
                 Signal* signal = *s;
 
                 signal->direction = AngularVector (signal_direction, 0.0);
-
                 compute_gains (signal->desired_gains, signal->desired_outputs, signal->direction.azi, signal->direction.ele);
-                        cerr << " @ " << signal->direction.azi << " /= " << signal->direction.ele
-                             << " Outputs: "
-                             << signal->desired_outputs[0] + 1 << ' '
-                             << signal->desired_outputs[1] + 1 << ' '
-                             << " Gains "
-                             << signal->desired_gains[0] << ' '
-                             << signal->desired_gains[1] << ' '
-                             << endl;
-
                 signal_direction += degree_step_per_signal;
         }
 }
@@ -164,7 +154,7 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 
 			speaker_ids[0] = _speakers->speaker_for_tuple (i, 0);
 			speaker_ids[1] = _speakers->speaker_for_tuple (i, 1);
-                        
+
 			if (_speakers->dimension() == 3) {
 				gains[2] = gtmp[2];
 				speaker_ids[2] = _speakers->speaker_for_tuple (i, 2);
