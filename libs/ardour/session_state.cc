@@ -523,7 +523,6 @@ Session::ensure_subdirs ()
 int
 Session::create (const string& mix_template, BusProfile* bus_profile)
 {
-
 	if (g_mkdir_with_parents (_path.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session folder \"%1\" (%2)"), _path, strerror (errno)) << endmsg;
 		return -1;
@@ -538,14 +537,14 @@ Session::create (const string& mix_template, BusProfile* bus_profile)
 
 		ifstream in(in_path.c_str());
 
-		if (in){
+		if (in) {
 			string out_path = _path;
 			out_path += _name;
 			out_path += statefile_suffix;
 
 			ofstream out(out_path.c_str());
 
-			if (out){
+			if (out) {
 				out << in.rdbuf();
                                 _is_new = false;
 				return 0;
@@ -1216,7 +1215,7 @@ Session::set_state (const XMLNode& node, int version)
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave);
 
-	if (node.name() != X_("Session")){
+	if (node.name() != X_("Session")) {
 		fatal << _("programming error: Session: incorrect XML node sent to set_state()") << endmsg;
 		return -1;
 	}
@@ -2009,7 +2008,7 @@ Session::save_template (string template_name)
 	}
 
 	if (!tree.write (template_file_path.to_string())) {
-		error << _("mix template not saved") << endmsg;
+		error << _("template not saved") << endmsg;
 		return -1;
 	}
 
@@ -2588,7 +2587,7 @@ Session::cleanup_regions ()
 		
 		uint32_t used = playlists->region_use_count (audio_region);
 
-		if (used == 0 && !audio_region->automatic()){
+		if (used == 0 && !audio_region->automatic()) {
 			RegionFactory::map_remove(i->second);
 		}
 	}
