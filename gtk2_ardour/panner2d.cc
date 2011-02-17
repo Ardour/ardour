@@ -29,6 +29,7 @@
 #include "pbd/error.h"
 #include "pbd/cartesian.h"
 #include "ardour/panner.h"
+#include "ardour/pannable.h"
 #include "ardour/speakers.h"
 
 #include "panner2d.h"
@@ -63,8 +64,11 @@ Panner2d::Target::set_text (const char* txt)
 Panner2d::Panner2d (boost::shared_ptr<Panner> p, int32_t h)
 	: panner (p), width (0), height (h)
 {
-	panner->StateChanged.connect (state_connection, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
-	panner->Changed.connect (change_connection, invalidator (*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
+	panner->StateChanged.connect (connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
+	panner->Changed.connect (connections, invalidator (*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
+
+        panner->pannable()->pan_azimuth_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
+        panner->pannable()->pan_width_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
 
 	drag_target = 0;
 	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
@@ -197,28 +201,25 @@ Panner2d::add_target (const AngularVector& a)
 void
 Panner2d::handle_state_change ()
 {
-	ENSURE_GUI_THREAD (*this, &Panner2d::handle_state_change)
-
 	queue_draw ();
 }
 
 void
 Panner2d::handle_position_change ()
 {
-#ifdef PANNER_HACKS 
 	uint32_t n;
-	ENSURE_GUI_THREAD (*this, &Panner2d::handle_position_change)
 
-	for (n = 0; n < pucks.size(); ++n) {
-		pucks[n]->position = panner->streampanner(n).get_position ();
-	}
+        for (uint32_t i = 0; i < pucks.size(); ++i) {
+                pucks[i]->position = panner->signal_position (i);
+        }
+
+        vector<Speaker>& speakers (panner->get_speakers()->speakers());
 
 	for (n = 0; n < targets.size(); ++n) {
-		targets[n]->position = panner->output(n).position;
+		targets[n]->position = speakers[n].angles();
 	}
 
 	queue_draw ();
-#endif
 }
 
 void
@@ -528,11 +529,9 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 
 			cp.angular (drag_target->position); /* sets drag target position */
 
-#ifdef PANNER_HACKS
-			panner->streampanner (drag_index).set_position (drag_target->position);
-#endif 
-                        
-			queue_draw ();
+                        double degree_fract = drag_target->position.azi / 360.0;
+
+			panner->set_position (degree_fract);
 		}
 	} 
 

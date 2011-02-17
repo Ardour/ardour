@@ -130,8 +130,7 @@ class Panner2d : public Gtk::DrawingArea
 	void handle_state_change ();
 	void handle_position_change ();
 
-	PBD::ScopedConnection state_connection;
-	PBD::ScopedConnection change_connection;
+	PBD::ScopedConnectionList connections;
 
 	/* cartesian coordinates in GTK units ; adjust to same but on a circle of radius 1.0
 	   and centered in the middle of our area

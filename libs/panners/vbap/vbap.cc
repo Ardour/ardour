@@ -347,3 +347,15 @@ VBAPanner::get_speakers () const
 {
         return _speakers->parent();
 }
+
+void
+VBAPanner::set_position (double p)
+{
+        _pannable->pan_azimuth_control->set_value (p);
+}
+
+void
+VBAPanner::set_width (double p)
+{
+        _pannable->pan_width_control->set_value (p);
+}

@@ -44,6 +44,9 @@ public:
         ChanCount in() const;
         ChanCount out() const;
 
+        void set_position (double);
+        void set_width (double);
+
         std::set<Evoral::Parameter> what_can_be_automated() const;
 
 	static Panner* factory (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
