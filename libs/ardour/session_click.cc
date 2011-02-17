@@ -131,85 +131,69 @@ Session::click (framepos_t start, framecnt_t nframes)
 }
 
 void
-Session::setup_click_sounds (int which)
+Session::setup_click_sounds (Sample** data, Sample const * default_data, framecnt_t* length, framecnt_t default_length, string const & path)
 {
-	SNDFILE *sndfile;
-	SF_INFO info;
-
-	clear_clicks();
-
-	if ((which == 0 || which == 1)) {
-
-		if (click_data != default_click) {
-			delete [] click_data;
-			click_data = 0;
-		}
-
-		string path = Config->get_click_sound();
-
-		if (path.empty()) {
-
-			click_data = const_cast<Sample*> (default_click);
-			click_length = default_click_length;
-
-		} else {
-
-			info.format = 0;
-			if ((sndfile = sf_open (path.c_str(), SFM_READ, &info)) == 0) {
-				char errbuf[256];
-				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-				warning << string_compose (_("cannot open click soundfile %1 (%2)"), path, errbuf) << endmsg;
-				_clicking = false;
-				return;
-			}
-
-			click_data = new Sample[info.frames];
-			click_length = info.frames;
-
-			if (sf_read_float (sndfile, click_data, info.frames) != info.frames) {
-				warning << _("cannot read data from click soundfile") << endmsg;
-				delete click_data;
-				click_data = 0;
-				_clicking = false;
-			}
-
-			sf_close (sndfile);
-
-		}
+	if (*data != default_data) {
+		delete[] *data;
+		*data = 0;
 	}
 
-	if ((which == 0 || which == -1)) {
+	if (path.empty ()) {
 
-		if (click_emphasis_data != default_click_emphasis) {
-			delete [] click_emphasis_data;
-			click_emphasis_data = 0;
+		*data = const_cast<Sample*> (default_data);
+		*length = default_length;
+
+	} else {
+
+		SF_INFO info;
+		SNDFILE* sndfile;
+		
+		info.format = 0;
+		if ((sndfile = sf_open (path.c_str(), SFM_READ, &info)) == 0) {
+			char errbuf[256];
+			sf_error_str (0, errbuf, sizeof (errbuf) - 1);
+			warning << string_compose (_("cannot open click soundfile %1 (%2)"), path, errbuf) << endmsg;
+			_clicking = false;
+			return;
 		}
 
-		string path = Config->get_click_emphasis_sound();
-
-		if (path.empty()) {
-			click_emphasis_data = const_cast<Sample*> (default_click_emphasis);
-			click_emphasis_length = default_click_emphasis_length;
-		} else {
-			info.format = 0;
-			if ((sndfile = sf_open (path.c_str(), SFM_READ, &info)) == 0) {
-				char errbuf[256];
-				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-				warning << string_compose (_("cannot open click emphasis soundfile %1 (%2)"), path, errbuf) << endmsg;
-				return;
-			}
-
-			click_emphasis_data = new Sample[info.frames];
-			click_emphasis_length = info.frames;
-
-			if (sf_read_float (sndfile, click_emphasis_data, info.frames) != info.frames) {
-				warning << _("cannot read data from click emphasis soundfile") << endmsg;
-				delete click_emphasis_data;
-				click_emphasis_data = 0;
-			}
-
-			sf_close (sndfile);
+		*data = new Sample[info.frames];
+		*length = info.frames;
+		
+		if (sf_read_float (sndfile, *data, info.frames) != info.frames) {
+			warning << _("cannot read data from click soundfile") << endmsg;
+			delete *data;
+			*data = 0;
+			_clicking = false;
 		}
+		
+		sf_close (sndfile);
+	}
+}
+
+void
+Session::setup_click_sounds (int which)
+{
+	clear_clicks ();
+
+	if (which == 0 || which == 1) {
+		setup_click_sounds (
+			&click_data,
+			default_click,
+			&click_length,
+			default_click_length,
+			Config->get_click_sound ()
+			);
+	}
+
+	if (which == 0 || which == -1) {
+		setup_click_sounds (
+			&click_emphasis_data,
+			default_click_emphasis,
+			&click_emphasis_length,
+			default_click_emphasis_length,
+			Config->get_click_emphasis_sound ()
+			);
 	}
 }
 
