@@ -361,13 +361,11 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 
 	case TempoBarItem:
 		ruler_items.push_back (MenuElem (_("New Tempo"), sigc::bind ( sigc::mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
-		ruler_items.push_back (MenuElem (_("Clear tempo")));
 		ruler_items.push_back (SeparatorElem ());
 		break;
 
 	case MeterBarItem:
 		ruler_items.push_back (MenuElem (_("New Meter"), sigc::bind ( sigc::mem_fun(*this, &Editor::mouse_add_new_meter_event), where)));
-		ruler_items.push_back (MenuElem (_("Clear meter")));
 		ruler_items.push_back (SeparatorElem ());
 		break;
 
