@@ -224,7 +224,7 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 			pan = gain_coefficient * signal->desired_gains[o];
 			mix_buffers_with_gain (dst+n,src+n,nframes-n,pan);
 
-			todo[o] = false;
+			todo[signal->desired_outputs[o]] = false;
 		}
 	}
         
