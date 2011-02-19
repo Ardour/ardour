@@ -8,11 +8,12 @@
 
 #include "pbd/cartesian.h"
 
-#include "ardour/pannable.h"
-#include "ardour/speakers.h"
+#include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/buffer_set.h"
 #include "ardour/pan_controllable.h"
+#include "ardour/pannable.h"
+#include "ardour/speakers.h"
 
 #include "vbap.h"
 #include "vbap_speakers.h"
@@ -29,13 +30,20 @@ static PanPluginDescriptor _descriptor = {
 
 extern "C" { PanPluginDescriptor* panner_descriptor () { return &_descriptor; } }
 
-VBAPanner::Signal::Signal (Session& session, VBAPanner& p, uint32_t n)
+VBAPanner::Signal::Signal (Session& session, VBAPanner& p, uint32_t n, uint32_t n_speakers)
 {
-        gains[0] = gains[1] = gains[2] = 0;
+        resize_gains (n_speakers);
+
         desired_gains[0] = desired_gains[1] = desired_gains[2] = 0;
         outputs[0] = outputs[1] = outputs[2] = -1;
         desired_outputs[0] = desired_outputs[1] = desired_outputs[2] = -1;
-};
+}
+
+void
+VBAPanner::Signal::Signal::resize_gains (uint32_t n)
+{
+        gains.assign (n, 0.0);
+}        
 
 VBAPanner::VBAPanner (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speakers> s)
 	: Panner (p)
@@ -69,7 +77,9 @@ VBAPanner::configure_io (ChanCount in, ChanCount /* ignored - we use Speakers */
         clear_signals ();
 
         for (uint32_t i = 0; i < n; ++i) {
-                _signals.push_back (new Signal (_pannable->session(), *this, i));
+                Signal* s = new Signal (_pannable->session(), *this, i, _speakers->n_speakers());
+                _signals.push_back (s);
+                
         }
 
         update ();
@@ -188,7 +198,6 @@ VBAPanner::distribute (BufferSet& inbufs, BufferSet& obufs, gain_t gain_coeffici
 
                 distribute_one (inbufs.get_audio (n), obufs, gain_coefficient, nframes, n);
 
-                memcpy (signal->gains, signal->desired_gains, sizeof (signal->gains));
                 memcpy (signal->outputs, signal->desired_outputs, sizeof (signal->outputs));
         }
 }
@@ -197,45 +206,123 @@ void
 VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coefficient, pframes_t nframes, uint32_t which)
 {
 	Sample* const src = srcbuf.data();
-	Sample* dst;
-	pan_t pan;
-	uint32_t n_audio = obufs.count().n_audio();
-	bool todo[n_audio];
         Signal* signal (_signals[which]);
 
-	for (uint32_t o = 0; o < n_audio; ++o) {
-		todo[o] = true;
-	}
-        
 	/* VBAP may distribute the signal across up to 3 speakers depending on
 	   the configuration of the speakers.
+
+           But the set of speakers in use "this time" may be different from
+           the set of speakers "the last time". So we have up to 6 speakers
+           involved, and we have to interpolate so that those no longer
+           in use are rapidly faded to silence and those newly in use
+           are rapidly faded to their correct level. This prevents clicks
+           as we change the set of speakers used to put the signal in
+           a given position.
+
+           However, the speakers are represented by output buffers, and other
+           speakers may write to the same buffers, so we cannot use
+           anything here that will simply assign new (sample) values
+           to the output buffers - everything must be done via mixing
+           functions and not assignment/copying.
 	*/
 
+        vector<double>::size_type sz = signal->gains.size();
+
+        assert (sz == obufs.count().n_audio());
+
+        int8_t outputs[sz]; // on the stack, no malloc
+        
+        /* set initial state of each output "record"
+         */
+
+        for (uint32_t o = 0; o < sz; ++o) {
+                outputs[o] = 0;
+        }
+
+        /* for all outputs used this time and last time,
+           change the output record to show what has
+           happened.
+        */
+
+        for (int o = 0; o < 3; ++o) {
+                if (signal->outputs[o] != -1) {
+                        /* used last time */
+                        outputs[signal->outputs[o]] |= 1;
+                } 
+
+                if (signal->desired_outputs[o] != -1) {
+                        /* used this time */
+                        outputs[signal->desired_outputs[o]] |= 1<<1;
+                } 
+        }
+
+        /* at this point, we can test a speaker's status:
+
+           (outputs[o] & 1)      <= in use before
+           (outputs[o] & 2)      <= in use this time
+           (outputs[o] & 3) == 3 <= in use both times
+            outputs[o] == 0      <= not in use either time
+           
+        */
+
 	for (int o = 0; o < 3; ++o) {
-		if (signal->desired_outputs[o] != -1) {
+                pan_t pan;
+                int output = signal->desired_outputs[o];
+
+		if (output == -1) {
+                        continue;
+                }
+
+                pan = gain_coefficient * signal->desired_gains[o];
+                
+                if (pan == 0.0 && signal->gains[output] == 0.0) {
                         
-			pframes_t n = 0;
+                        /* nothing deing delivered to this output */
 
-			/* XXX TODO: interpolate across changes in gain and/or outputs
-			 */
+                        // cerr << "VBAP: output " << output << " silent - no data delivered\n";
+                        signal->gains[o] = 0.0;
+                        
+                } else if (fabs (pan - signal->gains[output]) > 0.00001) {
+                        
+                        /* signal to this output but the gain coefficient has changed, so 
+                           interpolate between them.
+                        */
 
-			dst = obufs.get_audio (signal->desired_outputs[o]).data();
+                        // cerr << "VBAP: output " << output << " interpolate to new gain\n";
+                        
+                        AudioBuffer& buf (obufs.get_audio (output));
+                        buf.accumulate_with_ramped_gain_from (srcbuf.data(), nframes, signal->gains[output], pan, 0);
+                        signal->gains[output] = pan;
 
-			pan = gain_coefficient * signal->desired_gains[o];
-			mix_buffers_with_gain (dst+n,src+n,nframes-n,pan);
+                } else {
+                        
+                        /* signal to this output, same gain as before so just copy with gain
+                         */
+                           
+                        // cerr << "VBAP: output " << output << " use current gain\n";
 
-			todo[signal->desired_outputs[o]] = false;
-		}
+                        mix_buffers_with_gain (obufs.get_audio (output).data(),src,nframes,pan);
+                        signal->gains[output] = pan;
+                }
 	}
-        
-	for (uint32_t o = 0; o < n_audio; ++o) {
-		if (todo[o]) {
-			/* VBAP decided not to deliver any audio to this output, so we write silence */
-			dst = obufs.get_audio(o).data();
-			memset (dst, 0, sizeof (Sample) * nframes);
-		}
-	}
-        
+
+        /* clean up the outputs that were used last time but not this time
+         */
+
+        for (uint32_t o = 0; o < sz; ++o) {
+                if (outputs[o] == 1) {
+                        /* take signal and deliver with a rapid fade out
+                         */
+                        AudioBuffer& buf (obufs.get_audio (o));
+                        buf.accumulate_with_ramped_gain_from (srcbuf.data(), nframes, signal->gains[o], 0.0, 0);
+                        signal->gains[o] = 0.0;
+                }
+        }
+
+        /* note that the output buffers were all silenced at some point
+           so anything we didn't write to with this signal (or any others)
+           is just as it should be.
+        */
 }
 
 void 

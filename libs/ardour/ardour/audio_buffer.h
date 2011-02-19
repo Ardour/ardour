@@ -113,6 +113,25 @@ public:
 		_written = true;
 	}
 
+	/** Accumulate (add) @a len frames FROM THE START OF @a src into self
+	 * scaling by @a gain_coeff */
+	void accumulate_with_ramped_gain_from (const Sample* src, framecnt_t len, gain_t initial, gain_t target, framecnt_t dst_offset = 0) {
+
+		assert(_capacity > 0);
+		assert(len <= _capacity);
+
+		Sample* dst = _data + dst_offset;
+                gain_t  gain_delta = (target - initial)/len;
+
+                for (framecnt_t n = 0; n < len; ++n) {
+                        *dst++ += (*src++ * initial);
+                        initial += gain_delta;
+                }
+
+		_silent = (_silent && initial == 0 && target == 0);
+		_written = true;
+	}
+
 	void apply_gain (gain_t gain, framecnt_t len) {
 		apply_gain_to_buffer (_data, len, gain);
 	}

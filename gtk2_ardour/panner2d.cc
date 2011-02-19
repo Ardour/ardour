@@ -263,7 +263,6 @@ Panner2d::find_closest_object (gdouble x, gdouble y, int& which) const
 		}
 	}
 
-
 	if (best_distance > 20) { // arbitrary 
 		return 0;
 	}
