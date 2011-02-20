@@ -88,6 +88,7 @@ class PluginInsert : public Processor
 		double user_to_ui (double) const;
 		double ui_to_user (double) const;
 		double plugin_to_ui (double) const;
+		double plugin_to_user (double) const;
                 
 	private:
 		double user_to_plugin (double) const;

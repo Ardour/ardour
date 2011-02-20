@@ -1092,11 +1092,17 @@ PluginInsert::PluginControl::ui_to_user (double val) const
 double
 PluginInsert::PluginControl::plugin_to_ui (double val) const
 {
+	return user_to_ui (plugin_to_user (val));
+}
+
+double
+PluginInsert::PluginControl::plugin_to_user (double val) const
+{
 	if (_sr_dependent) {
 		val = val * _session.frame_rate ();
 	}
 
-	return user_to_ui (val);
+	return val;
 }
 
 XMLNode&
@@ -1111,27 +1117,13 @@ PluginInsert::PluginControl::get_state ()
         return node;
 }
 
+/** @return `user' val */
 double
-PluginInsert::PluginControl::get_value (void) const
+PluginInsert::PluginControl::get_value () const
 {
 	/* FIXME: probably should be taking out some lock here.. */
 
-	double val = _plugin->get_parameter (_list->parameter());
-
-	return val;
-
-	/*if (_toggled) {
-
-		return val;
-
-	} else {
-
-		if (_logarithmic) {
-			val = log(val);
-		}
-
-		return ((val - lower) / range);
-	}*/
+	return plugin_to_user (_plugin->get_parameter (_list->parameter()));
 }
 
 boost::shared_ptr<Plugin>
