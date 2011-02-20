@@ -1141,7 +1141,7 @@ TimeAxisView::hide_name_entry ()
 void
 TimeAxisView::color_handler ()
 {
-	for (list<GhostRegion*>::iterator i=ghosts.begin(); i != ghosts.end(); i++ ) {
+	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); i++) {
 		(*i)->set_colors();
 	}
 
