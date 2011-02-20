@@ -275,7 +275,7 @@ MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /
                                 target_gain = 0.0;
                         }
                 }
-                
+
                 if (target_gain != _channels[chn]->current_gain || target_gain != 1.0f) {
 
                         Amp::apply_gain (*b, nframes, _channels[chn]->current_gain, target_gain);
@@ -334,7 +334,8 @@ MonitorProcessor::configure_io (ChanCount in, ChanCount out)
 bool 
 MonitorProcessor::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
-        return in == out;
+	out = in;
+	return true;
 }
 
 void

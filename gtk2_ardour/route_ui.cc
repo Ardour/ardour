@@ -408,7 +408,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					}
 					
 					if (Config->get_solo_control_is_listen_control()) {
-						_session->set_listen (_session->get_routes(), !_route->listening(),  Session::rt_cleanup, true);
+						_session->set_listen (_session->get_routes(), !_route->listening_via_monitor(),  Session::rt_cleanup, true);
 					} else {
 						_session->set_solo (_session->get_routes(), !_route->self_soloed(),  Session::rt_cleanup, true);
 					}
@@ -458,7 +458,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 						}
 					
 						if (Config->get_solo_control_is_listen_control()) {
-							_session->set_listen (_route->route_group()->route_list(), !_route->listening(),  Session::rt_cleanup, true);
+							_session->set_listen (_route->route_group()->route_list(), !_route->listening_via_monitor(),  Session::rt_cleanup, true);
 						} else {
 							_session->set_solo (_route->route_group()->route_list(), !_route->self_soloed(),  Session::rt_cleanup, true);
 						}
@@ -476,7 +476,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					}
 
 					if (Config->get_solo_control_is_listen_control()) {
-						_session->set_listen (rl, !_route->listening());
+						_session->set_listen (rl, !_route->listening_via_monitor());
 					} else {
 						_session->set_solo (rl, !_route->self_soloed());
 					}
@@ -816,7 +816,7 @@ RouteUI::solo_visual_state (boost::shared_ptr<Route> r)
 	
 	if (Config->get_solo_control_is_listen_control()) {
 
-		if (r->listening()) {
+		if (r->listening_via_monitor()) {
 			return 1;
 		} else {
 			return 0;
@@ -844,7 +844,7 @@ RouteUI::solo_visual_state_with_isolate (boost::shared_ptr<Route> r)
 	
 	if (Config->get_solo_control_is_listen_control()) {
 
-		if (r->listening()) {
+		if (r->listening_via_monitor()) {
 			return 1;
 		} else {
                         return 0;
@@ -900,7 +900,7 @@ RouteUI::update_solo_display ()
 
 	if (Config->get_solo_control_is_listen_control()) {
 
-		if (solo_button->get_active() != (x = _route->listening())) {
+		if (solo_button->get_active() != (x = _route->listening_via_monitor())) {
 			++_i_am_the_modifier;
 			solo_button->set_active(x);
 			--_i_am_the_modifier;

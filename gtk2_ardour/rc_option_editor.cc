@@ -1090,6 +1090,18 @@ RCOptionEditor::RCOptionEditor ()
 	mm->add (ExternalMonitoring, _("audio hardware"));
 
 	add_option (_("Audio"), mm);
+	
+	ComboOption<PFLPosition>* pp = new ComboOption<PFLPosition> (
+		"pfl-position",
+		_("PFL signals come from"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_pfl_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_pfl_position)
+		);
+
+	pp->add (PFLFromBeforeProcessors, _("before pre-fader processors"));
+	pp->add (PFLFromAfterProcessors, _("pre-fader but after pre-fader processors"));
+
+	add_option (_("Audio"), pp);
 
 	add_option (_("Audio"),
 	     new BoolOption (

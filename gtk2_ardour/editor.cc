@@ -4870,8 +4870,6 @@ Editor::handle_new_route (RouteList& routes)
 	RouteTimeAxisView *rtv;
 	list<RouteTimeAxisView*> new_views;
 
-        cerr << "Handle new route\n";
-
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 

@@ -553,8 +553,8 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 gint
 GainMeterBase::meter_release(GdkEventButton*)
 {
-	if(!ignore_toggle){
-		if (wait_for_release){
+	if (!ignore_toggle) {
+		if (wait_for_release) {
 			wait_for_release = false;
 
 			if (_route) {

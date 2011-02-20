@@ -3476,7 +3476,7 @@ Session::config_changed (std::string p, bool ours)
 		}
 	} else if (p == "solo-mute-override") {
 		// catch_up_on_solo_mute_override ();
-	} else if (p == "listen-position") {
+	} else if (p == "listen-position" || p == "pfl-position") {
 		listen_position_changed ();
 	} else if (p == "solo-control-is-listen-control") {
 		solo_control_mode_changed ();

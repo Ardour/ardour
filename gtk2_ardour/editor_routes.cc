@@ -336,7 +336,7 @@ EditorRoutes::on_tv_solo_enable_toggled (std::string const & path_string)
 		boost::shared_ptr<RouteList> rl (new RouteList);
 		rl->push_back (rtv->route());
 		if (Config->get_solo_control_is_listen_control()) {
-			_session->set_listen (rl, !rtv->route()->listening(), Session::rt_cleanup);
+			_session->set_listen (rl, !rtv->route()->listening_via_monitor(), Session::rt_cleanup);
 		} else {
 			_session->set_solo (rl, !rtv->route()->self_soloed(), Session::rt_cleanup);
 		}
@@ -929,7 +929,7 @@ EditorRoutes::key_press (GdkEventKey* ev)
 
         case 's':
 		if (Config->get_solo_control_is_listen_control()) {
-			_session->set_listen (rl, !rl->front()->listening(), Session::rt_cleanup);
+			_session->set_listen (rl, !rl->front()->listening_via_monitor(), Session::rt_cleanup);
 		} else {
 			_session->set_solo (rl, !rl->front()->self_soloed(), Session::rt_cleanup);
 		}

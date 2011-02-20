@@ -727,10 +727,8 @@ Session::hookup_io ()
 				/* relax */
                                 
 			} else {
-                                
-				(*x)->listen_via (_monitor_out,
-				                  (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),
-				                  false, false);
+
+				(*x)->listen_via_monitor ();
 			}
 		}
 	}
@@ -2000,9 +1998,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 			} else if ((*x)->is_master()) {
 				/* relax */
 			} else {
-				(*x)->listen_via (_monitor_out,
-				                  (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),
-				                  false, false);
+				(*x)->listen_via_monitor ();
 			}
 		}
 
@@ -2091,7 +2087,7 @@ Session::add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::
 			continue;
 		}
 
-		(*i)->listen_via (dest, p, true, true);
+		(*i)->listen_via (dest, p);
 	}
 
 	graph_reordered ();
@@ -2207,7 +2203,7 @@ Session::route_listen_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 		return;
 	}
 
-	if (route->listening()) {
+	if (route->listening_via_monitor ()) {
 
 		if (Config->get_exclusive_solo()) {
 			/* new listen: disable all other listen */
@@ -2363,7 +2359,7 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 			something_soloed = true;
 		}
 
-		if (!(*i)->is_hidden() && (*i)->listening()) {
+		if (!(*i)->is_hidden() && (*i)->listening_via_monitor()) {
 			if (Config->get_solo_control_is_listen_control()) {
 				listeners++;
 			} else {
@@ -3892,22 +3888,10 @@ Session::update_have_rec_enabled_track ()
 void
 Session::listen_position_changed ()
 {
-	Placement p;
-
-	switch (Config->get_listen_position()) {
-	case AfterFaderListen:
-		p = PostFader;
-		break;
-
-	case PreFaderListen:
-		p = PreFader;
-		break;
-	}
-
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->put_monitor_send_at (p);
+		(*i)->listen_position_changed ();
 	}
 }
 

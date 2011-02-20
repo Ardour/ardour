@@ -65,6 +65,7 @@ setup_enum_writer ()
 	RegionPoint _RegionPoint;
 	Placement _Placement;
 	MonitorModel _MonitorModel;
+	PFLPosition _PFLPosition;
 	RemoteModel _RemoteModel;
 	DenormalModel _DenormalModel;
 	CrossfadeModel _CrossfadeModel;
@@ -218,6 +219,10 @@ setup_enum_writer ()
 	REGISTER_ENUM (SoftwareMonitoring);
 	REGISTER_ENUM (ExternalMonitoring);
 	REGISTER (_MonitorModel);
+
+	REGISTER_ENUM (PFLFromBeforeProcessors);
+	REGISTER_ENUM (PFLFromAfterProcessors);
+	REGISTER (_PFLPosition);
 
 	REGISTER_ENUM (DenormalNone);
 	REGISTER_ENUM (DenormalFTZ);
@@ -603,6 +608,7 @@ std::ostream& operator<<(std::ostream& o, const AutoConnectOption& var)
 	std::string s = enum_2_string (var);
 	return o << s;
 }
+
 std::istream& operator>>(std::istream& o, MonitorModel& var) 
 { 
 	std::string s;
@@ -616,6 +622,21 @@ std::ostream& operator<<(std::ostream& o, const MonitorModel& var)
 	std::string s = enum_2_string (var);
 	return o << s;
 }
+
+std::istream& operator>>(std::istream& o, PFLPosition& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (PFLPosition) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const PFLPosition& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
 std::istream& operator>>(std::istream& o, RemoteModel& var) 
 {
 	std::string s;

@@ -155,7 +155,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	bool solo_safe() const;
 
 	void set_listen (bool yn, void* src);
-	bool listening () const;
+	bool listening_via_monitor () const;
 
 	void set_phase_invert (uint32_t, bool yn);
 	void set_phase_invert (boost::dynamic_bitset<>);
@@ -220,7 +220,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void add_internal_return ();
 	BufferSet* get_return_buffer () const;
 	void release_return_buffer () const;
-	void put_monitor_send_at (Placement);
+	void listen_position_changed ();
 	boost::shared_ptr<CapturingProcessor> add_export_point(/* Add some argument for placement later */);
 
 	/** A record of the stream configuration at some point in the processor list.
@@ -294,7 +294,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	PBD::Signal1<void,void*> SelectedChanged;
 
-	int listen_via (boost::shared_ptr<Route>, Placement p, bool active, bool aux);
+	int listen_via_monitor ();
+	int listen_via (boost::shared_ptr<Route>, Placement p);
 	void drop_listen (boost::shared_ptr<Route>);
 
        /** 
@@ -508,6 +509,40 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	void set_processor_positions ();
         void update_port_latencies (const PortSet& ports, const PortSet& feeders, bool playback, framecnt_t) const;
+
+	void setup_invisible_processors ();
+
+	boost::shared_ptr<CapturingProcessor> _capturing_processor;
+
+	/** A handy class to keep processor state while we attempt a reconfiguration
+	 *  that may fail.
+	 */
+	class ProcessorState {
+	public:
+		ProcessorState (Route* r)
+			: _route (r)
+			, _processors (r->_processors)
+			, _processor_max_streams (r->processor_max_streams)
+		{ }
+
+		void restore () {
+			_route->_processors = _processors;
+			_route->processor_max_streams = _processor_max_streams;
+		}
+
+	private:
+		/* this should perhaps be a shared_ptr, but ProcessorStates will
+		   not hang around long enough for it to matter.
+		*/
+		Route* _route;
+		ProcessorList _processors;
+		ChanCount _processor_max_streams;
+	};
+
+	friend class ProcessorState;
+
+	/* no copy construction */
+	Route (Route const &);
 };
 
 } // namespace ARDOUR
