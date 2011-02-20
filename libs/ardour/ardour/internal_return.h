@@ -27,12 +27,14 @@
 
 namespace ARDOUR {
 
+class InternalSend;	
+
 class InternalReturn : public Return
 {
   public:
 	InternalReturn (Session&);
 
-XMLNode& state(bool full);
+	XMLNode& state(bool full);
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&, int version);
 
@@ -41,14 +43,16 @@ XMLNode& state(bool full);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	int  set_block_size (pframes_t);
 
-	BufferSet* get_buffers();
-	void release_buffers();
-
+	void add_send (InternalSend *);
+	void remove_send (InternalSend *);
+	
 	static PBD::Signal1<void, pframes_t> CycleStart;
 
   private:
 	BufferSet buffers;
-	gint user_count; /* atomic */
+	/** sends that we are receiving data from */
+	std::list<InternalSend*> _sends;
+	
 	void allocate_buffers (pframes_t);
 	void cycle_start (pframes_t);
 };

@@ -34,7 +34,6 @@ using namespace std;
 
 InternalSend::InternalSend (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, boost::shared_ptr<Route> sendto, Delivery::Role role)
 	: Send (s, p, mm, role)
-	, target (0)
 {
         if (sendto) {
                 if (use_target (sendto)) {
@@ -46,18 +45,20 @@ InternalSend::InternalSend (Session& s, boost::shared_ptr<Pannable> p, boost::sh
 InternalSend::~InternalSend ()
 {
 	if (_send_to) {
-		_send_to->release_return_buffer ();
+		_send_to->remove_send_from_internal_return (this);
 	}
 }
 
 int
 InternalSend::use_target (boost::shared_ptr<Route> sendto)
 {
+	if (_send_to) {
+		_send_to->remove_send_from_internal_return (this);
+	}
+	
         _send_to = sendto;
 
-        if ((target = _send_to->get_return_buffer ()) == 0) {
-                return -1;
-        }
+        _send_to->add_send_to_internal_return (this);
         
         set_name (sendto->name());
         _send_to_id = _send_to->id();
@@ -74,7 +75,6 @@ InternalSend::use_target (boost::shared_ptr<Route> sendto)
 void
 InternalSend::send_to_going_away ()
 {
-	target = 0;
         target_connections.drop_connections ();
 	_send_to.reset ();
 	_send_to_id = "0";
@@ -83,7 +83,7 @@ InternalSend::send_to_going_away ()
 void
 InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool)
 {
-	if ((!_active && !_pending_active) || !target || !_send_to) {
+	if ((!_active && !_pending_active) || !_send_to) {
 		_meter->reset ();
 		return;
 	}
@@ -138,9 +138,7 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 		}
 	}
 
-	/* deliver to target */
-
-	target->merge_from (mixbufs, nframes);
+	/* target will pick up our output when it is ready */
 
   out:
 	_active = _pending_active;
@@ -150,11 +148,6 @@ int
 InternalSend::set_block_size (pframes_t nframes)
 {
 	mixbufs.ensure_buffers (_configured_input, nframes);
-
-	/* ensure that our target can cope with us merging this many frames to it */
-	if (target) {
-		target->ensure_buffers (_configured_input, nframes);
-	}
         return 0;
 }
 

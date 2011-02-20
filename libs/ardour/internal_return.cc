@@ -23,6 +23,7 @@
 #include "ardour/internal_return.h"
 #include "ardour/mute_master.h"
 #include "ardour/session.h"
+#include "ardour/internal_send.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -31,7 +32,6 @@ PBD::Signal1<void, pframes_t> InternalReturn::CycleStart;
 
 InternalReturn::InternalReturn (Session& s)
 	: Return (s, true)
-	, user_count (0)
 {
 	CycleStart.connect_same_thread (*this, boost::bind (&InternalReturn::cycle_start, this, _1));
         _display_to_user = false;
@@ -44,14 +44,14 @@ InternalReturn::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*e
 		return;
 	}
 
-	/* no lock here, just atomic fetch */
+	/* _sends is only modified with the process lock held, so this is ok, I think */
 
-	if (g_atomic_int_get(&user_count) == 0) {
-		/* nothing to do - nobody is feeding us anything */
-		return;
+	for (list<InternalSend*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
+		if ((*i)->active ()) {
+			bufs.merge_from ((*i)->get_buffers(), nframes);
+		}
 	}
 
-	bufs.merge_from (buffers, nframes);
 	_active = _pending_active;
 }
 
@@ -77,34 +77,26 @@ InternalReturn::allocate_buffers (pframes_t nframes)
 	buffers.set_count (_configured_input);
 }
 
-BufferSet*
-InternalReturn::get_buffers ()
+void
+InternalReturn::add_send (InternalSend* send)
 {
 	Glib::Mutex::Lock lm (_session.engine().process_lock());
-	/* use of g_atomic here is just for code consistency - its protected by the lock
-	   for writing.
-	*/
-	g_atomic_int_inc (&user_count);
-	return &buffers;
+	_sends.push_back (send);
 }
 
 void
-InternalReturn::release_buffers ()
+InternalReturn::remove_send (InternalSend* send)
 {
 	Glib::Mutex::Lock lm (_session.engine().process_lock());
-	if (user_count) {
-		/* use of g_atomic here is just for code consistency - its protected by the lock
-		   for writing.
-		*/
-		(void) g_atomic_int_dec_and_test (&user_count);
-	}
+	_sends.remove (send);
+	/* XXX: do we need to remove the connection to this send from _send_drop_references_connections ? */
 }
 
 void
 InternalReturn::cycle_start (pframes_t nframes)
 {
 	/* called from process cycle - no lock necessary */
-	if (user_count) {
+	if (!_sends.empty ()) {
 		/* don't bother with this if nobody is going to feed us anything */
 		buffers.silence (nframes, 0);
 	}
@@ -138,3 +130,4 @@ InternalReturn::can_support_io_configuration (const ChanCount& in, ChanCount& ou
 	return true;
 }
 
+	

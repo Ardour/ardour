@@ -63,6 +63,7 @@ class InternalReturn;
 class MonitorProcessor;
 class Pannable;
 class CapturingProcessor;
+class InternalSend;
 
 class Route : public SessionObject, public Automatable, public RouteGroupMember, public GraphNode
 {
@@ -218,8 +219,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::shared_ptr<MonitorProcessor> monitor_control() const { return _monitor_control; }
 	boost::shared_ptr<Send>             internal_send_for (boost::shared_ptr<const Route> target) const;
 	void add_internal_return ();
-	BufferSet* get_return_buffer () const;
-	void release_return_buffer () const;
+	void add_send_to_internal_return (InternalSend *);
+	void remove_send_from_internal_return (InternalSend *);
 	void listen_position_changed ();
 	boost::shared_ptr<CapturingProcessor> add_export_point(/* Add some argument for placement later */);
 

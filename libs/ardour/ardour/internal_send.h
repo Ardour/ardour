@@ -48,9 +48,12 @@ class InternalSend : public Send
 	boost::shared_ptr<Route> target_route() const { return _send_to; }
 	const PBD::ID& target_id() const { return _send_to_id; }
 
+	BufferSet const & get_buffers () const {
+		return mixbufs;
+	}
+
   private:
-	BufferSet  mixbufs;
-	BufferSet* target;
+	BufferSet mixbufs;
 	boost::shared_ptr<Route> _send_to;
 	PBD::ID _send_to_id;
 	PBD::ScopedConnection connect_c;

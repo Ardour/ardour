@@ -2465,8 +2465,8 @@ Route::add_internal_return ()
 	}
 }
 
-BufferSet*
-Route::get_return_buffer () const
+void
+Route::add_send_to_internal_return (InternalSend* send)
 {
 	Glib::RWLock::ReaderLock rm (_processor_lock);
 
@@ -2474,16 +2474,13 @@ Route::get_return_buffer () const
 		boost::shared_ptr<InternalReturn> d = boost::dynamic_pointer_cast<InternalReturn>(*x);
 
 		if (d) {
-			BufferSet* bs = d->get_buffers ();
-			return bs;
+			return d->add_send (send);
 		}
 	}
-
-	return 0;
 }
 
 void
-Route::release_return_buffer () const
+Route::remove_send_from_internal_return (InternalSend* send)
 {
 	Glib::RWLock::ReaderLock rm (_processor_lock);
 
@@ -2491,7 +2488,7 @@ Route::release_return_buffer () const
 		boost::shared_ptr<InternalReturn> d = boost::dynamic_pointer_cast<InternalReturn>(*x);
 
 		if (d) {
-			return d->release_buffers ();
+			return d->remove_send (send);
 		}
 	}
 }
