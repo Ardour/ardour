@@ -422,10 +422,11 @@ ARDOUR_UI::post_engine ()
 	if (ARDOUR_COMMAND_LINE::show_key_actions) {
 		vector<string> names;
 		vector<string> paths;
+		vector<string> tooltips;
 		vector<string> keys;
 		vector<AccelKey> bindings;
 
-		ActionManager::get_all_actions (names, paths, keys, bindings);
+		ActionManager::get_all_actions (names, paths, tooltips, keys, bindings);
 
 		vector<string>::iterator n;
 		vector<string>::iterator k;

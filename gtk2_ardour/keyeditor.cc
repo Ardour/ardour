@@ -225,21 +225,23 @@ KeyEditor::populate ()
 {
 	vector<string> paths;
 	vector<string> labels;
+	vector<string> tooltips;
 	vector<string> keys;
 	vector<AccelKey> bindings;
 	typedef std::map<string,TreeIter> NodeMap;
 	NodeMap nodes;
 	NodeMap::iterator r;
 
-	ActionManager::get_all_actions (labels, paths, keys, bindings);
+	ActionManager::get_all_actions (labels, paths, tooltips, keys, bindings);
 
 	vector<string>::iterator k;
 	vector<string>::iterator p;
+	vector<string>::iterator t;
 	vector<string>::iterator l;
 
 	model->clear ();
 
-	for (l = labels.begin(), k = keys.begin(), p = paths.begin(); l != labels.end(); ++k, ++p, ++l) {
+	for (l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l) {
 
 		TreeModel::Row row;
 		vector<string> parts;
@@ -274,7 +276,11 @@ KeyEditor::populate ()
 
 		/* add this action */
 
-		row[columns.action] = (*l);
+		if (l->empty ()) {
+			row[columns.action] = *t;
+		} else {
+			row[columns.action] = *l;
+		}
 		row[columns.path] = (*p);
 		row[columns.bindable] = true;
 

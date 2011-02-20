@@ -83,11 +83,35 @@ ActionManager::register_radio_action (RefPtr<ActionGroup> group, RadioAction::Gr
 }
 
 RefPtr<Action>
+ActionManager::register_radio_action (
+	RefPtr<ActionGroup> group, RadioAction::Group& rgroup, string const & name, string const & label, string const & tooltip, slot<void> sl
+	)
+{
+	RefPtr<Action> act;
+
+	act = RadioAction::create (rgroup, name, label, tooltip);
+	group->add (act, sl);
+
+	return act;
+}
+
+RefPtr<Action>
 ActionManager::register_toggle_action (RefPtr<ActionGroup> group, const char * name, const char * label, slot<void> sl)
 {
 	RefPtr<Action> act;
 
 	act = ToggleAction::create (name, label);
+	group->add (act, sl);
+
+	return act;
+}
+
+RefPtr<Action>
+ActionManager::register_toggle_action (RefPtr<ActionGroup> group, string const & name, string const & label, string const & tooltip, slot<void> sl)
+{
+	RefPtr<Action> act;
+
+	act = ToggleAction::create (name, label, tooltip);
 	group->add (act, sl);
 
 	return act;
@@ -117,7 +141,7 @@ struct SortActionsByLabel {
 };
 
 void
-ActionManager::get_all_actions (vector<string>& groups, vector<string>& names, vector<AccelKey>& bindings)
+ActionManager::get_all_actions (vector<string>& groups, vector<string>& names, vector<string>& tooltips, vector<AccelKey>& bindings)
 {
 	/* the C++ API for functions used here appears to be broken in
 	   gtkmm2.6, so we fall back to the C level.
@@ -152,6 +176,7 @@ ActionManager::get_all_actions (vector<string>& groups, vector<string>& names, v
 
 			groups.push_back (gtk_action_group_get_name(group));
 			names.push_back (accel_path.substr (accel_path.find_last_of ('/') + 1));
+			tooltips.push_back ((*a)->get_tooltip ());
 
 			AccelKey key;
 			lookup_entry (accel_path, key);
@@ -161,7 +186,7 @@ ActionManager::get_all_actions (vector<string>& groups, vector<string>& names, v
 }
 
 void
-ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, vector<string>& keys, vector<AccelKey>& bindings)
+ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, vector<string>& tooltips, vector<string>& keys, vector<AccelKey>& bindings)
 {
 	/* the C++ API for functions used here appears to be broken in
 	   gtkmm2.6, so we fall back to the C level.
@@ -192,11 +217,12 @@ ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, ve
 
 		for (action_list::iterator a = the_acts.begin(); a != the_acts.end(); ++a) {
 
-			string accel_path = (*a)->get_accel_path ();
-			ustring label = (*a)->property_label();
+			ustring const label = (*a)->property_label ();
+			string const accel_path = (*a)->get_accel_path ();
 
 			names.push_back (label);
 			paths.push_back (accel_path);
+			tooltips.push_back ((*a)->get_tooltip ());
 
 			AccelKey key;
 			keys.push_back (get_key_representation (accel_path, key));

@@ -535,9 +535,10 @@ Keyboard::load_keybindings (string path)
 
 	vector<string> groups;
 	vector<string> names;
+	vector<string> tooltips;
 	vector<AccelKey> bindings;
 
-	ActionManager::get_all_actions (groups, names, bindings);
+	ActionManager::get_all_actions (groups, names, tooltips, bindings);
 
 	vector<string>::iterator g;
 	vector<AccelKey>::iterator b;

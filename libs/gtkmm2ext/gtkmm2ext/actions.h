@@ -58,23 +58,29 @@ namespace ActionManager {
 								const char * name, const char * label, sigc::slot<void> sl,
 								guint key, Gdk::ModifierType mods);
 	extern Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&,
-							 const char * name, const char * label, sigc::slot<void> sl);
+								const char * name, const char * label, sigc::slot<void> sl);
+	extern Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&,
+								std::string const &, std::string const &, std::string const &, sigc::slot<void> sl);
 
 	extern Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
 							  const char * name, const char * label, sigc::slot<void> sl,
 							  guint key, Gdk::ModifierType mods);
 	extern Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
-							  const char * name, const char * label, sigc::slot<void> sl);
+								 std::string const &, std::string const &, std::string const &, sigc::slot<void> sl);
+	extern Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
+								 const char * name, const char * label, sigc::slot<void> sl);
 
 	extern bool lookup_entry (const Glib::ustring accel_path, Gtk::AccelKey& key);
 
 	extern void get_all_actions (std::vector<std::string>& names,
 				     std::vector<std::string>& paths,
+				     std::vector<std::string>& tooltips,
 				     std::vector<std::string>& keys,
 				     std::vector<Gtk::AccelKey>& bindings);
 
 	extern void get_all_actions (std::vector<std::string>& groups,
 				     std::vector<std::string>& paths,
+				     std::vector<std::string>& tooltips,
 				     std::vector<Gtk::AccelKey>& bindings);
 
 	extern void uncheck_toggleaction (std::string);
