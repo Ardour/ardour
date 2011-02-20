@@ -89,7 +89,6 @@ InternalReturn::remove_send (InternalSend* send)
 {
 	Glib::Mutex::Lock lm (_session.engine().process_lock());
 	_sends.remove (send);
-	/* XXX: do we need to remove the connection to this send from _send_drop_references_connections ? */
 }
 
 void
