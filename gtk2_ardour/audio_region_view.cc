@@ -411,11 +411,10 @@ AudioRegionView::region_resized (const PropertyChange& what_changed)
 		list<std::pair<framepos_t, ArdourCanvas::Line*> >::iterator l;
 		
 		for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
-			if ((*l).first > _region->length()- 1){
-			  (*l).second->hide();
-			}
-			else {
-			  (*l).second->show();
+			if (l->first > _region->length() - 1) {
+				l->second->hide();
+			} else {
+				l->second->show();
 			}
 		}
 	}
