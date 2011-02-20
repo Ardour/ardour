@@ -2645,6 +2645,12 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		} else {
 
 			ret = load_session (session_path, session_name, template_name);
+
+			if (ret == -2) {
+				/* not connected to the AudioEngine, so quit to avoid an infinite loop */
+				exit (1);
+			}
+			
 			if (!ARDOUR_COMMAND_LINE::immediate_save.empty()) {
 				_session->save_state (ARDOUR_COMMAND_LINE::immediate_save, false);
 				exit (1);
@@ -2675,6 +2681,7 @@ ARDOUR_UI::close_session()
 	goto_editor_window ();
 }
 
+/** @return -2 if the load failed because we are not connected to the AudioEngine */
 int
 ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, std::string mix_template)
 {
@@ -2685,7 +2692,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 	session_loaded = false;
 
 	if (!check_audioengine()) {
-		return -1;
+		return -2;
 	}
 
 	unload_status = unload_session ();
