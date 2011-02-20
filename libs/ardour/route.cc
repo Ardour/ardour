@@ -3634,8 +3634,8 @@ Route::update_port_latencies (const PortSet& operands, const PortSet& feeders, b
 void
 Route::setup_invisible_processors ()
 {
-#ifdef NDEBUG
-	Glib::RWLock::WriterLock lm (_processor_lock, Glib::TryLock);
+#ifndef NDEBUG
+ 	Glib::RWLock::WriterLock lm (_processor_lock, Glib::TRY_LOCK);
 	assert (!lm.locked ());
 #endif
 
