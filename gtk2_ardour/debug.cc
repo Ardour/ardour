@@ -26,4 +26,5 @@
 using namespace std;
 
 uint64_t PBD::DEBUG::Drags = PBD::new_debug_bit ("drags");
+uint64_t PBD::DEBUG::CutNPaste = PBD::new_debug_bit ("cutnpaste");
 

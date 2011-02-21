@@ -49,6 +49,7 @@
 #include "canvas-hit.h"
 #include "canvas-note.h"
 #include "canvas_patch_change.h"
+#include "debug.h"
 #include "editor.h"
 #include "ghostregion.h"
 #include "gui_thread.h"
@@ -2969,6 +2970,8 @@ MidiRegionView::paste (framepos_t pos, float times, const MidiCutBuffer& mcb)
 		return;
 	}
 
+        DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("MIDI paste @ %1 times %2\n", pos, times));
+
 	start_note_diff_command (_("paste"));
 
 	Evoral::MusicalTime beat_delta;
@@ -2981,6 +2984,12 @@ MidiRegionView::paste (framepos_t pos, float times, const MidiCutBuffer& mcb)
 	beat_delta = (*mcb.notes().begin())->time() - paste_pos_beats;
 	paste_pos_beats = 0;
 
+        DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste data spans from %1 to %2 (%3) ; paste pos beats = %4 (based on %5 - %6 ; beat delta = %7\n",
+                                                       (*mcb.notes().begin())->time(),
+                                                       (*mcb.notes().rbegin())->end_time(),
+                                                       duration, pos, _region->position(),
+                                                       paste_pos_beats, beat_delta));
+                                                       
         clear_selection ();
 
 	for (int n = 0; n < (int) times; ++n) {
@@ -3005,6 +3014,8 @@ MidiRegionView::paste (framepos_t pos, float times, const MidiCutBuffer& mcb)
 	framepos_t region_end = _region->position() + _region->length() - 1;
 
 	if (end_frame > region_end) {
+
+                DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste extended region from %1 to %2\n", region_end, end_frame));
 
 		trackview.session()->begin_reversible_command (_("paste"));
 
