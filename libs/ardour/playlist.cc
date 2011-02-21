@@ -1255,6 +1255,7 @@ Playlist::paste (boost::shared_ptr<Playlist> other, framepos_t position, float t
 				*/
 
 				copy_of_region->set_layer (copy_of_region->layer() + top_layer);
+                                cerr << "DEBUG: add new region at " << pos << endl;
 				add_region_internal (copy_of_region, (*i)->position() + pos);
 			}
 			pos += shift;
