@@ -61,6 +61,7 @@
 #include "evoral/Parameter.hpp"
 
 #include "ardour_ui.h"
+#include "debug.h"
 #include "global_signals.h"
 #include "route_time_axis.h"
 #include "automation_time_axis.h"
@@ -1396,8 +1397,11 @@ RouteTimeAxisView::paste (framepos_t pos, float times, Selection& selection, siz
 		return false;
 	}
 
+        DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("paste to %1\n", pos));
+
 	if (track()->speed() != 1.0f) {
 		pos = session_frame_to_track_frame (pos, track()->speed());
+                DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("modified paste to %1\n", pos));
 	}
 
         pl->clear_changes ();
