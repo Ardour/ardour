@@ -77,6 +77,7 @@
 #include "control_protocol/control_protocol.h"
 
 #include "editor.h"
+#include "debug.h"
 #include "keyboard.h"
 #include "marker.h"
 #include "playlist_selector.h"
@@ -4402,6 +4403,7 @@ Editor::get_preferred_edit_position (bool ignore_playhead)
 	EditPoint ep = _edit_point;
 
 	if (entered_marker) {
+                DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use entered marker @ %1\n", entered_marker->position()));
 		return entered_marker->position();
 	}
 
@@ -4412,6 +4414,7 @@ Editor::get_preferred_edit_position (bool ignore_playhead)
 	switch (ep) {
 	case EditAtPlayhead:
 		where = _session->audible_frame();
+                DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use playhead @ %1\n", where));
 		break;
 
 	case EditAtSelectedMarker:
@@ -4424,6 +4427,7 @@ Editor::get_preferred_edit_position (bool ignore_playhead)
 				} else {
 					where = loc->end();
 				}
+                                DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use selected marker @ %1\n", where));
 				break;
 			}
 		}
@@ -4436,6 +4440,7 @@ Editor::get_preferred_edit_position (bool ignore_playhead)
 			return 0;
 		}
 		snap_to (where);
+                DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use mouse @ %1\n", where));
 		break;
 	}
 
