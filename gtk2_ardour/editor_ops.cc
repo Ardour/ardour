@@ -58,6 +58,7 @@
 #include "ardour/operations.h"
 
 #include "ardour_ui.h"
+#include "debug.h"
 #include "editor.h"
 #include "time_axis_view.h"
 #include "route_time_axis.h"
@@ -4131,6 +4132,7 @@ Editor::cut_copy_ranges (CutCopyOp op)
 void
 Editor::paste (float times)
 {
+        DEBUG_TRACE (DEBUG::CutNPaste, "paste to preferred edit pos\n");
 	paste_internal (get_preferred_edit_position(), times);
 }
 
@@ -4153,6 +4155,8 @@ Editor::paste_internal (framepos_t position, float times)
 {
 	bool commit = false;
 
+        DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("apparent paste position is %1\n", position));
+
 	if (internal_editing()) {
 		if (cut_buffer->midi_notes.empty()) {
 			return;
@@ -4165,6 +4169,7 @@ Editor::paste_internal (framepos_t position, float times)
 
 	if (position == max_framepos) {
 		position = get_preferred_edit_position();
+                DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("preferred edit position is %1\n", position));
 	}
 
 	begin_reversible_command (Operations::paste);
