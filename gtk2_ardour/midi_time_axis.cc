@@ -349,6 +349,8 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 
 	items.push_back (CheckMenuElem (_("MIDI Thru"), sigc::mem_fun(*this, &MidiTimeAxisView::toggle_midi_thru)));
 	_midi_thru_item = dynamic_cast<CheckMenuItem*>(&items.back());
+
+	items.push_back (SeparatorElem ());
 }
 
 Gtk::Menu*

@@ -179,9 +179,10 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 	MenuList& items = display_menu->items();
 
 	// crossfade stuff
-	if (!Profile->get_sae()) {
+	if (!Profile->get_sae() && is_track ()) {
 		items.push_back (MenuElem (_("Hide All Crossfades"), sigc::mem_fun(*this, &AudioTimeAxisView::hide_all_xfades)));
 		items.push_back (MenuElem (_("Show All Crossfades"), sigc::mem_fun(*this, &AudioTimeAxisView::show_all_xfades)));
+		items.push_back (SeparatorElem ());
 	}
 }
 

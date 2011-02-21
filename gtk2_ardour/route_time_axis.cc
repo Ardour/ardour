@@ -458,7 +458,6 @@ RouteTimeAxisView::build_display_menu ()
 
 	// Hook for derived classes to add type specific stuff
 	append_extra_display_menu_items ();
-	items.push_back (SeparatorElem());
 
 	if (is_track()) {
 
