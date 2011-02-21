@@ -777,7 +777,11 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t posi
 	regions.insert (upper_bound (regions.begin(), regions.end(), region, cmp), region);
 	all_regions.insert (region);
 
+        cerr << "Playlist: region added at " << position << endl;
+
 	possibly_splice_unlocked (position, region->length(), region);
+
+        cerr << "Playlist: post-splice, region @  " << region->position() << endl;
 
 	if (!holding_state ()) {
 		/* layers get assigned from XML state, and are not reset during undo/redo */
