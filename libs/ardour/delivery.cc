@@ -294,9 +294,6 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 
 		_panshell->run (bufs, output_buffers(), start_frame, end_frame, nframes);
 
-		if (result_required) {
-			bufs.read_from (output_buffers (), nframes);
-		}
 
 	} else {
 
@@ -310,6 +307,10 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, _output_offset);
 		}
 	}
+
+        if (result_required) {
+                bufs.read_from (output_buffers (), nframes);
+        }
 
   out:
 	_active = _pending_active;
