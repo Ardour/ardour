@@ -250,6 +250,9 @@ Mixer_UI::show_window ()
 	if (!_visible) {
 		set_window_pos_and_size ();
 
+		/* show/hide group tabs as required */
+		parameter_changed ("show-group-tabs");
+
 		/* now reset each strips width so the right widgets are shown */
 		MixerStrip* ms;
 

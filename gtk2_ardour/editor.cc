@@ -821,11 +821,11 @@ Editor::show_window ()
 		   be nicer if we could just call show () above rather
 		   than needing the show_all ()
 		*/
-		
+
 		/* re-hide stuff if necessary */
 		editor_list_button_toggled ();
 		parameter_changed ("show-summary");
-		parameter_changed ("show-edit-group-tabs");
+		parameter_changed ("show-group-tabs");
 		parameter_changed ("show-zoom-tools");
 
 		/* now reset all audio_time_axis heights, because widgets might need
