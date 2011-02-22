@@ -97,8 +97,6 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
         , _recordable (true)
         , _silent (false)
         , _declickable (false)
-	, _solo_control (new SoloControllable (X_("solo"), *this))
-	, _mute_control (new MuteControllable (X_("mute"), *this))
 	, _mute_master (new MuteMaster (sess, name))
         , _have_internal_generator (false)
         , _solo_safe (false)
@@ -114,6 +112,9 @@ int
 Route::init ()
 {
         /* add standard controls */
+
+	_solo_control.reset (new SoloControllable (X_("solo"), shared_from_this ()));
+	_mute_control.reset (new MuteControllable (X_("mute"), shared_from_this ()));
 
 	_solo_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
 	_mute_control->set_flags (Controllable::Flag (_mute_control->flags() | Controllable::Toggle));
@@ -3096,10 +3097,10 @@ Route::automation_snapshot (framepos_t now, bool force)
 	}
 }
 
-Route::SoloControllable::SoloControllable (std::string name, Route& r)
-	: AutomationControl (r.session(), Evoral::Parameter (SoloAutomation),
+Route::SoloControllable::SoloControllable (std::string name, boost::shared_ptr<Route> r)
+	: AutomationControl (r->session(), Evoral::Parameter (SoloAutomation),
 			     boost::shared_ptr<AutomationList>(), name)
-	, route (r)
+	, _route (r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(SoloAutomation)));
 	set_list (gl);
@@ -3109,36 +3110,42 @@ void
 Route::SoloControllable::set_value (double val)
 {
 	bool bval = ((val >= 0.5f) ? true: false);
-# if 0
-	this is how it should be done 
 
 	boost::shared_ptr<RouteList> rl (new RouteList);
-	rl->push_back (route);
+
+	boost::shared_ptr<Route> r = _route.lock ();
+	if (!r) {
+		return;
+	}
+	
+	rl->push_back (r);
 
 	if (Config->get_solo_control_is_listen_control()) {
 		_session.set_listen (rl, bval);
 	} else {
 		_session.set_solo (rl, bval);
 	}
-#else
-	route.set_solo (bval, this);
-#endif
 }
 
 double
-Route::SoloControllable::get_value (void) const
+Route::SoloControllable::get_value () const
 {
+	boost::shared_ptr<Route> r = _route.lock ();
+	if (!r) {
+		return 0;
+	}
+	
 	if (Config->get_solo_control_is_listen_control()) {
-		return route.listening_via_monitor() ? 1.0f : 0.0f;
+		return r->listening_via_monitor() ? 1.0f : 0.0f;
 	} else {
-		return route.self_soloed() ? 1.0f : 0.0f;
+		return r->self_soloed() ? 1.0f : 0.0f;
 	}
 }
 
-Route::MuteControllable::MuteControllable (std::string name, Route& r)
-	: AutomationControl (r.session(), Evoral::Parameter (MuteAutomation),
+Route::MuteControllable::MuteControllable (std::string name, boost::shared_ptr<Route> r)
+	: AutomationControl (r->session(), Evoral::Parameter (MuteAutomation),
 			     boost::shared_ptr<AutomationList>(), name)
-	, route (r)
+	, _route (r)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(MuteAutomation)));
 	set_list (gl);
@@ -3148,19 +3155,20 @@ void
 Route::MuteControllable::set_value (double val)
 {
 	bool bval = ((val >= 0.5f) ? true: false);
-# if 0
-	this is how it should be done 
 
 	boost::shared_ptr<RouteList> rl (new RouteList);
-	rl->push_back (route);
+
+	boost::shared_ptr<Route> r = _route.lock ();
+	if (!r) {
+		return;
+	}
+	
+	rl->push_back (r);
 	_session.set_mute (rl, bval);
-#else
-	route.set_mute (bval, this);
-#endif
 }
 
 double
-Route::MuteControllable::get_value (void) const
+Route::MuteControllable::get_value () const
 {
 	return route.muted() ? 1.0f : 0.0f;
 }

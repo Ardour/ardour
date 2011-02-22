@@ -671,7 +671,6 @@ Session::hookup_io ()
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state | InitialConnecting);
 
-
 	if (!auditioner) {
 
 		/* we delay creating the auditioner till now because
@@ -679,13 +678,12 @@ Session::hookup_io ()
 		*/
 
 		try {
-			Auditioner* a = new Auditioner (*this);
+			boost::shared_ptr<Auditioner> a (new Auditioner (*this));
 			if (a->init()) {
-				delete a;
-				throw failed_constructor();
+				throw failed_constructor ();
 			}
 			a->use_new_diskstream ();
-			auditioner.reset (a);
+			auditioner = a;
 		}
 
 		catch (failed_constructor& err) {
@@ -1486,20 +1484,17 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
                 boost::shared_ptr<MidiTrack> track;
                 
 		try {
-			MidiTrack* mt = new MidiTrack (*this, track_name, Route::Flag (0), mode);
+			track.reset (new MidiTrack (*this, track_name, Route::Flag (0), mode));
 
-			if (mt->init ()) {
-				delete mt;
+			if (track->init ()) {
 				goto failed;
 			}
 
-			mt->use_new_diskstream();
+			track->use_new_diskstream();
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			boost_debug_shared_ptr_mark_interesting (mt, "Track");
+			boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
 #endif
-			track = boost::shared_ptr<MidiTrack>(mt);
-
 			{
 				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				if (track->input()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
@@ -1657,20 +1652,17 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
                 boost::shared_ptr<AudioTrack> track;
                 
 		try {
-			AudioTrack* at = new AudioTrack (*this, track_name, Route::Flag (0), mode);
+			track.reset (new AudioTrack (*this, track_name, Route::Flag (0), mode));
 
-			if (at->init ()) {
-				delete at;
+			if (track->init ()) {
 				goto failed;
 			}
 
-			at->use_new_diskstream();
+			track->use_new_diskstream();
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			boost_debug_shared_ptr_mark_interesting (at, "Track");
+			boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
 #endif
-			track = boost::shared_ptr<AudioTrack>(at);
-
 			{
 				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
@@ -1779,18 +1771,15 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 		}
 
 		try {
-			Route* rt = new Route (*this, bus_name, Route::Flag(0), DataType::AUDIO);
+			boost::shared_ptr<Route> bus (new Route (*this, bus_name, Route::Flag(0), DataType::AUDIO));
 
-			if (rt->init ()) {
-				delete rt;
+			if (bus->init ()) {
 				goto failure;
 			}
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			boost_debug_shared_ptr_mark_interesting (rt, "Route");
+			boost_debug_shared_ptr_mark_interesting (bus.get(), "Route");
 #endif
-                        boost::shared_ptr<Route> bus (rt);
-
 			{
 				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
@@ -2222,6 +2211,8 @@ Session::route_listen_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 
 		_listen_cnt--;
 	}
+
+	update_route_solo_state ();
 }
 void
 Session::route_solo_isolated_changed (void* /*src*/, boost::weak_ptr<Route> wpr)

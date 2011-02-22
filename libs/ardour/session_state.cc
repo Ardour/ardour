@@ -580,15 +580,13 @@ Session::create (const string& mix_template, BusProfile* bus_profile)
                 ChanCount count(DataType::AUDIO, bus_profile->master_out_channels);
 
 		if (bus_profile->master_out_channels) {
-			Route* rt = new Route (*this, _("master"), Route::MasterOut, DataType::AUDIO);
-                        if (rt->init ()) {
-                                delete rt;
+			boost::shared_ptr<Route> r (new Route (*this, _("master"), Route::MasterOut, DataType::AUDIO));
+                        if (r->init ()) {
                                 return -1;
                         }
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			boost_debug_shared_ptr_mark_interesting (rt, "Route");
+			boost_debug_shared_ptr_mark_interesting (rt.get(), "Route");
 #endif
-			boost::shared_ptr<Route> r (rt);
 			{
 				Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				r->input()->ensure_io (count, false, this);
@@ -599,15 +597,13 @@ Session::create (const string& mix_template, BusProfile* bus_profile)
 			rl.push_back (r);
 
                         if (Config->get_use_monitor_bus()) {
-                                Route* rt = new Route (*this, _("monitor"), Route::MonitorOut, DataType::AUDIO);
-                                if (rt->init ()) {
-                                        delete rt;
+				boost::shared_ptr<Route> r (new Route (*this, _("monitor"), Route::MonitorOut, DataType::AUDIO));
+                                if (r->init ()) {
                                         return -1;
                                 }
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
                                 boost_debug_shared_ptr_mark_interesting (rt, "Route");
 #endif
-                                boost::shared_ptr<Route> r (rt);
 				{
 					Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 					r->input()->ensure_io (count, false, this);
@@ -1502,40 +1498,35 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 
 	if (ds_child) {
 
-                Track* track;
+		boost::shared_ptr<Track> track;
                 
                 if (type == DataType::AUDIO) {
-                        track = new AudioTrack (*this, X_("toBeResetFroXML"));
-                        
+                        track.reset (new AudioTrack (*this, X_("toBeResetFroXML")));
                 } else {
-                        track = new MidiTrack (*this, X_("toBeResetFroXML"));
+                        track.reset (new MidiTrack (*this, X_("toBeResetFroXML")));
                 }
                 
                 if (track->init()) {
-                        delete track;
                         return ret;
                 }
                 
                 if (track->set_state (node, version)) {
-                        delete track;
                         return ret;
                 }
                 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-                boost_debug_shared_ptr_mark_interesting (track, "Track");
+                boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
 #endif
-                ret.reset (track);
+                ret = track;
                 
 	} else {
-		Route* rt = new Route (*this, X_("toBeResetFroXML"));
+		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML")));
 
-                if (rt->init () == 0 && rt->set_state (node, version) == 0) {
+                if (r->init () == 0 && r->set_state (node, version) == 0) {
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-                        boost_debug_shared_ptr_mark_interesting (rt, "Route");
+                        boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
 #endif
-                        ret.reset (rt);
-                } else {
-                        delete rt;
+                        ret = r;
                 }
 	}
 
@@ -1577,42 +1568,37 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 			return boost::shared_ptr<Route> ();
 		}
 
-                Track* track;
-                
+		boost::shared_ptr<Track> track;
+
                 if (type == DataType::AUDIO) {
-                        track = new AudioTrack (*this, X_("toBeResetFroXML"));
-                        
+                        track.reset (new AudioTrack (*this, X_("toBeResetFroXML")));
                 } else {
-                        track = new MidiTrack (*this, X_("toBeResetFroXML"));
+                        track.reset (new MidiTrack (*this, X_("toBeResetFroXML")));
                 }
                 
                 if (track->init()) {
-                        delete track;
                         return ret;
                 }
                 
                 if (track->set_state (node, version)) {
-                        delete track;
                         return ret;
                 }
 
 		track->set_diskstream (*i);
                 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS                
-                boost_debug_shared_ptr_mark_interesting (track, "Track");
+                boost_debug_shared_ptr_mark_interesting (track.get(), "Track");
 #endif
-                ret.reset (track);
+                ret = track;
                 
 	} else {
-		Route* rt = new Route (*this, X_("toBeResetFroXML"));
+		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML")));
 
-                if (rt->init () == 0 && rt->set_state (node, version) == 0) {
+                if (r->init () == 0 && r->set_state (node, version) == 0) {
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
                         boost_debug_shared_ptr_mark_interesting (rt, "Route");
 #endif
-                        ret.reset (rt);
-                } else {
-                        delete rt;
+                        ret = r;
                 }
 	}
 

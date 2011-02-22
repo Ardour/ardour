@@ -30,6 +30,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #include <glibmm/thread.h>
 #include "pbd/fastlog.h"
@@ -65,7 +66,7 @@ class Pannable;
 class CapturingProcessor;
 class InternalSend;
 
-class Route : public SessionObject, public Automatable, public RouteGroupMember, public GraphNode
+class Route : public SessionObject, public Automatable, public RouteGroupMember, public GraphNode, public boost::enable_shared_from_this<Route>
 {
   public:
 
@@ -337,20 +338,24 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	boost::shared_ptr<AutomationControl> get_control (const Evoral::Parameter& param);
 
-	struct SoloControllable : public AutomationControl {
-		SoloControllable (std::string name, Route&);
+	class SoloControllable : public AutomationControl {
+	public:
+		SoloControllable (std::string name, boost::shared_ptr<Route>);
 		void set_value (double);
-		double get_value (void) const;
+		double get_value () const;
 
-		Route& route;
+	private:
+		boost::weak_ptr<Route> _route;
 	};
 
 	struct MuteControllable : public AutomationControl {
-		MuteControllable (std::string name, Route&);
+	public:
+		MuteControllable (std::string name, boost::shared_ptr<Route>);
 		void set_value (double);
-		double get_value (void) const;
+		double get_value () const;
 
-		Route& route;
+	private:		
+		boost::weak_ptr<Route> _route;
 	};
 
 	boost::shared_ptr<AutomationControl> solo_control() const {
