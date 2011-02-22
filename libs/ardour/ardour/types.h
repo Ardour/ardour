@@ -172,6 +172,7 @@ namespace ARDOUR {
 		MeterInput,
 		MeterPreFader,
 		MeterPostFader,
+                MeterOutput,
 		MeterCustom
 	};
 
@@ -351,6 +352,13 @@ namespace ARDOUR {
 		PFLFromBeforeProcessors,
 		/** PFL signals come pre-fader but after pre-fader processors */
 		PFLFromAfterProcessors
+	};
+
+	enum AFLPosition {
+		/** AFL signals come post-fader and before post-fader processors */
+		AFLFromBeforeProcessors,
+		/** AFL signals come post-fader but after post-fader processors */
+		AFLFromAfterProcessors
 	};
 
 	enum DenormalModel {
@@ -565,6 +573,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::AutoConnectOption& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::EditMode& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::MonitorModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::PFLPosition& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::AFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::RemoteModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ListenPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::LayerModel& sf);
@@ -585,6 +594,7 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::AutoConnectOption& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::EditMode& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::MonitorModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PFLPosition& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::AFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::RemoteModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ListenPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::LayerModel& sf);

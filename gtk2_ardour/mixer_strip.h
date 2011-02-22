@@ -288,6 +288,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	void update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width width, bool input_button);
 	void port_connected_or_disconnected (ARDOUR::Port *, ARDOUR::Port *);
+
+        static std::string meter_point_string (ARDOUR::MeterPoint);
 };
 
 #endif /* __ardour_mixer_strip__ */

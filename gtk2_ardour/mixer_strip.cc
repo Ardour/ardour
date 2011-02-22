@@ -427,23 +427,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-	switch (_route->meter_point()) {
-	case MeterInput:
-		meter_point_label.set_text (_("input"));
-		break;
-
-	case MeterPreFader:
-		meter_point_label.set_text (_("pre"));
-		break;
-
-	case MeterPostFader:
-		meter_point_label.set_text (_("post"));
-		break;
-
-	case MeterCustom:
-		meter_point_label.set_text (_("custom"));
-		break;
-	}
+        meter_point_label.set_text (meter_point_string (_route->meter_point()));
 
 	delete route_ops_menu;
 	route_ops_menu = 0;
@@ -1588,30 +1572,38 @@ MixerStrip::engine_running ()
 {
 }
 
+string
+MixerStrip::meter_point_string (MeterPoint mp)
+{
+	switch (mp) {
+	case MeterInput:
+                return _("in");
+		break;
+
+	case MeterPreFader:
+                return _("pre");
+		break;
+
+	case MeterPostFader:
+                return _("post");
+		break;
+
+	case MeterOutput:
+                return _("out");
+		break;
+
+	case MeterCustom:
+        default:
+                return _("custom");
+		break;
+	}
+}
+
 /** Called when the metering point has changed */
 void
 MixerStrip::meter_changed ()
 {
-	ENSURE_GUI_THREAD (*this, &MixerStrip::meter_changed)
-
-	switch (_route->meter_point()) {
-	case MeterInput:
-		meter_point_label.set_text (_("input"));
-		break;
-
-	case MeterPreFader:
-		meter_point_label.set_text (_("pre"));
-		break;
-
-	case MeterPostFader:
-		meter_point_label.set_text (_("post"));
-		break;
-
-	case MeterCustom:
-		meter_point_label.set_text (_("custom"));
-		break;
-	}
-
+        meter_point_label.set_text (meter_point_string (_route->meter_point()));
 	gpm.setup_meters ();
 	// reset peak when meter point changes
 	gpm.reset_peak_display();

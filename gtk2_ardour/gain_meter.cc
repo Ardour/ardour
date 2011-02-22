@@ -475,6 +475,10 @@ next_meter_point (MeterPoint mp)
 		break;
 
 	case MeterPostFader:
+		return MeterOutput;
+		break;
+
+	case MeterOutput:
 		return MeterCustom;
 		break;
 

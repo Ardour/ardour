@@ -1103,6 +1103,18 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Audio"), pp);
 
+	ComboOption<AFLPosition>* pa = new ComboOption<AFLPosition> (
+		"afl-position",
+		_("AFL signals come from"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_afl_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_afl_position)
+		);
+
+	pa->add (AFLFromBeforeProcessors, _("post-fader but before post-fader processors"));
+	pa->add (AFLFromAfterProcessors, _("after post-fader processors"));
+
+	add_option (_("Audio"), pa);
+
 	add_option (_("Audio"),
 	     new BoolOption (
 		     "tape-machine-mode",

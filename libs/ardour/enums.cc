@@ -66,6 +66,7 @@ setup_enum_writer ()
 	Placement _Placement;
 	MonitorModel _MonitorModel;
 	PFLPosition _PFLPosition;
+	AFLPosition _AFLPosition;
 	RemoteModel _RemoteModel;
 	DenormalModel _DenormalModel;
 	CrossfadeModel _CrossfadeModel;
@@ -164,6 +165,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeterInput);
 	REGISTER_ENUM (MeterPreFader);
 	REGISTER_ENUM (MeterPostFader);
+	REGISTER_ENUM (MeterOutput);
 	REGISTER_ENUM (MeterCustom);
 	REGISTER (_MeterPoint);
 
@@ -223,6 +225,10 @@ setup_enum_writer ()
 	REGISTER_ENUM (PFLFromBeforeProcessors);
 	REGISTER_ENUM (PFLFromAfterProcessors);
 	REGISTER (_PFLPosition);
+
+	REGISTER_ENUM (AFLFromBeforeProcessors);
+	REGISTER_ENUM (AFLFromAfterProcessors);
+	REGISTER (_AFLPosition);
 
 	REGISTER_ENUM (DenormalNone);
 	REGISTER_ENUM (DenormalFTZ);
@@ -632,6 +638,20 @@ std::istream& operator>>(std::istream& o, PFLPosition& var)
 }
 
 std::ostream& operator<<(std::ostream& o, const PFLPosition& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
+std::istream& operator>>(std::istream& o, AFLPosition& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (AFLPosition) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const AFLPosition& var) 
 { 
 	std::string s = enum_2_string (var);
 	return o << s;

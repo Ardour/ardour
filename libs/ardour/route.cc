@@ -3639,6 +3639,11 @@ Route::setup_invisible_processors ()
 	assert (!lm.locked ());
 #endif
 
+        if (!_main_outs) {
+                /* too early to be doing this stuff */
+                return;
+        }
+
 	/* we'll build this new list here and then use it */
 	
 	ProcessorList new_processors;
@@ -3678,8 +3683,10 @@ Route::setup_invisible_processors ()
 			new_processors.insert (amp, _meter);
 			break;
 		case MeterPostFader:
-			assert (!_meter->display_to_user ());
-			new_processors.insert (after_amp, _meter);
+                        /* do nothing here */
+			break;
+		case MeterOutput:
+                        /* do nothing here */
 			break;
 		case MeterCustom:
 			/* the meter is visible, so we don't touch it here */
@@ -3687,33 +3694,62 @@ Route::setup_invisible_processors ()
 		}
 	}
 
-
 	/* MAIN OUTS */
 
-	if (_main_outs) {
-		assert (!_main_outs->display_to_user ());
-		new_processors.push_back (_main_outs);
-	}
+        assert (_main_outs);
+        assert (!_main_outs->display_to_user ());
+        new_processors.push_back (_main_outs);
+
+        /* iterator for the main outs */
+        
+        ProcessorList::iterator main = new_processors.end();
+        --main;
+
+        /* OUTPUT METERING */
+
+        if (_meter && (_meter_point == MeterOutput || _meter_point == MeterPostFader)) {
+                assert (!_meter->display_to_user ());
+
+                /* add the processor just before or just after the main outs */
+                
+                ProcessorList::iterator meter_point = main;
+
+                if (_meter_point == MeterOutput) {
+                        ++meter_point;
+                }
+                new_processors.insert (meter_point, _meter);                        
+        }
 
 	/* MONITOR SEND */
 
 	if (_monitor_send && !is_monitor ()) {
 		assert (!_monitor_send->display_to_user ());
-		switch (Config->get_listen_position ()) {
-		case PreFaderListen:
-			switch (Config->get_pfl_position ()) {
-			case PFLFromBeforeProcessors:
-				new_processors.push_front (_monitor_send);
-				break;
-			case PFLFromAfterProcessors:
-				new_processors.insert (amp, _monitor_send);
-				break;
-			}
-			break;
-		case AfterFaderListen:
-			new_processors.insert (after_amp, _monitor_send);
-			break;
-		}
+                if (Config->get_solo_control_is_listen_control()) {
+                        switch (Config->get_listen_position ()) {
+                        case PreFaderListen:
+                                switch (Config->get_pfl_position ()) {
+                                case PFLFromBeforeProcessors:
+                                        new_processors.push_front (_monitor_send);
+                                        break;
+                                case PFLFromAfterProcessors:
+                                        new_processors.insert (amp, _monitor_send);
+                                        break;
+                                }
+                                break;
+                        case AfterFaderListen:
+                                switch (Config->get_afl_position ()) {
+                                case AFLFromBeforeProcessors:
+                                        new_processors.insert (after_amp, _monitor_send);
+                                        break;
+                                case AFLFromAfterProcessors:
+                                        new_processors.insert (new_processors.end(), _monitor_send);
+                                        break;
+                                }
+                                break;
+                        }
+                }  else {
+                        new_processors.insert (new_processors.end(), _monitor_send);
+                }
 	}
 
 	/* MONITOR CONTROL */
