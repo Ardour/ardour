@@ -150,13 +150,13 @@ class Panner2dWindow : public ArdourDialog
 
 	Gtk::HBox         hpacker;
 	Gtk::VBox         button_box;
-	Gtk::Button       reset_button;
 	Gtk::ToggleButton bypass_button;
-	Gtk::ToggleButton mute_button;
 	Gtk::VBox         spinner_box;
 	Gtk::VBox         left_side;
 
 	std::vector<Gtk::SpinButton*> spinners;
+
+        void bypass_toggled ();
 };
 
 #endif /* __ardour_panner_2d_h__ */

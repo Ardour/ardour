@@ -590,19 +590,17 @@ Panner2d::toggle_bypass ()
 Panner2dWindow::Panner2dWindow (boost::shared_ptr<Panner> p, int32_t h, uint32_t inputs)
 	: ArdourDialog (_("Panner (2D)"))
         , widget (p, h)
-	, reset_button (_("Reset"))
 	, bypass_button (_("Bypass"))
-	, mute_button (_("Mute"))
 {
 	widget.set_name ("MixerPanZone");
 
 	set_title (_("Panner"));
 	widget.set_size_request (h, h);
 
+        bypass_button.signal_toggled().connect (sigc::mem_fun (*this, &Panner2dWindow::bypass_toggled));
+
 	button_box.set_spacing (6);
-	button_box.pack_start (reset_button, false, false);
 	button_box.pack_start (bypass_button, false, false);
-	button_box.pack_start (mute_button, false, false);
 
 	spinner_box.set_spacing (6);
 	left_side.set_spacing (6);
@@ -610,9 +608,7 @@ Panner2dWindow::Panner2dWindow (boost::shared_ptr<Panner> p, int32_t h, uint32_t
 	left_side.pack_start (button_box, false, false);
 	left_side.pack_start (spinner_box, false, false);
 
-	reset_button.show ();
 	bypass_button.show ();
-	mute_button.show ();
 	button_box.show ();
 	spinner_box.show ();
 	left_side.show ();
@@ -647,4 +643,15 @@ Panner2dWindow::reset (uint32_t n_inputs)
 		spinners.erase (--spinners.end());
 	}
 #endif
+}
+
+void
+Panner2dWindow::bypass_toggled ()
+{
+        bool view = bypass_button.get_active ();
+        bool model = widget.get_panner()->bypassed ();
+        
+        if (model != view) {
+                widget.get_panner()->set_bypassed (view);
+        }
 }

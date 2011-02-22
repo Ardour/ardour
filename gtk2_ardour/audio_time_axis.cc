@@ -225,6 +225,8 @@ AudioTimeAxisView::ensure_pan_views (bool show)
 	set<Evoral::Parameter> params = _route->panner()->what_can_be_automated();
 	set<Evoral::Parameter>::iterator p;
 
+        cerr << _route->name() << " the panner has " << params.size() << " params that can be automated\n";
+
 	for (p = params.begin(); p != params.end(); ++p) {
 		boost::shared_ptr<ARDOUR::AutomationControl> pan_control = _route->pannable()->automation_control(*p);
 
