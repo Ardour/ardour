@@ -244,6 +244,7 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
            happened.
         */
 
+
         for (int o = 0; o < 3; ++o) {
                 if (signal->outputs[o] != -1) {
                         /* used last time */
@@ -274,13 +275,12 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
                 }
 
                 pan = gain_coefficient * signal->desired_gains[o];
-                
+
                 if (pan == 0.0 && signal->gains[output] == 0.0) {
                         
                         /* nothing deing delivered to this output */
 
-                        // cerr << "VBAP: output " << output << " silent - no data delivered\n";
-                        signal->gains[o] = 0.0;
+                        signal->gains[output] = 0.0;
                         
                 } else if (fabs (pan - signal->gains[output]) > 0.00001) {
                         
@@ -288,8 +288,6 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
                            interpolate between them.
                         */
 
-                        // cerr << "VBAP: output " << output << " interpolate to new gain\n";
-                        
                         AudioBuffer& buf (obufs.get_audio (output));
                         buf.accumulate_with_ramped_gain_from (srcbuf.data(), nframes, signal->gains[output], pan, 0);
                         signal->gains[output] = pan;
@@ -299,8 +297,6 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
                         /* signal to this output, same gain as before so just copy with gain
                          */
                            
-                        // cerr << "VBAP: output " << output << " use current gain\n";
-
                         mix_buffers_with_gain (obufs.get_audio (output).data(),src,nframes,pan);
                         signal->gains[output] = pan;
                 }
@@ -436,3 +432,4 @@ VBAPanner::set_width (double p)
 {
         _pannable->pan_width_control->set_value (p);
 }
+
