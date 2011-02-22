@@ -140,8 +140,7 @@ class Panner : public PBD::Stateful, public PBD::ScopedConnectionList
                                            framepos_t start, framepos_t end, pframes_t nframes,
                                            pan_t** buffers);
 
-	PBD::Signal0<void> Changed;      /* for positional info */
-	PBD::Signal0<void> StateChanged; /* for mute */
+	PBD::Signal0<void> StateChanged;
 
 	int set_state (const XMLNode&, int version);
 	virtual XMLNode& state (bool full_state) = 0;

@@ -42,6 +42,7 @@
 #include "ardour/location.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
+#include "ardour/panner_shell.h"
 #include "ardour/playlist.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
@@ -108,8 +109,8 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	}
 
 	if (_route->panner()) {
-		_route->panner()->Changed.connect (*this, invalidator (*this), 
-		                                   boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
+		_route->panner_shell()->Changed.connect (*this, invalidator (*this), 
+                                                         boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
 	}
 
 	/* map current state of the route */

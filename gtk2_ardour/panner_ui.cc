@@ -37,6 +37,7 @@
 #include "ardour/session.h"
 #include "ardour/panner.h"
 #include "ardour/pannable.h"
+#include "ardour/panner_shell.h"
 #include "ardour/route.h"
 
 #include "i18n.h"
@@ -91,8 +92,11 @@ PannerUI::PannerUI (Session* s)
 }
 
 void
-PannerUI::set_panner (boost::shared_ptr<Panner> p)
+PannerUI::set_panner (boost::shared_ptr<PannerShell> ps, boost::shared_ptr<Panner> p)
 {
+        /* note that the panshell might not change here (i.e. ps == _panshell)
+         */
+
  	connections.drop_connections ();
 
 	delete pan_astyle_menu;
@@ -101,6 +105,7 @@ PannerUI::set_panner (boost::shared_ptr<Panner> p)
 	delete pan_astate_menu;
 	pan_astate_menu = 0;
 
+        _panshell = ps;
 	_panner = p;
 
 	delete twod_panner;
@@ -113,7 +118,7 @@ PannerUI::set_panner (boost::shared_ptr<Panner> p)
 		return;
 	}
 
-	_panner->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::panner_changed, this, this), gui_context());
+	_panshell->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::panshell_changed, this), gui_context());
 	_panner->StateChanged.connect (connections, invalidator (*this), boost::bind (&PannerUI::update_pan_state, this), gui_context());
 
         /* new panner object, force complete reset of panner GUI
@@ -122,10 +127,9 @@ PannerUI::set_panner (boost::shared_ptr<Panner> p)
         _current_nouts = 0;
         _current_nins = 0;
 
-	panner_changed (0);
+        setup_pan ();
 	update_pan_sensitive ();
 	pan_automation_state_changed ();
-
 }
 
 void
@@ -206,8 +210,9 @@ PannerUI::~PannerUI ()
 
 
 void
-PannerUI::panner_changed (void* src)
+PannerUI::panshell_changed ()
 {
+        set_panner (_panshell, _panshell->panner());
 	setup_pan ();
 }
 
@@ -231,13 +236,16 @@ PannerUI::setup_pan ()
 		return;
 	}
 
+        _current_nins = nins;
+        _current_nouts = nouts;
+
         container_clear (pan_vbox);
 
         delete twod_panner;
         twod_panner = 0;
         delete _stereo_panner;
         _stereo_panner = 0;
-        
+
 	if (nouts == 0 || nouts == 1) {
 
                 delete _stereo_panner;

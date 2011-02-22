@@ -42,6 +42,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
+#include "ardour/panner_shell.h"
 #include "ardour/send.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
@@ -436,7 +437,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	_route->route_group_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::route_group_changed, this), gui_context());
 
 	if (_route->panner()) {
-		_route->panner()->Changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::connect_to_pan, this), gui_context());
+		_route->panner_shell()->Changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::connect_to_pan, this), gui_context());
 	}
 
 	if (is_audio_track()) {
@@ -457,7 +458,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	route_group_changed ();
 
 	connect_to_pan ();
-
 	panners.setup_pan ();
 
 	update_diskstream_display ();
@@ -929,7 +929,7 @@ MixerStrip::connect_to_pan ()
         p->automation_state_changed.connect (panstate_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_state_changed, &panners), gui_context());
         p->automation_style_changed.connect (panstyle_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_style_changed, &panners), gui_context());
 
-	panners.panner_changed (this);
+	panners.panshell_changed ();
 }
 
 
@@ -1689,7 +1689,7 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	gain_meter().set_controls (_route, send->meter(), send->amp());
 	gain_meter().setup_meters ();
 
-	panner_ui().set_panner (_current_delivery->panner());
+	panner_ui().set_panner (_current_delivery->panner_shell(), _current_delivery->panner());
 	panner_ui().setup_pan ();
 
 	input_button.set_sensitive (false);
@@ -1723,7 +1723,7 @@ MixerStrip::revert_to_default_display ()
 	gain_meter().set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gain_meter().setup_meters ();
 
-	panner_ui().set_panner (_route->main_outs()->panner());
+	panner_ui().set_panner (_route->main_outs()->panner_shell(), _route->main_outs()->panner());
 	panner_ui().setup_pan ();
 
 	reset_strip_style ();

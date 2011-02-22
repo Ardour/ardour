@@ -44,6 +44,7 @@ class MonoPanner;
 namespace ARDOUR {
 	class Session;
 	class Panner;
+	class PannerShell;
 	class Delivery;
         class AutomationControl;
 }
@@ -63,9 +64,9 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	PannerUI (ARDOUR::Session*);
 	~PannerUI ();
 
-	virtual void set_panner (boost::shared_ptr<ARDOUR::Panner>);
+	virtual void set_panner (boost::shared_ptr<ARDOUR::PannerShell>, boost::shared_ptr<ARDOUR::Panner>);
 
-	void panner_changed (void *);
+	void panshell_changed ();
 
 	void update_pan_sensitive ();
 	void update_gain_sensitive ();
@@ -85,6 +86,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
   private:
 	friend class MixerStrip;
 
+	boost::shared_ptr<ARDOUR::PannerShell> _panshell;
 	boost::shared_ptr<ARDOUR::Panner> _panner;
 	PBD::ScopedConnectionList connections;
 	PBD::ScopedConnectionList _pan_control_connections;

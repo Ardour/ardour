@@ -65,7 +65,6 @@ Panner2d::Panner2d (boost::shared_ptr<Panner> p, int32_t h)
 	: panner (p), width (0), height (h)
 {
 	panner->StateChanged.connect (connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
-	panner->Changed.connect (connections, invalidator (*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
 
         panner->pannable()->pan_azimuth_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
         panner->pannable()->pan_width_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());

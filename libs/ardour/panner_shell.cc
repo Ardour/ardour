@@ -85,13 +85,7 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 	   the config hasn't changed, we're done.
 	*/
 
-        cerr << "PShell: reconfigure for in = " << in << " out = " << out;
-        if (_panner) {
-                cerr << " current panner = " << _panner->in() << " and " << _panner->out();
-        } 
-        cerr << endl;
-
-	if (_panner && _panner->in().n_audio() == nins && _panner->out().n_audio() == nouts) {
+	if (_panner && (_panner->in().n_audio() == nins) && (_panner->out().n_audio() == nouts)) {
                 return;
 	}
 
@@ -121,7 +115,6 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
                 speakers.reset (s);
         }
 
-        cerr << "Creating a new panner\n";
         Panner* p = pi->descriptor.factory (_pannable, speakers);
         boost_debug_shared_ptr_mark_interesting (p, "Panner");
         _panner.reset (p);

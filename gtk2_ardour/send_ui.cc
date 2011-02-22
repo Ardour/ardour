@@ -43,7 +43,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 {
 	assert (_send);
 
- 	_panners.set_panner (s->panner());
+ 	_panners.set_panner (s->panner_shell(), s->panner());
  	_gpm.set_controls (boost::shared_ptr<Route>(), s->meter(), s->amp());
 
 	_hbox.pack_start (_gpm, true, true);

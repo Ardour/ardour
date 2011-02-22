@@ -20,7 +20,7 @@
 #include "ardour/route.h"
 #include "ardour/track.h"
 #include "ardour/midi_ui.h"
-#include "ardour/panner.h"
+#include "ardour/pannable.h"
 #include "ardour/session_object.h" // for Properties::name 
 
 #include "mackie_control_protocol.h"
@@ -50,8 +50,9 @@ void RouteSignal::connect()
 
 	_route->PropertyChanged.connect (connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_property_changed, &_mcp, _1, this), midi_ui_context());
 	
-	if (_route->panner()) {
-		_route->panner()->Changed.connect(connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false), midi_ui_context());
+	if (_route->pannable()) {
+		_route->pannable()->pan_azimuth_control->Changed.connect(connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false), midi_ui_context());
+		_route->pannable()->pan_width_control->Changed.connect(connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false), midi_ui_context());
 	}
 	
 	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);
