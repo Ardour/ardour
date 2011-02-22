@@ -3170,7 +3170,12 @@ Route::MuteControllable::set_value (double val)
 double
 Route::MuteControllable::get_value () const
 {
-	return route.muted() ? 1.0f : 0.0f;
+	boost::shared_ptr<Route> r = _route.lock ();
+	if (!r) {
+		return 0;
+	}
+	
+	return r->muted() ? 1.0f : 0.0f;
 }
 
 void
