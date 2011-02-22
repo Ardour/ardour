@@ -965,7 +965,8 @@ RouteUI::mute_visual_state (Session* s, boost::shared_ptr<Route> r)
 		return 0;
 	}
 
-	if (Config->get_show_solo_mutes()) {
+		
+	if (Config->get_show_solo_mutes() && !Config->get_solo_control_is_listen_control ()) {
 
 		if (r->muted ()) {
 			/* full mute */
