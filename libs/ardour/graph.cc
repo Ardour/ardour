@@ -160,6 +160,8 @@ Graph::drop_threads ()
 
         _thread_list.clear ();
 
+	_execution_tokens = 0;
+
         _quit_threads = false;
 }
 
