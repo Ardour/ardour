@@ -88,37 +88,47 @@ VBAPanner::configure_io (ChanCount in, ChanCount /* ignored - we use Speakers */
 void
 VBAPanner::update ()
 {
-        /* recompute signal directions based on panner azimuth and width (diffusion) parameters)
+        /* recompute signal directions based on panner azimuth and, if relevant, width (diffusion) parameters)
          */
 
         /* panner azimuth control is [0 .. 1.0] which we interpret as [0 .. 360] degrees
          */
-
         double center = _pannable->pan_azimuth_control->get_value() * 360.0;
 
-        /* panner width control is [-1.0 .. 1.0]; we ignore sign, and map to [0 .. 360] degrees
-           so that a width of 1 corresponds to a signal equally present from all directions, 
-           and a width of zero corresponds to a point source from the "center" (above)
-        */
+        if (_signals.size() > 1) {
 
-        double w = fabs (_pannable->pan_width_control->get_value()) * 360.0;
+                /* panner width control is [-1.0 .. 1.0]; we ignore sign, and map to [0 .. 360] degrees
+                   so that a width of 1 corresponds to a signal equally present from all directions, 
+                   and a width of zero corresponds to a point source from the "center" (above)
+                */
 
-        double min_dir = center - w;
-        min_dir = max (min (min_dir, 360.0), 0.0);
+                double w = fabs (_pannable->pan_width_control->get_value()) * 360.0;
+                
+                double min_dir = center - w;
+                min_dir = max (min (min_dir, 360.0), 0.0);
+                
+                double max_dir = center + w;
+                max_dir = max (min (max_dir, 360.0), 0.0);
+                
+                double degree_step_per_signal = (max_dir - min_dir) / _signals.size();
+                double signal_direction = min_dir;
+                
+                for (vector<Signal*>::iterator s = _signals.begin(); s != _signals.end(); ++s) {
+                        
+                        Signal* signal = *s;
+                        
+                        signal->direction = AngularVector (signal_direction, 0.0);
+                        compute_gains (signal->desired_gains, signal->desired_outputs, signal->direction.azi, signal->direction.ele);
+                        signal_direction += degree_step_per_signal;
+                }
 
-        double max_dir = center + w;
-        max_dir = max (min (max_dir, 360.0), 0.0);
+        } else if (_signals.size() == 1) {
 
-        double degree_step_per_signal = (max_dir - min_dir) / _signals.size();
-        double signal_direction = min_dir;
+                /* width has no role to play if there is only 1 signal: VBAP does not do "diffusion" of a single channel */
 
-        for (vector<Signal*>::iterator s = _signals.begin(); s != _signals.end(); ++s) {
-
-                Signal* signal = *s;
-
-                signal->direction = AngularVector (signal_direction, 0.0);
-                compute_gains (signal->desired_gains, signal->desired_outputs, signal->direction.azi, signal->direction.ele);
-                signal_direction += degree_step_per_signal;
+                Signal* s = _signals.front();
+                s->direction = AngularVector (center, 0);
+                compute_gains (s->desired_gains, s->desired_outputs, s->direction.azi, s->direction.ele);
         }
 }
 
@@ -370,7 +380,9 @@ VBAPanner::what_can_be_automated() const
 {
         set<Evoral::Parameter> s;
         s.insert (Evoral::Parameter (PanAzimuthAutomation));
-        s.insert (Evoral::Parameter (PanWidthAutomation));
+        if (_signals.size() > 1) {
+                s.insert (Evoral::Parameter (PanWidthAutomation));
+        }
         return s;
 }
         
@@ -395,7 +407,7 @@ VBAPanner::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 
         switch (ac->parameter().type()) {
         case PanAzimuthAutomation: /* direction */
-                return string_compose (_("%1"), val * 360.0);
+                return string_compose (_("%1"), int (rint (val * 360.0)));
                 
         case PanWidthAutomation: /* diffusion */
                 return string_compose (_("%1%%"), (int) floor (100.0 * fabs(val)));
