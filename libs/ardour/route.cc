@@ -2363,7 +2363,6 @@ Route::set_processor_state (const XMLNode& node)
                                 if (prop->value() == "intsend") {
                                         
                                         processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<Route>(), Delivery::Role (0)));
-                                        
                                 } else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
                                            prop->value() == "lv2" ||
                                            prop->value() == "vst" ||
@@ -2387,6 +2386,14 @@ Route::set_processor_state (const XMLNode& node)
 				if (processor->set_state (**niter, Stateful::current_state_version) != 0) {
 					/* This processor could not be configured.  Turn it into a UnknownProcessor */
 					processor.reset (new UnknownProcessor (_session, **niter));
+				}
+
+				/* we have to note the monitor send here, otherwise a new one will be created
+				   and the state of this one will be lost.
+				*/
+				boost::shared_ptr<InternalSend> isend = boost::dynamic_pointer_cast<InternalSend> (processor);
+				if (isend && isend->role() == Delivery::Listen) {
+					_monitor_send = isend;
 				}
 
 				/* it doesn't matter if invisible processors are added here, as they
@@ -2493,7 +2500,7 @@ Route::remove_send_from_internal_return (InternalSend* send)
 	}
 }
 
-/** Add a monitor send, if we don't already have one */
+/** Add a monitor send (if we don't already have one) but don't activate it */
 int
 Route::listen_via_monitor ()
 {
@@ -2503,7 +2510,6 @@ Route::listen_via_monitor ()
 	/* make sure we have one */
 	if (!_monitor_send) {
 		_monitor_send.reset (new InternalSend (_session, _pannable, _mute_master, _session.monitor_out(), Delivery::Listen));
-		_monitor_send->activate ();
 		_monitor_send->set_display_to_user (false);
 	}
 	
