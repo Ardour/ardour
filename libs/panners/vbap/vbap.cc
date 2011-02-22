@@ -436,12 +436,19 @@ VBAPanner::get_speakers () const
 void
 VBAPanner::set_position (double p)
 {
+        if (p < 0.0) {
+                p = 1.0 + p;
+        }
+
+        if (p > 1.0) {
+                p = fmod (p, 1.0);
+        } 
+
         _pannable->pan_azimuth_control->set_value (p);
 }
 
 void
-VBAPanner::set_width (double p)
+VBAPanner::set_width (double w)
 {
-        _pannable->pan_width_control->set_value (p);
+        _pannable->pan_width_control->set_value (min (1.0, max (-1.0, w)));
 }
-

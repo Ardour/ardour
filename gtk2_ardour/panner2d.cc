@@ -285,6 +285,7 @@ Panner2d::on_motion_notify_event (GdkEventMotion *ev)
 
 	return handle_motion (x, y, state);
 }
+
 bool
 Panner2d::on_expose_event (GdkEventExpose *event)
 {
@@ -534,6 +535,23 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 	} 
 
 	return true;
+}
+
+bool
+Panner2d::on_scroll_event (GdkEventScroll* ev)
+{
+        switch (ev->direction) {
+        case GDK_SCROLL_UP:
+        case GDK_SCROLL_RIGHT:
+                panner->set_position (panner->pannable()->pan_azimuth_control->get_value() - 1.0/360.0);
+                break;
+
+        case GDK_SCROLL_DOWN:
+        case GDK_SCROLL_LEFT:
+                panner->set_position (panner->pannable()->pan_azimuth_control->get_value() + 1.0/360.0);
+                break;
+        }
+        return true;
 }
 
 void
