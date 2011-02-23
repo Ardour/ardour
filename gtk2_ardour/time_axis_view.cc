@@ -428,9 +428,13 @@ TimeAxisView::set_heights (uint32_t h)
 }
 
 void
-TimeAxisView::set_height_enum (Height h)
+TimeAxisView::set_height_enum (Height h, bool apply_to_selection)
 {
-	set_height (preset_height (h));
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_time_axis (boost::bind (&TimeAxisView::set_height_enum, _1, h, false));
+	} else {
+		set_height (preset_height (h));
+	}
 }
 
 void
@@ -1362,10 +1366,10 @@ TimeAxisView::build_size_menu ()
 	_size_menu->set_name ("ArdourContextMenu");
 	MenuList& items = _size_menu->items();
 	
-	items.push_back (MenuElem (_("Largest"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLargest)));
-	items.push_back (MenuElem (_("Larger"),  sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarger)));
-	items.push_back (MenuElem (_("Large"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarge)));
-	items.push_back (MenuElem (_("Normal"),  sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightNormal)));
-	items.push_back (MenuElem (_("Smaller"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightSmaller)));
-	items.push_back (MenuElem (_("Small"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightSmall)));
+	items.push_back (MenuElem (_("Largest"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLargest, true)));
+	items.push_back (MenuElem (_("Larger"),  sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarger, true)));
+	items.push_back (MenuElem (_("Large"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarge, true)));
+	items.push_back (MenuElem (_("Normal"),  sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightNormal, true)));
+	items.push_back (MenuElem (_("Smaller"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightSmaller, true)));
+	items.push_back (MenuElem (_("Small"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightSmall, true)));
 }

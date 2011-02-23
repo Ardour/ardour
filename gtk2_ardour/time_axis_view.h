@@ -149,7 +149,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	virtual void exited () {}
 
 	virtual void set_height (uint32_t h);
-	void set_height_enum (Height);
+	void set_height_enum (Height, bool apply_to_selection = false);
 	void reset_height();
 
 	std::pair<TimeAxisView*, ARDOUR::layer_t> covers_y_position (double);

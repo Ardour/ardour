@@ -36,6 +36,13 @@ public:
 	TrackViewList add (TrackViewList const &);
 
 	template <typename Function>
+	void foreach_time_axis (Function f) {
+		for (iterator i = begin(); i != end(); ++i) {
+			f (*i);
+		}
+	}
+
+	template <typename Function>
 	void foreach_route_ui (Function f) {
 		for (iterator i = begin(); i != end(); ++i) {
 			RouteUI* t = dynamic_cast<RouteUI*> (*i);
