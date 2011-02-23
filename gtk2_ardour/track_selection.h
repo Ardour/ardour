@@ -21,6 +21,7 @@
 #define __ardour_gtk_track_selection_h__
 
 #include "track_view_list.h"
+#include "route_ui.h"
 
 class PublicEditor;
 
@@ -34,6 +35,14 @@ public:
 	
 	TrackViewList add (TrackViewList const &);
 
+	template <typename Function>
+	void foreach_route_ui (Function f) {
+		for (iterator i = begin(); i != end(); ++i) {
+			RouteUI* t = dynamic_cast<RouteUI*> (*i);
+			f (t);
+		}
+	}
+	
 private:
 	PublicEditor const * _editor;
 };

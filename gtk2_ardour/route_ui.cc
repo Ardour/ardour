@@ -1257,17 +1257,20 @@ RouteUI::toggle_solo_safe (Gtk::CheckMenuItem* check)
 	_route->set_solo_safe (check->get_active(), this);
 }
 
-bool
+/** Ask the user to choose a colour, and then set all selected tracks
+ *  to that colour.
+ */
+void
 RouteUI::choose_color ()
 {
 	bool picked;
 	Gdk::Color const color = Gtkmm2ext::UI::instance()->get_color (_("Color Selection"), picked, &_color);
 
 	if (picked) {
-		set_color (color);
+		ARDOUR_UI::instance()->the_editor().get_selection().tracks.foreach_route_ui (
+			boost::bind (&RouteUI::set_color, _1, color)
+			);
 	}
-
-	return picked;
 }
 
 void

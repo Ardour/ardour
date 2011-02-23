@@ -441,7 +441,7 @@ RouteTimeAxisView::build_display_menu ()
 	MenuList& items = display_menu->items();
 	display_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Color..."), sigc::hide_return (sigc::mem_fun (*this, &RouteUI::choose_color))));
+	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
 
 	build_size_menu ();
 	items.push_back (MenuElem (_("Height"), *_size_menu));
