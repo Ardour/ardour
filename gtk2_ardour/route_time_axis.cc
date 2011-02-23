@@ -464,15 +464,45 @@ RouteTimeAxisView::build_display_menu ()
 
 		RadioMenuItem::Group layers_group;
 
-		layers_items.push_back(RadioMenuElem (layers_group, _("Overlaid"),
-				sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Overlaid)));
+		/* Find out how many overlaid/stacked tracks we have in the selection */
 
-		dynamic_cast<RadioMenuItem*> (&layers_items.back())->set_active (_view && _view->layer_display() == Overlaid);
+		int overlaid = 0;
+		int stacked = 0;
+		TrackSelection const & s = _editor.get_selection().tracks;
+		for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
+			StreamView* v = (*i)->view ();
+			if (!v) {
+				continue;
+			}
+			
+			if (v->layer_display() == Overlaid) {
+				++overlaid;
+			} else if (v->layer_display() == Stacked) {
+				++stacked;
+			}
+		}
+
+		/* We're not connecting to signal_toggled() here; in the case where these two items are
+		   set to be in the `inconsistent' state, it seems that one or other will end up active
+		   as well as inconsistent (presumably due to the RadioMenuItem::Group).  Then when you
+		   select the active one, no toggled signal is emitted so nothing happens.
+		*/
 		
-		layers_items.push_back(RadioMenuElem (layers_group, _("Stacked"),
-				sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Stacked)));
+		layers_items.push_back (RadioMenuElem (layers_group, _("Overlaid")));
+		RadioMenuItem* i = dynamic_cast<RadioMenuItem*> (&layers_items.back ());
+		i->set_active (overlaid != 0 && stacked == 0);
+		i->set_inconsistent (overlaid != 0 && stacked != 0);
+		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Overlaid, true));
 
-		dynamic_cast<RadioMenuItem*> (&layers_items.back())->set_active (_view && _view->layer_display() == Stacked);
+		layers_items.push_back (
+			RadioMenuElem (layers_group, _("Stacked"),
+				       sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Stacked, true))
+			);
+
+		i = dynamic_cast<RadioMenuItem*> (&layers_items.back ());
+		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Stacked, true));
+		i->set_active (overlaid == 0 && stacked != 0);
+		i->set_inconsistent (overlaid != 0 && stacked != 0);
 		
 		items.push_back (MenuElem (_("Layers"), *layers_menu));
 
@@ -2162,14 +2192,19 @@ RouteTimeAxisView::update_rec_display ()
 }
 
 void
-RouteTimeAxisView::set_layer_display (LayerDisplay d)
+RouteTimeAxisView::set_layer_display (LayerDisplay d, bool apply_to_selection)
 {
-	if (_view) {
-		_view->set_layer_display (d);
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_layer_display, _1, d, false));
+	} else {
+		
+		if (_view) {
+			_view->set_layer_display (d);
+		}
+		
+		ensure_xml_node ();
+		xml_node->add_property (N_("layer-display"), enum_2_string (d));
 	}
-
-	ensure_xml_node ();
-	xml_node->add_property (N_("layer-display"), enum_2_string (d));
 }
 
 LayerDisplay

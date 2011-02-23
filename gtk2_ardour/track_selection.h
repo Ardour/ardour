@@ -52,6 +52,14 @@ public:
 	}
 
 	template <typename Function>
+	void foreach_route_time_axis (Function f) {
+		for (iterator i = begin(); i != end(); ++i) {
+			RouteTimeAxisView* t = dynamic_cast<RouteTimeAxisView*> (*i);
+			f (t);
+		}
+	}
+
+	template <typename Function>
 	void foreach_audio_time_axis (Function f) {
 		for (iterator i = begin(); i != end(); ++i) {
 			AudioTimeAxisView* t = dynamic_cast<AudioTimeAxisView*> (*i);

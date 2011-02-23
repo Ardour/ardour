@@ -85,7 +85,7 @@ public:
 	void set_selected_regionviews (RegionSelection&);
 	void get_selectables (ARDOUR::framepos_t start, ARDOUR::framepos_t end, double top, double bot, std::list<Selectable *>&);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>&);
-	void set_layer_display (LayerDisplay d);
+	void set_layer_display (LayerDisplay d, bool apply_to_selection = false);
 	LayerDisplay layer_display () const;
 
 	boost::shared_ptr<ARDOUR::Region> find_next_region (framepos_t pos, ARDOUR::RegionPoint, int32_t dir);
