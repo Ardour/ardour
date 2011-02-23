@@ -181,8 +181,8 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 
 	// crossfade stuff
 	if (!Profile->get_sae() && is_track ()) {
-		items.push_back (MenuElem (_("Hide All Crossfades"), sigc::mem_fun(*this, &AudioTimeAxisView::hide_all_xfades)));
-		items.push_back (MenuElem (_("Show All Crossfades"), sigc::mem_fun(*this, &AudioTimeAxisView::show_all_xfades)));
+		items.push_back (MenuElem (_("Hide All Crossfades"), sigc::bind (sigc::mem_fun(*this, &AudioTimeAxisView::hide_all_xfades), true)));
+		items.push_back (MenuElem (_("Show All Crossfades"), sigc::bind (sigc::mem_fun(*this, &AudioTimeAxisView::show_all_xfades), true)));
 		items.push_back (SeparatorElem ());
 	}
 }
@@ -346,22 +346,28 @@ AudioTimeAxisView::hide_all_automation ()
 }
 
 void
-AudioTimeAxisView::show_all_xfades ()
+AudioTimeAxisView::show_all_xfades (bool apply_to_selection)
 {
-	AudioStreamView* asv = audio_view();
-
-	if (asv) {
-		asv->show_all_xfades ();
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_audio_time_axis (boost::bind (&AudioTimeAxisView::show_all_xfades, _1, false));
+	} else {
+		AudioStreamView* asv = audio_view ();
+		if (asv) {
+			asv->show_all_xfades ();
+		}
 	}
 }
 
 void
-AudioTimeAxisView::hide_all_xfades ()
+AudioTimeAxisView::hide_all_xfades (bool apply_to_selection)
 {
-	AudioStreamView* asv = audio_view();
-
-	if (asv) {
-		asv->hide_all_xfades ();
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_audio_time_axis (boost::bind (&AudioTimeAxisView::hide_all_xfades, _1, false));
+	} else {
+		AudioStreamView* asv = audio_view ();
+		if (asv) {
+			asv->hide_all_xfades ();
+		}
 	}
 }
 
