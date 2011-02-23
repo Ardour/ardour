@@ -218,8 +218,7 @@ protected:
 	virtual void append_extra_display_menu_items () {}
 	void         build_display_menu ();
 
-	void align_style_changed ();
-	void set_align_style (ARDOUR::AlignStyle);
+	void set_align_style (ARDOUR::AlignStyle, bool apply_to_selection = false);
 
 	void         playlist_click ();
 	void         show_playlist_selector ();
@@ -261,8 +260,6 @@ protected:
 	Gtk::Menu*          automation_action_menu;
 	Gtk::MenuItem*      plugins_submenu_item;
 	RouteGroupMenu*     route_group_menu;
-	Gtk::RadioMenuItem* align_existing_item;
-	Gtk::RadioMenuItem* align_capture_item;
 	Gtk::RadioMenuItem* normal_track_mode_item;
 	Gtk::RadioMenuItem* non_layered_track_mode_item;
 	Gtk::RadioMenuItem* destructive_track_mode_item;

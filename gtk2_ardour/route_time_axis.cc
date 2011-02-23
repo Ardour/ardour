@@ -474,11 +474,14 @@ RouteTimeAxisView::build_display_menu ()
 			if (!v) {
 				continue;
 			}
-			
-			if (v->layer_display() == Overlaid) {
+
+			switch (v->layer_display ()) {
+			case Overlaid:
 				++overlaid;
-			} else if (v->layer_display() == Stacked) {
+				break;
+			case Stacked:
 				++stacked;
+				break;
 			}
 		}
 
@@ -513,23 +516,41 @@ RouteTimeAxisView::build_display_menu ()
 			alignment_menu->set_name ("ArdourContextMenu");
 			
 			RadioMenuItem::Group align_group;
-			
-			alignment_items.push_back (RadioMenuElem (align_group, _("Align With Existing Material"),
-								  sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), ExistingMaterial)));
-			align_existing_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
-			if (track()->alignment_style() == ExistingMaterial) {
-				align_existing_item->set_active();
+
+			/* Same verbose hacks as for the layering options above */
+
+			int existing = 0;
+			int capture = 0;
+			TrackSelection const & s = _editor.get_selection().tracks;
+			for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
+				RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
+				if (!r) {
+					continue;
+				}
+				
+				switch (r->track()->alignment_style()) {
+				case ExistingMaterial:
+					++existing;
+					break;
+				case CaptureTime:
+					++capture;
+					break;
+				}
 			}
 			
-			alignment_items.push_back (RadioMenuElem (align_group, _("Align With Capture Time"),
-								  sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), CaptureTime)));
-			align_capture_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
-			if (track()->alignment_style() == CaptureTime) {
-				align_capture_item->set_active();
-			}
+			alignment_items.push_back (RadioMenuElem (align_group, _("Align With Existing Material")));
+			RadioMenuItem* i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
+			i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), ExistingMaterial, true));
+			i->set_active (existing != 0 && capture == 0);
+			i->set_inconsistent (existing != 0 && capture != 0);
+			
+			alignment_items.push_back (RadioMenuElem (align_group, _("Align With Capture Time")));
+			i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
+			i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), CaptureTime, true));
+			i->set_active (existing == 0 && capture != 0);
+			i->set_inconsistent (existing != 0 && capture != 0);
 			
 			items.push_back (MenuElem (_("Alignment"), *alignment_menu));
-			track()->AlignmentStyleChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteTimeAxisView::align_style_changed, this), gui_context());
 
 			Menu* mode_menu = manage (new Menu);
 			MenuList& mode_items = mode_menu->items ();
@@ -935,41 +956,11 @@ RouteTimeAxisView::set_samples_per_unit (double spu)
 }
 
 void
-RouteTimeAxisView::align_style_changed ()
+RouteTimeAxisView::set_align_style (AlignStyle style, bool apply_to_selection)
 {
-	switch (track()->alignment_style()) {
-	case ExistingMaterial:
-		if (!align_existing_item->get_active()) {
-			align_existing_item->set_active();
-		}
-		break;
-	case CaptureTime:
-		if (!align_capture_item->get_active()) {
-			align_capture_item->set_active();
-		}
-		break;
-	}
-}
-
-void
-RouteTimeAxisView::set_align_style (AlignStyle style)
-{
-	RadioMenuItem* item;
-
-	switch (style) {
-	case ExistingMaterial:
-		item = align_existing_item;
-		break;
-	case CaptureTime:
-		item = align_capture_item;
-		break;
-	default:
-		fatal << string_compose (_("programming error: %1 %2"), "illegal align style in RouteTimeAxisView::set_align_style", style) << endmsg;
-		/*NOTREACHED*/
-		return;
-	}
-
-	if (item->get_active()) {
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_align_style, _1, style, false));
+	} else {
 		track()->set_align_style (style);
 	}
 }
