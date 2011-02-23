@@ -466,9 +466,14 @@ RouteTimeAxisView::build_display_menu ()
 
 		layers_items.push_back(RadioMenuElem (layers_group, _("Overlaid"),
 				sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Overlaid)));
+
+		dynamic_cast<RadioMenuItem*> (&layers_items.back())->set_active (_view && _view->layer_display() == Overlaid);
+		
 		layers_items.push_back(RadioMenuElem (layers_group, _("Stacked"),
 				sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Stacked)));
 
+		dynamic_cast<RadioMenuItem*> (&layers_items.back())->set_active (_view && _view->layer_display() == Stacked);
+		
 		items.push_back (MenuElem (_("Layers"), *layers_menu));
 
 		if (!Profile->get_sae()) {
