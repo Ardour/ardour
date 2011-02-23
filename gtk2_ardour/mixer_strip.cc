@@ -1287,7 +1287,8 @@ MixerStrip::select_route_group (GdkEventButton *ev)
 			group_menu->GroupSelected.connect (sigc::mem_fun (*this, &MixerStrip::set_route_group));
 		}
 
-		group_menu->popup (1, ev->time);
+		group_menu->build (route_group ());
+		group_menu->menu()->popup (1, ev->time);
 	}
 
 	return true;

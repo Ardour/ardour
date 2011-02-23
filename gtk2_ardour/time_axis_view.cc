@@ -617,9 +617,7 @@ TimeAxisView::conditionally_add_to_selection ()
 void
 TimeAxisView::popup_display_menu (guint32 when)
 {
-	if (display_menu == 0) {
-		build_display_menu ();
-	}
+	build_display_menu ();
 
 	conditionally_add_to_selection ();
 	display_menu->popup (1, when);
@@ -1356,9 +1354,11 @@ TimeAxisView::get_child_list ()
 void
 TimeAxisView::build_size_menu ()
 {
-	if (_size_menu) {
+	if (_size_menu && _size_menu->gobj ()) {
 		return;
 	}
+
+	delete _size_menu;
 	
 	using namespace Menu_Helpers;
 

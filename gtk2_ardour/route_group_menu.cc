@@ -19,6 +19,7 @@
 
 #include <gtkmm/menu.h>
 #include <gtkmm/stock.h>
+#include "gtkmm2ext/utils.h"
 #include "ardour/session.h"
 #include "ardour/route_group.h"
 #include "route_group_menu.h"
@@ -31,20 +32,23 @@ using namespace PBD;
 
 RouteGroupMenu::RouteGroupMenu (Session* s, PropertyList* plist)
 	: SessionHandlePtr (s)
+	, _menu (0)
 	, _default_properties (plist)
 	, _inhibit_group_selected (false)
 	, _selected_route_group (0)
 {
-	rebuild (0);
+
 }
 
 RouteGroupMenu::~RouteGroupMenu()
 {
-	delete _default_properties; 
+	delete _menu;
+	delete _default_properties;
 }
 
+/** @param curr Current route group to mark as selected, or 0 for no group */
 void
-RouteGroupMenu::rebuild (RouteGroup* curr)
+RouteGroupMenu::build (RouteGroup* curr)
 {
 	using namespace Menu_Helpers;
 
@@ -52,16 +56,25 @@ RouteGroupMenu::rebuild (RouteGroup* curr)
 
 	_inhibit_group_selected = true;
 
-	items().clear ();
+	delete _menu;
+	
+	/* Note: don't use manage() here, otherwise if our _menu object is attached as a submenu
+	   and its parent is then destroyed, our _menu object will be deleted and we'll have no
+	   way of knowing about it.  Without manage(), when the above happens our _menu's gobject
+	   will be destroyed and its value set to 0, so we know.
+	*/
+	_menu = new Menu;
 
-	items().push_back (MenuElem (_("New group..."), sigc::mem_fun (*this, &RouteGroupMenu::new_group)));
-	items().push_back (SeparatorElem ());
+	MenuList& items = _menu->items ();
+	
+	items.push_back (MenuElem (_("New group..."), sigc::mem_fun (*this, &RouteGroupMenu::new_group)));
+	items.push_back (SeparatorElem ());
 
 	RadioMenuItem::Group group;
-	items().push_back (RadioMenuElem (group, _("No group"), sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::set_group), (RouteGroup *) 0)));
+	items.push_back (RadioMenuElem (group, _("No group"), sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::set_group), (RouteGroup *) 0)));
 
 	if (curr == 0) {
-		static_cast<RadioMenuItem*> (&items().back())->set_active ();
+		static_cast<RadioMenuItem*> (&items.back())->set_active ();
 	}
 
 	if (_session) {
@@ -76,10 +89,12 @@ RouteGroupMenu::add_item (RouteGroup* rg, RouteGroup* curr, RadioMenuItem::Group
 {
 	using namespace Menu_Helpers;
 
-	items().push_back (RadioMenuElem (*group, rg->name(), sigc::bind (sigc::mem_fun(*this, &RouteGroupMenu::set_group), rg)));
+	MenuList& items = _menu->items ();
+
+	items.push_back (RadioMenuElem (*group, rg->name(), sigc::bind (sigc::mem_fun(*this, &RouteGroupMenu::set_group), rg)));
 
 	if (rg == curr) {
-		static_cast<RadioMenuItem*> (&items().back())->set_active ();
+		static_cast<RadioMenuItem*> (&items.back())->set_active ();
 	}
 }
 
@@ -120,5 +135,23 @@ RouteGroupMenu::new_group ()
 	} else {
 		_session->add_route_group (g);
 		set_group (g);
+	}
+}
+
+Gtk::Menu *
+RouteGroupMenu::menu ()
+{
+	/* Our menu's gobject can be 0 if it was attached as a submenu whose
+	   parent was subsequently deleted.
+	*/
+	assert (_menu && _menu->gobj());
+	return _menu;
+}
+
+void
+RouteGroupMenu::detach ()
+{
+	if (_menu && _menu->gobj ()) {
+		Gtkmm2ext::detach_menu (*_menu);
 	}
 }

@@ -23,14 +23,15 @@
 #include "ardour/route_group.h"
 #include "ardour/session_handle.h"
 
-
-class RouteGroupMenu : public Gtk::Menu, public ARDOUR::SessionHandlePtr
+class RouteGroupMenu : public ARDOUR::SessionHandlePtr
 {
 public:
 	RouteGroupMenu (ARDOUR::Session*, PBD::PropertyList*);
 	~RouteGroupMenu();
 
-	void rebuild (ARDOUR::RouteGroup *);
+	Gtk::Menu* menu ();
+	void build (ARDOUR::RouteGroup *);
+	void detach ();
 
 	sigc::signal<void, ARDOUR::RouteGroup*> GroupSelected;
 
@@ -39,6 +40,7 @@ public:
 	void new_group ();
 	void set_group (ARDOUR::RouteGroup *);
 
+	Gtk::Menu* _menu;
 	PBD::PropertyList* _default_properties;
 	bool _inhibit_group_selected;
 	ARDOUR::RouteGroup* _selected_route_group;

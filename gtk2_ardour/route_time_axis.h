@@ -266,7 +266,6 @@ protected:
 	Gtk::RadioMenuItem* normal_track_mode_item;
 	Gtk::RadioMenuItem* non_layered_track_mode_item;
 	Gtk::RadioMenuItem* destructive_track_mode_item;
-	Gtk::Menu*          playlist_menu;
 	Gtk::Menu*          playlist_action_menu;
 	Gtk::MenuItem*      playlist_item;
 	Gtk::Menu*          mode_menu;

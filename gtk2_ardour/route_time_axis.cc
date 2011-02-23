@@ -120,7 +120,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	gm.get_level_meter().setup_meters(50);
 
 	_has_state = true;
-	playlist_menu = 0;
 	playlist_action_menu = 0;
 	automation_action_menu = 0;
 	plugins_submenu_item = 0;
@@ -251,9 +250,6 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 		delete *i;
 	}
 
-	delete playlist_menu;
-	playlist_menu = 0;
-
 	delete playlist_action_menu;
 	playlist_action_menu = 0;
 
@@ -289,8 +285,8 @@ RouteTimeAxisView::route_group_click (GdkEventButton *ev)
 		return false;
 	}
 
-	route_group_menu->rebuild (_route->route_group ());
-	route_group_menu->popup (ev->button, ev->time);
+	route_group_menu->build (_route->route_group ());
+	route_group_menu->menu()->popup (ev->button, ev->time);
 
 	return false;
 }
@@ -443,6 +439,9 @@ RouteTimeAxisView::build_display_menu ()
 
 	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
 
+	if (_size_menu) {
+		detach_menu (*_size_menu);
+	}
 	build_size_menu ();
 	items.push_back (MenuElem (_("Height"), *_size_menu));
 
@@ -450,6 +449,7 @@ RouteTimeAxisView::build_display_menu ()
 
 	if (!Profile->get_sae()) {
 		items.push_back (MenuElem (_("Remote Control ID..."), sigc::mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
+		items.back().set_sensitive (_editor.get_selection().tracks.size() <= 1);
 		items.push_back (SeparatorElem());
 	}
 
@@ -458,7 +458,7 @@ RouteTimeAxisView::build_display_menu ()
 
 	if (is_track()) {
 
-		Menu *layers_menu = manage(new Menu);
+		Menu* layers_menu = manage (new Menu);
 		MenuList &layers_items = layers_menu->items();
 		layers_menu->set_name("ArdourContextMenu");
 
@@ -546,8 +546,9 @@ RouteTimeAxisView::build_display_menu ()
 		build_playlist_menu ();
 		items.push_back (MenuElem (_("Playlist"), *playlist_action_menu));
 
-		route_group_menu->rebuild (_route->route_group ());
-		items.push_back (MenuElem (_("Route Group"), *route_group_menu));
+		route_group_menu->detach ();
+		route_group_menu->build (_route->route_group ());
+		items.push_back (MenuElem (_("Route Group"), *route_group_menu->menu ()));
 
 		build_automation_action_menu ();
 		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
@@ -1429,8 +1430,6 @@ RouteTimeAxisView::build_playlist_menu ()
 	MenuList& playlist_items = playlist_action_menu->items();
 	playlist_action_menu->set_name ("ArdourContextMenu");
 	playlist_items.clear();
-
-	delete playlist_menu;
 
         vector<boost::shared_ptr<Playlist> > playlists, playlists_tr;
 	boost::shared_ptr<Track> tr = track();
