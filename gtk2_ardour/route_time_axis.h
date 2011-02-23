@@ -212,7 +212,7 @@ protected:
 	void reset_samples_per_unit ();
 	void horizontal_position_changed ();
 
-	void select_track_color();
+	void set_color (Gdk::Color const &);
 
 	virtual void build_automation_action_menu ();
 	virtual void append_extra_display_menu_items () {}

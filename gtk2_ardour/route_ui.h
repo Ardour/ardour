@@ -77,7 +77,7 @@ class RouteUI : public virtual AxisView
 
 	boost::shared_ptr<ARDOUR::Route> _route;
 
-	void set_color (const Gdk::Color & c);
+	virtual void set_color (const Gdk::Color & c);
 	bool choose_color ();
 
 	bool ignore_toggle;

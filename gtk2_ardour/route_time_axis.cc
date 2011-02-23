@@ -441,7 +441,7 @@ RouteTimeAxisView::build_display_menu ()
 	MenuList& items = display_menu->items();
 	display_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Color..."), sigc::mem_fun(*this, &RouteTimeAxisView::select_track_color)));
+	items.push_back (MenuElem (_("Color..."), sigc::hide_return (sigc::mem_fun (*this, &RouteUI::choose_color))));
 
 	build_size_menu ();
 	items.push_back (MenuElem (_("Height"), *_size_menu));
@@ -863,13 +863,12 @@ RouteTimeAxisView::set_height (uint32_t h)
 }
 
 void
-RouteTimeAxisView::select_track_color ()
+RouteTimeAxisView::set_color (Gdk::Color const & c)
 {
-	if (RouteUI::choose_color ()) {
-
-		if (_view) {
-			_view->apply_color (_color, StreamView::RegionColor);
-		}
+	RouteUI::set_color (c);
+	
+	if (_view) {
+		_view->apply_color (_color, StreamView::RegionColor);
 	}
 }
 
