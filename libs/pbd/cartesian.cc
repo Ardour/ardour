@@ -38,6 +38,31 @@ PBD::azi_ele_to_cart (double azi, double ele, double& x, double& y, double& z)
 void 
 PBD::cart_to_azi_ele (double x, double y, double z, double& azimuth, double& elevation)
 {
+#if 1
+	/* converts cartesian coordinates to cylindrical in degrees*/
+
+        double rho, theta, phi;
+
+        rho = sqrt (x*x + y*y + z*z);
+        phi = acos (1.0/rho);
+        theta = atan2 (y, x);
+
+        /* XXX for now, clamp phi to zero */
+
+        phi = 0.0;
+
+        if (theta < 0.0) {
+                azimuth = 180.0 - (180.0 * (theta / M_PI)); /* LHS is negative */
+        } else {
+                azimuth = 180.0 * (theta / M_PI);
+        }
+
+        if (phi < 0.0) {
+                elevation = 180.0 - (180.0 * (phi / M_PI)); /* LHS is negative */
+        } else {
+                elevation = 180.0 * (phi /  M_PI);
+        }
+#else
 	/* converts cartesian coordinates to cylindrical in degrees*/
 
 	const double atorad = 2.0 * M_PI / 360.0;
@@ -77,5 +102,6 @@ PBD::cart_to_azi_ele (double x, double y, double z, double& azimuth, double& ele
 	elevation = atan_x_pl_y_per_z / atorad;
 
 	// distance = sqrtf (x*x + y*y + z*z);
+#endif
 }
 
