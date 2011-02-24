@@ -457,11 +457,14 @@ PluginSelector::run ()
 				PluginPtr p = load_plugin (pp);
 				if (p) {
 					plugins.push_back (p);
-				}
+                                } else {
+                                        MessageDialog msg (string_compose (_("The plugin \"%1\" could not be loaded\n\nSee the Log window for more details (maybe)"), pp->name));
+                                        msg.run ();
+                                }
 			}
 			if (interested_object && !plugins.empty()) {
 				finish = !interested_object->use_plugins (plugins);
-			}
+                        }
 			
 			break;
 			
