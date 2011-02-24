@@ -524,7 +524,7 @@ RouteTimeAxisView::build_display_menu ()
 			TrackSelection const & s = _editor.get_selection().tracks;
 			for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
 				RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
-				if (!r) {
+				if (!r || !r->is_track ()) {
 					continue;
 				}
 				
@@ -961,7 +961,9 @@ RouteTimeAxisView::set_align_style (AlignStyle style, bool apply_to_selection)
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_align_style, _1, style, false));
 	} else {
-		track()->set_align_style (style);
+		if (track ()) {
+			track()->set_align_style (style);
+		}
 	}
 }
 
