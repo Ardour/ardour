@@ -503,13 +503,17 @@ Route::process_output_buffers (BufferSet& bufs,
 			break;
 		}
 
-		if (bufs.count() != (*i)->input_streams()) {
-			cerr << _name << " bufs = " << bufs.count()
-			     << " input for " << (*i)->name() << " = " << (*i)->input_streams()
-			     << endl;
-		}
-		assert (bufs.count() == (*i)->input_streams());
-                
+#ifndef NDEBUG
+                /* if it has any inputs, make sure they match */
+                if ((*i)->input_streams() != ChanCount::ZERO) {
+                        if (bufs.count() != (*i)->input_streams()) {
+                                cerr << _name << " bufs = " << bufs.count()
+                                     << " input for " << (*i)->name() << " = " << (*i)->input_streams()
+                                     << endl;
+                                abort ();
+                        }
+                }
+#endif                
                 /* should we NOT run plugins here if the route is inactive?
                    do we catch route != active somewhere higher?
                 */

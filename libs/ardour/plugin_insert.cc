@@ -612,6 +612,20 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	ChanCount inputs  = _plugins[0]->get_info()->n_inputs;
 	ChanCount outputs = _plugins[0]->get_info()->n_outputs;
 
+        bool no_inputs = true;
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+                if (inputs.get (*t) != 0) {
+                        no_inputs = false;
+                        break;
+                }
+        }
+
+        if (no_inputs) {
+                /* no inputs so we can take any input configuration since we throw it away */
+                out = outputs;
+                return true;
+        }
+
 	// Plugin inputs match requested inputs exactly
 	if (inputs == in) {
 		out = outputs;
@@ -624,12 +638,15 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	uint32_t f             = 0;
 	bool     can_replicate = true;
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+
+                uint32_t nin = inputs.get (*t);
+
 		// No inputs of this type
-		if (inputs.get(*t) == 0 && in.get(*t) == 0) {
+		if (nin == 0 && in.get(*t) == 0) {
 			continue;
                 }
 
-                if (inputs.get(*t) != 1 || outputs.get (*t) != 1) {
+                if (nin != 1 || outputs.get (*t) != 1) {
                         can_replicate = false;
                         break;
                 }
@@ -637,16 +654,16 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
                 // Potential factor not set yet
 
                 if (f == 0) {
-                        f = in.get(*t) / inputs.get(*t);;
+                        f = in.get(*t) / nin;
                 }
 
                 // Factor for this type does not match another type, can not replicate
-                if (f != (in.get(*t) / inputs.get(*t))) {
+                if (f != (in.get(*t) / nin)) {
                         can_replicate = false;
                         break;
                 }
 	}
-
+        
 	if (can_replicate) {
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			out.set (*t, outputs.get(*t) * f);
