@@ -105,14 +105,25 @@ VBAPanner::update ()
                 double w = fabs (_pannable->pan_width_control->get_value()) * 360.0;
                 
                 double min_dir = center - w;
+                if (min_dir < 0) {
+                        min_dir = 360.0 + min_dir; // its already negative
+                }
                 min_dir = max (min (min_dir, 360.0), 0.0);
                 
                 double max_dir = center + w;
+                if (max_dir > 360.0) {
+                        max_dir = max_dir - 360.0;
+                }
                 max_dir = max (min (max_dir, 360.0), 0.0);
                 
-                double degree_step_per_signal = (max_dir - min_dir) / _signals.size();
+                if (max_dir < min_dir) {
+                        swap (max_dir, min_dir);
+                }
+
+                double degree_step_per_signal = (max_dir - min_dir) / (_signals.size() - 1);
                 double signal_direction = min_dir;
-                
+                int x = 1;
+
                 for (vector<Signal*>::iterator s = _signals.begin(); s != _signals.end(); ++s) {
                         
                         Signal* signal = *s;

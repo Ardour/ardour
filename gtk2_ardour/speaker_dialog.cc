@@ -201,7 +201,7 @@ SpeakerDialog::clamp_to_circle (double& x, double& y)
 {
 	double azi, ele;
 	double z = 0.0;
-        
+
 	PBD::cart_to_azi_ele (x, y, z, azi, ele);
 	PBD::azi_ele_to_cart (azi, ele, x, y, z);
 }

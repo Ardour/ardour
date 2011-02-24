@@ -108,11 +108,11 @@ class Panner2d : public Gtk::DrawingArea
 	typedef std::vector<Target*> Targets;
 	Targets targets;
 	Targets pucks;
+        Target  position;
 
 	Target *drag_target;
 	int     drag_x;
 	int     drag_y;
-	int     drag_index;
 	bool    allow_target;
 	int     width;
 	int     height;
@@ -123,7 +123,7 @@ class Panner2d : public Gtk::DrawingArea
 	gint compute_x (float);
 	gint compute_y (float);
 
-	Target *find_closest_object (gdouble x, gdouble y, int& which) const;
+	Target *find_closest_object (gdouble x, gdouble y);
 
 	gint handle_motion (gint, gint, GdkModifierType);
 
@@ -158,6 +158,8 @@ class Panner2dWindow : public ArdourDialog
 	std::vector<Gtk::SpinButton*> spinners;
 
         void bypass_toggled ();
+        bool on_key_press_event (GdkEventKey*);
+        bool on_key_release_event (GdkEventKey*);
 };
 
 #endif /* __ardour_panner_2d_h__ */
