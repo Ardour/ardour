@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008-2010 Paul Davis
+    Copyright (C) 2008-2011 Paul Davis
     Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -18,11 +18,11 @@
 
 */
 
-#include <vector>
 #include <string>
+#include <vector>
 
-#include <cstdlib>
 #include <cmath>
+#include <cstdlib>
 #include <cstring>
 
 #include <glibmm.h>
@@ -33,11 +33,11 @@
 #include "pbd/xml++.h"
 
 #include "ardour/ardour.h"
-#include "ardour/session.h"
-#include "ardour/audioengine.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/audioengine.h"
 #include "ardour/lv2_event_buffer.h"
 #include "ardour/lv2_plugin.h"
+#include "ardour/session.h"
 
 #include "pbd/stl_delete.h"
 
@@ -47,19 +47,28 @@
 #include "lv2ext/lv2_persist.h"
 #include "lv2_pfile.h"
 
+#define NS_DC   "http://dublincore.org/documents/dcmi-namespace/"
+#define NS_LV2  "http://lv2plug.in/ns/lv2core#"
+#define NS_PSET "http://lv2plug.in/ns/dev/presets#"
+#define NS_UI   "http://lv2plug.in/ns/extensions/ui#"
+
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
 URIMap   LV2Plugin::_uri_map;
-uint32_t LV2Plugin::_midi_event_type = _uri_map.uri_to_id(
+uint32_t LV2Plugin::_midi_event_type = _uri_map.uri_to_id (
 		"http://lv2plug.in/ns/ext/event",
 		"http://lv2plug.in/ns/ext/midi#MidiEvent");
 
-LV2Plugin::LV2Plugin (AudioEngine& e, Session& session, LV2World& world, SLV2Plugin plugin, framecnt_t rate)
-	: Plugin (e, session)
-	, _world(world)
-	, _features(NULL)
+LV2Plugin::LV2Plugin (AudioEngine& engine,
+                      Session&     session,
+                      LV2World&    world,
+                      SLV2Plugin   plugin,
+                      framecnt_t   rate)
+	: Plugin (engine, session)
+	, _world (world)
+	, _features (NULL)
 {
 	init (world, plugin, rate);
 }
@@ -109,7 +118,8 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 	_author   = slv2_plugin_get_author_name(plugin);
 
 	if (_instance == 0) {
-		error << _("LV2: Failed to instantiate plugin ") << slv2_plugin_get_uri(plugin) << endl;
+		error << _("LV2: Failed to instantiate plugin ")
+		      << slv2_plugin_get_uri(plugin) << endl;
 		throw failed_constructor();
 	}
 
@@ -128,9 +138,11 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 
 	_sample_rate = rate;
 
-	const bool     latent       = slv2_plugin_has_latency(plugin);
-	uint32_t       latency_port = (latent ? slv2_plugin_get_latency_port_index(plugin) : 0);
 	const uint32_t num_ports    = slv2_plugin_get_num_ports(plugin);
+	const bool     latent       = slv2_plugin_has_latency(plugin);
+	const uint32_t latency_port = (latent)
+		? slv2_plugin_get_latency_port_index(plugin)
+		: 0;
 
 	_control_data = new float[num_ports];
 	_shadow_data  = new float[num_ports];
@@ -237,9 +249,10 @@ LV2Plugin::set_parameter (uint32_t which, float val)
 	if (which < slv2_plugin_get_num_ports(_plugin)) {
 		_shadow_data[which] = val;
 	} else {
-		warning << string_compose (_("Illegal parameter number used with plugin \"%1\"."
-		                             "This is a bug in either %2 or the LV2 plugin (%3)"),
-		                           name(), PROGRAM_NAME, unique_id()) << endmsg;
+		warning << string_compose (
+			_("Illegal parameter number used with plugin \"%1\". "
+			  "This is a bug in either %2 or the LV2 plugin (%3)"),
+			name(), PROGRAM_NAME, unique_id()) << endmsg;
 	}
         
 	Plugin::set_parameter (which, val);
@@ -259,11 +272,8 @@ LV2Plugin::get_parameter (uint32_t which) const
 uint32_t
 LV2Plugin::nth_parameter (uint32_t n, bool& ok) const
 {
-	uint32_t x, c;
-
 	ok = false;
-
-	for (c = 0, x = 0; x < slv2_plugin_get_num_ports(_plugin); ++x) {
+	for (uint32_t c = 0, x = 0; x < slv2_plugin_get_num_ports (_plugin); ++x) {
 		if (parameter_is_control (x)) {
 			if (c++ == n) {
 				ok = true;
@@ -309,22 +319,19 @@ LV2Plugin::add_state (XMLNode* root) const
 	LocaleGuard lg (X_("POSIX"));
 
 	for (uint32_t i = 0; i < parameter_count(); ++i){
-
 		if (parameter_is_input(i) && parameter_is_control(i)) {
 			child = new XMLNode("Port");
-			/*snprintf(buf, sizeof(buf), "%u", i);
-			child->add_property("number", string(buf));*/
 			child->add_property("symbol", port_symbol(i));
 			snprintf(buf, sizeof(buf), "%+f", _shadow_data[i]);
 			child->add_property("value", string(buf));
 			root->add_child_nocopy (*child);
-                }
+		}
 	}
 
 	if (_supports_persist) {
 		// Create state directory for this plugin instance
 		const std::string state_filename = _id.to_s() + ".lv2pfile";
-		const std::string state_path = Glib::build_filename(
+		const std::string state_path     = Glib::build_filename(
 			_session.plugins_dir(), state_filename);
 
 		cout << "Saving LV2 plugin state to " << state_path << endl;
@@ -347,10 +354,6 @@ LV2Plugin::add_state (XMLNode* root) const
 	}
 }
 
-#define NS_DC   "http://dublincore.org/documents/dcmi-namespace/"
-#define NS_LV2  "http://lv2plug.in/ns/lv2core#"
-#define NS_PSET "http://lv2plug.in/ns/dev/presets#"
-
 static inline SLV2Value
 get_value(SLV2Plugin p, SLV2Value subject, SLV2Value predicate)
 {
@@ -366,7 +369,6 @@ LV2Plugin::find_presets ()
 
 	SLV2Values presets = slv2_plugin_get_value(_plugin, pset_hasPreset);
 	for (unsigned i = 0; i < slv2_values_size(presets); ++i) {
-		// TODO: Choose which name to use based on locale?
 		SLV2Value preset = slv2_values_get_at(presets, i);
 		SLV2Value name   = get_value(_plugin, preset, dc_title);
 		if (name) {
@@ -401,7 +403,7 @@ LV2Plugin::load_preset (PresetRecord r)
 
 	SLV2Values ports = slv2_plugin_get_value_for_subject(_plugin, preset, lv2_port);
 	for (unsigned i = 0; i < slv2_values_size(ports); ++i) {
-		SLV2Value port   = slv2_values_get_at(ports, i); // ... because of this
+		SLV2Value port   = slv2_values_get_at(ports, i);
 		SLV2Value symbol = get_value(_plugin, port, lv2_symbol);
 		SLV2Value value  = get_value(_plugin, port, pset_value);
 		if (value && slv2_value_is_float(value)) {
@@ -507,7 +509,8 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 	}
 
 	if ((prop = node.property("state-file")) != 0) {
-		std::string state_path = Glib::build_filename(_session.plugins_dir(), prop->value());
+		std::string state_path = Glib::build_filename(_session.plugins_dir(),
+		                                              prop->value());
 
 		// Get LV2 Persist extension data from plugin instance
 		LV2_Persist* persist = (LV2_Persist*)slv2_instance_get_extension_data(
@@ -515,7 +518,9 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 		if (persist) {
 			cout << "Loading LV2 state from " << state_path << endl;
 			LV2PFile file = lv2_pfile_open(state_path.c_str(), false);
-			persist->restore(_instance->lv2_handle, &LV2Plugin::lv2_persist_retrieve_callback, file);
+			persist->restore(_instance->lv2_handle,
+			                 &LV2Plugin::lv2_persist_retrieve_callback,
+			                 file);
 			lv2_pfile_close(file);
 		} else {
 			warning << string_compose(
@@ -602,6 +607,33 @@ LV2Plugin::automatable () const
 	}
 
 	return ret;
+}
+
+void
+LV2Plugin::activate ()
+{
+	if (!_was_activated) {
+		slv2_instance_activate (_instance);
+		_was_activated = true;
+	}
+}
+
+void
+LV2Plugin::deactivate ()
+{
+	if (_was_activated) {
+		slv2_instance_deactivate (_instance);
+		_was_activated = false;
+	}
+}
+
+void
+LV2Plugin::cleanup ()
+{
+	activate ();
+	deactivate ();
+	slv2_instance_free (_instance);
+	_instance = NULL;
 }
 
 int
@@ -701,7 +733,7 @@ LV2Plugin::parameter_is_input (uint32_t param) const
 }
 
 void
-LV2Plugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
+LV2Plugin::print_parameter (uint32_t param, char* buf, uint32_t len) const
 {
 	if (buf && len) {
 		if (param < parameter_count()) {
@@ -781,8 +813,8 @@ LV2World::LV2World()
 	integer         = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "integer");
 	toggled         = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "toggled");
 	srate           = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "sampleRate");
-	gtk_gui         = slv2_value_new_uri(world, "http://lv2plug.in/ns/extensions/ui#GtkUI");
-	external_gui    = slv2_value_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
+	gtk_gui         = slv2_value_new_uri(world, NS_UI "GtkUI");
+	external_gui    = slv2_value_new_uri(world, NS_UI "external");
 	logarithmic     = slv2_value_new_uri(world, "http://lv2plug.in/ns/dev/extportinfo#logarithmic");
 }
 

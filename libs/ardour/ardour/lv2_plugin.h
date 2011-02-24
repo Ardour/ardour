@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008-2010 Paul Davis
+    Copyright (C) 2008-2011 Paul Davis
     Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -22,76 +22,70 @@
 #define __ardour_lv2_plugin_h__
 
 #include <set>
-#include <vector>
 #include <string>
+#include <vector>
+
 #include <dlfcn.h>
 
 #include "pbd/stateful.h"
 
 #include <jack/types.h>
 #include <slv2/slv2.h>
+
 #include "ardour/plugin.h"
 #include "ardour/uri_map.h"
 
 namespace ARDOUR {
+
 class AudioEngine;
+class LV2World;
 class Session;
-struct LV2World;
 
 class LV2Plugin : public ARDOUR::Plugin
 {
   public:
-	LV2Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&, ARDOUR::LV2World&, SLV2Plugin plugin, framecnt_t sample_rate);
+	LV2Plugin (ARDOUR::AudioEngine& engine,
+	           ARDOUR::Session&     session,
+	           ARDOUR::LV2World&    world,
+	           SLV2Plugin           plugin,
+	           framecnt_t           sample_rate);
 	LV2Plugin (const LV2Plugin &);
 	~LV2Plugin ();
 
-	/* Plugin interface */
+	std::string unique_id () const;
 
-	std::string unique_id() const;
-	const char* label() const           { return slv2_value_as_string(_name); }
-	const char* name() const            { return slv2_value_as_string(_name); }
-	const char* maker() const           { return _author ? slv2_value_as_string(_author) : "Unknown"; }
-	uint32_t    parameter_count() const { return slv2_plugin_get_num_ports(_plugin); }
-	float       default_value (uint32_t port);
-	framecnt_t  signal_latency () const;
-	void        set_parameter (uint32_t port, float val);
-	float       get_parameter (uint32_t port) const;
-	int         get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
-	uint32_t    nth_parameter (uint32_t port, bool& ok) const;
+	const char* label () const { return slv2_value_as_string(_name); }
+	const char* name () const  { return slv2_value_as_string(_name); }
+	const char* maker () const {
+		return _author ? slv2_value_as_string (_author) : "Unknown";
+	}
 
-	const void* extension_data(const char* uri) { return _instance->lv2_descriptor->extension_data(uri); }
+	uint32_t   parameter_count () const { return slv2_plugin_get_num_ports(_plugin); }
+	float      default_value (uint32_t port);
+	framecnt_t signal_latency () const;
+	void       set_parameter (uint32_t port, float val);
+	float      get_parameter (uint32_t port) const;
+	int        get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
+	uint32_t   nth_parameter (uint32_t port, bool& ok) const;
 
-	SLV2Plugin slv2_plugin()         { return _plugin; }
-	SLV2UI     slv2_ui()             { return _ui; }
-	bool       is_external_ui() const;
-	SLV2Port   slv2_port(uint32_t i) { return slv2_plugin_get_port_by_index(_plugin, i); }
+	const void* extension_data (const char* uri) {
+		return _instance->lv2_descriptor->extension_data (uri);
+	}
+
+	SLV2Plugin slv2_plugin ()         { return _plugin; }
+	SLV2UI     slv2_ui ()             { return _ui; }
+	SLV2Port   slv2_port (uint32_t i) { return slv2_plugin_get_port_by_index (_plugin, i); }
+	bool       is_external_ui () const;
 
 	const char* port_symbol (uint32_t port) const;
 
-	const LV2_Feature* const* features() { return _features; }
+	const LV2_Feature* const* features () { return _features; }
 
-	std::set<Evoral::Parameter> automatable() const;
+	std::set<Evoral::Parameter> automatable () const;
 
-	void activate () {
-		if (!_was_activated) {
-			slv2_instance_activate(_instance);
-			_was_activated = true;
-		}
-	}
-
-	void deactivate () {
-		if (_was_activated) {
-			slv2_instance_deactivate(_instance);
-			_was_activated = false;
-		}
-	}
-
-	void cleanup () {
-		activate();
-		deactivate();
-		slv2_instance_free(_instance);
-		_instance = NULL;
-	}
+	void activate ();
+	void deactivate ();
+	void cleanup ();
 
 	int set_block_size (pframes_t /*nframes*/) { return 0; }
 
@@ -100,25 +94,28 @@ class LV2Plugin : public ARDOUR::Plugin
 			pframes_t nframes, framecnt_t offset);
 
 	std::string describe_parameter (Evoral::Parameter);
-	std::string state_node_name() const { return "lv2"; }
-	void        print_parameter (uint32_t, char*, uint32_t len) const;
+	std::string state_node_name () const { return "lv2"; }
 
-	bool parameter_is_audio(uint32_t) const;
-	bool parameter_is_control(uint32_t) const;
-	bool parameter_is_midi(uint32_t) const;
-	bool parameter_is_input(uint32_t) const;
-	bool parameter_is_output(uint32_t) const;
-	bool parameter_is_toggled(uint32_t) const;
+	void print_parameter (uint32_t param,
+	                      char*    buf,
+	                      uint32_t len) const;
 
-	static uint32_t midi_event_type() { return _midi_event_type; }
+	bool parameter_is_audio (uint32_t) const;
+	bool parameter_is_control (uint32_t) const;
+	bool parameter_is_midi (uint32_t) const;
+	bool parameter_is_input (uint32_t) const;
+	bool parameter_is_output (uint32_t) const;
+	bool parameter_is_toggled (uint32_t) const;
 
-	int      set_state(const XMLNode& node, int version);
+	static uint32_t midi_event_type () { return _midi_event_type; }
+
+	int      set_state (const XMLNode& node, int version);
 	bool     save_preset (std::string uri);
 	void     remove_preset (std::string uri);
 	bool     load_preset (PresetRecord);
 	std::string current_preset () const;
 
-	bool has_editor() const;
+	bool has_editor () const;
 
   private:
 	void*             _module;
@@ -140,7 +137,10 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	std::map<std::string,uint32_t> _port_indices;
 
-	typedef struct { const void* (*extension_data)(const char* uri); } LV2_DataAccess;
+	typedef struct {
+		const void* (*extension_data) (const char* uri);
+	} LV2_DataAccess;
+
 	LV2_DataAccess _data_access_extension_data;
 	LV2_Feature    _data_access_feature;
 	LV2_Feature    _instance_access_feature;
@@ -149,16 +149,16 @@ class LV2Plugin : public ARDOUR::Plugin
 	static URIMap   _uri_map;
 	static uint32_t _midi_event_type;
 
-	static void lv2_persist_store_callback(void*       callback_data,
-	                                       const char* key,
-	                                       const void* value,
-	                                       size_t      size,
-	                                       uint32_t    type);
+	static void lv2_persist_store_callback (void*       callback_data,
+	                                        const char* key,
+	                                        const void* value,
+	                                        size_t      size,
+	                                        uint32_t    type);
 
-	static const void* lv2_persist_retrieve_callback(void*       callback_data,
-	                                                 const char* key,
-	                                                 size_t*     size,
-	                                                 uint32_t*   type);
+	static const void* lv2_persist_retrieve_callback (void*       callback_data,
+	                                                  const char* key,
+	                                                  size_t*     size,
+	                                                  uint32_t*   type);
 
 	void init (LV2World& world, SLV2Plugin plugin, framecnt_t rate);
 	void run (pframes_t nsamples);
@@ -176,9 +176,10 @@ class LV2Plugin : public ARDOUR::Plugin
  * This object represents everything ardour 'knows' about LV2
  * (ie understood extensions/features/etc)
  */
-struct LV2World {
-	LV2World();
-	~LV2World();
+class LV2World {
+public:
+	LV2World ();
+	~LV2World ();
 
 	SLV2World world;
 	SLV2Value input_class; ///< Input port
