@@ -5,6 +5,8 @@
 # This will collect up the x86 and x86_64 bundles created by build
 # and package them together with an installer script.
 
+STRIP=1
+BUILDTYPE=""
 
 if [ $# -eq 0 ] ; then
 	echo ""	 
@@ -33,6 +35,8 @@ while [ $# -gt 0 ] ; do
 		APPNAME=Ardour ;
 		shift ;;
 
+	--nostrip) STRIP= ; shift ;;
+
 	*)
 		#catch all for unknown arguments
 		echo ""
@@ -44,12 +48,34 @@ while [ $# -gt 0 ] ; do
 done
 
 
+# Figure out the Build Type
+if grep -q "DEBUG = True" ../../scache.conf; then
+	DEBUG="T"
+else
+	DEBUG="F"
+fi
+
+if [ x$DEBUG != x ]; then
+	if [ x$STRIP != x ]; then
+		BUILDTYPE="strip"
+	else
+		BUILDTYPE="dbg"
+	fi
+fi
+
 release_version=`grep -m 1 '^ardour_version' ../../SConstruct | cut -d' ' -f 3 | sed "s/'//g"`
 svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d' ' -f 6 | sed 's/[";]//g'`
 
-X86_BUILD="${APPNAME}_x86-${release_version}_${svn_version}.tar.bz2"
-X86_64_BUILD="${APPNAME}_x86_64-${release_version}_${svn_version}.tar.bz2"
-PACKAGE="${APPNAME}-${release_version}_${svn_version}"
+if [ -z ${BUILDTYPE} ]; then
+	X86_BUILD="${APPNAME}_x86-${release_version}_${svn_version}.tar.bz2"
+	X86_64_BUILD="${APPNAME}_x86_64-${release_version}_${svn_version}.tar.bz2"
+	PACKAGE="${APPNAME}-${release_version}_${svn_version}"
+else
+	X86_BUILD="${APPNAME}_x86-${release_version}_${svn_version}-${BUILDTYPE}.tar.bz2"
+	X86_64_BUILD="${APPNAME}_x86_64-${release_version}_${svn_version}-${BUILDTYPE}.tar.bz2"
+	PACKAGE="${APPNAME}-${release_version}_${svn_version}-${BUILDTYPE}"
+fi 
+
 
 if [ ! -e ${X86_BUILD} ]; then
 	echo ""

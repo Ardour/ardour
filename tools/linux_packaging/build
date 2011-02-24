@@ -20,6 +20,7 @@ PRINT_SYSDEPS=
 WITH_NLS=
 EXTERNAL_JACK=
 VENDOR=Ardour ;
+BUILDTYPE=""
 
 if [ $# -eq 0 ] ; then
 	echo ""	 
@@ -124,9 +125,32 @@ case `uname -m` in
 		;;
 esac
 
+# Figure out the Build Type
+if grep -q "DEBUG = True" ../../scache.conf; then
+	DEBUG="T"
+else
+	DEBUG="F"
+fi
+
+if [ x$DEBUG != x ]; then
+	if [ x$STRIP != x ]; then
+		BUILDTYPE="strip"
+	else
+		BUILDTYPE="dbg"
+	fi
+fi
+
+
 # setup directory structure
 
-APPDIR=${APPNAME}_${ARCH}-${release_version}_${svn_version}
+if [ -z "${BUILDTYPE}" ]; then
+	APPDIR=${APPNAME}_${ARCH}-${release_version}_${svn_version}
+	APP_VER_NAME=${APPNAME}-${release_version}_${svn_version}
+else
+	APPDIR=${APPNAME}_${ARCH}-${release_version}_${svn_version}-${BUILDTYPE}
+	APP_VER_NAME=${APPNAME}-${release_version}_${svn_version}-${BUILDTYPE}
+fi
+
 APPBIN=$APPDIR/bin
 APPLIB=$APPDIR/lib
 Libraries=$APPLIB
@@ -596,8 +620,7 @@ fi
 #
 # Add the uninstaller
 #
-APP_VER_NAME=${APPNAME}-${release_version}_${svn_version}
-sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_VERSION%/${release_version}/" -e "s/%REPLACE_BUILD%/${svn_version}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
+sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_VERSION%/${release_version}/" -e "s/%REPLACE_BUILD%/${svn_version}/" -e "s/%REPLACE_TYPE%/${BUILDTYPE}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
 chmod a+x $APPBIN/${APP_VER_NAME}.uninstall.sh
 
 #Sanity Check file
