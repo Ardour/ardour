@@ -28,6 +28,7 @@ namespace PBD {
 	namespace DEBUG {
                 extern uint64_t Drags;
                 extern uint64_t CutNPaste;
+                extern uint64_t Accelerators;
 	}
 }
 

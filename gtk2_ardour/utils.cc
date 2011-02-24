@@ -45,6 +45,7 @@
 #include "ardour/filesystem_paths.h"
 
 #include "ardour_ui.h"
+#include "debug.h"
 #include "public_editor.h"
 #include "keyboard.h"
 #include "utils.h"
@@ -599,11 +600,6 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	bool special_handling_of_unmodified_accelerators = false;
 	bool allow_activating = true;
 
-#undef DEBUG_ACCELERATOR_HANDLING
-#ifdef  DEBUG_ACCELERATOR_HANDLING
-	//bool debug = (getenv ("ARDOUR_DEBUG_ACCELERATOR_HANDLING") != 0);
-	bool debug=true;
-#endif
 	if (focus) {
 		if (GTK_IS_ENTRY(focus) || Keyboard::some_magic_widget_has_focus()) {
 			special_handling_of_unmodified_accelerators = true;
@@ -617,18 +613,15 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	}
 #endif
 
-#ifdef DEBUG_ACCELERATOR_HANDLING
-	if (debug) {
-		cerr << "Win = " << win << " Key event: code = " << ev->keyval << " state = " << hex << ev->state << dec << " special handling ? "
-		     << special_handling_of_unmodified_accelerators
-		     << " magic widget focus ? "
-		     << Keyboard::some_magic_widget_has_focus()
-		     << " allow_activation ? "
-		     << allow_activating
-		     << endl;
-	}
-#endif
-
+        
+        DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Win = %1 Key event: code = %2  state = %3 special handling ? %4 magic widget focus %5? allow_activation ? %6\n",
+                                                          win,
+                                                          ev->keyval,
+                                                          ev->state 
+                                                          << special_handling_of_unmodified_accelerators
+                                                          << Keyboard::some_magic_widget_has_focus()
+                                                          << allow_activating));
+        
 	/* This exists to allow us to override the way GTK handles
 	   key events. The normal sequence is:
 
@@ -670,10 +663,8 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 			guint keyval_without_alt = osx_keyval_without_alt (ev->keyval);
 
 			if (keyval_without_alt != GDK_VoidSymbol) {
-#ifdef DEBUG_ACCELERATOR_HANDLING
-				cerr << "Remapped " << gdk_keyval_name (ev->keyval) << " to " << gdk_keyval_name (keyval_without_alt) << endl;
-
-#endif				ev->keyval = keyval_without_alt;
+                                DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Remapped %1 to %2\n", gdk_keyval_name (ev->keyval), gdk_keyval_name (keyval_without_alt)));
+				ev->keyval = keyval_without_alt;
 			}
 		}
 	}
@@ -703,11 +694,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 
 		/* no special handling or there are modifiers in effect: accelerate first */
 
-#ifdef DEBUG_ACCELERATOR_HANDLING
-		if (debug) {
-			cerr << "\tactivate, then propagate\n";
-		}
-#endif
+                DEBUG_TRACE (DEBUG::Accelerators, "\tactivate, then propagate\n");
 
 		if (allow_activating) {
 			if (gtk_window_activate_key (win, ev)) {
@@ -715,46 +702,27 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 			}
 		}
 
-#ifdef DEBUG_ACCELERATOR_HANDLING
-		if (debug) {
-			cerr << "\tnot accelerated, now propagate\n";
-		}
-#endif
+                DEBUG_TRACE (DEBUG::Accelerators, "\tnot accelerated, now propagate\n");
+
 		return gtk_window_propagate_key_event (win, ev);
 	}
 
 	/* no modifiers, propagate first */
 
-#ifdef DEBUG_ACCELERATOR_HANDLING
-	if (debug) {
-		cerr << "\tpropagate, then activate\n";
-	}
-#endif
-	if (!gtk_window_propagate_key_event (win, ev)) {
-#ifdef DEBUG_ACCELERATOR_HANDLING
-		if (debug) {
-			cerr << "\tpropagation didn't handle, so activate\n";
-		}
-#endif
+        DEBUG_TRACE (DEBUG::Accelerators, "\tpropagate, then activate\n");
 
+	if (!gtk_window_propagate_key_event (win, ev)) {
+                DEBUG_TRACE (DEBUG::Accelerators, "\tpropagation didn't handle, so activate\n");
 		if (allow_activating) {
 			return gtk_window_activate_key (win, ev);
 		}
 
 	} else {
-#ifdef DEBUG_ACCELERATOR_HANDLING
-		if (debug) {
-			cerr << "\thandled by propagate\n";
-		}
-#endif
+                DEBUG_TRACE (DEBUG::Accelerators, "\thandled by propagate\n");
 		return true;
 	}
 
-#ifdef DEBUG_ACCELERATOR_HANDLING
-	if (debug) {
-		cerr << "\tnot handled\n";
-	}
-#endif
+        DEBUG_TRACE (DEBUG::Accelerators, "\tnot handled\n");
 	return true;
 }
 
