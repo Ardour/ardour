@@ -496,15 +496,15 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 				cairo_fill (cr);
                                 cairo_restore (cr);
 
-                                /* move the text in just a bit */
-                                
-                                AngularVector textpos (target->position.azi, 0.75);
-				textpos.cartesian (c);
-				cart_to_gtk (c);
-
                                 if (!small) {
+                                        cairo_set_font_size (cr, 16);
+
+                                        /* move the text in just a bit */
+                                        
+                                        AngularVector textpos (target->position.azi, target->position.ele, 0.85);
+                                        textpos.cartesian (c);
+                                        cart_to_gtk (c);
                                         cairo_move_to (cr, c.x, c.y);
-                                        cairo_set_font_size (cr, 10);
                                         cairo_show_text (cr, buf);
                                 }
 
@@ -723,9 +723,10 @@ Panner2d::clamp_to_circle (double& x, double& y)
 {
 	double azi, ele;
 	double z = 0.0;
+        double l;
 
-	PBD::cart_to_azi_ele (x, y, z, azi, ele);
-	PBD::azi_ele_to_cart (azi, ele, x, y, z);
+	PBD::cartesian_to_spherical (x, y, z, azi, ele, l);
+	PBD::spherical_to_cartesian (azi, ele, 1.0, x, y, z);
 }
 
 void

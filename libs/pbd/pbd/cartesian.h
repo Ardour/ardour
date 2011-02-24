@@ -24,8 +24,8 @@
 
 namespace PBD {
 
-void azi_ele_to_cart (double azi, double ele, double& x, double& y, double& z);
-void cart_to_azi_ele (double x, double y, double z, double& azi, double& ele);
+void spherical_to_cartesian (double azi, double ele, double len, double& x, double& y, double& z);
+void cartesian_to_spherical (double x, double y, double z, double& azi, double& ele, double& len);
         
 struct AngularVector;
 
@@ -91,12 +91,12 @@ struct AngularVector {
 	}
 
 	void cartesian (CartesianVector& c) const {
-		azi_ele_to_cart (azi, ele, c.x, c.y, c.z);
+		spherical_to_cartesian (azi, ele, length, c.x, c.y, c.z);
 	}
 };
 
 inline void CartesianVector::angular (AngularVector& a) const {
-	cart_to_azi_ele (x, y, z, a.azi, a.ele);
+	cartesian_to_spherical (x, y, z, a.azi, a.ele, a.length);
 }
 
 }

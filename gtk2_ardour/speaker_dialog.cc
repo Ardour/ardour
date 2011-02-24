@@ -201,9 +201,10 @@ SpeakerDialog::clamp_to_circle (double& x, double& y)
 {
 	double azi, ele;
 	double z = 0.0;
+        double l;
 
-	PBD::cart_to_azi_ele (x, y, z, azi, ele);
-	PBD::azi_ele_to_cart (azi, ele, x, y, z);
+	PBD::cartesian_to_spherical (x, y, z, azi, ele, l);
+	PBD::spherical_to_cartesian (azi, ele, 1.0, x, y, z);
 }
 
 void

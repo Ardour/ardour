@@ -122,7 +122,6 @@ VBAPanner::update ()
 
                 double degree_step_per_signal = (max_dir - min_dir) / (_signals.size() - 1);
                 double signal_direction = min_dir;
-                int x = 1;
 
                 for (vector<Signal*>::iterator s = _signals.begin(); s != _signals.end(); ++s) {
                         
@@ -153,7 +152,7 @@ VBAPanner::compute_gains (double gains[3], int speaker_ids[3], int azi, int ele)
 	double small_g;
 	double big_sm_g, gtmp[3];
 
-	azi_ele_to_cart (azi,ele, cartdir[0], cartdir[1], cartdir[2]);  
+	spherical_to_cartesian (azi, ele, 1.0, cartdir[0], cartdir[1], cartdir[2]);  
 	big_sm_g = -100000.0;
 
 	gains[0] = gains[1] = gains[2] = 0;

@@ -24,19 +24,23 @@
 using namespace std;
 
 void
-PBD::azi_ele_to_cart (double azi, double ele, double& x, double& y, double& z)
+PBD::spherical_to_cartesian (double azi, double ele, double len, double& x, double& y, double& z)
 {
 	/* convert from cylindrical coordinates in degrees to cartesian */
 
 	static const double atorad = 2.0 * M_PI / 360.0 ;
+        
+        if (len == 0.0) {
+                len = 1.0;
+        }
 
-	x = cos (azi * atorad) * cos (ele * atorad);
-	y = sin (azi * atorad) * cos (ele * atorad);
-	z = sin (ele * atorad);
+	x = len * cos (azi * atorad) * cos (ele * atorad);
+	y = len * sin (azi * atorad) * cos (ele * atorad);
+	z = len * sin (ele * atorad);
 }
 
 void 
-PBD::cart_to_azi_ele (double x, double y, double z, double& azimuth, double& elevation)
+PBD::cartesian_to_spherical (double x, double y, double z, double& azimuth, double& elevation, double& length)
 {
 #if 1
 	/* converts cartesian coordinates to cylindrical in degrees*/
@@ -62,6 +66,8 @@ PBD::cart_to_azi_ele (double x, double y, double z, double& azimuth, double& ele
         } else {
                 elevation = 180.0 * (phi /  M_PI);
         }
+        
+        length = rho;
 #else
 	/* converts cartesian coordinates to cylindrical in degrees*/
 
