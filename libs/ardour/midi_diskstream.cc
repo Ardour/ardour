@@ -496,8 +496,6 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can
 	bool      nominally_recording;
 	bool      re = record_enabled ();
 
-	playback_distance = 0;
-
 	check_record_status (transport_frame, can_record);
 
 	nominally_recording = (can_record && re);
@@ -559,25 +557,10 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can
 	}
 
 	if (rec_nframes) {
-
 		/* data will be written to disk */
-
-		if (rec_nframes == nframes && rec_offset == 0) {
-			playback_distance = nframes;
-		}
-
 		adjust_capture_position = rec_nframes;
-
-	} else if (nominally_recording) {
-
-		/* XXXX do this for MIDI !!!
-		   can't do actual capture yet - waiting for latency effects to finish before we start
-		   */
-
-		playback_distance = nframes;
-
 	}
-
+	
 	ret = 0;
 
 	if (commit (nframes)) {
