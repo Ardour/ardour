@@ -593,9 +593,9 @@ MidiDiskstream::commit (framecnt_t nframes)
 	bool need_butler = false;
 
 	if (_actual_speed < 0.0) {
-		playback_sample -= playback_distance;
+		playback_sample -= nframes;
 	} else {
-		playback_sample += playback_distance;
+		playback_sample += nframes;
 	}
 
 	if (adjust_capture_position != 0) {
@@ -814,7 +814,6 @@ MidiDiskstream::do_refill ()
 	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
 	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
 	if ((frames_written - frames_read) >= midi_readahead) {
-		//cout << "MDS Nothing to do. all fine" << endl;
 		return 0;
 	}
 
