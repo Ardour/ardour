@@ -76,7 +76,6 @@ AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream:
 	: Diskstream(sess, name, flag)
 	, deprecated_io_node(NULL)
 	, channels (new ChannelList)
-        , playback_distance (0)
 {
 	/* prevent any write sources from being created */
 
@@ -89,7 +88,6 @@ AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
 	: Diskstream(sess, node)
 	, deprecated_io_node(NULL)
 	, channels (new ChannelList)
-        , playback_distance (0)
 {
 	in_set_state = true;
 	init ();

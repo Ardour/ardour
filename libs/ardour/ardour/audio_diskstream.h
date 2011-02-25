@@ -284,7 +284,6 @@ class AudioDiskstream : public Diskstream
 	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
 	int remove_channel_from (boost::shared_ptr<ChannelList>, uint32_t how_many);
 
-	framecnt_t playback_distance;
 };
 
 } // namespace ARDOUR

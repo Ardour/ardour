@@ -288,6 +288,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	framepos_t     file_frame;
 	framepos_t     playback_sample;
+	framecnt_t     playback_distance;
 
 	uint32_t     _read_data_count;
 	uint32_t     _write_data_count;
