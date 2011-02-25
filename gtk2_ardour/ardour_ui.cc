@@ -2705,7 +2705,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		goto out;
 	}
 
-	loading_message (string_compose (_("Please wait while %1loads your session"), PROGRAM_NAME));
+	loading_message (string_compose (_("Please wait while %1 loads your session"), PROGRAM_NAME));
 
 	try {
 		new_session = new Session (*engine, path, snap_name, 0, mix_template);
