@@ -1,5 +1,22 @@
 #!/bin/sh
 
+while [ $# -gt 0 ] ; do
+	echo "arg = $1"
+	case $1 in
+
+	-d)
+		DEBUG="T";
+		shift ;;
+	*)
+		#catch all for unknown arguments
+		echo ""
+		echo "!!! ERROR !!! - Unknown argument $1"
+		echo ""
+		exit 1
+		;;
+	esac
+done
+
 #LD_LIBRARY_PATH needs to be set (empty) so that epa can swap between the original and the bundled version
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
@@ -34,7 +51,12 @@ export LD_LIBRARY_PATH=$INSTALL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 sed "s?@ROOTDIR@/modules?$LIB_DIR/modules?" < $ETC_DIR/pango.modules.in > $USER_ARDOUR_DIR/pango.modules
 sed "s?@ROOTDIR@/loaders?$LIB_DIR/loaders?" < $ETC_DIR/gdk-pixbuf.loaders.in > $USER_ARDOUR_DIR/gdk-pixbuf.loaders
 
-exec $INSTALL_DIR/bin/ardour-3.0 "$@"
+if [ "T" = "$DEBUG" ]; then
+	export ARDOUR_INSIDE_GDB=1
+	exec gdb $INSTALL_DIR/bin/ardour-3.0 "$@"
+else
+	exec $INSTALL_DIR/bin/ardour-3.0 "$@"
+fi
 
 
 

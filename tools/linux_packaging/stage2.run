@@ -99,6 +99,11 @@ SystemInstall ()
 #                                 Main
 ########################################################################
 
+# If you double click a script, some systems don't get the PWD correct.
+# Force it to be correct
+PKG_PATH=$(dirname $(readlink -f $0))
+cd ${PKG_PATH}
+
 echo ""
 echo "Welcome to the ${PGM_NAME} installer"
 echo ""
@@ -214,11 +219,20 @@ fi
 ################################
 PGM_VERSION=$(echo ${BUNDLE_DIR} | awk 'BEGIN { FS = "-" } ; { print $2 }' | awk 'BEGIN { FS = "_"} ; { print $1}')
 PGM_BUILD=$(echo ${BUNDLE_DIR} | awk 'BEGIN { FS = "-" } ; { print $2 }' | awk 'BEGIN { FS = "_"} ; { print $2}')
-PGM_FULL_NAME="${PGM_NAME}-${PGM_VERSION}_${PGM_BUILD}"
+PGM_BUILDTYPE=$(echo ${BUNDLE_DIR} | awk 'BEGIN { FS = "-" } ; { print $3 }')
 
-ICON_NAME="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}"			#no dash since it seperates vendor from program
-MENU_FILE="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}.desktop"	#no dash since it seperates vendor from program
-DESKTOP_LINK_FILE="${PGM_NAME}_${PGM_VERSION}.desktop"
+if [ -z ${PGM_BUILDTYPE} ];
+then
+	PGM_FULL_NAME="${PGM_NAME}-${PGM_VERSION}_${PGM_BUILD}"
+	ICON_NAME="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}"			#no dash between name and version since dash seperates vendor from program
+	MENU_FILE="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}.desktop"	#no dash between name and version since dash seperates vendor from program
+	DESKTOP_LINK_FILE="${PGM_NAME}_${PGM_VERSION}.desktop"
+else
+	PGM_FULL_NAME="${PGM_NAME}-${PGM_VERSION}_${PGM_BUILD}-${PGM_BUILDTYPE}"
+	ICON_NAME="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}_${PGM_BUILDTYPE}"			#no dash between name and version since dash seperates vendor from program
+	MENU_FILE="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}_${PGM_BUILDTYPE}.desktop"	#no dash between name and version since dash seperates vendor from program
+	DESKTOP_LINK_FILE="${PGM_NAME}_${PGM_VERSION}_${PGM_BUILDTYPE}.desktop"
+fi
 
 PGM_EXEC_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/${PGM_EXEC_FILE}"
 ICON_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/etc/icons"
@@ -256,6 +270,7 @@ then
 			echo "Running uninstaller $i"
 			
 			${i}
+			sudo rm -f ${i}
 		fi
 	done
 fi
@@ -278,10 +293,15 @@ echo "Version=1.0" >> /tmp/${MENU_FILE}
 echo "Type=Application" >> /tmp/${MENU_FILE}
 echo "Terminal=false" >> /tmp/${MENU_FILE}
 echo "Exec=${PGM_EXEC_PATH}" >> /tmp/${MENU_FILE}
-echo "Name=${PGM_NAME}-${PGM_VERSION}" >> /tmp/${MENU_FILE}
+if [ -z ${PGM_BUILDTYPE} ];
+then
+	echo "Name=${PGM_NAME}-${PGM_VERSION}" >> /tmp/${MENU_FILE}
+else
+	echo "Name=${PGM_NAME}-${PGM_VERSION}-${PGM_BUILDTYPE}" >> /tmp/${MENU_FILE}
+fi
 echo "Icon=${ICON_NAME}" >> /tmp/${MENU_FILE}
 echo "Comment=Digital Audio Workstation" >> /tmp/${MENU_FILE}
-echo "Categories=AudioVideo;Audio;Recorder;" >> /tmp/${MENU_FILE}
+echo "Categories=AudioVideo;AudioEditing;Audio;Recorder;" >> /tmp/${MENU_FILE}
 
 chmod ugo+rx /tmp/${MENU_FILE}
 sudo mv /tmp/${MENU_FILE} ${MENU_FILE_PATH}/.
@@ -301,7 +321,8 @@ then
 	fi
 
 	sudo xdg-desktop-menu install ${MENU_FILE_PATH}/${MENU_FILE}
-
+	sudo xdg-desktop-menu forceupdate --mode system			# Some systems need an extra kick
+	
 	echo ""
 	echo "Creating a desktop link for ${PGM_NAME}"
 	cp ${MENU_FILE_PATH}/${MENU_FILE} ~/Desktop/${DESKTOP_LINK_FILE}
@@ -354,8 +375,9 @@ fi
 if ! which qjackctl > /dev/null;
 then
 	echo ""
-	echo "The program QjackCtl is missing from this system. QjackCtl is an extremely useful tool"
-	echo "for any system that runs JACK applications like Ardour. We recommend that you install it."
+	echo "The program QjackCtl is missing from this system."
+	echo "QjackCtl is an extremely useful tool for any system that runs JACK applications like $PGM_NAME."
+	echo "We recommend that you install it."
 	echo ""
 
 	ANSWER=$(VaildateYesNoQuestion "Install QjackCtl using system software repository?")
@@ -512,6 +534,6 @@ then
 fi
 
 echo ""
-read -p "Press ENTER to close this window:" BLAH
+read -p "Press ENTER to exit installer:" BLAH
 
 

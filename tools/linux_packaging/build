@@ -5,6 +5,11 @@
 . ./buildenv
 
 # script for pulling together a Linux app bundle.
+#
+# This will create a bundle for a single architecture.
+# Execute this scirpt on both x86 and x86_64 and then use
+# package to merge the 2 bundles into a final package with the
+# installer.
 
 MIXBUS=
 WITH_LADSPA=0
@@ -12,7 +17,8 @@ STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
 EXTERNAL_JACK=
-VENDOR=Ardour
+VENDOR=Ardour ;
+BUILDTYPE=""
 
 if [ $# -eq 0 ] ; then
 	echo ""	 
@@ -35,7 +41,7 @@ while [ $# -gt 0 ] ; do
 		MIXBUS=1; 
 		WITH_NLS=1 ; 
 		WITH_LADSPA=; 
-		STRIP= ; 
+		STRIP=1; 
 		APPNAME=Mixbus ;
                 VENDOR=Harrison ;
 		shift ;;
@@ -48,7 +54,7 @@ while [ $# -gt 0 ] ; do
 	--allinone)
 		WITH_NLS= ; 
 		WITH_LADSPA=1; 
-		STRIP= ; 
+		STRIP=1; 
 		shift ;;
 	--test) WITH_LADSPA=; STRIP= ; shift ;;
 
@@ -98,13 +104,35 @@ case `uname -m` in
 		;;
 esac
 
+# Figure out the Build Type
+if grep -q "DEBUG = True" ../../build/c4che/default.cache.py; then
+	DEBUG="T"
+else
+	DEBUG="F"
+fi
+
+if [ x$DEBUG != x ]; then
+	if [ x$STRIP != x ]; then
+		BUILDTYPE="strip"
+	else
+		BUILDTYPE="dbg"
+	fi
+fi
+
 # the waf build tree to use when copying built/generated files
 
 BUILD_ROOT=../../build/default
 
 # setup directory structure
 
-APPDIR=${APPNAME}_${ARCH}-${release_version}_${svn_version}
+if [ -z "${BUILDTYPE}" ]; then
+	APPDIR=${APPNAME}_${ARCH}-${release_version}_${svn_version}
+	APP_VER_NAME=${APPNAME}-${release_version}_${svn_version}
+else
+	APPDIR=${APPNAME}_${ARCH}-${release_version}_${svn_version}-${BUILDTYPE}
+	APP_VER_NAME=${APPNAME}-${release_version}_${svn_version}-${BUILDTYPE}
+fi
+
 APPBIN=$APPDIR/bin
 APPLIB=$APPDIR/lib
 Libraries=$APPLIB
@@ -151,6 +179,7 @@ mkdir -p $Locale
 mkdir -p $Surfaces
 mkdir -p $Panners
 mkdir -p $Shared/templates
+mkdir -p $Shared/doc
 
 # maybe set variables
 ENVIRONMENT=environment
@@ -253,9 +282,9 @@ GTKROOT=`pkg-config --libs-only-L gtk+-2.0 | sed -e "s/-L//" -e "s/[[:space:]]//
 if [ ! -z "$GTKROOT" ]; then
 	echo "Found GTKROOT using pkg-config"
 elif [ -d /usr/lib/gtk-2.0 ]; then
-	GTKROOT="/usr/lib/gtk-2.0"
+	GTKROOT="/usr/lib"
 elif [ -d /usr/local/lib/gtk-2.0 ]; then
-	GTKROOT="/usr/local/lib/gtk-2.0"
+	GTKROOT="/usr/local/lib"
 else
 	echo ""
 	echo "!!! ERROR !!! - Unable to locate gtk-2.0 directory. Packager will exit"
@@ -287,9 +316,9 @@ PANGOROOT=`pkg-config --libs-only-L pango | sed -e "s/-L//" -e "s/[[:space:]]//g
 if [ ! -z "$PANGOROOT" ]; then
 	echo "Found PANGOROOT using pkg-config"
 elif [ -d /usr/lib/pango ]; then
-	PANGOROOT="/usr/lib/pango"
+	PANGOROOT="/usr/lib"
 elif [ -d /usr/local/lib/pango ]; then
-	PANGOROOT="/usr/local/lib/pango"
+	PANGOROOT="/usr/local/lib"
 else
 	echo ""
 	echo "!!! ERROR !!! - Unable to locate pango directory. Packager will exit"
@@ -530,8 +559,7 @@ done
 #
 # Add the uninstaller
 #
-APP_VER_NAME=${APPNAME}-${release_version}_${svn_version}
-sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_VERSION%/${release_version}/" -e "s/%REPLACE_BUILD%/${svn_version}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
+sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_VERSION%/${release_version}/" -e "s/%REPLACE_BUILD%/${svn_version}/" -e "s/%REPLACE_TYPE%/${BUILDTYPE}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
 chmod a+x $APPBIN/${APP_VER_NAME}.uninstall.sh
 
 #Sanity Check file
@@ -542,22 +570,12 @@ else
 	exit 1
 fi
 
-#
-# and now ... the final package
-# 
-
-if [ x$MIXBUS != x ] ; then
-
-	# Mixbus packaging
-
-	echo "Creating Mixbus packaging directory"
-	cp MixBus_Install_QuickStart.pdf "$APPDIR/Mixbus Install & Quick Start Guide.pdf"
-fi
-
 echo "Building tarball ..."
 
 rm -f $APPDIR.tar.bz2
 tar -cjf $APPDIR.tar.bz2 $APPDIR
+
+rm -rf $APPDIR/
 
 echo "Done."
 
