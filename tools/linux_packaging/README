@@ -1,0 +1,35 @@
+* Installing Ardour:
+
+On most distributions, you can double-click the file "install.sh".
+
+Alternatively, you can use a Terminal to run the installer.  Navigate
+to the folder and run:
+	
+	./install.sh
+	
+The installer will ask for your root password, and copy the contents of
+the appropriate bundle (32-bit or 64-bit) to your /opt folder.
+
+
+* Links and Menu entries:
+
+In addition to installing the program, the installer will create:
+1) A desktop link to launch the Ardour application
+2) A menu entry in Gnome/KDE
+3) An uninstall script in the /opt folder.
+
+
+* Uninstaller:
+
+To uninstall Ardour, run the uninstaller script in the /opt folder
+(as root).  This will remove the app, desktop links, menu links, and
+the uninstaller itself.
+
+
+* Manual Installation:
+
+If you would prefer to install Ardour in a custom location, then you
+may simply unzip the appropriate package (32bit or 64bit) to your
+preferred location and run the Ardour application from the "bin"
+folder inside.
+
