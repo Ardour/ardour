@@ -68,6 +68,7 @@ Panner2d::Panner2d (boost::shared_ptr<Panner> p, int32_t h)
         , position (AngularVector (0.0, 0.0), "")
         , width (0)
         , height (h)
+        , last_width (0)
 {
 	panner->StateChanged.connect (connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
 
@@ -106,27 +107,7 @@ Panner2d::reset (uint32_t n_inputs)
 		pucks.resize (n_inputs);
 	}
 						
-	switch (n_inputs) {
-	case 0:
-		break;
-
-	case 1:
-		pucks[0]->set_text ("");
-		break;
-
-	case 2:
-		pucks[0]->set_text ("R");
-		pucks[1]->set_text ("L");
-		break;
-
-	default:
-		for (uint32_t i = 0; i < n_inputs; ++i) {
-			char buf[64];
-			snprintf (buf, sizeof (buf), "%" PRIu32, i + 1);
-			pucks[i]->set_text (buf);
-		}
-		break;
-	}
+        label_pucks ();
 
         for (uint32_t i = 0; i < n_inputs; ++i) {
                 pucks[i]->position = panner->signal_position (i);
@@ -211,15 +192,61 @@ Panner2d::handle_state_change ()
 }
 
 void
+Panner2d::label_pucks ()
+{
+        double w = panner->pannable()->pan_width_control->get_value();
+        uint32_t sz = pucks.size();
+
+	switch (sz) {
+	case 0:
+		break;
+
+	case 1:
+		pucks[0]->set_text ("");
+		break;
+
+	case 2:
+                if (w  >= 0.0) {
+                        pucks[0]->set_text ("R");
+                        pucks[1]->set_text ("L");
+                } else {
+                        pucks[0]->set_text ("L");
+                        pucks[1]->set_text ("R");
+                }
+		break;
+
+	default:
+		for (uint32_t i = 0; i < sz; ++i) {
+			char buf[64];
+                        if (w >= 0.0) {
+                                snprintf (buf, sizeof (buf), "%" PRIu32, i + 1);
+                        } else {
+                                snprintf (buf, sizeof (buf), "%" PRIu32, sz - i);
+                        }
+			pucks[i]->set_text (buf);
+		}
+		break;
+	}
+}
+
+void
 Panner2d::handle_position_change ()
 {
 	uint32_t n;
+        double w = panner->pannable()->pan_width_control->get_value();
 
         position.position = AngularVector (panner->pannable()->pan_azimuth_control->get_value() * 360.0, 0.0);
 
         for (uint32_t i = 0; i < pucks.size(); ++i) {
                 pucks[i]->position = panner->signal_position (i);
         }
+
+        if (w * last_width <= 0) {
+                /* changed sign */
+                label_pucks ();
+        }
+
+        last_width = w;
 
         vector<Speaker>& speakers (panner->get_speakers()->speakers());
 
@@ -274,9 +301,17 @@ Panner2d::find_closest_object (gdouble x, gdouble y)
 		}
 	}
 
-	if (best_distance > 20) { // arbitrary 
-		return 0;
-	}
+        if (height > 100) {
+                /* "big" */
+                if (best_distance > 30) { // arbitrary 
+                        return 0;
+                }
+        } else {
+                /* "small" */
+                if (best_distance > 10) { // arbitrary 
+                        return 0;
+                }
+        }
 
 	return closest;
 }
@@ -326,7 +361,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 	/* horizontal line of "crosshairs" */
 
-	cairo_set_source_rgb (cr, 0.0, 0.1, 0.7);
+        cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
 	cairo_move_to (cr, 0.5, height/2.0+0.5);
 	cairo_line_to (cr, width+0.5, height/2+0.5);
 	cairo_stroke (cr);
@@ -359,54 +394,18 @@ Panner2d::on_expose_event (GdkEventExpose *event)
         if (pucks.size() > 1) {
                 /* arc to show "diffusion" */
 
-                cairo_move_to (cr, width/2, height/2);
+                double width_angle = fabs (panner->pannable()->pan_width_control->get_value()) * 2 * M_PI;
+                double position_angle = (2 * M_PI) - panner->pannable()->pan_azimuth_control->get_value() * 2 * M_PI;
 
-                double max_angle = 0.0;
-                double min_angle = DBL_MAX;
-
-                for (Targets::iterator i = pucks.begin(); i != pucks.end(); ++i) {
-                        max_angle = max ((*i)->position.azi, max_angle);
-                        min_angle = min ((*i)->position.azi, min_angle);
-                }
-                
-                /* if the angle between the max & min is bigger than 180, flip
-                   them to use the opposite angle for the display. this
-                   matches the psycho-acoustic perception of this condition
-                   too, in almost all conditions that VBAP will handle.
-                */
-                
-                if (fabs (max_angle - min_angle) > 180.0) {
-                        swap (max_angle, min_angle);
-                }
-
-                /* convert to radians */
-
-                min_angle = (min_angle / 360.0) * 2.0 * M_PI;
-                max_angle = (max_angle / 360.0) * 2.0 * M_PI;
-
-                /* cairo has coordinates increasing in a clockwise direction */
-
-                max_angle = (2 * M_PI) - max_angle;
-                min_angle = (2 * M_PI) - min_angle;
-
-                /* the above transformation will have reversed the min/max relationship */
-
-                swap (min_angle, max_angle);
-
-                if (min_angle > max_angle) {
-                        /* swapped because they span the zero position: draw two arc segments to span zero.
-                           XXX there must be a way to get cairo to do this in a single call
-                        */
-                        cairo_arc_negative (cr, width/2, height/2, dimen/2.0, max_angle, 0.0);
-                        cairo_arc_negative (cr, width/2, height/2, dimen/2.0, 0.0, min_angle);
-                } else {
-                        cairo_arc (cr, width/2, height/2, dimen/2.0, min_angle, max_angle);
-                }
-
-
+                cairo_save (cr);
+                cairo_translate (cr, width/2, height/2);
+                cairo_rotate (cr, position_angle - width_angle);
+                cairo_move_to (cr, 0, 0);
+                cairo_arc_negative (cr, 0, 0, dimen/2.0, width_angle * 2.0, 0.0);
                 cairo_close_path (cr);
                 cairo_set_source_rgba (cr, 1.0, 0.419, 0.419, 0.45);
                 cairo_fill (cr);
+                cairo_restore (cr);
         }
 
 	if (!panner->bypassed()) {
@@ -426,7 +425,6 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
                 if (pucks.size() > 1) {
                         for (Targets::iterator i = pucks.begin(); i != pucks.end(); ++i) {
-                                
                                 Target* puck = *i;
                                 
                                 if (puck->visible) {

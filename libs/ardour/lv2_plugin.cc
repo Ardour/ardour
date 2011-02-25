@@ -119,7 +119,7 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 
 	if (_instance == 0) {
 		error << _("LV2: Failed to instantiate plugin ")
-		      << slv2_plugin_get_uri(plugin) << endl;
+		      << slv2_value_as_string (slv2_plugin_get_uri(plugin)) << endmsg;
 		throw failed_constructor();
 	}
 
@@ -130,7 +130,7 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 	if (slv2_plugin_has_feature(plugin, world.in_place_broken)) {
 		error << string_compose(
 				_("LV2: \"%1\" cannot be used, since it cannot do inplace processing"),
-				slv2_value_as_string(_name));
+				slv2_value_as_string(_name)) << endmsg;
 		slv2_value_free(_name);
 		slv2_value_free(_author);
 		throw failed_constructor();

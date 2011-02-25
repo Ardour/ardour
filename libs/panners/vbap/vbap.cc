@@ -99,7 +99,8 @@ VBAPanner::update ()
 
                 /* panner width control is [-1.0 .. 1.0]; we ignore sign, and map to [0 .. 360] degrees
                    so that a width of 1 corresponds to a signal equally present from all directions, 
-                   and a width of zero corresponds to a point source from the "center" (above)
+                   and a width of zero corresponds to a point source from the "center" (above) point
+                   on the perimeter of the speaker array.
                 */
 
                 double w = fabs (_pannable->pan_width_control->get_value()) * 360.0;
@@ -123,13 +124,24 @@ VBAPanner::update ()
                 double degree_step_per_signal = (max_dir - min_dir) / (_signals.size() - 1);
                 double signal_direction = min_dir;
 
-                for (vector<Signal*>::iterator s = _signals.begin(); s != _signals.end(); ++s) {
+                if (w >= 0.0) {
+                        for (vector<Signal*>::iterator s = _signals.begin(); s != _signals.end(); ++s) {
                         
-                        Signal* signal = *s;
+                                Signal* signal = *s;
+                                
+                                signal->direction = AngularVector (signal_direction, 0.0);
+                                compute_gains (signal->desired_gains, signal->desired_outputs, signal->direction.azi, signal->direction.ele);
+                                signal_direction += degree_step_per_signal;
+                        }
+                } else {
+                        for (vector<Signal*>::reverse_iterator s = _signals.rbegin(); s != _signals.rend(); ++s) {
                         
-                        signal->direction = AngularVector (signal_direction, 0.0);
-                        compute_gains (signal->desired_gains, signal->desired_outputs, signal->direction.azi, signal->direction.ele);
-                        signal_direction += degree_step_per_signal;
+                                Signal* signal = *s;
+                                
+                                signal->direction = AngularVector (signal_direction, 0.0);
+                                compute_gains (signal->desired_gains, signal->desired_outputs, signal->direction.azi, signal->direction.ele);
+                                signal_direction += degree_step_per_signal;
+                        }
                 }
 
         } else if (_signals.size() == 1) {

@@ -117,6 +117,7 @@ class Panner2d : public Gtk::DrawingArea
 	int     width;
 	int     height;
         int     dimen; 
+        double  last_width;
 
 	bool bypassflag;
 
@@ -130,6 +131,7 @@ class Panner2d : public Gtk::DrawingArea
 	void toggle_bypass ();
 	void handle_state_change ();
 	void handle_position_change ();
+        void label_pucks ();
 
 	PBD::ScopedConnectionList connections;
 

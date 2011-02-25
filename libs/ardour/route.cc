@@ -870,6 +870,8 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 {
 	assert (processor != _meter);
 	assert (processor != _main_outs);
+
+        DEBUG_TRACE (DEBUG::Processors, string_compose ("%1 adding processor %2\n", name(), processor->name()));
 	
 	ChanCount old_pms = processor_max_streams;
 
@@ -916,7 +918,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 			if (configure_processors_unlocked (err)) {
 				pstate.restore ();
 				configure_processors_unlocked (0); // it worked before we tried to add it ...
-				cerr << "configure failed\n";
 				return -1;
 			}
 		}
