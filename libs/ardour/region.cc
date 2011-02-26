@@ -920,19 +920,29 @@ Region::trim_to_internal (framepos_t position, framecnt_t length, void */*src*/)
 		_start = new_start;
 		what_changed.add (Properties::start);
 	}
-	if (_length != length) {
-		if (!property_changes_suspended()) {
-			_last_length = _length;
-		}
-		set_length_internal (length);
-		what_changed.add (Properties::length);
-	}
+
+	/* Set position before length, otherwise for MIDI regions this bad thing happens:
+	 * 1. we call set_length_internal; length in beats is computed using the region's current
+	 *    (soon-to-be old) position
+	 * 2. we call set_position_internal; position is set and length in frames re-computed using
+	 *    length in beats from (1) but at the new position, which is wrong if the region
+	 *    straddles a tempo/meter change.
+	 */
+	
 	if (_position != position) {
 		if (!property_changes_suspended()) {
 			_last_position = _position;
 		}
 		set_position_internal (position, true);
 		what_changed.add (Properties::position);
+	}
+	
+	if (_length != length) {
+		if (!property_changes_suspended()) {
+			_last_length = _length;
+		}
+		set_length_internal (length);
+		what_changed.add (Properties::length);
 	}
 
 	_whole_file = false;
