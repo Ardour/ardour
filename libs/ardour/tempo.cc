@@ -1906,6 +1906,12 @@ TempoMap::bbt_subtract (const BBT_Time& start, const BBT_Time& decrement) const
 framepos_t
 TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 {
+	/* XXX: this is a little inaccurate as small errors are introduced
+	   every time a probably-fractional product of something and
+	   frames_per_beat is rounded.  Other errors can be introduced
+	   by op.ticks' integer nature.
+	*/
+	
 	Metrics::const_iterator i;
 	const MeterSection* meter;
 	const MeterSection* m;
