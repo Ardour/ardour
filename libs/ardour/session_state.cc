@@ -1265,7 +1265,7 @@ Session::set_state (const XMLNode& node, int version)
 	Metadata
 	Locations
 	Sources
-	AudioRegions
+	Regions
 	Connections
 	Routes
 	RouteGroups
@@ -1331,6 +1331,13 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	}
 
+	if ((child = find_named_node (node, "TempoMap")) == 0) {
+		error << _("Session: XML state has no Tempo Map section") << endmsg;
+		goto out;
+	} else if (_tempo_map->set_state (*child, version)) {
+		goto out;
+	}
+
 	if ((child = find_named_node (node, "Regions")) == 0) {
 		error << _("Session: XML state has no Regions section") << endmsg;
 		goto out;
@@ -1369,13 +1376,6 @@ Session::set_state (const XMLNode& node, int version)
 		}
 	}
 	
-	if ((child = find_named_node (node, "TempoMap")) == 0) {
-		error << _("Session: XML state has no Tempo Map section") << endmsg;
-		goto out;
-	} else if (_tempo_map->set_state (*child, version)) {
-		goto out;
-	}
-
 	if (version < 3000) {
 		if ((child = find_named_node (node, X_("DiskStreams"))) == 0) {
 			error << _("Session: XML state has no diskstreams section") << endmsg;
