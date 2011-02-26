@@ -2443,6 +2443,10 @@ RouteTimeAxisView::create_gain_automation_child (const Evoral::Parameter& param,
 						      false,
 						      parent_canvas,
 						      _route->amp()->describe_parameter(param)));
+
+	if (_view) {
+		_view->foreach_regionview (sigc::mem_fun (*gain_track.get(), &TimeAxisView::add_ghost));
+	}
 	
 	add_automation_child (Evoral::Parameter(GainAutomation), gain_track, show);
 }

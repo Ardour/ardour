@@ -864,6 +864,10 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 				_route->describe_parameter(param)
 				)
 			);
+
+		if (_view) {
+			_view->foreach_regionview (sigc::mem_fun (*track.get(), &TimeAxisView::add_ghost));
+		}
 		
 		add_automation_child (param, track, show);
 	}
