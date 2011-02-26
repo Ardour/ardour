@@ -1256,24 +1256,6 @@ Session::set_state (const XMLNode& node, int version)
 
 	IO::disable_connecting ();
 
-	/* Object loading order:
-
-	Path
-	Extra
-	Options/Config
-	MIDI Control // relies on data from Options/Config
-	Metadata
-	Locations
-	Sources
-	Regions
-	Connections
-	Routes
-	RouteGroups
-	MixGroups
-	Click
-	ControlProtocols
-	*/
-
 	if ((child = find_named_node (node, "Extra")) != 0) {
 		_extra_xml = new XMLNode (*child);
 	}
