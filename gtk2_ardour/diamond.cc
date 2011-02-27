@@ -29,7 +29,6 @@ Diamond::Diamond(Group& group, double height)
 	, _h (height)
 {
 	points = gnome_canvas_points_new (4);
-	g_object_set (gobj(), "points", points, NULL);
 	move_to (0, 0);
 }
 
