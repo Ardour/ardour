@@ -1417,20 +1417,29 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 
 }
 
-/** Find the route name starting with \a base with the lowest \a id.
+/** Find a route name starting with \a base, maybe followed by the
+ *  lowest \a id.  \a id will always be added if \a definitely_add_number
+ *  is true on entry; otherwise it will only be added if required
+ *  to make the name unique.
  *
- * Names are constructed like e.g. "Audio 3" for base="Audio" and id=3.
- * The available route name with the lowest ID will be used, and \a id
- * will be set to the ID.
+ *  Names are constructed like e.g. "Audio 3" for base="Audio" and id=3.
+ *  The available route name with the lowest ID will be used, and \a id
+ *  will be set to the ID.
  *
- * \return false if a route name could not be found, and \a track_name
- * and \a id do not reflect a free route name.
+ *  \return false if a route name could not be found, and \a track_name
+ *  and \a id do not reflect a free route name.
  */
 bool
-Session::find_route_name (const char* base, uint32_t& id, char* name, size_t name_len)
+Session::find_route_name (string const & base, uint32_t& id, char* name, size_t name_len, bool definitely_add_number)
 {
+	if (!definitely_add_number && route_by_name (base) == 0) {
+		/* juse use the base */
+		snprintf (name, name_len, "%s", base.c_str());
+		return true;
+	}
+		
 	do {
-		snprintf (name, name_len, "%s %" PRIu32, base, id);
+		snprintf (name, name_len, "%s %" PRIu32, base.c_str(), id);
 
 		if (route_by_name (name) == 0) {
 			return true;
@@ -1458,9 +1467,11 @@ Session::count_existing_route_channels (ChanCount& in, ChanCount& out)
 	}
 }
 
-/** Caller must not hold process lock */
+/** Caller must not hold process lock
+ *  @param name_template string to use for the start of the name, or "" to use "Midi".
+ */
 list<boost::shared_ptr<MidiTrack> >
-Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_many)
+Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template)
 {
 	char track_name[32];
 	uint32_t track_id = 0;
@@ -1476,7 +1487,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 	control_id = ntracks() + nbusses();
 
 	while (how_many) {
-		if (!find_route_name ("Midi", ++track_id, track_name, sizeof(track_name))) {
+		if (!find_route_name (name_template.empty() ? _("Midi") : name_template, ++track_id, track_name, sizeof(track_name), false)) {
 			error << "cannot find name for new midi track" << endmsg;
 			goto failed;
 		}
@@ -1626,9 +1637,13 @@ Session::auto_connect_route (
 	existing_outputs += route->n_outputs();
 }
 
-/** Caller must not hold process lock */
+/** Caller must not hold process lock
+ *  @param name_template string to use for the start of the name, or "" to use "Audio".
+ */
 list< boost::shared_ptr<AudioTrack> >
-Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, RouteGroup* route_group, uint32_t how_many)
+Session::new_audio_track (
+	int input_channels, int output_channels, TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template
+	)
 {
 	char track_name[32];
 	uint32_t track_id = 0;
@@ -1644,7 +1659,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	control_id = ntracks() + nbusses() + 1;
 
 	while (how_many) {
-		if (!find_route_name ("Audio", ++track_id, track_name, sizeof(track_name))) {
+		if (!find_route_name (name_template.empty() ? _("Audio") : name_template, ++track_id, track_name, sizeof(track_name), false)) {
 			error << "cannot find name for new audio track" << endmsg;
 			goto failed;
 		}
@@ -1748,9 +1763,11 @@ Session::set_remote_control_ids ()
 	}
 }
 
-/** Caller must not hold process lock */
+/** Caller must not hold process lock.
+ *  @param name_template string to use for the start of the name, or "" to use "Bus".
+ */
 RouteList
-Session::new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many)
+Session::new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, string name_template)
 {
 	char bus_name[32];
 	uint32_t bus_id = 0;
@@ -1765,7 +1782,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 	control_id = ntracks() + nbusses() + 1;
 
 	while (how_many) {
-		if (!find_route_name ("Bus", ++bus_id, bus_name, sizeof(bus_name))) {
+		if (!find_route_name (name_template.empty () ? _("Bus") : name_template, ++bus_id, bus_name, sizeof(bus_name), false)) {
 			error << "cannot find name for new audio bus" << endmsg;
 			goto failure;
 		}
@@ -1860,7 +1877,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 		std::string node_name = IO::name_from_state (*node_copy.children().front());
 
 		/* generate a new name by adding a number to the end of the template name */
-		if (!find_route_name (node_name.c_str(), ++number, name, sizeof(name))) {
+		if (!find_route_name (node_name.c_str(), ++number, name, sizeof(name), true)) {
 			fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
 			/*NOTREACHED*/
 		}

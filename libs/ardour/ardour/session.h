@@ -415,13 +415,20 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* fundamental operations. duh. */
 
 	std::list<boost::shared_ptr<AudioTrack> > new_audio_track (
-		int input_channels, int output_channels, TrackMode mode = Normal, RouteGroup* route_group = 0, uint32_t how_many = 1
+		int input_channels,
+		int output_channels,
+		TrackMode mode = Normal,
+		RouteGroup* route_group = 0,
+		uint32_t how_many = 1,
+		std::string name_template = ""
 		);
 
-	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many);
+	RouteList new_audio_route (
+		int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, std::string name_template = ""
+		);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
-		TrackMode mode = Normal, RouteGroup* route_group = 0, uint32_t how_many = 1
+		TrackMode mode = Normal, RouteGroup* route_group = 0, uint32_t how_many = 1, std::string name_template = ""
 		);
 
 	void   remove_route (boost::shared_ptr<Route>);
@@ -1206,7 +1213,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void route_processors_changed (RouteProcessorChange);
 
-	bool find_route_name (const char* base, uint32_t& id, char* name, size_t name_len);
+	bool find_route_name (std::string const &, uint32_t& id, char* name, size_t name_len, bool);
 	void count_existing_route_channels (ChanCount& in, ChanCount& out);
 	void auto_connect_route (
 		Route* route,

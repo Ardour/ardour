@@ -75,6 +75,7 @@ class AddRouteDialog : public ArdourDialog
 	void group_changed ();
 	bool channel_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i);
 	bool route_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i);
+	void maybe_update_name_template_entry ();
 
 	void reset_template_option_visibility ();
 

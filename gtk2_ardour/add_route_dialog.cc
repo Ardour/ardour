@@ -130,27 +130,37 @@ AddRouteDialog::AddRouteDialog (Session* s)
 	l->set_padding (8, 0);
 	table2->attach (*l, 0, 1, 0, 3, Gtk::FILL, Gtk::FILL, 0, 0);
 
+	int n = 0;
+
+	l = manage (new Label (_("Name:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	table2->attach (name_template_entry, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	++n;
+
 	/* Route configuration */
 
 	l = manage (new Label (_("Configuration:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	table2->attach (*l, 1, 2, 0, 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	table2->attach (channel_combo, 2, 3, 0, 1, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
+	table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	table2->attach (channel_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	++n;
 
 	if (!ARDOUR::Profile->get_sae ()) {
 
 		/* Track mode */
 
 		mode_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
-		table2->attach (mode_label, 1, 2, 1, 2, Gtk::FILL, Gtk::EXPAND, 0, 0);
-		table2->attach (mode_combo, 2, 3, 1, 2, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
+		table2->attach (mode_label, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		table2->attach (mode_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+		++n;
 
 	}
 
 	/* Group choice */
 
 	l = manage (new Label (_("Group:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	table2->attach (*l, 1, 2, 2, 3, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	table2->attach (route_group_combo, 2, 3, 2, 3, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
+	table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	table2->attach (route_group_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	++n;
 
 	options_box->pack_start (*table2, false, true);
 	vbox->pack_start (*options_box, false, true);
@@ -158,6 +168,7 @@ AddRouteDialog::AddRouteDialog (Session* s)
 	get_vbox()->pack_start (*vbox, false, false);
 
 	track_bus_combo.signal_changed().connect (sigc::mem_fun (*this, &AddRouteDialog::track_type_chosen));
+	channel_combo.signal_changed().connect (sigc::mem_fun (*this, &AddRouteDialog::maybe_update_name_template_entry));
 	channel_combo.set_row_separator_func (sigc::mem_fun (*this, &AddRouteDialog::channel_separator));
 	route_group_combo.set_row_separator_func (sigc::mem_fun (*this, &AddRouteDialog::route_separator));
 	route_group_combo.signal_changed ().connect (sigc::mem_fun (*this, &AddRouteDialog::group_changed));
@@ -179,16 +190,32 @@ AddRouteDialog::~AddRouteDialog ()
 }
 
 void
+AddRouteDialog::maybe_update_name_template_entry ()
+{
+	if (
+		name_template_entry.get_text() != "" &&
+		name_template_entry.get_text() != _("Audio") &&
+		name_template_entry.get_text() != _("MIDI")  &&
+		name_template_entry.get_text() != _("Bus")) {
+		return;
+	}
+
+	if (track ()) {
+		if (type () == DataType::MIDI) {
+			name_template_entry.set_text (_("MIDI"));
+		} else {
+			name_template_entry.set_text (_("Audio"));
+		}
+	} else {
+		name_template_entry.set_text (_("Bus"));
+	}
+}
+
+void
 AddRouteDialog::track_type_chosen ()
 {
-	if (track()) {
-		mode_label.set_text (_("Track mode:"));
-		set_popdown_strings (mode_combo, track_mode_strings);
-		mode_combo.set_sensitive (true);
-		mode_combo.set_active_text (track_mode_strings.front());
-	} else {
-		mode_combo.set_sensitive (false);
-	}
+	mode_combo.set_sensitive (track ());
+	maybe_update_name_template_entry ();
 }
 
 bool

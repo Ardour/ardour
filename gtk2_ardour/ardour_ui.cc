@@ -1334,7 +1334,7 @@ ARDOUR_UI::open_session ()
 
 
 void
-ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t how_many)
+ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t how_many, string const & name_template)
 {
 	list<boost::shared_ptr<MidiTrack> > tracks;
 
@@ -1346,7 +1346,7 @@ ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t 
 	try {
 		if (disk) {
 
-			tracks = _session->new_midi_track (ARDOUR::Normal, route_group, how_many);
+			tracks = _session->new_midi_track (ARDOUR::Normal, route_group, how_many, name_template);
 
 			if (tracks.size() != how_many) {
 				if (how_many == 1) {
@@ -1374,7 +1374,15 @@ restart JACK with more ports."), PROGRAM_NAME));
 
 
 void
-ARDOUR_UI::session_add_audio_route (bool track, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode, RouteGroup* route_group, uint32_t how_many)
+ARDOUR_UI::session_add_audio_route (
+	bool track,
+	int32_t input_channels,
+	int32_t output_channels,
+	ARDOUR::TrackMode mode,
+	RouteGroup* route_group,
+	uint32_t how_many,
+	string const & name_template
+	)
 {
 	list<boost::shared_ptr<AudioTrack> > tracks;
 	RouteList routes;
@@ -1386,7 +1394,7 @@ ARDOUR_UI::session_add_audio_route (bool track, int32_t input_channels, int32_t 
 
 	try {
 		if (track) {
-			tracks = _session->new_audio_track (input_channels, output_channels, mode, route_group, how_many);
+			tracks = _session->new_audio_track (input_channels, output_channels, mode, route_group, how_many, name_template);
 
 			if (tracks.size() != how_many) {
 				if (how_many == 1) {
@@ -1399,7 +1407,7 @@ ARDOUR_UI::session_add_audio_route (bool track, int32_t input_channels, int32_t 
 
 		} else {
 
-			routes = _session->new_audio_route (input_channels, output_channels, route_group, how_many);
+			routes = _session->new_audio_route (input_channels, output_channels, route_group, how_many, name_template);
 
 			if (routes.size() != how_many) {
 				if (how_many == 1) {
@@ -3219,7 +3227,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 
 	if (add_route_dialog->type() == ARDOUR::DataType::MIDI) {
 		if (track) {
-			session_add_midi_track (route_group, count);
+			session_add_midi_track (route_group, count, name_template);
 		} else  {
 			MessageDialog msg (*editor,
 					_("Sorry, MIDI Busses are not supported at this time."));
@@ -3228,9 +3236,9 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		}
 	} else {
 		if (track) {
-			session_add_audio_track (input_chan, output_chan, add_route_dialog->mode(), route_group, count);
+			session_add_audio_track (input_chan, output_chan, add_route_dialog->mode(), route_group, count, name_template);
 		} else {
-			session_add_audio_bus (input_chan, output_chan, route_group, count);
+			session_add_audio_bus (input_chan, output_chan, route_group, count, name_template);
 		}
 	}
 }
