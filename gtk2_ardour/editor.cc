@@ -1544,10 +1544,8 @@ Editor::build_track_region_context_menu ()
 		boost::shared_ptr<Track> tr;
 		boost::shared_ptr<Playlist> pl;
 
-		if ((tr = rtv->track()) && ((pl = tr->playlist()))) {
-			framepos_t const framepos = (framepos_t) floor ((double) get_preferred_edit_position() * tr->speed());
-			uint32_t regions_at = pl->count_regions_at (framepos);
-			add_region_context_items (edit_items, regions_at > 1);
+		if ((tr = rtv->track())) {
+			add_region_context_items (edit_items, tr);
 		}
 	}
 
@@ -1578,18 +1576,24 @@ Editor::build_track_crossfade_context_menu ()
 		if ((tr = atv->track()) && ((pl = tr->playlist()) != 0) && ((apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl)) != 0)) {
 
 			AudioPlaylist::Crossfades xfades;
+			framepos_t where;
+			bool ignored;
 
-			apl->crossfades_at (get_preferred_edit_position (), xfades);
+			/* The xfade menu is a bit of a special case, as we always use the mouse position
+			   to decide whether or not to display it (rather than the edit point).  No particularly
+			   strong reasons for this, other than it is a bit surprising to right-click on a xfade
+			   and not get a menu.
+			*/
+			mouse_frame (where, ignored);
+			apl->crossfades_at (where, xfades);
 
-			bool many = xfades.size() > 1;
+			bool const many = xfades.size() > 1;
 
 			for (AudioPlaylist::Crossfades::iterator i = xfades.begin(); i != xfades.end(); ++i) {
 				add_crossfade_context_items (atv->audio_view(), (*i), edit_items, many);
 			}
 
-			framepos_t framepos = (framepos_t) floor ((double) get_preferred_edit_position() * tr->speed());
-			uint32_t regions_at = pl->count_regions_at (framepos);
-			add_region_context_items (edit_items, regions_at > 1);
+			add_region_context_items (edit_items, tr);
 		}
 	}
 
@@ -1709,7 +1713,7 @@ Editor::xfade_edit_right_region ()
 }
 
 void
-Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, bool multiple_regions_at_position)
+Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, boost::shared_ptr<Track> track)
 {
 	using namespace Menu_Helpers;
 	
@@ -1717,14 +1721,14 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, bool multi
 	   the standard items.
 	*/
 
-	/* we have to hack up the region name because "_" has a special
-	   meaning for menu titles.
-	*/
-
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 	
 	string::size_type pos = 0;
 	string menu_item_name = (rs.size() == 1) ? rs.front()->region()->name() : _("Selected Regions");
+
+	/* we have to hack up the region name because "_" has a special
+	   meaning for menu titles.
+	*/
 
 	while ((pos = menu_item_name.find ("_", pos)) != string::npos) {
 		menu_item_name.replace (pos, 1, "__");
@@ -1739,8 +1743,17 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, bool multi
 		_popup_region_menu_item->set_label (menu_item_name);
 	}
 
+	/* Use the mouse position rather than the edit point to decide whether to show the `choose top region'
+	   dialogue.  If we use the edit point it gets a bit messy because the user still has to click over
+	   *some* region in order to get the region context menu stuff to be displayed at all.
+	*/
+	
+	framepos_t mouse;
+	bool ignored;
+	mouse_frame (mouse, ignored);
+
 	edit_items.push_back (*_popup_region_menu_item);
-	if (multiple_regions_at_position && (layering_order_editor == 0 || !layering_order_editor->is_visible ())) {
+	if (track->playlist()->count_regions_at (mouse) > 1 && (layering_order_editor == 0 || !layering_order_editor->is_visible ())) {
 		edit_items.push_back (*manage (_region_actions->get_action ("choose-top-region")->create_menu_item ()));
 	}
 	edit_items.push_back (SeparatorElem());
