@@ -146,7 +146,7 @@ AddRouteDialog::AddRouteDialog (Session* s)
 
 	}
 
-	/* Group choise */
+	/* Group choice */
 
 	l = manage (new Label (_("Group:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	table2->attach (*l, 1, 2, 2, 3, Gtk::FILL, Gtk::EXPAND, 0, 0);
