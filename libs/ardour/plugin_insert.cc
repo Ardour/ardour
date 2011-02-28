@@ -94,7 +94,7 @@ PluginInsert::set_count (uint32_t num)
 		uint32_t diff = num - _plugins.size();
 
 		for (uint32_t n = 0; n < diff; ++n) {
-			add_plugin_with_activation (_plugins[0]);
+			add_plugin_with_activation (plugin_factory (_plugins[0]));
 
 			if (require_state) {
 				/* XXX do something */
