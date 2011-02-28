@@ -1540,7 +1540,6 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadI
 
 	bool in_silence = false;
 	frameoffset_t silence_start = 0;
-	bool silence;
 
 	while (pos < end && !itt.cancel) {
 
@@ -1556,7 +1555,7 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadI
 
 		/* now look for silence */
 		for (framecnt_t i = 0; i < block_size; ++i) {
-			silence = abs (loudest[i]) < threshold;
+			bool const silence = abs (loudest[i]) < threshold;
 			if (silence && !in_silence) {
 				/* non-silence to silence */
 				in_silence = true;

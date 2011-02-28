@@ -140,7 +140,7 @@ void
 StripSilenceDialog::silences (AudioIntervalMap& m)
 {
         for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
-                pair<boost::shared_ptr<Region>,AudioIntervalResult> newpair ((*v).view->region(), (*v).intervals);
+                pair<boost::shared_ptr<Region>,AudioIntervalResult> newpair (v->view->region(), v->intervals);
                 m.insert (newpair);
         }
 }
@@ -149,7 +149,7 @@ void
 StripSilenceDialog::drop_rects ()
 {
         for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
-                (*v).view->drop_silent_frames ();
+                v->view->drop_silent_frames ();
         }
 }
 
@@ -190,7 +190,7 @@ StripSilenceDialog::update_silence_rects ()
         double const y = _threshold.get_value();
 
         for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
-                (*v).view->set_silent_frames ((*v).intervals, y);
+                v->view->set_silent_frames (v->intervals, y);
 	}
 }
 
@@ -215,7 +215,7 @@ StripSilenceDialog::detection_thread_work ()
                         boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> ((*i).view->region());
 
                         if (ar) {
-                                (*i).intervals = ar->find_silence (dB_to_coefficient (threshold ()), minimum_length (), _interthread_info);
+                                i->intervals = ar->find_silence (dB_to_coefficient (threshold ()), minimum_length (), _interthread_info);
                         }
 
 			if (_interthread_info.cancel) {
