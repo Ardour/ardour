@@ -113,11 +113,17 @@ public:
 
 	void add_note(ArdourCanvas::CanvasNote*);
 	void add_hit(ArdourCanvas::CanvasHit*);
+	void update_note (ArdourCanvas::CanvasNote *);
 
 	void clear_events();
 
+private:
+
+	MidiGhostRegion::Event* find_event (ArdourCanvas::CanvasNote *);
+
 	typedef std::list<MidiGhostRegion::Event*> EventList;
 	EventList events;
+	EventList::iterator _optimization_iterator;
 };
 
 #endif /* __ardour_gtk_ghost_region_h__ */

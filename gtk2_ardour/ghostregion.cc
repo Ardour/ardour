@@ -163,6 +163,7 @@ AudioGhostRegion::set_colors ()
  */
 MidiGhostRegion::MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
 	: GhostRegion(tv.ghost_group(), tv, source_tv, initial_unit_pos)
+	, _optimization_iterator (events.end ())
 {
 	base_rect->lower_to_bottom();
 	update_range ();
@@ -176,6 +177,7 @@ MidiGhostRegion::MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, doub
  */
 MidiGhostRegion::MidiGhostRegion(MidiStreamView& msv, TimeAxisView& source_tv, double initial_unit_pos)
 	: GhostRegion(msv.midi_underlay_group, msv.trackview(), source_tv, initial_unit_pos)
+	, _optimization_iterator (events.end ())
 {
 	base_rect->lower_to_bottom();
 	update_range ();
@@ -322,3 +324,51 @@ MidiGhostRegion::clear_events()
 	events.clear();
 }
 
+/** Update the x positions of our representation of a parent's note.
+ *  @param parent The CanvasNote from the parent MidiRegionView.
+ */
+void
+MidiGhostRegion::update_note (ArdourCanvas::CanvasNote* parent)
+{
+	Event* ev = find_event (parent);
+	if (!ev) {
+		return;
+	}
+
+	Note* note = dynamic_cast<Note *> (ev);
+	if (note) {
+		double const x1 = parent->property_x1 ();
+		double const x2 = parent->property_x2 ();
+		note->rect->property_x1 () = x1;
+		note->rect->property_x2 () = x2;
+	}
+}
+
+/** Given a note in our parent region (ie the actual MidiRegionView), find our
+ *  representation of it.
+ *  @return Our Event, or 0 if not found.
+ */
+
+MidiGhostRegion::Event *
+MidiGhostRegion::find_event (ArdourCanvas::CanvasNote* parent)
+{
+	/* we are using _optimization_iterator to speed up the common case where a caller
+	   is going through our notes in order.
+	*/
+	
+	if (_optimization_iterator != events.end()) {
+		++_optimization_iterator;
+	}
+
+	if (_optimization_iterator != events.end() && (*_optimization_iterator)->event == parent) {
+		return *_optimization_iterator;
+	}
+
+	for (_optimization_iterator = events.begin(); _optimization_iterator != events.end(); ++_optimization_iterator) {
+		if ((*_optimization_iterator)->event == parent) {
+			return *_optimization_iterator;
+		}
+	}
+
+	return 0;
+}

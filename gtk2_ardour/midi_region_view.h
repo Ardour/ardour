@@ -409,7 +409,7 @@ class MidiRegionView : public RegionView
 	ArdourCanvas::CanvasNoteEvent* find_canvas_note (boost::shared_ptr<NoteType>);
 	Events::iterator _optimization_iterator;
 
-	void update_note (ArdourCanvas::CanvasNote*);
+	void update_note (ArdourCanvas::CanvasNote *, bool update_ghost_regions = true);
 	double update_hit (ArdourCanvas::CanvasHit *);
 	void create_ghost_note (double, double);
 	void update_ghost_note (double, double);

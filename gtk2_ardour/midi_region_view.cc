@@ -1457,8 +1457,12 @@ MidiRegionView::note_in_region_range(const boost::shared_ptr<NoteType> note, boo
 	return !outside;
 }
 
+/** Update a canvas note's size from its model note.
+ *  @param ev Canvas note to update.
+ *  @param update_ghost_regions true to update the note in any ghost regions that we have, otherwise false.
+ */
 void
-MidiRegionView::update_note (CanvasNote* ev)
+MidiRegionView::update_note (CanvasNote* ev, bool update_ghost_regions)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
 
@@ -1500,6 +1504,15 @@ MidiRegionView::update_note (CanvasNote* ev)
 	} else {
 		/* outline all edges */
 		ev->property_outline_what() = (guint32) 0xF;
+	}
+
+	if (update_ghost_regions) {
+		for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+			MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
+			if (gr) {
+				gr->update_note (ev);
+			}
+		}
 	}
 }
 
@@ -3148,7 +3161,8 @@ MidiRegionView::update_ghost_note (double x, double y)
 	_ghost_note->note()->set_length (length);
 	_ghost_note->note()->set_note (midi_stream_view()->y_to_note (y));
 
-	update_note (_ghost_note);
+	/* the ghost note does not appear in ghost regions, so pass false in here */
+	update_note (_ghost_note, false);
 
 	show_verbose_canvas_cursor (_ghost_note->note ());
 }
