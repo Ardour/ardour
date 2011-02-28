@@ -26,6 +26,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <glibmm/miscutils.h>
+
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
 #include "pbd/stl_delete.h"
@@ -90,7 +92,7 @@ PathScanner::run_scan_internal (vector<string *> *result,
 	struct dirent *finfo;
 	char *pathcopy = strdup (dirpath.c_str());
 	char *thisdir;
-	char fullpath[PATH_MAX+1];
+	string fullpath;
 	string search_str;
 	string *newstr;
 	long nfound = 0;
@@ -117,12 +119,11 @@ PathScanner::run_scan_internal (vector<string *> *result,
 			    (finfo->d_name[0] == '.' && finfo->d_name[1] == '.' && finfo->d_name[2] == '\0')) {
 				continue;
 			}
-
-			snprintf (fullpath, sizeof(fullpath), "%s/%s",
-				  thisdir, finfo->d_name);
+                        
+                        fullpath = Glib::build_filename (thisdir, finfo->d_name);
 
 			struct stat statbuf;
-			if (stat (fullpath, &statbuf) < 0) {
+			if (stat (fullpath.c_str(), &statbuf) < 0) {
 				continue;
 			}
 
@@ -147,7 +148,7 @@ PathScanner::run_scan_internal (vector<string *> *result,
 						continue;
 					}
 				}
-				
+
 				if (return_fullpath) {
 					newstr = new string (fullpath);
 				} else {
