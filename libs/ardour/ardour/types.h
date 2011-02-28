@@ -76,8 +76,8 @@ namespace ARDOUR {
 	static const framepos_t max_framepos = INT64_MAX;
 	static const framecnt_t max_framecnt = INT64_MAX;
 
-	// a set of (time) intervals: first of pair is the offset within the region, second is the length of the interval
-	typedef std::list<std::pair<frameoffset_t,framecnt_t> > AudioIntervalResult;
+	// a set of (time) intervals: first of pair is the offset of the start within the region, second is the offset of the end
+	typedef std::list<std::pair<frameoffset_t, frameoffset_t> > AudioIntervalResult;
 	// associate a set of intervals with regions (e.g. for silence detection)
 	typedef std::map<boost::shared_ptr<ARDOUR::Region>,AudioIntervalResult> AudioIntervalMap;
 

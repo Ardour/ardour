@@ -78,66 +78,59 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 		return 0;
 	}
 
-        AudioIntervalResult::const_iterator s = silence.begin ();
-        PBD::PropertyList plist;
-        framepos_t start;
-        framepos_t end;
-        bool in_silence;
-        boost::shared_ptr<AudioRegion> copy;
+	/* Turn the silence list into an `audible' list */
+	AudioIntervalResult audible;
 
-        start = r->start();
+	/* Add the possible audible section at the start of the region */
+	AudioIntervalResult::const_iterator first_silence = silence.begin ();
+	if (first_silence->first != region->start()) {
+		audible.push_back (std::make_pair (r->start(), first_silence->first));
+	}
 
-        if (s->first == start) {
-                /* segment starting at zero is silent */
-                end = s->second;
-                in_silence = true;
-        } else {
-                /* segment starting at zero is audible, and begins at the start of the region in the source */
-                end = s->first;
-                in_silence = false;
-        }
+	/* Add audible sections in the middle of the region */
+	for (AudioIntervalResult::const_iterator i = silence.begin (); i != silence.end(); ++i) {
+		AudioIntervalResult::const_iterator j = i;
+		++j;
+
+		if (j != silence.end ()) {
+			audible.push_back (std::make_pair (i->second, j->first));
+		}
+	}
+
+	/* Add the possible audible section at the end of the region */
+	AudioIntervalResult::const_iterator last_silence = silence.end ();
+	--last_silence;
+
+	frameoffset_t const end_of_region = r->start() + r->length();
+	
+	if (last_silence->second != end_of_region - 1) {
+		audible.push_back (std::make_pair (last_silence->second, end_of_region - 1));
+	}
 
 	int n = 0;
-	int const N = silence.size ();
+	int const N = audible.size ();
+	
+	for (AudioIntervalResult::const_iterator i = audible.begin(); i != audible.end(); ++i) {
 
-        while (start < r->start() + r->length()) {
+		PBD::PropertyList plist;
+		boost::shared_ptr<AudioRegion> copy;
 
-                framecnt_t interval_duration;
-
-                interval_duration = end - start;
-
-                if (!in_silence && interval_duration > 0) {
-
-                        plist.clear ();
-                        plist.add (Properties::length, interval_duration);
-                        plist.add (Properties::position, r->position() + (start - r->start()));
-
-                        copy = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create 
-                                                                         (region, (start - r->start()), plist));
-
-                        copy->set_name (RegionFactory::new_region_name (region->name ()));
-
-                        copy->set_fade_in_active (true);
-                        copy->set_fade_in (FadeLinear, _fade_length);
-                        results.push_back (copy);
-                }
-
-                start = end;
-                in_silence = !in_silence;
-                ++s;
-
-                if (s == silence.end()) {
-                        end = r->start() + r->length();
-                } else {
-                        end = s->first;
-                }
-
-		++n;
-
+		plist.add (Properties::length, i->second - i->first);
+		plist.add (Properties::position, r->position() + (i->first - r->start()));
+		
+		copy = boost::dynamic_pointer_cast<AudioRegion> (
+			RegionFactory::create (region, (i->first - r->start()), plist)
+			);
+		
+		copy->set_name (RegionFactory::new_region_name (region->name ()));
+		
+		copy->set_fade_in_active (true);
+		copy->set_fade_in (FadeLinear, _fade_length);
+		results.push_back (copy);
+	
 		if (progress && (n <= N)) {
 			progress->set_progress (float (n) / N);
 		}
-
         }
 
 	return 0;
