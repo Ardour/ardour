@@ -80,7 +80,6 @@ public:
 		Event(ArdourCanvas::CanvasNoteEvent*);
 		virtual ~Event() {}
 
-		virtual void x_changed() = 0;
 		ArdourCanvas::CanvasNoteEvent* event;
 	};
 
@@ -89,7 +88,6 @@ public:
 		Note(ArdourCanvas::CanvasNote*, ArdourCanvas::Group*);
 		~Note();
 
-		void x_changed();
 		ArdourCanvas::SimpleRect* rect;
 	};
 
@@ -98,7 +96,6 @@ public:
 		Hit(ArdourCanvas::CanvasHit*, ArdourCanvas::Group*);
 		~Hit();
 
-		void x_changed();
 		ArdourCanvas::Diamond* diamond;
 	};
 

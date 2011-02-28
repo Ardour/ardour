@@ -204,13 +204,6 @@ MidiGhostRegion::Note::~Note()
 	//delete rect;
 }
 
-void
-MidiGhostRegion::Note::x_changed()
-{
-	rect->property_x1() = event->x1();
-	rect->property_x2() = event->x2();
-}
-
 MidiGhostRegion::Hit::Hit(ArdourCanvas::CanvasHit* h, ArdourCanvas::Group*)
 	: Event(h)
 {
@@ -218,11 +211,6 @@ MidiGhostRegion::Hit::Hit(ArdourCanvas::CanvasHit* h, ArdourCanvas::Group*)
 }
 
 MidiGhostRegion::Hit::~Hit()
-{
-}
-
-void
-MidiGhostRegion::Hit::x_changed()
 {
 }
 
