@@ -186,7 +186,7 @@ MidiGhostRegion::MidiGhostRegion(MidiStreamView& msv, TimeAxisView& source_tv, d
 
 MidiGhostRegion::~MidiGhostRegion()
 {
-	
+	clear_events ();
 }
 
 MidiGhostRegion::Event::Event(ArdourCanvas::CanvasNoteEvent* e)
@@ -203,7 +203,7 @@ MidiGhostRegion::Note::Note(ArdourCanvas::CanvasNote* n, ArdourCanvas::Group* g)
 
 MidiGhostRegion::Note::~Note()
 {
-	
+	delete rect;
 }
 
 void
