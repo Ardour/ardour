@@ -91,14 +91,6 @@ public:
 		ArdourCanvas::SimpleRect* rect;
 	};
 
-	class Hit : public Event {
-	public:
-		Hit(ArdourCanvas::CanvasHit*, ArdourCanvas::Group*);
-		~Hit();
-
-		ArdourCanvas::Diamond* diamond;
-	};
-
 	MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
 	MidiGhostRegion(MidiStreamView& msv, TimeAxisView& source_tv, double initial_unit_pos);
 	~MidiGhostRegion();
@@ -112,7 +104,6 @@ public:
 	void update_range();
 
 	void add_note(ArdourCanvas::CanvasNote*);
-	void add_hit(ArdourCanvas::CanvasHit*);
 	void update_note (ArdourCanvas::CanvasNote *);
 
 	void clear_events();

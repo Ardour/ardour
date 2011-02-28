@@ -20,7 +20,6 @@
 #include "evoral/Note.hpp"
 #include "ardour_ui.h"
 #include "automation_time_axis.h"
-#include "canvas-hit.h"
 #include "canvas-note.h"
 #include "ghostregion.h"
 #include "midi_streamview.h"
@@ -187,12 +186,13 @@ MidiGhostRegion::MidiGhostRegion(MidiStreamView& msv, TimeAxisView& source_tv, d
 
 MidiGhostRegion::~MidiGhostRegion()
 {
-	//clear_events();
+	
 }
 
 MidiGhostRegion::Event::Event(ArdourCanvas::CanvasNoteEvent* e)
 	: event(e)
 {
+	
 }
 
 MidiGhostRegion::Note::Note(ArdourCanvas::CanvasNote* n, ArdourCanvas::Group* g)
@@ -203,17 +203,7 @@ MidiGhostRegion::Note::Note(ArdourCanvas::CanvasNote* n, ArdourCanvas::Group* g)
 
 MidiGhostRegion::Note::~Note()
 {
-	//delete rect;
-}
-
-MidiGhostRegion::Hit::Hit(ArdourCanvas::CanvasHit* h, ArdourCanvas::Group*)
-	: Event(h)
-{
-	cerr << "Hit ghost item does not work yet" << endl;
-}
-
-MidiGhostRegion::Hit::~Hit()
-{
+	
 }
 
 void
@@ -306,12 +296,6 @@ MidiGhostRegion::add_note(ArdourCanvas::CanvasNote* n)
 			note->rect->property_y2() = y + mv->note_height();
 		}
 	}
-}
-
-void
-MidiGhostRegion::add_hit(ArdourCanvas::CanvasHit* /*h*/)
-{
-	//events.push_back(new Hit(h, group));
 }
 
 void
