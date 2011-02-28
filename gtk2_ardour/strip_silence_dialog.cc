@@ -84,12 +84,9 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
         _minimum_length.set_mode (AudioClock::Frames);
         _minimum_length.set (1000, true);
 
-        /* Add this back when we finally do something with it */
-        /*
 	table->attach (*Gtk::manage (new Gtk::Label (_("Fade length"), 1, 0.5)), 0, 1, n, n + 1, Gtk::FILL);
         table->attach (_fade_length, 1, 2, n, n + 1, Gtk::FILL);
 	++n;
-        */
 
         _fade_length.set_session (s);
         _fade_length.set_mode (AudioClock::Frames);
@@ -282,7 +279,7 @@ StripSilenceDialog::minimum_length () const
 framecnt_t
 StripSilenceDialog::fade_length () const
 {
-        return _minimum_length.current_duration (views.front().view->region()->position());
+        return _fade_length.current_duration (views.front().view->region()->position());
 }
 		
 void

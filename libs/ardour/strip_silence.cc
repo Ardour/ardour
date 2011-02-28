@@ -123,9 +123,12 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 			);
 		
 		copy->set_name (RegionFactory::new_region_name (region->name ()));
+
+		framecnt_t const f = std::min (_fade_length, (i->second - i->first));
 		
 		copy->set_fade_in_active (true);
-		copy->set_fade_in (FadeLinear, _fade_length);
+		copy->set_fade_in (FadeLinear, f);
+		copy->set_fade_out (FadeLinear, f);
 		results.push_back (copy);
 	
 		if (progress && (n <= N)) {
