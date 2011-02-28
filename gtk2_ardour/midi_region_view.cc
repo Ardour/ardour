@@ -1324,15 +1324,15 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 		ghost = new MidiGhostRegion (tv, trackview, unit_position);
 	}
 
-	ghost->set_height ();
-	ghost->set_duration (_region->length() / samples_per_unit);
-	ghosts.push_back (ghost);
-
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		if ((note = dynamic_cast<CanvasNote*>(*i)) != 0) {
 			ghost->add_note(note);
 		}
 	}
+
+	ghost->set_height ();
+	ghost->set_duration (_region->length() / samples_per_unit);
+	ghosts.push_back (ghost);
 
 	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), ui_bind (&RegionView::remove_ghost, this, _1), gui_context());
 
