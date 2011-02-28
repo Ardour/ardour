@@ -223,7 +223,6 @@ void
 RegionView::set_silent_frames (const AudioIntervalResult& silences, double threshold)
 {
         framecnt_t shortest = max_framecnt;
-        framecnt_t shortest_audible = max_framecnt;
 
 	/* remove old silent frames */
         drop_silent_frames ();
@@ -232,68 +231,42 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double thres
                 return;
         }
 
-        framepos_t start;
-        framepos_t end;
-        bool in_silence;
-        bool seen_audible = false;
-        AudioIntervalResult::const_iterator s;
         uint32_t const color = ARDOUR_UI::config()->canvasvar_Silence.get();
 
-        start = _region->start();
-        s = silences.begin();
+	for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
 
-        if (s->first == start) {
-                /* segment starting at zero is silent */
-                end = s->second;
-                in_silence = true;
-        } else {
-                /* segment starting at zero is audible, and begins at the start of the region in the source */
-                end = s->first;
-                in_silence = false;
-        }
+		ArdourCanvas::SimpleRect* cr = new ArdourCanvas::SimpleRect (*group);
+		_silent_frames.push_back (cr);
 
-        while (start < _region->start() + _region->length()) {
+		/* coordinates for the rect are relative to the regionview origin */
+                
+		cr->property_x1() = trackview.editor().frame_to_pixel (i->first - _region->start());
+		cr->property_x2() = trackview.editor().frame_to_pixel (i->second - _region->start());
+		cr->property_y1() = 1;
+		cr->property_y2() = _height - 2;
+		cr->property_outline_pixels() = 0;
+		cr->property_fill_color_rgba () = color;
 
-                framecnt_t interval_duration = end - start;
+		shortest = min (shortest, i->second - i->first);
+	}
 
-                if (interval_duration > 0) {
-                        if (in_silence) {
-                                
-                                ArdourCanvas::SimpleRect* cr = new ArdourCanvas::SimpleRect (*group);
-                                _silent_frames.push_back (cr);
-                                
-                                /* coordinates for the rect are relative to the regionview origin */
-                                
-                                cr->property_x1() = trackview.editor().frame_to_pixel (s->first - _region->start());
-                                cr->property_x2() = trackview.editor().frame_to_pixel (s->second - _region->start());
-                                cr->property_y1() = 1;
-                                cr->property_y2() = _height - 2;
-                                cr->property_outline_pixels() = 0;
-                                cr->property_fill_color_rgba () = color;
-                                
-                                if (interval_duration < shortest) {
-                                        shortest = interval_duration;
-                                }
-                                
-                        } else if (interval_duration > 0) {
-                                seen_audible = true;
-                                if (interval_duration < shortest_audible) {
-                                        shortest_audible = interval_duration;
-                                }
-                        }
-                        
-                        start = end;
-                        in_silence = !in_silence;
-                        ++s;
-                        
-                        if (s == silences.end()) {
-                                end = _region->start() + _region->length();
-                        } else {
-                                end = s->first;
-                        }
-                }
-        }
+	/* Find shortest audible segment */
+        framecnt_t shortest_audible = max_framecnt;
+	
+	framecnt_t s = _region->start();
+	for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
+		framecnt_t const dur = i->first - s;
+		if (dur > 0) {
+			shortest_audible = min (shortest_audible, dur);
+		}
 
+		s = i->second;
+	}
+
+	framecnt_t const dur = _region->start() + _region->length() - 1 - s;
+	if (dur > 0) {
+		shortest_audible = min (shortest_audible, dur);
+	}
 
         _silence_text = new ArdourCanvas::NoEventText (*group);
         _silence_text->property_font_desc() = *(get_font_for_style (N_("SilenceText")));
@@ -325,9 +298,9 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double thres
 		+ ", "
 		+ string_compose (_("shortest = %1 %2"), ms, sunits);
 
-        if (seen_audible) {
+        if (shortest_audible != max_framepos) {
                 /* ms are now in seconds */
-                double ma = shortest_audible / _region->session().frame_rate();
+                double ma = (float) shortest_audible / _region->session().frame_rate();
                 char const * aunits;
                 
                 if (ma >= 60.0) {
