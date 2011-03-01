@@ -1070,7 +1070,21 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 
 			_playlist->thaw ();
 			_session.add_command (new StatefulDiffCommand(_playlist));
-		}
+
+		} else {
+
+			/* No data was recorded, so this capture will
+			   effectively be aborted; do the same as we
+			   do for an explicit abort.
+			*/
+
+			if (_write_source) {
+				_write_source->mark_for_remove ();
+				_write_source->drop_references ();
+				_write_source.reset();
+			}
+ 		}
+		
 
 		mark_write_completed = true;
 	}
