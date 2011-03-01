@@ -189,7 +189,7 @@ PluginManager::ladspa_refresh ()
 	/* allow LADSPA_PATH to augment, not override standard locations */
 
 	/* Only add standard locations to ladspa_path if it doesn't
-	 * already contain them. Check for trailing '/'s too.
+	 * already contain them. Check for trailing G_DIR_SEPARATOR too.
 	 */
 
 	int i;
