@@ -299,7 +299,6 @@ Session::second_stage_init ()
 		if (load_state (_current_snapshot_name)) {
 			return -1;
 		}
-                cleanup_stubfiles ();
 	}
 
 	if (_butler->start_thread()) {
@@ -1236,6 +1235,8 @@ Session::set_state (const XMLNode& node, int version)
 
 	setup_raid_path(_session_dir->root_path().to_string());
 
+	cleanup_stubfiles ();
+	
 	if ((prop = node.property (X_("id-counter"))) != 0) {
 		uint64_t x;
 		sscanf (prop->value().c_str(), "%" PRIu64, &x);
