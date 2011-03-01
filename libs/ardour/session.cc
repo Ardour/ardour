@@ -301,12 +301,16 @@ Session::destroy ()
 	}
 	routes.flush ();
 
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
 	DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
+
+		SourceMap::iterator j = i;
+		++j;
+		
 		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->path(), i->second.use_count()));
 		i->second->drop_references ();
+
+		i = j;
 	}
 
 	sources.clear ();
