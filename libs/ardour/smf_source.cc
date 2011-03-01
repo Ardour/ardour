@@ -52,7 +52,7 @@ using namespace PBD;
 /** Constructor used for new internal-to-session files.  File cannot exist. */
 SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 	: Source(s, DataType::MIDI, path, flags)
-	, MidiSource(s, path)
+	, MidiSource(s, path, flags)
 	, FileSource(s, DataType::MIDI, path, string(), flags)
 	, Evoral::SMF()
 	, _last_ev_time_beats(0.0)
@@ -328,7 +328,7 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 		cerr << "SMFSource: Warning: Skipping event with non-monotonic time" << endl;
 		return;
 	}
-        
+
 	BeatsFramesConverter converter(_session.tempo_map(), position);
 	const double ev_time_beats = converter.from(ev.time());
 	Evoral::event_id_t event_id;
