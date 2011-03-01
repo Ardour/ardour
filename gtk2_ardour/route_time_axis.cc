@@ -113,7 +113,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	, playlist_button (_("p"))
 	, automation_button (_("a"))
 	, gm (sess, slider, true, 115)
-	, _ignore_track_mode_change (false)
 {
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gm.get_level_meter().set_no_show_all();
@@ -135,9 +134,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 
 	timestretch_rect = 0;
 	no_redraw = false;
-	destructive_track_mode_item = 0;
-	normal_track_mode_item = 0;
-	non_layered_track_mode_item = 0;
 
 	ignore_toggle = false;
 
@@ -216,7 +212,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 
 	if (is_track()) {
 
-		track()->TrackModeChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::track_mode_changed, this), gui_context());
 		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::map_frozen, this), gui_context());
 		track()->SpeedChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::speed_changed, this), gui_context());
 
@@ -558,36 +553,46 @@ RouteTimeAxisView::build_display_menu ()
 
 			RadioMenuItem::Group mode_group;
 
-			mode_items.push_back (RadioMenuElem (mode_group, _("Normal Mode"), sigc::bind (
-					sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode),
-					ARDOUR::Normal)));
-			normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&mode_items.back());
+			int normal = 0;
+			int tape = 0;
+			int non_layered = 0;
 
-			mode_items.push_back (RadioMenuElem (mode_group, _("Tape Mode"), sigc::bind (
-					sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode),
-					ARDOUR::Destructive)));
-			destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&mode_items.back());
-
- 			mode_items.push_back (RadioMenuElem (mode_group, _("Non-Layered Mode"),
- 							sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::NonLayered)));
- 			non_layered_track_mode_item = dynamic_cast<RadioMenuItem*>(&mode_items.back());
-
-
-			_ignore_track_mode_change = true;
-			
-			switch (track()->mode()) {
-			case ARDOUR::Destructive:
-				destructive_track_mode_item->set_active ();
-				break;
-			case ARDOUR::Normal:
-				normal_track_mode_item->set_active ();
-				break;
-			case ARDOUR::NonLayered:
-				non_layered_track_mode_item->set_active ();
-				break;
+			for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
+				RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
+				if (!r || !r->is_track ()) {
+					continue;
+				}
+				
+				switch (r->track()->mode()) {
+				case Normal:
+					++normal;
+					break;
+				case Destructive:
+					++tape;
+					break;
+				case NonLayered:
+					++non_layered;
+					break;
+				}
 			}
-			
-			_ignore_track_mode_change = false;
+
+			mode_items.push_back (RadioMenuElem (mode_group, _("Normal Mode")));
+			i = dynamic_cast<RadioMenuItem*> (&mode_items.back ());
+			i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Normal, true));
+			i->set_active (normal != 0 && tape == 0 && non_layered == 0);
+			i->set_inconsistent (normal != 0 && (tape != 0 || non_layered != 0));
+
+			mode_items.push_back (RadioMenuElem (mode_group, _("Tape Mode")));
+			i = dynamic_cast<RadioMenuItem*> (&mode_items.back ());
+			i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Destructive, true));
+			i->set_active (normal == 0 && tape != 0 && non_layered == 0);
+			i->set_inconsistent (tape != 0 && (normal != 0 || non_layered != 0));
+
+ 			mode_items.push_back (RadioMenuElem (mode_group, _("Non-Layered Mode")));
+			i = dynamic_cast<RadioMenuItem*> (&mode_items.back ());
+			i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::NonLayered, true));
+			i->set_active (normal == 0 && tape == 0 && non_layered != 0);
+			i->set_inconsistent (non_layered != 0 && (normal != 0 || tape != 0));
 
 			items.push_back (MenuElem (_("Mode"), *mode_menu));
 		}
@@ -626,108 +631,42 @@ RouteTimeAxisView::build_display_menu ()
 	}
 }
 
-static bool __reset_item (RadioMenuItem* item, RadioMenuItem* item_2)
-{
-	item->set_active ();
-	item_2->set_active ();
-	return false;
-}
-
 void
-RouteTimeAxisView::set_track_mode (TrackMode mode)
+RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
 {
-	if (_ignore_track_mode_change) {
-		return;
-	}
-	
-	RadioMenuItem* item;
-	RadioMenuItem* other_item;
-	RadioMenuItem* other_item_2;
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_track_mode, _1, mode, false));
+	} else {
 
-	switch (mode) {
-	case ARDOUR::Normal:
-		item = normal_track_mode_item;
-		other_item = non_layered_track_mode_item;
-		other_item_2 = destructive_track_mode_item;
-		break;
-	case ARDOUR::NonLayered:
-		item = non_layered_track_mode_item;
-		other_item = normal_track_mode_item;
-		other_item_2 = destructive_track_mode_item;
-		break;
-	case ARDOUR::Destructive:
-		item = destructive_track_mode_item;
-		other_item = normal_track_mode_item;
-		other_item_2 = non_layered_track_mode_item;
-		break;
-	default:
-		fatal << string_compose (_("programming error: %1 %2"), "illegal track mode in RouteTimeAxisView::set_track_mode", mode) << endmsg;
-		/*NOTREACHED*/
-		return;
-	}
+		bool needs_bounce;
 
-	if (item && other_item && other_item_2 && track()->mode() != mode) {
-		_set_track_mode (track().get(), mode, other_item, other_item_2);
-	}
-}
-
-void
-RouteTimeAxisView::_set_track_mode (Track* track, TrackMode mode, RadioMenuItem* reset_item, RadioMenuItem* reset_item_2)
-{
-	bool needs_bounce;
-
-	if (!track->can_use_mode (mode, needs_bounce)) {
-
-		if (!needs_bounce) {
-			/* cannot be done */
-			Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (__reset_item), reset_item, reset_item_2));
-			return;
-		} else {
-			cerr << "would bounce this one\n";
-			/* XXX: radio menu item becomes inconsistent with track state in this case */
-			return;
+		if (!track()->can_use_mode (mode, needs_bounce)) {
+			
+			if (!needs_bounce) {
+				/* cannot be done */
+				return;
+			} else {
+				cerr << "would bounce this one\n";
+				return;
+			}
 		}
+		
+		track()->set_mode (mode);
+		
+		rec_enable_button->remove ();
+		
+		switch (mode) {
+		case ARDOUR::NonLayered:
+		case ARDOUR::Normal:
+			rec_enable_button->add (*(manage (new Image (::get_icon (X_("record_normal_red"))))));
+			break;
+		case ARDOUR::Destructive:
+			rec_enable_button->add (*(manage (new Image (::get_icon (X_("record_tape_red"))))));
+			break;
+		}
+		
+		rec_enable_button->show_all ();
 	}
-
-	track->set_mode (mode);
-
-	rec_enable_button->remove ();
-
-	switch (mode) {
-	case ARDOUR::NonLayered:
-	case ARDOUR::Normal:
-		rec_enable_button->add (*(manage (new Image (::get_icon (X_("record_normal_red"))))));
-		break;
-	case ARDOUR::Destructive:
-		rec_enable_button->add (*(manage (new Image (::get_icon (X_("record_tape_red"))))));
-		break;
-	}
-
-	rec_enable_button->show_all ();
-}
-
-void
-RouteTimeAxisView::track_mode_changed ()
-{
-	RadioMenuItem* item;
-
-	switch (track()->mode()) {
-	case ARDOUR::Normal:
-		item = normal_track_mode_item;
-		break;
-	case ARDOUR::NonLayered:
-		item = non_layered_track_mode_item;
-		break;
-	case ARDOUR::Destructive:
-		item = destructive_track_mode_item;
-		break;
-	default:
-		fatal << string_compose (_("programming error: %1 %2"), "illegal track mode in RouteTimeAxisView::set_track_mode", track()->mode()) << endmsg;
-		/*NOTREACHED*/
-		return;
-	}
-
-	item->set_active ();
 }
 
 void
