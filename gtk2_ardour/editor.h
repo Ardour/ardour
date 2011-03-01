@@ -1156,9 +1156,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void temporal_zoom_by_frame (framepos_t start, framepos_t end, const std::string & op);
 	void temporal_zoom_to_frame (bool coarser, framepos_t frame);
 
-	void amplitude_zoom (gdouble scale);
-	void amplitude_zoom_step (bool in);
-
 	void insert_region_list_drag (boost::shared_ptr<ARDOUR::Region>, int x, int y);
 	void insert_region_list_selection (float times);
 

@@ -1987,27 +1987,6 @@ Editor::add_location_from_region ()
 	_session->commit_reversible_command ();
 }
 
-void
-Editor::amplitude_zoom_step (bool in)
-{
-	gdouble zoom = 1.0;
-
-	if (in) {
-		zoom *= 2.0;
-	} else {
-		if (zoom > 2.0) {
-			zoom /= 2.0;
-		} else {
-			zoom = 1.0;
-		}
-	}
-
-#ifdef FIX_FOR_CANVAS
-	/* XXX DO SOMETHING */
-#endif
-}
-
-
 /* DELETION */
 
 
