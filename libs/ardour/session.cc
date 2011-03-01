@@ -2676,6 +2676,8 @@ Session::add_source (boost::shared_ptr<Source> source)
 				Analyser::queue_source_for_analysis (source, false);
 			}
 		}
+
+		source->DropReferences.connect_same_thread (*this, boost::bind (&Session::remove_source, this, boost::weak_ptr<Source> (source)));
         }
 }
 

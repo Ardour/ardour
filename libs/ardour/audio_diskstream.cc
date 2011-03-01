@@ -1404,7 +1404,6 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 
 				(*chan)->write_source->mark_for_remove ();
 				(*chan)->write_source->drop_references ();
-                                _session.remove_source ((*chan)->write_source);
 				(*chan)->write_source.reset ();
 			}
 
@@ -1963,7 +1962,6 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
                                 if ((*chan)->write_source->removable()) {
                                         (*chan)->write_source->mark_for_remove ();
                                         (*chan)->write_source->drop_references ();
-                                        _session.remove_source ((*chan)->write_source);
                                 }
 				
                                 (*chan)->write_source.reset ();
