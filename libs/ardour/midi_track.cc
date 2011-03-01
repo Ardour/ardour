@@ -287,11 +287,8 @@ MidiTrack::set_state_part_two ()
 		}
 	}
 
-	if ((fnode = find_named_node (*pending_state, X_("Diskstream"))) != 0) {
-		boost::shared_ptr<MidiDiskstream> ds (new MidiDiskstream (_session, *fnode));
-		ds->do_refill_with_alloc ();
-		ds->set_block_size (_session.get_block_size ());
-		set_diskstream (ds);
+	if (midi_diskstream ()) {
+		midi_diskstream()->set_block_size (_session.get_block_size ());
 	}
 
 	return;
