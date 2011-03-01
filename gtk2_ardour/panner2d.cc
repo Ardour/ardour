@@ -46,6 +46,10 @@ using namespace ARDOUR;
 using namespace PBD;
 using Gtkmm2ext::Keyboard;
 
+static const int large_size_threshold = 100;
+static const int large_border_width = 25;
+static const int small_border_width = 8;
+
 Panner2d::Target::Target (const AngularVector& a, const char *txt)
 	: position (a)
 	, text (txt)
@@ -83,7 +87,7 @@ Panner2d::Panner2d (boost::shared_ptr<Panner> p, int32_t h)
 
 Panner2d::~Panner2d()
 {
-	for (Targets::iterator i = targets.begin(); i != targets.end(); ++i) {
+	for (Targets::iterator i = speakers.begin(); i != speakers.end(); ++i) {
 		delete *i;
 	}
 }
@@ -93,53 +97,53 @@ Panner2d::reset (uint32_t n_inputs)
 {
         uint32_t nouts = panner->out().n_audio();
 
-	/* pucks */
+	/* signals */
 
-	while (pucks.size() < n_inputs) {
-		add_puck ("", AngularVector());
+	while (signals.size() < n_inputs) {
+		add_signal ("", AngularVector());
 	}
 
-	if (pucks.size() > n_inputs) {
-		for (uint32_t i = pucks.size(); i < n_inputs; ++i) {
-			delete pucks[i];
+	if (signals.size() > n_inputs) {
+		for (uint32_t i = signals.size(); i < n_inputs; ++i) {
+			delete signals[i];
 		}
 
-		pucks.resize (n_inputs);
+		signals.resize (n_inputs);
 	}
 						
-        label_pucks ();
+        label_signals ();
 
         for (uint32_t i = 0; i < n_inputs; ++i) {
-                pucks[i]->position = panner->signal_position (i);
+                signals[i]->position = panner->signal_position (i);
         }
 
 	/* add all outputs */
 
-	while (targets.size() < nouts) {
-		add_target (AngularVector());
+	while (speakers.size() < nouts) {
+		add_speaker (AngularVector());
 	}
 
-	if (targets.size() > nouts) {
-		for (uint32_t i = nouts; i < targets.size(); ++i) {
-			delete targets[i];
+	if (speakers.size() > nouts) {
+		for (uint32_t i = nouts; i < speakers.size(); ++i) {
+			delete speakers[i];
 		}
 
-		targets.resize (nouts);
+		speakers.resize (nouts);
 	}
 
-	for (Targets::iterator x = targets.begin(); x != targets.end(); ++x) {
+	for (Targets::iterator x = speakers.begin(); x != speakers.end(); ++x) {
 		(*x)->visible = false;
 	}
-
-        vector<Speaker>& speakers (panner->get_speakers()->speakers());
+        
+        vector<Speaker>& the_speakers (panner->get_speakers()->speakers());
 
 	for (uint32_t n = 0; n < nouts; ++n) {
 		char buf[16];
 
 		snprintf (buf, sizeof (buf), "%d", n+1);
-		targets[n]->set_text (buf);
-		targets[n]->position = speakers[n].angles();
-		targets[n]->visible = true;
+		speakers[n]->set_text (buf);
+		speakers[n]->position = the_speakers[n].angles();
+		speakers[n]->visible = true;
 	}
 
 	queue_draw ();
@@ -151,38 +155,44 @@ Panner2d::on_size_allocate (Gtk::Allocation& alloc)
   	width = alloc.get_width();
   	height = alloc.get_height();
 
-        /* our idea of our width/height must be "square
-         */
+        if (height > large_size_threshold) {
+                border = large_border_width;
+        } else {
+                border = small_border_width;
+        }
 
-	if (height > 100) {
-		width -= 20;
-		height -= 20;
-	}
+        radius = min (width, height);
+        radius -= border;
+        radius /= 2;
 
-        dimen = min (width, height);
-        
+        hoffset = max ((double) (width - height), border);
+        voffset = max ((double) (height - width), border);
+
+        hoffset /= 2.0;
+        voffset /= 2.0;
+
 	DrawingArea::on_size_allocate (alloc);
 }
 
 int
-Panner2d::add_puck (const char* text, const AngularVector& a)
+Panner2d::add_signal (const char* text, const AngularVector& a)
 {
-	Target* puck = new Target (a, text);
-	pucks.push_back (puck);
-	puck->visible = true;
+	Target* signal = new Target (a, text);
+	signals.push_back (signal);
+	signal->visible = true;
 
 	return 0;
 }
 
 int
-Panner2d::add_target (const AngularVector& a)
+Panner2d::add_speaker (const AngularVector& a)
 {
-	Target* target = new Target (a, "");
-	targets.push_back (target);
-	target->visible = true;
+	Target* speaker = new Target (a, "");
+	speakers.push_back (speaker);
+	speaker->visible = true;
 	queue_draw ();
 
-	return targets.size() - 1;
+	return speakers.size() - 1;
 }
 
 void
@@ -192,26 +202,26 @@ Panner2d::handle_state_change ()
 }
 
 void
-Panner2d::label_pucks ()
+Panner2d::label_signals ()
 {
         double w = panner->pannable()->pan_width_control->get_value();
-        uint32_t sz = pucks.size();
+        uint32_t sz = signals.size();
 
 	switch (sz) {
 	case 0:
 		break;
 
 	case 1:
-		pucks[0]->set_text ("");
+		signals[0]->set_text ("");
 		break;
 
 	case 2:
                 if (w  >= 0.0) {
-                        pucks[0]->set_text ("R");
-                        pucks[1]->set_text ("L");
+                        signals[0]->set_text ("R");
+                        signals[1]->set_text ("L");
                 } else {
-                        pucks[0]->set_text ("L");
-                        pucks[1]->set_text ("R");
+                        signals[0]->set_text ("L");
+                        signals[1]->set_text ("R");
                 }
 		break;
 
@@ -223,7 +233,7 @@ Panner2d::label_pucks ()
                         } else {
                                 snprintf (buf, sizeof (buf), "%" PRIu32, sz - i);
                         }
-			pucks[i]->set_text (buf);
+			signals[i]->set_text (buf);
 		}
 		break;
 	}
@@ -237,39 +247,39 @@ Panner2d::handle_position_change ()
 
         position.position = AngularVector (panner->pannable()->pan_azimuth_control->get_value() * 360.0, 0.0);
 
-        for (uint32_t i = 0; i < pucks.size(); ++i) {
-                pucks[i]->position = panner->signal_position (i);
+        for (uint32_t i = 0; i < signals.size(); ++i) {
+                signals[i]->position = panner->signal_position (i);
         }
 
         if (w * last_width <= 0) {
                 /* changed sign */
-                label_pucks ();
+                label_signals ();
         }
 
         last_width = w;
 
-        vector<Speaker>& speakers (panner->get_speakers()->speakers());
+        vector<Speaker>& the_speakers (panner->get_speakers()->speakers());
 
-	for (n = 0; n < targets.size(); ++n) {
-		targets[n]->position = speakers[n].angles();
+	for (n = 0; n < speakers.size(); ++n) {
+		speakers[n]->position = the_speakers[n].angles();
 	}
 
 	queue_draw ();
 }
 
 void
-Panner2d::move_puck (int which, const AngularVector& a)
+Panner2d::move_signal (int which, const AngularVector& a)
 {
-	if (which >= int (targets.size())) {
+	if (which >= int (speakers.size())) {
 		return;
 	}
 	
-	targets[which]->position = a;
+	speakers[which]->position = a;
 	queue_draw ();
 }
 
 Panner2d::Target *
-Panner2d::find_closest_object (gdouble x, gdouble y)
+Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
 {
 	Target *closest = 0;
 	Target *candidate;
@@ -286,7 +296,7 @@ Panner2d::find_closest_object (gdouble x, gdouble y)
                          (c.y - y) * (c.y - y));
         closest = &position;
         
-	for (Targets::const_iterator i = pucks.begin(); i != pucks.end(); ++i) {
+	for (Targets::const_iterator i = signals.begin(); i != signals.end(); ++i) {
 		candidate = *i;
 
 		candidate->position.cartesian (c);
@@ -301,15 +311,52 @@ Panner2d::find_closest_object (gdouble x, gdouble y)
 		}
 	}
 
-        if (height > 100) {
+        is_signal = true;
+
+        if (height > large_size_threshold) {
                 /* "big" */
                 if (best_distance > 30) { // arbitrary 
-                        return 0;
+                        closest = 0;
                 }
         } else {
                 /* "small" */
                 if (best_distance > 10) { // arbitrary 
-                        return 0;
+                        closest = 0;
+                }
+        }
+
+        /* if we didn't find a signal close by, check the speakers */
+
+        if (!closest) {
+                for (Targets::const_iterator i = speakers.begin(); i != speakers.end(); ++i) {
+                        candidate = *i;
+                        
+                        candidate->position.cartesian (c);
+                        cart_to_gtk (c);
+                        
+                        distance = sqrt ((c.x - x) * (c.x - x) +
+                                         (c.y - y) * (c.y - y));
+                        
+                        if (distance < best_distance) {
+                                closest = candidate;
+                                best_distance = distance;
+                        }
+                }
+                
+                if (height > large_size_threshold) {
+                        /* "big" */
+                        if (best_distance < 30) { // arbitrary 
+                                is_signal = false;
+                        } else {
+                                closest = 0;
+                        }
+                } else {
+                        /* "small" */
+                        if (best_distance < 10) { // arbitrary 
+                                is_signal = false;
+                        } else {
+                                closest = 0;
+                        }
                 }
         }
 
@@ -330,6 +377,10 @@ Panner2d::on_motion_notify_event (GdkEventMotion *ev)
 		state = (GdkModifierType) ev->state;
 	}
 
+        if (ev->state & (GDK_BUTTON1_MASK|GDK_BUTTON2_MASK)) {
+                did_move = true;
+        }
+
 	return handle_motion (x, y, state);
 }
 
@@ -338,11 +389,12 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 {
         CartesianVector c;
 	cairo_t* cr;
-        bool small;
+        bool small = (height <= large_size_threshold);
+        const double diameter = radius*2.0;
 
 	cr = gdk_cairo_create (get_window()->gobj());
 
-	cairo_set_line_width (cr, 1.0);
+        /* background */
 
 	cairo_rectangle (cr, event->area.x, event->area.y, event->area.width, event->area.height);
 	if (!panner->bypassed()) {
@@ -353,57 +405,63 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	cairo_fill_preserve (cr);
 	cairo_clip (cr);
 
-        small = !(height > 100);
+        /* offset to give us some border */
 
-	if (!small) {
-		cairo_translate (cr, 10.0, 10.0);
-	}
+        cairo_translate (cr, hoffset, voffset);
+
+	cairo_set_line_width (cr, 1.0);
 
 	/* horizontal line of "crosshairs" */
 
         cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
-	cairo_move_to (cr, 0.5, height/2.0+0.5);
-	cairo_line_to (cr, width+0.5, height/2+0.5);
+	cairo_move_to (cr, 0.0, radius);
+	cairo_line_to (cr, diameter, radius);
 	cairo_stroke (cr);
 
 	/* vertical line of "crosshairs" */
 	
-	cairo_move_to (cr, width/2+0.5, 0.5);
-	cairo_line_to (cr, width/2+0.5, height+0.5);
+	cairo_move_to (cr, radius, 0);
+	cairo_line_to (cr, radius, diameter);
 	cairo_stroke (cr);
 
 	/* the circle on which signals live */
 
 	cairo_set_line_width (cr, 2.0);
         cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, 1.0);
-	cairo_arc (cr, width/2, height/2, dimen/2, 0, 2.0 * M_PI);
+	cairo_arc (cr, radius, radius, radius, 0.0, 2.0 * M_PI);
 	cairo_stroke (cr);
 
 	/* 3 other circles of smaller diameter circle on which signals live */
 
 	cairo_set_line_width (cr, 1.0);
         cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
-	cairo_arc (cr, width/2, height/2, (dimen/2.0) * 0.75, 0, 2.0 * M_PI);
+	cairo_arc (cr, radius, radius, radius * 0.75, 0, 2.0 * M_PI);
 	cairo_stroke (cr);
         cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.85);
-	cairo_arc (cr, width/2, height/2, (dimen/2.0) * 0.50, 0, 2.0 * M_PI);
+	cairo_arc (cr, radius, radius, radius * 0.50, 0, 2.0 * M_PI);
 	cairo_stroke (cr);
-	cairo_arc (cr, width/2, height/2, (dimen/2.0) * 0.25, 0, 2.0 * M_PI);
+	cairo_arc (cr, radius, radius, radius * 0.25, 0, 2.0 * M_PI);
 	cairo_stroke (cr);
 
-        if (pucks.size() > 1) {
+        if (signals.size() > 1) {
                 /* arc to show "diffusion" */
 
                 double width_angle = fabs (panner->pannable()->pan_width_control->get_value()) * 2 * M_PI;
                 double position_angle = (2 * M_PI) - panner->pannable()->pan_azimuth_control->get_value() * 2 * M_PI;
 
                 cairo_save (cr);
-                cairo_translate (cr, width/2, height/2);
-                cairo_rotate (cr, position_angle - width_angle);
+                cairo_translate (cr, radius, radius);
+                cairo_rotate (cr, position_angle - (width_angle/2.0));
                 cairo_move_to (cr, 0, 0);
-                cairo_arc_negative (cr, 0, 0, dimen/2.0, width_angle * 2.0, 0.0);
+                cairo_arc_negative (cr, 0, 0, radius, width_angle, 0.0);
                 cairo_close_path (cr);
-                cairo_set_source_rgba (cr, 1.0, 0.419, 0.419, 0.45);
+                if (panner->pannable()->pan_width_control->get_value() >= 0.0) {
+                        /* normal width */
+                        cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.45);
+                } else {
+                        /* inverse width */
+                        cairo_set_source_rgba (cr, 1.0, 0.419, 0.419, 0.45);
+                }
                 cairo_fill (cr);
                 cairo_restore (cr);
         }
@@ -423,13 +481,13 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
                 /* signals */
 
-                if (pucks.size() > 1) {
-                        for (Targets::iterator i = pucks.begin(); i != pucks.end(); ++i) {
-                                Target* puck = *i;
+                if (signals.size() > 1) {
+                        for (Targets::iterator i = signals.begin(); i != signals.end(); ++i) {
+                                Target* signal = *i;
                                 
-                                if (puck->visible) {
-                                        
-                                        puck->position.cartesian (c);
+                                if (signal->visible) {
+
+                                        signal->position.cartesian (c);
                                         cart_to_gtk (c);
                                         
                                         cairo_new_path (cr);
@@ -439,7 +497,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
                                         cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, 1.0);
                                         cairo_stroke (cr);
                                         
-                                        if (!small && !puck->text.empty()) {
+                                        if (!small && !signal->text.empty()) {
                                                 cairo_set_source_rgb (cr, 0.517, 0.772, 0.882);
                                                 /* the +/- adjustments are a hack to try to center the text in the circle */
                                                 if (small) {
@@ -447,7 +505,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
                                                 } else {
                                                         cairo_move_to (cr, c.x - 4, c.y + 4);
                                                 }
-                                                cairo_show_text (cr, puck->text.c_str());
+                                                cairo_show_text (cr, signal->text.c_str());
                                         }
                                 }
                         }
@@ -457,16 +515,16 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 		int n = 0;
 
-		for (Targets::iterator i = targets.begin(); i != targets.end(); ++i) {
-			Target *target = *i;
+		for (Targets::iterator i = speakers.begin(); i != speakers.end(); ++i) {
+			Target *speaker = *i;
 			char buf[256];
 			++n;
 
-			if (target->visible) {
+			if (speaker->visible) {
 
 				CartesianVector c;
                                 
-				target->position.cartesian (c);
+				speaker->position.cartesian (c);
 				cart_to_gtk (c);
 
 				snprintf (buf, sizeof (buf), "%d", n);
@@ -475,7 +533,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
                                 
                                 cairo_move_to (cr, c.x, c.y);
                                 cairo_save (cr);
-                                cairo_rotate (cr, -(target->position.azi/360.0) * (2.0 * M_PI));
+                                cairo_rotate (cr, -(speaker->position.azi/360.0) * (2.0 * M_PI));
                                 if (small) {
                                         cairo_scale (cr, 0.8, 0.8);
                                 } else {
@@ -499,7 +557,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
                                         /* move the text in just a bit */
                                         
-                                        AngularVector textpos (target->position.azi, target->position.ele, 0.85);
+                                        AngularVector textpos (speaker->position.azi, speaker->position.ele, 0.85);
                                         textpos.cartesian (c);
                                         cart_to_gtk (c);
                                         cairo_move_to (cr, c.x, c.y);
@@ -509,7 +567,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 			}
 		}
 
-                /* draw position puck */
+                /* draw position */
                 
                 position.position.cartesian (c);
                 cart_to_gtk (c);
@@ -531,20 +589,33 @@ bool
 Panner2d::on_button_press_event (GdkEventButton *ev)
 {
 	GdkModifierType state;
+        int x;
+        int y;
+        bool is_signal;
 
 	if (ev->type == GDK_2BUTTON_PRESS && ev->button == 1) {
 		return false;
 	}
 
+        did_move = false;
+
 	switch (ev->button) {
 	case 1:
 	case 2:
-		if ((drag_target = find_closest_object (ev->x, ev->y)) != 0) {
-			drag_target->set_selected (true);
+                x = ev->x - border;
+                y = ev->y - border;
+                        
+		if ((drag_target = find_closest_object (x, y, is_signal)) != 0) {
+                        if (!is_signal) {
+                                panner->set_position (drag_target->position.azi/360.0);
+                                drag_target = 0;
+                        } else {
+                                drag_target->set_selected (true);
+                        }
 		}
 
-		drag_x = (int) floor (ev->x);
-		drag_y = (int) floor (ev->y);
+		drag_x = ev->x; 
+		drag_y = ev->y;
 		state = (GdkModifierType) ev->state;
 
 		return handle_motion (drag_x, drag_y, state);
@@ -569,22 +640,7 @@ Panner2d::on_button_release_event (GdkEventButton *ev)
 		x = (int) floor (ev->x);
 		y = (int) floor (ev->y);
 		state = (GdkModifierType) ev->state;
-
-		if (Keyboard::modifier_state_contains (state, Keyboard::TertiaryModifier)) {
-                        
-			for (Targets::iterator i = pucks.begin(); i != pucks.end(); ++i) {
-				//Target* puck = i->second;
-				/* XXX DO SOMETHING TO SET PUCK BACK TO "normal" */
-			}
-
-			queue_draw ();
-			PuckMoved (-1);
-			ret = true;
-
-		} else {
-			ret = handle_motion (x, y, state);
-		}
-
+                ret = handle_motion (x, y, state);
 		drag_target = 0;
 		break;
 
@@ -621,7 +677,7 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 	if ((state & (GDK_BUTTON1_MASK|GDK_BUTTON2_MASK)) == 0) {
 		return false;
 	}
-
+        
 
 	if (state & GDK_BUTTON1_MASK && !(state & GDK_BUTTON2_MASK)) {
 		CartesianVector c;
@@ -638,23 +694,16 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 			CartesianVector cp (evx, evy, 0.0);
                         AngularVector av;
 
-			/* canonicalize position */
+			/* canonicalize position and then clamp to the circle */
 
 			gtk_to_cart (cp);
-                        
-                        // cerr << "Mouse at " << cp.x << ", " << cp.y << endl;
-                        
-			/* position actual signal on circle */
-
 			clamp_to_circle (cp.x, cp.y);
 
 			/* generate an angular representation of the current mouse position */
 
-
 			cp.angular (av);
                         
                         if (drag_target == &position) {
-                                // cerr << "Angle of mouse = " << av.azi << endl;
                                 double degree_fract = av.azi / 360.0;
                                 panner->set_position (degree_fract);
                         }
@@ -684,36 +733,30 @@ Panner2d::on_scroll_event (GdkEventScroll* ev)
 void
 Panner2d::cart_to_gtk (CartesianVector& c) const
 {
-	/* "c" uses a coordinate space that is:
-            
-	   center = 0.0
-	   dimension = 2.0 * 2.0
-	   so max values along each axis are -1..+1
+	/* cartesian coordinate space:
+   	      center = 0.0
+              dimension = 2.0 * 2.0
+              increasing y moves up
+              so max values along each axis are -1..+1
 
 	   GTK uses a coordinate space that is:
-
-	   top left = 0.0
-	   dimension = width * height
-	   so max values along each axis are 0,width and
-	   0,height
+  	      top left = 0.0
+              dimension = (radius*2.0) * (radius*2.0)
+              increasing y moves down
 	*/
-        
-        const uint32_t hoffset = (width - dimen)/2;
-        const uint32_t voffset = (height - dimen)/2;
+        const double diameter = radius*2.0;
 
-	c.x = hoffset + ((dimen / 2) * (c.x + 1));
-	c.y = voffset + ((dimen / 2) * (1 - c.y));
-
-	/* XXX z-axis not handled - 2D for now */
+        c.x = diameter * ((c.x + 1.0) / 2.0);
+        /* extra subtraction inverts the y-axis to match "increasing y moves down" */
+        c.y = diameter - (diameter * ((c.y + 1.0) / 2.0));
 }
 
 void
 Panner2d::gtk_to_cart (CartesianVector& c) const
 {
-	c.x = ((c.x / (dimen / 2.0)) - 1.0);
-	c.y = -((c.y / (dimen / 2.0)) - 1.0);
-
-	/* XXX z-axis not handled - 2D for now */
+        const double diameter = radius*2.0;
+	c.x = ((c.x / diameter) * 2.0) - 1.0;
+        c.y = (((diameter - c.y) / diameter) * 2.0) - 1.0;
 }
 
 void

@@ -59,9 +59,9 @@ class Panner2d : public Gtk::DrawingArea
 
 	void allow_target_motion (bool);
 
-	int  add_target (const PBD::AngularVector&);
-	int  add_puck (const char* text, const PBD::AngularVector&);
-	void move_puck (int which, const PBD::AngularVector&);
+	int  add_speaker (const PBD::AngularVector&);
+	int  add_signal (const char* text, const PBD::AngularVector&);
+	void move_signal (int which, const PBD::AngularVector&);
 	void reset (uint32_t n_inputs);
 
 	boost::shared_ptr<ARDOUR::Panner> get_panner() const { return panner; }
@@ -106,32 +106,34 @@ class Panner2d : public Gtk::DrawingArea
 	Glib::RefPtr<Pango::Layout> layout;
 
 	typedef std::vector<Target*> Targets;
-	Targets targets;
-	Targets pucks;
+	Targets speakers;
+	Targets signals;
         Target  position;
 
 	Target *drag_target;
 	int     drag_x;
 	int     drag_y;
-	bool    allow_target;
+	bool    allow_speaker_motion;
 	int     width;
 	int     height;
-        int     dimen; 
+        double  radius;
+        double  border;
+        double  hoffset;
+        double  voffset;
         double  last_width;
-
-	bool bypassflag;
+	bool    did_move;
 
 	gint compute_x (float);
 	gint compute_y (float);
 
-	Target *find_closest_object (gdouble x, gdouble y);
+	Target *find_closest_object (gdouble x, gdouble y, bool& is_signal);
 
 	gint handle_motion (gint, gint, GdkModifierType);
 
 	void toggle_bypass ();
 	void handle_state_change ();
 	void handle_position_change ();
-        void label_pucks ();
+        void label_signals ();
 
 	PBD::ScopedConnectionList connections;
 
