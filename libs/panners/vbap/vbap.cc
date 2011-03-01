@@ -105,13 +105,13 @@ VBAPanner::update ()
 
                 double w = fabs (_pannable->pan_width_control->get_value()) * 360.0;
                 
-                double min_dir = center - w;
+                double min_dir = center - (w/2.0);
                 if (min_dir < 0) {
                         min_dir = 360.0 + min_dir; // its already negative
                 }
                 min_dir = max (min (min_dir, 360.0), 0.0);
                 
-                double max_dir = center + w;
+                double max_dir = center + (w/2.0);
                 if (max_dir > 360.0) {
                         max_dir = max_dir - 360.0;
                 }
@@ -125,6 +125,9 @@ VBAPanner::update ()
                 double signal_direction = min_dir;
 
                 if (w >= 0.0) {
+
+                        /* positive width - normal order of signal spread */
+
                         for (vector<Signal*>::iterator s = _signals.begin(); s != _signals.end(); ++s) {
                         
                                 Signal* signal = *s;
@@ -134,6 +137,9 @@ VBAPanner::update ()
                                 signal_direction += degree_step_per_signal;
                         }
                 } else {
+
+                        /* inverted width - reverse order of signal spread */
+
                         for (vector<Signal*>::reverse_iterator s = _signals.rbegin(); s != _signals.rend(); ++s) {
                         
                                 Signal* signal = *s;
