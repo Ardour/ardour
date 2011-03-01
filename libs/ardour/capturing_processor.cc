@@ -25,8 +25,8 @@
 namespace ARDOUR {
 
 CapturingProcessor::CapturingProcessor (Session & session)
-  : Processor (session, X_("capture point"))
-  , block_size (session.engine().frames_per_cycle())
+	: Processor (session, X_("capture point"))
+	, block_size (session.engine().frames_per_cycle())
 {
 	realloc_buffers ();
 }
@@ -72,4 +72,12 @@ CapturingProcessor::realloc_buffers()
 	capture_buffers.ensure_buffers (_configured_input, block_size);
 }
 
+XMLNode &
+CapturingProcessor::state (bool full)
+{
+	XMLNode& node = Processor::state (full);
+
+	node.add_property (X_("type"), X_("capture"));
+}
+	
 } // namespace ARDOUR

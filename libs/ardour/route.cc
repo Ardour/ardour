@@ -2348,6 +2348,8 @@ Route::set_processor_state (const XMLNode& node)
                                 must_configure = true;
                         }
                         _monitor_control->set_state (**niter, Stateful::current_state_version);
+		} else if (prop->value() == "capture") {
+			_capturing_processor.reset (new CapturingProcessor (_session));
                 } else {
                         ProcessorList::iterator o;
 
