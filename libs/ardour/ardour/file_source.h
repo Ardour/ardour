@@ -44,8 +44,10 @@ class MissingSource : public std::exception
 /** A source associated with a file on disk somewhere */
 class FileSource : virtual public Source {
 public:
+	virtual ~FileSource () {}
+	
 	const std::string& path() const { return _path; }
-        
+
         int  unstubify ();
         void stubify ();
 
