@@ -520,6 +520,7 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can
 		calculate_record_range(ot, transport_frame, nframes, rec_nframes, rec_offset);
 
 		if (rec_nframes && !was_recording) {
+			_write_source->mark_write_starting_now ();
 			capture_captured = 0;
 			was_recording = true;
 		}

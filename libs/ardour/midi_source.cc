@@ -267,15 +267,30 @@ MidiSource::midi_write (MidiRingBuffer<framepos_t>& source, framepos_t source_st
 void
 MidiSource::mark_streaming_midi_write_started (NoteMode mode, framepos_t start_frame)
 {
-	set_timeline_position(start_frame);
-
 	if (_model) {
 		_model->set_note_mode(mode);
 		_model->start_write();
 	}
 
-	_last_write_end = start_frame;
 	_writing = true;
+}
+
+void
+MidiSource::mark_write_starting_now ()
+{
+	/* I'm not sure if this is the best way to approach this, but
+	   _last_write_end needs to be set up with the transport frame
+	   when a record actually starts, as it is used by
+	   SMFSource::write_unlocked to decide whether incoming notes
+	   are within the correct time range.
+	   mark_streaming_midi_write_started (perhaps a more logical
+	   place to do this) is not called at exactly the time when
+	   record starts, and I don't think it necessarily can be
+	   because it is not RT-safe.
+	*/
+
+	set_timeline_position (_session.transport_frame ());
+	_last_write_end = _session.transport_frame ();
 }
 
 void
