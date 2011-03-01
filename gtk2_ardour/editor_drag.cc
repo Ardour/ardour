@@ -1359,6 +1359,7 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move) {
 		add_region();
+		_view->playlist()->freeze ();
 	} else {
 		if (_region) {
 			framepos_t const f = adjusted_current_frame (event);
@@ -1378,6 +1379,8 @@ RegionCreateDrag::finished (GdkEvent*, bool movement_occurred)
 {
 	if (!movement_occurred) {
 		add_region ();
+	} else {
+		_view->playlist()->thaw ();
 	}
 
 	if (_region) {
@@ -1403,6 +1406,10 @@ RegionCreateDrag::add_region ()
 void
 RegionCreateDrag::aborted (bool)
 {
+	if (_region) {
+		_view->playlist()->thaw ();
+	}
+
 	/* XXX */
 }
 

@@ -540,6 +540,51 @@ Playlist::notify_region_moved (boost::shared_ptr<Region> r)
 }
 
 void
+Playlist::notify_region_start_trimmed (boost::shared_ptr<Region> r)
+{
+	if (r->position() >= r->last_position()) {
+		/* trimmed shorter */
+		return;
+	}
+
+	Evoral::Range<framepos_t> const extra (r->position(), r->last_position());
+	
+	if (holding_state ()) {
+		
+		pending_region_extensions.push_back (extra);
+		
+	} else {
+		
+		list<Evoral::Range<framepos_t> > r;
+		r.push_back (extra);
+		RegionsExtended (r);
+		
+	}
+}
+
+void
+Playlist::notify_region_end_trimmed (boost::shared_ptr<Region> r)
+{
+	if (r->length() < r->last_length()) {
+		/* trimmed shorter */
+	}
+
+	Evoral::Range<framepos_t> const extra (r->position() + r->last_length(), r->position() + r->length());
+
+	if (holding_state ()) {
+
+		pending_region_extensions.push_back (extra);
+
+	} else {
+
+		list<Evoral::Range<framepos_t> > r;
+		r.push_back (extra);
+		RegionsExtended (r);
+	}
+}
+
+
+void
 Playlist::notify_region_added (boost::shared_ptr<Region> r)
 {
 	/* the length change might not be true, but we have to act
@@ -663,6 +708,10 @@ Playlist::flush_notifications (bool from_undo)
 	if (!pending_range_moves.empty ()) {
 		RangesMoved (pending_range_moves, from_undo);
 	}
+
+	if (!pending_region_extensions.empty ()) {
+		RegionsExtended (pending_region_extensions);
+	}
 	
 	clear_pending ();
 
@@ -676,6 +725,7 @@ Playlist::clear_pending ()
 	pending_removes.clear ();
 	pending_bounds.clear ();
 	pending_range_moves.clear ();
+	pending_region_extensions.clear ();
 	pending_contents_change = false;
 	pending_length = false;
 }
@@ -1628,8 +1678,11 @@ Playlist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<
 
 	if (what_changed.contains (Properties::position) && !what_changed.contains (Properties::length)) {
 		notify_region_moved (region);
+	} else if (!what_changed.contains (Properties::position) && what_changed.contains (Properties::length)) {
+		notify_region_end_trimmed (region);
+	} else if (what_changed.contains (Properties::position) && what_changed.contains (Properties::length)) {
+		notify_region_start_trimmed (region);
 	}
-
 
 	/* don't notify about layer changes, since we are the only object that can initiate
 	   them, and we notify in ::relayer()

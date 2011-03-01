@@ -1270,6 +1270,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void track_playlist_changed (boost::weak_ptr<Track>);
 	void playlist_region_added (boost::weak_ptr<Region>);
 	void playlist_ranges_moved (std::list<Evoral::RangeMove<framepos_t> > const &);
+	void playlist_regions_extended (std::list<Evoral::Range<framepos_t> > const &);
 
 	/* NAMED SELECTIONS */
 

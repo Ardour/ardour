@@ -765,6 +765,7 @@ Session::track_playlist_changed (boost::weak_ptr<Track> wp)
 	if ((playlist = track->playlist()) != 0) {
 		playlist->RegionAdded.connect_same_thread (*this, boost::bind (&Session::playlist_region_added, this, _1));
 		playlist->RangesMoved.connect_same_thread (*this, boost::bind (&Session::playlist_ranges_moved, this, _1));
+		playlist->RegionsExtended.connect_same_thread (*this, boost::bind (&Session::playlist_regions_extended, this, _1));
 	}
 }
 
@@ -2542,6 +2543,14 @@ Session::playlist_ranges_moved (list<Evoral::RangeMove<framepos_t> > const & ran
 {
 	for (list<Evoral::RangeMove<framepos_t> >::const_iterator i = ranges.begin(); i != ranges.end(); ++i) {
 		maybe_update_session_range (i->to, i->to + i->length);
+	}
+}
+
+void
+Session::playlist_regions_extended (list<Evoral::Range<framepos_t> > const & ranges)
+{
+	for (list<Evoral::Range<framepos_t> >::const_iterator i = ranges.begin(); i != ranges.end(); ++i) {
+		maybe_update_session_range (i->from, i->to);
 	}
 }
 

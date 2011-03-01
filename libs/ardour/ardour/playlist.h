@@ -179,6 +179,11 @@ public:
 	/** Emitted when regions have moved (not when regions have only been trimmed) */
 	PBD::Signal2<void,std::list< Evoral::RangeMove<framepos_t> > const &, bool> RangesMoved;
 
+	/** Emitted when regions are extended; the ranges passed are the new extra time ranges
+	    that these regions now occupy.
+	*/
+	PBD::Signal1<void,std::list< Evoral::Range<framepos_t> > const &> RegionsExtended;
+
 	static std::string bump_name (std::string old_name, Session&);
 
 	void freeze ();
@@ -260,6 +265,8 @@ public:
 	 *  do automation-follows-regions.
 	 */
 	std::list< Evoral::RangeMove<framepos_t> > pending_range_moves;
+	/** Extra sections added to regions during trims */
+	std::list< Evoral::Range<framepos_t> >     pending_region_extensions;
 	bool             save_on_thaw;
 	std::string      last_save_reason;
 	uint32_t         in_set_state;
@@ -308,6 +315,8 @@ public:
 	void notify_contents_changed ();
 	void notify_state_changed (const PBD::PropertyChange&);
 	void notify_region_moved (boost::shared_ptr<Region>);
+	void notify_region_start_trimmed (boost::shared_ptr<Region>);
+	void notify_region_end_trimmed (boost::shared_ptr<Region>);
 
 	void mark_session_dirty();
 
