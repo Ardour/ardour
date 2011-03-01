@@ -724,6 +724,8 @@ ExportProfileManager::get_warnings ()
 {
 	boost::shared_ptr<Warnings> warnings (new Warnings ());
 
+	assert (!channel_configs.empty ());
+
 	ChannelConfigStatePtr channel_config_state = channel_configs.front();
 	TimespanStatePtr timespan_state = timespans.front();
 
