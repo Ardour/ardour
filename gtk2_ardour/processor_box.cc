@@ -1636,6 +1636,14 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 				p.reset (r);
 
+			} else if (type->value() == "port") {
+
+				XMLNode n (**niter);
+				p.reset (new PortInsert (*_session, _route->pannable (), _route->mute_master ()));
+				if (p->set_state (n, Stateful::loading_state_version)) {
+					return;
+				}
+
 			} else {
 				/* XXX its a bit limiting to assume that everything else
 				   is a plugin.
