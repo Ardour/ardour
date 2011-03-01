@@ -2956,7 +2956,7 @@ ARDOUR_UI::display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* lis
 
 	if (removed == 0) {
 		MessageDialog msgd (*editor,
-				    _("No audio files were ready for cleanup"),
+				    _("No files were ready for cleanup"),
 				    true,
 				    Gtk::MESSAGE_INFO,
 				    (Gtk::ButtonsType)(Gtk::BUTTONS_OK)  );
@@ -3003,11 +3003,11 @@ require some unused files to continue to exist."));
 
 	dimage->set_alignment(ALIGN_LEFT, ALIGN_TOP);
 
-	const string dead_sound_directory = _session->session_directory().dead_sound_path().to_string();
+	const string dead_directory = _session->session_directory().dead_path().to_string();
 
 	/* subst:
 	   %1 - number of files removed
-	   %2 - location of "dead_sounds"
+	   %2 - location of "dead"
 	   %3 - size of files affected
 	   %4 - prefix for "bytes" to produce sensible results (e.g. mega, kilo, giga)
 	*/
@@ -3015,20 +3015,24 @@ require some unused files to continue to exist."));
 	const char* bprefix;
 	double space_adjusted = 0;
 
-	if (rep.space < 100000.0f) {
-		bprefix = X_("kilo");
-	} else if (rep.space < 1000000.0f * 1000) {
-		bprefix = X_("mega");
+	if (rep.space < 1000) {
+		bprefix = X_("");
+		space_adjusted = rep.space;
+        } else if (rep.space < 1000000) {
+                        bprefix = X_("kilo");
 		space_adjusted = truncf((float)rep.space / 1000.0);
+	} else if (rep.space < 1000000 * 1000) {
+		bprefix = X_("mega");
+		space_adjusted = truncf((float)rep.space / (1000.0 * 1000.0));
 	} else {
 		bprefix = X_("giga");
-		space_adjusted = truncf((float)rep.space / (1000000.0 * 1000));
+		space_adjusted = truncf((float)rep.space / (1000.0 * 1000 * 1000.0));
 	}
 
 	if (removed > 1) {
-		txt.set_text (string_compose (plural_msg, removed, _session->path() + "dead_sounds", space_adjusted, bprefix));
+		txt.set_text (string_compose (plural_msg, removed, dead_directory, space_adjusted, bprefix));
 	} else {
-		txt.set_text (string_compose (singular_msg, removed, _session->path() + "dead_sounds", space_adjusted, bprefix));
+		txt.set_text (string_compose (singular_msg, removed, dead_directory, space_adjusted, bprefix));
 	}
 
 	dhbox.pack_start (*dimage, true, false, 5);
@@ -3066,7 +3070,7 @@ require some unused files to continue to exist."));
 
 	results.run ();
 
-}
+}        
 
 void
 ARDOUR_UI::cleanup ()
@@ -3084,8 +3088,7 @@ ARDOUR_UI::cleanup ()
 
 	checker.set_secondary_text(_("Cleanup is a destructive operation.\n\
 ALL undo/redo information will be lost if you cleanup.\n\
-After cleanup, unused audio files will be moved to a \
-\"dead sounds\" location."));
+Cleanup will move all unused files to a \"dead\" location."));
 
 	checker.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	checker.add_button (_("Clean Up"), RESPONSE_ACCEPT);
@@ -3125,17 +3128,19 @@ After cleanup, unused audio files will be moved to a \
 				 _("cleaned files"),
 				 _("\
 The following %1 files were not in use and \n\
-have been moved to:\n\
-%2. \n\n\
-Flushing the wastebasket will \n\
-release an additional\n\
+have been moved to:\n\n\
+%2\n\n\
+After a restart of Ardour,\n\n\
+Session -> Cleanup -> Flush Wastebasket\n\n\
+will release an additional\n\
 %3 %4bytes of disk space.\n"),
 				 _("\
 The following file was not in use and \n	\
 has been moved to:\n				\
-%2. \n\n\
-Flushing the wastebasket will \n\
-release an additional\n\
+%2\n\n\
+After a restart of Ardour,\n\n\
+Session -> Cleanup -> Flush Wastebasket\n\n\
+will release an additional\n\
 %3 %4bytes of disk space.\n"
 					 ));
 
