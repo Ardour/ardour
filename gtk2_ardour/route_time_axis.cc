@@ -606,6 +606,7 @@ RouteTimeAxisView::build_display_menu ()
 
 		build_playlist_menu ();
 		items.push_back (MenuElem (_("Playlist"), *playlist_action_menu));
+		items.back().set_sensitive (_editor.get_selection().tracks.size() <= 1);
 
 		route_group_menu->detach ();
 		route_group_menu->build (_route->route_group ());
