@@ -91,6 +91,9 @@ class Pannable : public PBD::Stateful, public Automatable, public SessionHandleR
         uint32_t  _responding_to_control_auto_state_change;
 
         void control_auto_state_changed (AutoState);
+
+  private:
+	void value_changed ();
 };
 
 } // namespace 
