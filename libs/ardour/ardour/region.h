@@ -176,6 +176,7 @@ class Region
 	bool region_list_equivalent (boost::shared_ptr<const Region>) const;
 	bool source_equivalent (boost::shared_ptr<const Region>) const;
 	bool uses_source (boost::shared_ptr<const Source>) const;
+	bool uses_source_path (const std::string&) const;
 	
 	std::string source_string () const;
 

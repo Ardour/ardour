@@ -57,6 +57,7 @@ public:
 	void unassigned (std::list<boost::shared_ptr<Playlist> > & list);
         void destroy_region (boost::shared_ptr<Region>);
 	boost::shared_ptr<Crossfade> find_crossfade (const PBD::ID &);
+        void sync_all_regions_with_regions ();
 
 private:
 	friend class Session;

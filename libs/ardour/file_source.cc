@@ -537,6 +537,18 @@ FileSource::set_within_session_from_path (const std::string& path)
 	_within_session = _session.path_is_within_session (path);
 }
 
+bool
+FileSource::is_stub_path (const std::string& path)
+{
+        return path.find (stub_dir_name) != string::npos;
+}
+
+bool
+FileSource::is_stub () const
+{
+        return is_stub_path (_path);
+}
+
 int
 FileSource::unstubify ()
 {

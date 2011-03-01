@@ -29,14 +29,15 @@
 #include "pbd/enumwriter.h"
 
 #include "ardour/debug.h"
-#include "ardour/region.h"
+#include "ardour/file_source.h"
+#include "ardour/filter.h"
 #include "ardour/playlist.h"
+#include "ardour/profile.h"
+#include "ardour/region.h"
+#include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
 #include "ardour/tempo.h"
-#include "ardour/region_factory.h"
-#include "ardour/filter.h"
-#include "ardour/profile.h"
 #include "ardour/utils.h"
 
 #include "i18n.h"
@@ -1470,6 +1471,20 @@ Region::uses_source (boost::shared_ptr<const Source> source) const
 		if (*i == source) {
 			return true;
 		}
+	}
+	return false;
+}
+
+bool
+Region::uses_source_path (const std::string& path) const
+{
+	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
+                boost::shared_ptr<const FileSource> fs = boost::dynamic_pointer_cast<const FileSource> (*i);
+                if (fs) {
+                        if (fs->path() == path) {
+                                return true;
+                        }
+                }
 	}
 	return false;
 }

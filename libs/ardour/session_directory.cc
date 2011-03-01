@@ -135,15 +135,9 @@ SessionDirectory::peak_path () const
 }
 
 const path
-SessionDirectory::dead_sound_path () const
+SessionDirectory::dead_path () const
 {
-	return m_root_path / dead_sound_dir_name;
-}
-
-const path
-SessionDirectory::dead_midi_path () const
-{
-	return m_root_path / dead_midi_dir_name;
+	return m_root_path / dead_dir_name;
 }
 
 const path
@@ -157,12 +151,11 @@ SessionDirectory::sub_directories () const
 {
 	vector<path> tmp_paths;
 
-	tmp_paths.push_back ( sound_path () );
-	tmp_paths.push_back ( midi_path () );
-	tmp_paths.push_back ( peak_path () );
-	tmp_paths.push_back ( dead_sound_path () );
-	tmp_paths.push_back ( dead_midi_path () );
-	tmp_paths.push_back ( export_path () );
+	tmp_paths.push_back (sound_path ());
+	tmp_paths.push_back (midi_path ());
+	tmp_paths.push_back (peak_path ());
+	tmp_paths.push_back (dead_path ());
+	tmp_paths.push_back (export_path ());
 
 	return tmp_paths;
 }

@@ -90,18 +90,11 @@ public:
 	const PBD::sys::path peak_path () const;
 
 	/**
-	 * @return The absolute path to the directory that audio
+	 * @return The absolute path to the directory that source
 	 * files are moved to when they are no longer part of the
 	 * session.
 	 */
-	const PBD::sys::path dead_sound_path () const;
-
-	/**
-	 * @return The absolute path to the directory that midi
-	 * files are moved to when they are no longer part of the
-	 * session.
-	 */
-	const PBD::sys::path dead_midi_path () const;
+	const PBD::sys::path dead_path () const;
 
 	/**
 	 * @return The absolute path to the directory that audio

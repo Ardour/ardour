@@ -827,11 +827,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t posi
 	regions.insert (upper_bound (regions.begin(), regions.end(), region, cmp), region);
 	all_regions.insert (region);
 
-        cerr << "Playlist: region added at " << position << endl;
-
 	possibly_splice_unlocked (position, region->length(), region);
-
-        cerr << "Playlist: post-splice, region @  " << region->position() << endl;
 
 	if (!holding_state ()) {
 		/* layers get assigned from XML state, and are not reset during undo/redo */
@@ -1309,7 +1305,6 @@ Playlist::paste (boost::shared_ptr<Playlist> other, framepos_t position, float t
 				*/
 
 				copy_of_region->set_layer (copy_of_region->layer() + top_layer);
-                                cerr << "DEBUG: add new region at " << pos << endl;
 				add_region_internal (copy_of_region, (*i)->position() + pos);
 			}
 			pos += shift;
@@ -1701,6 +1696,18 @@ Playlist::drop_regions ()
 	RegionLock rl (this);
 	regions.clear ();
 	all_regions.clear ();
+}
+
+void
+Playlist::sync_all_regions_with_regions ()
+{
+	RegionLock rl (this);
+
+        all_regions.clear ();
+
+        for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+                all_regions.insert (*i);
+        }
 }
 
 void
@@ -2755,6 +2762,20 @@ Playlist::nudge_after (framepos_t start, framecnt_t distance, bool forwards)
 		notify_length_changed ();
 	}
 
+}
+
+bool
+Playlist::uses_source (boost::shared_ptr<const Source> src) const
+{
+	RegionLock rlock (const_cast<Playlist*> (this));
+
+        for (set<boost::shared_ptr<Region> >::iterator r = all_regions.begin(); r != all_regions.end(); ++r) {
+                if ((*r)->uses_source (src)) {
+                        return true;
+                }
+        }
+
+        return false;
 }
 
 boost::shared_ptr<Region>

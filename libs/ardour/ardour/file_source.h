@@ -50,6 +50,9 @@ public:
 
         int  unstubify ();
         void stubify ();
+        bool is_stub () const;
+
+        static bool is_stub_path (const std::string& path);
 
 	virtual bool safe_file_extension (const std::string& path) const = 0;
 

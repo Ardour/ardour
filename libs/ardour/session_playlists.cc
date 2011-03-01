@@ -26,6 +26,7 @@
 #include "ardour/region.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/session.h"
+#include "ardour/source.h"
 #include "i18n.h"
 
 using namespace std;
@@ -246,18 +247,25 @@ uint32_t
 SessionPlaylists::source_use_count (boost::shared_ptr<const Source> src) const
 {
 	uint32_t count = 0;
+
 	for (List::const_iterator p = playlists.begin(); p != playlists.end(); ++p) {
-		for (Playlist::RegionList::const_iterator r = (*p)->region_list().begin();
-				r != (*p)->region_list().end(); ++r) {
-			if ((*r)->uses_source(src)) {
-				++count;
-				break;
-			}
-		}
+                if ((*p)->uses_source (src)) {
+                        ++count;
+                        break;
+                }
 	}
 	return count;
 }
 
+void
+SessionPlaylists::sync_all_regions_with_regions ()
+{
+	Glib::Mutex::Lock lm (lock);
+
+	for (List::const_iterator p = playlists.begin(); p != playlists.end(); ++p) {
+                (*p)->sync_all_regions_with_regions ();
+        }
+}
 
 void
 SessionPlaylists::update_after_tempo_map_change ()

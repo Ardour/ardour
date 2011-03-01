@@ -549,3 +549,15 @@ RegionFactory::get_regions_using_source (boost::shared_ptr<Source> s, std::set<b
 		}
 	}
 }
+
+void 
+RegionFactory::remove_regions_using_source (boost::shared_ptr<Source> src)
+{
+	Glib::Mutex::Lock lm (region_map_lock);
+
+	for (RegionMap::iterator i = region_map.begin(); i != region_map.end(); ++i) {
+		if (i->second->uses_source (src)) {
+			region_map.erase (i);
+                }
+	}
+}

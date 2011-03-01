@@ -56,6 +56,7 @@
 #include "midi++/manager.h"
 
 #include "pbd/boost_debug.h"
+#include "pbd/basename.h"
 #include "pbd/controllable_descriptor.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
@@ -146,7 +147,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	_path = string(buf);
 
-	if (_path[_path.length()-1] != '/') {
+	if (_path[_path.length()-1] != G_DIR_SEPARATOR) {
 		_path += G_DIR_SEPARATOR;
 	}
 
@@ -487,7 +488,7 @@ Session::ensure_subdirs ()
 		return -1;
 	}
 
-	dir = session_directory().dead_sound_path().to_string();
+	dir = session_directory().dead_path().to_string();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session dead sounds folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
@@ -2415,18 +2416,46 @@ Session::commit_reversible_command (Command *cmd)
 }
 
 static bool
-accept_all_non_peak_files (const string& path, void */*arg*/)
+accept_all_non_stub_audio_files (const string& path, void */*arg*/)
+{ 
+        if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
+                return false;
+        }
+
+        if (FileSource::is_stub_path (path)) {
+                return false;
+        }
+
+        if (!AudioFileSource::safe_audio_file_extension (path)) {
+                return false;
+        }
+
+        return true;
+}
+
+static bool
+accept_all_non_stub_midi_files (const string& path, void */*arg*/)
 {
         if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
                 return false;
         }
 
-	return (path.length() > 5 && path.find (peakfile_suffix) != (path.length() - 5));
+        if (FileSource::is_stub_path (path)) {
+                return false;
+        }
+
+	return ((path.length() > 4 && path.find (".mid") != (path.length() - 4)) ||
+                (path.length() > 4 && path.find (".smf") != (path.length() - 4)) ||
+                (path.length() > 5 && path.find (".midi") != (path.length() - 5)));
 }
 
 static bool
 accept_all_state_files (const string& path, void */*arg*/)
 {
+        if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
+                return false;
+        }
+
 	return (path.length() > 7 && path.find (".ardour") == (path.length() - 7));
 }
 
@@ -2572,10 +2601,12 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	vector<boost::shared_ptr<Source> > dead_sources;
 	PathScanner scanner;
-	string sound_path;
+	string audio_path;
+	string midi_path;
 	vector<space_and_path>::iterator i;
 	vector<space_and_path>::iterator nexti;
-	vector<string*>* soundfiles;
+	vector<string*>* candidates;
+	vector<string*>* candidates2;
 	vector<string> unused;
 	set<string> all_sources;
 	bool used;
@@ -2584,14 +2615,19 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state | InCleanup);
 
-	/* step 1: consider deleting all unused playlists */
+	/* consider deleting all unused playlists */
 	
 	if (playlists->maybe_delete_unused (boost::bind (Session::ask_about_playlist_deletion, _1))) {
 		ret = 0;
 		goto out;
 	}
 
-	/* step 2: find all un-used sources */
+        /* sync the "all regions" property of each playlist with its current state
+         */
+
+        playlists->sync_all_regions_with_regions ();
+
+	/* find all un-used sources */
 
 	rep.paths.clear ();
 	rep.space = 0;
@@ -2615,7 +2651,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		i = tmp;
 	}
 
-	/* build a list of all the possible sound directories for the session */
+	/* build a list of all the possible audio directories for the session */
 
 	for (i = session_dirs.begin(); i != session_dirs.end(); ) {
 
@@ -2623,24 +2659,48 @@ Session::cleanup_sources (CleanupReport& rep)
 		++nexti;
 
 		SessionDirectory sdir ((*i).path);
-		sound_path += sdir.sound_path().to_string();
+		audio_path += sdir.sound_path().to_string();
 
 		if (nexti != session_dirs.end()) {
-			sound_path += ':';
+			audio_path += ':';
 		}
 
 		i = nexti;
 	}
 
-	/* now do the same thing for the files that ended up in the sounds dir(s)
-	   but are not referenced as sources in any snapshot.
-	*/
 
-	soundfiles = scanner (sound_path, accept_all_non_peak_files, (void *) 0, false, true);
+	/* build a list of all the possible midi directories for the session */
 
-	if (soundfiles == 0) {
-		return 0;
+	for (i = session_dirs.begin(); i != session_dirs.end(); ) {
+
+		nexti = i;
+		++nexti;
+
+		SessionDirectory sdir ((*i).path);
+		midi_path += sdir.midi_path().to_string();
+
+		if (nexti != session_dirs.end()) {
+			midi_path += ':';
+		}
+
+		i = nexti;
 	}
+
+	candidates = scanner (audio_path, accept_all_non_stub_audio_files, (void *) 0, true, true);
+	candidates2 = scanner (midi_path, accept_all_non_stub_midi_files, (void *) 0, true, true);
+
+        /* merge them */
+
+        if (candidates) {
+                if (candidates2) {
+                        for (vector<string*>::iterator i = candidates2->begin(); i != candidates2->end(); ++i) {
+                                candidates->push_back (*i);
+                        }
+                        delete candidates2;
+                }
+        } else {
+                candidates = candidates2; // might still be null
+        }
 
 	/* find all sources, but don't use this snapshot because the
 	   state file on disk still references sources we may have already
@@ -2652,61 +2712,82 @@ Session::cleanup_sources (CleanupReport& rep)
 	/*  add our current source list
 	 */
 
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
 		boost::shared_ptr<FileSource> fs;
+                SourceMap::iterator tmp = i;
+                ++tmp;
 
 		if ((fs = boost::dynamic_pointer_cast<FileSource> (i->second)) != 0) {
-			all_sources.insert (fs->path());
+                        if (!fs->is_stub()) {
+                                if (playlists->source_use_count (fs) != 0) {
+                                        all_sources.insert (fs->path());
+                                } else {
+                                        
+                                        /* we might not remove this source from disk, because it may be used
+                                           by other snapshots, but its not being used in this version
+                                           so lets get rid of it now, along with any representative regions
+                                           in the region list.
+                                        */
+
+                                        cerr << "Source " << i->second->name() << "ID " << i->second->id() << " not used, remove from source list and also all regions\n";
+                                        
+                                        RegionFactory::remove_regions_using_source (i->second);
+                                        sources.erase (i);
+                                }
+                        }
 		}
+
+                i = tmp;
 	}
 
 	char tmppath1[PATH_MAX+1];
 	char tmppath2[PATH_MAX+1];
 
-	for (vector<string*>::iterator x = soundfiles->begin(); x != soundfiles->end(); ++x) {
+        if (candidates) {
+                for (vector<string*>::iterator x = candidates->begin(); x != candidates->end(); ++x) {
+                        
+                        used = false;
+                        spath = **x;
+                        
+                        for (set<string>::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
+                                
+                                if (realpath(spath.c_str(), tmppath1) == 0) {
+                                        error << string_compose (_("Cannot expand path %1 (%2)"),
+                                                                 spath, strerror (errno)) << endmsg;
+                                        continue;
+                                }
+                                
+                                if (realpath((*i).c_str(),  tmppath2) == 0) {
+                                        error << string_compose (_("Cannot expand path %1 (%2)"),
+                                                                 (*i), strerror (errno)) << endmsg;
+                                        continue;
+                                }
 
-		used = false;
-		spath = **x;
-
-		for (set<string>::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
-
-			if (realpath(spath.c_str(), tmppath1) == 0) {
-                                error << string_compose (_("Cannot expand path %1 (%2)"),
-                                                         spath, strerror (errno)) << endmsg;
-                                continue;
+                                if (strcmp(tmppath1, tmppath2) == 0) {
+                                        used = true;
+                                        break;
+                                }
+                        }
+                        
+                        if (!used) {
+                                unused.push_back (spath);
                         }
 
-                        if (realpath((*i).c_str(),  tmppath2) == 0) {
-                                error << string_compose (_("Cannot expand path %1 (%2)"),
-                                                         (*i), strerror (errno)) << endmsg;
-                                continue;
-                        }
+                        delete *x;
+                }
 
-			if (strcmp(tmppath1, tmppath2) == 0) {
-				used = true;
-				break;
-			}
-		}
+                delete candidates;
+        }
 
-		if (!used) {
-			unused.push_back (spath);
-		}
-	}
-
-	/* now try to move all unused files into the "dead_sounds" directory(ies) */
+	/* now try to move all unused files into the "dead" directory(ies) */
 
 	for (vector<string>::iterator x = unused.begin(); x != unused.end(); ++x) {
 		struct stat statbuf;
 
-		rep.paths.push_back (*x);
-		if (stat ((*x).c_str(), &statbuf) == 0) {
-			rep.space += statbuf.st_size;
-		}
-
 		string newpath;
 
 		/* don't move the file across filesystems, just
-		   stick it in the `dead_sound_dir_name' directory
+		   stick it in the `dead_dir_name' directory
 		   on whichever filesystem it was already on.
 		*/
 
@@ -2721,16 +2802,16 @@ Session::cleanup_sources (CleanupReport& rep)
 
 			/* new school, go up 4 levels */
 
-			newpath = Glib::path_get_dirname (*x);      // "audiofiles"
+			newpath = Glib::path_get_dirname (*x);      // "audiofiles" or "midifiles"
 			newpath = Glib::path_get_dirname (newpath); // "session-name"
 			newpath = Glib::path_get_dirname (newpath); // "interchange"
 			newpath = Glib::path_get_dirname (newpath); // "session-dir"
 		}
 
-		newpath = Glib::build_filename (newpath, dead_sound_dir_name);
+		newpath = Glib::build_filename (newpath, dead_dir_name);
 
 		if (g_mkdir_with_parents (newpath.c_str(), 0755) < 0) {
-			error << string_compose(_("Session: cannot create session peakfile folder \"%1\" (%2)"), newpath, strerror (errno)) << endmsg;
+			error << string_compose(_("Session: cannot create dead file folder \"%1\" (%2)"), newpath, strerror (errno)) << endmsg;
 			return -1;
 		}
 
@@ -2747,7 +2828,7 @@ Session::cleanup_sources (CleanupReport& rep)
 			snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), version);
 			newpath_v = buf;
 
-			while (access (newpath_v.c_str(), F_OK) == 0 && version < 999) {
+			while (Glib::file_test (newpath_v.c_str(), Glib::FILE_TEST_EXISTS) && version < 999) {
 				snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), ++version);
 				newpath_v = buf;
 			}
@@ -2766,8 +2847,10 @@ Session::cleanup_sources (CleanupReport& rep)
 
 		}
 
+		stat ((*x).c_str(), &statbuf);
+
 		if (::rename ((*x).c_str(), newpath.c_str()) != 0) {
-			error << string_compose (_("cannot rename audio file source from %1 to %2 (%3)"),
+			error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"),
 					  (*x), newpath, strerror (errno))
 			      << endmsg;
 			goto out;
@@ -2776,22 +2859,27 @@ Session::cleanup_sources (CleanupReport& rep)
 		/* see if there an easy to find peakfile for this file, and remove it.
 		 */
 
-		string peakpath = (*x).substr (0, (*x).find_last_of ('.'));
-		peakpath += peakfile_suffix;
-
-		if (access (peakpath.c_str(), W_OK) == 0) {
+                string base = basename_nosuffix (*x);
+                base += "%A"; /* this is what we add for the channel suffix of all native files, 
+                                 or for the first channel of embedded files. it will miss
+                                 some peakfiles for other channels
+                              */
+		string peakpath = peak_path (base);
+                
+		if (Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
 			if (::unlink (peakpath.c_str()) != 0) {
 				error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"),
-						  peakpath, _path, strerror (errno))
+                                                         peakpath, _path, strerror (errno))
 				      << endmsg;
 				/* try to back out */
 				rename (newpath.c_str(), _path.c_str());
 				goto out;
 			}
 		}
-	}
 
-	ret = 0;
+		rep.paths.push_back (*x);
+                rep.space += statbuf.st_size;
+        }
 
 	/* dump the history list */
 
@@ -2802,6 +2890,7 @@ Session::cleanup_sources (CleanupReport& rep)
 	*/
 
 	save_state ("");
+	ret = 0;
 
   out:
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state & ~InCleanup);
@@ -2815,17 +2904,17 @@ Session::cleanup_trash_sources (CleanupReport& rep)
 	// FIXME: needs adaptation for MIDI
 
 	vector<space_and_path>::iterator i;
-	string dead_sound_dir;
+	string dead_dir;
 
 	rep.paths.clear ();
 	rep.space = 0;
 
 	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 
-		dead_sound_dir = (*i).path;
-		dead_sound_dir += dead_sound_dir_name;
+		dead_dir = (*i).path;
+		dead_dir += dead_dir_name;
 
-                clear_directory (dead_sound_dir, &rep.space, &rep.paths);
+                clear_directory (dead_dir, &rep.space, &rep.paths);
 	}
 
 	return 0;

@@ -159,6 +159,7 @@ public:
 	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);
 	bool                       has_region_at (framepos_t const) const;
 
+        bool uses_source (boost::shared_ptr<const Source> src) const;
 
 	framepos_t find_next_transient (framepos_t position, int dir);
 
@@ -203,6 +204,8 @@ public:
 	/* destructive editing */
 
 	virtual bool destroy_region (boost::shared_ptr<Region>) = 0;
+
+        void sync_all_regions_with_regions ();
 
 	/* special case function used by UI selection objects, which have playlists that actually own the regions
 	   within them.
