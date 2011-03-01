@@ -34,9 +34,11 @@
 #include "pbd/file_utils.h"
 #include "pbd/search_path.h"
 #include "pbd/xml++.h"
+#include "pbd/debug.h"
 
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/debug.h"
 
 #include "i18n.h"
 
@@ -44,9 +46,6 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace std;
-
-#define KBD_DEBUG 1
-bool debug_keyboard = false;
 
 guint Keyboard::edit_but = 3;
 guint Keyboard::edit_mod = GDK_CONTROL_MASK;
@@ -223,24 +222,18 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 	uint32_t keyval;
 	bool ret = false;
 
-#if 0
-	cerr << "snoop widget " << widget << " key " << event->keyval << " type: " << event->type
-	     << " state " << std::hex << event->state << std::dec
-             << " magic ? " << _some_magic_widget_has_focus 
-	     << endl;
-#endif
-
-#if KBD_DEBUG
-	if (debug_keyboard) {
-		cerr << "snoop widget " << widget << " key " << event->keyval << " type: " << event->type
-		     << endl;
-	}
-#endif
+	DEBUG_TRACE (
+		DEBUG::Keyboard,
+		string_compose (
+			"Snoop widget %1 key %2 type %3 state %4 magic %5\n",
+			widget, event->keyval, event->type, event->state, _some_magic_widget_has_focus
+			)
+		);
 
 	if (event->keyval == GDK_Shift_R) {
 		keyval = GDK_Shift_L;
 
-	} else 	if (event->keyval == GDK_Control_R) {
+	} else if (event->keyval == GDK_Control_R) {
 		keyval = GDK_Control_L;
 
 	} else {
@@ -264,7 +257,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 				const AccelKey& ak (k->first);
 
 				if (keyval == ak.get_key() && (Gdk::ModifierType)((event->state & Keyboard::RelevantModifierKeyMask) | Gdk::RELEASE_MASK) == ak.get_mod()) {
-					cerr << "Suppress auto repeat\n";
+					DEBUG_TRACE (DEBUG::Keyboard, "Suppress auto repeat\n");
 					ret = true;
 					break;
 				}
@@ -288,8 +281,9 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 			if (keyval == ak.get_key() && (Gdk::ModifierType)((event->state & Keyboard::RelevantModifierKeyMask) | Gdk::RELEASE_MASK) == ak.get_mod()) {
 				Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (ts.first.c_str(), ts.second.c_str());
 				if (act) {
+					DEBUG_TRACE (DEBUG::Keyboard, string_compose ("Activate %1 %2\n", ts.first, ts.second));
 					act->activate();
-					cerr << "use repeat, suppress other\n";
+					DEBUG_TRACE (DEBUG::Keyboard, string_compose ("Use repeat, suppress other\n", ts.first, ts.second));
 					ret = true;
 				}
 				break;
@@ -336,22 +330,16 @@ Keyboard::leave_window (GdkEventCrossing *ev, Gtk::Window* /*win*/)
 	if (ev) {
 		switch (ev->detail) {
 		case GDK_NOTIFY_INFERIOR:
-			if (debug_keyboard) {
-				cerr << "INFERIOR crossing ... out\n";
-			}
+			DEBUG_TRACE (DEBUG::Keyboard, "INFERIOR crossing ... out\n");
 			break;
 
 		case GDK_NOTIFY_VIRTUAL:
-			if (debug_keyboard) {
-				cerr << "VIRTUAL crossing ... out\n";
-			}
+			DEBUG_TRACE (DEBUG::Keyboard, "VIRTUAL crossing ... out\n");
 			/* fallthru */
 
 		default:
-			if (debug_keyboard) {
-				cerr << "REAL CROSSING ... out\n";
-				cerr << "clearing current target\n";
-			}
+			DEBUG_TRACE (DEBUG::Keyboard, "REAL crossing ... out\n");
+			DEBUG_TRACE (DEBUG::Keyboard, "Clearing current target\n");
 			state.clear ();
 			current_window = 0;
 		}
@@ -546,22 +534,17 @@ Keyboard::load_keybindings (string path)
 
 	release_keys.clear ();
 
-	bool show_bindings = (getenv ("ARDOUR_SHOW_BINDINGS") != 0);
-
 	for (n = names.begin(), b = bindings.begin(), g = groups.begin(); n != names.end(); ++n, ++b, ++g) {
+		stringstream s;
+		s << "Action: " << *n << " Group: " << *g << " Binding: ";
 
-		if (show_bindings) {
-
-			cerr << "Action: " << (*n) << " Group: " << (*g) << " binding = ";
-
-			if ((*b).get_key() != GDK_VoidSymbol) {
-				cerr << (*b).get_key() << " w/mod = " << hex << (*b).get_mod() << dec << " = " << (*b).get_abbrev();
-			} else {
-				cerr << "unbound";
-			}
-
-			cerr << endl;
+		if ((*b).get_key() != GDK_VoidSymbol) {
+			s << b->get_key() << " w/mod " << hex << b->get_mod() << dec << " = " << b->get_abbrev () << "\n";
+		} else {
+			s << "unbound\n";
 		}
+
+		DEBUG_TRACE (DEBUG::Bindings, s.str ());
 	}
 
 	for (n = names.begin(), b = bindings.begin(), g = groups.begin(); n != names.end(); ++n, ++b, ++g) {
