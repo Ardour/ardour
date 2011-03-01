@@ -638,13 +638,13 @@ ProcessorBox::show_processor_menu (gint arg)
 		processor_menu = build_processor_menu ();
 	}
 
-	Gtk::MenuItem* plugin_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/processormenu/newplugin"));
+	Gtk::MenuItem* plugin_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/newplugin"));
 
 	if (plugin_menu_item) {
 		plugin_menu_item->set_submenu (*_get_plugin_selector()->plugin_menu());
 	}
 
-	Gtk::MenuItem* aux_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/processormenu/newaux"));
+	Gtk::MenuItem* aux_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/newaux"));
 
 	if (aux_menu_item) {
 		Menu* m = build_possible_aux_menu();
@@ -875,7 +875,7 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev, ProcessorEntry
 Menu *
 ProcessorBox::build_processor_menu ()
 {
-	processor_menu = dynamic_cast<Gtk::Menu*>(ActionManager::get_widget("/processormenu") );
+	processor_menu = dynamic_cast<Gtk::Menu*>(ActionManager::get_widget("/ProcessorMenu") );
 	processor_menu->set_name ("ArdourContextMenu");
 	return processor_menu;
 }
@@ -1928,7 +1928,7 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 void
 ProcessorBox::register_actions ()
 {
-	Glib::RefPtr<Gtk::ActionGroup> popup_act_grp = Gtk::ActionGroup::create(X_("processormenu"));
+	Glib::RefPtr<Gtk::ActionGroup> popup_act_grp = Gtk::ActionGroup::create(X_("ProcessorMenu"));
 	Glib::RefPtr<Action> act;
 
 	/* new stuff */
