@@ -352,6 +352,8 @@
                	     <menuitem action='zoom-to-region'/>
                	     <menuitem action='zoom-to-region-both-axes'/>
                	     <menuitem action='toggle-zoom'/>
+		     <menuitem action='expand-tracks'/>
+		     <menuitem action='shrink-tracks'/>
 	       </menu>
                <menu name='ZoomFocus' action='ZoomFocus'>
                    <menuitem action='zoom-focus-left'/>

@@ -2807,14 +2807,16 @@ Editor::setup_toolbar ()
 	
 	/* Track zoom buttons */
 	tav_expand_button.set_name ("TrackHeightButton");
-	tav_expand_button.set_size_request(-1,20);
-	tav_expand_button.add (*(manage (new Image (::get_icon("tav_exp")))));
-	tav_expand_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &Editor::tav_zoom_step), false));
+	tav_expand_button.set_size_request (-1, 20);
+	tav_expand_button.add (*(manage (new Image (::get_icon ("tav_exp")))));
+	RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("expand-tracks"));
+	act->connect_proxy (tav_expand_button);
 
 	tav_shrink_button.set_name ("TrackHeightButton");
-	tav_shrink_button.set_size_request(-1,20);
-	tav_shrink_button.add (*(manage (new Image (::get_icon("tav_shrink")))));
-	tav_shrink_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &Editor::tav_zoom_step), true));
+	tav_shrink_button.set_size_request (-1, 20);
+	tav_shrink_button.add (*(manage (new Image (::get_icon ("tav_shrink")))));
+	act = ActionManager::get_action (X_("Editor"), X_("shrink-tracks"));
+	act->connect_proxy (tav_shrink_button);
 
 	_zoom_box.pack_start (tav_shrink_button);
 	_zoom_box.pack_start (tav_expand_button);
