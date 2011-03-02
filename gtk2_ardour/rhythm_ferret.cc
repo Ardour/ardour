@@ -56,7 +56,7 @@ static const gchar * _operation_strings[] = {
 RhythmFerret::RhythmFerret (Editor& e)
 	: ArdourDialog (_("Rhythm Ferret"))
 	, editor (e)
-	, detection_threshold_adjustment (3, 0, 20, 1, 4)
+	, detection_threshold_adjustment (0.015, 0.0, 0.1, 0.001, 0.1)
 	, detection_threshold_scale (detection_threshold_adjustment)
 	, sensitivity_adjustment (40, 0, 100, 1, 10)
 	, sensitivity_scale (sensitivity_adjustment)
@@ -84,6 +84,7 @@ RhythmFerret::RhythmFerret (Editor& e)
 	   XXX there should be a non-hacky way to set this
 	 */
 	onset_detection_function_selector.set_active_text (onset_function_strings[3]);
+	detection_threshold_scale.set_digits (3);
 
 	Table* t = manage (new Table (7, 3));
 	t->set_spacings (12);
@@ -145,6 +146,7 @@ RhythmFerret::analysis_mode_changed ()
 {
 	bool const perc = get_analysis_mode() == PercussionOnset;
 	
+	trigger_gap_spinner.set_sensitive (!perc);
 	detection_threshold_scale.set_sensitive (perc);
 	sensitivity_scale.set_sensitive (perc);
 	onset_detection_function_selector.set_sensitive (!perc);
@@ -230,20 +232,12 @@ RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readabl
 			continue;
 		}
 
-		/* translate all transients to give absolute position */
-
-		//for (AnalysisFeatureList::iterator x = these_results.begin(); x != these_results.end(); ++x) {
-		//	(*x) += offset;
-		//}
-
 		/* merge */
 
 		results.insert (results.end(), these_results.begin(), these_results.end());
 		these_results.clear ();
-	}
-
-	if (!results.empty()) {
-		TransientDetector::cleanup_transients (results, _session->frame_rate(), trigger_gap_adjustment.get_value());
+		
+		t.update_positions (readable.get(), i, results);
 	}
 
 	return 0;
@@ -260,8 +254,10 @@ RhythmFerret::get_note_onset_function ()
 			return n;
 		}
 	}
+	
 	fatal << string_compose (_("programming error: %1 (%2)"), X_("illegal note onset function string"), txt)
 	      << endmsg;
+	
 	/*NOTREACHED*/
 	return -1;
 }
@@ -285,12 +281,6 @@ RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, fra
 			if (t.run ("", readable.get(), i, these_results)) {
 				continue;
 			}
-
-			/* translate all transients to give absolute position */
-
-			//for (AnalysisFeatureList::iterator x = these_results.begin(); x != these_results.end(); ++x) {
-			//	(*x) += offset;
-			//}
 
 			/* merge */
 
@@ -344,6 +334,8 @@ RhythmFerret::do_split_action ()
 	if (regions.empty()) {
 		return;
 	}
+	
+	editor.EditorFreeze(); /* Emit signal */
 
 	_session->begin_reversible_command (_("split regions (rhythm ferret)"));
 	
@@ -351,13 +343,13 @@ RhythmFerret::do_split_action ()
 	AnalysisFeatureList merged_features;
 	
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
-		
+
 		AnalysisFeatureList features;
 		features = (*i)->region()->transients();
-		
+
 		merged_features.insert (merged_features.end(), features.begin(), features.end());
 	}
-	
+
 	merged_features.sort();
 	merged_features.unique();
 
@@ -368,16 +360,15 @@ RhythmFerret::do_split_action ()
 		tmp = i;
 		++tmp;
 
-		AnalysisFeatureList features;
-		features = (*i)->region()->transients();
-		editor.split_region_at_points ((*i)->region(), merged_features, false, true);
+		editor.split_region_at_points ((*i)->region(), merged_features, false, false);
 
 		/* i is invalid at this point */
-
 		i = tmp;
 	}
 
 	_session->commit_reversible_command ();
+	
+	editor.EditorThaw(); /* Emit signal */
 }
 
 void
@@ -399,9 +390,11 @@ void
 RhythmFerret::clear_transients ()
 {
 	current_results.clear ();
+	
 	for (RegionSelection::iterator i = regions_with_transients.begin(); i != regions_with_transients.end(); ++i) {
 		(*i)->region()->set_transients (current_results);
 	}
+	
 	regions_with_transients.clear ();
 }
 

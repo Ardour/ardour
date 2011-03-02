@@ -21,6 +21,7 @@ children = [
 	'libs/midi++2',
 	'libs/evoral',
 	'libs/vamp-sdk',
+	'libs/qm-dsp',
 	'libs/vamp-plugins',
 	'libs/taglib',
 	'libs/rubberband',

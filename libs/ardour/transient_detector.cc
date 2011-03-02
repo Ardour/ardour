@@ -1,4 +1,6 @@
 #include <cmath>
+
+#include "ardour/readable.h"
 #include "ardour/transient_detector.h"
 
 #include "i18n.h"
@@ -9,18 +11,20 @@ using namespace std;
 
 /* need a static initializer function for this */
 
-string TransientDetector::_op_id = X_("libardourvampplugins:percussiononsets:2");
+string TransientDetector::_op_id = X_("libardourvampplugins:qm-onsetdetector:2");
 
 TransientDetector::TransientDetector (float sr)
-	: AudioAnalyser (sr, X_("libardourvampplugins:percussiononsets"))
+	: AudioAnalyser (sr, X_("libardourvampplugins:qm-onsetdetector"))
 {
 	/* update the op_id */
 
-	_op_id = X_("libardourvampplugins:percussiononsets");
+	_op_id = X_("libardourvampplugins:qm-onsetdetector");
 
 	// XXX this should load the above-named plugin and get the current version
 
 	_op_id += ":2";
+	
+	threshold = 0.00;
 }
 
 TransientDetector::~TransientDetector()
@@ -40,6 +44,7 @@ TransientDetector::run (const std::string& path, Readable* src, uint32_t channel
 	int ret = analyse (path, src, channel);
 
 	current_results = 0;
+
 	return ret;
 }
 
@@ -66,15 +71,14 @@ TransientDetector::use_features (Plugin::FeatureSet& features, ostream* out)
 void
 TransientDetector::set_threshold (float val)
 {
-	if (plugin) {
-		plugin->setParameter ("threshold", val);
-	}
+	threshold = val;
 }
 
 void
 TransientDetector::set_sensitivity (float val)
 {
 	if (plugin) {
+		plugin->selectProgram ("Percussive onsets");
 		plugin->setParameter ("sensitivity", val);
 	}
 }
@@ -116,4 +120,53 @@ TransientDetector::cleanup_transients (AnalysisFeatureList& t, float sr, float g
 			t.erase (b, f);
 		}
 	}
+}
+
+void
+TransientDetector::update_positions (Readable* src, uint32_t channel, AnalysisFeatureList& positions)
+{
+	Plugin::FeatureSet features;
+	
+	Sample* data = 0;
+	float* bufs[1] = { 0 };
+	
+	int buff_size = 1024;
+	int step_size = 64;
+	
+	data = new Sample[buff_size];
+	bufs[0] = data;
+	
+	AnalysisFeatureList::iterator i = positions.begin();
+	
+	while (i != positions.end()) {
+
+		framecnt_t to_read;
+
+		/* read from source */
+		to_read = buff_size;
+
+		if (src->read (data, (*i) - buff_size, to_read, channel) != to_read) {
+			break;
+		}
+		
+		// Simple heuristic for locating approx correct cut position.
+
+		for (int j = 0; j < buff_size;){
+
+			Sample s = abs (data[j]);
+			Sample s2 = abs (data[j + step_size]);
+
+			if ((s2 - s) > threshold){
+				//cerr << "Thresh exceeded. Moving pos from: " << (*i) << " to: " << (*i) - buff_size + (j + 16) << endl;
+				(*i) = (*i) - buff_size + (j + 24);
+				break;
+			}
+			
+			j = j + step_size;
+		}
+
+		++i;
+	}
+
+	delete [] data;
 }
