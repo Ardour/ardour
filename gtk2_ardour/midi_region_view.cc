@@ -921,7 +921,7 @@ MidiRegionView::note_diff_add_change (ArdourCanvas::CanvasNoteEvent* ev,
 }
 
 void
-MidiRegionView::apply_diff ()
+MidiRegionView::apply_diff (bool as_subcommand)
 {
         bool add_or_remove;
 
@@ -936,7 +936,12 @@ MidiRegionView::apply_diff ()
                 }
         }
 
-	_model->apply_command(*trackview.session(), _note_diff_command);
+	if (as_subcommand) {
+		_model->apply_command_as_subcommand (*trackview.session(), _note_diff_command);
+	} else {
+		_model->apply_command (*trackview.session(), _note_diff_command);
+	}
+	
 	_note_diff_command = 0;
 	midi_view()->midi_track()->playlist_modified();
         
@@ -946,33 +951,6 @@ MidiRegionView::apply_diff ()
 
 	_marked_for_velocity.clear();
 }
-
-void
-MidiRegionView::apply_diff_as_subcommand ()
-{
-        bool add_or_remove;
-
-	if (!_note_diff_command) {
-		return;
-	}
-
-        if ((add_or_remove = _note_diff_command->adds_or_removes())) {
-                // Mark all selected notes for selection when model reloads
-                for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-                        _marked_for_selection.insert((*i)->note());
-                }
-        }
-
-	_model->apply_command_as_subcommand(*trackview.session(), _note_diff_command);
-	_note_diff_command = 0;
-	midi_view()->midi_track()->playlist_modified();
-
-        if (add_or_remove) {
-                _marked_for_selection.clear();
-        }
-	_marked_for_velocity.clear();
-}
-
 
 void
 MidiRegionView::abort_command()
@@ -2976,6 +2954,7 @@ MidiRegionView::selection_as_cut_buffer () const
 	return cb;
 }
 
+/** This method handles undo */
 void
 MidiRegionView::paste (framepos_t pos, float times, const MidiCutBuffer& mcb)
 {
@@ -2984,6 +2963,8 @@ MidiRegionView::paste (framepos_t pos, float times, const MidiCutBuffer& mcb)
 	}
 
         DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("MIDI paste @ %1 times %2\n", pos, times));
+
+	trackview.session()->begin_reversible_command (_("paste"));
 
 	start_note_diff_command (_("paste"));
 
@@ -3030,14 +3011,14 @@ MidiRegionView::paste (framepos_t pos, float times, const MidiCutBuffer& mcb)
 
                 DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste extended region from %1 to %2\n", region_end, end_frame));
 
-		trackview.session()->begin_reversible_command (_("paste"));
-
                 _region->clear_changes ();
 		_region->set_length (end_frame, this);
 		trackview.session()->add_command (new StatefulDiffCommand (_region));
 	}
 
-	apply_diff ();
+	apply_diff (true);
+	
+	trackview.session()->commit_reversible_command ();
 }
 
 struct EventNoteTimeEarlyFirstComparator {

@@ -3911,8 +3911,6 @@ Editor::mouse_paste ()
 void
 Editor::paste_internal (framepos_t position, float times)
 {
-	bool commit = false;
-
         DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("apparent paste position is %1\n", position));
 
 	if (internal_editing()) {
@@ -3929,8 +3927,6 @@ Editor::paste_internal (framepos_t position, float times)
 		position = get_preferred_edit_position();
                 DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("preferred edit position is %1\n", position));
 	}
-
-	begin_reversible_command (Operations::paste);
 
 	TrackViewList ts;
 	TrackViewList::iterator i;
@@ -3949,18 +3945,18 @@ Editor::paste_internal (framepos_t position, float times)
 		ts.push_back (_last_cut_copy_source_track);
 	}
 
-	for (nth = 0, i = ts.begin(); i != ts.end(); ++i, ++nth) {
+	if (internal_editing ()) {
 
 		/* undo/redo is handled by individual tracks/regions */
-
-		if (internal_editing()) {
-
+		
+		for (nth = 0, i = ts.begin(); i != ts.end(); ++i, ++nth) {
+			
 			RegionSelection rs;
 			RegionSelection::iterator r;
 			MidiNoteSelection::iterator cb;
-
+			
 			get_regions_at (rs, position, ts);
-
+			
 			for (cb = cut_buffer->midi_notes.begin(), r = rs.begin();
 			     cb != cut_buffer->midi_notes.end() && r != rs.end(); ++r) {
 				MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
@@ -3969,16 +3965,18 @@ Editor::paste_internal (framepos_t position, float times)
 					++cb;
 				}
 			}
-
-		} else {
-
-			if ((*i)->paste (position, times, *cut_buffer, nth)) {
-				commit = true;
-			}
 		}
-	}
+		
+	} else {
 
-	if (commit) {
+		/* we do redo (do you do voodoo?) */
+
+		begin_reversible_command (Operations::paste);
+		
+		for (nth = 0, i = ts.begin(); i != ts.end(); ++i, ++nth) {
+			(*i)->paste (position, times, *cut_buffer, nth);
+		}
+		
 		commit_reversible_command ();
 	}
 }

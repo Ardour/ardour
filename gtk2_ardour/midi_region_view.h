@@ -176,8 +176,7 @@ class MidiRegionView : public RegionView
 	void note_diff_add_note (const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity = false);
 	void note_diff_remove_note (ArdourCanvas::CanvasNoteEvent* ev);
 
-	void apply_diff();
-	void apply_diff_as_subcommand();
+	void apply_diff (bool as_subcommand = false);
 	void abort_command();
 
 	void   note_entered(ArdourCanvas::CanvasNoteEvent* ev);
