@@ -22,7 +22,6 @@
 #include <algorithm>
 #include <cmath>
 
-#define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #include <float.h>
 #include <sys/time.h>

@@ -20,10 +20,6 @@
 #ifndef __ardour_types_h__
 #define __ardour_types_h__
 
-#ifndef __STDC_FORMAT_MACROS
-#define __STDC_FORMAT_MACROS /* PRI<foo>; C++ requires explicit requesting of these */
-#endif
-
 #include <istream>
 #include <vector>
 #include <boost/shared_ptr.hpp>
