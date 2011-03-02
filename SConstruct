@@ -61,7 +61,7 @@ opts.AddVariables(
     BoolVariable('GPROFILE', 'Compile with support for gprofile (Developers only)', 0),
     BoolVariable('FREEDESKTOP', 'Install MIME type, icons and .desktop file as per the freedesktop.org spec (requires xdg-utils and shared-mime-info). "scons uninstall" removes associations in desktop database', 0),
     BoolVariable('TRANZPORT', 'Compile with support for Frontier Designs (if libusb is available)', 1),
-    BoolVariable('AUBIO', "Use Paul Brossier's aubio library for feature detection (if available)", 1),
+    BoolVariable('AUBIO', "Use Paul Brossier's aubio library for feature detection", 1),
     BoolVariable('AUSTATE', "Build with support for AU settings & presets saving/loading", 0)
 )
 
@@ -435,7 +435,8 @@ deps = \
 	'lrdf'                 : '0.4.0',
 	'jack'                 : '0.109.0',
 	'libgnomecanvas-2.0'   : '2.0',
-	'sndfile'              : '1.0.18'
+	'sndfile'              : '1.0.18',
+        'aubio'                : '0.3.0'
 }
 
 def DependenciesRequiredMessage():
@@ -499,9 +500,6 @@ if conf.CheckPKGExists ('fftw3'):
 if conf.CheckPKGExists ('aubio'):
     libraries['aubio'] = LibraryInfo()
     libraries['aubio'].ParseConfig('pkg-config --cflags --libs aubio')
-    env['AUBIO'] = 1
-else:
-    env['AUBIO'] = 0
 
 env = conf.Finish ()
 

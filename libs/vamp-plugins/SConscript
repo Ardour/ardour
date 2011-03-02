@@ -10,9 +10,6 @@ AmplitudeFollower.cpp
 PercussionOnsetDetector.cpp
 SpectralCentroid.cpp
 ZeroCrossing.cpp
-""")
-
-aubio_files = Split ("""
 Onset.cpp
 """)
 
@@ -21,17 +18,12 @@ vampplugs = env.Clone()
 
 vampplugs.Append (CPPATH='#libs/vamp-sdk/vamp', CXXFLAGS="-Ilibs/vamp-sdk")
 vampplugs.Merge ([libraries['vamp'],
-                  libraries['vamphost']
+                  libraries['vamphost'],
+                  libraries['aubio'],
+                  libraries['fftw3f']
                   ])
 
 sources = plugin_files
-
-if vampplugs['AUBIO']:
-    sources += aubio_files
-    vampplugs.Merge ([libraries['aubio']])
-    vampplugs.Merge ([libraries['fftw3f']])
-else:
-    print 'WARNING: some VAMP plugins will not be built because this machine has no AUBIO support'
 
 libvampplugins = vampplugs.SharedLibrary('ardourvampplugins', sources)
 
@@ -41,5 +33,5 @@ env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ar
 
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript' ] +
-                                     plugin_files + aubio_files +
+                                     plugin_files +
                                      glob.glob('*.h')))
