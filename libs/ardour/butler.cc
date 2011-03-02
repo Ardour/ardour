@@ -135,7 +135,7 @@ Butler::terminate_thread ()
 void *
 Butler::_thread_work (void* arg)
 {
-	SessionEvent::create_per_thread_pool ("butler events", 64);
+	SessionEvent::create_per_thread_pool ("butler events", 4096);
 	pthread_set_name (X_("butler"));
 	return ((Butler *) arg)->thread_work ();
 }
