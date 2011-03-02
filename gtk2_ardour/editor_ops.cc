@@ -4586,22 +4586,6 @@ Editor::external_edit_region ()
 }
 
 void
-Editor::brush (framepos_t pos)
-{
-	snap_to (pos);
-
-	RegionSelection rs = get_regions_from_selection_and_entered ();
-
-	if (rs.empty()) {
-		return;
-	}
-
-	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-		mouse_brush_insert_region ((*i), pos);
-	}
-}
-
-void
 Editor::reset_region_gain_envelopes ()
 {
 	RegionSelection rs = get_regions_from_selection_and_entered ();

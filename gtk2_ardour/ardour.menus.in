@@ -200,7 +200,6 @@
 		   <menuitem action='set-fade-out-length'/>
 		   <menuitem action='toggle-region-fade-out'/>
                </menu>
-	       <menuitem action='brush-at-mouse'/>
                <separator/>       
 	       <menuitem action='remove-last-capture'/>
 	       <separator/>

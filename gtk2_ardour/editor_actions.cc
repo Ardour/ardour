@@ -321,8 +321,6 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "play-edit-range", _("Play Edit Range"), sigc::mem_fun(*this, &Editor::play_edit_range));
-	act = ActionManager::register_action (editor_actions, "brush-at-mouse", _("Brush at Mouse"), sigc::mem_fun(*this, &Editor::kbd_brush));
-	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "set-playhead", _("Playhead to Mouse"), sigc::mem_fun(*this, &Editor::set_playhead_cursor));
 	ActionManager::session_sensitive_actions.push_back (act);

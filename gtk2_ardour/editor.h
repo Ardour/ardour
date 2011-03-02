@@ -1328,7 +1328,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void remove_control_point (ArdourCanvas::Item*, GdkEvent*);
 
 	void mouse_brush_insert_region (RegionView*, framepos_t pos);
-	void brush (framepos_t);
 
 	void show_verbose_time_cursor (framepos_t frame, double offset = 0, double xpos=-1, double ypos=-1);
 	void show_verbose_duration_cursor (framepos_t start, framepos_t end, double offset = 0, double xpos=-1, double ypos=-1);
@@ -1407,12 +1406,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void set_playhead_cursor ();
 
-	void kbd_driver (sigc::slot<void,GdkEvent*>, bool use_track_canvas = true, bool use_time_canvas = true, bool can_select = true);
 	void toggle_region_mute ();
-	void kbd_brush ();
-
-	void kbd_do_brush (GdkEvent*);
-	void kbd_do_audition (GdkEvent*);
 
 	void initialize_canvas ();
 
