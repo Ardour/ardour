@@ -90,11 +90,3 @@ Editor::keyboard_paste ()
 	ensure_entered_track_selected (true);
 	paste (1);
 }
-
-int
-Editor::get_prefix (float& /*val*/, bool& was_floating)
-{
-	was_floating = false;
-	return 1;
-}
-

@@ -1138,8 +1138,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void snap_regions_to_grid ();
 	void close_region_gaps ();
 
-	int  get_prefix (float&, bool&);
-
 	void keyboard_paste ();
 
 	void region_from_selection ();
@@ -1222,25 +1220,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void move_to_start ();
 	void move_to_end ();
-	void goto_frame ();
 	void center_playhead ();
 	void center_edit_point ();
-	void edit_cursor_backward ();
-	void edit_cursor_forward ();
 	void playhead_forward_to_grid ();
 	void playhead_backward_to_grid ();
-	void playhead_backward ();
-	void playhead_forward ();
 	void scroll_playhead (bool forward);
 	void scroll_backward (float pages=0.8f);
 	void scroll_forward (float pages=0.8f);
 	void scroll_tracks_down ();
 	void scroll_tracks_up ();
-	void delete_sample_forward ();
-	void delete_sample_backward ();
-	void delete_screen ();
-	void search_backwards ();
-	void search_forwards ();
 	void set_mark ();
 	void clear_markers ();
 	void clear_ranges ();

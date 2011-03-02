@@ -1208,68 +1208,6 @@ Editor::scroll_playhead (bool forward)
 }
 
 void
-Editor::playhead_backward ()
-{
-	framepos_t pos;
-	framepos_t cnt;
-	float prefix;
-	bool was_floating;
-
-	if (get_prefix (prefix, was_floating)) {
-		cnt = 1;
-	} else {
-		if (was_floating) {
-			cnt = (framepos_t) floor (prefix * _session->frame_rate ());
-		} else {
-			cnt = (framepos_t) prefix;
-		}
-	}
-
-	pos = playhead_cursor->current_frame;
-
-	if ((framepos_t) pos < cnt) {
-		pos = 0;
-	} else {
-		pos -= cnt;
-	}
-
-	/* XXX this is completely insane. with the current buffering
-	   design, we'll force a complete track buffer flush and
-	   reload, just to move 1 sample !!!
-	*/
-
-	_session->request_locate (pos);
-}
-
-void
-Editor::playhead_forward ()
-{
-	framepos_t pos;
-	framepos_t cnt;
-	bool was_floating;
-	float prefix;
-
-	if (get_prefix (prefix, was_floating)) {
-		cnt = 1;
-	} else {
-		if (was_floating) {
-			cnt = (framepos_t) floor (prefix * _session->frame_rate ());
-		} else {
-			cnt = (framepos_t) floor (prefix);
-		}
-	}
-
-	pos = playhead_cursor->current_frame;
-
-	/* XXX this is completely insane. with the current buffering
-	   design, we'll force a complete track buffer flush and
-	   reload, just to move 1 sample !!!
-	*/
-
-	_session->request_locate (pos+cnt);
-}
-
-void
 Editor::cursor_align (bool playhead_to_edit)
 {
 	if (!_session) {
@@ -1303,97 +1241,12 @@ Editor::cursor_align (bool playhead_to_edit)
 }
 
 void
-Editor::edit_cursor_backward ()
-{
-	framepos_t pos;
-	framepos_t cnt;
-	float prefix;
-	bool was_floating;
-
-	if (get_prefix (prefix, was_floating)) {
-		cnt = 1;
-	} else {
-		if (was_floating) {
-			cnt = (framepos_t) floor (prefix * _session->frame_rate ());
-		} else {
-			cnt = (framepos_t) prefix;
-		}
-	}
-
-	if ((pos = get_preferred_edit_position()) < 0) {
-		return;
-	}
-
-	if (pos < cnt) {
-		pos = 0;
-	} else {
-		pos -= cnt;
-	}
-
-	// EDIT CURSOR edit_cursor->set_position (pos);
-}
-
-void
-Editor::edit_cursor_forward ()
-{
-	//framepos_t pos;
-	framepos_t cnt;
-	bool was_floating;
-	float prefix;
-
-	if (get_prefix (prefix, was_floating)) {
-		cnt = 1;
-	} else {
-		if (was_floating) {
-			cnt = (framepos_t) floor (prefix * _session->frame_rate ());
-		} else {
-			cnt = (framepos_t) floor (prefix);
-		}
-	}
-
-	// pos = edit_cursor->current_frame;
-	// EDIT CURSOR edit_cursor->set_position (pos+cnt);
-}
-
-void
-Editor::goto_frame ()
-{
-	float prefix;
-	bool was_floating;
-	framepos_t frame;
-
-	if (get_prefix (prefix, was_floating)) {
-		return;
-	}
-
-	if (was_floating) {
-		frame = (framepos_t) floor (prefix * _session->frame_rate());
-	} else {
-		frame = (framepos_t) floor (prefix);
-	}
-
-	_session->request_locate (frame);
-}
-
-void
 Editor::scroll_backward (float pages)
 {
+	framepos_t const one_page = (framepos_t) rint (_canvas_width * frames_per_unit);
+	framepos_t const cnt = (framepos_t) floor (pages * one_page);
+
 	framepos_t frame;
-	framepos_t one_page = (framepos_t) rint (_canvas_width * frames_per_unit);
-	bool was_floating;
-	float prefix;
-	framepos_t cnt;
-
-	if (get_prefix (prefix, was_floating)) {
-		cnt = (framepos_t) floor (pages * one_page);
-	} else {
-		if (was_floating) {
-			cnt = (framepos_t) floor (prefix * _session->frame_rate());
-		} else {
-			cnt = (framepos_t) floor (prefix * one_page);
-		}
-	}
-
 	if (leftmost_frame < cnt) {
 		frame = 0;
 	} else {
@@ -1406,22 +1259,10 @@ Editor::scroll_backward (float pages)
 void
 Editor::scroll_forward (float pages)
 {
+	framepos_t const one_page = (framepos_t) rint (_canvas_width * frames_per_unit);
+	framepos_t const cnt = (framepos_t) floor (pages * one_page);
+
 	framepos_t frame;
-	framepos_t one_page = (framepos_t) rint (_canvas_width * frames_per_unit);
-	bool was_floating;
-	float prefix;
-	framepos_t cnt;
-
-	if (get_prefix (prefix, was_floating)) {
-		cnt = (framepos_t) floor (pages * one_page);
-	} else {
-		if (was_floating) {
-			cnt = (framepos_t) floor (prefix * _session->frame_rate());
-		} else {
-			cnt = (framepos_t) floor (prefix * one_page);
-		}
-	}
-
 	if (max_framepos - cnt < leftmost_frame) {
 		frame = max_framepos - cnt;
 	} else {
@@ -1434,38 +1275,18 @@ Editor::scroll_forward (float pages)
 void
 Editor::scroll_tracks_down ()
 {
-	float prefix;
-	bool was_floating;
-	int cnt;
-
-	if (get_prefix (prefix, was_floating)) {
-		cnt = 1;
-	} else {
-		cnt = (int) floor (prefix);
-	}
-
-	double vert_value = vertical_adjustment.get_value() + (cnt *
-		vertical_adjustment.get_page_size());
+	double vert_value = vertical_adjustment.get_value() + vertical_adjustment.get_page_size();
 	if (vert_value > vertical_adjustment.get_upper() - _canvas_height) {
 		vert_value = vertical_adjustment.get_upper() - _canvas_height;
 	}
+	
 	vertical_adjustment.set_value (vert_value);
 }
 
 void
 Editor::scroll_tracks_up ()
 {
-	float prefix;
-	bool was_floating;
-	int cnt;
-
-	if (get_prefix (prefix, was_floating)) {
-		cnt = 1;
-	} else {
-		cnt = (int) floor (prefix);
-	}
-
-	vertical_adjustment.set_value (vertical_adjustment.get_value() - (cnt * vertical_adjustment.get_page_size()));
+	vertical_adjustment.set_value (vertical_adjustment.get_value() - vertical_adjustment.get_page_size());
 }
 
 void
@@ -1987,38 +1808,6 @@ Editor::add_location_from_region ()
 	_session->commit_reversible_command ();
 }
 
-/* DELETION */
-
-
-void
-Editor::delete_sample_forward ()
-{
-}
-
-void
-Editor::delete_sample_backward ()
-{
-}
-
-void
-Editor::delete_screen ()
-{
-}
-
-/* SEARCH */
-
-void
-Editor::search_backwards ()
-{
-	/* what ? */
-}
-
-void
-Editor::search_forwards ()
-{
-	/* what ? */
-}
-
 /* MARKS */
 
 void
@@ -2056,25 +1845,15 @@ Editor::jump_backward_to_mark ()
 void
 Editor::set_mark ()
 {
-	framepos_t pos;
-	float prefix;
-	bool was_floating;
+	framepos_t const pos = _session->audible_frame ();
+
 	string markername;
-
-	if (get_prefix (prefix, was_floating)) {
-		pos = _session->audible_frame ();
-	} else {
-		if (was_floating) {
-			pos = (framepos_t) floor (prefix * _session->frame_rate ());
-		} else {
-			pos = (framepos_t) floor (prefix);
-		}
-	}
-
-	_session->locations()->next_available_name(markername,"mark");
-	if (!choose_new_marker_name(markername)) {
+	_session->locations()->next_available_name (markername, "mark");
+	
+	if (!choose_new_marker_name (markername)) {
 		return;
 	}
+	
 	_session->locations()->add (new Location (*_session, pos, 0, markername, Location::IsMark), true);
 }
 
