@@ -187,7 +187,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::string peak_path_from_audio_path (std::string) const;
 	std::string new_audio_source_name (const std::string&, uint32_t nchans, uint32_t chan, bool destructive);
 	std::string new_midi_source_name (const std::string&);
-	std::string new_source_path_from_name (DataType type, const std::string&, bool as_stub = false);
+	std::string new_source_path_from_name (DataType type, const std::string&);
 	RouteList new_route_from_template (uint32_t how_many, const std::string& template_path);
 
 	void process (pframes_t nframes);
@@ -543,10 +543,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	static PBD::Signal0<int> AskAboutPendingState;
 
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (
-		size_t, std::string const &, uint32_t, bool destructive, bool as_stub = false);
+		size_t, std::string const &, uint32_t, bool destructive);
 	
 	boost::shared_ptr<MidiSource> create_midi_source_for_session (
-		Track*, std::string const &, bool as_stub = false);
+		Track*, std::string const &);
 
 	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
 	boost::shared_ptr<Source> source_by_path_and_channel (const std::string&, uint16_t);
@@ -1472,7 +1472,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void add_session_range_location (framepos_t, framepos_t);
 
 	void setup_midi_machine_control ();
-	void cleanup_stubfiles ();
 
 	void route_order_key_changed ();
 

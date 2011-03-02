@@ -1335,7 +1335,7 @@ MidiModel::write_to (boost::shared_ptr<MidiSource> source)
 	assert (ms);
 	
 	source->drop_model();
-	source->mark_streaming_midi_write_started (note_mode(), ms->timeline_position ());
+	source->mark_streaming_midi_write_started (note_mode());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(0, true); i != end(); ++i) {
 		source->append_event_unlocked_beats(*i);
@@ -1365,7 +1365,7 @@ MidiModel::sync_to_source ()
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
 	
-	ms->mark_streaming_midi_write_started (note_mode(), ms->timeline_position());
+	ms->mark_streaming_midi_write_started (note_mode());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(0, true); i != end(); ++i) {
 		ms->append_event_unlocked_beats(*i);
@@ -1400,7 +1400,7 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource> source, Evoral::Music
 	assert (ms);
 	
 	source->drop_model();
-	source->mark_streaming_midi_write_started (note_mode(), ms->timeline_position());
+	source->mark_streaming_midi_write_started (note_mode());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(0, true); i != end(); ++i) {
 		const Evoral::Event<Evoral::MusicalTime>& ev (*i);

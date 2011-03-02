@@ -102,24 +102,9 @@ SessionDirectory::sound_path () const
 }
 
 const path
-SessionDirectory::sound_stub_path () const
-{
-	if(is_directory (old_sound_path ())) return old_sound_path();
-
-	// the new style sound directory
-	return sources_root() / sound_dir_name / stub_dir_name;
-}
-
-const path
 SessionDirectory::midi_path () const
 {
 	return sources_root() / midi_dir_name;
-}
-
-const path
-SessionDirectory::midi_stub_path () const
-{
-	return sources_root() / midi_dir_name / stub_dir_name;
 }
 
 const path

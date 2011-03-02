@@ -467,24 +467,10 @@ Session::ensure_subdirs ()
 		return -1;
 	}
 
-	dir = session_directory().sound_stub_path().to_string();
-
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session stub sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
-	}
-
 	dir = session_directory().midi_path().to_string();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session midi dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	dir = session_directory().midi_stub_path().to_string();
-
-	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create session stub midi dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -1236,8 +1222,6 @@ Session::set_state (const XMLNode& node, int version)
 
 	setup_raid_path(_session_dir->root_path().to_string());
 
-	cleanup_stubfiles ();
-	
 	if ((prop = node.property (X_("id-counter"))) != 0) {
 		uint64_t x;
 		sscanf (prop->value().c_str(), "%" PRIu64, &x);
@@ -2416,13 +2400,9 @@ Session::commit_reversible_command (Command *cmd)
 }
 
 static bool
-accept_all_non_stub_audio_files (const string& path, void */*arg*/)
+accept_all_audio_files (const string& path, void */*arg*/)
 { 
         if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
-                return false;
-        }
-
-        if (FileSource::is_stub_path (path)) {
                 return false;
         }
 
@@ -2434,13 +2414,9 @@ accept_all_non_stub_audio_files (const string& path, void */*arg*/)
 }
 
 static bool
-accept_all_non_stub_midi_files (const string& path, void */*arg*/)
+accept_all_midi_files (const string& path, void */*arg*/)
 {
         if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
-                return false;
-        }
-
-        if (FileSource::is_stub_path (path)) {
                 return false;
         }
 
@@ -2686,8 +2662,8 @@ Session::cleanup_sources (CleanupReport& rep)
 		i = nexti;
 	}
 
-	candidates = scanner (audio_path, accept_all_non_stub_audio_files, (void *) 0, true, true);
-	candidates2 = scanner (midi_path, accept_all_non_stub_midi_files, (void *) 0, true, true);
+	candidates = scanner (audio_path, accept_all_audio_files, (void *) 0, true, true);
+	candidates2 = scanner (midi_path, accept_all_midi_files, (void *) 0, true, true);
 
         /* merge them */
 
@@ -2718,22 +2694,18 @@ Session::cleanup_sources (CleanupReport& rep)
                 ++tmp;
 
 		if ((fs = boost::dynamic_pointer_cast<FileSource> (i->second)) != 0) {
-                        if (!fs->is_stub()) {
-                                if (playlists->source_use_count (fs) != 0) {
-                                        all_sources.insert (fs->path());
-                                } else {
-                                        
-                                        /* we might not remove this source from disk, because it may be used
-                                           by other snapshots, but its not being used in this version
-                                           so lets get rid of it now, along with any representative regions
-                                           in the region list.
-                                        */
-
-                                        cerr << "Source " << i->second->name() << "ID " << i->second->id() << " not used, remove from source list and also all regions\n";
-                                        
-                                        RegionFactory::remove_regions_using_source (i->second);
-                                        sources.erase (i);
-                                }
+                        if (playlists->source_use_count (fs) != 0) {
+                                all_sources.insert (fs->path());
+                        } else {
+                                
+                                /* we might not remove this source from disk, because it may be used
+                                   by other snapshots, but its not being used in this version
+                                   so lets get rid of it now, along with any representative regions
+                                   in the region list.
+                                */
+                                
+                                RegionFactory::remove_regions_using_source (i->second);
+                                sources.erase (i);
                         }
 		}
 
@@ -2918,45 +2890,6 @@ Session::cleanup_trash_sources (CleanupReport& rep)
 	}
 
 	return 0;
-}
-
-void
-Session::cleanup_stubfiles ()
-{
-	vector<space_and_path>::iterator i;
-
-	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-
-                string dir;
-                string lname = legalize_for_path (_name);
-
-                vector<string> v;
-
-                /* XXX this is a hack caused by semantic conflicts
-                   between space_and_path and the SessionDirectory concept.
-                */
-
-                v.push_back ((*i).path);
-                v.push_back ("interchange");
-                v.push_back (lname);
-                v.push_back ("audiofiles");
-                v.push_back (stub_dir_name);
-
-                dir = Glib::build_filename (v);
-                
-                clear_directory (dir);
-
-                v.clear ();
-                v.push_back ((*i).path);
-                v.push_back ("interchange");
-                v.push_back (lname);
-                v.push_back ("midifiles");
-                v.push_back (stub_dir_name);
-
-                dir = Glib::build_filename (v);
-
-                clear_directory (dir);
-	}
 }
 
 void

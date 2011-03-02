@@ -78,7 +78,7 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	virtual framecnt_t length (framepos_t pos) const;
 	virtual void       update_length (framepos_t pos, framecnt_t cnt);
 
-	virtual void mark_streaming_midi_write_started (NoteMode mode, framepos_t start_time);
+	virtual void mark_streaming_midi_write_started (NoteMode mode);
 	virtual void mark_streaming_write_started ();
 	virtual void mark_streaming_write_completed ();
 	void mark_write_starting_now ();

@@ -65,10 +65,8 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 	if (init(_path, false)) {
 		throw failed_constructor ();
 	}
-
-	if (create(path)) {
-		throw failed_constructor ();
-	}
+        
+        /* file is not opened until write */
 }
 
 /** Constructor used for existing internal-to-session files. */
@@ -92,6 +90,8 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 	if (open(_path)) {
 		throw failed_constructor ();
 	}
+
+        _open = true;
 }
 
 SMFSource::~SMFSource ()
@@ -99,6 +99,16 @@ SMFSource::~SMFSource ()
 	if (removable()) {
 		unlink (_path.c_str());
 	}
+}
+
+int
+SMFSource::open_for_write ()
+{
+	if (create (_path)) {
+                return -1;
+        } 
+        _open = true;
+        return 0;
 }
 
 /** All stamps in audio frames */
@@ -109,6 +119,11 @@ SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination, framepos_t
 {
 	int      ret  = 0;
 	uint64_t time = 0; // in SMF ticks, 1 tick per _ppqn
+
+        if (writable() && !_open) {
+                /* nothing to read since nothing has ben written */
+                return duration;
+        }
 
 	DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: start %1 duration %2\n", start, duration));
 
@@ -206,6 +221,15 @@ SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination, framepos_t
 framecnt_t
 SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t position, framecnt_t duration)
 {
+        if (!_open && open_for_write()) {
+                error << string_compose (_("cannot open MIDI file %1 for write"), _path) << endmsg;
+                return 0;
+        }
+
+        if (!_writing) {
+                mark_streaming_write_started ();
+        }
+
 	_write_data_count = 0;
 
 	framepos_t        time;
@@ -387,10 +411,11 @@ SMFSource::set_state (const XMLNode& node, int version)
 }
 
 void
-SMFSource::mark_streaming_midi_write_started (NoteMode mode, framepos_t start_frame)
+SMFSource::mark_streaming_midi_write_started (NoteMode mode)
 {
-	Glib::Mutex::Lock lm (_lock);
-	MidiSource::mark_streaming_midi_write_started (mode, start_frame);
+        /* CALLER MUST HOLD LOCK */
+
+	MidiSource::mark_streaming_midi_write_started (mode);
 	Evoral::SMF::begin_write ();
 	_last_ev_time_beats = 0.0;
 	_last_ev_time_frames = 0;
@@ -443,6 +468,10 @@ SMFSource::load_model (bool lock, bool force_reload)
 	} else {
 		_model->clear();
 	}
+
+        if (writable() && !_open) {
+                return;
+        }
 
 	_model->start_write();
 	Evoral::SMF::seek_to_start();
@@ -533,7 +562,7 @@ SMFSource::destroy_model ()
 void
 SMFSource::flush_midi ()
 {
-	if (!writable()) {
+	if (!writable() || (writable() && !_open)) {
 		return;
 	}
 

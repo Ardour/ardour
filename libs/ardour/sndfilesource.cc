@@ -89,7 +89,7 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 {
 	int fmt = 0;
 
-	init_sndfile ();
+        init_sndfile ();
 
 	_file_is_new = true;
 
@@ -143,43 +143,17 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 	_info.channels = 1;
 	_info.samplerate = rate;
 	_info.format = fmt;
-
-	if (open()) {
-		throw failed_constructor();
-	}
-
-	if (writable() && (_flags & Broadcast)) {
-
-		SNDFILE* sf = _descriptor->allocate ();
-		if (sf == 0) {
-			error << string_compose (_("could not allocate file %1"), _path) << endmsg;
-			throw failed_constructor ();
-		}
-
-		if (!_broadcast_info) {
-			_broadcast_info = new BroadcastInfo;
-		}
-
-		_broadcast_info->set_from_session (s, header_position_offset);
-		_broadcast_info->set_description (string_compose ("BWF %1", _name));
-
-		if (!_broadcast_info->write_to_file (sf)) {
-			error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
-			                           _path, _broadcast_info->get_error())
-			      << endmsg;
-			_flags = Flag (_flags & ~Broadcast);
-			delete _broadcast_info;
-			_broadcast_info = 0;
-		}
-
-		_descriptor->release ();
-	}
+        
+        /* do not open the file here - do that in write_unlocked() as needed
+         */
 }
 
 void
 SndFileSource::init_sndfile ()
 {
 	string file;
+
+        _descriptor = 0;
 
 	// lets try to keep the object initalizations here at the top
 	xfade_buf = 0;
@@ -253,9 +227,29 @@ SndFileSource::open ()
 
 	if (writable()) {
 		sf_command (sf, SFC_SET_UPDATE_HEADER_AUTO, 0, SF_FALSE);
-	}
+                
+                if (_flags & Broadcast) {
+                        
+                        if (!_broadcast_info) {
+                                _broadcast_info = new BroadcastInfo;
+                        }
+                        
+                        _broadcast_info->set_from_session (_session, header_position_offset);
+                        _broadcast_info->set_description (string_compose ("BWF %1", _name));
+                        
+                        if (!_broadcast_info->write_to_file (sf)) {
+                                error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
+                                                         _path, _broadcast_info->get_error())
+                                      << endmsg;
+                                _flags = Flag (_flags & ~Broadcast);
+                                delete _broadcast_info;
+                                _broadcast_info = 0;
+                        }
+                }
+        }
 
-	_descriptor->release ();
+        _descriptor->release ();
+        _open = true;
 	return 0;
 }
 
@@ -280,7 +274,14 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 	uint32_t real_cnt;
 	framepos_t file_cnt;
 
+        if (writable() && !_open) {
+                /* file has not been opened yet - nothing written to it */
+                memset (dst, 0, sizeof (Sample) * cnt);
+                return cnt;
+        }
+
 	SNDFILE* sf = _descriptor->allocate ();
+
 	if (sf == 0) {
 		error << string_compose (_("could not allocate file %1 for reading."), _path) << endmsg;
 		return 0;
@@ -357,6 +358,10 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 framecnt_t
 SndFileSource::write_unlocked (Sample *data, framecnt_t cnt)
 {
+        if (!_open && open()) {
+                return 0; // failure
+        }
+
 	if (destructive()) {
 		return destructive_write_unlocked (data, cnt);
 	} else {
@@ -511,6 +516,11 @@ SndFileSource::flush_header ()
 		return -1;
 	}
 
+        if (!_open) {
+		warning << string_compose (_("attempt to flush an un-opened audio file source (%1)"), _path) << endmsg;
+		return -1;
+        }
+
 	SNDFILE* sf = _descriptor->allocate ();
 	if (sf == 0) {
 		error << string_compose (_("could not allocate file %1 to write header"), _path) << endmsg;
@@ -530,6 +540,11 @@ SndFileSource::setup_broadcast_info (framepos_t /*when*/, struct tm& now, time_t
 		warning << string_compose (_("attempt to store broadcast info in a non-writable audio file source (%1)"), _path) << endmsg;
 		return -1;
 	}
+
+        if (!_open) {
+		warning << string_compose (_("attempt to set BWF info for an un-opened audio file source (%1)"), _path) << endmsg;
+		return -1;
+        }
 
 	if (!(_flags & Broadcast)) {
 		return 0;

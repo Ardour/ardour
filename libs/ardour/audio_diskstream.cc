@@ -1425,9 +1425,6 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 
 		if (s) {
 			srcs.push_back (s);
-                        if (s->unstubify ()) {
-                                error << string_compose (_("Could not move capture file from %1"), s->path()) << endmsg;
-                        }
 			s->update_header (capture_info.front()->start, when, twhen);
 			s->set_captured_for (_name.val());
 			s->mark_immutable ();
@@ -1903,13 +1900,8 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 	ChannelInfo* chan = (*c)[n];
 
 	try {
-                /* file starts off as a stub file, it will be converted
-                   when we're done with a capture pass.
-                */
-
 		if ((chan->write_source = _session.create_audio_source_for_session (n_channels().n_audio(), 
-                                                                                    name(), n, destructive(), 
-                                                                                    true)) == 0) {
+                                                                                    name(), n, destructive())) == 0) {
 			throw failed_constructor();
 		}
 	}

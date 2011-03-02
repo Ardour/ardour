@@ -54,7 +54,7 @@ public:
 	void append_event_unlocked_beats (const Evoral::Event<Evoral::MusicalTime>& ev);
 	void append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, framepos_t source_start);
 
-	void mark_streaming_midi_write_started (NoteMode mode, framepos_t start_time);
+	void mark_streaming_midi_write_started (NoteMode mode);
 	void mark_streaming_write_completed ();
 
 	XMLNode& get_state ();
@@ -73,6 +73,8 @@ public:
         void set_path (const std::string& newpath);
         
   private:
+        int open_for_write ();
+
 	framecnt_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
 				  framepos_t position,
 				  framepos_t start,

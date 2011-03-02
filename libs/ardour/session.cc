@@ -238,10 +238,6 @@ Session::destroy ()
 
 	delete state_tree;
 
-	/* remove all stubfiles that might still be lurking */
-
-	cleanup_stubfiles ();
-
 	/* reset dynamic state version back to default */
 
 	Stateful::loading_state_version = 0;
@@ -2878,7 +2874,7 @@ Session::change_source_path_by_name (string path, string oldname, string newname
  *         (e.g. as returned by new_*_source_name)
  */
 string
-Session::new_source_path_from_name (DataType type, const string& name, bool as_stub)
+Session::new_source_path_from_name (DataType type, const string& name)
 {
 	assert(name.find("/") == string::npos);
 
@@ -2886,9 +2882,9 @@ Session::new_source_path_from_name (DataType type, const string& name, bool as_s
 
 	sys::path p;
 	if (type == DataType::AUDIO) {
-		p = (as_stub ? sdir.sound_stub_path() : sdir.sound_path());
+		p = sdir.sound_path();
 	} else if (type == DataType::MIDI) {
-		p = (as_stub ? sdir.midi_stub_path() : sdir.midi_path());
+		p = sdir.midi_path();
 	} else {
 		error << "Unknown source type, unable to create file path" << endmsg;
 		return "";
@@ -2968,7 +2964,6 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 			SessionDirectory sdir((*i).path);
 
 			string spath = sdir.sound_path().to_string();
-			string spath_stubs = sdir.sound_stub_path().to_string();
 
 			/* note that we search *without* the extension so that
 			   we don't end up both "Audio 1-1.wav" and "Audio 1-1.caf" 
@@ -2976,8 +2971,7 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 			   a file format change.
 			*/
 
-			if (matching_unsuffixed_filename_exists_in (spath, buf) ||
-			    matching_unsuffixed_filename_exists_in (spath_stubs, buf)) {
+			if (matching_unsuffixed_filename_exists_in (spath, buf)) {
 				existing++;
 				break;
 			}
@@ -3001,10 +2995,10 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 
 /** Create a new within-session audio source */
 boost::shared_ptr<AudioFileSource>
-Session::create_audio_source_for_session (size_t n_chans, string const & n, uint32_t chan, bool destructive, bool as_stub)
+Session::create_audio_source_for_session (size_t n_chans, string const & n, uint32_t chan, bool destructive)
 {
 	const string name    = new_audio_source_name (n, n_chans, chan, destructive);
-	const string path    = new_source_path_from_name(DataType::AUDIO, name, as_stub);
+	const string path    = new_source_path_from_name(DataType::AUDIO, name);
 
 	return boost::dynamic_pointer_cast<AudioFileSource> (
 		SourceFactory::createWritable (DataType::AUDIO, *this, path, string(), destructive, frame_rate()));
@@ -3061,7 +3055,7 @@ Session::new_midi_source_name (const string& base)
 
 /** Create a new within-session MIDI source */
 boost::shared_ptr<MidiSource>
-Session::create_midi_source_for_session (Track* track, string const & n, bool as_stub)
+Session::create_midi_source_for_session (Track* track, string const & n)
 {
 	/* try to use the existing write source for the track, to keep numbering sane 
 	 */
@@ -3080,7 +3074,7 @@ Session::create_midi_source_for_session (Track* track, string const & n, bool as
 	}
 
 	const string name = new_midi_source_name (n);
-	const string path = new_source_path_from_name (DataType::MIDI, name, as_stub);
+	const string path = new_source_path_from_name (DataType::MIDI, name);
 
 	return boost::dynamic_pointer_cast<SMFSource> (
 		SourceFactory::createWritable (

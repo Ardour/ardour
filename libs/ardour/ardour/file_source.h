@@ -48,12 +48,6 @@ public:
 	
 	const std::string& path() const { return _path; }
 
-        int  unstubify ();
-        void stubify ();
-        bool is_stub () const;
-
-        static bool is_stub_path (const std::string& path);
-
 	virtual bool safe_file_extension (const std::string& path) const = 0;
 
 	int  move_to_trash (const std::string& trash_dir_name);
@@ -104,7 +98,8 @@ protected:
 	uint16_t    _channel;
 	bool        _within_session;
         std::string _origin;
-
+        bool        _open;
+        
         void prevent_deletion ();
 };
 

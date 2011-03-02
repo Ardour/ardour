@@ -60,6 +60,7 @@ FileSource::FileSource (Session& session, DataType type, const string& path, con
 	, _file_is_new(true)
 	, _channel (0)
         , _origin (origin)
+        , _open (false)
 {
 	set_within_session_from_path (path);
 
@@ -99,11 +100,10 @@ FileSource::prevent_deletion ()
 bool
 FileSource::removable () const
 {
-        bool r = (_path.find (stub_dir_name) != string::npos) ||
-                ((_flags & Removable)
-                 && ((_flags & RemoveAtDestroy) || 
-                     ((_flags & RemovableIfEmpty) && empty() == 0)));
-
+        bool r = ((_flags & Removable)
+                  && ((_flags & RemoveAtDestroy) || 
+                      ((_flags & RemovableIfEmpty) && empty() == 0)));
+        
         return r;
 }
 
@@ -535,44 +535,6 @@ void
 FileSource::set_within_session_from_path (const std::string& path)
 {
 	_within_session = _session.path_is_within_session (path);
-}
-
-bool
-FileSource::is_stub_path (const std::string& path)
-{
-        return path.find (stub_dir_name) != string::npos;
-}
-
-bool
-FileSource::is_stub () const
-{
-        return is_stub_path (_path);
-}
-
-int
-FileSource::unstubify ()
-{
-        string::size_type pos = _path.find (stub_dir_name);
-
-        if (pos == string::npos || (_flags & Destructive)) {
-                return 0;
-        }
-
-        vector<string> v;
-
-        v.push_back (Glib::path_get_dirname (Glib::path_get_dirname (_path)));
-	v.push_back (Glib::path_get_basename(_path));
-        
-        string newpath = Glib::build_filename (v);
-
-        if (::rename (_path.c_str(), newpath.c_str()) != 0) {
-                error << string_compose (_("rename from %1 to %2 failed: %3)"), _path, newpath, strerror (errno)) << endmsg;
-                return -1;
-        }
-
-        set_path (newpath);
-
-        return 0;
 }
 
 void

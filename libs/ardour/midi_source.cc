@@ -265,11 +265,11 @@ MidiSource::midi_write (MidiRingBuffer<framepos_t>& source, framepos_t source_st
 }
 
 void
-MidiSource::mark_streaming_midi_write_started (NoteMode mode, framepos_t start_frame)
+MidiSource::mark_streaming_midi_write_started (NoteMode mode)
 {
 	if (_model) {
-		_model->set_note_mode(mode);
-		_model->start_write();
+		_model->set_note_mode (mode);
+		_model->start_write ();
 	}
 
 	_writing = true;
@@ -297,7 +297,7 @@ void
 MidiSource::mark_streaming_write_started ()
 {
 	NoteMode note_mode = _model ? _model->note_mode() : Sustained;
-	mark_streaming_midi_write_started(note_mode, _session.transport_frame());
+	mark_streaming_midi_write_started (note_mode);
 }
 
 void

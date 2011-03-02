@@ -981,10 +981,6 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 			const double total_capture_beats = converter.from(total_capture);
 			_write_source->set_length_beats(total_capture_beats);
 
-			/* make it not a stub anymore */
-
-			_write_source->unstubify ();
-
 			/* we will want to be able to keep (over)writing the source
 			   but we don't want it to be removable. this also differs
 			   from the audio situation, where the source at this point
@@ -1366,13 +1362,8 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 	_write_source.reset();
 
 	try {
-		/* file starts off as a stub file, it will be converted
-		   when we're done with a capture pass, or when "stolen"
-		   by the GUI.
-		*/
-
 		_write_source = boost::dynamic_pointer_cast<SMFSource>(
-			_session.create_midi_source_for_session (0, name (), true));
+			_session.create_midi_source_for_session (0, name ()));
 
 		if (!_write_source) {
 			throw failed_constructor();
@@ -1384,8 +1375,6 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 		_write_source.reset();
 		return -1;
 	}
-
-	_write_source->mark_streaming_midi_write_started (_note_mode, _session.transport_frame());
 
 	return 0;
 }
@@ -1403,8 +1392,6 @@ MidiDiskstream::steal_write_sources()
 
 	boost::dynamic_pointer_cast<MidiSource>(_write_source)->session_saved ();
 
-	/* make it visible/present */
-	_write_source->unstubify ();
 	/* never let it go away */
 	_write_source->mark_nonremovable ();
 
