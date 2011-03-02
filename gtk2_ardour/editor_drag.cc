@@ -1176,7 +1176,10 @@ RegionMotionDrag::aborted (bool)
 
 	_editor->update_canvas_now ();
 }
-				      
+
+/** @param b true to brush, otherwise false.
+ *  @param c true to make copies of the regions being moved, otherwise false.
+ */
 RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b, bool c)
 	: RegionMotionDrag (e, i, p, v, b),
 	  _copy (c)
