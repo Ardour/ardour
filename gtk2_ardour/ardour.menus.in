@@ -1,5 +1,13 @@
 <ui>
 
+    <accelerator action='set-mouse-mode-object'/>
+    <accelerator action='set-mouse-mode-range'/>
+    <accelerator action='set-mouse-mode-gain'/>
+    <accelerator action='set-mouse-mode-zoom'/>
+    <accelerator action='set-mouse-mode-timefx'/>
+    <accelerator action='set-mouse-mode-object-range'/>
+    <accelerator action='toggle-internal-edit'/>
+
     <menubar name='Main' action='MainMenu'>
         <menu name='Session' action='Session'>
            <menuitem action='New'/>
@@ -162,6 +170,9 @@
                    <menuitem action='start-range'/>
                    <menuitem action='finish-range'/>
                    <menuitem action='finish-add-range'/>
+		   <separator/>
+                   <menuitem action='select-next-route'/>
+                   <menuitem action='select-prev-route'/>
 	       </menu>	   
 	       <separator/>
                <menuitem action='editor-delete'/>
@@ -189,33 +200,16 @@
 		   <menuitem action='set-fade-out-length'/>
 		   <menuitem action='toggle-region-fade-out'/>
                </menu>
+	       <menuitem action='brush-at-mouse'/>
                <separator/>       
 	       <menuitem action='remove-last-capture'/>
 	       <separator/>
-	       <menu action='KeyMouseActions'>
-                   <menuitem action='select-next-route'/>
-                   <menuitem action='select-prev-route'/>
-		   <menuitem action='brush-at-mouse'/>
-		   <separator/>
-		   <menuitem action='step-mouse-mode'/>
-		   <menuitem action='set-mouse-mode-object'/>
-		   <menuitem action='set-mouse-mode-range'/>
-		   <menuitem action='set-mouse-mode-gain'/>
-		   <menuitem action='set-mouse-mode-zoom'/>
-		   <menuitem action='set-mouse-mode-timefx'/>
-		   <menuitem action='set-mouse-mode-object-range'/>
-		   <separator/>
-		   <menuitem action='toggle-internal-edit'/>
-		   <separator/>
-		   <menuitem action='cycle-edit-point'/>
-		   <menuitem action='cycle-edit-point-with-marker'/>
-		   <menuitem action='toggle-edit-mode'/>
-		   <separator/>
-		   <menuitem action='boost-region-gain'/>
-		   <menuitem action='cut-region-gain'/>
-		   <separator/>
-		   <menuitem action='escape'/>
-             </menu>
+	       <menu action="EditPointMenu">
+	           <menuitem action='cycle-edit-point'/>
+	           <menuitem action='cycle-edit-point-with-marker'/>
+	       </menu>
+	       <menuitem action='toggle-edit-mode'/>
+	       <separator/>
 	       <menu action="TempoMenu">
 	       	      <menuitem action='set-tempo-from-region'/>
 		      <menuitem action='set-tempo-from-edit-range'/>

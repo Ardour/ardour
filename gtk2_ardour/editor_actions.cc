@@ -76,7 +76,6 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("RegionMenuDuplicate"), _("Duplicate"));
 	ActionManager::register_action (editor_actions, X_("Link"), _("Link"));
 	ActionManager::register_action (editor_actions, X_("ZoomFocusMenu"), _("Zoom Focus"));
-	ActionManager::register_action (editor_actions, X_("KeyMouseActions"), _("Key Mouse"));
 	ActionManager::register_action (editor_actions, X_("LocateToMarker"), _("Locate to Markers"));
 	ActionManager::register_action (editor_actions, X_("MarkerMenu"), _("Markers"));
 	ActionManager::register_action (editor_actions, X_("MeterFalloff"), _("Meter falloff"));
@@ -370,7 +369,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "editor-paste", _("Paste"), sigc::mem_fun(*this, &Editor::keyboard_paste));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "set-tempo-from-edit-range", _("Set Tempo from Edit Range=Bar"), sigc::mem_fun(*this, &Editor::use_range_as_bar));
+	act = ActionManager::register_action (editor_actions, "set-tempo-from-edit-range", _("Set Tempo from Edit Range = Bar"), sigc::mem_fun(*this, &Editor::use_range_as_bar));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_toggle_action (editor_actions, "toggle-log-window", _("Log"),
