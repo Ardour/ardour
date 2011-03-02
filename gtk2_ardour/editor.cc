@@ -2784,15 +2784,15 @@ Editor::setup_toolbar ()
 	_zoom_box.set_border_width (0);
 
 	zoom_in_button.set_name ("EditorTimeButton");
-	zoom_in_button.set_image (*(manage (new Image (Stock::ZOOM_IN, Gtk::ICON_SIZE_MENU))));
+	zoom_in_button.set_image (*(manage (new Image (::get_icon ("zoom_in")))));
 	zoom_in_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), false));
 
 	zoom_out_button.set_name ("EditorTimeButton");
-	zoom_out_button.set_image (*(manage (new Image (Stock::ZOOM_OUT, Gtk::ICON_SIZE_MENU))));
+	zoom_out_button.set_image (*(manage (new Image (::get_icon ("zoom_out")))));
 	zoom_out_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), true));
 
 	zoom_out_full_button.set_name ("EditorTimeButton");
-	zoom_out_full_button.set_image (*(manage (new Image (Stock::ZOOM_100, Gtk::ICON_SIZE_MENU))));
+	zoom_out_full_button.set_image (*(manage (new Image (::get_icon ("zoom_full")))));
 	zoom_out_full_button.signal_clicked().connect (sigc::mem_fun(*this, &Editor::temporal_zoom_session));
 
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
