@@ -48,11 +48,13 @@ namespace ARDOUR {
 	class Session;
 }
 
+class ClockGroup;
+
 class RegionEditor : public ArdourDialog
 {
   public:
 	RegionEditor (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Region>);
-	virtual ~RegionEditor () {}
+	virtual ~RegionEditor ();
 
   protected:	
 	virtual void region_changed (const PBD::PropertyChange&);
@@ -75,6 +77,8 @@ class RegionEditor : public ArdourDialog
 	Gtk::Label sync_relative_label;
 	Gtk::Label sync_absolute_label;
 	Gtk::Label start_label;
+
+        ClockGroup* _clock_group;
 
 	AudioClock position_clock;
 	AudioClock end_clock;

@@ -28,11 +28,12 @@
 #include "pbd/memento_command.h"
 
 #include "ardour_ui.h"
-#include "prompter.h"
-#include "location_ui.h"
-#include "keyboard.h"
-#include "utils.h"
+#include "clock_group.h"
 #include "gui_thread.h"
+#include "keyboard.h"
+#include "location_ui.h"
+#include "prompter.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -43,120 +44,142 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
-	: SessionHandlePtr (0), /* explicitly set below */
-	  location(0), 
-	  item_table (1, 6, false),
-	  start_clock (X_("locationstart"), true, X_("LocationEditRowClock"), true, false),
-	  end_clock (X_("locationend"), true, X_("LocationEditRowClock"), true, false),
-	  length_clock (X_("locationlength"), true, X_("LocationEditRowClock"), true, false, true),
-	  cd_check_button (_("CD")),
-	  hide_check_button (_("Hide")),
-	  lock_check_button (_("Lock")),
-	  glue_check_button (_("Glue")),
-	  scms_check_button (_("SCMS")),
-	  preemph_check_button (_("Pre-Emphasis"))
+	: SessionHandlePtr (0) /* explicitly set below */
+        , location(0) 
+        , item_table (1, 6, false)
+        , start_clock (X_("locationstart"), true, X_("LocationEditRowClock"), true, false)
+        , end_clock (X_("locationend"), true, X_("LocationEditRowClock"), true, false)
+        , length_clock (X_("locationlength"), true, X_("LocationEditRowClock"), true, false, true)
+        , cd_check_button (_("CD"))
+        , hide_check_button (_("Hide"))
+        , lock_check_button (_("Lock"))
+        , glue_check_button (_("Glue"))
+        , scms_check_button (_("SCMS"))
+        , preemph_check_button (_("Pre-Emphasis"))
+        , _clock_group (0)
+ {
+         i_am_the_modifier = 0;
 
-{
-	i_am_the_modifier = 0;
+         start_go_button.set_image (*manage (new Image (Stock::JUMP_TO, Gtk::ICON_SIZE_SMALL_TOOLBAR)));
+         end_go_button.set_image (*manage (new Image (Stock::JUMP_TO, Gtk::ICON_SIZE_SMALL_TOOLBAR)));
+         remove_button.set_image (*manage (new Image (Stock::REMOVE, Gtk::ICON_SIZE_SMALL_TOOLBAR)));
 
-	start_go_button.set_image (*manage (new Image (Stock::JUMP_TO, Gtk::ICON_SIZE_SMALL_TOOLBAR)));
-	end_go_button.set_image (*manage (new Image (Stock::JUMP_TO, Gtk::ICON_SIZE_SMALL_TOOLBAR)));
-	remove_button.set_image (*manage (new Image (Stock::REMOVE, Gtk::ICON_SIZE_SMALL_TOOLBAR)));
+         number_label.set_name ("LocationEditNumberLabel");
+         name_label.set_name ("LocationEditNameLabel");
+         name_entry.set_name ("LocationEditNameEntry");
+         start_go_button.set_name ("LocationEditGoButton");
+         end_go_button.set_name ("LocationEditGoButton");
+         cd_check_button.set_name ("LocationEditCdButton");
+         hide_check_button.set_name ("LocationEditHideButton");
+         lock_check_button.set_name ("LocationEditLockButton");
+         glue_check_button.set_name ("LocationEditGlueButton");
+         remove_button.set_name ("LocationEditRemoveButton");
+         isrc_label.set_name ("LocationEditNumberLabel");
+         isrc_entry.set_name ("LocationEditNameEntry");
+         scms_check_button.set_name ("LocationEditCdButton");
+         preemph_check_button.set_name ("LocationEditCdButton");
+         performer_label.set_name ("LocationEditNumberLabel");
+         performer_entry.set_name ("LocationEditNameEntry");
+         composer_label.set_name ("LocationEditNumberLabel");
+         composer_entry.set_name ("LocationEditNameEntry");
 
-	number_label.set_name ("LocationEditNumberLabel");
-	name_label.set_name ("LocationEditNameLabel");
-	name_entry.set_name ("LocationEditNameEntry");
-	start_go_button.set_name ("LocationEditGoButton");
-	end_go_button.set_name ("LocationEditGoButton");
-	cd_check_button.set_name ("LocationEditCdButton");
-	hide_check_button.set_name ("LocationEditHideButton");
-	lock_check_button.set_name ("LocationEditLockButton");
-	glue_check_button.set_name ("LocationEditGlueButton");
-	remove_button.set_name ("LocationEditRemoveButton");
-	isrc_label.set_name ("LocationEditNumberLabel");
-	isrc_entry.set_name ("LocationEditNameEntry");
-	scms_check_button.set_name ("LocationEditCdButton");
-	preemph_check_button.set_name ("LocationEditCdButton");
-	performer_label.set_name ("LocationEditNumberLabel");
-	performer_entry.set_name ("LocationEditNameEntry");
-	composer_label.set_name ("LocationEditNumberLabel");
-	composer_entry.set_name ("LocationEditNameEntry");
+         isrc_label.set_text ("ISRC: ");
+         isrc_label.set_size_request (30, -1);
+         performer_label.set_text ("Performer: ");
+         performer_label.set_size_request (60, -1);
+         composer_label.set_text ("Composer: ");
+         composer_label.set_size_request (60, -1);
 
-	isrc_label.set_text ("ISRC: ");
-	isrc_label.set_size_request (30, -1);
-	performer_label.set_text ("Performer: ");
-	performer_label.set_size_request (60, -1);
-	composer_label.set_text ("Composer: ");
-	composer_label.set_size_request (60, -1);
+         isrc_entry.set_size_request (112, -1);
+         isrc_entry.set_max_length(12);
+         isrc_entry.set_editable (true);
 
-	isrc_entry.set_size_request (112, -1);
-	isrc_entry.set_max_length(12);
-	isrc_entry.set_editable (true);
+         performer_entry.set_size_request (100, -1);
+         performer_entry.set_editable (true);
 
-	performer_entry.set_size_request (100, -1);
-	performer_entry.set_editable (true);
+         composer_entry.set_size_request (100, -1);
+         composer_entry.set_editable (true);
 
-	composer_entry.set_size_request (100, -1);
-	composer_entry.set_editable (true);
+         name_label.set_alignment (0, 0.5);
 
-	name_label.set_alignment (0, 0.5);
+         cd_track_details_hbox.pack_start (isrc_label, false, false);
+         cd_track_details_hbox.pack_start (isrc_entry, false, false);
+         cd_track_details_hbox.pack_start (scms_check_button, false, false);
+         cd_track_details_hbox.pack_start (preemph_check_button, false, false);
+         cd_track_details_hbox.pack_start (performer_label, false, false);
+         cd_track_details_hbox.pack_start (performer_entry, true, true);
+         cd_track_details_hbox.pack_start (composer_label, false, false);
+         cd_track_details_hbox.pack_start (composer_entry, true, true);
 
-	cd_track_details_hbox.pack_start (isrc_label, false, false);
-	cd_track_details_hbox.pack_start (isrc_entry, false, false);
-	cd_track_details_hbox.pack_start (scms_check_button, false, false);
-	cd_track_details_hbox.pack_start (preemph_check_button, false, false);
-	cd_track_details_hbox.pack_start (performer_label, false, false);
-	cd_track_details_hbox.pack_start (performer_entry, true, true);
-	cd_track_details_hbox.pack_start (composer_label, false, false);
-	cd_track_details_hbox.pack_start (composer_entry, true, true);
+         isrc_entry.signal_changed().connect (sigc::mem_fun(*this, &LocationEditRow::isrc_entry_changed));
+         performer_entry.signal_changed().connect (sigc::mem_fun(*this, &LocationEditRow::performer_entry_changed));
+         composer_entry.signal_changed().connect (sigc::mem_fun(*this, &LocationEditRow::composer_entry_changed));
+         scms_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::scms_toggled));
+         preemph_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::preemph_toggled));
 
-	isrc_entry.signal_changed().connect (sigc::mem_fun(*this, &LocationEditRow::isrc_entry_changed));
-	performer_entry.signal_changed().connect (sigc::mem_fun(*this, &LocationEditRow::performer_entry_changed));
-	composer_entry.signal_changed().connect (sigc::mem_fun(*this, &LocationEditRow::composer_entry_changed));
-	scms_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::scms_toggled));
-	preemph_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::preemph_toggled));
+         set_session (sess);
 
-	set_session (sess);
+         start_hbox.pack_start (start_go_button, false, false);
+         start_hbox.pack_start (start_clock, false, false);
 
-	start_hbox.pack_start (start_go_button, false, false);
-	start_hbox.pack_start (start_clock, false, false);
+         /* this is always in this location, no matter what the location is */
 
-	/* this is always in this location, no matter what the location is */
+         item_table.attach (start_hbox, 1, 2, 0, 1, FILL, FILL, 4, 0);
 
-	item_table.attach (start_hbox, 1, 2, 0, 1, FILL, FILL, 4, 0);
+         start_go_button.signal_clicked().connect(sigc::bind (sigc::mem_fun (*this, &LocationEditRow::go_button_pressed), LocStart));
+         start_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocStart));
+         start_clock.ChangeAborted.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::change_aborted), LocStart));
 
-	start_go_button.signal_clicked().connect(sigc::bind (sigc::mem_fun (*this, &LocationEditRow::go_button_pressed), LocStart));
- 	start_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocStart));
- 	start_clock.ChangeAborted.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::change_aborted), LocStart));
+         end_hbox.pack_start (end_go_button, false, false);
+         end_hbox.pack_start (end_clock, false, false);
 
-	end_hbox.pack_start (end_go_button, false, false);
-	end_hbox.pack_start (end_clock, false, false);
+         end_go_button.signal_clicked().connect(sigc::bind (sigc::mem_fun (*this, &LocationEditRow::go_button_pressed), LocEnd));
+         end_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocEnd));
+         end_clock.ChangeAborted.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::change_aborted), LocEnd));
 
-	end_go_button.signal_clicked().connect(sigc::bind (sigc::mem_fun (*this, &LocationEditRow::go_button_pressed), LocEnd));
-	end_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocEnd));
- 	end_clock.ChangeAborted.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::change_aborted), LocEnd));
+         length_clock.ValueChanged.connect (sigc::bind ( sigc::mem_fun(*this, &LocationEditRow::clock_changed), LocLength));
+         length_clock.ChangeAborted.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::change_aborted), LocLength));
 
-	length_clock.ValueChanged.connect (sigc::bind ( sigc::mem_fun(*this, &LocationEditRow::clock_changed), LocLength));
- 	length_clock.ChangeAborted.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::change_aborted), LocLength));
+         cd_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::cd_toggled));
+         hide_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::hide_toggled));
+         lock_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::lock_toggled));
+         glue_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::glue_toggled));
 
-	cd_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::cd_toggled));
-	hide_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::hide_toggled));
-	lock_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::lock_toggled));
-	glue_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::glue_toggled));
+         remove_button.signal_clicked().connect(sigc::mem_fun(*this, &LocationEditRow::remove_button_pressed));
 
-	remove_button.signal_clicked().connect(sigc::mem_fun(*this, &LocationEditRow::remove_button_pressed));
+         pack_start(item_table, true, true);
 
-	pack_start(item_table, true, true);
+         set_location (loc);
+         set_number (num);
+ }
 
-	set_location (loc);
-	set_number (num);
-}
+ LocationEditRow::~LocationEditRow()
+ {
+         if (location) {
+                 connections.drop_connections ();
+         }
 
-LocationEditRow::~LocationEditRow()
-{
-	if (location) {
-		connections.drop_connections ();
-	}
+         if (_clock_group) {
+                 _clock_group->remove (start_clock);
+                 _clock_group->remove (end_clock);
+                 _clock_group->remove (length_clock);
+         }
+ }
+
+ void
+ LocationEditRow::set_clock_group (ClockGroup& cg)
+ {
+         if (_clock_group) {
+                 _clock_group->remove (start_clock);
+                 _clock_group->remove (end_clock);
+                 _clock_group->remove (length_clock);
+         }
+
+         _clock_group = &cg;
+
+         _clock_group->add (start_clock);
+         _clock_group->add (end_clock);
+         _clock_group->add (length_clock);
 }
 
 void
@@ -659,12 +682,24 @@ LocationEditRow::focus_name() {
 	name_entry.grab_focus();
 }
 
+void
+LocationEditRow::set_clock_sensitivity ()
+{
+	start_clock.set_sensitive (!location->locked());
+	end_clock.set_sensitive (!location->locked());
+	length_clock.set_sensitive (!location->locked());
+}
+
+/*------------------------------------------------------------------------*/
 
 LocationUI::LocationUI ()
 	: add_location_button (_("New Marker"))
 	, add_range_button (_("New Range"))
 {
 	i_am_the_modifier = 0;
+
+        _clock_group = new ClockGroup;
+        _clock_group->set_clock_mode (AudioClock::Frames);
 
 	VBox* vbox = manage (new VBox);
 
@@ -678,6 +713,9 @@ LocationUI::LocationUI ()
 	l->set_use_markup (true);
 	table->attach (*l, 0, 2, table_row, table_row + 1);
 	++table_row;
+
+        loop_edit_row.set_clock_group (*_clock_group);
+        punch_edit_row.set_clock_group (*_clock_group);
 
 	loop_punch_box.pack_start (loop_edit_row, false, false);
 	loop_punch_box.pack_start (punch_edit_row, false, false);
@@ -771,6 +809,7 @@ LocationUI::LocationUI ()
 
 LocationUI::~LocationUI()
 {
+        delete _clock_group;
 }
 
 gint 
@@ -830,7 +869,10 @@ LocationUI::location_added (Location* location)
 		loc.sort (LocationSortByStart ());
 
 		LocationEditRow* erow = manage (new LocationEditRow (_session, location));
+
+                erow->set_clock_group (*_clock_group);
 		erow->remove_requested.connect (sigc::mem_fun (*this, &LocationUI::location_remove_requested));
+
 		Box_Helpers::BoxList & children = location->is_range_marker() ? range_rows.children () : location_rows.children ();
 
 		/* Step through the location list and the GUI list to find the place to insert */
@@ -900,9 +942,12 @@ LocationUI::map_locations (Locations::LocationList& locations)
 
 		if (location->is_mark()) {
 			LocationEditRow* erow = manage (new LocationEditRow (_session, location, mark_n));
+
+                        erow->set_clock_group (*_clock_group);
 			erow->remove_requested.connect (sigc::mem_fun(*this, &LocationUI::location_remove_requested));
 			erow->redraw_ranges.connect (sigc::mem_fun(*this, &LocationUI::location_redraw_ranges));
-			Box_Helpers::BoxList & loc_children = location_rows.children();
+
+                        Box_Helpers::BoxList & loc_children = location_rows.children();
 			loc_children.push_back(Box_Helpers::Element(*erow, PACK_SHRINK, 1, PACK_START));
 			if (location == newest_location) {
 				newest_location = 0;
@@ -918,7 +963,10 @@ LocationUI::map_locations (Locations::LocationList& locations)
 			loop_edit_row.show_all();
 		} else {
 			LocationEditRow* erow = manage (new LocationEditRow(_session, location));
+
+                        erow->set_clock_group (*_clock_group);
 			erow->remove_requested.connect (sigc::mem_fun(*this, &LocationUI::location_remove_requested));
+
 			Box_Helpers::BoxList & range_children = range_rows.children();
 			range_children.push_back(Box_Helpers::Element(*erow,  PACK_SHRINK, 1, PACK_START));
 		}
@@ -1039,13 +1087,6 @@ LocationUI::session_going_away()
 	SessionHandlePtr::session_going_away ();
 }
 
-void
-LocationEditRow::set_clock_sensitivity ()
-{
-	start_clock.set_sensitive (!location->locked());
-	end_clock.set_sensitive (!location->locked());
-	length_clock.set_sensitive (!location->locked());
-}
 
 /*------------------------*/
 

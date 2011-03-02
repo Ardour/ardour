@@ -30,10 +30,11 @@
 #include <gtkmm/listviewtext.h>
 #include <cmath>
 
-#include "region_editor.h"
 #include "ardour_ui.h"
-#include "utils.h"
+#include "clock_group.h"
 #include "gui_thread.h"
+#include "region_editor.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -43,22 +44,31 @@ using namespace std;
 using namespace Gtkmm2ext;
 
 RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
-	: ArdourDialog (_("Region")),
-	  _table (9, 2),
-	  _table_row (0),
-	  _region (r),
-	  name_label (_("Name:")),
-	  audition_button (_("Play")),
-	  position_clock (X_("regionposition"), true, X_("RegionEditorClock"), true, false),
-	  end_clock (X_("regionend"), true, X_("RegionEditorClock"), true, false),
-	  length_clock (X_("regionlength"), true, X_("RegionEditorClock"), true, false, true),
-	  sync_offset_relative_clock (X_("regionsyncoffsetrelative"), true, X_("RegionEditorClock"), true, false),
-	  sync_offset_absolute_clock (X_("regionsyncoffsetabsolute"), true, X_("RegionEditorClock"), true, false),
-	  /* XXX cannot file start yet */
-	  start_clock (X_("regionstart"), true, X_("RegionEditorClock"), false, false),
-	  _sources (1)
+	: ArdourDialog (_("Region"))
+        , _table (9, 2)
+        , _table_row (0)
+        , _region (r)
+        , name_label (_("Name:"))
+        , audition_button (_("Play"))
+        , _clock_group (new ClockGroup)
+        , position_clock (X_("regionposition"), true, X_("RegionEditorClock"), true, false)
+        , end_clock (X_("regionend"), true, X_("RegionEditorClock"), true, false)
+        , length_clock (X_("regionlength"), true, X_("RegionEditorClock"), true, false, true)
+        , sync_offset_relative_clock (X_("regionsyncoffsetrelative"), true, X_("RegionEditorClock"), true, false)
+        , sync_offset_absolute_clock (X_("regionsyncoffsetabsolute"), true, X_("RegionEditorClock"), true, false)
+          /* XXX cannot file start yet */
+        , start_clock (X_("regionstart"), true, X_("RegionEditorClock"), false, false)
+        , _sources (1)
 {
 	set_session (s);
+
+        _clock_group->set_clock_mode (AudioClock::Frames);
+        _clock_group->add (position_clock);
+        _clock_group->add (end_clock);
+        _clock_group->add (length_clock);
+        _clock_group->add (sync_offset_relative_clock);
+        _clock_group->add (sync_offset_absolute_clock);
+        _clock_group->add (start_clock);
 	
 	position_clock.set_session (_session);
 	end_clock.set_session (_session);
@@ -184,6 +194,11 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	spin_arrow_grab = false;
 
 	connect_editor_events ();
+}
+
+RegionEditor::~RegionEditor ()
+{
+        delete _clock_group;
 }
 
 void

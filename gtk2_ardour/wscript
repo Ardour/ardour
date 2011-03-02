@@ -60,6 +60,7 @@ gtk2_ardour_sources = [
 	'canvas-simplerect.c',
 	'canvas-sysex.cc',
 	'canvas-waveview.c',
+        'clock_group.cc',
 	'configinfo.cc',
 	'control_point.cc',
 	'control_point_dialog.cc',

@@ -42,6 +42,8 @@ namespace ARDOUR {
 	class Location;
 }
 
+class ClockGroup;
+
 class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
   public:
@@ -55,7 +57,8 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	void set_number (int);
 	void focus_name();
-
+        void set_clock_group (ClockGroup&);
+        
 	sigc::signal<void,ARDOUR::Location*> remove_requested;
 	sigc::signal<void> redraw_ranges;
 
@@ -97,11 +100,12 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 
 	Gtk::Label    performer_label;
-	Gtk::Entry  performer_entry;
+	Gtk::Entry    performer_entry;
 	Gtk::Label    composer_label;
- 	Gtk::Entry  composer_entry;
+ 	Gtk::Entry    composer_entry;
 	Gtk::CheckButton   scms_check_button;
 	Gtk::CheckButton   preemph_check_button;
+        ClockGroup* _clock_group;
 
 	guint32 i_am_the_modifier;
 	int   number;
@@ -146,6 +150,7 @@ class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	~LocationUI ();
 	
 	void set_session (ARDOUR::Session *);
+        void set_clock_mode (AudioClock::Mode);
 
 	void add_new_location();
 	void add_new_range();
@@ -191,6 +196,8 @@ class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void location_added (ARDOUR::Location *);
 	void locations_changed (ARDOUR::Locations::Change);
 	void map_locations (ARDOUR::Locations::LocationList&);
+
+        ClockGroup* _clock_group;
 };
 
 class LocationUIWindow : public ArdourDialog

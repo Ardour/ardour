@@ -2056,10 +2056,11 @@ AudioClock::set_mode (Mode m)
 	clock_base.show_all ();
 	key_entry_state = 0;
 
-	if (!is_transient) {
-		ModeChanged (); /* EMIT SIGNAL */
-		mode_changed (); /* EMIT SIGNAL */
-	}
+        if (!is_transient) {
+                ModeChanged (); /* EMIT SIGNAL (the static one)*/
+        }
+
+        mode_changed (); /* EMIT SIGNAL (the member one) */
 }
 
 void
