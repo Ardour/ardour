@@ -45,6 +45,7 @@
 #include "SpectralCentroid.h"
 #include "PercussionOnsetDetector.h"
 #include "AmplitudeFollower.h"
+#include "OnsetDetect.h"
 #ifdef HAVE_AUBIO
 #include "Onset.h"
 #endif
@@ -53,6 +54,7 @@ static Vamp::PluginAdapter<ZeroCrossing> zeroCrossingAdapter;
 static Vamp::PluginAdapter<SpectralCentroid> spectralCentroidAdapter;
 static Vamp::PluginAdapter<PercussionOnsetDetector> percussionOnsetAdapter;
 static Vamp::PluginAdapter<AmplitudeFollower> amplitudeAdapter;
+static Vamp::PluginAdapter<OnsetDetector> onsetDetectorAdapter;
 #ifdef HAVE_AUBIO
 static Vamp::PluginAdapter<Onset> onsetAdapter;
 #endif
@@ -67,8 +69,9 @@ const VampPluginDescriptor *vampGetPluginDescriptor(unsigned int version,
     case  1: return spectralCentroidAdapter.getDescriptor();
     case  2: return percussionOnsetAdapter.getDescriptor();
     case  3: return amplitudeAdapter.getDescriptor();
+    case  4: return onsetDetectorAdapter.getDescriptor();
 #ifdef HAVE_AUBIO
-    case  4: return onsetAdapter.getDescriptor();
+    case  5: return onsetAdapter.getDescriptor();
 #endif
     default: return 0;
     }
