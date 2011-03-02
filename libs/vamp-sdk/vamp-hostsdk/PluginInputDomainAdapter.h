@@ -6,7 +6,7 @@
     An API for audio analysis and feature extraction plugins.
 
     Centre for Digital Music, Queen Mary, University of London.
-    Copyright 2006-2007 Chris Cannam and QMUL.
+    Copyright 2006-2009 Chris Cannam and QMUL.
   
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
@@ -91,6 +91,7 @@ public:
     virtual ~PluginInputDomainAdapter();
     
     bool initialise(size_t channels, size_t stepSize, size_t blockSize);
+    void reset();
 
     InputDomain getInputDomain() const;
 
@@ -98,6 +99,63 @@ public:
     size_t getPreferredBlockSize() const;
 
     FeatureSet process(const float *const *inputBuffers, RealTime timestamp);
+
+    /**
+     * ProcessTimestampMethod determines how the
+     * PluginInputDomainAdapter handles timestamps for the data passed
+     * to the process() function of the plugin it wraps, in the case
+     * where the plugin is expecting frequency-domain data.
+     *
+     * The Vamp specification requires that the timestamp passed to
+     * the plugin for frequency-domain input should be that of the
+     * centre of the processing block, rather than the start as is the
+     * case for time-domain input.
+     *
+     * Since PluginInputDomainAdapter aims to be transparent in use,
+     * it needs to handle this timestamp adjustment itself.  However,
+     * some control is available over the method used for adjustment,
+     * by means of the ProcessTimestampMethod setting.
+     *
+     * If ProcessTimestampMethod is set to ShiftTimestamp (the
+     * default), then the data passed to the wrapped plugin will be
+     * calculated from the same input data block as passed to the
+     * wrapper, but the timestamp passed to the plugin will be
+     * advanced by half of the window size.
+     * 
+     * If ProcessTimestampMethod is set to ShiftData, then the
+     * timestamp passed to the wrapped plugin will be the same as that
+     * passed to the process call of the wrapper, but the data block
+     * used to calculate the input will be shifted back (earlier) by
+     * half of the window size, with half a block of zero padding at
+     * the start of the first process call.  This has the advantage of
+     * preserving the first half block of audio without any
+     * deterioration from window shaping.
+     * 
+     * If ProcessTimestampMethod is set to NoShift, then no adjustment
+     * will be made and the timestamps will be incorrect.
+     */
+    enum ProcessTimestampMethod {
+        ShiftTimestamp,
+        ShiftData,
+        NoShift
+    };
+
+    /**
+     * Set the method used for timestamp adjustment in plugins taking
+     * frequency-domain input.  See the ProcessTimestampMethod
+     * documentation for details.
+     *
+     * This function must be called before the first call to
+     * process().
+     */
+    void setProcessTimestampMethod(ProcessTimestampMethod);
+
+    /**
+     * Retrieve the method used for timestamp adjustment in plugins
+     * taking frequency-domain input.  See the ProcessTimestampMethod
+     * documentation for details.
+     */
+    ProcessTimestampMethod getProcessTimestampMethod() const;
 
     /**
      * Return the amount by which the timestamps supplied to process()
@@ -116,9 +174,13 @@ public:
      * timestamps) the host may need to be aware that this adjustment
      * is taking place.
      *
-     * If the plugin requires time-domain input, this function will
-     * return zero.  The result of calling this function before
-     * initialise() has been called is undefined.
+     * If the plugin requires time-domain input or the
+     * PluginInputDomainAdapter is configured with its
+     * ProcessTimestampMethod set to ShiftData instead of
+     * ShiftTimestamp, then this function will return zero.
+     *
+     * The result of calling this function before initialise() has
+     * been called is undefined.
      */
     RealTime getTimestampAdjustment() const;
 

@@ -6,8 +6,8 @@
     An API for audio analysis and feature extraction plugins.
 
     Centre for Digital Music, Queen Mary, University of London.
-    Copyright 2006-2007 Chris Cannam and QMUL.
-    This file by Mark Levy and Chris Cannam, Copyright 2007-2008 QMUL.
+    Copyright 2006-2009 Chris Cannam and QMUL.
+    This file by Mark Levy and Chris Cannam, Copyright 2007-2009 QMUL.
   
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
@@ -39,6 +39,7 @@
 #include <map>
 
 #include "vamp-hostsdk/PluginBufferingAdapter.h"
+#include "vamp-hostsdk/PluginInputDomainAdapter.h"
 
 using std::vector;
 using std::map;
@@ -652,6 +653,14 @@ PluginBufferingAdapter::Impl::processBlock(FeatureSet& allFeatureSets)
 
     FeatureSet featureSet = m_plugin->process(m_buffers, timestamp);
     
+    PluginWrapper *wrapper = dynamic_cast<PluginWrapper *>(m_plugin);
+    RealTime adjustment;
+    if (wrapper) {
+        PluginInputDomainAdapter *ida =
+            wrapper->getWrapper<PluginInputDomainAdapter>();
+        if (ida) adjustment = ida->getTimestampAdjustment();
+    }
+
     for (FeatureSet::iterator iter = featureSet.begin();
          iter != featureSet.end(); ++iter) {
 
@@ -667,14 +676,14 @@ PluginBufferingAdapter::Impl::processBlock(FeatureSet& allFeatureSets)
 
                 case OutputDescriptor::OneSamplePerStep:
                     // use our internal timestamp, always
-                    featureList[i].timestamp = timestamp;
+                    featureList[i].timestamp = timestamp + adjustment;
                     featureList[i].hasTimestamp = true;
                     break;
 
                 case OutputDescriptor::FixedSampleRate:
                     // use our internal timestamp if feature lacks one
                     if (!featureList[i].hasTimestamp) {
-                        featureList[i].timestamp = timestamp;
+                        featureList[i].timestamp = timestamp + adjustment;
                         featureList[i].hasTimestamp = true;
                     }
                     break;
