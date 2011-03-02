@@ -276,6 +276,13 @@ def configure(conf):
                       define_name = 'HAVE_JACK_NEW_LATENCY',
                       uselib_store = "JACK_NEW_LATENCY",
 		      okmsg = 'present')
+
+	conf.check_cc(fragment = '#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_type_get_buffer_size ((jack_client_t*)0, ""); }\n',
+                      linkflags = ['-ljack'],
+		      msg = 'Checking for new jack_port_type_get_buffer_size',
+                      okmsg = 'present',
+                      mandatory = True,
+		      errmsg = 'missing - a version of JACK that supports jack_port_type_get_buffer_size() is required to compile Ardour3')
         
 	if flac_supported():
 		conf.define ('HAVE_FLAC', 1)

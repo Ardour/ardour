@@ -318,6 +318,8 @@ _	   the regular process() call to session->process() is not made.
 	int  jack_bufsize_callback (pframes_t);
 	int  jack_sample_rate_callback (pframes_t);
 
+        void set_jack_callbacks ();
+
 #ifdef HAVE_JACK_NEW_LATENCY
         static void _latency_callback (jack_latency_callback_mode_t, void*);
         void jack_latency_callback (jack_latency_callback_mode_t);
