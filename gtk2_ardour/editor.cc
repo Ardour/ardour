@@ -566,31 +566,31 @@ Editor::Editor ()
 
 	Button* summary_arrows_left_left = manage (new Button);
 	summary_arrows_left_left->add (*manage (new Arrow (ARROW_LEFT, SHADOW_NONE)));
-	summary_arrows_left_left->signal_pressed().connect (sigc::hide_return (sigc::mem_fun (*this, &Editor::horizontal_scroll_left_press)));
-	summary_arrows_left_left->signal_released().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_left_release));
+	summary_arrows_left_left->signal_pressed().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), LEFT)));
+	summary_arrows_left_left->signal_released().connect (sigc::mem_fun (*this, &Editor::scroll_release));
 	
 	Button* summary_arrows_left_right = manage (new Button);
 	summary_arrows_left_right->add (*manage (new Arrow (ARROW_RIGHT, SHADOW_NONE)));
-	summary_arrows_left_right->signal_pressed().connect (sigc::hide_return (sigc::mem_fun (*this, &Editor::horizontal_scroll_right_press)));
-	summary_arrows_left_right->signal_released().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_right_release));
+	summary_arrows_left_right->signal_pressed().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), RIGHT)));
+	summary_arrows_left_right->signal_released().connect (sigc::mem_fun (*this, &Editor::scroll_release));
 	
 	VBox* summary_arrows_left = manage (new VBox);
 	summary_arrows_left->pack_start (*summary_arrows_left_left);
 	summary_arrows_left->pack_start (*summary_arrows_left_right);
 
-	Button* summary_arrows_right_left = manage (new Button);
-	summary_arrows_right_left->add (*manage (new Arrow (ARROW_LEFT, SHADOW_NONE)));
-	summary_arrows_right_left->signal_pressed().connect (sigc::hide_return (sigc::mem_fun (*this, &Editor::horizontal_scroll_left_press)));
-	summary_arrows_right_left->signal_released().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_left_release));
+	Button* summary_arrows_right_up = manage (new Button);
+	summary_arrows_right_up->add (*manage (new Arrow (ARROW_UP, SHADOW_NONE)));
+	summary_arrows_right_up->signal_pressed().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), UP)));
+	summary_arrows_right_up->signal_released().connect (sigc::mem_fun (*this, &Editor::scroll_release));
 	
-	Button* summary_arrows_right_right = manage (new Button);
-	summary_arrows_right_right->add (*manage (new Arrow (ARROW_RIGHT, SHADOW_NONE)));
-	summary_arrows_right_right->signal_pressed().connect (sigc::hide_return (sigc::mem_fun (*this, &Editor::horizontal_scroll_right_press)));
-	summary_arrows_right_right->signal_released().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_right_release));
+	Button* summary_arrows_right_down = manage (new Button);
+	summary_arrows_right_down->add (*manage (new Arrow (ARROW_DOWN, SHADOW_NONE)));
+	summary_arrows_right_down->signal_pressed().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), DOWN)));
+	summary_arrows_right_down->signal_released().connect (sigc::mem_fun (*this, &Editor::scroll_release));
 	
 	VBox* summary_arrows_right = manage (new VBox);
-	summary_arrows_right->pack_start (*summary_arrows_right_left);
-	summary_arrows_right->pack_start (*summary_arrows_right_right);
+	summary_arrows_right->pack_start (*summary_arrows_right_up);
+	summary_arrows_right->pack_start (*summary_arrows_right_down);
 
 	Frame* summary_frame = manage (new Frame);
 	summary_frame->set_shadow_type (Gtk::SHADOW_ETCHED_IN);
@@ -5136,7 +5136,7 @@ Editor::check_step_edit ()
 }
 
 bool
-Editor::horizontal_scroll_left_press ()
+Editor::scroll_press (Direction dir)
 {
 	++_scroll_callbacks;
 	
@@ -5144,17 +5144,32 @@ Editor::horizontal_scroll_left_press ()
 		/* delay the first auto-repeat */
 		return true;
 	}
+
+	switch (dir) {
+	case LEFT:
+		scroll_backward (1);
+		break;
+
+	case RIGHT:
+		scroll_forward (1);
+		break;
+
+	case UP:
+		scroll_tracks_up_line ();
+		break;
+
+	case DOWN:
+		scroll_tracks_down_line ();
+		break;
+	}
+
+	/* do hacky auto-repeat */
+	if (!_scroll_connection.connected ()) {
+
+		_scroll_connection = Glib::signal_timeout().connect (
+			sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), dir), 100
+			);
 		
-	double x = leftmost_position() - current_page_frames() / 5;
-	if (x < 0) {
-		x = 0;
-	}
-	
-	reset_x_origin (x);
-
-	/* do hacky auto-repeat */
-	if (!_scroll_connection.connected ()) {
-		_scroll_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_left_press), 100);
 		_scroll_callbacks = 0;
 	}
 
@@ -5162,34 +5177,7 @@ Editor::horizontal_scroll_left_press ()
 }
 
 void
-Editor::horizontal_scroll_left_release ()
-{
-	_scroll_connection.disconnect ();
-}
-
-bool
-Editor::horizontal_scroll_right_press ()
-{
-	++_scroll_callbacks;
-	
-	if (_scroll_connection.connected() && _scroll_callbacks < 5) {
-		/* delay the first auto-repeat */
-		return true;
-	}
-
-	reset_x_origin (leftmost_position() + current_page_frames() / 5);
-
-	/* do hacky auto-repeat */
-	if (!_scroll_connection.connected ()) {
-		_scroll_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_right_press), 100);
-		_scroll_callbacks = 0;
-	}
-
-	return true;
-}
-
-void
-Editor::horizontal_scroll_right_release ()
+Editor::scroll_release ()
 {
 	_scroll_connection.disconnect ();
 }

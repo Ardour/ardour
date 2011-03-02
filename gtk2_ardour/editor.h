@@ -941,10 +941,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         void reset_controls_layout_width ();
         void reset_controls_layout_height (int32_t height);
 
-	bool horizontal_scroll_left_press ();
-	void horizontal_scroll_left_release ();
-	bool horizontal_scroll_right_press ();
-	void horizontal_scroll_right_release ();
+	enum Direction {
+		LEFT,
+		RIGHT,
+		UP,
+		DOWN
+	};
+		
+	bool scroll_press (Direction);
+	void scroll_release ();
 	sigc::connection _scroll_connection;
 	int _scroll_callbacks;
 
