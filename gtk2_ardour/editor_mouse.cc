@@ -825,8 +825,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				/* click on a normal region view */
 				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
 					add_region_copy_drag (item, event, clicked_regionview);
-				} 
-				else if (Keyboard::the_keyboard().key_is_down (GDK_b)) {
+				} else if (Keyboard::the_keyboard().key_is_down (GDK_b)) {
 					add_region_brush_drag (item, event, clicked_regionview);
 				} else {
 					add_region_drag (item, event, clicked_regionview);
