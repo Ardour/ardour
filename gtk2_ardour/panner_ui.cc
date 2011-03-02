@@ -435,9 +435,8 @@ PannerUI::update_pan_sensitive ()
 {
 	bool const sensitive = !(_panner->pannable()->automation_state() & Play);
 
-#ifdef PANNER_HACKS
         pan_vbox.set_sensitive (sensitive);
-#endif
+
         if (big_window) {
                 big_window->set_sensitive (sensitive);
         }

@@ -6214,7 +6214,21 @@ Editor::insert_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 void
 Editor::fit_selected_tracks ()
 {
-	fit_tracks (selection->tracks);
+        if (!selection->tracks.empty()) {
+                fit_tracks (selection->tracks);
+        } else {
+                TrackViewList tvl;
+
+                /* no selected tracks - use tracks with selected regions */
+
+                for (RegionSelection::iterator r = selection->regions.begin(); r != selection->regions.end(); ++r) {
+                        tvl.push_back (&(*r)->get_time_axis_view ());
+                }
+
+                if (!tvl.empty()) {
+                        fit_tracks (tvl);
+                }
+        }
 }
 
 void
