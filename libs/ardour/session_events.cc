@@ -62,6 +62,11 @@ SessionEvent::operator new (size_t)
 	CrossThreadPool* p = pool->per_thread_pool ();
 	SessionEvent* ev = static_cast<SessionEvent*> (p->alloc ());
 	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("%1 Allocating SessionEvent from %2 ev @ %3\n", pthread_self(), p->name(), ev));
+#ifdef NDEBUG
+	if (DEBUG::SessionEvents & PBD::debug_bits) {
+		stacktrace (cerr, 20);
+	}
+#endif
 	ev->own_pool = p;
 	return ev;
 }
