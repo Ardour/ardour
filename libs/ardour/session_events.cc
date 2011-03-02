@@ -64,7 +64,7 @@ SessionEvent::operator new (size_t)
 	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("%1 Allocating SessionEvent from %2 ev @ %3\n", pthread_self(), p->name(), ev));
 #ifndef NDEBUG
 	if (DEBUG::SessionEvents & PBD::debug_bits) {
-		stacktrace (cerr, 20);
+		stacktrace (cerr, 40);
 	}
 #endif
 	ev->own_pool = p;
@@ -84,7 +84,7 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 
 #ifndef NDEBUG
 	if (DEBUG::SessionEvents & PBD::debug_bits) {
-		stacktrace (cerr, 20);
+		stacktrace (cerr, 40);
 	}
 #endif
 	
