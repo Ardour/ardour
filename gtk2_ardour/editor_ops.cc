@@ -6221,12 +6221,22 @@ Editor::fit_selected_tracks ()
 
                 /* no selected tracks - use tracks with selected regions */
 
-                for (RegionSelection::iterator r = selection->regions.begin(); r != selection->regions.end(); ++r) {
-                        tvl.push_back (&(*r)->get_time_axis_view ());
-                }
-
-                if (!tvl.empty()) {
-                        fit_tracks (tvl);
+                if (!selection->regions.empty()) {
+                        for (RegionSelection::iterator r = selection->regions.begin(); r != selection->regions.end(); ++r) {
+                                tvl.push_back (&(*r)->get_time_axis_view ());
+                        }
+                        
+                        if (!tvl.empty()) {
+                                fit_tracks (tvl);
+                        }
+                } else if (internal_editing()) {
+                        /* no selected tracks, or regions, but in internal edit mode, so follow the mouse and use
+                           the entered track
+                        */
+                        if (entered_track) {
+                                tvl.push_back (entered_track);
+                                fit_tracks (tvl);
+                        }
                 }
         }
 }
