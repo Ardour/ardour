@@ -302,15 +302,9 @@ Session::destroy ()
 	routes.flush ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
-
-		SourceMap::iterator j = i;
-		++j;
-		
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->path(), i->second.use_count()));
 		i->second->drop_references ();
-
-		i = j;
 	}
 
 	sources.clear ();
@@ -2697,6 +2691,10 @@ Session::add_source (boost::shared_ptr<Source> source)
 void
 Session::remove_source (boost::weak_ptr<Source> src)
 {
+	if (_state_of_the_state & Deletion) {
+		return;
+	}
+	
 	SourceMap::iterator i;
 	boost::shared_ptr<Source> source = src.lock();
 
@@ -2708,7 +2706,6 @@ Session::remove_source (boost::weak_ptr<Source> src)
 		Glib::Mutex::Lock lm (source_lock);
 
 		if ((i = sources.find (source->id())) != sources.end()) {
-			cerr << "Removing source " << source->name() << endl;
 			sources.erase (i);
 		}
 	}
