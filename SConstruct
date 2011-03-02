@@ -858,8 +858,8 @@ env.Append(CXXFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_F
 #
 # we use inttypes.h format macros anywhere we want
 #
-env.Append(CCFLAGS="-D_STDC_FORMAT_MACROS")
-env.Append(CXXFLAGS="-D_STDC_FORMAT_MACROS")
+env.Append(CCFLAGS="-D__STDC_FORMAT_MACROS")
+env.Append(CXXFLAGS="-D__STDC_FORMAT_MACROS")
 
 #
 # fix scons nitpickiness on APPLE
