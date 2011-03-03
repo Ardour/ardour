@@ -1218,9 +1218,11 @@ Editor::select_all_internal_edit (Selection::Operation op)
 {
         /* currently limited to MIDI only */
 
-	for (MidiRegionSelection::iterator i = selection->midi_regions.begin(); i != selection->midi_regions.end(); ++i) {
-		MidiRegionView* mrv = *i;
-		mrv->select_all_notes ();
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
+                if (mrv) {
+                        mrv->select_all_notes ();
+                }
 	}
 }
 
