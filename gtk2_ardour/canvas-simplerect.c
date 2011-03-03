@@ -531,7 +531,6 @@ static void
 gnome_canvas_simplerect_update (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags)
 {
 	GnomeCanvasSimpleRect *simplerect;
-	unsigned char foo;
 
 	simplerect = GNOME_CANVAS_SIMPLERECT (item);
 
@@ -550,7 +549,7 @@ gnome_canvas_simplerect_update (GnomeCanvasItem *item, double *affine, ArtSVP *c
 	}
 
 	UINT_TO_RGBA (simplerect->fill_color, &simplerect->fill_r, &simplerect->fill_g, &simplerect->fill_b, &simplerect->fill_a);
-	UINT_TO_RGBA (simplerect->outline_color, &simplerect->outline_r, &simplerect->outline_g, &simplerect->outline_b, &foo);
+	UINT_TO_RGBA (simplerect->outline_color, &simplerect->outline_r, &simplerect->outline_g, &simplerect->outline_b, &simplerect->outline_a);
 }
 
 // this can be useful for debugging/understanding how the canvas redraws
@@ -627,28 +626,30 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 
 	}
 
-	for (i = 0; i < simplerect->outline_pixels; ++i) {
-
-		if (simplerect->outline_what & 0x1) {
-			if (begin == simplerect->bbox_ulx) {
-				PAINT_VERT(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, begin + i, sy, ey);
-			}
-		}
-
-		if (simplerect->outline_what & 0x2) {
-			if (end == (simplerect->bbox_lrx - 1)) {
-				PAINT_VERT(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, end - i, sy, ey + 1);
-			}
-		}
-
-		if (simplerect->outline_what & 0x4) {
-			PAINT_HORIZ(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, begin, end, sy+i);
-		}
-
-		if (simplerect->outline_what & 0x8) {
-			PAINT_HORIZ(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, begin, end + 1, ey-i);
-		}
-	}
+        if (simplerect->outline_a > 0) {
+                for (i = 0; i < simplerect->outline_pixels; ++i) {
+                        
+                        if (simplerect->outline_what & 0x1) {
+                                if (begin == simplerect->bbox_ulx) {
+                                        PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin + i, sy, ey);
+                                }
+                        }
+                        
+                        if (simplerect->outline_what & 0x2) {
+                                if (end == (simplerect->bbox_lrx - 1)) {
+                                        PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, end - i, sy, ey + 1);
+                                }
+                        }
+                        
+                        if (simplerect->outline_what & 0x4) {
+                                PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end, sy+i);
+                        }
+                        
+                        if (simplerect->outline_what & 0x8) {
+                                PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end + 1, ey-i);
+                        }
+                }
+        }
 }
 
 #else /* SIMPLERECT_FAST_RENDERER */
@@ -660,8 +661,8 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 	GnomeCanvasSimpleRect *simplerect;
 	int end, begin;
 	int ey, sy;
-	unsigned int i;
-
+	int i;
+        
 	simplerect = GNOME_CANVAS_SIMPLERECT (item);
 
 	if (parent_class->render) {
@@ -704,28 +705,30 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 #endif
 	}
 
-	for (i = 0; i < simplerect->outline_pixels; ++i) {
-
-		if (simplerect->outline_what & 0x1) {
-			if (begin == simplerect->bbox_ulx) {
-				PAINT_VERT(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, begin + i, sy, ey);
-			}
-		}
-
-		if (simplerect->outline_what & 0x2) {
-			if (end == (simplerect->bbox_lrx - 1)) {
-				PAINT_VERT(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, end - i, sy, ey + 1);
-			}
-		}
-
-		if (simplerect->outline_what & 0x4) {
-			PAINT_HORIZ(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, begin, end, sy+i);
-		}
-
-		if (simplerect->outline_what & 0x8) {
-			PAINT_HORIZ(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, begin, end + 1, ey-i);
-		}
-	}
+        if (simplerect->outline_a) {
+                for (i = 0; i < (int) simplerect->outline_pixels; ++i) {
+                        
+                        if (simplerect->outline_what & 0x1) {
+                                if (begin == simplerect->bbox_ulx) {
+                                        PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin + i, sy, ey);
+                                }
+                        }
+                        
+                        if (simplerect->outline_what & 0x2) {
+                                if (end == (simplerect->bbox_lrx - 1)) {
+                                        PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, end - i, sy, ey + 1);
+                                }
+                        }
+                        
+                        if (simplerect->outline_what & 0x4) {
+                                PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end, sy+i);
+                        }
+                        
+                        if (simplerect->outline_what & 0x8) {
+                                PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end + 1, ey-i);
+                        }
+                }
+        }
 }
 #endif /* SIMPLERECT_FAST_RENDERER */
 

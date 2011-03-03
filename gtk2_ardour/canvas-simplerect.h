@@ -55,7 +55,7 @@ struct _GnomeCanvasSimpleRect
     /* cached values set during update/used during render */
 
     unsigned char fill_r, fill_b, fill_g, fill_a;
-    unsigned char outline_r, outline_b, outline_g;
+    unsigned char outline_r, outline_b, outline_g, outline_a;
     unsigned char outline_what;
     gint32 bbox_ulx, bbox_uly;
     gint32 bbox_lrx, bbox_lry;
