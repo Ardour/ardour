@@ -218,14 +218,14 @@ PluginEqGui::set_buffer_size(uint32_t size, uint32_t signal_size)
 		return;
 
 
-	FFT *tmp1 = _impulse_fft;
-	FFT *tmp2 = _signal_input_fft;
-	FFT *tmp3 = _signal_output_fft;
+        GTKArdour::FFT *tmp1 = _impulse_fft;
+        GTKArdour::FFT *tmp2 = _signal_input_fft;
+        GTKArdour::FFT *tmp3 = _signal_output_fft;
 
 	try {
-		_impulse_fft       = new FFT(size);
-		_signal_input_fft  = new FFT(signal_size);
-		_signal_output_fft = new FFT(signal_size);
+		_impulse_fft       = new GTKArdour::FFT(size);
+		_signal_input_fft  = new GTKArdour::FFT(signal_size);
+		_signal_output_fft = new GTKArdour::FFT(signal_size);
 	} catch( ... ) {
 		// Don't care about lost memory, we're screwed anyhow
 		_impulse_fft       = tmp1;
@@ -284,11 +284,11 @@ PluginEqGui::signal_collect_callback(ARDOUR::BufferSet *in, ARDOUR::BufferSet *o
 	_signal_output_fft->reset();
 
 	for (uint32_t i = 0; i < _plugin_insert->input_streams().n_audio(); ++i) {
-		_signal_input_fft ->analyze(in ->get_audio(i).data(), FFT::HANN);
+		_signal_input_fft ->analyze(in ->get_audio(i).data(), GTKArdour::FFT::HANN);
 	}
 
 	for (uint32_t i = 0; i < _plugin_insert->output_streams().n_audio(); ++i) {
-		_signal_output_fft->analyze(out->get_audio(i).data(), FFT::HANN);
+		_signal_output_fft->analyze(out->get_audio(i).data(), GTKArdour::FFT::HANN);
 	}
 
 	_signal_input_fft ->calculate();

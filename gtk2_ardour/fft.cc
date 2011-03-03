@@ -23,6 +23,8 @@
 #include <string.h>
 #include <math.h>
 
+using namespace GTKArdour;
+
 FFT::FFT(uint32_t windowSize)
 	: _window_size(windowSize),
 	  _data_size(_window_size/2),

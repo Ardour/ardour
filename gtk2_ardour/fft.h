@@ -32,6 +32,8 @@
 
 #include "ardour/types.h"
 
+namespace GTKArdour {
+
 class FFT
 {
 	public:
@@ -71,5 +73,7 @@ class FFT
 
 		fftwf_plan _plan;
 };
+
+}
 
 #endif
