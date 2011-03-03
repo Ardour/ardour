@@ -207,6 +207,22 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 }
 
 void
+MidiStreamView::enter_internal_edit_mode ()
+{
+        for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+                (*i)->hide_rect ();
+        }
+}
+
+void
+MidiStreamView::leave_internal_edit_mode ()
+{
+        for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+                (*i)->show_rect ();
+        }
+}
+
+void
 MidiStreamView::display_track (boost::shared_ptr<Track> tr)
 {
 	StreamView::display_track (tr);

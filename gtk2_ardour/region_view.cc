@@ -941,3 +941,4 @@ RegionView::trim_contents (framepos_t frame_delta, bool left_direction, bool swa
 	_region->trim_start ((framepos_t) (new_bound * speed), this);
 	region_changed (PropertyChange (ARDOUR::Properties::start));
 }
+

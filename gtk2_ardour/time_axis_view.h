@@ -98,6 +98,9 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	/** @return maximum allowable value of order */
 	static int max_order () { return _max_order; }
 
+        virtual void enter_internal_edit_mode () {}
+        virtual void leave_internal_edit_mode () {}
+
 	ArdourCanvas::Group* canvas_display () { return _canvas_display; }
 	ArdourCanvas::Group* canvas_background () { return _canvas_background; }
 	ArdourCanvas::Group* ghost_group () { return _ghost_group; }

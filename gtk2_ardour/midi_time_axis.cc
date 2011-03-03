@@ -245,6 +245,22 @@ MidiTimeAxisView::~MidiTimeAxisView ()
 }
 
 void
+MidiTimeAxisView::enter_internal_edit_mode ()
+{
+        if (midi_view()) {
+                midi_view()->enter_internal_edit_mode ();
+        }
+}
+
+void
+MidiTimeAxisView::leave_internal_edit_mode ()
+{
+        if (midi_view()) {
+                midi_view()->leave_internal_edit_mode ();
+        }
+}
+
+void
 MidiTimeAxisView::check_step_edit ()
 {
 	ensure_step_editor ();

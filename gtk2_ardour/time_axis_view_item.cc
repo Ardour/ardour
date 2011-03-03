@@ -156,6 +156,7 @@ TimeAxisViewItem::init (
 	last_item_width = 0;
 	wide_enough_for_name = wide;
 	high_enough_for_name = high;
+        rect_visible = true;
 
 	if (duration == 0) {
 		warning << "Time Axis Item Duration == 0" << endl;
@@ -232,6 +233,28 @@ TimeAxisViewItem::init (
 TimeAxisViewItem::~TimeAxisViewItem()
 {
 	delete group;
+}
+
+void
+TimeAxisViewItem::hide_rect ()
+{
+        rect_visible = false;
+        set_frame_color ();
+
+        if (name_highlight) {
+                name_highlight->property_outline_what() = 0x0;
+        }
+}
+
+void
+TimeAxisViewItem::show_rect ()
+{
+        rect_visible = true;
+        set_frame_color ();
+
+        if (name_highlight) {
+                name_highlight->property_outline_what() = 0x4;
+        }
 }
 
 
@@ -682,21 +705,30 @@ TimeAxisViewItem::set_colors()
 void
 TimeAxisViewItem::set_frame_color()
 {
+        uint32_t f = 0;
+
 	if (!frame) {
 		return;
 	}
 	
 	if (_selected) {
+
+                f = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
+
 		if (fill_opacity) {
-			frame->property_fill_color_rgba() = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get(), fill_opacity);
-		} else {
-			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
-		}
+                        f = UINT_RGBA_CHANGE_A (f, fill_opacity);
+		} 
+
+                if (!rect_visible) {
+                        f = UINT_RGBA_CHANGE_A (f, 0);
+                }
+
 	} else {
+
 		if (_recregion) {
-			frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
+			f = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 		} else {
-			uint32_t f = 0;
+                        
 			if (high_enough_for_name && !Config->get_color_regions_using_track_color()) {
 				f = ARDOUR_UI::config()->canvasvar_FrameBase.get();
 			} else {
@@ -707,9 +739,13 @@ TimeAxisViewItem::set_frame_color()
 				f = UINT_RGBA_CHANGE_A (f, fill_opacity);
 			}
 
-			frame->property_fill_color_rgba() = f;
-		}
+                        if (!rect_visible) {
+                                f = UINT_RGBA_CHANGE_A (f, 0);
+                        }
+                }
 	}
+
+        frame->property_fill_color_rgba() = f;
 }
 
 /**

@@ -2856,17 +2856,33 @@ MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, boo
 void
 MidiRegionView::set_frame_color()
 {
+        uint32_t f;
+
 	if (!frame) {
 		return;
 	}
 
 	if (_selected) {
-		frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
+		f = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
 	} else if (high_enough_for_name) {
-		frame->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiFrameBase.get();
+		f= ARDOUR_UI::config()->canvasvar_MidiFrameBase.get();
 	} else {
-		frame->property_fill_color_rgba() = fill_color;
+		f = fill_color;
 	}
+        
+        if (!rect_visible) {
+                f = UINT_RGBA_CHANGE_A (f, 0);
+        }
+
+        frame->property_fill_color_rgba() = f;
+
+        f = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
+
+        if (!rect_visible) {
+                f = UINT_RGBA_CHANGE_A (f, 0);
+        }
+
+        frame->property_outline_color_rgba() = f;
 }
 
 void

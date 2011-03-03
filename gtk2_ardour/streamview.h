@@ -74,6 +74,9 @@ public:
 	gdouble     get_samples_per_unit () { return _samples_per_unit; }
 	virtual void horizontal_position_changed () {}
 
+        virtual void enter_internal_edit_mode () {}
+        virtual void leave_internal_edit_mode () {}
+
  	void set_layer_display (LayerDisplay);
 	LayerDisplay layer_display () const { return _layer_display; }
 

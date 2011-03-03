@@ -2635,12 +2635,20 @@ Editor::set_internal_edit (bool yn)
 		ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Draw/Edit MIDI Notes"));
 		mouse_mode_toggled (mouse_mode);
 
+                for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+                        (*i)->enter_internal_edit_mode ();
+                }
+
 	} else {
 
 		mouse_select_button.set_image (*(manage (new Image (::get_icon("tool_range")))));
 		mouse_select_button.get_image ()->show ();
 		ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Select/Move Ranges"));
 		mouse_mode_toggled (mouse_mode); // sets cursor
+
+                for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+                        (*i)->leave_internal_edit_mode ();
+                }
 	}
 }
 

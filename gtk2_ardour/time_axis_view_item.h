@@ -82,7 +82,10 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	virtual void raise_to_top () { return; }
 	virtual void lower () { return; }
 	virtual void lower_to_bottom () { return; }
-	
+
+        virtual void hide_rect ();
+        virtual void show_rect ();
+        
 	/** @return true if the name area should respond to events */
 	bool name_active() const { return name_connected; }
 
@@ -220,7 +223,8 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	int name_pixbuf_width;
 	bool wide_enough_for_name;
 	bool high_enough_for_name;
-	
+        bool rect_visible;
+
 	ArdourCanvas::Group*      group;
 	ArdourCanvas::SimpleRect* vestigial_frame;
 	ArdourCanvas::SimpleRect* frame;
