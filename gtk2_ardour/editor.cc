@@ -2136,7 +2136,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		}
 	}
 
-	//set_default_size (g.base_width, g.base_height);
+	set_default_size (g.base_width, g.base_height);
 	move (x, y);
         
 	if (_session && (prop = node.property ("playhead"))) {
