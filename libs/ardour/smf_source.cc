@@ -221,11 +221,6 @@ SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination, framepos_t
 framecnt_t
 SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t position, framecnt_t duration)
 {
-        if (!_open && open_for_write()) {
-                error << string_compose (_("cannot open MIDI file %1 for write"), _path) << endmsg;
-                return 0;
-        }
-
         if (!_writing) {
                 mark_streaming_write_started ();
         }
@@ -414,6 +409,12 @@ void
 SMFSource::mark_streaming_midi_write_started (NoteMode mode)
 {
         /* CALLER MUST HOLD LOCK */
+
+        if (!_open && open_for_write()) {
+                error << string_compose (_("cannot open MIDI file %1 for write"), _path) << endmsg;
+                /* XXX should probably throw or return something */
+                return; 
+        }
 
 	MidiSource::mark_streaming_midi_write_started (mode);
 	Evoral::SMF::begin_write ();
