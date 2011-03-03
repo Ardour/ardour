@@ -337,8 +337,6 @@ Editor::track_canvas_size_allocated ()
 	redisplay_tempo (false);
 	_summary->set_overlays_dirty ();
 
-	Resized (); /* EMIT_SIGNAL */
-
 	return false;
 }
 
