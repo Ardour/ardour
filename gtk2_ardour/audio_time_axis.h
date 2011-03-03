@@ -80,6 +80,9 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();
 
+        void enter_internal_edit_mode ();
+        void leave_internal_edit_mode ();
+
 	void create_automation_child (const Evoral::Parameter& param, bool show);
 
 	void first_idle ();

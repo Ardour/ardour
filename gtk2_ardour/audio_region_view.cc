@@ -1335,37 +1335,39 @@ AudioRegionView::set_frame_color ()
 	}
 
 	TimeAxisViewItem::set_frame_color ();
+        
+        uint32_t wc;
+        uint32_t fc;
 
 	if (_selected) {
-		for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
-			if (_region->muted()) {
-				(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_SelectedWaveForm.get(), MUTED_ALPHA);
-			} else {
-				(*w)->property_wave_color() = ARDOUR_UI::config()->canvasvar_SelectedWaveForm.get();
-				(*w)->property_fill_color() = ARDOUR_UI::config()->canvasvar_SelectedWaveFormFill.get();
-			}
-		}
+                wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_SelectedWaveForm.get(), MUTED_ALPHA);
+                fc = ARDOUR_UI::config()->canvasvar_SelectedWaveFormFill.get();
 	} else {
 		if (_recregion) {
-			for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
-				if (_region->muted()) {
-					(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_RecWaveForm.get(), MUTED_ALPHA);
-				} else {
-					(*w)->property_wave_color() = ARDOUR_UI::config()->canvasvar_RecWaveForm.get();
-					(*w)->property_fill_color() = ARDOUR_UI::config()->canvasvar_RecWaveFormFill.get();
-				}
-			}
+                        if (_region->muted()) {
+                                wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_RecWaveForm.get(), MUTED_ALPHA);
+                        } else {
+                                wc = ARDOUR_UI::config()->canvasvar_RecWaveForm.get();
+                                fc = ARDOUR_UI::config()->canvasvar_RecWaveFormFill.get();
+                        }
 		} else {
-			for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
-				if (_region->muted()) {
-					(*w)->property_wave_color() = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA);
-				} else {
-					(*w)->property_wave_color() = ARDOUR_UI::config()->canvasvar_WaveForm.get();
-					(*w)->property_fill_color() = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
-				}
-			}
+                        if (_region->muted()) {
+                                wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA);
+                        } else {
+                                wc = ARDOUR_UI::config()->canvasvar_WaveForm.get();
+                                fc = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
+                        }
 		}
 	}
+
+        for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
+                if (_region->muted()) {
+                        (*w)->property_wave_color() = wc;
+                } else {
+                        (*w)->property_wave_color() = wc;
+                        (*w)->property_fill_color() = fc;
+                }
+        }
 }
 
 void

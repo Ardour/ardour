@@ -477,3 +477,19 @@ AudioTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> w
 		RouteTimeAxisView::add_processor_to_subplugin_menu (wp);
 	}
 }
+
+void
+AudioTimeAxisView::enter_internal_edit_mode ()
+{
+        if (audio_view()) {
+                audio_view()->enter_internal_edit_mode ();
+        }
+}
+
+void
+AudioTimeAxisView::leave_internal_edit_mode ()
+{
+        if (audio_view()) {
+                audio_view()->leave_internal_edit_mode ();
+        }
+}

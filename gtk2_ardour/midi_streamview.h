@@ -56,9 +56,6 @@ class MidiStreamView : public StreamView
 	MidiStreamView (MidiTimeAxisView&);
 	~MidiStreamView ();
 
-        void enter_internal_edit_mode ();
-        void leave_internal_edit_mode ();
-
 	void set_selected_regionviews (RegionSelection&);
 	void get_inverted_selectables (Selection&, std::list<Selectable* >& results);
 

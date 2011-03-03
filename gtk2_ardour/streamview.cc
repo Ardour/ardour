@@ -648,3 +648,19 @@ StreamView::setup_new_rec_layer_time (boost::shared_ptr<Region> region)
 		_new_rec_layer_time = max_framepos;
 	}
 }
+
+void
+StreamView::enter_internal_edit_mode ()
+{
+        for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+                (*i)->hide_rect ();
+        }
+}
+
+void
+StreamView::leave_internal_edit_mode ()
+{
+        for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+                (*i)->show_rect ();
+        }
+}

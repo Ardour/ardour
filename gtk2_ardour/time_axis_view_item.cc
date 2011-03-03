@@ -746,6 +746,16 @@ TimeAxisViewItem::set_frame_color()
 	}
 
         frame->property_fill_color_rgba() = f;
+
+        if (!_recregion) {
+                f = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
+                
+                if (!rect_visible) {
+                        f = UINT_RGBA_CHANGE_A (f, 64);
+                }
+                
+                frame->property_outline_color_rgba() = f;
+        }
 }
 
 /**
