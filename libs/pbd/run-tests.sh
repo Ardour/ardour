@@ -15,6 +15,9 @@ export LD_LIBRARY_PATH=$libs/audiographer:$libs/vamp-sdk:$libs/surfaces:$libs/su
 if [ "$1" == "--debug" ]
 then
         gdb ./libs/pbd/run-tests
+elif [ "$1" == "--valgrind" ]
+then
+        valgrind --tool="memcheck" ./libs/pbd/run-tests
 else
         ./libs/pbd/run-tests
 fi

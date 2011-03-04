@@ -43,5 +43,5 @@ ScalarPropertiesTest::testBasic ()
 
 	PropertyTemplate<int>* t = dynamic_cast<Property<int>*> (changes.begin()->second);
 	CPPUNIT_ASSERT (t);
-	CPPUNIT_ASSERT (t->val() == 4);
+	CPPUNIT_ASSERT (t->val() == 5);
 }

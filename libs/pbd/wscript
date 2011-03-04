@@ -134,6 +134,7 @@ def build(bld):
                         test/testrunner.cc
 			test/xpath.cc
                         test/scalar_properties.cc
+			test/signals_test.cc
 		'''.split()
 		testobj.target       = 'run-tests'
 		testobj.includes     = obj.includes + ['test', '../pbd']
