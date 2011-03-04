@@ -459,11 +459,10 @@ MidiStreamView::setup_rec_box ()
 				   must also set length_beats to something non-zero, otherwise the frame length
 				   of 1 causes length_beats to be set to some small quantity << 1.  Then
 				   when the position is set up below, this length_beats is used to recompute
-				   length using Tempo::framepos_plus_bbt, which is slightly innacurate for small
-				   beats values (see comment in Tempo::framepos_plus_bbt) [mostly because
-				   it converts floating point beats to bars, beats and integer ticks].  The upshot
-				   of which being that length gets set back to 0, meaning no region view is ever
-				   seen, meaning no MIDI notes during record (#3820).
+				   length using BeatsFramesConverter::to, which is slightly innacurate for small
+				   beats values because it converts floating point beats to bars, beats and
+				   integer ticks.  The upshot of which being that length gets set back to 0,
+				   meaning no region view is ever seen, meaning no MIDI notes during record (#3820).
 				*/
 				plist.add (ARDOUR::Properties::length_beats, 1);
 				plist.add (ARDOUR::Properties::name, string());
