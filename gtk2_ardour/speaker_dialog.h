@@ -49,10 +49,15 @@ private:
 	Gtk::Button      add_speaker_button;
 	Gtk::Button      use_system_button;
 	int32_t          selected_speaker;
-	int              width;
-	int              height;
-	int              drag_x;
-	int              drag_y;
+	int              width;         ///< width of the circle
+	int              height;        ///< height of the circle
+	int              x_origin;      ///< x origin of our stuff within the drawing area
+	int              y_origin;      ///< y origin of our stuff within the drawing area
+	/** distance from the centre of the object being dragged to the mouse pointer
+	 *  when the drag was started (ie start_pointer - object_position).
+	 */
+	double           drag_offset_x;
+	double           drag_offset_y;
 	int              drag_index;
 	
 	bool darea_expose_event (GdkEventExpose*);

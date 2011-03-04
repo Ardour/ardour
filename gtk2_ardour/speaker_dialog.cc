@@ -99,9 +99,7 @@ SpeakerDialog::darea_expose_event (GdkEventExpose* event)
 	cairo_fill_preserve (cr);
 	cairo_clip (cr);
 
-	if (height > 100) {
-		cairo_translate (cr, 10.0, 10.0);
-	}
+	cairo_translate (cr, x_origin, y_origin);
 
 	/* horizontal line of "crosshairs" */
 
@@ -218,6 +216,9 @@ SpeakerDialog::darea_size_allocate (Gtk::Allocation& alloc)
 		width -= 20;
 		height -= 20;
 	}
+
+	x_origin = (alloc.get_width() - width) / 2;
+	y_origin = (alloc.get_height() - height) / 2;
 }
 
 bool
@@ -234,13 +235,23 @@ SpeakerDialog::darea_button_press_event (GdkEventButton *ev)
 	switch (ev->button) {
 	case 1:
 	case 2:
+	{
 		drag_index = find_closest_object (ev->x, ev->y);
-		drag_x = (int) floor (ev->x);
-		drag_y = (int) floor (ev->y);
+		int const drag_x = (int) floor (ev->x);
+		int const drag_y = (int) floor (ev->y);
 		state = (GdkModifierType) ev->state;
+
+		if (drag_index >= 0) {
+			CartesianVector c;
+			speakers.speakers()[drag_index].angles().cartesian (c);
+			cart_to_gtk (c);
+			drag_offset_x = drag_x - x_origin - c.x;
+			drag_offset_y = drag_y - y_origin - c.y;
+		}
 
 		return handle_motion (drag_x, drag_y, state);
 		break;
+	}
 
 	default:
 		break;
@@ -356,6 +367,17 @@ SpeakerDialog::handle_motion (gint evx, gint evy, GdkModifierType state)
 		return false;
 	}
 
+	/* correct event coordinates to have their origin at the corner of our graphic
+	   rather than the corner of our allocation */
+
+	double obx = evx - x_origin;
+	double oby = evy - y_origin;
+
+	/* and compensate for any distance between the mouse pointer and the centre
+	   of the object being dragged */
+
+	obx -= drag_offset_x;
+	oby -= drag_offset_y;
 
 	if (state & GDK_BUTTON1_MASK && !(state & GDK_BUTTON2_MASK)) {
 		CartesianVector c;
@@ -365,12 +387,12 @@ SpeakerDialog::handle_motion (gint evx, gint evy, GdkModifierType state)
 		moving.angles().cartesian (c);
 		cart_to_gtk (c);
 
-		if ((evx != c.x) || (evy != c.y)) {
+		if (obx != c.x || oby != c.y) {
 			need_move = true;
 		}
 
 		if (need_move) {
-			CartesianVector cp (evx, evy, 0.0);
+			CartesianVector cp (obx, oby, 0.0);
 
 			/* canonicalize position */
 
