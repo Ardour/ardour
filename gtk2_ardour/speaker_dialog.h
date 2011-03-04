@@ -32,40 +32,40 @@
 
 class SpeakerDialog  : public ArdourDialog
 {
-  public:
-    SpeakerDialog ();
-    
-    ARDOUR::Speakers get_speakers() const;
-    void set_speakers (boost::shared_ptr<ARDOUR::Speakers>);
-
-  private:
-    ARDOUR::Speakers speakers;
-    Gtk::HBox        hbox;
-    Gtk::VBox        side_vbox;
-    Gtk::AspectFrame aspect_frame;
-    Gtk::DrawingArea darea;
-    Gtk::Adjustment  azimuth_adjustment;
-    Gtk::SpinButton  azimuth_spinner;
-    Gtk::Button      add_speaker_button;
-    Gtk::Button      use_system_button;
-    int32_t          selected_speaker;
-    int              width;
-    int              height;
-    int              drag_x;
-    int              drag_y;
-    int              drag_index;
-
-    bool darea_expose_event (GdkEventExpose*);
-    void darea_size_allocate (Gtk::Allocation& alloc);
-    bool darea_motion_notify_event (GdkEventMotion *ev);
-    bool handle_motion (gint evx, gint evy, GdkModifierType state);
-    bool darea_button_press_event (GdkEventButton *ev);
-    bool darea_button_release_event (GdkEventButton *ev);
-
-    void clamp_to_circle (double& x, double& y);
-    void gtk_to_cart (PBD::CartesianVector& c) const;
-    void cart_to_gtk (PBD::CartesianVector& c) const;
-    int find_closest_object (gdouble x, gdouble y);
+public:
+	SpeakerDialog ();
+	
+	ARDOUR::Speakers get_speakers() const;
+	void set_speakers (boost::shared_ptr<ARDOUR::Speakers>);
+	
+private:
+	ARDOUR::Speakers speakers;
+	Gtk::HBox        hbox;
+	Gtk::VBox        side_vbox;
+	Gtk::AspectFrame aspect_frame;
+	Gtk::DrawingArea darea;
+	Gtk::Adjustment  azimuth_adjustment;
+	Gtk::SpinButton  azimuth_spinner;
+	Gtk::Button      add_speaker_button;
+	Gtk::Button      use_system_button;
+	int32_t          selected_speaker;
+	int              width;
+	int              height;
+	int              drag_x;
+	int              drag_y;
+	int              drag_index;
+	
+	bool darea_expose_event (GdkEventExpose*);
+	void darea_size_allocate (Gtk::Allocation& alloc);
+	bool darea_motion_notify_event (GdkEventMotion *ev);
+	bool handle_motion (gint evx, gint evy, GdkModifierType state);
+	bool darea_button_press_event (GdkEventButton *ev);
+	bool darea_button_release_event (GdkEventButton *ev);
+	
+	void clamp_to_circle (double& x, double& y);
+	void gtk_to_cart (PBD::CartesianVector& c) const;
+	void cart_to_gtk (PBD::CartesianVector& c) const;
+	int find_closest_object (gdouble x, gdouble y);
 };
 
 #endif /* __ardour_gtk_speaker_dialog_h__ */
