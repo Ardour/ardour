@@ -3336,8 +3336,8 @@ MidiRegionView::data_recorded (boost::shared_ptr<MidiBuffer> buf, boost::weak_pt
 
 		if (ev.type() == MIDI_CMD_NOTE_ON) {
 
-			boost::shared_ptr<Evoral::Note<Evoral::MusicalTime> > note (
-				new Evoral::Note<Evoral::MusicalTime> (ev.channel(), time_beats, 0, ev.note(), ev.velocity())
+			boost::shared_ptr<NoteType> note (
+				new NoteType (ev.channel(), time_beats, 0, ev.note(), ev.velocity())
 				);
 
 			add_note (note, true);
