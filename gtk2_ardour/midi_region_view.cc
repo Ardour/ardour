@@ -3166,6 +3166,7 @@ MidiRegionView::create_ghost_note (double x, double y)
 
 	boost::shared_ptr<NoteType> g (new NoteType);
 	_ghost_note = new NoEventCanvasNote (*this, *_note_group, g);
+	_ghost_note->property_outline_color_rgba() = 0x000000aa;
 	update_ghost_note (x, y);
 	_ghost_note->show ();
 
