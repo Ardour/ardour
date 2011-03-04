@@ -22,6 +22,7 @@
 #include "gtkmm2ext/keyboard.h"
 
 #include "speaker_dialog.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -37,15 +38,16 @@ SpeakerDialog::SpeakerDialog ()
         , azimuth_adjustment (0, 0.0, 360.0, 10.0, 1.0)
         , azimuth_spinner (azimuth_adjustment)
         , add_speaker_button (_("Add Speaker"))
-        , use_system_button (_("Use System"))
-                              
+	, remove_speaker_button (_("Remove Speaker"))
+	/* initialize to 0 so that set_selected works below */
+	, selected_index (0)
+	, ignore_speaker_position_change (false)
+	, ignore_azimuth_change (false)
 {
         side_vbox.set_homogeneous (false);
-        side_vbox.set_border_width (9);
+        side_vbox.set_border_width (6);
         side_vbox.set_spacing (6);
-        side_vbox.pack_start (azimuth_spinner, false, false);
         side_vbox.pack_start (add_speaker_button, false, false);
-        side_vbox.pack_start (use_system_button, false, false);
 
         aspect_frame.set_size_request (200, 200);
         aspect_frame.set_shadow_type (SHADOW_NONE);
@@ -54,9 +56,16 @@ SpeakerDialog::SpeakerDialog ()
         hbox.set_spacing (6);
         hbox.set_border_width (6);
         hbox.pack_start (aspect_frame, true, true);
-        hbox.pack_start (side_vbox, false, false);
+        hbox.pack_start (side_vbox, true, true);
+
+	HBox* current_speaker_hbox = manage (new HBox);
+	current_speaker_hbox->set_spacing (4);
+	current_speaker_hbox->pack_start (*manage (new Label (_("Azimuth:"))), false, false);
+	current_speaker_hbox->pack_start (azimuth_spinner, true, true);
+	current_speaker_hbox->pack_start (remove_speaker_button, true, true);
 
         get_vbox()->pack_start (hbox);
+        get_vbox()->pack_start (*current_speaker_hbox, true, true);
         get_vbox()->show_all ();
 
         darea.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
@@ -68,25 +77,37 @@ SpeakerDialog::SpeakerDialog ()
         darea.signal_motion_notify_event().connect (sigc::mem_fun (*this, &SpeakerDialog::darea_motion_notify_event));
 
 	add_speaker_button.signal_clicked().connect (sigc::mem_fun (*this, &SpeakerDialog::add_speaker));
+	remove_speaker_button.signal_clicked().connect (sigc::mem_fun (*this, &SpeakerDialog::remove_speaker));
+	azimuth_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &SpeakerDialog::azimuth_changed));
 
         drag_index = -1;
+
+	/* selected index initialised to 0 above; this will set `no selection' and
+	   sensitize widgets accordingly.
+	*/
+	set_selected (-1);
 }
 
 void
 SpeakerDialog::set_speakers (boost::shared_ptr<Speakers> s) 
 {
-        speakers = *s;
+        _speakers = s;
 }
 
-Speakers
+boost::shared_ptr<Speakers>
 SpeakerDialog::get_speakers () const
 {
-        return speakers;
+        return _speakers.lock ();
 }
 
 bool
 SpeakerDialog::darea_expose_event (GdkEventExpose* event)
 {
+	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	if (!speakers) {
+		return false;
+	}
+
 	gint x, y;
 	cairo_t* cr;
 
@@ -131,8 +152,8 @@ SpeakerDialog::darea_expose_event (GdkEventExpose* event)
                 arc_radius = 4.0;
         }
 
-        uint32_t n = 0;
-        for (vector<Speaker>::iterator i = speakers.speakers().begin(); i != speakers.speakers().end(); ++i) {
+        int n = 0;
+        for (vector<Speaker>::iterator i = speakers->speakers().begin(); i != speakers->speakers().end(); ++i) {
                 
                 Speaker& s (*i);
                 CartesianVector c (s.coords());
@@ -145,7 +166,11 @@ SpeakerDialog::darea_expose_event (GdkEventExpose* event)
                 /* XXX need to shift circles so that they are centered on the circle */
                 
                 cairo_arc (cr, x, y, arc_radius, 0, 2.0 * M_PI);
-                cairo_set_source_rgb (cr, 0.8, 0.2, 0.1);
+		if (selected_index == n) {
+			cairo_set_source_rgb (cr, 0.8, 0.8, 0.2);
+		} else {
+			cairo_set_source_rgb (cr, 0.8, 0.2, 0.1);
+		}
                 cairo_close_path (cr);
                 cairo_fill (cr);
                 
@@ -224,6 +249,11 @@ SpeakerDialog::darea_size_allocate (Gtk::Allocation& alloc)
 bool
 SpeakerDialog::darea_button_press_event (GdkEventButton *ev)
 {
+	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	if (!speakers) {
+		return false;
+	}
+	
 	GdkModifierType state;
 
 	if (ev->type == GDK_2BUTTON_PRESS && ev->button == 1) {
@@ -236,14 +266,17 @@ SpeakerDialog::darea_button_press_event (GdkEventButton *ev)
 	case 1:
 	case 2:
 	{
-		drag_index = find_closest_object (ev->x, ev->y);
+		int const index = find_closest_object (ev->x, ev->y);
+		set_selected (index);
+
+		drag_index = index;
 		int const drag_x = (int) floor (ev->x);
 		int const drag_y = (int) floor (ev->y);
 		state = (GdkModifierType) ev->state;
 
 		if (drag_index >= 0) {
 			CartesianVector c;
-			speakers.speakers()[drag_index].angles().cartesian (c);
+			speakers->speakers()[drag_index].angles().cartesian (c);
 			cart_to_gtk (c);
 			drag_offset_x = drag_x - x_origin - c.x;
 			drag_offset_y = drag_y - y_origin - c.y;
@@ -263,6 +296,11 @@ SpeakerDialog::darea_button_press_event (GdkEventButton *ev)
 bool
 SpeakerDialog::darea_button_release_event (GdkEventButton *ev)
 {
+	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	if (!speakers) {
+		return false;
+	}
+	
 	gint x, y;
 	GdkModifierType state;
 	bool ret = false;
@@ -275,7 +313,7 @@ SpeakerDialog::darea_button_release_event (GdkEventButton *ev)
 
 		if (Keyboard::modifier_state_contains (state, Keyboard::TertiaryModifier)) {
                         
-			for (vector<Speaker>::iterator i = speakers.speakers().begin(); i != speakers.speakers().end(); ++i) {
+			for (vector<Speaker>::iterator i = speakers->speakers().begin(); i != speakers->speakers().end(); ++i) {
 				/* XXX DO SOMETHING TO SET SPEAKER BACK TO "normal" */
 			}
 
@@ -309,12 +347,17 @@ SpeakerDialog::darea_button_release_event (GdkEventButton *ev)
 int
 SpeakerDialog::find_closest_object (gdouble x, gdouble y) 
 {
+	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	if (!speakers) {
+		return -1;
+	}
+
 	float distance;
 	float best_distance = FLT_MAX;
 	int n = 0;
         int which = -1;
 
-	for (vector<Speaker>::iterator i = speakers.speakers().begin(); i != speakers.speakers().end(); ++i, ++n) {
+	for (vector<Speaker>::iterator i = speakers->speakers().begin(); i != speakers->speakers().end(); ++i, ++n) {
 
 		Speaker& candidate (*i);
 		CartesianVector c;
@@ -359,6 +402,11 @@ SpeakerDialog::darea_motion_notify_event (GdkEventMotion *ev)
 bool
 SpeakerDialog::handle_motion (gint evx, gint evy, GdkModifierType state)
 {
+	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	if (!speakers) {
+		return false;
+	}
+
 	if (drag_index < 0) {
 		return false;
 	}
@@ -382,7 +430,7 @@ SpeakerDialog::handle_motion (gint evx, gint evy, GdkModifierType state)
 	if (state & GDK_BUTTON1_MASK && !(state & GDK_BUTTON2_MASK)) {
 		CartesianVector c;
 		bool need_move = false;
-                Speaker& moving (speakers.speakers()[drag_index]);
+                Speaker& moving (speakers->speakers()[drag_index]);
 
 		moving.angles().cartesian (c);
 		cart_to_gtk (c);
@@ -420,6 +468,99 @@ SpeakerDialog::handle_motion (gint evx, gint evy, GdkModifierType state)
 void
 SpeakerDialog::add_speaker ()
 {
-	speakers.add_speaker (PBD::AngularVector (0, 0, 0));
+	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	if (!speakers) {
+		return;
+	}
+	
+	speakers->add_speaker (PBD::AngularVector (0, 0, 0));
+	queue_draw ();
+}
+
+void
+SpeakerDialog::set_selected (int i)
+{
+	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	if (!speakers) {
+		return;
+	}
+	
+	if (i == selected_index) {
+		return;
+	}
+
+	selected_index = i;
+	queue_draw ();
+
+	selected_speaker_connection.disconnect ();
+	
+	azimuth_spinner.set_sensitive (selected_index != -1);
+	remove_speaker_button.set_sensitive (selected_index != -1);
+	
+	if (selected_index != -1) {
+		azimuth_adjustment.set_value (speakers->speakers()[selected_index].angles().azi);
+		speakers->speakers()[selected_index].PositionChanged.connect (
+			selected_speaker_connection, MISSING_INVALIDATOR,
+			boost::bind (&SpeakerDialog::speaker_position_changed, this),
+			gui_context ()
+			);
+	}
+}
+
+void
+SpeakerDialog::azimuth_changed ()
+{
+	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	if (!speakers) {
+		return;
+	}
+
+	assert (selected_index != -1);
+
+	if (ignore_azimuth_change) {
+		return;
+	}
+	
+	ignore_speaker_position_change = true;
+	speakers->move_speaker (speakers->speakers()[selected_index].id, PBD::AngularVector (azimuth_adjustment.get_value (), 0, 0));
+	ignore_speaker_position_change = false;
+
+	queue_draw ();
+}
+
+void
+SpeakerDialog::speaker_position_changed ()
+{
+	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	if (!speakers) {
+		return;
+	}
+	
+	assert (selected_index != -1);
+
+	if (ignore_speaker_position_change) {
+		return;
+	}
+	
+	ignore_azimuth_change = true;
+	azimuth_adjustment.set_value (speakers->speakers()[selected_index].angles().azi);
+	ignore_azimuth_change = false;
+
+	queue_draw ();
+}
+					   
+void
+SpeakerDialog::remove_speaker ()
+{
+	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	if (!speakers) {
+		return;
+	}
+	
+	assert (selected_index != -1);
+
+	speakers->remove_speaker (speakers->speakers()[selected_index].id);
+	set_selected (-1);
+	
 	queue_draw ();
 }

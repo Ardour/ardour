@@ -35,11 +35,35 @@ Speaker::Speaker (int i, const AngularVector& position)
 	move (position);
 }
 
+Speaker::Speaker (Speaker const & o)
+	: id (o.id)
+	, _coords (o._coords)
+	, _angles (o._angles)
+{
+	
+}
+
+Speaker &
+Speaker::operator= (Speaker const & o)
+{
+	if (&o == this) {
+		return *this;
+	}
+
+	id = o.id;
+	_coords = o._coords;
+	_angles = o._angles;
+
+	return *this;
+}
+
 void
 Speaker::move (const AngularVector& new_position)
 {
 	_angles = new_position;
 	_angles.cartesian (_coords);
+
+	PositionChanged (); /* EMIT SIGNAL */
 }
 
 Speakers::Speakers ()
@@ -100,12 +124,12 @@ Speakers::add_speaker (const AngularVector& position)
 void
 Speakers::remove_speaker (int id)
 {
-	for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ) {
-		if ((*i).id == id) {
+	for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
+		if (i->id == id) {
 			i = _speakers.erase (i);
 			update ();
 			break;
-		} 
+		}
 	}
 }
 

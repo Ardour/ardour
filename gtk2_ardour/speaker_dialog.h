@@ -35,11 +35,11 @@ class SpeakerDialog  : public ArdourDialog
 public:
 	SpeakerDialog ();
 	
-	ARDOUR::Speakers get_speakers() const;
+	boost::shared_ptr<ARDOUR::Speakers> get_speakers() const;
 	void set_speakers (boost::shared_ptr<ARDOUR::Speakers>);
 	
 private:
-	ARDOUR::Speakers speakers;
+	boost::weak_ptr<ARDOUR::Speakers> _speakers;
 	Gtk::HBox        hbox;
 	Gtk::VBox        side_vbox;
 	Gtk::AspectFrame aspect_frame;
@@ -47,7 +47,7 @@ private:
 	Gtk::Adjustment  azimuth_adjustment;
 	Gtk::SpinButton  azimuth_spinner;
 	Gtk::Button      add_speaker_button;
-	Gtk::Button      use_system_button;
+	Gtk::Button      remove_speaker_button;
 	int32_t          selected_speaker;
 	int              width;         ///< width of the circle
 	int              height;        ///< height of the circle
@@ -59,6 +59,10 @@ private:
 	double           drag_offset_x;
 	double           drag_offset_y;
 	int              drag_index;
+	int              selected_index; ///< index of any selected speaker, or -1
+	PBD::ScopedConnection selected_speaker_connection;
+	bool             ignore_speaker_position_change;
+	bool             ignore_azimuth_change;
 	
 	bool darea_expose_event (GdkEventExpose*);
 	void darea_size_allocate (Gtk::Allocation& alloc);
@@ -73,6 +77,10 @@ private:
 	int find_closest_object (gdouble x, gdouble y);
 
 	void add_speaker ();
+	void remove_speaker ();
+	void azimuth_changed ();
+	void set_selected (int);
+	void speaker_position_changed ();
 };
 
 #endif /* __ardour_gtk_speaker_dialog_h__ */

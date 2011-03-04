@@ -20,12 +20,15 @@
 #define __libardour_speaker_h__
 
 #include "pbd/cartesian.h"
+#include "pbd/signals.h"
 
 namespace ARDOUR { 
 
 class Speaker {
 public:
 	Speaker (int, const PBD::AngularVector& position);
+	Speaker (const Speaker &);
+	Speaker& operator= (const Speaker &);
         
 	void move (const PBD::AngularVector& new_position);
 
@@ -33,6 +36,9 @@ public:
 	const PBD::AngularVector&   angles() const { return _angles; }
 
 	int id;
+
+	/** emitted when this speaker's position has changed */
+	PBD::Signal0<void> PositionChanged;
 
 private:
 	PBD::CartesianVector _coords;
