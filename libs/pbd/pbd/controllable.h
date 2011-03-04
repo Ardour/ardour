@@ -37,9 +37,7 @@ class Controllable : public PBD::StatefulDestructible {
   public:
 	enum Flag {
 		Toggle = 0x1,
-		Discrete = 0x2,
-		GainLike = 0x4,
-		IntegerOnly = 0x8
+		GainLike = 0x2,
 	};
 
 	Controllable (const std::string& name, Flag f = Flag (0));
@@ -79,17 +77,13 @@ class Controllable : public PBD::StatefulDestructible {
 	void set_touching (bool yn) { _touching = yn; }
 
 	bool is_toggle() const { return _flags & Toggle; }
-	bool is_discrete() const { return _flags & Discrete; }
 	bool is_gain_like() const { return _flags & GainLike; }
-	bool is_integral_only() const { return _flags & IntegerOnly; }
 
         virtual double lower() const { return 0.0; }
         virtual double upper() const { return 1.0; }
 
 	Flag flags() const { return _flags; }
 	void set_flags (Flag f);
-
-	virtual uint32_t get_discrete_values (std::list<float>&) { return 0; /* no values returned */ }
 
 	static Controllable* by_id (const PBD::ID&);
 	static Controllable* by_name (const std::string&);

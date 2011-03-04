@@ -40,8 +40,6 @@ setup_libpbd_enums ()
 #define REGISTER_CLASS_ENUM(t,e) i.push_back (t::e); s.push_back (#e)
 
 	REGISTER_CLASS_ENUM (Controllable, Toggle);
-	REGISTER_CLASS_ENUM (Controllable, Discrete);
 	REGISTER_CLASS_ENUM (Controllable, GainLike);
-	REGISTER_CLASS_ENUM (Controllable, IntegerOnly);
 	REGISTER (controllable_flags);
 }
