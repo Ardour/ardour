@@ -377,16 +377,20 @@ MidiRegionView::mouse_mode_changed ()
 bool
 MidiRegionView::button_press (GdkEventButton* ev)
 {
+        if (ev->button != 1) {
+                return false;
+        }
+
         _last_x = ev->x;
         _last_y = ev->y;
-	
+        
         group->w2i (_last_x, _last_y);
         
         if (_mouse_state != SelectTouchDragging) {
-	  
+                
                 _pressed_button = ev->button;
                 _mouse_state = Pressed;
-
+                
                 return true;
         }
         
@@ -400,6 +404,10 @@ MidiRegionView::button_release (GdkEventButton* ev)
 {
 	double event_x, event_y;
 	framepos_t event_frame = 0;
+
+        if (ev->button != 1) {
+                return false;
+        }
 
         event_x = ev->x;
         event_y = ev->y;

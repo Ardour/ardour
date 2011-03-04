@@ -243,6 +243,7 @@ TimeAxisViewItem::hide_rect ()
 
         if (name_highlight) {
                 name_highlight->property_outline_what() = 0x0;
+                name_highlight->property_fill_color_rgba() = UINT_RGBA_CHANGE_A(fill_color,64);
         }
 }
 
@@ -254,6 +255,7 @@ TimeAxisViewItem::show_rect ()
 
         if (name_highlight) {
                 name_highlight->property_outline_what() = 0x4;
+                name_highlight->property_fill_color_rgba() = fill_color;
         }
 }
 
