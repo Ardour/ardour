@@ -1,5 +1,9 @@
 #include <iostream>
+
 #include "pbd/xml++.h"
+#include "pbd/convert.h"
+
+#include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/keyboard.h"
 
@@ -10,11 +14,100 @@ using namespace Glib;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-uint32_t KeyboardKey::_ignored_state = 0;
+uint32_t Bindings::_ignored_state = 0;
+
+MouseButton::MouseButton (uint32_t state, uint32_t keycode)
+{
+        uint32_t ignore = Bindings::ignored_state();
+        
+        if (gdk_keyval_is_upper (keycode) && gdk_keyval_is_lower (keycode)) {
+                /* key is not subject to case, so ignore SHIFT
+                 */
+                ignore |= GDK_SHIFT_MASK;
+        }
+
+        _val = (state & ~ignore);
+        _val <<= 32;
+        _val |= keycode;
+};
+
+bool
+MouseButton::make_button (const string& str, MouseButton& b)
+{
+        int s = 0;
+
+        if (str.find ("Primary") != string::npos) {
+                s |= Keyboard::PrimaryModifier;
+        }
+
+        if (str.find ("Secondary") != string::npos) {
+                s |= Keyboard::SecondaryModifier;
+        }
+
+        if (str.find ("Tertiary") != string::npos) {
+                s |= Keyboard::TertiaryModifier;
+        }
+
+        if (str.find ("Level4") != string::npos) {
+                s |= Keyboard::Level4Modifier;
+        }
+
+        string::size_type lastmod = str.find_last_of ('-');
+        uint32_t button_number;
+        
+        if (lastmod == string::npos) {
+                button_number = PBD::atoi (str);
+        } else {
+                button_number = PBD::atoi (str.substr (lastmod+1));
+        }
+
+        b = MouseButton (s, button_number);
+        return true;
+}
+
+string
+MouseButton::name () const
+{
+        int s = state();
+        
+        string str;
+
+        if (s & Keyboard::PrimaryModifier) {
+                str += "Primary";
+        } 
+        if (s & Keyboard::SecondaryModifier) {
+                if (!str.empty()) {
+                        str += '-';
+                }
+                str += "Secondary";
+        }
+        if (s & Keyboard::TertiaryModifier) {
+                if (!str.empty()) {
+                        str += '-';
+                }
+                str += "Tertiary";
+        } 
+        if (s & Keyboard::Level4Modifier) {
+                if (!str.empty()) {
+                        str += '-';
+                }
+                str += "Level4";
+        }
+        
+        if (!str.empty()) {
+                str += '-';
+        }
+
+        char buf[16];
+        snprintf (buf, sizeof (buf), "%u", button());
+        str += buf;
+
+        return str;
+}
 
 KeyboardKey::KeyboardKey (uint32_t state, uint32_t keycode)
 {
-        uint32_t ignore = _ignored_state;
+        uint32_t ignore = Bindings::ignored_state();
         
         if (gdk_keyval_is_upper (keycode) && gdk_keyval_is_lower (keycode)) {
                 /* key is not subject to case, so ignore SHIFT
@@ -122,15 +215,15 @@ Bindings::set_action_map (ActionMap& am)
 }
 
 bool
-Bindings::activate (KeyboardKey kb, KeyboardKey::Operation op)
+Bindings::activate (KeyboardKey kb, Operation op)
 {
         KeybindingMap* kbm;
 
         switch (op) {
-        case KeyboardKey::Press:
+        case Press:
                 kbm = &press_bindings;
                 break;
-        case KeyboardKey::Release:
+        case Release:
                 kbm = &release_bindings;
                 break;
         }
@@ -149,15 +242,15 @@ Bindings::activate (KeyboardKey kb, KeyboardKey::Operation op)
 }
 
 void
-Bindings::add (KeyboardKey kb, KeyboardKey::Operation op, RefPtr<Action> what)
+Bindings::add (KeyboardKey kb, Operation op, RefPtr<Action> what)
 {
         KeybindingMap* kbm;
 
         switch (op) {
-        case KeyboardKey::Press:
+        case Press:
                 kbm = &press_bindings;
                 break;
-        case KeyboardKey::Release:
+        case Release:
                 kbm = &release_bindings;
                 break;
         }
@@ -167,22 +260,22 @@ Bindings::add (KeyboardKey kb, KeyboardKey::Operation op, RefPtr<Action> what)
         if (k == kbm->end()) {
                 pair<KeyboardKey,RefPtr<Action> > newpair (kb, what);
                 kbm->insert (newpair);
-                cerr << "Bindings added " << kb.key() << " w/ " << kb.state() << endl;
+                cerr << "Bindings added " << kb.key() << " w/ " << kb.state() << " => " << what->get_name() << endl;
         } else {
                 k->second = what;
         }
 }
 
 void
-Bindings::remove (KeyboardKey kb, KeyboardKey::Operation op)
+Bindings::remove (KeyboardKey kb, Operation op)
 {
         KeybindingMap* kbm;
 
         switch (op) {
-        case KeyboardKey::Press:
+        case Press:
                 kbm = &press_bindings;
                 break;
-        case KeyboardKey::Release:
+        case Release:
                 kbm = &release_bindings;
                 break;
         }
@@ -195,33 +288,86 @@ Bindings::remove (KeyboardKey kb, KeyboardKey::Operation op)
 }
 
 bool
+Bindings::activate (MouseButton bb, Operation op)
+{
+        MouseButtonBindingMap* bbm;
+
+        switch (op) {
+        case Press:
+                bbm = &button_press_bindings;
+                break;
+        case Release:
+                bbm = &button_release_bindings;
+                break;
+        }
+
+        MouseButtonBindingMap::iterator b = bbm->find (bb);
+        
+        if (b == bbm->end()) {
+                /* no entry for this key in the state map */
+                return false;
+        }
+
+        /* lets do it ... */
+
+        b->second->activate ();
+        return true;
+}
+
+void
+Bindings::add (MouseButton bb, Operation op, RefPtr<Action> what)
+{
+        MouseButtonBindingMap* bbm;
+
+        switch (op) {
+        case Press:
+                bbm = &button_press_bindings;
+                break;
+        case Release:
+                bbm = &button_release_bindings;
+                break;
+        }
+
+        MouseButtonBindingMap::iterator b = bbm->find (bb);
+
+        if (b == bbm->end()) {
+                pair<MouseButton,RefPtr<Action> > newpair (bb, what);
+                bbm->insert (newpair);
+                cerr << "Bindings added mouse button " << bb.button() << " w/ " << bb.state() << " => " << what->get_name() << endl;
+        } else {
+                b->second = what;
+        }
+}
+
+void
+Bindings::remove (MouseButton bb, Operation op)
+{
+        MouseButtonBindingMap* bbm;
+
+        switch (op) {
+        case Press:
+                bbm = &button_press_bindings;
+                break;
+        case Release:
+                bbm = &button_release_bindings;
+                break;
+        }
+        
+        MouseButtonBindingMap::iterator b = bbm->find (bb);
+
+        if (b != bbm->end()) {
+                bbm->erase (b);
+        }
+}
+
+bool
 Bindings::save (const string& path)
 {
         XMLTree tree;
         XMLNode* root = new XMLNode (X_("Bindings"));
         tree.set_root (root);
-
-        XMLNode* presses = new XMLNode (X_("Press"));
-        root->add_child_nocopy (*presses);
-
-        for (KeybindingMap::iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
-                XMLNode* child;
-                child = new XMLNode (X_("Binding"));
-                child->add_property (X_("key"), k->first.name());
-                child->add_property (X_("action"), k->second->get_name());
-                presses->add_child_nocopy (*child);
-        }
-
-        XMLNode* releases = new XMLNode (X_("Release"));
-        root->add_child_nocopy (*releases);
-
-        for (KeybindingMap::iterator k = release_bindings.begin(); k != release_bindings.end(); ++k) {
-                XMLNode* child;
-                child = new XMLNode (X_("Binding"));
-                child->add_property (X_("key"), k->first.name());
-                child->add_property (X_("action"), k->second->get_name());
-                releases->add_child_nocopy (*child);
-        }
+        
+        save (*root);
 
         if (!tree.write (path)) {
                 ::unlink (path.c_str());
@@ -229,6 +375,53 @@ Bindings::save (const string& path)
         }
 
         return true;
+}
+
+void
+Bindings::save (XMLNode& root)
+{
+        XMLNode* presses = new XMLNode (X_("Press"));
+        root.add_child_nocopy (*presses);
+
+        for (KeybindingMap::iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
+                XMLNode* child;
+                child = new XMLNode (X_("Binding"));
+                child->add_property (X_("key"), k->first.name());
+                string ap = k->second->get_accel_path();
+                child->add_property (X_("action"), ap.substr (ap.find ('/') + 1));
+                presses->add_child_nocopy (*child);
+        }
+
+        for (MouseButtonBindingMap::iterator k = button_press_bindings.begin(); k != button_press_bindings.end(); ++k) {
+                XMLNode* child;
+                child = new XMLNode (X_("Binding"));
+                child->add_property (X_("button"), k->first.name());
+                string ap = k->second->get_accel_path();
+                child->add_property (X_("action"), ap.substr (ap.find ('/') + 1));
+                presses->add_child_nocopy (*child);
+        }
+
+        XMLNode* releases = new XMLNode (X_("Release"));
+        root.add_child_nocopy (*releases);
+
+        for (KeybindingMap::iterator k = release_bindings.begin(); k != release_bindings.end(); ++k) {
+                XMLNode* child;
+                child = new XMLNode (X_("Binding"));
+                child->add_property (X_("key"), k->first.name());
+                string ap = k->second->get_accel_path();
+                child->add_property (X_("action"), ap.substr (ap.find ('/') + 1));
+                releases->add_child_nocopy (*child);
+        }
+
+        for (MouseButtonBindingMap::iterator k = button_release_bindings.begin(); k != button_release_bindings.end(); ++k) {
+                XMLNode* child;
+                child = new XMLNode (X_("Binding"));
+                child->add_property (X_("button"), k->first.name());
+                string ap = k->second->get_accel_path();
+                child->add_property (X_("action"), ap.substr (ap.find ('/') + 1));
+                releases->add_child_nocopy (*child);
+        }
+
 }
 
 bool
@@ -251,50 +444,76 @@ Bindings::load (const string& path)
         const XMLNodeList& children (root.children());
 
         for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-
-                if ((*i)->name() == X_("Press") || (*i)->name() == X_("Release")) {
-
-                        KeyboardKey::Operation op;
-
-                        if ((*i)->name() == X_("Press")) {
-                                op = KeyboardKey::Press;
-                        } else {
-                                op = KeyboardKey::Release;
-                        }
-                        
-                        const XMLNodeList& gchildren ((*i)->children());
-
-                        for (XMLNodeList::const_iterator p = gchildren.begin(); p != gchildren.end(); ++p) {
-
-                                XMLProperty* ap;
-                                XMLProperty* kp;
-
-                                ap = (*p)->property ("action");
-                                kp = (*p)->property ("key");
-
-                                if (!ap || !kp) {
-                                        continue;
-                                }
-
-                                RefPtr<Action> act = action_map->find_action (ap->value());
-                                
-                                if (!act) {
-                                        continue;
-                                }
-
-                                KeyboardKey k;
-                                
-                                if (!KeyboardKey::make_key (kp->value(), k)) {
-                                        continue;
-                                }
-
-                                add (k, op, act);
-                        }
-                }
+                load (**i);
         }
 
         return true;
 }
+
+void
+Bindings::load (const XMLNode& node)
+{
+        if (node.name() == X_("Press") || node.name() == X_("Release")) {
+                
+                Operation op;
+                
+                if (node.name() == X_("Press")) {
+                        op = Press;
+                } else {
+                        op = Release;
+                }
+                
+                const XMLNodeList& children (node.children());
+                
+                for (XMLNodeList::const_iterator p = children.begin(); p != children.end(); ++p) {
+                        
+                        XMLProperty* ap;
+                        XMLProperty* kp;
+                        XMLProperty* bp;
+                        
+                        ap = (*p)->property ("action");
+                        kp = (*p)->property ("key");
+                        bp = (*p)->property ("button");
+                        
+                        if (!ap || (!kp && !bp)) {
+                                continue;
+                        }
+
+                        RefPtr<Action> act;
+
+                        if (action_map) {
+                                act = action_map->find_action (ap->value());
+                        } 
+
+                        if (!act) {
+                                string::size_type slash = ap->value().find ('/');
+                                if (slash != string::npos) {
+                                        string group = ap->value().substr (0, slash);
+                                        string action = ap->value().substr (slash+1);
+                                        act = ActionManager::get_action (group.c_str(), action.c_str());
+                                }
+                        }
+                        
+                        if (!act) {
+                                continue;
+                        }
+                        
+                        if (kp) {
+                                KeyboardKey k;
+                                if (!KeyboardKey::make_key (kp->value(), k)) {
+                                        continue;
+                                }
+                                add (k, op, act);
+                        } else {
+                                MouseButton b;
+                                if (!MouseButton::make_button (bp->value(), b)) {
+                                        continue;
+                                }
+                                add (b, op, act);
+                        }
+                }
+        }
+}        
 
 RefPtr<Action>
 ActionMap::find_action (const string& name)

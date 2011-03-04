@@ -9,16 +9,13 @@
 #include <gtkmm/radioaction.h>
 #include <gtkmm/toggleaction.h>
 
+class XMLNode;
+
 namespace Gtkmm2ext {
 
 class KeyboardKey
 {
   public:
-        enum Operation { 
-                Press,
-                Release
-        };
-
         KeyboardKey () {
                 _val = GDK_VoidSymbol;
         }
@@ -38,6 +35,31 @@ class KeyboardKey
 
         std::string name() const;
         static bool make_key (const std::string&, KeyboardKey&);
+
+  private:
+        uint64_t _val;
+};
+
+class MouseButton {
+  public:
+        MouseButton () {
+                _val = ~0ULL;
+        }
+
+        MouseButton (uint32_t state, uint32_t button_number);
+        uint32_t state() const { return _val >> 32; }
+        uint32_t button() const { return _val & 0xffff; }
+
+        bool operator<(const MouseButton& other) const {
+                return _val < other._val;
+        }
+
+        bool operator==(const MouseButton& other) const {
+                return _val == other._val;
+        }
+
+        std::string name() const;
+        static bool make_button (const std::string&, MouseButton&);
         static void set_ignored_state (int mask) {
                 _ignored_state = mask;
         }
@@ -70,24 +92,46 @@ class ActionMap {
 
 class Bindings {
   public:
+        enum Operation { 
+                Press,
+                Release
+        };
+        
         Bindings();
         ~Bindings ();
 
-        void add (KeyboardKey, KeyboardKey::Operation, Glib::RefPtr<Gtk::Action>);
-        void remove (KeyboardKey, KeyboardKey::Operation);
-        bool activate (KeyboardKey, KeyboardKey::Operation);
+        void add (KeyboardKey, Operation, Glib::RefPtr<Gtk::Action>);
+        void remove (KeyboardKey, Operation);
+        bool activate (KeyboardKey, Operation);
+
+        void add (MouseButton, Operation, Glib::RefPtr<Gtk::Action>);
+        void remove (MouseButton, Operation);
+        bool activate (MouseButton, Operation);
 
         bool load (const std::string& path);
+        void load (const XMLNode& node);
         bool save (const std::string& path);
+        void save (XMLNode& root);
         
         void set_action_map (ActionMap&);
 
+        static void set_ignored_state (int mask) {
+                _ignored_state = mask;
+        }
+        static uint32_t ignored_state() { return _ignored_state; }
+
   private:
         typedef std::map<KeyboardKey,Glib::RefPtr<Gtk::Action> > KeybindingMap;
+
         KeybindingMap press_bindings;
         KeybindingMap release_bindings;
 
+        typedef std::map<MouseButton,Glib::RefPtr<Gtk::Action> > MouseButtonBindingMap;
+        MouseButtonBindingMap button_press_bindings;
+        MouseButtonBindingMap button_release_bindings;
+
         ActionMap* action_map;
+        static uint32_t _ignored_state;
 };
 
 } // namespace
