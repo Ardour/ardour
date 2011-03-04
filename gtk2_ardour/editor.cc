@@ -49,13 +49,14 @@
 #include <gdkmm/color.h>
 #include <gdkmm/bitmap.h>
 
-#include <gtkmm2ext/grouped_buttons.h>
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/tearoff.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/window_title.h>
-#include <gtkmm2ext/choice.h>
-#include <gtkmm2ext/cell_renderer_pixbuf_toggle.h>
+#include "gtkmm2ext/bindings.h"
+#include "gtkmm2ext/grouped_buttons.h"
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/tearoff.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/window_title.h"
+#include "gtkmm2ext/choice.h"
+#include "gtkmm2ext/cell_renderer_pixbuf_toggle.h"
 
 #include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
@@ -719,6 +720,17 @@ Editor::Editor ()
 	_show_marker_lines = false;
 	_over_region_trim_target = false;
 
+        /* Button bindings */
+
+        button_bindings = new Bindings;
+
+	XMLNode* node = button_settings();
+        if (node) {
+                for (XMLNodeList::const_iterator i = node->children().begin(); i != node->children().end(); ++i) {
+                        button_bindings->load (**i);
+                }
+        }
+
 	constructed = true;
 	instant_save ();
 
@@ -738,11 +750,26 @@ Editor::~Editor()
 		image_socket_listener = 0 ;
 	}
 #endif
-        
+
+        delete button_bindings;
 	delete _routes;
 	delete _route_groups;
 	delete track_canvas;
 	delete _drags;
+}
+
+XMLNode*
+Editor::button_settings () const
+{
+	XMLNode* settings = ARDOUR_UI::instance()->editor_settings();
+	XMLNode* node = find_named_node (*settings, X_("Buttons"));
+
+	if (!node) {
+                cerr << "new empty Button node\n";
+		node = new XMLNode (X_("Buttons"));
+	}
+
+	return node;
 }
 
 void
@@ -2388,6 +2415,12 @@ Editor::get_state ()
 
 	snprintf (buf, sizeof (buf), "%d", _the_notebook.get_current_page ());
 	node->add_property (X_("editor-list-page"), buf);
+
+        if (button_bindings) {
+                XMLNode* bb = new XMLNode (X_("Buttons"));
+                button_bindings->save (*bb);
+                node->add_child_nocopy (*bb);
+        } 
 
 	node->add_property (X_("show-marker-lines"), _show_marker_lines ? "yes" : "no");
 

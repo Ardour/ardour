@@ -27,11 +27,13 @@
 
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/tearoff.h>
 #include "pbd/memento_command.h"
 #include "pbd/basename.h"
 #include "pbd/stateful_diff_command.h"
+
+#include "gtkmm2ext/bindings.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/tearoff.h"
 
 #include "ardour_ui.h"
 #include "actions.h"
@@ -1168,11 +1170,32 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		break;
 
 	default:
+                return button_press_dispatch (&event->button);
 		break;
 
 	}
 
 	return false;
+}
+
+bool
+Editor::button_press_dispatch (GdkEventButton* ev)
+{
+        /* this function is intended only for buttons 4 and above.
+         */
+
+        Gtkmm2ext::MouseButton b (ev->state, ev->button);
+        return button_bindings->activate (b, Gtkmm2ext::Bindings::Press);
+}
+
+bool
+Editor::button_release_dispatch (GdkEventButton* ev)
+{
+        /* this function is intended only for buttons 4 and above.
+         */
+
+        Gtkmm2ext::MouseButton b (ev->state, ev->button);
+        return button_bindings->activate (b, Gtkmm2ext::Bindings::Release);
 }
 
 bool

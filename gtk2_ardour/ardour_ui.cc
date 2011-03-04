@@ -49,6 +49,7 @@
 #include "pbd/file_utils.h"
 
 #include "gtkmm2ext/application.h"
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/click_box.h"
@@ -305,10 +306,14 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	keyboard = new ArdourKeyboard(*this);
 
+
 	XMLNode* node = ARDOUR_UI::instance()->keyboard_settings();
 	if (node) {
 		keyboard->set_state (*node, Stateful::loading_state_version);
 	}
+
+        /* we don't like certain modifiers */
+        Bindings::set_ignored_state (GDK_LOCK_MASK|GDK_MOD2_MASK|GDK_MOD3_MASK);
 
 	reset_dpi();
 
@@ -3300,6 +3305,7 @@ ARDOUR_UI::keyboard_settings () const
 	if (!node) {
 		node = new XMLNode (X_("Keyboard"));
 	}
+
 	return node;
 }
 

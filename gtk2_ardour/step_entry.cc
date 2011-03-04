@@ -487,7 +487,7 @@ StepEntry::on_key_press_event (GdkEventKey* ev)
 	if (!gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
                 KeyboardKey k (ev->state, ev->keyval);
 
-                if (bindings.activate (k, KeyboardKey::Press)) {
+                if (bindings.activate (k, Bindings::Press)) {
                         return true;
                 }
 	}
@@ -501,7 +501,7 @@ StepEntry::on_key_release_event (GdkEventKey* ev)
 	if (!gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
                 KeyboardKey k (ev->state, ev->keyval);
 
-                if (bindings.activate (k, KeyboardKey::Release)) {
+                if (bindings.activate (k, Bindings::Release)) {
                         return true;
                 }
 	}
@@ -693,7 +693,6 @@ void
 StepEntry::load_bindings ()
 {
         /* XXX move this to a better place */
-        KeyboardKey::set_ignored_state (GDK_LOCK_MASK|GDK_MOD2_MASK|GDK_MOD3_MASK);
 
         bindings.set_action_map (myactions);
 
