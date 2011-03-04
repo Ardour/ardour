@@ -66,6 +66,8 @@ private:
 	void gtk_to_cart (PBD::CartesianVector& c) const;
 	void cart_to_gtk (PBD::CartesianVector& c) const;
 	int find_closest_object (gdouble x, gdouble y);
+
+	void add_speaker ();
 };
 
 #endif /* __ardour_gtk_speaker_dialog_h__ */

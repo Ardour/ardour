@@ -40,7 +40,6 @@ SpeakerDialog::SpeakerDialog ()
         , use_system_button (_("Use System"))
                               
 {
-        
         side_vbox.set_homogeneous (false);
         side_vbox.set_border_width (9);
         side_vbox.set_spacing (6);
@@ -67,6 +66,8 @@ SpeakerDialog::SpeakerDialog ()
         darea.signal_button_press_event().connect (sigc::mem_fun (*this, &SpeakerDialog::darea_button_press_event));
         darea.signal_button_release_event().connect (sigc::mem_fun (*this, &SpeakerDialog::darea_button_release_event));
         darea.signal_motion_notify_event().connect (sigc::mem_fun (*this, &SpeakerDialog::darea_motion_notify_event));
+
+	add_speaker_button.signal_clicked().connect (sigc::mem_fun (*this, &SpeakerDialog::add_speaker));
 
         drag_index = -1;
 }
@@ -392,4 +393,11 @@ SpeakerDialog::handle_motion (gint evx, gint evy, GdkModifierType state)
 	} 
 
 	return true;
+}
+
+void
+SpeakerDialog::add_speaker ()
+{
+	speakers.add_speaker (PBD::AngularVector (0, 0, 0));
+	queue_draw ();
 }
