@@ -69,6 +69,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	Gtk::Widget*   _gui_widget;
 	SLV2UIInstance _inst;
 	float*         _values;
+	std::vector<boost::shared_ptr<ARDOUR::AutomationControl> > _controllables;
 
 	struct lv2_external_ui_host _external_ui_host;
 	LV2_Feature _external_ui_feature;

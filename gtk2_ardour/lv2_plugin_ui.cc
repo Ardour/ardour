@@ -38,11 +38,8 @@ LV2PluginUI::lv2_ui_write(
 		const void*      buffer)
 {
 	//cout << "lv2_ui_write" << endl;
-	LV2PluginUI* me = (LV2PluginUI*)controller;
-	if (*(float*)buffer != me->_values[port_index]) {
-		//cout << "set_parameter " << port_index << ":"  << *(float*)buffer << endl;
-		me->_lv2->set_parameter(port_index, *(float*)buffer);
-  }
+	LV2PluginUI* me = (LV2PluginUI *) controller;
+	me->_controllables[port_index]->set_value (*(float *) buffer);
 }
 
 void LV2PluginUI::on_external_ui_closed(LV2UI_Controller controller)
@@ -190,11 +187,16 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	}
 
 	_values = new float[num_ports];
+	_controllables.resize (num_ports);
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		bool ok;
 		uint32_t port = _lv2->nth_parameter(i, ok);
 		if (ok) {
 			_values[port] = _lv2->get_parameter(port);
+			_controllables[port] = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (
+				insert->control (Evoral::Parameter (PluginAutomation, 0, port))
+				);
+			
 			if (_lv2->parameter_is_control(port) && _lv2->parameter_is_input(port)) {
 				parameter_update(port, _values[port]);
 			}
