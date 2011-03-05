@@ -95,7 +95,9 @@ public:
 
 	const_iterator begin() const { return const_iterator(*this, 0); }
 	const_iterator end()   const { return const_iterator(*this, _size); }
-
+        
+        uint8_t* data() const { return _data; }
+        
 private:
 	friend class iterator_base< MidiBuffer, Evoral::MIDIEvent<TimeType> >;
 	friend class iterator_base< const MidiBuffer, const Evoral::MIDIEvent<TimeType> >;
