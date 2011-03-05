@@ -35,6 +35,7 @@
 #include "ardour/ardour.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
+#include "ardour/debug.h"
 #include "ardour/lv2_event_buffer.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/session.h"
@@ -89,6 +90,8 @@ LV2Plugin::LV2Plugin (const LV2Plugin &other)
 void
 LV2Plugin::init (LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 {
+        DEBUG_TRACE (DEBUG::LV2, "LV2 plugin init\n");
+
 	_world                = world;
 	_plugin               = plugin;
 	_ui                   = NULL;
@@ -200,6 +203,8 @@ LV2Plugin::init (LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 
 LV2Plugin::~LV2Plugin ()
 {
+        DEBUG_TRACE (DEBUG::LV2, string_compose ("%1 destroy\n", name()));
+
 	deactivate ();
 	cleanup ();
 
@@ -246,6 +251,8 @@ LV2Plugin::port_symbol (uint32_t index) const
 void
 LV2Plugin::set_parameter (uint32_t which, float val)
 {
+        DEBUG_TRACE (DEBUG::LV2, string_compose ("%1 set parameter %2 to %3\n", name(), which, val));
+
 	if (which < slv2_plugin_get_num_ports(_plugin)) {
 		_shadow_data[which] = val;
 	} else {
@@ -542,16 +549,16 @@ LV2Plugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 	SLV2Value def, min, max;
 	slv2_port_get_range(_plugin, port, &def, &min, &max);
 
-    desc.integer_step = slv2_port_has_property(_plugin, port, _world.integer);
-    desc.toggled      = slv2_port_has_property(_plugin, port, _world.toggled);
-    desc.logarithmic  = slv2_port_has_property(_plugin, port, _world.logarithmic);
-    desc.sr_dependent = slv2_port_has_property(_plugin, port, _world.srate);
-    desc.label        = slv2_value_as_string(slv2_port_get_name(_plugin, port));
-    desc.lower        = min ? slv2_value_as_float(min) : 0.0f;
-    desc.upper        = max ? slv2_value_as_float(max) : 1.0f;
-    desc.min_unbound  = false; // TODO: LV2 extension required
-    desc.max_unbound  = false; // TODO: LV2 extension required
-
+        desc.integer_step = slv2_port_has_property(_plugin, port, _world.integer);
+        desc.toggled      = slv2_port_has_property(_plugin, port, _world.toggled);
+        desc.logarithmic  = slv2_port_has_property(_plugin, port, _world.logarithmic);
+        desc.sr_dependent = slv2_port_has_property(_plugin, port, _world.srate);
+        desc.label        = slv2_value_as_string(slv2_port_get_name(_plugin, port));
+        desc.lower        = min ? slv2_value_as_float(min) : 0.0f;
+        desc.upper        = max ? slv2_value_as_float(max) : 1.0f;
+        desc.min_unbound  = false; // TODO: LV2 extension required
+        desc.max_unbound  = false; // TODO: LV2 extension required
+        
 	if (desc.integer_step) {
 		desc.step      = 1.0;
 		desc.smallstep = 0.1;
@@ -612,6 +619,8 @@ LV2Plugin::automatable () const
 void
 LV2Plugin::activate ()
 {
+        DEBUG_TRACE (DEBUG::LV2, string_compose ("%1 activate\n", name()));
+
 	if (!_was_activated) {
 		slv2_instance_activate (_instance);
 		_was_activated = true;
@@ -621,6 +630,8 @@ LV2Plugin::activate ()
 void
 LV2Plugin::deactivate ()
 {
+        DEBUG_TRACE (DEBUG::LV2, string_compose ("%1 deactivate\n", name()));
+
 	if (_was_activated) {
 		slv2_instance_deactivate (_instance);
 		_was_activated = false;
@@ -630,6 +641,8 @@ LV2Plugin::deactivate ()
 void
 LV2Plugin::cleanup ()
 {
+        DEBUG_TRACE (DEBUG::LV2, string_compose ("%1 cleanup\n", name()));
+
 	activate ();
 	deactivate ();
 	slv2_instance_free (_instance);
@@ -638,9 +651,11 @@ LV2Plugin::cleanup ()
 
 int
 LV2Plugin::connect_and_run (BufferSet& bufs,
-		ChanMapping in_map, ChanMapping out_map,
-		pframes_t nframes, framecnt_t offset)
+                            ChanMapping in_map, ChanMapping out_map,
+                            pframes_t nframes, framecnt_t offset)
 {
+        DEBUG_TRACE (DEBUG::LV2, string_compose ("%1 run %2 offset %3\n", name(), nframes, offset));
+
 	Plugin::connect_and_run (bufs, in_map, out_map, nframes, offset);
 
 	cycles_t then = get_cycles ();
