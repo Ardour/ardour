@@ -3300,14 +3300,7 @@ Session::config_changed (std::string p, bool ours)
 
 		if (Config->get_monitoring_model() == HardwareMonitoring && transport_rolling()) {
 			/* auto-input only makes a difference if we're rolling */
-
-			boost::shared_ptr<RouteList> rl = routes.reader ();
-			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-				if (tr && tr->record_enabled ()) {
-					tr->monitor_input (!config.get_auto_input());
-				}
-			}
+                        set_track_monitor_input_status (!config.get_auto_input());
 		}
 
 	} else if (p == "punch-in") {

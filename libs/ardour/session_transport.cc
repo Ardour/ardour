@@ -819,13 +819,6 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 		return;
 	}
 
-	// Update Timecode time
-	// [DR] FIXME: find out exactly where this should go below
-	_transport_frame = target_frame;
-	timecode_time(_transport_frame, transmitting_timecode_time);
-	outbound_mtc_timecode_frame = _transport_frame;
-	next_quarter_frame_to_send = 0;
-
 	if (_transport_speed && (!with_loop || loop_changing)) {
 		/* schedule a declick. we'll be called again when its done */
 
@@ -837,6 +830,13 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 			return;
 		}
 	}
+
+	// Update Timecode time
+	// [DR] FIXME: find out exactly where this should go below
+	_transport_frame = target_frame;
+	timecode_time(_transport_frame, transmitting_timecode_time);
+	outbound_mtc_timecode_frame = _transport_frame;
+	next_quarter_frame_to_send = 0;
 
 	if (transport_rolling() && (!auto_play_legal || !config.get_auto_play()) && !with_roll && !(synced_to_jack() && play_loop)) {
 		realtime_stop (false, true); // XXX paul - check if the 2nd arg is really correct
@@ -872,28 +872,12 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 	if (with_roll) {
 		/* switch from input if we're going to roll */
 		if (Config->get_monitoring_model() == HardwareMonitoring) {
-
-			boost::shared_ptr<RouteList> rl = routes.reader();
-			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-				if (tr && tr->record_enabled ()) {
-					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
-					tr->monitor_input (!config.get_auto_input());
-				}
-			}
+                        set_track_monitor_input_status (!config.get_auto_input());
 		}
 	} else {
 		/* otherwise we're going to stop, so do the opposite */
 		if (Config->get_monitoring_model() == HardwareMonitoring) {
-
-			boost::shared_ptr<RouteList> rl = routes.reader();
-			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-				if (tr && tr->record_enabled ()) {
-					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
-					tr->monitor_input (true);
-				}
-			}
+                        set_track_monitor_input_status (true);
 		}
 	}
 
@@ -963,17 +947,8 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 
 		/* we are rolling and we want to stop */
 
-		if (Config->get_monitoring_model() == HardwareMonitoring)
-		{
-			boost::shared_ptr<RouteList> rl = routes.reader();
-			
-			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-				if (tr && tr->record_enabled ()) {
-					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
-					tr->monitor_input (true);
-				}
-			}
+		if (Config->get_monitoring_model() == HardwareMonitoring) {
+                        set_track_monitor_input_status (true);
 		}
 
 		if (synced_to_jack ()) {
@@ -995,16 +970,8 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 
 		/* we are stopped and we want to start rolling at speed 1 */
 
-		if (Config->get_monitoring_model() == HardwareMonitoring) {
-
-			boost::shared_ptr<RouteList> rl = routes.reader();
-			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-				if (config.get_auto_input() && tr && tr->record_enabled ()) {
-					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
-					tr->monitor_input (false);
-				}
-			}
+		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
+                        set_track_monitor_input_status (false);
 		}
 
 		if (synced_to_jack()) {

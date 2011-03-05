@@ -778,29 +778,25 @@ Session::record_enabling_legal () const
 }
 
 void
+Session::set_track_monitor_input_status (bool yn)
+{
+        boost::shared_ptr<RouteList> rl = routes.reader ();
+        for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+                boost::shared_ptr<AudioTrack> tr = boost::dynamic_pointer_cast<AudioTrack> (*i);
+                if (tr && tr->record_enabled ()) {
+                        //cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
+                        tr->monitor_input (yn);
+                }
+        }
+}
+
+void
 Session::reset_input_monitor_state ()
 {
 	if (transport_rolling()) {
-
-		boost::shared_ptr<RouteList> rl = routes.reader ();
-		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-			if (tr && tr->record_enabled ()) {
-				//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
-				tr->monitor_input (Config->get_monitoring_model() == HardwareMonitoring && !config.get_auto_input());
-			}
-		}
-		
+                set_track_monitor_input_status (Config->get_monitoring_model() == HardwareMonitoring && !config.get_auto_input());
 	} else {
-		
-		boost::shared_ptr<RouteList> rl = routes.reader ();
-		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-			if (tr && tr->record_enabled ()) {
-				//cerr << "switching to input = " << !Config->get_auto_input() << __FILE__ << __LINE__ << endl << endl;
-				tr->monitor_input (Config->get_monitoring_model() == HardwareMonitoring);
-			}
-		}
+                set_track_monitor_input_status (Config->get_monitoring_model() == HardwareMonitoring);
 	}
 }
 
@@ -1011,14 +1007,7 @@ Session::enable_record ()
 			MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordStrobe));
                         
 			if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
-                                
-				boost::shared_ptr<RouteList> rl = routes.reader ();
-				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-					boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-					if (tr && tr->record_enabled ()) {
-						tr->monitor_input (true);
-					}
-				}
+                                set_track_monitor_input_status (true);
 			}
                         
 			RecordStateChanged ();
@@ -1044,14 +1033,7 @@ Session::disable_record (bool rt_context, bool force)
 		}
 
 		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
-
-			boost::shared_ptr<RouteList> rl = routes.reader ();
-			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-				if (tr && tr->record_enabled ()) {
-					tr->monitor_input (false);
-				}
-			}
+                        set_track_monitor_input_status (false);
 		}
 
 		RecordStateChanged (); /* emit signal */
@@ -1068,14 +1050,7 @@ Session::step_back_from_record ()
 	if (g_atomic_int_compare_and_exchange (&_record_status, Recording, Enabled)) {
 
 		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
-			boost::shared_ptr<RouteList> rl = routes.reader ();
-			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-				if (tr && tr->record_enabled ()) {
-					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
-					tr->monitor_input (false);
-				}
-			}
+                        set_track_monitor_input_status (false);
 		}
 	}
 }

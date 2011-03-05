@@ -166,12 +166,6 @@ Route::init ()
                  */
                 _monitor_control.reset (new MonitorProcessor (_session));
 		_monitor_control->activate ();
-
-                /* no panning on the monitor main outs */
-
-#ifdef PANNER_HACKS
-                _main_outs->panner()->set_bypassed (true);
-#endif
 	}
 
         if (is_master() || is_monitor() || is_hidden()) {
@@ -401,18 +395,14 @@ Route::process_output_buffers (BufferSet& bufs,
 			       bool /*with_processors*/, int declick,
                                bool gain_automation_ok)
 {
-	bool monitor;
+	bool monitor = should_monitor ();
+
+        cerr << name() << " will monitor ? " << monitor << endl;
 
 	bufs.is_silent (false);
 
-	switch (Config->get_monitoring_model()) {
-	case HardwareMonitoring:
-	case ExternalMonitoring:
-		monitor = !record_enabled() || (_session.config.get_auto_input() && !_session.actively_recording());
-		break;
-	default:
-		monitor = true;
-	}
+        cerr << name() << " POB, should declick ? " << declick << endl;
+        declick = 0;
 
 	if (!declick) {
 		declick = _pending_declick;
@@ -2694,7 +2684,7 @@ void
 Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool did_locate, bool can_flush_processors)
 {
 	framepos_t now = _session.transport_frame();
-
+        
 	{
 		Glib::RWLock::ReaderLock lm (_processor_lock);
 
@@ -3810,3 +3800,19 @@ Route::setup_invisible_processors ()
 		DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1\n", (*i)->name ()));
 	}
 }
+
+bool
+Route::should_monitor () const
+{
+	switch (Config->get_monitoring_model()) {
+	case HardwareMonitoring:
+	case ExternalMonitoring:
+                return !record_enabled() || (_session.config.get_auto_input() && !_session.actively_recording());
+		break;
+	default:
+                break;
+	}
+
+        return true;
+}
+

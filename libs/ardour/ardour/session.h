@@ -1486,6 +1486,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void start_time_changed (framepos_t);
 	void end_time_changed (framepos_t);
 
+        void set_track_monitor_input_status (bool);
+
         boost::shared_ptr<Speakers> _speakers; 
 };
 

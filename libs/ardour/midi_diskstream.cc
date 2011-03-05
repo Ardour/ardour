@@ -1200,12 +1200,6 @@ void
 MidiDiskstream::disengage_record_enable ()
 {
 	g_atomic_int_set (&_record_enabled, 0);
-	if (_source_port && Config->get_monitoring_model() == HardwareMonitoring) {
-		if (_source_port) {
-			_source_port->request_monitor_input (false);
-		}
-	}
-
 	RecordEnableChanged (); /* EMIT SIGNAL */
 }
 

@@ -655,3 +655,14 @@ MidiTrack::diskstream_data_recorded (boost::shared_ptr<MidiBuffer> buf, boost::w
 	DataRecorded (buf, src); /* EMIT SIGNAL */
 }
 			       
+bool
+MidiTrack::should_monitor () const
+{
+        return true;
+}
+
+bool
+MidiTrack::send_silence () const
+{
+        return false;
+}

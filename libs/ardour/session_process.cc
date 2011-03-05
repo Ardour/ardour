@@ -436,7 +436,6 @@ Session::process_with_events (pframes_t nframes)
 
 			/* this is necessary to handle the case of seamless looping */
 			end_frame = _transport_frame + floor (nframes * _transport_speed);
-
 		}
 
 		set_next_event ();

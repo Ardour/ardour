@@ -480,7 +480,9 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
-	
+
+        virtual bool should_monitor () const;
+
 	virtual int  _set_state (const XMLNode&, int, bool call_base);
 
 	boost::shared_ptr<Amp>       _amp;

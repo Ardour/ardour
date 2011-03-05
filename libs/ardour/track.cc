@@ -270,44 +270,21 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 
 	_diskstream->check_record_status (start_frame, can_record);
 
-	bool send_silence;
+	bool be_silent;
 
 	if (_have_internal_generator) {
 		/* since the instrument has no input streams,
 		   there is no reason to send any signal
 		   into the route.
 		*/
-		send_silence = true;
+		be_silent = true;
 	} else {
-		if (!Config->get_tape_machine_mode()) {
-			/*
-			   ADATs work in a strange way..
-			   they monitor input always when stopped.and auto-input is engaged.
-			*/
-			if ((Config->get_monitoring_model() == SoftwareMonitoring)
-					&& (_session.config.get_auto_input () || _diskstream->record_enabled())) {
-				send_silence = false;
-			} else {
-				send_silence = true;
-			}
-		} else {
-			/*
-			   Other machines switch to input on stop if the track is record enabled,
-			   regardless of the auto input setting (auto input only changes the
-			   monitoring state when the transport is rolling)
-			*/
-			if ((Config->get_monitoring_model() == SoftwareMonitoring)
-					&& _diskstream->record_enabled()) {
-				send_silence = false;
-			} else {
-				send_silence = true;
-			}
-		}
+                be_silent = send_silence ();
 	}
 
 	_amp->apply_gain_automation(false);
 
-	if (send_silence) {
+	if (be_silent) {
 
 		/* if we're sending silence, but we want the meters to show levels for the signal,
 		   meter right here.
@@ -670,4 +647,46 @@ Track::adjust_capture_buffering ()
         if (_diskstream) {
                 _diskstream->adjust_capture_buffering ();
         }
+}
+
+bool
+Track::send_silence () const
+{
+        /*
+          ADATs work in a strange way..
+          they monitor input always when stopped.and auto-input is engaged.
+
+          Other machines switch to input on stop if the track is record enabled,
+          regardless of the auto input setting (auto input only changes the
+          monitoring state when the transport is rolling)
+        */
+
+        bool send_silence;
+
+        if (!Config->get_tape_machine_mode()) {
+                /*
+                  ADATs work in a strange way..
+                  they monitor input always when stopped.and auto-input is engaged.
+                */
+                if ((Config->get_monitoring_model() == SoftwareMonitoring)
+                    && (_session.config.get_auto_input () || _diskstream->record_enabled())) {
+                        send_silence = false;
+                } else {
+                        send_silence = true;
+                }
+        } else {
+                /*
+                  Other machines switch to input on stop if the track is record enabled,
+                  regardless of the auto input setting (auto input only changes the
+                  monitoring state when the transport is rolling)
+                */
+                if ((Config->get_monitoring_model() == SoftwareMonitoring)
+                    && _diskstream->record_enabled()) {
+                        send_silence = false;
+                } else {
+                        send_silence = true;
+                }
+        }
+
+        return send_silence;
 }
