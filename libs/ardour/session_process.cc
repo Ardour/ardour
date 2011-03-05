@@ -106,7 +106,7 @@ Session::no_roll (pframes_t nframes)
 		_click_io->silence (nframes);
 	}
 
-        if (route_graph->threads_in_use() > 1) {
+        if (route_graph->threads_in_use() > 0) {
                 DEBUG_TRACE(DEBUG::Graph,"calling graph/no-roll\n");
                 route_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), actively_recording(), declick);
         } else {
@@ -148,7 +148,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
         const framepos_t start_frame = _transport_frame;
         const framepos_t end_frame = _transport_frame + floor (nframes * _transport_speed);
         
-        if (route_graph->threads_in_use() > 1) {
+        if (route_graph->threads_in_use() > 0) {
                 DEBUG_TRACE(DEBUG::Graph,"calling graph/process-routes\n");
                 route_graph->process_routes( nframes, start_frame, end_frame, declick, record_active, rec_monitors, need_butler);
         } else {
@@ -189,7 +189,7 @@ Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 	const framepos_t start_frame = _transport_frame;
 	const framepos_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
 
-        if (route_graph->threads_in_use() > 1) {
+        if (route_graph->threads_in_use() > 0) {
                 route_graph->silent_process_routes( nframes, start_frame, end_frame, record_active, rec_monitors, need_butler);
         } else {
                 for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
