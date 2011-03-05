@@ -95,10 +95,10 @@ class CanvasNoteEvent : virtual public sigc::trackable
 	virtual void set_outline_color(uint32_t c) = 0;
 	virtual void set_fill_color(uint32_t c) = 0;
 
-	virtual double x1() = 0;
-	virtual double y1() = 0;
-	virtual double x2() = 0;
-	virtual double y2() = 0;
+	virtual double x1() const = 0;
+	virtual double y1() const = 0;
+	virtual double x2() const = 0;
+	virtual double y2() const = 0;
 
         float mouse_x_fraction() const { return _mouse_x_fraction; }
         float mouse_y_fraction() const { return _mouse_y_fraction; }
@@ -143,7 +143,8 @@ class CanvasNoteEvent : virtual public sigc::trackable
 	static const uint32_t midi_channel_colors[16];
 
         bool mouse_near_ends () const;
-  
+        bool big_enough_to_trim () const;
+
   protected:
 	enum State { None, Pressed, Dragging };
 

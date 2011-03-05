@@ -39,10 +39,10 @@ class CanvasNote : public SimpleRect, public CanvasNoteEvent
 		    const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>(),
                     bool with_events = true);
 
-	double x1() { return property_x1(); }
-	double y1() { return property_y1(); }
-	double x2() { return property_x2(); }
-	double y2() { return property_y2(); }
+	double x1() const { return property_x1(); }
+	double y1() const { return property_y1(); }
+	double x2() const { return property_x2(); }
+	double y2() const { return property_y2(); }
 
 	void set_outline_color(uint32_t c) { property_outline_color_rgba() = c; hide(); show(); }
 	void set_fill_color(uint32_t c)    { property_fill_color_rgba()    = c; hide(); show(); }
