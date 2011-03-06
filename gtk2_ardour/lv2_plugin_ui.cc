@@ -31,19 +31,18 @@ using namespace ARDOUR;
 using namespace PBD;
 
 void
-LV2PluginUI::lv2_ui_write(
-		LV2UI_Controller controller,
-		uint32_t         port_index,
-		uint32_t         /*buffer_size*/,
-		uint32_t         /*format*/,
-		const void*      buffer)
+LV2PluginUI::lv2_ui_write(LV2UI_Controller controller,
+                          uint32_t         port_index,
+                          uint32_t         /*buffer_size*/,
+                          uint32_t         /*format*/,
+                          const void*      buffer)
 {
-	//cout << "lv2_ui_write" << endl;
-	LV2PluginUI* me = (LV2PluginUI *) controller;
-	me->_controllables[port_index]->set_value (*(float *) buffer);
+	LV2PluginUI* me = (LV2PluginUI*)controller;
+	me->_controllables[port_index]->set_value(*(float*)buffer);
 }
 
-void LV2PluginUI::on_external_ui_closed(LV2UI_Controller controller)
+void
+LV2PluginUI::on_external_ui_closed(LV2UI_Controller controller)
 {
 	LV2PluginUI* me = (LV2PluginUI*)controller;
 	me->_screen_update_connection.disconnect();
@@ -51,17 +50,17 @@ void LV2PluginUI::on_external_ui_closed(LV2UI_Controller controller)
 }
 
 void
-LV2PluginUI::parameter_changed (uint32_t port_index, float val)
+LV2PluginUI::parameter_changed(uint32_t port_index, float val)
 {
-	PlugUIBase::parameter_changed (port_index, val);
-	
+	PlugUIBase::parameter_changed(port_index, val);
+
 	if (val != _values[port_index]) {
 		parameter_update(port_index, val);
 	}
 }
 
 void
-LV2PluginUI::parameter_update (uint32_t port_index, float val)
+LV2PluginUI::parameter_update(uint32_t port_index, float val)
 {
 	if (!_inst) {
 		return;
@@ -70,8 +69,8 @@ LV2PluginUI::parameter_update (uint32_t port_index, float val)
 #ifdef HAVE_NEW_SLV2
 	slv2_ui_instance_port_event(_inst, port_index, 4, 0, &val);
 #else
-	const LV2UI_Descriptor* ui_desc = slv2_ui_instance_get_descriptor(_inst);
-	LV2UI_Handle ui_handle = slv2_ui_instance_get_handle(_inst);
+	const LV2UI_Descriptor* ui_desc   = slv2_ui_instance_get_descriptor(_inst);
+	LV2UI_Handle            ui_handle = slv2_ui_instance_get_handle(_inst);
 	if (ui_desc->port_event) {
 		ui_desc->port_event(ui_handle, port_index, 4, 0, &val);
 	}
@@ -85,7 +84,7 @@ LV2PluginUI::start_updating(GdkEventAny*)
 	if (!_output_ports.empty()) {
 		_screen_update_connection.disconnect();
 		_screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
-			(sigc::mem_fun(*this, &LV2PluginUI::output_update));
+		        (sigc::mem_fun(*this, &LV2PluginUI::output_update));
 	}
 	return false;
 }
@@ -95,8 +94,8 @@ LV2PluginUI::stop_updating(GdkEventAny*)
 {
 	//cout << "stop_updating" << endl;
 
-	if (//!_external_ui_ptr &&
-			!_output_ports.empty()) {
+	if ( //!_external_ui_ptr &&
+	    !_output_ports.empty()) {
 		_screen_update_connection.disconnect();
 	}
 	return false;
@@ -119,8 +118,9 @@ LV2PluginUI::output_update()
 
 }
 
-LV2PluginUI::LV2PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<LV2Plugin> lv2p)
-	: PlugUIBase (pi)
+LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
+                         boost::shared_ptr<LV2Plugin>    lv2p)
+	: PlugUIBase(pi)
 	, _lv2(lv2p)
 	, _inst(NULL)
 	, _values(NULL)
@@ -137,16 +137,16 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	LV2_Feature** features;
 	LV2_Feature** features_src;
 	LV2_Feature** features_dst;
-	size_t features_count;
-	bool is_external_ui;
+	size_t        features_count;
+	bool          is_external_ui;
 
 	is_external_ui = _lv2->is_external_ui();
 
 	if (is_external_ui) {
-		_external_ui_host.ui_closed = LV2PluginUI::on_external_ui_closed;
+		_external_ui_host.ui_closed       = LV2PluginUI::on_external_ui_closed;
 		_external_ui_host.plugin_human_id = strdup(title.c_str());
 
-		_external_ui_feature.URI = LV2_EXTERNAL_UI_URI;
+		_external_ui_feature.URI  = LV2_EXTERNAL_UI_URI;
 		_external_ui_feature.data = &_external_ui_host;
 
 		features_src = features = (LV2_Feature**)_lv2->features();
@@ -154,8 +154,8 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		while (*features++) {
 			features_count++;
 		}
-
-		features_dst = features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * features_count);
+		features_dst = features = (LV2_Feature**)malloc(
+			sizeof(LV2_Feature*) * features_count);
 		features_dst[--features_count] = NULL;
 		features_dst[--features_count] = &_external_ui_feature;
 		while (features_count--) {
@@ -167,18 +167,18 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 
 #ifdef HAVE_NEW_SLV2
 	SLV2UIHost ui_host = slv2_ui_host_new(
-		this, LV2PluginUI::lv2_ui_write, NULL, NULL, NULL);
+	        this, LV2PluginUI::lv2_ui_write, NULL, NULL, NULL);
 	SLV2Value gtk_ui = slv2_value_new_uri(
-		ARDOUR::PluginManager::the_manager()->lv2_world()->world,
-		"http://lv2plug.in/ns/extensions/ui#GtkUI");
+	        ARDOUR::PluginManager::the_manager()->lv2_world()->world,
+	        "http://lv2plug.in/ns/extensions/ui#GtkUI");
 	_inst = slv2_ui_instance_new(
-		_lv2->slv2_plugin(), _lv2->slv2_ui(), gtk_ui, ui_host, features_dst);
+	        _lv2->slv2_plugin(), _lv2->slv2_ui(), gtk_ui, ui_host, features_dst);
 	slv2_value_free(gtk_ui);
 	slv2_ui_host_free(ui_host);
 #else
 	_inst = slv2_ui_instantiate(
-			_lv2->slv2_plugin(), _lv2->slv2_ui(), LV2PluginUI::lv2_ui_write, this,
-			features_dst);
+	        _lv2->slv2_plugin(), _lv2->slv2_ui(), LV2PluginUI::lv2_ui_write, this,
+	        features_dst);
 #endif
 
 	if (is_external_ui) {
@@ -187,7 +187,9 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 
 	uint32_t num_ports = slv2_plugin_get_num_ports(_lv2->slv2_plugin());
 	for (uint32_t i = 0; i < num_ports; ++i) {
-		if (_lv2->parameter_is_output(i) && _lv2->parameter_is_control(i) && is_update_wanted(i)) {
+		if (_lv2->parameter_is_output(i)
+		    && _lv2->parameter_is_control(i)
+		    && is_update_wanted(i)) {
 			_output_ports.push_back(i);
 		}
 	}
@@ -200,21 +202,20 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 			_gui_widget->show_all();
 			pack_start(*_gui_widget, true, true);
 		} else {
-			_external_ui_ptr = (struct lv2_external_ui *)slv2_ui_instance_get_widget(_inst);
+			_external_ui_ptr = (struct lv2_external_ui*)slv2_ui_instance_get_widget(_inst);
 		}
 	}
 
 	_values = new float[num_ports];
-	_controllables.resize (num_ports);
+	_controllables.resize(num_ports);
 	for (uint32_t i = 0; i < num_ports; ++i) {
-		bool ok;
+		bool     ok;
 		uint32_t port = _lv2->nth_parameter(i, ok);
 		if (ok) {
-			_values[port] = _lv2->get_parameter(port);
+			_values[port]        = _lv2->get_parameter(port);
 			_controllables[port] = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (
-				insert->control (Evoral::Parameter (PluginAutomation, 0, port))
-				);
-			
+				insert->control(Evoral::Parameter(PluginAutomation, 0, port)));
+
 			if (_lv2->parameter_is_control(port) && _lv2->parameter_is_input(port)) {
 				parameter_update(port, _values[port]);
 			}
@@ -234,15 +235,15 @@ LV2PluginUI::~LV2PluginUI ()
 #ifdef HAVE_NEW_SLV2
 	slv2_ui_instance_free(_inst);
 #else
-	const LV2UI_Descriptor* ui_desc = slv2_ui_instance_get_descriptor(_inst);
-	LV2UI_Handle ui_handle = slv2_ui_instance_get_handle(_inst);
-		
+	const LV2UI_Descriptor* ui_desc   = slv2_ui_instance_get_descriptor(_inst);
+	LV2UI_Handle            ui_handle = slv2_ui_instance_get_handle(_inst);
+
 	if (ui_desc) {
 		ui_desc->cleanup(ui_handle);
 	}
 #endif
-		
-	_screen_update_connection.disconnect();		
+
+	_screen_update_connection.disconnect();
 
 	if (_lv2->is_external_ui()) {
 		/* External UI is no longer valid.
@@ -253,36 +254,38 @@ LV2PluginUI::~LV2PluginUI ()
 }
 
 int
-LV2PluginUI::get_preferred_height ()
+LV2PluginUI::get_preferred_height()
 {
 	Gtk::Requisition r = size_request();
 	return r.height;
 }
 
 int
-LV2PluginUI::get_preferred_width ()
+LV2PluginUI::get_preferred_width()
 {
 	Gtk::Requisition r = size_request();
 	return r.width;
 }
 
 int
-LV2PluginUI::package (Gtk::Window& win)
+LV2PluginUI::package(Gtk::Window& win)
 {
-	//cout << "package" << endl;
 	if (_external_ui_ptr) {
 		_win_ptr = &win;
 	} else {
 		/* forward configure events to plugin window */
-		win.signal_configure_event().connect (sigc::mem_fun (*this, &LV2PluginUI::configure_handler));
-		win.signal_map_event().connect (sigc::mem_fun (*this, &LV2PluginUI::start_updating));
-		win.signal_unmap_event().connect (sigc::mem_fun (*this, &LV2PluginUI::stop_updating));
+		win.signal_configure_event().connect(
+			sigc::mem_fun(*this, &LV2PluginUI::configure_handler));
+		win.signal_map_event().connect(
+			sigc::mem_fun(*this, &LV2PluginUI::start_updating));
+		win.signal_unmap_event().connect(
+			sigc::mem_fun(*this, &LV2PluginUI::stop_updating));
 	}
 	return 0;
 }
 
 bool
-LV2PluginUI::configure_handler (GdkEventConfigure*)
+LV2PluginUI::configure_handler(GdkEventConfigure*)
 {
 	std::cout << "CONFIGURE" << std::endl;
 	return false;
@@ -291,7 +294,9 @@ LV2PluginUI::configure_handler (GdkEventConfigure*)
 bool
 LV2PluginUI::is_update_wanted(uint32_t /*index*/)
 {
-	/* FIXME this should check the port notification properties, which nobody sets now anyway :) */
+	/* FIXME: use port notification properties
+	   and/or new UI extension subscription methods
+	*/
 	return true;
 }
 
@@ -313,7 +318,7 @@ LV2PluginUI::on_window_show(const std::string& title)
 		LV2_EXTERNAL_UI_SHOW(_external_ui_ptr);
 		_screen_update_connection.disconnect();
 		_screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
-			(sigc::mem_fun(*this, &LV2PluginUI::output_update));
+		        (sigc::mem_fun(*this, &LV2PluginUI::output_update));
 		return false;
 	}
 
