@@ -1,6 +1,6 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Dave Robillard
+    Copyright (C) 2008-2011 Paul Davis
+    Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,8 +18,9 @@
 
 */
 
-#include "ardour/processor.h"
 #include "ardour/lv2_plugin.h"
+#include "ardour/plugin_manager.h"
+#include "ardour/processor.h"
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -66,10 +67,15 @@ LV2PluginUI::parameter_update (uint32_t port_index, float val)
 		return;
 	}
 
+#ifdef HAVE_NEW_SLV2
+	slv2_ui_instance_port_event(_inst, port_index, 4, 0, &val);
+#else
 	const LV2UI_Descriptor* ui_desc = slv2_ui_instance_get_descriptor(_inst);
 	LV2UI_Handle ui_handle = slv2_ui_instance_get_handle(_inst);
-	if (ui_desc->port_event)
+	if (ui_desc->port_event) {
 		ui_desc->port_event(ui_handle, port_index, 4, 0, &val);
+	}
+#endif
 	_values[port_index] = val;
 }
 
@@ -159,9 +165,21 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		features_dst = (LV2_Feature**)_lv2->features();
 	}
 
+#ifdef HAVE_NEW_SLV2
+	SLV2UIHost ui_host = slv2_ui_host_new(
+		this, LV2PluginUI::lv2_ui_write, NULL, NULL, NULL);
+	SLV2Value gtk_ui = slv2_value_new_uri(
+		ARDOUR::PluginManager::the_manager()->lv2_world()->world,
+		"http://lv2plug.in/ns/extensions/ui#GtkUI");
+	_inst = slv2_ui_instance_new(
+		_lv2->slv2_plugin(), _lv2->slv2_ui(), gtk_ui, ui_host, features_dst);
+	slv2_value_free(gtk_ui);
+	slv2_ui_host_free(ui_host);
+#else
 	_inst = slv2_ui_instantiate(
 			_lv2->slv2_plugin(), _lv2->slv2_ui(), LV2PluginUI::lv2_ui_write, this,
 			features_dst);
+#endif
 
 	if (is_external_ui) {
 		free(features_dst);
@@ -211,22 +229,25 @@ LV2PluginUI::~LV2PluginUI ()
 	if (_values) {
 		delete[] _values;
 	}
-	// plugin destructor destroys the GTK GUI
-	
-        
-        const LV2UI_Descriptor* ui_desc = slv2_ui_instance_get_descriptor(_inst);
-        LV2UI_Handle ui_handle = slv2_ui_instance_get_handle(_inst);
-		
-        /*Call cleanup to tell the plugin to close its GUI and delete it*/
-		
-        if (ui_desc) {
-                ui_desc->cleanup(ui_handle);
-        }
-		
-        _screen_update_connection.disconnect();		
 
-        if (_lv2->is_external_ui()) {
-		/*external UI is no longer valid - on_window_hide() will not try to use it if is NULL*/
+	/* Close and delete GUI. */
+#ifdef HAVE_NEW_SLV2
+	slv2_ui_instance_free(_inst);
+#else
+	const LV2UI_Descriptor* ui_desc = slv2_ui_instance_get_descriptor(_inst);
+	LV2UI_Handle ui_handle = slv2_ui_instance_get_handle(_inst);
+		
+	if (ui_desc) {
+		ui_desc->cleanup(ui_handle);
+	}
+#endif
+		
+	_screen_update_connection.disconnect();		
+
+	if (_lv2->is_external_ui()) {
+		/* External UI is no longer valid.
+		   on_window_hide() will not try to use it if is NULL.
+		*/
 		_external_ui_ptr = NULL;
 	}
 }
