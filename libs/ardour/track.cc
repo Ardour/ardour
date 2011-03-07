@@ -690,3 +690,23 @@ Track::send_silence () const
 
         return send_silence;
 }
+
+void
+Track::maybe_declick (BufferSet& bufs, framecnt_t nframes, int declick)
+{	
+        /* never declick if there is an internal generator - we just want it to 
+           keep generating sound without interruption.
+        */
+
+        if (_have_internal_generator) {
+                return;
+        }
+
+        if (!declick) {
+		declick = _pending_declick;
+	}
+
+	if (declick != 0) {
+		Amp::declick (bufs, nframes, declick);
+	}
+}

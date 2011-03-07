@@ -379,6 +379,14 @@ Route::set_gain (gain_t val, void *src)
 	_amp->set_gain (val, src);
 }
 
+void
+Route::maybe_declick (BufferSet&, framecnt_t, int)
+{
+        /* this is the "bus" implementation and they never declick.
+         */
+        return;
+}
+
 /** Process this route for one (sub) cycle (process thread)
  *
  * @param bufs Scratch buffers to use for the signal path
@@ -399,10 +407,6 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	bufs.is_silent (false);
 
-	if (!declick) {
-		declick = _pending_declick;
-	}
-
 	/* figure out if we're going to use gain automation */
         if (gain_automation_ok) {
                 _amp->setup_gain_automation (start_frame, end_frame, nframes);
@@ -418,10 +422,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   GLOBAL DECLICK (for transport changes etc.)
 	   ----------------------------------------------------------------------------------------- */
 
-	if (declick != 0) {
-		Amp::declick (bufs, nframes, declick);
-	}
-
+        maybe_declick (bufs, nframes, declick);
 	_pending_declick = 0;
 
 	/* -------------------------------------------------------------------------------------------
@@ -1056,6 +1057,17 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 			}
 
 			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false));
+		}
+                
+		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			boost::shared_ptr<PluginInsert> pi;
+
+			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
+				if (pi->is_generator()) {
+					_have_internal_generator = true;
+					break;
+				}
+			}
 		}
 
 		_output->set_user_latency (0);
@@ -2401,10 +2413,22 @@ Route::set_processor_state (const XMLNode& node)
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
                 _processors = new_order;
+
                 if (must_configure) {
 			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
                         configure_processors_unlocked (0);
                 }
+
+		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			boost::shared_ptr<PluginInsert> pi;
+
+			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
+				if (pi->is_generator()) {
+					_have_internal_generator = true;
+					break;
+				}
+			}
+		}
         }
 
         processors_changed (RouteProcessorChange ());
@@ -2690,7 +2714,7 @@ Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool did_lo
 
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
-			if (Config->get_plugins_stop_with_transport() && can_flush_processors) {
+			if (!_have_internal_generator && (Config->get_plugins_stop_with_transport() && can_flush_processors)) {
                                 (*i)->flush ();
 			}
                         

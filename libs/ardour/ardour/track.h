@@ -202,6 +202,8 @@ class Track : public Route, public PublicDiskstream
 	XMLNode*              pending_state;
 	bool                  _destructive;
 
+        void maybe_declick (BufferSet&, framecnt_t, int);
+
 	virtual bool send_silence () const;
 
 	boost::shared_ptr<RecEnableControllable> _rec_enable_control;

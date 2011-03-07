@@ -482,6 +482,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	ChanCount n_process_buffers ();
 
         virtual bool should_monitor () const;
+        virtual void maybe_declick (BufferSet&, framecnt_t, int);
 
 	virtual int  _set_state (const XMLNode&, int, bool call_base);
 

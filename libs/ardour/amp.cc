@@ -243,7 +243,7 @@ Amp::declick (BufferSet& bufs, framecnt_t nframes, int dir)
 		if (declick != nframes) {
 
 			if (target == 0.0) {
-				memset (&buffer[declick], 0, sizeof (Sample) * (nframes - declick));
+                                memset (&buffer[declick], 0, sizeof (Sample) * (nframes - declick));
 			} else if (target != 1.0) {
 				apply_gain_to_buffer (&buffer[declick], nframes - declick, target);
 			}
