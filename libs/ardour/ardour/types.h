@@ -488,7 +488,8 @@ namespace ARDOUR {
 
 	typedef std::list<framepos_t> AnalysisFeatureList;
 
-	typedef std::list<boost::shared_ptr<Route> >      RouteList;
+	typedef std::list<boost::shared_ptr<Route> > RouteList;
+	typedef std::list<boost::weak_ptr  <Route> > WeakRouteList;
 
 	class Bundle;
 	typedef std::vector<boost::shared_ptr<Bundle> > BundleList;

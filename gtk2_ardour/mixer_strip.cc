@@ -1255,19 +1255,6 @@ MixerStrip::comment_changed (void *src)
 	}
 }
 
-/** Set the route group for this strip's route, or remove it from its current group.
- *  @param rg New RouteGroup, or 0.
- */
-void
-MixerStrip::set_route_group (RouteGroup *rg)
-{
-	if (rg) {
-		rg->add (_route);
-	} else if (_route->route_group ()) {
-		_route->route_group()->remove (_route);
-	}
-}
-
 bool
 MixerStrip::select_route_group (GdkEventButton *ev)
 {
@@ -1284,10 +1271,11 @@ MixerStrip::select_route_group (GdkEventButton *ev)
 			plist->add (Properties::solo, true);
 
 			group_menu = new RouteGroupMenu (_session, plist);
-			group_menu->GroupSelected.connect (sigc::mem_fun (*this, &MixerStrip::set_route_group));
 		}
 
-		group_menu->build (route_group ());
+		WeakRouteList r;
+		r.push_back (route ());
+		group_menu->build (r);
 		group_menu->menu()->popup (1, ev->time);
 	}
 

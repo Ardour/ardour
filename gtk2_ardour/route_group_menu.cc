@@ -22,6 +22,7 @@
 #include "gtkmm2ext/utils.h"
 #include "ardour/session.h"
 #include "ardour/route_group.h"
+#include "ardour/route.h"
 #include "route_group_menu.h"
 #include "route_group_dialog.h"
 #include "i18n.h"
@@ -35,7 +36,6 @@ RouteGroupMenu::RouteGroupMenu (Session* s, PropertyList* plist)
 	, _menu (0)
 	, _default_properties (plist)
 	, _inhibit_group_selected (false)
-	, _selected_route_group (0)
 {
 
 }
@@ -46,13 +46,24 @@ RouteGroupMenu::~RouteGroupMenu()
 	delete _default_properties;
 }
 
-/** @param curr Current route group to mark as selected, or 0 for no group */
+/** @param s Routes to operate on */
 void
-RouteGroupMenu::build (RouteGroup* curr)
+RouteGroupMenu::build (WeakRouteList const & s)
 {
+	assert (!s.empty ());
+	
 	using namespace Menu_Helpers;
 
-	_selected_route_group = curr;
+	_subject = s;
+
+	/* FInd all the route groups that our subjects are members of */
+	std::set<RouteGroup*> groups;
+	for (WeakRouteList::const_iterator i = _subject.begin (); i != _subject.end(); ++i) {
+		boost::shared_ptr<Route> r = i->lock ();
+		if (r) {
+			groups.insert (r->route_group ());
+		}
+	}
 
 	_inhibit_group_selected = true;
 
@@ -71,30 +82,44 @@ RouteGroupMenu::build (RouteGroup* curr)
 	items.push_back (SeparatorElem ());
 
 	RadioMenuItem::Group group;
-	items.push_back (RadioMenuElem (group, _("No group"), sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::set_group), (RouteGroup *) 0)));
+	items.push_back (RadioMenuElem (group, _("No group")));
+	RadioMenuItem* i = static_cast<RadioMenuItem *> (&items.back ());
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::set_group), (RouteGroup *) 0));
 
-	if (curr == 0) {
-		static_cast<RadioMenuItem*> (&items.back())->set_active ();
+	if (groups.size() == 1 && *groups.begin() == 0) {
+		i->set_active ();
+	} else if (groups.size() > 1) {
+		i->set_inconsistent ();
 	}
 
 	if (_session) {
-		_session->foreach_route_group (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::add_item), curr, &group));
+		_session->foreach_route_group (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::add_item), groups, &group));
 	}
 
 	_inhibit_group_selected = false;
 }
 
+/** @param rg Route group to add.
+ *  @param groups Active route groups (may included 0 for `no group')
+ *  @param group Radio item group to add radio items to.
+ */
 void
-RouteGroupMenu::add_item (RouteGroup* rg, RouteGroup* curr, RadioMenuItem::Group* group)
+RouteGroupMenu::add_item (RouteGroup* rg, std::set<RouteGroup*> const & groups, RadioMenuItem::Group* group)
 {
 	using namespace Menu_Helpers;
 
 	MenuList& items = _menu->items ();
 
-	items.push_back (RadioMenuElem (*group, rg->name(), sigc::bind (sigc::mem_fun(*this, &RouteGroupMenu::set_group), rg)));
+	items.push_back (RadioMenuElem (*group, rg->name()));
+	RadioMenuItem* i = static_cast<RadioMenuItem*> (&items.back ());
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::set_group), rg));
 
-	if (rg == curr) {
-		static_cast<RadioMenuItem*> (&items.back())->set_active ();
+	if (groups.size() == 1 && *groups.begin() == rg) {
+		/* there's only one active group, and it's this one */
+		i->set_active ();
+	} else if (groups.size() > 1) {
+		/* there are >1 active groups */
+		i->set_inconsistent ();
 	}
 }
 
@@ -104,18 +129,25 @@ RouteGroupMenu::add_item (RouteGroup* rg, RouteGroup* curr, RadioMenuItem::Group
 void
 RouteGroupMenu::set_group (RouteGroup* g)
 {
-	if (g == _selected_route_group) {
-		/* cut off the signal_toggled that GTK emits for an option that is being un-selected
-		   when a new option is being selected instead
-		*/
+	if (_inhibit_group_selected) {
 		return;
 	}
-	
-	if (!_inhibit_group_selected) {
-		GroupSelected (g);
-	}
 
-	_selected_route_group = g;
+	for (WeakRouteList::const_iterator i = _subject.begin(); i != _subject.end(); ++i) {
+		boost::shared_ptr<Route> r = i->lock ();
+		if (!r || r->route_group () == g) {
+			/* lock of weak_ptr failed, or the group for this route is already right */
+			continue;
+		}
+
+		if (g) {
+			g->add (r);
+		} else {
+			if (r->route_group ()) {
+				r->route_group()->remove (r);
+			}
+		}
+	}
 }
 
 void

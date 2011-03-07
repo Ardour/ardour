@@ -248,7 +248,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void comment_edited ();
 	bool ignore_comment_edit;
 
-	void set_route_group (ARDOUR::RouteGroup *);
 	bool select_route_group (GdkEventButton *);
 	void route_group_changed ();
 

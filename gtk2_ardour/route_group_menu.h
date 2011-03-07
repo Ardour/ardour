@@ -30,20 +30,18 @@ public:
 	~RouteGroupMenu();
 
 	Gtk::Menu* menu ();
-	void build (ARDOUR::RouteGroup *);
+	void build (ARDOUR::WeakRouteList const &);
 	void detach ();
 
-	sigc::signal<void, ARDOUR::RouteGroup*> GroupSelected;
-
   private:
-	void add_item (ARDOUR::RouteGroup *, ARDOUR::RouteGroup *, Gtk::RadioMenuItem::Group*);
+	void add_item (ARDOUR::RouteGroup *, std::set<ARDOUR::RouteGroup*> const &, Gtk::RadioMenuItem::Group*);
 	void new_group ();
 	void set_group (ARDOUR::RouteGroup *);
 
 	Gtk::Menu* _menu;
 	PBD::PropertyList* _default_properties;
 	bool _inhibit_group_selected;
-	ARDOUR::RouteGroup* _selected_route_group;
+	ARDOUR::WeakRouteList _subject;
 };
 
 #endif /* __ardour_gtk_route_group_menu_h__ */

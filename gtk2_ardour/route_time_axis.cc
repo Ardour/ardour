@@ -231,7 +231,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	plist->add (ARDOUR::Properties::solo, true);
 	
 	route_group_menu = new RouteGroupMenu (_session, plist);
-	route_group_menu->GroupSelected.connect (sigc::mem_fun (*this, &RouteTimeAxisView::set_route_group_from_menu));
 
 	gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 	gm.get_gain_slider().set_name ("TrackGainFader");
@@ -280,22 +279,13 @@ RouteTimeAxisView::route_group_click (GdkEventButton *ev)
 		return false;
 	}
 
-	route_group_menu->build (_route->route_group ());
+	WeakRouteList r;
+	r.push_back (route ());
+	
+	route_group_menu->build (r);
 	route_group_menu->menu()->popup (ev->button, ev->time);
 
 	return false;
-}
-
-void
-RouteTimeAxisView::set_route_group_from_menu (RouteGroup *eg)
-{
-	if (eg) {
-		eg->add (_route);
-	} else {
-		if (_route->route_group()) {
-			_route->route_group()->remove (_route);
-		}
-	}
 }
 
 void
@@ -609,7 +599,20 @@ RouteTimeAxisView::build_display_menu ()
 		items.back().set_sensitive (_editor.get_selection().tracks.size() <= 1);
 
 		route_group_menu->detach ();
-		route_group_menu->build (_route->route_group ());
+
+		WeakRouteList r;
+		for (TrackSelection::iterator i = _editor.get_selection().tracks.begin(); i != _editor.get_selection().tracks.end(); ++i) {
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+			if (rtv) {
+				r.push_back (rtv->route ());
+			}
+		}
+
+		if (r.empty ()) {
+			r.push_back (route ());
+		}
+		
+		route_group_menu->build (r);
 		items.push_back (MenuElem (_("Route Group"), *route_group_menu->menu ()));
 
 		build_automation_action_menu ();
