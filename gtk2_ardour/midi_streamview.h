@@ -83,10 +83,7 @@ class MidiStreamView : public StreamView
 		{ return contents_height()
 			- (note + 1 - lowest_note()) * note_height() + 1; }
 
-	inline uint8_t y_to_note(double y) const
-		{ return (uint8_t)((contents_height() - y - 1)
-				/ contents_height() * (double)contents_note_range())
-				+ lowest_note(); }
+	uint8_t y_to_note(double y) const;
 
 	inline double note_height() const
 		{ return contents_height() / (double)contents_note_range(); }

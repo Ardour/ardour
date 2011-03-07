@@ -628,3 +628,17 @@ MidiStreamView::update_rec_box ()
 	mrv->extend_active_notes ();
 }
 
+uint8_t
+MidiStreamView::y_to_note (double y) const
+{
+	int const n = ((contents_height() - y - 1) / contents_height() * (double)contents_note_range())
+		+ lowest_note();
+
+	if (n < 0) {
+		return 0;
+	} else if (n > 127) {
+		return 127;
+	}
+	
+	return n;
+}
