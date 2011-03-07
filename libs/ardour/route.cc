@@ -2078,8 +2078,8 @@ Route::_set_state_2X (const XMLNode& node, int version)
 		bool first = true;
 		bool muted = string_is_affirmative (prop->value());
 		
-		if (muted){
-		  
+		if (muted) {
+
 			string mute_point;
 			
 			if ((prop = node.property (X_("mute-affects-pre-fader"))) != 0) {
@@ -2129,6 +2129,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 			}
 			
 			_mute_master->set_mute_points (mute_point);
+			_mute_master->set_muted_by_self (true);
 		}
 	}
 
