@@ -212,7 +212,7 @@ protected:
 
 	void set_color (Gdk::Color const &);
 
-	virtual void build_automation_action_menu ();
+	virtual void build_automation_action_menu (bool);
 	virtual void append_extra_display_menu_items () {}
 	void         build_display_menu ();
 
@@ -225,9 +225,10 @@ protected:
 	void rename_current_playlist ();
 
 	void         automation_click ();
-	virtual void show_all_automation ();
-	virtual void show_existing_automation ();
-	virtual void hide_all_automation ();
+
+	virtual void show_all_automation (bool apply_to_selection = false);
+	virtual void show_existing_automation (bool apply_to_selection = false);
+	virtual void hide_all_automation (bool apply_to_selection = false);
 
 	void timestretch (framepos_t start, framepos_t end);
 

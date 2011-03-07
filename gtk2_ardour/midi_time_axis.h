@@ -112,7 +112,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void custom_device_mode_changed();
 
 	void append_extra_display_menu_items ();
-	void build_automation_action_menu ();
+	void build_automation_action_menu (bool);
 	Gtk::Menu* build_note_mode_menu();
 	Gtk::Menu* build_color_mode_menu();
 

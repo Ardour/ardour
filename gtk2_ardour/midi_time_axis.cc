@@ -414,7 +414,7 @@ MidiTimeAxisView::toggle_midi_thru ()
 }
 
 void
-MidiTimeAxisView::build_automation_action_menu ()
+MidiTimeAxisView::build_automation_action_menu (bool for_selection)
 {
 	using namespace Menu_Helpers;
 
@@ -430,7 +430,7 @@ MidiTimeAxisView::build_automation_action_menu ()
 	}
 
 	_channel_command_menu_map.clear ();
-	RouteTimeAxisView::build_automation_action_menu ();
+	RouteTimeAxisView::build_automation_action_menu (for_selection);
 
 	MenuList& automation_items = automation_action_menu->items();
 	
@@ -447,7 +447,9 @@ MidiTimeAxisView::build_automation_action_menu ()
 		*/
 
 		add_channel_command_menu_item (automation_items, _("Bender"), MidiPitchBenderAutomation, 0);
+		automation_items.back().set_sensitive (!for_selection || _editor.get_selection().tracks.size() == 1);
 		add_channel_command_menu_item (automation_items, _("Pressure"), MidiChannelPressureAutomation, 0);
+		automation_items.back().set_sensitive (!for_selection || _editor.get_selection().tracks.size() == 1);
 		
 		/* now all MIDI controllers. Always offer the possibility that we will rebuild the controllers menu
 		   since it might need to be updated after a channel mode change or other change. Also detach it
@@ -458,6 +460,7 @@ MidiTimeAxisView::build_automation_action_menu ()
 		
 		automation_items.push_back (SeparatorElem());
 		automation_items.push_back (MenuElem (_("Controllers"), *controller_menu));
+		automation_items.back().set_sensitive (!for_selection || _editor.get_selection().tracks.size() == 1);
 	} else {
 		automation_items.push_back (MenuElem (string_compose ("<i>%1</i>", _("No MIDI Channels selected"))));
 		dynamic_cast<Label*> (automation_items.back().get_child())->set_use_markup (true);

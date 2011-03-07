@@ -338,7 +338,7 @@ void
 RouteTimeAxisView::automation_click ()
 {
 	conditionally_add_to_selection ();
-	build_automation_action_menu ();
+	build_automation_action_menu (false);
 	automation_action_menu->popup (1, gtk_get_current_event_time());
 }
 
@@ -372,7 +372,7 @@ RouteTimeAxisView::set_state (const XMLNode& node, int version)
 }
 
 void
-RouteTimeAxisView::build_automation_action_menu ()
+RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 {
 	using namespace Menu_Helpers;
 
@@ -391,13 +391,13 @@ RouteTimeAxisView::build_automation_action_menu ()
 	automation_action_menu->set_name ("ArdourContextMenu");
 	
 	items.push_back (MenuElem (_("Show All Automation"),
-				   sigc::mem_fun(*this, &RouteTimeAxisView::show_all_automation)));
+				   sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::show_all_automation), for_selection)));
 	
 	items.push_back (MenuElem (_("Show Existing Automation"),
-				   sigc::mem_fun(*this, &RouteTimeAxisView::show_existing_automation)));
+				   sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::show_existing_automation), for_selection)));
 	
 	items.push_back (MenuElem (_("Hide All Automation"),
-				   sigc::mem_fun(*this, &RouteTimeAxisView::hide_all_automation)));
+				   sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::hide_all_automation), for_selection)));
 
 	items.push_back (SeparatorElem ());
 	
@@ -405,7 +405,7 @@ RouteTimeAxisView::build_automation_action_menu ()
 	   so it was detached above */
 
 	items.push_back (MenuElem (_("Plugins"), subplugin_menu));
-	items.back().set_sensitive (!subplugin_menu.items().empty());
+	items.back().set_sensitive (!subplugin_menu.items().empty() && (!for_selection || _editor.get_selection().tracks.size() == 1));;
 }
 
 void
@@ -615,7 +615,7 @@ RouteTimeAxisView::build_display_menu ()
 		route_group_menu->build (r);
 		items.push_back (MenuElem (_("Route Group"), *route_group_menu->menu ()));
 
-		build_automation_action_menu ();
+		build_automation_action_menu (true);
 		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
 
 		items.push_back (SeparatorElem());
@@ -1615,109 +1615,121 @@ RouteTimeAxisView::automation_track_hidden (Evoral::Parameter param)
 
 
 void
-RouteTimeAxisView::show_all_automation ()
+RouteTimeAxisView::show_all_automation (bool apply_to_selection)
 {
-	no_redraw = true;
-
-	/* Show our automation */
-
-	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-		i->second->set_marked_for_display (true);
-		i->second->canvas_display()->show();
-		i->second->get_state_node()->add_property ("shown", X_("yes"));
-
-		Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::show_all_automation, _1, false));
+	} else {
+		no_redraw = true;
 		
-		if (menu) {
-			menu->set_active(true);
-		}
-	}
-
-
-	/* Show processor automation */
-
-	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
-			if ((*ii)->view == 0) {
-				add_processor_automation_curve ((*i)->processor, (*ii)->what);
-			}
-
-			(*ii)->menu_item->set_active (true);
-		}
-	}
-
-	no_redraw = false;
-
-	/* Redraw */
-
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
-}
-
-void
-RouteTimeAxisView::show_existing_automation ()
-{
-	no_redraw = true;
-
-	/* Show our automation */
-
-	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-		if (i->second->has_automation()) {
+		/* Show our automation */
+		
+		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 			i->second->set_marked_for_display (true);
 			i->second->canvas_display()->show();
 			i->second->get_state_node()->add_property ("shown", X_("yes"));
-
+			
 			Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+			
 			if (menu) {
 				menu->set_active(true);
 			}
 		}
-	}
-
-
-	/* Show processor automation */
-
-	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
-			if ((*ii)->view != 0 && (*i)->processor->control((*ii)->what)->list()->size() > 0) {
+		
+		
+		/* Show processor automation */
+		
+		for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+			for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+				if ((*ii)->view == 0) {
+					add_processor_automation_curve ((*i)->processor, (*ii)->what);
+				}
+				
 				(*ii)->menu_item->set_active (true);
 			}
 		}
+		
+		no_redraw = false;
+		
+		/* Redraw */
+		
+		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
-
-	no_redraw = false;
-
-	_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+}
+	
+void
+RouteTimeAxisView::show_existing_automation (bool apply_to_selection)
+{
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::show_existing_automation, _1, false));
+	} else {
+		no_redraw = true;
+		
+		/* Show our automation */
+		
+		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+			if (i->second->has_automation()) {
+				i->second->set_marked_for_display (true);
+				i->second->canvas_display()->show();
+				i->second->get_state_node()->add_property ("shown", X_("yes"));
+				
+				Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+				if (menu) {
+					menu->set_active(true);
+				}
+			}
+		}
+		
+		
+		/* Show processor automation */
+		
+		for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+			for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+				if ((*ii)->view != 0 && (*i)->processor->control((*ii)->what)->list()->size() > 0) {
+					(*ii)->menu_item->set_active (true);
+				}
+			}
+		}
+		
+		no_redraw = false;
+		
+		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	}
 }
 
 void
-RouteTimeAxisView::hide_all_automation ()
+RouteTimeAxisView::hide_all_automation (bool apply_to_selection)
 {
-	no_redraw = true;
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::hide_all_automation, _1, false));
+	} else {
+		no_redraw = true;
 
-	/* Hide our automation */
-
-	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-		i->second->set_marked_for_display (false);
-		i->second->hide ();
-		i->second->get_state_node()->add_property ("shown", X_("no"));
-
-		Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+		/* Hide our automation */
 		
-		if (menu) {
-			menu->set_active (false);
+		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+			i->second->set_marked_for_display (false);
+			i->second->hide ();
+			i->second->get_state_node()->add_property ("shown", X_("no"));
+			
+			Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+			
+			if (menu) {
+				menu->set_active (false);
+			}
 		}
-	}
-
-	/* Hide processor automation */
-
-	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
-		for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
-			(*ii)->menu_item->set_active (false);
+		
+		/* Hide processor automation */
+		
+		for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
+			for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
+				(*ii)->menu_item->set_active (false);
+			}
 		}
+		
+		no_redraw = false;
+		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
-
-	no_redraw = false;
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
 

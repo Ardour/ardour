@@ -311,38 +311,51 @@ AudioTimeAxisView::update_pan_track_visibility ()
 }
 
 void
-AudioTimeAxisView::show_all_automation ()
+AudioTimeAxisView::show_all_automation (bool apply_to_selection)
 {
-	no_redraw = true;
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_audio_time_axis (boost::bind (&AudioTimeAxisView::show_all_automation, _1, false));
+	} else {
+		
+		no_redraw = true;
+		
+		RouteTimeAxisView::show_all_automation ();
 
-	RouteTimeAxisView::show_all_automation ();
-
-	no_redraw = false;
-
-	_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		no_redraw = false;
+		
+		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	}
 }
 
 void
-AudioTimeAxisView::show_existing_automation ()
+AudioTimeAxisView::show_existing_automation (bool apply_to_selection)
 {
-	no_redraw = true;
-
-	RouteTimeAxisView::show_existing_automation ();
-
-	no_redraw = false;
-
-	_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_audio_time_axis (boost::bind (&AudioTimeAxisView::show_existing_automation, _1, false));
+	} else {
+		no_redraw = true;
+		
+		RouteTimeAxisView::show_existing_automation ();
+		
+		no_redraw = false;
+		
+		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	}
 }
 
 void
-AudioTimeAxisView::hide_all_automation ()
+AudioTimeAxisView::hide_all_automation (bool apply_to_selection)
 {
-	no_redraw = true;
-
-	RouteTimeAxisView::hide_all_automation();
-
-	no_redraw = false;
-	_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_audio_time_axis (boost::bind (&AudioTimeAxisView::hide_all_automation, _1, false));
+	} else {
+		no_redraw = true;
+		
+		RouteTimeAxisView::hide_all_automation();
+		
+		no_redraw = false;
+		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	}
 }
 
 void
@@ -436,23 +449,23 @@ AudioTimeAxisView::update_control_names ()
 }
 
 void
-AudioTimeAxisView::build_automation_action_menu ()
+AudioTimeAxisView::build_automation_action_menu (bool for_selection)
 {
 	using namespace Menu_Helpers;
 
-	RouteTimeAxisView::build_automation_action_menu ();
+	RouteTimeAxisView::build_automation_action_menu (for_selection);
 
 	MenuList& automation_items = automation_action_menu->items ();
 
 	automation_items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &AudioTimeAxisView::update_gain_track_visibility)));
 	gain_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
-	gain_automation_item->set_active (gain_track->marked_for_display ());
+	gain_automation_item->set_active (gain_track->marked_for_display () && (!for_selection || _editor.get_selection().tracks.size() == 1));
 
 	_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
 
 	automation_items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &AudioTimeAxisView::update_pan_track_visibility)));
 	pan_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
-	pan_automation_item->set_active (pan_tracks.front()->marked_for_display ());
+	pan_automation_item->set_active (pan_tracks.front()->marked_for_display () && (!for_selection || _editor.get_selection().tracks.size() == 1));
 
 	set<Evoral::Parameter> const & params = _route->pannable()->what_can_be_automated ();
 	for (set<Evoral::Parameter>::iterator p = params.begin(); p != params.end(); ++p) {
