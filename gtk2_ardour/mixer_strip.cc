@@ -1365,7 +1365,7 @@ MixerStrip::build_route_ops_menu ()
         }
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &RouteUI::remove_this_route)));
+	items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), false)));
 }
 
 gboolean

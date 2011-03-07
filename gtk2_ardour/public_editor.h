@@ -233,7 +233,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual void select_all_tracks () = 0;
 	virtual void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove = false) = 0;
 	virtual void set_selected_mixer_strip (TimeAxisView&) = 0;
-	virtual void hide_track_in_display (TimeAxisView* tv, bool temporary = false) = 0;
+	virtual void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false) = 0;
 
         virtual void set_stationary_playhead (bool yn) = 0;
         virtual void toggle_stationary_playhead () = 0;

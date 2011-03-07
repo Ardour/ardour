@@ -5026,16 +5026,28 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 }
 
 void
-Editor::hide_track_in_display (TimeAxisView* tv, bool /*temponly*/)
+Editor::hide_track_in_display (TimeAxisView* tv, bool apply_to_selection)
 {
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	if (apply_to_selection) {
+		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ) {
 
-	if (rtv && current_mixer_strip && (rtv->route() == current_mixer_strip->route())) {
-		// this will hide the mixer strip
-		set_selected_mixer_strip (*tv);
+			TrackSelection::iterator j = i;
+			++j;
+			
+			hide_track_in_display (*i, false);
+			
+			i = j;
+		}
+	} else {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+		
+		if (rtv && current_mixer_strip && (rtv->route() == current_mixer_strip->route())) {
+			// this will hide the mixer strip
+			set_selected_mixer_strip (*tv);
+		}
+		
+		_routes->hide_track_in_display (*tv);
 	}
-
-	_routes->hide_track_in_display (*tv);
 }
 
 bool

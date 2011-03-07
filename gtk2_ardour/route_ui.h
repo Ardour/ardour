@@ -167,7 +167,7 @@ class RouteUI : public virtual AxisView
 
 	int  set_color_from_route ();
 
-	void remove_this_route ();
+	void remove_this_route (bool apply_to_selection = false);
 	static gint idle_remove_this_route (RouteUI *);
 
 	void route_rename();
