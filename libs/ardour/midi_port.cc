@@ -50,7 +50,7 @@ MidiPort::cycle_start (pframes_t nframes)
 }
 
 MidiBuffer &
-MidiPort::get_midi_buffer (framecnt_t nframes, framecnt_t offset)
+MidiPort::get_midi_buffer (framecnt_t nframes)
 {
 	if (_has_been_mixed_down) {
 		return *_buffer;
@@ -78,10 +78,10 @@ MidiPort::get_midi_buffer (framecnt_t nframes, framecnt_t offset)
                                 continue;
                         }
 
-			if (ev.time >= offset && ev.time < (offset + nframes)) {
+			if (ev.time >= _port_offset && ev.time < (_port_offset + nframes)) {
 				_buffer->push_back (ev);
 			} else {
-				cerr << "Dropping incoming MIDI at time " << ev.time << "; offset=" << offset << " limit=" << (offset + nframes) << "\n";
+				cerr << "Dropping incoming MIDI at time " << ev.time << "; offset=" << _port_offset << " limit=" << (_port_offset + nframes) << "\n";
 			}
 		}
 
@@ -114,7 +114,7 @@ MidiPort::cycle_split ()
 }
 
 void
-MidiPort::flush_buffers (pframes_t nframes, framepos_t time, framecnt_t offset)
+MidiPort::flush_buffers (pframes_t nframes, framepos_t time)
 {
 	if (sends_output ()) {
 
@@ -137,14 +137,14 @@ MidiPort::flush_buffers (pframes_t nframes, framepos_t time, framecnt_t offset)
 
 			// event times are in frames, relative to cycle start
 
-			assert (ev.time() < (nframes + offset));
+			assert (ev.time() < (nframes + _port_offset));
 
-			if (ev.time() >= offset) {
+			if (ev.time() >= _port_offset) {
 				if (jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size()) != 0) {
-                                        cerr << "write failed, drop flushed note off on the floor, time " << ev.time() << " > " << offset << endl;
+                                        cerr << "write failed, drop flushed note off on the floor, time " << ev.time() << " > " << _port_offset << endl;
                                 }
                         } else {
-                                cerr << "drop flushed event on the floor, time " << ev.time() << " < " << offset << endl;
+                                cerr << "drop flushed event on the floor, time " << ev.time() << " < " << _port_offset << endl;
                         }
 		}
 	}

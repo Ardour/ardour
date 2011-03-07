@@ -27,6 +27,7 @@
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/audio_port.h"
 #include "ardour/amp.h"
 #include "ardour/buffer_set.h"
 #include "ardour/configuration.h"
@@ -253,7 +254,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 	   processing pathway that wants to use this->output_buffers() for some reason.
 	*/
 
-	output_buffers().get_jack_port_addresses (ports, nframes, _output_offset);
+	output_buffers().get_jack_port_addresses (ports, nframes);
 
 	// this Delivery processor is not a derived type, and thus we assume
 	// we really can modify the buffers passed in (it is almost certainly
@@ -289,7 +290,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
         panner = _panshell->panner();
 
 	if (panner && !panner->bypassed()) {
-
+                
 		// Use the panner to distribute audio to output port buffers
 
 		_panshell->run (bufs, output_buffers(), start_frame, end_frame, nframes);
@@ -300,11 +301,11 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 		// Do a 1:1 copy of data to output ports
 
 		if (bufs.count().n_audio() > 0 && ports.count().n_audio () > 0) {
-			_output->copy_to_outputs (bufs, DataType::AUDIO, nframes, _output_offset);
+			_output->copy_to_outputs (bufs, DataType::AUDIO, nframes, 0);
                 }
 
 		if (bufs.count().n_midi() > 0 && ports.count().n_midi () > 0) {
-			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, _output_offset);
+			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, 0);
 		}
 	}
 
@@ -451,7 +452,7 @@ Delivery::flush_buffers (framecnt_t nframes, framepos_t time)
 	PortSet& ports (_output->ports());
         
 	for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-		(*i).flush_buffers (nframes, time, _output_offset);
+		(*i).flush_buffers (nframes, time);
 	}
 }
 

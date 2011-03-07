@@ -819,7 +819,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 		return;
 	}
 
-	if (_transport_speed && (!with_loop || loop_changing)) {
+	if (_transport_speed) {
 		/* schedule a declick. we'll be called again when its done */
 
 		if (!(transport_sub_state & PendingDeclickOut)) {

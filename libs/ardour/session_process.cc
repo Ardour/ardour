@@ -51,6 +51,7 @@ using namespace std;
 /** Called by the audio engine when there is work to be done with JACK.
  * @param nframes Number of frames to process.
  */
+
 void
 Session::process (pframes_t nframes)
 {
@@ -397,7 +398,7 @@ Session::process_with_events (pframes_t nframes)
 					fail_roll (nframes);
 					return;
 				}
-
+                                
 				get_track_statistics ();
 
 				nframes -= this_nframes;

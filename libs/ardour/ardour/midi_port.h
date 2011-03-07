@@ -41,16 +41,16 @@ class MidiPort : public Port {
 	void cycle_end (pframes_t nframes);
 	void cycle_split ();
 
-	void flush_buffers (pframes_t nframes, framepos_t time, framecnt_t offset = 0);
+	void flush_buffers (pframes_t nframes, framepos_t time);
 	void transport_stopped ();
 
 	size_t raw_buffer_size (pframes_t nframes) const;
 
-	Buffer& get_buffer (framecnt_t nframes, framecnt_t offset = 0) {
-		return get_midi_buffer (nframes, offset);
+	Buffer& get_buffer (framecnt_t nframes) {
+		return get_midi_buffer (nframes);
 	}
 
-	MidiBuffer& get_midi_buffer (framecnt_t nframes, framecnt_t offset = 0);
+	MidiBuffer& get_midi_buffer (framecnt_t nframes);
 
   protected:
 	friend class AudioEngine;

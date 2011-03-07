@@ -133,8 +133,6 @@ GenericMidiControlProtocol::reload_maps ()
 		return;
 	}
 
-	cerr << "Found " << midi_maps->size() << " MIDI maps along " << spath.to_string() << endl;
-
 	for (vector<string*>::iterator i = midi_maps->begin(); i != midi_maps->end(); ++i) {
 		string fullpath = *(*i);
 

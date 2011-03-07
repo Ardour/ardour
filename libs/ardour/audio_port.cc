@@ -17,6 +17,9 @@
 */
 
 #include <cassert>
+
+#include "pbd/stacktrace.h"
+
 #include "ardour/audio_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/data_type.h"
@@ -24,8 +27,6 @@
 
 using namespace ARDOUR;
 using namespace std;
-
-framecnt_t AudioPort::_port_offset = 0;
 
 AudioPort::AudioPort (const std::string& name, Flags flags)
 	: Port (name, DataType::AUDIO, flags)
@@ -44,22 +45,7 @@ AudioPort::cycle_start (pframes_t nframes)
 {
 	/* caller must hold process lock */
 
-	/* get_buffer() must only be run on outputs here in cycle_start().
-
-	   Inputs must be done in the correct processing order, which
-	   requires interleaving with route processing. that will
-	   happen when Port::get_buffer() is called.
-	*/
-
 	if (sends_output()) {
-
-		/* Notice that cycle_start() is always run with the *entire* process cycle frame count,
-		   so we do not bother to apply _port_offset here - we always want the address of the
-		   entire JACK port buffer. We are not collecting data here - just noting the
-		   address where we will write data later in the process cycle.
-		*/
-
-		_buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, nframes), nframes);
 		_buffer->prepare ();
 	}
 }
@@ -67,7 +53,7 @@ AudioPort::cycle_start (pframes_t nframes)
 void
 AudioPort::cycle_end (pframes_t nframes)
 {
-	if (sends_output() && !_buffer->written()) {
+        if (sends_output() && !_buffer->written()) {
 		_buffer->silence (nframes);
 	}
 }
@@ -78,24 +64,10 @@ AudioPort::cycle_split ()
 }
 
 AudioBuffer&
-AudioPort::get_audio_buffer (framecnt_t nframes, framecnt_t offset)
+AudioPort::get_audio_buffer (framecnt_t nframes)
 {
 	/* caller must hold process lock */
-
-	if (receives_input ()) {
-
-		/* Get a pointer to the audio data @ offset + _port_offset within the JACK port buffer and store
-		   it in our _buffer member.
-
-		   Note that offset is expected to be zero in almost all cases.
-		*/
-
-		_buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, nframes) + offset + _port_offset, nframes);
-	}
-
-	/* output ports set their _buffer data information during ::cycle_start()
-	 */
-
+       _buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, nframes) + _port_offset, nframes);
 	return *_buffer;
 }
 

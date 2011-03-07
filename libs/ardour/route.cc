@@ -418,10 +418,8 @@ Route::process_output_buffers (BufferSet& bufs,
 	   GLOBAL DECLICK (for transport changes etc.)
 	   ----------------------------------------------------------------------------------------- */
 
-	if (declick > 0) {
-		Amp::declick (bufs, nframes, 1);
-	} else if (declick < 0) {
-		Amp::declick (bufs, nframes, -1);
+	if (declick != 0) {
+		Amp::declick (bufs, nframes, declick);
 	}
 
 	_pending_declick = 0;
@@ -503,7 +501,7 @@ Route::process_output_buffers (BufferSet& bufs,
                    do we catch route != active somewhere higher?
                 */
 
-		(*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
+                (*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
 		bufs.set_count ((*i)->output_streams());
 	}
 }
@@ -2695,7 +2693,7 @@ Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool did_lo
 			if (Config->get_plugins_stop_with_transport() && can_flush_processors) {
                                 (*i)->flush ();
 			}
-
+                        
 			(*i)->transport_stopped (now);
 		}
 	}
@@ -2819,6 +2817,7 @@ Route::check_initial_delay (framecnt_t nframes, framecnt_t& transport_frame)
 		   output ports, so make a note of that for
 		   future reference.
 		*/
+
 		_main_outs->increment_output_offset (_roll_delay);
 		transport_frame += _roll_delay;
 

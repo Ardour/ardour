@@ -67,7 +67,7 @@ public:
 	void clear();
 
 	void attach_buffers (PortSet& ports);
-	void get_jack_port_addresses (PortSet &, framecnt_t, framecnt_t);
+	void get_jack_port_addresses (PortSet &, framecnt_t);
 
 	/* the capacity here is a size_t and has a different interpretation depending
 	   on the DataType of the buffers. for audio, its a frame count. for MIDI

@@ -41,6 +41,7 @@ using namespace std;
 
 #ifdef DEBUG_RT_ALLOC
 static Graph* graph = 0;
+
 extern "C" {
 
 int alloc_allowed ()

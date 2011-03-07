@@ -113,10 +113,8 @@ public:
 	virtual void cycle_start (pframes_t) = 0;
 	virtual void cycle_end (pframes_t) = 0;
 	virtual void cycle_split () = 0;
-	virtual Buffer& get_buffer (framecnt_t nframes, framecnt_t offset = 0) = 0;
-	virtual void flush_buffers (pframes_t nframes, framepos_t /*time*/, framecnt_t offset = 0) {
-		assert (offset < nframes);
-	}
+	virtual Buffer& get_buffer (framecnt_t nframes) = 0;
+	virtual void flush_buffers (pframes_t nframes, framepos_t /*time*/) {}
 	virtual void transport_stopped () {}
 
         bool physically_connected () const;
@@ -124,6 +122,17 @@ public:
 	static void set_engine (AudioEngine *);
 
 	PBD::Signal1<void,bool> MonitorInputChanged;
+
+
+	static framecnt_t port_offset() { return _port_offset; }
+
+	static void set_port_offset (framecnt_t off) {
+		_port_offset = off;
+	}
+	
+	static void increment_port_offset (framecnt_t n) {
+		_port_offset += n;
+	}
 
 protected:
 
@@ -133,6 +142,7 @@ protected:
 
 	static pframes_t  _buffer_size;
 	static bool	  _connecting_blocked;
+	static framecnt_t _port_offset;
         
 	static AudioEngine* _engine; ///< the AudioEngine
 
@@ -150,6 +160,7 @@ private:
 	/** ports that we are connected to, kept so that we can
 	    reconnect to JACK when required */
 	std::set<std::string> _connections;
+
 };
 
 }

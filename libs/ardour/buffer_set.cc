@@ -113,7 +113,7 @@ BufferSet::attach_buffers (PortSet& ports)
  *  Does not allocate, so RT-safe.
  */
 void
-BufferSet::get_jack_port_addresses (PortSet& ports, framecnt_t nframes, framecnt_t offset)
+BufferSet::get_jack_port_addresses (PortSet& ports, framecnt_t nframes)
 {
 	assert (_count == ports.count ());
 	assert (_available == ports.count ());
@@ -128,7 +128,7 @@ BufferSet::get_jack_port_addresses (PortSet& ports, framecnt_t nframes, framecnt
 
 		int i = 0;
 		for (PortSet::iterator p = ports.begin(*t); p != ports.end(*t); ++p) {
-			v[i] = &p->get_buffer (nframes, offset);
+			v[i] = &p->get_buffer (nframes);
 			++i;
 		}
 	}

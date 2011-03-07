@@ -3745,45 +3745,18 @@ BufferSet&
 Session::get_silent_buffers (ChanCount count)
 {
 	return ProcessThread::get_silent_buffers (count);
-#if 0
-	assert(_silent_buffers->available() >= count);
-	_silent_buffers->set_count(count);
-
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		for (size_t i= 0; i < count.get(*t); ++i) {
-			_silent_buffers->get(*t, i).clear();
-		}
-	}
-
-	return *_silent_buffers;
-#endif
 }
 
 BufferSet&
 Session::get_scratch_buffers (ChanCount count)
 {
 	return ProcessThread::get_scratch_buffers (count);
-#if 0
-	if (count != ChanCount::ZERO) {
-		assert(_scratch_buffers->available() >= count);
-		_scratch_buffers->set_count(count);
-	} else {
-		_scratch_buffers->set_count (_scratch_buffers->available());
-	}
-
-	return *_scratch_buffers;
-#endif
 }
 
 BufferSet&
 Session::get_mix_buffers (ChanCount count)
 {
 	return ProcessThread::get_mix_buffers (count);
-#if 0
-	assert(_mix_buffers->available() >= count);
-	_mix_buffers->set_count(count);
-	return *_mix_buffers;
-#endif
 }
 
 uint32_t

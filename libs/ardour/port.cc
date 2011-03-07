@@ -42,6 +42,7 @@ using namespace PBD;
 AudioEngine* Port::_engine = 0;
 pframes_t Port::_buffer_size = 0;
 bool Port::_connecting_blocked = false;
+framecnt_t Port::_port_offset = 0;
 
 /** @param n Port short name */
 Port::Port (std::string const & n, DataType t, Flags f)
