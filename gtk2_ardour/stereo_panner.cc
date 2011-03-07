@@ -140,7 +140,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         double pos = position_control->get_value (); /* 0..1 */
         double swidth = width_control->get_value (); /* -1..+1 */
         double fswidth = fabs (swidth);
-        uint32_t o, f, t, b;
+        uint32_t o, f, t, b, r;
         State state;
         const double corner_radius = 5.0;
 
@@ -159,6 +159,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         f = colors[state].fill;
         t = colors[state].text;
         b = colors[state].background;
+        r = colors[state].rule;
 
         /* background */
 
@@ -197,7 +198,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         context->set_line_width (1.0);
         context->move_to ((usable_width + lr_box_size)/2.0, 0);
         context->rel_line_to (0, height);
-        context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
+        context->set_source_rgba (UINT_RGBA_R_FLT(r), UINT_RGBA_G_FLT(r), UINT_RGBA_B_FLT(r), UINT_RGBA_A_FLT(r));
         context->stroke ();
 
         /* compute & draw the line through the box */
