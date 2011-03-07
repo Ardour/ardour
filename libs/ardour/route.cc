@@ -397,12 +397,7 @@ Route::process_output_buffers (BufferSet& bufs,
 {
 	bool monitor = should_monitor ();
 
-        cerr << name() << " will monitor ? " << monitor << endl;
-
 	bufs.is_silent (false);
-
-        cerr << name() << " POB, should declick ? " << declick << endl;
-        declick = 0;
 
 	if (!declick) {
 		declick = _pending_declick;
