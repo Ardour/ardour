@@ -74,8 +74,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
         
 	boost::shared_ptr<ARDOUR::MidiRegion> add_region (ARDOUR::framepos_t, ARDOUR::framecnt_t, bool);
 
-	void show_all_automation ();
-	void show_existing_automation ();
+	void show_all_automation (bool apply_to_selection = false);
+	void show_existing_automation (bool apply_to_selection = false);
 	void create_automation_child (const Evoral::Parameter& param, bool show);
 
 	ARDOUR::NoteMode  note_mode() const { return _note_mode; }

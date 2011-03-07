@@ -260,8 +260,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void show_route_color ();
 	void show_passthru_color ();
 
-	void route_active_changed ();
-
 	void name_changed ();
 	void update_speed_display ();
 	void map_frozen ();

@@ -1321,13 +1321,13 @@ MixerStrip::show_route_color ()
 {
 	name_button.modify_bg (STATE_NORMAL, color());
 	top_event_box.modify_bg (STATE_NORMAL, color());
-	route_active_changed ();
+	reset_strip_style ();
 }
 
 void
 MixerStrip::show_passthru_color ()
 {
-	route_active_changed ();
+	reset_strip_style ();
 }
 
 void
@@ -1345,9 +1345,10 @@ MixerStrip::build_route_ops_menu ()
 	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
 	rename_menu_item = &items.back();
 	items.push_back (SeparatorElem());
-	items.push_back (CheckMenuElem (_("Active"), sigc::mem_fun (*this, &RouteUI::toggle_route_active)));
-	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
-	route_active_menu_item->set_active (_route->active());
+	items.push_back (CheckMenuElem (_("Active")));
+	CheckMenuItem* i = dynamic_cast<CheckMenuItem *> (&items.back());
+	i->set_active (_route->active());
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
 
 	items.push_back (SeparatorElem());
 
@@ -1387,9 +1388,8 @@ MixerStrip::name_button_button_press (GdkEventButton* ev)
 void
 MixerStrip::list_route_operations ()
 {
-	if (route_ops_menu == 0) {
-		build_route_ops_menu ();
-	}
+	delete route_ops_menu;
+	build_route_ops_menu ();
 }
 
 void
@@ -1494,13 +1494,6 @@ MixerStrip::hide_processor_editor (boost::weak_ptr<Processor> p)
 	if (w) {
 		w->hide ();
 	}
-}
-
-void
-MixerStrip::route_active_changed ()
-{
-	RouteUI::route_active_changed ();
-	reset_strip_style ();
 }
 
 void

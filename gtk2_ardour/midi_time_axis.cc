@@ -820,31 +820,39 @@ MidiTimeAxisView::update_range()
 }
 
 void
-MidiTimeAxisView::show_all_automation ()
+MidiTimeAxisView::show_all_automation (bool apply_to_selection)
 {
-	if (midi_track()) {
-		const set<Evoral::Parameter> params = midi_track()->midi_playlist()->contained_automation();
-
-		for (set<Evoral::Parameter>::const_iterator i = params.begin(); i != params.end(); ++i) {
-			create_automation_child(*i, true);
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_midi_time_axis (boost::bind (&MidiTimeAxisView::show_all_automation, _1, false));
+	} else {
+		if (midi_track()) {
+			const set<Evoral::Parameter> params = midi_track()->midi_playlist()->contained_automation();
+			
+			for (set<Evoral::Parameter>::const_iterator i = params.begin(); i != params.end(); ++i) {
+				create_automation_child(*i, true);
+			}
 		}
+		
+		RouteTimeAxisView::show_all_automation ();
 	}
-
-	RouteTimeAxisView::show_all_automation ();
 }
 
 void
-MidiTimeAxisView::show_existing_automation ()
+MidiTimeAxisView::show_existing_automation (bool apply_to_selection)
 {
-	if (midi_track()) {
-		const set<Evoral::Parameter> params = midi_track()->midi_playlist()->contained_automation();
-
-		for (set<Evoral::Parameter>::const_iterator i = params.begin(); i != params.end(); ++i) {
-			create_automation_child(*i, true);
+	if (apply_to_selection) {
+		_editor.get_selection().tracks.foreach_midi_time_axis (boost::bind (&MidiTimeAxisView::show_existing_automation, _1, false));
+	} else {
+		if (midi_track()) {
+			const set<Evoral::Parameter> params = midi_track()->midi_playlist()->contained_automation();
+			
+			for (set<Evoral::Parameter>::const_iterator i = params.begin(); i != params.end(); ++i) {
+				create_automation_child(*i, true);
+			}
 		}
+		
+		RouteTimeAxisView::show_existing_automation ();
 	}
-
-	RouteTimeAxisView::show_existing_automation ();
 }
 
 /** Create an automation track for the given parameter (pitch bend, channel pressure).

@@ -621,9 +621,32 @@ RouteTimeAxisView::build_display_menu ()
 		items.push_back (SeparatorElem());
 	}
 
-	items.push_back (CheckMenuElem (_("Active"), sigc::mem_fun(*this, &RouteUI::toggle_route_active)));
-	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
-	route_active_menu_item->set_active (_route->active());
+	int active = 0;
+	int inactive = 0;
+	TrackSelection const & s = _editor.get_selection().tracks;
+	for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
+		RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (!r) {
+			continue;
+		}
+
+		if (r->route()->active()) {
+			++active;
+		} else {
+			++inactive;
+		}
+	}
+
+	items.push_back (CheckMenuElem (_("Active")));
+	CheckMenuItem* i = dynamic_cast<CheckMenuItem *> (&items.back());
+	bool click_sets_active = true;
+	if (active > 0 && inactive == 0) {
+		i->set_active (true);
+		click_sets_active = false;
+	} else if (active > 0 && inactive > 0) {
+		i->set_inconsistent (true);
+	}
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), click_sets_active, true));
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), sigc::bind (sigc::mem_fun(_editor, &PublicEditor::hide_track_in_display), this, false)));

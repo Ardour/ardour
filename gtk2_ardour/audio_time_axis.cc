@@ -409,7 +409,6 @@ AudioTimeAxisView::reveal_dependent_views (TimeAxisViewItem& tavi)
 void
 AudioTimeAxisView::route_active_changed ()
 {
-	RouteTimeAxisView::route_active_changed ();
 	update_control_names ();
 }
 

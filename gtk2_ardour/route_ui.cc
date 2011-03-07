@@ -109,7 +109,6 @@ RouteUI::init ()
         solo_safe_led = 0;
 	_solo_release = 0;
 	_mute_release = 0;
-	route_active_menu_item = 0;
 	denormal_menu_item = 0;
         step_edit_item = 0;
 	multiple_mute_change = false;
@@ -179,7 +178,6 @@ RouteUI::reset ()
 		xml_node = 0;
 	}
 
-	route_active_menu_item = 0;
 	denormal_menu_item = 0;
 }
 
@@ -1467,25 +1465,14 @@ RouteUI::property_changed (const PropertyChange& what_changed)
 }
 
 void
-RouteUI::toggle_route_active ()
+RouteUI::set_route_active (bool a, bool apply_to_selection)
 {
-	bool yn;
-
-	if (route_active_menu_item) {
-		if (route_active_menu_item->get_active() != (yn = _route->active())) {
-			_route->set_active (!yn, this);
-		}
+	if (apply_to_selection) {
+		ARDOUR_UI::instance()->the_editor().get_selection().tracks.foreach_route_ui (boost::bind (&RouteTimeAxisView::set_route_active, _1, a, false));
+	} else {
+		_route->set_active (a, this);
 	}
 }
-
-void
-RouteUI::route_active_changed ()
-{
-	if (route_active_menu_item) {
-		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&CheckMenuItem::set_active, route_active_menu_item, _route->active()));
-	}
-}
-
 
 void
 RouteUI::toggle_denormal_protection ()

@@ -23,6 +23,7 @@
 #include "track_view_list.h"
 #include "route_ui.h"
 #include "audio_time_axis.h"
+#include "midi_time_axis.h"
 
 class PublicEditor;
 
@@ -47,7 +48,9 @@ public:
 	void foreach_route_ui (Function f) {
 		for (iterator i = begin(); i != end(); ++i) {
 			RouteUI* t = dynamic_cast<RouteUI*> (*i);
-			f (t);
+			if (t) {
+				f (t);
+			}
 		}
 	}
 
@@ -55,7 +58,9 @@ public:
 	void foreach_route_time_axis (Function f) {
 		for (iterator i = begin(); i != end(); ++i) {
 			RouteTimeAxisView* t = dynamic_cast<RouteTimeAxisView*> (*i);
-			f (t);
+			if (t) {
+				f (t);
+			}
 		}
 	}
 
@@ -63,7 +68,19 @@ public:
 	void foreach_audio_time_axis (Function f) {
 		for (iterator i = begin(); i != end(); ++i) {
 			AudioTimeAxisView* t = dynamic_cast<AudioTimeAxisView*> (*i);
-			f (t);
+			if (t) {
+				f (t);
+			}
+		}
+	}
+
+	template <typename Function>
+	void foreach_midi_time_axis (Function f) {
+		for (iterator i = begin(); i != end(); ++i) {
+			MidiTimeAxisView* t = dynamic_cast<MidiTimeAxisView*> (*i);
+			if (t) {
+				f (t);
+			}
 		}
 	}
 	
