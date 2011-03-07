@@ -49,9 +49,6 @@ public:
 		assert(src.type() == DataType::AUDIO);
 		assert(len <= _capacity);
 		memcpy(_data + dst_offset, ((AudioBuffer&)src).data() + src_offset, sizeof(Sample) * len);
-                if (next_write_addr >= _data + _capacity) {
-                        next_write_addr = _data;
-                }
 		if (dst_offset == 0 && src_offset == 0 && len == _capacity) {
 			_silent = src.silent();
 		} else {
@@ -171,8 +168,6 @@ public:
 
 	void prepare () { _written = false; }
 	bool written() const { return _written; }
-
-        void set_marked_for_write (bool yn) { mfw = yn; }
 
   private:
 	bool    _owns_data;
