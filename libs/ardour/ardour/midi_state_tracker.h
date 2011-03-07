@@ -20,7 +20,6 @@
 #ifndef __ardour_midi_state_tracker_h__
 #define __ardour_midi_state_tracker_h__
 
-#include <bitset>
 #include "ardour/midi_buffer.h"
 
 namespace Evoral {

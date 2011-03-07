@@ -25,7 +25,6 @@
 #include <set>
 #include <string>
 #include <sys/time.h>
-#include <bitset>
 
 #include <boost/optional.hpp>
 
