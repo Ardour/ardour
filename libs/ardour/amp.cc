@@ -211,7 +211,7 @@ Amp::declick (BufferSet& bufs, framecnt_t nframes, int dir)
 
 	const framecnt_t declick = std::min ((framecnt_t) 128, nframes);
 	gain_t         delta, initial, target;
-	double         fractional_shift = -1.0/declick;
+	double         fractional_shift = -1.0/(declick-1);
 	double         fractional_pos;
 
 	if (dir < 0) {
