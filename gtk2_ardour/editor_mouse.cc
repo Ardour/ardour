@@ -2657,6 +2657,8 @@ Editor::set_internal_edit (bool yn)
 		ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Draw/Edit MIDI Notes"));
 		mouse_mode_toggled (mouse_mode);
 
+                pre_internal_mouse_mode = mouse_mode;
+
                 for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
                         (*i)->enter_internal_edit_mode ();
                 }
@@ -2670,6 +2672,11 @@ Editor::set_internal_edit (bool yn)
 
                 for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
                         (*i)->leave_internal_edit_mode ();
+                }
+
+                if (mouse_mode == MouseRange && pre_internal_mouse_mode != MouseRange) {
+                        /* we were drawing .. flip back to something sensible */
+                        set_mouse_mode (pre_internal_mouse_mode);
                 }
 	}
 }

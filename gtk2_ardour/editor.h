@@ -498,6 +498,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void post_zoom ();
 
 	Editing::MouseMode mouse_mode;
+	Editing::MouseMode pre_internal_mouse_mode;
 	bool _internal_editing;
 	Editing::MouseMode effective_mouse_mode () const;
 

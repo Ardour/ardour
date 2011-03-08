@@ -647,6 +647,7 @@ Editor::Editor ()
 	_snap_mode = SnapOff;
 	set_snap_mode (_snap_mode);
 	set_mouse_mode (MouseObject, true);
+        pre_internal_mouse_mode = MouseObject;
 	set_edit_point_preference (EditAtMouse, true);
 
 	_playlist_selector = new PlaylistSelector();
