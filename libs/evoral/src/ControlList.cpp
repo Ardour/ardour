@@ -223,6 +223,13 @@ ControlList::write_pass_finished (double when)
         merge_nascent (when);
 }
 
+
+struct ControlEventTimeComparator {
+	bool operator() (ControlEvent* a, ControlEvent* b) {
+		return a->when < b->when;
+	}
+};
+
 void
 ControlList::merge_nascent (double when)
 {
@@ -244,6 +251,8 @@ ControlList::merge_nascent (double when)
                                 delete ninfo;
                                 continue;
                         }
+
+			nascent_events.sort (ControlEventTimeComparator ());
                         
                         if (ninfo->start_time < 0.0) {
                                 ninfo->start_time = nascent_events.front()->when;
@@ -372,9 +381,9 @@ ControlList::rt_add (double when, double value)
 
         if (lm.locked()) {
                 assert (!nascent.empty());
-                if (!nascent.back()->events.empty()) {
-                        assert (when > nascent.back()->events.back()->when);
-                }
+		/* we don't worry about adding events out of time order as we will
+		   sort them in merge_nascent.
+		*/
                 nascent.back()->events.push_back (new ControlEvent (when, value));
         }
 }
