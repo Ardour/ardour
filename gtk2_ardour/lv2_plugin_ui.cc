@@ -30,7 +30,9 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace PBD;
 
+#ifdef HAVE_NEW_SLV2
 SLV2UIHost LV2PluginUI::ui_host = NULL;
+#endif
 
 void
 LV2PluginUI::lv2_ui_write(LV2UI_Controller controller,
