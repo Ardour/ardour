@@ -30,6 +30,8 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace PBD;
 
+SLV2UIHost LV2PluginUI::ui_host = NULL;
+
 void
 LV2PluginUI::lv2_ui_write(LV2UI_Controller controller,
                           uint32_t         port_index,
@@ -166,13 +168,15 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	}
 
 #ifdef HAVE_NEW_SLV2
-	SLV2UIHost ui_host = slv2_ui_host_new(
-	        this, LV2PluginUI::lv2_ui_write, NULL, NULL, NULL);
+	if (!LV2PluginUI::ui_host) {
+		LV2PluginUI::ui_host = slv2_ui_host_new(
+	        LV2PluginUI::lv2_ui_write, NULL, NULL, NULL);
+	}
 	SLV2Value gtk_ui = slv2_value_new_uri(
-	        ARDOUR::PluginManager::the_manager()->lv2_world()->world,
-	        "http://lv2plug.in/ns/extensions/ui#GtkUI");
+		ARDOUR::PluginManager::the_manager()->lv2_world()->world,
+		"http://lv2plug.in/ns/extensions/ui#GtkUI");
 	_inst = slv2_ui_instance_new(
-	        _lv2->slv2_plugin(), _lv2->slv2_ui(), gtk_ui, ui_host, features_dst);
+		_lv2->slv2_plugin(), _lv2->slv2_ui(), gtk_ui, ui_host, this, features_dst);
 	slv2_value_free(gtk_ui);
 	slv2_ui_host_free(ui_host);
 #else

@@ -1,6 +1,6 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Dave Robillard
+    Copyright (C) 2008-2011 Paul Davis
+    Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -77,6 +77,10 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	Gtk::Window* _win_ptr;
 
 	static void on_external_ui_closed(LV2UI_Controller controller);
+
+#ifdef HAVE_NEW_SLV2
+	static SLV2UIHost ui_host;
+#endif
 
 	static void lv2_ui_write(
 			LV2UI_Controller controller,
