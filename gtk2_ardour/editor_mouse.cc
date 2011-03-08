@@ -1549,8 +1549,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		break;
 	}
 
-        cerr << "button release hits bottom\n";
-
 	return false;
 }
 
