@@ -522,7 +522,6 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 		switch (op) {
 		case Selection::Toggle:
-
 			if (selection->selected (clicked_regionview)) {
 				if (press) {
 
@@ -533,11 +532,10 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 					button_release_can_deselect = true;
 
 				} else {
-
 					if (button_release_can_deselect) {
 
 						/* just remove this one region, but only on a permitted button release */
-
+                                                
 						selection->remove (clicked_regionview);
 						commit = true;
 

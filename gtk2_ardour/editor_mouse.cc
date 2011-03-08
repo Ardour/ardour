@@ -505,8 +505,6 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
 	bool press = (event->type == GDK_BUTTON_PRESS);
 
-	// begin_reversible_command (_("select on click"));
-
 	switch (item_type) {
 	case RegionItem:
 		if (mouse_mode != MouseRange || _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
@@ -1501,9 +1499,11 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		default:
 			break;
-
+                        
 		}
 
+                /* do any (de)selection operations that should occur on button release */
+                button_selection (item, event, item_type);
 		return true;
 		break;
 
@@ -1548,6 +1548,9 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	default:
 		break;
 	}
+
+        cerr << "button release hits bottom\n";
+
 	return false;
 }
 
