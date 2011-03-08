@@ -113,7 +113,7 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
         , _persistent_alignment_style (ExistingMaterial)
         , first_input_change (true)
         , _flags (flag)
-
+        , deprecated_io_node (0)
 {
 }
 
@@ -157,6 +157,7 @@ Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
         , _persistent_alignment_style (ExistingMaterial)
         , first_input_change (true)
         , _flags (Recordable)
+        , deprecated_io_node (0)
 {
 }
 
@@ -167,6 +168,8 @@ Diskstream::~Diskstream ()
 	if (_playlist) {
 		_playlist->release ();
 	}
+
+        delete deprecated_io_node;
 }
 
 void
@@ -264,6 +267,7 @@ Diskstream::set_capture_offset ()
 	}
 
 	_capture_offset = _io->latency();
+        DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: using IO latency, capture offset set to %2\n", name(), _capture_offset));
 }
 
 void
@@ -434,6 +438,78 @@ Diskstream::set_name (const string& str)
 	return true;
 }
 
+XMLNode&
+Diskstream::get_state ()
+{
+	XMLNode* node = new XMLNode ("Diskstream");
+        char buf[64];
+	LocaleGuard lg (X_("POSIX"));
+
+	node->add_property ("flags", enum_2_string (_flags));
+	node->add_property ("playlist", _playlist->name());
+	node->add_property("name", _name);
+	id().print (buf, sizeof (buf));
+	node->add_property("id", buf);
+	snprintf (buf, sizeof(buf), "%f", _visible_speed);
+	node->add_property ("speed", buf);
+
+	if (_extra_xml) {
+		node->add_child_copy (*_extra_xml);
+	}
+        
+        return *node;
+}
+
+int
+Diskstream::set_state (const XMLNode& node, int /*version*/)
+{
+	const XMLProperty* prop;
+
+	if ((prop = node.property ("name")) != 0) {
+		_name = prop->value();
+	}
+
+	if (deprecated_io_node) {
+		if ((prop = deprecated_io_node->property ("id")) != 0) {
+			_id = prop->value ();
+		}
+	} else {
+		if ((prop = node.property ("id")) != 0) {
+			_id = prop->value ();
+		}
+	}
+
+	if ((prop = node.property ("flags")) != 0) {
+		_flags = Flag (string_2_enum (prop->value(), _flags));
+	}
+
+	if ((prop = node.property ("playlist")) == 0) {
+		return -1;
+	}
+
+	{
+		bool had_playlist = (_playlist != 0);
+
+		if (find_and_use_playlist (prop->value())) {
+			return -1;
+		}
+
+		if (!had_playlist) {
+			_playlist->set_orig_diskstream_id (id());
+		}
+	}
+
+	if ((prop = node.property ("speed")) != 0) {
+		double sp = atof (prop->value().c_str());
+
+		if (realtime_set_speed (sp, false)) {
+			non_realtime_set_speed ();
+		}
+	}
+
+        return 0;
+}
+
 void
 Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const & movements_frames, bool from_undo)
 {
@@ -545,29 +621,33 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
 		last_recordable_frame = max_framepos;
 		capture_start_frame = transport_frame;
 
+                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %7 basic FRF = %2 LRF = %3 CSF = %4 CO = %5, WLO = %6\n",
+                                                                      name(), first_recordable_frame, last_recordable_frame, capture_start_frame,
+                                                                      _capture_offset,
+                                                                      _session.worst_output_latency(),
+                                                                      transport_frame));
+
+                
+
                 if (change & transport_rolling) {
 
                         /* transport-change (started rolling) */
                         
 			if (_alignment_style == ExistingMaterial) {
                                 
-                                /* there are two delays happening:
-                                   
-                                   1) inbound, represented by _capture_offset
-                                   2) outbound, represented by _session.worst_output_latency()
-
-                                   the first sample to record occurs when the larger of these
-                                   two has elapsed, since they occur in parallel.
-
-                                   since we've already added _capture_offset, just add the
-                                   difference if _session.worst_output_latency() is larger.
+                                /* audio played by ardour will take (up to) _session.worst_output_latency() ("WOL") to
+                                   appear at the speakers; audio played at the time when it does appear at
+                                   the speakers will take _capture_offset to arrive back here. we've
+                                   already added _capture_offset, so now add WOL.
                                 */
-
-                                if (_capture_offset < _session.worst_output_latency()) {
-                                        first_recordable_frame += (_session.worst_output_latency() - _capture_offset);
-                                } 
+                                
+                                first_recordable_frame += _session.worst_output_latency();
+                                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tROLL: shift FRF by delta between WOL %1\n",
+                                                                                      first_recordable_frame));
                         } else {
 				first_recordable_frame += _roll_delay;
+                                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tROLL: shift FRF by roll delay of %1 to %2\n",
+                                                                                      _roll_delay, first_recordable_frame));
   			}
                         
                 } else {
@@ -576,29 +656,14 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
 
 			if (_alignment_style == ExistingMaterial) {
 
-				/* There are two kinds of punch:
-                                   
-                                   manual punch in happens at the correct transport frame
-                                   because the user hit a button. but to get alignment correct 
-                                   we have to back up the position of the new region to the 
-                                   appropriate spot given the roll delay.
-
-                                   autopunch toggles recording at the precise
-				   transport frame, and then the DS waits
-				   to start recording for a time that depends
-				   on the output latency.
-
-                                   XXX: BUT THIS CODE DOESN'T DIFFERENTIATE !!!
-
-				*/
-
-                                if (_capture_offset < _session.worst_output_latency()) {
-                                        /* see comment in ExistingMaterial block above */
-                                        first_recordable_frame += (_session.worst_output_latency() - _capture_offset);
-                                }
-
+                                /* see comment in ExistingMaterial block above */
+                                first_recordable_frame += _session.worst_output_latency();
+                                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tMANUAL PUNCH: shift FRF by delta between WOL and CO to %1\n",
+                                                                                      first_recordable_frame));
 			} else {
 				capture_start_frame -= _roll_delay;
+                                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tPUNCH: shift CSF by roll delay of %1 to %2\n",
+                                                                                      _roll_delay, capture_start_frame));
 			}
                 }
                 
@@ -619,9 +684,7 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
                                 last_recordable_frame = transport_frame + _capture_offset;
                                 
                                 if (_alignment_style == ExistingMaterial) {
-                                        if (_session.worst_output_latency() > _capture_offset) {
-                                                last_recordable_frame += (_session.worst_output_latency() - _capture_offset);
-                                        }
+                                        last_recordable_frame += _session.worst_input_latency();
                                 } else {
                                         last_recordable_frame += _roll_delay;
                                 }

@@ -97,10 +97,7 @@ Track::update_total_latency ()
 		}
 	}
 
-#undef DEBUG_LATENCY
-#ifdef DEBUG_LATENCY
-	cerr << _name << ": internal redirect (final) latency = " << own_latency << endl;
-#endif
+	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: track: internal redirect latency = %2\n", _name, own_latency));
 
 	_output->set_port_latency (own_latency);
 

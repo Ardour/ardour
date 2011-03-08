@@ -74,7 +74,6 @@ gain_t* AudioDiskstream::_gain_buffer          = 0;
 
 AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream::Flag flag)
 	: Diskstream(sess, name, flag)
-	, deprecated_io_node(NULL)
 	, channels (new ChannelList)
 {
 	/* prevent any write sources from being created */
@@ -86,7 +85,6 @@ AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream:
 
 AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
 	: Diskstream(sess, node)
-	, deprecated_io_node(NULL)
 	, channels (new ChannelList)
 {
 	in_set_state = true;
@@ -132,8 +130,6 @@ AudioDiskstream::~AudioDiskstream ()
 	}
 
 	channels.flush ();
-
-	delete deprecated_io_node;
 }
 
 void
@@ -1491,7 +1487,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 
 			RegionFactory::region_name (region_name, whole_file_region_name, false);
 
-			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add region " << region_name << endl;
+			cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add region " << region_name << endl;
 
 			try {
 
@@ -1723,25 +1719,14 @@ AudioDiskstream::disengage_record_enable ()
 XMLNode&
 AudioDiskstream::get_state ()
 {
-	XMLNode* node = new XMLNode ("Diskstream");
+	XMLNode& node (Diskstream::get_state());
 	char buf[64] = "";
 	LocaleGuard lg (X_("POSIX"));
+
 	boost::shared_ptr<ChannelList> c = channels.reader();
-
-	node->add_property ("flags", enum_2_string (_flags));
-
 	snprintf (buf, sizeof(buf), "%zd", c->size());
-	node->add_property ("channels", buf);
-
-	node->add_property ("playlist", _playlist->name());
-
-	snprintf (buf, sizeof(buf), "%.12g", _visible_speed);
-	node->add_property ("speed", buf);
-
-	node->add_property("name", _name);
-	id().print (buf, sizeof (buf));
-	node->add_property("id", buf);
-
+	node.add_property ("channels", buf);
+        
 	if (!capturing_sources.empty() && _session.get_record_enabled()) {
 
 		XMLNode* cs_child = new XMLNode (X_("CapturingSources"));
@@ -1764,18 +1749,14 @@ AudioDiskstream::get_state ()
 		}
 
 		cs_child->add_property (X_("at"), buf);
-		node->add_child_nocopy (*cs_child);
+		node.add_child_nocopy (*cs_child);
 	}
 
-	if (_extra_xml) {
-		node->add_child_copy (*_extra_xml);
-	}
-
-	return* node;
+	return node;
 }
 
 int
-AudioDiskstream::set_state (const XMLNode& node, int /*version*/)
+AudioDiskstream::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 	XMLNodeList nlist = node.children();
@@ -1783,6 +1764,8 @@ AudioDiskstream::set_state (const XMLNode& node, int /*version*/)
 	uint32_t nchans = 1;
 	XMLNode* capture_pending_node = 0;
 	LocaleGuard lg (X_("POSIX"));
+
+	/* prevent write sources from being created */
 
 	in_set_state = true;
 
@@ -1796,27 +1779,9 @@ AudioDiskstream::set_state (const XMLNode& node, int /*version*/)
 		}
 	}
 
-	/* prevent write sources from being created */
-
-	in_set_state = true;
-
-	if ((prop = node.property ("name")) != 0) {
-		_name = prop->value();
-	}
-
-	if (deprecated_io_node) {
-		if ((prop = deprecated_io_node->property ("id")) != 0) {
-			_id = prop->value ();
-		}
-	} else {
-		if ((prop = node.property ("id")) != 0) {
-			_id = prop->value ();
-		}
-	}
-
-	if ((prop = node.property ("flags")) != 0) {
-		_flags = Flag (string_2_enum (prop->value(), _flags));
-	}
+        if (Diskstream::set_state (node, version)) {
+                return -1;
+        }
 
 	if ((prop = node.property ("channels")) != 0) {
 		nchans = atoi (prop->value().c_str());
@@ -1837,38 +1802,15 @@ AudioDiskstream::set_state (const XMLNode& node, int /*version*/)
 		remove_channel (_n_channels.n_audio() - nchans);
 	}
 
-	if ((prop = node.property ("playlist")) == 0) {
-		return -1;
-	}
 
-	{
-		bool had_playlist = (_playlist != 0);
-
-		if (find_and_use_playlist (prop->value())) {
-			return -1;
-		}
-
-		if (!had_playlist) {
-			_playlist->set_orig_diskstream_id (id());
-		}
-
-		if (!destructive() && capture_pending_node) {
-			/* destructive streams have one and only one source per channel,
-			   and so they never end up in pending capture in any useful
-			   sense.
-			*/
-			use_pending_capture_data (*capture_pending_node);
-		}
-
-	}
-
-	if ((prop = node.property ("speed")) != 0) {
-		double sp = atof (prop->value().c_str());
-
-		if (realtime_set_speed (sp, false)) {
-			non_realtime_set_speed ();
-		}
-	}
+        
+        if (!destructive() && capture_pending_node) {
+                /* destructive streams have one and only one source per channel,
+                   and so they never end up in pending capture in any useful
+                   sense.
+                */
+                use_pending_capture_data (*capture_pending_node);
+        }
 
 	in_set_state = false;
 

@@ -149,8 +149,6 @@ class AudioDiskstream : public Diskstream
 
 	CubicInterpolation interpolation;
 
-	XMLNode* deprecated_io_node;
-
   protected:
 	friend class Session;
 

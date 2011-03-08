@@ -1206,26 +1206,13 @@ MidiDiskstream::disengage_record_enable ()
 XMLNode&
 MidiDiskstream::get_state ()
 {
-	XMLNode* node = new XMLNode ("Diskstream");
+	XMLNode& node (Diskstream::get_state());
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof(buf), "0x%x", _flags);
-	node->add_property ("flags", buf);
-
-	node->add_property("channel-mode", enum_2_string(get_channel_mode()));
-
+	node.add_property("channel-mode", enum_2_string(get_channel_mode()));
 	snprintf (buf, sizeof(buf), "0x%x", get_channel_mask());
-	node->add_property("channel-mask", buf);
-
-	node->add_property ("playlist", _playlist->name());
-
-	snprintf (buf, sizeof(buf), "%f", _visible_speed);
-	node->add_property ("speed", buf);
-
-	node->add_property("name", _name);
-	id().print(buf, sizeof(buf));
-	node->add_property("id", buf);
+	node.add_property("channel-mask", buf);
 
 	if (_write_source && _session.get_record_enabled()) {
 
@@ -1247,18 +1234,14 @@ MidiDiskstream::get_state ()
 		}
 
 		cs_child->add_property (X_("at"), buf);
-		node->add_child_nocopy (*cs_child);
+		node.add_child_nocopy (*cs_child);
 	}
 
-	if (_extra_xml) {
-		node->add_child_copy (*_extra_xml);
-	}
-
-	return* node;
+	return node;
 }
 
 int
-MidiDiskstream::set_state (const XMLNode& node, int /*version*/)
+MidiDiskstream::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 	XMLNodeList nlist = node.children();
@@ -1266,12 +1249,11 @@ MidiDiskstream::set_state (const XMLNode& node, int /*version*/)
 	XMLNode* capture_pending_node = 0;
 	LocaleGuard lg (X_("POSIX"));
 
+	/* prevent write sources from being created */
+
 	in_set_state = true;
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		/*if ((*niter)->name() == IO::state_node_name) {
-			deprecated_io_node = new XMLNode (**niter);
-		}*/
 		assert ((*niter)->name() != IO::state_node_name);
 
 		if ((*niter)->name() == X_("CapturingSources")) {
@@ -1279,21 +1261,9 @@ MidiDiskstream::set_state (const XMLNode& node, int /*version*/)
 		}
 	}
 
-	/* prevent write sources from being created */
-
-	in_set_state = true;
-
-	if ((prop = node.property ("name")) != 0) {
-		_name = prop->value();
-	}
-
-	if ((prop = node.property ("id")) != 0) {
-		_id = prop->value ();
-	}
-
-	if ((prop = node.property ("flags")) != 0) {
-		_flags = Flag (string_2_enum (prop->value(), _flags));
-	}
+        if (Diskstream::set_state (node, version)) {
+                return -1;
+        }
 
 	ChannelMode channel_mode = AllChannels;
 	if ((prop = node.property ("channel-mode")) != 0) {
@@ -1308,36 +1278,12 @@ MidiDiskstream::set_state (const XMLNode& node, int /*version*/)
 		}
 	}
 
-	set_channel_mode(channel_mode, channel_mask);
 
-	if ((prop = node.property ("playlist")) == 0) {
-		return -1;
-	}
+        if (capture_pending_node) {
+                use_pending_capture_data (*capture_pending_node);
+        }
 
-	{
-		bool had_playlist = (_playlist != 0);
-
-		if (find_and_use_playlist (prop->value())) {
-			return -1;
-		}
-
-		if (!had_playlist) {
-			_playlist->set_orig_diskstream_id (id());
-		}
-
-		if (capture_pending_node) {
-			use_pending_capture_data (*capture_pending_node);
-		}
-
-	}
-
-	if ((prop = node.property ("speed")) != 0) {
-		double sp = atof (prop->value().c_str());
-
-		if (realtime_set_speed (sp, false)) {
-			non_realtime_set_speed ();
-		}
-	}
+	set_channel_mode (channel_mode, channel_mask);
 
 	in_set_state = false;
 

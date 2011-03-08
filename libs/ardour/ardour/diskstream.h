@@ -122,8 +122,8 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	static void set_disk_io_chunk_frames (framecnt_t n) { disk_io_chunk_frames = n; }
 
 	/* Stateful */
-	virtual XMLNode& get_state(void) = 0;
-	virtual int      set_state(const XMLNode&, int version) = 0;
+	virtual XMLNode& get_state(void);
+	virtual int      set_state(const XMLNode&, int version);
 
 	virtual void monitor_input (bool) {}
 
@@ -304,6 +304,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	PBD::ScopedConnection ic_connection;
 
 	Flag _flags;
+	XMLNode* deprecated_io_node;
 
 	void route_going_away ();
 };

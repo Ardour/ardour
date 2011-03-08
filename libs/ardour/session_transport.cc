@@ -1508,7 +1508,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 		_engine.update_total_latencies ();
 	}
 
-	DEBUG_TRACE(DEBUG::Latency, string_compose("worst case latency was %1\n", _worst_track_latency));
+	DEBUG_TRACE(DEBUG::Latency, string_compose("worst case route internal latency was %1\n", _worst_track_latency));
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		(*i)->set_latency_delay (_worst_track_latency);

@@ -34,6 +34,7 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/buffer.h"
+#include "ardour/debug.h"
 #include "ardour/io.h"
 #include "ardour/route.h"
 #include "ardour/port.h"
@@ -1158,6 +1159,8 @@ IO::latency () const
 		}
 	}
 
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: max latency from %2 ports = %3\n", 
+                                                     name(), _ports.num_ports(), max_latency));
 	return max_latency;
 }
 

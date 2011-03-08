@@ -3051,7 +3051,7 @@ Route::update_total_latency ()
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: internal redirect latency = %2\n", _name, own_latency));
+	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: bus: internal redirect latency = %2\n", _name, own_latency));
 
 	_output->set_port_latency (own_latency);
 

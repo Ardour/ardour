@@ -328,6 +328,10 @@ Session::destroy ()
 void
 Session::set_worst_io_latencies ()
 {
+        if (_state_of_the_state & InitialConnecting) {
+                return;
+        }
+
 	_worst_output_latency = 0;
 	_worst_input_latency = 0;
 
@@ -341,6 +345,9 @@ Session::set_worst_io_latencies ()
 		_worst_output_latency = max (_worst_output_latency, (*i)->output()->latency());
 		_worst_input_latency = max (_worst_input_latency, (*i)->input()->latency());
 	}
+        
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("Worst output latency: %1 Worst input latency: %2\n",
+                                                     _worst_output_latency, _worst_input_latency));
 }
 
 void
@@ -428,8 +435,6 @@ Session::when_engine_running ()
 	}
 
 	BootMessage (_("Compute I/O Latencies"));
-
-	set_worst_io_latencies ();
 
 	if (_clicking) {
 		// XXX HOW TO ALERT UI TO THIS ? DO WE NEED TO?
@@ -644,7 +649,7 @@ Session::when_engine_running ()
 		}
 	}
 
-	/* catch up on send+insert cnts */
+	set_worst_io_latencies ();
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave|Dirty));
 

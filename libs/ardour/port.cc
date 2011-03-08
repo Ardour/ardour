@@ -310,7 +310,13 @@ Port::total_latency () const
 
 	return jack_port_get_total_latency (jack, _jack_port);
 #else
-        return 0;
+        jack_latency_range_t r;
+        jack_port_get_latency_range (_jack_port, 
+                                     sends_output() ? JackPlaybackLatency : JackCaptureLatency,
+                                     &r);
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("PORT %1: latency range %2 .. %3\n", 
+                                                     name(), r.min, r.max));
+        return r.max;
 #endif
 }
 
