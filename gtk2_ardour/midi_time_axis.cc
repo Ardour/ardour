@@ -249,7 +249,7 @@ MidiTimeAxisView::enter_internal_edit_mode ()
 {
         if (midi_view()) {
                 midi_view()->enter_internal_edit_mode ();
-        }
+        } 
 }
 
 void

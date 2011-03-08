@@ -4945,6 +4945,12 @@ Editor::handle_new_route (RouteList& routes)
 
 		rtv->effective_gain_display ();
 
+                if (internal_editing()) {
+                        rtv->enter_internal_edit_mode ();
+                } else {
+                        rtv->leave_internal_edit_mode ();
+                }
+
 		rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
 		rtv->view()->RegionViewRemoved.connect (sigc::mem_fun (*this, &Editor::region_view_removed));
 	}

@@ -172,6 +172,12 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd,
 
 	region_views.push_front (region_view);
 
+        if (_trackview.editor().internal_editing()) {
+                region_view->hide_rect ();
+        } else {
+                region_view->show_rect ();
+        }
+
 	/* display events and find note range */
 	display_region (region_view, wfd);
 
@@ -186,8 +192,9 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd,
 void
 MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 {
-	if ( ! region_view)
+	if (!region_view) {
 		return;
+        }
 
 	region_view->enable_display(true);
 

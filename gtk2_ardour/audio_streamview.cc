@@ -191,6 +191,12 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 
 	region_views.push_front (region_view);
 
+        if (_trackview.editor().internal_editing()) {
+                region_view->hide_rect ();
+        } else {
+                region_view->show_rect ();
+        }
+
 	/* catch region going away */
 
 	r->DropReferences.connect (*this, invalidator (*this), boost::bind (&AudioStreamView::remove_region_view, this, boost::weak_ptr<Region> (r)), gui_context());
