@@ -272,16 +272,17 @@ PannerUI::setup_pan ()
 
                         ac = pannable->pan_azimuth_control;
                         _stereo_panner->StartPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
-                                                              boost::weak_ptr<AutomationControl> (ac)));
+                                                                                  boost::weak_ptr<AutomationControl> (ac)));
                         _stereo_panner->StopPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
-                                                             boost::weak_ptr<AutomationControl>(ac)));
-
+                                                                                 boost::weak_ptr<AutomationControl>(ac)));
+                        
                         ac = pannable->pan_width_control;
                         _stereo_panner->StartWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
-                                                              boost::weak_ptr<AutomationControl> (ac)));
+                                                                               boost::weak_ptr<AutomationControl> (ac)));
                         _stereo_panner->StopWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
-                                                             boost::weak_ptr<AutomationControl>(ac)));
-
+                                                                              boost::weak_ptr<AutomationControl>(ac)));
+                        _stereo_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
+                        
                 } else if (nins == 1) {
                         /* 1-in/2out */
                         
