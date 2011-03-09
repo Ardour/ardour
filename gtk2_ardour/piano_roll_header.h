@@ -92,6 +92,8 @@ private:
 	void send_note_on(uint8_t note);
 	void send_note_off(uint8_t note);
 
+	void reset_clicked_note(uint8_t, bool invalidate = true);
+
 	MidiStreamView& _view;
 
 	uint8_t _event[3];

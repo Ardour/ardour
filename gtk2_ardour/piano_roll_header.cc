@@ -479,7 +479,7 @@ PianoRollHeader::on_motion_notify_event (GdkEventMotion* ev)
 		if (_clicked_note != no_note && _clicked_note != note) {
 			_active_notes[_clicked_note] = false;
 			send_note_off(_clicked_note);
-			
+
 			_clicked_note = note;
 			
 			if (!_active_notes[note]) {
@@ -516,7 +516,7 @@ PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 				
 				invalidate_note_range(note, note);
 			} else {
-				_clicked_note = no_note;
+				reset_clicked_note(note);
 			}
 		}
 	}
@@ -547,11 +547,7 @@ PianoRollHeader::on_button_release_event (GdkEventButton* ev)
 			_dragging = false;
 			
 			if (note == _clicked_note) {
-				_active_notes[note] = false;
-				_clicked_note = no_note;
-				send_note_off(note);
-				
-				invalidate_note_range(note, note);
+				reset_clicked_note(note);
 			}
 		} 
 	}
@@ -574,14 +570,7 @@ PianoRollHeader::on_leave_notify_event (GdkEventCrossing*)
 	invalidate_note_range(_highlighted_note, _highlighted_note);
 
 	if (_clicked_note != no_note) {
-		_active_notes[_clicked_note] = false;
-		send_note_off(_clicked_note);
-
-		if (_clicked_note != _highlighted_note) {
-			invalidate_note_range(_clicked_note, _clicked_note);
-		}
-
-		_clicked_note = no_note;
+		reset_clicked_note(_clicked_note, _clicked_note != _highlighted_note);
 	}
 
 	_highlighted_note = no_note;
@@ -700,3 +689,13 @@ PianoRollHeader::send_note_off(uint8_t note)
 	}
 }
 
+void
+PianoRollHeader::reset_clicked_note (uint8_t note, bool invalidate)
+{
+	_active_notes[note] = false;
+	_clicked_note = no_note;
+	send_note_off (note);
+	if (invalidate) {
+		invalidate_note_range (note, note);
+	}
+}
