@@ -984,11 +984,10 @@ RouteTimeAxisView::set_samples_per_unit (double spu)
 void
 RouteTimeAxisView::set_align_choice (RadioMenuItem* mitem, AlignChoice choice, bool apply_to_selection)
 {
-        /* this is one of the two calls made when these radio menu items change status. this one
-           is for the item that became inactive, and we want to ignore it.
-        */
-
         if (!mitem->get_active()) {
+                /* this is one of the two calls made when these radio menu items change status. this one
+                   is for the item that became inactive, and we want to ignore it.
+                */
                 return;
         }
 
