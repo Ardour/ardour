@@ -506,36 +506,96 @@ RouteTimeAxisView::build_display_menu ()
 
 			int existing = 0;
 			int capture = 0;
+                        int automatic = 0;
+                        int styles = 0;
+                        boost::shared_ptr<Track> first_track;
+
 			TrackSelection const & s = _editor.get_selection().tracks;
 			for (TrackSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
 				RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
 				if (!r || !r->is_track ()) {
 					continue;
 				}
-				
-				switch (r->track()->alignment_style()) {
-				case ExistingMaterial:
-					++existing;
-					break;
-				case CaptureTime:
-					++capture;
-					break;
-				}
+
+                                if (!first_track) {
+                                        first_track = r->track();
+                                }
+
+                                switch (r->track()->alignment_choice()) {
+                                case Automatic:
+                                        ++automatic;
+                                        styles |= 0x1;
+                                        switch (r->track()->alignment_style()) {
+                                        case ExistingMaterial:
+                                                ++existing;
+                                                break;
+                                        case CaptureTime:
+                                                ++capture;
+                                                break;
+                                        }
+                                        break;
+                                case UseExistingMaterial:
+                                        ++existing;
+                                        styles |= 0x2;
+                                        break;
+                                case UseCaptureTime:
+                                        ++capture;
+                                        styles |= 0x4;
+                                        break;
+                                }
 			}
-			
-			alignment_items.push_back (RadioMenuElem (align_group, _("Align With Existing Material")));
-			RadioMenuItem* i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
-			i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), ExistingMaterial, true));
-			i->set_active (existing != 0 && capture == 0);
-			i->set_inconsistent (existing != 0 && capture != 0);
-			
-			alignment_items.push_back (RadioMenuElem (align_group, _("Align With Capture Time")));
-			i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
-			i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), CaptureTime, true));
-			i->set_active (existing == 0 && capture != 0);
-			i->set_inconsistent (existing != 0 && capture != 0);
-			
-			items.push_back (MenuElem (_("Alignment"), *alignment_menu));
+
+                        bool inconsistent;
+                        switch (styles) {
+                        case 1:
+                        case 2:
+                        case 4:
+                                inconsistent = false;
+                                break;
+                        default:
+                                inconsistent = true;
+                                break;
+                        }
+
+                        RadioMenuItem* i;
+
+                        if (!inconsistent && first_track) {
+
+                                alignment_items.push_back (RadioMenuElem (align_group, _("Automatic (based on I/O connections)")));
+                                i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
+                                i->set_active (automatic != 0 && existing == 0 && capture == 0); 
+                                i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_choice), i, Automatic, true));
+
+                                switch (first_track->alignment_choice()) {
+                                case Automatic:
+                                        switch (first_track->alignment_style()) { 
+                                        case ExistingMaterial:
+                                                alignment_items.push_back (MenuElem (_("(Currently: Existing Material)")));
+                                                break;
+                                        case CaptureTime:
+                                                alignment_items.push_back (MenuElem (_("(Currently: Capture Time)")));
+                                                break;
+                                        }
+                                        break;
+                                default:
+                                        break;
+                                }
+                                
+                                alignment_items.push_back (RadioMenuElem (align_group, _("Align With Existing Material")));
+                                i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
+                                i->set_active (existing != 0 && capture == 0 && automatic == 0);
+                                i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_choice), i, UseExistingMaterial, true));
+                                
+                                alignment_items.push_back (RadioMenuElem (align_group, _("Align With Capture Time")));
+                                i = dynamic_cast<RadioMenuItem*> (&alignment_items.back());
+                                i->set_active (existing == 0 && capture != 0 && automatic == 0);
+                                i->signal_activate().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_choice), i, UseCaptureTime, true));
+
+                                items.push_back (MenuElem (_("Alignment"), *alignment_menu));
+
+                        } else {
+                                /* show nothing */
+                        }
 
 			Menu* mode_menu = manage (new Menu);
 			MenuList& mode_items = mode_menu->items ();
@@ -922,13 +982,21 @@ RouteTimeAxisView::set_samples_per_unit (double spu)
 }
 
 void
-RouteTimeAxisView::set_align_style (AlignStyle style, bool apply_to_selection)
+RouteTimeAxisView::set_align_choice (RadioMenuItem* mitem, AlignChoice choice, bool apply_to_selection)
 {
+        /* this is one of the two calls made when these radio menu items change status. this one
+           is for the item that became inactive, and we want to ignore it.
+        */
+
+        if (!mitem->get_active()) {
+                return;
+        }
+
 	if (apply_to_selection) {
-		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_align_style, _1, style, false));
+		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_align_choice, _1, mitem, choice, false));
 	} else {
 		if (track ()) {
-			track()->set_align_style (style);
+			track()->set_align_choice (choice);
 		}
 	}
 }
@@ -1524,7 +1592,6 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 
 				boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track>(*i);
 				if (!track) {
-					std::cerr << "route " << (*i)->name() << " is not a Track" << std::endl;
 					continue;
 				}
 

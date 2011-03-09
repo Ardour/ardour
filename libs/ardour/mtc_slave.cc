@@ -212,7 +212,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 		   frames. Also compensate for audio latency.
 		*/
 		
-		mtc_frame += (long) (1.75 * session.frames_per_timecode_frame()) + session.worst_output_latency();
+		mtc_frame += (long) (1.75 * session.frames_per_timecode_frame()) + session.worst_playback_latency();
 
 
 		if (now) {

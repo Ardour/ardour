@@ -139,11 +139,13 @@ class Track : public Route, public PublicDiskstream
 	ChanCount n_channels ();
 	framepos_t get_capture_start_frame (uint32_t n = 0) const;
 	AlignStyle alignment_style () const;
+	AlignChoice alignment_choice () const;
 	framepos_t current_capture_start () const;
 	framepos_t current_capture_end () const;
 	void playlist_modified ();
 	int use_playlist (boost::shared_ptr<Playlist>);
 	void set_align_style (AlignStyle);
+	void set_align_choice (AlignChoice);
 	int use_copy_playlist ();
 	int use_new_playlist ();
         void adjust_playback_buffering ();

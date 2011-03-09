@@ -75,9 +75,10 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	void set_flag (Flag f)   { _flags = Flag (_flags | f); }
 	void unset_flag (Flag f) { _flags = Flag (_flags & ~f); }
 
-	AlignStyle alignment_style() const { return _alignment_style; }
+	AlignStyle  alignment_style() const { return _alignment_style; }
+	AlignChoice alignment_choice() const { return _alignment_choice; }
 	void       set_align_style (AlignStyle);
-	void       set_persistent_align_style (AlignStyle a) { _persistent_alignment_style = a; }
+	void       set_align_choice (AlignChoice a);
 
 	framecnt_t roll_delay() const { return _roll_delay; }
 	void       set_roll_delay (framecnt_t);
@@ -272,6 +273,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	framepos_t    last_recordable_frame;
 	int           last_possibly_recording;
 	AlignStyle   _alignment_style;
+	AlignChoice  _alignment_choice;
 	bool         _scrubbing;
 	bool         _slaved;
 	Location*     loop_location;
@@ -294,8 +296,6 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	uint32_t     _write_data_count;
 
 	bool          in_set_state;
-	AlignStyle   _persistent_alignment_style;
-	bool          first_input_change;
 
 	Glib::Mutex state_lock;
 

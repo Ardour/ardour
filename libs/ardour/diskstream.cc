@@ -32,11 +32,12 @@
 #include <sys/mman.h>
 
 
+#include <glibmm/thread.h>
+
 #include "pbd/error.h"
 #include "pbd/basename.h"
-#include <glibmm/thread.h>
-#include "pbd/xml++.h"
 #include "pbd/memento_command.h"
+#include "pbd/xml++.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
@@ -93,6 +94,7 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
         , last_recordable_frame (max_framepos)
         , last_possibly_recording (0)
         , _alignment_style (ExistingMaterial)
+        , _alignment_choice (Automatic)
         , _scrubbing (false)
         , _slaved (false)
         , loop_location (0)
@@ -110,8 +112,6 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
         , _read_data_count (0)
         , _write_data_count (0)
         , in_set_state (false)
-        , _persistent_alignment_style (ExistingMaterial)
-        , first_input_change (true)
         , _flags (flag)
         , deprecated_io_node (0)
 {
@@ -137,6 +137,7 @@ Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
         , last_recordable_frame (max_framepos)
         , last_possibly_recording (0)
         , _alignment_style (ExistingMaterial)
+        , _alignment_choice (Automatic)
         , _scrubbing (false)
         , _slaved (false)
         , loop_location (0)
@@ -154,8 +155,6 @@ Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
         , _read_data_count (0)
         , _write_data_count (0)
         , in_set_state (false)
-        , _persistent_alignment_style (ExistingMaterial)
-        , first_input_change (true)
         , _flags (Recordable)
         , deprecated_io_node (0)
 {
@@ -270,6 +269,7 @@ Diskstream::set_capture_offset ()
         DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: using IO latency, capture offset set to %2\n", name(), _capture_offset));
 }
 
+
 void
 Diskstream::set_align_style (AlignStyle a)
 {
@@ -280,6 +280,30 @@ Diskstream::set_align_style (AlignStyle a)
 	if (a != _alignment_style) {
 		_alignment_style = a;
 		AlignmentStyleChanged ();
+	}
+}
+
+void
+Diskstream::set_align_choice (AlignChoice a)
+{
+	if (record_enabled() && _session.actively_recording()) {
+		return;
+	}
+
+	if (a != _alignment_choice) {
+		_alignment_choice = a;
+
+                switch (_alignment_choice) {
+                case Automatic:
+                        set_align_style_from_io ();
+                        break;
+                case UseExistingMaterial:
+                        set_align_style (ExistingMaterial);
+                        break;
+                case UseCaptureTime:
+                        set_align_style (CaptureTime);
+                        break;
+                }
 	}
 }
 
@@ -452,6 +476,7 @@ Diskstream::get_state ()
 	node->add_property("id", buf);
 	snprintf (buf, sizeof(buf), "%f", _visible_speed);
 	node->add_property ("speed", buf);
+        node->add_property ("capture-alignment", enum_2_string (_alignment_choice));
 
 	if (_extra_xml) {
 		node->add_child_copy (*_extra_xml);
@@ -482,6 +507,12 @@ Diskstream::set_state (const XMLNode& node, int /*version*/)
 	if ((prop = node.property ("flags")) != 0) {
 		_flags = Flag (string_2_enum (prop->value(), _flags));
 	}
+
+        if ((prop = node.property (X_("capture-alignment"))) != 0) {
+                _alignment_choice = AlignChoice (string_2_enum (prop->value(), _alignment_choice));
+        } else {
+                _alignment_choice = Automatic;
+        }
 
 	if ((prop = node.property ("playlist")) == 0) {
 		return -1;
@@ -621,10 +652,10 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
 		last_recordable_frame = max_framepos;
 		capture_start_frame = transport_frame;
 
-                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %7 basic FRF = %2 LRF = %3 CSF = %4 CO = %5, WLO = %6\n",
+                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %7 basic FRF = %2 LRF = %3 CSF = %4 CO = %5, WPL = %6\n",
                                                                       name(), first_recordable_frame, last_recordable_frame, capture_start_frame,
                                                                       _capture_offset,
-                                                                      _session.worst_output_latency(),
+                                                                      _session.worst_playback_latency(),
                                                                       transport_frame));
 
                 
@@ -635,13 +666,13 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
                         
 			if (_alignment_style == ExistingMaterial) {
                                 
-                                /* audio played by ardour will take (up to) _session.worst_output_latency() ("WOL") to
+                                /* audio played by ardour will take (up to) _session.worst_playback_latency() ("WOL") to
                                    appear at the speakers; audio played at the time when it does appear at
                                    the speakers will take _capture_offset to arrive back here. we've
                                    already added _capture_offset, so now add WOL.
                                 */
                                 
-                                first_recordable_frame += _session.worst_output_latency();
+                                first_recordable_frame += _session.worst_playback_latency();
                                 DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tROLL: shift FRF by delta between WOL %1\n",
                                                                                       first_recordable_frame));
                         } else {
@@ -657,7 +688,7 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
 			if (_alignment_style == ExistingMaterial) {
 
                                 /* see comment in ExistingMaterial block above */
-                                first_recordable_frame += _session.worst_output_latency();
+                                first_recordable_frame += _session.worst_playback_latency();
                                 DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tMANUAL PUNCH: shift FRF by delta between WOL and CO to %1\n",
                                                                                       first_recordable_frame));
 			} else {

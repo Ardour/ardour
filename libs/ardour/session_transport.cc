@@ -222,11 +222,11 @@ Session::realtime_stop (bool abort, bool clear_state)
 		   past that point to pick up delayed input (and/or to delick)
 		*/
 
-                if (_worst_output_latency > current_block_size) {
+                if (worst_playback_latency() > current_block_size) {
                         /* we rolled past the stop point to pick up data that had
                            not yet arrived. move back to where the stop occured.
                         */
-                        decrement_transport_position (current_block_size + (_worst_output_latency - current_block_size));
+                        decrement_transport_position (current_block_size + (worst_playback_latency() - current_block_size));
                 } else {
                         decrement_transport_position (current_block_size);
                 }
@@ -1041,7 +1041,7 @@ Session::stop_transport (bool abort, bool clear_state)
 		return;
 	}
 
-	if (actively_recording() && !(transport_sub_state & StopPendingCapture) && _worst_output_latency > current_block_size) {
+	if (actively_recording() && !(transport_sub_state & StopPendingCapture) && worst_playback_latency() > current_block_size) {
 
 		boost::shared_ptr<RouteList> rl = routes.reader();
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
@@ -1060,8 +1060,8 @@ Session::stop_transport (bool abort, bool clear_state)
 		*/
 
 		SessionEvent *ev = new SessionEvent (SessionEvent::StopOnce, SessionEvent::Replace,
-				       _transport_frame + _worst_output_latency - current_block_size,
-				       0, 0, abort);
+                                                     _transport_frame + _worst_input_latency - current_block_size,
+                                                     0, 0, abort);
 
 		merge_event (ev);
 		transport_sub_state |= StopPendingCapture;

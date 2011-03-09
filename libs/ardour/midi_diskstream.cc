@@ -171,13 +171,7 @@ MidiDiskstream::non_realtime_input_change ()
 
 		get_input_sources ();
 		set_capture_offset ();
-
-		if (first_input_change) {
-			set_align_style (_persistent_alignment_style);
-			first_input_change = false;
-		} else {
-			set_align_style_from_io ();
-		}
+                set_align_style_from_io ();
 
 		input_change_pending.type = IOChange::NoChange;
 
@@ -1110,7 +1104,7 @@ MidiDiskstream::transport_looped (framepos_t transport_frame)
 			capture_captured += _capture_offset;
 
 			if (_alignment_style == ExistingMaterial) {
-				capture_captured += _session.worst_output_latency();
+				capture_captured += _session.worst_playback_latency();
 			} else {
 				capture_captured += _roll_delay;
 			}
@@ -1388,6 +1382,10 @@ void
 MidiDiskstream::set_align_style_from_io ()
 {
 	bool have_physical = false;
+
+        if (_alignment_choice != Automatic) {
+                return;
+        }
 
 	if (_io == 0) {
 		return;

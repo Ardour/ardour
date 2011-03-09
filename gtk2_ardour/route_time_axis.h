@@ -216,7 +216,7 @@ protected:
 	virtual void append_extra_display_menu_items () {}
 	void         build_display_menu ();
 
-	void set_align_style (ARDOUR::AlignStyle, bool apply_to_selection = false);
+	void set_align_choice (Gtk::RadioMenuItem*, ARDOUR::AlignChoice, bool apply_to_selection = false);
 
 	void         playlist_click ();
 	void         show_playlist_selector ();

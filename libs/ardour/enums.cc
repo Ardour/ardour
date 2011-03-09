@@ -54,6 +54,7 @@ setup_enum_writer ()
 
 	OverlapType _OverlapType;
 	AlignStyle _AlignStyle;
+	AlignChoice _AlignChoice;
 	MeterPoint _MeterPoint;
 	TrackMode _TrackMode;
 	NoteMode _NoteMode;
@@ -161,6 +162,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (CaptureTime);
 	REGISTER_ENUM (ExistingMaterial);
 	REGISTER (_AlignStyle);
+
+	REGISTER_ENUM (UseCaptureTime);
+	REGISTER_ENUM (UseExistingMaterial);
+	REGISTER_ENUM (Automatic);
+	REGISTER (_AlignChoice);
 
 	REGISTER_ENUM (MeterInput);
 	REGISTER_ENUM (MeterPreFader);

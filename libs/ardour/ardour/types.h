@@ -168,6 +168,12 @@ namespace ARDOUR {
 		ExistingMaterial
 	};
 
+	enum AlignChoice {
+		UseCaptureTime,
+		UseExistingMaterial,
+                Automatic
+	};
+
 	enum MeterPoint {
 		MeterInput,
 		MeterPreFader,

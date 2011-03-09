@@ -379,7 +379,7 @@ Session::send_full_time_code (framepos_t const t)
 	}
 
 	// Compensate for audio latency
-	outbound_mtc_timecode_frame += _worst_output_latency;
+	outbound_mtc_timecode_frame += worst_playback_latency();
 	next_quarter_frame_to_send = 0;
 
 	// Sync slave to the same Timecode time as we are on

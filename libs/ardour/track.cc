@@ -563,6 +563,12 @@ Track::alignment_style () const
 	return _diskstream->alignment_style ();
 }
 
+AlignChoice
+Track::alignment_choice () const
+{
+	return _diskstream->alignment_choice ();
+}
+
 framepos_t
 Track::current_capture_start () const
 {
@@ -609,6 +615,12 @@ void
 Track::set_align_style (AlignStyle s)
 {
 	_diskstream->set_align_style (s);
+}
+
+void
+Track::set_align_choice (AlignChoice s)
+{
+	_diskstream->set_align_choice (s);
 }
 
 uint32_t

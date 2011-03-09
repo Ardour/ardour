@@ -1106,7 +1106,7 @@ Session::audible_frame () const
 	   in the absence of any plugin latency compensation
 	*/
 
-	offset = _worst_output_latency;
+	offset = worst_playback_latency ();
 
 	if (offset > current_block_size) {
 		offset -= current_block_size;
