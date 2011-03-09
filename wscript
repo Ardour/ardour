@@ -558,7 +558,7 @@ def configure(conf):
 
 	autowaf.display_msg(conf, 'C Compiler flags', conf.env['CCFLAGS'])
 	autowaf.display_msg(conf, 'C++ Compiler flags', conf.env['CXXFLAGS'])
-	print()
+	print('')
 
 	# and dump the same stuff to a file for use in the build
 
