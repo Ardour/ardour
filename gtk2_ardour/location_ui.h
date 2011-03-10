@@ -115,7 +115,7 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void performer_entry_changed ();
 	void composer_entry_changed ();
 
-	void set_button_pressed (LocationPart part);
+	void to_playhead_button_pressed (LocationPart part);
 	void go_button_pressed (LocationPart part);
 
 	void clock_changed (LocationPart part);

@@ -83,6 +83,12 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
          composer_label.set_name ("LocationEditNumberLabel");
          composer_entry.set_name ("LocationEditNameEntry");
 
+	 Gtk::Button* start_to_playhead_button = manage (new Button (_("Use PH")));
+	 Gtk::Button* end_to_playhead_button = manage (new Button (_("Use PH")));
+
+	 ARDOUR_UI::instance()->tooltips().set_tip (*start_to_playhead_button, _("Set value to playhead"));
+	 ARDOUR_UI::instance()->tooltips().set_tip (*end_to_playhead_button, _("Set value to playhead"));
+	 
          isrc_label.set_text ("ISRC: ");
          isrc_label.set_size_request (30, -1);
          performer_label.set_text ("Performer: ");
@@ -121,19 +127,23 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 
          start_hbox.pack_start (start_go_button, false, false);
          start_hbox.pack_start (start_clock, false, false);
+	 start_hbox.pack_start (*start_to_playhead_button, false, false);
 
          /* this is always in this location, no matter what the location is */
 
          item_table.attach (start_hbox, 1, 2, 0, 1, FILL, FILL, 4, 0);
 
          start_go_button.signal_clicked().connect(sigc::bind (sigc::mem_fun (*this, &LocationEditRow::go_button_pressed), LocStart));
+	 start_to_playhead_button->signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocStart));
          start_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocStart));
          start_clock.ChangeAborted.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::change_aborted), LocStart));
 
          end_hbox.pack_start (end_go_button, false, false);
          end_hbox.pack_start (end_clock, false, false);
+	 end_hbox.pack_start (*end_to_playhead_button, false, false);
 
          end_go_button.signal_clicked().connect(sigc::bind (sigc::mem_fun (*this, &LocationEditRow::go_button_pressed), LocEnd));
+	 end_to_playhead_button->signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::to_playhead_button_pressed), LocEnd));
          end_clock.ValueChanged.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::clock_changed), LocEnd));
          end_clock.ChangeAborted.connect (sigc::bind (sigc::mem_fun (*this, &LocationEditRow::change_aborted), LocEnd));
 
@@ -400,6 +410,25 @@ LocationEditRow::go_button_pressed (LocationPart part)
 		break;
 	case LocEnd:
 		ARDOUR_UI::instance()->do_transport_locate (location->end(), _session->transport_rolling ());
+		break;
+	default:
+		break;
+	}
+}
+
+void
+LocationEditRow::to_playhead_button_pressed (LocationPart part)
+{
+	if (!location) {
+		return;
+	}
+
+	switch (part) {
+	case LocStart:
+		location->set_start (_session->transport_frame ());
+		break;
+	case LocEnd:
+		location->set_end (_session->transport_frame ());
 		break;
 	default:
 		break;
