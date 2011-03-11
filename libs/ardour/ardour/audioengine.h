@@ -187,7 +187,6 @@ class AudioEngine : public SessionHandlePtr
 	void get_physical_inputs (DataType type, std::vector<std::string>&);
 
 	void update_total_latencies ();
-	void update_total_latency (const Port&);
 
 	Port *get_port_by_name (const std::string &);
 
@@ -320,10 +319,8 @@ _	   the regular process() call to session->process() is not made.
 
         void set_jack_callbacks ();
 
-#ifdef HAVE_JACK_NEW_LATENCY
         static void _latency_callback (jack_latency_callback_mode_t, void*);
         void jack_latency_callback (jack_latency_callback_mode_t);
-#endif
 
 	int connect_to_jack (std::string client_name, std::string session_uuid);
 

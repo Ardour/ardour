@@ -84,6 +84,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, Automatable (sess)
 	, GraphNode( sess.route_graph )
         , _active (true)
+        , _signal_latency (0)
         , _initial_delay (0)
         , _roll_delay (0)
 	, _flags (flg)
@@ -919,7 +920,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 			processor->activate ();
 		}
 
-		processor->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false));
+		processor->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false, false));
 
 		_output->set_user_latency (0);
 	}
@@ -1056,7 +1057,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 				}
 			}
 
-			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false));
+			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false, false));
 		}
                 
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
@@ -2420,6 +2421,9 @@ Route::set_processor_state (const XMLNode& node)
                 }
 
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+
+                        (*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false, false));
+
 			boost::shared_ptr<PluginInsert> pi;
 
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
@@ -2837,16 +2841,24 @@ Route::check_initial_delay (framecnt_t nframes, framecnt_t& transport_frame)
 
 		nframes -= _roll_delay;
 		silence_unlocked (_roll_delay);
-		/* we've written _roll_delay of samples into the
-		   output ports, so make a note of that for
-		   future reference.
-		*/
-
-		_main_outs->increment_output_offset (_roll_delay);
 		transport_frame += _roll_delay;
 
+                /* shuffle all the port buffers for things that lead "out" of this Route
+                   to reflect that we just wrote _roll_delay frames of silence.
+                */
+
+                Glib::RWLock::ReaderLock lm (_processor_lock);
+                for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+                        boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
+                        if (iop) {
+                                iop->increment_port_buffer_offset (_roll_delay);
+                        }
+                }
+                _output->increment_port_buffer_offset (_roll_delay);
+
 		_roll_delay = 0;
-	}
+
+	} 
 
 	return nframes;
 }
@@ -3040,41 +3052,24 @@ Route::add_export_point()
 }
 
 framecnt_t
-Route::update_total_latency ()
+Route::update_signal_latency ()
 {
-	framecnt_t old = _output->effective_latency();
-	framecnt_t own_latency = _output->user_latency();
+	framecnt_t l = _output->user_latency();
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->active ()) {
-			own_latency += (*i)->signal_latency ();
+			l += (*i)->signal_latency ();
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: bus: internal redirect latency = %2\n", _name, own_latency));
+	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: internal signal latency = %2\n", _name, l));
 
-	_output->set_port_latency (own_latency);
-
-	if (_output->user_latency() == 0) {
-
-		/* this (virtual) function is used for pure Routes,
-		   not derived classes like AudioTrack.  this means
-		   that the data processed here comes from an input
-		   port, not prerecorded material, and therefore we
-		   have to take into account any input latency.
-		*/
-
-		own_latency += _input->signal_latency ();
-	}
-
-	if (old != own_latency) {
-		_output->set_latency_delay (own_latency);
+	if (_signal_latency != l) {
+                _signal_latency = l;
 		signal_latency_changed (); /* EMIT SIGNAL */
 	}
 
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: input latency = %2 total = %3\n", _name, _input->signal_latency(), own_latency));
-
-	return _output->effective_latency ();
+	return _signal_latency;
 }
 
 void
@@ -3085,15 +3080,18 @@ Route::set_user_latency (framecnt_t nframes)
 }
 
 void
-Route::set_latency_delay (framecnt_t longest_session_latency)
+Route::set_latency_compensation (framecnt_t longest_session_latency)
 {
 	framecnt_t old = _initial_delay;
 
-	if (_output->effective_latency() < longest_session_latency) {
-		_initial_delay = longest_session_latency - _output->effective_latency();
+	if (_signal_latency < longest_session_latency) {
+		_initial_delay = longest_session_latency - _signal_latency;
 	} else {
 		_initial_delay = 0;
 	}
+
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: compensate for maximum latency of %2, given own latency of %3, using initial delay of %4\n",
+                                                     name(), longest_session_latency, _signal_latency, _initial_delay));
 
 	if (_initial_delay != old) {
 		initial_delay_changed (); /* EMIT SIGNAL */
@@ -3595,33 +3593,10 @@ Route::unknown_processors () const
 	return p;
 }
 
-void
-Route::set_latency_ranges (bool playback) const
+
+framecnt_t
+Route::update_port_latencies (const PortSet& from, const PortSet& to, bool playback, framecnt_t our_latency) const
 {
-	framecnt_t own_latency = 0;
-
-        /* Processor list not protected by lock: MUST BE CALLED FROM PROCESS THREAD OR
-           LATENCY CALLBACK
-        */
-
-	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if ((*i)->active ()) {
-			own_latency += (*i)->signal_latency ();
-		}
-	}
-
-        if (playback) {
-                update_port_latencies (_input->ports (), _output->ports (), true, own_latency);
-        } else {
-                update_port_latencies (_output->ports (), _input->ports (), false, own_latency);
-        }
-}
-
-void
-Route::update_port_latencies (const PortSet& operands, const PortSet& feeders, bool playback, framecnt_t our_latency) const
-{
-#ifdef HAVE_JACK_NEW_LATENCY
-
         /* we assume that all our input ports feed all our output ports. its not
            universally true, but the alternative is way too corner-case to worry about.
         */
@@ -3631,11 +3606,11 @@ Route::update_port_latencies (const PortSet& operands, const PortSet& feeders, b
         all_connections.min = ~((jack_nframes_t) 0);
         all_connections.max = 0;
         
-        /* iterate over all feeder ports and determine their relevant latency, taking
-           the maximum and minimum across all of them.
+        /* iterate over all "from" ports and determine the latency range for all of their
+           connections to the "outside" (outside of this Route).
         */
         
-        for (PortSet::const_iterator p = feeders.begin(); p != feeders.end(); ++p) {
+        for (PortSet::const_iterator p = from.begin(); p != from.end(); ++p) {
                 
                 jack_latency_range_t range;
                 
@@ -3644,24 +3619,81 @@ Route::update_port_latencies (const PortSet& operands, const PortSet& feeders, b
                 all_connections.min = min (all_connections.min, range.min);
                 all_connections.max = max (all_connections.max, range.max);
         }
+
+        /* set the "from" port latencies to the max/min range of all their connections */
         
+        for (PortSet::const_iterator p = from.begin(); p != from.end(); ++p) {
+                p->set_public_latency_range (all_connections, playback);
+        }
+
+        /* set the ports "in the direction of the flow" to the same value as above plus our own signal latency */
+
         all_connections.min += our_latency;
         all_connections.max += our_latency;
-
-        for (PortSet::const_iterator p = operands.begin(); p != operands.end(); ++p) {
-                
-                p->set_latency_range (all_connections, playback);
-                
-                DEBUG_TRACE (DEBUG::Latency, string_compose ("Port %1 %5 latency range %2 .. %3 (including route latency of %4)\n",
-                                                             p->name(),
-                                                             all_connections.min,
-                                                             all_connections.max,
-                                                             our_latency,
-                                                             (playback ? "PLAYBACK" : "CAPTURE")));
+        
+        for (PortSet::const_iterator p = to.begin(); p != to.end(); ++p) {
+                p->set_public_latency_range (all_connections, playback);
         }
-#endif
+      
+        return all_connections.max;
 }
 
+framecnt_t
+Route::set_private_port_latencies (bool playback) const
+{
+	framecnt_t own_latency = 0;
+
+        /* Processor list not protected by lock: MUST BE CALLED FROM PROCESS THREAD OR
+           LATENCY CALLBACK.
+
+           This is called (early) from the latency callback. It computes the REAL latency associated
+           with each port and stores the result as the "private" latency of the port. A later
+           call to Route::set_public_port_latencies() sets all ports to the same value to reflect
+           the fact that we do latency compensation and so all signals are delayed by the
+           same amount as they flow through ardour.
+        */
+
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if ((*i)->active ()) {
+			own_latency += (*i)->signal_latency ();
+		}
+	}
+
+        if (playback) {
+                /* playback: propagate latency from "outside the route" to outputs to inputs */
+                return update_port_latencies (_output->ports (), _input->ports (), true, own_latency);
+        } else {
+                /* capture: propagate latency from "outside the route" to inputs to outputs */
+                return update_port_latencies (_input->ports (), _output->ports (), false, own_latency);
+        }
+}
+
+void
+Route::set_public_port_latencies (framecnt_t value, bool playback) const
+{
+        /* this is called to set the JACK-visible port latencies, which take latency compensation
+           into account.
+        */
+
+        jack_latency_range_t range;
+
+        range.min = value;
+        range.max = value;
+        
+        {
+                const PortSet& ports (_input->ports());
+                for (PortSet::const_iterator p = ports.begin(); p != ports.end(); ++p) {
+                        p->set_public_latency_range (range, playback);
+                }
+        }
+
+        {
+                const PortSet& ports (_output->ports());
+                for (PortSet::const_iterator p = ports.begin(); p != ports.end(); ++p) {
+                        p->set_public_latency_range (range, playback);
+                }
+        }
+}
 
 /** Put the invisible processors in the right place in _processors.
  *  Must be called with a writer lock on _processor_lock held.

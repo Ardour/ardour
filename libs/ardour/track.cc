@@ -85,30 +85,6 @@ Track::toggle_monitor_input ()
 	}
 }
 
-ARDOUR::framecnt_t
-Track::update_total_latency ()
-{
-	framecnt_t old = _output->effective_latency();
-	framecnt_t own_latency = _output->user_latency();
-
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if ((*i)->active ()) {
-			own_latency += (*i)->signal_latency ();
-		}
-	}
-
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: track: internal redirect latency = %2\n", _name, own_latency));
-
-	_output->set_port_latency (own_latency);
-
-	if (old != own_latency) {
-		_output->set_latency_delay (own_latency);
-		signal_latency_changed (); /* EMIT SIGNAL */
-	}
-
-	return _output->effective_latency();
-}
-
 Track::FreezeRecord::~FreezeRecord ()
 {
 	for (vector<FreezeRecordProcessorInfo*>::iterator i = processor_info.begin(); i != processor_info.end(); ++i) {
@@ -218,9 +194,9 @@ Track::set_name (const string& str)
 }
 
 void
-Track::set_latency_delay (framecnt_t longest_session_latency)
+Track::set_latency_compensation (framecnt_t longest_session_latency)
 {
-	Route::set_latency_delay (longest_session_latency);
+	Route::set_latency_compensation (longest_session_latency);
 	_diskstream->set_roll_delay (_roll_delay);
 }
 

@@ -1466,7 +1466,7 @@ Session::route_processors_changed (RouteProcessorChange c)
 }
 
 void
-Session::update_latency_compensation (bool with_stop, bool abort)
+Session::update_latency_compensation (bool with_stop, bool abort, bool force_whole_graph)
 {
 	bool update_jack = false;
 	PostTransportWork ptw;
@@ -1478,7 +1478,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 	_worst_track_latency = 0;
 	ptw = post_transport_work();
 
-	DEBUG_TRACE(DEBUG::Latency, "---------------------------- update latency\n\n")
+	DEBUG_TRACE(DEBUG::Latency, "---------------------------- update latency compensation\n\n")
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
@@ -1488,30 +1488,28 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 			(*i)->nonrealtime_handle_transport_stopped (abort, (ptw & PostTransportLocate), (!(ptw & PostTransportLocate) || pending_locate_flush));
 		}
 
-		framecnt_t old_latency = (*i)->output()->signal_latency ();
-		framecnt_t track_latency = (*i)->update_total_latency ();
+		framecnt_t old_latency = (*i)->signal_latency ();
+		framecnt_t new_latency = (*i)->update_signal_latency ();
 
-		if (old_latency != track_latency) {
-#ifndef HAVE_JACK_NEW_LATENCY
-			(*i)->input()->update_port_total_latencies ();
-			(*i)->output()->update_port_total_latencies ();
-#endif
+		if (old_latency != new_latency) {
 			update_jack = true;
 		}
 
 		if (!(*i)->is_hidden() && ((*i)->active())) {
-			_worst_track_latency = max (_worst_track_latency, track_latency);
+			_worst_track_latency = max (_worst_track_latency, new_latency);
 		}
 	}
 
-	if (update_jack) {
+	if (force_whole_graph || update_jack) {
+                /* trigger a full recompute of latency numbers for the graph
+                 */
 		_engine.update_total_latencies ();
-	}
+	} 
 
 	DEBUG_TRACE(DEBUG::Latency, string_compose("worst case route internal latency was %1\n", _worst_track_latency));
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->set_latency_delay (_worst_track_latency);
+		(*i)->set_latency_compensation (_worst_track_latency);
 	}
 
 	set_worst_io_latencies ();
@@ -1526,6 +1524,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 			tr->set_capture_offset ();
 		}
 	}
+	DEBUG_TRACE(DEBUG::Latency, "---------------------------- DONE update latency compensation\n\n")
 }
 
 void

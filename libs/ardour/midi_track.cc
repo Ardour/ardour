@@ -464,13 +464,6 @@ MidiTrack::export_stuff (BufferSet& /*bufs*/, framecnt_t /*nframes*/, framepos_t
 	return -1;
 }
 
-void
-MidiTrack::set_latency_delay (framecnt_t longest_session_latency)
-{
-	Route::set_latency_delay (longest_session_latency);
-	_diskstream->set_roll_delay (_roll_delay);
-}
-
 boost::shared_ptr<Region>
 MidiTrack::bounce (InterThreadInfo& /*itt*/)
 {

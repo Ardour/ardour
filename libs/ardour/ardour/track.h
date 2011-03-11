@@ -67,8 +67,7 @@ class Track : public Route, public PublicDiskstream
         virtual void use_new_diskstream () = 0;
         virtual void set_diskstream (boost::shared_ptr<Diskstream>);
 
-	framecnt_t update_total_latency();
-	void set_latency_delay (framecnt_t);
+	void set_latency_compensation (framecnt_t);
 
 	enum FreezeState {
 		NoFreeze,

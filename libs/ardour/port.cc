@@ -40,15 +40,16 @@ using namespace ARDOUR;
 using namespace PBD;
 
 AudioEngine* Port::_engine = 0;
-pframes_t Port::_buffer_size = 0;
 bool Port::_connecting_blocked = false;
-framecnt_t Port::_port_offset = 0;
+pframes_t Port::_global_port_buffer_offset = 0;
+pframes_t Port::_cycle_nframes = 0;
 
 /** @param n Port short name */
 Port::Port (std::string const & n, DataType t, Flags f)
-	: _last_monitor (false)
+	: _port_buffer_offset (0)
 	, _name (n)
 	, _flags (f)
+        , _last_monitor (false)
 {
 
 	/* Unfortunately we have to pass the DataType into this constructor so that we can
@@ -217,41 +218,79 @@ void
 Port::reset ()
 {
 	_last_monitor = false;
-
-	// XXX
-	// _metering = 0;
-	// reset_meters ();
 }
 
 void
-Port::recompute_total_latency () const
+Port::cycle_start (pframes_t nframes)
 {
-#ifndef HAVE_JACK_NEW_LATENCY
-#ifdef  HAVE_JACK_RECOMPUTE_LATENCY
-	jack_client_t* jack = _engine->jack();
-
-	if (!jack) {
-		return;
-	}
-
-	jack_recompute_total_latency (jack, _jack_port);
-#endif
-#endif
+        _port_buffer_offset = 0;
 }
 
-#ifdef HAVE_JACK_NEW_LATENCY
 void
-Port::set_latency_range (jack_latency_range_t& range, bool playback) const
+Port::increment_port_buffer_offset (pframes_t nframes)
 {
+        _port_buffer_offset += nframes;
+}
+        
+void
+Port::set_public_latency_range (jack_latency_range_t& range, bool playback) const
+{
+        /* this sets the visible latency that the rest of JACK sees. because we do latency
+           compensation, all (most) of our visible port latency values are identical.
+        */
+
         if (!jack_port_set_latency_range) {
                 return;
         }
 
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("PORT %1 %4 latency now [%2 - %3]\n", name(), 
+                                                     range.min, 
+                                                     range.max,
+                                                     (playback ? "PLAYBACK" : "CAPTURE")));;
+
         jack_port_set_latency_range (_jack_port, (playback ? JackPlaybackLatency : JackCaptureLatency), &range);
 }
-#endif
 
-#ifdef HAVE_JACK_NEW_LATENCY
+void
+Port::set_private_latency_range (jack_latency_range_t& range, bool playback)
+{
+        if (playback) {
+                _private_playback_latency = range;
+                DEBUG_TRACE (DEBUG::Latency, string_compose ("PORT %1 playback latency now [%2 - %3]\n", name(), 
+                                                             _private_playback_latency.min, 
+                                                             _private_playback_latency.max));
+        } else {
+                _private_capture_latency = range;
+                DEBUG_TRACE (DEBUG::Latency, string_compose ("PORT %1 capture latency now [%2 - %3]\n", name(), 
+                                                             _private_playback_latency.min, 
+                                                             _private_playback_latency.max));
+        }
+}
+
+const jack_latency_range_t&
+Port::private_latency_range (bool playback) const
+{
+        if (playback) {
+                return _private_playback_latency;
+        } else {
+                return _private_capture_latency;
+        }
+}
+
+jack_latency_range_t
+Port::public_latency_range (bool playback) const
+{
+        jack_latency_range_t r;
+
+        jack_port_get_latency_range (_jack_port, 
+                                     sends_output() ? JackPlaybackLatency : JackCaptureLatency,
+                                     &r);
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("PORT %1: %4 public latency range %2 .. %3\n", 
+                                                     name(), r.min, r.max,
+                                                     sends_output() ? "PLAYBACK" : "CAPTURE"));
+        return r;
+}
+
 void
 Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) const
 {
@@ -280,11 +319,9 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
                         jack_port_t* remote_port = jack_port_by_name (_engine->jack(), (*c).c_str());
                         jack_latency_range_t lr;
 
-                        DEBUG_TRACE (DEBUG::Latency, string_compose ("\t%1 connected to %2\n", name(), *c));
-
                         if (remote_port) {
                                 jack_port_get_latency_range (remote_port, (playback ? JackPlaybackLatency : JackCaptureLatency), &lr);
-                                DEBUG_TRACE (DEBUG::Latency, string_compose ("\t\tremote has latency range %1 .. %2\n", lr.min, lr.max));
+                                DEBUG_TRACE (DEBUG::Latency, string_compose ("\t\%1 has latency range %2 .. %3\n", *c, lr.min, lr.max));
                                 range.min = min (range.min, lr.min);
                                 range.max = max (range.max, lr.max);
                         }
@@ -296,29 +333,6 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
                 range.max = 0;
         }
 }
-#endif /* HAVE_JACK_NEW_LATENCY */
-
-framecnt_t
-Port::total_latency () const
-{
-#ifndef HAVE_JACK_NEW_LATENCY
-	jack_client_t* jack = _engine->jack();
-
-	if (!jack) {
-		return 0;
-	}
-
-	return jack_port_get_total_latency (jack, _jack_port);
-#else
-        jack_latency_range_t r;
-        jack_port_get_latency_range (_jack_port, 
-                                     sends_output() ? JackPlaybackLatency : JackCaptureLatency,
-                                     &r);
-        DEBUG_TRACE (DEBUG::Latency, string_compose ("PORT %1: latency range %2 .. %3\n", 
-                                                     name(), r.min, r.max));
-        return r.max;
-#endif
-}
 
 int
 Port::reestablish ()
@@ -329,7 +343,6 @@ Port::reestablish ()
 		return -1;
 	}
 
-	cerr << "RE-REGISTER: " << _name.c_str() << endl;
 	_jack_port = jack_port_register (jack, _name.c_str(), type().to_jack_type(), _flags, 0);
 
 	if (_jack_port == 0) {
@@ -378,14 +391,6 @@ void
 Port::request_monitor_input (bool yn)
 {
 	jack_port_request_monitor (_jack_port, yn);
-}
-
-void
-Port::set_latency (framecnt_t n)
-{
-#ifndef HAVE_JACK_NEW_LATENCY
-	jack_port_set_latency (_jack_port, n);
-#endif
 }
 
 bool

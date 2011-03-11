@@ -45,6 +45,8 @@ AudioPort::cycle_start (pframes_t nframes)
 {
 	/* caller must hold process lock */
 
+        Port::cycle_start (nframes);
+
 	if (sends_output()) {
 		_buffer->prepare ();
 	}
@@ -67,10 +69,11 @@ AudioPort::cycle_split ()
 }
 
 AudioBuffer&
-AudioPort::get_audio_buffer (framecnt_t nframes)
+AudioPort::get_audio_buffer (pframes_t nframes)
 {
 	/* caller must hold process lock */
-       _buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, nframes) + _port_offset, nframes);
+       _buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, _cycle_nframes) + 
+                          _global_port_buffer_offset + _port_buffer_offset, nframes);
 	return *_buffer;
 }
 

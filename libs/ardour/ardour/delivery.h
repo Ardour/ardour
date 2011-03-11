@@ -75,7 +75,6 @@ public:
 	void flush_buffers (framecnt_t nframes, framepos_t time);
 	void no_outs_cuz_we_no_monitor(bool);
 	void cycle_start (pframes_t);
-	void increment_output_offset (framecnt_t);
 	void transport_stopped (framepos_t frame);
 
 	BufferSet& output_buffers() { return *_output_buffers; }
@@ -105,7 +104,6 @@ public:
 	Role        _role;
 	BufferSet*  _output_buffers;
 	gain_t      _current_gain;
-	framecnt_t  _output_offset;
 	bool        _no_outs_cuz_we_no_monitor;
 	boost::shared_ptr<MuteMaster> _mute_master;
 	bool         no_panner_reset;

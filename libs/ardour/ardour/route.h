@@ -250,11 +250,15 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void all_processors_flip();
 	void all_processors_active (Placement, bool state);
 
-        void set_latency_ranges (bool playback) const;
-	virtual framecnt_t update_total_latency();
-	void set_latency_delay (framecnt_t);
+        framecnt_t set_private_port_latencies (bool playback) const;
+        void       set_public_port_latencies (framecnt_t, bool playback) const;
+
+	framecnt_t   update_signal_latency();
+	virtual void set_latency_compensation (framecnt_t);
+
 	void set_user_latency (framecnt_t);
 	framecnt_t initial_delay() const { return _initial_delay; }
+        framecnt_t signal_latency() const { return _signal_latency; }
 
 	PBD::Signal0<void>       active_changed;
 	PBD::Signal0<void>       phase_invert_changed;
@@ -426,6 +430,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::shared_ptr<IO> _output;
 
 	bool           _active;
+        framecnt_t     _signal_latency;
 	framecnt_t     _initial_delay;
 	framecnt_t     _roll_delay;
 
@@ -517,7 +522,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void set_mute_master_solo ();
 
 	void set_processor_positions ();
-        void update_port_latencies (const PortSet& ports, const PortSet& feeders, bool playback, framecnt_t) const;
+        framecnt_t update_port_latencies (const PortSet& ports, const PortSet& feeders, bool playback, framecnt_t) const;
 
 	void setup_invisible_processors ();
 

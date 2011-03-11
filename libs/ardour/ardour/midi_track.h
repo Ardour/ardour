@@ -52,8 +52,6 @@ public:
 		return DataType::MIDI;
 	}
 
-	void set_latency_delay (framecnt_t);
-
 	int export_stuff (BufferSet& bufs, framecnt_t nframes, framepos_t end_frame);
 
 	void freeze_me (InterThreadInfo&);

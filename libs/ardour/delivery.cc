@@ -59,7 +59,6 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 	, _role (r)
 	, _output_buffers (new BufferSet())
 	, _current_gain (1.0)
-	, _output_offset (0)
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
 	, no_panner_reset (false)
@@ -81,7 +80,6 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 	, _role (r)
 	, _output_buffers (new BufferSet())
 	, _current_gain (1.0)
-	, _output_offset (0)
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
 	, no_panner_reset (false)
@@ -123,14 +121,7 @@ Delivery::display_name () const
 void
 Delivery::cycle_start (pframes_t /*nframes*/)
 {
-	_output_offset = 0;
 	_no_outs_cuz_we_no_monitor = false;
-}
-
-void
-Delivery::increment_output_offset (framecnt_t n)
-{
-	_output_offset += n;
 }
 
 bool

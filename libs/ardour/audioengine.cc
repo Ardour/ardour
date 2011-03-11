@@ -190,11 +190,10 @@ AudioEngine::set_jack_callbacks ()
         if( jack_set_session_callback)
                 jack_set_session_callback (_priv_jack, _session_callback, this);
 #endif
-#if HAVE_JACK_NEW_LATENCY
+
         if (jack_set_latency_callback) {
                 jack_set_latency_callback (_priv_jack, _latency_callback, this);
         }
-#endif
         
         jack_set_error_function (ardour_jack_error);
 }
@@ -389,13 +388,11 @@ AudioEngine::_registration_callback (jack_port_id_t /*id*/, int /*reg*/, void* a
 	ae->PortRegisteredOrUnregistered (); /* EMIT SIGNAL */
 }
 
-#ifdef HAVE_JACK_NEW_LATENCY
 void
 AudioEngine::_latency_callback (jack_latency_callback_mode_t mode, void* arg)
 {
 	return static_cast<AudioEngine *> (arg)->jack_latency_callback (mode);
 }
-#endif
 
 void
 AudioEngine::_connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int conn, void* arg)
@@ -413,9 +410,9 @@ AudioEngine::_connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int co
 	boost::shared_ptr<Ports> pr = ae->ports.reader ();
 	Ports::iterator i = pr->begin ();
 	while (i != pr->end() && (port_a == 0 || port_b == 0)) {
-		if (jack_port_a == (*i)->_jack_port) {
+		if (jack_port_a == (*i)->jack_port()) {
 			port_a = *i;
-		} else if (jack_port_b == (*i)->_jack_port) {
+		} else if (jack_port_b == (*i)->jack_port()) {
 			port_b = *i;
 		}
 		++i;
@@ -429,7 +426,7 @@ AudioEngine::split_cycle (pframes_t offset)
 {
 	/* caller must hold process lock */
 
-	AudioPort::increment_port_offset (offset);
+	Port::increment_global_port_buffer_offset (offset);
 
 	/* tell all Ports that we're going to start a new (split) cycle */
 
@@ -512,7 +509,8 @@ AudioEngine::process_callback (pframes_t nframes)
 	/* tell all relevant objects that we're starting a new cycle */
 
 	Delivery::CycleStart (nframes);
-	AudioPort::set_port_offset (0);
+	Port::set_global_port_buffer_offset (0);
+        Port::set_cycle_framecnt (nframes);
 	InternalReturn::CycleStart (nframes);
 
 	/* tell all Ports that we're starting a new cycle */
@@ -560,8 +558,8 @@ AudioEngine::process_callback (pframes_t nframes)
 			Port *port = (*i);
 			bool x;
 
-			if (port->_last_monitor != (x = port->monitoring_input ())) {
-				port->_last_monitor = x;
+			if (port->last_monitor() != (x = port->monitoring_input ())) {
+				port->set_last_monitor (x);
 				/* XXX I think this is dangerous, due to
 				   a likely mutex in the signal handlers ...
 				*/
@@ -621,7 +619,6 @@ AudioEngine::jack_sample_rate_callback (pframes_t nframes)
 	return 0;
 }
 
-#ifdef HAVE_JACK_NEW_LATENCY
 void
 AudioEngine::jack_latency_callback (jack_latency_callback_mode_t mode)
 {
@@ -629,7 +626,6 @@ AudioEngine::jack_latency_callback (jack_latency_callback_mode_t mode)
                 _session->update_latency (mode == JackPlaybackLatency);
         }
 }
-#endif
 
 int
 AudioEngine::_bufsize_callback (pframes_t nframes, void *arg)
@@ -1186,12 +1182,6 @@ void
 AudioEngine::get_physical_outputs (DataType type, vector<string>& outs)
 {
 	get_physical (type, JackPortIsInput, outs);
-}
-
-void
-AudioEngine::update_total_latency (const Port& port)
-{
-	port.recompute_total_latency ();
 }
 
 void

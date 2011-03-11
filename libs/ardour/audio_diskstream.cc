@@ -390,12 +390,12 @@ AudioDiskstream::prepare_record_status(framepos_t capture_start_frame)
 		boost::shared_ptr<ChannelList> c = channels.reader();
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 
-			RingBufferNPT<CaptureTransition>::rw_vector transvec;
-			(*chan)->capture_transition_buf->get_write_vector(&transvec);
+			RingBufferNPT<CaptureTransition>::rw_vector transitions;
+			(*chan)->capture_transition_buf->get_write_vector (&transitions);
 
-			if (transvec.len[0] > 0) {
-				transvec.buf[0]->type = CaptureStart;
-				transvec.buf[0]->capture_val = capture_start_frame;
+			if (transitions.len[0] > 0) {
+				transitions.buf[0]->type = CaptureStart;
+				transitions.buf[0]->capture_val = capture_start_frame;
 				(*chan)->capture_transition_buf->increment_write_ptr(1);
 			} else {
 				// bad!
@@ -1481,7 +1481,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 
 			RegionFactory::region_name (region_name, whole_file_region_name, false);
 
-			cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add region " << region_name << endl;
+			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add region " << region_name << endl;
 
 			try {
 
@@ -1548,7 +1548,7 @@ AudioDiskstream::transport_looped (framepos_t transport_frame)
 			capture_captured += _capture_offset;
 
 			if (_alignment_style == ExistingMaterial) {
-				capture_captured += _session.worst_playback_latency();
+				capture_captured += _session.worst_output_latency();
 			} else {
 				capture_captured += _roll_delay;
 			}

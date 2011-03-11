@@ -41,7 +41,10 @@ MidiPort::~MidiPort()
 void
 MidiPort::cycle_start (pframes_t nframes)
 {
+        Port::cycle_start (nframes);
+
 	_buffer->clear ();
+
 	assert (_buffer->size () == 0);
 
 	if (sends_output ()) {
@@ -50,7 +53,7 @@ MidiPort::cycle_start (pframes_t nframes)
 }
 
 MidiBuffer &
-MidiPort::get_midi_buffer (framecnt_t nframes)
+MidiPort::get_midi_buffer (pframes_t nframes)
 {
 	if (_has_been_mixed_down) {
 		return *_buffer;
@@ -59,7 +62,7 @@ MidiPort::get_midi_buffer (framecnt_t nframes)
 	if (receives_input ()) {
 
 		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
-		const pframes_t event_count = jack_midi_get_event_count(jack_buffer);
+		const pframes_t event_count = jack_midi_get_event_count (jack_buffer);
 
 		assert (event_count < _buffer->capacity());
 
@@ -78,15 +81,16 @@ MidiPort::get_midi_buffer (framecnt_t nframes)
                                 continue;
                         }
 
-			if (ev.time >= _port_offset && ev.time < (_port_offset + nframes)) {
+                        /* check that the event is in the acceptable time range */
+
+			if ((ev.time >= (_global_port_buffer_offset + _port_buffer_offset)) && 
+                            (ev.time < (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
 				_buffer->push_back (ev);
 			} else {
-				cerr << "Dropping incoming MIDI at time " << ev.time << "; offset=" << _port_offset << " limit=" << (_port_offset + nframes) << "\n";
+				cerr << "Dropping incoming MIDI at time " << ev.time << "; offset=" 
+                                     << _global_port_buffer_offset << " limit=" 
+                                     << (_global_port_buffer_offset + _port_buffer_offset + nframes) << "\n";
 			}
-		}
-
-		if (nframes) {
-			_has_been_mixed_down = true;
 		}
 
 	} else {
@@ -137,14 +141,16 @@ MidiPort::flush_buffers (pframes_t nframes, framepos_t time)
 
 			// event times are in frames, relative to cycle start
 
-			assert (ev.time() < (nframes + _port_offset));
+			assert (ev.time() < (nframes + _global_port_buffer_offset + _port_buffer_offset));
 
-			if (ev.time() >= _port_offset) {
+			if (ev.time() >= _global_port_buffer_offset + _port_buffer_offset) {
 				if (jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size()) != 0) {
-                                        cerr << "write failed, drop flushed note off on the floor, time " << ev.time() << " > " << _port_offset << endl;
+                                        cerr << "write failed, drop flushed note off on the floor, time " 
+                                             << ev.time() << " > " << _global_port_buffer_offset + _port_buffer_offset << endl;
                                 }
                         } else {
-                                cerr << "drop flushed event on the floor, time " << ev.time() << " < " << _port_offset << endl;
+                                cerr << "drop flushed event on the floor, time " << ev.time() 
+                                     << " < " << _global_port_buffer_offset + _port_buffer_offset << endl;
                         }
 		}
 	}

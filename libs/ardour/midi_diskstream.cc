@@ -1104,7 +1104,7 @@ MidiDiskstream::transport_looped (framepos_t transport_frame)
 			capture_captured += _capture_offset;
 
 			if (_alignment_style == ExistingMaterial) {
-				capture_captured += _session.worst_playback_latency();
+				capture_captured += _session.worst_output_latency();
 			} else {
 				capture_captured += _roll_delay;
 			}

@@ -273,9 +273,9 @@ def configure(conf):
 	conf.check_cc(fragment = "#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_t* p; jack_latency_range_t r; jack_port_set_latency_range (p, JackCaptureLatency, &r); return 0; }\n",
                       linkflags = ['-ljack'],
 		      msg = 'Checking for new JACK latency API',
-                      define_name = 'HAVE_JACK_NEW_LATENCY',
-                      uselib_store = "JACK_NEW_LATENCY",
-		      okmsg = 'present')
+		      okmsg = 'present',
+                      mandatory = True,
+                      errmsg = 'missing - a version of JACK that supports jack_port_set_latency_range() is required to compile Ardour3')
 
 	conf.check_cc(fragment = '#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_type_get_buffer_size ((jack_client_t*)0, ""); }\n',
                       linkflags = ['-ljack'],

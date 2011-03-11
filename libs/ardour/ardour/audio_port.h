@@ -41,11 +41,11 @@ class AudioPort : public Port
 
 	size_t raw_buffer_size (pframes_t nframes) const;
 
-	Buffer& get_buffer (framecnt_t nframes) {
+	Buffer& get_buffer (pframes_t nframes) {
 		return get_audio_buffer (nframes);
 	}
 
-	AudioBuffer& get_audio_buffer (framecnt_t nframes);
+	AudioBuffer& get_audio_buffer (pframes_t nframes);
 
   protected:
 	friend class AudioEngine;

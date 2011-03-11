@@ -640,6 +640,9 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
 	if (possibly_recording == last_possibly_recording) {
 		return;
 	}
+
+        framecnt_t existing_material_offset = _session.worst_playback_latency();
+
         if (possibly_recording == fully_rec_enabled) {
 
                 if (last_possibly_recording == fully_rec_enabled) {
@@ -650,52 +653,30 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
                 
 		first_recordable_frame = transport_frame + _capture_offset;
 		last_recordable_frame = max_framepos;
-		capture_start_frame = transport_frame;
+		capture_start_frame = _session.transport_frame();
 
-                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %7 basic FRF = %2 LRF = %3 CSF = %4 CO = %5, WPL = %6\n",
+                /* in theory, we should be offsetting by _session.worst_playback_latency() when we adjust
+                   for ExistingMaterial alignment. But that number includes the worst processor latency
+                   across all routes, and each track will already be roll-delay adjusted to handle that.
+                   so don't use worst_playback_latency(), just worst_output_latency() which covers
+                   only downstream latency from IO ports.
+                */
+
+                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %7 basic FRF = %2 CSF = %4 CO = %5, EMO = %6 RD = %8\n",
                                                                       name(), first_recordable_frame, last_recordable_frame, capture_start_frame,
                                                                       _capture_offset,
-                                                                      _session.worst_playback_latency(),
-                                                                      transport_frame));
+                                                                      existing_material_offset,
+                                                                      transport_frame, 
+                                                                      _roll_delay));
 
-                
-
-                if (change & transport_rolling) {
-
-                        /* transport-change (started rolling) */
-                        
-			if (_alignment_style == ExistingMaterial) {
-                                
-                                /* audio played by ardour will take (up to) _session.worst_playback_latency() ("WOL") to
-                                   appear at the speakers; audio played at the time when it does appear at
-                                   the speakers will take _capture_offset to arrive back here. we've
-                                   already added _capture_offset, so now add WOL.
-                                */
-                                
-                                first_recordable_frame += _session.worst_playback_latency();
-                                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tROLL: shift FRF by delta between WOL %1\n",
-                                                                                      first_recordable_frame));
-                        } else {
-				first_recordable_frame += _roll_delay;
-                                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tROLL: shift FRF by roll delay of %1 to %2\n",
-                                                                                      _roll_delay, first_recordable_frame));
-  			}
-                        
+                if (_alignment_style == ExistingMaterial) {
+                        first_recordable_frame += existing_material_offset;
+                        DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tshift FRF by EMO %1\n",
+                                                                              first_recordable_frame));
                 } else {
-
-                        /* punch in */
-
-			if (_alignment_style == ExistingMaterial) {
-
-                                /* see comment in ExistingMaterial block above */
-                                first_recordable_frame += _session.worst_playback_latency();
-                                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tMANUAL PUNCH: shift FRF by delta between WOL and CO to %1\n",
-                                                                                      first_recordable_frame));
-			} else {
-				capture_start_frame -= _roll_delay;
-                                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tPUNCH: shift CSF by roll delay of %1 to %2\n",
-                                                                                      _roll_delay, capture_start_frame));
-			}
+                        capture_start_frame += _roll_delay;
+                        DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tshift CFS by roll delay of %1 to %2\n",
+                                                                              _roll_delay, capture_start_frame));
                 }
                 
                 prepare_record_status (capture_start_frame);
@@ -707,7 +688,11 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
                         /* we were recording last time */
                         
                         if (change & transport_rolling) {
-                                /* transport-change (stopped rolling): last_recordable_frame was set in ::prepare_to_stop() */
+
+                                /* transport-change (stopped rolling): last_recordable_frame was set in ::prepare_to_stop(). We
+                                   had to set it there because we likely rolled past the stopping point to declick out,
+                                   and then backed up.
+                                 */
                                 
                         } else {
                                 /* punch out */
@@ -715,7 +700,7 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
                                 last_recordable_frame = transport_frame + _capture_offset;
                                 
                                 if (_alignment_style == ExistingMaterial) {
-                                        last_recordable_frame += _session.worst_input_latency();
+                                        last_recordable_frame += existing_material_offset;
                                 } else {
                                         last_recordable_frame += _roll_delay;
                                 }

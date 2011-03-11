@@ -96,6 +96,18 @@ IO::~IO ()
 	}
 }
 
+void 
+IO::increment_port_buffer_offset (pframes_t offset)
+{
+	/* io_lock, not taken: function must be called from Session::process() calltree */
+
+        if (_direction == Output) {
+                for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
+                        i->increment_port_buffer_offset (offset);
+                }
+        }
+}
+
 void
 IO::silence (framecnt_t nframes)
 {
@@ -1133,16 +1145,6 @@ IO::set_name (const string& requested_name)
 	return r;
 }
 
-void
-IO::set_port_latency (framecnt_t nframes)
-{
-	Glib::Mutex::Lock lm (io_lock);
-
-	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
-		i->set_latency (nframes);
-	}
-}
-
 framecnt_t
 IO::latency () const
 {
@@ -1154,24 +1156,15 @@ IO::latency () const
 	/* io lock not taken - must be protected by other means */
 
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
-		if ((latency = i->total_latency ()) > max_latency) {
+		if ((latency = i->public_latency_range (_direction == Output).max) > max_latency) {
 			max_latency = latency;
 		}
 	}
 
-        DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: max latency from %2 ports = %3\n", 
-                                                     name(), _ports.num_ports(), max_latency));
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: max %4 latency from %2 ports = %3\n", 
+                                                     name(), _ports.num_ports(), max_latency,
+                                                     ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
 	return max_latency;
-}
-
-void
-IO::update_port_total_latencies ()
-{
-	/* io_lock, not taken: function must be called from Session::process() calltree */
-
-	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
-		_session.engine().update_total_latency (*i);
-	}
 }
 
 int

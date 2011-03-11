@@ -649,16 +649,14 @@ Session::when_engine_running ()
 		}
 	}
 
-	set_worst_io_latencies ();
-
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave|Dirty));
 
 	/* hook us up to the engine */
 
 	BootMessage (_("Connect to engine"));
-
 	_engine.set_session (this);
-        _engine.update_total_latencies ();
+
+        update_latency_compensation (false, false, true);
 }
 
 void
@@ -4153,13 +4151,13 @@ Session::unknown_processors () const
 	return p;
 }
 
-#ifdef HAVE_JACK_NEW_LATENCY
 void
 Session::update_latency (bool playback)
 {
-        DEBUG_TRACE (DEBUG::Latency, "JACK latency callback\n");
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("\n\nJACK latency callback: %1\n", (playback ? "PLAYBACK" : "CAPTURE")));
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
+        framecnt_t max_latency = 0;
 
         if (playback) {
                 /* reverse the list so that we work backwards from the last route to run to the first */
@@ -4167,9 +4165,14 @@ Session::update_latency (bool playback)
         }
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-                DEBUG_TRACE (DEBUG::Latency, string_compose ("------------- Working on latency for %1\n", (*i)->name()));
-                (*i)->set_latency_ranges (playback);
-                DEBUG_TRACE (DEBUG::Latency, string_compose ("------------- Done working on latency for %1\n\n", (*i)->name()));
+                max_latency = max (max_latency, (*i)->set_private_port_latencies (playback));
         }
-}
+
+#if 0
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("Set public port latencies to %1\n", max_latency));
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                (*i)->set_public_port_latencies (max_latency, playback);
+        }
 #endif
+}

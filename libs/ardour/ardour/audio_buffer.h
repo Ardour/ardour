@@ -166,7 +166,7 @@ public:
 		return _data + offset;
 	}
 
-	void prepare () { _written = false; }
+	void prepare () { _written = false; _silent = false; }
 	bool written() const { return _written; }
 
   private:

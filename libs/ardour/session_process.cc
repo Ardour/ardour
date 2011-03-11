@@ -932,7 +932,7 @@ Session::maybe_sync_start (pframes_t & nframes)
 
 		no_roll (sync_offset);
 		nframes -= sync_offset;
-		AudioPort::increment_port_offset (sync_offset);
+		Port::increment_global_port_buffer_offset (sync_offset);
 		waiting_for_sync_offset = false;
 
 		if (nframes == 0) {

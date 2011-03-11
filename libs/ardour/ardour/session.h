@@ -20,6 +20,8 @@
 #ifndef __ardour_session_h__
 #define __ardour_session_h__
 
+#include "libardour-config.h"
+
 #include <list>
 #include <map>
 #include <set>
@@ -818,7 +820,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
   protected:
 	friend class Route;
 	void schedule_curve_reallocation ();
-	void update_latency_compensation (bool, bool);
+	void update_latency_compensation (bool, bool, bool force=false);
 
   private:
 	int  create (const std::string& mix_template, BusProfile*);
@@ -1364,9 +1366,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void reset_jack_connection (jack_client_t* jack);
 	void process_rtop (SessionEvent*);
 
-#ifdef HAVE_JACK_NEW_LATENCY
         void  update_latency (bool playback);
-#endif
 
 	XMLNode& state(bool);
 

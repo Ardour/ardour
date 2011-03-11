@@ -46,11 +46,11 @@ class MidiPort : public Port {
 
 	size_t raw_buffer_size (pframes_t nframes) const;
 
-	Buffer& get_buffer (framecnt_t nframes) {
+	Buffer& get_buffer (pframes_t nframes) {
 		return get_midi_buffer (nframes);
 	}
 
-	MidiBuffer& get_midi_buffer (framecnt_t nframes);
+	MidiBuffer& get_midi_buffer (pframes_t nframes);
 
   protected:
 	friend class AudioEngine;

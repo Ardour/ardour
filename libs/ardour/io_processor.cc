@@ -249,6 +249,14 @@ IOProcessor::silence (framecnt_t nframes)
 	}
 }
 
+void 
+IOProcessor::increment_port_buffer_offset (pframes_t offset)
+{
+        if (_own_output && _output) {
+                _output->increment_port_buffer_offset (offset);
+        }
+}
+
 ChanCount
 IOProcessor::natural_output_streams() const
 {

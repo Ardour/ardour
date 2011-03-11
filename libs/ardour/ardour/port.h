@@ -20,6 +20,8 @@
 #ifndef __ardour_port_h__
 #define __ardour_port_h__
 
+#include "libardour-config.h"
+
 #include <set>
 #include <string>
 #include <vector>
@@ -45,9 +47,6 @@ public:
 
 	virtual ~Port ();
 
-	static void set_buffer_size (pframes_t sz) {
-		_buffer_size = sz;
-	}
 	static void set_connecting_blocked( bool yn ) { 
 		_connecting_blocked = yn;
 	}
@@ -93,16 +92,22 @@ public:
 
 	void ensure_monitor_input (bool);
 	bool monitoring_input () const;
-	framecnt_t total_latency () const;
 	int reestablish ();
 	int reconnect ();
 	void request_monitor_input (bool);
-	void set_latency (framecnt_t);
         
-#ifdef HAVE_JACK_NEW_LATENCY
+        bool last_monitor() const { return _last_monitor; }
+        void set_last_monitor (bool yn) { _last_monitor = yn; }
+
+        jack_port_t* jack_port() const { return _jack_port; }
+        
         void get_connected_latency_range (jack_latency_range_t& range, bool playback) const;
-        void set_latency_range (jack_latency_range_t& range, bool playback) const;
-#endif
+
+        void set_private_latency_range (jack_latency_range_t& range, bool playback);
+        const jack_latency_range_t&  private_latency_range (bool playback) const;
+
+        void set_public_latency_range (jack_latency_range_t& range, bool playback) const;
+        jack_latency_range_t public_latency_range (bool playback) const;
 
 	virtual void reset ();
 
@@ -110,10 +115,10 @@ public:
 	virtual size_t raw_buffer_size (pframes_t nframes) const = 0;
 
 	virtual DataType type () const = 0;
-	virtual void cycle_start (pframes_t) = 0;
+	virtual void cycle_start (pframes_t);
 	virtual void cycle_end (pframes_t) = 0;
 	virtual void cycle_split () = 0;
-	virtual Buffer& get_buffer (framecnt_t nframes) = 0;
+	virtual Buffer& get_buffer (pframes_t nframes) = 0;
 	virtual void flush_buffers (pframes_t nframes, framepos_t /*time*/) {}
 	virtual void transport_stopped () {}
 
@@ -124,15 +129,18 @@ public:
 	PBD::Signal1<void,bool> MonitorInputChanged;
 
 
-	static framecnt_t port_offset() { return _port_offset; }
+        static void set_cycle_framecnt (pframes_t n) {
+                _cycle_nframes = n;
+        }
+	static framecnt_t port_offset() { return _global_port_buffer_offset; }
+	static void set_global_port_buffer_offset (pframes_t off) {
+		_global_port_buffer_offset = off;
+	}
+	static void increment_global_port_buffer_offset (pframes_t n) {
+		_global_port_buffer_offset += n;
+	}
 
-	static void set_port_offset (framecnt_t off) {
-		_port_offset = off;
-	}
-	
-	static void increment_port_offset (framecnt_t n) {
-		_port_offset += n;
-	}
+        virtual void increment_port_buffer_offset (pframes_t n);
 
 protected:
 
@@ -140,25 +148,25 @@ protected:
 
 	jack_port_t* _jack_port; ///< JACK port
 
-	static pframes_t  _buffer_size;
 	static bool	  _connecting_blocked;
-	static framecnt_t _port_offset;
+	static pframes_t  _global_port_buffer_offset;   /* access only from process() tree */
+        static pframes_t  _cycle_nframes; /* access only from process() tree */
+
+        framecnt_t _port_buffer_offset; /* access only from process() tree */
+
+        jack_latency_range_t _private_playback_latency;
+        jack_latency_range_t _private_capture_latency;
         
 	static AudioEngine* _engine; ///< the AudioEngine
 
 private:
-	friend class AudioEngine;
-
-	void recompute_total_latency () const;
-
-	/* XXX */
-	bool _last_monitor;
-
 	std::string _name;  ///< port short name
 	Flags       _flags; ///< flags
+	bool        _last_monitor;
 
 	/** ports that we are connected to, kept so that we can
-	    reconnect to JACK when required */
+	    reconnect to JACK when required 
+        */
 	std::set<std::string> _connections;
 
 };

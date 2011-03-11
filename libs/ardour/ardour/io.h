@@ -90,6 +90,7 @@ class IO : public SessionObject, public Latent
 	bool set_name (const std::string& str);
 
 	virtual void silence (framecnt_t);
+        void increment_port_buffer_offset (pframes_t offset);
 
 	int ensure_io (ChanCount cnt, bool clear, void *src);
 
@@ -111,9 +112,6 @@ class IO : public SessionObject, public Latent
         
 	framecnt_t signal_latency () const { return _own_latency; }
 	framecnt_t latency () const;
-	void set_port_latency (framecnt_t);
-
-	void update_port_total_latencies ();
 
 	PortSet& ports() { return _ports; }
 	const PortSet& ports() const { return _ports; }
