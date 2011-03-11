@@ -442,7 +442,33 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 	string label = matches2->object;
 	lrdf_free_statements(matches2);
 
-	return label;
+	/* Kludge LADSPA class names to be singular and match LV2 class names.
+	   This avoids duplicate plugin menus for every class, which is necessary
+	   to make the plugin category menu at all usable, but is obviously a
+	   filthy kludge.
+
+	   In the short term, lrdf could be updated so the labels match and a new
+	   release made. To support both specs, we should probably be mapping the
+	   URIs to the same category in code and perhaps tweaking that hierarchy
+	   dynamically to suit the user. Personally, I (drobilla) think that time
+	   is better spent replacing the little-used LRDF.
+
+	   In the longer term, we will abandon LRDF entirely in favour of LV2 and
+	   use that class hierarchy. Aside from fixing this problem properly, that
+	   will also allow for translated labels. SWH plugins have been LV2 for
+	   ages; TAP needs porting. I don't know of anything else with LRDF data.
+	*/
+	if (label == "Utilities") {
+		return "Utility";
+	} else if (label == "Pitch shifters") {
+		return "Pitch Shifter";
+	} else if (label != "Dynamics" && label != "Chorus"
+	           &&label[label.length() - 1] == 's'
+	           && label[label.length() - 2] != 's') {
+		return label.substr(0, label.length() - 1);
+	} else {
+		return label;
+	}
 }
 
 #ifdef HAVE_SLV2
