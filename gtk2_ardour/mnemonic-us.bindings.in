@@ -135,7 +135,7 @@ This mode provides many different operations on both regions and control points,
 
 ;; note that ctrl-w is special and consumed by the keyboard snooper
 
-@rop|Region/set-edit-point|e|set fade out length
+@mmode|MouseMode/toggle-internal-edit|e|toggle MIDI note editing
 @select|Editor/select-all-before-edit-cursor|<@PRIMARY@>e|select all before EP
 @rop|Region/export-region|<@PRIMARY@><@LEVEL4@>e|export selected region(s)
 @sess|Main/ExportSession|<@LEVEL4@>e|export session
@@ -211,7 +211,6 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/normalize-region|n|normalize
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
 @sess|Main/New|<@PRIMARY@>n|open a new session
-@mmode|MouseMode/toggle-internal-edit|m|toggle MIDI note editing
 @rop|Region/toggle-region-mute|<@PRIMARY@>m|mute/unmute
 @wvis|Common/toggle-mixer-on-top|<@WINDOW@>m|rotate editor \& mixer window
 
