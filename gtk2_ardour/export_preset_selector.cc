@@ -51,7 +51,7 @@ ExportPresetSelector::ExportPresetSelector () :
 
 	select_connection = entry.signal_changed().connect (sigc::mem_fun (*this, &ExportPresetSelector::update_selection));
 	save_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportPresetSelector::save_current));
-	new_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportPresetSelector::save_current));
+	new_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportPresetSelector::create_new));
 	remove_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportPresetSelector::remove_current));
 
 	show_all_children ();
@@ -125,6 +125,16 @@ ExportPresetSelector::update_selection ()
 	save_button.set_sensitive (current);
 	remove_button.set_sensitive (current);
 	new_button.set_sensitive (!current && !text.empty() && !preset_name_exists);
+}
+
+void
+ExportPresetSelector::create_new ()
+{
+	if (!profile_manager) { return; }
+
+	previous = current = profile_manager->new_preset (entry.get_entry()->get_text());
+	sync_with_manager ();
+	update_selection (); // Update preset widget states
 }
 
 void

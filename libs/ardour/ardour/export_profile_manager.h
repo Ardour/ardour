@@ -66,6 +66,7 @@ class ExportProfileManager
 
 	PresetList const & get_presets () { return preset_list; }
 	bool load_preset (PresetPtr preset);
+	PresetPtr new_preset (std::string const & name);
 	PresetPtr save_preset (std::string const & name);
 	void remove_preset ();
 
@@ -79,6 +80,7 @@ class ExportProfileManager
 	HandlerPtr  handler;
 	Session &   session;
 
+	std::string preset_filename (std::string const & preset_name);
 	void load_presets ();
 	void load_preset_from_disk (PBD::sys::path const & path);
 

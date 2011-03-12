@@ -181,11 +181,27 @@ ExportProfileManager::load_presets ()
 	}
 }
 
+std::string
+ExportProfileManager::preset_filename (std::string const & preset_name)
+{
+	string safe_name = legalize_for_path (preset_name);
+	return export_config_dir.to_string() + "/" + safe_name + export_preset_suffix;
+}
+
+ExportProfileManager::PresetPtr
+ExportProfileManager::new_preset (string const & name)
+{
+	// Generate new ID and do regular save
+	string filename = preset_filename (name);
+	current_preset.reset (new ExportPreset (filename, session));
+	preset_list.push_back (current_preset);
+	return save_preset (name);
+}
+
 ExportProfileManager::PresetPtr
 ExportProfileManager::save_preset (string const & name)
 {
-        string safe_name = legalize_for_path (name);
-	string filename = export_config_dir.to_string() + "/" + safe_name + export_preset_suffix;
+	string filename = preset_filename (name);
 
 	if (!current_preset) {
 		current_preset.reset (new ExportPreset (filename, session));

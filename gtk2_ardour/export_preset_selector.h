@@ -48,6 +48,7 @@ class ExportPresetSelector : public Gtk::HBox
 
 	void sync_with_manager ();
 	void update_selection ();
+	void create_new ();
 	void save_current ();
 	void remove_current ();
 
