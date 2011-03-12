@@ -3595,7 +3595,7 @@ Route::unknown_processors () const
 
 
 framecnt_t
-Route::update_port_latencies (const PortSet& from, const PortSet& to, bool playback, framecnt_t our_latency) const
+Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, framecnt_t our_latency) const
 {
         /* we assume that all our input ports feed all our output ports. its not
            universally true, but the alternative is way too corner-case to worry about.
@@ -3610,7 +3610,7 @@ Route::update_port_latencies (const PortSet& from, const PortSet& to, bool playb
            connections to the "outside" (outside of this Route).
         */
         
-        for (PortSet::const_iterator p = from.begin(); p != from.end(); ++p) {
+        for (PortSet::iterator p = from.begin(); p != from.end(); ++p) {
                 
                 jack_latency_range_t range;
                 
@@ -3622,8 +3622,8 @@ Route::update_port_latencies (const PortSet& from, const PortSet& to, bool playb
 
         /* set the "from" port latencies to the max/min range of all their connections */
         
-        for (PortSet::const_iterator p = from.begin(); p != from.end(); ++p) {
-                p->set_public_latency_range (all_connections, playback);
+        for (PortSet::iterator p = from.begin(); p != from.end(); ++p) {
+                p->set_private_latency_range (all_connections, playback);
         }
 
         /* set the ports "in the direction of the flow" to the same value as above plus our own signal latency */
@@ -3631,8 +3631,8 @@ Route::update_port_latencies (const PortSet& from, const PortSet& to, bool playb
         all_connections.min += our_latency;
         all_connections.max += our_latency;
         
-        for (PortSet::const_iterator p = to.begin(); p != to.end(); ++p) {
-                p->set_public_latency_range (all_connections, playback);
+        for (PortSet::iterator p = to.begin(); p != to.end(); ++p) {
+                p->set_private_latency_range (all_connections, playback);
         }
       
         return all_connections.max;

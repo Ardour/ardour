@@ -4154,7 +4154,7 @@ Session::unknown_processors () const
 void
 Session::update_latency (bool playback)
 {
-        DEBUG_TRACE (DEBUG::Latency, string_compose ("\n\nJACK latency callback: %1\n", (playback ? "PLAYBACK" : "CAPTURE")));
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("JACK latency callback: %1\n", (playback ? "PLAYBACK" : "CAPTURE")));
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
         framecnt_t max_latency = 0;
@@ -4168,11 +4168,11 @@ Session::update_latency (bool playback)
                 max_latency = max (max_latency, (*i)->set_private_port_latencies (playback));
         }
 
-#if 0
         DEBUG_TRACE (DEBUG::Latency, string_compose ("Set public port latencies to %1\n", max_latency));
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
                 (*i)->set_public_port_latencies (max_latency, playback);
         }
-#endif
+
+        DEBUG_TRACE (DEBUG::Latency, "JACK latency callback: DONE\n");
 }

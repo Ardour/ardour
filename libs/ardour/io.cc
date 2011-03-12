@@ -1156,7 +1156,7 @@ IO::latency () const
 	/* io lock not taken - must be protected by other means */
 
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
-		if ((latency = i->public_latency_range (_direction == Output).max) > max_latency) {
+		if ((latency = i->private_latency_range (_direction == Output).max) > max_latency) {
 			max_latency = latency;
 		}
 	}

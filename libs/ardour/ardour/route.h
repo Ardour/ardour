@@ -522,7 +522,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void set_mute_master_solo ();
 
 	void set_processor_positions ();
-        framecnt_t update_port_latencies (const PortSet& ports, const PortSet& feeders, bool playback, framecnt_t) const;
+        framecnt_t update_port_latencies (PortSet& ports, PortSet& feeders, bool playback, framecnt_t) const;
 
 	void setup_invisible_processors ();
 

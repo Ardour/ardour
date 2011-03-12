@@ -265,6 +265,10 @@ Port::set_private_latency_range (jack_latency_range_t& range, bool playback)
                                                              _private_playback_latency.min, 
                                                              _private_playback_latency.max));
         }
+
+        /* push to public (JACK) location so that everyone else can see it */
+
+        set_public_latency_range (range, playback);
 }
 
 const jack_latency_range_t&
