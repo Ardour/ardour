@@ -406,8 +406,8 @@ XMLNode::add_property(const char* n, const char* v)
 XMLProperty*
 XMLNode::add_property(const char* name, const long value)
 {
-	static char str[1024];
-	snprintf(str, 1024, "%ld", value);
+	char str[64];
+	snprintf(str, sizeof(str), "%ld", value);
 	return add_property(name, str);
 }
 
