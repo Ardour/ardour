@@ -184,7 +184,8 @@ ExportProfileManager::load_presets ()
 ExportProfileManager::PresetPtr
 ExportProfileManager::save_preset (string const & name)
 {
-	string filename = export_config_dir.to_string() + "/" + name + export_preset_suffix;
+        string safe_name = legalize_for_path (name);
+	string filename = export_config_dir.to_string() + "/" + safe_name + export_preset_suffix;
 
 	if (!current_preset) {
 		current_preset.reset (new ExportPreset (filename, session));
@@ -518,6 +519,10 @@ ExportProfileManager::save_format_to_disk (FormatPtr format)
 
 	string new_name = format->name();
 	new_name += export_format_suffix;
+
+        /* make sure its legal for the filesystem */
+
+        new_name = legalize_for_path (new_name);
 
 	sys::path new_path (export_config_dir);
 	new_path /= new_name;
