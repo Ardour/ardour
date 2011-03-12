@@ -63,21 +63,6 @@ using namespace PBD;
 string
 legalize_for_path (const string& str)
 {
-#if OLD_SCHOOL_PROHIBITIVE
-	string::size_type pos;
-	string legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+=: ";
-	string legal;
-
-	legal = str;
-	pos = 0;
-
-	while ((pos = legal.find_first_not_of (legal_chars, pos)) != string::npos) {
-		legal.replace (pos, 1, "_");
-		pos += 1;
-	}
-
-	return legal;
-#else
 	string::size_type pos;
 	string illegal_chars = "/\\"; /* DOS, POSIX. Yes, we're going to ignore HFS */
 	string legal;
@@ -91,7 +76,6 @@ legalize_for_path (const string& str)
 	}
 
 	return legal;
-#endif
 }
 
 string 
