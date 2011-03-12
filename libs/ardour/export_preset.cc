@@ -66,7 +66,7 @@ ExportPreset::set_name (string const & name)
 }
 
 void
-ExportPreset::set_id (string id)
+ExportPreset::set_id (string const & id)
 {
 	_id = id;
 

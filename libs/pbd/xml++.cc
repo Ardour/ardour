@@ -377,8 +377,11 @@ XMLProperty*
 XMLNode::add_property(const char* n, const string& v)
 {
 	string ns(n);
-	if (_propmap.find(ns) != _propmap.end()) {
-		remove_property(ns);
+        map<string,XMLProperty*>::iterator iter;
+	
+        if ((iter = _propmap.find(ns)) != _propmap.end()) {
+                iter->second->set_value (v);
+                return iter->second;
 	}
 
 	XMLProperty* tmp = new XMLProperty(ns, v);
