@@ -53,7 +53,7 @@ class ExportPreset {
 
   private:
 
-	void set_id (std::string const & id);
+	void set_id (std::string id);
 
 	XMLNode * get_instant_xml () const;
 	void save_instant_xml () const;
