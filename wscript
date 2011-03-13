@@ -35,6 +35,7 @@ children = [
 	'libs/gnomecanvas',
 	'gtk2_ardour',
 	'templates',
+        'export',
 # this needs to be conditional at some point, since
 # we will not build it or use it on OS X
         'tools/sanity_check'

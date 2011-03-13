@@ -1,0 +1,19 @@
+#!/usr/bin/python
+
+import os
+import glob
+
+srcdir = '.'
+blddir = 'build'
+
+def configure(conf):
+    pass
+
+def build(bld):
+    presets = glob.glob (os.path.join(bld.get_curdir(), '*.preset'))
+    formats = glob.glob (os.path.join(bld.get_curdir(), '*.format'))
+    bld.install_files (os.path.join(bld.env['DATADIR'], 'ardour3', 'export'), 
+                      presets + formats)
+
+def set_options(opt):
+    pass
