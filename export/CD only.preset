@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportPreset id="df340c53-88b5-4342-a1c8-58e0704872ea" name="CD only">
+  <ExportFormat id="7bb867db-67b0-4aaf-9987-38c31e15052e"/>
+  <ExportFilename>
+    <Folder relative="true" path="/export"/>
+    <Field name="label" enabled="false"/>
+    <Field name="session" enabled="false"/>
+    <Field name="revision" enabled="false"/>
+    <Field name="time" enabled="false" value="T_None"/>
+    <Field name="date" enabled="false" value="D_None"/>
+  </ExportFilename>
+</ExportPreset>

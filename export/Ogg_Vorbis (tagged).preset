@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportPreset id="a83019f9-858e-4b69-8cc2-8d0487003d14" name="Ogg/Vorbis (tagged)">
+  <ExportFormat id="f6bc67b9-558d-4788-a7de-57ed763c6227"/>
+  <ExportFilename>
+    <Folder relative="true" path="/export"/>
+    <Field name="label" enabled="false"/>
+    <Field name="session" enabled="false"/>
+    <Field name="revision" enabled="false"/>
+    <Field name="time" enabled="false" value="T_None"/>
+    <Field name="date" enabled="false" value="D_None"/>
+  </ExportFilename>
+</ExportPreset>

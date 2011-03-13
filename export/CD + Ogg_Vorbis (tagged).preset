@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportPreset id="1720a0a5-ac77-4276-b096-af082fd2f48d" name="CD + Ogg/Vorbis (tagged)">
+  <ExportFormat id="7bb867db-67b0-4aaf-9987-38c31e15052e"/>
+  <ExportFormat id="f6bc67b9-558d-4788-a7de-57ed763c6227"/>
+  <ExportFilename>
+    <Folder relative="true" path="/export"/>
+    <Field name="label" enabled="false"/>
+    <Field name="session" enabled="false"/>
+    <Field name="revision" enabled="false"/>
+    <Field name="time" enabled="false" value="T_None"/>
+    <Field name="date" enabled="false" value="D_None"/>
+  </ExportFilename>
+  <ExportFilename>
+    <Folder relative="true" path="/export"/>
+    <Field name="label" enabled="false"/>
+    <Field name="session" enabled="false"/>
+    <Field name="revision" enabled="false"/>
+    <Field name="time" enabled="false" value="T_None"/>
+    <Field name="date" enabled="false" value="D_None"/>
+  </ExportFilename>
+</ExportPreset>

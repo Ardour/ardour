@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportPreset id="4edb978c-4ef2-4a8b-86f7-776c63f358e8" name="Ogg/Vorbis + FLAC">
+  <ExportFormat id="84a9d860-578b-4b4a-bb2c-3808435d114a"/>
+  <ExportFormat id="fd73f19e-c0fb-4e72-906d-a25625b752b2"/>
+  <ExportFilename>
+    <Folder relative="true" path="/export"/>
+    <Field name="label" enabled="false"/>
+    <Field name="session" enabled="false"/>
+    <Field name="revision" enabled="false"/>
+    <Field name="time" enabled="false" value="T_None"/>
+    <Field name="date" enabled="false" value="D_None"/>
+  </ExportFilename>
+  <ExportFilename>
+    <Folder relative="true" path="/export"/>
+    <Field name="label" enabled="false"/>
+    <Field name="session" enabled="false"/>
+    <Field name="revision" enabled="false"/>
+    <Field name="time" enabled="false" value="T_None"/>
+    <Field name="date" enabled="false" value="D_None"/>
+  </ExportFilename>
+</ExportPreset>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportPreset id="46a07add-07b8-449b-ba91-c7e705adb1c4" name="CD + Ogg/Vorbis + FLAC (tagged)">
+  <ExportFormat id="7bb867db-67b0-4aaf-9987-38c31e15052e"/>
+  <ExportFormat id="f6bc67b9-558d-4788-a7de-57ed763c6227"/>
+  <ExportFormat id="0627662f-f190-468d-9bb8-db0cca42eac5"/>
+  <ExportFilename>
+    <Folder relative="true" path="/export"/>
+    <Field name="label" enabled="false"/>
+    <Field name="session" enabled="false"/>
+    <Field name="revision" enabled="false"/>
+    <Field name="time" enabled="false" value="T_None"/>
+    <Field name="date" enabled="false" value="D_None"/>
+  </ExportFilename>
+  <ExportFilename>
+    <Folder relative="true" path="/export"/>
+    <Field name="label" enabled="false"/>
+    <Field name="session" enabled="false"/>
+    <Field name="revision" enabled="false"/>
+    <Field name="time" enabled="false" value="T_None"/>
+    <Field name="date" enabled="false" value="D_None"/>
+  </ExportFilename>
+  <ExportFilename>
+    <Folder relative="true" path="/export"/>
+    <Field name="label" enabled="false"/>
+    <Field name="session" enabled="false"/>
+    <Field name="revision" enabled="false"/>
+    <Field name="time" enabled="false" value="T_None"/>
+    <Field name="date" enabled="false" value="D_None"/>
+  </ExportFilename>
+</ExportPreset>

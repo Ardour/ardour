@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportFormatSpecification name="FLAC 24 bit " id="84a9d860-578b-4b4a-bb2c-3808435d114a">
+  <Encoding id="F_FLAC" type="T_Sndfile" extension="flac" name="FLAC" has-sample-format="true" channel-limit="8"/>
+  <SampleRate rate="1"/>
+  <SRCQuality quality="SRC_SincBest"/>
+  <EncodingOptions>
+    <Option name="sample-format" value="SF_24"/>
+    <Option name="dithering" value="D_None"/>
+    <Option name="tag-metadata" value="false"/>
+    <Option name="tag-support" value="true"/>
+    <Option name="broadcast-info" value="false"/>
+  </EncodingOptions>
+  <Processing>
+    <Normalize enabled="true" target="-0"/>
+    <Silence>
+      <Start>
+        <Trim enabled="false"/>
+        <Add enabled="false">
+          <Duration format="Timecode" hours="0" minutes="0" seconds="0" frames="0"/>
+        </Add>
+      </Start>
+      <End>
+        <Trim enabled="false"/>
+        <Add enabled="false">
+          <Duration format="Timecode" hours="0" minutes="0" seconds="0" frames="0"/>
+        </Add>
+      </End>
+    </Silence>
+  </Processing>
+</ExportFormatSpecification>

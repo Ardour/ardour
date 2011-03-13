@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportPreset id="6a94a44b-c7f5-4859-a8ee-cbf31019d697" name="DVD only">
+  <ExportFormat id="8019f5e8-4929-447d-8471-e0df80b41795"/>
+  <ExportFilename>
+    <Folder relative="true" path="/export"/>
+    <Field name="label" enabled="false"/>
+    <Field name="session" enabled="false"/>
+    <Field name="revision" enabled="false"/>
+    <Field name="time" enabled="false" value="T_None"/>
+    <Field name="date" enabled="false" value="D_None"/>
+  </ExportFilename>
+</ExportPreset>
