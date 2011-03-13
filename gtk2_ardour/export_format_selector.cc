@@ -50,6 +50,7 @@ ExportFormatSelector::ExportFormatSelector () :
 	/* Format combo */
 
 	format_list = Gtk::ListStore::create (format_cols);
+        format_list->set_sort_column (format_cols.label, Gtk::SORT_ASCENDING);
 	format_combo.set_model (format_list);
 	format_combo.pack_start (format_cols.label);
 	format_combo.set_active (0);

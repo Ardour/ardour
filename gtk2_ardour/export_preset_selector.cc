@@ -31,6 +31,7 @@ ExportPresetSelector::ExportPresetSelector () :
   new_button (Gtk::Stock::NEW)
 {
 	list = Gtk::ListStore::create (cols);
+        list->set_sort_column (cols.label, Gtk::SORT_ASCENDING);
 	entry.set_model (list);
 	entry.set_text_column (cols.label);
 
