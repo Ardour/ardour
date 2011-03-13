@@ -108,6 +108,8 @@ Ardour will play NO role in monitoring"))
 
 	bool need_audio_setup = !EngineControl::engine_running();
 
+        setup_alpha_page ();
+
 	if (new_user) {
 		/* "touch" the file */
 		ofstream fout (been_here_before.to_string().c_str());
@@ -141,6 +143,41 @@ Ardour will play NO role in monitoring"))
 
 ArdourStartup::~ArdourStartup ()
 {
+}
+
+void
+ArdourStartup::setup_alpha_page ()
+{
+        VBox* vbox = manage (new VBox);
+        Label* label = manage (new Label);
+        label->set_markup (_("<b>Welcome to this ALPHA release of Ardour 3.0</b>\n\n\
+There are still many issues and bugs to be worked on,\n\
+as well as general workflow improvements, before this can be considered\n\
+release software. So, a few guidelines:\n\
+\n\
+1) Please do <b>NOT</b> use this software with the expectation that it is stable or reliable\n\
+   though it may be so, depending on your workflow.\n\
+2) Please see http://ardour.org/a3_features for a guide to new features.\n\
+3) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n\
+4) Please <b>DO</b> use the bugtracker at http://tracker.ardour.org/ to report issues\n\
+   making sure to note the product version number as 3.0-alpha.\n\
+5) Please <b>DO</b> use the ardour-users mailing list to discuss ideas and pass on comments.\n\
+6) Please <b>DO</b> join us on IRC for real time discussions about ardour3. You\n\
+   can get there directly from Ardour via the Help->Chat menu option.\n\
+\n\
+Full information on all the above can be found on the support page at\n\
+\n\
+                http://ardour.org/support\n\
+"));
+
+        vbox->set_border_width (12);
+        vbox->pack_start (*label, false, false, 12);
+        vbox->show_all ();
+
+        append_page (*vbox);
+        set_page_type (*vbox, ASSISTANT_PAGE_CONTENT);
+        set_page_title (*vbox, _("This is an ALPHA RELEASE"));
+	set_page_complete (*vbox, true);
 }
 
 void
