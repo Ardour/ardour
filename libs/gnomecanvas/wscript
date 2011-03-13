@@ -54,6 +54,7 @@ def build(bld):
 	# Library
 	obj              = bld.new_task_gen('cc', 'shlib')
 	obj.source       = libgnomecanvas_sources
+	obj.export_incdirs = ['.']
         obj.includes     = ['.']
 	obj.name         = 'libgnomecanvas-2'
 	obj.target       = 'gnomecanvas-2'
