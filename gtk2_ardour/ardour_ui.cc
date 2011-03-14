@@ -1653,7 +1653,6 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		return;
 	}
 
-#if 0
 	if (_session->config.get_external_sync()) {
 		switch (_session->config.get_sync_source()) {
 		case JACK:
@@ -1663,7 +1662,6 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 			return;
 		}
 	}
-#endif
 
 	bool rolling = _session->transport_rolling();
 	bool affect_transport = true;
