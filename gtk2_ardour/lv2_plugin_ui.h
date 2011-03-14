@@ -80,6 +80,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 
 #ifdef HAVE_NEW_SLV2
 	static SLV2UIHost ui_host;
+	static SLV2Value  ui_GtkUI;
 #endif
 
 	static void lv2_ui_write(
