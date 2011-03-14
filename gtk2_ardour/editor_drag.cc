@@ -2465,10 +2465,6 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 	framepos_t next = newframe;
 
-	if (newframe == last_pointer_frame()) {
-		return;
-	}
-
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 		move_both = true;
 	}
