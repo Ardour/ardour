@@ -316,7 +316,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 
 	if (!from_autoscroll && !_move_threshold_passed) {
 
-		bool const xp = (::llabs (_drags->current_pointer_frame () - _grab_frame) >= threshold.first);
+		bool const xp = (::llabs (_drags->current_pointer_frame () - _raw_grab_frame) >= threshold.first);
 		bool const yp = (::fabs ((_drags->current_pointer_y () - _grab_y)) >= threshold.second);
 
 		_move_threshold_passed = ((xp && x_movement_matters()) || (yp && y_movement_matters()));
