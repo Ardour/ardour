@@ -118,6 +118,7 @@ CANVAS_VARIABLE(canvasvar_StereoPannerInvertedBackground, "stereo panner inverte
 CANVAS_VARIABLE(canvasvar_TempoBar, "tempo bar")
 CANVAS_VARIABLE(canvasvar_TempoMarker, "tempo marker")
 CANVAS_VARIABLE(canvasvar_TimeAxisFrame, "time axis frame")
+CANVAS_VARIABLE(canvasvar_SelectedTimeAxisFrame, "selected time axis frame")
 CANVAS_VARIABLE(canvasvar_TimeStretchFill, "time stretch fill")
 CANVAS_VARIABLE(canvasvar_TimeStretchOutline, "time stretch outline")
 CANVAS_VARIABLE(canvasvar_TransportDragRect, "transport drag rect")
