@@ -820,7 +820,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
   protected:
 	friend class Route;
 	void schedule_curve_reallocation ();
-	void update_latency_compensation (bool, bool, bool force=false);
+	void update_latency_compensation (bool force = false);
 
   private:
 	int  create (const std::string& mix_template, BusProfile*);
@@ -880,9 +880,13 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool                    _was_seamless;
 
 	void set_worst_io_latencies ();
+	void set_worst_playback_latency ();
+	void set_worst_capture_latency ();
 	void set_worst_io_latencies_x (IOChange, void *) {
 		set_worst_io_latencies ();
 	}
+        void post_capture_latency ();
+        void post_playback_latency ();
 
 	void update_latency_compensation_proxy (void* ignored);
 
@@ -1208,7 +1212,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	SerializedRCUManager<RouteList>  routes;
 
-	void add_routes (RouteList&, bool save);
+	void add_routes (RouteList&, bool auto_connect, bool save);
 	uint32_t destructive_index;
 
 	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&, int);
@@ -1218,14 +1222,24 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	bool find_route_name (std::string const &, uint32_t& id, char* name, size_t name_len, bool);
 	void count_existing_route_channels (ChanCount& in, ChanCount& out);
-	void auto_connect_route (
-		Route* route,
-		ChanCount& existing_inputs,
-		ChanCount& existing_outputs,
-		bool connect_inputs = true,
-		ChanCount input_start = ChanCount (),
-		ChanCount output_start = ChanCount ()
-		);
+	void auto_connect_route (Route*,
+                                 ChanCount& existing_inputs,
+                                 ChanCount& existing_outputs,
+                                 bool with_lock,
+                                 bool connect_inputs = true,
+                                 ChanCount input_start = ChanCount (),
+                                 ChanCount output_start = ChanCount ());
+
+	void auto_connect_route (boost::shared_ptr<Route> route,
+                                 ChanCount& existing_inputs,
+                                 ChanCount& existing_outputs,
+                                 bool with_lock,
+                                 bool connect_inputs = true,
+                                 ChanCount input_start = ChanCount (),
+                                 ChanCount output_start = ChanCount ()) {
+                auto_connect_route (route.get(), existing_inputs, existing_outputs, with_lock, connect_inputs, input_start, output_start);
+        }
+
 
 	/* mixer stuff */
 

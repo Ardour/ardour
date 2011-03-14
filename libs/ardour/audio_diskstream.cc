@@ -174,11 +174,11 @@ AudioDiskstream::non_realtime_input_change ()
 				remove_channel_from (c, _n_channels.n_audio() - _io->n_ports().n_audio());
 			}
 		}
-
+                
 		get_input_sources ();
 		set_capture_offset ();
                 set_align_style_from_io ();
-
+                
 		input_change_pending = IOChange::NoChange;
 
 		/* implicit unlock */
@@ -223,8 +223,11 @@ AudioDiskstream::get_input_sources ()
 
 		connections.clear ();
 
+                cerr << "Getting Nth connection from io " << n << " = " << _io->nth(n) << endl;
+
 		if (_io->nth (n)->get_connections (connections) == 0) {
 
+                        cerr << "\tThere were NO connections, apparently ...\n";
 			if ((*chan)->source) {
 				// _source->disable_metering ();
 			}
@@ -232,6 +235,7 @@ AudioDiskstream::get_input_sources ()
 			(*chan)->source = 0;
 
 		} else {
+                        cerr << "\tThere were some connections, apparently ... to " << connections[0] << endl;
 			(*chan)->source = dynamic_cast<AudioPort*>(_session.engine().get_port_by_name (connections[0]) );
 		}
 	}
@@ -2012,12 +2016,17 @@ AudioDiskstream::set_align_style_from_io ()
 
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
+        cerr << "Checking " << c->size() << " for physical connections\n";
+
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+                cerr << "Channel connected via " << (*chan)->source << endl;
 		if ((*chan)->source && (*chan)->source->flags() & JackPortIsPhysical) {
+                        cerr << "\tchannel has physical connection to " << (*chan)->source->name() << endl;
 			have_physical = true;
 			break;
 		}
 	}
+        cerr << "\tphysical? " << have_physical << endl;
 
 	if (have_physical) {
 		set_align_style (ExistingMaterial);

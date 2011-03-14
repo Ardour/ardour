@@ -326,31 +326,6 @@ Session::destroy ()
 }
 
 void
-Session::set_worst_io_latencies ()
-{
-        if (_state_of_the_state & InitialConnecting) {
-                return;
-        }
-
-	_worst_output_latency = 0;
-	_worst_input_latency = 0;
-
-	if (!_engine.connected()) {
-		return;
-	}
-
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		_worst_output_latency = max (_worst_output_latency, (*i)->output()->latency());
-		_worst_input_latency = max (_worst_input_latency, (*i)->input()->latency());
-	}
-        
-        DEBUG_TRACE (DEBUG::Latency, string_compose ("Worst output latency: %1 Worst input latency: %2\n",
-                                                     _worst_output_latency, _worst_input_latency));
-}
-
-void
 Session::when_engine_running ()
 {
 	string first_physical_output;
@@ -656,7 +631,7 @@ Session::when_engine_running ()
 	BootMessage (_("Connect to engine"));
 	_engine.set_session (this);
 
-        update_latency_compensation (false, false, true);
+        update_latency_compensation (true);
 }
 
 void
@@ -1431,7 +1406,9 @@ Session::count_existing_route_channels (ChanCount& in, ChanCount& out)
 {
 	in  = ChanCount::ZERO;
 	out = ChanCount::ZERO;
+
         boost::shared_ptr<RouteList> r = routes.reader ();
+
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->is_hidden()) {
 			in  += (*i)->n_inputs();
@@ -1448,14 +1425,10 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 {
 	char track_name[32];
 	uint32_t track_id = 0;
-	ChanCount existing_inputs;
-	ChanCount existing_outputs;
 	string port;
 	RouteList new_routes;
 	list<boost::shared_ptr<MidiTrack> > ret;
 	uint32_t control_id;
-
-	count_existing_route_channels (existing_inputs, existing_outputs);
 
 	control_id = ntracks() + nbusses();
 
@@ -1494,8 +1467,6 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 				}
 			}
 
-			auto_connect_route (track.get(), existing_inputs, existing_outputs);
-
 			track->non_realtime_input_change();
 
 			if (route_group) {
@@ -1525,23 +1496,31 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 
   failed:
 	if (!new_routes.empty()) {
-		add_routes (new_routes, false);
+		add_routes (new_routes, true, false);
 		save_state (_current_snapshot_name);
 	}
 
 	return ret;
 }
 
-/** Caller must hold process lock.
- *  @param connect_inputs true to connect inputs as well as outputs, false to connect just outputs.
+/** @param connect_inputs true to connect inputs as well as outputs, false to connect just outputs.
  *  @param input_start Where to start from when auto-connecting inputs; e.g. if this is 0, auto-connect starting from input 0.
  *  @param output_start As \a input_start, but for outputs.
  */
 void
-Session::auto_connect_route (
-	Route* route, ChanCount& existing_inputs, ChanCount& existing_outputs, bool connect_inputs, ChanCount input_start, ChanCount output_start
-	)
+Session::auto_connect_route (Route* route, ChanCount& existing_inputs, ChanCount& existing_outputs, 
+                             bool with_lock, bool connect_inputs, ChanCount input_start, ChanCount output_start)
 {
+        if (!IO::connecting_legal) {
+                return;
+        }
+
+        Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::NOT_LOCK);
+
+        if (with_lock) {
+                lm.acquire ();
+        }
+
 	/* If both inputs and outputs are auto-connected to physical ports,
 	   use the max of input and output offsets to ensure auto-connected
 	   port numbers always match up (e.g. the first audio input and the
@@ -1550,14 +1529,14 @@ Session::auto_connect_route (
 	   offset possible.
 	*/
 
+        cerr << "ACR: existing in = " << existing_inputs << " out = " << existing_outputs << endl;
+
 	const bool in_out_physical =
 		   (Config->get_input_auto_connect() & AutoConnectPhysical)
 		&& (Config->get_output_auto_connect() & AutoConnectPhysical)
 		&& connect_inputs;
 
-	const ChanCount in_offset = in_out_physical
-		? ChanCount::max(existing_inputs, existing_outputs)
-		: existing_inputs;
+	const ChanCount in_offset = existing_inputs;
 
 	const ChanCount out_offset = in_out_physical
 		? ChanCount::max(existing_inputs, existing_outputs)
@@ -1572,12 +1551,20 @@ Session::auto_connect_route (
 
 		if (!physinputs.empty() && connect_inputs) {
 			uint32_t nphysical_in = physinputs.size();
+
+                        cerr << "There are " << nphysical_in << " physical inputs of type " << *t << endl;
+
 			for (uint32_t i = input_start.get(*t); i < route->n_inputs().get(*t) && i < nphysical_in; ++i) {
 				string port;
 
 				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
+                                        cerr << "Get index " << in_offset.get(*t) << " + " << i << " % " << nphysical_in << " = " 
+                                             << (in_offset.get(*t) + i) % nphysical_in
+                                             << endl;
 					port = physinputs[(in_offset.get(*t) + i) % nphysical_in];
 				}
+
+                                cerr << "Connect route " << route->name() << " IN to " << port << endl;
 
 				if (!port.empty() && route->input()->connect (
 						route->input()->ports().port(*t, i), port, this)) {
@@ -1600,6 +1587,8 @@ Session::auto_connect_route (
 					}
 				}
 
+                                cerr << "Connect route " << route->name() << " OUT to " << port << endl;
+
 				if (!port.empty() && route->output()->connect (
 						route->output()->ports().port(*t, i), port, this)) {
 					break;
@@ -1607,9 +1596,6 @@ Session::auto_connect_route (
 			}
 		}
 	}
-
-	existing_inputs += route->n_inputs();
-	existing_outputs += route->n_outputs();
 }
 
 /** Caller must not hold process lock
@@ -1622,14 +1608,10 @@ Session::new_audio_track (
 {
 	char track_name[32];
 	uint32_t track_id = 0;
-	ChanCount existing_inputs;
-	ChanCount existing_outputs;
 	string port;
 	RouteList new_routes;
 	list<boost::shared_ptr<AudioTrack> > ret;
 	uint32_t control_id;
-
-	count_existing_route_channels (existing_inputs, existing_outputs);
 
 	control_id = ntracks() + nbusses() + 1;
 
@@ -1673,8 +1655,6 @@ Session::new_audio_track (
 					      << endmsg;
 					goto failed;
 				}
-
-				auto_connect_route (track.get(), existing_inputs, existing_outputs);
 			}
 
 			if (route_group) {
@@ -1707,7 +1687,7 @@ Session::new_audio_track (
 
   failed:
 	if (!new_routes.empty()) {
-		add_routes (new_routes, true);
+		add_routes (new_routes, true, true);
 	}
 
 	return ret;
@@ -1748,13 +1728,9 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 {
 	char bus_name[32];
 	uint32_t bus_id = 0;
-	ChanCount existing_inputs;
-	ChanCount existing_outputs;
 	string port;
 	RouteList ret;
 	uint32_t control_id;
-
-	count_existing_route_channels (existing_inputs, existing_outputs);
 
 	control_id = ntracks() + nbusses() + 1;
 
@@ -1792,8 +1768,6 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 					      << endmsg;
 					goto failure;
 				}
-
-				auto_connect_route (bus.get(), existing_inputs, existing_outputs, false);
 			}
 
 			if (route_group) {
@@ -1824,7 +1798,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 
   failure:
 	if (!ret.empty()) {
-		add_routes (ret, true);
+		add_routes (ret, true, true);
 	}
 
 	return ret;
@@ -1914,14 +1888,14 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 
   out:
 	if (!ret.empty()) {
-		add_routes (ret, true);
+		add_routes (ret, true, true);
 	}
 
 	return ret;
 }
 
 void
-Session::add_routes (RouteList& new_routes, bool save)
+Session::add_routes (RouteList& new_routes, bool auto_connect, bool save)
 {
 	{
 		RCUWriter<RouteList> writer (routes);
@@ -1972,7 +1946,17 @@ Session::add_routes (RouteList& new_routes, bool save)
 				mt->StepEditStatusChange.connect_same_thread (*this, boost::bind (&Session::step_edit_status_change, this, _1));
 			}
 		}
-	}
+        
+                if (auto_connect) {
+
+                        ChanCount existing_inputs;
+                        ChanCount existing_outputs;
+
+                        count_existing_route_channels (existing_inputs, existing_outputs);
+
+                        auto_connect_route (r, existing_inputs, existing_outputs, true);
+                }
+        }
 
 	if (_monitor_out && IO::connecting_legal) {
 
@@ -2141,7 +2125,7 @@ Session::remove_route (boost::shared_ptr<Route> route)
 		}
 	}
 
-	update_latency_compensation (false, false);
+	update_latency_compensation ();
 	set_dirty();
 
 	/* Re-sort routes to remove the graph's current references to the one that is
@@ -4156,6 +4140,10 @@ Session::update_latency (bool playback)
 {
         DEBUG_TRACE (DEBUG::Latency, string_compose ("JACK latency callback: %1\n", (playback ? "PLAYBACK" : "CAPTURE")));
 
+        if (_state_of_the_state & (InitialConnecting|Deletion)) {
+                return;
+        }
+
 	boost::shared_ptr<RouteList> r = routes.reader ();
         framecnt_t max_latency = 0;
 
@@ -4164,15 +4152,166 @@ Session::update_latency (bool playback)
                 reverse (r->begin(), r->end());
         }
 
+        /* compute actual latency values for the given direction and store them all in per-port
+           structures. this will also publish the same values (to JACK) so that computation of latency
+           for routes can consistently use public latency values.
+        */
+
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
                 max_latency = max (max_latency, (*i)->set_private_port_latencies (playback));
         }
 
-        DEBUG_TRACE (DEBUG::Latency, string_compose ("Set public port latencies to %1\n", max_latency));
+        if (playback) {
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-                (*i)->set_public_port_latencies (max_latency, playback);
+                post_playback_latency ();
+ 
+                /* because we latency compensate playback, our published playback latencies should
+                   be the same for all output ports - all material played back by ardour has
+                   the same latency, whether its caused by plugins or by latency compensation. since
+                   these may differ from the values computed above, reset all playback port latencies
+                   to the same value.
+                */
+
+               DEBUG_TRACE (DEBUG::Latency, string_compose ("Set public port latencies to %1\n", max_latency));
+
+                for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                        (*i)->set_public_port_latencies (max_latency, playback);
+                }
+                
+
+
+        } else {
+
+                post_capture_latency ();
         }
 
         DEBUG_TRACE (DEBUG::Latency, "JACK latency callback: DONE\n");
 }
+
+void
+Session::post_playback_latency ()
+{
+        set_worst_playback_latency ();
+
+        boost::shared_ptr<RouteList> r = routes.reader (); 
+        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                if (!(*i)->is_hidden() && ((*i)->active())) {
+                        _worst_track_latency = max (_worst_track_latency, (*i)->update_signal_latency ());
+                }
+                
+                for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                        (*i)->set_latency_compensation (_worst_track_latency);
+                }
+        }
+}
+
+void
+Session::post_capture_latency ()
+{
+        set_worst_capture_latency ();
+        
+        /* reflect any changes in capture latencies into capture offsets
+         */
+        
+        boost::shared_ptr<RouteList> rl = routes.reader();
+        for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+                boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+                if (tr) {
+                        tr->set_capture_offset ();
+                }
+        }
+}
+
+void
+Session::set_worst_io_latencies ()
+{
+        set_worst_playback_latency ();
+        set_worst_capture_latency ();
+}
+
+void
+Session::set_worst_playback_latency ()
+{
+        if (_state_of_the_state & (InitialConnecting|Deletion)) {
+                return;
+        }
+
+        _worst_output_latency = 0;
+
+	if (!_engine.connected()) {
+		return;
+	}
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                _worst_output_latency = max (_worst_output_latency, (*i)->output()->latency());
+	}
+
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("Worst output latency: %1\n", _worst_output_latency));
+}
+
+void
+Session::set_worst_capture_latency ()
+{
+        if (_state_of_the_state & (InitialConnecting|Deletion)) {
+                return;
+        }
+
+        _worst_input_latency = 0;
+
+	if (!_engine.connected()) {
+		return;
+	}
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                _worst_input_latency = max (_worst_input_latency, (*i)->input()->latency());
+	}
+
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("Worst input latency: %1\n", _worst_input_latency));
+}
+
+void
+Session::update_latency_compensation (bool force_whole_graph)
+{
+	bool update_jack = false;
+
+	if (_state_of_the_state & Deletion) {
+		return;
+	}
+
+	DEBUG_TRACE(DEBUG::Latency, "---------------------------- update latency compensation\n\n");
+
+        _worst_track_latency = 0;
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if (!(*i)->is_hidden() && ((*i)->active())) {
+                        framecnt_t tl;
+                        if ((*i)->signal_latency () != (tl = (*i)->update_signal_latency ())) {
+                                update_jack = true;
+                        }
+                        _worst_track_latency = max (tl, _worst_track_latency); 
+               }
+        }
+
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("worst signal processing latency: %1 (changed ? %2)\n", _worst_track_latency,
+                                                     (update_jack ? "yes" : "no")));
+
+	if (force_whole_graph || update_jack) {
+                /* trigger a full recompute of latency numbers for the graph.
+                   everything else that we need to do will be done in the latency
+                   callback.
+                 */
+		_engine.update_total_latencies ();
+                return; // everything else will be done in the latency callback
+	} 
+
+        
+
+	DEBUG_TRACE(DEBUG::Latency, "---------------------------- DONE update latency compensation\n\n")
+}
+

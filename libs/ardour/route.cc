@@ -920,7 +920,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 			processor->activate ();
 		}
 
-		processor->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false, false));
+		processor->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false));
 
 		_output->set_user_latency (0);
 	}
@@ -1057,7 +1057,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 				}
 			}
 
-			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false, false));
+			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false));
 		}
                 
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
@@ -2422,7 +2422,7 @@ Route::set_processor_state (const XMLNode& node)
 
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
-                        (*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false, false));
+                        (*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false));
 
 			boost::shared_ptr<PluginInsert> pi;
 
@@ -2752,7 +2752,9 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 		   and we are master (as an auto-connect in this situation would cause a
 		   feedback loop)
 		*/
+
 		AutoConnectOption ac = Config->get_output_auto_connect ();
+
 		if (ac == AutoConnectPhysical || (ac == AutoConnectMaster && !is_master ())) {
 
 			ChanCount start = change.before;
@@ -2769,8 +2771,8 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 					   already there
 					*/
 					start.set (*i, start.get (*i) + 1);
-					
-					_session.auto_connect_route (this, dummy, dummy, false, ChanCount(), change.before);
+                                        
+					_session.auto_connect_route (this, dummy, dummy, false, false, ChanCount(), change.before);
 				}
 			}
 		}
@@ -3076,7 +3078,7 @@ void
 Route::set_user_latency (framecnt_t nframes)
 {
 	_output->set_user_latency (nframes);
-	_session.update_latency_compensation (false, false);
+	_session.update_latency_compensation ();
 }
 
 void
