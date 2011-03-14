@@ -222,14 +222,14 @@ Session::realtime_stop (bool abort, bool clear_state)
 		   past that point to pick up delayed input (and/or to delick)
 		*/
 
-                if (worst_playback_latency() > current_block_size) {
-                        /* we rolled past the stop point to pick up data that had
-                           not yet arrived. move back to where the stop occured.
-                        */
-                        decrement_transport_position (current_block_size + (worst_playback_latency() - current_block_size));
-                } else {
-                        decrement_transport_position (current_block_size);
-                }
+		if (worst_playback_latency() > current_block_size) {
+			/* we rolled past the stop point to pick up data that had
+			   not yet arrived. move back to where the stop occured.
+			*/
+			decrement_transport_position (current_block_size + (worst_playback_latency() - current_block_size));
+		} else {
+			decrement_transport_position (current_block_size);
+		}
 
 		/* the duration change is not guaranteed to have happened, but is likely */
 
@@ -252,9 +252,9 @@ Session::realtime_stop (bool abort, bool clear_state)
 	_clear_event_type (SessionEvent::RangeStop);
 	_clear_event_type (SessionEvent::RangeLocate);
 
-        /* if we're going to clear loop state, then force disabling record BUT only if we're not doing latched rec-enable */
+	/* if we're going to clear loop state, then force disabling record BUT only if we're not doing latched rec-enable */
 	disable_record (true, (!Config->get_latched_record_enable() && clear_state));
-        
+
 	reset_slave_state ();
 
 	_transport_speed = 0;
@@ -284,26 +284,26 @@ Session::butler_transport_work ()
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler transport work, todo = %1\n", enum_2_string (ptw)));
 
-        if (ptw & PostTransportAdjustPlaybackBuffering) {
+	if (ptw & PostTransportAdjustPlaybackBuffering) {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
 				tr->adjust_playback_buffering ();
-                                /* and refill those buffers ... */
-                                tr->non_realtime_locate (_transport_frame);
+				/* and refill those buffers ... */
+				tr->non_realtime_locate (_transport_frame);
 			}
 		}
-                
-        }
 
-        if (ptw & PostTransportAdjustCaptureBuffering) {
+	}
+
+	if (ptw & PostTransportAdjustCaptureBuffering) {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
 				tr->adjust_capture_buffering ();
 			}
 		}
-        }
+	}
 
 	if (ptw & PostTransportCurveRealloc) {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -460,11 +460,11 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: DS stop\n"));
 
-        if (abort && did_record) {
-                /* no reason to save the session file when we remove sources
-                 */
-                _state_of_the_state = StateOfTheState (_state_of_the_state|InCleanup);
-        }
+	if (abort && did_record) {
+		/* no reason to save the session file when we remove sources
+		 */
+		_state_of_the_state = StateOfTheState (_state_of_the_state|InCleanup);
+	}
 
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
@@ -473,9 +473,9 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		}
 	}
 
-        if (abort && did_record) {
-                _state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);                
-        }
+	if (abort && did_record) {
+		_state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);                
+	}
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
@@ -490,8 +490,8 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	if (_engine.running()) {
-                PostTransportWork ptw = post_transport_work ();
-                for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		PostTransportWork ptw = post_transport_work ();
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->nonrealtime_handle_transport_stopped (abort, (ptw & PostTransportLocate), (!(ptw & PostTransportLocate) || pending_locate_flush));
 		}
 		update_latency_compensation ();
@@ -512,7 +512,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		if ((auto_return_enabled || synced_to_jack() || _requested_return_frame >= 0) &&
 		    !(ptw & PostTransportLocate)) {
 
-                        /* no explicit locate queued */
+			/* no explicit locate queued */
 
 			bool do_locate = false;
 
@@ -601,10 +601,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	send_full_time_code (_transport_frame);
 
-        if (!dynamic_cast<MTC_Slave*>(_slave)) {
-                MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
-                send_mmc_locate (_transport_frame);
-        }
+	if (!dynamic_cast<MTC_Slave*>(_slave)) {
+		MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
+		send_mmc_locate (_transport_frame);
+	}
 
 	if ((ptw & PostTransportLocate) && get_record_enabled()) {
 		/* capture start has been changed, so save pending state */
@@ -612,9 +612,9 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		saved = true;
 	}
 
-        /* always try to get rid of this */
+	/* always try to get rid of this */
 
-        remove_pending_capture_state ();
+	remove_pending_capture_state ();
 
 	/* save the current state of things if appropriate */
 
@@ -691,8 +691,9 @@ Session::set_play_loop (bool yn)
 	}
 	
 	if (yn && Config->get_seamless_loop() && synced_to_jack()) {
-		warning << string_compose (_("Seamless looping cannot be supported while %1 is using JACK transport.\n"
-                                             "Recommend changing the configured options"), PROGRAM_NAME)
+		warning << string_compose (
+			_("Seamless looping cannot be supported while %1 is using JACK transport.\n"
+			  "Recommend changing the configured options"), PROGRAM_NAME)
 			<< endmsg;
 		return;
 	}
@@ -876,12 +877,12 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 	if (with_roll) {
 		/* switch from input if we're going to roll */
 		if (Config->get_monitoring_model() == HardwareMonitoring) {
-                        set_track_monitor_input_status (!config.get_auto_input());
+			set_track_monitor_input_status (!config.get_auto_input());
 		}
 	} else {
 		/* otherwise we're going to stop, so do the opposite */
 		if (Config->get_monitoring_model() == HardwareMonitoring) {
-                        set_track_monitor_input_status (true);
+			set_track_monitor_input_status (true);
 		}
 	}
 
@@ -952,7 +953,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 		/* we are rolling and we want to stop */
 
 		if (Config->get_monitoring_model() == HardwareMonitoring) {
-                        set_track_monitor_input_status (true);
+			set_track_monitor_input_status (true);
 		}
 
 		if (synced_to_jack ()) {
@@ -975,7 +976,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 		/* we are stopped and we want to start rolling at speed 1 */
 
 		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
-                        set_track_monitor_input_status (false);
+			set_track_monitor_input_status (false);
 		}
 
 		if (synced_to_jack()) {
@@ -987,8 +988,9 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 	} else {
 
 		if ((synced_to_jack()) && speed != 0.0 && speed != 1.0) {
-			warning << string_compose (_("Global varispeed cannot be supported while %1 is connected to JACK transport control"),
-                                                   PROGRAM_NAME)
+			warning << string_compose (
+				_("Global varispeed cannot be supported while %1 is connected to JACK transport control"),
+				PROGRAM_NAME)
 				<< endmsg;
 			return;
 		}
@@ -1053,7 +1055,7 @@ Session::stop_transport (bool abort, bool clear_state)
 			if (tr) {
 				tr->prepare_to_stop (_transport_frame);
 			}
-                }
+		}
 
 		/* we need to capture the audio that has still not yet been received by the system
 		   at the time the stop is requested, so we have to roll past that time.
@@ -1064,8 +1066,8 @@ Session::stop_transport (bool abort, bool clear_state)
 		*/
 
 		SessionEvent *ev = new SessionEvent (SessionEvent::StopOnce, SessionEvent::Replace,
-                                                     _transport_frame + _worst_input_latency - current_block_size,
-                                                     0, 0, abort);
+		                                     _transport_frame + _worst_input_latency - current_block_size,
+		                                     0, 0, abort);
 
 		merge_event (ev);
 		transport_sub_state |= StopPendingCapture;
@@ -1076,16 +1078,16 @@ Session::stop_transport (bool abort, bool clear_state)
 
 	if ((transport_sub_state & PendingDeclickOut) == 0) {
 
-                if (!(transport_sub_state & StopPendingCapture)) {
+		if (!(transport_sub_state & StopPendingCapture)) {
 			boost::shared_ptr<RouteList> rl = routes.reader();
 			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 				if (tr) {
 					tr->prepare_to_stop (_transport_frame);
 				}
-                        }
-                }
-                
+			}
+		}
+
 		transport_sub_state |= PendingDeclickOut;
 		/* we'll be called again after the declick */
 		pending_abort = abort;
@@ -1136,14 +1138,14 @@ Session::start_transport ()
 		if (tr) {
 			tr->realtime_set_speed (tr->speed(), true);
 		}
-                (*i)->automation_snapshot (_transport_frame, true);
+		(*i)->automation_snapshot (_transport_frame, true);
 	}
 
-        Timecode::Time time;
-        timecode_time_subframes (_transport_frame, time);
-        if (!dynamic_cast<MTC_Slave*>(_slave)) {
-                MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
-        }
+	Timecode::Time time;
+	timecode_time_subframes (_transport_frame, time);
+	if (!dynamic_cast<MTC_Slave*>(_slave)) {
+		MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
+	}
 
 	TransportStateChange (); /* EMIT SIGNAL */
 }
@@ -1284,9 +1286,9 @@ Session::switch_to_sync_source (SyncSource src)
 			return;
 		}
 
-                if (config.get_video_pullup() != 0.0f) {
-                        return;
-                }
+		if (config.get_video_pullup() != 0.0f) {
+			return;
+		}
 
 		new_slave = new JACK_Slave (_engine.jack());
 		break;
@@ -1488,15 +1490,15 @@ Session::reset_jack_connection (jack_client_t* jack)
 bool
 Session::maybe_stop (framepos_t limit)
 {
-       if ((_transport_speed > 0.0f && _transport_frame >= limit) || (_transport_speed < 0.0f && _transport_frame == 0)) {
-               if (synced_to_jack () && config.get_jack_time_master ()) {
-                       _engine.transport_stop ();
-               } else if (!synced_to_jack ()) {
-                       stop_transport ();
-               }
-               return true;
-       }
-       return false;
+	if ((_transport_speed > 0.0f && _transport_frame >= limit) || (_transport_speed < 0.0f && _transport_frame == 0)) {
+		if (synced_to_jack () && config.get_jack_time_master ()) {
+			_engine.transport_stop ();
+		} else if (!synced_to_jack ()) {
+			stop_transport ();
+		}
+		return true;
+	}
+	return false;
 }
 
 void

@@ -40,9 +40,9 @@ using namespace ARDOUR;
 using namespace PBD;
 
 AudioEngine* Port::_engine = 0;
-bool Port::_connecting_blocked = false;
-pframes_t Port::_global_port_buffer_offset = 0;
-pframes_t Port::_cycle_nframes = 0;
+bool         Port::_connecting_blocked = false;
+pframes_t    Port::_global_port_buffer_offset = 0;
+pframes_t    Port::_cycle_nframes = 0;
 
 /** @param n Port short name */
 Port::Port (std::string const & n, DataType t, Flags f)
@@ -51,14 +51,14 @@ Port::Port (std::string const & n, DataType t, Flags f)
 	, _flags (f)
         , _last_monitor (false)
 {
-        _private_playback_latency.min = 0;
-        _private_playback_latency.max = 0;
-        _private_capture_latency.min = 0;
-        _private_capture_latency.max = 0;
+	_private_playback_latency.min = 0;
+	_private_playback_latency.max = 0;
+	_private_capture_latency.min = 0;
+	_private_capture_latency.max = 0;
 
-	/* Unfortunately we have to pass the DataType into this constructor so that we can
-	   create the right kind of JACK port; aside from this we'll use the virtual function type ()
-	   to establish type.
+	/* Unfortunately we have to pass the DataType into this constructor so that
+	   we can create the right kind of JACK port; aside from this we'll use the
+	   virtual function type () to establish type.
 	*/
 
 	assert (_name.find_first_of (':') == std::string::npos);
@@ -68,7 +68,7 @@ Port::Port (std::string const & n, DataType t, Flags f)
 	}
 
 	if ((_jack_port = jack_port_register (_engine->jack (), _name.c_str (), t.to_jack_type (), _flags, 0)) == 0) {
-                cerr << "Failed to register JACK port, reason is unknown from here\n";
+		cerr << "Failed to register JACK port, reason is unknown from here\n";
 		throw failed_constructor ();
 	}
 }
@@ -103,15 +103,16 @@ Port::disconnect_all ()
 bool
 Port::connected_to (std::string const & o) const
 {
-        if (!_engine->connected()) {
-                /* in some senses, this answer isn't the right one all the time, 
-                   because we know about our connections and will re-establish
-                   them when we reconnect to JACK.
-                */
-                return false;
-        }
+	if (!_engine->connected()) {
+		/* in some senses, this answer isn't the right one all the time, 
+		   because we know about our connections and will re-establish
+		   them when we reconnect to JACK.
+		*/
+		return false;
+	}
 
-	return jack_port_connected_to (_jack_port, _engine->make_port_name_non_relative(o).c_str ());
+	return jack_port_connected_to (_jack_port,
+	                               _engine->make_port_name_non_relative(o).c_str ());
 }
 
 /** @param o Filled in with port full names of ports that we are connected to */
@@ -120,17 +121,17 @@ Port::get_connections (std::vector<std::string> & c) const
 {
 	int n = 0;
 
-        if (_engine->connected()) {
-                const char** jc = jack_port_get_connections (_jack_port);
-                if (jc) {
-                        for (int i = 0; jc[i]; ++i) {
-                                c.push_back (jc[i]);
-                                ++n;
-                        }
+	if (_engine->connected()) {
+		const char** jc = jack_port_get_connections (_jack_port);
+		if (jc) {
+			for (int i = 0; jc[i]; ++i) {
+				c.push_back (jc[i]);
+				++n;
+			}
                         
-                        jack_free (jc);
-                }
-        }
+			jack_free (jc);
+		}
+	}
 
 	return n;
 }
@@ -178,7 +179,7 @@ Port::disconnect (std::string const & other)
 		_connections.erase (other);
 	}
 
-        return r;
+	return r;
 }
 
 
@@ -239,118 +240,134 @@ Port::increment_port_buffer_offset (pframes_t nframes)
 void
 Port::set_public_latency_range (jack_latency_range_t& range, bool playback) const
 {
-        /* this sets the visible latency that the rest of JACK sees. because we do latency
-           compensation, all (most) of our visible port latency values are identical.
-        */
+	/* this sets the visible latency that the rest of JACK sees. because we do latency
+	   compensation, all (most) of our visible port latency values are identical.
+	*/
 
-        if (!jack_port_set_latency_range) {
-                return;
-        }
+	if (!jack_port_set_latency_range) {
+		return;
+	}
         
-        DEBUG_TRACE (DEBUG::Latency, string_compose ("SET PORT %1 %4 PUBLIC latency now [%2 - %3]\n", name(), 
-                                                     range.min, 
-                                                     range.max,
-                                                     (playback ? "PLAYBACK" : "CAPTURE")));;
+	DEBUG_TRACE (DEBUG::Latency,
+	             string_compose ("SET PORT %1 %4 PUBLIC latency now [%2 - %3]\n",
+	                             name(), range.min, range.max,
+	                             (playback ? "PLAYBACK" : "CAPTURE")));;
 
-        jack_port_set_latency_range (_jack_port, (playback ? JackPlaybackLatency : JackCaptureLatency), &range);
+	jack_port_set_latency_range (_jack_port,
+	                             (playback ? JackPlaybackLatency : JackCaptureLatency),
+	                             &range);
 }
 
 void
 Port::set_private_latency_range (jack_latency_range_t& range, bool playback)
 {
-        if (playback) {
-                _private_playback_latency = range;
-                DEBUG_TRACE (DEBUG::Latency, string_compose ("SET PORT %1 playback PRIVATE latency now [%2 - %3]\n", name(), 
-                                                             _private_playback_latency.min, 
-                                                             _private_playback_latency.max));
-        } else {
-                _private_capture_latency = range;
-                DEBUG_TRACE (DEBUG::Latency, string_compose ("SET PORT %1 capture PRIVATE latency now [%2 - %3]\n", name(), 
-                                                             _private_capture_latency.min, 
-                                                             _private_capture_latency.max));
-        }
+	if (playback) {
+		_private_playback_latency = range;
+		DEBUG_TRACE (DEBUG::Latency, string_compose (
+			             "SET PORT %1 playback PRIVATE latency now [%2 - %3]\n",
+			             name(),
+			             _private_playback_latency.min, 
+			             _private_playback_latency.max));
+	} else {
+		_private_capture_latency = range;
+		DEBUG_TRACE (DEBUG::Latency, string_compose (
+			             "SET PORT %1 capture PRIVATE latency now [%2 - %3]\n",
+			             name(), 
+			             _private_capture_latency.min, 
+			             _private_capture_latency.max));
+	}
 
-        /* push to public (JACK) location so that everyone else can see it */
+	/* push to public (JACK) location so that everyone else can see it */
 
-        set_public_latency_range (range, playback);
+	set_public_latency_range (range, playback);
 }
 
 const jack_latency_range_t&
 Port::private_latency_range (bool playback) const
 {
-        if (playback) {
-                DEBUG_TRACE (DEBUG::Latency, string_compose ("GET PORT %1 playback PRIVATE latency now [%2 - %3]\n", name(), 
-                                                             _private_playback_latency.min, 
-                                                             _private_playback_latency.max)); 
-               return _private_playback_latency;
-        } else {
-                 DEBUG_TRACE (DEBUG::Latency, string_compose ("GET PORT %1 capture PRIVATE latency now [%2 - %3]\n", name(), 
-                                                             _private_playback_latency.min, 
-                                                             _private_playback_latency.max));
-                return _private_capture_latency;
-        }
+	if (playback) {
+		DEBUG_TRACE (DEBUG::Latency, string_compose (
+			             "GET PORT %1 playback PRIVATE latency now [%2 - %3]\n",
+			             name(), 
+			             _private_playback_latency.min, 
+			             _private_playback_latency.max)); 
+		return _private_playback_latency;
+	} else {
+		DEBUG_TRACE (DEBUG::Latency, string_compose (
+			             "GET PORT %1 capture PRIVATE latency now [%2 - %3]\n",
+			             name(), 
+			             _private_playback_latency.min, 
+			             _private_playback_latency.max));
+		return _private_capture_latency;
+	}
 }
 
 jack_latency_range_t
 Port::public_latency_range (bool playback) const
 {
-        jack_latency_range_t r;
+	jack_latency_range_t r;
 
-        jack_port_get_latency_range (_jack_port, 
-                                     sends_output() ? JackPlaybackLatency : JackCaptureLatency,
-                                     &r);
-        DEBUG_TRACE (DEBUG::Latency, string_compose ("GET PORT %1: %4 PUBLIC latency range %2 .. %3\n", 
-                                                     name(), r.min, r.max,
-                                                     sends_output() ? "PLAYBACK" : "CAPTURE"));
-        return r;
+	jack_port_get_latency_range (_jack_port, 
+	                             sends_output() ? JackPlaybackLatency : JackCaptureLatency,
+	                             &r);
+	DEBUG_TRACE (DEBUG::Latency, string_compose (
+		             "GET PORT %1: %4 PUBLIC latency range %2 .. %3\n", 
+		             name(), r.min, r.max,
+		             sends_output() ? "PLAYBACK" : "CAPTURE"));
+	return r;
 }
 
 void
 Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) const
 {
-        if (!jack_port_get_latency_range) {
-                return;
-        }
+	if (!jack_port_get_latency_range) {
+		return;
+	}
 
-        vector<string> connections;
-        jack_client_t* jack = _engine->jack();
+	vector<string> connections;
+	jack_client_t* jack = _engine->jack();
         
-        if (!jack) {
-                range.min = 0;
-                range.max = 0;
-                PBD::warning << _("get_connected_latency_range() called while disconnected from JACK") << endmsg;
-                return;
-        }
+	if (!jack) {
+		range.min = 0;
+		range.max = 0;
+		PBD::warning << _("get_connected_latency_range() called while disconnected from JACK") << endmsg;
+		return;
+	}
 
-        get_connections (connections);
+	get_connections (connections);
 
-        if (!connections.empty()) {
+	if (!connections.empty()) {
                 
-                range.min = ~((jack_nframes_t) 0);
-                range.max = 0;
+		range.min = ~((jack_nframes_t) 0);
+		range.max = 0;
 
-                for (vector<string>::iterator c = connections.begin(); c != connections.end(); ++c) {
+		for (vector<string>::const_iterator c = connections.begin();
+		     c != connections.end(); ++c) {
 
-                        cerr << "Connection between " << name() << " and " << *c << endl;
+			cerr << "Connection between " << name() << " and " << *c << endl;
 
-                        jack_port_t* remote_port = jack_port_by_name (_engine->jack(), (*c).c_str());
-                        jack_latency_range_t lr;
+			jack_port_t* remote_port = jack_port_by_name (_engine->jack(), (*c).c_str());
+			jack_latency_range_t lr;
 
-                        if (remote_port) {
-                                jack_port_get_latency_range (remote_port, (playback ? JackPlaybackLatency : JackCaptureLatency), &lr);
-                                DEBUG_TRACE (DEBUG::Latency, string_compose ("\t%1 <-> %2 : latter has latency range %3 .. %4\n", name(), *c, lr.min, lr.max));
-                                range.min = min (range.min, lr.min);
-                                range.max = max (range.max, lr.max);
-                        } else {
-                                cerr << "\t NO PORT BY NAME!\n";
-                        }
-                }
+			if (remote_port) {
+				jack_port_get_latency_range (
+					remote_port,
+					(playback ? JackPlaybackLatency : JackCaptureLatency),
+					&lr);
+				DEBUG_TRACE (DEBUG::Latency, string_compose (
+					             "\t%1 <-> %2 : latter has latency range %3 .. %4\n",
+					             name(), *c, lr.min, lr.max));
+				range.min = min (range.min, lr.min);
+				range.max = max (range.max, lr.max);
+			} else {
+				cerr << "\t NO PORT BY NAME!\n";
+			}
+		}
 
-        } else {
-
-                range.min = 0;
-                range.max = 0;
-        }
+	} else {
+		range.min = 0;
+		range.max = 0;
+	}
 }
 
 int
@@ -420,17 +437,17 @@ Port::physically_connected () const
 	if (jc) {
 		for (int i = 0; jc[i]; ++i) {
 
-                        jack_port_t* port = jack_port_by_name (_engine->jack(), jc[i]);
+			jack_port_t* port = jack_port_by_name (_engine->jack(), jc[i]);
                         
-                        if (port && (jack_port_flags (port) & JackPortIsPhysical)) {
-                                jack_free (jc);
-                                return true;
-                        }
+			if (port && (jack_port_flags (port) & JackPortIsPhysical)) {
+				jack_free (jc);
+				return true;
+			}
 		}
                 
 		jack_free (jc);
 	}
 
-        return false;
+	return false;
 }
 

@@ -83,27 +83,27 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	: SessionObject (sess, name)
 	, Automatable (sess)
 	, GraphNode( sess.route_graph )
-        , _active (true)
-        , _signal_latency (0)
-        , _initial_delay (0)
-        , _roll_delay (0)
+	, _active (true)
+	, _signal_latency (0)
+	, _initial_delay (0)
+	, _roll_delay (0)
 	, _flags (flg)
-        , _pending_declick (true)
-        , _meter_point (MeterPostFader)
-        , _self_solo (false)
-        , _soloed_by_others_upstream (0)
-        , _soloed_by_others_downstream (0)
-        , _solo_isolated (0)
-        , _denormal_protection (false)
-        , _recordable (true)
-        , _silent (false)
-        , _declickable (false)
+	, _pending_declick (true)
+	, _meter_point (MeterPostFader)
+	, _self_solo (false)
+	, _soloed_by_others_upstream (0)
+	, _soloed_by_others_downstream (0)
+	, _solo_isolated (0)
+	, _denormal_protection (false)
+	, _recordable (true)
+	, _silent (false)
+	, _declickable (false)
 	, _mute_master (new MuteMaster (sess, name))
-        , _have_internal_generator (false)
-        , _solo_safe (false)
+	, _have_internal_generator (false)
+	, _solo_safe (false)
 	, _default_type (default_type)
-        , _remote_control_id (0)
-        , _in_configure_processors (false)
+	, _remote_control_id (0)
+	, _in_configure_processors (false)
 {
 	processor_max_streams.reset();
 	order_keys[N_("signal")] = order_key_cnt++;
@@ -112,7 +112,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 int
 Route::init ()
 {
-        /* add standard controls */
+	/* add standard controls */
 
 	_solo_control.reset (new SoloControllable (X_("solo"), shared_from_this ()));
 	_mute_control.reset (new MuteControllable (X_("mute"), shared_from_this ()));
@@ -123,13 +123,13 @@ Route::init ()
 	add_control (_solo_control);
 	add_control (_mute_control);
 
-        /* panning */
-        
+	/* panning */
+
         Pannable* p = new Pannable (_session);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 	boost_debug_shared_ptr_mark_interesting (p, "Pannable");
 #endif
-        _pannable.reset (p);
+	_pannable.reset (p);
 
 	/* input and output objects */
 
@@ -162,16 +162,16 @@ Route::init ()
 		_intreturn.reset (new InternalReturn (_session));
 		_intreturn->activate ();
 
-                /* the thing that provides proper control over a control/monitor/listen bus 
-                   (such as per-channel cut, dim, solo, invert, etc).
-                 */
-                _monitor_control.reset (new MonitorProcessor (_session));
+		/* the thing that provides proper control over a control/monitor/listen bus 
+		   (such as per-channel cut, dim, solo, invert, etc).
+		*/
+		_monitor_control.reset (new MonitorProcessor (_session));
 		_monitor_control->activate ();
 	}
 
-        if (is_master() || is_monitor() || is_hidden()) {
-                _mute_master->set_solo_ignore (true);
-        }
+	if (is_master() || is_monitor() || is_hidden()) {
+		_mute_master->set_solo_ignore (true);
+	}
 
 	/* now that we have _meter, its safe to connect to this */
 
@@ -183,7 +183,7 @@ Route::init ()
 		configure_processors (0);
 	}
 
-        return 0;
+	return 0;
 }
 
 Route::~Route ()
@@ -383,9 +383,9 @@ Route::set_gain (gain_t val, void *src)
 void
 Route::maybe_declick (BufferSet&, framecnt_t, int)
 {
-        /* this is the "bus" implementation and they never declick.
-         */
-        return;
+	/* this is the "bus" implementation and they never declick.
+	 */
+	return;
 }
 
 /** Process this route for one (sub) cycle (process thread)
@@ -409,12 +409,12 @@ Route::process_output_buffers (BufferSet& bufs,
 	bufs.is_silent (false);
 
 	/* figure out if we're going to use gain automation */
-        if (gain_automation_ok) {
-                _amp->setup_gain_automation (start_frame, end_frame, nframes);
-        } else {
-                _amp->apply_gain_automation (false);
-        }
-        
+	if (gain_automation_ok) {
+		_amp->setup_gain_automation (start_frame, end_frame, nframes);
+	} else {
+		_amp->apply_gain_automation (false);
+	}
+
 	/* tell main outs what to do about monitoring */
 	_main_outs->no_outs_cuz_we_no_monitor (!monitor);
 
@@ -423,7 +423,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	   GLOBAL DECLICK (for transport changes etc.)
 	   ----------------------------------------------------------------------------------------- */
 
-        maybe_declick (bufs, nframes, declick);
+	maybe_declick (bufs, nframes, declick);
 	_pending_declick = 0;
 
 	/* -------------------------------------------------------------------------------------------
@@ -489,21 +489,21 @@ Route::process_output_buffers (BufferSet& bufs,
 		}
 
 #ifndef NDEBUG
-                /* if it has any inputs, make sure they match */
-                if ((*i)->input_streams() != ChanCount::ZERO) {
-                        if (bufs.count() != (*i)->input_streams()) {
-                                cerr << _name << " bufs = " << bufs.count()
-                                     << " input for " << (*i)->name() << " = " << (*i)->input_streams()
-                                     << endl;
-                                abort ();
-                        }
-                }
+		/* if it has any inputs, make sure they match */
+		if ((*i)->input_streams() != ChanCount::ZERO) {
+			if (bufs.count() != (*i)->input_streams()) {
+				cerr << _name << " bufs = " << bufs.count()
+				     << " input for " << (*i)->name() << " = " << (*i)->input_streams()
+				     << endl;
+				abort ();
+			}
+		}
 #endif                
-                /* should we NOT run plugins here if the route is inactive?
-                   do we catch route != active somewhere higher?
-                */
+		/* should we NOT run plugins here if the route is inactive?
+		   do we catch route != active somewhere higher?
+		*/
 
-                (*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
+		(*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
 		bufs.set_count ((*i)->output_streams());
 	}
 }
@@ -566,18 +566,18 @@ Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, pframes_t
 void
 Route::set_listen (bool yn, void* src)
 {
-        if (_solo_safe) {
-                return;
-        }
+	if (_solo_safe) {
+		return;
+	}
 
 	if (_monitor_send) {
 		if (yn != _monitor_send->active()) {
 			if (yn) {
 				_monitor_send->activate ();
-                                _mute_master->set_soloed (true);
-                        } else {
+				_mute_master->set_soloed (true);
+			} else {
 				_monitor_send->deactivate ();
-                                _mute_master->set_soloed (false);
+				_mute_master->set_soloed (false);
 			}
 
 			listen_changed (src); /* EMIT SIGNAL */
@@ -624,7 +624,7 @@ Route::set_solo (bool yn, void *src)
 
 	if (self_soloed() != yn) {
 		set_self_solo (yn);
-                set_mute_master_solo ();
+		set_mute_master_solo ();
 		solo_changed (true, src); /* EMIT SIGNAL */
 		_solo_control->Changed (); /* EMIT SIGNAL */
 	}
@@ -633,17 +633,17 @@ Route::set_solo (bool yn, void *src)
 void
 Route::set_self_solo (bool yn)
 {
-        _self_solo = yn;
+	_self_solo = yn;
 }
 
 void
 Route::mod_solo_by_others_upstream (int32_t delta)
 {
-        if (_solo_safe) {
-                return;
-        }
+	if (_solo_safe) {
+		return;
+	}
 
-        uint32_t old_sbu = _soloed_by_others_upstream;
+	uint32_t old_sbu = _soloed_by_others_upstream;
 
 	if (delta < 0) {
 		if (_soloed_by_others_upstream >= (uint32_t) abs (delta)) {
@@ -655,50 +655,51 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 		_soloed_by_others_upstream += delta;
 	}
 
-        DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 SbU delta %2 = %3 old = %4 sbd %5 ss %6 exclusive %7\n",
-                                                  name(), delta, _soloed_by_others_upstream, old_sbu, 
-                                                  _soloed_by_others_downstream, _self_solo, Config->get_exclusive_solo()));
+	DEBUG_TRACE (DEBUG::Solo, string_compose (
+		             "%1 SbU delta %2 = %3 old = %4 sbd %5 ss %6 exclusive %7\n",
+		             name(), delta, _soloed_by_others_upstream, old_sbu, 
+		             _soloed_by_others_downstream, _self_solo, Config->get_exclusive_solo()));
 
-        /* push the inverse solo change to everything that feeds us. 
-           
-           This is important for solo-within-group. When we solo 1 track out of N that
-           feed a bus, that track will cause mod_solo_by_upstream (+1) to be called
-           on the bus. The bus then needs to call mod_solo_by_downstream (-1) on all
-           tracks that feed it. This will silence them if they were audible because
-           of a bus solo, but the newly soloed track will still be audible (because 
-           it is self-soloed).
-           
-           but .. do this only when we are being told to solo-by-upstream (i.e delta = +1),
-           not in reverse.
-         */
+	/* push the inverse solo change to everything that feeds us. 
 
-        if ((_self_solo || _soloed_by_others_downstream) &&
-            ((old_sbu == 0 && _soloed_by_others_upstream > 0) || 
-             (old_sbu > 0 && _soloed_by_others_upstream == 0))) {
-                
-                if (delta > 0 || !Config->get_exclusive_solo()) {
-                        DEBUG_TRACE (DEBUG::Solo, "\t ... INVERT push\n");
-                        for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
-                                boost::shared_ptr<Route> sr = i->r.lock();
-                                if (sr) {
-                                        sr->mod_solo_by_others_downstream (-delta);
-                                }
-                        }
-                } 
-        }
+	   This is important for solo-within-group. When we solo 1 track out of N that
+	   feed a bus, that track will cause mod_solo_by_upstream (+1) to be called
+	   on the bus. The bus then needs to call mod_solo_by_downstream (-1) on all
+	   tracks that feed it. This will silence them if they were audible because
+	   of a bus solo, but the newly soloed track will still be audible (because 
+	   it is self-soloed).
 
-        set_mute_master_solo ();
-        solo_changed (false, this);
+	   but .. do this only when we are being told to solo-by-upstream (i.e delta = +1),
+	   not in reverse.
+	*/
+
+	if ((_self_solo || _soloed_by_others_downstream) &&
+	    ((old_sbu == 0 && _soloed_by_others_upstream > 0) || 
+	     (old_sbu > 0 && _soloed_by_others_upstream == 0))) {
+
+		if (delta > 0 || !Config->get_exclusive_solo()) {
+			DEBUG_TRACE (DEBUG::Solo, "\t ... INVERT push\n");
+			for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
+				boost::shared_ptr<Route> sr = i->r.lock();
+				if (sr) {
+					sr->mod_solo_by_others_downstream (-delta);
+				}
+			}
+		} 
+	}
+
+	set_mute_master_solo ();
+	solo_changed (false, this);
 }
 
 void
 Route::mod_solo_by_others_downstream (int32_t delta)
 {
-        if (_solo_safe) {
-                return;
-        }
+	if (_solo_safe) {
+		return;
+	}
 
-        if (delta < 0) {
+	if (delta < 0) {
 		if (_soloed_by_others_downstream >= (uint32_t) abs (delta)) {
 			_soloed_by_others_downstream += delta;
 		} else {
@@ -708,16 +709,16 @@ Route::mod_solo_by_others_downstream (int32_t delta)
 		_soloed_by_others_downstream += delta;
 	}
 
-        DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 SbD delta %2 = %3\n", name(), delta, _soloed_by_others_downstream));
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 SbD delta %2 = %3\n", name(), delta, _soloed_by_others_downstream));
 
-        set_mute_master_solo ();
-        solo_changed (false, this);
+	set_mute_master_solo ();
+	solo_changed (false, this);
 }
 
 void
 Route::set_mute_master_solo ()
 {
-        _mute_master->set_soloed (self_soloed() || soloed_by_others_downstream() || soloed_by_others_upstream());
+	_mute_master->set_soloed (self_soloed() || soloed_by_others_downstream() || soloed_by_others_upstream());
 }
 
 void
@@ -738,8 +739,8 @@ Route::set_solo_isolated (bool yn, void *src)
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 
 		if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {
-                        continue;
-                }
+			continue;
+		}
 
 		bool sends_only;
 		bool does_feed = direct_feeds (*i, &sends_only); // we will recurse anyway, so don't use ::feeds()
@@ -749,29 +750,29 @@ Route::set_solo_isolated (bool yn, void *src)
 		}
 	}
 
-        /* XXX should we back-propagate as well? (April 2010: myself and chris goddard think not) */
+	/* XXX should we back-propagate as well? (April 2010: myself and chris goddard think not) */
 
-        bool changed = false;
+	bool changed = false;
 
 	if (yn) {
-                if (_solo_isolated == 0) {
-                        _mute_master->set_solo_ignore (true);
-                        changed = true;
-                }
+		if (_solo_isolated == 0) {
+			_mute_master->set_solo_ignore (true);
+			changed = true;
+		}
 		_solo_isolated++;
 	} else {
 		if (_solo_isolated > 0) {
 			_solo_isolated--;
-                        if (_solo_isolated == 0) {
-                                _mute_master->set_solo_ignore (false);
-                                changed = true;
-                        }
+			if (_solo_isolated == 0) {
+				_mute_master->set_solo_ignore (false);
+				changed = true;
+			}
 		}
 	}
 
-        if (changed) {
-                solo_isolated_changed (src);
-        }
+	if (changed) {
+		solo_isolated_changed (src);
+	}
 }
 
 bool
@@ -783,13 +784,13 @@ Route::solo_isolated () const
 void
 Route::set_mute_points (MuteMaster::MutePoint mp)
 {
-        _mute_master->set_mute_points (mp);
-        mute_points_changed (); /* EMIT SIGNAL */
-        
-        if (_mute_master->muted_by_self()) {
-                mute_changed (this); /* EMIT SIGNAL */
+	_mute_master->set_mute_points (mp);
+	mute_points_changed (); /* EMIT SIGNAL */
+
+	if (_mute_master->muted_by_self()) {
+		mute_changed (this); /* EMIT SIGNAL */
 		_mute_control->Changed (); /* EMIT SIGNAL */
-        }
+	}
 }
 
 void
@@ -801,7 +802,7 @@ Route::set_mute (bool yn, void *src)
 	}
 
 	if (muted() != yn) {
-                _mute_master->set_muted_by_self (yn);
+		_mute_master->set_muted_by_self (yn);
 		mute_changed (src); /* EMIT SIGNAL */
 		_mute_control->Changed (); /* EMIT SIGNAL */
 	}
@@ -810,7 +811,7 @@ Route::set_mute (bool yn, void *src)
 bool
 Route::muted () const
 {
-        return _mute_master->muted_by_self();
+	return _mute_master->muted_by_self();
 }
 
 #if 0
@@ -856,7 +857,8 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 	assert (processor != _meter);
 	assert (processor != _main_outs);
 
-        DEBUG_TRACE (DEBUG::Processors, string_compose ("%1 adding processor %2\n", name(), processor->name()));
+	DEBUG_TRACE (DEBUG::Processors, string_compose (
+		             "%1 adding processor %2\n", name(), processor->name()));
 	
 	ChanCount old_pms = processor_max_streams;
 
@@ -986,9 +988,9 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 			return false;
 		}
 
-                if (processor->set_state (node, version)) {
-                        return false;
-                }
+		if (processor->set_state (node, version)) {
+			return false;
+		}
 
 		return (add_processor (processor, placement) == 0);
 	}
@@ -1059,7 +1061,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 
 			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false));
 		}
-                
+
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			boost::shared_ptr<PluginInsert> pi;
 
@@ -1494,7 +1496,7 @@ Route::configure_processors (ProcessorStreams* err)
 ChanCount
 Route::input_streams () const
 {
-        return _input->n_ports ();
+	return _input->n_ports ();
 }
 
 list<pair<ChanCount, ChanCount> >
@@ -1738,7 +1740,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 					}
 				}
 
-                                /* now remove from old order - its taken care of no matter what */
+				/* now remove from old order - its taken care of no matter what */
 				oiter = _processors.erase (oiter);
 			}
 
@@ -1843,7 +1845,7 @@ Route::state(bool full_state)
 		cmt->add_content (_comment);
 	}
 
-        node->add_child_nocopy (_pannable->state (full_state));
+	node->add_child_nocopy (_pannable->state (full_state));
 
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
 		node->add_child_nocopy((*i)->state (full_state));
@@ -1893,9 +1895,9 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 		_flags = Flag (0);
 	}
 
-        if (is_master() || is_monitor() || is_hidden()) {
-                _mute_master->set_solo_ignore (true);
-        }
+	if (is_master() || is_monitor() || is_hidden()) {
+		_mute_master->set_solo_ignore (true);
+	}
 
 	/* add all processors (except amp, which is always present) */
 
@@ -1923,9 +1925,9 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 		}
 
 
-                if (child->name() == X_("Pannable")) {
-                        _pannable->set_state (*child, version);
-                }
+		if (child->name() == X_("Pannable")) {
+			_pannable->set_state (*child, version);
+		}
 	}
 
 	set_processor_state (processor_state);
@@ -1968,7 +1970,7 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 
 	if ((prop = node.property (X_("meter-point"))) != 0) {
 		MeterPoint mp = MeterPoint (string_2_enum (prop->value (), _meter_point));
-                set_meter_point (mp, true);
+		set_meter_point (mp, true);
 		if (_meter) {
 			_meter->set_display_to_user (_meter_point == MeterCustom);
 		}
@@ -2274,8 +2276,8 @@ Route::_set_state_2X (const XMLNode& node, int version)
 				_solo_control->set_state (*child, version);
 			} else if (prop->value() == X_("mute")) {
 				_mute_control->set_state (*child, version);
-                        }
-                                
+			}
+
 		} else if (child->name() == X_("RemoteControl")) {
 			if ((prop = child->property (X_("id"))) != 0) {
 				int32_t x;
@@ -2319,74 +2321,74 @@ Route::set_processor_state (const XMLNode& node)
 {
 	const XMLNodeList &nlist = node.children();
 	XMLNodeConstIterator niter;
-        ProcessorList new_order;
-        bool must_configure = false;
+	ProcessorList new_order;
+	bool must_configure = false;
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		XMLProperty* prop = (*niter)->property ("type");
 
 		if (prop->value() == "amp") {
-                        _amp->set_state (**niter, Stateful::current_state_version);
-                        new_order.push_back (_amp);
-                } else if (prop->value() == "meter") {
-                        _meter->set_state (**niter, Stateful::current_state_version);
-                } else if (prop->value() == "main-outs") {
-                        _main_outs->set_state (**niter, Stateful::current_state_version);
-                } else if (prop->value() == "intreturn") {
-                        if (!_intreturn) {
-                                _intreturn.reset (new InternalReturn (_session));
-                                must_configure = true;
-                        }
-                        _intreturn->set_state (**niter, Stateful::current_state_version);
-                } else if (is_monitor() && prop->value() == "monitor") {
-                        if (!_monitor_control) {
-                                _monitor_control.reset (new MonitorProcessor (_session));
-                                must_configure = true;
-                        }
-                        _monitor_control->set_state (**niter, Stateful::current_state_version);
+			_amp->set_state (**niter, Stateful::current_state_version);
+			new_order.push_back (_amp);
+		} else if (prop->value() == "meter") {
+			_meter->set_state (**niter, Stateful::current_state_version);
+		} else if (prop->value() == "main-outs") {
+			_main_outs->set_state (**niter, Stateful::current_state_version);
+		} else if (prop->value() == "intreturn") {
+			if (!_intreturn) {
+				_intreturn.reset (new InternalReturn (_session));
+				must_configure = true;
+			}
+			_intreturn->set_state (**niter, Stateful::current_state_version);
+		} else if (is_monitor() && prop->value() == "monitor") {
+			if (!_monitor_control) {
+				_monitor_control.reset (new MonitorProcessor (_session));
+				must_configure = true;
+			}
+			_monitor_control->set_state (**niter, Stateful::current_state_version);
 		} else if (prop->value() == "capture") {
 			_capturing_processor.reset (new CapturingProcessor (_session));
-                } else {
-                        ProcessorList::iterator o;
+		} else {
+			ProcessorList::iterator o;
 
 			for (o = _processors.begin(); o != _processors.end(); ++o) {
 				XMLProperty* id_prop = (*niter)->property(X_("id"));
 				if (id_prop && (*o)->id() == id_prop->value()) {
-                                        (*o)->set_state (**niter, Stateful::current_state_version);
-                                        new_order.push_back (*o);
+					(*o)->set_state (**niter, Stateful::current_state_version);
+					new_order.push_back (*o);
 					break;
 				}
 			}
 
-                        // If the processor (*niter) is not on the route then create it 
-                        
-                        if (o == _processors.end()) {
-                                
-                                boost::shared_ptr<Processor> processor;
+			// If the processor (*niter) is not on the route then create it 
 
-                                if (prop->value() == "intsend") {
-                                        
-                                        processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<Route>(), Delivery::Role (0)));
-                                } else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
-                                           prop->value() == "lv2" ||
-                                           prop->value() == "vst" ||
-                                           prop->value() == "audiounit") {
-                                        
-                                        processor.reset (new PluginInsert(_session));
-                                        
-                                } else if (prop->value() == "port") {
-                                        
-                                        processor.reset (new PortInsert (_session, _pannable, _mute_master));
-                                        
-                                } else if (prop->value() == "send") {
-                                        
-                                        processor.reset (new Send (_session, _pannable, _mute_master));
-                                        
-                                } else {
-                                        error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
-                                        continue;
-                                }
+			if (o == _processors.end()) {
+
+				boost::shared_ptr<Processor> processor;
+
+				if (prop->value() == "intsend") {
+
+					processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<Route>(), Delivery::Role (0)));
+				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
+				           prop->value() == "lv2" ||
+				           prop->value() == "vst" ||
+				           prop->value() == "audiounit") {
+
+					processor.reset (new PluginInsert(_session));
+
+				} else if (prop->value() == "port") {
+
+					processor.reset (new PortInsert (_session, _pannable, _mute_master));
+
+				} else if (prop->value() == "send") {
+
+					processor.reset (new Send (_session, _pannable, _mute_master));
+
+				} else {
+					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
+					continue;
+				}
 
 				if (processor->set_state (**niter, Stateful::current_state_version) != 0) {
 					/* This processor could not be configured.  Turn it into a UnknownProcessor */
@@ -2407,22 +2409,22 @@ Route::set_processor_state (const XMLNode& node)
 
 				new_order.push_back (processor);
 				must_configure = true;
-                        }
-                }
-        }
+			}
+		}
+	}
 
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
-                _processors = new_order;
+		_processors = new_order;
 
-                if (must_configure) {
+		if (must_configure) {
 			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-                        configure_processors_unlocked (0);
-                }
+			configure_processors_unlocked (0);
+		}
 
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
-                        (*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false));
+			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false));
 
 			boost::shared_ptr<PluginInsert> pi;
 
@@ -2433,9 +2435,9 @@ Route::set_processor_state (const XMLNode& node)
 				}
 			}
 		}
-        }
+	}
 
-        processors_changed (RouteProcessorChange ());
+	processors_changed (RouteProcessorChange ());
 	set_processor_positions ();
 }
 
@@ -2593,7 +2595,7 @@ Route::drop_listen (boost::shared_ptr<Route> route)
 			remove_processor (*x, &err);
 			rl.acquire ();
 
-                        /* list could have been demolished while we dropped the lock
+			/* list could have been demolished while we dropped the lock
 			   so start over.
 			*/
 
@@ -2619,47 +2621,47 @@ Route::set_comment (string cmt, void *src)
 bool
 Route::add_fed_by (boost::shared_ptr<Route> other, bool via_sends_only)
 {
-        FeedRecord fr (other, via_sends_only);
+	FeedRecord fr (other, via_sends_only);
 
-        pair<FedBy::iterator,bool> result =  _fed_by.insert (fr);
+	pair<FedBy::iterator,bool> result =  _fed_by.insert (fr);
 
-        if (!result.second) {
+	if (!result.second) {
 
-                /* already a record for "other" - make sure sends-only information is correct */
-                if (!via_sends_only && result.first->sends_only) {
-                        FeedRecord* frp = const_cast<FeedRecord*>(&(*result.first));
-                        frp->sends_only = false;
-                }
-        }
-        
-        return result.second;
+		/* already a record for "other" - make sure sends-only information is correct */
+		if (!via_sends_only && result.first->sends_only) {
+			FeedRecord* frp = const_cast<FeedRecord*>(&(*result.first));
+			frp->sends_only = false;
+		}
+	}
+
+	return result.second;
 }
 
 void
 Route::clear_fed_by ()
 {
-        _fed_by.clear ();
+	_fed_by.clear ();
 }
 
 bool
 Route::feeds (boost::shared_ptr<Route> other, bool* via_sends_only)
 {
-        const FedBy& fed_by (other->fed_by());
+	const FedBy& fed_by (other->fed_by());
 
-        for (FedBy::iterator f = fed_by.begin(); f != fed_by.end(); ++f) {
-                boost::shared_ptr<Route> sr = f->r.lock();
+	for (FedBy::iterator f = fed_by.begin(); f != fed_by.end(); ++f) {
+		boost::shared_ptr<Route> sr = f->r.lock();
 
-                if (sr && (sr.get() == this)) {
+		if (sr && (sr.get() == this)) {
 
-                        if (via_sends_only) {
-                                *via_sends_only = f->sends_only;
-                        }
+			if (via_sends_only) {
+				*via_sends_only = f->sends_only;
+			}
 
-                        return true;
-                }
-        }
+			return true;
+		}
+	}
 
-        return false;
+	return false;
 }
 
 bool
@@ -2706,7 +2708,7 @@ void
 Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool did_locate, bool can_flush_processors)
 {
 	framepos_t now = _session.transport_frame();
-        
+
 	{
 		Glib::RWLock::ReaderLock lm (_processor_lock);
 
@@ -2714,14 +2716,14 @@ Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool did_lo
 			automation_snapshot (now, true);
 		}
 
-                Automatable::transport_stopped (now);
+		Automatable::transport_stopped (now);
 
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 			if (!_have_internal_generator && (Config->get_plugins_stop_with_transport() && can_flush_processors)) {
-                                (*i)->flush ();
+				(*i)->flush ();
 			}
-                        
+
 			(*i)->transport_stopped (now);
 		}
 	}
@@ -2771,7 +2773,7 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 					   already there
 					*/
 					start.set (*i, start.get (*i) + 1);
-                                        
+
 					_session.auto_connect_route (this, dummy, dummy, false, false, ChanCount(), change.before);
 				}
 			}
@@ -2845,18 +2847,18 @@ Route::check_initial_delay (framecnt_t nframes, framecnt_t& transport_frame)
 		silence_unlocked (_roll_delay);
 		transport_frame += _roll_delay;
 
-                /* shuffle all the port buffers for things that lead "out" of this Route
-                   to reflect that we just wrote _roll_delay frames of silence.
-                */
+		/* shuffle all the port buffers for things that lead "out" of this Route
+		   to reflect that we just wrote _roll_delay frames of silence.
+		*/
 
-                Glib::RWLock::ReaderLock lm (_processor_lock);
-                for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-                        boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
-                        if (iop) {
-                                iop->increment_port_buffer_offset (_roll_delay);
-                        }
-                }
-                _output->increment_port_buffer_offset (_roll_delay);
+		Glib::RWLock::ReaderLock lm (_processor_lock);
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
+			if (iop) {
+				iop->increment_port_buffer_offset (_roll_delay);
+			}
+		}
+		_output->increment_port_buffer_offset (_roll_delay);
 
 		_roll_delay = 0;
 
@@ -2952,7 +2954,7 @@ Route::flush_processors ()
 	Glib::RWLock::ReaderLock lm (_processor_lock);
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-                (*i)->flush ();
+		(*i)->flush ();
 	}
 }
 
@@ -3067,7 +3069,7 @@ Route::update_signal_latency ()
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: internal signal latency = %2\n", _name, l));
 
 	if (_signal_latency != l) {
-                _signal_latency = l;
+		_signal_latency = l;
 		signal_latency_changed (); /* EMIT SIGNAL */
 	}
 
@@ -3092,8 +3094,10 @@ Route::set_latency_compensation (framecnt_t longest_session_latency)
 		_initial_delay = 0;
 	}
 
-        DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: compensate for maximum latency of %2, given own latency of %3, using initial delay of %4\n",
-                                                     name(), longest_session_latency, _signal_latency, _initial_delay));
+	DEBUG_TRACE (DEBUG::Latency, string_compose (
+		             "%1: compensate for maximum latency of %2,"
+		             "given own latency of %3, using initial delay of %4\n",
+		             name(), longest_session_latency, _signal_latency, _initial_delay));
 
 	if (_initial_delay != old) {
 		initial_delay_changed (); /* EMIT SIGNAL */
@@ -3107,7 +3111,7 @@ Route::set_latency_compensation (framecnt_t longest_session_latency)
 void
 Route::automation_snapshot (framepos_t now, bool force)
 {
-        _pannable->automation_snapshot (now, force);
+	_pannable->automation_snapshot (now, force);
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->automation_snapshot (now, force);
 	}
@@ -3237,30 +3241,30 @@ void
 Route::shift (framepos_t pos, framecnt_t frames)
 {
 	/* gain automation */
-        {
-                boost::shared_ptr<AutomationControl> gc = _amp->gain_control();
-                
-                XMLNode &before = gc->alist()->get_state ();
-                gc->alist()->shift (pos, frames);
-                XMLNode &after = gc->alist()->get_state ();
-                _session.add_command (new MementoCommand<AutomationList> (*gc->alist().get(), &before, &after));
-        }
+	{
+		boost::shared_ptr<AutomationControl> gc = _amp->gain_control();
+
+		XMLNode &before = gc->alist()->get_state ();
+		gc->alist()->shift (pos, frames);
+		XMLNode &after = gc->alist()->get_state ();
+		_session.add_command (new MementoCommand<AutomationList> (*gc->alist().get(), &before, &after));
+	}
 
 	/* pan automation */
-        {
-                ControlSet::Controls& c (_pannable->controls());
-                
-                for (ControlSet::Controls::const_iterator ci = c.begin(); ci != c.end(); ++ci) {
-                        boost::shared_ptr<AutomationControl> pc = boost::dynamic_pointer_cast<AutomationControl> (ci->second);
-                        if (pc) {
-                                boost::shared_ptr<AutomationList> al = pc->alist();
-                                XMLNode& before = al->get_state ();
-                                al->shift (pos, frames);
-                                XMLNode& after = al->get_state ();
-                                _session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
-                        }
-                }
-        }
+	{
+		ControlSet::Controls& c (_pannable->controls());
+
+		for (ControlSet::Controls::const_iterator ci = c.begin(); ci != c.end(); ++ci) {
+			boost::shared_ptr<AutomationControl> pc = boost::dynamic_pointer_cast<AutomationControl> (ci->second);
+			if (pc) {
+				boost::shared_ptr<AutomationList> al = pc->alist();
+				XMLNode& before = al->get_state ();
+				al->shift (pos, frames);
+				XMLNode& after = al->get_state ();
+				_session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
+			}
+		}
+	}
 
 	/* redirect automation */
 	{
@@ -3270,16 +3274,16 @@ Route::shift (framepos_t pos, framecnt_t frames)
 			set<Evoral::Parameter> parameters = (*i)->what_can_be_automated();
 
 			for (set<Evoral::Parameter>::const_iterator p = parameters.begin (); p != parameters.end (); ++p) {
-                                boost::shared_ptr<AutomationControl> ac = (*i)->automation_control (*p);
-                                if (ac) {
-                                        boost::shared_ptr<AutomationList> al = ac->alist();
-                                        XMLNode &before = al->get_state ();
-                                        al->shift (pos, frames);
-                                        XMLNode &after = al->get_state ();
-                                        _session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
-                                }
-                        }
-                }
+				boost::shared_ptr<AutomationControl> ac = (*i)->automation_control (*p);
+				if (ac) {
+					boost::shared_ptr<AutomationList> al = ac->alist();
+					XMLNode &before = al->get_state ();
+					al->shift (pos, frames);
+					XMLNode &after = al->get_state ();
+					_session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
+				}
+			}
+		}
 	}
 }
 
@@ -3358,7 +3362,7 @@ Route::set_phase_invert (uint32_t c, bool yn)
 	if (_phase_invert[c] != yn) {
 		_phase_invert[c] = yn;
 		phase_invert_changed (); /* EMIT SIGNAL */
-                _session.set_dirty ();
+		_session.set_dirty ();
 	}
 }
 
@@ -3368,7 +3372,7 @@ Route::set_phase_invert (boost::dynamic_bitset<> p)
 	if (_phase_invert != p) {
 		_phase_invert = p;
 		phase_invert_changed (); /* EMIT SIGNAL */
-                _session.set_dirty ();
+		_session.set_dirty ();
 	}
 }
 
@@ -3446,7 +3450,7 @@ Route::pannable() const
 boost::shared_ptr<Panner>
 Route::panner() const
 {
-        /* may be null ! */
+	/* may be null ! */
 	return _main_outs->panner_shell()->panner();
 }
 
@@ -3529,19 +3533,19 @@ Route::nth_send (uint32_t n)
 bool
 Route::has_io_processor_named (const string& name)
 {
-        Glib::RWLock::ReaderLock lm (_processor_lock);
-        ProcessorList::iterator i;
-        
-        for (i = _processors.begin(); i != _processors.end(); ++i) {
-                if (boost::dynamic_pointer_cast<Send> (*i) ||
-                    boost::dynamic_pointer_cast<PortInsert> (*i)) {
-                        if ((*i)->name() == name) {
-                                return true;
-                        }
-                }
-        }
-        
-        return false;
+	Glib::RWLock::ReaderLock lm (_processor_lock);
+	ProcessorList::iterator i;
+
+	for (i = _processors.begin(); i != _processors.end(); ++i) {
+		if (boost::dynamic_pointer_cast<Send> (*i) ||
+		    boost::dynamic_pointer_cast<PortInsert> (*i)) {
+			if ((*i)->name() == name) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 MuteMaster::MutePoint
@@ -3599,45 +3603,45 @@ Route::unknown_processors () const
 framecnt_t
 Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, framecnt_t our_latency) const
 {
-        /* we assume that all our input ports feed all our output ports. its not
-           universally true, but the alternative is way too corner-case to worry about.
-        */
-        
-        jack_latency_range_t all_connections;
-        
-        all_connections.min = ~((jack_nframes_t) 0);
-        all_connections.max = 0;
-        
-        /* iterate over all "from" ports and determine the latency range for all of their
-           connections to the "outside" (outside of this Route).
-        */
-        
-        for (PortSet::iterator p = from.begin(); p != from.end(); ++p) {
-                
-                jack_latency_range_t range;
-                
-                p->get_connected_latency_range (range, playback);
-                
-                all_connections.min = min (all_connections.min, range.min);
-                all_connections.max = max (all_connections.max, range.max);
-        }
+	/* we assume that all our input ports feed all our output ports. its not
+	   universally true, but the alternative is way too corner-case to worry about.
+	*/
 
-        /* set the "from" port latencies to the max/min range of all their connections */
-        
-        for (PortSet::iterator p = from.begin(); p != from.end(); ++p) {
-                p->set_private_latency_range (all_connections, playback);
-        }
+	jack_latency_range_t all_connections;
 
-        /* set the ports "in the direction of the flow" to the same value as above plus our own signal latency */
+	all_connections.min = ~((jack_nframes_t) 0);
+	all_connections.max = 0;
 
-        all_connections.min += our_latency;
-        all_connections.max += our_latency;
-        
-        for (PortSet::iterator p = to.begin(); p != to.end(); ++p) {
-                p->set_private_latency_range (all_connections, playback);
-        }
-      
-        return all_connections.max;
+	/* iterate over all "from" ports and determine the latency range for all of their
+	   connections to the "outside" (outside of this Route).
+	*/
+
+	for (PortSet::iterator p = from.begin(); p != from.end(); ++p) {
+
+		jack_latency_range_t range;
+
+		p->get_connected_latency_range (range, playback);
+
+		all_connections.min = min (all_connections.min, range.min);
+		all_connections.max = max (all_connections.max, range.max);
+	}
+
+	/* set the "from" port latencies to the max/min range of all their connections */
+
+	for (PortSet::iterator p = from.begin(); p != from.end(); ++p) {
+		p->set_private_latency_range (all_connections, playback);
+	}
+
+	/* set the ports "in the direction of the flow" to the same value as above plus our own signal latency */
+
+	all_connections.min += our_latency;
+	all_connections.max += our_latency;
+
+	for (PortSet::iterator p = to.begin(); p != to.end(); ++p) {
+		p->set_private_latency_range (all_connections, playback);
+	}
+
+	return all_connections.max;
 }
 
 framecnt_t
@@ -3645,15 +3649,16 @@ Route::set_private_port_latencies (bool playback) const
 {
 	framecnt_t own_latency = 0;
 
-        /* Processor list not protected by lock: MUST BE CALLED FROM PROCESS THREAD OR
-           LATENCY CALLBACK.
+	/* Processor list not protected by lock: MUST BE CALLED FROM PROCESS THREAD
+	   OR LATENCY CALLBACK.
 
-           This is called (early) from the latency callback. It computes the REAL latency associated
-           with each port and stores the result as the "private" latency of the port. A later
-           call to Route::set_public_port_latencies() sets all ports to the same value to reflect
-           the fact that we do latency compensation and so all signals are delayed by the
-           same amount as they flow through ardour.
-        */
+	   This is called (early) from the latency callback. It computes the REAL
+	   latency associated with each port and stores the result as the "private"
+	   latency of the port. A later call to Route::set_public_port_latencies()
+	   sets all ports to the same value to reflect the fact that we do latency
+	   compensation and so all signals are delayed by the same amount as they
+	   flow through ardour.
+	*/
 
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->active ()) {
@@ -3661,40 +3666,40 @@ Route::set_private_port_latencies (bool playback) const
 		}
 	}
 
-        if (playback) {
-                /* playback: propagate latency from "outside the route" to outputs to inputs */
-                return update_port_latencies (_output->ports (), _input->ports (), true, own_latency);
-        } else {
-                /* capture: propagate latency from "outside the route" to inputs to outputs */
-                return update_port_latencies (_input->ports (), _output->ports (), false, own_latency);
-        }
+	if (playback) {
+		/* playback: propagate latency from "outside the route" to outputs to inputs */
+		return update_port_latencies (_output->ports (), _input->ports (), true, own_latency);
+	} else {
+		/* capture: propagate latency from "outside the route" to inputs to outputs */
+		return update_port_latencies (_input->ports (), _output->ports (), false, own_latency);
+	}
 }
 
 void
 Route::set_public_port_latencies (framecnt_t value, bool playback) const
 {
-        /* this is called to set the JACK-visible port latencies, which take latency compensation
-           into account.
-        */
+	/* this is called to set the JACK-visible port latencies, which take
+	   latency compensation into account.
+	*/
 
-        jack_latency_range_t range;
+	jack_latency_range_t range;
 
-        range.min = value;
-        range.max = value;
-        
-        {
-                const PortSet& ports (_input->ports());
-                for (PortSet::const_iterator p = ports.begin(); p != ports.end(); ++p) {
-                        p->set_public_latency_range (range, playback);
-                }
-        }
+	range.min = value;
+	range.max = value;
 
-        {
-                const PortSet& ports (_output->ports());
-                for (PortSet::const_iterator p = ports.begin(); p != ports.end(); ++p) {
-                        p->set_public_latency_range (range, playback);
-                }
-        }
+	{
+		const PortSet& ports (_input->ports());
+		for (PortSet::const_iterator p = ports.begin(); p != ports.end(); ++p) {
+			p->set_public_latency_range (range, playback);
+		}
+	}
+
+	{
+		const PortSet& ports (_output->ports());
+		for (PortSet::const_iterator p = ports.begin(); p != ports.end(); ++p) {
+			p->set_public_latency_range (range, playback);
+		}
+	}
 }
 
 /** Put the invisible processors in the right place in _processors.
@@ -3704,14 +3709,14 @@ void
 Route::setup_invisible_processors ()
 {
 #ifndef NDEBUG
- 	Glib::RWLock::WriterLock lm (_processor_lock, Glib::TRY_LOCK);
+	Glib::RWLock::WriterLock lm (_processor_lock, Glib::TRY_LOCK);
 	assert (!lm.locked ());
 #endif
 
-        if (!_main_outs) {
-                /* too early to be doing this stuff */
-                return;
-        }
+	if (!_main_outs) {
+		/* too early to be doing this stuff */
+		return;
+	}
 
 	/* we'll build this new list here and then use it */
 	
@@ -3752,10 +3757,10 @@ Route::setup_invisible_processors ()
 			new_processors.insert (amp, _meter);
 			break;
 		case MeterPostFader:
-                        /* do nothing here */
+			/* do nothing here */
 			break;
 		case MeterOutput:
-                        /* do nothing here */
+			/* do nothing here */
 			break;
 		case MeterCustom:
 			/* the meter is visible, so we don't touch it here */
@@ -3765,60 +3770,60 @@ Route::setup_invisible_processors ()
 
 	/* MAIN OUTS */
 
-        assert (_main_outs);
-        assert (!_main_outs->display_to_user ());
-        new_processors.push_back (_main_outs);
+	assert (_main_outs);
+	assert (!_main_outs->display_to_user ());
+	new_processors.push_back (_main_outs);
 
-        /* iterator for the main outs */
-        
-        ProcessorList::iterator main = new_processors.end();
-        --main;
+	/* iterator for the main outs */
 
-        /* OUTPUT METERING */
+	ProcessorList::iterator main = new_processors.end();
+	--main;
 
-        if (_meter && (_meter_point == MeterOutput || _meter_point == MeterPostFader)) {
-                assert (!_meter->display_to_user ());
+	/* OUTPUT METERING */
 
-                /* add the processor just before or just after the main outs */
-                
-                ProcessorList::iterator meter_point = main;
+	if (_meter && (_meter_point == MeterOutput || _meter_point == MeterPostFader)) {
+		assert (!_meter->display_to_user ());
 
-                if (_meter_point == MeterOutput) {
-                        ++meter_point;
-                }
-                new_processors.insert (meter_point, _meter);                        
-        }
+		/* add the processor just before or just after the main outs */
+
+		ProcessorList::iterator meter_point = main;
+
+		if (_meter_point == MeterOutput) {
+			++meter_point;
+		}
+		new_processors.insert (meter_point, _meter);
+	}
 
 	/* MONITOR SEND */
 
 	if (_monitor_send && !is_monitor ()) {
 		assert (!_monitor_send->display_to_user ());
-                if (Config->get_solo_control_is_listen_control()) {
-                        switch (Config->get_listen_position ()) {
-                        case PreFaderListen:
-                                switch (Config->get_pfl_position ()) {
-                                case PFLFromBeforeProcessors:
-                                        new_processors.push_front (_monitor_send);
-                                        break;
-                                case PFLFromAfterProcessors:
-                                        new_processors.insert (amp, _monitor_send);
-                                        break;
-                                }
-                                break;
-                        case AfterFaderListen:
-                                switch (Config->get_afl_position ()) {
-                                case AFLFromBeforeProcessors:
-                                        new_processors.insert (after_amp, _monitor_send);
-                                        break;
-                                case AFLFromAfterProcessors:
-                                        new_processors.insert (new_processors.end(), _monitor_send);
-                                        break;
-                                }
-                                break;
-                        }
-                }  else {
-                        new_processors.insert (new_processors.end(), _monitor_send);
-                }
+		if (Config->get_solo_control_is_listen_control()) {
+			switch (Config->get_listen_position ()) {
+			case PreFaderListen:
+				switch (Config->get_pfl_position ()) {
+				case PFLFromBeforeProcessors:
+					new_processors.push_front (_monitor_send);
+					break;
+				case PFLFromAfterProcessors:
+					new_processors.insert (amp, _monitor_send);
+					break;
+				}
+				break;
+			case AfterFaderListen:
+				switch (Config->get_afl_position ()) {
+				case AFLFromBeforeProcessors:
+					new_processors.insert (after_amp, _monitor_send);
+					break;
+				case AFLFromAfterProcessors:
+					new_processors.insert (new_processors.end(), _monitor_send);
+					break;
+				}
+				break;
+			}
+		}  else {
+			new_processors.insert (new_processors.end(), _monitor_send);
+		}
 	}
 
 	/* MONITOR CONTROL */
@@ -3860,12 +3865,12 @@ Route::should_monitor () const
 	switch (Config->get_monitoring_model()) {
 	case HardwareMonitoring:
 	case ExternalMonitoring:
-                return !record_enabled() || (_session.config.get_auto_input() && !_session.actively_recording());
+		return !record_enabled() || (_session.config.get_auto_input() && !_session.actively_recording());
 		break;
 	default:
-                break;
+		break;
 	}
 
-        return true;
+	return true;
 }
 
