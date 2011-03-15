@@ -892,7 +892,7 @@ TempoMap::count_frames_between (const BBT_Time& start, const BBT_Time& end) cons
 		+ start.ticks/BBT_Time::ticks_per_beat;
 
 
-	start_frame = m.frame() + (framepos_t) rint( beat_offset * m.tempo().frames_per_beat(_frame_rate, m.meter()));
+	start_frame = m.frame() + (framepos_t) rint(beat_offset * m.tempo().frames_per_beat(_frame_rate, m.meter()));
 
 	m =  metric_at(end);
 
@@ -964,7 +964,7 @@ TempoMap::frame_time (const BBT_Time& bbt) const
 {
 	BBT_Time start ; /* 1|1|0 */
 
-	return  count_frames_between ( start, bbt);
+	return count_frames_between (start, bbt);
 }
 
 framecnt_t
@@ -1026,7 +1026,7 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 		/* of course gtk_ardour only allows bar with at least 1.0 beats .....
 		 */
 
-		uint32_t ticks_at_beat = (uint32_t) ( result.beats == ceil(beats_per_bar) ?
+		uint32_t ticks_at_beat = (uint32_t) (result.beats == ceil(beats_per_bar) ?
 					(1 - (ceil(beats_per_bar) - beats_per_bar))* BBT_Time::ticks_per_beat
 					   : BBT_Time::ticks_per_beat );
 
@@ -1039,10 +1039,9 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 				metric = metric_at(result); // maybe there is a meter change
 				beats_per_bar = metric.meter().beats_per_bar();
 			}
-			ticks_at_beat= (uint32_t) ( result.beats == ceil(beats_per_bar) ?
+			ticks_at_beat= (uint32_t) (result.beats == ceil(beats_per_bar) ?
 				       (1 - (ceil(beats_per_bar) - beats_per_bar) ) * BBT_Time::ticks_per_beat
 				       : BBT_Time::ticks_per_beat);
-
 		}
 
 
@@ -1050,13 +1049,12 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 		uint32_t b = bbt.beats;
 
 		/* count beats */
-		while( b > when.beats ) {
+		while (b > when.beats) {
 			--result.bars;
 			result.bars = max(1U, result.bars);
 			metric = metric_at(result); // maybe there is a meter change
 			beats_per_bar = metric.meter().beats_per_bar();
 			if (b >= ceil(beats_per_bar)) {
-
 				b -= (uint32_t) ceil(beats_per_bar);
 			} else {
 				b = (uint32_t) ceil(beats_per_bar) - b + when.beats ;
@@ -1099,8 +1097,8 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 
 	}
 
-	if (dir < 0 ) {
-		frames = count_frames_between( result,when);
+	if (dir < 0) {
+		frames = count_frames_between(result, when);
 	} else {
 		frames = count_frames_between(when,result);
 	}
@@ -1425,7 +1423,7 @@ TempoMap::get_points (framepos_t lower, framepos_t upper) const
 
 			beat_frame = current;
 
-			while (beat <= ceil( beats_per_bar) && beat_frame < limit) {
+			while (beat <= ceil(beats_per_bar) && beat_frame < limit) {
 				if (beat_frame >= lower) {
 					// cerr << "Add Beat at " << bar << '|' << beat << " @ " << beat_frame << endl;
 					points->push_back (BBTPoint (*meter, *tempo, (framepos_t) rint(beat_frame), Beat, bar, beat));
