@@ -341,10 +341,10 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
 		range.min = ~((jack_nframes_t) 0);
 		range.max = 0;
 
+                DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: %2 connections to check for latency range\n", name(), connections.size()));
+
 		for (vector<string>::const_iterator c = connections.begin();
 		     c != connections.end(); ++c) {
-
-			cerr << "Connection between " << name() << " and " << *c << endl;
 
 			jack_port_t* remote_port = jack_port_by_name (_engine->jack(), (*c).c_str());
 			jack_latency_range_t lr;
@@ -359,15 +359,16 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
 					             name(), *c, lr.min, lr.max));
 				range.min = min (range.min, lr.min);
 				range.max = max (range.max, lr.max);
-			} else {
-				cerr << "\t NO PORT BY NAME!\n";
 			}
 		}
 
 	} else {
+                DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: not connected to anything\n", name()));
 		range.min = 0;
 		range.max = 0;
 	}
+
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: final connected latency range [ %2 .. %3 ] \n", name(), range.min, range.max));
 }
 
 int

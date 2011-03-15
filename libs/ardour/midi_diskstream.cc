@@ -164,14 +164,17 @@ MidiDiskstream::non_realtime_input_change ()
 
 		if (input_change_pending.type & IOChange::ConfigurationChanged) {
 			if (_io->n_ports().n_midi() != _n_channels.n_midi()) {
-				error << "Can not feed IO " << _io->n_ports()
-					<< " with diskstream " << _n_channels << endl;
+				error << "Can not feed " << _io->n_ports() 
+                                      << " ports to " << _n_channels << " channels" 
+                                      << endmsg;
 			}
 		}
 
-		get_input_sources ();
-		set_capture_offset ();
-		set_align_style_from_io ();
+                if (input_change_pending.type & IOChange::ConnectionsChanged) {
+                        get_input_sources ();
+                        set_capture_offset ();
+                        set_align_style_from_io ();
+                }
 
 		input_change_pending.type = IOChange::NoChange;
 

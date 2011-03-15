@@ -1010,7 +1010,7 @@ AudioEngine::get_port_by_name (const string& portname)
 		}
 	}
 
-	return 0;
+        return 0;
 }
 
 const char **
@@ -1483,4 +1483,32 @@ AudioEngine::_start_process_thread (void* arg)
         f ();
 
         return 0;
+}
+
+bool 
+AudioEngine::port_is_physical (const std::string& portname) const
+{
+        GET_PRIVATE_JACK_POINTER_RET(_jack, false);
+
+        jack_port_t *port = jack_port_by_name (_priv_jack, portname.c_str());
+
+        if (!port) {
+                return false;
+        }
+        
+        return jack_port_flags (port) & JackPortIsPhysical;
+}
+
+void 
+AudioEngine::ensure_monitor_input (const std::string& portname, bool yn) const
+{
+        GET_PRIVATE_JACK_POINTER(_jack);
+
+        jack_port_t *port = jack_port_by_name (_priv_jack, portname.c_str());
+
+        if (!port) {
+                return;
+        }
+
+        jack_port_request_monitor (port, yn);
 }

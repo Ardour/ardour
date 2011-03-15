@@ -180,9 +180,8 @@ Diskstream::set_track (Track* t)
 	ic_connection.disconnect();
 	_io->changed.connect_same_thread (ic_connection, boost::bind (&Diskstream::handle_input_change, this, _1, _2));
 
-	input_change_pending = IOChange::ConfigurationChanged;
+	input_change_pending.type = IOChange::Type (IOChange::ConfigurationChanged|IOChange::ConnectionsChanged);
 	non_realtime_input_change ();
-	set_align_style_from_io ();
 
 	_track->Destroyed.connect_same_thread (*this, boost::bind (&Diskstream::route_going_away, this));
 }
@@ -192,7 +191,14 @@ Diskstream::handle_input_change (IOChange change, void * /*src*/)
 {
 	Glib::Mutex::Lock lm (state_lock);
 
-        if (change.type & IOChange::ConfigurationChanged) {
+        if (change.type & (IOChange::ConfigurationChanged|IOChange::ConnectionsChanged)) {
+
+                /* rather than handle this here on a DS-by-DS basis we defer to the
+                   session transport/butler thread, and let it tackle
+                   as many diskstreams as need it in one shot. this avoids many repeated
+                   takings of the audioengine process lock.
+                */
+
                 if (!(input_change_pending.type & change.type)) {
                         input_change_pending.type = IOChange::Type (input_change_pending.type | change.type);
                         _session.request_input_change_handling ();

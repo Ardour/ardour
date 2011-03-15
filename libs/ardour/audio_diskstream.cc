@@ -162,7 +162,7 @@ AudioDiskstream::non_realtime_input_change ()
 			return;
 		}
 
-		{
+                if (input_change_pending.type == IOChange::ConfigurationChanged) {
 			RCUWriter<ChannelList> writer (channels);
 			boost::shared_ptr<ChannelList> c = writer.get_copy();
 
@@ -175,9 +175,11 @@ AudioDiskstream::non_realtime_input_change ()
 			}
 		}
 
-		get_input_sources ();
-		set_capture_offset ();
-		set_align_style_from_io ();
+                if (input_change_pending.type & IOChange::ConnectionsChanged) {
+                        get_input_sources ();
+                        set_capture_offset ();
+                        set_align_style_from_io ();
+                }
 
 		input_change_pending = IOChange::NoChange;
 
@@ -223,20 +225,13 @@ AudioDiskstream::get_input_sources ()
 
 		connections.clear ();
 
-		cerr << "Getting Nth connection from io " << n << " = " << _io->nth(n) << endl;
-
 		if (_io->nth (n)->get_connections (connections) == 0) {
-
-			cerr << "\tThere were NO connections, apparently ...\n";
-			if ((*chan)->source) {
+			if (!(*chan)->source.name.empty()) {
 				// _source->disable_metering ();
 			}
-
-			(*chan)->source = 0;
-
+			(*chan)->source.name = string();
 		} else {
-			cerr << "\tThere were some connections, apparently ... to " << connections[0] << endl;
-			(*chan)->source = dynamic_cast<AudioPort*>(_session.engine().get_port_by_name (connections[0]) );
+			(*chan)->source.name = connections[0];
 		}
 	}
 }
@@ -1681,9 +1676,7 @@ AudioDiskstream::engage_record_enable ()
 	if (Config->get_monitoring_model() == HardwareMonitoring) {
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-			if ((*chan)->source) {
-				(*chan)->source->ensure_monitor_input (!(_session.config.get_auto_input() && rolling));
-			}
+                        (*chan)->source.ensure_monitor_input (!(_session.config.get_auto_input() && rolling));
 			capturing_sources.push_back ((*chan)->write_source);
 			(*chan)->write_source->mark_streaming_write_started ();
 		}
@@ -1705,9 +1698,7 @@ AudioDiskstream::disengage_record_enable ()
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	if (Config->get_monitoring_model() == HardwareMonitoring) {
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-			if ((*chan)->source) {
-				(*chan)->source->ensure_monitor_input (false);
-			}
+                        (*chan)->source.ensure_monitor_input (false);
 		}
 	}
 	capturing_sources.clear ();
@@ -1992,10 +1983,7 @@ AudioDiskstream::monitor_input (bool yn)
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-
-		if ((*chan)->source) {
-			(*chan)->source->ensure_monitor_input (yn);
-		}
+                (*chan)->source.ensure_monitor_input (yn);
 	}
 }
 
@@ -2016,17 +2004,12 @@ AudioDiskstream::set_align_style_from_io ()
 
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
-	cerr << "Checking " << c->size() << " for physical connections\n";
-
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-		cerr << "Channel connected via " << (*chan)->source << endl;
-		if ((*chan)->source && (*chan)->source->flags() & JackPortIsPhysical) {
-			cerr << "\tchannel has physical connection to " << (*chan)->source->name() << endl;
+		if ((*chan)->source.is_physical ()) {
 			have_physical = true;
 			break;
 		}
 	}
-	cerr << "\tphysical? " << have_physical << endl;
 
 	if (have_physical) {
 		set_align_style (ExistingMaterial);
@@ -2312,10 +2295,29 @@ AudioDiskstream::adjust_capture_buffering ()
 	}
 }
 
+bool
+AudioDiskstream::ChannelSource::is_physical () const
+{
+        if (name.empty()) {
+                return false;
+        }
+
+        return AudioEngine::instance()->port_is_physical (name);
+}
+
+void
+AudioDiskstream::ChannelSource::ensure_monitor_input (bool yn) const
+{
+        if (name.empty()) {
+                return;
+        }
+
+        return AudioEngine::instance()->ensure_monitor_input (name, yn);
+}
+
 AudioDiskstream::ChannelInfo::ChannelInfo (framecnt_t playback_bufsize, framecnt_t capture_bufsize, framecnt_t speed_size, framecnt_t wrap_size)
 {
 	peak_power = 0.0f;
-	source = 0;
 	current_capture_buffer = 0;
 	current_playback_buffer = 0;
 	curr_capture_cnt = 0;

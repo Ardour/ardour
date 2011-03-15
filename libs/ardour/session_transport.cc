@@ -226,7 +226,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 			/* we rolled past the stop point to pick up data that had
 			   not yet arrived. move back to where the stop occured.
 			*/
-			decrement_transport_position (current_block_size + (worst_playback_latency() - current_block_size));
+			decrement_transport_position (current_block_size + (worst_input_latency() - current_block_size));
 		} else {
 			decrement_transport_position (current_block_size);
 		}
@@ -1047,7 +1047,7 @@ Session::stop_transport (bool abort, bool clear_state)
 		return;
 	}
 
-	if (actively_recording() && !(transport_sub_state & StopPendingCapture) && worst_playback_latency() > current_block_size) {
+	if (actively_recording() && !(transport_sub_state & StopPendingCapture) && worst_input_latency() > current_block_size) {
 
 		boost::shared_ptr<RouteList> rl = routes.reader();
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
@@ -1074,7 +1074,6 @@ Session::stop_transport (bool abort, bool clear_state)
 		pending_abort = abort;
 		return;
 	}
-
 
 	if ((transport_sub_state & PendingDeclickOut) == 0) {
 

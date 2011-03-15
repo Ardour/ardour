@@ -1221,7 +1221,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void route_processors_changed (RouteProcessorChange);
 
 	bool find_route_name (std::string const &, uint32_t& id, char* name, size_t name_len, bool);
-	void count_existing_route_channels (ChanCount& in, ChanCount& out);
+	void count_existing_track_channels (ChanCount& in, ChanCount& out);
 	void auto_connect_route (Route*,
                                  ChanCount& existing_inputs,
                                  ChanCount& existing_outputs,

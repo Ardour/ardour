@@ -137,8 +137,6 @@ Route::init ()
 	_output.reset (new IO (_session, _name, IO::Output, _default_type));
 
 	_input->changed.connect_same_thread (*this, boost::bind (&Route::input_change_handler, this, _1, _2));
-	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
-
 	_input->PortCountChanging.connect_same_thread (*this, boost::bind (&Route::input_port_count_changing, this, _1));
 
 	/* add amp processor  */
@@ -2739,47 +2737,6 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 		configure_processors (0);
 		_phase_invert.resize (_input->n_ports().n_audio ());
 		io_changed (); /* EMIT SIGNAL */
-	}
-}
-
-/** Called with the process lock held if change contains ConfigurationChanged */
-void
-Route::output_change_handler (IOChange change, void * /*src*/)
-{
-	if ((change.type & IOChange::ConfigurationChanged)) {
-
-		/* XXX resize all listeners to match _main_outs? */
-
-		/* Auto-connect newly-created outputs, unless we're auto-connecting to master
-		   and we are master (as an auto-connect in this situation would cause a
-		   feedback loop)
-		*/
-
-		AutoConnectOption ac = Config->get_output_auto_connect ();
-
-		if (ac == AutoConnectPhysical || (ac == AutoConnectMaster && !is_master ())) {
-
-			ChanCount start = change.before;
-			
-			for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-				if (change.before.get(*i) < change.after.get(*i)) {
-					/* the existing ChanCounts don't matter for this call as they are only
-					   to do with matching input and output indices, and we are only changing
-					   outputs here.
-					*/
-					ChanCount dummy;
-
-					/* only auto-connect the newly-created outputs, not the ones that were
-					   already there
-					*/
-					start.set (*i, start.get (*i) + 1);
-
-					_session.auto_connect_route (this, dummy, dummy, false, false, ChanCount(), change.before);
-				}
-			}
-		}
-
-		// configure_processors (0);
 	}
 }
 

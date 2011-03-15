@@ -224,7 +224,6 @@ IO::connect (Port* our_port, string other_port, void* src)
 			return -1;
 		}
 	}
-
 	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
 	_session.set_dirty ();
 	return 0;
@@ -912,7 +911,7 @@ IO::make_connections (const XMLNode& node, int version, bool in)
 					}
                                         
 					if (prop) {
-						p->connect (prop->value());
+                                                connect (p, prop->value(), this);
 					}
 				}
 			} 

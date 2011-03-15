@@ -1399,9 +1399,9 @@ Session::find_route_name (string const & base, uint32_t& id, char* name, size_t 
 	return false;
 }
 
-/** Count the total ins and outs of all non-hidden routes in the session and return them in in and out */
+/** Count the total ins and outs of all non-hidden tracks in the session and return them in in and out */
 void
-Session::count_existing_route_channels (ChanCount& in, ChanCount& out)
+Session::count_existing_track_channels (ChanCount& in, ChanCount& out)
 {
 	in  = ChanCount::ZERO;
 	out = ChanCount::ZERO;
@@ -1409,9 +1409,11 @@ Session::count_existing_route_channels (ChanCount& in, ChanCount& out)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_hidden()) {
-			in  += (*i)->n_inputs();
-			out += (*i)->n_outputs();
+                boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr && !tr->is_hidden()) {
+                        cerr << "Using track i/o counts for " << tr->name() << endl;
+			in  += tr->n_inputs();
+			out += tr->n_outputs();
 		}
 	}
 }
@@ -1511,6 +1513,7 @@ Session::auto_connect_route (Route* route, ChanCount& existing_inputs, ChanCount
                              bool with_lock, bool connect_inputs, ChanCount input_start, ChanCount output_start)
 {
 	if (!IO::connecting_legal) {
+                cerr << "Auto-connect ignored because connecting it not legal\n";
 		return;
 	}
 
@@ -1528,14 +1531,16 @@ Session::auto_connect_route (Route* route, ChanCount& existing_inputs, ChanCount
 	   offset possible.
 	*/
 
-	cerr << "ACR: existing in = " << existing_inputs << " out = " << existing_outputs << endl;
+	cerr << "Auto-connect: existing in = " << existing_inputs << " out = " << existing_outputs << endl;
 
 	const bool in_out_physical =
 		(Config->get_input_auto_connect() & AutoConnectPhysical)
 		&& (Config->get_output_auto_connect() & AutoConnectPhysical)
 		&& connect_inputs;
 
-	const ChanCount in_offset = existing_inputs;
+	const ChanCount in_offset = in_out_physical
+		? ChanCount::max(existing_inputs, existing_outputs)
+                : existing_inputs;
 
 	const ChanCount out_offset = in_out_physical
 		? ChanCount::max(existing_inputs, existing_outputs)
@@ -1896,6 +1901,11 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 void
 Session::add_routes (RouteList& new_routes, bool auto_connect, bool save)
 {
+        ChanCount existing_inputs;
+        ChanCount existing_outputs;
+        
+        count_existing_track_channels (existing_inputs, existing_outputs);
+
 	{
 		RCUWriter<RouteList> writer (routes);
 		boost::shared_ptr<RouteList> r = writer.get_copy ();
@@ -1947,11 +1957,6 @@ Session::add_routes (RouteList& new_routes, bool auto_connect, bool save)
 		}
         
 		if (auto_connect) {
-
-			ChanCount existing_inputs;
-			ChanCount existing_outputs;
-
-			count_existing_route_channels (existing_inputs, existing_outputs);
 
 			auto_connect_route (r, existing_inputs, existing_outputs, true);
 		}
@@ -4160,25 +4165,23 @@ Session::update_latency (bool playback)
 		max_latency = max (max_latency, (*i)->set_private_port_latencies (playback));
 	}
 
+        /* because we latency compensate playback, our published playback latencies should
+           be the same for all output ports - all material played back by ardour has
+           the same latency, whether its caused by plugins or by latency compensation. since
+           these may differ from the values computed above, reset all playback port latencies
+           to the same value.
+        */
+
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("Set public port latencies to %1\n", max_latency));
+        
+        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                (*i)->set_public_port_latencies (max_latency, playback);
+        }
+                
 	if (playback) {
 
 		post_playback_latency ();
  
-		/* because we latency compensate playback, our published playback latencies should
-		   be the same for all output ports - all material played back by ardour has
-		   the same latency, whether its caused by plugins or by latency compensation. since
-		   these may differ from the values computed above, reset all playback port latencies
-		   to the same value.
-		*/
-
-		DEBUG_TRACE (DEBUG::Latency, string_compose ("Set public port latencies to %1\n", max_latency));
-
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->set_public_port_latencies (max_latency, playback);
-		}
-                
-
-
 	} else {
 
 		post_capture_latency ();
@@ -4275,9 +4278,9 @@ Session::set_worst_capture_latency ()
 void
 Session::update_latency_compensation (bool force_whole_graph)
 {
-	bool update_jack = false;
+	bool some_track_latency_changed = false;
 
-	if (_state_of_the_state & Deletion) {
+	if (_state_of_the_state & (InitialConnecting|Deletion)) {
 		return;
 	}
 
@@ -4286,21 +4289,21 @@ Session::update_latency_compensation (bool force_whole_graph)
 	_worst_track_latency = 0;
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
-
+        
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->is_hidden() && ((*i)->active())) {
 			framecnt_t tl;
 			if ((*i)->signal_latency () != (tl = (*i)->update_signal_latency ())) {
-				update_jack = true;
+				some_track_latency_changed = true;
 			}
 			_worst_track_latency = max (tl, _worst_track_latency); 
 		}
 	}
 
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("worst signal processing latency: %1 (changed ? %2)\n", _worst_track_latency,
-	                                             (update_jack ? "yes" : "no")));
+	                                             (some_track_latency_changed ? "yes" : "no")));
 
-	if (force_whole_graph || update_jack) {
+	if (force_whole_graph || some_track_latency_changed) {
 		/* trigger a full recompute of latency numbers for the graph.
 		   everything else that we need to do will be done in the latency
 		   callback.
@@ -4308,8 +4311,6 @@ Session::update_latency_compensation (bool force_whole_graph)
 		_engine.update_total_latencies ();
 		return; // everything else will be done in the latency callback
 	} 
-
-        
 
 	DEBUG_TRACE(DEBUG::Latency, "---------------------------- DONE update latency compensation\n\n")
 }

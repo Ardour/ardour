@@ -170,6 +170,9 @@ class AudioEngine : public SessionHandlePtr
 	Port *register_output_port (DataType, const std::string& portname);
 	int   unregister_port (Port &);
 
+        bool port_is_physical (const std::string&) const;
+        void ensure_monitor_input (const std::string&, bool) const;
+
 	void split_cycle (pframes_t offset);
 
 	int connect (const std::string& source, const std::string& destination);

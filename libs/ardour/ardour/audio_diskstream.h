@@ -66,15 +66,10 @@ class AudioDiskstream : public Diskstream
 	std::string input_source (uint32_t n=0) const {
 		boost::shared_ptr<ChannelList> c = channels.reader();
 		if (n < c->size()) {
-			return (*c)[n]->source ? (*c)[n]->source->name() : "";
+			return (*c)[n]->source.name;
 		} else {
 			return "";
 		}
-	}
-
-	Port *input_source_port (uint32_t n=0) const {
-		boost::shared_ptr<ChannelList> c = channels.reader();
-		if (n < c->size()) return (*c)[n]->source; return 0;
 	}
 
 	void set_record_enabled (bool yn);
@@ -179,6 +174,12 @@ class AudioDiskstream : public Diskstream
 	bool commit  (framecnt_t nframes);
 
   private:
+        struct ChannelSource { 
+            std::string name;
+
+            bool is_physical () const;
+            void ensure_monitor_input (bool) const;
+        };
 
 	struct ChannelInfo : public boost::noncopyable {
 
@@ -197,8 +198,10 @@ class AudioDiskstream : public Diskstream
 		boost::shared_ptr<AudioFileSource> fades_source;
 		boost::shared_ptr<AudioFileSource> write_source;
 
-		/// the Port that our audio data comes from
-		Port         *source;
+		/// information the Port that our audio data comes from
+		
+                ChannelSource source;
+
 		Sample       *current_capture_buffer;
 		Sample       *current_playback_buffer;
 
