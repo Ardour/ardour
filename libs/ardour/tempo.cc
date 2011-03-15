@@ -1051,8 +1051,8 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 
 		/* count beats */
 		while( b > when.beats ) {
-
-			result.bars = max(1U,result.bars-- ) ;
+			--result.bars;
+			result.bars = max(1U, result.bars);
 			metric = metric_at(result); // maybe there is a meter change
 			beats_per_bar = metric.meter().beats_per_bar();
 			if (b >= ceil(beats_per_bar)) {
@@ -1076,13 +1076,14 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 			do {
 
 				if (result.beats == 1) {
-					result.bars = max(1U, result.bars-- ) ;
+					--result.bars;
+					result.bars = max(1U, result.bars) ;
 					metric = metric_at(result); // maybe there is a meter change
 					beats_per_bar = metric.meter().beats_per_bar();
 					result.beats = (uint32_t) ceil(beats_per_bar);
 					ticks_at_beat = (uint32_t) ((1 - (ceil(beats_per_bar) - beats_per_bar)) * BBT_Time::ticks_per_beat) ;
 				} else {
-					result.beats --;
+					--result.beats;
 					ticks_at_beat = (uint32_t) BBT_Time::ticks_per_beat;
 				}
 
