@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2006 Paul Davis
-	By Dave Robillard, 2006
+    Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+
 #include "pbd/error.h"
 
 #include "pbd/enumwriter.h"
@@ -87,11 +88,11 @@ MidiTrack::use_new_diskstream ()
 void
 MidiTrack::set_record_enabled (bool yn, void *src)
 {
-        if (_step_editing) {
-                return;
-        }
+	if (_step_editing) {
+		return;
+	}
 
-        Track::set_record_enabled (yn, src);
+	Track::set_record_enabled (yn, src);
 }
 
 void
@@ -107,7 +108,9 @@ MidiTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 
 	_diskstream_data_recorded_connection.disconnect ();
 	boost::shared_ptr<MidiDiskstream> mds = boost::dynamic_pointer_cast<MidiDiskstream> (ds);
-	mds->DataRecorded.connect_same_thread (_diskstream_data_recorded_connection, boost::bind (&MidiTrack::diskstream_data_recorded, this, _1, _2));
+	mds->DataRecorded.connect_same_thread (
+		_diskstream_data_recorded_connection,
+		boost::bind (&MidiTrack::diskstream_data_recorded, this, _1, _2));
 
 	DiskstreamChanged (); /* EMIT SIGNAL */
 }
@@ -165,24 +168,25 @@ MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
 		}
 	}
 
-        /* set rec-enable control *AFTER* setting up diskstream, because it may want to operate
-           on the diskstream as it sets its own state
-        */
+	/* set rec-enable control *AFTER* setting up diskstream, because it may
+	   want to operate on the diskstream as it sets its own state
+	*/
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 		child = *niter;
 
-                if (child->name() == Controllable::xml_node_name && (prop = child->property ("name")) != 0) {
-                        if (prop->value() == X_("recenable")) {
-                                _rec_enable_control->set_state (*child, version);
-                        }
-                }
+		if (child->name() == Controllable::xml_node_name && (prop = child->property ("name")) != 0) {
+			if (prop->value() == X_("recenable")) {
+				_rec_enable_control->set_state (*child, version);
+			}
+		}
 	}
 
 	pending_state = const_cast<XMLNode*> (&node);
 
 	if (_session.state_of_the_state() & Session::Loading) {
-		_session.StateReady.connect_same_thread (*this, boost::bind (&MidiTrack::set_state_part_two, this));
+		_session.StateReady.connect_same_thread (
+			*this, boost::bind (&MidiTrack::set_state_part_two, this));
 	} else {
 		set_state_part_two ();
 	}
@@ -380,7 +384,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 
 		process_output_buffers (bufs, start_frame, end_frame, nframes,
 					(!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick,
-                                        (!diskstream->record_enabled() && !_session.transport_stopped()));
+		                        (!diskstream->record_enabled() && !_session.transport_stopped()));
 	}
 
 	_main_outs->flush_buffers (nframes, end_frame - start_frame - 1);
@@ -429,14 +433,14 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes)
 
 			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
 
-                        /* note on, since for step edit, note length is determined
-                           elsewhere 
-                        */
-                        
-                        if (ev.is_note_on()) {
-                                /* we don't care about the time for this purpose */
-                                _step_edit_ring_buffer.write (0, ev.type(), ev.size(), ev.buffer());
-                        }
+			/* note on, since for step edit, note length is determined
+			   elsewhere 
+			*/
+
+			if (ev.is_note_on()) {
+				/* we don't care about the time for this purpose */
+				_step_edit_ring_buffer.write (0, ev.type(), ev.size(), ev.buffer());
+			}
 		}
 	}
 }
@@ -446,12 +450,12 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framep
 {
 	// Append immediate events
 	MidiBuffer& buf (bufs.get_midi (0));
-        if (_immediate_events.read_space()) {
-                DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 has %2 of immediate events to deliver\n", 
-                                                            name(), _immediate_events.read_space()));
-        }
+	if (_immediate_events.read_space()) {
+		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 has %2 of immediate events to deliver\n", 
+		                                            name(), _immediate_events.read_space()));
+	}
 	_immediate_events.read (buf, 0, 1, nframes-1); // all stamps = 0
-        
+
 	// MIDI thru: send incoming data "through" output
 	if (_midi_thru && _session.transport_speed() != 0.0f && _input->n_ports().n_midi()) {
 		buf.merge_in_place (_input->midi(0)->get_midi_buffer(nframes));
@@ -505,7 +509,7 @@ MidiTrack::set_note_mode (NoteMode m)
 void
 MidiTrack::midi_panic()
 {
-        DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 delivers panic data\n", name()));
+	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 delivers panic data\n", name()));
 	for (uint8_t channel = 0; channel <= 0xF; channel++) {
 		uint8_t ev[3] = { MIDI_CMD_CONTROL | channel, MIDI_CTL_SUSTAIN, 0 };
 		write_immediate_event(3, ev);
@@ -590,14 +594,14 @@ MidiTrack::MidiControl::set_value(double val)
 void
 MidiTrack::set_step_editing (bool yn)
 {
-        if (_session.record_status() != Session::Disabled) {
-                return;
-        }
+	if (_session.record_status() != Session::Disabled) {
+		return;
+	}
 
-        if (yn != _step_editing) {
-                _step_editing = yn;
-                StepEditStatusChange (yn);
-        }
+	if (yn != _step_editing) {
+		_step_editing = yn;
+		StepEditStatusChange (yn);
+	}
 }
 
 void
@@ -651,11 +655,11 @@ MidiTrack::diskstream_data_recorded (boost::shared_ptr<MidiBuffer> buf, boost::w
 bool
 MidiTrack::should_monitor () const
 {
-        return true;
+	return true;
 }
 
 bool
 MidiTrack::send_silence () const
 {
-        return false;
+	return false;
 }

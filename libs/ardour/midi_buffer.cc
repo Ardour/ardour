@@ -100,9 +100,9 @@ MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, framecnt_t dst_off
 		if (ev.time() >= src_offset && ev.time() < (nframes+src_offset)) {
 			push_back (ev);
 		} else {
-                        cerr << "MIDI event @ " <<  ev.time() << " skipped, not within range " << src_offset << " .. " 
-                             << (nframes + src_offset) << endl;
-                }
+			cerr << "MIDI event @ " <<  ev.time() << " skipped, not within range "
+			     << src_offset << " .. " << (nframes + src_offset) << endl;
+		}
 	}
 
 	_silent = src.silent();
@@ -137,7 +137,7 @@ MidiBuffer::push_back(const Evoral::MIDIEvent<TimeType>& ev)
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
 		return false;
 	}
-        
+
 	if (!Evoral::midi_event_is_valid(ev.buffer(), ev.size())) {
 		cerr << "WARNING: MidiBuffer ignoring illegal MIDI event" << endl;
 		return false;
@@ -159,16 +159,16 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 
 #ifndef NDEBUG
 	if (DEBUG::MidiIO & PBD::debug_bits) {
-                DEBUG_STR_DECL(a);
-                DEBUG_STR_APPEND(a, string_compose ("midibuffer %1 push event @ %2 sz %3 ", this, time, size));
+		DEBUG_STR_DECL(a);
+		DEBUG_STR_APPEND(a, string_compose ("midibuffer %1 push event @ %2 sz %3 ", this, time, size));
 		for (size_t i=0; i < size; ++i) {
 			DEBUG_STR_APPEND(a,hex);
 			DEBUG_STR_APPEND(a,"0x");
 			DEBUG_STR_APPEND(a,(int)data[i]);
-                        DEBUG_STR_APPEND(a,' ');
+			DEBUG_STR_APPEND(a,' ');
 		}
-                DEBUG_STR_APPEND(a,'\n');
-                DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
+		DEBUG_STR_APPEND(a,'\n');
+		DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
 	}
 #endif
 
@@ -324,7 +324,7 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 			++them;
 		}
 
-#if 0                
+#if 0
 		if (us != end())
 			cerr << "us @ " << (*us).time() << endl;
 		if (them != other.end())

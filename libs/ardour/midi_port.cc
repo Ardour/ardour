@@ -41,7 +41,7 @@ MidiPort::~MidiPort()
 void
 MidiPort::cycle_start (pframes_t nframes)
 {
-        Port::cycle_start (nframes);
+	Port::cycle_start (nframes);
 
 	_buffer->clear ();
 
@@ -76,20 +76,20 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 
 			jack_midi_event_get (&ev, jack_buffer, i);
 
-                        if (ev.buffer[0] == 0xfe) {
-                                /* throw away active sensing */
-                                continue;
-                        }
+			if (ev.buffer[0] == 0xfe) {
+				/* throw away active sensing */
+				continue;
+			}
 
-                        /* check that the event is in the acceptable time range */
+			/* check that the event is in the acceptable time range */
 
 			if ((ev.time >= (_global_port_buffer_offset + _port_buffer_offset)) && 
-                            (ev.time < (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
+			    (ev.time < (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
 				_buffer->push_back (ev);
 			} else {
 				cerr << "Dropping incoming MIDI at time " << ev.time << "; offset=" 
-                                     << _global_port_buffer_offset << " limit=" 
-                                     << (_global_port_buffer_offset + _port_buffer_offset + nframes) << "\n";
+				     << _global_port_buffer_offset << " limit=" 
+				     << (_global_port_buffer_offset + _port_buffer_offset + nframes) << "\n";
 			}
 		}
 
@@ -145,13 +145,13 @@ MidiPort::flush_buffers (pframes_t nframes, framepos_t time)
 
 			if (ev.time() >= _global_port_buffer_offset + _port_buffer_offset) {
 				if (jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size()) != 0) {
-                                        cerr << "write failed, drop flushed note off on the floor, time " 
-                                             << ev.time() << " > " << _global_port_buffer_offset + _port_buffer_offset << endl;
-                                }
-                        } else {
-                                cerr << "drop flushed event on the floor, time " << ev.time() 
-                                     << " < " << _global_port_buffer_offset + _port_buffer_offset << endl;
-                        }
+					cerr << "write failed, drop flushed note off on the floor, time " 
+					     << ev.time() << " > " << _global_port_buffer_offset + _port_buffer_offset << endl;
+				}
+			} else {
+				cerr << "drop flushed event on the floor, time " << ev.time() 
+				     << " < " << _global_port_buffer_offset + _port_buffer_offset << endl;
+			}
 		}
 	}
 }

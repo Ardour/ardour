@@ -1,6 +1,6 @@
 /*
   Copyright (C) 2007 Paul Davis
-  Author: Dave Robillard
+  Author: David Robillard
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -164,7 +164,7 @@ MidiModel::NoteDiffCommand::change (const NotePtr note, Property prop,
 	assert (note);
 	
 	NoteChange change;
-        
+
 	switch (prop) {
 	case NoteNumber:
 		if (new_value == note->note()) {
@@ -1345,7 +1345,7 @@ MidiModel::write_to (boost::shared_ptr<MidiSource> source)
 	source->mark_streaming_write_completed();
 
 	set_edited(false);
-        
+
 	return true;
 }
 
@@ -1375,7 +1375,7 @@ MidiModel::sync_to_source ()
 	ms->mark_streaming_write_completed ();
 
 	set_edited (false);
-        
+
 	return true;
 }
 
@@ -1606,8 +1606,9 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 			continue;
 		}
 
-		DEBUG_TRACE (DEBUG::Sequence, string_compose ("\toverlap is %1 for (%2,%3) vs (%4,%5)\n", enum_2_string(overlap), 
-		                                              sa, ea, sb, eb));
+		DEBUG_TRACE (DEBUG::Sequence, string_compose (
+			             "\toverlap is %1 for (%2,%3) vs (%4,%5)\n",
+			             enum_2_string(overlap), sa, ea, sb, eb));
 
 		if (insert_merge_policy() == InsertMergeReject) {
 			DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 just reject\n", this));
@@ -1762,7 +1763,7 @@ MidiModel::insert_merge_policy () const
 
 	return ms->session().config.get_insert_merge_policy ();
 }
-                        
+
 void
 MidiModel::set_midi_source (boost::shared_ptr<MidiSource> s)
 {

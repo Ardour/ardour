@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2006 Paul Davis
-    Written by Dave Robillard, 2006
+    Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -426,7 +426,7 @@ MidiPlaylist::region_changed (const PBD::PropertyChange& what_changed, boost::sh
 	}
 
 	PBD::PropertyChange our_interests;
-        our_interests.add (Properties::midi_data);
+	our_interests.add (Properties::midi_data);
 
 	bool parent_wants_notify = Playlist::region_changed (what_changed, region);
 

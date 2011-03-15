@@ -171,7 +171,7 @@ MidiDiskstream::non_realtime_input_change ()
 
 		get_input_sources ();
 		set_capture_offset ();
-                set_align_style_from_io ();
+		set_align_style_from_io ();
 
 		input_change_pending.type = IOChange::NoChange;
 
@@ -882,8 +882,8 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	assert(!destructive());
 
 	if (record_enabled() &&
-            ((_session.transport_frame() - _last_flush_frame > disk_io_chunk_frames) ||
-             force_flush)) {
+	    ((_session.transport_frame() - _last_flush_frame > disk_io_chunk_frames) ||
+	     force_flush)) {
 		if ((!_write_source) || _write_source->midi_write (*_capture_buf, get_capture_start_frame (0), to_write) != to_write) {
 			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), _id) << endmsg;
 			return -1;
@@ -1255,9 +1255,9 @@ MidiDiskstream::set_state (const XMLNode& node, int version)
 		}
 	}
 
-        if (Diskstream::set_state (node, version)) {
-                return -1;
-        }
+	if (Diskstream::set_state (node, version)) {
+		return -1;
+	}
 
 	ChannelMode channel_mode = AllChannels;
 	if ((prop = node.property ("channel-mode")) != 0) {
@@ -1273,9 +1273,9 @@ MidiDiskstream::set_state (const XMLNode& node, int version)
 	}
 
 
-        if (capture_pending_node) {
-                use_pending_capture_data (*capture_pending_node);
-        }
+	if (capture_pending_node) {
+		use_pending_capture_data (*capture_pending_node);
+	}
 
 	set_channel_mode (channel_mode, channel_mask);
 
@@ -1383,9 +1383,9 @@ MidiDiskstream::set_align_style_from_io ()
 {
 	bool have_physical = false;
 
-        if (_alignment_choice != Automatic) {
-                return;
-        }
+	if (_alignment_choice != Automatic) {
+		return;
+	}
 
 	if (_io == 0) {
 		return;
