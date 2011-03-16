@@ -1,0 +1,8 @@
+((nil . ((fill-column . 79)))
+ (c-mode . ((indent-tabs-mode . t)
+            (c-file-style . "linux")
+            (c-label-minimum-indentation . 0)
+            (c-hanging-braces-alist . '((namespace-open after)
+                                        (substatement-open after)
+                                        (brace-list-open after)))))
+ (python-mode . ((indent-tabs-mode . nil))))
