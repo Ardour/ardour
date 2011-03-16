@@ -1531,7 +1531,9 @@ Session::auto_connect_route (Route* route, ChanCount& existing_inputs, ChanCount
 	   offset possible.
 	*/
 
-	cerr << "Auto-connect: existing in = " << existing_inputs << " out = " << existing_outputs << endl;
+	DEBUG_TRACE (DEBUG::Graph,
+	             string_compose("Auto-connect: existing in = %1 out = %2\n",
+	                            existing_inputs, existing_outputs));
 
 	const bool in_out_physical =
 		(Config->get_input_auto_connect() & AutoConnectPhysical)
@@ -1556,19 +1558,24 @@ Session::auto_connect_route (Route* route, ChanCount& existing_inputs, ChanCount
 		if (!physinputs.empty() && connect_inputs) {
 			uint32_t nphysical_in = physinputs.size();
 
-			cerr << "There are " << nphysical_in << " physical inputs of type " << *t << endl;
+			DEBUG_TRACE (DEBUG::Graph,
+			             string_compose("There are %1 physical inputs of type %2\n",
+			                            nphysical_in, *t));
 
 			for (uint32_t i = input_start.get(*t); i < route->n_inputs().get(*t) && i < nphysical_in; ++i) {
 				string port;
 
 				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-					cerr << "Get index " << in_offset.get(*t) << " + " << i << " % " << nphysical_in << " = " 
-					     << (in_offset.get(*t) + i) % nphysical_in
-					     << endl;
+					DEBUG_TRACE (DEBUG::Graph,
+					             string_compose("Get index %1 + %2 % %3 = %4\n",
+					                            in_offset.get(*t), i, nphysical_in,
+					                            (in_offset.get(*t) + i) % nphysical_in));
 					port = physinputs[(in_offset.get(*t) + i) % nphysical_in];
 				}
 
-				cerr << "Connect route " << route->name() << " IN to " << port << endl;
+				DEBUG_TRACE (DEBUG::Graph,
+				             string_compose("Connect route %1 IN to %2\n",
+				                            route->name(), port));
 
 				if (!port.empty() && route->input()->connect (
 					    route->input()->ports().port(*t, i), port, this)) {
@@ -1591,7 +1598,9 @@ Session::auto_connect_route (Route* route, ChanCount& existing_inputs, ChanCount
 					}
 				}
 
-				cerr << "Connect route " << route->name() << " OUT to " << port << endl;
+				DEBUG_TRACE (DEBUG::Graph,
+				             string_compose("Connect route %1 OUT to %2\n",
+				                            route->name(), port));
 
 				if (!port.empty() && route->output()->connect (
 						route->output()->ports().port(*t, i), port, this)) {

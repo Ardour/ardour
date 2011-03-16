@@ -341,7 +341,7 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
 		range.min = ~((jack_nframes_t) 0);
 		range.max = 0;
 
-                DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: %2 connections to check for latency range\n", name(), connections.size()));
+		DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: %2 connections to check for latency range\n", name(), connections.size()));
 
 		for (vector<string>::const_iterator c = connections.begin();
 		     c != connections.end(); ++c) {
@@ -354,6 +354,7 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
 					remote_port,
 					(playback ? JackPlaybackLatency : JackCaptureLatency),
 					&lr);
+				
 				DEBUG_TRACE (DEBUG::Latency, string_compose (
 					             "\t%1 <-> %2 : latter has latency range %3 .. %4\n",
 					             name(), *c, lr.min, lr.max));
@@ -363,7 +364,7 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
 		}
 
 	} else {
-                DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: not connected to anything\n", name()));
+		DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: not connected to anything\n", name()));
 		range.min = 0;
 		range.max = 0;
 	}
