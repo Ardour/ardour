@@ -19,42 +19,42 @@ APPNAME = 'gtkmm2ext'
 VERSION = GTKMM2EXT_VERSION
 
 gtkmm2ext_sources = [
-	'actions.cc',
+        'actions.cc',
         'application.cc',
-	'auto_spin.cc',
-	'barcontroller.cc',
-	'binding_proxy.cc',
-	'bindable_button.cc',
+        'auto_spin.cc',
+        'barcontroller.cc',
+        'binding_proxy.cc',
+        'bindable_button.cc',
         'bindings.cc',
-	'cell_renderer_pixbuf_multi.cc',
-	'cell_renderer_pixbuf_toggle.cc',
-	'choice.cc',
-	'click_box.cc',
-	'debug.cc',
-	'dndtreeview.cc',
-	'fastmeter.cc',
-	'focus_entry.cc',
-	'grouped_buttons.cc',
-	'gtk_ui.cc',
+        'cell_renderer_pixbuf_multi.cc',
+        'cell_renderer_pixbuf_toggle.cc',
+        'choice.cc',
+        'click_box.cc',
+        'debug.cc',
+        'dndtreeview.cc',
+        'fastmeter.cc',
+        'focus_entry.cc',
+        'grouped_buttons.cc',
+        'gtk_ui.cc',
         'gtkapplication.c',
-	'idle_adjustment.cc',
-	'keyboard.cc',
+        'idle_adjustment.cc',
+        'keyboard.cc',
         'motionfeedback.cc',
         'prolooks_helpers.c',
-	'pixfader.cc',
-	'pixscroller.cc',
-	'popup.cc',
-	'prompter.cc',
-	'scroomer.cc',
-	'selector.cc',
-	'slider_controller.cc',
-	'stateful_button.cc',
-	'tearoff.cc',
-	'textviewer.cc',
+        'pixfader.cc',
+        'pixscroller.cc',
+        'popup.cc',
+        'prompter.cc',
+        'scroomer.cc',
+        'selector.cc',
+        'slider_controller.cc',
+        'stateful_button.cc',
+        'tearoff.cc',
+        'textviewer.cc',
         'treeutils.cc',
-	'utils.cc',
-	'version.cc',
-	'window_title.cc'
+        'utils.cc',
+        'version.cc',
+        'window_title.cc'
 ]
 
 # Mandatory variables
@@ -64,37 +64,37 @@ blddir = 'build'
 path_prefix = 'libs/gtkmm2ext/'
 
 def set_options(opt):
-	autowaf.set_options(opt)
+        autowaf.set_options(opt)
 
 def configure(conf):
-	autowaf.build_version_files(path_prefix+'gtkmm2ext/version.h', path_prefix+'version.cc',
-			'libgtkmm2ext', MAJOR, MINOR, MICRO)
-	autowaf.configure(conf)
-	conf.check_tool('compiler_cxx')
-	autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM', atleast_version='2.8')
-	autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.12.1')
+        autowaf.build_version_files(path_prefix+'gtkmm2ext/version.h', path_prefix+'version.cc',
+        		'libgtkmm2ext', MAJOR, MINOR, MICRO)
+        autowaf.configure(conf)
+        conf.check_tool('compiler_cxx')
+        autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM', atleast_version='2.8')
+        autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.12.1')
 
 
 def build(bld):
-	obj = bld.new_task_gen(features = 'cc cxx cshlib')
-	obj.source = gtkmm2ext_sources
-	obj.export_incdirs = ['.']
-	obj.includes     = ['.']
-	obj.name         = 'libgtkmm2ext'
-	obj.target       = 'gtkmm2ext'
-	obj.uselib       = 'GTKMM GTK GTKOSX OSX GDK'
-	obj.uselib_local = 'libpbd'
-	obj.vnum         = GTKMM2EXT_LIB_VERSION
-	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-	obj.cxxflags     = [
-			'-DPACKAGE="libgtkmm2ext"',
-			'-DLOCALEDIR="' + os.path.join(
-				os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '"']
-	if bld.env['GTKOSX']:
-		obj.source += ['gtkapplication_quartz.mm']
-	else:
+        obj = bld.new_task_gen(features = 'cc cxx cshlib')
+        obj.source = gtkmm2ext_sources
+        obj.export_incdirs = ['.']
+        obj.includes     = ['.']
+        obj.name         = 'libgtkmm2ext'
+        obj.target       = 'gtkmm2ext'
+        obj.uselib       = 'GTKMM GTK GTKOSX OSX GDK'
+        obj.uselib_local = 'libpbd'
+        obj.vnum         = GTKMM2EXT_LIB_VERSION
+        obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+        obj.cxxflags     = [
+        		'-DPACKAGE="libgtkmm2ext"',
+        		'-DLOCALEDIR="' + os.path.join(
+        			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '"']
+        if bld.env['GTKOSX']:
+        	obj.source += ['gtkapplication_quartz.mm']
+        else:
                 obj.source += ['gtkapplication_x11.c']
 
 def shutdown():
-	autowaf.shutdown()
+        autowaf.shutdown()
 

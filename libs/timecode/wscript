@@ -23,24 +23,24 @@ srcdir = '.'
 blddir = 'build'
 
 def set_options(opt):
-	autowaf.set_options(opt)
+        autowaf.set_options(opt)
 
 def configure(conf):
-	autowaf.configure(conf)
+        autowaf.configure(conf)
 
-	conf.check_tool('compiler_cxx')
+        conf.check_tool('compiler_cxx')
 
 def build(bld):
-	# Library
-	obj = bld.new_task_gen('cxx', 'shlib')
-	obj.source         = [ 'src/time.cc', 'src/bbt_time.cc' ]
-	obj.export_incdirs = ['.']
-	obj.includes       = ['.', './src']
-	obj.name           = 'libtimecode'
-	obj.target         = 'timecode'
-	obj.vnum           = TIMECODE_LIB_VERSION
-	obj.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
+        # Library
+        obj = bld.new_task_gen('cxx', 'shlib')
+        obj.source         = [ 'src/time.cc', 'src/bbt_time.cc' ]
+        obj.export_incdirs = ['.']
+        obj.includes       = ['.', './src']
+        obj.name           = 'libtimecode'
+        obj.target         = 'timecode'
+        obj.vnum           = TIMECODE_LIB_VERSION
+        obj.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 def shutdown():
-	autowaf.shutdown()
+        autowaf.shutdown()
 

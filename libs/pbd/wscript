@@ -27,121 +27,121 @@ blddir = 'build'
 path_prefix = 'libs/pbd/'
 
 def set_options(opt):
-	autowaf.set_options(opt)
+        autowaf.set_options(opt)
 
 def configure(conf):
-	autowaf.build_version_files(path_prefix+'pbd/version.h', path_prefix+'version.cc',
-			'libpbd', MAJOR, MINOR, MICRO)
-	autowaf.configure(conf)
-	conf.check_tool('compiler_cxx')
-	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
-	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
+        autowaf.build_version_files(path_prefix+'pbd/version.h', path_prefix+'version.cc',
+        		'libpbd', MAJOR, MINOR, MICRO)
+        autowaf.configure(conf)
+        conf.check_tool('compiler_cxx')
+        autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
+        autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
         if sys.platform != 'darwin':
                 autowaf.check_pkg(conf, 'uuid', uselib_store='UUID')
 
-	conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT')
-	conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO')
-	conf.check(header_name='unistd.h', define_name='HAVE_UNISTD')
-	if conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', ccflags='-D_XOPEN_SOURCE=600') == False:
-		conf.define ('NO_POSIX_MEMALIGN',1)
+        conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT')
+        conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO')
+        conf.check(header_name='unistd.h', define_name='HAVE_UNISTD')
+        if conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', ccflags='-D_XOPEN_SOURCE=600') == False:
+        	conf.define ('NO_POSIX_MEMALIGN',1)
 
-	conf.write_config_header('libpbd-config.h')
+        conf.write_config_header('libpbd-config.h')
 
-	# Boost headers
-	autowaf.check_header(conf, 'boost/shared_ptr.hpp')
-	autowaf.check_header(conf, 'boost/weak_ptr.hpp')
-	# autowaf.check_header(conf, 'boost/uuid/uuid.hpp')
+        # Boost headers
+        autowaf.check_header(conf, 'boost/shared_ptr.hpp')
+        autowaf.check_header(conf, 'boost/weak_ptr.hpp')
+        # autowaf.check_header(conf, 'boost/uuid/uuid.hpp')
 
 def build(bld):
-	# Library
-	obj = bld.new_task_gen('cxx', 'shlib')
-	obj.source = '''
-		basename.cc
-		base_ui.cc
+        # Library
+        obj = bld.new_task_gen('cxx', 'shlib')
+        obj.source = '''
+        	basename.cc
+        	base_ui.cc
                 boost_debug.cc
                 cartesian.cc
-		command.cc
-		convert.cc
-		controllable.cc
-		controllable_descriptor.cc
+        	command.cc
+        	convert.cc
+        	controllable.cc
+        	controllable_descriptor.cc
                 clear_dir.cc
                 crossthread.cc
                 cpus.cc
                 debug.cc
-		enumwriter.cc
+        	enumwriter.cc
                 event_loop.cc
-		dmalloc.cc
+        	dmalloc.cc
                 enums.cc
                 epa.cc
-		error.cc
-		filesystem.cc
-		filesystem_paths.cc
-		file_manager.cc
-		file_utils.cc
-		fpu.cc
-		id.cc
+        	error.cc
+        	filesystem.cc
+        	filesystem_paths.cc
+        	file_manager.cc
+        	file_utils.cc
+        	fpu.cc
+        	id.cc
                 locale_guard.cc
                 malign.cc
-		mountpoint.cc
+        	mountpoint.cc
                 openuri.cc
-		pathscanner.cc
-		pool.cc
+        	pathscanner.cc
+        	pool.cc
                 property_list.cc
-		pthread_utils.cc
-		receiver.cc
-		search_path.cc
-		semutils.cc
-		shortpath.cc
-		signals.cc
+        	pthread_utils.cc
+        	receiver.cc
+        	search_path.cc
+        	semutils.cc
+        	shortpath.cc
+        	signals.cc
                 sndfile_manager.cc
-		stacktrace.cc
-		stateful_diff_command.cc
-		stateful.cc
-		strreplace.cc
-		strsplit.cc
-		textreceiver.cc
-		transmitter.cc
-		undo.cc
-		uuid.cc
-		version.cc
-		whitespace.cc
-		xml++.cc
-	'''
+        	stacktrace.cc
+        	stateful_diff_command.cc
+        	stateful.cc
+        	strreplace.cc
+        	strsplit.cc
+        	textreceiver.cc
+        	transmitter.cc
+        	undo.cc
+        	uuid.cc
+        	version.cc
+        	whitespace.cc
+        	xml++.cc
+        '''
 
-	if bld.env['DEBUG_RT_ALLOC']:
-		obj.source += 'debug_rt_alloc.c'
+        if bld.env['DEBUG_RT_ALLOC']:
+        	obj.source += 'debug_rt_alloc.c'
 
-	obj.export_incdirs = ['.']
-	obj.includes     = ['.']
-	obj.name         = 'libpbd'
-	obj.target       = 'pbd'
-	obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE'
-	if sys.platform == 'darwin':
-		TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
-		obj.source += 'cocoa_open_uri.mm'
-		obj.uselib += ' OSX'
-	obj.vnum         = LIBPBD_LIB_VERSION
-	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-	obj.cxxflags     = ['-DPACKAGE="libpbd"']
+        obj.export_incdirs = ['.']
+        obj.includes     = ['.']
+        obj.name         = 'libpbd'
+        obj.target       = 'pbd'
+        obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE'
+        if sys.platform == 'darwin':
+        	TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
+        	obj.source += 'cocoa_open_uri.mm'
+        	obj.uselib += ' OSX'
+        obj.vnum         = LIBPBD_LIB_VERSION
+        obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+        obj.cxxflags     = ['-DPACKAGE="libpbd"']
 
-	if bld.env['build_target'] == 'x86_64':
-		obj.cxxflags += [ '-DUSE_X86_64_ASM' ]
+        if bld.env['build_target'] == 'x86_64':
+        	obj.cxxflags += [ '-DUSE_X86_64_ASM' ]
 
-	if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
-		# Unit tests
-		testobj              = bld.new_task_gen('cxx', 'program')
-		testobj.source       = '''
+        if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
+        	# Unit tests
+        	testobj              = bld.new_task_gen('cxx', 'program')
+        	testobj.source       = '''
                         test/testrunner.cc
-			test/xpath.cc
+        		test/xpath.cc
                         test/scalar_properties.cc
-			test/signals_test.cc
-		'''.split()
-		testobj.target       = 'run-tests'
-		testobj.includes     = obj.includes + ['test', '../pbd']
-		testobj.uselib       = 'CPPUNIT XML SNDFILE'
-		testobj.uselib_local = 'libpbd'
+        		test/signals_test.cc
+        	'''.split()
+        	testobj.target       = 'run-tests'
+        	testobj.includes     = obj.includes + ['test', '../pbd']
+        	testobj.uselib       = 'CPPUNIT XML SNDFILE'
+        	testobj.uselib_local = 'libpbd'
 
 
 def shutdown():
-	autowaf.shutdown()
+        autowaf.shutdown()
 

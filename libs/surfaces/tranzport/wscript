@@ -13,40 +13,40 @@ srcdir = '.'
 blddir = 'build'
 
 def set_options(opt):
-	autowaf.set_options(opt)
+        autowaf.set_options(opt)
 
 def configure(conf):
-	autowaf.configure(conf)
+        autowaf.configure(conf)
 
 def build(bld):
-	obj = bld.new_task_gen('cxx', 'shlib')
-	obj.source = '''
-		button_events.cc
-		buttons.cc
-		general.cc
-		init.cc
-		interface.cc
-		io.cc
-		io_usb.cc
-		lcd.cc
-		lights.cc
-		mode.cc
-		panner.cc
-		screen.cc
-		show.cc
-		state.cc
-		wheel.cc
-		wheel_modes.cc
-	'''
-	obj.export_incdirs = ['./tranzport']
-	obj.cxxflags     = '-DPACKAGE="ardour_tranzport"'
-	obj.includes     = ['.', './tranzport']
-	obj.name         = 'libardour_tranzport'
-	obj.target       = 'ardour_tranzport'
-	obj.uselib_local = 'libardour libardour_cp'
-	obj.vnum         = LIBARDOUR_TRANZPORT_LIB_VERSION
-	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'surfaces')
+        obj = bld.new_task_gen('cxx', 'shlib')
+        obj.source = '''
+        	button_events.cc
+        	buttons.cc
+        	general.cc
+        	init.cc
+        	interface.cc
+        	io.cc
+        	io_usb.cc
+        	lcd.cc
+        	lights.cc
+        	mode.cc
+        	panner.cc
+        	screen.cc
+        	show.cc
+        	state.cc
+        	wheel.cc
+        	wheel_modes.cc
+        '''
+        obj.export_incdirs = ['./tranzport']
+        obj.cxxflags     = '-DPACKAGE="ardour_tranzport"'
+        obj.includes     = ['.', './tranzport']
+        obj.name         = 'libardour_tranzport'
+        obj.target       = 'ardour_tranzport'
+        obj.uselib_local = 'libardour libardour_cp'
+        obj.vnum         = LIBARDOUR_TRANZPORT_LIB_VERSION
+        obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'surfaces')
 
 def shutdown():
-	autowaf.shutdown()
+        autowaf.shutdown()
 

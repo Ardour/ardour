@@ -2,43 +2,43 @@ import autowaf
 import os
 
 libappleutility_sources = [
-	'AUOutputBL.cpp',
-	'AUParamInfo.cpp',
-	'CAAudioChannelLayout.cpp',
-	'CAAudioChannelLayoutObject.cpp',
-	'CAAudioFile.cpp',
-	'CAAudioUnit.cpp',
-	'CAAUParameter.cpp',
-	'CABufferList.cpp',
-	'CACFDictionary.cpp',
-	'CACFNumber.cpp',
-	'CACFString.cpp',
-	'CAComponent.cpp',
-	'CAComponentDescription.cpp',
-	'CADebugMacros.cpp',
-	'CAStreamBasicDescription.cpp',
-	'CAXException.cpp'
+        'AUOutputBL.cpp',
+        'AUParamInfo.cpp',
+        'CAAudioChannelLayout.cpp',
+        'CAAudioChannelLayoutObject.cpp',
+        'CAAudioFile.cpp',
+        'CAAudioUnit.cpp',
+        'CAAUParameter.cpp',
+        'CABufferList.cpp',
+        'CACFDictionary.cpp',
+        'CACFNumber.cpp',
+        'CACFString.cpp',
+        'CAComponent.cpp',
+        'CAComponentDescription.cpp',
+        'CADebugMacros.cpp',
+        'CAStreamBasicDescription.cpp',
+        'CAXException.cpp'
 ]
 
 def set_options(opt):
-	autowaf.set_options(opt)
-	
+        autowaf.set_options(opt)
+        
 def configure(conf):
-	autowaf.configure(conf)
-	
+        autowaf.configure(conf)
+        
 def build(bld):
-	obj                = bld.new_task_gen('cxx', 'shlib')
-	obj.uselib         = 'AUDIOUNITS OSX'
-	obj.source         = libappleutility_sources
-	obj.export_incdirs = ['.']
-	obj.includes       = ['.']
-	obj.name           = 'libappleutility'
-	obj.target         = 'appleutility'
-	obj.install_path   = os.path.join(bld.env['LIBDIR'], 'appleutility')
+        obj                = bld.new_task_gen('cxx', 'shlib')
+        obj.uselib         = 'AUDIOUNITS OSX'
+        obj.source         = libappleutility_sources
+        obj.export_incdirs = ['.']
+        obj.includes       = ['.']
+        obj.name           = 'libappleutility'
+        obj.target         = 'appleutility'
+        obj.install_path   = os.path.join(bld.env['LIBDIR'], 'appleutility')
 
 
 def shutdown():
-	autowaf.shutdown()
+        autowaf.shutdown()
 
 def i18n(bld):
-	pass
+        pass

@@ -32,359 +32,359 @@ blddir = 'build'
 path_prefix = 'libs/ardour/'
 
 libardour_sources = [
-	'amp.cc',
-	'analyser.cc',
-	'audio_buffer.cc',
-	'audio_diskstream.cc',
-	'audio_library.cc',
-	'audio_playlist.cc',
-	'audio_playlist_importer.cc',
-	'audio_port.cc',
-	'audio_region_importer.cc',
-	'audio_track.cc',
-	'audio_track_importer.cc',
-	'audioanalyser.cc',
-	'audioengine.cc',
-	'audiofile_tagger.cc',
-	'audiofilesource.cc',
-	'audioregion.cc',
-	'audiosource.cc',
-	'auditioner.cc',
-	'automatable.cc',
-	'automation.cc',
-	'automation_control.cc',
-	'automation_list.cc',
-	'beats_frames_converter.cc',
-	'broadcast_info.cc',
-	'buffer.cc',
-	'buffer_manager.cc',
-	'buffer_set.cc',
-	'bundle.cc',
-	'butler.cc',
+        'amp.cc',
+        'analyser.cc',
+        'audio_buffer.cc',
+        'audio_diskstream.cc',
+        'audio_library.cc',
+        'audio_playlist.cc',
+        'audio_playlist_importer.cc',
+        'audio_port.cc',
+        'audio_region_importer.cc',
+        'audio_track.cc',
+        'audio_track_importer.cc',
+        'audioanalyser.cc',
+        'audioengine.cc',
+        'audiofile_tagger.cc',
+        'audiofilesource.cc',
+        'audioregion.cc',
+        'audiosource.cc',
+        'auditioner.cc',
+        'automatable.cc',
+        'automation.cc',
+        'automation_control.cc',
+        'automation_list.cc',
+        'beats_frames_converter.cc',
+        'broadcast_info.cc',
+        'buffer.cc',
+        'buffer_manager.cc',
+        'buffer_set.cc',
+        'bundle.cc',
+        'butler.cc',
         'callback.cc',
         'capturing_processor.cc',
-	'chan_count.cc',
-	'chan_mapping.cc',
-	'configuration.cc',
-	'config_text.cc',
-	'control_protocol_manager.cc',
-	'control_protocol_search_path.cc',
-	'crossfade.cc',
-	'cycle_timer.cc',
-	'default_click.cc',
-	'debug.cc',
-	'delivery.cc',
-	'directory_names.cc',
-	'diskstream.cc',
-	'element_import_handler.cc',
-	'element_importer.cc',
-	'enums.cc',
-	'event_type_map.cc',
-	'export_channel.cc',
-	'export_channel_configuration.cc',
-	'export_failed.cc',
-	'export_filename.cc',
-	'export_format_base.cc',
-	'export_format_manager.cc',
-	'export_format_specification.cc',
-	'export_formats.cc',
-	'export_graph_builder.cc',
-	'export_handler.cc',
-	'export_preset.cc',
-	'export_profile_manager.cc',
-	'export_status.cc',
-	'export_timespan.cc',
-	'file_source.cc',
-	'filename_extensions.cc',
-	'filesystem_paths.cc',
-	'filter.cc',
-	'find_session.cc',
-	'gain.cc',
-	'globals.cc',
-	'graph.cc',
-	'graphnode.cc',
-	'import.cc',
-	'internal_return.cc',
-	'internal_send.cc',
-	'interpolation.cc',
-	'io.cc',
-	'io_processor.cc',
-	'jack_slave.cc',
-	'ladspa_plugin.cc',
-	'location.cc',
-	'location_importer.cc',
-	'meter.cc',
-	'midi_automation_list_binder.cc',
-	'midi_buffer.cc',
-	'midi_clock_slave.cc',
-	'midi_diskstream.cc',
-	'midi_model.cc',
-	'midi_patch_manager.cc',
-	'midi_playlist.cc',
-	'midi_port.cc',
-	'midi_region.cc',
-	'midi_ring_buffer.cc',
-	'midi_source.cc',
-	'midi_state_tracker.cc',
-	'midi_stretch.cc',
-	'midi_track.cc',
-	'midi_ui.cc',
-	'mix.cc',
+        'chan_count.cc',
+        'chan_mapping.cc',
+        'configuration.cc',
+        'config_text.cc',
+        'control_protocol_manager.cc',
+        'control_protocol_search_path.cc',
+        'crossfade.cc',
+        'cycle_timer.cc',
+        'default_click.cc',
+        'debug.cc',
+        'delivery.cc',
+        'directory_names.cc',
+        'diskstream.cc',
+        'element_import_handler.cc',
+        'element_importer.cc',
+        'enums.cc',
+        'event_type_map.cc',
+        'export_channel.cc',
+        'export_channel_configuration.cc',
+        'export_failed.cc',
+        'export_filename.cc',
+        'export_format_base.cc',
+        'export_format_manager.cc',
+        'export_format_specification.cc',
+        'export_formats.cc',
+        'export_graph_builder.cc',
+        'export_handler.cc',
+        'export_preset.cc',
+        'export_profile_manager.cc',
+        'export_status.cc',
+        'export_timespan.cc',
+        'file_source.cc',
+        'filename_extensions.cc',
+        'filesystem_paths.cc',
+        'filter.cc',
+        'find_session.cc',
+        'gain.cc',
+        'globals.cc',
+        'graph.cc',
+        'graphnode.cc',
+        'import.cc',
+        'internal_return.cc',
+        'internal_send.cc',
+        'interpolation.cc',
+        'io.cc',
+        'io_processor.cc',
+        'jack_slave.cc',
+        'ladspa_plugin.cc',
+        'location.cc',
+        'location_importer.cc',
+        'meter.cc',
+        'midi_automation_list_binder.cc',
+        'midi_buffer.cc',
+        'midi_clock_slave.cc',
+        'midi_diskstream.cc',
+        'midi_model.cc',
+        'midi_patch_manager.cc',
+        'midi_playlist.cc',
+        'midi_port.cc',
+        'midi_region.cc',
+        'midi_ring_buffer.cc',
+        'midi_source.cc',
+        'midi_state_tracker.cc',
+        'midi_stretch.cc',
+        'midi_track.cc',
+        'midi_ui.cc',
+        'mix.cc',
         'monitor_processor.cc',
-	'mtc_slave.cc',
-	'mtdm.cc',
-	'mute_master.cc',
-	'named_selection.cc',
-	'onset_detector.cc',
-	'operations.cc',
+        'mtc_slave.cc',
+        'mtdm.cc',
+        'mute_master.cc',
+        'named_selection.cc',
+        'onset_detector.cc',
+        'operations.cc',
         'pan_controllable.cc',
         'pannable.cc',
         'panner.cc',
         'panner_manager.cc',
         'panner_search_path.cc',
         'panner_shell.cc',
-	'pcm_utils.cc',
-	'pi_controller.cc',
-	'playlist.cc',
-	'playlist_factory.cc',
-	'plugin.cc',
-	'plugin_insert.cc',
-	'plugin_manager.cc',
-	'port.cc',
-	'port_insert.cc',
-	'port_set.cc',
-	'process_thread.cc',
-	'processor.cc',
-	'progress.cc',
-	'quantize.cc',
-	'rc_configuration.cc',
-	'recent_sessions.cc',
-	'region_factory.cc',
-	'resampled_source.cc',
-	'region.cc',
-	'return.cc',
-	'reverse.cc',
-	'route.cc',
-	'route_group.cc',
-	'route_group_member.cc',
-	'rb_effect.cc',
-	'send.cc',
-	'session.cc',
-	'session_butler.cc',
-	'session_click.cc',
-	'session_command.cc',
-	'session_configuration.cc',
-	'session_directory.cc',
-	'session_events.cc',
-	'session_export.cc',
-	'session_handle.cc',
-	'session_metadata.cc',
-	'session_midi.cc',
-	'session_object.cc',
-	'session_playlists.cc',
-	'session_process.cc',
-	'session_rtevents.cc',
-	'session_state.cc',
-	'session_state_utils.cc',
-	'session_time.cc',
-	'session_transport.cc',
-	'session_utils.cc',
-	'slave.cc',
-	'smf_source.cc',
-	'sndfile_helpers.cc',
-	'sndfileimportable.cc',
-	'sndfilesource.cc',
-	'source.cc',
-	'source_factory.cc',
+        'pcm_utils.cc',
+        'pi_controller.cc',
+        'playlist.cc',
+        'playlist_factory.cc',
+        'plugin.cc',
+        'plugin_insert.cc',
+        'plugin_manager.cc',
+        'port.cc',
+        'port_insert.cc',
+        'port_set.cc',
+        'process_thread.cc',
+        'processor.cc',
+        'progress.cc',
+        'quantize.cc',
+        'rc_configuration.cc',
+        'recent_sessions.cc',
+        'region_factory.cc',
+        'resampled_source.cc',
+        'region.cc',
+        'return.cc',
+        'reverse.cc',
+        'route.cc',
+        'route_group.cc',
+        'route_group_member.cc',
+        'rb_effect.cc',
+        'send.cc',
+        'session.cc',
+        'session_butler.cc',
+        'session_click.cc',
+        'session_command.cc',
+        'session_configuration.cc',
+        'session_directory.cc',
+        'session_events.cc',
+        'session_export.cc',
+        'session_handle.cc',
+        'session_metadata.cc',
+        'session_midi.cc',
+        'session_object.cc',
+        'session_playlists.cc',
+        'session_process.cc',
+        'session_rtevents.cc',
+        'session_state.cc',
+        'session_state_utils.cc',
+        'session_time.cc',
+        'session_transport.cc',
+        'session_utils.cc',
+        'slave.cc',
+        'smf_source.cc',
+        'sndfile_helpers.cc',
+        'sndfileimportable.cc',
+        'sndfilesource.cc',
+        'source.cc',
+        'source_factory.cc',
         'speakers.cc',
-	'strip_silence.cc',
-	'svn_revision.cc',
-	'tape_file_matcher.cc',
-	'template_utils.cc',
-	'tempo.cc',
-	'tempo_map_importer.cc',
+        'strip_silence.cc',
+        'svn_revision.cc',
+        'tape_file_matcher.cc',
+        'template_utils.cc',
+        'tempo.cc',
+        'tempo_map_importer.cc',
         'thread_buffers.cc',
-	'ticker.cc',
-	'track.cc',
-	'transient_detector.cc',
-	'unknown_processor.cc',
-	'user_bundle.cc',
-	'utils.cc',
-	'version.cc'
+        'ticker.cc',
+        'track.cc',
+        'transient_detector.cc',
+        'unknown_processor.cc',
+        'user_bundle.cc',
+        'utils.cc',
+        'version.cc'
 ]
 
 def flac_supported():
-	cmd = subprocess.Popen ("sndfile-info testfile.flac", 
-				stdout = subprocess.PIPE,
-				stderr = subprocess.STDOUT, shell = True)
-	out = cmd.communicate()[0].decode('utf-8');
-	return re.search ('unknown format', out) == None
+        cmd = subprocess.Popen ("sndfile-info testfile.flac", 
+        			stdout = subprocess.PIPE,
+        			stderr = subprocess.STDOUT, shell = True)
+        out = cmd.communicate()[0].decode('utf-8');
+        return re.search ('unknown format', out) == None
 
 def ogg_supported():
-	cmd = subprocess.Popen ("sndfile-info testfile.ogg", 
-				stdout = subprocess.PIPE,
-				stderr = subprocess.STDOUT, shell = True)
-	out = cmd.communicate()[0].decode('utf-8');
-	return re.search ('unknown format', out) == None
+        cmd = subprocess.Popen ("sndfile-info testfile.ogg", 
+        			stdout = subprocess.PIPE,
+        			stderr = subprocess.STDOUT, shell = True)
+        out = cmd.communicate()[0].decode('utf-8');
+        return re.search ('unknown format', out) == None
 
 def set_options(opt):
-	autowaf.set_options(opt)
+        autowaf.set_options(opt)
 
 def configure(conf):
-	autowaf.build_version_files(path_prefix+'ardour/version.h', path_prefix+'version.cc',
-			'libardour3', MAJOR, MINOR, MICRO)
-	autowaf.configure(conf)
-	conf.check_tool('compiler_cxx gas')
-	autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO', atleast_version='0.3.2')
-	autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.118.2')
-	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
-	autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF', atleast_version='0.4.0')
-	autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE', atleast_version='0.1.0')
-	autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
-	autowaf.check_pkg(conf, 'slv2', uselib_store='SLV2', atleast_version='0.6.4', mandatory=False)
-	autowaf.check_pkg(conf, 'slv2', uselib_store='NEW_SLV2', atleast_version='0.7.0', mandatory=False)
-	autowaf.check_pkg(conf, 'rasqal', uselib_store='RASQAL', atleast_version='0.9.14', mandatory=False)
-	autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH', mandatory=False)
-	autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
-	autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
-	autowaf.check_pkg(conf, 'flac', uselib_store='FLAC', atleast_version='1.2.1')
-	autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
+        autowaf.build_version_files(path_prefix+'ardour/version.h', path_prefix+'version.cc',
+        		'libardour3', MAJOR, MINOR, MICRO)
+        autowaf.configure(conf)
+        conf.check_tool('compiler_cxx gas')
+        autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO', atleast_version='0.3.2')
+        autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.118.2')
+        autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
+        autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF', atleast_version='0.4.0')
+        autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE', atleast_version='0.1.0')
+        autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
+        autowaf.check_pkg(conf, 'slv2', uselib_store='SLV2', atleast_version='0.6.4', mandatory=False)
+        autowaf.check_pkg(conf, 'slv2', uselib_store='NEW_SLV2', atleast_version='0.7.0', mandatory=False)
+        autowaf.check_pkg(conf, 'rasqal', uselib_store='RASQAL', atleast_version='0.9.14', mandatory=False)
+        autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH', mandatory=False)
+        autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
+        autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
+        autowaf.check_pkg(conf, 'flac', uselib_store='FLAC', atleast_version='1.2.1')
+        autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
 
-	# we don't try to detect this, since its part of our source tree
+        # we don't try to detect this, since its part of our source tree
 
-	conf.define('HAVE_RUBBERBAND', 1) # controls whether we think we have it
-	conf.define('USE_RUBBERBAND', 1)  # controls whether we actually use it
+        conf.define('HAVE_RUBBERBAND', 1) # controls whether we think we have it
+        conf.define('USE_RUBBERBAND', 1)  # controls whether we actually use it
 
-	conf.define('CURRENT_SESSION_FILE_VERSION', CURRENT_SESSION_FILE_VERSION)
+        conf.define('CURRENT_SESSION_FILE_VERSION', CURRENT_SESSION_FILE_VERSION)
 
-	conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H')
-	conf.check(header_name='wordexp.h', define_name='HAVE_WORDEXP')
+        conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H')
+        conf.check(header_name='wordexp.h', define_name='HAVE_WORDEXP')
 
-	conf.check(header_name='jack/session.h', define_name='HAVE_JACK_SESSION')
+        conf.check(header_name='jack/session.h', define_name='HAVE_JACK_SESSION')
 
-	conf.check(header_name='unistd.h', define_name='HAVE_UNISTD')
+        conf.check(header_name='unistd.h', define_name='HAVE_UNISTD')
         
-	conf.check_cc(fragment = "#include <jack/jack.h>\nvoid callback (int code, const char* reason, void* arg) { return; }\nint main(int argc, char **argv) { jack_client_t* c; jack_on_info_shutdown (c, callback, (void*) 0); return 0; }\n",
+        conf.check_cc(fragment = "#include <jack/jack.h>\nvoid callback (int code, const char* reason, void* arg) { return; }\nint main(int argc, char **argv) { jack_client_t* c; jack_on_info_shutdown (c, callback, (void*) 0); return 0; }\n",
                       linkflags = ['-ljack'],
-		      msg = 'Checking for jack_on_info_shutdown',
+        	      msg = 'Checking for jack_on_info_shutdown',
                       define_name = 'HAVE_JACK_ON_INFO_SHUTDOWN',
-		      okmsg = 'present')
+        	      okmsg = 'present')
 
-	conf.check_cc(fragment = "#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_t* p; jack_latency_range_t r; jack_port_set_latency_range (p, JackCaptureLatency, &r); return 0; }\n",
+        conf.check_cc(fragment = "#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_t* p; jack_latency_range_t r; jack_port_set_latency_range (p, JackCaptureLatency, &r); return 0; }\n",
                       linkflags = ['-ljack'],
-		      msg = 'Checking for new JACK latency API',
-		      okmsg = 'present',
+        	      msg = 'Checking for new JACK latency API',
+        	      okmsg = 'present',
                       mandatory = True,
                       errmsg = 'missing - a version of JACK that supports jack_port_set_latency_range() is required to compile Ardour3')
 
-	conf.check_cc(fragment = '#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_type_get_buffer_size ((jack_client_t*)0, ""); }\n',
+        conf.check_cc(fragment = '#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_type_get_buffer_size ((jack_client_t*)0, ""); }\n',
                       linkflags = ['-ljack'],
-		      msg = 'Checking for new jack_port_type_get_buffer_size',
+        	      msg = 'Checking for new jack_port_type_get_buffer_size',
                       okmsg = 'present',
                       mandatory = True,
-		      errmsg = 'missing - a version of JACK that supports jack_port_type_get_buffer_size() is required to compile Ardour3')
+        	      errmsg = 'missing - a version of JACK that supports jack_port_type_get_buffer_size() is required to compile Ardour3')
         
-	if flac_supported():
-		conf.define ('HAVE_FLAC', 1)
-	if ogg_supported():
-		conf.define ('HAVE_OGG', 1)
+        if flac_supported():
+        	conf.define ('HAVE_FLAC', 1)
+        if ogg_supported():
+        	conf.define ('HAVE_OGG', 1)
 
-	conf.write_config_header('libardour-config.h')
+        conf.write_config_header('libardour-config.h')
 
-	# Boost headers
-	autowaf.check_header(conf, 'boost/shared_ptr.hpp')
-	autowaf.check_header(conf, 'boost/weak_ptr.hpp')
-	autowaf.check_header(conf, 'boost/scoped_ptr.hpp')
-	autowaf.check_header(conf, 'boost/ptr_container/ptr_list.hpp')
+        # Boost headers
+        autowaf.check_header(conf, 'boost/shared_ptr.hpp')
+        autowaf.check_header(conf, 'boost/weak_ptr.hpp')
+        autowaf.check_header(conf, 'boost/scoped_ptr.hpp')
+        autowaf.check_header(conf, 'boost/ptr_container/ptr_list.hpp')
 
 
 def build(bld):
-	# Library
-	obj              = bld.new_task_gen('cxx', 'shlib')
-	obj.source       = libardour_sources
-	obj.export_incdirs = ['.']
-	obj.includes     = ['.', '../surfaces/control_protocol', '..']
-	obj.name         = 'libardour'
-	obj.target       = 'ardour'
-	obj.uselib       = 'GLIBMM GTHREAD AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF AUDIOUNIT OSX BOOST CURL DL'
-	obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libvampplugin libtaglib librubberband libaudiographer'
-	obj.vnum         = LIBARDOUR_LIB_VERSION
-	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-	obj.cxxflags     = ['-DPACKAGE="libardour3"']
-	obj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
-	obj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
-	obj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
-	obj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
-			os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
-	obj.cxxflags     += ['-DVAMP_DIR="' + os.path.join(
-			os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"']
-	obj.cxxflags     += ['-DPROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"']
+        # Library
+        obj              = bld.new_task_gen('cxx', 'shlib')
+        obj.source       = libardour_sources
+        obj.export_incdirs = ['.']
+        obj.includes     = ['.', '../surfaces/control_protocol', '..']
+        obj.name         = 'libardour'
+        obj.target       = 'ardour'
+        obj.uselib       = 'GLIBMM GTHREAD AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF AUDIOUNIT OSX BOOST CURL DL'
+        obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libvampplugin libtaglib librubberband libaudiographer'
+        obj.vnum         = LIBARDOUR_LIB_VERSION
+        obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+        obj.cxxflags     = ['-DPACKAGE="libardour3"']
+        obj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
+        obj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
+        obj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
+        obj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
+        		os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
+        obj.cxxflags     += ['-DVAMP_DIR="' + os.path.join(
+        		os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"']
+        obj.cxxflags     += ['-DPROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"']
 
-	#obj.source += ' st_stretch.cc st_pitch.cc '
-	#obj.uselib += ' SOUNDTOUCH '
-	#obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
-	
-	if bld.env['HAVE_SLV2']:
-		obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc', 'uri_map.cc', 'lv2_pfile.c' ]
-		obj.uselib += ' SLV2 ' + ' RASQAL '
-		
-	if bld.env['VST_SUPPORT']:
-		obj.source += [ 'vst_plugin.cc', 'session_vst.cc' ]
-		obj.includes += [ '../fst' ]
-		obj.cxxflags += [ '-DVST_SUPPORT' ]
+        #obj.source += ' st_stretch.cc st_pitch.cc '
+        #obj.uselib += ' SOUNDTOUCH '
+        #obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
+        
+        if bld.env['HAVE_SLV2']:
+        	obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc', 'uri_map.cc', 'lv2_pfile.c' ]
+        	obj.uselib += ' SLV2 ' + ' RASQAL '
+        	
+        if bld.env['VST_SUPPORT']:
+        	obj.source += [ 'vst_plugin.cc', 'session_vst.cc' ]
+        	obj.includes += [ '../fst' ]
+        	obj.cxxflags += [ '-DVST_SUPPORT' ]
 
-	if bld.env['COREAUDIO']:
-		obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
-		obj.uselib_local += ' libappleutility'	
-		obj.source += [ 'audio_unit.cc' ]
+        if bld.env['COREAUDIO']:
+        	obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
+        	obj.uselib_local += ' libappleutility'	
+        	obj.source += [ 'audio_unit.cc' ]
 
-	if bld.env['FPU_OPTIMIZATION']:
-		if bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686':
+        if bld.env['FPU_OPTIMIZATION']:
+        	if bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686':
                         obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s' ]
-		elif bld.env['build_target'] == 'x86_64':
+        	elif bld.env['build_target'] == 'x86_64':
                         obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit.s' ]
 
-	# i18n
-	if bld.env['ENABLE_NLS']:
-		mo_files = glob.glob (os.path.join (bld.get_curdir(), 'po/*.mo'))
-		for mo in mo_files:
-			lang = os.path.basename (mo).replace ('.mo', '')
-			bld.install_as (os.path.join (bld.env['PREFIX'], 'share', 'locale', lang, 'LC_MESSAGES', APPNAME + '.mo'), mo)
+        # i18n
+        if bld.env['ENABLE_NLS']:
+        	mo_files = glob.glob (os.path.join (bld.get_curdir(), 'po/*.mo'))
+        	for mo in mo_files:
+        		lang = os.path.basename (mo).replace ('.mo', '')
+        		bld.install_as (os.path.join (bld.env['PREFIX'], 'share', 'locale', lang, 'LC_MESSAGES', APPNAME + '.mo'), mo)
 
-	if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
-		# Unit tests
-		testobj              = bld.new_task_gen('cxx', 'program')
-		testobj.source       = '''
-			test/bbt_test.cpp
-			test/interpolation_test.cpp
-			test/midi_clock_slave_test.cpp
-			test/resampled_source.cc
-			test/mantis_3356.cc
-			test/testrunner.cpp
-		'''.split()
-		testobj.includes     = obj.includes + ['test', '../pbd']
-		testobj.uselib       = 'CPPUNIT SIGCPP JACK GLIBMM GTHREAD SAMPLERATE XML LRDF COREAUDIO'
-		testobj.uselib_local = 'libpbd libmidipp libardour'
-		testobj.name         = 'libardour-tests'
-		testobj.target       = 'run-tests'
-		testobj.install_path = ''
-		testobj.cxxflags     = ['-DPACKAGE="libardour3test"']
-		testobj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
-		testobj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
-		testobj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
-		testobj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
-				os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
-		testobj.cxxflags     += ['-DVAMP_DIR="' + os.path.join(
-				os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"']
-		if bld.env['FPU_OPTIMIZATION']:
-			testobj.source += [ 'sse_functions_xmm.cc' ]
-			if bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686':
-				testobj.source += [ 'sse_functions.s' ]
-			elif bld.env['build_target'] == 'x86_64':
-				testobj.source += [ 'sse_functions_64bit.s' ]
+        if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
+        	# Unit tests
+        	testobj              = bld.new_task_gen('cxx', 'program')
+        	testobj.source       = '''
+        		test/bbt_test.cpp
+        		test/interpolation_test.cpp
+        		test/midi_clock_slave_test.cpp
+        		test/resampled_source.cc
+        		test/mantis_3356.cc
+        		test/testrunner.cpp
+        	'''.split()
+        	testobj.includes     = obj.includes + ['test', '../pbd']
+        	testobj.uselib       = 'CPPUNIT SIGCPP JACK GLIBMM GTHREAD SAMPLERATE XML LRDF COREAUDIO'
+        	testobj.uselib_local = 'libpbd libmidipp libardour'
+        	testobj.name         = 'libardour-tests'
+        	testobj.target       = 'run-tests'
+        	testobj.install_path = ''
+        	testobj.cxxflags     = ['-DPACKAGE="libardour3test"']
+        	testobj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
+        	testobj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
+        	testobj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
+        	testobj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
+        			os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
+        	testobj.cxxflags     += ['-DVAMP_DIR="' + os.path.join(
+        			os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"']
+        	if bld.env['FPU_OPTIMIZATION']:
+        		testobj.source += [ 'sse_functions_xmm.cc' ]
+        		if bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686':
+        			testobj.source += [ 'sse_functions.s' ]
+        		elif bld.env['build_target'] == 'x86_64':
+        			testobj.source += [ 'sse_functions_64bit.s' ]
 
 def shutdown():
-	autowaf.shutdown()
+        autowaf.shutdown()
 
 def i18n(bld):
-	autowaf.build_i18n (bld, '..', 'libs/ardour', APPNAME, libardour_sources)
+        autowaf.build_i18n (bld, '..', 'libs/ardour', APPNAME, libardour_sources)

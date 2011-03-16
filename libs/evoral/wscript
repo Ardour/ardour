@@ -23,112 +23,112 @@ srcdir = '.'
 blddir = 'build'
 
 def set_options(opt):
-	autowaf.set_options(opt)
-	opt.add_option('--test', action='store_true', default=False, dest='build_tests',
-			help="Build unit tests")
+        autowaf.set_options(opt)
+        opt.add_option('--test', action='store_true', default=False, dest='build_tests',
+        		help="Build unit tests")
 
 def configure(conf):
-	autowaf.configure(conf)
-	#autowaf.display_header('Evoral Configuration')
+        autowaf.configure(conf)
+        #autowaf.display_header('Evoral Configuration')
 
-	conf.check_tool('compiler_cxx')
-	autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
-	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
-	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
-	autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.14.0')
+        conf.check_tool('compiler_cxx')
+        autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
+        autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
+        autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
+        autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.14.0')
 
-	# Boost headers
-	autowaf.check_header(conf, 'boost/shared_ptr.hpp')
-	autowaf.check_header(conf, 'boost/weak_ptr.hpp')
-	
-	conf.env['BUILD_TESTS'] = Options.options.build_tests
-	
-	#autowaf.display_msg(conf, "Unit tests", str(conf.env['BUILD_TESTS']))
-	#print
+        # Boost headers
+        autowaf.check_header(conf, 'boost/shared_ptr.hpp')
+        autowaf.check_header(conf, 'boost/weak_ptr.hpp')
+        
+        conf.env['BUILD_TESTS'] = Options.options.build_tests
+        
+        #autowaf.display_msg(conf, "Unit tests", str(conf.env['BUILD_TESTS']))
+        #print
 
 def build(bld):
-	# Headers
-	#bld.install_files('${INCLUDEDIR}/evoral', 'evoral/*.h')
-	#bld.install_files('${INCLUDEDIR}/evoral', 'evoral/*.hpp')
+        # Headers
+        #bld.install_files('${INCLUDEDIR}/evoral', 'evoral/*.h')
+        #bld.install_files('${INCLUDEDIR}/evoral', 'evoral/*.hpp')
 
-	# Pkgconfig file
-	#autowaf.build_pc(bld, 'EVORAL', EVORAL_VERSION, 'GLIBMM GTHREAD')
+        # Pkgconfig file
+        #autowaf.build_pc(bld, 'EVORAL', EVORAL_VERSION, 'GLIBMM GTHREAD')
 
-	libsmf = bld.new_task_gen('cc', 'shlib')
-	libsmf.source = '''
-		src/libsmf/smf.c
-		src/libsmf/smf_decode.c
-		src/libsmf/smf_load.c
-		src/libsmf/smf_save.c
-		src/libsmf/smf_tempo.c
-	'''
-	libsmf.export_incdirs = ['./src/libsmf']
-	libsmf.defines      = 'SMF_VERSION="1.2"'
-	libsmf.includes     = ['./src']
-	libsmf.name         = 'libsmf'
-	libsmf.target       = 'smf'
-	libsmf.uselib       = 'GLIB'
-	libsmf.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+        libsmf = bld.new_task_gen('cc', 'shlib')
+        libsmf.source = '''
+        	src/libsmf/smf.c
+        	src/libsmf/smf_decode.c
+        	src/libsmf/smf_load.c
+        	src/libsmf/smf_save.c
+        	src/libsmf/smf_tempo.c
+        '''
+        libsmf.export_incdirs = ['./src/libsmf']
+        libsmf.defines      = 'SMF_VERSION="1.2"'
+        libsmf.includes     = ['./src']
+        libsmf.name         = 'libsmf'
+        libsmf.target       = 'smf'
+        libsmf.uselib       = 'GLIB'
+        libsmf.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
-	lib_source = '''
-		src/Control.cpp
-		src/ControlList.cpp
-		src/ControlSet.cpp
-		src/Curve.cpp
-		src/Event.cpp
-		src/midi_util.cpp
-		src/MIDIEvent.cpp
-		src/Note.cpp
-		src/SMF.cpp
-		src/Sequence.cpp
+        lib_source = '''
+        	src/Control.cpp
+        	src/ControlList.cpp
+        	src/ControlSet.cpp
+        	src/Curve.cpp
+        	src/Event.cpp
+        	src/midi_util.cpp
+        	src/MIDIEvent.cpp
+        	src/Note.cpp
+        	src/SMF.cpp
+        	src/Sequence.cpp
                 src/debug.cpp
-	'''
+        '''
 
-	# Library
-	obj = bld.new_task_gen('cxx', 'shlib')
-	obj.source         = lib_source
-	obj.export_incdirs = ['.']
-	obj.includes       = ['.', './src']
-	obj.name           = 'libevoral'
-	obj.target         = 'evoral'
-	obj.uselib         = 'GLIBMM GTHREAD SMF'
-	obj.uselib_local   = 'libsmf libpbd'
-	obj.vnum           = EVORAL_LIB_VERSION
-	obj.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
+        # Library
+        obj = bld.new_task_gen('cxx', 'shlib')
+        obj.source         = lib_source
+        obj.export_incdirs = ['.']
+        obj.includes       = ['.', './src']
+        obj.name           = 'libevoral'
+        obj.target         = 'evoral'
+        obj.uselib         = 'GLIBMM GTHREAD SMF'
+        obj.uselib_local   = 'libsmf libpbd'
+        obj.vnum           = EVORAL_LIB_VERSION
+        obj.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
-	if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
-		# Static library (for unit test code coverage)
-		obj = bld.new_task_gen('cxx', 'staticlib')
-		obj.source       = lib_source
-		obj.source         = lib_source
-		obj.export_incdirs = ['.']
-		obj.includes       = ['.', './src']
-		obj.name           = 'libevoral_static'
-		obj.target         = 'evoral_static'
-		obj.uselib         = 'GLIBMM GTHREAD SMF'
-		obj.uselib_local   = 'libsmf libpbd'
-		obj.vnum           = EVORAL_LIB_VERSION
-		obj.install_path   = ''
-		obj.ccflags        = [ '-fprofile-arcs',  '-ftest-coverage' ]
-		obj.cxxflags       = [ '-fprofile-arcs',  '-ftest-coverage' ]
+        if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
+        	# Static library (for unit test code coverage)
+        	obj = bld.new_task_gen('cxx', 'staticlib')
+        	obj.source       = lib_source
+        	obj.source         = lib_source
+        	obj.export_incdirs = ['.']
+        	obj.includes       = ['.', './src']
+        	obj.name           = 'libevoral_static'
+        	obj.target         = 'evoral_static'
+        	obj.uselib         = 'GLIBMM GTHREAD SMF'
+        	obj.uselib_local   = 'libsmf libpbd'
+        	obj.vnum           = EVORAL_LIB_VERSION
+        	obj.install_path   = ''
+        	obj.ccflags        = [ '-fprofile-arcs',  '-ftest-coverage' ]
+        	obj.cxxflags       = [ '-fprofile-arcs',  '-ftest-coverage' ]
 
-		# Unit tests
-		obj              = bld.new_task_gen('cxx', 'program')
-		obj.source       = '''
-			test/SequenceTest.cpp
-			test/SMFTest.cpp
-			test/testrunner.cpp
-		'''
-		obj.includes     = ['.', './src']
-		obj.uselib_local = 'libevoral_static'
-		obj.uselib       = 'CPPUNIT SNDFILE'
-		obj.libs         = 'gcov'
-		obj.target       = 'run-tests'
-		obj.name         = 'libevoral-tests'
-		obj.install_path = ''
-		obj.ccflags      = [ '-fprofile-arcs',  '-ftest-coverage' ]
-		obj.cxxflags     = [ '-fprofile-arcs',  '-ftest-coverage' ]
+        	# Unit tests
+        	obj              = bld.new_task_gen('cxx', 'program')
+        	obj.source       = '''
+        		test/SequenceTest.cpp
+        		test/SMFTest.cpp
+        		test/testrunner.cpp
+        	'''
+        	obj.includes     = ['.', './src']
+        	obj.uselib_local = 'libevoral_static'
+        	obj.uselib       = 'CPPUNIT SNDFILE'
+        	obj.libs         = 'gcov'
+        	obj.target       = 'run-tests'
+        	obj.name         = 'libevoral-tests'
+        	obj.install_path = ''
+        	obj.ccflags      = [ '-fprofile-arcs',  '-ftest-coverage' ]
+        	obj.cxxflags     = [ '-fprofile-arcs',  '-ftest-coverage' ]
 
 def shutdown():
-	autowaf.shutdown()
+        autowaf.shutdown()
 
