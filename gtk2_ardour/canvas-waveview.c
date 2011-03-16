@@ -1618,12 +1618,11 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		}
 	}
 
-	if (!waveview->rectified && waveview->zero_line) {
+	if (!waveview->rectified && waveview->zero_line && waveview->height >= 100) {
 		// Paint zeroline.
-		//PAINT_HORIZA(buf, waveview->zero_r, waveview->zero_g, waveview->zero_b, waveview->zero_a, begin, endi-1, origin );
 
 		unsigned char zero_r, zero_g, zero_b, zero_a;
-		UINT_TO_RGBA( waveview->zero_color, &zero_r, &zero_g, &zero_b, &zero_a );
+		UINT_TO_RGBA( waveview->zero_color, &zero_r, &zero_g, &zero_b, &zero_a);
 		int zeroline_y = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
 		PAINT_HORIZA(buf, zero_r, zero_g, zero_b, zero_a, zbegin, zend, zeroline_y);
 	}

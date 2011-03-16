@@ -139,7 +139,6 @@ class AudioRegionView : public RegionView
 	std::list<std::pair<framepos_t, ArdourCanvas::Line*> > feature_lines;
 	
 	ArdourCanvas::Polygon*           sync_mark; ///< polgyon for sync position
-	ArdourCanvas::SimpleLine*        zero_line;
 	ArdourCanvas::Polygon*           fade_in_shape;
 	ArdourCanvas::Polygon*           fade_out_shape;
 	ArdourCanvas::SimpleRect*        fade_in_handle; ///< fade in handle, or 0
@@ -167,7 +166,6 @@ class AudioRegionView : public RegionView
 	void region_renamed ();
 	
 	void create_one_wave (uint32_t, bool);
-	void manage_zero_line ();
 	void peaks_ready_handler (uint32_t);
 	void set_flags (XMLNode *);
 	void store_flags ();

@@ -68,7 +68,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 				  Gdk::Color const & basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
 	, sync_mark(0)
-	, zero_line(0)
 	, fade_in_shape(0)
 	, fade_out_shape(0)
 	, fade_in_handle(0)
@@ -86,7 +85,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 				  Gdk::Color const & basic_color, bool recording, TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, recording, visibility)
 	, sync_mark(0)
-	, zero_line(0)
 	, fade_in_shape(0)
 	, fade_out_shape(0)
 	, fade_in_handle(0)
@@ -103,7 +101,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 AudioRegionView::AudioRegionView (const AudioRegionView& other)
 	: sigc::trackable(other)
 	, RegionView (other)
-	, zero_line(0)
 	, fade_in_shape(0)
 	, fade_out_shape(0)
 	, fade_in_handle(0)
@@ -125,7 +122,6 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other)
 
 AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_ptr<AudioRegion> other_region)
 	: RegionView (other, boost::shared_ptr<Region> (other_region))
-	, zero_line(0)
 	, fade_in_shape(0)
 	, fade_out_shape(0)
 	, fade_in_handle(0)
@@ -156,7 +152,6 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	XMLNode *node;
 
 	_amplitude_above_axis = 1.0;
-	zero_line             = 0;
 	_flags                = 0;
 
 	if ((node = _region->extra_xml ("GUI")) != 0) {
@@ -426,10 +421,6 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 	RegionView::reset_width_dependent_items(pixel_width);
 	assert(_pixel_width == pixel_width);
 
-	if (zero_line) {
-		zero_line->property_x2() = pixel_width - 1.0;
-	}
-
 	if (fade_in_handle) {
 		if (pixel_width <= 6.0 || _height < 5.0 || !trackview.session()->config.get_show_region_fades()) {
 			fade_in_handle->hide();
@@ -529,7 +520,6 @@ AudioRegionView::set_height (gdouble height)
 		gain_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE) - 2);
 	}
 
-	manage_zero_line ();
 	reset_fade_shapes ();
 	
 	/* Update hights for any active feature lines */
@@ -559,23 +549,6 @@ AudioRegionView::set_height (gdouble height)
 
 	if (name_pixbuf) {
 		name_pixbuf->raise_to_top();
-	}
-}
-
-void
-AudioRegionView::manage_zero_line ()
-{
-	if (!zero_line) {
-		return;
-	}
-
-	if (_height >= 100) {
-		double const wave_midpoint = (_height - NAME_HIGHLIGHT_SIZE) / 2.0;
-		zero_line->property_y1() = wave_midpoint;
-		zero_line->property_y2() = wave_midpoint;
-		zero_line->show();
-	} else {
-		zero_line->hide();
 	}
 }
 
@@ -976,6 +949,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 
 	wave->property_clip_color() = ARDOUR_UI::config()->canvasvar_WaveFormClip.get();
 	wave->property_zero_color() = ARDOUR_UI::config()->canvasvar_ZeroLine.get();
+	wave->property_zero_line() = true;
 	wave->property_region_start() = _region->start();
 	wave->property_rectified() = (bool) (_flags & WaveformRectified);
 	wave->property_logscaled() = (bool) (_flags & WaveformLogScaled);
@@ -1014,16 +988,6 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		/* all waves created, don't hook into peaks ready anymore */
 		delete _data_ready_connections[which];
 		_data_ready_connections[which] = 0;
-
-#if 0
-		if (!zero_line) {
-			zero_line = new ArdourCanvas::SimpleLine (*group);
-			zero_line->property_x1() = (gdouble) 1.0;
-			zero_line->property_x2() = (gdouble) (_region->length() / samples_per_unit) - 1.0;
-			zero_line->property_color_rgba() = (guint) ARDOUR_UI::config()->canvasvar_ZeroLine.get();
-			manage_zero_line ();
-		}
-#endif
 	}
 }
 
@@ -1159,14 +1123,6 @@ AudioRegionView::set_waveform_shape (WaveformShape shape)
 	if (yn != (bool) (_flags & WaveformRectified)) {
 		for (vector<WaveView *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
 			(*wave)->property_rectified() = yn;
-		}
-
-		if (zero_line) {
-			if (yn) {
-				zero_line->hide();
-			} else {
-				zero_line->show();
-			}
 		}
 
 		if (yn) {
@@ -1340,7 +1296,11 @@ AudioRegionView::set_frame_color ()
         uint32_t fc;
 
 	if (_selected) {
-                wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_SelectedWaveForm.get(), MUTED_ALPHA);
+                if (_region->muted()) {
+                        wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_SelectedWaveForm.get(), MUTED_ALPHA);
+                } else {
+                        wc = ARDOUR_UI::config()->canvasvar_SelectedWaveForm.get();
+                }
                 fc = ARDOUR_UI::config()->canvasvar_SelectedWaveFormFill.get();
 	} else {
 		if (_recregion) {
@@ -1348,15 +1308,15 @@ AudioRegionView::set_frame_color ()
                                 wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_RecWaveForm.get(), MUTED_ALPHA);
                         } else {
                                 wc = ARDOUR_UI::config()->canvasvar_RecWaveForm.get();
-                                fc = ARDOUR_UI::config()->canvasvar_RecWaveFormFill.get();
                         }
+                        fc = ARDOUR_UI::config()->canvasvar_RecWaveFormFill.get();
 		} else {
                         if (_region->muted()) {
                                 wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA);
                         } else {
                                 wc = ARDOUR_UI::config()->canvasvar_WaveForm.get();
-                                fc = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
                         }
+                        fc = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
 		}
 	}
 
