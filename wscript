@@ -398,6 +398,13 @@ def sub_config_and_use(conf, name, has_objects = True):
         autowaf.set_local_lib(conf, name, has_objects)
 
 def configure(conf):
+        print ('\n\nThis is an alpha version of Ardour 3.0.\n\n' + 
+               'You are respectfully requested NOT to ask for assistance with build issues\n' +
+               'and not to report issues with Ardour 3.0 on the forums at ardour.org.\n\n' +
+               'Please use IRC, the bug tracker and/or the ardour mailing lists (-dev or -user)\n\n' +
+               'Thanks for you co-operation with our development process.\n\n' +
+               'Press Enter to continue.\n')
+        sys.stdin.readline()
         create_stored_revision()
         conf.env['VERSION'] = VERSION
         conf.line_just = 52
