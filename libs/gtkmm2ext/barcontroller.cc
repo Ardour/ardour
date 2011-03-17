@@ -79,7 +79,7 @@ BarController::BarController (Gtk::Adjustment& adj,
 	spinner.signal_focus_out_event().connect (mem_fun (*this, &BarController::entry_focus_out));
 	spinner.signal_input().connect (mem_fun (*this, &BarController::entry_input));
 	spinner.signal_output().connect (mem_fun (*this, &BarController::entry_output));
-	spinner.set_digits (3);
+	spinner.set_digits (9);
 	spinner.set_numeric (true);
 
 	add (darea);
