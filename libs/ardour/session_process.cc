@@ -149,7 +149,11 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
         const framepos_t start_frame = _transport_frame;
         const framepos_t end_frame = _transport_frame + floor (nframes * _transport_speed);
         
-        if (route_graph->threads_in_use() > 0) {
+        /* XXX this is hack to force use of the graph even if we are only
+           using 1 thread. its needed because otherwise when we remove
+           tracks, the graph never gets updated.
+        */
+        if (1 || route_graph->threads_in_use() > 0) {
                 DEBUG_TRACE(DEBUG::Graph,"calling graph/process-routes\n");
                 route_graph->process_routes( nframes, start_frame, end_frame, declick, record_active, rec_monitors, need_butler);
         } else {
@@ -190,7 +194,11 @@ Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 	const framepos_t start_frame = _transport_frame;
 	const framepos_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
 
-        if (route_graph->threads_in_use() > 0) {
+        /* XXX this is hack to force use of the graph even if we are only
+           using 1 thread. its needed because otherwise when we remove
+           tracks, the graph never gets updated.
+        */
+        if (1 || route_graph->threads_in_use() > 0) {
                 route_graph->silent_process_routes( nframes, start_frame, end_frame, record_active, rec_monitors, need_butler);
         } else {
                 for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
