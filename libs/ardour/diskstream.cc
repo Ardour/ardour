@@ -655,35 +655,26 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
                         return;
                 }
 
-                /* we transitioned to recording. lets see if its transport based or a punch */
-                
-		first_recordable_frame = transport_frame + _capture_offset;
-		last_recordable_frame = max_framepos;
 		capture_start_frame = _session.transport_frame();
+		first_recordable_frame = capture_start_frame + _capture_offset;
+		last_recordable_frame = max_framepos;
 
-                /* in theory, we should be offsetting by _session.worst_playback_latency() when we adjust
-                   for ExistingMaterial alignment. But that number includes the worst processor latency
-                   across all routes, and each track will already be roll-delay adjusted to handle that.
-                   so don't use worst_playback_latency(), just worst_output_latency() which covers
-                   only downstream latency from IO ports.
-                */
-
-                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %7 basic FRF = %2 CSF = %4 CO = %5, EMO = %6 RD = %8\n",
+                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %7 (%9) FRF = %2 CSF = %4 CO = %5, EMO = %6 RD = %8 WOL %10 WTL %11\n",
                                                                       name(), first_recordable_frame, last_recordable_frame, capture_start_frame,
                                                                       _capture_offset,
                                                                       existing_material_offset,
                                                                       transport_frame, 
-                                                                      _roll_delay));
+                                                                      _roll_delay,
+                                                                      _session.transport_frame(),
+                                                                      _session.worst_output_latency(),
+                                                                      _session.worst_track_latency()));
+                                                                    
 
                 if (_alignment_style == ExistingMaterial) {
                         first_recordable_frame += existing_material_offset;
                         DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tshift FRF by EMO %1\n",
                                                                               first_recordable_frame));
-                } else {
-                        capture_start_frame += _roll_delay;
-                        DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tshift CFS by roll delay of %1 to %2\n",
-                                                                              _roll_delay, capture_start_frame));
-                }
+                } 
                 
                 prepare_record_status (capture_start_frame);
 
@@ -703,13 +694,11 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
                         } else {
                                 /* punch out */
                                 
-                                last_recordable_frame = transport_frame + _capture_offset;
+                                last_recordable_frame = _session.transport_frame() + _capture_offset;
                                 
                                 if (_alignment_style == ExistingMaterial) {
                                         last_recordable_frame += existing_material_offset;
-                                } else {
-                                        last_recordable_frame += _roll_delay;
-                                }
+                                } 
                         }
                 }
         }
@@ -766,6 +755,10 @@ Diskstream::calculate_record_range(OverlapType ot, framepos_t transport_frame, f
 		rec_offset = first_recordable_frame - transport_frame;
 		break;
 	}
+
+        DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 rec? %2 @ %3 (for %4) FRF %5 LRF %6 : rf %7 @ %8\n",
+                                                              _name, enum_2_string (ot), transport_frame, nframes, 
+                                                              first_recordable_frame, last_recordable_frame, rec_nframes, rec_offset));
 }
 
 void

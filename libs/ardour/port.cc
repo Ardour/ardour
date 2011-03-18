@@ -346,21 +346,50 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
 		for (vector<string>::const_iterator c = connections.begin();
 		     c != connections.end(); ++c) {
 
-			jack_port_t* remote_port = jack_port_by_name (_engine->jack(), (*c).c_str());
-			jack_latency_range_t lr;
+                        jack_latency_range_t lr;
+                                
+                        if (!AudioEngine::instance()->port_is_mine (*c)) {
 
-			if (remote_port) {
-				jack_port_get_latency_range (
-					remote_port,
-					(playback ? JackPlaybackLatency : JackCaptureLatency),
-					&lr);
-				
-				DEBUG_TRACE (DEBUG::Latency, string_compose (
-					             "\t%1 <-> %2 : latter has latency range %3 .. %4\n",
-					             name(), *c, lr.min, lr.max));
-				range.min = min (range.min, lr.min);
-				range.max = max (range.max, lr.max);
-			}
+                                /* port belongs to some other JACK client, use
+                                 * JACK to lookup its latency information.
+                                 */
+
+                                jack_port_t* remote_port = jack_port_by_name (_engine->jack(), (*c).c_str());
+
+                                if (remote_port) {
+                                        jack_port_get_latency_range (
+                                                remote_port,
+                                                (playback ? JackPlaybackLatency : JackCaptureLatency),
+                                                &lr);
+                                        
+                                        DEBUG_TRACE (DEBUG::Latency, string_compose (
+                                                             "\t%1 <-> %2 : latter has latency range %3 .. %4\n",
+                                                             name(), *c, lr.min, lr.max));
+
+                                        range.min = min (range.min, lr.min);
+                                        range.max = max (range.max, lr.max);
+                                }
+
+			} else {
+
+                                /* port belongs to this instance of ardour,
+                                   so look up its latency information
+                                   internally, because our published/public
+                                   values already contain our plugin
+                                   latency compensation.
+                                */
+
+                                Port* remote_port = AudioEngine::instance()->get_port_by_name (*c);
+                                if (remote_port) {
+                                        lr = remote_port->private_latency_range ((playback ? JackPlaybackLatency : JackCaptureLatency));
+                                        DEBUG_TRACE (DEBUG::Latency, string_compose (
+                                                             "\t%1 <-LOCAL-> %2 : latter has latency range %3 .. %4\n",
+                                                             name(), *c, lr.min, lr.max));
+
+                                        range.min = min (range.min, lr.min);
+                                        range.max = max (range.max, lr.max);
+                                }
+                        }
 		}
 
 	} else {

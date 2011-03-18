@@ -993,12 +993,10 @@ AudioEngine::get_port_by_name (const string& portname)
 		}
 	}
 
-	if (portname.find_first_of (':') != string::npos) {
-		if (portname.substr (0, jack_client_name.length ()) != jack_client_name) {
-			/* not an ardour: port */
-			return 0;
-		}
-	}
+        if (!port_is_mine (portname)) {
+                /* not an ardour port */
+                return 0;
+        }
 
 	std::string const rel = make_port_name_relative (portname);
 
@@ -1416,7 +1414,7 @@ AudioEngine::update_total_latencies ()
 }
 
 string
-AudioEngine::make_port_name_relative (string portname)
+AudioEngine::make_port_name_relative (string portname) const
 {
 	string::size_type len;
 	string::size_type n;
@@ -1437,7 +1435,7 @@ AudioEngine::make_port_name_relative (string portname)
 }
 
 string
-AudioEngine::make_port_name_non_relative (string portname)
+AudioEngine::make_port_name_non_relative (string portname) const
 {
 	string str;
 
@@ -1450,6 +1448,17 @@ AudioEngine::make_port_name_non_relative (string portname)
 	str += portname;
 
 	return str;
+}
+
+bool
+AudioEngine::port_is_mine (const string& portname) const
+{
+	if (portname.find_first_of (':') != string::npos) {
+		if (portname.substr (0, jack_client_name.length ()) != jack_client_name) {
+                        return false;
+                }
+        }
+        return true;
 }
 
 bool

@@ -253,8 +253,9 @@ _	   the regular process() call to session->process() is not made.
 	 */
 	PBD::Signal3<void, Port *, Port *, bool> PortConnectedOrDisconnected;
 
-	std::string make_port_name_relative (std::string);
-	std::string make_port_name_non_relative (std::string);
+	std::string make_port_name_relative (std::string) const;
+	std::string make_port_name_non_relative (std::string) const;
+        bool port_is_mine (const std::string&) const;
 
 	static AudioEngine* instance() { return _instance; }
 	void died ();

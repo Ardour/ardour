@@ -441,16 +441,6 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool ca
 		(*chan)->current_playback_buffer = 0;
 	}
 
-	/* two conditions to test for here:
-
-	   A: this track is rec-enabled, and the session has confirmed that we can record
-	   B: this track is rec-enabled, has been recording, and we are set up for auto-punch-in
-
-	   The second test is necessary to capture the extra material that arrives AFTER the transport
-	   frame has left the punch range (which will cause the "can_record" argument to be false).
-	*/
-
-
 	// Safeguard against situations where process() goes haywire when autopunching 
 	// and last_recordable_frame < first_recordable_frame
 
@@ -458,14 +448,16 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool ca
 		last_recordable_frame = max_framepos;
 	}
 
-	OverlapType ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
+        if (record_enabled()) {
 
-	calculate_record_range (ot, transport_frame, nframes, rec_nframes, rec_offset);
-
-	if (rec_nframes && !was_recording) {
-		capture_captured = 0;
-		was_recording = true;
-	}
+                OverlapType ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
+                calculate_record_range (ot, transport_frame, nframes, rec_nframes, rec_offset);
+                
+                if (rec_nframes && !was_recording) {
+                        capture_captured = 0;
+                        was_recording = true;
+                }
+        }
 
 	if (can_record && !_last_capture_sources.empty()) {
 		_last_capture_sources.clear ();
@@ -1479,8 +1471,9 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 			string region_name;
 
 			RegionFactory::region_name (region_name, whole_file_region_name, false);
-
-			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add region " << region_name << endl;
+                        
+                        DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 capture start @ %2 length %3 add new region %4\n",
+                                                                              _name, (*ci)->start, (*ci)->frames, region_name));
 
 			try {
 

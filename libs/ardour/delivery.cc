@@ -62,6 +62,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
 	, no_panner_reset (false)
+        , scnt (0)
 {
 	_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
 	_display_to_user = false;
@@ -83,6 +84,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
 	, no_panner_reset (false)
+        , scnt (0)
 {
 	_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
 	_display_to_user = false;
@@ -279,6 +281,21 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 	}
 
         panner = _panshell->panner();
+
+#if 0
+        if (_session.transport_rolling()) {
+                cerr << name() << " first value written : " << scnt << endl;
+                for (BufferSet::audio_iterator b = bufs.audio_begin(); b != bufs.audio_end(); ++b) {
+                        Sample* p = b->data ();
+                        float s = (float) scnt;
+                        for (pframes_t n = 0; n < nframes; ++n) {
+                                p[n] =  s * 0.001;
+                                s += 1.0;
+                        }
+                }
+                scnt += nframes;
+        }
+#endif
 
 	if (panner && !panner->bypassed()) {
                 

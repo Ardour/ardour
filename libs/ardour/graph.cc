@@ -113,12 +113,16 @@ Graph::reset_thread_list ()
                 drop_threads ();
         }
 
+#if 0
+        /* XXX this only makes sense when we can use just the AudioEngine thread
+           and still keep the graph current with the route list
+        */
         if (num_threads <= 1) {
                 /* no point creating 1 thread - the AudioEngine already gives us one
                  */
                 return;
         }
-
+#endif
 	if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::main_thread, this), &a_thread, 100000) == 0) {
 		_thread_list.push_back (a_thread);
 	}

@@ -1200,6 +1200,26 @@ Session::set_block_size (pframes_t nframes)
 
 struct RouteSorter {
     /** @return true to run r1 before r2, otherwise false */
+    bool sort_by_rec_enabled (const boost::shared_ptr<Route>& r1, const boost::shared_ptr<Route>& r2) {
+            if (r1->record_enabled()) {
+                    if (r2->record_enabled()) {
+                            /* both rec-enabled, just use signal order */
+                            return r1->order_key(N_("signal")) < r2->order_key(N_("signal"));
+                    } else {
+                            /* r1 rec-enabled, r2 not rec-enabled, run r2 early */
+                            return false;
+                    }
+            } else {
+                    if (r2->record_enabled()) {
+                            /* r2 rec-enabled, r1 not rec-enabled, run r1 early */
+                            return true;
+                    } else {
+                            /* neither rec-enabled, use signal order */
+                            return r1->order_key(N_("signal")) < r2->order_key(N_("signal"));
+                    }
+            }
+    }
+            
     bool operator() (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> r2) {
 	    if (r2->feeds (r1)) {
 		    /* r1 fed by r2; run r2 early */
@@ -1210,8 +1230,8 @@ struct RouteSorter {
 	    } else {
 		    if (r1->not_fed ()) {
 			    if (r2->not_fed ()) {
-				    /* no ardour-based connections inbound to either route. just use signal order */
-				    return r1->order_key(N_("signal")) < r2->order_key(N_("signal"));
+				    /* no ardour-based connections inbound to either route. */ 
+                                    return sort_by_rec_enabled (r1, r2);
 			    } else {
 				    /* r2 has connections, r1 does not; run r1 early */
 				    return true;
@@ -1497,8 +1517,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 
   failed:
 	if (!new_routes.empty()) {
-		add_routes (new_routes, true, false);
-		save_state (_current_snapshot_name);
+		add_routes (new_routes, true, true);
 	}
 
 	return ret;
