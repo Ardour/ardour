@@ -270,19 +270,21 @@ def configure(conf):
                       define_name = 'HAVE_JACK_ON_INFO_SHUTDOWN',
         	      okmsg = 'present')
 
+        missing_jack_message = 'missing - a version of JACK that supports jack_port_set_latency_range() is required to compile Ardour3\nCurrently this means using JACK version 0.120.1 from http://www.jackaudio.org/download\n'
+
         conf.check_cc(fragment = "#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_t* p; jack_latency_range_t r; jack_port_set_latency_range (p, JackCaptureLatency, &r); return 0; }\n",
                       linkflags = ['-ljack'],
         	      msg = 'Checking for new JACK latency API',
         	      okmsg = 'present',
                       mandatory = True,
-                      errmsg = 'missing - a version of JACK that supports jack_port_set_latency_range() is required to compile Ardour3')
+                      errmsg = missing_jack_message)
 
         conf.check_cc(fragment = '#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_type_get_buffer_size ((jack_client_t*)0, ""); }\n',
                       linkflags = ['-ljack'],
         	      msg = 'Checking for new jack_port_type_get_buffer_size',
                       okmsg = 'present',
                       mandatory = True,
-        	      errmsg = 'missing - a version of JACK that supports jack_port_type_get_buffer_size() is required to compile Ardour3')
+        	      errmsg = missing_jack_message)
         
         if flac_supported():
         	conf.define ('HAVE_FLAC', 1)
