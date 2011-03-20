@@ -1523,16 +1523,44 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 	return ret;
 }
 
+void
+Session::midi_output_change_handler (IOChange change, void * /*src*/, boost::weak_ptr<Route> wmt)
+{
+        boost::shared_ptr<Route> midi_track (wmt.lock());
+
+        if (!midi_track) {
+                return;
+        }
+
+	if ((change.type & IOChange::ConfigurationChanged) && Config->get_output_auto_connect() != ManualConnect) {
+
+                if (change.after.n_audio() <= change.before.n_audio()) {
+                        return;
+                }
+
+                /* new audio ports: make sure the audio goes somewhere useful, 
+                   unless the user has no-auto-connect selected.
+                
+                   The existing ChanCounts don't matter for this call as they are only
+                   to do with matching input and output indices, and we are only changing
+                   outputs here.
+                */
+
+                ChanCount dummy;
+                
+                auto_connect_route (midi_track, dummy, dummy, false, false, ChanCount(), change.before);
+        }
+}
+
 /** @param connect_inputs true to connect inputs as well as outputs, false to connect just outputs.
  *  @param input_start Where to start from when auto-connecting inputs; e.g. if this is 0, auto-connect starting from input 0.
  *  @param output_start As \a input_start, but for outputs.
  */
 void
-Session::auto_connect_route (Route* route, ChanCount& existing_inputs, ChanCount& existing_outputs, 
+Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing_inputs, ChanCount& existing_outputs, 
                              bool with_lock, bool connect_inputs, ChanCount input_start, ChanCount output_start)
 {
 	if (!IO::connecting_legal) {
-                cerr << "Auto-connect ignored because connecting it not legal\n";
 		return;
 	}
 
@@ -1583,7 +1611,7 @@ Session::auto_connect_route (Route* route, ChanCount& existing_inputs, ChanCount
 
 			for (uint32_t i = input_start.get(*t); i < route->n_inputs().get(*t) && i < nphysical_in; ++i) {
 				string port;
-
+                                
 				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
 					DEBUG_TRACE (DEBUG::Graph,
 					             string_compose("Get index %1 + %2 % %3 = %4\n",
@@ -1596,10 +1624,12 @@ Session::auto_connect_route (Route* route, ChanCount& existing_inputs, ChanCount
 				             string_compose("Connect route %1 IN to %2\n",
 				                            route->name(), port));
 
-				if (!port.empty() && route->input()->connect (
-					    route->input()->ports().port(*t, i), port, this)) {
+				if (!port.empty() && route->input()->connect (route->input()->ports().port(*t, i), port, this)) {
 					break;
 				}
+
+                                ChanCount one_added (*t, 1);
+                                existing_inputs += one_added;
 			}
 		}
 
@@ -1608,9 +1638,10 @@ Session::auto_connect_route (Route* route, ChanCount& existing_inputs, ChanCount
 			for (uint32_t i = output_start.get(*t); i < route->n_outputs().get(*t); ++i) {
 				string port;
 
-				if (Config->get_output_auto_connect() & AutoConnectPhysical) {
+				if ((*t) == DataType::MIDI || Config->get_output_auto_connect() & AutoConnectPhysical) {
 					port = physoutputs[(out_offset.get(*t) + i) % nphysical_out];
-				} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
+				} else if ((*t) == DataType::AUDIO && Config->get_output_auto_connect() & AutoConnectMaster) {
+                                        /* master bus is audio only */
 					if (_master_out && _master_out->n_inputs().get(*t) > 0) {
 						port = _master_out->input()->ports().port(*t,
 								i % _master_out->input()->n_ports().get(*t))->name();
@@ -1621,10 +1652,12 @@ Session::auto_connect_route (Route* route, ChanCount& existing_inputs, ChanCount
 				             string_compose("Connect route %1 OUT to %2\n",
 				                            route->name(), port));
 
-				if (!port.empty() && route->output()->connect (
-						route->output()->ports().port(*t, i), port, this)) {
+				if (!port.empty() && route->output()->connect (route->output()->ports().port(*t, i), port, this)) {
 					break;
 				}
+
+                                ChanCount one_added (*t, 1);
+                                existing_outputs += one_added;
 			}
 		}
 	}
@@ -1981,11 +2014,11 @@ Session::add_routes (RouteList& new_routes, bool auto_connect, bool save)
 			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (tr);
 			if (mt) {
 				mt->StepEditStatusChange.connect_same_thread (*this, boost::bind (&Session::step_edit_status_change, this, _1));
+                                mt->output()->changed.connect_same_thread (*this, boost::bind (&Session::midi_output_change_handler, this, _1, _2, boost::weak_ptr<Route>(mt)));
 			}
 		}
         
 		if (auto_connect) {
-
 			auto_connect_route (r, existing_inputs, existing_outputs, true);
 		}
 	}
@@ -2577,23 +2610,17 @@ Session::destroy_sources (list<boost::shared_ptr<Source> > srcs)
 		RegionFactory::get_regions_using_source (*s, relevant_regions);
 	}
 
-	cerr << "There are " << relevant_regions.size() << " using " << srcs.size() << " sources" << endl;
-
 	for (set<boost::shared_ptr<Region> >::iterator r = relevant_regions.begin(); r != relevant_regions.end(); ) {
 		set<boost::shared_ptr<Region> >::iterator tmp;
 
 		tmp = r;
 		++tmp;
 
-		cerr << "Cleanup " << (*r)->name() << " UC = " << (*r).use_count() << endl;
-
 		playlists->destroy_region (*r);
 		RegionFactory::map_remove (*r);
 
 		(*r)->drop_sources ();
 		(*r)->drop_references ();
-
-		cerr << "\tdone UC = " << (*r).use_count() << endl;
 
 		relevant_regions.erase (r);
 

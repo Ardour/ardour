@@ -1222,24 +1222,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	bool find_route_name (std::string const &, uint32_t& id, char* name, size_t name_len, bool);
 	void count_existing_track_channels (ChanCount& in, ChanCount& out);
-	void auto_connect_route (Route*,
-                                 ChanCount& existing_inputs,
-                                 ChanCount& existing_outputs,
-                                 bool with_lock,
-                                 bool connect_inputs = true,
-                                 ChanCount input_start = ChanCount (),
-                                 ChanCount output_start = ChanCount ());
-
-	void auto_connect_route (boost::shared_ptr<Route> route,
-                                 ChanCount& existing_inputs,
-                                 ChanCount& existing_outputs,
-                                 bool with_lock,
-                                 bool connect_inputs = true,
-                                 ChanCount input_start = ChanCount (),
-                                 ChanCount output_start = ChanCount ()) {
-                auto_connect_route (route.get(), existing_inputs, existing_outputs, with_lock, connect_inputs, input_start, output_start);
-        }
-
+	void auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing_inputs, ChanCount& existing_outputs,
+                                 bool with_lock, bool connect_inputs = true, 
+                                 ChanCount input_start = ChanCount (), ChanCount output_start = ChanCount ());
+        void midi_output_change_handler (IOChange change, void* /*src*/, boost::weak_ptr<Route> midi_track);
 
 	/* mixer stuff */
 
