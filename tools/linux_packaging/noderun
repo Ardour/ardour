@@ -1,0 +1,20 @@
+#!/bin/sh
+
+BASE=$1
+
+if [ x$BASE = "x" ] ; then 
+   exit 1
+fi
+
+cd $BASE || exit 1
+svn update || exit 1
+./waf configure --strict || exit 1
+./waf || exit 1
+cd tools/linux_packaging || exit 1
+./build --public || exit 1
+file=`ls -t *.bz2 | head -1`
+cp $file $BASE/../vmshare || exit 1
+exit 0
+
+
+

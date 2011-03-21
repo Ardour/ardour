@@ -1,0 +1,16 @@
+#!/bin/sh
+
+vbm=VBoxManage
+basedir=/home/harrison/ardour/3.0/tools/linux_packaging
+tooldir=$basedir/tools/linux_packaging
+u=harrison
+p=harrison
+
+
+
+for VM in Build_64bit_804s ; do
+    $vbm startvm $VM --type headless
+    $vbm guestcontrol exec $VM $tooldir/noderun $basedir --username $u --password $p --wait-for stdout
+    status=$?
+    $vbm controlvm $VM savestate
+done
