@@ -102,16 +102,20 @@ draw_note(PianoKeyboard *pk, cairo_t* cr, int note)
 	int		h = pk->notes[note].h;
 
 	if (pk->notes[note].pressed || pk->notes[note].sustained) {
-		is_white = !is_white;
+		if (is_white) {
+			cairo_set_source_rgb (cr, 0.60f, 0.60f, 0.60f);
+		} else {
+			cairo_set_source_rgb (cr, 0.50f, 0.50f, 0.50f);
+		}
+	} else {
+		if (is_white) {
+			cairo_set_source_rgb (cr, 1.0f, 1.0f, 1.0f);
+		} else {
+			cairo_set_source_rgb (cr, 0.0f, 0.0f, 0.0f);
+		}
 	}
 
 	cairo_set_line_width (cr, 1.0);
-
-	if (is_white) {
-		cairo_set_source_rgb (cr, 1.0f, 1.0f, 1.0f);
-	} else {
-		cairo_set_source_rgb (cr, 0.0f, 0.0f, 0.0f);
-	}
 
 	cairo_rectangle (cr, x, 0, w, h);
 	cairo_fill (cr);
@@ -744,4 +748,3 @@ piano_keyboard_set_keyboard_layout(PianoKeyboard *pk, const char *layout)
 
 	return FALSE;
 }
-

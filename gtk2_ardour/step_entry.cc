@@ -790,6 +790,10 @@ StepEntry::insert_grid_rest ()
 void
 StepEntry::insert_note (uint8_t note)
 {
+        if (note > 127) {
+                return;
+        }
+
 	se->step_add_note (note_channel(), note, note_velocity(), note_length());
 }
 void
