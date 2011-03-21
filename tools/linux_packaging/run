@@ -1,17 +1,26 @@
 #!/bin/sh
 
 vbm=VBoxManage
-basedir=/home/harrison/ardour/3.0/tools/linux_packaging
+basedir=/home/harrison/ardour/3.0
 tooldir=$basedir/tools/linux_packaging
 u=harrison
 p=harrison
 
-for VM in Build_64bit_804s ; do
+for VM in Build_32bit_804s ; do
     $vbm startvm $VM --type headless
-    echo "Waiting for guest control to be available (12 seconds) ... "
+    echo "$VM: Waiting for guest control to be available (12 seconds) ... "
     sleep 12
-    echo "Running $tooldir/noderun $basedir on $VM ... "
-    $vbm guestcontrol exec $VM /bin/sh --arguments $tooldir/noderun --arguments $basedir --username $u --password $p --wait-for stdout
+    echo "$VM: Running $tooldir/noderun $basedir on $VM ... "
+    $vbm guestcontrol exec $VM /bin/sh \
+             --arguments -vx \
+             --arguments $tooldir/noderun \
+             --arguments $basedir \
+             --environment PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+             --username $u --password $p --wait-for stdout
     status=$?
     $vbm controlvm $VM savestate
+    if [ $status -ne 0 ] ; then
+        echo "Build failed while in VM $VM"
+        break
+    fi
 done
