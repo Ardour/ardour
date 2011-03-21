@@ -6,11 +6,12 @@ tooldir=$basedir/tools/linux_packaging
 u=harrison
 p=harrison
 
-
-
 for VM in Build_64bit_804s ; do
     $vbm startvm $VM --type headless
-    $vbm guestcontrol exec $VM $tooldir/noderun $basedir --username $u --password $p --wait-for stdout
+    echo "Waiting for guest control to be available (12 seconds) ... "
+    sleep 12
+    echo "Running $tooldir/noderun $basedir on $VM ... "
+    $vbm guestcontrol exec $VM /bin/sh --arguments $tooldir/noderun --arguments $basedir --username $u --password $p --wait-for stdout
     status=$?
     $vbm controlvm $VM savestate
 done
