@@ -129,7 +129,11 @@ Port::get_connections (std::vector<std::string> & c) const
 				++n;
 			}
                         
-			jack_free (jc);
+                        if (jack_free) {
+                                jack_free (jc);
+                        } else {
+                                free (jc);
+                        }
 		}
 	}
 
@@ -471,12 +475,19 @@ Port::physically_connected () const
 			jack_port_t* port = jack_port_by_name (_engine->jack(), jc[i]);
                         
 			if (port && (jack_port_flags (port) & JackPortIsPhysical)) {
-				jack_free (jc);
+                                if (jack_free) {
+                                        jack_free (jc);
+                                } else {
+                                        free (jc);
+                                }
 				return true;
 			}
 		}
-                
-		jack_free (jc);
+                if (jack_free) {
+                        jack_free (jc);
+                } else {
+                        free (jc);
+                }
 	}
 
 	return false;

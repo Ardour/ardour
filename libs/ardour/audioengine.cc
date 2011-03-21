@@ -648,8 +648,25 @@ AudioEngine::jack_bufsize_callback (pframes_t nframes)
 	_usecs_per_cycle = (int) floor ((((double) nframes / frame_rate())) * 1000000.0);
 	last_monitor_check = 0;
 
-        _raw_buffer_sizes[DataType::AUDIO] = jack_port_type_get_buffer_size (_priv_jack, JACK_DEFAULT_AUDIO_TYPE);
-        _raw_buffer_sizes[DataType::MIDI] = jack_port_type_get_buffer_size (_priv_jack, JACK_DEFAULT_MIDI_TYPE);
+        if (jack_port_type_get_buffer_size) {
+                _raw_buffer_sizes[DataType::AUDIO] = jack_port_type_get_buffer_size (_priv_jack, JACK_DEFAULT_AUDIO_TYPE);
+                _raw_buffer_sizes[DataType::MIDI] = jack_port_type_get_buffer_size (_priv_jack, JACK_DEFAULT_MIDI_TYPE);
+        } else {
+
+                /* Old version of JACK.
+                   
+                   These crude guesses, see below where we try to get the right answers.
+                   
+                   Note that our guess for MIDI deliberatey tries to overestimate
+                   by a little. It would be nicer if we could get the actual
+                   size from a port, but we have to use this estimate in the 
+                   event that there are no MIDI ports currently. If there are
+                   the value will be adjusted below.
+                */
+                
+                _raw_buffer_sizes[DataType::AUDIO] = nframes * sizeof (Sample);
+                _raw_buffer_sizes[DataType::MIDI] = nframes * 4 - (nframes/2);
+        }
 
 	boost::shared_ptr<Ports> p = ports.reader();
 
