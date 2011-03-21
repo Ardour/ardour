@@ -6,6 +6,12 @@ if [ x$BASE = "x" ] ; then
    exit 1
 fi
 
+if mount | grep --silent vmshare ; then
+    :
+else
+    sudo mount -t vboxsf vmshare ~/vmshare
+fi
+
 cd $BASE || exit 1
 svn update || exit 1
 ./waf configure --strict --noconfirm || exit 1
