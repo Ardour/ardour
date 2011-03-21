@@ -619,13 +619,13 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::PositionLockStyle& sf);
 static inline ARDOUR::framepos_t
 session_frame_to_track_frame (ARDOUR::framepos_t session_frame, double speed)
 {
-	return (ARDOUR::framepos_t)( (double)session_frame * speed );
+	return (ARDOUR::framepos_t) ((long double) session_frame * (long double) speed);
 }
 
 static inline ARDOUR::framepos_t
 track_frame_to_session_frame (ARDOUR::framepos_t track_frame, double speed)
 {
-	return (ARDOUR::framepos_t)( (double)track_frame / speed );
+	return (ARDOUR::framepos_t) ((long double) track_frame / (long double) speed);
 }
 
 /* for now, break the rules and use "using" to make this "global" */
