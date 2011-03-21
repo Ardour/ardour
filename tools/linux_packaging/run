@@ -6,7 +6,7 @@ tooldir=$basedir/tools/linux_packaging
 u=harrison
 p=harrison
 
-for VM in Build_32bit_804s ; do
+for VM in Build_32bit_804s Build_64bit_804s ; do
     $vbm startvm $VM --type headless
     echo "$VM: Waiting for guest control to be available (12 seconds) ... "
     sleep 12

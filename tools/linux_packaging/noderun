@@ -7,8 +7,6 @@ if [ x$BASE = "x" ] ; then
 fi
 
 if mount | grep --silent vmshare ; then
-    :
-else
     sudo mount -t vboxsf vmshare $HOME/vmshare
 fi
 
@@ -20,6 +18,6 @@ cd tools/linux_packaging || exit 1
 ./build --public --nostrip || exit 1
 file=`ls -t *.bz2 | head -1`
 echo "Copying $file to shared folder ..."
-cp $file $HOME/vmshare || exit 1
+sudo cp $file $HOME/vmshare || exit 1
 
 exit 0
