@@ -9,7 +9,7 @@ fi
 if mount | grep --silent vmshare ; then
     :
 else
-    sudo mount -t vboxsf vmshare ~/vmshare
+    sudo mount -t vboxsf vmshare $HOME/vmshare
 fi
 
 cd $BASE || exit 1
@@ -19,7 +19,7 @@ svn update || exit 1
 cd tools/linux_packaging || exit 1
 ./build --public --nostrip || exit 1
 file=`ls -t *.bz2 | head -1`
-echo "Copying $file to ardour.org ..."
-scp $file ardour@ardour.org:ardour.org/files || exit 1
+echo "Copying $file to shared folder ..."
+cp $file $HOME/vmshare || exit 1
 
 exit 0
