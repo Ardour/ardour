@@ -1109,7 +1109,7 @@ Selection::get_state () const
 		} else if (atv) {
 			XMLNode* t = node->add_child (X_("AutomationView"));
 			t->add_property (X_("id"), atoi (atv->parent_route()->id().to_s().c_str()));
-			t->add_property (X_("parameter"), EventTypeMap::instance().to_symbol (atv->control()->parameter ()));
+			t->add_property (X_("parameter"), EventTypeMap::instance().to_symbol (atv->parameter ()));
 		}
 	}
 
