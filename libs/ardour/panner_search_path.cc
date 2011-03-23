@@ -17,7 +17,6 @@
 
 */
 
-#include <iostream>
 #include <glibmm/miscutils.h>
 
 #include "ardour/panner_search_path.h"
@@ -39,14 +38,11 @@ panner_search_path ()
 	SearchPath spath_env (Glib::getenv(panner_env_variable_name, panner_path_defined));
 
 	if (panner_path_defined) {
-                std::cerr << "for panner, using environment search path " << spath_env.to_string() << std::endl;
 		return spath_env;
 	}
 
 	SearchPath spath (user_config_directory ());
 
-        std::cerr << "for panner, AMD = " << ardour_module_directory().to_string() << std::endl;
-        
 	spath += ardour_module_directory ();
 	spath.add_subdirectory_to_paths(panner_dir_name);
 

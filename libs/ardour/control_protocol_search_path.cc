@@ -17,7 +17,6 @@
 
 */
 
-#include <iostream>
 #include <glibmm/miscutils.h>
 
 #include "ardour/control_protocol_search_path.h"
@@ -43,8 +42,6 @@ control_protocol_search_path ()
 	}
 
 	SearchPath spath (user_config_directory ());
-
-        std::cerr << "for CPS, AMD = " << ardour_module_directory().to_string() << std::endl;
 
 	spath += ardour_module_directory ();
 	spath.add_subdirectory_to_paths (surfaces_dir_name);
