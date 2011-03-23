@@ -237,7 +237,6 @@ fixup_bundle_environment (int, char* [])
 	
 	setenv ("ARDOUR_SURFACES_PATH", path.c_str(), 1);
 
-
 	path = dir_path;
 	path += "/../Frameworks/clearlooks";
 
@@ -423,6 +422,18 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	path += "/lib/panners";
 	
 	setenv ("ARDOUR_PANNER_PATH", path.c_str(), 1);
+
+	cstr = getenv ("ARDOUR_SURFACES_PATH");
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	} else {
+		path = "";
+	}
+	path += dir_path;
+	path += "/lib/surfaces";
+	
+	setenv ("ARDOUR_SURFACES_PATH", path.c_str(), 1);
 
 	path = dir_path;
 	path += "/lib/clearlooks";
