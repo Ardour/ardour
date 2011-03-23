@@ -29,24 +29,25 @@ midi_note_name (uint8_t val)
 	}
 
 	static const char* notes[] = {
-		"c",
-		"c#",
-		"d",
-		"d#",
-		"e",
-		"f",
-		"f#",
-		"g",
-		"g#",
-		"a",
-		"a#",
-		"b"
+		"C",
+		"C#",
+		"D",
+		"D#",
+		"E",
+		"F",
+		"F#",
+		"G",
+		"G#",
+		"A",
+		"A#",
+		"B"
 	};
 
-	int octave = val/12;
+	/* MIDI note 0 is in octave -1 (in scientific pitch notation) */
+	int octave = val / 12 - 1;
 	static char buf[8];
 
-	val -= octave*12;
+	val = val % 12;
 
 	snprintf (buf, sizeof (buf), "%s%d", notes[val], octave);
 	return buf;
