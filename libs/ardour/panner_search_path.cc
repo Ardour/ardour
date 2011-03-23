@@ -39,6 +39,7 @@ panner_search_path ()
 	SearchPath spath_env (Glib::getenv(panner_env_variable_name, panner_path_defined));
 
 	if (panner_path_defined) {
+                std::cerr << "for panner, using environment search path " << spath_env.to_string() << std::endl;
 		return spath_env;
 	}
 
