@@ -3,6 +3,7 @@
 BASE=$(readlink -f $0)
 BASE=$(dirname $BASE) # up one
 BASE=$(dirname $BASE) # up one more
+BASE=$(dirname $BASE) # up again
 
 if mount | grep --silent vmshare ; then
     sudo mount -t vboxsf vmshare $HOME/vmshare
