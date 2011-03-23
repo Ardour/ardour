@@ -260,12 +260,12 @@ def configure(conf):
         conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H')
         conf.check(header_name='wordexp.h', define_name='HAVE_WORDEXP')
 
-        conf.check(header_name='jack/session.h', define_name='HAVE_JACK_SESSION')
+        conf.check(header_name='jack/session.h', uselib = [ 'JACK' ], define_name='HAVE_JACK_SESSION')
 
         conf.check(header_name='unistd.h', define_name='HAVE_UNISTD')
         
         conf.check_cc(fragment = "#include <jack/jack.h>\nvoid callback (int code, const char* reason, void* arg) { return; }\nint main(int argc, char **argv) { jack_client_t* c; jack_on_info_shutdown (c, callback, (void*) 0); return 0; }\n",
-                      linkflags = ['-ljack'],
+                      uselib= [ 'JACK' ],
         	      msg = 'Checking for jack_on_info_shutdown',
                       define_name = 'HAVE_JACK_ON_INFO_SHUTDOWN',
         	      okmsg = 'present')
@@ -273,14 +273,14 @@ def configure(conf):
         missing_jack_message = 'missing - a version of JACK that supports jack_port_set_latency_range() is required to compile Ardour3\nCurrently this means using JACK version 0.120.1 from http://www.jackaudio.org/download\n'
 
         conf.check_cc(fragment = "#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_t* p; jack_latency_range_t r; jack_port_set_latency_range (p, JackCaptureLatency, &r); return 0; }\n",
-                      linkflags = ['-ljack'],
+                      uselib = [ 'JACK' ],
         	      msg = 'Checking for new JACK latency API',
         	      okmsg = 'present',
                       mandatory = True,
                       errmsg = missing_jack_message)
 
         conf.check_cc(fragment = '#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_type_get_buffer_size ((jack_client_t*)0, ""); }\n',
-                      linkflags = ['-ljack'],
+                      uselib = [ 'JACK' ],
         	      msg = 'Checking for new jack_port_type_get_buffer_size',
                       okmsg = 'present',
                       mandatory = True,
