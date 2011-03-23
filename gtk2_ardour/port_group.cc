@@ -550,9 +550,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 					DataType t (jack_port_type (jp));
 					if (t != DataType::NIL) {
 						if (port_has_prefix (p, N_("system:")) || 
-                                                    port_has_prefix (p, N_("alsa_pcm")) || 
                                                     port_has_prefix (p, lpnc)) {
 							extra_system[t].push_back (p);
+                                                } else if (port_has_prefix (p, N_("alsa_pcm"))) {
+                                                        /* JACK MIDI .. hack hack hack */
+							extra_system[t].push_back (p.substr (p.find (':') + 1));
 						} else {
 							extra_other[t].push_back (p);
 						}
