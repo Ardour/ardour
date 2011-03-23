@@ -12,9 +12,7 @@ for VM in Build_32bit_804s Build_64bit_804s ; do
     sleep 12
     echo "$VM: Running $tooldir/noderun $basedir on $VM ... "
     $vbm guestcontrol exec $VM /bin/sh \
-             --arguments -vx \
              --arguments $tooldir/noderun \
-             --arguments $basedir \
              --environment PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
              --username $u --password $p --wait-for stdout
     status=$?

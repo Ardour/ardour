@@ -1,10 +1,8 @@
 #!/bin/sh
 
-BASE=$1
-
-if [ x$BASE = "x" ] ; then 
-   exit 1
-fi
+BASE=$(readlink -f $0)
+BASE=$(dirname $BASE) # up one
+BASE=$(dirname $BASE) # up one more
 
 if mount | grep --silent vmshare ; then
     sudo mount -t vboxsf vmshare $HOME/vmshare
