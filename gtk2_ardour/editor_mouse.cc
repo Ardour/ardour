@@ -1049,6 +1049,11 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MouseObject:
 		switch (item_type) {
 		case RegionItem:
+			if (internal_editing ()) {
+				/* no region drags in internal edit mode */
+				return false;
+			}
+			
 			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
 				add_region_copy_drag (item, event, clicked_regionview);
 			} else {
