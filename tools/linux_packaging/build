@@ -142,6 +142,7 @@ Plugins=$APPLIB/plugins
 Surfaces=$APPLIB/surfaces
 Panners=$APPLIB/panners
 Locale=$Shared/locale
+MidiMaps=$Shared/midi_maps
 Modules=$Libraries/modules
 Loaders=$Libraries/loaders
 
@@ -177,6 +178,7 @@ mkdir -p $Loaders
 mkdir -p $Shared
 mkdir -p $Locale
 mkdir -p $Surfaces
+mkdir -p $MidiMaps
 mkdir -p $Panners
 mkdir -p $Shared/templates
 mkdir -p $Shared/doc
@@ -428,6 +430,9 @@ fi
 cp $BUILD_ROOT/libs/surfaces/*/libardour*.so* $Surfaces
 # hack ... move libardour_cp back into Libraries
 mv $Surfaces/libardourcp.so* $Libraries
+
+# MidiMaps
+cp $BUILD_ROOT/../../midi_maps/*.map $MidiMaps
 
 # Panners
 cp $BUILD_ROOT/libs/panners/*/lib*.so* $Panners
