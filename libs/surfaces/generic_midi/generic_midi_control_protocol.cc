@@ -22,6 +22,8 @@
 #include <sstream>
 #include <algorithm>
 
+#include <glibmm/miscutils.h>
+
 #include "pbd/controllable_descriptor.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
@@ -85,13 +87,21 @@ GenericMidiControlProtocol::~GenericMidiControlProtocol ()
 	tear_down_gui ();
 }
 
+static const char * const midimap_env_variable_name = "ARDOUR_MIDIMAPS_PATH";
 static const char* const midi_map_dir_name = "midi_maps";
 static const char* const midi_map_suffix = ".map";
 
 static sys::path
 system_midi_map_search_path ()
 {
-	SearchPath spath(system_data_search_path());
+	bool midimap_path_defined = false;
+        sys::path spath_env (Glib::getenv (midimap_env_variable_name, midimap_path_defined));
+
+	if (midimap_path_defined) {
+		return spath_env;
+	}
+
+	SearchPath spath (system_data_search_path());
 	spath.add_subdirectory_to_paths(midi_map_dir_name);
 
 	// just return the first directory in the search path that exists
