@@ -31,7 +31,7 @@ def build(bld):
         obj.cxxflags     = '-DPACKAGE="ardour_cp"'
         obj.includes     = ['.', './osc']
         obj.name         = 'libardour_osc'
-        obj.target       = 'osc'
+        obj.target       = 'ardour_osc'
         obj.uselib       = ' LO '
         obj.uselib_local = 'libardour libardour_cp libpbd'
         obj.vnum         = LIBARDOUR_OSC_LIB_VERSION
