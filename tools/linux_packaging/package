@@ -162,7 +162,7 @@ cp stage2.run ${PACKAGE}/.stage2.run
 cp README ${PACKAGE}
 
 echo "Creating tarball..."
-tar -czf ${PACKAGE}.tar.gz ${PACKAGE}
+tar -cf ${PACKAGE}.tar ${PACKAGE}
 
 echo "Clean up"
 rm -rf ${PACKAGE}
