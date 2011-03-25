@@ -89,7 +89,7 @@
 
   <Binding channel="1"  ctl="61"  uri="/bus/gain master"  />
 
-<!-- Pan commented out for now --- the 16 Busses have no pan controls on ddx3216 -->
+<!-- Pan commented out for now - the 16 Busses have no pan controls on ddx3216 -->
 
    <!--<Binding channel="1"  ctl="64"  uri="/route/pan B1"  />  -->
    <!--<Binding channel="1"  ctl="65"  uri="/route/pan B2"  />  -->
