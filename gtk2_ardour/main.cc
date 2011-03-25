@@ -233,7 +233,7 @@ fixup_bundle_environment (int, char* [])
 		path = "";
 	}
 	path += dir_path;
-	path += "/share/midimaps";
+	path += "/share/midi_maps";
 	
 	setenv ("ARDOUR_MIDIMAPS_PATH", path.c_str(), 1);
 
@@ -431,7 +431,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 		path = "";
 	}
 	path += dir_path;
-	path += "/share/midimaps";
+	path += "/share/midi_maps";
 	
 	setenv ("ARDOUR_MIDIMAPS_PATH", path.c_str(), 1);
 
