@@ -448,12 +448,12 @@ ARDOUR_UI::setup_transport ()
 	VBox* auto_box = manage (new VBox);
 	auto_box->pack_start (auto_play_button, false, false);
 	auto_box->pack_start (auto_return_button, false, false);
-	toggle_box->pack_start (*auto_box, false, false);
+	// toggle_box->pack_start (*auto_box, false, false);
 
 	VBox* io_box = manage (new VBox);
 	io_box->pack_start (auto_input_button, false, false);
 	io_box->pack_start (click_button, false, false);
-	toggle_box->pack_start (*io_box, false, false);
+	//toggle_box->pack_start (*io_box, false, false);
 
 	/* desensitize */
 
@@ -466,6 +466,7 @@ ARDOUR_UI::setup_transport ()
 //	toggle_box->pack_start (postroll_clock, false, false);
 
 	transport_tearoff_hbox.pack_start (*toggle_box, false, false, 4);
+        transport_tearoff_hbox.pack_start (_editor_transport_box, false, false, 4);
 	transport_tearoff_hbox.pack_start (alert_box, false, false);
 
 	if (Profile->get_sae()) {

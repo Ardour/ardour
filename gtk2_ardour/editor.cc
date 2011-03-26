@@ -2929,8 +2929,11 @@ Editor::setup_toolbar ()
 	toolbar_hbox.pack_start (*_tools_tearoff, false, false);
 
 	hbox->pack_start (snap_box, false, false);
-	hbox->pack_start (*nudge_box, false, false);
+	// hbox->pack_start (*nudge_box, false, false);
 	hbox->pack_start (panic_box, false, false);
+
+        ARDOUR_UI::instance()->editor_transport_box().pack_start (*nudge_box, false, false);
+        // ARDOUR_UI::instance()->editor_transport_box().pack_start (panic_box, false, false);
 
 	hbox->show_all ();
 

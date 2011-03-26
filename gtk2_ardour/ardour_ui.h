@@ -170,6 +170,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	Gtk::Tooltips& tooltips() { return _tooltips; }
 
+	Gtk::HBox& editor_transport_box() { return _editor_transport_box; }
+
+	static PublicEditor* _instance;
 	static sigc::signal<void,bool> Blink;
 	static sigc::signal<void>      RapidScreenUpdate;
 	static sigc::signal<void>      SuperRapidScreenUpdate;
@@ -367,6 +370,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::HBox                transport_tearoff_hbox;
 	Gtk::HBox                play_range_hbox;
 	Gtk::VBox                play_range_vbox;
+	Gtk::HBox               _editor_transport_box;
 	Gtk::HBox                transport_hbox;
 	Gtk::Fixed               transport_base;
 	Gtk::Fixed               transport_button_base;
