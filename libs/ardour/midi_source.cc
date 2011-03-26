@@ -234,10 +234,10 @@ MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_sta
 				if (tracker) {
 					Evoral::MIDIEvent<Evoral::MusicalTime>& ev (*(Evoral::MIDIEvent<Evoral::MusicalTime>*) (&(*i)));
 					if (ev.is_note_on()) {
-						DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("\t%1 add note on %2 @ %3 velocity %4\n", _name, ev.note(), time_frames, (int) ev.velocity()));
+						DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("\t%1 add note on %2 @ %3 velocity %4\n", _name, (int) ev.note(), time_frames, (int) ev.velocity()));
 						tracker->add (ev.note(), ev.channel());
 					} else if (ev.is_note_off()) {
-						DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("\t%1 add note off %2 @ %3\n", _name, ev.note(), time_frames));
+						DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("\t%1 add note off %2 @ %3\n", _name, (int) ev.note(), time_frames));
 						tracker->remove (ev.note(), ev.channel());
 					}
 				}
