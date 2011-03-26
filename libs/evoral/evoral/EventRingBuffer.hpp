@@ -18,12 +18,12 @@
 #ifndef EVORAL_EVENT_RING_BUFFER_HPP
 #define EVORAL_EVENT_RING_BUFFER_HPP
 
-#include "evoral/EventSink.hpp"
-#include "evoral/types.hpp"
-
 #include <iostream>
 
 #include "pbd/ringbufferNPT.h"
+
+#include "evoral/EventSink.hpp"
+#include "evoral/types.hpp"
 
 using namespace std;
 
