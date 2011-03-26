@@ -205,17 +205,17 @@ class AudioDiskstream : public Diskstream
 		Sample       *current_capture_buffer;
 		Sample       *current_playback_buffer;
 
-		RingBufferNPT<Sample> *playback_buf;
-		RingBufferNPT<Sample> *capture_buf;
+		PBD::RingBufferNPT<Sample> *playback_buf;
+		PBD::RingBufferNPT<Sample> *capture_buf;
 
 		Sample* scrub_buffer;
 		Sample* scrub_forward_buffer;
 		Sample* scrub_reverse_buffer;
 
-		RingBufferNPT<Sample>::rw_vector playback_vector;
-		RingBufferNPT<Sample>::rw_vector capture_vector;
+		PBD::RingBufferNPT<Sample>::rw_vector playback_vector;
+		PBD::RingBufferNPT<Sample>::rw_vector capture_vector;
 
-		RingBufferNPT<CaptureTransition> * capture_transition_buf;
+		PBD::RingBufferNPT<CaptureTransition> * capture_transition_buf;
 		// the following are used in the butler thread only
 		framecnt_t                     curr_capture_cnt;
 

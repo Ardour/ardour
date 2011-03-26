@@ -51,7 +51,7 @@ public:
 	inline bool read_contents(uint32_t size, uint8_t* buf);
 
 	size_t read(MidiBuffer& dst, framepos_t start, framepos_t end, framecnt_t offset=0);
-	void dump(std::ostream& dst);
+	// void dump(std::ostream& dst);
 
 	/** Set the channel filtering mode.
 	 * @param mask If mode is FilterChannels, each bit represents a midi channel:
@@ -92,13 +92,19 @@ template<typename T>
 inline bool
 MidiRingBuffer<T>::read_prefix(T* time, Evoral::EventType* type, uint32_t* size)
 {
-	bool success = Evoral::EventRingBuffer<T>::full_read(sizeof(T), (uint8_t*)time);
-	if (success)
-		success = Evoral::EventRingBuffer<T>::full_read(sizeof(Evoral::EventType), (uint8_t*)type);
-	if (success)
-		success = Evoral::EventRingBuffer<T>::full_read(sizeof(uint32_t), (uint8_t*)size);
+	if (PBD::RingBufferNPT<uint8_t>::read((uint8_t*)time, sizeof(T)) != sizeof (T)) {
+		return false;
+	}
 
-	return success;
+	if (PBD::RingBufferNPT<uint8_t>::read((uint8_t*)type, sizeof(Evoral::EventType)) != sizeof (Evoral::EventType)) {
+		return false;
+	}
+
+	if (PBD::RingBufferNPT<uint8_t>::read((uint8_t*)size, sizeof(uint32_t)) != sizeof (uint32_t)) {
+		return false;
+	}
+
+	return true;
 }
 
 
@@ -109,7 +115,7 @@ template<typename T>
 inline bool
 MidiRingBuffer<T>::read_contents(uint32_t size, uint8_t* buf)
 {
-	return Evoral::EventRingBuffer<T>::full_read(size, buf);
+	return PBD::RingBufferNPT<uint8_t>::read(buf, size) == size;
 }
 
 

@@ -47,11 +47,11 @@ class AbstractUI : public BaseUI
 	Glib::Mutex request_buffer_map_lock;
 
   protected:
-       struct RequestBuffer : public RingBufferNPT<RequestObject> {
+	struct RequestBuffer : public PBD::RingBufferNPT<RequestObject> {
                 bool dead;
                 AbstractUI<RequestObject>& ui;
                 RequestBuffer (uint32_t size, AbstractUI<RequestObject>& uir) 
-                        : RingBufferNPT<RequestObject> (size)
+                        : PBD::RingBufferNPT<RequestObject> (size)
                         , dead (false) 
                         , ui (uir) {}
         };

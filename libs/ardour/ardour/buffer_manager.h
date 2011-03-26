@@ -26,7 +26,7 @@ class BufferManager
   private:
 	static Glib::StaticMutex rb_mutex;
 	
-        typedef RingBufferNPT<ThreadBuffers*> ThreadBufferFIFO;
+        typedef PBD::RingBufferNPT<ThreadBuffers*> ThreadBufferFIFO;
 	typedef std::list<ThreadBuffers*> ThreadBufferList;
 
         static ThreadBufferFIFO* thread_buffers;

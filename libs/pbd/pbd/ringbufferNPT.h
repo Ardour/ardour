@@ -25,6 +25,8 @@
 #include <cstring>
 #include <glib.h>
 
+namespace PBD {
+
 /* ringbuffer class where the element size is not required to be a power of two */
 
 template<class T>
@@ -54,7 +56,7 @@ class RingBufferNPT
 	}
 	
 	size_t  read  (T *dest, size_t cnt);
-	size_t  write (T *src, size_t cnt);
+	size_t  write (const T *src, size_t cnt);
 
 	struct rw_vector {
 	    T *buf[2];
@@ -156,7 +158,7 @@ RingBufferNPT<T>::read (T *dest, size_t cnt)
 }
 
 template<class T> size_t
-RingBufferNPT<T>::write (T *src, size_t cnt)
+RingBufferNPT<T>::write (const T *src, size_t cnt)
 {
         size_t free_cnt;
         size_t cnt2;
@@ -270,5 +272,7 @@ RingBufferNPT<T>::get_write_vector (RingBufferNPT<T>::rw_vector *vec)
 		vec->len[1] = 0;
 	}
 }
+
+} /* namespace */
 
 #endif /* __ringbuffer_npt_h__ */

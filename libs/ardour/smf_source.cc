@@ -241,7 +241,7 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t positi
 	Evoral::MIDIEvent<framepos_t> ev;
 
 	while (true) {
-		bool ret = source.peek_time(&time);
+		bool ret = source.peek ((uint8_t*)&time, sizeof (time));
 		if (!ret || time > _last_write_end + duration) {
 			break;
 		}

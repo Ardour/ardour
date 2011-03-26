@@ -76,7 +76,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 
 	while (this->read_space() >= sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t)) {
 
-		this->full_peek(sizeof(T), (uint8_t*)&ev_time);
+		this->peek ((uint8_t*) &ev_time, sizeof (T));
 
 		if (ev_time + loop_offset >= end) {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 past end @ %2\n", ev_time, end));
@@ -107,7 +107,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		ev_time += loop_offset;
 
 		uint8_t status;
-		success = this->full_peek(sizeof(uint8_t), &status);
+		success = this->peek (&status, sizeof(uint8_t));
 		assert(success); // If this failed, buffer is corrupt, all hope is lost
 
 		// Ignore event if it doesn't match channel filter
@@ -115,7 +115,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 			const uint8_t channel = status & 0x0F;
 			if (!(get_channel_mask() & (1L << channel))) {
 				// cerr << "MRB skipping event due to channel mask" << endl;
-				this->skip(ev_size); // Advance read pointer to next event
+				this->increment_read_ptr (ev_size); // Advance read pointer to next event
 				continue;
 			}
 		}
@@ -129,7 +129,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		uint8_t* write_loc = dst.reserve(ev_time, ev_size);
 		if (write_loc == NULL) {
 			cerr << "MRB: Unable to reserve space in buffer, event skipped";
-			this->skip (ev_size); // Advance read pointer to next event
+			this->increment_read_ptr (ev_size); // Advance read pointer to next event
 			continue;
 		}
 
@@ -163,6 +163,8 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 
 	return count;
 }
+
+#if 0
 template<typename T>
 void
 MidiRingBuffer<T>::dump(ostream& str)
@@ -240,7 +242,7 @@ MidiRingBuffer<T>::dump(ostream& str)
 		delete [] data;
 	}
 }
-
+#endif
 
 template class MidiRingBuffer<framepos_t>;
 
