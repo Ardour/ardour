@@ -1074,10 +1074,7 @@ PluginInsert::PluginControl::set_value (double user_val)
 double
 PluginInsert::PluginControl::user_to_plugin (double val) const
 {
-	if (_sr_dependent) {
-		val /= _session.frame_rate ();
-	}
-	
+        /* no known transformations at this time */
 	return val;
 }
 
@@ -1115,10 +1112,7 @@ PluginInsert::PluginControl::plugin_to_ui (double val) const
 double
 PluginInsert::PluginControl::plugin_to_user (double val) const
 {
-	if (_sr_dependent) {
-		val = val * _session.frame_rate ();
-	}
-
+        /* no known transformations at this time */
 	return val;
 }
 
