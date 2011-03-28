@@ -149,16 +149,18 @@ class LV2Plugin : public ARDOUR::Plugin
 	static URIMap   _uri_map;
 	static uint32_t _midi_event_type;
 
-	static void lv2_persist_store_callback (void*       callback_data,
-	                                        const char* key,
-	                                        const void* value,
-	                                        size_t      size,
-	                                        uint32_t    type);
+	static int lv2_persist_store_callback (void*       callback_data,
+	                                       uint32_t    key,
+	                                       const void* value,
+	                                       size_t      size,
+	                                       uint32_t    type,
+	                                       bool        pod);
 
-	static const void* lv2_persist_retrieve_callback (void*       callback_data,
-	                                                  const char* key,
-	                                                  size_t*     size,
-	                                                  uint32_t*   type);
+	static const void* lv2_persist_retrieve_callback (void*     callback_data,
+	                                                  uint32_t  key,
+	                                                  size_t*   size,
+	                                                  uint32_t* type,
+	                                                  bool*     pod);
 
 	void init (LV2World& world, SLV2Plugin plugin, framecnt_t rate);
 	void run (pframes_t nsamples);

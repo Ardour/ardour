@@ -57,7 +57,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-URIMap LV2Plugin::  _uri_map;
+URIMap LV2Plugin::_uri_map;
 uint32_t LV2Plugin::_midi_event_type = _uri_map.uri_to_id(
         "http://lv2plug.in/ns/ext/event",
         "http://lv2plug.in/ns/ext/midi#MidiEvent");
@@ -296,30 +296,108 @@ LV2Plugin::nth_parameter(uint32_t n, bool& ok) const
 	return 0;
 }
 
-void
+struct PersistValue {
+	inline PersistValue(uint32_t k, const void* v, size_t s, uint32_t t, bool p)
+		: key(k), value(v), size(s), type(t), pod(p)
+	{}
+
+	const uint32_t key;
+	const void*    value;
+	const size_t   size;
+	const uint32_t type;
+	const bool     pod;
+};
+
+struct PersistState {
+	PersistState(URIMap& map) : uri_map(map) {}
+
+	typedef std::map<uint32_t, std::string>  URIs;
+	typedef std::map<uint32_t, PersistValue> Values;
+
+	uint32_t file_id_to_runtime_id(uint32_t file_id) const {
+		URIs::const_iterator i = uris.find(file_id);
+		if (i == uris.end()) {
+			error << "LV2 state refers to undefined URI ID" << endmsg;
+			return 0;
+		}
+		return uri_map.uri_to_id(NULL, i->second.c_str());
+	}
+
+	int add_uri(uint32_t file_id, const char* str) {
+		// TODO: check for clashes (invalid file)
+		uris.insert(make_pair(file_id, str));
+		return 0;
+	}
+
+	int add_value(uint32_t    file_key,
+	              const void* value,
+	              size_t      size,
+	              uint32_t    file_type,
+	              bool        pod) {
+		const uint32_t key  = file_id_to_runtime_id(file_key);
+		const uint32_t type = file_id_to_runtime_id(file_type);
+		if (!key || !type) {
+			return 1;
+		}
+
+		Values::const_iterator i = values.find(key);
+		if (i != values.end()) {
+			error << "LV2 state contains duplicate keys" << endmsg;
+			return 1;
+		} else {
+			void* value_copy = malloc(size);
+			memcpy(value_copy, value, size); // FIXME: leak
+			values.insert(
+				make_pair(key,
+				          PersistValue(key, value_copy, size, type, pod)));
+			return 0;
+		}
+	}
+
+	URIMap& uri_map;
+	URIs    uris;
+	Values  values;
+};
+
+int
 LV2Plugin::lv2_persist_store_callback(void*       callback_data,
-                                      const char* key,
+                                      uint32_t    key,
                                       const void* value,
                                       size_t      size,
-                                      uint32_t    type)
+                                      uint32_t    type,
+                                      bool        pod)
 {
-	LV2PFile file = (LV2PFile)callback_data;
+	cout << "LV2 PERSIST STORE " << key
+	     << " = " << value
+	     << " :: " << type
+	     << " POD: " << pod << endl;
 
-	// FIXME: assumes URIs are mapped in the default context (or not event, at least)
-	const char* type_uri = LV2Plugin::_uri_map.id_to_uri(NULL, type);
-	cout << "LV2 PERSIST STORE " << key << " = " << value << " :: " << type_uri << endl;
-	lv2_pfile_write(file, key, value, size, type_uri);
+	PersistState* state = (PersistState*)callback_data;
+	state->add_uri(key,  _uri_map.id_to_uri(NULL, key)); 
+	state->add_uri(type, _uri_map.id_to_uri(NULL, type)); 
+	return state->add_value(key, value, size, type, pod);
 }
 
 const void*
-LV2Plugin::lv2_persist_retrieve_callback(void*       callback_data,
-                                         const char* key,
-                                         size_t*     size,
-                                         uint32_t*   type)
+LV2Plugin::lv2_persist_retrieve_callback(void*     callback_data,
+                                         uint32_t  key,
+                                         size_t*   size,
+                                         uint32_t* type,
+                                         bool*     pod)
 {
-	//LV2PFile file = (LV2PFile)callback_data;
-	cout << "LV2 PERSIST RETRIEVE " << key << endl;
-	return NULL;
+	cout << "LV2 PERSIST RETRIEVE " << _uri_map.id_to_uri(NULL, key) << endl;
+
+	PersistState* state = (PersistState*)callback_data;
+	PersistState::Values::const_iterator i = state->values.find(key);
+	if (i == state->values.end()) {
+		warning << "LV2 plugin attempted to retrieve nonexistent key: "
+		        << _uri_map.id_to_uri(NULL, key) << endmsg;
+		return NULL;
+	}
+	*size = i->second.size;
+	*type = i->second.type;
+	*pod  = true; // FIXME
+	return i->second.value;
 }
 
 void
@@ -341,7 +419,7 @@ LV2Plugin::add_state(XMLNode* root) const
 
 	if (_supports_persist) {
 		// Create state directory for this plugin instance
-		const std::string state_filename = _id.to_s() + ".lv2pfile";
+		const std::string state_filename = _id.to_s() + ".lv2f";
 		const std::string state_path     = Glib::build_filename(
 		        _session.plugins_dir(), state_filename);
 
@@ -357,8 +435,35 @@ LV2Plugin::add_state(XMLNode* root) const
 			return;
 		}
 
+		// Save plugin state to state object
+		PersistState state(_uri_map);
+		persist->save(_instance->lv2_handle,
+		              &LV2Plugin::lv2_persist_store_callback,
+		              &state);
+
+		// Open state file
 		LV2PFile file = lv2_pfile_open(state_path.c_str(), true);
-		persist->save(_instance->lv2_handle, &LV2Plugin::lv2_persist_store_callback, file);
+
+		// Write all referenced URIs to state file
+		for (PersistState::URIs::const_iterator i = state.uris.begin();
+		     i != state.uris.end(); ++i) {
+			lv2_pfile_write_uri(file, i->first,
+			                    i->second.c_str(), i->second.length() + 1);
+		}
+
+		// Write all values to state file
+		for (PersistState::Values::const_iterator i = state.values.begin();
+		     i != state.values.end(); ++i) {
+			const uint32_t      key = i->first;
+			const PersistValue& val = i->second;
+			lv2_pfile_write_value(file,
+			                      key,
+			                      val.value,
+			                      val.size,
+			                      val.type);
+		}
+
+		// Close state file
 		lv2_pfile_close(file);
 
 		root->add_property("state-file", state_filename);
@@ -527,9 +632,34 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 		if (persist) {
 			cout << "Loading LV2 state from " << state_path << endl;
 			LV2PFile file = lv2_pfile_open(state_path.c_str(), false);
+
+			PersistState state(_uri_map);
+
+			// Load file into state object
+			LV2PFileChunkHeader* chunk = (LV2PFileChunkHeader*)malloc(
+				sizeof(LV2PFileChunkHeader));
+			chunk->size = 0;
+			while (!lv2_pfile_read_chunk(file, &chunk)) {
+				if (!strncmp(chunk->type, "URID", 4)) {
+					LV2PFileURIChunk* body = (LV2PFileURIChunk*)chunk->data;
+					printf("READ URI %u: %s\n", body->id, body->uri);
+					state.add_uri(body->id, body->uri);
+				} else if (!strncmp(chunk->type, "KVAL", 4)) {
+					LV2PFileValueChunk* body = (LV2PFileValueChunk*)chunk->data;
+					printf("READ VAL %u = %s (size: %u type: %u)\n",
+					       body->key, body->value, body->size, body->type);
+					state.add_value(body->key,
+					                body->value,
+					                body->size,
+					                body->type,
+					                true);
+				}
+			}
+			free(chunk);
+			
 			persist->restore(_instance->lv2_handle,
 			                 &LV2Plugin::lv2_persist_retrieve_callback,
-			                 file);
+			                 &state);
 			lv2_pfile_close(file);
 		} else {
 			warning << string_compose(
