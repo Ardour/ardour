@@ -329,8 +329,7 @@ struct PersistState {
 		return 0;
 	}
 
-	int add_value(uint32_t    file_subject,
-	              uint32_t    file_key,
+	int add_value(uint32_t    file_key,
 	              const void* value,
 	              size_t      size,
 	              uint32_t    file_type,
@@ -362,7 +361,6 @@ struct PersistState {
 
 int
 LV2Plugin::lv2_persist_store_callback(void*       callback_data,
-                                      uint32_t    subject,
                                       uint32_t    key,
                                       const void* value,
                                       size_t      size,
@@ -375,12 +373,11 @@ LV2Plugin::lv2_persist_store_callback(void*       callback_data,
 	PersistState* state = (PersistState*)callback_data;
 	state->add_uri(key,  _uri_map.id_to_uri(NULL, key)); 
 	state->add_uri(type, _uri_map.id_to_uri(NULL, type)); 
-	return state->add_value(subject, key, value, size, type, flags);
+	return state->add_value(key, value, size, type, flags);
 }
 
 const void*
 LV2Plugin::lv2_persist_retrieve_callback(void*     callback_data,
-                                         uint32_t  subject,
                                          uint32_t  key,
                                          size_t*   size,
                                          uint32_t* type,
@@ -653,8 +650,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 					printf("READ VAL %u = %s (size: %u type: %u)\n",
 					       body->predicate, body->object,
 					       body->object_size, body->object_type);
-					state.add_value(body->subject,
-					                body->predicate,
+					state.add_value(body->predicate,
 					                body->object,
 					                body->object_size,
 					                body->object_type,

@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2010-2011 David Robillard <http://drobilla.net>
-  Copyright (C) 2010 Leonard Ritter <paniq@paniq.org>
+  Copyright 2010-2011 David Robillard <http://drobilla.net>
+  Copyright 2010 Leonard Ritter <paniq@paniq.org>
 
   This header is free software; you can redistribute it and/or modify it
   under the terms of the GNU Lesser General Public License as published
@@ -68,9 +68,8 @@ typedef enum {
 } LV2_Persist_Flags;
 
 /**
-   A host-provided function to store a property.
+   A host-provided function to store a plugin instance property.
    @param callback_data Must be the callback_data passed to LV2_Persist.save().
-   @param subject The subject of this property (URI), or 0 for plugin instance.
    @param key The key (predicate) to store @a value under (URI mapped integer).
    @param value Pointer to the value (object) to be stored.
    @param size The size of the data at @a value in bytes.
@@ -82,7 +81,7 @@ typedef enum {
    is called repeatedly by the plugin within LV2_Persist.save() to store all
    the statements that describe its current state.
 
-   The host MAY fail to store a statement if the type is not understood and is
+   The host MAY fail to store a property if the type is not understood and is
    not LV2_PERSIST_IS_POD and/or LV2_PERSIST_IS_PORTABLE. Implementations are
    encouraged to use POD and portable values (e.g. string literals) wherever
    possible, and use common types (e.g. types from
@@ -97,7 +96,6 @@ typedef enum {
 */
 typedef int (*LV2_Persist_Store_Function)(
 	void*       callback_data,
-	uint32_t    subject,
 	uint32_t    key,
 	const void* value,
 	size_t      size,
@@ -107,7 +105,6 @@ typedef int (*LV2_Persist_Store_Function)(
 /**
    A host-provided function to retrieve a property.
    @param callback_data Must be the callback_data passed to LV2_Persist.restore().
-   @param subject The subject of the property (URI), or 0 for plugin instance.
    @param key The key (predicate) of the property to retrieve (URI).
    @param size (Output) If non-NULL, set to the size of the restored value.
    @param type (Output) If non-NULL, set to the type of the restored value.
@@ -129,7 +126,6 @@ typedef int (*LV2_Persist_Store_Function)(
 */
 typedef const void* (*LV2_Persist_Retrieve_Function)(
 	void*     callback_data,
-	uint32_t  subject,
 	uint32_t  key,
 	size_t*   size,
 	uint32_t* type,

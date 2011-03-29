@@ -150,7 +150,6 @@ class LV2Plugin : public ARDOUR::Plugin
 	static uint32_t _midi_event_type;
 
 	static int lv2_persist_store_callback (void*       callback_data,
-	                                       uint32_t    subject,
 	                                       uint32_t    key,
 	                                       const void* value,
 	                                       size_t      size,
@@ -158,7 +157,6 @@ class LV2Plugin : public ARDOUR::Plugin
 	                                       uint32_t    flags);
 
 	static const void* lv2_persist_retrieve_callback (void*     callback_data,
-	                                                  uint32_t  subject,
 	                                                  uint32_t  key,
 	                                                  size_t*   size,
 	                                                  uint32_t* type,
