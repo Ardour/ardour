@@ -148,6 +148,14 @@ esac
 
 # untar the correct bundle for us to install
 echo "Unpacking bundle for $ARCH"
+
+if [ ! -e ${PGM_NAME}_${ARCH}-*.tar.bz2 ]; then
+	echo ""
+	echo "!!! ERROR !!! Can't locate ${ARCH} bundle file."
+	echo ""
+	exit 1
+fi
+
 tar -xjf ${PGM_NAME}_${ARCH}-*.tar.bz2
 BUNDLE_DIR=$(basename `find -maxdepth 1 -type d -name "${PGM_NAME}_${ARCH}-*"`)
 
