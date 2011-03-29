@@ -2683,7 +2683,7 @@ IO::end_gain_touch ()
                 when = _session.transport_frame();
         }
 
-	_gain_automation_curve.stop_touch (mark, when);
+	_gain_automation_curve.stop_touch (mark, when, gain());
 }
 
 void
@@ -2706,7 +2706,7 @@ IO::end_pan_touch (uint32_t which)
                         when = _session.transport_frame();
                 }
                 
-		(*_panner)[which]->automation().stop_touch(mark, when);
+		(*_panner)[which]->automation().stop_touch(mark, when, 0);
 	}
 }
 

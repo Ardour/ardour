@@ -589,7 +589,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontr
 void
 GenericPluginUI::start_touch (GenericPluginUI::ControlUI* cui)
 {
-	insert->automation_list (cui->port_index).start_touch (insert->session().transport_frame());
+	insert->automation_list ( cui->port_index).start_touch (insert->session().transport_frame() );
 }
 
 void
@@ -603,8 +603,13 @@ GenericPluginUI::stop_touch (GenericPluginUI::ControlUI* cui)
                 when = insert->session().transport_frame();
         }
 
+		double value = cui->adjustment->get_value();
+		if (cui->logarithmic) {
+			value = exp(value);
+		}
+
         if (insert->automation_list (cui->port_index).automation_state() == Auto_Touch) {
-                insert->automation_list (cui->port_index).stop_touch (mark, when);
+                insert->automation_list (cui->port_index).stop_touch (mark, when, value);
         }
 }
 

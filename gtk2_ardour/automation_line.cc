@@ -564,7 +564,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 	uint32_t prev_rx = 0;
 	uint32_t this_ry = 0;
  	uint32_t prev_ry = 0;	
-	double* slope;
+	double* slope = NULL;
 	uint32_t box_size;
 	uint32_t cpsize;
 
@@ -587,13 +587,13 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 
 	/* compute derivative/slope for the entire line */
 
-	slope = new double[npoints];
+	//slope = new double[npoints];
 
-	for (n = 0; n < npoints - 1; ++n) {
-		double xdelta = points[n+1].x - points[n].x;
-		double ydelta = points[n+1].y - points[n].y;
-		slope[n] = ydelta/xdelta;
-	}
+	//for (n = 0; n < npoints - 1; ++n) {
+	//	double xdelta = points[n+1].x - points[n].x;
+	//	double ydelta = points[n+1].y - points[n].y;
+	//	slope[n] = ydelta/xdelta;
+	//}
 
 	box_size = (uint32_t) control_point_box_size ();
 
@@ -626,14 +626,14 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 			continue;
 		}
 
-		if (pi > 0 && pi < npoints - 1) {
-			if (slope[pi] == slope[pi-1]) {
+//		if (pi > 0 && pi < npoints - 1) {
+//			if (slope[pi] == slope[pi-1]) {
 
 				/* no reason to display this point */
 				
-				continue;
-			}
-		}
+//				continue;
+//			}
+//		}
 		
 		/* need to round here. the ultimate coordinates are integer
 		   pixels, so tiny deltas in the coords will be eliminated
@@ -646,12 +646,12 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		this_rx = (uint32_t) rint (tx);
       		this_ry = (uint32_t) rint (ty); 
  
- 		if (view_index && pi != npoints && /* not the first, not the last */
-		    (((this_rx == prev_rx) && (this_ry == prev_ry)) || /* same point */
-		     (((this_rx - prev_rx) < (box_size + 2)) &&  /* not identical, but still too close horizontally */
-		      (abs ((int)(this_ry - prev_ry)) < (int) (box_size + 2))))) { /* too close vertically */
-  			continue;
-		} 
+ //		if (view_index && pi != npoints && /* not the first, not the last */
+//		    (((this_rx == prev_rx) && (this_ry == prev_ry)) || /* same point */
+//		     (((this_rx - prev_rx) < (box_size + 2)) &&  /* not identical, but still too close horizontally */
+//		      (abs ((int)(this_ry - prev_ry)) < (int) (box_size + 2))))) { /* too close vertically */
+//  			continue;
+//		} 
 
 		/* ok, we should display this point */
 

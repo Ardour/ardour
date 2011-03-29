@@ -134,7 +134,7 @@ class AutomationList : public PBD::StatefulDestructible
 	}
 
 	void start_touch (double when);
-	void stop_touch (bool mark, double when);
+	void stop_touch (bool mark, double when, double value);
         bool touching() const { return g_atomic_int_get (&_touching); }
 
 	void set_yrange (double min, double max) {
