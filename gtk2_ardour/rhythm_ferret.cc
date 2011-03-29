@@ -72,14 +72,14 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 	, trigger_gap_adjustment (3, 0, 100, 1, 10)
 	, trigger_gap_spinner (trigger_gap_adjustment)
 	, trigger_gap_label (_("Trigger gap (msecs)"))
-	, action_button (Stock::APPLY)
+	, action_button ( _("Split On Onsets"))
 
 {
 	upper_hpacker.set_spacing (6);
 
 	upper_hpacker.pack_start (ferret_frame, true, true);
-	upper_hpacker.pack_start (selection_frame, true, true);
-	upper_hpacker.pack_start (operation_frame, true, true);
+//	upper_hpacker.pack_start (selection_frame, true, true);
+//	upper_hpacker.pack_start (operation_frame, true, true);
 
 	op_packer.pack_start (region_split_button, false, false);
 	op_packer.pack_start (tempo_button, false, false);
@@ -219,12 +219,13 @@ RhythmFerret::get_analysis_mode () const
 RhythmFerret::Action
 RhythmFerret::get_action () const
 {
-	if (tempo_button.get_active()) {
+/*
+ * 	if (tempo_button.get_active()) {
 		return DefineTempoMap;
 	} else if (region_conform_button.get_active()) {
 		return ConformRegion;
 	}
-
+*/
 	return SplitRegion;
 }
 
