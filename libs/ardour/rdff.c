@@ -1,21 +1,27 @@
 /*
   RDFF - RDF in RIFF
   Copyright 2011 David Robillard <http://drobilla.net>
- 
-  This is free software; you can redistribute it and/or modify it
-  under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
- 
-  This software is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the GNU General Public License for more details.
- 
-  You should have received a copy of the GNU General Public License
-  along with this sofware; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-  02110-1301 USA.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+  1. Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+  AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+  AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+  THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <assert.h>
@@ -52,7 +58,7 @@ rdff_open(const char* path, bool write)
 	if (write) {
 		fwrite("RIFF", CHUNK_ID_LEN, 1, fd);    /* RIFF chunk ID */
 		fwrite(&size, sizeof(size), 1, fd);     /* RIFF chunk size */
-		fwrite(FILE_TYPE, CHUNK_ID_LEN, 1, fd); /* LV2 RIFF file type */
+		fwrite(FILE_TYPE, CHUNK_ID_LEN, 1, fd); /* File type */
 	} else {
 		char magic[CHUNK_ID_LEN];
 		if (fread(magic, CHUNK_ID_LEN, 1, fd) != 1
@@ -71,7 +77,8 @@ rdff_open(const char* path, bool write)
 		if (fread(magic, CHUNK_ID_LEN, 1, fd) != 1
 		    || strncmp(magic, FILE_TYPE, CHUNK_ID_LEN)) {
 			fclose(fd);
-			fprintf(stderr, "%s: error: not an LV2 RIFF file\n", path);
+			fprintf(stderr, "%s: error: not an %s RIFF file\n",
+			        FILE_TYPE, path);
 			return NULL;
 		}
 	}
@@ -194,7 +201,7 @@ main(int argc, char** argv)
 		snprintf(uri, sizeof(uri), "http://example.org/uri%02d", i + 1);
 		rdff_write_uri(file, i + 1, uri, strlen(uri) + 1);
 	}
-	
+
 	char val[6];
 	for (int i = 0; i < N_RECORDS; ++i) {
 		snprintf(val, sizeof(val), "VAL%02d", i);
