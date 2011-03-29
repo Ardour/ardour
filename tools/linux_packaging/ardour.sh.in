@@ -7,13 +7,7 @@ while [ $# -gt 0 ] ; do
 	-d)
 		DEBUG="T";
 		shift ;;
-	*)
-		#catch all for unknown arguments
-		echo ""
-		echo "!!! ERROR !!! - Unknown argument $1"
-		echo ""
-		exit 1
-		;;
+	*)      break;;
 	esac
 done
 
