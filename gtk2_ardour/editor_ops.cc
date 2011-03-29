@@ -1797,20 +1797,9 @@ Editor::temporal_zoom_region (bool both_axes)
 			(*t)->set_height (per_track_height);
 		}
 		
-		/* hide irrelevant tracks */
-		
-		no_route_list_redisplay = true;
+		controls_layout.property_height () = full_canvas_height - canvas_timebars_vsize;
+		vertical_adjustment.set_value ((*tracks.begin())->y_position );
 
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			if (find (tracks.begin(), tracks.end(), (*i)) == tracks.end()) {
-				hide_track_in_display (**i, true);
-			}
-		}
-
-		no_route_list_redisplay = false;
-		redisplay_route_list ();
-
-		vertical_adjustment.set_value (0);
 		no_save_visual = false;
 	}
 
@@ -2302,9 +2291,7 @@ Editor::insert_region_list_selection (float times)
 	RouteTimeAxisView *tv = 0;
 	boost::shared_ptr<Playlist> playlist;
 
-	if (clicked_audio_trackview != 0) {
-		tv = clicked_audio_trackview;
-	} else if (!selection->tracks.empty()) {
+	if (!selection->tracks.empty()) {
 		if ((tv = dynamic_cast<RouteTimeAxisView*>(selection->tracks.front())) == 0) {
 			return;
 		}
@@ -3113,8 +3100,10 @@ Editor::region_fill_selection ()
 	}
 
 	TreeModel::iterator i = region_list_display.get_selection()->get_selected();
-	boost::shared_ptr<Region> region = (*i)[region_list_columns.region];
-
+	TreeView::Selection::ListHandle_Path rows = selected->get_selected_rows ();
+	TreeIter iter  = region_list_model->get_iter (*rows.begin());
+	boost::shared_ptr<Region> region = (*iter)[region_list_columns.region];
+	
 	nframes64_t start = selection->time[clicked_selection].start;
 	nframes64_t end = selection->time[clicked_selection].end;
 
@@ -3135,7 +3124,7 @@ Editor::region_fill_selection ()
 			continue;
 		}		
 		
-                XMLNode &before = playlist->get_state();
+               XMLNode &before = playlist->get_state();
 		playlist->add_region (RegionFactory::create (region), start, times);
 		session->add_command (new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 	}

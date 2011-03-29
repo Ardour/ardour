@@ -378,7 +378,7 @@ AudioStreamView::redisplay_diskstream ()
 	list<RegionView *>::iterator i, tmp;
 	list<CrossfadeView*>::iterator xi, tmpx;
 
-        cerr << "REDISPLAY diskstream\n";
+//        cerr << "REDISPLAY diskstream\n";
 
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		(*i)->set_valid (false);
@@ -426,7 +426,7 @@ AudioStreamView::redisplay_diskstream ()
 	/* now fix layering */
 
 	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-                cerr << "Layering call for " << (*i)->region()->name() << endl;
+//                cerr << "Layering call for " << (*i)->region()->name() << endl;
 		region_layered (*i);
 	}
 }

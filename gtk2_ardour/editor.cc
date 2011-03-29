@@ -1892,7 +1892,7 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	items.push_back (MenuElem (_("Bounce"), mem_fun(*this, &Editor::bounce_region_selection)));
 
 #ifdef FFT_ANALYSIS
-	items.push_back (MenuElem (_("Spectral Analysis"), mem_fun(*this, &Editor::analyze_region_selection)));
+//	items.push_back (MenuElem (_("Spectral Analysis"), mem_fun(*this, &Editor::analyze_region_selection)));
 #endif
 
 	items.push_back (SeparatorElem());
@@ -2088,6 +2088,10 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& items)
 	items.push_back (MenuElem (_("Play range"), mem_fun(*this, &Editor::play_selection)));
 	items.push_back (MenuElem (_("Loop range"), bind (mem_fun(*this, &Editor::set_loop_from_selection), true)));
 
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Set loop from selection"), bind (mem_fun(*this, &Editor::set_loop_from_selection), false)));
+	items.push_back (MenuElem (_("Set punch from selection"), mem_fun(*this, &Editor::set_punch_from_selection)));
+
 #ifdef FFT_ANALYSIS
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Spectral Analysis"), mem_fun(*this, &Editor::analyze_range_selection)));
@@ -2104,10 +2108,6 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& items)
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Select all in range"), mem_fun(*this, &Editor::select_all_selectables_using_time_selection)));
 
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Set loop from selection"), bind (mem_fun(*this, &Editor::set_loop_from_selection), false)));
-	items.push_back (MenuElem (_("Set punch from selection"), mem_fun(*this, &Editor::set_punch_from_selection)));
-	
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Add Range Markers"), mem_fun (*this, &Editor::add_location_from_selection)));
 	items.push_back (SeparatorElem());

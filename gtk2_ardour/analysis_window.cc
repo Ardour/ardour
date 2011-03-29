@@ -87,7 +87,7 @@ AnalysisWindow::AnalysisWindow() :
 
 
 	// "Signal source"
-	vbox.pack_start(source_selection_label, false, false);
+	//vbox.pack_start(source_selection_label, false, false);
 
 	{
 		Gtk::RadioButtonGroup group = source_selection_ranges_rb.get_group();
@@ -95,8 +95,8 @@ AnalysisWindow::AnalysisWindow() :
 
 		source_selection_ranges_rb.set_active();
 		
-		vbox.pack_start (source_selection_ranges_rb,  false, false);
-		vbox.pack_start (source_selection_regions_rb, false, false);
+		//vbox.pack_start (source_selection_ranges_rb,  false, false);
+		//vbox.pack_start (source_selection_regions_rb, false, false);
 		
 		// "Selected ranges" radio
 		source_selection_ranges_rb.signal_toggled().connect (
@@ -107,18 +107,18 @@ AnalysisWindow::AnalysisWindow() :
 				bind ( mem_fun(*this, &AnalysisWindow::source_selection_changed), &source_selection_regions_rb));
 	}
 	
-	vbox.pack_start(hseparator1, false, false);
+	//vbox.pack_start(hseparator1, false, false);
 	
 	// "Display model"
-	vbox.pack_start(display_model_label, false, false);
+	//vbox.pack_start(display_model_label, false, false);
 	{
 		Gtk::RadioButtonGroup group = display_model_composite_separate_rb.get_group();
 		display_model_composite_all_tracks_rb.set_group (group);
 		
 		display_model_composite_separate_rb.set_active();
 		
-		vbox.pack_start (display_model_composite_separate_rb,   false, false);
-		vbox.pack_start (display_model_composite_all_tracks_rb, false, false);
+		//vbox.pack_start (display_model_composite_separate_rb,   false, false);
+		//vbox.pack_start (display_model_composite_all_tracks_rb, false, false);
 
 		// "Composite graphs for all tracks"
 		display_model_composite_separate_rb.signal_toggled().connect (
@@ -136,7 +136,7 @@ AnalysisWindow::AnalysisWindow() :
 
 	refresh_button.signal_clicked().connect ( bind ( mem_fun(*this, &AnalysisWindow::analyze_data), &refresh_button)); 
 
-	vbox.pack_start(refresh_button, false, false, 10);
+	vbox.pack_start(refresh_button, false, false);
 
 
 	// Feature checkboxes
@@ -147,7 +147,7 @@ AnalysisWindow::AnalysisWindow() :
 
 	// normalize
 	show_normalized_button.signal_toggled().connect( mem_fun(*this, &AnalysisWindow::show_normalized_changed));
-	vbox.pack_start(show_normalized_button, false, false);
+	//vbox.pack_start(show_normalized_button, false, false);
 
 	
 
