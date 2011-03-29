@@ -65,7 +65,7 @@ typedef struct {
 } PACKED RDFFChunk;
 
 /**
-   Body of a URID chunk.
+   Body of a RDFF "urid" chunk.
 */
 typedef struct {
 	uint32_t id;     /**< Numeric ID of URI in this RDFF. */
@@ -73,14 +73,15 @@ typedef struct {
 } PACKED RDFFURIChunk;
 
 /**
-   Body of a KVAL chunk.
+   Body of a RDFF "trip" chunk.
 */
 typedef struct {
-	uint32_t key;      /**< Predicate URI ID. */
-	uint32_t type;     /**< Type URI ID. */
-	uint32_t size;     /**< Size of object data. */
-	char     value[];  /**< Object data. */
-} PACKED RDFFValueChunk;
+	uint32_t subject;      /**< Subject URI ID. */
+	uint32_t predicate;    /**< Predicate URI ID. */
+	uint32_t object_type;  /**< Object type URI ID. */
+	uint32_t object_size;  /**< Size of object data. */
+	char     object[];     /**< Object data. */
+} PACKED RDFFTripleChunk;
 
 /**
    Open/Create a new RDFF file.
@@ -94,18 +95,19 @@ rdff_open(const char* path, bool write);
 RDFFStatus
 rdff_write_uri(RDFF        file,
                uint32_t    id,
-               const char* uri,
-               uint32_t    len);
+               uint32_t    len,
+               const char* uri);
 
 /**
    Write a key/value record to @a file.
 */
 RDFFStatus
-rdff_write_value(RDFF        file,
-                 uint32_t    key,
-                 const void* value,
-                 uint32_t    size,
-                 uint32_t    type);
+rdff_write_triple(RDFF        file,
+                  uint32_t    subject,
+                  uint32_t    predicate,
+                  uint32_t    object_type,
+                  uint32_t    object_size,
+                  const void* object);
 
 /**
    Read a chunk from @a file.

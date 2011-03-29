@@ -367,10 +367,8 @@ LV2Plugin::lv2_persist_store_callback(void*       callback_data,
                                       uint32_t    type,
                                       bool        pod)
 {
-	cout << "LV2 PERSIST STORE " << key
-	     << " = " << value
-	     << " :: " << type
-	     << " POD: " << pod << endl;
+	DEBUG_TRACE(DEBUG::LV2, string_compose("persist store %1\n",
+	                                       _uri_map.id_to_uri(NULL, key)));
 
 	PersistState* state = (PersistState*)callback_data;
 	state->add_uri(key,  _uri_map.id_to_uri(NULL, key)); 
@@ -385,7 +383,8 @@ LV2Plugin::lv2_persist_retrieve_callback(void*     callback_data,
                                          uint32_t* type,
                                          bool*     pod)
 {
-	cout << "LV2 PERSIST RETRIEVE " << _uri_map.id_to_uri(NULL, key) << endl;
+	DEBUG_TRACE(DEBUG::LV2, string_compose("persist retrieve %1\n",
+	                                       _uri_map.id_to_uri(NULL, key)));
 
 	PersistState* state = (PersistState*)callback_data;
 	PersistState::Values::const_iterator i = state->values.find(key);
@@ -447,8 +446,10 @@ LV2Plugin::add_state(XMLNode* root) const
 		// Write all referenced URIs to state file
 		for (PersistState::URIs::const_iterator i = state.uris.begin();
 		     i != state.uris.end(); ++i) {
-			rdff_write_uri(file, i->first,
-			                    i->second.c_str(), i->second.length() + 1);
+			rdff_write_uri(file,
+			               i->first,
+			               i->second.length(),
+			               i->second.c_str());
 		}
 
 		// Write all values to state file
@@ -456,11 +457,12 @@ LV2Plugin::add_state(XMLNode* root) const
 		     i != state.values.end(); ++i) {
 			const uint32_t      key = i->first;
 			const PersistValue& val = i->second;
-			rdff_write_value(file,
-			                      key,
-			                      val.value,
-			                      val.size,
-			                      val.type);
+			rdff_write_triple(file,
+			                  0,
+			                  key,
+			                  val.type,
+			                  val.size,
+			                  val.value);
 		}
 
 		// Close state file
@@ -644,13 +646,14 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 					printf("READ URI %u: %s\n", body->id, body->uri);
 					state.add_uri(body->id, body->uri);
 				} else if (!strncmp(chunk->type, "KVAL", 4)) {
-					RDFFValueChunk* body = (RDFFValueChunk*)chunk->data;
+					RDFFTripleChunk* body = (RDFFTripleChunk*)chunk->data;
 					printf("READ VAL %u = %s (size: %u type: %u)\n",
-					       body->key, body->value, body->size, body->type);
-					state.add_value(body->key,
-					                body->value,
-					                body->size,
-					                body->type,
+					       body->predicate, body->object,
+					       body->object_size, body->object_type);
+					state.add_value(body->predicate,
+					                body->object,
+					                body->object_size,
+					                body->object_type,
 					                true);
 				}
 			}

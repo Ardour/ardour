@@ -35,8 +35,8 @@
 #define CHUNK_ID_LEN 4
 
 static const char FILE_TYPE[CHUNK_ID_LEN]  = "RDFF";  /* RDFF File ID */
-static const char CHUNK_KVAL[CHUNK_ID_LEN] = "KVAL";  /* Key/Value Chunk ID */
-static const char CHUNK_URID[CHUNK_ID_LEN] = "URID";  /* URI-ID Chunk ID*/
+static const char CHUNK_TRIP[CHUNK_ID_LEN] = "trip";  /* Triple Chunk ID */
+static const char CHUNK_URID[CHUNK_ID_LEN] = "urid";  /* URI-ID Chunk ID*/
 
 struct _RDFF {
 	FILE*    fd;
@@ -98,8 +98,8 @@ rdff_open(const char* path, bool write)
 RDFFStatus
 rdff_write_uri(RDFF        file,
                uint32_t    id,
-               const char* uri,
-               uint32_t    len)
+               uint32_t    len,
+               const char* uri)
 {
 	const uint32_t chunk_size = sizeof(id) + len + 1;
 	WRITE(CHUNK_URID,  CHUNK_ID_LEN,       1, file->fd);
@@ -114,20 +114,22 @@ rdff_write_uri(RDFF        file,
 }
 
 RDFFStatus
-rdff_write_value(RDFF        file,
-                 uint32_t    key,
-                 const void* value,
-                 uint32_t    size,
-                 uint32_t    type)
+rdff_write_triple(RDFF        file,
+                  uint32_t    subject,
+                  uint32_t    predicate,
+                  uint32_t    object_type,
+                  uint32_t    object_size,
+                  const void* object)
 {
-	const uint32_t chunk_size = sizeof(key) + sizeof(type) + sizeof(size) + size;
-	WRITE(CHUNK_KVAL,  CHUNK_ID_LEN,       1, file->fd);
-	WRITE(&chunk_size, sizeof(chunk_size), 1, file->fd);
-	WRITE(&key,        sizeof(key),        1, file->fd);
-	WRITE(&type,       sizeof(type),       1, file->fd);
-	WRITE(&size,       sizeof(size),       1, file->fd);
-	WRITE(value,       size,               1, file->fd);
-	if ((size % 2)) {
+	const uint32_t chunk_size = sizeof(RDFFTripleChunk) + object_size;
+	WRITE(CHUNK_TRIP,   CHUNK_ID_LEN,        1, file->fd);
+	WRITE(&chunk_size,  sizeof(chunk_size),  1, file->fd);
+	WRITE(&subject,     sizeof(subject),     1, file->fd);
+	WRITE(&predicate,   sizeof(predicate),   1, file->fd);
+	WRITE(&object_type, sizeof(object_type), 1, file->fd);
+	WRITE(&object_size, sizeof(object_size), 1, file->fd);
+	WRITE(object,       object_size,         1, file->fd);
+	if ((object_size % 2)) {
 		WRITE("", 1, 1, file->fd);  /* write pad */
 	}
 	file->size += 8 + chunk_size;
@@ -199,17 +201,18 @@ main(int argc, char** argv)
 	char uri[64];
 	for (int i = 0; i < N_URIS; ++i) {
 		snprintf(uri, sizeof(uri), "http://example.org/uri%02d", i + 1);
-		rdff_write_uri(file, i + 1, uri, strlen(uri) + 1);
+		rdff_write_uri(file, i + 1, strlen(uri), uri);
 	}
 
 	char val[6];
 	for (int i = 0; i < N_RECORDS; ++i) {
 		snprintf(val, sizeof(val), "VAL%02d", i);
-		rdff_write_value(file,
-		                      rand() % N_URIS,
-		                      val,
-		                      sizeof(val),
-		                      0);
+		rdff_write_triple(file,
+		                  0,
+		                  rand() % N_URIS,
+		                  0,
+		                  sizeof(val),
+		                  val);
 	}
 
 	rdff_close(file);
@@ -222,8 +225,8 @@ main(int argc, char** argv)
 	chunk->size = 0;
 	for (int i = 0; i < N_URIS; ++i) {
 		if (rdff_read_chunk(file, &chunk)
-		    || strncmp(chunk->type, "URID", 4)) {
-			fprintf(stderr, "error: expected URID chunk\n");
+		    || strncmp(chunk->type, CHUNK_URID, 4)) {
+			fprintf(stderr, "error: expected %s chunk\n", CHUNK_URID);
 			goto fail;
 		}
 		RDFFURIChunk* body = (RDFFURIChunk*)chunk->data;
@@ -232,12 +235,12 @@ main(int argc, char** argv)
 
 	for (int i = 0; i < N_RECORDS; ++i) {
 		if (rdff_read_chunk(file, &chunk)
-		    || strncmp(chunk->type, "KVAL", 4)) {
-			fprintf(stderr, "error: expected KVAL chunk\n");
+		    || strncmp(chunk->type, CHUNK_TRIP, 4)) {
+			fprintf(stderr, "error: expected %s chunk\n", CHUNK_TRIP);
 			goto fail;
 		}
-		RDFFValueChunk* body = (RDFFValueChunk*)chunk->data;
-		printf("KEY %d = %s\n", body->key, body->value);
+		RDFFTripleChunk* body = (RDFFTripleChunk*)chunk->data;
+		printf("KEY %d = %s\n", body->predicate, body->object);
 	}
 
 	free(chunk);
