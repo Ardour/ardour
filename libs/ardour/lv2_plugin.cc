@@ -46,7 +46,7 @@
 #include <locale.h>
 
 #include "lv2ext/lv2_persist.h"
-#include "lv2_pfile.h"
+#include "rdff.h"
 
 #define NS_DC   "http://dublincore.org/documents/dcmi-namespace/"
 #define NS_LV2  "http://lv2plug.in/ns/lv2core#"
@@ -442,12 +442,12 @@ LV2Plugin::add_state(XMLNode* root) const
 		              &state);
 
 		// Open state file
-		LV2PFile file = lv2_pfile_open(state_path.c_str(), true);
+		RDFF file = rdff_open(state_path.c_str(), true);
 
 		// Write all referenced URIs to state file
 		for (PersistState::URIs::const_iterator i = state.uris.begin();
 		     i != state.uris.end(); ++i) {
-			lv2_pfile_write_uri(file, i->first,
+			rdff_write_uri(file, i->first,
 			                    i->second.c_str(), i->second.length() + 1);
 		}
 
@@ -456,7 +456,7 @@ LV2Plugin::add_state(XMLNode* root) const
 		     i != state.values.end(); ++i) {
 			const uint32_t      key = i->first;
 			const PersistValue& val = i->second;
-			lv2_pfile_write_value(file,
+			rdff_write_value(file,
 			                      key,
 			                      val.value,
 			                      val.size,
@@ -464,7 +464,7 @@ LV2Plugin::add_state(XMLNode* root) const
 		}
 
 		// Close state file
-		lv2_pfile_close(file);
+		rdff_close(file);
 
 		root->add_property("state-file", state_filename);
 	}
@@ -631,21 +631,20 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 		        _instance, "http://lv2plug.in/ns/ext/persist");
 		if (persist) {
 			cout << "Loading LV2 state from " << state_path << endl;
-			LV2PFile file = lv2_pfile_open(state_path.c_str(), false);
+			RDFF file = rdff_open(state_path.c_str(), false);
 
 			PersistState state(_uri_map);
 
 			// Load file into state object
-			LV2PFileChunkHeader* chunk = (LV2PFileChunkHeader*)malloc(
-				sizeof(LV2PFileChunkHeader));
+			RDFFChunk* chunk = (RDFFChunk*)malloc(sizeof(RDFFChunk));
 			chunk->size = 0;
-			while (!lv2_pfile_read_chunk(file, &chunk)) {
+			while (!rdff_read_chunk(file, &chunk)) {
 				if (!strncmp(chunk->type, "URID", 4)) {
-					LV2PFileURIChunk* body = (LV2PFileURIChunk*)chunk->data;
+					RDFFURIChunk* body = (RDFFURIChunk*)chunk->data;
 					printf("READ URI %u: %s\n", body->id, body->uri);
 					state.add_uri(body->id, body->uri);
 				} else if (!strncmp(chunk->type, "KVAL", 4)) {
-					LV2PFileValueChunk* body = (LV2PFileValueChunk*)chunk->data;
+					RDFFValueChunk* body = (RDFFValueChunk*)chunk->data;
 					printf("READ VAL %u = %s (size: %u type: %u)\n",
 					       body->key, body->value, body->size, body->type);
 					state.add_value(body->key,
@@ -660,7 +659,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 			persist->restore(_instance->lv2_handle,
 			                 &LV2Plugin::lv2_persist_retrieve_callback,
 			                 &state);
-			lv2_pfile_close(file);
+			rdff_close(file);
 		} else {
 			warning << string_compose(
 			    _("Plugin \"%1\% failed to return LV2 persist data"),

@@ -327,7 +327,7 @@ def build(bld):
         #obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
         
         if bld.env['HAVE_SLV2']:
-        	obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc', 'uri_map.cc', 'lv2_pfile.c' ]
+        	obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc', 'uri_map.cc', 'rdff.c' ]
         	obj.uselib += ' SLV2 ' + ' RASQAL '
         	
         if bld.env['VST_SUPPORT']:

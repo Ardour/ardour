@@ -1,7 +1,5 @@
 /*
-  Portable file-based LV2 Persist implementation.
-  See <http://lv2plug.in/ns/ext/persist> for details.
-
+  RDFF - RDF in RIFF
   Copyright 2011 David Robillard <http://drobilla.net>
  
   This is free software; you can redistribute it and/or modify it
@@ -26,22 +24,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lv2_pfile.h"
+#include "rdff.h"
 
 #define CHUNK_ID_LEN 4
 
-static const char FILE_TYPE[CHUNK_ID_LEN]  = "LV2F";  /* LV2 RIFF File */ 
-static const char CHUNK_KVAL[CHUNK_ID_LEN] = "KVAL";  /* Key/Value Chunk */
-static const char CHUNK_URID[CHUNK_ID_LEN] = "URID";  /* URI ID Chunk */
+static const char FILE_TYPE[CHUNK_ID_LEN]  = "RDFF";  /* RDFF File ID */
+static const char CHUNK_KVAL[CHUNK_ID_LEN] = "KVAL";  /* Key/Value Chunk ID */
+static const char CHUNK_URID[CHUNK_ID_LEN] = "URID";  /* URI-ID Chunk ID*/
 
-struct _LV2PFile {
+struct _RDFF {
 	FILE*    fd;
 	uint32_t size;
 	bool     write;
 };
 
-LV2PFile
-lv2_pfile_open(const char* path, bool write)
+RDFF
+rdff_open(const char* path, bool write)
 {
 	FILE* fd = fopen(path, (write ? "w" : "r"));
 	if (!fd) {
@@ -78,7 +76,7 @@ lv2_pfile_open(const char* path, bool write)
 		}
 	}
 
-	LV2PFile ret = (LV2PFile)malloc(sizeof(struct _LV2PFile));
+	RDFF ret = (RDFF)malloc(sizeof(struct _RDFF));
 	ret->fd    = fd;
 	ret->size  = size;
 	ret->write = write;
@@ -87,14 +85,14 @@ lv2_pfile_open(const char* path, bool write)
 
 #define WRITE(ptr, size, nmemb, stream) \
 	if (fwrite(ptr, size, nmemb, stream) != nmemb) { \
-		return LV2_PFILE_UNKNOWN_ERROR; \
+		return RDFF_STATUS_UNKNOWN_ERROR; \
 	}
 
-LV2PFileStatus
-lv2_pfile_write_uri(LV2PFile    file,
-                    uint32_t    id,
-                    const char* uri,
-                    uint32_t    len)
+RDFFStatus
+rdff_write_uri(RDFF        file,
+               uint32_t    id,
+               const char* uri,
+               uint32_t    len)
 {
 	const uint32_t chunk_size = sizeof(id) + len + 1;
 	WRITE(CHUNK_URID,  CHUNK_ID_LEN,       1, file->fd);
@@ -105,15 +103,15 @@ lv2_pfile_write_uri(LV2PFile    file,
 		WRITE("", 1, 1, file->fd);  /* pad */
 	}
 	file->size += 8 + chunk_size;
-	return LV2_PFILE_OK;
+	return RDFF_STATUS_OK;
 }
 
-LV2PFileStatus
-lv2_pfile_write_value(LV2PFile    file,
-                      uint32_t    key,
-                      const void* value,
-                      uint32_t    size,
-                      uint32_t    type)
+RDFFStatus
+rdff_write_value(RDFF        file,
+                 uint32_t    key,
+                 const void* value,
+                 uint32_t    size,
+                 uint32_t    type)
 {
 	const uint32_t chunk_size = sizeof(key) + sizeof(type) + sizeof(size) + size;
 	WRITE(CHUNK_KVAL,  CHUNK_ID_LEN,       1, file->fd);
@@ -126,19 +124,19 @@ lv2_pfile_write_value(LV2PFile    file,
 		WRITE("", 1, 1, file->fd);  /* write pad */
 	}
 	file->size += 8 + chunk_size;
-	return LV2_PFILE_OK;
+	return RDFF_STATUS_OK;
 }
 
-LV2PFileStatus
-lv2_pfile_read_chunk(LV2PFile              file,
-                     LV2PFileChunkHeader** buf)
+RDFFStatus
+rdff_read_chunk(RDFF        file,
+                RDFFChunk** buf)
 {
 	if (feof(file->fd))
-		return LV2_PFILE_EOF;
+		return RDFF_STATUS_EOF;
 
 #define READ(ptr, size, nmemb, stream) \
 	if (fread(ptr, size, nmemb, stream) != nmemb) { \
-		return LV2_PFILE_CORRUPT; \
+		return RDFF_STATUS_CORRUPT; \
 	}
 
 	const uint32_t alloc_size = (*buf)->size;
@@ -146,18 +144,18 @@ lv2_pfile_read_chunk(LV2PFile              file,
 	READ((*buf)->type,  sizeof((*buf)->type), 1, file->fd);
 	READ(&(*buf)->size, sizeof((*buf)->size), 1, file->fd);
 	if ((*buf)->size > alloc_size) {
-		*buf = realloc(*buf, sizeof(LV2PFileChunkHeader) + (*buf)->size);
+		*buf = realloc(*buf, sizeof(RDFFChunk) + (*buf)->size);
 	}
 	READ((*buf)->data, (*buf)->size, 1, file->fd);
 	if (((*buf)->size % 2)) {
 		char pad;
 		READ(&pad, 1, 1, file->fd);  /* skip pad */
 	}
-	return LV2_PFILE_OK;
+	return RDFF_STATUS_OK;
 }
 
 void
-lv2_pfile_close(LV2PFile file)
+rdff_close(RDFF file)
 {
 	if (file) {
 		if (file->write) {
@@ -184,7 +182,7 @@ main(int argc, char** argv)
 
 	const char* const filename = argv[1];
 
-	LV2PFile file = lv2_pfile_open(filename, true);
+	RDFF file = rdff_open(filename, true);
 	if (!file)
 		goto fail;
 
@@ -194,54 +192,54 @@ main(int argc, char** argv)
 	char uri[64];
 	for (int i = 0; i < N_URIS; ++i) {
 		snprintf(uri, sizeof(uri), "http://example.org/uri%02d", i + 1);
-		lv2_pfile_write_uri(file, i + 1, uri, strlen(uri) + 1);
+		rdff_write_uri(file, i + 1, uri, strlen(uri) + 1);
 	}
 	
 	char val[6];
 	for (int i = 0; i < N_RECORDS; ++i) {
 		snprintf(val, sizeof(val), "VAL%02d", i);
-		lv2_pfile_write_value(file,
+		rdff_write_value(file,
 		                      rand() % N_URIS,
 		                      val,
 		                      sizeof(val),
 		                      0);
 	}
 
-	lv2_pfile_close(file);
+	rdff_close(file);
 
-	file = lv2_pfile_open(filename, false);
+	file = rdff_open(filename, false);
 	if (!file)
 		goto fail;
 
-	LV2PFileChunkHeader* chunk = malloc(sizeof(LV2PFileChunkHeader));
+	RDFFChunk* chunk = malloc(sizeof(RDFFChunk));
 	chunk->size = 0;
 	for (int i = 0; i < N_URIS; ++i) {
-		if (lv2_pfile_read_chunk(file, &chunk)
+		if (rdff_read_chunk(file, &chunk)
 		    || strncmp(chunk->type, "URID", 4)) {
 			fprintf(stderr, "error: expected URID chunk\n");
 			goto fail;
 		}
-		LV2PFileURIChunk* body = (LV2PFileURIChunk*)chunk->data;
+		RDFFURIChunk* body = (RDFFURIChunk*)chunk->data;
 		printf("URI: %s\n", body->uri);
 	}
 
 	for (int i = 0; i < N_RECORDS; ++i) {
-		if (lv2_pfile_read_chunk(file, &chunk)
+		if (rdff_read_chunk(file, &chunk)
 		    || strncmp(chunk->type, "KVAL", 4)) {
 			fprintf(stderr, "error: expected KVAL chunk\n");
 			goto fail;
 		}
-		LV2PFileValueChunk* body = (LV2PFileValueChunk*)chunk->data;
+		RDFFValueChunk* body = (RDFFValueChunk*)chunk->data;
 		printf("KEY %d = %s\n", body->key, body->value);
 	}
 
 	free(chunk);
-	lv2_pfile_close(file);
+	rdff_close(file);
 
 	return 0;
 
 fail:
-	lv2_pfile_close(file);
+	rdff_close(file);
 	fprintf(stderr, "Test failed\n");
 	return 1;
 }
