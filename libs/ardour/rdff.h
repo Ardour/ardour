@@ -40,40 +40,46 @@
 extern "C" {
 #endif
 
+/**
+   RDFF file or stream.
+ */
 typedef struct _RDFF* RDFF;
 
+/**
+   Status codes for function returns.
+*/
 typedef enum {
-	RDFF_STATUS_OK            = 0,
-	RDFF_STATUS_UNKNOWN_ERROR = 1,
-	RDFF_STATUS_EOF           = 2,
-	RDFF_STATUS_CORRUPT       = 3
+	RDFF_STATUS_OK            = 0,  /**< Success. */
+	RDFF_STATUS_UNKNOWN_ERROR = 1,  /**< Unknown error. */
+	RDFF_STATUS_EOF           = 2,  /**< End of file. */
+	RDFF_STATUS_CORRUPT       = 3   /**< Corrupt data. */
 } RDFFStatus;
 
 /**
    Generic RIFF chunk header.
 */
 typedef struct {
-	char     type[4];
-	uint32_t size;
-	char     data[];
+	char     type[4];  /**< Chunk type ID. */
+	uint32_t size;     /**< Size of chunk body (not including header). */
+	char     data[];   /**< Chunk body. */
 } PACKED RDFFChunk;
 
 /**
    Body of a URID chunk.
 */
 typedef struct {
-	uint32_t id;
-	char     uri[];
+	uint32_t id;     /**< Numeric ID of URI in this RDFF. */
+	char     uri[];  /**< URI string. */
 } PACKED RDFFURIChunk;
 
 /**
    Body of a KVAL chunk.
 */
 typedef struct {
-	uint32_t key;
-	uint32_t type;
-	uint32_t size;
-	char     value[];
+	uint32_t key;      /**< Predicate URI ID. */
+	uint32_t type;     /**< Type URI ID. */
+	uint32_t size;     /**< Size of object data. */
+	char     value[];  /**< Object data. */
 } PACKED RDFFValueChunk;
 
 /**
