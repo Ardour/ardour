@@ -1,5 +1,7 @@
 <ui>
 
+     <accelerator action='editor-alternate-delete'/>
+     
     <menubar name='Main' action='MainMenu'>
         <menu name='Session' action='Session'>
            <menuitem action='New'/>

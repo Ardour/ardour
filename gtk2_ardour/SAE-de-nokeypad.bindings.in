@@ -118,7 +118,8 @@
 
 (gtk_accel_path "<Actions>/Editor/playhead-to-edit" "Return")
 (gtk_accel_path "<Actions>/Editor/edit-to-playhead" "<%SECONDARY%>Return")
-(gtk_accel_path "<Actions>/Editor/editor-delete" "BackSpace")
+(gtk_accel_path "<Actions>/Editor/editor-delete" "Delete")
+(gtk_accel_path "<Actions>/Editor/editor-alternate-delete" "BackSpace")
 (gtk_accel_path "<Actions>/Editor/remove-last-capture" "<%PRIMARY%>BackSpace")
 
 (gtk_accel_path "<Actions>/Editor/playhead-to-previous-region-boundary-noselection" "<%LEVEL4%>leftarrow")

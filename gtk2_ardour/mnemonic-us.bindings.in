@@ -140,6 +140,7 @@
 (gtk_accel_path "<Actions>/Transport/GotoStart" "Home")
 (gtk_accel_path "<Actions>/Transport/GotoEnd" "End")
 (gtk_accel_path "<Actions>/Editor/editor-delete" "Delete")
+(gtk_accel_path "<Actions>/Editor/editor-alternate-delete" "BackSpace")
 
 (gtk_accel_path "<Actions>/Editor/playhead-to-edit" "Return")
 (gtk_accel_path "<Actions>/Editor/edit-to-playhead" "<%SECONDARY%>Return")
