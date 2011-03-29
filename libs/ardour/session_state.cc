@@ -2272,6 +2272,7 @@ RouteGroup *
 Session::add_edit_group (string name)
 {
 	RouteGroup* rg = new RouteGroup (*this, name);
+	rg->set_active(true, this);
 	edit_groups.push_back (rg);
 	edit_group_added (rg); /* EMIT SIGNAL */
 	set_dirty();
@@ -2282,6 +2283,7 @@ RouteGroup *
 Session::add_mix_group (string name)
 {
 	RouteGroup* rg = new RouteGroup (*this, name, RouteGroup::Relative);
+	rg->set_active(true, this);
 	mix_groups.push_back (rg);
 	mix_group_added (rg); /* EMIT SIGNAL */
 	set_dirty();
