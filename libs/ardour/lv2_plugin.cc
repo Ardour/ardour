@@ -297,15 +297,15 @@ LV2Plugin::nth_parameter(uint32_t n, bool& ok) const
 }
 
 struct PersistValue {
-	inline PersistValue(uint32_t k, const void* v, size_t s, uint32_t t, bool p)
-		: key(k), value(v), size(s), type(t), pod(p)
+	inline PersistValue(uint32_t k, const void* v, size_t s, uint32_t t, uint32_t f)
+		: key(k), value(v), size(s), type(t), flags(f)
 	{}
 
 	const uint32_t key;
 	const void*    value;
 	const size_t   size;
 	const uint32_t type;
-	const bool     pod;
+	const bool     flags;
 };
 
 struct PersistState {
@@ -329,11 +329,12 @@ struct PersistState {
 		return 0;
 	}
 
-	int add_value(uint32_t    file_key,
+	int add_value(uint32_t    file_subject,
+	              uint32_t    file_key,
 	              const void* value,
 	              size_t      size,
 	              uint32_t    file_type,
-	              bool        pod) {
+	              uint32_t    flags) {
 		const uint32_t key  = file_id_to_runtime_id(file_key);
 		const uint32_t type = file_id_to_runtime_id(file_type);
 		if (!key || !type) {
@@ -349,7 +350,7 @@ struct PersistState {
 			memcpy(value_copy, value, size); // FIXME: leak
 			values.insert(
 				make_pair(key,
-				          PersistValue(key, value_copy, size, type, pod)));
+				          PersistValue(key, value_copy, size, type, flags)));
 			return 0;
 		}
 	}
@@ -361,11 +362,12 @@ struct PersistState {
 
 int
 LV2Plugin::lv2_persist_store_callback(void*       callback_data,
+                                      uint32_t    subject,
                                       uint32_t    key,
                                       const void* value,
                                       size_t      size,
                                       uint32_t    type,
-                                      bool        pod)
+                                      uint32_t    flags)
 {
 	DEBUG_TRACE(DEBUG::LV2, string_compose("persist store %1\n",
 	                                       _uri_map.id_to_uri(NULL, key)));
@@ -373,19 +375,17 @@ LV2Plugin::lv2_persist_store_callback(void*       callback_data,
 	PersistState* state = (PersistState*)callback_data;
 	state->add_uri(key,  _uri_map.id_to_uri(NULL, key)); 
 	state->add_uri(type, _uri_map.id_to_uri(NULL, type)); 
-	return state->add_value(key, value, size, type, pod);
+	return state->add_value(subject, key, value, size, type, flags);
 }
 
 const void*
 LV2Plugin::lv2_persist_retrieve_callback(void*     callback_data,
+                                         uint32_t  subject,
                                          uint32_t  key,
                                          size_t*   size,
                                          uint32_t* type,
-                                         bool*     pod)
+                                         uint32_t* flags)
 {
-	DEBUG_TRACE(DEBUG::LV2, string_compose("persist retrieve %1\n",
-	                                       _uri_map.id_to_uri(NULL, key)));
-
 	PersistState* state = (PersistState*)callback_data;
 	PersistState::Values::const_iterator i = state->values.find(key);
 	if (i == state->values.end()) {
@@ -395,7 +395,10 @@ LV2Plugin::lv2_persist_retrieve_callback(void*     callback_data,
 	}
 	*size = i->second.size;
 	*type = i->second.type;
-	*pod  = true; // FIXME
+	*flags = LV2_PERSIST_IS_POD | LV2_PERSIST_IS_PORTABLE; // FIXME
+	DEBUG_TRACE(DEBUG::LV2, string_compose(
+		            "persist retrieve %1 = %s (size: %u, type: %u)\n",
+		            _uri_map.id_to_uri(NULL, key), i->second.value, *size, *type));
 	return i->second.value;
 }
 
@@ -418,7 +421,7 @@ LV2Plugin::add_state(XMLNode* root) const
 
 	if (_supports_persist) {
 		// Create state directory for this plugin instance
-		const std::string state_filename = _id.to_s() + ".lv2f";
+		const std::string state_filename = _id.to_s() + ".rdff";
 		const std::string state_path     = Glib::build_filename(
 		        _session.plugins_dir(), state_filename);
 
@@ -641,20 +644,21 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 			RDFFChunk* chunk = (RDFFChunk*)malloc(sizeof(RDFFChunk));
 			chunk->size = 0;
 			while (!rdff_read_chunk(file, &chunk)) {
-				if (!strncmp(chunk->type, "URID", 4)) {
+				if (rdff_chunk_is_uri(chunk)) {
 					RDFFURIChunk* body = (RDFFURIChunk*)chunk->data;
 					printf("READ URI %u: %s\n", body->id, body->uri);
 					state.add_uri(body->id, body->uri);
-				} else if (!strncmp(chunk->type, "KVAL", 4)) {
+				} else if (rdff_chunk_is_triple(chunk)) {
 					RDFFTripleChunk* body = (RDFFTripleChunk*)chunk->data;
 					printf("READ VAL %u = %s (size: %u type: %u)\n",
 					       body->predicate, body->object,
 					       body->object_size, body->object_type);
-					state.add_value(body->predicate,
+					state.add_value(body->subject,
+					                body->predicate,
 					                body->object,
 					                body->object_size,
 					                body->object_type,
-					                true);
+					                LV2_PERSIST_IS_POD | LV2_PERSIST_IS_PORTABLE);
 				}
 			}
 			free(chunk);

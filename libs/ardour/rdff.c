@@ -163,6 +163,19 @@ rdff_read_chunk(RDFF        file,
 	return RDFF_STATUS_OK;
 }
 
+bool
+rdff_chunk_is_uri(RDFFChunk* chunk)
+
+{
+	return !strncmp(chunk->type, CHUNK_URID, CHUNK_ID_LEN);
+}
+
+bool
+rdff_chunk_is_triple(RDFFChunk* chunk)
+{
+	return !strncmp(chunk->type, CHUNK_TRIP, CHUNK_ID_LEN);
+}
+
 void
 rdff_close(RDFF file)
 {

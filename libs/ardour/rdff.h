@@ -122,6 +122,18 @@ rdff_read_chunk(RDFF        file,
                 RDFFChunk** buf);
 
 /**
+   Return true iff @a chunk is a URI chunk.
+*/
+bool
+rdff_chunk_is_uri(RDFFChunk* chunk);
+
+/**
+   Return true iff @a chunk is a Triple chunk.
+*/
+bool
+rdff_chunk_is_triple(RDFFChunk* chunk);
+
+/**
    Close @a file.
    After this call, @a file is invalid.
 */
