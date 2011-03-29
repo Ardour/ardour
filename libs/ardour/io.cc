@@ -260,7 +260,7 @@ IO::apply_declick (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes, ga
 
 	if (nframes == 0) return;
 	
-	fractional_shift = -1.0/declick;
+	fractional_shift = -1.0/(declick-1);
 
 	if (target < initial) {
 		/* fade out: remove more and more of delta from initial */
