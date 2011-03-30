@@ -48,7 +48,7 @@ template<typename T> class MPControl : public PBD::Controllable {
         
         /* Controllable API */
         
-        void set_value (double v) { 
+        void set_value (double v) {
                 T newval = (T) v;
                 if (newval != _value) {
                         _value = newval;
@@ -125,9 +125,6 @@ class MonitorProcessor : public Processor
         void set_dim (uint32_t, bool dim);
         void set_solo (uint32_t, bool);
         void set_mono (bool);
-
-        void set_dim_level (gain_t);
-        void set_solo_boost_level (gain_t);
 
         gain_t dim_level() const { return _dim_level; }
         gain_t solo_boost_level() const { return _solo_boost_level; }

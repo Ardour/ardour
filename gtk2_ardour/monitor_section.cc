@@ -982,12 +982,6 @@ MonitorSection::cancel_audition (GdkEventButton*)
 }
 
 void
-MonitorSection::solo_cut_changed ()
-{
-        Config->set_solo_mute_gain (slider_position_to_gain (solo_cut_adjustment.get_value()));
-}
-
-void
 MonitorSection::parameter_changed (std::string name)
 {
         if (name == "solo-control-is-listen-control" ||
@@ -1011,7 +1005,7 @@ MonitorSection::assign_controllables ()
         if (_session) {
                 boost::shared_ptr<Controllable> c = _session->solo_cut_control();
                 solo_cut_control->set_controllable (c);
-                solo_cut_control->get_adjustment()->set_value (c->get_value());
+                solo_cut_control->get_adjustment()->set_value (gain_to_slider_position (c->get_value()));
         } else {
                 solo_cut_control->set_controllable (none);
         }

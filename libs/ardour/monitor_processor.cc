@@ -404,18 +404,6 @@ MonitorProcessor::display_to_user () const
         return false;
 }
 
-void
-MonitorProcessor::set_dim_level (gain_t val)
-{
-        _dim_level = val;
-}
-
-void
-MonitorProcessor::set_solo_boost_level (gain_t val)
-{
-        _solo_boost_level = val;
-}
-
 bool 
 MonitorProcessor::soloed (uint32_t chn) const
 {

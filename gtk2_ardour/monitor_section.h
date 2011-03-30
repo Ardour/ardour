@@ -127,7 +127,6 @@ class MonitorSection : public RouteUI
         bool cancel_solo (GdkEventButton*);
         bool cancel_isolate (GdkEventButton*);
         bool cancel_audition (GdkEventButton*);
-        void solo_cut_changed ();
         void update_solo_model ();
         void parameter_changed (std::string);
         void isolated_changed ();

@@ -49,6 +49,8 @@ VolumeController::set_controllable (boost::shared_ptr<PBD::Controllable> c)
         if (c) {
                 c->Changed.connect (controllable_connection, MISSING_INVALIDATOR, boost::bind (&VolumeController::controllable_value_changed, this), gui_context());
         }
+
+	controllable_value_changed ();
 }
 
 void
