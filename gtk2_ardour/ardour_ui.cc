@@ -334,8 +334,11 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	}
 
 	setup_clock ();
-	speaker_config_window->set (new SpeakerDialog);
 
+	SpeakerDialog* s = new SpeakerDialog ();
+	s->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/toggle-speaker-config")));
+	speaker_config_window->set (s);
+	
 	starting.connect (sigc::mem_fun(*this, &ARDOUR_UI::startup));
 	stopping.connect (sigc::mem_fun(*this, &ARDOUR_UI::shutdown));
 
