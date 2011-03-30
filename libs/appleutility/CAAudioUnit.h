@@ -57,6 +57,7 @@
 #endif
 
 #include <vector>
+#include <set>
 #include "CAStreamBasicDescription.h"
 #include "CAComponent.h"
 #include "CAAudioChannelLayout.h"
@@ -328,14 +329,33 @@ public:
 #pragma mark __Print	
 	void					Print () const { Print (stdout); }
 	void					Print (FILE* file) const;
+
+	void SetPropertyCallback (void (*param_callback)(void*, int32_t, float, void*), void* arg);
+	void addPropertyListen (AudioUnitPropertyID);
+	void removePropertyListen (AudioUnitPropertyID);
 	
 private:
 	CAComponent				mComp;
 	
 	class AUState;
 	AUState*		mDataPtr;
-		
-		// this can throw - so wrap this up in a static that returns a result code...
+	
+	void (*mPropertyCallback)(void* Unit, int32_t which, float val, void*);
+	void* mPropertyCallbackArg;
+	std::set<AudioUnitPropertyID> mWatching;
+	void dropPropertyListens ();
+	static void             PropertyCallback (
+		void                 *inRefCon,
+		AudioUnit            inUnit,
+		AudioUnitPropertyID  inID,
+		AudioUnitScope       inScope,
+		AudioUnitElement     inElement);
+	void DoPropertyCallback (AudioUnit            inUnit,
+				 AudioUnitPropertyID  inID,
+				 AudioUnitScope       inScope,
+				 AudioUnitElement     inElement);
+
+	// this can throw - so wrap this up in a static that returns a result code...
 	CAAudioUnit (const CAComponent& inComp);
 
 	bool				HasDynamicScope (AudioUnitScope inScope, SInt32 &outTotalNumChannels) const;
