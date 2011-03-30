@@ -161,7 +161,7 @@ PortInsert::get_state(void)
 XMLNode&
 PortInsert::state (bool full)
 {
-	XMLNode& node = Processor::state(full);
+	XMLNode& node = IOProcessor::state(full);
 	char buf[32];
 	node.add_property ("type", "port");
 	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
@@ -192,7 +192,7 @@ PortInsert::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	Processor::set_state (*insert_node, version);
+	IOProcessor::set_state (*insert_node, version);
 
 	if ((prop = node.property ("type")) == 0) {
 		error << _("XML node describing port insert is missing the `type' field") << endmsg;
