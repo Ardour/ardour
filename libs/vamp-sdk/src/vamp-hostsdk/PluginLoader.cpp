@@ -414,14 +414,15 @@ PluginLoader::Impl::loadPlugin(PluginKey key,
 
             m_pluginLibraryHandleMap[adapter] = handle;
 
+            if (adapterFlags & ADAPT_BUFFER_SIZE) {
+                PluginBufferingAdapter* a = new PluginBufferingAdapter(adapter);
+                adapter = a;
+            }
+            
             if (adapterFlags & ADAPT_INPUT_DOMAIN) {
                 if (adapter->getInputDomain() == Plugin::FrequencyDomain) {
                     adapter = new PluginInputDomainAdapter(adapter);
                 }
-            }
-
-            if (adapterFlags & ADAPT_BUFFER_SIZE) {
-                adapter = new PluginBufferingAdapter(adapter);
             }
 
             if (adapterFlags & ADAPT_CHANNEL_COUNT) {
