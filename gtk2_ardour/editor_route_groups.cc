@@ -130,7 +130,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_display.set_name ("EditGroupList");
 	_display.get_selection()->set_mode (SELECTION_SINGLE);
 	_display.set_headers_visible (true);
-	_display.set_reorderable (false);
+	_display.set_reorderable (true);
 	_display.set_rules_hint (true);
 	_display.set_size_request (75, -1);
 
