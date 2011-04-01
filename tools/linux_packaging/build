@@ -13,7 +13,7 @@
 
 MIXBUS=
 WITH_LADSPA=0
-STRIP=1
+STRIP=all
 PRINT_SYSDEPS=
 WITH_NLS=
 EXTERNAL_JACK=
@@ -41,20 +41,20 @@ while [ $# -gt 0 ] ; do
 		MIXBUS=1; 
 		WITH_NLS=1 ; 
 		WITH_LADSPA=; 
-		STRIP=1; 
+		STRIP=all
 		APPNAME=Mixbus ;
                 VENDOR=Harrison ;
 		shift ;;
 	--public)
 		WITH_NLS=1 ; 
 		WITH_LADSPA=; 
-		STRIP=1 ; 
+		STRIP=all ; 
 		APPNAME=Ardour ;
 		shift ;;
 	--allinone)
 		WITH_NLS= ; 
 		WITH_LADSPA=1; 
-		STRIP=1; 
+		STRIP=all; 
 		shift ;;
 	--test) WITH_LADSPA=; STRIP= ; shift ;;
 
@@ -64,7 +64,7 @@ while [ $# -gt 0 ] ; do
 
 	--nojack) INTERNAL_JACK= ; shift ;;
 	--noladspa) WITH_LADSPA= ; shift ;;
-	--nostrip) STRIP= ; shift ;;
+	--strip) STRIP=$2 ; shift ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
 
@@ -77,6 +77,12 @@ while [ $# -gt 0 ] ; do
 		;;
 	esac
 done
+
+if test x$STRIP != xall -a x$STRIP != xnone -a x$STRIP != xsome ; then
+    echo "Unknown strip option \"$STRIP\""
+    echo "Legal values are: all, none, some"
+    exit 1
+fi
 
 release_version=`grep -m 1 '^VERSION' ../../wscript | awk '{print $3}' | sed "s/'//g"`
 svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d"'" -f 2`
@@ -112,11 +118,11 @@ else
 fi
 
 if [ x$DEBUG != x ]; then
-	if [ x$STRIP != x ]; then
-		BUILDTYPE="strip"
-	else
-		BUILDTYPE="dbg"
-	fi
+    BUILDTYPE="dbg"
+    if [ x$STRIP = xall ] ; then
+        echo "A debug build with --strip all makes no sense - STRIP reset to \"some\""
+        STRIP=some
+    fi
 fi
 
 # the waf build tree to use when copying built/generated files
@@ -214,7 +220,7 @@ MAIN_EXECUTABLE=ardour-3.0
 
 echo "Copying ardour executable ...."
 cp $BUILD_ROOT/gtk2_ardour/$MAIN_EXECUTABLE $APPBIN
-if test x$STRIP != x ; then
+if test x$STRIP = xall ; then
 	strip $APPBIN/$MAIN_EXECUTABLE
 fi
 
@@ -505,6 +511,7 @@ while [ true ] ; do
 				else
 					echo "Copying dependant lib $dep    (required by ${parent})"
 					cp $dep $Libraries
+                                        deplibs = "$deplibs $base"
 				fi
 				missing=true
 			fi
@@ -518,9 +525,14 @@ done
 echo
 
 # strip libraries
-if test x$STRIP != x ; then
-    echo Stripping libraries
+if test x$STRIP = xall ; then
+    echo Stripping all libraries
     find $APPLIB/ -name "*.so*" | xargs strip
+else if test x$STRIP = xsome ; then
+    echo Stripping dependent libraries
+    for l in $deplibs ; do
+        strip $APPLIB/$l
+    done
 fi
 find $APPLIB/ -name "*.so*" | xargs chmod a+rx
 
