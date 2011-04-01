@@ -512,8 +512,11 @@ while [ true ] ; do
 				else
 					echo "Copying dependant lib $dep    (required by ${parent})"
 					cp $dep $Libraries
-                                        deplibs="$deplibs $base"
 				fi
+                                if echo $dep | grep -sq '^/' ; then
+                                    # absolute path, candidate for stripping
+                                    deplibs="$deplibs $base"
+                                fi
 				missing=true
 			fi
 		done
