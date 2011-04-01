@@ -452,6 +452,7 @@ OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardo
 echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 checkedIdx=0
+deplibs=
 
 while [ true ] ; do 
 	missing=false
@@ -511,7 +512,7 @@ while [ true ] ; do
 				else
 					echo "Copying dependant lib $dep    (required by ${parent})"
 					cp $dep $Libraries
-                                        deplibs = "$deplibs $base"
+                                        deplibs="$deplibs $base"
 				fi
 				missing=true
 			fi
