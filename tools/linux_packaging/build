@@ -529,7 +529,7 @@ echo
 if test x$STRIP = xall ; then
     echo Stripping all libraries
     find $APPLIB/ -name "*.so*" | xargs strip
-else if test x$STRIP = xsome ; then
+elif test x$STRIP = xsome ; then
     echo Stripping dependent libraries
     for l in $deplibs ; do
         strip $APPLIB/$l
