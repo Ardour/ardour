@@ -112,6 +112,19 @@ echo ""
 # Check sudo
 ##############
 
+if ! which sudo > /dev/null;
+then
+	echo ""
+	echo "!!! ERROR !!!"
+	echo ""
+	echo "The program sudo appears to be missing from the system."
+	echo "Please correct this and run the installer again."
+	echo "This installer requires root privileges."
+	echo ""
+	read -p "Press ENTER to exit installer:" BLAH
+	exit 1
+fi
+
 if ! sudo date;
 then
 	echo ""
@@ -145,6 +158,47 @@ case `uname -m` in
 		exit 1
 		;;
 esac
+
+####################
+# Check disk space
+####################
+
+# We have to check the current folder and the INSTALL_DEST_BASE just
+# in case they are on different devices
+echo "Checking for required disk space"
+
+if [ ! -e .${PGM_NAME}_${ARCH}-*.size ]; then
+	echo ""
+	echo "!!! ERROR !!! Can't locate .size file for ${ARCH} bundle."
+	echo ""
+	exit 1
+else
+	REQUIRED_BYTES=$(cat .${PGM_NAME}_${ARCH}-*.size)
+
+	#Check space in current folder
+	FREE_BYTES=$(df -B 1 ${PKG_PATH} | grep / | awk '{print $4}')
+
+	if [ ${FREE_BYTES} -le ${REQUIRED_BYTES} ] ; then
+		echo ""
+		echo "!!! ERROR !!! - Insufficient disk space in ${PKG_PATH}"
+		echo ""
+		exit 1
+	fi
+
+	#Check space in INSTALL_DEST_BASE
+	FREE_BYTES=$(df -B 1 ${INSTALL_DEST_BASE} | grep / | awk '{print $4}')
+
+	if [ ${FREE_BYTES} -le ${REQUIRED_BYTES} ] ; then
+		echo ""
+		echo "!!! ERROR !!! - Insufficient disk space in ${INSTALL_DEST_BASE}"
+		echo ""
+		exit 1
+	fi
+fi
+
+#####################
+# Unpack the bundle
+#####################
 
 # untar the correct bundle for us to install
 echo "Unpacking bundle for $ARCH"
