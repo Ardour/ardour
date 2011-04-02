@@ -100,6 +100,22 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 	win.run ();
 }
 
+static void export_search_path (const string& base_dir, const char* varname, const char* dir) 
+{
+        string path;
+	const char * cstr = getenv (varname);
+
+	if (cstr) {
+		path = cstr;
+		path += ':';
+	} else {
+		path = "";
+	}
+	path += base_dir;
+	path += dir;
+        
+        setenv (varname, path.c_str(), 1);
+}
 
 #ifdef __APPLE__
 
@@ -177,65 +193,12 @@ fixup_bundle_environment (int, char* [])
 	path += "/../Resources";
 	setenv ("ARDOUR_INSTANT_XML_PATH", path.c_str(), 1);
 
-	cstr = getenv ("LADSPA_PATH");
-	if (cstr) {
-		path = cstr;
-		path += ':';
-	} else {
-		path = "";
-	}
-	path += dir_path;
-	path += "/../Plugins";
-
-	setenv ("LADSPA_PATH", path.c_str(), 1);
-
-	cstr = getenv ("VAMP_PATH");
-	if (cstr) {
-		path = cstr;
-		path += ':';
-	} else {
-		path = "";
-	}
-	path += dir_path;
-	path += "/../Frameworks";
-
-	setenv ("VAMP_PATH", path.c_str(), 1);
-
-	cstr = getenv ("ARDOUR_PANNER_PATH");
-	if (cstr) {
-		path = cstr;
-		path += ':';
-	} else {
-		path = "";
-	}
-	path += dir_path;
-	path += "/lib/panners";
-	
-	setenv ("ARDOUR_PANNER_PATH", path.c_str(), 1);
-
-	cstr = getenv ("ARDOUR_SURFACES_PATH");
-	if (cstr) {
-		path = cstr;
-		path += ':';
-	} else {
-		path = "";
-	}
-	path += dir_path;
-	path += "/lib/surfaces";
-	
-	setenv ("ARDOUR_SURFACES_PATH", path.c_str(), 1);
-
-	cstr = getenv ("ARDOUR_MIDIMAPS_PATH");
-	if (cstr) {
-		path = cstr;
-		path += ':';
-	} else {
-		path = "";
-	}
-	path += dir_path;
-	path += "/share/midi_maps";
-	
-	setenv ("ARDOUR_MIDIMAPS_PATH", path.c_str(), 1);
+        export_search_path (dir_path, "LADSPA_PATH", "/../Plugins");
+        export_search_path (dir_path, "VAMP_PATH", "/../Frameworks");
+        export_search_path (dir_path, "ARDOUR_PANNER_PATH", "/lib/panners");
+        export_search_path (dir_path, "ARDOUR_SURFACES_PATH", "/lib/surfaces");
+        export_search_path (dir_path, "ARDOUR_MIDIMAPS_PATH", "/share/midi_maps");
+        export_search_path (dir_path, "ARDOUR_EXPORT_FORMATS_PATH", "/share/exports");
 
 	path = dir_path;
 	path += "/../Frameworks/clearlooks";
@@ -336,7 +299,6 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	Glib::ustring exec_path = argv[0];
 	Glib::ustring dir_path = Glib::path_get_dirname (Glib::path_get_dirname (exec_path));
 	Glib::ustring path;
-	const char *cstr = getenv ("PATH");
         Glib::ustring userconfigdir = user_config_directory().to_string();
 
 	/* ensure that we find any bundled executables (e.g. JACK),
@@ -374,70 +336,16 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	path = dir_path;
 	path += "/etc";
 	setenv ("ARDOUR_INSTANT_XML_PATH", path.c_str(), 1);
-
-	cstr = getenv ("LADSPA_PATH");
-	if (cstr) {
-		path = cstr;
-		path += ':';
-	} else {
-		path = "";
-	}
-	path += dir_path;
-	path += "/lib/plugins";
 	
-	setenv ("LADSPA_PATH", path.c_str(), 1);
-
-	cstr = getenv ("VAMP_PATH");
-	if (cstr) {
-		path = cstr;
-		path += ':';
-	} else {
-		path = "";
-	}
-	path += dir_path;
-	path += "/lib";
-	
-	setenv ("VAMP_PATH", path.c_str(), 1);
-
-	cstr = getenv ("ARDOUR_PANNER_PATH");
-	if (cstr) {
-		path = cstr;
-		path += ':';
-	} else {
-		path = "";
-	}
-	path += dir_path;
-	path += "/lib/panners";
-	
-	setenv ("ARDOUR_PANNER_PATH", path.c_str(), 1);
-
-	cstr = getenv ("ARDOUR_SURFACES_PATH");
-	if (cstr) {
-		path = cstr;
-		path += ':';
-	} else {
-		path = "";
-	}
-	path += dir_path;
-	path += "/lib/surfaces";
-	
-	setenv ("ARDOUR_SURFACES_PATH", path.c_str(), 1);
-
-	cstr = getenv ("ARDOUR_MIDIMAPS_PATH");
-	if (cstr) {
-		path = cstr;
-		path += ':';
-	} else {
-		path = "";
-	}
-	path += dir_path;
-	path += "/share/midi_maps";
-	
-	setenv ("ARDOUR_MIDIMAPS_PATH", path.c_str(), 1);
+        export_search_path (dir_path, "LADSPA_PATH", "/../plugins");
+        export_search_path (dir_path, "VAMP_PATH", "/lib");
+        export_search_path (dir_path, "ARDOUR_PANNER_PATH", "/lib/panners");
+        export_search_path (dir_path, "ARDOUR_SURFACES_PATH", "/lib/surfaces");
+        export_search_path (dir_path, "ARDOUR_MIDIMAPS_PATH", "/share/midi_maps");
+        export_search_path (dir_path, "ARDOUR_EXPORT_FORMATS_PATH", "/share/exports");
 
 	path = dir_path;
 	path += "/lib/clearlooks";
-
 	setenv ("GTK_PATH", path.c_str(), 1);
 
         /* unset GTK_RC_FILES so that we only load the RC files that we define
