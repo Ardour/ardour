@@ -147,6 +147,7 @@ Shared=$APPDIR/share
 Plugins=$APPLIB/plugins
 Surfaces=$APPLIB/surfaces
 Panners=$APPLIB/panners
+ExportFormats=$Shared/export
 Locale=$Shared/locale
 MidiMaps=$Shared/midi_maps
 Modules=$Libraries/modules
@@ -185,6 +186,7 @@ mkdir -p $Shared
 mkdir -p $Locale
 mkdir -p $Surfaces
 mkdir -p $MidiMaps
+mkdir -p $ExportFormats
 mkdir -p $Panners
 mkdir -p $Shared/templates
 mkdir -p $Shared/doc
@@ -438,7 +440,16 @@ cp $BUILD_ROOT/libs/surfaces/*/libardour*.so* $Surfaces
 mv $Surfaces/libardourcp.so* $Libraries
 
 # MidiMaps
-cp $BUILD_ROOT/../../midi_maps/*.map $MidiMaps
+# got to be careful with names here
+for x in $BUILD_ROOT/../../midi_maps/*.map ; do
+    cp "$x" $MidiMaps
+done
+
+# ExportFormats
+# got to be careful with names here
+for x in $BUILD_ROOT/../../export/*.preset $BUILD_ROOT/../../export/*.format ; do
+    cp "$x" $ExportFormats
+done
 
 # Panners
 cp $BUILD_ROOT/libs/panners/*/lib*.so* $Panners
