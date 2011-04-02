@@ -373,71 +373,88 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
                               vector<boost::shared_ptr<Source> >& newfiles)
 {
 	uint32_t buf_size = 4;
-	uint8_t* buf      = (uint8_t*)malloc(buf_size);
+	uint8_t* buf      = (uint8_t*) malloc (buf_size);
 
 	status.progress = 0.0f;
 
+        assert (newfiles.size() == source->num_tracks());
+
 	try {
+                vector<boost::shared_ptr<Source> >::iterator s = newfiles.begin();
+                
+                for (unsigned i = 1; i <= source->num_tracks(); ++i) {
 
-	for (unsigned i = 1; i <= source->num_tracks(); ++i) {
-		boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource>(newfiles[i-1]);
-		smfs->drop_model();
+                        boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource> (*s);
 
-		source->seek_to_track(i);
-
-		uint64_t t       = 0;
-		uint32_t delta_t = 0;
-		uint32_t size    = 0;
-                bool first = true;
-
-		while (!status.cancel) {
-                        gint ignored; // imported files either don't have NoteID's or
-                                      // we ignore them.
-
-			size = buf_size;
+                        smfs->drop_model ();
+                        source->seek_to_track (i);
                         
-			int ret = source->read_event(&delta_t, &size, &buf, &ignored);
-			if (size > buf_size)
-				buf_size = size;
-
-			if (ret < 0) { // EOT
-				break;
-			}
-
-			t += delta_t;
-
-			if (ret == 0) { // Meta
-				continue;
-			}
+                        uint64_t t       = 0;
+                        uint32_t delta_t = 0;
+                        uint32_t size    = 0;
+                        bool first = true;
                         
-                        if (first) {
-                                smfs->mark_streaming_write_started ();
-                                first = false;
+                        while (!status.cancel) {
+                                gint note_id_ignored; // imported files either don't have NoteID's or we ignore them.
+                                
+                                size = buf_size;
+                                
+                                int ret = source->read_event (&delta_t, &size, &buf, &note_id_ignored);
+                                
+                                if (size > buf_size) {
+                                        buf_size = size;
+                                }
+                                
+                                if (ret < 0) { // EOT
+                                        break;
+                                }
+                                
+                                t += delta_t;
+                                
+                                if (ret == 0) { // Meta
+                                        continue;
+                                }
+                                
+                                if (first) {
+                                        smfs->mark_streaming_write_started ();
+                                        first = false;
+                                }
+                                
+                                smfs->append_event_unlocked_beats(Evoral::Event<double>(0,
+                                                                                        (double)t / (double)source->ppqn(),
+                                                                                        size,
+                                                                                        buf));
+                                
+                                if (status.progress < 0.99) {
+                                        status.progress += 0.01;
+                                }
                         }
-
-			smfs->append_event_unlocked_beats(Evoral::Event<double>(0,
-					(double)t / (double)source->ppqn(),
-					size,
-					buf));
-
-			if (status.progress < 0.99)
-				status.progress += 0.01;
-		}
-
-		const framepos_t pos = 0;
-		const double length_beats = ceil(t / (double)source->ppqn());
-		BeatsFramesConverter converter(smfs->session().tempo_map(), pos);
-		smfs->update_length(pos, converter.to(length_beats));
-		smfs->mark_streaming_write_completed ();
-
-		if (status.cancel) {
-			break;
-		}
-	}
+                        
+                        if (!first) {
+                                
+                                /* we wrote something */
+                                
+                                const framepos_t pos = 0;
+                                const double length_beats = ceil(t / (double)source->ppqn());
+                                BeatsFramesConverter converter(smfs->session().tempo_map(), pos);
+                                smfs->update_length(pos, converter.to(length_beats));
+                                smfs->mark_streaming_write_completed ();
+                                
+                                if (status.cancel) {
+                                        break;
+                                }
+                        }
+                        
+                        ++s; // next source
+                }
 
 	} catch (...) {
-		error << "Corrupt MIDI file " << source->file_path() << endl;
+		error << "Corrupt MIDI file " << source->file_path() << endmsg;
 	}
+
+        if (buf) {
+                free (buf);
+        }
 }
 
 static void
@@ -497,6 +514,7 @@ Session::import_audiofiles (ImportStatus& status)
 								      channels);
 		Sources newfiles;
 		framepos_t natural_position = source ? source->natural_position() : 0;
+
 
 		if (status.replace_existing_source) {
 			fatal << "THIS IS NOT IMPLEMENTED YET, IT SHOULD NEVER GET CALLED!!! DYING!" << endmsg;

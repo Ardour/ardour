@@ -1431,7 +1431,6 @@ Session::count_existing_track_channels (ChanCount& in, ChanCount& out)
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
                 boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr && !tr->is_hidden()) {
-                        cerr << "Using track i/o counts for " << tr->name() << endl;
 			in  += tr->n_inputs();
 			out += tr->n_outputs();
 		}
