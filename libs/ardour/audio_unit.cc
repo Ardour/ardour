@@ -1658,10 +1658,8 @@ AUPlugin::set_state(const XMLNode& node, int version)
 }
 
 bool
-AUPlugin::load_preset (PluginRecord r)
+AUPlugin::load_preset (const string& preset_label)
 {
-	Plugin::load_preset (r);
-	
 #ifdef AU_STATE_SUPPORT
 	bool ret = false;
 	CFPropertyListRef propertyList;
