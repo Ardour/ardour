@@ -23,7 +23,6 @@
 
 #include <string>
 
-
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
 #include "pbd/convert.h"
@@ -70,9 +69,9 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 {
 	/* the first is the master */
 
-        if (plug) {
-                _plugins.push_back (plug);
-                set_automatable ();
+	if (plug) {
+		_plugins.push_back (plug);
+		set_automatable ();
 
 		Glib::Mutex::Lock em (_session.engine().process_lock());
 		IO::PortCountChanged (max(input_streams(), output_streams()));
@@ -204,7 +203,7 @@ PluginInsert::set_automatable ()
 			Evoral::Parameter param(*i);
 
 			_plugins.front()->get_parameter_descriptor(i->id(), desc);
-                        
+
 			/* the Parameter belonging to the actual plugin doesn't have its range set
 			   but we want the Controllable related to this Parameter to have those limits.
 			*/
@@ -212,7 +211,7 @@ PluginInsert::set_automatable ()
 			param.set_range (desc.lower, desc.upper, _plugins.front()->default_value(i->id()), desc.toggled);
 			can_automate (param);
 			boost::shared_ptr<AutomationList> list(new AutomationList(param));
-                        add_control (boost::shared_ptr<AutomationControl> (new PluginControl(this, param, list)));
+			add_control (boost::shared_ptr<AutomationControl> (new PluginControl(this, param, list)));
 		}
 	}
 }
@@ -238,13 +237,13 @@ PluginInsert::parameter_changed (Evoral::Parameter which, float val)
 int
 PluginInsert::set_block_size (pframes_t nframes)
 {
-        int ret = 0;
+	int ret = 0;
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		if ((*i)->set_block_size (nframes) != 0) {
-                        ret = -1;
-                }
+			ret = -1;
+		}
 	}
-        return ret;
+	return ret;
 }
 
 void
@@ -253,7 +252,7 @@ PluginInsert::activate ()
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->activate ();
 	}
-	
+
 	Processor::activate ();
 }
 
@@ -270,9 +269,9 @@ PluginInsert::deactivate ()
 void
 PluginInsert::flush ()
 {
-        for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-                (*i)->flush ();
-        }
+	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		(*i)->flush ();
+	}
 }
 
 void
@@ -385,7 +384,7 @@ PluginInsert::silence (framecnt_t nframes)
 	if (!active ()) {
 		return;
 	}
-	
+
 	ChanMapping in_map(input_streams());
 	ChanMapping out_map(output_streams());
 
@@ -393,7 +392,7 @@ PluginInsert::silence (framecnt_t nframes)
 		/* fix the input mapping so that we have maps for each of the plugin's inputs */
 		in_map = ChanMapping (natural_input_streams ());
 	}
-	
+
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->connect_and_run (_session.get_silent_buffers ((*i)->get_info()->n_inputs), in_map, out_map, nframes, 0);
 	}
@@ -438,7 +437,7 @@ PluginInsert::set_parameter (Evoral::Parameter param, float val)
 {
 	if (param.type() != PluginAutomation) {
 		return;
-        }
+	}
 
 	/* the others will be set from the event triggered by this */
 
@@ -612,19 +611,19 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	ChanCount inputs  = _plugins[0]->get_info()->n_inputs;
 	ChanCount outputs = _plugins[0]->get_info()->n_outputs;
 
-        bool no_inputs = true;
+	bool no_inputs = true;
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-                if (inputs.get (*t) != 0) {
-                        no_inputs = false;
-                        break;
-                }
-        }
+		if (inputs.get (*t) != 0) {
+			no_inputs = false;
+			break;
+		}
+	}
 
-        if (no_inputs) {
-                /* no inputs so we can take any input configuration since we throw it away */
-                out = outputs;
-                return true;
-        }
+	if (no_inputs) {
+		/* no inputs so we can take any input configuration since we throw it away */
+		out = outputs;
+		return true;
+	}
 
 	// Plugin inputs match requested inputs exactly
 	if (inputs == in) {
@@ -633,37 +632,37 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	}
 
 	// See if replication is possible
-        // We allow replication only for plugins with either zero or 1 inputs and outputs
-        // for every valid data type.
+	// We allow replication only for plugins with either zero or 1 inputs and outputs
+	// for every valid data type.
 	uint32_t f             = 0;
 	bool     can_replicate = true;
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 
-                uint32_t nin = inputs.get (*t);
+		uint32_t nin = inputs.get (*t);
 
 		// No inputs of this type
 		if (nin == 0 && in.get(*t) == 0) {
 			continue;
-                }
+		}
 
-                if (nin != 1 || outputs.get (*t) != 1) {
-                        can_replicate = false;
-                        break;
-                }
+		if (nin != 1 || outputs.get (*t) != 1) {
+			can_replicate = false;
+			break;
+		}
 
-                // Potential factor not set yet
+		// Potential factor not set yet
 
-                if (f == 0) {
-                        f = in.get(*t) / nin;
-                }
+		if (f == 0) {
+			f = in.get(*t) / nin;
+		}
 
-                // Factor for this type does not match another type, can not replicate
-                if (f != (in.get(*t) / nin)) {
-                        can_replicate = false;
-                        break;
-                }
+		// Factor for this type does not match another type, can not replicate
+		if (f != (in.get(*t) / nin)) {
+			can_replicate = false;
+			break;
+		}
 	}
-        
+
 	if (can_replicate) {
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			out.set (*t, outputs.get(*t) * f);
@@ -765,11 +764,11 @@ PluginInsert::state (bool full)
 	node.add_child_nocopy (_plugins[0]->get_state());
 
 	for (Controls::iterator c = controls().begin(); c != controls().end(); ++c) {
-                boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> ((*c).second);
-                if (ac) {
-                        node.add_child_nocopy (ac->get_state());
-                }
-        }
+		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> ((*c).second);
+		if (ac) {
+			node.add_child_nocopy (ac->get_state());
+		}
+	}
 
 	return node;
 }
@@ -777,28 +776,29 @@ PluginInsert::state (bool full)
 void
 PluginInsert::set_control_ids (const XMLNode& node, int version)
 {
-        const XMLNodeList& nlist = node.children();
-        XMLNodeConstIterator iter;
-        set<Evoral::Parameter>::const_iterator p;
+	const XMLNodeList& nlist = node.children();
+	XMLNodeConstIterator iter;
+	set<Evoral::Parameter>::const_iterator p;
 
-        for (iter = nlist.begin(); iter != nlist.end(); ++iter) {
-                if ((*iter)->name() == Controllable::xml_node_name) {
-                        const XMLProperty* prop;
+	for (iter = nlist.begin(); iter != nlist.end(); ++iter) {
+		if ((*iter)->name() == Controllable::xml_node_name) {
+			const XMLProperty* prop;
 
-                        if ((prop = (*iter)->property (X_("parameter"))) != 0) {
-                                uint32_t p = atoi (prop->value());
-                                boost::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, p));
-                                if (!c) {
-                                        continue;
-                                }
-                                boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (c);
-                                if (ac) {
-                                        ac->set_state (**iter, version);
-                                }
-                        }
-                }
-        }
+			if ((prop = (*iter)->property (X_("parameter"))) != 0) {
+				uint32_t p = atoi (prop->value());
+				boost::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, p));
+				if (!c) {
+					continue;
+				}
+				boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (c);
+				if (ac) {
+					ac->set_state (**iter, version);
+				}
+			}
+		}
+	}
 }
+
 int
 PluginInsert::set_state(const XMLNode& node, int version)
 {
@@ -834,11 +834,11 @@ PluginInsert::set_state(const XMLNode& node, int version)
 #ifdef VST_SUPPORT
 		/* older sessions contain VST plugins with only an "id" field.
 		 */
-		
+
 		if (type == ARDOUR::VST) {
 			prop = node.property ("id");
 		}
-#endif		
+#endif
 		/* recheck  */
 
 		if (prop == 0) {
@@ -883,7 +883,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 	if (need_automatables) {
 		set_automatable ();
-                set_control_ids (node, version);
+		set_control_ids (node, version);
 	}
 
 	/* Handle the node list for this Processor (or Insert if an A2 session) */
@@ -898,13 +898,13 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		}
 	}
 
-        Processor::set_state (node, version);
+	Processor::set_state (node, version);
 
 	if (version < 3000) {
 
-                /* Only 2.X sessions need a call to set_parameter_state() - in 3.X and above
-                   this is all handled by Automatable
-                */
+		/* Only 2.X sessions need a call to set_parameter_state() - in 3.X and above
+		   this is all handled by Automatable
+		*/
 
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			if ((*niter)->name() == "Redirect") {
@@ -913,14 +913,14 @@ PluginInsert::set_state(const XMLNode& node, int version)
 				break;
 			}
 		}
-		
+
 		set_parameter_state_2X (node, version);
 	}
 
 	// The name of the PluginInsert comes from the plugin, nothing else
 	_name = plugin->get_info()->name;
 
-        /* catch up on I/O */
+	/* catch up on I/O */
 
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
@@ -937,7 +937,7 @@ PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 	XMLNodeIterator niter;
 
 	/* look for port automation node */
-	
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		if ((*niter)->name() != port_automation_node_name) {
@@ -954,18 +954,18 @@ PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 		cnodes = (*niter)->children ("port");
 
 		for (iter = cnodes.begin(); iter != cnodes.end(); ++iter){
-			
+
 			child = *iter;
-			
+
 			if ((cprop = child->property("number")) != 0) {
 				port = cprop->value().c_str();
 			} else {
 				warning << _("PluginInsert: Auto: no ladspa port number") << endmsg;
 				continue;
 			}
-			
+
 			sscanf (port, "%" PRIu32, &port_id);
-			
+
 			if (port_id >= _plugins[0]->parameter_count()) {
 				warning << _("PluginInsert: Auto: port id out of range") << endmsg;
 				continue;
@@ -995,7 +995,7 @@ PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 					if (min_y == FLT_MIN) {
 						min_y = desc.lower;
 					}
-					
+
 					if (max_y == FLT_MAX) {
 						max_y = desc.upper;
 					}
@@ -1006,11 +1006,11 @@ PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 				error << string_compose (_("PluginInsert: automatable control %1 not found - ignored"), port_id) << endmsg;
 			}
 		}
-		
+
 		/* done */
-		
+
 		break;
-	} 
+	}
 }
 
 
@@ -1019,7 +1019,7 @@ PluginInsert::describe_parameter (Evoral::Parameter param)
 {
 	if (param.type() != PluginAutomation) {
 		return Automatable::describe_parameter(param);
-        }
+	}
 
 	return _plugins[0]->describe_parameter (param);
 }
@@ -1074,7 +1074,7 @@ PluginInsert::PluginControl::set_value (double user_val)
 double
 PluginInsert::PluginControl::user_to_plugin (double val) const
 {
-        /* no known transformations at this time */
+	/* no known transformations at this time */
 	return val;
 }
 
@@ -1112,20 +1112,20 @@ PluginInsert::PluginControl::plugin_to_ui (double val) const
 double
 PluginInsert::PluginControl::plugin_to_user (double val) const
 {
-        /* no known transformations at this time */
+	/* no known transformations at this time */
 	return val;
 }
 
 XMLNode&
 PluginInsert::PluginControl::get_state ()
 {
-        stringstream ss;
+	stringstream ss;
 
-        XMLNode& node (AutomationControl::get_state());
-        ss << parameter().id();
-        node.add_property (X_("parameter"), ss.str());
+	XMLNode& node (AutomationControl::get_state());
+	ss << parameter().id();
+	node.add_property (X_("parameter"), ss.str());
 
-        return node;
+	return node;
 }
 
 /** @return `user' val */
@@ -1187,7 +1187,7 @@ PluginInsert::set_splitting (bool s)
 	if (_splitting == s) {
 		return;
 	}
-			
+
 	_splitting = s;
 	SplittingChanged (); /* EMIT SIGNAL */
 }
