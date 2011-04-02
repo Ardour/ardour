@@ -88,6 +88,7 @@ libardour_sources = [
         'export_format_manager.cc',
         'export_format_specification.cc',
         'export_formats.cc',
+        'export_formats_search_path.cc',
         'export_graph_builder.cc',
         'export_handler.cc',
         'export_preset.cc',

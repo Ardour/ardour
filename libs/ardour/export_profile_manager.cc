@@ -29,6 +29,7 @@
 
 #include "ardour/export_profile_manager.h"
 #include "ardour/export_format_specification.h"
+#include "ardour/export_formats_search_path.h"
 #include "ardour/export_timespan.h"
 #include "ardour/export_channel_configuration.h"
 #include "ardour/export_filename.h"
@@ -60,14 +61,12 @@ ExportProfileManager::ExportProfileManager (Session & s, std::string xml_node_na
 
   , format_list (new FormatList ())
 {
-
 	/* Initialize path variables */
 
 	export_config_dir = user_config_directory();
 	export_config_dir /= "export";
 
-	search_path += export_config_dir;
-	search_path += system_data_search_path().add_subdirectory_to_paths("export");
+	search_path += export_formats_search_path();
 
 	info << string_compose (_("Searching for export formats in %1"), search_path.to_string()) << endmsg;
 
