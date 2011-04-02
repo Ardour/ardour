@@ -97,8 +97,8 @@ class AUPlugin : public ARDOUR::Plugin
     
 	int set_state(const XMLNode& node, int);
 	
-	bool save_preset (std::string name);
-	bool load_preset (const std::string& preset_label);
+	PresetRecord save_preset (std::string name);
+	bool load_preset (PresetRecord);
 	std::string current_preset() const;
 
 	bool has_editor () const;
