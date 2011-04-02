@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Where a control's mapping to an Ardour function is unclear, it has been commented out for future implementation -->
+
+<ArdourMIDIBindings version="1.0.0" name="Roland SI-24">
+	<DeviceInfo bank-size="12"/>
+
+	<!--	faders	-->
+	<Binding channel="1" ctl="0" uri="/route/gain B1"/>
+	<Binding channel="1" ctl="1" uri="/route/gain B2"/>
+	<Binding channel="1" ctl="2" uri="/route/gain B3"/>
+	<Binding channel="1" ctl="3" uri="/route/gain B4"/>
+	<Binding channel="1" ctl="4" uri="/route/gain B5"/>
+	<Binding channel="1" ctl="5" uri="/route/gain B6"/>
+	<Binding channel="1" ctl="6" uri="/route/gain B7"/>
+	<Binding channel="1" ctl="7" uri="/route/gain B8"/>
+	<Binding channel="1" ctl="8" uri="/route/gain B9"/>
+	<Binding channel="1" ctl="9" uri="/route/gain B10"/>
+	<Binding channel="1" ctl="10" uri="/route/gain B11"/>
+	<Binding channel="1" ctl="11" uri="/route/gain B12"/>
+	<Binding channel="1" ctl="12" uri="/bus/gain master"/>
+
+<!--	<Binding channel="1" ctl="13" uri=""/>		SURROUND PAN left/right (0 through 127, respectively)	-->
+<!--	<Binding channel="1" ctl="14" uri=""/>		SURROUND PAN up/down (127 through 0, respectively)	-->
+<!--	<Binding channel="1" note="15" function=""/>	transport jog wheel (1 = clockwise, 127 = counter-clockwise) -->
+
+	<!--	STATUS buttons	-->
+	<Binding channel="1" note="16" uri="/route/mute B1"/>
+	<Binding channel="1" note="17" uri="/route/mute B2"/>
+	<Binding channel="1" note="18" uri="/route/mute B3"/>
+	<Binding channel="1" note="19" uri="/route/mute B4"/>
+	<Binding channel="1" note="20" uri="/route/mute B5"/>
+	<Binding channel="1" note="21" uri="/route/mute B6"/>
+	<Binding channel="1" note="22" uri="/route/mute B7"/>
+	<Binding channel="1" note="23" uri="/route/mute B8"/>
+	<Binding channel="1" note="24" uri="/route/mute B9"/>
+	<Binding channel="1" note="25" uri="/route/mute B10"/>
+	<Binding channel="1" note="26" uri="/route/mute B11"/>
+	<Binding channel="1" note="27" uri="/route/mute B12"/>
+
+	<!--	CH SELECT buttons	-->
+	<!-- These are intended to be used for selecting individual tracks so that the buttons EQ/PLUG-IN, AUTOMIX, REC/PLAY, etc. affect them, but until there's a better way to implement this in Ardour I'm just using them as solo buttons -->
+	<Binding channel="1" note="28" uri="/route/solo B1"/>
+	<Binding channel="1" note="29" uri="/route/solo B2"/>
+	<Binding channel="1" note="30" uri="/route/solo B3"/>
+	<Binding channel="1" note="31" uri="/route/solo B4"/>
+	<Binding channel="1" note="32" uri="/route/solo B5"/>
+	<Binding channel="1" note="33" uri="/route/solo B6"/>
+	<Binding channel="1" note="34" uri="/route/solo B7"/>
+	<Binding channel="1" note="35" uri="/route/solo B8"/>
+	<Binding channel="1" note="36" uri="/route/solo B9"/>
+	<Binding channel="1" note="37" uri="/route/solo B10"/>
+	<Binding channel="1" note="38" uri="/route/solo B11"/>
+	<Binding channel="1" note="39" uri="/route/solo B12"/>
+
+	<!--	PAN pots (1 = clockwise, 127 = counter-clockwise)
+	<Binding channel="1" note="40" uri="/route/pan B1"/>
+	<Binding channel="1" note="41" uri="/route/pan B2"/>
+	<Binding channel="1" note="42" uri="/route/pan B3"/>
+	<Binding channel="1" note="43" uri="/route/pan B4"/>
+	<Binding channel="1" note="44" uri="/route/pan B5"/>
+	<Binding channel="1" note="45" uri="/route/pan B6"/>
+	<Binding channel="1" note="46" uri="/route/pan B7"/>
+	<Binding channel="1" note="47" uri="/route/pan B8"/>
+	<Binding channel="1" note="48" uri="/route/pan B9"/>
+	<Binding channel="1" note="49" uri="/route/pan B10"/>
+	<Binding channel="1" note="50" uri="/route/pan B11"/>
+	<Binding channel="1" note="51" uri="/route/pan B12"/>	-->
+
+	<!-- EQ select buttons
+	When the EQ/SEND button is activated, each of the EQ ON buttons activates/deactivates an individual band.  The two pan pots below each ON button now control the gain and frequency of the band (for example, if EQ 1 is activated, the pan pots from channels 1 and 2 become EQ 1 gain and EQ 1 frequency, respectively.  Pan pots 9-12 now control the levels going to sends 1-4.  The PLUG-IN button works similarly to EQ/SEND, but the parameters affected depend on the plugin being used.
+	<Binding channel="1" note="52" uri=""/>	EQ 1 ON
+	<Binding channel="1" note="53" uri=""/>	EQ 2 ON
+	<Binding channel="1" note="54" uri=""/>	EQ 3 ON
+	<Binding channel="1" note="55" uri=""/>	EQ 4 ON
+	<Binding channel="1" note="56" uri=""/>	PLUG-IN
+	<Binding channel="1" note="57" uri=""/>	EQ/SEND	-->
+
+<!--	<Binding channel="1" note="58" uri=""/>	SHIFT (PHANTOM)	-->
+
+	<!--	STATUS MODE buttons
+	<Binding channel="1" note="59" uri=""/>	AUTOMIX		toggle automation read/write on selected track(s)
+	<Binding channel="1" note="60" uri=""/>	REC/PLAY	arm/disarm selected track(s) for recording
+	<Binding channel="1" note="61" uri=""/>	SOLO		toggle solo on selected track(s)
+	<Binding channel="1" note="62" uri=""/>	MUTE		toggle mute on selected track(s)	-->
+
+	<!-- CH ASSIGN buttons
+	<Binding channel="1" note="63" uri=""/>	INPUT/INST (SHIFT+)
+	<Binding channel="1" note="64" uri=""/>	OUTPUT
+	<Binding channel="1" note="65" uri=""/>	BUS		-->
+	<Binding channel="1" note="66" function="prev-bank"/>	Tr 1-12
+	<Binding channel="1" note="67" function="next-bank"/>	Tr 13-24
+
+<!--	<Binding channel="1" note="68" uri=""/>	DIGITAL IN -->
+
+<!--	<Binding channel="1" note="69" uri=""/>	SURROUND PAN ON -->
+
+<!--	<Binding channel="1" note="70" uri=""/>	SYSTEM -->
+<!--	<Binding channel="1" note="71" uri=""/>	MARKER (0 -> Create) -->
+<!--	<Binding channel="1" note="72" uri=""/>	SHORT CUT	-->
+<!--	<Binding channel="1" note="73" uri=""/>	SCREEN SET-->
+	<!-- PROTOCOL buttons
+	Simultaneously holding down the SYSTEM button and pressing one of the following buttons will change the SI-24's MIDI mapping to suit Logic, ProTools, Cubase, or two custom user presets.  No MIDI messages are generated during these 2-button combinations.  Without pressing SYSTEM, the buttons simply send the note values listed below (74-83).  In Logic, ProTools, and Cubase modes, all of the SI-24's buttons will send a Note-on followed by a Note-off when the button is released.  In the two user-defined modes, only a Note-on is sent.
+	<Binding channel="1" note="74" uri=""/>	0 [LED]  (used for assigning MIDI events to LEDs and faders)
+	<Binding channel="1" note="75" uri=""/>	1 [L5]  (switch to Logic mode)
+	<Binding channel="1" note="76" uri=""/>	2 [H]  (switch to ProTools mode)
+	<Binding channel="1" note="77" uri=""/>	3 [S.C]  (switch to Cubase mode)
+	<Binding channel="1" note="78" uri=""/>	4 [USR 1]  (switch to user mode 1)
+	<Binding channel="1" note="79" uri=""/>	5 [USR 2]  (switch to user mode 2)
+	<Binding channel="1" note="80" uri=""/>	6 [MIDI ctrl]  (toggle whether MIDI data is sent to devices via MIDI cables or via R-BUS cable)
+	<Binding channel="1" note="81" uri=""/>	7 [7/8 -> D.OUT]  (toggle SI-24's digital audio output on/off)
+	<Binding channel="1" note="82" uri=""/>	8 [DUMP/LD]  (used for dumping and loading user presets)
+	<Binding channel="1" note="83" uri=""/>	9 [KEY]  (used for assigning MIDI events to buttons and faders)	-->
+
+	<!-- Transport buttons -->
+	<Binding channel="1" note="84" function="transport-stop"/>	<!-- PAUSE -->
+	<Binding channel="1" note="85" function="transport-stop"/>	<!-- REW -->
+	<Binding channel="1" note="86" function="transport-start"/>	<!-- FF -->
+	<Binding channel="1" note="87" function="transport-end"/>		<!-- STOP -->
+	<Binding channel="1" note="88" function="transport-roll"/>	<!-- PLAY -->
+	<Binding channel="1" note="89" function="rec-enable"/>		<!-- REC -->
+
+</ArdourMIDIBindings>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
