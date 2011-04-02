@@ -32,7 +32,7 @@
 <Binding sysex="f0 42 40 0 1 4 0 5f 4f 2 f7" function="next-bank"/>
 <Binding sysex="f0 42 40 0 1 4 0 5f 4f 3 f7" function="next-bank"/>
 
-<!--  Channel controls:
+<!--  Channel controls:                                                     -->
 <!--  - The two buttons on each channel are unmarked. I decided to use them -->
 <!--    as "Solo" and "Record Enable".                                      -->
 <!--  - Channel pan is not yet implemented in Ardour-3, so I chose to map   -->
