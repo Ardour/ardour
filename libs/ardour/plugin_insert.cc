@@ -70,6 +70,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	/* the first is the master */
 
 	if (plug) {
+		plug->set_insert_info (this);
 		_plugins.push_back (plug);
 		set_automatable ();
 
@@ -847,13 +848,13 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		}
 	}
 
-	boost::shared_ptr<Plugin> plugin;
-
-	plugin = find_plugin (_session, prop->value(), type);
+	boost::shared_ptr<Plugin> plugin = find_plugin (_session, prop->value(), type);
 
 	if (plugin == 0) {
-		error << string_compose(_("Found a reference to a plugin (\"%1\") that is unknown.\n"
-				   "Perhaps it was removed or moved since it was last used."), prop->value())
+		error << string_compose(
+			_("Found a reference to a plugin (\"%1\") that is unknown.\n"
+			  "Perhaps it was removed or moved since it was last used."),
+			prop->value())
 		      << endmsg;
 		return -1;
 	}
@@ -867,6 +868,8 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		*/
 		need_automatables = true;
 	}
+
+	Processor::set_state (node, version);
 
 	if ((prop = node.property ("count")) != 0) {
 		sscanf (prop->value().c_str(), "%u", &count);
@@ -897,8 +900,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			break;
 		}
 	}
-
-	Processor::set_state (node, version);
 
 	if (version < 3000) {
 
@@ -1167,6 +1168,7 @@ PluginInsert::collect_signal_for_analysis (framecnt_t nframes)
 void
 PluginInsert::add_plugin_with_activation (boost::shared_ptr<Plugin> plugin)
 {
+	plugin->set_insert_info (this);
 	_plugins.push_back (plugin);
 	if (active()) {
 		plugin->activate ();

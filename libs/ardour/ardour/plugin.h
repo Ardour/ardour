@@ -102,6 +102,8 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	XMLNode& get_state ();
 	virtual int set_state (const XMLNode &, int version);
 
+	virtual void set_insert_info(const PluginInsert* insert) {}
+
 	virtual std::string unique_id() const = 0;
 	virtual const char * label() const = 0;
 	virtual const char * name() const = 0;

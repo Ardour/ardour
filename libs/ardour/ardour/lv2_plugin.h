@@ -90,8 +90,8 @@ class LV2Plugin : public ARDOUR::Plugin
 	int set_block_size (pframes_t /*nframes*/) { return 0; }
 
 	int connect_and_run (BufferSet& bufs,
-			ChanMapping in, ChanMapping out,
-			pframes_t nframes, framecnt_t offset);
+	                     ChanMapping in, ChanMapping out,
+	                     pframes_t nframes, framecnt_t offset);
 
 	std::string describe_parameter (Evoral::Parameter);
 	std::string state_node_name () const { return "lv2"; }
@@ -108,6 +108,8 @@ class LV2Plugin : public ARDOUR::Plugin
 	bool parameter_is_toggled (uint32_t) const;
 
 	static uint32_t midi_event_type () { return _midi_event_type; }
+
+	void set_insert_info(const PluginInsert* insert);
 
 	int      set_state (const XMLNode& node, int version);
 	bool     save_preset (std::string uri);
@@ -137,6 +139,8 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	std::map<std::string,uint32_t> _port_indices;
 
+	PBD::ID _insert_id;
+
 	typedef struct {
 		const void* (*extension_data) (const char* uri);
 	} LV2_DataAccess;
@@ -144,23 +148,29 @@ class LV2Plugin : public ARDOUR::Plugin
 	LV2_DataAccess _data_access_extension_data;
 	LV2_Feature    _data_access_feature;
 	LV2_Feature    _instance_access_feature;
+	LV2_Feature    _files_feature;
 	LV2_Feature    _persist_feature;
 
 	static URIMap   _uri_map;
 	static uint32_t _midi_event_type;
 
-	static int lv2_persist_store_callback (void*       callback_data,
+	static int lv2_persist_store_callback (void*       host_data,
 	                                       uint32_t    key,
 	                                       const void* value,
 	                                       size_t      size,
 	                                       uint32_t    type,
 	                                       uint32_t    flags);
-
-	static const void* lv2_persist_retrieve_callback (void*     callback_data,
+	static const void* lv2_persist_retrieve_callback (void*     host_data,
 	                                                  uint32_t  key,
 	                                                  size_t*   size,
 	                                                  uint32_t* type,
 	                                                  uint32_t* flags);
+	static char* lv2_files_abstract_path (void*       host_data,
+	                                      const char* absolute_path);
+	static char* lv2_files_absolute_path (void*       host_data,
+	                                      const char* abstract_path);
+	static char* lv2_files_new_file_path (void*       host_data,
+	                                      const char* relative_path);
 
 	void init (LV2World& world, SLV2Plugin plugin, framecnt_t rate);
 	void run (pframes_t nsamples);
