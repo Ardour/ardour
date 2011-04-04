@@ -683,7 +683,7 @@ Editor::Editor ()
 		window_icons.push_back (icon);
 	}
 	if (!window_icons.empty()) {
-		set_icon_list (window_icons);
+		// set_icon_list (window_icons);
 		set_default_icon_list (window_icons);
 	}
 
