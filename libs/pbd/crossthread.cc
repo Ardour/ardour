@@ -30,7 +30,7 @@ using namespace std;
 using namespace PBD;
 using namespace Glib;
 
-CrossThreadChannel::CrossThreadChannel ()
+CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 {
 	_ios = 0;
 	fds[0] = -1;
@@ -41,14 +41,16 @@ CrossThreadChannel::CrossThreadChannel ()
 		return;
 	}
 
-	if (fcntl (fds[0], F_SETFL, O_NONBLOCK)) {
-		error << "cannot set non-blocking mode for x-thread pipe (read) (" << ::strerror (errno) << ')' << endmsg;
-		return;
-	}
-
-	if (fcntl (fds[1], F_SETFL, O_NONBLOCK)) {
-		error << "cannot set non-blocking mode for x-thread pipe (write) (%2)" << ::strerror (errno) << ')' << endmsg;
-		return;
+	if (non_blocking) {
+		if (fcntl (fds[0], F_SETFL, O_NONBLOCK)) {
+			error << "cannot set non-blocking mode for x-thread pipe (read) (" << ::strerror (errno) << ')' << endmsg;
+			return;
+		}
+		
+		if (fcntl (fds[1], F_SETFL, O_NONBLOCK)) {
+			error << "cannot set non-blocking mode for x-thread pipe (write) (%2)" << ::strerror (errno) << ')' << endmsg;
+			return;
+		}
 	}
 }
 

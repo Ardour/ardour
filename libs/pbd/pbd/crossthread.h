@@ -28,7 +28,7 @@
 
 class CrossThreadChannel { 
   public:
-	CrossThreadChannel();
+	CrossThreadChannel(bool);
 	~CrossThreadChannel();
 	
 	void wakeup();

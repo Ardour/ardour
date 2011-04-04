@@ -41,7 +41,8 @@ BaseUI::RequestType BaseUI::CallSlot = BaseUI::new_request_type();
 BaseUI::RequestType BaseUI::Quit = BaseUI::new_request_type();
 
 BaseUI::BaseUI (const string& str)
-	: run_loop_thread (0)
+	: request_channel (true)
+	, run_loop_thread (0)
 	, _name (str)
 {
 	base_ui_instance = this;

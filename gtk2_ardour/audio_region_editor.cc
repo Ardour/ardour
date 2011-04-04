@@ -53,8 +53,8 @@ _peak_amplitude_thread (void* arg)
 AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion> r)
 	: RegionEditor (s, r)
 	, _audio_region (r)
-	, gain_adjustment(accurate_coefficient_to_dB(_audio_region->scale_amplitude()), -40.0, +40.0, 0.1, 1.0, 0)	  
-	, _peak_amplitude_found (false)
+	, gain_adjustment(accurate_coefficient_to_dB(_audio_region->scale_amplitude()), -40.0, +40.0, 0.1, 1.0, 0)
+	, _peak_channel (false)
 {
 
 	Gtk::HBox* b = Gtk::manage (new Gtk::HBox);
@@ -91,6 +91,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 
 	PeakAmplitudeFound.connect (_peak_amplitude_connection, invalidator (*this), boost::bind (&AudioRegionEditor::peak_amplitude_found, this, _1), gui_context ());
 	pthread_create_and_store (X_("peak-amplitude"), &_peak_amplitude_thread_handle, _peak_amplitude_thread, this);
+	_peak_channel.deliver ('c');
 }
 
 AudioRegionEditor::~AudioRegionEditor ()
@@ -108,6 +109,11 @@ AudioRegionEditor::region_changed (const PBD::PropertyChange& what_changed)
 	
 	if (what_changed.contains (ARDOUR::Properties::scale_amplitude)) {
 		gain_changed ();
+	}
+
+	if (what_changed.contains (ARDOUR::Properties::start) || what_changed.contains (ARDOUR::Properties::length)) {
+		/* ask the peak thread to run again */
+		_peak_channel.deliver ('c');
 	}
 }
 void
@@ -131,7 +137,14 @@ AudioRegionEditor::gain_adjustment_changed ()
 void
 AudioRegionEditor::peak_amplitude_thread ()
 {
-	PeakAmplitudeFound (accurate_coefficient_to_dB (_audio_region->maximum_amplitude ())); /* EMIT SIGNAL */
+	while (1) {
+		/* await instructions to run */
+		char msg;
+		_peak_channel.receive (msg);
+
+		/* compute peak amplitude and signal the fact */
+		PeakAmplitudeFound (accurate_coefficient_to_dB (_audio_region->maximum_amplitude ())); /* EMIT SIGNAL */
+	}
 }
 
 void
