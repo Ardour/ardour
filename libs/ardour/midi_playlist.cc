@@ -24,6 +24,8 @@
 
 #include <stdlib.h>
 
+#include "pbd/error.h"
+
 #include "evoral/EventList.hpp"
 
 #include "ardour/debug.h"
@@ -33,8 +35,6 @@
 #include "ardour/midi_region.h"
 #include "ardour/session.h"
 #include "ardour/midi_ring_buffer.h"
-
-#include "pbd/error.h"
 
 #include "i18n.h"
 

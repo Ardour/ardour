@@ -745,7 +745,9 @@ AudioDiskstream::overwrite_existing_buffers ()
 	mixdown_buffer = new Sample[size];
 	gain_buffer = new float[size];
 
-	/* reduce size so that we can fill the buffer correctly. */
+	/* reduce size so that we can fill the buffer correctly (ringbuffers
+         * can only handle size-1, otherwise they appear to be empty)
+         */
 	size--;
 
 	uint32_t n=0;
