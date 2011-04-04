@@ -1011,7 +1011,6 @@ MidiRegionView::redisplay_model()
 	}
 
 	if (!_model) {
-		cerr << "MidiRegionView::redisplay_model called without a model" << endmsg;
 		return;
 	}
 
