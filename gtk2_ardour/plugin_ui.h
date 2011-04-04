@@ -201,6 +201,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	/* FIXME: Unify with AutomationController */
 	struct ControlUI : public Gtk::HBox {
 
+		uint32_t port_index;
 		boost::shared_ptr<ARDOUR::AutomationControl> control;
 
 		Evoral::Parameter parameter() { return control->parameter(); }

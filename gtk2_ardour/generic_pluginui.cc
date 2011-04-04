@@ -145,7 +145,6 @@ GenericPluginUI::~GenericPluginUI ()
 
 void
 GenericPluginUI::build ()
-
 {
 	guint32 i = 0;
 	guint32 x = 0;
@@ -386,9 +385,6 @@ GenericPluginUI::ControlUI*
 GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<AutomationControl> mcontrol)
 {
 	ControlUI* control_ui = 0;
-	if (!mcontrol) {
-		return control_ui;
-	}
 
 	Plugin::ParameterDescriptor desc;
 
@@ -402,6 +398,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 	control_ui->label.set_text (desc.label);
 	control_ui->label.set_alignment (0.0, 0.5);
 	control_ui->label.set_name ("PluginParameterLabel");
+	control_ui->port_index = port_index;
 
 	control_ui->set_spacing (5);
 
@@ -487,7 +484,9 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 		/* create the controller */
 
-		control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), mcontrol);
+		if (mcontrol) {
+			control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), mcontrol);
+		}
 
 		/* XXX this code is not right yet, because it doesn't handle
 		   the absence of bounds in any sensible fashion.
@@ -591,7 +590,9 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		output_controls.push_back (control_ui);
 	}
 
-	mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::ui_parameter_changed, this, control_ui), gui_context());
+	if (mcontrol) {
+		mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::ui_parameter_changed, this, control_ui), gui_context());
+	}
 
 	return control_ui;
 }
@@ -763,7 +764,7 @@ void
 GenericPluginUI::output_update ()
 {
 	for (vector<ControlUI*>::iterator i = output_controls.begin(); i != output_controls.end(); ++i) {
-		float val = plugin->get_parameter ((*i)->parameter().id());
+		float val = plugin->get_parameter ((*i)->port_index);
 		char buf[32];
 		snprintf (buf, sizeof(buf), "%.2f", val);
 		(*i)->display_label->set_text (buf);
