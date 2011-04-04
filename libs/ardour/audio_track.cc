@@ -92,7 +92,7 @@ AudioTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 {
 	Track::set_diskstream (ds);
 
-        _diskstream->set_track (this);
+	_diskstream->set_track (this);
 	_diskstream->set_destructive (_mode == Destructive);
 	_diskstream->set_non_layered (_mode == NonLayered);
 
@@ -231,9 +231,9 @@ AudioTrack::_set_state (const XMLNode& node, int version, bool call_base)
 		}
 	}
 
-        /* set rec-enable control *AFTER* setting up diskstream, because it may want to operate
-           on the diskstream as it sets its own state
-        */
+	/* set rec-enable control *AFTER* setting up diskstream, because it may want to operate
+	   on the diskstream as it sets its own state
+	*/
 
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
@@ -242,13 +242,12 @@ AudioTrack::_set_state (const XMLNode& node, int version, bool call_base)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 		child = *niter;
 
-                if (child->name() == Controllable::xml_node_name && (prop = child->property ("name")) != 0) {
-                        if (prop->value() == X_("recenable")) {
-                                _rec_enable_control->set_state (*child, version);
-                        }
-                }
+		if (child->name() == Controllable::xml_node_name && (prop = child->property ("name")) != 0) {
+			if (prop->value() == X_("recenable")) {
+				_rec_enable_control->set_state (*child, version);
+			}
+		}
 	}
-
 
 	pending_state = const_cast<XMLNode*> (&node);
 
@@ -375,7 +374,7 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 	}
 
 	if (!_active) {
-                silence (nframes);
+		silence (nframes);
 		return 0;
 	}
 
@@ -387,7 +386,7 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 		   playback distance to zero, thus causing diskstream::commit
 		   to do nothing.
 		*/
-                cerr << name() << " Can't operate at " << transport_frame << " since roll delay is only " << _roll_delay << endl;
+		cerr << name() << " Can't operate at " << transport_frame << " since roll delay is only " << _roll_delay << endl;
 		return diskstream->process (transport_frame, 0, can_record, rec_monitors_input, need_butler);
 	}
 
@@ -506,9 +505,11 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 
 		/* final argument: don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
 
-		process_output_buffers (bufs, start_frame, end_frame, nframes, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick,
-                                        (!diskstream->record_enabled() && _session.transport_rolling()));
-
+		process_output_buffers (
+			bufs, start_frame, end_frame, nframes,
+			(!_session.get_record_enabled() || !Config->get_do_not_record_plugins()),
+			declick,
+			(!diskstream->record_enabled() && _session.transport_rolling()));
 
 	} else {
 		/* problem with the diskstream; just be quiet for a bit */

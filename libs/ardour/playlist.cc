@@ -101,13 +101,14 @@ struct RegionSortByLastLayerOp {
 void
 Playlist::make_property_quarks ()
 {
-        Properties::regions.property_id = g_quark_from_static_string (X_("regions"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for regions = %1\n",         Properties::regions.property_id));
+	Properties::regions.property_id = g_quark_from_static_string (X_("regions"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for regions = %1\n",
+	                                                Properties::regions.property_id));
 }
 
 RegionListProperty::RegionListProperty (Playlist& pl)
-        : SequenceProperty<std::list<boost::shared_ptr<Region> > > (Properties::regions.property_id, boost::bind (&Playlist::update, &pl, _1))
-        , _playlist (pl)
+	: SequenceProperty<std::list<boost::shared_ptr<Region> > > (Properties::regions.property_id, boost::bind (&Playlist::update, &pl, _1))
+	, _playlist (pl)
 {
 	
 }
@@ -149,32 +150,30 @@ RegionListProperty::get_content_from_xml (XMLNode const & node) const
 
 	PBD::ID id (prop->value ());
 
-        boost::shared_ptr<Region> ret = _playlist.region_by_id (id);
+	boost::shared_ptr<Region> ret = _playlist.region_by_id (id);
         
-        if (!ret) {
-                ret = RegionFactory::region_by_id (id);
-        }
+	if (!ret) {
+		ret = RegionFactory::region_by_id (id);
+	}
 
-        return ret;
+	return ret;
 }
 
 Playlist::Playlist (Session& sess, string nom, DataType type, bool hide)
 	: SessionObject(sess, nom)
-        , regions (*this)
+	, regions (*this)
 	, _type(type)
 {
 	init (hide);
 	first_set_state = false;
 	_name = nom;
-        _set_sort_id ();
-
+	_set_sort_id ();
 }
 
 Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide)
 	: SessionObject(sess, "unnamed playlist")
-        , regions (*this)	
-        , _type(type)
-
+	, regions (*this)	
+	, _type(type)
 {
 #ifndef NDEBUG
 	const XMLProperty* prop = node.property("type");
@@ -183,14 +182,14 @@ Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide
 
 	init (hide);
 	_name = "unnamed"; /* reset by set_state */
-        _set_sort_id ();
+	_set_sort_id ();
 
 	/* set state called by derived class */
 }
 
 Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, bool hide)
 	: SessionObject(other->_session, namestr)
-        , regions (*this)
+	, regions (*this)
 	, _type(other->_type)
 	, _orig_diskstream_id (other->_orig_diskstream_id)
 {
@@ -225,7 +224,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 
 Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, framecnt_t cnt, string str, bool hide)
 	: SessionObject(other->_session, str)
-        , regions (*this)
+	, regions (*this)
 	, _type(other->_type)
 	, _orig_diskstream_id (other->_orig_diskstream_id)
 {
@@ -332,8 +331,8 @@ Playlist::copy_regions (RegionList& newlist) const
 void
 Playlist::init (bool hide)
 {
-        add_property (regions);
-        _xml_node_name = X_("Playlist");
+	add_property (regions);
+	_xml_node_name = X_("Playlist");
 
 	g_atomic_int_set (&block_notifications, 0);
 	g_atomic_int_set (&ignore_state_changes, 0);
@@ -347,7 +346,7 @@ Playlist::init (bool hide)
 	_shuffling = false;
 	_nudging = false;
 	in_set_state = 0;
-        in_update = false;
+	in_update = false;
 	_edit_mode = Config->get_edit_mode();
 	in_flush = false;
 	in_partition = false;
@@ -382,27 +381,27 @@ Playlist::~Playlist ()
 void
 Playlist::_set_sort_id ()
 {
-        /*
-          Playlists are given names like <track name>.<id>
-          or <track name>.<edit group name>.<id> where id
-          is an integer. We extract the id and sort by that.
-        */
+	/*
+	  Playlists are given names like <track name>.<id>
+	  or <track name>.<edit group name>.<id> where id
+	  is an integer. We extract the id and sort by that.
+	*/
         
-        size_t dot_position = _name.val().find_last_of(".");
+	size_t dot_position = _name.val().find_last_of(".");
 
-        if (dot_position == string::npos) {
-                _sort_id = 0;
-        } else {
-                string t = _name.val().substr(dot_position + 1);
+	if (dot_position == string::npos) {
+		_sort_id = 0;
+	} else {
+		string t = _name.val().substr(dot_position + 1);
 
-                try {
-                        _sort_id = boost::lexical_cast<int>(t);
-                }
+		try {
+			_sort_id = boost::lexical_cast<int>(t);
+		}
 
-                catch (boost::bad_lexical_cast e) {
-                        _sort_id = 0;
-                }
-        }
+		catch (boost::bad_lexical_cast e) {
+			_sort_id = 0;
+		}
+	}
 }
 
 bool
@@ -418,11 +417,11 @@ Playlist::set_name (const string& str)
 		return false;
 	} 
 
-        bool ret =  SessionObject::set_name(str);
-        if (ret) {
-                _set_sort_id ();
-        }
-        return ret;
+	bool ret =  SessionObject::set_name(str);
+	if (ret) {
+		_set_sort_id ();
+	}
+	return ret;
 }
 
 /***********************************************************************
@@ -436,7 +435,7 @@ Playlist::set_name (const string& str)
 void
 Playlist::begin_undo ()
 {
-        in_update = true;
+	in_update = true;
 	freeze ();
 }
 
@@ -444,7 +443,7 @@ void
 Playlist::end_undo ()
 {
 	thaw (true);
-        in_update = false;
+	in_update = false;
 }
 
 void
@@ -476,8 +475,7 @@ Playlist::release_notifications (bool from_undo)
 {
 	if (g_atomic_int_dec_and_test (&block_notifications)) {
 		flush_notifications (from_undo);
-        }
-
+	}
 }
 
 void
@@ -596,7 +594,7 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 		pending_contents_change = true;
 		pending_length = true;
 	} else {
-                r->clear_changes ();
+		r->clear_changes ();
 		pending_length = false;
 		LengthChanged (); /* EMIT SIGNAL */
 		pending_contents_change = false;
@@ -666,10 +664,10 @@ Playlist::flush_notifications (bool from_undo)
 
 	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
 		// cerr << _name << " sends RegionAdded\n";
-                /* don't emit RegionAdded signal until relayering is done,
-                   so that the region is fully setup by the time
-                   anyone hear's that its been added
-                */
+		/* don't emit RegionAdded signal until relayering is done,
+		   so that the region is fully setup by the time
+		   anyone hear's that its been added
+		*/
 		dependent_checks_needed.insert (*s);
 	}
 
@@ -697,9 +695,9 @@ Playlist::flush_notifications (bool from_undo)
 	}
 
 	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
-                (*s)->clear_changes ();
+		(*s)->clear_changes ();
 		RegionAdded (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
-        }
+	}
 
 	for (s = dependent_checks_needed.begin(); s != dependent_checks_needed.end(); ++s) {
 		check_dependents (*s, false);
@@ -904,7 +902,7 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region)
 			possibly_splice_unlocked (pos, -distance);
 
 			if (!holding_state ()) {
-                                relayer ();
+				relayer ();
 				remove_dependents (region);
 
 				if (old_length != _get_extent().second) {
@@ -1583,10 +1581,10 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shar
 		RegionList::iterator i = find (regions.begin(), regions.end(), region);
 
 		if (i == regions.end()) {
-                        /* the region bounds are being modified but its not currently
-                           in the region list. we will use its bounds correctly when/if
-                           it is added
-                        */
+			/* the region bounds are being modified but its not currently
+			   in the region list. we will use its bounds correctly when/if
+			   it is added
+			*/
 			return;
 		}
 
@@ -1703,11 +1701,11 @@ Playlist::sync_all_regions_with_regions ()
 {
 	RegionLock rl (this);
 
-        all_regions.clear ();
+	all_regions.clear ();
 
-        for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-                all_regions.insert (*i);
-        }
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		all_regions.insert (*i);
+	}
 }
 
 void
@@ -1724,18 +1722,18 @@ Playlist::clear (bool with_signals)
 
 		regions.clear ();
 
-                for (set<boost::shared_ptr<Region> >::iterator s = pending_removes.begin(); s != pending_removes.end(); ++s) {
-                        remove_dependents (*s);
-                }
+		for (set<boost::shared_ptr<Region> >::iterator s = pending_removes.begin(); s != pending_removes.end(); ++s) {
+			remove_dependents (*s);
+		}
 	}
 
 	if (with_signals) {
 
-                for (set<boost::shared_ptr<Region> >::iterator s = pending_removes.begin(); s != pending_removes.end(); ++s) {
-                        RegionRemoved (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
-                }
+		for (set<boost::shared_ptr<Region> >::iterator s = pending_removes.begin(); s != pending_removes.end(); ++s) {
+			RegionRemoved (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
+		}
 
-                pending_removes.clear ();
+		pending_removes.clear ();
 		pending_length = false;
 		LengthChanged ();
 		pending_contents_change = false;
@@ -1832,7 +1830,7 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 	to_check.insert (start);
 	to_check.insert (end);
 
-        DEBUG_TRACE (DEBUG::AudioPlayback, ">>>>> REGIONS TO READ\n");
+	DEBUG_TRACE (DEBUG::AudioPlayback, ">>>>> REGIONS TO READ\n");
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 
@@ -1844,38 +1842,38 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 
 		case OverlapInternal:
 			covering.push_back (*i);
-                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("toread: will cover %1 (OInternal)\n", (*i)->name()));
+			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("toread: will cover %1 (OInternal)\n", (*i)->name()));
 			break;
 
 		case OverlapStart:
 			to_check.insert ((*i)->position());
-                        if ((*i)->position() != 0) {
-                                to_check.insert ((*i)->position()-1);
-                        }
-                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("toread: will check %1 for %2\n", (*i)->position(), (*i)->name()));
+			if ((*i)->position() != 0) {
+				to_check.insert ((*i)->position()-1);
+			}
+			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("toread: will check %1 for %2\n", (*i)->position(), (*i)->name()));
 			covering.push_back (*i);
 			break;
 
 		case OverlapEnd:
 			to_check.insert ((*i)->last_frame());
 			to_check.insert ((*i)->last_frame()+1);
-                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("toread: will cover %1 (OEnd)\n", (*i)->name()));
-                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\ttoread: will check %1 for %2\n", (*i)->last_frame(), (*i)->name()));
-                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\ttoread: will check %1 for %2\n", (*i)->last_frame(), (*i)->name()));
+			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("toread: will cover %1 (OEnd)\n", (*i)->name()));
+			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\ttoread: will check %1 for %2\n", (*i)->last_frame(), (*i)->name()));
+			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\ttoread: will check %1 for %2\n", (*i)->last_frame(), (*i)->name()));
 			covering.push_back (*i);
 			break;
 
 		case OverlapExternal:
 			covering.push_back (*i);
 			to_check.insert ((*i)->position());
-                        if ((*i)->position() != 0) {
-                                to_check.insert ((*i)->position()-1);
-                        }
+			if ((*i)->position() != 0) {
+				to_check.insert ((*i)->position()-1);
+			}
 			to_check.insert ((*i)->last_frame());
 			to_check.insert ((*i)->last_frame()+1);
-                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("toread: will cover %1 (OExt)\n", (*i)->name()));
-                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\ttoread: will check %1 for %2\n", (*i)->position(), (*i)->name()));
-                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\ttoread: will check %1 for %2\n", (*i)->last_frame(), (*i)->name()));
+			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("toread: will cover %1 (OExt)\n", (*i)->name()));
+			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\ttoread: will check %1 for %2\n", (*i)->position(), (*i)->name()));
+			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\ttoread: will check %1 for %2\n", (*i)->last_frame(), (*i)->name()));
 			break;
 		}
 
@@ -1893,7 +1891,7 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 	if (covering.size() == 1) {
 
 		rlist->push_back (covering.front());
-                DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Just one covering region (%1)\n", covering.front()->name()));
+		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Just one covering region (%1)\n", covering.front()->name()));
 
 	} else {
 
@@ -1902,20 +1900,20 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 
 			here.clear ();
 
-                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("++++ Considering %1\n", *t));
+			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("++++ Considering %1\n", *t));
 
 			for (RegionList::iterator x = covering.begin(); x != covering.end(); ++x) {
 
 				if ((*x)->covers (*t)) {
 					here.push_back (*x);
-                                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("region %1 covers %2\n",
-                                                                                           (*x)->name(),
-                                                                                           (*t)));
+					DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("region %1 covers %2\n",
+					                                                   (*x)->name(),
+					                                                   (*t)));
 				} else {
-                                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("region %1 does NOT covers %2\n",
-                                                                                           (*x)->name(),
-                                                                                           (*t)));
-                                }
+					DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("region %1 does NOT covers %2\n",
+					                                                   (*x)->name(),
+					                                                   (*t)));
+				}
                                         
 			}
 
@@ -1931,8 +1929,8 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 				if ((*c)->opaque()) {
 
 					/* the other regions at this position are hidden by this one */
-                                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("%1 is opaque, ignore all others\n",
-                                                                                           (*c)->name()));
+					DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("%1 is opaque, ignore all others\n",
+					                                                   (*c)->name()));
 					break;
 				}
 			}
@@ -1950,7 +1948,7 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 		}
 	}
 
-        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("<<<<< REGIONS TO READ returns %1\n", rlist->size()));
+	DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("<<<<< REGIONS TO READ returns %1\n", rlist->size()));
 
 	return rlist;
 }
@@ -2206,20 +2204,20 @@ Playlist::clear_owned_changes ()
 void
 Playlist::update (const RegionListProperty::ChangeRecord& change)
 {
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("Playlist %1 updates from a change record with %2 adds %3 removes\n", 
-                                                        name(), change.added.size(), change.removed.size()));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("Playlist %1 updates from a change record with %2 adds %3 removes\n", 
+	                                                name(), change.added.size(), change.removed.size()));
         
-        freeze ();
-        /* add the added regions */
-        for (RegionListProperty::ChangeContainer::iterator i = change.added.begin(); i != change.added.end(); ++i) {
-                add_region ((*i), (*i)->position());
-        }
-        /* remove the removed regions */
-        for (RegionListProperty::ChangeContainer::iterator i = change.removed.begin(); i != change.removed.end(); ++i) {
-                remove_region (*i);
-        }
+	freeze ();
+	/* add the added regions */
+	for (RegionListProperty::ChangeContainer::iterator i = change.added.begin(); i != change.added.end(); ++i) {
+		add_region ((*i), (*i)->position());
+	}
+	/* remove the removed regions */
+	for (RegionListProperty::ChangeContainer::iterator i = change.removed.begin(); i != change.removed.end(); ++i) {
+		remove_region (*i);
+	}
 
-        thaw ();
+	thaw ();
 }
 
 int
@@ -2251,9 +2249,9 @@ Playlist::set_state (const XMLNode& node, int version)
 
 		if (prop->name() == X_("name")) {
 			_name = prop->value();
-                        _set_sort_id ();
+			_set_sort_id ();
 		} else if (prop->name() == X_("id")) {
-                        _id = prop->value();
+			_id = prop->value();
 		} else if (prop->name() == X_("orig_diskstream_id")) {
 			_orig_diskstream_id = prop->value ();
 		} else if (prop->name() == X_("frozen")) {
@@ -2439,11 +2437,11 @@ Playlist::set_edit_mode (EditMode mode)
 void
 Playlist::relayer ()
 {
-        /* never compute layers when changing state for undo/redo or setting from XML */
+	/* never compute layers when changing state for undo/redo or setting from XML */
 
-        if (in_update || in_set_state) {
-                return;
-        }
+	if (in_update || in_set_state) {
+		return;
+	}
 
 	bool changed = false;
 
@@ -2693,7 +2691,7 @@ Playlist::move_region_to_layer (layer_t target_layer, boost::shared_ptr<Region> 
 		}
 	}
 
-        freeze ();
+	freeze ();
 
 	/* now reset the layers without holding the region lock */
 
@@ -2703,16 +2701,16 @@ Playlist::move_region_to_layer (layer_t target_layer, boost::shared_ptr<Region> 
 
 	region->set_layer (target_layer);
 
-        /* now check all dependents, since we changed the layering */
+	/* now check all dependents, since we changed the layering */
 
 	for (list<LayerInfo>::iterator x = layerinfo.begin(); x != layerinfo.end(); ++x) {
 		check_dependents (x->first, false);
 	}
 
 	check_dependents (region, false);
-        notify_layering_changed ();
+	notify_layering_changed ();
 
-        thaw ();
+	thaw ();
 
 	return 0;
 }
@@ -2769,13 +2767,13 @@ Playlist::uses_source (boost::shared_ptr<const Source> src) const
 {
 	RegionLock rlock (const_cast<Playlist*> (this));
 
-        for (set<boost::shared_ptr<Region> >::iterator r = all_regions.begin(); r != all_regions.end(); ++r) {
-                if ((*r)->uses_source (src)) {
-                        return true;
-                }
-        }
+	for (set<boost::shared_ptr<Region> >::iterator r = all_regions.begin(); r != all_regions.end(); ++r) {
+		if ((*r)->uses_source (src)) {
+			return true;
+		}
+	}
 
-        return false;
+	return false;
 }
 
 boost::shared_ptr<Region>
@@ -2798,11 +2796,11 @@ uint32_t
 Playlist::region_use_count (boost::shared_ptr<Region> r) const
 {
 	RegionLock rlock (const_cast<Playlist*> (this));
-        uint32_t cnt = 0;
+	uint32_t cnt = 0;
 
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 		if ((*i) == r) {
-                        cnt++;
+			cnt++;
 		}
 	}
 

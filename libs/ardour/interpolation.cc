@@ -57,7 +57,7 @@ CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input,
     if (_speed != _target_speed) {
         acceleration = _target_speed - _speed;
     } else {
-        acceleration = 0.0;
+	    acceleration = 0.0;
     }
 
     distance = phase[channel];

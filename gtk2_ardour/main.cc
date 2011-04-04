@@ -100,9 +100,9 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 	win.run ();
 }
 
-static void export_search_path (const string& base_dir, const char* varname, const char* dir) 
+static void export_search_path (const string& base_dir, const char* varname, const char* dir)
 {
-        string path;
+	string path;
 	const char * cstr = getenv (varname);
 
 	if (cstr) {
@@ -113,8 +113,8 @@ static void export_search_path (const string& base_dir, const char* varname, con
 	}
 	path += base_dir;
 	path += dir;
-        
-        setenv (varname, path.c_str(), 1);
+
+	setenv (varname, path.c_str(), 1);
 }
 
 #ifdef __APPLE__
@@ -131,7 +131,7 @@ fixup_bundle_environment (int, char* [])
 		return;
 	}
 
-        EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true, "PREBUNDLE_ENV"));
+	EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true, "PREBUNDLE_ENV"));
 
 	set_language_preference ();
 
@@ -152,11 +152,11 @@ fixup_bundle_environment (int, char* [])
 
 	path = dir_path;
 
-	/* JACK is often in /usr/local/bin and since Info.plist refuses to 
+	/* JACK is often in /usr/local/bin and since Info.plist refuses to
 	   set PATH, we have to force this in order to discover a running
 	   instance of JACK ...
 	*/
-	
+
 	path += ':';
 	path += "/usr/local/bin";
 
@@ -175,8 +175,8 @@ fixup_bundle_environment (int, char* [])
 
 	setenv ("ARDOUR_MODULE_PATH", path.c_str(), 1);
 
-        path = user_config_directory().to_string();
-        path += ':';
+	path = user_config_directory().to_string();
+	path += ':';
 	path += dir_path;
 	path += "/../Resources/icons:";
 	path += dir_path;
@@ -193,28 +193,28 @@ fixup_bundle_environment (int, char* [])
 	path += "/../Resources";
 	setenv ("ARDOUR_INSTANT_XML_PATH", path.c_str(), 1);
 
-        export_search_path (dir_path, "LADSPA_PATH", "/../Plugins");
-        export_search_path (dir_path, "VAMP_PATH", "/../Frameworks");
-        export_search_path (dir_path, "ARDOUR_PANNER_PATH", "/lib/panners");
-        export_search_path (dir_path, "ARDOUR_SURFACES_PATH", "/lib/surfaces");
-        export_search_path (dir_path, "ARDOUR_MIDIMAPS_PATH", "/share/midi_maps");
-        export_search_path (dir_path, "ARDOUR_EXPORT_FORMATS_PATH", "/share/exports");
+	export_search_path (dir_path, "LADSPA_PATH", "/../Plugins");
+	export_search_path (dir_path, "VAMP_PATH", "/../Frameworks");
+	export_search_path (dir_path, "ARDOUR_PANNER_PATH", "/lib/panners");
+	export_search_path (dir_path, "ARDOUR_SURFACES_PATH", "/lib/surfaces");
+	export_search_path (dir_path, "ARDOUR_MIDIMAPS_PATH", "/share/midi_maps");
+	export_search_path (dir_path, "ARDOUR_EXPORT_FORMATS_PATH", "/share/exports");
 
 	path = dir_path;
 	path += "/../Frameworks/clearlooks";
 
 	setenv ("GTK_PATH", path.c_str(), 1);
 
-        /* unset GTK_RC_FILES so that we only load the RC files that we define
-         */
+	/* unset GTK_RC_FILES so that we only load the RC files that we define
+	 */
 
-        unsetenv ("GTK_RC_FILES");
+	unsetenv ("GTK_RC_FILES");
 
 	if (!ARDOUR::translations_are_disabled ()) {
 
 		path = dir_path;
 		path += "/../Resources/locale";
-		
+
 		localedir = strdup (path.c_str());
 		setenv ("GTK_LOCALEDIR", localedir, 1);
 	}
@@ -293,22 +293,22 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	if (!getenv ("ARDOUR_BUNDLED")) {
 		return;
 	}
-	
-        EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true, "PREBUNDLE_ENV"));
+
+	EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true, "PREBUNDLE_ENV"));
 
 	Glib::ustring exec_path = argv[0];
 	Glib::ustring dir_path = Glib::path_get_dirname (Glib::path_get_dirname (exec_path));
 	Glib::ustring path;
-        Glib::ustring userconfigdir = user_config_directory().to_string();
+	Glib::ustring userconfigdir = user_config_directory().to_string();
 
 	/* ensure that we find any bundled executables (e.g. JACK),
 	   and find them before any instances of the same name
 	   elsewhere in PATH
 	*/
 
-        /* note that this function is POSIX/Linux specific, so using / as 
-           a dir separator in this context is just fine.
-        */
+	/* note that this function is POSIX/Linux specific, so using / as
+	   a dir separator in this context is just fine.
+	*/
 
 	path = dir_path;
 	path += "/etc:";
@@ -319,8 +319,8 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 
 	setenv ("ARDOUR_MODULE_PATH", path.c_str(), 1);
 
-        path = userconfigdir;
-        path += ':';
+	path = userconfigdir;
+	path += ':';
 	path += dir_path;
 	path += "/etc/icons:";
 	path += dir_path;
@@ -336,34 +336,34 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	path = dir_path;
 	path += "/etc";
 	setenv ("ARDOUR_INSTANT_XML_PATH", path.c_str(), 1);
-	
-        export_search_path (dir_path, "LADSPA_PATH", "/../plugins");
-        export_search_path (dir_path, "VAMP_PATH", "/lib");
-        export_search_path (dir_path, "ARDOUR_PANNER_PATH", "/lib/panners");
-        export_search_path (dir_path, "ARDOUR_SURFACES_PATH", "/lib/surfaces");
-        export_search_path (dir_path, "ARDOUR_MIDIMAPS_PATH", "/share/midi_maps");
-        export_search_path (dir_path, "ARDOUR_EXPORT_FORMATS_PATH", "/share/export");
+
+	export_search_path (dir_path, "LADSPA_PATH", "/../plugins");
+	export_search_path (dir_path, "VAMP_PATH", "/lib");
+	export_search_path (dir_path, "ARDOUR_PANNER_PATH", "/lib/panners");
+	export_search_path (dir_path, "ARDOUR_SURFACES_PATH", "/lib/surfaces");
+	export_search_path (dir_path, "ARDOUR_MIDIMAPS_PATH", "/share/midi_maps");
+	export_search_path (dir_path, "ARDOUR_EXPORT_FORMATS_PATH", "/share/export");
 
 	path = dir_path;
 	path += "/lib/clearlooks";
 	setenv ("GTK_PATH", path.c_str(), 1);
 
-        /* unset GTK_RC_FILES so that we only load the RC files that we define
-         */
+	/* unset GTK_RC_FILES so that we only load the RC files that we define
+	 */
 
-        unsetenv ("GTK_RC_FILES");
+	unsetenv ("GTK_RC_FILES");
 
 	if (!ARDOUR::translations_are_disabled ()) {
-                path = dir_path;
-                path += "/share/locale";
-                
-                localedir = strdup (path.c_str());
-                setenv ("GTK_LOCALEDIR", localedir, 1);
-        }
+		path = dir_path;
+		path += "/share/locale";
+
+		localedir = strdup (path.c_str());
+		setenv ("GTK_LOCALEDIR", localedir, 1);
+	}
 
 	/* write a pango.rc file and tell pango to use it. we'd love
 	   to put this into the Ardour.app bundle and leave it there,
-	   but the user may not have write permission. so ... 
+	   but the user may not have write permission. so ...
 
 	   we also have to make sure that the user ardour directory
 	   actually exists ...
@@ -374,29 +374,29 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 		      << endmsg;
 	} else {
 
-                Glib::ustring mpath;
+		Glib::ustring mpath;
 
 		path = Glib::build_filename (userconfigdir, "pango.rc");
 
 		std::ofstream pangorc (path.c_str());
 		if (!pangorc) {
 			error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
-                } else {
-                        mpath = Glib::build_filename (userconfigdir, "pango.modules");
-                        
+		} else {
+			mpath = Glib::build_filename (userconfigdir, "pango.modules");
+
 			pangorc << "[Pango]\nModuleFiles=";
 			pangorc << mpath << endl;
 			pangorc.close ();
-                }
+		}
 
-                setenv ("PANGO_RC_FILE", path.c_str(), 1);
+		setenv ("PANGO_RC_FILE", path.c_str(), 1);
 
-                /* similar for GDK pixbuf loaders, but there's no RC file required
-                   to specify where it lives.
-                */
+		/* similar for GDK pixbuf loaders, but there's no RC file required
+		   to specify where it lives.
+		*/
 
-                mpath = Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders");
-                setenv ("GDK_PIXBUF_MODULE_FILE", mpath.c_str(), 1);
+		mpath = Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders");
+		setenv ("GDK_PIXBUF_MODULE_FILE", mpath.c_str(), 1);
 	}
 }
 
@@ -415,14 +415,14 @@ tell_about_jack_death (void* /* ignored */)
 This could be due to misconfiguration or to an error inside JACK.\n\
 \n\
 Click OK to exit %1."), PROGRAM_NAME));
-    
+
 		msg.run ();
 		_exit (0);
-		
+
 	} else {
 
 		/* engine has already run, so this is a mid-session JACK death */
-		
+
 		MessageDialog* msg = manage (new MessageDialog (_("JACK exited"), false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_NONE));
 		msg->set_secondary_text (string_compose (_(
 "JACK exited unexpectedly, and without notifying %1.\n\
@@ -438,11 +438,11 @@ session at this time, because we would lose your connection information.\n"), PR
 static void
 sigpipe_handler (int /*signal*/)
 {
-        /* XXX fix this so that we do this again after a reconnect to JACK
-         */
+	/* XXX fix this so that we do this again after a reconnect to JACK
+	 */
 
-        static bool done_the_jack_thing = false;
-	
+	static bool done_the_jack_thing = false;
+
 	if (!done_the_jack_thing) {
 		AudioEngine::instance()->died ();
 		g_idle_add (tell_about_jack_death, 0);
@@ -472,7 +472,7 @@ int main (int argc, char *argv[])
 
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
-        }
+	}
 
 	gtk_set_locale ();
 
@@ -501,9 +501,9 @@ int main (int argc, char *argv[])
 	text_receiver.listen_to (warning);
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-        if (getenv ("BOOST_DEBUG")) {
-                boost_debug_shared_ptr_show_live_debugging (true);
-        }
+	if (getenv ("BOOST_DEBUG")) {
+		boost_debug_shared_ptr_show_live_debugging (true);
+	}
 #endif
 
 	if (parse_opts (argc, argv)) {
@@ -555,7 +555,7 @@ int main (int argc, char *argv[])
 	}
 
 	ui->run (text_receiver);
-        Gtkmm2ext::Application::instance()->cleanup();
+	Gtkmm2ext::Application::instance()->cleanup();
 	ui = 0;
 
 	ARDOUR::cleanup ();

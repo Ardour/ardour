@@ -34,41 +34,41 @@ PortSet::PortSet()
 
 static bool sort_ports_by_name (Port* a, Port* b)
 {
-        string aname (a->name());
-        string bname (b->name());
+	string aname (a->name());
+	string bname (b->name());
         
-        string::size_type last_digit_position_a = aname.size();
-        string::reverse_iterator r_iterator = aname.rbegin();
+	string::size_type last_digit_position_a = aname.size();
+	string::reverse_iterator r_iterator = aname.rbegin();
         
-        while (r_iterator!= aname.rend() && Glib::Unicode::isdigit(*r_iterator)) {
-                r_iterator++; 
-                last_digit_position_a--;
-        }
+	while (r_iterator!= aname.rend() && Glib::Unicode::isdigit(*r_iterator)) {
+		r_iterator++; 
+		last_digit_position_a--;
+	}
         
-        string::size_type last_digit_position_b = bname.size();
-        r_iterator = bname.rbegin();
+	string::size_type last_digit_position_b = bname.size();
+	r_iterator = bname.rbegin();
         
-        while (r_iterator != bname.rend() && Glib::Unicode::isdigit(*r_iterator)) {
-                r_iterator++; 
-                last_digit_position_b--;
-        }
+	while (r_iterator != bname.rend() && Glib::Unicode::isdigit(*r_iterator)) {
+		r_iterator++; 
+		last_digit_position_b--;
+	}
         
-        // if some of the names don't have a number as posfix, compare as strings
+	// if some of the names don't have a number as posfix, compare as strings
 
-        if (last_digit_position_a == aname.size() or last_digit_position_b == bname.size()) {
-                return aname < bname;
-        }
+	if (last_digit_position_a == aname.size() or last_digit_position_b == bname.size()) {
+		return aname < bname;
+	}
         
-        const std::string       prefix_a = aname.substr(0, last_digit_position_a - 1);
-        const unsigned int      posfix_a = std::atoi(aname.substr(last_digit_position_a, aname.size() - last_digit_position_a).c_str());
-        const std::string       prefix_b = bname.substr(0, last_digit_position_b - 1);
-        const unsigned int      posfix_b = std::atoi(bname.substr(last_digit_position_b, bname.size() - last_digit_position_b).c_str());
+	const std::string       prefix_a = aname.substr(0, last_digit_position_a - 1);
+	const unsigned int      posfix_a = std::atoi(aname.substr(last_digit_position_a, aname.size() - last_digit_position_a).c_str());
+	const std::string       prefix_b = bname.substr(0, last_digit_position_b - 1);
+	const unsigned int      posfix_b = std::atoi(bname.substr(last_digit_position_b, bname.size() - last_digit_position_b).c_str());
         
-        if (prefix_a != prefix_b) {
-                return aname < bname;
-        } else {
-                return posfix_a < posfix_b;
-        }
+	if (prefix_a != prefix_b) {
+		return aname < bname;
+	} else {
+		return posfix_a < posfix_b;
+	}
 }
 
 void

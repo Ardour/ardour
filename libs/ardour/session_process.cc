@@ -107,26 +107,26 @@ Session::no_roll (pframes_t nframes)
 		_click_io->silence (nframes);
 	}
 
-        if (route_graph->threads_in_use() > 0) {
-                DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
-                route_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), actively_recording(), declick);
-        } else {
-                for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-                        
-                        if ((*i)->is_hidden()) {
-                                continue;
-                        }
-                        
-                        (*i)->set_pending_declick (declick);
-                        
-                        if ((*i)->no_roll (nframes, _transport_frame, end_frame, non_realtime_work_pending(),
-                                           actively_recording(), declick)) {
-                                error << string_compose(_("Session: error in no roll for %1"), (*i)->name()) << endmsg;
-                                ret = -1;
-                                break;
-                        }
-                }
-        }
+	if (route_graph->threads_in_use() > 0) {
+		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
+		route_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), actively_recording(), declick);
+	} else {
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+
+			if ((*i)->is_hidden()) {
+				continue;
+			}
+
+			(*i)->set_pending_declick (declick);
+
+			if ((*i)->no_roll (nframes, _transport_frame, end_frame, non_realtime_work_pending(),
+			                   actively_recording(), declick)) {
+				error << string_compose(_("Session: error in no roll for %1"), (*i)->name()) << endmsg;
+				ret = -1;
+				break;
+			}
+		}
+	}
 
 	return ret;
 }
@@ -134,46 +134,46 @@ Session::no_roll (pframes_t nframes)
 int
 Session::process_routes (pframes_t nframes, bool& need_butler)
 {
-        bool record_active;
-        int  declick = get_transport_declick_required();
-        bool rec_monitors = get_rec_monitors_input();
-        boost::shared_ptr<RouteList> r = routes.reader ();
+	bool record_active;
+	int  declick = get_transport_declick_required();
+	bool rec_monitors = get_rec_monitors_input();
+	boost::shared_ptr<RouteList> r = routes.reader ();
 
-        if (transport_sub_state & StopPendingCapture) {
-                /* force a declick out */
-                declick = -1;
-        }
-        
-        record_active = actively_recording(); // || (get_record_enabled() && get_punch_in());
-        
-        const framepos_t start_frame = _transport_frame;
-        const framepos_t end_frame = _transport_frame + floor (nframes * _transport_speed);
-        
-        /* XXX this is hack to force use of the graph even if we are only
-           using 1 thread. its needed because otherwise when we remove
-           tracks, the graph never gets updated.
-        */
-        if (1 || route_graph->threads_in_use() > 0) {
-                DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
-                route_graph->process_routes( nframes, start_frame, end_frame, declick, record_active, rec_monitors, need_butler);
-        } else {
+	if (transport_sub_state & StopPendingCapture) {
+		/* force a declick out */
+		declick = -1;
+	}
 
-                for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-                        
-                        int ret;
-                        
-                        if ((*i)->is_hidden()) {
-                                continue;
-                        }
-                        
-                        (*i)->set_pending_declick (declick);
-                        
-                        if ((ret = (*i)->roll (nframes, start_frame, end_frame, declick, record_active, rec_monitors, need_butler)) < 0) {
-                                stop_transport ();
-                                return -1;
-                        }
-                }
-        }
+	record_active = actively_recording(); // || (get_record_enabled() && get_punch_in());
+
+	const framepos_t start_frame = _transport_frame;
+	const framepos_t end_frame = _transport_frame + floor (nframes * _transport_speed);
+
+	/* XXX this is hack to force use of the graph even if we are only
+	   using 1 thread. its needed because otherwise when we remove
+	   tracks, the graph never gets updated.
+	*/
+	if (1 || route_graph->threads_in_use() > 0) {
+		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
+		route_graph->process_routes( nframes, start_frame, end_frame, declick, record_active, rec_monitors, need_butler);
+	} else {
+
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+
+			int ret;
+
+			if ((*i)->is_hidden()) {
+				continue;
+			}
+
+			(*i)->set_pending_declick (declick);
+
+			if ((ret = (*i)->roll (nframes, start_frame, end_frame, declick, record_active, rec_monitors, need_butler)) < 0) {
+				stop_transport ();
+				return -1;
+			}
+		}
+	}
 
 	return 0;
 }
@@ -194,27 +194,27 @@ Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 	const framepos_t start_frame = _transport_frame;
 	const framepos_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
 
-        /* XXX this is hack to force use of the graph even if we are only
-           using 1 thread. its needed because otherwise when we remove
-           tracks, the graph never gets updated.
-        */
-        if (1 || route_graph->threads_in_use() > 0) {
-                route_graph->silent_process_routes( nframes, start_frame, end_frame, record_active, rec_monitors, need_butler);
-        } else {
-                for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-                        
-                        int ret;
-                        
-                        if ((*i)->is_hidden()) {
-                                continue;
-                        }
-                        
-                        if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, record_active, rec_monitors, need_butler)) < 0) {
-                                stop_transport ();
-                                return -1;
-                        }
-                }
-        }
+	/* XXX this is hack to force use of the graph even if we are only
+	   using 1 thread. its needed because otherwise when we remove
+	   tracks, the graph never gets updated.
+	*/
+	if (1 || route_graph->threads_in_use() > 0) {
+		route_graph->silent_process_routes( nframes, start_frame, end_frame, record_active, rec_monitors, need_butler);
+	} else {
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+
+			int ret;
+
+			if ((*i)->is_hidden()) {
+				continue;
+			}
+
+			if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, record_active, rec_monitors, need_butler)) < 0) {
+				stop_transport ();
+				return -1;
+			}
+		}
+	}
 
 	return 0;
 }
@@ -291,12 +291,12 @@ Session::process_with_events (pframes_t nframes)
 			_transport_speed >= (1 - tolerance) &&
 			_transport_speed <= (1 + tolerance)
 			);
-		
+
 		if (_send_qf_mtc && !was_sending_qf_mtc) {
 			/* we will re-start quarter-frame MTC this cycle, so send a full update to set things up */
 			_send_timecode_update = true;
 		}
-		
+
 		if (Config->get_send_mtc() && !_send_qf_mtc && _pframes_since_last_mtc > (frame_rate () / 4)) {
 			/* we're sending MTC, but we're not sending QF MTC at the moment, and it's been
 			   a quarter of a second since we sent anything at all, so send a full MTC update
@@ -304,10 +304,10 @@ Session::process_with_events (pframes_t nframes)
 			*/
 			_send_timecode_update = true;
 		}
-		
+
 		_pframes_since_last_mtc += nframes;
 	}
-		
+
 	/* Events caused a transport change (or we re-started sending
 	 * MTC), so send an MTC Full Frame (Timecode) message.  This
 	 * is sent whether rolling or not, to give slaves an idea of
@@ -406,7 +406,7 @@ Session::process_with_events (pframes_t nframes)
 					fail_roll (nframes);
 					return;
 				}
-                                
+
 				get_track_statistics ();
 
 				nframes -= this_nframes;
@@ -538,7 +538,7 @@ Session::follow_slave (pframes_t nframes)
 
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("slave state %1 @ %2 speed %3 cur delta %4 avg delta %5\n",
 						   _slave_state, slave_transport_frame, slave_speed, this_delta, average_slave_delta));
-		     
+
 
 	if (_slave_state == Running && !_slave->is_always_synced() && !config.get_timecode_source_is_synced()) {
 
@@ -565,11 +565,11 @@ Session::follow_slave (pframes_t nframes)
 									   slave_speed,
 									   _transport_speed,
 									   _transport_frame,
-									   slave_transport_frame, 
+									   slave_transport_frame,
 									   average_slave_delta));
 			}
 #endif
-			
+
 			if (_slave->give_slave_full_control_over_transport_speed()) {
 				set_transport_speed (slave_speed, false, false);
 				//std::cout << "set speed = " << slave_speed << "\n";
@@ -580,7 +580,7 @@ Session::follow_slave (pframes_t nframes)
 									   delta, adjusted_speed, adjusted_speed/slave_speed, _transport_speed,
 									   slave_speed));
 			}
-			
+
 #if 1
 			if ((framecnt_t) abs(average_slave_delta) > _slave->resolution()) {
 				cerr << "average slave delta greater than slave resolution (" << _slave->resolution() << "), going to silent motion\n";
@@ -768,7 +768,7 @@ Session::follow_slave_silently (pframes_t nframes, float slave_speed)
 		} else {
 			increment_transport_position (frames_moved);
 		}
-                
+
 		framepos_t stop_limit;
 
 		if (actively_recording()) {
@@ -815,7 +815,7 @@ Session::process_without_events (pframes_t nframes)
 		interpolation.set_speed (fabs(_transport_speed));
 		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
 	}
-	
+
 	if (!_exporting && !timecode_transmission_suspended()) {
 		send_midi_time_code_for_cycle (_transport_frame, _transport_frame + frames_moved, nframes);
 	}
@@ -855,9 +855,9 @@ Session::process_without_events (pframes_t nframes)
 	   reverse.  It seems a bit wrong that we're not using the
 	   interpolator to compute this.
 	*/
-	   
+
 	frames_moved = (framecnt_t) floor (_transport_speed * nframes);
-	
+
 	if (frames_moved < 0) {
 		decrement_transport_position (-frames_moved);
 	} else {
@@ -893,12 +893,12 @@ Session::process_audition (pframes_t nframes)
 		_butler->summon ();
 	}
 
-        /* if using a monitor section, run it because otherwise we don't hear anything */
+	/* if using a monitor section, run it because otherwise we don't hear anything */
 
-        if (auditioner->needs_monitor()) {
-                _monitor_out->passthru (_transport_frame, _transport_frame + nframes, nframes, false);
-        }
-        
+	if (auditioner->needs_monitor()) {
+		_monitor_out->passthru (_transport_frame, _transport_frame + nframes, nframes, false);
+	}
+
 	/* handle pending events */
 
 	while (pending_events.read (&ev, 1) == 1) {
@@ -1147,13 +1147,13 @@ Session::process_event (SessionEvent* ev)
 		del = false; // other side of RT request needs to clean up
 		break;
 
-        case SessionEvent::AdjustPlaybackBuffering:
-                schedule_playback_buffering_adjustment ();
-                break;
+	case SessionEvent::AdjustPlaybackBuffering:
+		schedule_playback_buffering_adjustment ();
+		break;
 
-        case SessionEvent::AdjustCaptureBuffering:
-                schedule_capture_buffering_adjustment ();
-                break;
+	case SessionEvent::AdjustCaptureBuffering:
+		schedule_capture_buffering_adjustment ();
+		break;
 
 	case SessionEvent::SetTimecodeTransmission:
 		g_atomic_int_set (&_suspend_timecode_transmission, ev->yes_or_no ? 0 : 1);

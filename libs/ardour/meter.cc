@@ -45,7 +45,7 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 		return;
 	}
 
-        // cerr << "meter " << name() << " runs with " << bufs.available() << " inputs\n";
+	// cerr << "meter " << name() << " runs with " << bufs.available() << " inputs\n";
 
 	const uint32_t n_audio = min (current_meters.n_audio(), bufs.count().n_audio());
 	const uint32_t n_midi  = min (current_meters.n_midi(), bufs.count().n_midi());
@@ -117,7 +117,7 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 
 	current_meters = in;
 
-        reset_max_channels (in);
+	reset_max_channels (in);
 
 	return Processor::configure_io (in, out);
 }

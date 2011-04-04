@@ -96,9 +96,9 @@ _render_callback(void *userData,
 }
 
 static OSStatus 
-_get_beat_and_tempo_callback (void*                userData,
-			      Float64*             outCurrentBeat, 
-			      Float64*             outCurrentTempo)
+_get_beat_and_tempo_callback (void*    userData,
+                              Float64* outCurrentBeat, 
+                              Float64* outCurrentTempo)
 {
 	if (userData) {
 		return ((AUPlugin*)userData)->get_beat_and_tempo_callback (outCurrentBeat, outCurrentTempo);
@@ -109,10 +109,10 @@ _get_beat_and_tempo_callback (void*                userData,
 
 static OSStatus 
 _get_musical_time_location_callback (void *     userData,
-				     UInt32 *   outDeltaSampleOffsetToNextBeat,
-				     Float32 *  outTimeSig_Numerator,
-				     UInt32 *   outTimeSig_Denominator,
-				     Float64 *  outCurrentMeasureDownBeat)
+                                     UInt32 *   outDeltaSampleOffsetToNextBeat,
+                                     Float32 *  outTimeSig_Numerator,
+                                     UInt32 *   outTimeSig_Denominator,
+                                     Float64 *  outCurrentMeasureDownBeat)
 {
 	if (userData) {
 		return ((AUPlugin*)userData)->get_musical_time_location_callback (outDeltaSampleOffsetToNextBeat,
@@ -133,9 +133,10 @@ _get_transport_state_callback (void*     userData,
 			       Float64*  outCycleEndBeat)
 {
 	if (userData) {
-		return ((AUPlugin*)userData)->get_transport_state_callback (outIsPlaying, outTransportStateChanged,
-									    outCurrentSampleInTimeLine, outIsCycling,
-									    outCycleStartBeat, outCycleEndBeat);
+		return ((AUPlugin*)userData)->get_transport_state_callback (
+			outIsPlaying, outTransportStateChanged,
+			outCurrentSampleInTimeLine, outIsCycling,
+			outCycleStartBeat, outCycleEndBeat);
 	}
 	return paramErr;
 }
@@ -162,9 +163,11 @@ save_property_list (CFPropertyListRef propertyList, Glib::ustring path)
 	fd = open (path.c_str(), O_WRONLY|O_CREAT|O_EXCL, 0664);
 	while (fd < 0) {
 		if (errno == EEXIST) {
-			error << string_compose (_("Preset file %1 exists; not overwriting"), path);
+			error << string_compose (_("Preset file %1 exists; not overwriting"),
+			                         path) << endmsg;
 		} else {
-			error << string_compose (_("Cannot open preset file %1 (%2)"), path, strerror (errno)) << endmsg;
+			error << string_compose (_("Cannot open preset file %1 (%2)"),
+			                         path, strerror (errno)) << endmsg;
 		}
 		CFRelease (xmlData);
 		return -1;
@@ -451,19 +454,19 @@ AUPlugin::init ()
 	TRACE_API ("count output elements\n");
 	unit->GetElementCount (kAudioUnitScope_Output, output_elements);
 
-        if (input_elements > 0) {
-                AURenderCallbackStruct renderCallbackInfo;
+	if (input_elements > 0) {
+		AURenderCallbackStruct renderCallbackInfo;
                 
-                renderCallbackInfo.inputProc = _render_callback;
-                renderCallbackInfo.inputProcRefCon = this;
+		renderCallbackInfo.inputProc = _render_callback;
+		renderCallbackInfo.inputProcRefCon = this;
                 
-                TRACE_API ("set render callback in input scope\n");
-                if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 
-                                              0, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
-                        cerr << "cannot install render callback (err = " << err << ')' << endl;
-                        throw failed_constructor();
-                }
-        }
+		TRACE_API ("set render callback in input scope\n");
+		if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 
+		                              0, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
+			cerr << "cannot install render callback (err = " << err << ')' << endl;
+			throw failed_constructor();
+		}
+	}
 
 	/* tell the plugin about tempo/meter/transport callbacks in case it wants them */
 
@@ -474,7 +477,7 @@ AUPlugin::init ()
 	info.musicalTimeLocationProc = _get_musical_time_location_callback;
 	info.transportStateProc = _get_transport_state_callback;
 	
-        //ignore result of this - don't care if the property isn't supported
+	//ignore result of this - don't care if the property isn't supported
 	TRACE_API ("set host callbacks in global scope\n");
 	unit->SetProperty (kAudioUnitProperty_HostCallbacks, 
 			   kAudioUnitScope_Global, 
@@ -1214,7 +1217,7 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 			{ 
 				const uint8_t* b = ev.buffer();
 				unit->MIDIEvent (b[0], b[1], b[2], ev.time());
-			        break;
+				break;
 			}
 			
 			default:
@@ -1817,43 +1820,43 @@ GetDictionarySInt32Value(CFDictionaryRef inAUStateDictionary, CFStringRef inDict
 static OSStatus 
 GetAUComponentDescriptionFromStateData(CFPropertyListRef inAUStateData, ComponentDescription * outComponentDescription)
 {
-        CFDictionaryRef auStateDictionary;
-        ComponentDescription tempDesc = {0,0,0,0,0};
-        SInt32 versionValue;
-        Boolean gotValue;
+	CFDictionaryRef auStateDictionary;
+	ComponentDescription tempDesc = {0,0,0,0,0};
+	SInt32 versionValue;
+	Boolean gotValue;
 
-        if ( (inAUStateData == NULL) || (outComponentDescription == NULL) )
-                return paramErr;
+	if ( (inAUStateData == NULL) || (outComponentDescription == NULL) )
+		return paramErr;
 	
-        // the property list for AU state data must be of the dictionary type
-        if (CFGetTypeID(inAUStateData) != CFDictionaryGetTypeID()) {
-                return kAudioUnitErr_InvalidPropertyValue;
+	// the property list for AU state data must be of the dictionary type
+	if (CFGetTypeID(inAUStateData) != CFDictionaryGetTypeID()) {
+		return kAudioUnitErr_InvalidPropertyValue;
 	}
 
-        auStateDictionary = (CFDictionaryRef)inAUStateData;
+	auStateDictionary = (CFDictionaryRef)inAUStateData;
 
-        // first check to make sure that the version of the AU state data is one that we know understand
-        // XXX should I really do this?  later versions would probably still hold these ID keys, right?
-        versionValue = GetDictionarySInt32Value(auStateDictionary, CFSTR(kAUPresetVersionKey), &gotValue);
+	// first check to make sure that the version of the AU state data is one that we know understand
+	// XXX should I really do this?  later versions would probably still hold these ID keys, right?
+	versionValue = GetDictionarySInt32Value(auStateDictionary, CFSTR(kAUPresetVersionKey), &gotValue);
 
-        if (!gotValue) {
-                return kAudioUnitErr_InvalidPropertyValue;
+	if (!gotValue) {
+		return kAudioUnitErr_InvalidPropertyValue;
 	}
 #define kCurrentSavedStateVersion 0
-        if (versionValue != kCurrentSavedStateVersion) {
-                return kAudioUnitErr_InvalidPropertyValue;
+	if (versionValue != kCurrentSavedStateVersion) {
+		return kAudioUnitErr_InvalidPropertyValue;
 	}
 
-        // grab the ComponentDescription values from the AU state data
-        tempDesc.componentType = (OSType) GetDictionarySInt32Value(auStateDictionary, CFSTR(kAUPresetTypeKey), NULL);
-        tempDesc.componentSubType = (OSType) GetDictionarySInt32Value(auStateDictionary, CFSTR(kAUPresetSubtypeKey), NULL);
-        tempDesc.componentManufacturer = (OSType) GetDictionarySInt32Value(auStateDictionary, CFSTR(kAUPresetManufacturerKey), NULL);
-        // zero values are illegit for specific ComponentDescriptions, so zero for any value means that there was an error
-        if ( (tempDesc.componentType == 0) || (tempDesc.componentSubType == 0) || (tempDesc.componentManufacturer == 0) )
-                return kAudioUnitErr_InvalidPropertyValue;
+	// grab the ComponentDescription values from the AU state data
+	tempDesc.componentType = (OSType) GetDictionarySInt32Value(auStateDictionary, CFSTR(kAUPresetTypeKey), NULL);
+	tempDesc.componentSubType = (OSType) GetDictionarySInt32Value(auStateDictionary, CFSTR(kAUPresetSubtypeKey), NULL);
+	tempDesc.componentManufacturer = (OSType) GetDictionarySInt32Value(auStateDictionary, CFSTR(kAUPresetManufacturerKey), NULL);
+	// zero values are illegit for specific ComponentDescriptions, so zero for any value means that there was an error
+	if ( (tempDesc.componentType == 0) || (tempDesc.componentSubType == 0) || (tempDesc.componentManufacturer == 0) )
+		return kAudioUnitErr_InvalidPropertyValue;
 
-        *outComponentDescription = tempDesc;
-        return noErr;
+	*outComponentDescription = tempDesc;
+	return noErr;
 }
 
 
@@ -1898,8 +1901,8 @@ static bool au_preset_filter (const string& str, void* arg)
 bool 
 check_and_get_preset_name (Component component, const string& pathstr, string& preset_name)
 {
-        OSStatus status;
-        CFPropertyListRef plist;
+	OSStatus status;
+	CFPropertyListRef plist;
 	ComponentDescription presetDesc;
 	bool ret = false;
 		
@@ -1999,13 +2002,13 @@ AUPlugin::find_presets ()
 
 	delete preset_files;
 
-        /* now fill the vector<string> with the names we have */
+	/* now fill the vector<string> with the names we have */
 
 	for (UserPresetMap::iterator i = user_preset_map.begin(); i != user_preset_map.end(); ++i) {
 		_presets.insert (i->second, Plugin::PresetRecord (i->second, i->first));
 	}
 
-        /* add factory presets */
+	/* add factory presets */
 
 	for (FactoryPresetMap::iterator i = factory_preset_map.begin(); i != factory_preset_map.end(); ++i) {
 		/* XXX: dubious */

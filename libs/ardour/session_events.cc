@@ -77,10 +77,10 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 	Pool* p = pool->per_thread_pool ();
 	SessionEvent* ev = static_cast<SessionEvent*> (ptr);
 
-        DEBUG_TRACE (DEBUG::SessionEvents, string_compose (
-			     "%1 Deleting SessionEvent @ %2 ev thread pool = %3 ev pool = %4\n",
-			     pthread_self(), ev, p->name(), ev->own_pool->name()
-			     ));
+	DEBUG_TRACE (DEBUG::SessionEvents, string_compose (
+		             "%1 Deleting SessionEvent @ %2 ev thread pool = %3 ev pool = %4\n",
+		             pthread_self(), ev, p->name(), ev->own_pool->name()
+		             ));
 
 #ifndef NDEBUG
 	if (DEBUG::SessionEvents & PBD::debug_bits) {
@@ -133,7 +133,7 @@ SessionEventManager::dump_events () const
 	}
 	cerr << "Next event: ";
 
-        if ((Events::const_iterator) next_event == events.end()) {
+	if ((Events::const_iterator) next_event == events.end()) {
 		cerr << "none" << endl;
 	} else {
 		cerr << "at " << (*next_event)->action_frame << ' '

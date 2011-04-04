@@ -103,7 +103,7 @@ void
 ExportPreset::save (std::string const & filename)
 {
 	save_instant_xml ();
-        
+
 	if (global.root()) {
                 global.set_filename (filename);
 		global.write ();
