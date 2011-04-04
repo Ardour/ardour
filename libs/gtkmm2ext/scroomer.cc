@@ -203,6 +203,23 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev)
 }
 
 bool
+Scroomer::on_scroll_event (GdkEventScroll* ev)
+{
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+		adj.set_value (adj.get_value() - adj.get_page_size()/10.0);
+		break;
+	case GDK_SCROLL_DOWN:
+		adj.set_value (adj.get_value() + adj.get_page_size()/10.0);
+		break;
+	default:
+		return false;
+	}
+
+	return true;
+}
+
+bool
 Scroomer::on_button_press_event (GdkEventButton* ev)
 {
 	if (ev->button == 1 || ev->button == 3) {
@@ -264,12 +281,6 @@ Scroomer::on_button_release_event (GdkEventButton* ev)
 	grab_comp = None;
 
 	remove_modal_grab();
-	return true;
-}
-
-bool
-Scroomer::on_scroll_event (GdkEventScroll*)
-{
 	return true;
 }
 
