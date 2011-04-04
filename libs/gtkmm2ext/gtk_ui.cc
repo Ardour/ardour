@@ -565,11 +565,25 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 		display_message (prefix, prefix_len, ptag, mtag, str);
 
 		if (!errors->is_visible() && chn != Transmitter::Info) {
-			toggle_errors();
+			show_errors ();
 		}
 	}
 
 	errors->text().get_buffer()->end_user_action();
+}
+
+void
+UI::show_errors ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
+	if (!act) {
+		return;
+	}
+
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+        if (tact) {
+                tact->set_active ();
+        }
 }
 
 void

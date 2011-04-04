@@ -117,6 +117,7 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 	void popup_error (const std::string& text);
 	void flush_pending ();
 	void toggle_errors ();
+	void show_errors ();
 	void touch_display (Touchable *);
 	void set_tip (Gtk::Widget &w, const gchar *tip);
 	void set_tip (Gtk::Widget &w, const std::string &tip);
