@@ -163,19 +163,19 @@ MidiDiskstream::non_realtime_input_change ()
 
 		if (input_change_pending.type & IOChange::ConfigurationChanged) {
 			if (_io->n_ports().n_midi() != _n_channels.n_midi()) {
-                                error << string_compose (_("%1: I/O configuration change %4 requested to use %2, but channel setup is %3"),
-                                                         name(),
-                                                         _io->n_ports(),
-                                                       _n_channels, input_change_pending.type)
-                                      << endmsg;
+				error << string_compose (_("%1: I/O configuration change %4 requested to use %2, but channel setup is %3"),
+				                         name(),
+				                         _io->n_ports(),
+				                         _n_channels, input_change_pending.type)
+				      << endmsg;
 			}
 		}
 
-                if (input_change_pending.type & IOChange::ConnectionsChanged) {
-                        get_input_sources ();
-                        set_capture_offset ();
-                        set_align_style_from_io ();
-                }
+		if (input_change_pending.type & IOChange::ConnectionsChanged) {
+			get_input_sources ();
+			set_capture_offset ();
+			set_align_style_from_io ();
+		}
 
 		input_change_pending.type = IOChange::NoChange;
 
@@ -640,7 +640,7 @@ MidiDiskstream::overwrite_existing_buffers ()
 	g_atomic_int_set (&_frames_written_to_ringbuffer, 0);
 
 	read (overwrite_frame, disk_io_chunk_frames, false);
-        file_frame = overwrite_frame; // it was adjusted by ::read()
+	file_frame = overwrite_frame; // it was adjusted by ::read()
 	overwrite_queued = false;
 	_pending_overwrite = false;
 
@@ -1433,21 +1433,23 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framepos_t start, framepos_t end)
 		return;
 	}
 
-	// Translates stamps to be relative to start
+	// Translate stamps to be relative to start
 
 
 #ifndef NDEBUG
-        DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("%1 MDS pre-read read from %2 write to %3\n", 
-                                                              _name, 
-                                                              _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr()));
+	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
+		             "%1 MDS pre-read read from %2 write to %3\n", _name, 
+		             _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr()));
 //        cerr << "================\n";
 //        _playback_buf->dump (cerr);
 //        cerr << "----------------\n";
 
 	const size_t events_read = _playback_buf->read(dst, start, end);
-	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("%1 MDS events read %2 range %3 .. %4 rspace %5 wspace %6 r@%7 w@%8\n", _name, events_read, start, end,
-							      _playback_buf->read_space(), _playback_buf->write_space(),
-                                                              _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr()));
+	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
+		             "%1 MDS events read %2 range %3 .. %4 rspace %5 wspace %6 r@%7 w@%8\n",
+		             _name, events_read, start, end,
+		             _playback_buf->read_space(), _playback_buf->write_space(),
+	                 _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr()));
 #else
 	_playback_buf->read(dst, start, end);
 #endif

@@ -162,7 +162,7 @@ AudioDiskstream::non_realtime_input_change ()
 			return;
 		}
 
-                if (input_change_pending.type == IOChange::ConfigurationChanged) {
+		if (input_change_pending.type == IOChange::ConfigurationChanged) {
 			RCUWriter<ChannelList> writer (channels);
 			boost::shared_ptr<ChannelList> c = writer.get_copy();
 
@@ -175,11 +175,11 @@ AudioDiskstream::non_realtime_input_change ()
 			}
 		}
 
-                if (input_change_pending.type & IOChange::ConnectionsChanged) {
-                        get_input_sources ();
-                        set_capture_offset ();
-                        set_align_style_from_io ();
-                }
+		if (input_change_pending.type & IOChange::ConnectionsChanged) {
+			get_input_sources ();
+			set_capture_offset ();
+			set_align_style_from_io ();
+		}
 
 		input_change_pending = IOChange::NoChange;
 
@@ -448,16 +448,16 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool ca
 		last_recordable_frame = max_framepos;
 	}
 
-        if (record_enabled()) {
+	if (record_enabled()) {
 
-                OverlapType ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
-                calculate_record_range (ot, transport_frame, nframes, rec_nframes, rec_offset);
+		OverlapType ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
+		calculate_record_range (ot, transport_frame, nframes, rec_nframes, rec_offset);
                 
-                if (rec_nframes && !was_recording) {
-                        capture_captured = 0;
-                        was_recording = true;
-                }
-        }
+		if (rec_nframes && !was_recording) {
+			capture_captured = 0;
+			was_recording = true;
+		}
+	}
 
 	if (can_record && !_last_capture_sources.empty()) {
 		_last_capture_sources.clear ();
@@ -746,8 +746,8 @@ AudioDiskstream::overwrite_existing_buffers ()
 	gain_buffer = new float[size];
 
 	/* reduce size so that we can fill the buffer correctly (ringbuffers
-         * can only handle size-1, otherwise they appear to be empty)
-         */
+	   can only handle size-1, otherwise they appear to be empty)
+	*/
 	size--;
 
 	uint32_t n=0;
@@ -867,7 +867,7 @@ AudioDiskstream::internal_playback_seek (framecnt_t distance)
 int
 AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
                        framepos_t& start, framecnt_t cnt,
-		       ChannelInfo* /*channel_info*/, int channel, bool reversed)
+                       ChannelInfo* /*channel_info*/, int channel, bool reversed)
 {
 	framecnt_t this_read = 0;
 	bool reloop = false;
@@ -1474,8 +1474,8 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 
 			RegionFactory::region_name (region_name, whole_file_region_name, false);
                         
-                        DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 capture start @ %2 length %3 add new region %4\n",
-                                                                              _name, (*ci)->start, (*ci)->frames, region_name));
+			DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 capture start @ %2 length %3 add new region %4\n",
+			                                                      _name, (*ci)->start, (*ci)->frames, region_name));
 
 			try {
 
@@ -1671,7 +1671,7 @@ AudioDiskstream::engage_record_enable ()
 	if (Config->get_monitoring_model() == HardwareMonitoring) {
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-                        (*chan)->source.ensure_monitor_input (!(_session.config.get_auto_input() && rolling));
+			(*chan)->source.ensure_monitor_input (!(_session.config.get_auto_input() && rolling));
 			capturing_sources.push_back ((*chan)->write_source);
 			(*chan)->write_source->mark_streaming_write_started ();
 		}
@@ -1693,7 +1693,7 @@ AudioDiskstream::disengage_record_enable ()
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	if (Config->get_monitoring_model() == HardwareMonitoring) {
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-                        (*chan)->source.ensure_monitor_input (false);
+			(*chan)->source.ensure_monitor_input (false);
 		}
 	}
 	capturing_sources.clear ();
@@ -1961,7 +1961,7 @@ AudioDiskstream::monitor_input (bool yn)
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-                (*chan)->source.ensure_monitor_input (yn);
+		(*chan)->source.ensure_monitor_input (yn);
 	}
 }
 
@@ -2276,21 +2276,21 @@ AudioDiskstream::adjust_capture_buffering ()
 bool
 AudioDiskstream::ChannelSource::is_physical () const
 {
-        if (name.empty()) {
-                return false;
-        }
+	if (name.empty()) {
+		return false;
+	}
 
-        return AudioEngine::instance()->port_is_physical (name);
+	return AudioEngine::instance()->port_is_physical (name);
 }
 
 void
 AudioDiskstream::ChannelSource::ensure_monitor_input (bool yn) const
 {
-        if (name.empty()) {
-                return;
-        }
+	if (name.empty()) {
+		return;
+	}
 
-        return AudioEngine::instance()->ensure_monitor_input (name, yn);
+	return AudioEngine::instance()->ensure_monitor_input (name, yn);
 }
 
 AudioDiskstream::ChannelInfo::ChannelInfo (framecnt_t playback_bufsize, framecnt_t capture_bufsize, framecnt_t speed_size, framecnt_t wrap_size)

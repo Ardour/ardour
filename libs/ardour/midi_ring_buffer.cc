@@ -47,7 +47,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 	/* If we see the end of a loop during this read, we must write the events after it
 	   to the MidiBuffer with adjusted times.  The situation is as follows:
 
-           session frames----------------------------->
+	   session frames----------------------------->
 	   
 	             |                            |                    |
 	        start_of_loop                   start              end_of_loop
@@ -179,67 +179,67 @@ MidiRingBuffer<T>::dump(ostream& str)
 	Evoral::EventType ev_type;
 	uint32_t          ev_size;
 
-        RingBufferNPT<uint8_t>::rw_vector vec;
-        RingBufferNPT<uint8_t>::get_read_vector (&vec);
+	RingBufferNPT<uint8_t>::rw_vector vec;
+	RingBufferNPT<uint8_t>::get_read_vector (&vec);
 
-        if (vec.len[0] == 0) {
-                return;
-        }
+	if (vec.len[0] == 0) {
+		return;
+	}
 
 	str << this << ": Dump size = " << vec.len[0] + vec.len[1] 
-            << " r@ " << RingBufferNPT<uint8_t>::get_read_ptr() 
-            << " w@" << RingBufferNPT<uint8_t>::get_write_ptr() << endl;
+	    << " r@ " << RingBufferNPT<uint8_t>::get_read_ptr() 
+	    << " w@" << RingBufferNPT<uint8_t>::get_write_ptr() << endl;
 
 
-        uint8_t *buf = new uint8_t[vec.len[0] + vec.len[1]];
-        memcpy (buf, vec.buf[0], vec.len[0]);
+	uint8_t *buf = new uint8_t[vec.len[0] + vec.len[1]];
+	memcpy (buf, vec.buf[0], vec.len[0]);
 
-        if (vec.len[1]) {
-                memcpy (buf+vec.len[1], vec.buf[1], vec.len[1]);
-        }
+	if (vec.len[1]) {
+		memcpy (buf+vec.len[1], vec.buf[1], vec.len[1]);
+	}
 
-        uint8_t* data = buf;
-        const uint8_t* end = buf + vec.len[0] + vec.len[1];
+	uint8_t* data = buf;
+	const uint8_t* end = buf + vec.len[0] + vec.len[1];
 
-        while (data < end) {
+	while (data < end) {
                 
 		memcpy (&ev_time, data, sizeof (T));
-                data += sizeof (T);
+		data += sizeof (T);
 		str << "\ttime " << ev_time;
 
-                if (data >= end) {
-                        str << "(incomplete)\n ";
-                        break;
-                }
+		if (data >= end) {
+			str << "(incomplete)\n ";
+			break;
+		}
 
 		memcpy (&ev_type, data, sizeof (ev_type));
-                data += sizeof (ev_type);
+		data += sizeof (ev_type);
 		str << " type " << ev_type;
 
-                if (data >= end) {
-                        str << "(incomplete)\n";
-                        break;
-                }
+		if (data >= end) {
+			str << "(incomplete)\n";
+			break;
+		}
 
 		memcpy (&ev_size, data, sizeof (ev_size));
-                data += sizeof (ev_size);
+		data += sizeof (ev_size);
 		str << " size " << ev_size;
 
-                if (data >= end) {
-                        str << "(incomplete)\n";
-                        break;
-                }
+		if (data >= end) {
+			str << "(incomplete)\n";
+			break;
+		}
 
 		for (uint32_t i = 0; i != ev_size && data < end; ++i) {
 			str << ' ' << hex << (int) data[i] << dec;
 		}
 
-                data += ev_size;
+		data += ev_size;
 
 		str << endl;
 	}
 
-        delete [] buf;
+	delete [] buf;
 }
 
 template class MidiRingBuffer<framepos_t>;
