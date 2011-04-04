@@ -875,6 +875,23 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		sscanf (prop->value().c_str(), "%u", &count);
 	}
 
+	/* Handle the node list for this Processor (or Insert if an A2 session).
+	 * This needs to happen before the add_plugin_with_activation below, as
+	 * the plugin set_state calls may themselves call latency_compute_run,
+	 * which will leave the plugin deactivated whether it is currently
+	 * activated or not.
+	 */
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+
+		if ((*niter)->name() == plugin->state_node_name()) {
+
+			for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+				(*i)->set_state (**niter, version);
+			}
+			break;
+		}
+	}
+
 	if (_plugins.size() != count) {
 
 		add_plugin_with_activation (plugin);
@@ -887,18 +904,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	if (need_automatables) {
 		set_automatable ();
 		set_control_ids (node, version);
-	}
-
-	/* Handle the node list for this Processor (or Insert if an A2 session) */
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
-		if ((*niter)->name() == plugin->state_node_name()) {
-
-			for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-				(*i)->set_state (**niter, version);
-			}
-			break;
-		}
 	}
 
 	if (version < 3000) {
