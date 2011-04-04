@@ -1080,7 +1080,7 @@ AudioRegion::separate_by_channel (Session& /*session*/, vector<boost::shared_ptr
 framecnt_t
 AudioRegion::read_raw_internal (Sample* buf, framepos_t pos, framecnt_t cnt, int channel) const
 {
-	return audio_source()->read (buf, pos, cnt, channel);
+	return audio_source(channel)->read (buf, pos, cnt);
 }
 
 int
@@ -1190,7 +1190,7 @@ AudioRegion::maximum_amplitude (Progress* p) const
 
 			/* read it in */
 
-			if (read_raw_internal (buf, fpos, to_read, 0) != to_read) {
+			if (read_raw_internal (buf, fpos, to_read, n) != to_read) {
 				return 0;
 			}
 
