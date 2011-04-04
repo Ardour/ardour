@@ -627,7 +627,6 @@ MidiDiskstream::set_pending_overwrite (bool yn)
 	/* called from audio thread, so we can use the read ptr and playback sample as we wish */
 
 	_pending_overwrite = yn;
-
 	overwrite_frame = playback_sample;
 }
 
@@ -641,6 +640,7 @@ MidiDiskstream::overwrite_existing_buffers ()
 	g_atomic_int_set (&_frames_written_to_ringbuffer, 0);
 
 	read (overwrite_frame, disk_io_chunk_frames, false);
+        file_frame = overwrite_frame; // it was adjusted by ::read()
 	overwrite_queued = false;
 	_pending_overwrite = false;
 
@@ -828,7 +828,7 @@ MidiDiskstream::do_refill ()
 	//	<< frames_written - frames_read << endl;
 
 	to_read = (framecnt_t) min ((framecnt_t) to_read, (framecnt_t) (max_framepos - file_frame));
-
+ 
 	if (read (file_frame, to_read, reversed)) {
 		ret = -1;
 	}
@@ -1437,9 +1437,17 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framepos_t start, framepos_t end)
 
 
 #ifndef NDEBUG
+        DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("%1 MDS pre-read read from %2 write to %3\n", 
+                                                              _name, 
+                                                              _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr()));
+//        cerr << "================\n";
+//        _playback_buf->dump (cerr);
+//        cerr << "----------------\n";
+
 	const size_t events_read = _playback_buf->read(dst, start, end);
-	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("%1 MDS events read %2 range %3 .. %4 rspace %5 wspace %6\n", _name, events_read, start, end,
-							      _playback_buf->read_space(), _playback_buf->write_space()));
+	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("%1 MDS events read %2 range %3 .. %4 rspace %5 wspace %6 r@%7 w@%8\n", _name, events_read, start, end,
+							      _playback_buf->read_space(), _playback_buf->write_space(),
+                                                              _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr()));
 #else
 	_playback_buf->read(dst, start, end);
 #endif
