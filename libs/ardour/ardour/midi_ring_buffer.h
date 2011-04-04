@@ -51,7 +51,7 @@ public:
 	inline bool read_contents(uint32_t size, uint8_t* buf);
 
 	size_t read(MidiBuffer& dst, framepos_t start, framepos_t end, framecnt_t offset=0);
-	// void dump(std::ostream& dst);
+	void dump(std::ostream& dst);
 
 	/** Set the channel filtering mode.
 	 * @param mask If mode is FilterChannels, each bit represents a midi channel:

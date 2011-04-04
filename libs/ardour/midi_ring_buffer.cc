@@ -164,7 +164,6 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 	return count;
 }
 
-#if 0
 template<typename T>
 void
 MidiRingBuffer<T>::dump(ostream& str)
@@ -179,70 +178,69 @@ MidiRingBuffer<T>::dump(ostream& str)
 	T                 ev_time;
 	Evoral::EventType ev_type;
 	uint32_t          ev_size;
-	size_t read_ptr = g_atomic_int_get (&this->_read_ptr);
 
-	str << "Dump @ " << read_ptr << endl;
+        RingBufferNPT<uint8_t>::rw_vector vec;
+        RingBufferNPT<uint8_t>::get_read_vector (&vec);
 
-	while (1) {
-		uint8_t* wp;
-		uint8_t* data;
-		size_t write_ptr;
+        if (vec.len[0] == 0) {
+                return;
+        }
 
-#define space(r,w) ((w > r) ? (w - r) : ((w - r + this->_size) % this->_size))
+	str << this << ": Dump size = " << vec.len[0] + vec.len[1] 
+            << " r@ " << RingBufferNPT<uint8_t>::get_read_ptr() 
+            << " w@" << RingBufferNPT<uint8_t>::get_write_ptr() << endl;
 
-		write_ptr  = g_atomic_int_get (&this->_write_ptr);
-		if (space (read_ptr, write_ptr) < sizeof (T)) {
-			break;
-		}
 
-		wp = &this->_buf[read_ptr];
-		memcpy (&ev_time, wp, sizeof (T));
-		read_ptr = (read_ptr + sizeof (T)) % this->_size;
-		str << "time " << ev_time;
+        uint8_t *buf = new uint8_t[vec.len[0] + vec.len[1]];
+        memcpy (buf, vec.buf[0], vec.len[0]);
 
-		write_ptr  = g_atomic_int_get (&this->_write_ptr);
-		if (space (read_ptr, write_ptr) < sizeof (ev_type)) {
-			break;
-		}
+        if (vec.len[1]) {
+                memcpy (buf+vec.len[1], vec.buf[1], vec.len[1]);
+        }
 
-		wp = &this->_buf[read_ptr];
-		memcpy (&ev_type, wp, sizeof (ev_type));
-		read_ptr = (read_ptr + sizeof (ev_type)) % this->_size;
+        uint8_t* data = buf;
+        const uint8_t* end = buf + vec.len[0] + vec.len[1];
+
+        while (data < end) {
+                
+		memcpy (&ev_time, data, sizeof (T));
+                data += sizeof (T);
+		str << "\ttime " << ev_time;
+
+                if (data >= end) {
+                        str << "(incomplete)\n ";
+                        break;
+                }
+
+		memcpy (&ev_type, data, sizeof (ev_type));
+                data += sizeof (ev_type);
 		str << " type " << ev_type;
 
-		write_ptr  = g_atomic_int_get (&this->_write_ptr);
-		if (space (read_ptr, write_ptr) < sizeof (ev_size)) {
-			str << "!OUT!\n";
-			break;
-		}
+                if (data >= end) {
+                        str << "(incomplete)\n";
+                        break;
+                }
 
-		wp = &this->_buf[read_ptr];
-		memcpy (&ev_size, wp, sizeof (ev_size));
-		read_ptr = (read_ptr + sizeof (ev_size)) % this->_size;
+		memcpy (&ev_size, data, sizeof (ev_size));
+                data += sizeof (ev_size);
 		str << " size " << ev_size;
 
-		write_ptr  = g_atomic_int_get (&this->_write_ptr);
-		if (space (read_ptr, write_ptr) < ev_size) {
-			str << "!OUT!\n";
-			break;
-		}
+                if (data >= end) {
+                        str << "(incomplete)\n";
+                        break;
+                }
 
-		data = new uint8_t[ev_size];
-
-		wp = &this->_buf[read_ptr];
-		memcpy (data, wp, ev_size);
-		read_ptr = (read_ptr + ev_size) % this->_size;
-
-		for (uint32_t i = 0; i != ev_size; ++i) {
+		for (uint32_t i = 0; i != ev_size && data < end; ++i) {
 			str << ' ' << hex << (int) data[i] << dec;
 		}
 
-		str << endl;
+                data += ev_size;
 
-		delete [] data;
+		str << endl;
 	}
+
+        delete [] buf;
 }
-#endif
 
 template class MidiRingBuffer<framepos_t>;
 
