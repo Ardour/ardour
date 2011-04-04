@@ -180,9 +180,7 @@ Track::set_name (const string& str)
 		return false;
 	}
 
-	if (_diskstream->set_name (str)) {
-		return false;
-	}
+	_diskstream->set_name (str);
 
 	/* save state so that the statefile fully reflects any filename changes */
 

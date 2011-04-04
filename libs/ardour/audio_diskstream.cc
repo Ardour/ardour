@@ -1909,23 +1909,6 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 	}
 }
 
-int
-AudioDiskstream::rename_write_sources ()
-{
-	ChannelList::iterator chan;
-	boost::shared_ptr<ChannelList> c = channels.reader();
-	uint32_t n;
-
-	for (chan = c->begin(), n = 0; chan != c->end(); ++chan, ++n) {
-		if ((*chan)->write_source != 0) {
-			(*chan)->write_source->set_source_name (_name.val(), destructive());
-			/* XXX what to do if one of them fails ? */
-		}
-	}
-
-	return 0;
-}
-
 void
 AudioDiskstream::set_block_size (pframes_t /*nframes*/)
 {

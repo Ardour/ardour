@@ -443,13 +443,15 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
                                 if (status.cancel) {
                                         break;
                                 }
+                        } else {
+                                warning << string_compose (_("Track %1 of %2 contained no usable MIDI data"), i, source->file_path()) << endmsg;
                         }
                         
                         ++s; // next source
                 }
 
 	} catch (...) {
-		error << "Corrupt MIDI file " << source->file_path() << endmsg;
+		error << string_compose (_("MIDI file %1 was not readable (no reason available"), source->file_path()) << endmsg;
 	}
 
         if (buf) {

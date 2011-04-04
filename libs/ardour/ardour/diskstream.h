@@ -173,7 +173,6 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	virtual int  overwrite_existing_buffers () = 0;
 	virtual int  internal_playback_seek (framecnt_t distance) = 0;
 	virtual int  can_internal_playback_seek (framecnt_t distance) = 0;
-	virtual int  rename_write_sources () = 0;
 	virtual void reset_write_sources (bool, bool force = false) = 0;
 	virtual void non_realtime_input_change () = 0;
 

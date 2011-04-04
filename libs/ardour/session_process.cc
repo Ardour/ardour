@@ -108,7 +108,7 @@ Session::no_roll (pframes_t nframes)
 	}
 
         if (route_graph->threads_in_use() > 0) {
-                DEBUG_TRACE(DEBUG::Graph,"calling graph/no-roll\n");
+                DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
                 route_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), actively_recording(), declick);
         } else {
                 for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -154,7 +154,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
            tracks, the graph never gets updated.
         */
         if (1 || route_graph->threads_in_use() > 0) {
-                DEBUG_TRACE(DEBUG::Graph,"calling graph/process-routes\n");
+                DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
                 route_graph->process_routes( nframes, start_frame, end_frame, declick, record_active, rec_monitors, need_butler);
         } else {
 

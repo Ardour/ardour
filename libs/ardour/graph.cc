@@ -460,7 +460,7 @@ Graph::main_thread()
 
   again:
         _callback_start_sem.wait ();
-	DEBUG_TRACE(DEBUG::Graph, "main thread is awake\n");
+	DEBUG_TRACE(DEBUG::ProcessThreads, "main thread is awake\n");
 
         if (_quit_threads) {
                 return;
@@ -470,12 +470,12 @@ Graph::main_thread()
 
         if (_graph_empty && !_quit_threads) {
                 _callback_done_sem.signal ();
-                DEBUG_TRACE(DEBUG::Graph, "main thread sees graph done, goes back to slee\n");
+                DEBUG_TRACE(DEBUG::ProcessThreads, "main thread sees graph done, goes back to slee\n");
                 goto again;
         }
 
         while (1) {
-		DEBUG_TRACE(DEBUG::Graph, "main thread runs one graph node\n");
+		DEBUG_TRACE(DEBUG::ProcessThreads, "main thread runs one graph node\n");
                 if (run_one()) {
                         break;
                 }
@@ -527,7 +527,7 @@ Graph::silent_process_routes (pframes_t nframes, framepos_t start_frame, framepo
         _process_need_butler = false;
 
         if (!_graph_empty) {
-		DEBUG_TRACE(DEBUG::Graph, "wake graph for silent process\n");
+		DEBUG_TRACE(DEBUG::ProcessThreads, "wake graph for silent process\n");
                 _callback_start_sem.signal ();
                 _callback_done_sem.wait ();
         }
@@ -541,7 +541,7 @@ int
 Graph::process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
                        bool can_record, bool rec_monitors_input, bool& need_butler)
 {
-	DEBUG_TRACE (DEBUG::Graph, string_compose ("graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
+	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
 
         _process_nframes = nframes;
         _process_start_frame = start_frame;
@@ -555,11 +555,11 @@ Graph::process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end
         _process_retval = 0;
         _process_need_butler = false;
 
-	DEBUG_TRACE(DEBUG::Graph, "wake graph for non-silent process\n");
+	DEBUG_TRACE(DEBUG::ProcessThreads, "wake graph for non-silent process\n");
         _callback_start_sem.signal ();
 	_callback_done_sem.wait ();
 
-	DEBUG_TRACE (DEBUG::Graph, "graph execution complete\n");
+	DEBUG_TRACE (DEBUG::ProcessThreads, "graph execution complete\n");
 
         need_butler = _process_need_butler;
 
@@ -570,7 +570,7 @@ int
 Graph::routes_no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, 
                        bool non_rt_pending, bool can_record, int declick)
 {
-	DEBUG_TRACE (DEBUG::Graph, string_compose ("no-roll graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
+	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("no-roll graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
 
         _process_nframes = nframes;
         _process_start_frame = start_frame;
@@ -584,7 +584,7 @@ Graph::routes_no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end
         _process_retval = 0;
         _process_need_butler = false;
 
-	DEBUG_TRACE(DEBUG::Graph, "wake graph for no-roll process\n");
+	DEBUG_TRACE(DEBUG::ProcessThreads, "wake graph for no-roll process\n");
         _callback_start_sem.signal ();
         _callback_done_sem.wait ();
 

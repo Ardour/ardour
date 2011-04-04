@@ -36,7 +36,6 @@
 #include "pbd/memento_command.h"
 #include "pbd/enumwriter.h"
 #include "pbd/stateful_diff_command.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
@@ -164,8 +163,10 @@ MidiDiskstream::non_realtime_input_change ()
 
 		if (input_change_pending.type & IOChange::ConfigurationChanged) {
 			if (_io->n_ports().n_midi() != _n_channels.n_midi()) {
-				error << "Can not feed " << _io->n_ports() 
-                                      << " ports to " << _n_channels << " channels" 
+                                error << string_compose (_("%1: I/O configuration change %4 requested to use %2, but channel setup is %3"),
+                                                         name(),
+                                                         _io->n_ports(),
+                                                       _n_channels, input_change_pending.type)
                                       << endmsg;
 			}
 		}
@@ -1352,16 +1353,6 @@ MidiDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 		_write_source->mark_streaming_write_completed ();
 	}
 	use_new_write_source (0);
-}
-
-int
-MidiDiskstream::rename_write_sources ()
-{
-	if (_write_source != 0) {
-		_write_source->set_source_name (_name.val(), destructive());
-		/* XXX what to do if this fails ? */
-	}
-	return 0;
 }
 
 void

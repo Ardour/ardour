@@ -38,6 +38,7 @@
 #include "pbd/basename.h"
 #include "pbd/memento_command.h"
 #include "pbd/xml++.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
@@ -180,8 +181,10 @@ Diskstream::set_track (Track* t)
 	ic_connection.disconnect();
 	_io->changed.connect_same_thread (ic_connection, boost::bind (&Diskstream::handle_input_change, this, _1, _2));
 
-	input_change_pending.type = IOChange::Type (IOChange::ConfigurationChanged|IOChange::ConnectionsChanged);
-	non_realtime_input_change ();
+        if (_io->n_ports() != ChanCount::ZERO) {
+                input_change_pending.type = IOChange::Type (IOChange::ConfigurationChanged|IOChange::ConnectionsChanged);
+                non_realtime_input_change ();
+        }
 
 	_track->Destroyed.connect_same_thread (*this, boost::bind (&Diskstream::route_going_away, this));
 }
@@ -454,18 +457,9 @@ Diskstream::set_name (const string& str)
 	if (_name != str) {
 		assert(playlist());
 		playlist()->set_name (str);
-
 		SessionObject::set_name(str);
-
-		if (!in_set_state && recordable()) {
-			/* rename existing capture files so that they have the correct name */
-			return rename_write_sources ();
-		} else {
-			return false;
-		}
 	}
-
-	return true;
+        return true;
 }
 
 XMLNode&
