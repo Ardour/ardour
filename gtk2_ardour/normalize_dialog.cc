@@ -43,6 +43,7 @@ NormalizeDialog::NormalizeDialog (bool more_than_one)
 	_spin->set_range (-112, 0);
 	_spin->set_increments (0.1, 1);
 	_spin->set_value (_last_normalization_value);
+	_spin->set_activates_default ();
 	hbox->pack_start (*_spin, false, false);
 	hbox->pack_start (*manage (new Label (_("dbFS"))), false, false);
 	get_vbox()->pack_start (*hbox);
@@ -69,6 +70,7 @@ NormalizeDialog::NormalizeDialog (bool more_than_one)
 	
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (_("Normalize"), RESPONSE_ACCEPT);
+	set_default_response (RESPONSE_ACCEPT);
 
 	signal_response().connect (sigc::mem_fun (*this, &NormalizeDialog::button_clicked));
 }
