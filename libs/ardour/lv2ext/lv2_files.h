@@ -32,17 +32,18 @@
 extern "C" {
 #endif
 
-#define LV2_FILES_URI              "http://lv2plug.in/ns/ext/files"
-#define LV2_FILES_FILE_SUPPORT_URI LV2_FILES_URI "#fileSupport"
+#define LV2_FILES_URI                  "http://lv2plug.in/ns/ext/files"
+#define LV2_FILES_PATH_SUPPORT_URI     LV2_FILES_URI "#pathSupport"
+#define LV2_FILES_NEW_FILE_SUPPORT_URI LV2_FILES_URI "#newFileSupport"
 
 typedef void* LV2_Files_Host_Data;
 
 /**
-   files:fileSupport feature struct.
+   files:pathSupport feature struct.
    
    To support this feature, the host MUST pass an LV2_Feature struct with @a
-   URI "http://lv2plug.in/ns/ext/files#fileSupport" and @a data pointed to an
-   instance of this struct.
+   URI @ref LV2_FILES_PATH_SUPPORT_URI and @a data pointed to an instance of
+   this struct.
 */
 typedef struct {
 
@@ -95,6 +96,21 @@ typedef struct {
 	char* (*absolute_path)(LV2_Files_Host_Data host_data,
 	                       const char*         abstract_path);
 
+} LV2_Files_Path_Support;
+
+/**
+   files:newFileSupport feature struct.
+   
+   To support this feature, the host MUST pass an LV2_Feature struct with @a
+   URI @ref LV2_FILES_NEW_FILE_SUPPORT_URI and @a data pointed to an instance
+   of this struct.
+*/
+typedef struct {
+
+	/**
+	   Opaque host data.
+	*/
+	LV2_Files_Host_Data host_data;
 
 	/**
 	   Return an absolute path the plugin may use to create a new file.
@@ -107,7 +123,7 @@ typedef struct {
 	   giving each plugin instance its own state directory.  The returned path
 	   is absolute and thus suitable for creating and using a file, but NOT
 	   suitable for storing in plugin state (it MUST be mapped to an abstract
-	   path using @ref abstract_path in order to do so).
+	   path using @ref LV2_Files_Path_Support::abstract_path to do so).
 
 	   This function may be called from any non-realtime context.  The caller
 	   is responsible for freeing the returned value.
@@ -115,8 +131,7 @@ typedef struct {
 	char* (*new_file_path)(LV2_Files_Host_Data host_data,
 	                       const char*         relative_path);
 
-
-} LV2_Files_File_Support;
+} LV2_Files_New_File_Support;
 
 #ifdef __cplusplus
 } /* extern "C" */
