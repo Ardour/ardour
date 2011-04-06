@@ -59,7 +59,7 @@ SystemInstall ()
 
 	if which yum > /dev/null;
 	then
-		sudo yum -y install $1
+		${SUPER} yum -y install $1
 		rtrn=$?
 
 		if [ $rtrn -ne 0 ];
@@ -72,7 +72,7 @@ SystemInstall ()
 
 	elif which apt-get > /dev/null;
 	then
-		sudo apt-get -y install $1
+		${SUPER} apt-get -y install $1
 		rtrn=$?
 
 		if [ $rtrn -ne 0 ];
@@ -108,33 +108,53 @@ echo ""
 echo "Welcome to the ${PGM_NAME} installer"
 echo ""
 
-##############
-# Check sudo
-##############
+#############################
+# Check for root privileges
+#############################
 
-if ! which sudo > /dev/null;
-then
-	echo ""
-	echo "!!! ERROR !!!"
-	echo ""
-	echo "The program sudo appears to be missing from the system."
-	echo "Please correct this and run the installer again."
-	echo "This installer requires root privileges."
-	echo ""
-	read -p "Press ENTER to exit installer:" BLAH
-	exit 1
-fi
+SUPER=""
 
-if ! sudo date;
-then
+if [ "$(id -u)" != "0" ]; then
+
+	if ! which sudo > /dev/null;
+	then
+		echo ""
+		echo "!!! ERROR !!!"
+		echo ""
+		echo "The installer requires root privileges. It is currently not"
+		echo "running as root AND the program sudo is missing from this system."
+		echo ""
+		echo "Please correct this by installing and configuring sudo or running"
+		echo "the installer as root."
+		echo ""
+		read -p "Press ENTER to exit installer:" BLAH
+		exit 1
+	fi
+
+	if ! sudo date;
+	then
+		echo ""
+		echo "!!! ERROR !!!"
+		echo ""
+		echo "Either you don't know the root password or the user is not allowed to sudo"
+		echo "Please correct this and run the installer again"
+		echo "(hint: use visudo to edit sudoers file)"
+		echo ""
+		read -p "Press ENTER to exit installer:" BLAH
+		exit 1
+	fi
+	SUPER="sudo"
+else
 	echo ""
-	echo "!!! ERROR !!!"
+	echo "!!! Warning !!!"
 	echo ""
-	echo "Either you don't know the root password or the user is not allowed to sudo"
-	echo "Please correct this and run the installer again (hint: use visudo to edit sudoers file)"
+	echo "The installer is running as the root user which is not the prefered method."
+	echo "There are checks run at the end of the installer to help ensure proper operation"
+	echo "of ${PGM_NAME} (realtime priviledges, memory locking, frequency scaling)."
+	echo "Running as root will invalidate these tests."
 	echo ""
-	read -p "Press ENTER to exit installer:" BLAH
-	exit 1
+	read -p "Press ENTER to continue:" BLAH
+	
 fi
 
 ############################
@@ -332,7 +352,7 @@ then
 			echo "Running uninstaller $i"
 			
 			${i}
-			sudo rm -f ${i}
+			${SUPER} rm -f ${i}
 		fi
 	done
 fi
@@ -345,8 +365,8 @@ echo "Installing ${PGM_NAME} ${PGM_VERSION} built from ${PGM_BUILD} in ${INSTALL
 echo ""
 
 # Copy the new version in the install directory
-sudo mkdir ${INSTALL_DEST_BASE}/${PGM_FULL_NAME} 
-sudo cp -Rf	${BUNDLE_DIR}/* ${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/
+${SUPER} mkdir ${INSTALL_DEST_BASE}/${PGM_FULL_NAME} 
+${SUPER} cp -Rf	${BUNDLE_DIR}/* ${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/
 
 # write the desktop/menu file
 echo "[Desktop Entry]" > /tmp/${MENU_FILE}
@@ -366,24 +386,24 @@ echo "Comment=Digital Audio Workstation" >> /tmp/${MENU_FILE}
 echo "Categories=AudioVideo;AudioEditing;Audio;Recorder;" >> /tmp/${MENU_FILE}
 
 chmod ugo+rx /tmp/${MENU_FILE}
-sudo mv /tmp/${MENU_FILE} ${MENU_FILE_PATH}/.
+${SUPER} mv /tmp/${MENU_FILE} ${MENU_FILE_PATH}/.
 
 # install the Menu, Link, and Icon(s)
 if [ "T" = ${HAS_XDG} ];
 then
 	echo "Adding ${PGM_NAME} to the applications menu"
-	sudo xdg-icon-resource install --context apps --size 16 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_16px.png ${ICON_NAME}
-	sudo xdg-icon-resource install --context apps --size 22 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_22px.png ${ICON_NAME}
-	sudo xdg-icon-resource install --context apps --size 32 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_32px.png ${ICON_NAME}
-	sudo xdg-icon-resource install --context apps --size 48 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_48px.png ${ICON_NAME}
+	${SUPER} xdg-icon-resource install --context apps --size 16 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_16px.png ${ICON_NAME}
+	${SUPER} xdg-icon-resource install --context apps --size 22 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_22px.png ${ICON_NAME}
+	${SUPER} xdg-icon-resource install --context apps --size 32 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_32px.png ${ICON_NAME}
+	${SUPER} xdg-icon-resource install --context apps --size 48 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_48px.png ${ICON_NAME}
 
 	if [ -e ${ICON_PATH}/${PGM_NAME_LOWER}_icon.svg -a -d /usr/share/icons/hicolor/scalable/apps ]; 
 	then
-		sudo cp -f ${ICON_PATH}/${PGM_NAME_LOWER}_icon.svg  /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg
+		${SUPER} cp -f ${ICON_PATH}/${PGM_NAME_LOWER}_icon.svg  /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg
 	fi
 
-	sudo xdg-desktop-menu install ${MENU_FILE_PATH}/${MENU_FILE}
-	sudo xdg-desktop-menu forceupdate --mode system			# Some systems need an extra kick
+	${SUPER} xdg-desktop-menu install ${MENU_FILE_PATH}/${MENU_FILE}
+	${SUPER} xdg-desktop-menu forceupdate --mode system			# Some systems need an extra kick
 	
 	echo ""
 	echo "Creating a desktop link for ${PGM_NAME}"
@@ -400,7 +420,7 @@ echo ""
 echo "Copying uninstall script to ${INSTALL_DEST_BASE}"
 echo ""
 
-sudo cp -f ${BUNDLE_DIR}/bin/*.uninstall.sh ${INSTALL_DEST_BASE}/.
+${SUPER} cp -f ${BUNDLE_DIR}/bin/*.uninstall.sh ${INSTALL_DEST_BASE}/.
 
 ###########################
 # Check Jack and qjackctl
@@ -502,7 +522,7 @@ then
 					read -p "Press ENTER to continue:" BLAH
 
 					user=`whoami`
-					if sudo usermod -a -G audio $user;
+					if ${SUPER} usermod -a -G audio $user;
 					then
 						USER_GROUP_ADJUSTED="t"
 					else
@@ -524,7 +544,7 @@ then
 					read -p "Press ENTER to continue:" BLAH
 
 					user=`whoami`
-					if sudo usermod -a -G jackuser $user;
+					if ${SUPER} usermod -a -G jackuser $user;
 					then
 						USER_GROUP_ADJUSTED="t"
 					else
