@@ -343,20 +343,6 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 		return;
 	}
 
-	if ((*iter)[_columns.is_visible]) {
-		for (TrackViewList::const_iterator j = _editor->get_track_views().begin(); j != _editor->get_track_views().end(); ++j) {
-			if ((*j)->route_group() == group) {
-				_editor->_routes->show_track_in_display (**j);
-			}
-		}
-	} else {
-		for (TrackViewList::const_iterator j = _editor->get_track_views().begin(); j != _editor->get_track_views().end(); ++j) {
-			if ((*j)->route_group() == group) {
-				_editor->hide_track_in_display (*j);
-			}
-		}
-	}
-
 	PropertyList plist;
 	bool val = (*iter)[_columns.gain];
 	plist.add (Properties::gain, val);
@@ -404,7 +390,7 @@ EditorRouteGroups::add (RouteGroup* group)
 		focus = true;
 	}
 
-	group->PropertyChanged.connect (property_changed_connection, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::property_changed, this, group, _1), gui_context());
+	group->PropertyChanged.connect (_property_changed_connections, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::property_changed, this, group, _1), gui_context());
 
 	if (focus) {
 		TreeViewColumn* col = _display.get_column (0);
@@ -456,6 +442,16 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange& ch
 	if (change.contains (Properties::name) || change.contains (Properties::active)) {
 		_editor->_group_tabs->set_dirty ();
 	}
+
+	for (TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
+		if ((*i)->route_group() == group) {
+			if (group->is_hidden ()) {
+				_editor->hide_track_in_display (*i);
+			} else {
+				_editor->_routes->show_track_in_display (**i);
+			}
+		}
+	}
 }
 
 void
@@ -493,7 +489,7 @@ EditorRouteGroups::set_session (Session* s)
 
 		RouteGroup& arg (_session->all_route_group());
                 
-		arg.PropertyChanged.connect (property_changed_connection, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::all_group_changed, this, _1), gui_context());
+		arg.PropertyChanged.connect (all_route_groups_changed_connection, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::all_group_changed, this, _1), gui_context());
 
 		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::add, this, _1), gui_context());
 		_session->route_group_removed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::groups_changed, this), gui_context());

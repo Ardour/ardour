@@ -81,7 +81,8 @@ private:
 	Gtk::VBox _display_packer;
         Gtk::ToggleButton _all_group_active_button;
 	bool _in_row_change;
-	PBD::ScopedConnection property_changed_connection;
+	PBD::ScopedConnectionList _property_changed_connections;
+	PBD::ScopedConnection all_route_groups_changed_connection;
 };
 
 

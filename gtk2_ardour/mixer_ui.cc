@@ -1188,6 +1188,16 @@ Mixer_UI::route_group_property_changed (RouteGroup* group, const PropertyChange&
 	if (change.contains (Properties::name)) {
 		_group_tabs->set_dirty ();
 	}
+
+	for (list<MixerStrip*>::iterator j = strips.begin(); j != strips.end(); ++j) {
+		if ((*j)->route_group() == group) {
+			if (group->is_hidden ()) {
+				hide_strip (*j);
+			} else {
+				show_strip (*j);
+			}
+		}
+	}
 }
 
 void
@@ -1221,26 +1231,17 @@ Mixer_UI::route_group_row_change (const Gtk::TreeModel::Path&, const Gtk::TreeMo
 		return;
 	}
 
-	if ((*iter)[group_columns.visible]) {
-		for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-			if ((*i)->route_group() == group) {
-				show_strip (*i);
-			}
-		}
-	} else {
-		for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-			if ((*i)->route_group() == group) {
-				hide_strip (*i);
-			}
-		}
-	}
-
 	std::string name = (*iter)[group_columns.text];
 
 	if (name != group->name()) {
 		group->set_name (name);
 	}
 
+	bool hidden = !(*iter)[group_columns.visible];
+
+	if (hidden != group->is_hidden ()) {
+		group->set_hidden (hidden, this);
+	}
 }
 
 void
@@ -1252,7 +1253,7 @@ Mixer_UI::add_route_group (RouteGroup* group)
 	in_group_row_change = true;
 
 	TreeModel::Row row = *(group_model->append());
-	row[group_columns.visible] = true;
+	row[group_columns.visible] = !group->is_hidden ();
 	row[group_columns.group] = group;
 	if (!group->name().empty()) {
 		row[group_columns.text] = group->name();

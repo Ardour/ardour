@@ -377,6 +377,7 @@ RouteGroup::set_hidden (bool yn, void* /*src*/)
 	if (is_hidden() == yn) {
 		return;
 	}
+	
 	if (yn) {
 		_hidden = true;
 		if (Config->get_hiding_groups_deactivates_groups()) {
@@ -388,6 +389,9 @@ RouteGroup::set_hidden (bool yn, void* /*src*/)
 			_active = true;
 		}
 	}
+
+	PropertyChanged (Properties::hidden); /* EMIT SIGNAL */
+	
 	_session.set_dirty ();
 }
 
