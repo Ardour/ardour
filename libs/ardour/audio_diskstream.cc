@@ -397,6 +397,8 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 	possibly_recording = (rolling << 2) | (record_enabled() << 1) | can_record;
 	change = possibly_recording ^ last_possibly_recording;
 
+        nframes_t existing_material_offset = _session.worst_playback_latency ();
+
         if (possibly_recording == fully_rec_enabled) {
 
                 if (last_possibly_recording == fully_rec_enabled) {
@@ -405,65 +407,12 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 
                 /* we transitioned to recording. lets see if its transport based or a punch */
                 
-		first_recordable_frame = transport_frame + _capture_offset;
+		capture_start_frame = _session.transport_frame();
+		first_recordable_frame = capture_start_frame + _capture_offset;
 		last_recordable_frame = max_frames;
-		capture_start_frame = transport_frame;
 
-                if (change & transport_rolling) {
-
-                        /* transport-change (started rolling) */
-                        
-			if (_alignment_style == ExistingMaterial) {
-                                
-                                /* there are two delays happening:
-                                   
-                                   1) inbound, represented by _capture_offset
-                                   2) outbound, represented by _session.worst_output_latency()
-
-                                   the first sample to record occurs when the larger of these
-                                   two has elapsed, since they occur in parallel.
-
-                                   since we've already added _capture_offset, just add the
-                                   difference if _session.worst_output_latency() is larger.
-                                */
-
-                                if (_capture_offset < _session.worst_output_latency()) {
-                                        first_recordable_frame += (_session.worst_output_latency() - _capture_offset);
-                                } 
-                        } else {
-				first_recordable_frame += _roll_delay;
-  			}
-                        
-                } else {
-
-                        /* punch in */
-
-			if (_alignment_style == ExistingMaterial) {
-
-				/* There are two kinds of punch:
-                                   
-                                   manual punch in happens at the correct transport frame
-                                   because the user hit a button. but to get alignment correct 
-                                   we have to back up the position of the new region to the 
-                                   appropriate spot given the roll delay.
-
-                                   autopunch toggles recording at the precise
-				   transport frame, and then the DS waits
-				   to start recording for a time that depends
-				   on the output latency.
-
-                                   XXX: BUT THIS CODE DOESN'T DIFFERENTIATE !!!
-
-				*/
-
-                                if (_capture_offset < _session.worst_output_latency()) {
-                                        /* see comment in ExistingMaterial block above */
-                                        first_recordable_frame += (_session.worst_output_latency() - _capture_offset);
-                                }
-
-			} else {
-				capture_start_frame -= _roll_delay;
-			}
+                if (_alignment_style == ExistingMaterial) {
+                        first_recordable_frame += existing_material_offset;
                 }
 
 		if (recordable() && destructive()) {
@@ -499,14 +448,10 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
                         } else {
                                 /* punch out */
                                 
-                                last_recordable_frame = transport_frame + _capture_offset;
+                                last_recordable_frame = _session.transport_frame() + _capture_offset;
                                 
                                 if (_alignment_style == ExistingMaterial) {
-                                        if (_session.worst_output_latency() > _capture_offset) {
-                                                last_recordable_frame += (_session.worst_output_latency() - _capture_offset);
-                                        }
-                                } else {
-                                        last_recordable_frame += _roll_delay;
+                                        last_recordable_frame += existing_material_offset;
                                 }
                         }
                 }

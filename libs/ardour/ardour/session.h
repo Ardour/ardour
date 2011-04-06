@@ -444,6 +444,7 @@ class Session : public PBD::StatefulDestructible
 	nframes_t worst_output_latency () const { return _worst_output_latency; }
 	nframes_t worst_input_latency () const { return _worst_input_latency; }
 	nframes_t worst_track_latency () const { return _worst_track_latency; }
+	nframes_t worst_playback_latency () const { return _worst_output_latency + _worst_track_latency; }
 
 	int save_state (string snapshot_name, bool pending = false, bool switch_to_snapshot = false);
 	int restore_state (string snapshot_name);
