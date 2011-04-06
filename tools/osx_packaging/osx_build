@@ -152,11 +152,11 @@ fi
 if test x$INTERNAL_JACK != x ; then
     env="$env<key>ARDOUR_INTERNAL_JACK</key><string>true</string>"
 else
-    env="$env<key>PATH</key><string>/usr/local/bin:/opt/bin</string>"
+    env="$env<key>PATH</key><string>/usr/local/bin:/opt/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>"
     env="$env<key>DYLIB_FALLBACK_LIBRARY_PATH</key><string>/usr/local/lib:/opt/lib</string>"
 fi
 
-env="<key>LSEnvironment</key><dict><key>ARDOUR_BUNDLED</key><string>true</string>$env</dict>"
+env="<key>LSEnvironment</key><dict>$env<key>ARDOUR_BUNDLED</key><string>true</string></dict>"
 
 # edit plist
 sed -e "s?@ENV@?$env?g" \
