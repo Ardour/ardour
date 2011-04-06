@@ -148,7 +148,8 @@ class LV2Plugin : public ARDOUR::Plugin
 	LV2_DataAccess _data_access_extension_data;
 	LV2_Feature    _data_access_feature;
 	LV2_Feature    _instance_access_feature;
-	LV2_Feature    _files_feature;
+	LV2_Feature    _path_support_feature;
+	LV2_Feature    _new_file_support_feature;
 	LV2_Feature    _persist_feature;
 
 	static URIMap   _uri_map;

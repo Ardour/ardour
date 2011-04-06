@@ -103,32 +103,38 @@ LV2Plugin::init(LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 	_latency_control_port = 0;
 	_was_activated        = false;
 
-	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
-	_data_access_feature.URI     = "http://lv2plug.in/ns/ext/data-access";
-	_files_feature.URI           = LV2_FILES_FILE_SUPPORT_URI;
-	_persist_feature.URI         = "http://lv2plug.in/ns/ext/persist";
-	_persist_feature.data        = NULL;
+	_instance_access_feature.URI  = "http://lv2plug.in/ns/ext/instance-access";
+	_data_access_feature.URI      = "http://lv2plug.in/ns/ext/data-access";
+	_path_support_feature.URI     = LV2_FILES_PATH_SUPPORT_URI;
+	_new_file_support_feature.URI = LV2_FILES_NEW_FILE_SUPPORT_URI;
+	_persist_feature.URI          = "http://lv2plug.in/ns/ext/persist";
+	_persist_feature.data         = NULL;
 
 	SLV2Value persist_uri = slv2_value_new_uri(_world.world, _persist_feature.URI);
 	_supports_persist = slv2_plugin_has_feature(plugin, persist_uri);
 	slv2_value_free(persist_uri);
 
-	_features    = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 6);
+	_features    = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 7);
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
-	_features[2] = &_files_feature;
-	_features[3] = &_persist_feature;
-	_features[4] = _uri_map.feature();
-	_features[5] = NULL;
+	_features[2] = &_path_support_feature;
+	_features[3] = &_new_file_support_feature;
+	_features[4] = &_persist_feature;
+	_features[5] = _uri_map.feature();
+	_features[6] = NULL;
 
-	LV2_Files_File_Support* file_support = (LV2_Files_File_Support*)malloc(
-		sizeof(LV2_Files_File_Support));
-	file_support->host_data = this;
-	file_support->abstract_path = &lv2_files_abstract_path;
-	file_support->absolute_path = &lv2_files_absolute_path;
-	file_support->new_file_path = &lv2_files_new_file_path;
-	
-	_files_feature.data = file_support;
+	LV2_Files_Path_Support* path_support = (LV2_Files_Path_Support*)malloc(
+		sizeof(LV2_Files_Path_Support));
+	path_support->host_data = this;
+	path_support->abstract_path = &lv2_files_abstract_path;
+	path_support->absolute_path = &lv2_files_absolute_path;
+	_path_support_feature.data = path_support;
+
+	LV2_Files_New_File_Support* new_file_support = (LV2_Files_New_File_Support*)malloc(
+		sizeof(LV2_Files_New_File_Support));
+	new_file_support->host_data = this;
+	new_file_support->new_file_path = &lv2_files_new_file_path;
+	_new_file_support_feature.data = new_file_support;
 
 	_instance = slv2_plugin_instantiate(plugin, rate, _features);
 	_name     = slv2_plugin_get_name(plugin);
@@ -724,6 +730,8 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 	if ((prop = node.property("state-file")) != 0) {
 		std::string state_path = Glib::build_filename(_session.plugins_dir(),
 		                                              prop->value());
+
+		cout << "LV2 state path " << state_path << endl;
 
 		// Get LV2 Persist extension data from plugin instance
 		LV2_Persist* persist = (LV2_Persist*)slv2_instance_get_extension_data(
