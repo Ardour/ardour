@@ -487,13 +487,13 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, framepos_t* pending_r
 
 	if ((*pending_region_position != _last_frame_position) && x_move_allowed) {
 
-		/* x movement since last time */
+		/* x movement since last time (in pixels) */
 		dx = (static_cast<double> (*pending_region_position) - _last_frame_position) / _editor->frames_per_unit;
 
 		/* total x movement */
 		framecnt_t total_dx = *pending_region_position;
 		if (regions_came_from_canvas()) {
-			total_dx = total_dx - grab_frame () + _pointer_frame_offset;
+			total_dx = total_dx - grab_frame ();
 		}
 
 		/* check that no regions have gone off the start of the session */
