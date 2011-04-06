@@ -163,8 +163,8 @@ msgid "Nimal Ratnayake"
 msgstr "Nimal Ratnayake"
 
 #: about.cc:158
-msgid "Dave Robillard"
-msgstr "Dave Robillard"
+msgid "David Robillard"
+msgstr "David Robillard"
 
 #: about.cc:159
 msgid "Taybin Rutkin"

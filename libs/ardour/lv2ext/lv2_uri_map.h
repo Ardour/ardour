@@ -1,6 +1,6 @@
 /* lv2_uri_map.h - C header file for the LV2 URI Map extension.
  * 
- * Copyright (C) 2008 Dave Robillard <dave@drobilla.net>
+ * Copyright (C) 2008 David Robillard <d@drobilla.net>
  * 
  * This header is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published

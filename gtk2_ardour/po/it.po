@@ -154,7 +154,7 @@ msgid "Nimal Ratnayake"
 msgstr ""
 
 #: about.cc:157
-msgid "Dave Robillard"
+msgid "David Robillard"
 msgstr ""
 
 #: about.cc:158

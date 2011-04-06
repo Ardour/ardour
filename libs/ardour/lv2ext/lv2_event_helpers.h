@@ -1,6 +1,6 @@
 /* lv2_event_helpers.h - Helper functions for the LV2 events extension.
  *
- * Copyright (C) 2008 Dave Robillard <dave@drobilla.net>
+ * Copyright (C) 2008 David Robillard <d@drobilla.net>
  *
  * This header is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published

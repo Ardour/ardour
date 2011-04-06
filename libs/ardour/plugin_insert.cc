@@ -870,6 +870,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	}
 
 	Processor::set_state (node, version);
+	plugin->set_insert_info (this);
 
 	if ((prop = node.property ("count")) != 0) {
 		sscanf (prop->value().c_str(), "%u", &count);
@@ -885,6 +886,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 		if ((*niter)->name() == plugin->state_node_name()) {
 
+			plugin->set_state (**niter, version);
 			for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 				(*i)->set_state (**niter, version);
 			}

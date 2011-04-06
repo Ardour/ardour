@@ -1,6 +1,6 @@
 
 /* This file is part of Evoral.
- * Copyright (C) 2008 Dave Robillard <http://drobilla.net>
+ * Copyright (C) 2008 David Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
  *
  * Evoral is free software; you can redistribute it and/or modify it under the

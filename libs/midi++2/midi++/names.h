@@ -1,5 +1,5 @@
 /* Names of standard MIDI events and controllers.
- * Copyright (C) 2007-2008 Dave Robillard <http://drobilla.net>
+ * Copyright (C) 2007-2008 David Robillard <http://drobilla.net>
  *
  * This library is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as

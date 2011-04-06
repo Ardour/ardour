@@ -155,7 +155,7 @@ static const char* authors[] = {
 	N_("Doug Mclain"),
 	N_("Jack O'Quin"),
 	N_("Nimal Ratnayake"),
-	N_("Dave Robillard"),
+	N_("David Robillard"),
 	N_("Taybin Rutkin"),
 	N_("Andreas Ruge"),
 	N_("Sampo Savolainen"),

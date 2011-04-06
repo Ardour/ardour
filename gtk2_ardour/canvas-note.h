@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2007 Paul Davis
-    Author: Dave Robillard
+    Author: David Robillard
     Author: Hans Baier
 
     This program is free software; you can redistribute it and/or modify
