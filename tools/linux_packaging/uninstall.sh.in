@@ -33,6 +33,44 @@ fi
 MENU_FILE_PATH="${PGM_PATH}/share/${MENU_FILE}"
 
 
+#############################
+# Check for root privileges
+#############################
+
+SUPER=""
+
+if [ "$(id -u)" != "0" ]; then
+
+	if ! which sudo > /dev/null;
+	then
+		echo ""
+		echo "!!! ERROR !!!"
+		echo ""
+		echo "The uninstaller requires root privileges. It is currently not"
+		echo "running as root AND the program sudo is missing from this system."
+		echo ""
+		echo "Please correct this by running the uninstaller as root or"
+		echo "installing and configuring sudo."
+		echo ""
+		read -p "Press ENTER to exit uninstaller:" BLAH
+		exit 1
+	fi
+
+	if ! sudo date;
+	then
+		echo ""
+		echo "!!! ERROR !!!"
+		echo ""
+		echo "Either you don't know the root password or the user is not allowed to sudo"
+		echo "Please correct this and run the uninstaller again"
+		echo "(hint: use visudo to edit sudoers file or run the installer as root)"
+		echo ""
+		read -p "Press ENTER to exit uninstaller:" BLAH
+		exit 1
+	fi
+	SUPER="sudo"
+fi
+
 #######################
 # Check for xdg utils
 #######################
@@ -65,26 +103,26 @@ then
 
 	if [ "T" = ${HAS_XDG} ];
 	then
-		sudo xdg-desktop-menu uninstall ${MENU_FILE_PATH}
-		sudo xdg-icon-resource uninstall --size 16 ${ICON_NAME}
-		sudo xdg-icon-resource uninstall --size 22 ${ICON_NAME}
-		sudo xdg-icon-resource uninstall --size 32 ${ICON_NAME}
-		sudo xdg-icon-resource uninstall --size 48 ${ICON_NAME}
+		${SUPER} xdg-desktop-menu uninstall ${MENU_FILE_PATH}
+		${SUPER} xdg-icon-resource uninstall --size 16 ${ICON_NAME}
+		${SUPER} xdg-icon-resource uninstall --size 22 ${ICON_NAME}
+		${SUPER} xdg-icon-resource uninstall --size 32 ${ICON_NAME}
+		${SUPER} xdg-icon-resource uninstall --size 48 ${ICON_NAME}
 
 		if [ -e /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg ]; 
 		then
-			sudo rm -f /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg
+			${SUPER} rm -f /usr/share/icons/hicolor/scalable/apps/${ICON_NAME}.svg
 		fi
 	fi
 
 	if [ -e ~/Desktop/${DESKTOP_LINK_FILE} ];
 	then
-		sudo rm -f ~/Desktop/${DESKTOP_LINK_FILE}
+		${SUPER} rm -f ~/Desktop/${DESKTOP_LINK_FILE}
 	fi
 
 	# delete the old package
-	sudo rm -rf ${PGM_PATH}
-	sudo rm -f $0
+	${SUPER} rm -rf ${PGM_PATH}
+	${SUPER} rm -f $0
 else
 	echo ""
 	echo "!!! FAILURE !!! - install path ${PGM_PATH} does not exist."

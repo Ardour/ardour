@@ -52,8 +52,6 @@ while [ $# -gt 0 ] ; do
 	esac
 done
 
-release_version=`grep -m 1 '^VERSION' ../../wscript | awk '{print $3}' | sed "s/'//g"`
-svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d"'" -f 2`
 
 # Figure out the Build Type
 if grep -q "DEBUG = True" ../../build/c4che/default.cache.py; then
@@ -70,27 +68,37 @@ if [ x$DEBUG != x ]; then
 	fi
 fi
 
+release_version=`grep -m 1 '^VERSION' ../../wscript | awk '{print $3}' | sed "s/'//g"`
+svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d"'" -f 2`
 
-if [ -z ${BUILDTYPE} ]; then
-	X86_BUILD="${APPNAME}_x86-${release_version}_${svn_version}.tar.bz2"
-	X86_64_BUILD="${APPNAME}_x86_64-${release_version}_${svn_version}.tar.bz2"
-else
-	X86_BUILD="${APPNAME}_x86-${release_version}_${svn_version}-${BUILDTYPE}.tar.bz2"
-	X86_64_BUILD="${APPNAME}_x86_64-${release_version}_${svn_version}-${BUILDTYPE}.tar.bz2"
+X86_BUNDLE="${APPNAME}_x86-${release_version}_${svn_version}"
+X86_64_BUNDLE="${APPNAME}_x86_64-${release_version}_${svn_version}"
+
+if [ ! -z ${BUILDTYPE} ]; then
+	X86_BUNDLE="${X86_BUNDLE}-${BUILDTYPE}"
+	X86_64_BUNDLE="${X86_64_BUNDLE}-${BUILDTYPE}"
 fi 
 
 
-if [ ! -e ${X86_BUILD} ]; then
+if [ ! -e ${X86_BUNDLE}.tar.bz2 ] ; then
 	echo ""
-	echo "Can't locate x86 bundle file ${X86_BUILD}"
+	echo "Can't locate x86 bundle file ${X86_BUNDLE}.tar.bz2"
+	echo ""
+elif [ ! -e ${X86_BUNDLE}.size ] ; then
+	echo ""
+	echo "Can't locate x86 bundle size file ${X86_BUNDLE}.size"
 	echo ""
 else
 	X86_BUNDLE_OK="T"
 fi
 
-if [ ! -e ${X86_64_BUILD} ]; then
+if [ ! -e ${X86_64_BUNDLE}.tar.bz2 ]; then
 	echo ""
-	echo "Can't locate x86_64 bundle file ${X86_64_BUILD}"
+	echo "Can't locate x86_64 bundle file ${X86_64_BUNDLE}.tar.bz2"
+	echo ""
+elif [ ! -e ${X86_64_BUNDLE}.size ]; then
+	echo ""
+	echo "Can't locate x86 bundle size file ${X86_BUNDLE}.size"
 	echo ""
 else
 	X86_64_BUNDLE_OK="T"
@@ -100,7 +108,7 @@ fi
 if [ "${X86_BUNDLE_OK}" = "F" ] || [ "${X86_64_BUNDLE_OK}" = "F" ]; then
 	if [ "${X86_BUNDLE_OK}" = "${X86_64_BUNDLE_OK}" ]; then
 		echo ""
-		echo "!!! ERROR !!! - Can't locate bundle files ${X86_BUILD} or ${X86_64_BUILD}"
+		echo "!!! ERROR !!! - Can't locate bundle files ${X86_BUNDLE} or ${X86_64_BUNDLE}"
 		echo ""
 		exit 1
 	elif [ "${SINGLE_ARCH}" = "T" ]; then
@@ -150,11 +158,13 @@ echo "Creating new package dir..."
 mkdir ${PACKAGE}
 
 if [ "${X86_BUNDLE_OK}" = "T" ]; then
-	mv ${X86_BUILD} ${PACKAGE}
+	mv ${X86_BUNDLE}.tar.bz2 ${PACKAGE}
+	mv ${X86_BUNDLE}.size ${PACKAGE}/.${X86_BUNDLE}.size
 fi
 
 if [ "${X86_64_BUNDLE_OK}" = "T" ]; then
-	mv ${X86_64_BUILD} ${PACKAGE}
+	mv ${X86_64_BUNDLE}.tar.bz2 ${PACKAGE}
+	mv ${X86_64_BUNDLE}.size ${PACKAGE}/.${X86_64_BUNDLE}.size
 fi
 
 cp install.sh ${PACKAGE}

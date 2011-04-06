@@ -607,6 +607,9 @@ echo "Building tarball ..."
 rm -f $APPDIR.tar.bz2
 tar -cjf $APPDIR.tar.bz2 $APPDIR
 
+echo "Calculating bundle size"
+du -sb $APPDIR/  | awk '{print $1}' > $APPDIR.size
+
 rm -rf $APPDIR/
 
 echo "Done."
