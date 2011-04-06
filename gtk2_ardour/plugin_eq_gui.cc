@@ -73,7 +73,10 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	// dB selection
 	dBScaleModel = Gtk::ListStore::create(dBColumns);
 
-	dBScaleCombo = new Gtk::ComboBox(dBScaleModel);
+	/* this grotty-looking cast allows compilation against gtkmm 2.24.0, which
+	   added a new ComboBox constructor.
+	*/
+	dBScaleCombo = new Gtk::ComboBox ((Glib::RefPtr<Gtk::TreeModel> &) dBScaleModel);
 	dBScaleCombo->set_title (_("dB scale"));
 
 #define ADD_DB_ROW(MIN,MAX,STEP,NAME) \
