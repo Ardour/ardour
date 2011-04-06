@@ -15,7 +15,7 @@ SAE=
 MIXBUS=
 INTERNAL_JACK=1
 WITH_LADSPA=0
-STRIP=1
+STRIP=all
 PRINT_SYSDEPS=
 WITH_NLS=
 EXTERNAL_JACK=
@@ -44,7 +44,7 @@ while [ $# -gt 0 ] ; do
 		SAE=1 ; 
 		INTERNAL_JACK=1; 
 		WITH_LADSPA=1; 
-		STRIP=1; 
+		STRIP=all; 
 		APPNAME=Ardour ;
 		shift ;;
 	--mixbus)
@@ -53,7 +53,7 @@ while [ $# -gt 0 ] ; do
 		SAE= ; 
 		INTERNAL_JACK=; 
 		WITH_LADSPA=; 
-		STRIP=1; 
+		STRIP=all;
 		APPNAME=Mixbus ;
 		VENDOR=Harrison ;
 		shift ;;
@@ -62,7 +62,7 @@ while [ $# -gt 0 ] ; do
 		SAE= ; 
 		INTERNAL_JACK=; 
 		WITH_LADSPA=; 
-		STRIP=1; 
+		STRIP=all ; 
 		APPNAME=Ardour ;
 		shift ;;
 	--allinone)
@@ -70,9 +70,9 @@ while [ $# -gt 0 ] ; do
 		WITH_NLS= ; 
 		INTERNAL_JACK=1; 
 		WITH_LADSPA=1; 
-		STRIP=1; 
+		STRIP=all; 
 		shift ;;
-	--test) SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP= ; shift ;;
+	--test) SAE= ; INTERNAL_JACK=; WITH_LADSPA=; STRIP=all ; shift ;;
 
 	#
 	# specific build flags
@@ -80,7 +80,7 @@ while [ $# -gt 0 ] ; do
 
 	--nojack) INTERNAL_JACK= ; shift ;;
 	--noladspa) WITH_LADSPA= ; shift ;;
-	--nostrip) STRIP= ; shift ;;
+	--strip) STRIP=$2 ; shift ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
 	--external_jack) EXTERNAL_JACK=$2; shift ; shift ;;
@@ -94,6 +94,12 @@ while [ $# -gt 0 ] ; do
 		;;
 	esac
 done
+
+if test x$STRIP != xall -a x$STRIP != xnone -a x$STRIP != xsome ; then
+	echo "Unknown strip option \"$STRIP\""
+	echo "Legal values are: all, none, some"
+	exit 1
+fi
 
 if [ x$EXTERNAL_JACK != x -a x$INTERNAL_JACK != x ] ; then
 	echo "It makes no sense to package JACK internally and externally. Please pick one."
@@ -133,11 +139,11 @@ else
 fi
 
 if [ x$DEBUG != x ]; then
-	if [ x$STRIP != x ]; then
-		BUILDTYPE="strip"
-	else
-		BUILDTYPE="dbg"
-	fi
+    BUILDTYPE="dbg"
+    if [ x$STRIP = xall ] ; then
+        echo "A debug build with --strip all makes no sense - STRIP reset to \"some\""
+        STRIP=some
+    fi
 fi
 
 
@@ -237,7 +243,7 @@ MAIN_EXECUTABLE=ardour-$release_version
 
 echo "Copying ardour executable ...."
 cp ../../gtk2_ardour/$MAIN_EXECUTABLE $APPBIN
-if test x$STRIP != x ; then
+if test x$STRIP = xall ; then
 	strip $APPBIN/$MAIN_EXECUTABLE
 fi
 
@@ -463,6 +469,7 @@ OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardo
 echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 checkedIdx=0
+deplibs=
 
 while [ true ] ; do 
 	missing=false
@@ -523,6 +530,10 @@ while [ true ] ; do
 					echo "Copying dependant lib $dep    (required by ${parent})"
 					cp $dep $Libraries
 				fi
+				if echo $dep | grep -sq '^/' ; then
+					# absolute path, candidate for stripping
+					deplibs="$deplibs $base"
+				fi
 				missing=true
 			fi
 		done
@@ -535,11 +546,15 @@ done
 echo
 
 # strip libraries
-if test x$STRIP != x ; then
-	echo Stripping libraries
-	find $APPLIB/ -name "*.so*" | xargs strip
+if test x$STRIP = xall ; then
+    echo Stripping all libraries
+    find $APPLIB/ -name "*.so*" | xargs strip
+elif test x$STRIP = xsome ; then
+    echo Stripping dependent libraries
+    for l in $deplibs ; do
+        strip $APPLIB/$l
+    done
 fi
-	
 find $APPLIB/ -name "*.so*" | xargs chmod a+rx
 
 echo "Copying other stuff to $APPDIR  ..."
