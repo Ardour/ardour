@@ -1251,7 +1251,7 @@ Editor::register_region_actions ()
 	reg_sens (_region_actions, "cut-region-gain", _("Cut Gain"), sigc::bind (sigc::mem_fun(*this, &Editor::adjust_region_gain), false));
 	
 	/* Open the pitch shift dialogue for the selected regions */
-	reg_sens (_region_actions, "pitch-shift-region", _("Transpose"), sigc::mem_fun (*this, &Editor::pitch_shift_region));
+	reg_sens (_region_actions, "pitch-shift-region", _("Pitch Shift"), sigc::mem_fun (*this, &Editor::pitch_shift_region));
 	
 	/* Toggle selected region opacity */
 	toggle_reg_sens (_region_actions, "toggle-opaque-region", _("Opaque"), sigc::mem_fun (*this, &Editor::toggle_opaque_region));
