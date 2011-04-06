@@ -58,7 +58,7 @@ public:
 
 	class DiffCommand : public Command {
 	public:
-		
+
 		DiffCommand (boost::shared_ptr<MidiModel> m, const std::string& name);
 
 		const std::string& name () const { return _name; }
@@ -69,7 +69,7 @@ public:
 		virtual int set_state (const XMLNode&, int version) = 0;
 		virtual XMLNode & get_state () = 0;
 
-                boost::shared_ptr<MidiModel> model() const { return _model; }
+		boost::shared_ptr<MidiModel> model() const { return _model; }
 
 	protected:
 		boost::shared_ptr<MidiModel> _model;
@@ -82,7 +82,7 @@ public:
 
 		NoteDiffCommand (boost::shared_ptr<MidiModel> m, const std::string& name) : DiffCommand (m, name) {}
 		NoteDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
-		
+
 		enum Property {
 			NoteNumber,
 			Velocity,
@@ -96,21 +96,21 @@ public:
 
 		int set_state (const XMLNode&, int version);
 		XMLNode & get_state ();
-		
+
 		void add (const NotePtr note);
 		void remove (const NotePtr note);
-                void side_effect_remove (const NotePtr note);
+		void side_effect_remove (const NotePtr note);
 
 		void change (const NotePtr note, Property prop, uint8_t new_value);
 		void change (const NotePtr note, Property prop, TimeType new_time);
 
-                bool adds_or_removes() const { 
-                        return !_added_notes.empty() || !_removed_notes.empty();
-                }
+		bool adds_or_removes() const {
+			return !_added_notes.empty() || !_removed_notes.empty();
+		}
 
-                NoteDiffCommand& operator+= (const NoteDiffCommand& other);
-		
-          private:
+		NoteDiffCommand& operator+= (const NoteDiffCommand& other);
+
+	private:
 		struct NoteChange {
 			NoteDiffCommand::Property property;
 			NotePtr note;
@@ -131,7 +131,7 @@ public:
 		NoteList _added_notes;
 		NoteList _removed_notes;
 
-                std::set<NotePtr> side_effect_removals;
+		std::set<NotePtr> side_effect_removals;
 
 		XMLNode &marshal_change(const NoteChange&);
 		NoteChange unmarshal_change(XMLNode *xml_note);
@@ -144,7 +144,7 @@ public:
 	class SysExDiffCommand : public DiffCommand {
 	public:
 		SysExDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
-		
+
 		enum Property {
 			Time,
 		};
@@ -154,7 +154,7 @@ public:
 
 		void operator() ();
 		void undo ();
-		
+
 		void change (boost::shared_ptr<Evoral::Event<TimeType> >, TimeType);
 
 	private:
@@ -164,7 +164,7 @@ public:
 			TimeType old_time;
 			TimeType new_time;
 		};
-			
+
 		typedef std::list<Change> ChangeList;
 		ChangeList _changes;
 
@@ -196,29 +196,28 @@ public:
 			Program,
 			Bank
 		};
-		
+
 	private:
-		
 		struct Change {
 			PatchChangePtr patch;
-			Property property;
+			Property       property;
 			union {
-				TimeType old_time;
-				uint8_t old_channel;
-				int old_bank;
-				uint8_t old_program;
+				TimeType   old_time;
+				uint8_t    old_channel;
+				int        old_bank;
+				uint8_t    old_program;
 			};
 			union {
-				uint8_t new_channel;
-				TimeType new_time;
-				uint8_t new_program;
-				int new_bank;
+				uint8_t    new_channel;
+				TimeType   new_time;
+				uint8_t    new_program;
+				int        new_bank;
 			};
 		};
-			
+
 		typedef std::list<Change> ChangeList;
 		ChangeList _changes;
-		
+
 		std::list<PatchChangePtr> _added;
 		std::list<PatchChangePtr> _removed;
 
@@ -238,7 +237,7 @@ public:
 	bool sync_to_source ();
 	bool write_to(boost::shared_ptr<MidiSource> source);
 	bool write_section_to (boost::shared_ptr<MidiSource> source, Evoral::MusicalTime begin = Evoral::MinMusicalTime,
-                               Evoral::MusicalTime end = Evoral::MaxMusicalTime);
+	Evoral::MusicalTime end = Evoral::MaxMusicalTime);
 
 	// MidiModel doesn't use the normal AutomationList serialisation code
 	// since controller data is stored in the .mid
@@ -255,8 +254,8 @@ public:
 	boost::shared_ptr<Evoral::Note<TimeType> > find_note (gint note_id);
 	boost::shared_ptr<Evoral::Event<TimeType> > find_sysex (gint);
 
-        InsertMergePolicy insert_merge_policy () const;
-        void set_insert_merge_policy (InsertMergePolicy);
+	InsertMergePolicy insert_merge_policy () const;
+	void set_insert_merge_policy (InsertMergePolicy);
 
 	boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
 
@@ -264,7 +263,7 @@ public:
 	void transpose (TimeType, TimeType, int);
 
 protected:
-        int resolve_overlaps_unlocked (const NotePtr, void* arg = 0);
+	int resolve_overlaps_unlocked (const NotePtr, void* arg = 0);
 
 private:
 	struct WriteLockImpl : public AutomatableSequence<TimeType>::WriteLockImpl {
@@ -289,15 +288,17 @@ private:
 	void source_automation_state_changed (Evoral::Parameter, AutoState);
 	void control_list_interpolation_changed (Evoral::Parameter, Evoral::ControlList::InterpolationStyle);
 	void automation_list_automation_state_changed (Evoral::Parameter, AutoState);
-	
+
 	PBD::ScopedConnectionList _midi_source_connections;
 
 	// We cannot use a boost::shared_ptr here to avoid a retain cycle
 	boost::weak_ptr<MidiSource> _midi_source;
-        InsertMergePolicy _insert_merge_policy;
+	InsertMergePolicy _insert_merge_policy;
 };
 
 } /* namespace ARDOUR */
+
+/* This is a very long comment and stuff oh my god it's so long what are we going to do oh no oh no*/
 
 #endif /* __ardour_midi_model_h__ */
 
