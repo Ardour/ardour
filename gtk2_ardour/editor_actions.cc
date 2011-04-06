@@ -469,7 +469,7 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twentieths"), _("Snap to Twentieths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv20)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-asixteenthbeat"), _("Snap to Sixteenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv16)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-fourteenths"), _("Snap to Fourteenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv14)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twelfths"), _("Snap to Tweflths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv12)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twelfths"), _("Snap to Twelfths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv12)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-tenths"), _("Snap to Tenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv10)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-eighths"), _("Snap to Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv8)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-sevenths"), _("Snap to Sevenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv7)));

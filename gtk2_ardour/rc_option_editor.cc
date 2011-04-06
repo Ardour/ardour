@@ -852,7 +852,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Misc"),
 	     new BoolOption (
 		     "sync-all-route-ordering",
-		     _("Syncronise editor and mixer track order"),
+		     _("Synchronise editor and mixer track order"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_sync_all_route_ordering),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_sync_all_route_ordering)
 		     ));
