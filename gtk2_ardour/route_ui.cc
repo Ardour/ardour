@@ -1403,7 +1403,7 @@ edit your ardour.rc file to set the\n\
 		if (is_track()) {
 			prompt  = string_compose (_("Do you really want to remove track \"%1\" ?\n\nYou may also lose the playlist used by this track.\n\n(This action cannot be undone, and the session file will be overwritten)"), _route->name());
 		} else {
-			prompt  = string_compose (_("Do you really want to remove bus \"%1\" ?\n\nYou may also lose the playlist used by this track.\n\n(This action cannot be undone, and the session file will be overwritten)"), _route->name());
+			prompt  = string_compose (_("Do you really want to remove bus \"%1\" ?\n\n(This action cannot be undone, and the session file will be overwritten)"), _route->name());
 		}
 		
 		choices.push_back (_("No, do nothing."));
