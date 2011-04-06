@@ -67,6 +67,11 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 
 	OSStatus carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event);
 
+#ifdef PARAMETER_LISTENING
+	static void _parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value);
+	void parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value);
+#endif
+
   private:
 	boost::shared_ptr<ARDOUR::AUPlugin> au;
 	int prefheight;

@@ -120,6 +120,18 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 		error << _("unknown type of editor-supplying plugin (note: no AudioUnit support in this version of ardour)") << endmsg;
 		throw failed_constructor ();
 	}
+	
+#ifdef PARAMETER_LISTENING
+	if (au->create_parameter_listener (AUPluginUI::_parameter_change_listener, this, 0.05) == 0) {
+		cerr << "Registered parameter listener for " << insert->name() << endl;
+		set<uint32_t> params = au->automatable ();
+		for (set<uint32_t>::iterator p = params.begin(); p != params.end(); ++p) {
+			cerr << "Listen to " << *p << " result = " << au->listen_to_parameter (*p) << endl;
+		}
+	} else {
+		cerr << "Could not registered parameter listener for " << insert->name() << endl;
+	}
+#endif
 
 	/* stuff some stuff into the top of the window */
 
@@ -171,8 +183,10 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	/* prefer cocoa, fall back to cocoa, but use carbon if its there */
 
 	if (test_cocoa_view_support()) {
+	        cerr << insert->name() << " creating cocoa view\n";
 		create_cocoa_view ();
 	} else if (test_carbon_view_support()) {
+	        cerr << insert->name() << " creating carbon view\n";
 		create_carbon_view ();
 	} else {
 		create_cocoa_view ();
@@ -268,11 +282,11 @@ AUPluginUI::create_cocoa_view ()
 {
 	BOOL wasAbleToLoadCustomView = NO;
 	AudioUnitCocoaViewInfo* cocoaViewInfo = NULL;
-	UInt32               numberOfClasses = 0;
+	UInt32     numberOfClasses = 0;
 	UInt32     dataSize;
 	Boolean    isWritable;
-	NSString*	    factoryClassName = 0;
-	NSURL*	            CocoaViewBundlePath;
+	NSString*  factoryClassName = 0;
+	NSURL*     CocoaViewBundlePath = 0;
 
 	OSStatus result = AudioUnitGetPropertyInfo (*au->get_au(),
 						    kAudioUnitProperty_CocoaUI,
@@ -286,7 +300,9 @@ AUPluginUI::create_cocoa_view ()
 	// Does view have custom Cocoa UI?
 	
 	if ((result == noErr) && (numberOfClasses > 0) ) {
+		cerr << insert->name() << " has " << numberOfClasses << " cocoa UI classes\n";
 		cocoaViewInfo = (AudioUnitCocoaViewInfo *)malloc(dataSize);
+
 		if(AudioUnitGetProperty(*au->get_au(),
 					kAudioUnitProperty_CocoaUI,
 					kAudioUnitScope_Global,
@@ -298,6 +314,7 @@ AUPluginUI::create_cocoa_view ()
 			
 			// we only take the first view in this example.
 			factoryClassName	= (NSString *)cocoaViewInfo->mCocoaAUViewClass[0];
+	                cerr << insert->name() << " fetching cocoa UI via factory called " << factoryClassName << '\n';
 
 		} else {
 
@@ -523,7 +540,6 @@ int
 AUPluginUI::parent_cocoa_window ()
 {
 	NSWindow* win = get_nswindow ();
-	NSRect packFrame;
 
 	if (!win) {
 		return -1;
@@ -683,3 +699,18 @@ AUPluginUI::on_focus_out_event (GdkEventFocus* ev)
 	return false;
 }
 
+#ifdef PARAMETER_LISTENING
+
+void
+AUPluginUI::_parameter_change_listener (void* arg, void* src, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value)
+{
+	((AUPluginUI*) arg)->parameter_change_listener (arg, src, event, host_time, new_value);
+}
+
+void
+AUPluginUI::parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value)
+{
+	cerr << insert->name() << "Parameter " << event->mArgument.mParameter.mParameterID << " changed to " << new_value << endl;
+}
+
+#endif
