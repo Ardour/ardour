@@ -47,8 +47,6 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreServices/CoreServices.h>
-#include <AudioUnit/AudioUnit.h>
-#include <AudioToolbox/AudioUnitUtilities.h>
 
 #include "i18n.h"
 
@@ -355,6 +353,8 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, current_offset (0)
 	, current_buffers (0)
 	, frames_processed (0)
+	, _parameter_listener (0)
+	, _parameter_listener_arg (0)
 	, last_transport_rolling (false)
 	, last_transport_speed (0.0)
 {			
@@ -382,13 +382,21 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, current_offset (0)
 	, current_buffers (0)
 	, frames_processed (0)
-	  
+	, _parameter_listener (0)
+	, _parameter_listener_arg (0)
+	, last_transport_rolling (false)
+	, last_transport_speed (0.0)
 {
 	init ();
 }
 
 AUPlugin::~AUPlugin ()
 {
+	if (_parameter_listener) {
+		AUListenerDispose (_parameter_listener);
+		_parameter_listener = 0;
+	}
+	
 	if (unit) {
 		TRACE_API ("about to call uninitialize in plugin destructor\n");
 		unit->Uninitialize ();
@@ -611,6 +619,10 @@ AUPlugin::discover_parameters ()
 			d.max_unbound = 0; // upper is bound
 
 			descriptors.push_back (d);
+
+			if (d.automatable) {
+				unit->addPropertyListen (d.id);
+			}
 		}
 	}
 }
@@ -2464,5 +2476,65 @@ AUPluginInfo::stringify_descriptor (const CAComponentDescription& desc)
 	s << desc.Manu();
 
 	return s.str();
+}
+
+
+int
+AUPlugin::create_parameter_listener (AUEventListenerProc cb, void* arg, float interval_secs)
+{
+	CFRunLoopRef run_loop = (CFRunLoopRef)GetCFRunLoopFromEventLoop(GetCurrentEventLoop()); 
+	CFStringRef  loop_mode = kCFRunLoopDefaultMode;
+
+	if (AUEventListenerCreate (cb, arg, run_loop, loop_mode, interval_secs, interval_secs, &_parameter_listener) != noErr) {
+		return -1;
+	}
+
+	_parameter_listener_arg = arg;
+
+	return 0;
+}
+
+int
+AUPlugin::listen_to_parameter (uint32_t param_id)
+{
+	AudioUnitEvent      event;
+
+	if (param_id >= descriptors.size()) {
+		return -2;
+	}
+
+	event.mEventType = kAudioUnitEvent_ParameterValueChange;
+	event.mArgument.mParameter.mAudioUnit = unit->AU();
+	event.mArgument.mParameter.mParameterID = descriptors[param_id].id;
+	event.mArgument.mParameter.mScope = descriptors[param_id].scope;
+	event.mArgument.mParameter.mElement = descriptors[param_id].element;
+
+	if (AUEventListenerAddEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
+		return -1;
+	} 
+
+	return 0;
+}
+
+int
+AUPlugin::end_listen_to_parameter (uint32_t param_id)
+{
+	AudioUnitEvent      event;
+
+	if (param_id >= descriptors.size()) {
+		return -2;
+	}
+
+	event.mEventType = kAudioUnitEvent_ParameterValueChange;
+	event.mArgument.mParameter.mAudioUnit = unit->AU();
+	event.mArgument.mParameter.mParameterID = descriptors[param_id].id;
+	event.mArgument.mParameter.mScope = descriptors[param_id].scope;
+	event.mArgument.mParameter.mElement = descriptors[param_id].element;
+
+	if (AUEventListenerRemoveEventType (_parameter_listener, _parameter_listener_arg, &event) != noErr) {
+		return -1;
+	} 
+
+	return 0;
 }
 

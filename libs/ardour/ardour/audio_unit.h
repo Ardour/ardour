@@ -34,6 +34,7 @@
 
 #include <AudioUnit/AudioUnit.h>
 #include <AudioUnit/AudioUnitProperties.h>
+#include <AudioToolbox/AudioUnitUtilities.h>
 #include <appleutility/AUParamInfo.h>
 
 #include <boost/shared_ptr.hpp>
@@ -141,6 +142,16 @@ class AUPlugin : public ARDOUR::Plugin
 
 	static std::string maybe_fix_broken_au_id (const std::string&);
 
+	/* this MUST be called from thread in which you want to receive notifications
+	   about parameter changes.
+	*/
+	int create_parameter_listener (AUEventListenerProc callback, void *arg, float interval_secs);
+	/* these can be called from any thread but SHOULD be called from the same thread
+	   that will receive parameter change notifications.
+	*/
+	int listen_to_parameter (uint32_t param_id);
+	int end_listen_to_parameter (uint32_t param_id);
+
   private:
         boost::shared_ptr<CAComponent> comp;
         boost::shared_ptr<CAAudioUnit> unit;
@@ -184,6 +195,8 @@ class AUPlugin : public ARDOUR::Plugin
         nframes_t frames_processed;
 	
 	std::vector<AUParameterDescriptor> descriptors;
+	AUEventListenerRef _parameter_listener;
+	void * _parameter_listener_arg;
 	void init ();
 
 	void discover_factory_presets ();
