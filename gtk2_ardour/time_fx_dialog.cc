@@ -81,9 +81,9 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	set_name (N_("TimeFXDialog"));
 
 	if (pitching) {
-		set_title (_("Pitch Shift"));
+		set_title (_("Pitch Shift Audio"));
 	} else {
-		set_title (_("Time Stretch"));
+		set_title (_("Time Stretch Audio"));
 	}
 
 	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);

@@ -87,6 +87,7 @@
 #include "editor_cursors.h"
 #include "mouse_cursors.h"
 #include "patch_change_dialog.h"
+#include "transpose_dialog.h"
 
 #include "i18n.h"
 
@@ -5344,11 +5345,42 @@ Editor::pitch_shift_region ()
 {
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 
-	if (rs.empty()) {
+	RegionSelection audio_rs;
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		if (dynamic_cast<AudioRegionView*> (*i)) {
+			audio_rs.push_back (*i);
+		}
+	}
+
+	if (audio_rs.empty()) {
 		return;
 	}
 
-	pitch_shift (rs, 1.2);
+	pitch_shift (audio_rs, 1.2);
+}
+
+void
+Editor::transpose_region ()
+{
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+
+	list<MidiRegionView*> midi_region_views;
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*i);
+		if (mrv) {
+			midi_region_views.push_back (mrv);
+		}
+	}
+
+	TransposeDialog d;
+	int const r = d.run ();
+	if (r != RESPONSE_ACCEPT) {
+		return;
+	}
+
+	for (list<MidiRegionView*>::iterator i = midi_region_views.begin(); i != midi_region_views.end(); ++i) {
+		(*i)->midi_region()->transpose (d.semitones ());
+	}
 }
 
 void

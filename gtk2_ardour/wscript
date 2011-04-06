@@ -219,6 +219,7 @@ gtk2_ardour_sources = [
         'time_selection.cc',
         'track_selection.cc',
         'track_view_list.cc',
+        'transpose_dialog.cc',
         'ui_config.cc',
         'utils.cc',
         'version.cc',

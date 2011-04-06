@@ -234,6 +234,7 @@
 	      <menuitem action='toggle-opaque-region'/>
               <menuitem action='toggle-region-mute'/>
 	      <menuitem action='pitch-shift-region'/>
+	      <menuitem action='transpose-region'/>
 	      <menuitem action='naturalize-region'/>
 	      <menuitem action='split-region'/>
 	      <menuitem action='split-multichannel-region'/>
@@ -584,6 +585,7 @@
 	      <menuitem action='toggle-opaque-region'/>
               <menuitem action='toggle-region-mute'/>
 	      <menuitem action='pitch-shift-region'/>
+	      <menuitem action='transpose-region'/>
 	      <menuitem action='naturalize-region'/>
 	      <menuitem action='split-region'/>
 	      <menuitem action='split-multichannel-region'/>

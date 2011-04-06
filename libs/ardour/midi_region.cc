@@ -378,3 +378,11 @@ MidiRegion::fix_negative_start ()
 	model()->insert_silence_at_start (c.from (-_start));
 	_start = 0;
 }
+
+/** Transpose the notes in this region by a given number of semitones */
+void
+MidiRegion::transpose (int semitones)
+{
+	BeatsFramesConverter c (_session.tempo_map(), _start);
+	model()->transpose (c.from (_start), c.from (_start + _length), semitones);
+}

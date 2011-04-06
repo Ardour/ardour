@@ -261,6 +261,7 @@ public:
 	boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
 
 	void insert_silence_at_start (TimeType);
+	void transpose (TimeType, TimeType, int);
 
 protected:
         int resolve_overlaps_unlocked (const NotePtr, void* arg = 0);

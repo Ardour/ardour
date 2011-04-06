@@ -109,6 +109,7 @@ class MidiRegion : public Region
 	boost::shared_ptr<const MidiModel> model() const { return midi_source()->model(); }
 
 	void fix_negative_start ();
+	void transpose (int);
 
   protected:
 	

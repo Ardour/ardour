@@ -1816,6 +1816,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void pitch_shift_region ();
 	int time_fx (RegionSelection&, float val, bool pitching);
 
+	void transpose_region ();
+
 	/* editor-mixer strip */
 
 	MixerStrip *current_mixer_strip;

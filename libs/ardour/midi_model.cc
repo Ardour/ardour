@@ -1899,3 +1899,43 @@ MidiModel::insert_silence_at_start (TimeType t)
 		apply_command_as_subcommand (s->session(), c);
 	}
 }
+
+/** Transpose notes in a time range by a given number of semitones.  Notes
+ *  will be clamped at 0 and 127 if the transposition would make them exceed
+ *  that range.
+ *
+ *  @param from Start time.
+ *  @param end End time.
+ *  @param semitones Number of semitones to transpose by (+ve is higher, -ve is lower).
+ */
+void
+MidiModel::transpose (TimeType from, TimeType to, int semitones)
+{
+	boost::shared_ptr<const MidiSource> s = midi_source ();
+	
+	NoteDiffCommand* c = new_note_diff_command (_("transpose"));
+	
+	for (Notes::iterator i = notes().begin(); i != notes().end(); ++i) {
+
+		if ((*i)->time() >= to) {
+			
+			/* finished */
+			break;
+			
+		} else if ((*i)->time() >= from) {
+
+			int new_note = (*i)->note() + semitones;
+			
+			if (new_note < 0) {
+				new_note = 0;
+			} else if (new_note > 127) {
+				new_note = 127;
+			}
+
+			c->change (*i, NoteDiffCommand::NoteNumber, (uint8_t) new_note);
+			
+		}
+	}
+
+	apply_command (s->session (), c);
+}
