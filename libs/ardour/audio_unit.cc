@@ -504,12 +504,11 @@ AUPlugin::init ()
 		throw failed_constructor();
 	}
 
+	create_parameter_listener (AUPlugin::_parameter_change_listener, this, 0.05);
 	discover_parameters ();
 	discover_factory_presets ();
 
 	Plugin::setup_controls ();
-
-	create_parameter_listener (AUPlugin::_parameter_change_listener, this, 0.05);
 }
 
 void
