@@ -43,7 +43,11 @@ LV2PluginUI::lv2_ui_write(LV2UI_Controller controller,
                           const void*      buffer)
 {
 	LV2PluginUI* me = (LV2PluginUI*)controller;
-	me->_controllables[port_index]->set_value(*(float*)buffer);
+	boost::shared_ptr<AutomationControl> ac = me->_controllables[port_index];
+
+	if (ac) {
+		ac->set_value(*(float*)buffer);
+	}
 }
 
 void
