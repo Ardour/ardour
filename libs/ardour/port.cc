@@ -63,4 +63,14 @@ Port::set_name (string str)
 	return ret;
 }
 
-	
+nframes_t
+Port::latency () const
+{
+	return jack_port_get_latency (_port);
+}
+
+void 
+Port::set_latency (nframes_t nframes)
+{
+	jack_port_set_latency (_port, nframes);
+}
