@@ -223,99 +223,21 @@ CAAudioUnit::CAAudioUnit (const AudioUnit& inUnit)
 }
 
 CAAudioUnit::CAAudioUnit (const CAComponent& inComp)
-	: mComp (inComp), mDataPtr (0), mPropertyCallback (0)
+	: mComp (inComp), mDataPtr (0)
 {
 	mDataPtr = new AUState (mComp.Comp());
 }
 
 CAAudioUnit::CAAudioUnit (const AUNode &inNode, const AudioUnit& inUnit)
-	: mComp (inUnit), mDataPtr(new AUState (inNode, inUnit)), mPropertyCallback (0)
+	: mComp (inUnit), mDataPtr(new AUState (inNode, inUnit))
 {
 }
 
 CAAudioUnit::~CAAudioUnit ()
 {
-	dropPropertyListens ();
-
 	if (mDataPtr) {
 		mDataPtr->release();
 		mDataPtr = NULL;
-	}
-}
-
-void
-CAAudioUnit::addPropertyListen (AudioUnitPropertyID id)
-{
-	if (mPropertyCallback == 0) {
-		return;
-	}
-
-	if (mWatching.find (id) != mWatching.end()) {
-		return;
-	}
-
-	if (AudioUnitAddPropertyListener (AU(), id, PropertyCallback, this) == noErr) {
-		mWatching.insert (id);
-	}
-}
-
-void
-CAAudioUnit::removePropertyListen (AudioUnitPropertyID id)
-{
-	if (!mPropertyCallback) {
-		return;
-	}
-	std::set<AudioUnitPropertyID>::iterator i = mWatching.find (id);
-	if (i != mWatching.end()) {
-		mWatching.erase (i);
-	}
-	/* this is for 10.6 and above ...
-	   AudioUnitRemovePropertyListenerWithUserData (AU(), id, PropertyCallback, this);
-	*/
-	AudioUnitRemovePropertyListener (AU(), id, PropertyCallback);
-}
-
-void
-CAAudioUnit::dropPropertyListens ()
-{
-	for (std::set<AudioUnitPropertyID>::iterator i = mWatching.begin(); i != mWatching.end(); ++i) {
-		/* this is for 10.6 and above ...
-		AudioUnitRemovePropertyListenerWithUserData (AU(), *i, PropertyCallback, this);
-		*/
-		AudioUnitRemovePropertyListener (AU(), *i, PropertyCallback);
-	}
-	mWatching.clear ();
-}
-
-void
-CAAudioUnit::SetPropertyCallback (void (*prop_callback)(void*, int32_t, float, void*), void* arg)
-{
-	dropPropertyListens ();
-	mPropertyCallback = prop_callback;
-	mPropertyCallbackArg = arg;
-}
-
-void
-CAAudioUnit::PropertyCallback (void                *inRefCon,
-			       AudioUnit            inUnit,
-			       AudioUnitPropertyID  inID,
-			       AudioUnitScope       inScope,
-			       AudioUnitElement     inElement)
-{
-	static_cast<CAAudioUnit*>(inRefCon)->
-		DoPropertyCallback (inUnit, inID, inScope, inElement);
-}
-
-void
-CAAudioUnit::DoPropertyCallback (AudioUnit            inUnit,
-				 AudioUnitPropertyID  inID,
-				 AudioUnitScope       inScope,
-				 AudioUnitElement     inElement)
-{
-	if (mPropertyCallback) {
-		float value;
-		AudioUnitGetParameter (inUnit, inID, inScope, inElement, &value);
-		mPropertyCallback (this, inID, value, mPropertyCallbackArg);
 	}
 }
 
