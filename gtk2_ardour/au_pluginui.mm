@@ -121,18 +121,6 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 		throw failed_constructor ();
 	}
 	
-#ifdef PARAMETER_LISTENING
-	if (au->create_parameter_listener (AUPluginUI::_parameter_change_listener, this, 0.05) == 0) {
-		cerr << "Registered parameter listener for " << insert->name() << endl;
-		set<uint32_t> params = au->automatable ();
-		for (set<uint32_t>::iterator p = params.begin(); p != params.end(); ++p) {
-			cerr << "Listen to " << *p << " result = " << au->listen_to_parameter (*p) << endl;
-		}
-	} else {
-		cerr << "Could not registered parameter listener for " << insert->name() << endl;
-	}
-#endif
-
 	/* stuff some stuff into the top of the window */
 
 	HBox* smaller_hbox = manage (new HBox);
@@ -699,18 +687,3 @@ AUPluginUI::on_focus_out_event (GdkEventFocus* ev)
 	return false;
 }
 
-#ifdef PARAMETER_LISTENING
-
-void
-AUPluginUI::_parameter_change_listener (void* arg, void* src, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value)
-{
-	((AUPluginUI*) arg)->parameter_change_listener (arg, src, event, host_time, new_value);
-}
-
-void
-AUPluginUI::parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value)
-{
-	cerr << insert->name() << "Parameter " << event->mArgument.mParameter.mParameterID << " changed to " << new_value << endl;
-}
-
-#endif

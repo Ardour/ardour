@@ -187,13 +187,14 @@ class AUPlugin : public ARDOUR::Plugin
 	int set_stream_format (int scope, uint32_t cnt, AudioStreamBasicDescription&);
 	void discover_parameters ();
 
-	std::vector<std::pair<uint32_t, uint32_t> > parameter_map;
 	uint32_t current_maxbuf;
         nframes_t current_offset;
         nframes_t cb_offset;
         vector<Sample*>* current_buffers;
         nframes_t frames_processed;
 	
+	typedef std::map<uint32_t, uint32_t> ParameterMap;
+	ParameterMap parameter_map;
 	std::vector<AUParameterDescriptor> descriptors;
 	AUEventListenerRef _parameter_listener;
 	void * _parameter_listener_arg;
@@ -203,6 +204,9 @@ class AUPlugin : public ARDOUR::Plugin
 
 	bool      last_transport_rolling;
 	float     last_transport_speed;
+
+	static void _parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value);
+	void parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value);
 };
 	
 typedef boost::shared_ptr<AUPlugin> AUPluginPtr;

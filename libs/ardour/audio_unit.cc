@@ -508,6 +508,8 @@ AUPlugin::init ()
 	discover_factory_presets ();
 
 	Plugin::setup_controls ();
+
+	create_parameter_listener (AUPlugin::_parameter_change_listener, this, 0.05);
 }
 
 void
@@ -620,13 +622,12 @@ AUPlugin::discover_parameters ()
 
 			descriptors.push_back (d);
 
-			if (d.automatable) {
-				unit->addPropertyListen (d.id);
-			}
+			uint32_t last_param = descriptors.size() - 1;
+			parameter_map.insert (pair<uint32_t,uint32_t> (d.id, last_param));
+			listen_to_parameter (last_param);
 		}
 	}
 }
-
 
 static unsigned int
 four_ints_to_four_byte_literal (unsigned char n[4])
@@ -771,24 +772,34 @@ AUPlugin::latency () const
 void
 AUPlugin::set_parameter (uint32_t which, float val)
 {
-	if (which < descriptors.size()) {
-		const AUParameterDescriptor& d (descriptors[which]);
-		TRACE_API ("set parameter %d in scope %d element %d to %f\n", d.id, d.scope, d.element, val);
-		unit->SetParameter (d.id, d.scope, d.element, val);
-
-		/* tell the world what we did */
-
-		AudioUnitEvent theEvent;
-		
-		theEvent.mEventType = kAudioUnitEvent_ParameterValueChange;
-		theEvent.mArgument.mParameter.mAudioUnit = unit->AU();
-		theEvent.mArgument.mParameter.mParameterID = d.id;
-		theEvent.mArgument.mParameter.mScope = d.scope;
-		theEvent.mArgument.mParameter.mElement = d.element;
-
-		TRACE_API ("notify about parameter change\n");
-		AUEventListenerNotify (NULL, NULL, &theEvent);
+	if (which >= descriptors.size()) {
+		return;
 	}
+
+	const AUParameterDescriptor& d (descriptors[which]);
+	TRACE_API ("set parameter %d in scope %d element %d to %f\n", d.id, d.scope, d.element, val);
+	unit->SetParameter (d.id, d.scope, d.element, val);
+	
+	/* tell the world what we did */
+	
+	AudioUnitEvent theEvent;
+	
+	theEvent.mEventType = kAudioUnitEvent_ParameterValueChange;
+	theEvent.mArgument.mParameter.mAudioUnit = unit->AU();
+	theEvent.mArgument.mParameter.mParameterID = d.id;
+	theEvent.mArgument.mParameter.mScope = d.scope;
+	theEvent.mArgument.mParameter.mElement = d.element;
+	
+	TRACE_API ("notify about parameter change\n");
+
+	/* use the AU Event API to notify about the change. Our own listener will 
+	   end up "emitting" ParameterChanged, and this way ParameterChanged is 
+	   used whether the change to the parameter comes from this function
+	   or within the plugin or anywhere else, since they should all notify
+	   via AUEventListenerNotify().
+	*/
+
+	AUEventListenerNotify (NULL, NULL, &theEvent);
 }
 
 float
@@ -2478,11 +2489,10 @@ AUPluginInfo::stringify_descriptor (const CAComponentDescription& desc)
 	return s.str();
 }
 
-
 int
 AUPlugin::create_parameter_listener (AUEventListenerProc cb, void* arg, float interval_secs)
 {
-	CFRunLoopRef run_loop = (CFRunLoopRef)GetCFRunLoopFromEventLoop(GetCurrentEventLoop()); 
+	CFRunLoopRef run_loop = (CFRunLoopRef) GetCFRunLoopFromEventLoop(GetCurrentEventLoop()); 
 	CFStringRef  loop_mode = kCFRunLoopDefaultMode;
 
 	if (AUEventListenerCreate (cb, arg, run_loop, loop_mode, interval_secs, interval_secs, &_parameter_listener) != noErr) {
@@ -2499,7 +2509,7 @@ AUPlugin::listen_to_parameter (uint32_t param_id)
 {
 	AudioUnitEvent      event;
 
-	if (param_id >= descriptors.size()) {
+	if (!_parameter_listener || param_id >= descriptors.size()) {
 		return -2;
 	}
 
@@ -2521,7 +2531,7 @@ AUPlugin::end_listen_to_parameter (uint32_t param_id)
 {
 	AudioUnitEvent      event;
 
-	if (param_id >= descriptors.size()) {
+	if (!_parameter_listener || param_id >= descriptors.size()) {
 		return -2;
 	}
 
@@ -2538,3 +2548,18 @@ AUPlugin::end_listen_to_parameter (uint32_t param_id)
 	return 0;
 }
 
+void
+AUPlugin::_parameter_change_listener (void* arg, void* src, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value)
+{
+	((AUPlugin*) arg)->parameter_change_listener (arg, src, event, host_time, new_value);
+}
+
+void
+AUPlugin::parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value)
+{
+	ParameterMap::iterator i = parameter_map.find (event->mArgument.mParameter.mParameterID);
+
+	if (i != parameter_map.end()) {
+		ParameterChanged (i->second, new_value);
+	}
+}
