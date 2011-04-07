@@ -802,6 +802,8 @@ Editor::catch_vanishing_regionview (RegionView *rv)
 	if (!_all_region_actions_sensitized) {
 		sensitize_all_region_actions (true);
 	}
+
+	_over_region_trim_target = false;
 }
 
 void
