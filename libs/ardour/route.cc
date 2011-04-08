@@ -3271,22 +3271,20 @@ Route::set_name (const string& str)
 	ret = (_input->set_name(name) && _output->set_name(name));
 
 	if (ret) {
-
-		Glib::RWLock::ReaderLock lm (_processor_lock);
-
-		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-
-			/* rename all I/O processors that have inputs or outputs */
-
-			boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
-
-			if (iop && (iop->output() || iop->input())) {
-				if (!iop->set_name (name)) {
-					ret = false;
-				}
+		/* rename the main outs. Leave other IO processors
+		 * with whatever name they already have, because its
+		 * just fine as it is (it will not contain the route
+		 * name if its a port insert, port send or port return).
+		 */
+		
+		if (_main_outs) {
+			if (_main_outs->set_name (name)) {
+				/* XXX returning false here is stupid because
+				   we already changed the route name.
+				*/
+				return false;
 			}
 		}
-
 	}
 
 	return ret;
