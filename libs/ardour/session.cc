@@ -3646,7 +3646,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 		for (x = 0; x < 99999; ++x) {
 			snprintf (buf, sizeof(buf), "%s/%s-%d-bounce-%" PRIu32 "%s", sound_dir.c_str(), playlist->name().c_str(), chan_n, x+1, ext.c_str());
-			if (access (buf, F_OK) != 0) {
+			if (!Glib::file_test (buf, Glib::FILE_TEST_EXISTS)) {
 				break;
 			}
 		}
