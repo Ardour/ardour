@@ -529,15 +529,15 @@ AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nfram
 	Glib::RWLock::ReaderLock rlock (_processor_lock);
 
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist());
-	assert(apl);
 
+	assert(apl);
+	assert(buffers.count().n_audio() >= 1);
 	assert ((framecnt_t) buffers.get_audio(0).capacity() >= nframes);
 
 	if (apl->read (buffers.get_audio(0).data(), mix_buffer.get(), gain_buffer.get(), start, nframes) != nframes) {
 		return -1;
 	}
 
-	assert(buffers.count().n_audio() >= 1);
 	uint32_t n=1;
 	Sample* b = buffers.get_audio(0).data();
 	BufferSet::audio_iterator bi = buffers.audio_begin();
@@ -548,8 +548,7 @@ AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nfram
 				return -1;
 			}
 			b = bi->data();
-		}
-		else {
+		} else {
 			/* duplicate last across remaining buffers */
 			memcpy (bi->data(), b, sizeof (Sample) * nframes);
 		}
