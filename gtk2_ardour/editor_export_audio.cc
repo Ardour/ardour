@@ -221,7 +221,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 
 				path = s;
 
-				if (::access (path.c_str(), F_OK) != 0) {
+				if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
 					break;
 				}
 			}
@@ -360,7 +360,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 					  legalize_for_path(playlist.name()).c_str(), cnt, n);
 			}
 
-			if (::access (s, F_OK) != 0) {
+			if (!Glib::file_test (s, Glib::FILE_TEST_EXISTS)) {
 				break;
 			}
 		}

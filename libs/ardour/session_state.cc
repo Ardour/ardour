@@ -130,6 +130,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+
 void
 Session::first_stage_init (string fullpath, string snapshot_name)
 {
@@ -151,11 +152,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 		_path += G_DIR_SEPARATOR;
 	}
 
-	if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS) && ::access (_path.c_str(), W_OK)) {
-		_writable = false;
-	} else {
-		_writable = true;
-	}
+	_writable = exists_and_writable (sys::path (_path));
 
 	/* these two are just provisional settings. set_state()
 	   will likely override them.
@@ -898,14 +895,7 @@ Session::load_state (string snapshot_name)
 
 	set_dirty();
 
-	/* writable() really reflects the whole folder, but if for any
-	   reason the session state file can't be written to, still
-	   make us unwritable.
-	*/
-
-	if (::access (xmlpath.to_string().c_str(), W_OK) != 0) {
-		_writable = false;
-	}
+	_writable = exists_and_writable (xmlpath);
 
 	if (!state_tree->read (xmlpath.to_string())) {
 		error << string_compose(_("Could not understand ardour file %1"), xmlpath.to_string()) << endmsg;

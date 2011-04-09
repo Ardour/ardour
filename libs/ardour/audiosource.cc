@@ -197,7 +197,7 @@ AudioSource::rename_peakfile (string newpath)
 
 	string oldpath = peakpath;
 
-	if (access (oldpath.c_str(), F_OK) == 0) {
+	if (Glib::file_test (oldpath, Glib::FILE_TEST_EXISTS)) {
 		if (rename (oldpath.c_str(), newpath.c_str()) != 0) {
 			error << string_compose (_("cannot rename peakfile for %1 from %2 to %3 (%4)"), _name, oldpath, newpath, strerror (errno)) << endmsg;
 			return -1;

@@ -191,7 +191,7 @@ FileSource::move_to_trash (const string& trash_dir_name)
 		snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), version);
 		newpath_v = buf;
 
-		while (access (newpath_v.c_str(), F_OK) == 0 && version < 999) {
+		while (Glib::file_test (newpath_v, Glib::FILE_TEST_EXISTS) && version < 999) {
 			snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), ++version);
 			newpath_v = buf;
 		}
