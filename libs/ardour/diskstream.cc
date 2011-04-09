@@ -280,26 +280,26 @@ Diskstream::set_capture_offset ()
 
 
 void
-Diskstream::set_align_style (AlignStyle a)
+Diskstream::set_align_style (AlignStyle a, bool force)
 {
 	if (record_enabled() && _session.actively_recording()) {
 		return;
 	}
 
-	if (a != _alignment_style) {
+	if ((a != _alignment_style) || force) {
 		_alignment_style = a;
 		AlignmentStyleChanged ();
 	}
 }
 
 void
-Diskstream::set_align_choice (AlignChoice a)
+Diskstream::set_align_choice (AlignChoice a, bool force)
 {
 	if (record_enabled() && _session.actively_recording()) {
 		return;
 	}
 
-	if (a != _alignment_choice) {
+	if ((a != _alignment_choice) || force) {
 		_alignment_choice = a;
 
                 switch (_alignment_choice) {
@@ -509,9 +509,9 @@ Diskstream::set_state (const XMLNode& node, int /*version*/)
 	}
 
         if ((prop = node.property (X_("capture-alignment"))) != 0) {
-                _alignment_choice = AlignChoice (string_2_enum (prop->value(), _alignment_choice));
+                set_align_choice (AlignChoice (string_2_enum (prop->value(), _alignment_choice)), true);
         } else {
-                _alignment_choice = Automatic;
+                set_align_choice (Automatic, true);
         }
 
 	if ((prop = node.property ("playlist")) == 0) {

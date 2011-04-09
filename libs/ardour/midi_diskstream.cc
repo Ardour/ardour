@@ -36,6 +36,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/enumwriter.h"
 #include "pbd/stateful_diff_command.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
@@ -162,17 +163,24 @@ MidiDiskstream::non_realtime_input_change ()
 		}
 
 		if (input_change_pending.type & IOChange::ConfigurationChanged) {
-			if (_io->n_ports().n_midi() != _n_channels.n_midi()) {
+			uint32_t ni = _io->n_ports().n_midi();
+
+			if (ni != _n_channels.n_midi()) {
 				error << string_compose (_("%1: I/O configuration change %4 requested to use %2, but channel setup is %3"),
 				                         name(),
 				                         _io->n_ports(),
 				                         _n_channels, input_change_pending.type)
 				      << endmsg;
 			}
+			
+			if (ni == 0) {
+				_source_port = 0;
+			} else {
+				_source_port = _io->midi(0);
+			}
 		}
 
 		if (input_change_pending.type & IOChange::ConnectionsChanged) {
-			get_input_sources ();
 			set_capture_offset ();
 			set_align_style_from_io ();
 		}
@@ -197,23 +205,6 @@ MidiDiskstream::non_realtime_input_change ()
 	}
 
 	_last_flush_frame = _session.transport_frame();
-}
-
-void
-MidiDiskstream::get_input_sources ()
-{
-	uint32_t ni = _io->n_ports().n_midi();
-
-	if (ni == 0) {
-		return;
-	}
-
-	// This is all we do for now at least
-	assert(ni == 1);
-
-	_source_port = _io->midi(0);
-
-	// do... stuff?
 }
 
 int
@@ -504,6 +495,10 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can
 		return 0;
 	}
 
+	if (_source_port == 0) {
+		return 1;
+	}
+
 	Glib::Mutex::Lock sm (state_lock, Glib::TRY_LOCK);
 
 	if (!sm.locked()) {
@@ -524,13 +519,12 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool can
 		}
 	}
 
-
 	if (can_record && !_last_capture_sources.empty()) {
 		_last_capture_sources.clear ();
 	}
 
 	if (nominally_recording || rec_nframes) {
-
+		
 		// Pump entire port buffer into the ring buffer (FIXME: split cycles?)
 		MidiBuffer& buf = _source_port->get_midi_buffer(nframes);
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
@@ -1375,27 +1369,15 @@ MidiDiskstream::monitor_input (bool yn)
 void
 MidiDiskstream::set_align_style_from_io ()
 {
-	bool have_physical = false;
-
 	if (_alignment_choice != Automatic) {
 		return;
 	}
 
-	if (_io == 0) {
-		return;
-	}
+	/* XXX Not sure what, if anything we can do with MIDI 
+	   as far as capture alignment etc.
+	*/
 
-	get_input_sources ();
-
-	if (_source_port && _source_port->flags() & JackPortIsPhysical) {
-		have_physical = true;
-	}
-
-	if (have_physical) {
-		set_align_style (ExistingMaterial);
-	} else {
-		set_align_style (CaptureTime);
-	}
+	set_align_style (ExistingMaterial);
 }
 
 

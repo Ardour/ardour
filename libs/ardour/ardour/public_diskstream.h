@@ -70,7 +70,8 @@ public:
 	virtual framepos_t current_capture_end () const = 0;
 	virtual void playlist_modified () = 0;
 	virtual int use_playlist (boost::shared_ptr<Playlist>) = 0;
-	virtual void set_align_style (AlignStyle) = 0;
+	virtual void set_align_style (AlignStyle, bool force=false) = 0;
+	virtual void set_align_choice (AlignChoice, bool force=false) = 0;
 	virtual int use_copy_playlist () = 0;
 	virtual int use_new_playlist () = 0;
         virtual void adjust_playback_buffering () = 0;

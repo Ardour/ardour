@@ -77,15 +77,14 @@ class Diskstream : public SessionObject, public PublicDiskstream
 
 	AlignStyle  alignment_style() const { return _alignment_style; }
 	AlignChoice alignment_choice() const { return _alignment_choice; }
-	void       set_align_style (AlignStyle);
-	void       set_align_choice (AlignChoice a);
+	void       set_align_style (AlignStyle, bool force=false);
+	void       set_align_choice (AlignChoice a, bool force=false);
 
 	framecnt_t roll_delay() const { return _roll_delay; }
 	void       set_roll_delay (framecnt_t);
 
 	bool         record_enabled() const { return g_atomic_int_get (&_record_enabled); }
 	virtual void set_record_enabled (bool yn) = 0;
-	virtual void get_input_sources () = 0;
 
 	bool destructive() const { return _flags & Destructive; }
 	virtual int set_destructive (bool /*yn*/) { return -1; }
