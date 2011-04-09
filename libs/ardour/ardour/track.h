@@ -143,8 +143,8 @@ class Track : public Route, public PublicDiskstream
 	framepos_t current_capture_end () const;
 	void playlist_modified ();
 	int use_playlist (boost::shared_ptr<Playlist>);
-	void set_align_style (AlignStyle);
-	void set_align_choice (AlignChoice);
+	void set_align_style (AlignStyle, bool force=false);
+	void set_align_choice (AlignChoice, bool force=false);
 	int use_copy_playlist ();
 	int use_new_playlist ();
         void adjust_playback_buffering ();

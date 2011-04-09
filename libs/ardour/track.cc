@@ -586,15 +586,15 @@ Track::read_data_count () const
 }
 
 void
-Track::set_align_style (AlignStyle s)
+Track::set_align_style (AlignStyle s, bool force)
 {
-	_diskstream->set_align_style (s);
+	_diskstream->set_align_style (s, force);
 }
 
 void
-Track::set_align_choice (AlignChoice s)
+Track::set_align_choice (AlignChoice s, bool force)
 {
-	_diskstream->set_align_choice (s);
+	_diskstream->set_align_choice (s, force);
 }
 
 uint32_t
