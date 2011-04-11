@@ -152,8 +152,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 		_path += G_DIR_SEPARATOR;
 	}
 
-	_writable = exists_and_writable (sys::path (_path));
-
 	/* these two are just provisional settings. set_state()
 	   will likely override them.
 	*/
@@ -514,6 +512,8 @@ Session::create (const string& mix_template, BusProfile* bus_profile)
 	if (ensure_subdirs ()) {
 		return -1;
 	}
+
+	_writable = exists_and_writable (sys::path (_path));
 
 	if (!mix_template.empty()) {
 		std::string in_path = mix_template;
