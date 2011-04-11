@@ -69,8 +69,10 @@ private:
 	void render (cairo_t *);
 	void render_region (RegionView*, cairo_t*, double) const;
 	void get_editor (std::pair<double, double> *, std::pair<double, double> *) const;
+	void set_editor (double, double);
 	void set_editor (std::pair<double, double> const &, double);
 	void set_editor (std::pair<double, double> const &, std::pair<double, double> const &);
+	void set_editor_x (double);
 	void set_editor_x (std::pair<double, double> const &);
 	void set_editor_y (double);
 	void set_editor_y (std::pair<double, double> const &);

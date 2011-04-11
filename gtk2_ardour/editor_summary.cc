@@ -275,25 +275,22 @@ EditorSummary::centre_on_click (GdkEventButton* ev)
 	get_editor (&xr, &yr);
 
 	double const w = xr.second - xr.first;
-
-	xr.first = ev->x - w / 2;
-	xr.second = ev->x + w / 2;
-
-	if (xr.first < 0) {
-		xr.first = 0;
-		xr.second = w;
-	} else if (xr.second > _width) {
-		xr.second = _width;
-		xr.first = _width - w;
+	double ex = ev->x - w / 2;
+	if (ex < 0) {
+		ex = 0;
+	} else if ((ex + w) > _width) {
+		ex = _width - w;
 	}
 
-	double ey = summary_y_to_editor (ev->y);
-	ey -= (_editor->canvas_height() - _editor->get_canvas_timebars_vsize ()) / 2;
+	double const h = yr.second - yr.first;
+	double ey = ev->y - h / 2;
 	if (ey < 0) {
 		ey = 0;
+	} else if ((ey + h) > _height) {
+		ey = _height - h;
 	}
-	
-	set_editor (xr, editor_y_to_summary (ey));
+
+	set_editor (ex, ey);
 }
 
 /** Handle a button press.
@@ -463,6 +460,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 {
 	pair<double, double> xr = _start_editor_x;
 	pair<double, double> yr = _start_editor_y;
+	double x = _start_editor_x.first;
 	double y = _start_editor_y.first;
 
 	if (_move_dragging) {
@@ -471,8 +469,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 
 		/* don't alter x if we clicked outside and above or below the viewbox */
 		if (_start_position == INSIDE || _start_position == TO_LEFT_OR_RIGHT || _start_position == OTHERWISE_OUTSIDE) {
-			xr.first += ev->x - _start_mouse_x;
-			xr.second += ev->x - _start_mouse_x;
+			x += ev->x - _start_mouse_x;
 		}
 
 		/* don't alter y if we clicked outside and to the left or right of the viewbox */
@@ -480,16 +477,15 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 			y += ev->y - _start_mouse_y;
 		}
 
-		if (xr.first < 0) {
-			xr.second -= xr.first;
-			xr.first = 0;
+		if (x < 0) {
+			x = 0;
 		}
 
 		if (y < 0) {
 			y = 0;
 		}
 
-		set_editor (xr, y);
+		set_editor (x, y);
 		set_cursor (_start_position);
 
 	} else if (_zoom_dragging) {
@@ -541,6 +537,7 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 	pair<double, double> xr;
 	pair<double, double> yr;
 	get_editor (&xr, &yr);
+	double x = xr.first;
 	double y = yr.first;
 
 	double amount = 8;
@@ -556,11 +553,9 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 		/* primary-wheel == left-right scrolling */
 
 		if (ev->direction == GDK_SCROLL_UP) {
-			xr.first += amount;
-			xr.second += amount;
+			x += amount;
 		} else if (ev->direction == GDK_SCROLL_DOWN) {
-			xr.first -= amount;
-			xr.second -= amount;
+			x -= amount;
 		}
 
 	} else {
@@ -570,24 +565,23 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 		} else if (ev->direction == GDK_SCROLL_UP) {
 			y -= amount;
 		} else if (ev->direction == GDK_SCROLL_LEFT) {
-			xr.first -= amount;
-			xr.second -= amount;
+			x -= amount;
 		} else if (ev->direction == GDK_SCROLL_RIGHT) {
-			xr.first += amount;
-			xr.second += amount;
+			x += amount;
 		}
 	}
 
-	set_editor (xr, y);
+	set_editor (x, y);
 	return true;
 }
 
-/** Set the editor to display a given x range and a y range with the top at a given position.
- *  The editor's x zoom is adjusted if necessary, but the y zoom is not changed.
+/** Set the editor to display a x range with the left at a given position
+ *  and a y range with the top at a given position.
  *  x and y parameters are specified in summary coordinates.
+ *  Zoom is not changed in either direction.
  */
 void
-EditorSummary::set_editor (pair<double,double> const & x, double const y)
+EditorSummary::set_editor (double const x, double const y)
 {
 	if (_editor->pending_visual_change.idle_handler_id >= 0) {
 
@@ -609,6 +603,22 @@ EditorSummary::set_editor (pair<double,double> const & x, double const y)
 	set_editor_y (y);
 }
 
+/** Set the editor to display a given x range and a y range with the top at a given position.
+ *  The editor's x zoom is adjusted if necessary, but the y zoom is not changed.
+ *  x and y parameters are specified in summary coordinates.
+ */
+void
+EditorSummary::set_editor (pair<double,double> const & x, double const y)
+{
+	if (_editor->pending_visual_change.idle_handler_id >= 0) {
+		/* see comment in other set_editor () */
+		return;
+	}
+	
+	set_editor_x (x);
+	set_editor_y (y);
+}
+
 /** Set the editor to display given x and y ranges.  x zoom and track heights are
  *  adjusted if necessary.
  *  x and y parameters are specified in summary coordinates.
@@ -623,6 +633,16 @@ EditorSummary::set_editor (pair<double,double> const & x, pair<double, double> c
 
 	set_editor_x (x);
 	set_editor_y (y);
+}
+
+/** Set the left of the x range visible in the editor.
+ *  Caller should have checked that Editor::pending_visual_change.idle_handler_id is < 0
+ *  @param x new x left position in summary coordinates.
+ */
+void
+EditorSummary::set_editor_x (double const x)
+{
+	_editor->reset_x_origin (x / _x_scale + _start);
 }
 
 /** Set the x range visible in the editor.
