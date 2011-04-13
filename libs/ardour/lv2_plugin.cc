@@ -428,7 +428,9 @@ LV2Plugin::lv2_files_abstract_path(LV2_Files_Host_Data host_data,
                                    const char*         absolute_path)
 {
 	LV2Plugin* me = (LV2Plugin*)host_data;
-	assert(me->_insert_id != PBD::ID("0"));
+	if (me->_insert_id == PBD::ID("0")) {
+		return g_strdup(absolute_path);
+	}
 
 	const std::string state_dir = Glib::build_filename(me->_session.plugins_dir(),
 	                                                   me->_insert_id.to_s());
@@ -452,7 +454,9 @@ LV2Plugin::lv2_files_absolute_path(LV2_Files_Host_Data host_data,
                                    const char*         abstract_path)
 {
 	LV2Plugin* me = (LV2Plugin*)host_data;
-	assert(me->_insert_id != PBD::ID("0"));
+	if (me->_insert_id == PBD::ID("0")) {
+		return g_strdup(abstract_path);
+	}
 
 	char* ret = NULL;
 	if (g_path_is_absolute(abstract_path)) {
@@ -477,7 +481,9 @@ LV2Plugin::lv2_files_new_file_path(LV2_Files_Host_Data host_data,
                                    const char*         relative_path)
 {
 	LV2Plugin* me = (LV2Plugin*)host_data;
-	assert(me->_insert_id != PBD::ID("0"));
+	if (me->_insert_id == PBD::ID("0")) {
+		return g_strdup(relative_path);
+	}
 
 	const std::string state_dir = Glib::build_filename(me->_session.plugins_dir(),
 	                                                   me->_insert_id.to_s());

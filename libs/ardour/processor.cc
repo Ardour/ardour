@@ -68,7 +68,7 @@ Processor::Processor(Session& session, const string& name)
 	, _configured(false)
 	, _display_to_user (true)
 	, _pre_fader (false)
-        , _ui_pointer (0)
+	, _ui_pointer (0)
 {
 }
 
@@ -82,7 +82,7 @@ Processor::Processor (const Processor& other)
 	, _configured(false)
 	, _display_to_user (true)
 	, _pre_fader (false)
-        , _ui_pointer (0)
+	, _ui_pointer (0)
 {
 }
 
@@ -130,7 +130,7 @@ Processor::state (bool full_state)
 			stringstream sstr;
 			for (set<Evoral::Parameter>::iterator x = _visible_controls.begin();
 					x != _visible_controls.end(); ++x) {
-                                
+
 				if (x != _visible_controls.begin()) {
 					sstr << ' ';
 				}
@@ -298,5 +298,5 @@ Processor::set_pre_fader (bool p)
 void
 Processor::set_ui (void* p)
 {
-        _ui_pointer = p;
+	_ui_pointer = p;
 }
