@@ -921,11 +921,7 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 
 		Route::ProcessorStreams err_streams;
 
-		if (Config->get_new_plugins_active()) {
-			processor->activate ();
-		}
-
-		if (_route->add_processor (processor, _placement, &err_streams)) {
+		if (_route->add_processor (processor, _placement, &err_streams, Config->get_new_plugins_active ())) {
 			weird_plugin_dialog (**p, err_streams);
 			return true;
 			// XXX SHAREDPTR delete plugin here .. do we even need to care?

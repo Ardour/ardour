@@ -235,7 +235,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 		ChanCount count; ///< Input requested of processor
 	};
 
-	int add_processor (boost::shared_ptr<Processor>, Placement placement, ProcessorStreams* err = 0);
+	int add_processor (boost::shared_ptr<Processor>, Placement placement, ProcessorStreams* err = 0, bool activation_allowed = true);
 	int add_processor (boost::shared_ptr<Processor>, ProcessorList::iterator iter, ProcessorStreams* err = 0, bool activation_allowed = true);
 	int add_processors (const ProcessorList&, boost::shared_ptr<Processor> before, ProcessorStreams* err = 0);
 	int remove_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0);

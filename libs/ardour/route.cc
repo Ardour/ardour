@@ -826,7 +826,7 @@ dump_processors(const string& name, const list<boost::shared_ptr<Processor> >& p
 #endif
 
 int
-Route::add_processor (boost::shared_ptr<Processor> processor, Placement placement, ProcessorStreams* err)
+Route::add_processor (boost::shared_ptr<Processor> processor, Placement placement, ProcessorStreams* err, bool activation_allowed)
 {
 	ProcessorList::iterator loc;
 
@@ -842,7 +842,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, Placement placemen
 		loc = find (_processors.begin(), _processors.end(), _main_outs);
 	}
 
-	return add_processor (processor, loc, err);
+	return add_processor (processor, loc, err, activation_allowed);
 }
 
 
