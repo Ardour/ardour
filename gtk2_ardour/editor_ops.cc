@@ -3361,7 +3361,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 
 	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-		if (rtv && !rtv->track()->bounceable()) {
+		if (rtv && rtv->track() && !rtv->track()->bounceable()) {
 			MessageDialog d (
 				_("One or more selected tracks cannot be bounced because it has more outputs than inputs.  "
 				  "You can fix this by increasing the number of inputs on that track.")
