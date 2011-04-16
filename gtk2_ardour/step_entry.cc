@@ -459,6 +459,18 @@ StepEntry::StepEntry (StepEditor& seditor)
 	packer.show_all ();
 
 	get_vbox()->add (packer);
+
+	/* initial settings: quarter note and mezzo forte */
+	
+        act = myactions.find_action ("StepEditing/note-length-quarter");
+	RefPtr<RadioAction> r = RefPtr<RadioAction>::cast_dynamic (act);
+	assert (r);
+	r->set_active (true);
+
+        act = myactions.find_action ("StepEditing/note-velocity-mf");
+	r = RefPtr<RadioAction>::cast_dynamic (act);
+	assert (r);
+	r->set_active (true);
 }
 
 StepEntry::~StepEntry()
@@ -520,7 +532,7 @@ StepEntry::rest_event_handler ()
 Evoral::MusicalTime
 StepEntry::note_length ()
 {
-        Evoral::MusicalTime base_time = 1.0 / (Evoral::MusicalTime) length_divisor_adjustment.get_value();
+        Evoral::MusicalTime base_time = 4.0 / (Evoral::MusicalTime) length_divisor_adjustment.get_value();
         
         RefPtr<Action> act = myactions.find_action ("StepEditing/toggle-triplet");
         RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
