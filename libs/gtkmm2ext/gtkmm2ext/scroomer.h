@@ -57,8 +57,8 @@ public:
 	
 	inline int position_of(Component comp) { return position[comp]; }
 
-	// debug
-	std::string get_comp_name(Component);
+	sigc::signal0<void> DragStarting;
+	sigc::signal0<void> DragFinishing;
 
 protected:
 	Gtk::Adjustment& adj;

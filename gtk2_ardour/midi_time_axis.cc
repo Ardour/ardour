@@ -154,6 +154,10 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 
 		_range_scroomer = new MidiScroomer(midi_view()->note_range_adjustment);
 
+		/* Suspend updates of the StreamView during scroomer drags to speed things up */
+		_range_scroomer->DragStarting.connect (sigc::mem_fun (*midi_view(), &MidiStreamView::suspend_updates));
+		_range_scroomer->DragFinishing.connect (sigc::mem_fun (*midi_view(), &MidiStreamView::resume_updates));
+
 		controls_hbox.pack_start(*_range_scroomer);
 		controls_hbox.pack_start(*_piano_roll_header);
 

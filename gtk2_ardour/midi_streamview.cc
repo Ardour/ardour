@@ -65,6 +65,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	, _data_note_min(60)
 	, _data_note_max(71)
         , _note_lines (0)
+	, _updates_suspended (false)
 {
 	/* use a group dedicated to MIDI underlays. Audio underlays are not in this group. */
 	midi_underlay_group = new ArdourCanvas::Group (*_canvas_group);
@@ -310,7 +311,7 @@ MidiStreamView::update_contents_height ()
 void
 MidiStreamView::draw_note_lines()
 {
-        if (!_note_lines) {
+        if (!_note_lines || _updates_suspended) {
                 return;
         }
 
@@ -371,7 +372,7 @@ MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest, bool to_region
 {
 	_highest_note = highest;
 	_lowest_note = lowest;
-	
+
 	int const range = _highest_note - _lowest_note;  
 	int const pixels_per_note = floor (child_height () / range);
 	
@@ -405,12 +406,20 @@ MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest, bool to_region
 	draw_note_lines();
 
 	if (to_region_views) {
+		apply_note_range_to_regions ();
+	}
+	
+	NoteRangeChanged();
+}
+
+void
+MidiStreamView::apply_note_range_to_regions ()
+{
+	if (!_updates_suspended) {
 		for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 			((MidiRegionView*)(*i))->apply_note_range(_lowest_note, _highest_note);
 		}
 	}
-
-	NoteRangeChanged();
 }
 
 void
@@ -648,4 +657,25 @@ MidiStreamView::y_to_note (double y) const
 	}
 	
 	return n;
+}
+
+/** Suspend updates to the regions' note ranges and our
+ *  note lines until resume_updates() is called.
+ */
+void
+MidiStreamView::suspend_updates ()
+{
+	_updates_suspended = true;
+}
+
+/** Resume updates to region note ranges and note lines,
+ *  and update them now.
+ */
+void
+MidiStreamView::resume_updates ()
+{
+	_updates_suspended = false;
+
+	draw_note_lines ();
+	apply_note_range_to_regions ();
 }

@@ -241,6 +241,8 @@ Scroomer::on_button_press_event (GdkEventButton* ev)
 		} else {
                         pinch = false;
                 }
+
+		DragStarting (); /* EMIT SIGNAL */
 	}
 	
 	return false;
@@ -281,6 +283,7 @@ Scroomer::on_button_release_event (GdkEventButton* ev)
 	grab_comp = None;
 
 	remove_modal_grab();
+	DragFinishing (); /* EMIT SIGNAL */
 	return true;
 }
 
@@ -391,29 +394,5 @@ Scroomer::adjustment_changed()
 		rect.set_height(position[BottomBase] - old_pos[Handle2]);
 		win->invalidate_rect(rect, false);
 	}
-
-	win->process_updates(false);
 }
 
-std::string
-Scroomer::get_comp_name(Component c)
-{
-	switch (c) {
-	case TopBase:
-		return "TopBase";
-	case Handle1:
-		return "Handle1";
-	case Slider:
-		return "Slider";
-	case Handle2:
-		return "Handle2";
-	case BottomBase:
-		return "BottomBase";
-	case Total:
-		return "Total";
-	case None:
-		return "None";
-	default:
-		return "ERROR";
-	}
-}

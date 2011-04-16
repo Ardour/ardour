@@ -587,14 +587,7 @@ void
 PianoRollHeader::note_range_changed()
 {
 	_note_height = floor(_view.note_height()) + 0.5f;
-
 	queue_draw();
-
-	Glib::RefPtr<Gdk::Window> win = get_window();
-
-	if (win) {
-		win->process_updates(false);
-	}
 }
 
 void

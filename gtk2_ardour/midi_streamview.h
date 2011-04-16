@@ -97,6 +97,9 @@ class MidiStreamView : public StreamView
 
 	void apply_note_range(uint8_t lowest, uint8_t highest, bool to_region_views);
 
+	void suspend_updates ();
+	void resume_updates ();
+
   private:
 	void setup_rec_box ();
 	void update_rec_box ();
@@ -118,6 +121,7 @@ class MidiStreamView : public StreamView
 	void color_handler ();
 
 	void note_range_adjustment_changed();
+	void apply_note_range_to_regions ();
 
 	bool                      _range_dirty;
 	double                    _range_sum_cache;
@@ -126,6 +130,8 @@ class MidiStreamView : public StreamView
 	uint8_t                   _data_note_min; ///< in data
 	uint8_t                   _data_note_max; ///< in data
 	ArdourCanvas::LineSet*    _note_lines;
+	/** true if updates to the note lines and regions are currently suspended */
+	bool                      _updates_suspended;
 };
 
 #endif /* __ardour_midi_streamview_h__ */
