@@ -819,10 +819,10 @@ Sequence<Time>::append(const Event<Time>& event, event_id_t evid)
 	} else if (ev.is_cc() && (ev.cc_number() == MIDI_CTL_MSB_BANK || ev.cc_number() == MIDI_CTL_LSB_BANK)) {
 		/* note bank numbers in our _bank[] array, so that we can write an event when the program change arrives */
 		if (ev.cc_number() == MIDI_CTL_MSB_BANK) {
-			_bank[ev.channel()] &= (0x7f << 7);
+			_bank[ev.channel()] &= ~(0x7f << 7);
 			_bank[ev.channel()] |= ev.cc_value() << 7;
 		} else {
-			_bank[ev.channel()] &= 0x7f;
+			_bank[ev.channel()] &= ~0x7f;
 			_bank[ev.channel()] |= ev.cc_value();
 		}
         } else if (ev.is_cc()) {
