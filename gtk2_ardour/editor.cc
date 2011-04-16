@@ -2719,19 +2719,6 @@ Editor::snap_to_internal (framepos_t& start, int32_t direction, bool for_mark)
 void
 Editor::setup_toolbar ()
 {
-	string pixmap_path;
-
-	/* Mode Buttons (tool selection) */
-
-	mouse_move_button.set_relief(Gtk::RELIEF_NONE);
-	mouse_select_button.set_relief(Gtk::RELIEF_NONE);
-	mouse_gain_button.set_relief(Gtk::RELIEF_NONE);
-	mouse_zoom_button.set_relief(Gtk::RELIEF_NONE);
-	mouse_timefx_button.set_relief(Gtk::RELIEF_NONE);
-	mouse_audition_button.set_relief(Gtk::RELIEF_NONE);
-	// internal_edit_button.set_relief(Gtk::RELIEF_NONE);
-	join_object_range_button.set_relief(Gtk::RELIEF_NONE);
-
 	HBox* mode_box = manage(new HBox);
 	mode_box->set_border_width (2);
 	mode_box->set_spacing(4);
@@ -2998,7 +2985,6 @@ Editor::setup_midi_toolbar ()
 
 	/* Midi sound notes */
 	midi_sound_notes.add (*(manage (new Image (::get_icon("midi_sound_notes")))));
-	midi_sound_notes.set_relief(Gtk::RELIEF_NONE);
 	midi_sound_notes.unset_flags (CAN_FOCUS);
 
 	/* Panic */
