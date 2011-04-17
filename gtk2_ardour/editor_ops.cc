@@ -231,7 +231,7 @@ Editor::move_range_selection_start_or_end_to_region_boundary (bool move_end, boo
 		pos += dir;
 	}
 
-	framepos_t const target = get_region_boundary (pos, dir, false, false);
+	framepos_t const target = get_region_boundary (pos, dir, true, false);
 	if (target < 0) {
 		return;
 	}
