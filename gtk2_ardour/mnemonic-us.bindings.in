@@ -100,7 +100,7 @@ This mode provides many different operations on both regions and control points,
 @aep|Editor/move-range-start-to-previous-region-boundary|less|move range start to previous region boundary
 @aep|Editor/move-range-start-to-next-region-boundary|<@PRIMARY@>less|move range start to next region boundary
 @aep|Editor/move-range-end-to-previous-region-boundary|<@PRIMARY@>greater|move range end to next previous boundary
-@aep|Editor/move-range-end-to-next-region-boundary|<greater|move range end to next region boundary
+@aep|Editor/move-range-end-to-next-region-boundary|greater|move range end to next region boundary
 
 @trans|Transport/ToggleRoll|space|toggle roll
 @epp|Editor/play-edit-range|<@SECONDARY@>space|play edit range
