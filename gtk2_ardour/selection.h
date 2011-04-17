@@ -122,6 +122,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void set (MidiRegionView*);
 	void set (std::vector<RegionView*>&);
 	long set (framepos_t, framepos_t);
+	void set_preserving_all_ranges (framepos_t, framepos_t);
 	void set (boost::shared_ptr<Evoral::ControlList>);
 	void set (boost::shared_ptr<ARDOUR::Playlist>);
 	void set (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);

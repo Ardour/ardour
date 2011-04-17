@@ -1803,12 +1803,36 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Spectral Analysis"), sigc::mem_fun(*this, &Editor::analyze_range_selection)));
 
-	if (!selection->regions.empty()) {
-		edit_items.push_back (SeparatorElem());
-		edit_items.push_back (MenuElem (_("Extend Range to End of Region"), sigc::bind (sigc::mem_fun(*this, &Editor::extend_selection_to_end_of_region), false)));
-		edit_items.push_back (MenuElem (_("Extend Range to Start of Region"), sigc::bind (sigc::mem_fun(*this, &Editor::extend_selection_to_start_of_region), false)));
-	}
+	edit_items.push_back (SeparatorElem());
 
+	edit_items.push_back (
+		MenuElem (
+			_("Move Range Start to Previous Region Boundary"),
+			sigc::bind (sigc::mem_fun (*this, &Editor::move_range_selection_start_or_end_to_region_boundary), false, false)
+			)
+		);
+
+	edit_items.push_back (
+		MenuElem (
+			_("Move Range Start to Next Region Boundary"),
+			sigc::bind (sigc::mem_fun (*this, &Editor::move_range_selection_start_or_end_to_region_boundary), false, true)
+			)
+		);
+	
+	edit_items.push_back (
+		MenuElem (
+			_("Move Range End to Previous Region Boundary"),
+			sigc::bind (sigc::mem_fun (*this, &Editor::move_range_selection_start_or_end_to_region_boundary), true, false)
+			)
+		);
+
+	edit_items.push_back (
+		MenuElem (
+			_("Move Range End to Next Region Boundary"),
+			sigc::bind (sigc::mem_fun (*this, &Editor::move_range_selection_start_or_end_to_region_boundary), true, true)
+			)
+		);
+	
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Convert to Region In-Place"), mem_fun(*this, &Editor::separate_region_from_selection)));
 	edit_items.push_back (MenuElem (_("Convert to Region in Region List"), sigc::mem_fun(*this, &Editor::new_region_from_selection)));

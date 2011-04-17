@@ -97,8 +97,10 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/cycle-edit-point|grave|next EP w/o marker
 @eep|Editor/cycle-edit-point-with-marker|<@PRIMARY@>asciicircum|next EP w/marker
 
-@aep|Editor/extend-range-to-end-of-region|rightanglebracket|align sync point relative
-@-group|Editor/extend-range-to-start-of-region|leftanglebracket|some text
+@aep|Editor/move-range-start-to-previous-region-boundary|less|move range start to previous region boundary
+@aep|Editor/move-range-start-to-next-region-boundary|<@PRIMARY@>less|move range start to next region boundary
+@aep|Editor/move-range-end-to-previous-region-boundary|greater|move range end to next region boundary
+@aep|Editor/move-range-end-to-next-region-boundary|<@PRIMARY@>greater|move range end to previous region boundary
 
 @trans|Transport/ToggleRoll|space|toggle roll
 @epp|Editor/play-edit-range|<@SECONDARY@>space|play edit range

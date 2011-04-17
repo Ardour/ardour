@@ -769,6 +769,34 @@ Selection::set (framepos_t start, framepos_t end)
 	return time.front().id;
 }
 
+/** Set the start and end of the range selection.  If more than one range
+ *  is currently selected, the start of the earliest range and the end of the
+ *  latest range are set.  If no range is currently selected, this method
+ *  selects a single range from start to end.
+ *
+ *  @param start New start time.
+ *  @param end New end time.
+ */
+void
+Selection::set_preserving_all_ranges (framepos_t start, framepos_t end)
+{
+	if ((start == 0 && end == 0) || (end < start)) {
+		return;
+	}
+
+	if (time.empty ()) {
+		time.push_back (AudioRange (start, end, next_time_id++));
+	} else {
+		time.sort (AudioRangeComparator ());
+		time.front().start = start;
+		time.back().end = end;
+	}
+
+	time.consolidate ();
+	
+	TimeChanged ();
+}
+
 void
 Selection::set (boost::shared_ptr<Evoral::ControlList> ac)
 {

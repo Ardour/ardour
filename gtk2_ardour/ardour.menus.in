@@ -165,8 +165,10 @@
 		   <menuitem action='select-all-in-loop-range'/>
 		   <separator/>
                    <menuitem action='select-range-between-cursors'/>
-                   <menuitem action='extend-range-to-start-of-region'/>
-                   <menuitem action='extend-range-to-end-of-region'/>
+                   <menuitem action='move-range-start-to-previous-region-boundary'/>
+                   <menuitem action='move-range-start-to-next-region-boundary'/>
+                   <menuitem action='move-range-end-to-previous-region-boundary'/>
+                   <menuitem action='move-range-end-to-next-region-boundary'/>
                    <menuitem action='start-range'/>
                    <menuitem action='finish-range'/>
                    <menuitem action='finish-add-range'/>

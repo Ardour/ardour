@@ -204,92 +204,50 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
 	}
 }
 
-boost::shared_ptr<Region>
-Editor::select_region_for_operation (int /*dir*/, TimeAxisView **tv)
-{
-	RegionView* rv;
-	boost::shared_ptr<Region> region;
-	framepos_t start = 0;
-
-	if (selection->time.start () == selection->time.end_frame ()) {
-
-		/* no current selection-> is there a selected regionview? */
-
-		if (selection->regions.empty()) {
-			return region;
-		}
-
-	}
-
-	if (!selection->regions.empty()) {
-
-		rv = *(selection->regions.begin());
-		(*tv) = &rv->get_time_axis_view();
-		region = rv->region();
-
-	} else if (!selection->tracks.empty()) {
-
-		(*tv) = selection->tracks.front();
-
-		RouteTimeAxisView* rtv;
-
-		if ((rtv = dynamic_cast<RouteTimeAxisView*> (*tv)) != 0) {
-			boost::shared_ptr<Playlist> pl;
-
-			if ((pl = rtv->playlist()) == 0) {
-				return region;
-			}
-
-			region = pl->top_region_at (start);
-		}
-	}
-
-	return region;
-}
-
+/** Move one extreme of the current range selection.  If more than one range is selected,
+ *  the start of the earliest range or the end of the latest range is moved.
+ *
+ *  @param move_end true to move the end of the current range selection, false to move
+ *  the start.
+ *  @param next true to move the extreme to the next region boundary, false to move to
+ *  the previous.
+ */
 void
-Editor::extend_selection_to_end_of_region (bool next)
+Editor::move_range_selection_start_or_end_to_region_boundary (bool move_end, bool next)
 {
-	TimeAxisView *tv;
-	boost::shared_ptr<Region> region;
-	framepos_t start;
-
-	if ((region = select_region_for_operation (next ? 1 : 0, &tv)) == 0) {
+	if (selection->time.start() == selection->time.end_frame()) {
 		return;
 	}
 
-	if (region && selection->time.start () == selection->time.end_frame ()) {
-		start = region->position();
-	} else {
-		start = selection->time.start ();
+	framepos_t start = selection->time.start ();
+	framepos_t end = selection->time.end_frame ();
+
+	/* the position of the thing we may move */
+	framepos_t pos = move_end ? end : start;
+	int dir = next ? 1 : -1;
+
+	/* so we don't find the current region again */
+	if (dir > 0 || pos > 0) {
+		pos += dir;
 	}
 
-	begin_reversible_command (_("extend selection"));
-	selection->set (start, region->position() + region->length());
-	commit_reversible_command ();
-}
-
-void
-Editor::extend_selection_to_start_of_region (bool previous)
-{
-	TimeAxisView *tv;
-	boost::shared_ptr<Region> region;
-	framepos_t end;
-
-	if ((region = select_region_for_operation (previous ? -1 : 0, &tv)) == 0) {
+	framepos_t const target = get_region_boundary (pos, dir, false, false);
+	if (target < 0) {
 		return;
 	}
 
-	if (region && selection->time.start () == selection->time.end_frame ()) {
-		end = region->position() + region->length();
+	if (move_end) {
+		end = target;
 	} else {
-		end = selection->time.end_frame ();
+		start = target;
 	}
 
-	/* Try to leave the selection with the same route if possible */
-
-	begin_reversible_command (_("extend selection"));
-	selection->set (region->position(), end);
+	if (end < start) {
+		return;
+	}
+	
+	begin_reversible_command (_("alter selection"));
+	selection->set_preserving_all_ranges (start, end);
 	commit_reversible_command ();
 }
 

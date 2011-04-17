@@ -1286,9 +1286,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool have_pending_keyboard_selection;
 	framepos_t pending_keyboard_selection_start;
 
-	boost::shared_ptr<ARDOUR::Region> select_region_for_operation (int dir, TimeAxisView **tv);
-	void extend_selection_to_end_of_region (bool next);
-	void extend_selection_to_start_of_region (bool previous);
+	void move_range_selection_start_or_end_to_region_boundary (bool, bool);
 
 	Editing::SnapType _snap_type;
 	Editing::SnapMode _snap_mode;
