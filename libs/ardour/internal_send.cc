@@ -40,6 +40,8 @@ InternalSend::InternalSend (Session& s, boost::shared_ptr<Pannable> p, boost::sh
                         throw failed_constructor();
                 }
         }
+
+	_amp->set_gain (0, this);
 }
 
 InternalSend::~InternalSend ()
