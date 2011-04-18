@@ -287,7 +287,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, PBD::PropertyID) const = 0;
 
-	sigc::signal<void> ZoomFocusChanged;
 	sigc::signal<void> ZoomChanged;
 	/** Emitted when the horizontal position of the editor view changes */
 	sigc::signal<void> HorizontalPositionChanged;

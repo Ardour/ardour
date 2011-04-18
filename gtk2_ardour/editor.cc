@@ -3577,9 +3577,6 @@ Editor::set_zoom_focus (ZoomFocus f)
 
 	if (zoom_focus != f) {
 		zoom_focus = f;
-
-		ZoomFocusChanged (); /* EMIT_SIGNAL */
-
 		instant_save ();
 	}
 }
