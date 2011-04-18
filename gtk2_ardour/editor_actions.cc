@@ -64,7 +64,7 @@ toggle_reg_sens (RefPtr<ActionGroup> group, char const * name, char const * labe
 }
 
 static void
-radio_reg_sens (RefPtr<ActionGroup> action_group, RadioAction::Group radio_group, char const * name, char const * label, sigc::slot<void> slot)
+radio_reg_sens (RefPtr<ActionGroup> action_group, RadioAction::Group& radio_group, char const * name, char const * label, sigc::slot<void> slot)
 {
 	RefPtr<Action> act = ActionManager::register_radio_action (action_group, radio_group, name, label, slot);
 	ActionManager::session_sensitive_actions.push_back (act);
