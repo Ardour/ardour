@@ -216,11 +216,11 @@ Editor::ruler_scroll (GdkEventScroll* event)
 }
 
 
-gint
+bool
 Editor::ruler_button_press (GdkEventButton* ev)
 {
 	if (_session == 0) {
-		return FALSE;
+		return false;
 	}
 
 	// jlc: grab ev->window ?
@@ -254,14 +254,14 @@ Editor::ruler_button_press (GdkEventButton* ev)
 		_dragging_playhead = true;
 	}
 
-	return TRUE;
+	return true;
 }
 
-gint
+bool
 Editor::ruler_button_release (GdkEventButton* ev)
 {
 	if (_session == 0) {
-		return FALSE;
+		return false;
 	}
 
 	gint x,y;
@@ -288,35 +288,35 @@ Editor::ruler_button_release (GdkEventButton* ev)
 		ruler_grabbed_widget = 0;
 	}
 
-	return TRUE;
+	return true;
 }
 
-gint
+bool
 Editor::ruler_label_button_release (GdkEventButton* ev)
 {
 	if (ev->button == 3) {
-		Gtk::Menu* m= dynamic_cast<Gtk::Menu*> (ActionManager::get_widget (X_("/RulerMenuPopup")));
+		Gtk::Menu* m = dynamic_cast<Gtk::Menu*> (ActionManager::get_widget (X_("/RulerMenuPopup")));
 		if (m) {
 			m->popup (1, ev->time);
 		}
 	}
 
-	return TRUE;
+	return true;
 }
 
 
-gint
+bool
 Editor::ruler_mouse_motion (GdkEventMotion* ev)
 {
 	if (_session == 0) {
-		return FALSE;
+		return false;
 	}
 
 	if (_drags->active ()) {
 		_drags->motion_handler (reinterpret_cast<GdkEvent*> (ev), false);
 	}
 
-	return TRUE;
+	return true;
 }
 
 

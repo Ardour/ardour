@@ -3557,7 +3557,7 @@ Editor::edit_controls_button_release (GdkEventButton* ev)
 	return true;
 }
 
-gint
+bool
 Editor::mouse_select_button_release (GdkEventButton* ev)
 {
 	/* this handles just right-clicks */

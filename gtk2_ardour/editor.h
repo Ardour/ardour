@@ -774,9 +774,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Glib::RefPtr<Gtk::ToggleAction> ruler_cd_marker_action;
 	bool                            no_ruler_shown_update;
 
-	gint ruler_button_press (GdkEventButton*);
-	gint ruler_button_release (GdkEventButton*);
-	gint ruler_mouse_motion (GdkEventMotion*);
+	bool ruler_button_press (GdkEventButton*);
+	bool ruler_button_release (GdkEventButton*);
+	bool ruler_mouse_motion (GdkEventMotion*);
 	bool ruler_scroll (GdkEventScroll* event);
 
 	Gtk::Widget * ruler_grabbed_widget;
@@ -791,7 +791,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_ruler_visible (RulerType, bool);
 	void toggle_ruler_visibility (RulerType rt);
 	void ruler_toggled (int);
-	gint ruler_label_button_release (GdkEventButton*);
+	bool ruler_label_button_release (GdkEventButton*);
 	void store_ruler_visibility ();
 	void restore_ruler_visibility ();
 
@@ -1537,7 +1537,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtkmm2ext::StatefulToggleButton internal_edit_button;
 	void                     toggle_internal_editing ();
 
-	gint                     mouse_select_button_release (GdkEventButton*);
+	bool                     mouse_select_button_release (GdkEventButton*);
 
 	Gtk::VBox                automation_box;
 	Gtk::Button              automation_mode_button;
