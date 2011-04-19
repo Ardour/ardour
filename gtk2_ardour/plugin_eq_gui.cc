@@ -36,28 +36,22 @@
 #include <cmath>
 
 using namespace ARDOUR;
+using std::cerr;
 
 PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
-	: _min_dB(-12.0),
-	  _max_dB(+12.0),
-	  _step_dB(3.0),
-	  _impulse_fft(0),
-	  _signal_input_fft(0),
-	  _signal_output_fft(0),
-	  _plugin_insert(pluginInsert)
+	: _min_dB(-12.0)
+	, _max_dB(+12.0)
+	, _step_dB(3.0)
+	, _impulse_fft(0)
+	, _signal_input_fft(0)
+	, _signal_output_fft(0)
+	, _plugin_insert(pluginInsert)
 {
 	_signal_analysis_running = false;
 	_samplerate = ARDOUR_UI::instance()->the_session()->frame_rate();
 
-	_plugin = _plugin_insert->get_impulse_analysis_plugin();
-	_plugin->activate();
-
-	set_buffer_size(4096, 16384);
-	//set_buffer_size(4096, 4096);
-
 	_log_coeff = (1.0 - 2.0 * (1000.0/(_samplerate/2.0))) / powf(1000.0/(_samplerate/2.0), 2.0);
 	_log_max = log10f(1 + _log_coeff);
-
 
 	// Setup analysis drawing area
 	_analysis_scale_surface = 0;
@@ -116,27 +110,47 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	attach( *manage(_analysis_area), 1, 3, 1, 2);
 	attach( *manage(dBSelectBin),    1, 2, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
 	attach( *manage(_phase_button),	 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
-
-
-	// Connect the realtime signal collection callback
-	_plugin_insert->AnalysisDataGathered.connect (analysis_connection, invalidator (*this), ui_bind (&PluginEqGui::signal_collect_callback, this, _1, _2), gui_context());
 }
 
 PluginEqGui::~PluginEqGui()
 {
+	cerr << "PEG::delete\n";
+
+	stop_listening ();
+
 	if (_analysis_scale_surface) {
 		cairo_surface_destroy (_analysis_scale_surface);
 	}
 
 	delete _impulse_fft;
+	_impulse_fft = 0;
 	delete _signal_input_fft;
+	_signal_input_fft = 0;
 	delete _signal_output_fft;
-
-	_plugin->deactivate();
+	_signal_output_fft = 0;
 
 	// all gui objects are *manage'd by the inherited Table object
 }
 
+void
+PluginEqGui::start_listening ()
+{
+	if (!_plugin) {
+		_plugin = _plugin_insert->get_impulse_analysis_plugin();
+	}
+
+	_plugin->activate();
+	set_buffer_size(4096, 16384);
+	// Connect the realtime signal collection callback
+	_plugin_insert->AnalysisDataGathered.connect (analysis_connection, invalidator (*this), ui_bind (&PluginEqGui::signal_collect_callback, this, _1, _2), gui_context());
+}
+
+void
+PluginEqGui::stop_listening ()
+{
+	analysis_connection.disconnect ();
+	_plugin->deactivate ();
+}
 
 void
 PluginEqGui::on_hide()
@@ -169,18 +183,15 @@ PluginEqGui::on_show()
 	start_updating();
 
 	Gtk::Widget *toplevel = get_toplevel();
-	if (!toplevel) {
-		std::cerr << "No toplevel widget for PluginEqGui?!?!" << std::endl;
-        }
-
-	if (!_window_unmap_connection.connected()) {
-		_window_unmap_connection = toplevel->signal_unmap().connect( sigc::mem_fun(this, &PluginEqGui::stop_updating));
+	if (toplevel) {
+		if (!_window_unmap_connection.connected()) {
+			_window_unmap_connection = toplevel->signal_unmap().connect( sigc::mem_fun(this, &PluginEqGui::stop_updating));
+		}
+		
+		if (!_window_map_connection.connected()) {
+			_window_map_connection = toplevel->signal_map().connect( sigc::mem_fun(this, &PluginEqGui::start_updating));
+		}
 	}
-
-	if (!_window_map_connection.connected()) {
-		_window_map_connection = toplevel->signal_map().connect( sigc::mem_fun(this, &PluginEqGui::start_updating));
-	}
-
 }
 
 void
@@ -217,9 +228,9 @@ PluginEqGui::redraw_scales()
 void
 PluginEqGui::set_buffer_size(uint32_t size, uint32_t signal_size)
 {
-	if (_buffer_size == size && _signal_buffer_size == signal_size)
+	if (_buffer_size == size && _signal_buffer_size == signal_size) {
 		return;
-
+	}
 
         GTKArdour::FFT *tmp1 = _impulse_fft;
         GTKArdour::FFT *tmp2 = _signal_input_fft;
@@ -245,6 +256,7 @@ PluginEqGui::set_buffer_size(uint32_t size, uint32_t signal_size)
 	_signal_buffer_size = signal_size;
 
 	ARDOUR::ChanCount count = ARDOUR::ChanCount::max (_plugin->get_info()->n_inputs, _plugin->get_info()->n_outputs);
+
 	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
 		_bufferset.ensure_buffers (*i, count.get (*i), _buffer_size);
 		_collect_bufferset.ensure_buffers (*i, count.get (*i), _buffer_size);
@@ -255,7 +267,7 @@ PluginEqGui::set_buffer_size(uint32_t size, uint32_t signal_size)
 }
 
 void
-PluginEqGui::resize_analysis_area(Gtk::Allocation& size)
+PluginEqGui::resize_analysis_area (Gtk::Allocation& size)
 {
 	_analysis_width  = (float)size.get_width();
 	_analysis_height = (float)size.get_height();
@@ -300,6 +312,7 @@ PluginEqGui::signal_collect_callback(ARDOUR::BufferSet *in, ARDOUR::BufferSet *o
 	_signal_analysis_running = false;
 
 	// This signals calls expose_analysis_area()
+	cerr << "PEG::queue_draw\n";
 	_analysis_area->queue_draw();
 }
 
@@ -401,8 +414,7 @@ bool
 PluginEqGui::expose_analysis_area(GdkEventExpose *)
 {
 	redraw_analysis_area();
-
-	return false;
+	return true;
 }
 
 void
@@ -563,8 +575,11 @@ PluginEqGui::plot_impulse_phase(Gtk::Widget *w, cairo_t *cr)
 void
 PluginEqGui::draw_scales_power(Gtk::Widget */*w*/, cairo_t *cr)
 {
-	static float scales[] = { 30.0, 70.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 5000.0, 10000.0, 15000.0, 20000.0, -1.0 };
+	if (_impulse_fft == 0) {
+		return;
+	}
 
+	static float scales[] = { 30.0, 70.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 5000.0, 10000.0, 15000.0, 20000.0, -1.0 };
 	float divisor = _samplerate / 2.0 / _impulse_fft->bins();
 	float x;
 
@@ -667,7 +682,6 @@ void
 PluginEqGui::plot_impulse_amplitude(Gtk::Widget *w, cairo_t *cr)
 {
 	float x,y;
-
 	int prevX = 0;
 	float avgY = 0.0;
 	int avgNum = 0;

@@ -40,6 +40,9 @@ public:
 	PluginEqGui (boost::shared_ptr<ARDOUR::PluginInsert>);
 	~PluginEqGui ();
 
+	void start_listening ();
+	void stop_listening ();
+
 private:
 	// Setup
 	void set_buffer_size (uint32_t, uint32_t);

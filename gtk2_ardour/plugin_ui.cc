@@ -125,16 +125,6 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 		_pluginui = pu;
 		_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
 		add (*pu);
-
-		/*
-		Gtk::HBox *hbox = new Gtk::HBox();
-		hbox->pack_start( *pu);
-		// TODO: this should be nicer
-		hbox->pack_start( eqgui_bin );
-
-		add (*manage(hbox));
-		*/
-
 		set_wmclass (X_("ardour_plugin_editor"), PROGRAM_NAME);
 
 		signal_map_event().connect (sigc::mem_fun (*pu, &GenericPluginUI::start_updating));
@@ -419,14 +409,16 @@ PluginUIWindow::plugin_going_away ()
 }
 
 PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
-	: insert (pi),
-	  plugin (insert->plugin()),
-	  add_button (_("Add")),
-	  save_button (_("Save")),
-	  delete_button (_("Delete")),
-	  bypass_button (_("Bypass")),
-	  latency_gui (0),
-	  plugin_analysis_expander (_("Plugin analysis"))
+	: insert (pi)
+	, plugin (insert->plugin())
+	, add_button (_("Add"))
+	, save_button (_("Save"))
+	, delete_button (_("Delete"))
+	, bypass_button (_("Bypass"))
+	, latency_gui (0)
+	, latency_dialog (0)
+	, plugin_analysis_expander (_("Plugin analysis"))
+	, eqgui (0)
 {
 	_preset_combo.set_size_request (100, -1);
 	_preset_modified.set_size_request (16, -1);
@@ -482,6 +474,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 PlugUIBase::~PlugUIBase()
 {
+	delete eqgui;
 	delete latency_gui;
 }
 
@@ -634,36 +627,36 @@ PlugUIBase::toggle_plugin_analysis()
 	if (plugin_analysis_expander.get_expanded() &&
             !plugin_analysis_expander.get_child()) {
 		// Create the GUI
-		PluginEqGui *foo = new PluginEqGui(insert);
-		plugin_analysis_expander.add( *foo );
-		plugin_analysis_expander.show_all();
+		if (eqgui == 0) {
+			eqgui = new PluginEqGui (insert);
+		}
+
+		Gtk::Window *toplevel = (Gtk::Window*) plugin_analysis_expander.get_ancestor (GTK_TYPE_WINDOW);
+
+		if (toplevel) {
+			toplevel->get_size (pre_eq_size.width, pre_eq_size.height);
+			cerr << "Pre EQ size was " << pre_eq_size.width << " x " << pre_eq_size.height << endl;
+		}
+
+		plugin_analysis_expander.add (*eqgui);
+		plugin_analysis_expander.show_all ();
+		eqgui->start_listening ();
 	}
 
-	Gtk::Widget *gui;
+	if (!plugin_analysis_expander.get_expanded()) {
 
-	if (!plugin_analysis_expander.get_expanded() &&
-            (gui = plugin_analysis_expander.get_child())) {
-		// Hide & remove
-		gui->hide();
-		//plugin_analysis_expander.remove(*gui);
+		// Hide & remove from expander
+
+		eqgui->hide ();
+		eqgui->stop_listening ();
 		plugin_analysis_expander.remove();
 
-		delete gui;
+		Gtk::Window *toplevel = (Gtk::Window*) plugin_analysis_expander.get_ancestor (GTK_TYPE_WINDOW);
 
-		Gtk::Widget *toplevel = plugin_analysis_expander.get_toplevel();
-		if (!toplevel) {
-			std::cerr << "No toplevel widget?!?!" << std::endl;
-			return;
+		if (toplevel) {
+			cerr << "reset size too " << pre_eq_size.width << " x " << pre_eq_size.height << endl;
+			toplevel->resize (pre_eq_size.width, pre_eq_size.height);
 		}
-
-		Gtk::Container *cont = dynamic_cast<Gtk::Container *>(toplevel);
-		if (!cont) {
-			std::cerr << "Toplevel widget is not a container?!?" << std::endl;
-			return;
-		}
-
-		Gtk::Allocation alloc(0, 0, 50, 50); // Just make it small
-		toplevel->size_allocate(alloc);
 	}
 }
 
