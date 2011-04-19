@@ -207,10 +207,10 @@ Scroomer::on_scroll_event (GdkEventScroll* ev)
 {
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
-		adj.set_value (adj.get_value() - adj.get_page_size()/10.0);
+		adj.set_value (adj.get_value() + adj.get_page_size() / 10.0);
 		break;
 	case GDK_SCROLL_DOWN:
-		adj.set_value (adj.get_value() + adj.get_page_size()/10.0);
+		adj.set_value (adj.get_value() - adj.get_page_size() / 10.0);
 		break;
 	default:
 		return false;
