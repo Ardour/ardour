@@ -909,7 +909,7 @@ Editor::build_tempo_or_meter_marker_menu (bool can_remove)
 	MenuList& items = tempo_or_meter_marker_menu->items();
 	tempo_or_meter_marker_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Edit"), sigc::mem_fun(*this, &Editor::marker_menu_edit)));
+	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun(*this, &Editor::marker_menu_edit)));
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 
 	items.back().set_sensitive (can_remove);
