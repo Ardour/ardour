@@ -35,7 +35,7 @@ EventLoop::invalidate_request (void* data)
 			(*i)->invalidation = 0;
 		}
 		delete ir;
-        }
+        } 
 
         return 0;
 }

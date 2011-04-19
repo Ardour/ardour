@@ -90,6 +90,9 @@ public:
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
+	    if (ir) {
+		    ir->event_loop = event_loop;
+	    }
 	    clist.add_connection (_signal.connect (boost::bind (&EventLoop::call_slot, event_loop, ir, slot)));
     }
     
@@ -97,6 +100,9 @@ public:
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
+	    if (ir) {
+		    ir->event_loop = event_loop;
+	    }
 	    c = _signal.connect (boost::bind (&EventLoop::call_slot, event_loop, ir, slot));
     }
     
@@ -134,6 +140,9 @@ public:
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
+	    if (ir) {
+		    ir->event_loop = event_loop;
+	    }
 	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1)));
     }
 
@@ -141,6 +150,9 @@ public:
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
+	    if (ir) {
+		    ir->event_loop = event_loop;
+	    }
 	    c = _signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1));
 
     }
@@ -181,6 +193,9 @@ public:
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
+	    if (ir) {
+		    ir->event_loop = event_loop;
+	    }
 	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2)));
     }
 
@@ -188,6 +203,9 @@ public:
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
+	    if (ir) {
+		    ir->event_loop = event_loop;
+	    }
 	    c = _signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2));
     }
 
@@ -227,6 +245,9 @@ public:
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
+	    if (ir) {
+		    ir->event_loop = event_loop;
+	    }
 	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3)));
     }
     
@@ -234,6 +255,9 @@ public:
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
+	    if (ir) {
+		    ir->event_loop = event_loop;
+	    }
 	    c = _signal.connect (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3)));
     }
     
@@ -273,6 +297,9 @@ public:
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
+	    if (ir) {
+		    ir->event_loop = event_loop;
+	    }
 	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3, _4)));
     }
     
@@ -280,6 +307,9 @@ public:
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
+	    if (ir) {
+		    ir->event_loop = event_loop;
+	    }
 	    c = _signal.connect (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3, _4)));
     }
     
