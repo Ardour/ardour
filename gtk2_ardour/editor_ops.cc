@@ -3831,6 +3831,13 @@ Editor::cut_copy_ranges (CutCopyOp op)
 	TrackViewList* ts;
 	TrackViewList entered;
 
+	/* Sort the track selection now, so that it if is used, the playlists
+	   selected by the calls below to cut_copy_clear are in the order that
+	   their tracks appear in the editor.  This makes things like paste
+	   of ranges work properly.
+	*/
+	sort_track_selection (&selection->tracks);
+
 	if (selection->tracks.empty()) {
 		if (!entered_track) {
 			return;
@@ -3899,7 +3906,7 @@ Editor::paste_internal (framepos_t position, float times)
 		ts = selection->tracks;
 	} else if (_last_cut_copy_source_track) {
 		/* otherwise paste to the track that the cut/copy came from;
-		   see discussion in mants #3333.
+		   see discussion in mantis #3333.
 		*/
 		ts.push_back (_last_cut_copy_source_track);
 	}
