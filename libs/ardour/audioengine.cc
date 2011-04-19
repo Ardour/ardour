@@ -353,9 +353,7 @@ int
 AudioEngine::_graph_order_callback (void *arg)
 {
 	AudioEngine* ae = static_cast<AudioEngine*> (arg);
-	if (ae->port_remove_in_progress) {
-		cerr << "skip reorder callback - PRiP\n";
-	}
+
 	if (ae->connected() && !ae->port_remove_in_progress) {
 		ae->GraphReordered (); /* EMIT SIGNAL */
 	}
@@ -390,9 +388,6 @@ AudioEngine::_registration_callback (jack_port_id_t /*id*/, int /*reg*/, void* a
 {
 	AudioEngine* ae = static_cast<AudioEngine*> (arg);
 
-	if (ae->port_remove_in_progress) {
-		cerr << "skip registration callback - PRiP\n";
-	}
 	if (!ae->port_remove_in_progress) {
 		ae->PortRegisteredOrUnregistered (); /* EMIT SIGNAL */
 	}
@@ -410,7 +405,6 @@ AudioEngine::_connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int co
 	AudioEngine* ae = static_cast<AudioEngine*> (arg);
 
 	if (ae->port_remove_in_progress) {
-		cerr << "skip connect callback - PRiP\n";
 		return;
 	}
 
@@ -468,7 +462,6 @@ AudioEngine::process_thread ()
                 pframes_t nframes = jack_cycle_wait (_priv_jack);
 
                 if (process_callback (nframes)) {
-                        cerr << "--- process\n";
                         return 0;
                 }
 
@@ -1230,7 +1223,6 @@ void
 AudioEngine::transport_locate (framepos_t where)
 {
 	GET_PRIVATE_JACK_POINTER (_jack);
-	// cerr << "tell JACK to locate to " << where << endl;
 	jack_transport_locate (_priv_jack, where);
 }
 
