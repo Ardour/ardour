@@ -113,6 +113,7 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 	compute_current_bbt_points(leftmost_frame, leftmost_frame + current_page_frames());
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 	redraw_measures ();
+	update_tempo_based_rulers ();
 }
 
 void
@@ -124,7 +125,6 @@ Editor::redisplay_tempo (bool immediate_redraw)
 
 	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames()); // redraw rulers and measures
 
-	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames());
 	if (immediate_redraw) {
 		redraw_measures ();
 	} else {
