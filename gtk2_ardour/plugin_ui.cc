@@ -298,7 +298,6 @@ PluginUIWindow::app_activated (bool)
 #endif
 {
 #ifdef GTKOSX
-	cerr << "APP activated ? " << yn << endl;
 	if (_pluginui) {
 		if (yn) {
 			if (was_visible) {
@@ -635,7 +634,6 @@ PlugUIBase::toggle_plugin_analysis()
 
 		if (toplevel) {
 			toplevel->get_size (pre_eq_size.width, pre_eq_size.height);
-			cerr << "Pre EQ size was " << pre_eq_size.width << " x " << pre_eq_size.height << endl;
 		}
 
 		plugin_analysis_expander.add (*eqgui);
@@ -654,7 +652,6 @@ PlugUIBase::toggle_plugin_analysis()
 		Gtk::Window *toplevel = (Gtk::Window*) plugin_analysis_expander.get_ancestor (GTK_TYPE_WINDOW);
 
 		if (toplevel) {
-			cerr << "reset size too " << pre_eq_size.width << " x " << pre_eq_size.height << endl;
 			toplevel->resize (pre_eq_size.width, pre_eq_size.height);
 		}
 	}
