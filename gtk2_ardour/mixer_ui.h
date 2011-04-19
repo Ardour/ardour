@@ -189,6 +189,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void route_groups_changed ();
 	void route_group_name_edit (const std::string&, const std::string&);
 	void route_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter);
+	void route_group_row_deleted (Gtk::TreeModel::Path const &);
 
 	Gtk::Menu *track_menu;
 	void track_column_click (gint);
@@ -257,6 +258,8 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	static const int32_t default_width = 478;
 	static const int32_t default_height = 765;
+
+	bool _in_group_rebuild;
 
 	friend class MixerGroupTabs;
 };

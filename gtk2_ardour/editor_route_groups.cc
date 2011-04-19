@@ -54,6 +54,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	: EditorComponent (e)
 	, _all_group_active_button (_("No Selection = All Tracks"))
 	, _in_row_change (false)
+	, _in_rebuild (false)
 {
 	_model = ListStore::create (_columns);
 	_display.set_model (_model);
@@ -126,6 +127,11 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	active_cell->property_radio() = false;
 
 	_model->signal_row_changed().connect (sigc::mem_fun (*this, &EditorRouteGroups::row_change));
+	/* What signal would you guess was emitted when the rows of your treeview are reordered
+	   by a drag and drop?  signal_rows_reordered?  That would be far too easy.
+	   No, signal_row_deleted().
+	 */
+	_model->signal_row_deleted().connect (sigc::mem_fun (*this, &EditorRouteGroups::row_deleted));
 
 	_display.set_name ("EditGroupList");
 	_display.get_selection()->set_mode (SELECTION_SINGLE);
@@ -406,7 +412,9 @@ EditorRouteGroups::add (RouteGroup* group)
 void
 EditorRouteGroups::groups_changed ()
 {
-	ENSURE_GUI_THREAD (*this, &EditorRouteGroups::groups_changed)
+	ENSURE_GUI_THREAD (*this, &EditorRouteGroups::groups_changed);
+
+	_in_rebuild = true;
 
 	/* just rebuild the while thing */
 
@@ -415,6 +423,8 @@ EditorRouteGroups::groups_changed ()
 	if (_session) {
 		_session->foreach_route_group (sigc::mem_fun (*this, &EditorRouteGroups::add));
 	}
+
+	_in_rebuild = false;
 }
 
 void
@@ -492,7 +502,12 @@ EditorRouteGroups::set_session (Session* s)
 		arg.PropertyChanged.connect (all_route_groups_changed_connection, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::all_group_changed, this, _1), gui_context());
 
 		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::add, this, _1), gui_context());
-		_session->route_group_removed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::groups_changed, this), gui_context());
+		_session->route_group_removed.connect (
+			_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::groups_changed, this), gui_context()
+			);
+		_session->route_groups_reordered.connect (
+			_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::groups_changed, this), gui_context()
+			);
 	}
 
 	PBD::PropertyChange pc;
@@ -530,3 +545,30 @@ EditorRouteGroups::all_group_changed (const PropertyChange&)
 	}
 }
         
+/** Called when a model row is deleted, but also when the model is
+ *  reordered by a user drag-and-drop; the latter is what we are
+ *  interested in here.
+ */
+void
+EditorRouteGroups::row_deleted (Gtk::TreeModel::Path const &)
+{
+	if (_in_rebuild) {
+		/* We need to ignore this in cases where we're not doing a drag-and-drop
+		   re-order.
+		*/
+		return;
+	}
+	
+	/* Re-write the session's route group list so that the new order is preserved */
+
+	list<RouteGroup*> new_list;
+
+	Gtk::TreeModel::Children children = _model->children();
+	for (Gtk::TreeModel::Children::iterator i = children.begin(); i != children.end(); ++i) {
+		new_list.push_back ((*i)[_columns.routegroup]);
+	}
+
+	_session->reorder_route_groups (new_list);
+}
+
+

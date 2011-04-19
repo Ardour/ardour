@@ -124,7 +124,8 @@ Mixer_UI::Mixer_UI ()
 	active_cell->property_radio() = false;
 
 	group_model->signal_row_changed().connect (sigc::mem_fun (*this, &Mixer_UI::route_group_row_change));
-
+	/* We use this to notice drag-and-drop reorders of the group list */
+	group_model->signal_row_deleted().connect (sigc::mem_fun (*this, &Mixer_UI::route_group_row_deleted));
 	group_display.signal_button_press_event().connect (sigc::mem_fun (*this, &Mixer_UI::group_display_button_press), false);
 
 	group_display_scroller.add (group_display);
@@ -223,6 +224,8 @@ Mixer_UI::Mixer_UI ()
 	group_display.show();
 
 	auto_rebinding = FALSE;
+
+	_in_group_rebuild = false;
 
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), ui_bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 
@@ -487,6 +490,7 @@ Mixer_UI::set_session (Session* sess)
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), ui_bind (&Mixer_UI::add_strip, this, _1), gui_context());
 	_session->route_group_added.connect (_session_connections, invalidator (*this), ui_bind (&Mixer_UI::add_route_group, this, _1), gui_context());
 	_session->route_group_removed.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::route_groups_changed, this), gui_context());
+	_session->route_groups_reordered.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::route_groups_changed, this), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), ui_bind (&Mixer_UI::parameter_changed, this, _1), gui_context());
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&Mixer_UI::parameter_changed, this, _1), gui_context ());
@@ -1100,7 +1104,9 @@ Mixer_UI::disable_all_route_groups ()
 void
 Mixer_UI::route_groups_changed ()
 {
-	ENSURE_GUI_THREAD (*this, &Mixer_UI::route_groups_changed)
+	ENSURE_GUI_THREAD (*this, &Mixer_UI::route_groups_changed);
+
+	_in_group_rebuild = true;
 
 	/* just rebuild the while thing */
 
@@ -1117,6 +1123,7 @@ Mixer_UI::route_groups_changed ()
 	_session->foreach_route_group (sigc::mem_fun (*this, &Mixer_UI::add_route_group));
 
 	_group_tabs->set_dirty ();
+	_in_group_rebuild = false;
 }
 
 void
@@ -1243,6 +1250,33 @@ Mixer_UI::route_group_row_change (const Gtk::TreeModel::Path&, const Gtk::TreeMo
 		group->set_hidden (hidden, this);
 	}
 }
+
+/** Called when a group model row is deleted, but also when the model is
+ *  reordered by a user drag-and-drop; the latter is what we are
+ *  interested in here.
+ */
+void
+Mixer_UI::route_group_row_deleted (Gtk::TreeModel::Path const &)
+{
+	if (_in_group_rebuild) {
+		return;
+	}
+
+	/* Re-write the session's route group list so that the new order is preserved */
+
+	list<RouteGroup*> new_list;
+
+	Gtk::TreeModel::Children children = group_model->children();
+	for (Gtk::TreeModel::Children::iterator i = children.begin(); i != children.end(); ++i) {
+		RouteGroup* g = (*i)[group_columns.group];
+		if (g) {
+			new_list.push_back (g);
+		}
+	}
+
+	_session->reorder_route_groups (new_list);
+}
+
 
 void
 Mixer_UI::add_route_group (RouteGroup* group)
@@ -1648,3 +1682,4 @@ Mixer_UI::new_track_or_bus ()
 {
 	ARDOUR_UI::instance()->add_route (this);
 }
+

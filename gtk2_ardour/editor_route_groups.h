@@ -73,6 +73,7 @@ private:
 	void run_new_group_dialog ();
         void all_group_toggled();
         void all_group_changed (const PBD::PropertyChange&);
+	void row_deleted (Gtk::TreeModel::Path const &);
 
 	Glib::RefPtr<Gtk::ListStore> _model;
 	Glib::RefPtr<Gtk::TreeSelection> _selection;
@@ -81,6 +82,7 @@ private:
 	Gtk::VBox _display_packer;
         Gtk::ToggleButton _all_group_active_button;
 	bool _in_row_change;
+	bool _in_rebuild;
 	PBD::ScopedConnectionList _property_changed_connections;
 	PBD::ScopedConnection all_route_groups_changed_connection;
 };

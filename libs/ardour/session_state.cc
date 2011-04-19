@@ -2298,8 +2298,20 @@ Session::remove_route_group (RouteGroup& rg)
 
 		route_group_removed (); /* EMIT SIGNAL */
 	}
-
 }
+
+/** Set a new order for our route groups, without adding or removing any.
+ *  @param groups Route group list in the new order.
+ */
+void
+Session::reorder_route_groups (list<RouteGroup*> groups)
+{
+	_route_groups = groups;
+
+	route_groups_reordered (); /* EMIT SIGNAL */
+	set_dirty ();
+}
+
 
 RouteGroup *
 Session::route_group_by_name (string name)
