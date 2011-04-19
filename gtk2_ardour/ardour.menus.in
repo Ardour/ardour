@@ -177,7 +177,6 @@
                    <menuitem action='select-prev-route'/>
 	       </menu>	   
 	       <separator/>
-               <menuitem action='editor-delete'/>
                <menuitem action='editor-crop'/>
                <menuitem action='split-region'/>
 	       <menuitem action='split-region-at-transients'/>

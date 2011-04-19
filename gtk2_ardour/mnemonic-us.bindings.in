@@ -250,7 +250,7 @@ This mode provides many different operations on both regions and control points,
 @vis|Editor/scroll-tracks-up|Page_Up|scroll up (page)
 @movp|Transport/GotoStart|Home|to start marker
 @movp|Transport/GotoEnd|End|to end marker
-@edit|Editor/editor-delete|Delete|delete
+@edit|Editor/editor-cut|Delete|cut
 
 @movp|Editor/playhead-to-edit|Return|to edit point
 @eep|Editor/edit-to-playhead|<@SECONDARY@>Return|move EP to playhead
