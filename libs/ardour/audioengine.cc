@@ -86,6 +86,7 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 	_buffer_size = 0;
 	_freewheeling = false;
         _main_thread = 0;
+	port_remove_in_progress = false;
 
 	m_meter_thread = 0;
 	g_atomic_int_set (&m_meter_exit, 0);
@@ -170,18 +171,18 @@ AudioEngine::set_jack_callbacks ()
         } else {
                 jack_on_shutdown (_priv_jack, halted, this);
         }
-
-        jack_set_graph_order_callback (_priv_jack, _graph_order_callback, this);
+	
         jack_set_thread_init_callback (_priv_jack, _thread_init_callback, this);
         jack_set_process_thread (_priv_jack, _process_thread, this);
         jack_set_sample_rate_callback (_priv_jack, _sample_rate_callback, this);
         jack_set_buffer_size_callback (_priv_jack, _bufsize_callback, this);
+        jack_set_graph_order_callback (_priv_jack, _graph_order_callback, this);
+        jack_set_port_registration_callback (_priv_jack, _registration_callback, this);
+        jack_set_port_connect_callback (_priv_jack, _connect_callback, this);
         jack_set_xrun_callback (_priv_jack, _xrun_callback, this);
         jack_set_sync_callback (_priv_jack, _jack_sync_callback, this);
         jack_set_freewheel_callback (_priv_jack, _freewheel_callback, this);
-        jack_set_port_registration_callback (_priv_jack, _registration_callback, this);
-        jack_set_port_connect_callback (_priv_jack, _connect_callback, this);
-        
+
         if (_session && _session->config.get_jack_time_master()) {
                 jack_set_timebase_callback (_priv_jack, 0, _jack_timebase_callback, this);
         }
@@ -194,7 +195,7 @@ AudioEngine::set_jack_callbacks ()
         if (jack_set_latency_callback) {
                 jack_set_latency_callback (_priv_jack, _latency_callback, this);
         }
-        
+
         jack_set_error_function (ardour_jack_error);
 }
 
@@ -352,7 +353,10 @@ int
 AudioEngine::_graph_order_callback (void *arg)
 {
 	AudioEngine* ae = static_cast<AudioEngine*> (arg);
-	if (ae->connected()) {
+	if (ae->port_remove_in_progress) {
+		cerr << "skip reorder callback - PRiP\n";
+	}
+	if (ae->connected() && !ae->port_remove_in_progress) {
 		ae->GraphReordered (); /* EMIT SIGNAL */
 	}
 	return 0;
@@ -385,7 +389,13 @@ void
 AudioEngine::_registration_callback (jack_port_id_t /*id*/, int /*reg*/, void* arg)
 {
 	AudioEngine* ae = static_cast<AudioEngine*> (arg);
-	ae->PortRegisteredOrUnregistered (); /* EMIT SIGNAL */
+
+	if (ae->port_remove_in_progress) {
+		cerr << "skip registration callback - PRiP\n";
+	}
+	if (!ae->port_remove_in_progress) {
+		ae->PortRegisteredOrUnregistered (); /* EMIT SIGNAL */
+	}
 }
 
 void
@@ -398,6 +408,11 @@ void
 AudioEngine::_connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int conn, void* arg)
 {
 	AudioEngine* ae = static_cast<AudioEngine*> (arg);
+
+	if (ae->port_remove_in_progress) {
+		cerr << "skip connect callback - PRiP\n";
+		return;
+	}
 
 	GET_PRIVATE_JACK_POINTER (ae->_jack);
 
@@ -437,13 +452,6 @@ AudioEngine::split_cycle (pframes_t offset)
 	}
 }
 
-void
-AudioEngine::finish_process_cycle (int /* status*/ )
-{
-        GET_PRIVATE_JACK_POINTER(_jack);
-        jack_cycle_signal (_jack, 0);
-}
-
 void*
 AudioEngine::process_thread ()
 {
@@ -456,14 +464,15 @@ AudioEngine::process_thread ()
 
         while (1) {
                 GET_PRIVATE_JACK_POINTER_RET(_jack,0);
-                pframes_t nframes = jack_cycle_wait (_jack);
+
+                pframes_t nframes = jack_cycle_wait (_priv_jack);
 
                 if (process_callback (nframes)) {
                         cerr << "--- process\n";
                         return 0;
                 }
 
-                finish_process_cycle (0);
+		jack_cycle_signal (_priv_jack, 0);
         }
 
         return 0;
@@ -668,10 +677,14 @@ AudioEngine::jack_bufsize_callback (pframes_t nframes)
                 _raw_buffer_sizes[DataType::MIDI] = nframes * 4 - (nframes/2);
         }
 
-	boost::shared_ptr<Ports> p = ports.reader();
-
-	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		(*i)->reset();
+	{ 
+		Glib::Mutex::Lock lm (_process_lock);
+		
+		boost::shared_ptr<Ports> p = ports.reader();
+		
+		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+			(*i)->reset();
+		}
 	}
 
 	if (_session) {
@@ -719,7 +732,7 @@ void
 AudioEngine::set_session (Session *s)
 {
 	Glib::Mutex::Lock pl (_process_lock);
-
+	
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
@@ -751,7 +764,7 @@ AudioEngine::set_session (Session *s)
 			(*i)->cycle_end (blocksize);
 		}
 	}
-}
+} 
 
 void
 AudioEngine::remove_session ()
@@ -795,10 +808,10 @@ AudioEngine::port_registration_failure (const std::string& portname)
 	throw PortRegistrationFailure (string_compose (_("AudioEngine: cannot register port \"%1\": %2"), portname, reason).c_str());
 }
 
-Port *
+Port*
 AudioEngine::register_port (DataType dtype, const string& portname, bool input)
 {
-	Port* newport = 0;
+	Port* newport;
 
 	try {
 		if (dtype == DataType::AUDIO) {
@@ -995,10 +1008,10 @@ AudioEngine::frames_per_cycle () const
 }
 
 /** @param name Full or short name of port
- *  @return Corresponding Port*, or 0.  This object remains the property of the AudioEngine
+ *  @return Corresponding Port* or 0. This object remains the property of the AudioEngine
  *  so must not be deleted.
  */
-Port *
+Port*
 AudioEngine::get_port_by_name (const string& portname)
 {
 	if (!_running) {
@@ -1260,22 +1273,39 @@ AudioEngine::freewheel (bool onoff)
 void
 AudioEngine::remove_all_ports ()
 {
-	/* process lock MUST be held */
+	/* make sure that JACK callbacks that will be invoked as we cleanup
+	 * ports know that they have nothing to do.
+	 */
+	 
+	port_remove_in_progress = true;
+
+	/* process lock MUST be held by caller
+	*/
+
+	vector<Port*> to_be_deleted;
 
 	{
 		RCUWriter<Ports> writer (ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
-
 		for (Ports::iterator i = ps->begin(); i != ps->end(); ++i) {
-			delete *i;
+			to_be_deleted.push_back (*i);
 		}
-
 		ps->clear ();
 	}
 
-	/* clear dead wood list too */
+	/* clear dead wood list in RCU */
 
 	ports.flush ();
+
+	/* now do the actual deletion, given that "ports" is now empty, thus
+	   preventing anyone else from getting a handle on a Port
+	*/
+
+	for (vector<Port*>::iterator p = to_be_deleted.begin(); p != to_be_deleted.end(); ++p) {
+		delete *p;
+	}
+
+	port_remove_in_progress = false;
 }
 
 int
@@ -1386,7 +1416,7 @@ AudioEngine::reconnect_to_jack ()
 	}
 
 	last_monitor_check = 0;
-
+	
         set_jack_callbacks ();
 
 	if (jack_activate (_priv_jack) == 0) {

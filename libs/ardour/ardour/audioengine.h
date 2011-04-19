@@ -286,14 +286,14 @@ _	   the regular process() call to session->process() is not made.
 	boost::function<int(framecnt_t)>  freewheel_action;
 	bool                       reconnect_on_halt;
 	int                       _usecs_per_cycle;
+	bool                       port_remove_in_progress;
 
 	SerializedRCUManager<Ports> ports;
 
-	Port *register_port (DataType type, const std::string& portname, bool input);
+	Port* register_port (DataType type, const std::string& portname, bool input);
 
 	int    process_callback (pframes_t nframes);
 	void*  process_thread ();
-        void   finish_process_cycle (int status);
 	void   remove_all_ports ();
 
 	ChanCount n_physical (unsigned long) const;
@@ -337,7 +337,7 @@ _	   the regular process() call to session->process() is not made.
 
 	Glib::Thread*    m_meter_thread;
 	static gint      m_meter_exit;
-
+	
         ProcessThread* _main_thread;
 
         struct ThreadData {
