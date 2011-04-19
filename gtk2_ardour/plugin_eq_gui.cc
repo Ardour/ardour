@@ -36,7 +36,6 @@
 #include <cmath>
 
 using namespace ARDOUR;
-using std::cerr;
 
 PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	: _min_dB(-12.0)
@@ -114,8 +113,6 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 
 PluginEqGui::~PluginEqGui()
 {
-	cerr << "PEG::delete\n";
-
 	stop_listening ();
 
 	if (_analysis_scale_surface) {
@@ -312,7 +309,6 @@ PluginEqGui::signal_collect_callback(ARDOUR::BufferSet *in, ARDOUR::BufferSet *o
 	_signal_analysis_running = false;
 
 	// This signals calls expose_analysis_area()
-	cerr << "PEG::queue_draw\n";
 	_analysis_area->queue_draw();
 }
 
