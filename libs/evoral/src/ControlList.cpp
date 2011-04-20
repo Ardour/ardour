@@ -282,7 +282,7 @@ ControlList::merge_nascent (double when)
                                 
                         } else {
                                 
-                                /* find the range that overaps with nascent events,
+                                /* find the range that overlaps with nascent events,
                                    and insert the contents of nascent events.
                                 */
                                 
@@ -331,8 +331,14 @@ ControlList::merge_nascent (double when)
                                                 }
                                         }
                                 }
-                                
-                                assert (range_begin != _events.end());
+
+				/* Now:
+				   range_begin is the first event on our list after the first nascent event
+				   range_end   is the first event on our list after the last  nascent event
+
+				   range_begin may be equal to _events.end() iff the last event on our list
+				   was at the same time as the first nascent event.
+				*/
                                 
                                 if (range_begin != _events.begin()) {
                                         /* clamp point before */
