@@ -82,6 +82,7 @@ class ShuttleControl : public Gtk::DrawingArea, public ARDOUR::SessionHandlePtr
 	bool on_motion_notify_event(GdkEventMotion*);
 	bool on_expose_event(GdkEventExpose*);
 	void on_size_allocate (Gtk::Allocation&);
+	bool on_query_tooltip (int, int, bool, const Glib::RefPtr<Gtk::Tooltip>&);
 
 	gint mouse_shuttle (double x, bool force);
 	void use_shuttle_fract (bool force);
