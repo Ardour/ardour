@@ -1834,3 +1834,10 @@ widget "*ContrastingPopup*" style:highest "contrasting_popup"
 
 widget "*RouteNameEditorEntry" style:highest "text_cell_entry"
 widget "*RegionNameEditorEntry" style:highest "text_cell_entry"
+
+style "tooltip" = "medium_text"
+{
+        fg[NORMAL] = @@COLPREFIX@_fg_tooltip
+        bg[NORMAL] = @@COLPREFIX@_bg_tooltip
+}
+widget "gtk-tooltip*" style:highest "tooltip"
