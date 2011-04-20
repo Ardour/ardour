@@ -50,6 +50,7 @@
 #include "utils.h"
 #include "theme_manager.h"
 #include "midi_tracer.h"
+#include "shuttle_control.h"
 #include "global_port_matrix.h"
 #include "location_ui.h"
 #include "rc_option_editor.h"
@@ -137,9 +138,6 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 	set_tip (click_button, _("Enable/Disable audio click"));
 	set_tip (time_master_button, string_compose (_("Does %1 control the time?"), PROGRAM_NAME));
-	set_tip (shuttle_box, _("Shuttle speed control"));
-	set_tip (shuttle_units_button, _("Select semitones or %%-age for speed display"));
-	set_tip (speed_display_box, _("Current transport speed"));
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	set_tip (auditioning_alert_button, _("When active, auditioning is taking place\nClick to stop the audition"));
 	set_tip (primary_clock, _("Primary Clock"));
@@ -238,7 +236,6 @@ ARDOUR_UI::setup_transport ()
 	transport_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
 						  static_cast<Widget*> (&transport_frame), 1));
 
-	shuttle_box.set_name ("TransportButton");
 	goto_start_button.set_name ("TransportButton");
 	goto_end_button.set_name ("TransportButton");
 	roll_button.set_name ("TransportButton");
@@ -290,7 +287,7 @@ ARDOUR_UI::setup_transport ()
 	w = manage (new Image (get_icon (X_("transport_loop"))));
 	w->show();
 	auto_loop_button.add (*w);
-	w = manage (new Image (get_icon (X_("join_tools"))));
+	w = manage (new Image (get_icon (X_("tool_object_range"))));
 	w->show ();
 	join_play_range_button.add (*w);
 
@@ -315,15 +312,6 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
 	act->connect_proxy (sync_button);
 
-	shuttle_box.set_flags (CAN_FOCUS);
-	shuttle_box.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
-	shuttle_box.set_size_request (100, 15);
-
-	shuttle_box.signal_button_press_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::shuttle_box_button_press));
-	shuttle_box.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::shuttle_box_button_release));
-	shuttle_box.signal_scroll_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::shuttle_box_scroll));
-	shuttle_box.signal_motion_notify_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::shuttle_box_motion));
-	shuttle_box.signal_expose_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::shuttle_box_expose));
 
 	/* clocks, etc. */
 
@@ -363,65 +351,38 @@ ARDOUR_UI::setup_transport ()
 	alert_box.pack_start (solo_alert_button, false, false);
 	alert_box.pack_start (auditioning_alert_button, false, false);
 
+	HBox* transport_hbox = manage (new HBox);
+
 	transport_tearoff_hbox.set_border_width (3);
 
-	transport_tearoff_hbox.pack_start (goto_start_button, false, false);
-	transport_tearoff_hbox.pack_start (goto_end_button, false, false);
-
-	Frame* sframe = manage (new Frame);
-	VBox*  svbox = manage (new VBox);
-	HBox*  shbox = manage (new HBox);
-
-	sframe->set_shadow_type (SHADOW_IN);
-	sframe->add (shuttle_box);
-
-	shuttle_box.set_name (X_("ShuttleControl"));
-
-	speed_display_box.add (speed_display_label);
-	speed_display_box.set_name (X_("ShuttleDisplay"));
-	set_size_request_to_display_given_text (speed_display_label, X_("> 24.0"), 2, 2);
-
-	shuttle_units_button.set_name (X_("ShuttleButton"));
-	shuttle_units_button.signal_clicked().connect (sigc::mem_fun(*this, &ARDOUR_UI::shuttle_unit_clicked));
-
-	shuttle_style_button.set_name (X_("ShuttleStyleButton"));
-
-	vector<string> shuttle_strings;
-	shuttle_strings.push_back (_("sprung"));
-	shuttle_strings.push_back (_("wheel"));
-	set_popdown_strings (shuttle_style_button, shuttle_strings, true);
-	shuttle_style_button.signal_changed().connect (sigc::mem_fun (*this, &ARDOUR_UI::shuttle_style_changed));
-
-	Frame* sdframe = manage (new Frame);
-
-	sdframe->set_shadow_type (SHADOW_IN);
-	sdframe->add (speed_display_box);
+	transport_hbox->pack_start (goto_start_button, false, false);
+	transport_hbox->pack_start (goto_end_button, false, false);
 
 	/* translators: Egternal is "External" with a descender character */
 	set_size_request_to_display_given_text (sync_button, X_("Egternal"), 4, 10);
 
-	shbox->pack_start (*sdframe, false, false);
-	shbox->pack_start (shuttle_units_button, true, true);
-	shbox->pack_start (shuttle_style_button, false, false);
-
-	svbox->pack_start (*sframe, false, false);
-	svbox->pack_start (*shbox, false, false);
-
-	transport_tearoff_hbox.pack_start (*svbox, false, false, 3);
+	// transport_tearoff_hbox.pack_start (*svbox, false, false, 3);
 
 	if (Profile->get_sae()) {
-		transport_tearoff_hbox.pack_start (auto_loop_button);
-		transport_tearoff_hbox.pack_start (roll_button);
+		transport_hbox->pack_start (auto_loop_button);
+		transport_hbox->pack_start (roll_button);
 	} else {
-		transport_tearoff_hbox.pack_start (auto_loop_button, false, false);
-		play_range_hbox.pack_start (play_selection_button, false, false);
-		play_range_hbox.pack_start (roll_button, false, false);
-		play_range_vbox.pack_start (play_range_hbox, false, false);
-		play_range_vbox.pack_start (join_play_range_button, false, false);
-		transport_tearoff_hbox.pack_start (play_range_vbox, false, false);
+		transport_hbox->pack_start (auto_loop_button, false, false);
+
+		Frame* jpframe = manage (new Frame);
+		HBox* jpbox = manage (new HBox);
+
+		jpframe->add (*jpbox);
+		jpframe->set_shadow_type (SHADOW_NONE);
+
+		jpbox->pack_start (play_selection_button, false, false);
+		jpbox->pack_start (join_play_range_button, false, false);
+		jpbox->pack_start (roll_button, false, false);
+
+		transport_hbox->pack_start (*jpframe, false, false);
 	}
-	transport_tearoff_hbox.pack_start (stop_button, false, false);
-	transport_tearoff_hbox.pack_start (rec_button, false, false, 6);
+	transport_hbox->pack_start (stop_button, false, false);
+	transport_hbox->pack_start (rec_button, false, false, 6);
 
 	HBox* clock_box = manage (new HBox);
 	clock_box->pack_start (primary_clock, false, false);
@@ -436,6 +397,17 @@ ARDOUR_UI::setup_transport ()
 		clock_box->pack_start (*time_controls_box, false, false, 1);
 	}
 
+	shuttle_box = new ShuttleControl;
+	shuttle_box->show ();
+
+	VBox* transport_vbox = manage (new VBox);
+	transport_vbox->set_name ("TransportBase");
+	transport_vbox->set_border_width (3);
+	transport_vbox->set_spacing (3);
+	transport_vbox->pack_start (*transport_hbox, true, true, 0);
+	transport_vbox->pack_start (*shuttle_box, false, false, 0);
+
+	transport_tearoff_hbox.pack_start (*transport_vbox, false, false, 0);
 	transport_tearoff_hbox.pack_start (*clock_box, false, false, 0);
 
 	HBox* toggle_box = manage(new HBox);
@@ -615,330 +587,10 @@ ARDOUR_UI::audition_blink (bool onoff)
 }
 
 void
-ARDOUR_UI::build_shuttle_context_menu ()
-{
-	using namespace Menu_Helpers;
-
-	shuttle_context_menu = new Menu();
-	MenuList& items = shuttle_context_menu->items();
-
-	Menu* speed_menu = manage (new Menu());
-	MenuList& speed_items = speed_menu->items();
-
-	RadioMenuItem::Group group;
-
-	speed_items.push_back (RadioMenuElem (group, "8", sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 8.0f)));
-	if (shuttle_max_speed == 8.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (group, "6", sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 6.0f)));
-	if (shuttle_max_speed == 6.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (group, "4", sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 4.0f)));
-	if (shuttle_max_speed == 4.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (group, "3", sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 3.0f)));
-	if (shuttle_max_speed == 3.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (group, "2", sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 2.0f)));
-	if (shuttle_max_speed == 2.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-	speed_items.push_back (RadioMenuElem (group, "1.5", sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 1.5f)));
-	if (shuttle_max_speed == 1.5) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
-	}
-
-	items.push_back (MenuElem (_("Maximum speed"), *speed_menu));
-}
-
-void
-ARDOUR_UI::show_shuttle_context_menu ()
-{
-	if (shuttle_context_menu == 0) {
-		build_shuttle_context_menu ();
-	}
-
-	shuttle_context_menu->popup (1, gtk_get_current_event_time());
-}
-
-void
-ARDOUR_UI::set_shuttle_max_speed (float speed)
-{
-	shuttle_max_speed = speed;
-}
-
-gint
-ARDOUR_UI::shuttle_box_button_press (GdkEventButton* ev)
-{
-	if (!_session) {
-		return true;
-	}
-
-	if (shuttle_controller_binding_proxy.button_press_handler (ev)) {
-		return true;
-	}
-
-	if (Keyboard::is_context_menu_event (ev)) {
-		show_shuttle_context_menu ();
-		return true;
-	}
-
-	switch (ev->button) {
-	case 1:
-		shuttle_box.add_modal_grab ();
-		shuttle_grabbed = true;
-		mouse_shuttle (ev->x, true);
-		break;
-
-	case 2:
-	case 3:
-		return true;
-		break;
-	}
-
-	return true;
-}
-
-gint
-ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
-{
-	if (!_session) {
-		return true;
-	}
-
-	switch (ev->button) {
-	case 1:
-		mouse_shuttle (ev->x, true);
-		shuttle_grabbed = false;
-		shuttle_box.remove_modal_grab ();
-		if (Config->get_shuttle_behaviour() == Sprung) {
-			if (_session->config.get_auto_play() || roll_button.get_visual_state()) {
-				shuttle_fract = SHUTTLE_FRACT_SPEED1;
-				_session->request_transport_speed (1.0);
-				stop_button.set_visual_state (0);
-				roll_button.set_visual_state (1);
-			} else {
-				shuttle_fract = 0;
-				_session->request_transport_speed (0.0);
-			}
-			shuttle_box.queue_draw ();
-		}
-		return true;
-
-	case 2:
-		if (_session->transport_rolling()) {
-			shuttle_fract = SHUTTLE_FRACT_SPEED1;
-			_session->request_transport_speed (1.0);
-			stop_button.set_visual_state (0);
-			roll_button.set_visual_state (1);
-		} else {
-			shuttle_fract = 0;
-		}
-		shuttle_box.queue_draw ();
-		return true;
-
-	case 3:
-	default:
-		return true;
-
-	}
-
-	use_shuttle_fract (true);
-
-	return true;
-}
-
-gint
-ARDOUR_UI::shuttle_box_scroll (GdkEventScroll* ev)
-{
-	if (!_session) {
-		return true;
-	}
-
-	switch (ev->direction) {
-
-	case GDK_SCROLL_UP:
-		shuttle_fract += 0.005;
-		break;
-	case GDK_SCROLL_DOWN:
-		shuttle_fract -= 0.005;
-		break;
-	default:
-		/* scroll left/right */
-		return false;
-	}
-
-	use_shuttle_fract (true);
-
-	return true;
-}
-
-gint
-ARDOUR_UI::shuttle_box_motion (GdkEventMotion* ev)
-{
-	if (!_session || !shuttle_grabbed) {
-		return true;
-	}
-
-	return mouse_shuttle (ev->x, false);
-}
-
-gint
-ARDOUR_UI::mouse_shuttle (double x, bool force)
-{
-	double const half_width = shuttle_box.get_width() / 2.0;
-	double distance = x - half_width;
-
-	if (distance > 0) {
-		distance = min (distance, half_width);
-	} else {
-		distance = max (distance, -half_width);
-	}
-
-	shuttle_fract = distance / half_width;
-	use_shuttle_fract (force);
-	return true;
-}
-
-void
-ARDOUR_UI::set_shuttle_fract (double f)
-{
-	shuttle_fract = f;
-	use_shuttle_fract (false);
-}
-
-void
-ARDOUR_UI::use_shuttle_fract (bool force)
-{
-	microseconds_t now = get_microseconds();
-
-	/* do not attempt to submit a motion-driven transport speed request
-	   more than once per process cycle.
-	 */
-
-	if (!force && (last_shuttle_request - now) < (microseconds_t) engine->usecs_per_cycle()) {
-		return;
-	}
-
-	last_shuttle_request = now;
-
-	double speed = 0;
-
-	if (Config->get_shuttle_units() == Semitones) {
-
-		double const step = 1.0 / 24.0; // range is 24 semitones up & down
-		double const semitones = round (shuttle_fract / step);
-		speed = pow (2.0, (semitones / 12.0));
-
-	} else {
-
-		bool const neg = (shuttle_fract < 0.0);
-		double fract = 1 - sqrt (1 - (shuttle_fract * shuttle_fract)); // Formula A1
-
-		if (neg) {
-			fract = -fract;
-		}
-
-		speed = shuttle_max_speed * fract;
-	}
-	
-	_session->request_transport_speed_nonzero (speed);
-	
-	shuttle_box.queue_draw ();
-}
-
-gint
-ARDOUR_UI::shuttle_box_expose (GdkEventExpose* event)
-{
-	gint x;
-	Glib::RefPtr<Gdk::Window> win (shuttle_box.get_window());
-
-	/* redraw the background */
-
-	win->draw_rectangle (shuttle_box.get_style()->get_bg_gc (shuttle_box.get_state()),
-			     true,
-			     event->area.x, event->area.y,
-			     event->area.width, event->area.height);
-
-
-	x = (gint) floor ((shuttle_box.get_width() / 2.0) + (0.5 * (shuttle_box.get_width() * shuttle_fract)));
-
-	/* draw line */
-
-	win->draw_line (shuttle_box.get_style()->get_fg_gc (shuttle_box.get_state()),
-			x,
-			0,
-			x,
-			shuttle_box.get_height());
-	return true;
-}
-
-void
-ARDOUR_UI::shuttle_unit_clicked ()
-{
-	if (shuttle_unit_menu == 0) {
-		shuttle_unit_menu = dynamic_cast<Menu*> (ActionManager::get_widget ("/ShuttleUnitPopup"));
-	}
-	shuttle_unit_menu->popup (1, gtk_get_current_event_time());
-}
-
-void
-ARDOUR_UI::shuttle_style_changed ()
-{
-	string str = shuttle_style_button.get_active_text ();
-
-	if (str == _("sprung")) {
-		Config->set_shuttle_behaviour (Sprung);
-	} else if (str == _("wheel")) {
-		Config->set_shuttle_behaviour (Wheel);
-	}
-}
-
-void
-ARDOUR_UI::update_speed_display ()
-{
-	if (!_session) {
-		if (last_speed_displayed != 0) {
-			speed_display_label.set_text (_("stop"));
-			last_speed_displayed = 0;
-		}
-		return;
-	}
-
-	char buf[32];
-	float x = _session->transport_speed ();
-
-	if (x != last_speed_displayed) {
-
-		if (x != 0) {
-			if (Config->get_shuttle_units() == Percentage) {
-				snprintf (buf, sizeof (buf), "%d", (int) round (x * 100));
-			} else {
-
-				if (x < 0) {
-					snprintf (buf, sizeof (buf), "< %d", (int) round (12.0 * fast_log2 (-x)));
-				} else {
-					snprintf (buf, sizeof (buf), "> %d", (int) round (12.0 * fast_log2 (x)));
-				}
-			}
-			speed_display_label.set_text (buf);
-		} else {
-			speed_display_label.set_text (_("stop"));
-		}
-
-		last_speed_displayed = x;
-	}
-}
-
-void
 ARDOUR_UI::set_transport_sensitivity (bool yn)
 {
 	ActionManager::set_sensitive (ActionManager::transport_sensitive_actions, yn);
-	shuttle_box.set_sensitive (yn);
+	shuttle_box->set_sensitive (yn);
 }
 
 void
@@ -947,7 +599,6 @@ ARDOUR_UI::editor_realized ()
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	Config->map_parameters (pc);
 
-	set_size_request_to_display_given_text (speed_display_box, _("-0.55"), 2, 2);
 	reset_dpi ();
 }
 

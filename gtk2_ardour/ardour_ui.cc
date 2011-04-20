@@ -103,6 +103,7 @@ typedef uint64_t microseconds_t;
 #include "public_editor.h"
 #include "route_time_axis.h"
 #include "session_metadata_dialog.h"
+#include "shuttle_control.h"
 #include "speaker_dialog.h"
 #include "splash.h"
 #include "startup.h"
@@ -155,7 +156,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	  auto_loop_controllable (new TransportControllable ("transport auto loop", *this, TransportControllable::AutoLoop)),
 	  play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection)),
 	  rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable)),
-	  shuttle_controllable (new TransportControllable ("shuttle", *this, TransportControllable::ShuttleControl)),
 	  shuttle_controller_binding_proxy (shuttle_controllable),
 
 	  roll_button (roll_controllable),
@@ -165,8 +165,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	  auto_loop_button (auto_loop_controllable),
 	  play_selection_button (play_selection_controllable),
 	  rec_button (rec_controllable),
-
-	  shuttle_units_button (_("% ")),
 
 	  punch_in_button (_("Punch In")),
 	  punch_out_button (_("Punch Out")),
@@ -227,7 +225,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	have_configure_timeout = false;
 	have_disk_speed_dialog_displayed = false;
 	session_loaded = false;
-	last_speed_displayed = -1.0f;
 	ignore_dual_punch = false;
 	original_big_clock_width = -1;
 	original_big_clock_height = -1;
@@ -240,19 +237,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	auto_loop_button.unset_flags (Gtk::CAN_FOCUS);
 	play_selection_button.unset_flags (Gtk::CAN_FOCUS);
 	rec_button.unset_flags (Gtk::CAN_FOCUS);
-
+	join_play_range_button.unset_flags (Gtk::CAN_FOCUS);
 	last_configure_time= 0;
-
-	shuttle_grabbed = false;
-	shuttle_fract = 0.0;
-	shuttle_max_speed = 8.0f;
-
-	shuttle_style_menu = 0;
-	shuttle_unit_menu = 0;
-
-	// We do not have jack linked in yet so;
-
-	last_shuttle_request = last_peak_grab = 0; //  get_microseconds();
+	last_peak_grab = 0;
 
 	ARDOUR::Diskstream::DiskOverrun.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::disk_overrun_handler, this), gui_context());
 	ARDOUR::Diskstream::DiskUnderrun.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::disk_underrun_handler, this), gui_context());
@@ -568,8 +555,9 @@ ARDOUR_UI::set_transport_controllable_state (const XMLNode& node)
 		rec_controllable->set_id (prop->value());
 	}
 	if ((prop = node.property ("shuttle")) != 0) {
-		shuttle_controllable->set_id (prop->value());
+		shuttle_box->controllable().set_id (prop->value());
 	}
+
 }
 
 XMLNode&
@@ -592,7 +580,7 @@ ARDOUR_UI::get_transport_controllable_state ()
 	node->add_property (X_("play_selection"), buf);
 	rec_controllable->id().print (buf, sizeof (buf));
 	node->add_property (X_("rec"), buf);
-	shuttle_controllable->id().print (buf, sizeof (buf));
+	shuttle_box->controllable().id().print (buf, sizeof (buf));
 	node->add_property (X_("shuttle"), buf);
 
 	return *node;
@@ -953,7 +941,7 @@ ARDOUR_UI::every_second ()
 gint
 ARDOUR_UI::every_point_one_seconds ()
 {
-	update_speed_display ();
+	shuttle_box->update_speed_display ();
 	RapidScreenUpdate(); /* EMIT_SIGNAL */
 	return TRUE;
 }
@@ -1824,8 +1812,6 @@ ARDOUR_UI::toggle_record_enable (uint32_t rid)
 void
 ARDOUR_UI::map_transport_state ()
 {
-	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::map_transport_state)
-
 	if (!_session) {
 		auto_loop_button.set_visual_state (0);
 		play_selection_button.set_visual_state (0);
@@ -1834,18 +1820,11 @@ ARDOUR_UI::map_transport_state ()
 		return;
 	}
 
+	shuttle_box->map_transport_state ();
+
 	float sp = _session->transport_speed();
 
-	if (sp == 1.0f) {
-		shuttle_fract = SHUTTLE_FRACT_SPEED1;  /* speed = 1.0, believe it or not */
-		shuttle_box.queue_draw ();
-	} else if (sp == 0.0f) {
-		shuttle_fract = 0;
-		shuttle_box.queue_draw ();
-		update_disk_space ();
-	}
-
-	if (sp != 0.0) {
+	if (sp != 0.0f) {
 
 		/* we're rolling */
 
@@ -1882,6 +1861,7 @@ ARDOUR_UI::map_transport_state ()
 		roll_button.set_visual_state (0);
 		play_selection_button.set_visual_state (0);
 		auto_loop_button.set_visual_state (0);
+		update_disk_space ();
 	}
 }
 
@@ -3606,23 +3586,6 @@ ARDOUR_UI::TransportControllable::TransportControllable (std::string name, ARDOU
 void
 ARDOUR_UI::TransportControllable::set_value (double val)
 {
-	if (type == ShuttleControl) {
-		double fract;
-
-		if (val == 0.5) {
-			fract = 0.0;
-		} else {
-			if (val < 0.5) {
-				fract = -((0.5 - val)/0.5);
-			} else {
-				fract = ((val - 0.5)/0.5);
-			}
-		}
-
-		ui.set_shuttle_fract (fract);
-		return;
-	}
-
 	if (val < 0.5) {
 		/* do nothing: these are radio-style actions */
 		return;
@@ -3686,8 +3649,6 @@ ARDOUR_UI::TransportControllable::get_value (void) const
 	case PlaySelection:
 		break;
 	case RecordEnable:
-		break;
-	case ShuttleControl:
 		break;
 	default:
 		break;

@@ -83,6 +83,7 @@ class PublicEditor;
 class RCOptionEditor;
 class RouteParams_UI;
 class SessionOptionEditor;
+class ShuttleControl;
 class Splash;
 class SpeakerDialog;
 class ThemeManager;
@@ -368,8 +369,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtkmm2ext::TearOff*      transport_tearoff;
 	Gtk::Frame               transport_frame;
 	Gtk::HBox                transport_tearoff_hbox;
-	Gtk::HBox                play_range_hbox;
-	Gtk::VBox                play_range_vbox;
 	Gtk::HBox               _editor_transport_box;
 	Gtk::HBox                transport_hbox;
 	Gtk::Fixed               transport_base;
@@ -384,7 +383,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::HBox                primary_clock_hbox;
 	Gtk::HBox                secondary_clock_hbox;
 
-
 	struct TransportControllable : public PBD::Controllable {
 	    enum ToggleType {
 		    Roll = 0,
@@ -394,8 +392,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 		    GotoEnd,
 		    AutoLoop,
 		    PlaySelection,
-		    ShuttleControl
-
 	    };
 
 	    TransportControllable (std::string name, ARDOUR_UI&, ToggleType);
@@ -416,6 +412,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	boost::shared_ptr<TransportControllable> play_selection_controllable;
 	boost::shared_ptr<TransportControllable> rec_controllable;
 	boost::shared_ptr<TransportControllable> shuttle_controllable;
+	boost::shared_ptr<TransportControllable> join_play_range_controllable;
 	BindingProxy shuttle_controller_binding_proxy;
 
 	void set_transport_controllable_state (const XMLNode&);
@@ -428,40 +425,13 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	BindableButton auto_loop_button;
 	BindableButton play_selection_button;
 	BindableButton rec_button;
-	Gtk::ToggleButton join_play_range_button;
+	BindableToggleButton join_play_range_button;
 
 	void toggle_external_sync ();
 	void toggle_time_master ();
 	void toggle_video_sync ();
 
-	Gtk::DrawingArea  shuttle_box;
-	Gtk::EventBox     speed_display_box;
-	Gtk::Label        speed_display_label;
-	Gtk::Button       shuttle_units_button;
-	Gtk::ComboBoxText shuttle_style_button;
-	Gtk::Menu*        shuttle_unit_menu;
-	Gtk::Menu*        shuttle_style_menu;
-	float             shuttle_max_speed;
-	Gtk::Menu*        shuttle_context_menu;
-
-	void build_shuttle_context_menu ();
-	void show_shuttle_context_menu ();
-	void shuttle_style_changed();
-	void shuttle_unit_clicked ();
-	void set_shuttle_max_speed (float);
-	void update_speed_display ();
-	float last_speed_displayed;
-
-	gint shuttle_box_button_press (GdkEventButton*);
-	gint shuttle_box_button_release (GdkEventButton*);
-	gint shuttle_box_scroll (GdkEventScroll*);
-	gint shuttle_box_motion (GdkEventMotion*);
-	gint shuttle_box_expose (GdkEventExpose*);
-	gint mouse_shuttle (double x, bool force);
-	void use_shuttle_fract (bool force);
-
-	bool   shuttle_grabbed;
-	double shuttle_fract;
+	ShuttleControl* shuttle_box;
 
 	Gtkmm2ext::StatefulToggleButton punch_in_button;
 	Gtkmm2ext::StatefulToggleButton punch_out_button;

@@ -383,35 +383,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ActionManager::map_some_state ("Transport",  "ToggleTimeMaster", sigc::mem_fun (_session->config, &SessionConfiguration::get_jack_time_master));
 	} else if (p == "use-video-sync") {
 		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_use_video_sync));
-	} else if (p == "shuttle-behaviour") {
-
-		switch (Config->get_shuttle_behaviour ()) {
-		case Sprung:
-			shuttle_style_button.set_active_text (_("sprung"));
-			shuttle_fract = 0.0;
-			shuttle_box.queue_draw ();
-			if (_session) {
-				if (_session->transport_rolling()) {
-					shuttle_fract = SHUTTLE_FRACT_SPEED1;
-					_session->request_transport_speed (1.0);
-				}
-			}
-			break;
-		case Wheel:
-			shuttle_style_button.set_active_text (_("wheel"));
-			break;
-		}
-
-	} else if (p == "shuttle-units") {
-
-		switch (Config->get_shuttle_units()) {
-		case Percentage:
-			shuttle_units_button.set_label("% ");
-			break;
-		case Semitones:
-			shuttle_units_button.set_label(_("ST"));
-			break;
-		}
 	} else if (p == "video-pullup" || p == "timecode-format") {
 
 		synchronize_sync_source_and_video_pullup ();

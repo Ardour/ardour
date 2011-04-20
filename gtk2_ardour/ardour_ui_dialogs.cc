@@ -39,6 +39,7 @@
 #include "public_editor.h"
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
+#include "shuttle_control.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
 #include "sfdb_ui.h"
@@ -79,6 +80,10 @@ ARDOUR_UI::set_session (Session *s)
 
 	if (session_option_editor) {
 		session_option_editor->set_session (s);
+	}
+
+	if (shuttle_box) {
+		shuttle_box->set_session (s);
 	}
 
 	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
@@ -127,7 +132,7 @@ ARDOUR_UI::set_session (Session *s)
 	ActionManager::set_sensitive (ActionManager::playlist_selection_sensitive_actions, false);
 
 	rec_button.set_sensitive (true);
-	shuttle_box.set_sensitive (true);
+
 	solo_alert_button.set_active (_session->soloing());
 
 	setup_session_options ();
@@ -205,7 +210,6 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
 
 	rec_button.set_sensitive (false);
-	shuttle_box.set_sensitive (false);
 
 	stop_blinking ();
 	stop_clocking ();
