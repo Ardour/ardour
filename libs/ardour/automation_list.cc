@@ -213,21 +213,30 @@ AutomationList::start_touch (double when)
 void
 AutomationList::stop_touch (bool mark, double when)
 {
+	if (g_atomic_int_get (&_touching) == 0) {
+		/* this touch has already been stopped (probably by Automatable::transport_stopped),
+		   so we've nothing to do.
+		*/
+		return;
+	}
+	
 	g_atomic_int_set (&_touching, 0);
 
         if (_state == Touch) {
+
+		assert (!nascent.empty ());
+
                 Glib::Mutex::Lock lm (ControlList::_lock);
                 
                 if (mark) {
-                        nascent.back()->end_time = when;
+
+			nascent.back()->end_time = when;
                         
                 } else {
                         
                         /* nascent info created in start touch but never used. just get rid of it.
                          */
 
-			assert (!nascent.empty ());
-                        
                         NascentInfo* ninfo = nascent.back ();
                         nascent.erase (nascent.begin());
                         delete ninfo;

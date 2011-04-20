@@ -417,6 +417,13 @@ Automatable::transport_stopped (framepos_t now)
 				= boost::dynamic_pointer_cast<AutomationList>(c->list());
                         
                         if (l) {
+				/* Stop any active touch gesture just before we mark the write pass
+				   as finished.  If we don't do this, the transport can end up stopped with
+				   an AutomationList thinking that a touch is still in progress and,
+				   when the transport is re-started, a touch will magically
+				   be happening without it ever have being started in the usual way.
+				*/
+				l->stop_touch (true, now);
                                 l->write_pass_finished (now);
                                 
                                 if (l->automation_playback()) {
