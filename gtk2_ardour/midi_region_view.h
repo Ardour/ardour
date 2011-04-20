@@ -250,11 +250,7 @@ class MidiRegionView : public RegionView
 	 */
 	framepos_t snap_pixel_to_frame(double x);
 
-	/** Snap a region relative frame coordinate to frame units.
-	 * @param x a pixel coordinate relative to region start
-	 * @return the snapped framepos_t coordinate relative to region start
-	 */
-	framepos_t snap_frame_to_frame(framepos_t x);
+	ARDOUR::frameoffset_t snap_frame_to_frame (ARDOUR::frameoffset_t);
 
 	/** Convert a timestamp in beats to frames (both relative to region start) */
 	framepos_t beats_to_frames(double beats) const;
