@@ -225,6 +225,8 @@ AutomationList::stop_touch (bool mark, double when)
                         
                         /* nascent info created in start touch but never used. just get rid of it.
                          */
+
+			assert (!nascent.empty ());
                         
                         NascentInfo* ninfo = nascent.back ();
                         nascent.erase (nascent.begin());
