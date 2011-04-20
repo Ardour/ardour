@@ -184,7 +184,7 @@ AutomationList::set_automation_state (AutoState s)
 
                 if (_state == Write) {
                         Glib::Mutex::Lock lm (ControlList::_lock);
-                        nascent.push_back (new NascentInfo (false));
+                        nascent.push_back (new NascentInfo ());
                 }
 		automation_state_changed (s); /* EMIT SIGNAL */
 	}
@@ -204,7 +204,7 @@ AutomationList::start_touch (double when)
 {
         if (_state == Touch) {
                 Glib::Mutex::Lock lm (ControlList::_lock);
-                nascent.push_back (new NascentInfo (true, when));
+                nascent.push_back (new NascentInfo (when));
         }
 
 	g_atomic_int_set (&_touching, 1);

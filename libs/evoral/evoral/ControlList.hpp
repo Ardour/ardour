@@ -280,13 +280,11 @@ protected:
 
 	struct NascentInfo {
 		EventList events;
-		bool   is_touch;
 		double start_time;
 		double end_time;
             
-		NascentInfo (bool touching, double start = -1.0)
-			: is_touch (touching)
-			, start_time (start)
+		NascentInfo (double start = -1.0)
+			: start_time (start)
 			, end_time (-1.0) 
 			{}
 	};

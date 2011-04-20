@@ -365,7 +365,7 @@ ControlList::merge_nascent (double when)
                 nascent.clear ();
 
                 if (writing()) {
-                        nascent.push_back (new NascentInfo (false));
+                        nascent.push_back (new NascentInfo ());
                 }
         }
 
