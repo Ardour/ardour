@@ -924,8 +924,8 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 }
 
 /** Set the transport speed.
- * @param speed New speed
- * @param abort
+ *  Called from the process thread.
+ *  @param speed New speed
  */
 void
 Session::set_transport_speed (double speed, bool abort, bool clear_state)
@@ -1097,6 +1097,7 @@ Session::stop_transport (bool abort, bool clear_state)
 	_butler->schedule_transport_work ();
 }
 
+/** Called from the process thread */
 void
 Session::start_transport ()
 {
@@ -1447,7 +1448,7 @@ Session::engine_halted ()
 void
 Session::xrun_recovery ()
 {
-	Xrun (_transport_frame); //EMIT SIGNAL
+	Xrun (_transport_frame); /* EMIT SIGNAL */
 
 	if (Config->get_stop_recording_on_xrun() && actively_recording()) {
 

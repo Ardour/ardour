@@ -274,7 +274,15 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* Transport mechanism signals */
 
-	PBD::Signal0<void> TransportStateChange; /* generic */
+	/** Emitted on the following changes in transport state:
+	 *  - stop (from the butler thread)
+	 *  - change in whether or not we are looping (from the process thread)
+	 *  - change in the play range (from the process thread)
+	 *  - start (from the process thread)
+	 *  - engine halted
+	*/
+	PBD::Signal0<void> TransportStateChange;
+	
 	PBD::Signal1<void,framepos_t> PositionChanged; /* sent after any non-sequential motion */
 	PBD::Signal1<void,framepos_t> Xrun;
 	PBD::Signal0<void> TransportLooped;
