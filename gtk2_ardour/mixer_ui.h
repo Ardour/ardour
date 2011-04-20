@@ -259,7 +259,10 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	static const int32_t default_width = 478;
 	static const int32_t default_height = 765;
 
-	bool _in_group_rebuild;
+	/** true if we are rebuilding the route group list, or clearing
+	    it during a session teardown.
+	*/
+	bool _in_group_rebuild_or_clear;
 
 	friend class MixerGroupTabs;
 };

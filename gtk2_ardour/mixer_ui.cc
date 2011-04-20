@@ -225,7 +225,7 @@ Mixer_UI::Mixer_UI ()
 
 	auto_rebinding = FALSE;
 
-	_in_group_rebuild = false;
+	_in_group_rebuild_or_clear = false;
 
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), ui_bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 
@@ -507,9 +507,12 @@ Mixer_UI::set_session (Session* sess)
 void
 Mixer_UI::session_going_away ()
 {
-	ENSURE_GUI_THREAD (*this, &Mixer_UI::session_going_away)
+	ENSURE_GUI_THREAD (*this, &Mixer_UI::session_going_away);
 
+	_in_group_rebuild_or_clear = true;
 	group_model->clear ();
+	_in_group_rebuild_or_clear = false;
+	
 	_selection.clear ();
 	track_model->clear ();
 
@@ -1106,7 +1109,7 @@ Mixer_UI::route_groups_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &Mixer_UI::route_groups_changed);
 
-	_in_group_rebuild = true;
+	_in_group_rebuild_or_clear = true;
 
 	/* just rebuild the while thing */
 
@@ -1123,7 +1126,7 @@ Mixer_UI::route_groups_changed ()
 	_session->foreach_route_group (sigc::mem_fun (*this, &Mixer_UI::add_route_group));
 
 	_group_tabs->set_dirty ();
-	_in_group_rebuild = false;
+	_in_group_rebuild_or_clear = false;
 }
 
 void
@@ -1258,7 +1261,7 @@ Mixer_UI::route_group_row_change (const Gtk::TreeModel::Path&, const Gtk::TreeMo
 void
 Mixer_UI::route_group_row_deleted (Gtk::TreeModel::Path const &)
 {
-	if (_in_group_rebuild) {
+	if (_in_group_rebuild_or_clear) {
 		return;
 	}
 
