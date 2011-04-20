@@ -1370,8 +1370,14 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 				_region->set_position (f, this);
 			}
                         
-			/* again, don't use a zero-length region (see above) */
-			framecnt_t const len = abs (f - grab_frame ());
+			/* Don't use a zero-length region, and subtract 1 frame from the snapped length
+			   so that if this region is duplicated, its duplicate starts on
+			   a snap point rather than 1 frame after a snap point.  Otherwise things get
+			   a bit confusing as if a region starts 1 frame after a snap point, one cannot
+			   place snapped notes at the start of the region.
+			*/
+			  
+			framecnt_t const len = abs (f - grab_frame () - 1);
 			_region->set_length (len < 1 ? 1 : len, this);
 		}
 	}
