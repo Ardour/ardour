@@ -3197,9 +3197,10 @@ void
 MidiRegionView::show_verbose_canvas_cursor (boost::shared_ptr<NoteType> n) const
 {
 	char buf[24];
-	snprintf (buf, sizeof (buf), "%s (%d)\nVel %d", 
+	snprintf (buf, sizeof (buf), "%s (%d) Chn %d\nVel %d", 
                   Evoral::midi_note_name (n->note()).c_str(), 
                   (int) n->note (),
+		  (int) n->channel() + 1,
                   (int) n->velocity());
 	trackview.editor().show_verbose_canvas_cursor_with (buf, 10, 20);
 }
