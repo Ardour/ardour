@@ -413,7 +413,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	boost::shared_ptr<TransportControllable> rec_controllable;
 	boost::shared_ptr<TransportControllable> shuttle_controllable;
 	boost::shared_ptr<TransportControllable> join_play_range_controllable;
-	BindingProxy shuttle_controller_binding_proxy;
 
 	void set_transport_controllable_state (const XMLNode&);
 	XMLNode& get_transport_controllable_state ();

@@ -21,6 +21,8 @@
 
 #include <gtkmm/drawingarea.h>
 
+#include "gtkmm2ext/binding_proxy.h"
+
 #include "pbd/controllable.h"
 #include "ardour/session_handle.h"
 
@@ -52,20 +54,21 @@ class ShuttleControl : public Gtk::DrawingArea, public ARDOUR::SessionHandlePtr
 		ShuttleControl& sc;
 	};
 
-	ShuttleControllable& controllable() { return _controllable; }
+	boost::shared_ptr<ShuttleControllable> controllable() const { return _controllable; }
 
   protected:
 	float  shuttle_max_speed;
 	float  last_speed_displayed;
 	bool   shuttle_grabbed;
 	double shuttle_fract;
-	ShuttleControllable _controllable;
+	boost::shared_ptr<ShuttleControllable> _controllable;
 	cairo_pattern_t* pattern;
 	ARDOUR::microseconds_t last_shuttle_request;
 	PBD::ScopedConnection parameter_connection;
 	Gtk::Menu*        shuttle_unit_menu;
 	Gtk::Menu*        shuttle_style_menu;
 	Gtk::Menu*        shuttle_context_menu;
+	BindingProxy      binding_proxy;
 
 	void build_shuttle_context_menu ();
 	void show_shuttle_context_menu ();

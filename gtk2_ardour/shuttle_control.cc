@@ -40,9 +40,10 @@ using std::min;
 using std::max;
 
 ShuttleControl::ShuttleControl ()
-        : _controllable (*this)
+        : _controllable (new ShuttleControllable (*this))
+        , binding_proxy (_controllable)
 {
-        ARDOUR_UI::instance()->set_tip (*this, _("Shuttle speed control"));
+        ARDOUR_UI::instance()->set_tip (*this, _("Shuttle speed control (Context-click for options)"));
 
         pattern = 0;
 	last_shuttle_request = 0;
@@ -74,6 +75,7 @@ ShuttleControl::set_session (Session *s)
 
         if (_session) {
                 set_sensitive (true);
+                _session->add_controllable (_controllable);
         } else {
                 set_sensitive (false);
         }
@@ -205,11 +207,9 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 		return true;
 	}
 
-#if 0
-	if (shuttle_controller_binding_proxy.button_press_handler (ev)) {
+	if (binding_proxy.button_press_handler (ev)) {
 		return true;
 	}
-#endif
 
 	if (Keyboard::is_context_menu_event (ev)) {
 		show_shuttle_context_menu ();
@@ -370,7 +370,7 @@ ShuttleControl::use_shuttle_fract (bool force)
 
 		speed = shuttle_max_speed * fract;
 	}
-	
+
 	_session->request_transport_speed_nonzero (speed);
 }
 
@@ -418,7 +418,7 @@ ShuttleControl::on_expose_event (GdkEventExpose* event)
 			}
 		}
 	} else {
-		snprintf (buf, sizeof (buf), _("stop"));
+		snprintf (buf, sizeof (buf), _("Stopped"));
 	}
 
 	last_speed_displayed = speed;
@@ -479,13 +479,6 @@ ShuttleControl::update_speed_display ()
 	}
 }
       
-/*
-	set_tip (shuttle_units_button, _("Select semitones or %%-age for speed display"));
-	set_tip (speed_display_box, _("Current transport speed"));
-
-
-*/
-
 ShuttleControl::ShuttleControllable::ShuttleControllable (ShuttleControl& s)
         : PBD::Controllable (X_("Shuttle")) 
         , sc (s)
@@ -512,7 +505,7 @@ ShuttleControl::ShuttleControllable::set_value (double val)
                         fract = ((val - 0.5)/0.5);
                 }
         }
-        
+
         sc.set_shuttle_fract (fract);
 }
 

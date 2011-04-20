@@ -156,7 +156,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	  auto_loop_controllable (new TransportControllable ("transport auto loop", *this, TransportControllable::AutoLoop)),
 	  play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection)),
 	  rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable)),
-	  shuttle_controller_binding_proxy (shuttle_controllable),
 
 	  roll_button (roll_controllable),
 	  stop_button (stop_controllable),
@@ -555,7 +554,7 @@ ARDOUR_UI::set_transport_controllable_state (const XMLNode& node)
 		rec_controllable->set_id (prop->value());
 	}
 	if ((prop = node.property ("shuttle")) != 0) {
-		shuttle_box->controllable().set_id (prop->value());
+		shuttle_box->controllable()->set_id (prop->value());
 	}
 
 }
@@ -580,7 +579,7 @@ ARDOUR_UI::get_transport_controllable_state ()
 	node->add_property (X_("play_selection"), buf);
 	rec_controllable->id().print (buf, sizeof (buf));
 	node->add_property (X_("rec"), buf);
-	shuttle_box->controllable().id().print (buf, sizeof (buf));
+	shuttle_box->controllable()->id().print (buf, sizeof (buf));
 	node->add_property (X_("shuttle"), buf);
 
 	return *node;
