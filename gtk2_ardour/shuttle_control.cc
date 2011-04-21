@@ -444,9 +444,9 @@ ShuttleControl::on_expose_event (GdkEventExpose* event)
 
         double visual_fraction = std::min (1.0f, speed/shuttle_max_speed);
 	double x = (get_width() / 2.0) + (0.5 * (get_width() * visual_fraction));
-	cairo_move_to (cr, x, 0);
+	cairo_move_to (cr, x, 1);
 	cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
-	cairo_line_to (cr, x, get_height());
+	cairo_line_to (cr, x, get_height()-1);
 	cairo_stroke (cr);
 
 	/* speed text */
