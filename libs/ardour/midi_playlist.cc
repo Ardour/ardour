@@ -124,7 +124,7 @@ MidiPlaylist::read (MidiRingBuffer<framepos_t>& dst, framepos_t start, framecnt_
 				*/
 
 				framepos_t resolve_at = (*i)->last_frame();
-				if (resolve_at >= end) {
+				if (resolve_at < start || resolve_at >= end) {
 					resolve_at = start;
 				}
 
