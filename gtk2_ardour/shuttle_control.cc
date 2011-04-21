@@ -20,8 +20,6 @@
 
 #include <cairo/cairo.h>
 
-#include <pbd/stacktrace.h>
-
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/rc_configuration.h"
@@ -38,6 +36,11 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using std::min;
 using std::max;
+
+gboolean qt (gboolean, gint, gint, gboolean, Gtk::Tooltip*, gpointer)
+{
+        return FALSE;
+}
 
 ShuttleControl::ShuttleControl ()
         : _controllable (new ShuttleControllable (*this))
@@ -62,7 +65,9 @@ ShuttleControl::ShuttleControl ()
 
         Config->ParameterChanged.connect (parameter_connection, MISSING_INVALIDATOR, ui_bind (&ShuttleControl::parameter_changed, this, _1), gui_context());
 
-        signal_query_tooltip().connect (sigc::mem_fun (*this, &ShuttleControl::on_query_tooltip));
+        /* gtkmm 2.4: the C++ wrapper doesn't work */
+        g_signal_connect ((GObject*) gobj(), "query-tooltip", G_CALLBACK (qt), NULL);
+        // signal_query_tooltip().connect (sigc::mem_fun (*this, &ShuttleControl::on_query_tooltip));
 }
 
 ShuttleControl::~ShuttleControl ()
@@ -109,7 +114,7 @@ ShuttleControl::map_transport_state ()
 
 	if (speed != 0.0) {
                 if (Config->get_shuttle_units() == Semitones) {
-                        shuttle_fract = speed/2.0;
+                        shuttle_fract = semitones_as_fract (speed_as_semitones (speed));
                 } else {
                         shuttle_fract = speed/shuttle_max_speed;
                 }
@@ -248,29 +253,25 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 
 	switch (ev->button) {
 	case 1:
-		mouse_shuttle (ev->x, true);
 		shuttle_grabbed = false;
 		remove_modal_grab ();
+
 		if (Config->get_shuttle_behaviour() == Sprung) {
 			if (_session->config.get_auto_play()) {
-				shuttle_fract = SHUTTLE_FRACT_SPEED1;
 				_session->request_transport_speed (1.0);
 			} else {
-				shuttle_fract = 0;
 				_session->request_transport_speed (0.0);
 			}
-			queue_draw ();
-		}
+		} else {
+                        mouse_shuttle (ev->x, true);
+                }
+
 		return true;
 
 	case 2:
 		if (_session->transport_rolling()) {
-			shuttle_fract = SHUTTLE_FRACT_SPEED1;
 			_session->request_transport_speed (1.0);
-		} else {
-			shuttle_fract = 0;
-		}
-		queue_draw ();
+		} 
 		return true;
 
 	case 3:
@@ -279,15 +280,12 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 
 	}
 
-	use_shuttle_fract (true);
-
 	return true;
 }
 
 bool
 ShuttleControl::on_query_tooltip (int, int, bool, const Glib::RefPtr<Gtk::Tooltip>&)
 {
-        std::cerr << "OQT!\n";
         return false;
 }
 
@@ -302,11 +300,11 @@ ShuttleControl::on_scroll_event (GdkEventScroll* ev)
 
 	case GDK_SCROLL_UP:
         case GDK_SCROLL_RIGHT:
-		shuttle_fract += 0.005;
+                shuttle_fract += 0.005;
 		break;
 	case GDK_SCROLL_DOWN:
         case GDK_SCROLL_LEFT:
-		shuttle_fract -= 0.005;
+                shuttle_fract -= 0.005;
 		break;
 	default:
 		return false;
@@ -330,16 +328,21 @@ ShuttleControl::on_motion_notify_event (GdkEventMotion* ev)
 gint
 ShuttleControl::mouse_shuttle (double x, bool force)
 {
-	double const half_width = get_width() / 2.0;
-	double distance = x - half_width;
+	double const center = get_width() / 2.0;
+	double distance_from_center = x - center;
 
-	if (distance > 0) {
-		distance = min (distance, half_width);
+	if (distance_from_center > 0) {
+		distance_from_center = min (distance_from_center, center);
 	} else {
-		distance = max (distance, -half_width);
+		distance_from_center = max (distance_from_center, -center);
 	}
 
-	shuttle_fract = distance / half_width;
+        /* compute shuttle fract as expressing how far between the center
+           and the edge we are. positive values indicate we are right of 
+           center, negative values indicate left of center
+        */
+
+	shuttle_fract = distance_from_center / center; // center == half the width
 	use_shuttle_fract (force);
 	return true;
 }
@@ -351,10 +354,48 @@ ShuttleControl::set_shuttle_fract (double f)
 	use_shuttle_fract (false);
 }
 
+int
+ShuttleControl::speed_as_semitones (float speed)
+{
+        if (speed < 0.0) {
+                return (int) round (12.0 * fast_log2 (-speed));
+        } else {
+                return (int) round (12.0 * fast_log2 (speed));
+        }
+}        
+
+float
+ShuttleControl::semitones_as_speed (int semi)
+{
+        return pow (2.0, (semi / 12.0));
+}
+
+float
+ShuttleControl::semitones_as_fract (int semi)
+{
+        double const step = 1.0 / 24.0; // range is 24 semitones up & down
+        return semi * step;
+}
+
+int
+ShuttleControl::fract_as_semitones (float fract)
+{
+        double const step = 1.0 / 24.0; // range is 24 semitones up & down
+        return (int) round (shuttle_fract / step);
+}
+
 void
 ShuttleControl::use_shuttle_fract (bool force)
 {
 	microseconds_t now = get_microseconds();
+
+        if (Config->get_shuttle_units() == Semitones) {
+                shuttle_fract = max (-1.0f, shuttle_fract);
+                shuttle_fract = min (1.0f, shuttle_fract);
+        } else {
+                shuttle_fract = max (-shuttle_max_speed, shuttle_fract);
+                shuttle_fract = min (shuttle_max_speed, shuttle_fract);
+        }
 
 	/* do not attempt to submit a motion-driven transport speed request
 	   more than once per process cycle.
@@ -369,9 +410,7 @@ ShuttleControl::use_shuttle_fract (bool force)
 	double speed = 0;
 
 	if (Config->get_shuttle_units() == Semitones) {
-		double const step = 1.0 / 24.0; // range is 24 semitones up & down
-		double const semitones = round (shuttle_fract / step);
-		speed = pow (2.0, (semitones / 12.0));
+		speed = semitones_as_speed (fract_as_semitones (shuttle_fract));
 	} else {
 		speed = shuttle_max_speed * shuttle_fract;
 	}
@@ -421,11 +460,7 @@ ShuttleControl::on_expose_event (GdkEventExpose* event)
                                 snprintf (buf, sizeof (buf), "%d%%", (int) round (speed * 100));
                         }
 		} else {
-			if (speed < 0) {
-				snprintf (buf, sizeof (buf), "-%d semitones", (int) round (12.0 * fast_log2 (-speed)));
-			} else {
-				snprintf (buf, sizeof (buf), "+%d semitones", (int) round (12.0 * fast_log2 (speed)));
-			}
+                        snprintf (buf, sizeof (buf), "%+d semitones", speed_as_semitones (speed));
 		}
 	} else {
 		snprintf (buf, sizeof (buf), _("Stopped"));
