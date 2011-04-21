@@ -282,6 +282,7 @@ void
 Plugin::set_parameter (uint32_t which, float val)
 {
 	_parameter_changed_since_last_preset = true;
+	_session.set_dirty ();
 	ParameterChanged (which, val); /* EMIT SIGNAL */
 }
 
