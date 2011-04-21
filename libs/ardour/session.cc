@@ -596,18 +596,20 @@ Session::when_engine_running ()
 
 				} else {
 
-					for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-						uint32_t mod = n_physical_outputs.get (*t);
-						uint32_t limit = _monitor_out->n_outputs().get(*t);
+					/* Monitor bus is audio only */
+					uint32_t mod = n_physical_outputs.get (DataType::AUDIO);
+					uint32_t limit = _monitor_out->n_outputs().get (DataType::AUDIO);
 
+					if (mod != 0) {
+						
 						for (uint32_t n = 0; n < limit; ++n) {
 
-							Port* p = _monitor_out->output()->ports().port(*t, n);
+							Port* p = _monitor_out->output()->ports().port(DataType::AUDIO, n);
 							string connect_to;
-							if (outputs[*t].size() > (n % mod)) {
-								connect_to = outputs[*t][n % mod];
+							if (outputs[DataType::AUDIO].size() > (n % mod)) {
+								connect_to = outputs[DataType::AUDIO][n % mod];
 							}
-
+							
 							if (!connect_to.empty()) {
 								if (_monitor_out->output()->connect (p, connect_to, this)) {
 									error << string_compose (
