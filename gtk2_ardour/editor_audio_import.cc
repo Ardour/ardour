@@ -752,10 +752,16 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 
 			region_name = region_name_from_path ((*x)->path(), false, false, sources.size(), n);
 
-			PropertyList plist; 
+			PropertyList plist;
+
+			/* Fudge region length to ensure it is non-zero */
+			framecnt_t len = (*x)->length (pos);
+			if (len == 0) {
+				len = 1;
+			}
 			
 			plist.add (ARDOUR::Properties::start, 0);
-			plist.add (ARDOUR::Properties::length, (*x)->length (pos));
+			plist.add (ARDOUR::Properties::length, len);
 			plist.add (ARDOUR::Properties::name, region_name);
 			plist.add (ARDOUR::Properties::layer, 0);
 			plist.add (ARDOUR::Properties::whole_file, true);
