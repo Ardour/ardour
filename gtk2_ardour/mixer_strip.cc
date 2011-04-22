@@ -1213,25 +1213,25 @@ MixerStrip::toggle_comment ()
 		return;
 	}
 
-	comment_window->show();
+	string title;
+	title = _route->name();
+	title += _(": comment editor");
+
+	comment_window->set_title (title);
 	comment_window->present();
 }
 
 void
 MixerStrip::setup_comment_editor ()
 {
-	string title;
-	title = _route->name();
-	title += _(": comment editor");
-
-	comment_window = new ArdourDialog (title, false);
+	comment_window = new ArdourDialog ("", false); // title will be reset to show route
 	comment_window->set_position (Gtk::WIN_POS_MOUSE);
 	comment_window->set_skip_taskbar_hint (true);
 	comment_window->signal_hide().connect (sigc::mem_fun(*this, &MixerStrip::comment_editor_done_editing));
+	comment_window->set_default_size (400, 200);
 
 	comment_area = manage (new TextView());
 	comment_area->set_name ("MixerTrackCommentArea");
-	comment_area->set_size_request (110, 178);
 	comment_area->set_wrap_mode (WRAP_WORD);
 	comment_area->set_editable (true);
 	comment_area->get_buffer()->set_text (_route->comment());
