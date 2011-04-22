@@ -23,57 +23,56 @@ blddir = 'build'
 path_prefix = 'libs/taglib/'
 
 def set_options(opt):
-        autowaf.set_options(opt)
+    autowaf.set_options(opt)
 
 def configure(conf):
-        autowaf.configure(conf)
-        conf.check_tool('compiler_cxx')
+    autowaf.configure(conf)
+    conf.check_tool('compiler_cxx')
 
 def build(bld):
-        # Library
-        obj = bld.new_task_gen('cxx', 'shlib')
-        sources = glob.glob(path_prefix + 'taglib/*.cpp')
-        sources += glob.glob(path_prefix + 'taglib/flac/*.cpp')
-        sources += glob.glob(path_prefix + 'taglib/mpc/*.cpp')
-        sources += glob.glob(path_prefix + 'taglib/mpeg/*.cpp')
-        sources += glob.glob(path_prefix + 'taglib/mpeg/id3v1/*.cpp')
-        sources += glob.glob(path_prefix + 'taglib/mpeg/id3v2/*.cpp')
-        sources += glob.glob(path_prefix + 'taglib/mpeg/id3v2/frames/*.cpp')
-        sources += glob.glob(path_prefix + 'taglib/ogg/*.cpp')
-        sources += glob.glob(path_prefix + 'taglib/ogg/vorbis/*.cpp')
-        sources += glob.glob(path_prefix + 'taglib/ogg/speex/*.cpp')
-        sources += glob.glob(path_prefix + 'taglib/ogg/flac/*.cpp')
-        sources += glob.glob(path_prefix + 'taglib/trueaudio/*.cpp')
-        sources += glob.glob(path_prefix + 'taglib/wavpack/*.cpp')
-        sources += glob.glob(path_prefix + 'taglib/ape/*.cpp')
-        sources += glob.glob(path_prefix + 'taglib/toolkit/*.cpp')
-        obj.source = []
-        for i in sources:
-        	obj.source += [ i.replace(path_prefix, '') ]
+    # Library
+    obj = bld.new_task_gen('cxx', 'shlib')
+    sources = glob.glob(path_prefix + 'taglib/*.cpp')
+    sources += glob.glob(path_prefix + 'taglib/flac/*.cpp')
+    sources += glob.glob(path_prefix + 'taglib/mpc/*.cpp')
+    sources += glob.glob(path_prefix + 'taglib/mpeg/*.cpp')
+    sources += glob.glob(path_prefix + 'taglib/mpeg/id3v1/*.cpp')
+    sources += glob.glob(path_prefix + 'taglib/mpeg/id3v2/*.cpp')
+    sources += glob.glob(path_prefix + 'taglib/mpeg/id3v2/frames/*.cpp')
+    sources += glob.glob(path_prefix + 'taglib/ogg/*.cpp')
+    sources += glob.glob(path_prefix + 'taglib/ogg/vorbis/*.cpp')
+    sources += glob.glob(path_prefix + 'taglib/ogg/speex/*.cpp')
+    sources += glob.glob(path_prefix + 'taglib/ogg/flac/*.cpp')
+    sources += glob.glob(path_prefix + 'taglib/trueaudio/*.cpp')
+    sources += glob.glob(path_prefix + 'taglib/wavpack/*.cpp')
+    sources += glob.glob(path_prefix + 'taglib/ape/*.cpp')
+    sources += glob.glob(path_prefix + 'taglib/toolkit/*.cpp')
+    obj.source = []
+    for i in sources:
+        obj.source += [ i.replace(path_prefix, '') ]
 
-        include_dirs = '''
-        	taglib
-        	taglib/toolkit
-        	taglib/flac
-        	taglib/ape
-        	taglib/mpc
-        	taglib/mpeg
-        	taglib/mpeg/id3v1
-        	taglib/mpeg/id3v2
-        	taglib/wavpack
-        	taglib/trueaudio
-        	taglib/ogg
-        	taglib/ogg/vorbis
-        	taglib/ogg/speex
-        	taglib/ogg/flac
-        '''.split()
-        obj.export_incdirs = ['.', 'taglib', 'taglib/toolkit']
-        obj.includes     = include_dirs
-        obj.name         = 'libtaglib'
-        obj.target       = 'taglib'
-        obj.vnum         = LIBTAGLIB_LIB_VERSION
-        obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    include_dirs = '''
+            taglib
+            taglib/toolkit
+            taglib/flac
+            taglib/ape
+            taglib/mpc
+            taglib/mpeg
+            taglib/mpeg/id3v1
+            taglib/mpeg/id3v2
+            taglib/wavpack
+            taglib/trueaudio
+            taglib/ogg
+            taglib/ogg/vorbis
+            taglib/ogg/speex
+            taglib/ogg/flac
+    '''.split()
+    obj.export_incdirs = ['.', 'taglib', 'taglib/toolkit']
+    obj.includes     = include_dirs
+    obj.name         = 'libtaglib'
+    obj.target       = 'taglib'
+    obj.vnum         = LIBTAGLIB_LIB_VERSION
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 def shutdown():
-        autowaf.shutdown()
-
+    autowaf.shutdown()

@@ -20,40 +20,39 @@ srcdir = '.'
 blddir = 'build'
 
 def set_options(opt):
-        autowaf.set_options(opt)
+    autowaf.set_options(opt)
 
 def configure(conf):
-        autowaf.configure(conf)
-        conf.check_tool('compiler_cxx')
+    autowaf.configure(conf)
+    conf.check_tool('compiler_cxx')
 
 def build(bld):
-        # Host Library
-        obj = bld.new_task_gen('cxx', 'shlib')
-        obj.source = '''
-        	dsp/onsets/DetectionFunction.cpp
-        	dsp/onsets/PeakPicking.cpp
-        	dsp/phasevocoder/PhaseVocoder.cpp
-        	dsp/rateconversion/Decimator.cpp
-        	dsp/rhythm/BeatSpectrum.cpp
-        	dsp/signalconditioning/DFProcess.cpp
-        	dsp/signalconditioning/Filter.cpp
-        	dsp/signalconditioning/FiltFilt.cpp
-        	dsp/signalconditioning/Framer.cpp
-        	dsp/transforms/FFT.cpp
-        	dsp/wavelet/Wavelet.cpp
-        	maths/Correlation.cpp
-        	maths/CosineDistance.cpp
-        	maths/KLDivergence.cpp
-        	maths/MathUtilities.cpp
-        	base/Pitch.cpp
-        '''
-        obj.export_incdirs = ['.']
-        obj.includes     = ['.']
-        obj.name         = 'libqmdsp'
-        obj.target       = 'qmdsp'
-        obj.vnum         = QM_DSP_VERSION
-        obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    # Host Library
+    obj = bld.new_task_gen('cxx', 'shlib')
+    obj.source = '''
+            dsp/onsets/DetectionFunction.cpp
+            dsp/onsets/PeakPicking.cpp
+            dsp/phasevocoder/PhaseVocoder.cpp
+            dsp/rateconversion/Decimator.cpp
+            dsp/rhythm/BeatSpectrum.cpp
+            dsp/signalconditioning/DFProcess.cpp
+            dsp/signalconditioning/Filter.cpp
+            dsp/signalconditioning/FiltFilt.cpp
+            dsp/signalconditioning/Framer.cpp
+            dsp/transforms/FFT.cpp
+            dsp/wavelet/Wavelet.cpp
+            maths/Correlation.cpp
+            maths/CosineDistance.cpp
+            maths/KLDivergence.cpp
+            maths/MathUtilities.cpp
+            base/Pitch.cpp
+    '''
+    obj.export_incdirs = ['.']
+    obj.includes     = ['.']
+    obj.name         = 'libqmdsp'
+    obj.target       = 'qmdsp'
+    obj.vnum         = QM_DSP_VERSION
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 def shutdown():
-        autowaf.shutdown()
-
+    autowaf.shutdown()

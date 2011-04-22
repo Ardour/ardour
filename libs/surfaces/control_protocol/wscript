@@ -14,26 +14,25 @@ srcdir = '.'
 blddir = 'build'
 
 def set_options(opt):
-        autowaf.set_options(opt)
+    autowaf.set_options(opt)
 
 def configure(conf):
-        autowaf.configure(conf)
+    autowaf.configure(conf)
 
 def build(bld):
-        obj = bld.new_task_gen('cxx', 'shlib')
-        obj.source = '''
-        	basic_ui.cc
-        	control_protocol.cc
-        '''
-        obj.export_incdirs = ['.', './control_protocol' ]
-        obj.cxxflags     = '-DPACKAGE="ardour_cp"'
-        obj.includes     = ['.', './control_protocol']
-        obj.name         = 'libardour_cp'
-        obj.target       = 'ardourcp'
-        obj.uselib_local = 'libardour libtimecode'
-        obj.vnum         = LIBARDOUR_CP_LIB_VERSION
-        obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    obj = bld.new_task_gen('cxx', 'shlib')
+    obj.source = '''
+            basic_ui.cc
+            control_protocol.cc
+    '''
+    obj.export_incdirs = ['.', './control_protocol' ]
+    obj.cxxflags     = '-DPACKAGE="ardour_cp"'
+    obj.includes     = ['.', './control_protocol']
+    obj.name         = 'libardour_cp'
+    obj.target       = 'ardourcp'
+    obj.uselib_local = 'libardour libtimecode'
+    obj.vnum         = LIBARDOUR_CP_LIB_VERSION
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 def shutdown():
-        autowaf.shutdown()
-
+    autowaf.shutdown()

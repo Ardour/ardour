@@ -42,26 +42,25 @@ libgnomecanvas_sources = [
         ]
 
 def set_options(opt):
-        autowaf.set_options(opt)
+    autowaf.set_options(opt)
 
 def configure(conf):
-        autowaf.configure(conf)
-        conf.check_tool('compiler_cc')
-        autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.18')
-        autowaf.check_pkg(conf, 'libart-2.0', uselib_store='LIBART', atleast_version='2.3')
+    autowaf.configure(conf)
+    conf.check_tool('compiler_cc')
+    autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.18')
+    autowaf.check_pkg(conf, 'libart-2.0', uselib_store='LIBART', atleast_version='2.3')
 
 def build(bld):
-        # Library
-        obj              = bld.new_task_gen('cc', 'shlib')
-        obj.source       = libgnomecanvas_sources
-        obj.export_incdirs = ['.']
-        obj.includes     = ['.']
-        obj.name         = 'libgnomecanvas-2'
-        obj.target       = 'gnomecanvas-2'
-        obj.uselib       = 'GLIB GTK LIBART'
-        obj.vnum         = LIBGNOMECANVAS_LIB_VERSION
-        obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    # Library
+    obj              = bld.new_task_gen('cc', 'shlib')
+    obj.source       = libgnomecanvas_sources
+    obj.export_incdirs = ['.']
+    obj.includes     = ['.']
+    obj.name         = 'libgnomecanvas-2'
+    obj.target       = 'gnomecanvas-2'
+    obj.uselib       = 'GLIB GTK LIBART'
+    obj.vnum         = LIBGNOMECANVAS_LIB_VERSION
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 def shutdown():
-        autowaf.shutdown()
-
+    autowaf.shutdown()

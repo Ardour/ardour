@@ -215,182 +215,182 @@ libardour_sources = [
 ]
 
 def flac_supported():
-        cmd = subprocess.Popen ("sndfile-info testfile.flac", 
-        			stdout = subprocess.PIPE,
-        			stderr = subprocess.STDOUT, shell = True)
-        out = cmd.communicate()[0].decode('utf-8');
-        return re.search ('unknown format', out) == None
+    cmd = subprocess.Popen ("sndfile-info testfile.flac",
+                            stdout = subprocess.PIPE,
+                            stderr = subprocess.STDOUT, shell = True)
+    out = cmd.communicate()[0].decode('utf-8');
+    return re.search ('unknown format', out) == None
 
 def ogg_supported():
-        cmd = subprocess.Popen ("sndfile-info testfile.ogg", 
-        			stdout = subprocess.PIPE,
-        			stderr = subprocess.STDOUT, shell = True)
-        out = cmd.communicate()[0].decode('utf-8');
-        return re.search ('unknown format', out) == None
+    cmd = subprocess.Popen ("sndfile-info testfile.ogg",
+                            stdout = subprocess.PIPE,
+                            stderr = subprocess.STDOUT, shell = True)
+    out = cmd.communicate()[0].decode('utf-8');
+    return re.search ('unknown format', out) == None
 
 def set_options(opt):
-        autowaf.set_options(opt)
+    autowaf.set_options(opt)
 
 def configure(conf):
-        autowaf.build_version_files(path_prefix+'ardour/version.h', path_prefix+'version.cc',
-        		'libardour3', MAJOR, MINOR, MICRO)
-        autowaf.configure(conf)
-        conf.check_tool('compiler_cxx gas')
-        autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO', atleast_version='0.3.2')
-        autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.118.2')
-        autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
-        autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF', atleast_version='0.4.0')
-        autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE', atleast_version='0.1.0')
-        autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
-        autowaf.check_pkg(conf, 'slv2', uselib_store='SLV2', atleast_version='0.6.4', mandatory=False)
-        autowaf.check_pkg(conf, 'slv2', uselib_store='NEW_SLV2', atleast_version='0.7.0', mandatory=False)
-        autowaf.check_pkg(conf, 'suil', uselib_store='SUIL', atleast_version='0.1.0', mandatory=False)
-        autowaf.check_pkg(conf, 'rasqal', uselib_store='RASQAL', atleast_version='0.9.14', mandatory=False)
-        autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH', mandatory=False)
-        autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
-        autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
-        autowaf.check_pkg(conf, 'flac', uselib_store='FLAC', atleast_version='1.2.1')
-        autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
+    autowaf.build_version_files(path_prefix+'ardour/version.h', path_prefix+'version.cc',
+                    'libardour3', MAJOR, MINOR, MICRO)
+    autowaf.configure(conf)
+    conf.check_tool('compiler_cxx gas')
+    autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO', atleast_version='0.3.2')
+    autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.118.2')
+    autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
+    autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF', atleast_version='0.4.0')
+    autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE', atleast_version='0.1.0')
+    autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
+    autowaf.check_pkg(conf, 'slv2', uselib_store='SLV2', atleast_version='0.6.4', mandatory=False)
+    autowaf.check_pkg(conf, 'slv2', uselib_store='NEW_SLV2', atleast_version='0.7.0', mandatory=False)
+    autowaf.check_pkg(conf, 'suil', uselib_store='SUIL', atleast_version='0.1.0', mandatory=False)
+    autowaf.check_pkg(conf, 'rasqal', uselib_store='RASQAL', atleast_version='0.9.14', mandatory=False)
+    autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH', mandatory=False)
+    autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
+    autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
+    autowaf.check_pkg(conf, 'flac', uselib_store='FLAC', atleast_version='1.2.1')
+    autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
 
-        # we don't try to detect this, since its part of our source tree
+    # we don't try to detect this, since its part of our source tree
 
-        conf.define('HAVE_RUBBERBAND', 1) # controls whether we think we have it
-        conf.define('USE_RUBBERBAND', 1)  # controls whether we actually use it
+    conf.define('HAVE_RUBBERBAND', 1) # controls whether we think we have it
+    conf.define('USE_RUBBERBAND', 1)  # controls whether we actually use it
 
-        conf.define('CURRENT_SESSION_FILE_VERSION', CURRENT_SESSION_FILE_VERSION)
+    conf.define('CURRENT_SESSION_FILE_VERSION', CURRENT_SESSION_FILE_VERSION)
 
-        conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H')
-        conf.check(header_name='wordexp.h', define_name='HAVE_WORDEXP')
+    conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H')
+    conf.check(header_name='wordexp.h', define_name='HAVE_WORDEXP')
 
-        conf.check(header_name='jack/session.h', uselib = [ 'JACK' ], define_name='HAVE_JACK_SESSION')
+    conf.check(header_name='jack/session.h', uselib = [ 'JACK' ], define_name='HAVE_JACK_SESSION')
 
-        conf.check(header_name='unistd.h', define_name='HAVE_UNISTD')
-        
-        conf.check_cc(fragment = "#include <jack/jack.h>\nvoid callback (int code, const char* reason, void* arg) { return; }\nint main(int argc, char **argv) { jack_client_t* c; jack_on_info_shutdown (c, callback, (void*) 0); return 0; }\n",
-                      uselib= [ 'JACK' ],
-        	      msg = 'Checking for jack_on_info_shutdown',
-                      define_name = 'HAVE_JACK_ON_INFO_SHUTDOWN',
-        	      okmsg = 'present')
+    conf.check(header_name='unistd.h', define_name='HAVE_UNISTD')
 
-        missing_jack_message = 'missing - a version of JACK that supports jack_port_set_latency_range() is required to compile Ardour3\nCurrently this means using JACK version 0.120.1 from http://www.jackaudio.org/download\n'
+    conf.check_cc(fragment = "#include <jack/jack.h>\nvoid callback (int code, const char* reason, void* arg) { return; }\nint main(int argc, char **argv) { jack_client_t* c; jack_on_info_shutdown (c, callback, (void*) 0); return 0; }\n",
+                  uselib= [ 'JACK' ],
+                  msg = 'Checking for jack_on_info_shutdown',
+                  define_name = 'HAVE_JACK_ON_INFO_SHUTDOWN',
+                  okmsg = 'present')
 
-        conf.check_cc(fragment = "#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_t* p; jack_latency_range_t r; jack_port_set_latency_range (p, JackCaptureLatency, &r); return 0; }\n",
-                      uselib = [ 'JACK' ],
-        	      msg = 'Checking for new JACK latency API',
-        	      okmsg = 'present',
-                      mandatory = True,
-                      errmsg = missing_jack_message)
+    missing_jack_message = 'missing - a version of JACK that supports jack_port_set_latency_range() is required to compile Ardour3\nCurrently this means using JACK version 0.120.1 from http://www.jackaudio.org/download\n'
 
-        conf.check_cc(fragment = '#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_type_get_buffer_size ((jack_client_t*)0, ""); }\n',
-                      uselib = [ 'JACK' ],
-        	      msg = 'Checking for new jack_port_type_get_buffer_size',
-                      okmsg = 'present',
-                      mandatory = True,
-        	      errmsg = missing_jack_message)
-        
-        if flac_supported():
-        	conf.define ('HAVE_FLAC', 1)
-        if ogg_supported():
-        	conf.define ('HAVE_OGG', 1)
+    conf.check_cc(fragment = "#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_t* p; jack_latency_range_t r; jack_port_set_latency_range (p, JackCaptureLatency, &r); return 0; }\n",
+                  uselib = [ 'JACK' ],
+                  msg = 'Checking for new JACK latency API',
+                  okmsg = 'present',
+                  mandatory = True,
+                  errmsg = missing_jack_message)
 
-        conf.write_config_header('libardour-config.h')
+    conf.check_cc(fragment = '#include <jack/jack.h>\nint main(int argc, char **argv) { jack_port_type_get_buffer_size ((jack_client_t*)0, ""); }\n',
+                  uselib = [ 'JACK' ],
+                  msg = 'Checking for new jack_port_type_get_buffer_size',
+                  okmsg = 'present',
+                  mandatory = True,
+                  errmsg = missing_jack_message)
 
-        # Boost headers
-        autowaf.check_header(conf, 'boost/shared_ptr.hpp')
-        autowaf.check_header(conf, 'boost/weak_ptr.hpp')
-        autowaf.check_header(conf, 'boost/scoped_ptr.hpp')
-        autowaf.check_header(conf, 'boost/ptr_container/ptr_list.hpp')
+    if flac_supported():
+        conf.define ('HAVE_FLAC', 1)
+    if ogg_supported():
+        conf.define ('HAVE_OGG', 1)
+
+    conf.write_config_header('libardour-config.h')
+
+    # Boost headers
+    autowaf.check_header(conf, 'boost/shared_ptr.hpp')
+    autowaf.check_header(conf, 'boost/weak_ptr.hpp')
+    autowaf.check_header(conf, 'boost/scoped_ptr.hpp')
+    autowaf.check_header(conf, 'boost/ptr_container/ptr_list.hpp')
 
 
 def build(bld):
-        # Library
-        obj              = bld.new_task_gen('cxx', 'shlib')
-        obj.source       = libardour_sources
-        obj.export_incdirs = ['.']
-        obj.includes     = ['.', '../surfaces/control_protocol', '..']
-        obj.name         = 'libardour'
-        obj.target       = 'ardour'
-        obj.uselib       = 'GLIBMM GTHREAD AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF AUDIOUNIT OSX BOOST CURL DL'
-        obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libvampplugin libtaglib librubberband libaudiographer'
-        obj.vnum         = LIBARDOUR_LIB_VERSION
-        obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-        obj.cxxflags     = ['-DPACKAGE="libardour3"']
-        obj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
-        obj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
-        obj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
-        obj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
-        		os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
-        obj.cxxflags     += ['-DVAMP_DIR="' + os.path.join(
-        		os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"']
-        obj.cxxflags     += ['-DPROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"']
+    # Library
+    obj              = bld.new_task_gen('cxx', 'shlib')
+    obj.source       = libardour_sources
+    obj.export_incdirs = ['.']
+    obj.includes     = ['.', '../surfaces/control_protocol', '..']
+    obj.name         = 'libardour'
+    obj.target       = 'ardour'
+    obj.uselib       = 'GLIBMM GTHREAD AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF AUDIOUNIT OSX BOOST CURL DL'
+    obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libvampplugin libtaglib librubberband libaudiographer'
+    obj.vnum         = LIBARDOUR_LIB_VERSION
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    obj.cxxflags     = ['-DPACKAGE="libardour3"']
+    obj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
+    obj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
+    obj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
+    obj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
+                    os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
+    obj.cxxflags     += ['-DVAMP_DIR="' + os.path.join(
+                    os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"']
+    obj.cxxflags     += ['-DPROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"']
 
-        #obj.source += ' st_stretch.cc st_pitch.cc '
-        #obj.uselib += ' SOUNDTOUCH '
-        #obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
-        
-        if bld.env['HAVE_SLV2']:
-        	obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc', 'uri_map.cc', 'rdff.c' ]
-        	obj.uselib += ' SLV2 ' + ' RASQAL '
-        	if bld.env['HAVE_SUIL']:
-        		obj.uselib += ' SUIL '
-        	
-        if bld.env['VST_SUPPORT']:
-        	obj.source += [ 'vst_plugin.cc', 'session_vst.cc' ]
-        	obj.includes += [ '../fst' ]
-        	obj.cxxflags += [ '-DVST_SUPPORT' ]
+    #obj.source += ' st_stretch.cc st_pitch.cc '
+    #obj.uselib += ' SOUNDTOUCH '
+    #obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'
 
-        if bld.env['COREAUDIO']:
-        	obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
-        	obj.uselib_local += ' libappleutility'	
-        	obj.source += [ 'audio_unit.cc' ]
+    if bld.env['HAVE_SLV2']:
+        obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc', 'uri_map.cc', 'rdff.c' ]
+        obj.uselib += ' SLV2 ' + ' RASQAL '
+        if bld.env['HAVE_SUIL']:
+            obj.uselib += ' SUIL '
 
+    if bld.env['VST_SUPPORT']:
+        obj.source += [ 'vst_plugin.cc', 'session_vst.cc' ]
+        obj.includes += [ '../fst' ]
+        obj.cxxflags += [ '-DVST_SUPPORT' ]
+
+    if bld.env['COREAUDIO']:
+        obj.source += [ 'coreaudiosource.cc', 'caimportable.cc' ]
+        obj.uselib_local += ' libappleutility'
+        obj.source += [ 'audio_unit.cc' ]
+
+    if bld.env['FPU_OPTIMIZATION']:
+        if bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686':
+            obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s' ]
+        elif bld.env['build_target'] == 'x86_64':
+            obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit.s' ]
+
+    # i18n
+    if bld.env['ENABLE_NLS']:
+        mo_files = glob.glob (os.path.join (bld.get_curdir(), 'po/*.mo'))
+        for mo in mo_files:
+            lang = os.path.basename (mo).replace ('.mo', '')
+            bld.install_as (os.path.join (bld.env['PREFIX'], 'share', 'locale', lang, 'LC_MESSAGES', APPNAME + '.mo'), mo)
+
+    if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
+        # Unit tests
+        testobj              = bld.new_task_gen('cxx', 'program')
+        testobj.source       = '''
+                test/bbt_test.cpp
+                test/interpolation_test.cpp
+                test/midi_clock_slave_test.cpp
+                test/resampled_source.cc
+                test/mantis_3356.cc
+                test/testrunner.cpp
+        '''.split()
+        testobj.includes     = obj.includes + ['test', '../pbd']
+        testobj.uselib       = 'CPPUNIT SIGCPP JACK GLIBMM GTHREAD SAMPLERATE XML LRDF COREAUDIO'
+        testobj.uselib_local = 'libpbd libmidipp libardour'
+        testobj.name         = 'libardour-tests'
+        testobj.target       = 'run-tests'
+        testobj.install_path = ''
+        testobj.cxxflags     = ['-DPACKAGE="libardour3test"']
+        testobj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
+        testobj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
+        testobj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
+        testobj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
+                        os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
+        testobj.cxxflags     += ['-DVAMP_DIR="' + os.path.join(
+                        os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"']
         if bld.env['FPU_OPTIMIZATION']:
-        	if bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686':
-                        obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s' ]
-        	elif bld.env['build_target'] == 'x86_64':
-                        obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit.s' ]
-
-        # i18n
-        if bld.env['ENABLE_NLS']:
-        	mo_files = glob.glob (os.path.join (bld.get_curdir(), 'po/*.mo'))
-        	for mo in mo_files:
-        		lang = os.path.basename (mo).replace ('.mo', '')
-        		bld.install_as (os.path.join (bld.env['PREFIX'], 'share', 'locale', lang, 'LC_MESSAGES', APPNAME + '.mo'), mo)
-
-        if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
-        	# Unit tests
-        	testobj              = bld.new_task_gen('cxx', 'program')
-        	testobj.source       = '''
-        		test/bbt_test.cpp
-        		test/interpolation_test.cpp
-        		test/midi_clock_slave_test.cpp
-        		test/resampled_source.cc
-        		test/mantis_3356.cc
-        		test/testrunner.cpp
-        	'''.split()
-        	testobj.includes     = obj.includes + ['test', '../pbd']
-        	testobj.uselib       = 'CPPUNIT SIGCPP JACK GLIBMM GTHREAD SAMPLERATE XML LRDF COREAUDIO'
-        	testobj.uselib_local = 'libpbd libmidipp libardour'
-        	testobj.name         = 'libardour-tests'
-        	testobj.target       = 'run-tests'
-        	testobj.install_path = ''
-        	testobj.cxxflags     = ['-DPACKAGE="libardour3test"']
-        	testobj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
-        	testobj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
-        	testobj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
-        	testobj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
-        			os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
-        	testobj.cxxflags     += ['-DVAMP_DIR="' + os.path.join(
-        			os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"']
-        	if bld.env['FPU_OPTIMIZATION']:
-        		testobj.source += [ 'sse_functions_xmm.cc' ]
-        		if bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686':
-        			testobj.source += [ 'sse_functions.s' ]
-        		elif bld.env['build_target'] == 'x86_64':
-        			testobj.source += [ 'sse_functions_64bit.s' ]
+            testobj.source += [ 'sse_functions_xmm.cc' ]
+            if bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686':
+                testobj.source += [ 'sse_functions.s' ]
+            elif bld.env['build_target'] == 'x86_64':
+                testobj.source += [ 'sse_functions_64bit.s' ]
 
 def shutdown():
-        autowaf.shutdown()
+    autowaf.shutdown()
 
 def i18n(bld):
-        autowaf.build_i18n (bld, '..', 'libs/ardour', APPNAME, libardour_sources)
+    autowaf.build_i18n (bld, '..', 'libs/ardour', APPNAME, libardour_sources)

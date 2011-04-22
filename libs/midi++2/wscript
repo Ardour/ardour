@@ -26,46 +26,45 @@ blddir = 'build'
 path_prefix = 'libs/midi++2/'
 
 def set_options(opt):
-        autowaf.set_options(opt)
+    autowaf.set_options(opt)
 
 def configure(conf):
-        autowaf.build_version_files(path_prefix+'midi++/version.h', path_prefix+'version.cc',
-        		'midipp', MAJOR, MINOR, MICRO)
-        autowaf.configure(conf)
-        conf.check_tool('compiler_cxx')
-        autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.118.2')
-        autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
-        autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
+    autowaf.build_version_files(path_prefix+'midi++/version.h', path_prefix+'version.cc',
+                    'midipp', MAJOR, MINOR, MICRO)
+    autowaf.configure(conf)
+    conf.check_tool('compiler_cxx')
+    autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.118.2')
+    autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
+    autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
 
-        # Boost headers
-        autowaf.check_header(conf, 'boost/shared_ptr.hpp')
-        autowaf.check_header(conf, 'boost/weak_ptr.hpp')
+    # Boost headers
+    autowaf.check_header(conf, 'boost/shared_ptr.hpp')
+    autowaf.check_header(conf, 'boost/weak_ptr.hpp')
 
 def build(bld):
-        # Library
-        obj = bld.new_task_gen('cxx', 'shlib')
-        obj.source = '''
-        	midi.cc
-        	channel.cc
-        	manager.cc
-        	parser.cc
-        	port.cc
-        	midnam_patch.cc
-        	mmc.cc
-        	mtc.cc
-        	version.cc
-        '''
-        # everybody loves JACK
-        obj.cxxflags = [ '-DWITH_JACK_MIDI' ]
-        obj.export_incdirs = ['.']
-        obj.includes     = ['.', '../surfaces/control_protocol']
-        obj.name         = 'libmidipp'
-        obj.target       = 'midipp'
-        obj.uselib       = 'GLIBMM SIGCPP XML JACK OSX'
-        obj.uselib_local = 'libpbd libevoral libtimecode'
-        obj.vnum         = LIBMIDIPP_LIB_VERSION
-        obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    # Library
+    obj = bld.new_task_gen('cxx', 'shlib')
+    obj.source = '''
+            midi.cc
+            channel.cc
+            manager.cc
+            parser.cc
+            port.cc
+            midnam_patch.cc
+            mmc.cc
+            mtc.cc
+            version.cc
+    '''
+    # everybody loves JACK
+    obj.cxxflags = [ '-DWITH_JACK_MIDI' ]
+    obj.export_incdirs = ['.']
+    obj.includes     = ['.', '../surfaces/control_protocol']
+    obj.name         = 'libmidipp'
+    obj.target       = 'midipp'
+    obj.uselib       = 'GLIBMM SIGCPP XML JACK OSX'
+    obj.uselib_local = 'libpbd libevoral libtimecode'
+    obj.vnum         = LIBMIDIPP_LIB_VERSION
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 def shutdown():
-        autowaf.shutdown()
-
+    autowaf.shutdown()

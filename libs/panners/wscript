@@ -9,19 +9,19 @@ blddir = 'build'
 panners = [ '2in2out', '1in2out', 'vbap' ]
 
 def set_options(opt):
-        autowaf.set_options(opt)
+    autowaf.set_options(opt)
 
 def sub_config_and_use(conf, name, has_objects = True):
-        conf.sub_config(name)
-        autowaf.set_local_lib(conf, name, has_objects)
+    conf.sub_config(name)
+    autowaf.set_local_lib(conf, name, has_objects)
 
 def configure(conf):
-        autowaf.set_recursive()
-        autowaf.configure(conf)
+    autowaf.set_recursive()
+    autowaf.configure(conf)
 
-        for i in panners:
-        	sub_config_and_use(conf, i)
+    for i in panners:
+        sub_config_and_use(conf, i)
 
 def build(bld):
-        for i in panners:
-            bld.add_subdirs(i)
+    for i in panners:
+        bld.add_subdirs(i)

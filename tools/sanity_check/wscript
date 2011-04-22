@@ -21,4 +21,3 @@ def build(bld):
     obj.target = 'sanityCheck'
     obj.name = 'sanityCheck'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-    

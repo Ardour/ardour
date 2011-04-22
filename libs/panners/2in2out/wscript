@@ -13,23 +13,22 @@ srcdir = '.'
 blddir = 'build'
 
 def set_options(opt):
-        autowaf.set_options(opt)
+    autowaf.set_options(opt)
 
 def configure(conf):
-        autowaf.configure(conf)
+    autowaf.configure(conf)
 
 def build(bld):
-        obj = bld.new_task_gen('cxx', 'shlib')
-        obj.source = [ 'panner_2in2out.cc' ]
-        obj.export_incdirs = ['.']
-        obj.cxxflags     = '-DPACKAGE="libardour_pan2in2out"'
-        obj.includes     = ['.']
-        obj.name         = 'libardour_pan2in2out'
-        obj.target       = 'pan2in2out'
-        obj.uselib_local = 'libardour libardour_cp libpbd'
-        obj.vnum         = LIBARDOUR_PAN2IN2OUT_LIB_VERSION
-        obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'panners')
+    obj = bld.new_task_gen('cxx', 'shlib')
+    obj.source = [ 'panner_2in2out.cc' ]
+    obj.export_incdirs = ['.']
+    obj.cxxflags     = '-DPACKAGE="libardour_pan2in2out"'
+    obj.includes     = ['.']
+    obj.name         = 'libardour_pan2in2out'
+    obj.target       = 'pan2in2out'
+    obj.uselib_local = 'libardour libardour_cp libpbd'
+    obj.vnum         = LIBARDOUR_PAN2IN2OUT_LIB_VERSION
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'panners')
 
 def shutdown():
-        autowaf.shutdown()
-
+    autowaf.shutdown()
