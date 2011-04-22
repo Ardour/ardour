@@ -91,10 +91,11 @@ class ShuttleControl : public Gtk::DrawingArea, public ARDOUR::SessionHandlePtr
 	void set_shuttle_units (ARDOUR::ShuttleUnits);
 	void set_shuttle_style (ARDOUR::ShuttleBehaviour);
 
-	int speed_as_semitones (float);
-	float semitones_as_speed (int);
-	float semitones_as_fract (int);
-	int fract_as_semitones (float);
+	int speed_as_semitones (float, bool&);
+	int fract_as_semitones (float, bool&);
+
+	float semitones_as_speed (int, bool);
+	float semitones_as_fract (int, bool);
 };
 
 #endif /* __gtk2_ardour_shuttle_control_h__ */

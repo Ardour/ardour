@@ -112,14 +112,16 @@ ShuttleControl::map_transport_state ()
 {
 	float speed = _session->transport_speed ();
 
-	if (speed != 0.0) {
+	if (fabs(speed) <= (2*DBL_EPSILON)) {
+		shuttle_fract = 0;
+        } else {
                 if (Config->get_shuttle_units() == Semitones) {
-                        shuttle_fract = semitones_as_fract (speed_as_semitones (speed));
+                        bool reverse;
+                        int semi = speed_as_semitones (speed, reverse);
+                        shuttle_fract = semitones_as_fract (semi, reverse);
                 } else {
                         shuttle_fract = speed/shuttle_max_speed;
                 }
-	} else {
-		shuttle_fract = 0;
 	}
 
 	queue_draw ();
@@ -296,21 +298,46 @@ ShuttleControl::on_scroll_event (GdkEventScroll* ev)
 		return true;
 	}
 
-	switch (ev->direction) {
-
-	case GDK_SCROLL_UP:
+        switch (ev->direction) {
+        case GDK_SCROLL_UP:
         case GDK_SCROLL_RIGHT:
                 shuttle_fract += 0.005;
-		break;
-	case GDK_SCROLL_DOWN:
+                break;
+        case GDK_SCROLL_DOWN:
         case GDK_SCROLL_LEFT:
                 shuttle_fract -= 0.005;
-		break;
-	default:
-		return false;
-	}
+                break;
+        default:
+                return false;
+        }
+        
+        if (Config->get_shuttle_units() == Semitones) {
 
-	use_shuttle_fract (true);
+                float lower_side_of_dead_zone = semitones_as_fract (-24, true);
+                float upper_side_of_dead_zone = semitones_as_fract (-24, false);
+
+                /* if we entered the "dead zone" (-24 semitones in forward or reverse), jump
+                   to the far side of it.
+                */
+
+                if (shuttle_fract > lower_side_of_dead_zone && shuttle_fract < upper_side_of_dead_zone) {
+                        switch (ev->direction) {
+                        case GDK_SCROLL_UP:
+                        case GDK_SCROLL_RIGHT:
+                                shuttle_fract = upper_side_of_dead_zone;
+                                break;
+                        case GDK_SCROLL_DOWN:
+                        case GDK_SCROLL_LEFT:
+                                shuttle_fract = lower_side_of_dead_zone;
+                                break;
+                        default:
+                                /* impossible, checked above */
+                                return false;
+                        }
+                }
+        }
+
+        use_shuttle_fract (true);
 
 	return true;
 }
@@ -355,33 +382,41 @@ ShuttleControl::set_shuttle_fract (double f)
 }
 
 int
-ShuttleControl::speed_as_semitones (float speed)
+ShuttleControl::speed_as_semitones (float speed, bool& reverse)
 {
+        assert (speed != 0.0);
+
         if (speed < 0.0) {
+                reverse = true;
                 return (int) round (12.0 * fast_log2 (-speed));
         } else {
+                reverse = false;
                 return (int) round (12.0 * fast_log2 (speed));
         }
 }        
 
 float
-ShuttleControl::semitones_as_speed (int semi)
+ShuttleControl::semitones_as_speed (int semi, bool reverse)
 {
-        return pow (2.0, (semi / 12.0));
+        if (reverse) {
+                return -pow (2.0, (semi / 12.0));
+        } else {
+                return pow (2.0, (semi / 12.0));
+        }
 }
 
 float
-ShuttleControl::semitones_as_fract (int semi)
+ShuttleControl::semitones_as_fract (int semi, bool reverse)
 {
-        double const step = 1.0 / 24.0; // range is 24 semitones up & down
-        return semi * step;
+        float speed = semitones_as_speed (semi, reverse);
+        return speed/4.0; /* 4.0 is the maximum speed for a 24 semitone shift */
 }
 
 int
-ShuttleControl::fract_as_semitones (float fract)
+ShuttleControl::fract_as_semitones (float fract, bool& reverse)
 {
-        double const step = 1.0 / 24.0; // range is 24 semitones up & down
-        return (int) round (shuttle_fract / step);
+        assert (fract != 0.0);
+        return speed_as_semitones (fract * 4.0, reverse);
 }
 
 void
@@ -389,13 +424,8 @@ ShuttleControl::use_shuttle_fract (bool force)
 {
 	microseconds_t now = get_microseconds();
 
-        if (Config->get_shuttle_units() == Semitones) {
-                shuttle_fract = max (-1.0f, shuttle_fract);
-                shuttle_fract = min (1.0f, shuttle_fract);
-        } else {
-                shuttle_fract = max (-shuttle_max_speed, shuttle_fract);
-                shuttle_fract = min (shuttle_max_speed, shuttle_fract);
-        }
+        shuttle_fract = max (-1.0f, shuttle_fract);
+        shuttle_fract = min (1.0f, shuttle_fract);
 
 	/* do not attempt to submit a motion-driven transport speed request
 	   more than once per process cycle.
@@ -409,11 +439,17 @@ ShuttleControl::use_shuttle_fract (bool force)
 
 	double speed = 0;
 
-	if (Config->get_shuttle_units() == Semitones) {
-		speed = semitones_as_speed (fract_as_semitones (shuttle_fract));
-	} else {
-		speed = shuttle_max_speed * shuttle_fract;
-	}
+        if (Config->get_shuttle_units() == Semitones) {
+                if (shuttle_fract != 0.0) {
+                        bool reverse;
+                        int semi = fract_as_semitones (shuttle_fract, reverse);
+                        speed = semitones_as_speed (semi, reverse);
+                } else {
+                        speed = 0.0;
+                }
+        } else {
+                speed = shuttle_max_speed * shuttle_fract;
+        }
 
 	_session->request_transport_speed_nonzero (speed);
 }
@@ -452,16 +488,33 @@ ShuttleControl::on_expose_event (GdkEventExpose* event)
 	/* speed text */
 
 	char buf[32];
+
 	if (speed != 0) {
+
 		if (Config->get_shuttle_units() == Percentage) {
+
                         if (speed == 1.0) {
                                 snprintf (buf, sizeof (buf), _("Playing"));
                         } else {
-                                snprintf (buf, sizeof (buf), "%d%%", (int) round (speed * 100));
+                                if (speed < 0.0) {
+                                        snprintf (buf, sizeof (buf), "<<< %d%%", (int) round (-speed * 100));
+                                } else {
+                                        snprintf (buf, sizeof (buf), ">>> %d%%", (int) round (speed * 100));
+                                }
                         }
+
 		} else {
-                        snprintf (buf, sizeof (buf), "%+d semitones", speed_as_semitones (speed));
+
+                        bool reversed;
+                        int semi = speed_as_semitones (speed, reversed);
+
+                        if (reversed) {
+                                snprintf (buf, sizeof (buf), _("<<< %+d semitones"), semi);
+                        } else {
+                                snprintf (buf, sizeof (buf), _(">>> %+d semitones"), semi);
+                        }
 		}
+
 	} else {
 		snprintf (buf, sizeof (buf), _("Stopped"));
 	}
