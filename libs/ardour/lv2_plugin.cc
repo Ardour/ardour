@@ -30,7 +30,10 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
+#include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
+
+#include "libardour-config.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audio_buffer.h"
@@ -40,14 +43,15 @@
 #include "ardour/lv2_plugin.h"
 #include "ardour/session.h"
 
-#include "pbd/stl_delete.h"
-
 #include "i18n.h"
 #include <locale.h>
 
 #include "lv2ext/lv2_files.h"
 #include "lv2ext/lv2_persist.h"
 #include "rdff.h"
+#ifdef HAVE_SUIL
+#include <suil/suil.h>
+#endif
 
 #define NS_DC   "http://dublincore.org/documents/dcmi-namespace/"
 #define NS_LV2  "http://lv2plug.in/ns/lv2core#"
@@ -98,6 +102,7 @@ LV2Plugin::init(LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 	_world                = world;
 	_plugin               = plugin;
 	_ui                   = NULL;
+	_ui_type              = NULL;
 	_control_data         = 0;
 	_shadow_data          = 0;
 	_latency_control_port = 0;
@@ -202,6 +207,21 @@ LV2Plugin::init(LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 
 	SLV2UIs uis = slv2_plugin_get_uis(_plugin);
 	if (slv2_uis_size(uis) > 0) {
+#if defined(HAVE_NEW_SLV2) and defined(HAVE_SUIL)
+		// Look for embeddable UI
+		SLV2Value ui_type = NULL;
+		SLV2_FOREACH(u, uis) {
+			SLV2UI this_ui = slv2_uis_get(uis, u);
+			if (slv2_ui_is_supported(this_ui,
+			                         suil_ui_supported,
+			                         _world.gtk_gui,
+			                         &_ui_type)) {
+				// TODO: Multiple UI support
+				_ui = this_ui;
+				break;
+			}
+		}
+#else
 		// Look for Gtk native UI
 		for (unsigned i = 0; i < slv2_uis_size(uis); ++i) {
 			SLV2UI ui = slv2_uis_get_at(uis, i);
@@ -210,6 +230,7 @@ LV2Plugin::init(LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 				break;
 			}
 		}
+#endif
 
 		// If Gtk UI is not available, try to find external UI
 		if (!_ui) {
@@ -236,6 +257,7 @@ LV2Plugin::~LV2Plugin ()
 	slv2_instance_free(_instance);
 	slv2_value_free(_name);
 	slv2_value_free(_author);
+	slv2_value_free(_ui_type);
 
 	delete [] _control_data;
 	delete [] _shadow_data;

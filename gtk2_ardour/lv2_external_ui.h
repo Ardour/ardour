@@ -77,7 +77,7 @@ struct lv2_external_ui_host
    * @param controller Host context associated with plugin UI, as
    * supplied to LV2UI_Descriptor::instantiate()
    */
-  void (* ui_closed)(LV2UI_Controller controller);
+  void (* ui_closed)(void* controller);
 
   /**
    * Optional (may be NULL) "user friendly" identifier which the UI

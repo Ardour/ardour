@@ -534,6 +534,7 @@ def configure(conf):
         if opts.freesound:
         	conf.define('FREESOUND',1)
         autowaf.display_msg(conf, 'LV2 Support', bool(conf.env['HAVE_SLV2']))
+        autowaf.display_msg(conf, 'LV2 UI Embedding', bool(conf.env['HAVE_SUIL']))
         autowaf.display_msg(conf, 'OGG', bool(conf.env['HAVE_OGG']))
         autowaf.display_msg(conf, 'Rubberband', bool(conf.env['HAVE_RUBBERBAND']))
         autowaf.display_msg(conf, 'Samplerate', bool(conf.env['HAVE_SAMPLERATE']))
@@ -586,6 +587,7 @@ def configure(conf):
         config_text.write ('Freedesktop files: '); config_text.write (str (opts.freedesktop)); config_text.write ("\\n\\\n")
         config_text.write ('Freesound: '); config_text.write (str (opts.freesound)); config_text.write ("\\n\\\n")
         config_text.write ('LV2 support: '); config_text.write (str (bool(conf.env['HAVE_SLV2']))); config_text.write ("\\n\\\n")
+        config_text.write ('LV2 UI embedding: '); config_text.write (str (bool(conf.env['HAVE_SUIL']))); config_text.write ("\\n\\\n")
         config_text.write ('Rubberband: '); config_text.write (str (bool(conf.env['HAVE_RUBBERBAND']))); config_text.write ("\\n\\\n")
         config_text.write ('Samplerate: '); config_text.write (str (bool(conf.env['HAVE_SAMPLERATE']))); config_text.write ("\\n\\\n")
         config_text.write ('Soundtouch: '); config_text.write (str (bool(conf.env['HAVE_SOUNDTOUCH']))); config_text.write ("\\n\\\n")

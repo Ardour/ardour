@@ -74,6 +74,7 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	SLV2Plugin slv2_plugin ()         { return _plugin; }
 	SLV2UI     slv2_ui ()             { return _ui; }
+	SLV2Value  ui_type()              { return _ui_type; }
 	SLV2Port   slv2_port (uint32_t i) { return slv2_plugin_get_port_by_index (_plugin, i); }
 	bool       is_external_ui () const;
 
@@ -125,6 +126,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	LV2_Feature**     _features;
 	SLV2Plugin        _plugin;
 	SLV2UI            _ui;
+	SLV2Value         _ui_type;
 	SLV2Value         _name;
 	SLV2Value         _author;
 	SLV2Instance      _instance;

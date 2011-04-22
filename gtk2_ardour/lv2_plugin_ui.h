@@ -40,6 +40,10 @@
 
 #include "lv2_external_ui.h"
 
+#if defined(HAVE_NEW_SLV2) && defined(HAVE_SUIL)
+#include <suil/suil.h>
+#endif
+
 namespace ARDOUR {
 	class PluginInsert;
 	class LV2Plugin;
@@ -66,9 +70,8 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	std::vector<int> _output_ports;
 	sigc::connection _screen_update_connection;
 
-	Gtk::Widget*   _gui_widget;
-	SLV2UIInstance _inst;
-	float*         _values;
+	Gtk::Widget* _gui_widget;
+	float*       _values;
 	std::vector<boost::shared_ptr<ARDOUR::AutomationControl> > _controllables;
 
 	struct lv2_external_ui_host _external_ui_host;
@@ -76,19 +79,23 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	struct lv2_external_ui* _external_ui_ptr;
 	Gtk::Window* _win_ptr;
 
-	static void on_external_ui_closed(LV2UI_Controller controller);
+	static void on_external_ui_closed(void* controller);
 
-#ifdef HAVE_NEW_SLV2
-	static SLV2UIHost ui_host;
+#if defined(HAVE_NEW_SLV2) && defined(HAVE_SUIL)
+	static SuilHost   ui_host;
 	static SLV2Value  ui_GtkUI;
+
+	SuilInstance _inst;
+#else
+	SLV2UIInstance _inst;
 #endif
 
 	static void lv2_ui_write(
-			LV2UI_Controller controller,
-			uint32_t         port_index,
-			uint32_t         buffer_size,
-			uint32_t         format,
-			const void*      buffer);
+			void*       controller,
+			uint32_t    port_index,
+			uint32_t    buffer_size,
+			uint32_t    format,
+			const void* buffer);
 
 	void lv2ui_instantiate(const std::string& title);
 

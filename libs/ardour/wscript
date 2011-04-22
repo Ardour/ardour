@@ -244,6 +244,7 @@ def configure(conf):
         autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
         autowaf.check_pkg(conf, 'slv2', uselib_store='SLV2', atleast_version='0.6.4', mandatory=False)
         autowaf.check_pkg(conf, 'slv2', uselib_store='NEW_SLV2', atleast_version='0.7.0', mandatory=False)
+        autowaf.check_pkg(conf, 'suil', uselib_store='SUIL', atleast_version='0.1.0', mandatory=False)
         autowaf.check_pkg(conf, 'rasqal', uselib_store='RASQAL', atleast_version='0.9.14', mandatory=False)
         autowaf.check_pkg(conf, 'soundtouch-1.0', uselib_store='SOUNDTOUCH', mandatory=False)
         autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
@@ -330,6 +331,8 @@ def build(bld):
         if bld.env['HAVE_SLV2']:
         	obj.source += [ 'lv2_plugin.cc', 'lv2_event_buffer.cc', 'uri_map.cc', 'rdff.c' ]
         	obj.uselib += ' SLV2 ' + ' RASQAL '
+        	if bld.env['HAVE_SUIL']:
+        		obj.uselib += ' SUIL '
         	
         if bld.env['VST_SUPPORT']:
         	obj.source += [ 'vst_plugin.cc', 'session_vst.cc' ]
