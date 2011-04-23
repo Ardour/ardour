@@ -206,7 +206,7 @@ class LocationUIWindow : public ArdourDialog
 	LocationUIWindow ();
 	~LocationUIWindow ();
 
-	void on_show();
+	void on_map ();
 	void set_session (ARDOUR::Session *);
 
 	LocationUI& ui() { return _ui; }

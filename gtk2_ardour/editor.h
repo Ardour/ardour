@@ -541,9 +541,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void location_changed (ARDOUR::Location *);
 	void location_flags_changed (ARDOUR::Location *, void *);
 	void refresh_location_display ();
-	void refresh_location_display_s (const PBD::PropertyChange&);
 	void refresh_location_display_internal (ARDOUR::Locations::LocationList&);
 	void add_new_location (ARDOUR::Location *);
+	ArdourCanvas::Group* add_new_location_internal (ARDOUR::Location *);
 	void location_gone (ARDOUR::Location *);
 	void remove_marker (ArdourCanvas::Item&, GdkEvent*);
 	gint really_remove_marker (ARDOUR::Location* loc);

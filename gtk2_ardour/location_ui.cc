@@ -972,7 +972,7 @@ LocationUI::map_locations (Locations::LocationList& locations)
 		if (location->is_mark()) {
 			LocationEditRow* erow = manage (new LocationEditRow (_session, location, mark_n));
 
-                        erow->set_clock_group (*_clock_group);
+			erow->set_clock_group (*_clock_group);
 			erow->remove_requested.connect (sigc::mem_fun(*this, &LocationUI::location_remove_requested));
 			erow->redraw_ranges.connect (sigc::mem_fun(*this, &LocationUI::location_redraw_ranges));
 
@@ -1052,7 +1052,9 @@ LocationUI::refresh_location_list ()
 	using namespace Box_Helpers;
 
 	// this is just too expensive to do when window is not shown
-	if (!is_visible()) return;
+	if (!is_mapped()) {
+		return;
+	}
 
 	BoxList & loc_children = location_rows.children();
 	BoxList & range_children = range_rows.children();
@@ -1063,7 +1065,6 @@ LocationUI::refresh_location_list ()
 	if (_session) {
 		_session->locations()->apply (*this, &LocationUI::map_locations);
 	}
-
 }
 
 void
@@ -1133,10 +1134,10 @@ LocationUIWindow::~LocationUIWindow()
 }
 
 void 
-LocationUIWindow::on_show()
+LocationUIWindow::on_map ()
 {
+	ArdourDialog::on_map ();
 	_ui.refresh_location_list();
-	ArdourDialog::on_show();
 }
 
 bool

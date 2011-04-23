@@ -61,8 +61,21 @@ Editor::clear_marker_display ()
 void
 Editor::add_new_location (Location *location)
 {
-	ENSURE_GUI_THREAD (*this, &Editor::add_new_location, location)
+	ENSURE_GUI_THREAD (*this, &Editor::add_new_location, location);
 
+	ArdourCanvas::Group* group = add_new_location_internal (location);
+
+	/* Do a full update of the markers in this group */
+	update_marker_labels (group);
+}
+
+/** Add a new location, without a time-consuming update of all marker labels;
+ *  the caller must call update_marker_labels () after calling this.
+ *  @return canvas group that the location's marker was added to.
+ */
+ArdourCanvas::Group*
+Editor::add_new_location_internal (Location* location)
+{
 	LocationMarkers *lam = new LocationMarkers;
 	uint32_t color;
 
@@ -163,15 +176,14 @@ Editor::add_new_location (Location *location)
 	lam->set_show_lines (_show_marker_lines);
 
 	/* Add these markers to the appropriate sorted marker lists, which will render
-	   them unsorted until the update_marker_labels() below sorts them out.
+	   them unsorted until a call to update_marker_labels() sorts them out.
 	*/
 	_sorted_marker_lists[group].push_back (lam->start);
 	if (lam->end) {
 		_sorted_marker_lists[group].push_back (lam->end);
 	}
 
-	/* Do a full update of the markers in this group */
-	update_marker_labels (group);
+	return group;
 }
 
 void
@@ -483,7 +495,7 @@ Editor::refresh_location_display_internal (Locations::LocationList& locations)
 			continue;
 		}
 
-		add_new_location (*i);
+		add_new_location_internal (*i);
 	}
 
 	/* remove dead ones */
@@ -521,16 +533,8 @@ Editor::refresh_location_display ()
 	if (_session) {
 		_session->locations()->apply (*this, &Editor::refresh_location_display_internal);
 	}
-}
 
-void
-Editor::refresh_location_display_s (const PropertyChange&)
-{
-	ENSURE_GUI_THREAD (*this, &Editor::refresh_location_display_s, ignored)
-
-	if (_session) {
-		_session->locations()->apply (*this, &Editor::refresh_location_display_internal);
-	}
+	update_marker_labels ();
 }
 
 void
