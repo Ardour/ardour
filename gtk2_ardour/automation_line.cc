@@ -87,8 +87,6 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 
 	line->signal_event().connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
 
-	connect_to_list ();
-
 	trackview.session()->register_with_memento_command_factory(alist->id(), this);
 
 	if (alist->parameter().type() == GainAutomation ||
