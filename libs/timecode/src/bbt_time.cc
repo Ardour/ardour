@@ -17,6 +17,7 @@
 */
 
 #include <cmath>
+#include <cassert>
 
 #include "timecode/bbt_time.h"
 
@@ -30,6 +31,8 @@ BBT_Time::BBT_Time (double dbeats)
            in that beats may be a very large number, and bars will
            always be zero.
         */
+
+	assert (dbeats >= 0);
 
         bars = 0;
         beats = rint (floor (dbeats));
