@@ -52,8 +52,8 @@ def fetch_svn_revision (path):
     cmd = "LANG= svn info " + path + " | awk '/^Revision:/ { print $2}'"
     return subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
 
-def fetch_gcc_version ():
-    cmd = "LANG= gcc --version"
+def fetch_gcc_version (CC):
+    cmd = "LANG= %s --version" % CC
     output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
     o = output[0].decode('utf-8')
     version = o.split(' ')[2].split('.')
@@ -415,7 +415,7 @@ def configure(conf):
     autowaf.configure(conf)
     autowaf.display_header('Ardour Configuration')
 
-    gcc_versions = fetch_gcc_version()
+    gcc_versions = fetch_gcc_version(str(conf.env['CC']))
     if not Options.options.debug and gcc_versions[0] == '4' and gcc_versions[1] > '4':
         print('Version 4.5 of gcc is not ready for use when compiling Ardour with optimization.')
         print('Please use a different version or re-configure with --debug')
