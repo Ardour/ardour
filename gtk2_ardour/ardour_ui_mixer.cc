@@ -25,6 +25,7 @@
 
 #include "ardour_ui.h"
 #include "mixer_ui.h"
+#include "i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;

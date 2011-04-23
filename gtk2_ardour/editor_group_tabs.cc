@@ -24,6 +24,7 @@
 #include "utils.h"
 #include "editor_route_groups.h"
 #include "editor_routes.h"
+#include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

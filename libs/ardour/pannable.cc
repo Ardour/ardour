@@ -19,6 +19,7 @@
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
+#include "pbd/compose.h"
 
 #include "ardour/debug.h"
 #include "ardour/automation_control.h"
@@ -27,6 +28,8 @@
 #include "ardour/panner.h"
 #include "ardour/pan_controllable.h"
 #include "ardour/session.h"
+
+#include "i18n.h"
 
 using namespace std;
 using namespace PBD;

@@ -25,6 +25,7 @@
 #include <stdint.h>
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
+#include "pbd/compose.h"
 #include "midi++/events.h"
 
 #include "ardour/midi_model.h"
@@ -34,6 +35,8 @@
 #include "ardour/types.h"
 #include "ardour/session.h"
 #include "ardour/midi_automation_list_binder.h"
+
+#include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

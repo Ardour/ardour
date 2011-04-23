@@ -23,6 +23,7 @@
 #include "edit_note_dialog.h"
 #include "canvas-note-event.h"
 #include "midi_region_view.h"
+#include "i18n.h"
 
 using namespace Gtk;
 

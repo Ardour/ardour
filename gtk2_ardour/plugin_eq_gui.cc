@@ -35,6 +35,8 @@
 #include <iostream>
 #include <cmath>
 
+#include "i18n.h"
+
 using namespace ARDOUR;
 
 PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)

@@ -23,6 +23,7 @@
 #include "ardour/session.h"
 
 #include "missing_file_dialog.h"
+#include "i18n.h"
 
 using namespace Gtk;
 using namespace std;

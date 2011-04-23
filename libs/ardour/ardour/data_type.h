@@ -23,8 +23,6 @@
 #include <string>
 #include <jack/jack.h>
 
-#include "i18n.h"
-
 namespace ARDOUR {
 
 
@@ -90,13 +88,7 @@ public:
 		}
 	}
 
-	const char* to_i18n_string() const {
-		switch (_symbol) {
-			case AUDIO: return _("audio");
-			case MIDI: return _("MIDI");
-			default: return _("unknown");
-		}
-	}
+	const char* to_i18n_string () const;
 
 	inline operator uint32_t() const { return (uint32_t)_symbol; }
 

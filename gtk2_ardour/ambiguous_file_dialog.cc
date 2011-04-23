@@ -18,7 +18,9 @@
 */
 
 #include <gtkmm/label.h>
+#include "pbd/compose.h"
 #include "ambiguous_file_dialog.h"
+#include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

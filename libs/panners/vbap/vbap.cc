@@ -7,6 +7,7 @@
 #include <string>
 
 #include "pbd/cartesian.h"
+#include "pbd/compose.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
@@ -17,6 +18,8 @@
 
 #include "vbap.h"
 #include "vbap_speakers.h"
+
+#include "i18n.h"
 
 using namespace PBD;
 using namespace ARDOUR;

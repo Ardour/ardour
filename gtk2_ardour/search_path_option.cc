@@ -17,7 +17,9 @@
 */
 
 #include "pbd/strsplit.h"
+#include "pbd/compose.h"
 #include "search_path_option.h"
+#include "i18n.h"
 
 using namespace std;
 using namespace Gtk;

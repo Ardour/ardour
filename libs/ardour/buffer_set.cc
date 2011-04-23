@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include "pbd/compose.h"
 #include "ardour/buffer.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"

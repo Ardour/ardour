@@ -7,6 +7,8 @@
 #include "ardour/panner_manager.h"
 #include "ardour/panner_search_path.h"
 
+#include "i18n.h"
+
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;

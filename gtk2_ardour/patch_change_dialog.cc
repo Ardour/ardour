@@ -22,6 +22,7 @@
 #include <gtkmm/table.h>
 #include "ardour/beats_frames_converter.h"
 #include "patch_change_dialog.h"
+#include "i18n.h"
 
 using namespace Gtk;
 

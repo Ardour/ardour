@@ -196,7 +196,7 @@ Send::set_state_2X (const XMLNode& node, int /* version */)
 		return -1;
 	}
 
-	XMLProperty const * prop = (*j)->property X_("name");
+	XMLProperty const * prop = (*j)->property (X_("name"));
 	if (!prop) {
 		return -1;
 	}

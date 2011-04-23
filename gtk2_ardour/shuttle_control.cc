@@ -31,6 +31,8 @@
 #include "ardour_ui.h"
 #include "shuttle_control.h"
 
+#include "i18n.h"
+
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;

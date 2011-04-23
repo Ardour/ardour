@@ -4,11 +4,11 @@
 #include "ardour/region.h"
 
 #include "gui_thread.h"
-#include "i18n.h"
 #include "keyboard.h"
 #include "public_editor.h"
 #include "region_layering_order_editor.h"
 #include "utils.h"
+#include "i18n.h"
 
 using namespace std;
 using namespace Gtk;

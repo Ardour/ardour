@@ -19,6 +19,7 @@
 
 #include <gtkmm/window.h>
 #include "window_proxy.h"
+#include "i18n.h"
 
 using namespace std;
 

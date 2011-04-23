@@ -20,6 +20,7 @@
 
 #include <gtkmm/stock.h>
 #include "new_plugin_preset_dialog.h"
+#include "i18n.h"
 
 using namespace std;
 using namespace Gtk;

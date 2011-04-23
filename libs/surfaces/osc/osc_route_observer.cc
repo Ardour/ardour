@@ -26,6 +26,8 @@
 #include "osc.h"
 #include "osc_route_observer.h"
 
+#include "i18n.h"
+
 #define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
 
 using namespace std;

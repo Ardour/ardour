@@ -30,6 +30,8 @@
 
 #include "pbd/error.h"
 
+#include "i18n.h"
+
 using namespace ARDOUR;
 
 PortExportChannel::PortExportChannel ()

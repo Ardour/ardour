@@ -19,6 +19,8 @@
 
 #include "ardour/unknown_processor.h"
 
+#include "i18n.h"
+
 using namespace std;
 using namespace ARDOUR;
 

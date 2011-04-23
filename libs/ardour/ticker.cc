@@ -18,6 +18,7 @@
     $Id$
 */
 
+#include "pbd/compose.h"
 #include "midi++/port.h"
 #include "midi++/manager.h"
 #include "evoral/midi_events.h"

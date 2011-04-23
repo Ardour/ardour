@@ -22,6 +22,8 @@
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
 
+#include "i18n.h"
+
 namespace ARDOUR {
 
 CapturingProcessor::CapturingProcessor (Session & session)
