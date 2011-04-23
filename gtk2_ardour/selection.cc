@@ -1088,9 +1088,9 @@ Selection::set_point_selection_from_line (AutomationLine const & line)
 			double const x_size = line.time_converter().from (line.trackview.editor().pixel_to_frame (size));
 			double const y_size = size / line.trackview.current_height ();
 			
-			double const x1 = x - x_size / 2;
+			double const x1 = max (0.0, x - x_size / 2);
 			double const x2 = x + x_size / 2;
-			double const y1 = y - y_size / 2;
+			double const y1 = max (0.0, y - y_size / 2);
 			double const y2 = y + y_size / 2;
 
 			/* extend the current AutomationRange to put this point in */
