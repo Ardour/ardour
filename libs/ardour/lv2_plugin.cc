@@ -206,6 +206,7 @@ LV2Plugin::init(LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 	}
 
 	SLV2UIs uis = slv2_plugin_get_uis(_plugin);
+	cerr << name() << " appears to have " << slv2_uis_size(uis) << endl;
 	if (slv2_uis_size(uis) > 0) {
 #if defined(HAVE_NEW_SLV2) and defined(HAVE_SUIL)
 		// Look for embeddable UI
