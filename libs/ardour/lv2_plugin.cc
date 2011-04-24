@@ -219,6 +219,7 @@ LV2Plugin::init(LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 			                         &_ui_type)) {
 				// TODO: Multiple UI support
 				_ui = this_ui;
+				cerr << name() << " got a viable GTK UI\n";
 				break;
 			} else {
 				cerr << name() << " does not support GTK UI\n";
