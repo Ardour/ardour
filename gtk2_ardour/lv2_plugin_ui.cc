@@ -194,8 +194,12 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	slv2_value_as_uri (slv2_ui_get_uri(ui));
 	cerr << "get ui_type as URI\n";
 	slv2_value_as_uri (_lv2->ui_type());
+	cerr << "get bundle as URI\n";
+	slv2_value_as_uri (slv2_ui_get_bundle_uri(ui));
+	cerr << "get binary as URI\n";
+	slv2_value_as_uri (slv2_ui_get_binary_uri(ui));
 	cerr << "Now instantiate the GUI...\n";
-
+	
 	_inst = suil_instance_new(
 		LV2PluginUI::ui_host,
 		this,
