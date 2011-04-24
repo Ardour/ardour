@@ -185,21 +185,6 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	        LV2PluginUI::lv2_ui_write, NULL, NULL, NULL);
 	}
 	SLV2UI ui = _lv2->slv2_ui();
-
-	std::cerr << "get ui_GtkUI as URI\n";
-	slv2_value_as_uri (ui_GtkUI);
-	std::cerr << "get plugin as URI\n";
-	slv2_value_as_uri (slv2_plugin_get_uri(_lv2->slv2_plugin()));
-	std::cerr << "get ui as URI\n";
-	slv2_value_as_uri (slv2_ui_get_uri(ui));
-	std::cerr << "get ui_type as URI\n";
-	slv2_value_as_uri (_lv2->ui_type());
-	std::cerr << "get bundle as URI\n";
-	slv2_value_as_uri (slv2_ui_get_bundle_uri(ui));
-	std::cerr << "get binary as URI\n";
-	slv2_value_as_uri (slv2_ui_get_binary_uri(ui));
-	std::cerr << "Now instantiate the GUI...\n";
-	
 	_inst = suil_instance_new(
 		LV2PluginUI::ui_host,
 		this,
