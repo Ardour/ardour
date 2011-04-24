@@ -206,7 +206,6 @@ LV2Plugin::init(LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 	}
 
 	SLV2UIs uis = slv2_plugin_get_uis(_plugin);
-	cerr << name() << " appears to have " << slv2_uis_size(uis) << endl;
 	if (slv2_uis_size(uis) > 0) {
 #if defined(HAVE_NEW_SLV2) and defined(HAVE_SUIL)
 		// Look for embeddable UI
@@ -219,11 +218,8 @@ LV2Plugin::init(LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 			                         &_ui_type)) {
 				// TODO: Multiple UI support
 				_ui = this_ui;
-				cerr << name() << " got a viable GTK UI\n";
 				break;
-			} else {
-				cerr << name() << " does not support GTK UI\n";
-			}
+			} 
 		}
 #else
 		// Look for Gtk native UI
@@ -270,6 +266,9 @@ LV2Plugin::~LV2Plugin ()
 bool
 LV2Plugin::is_external_ui() const
 {
+	if (!_ui) {
+		return false;
+	}
 	return slv2_ui_is_a(_ui, _world.external_gui);
 }
 
