@@ -386,7 +386,6 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 		   playback distance to zero, thus causing diskstream::commit
 		   to do nothing.
 		*/
-		cerr << name() << " Can't operate at " << transport_frame << " since roll delay is only " << _roll_delay << endl;
 		return diskstream->process (transport_frame, 0, can_record, rec_monitors_input, need_butler);
 	}
 
