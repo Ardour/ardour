@@ -2264,6 +2264,7 @@ Editor::show_verbose_duration_cursor (framepos_t start, framepos_t end, double o
 
 	switch (m) {
 	case AudioClock::BBT:
+	{
 		_session->bbt_time (start, sbbt);
 		_session->bbt_time (end, ebbt);
 
@@ -2272,22 +2273,31 @@ Editor::show_verbose_duration_cursor (framepos_t start, framepos_t end, double o
 		user makes a selection that spans any meter changes.
 		*/
 
-		ebbt.bars -= sbbt.bars;
-		if (ebbt.beats >= sbbt.beats) {
-			ebbt.beats -= sbbt.beats;
-		} else {
-			ebbt.bars--;
-			ebbt.beats =  int(meter_at_start.beats_per_bar()) + ebbt.beats - sbbt.beats;
-		}
-		if (ebbt.ticks >= sbbt.ticks) {
-			ebbt.ticks -= sbbt.ticks;
-		} else {
-			ebbt.beats--;
-			ebbt.ticks = int(Timecode::BBT_Time::ticks_per_beat) + ebbt.ticks - sbbt.ticks;
+		/* use signed integers for the working values so that
+		   we can underflow.
+		*/
+
+		int ticks = ebbt.ticks;
+		int beats = ebbt.beats;
+		int bars = ebbt.bars;
+
+		ticks -= sbbt.ticks;
+		if (ticks < 0) {
+			ticks += int (Timecode::BBT_Time::ticks_per_beat);
+			--beats;
 		}
 
-		snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32, ebbt.bars, ebbt.beats, ebbt.ticks);
+		beats -= sbbt.beats;
+		if (beats < 0) {
+			beats += int (meter_at_start.beats_per_bar());
+			--bars;
+		}
+
+		bars -= sbbt.bars;
+
+		snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32, bars, beats, ticks);
 		break;
+	}
 
 	case AudioClock::Timecode:
 		_session->timecode_duration (end - start, timecode);
