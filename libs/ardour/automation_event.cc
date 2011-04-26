@@ -320,7 +320,7 @@ AutomationList::write_pass_finished (double when)
 {
 	//if fader is in Write, we need to put an automation point to mark the last place we rolled.
 	if ( (_state & Auto_Write) ) {
-		if ( nascent.back() && !nascent.back()->events.empty() ) {
+		if ( !nascent.empty() && !nascent.back()->events.empty() ) {
 			rt_add( when, nascent.back()->events.back()->value );
 		}
 	}
