@@ -20,6 +20,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
+#include <ctime>
 
 #include <string>
 
@@ -364,6 +365,14 @@ Editor::timefx_thread (void *arg)
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
 	tsd->editor.do_timefx (*tsd);
+
+        /* GACK! HACK! sleep for a bit so that our request buffer for the GUI
+           event loop doesn't die before any changes we made are processed
+           by the GUI ...
+        */
+
+        struct timespec t = { 2, 0 };
+        nanosleep (&t, 0);
 
 	return 0;
 }
