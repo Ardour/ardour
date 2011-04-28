@@ -117,7 +117,7 @@ else
 	DEBUG="F"
 fi
 
-if [ x$DEBUG != x ]; then
+if [ x$DEBUG = xT ]; then
     BUILDTYPE="dbg"
     if [ x$STRIP = xall ] ; then
         echo "A debug build with --strip all makes no sense - STRIP reset to \"some\""

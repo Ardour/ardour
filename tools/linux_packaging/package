@@ -5,7 +5,6 @@
 # This will collect up the x86 and x86_64 bundles created by build
 # and package them together with an installer script.
 
-STRIP=1
 BUILDTYPE=""
 SINGLE_ARCH="F"
 X86_BUNDLE_OK="F"
@@ -39,7 +38,6 @@ while [ $# -gt 0 ] ; do
 		APPNAME=Ardour ;
 		shift ;;
 
-	--nostrip) STRIP= ; shift ;;
 	--singlearch) SINGLE_ARCH="T" ; shift ;;
 
 	*)
@@ -61,11 +59,7 @@ else
 fi
 
 if [ x$DEBUG != x ]; then
-	if [ x$STRIP != x ]; then
-		BUILDTYPE="strip"
-	else
-		BUILDTYPE="dbg"
-	fi
+	BUILDTYPE="dbg"
 fi
 
 release_version=`grep -m 1 '^VERSION' ../../wscript | awk '{print $3}' | sed "s/'//g"`
