@@ -210,7 +210,7 @@ LV2Plugin::init(LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 #if defined(HAVE_NEW_SLV2) and defined(HAVE_SUIL)
 		// Look for embeddable UI
 		SLV2Value ui_type = NULL;
-		SLV2_FOREACH(u, uis) {
+		SLV2_FOREACH(uis, u, uis) {
 			SLV2UI this_ui = slv2_uis_get(uis, u);
 			if (slv2_ui_is_supported(this_ui,
 			                         suil_ui_supported,
