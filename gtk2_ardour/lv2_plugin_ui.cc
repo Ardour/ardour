@@ -33,7 +33,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 #if defined(HAVE_NEW_SLV2) && defined(HAVE_SUIL)
-SuilHost  LV2PluginUI::ui_host  = NULL;
+SuilHost* LV2PluginUI::ui_host  = NULL;
 SLV2Value LV2PluginUI::ui_GtkUI = NULL;
 #endif
 
