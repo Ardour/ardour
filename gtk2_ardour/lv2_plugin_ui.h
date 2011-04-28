@@ -84,6 +84,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 #if defined(HAVE_NEW_SLV2) && defined(HAVE_SUIL)
 	static SuilHost* ui_host;
 	static SLV2Value ui_GtkUI;
+	static SLV2Value ui_external;
 
 	SuilInstance* _inst;
 #else

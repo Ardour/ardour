@@ -33,8 +33,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 #if defined(HAVE_NEW_SLV2) && defined(HAVE_SUIL)
-SuilHost* LV2PluginUI::ui_host  = NULL;
-SLV2Value LV2PluginUI::ui_GtkUI = NULL;
+SuilHost* LV2PluginUI::ui_host = NULL;
 #endif
 
 void
@@ -178,17 +177,17 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 
 #if defined(HAVE_NEW_SLV2) && defined(HAVE_SUIL)
 	if (!LV2PluginUI::ui_host) {
-		LV2PluginUI::ui_GtkUI = slv2_value_new_uri(
-			ARDOUR::PluginManager::the_manager()->lv2_world()->world,
-			"http://lv2plug.in/ns/extensions/ui#GtkUI");
 		LV2PluginUI::ui_host = suil_host_new(
 	        LV2PluginUI::lv2_ui_write, NULL, NULL, NULL);
 	}
+	LV2World* lv2_world      = ARDOUR::PluginManager::the_manager()->lv2_world();
+	SLV2Value container_type = (is_external_ui)
+		? lv2_world->external_gui : lv2_world->gtk_gui;
 	SLV2UI ui = _lv2->slv2_ui();
 	_inst = suil_instance_new(
 		LV2PluginUI::ui_host,
 		this,
-		slv2_value_as_uri(ui_GtkUI),
+		slv2_value_as_uri(container_type),
 		slv2_value_as_uri(slv2_plugin_get_uri(_lv2->slv2_plugin())),
 		slv2_value_as_uri(slv2_ui_get_uri(ui)),
 		slv2_value_as_uri(_lv2->ui_type()),

@@ -211,13 +211,15 @@ LV2Plugin::init(LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 		// Look for embeddable UI
 		SLV2Value ui_type = NULL;
 		SLV2_FOREACH(uis, u, uis) {
-			SLV2UI this_ui = slv2_uis_get(uis, u);
+			SLV2UI    this_ui      = slv2_uis_get(uis, u);
+			SLV2Value this_ui_type = NULL;
 			if (slv2_ui_is_supported(this_ui,
 			                         suil_ui_supported,
 			                         _world.gtk_gui,
-			                         &_ui_type)) {
+			                         &this_ui_type)) {
 				// TODO: Multiple UI support
-				_ui = this_ui;
+				_ui      = this_ui;
+				_ui_type = this_ui_type;
 				break;
 			} 
 		}
@@ -226,7 +228,8 @@ LV2Plugin::init(LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 		for (unsigned i = 0; i < slv2_uis_size(uis); ++i) {
 			SLV2UI ui = slv2_uis_get_at(uis, i);
 			if (slv2_ui_is_a(ui, _world.gtk_gui)) {
-				_ui = ui;
+				_ui      = ui;
+				_ui_type = _world.gtk_gui;
 				break;
 			}
 		}
@@ -238,6 +241,7 @@ LV2Plugin::init(LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 				SLV2UI ui = slv2_uis_get_at(uis, i);
 				if (slv2_ui_is_a(ui, _world.external_gui)) {
 					_ui = ui;
+					_ui_type = _world.external_gui;
 					break;
 				}
 			}
