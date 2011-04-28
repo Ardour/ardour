@@ -58,7 +58,7 @@ else
 	DEBUG="F"
 fi
 
-if [ x$DEBUG != x ]; then
+if [ x$DEBUG = xT ]; then
 	BUILDTYPE="dbg"
 fi
 
