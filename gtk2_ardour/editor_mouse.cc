@@ -60,6 +60,7 @@
 #include "edit_note_dialog.h"
 #include "mouse_cursors.h"
 #include "editor_cursors.h"
+#include "verbose_cursor.h"
 
 #include "ardour/types.h"
 #include "ardour/profile.h"
@@ -1586,8 +1587,8 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			        set_canvas_cursor (_cursors->fader);
 			}
 
-			set_verbose_canvas_cursor (cp->line().get_verbose_cursor_string (fraction), at_x, at_y);
-			show_verbose_canvas_cursor ();
+			_verbose_cursor->set (cp->line().get_verbose_cursor_string (fraction), at_x, at_y);
+			_verbose_cursor->show ();
 		}
 		break;
 
@@ -1802,7 +1803,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			set_canvas_cursor (current_canvas_cursor);
 		}
 
-		hide_verbose_canvas_cursor ();
+		_verbose_cursor->hide ();
 		break;
 
 	case RegionViewNameHighlight:
@@ -2179,156 +2180,6 @@ Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 			}
 		}
 	}
-}
-
-void
-Editor::show_verbose_time_cursor (framepos_t frame, double offset, double xpos, double ypos)
-{
-	char buf[128];
-	Timecode::Time timecode;
-	Timecode::BBT_Time bbt;
-	int hours, mins;
-	framepos_t frame_rate;
-	float secs;
-
-	if (_session == 0) {
-		return;
-	}
-
-	AudioClock::Mode m;
-
-	if (Profile->get_sae() || Profile->get_small_screen()) {
-		m = ARDOUR_UI::instance()->primary_clock.mode();
-	} else {
-		m = ARDOUR_UI::instance()->secondary_clock.mode();
-	}
-
-	switch (m) {
-	case AudioClock::BBT:
-		_session->bbt_time (frame, bbt);
-		snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32, bbt.bars, bbt.beats, bbt.ticks);
-		break;
-
-	case AudioClock::Timecode:
-		_session->timecode_time (frame, timecode);
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
-		break;
-
-	case AudioClock::MinSec:
-		/* XXX this is copied from show_verbose_duration_cursor() */
-		frame_rate = _session->frame_rate();
-		hours = frame / (frame_rate * 3600);
-		frame = frame % (frame_rate * 3600);
-		mins = frame / (frame_rate * 60);
-		frame = frame % (frame_rate * 60);
-		secs = (float) frame / (float) frame_rate;
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%07.4f", hours, mins, secs);
-		break;
-
-	default:
-		snprintf (buf, sizeof(buf), "%" PRIi64, frame);
-		break;
-	}
-
-	if (xpos >= 0 && ypos >=0) {
-		set_verbose_canvas_cursor (buf, xpos + offset, ypos + offset);
-	} else {
-		set_verbose_canvas_cursor (buf, _drags->current_pointer_x() + offset - horizontal_position(), _drags->current_pointer_y() + offset - vertical_adjustment.get_value() + canvas_timebars_vsize);
-	}
-	show_verbose_canvas_cursor ();
-}
-
-void
-Editor::show_verbose_duration_cursor (framepos_t start, framepos_t end, double offset, double xpos, double ypos)
-{
-	char buf[128];
-	Timecode::Time timecode;
-	Timecode::BBT_Time sbbt;
-	Timecode::BBT_Time ebbt;
-	int hours, mins;
-	framepos_t distance, frame_rate;
-	float secs;
-	Meter meter_at_start(_session->tempo_map().meter_at(start));
-
-	if (_session == 0) {
-		return;
-	}
-
-	AudioClock::Mode m;
-
-	if (Profile->get_sae() || Profile->get_small_screen()) {
-		m = ARDOUR_UI::instance()->primary_clock.mode ();
-	} else {
-		m = ARDOUR_UI::instance()->secondary_clock.mode ();
-	}
-
-	switch (m) {
-	case AudioClock::BBT:
-	{
-		_session->bbt_time (start, sbbt);
-		_session->bbt_time (end, ebbt);
-
-		/* subtract */
-		/* XXX this computation won't work well if the
-		user makes a selection that spans any meter changes.
-		*/
-
-		/* use signed integers for the working values so that
-		   we can underflow.
-		*/
-
-		int ticks = ebbt.ticks;
-		int beats = ebbt.beats;
-		int bars = ebbt.bars;
-
-		ticks -= sbbt.ticks;
-		if (ticks < 0) {
-			ticks += int (Timecode::BBT_Time::ticks_per_beat);
-			--beats;
-		}
-
-		beats -= sbbt.beats;
-		if (beats < 0) {
-			beats += int (meter_at_start.beats_per_bar());
-			--bars;
-		}
-
-		bars -= sbbt.bars;
-
-		snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32, bars, beats, ticks);
-		break;
-	}
-
-	case AudioClock::Timecode:
-		_session->timecode_duration (end - start, timecode);
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
-		break;
-
-	case AudioClock::MinSec:
-		/* XXX this stuff should be elsewhere.. */
-		distance = end - start;
-		frame_rate = _session->frame_rate();
-		hours = distance / (frame_rate * 3600);
-		distance = distance % (frame_rate * 3600);
-		mins = distance / (frame_rate * 60);
-		distance = distance % (frame_rate * 60);
-		secs = (float) distance / (float) frame_rate;
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%07.4f", hours, mins, secs);
-		break;
-
-	default:
-		snprintf (buf, sizeof(buf), "%" PRIi64, end - start);
-		break;
-	}
-
-	if (xpos >= 0 && ypos >=0) {
-		set_verbose_canvas_cursor (buf, xpos + offset, ypos + offset);
-	}
-	else {
-		set_verbose_canvas_cursor (buf, _drags->current_pointer_x() + offset, _drags->current_pointer_y() + offset);
-	}
-
-	show_verbose_canvas_cursor ();
 }
 
 void
@@ -2793,4 +2644,13 @@ Editor::set_canvas_cursor_for_region_view (double x, RegionView* rv)
 			set_canvas_cursor (_cursors->right_side_trim_left_only);
 		}
 	}
+}
+
+/** Obtain the pointer position in world coordinates */
+void
+Editor::get_pointer_position (double& x, double& y) const
+{
+	int px, py;
+	track_canvas->get_pointer (px, py);
+	track_canvas->window_to_world (px, py, x, y);
 }

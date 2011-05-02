@@ -69,6 +69,7 @@
 #include "utils.h"
 #include "mouse_cursors.h"
 #include "patch_change_dialog.h"
+#include "verbose_cursor.h"
 
 #include "i18n.h"
 
@@ -358,7 +359,7 @@ MidiRegionView::leave_notify (GdkEventCrossing*)
 {
 	_mouse_mode_connection.disconnect ();
 	
-        trackview.editor().hide_verbose_canvas_cursor ();
+        trackview.editor().verbose_cursor()->hide ();
 	remove_ghost_note ();
         return false;
 }
@@ -370,7 +371,7 @@ MidiRegionView::mouse_mode_changed ()
 		create_ghost_note (_last_event_x, _last_event_y);
 	} else {
 		remove_ghost_note ();
-		trackview.editor().hide_verbose_canvas_cursor ();
+		trackview.editor().verbose_cursor()->hide ();
 	}
 }
 
@@ -529,7 +530,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 		delete _ghost_note;
                 _ghost_note = 0;
 		
-		trackview.editor().hide_verbose_canvas_cursor ();
+		trackview.editor().verbose_cursor()->hide ();
 	}
 	else if (_ghost_note && trackview.editor().current_mouse_mode() == MouseRange) {
                 update_ghost_note (ev->x, ev->y);
@@ -608,7 +609,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 				delete _ghost_note;
 				_ghost_note = 0;
 		
-				trackview.editor().hide_verbose_canvas_cursor ();
+				trackview.editor().verbose_cursor()->hide ();
 			}
 
                         return true;
@@ -675,7 +676,7 @@ MidiRegionView::scroll (GdkEventScroll* ev)
                 return false;
         }
 
-	trackview.editor().hide_verbose_canvas_cursor ();
+	trackview.editor().verbose_cursor()->hide ();
 
         bool fine = !Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier);
         
@@ -1168,7 +1169,7 @@ MidiRegionView::~MidiRegionView ()
 {
 	in_destructor = true;
 
-	trackview.editor().hide_verbose_canvas_cursor ();
+	trackview.editor().verbose_cursor()->hide ();
 
         note_delete_connection.disconnect ();
 
@@ -1819,7 +1820,7 @@ MidiRegionView::delete_note (boost::shared_ptr<NoteType> n)
 	_note_diff_command->remove (n);
 	apply_diff ();
 
-	trackview.editor().hide_verbose_canvas_cursor ();
+	trackview.editor().verbose_cursor()->hide ();
 }
 
 void
@@ -2395,7 +2396,7 @@ MidiRegionView::update_resizing (ArdourCanvas::CanvasNoteEvent* primary, bool at
 
                         char buf[16];
                         snprintf (buf, sizeof (buf), "%.3g beats", len);
-                        trackview.editor().show_verbose_canvas_cursor_with (buf);
+                        show_verbose_cursor (buf, 0, 0);
 
                         cursor_set = true;
                 }
@@ -2643,7 +2644,7 @@ MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush)
                 char buf[24];
                 snprintf (buf, sizeof (buf), "Vel %d", 
                           (int) (*_selection.begin())->note()->velocity());
-                trackview.editor().show_verbose_canvas_cursor_with (buf, 10, 10);
+                show_verbose_cursor (buf, 10, 10);
         }
 }
 
@@ -2819,7 +2820,7 @@ MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 		note_selected (ev, true);
 	}
 
-	show_verbose_canvas_cursor (ev->note ());
+	show_verbose_cursor (ev->note ());
 }
 
 void
@@ -2831,7 +2832,7 @@ MidiRegionView::note_left (ArdourCanvas::CanvasNoteEvent*)
 		(*i)->hide_velocity ();
 	}
 
-	editor->hide_verbose_canvas_cursor ();
+	editor->verbose_cursor()->hide ();
 
         if (pre_enter_cursor) {
                 editor->set_canvas_cursor (pre_enter_cursor);
@@ -2844,13 +2845,13 @@ MidiRegionView::patch_entered (ArdourCanvas::CanvasPatchChange* ev)
 {
 	ostringstream s;
 	s << ((int) ev->patch()->program() + 1) << ":" << (ev->patch()->bank() + 1);
-	trackview.editor().show_verbose_canvas_cursor_with (s.str().c_str(), 10, 20);
+	show_verbose_cursor (s.str(), 10, 20);
 }
 
 void
 MidiRegionView::patch_left (ArdourCanvas::CanvasPatchChange *)
 {
-	trackview.editor().hide_verbose_canvas_cursor ();
+	trackview.editor().verbose_cursor()->hide ();
 }
 
 void
@@ -3169,7 +3170,7 @@ MidiRegionView::update_ghost_note (double x, double y)
 	/* the ghost note does not appear in ghost regions, so pass false in here */
 	update_note (_ghost_note, false);
 
-	show_verbose_canvas_cursor (_ghost_note->note ());
+	show_verbose_cursor (_ghost_note->note ());
 }
 
 void
@@ -3187,7 +3188,7 @@ MidiRegionView::create_ghost_note (double x, double y)
 	_last_ghost_x = x;
 	_last_ghost_y = y;
 
-	show_verbose_canvas_cursor (_ghost_note->note ());
+	show_verbose_cursor (_ghost_note->note ());
 }
 
 void
@@ -3198,18 +3199,6 @@ MidiRegionView::snap_changed ()
 	}
 	
 	create_ghost_note (_last_ghost_x, _last_ghost_y);
-}
-
-void
-MidiRegionView::show_verbose_canvas_cursor (boost::shared_ptr<NoteType> n) const
-{
-	char buf[24];
-	snprintf (buf, sizeof (buf), "%s (%d) Chn %d\nVel %d", 
-                  Evoral::midi_note_name (n->note()).c_str(), 
-                  (int) n->note (),
-		  (int) n->channel() + 1,
-                  (int) n->velocity());
-	trackview.editor().show_verbose_canvas_cursor_with (buf, 10, 20);
 }
 
 void
@@ -3437,4 +3426,32 @@ MidiRegionView::edit_patch_change (ArdourCanvas::CanvasPatchChange* pc)
 	}
 
 	change_patch_change (pc->patch(), d.patch ());
+}
+
+
+void
+MidiRegionView::show_verbose_cursor (boost::shared_ptr<NoteType> n) const
+{
+	char buf[24];
+	snprintf (buf, sizeof (buf), "%s (%d) Chn %d\nVel %d", 
+                  Evoral::midi_note_name (n->note()).c_str(), 
+                  (int) n->note (),
+		  (int) n->channel() + 1,
+                  (int) n->velocity());
+	
+	show_verbose_cursor (buf, 10, 20);
+}
+
+void
+MidiRegionView::show_verbose_cursor (string const & text, double xoffset, double yoffset) const
+{
+	double wx, wy;
+
+	trackview.editor().get_pointer_position (wx, wy);
+
+	wx += xoffset;
+	wy += yoffset;
+
+	trackview.editor().verbose_cursor()->set (text, wx, wy);
+	trackview.editor().verbose_cursor()->show ();
 }

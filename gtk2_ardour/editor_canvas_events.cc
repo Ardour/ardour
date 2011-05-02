@@ -47,6 +47,7 @@
 #include "editor_drag.h"
 #include "midi_time_axis.h"
 #include "editor_regions.h"
+#include "verbose_cursor.h"
 
 #include "i18n.h"
 
@@ -178,9 +179,8 @@ Editor::track_canvas_motion_notify_event (GdkEventMotion */*event*/)
 bool
 Editor::track_canvas_motion (GdkEvent *ev)
 {
-	if (verbose_cursor_visible) {
-		verbose_canvas_cursor->property_x() = clamp_verbose_cursor_x (ev->motion.x + 10);
-		verbose_canvas_cursor->property_y() = clamp_verbose_cursor_y (ev->motion.y + 10);
+	if (_verbose_cursor->visible ()) {
+		_verbose_cursor->set_position (ev->motion.x + 10, ev->motion.y + 10);
 	}
 
 	return false;

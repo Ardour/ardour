@@ -87,6 +87,7 @@ class ImageFrameTimeAxis;
 class MarkerView;
 class DragManager;
 class MouseCursors;
+class VerboseCursor;
 
 using ARDOUR::framepos_t;
 using ARDOUR::framecnt_t;
@@ -361,9 +362,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	virtual TimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const = 0;
 
-	virtual void show_verbose_canvas_cursor_with (const std::string& txt, int32_t xoffset = 0, int32_t yoffset = 0) = 0;
-	virtual void hide_verbose_canvas_cursor() = 0;
-
         virtual void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>) = 0;
         virtual void set_current_movable (boost::shared_ptr<ARDOUR::Movable>) = 0;
 
@@ -380,7 +378,10 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual void stop_canvas_autoscroll () = 0;
 
 	virtual MouseCursors const * cursors () const = 0;
+	virtual VerboseCursor * verbose_cursor () const = 0;
 
+	virtual void get_pointer_position (double &, double &) const = 0;
+	
 	/// Singleton instance, set up by Editor::Editor()
 
 	static PublicEditor* _instance;

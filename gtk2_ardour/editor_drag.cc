@@ -54,6 +54,7 @@
 #include "debug.h"
 #include "editor_cursors.h"
 #include "mouse_cursors.h"
+#include "verbose_cursor.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -273,7 +274,7 @@ Drag::end_grab (GdkEvent* event)
 
 	finished (event, _move_threshold_passed);
 
-	_editor->hide_verbose_canvas_cursor();
+	_editor->verbose_cursor()->hide ();
 
 	return _move_threshold_passed;
 }
@@ -352,8 +353,45 @@ Drag::abort ()
 	aborted (_move_threshold_passed);
 
 	_editor->stop_canvas_autoscroll ();
-	_editor->hide_verbose_canvas_cursor ();
+	_editor->verbose_cursor()->hide ();
 }
+
+void
+Drag::show_verbose_cursor_time (framepos_t frame)
+{
+	_editor->verbose_cursor()->set_time (
+		frame,
+		_drags->current_pointer_x() + 10 - _editor->horizontal_position(),
+		_drags->current_pointer_y() + 10 - _editor->vertical_adjustment.get_value() + _editor->canvas_timebars_vsize
+		);
+
+	_editor->verbose_cursor()->show ();
+}
+
+void
+Drag::show_verbose_cursor_duration (framepos_t start, framepos_t end)
+{
+	_editor->verbose_cursor()->set_duration (
+		start, end,
+		_drags->current_pointer_x() + 10 - _editor->horizontal_position(),
+		_drags->current_pointer_y() + 10 - _editor->vertical_adjustment.get_value() + _editor->canvas_timebars_vsize
+		);
+
+	_editor->verbose_cursor()->show ();
+}
+
+void
+Drag::show_verbose_cursor_text (string const & text)
+{
+	_editor->verbose_cursor()->set (
+		text,
+		_drags->current_pointer_x() + 10 - _editor->horizontal_position(),
+		_drags->current_pointer_y() + 10 - _editor->vertical_adjustment.get_value() + _editor->canvas_timebars_vsize
+		);
+
+	_editor->verbose_cursor()->show ();
+}
+
 
 struct EditorOrderTimeAxisViewSorter {
     bool operator() (TimeAxisView* a, TimeAxisView* b) {
@@ -441,7 +479,7 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	_editor->show_verbose_time_cursor (_last_frame_position, 10);
+	show_verbose_cursor_time (_last_frame_position);
 
 	pair<TimeAxisView*, int> const tv = _editor->trackview_by_y_position (_drags->current_pointer_y ());
 	_last_pointer_time_axis_view = find_time_axis_view (tv.first);
@@ -551,7 +589,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	/* Bail early if we're not over a track */
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv.first);
 	if (!rtv || !rtv->is_track()) {
-		_editor->hide_verbose_canvas_cursor ();
+		_editor->verbose_cursor()->hide ();
 		return;
 	}
 
@@ -693,7 +731,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	if (x_delta != 0 && !_brushing) {
-		_editor->show_verbose_time_cursor (_last_frame_position, 10);
+		show_verbose_cursor_time (_last_frame_position);
 	}
 
 	_last_pointer_time_axis_view += delta_time_axis_view;
@@ -1284,7 +1322,7 @@ RegionSpliceDrag::motion (GdkEvent* event, bool)
 		/* To make sure we hide the verbose canvas cursor when the mouse is
 		   not held over and audiotrack.
 		*/
-		_editor->hide_verbose_canvas_cursor ();
+		_editor->verbose_cursor()->hide ();
 		return;
 	}
 
@@ -1576,16 +1614,16 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 
 	switch (_operation) {
 	case StartTrim:
-		_editor->show_verbose_time_cursor (region_start, 10);
+		show_verbose_cursor_time (region_start);
 		for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 			i->view->trim_front_starting ();
 		}
 		break;
 	case EndTrim:
-		_editor->show_verbose_time_cursor (region_end, 10);
+		show_verbose_cursor_time (region_end);
 		break;
 	case ContentsTrim:
-		_editor->show_verbose_time_cursor (pf, 10);
+		show_verbose_cursor_time (pf);
 		break;
 	}
 
@@ -1698,13 +1736,13 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	switch (_operation) {
 	case StartTrim:
-		_editor->show_verbose_time_cursor ((framepos_t) (rv->region()->position() / speed), 10);
+		show_verbose_cursor_time ((framepos_t) (rv->region()->position() / speed));
 		break;
 	case EndTrim:
-		_editor->show_verbose_time_cursor ((framepos_t) (rv->region()->last_frame() / speed), 10);
+		show_verbose_cursor_time ((framepos_t) (rv->region()->last_frame() / speed));
 		break;
 	case ContentsTrim:
-		_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
+		show_verbose_cursor_time (adjusted_current_frame (event));
 		break;
 	}
 }
@@ -1857,7 +1895,7 @@ MeterMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	Drag::start_grab (event, cursor);
 
-	_editor->show_verbose_time_cursor (adjusted_current_frame(event), 10);
+	show_verbose_cursor_time (adjusted_current_frame(event));
 }
 
 void
@@ -1873,7 +1911,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool)
 
 	_marker->set_position (pf);
 	
-	_editor->show_verbose_time_cursor (pf, 10);
+	show_verbose_cursor_time (pf);
 }
 
 void
@@ -1952,7 +1990,7 @@ TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	Drag::start_grab (event, cursor);
 
-	_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
+	show_verbose_cursor_time (adjusted_current_frame (event));
 }
 
 void
@@ -1966,7 +2004,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool)
 {
 	framepos_t const pf = adjusted_current_frame (event);
 	_marker->set_position (pf);
-	_editor->show_verbose_time_cursor (pf, 10);
+	show_verbose_cursor_time (pf);
 }
 
 void
@@ -2033,7 +2071,7 @@ CursorDrag::fake_locate (framepos_t t)
 		s->send_full_time_code (f);
 	}
 
-	_editor->show_verbose_time_cursor (t, 10);
+	show_verbose_cursor_time (t);
 	_editor->UpdateAllTransportClocks (t);
 }
 
@@ -2127,7 +2165,7 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> const r = arv->audio_region ();
 
-	_editor->show_verbose_duration_cursor (r->position(), r->position() + r->fade_in()->back()->when, 10);
+	show_verbose_cursor_duration (r->position(), r->position() + r->fade_in()->back()->when);
 	
 	arv->show_fade_line((framepos_t) r->fade_in()->back()->when);
 }
@@ -2169,7 +2207,7 @@ FadeInDrag::motion (GdkEvent* event, bool)
 		tmp->show_fade_line((framecnt_t) fade_length);
 	}
 
-	_editor->show_verbose_duration_cursor (region->position(), region->position() + fade_length, 10);
+	show_verbose_cursor_duration (region->position(), region->position() + fade_length);
 }
 
 void
@@ -2246,7 +2284,7 @@ FadeOutDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> r = arv->audio_region ();
 
-	_editor->show_verbose_duration_cursor (r->last_frame() - r->fade_out()->back()->when, r->last_frame(), 10);
+	show_verbose_cursor_duration (r->last_frame() - r->fade_out()->back()->when, r->last_frame());
 	
 	arv->show_fade_line(r->length() - r->fade_out()->back()->when);
 }
@@ -2290,7 +2328,7 @@ FadeOutDrag::motion (GdkEvent* event, bool)
 		tmp->show_fade_line(region->length() - fade_length);
 	}
 
-	_editor->show_verbose_duration_cursor (region->last_frame() - fade_length, region->last_frame(), 10);
+	show_verbose_cursor_duration (region->last_frame() - fade_length, region->last_frame());
 }
 
 void
@@ -2390,9 +2428,9 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	// _line->raise_to_top();
 
 	if (is_start) {
-		_editor->show_verbose_time_cursor (location->start(), 10);
+		show_verbose_cursor_time (location->start());
 	} else {
-		_editor->show_verbose_time_cursor (location->end(), 10);
+		show_verbose_cursor_time (location->end());
 	}
 
 	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
@@ -2596,7 +2634,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 	assert (!_copied_locations.empty());
 
-	_editor->show_verbose_time_cursor (newframe, 10);
+	show_verbose_cursor_time (newframe);
 
 #ifdef GTKOSX
 	_editor->update_canvas_now ();
@@ -2702,10 +2740,10 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	_point->line().start_drag_single (_point, _fixed_grab_x, fraction);
 
-	_editor->set_verbose_canvas_cursor (_point->line().get_verbose_cursor_string (fraction),
-					    event->button.x + 10, event->button.y + 10);
+	_editor->verbose_cursor()->set (_point->line().get_verbose_cursor_string (fraction),
+					event->button.x + 10, event->button.y + 10);
 
-	_editor->show_verbose_canvas_cursor ();
+	_editor->verbose_cursor()->show ();
 }
 
 void
@@ -2761,7 +2799,7 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 
 	_point->line().drag_motion (_editor->frame_to_unit (cx_frames), fraction, false, push);
 
-	_editor->set_verbose_canvas_cursor_text (_point->line().get_verbose_cursor_string (fraction));
+	_editor->verbose_cursor()->set_text (_point->line().get_verbose_cursor_string (fraction));
 }
 
 void
@@ -2847,10 +2885,10 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	_line->start_drag_line (before, after, fraction);
 
-	_editor->set_verbose_canvas_cursor (_line->get_verbose_cursor_string (fraction),
-					    event->button.x + 10, event->button.y + 10);
+	_editor->verbose_cursor()->set (_line->get_verbose_cursor_string (fraction),
+					event->button.x + 10, event->button.y + 10);
 
-	_editor->show_verbose_canvas_cursor ();
+	_editor->verbose_cursor()->show ();
 }
 
 void
@@ -2882,7 +2920,7 @@ LineDrag::motion (GdkEvent* event, bool)
 	/* we are ignoring x position for this drag, so we can just pass in anything */
 	_line->drag_motion (0, fraction, true, push);
 
-	_editor->set_verbose_canvas_cursor_text (_line->get_verbose_cursor_string (fraction));
+	_editor->verbose_cursor()->set_text (_line->get_verbose_cursor_string (fraction));
 }
 
 void
@@ -2992,7 +3030,7 @@ void
 RubberbandSelectDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	Drag::start_grab (event);
-	_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
+	show_verbose_cursor_time (adjusted_current_frame (event));
 }
 
 void
@@ -3042,7 +3080,7 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 		_editor->rubberband_rect->show();
 		_editor->rubberband_rect->raise_to_top();
 
-		_editor->show_verbose_time_cursor (pf, 10);
+		show_verbose_cursor_time (pf);
 	}
 }
 
@@ -3104,7 +3142,7 @@ TimeFXDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
+	show_verbose_cursor_time (adjusted_current_frame (event));
 }
 
 void
@@ -3118,7 +3156,7 @@ TimeFXDrag::motion (GdkEvent* event, bool)
 		rv->get_time_axis_view().show_timestretch (rv->region()->position(), pf);
 	}
 
-	_editor->show_verbose_time_cursor (pf, 10);
+	show_verbose_cursor_time (pf);
 }
 
 void
@@ -3247,9 +3285,9 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	}
 
 	if (_operation == SelectionMove) {
-		_editor->show_verbose_time_cursor (_editor->selection->time[_editor->clicked_selection].start, 10);
+		show_verbose_cursor_time (_editor->selection->time[_editor->clicked_selection].start);
 	} else {
-		_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
+		show_verbose_cursor_time (adjusted_current_frame (event));
 	}
 
 	_original_pointer_time_axis = _editor->trackview_by_y_position (_drags->current_pointer_y ()).first->order ();
@@ -3415,9 +3453,9 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	if (_operation == SelectionMove) {
-		_editor->show_verbose_time_cursor(start, 10);
+		show_verbose_cursor_time(start);
 	} else {
-		_editor->show_verbose_time_cursor(pending_position, 10);
+		show_verbose_cursor_time(pending_position);
 	}
 }
 
@@ -3509,7 +3547,7 @@ RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 
 	Drag::start_grab (event, cursor);
 
-	_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
+	show_verbose_cursor_time (adjusted_current_frame (event));
 }
 
 void
@@ -3581,7 +3619,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 		update_item (_editor->temp_location);
 	}
 
-	_editor->show_verbose_time_cursor (pf, 10);
+	show_verbose_cursor_time (pf);
 
 }
 
@@ -3699,7 +3737,7 @@ MouseZoomDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 		_zoom_out = false;
 	}
 		
-	_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
+	show_verbose_cursor_time (adjusted_current_frame (event));
 }
 
 void
@@ -3731,7 +3769,7 @@ MouseZoomDrag::motion (GdkEvent* event, bool first_move)
 
 		_editor->reposition_zoom_rect(start, end);
 
-		_editor->show_verbose_time_cursor (pf, 10);
+		show_verbose_cursor_time (pf);
 	}
 }
 
@@ -3866,7 +3904,7 @@ NoteDrag::motion (GdkEvent *, bool)
 		snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (_primary->note()->note() + note_delta).c_str(),
 		          (int) floor (_primary->note()->note() + note_delta));
                 
-		_editor->show_verbose_canvas_cursor_with (buf);
+		show_verbose_cursor_text (buf);
 	}
 }
 

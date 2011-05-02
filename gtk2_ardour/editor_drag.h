@@ -212,6 +212,10 @@ protected:
 		return _last_pointer_frame;
 	}
 
+	void show_verbose_cursor_time (framepos_t);
+	void show_verbose_cursor_duration (framepos_t, framepos_t);
+	void show_verbose_cursor_text (std::string const &);
+
 	Editor* _editor; ///< our editor
 	DragManager* _drags;
 	ArdourCanvas::Item* _item; ///< our item

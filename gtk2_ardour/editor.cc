@@ -331,7 +331,6 @@ Editor::Editor ()
 	current_interthread_info = 0;
 	_show_measures = true;
 	show_gain_after_trim = false;
-	verbose_cursor_on = true;
 	last_item_entered = 0;
 
 	have_pending_keyboard_selection = false;
@@ -3275,79 +3274,6 @@ Editor::duplicate_dialog (bool with_dialog)
 	} else {
 		duplicate_some_regions (rs, times);
 	}
-}
-
-void
-Editor::show_verbose_canvas_cursor ()
-{
-	verbose_canvas_cursor->raise_to_top();
-	verbose_canvas_cursor->show();
-	verbose_cursor_visible = true;
-}
-
-void
-Editor::hide_verbose_canvas_cursor ()
-{
-	verbose_canvas_cursor->hide();
-	verbose_cursor_visible = false;
-}
-
-double
-Editor::clamp_verbose_cursor_x (double x)
-{
-	if (x < 0) {
-		x = 0;
-	} else {
-		x = min (_canvas_width - 200.0, x);
-	}
-	return x;
-}
-
-double
-Editor::clamp_verbose_cursor_y (double y)
-{
-	if (y < canvas_timebars_vsize) {
-		y = canvas_timebars_vsize;
-	} else {
-		y = min (_canvas_height - 50, y);
-	}
-	return y;
-}
-
-void
-Editor::show_verbose_canvas_cursor_with (const string & txt, int32_t xoffset, int32_t yoffset)
-{
-	verbose_canvas_cursor->property_text() = txt.c_str();
-
-	int x, y;
-	double wx, wy;
-
-	track_canvas->get_pointer (x, y);
-	track_canvas->window_to_world (x, y, wx, wy);
-
-	wx += xoffset;
-	wy += yoffset;
-
-	/* don't get too close to the edge */
-	verbose_canvas_cursor->property_x() = clamp_verbose_cursor_x (wx);
-	verbose_canvas_cursor->property_y() = clamp_verbose_cursor_y (wy);
-
-	show_verbose_canvas_cursor ();
-}
-
-void
-Editor::set_verbose_canvas_cursor (const string & txt, double x, double y)
-{
-	verbose_canvas_cursor->property_text() = txt.c_str();
-	/* don't get too close to the edge */
-	verbose_canvas_cursor->property_x() = clamp_verbose_cursor_x (x);
-	verbose_canvas_cursor->property_y() = clamp_verbose_cursor_y (y);
-}
-
-void
-Editor::set_verbose_canvas_cursor_text (const string & txt)
-{
-	verbose_canvas_cursor->property_text() = txt.c_str();
 }
 
 void

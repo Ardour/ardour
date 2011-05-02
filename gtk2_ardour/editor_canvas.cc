@@ -54,6 +54,7 @@
 #include "keyboard.h"
 #include "editor_cursors.h"
 #include "mouse_cursors.h"
+#include "verbose_cursor.h"
 
 #include "i18n.h"
 
@@ -116,18 +117,8 @@ Editor::initialize_canvas ()
         gint phys_width = physical_screen_width (Glib::RefPtr<Gdk::Window>());
         gint phys_height = physical_screen_height (Glib::RefPtr<Gdk::Window>());
 
-	/* stuff for the verbose canvas cursor */
-
-	Pango::FontDescription* font = get_font_for_style (N_("VerboseCanvasCursor"));
-
-	verbose_canvas_cursor = new ArdourCanvas::NoEventText (*track_canvas->root());
-	verbose_canvas_cursor->property_font_desc() = *font;
-	verbose_canvas_cursor->property_anchor() = ANCHOR_NW;
-
-	delete font;
-
-	verbose_cursor_visible = false;
-
+	_verbose_cursor = new VerboseCursor (this);
+	
 	/* on the bottom, an image */
 
 	if (Profile->get_sae()) {
@@ -774,7 +765,7 @@ void
 Editor::color_handler()
 {
 	playhead_cursor->canvas_item.property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_PlayHead.get();
-	verbose_canvas_cursor->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_VerboseCanvasCursor.get();
+	_verbose_cursor->set_color (ARDOUR_UI::config()->canvasvar_VerboseCanvasCursor.get());
 
 	meter_bar->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MeterBar.get();
 	meter_bar->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerBarSeparator.get();
