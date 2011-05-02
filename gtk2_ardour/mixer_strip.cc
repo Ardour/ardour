@@ -622,6 +622,12 @@ MixerStrip::set_packed (bool yn)
 }
 
 
+struct RouteCompareByName {
+	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
+		return a->name().compare (b->name()) < 0;
+	}
+};
+
 gint
 MixerStrip::output_press (GdkEventButton *ev)
 {
@@ -667,7 +673,9 @@ MixerStrip::output_press (GdkEventButton *ev)
 		}
 		
 		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
-		for (ARDOUR::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+		RouteList copy = *routes;
+		copy.sort (RouteCompareByName ());
+		for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
 			maybe_add_bundle_to_output_menu ((*i)->input()->bundle(), current);
 		}
 
@@ -777,7 +785,9 @@ MixerStrip::input_press (GdkEventButton *ev)
 		}
 		
 		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
-		for (ARDOUR::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+		RouteList copy = *routes;
+		copy.sort (RouteCompareByName ());
+		for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
 			maybe_add_bundle_to_input_menu ((*i)->output()->bundle(), current);
 		}
 
