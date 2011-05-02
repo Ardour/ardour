@@ -445,7 +445,7 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 			double y = floor(_view.note_to_y(i)) - 0.5f;
 			double note_height = floor(_view.note_to_y(i - 1)) - y;
 
-			int cn = i / 12;
+			int cn = i / 12 - 1;
 			s << "C" << cn;
 
 			//cr->get_text_extents(s.str(), te);
