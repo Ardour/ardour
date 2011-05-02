@@ -2948,10 +2948,11 @@ ARDOUR_UI::display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* lis
 
 	if (removed == 0) {
 		MessageDialog msgd (*editor,
-				    _("No files were ready for cleanup"),
+				    _("No files were ready for clean-up"),
 				    true,
 				    Gtk::MESSAGE_INFO,
 				    (Gtk::ButtonsType)(Gtk::BUTTONS_OK)  );
+		msgd.set_title (_("Clean-up"));
 		msgd.set_secondary_text (_("If this seems suprising, \n\
 check for any existing snapshots.\n\
 These may still include regions that\n\
@@ -3073,17 +3074,19 @@ ARDOUR_UI::cleanup ()
 	}
 
 
-	MessageDialog  checker (_("Are you sure you want to cleanup?"),
+	MessageDialog checker (_("Are you sure you want to clean-up?"),
 				true,
 				Gtk::MESSAGE_QUESTION,
 				(Gtk::ButtonsType)(Gtk::BUTTONS_NONE));
 
-	checker.set_secondary_text(_("Cleanup is a destructive operation.\n\
-ALL undo/redo information will be lost if you cleanup.\n\
-Cleanup will move all unused files to a \"dead\" location."));
+	checker.set_title (_("Clean-up"));
+	
+	checker.set_secondary_text(_("Clean-up is a destructive operation.\n\
+ALL undo/redo information will be lost if you clean-up.\n\
+Clean-up will move all unused files to a \"dead\" location."));
 
 	checker.add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	checker.add_button (_("Clean Up"), RESPONSE_ACCEPT);
+	checker.add_button (_("Clean-up"), RESPONSE_ACCEPT);
 	checker.set_default_response (RESPONSE_CANCEL);
 
 	checker.set_name (_("CleanupDialog"));
@@ -3117,21 +3120,21 @@ Cleanup will move all unused files to a \"dead\" location."));
 
 	checker.hide();
 	display_cleanup_results (rep,
-				 _("cleaned files"),
+				 _("Cleaned Files"),
 				 _("\
 The following %1 files were not in use and \n\
 have been moved to:\n\n\
 %2\n\n\
 After a restart of Ardour,\n\n\
-Session -> Cleanup -> Flush Wastebasket\n\n\
+Session -> Clean-up -> Flush Wastebasket\n\n\
 will release an additional\n\
 %3 %4bytes of disk space.\n"),
 				 _("\
-The following file was not in use and \n	\
+The following file was not in use and \n\
 has been moved to:\n				\
 %2\n\n\
 After a restart of Ardour,\n\n\
-Session -> Cleanup -> Flush Wastebasket\n\n\
+Session -> Clean-up -> Flush Wastebasket\n\n\
 will release an additional\n\
 %3 %4bytes of disk space.\n"
 					 ));

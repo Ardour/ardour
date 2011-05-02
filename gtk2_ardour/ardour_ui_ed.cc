@@ -98,7 +98,7 @@ ARDOUR_UI::install_actions ()
 	/* menus + submenus that need action items */
 
 	ActionManager::register_action (main_actions, X_("Session"), _("Session"));
-	act = ActionManager::register_action (main_actions, X_("Cleanup"), _("Cleanup"));
+	act = ActionManager::register_action (main_actions, X_("Cleanup"), _("Clean-up"));
 	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::register_action (main_actions, X_("Sync"), _("Sync"));
 	ActionManager::register_action (main_actions, X_("TransportOptions"), _("Options"));
@@ -168,7 +168,7 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("Export"), _("Export"));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("CleanupUnused"), _("Cleanup Unused Sources..."),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
+	act = ActionManager::register_action (main_actions, X_("CleanupUnused"), _("Clean-up Unused Sources..."),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 

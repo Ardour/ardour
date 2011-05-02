@@ -3833,8 +3833,8 @@ Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
 {
 	ArdourDialog dialog (_("Playlist Deletion"));
 	Label  label (string_compose (_("Playlist %1 is currently unused.\n"
-					"If left alone, no audio files used by it will be cleaned.\n"
-					"If deleted, audio files used by it alone by will cleaned."),
+					"If it is kept, its audio files will not be cleaned.\n"
+					"If it is deleted, audio files used by it alone will be cleaned."),
 				      pl->name()));
 
 	dialog.set_position (WIN_POS_CENTER);
@@ -3842,8 +3842,8 @@ Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
 
 	label.show ();
 
-	dialog.add_button (_("Delete playlist"), RESPONSE_ACCEPT);
-	dialog.add_button (_("Keep playlist"), RESPONSE_REJECT);
+	dialog.add_button (_("Delete Playlist"), RESPONSE_ACCEPT);
+	dialog.add_button (_("Keep Playlist"), RESPONSE_REJECT);
 	dialog.add_button (_("Cancel"), RESPONSE_CANCEL);
 
 	switch (dialog.run ()) {
