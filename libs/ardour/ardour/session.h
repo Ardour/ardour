@@ -253,7 +253,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		return (RecordState) g_atomic_int_get (&_record_status);
 	}
 
-	bool actively_recording () {
+	bool actively_recording () const {
 		return record_status() == Recording;
 	}
 
@@ -1498,6 +1498,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void end_time_changed (framepos_t);
 
         void set_track_monitor_input_status (bool);
+	framepos_t compute_stop_limit () const;
 
         boost::shared_ptr<Speakers> _speakers; 
 };

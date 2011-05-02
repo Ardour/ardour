@@ -254,7 +254,6 @@ Session::process_with_events (pframes_t nframes)
 	pframes_t      this_nframes;
 	framepos_t     end_frame;
 	bool           session_needs_butler = false;
-	framepos_t     stop_limit;
 	framecnt_t     frames_moved;
 
 	/* make sure the auditioner is silent */
@@ -362,16 +361,7 @@ Session::process_with_events (pframes_t nframes)
 			send_midi_time_code_for_cycle (_transport_frame, end_frame, nframes);
 		}
 
-		if (actively_recording()) {
-			stop_limit = max_framepos;
-		} else {
-
-			if (Config->get_stop_at_session_end()) {
-				stop_limit = current_end_frame();
-			} else {
-				stop_limit = max_framepos;
-			}
-		}
+		framepos_t stop_limit = compute_stop_limit ();
 
 		if (maybe_stop (stop_limit)) {
 			no_roll (nframes);
@@ -769,18 +759,7 @@ Session::follow_slave_silently (pframes_t nframes, float slave_speed)
 			increment_transport_position (frames_moved);
 		}
 
-		framepos_t stop_limit;
-
-		if (actively_recording()) {
-			stop_limit = max_framepos;
-		} else {
-			if (Config->get_stop_at_session_end()) {
-				stop_limit = current_end_frame();
-			} else {
-				stop_limit = max_framepos;
-			}
-		}
-
+		framepos_t const stop_limit = compute_stop_limit ();
 		maybe_stop (stop_limit);
 	}
 }
@@ -789,7 +768,6 @@ void
 Session::process_without_events (pframes_t nframes)
 {
 	bool session_needs_butler = false;
-	framepos_t stop_limit;
 	framecnt_t frames_moved;
 
 	if (!process_can_proceed()) {
@@ -820,15 +798,7 @@ Session::process_without_events (pframes_t nframes)
 		send_midi_time_code_for_cycle (_transport_frame, _transport_frame + frames_moved, nframes);
 	}
 
-	if (actively_recording()) {
-		stop_limit = max_framepos;
-	} else {
-		if (Config->get_stop_at_session_end()) {
-			stop_limit = current_end_frame();
-		} else {
-			stop_limit = max_framepos;
-		}
-	}
+	framepos_t const stop_limit = compute_stop_limit ();
 
 	if (maybe_stop (stop_limit)) {
 		fail_roll (nframes);
@@ -1174,3 +1144,14 @@ Session::process_event (SessionEvent* ev)
 	}
 }
 
+framepos_t
+Session::compute_stop_limit () const
+{
+	bool const punching = (config.get_punch_in () && _locations->auto_punch_location());
+		
+	if (!actively_recording() && !punching && Config->get_stop_at_session_end()) {
+		return current_end_frame ();
+	}
+
+	return max_framepos;
+}
