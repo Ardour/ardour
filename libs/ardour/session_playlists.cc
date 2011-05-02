@@ -78,9 +78,21 @@ SessionPlaylists::add (boost::shared_ptr<Playlist> playlist)
 	if (!existing) {
 		playlists.insert (playlists.begin(), playlist);
 		playlist->InUse.connect_same_thread (*this, boost::bind (&SessionPlaylists::track, this, _1, boost::weak_ptr<Playlist>(playlist)));
+		playlist->DropReferences.connect_same_thread (
+			*this, boost::bind (&SessionPlaylists::remove_weak, this, boost::weak_ptr<Playlist> (playlist))
+			);
 	}
 
 	return existing;
+}
+
+void
+SessionPlaylists::remove_weak (boost::weak_ptr<Playlist> playlist)
+{
+	boost::shared_ptr<Playlist> p = playlist.lock ();
+	if (p) {
+		remove (p);
+	}
 }
 
 void

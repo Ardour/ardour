@@ -64,6 +64,7 @@ private:
 	
 	bool add (boost::shared_ptr<Playlist>);
 	void remove (boost::shared_ptr<Playlist>);
+	void remove_weak (boost::weak_ptr<Playlist>);
 	void track (bool, boost::weak_ptr<Playlist>);
 	
 	uint32_t n_playlists() const;
