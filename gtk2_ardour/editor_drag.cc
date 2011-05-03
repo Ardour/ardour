@@ -3850,7 +3850,12 @@ NoteDrag::total_dx () const
 	frameoffset_t const n = _region->beats_to_frames (_primary->note()->time ());
 	
 	/* new time of the primary note relative to the region position */
-	frameoffset_t const st = n + dx;
+	frameoffset_t st = n + dx;
+
+	/* prevent the note being dragged earlier than the region's position */
+	if (st < 0) {
+		st = 0;
+	}
 
 	/* snap and return corresponding delta */
 	return _region->snap_frame_to_frame (st) - n;
