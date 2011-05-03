@@ -261,8 +261,11 @@ LV2Plugin::~LV2Plugin ()
 	slv2_instance_free(_instance);
 	slv2_value_free(_name);
 	slv2_value_free(_author);
+#if defined(HAVE_NEW_SLV2) and defined(HAVE_SUIL)
 	slv2_value_free(_ui_type);
-
+#else
+	/* _ui_type points to a global, so leave it alone */
+#endif
 	delete [] _control_data;
 	delete [] _shadow_data;
 }
