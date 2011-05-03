@@ -862,6 +862,9 @@ RouteTimeAxisView::set_height (uint32_t h)
 	xml_node->add_property ("height", buf);
 
 	if (height >= preset_height (HeightNormal)) {
+		
+		controls_table.set_border_width (2);
+		
 		reset_meter();
 		show_name_entry ();
 		hide_name_label ();
@@ -885,6 +888,8 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 	} else if (height >= preset_height (HeightSmaller)) {
 
+		controls_table.set_border_width (2);
+		
 		reset_meter();
 		show_name_entry ();
 		hide_name_label ();
@@ -908,31 +913,8 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 	} else {
 
-
-		/* don't allow name_entry to be hidden while
-		   it has focus, otherwise the GUI becomes unusable.
-		*/
-
-		if (name_entry.has_focus()) {
-			if (name_entry.get_text() != _route->name()) {
-				name_entry_changed ();
-			}
-			controls_ebox.grab_focus ();
-		}
-
-		hide_name_entry ();
-		show_name_label ();
-
-		gm.get_gain_slider().hide();
-		mute_button->hide();
-		solo_button->hide();
-		if (rec_enable_button)
-			rec_enable_button->hide();
-
-		route_group_button.hide ();
-		automation_button.hide ();
-		playlist_button.hide ();
-		name_label.set_text (_route->name());
+		controls_table.set_border_width (0);
+	
 	}
 
 	if (height_changed && !no_redraw) {
