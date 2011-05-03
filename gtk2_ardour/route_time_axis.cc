@@ -234,6 +234,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 
 	gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 	gm.get_gain_slider().set_name ("TrackGainFader");
+
+	show_name_entry ();
+	hide_name_label ();
 }
 
 RouteTimeAxisView::~RouteTimeAxisView ()
@@ -866,8 +869,6 @@ RouteTimeAxisView::set_height (uint32_t h)
 		controls_table.set_border_width (2);
 		
 		reset_meter();
-		show_name_entry ();
-		hide_name_label ();
 
 		gm.get_gain_slider().show();
 		mute_button->show();
@@ -891,8 +892,6 @@ RouteTimeAxisView::set_height (uint32_t h)
 		controls_table.set_border_width (2);
 		
 		reset_meter();
-		show_name_entry ();
-		hide_name_label ();
 
 		gm.get_gain_slider().hide();
 		mute_button->show();
