@@ -83,6 +83,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _timecode_type (ARDOUR::AnyTime::BBT)
 	, _input_bundle (new ARDOUR::Bundle (_("Mackie Control In"), true))
 	, _output_bundle (new ARDOUR::Bundle (_("Mackie Control Out"), false))
+	, _gui (0)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 }

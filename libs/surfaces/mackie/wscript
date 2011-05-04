@@ -25,6 +25,7 @@ def build(bld):
             bcf_surface_generated.cc
             controls.cc
             dummy_port.cc
+            gui.cc
             interface.cc
             mackie_button_handler.cc
             mackie_control_protocol.cc
@@ -45,7 +46,8 @@ def build(bld):
     obj.includes     = ['.', './mackie']
     obj.name         = 'libardour_mcp'
     obj.target       = 'ardour_mcp'
-    obj.uselib_local = 'libardour libardour_cp'
+    obj.uselib       = 'GTKMM'
+    obj.uselib_local = 'libardour libardour_cp libgtkmm2ext'
     obj.vnum         = LIBARDOUR_MCP_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'surfaces')
 
