@@ -808,7 +808,7 @@ MackieControlProtocol::handle_control_event (SurfacePort & port, Control & contr
 			// at which point the fader should just reset itself
 			if (route != 0)
 			{
-				route->gain_control()->set_value (state.pos);
+				route->gain_control()->set_value (slider_position_to_gain (state.pos));
 
 				if (ARDOUR::Config->get_mackie_emulation() == "bcf") {
 					/* reset the timeout while we're still moving the fader */
@@ -953,7 +953,7 @@ MackieControlProtocol::notify_gain_changed (RouteSignal * route_signal, bool for
 		Fader & fader = route_signal->strip().gain();
 		if (!fader.in_use())
 		{
-			float gain_value = route_signal->route()->gain_control()->get_value();
+			float gain_value = gain_to_slider_position (route_signal->route()->gain_control()->get_value());
 			// check that something has actually changed
 			if (force_update || gain_value != route_signal->last_gain_written())
 			{
