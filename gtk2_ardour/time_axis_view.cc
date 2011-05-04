@@ -75,6 +75,7 @@ PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
 	, controls_table (2, 8)
+	, _controls_padding_table (3, 3)
 	, _size_menu (0)
 	, _y_position (0)
 	, _editor (ed)
@@ -134,7 +135,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	name_hbox.show ();
 
 	controls_table.set_size_request (200);
-	controls_table.set_border_width (2);
 	controls_table.set_row_spacings (0);
 	controls_table.set_col_spacings (0);
 	controls_table.set_homogeneous (true);
@@ -161,7 +161,15 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 
 	HSeparator* separator = manage (new HSeparator());
 
-	controls_vbox.pack_start (controls_table, false, false);
+	/* Use a rather hacky extra table so that we can control the space above/below and
+	 * left/right of the controls_table separately.  This in turn is so that we can
+	 * shrink the vertical space when the track is at its minimum height.
+	 */
+	_controls_padding_table.set_row_spacings (2);
+	_controls_padding_table.set_col_spacings (0);
+	_controls_padding_table.attach (controls_table, 1, 2, 1, 2);
+	
+	controls_vbox.pack_start (_controls_padding_table, false, false);
 	controls_vbox.pack_end (resizer_box, false, false);
 	controls_vbox.show ();
 

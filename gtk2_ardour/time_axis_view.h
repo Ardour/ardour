@@ -219,6 +219,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	/* The Standard LHS Controls */
 	Gtk::HBox     controls_hbox;
 	Gtk::Table    controls_table;
+	Gtk::Table   _controls_padding_table;
 	Gtk::EventBox controls_ebox;
 	Gtk::VBox     controls_vbox;
 	Gtk::VBox     time_axis_vbox;

@@ -866,7 +866,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 	if (height >= preset_height (HeightNormal)) {
 		
-		controls_table.set_border_width (2);
+		_controls_padding_table.set_row_spacings (2);
 		
 		reset_meter();
 
@@ -889,8 +889,8 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 	} else if (height >= preset_height (HeightSmaller)) {
 
-		controls_table.set_border_width (2);
-		
+		_controls_padding_table.set_row_spacings (2);
+
 		reset_meter();
 
 		gm.get_gain_slider().hide();
@@ -912,7 +912,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 	} else {
 
-		controls_table.set_border_width (0);
+		_controls_padding_table.set_row_spacings (0);
 	
 	}
 
