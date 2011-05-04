@@ -355,12 +355,6 @@ ARDOUR::cleanup ()
 	return 0;
 }
 
-string
-ARDOUR::get_ardour_revision ()
-{
-	return "$Rev$";
-}
-
 void
 ARDOUR::find_bindings_files (map<string,string>& files)
 {

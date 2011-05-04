@@ -140,8 +140,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	}
 
 	int get_session_parameters (bool quit_on_cancel, bool should_be_new = false, std::string load_template = "");
-	void parse_cmdline_path (const std::string& cmdline_path, std::string& session_name, std::string& session_path, bool& existing_session);
-	int  load_cmdline_session (const std::string& session_name, const std::string& session_path, bool& existing_session);
 	int  build_session_from_nsd (const std::string& session_name, const std::string& session_path);
 	bool ask_about_loading_existing_session (const std::string& session_path);
 

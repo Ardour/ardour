@@ -56,7 +56,6 @@ namespace ARDOUR {
         
 	extern PBD::PropertyChange bounds_change;
 
-	std::string get_ardour_revision ();
 	extern const char* const ardour_config_info;
 
 	void find_bindings_files (std::map<std::string,std::string>&);
