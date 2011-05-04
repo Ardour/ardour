@@ -14,9 +14,7 @@ class MackieButtonHandler;
 class BcfSurface : public Surface
 {
 public:
-	BcfSurface( uint32_t max_strips ) : Surface( max_strips )
-	{
-	}
+	BcfSurface (uint32_t max_strips) : Surface (max_strips, 7) {}
 	
 	virtual void handle_button( MackieButtonHandler & mbh, ButtonState bs, Button & button );
 	virtual void init_controls();
