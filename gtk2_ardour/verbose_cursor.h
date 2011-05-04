@@ -40,7 +40,7 @@ public:
 	void set_time (framepos_t, double, double);
 	void set_duration (framepos_t, framepos_t, double, double);
 
-	void show ();
+	void show (double xoffset = 0, double yoffset = 0);
 	void hide ();
 
 private:
@@ -50,4 +50,6 @@ private:
 	Editor* _editor;
 	ArdourCanvas::NoEventText* _canvas_item;
 	bool _visible;
+	double _xoffset;
+	double _yoffset;
 };

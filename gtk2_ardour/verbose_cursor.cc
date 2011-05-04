@@ -19,6 +19,7 @@
 
 #include <string>
 #include <gtkmm/enums.h>
+#include "pbd/stacktrace.h"
 #include "ardour/profile.h"
 #include "editor.h"
 #include "ardour_ui.h"
@@ -34,6 +35,8 @@ using namespace ARDOUR;
 VerboseCursor::VerboseCursor (Editor* editor)
 	: _editor (editor)
 	, _visible (false)
+	, _xoffset (0)
+	, _yoffset (0)
 {
 	Pango::FontDescription* font = get_font_for_style (N_("VerboseCanvasCursor"));
 
@@ -63,9 +66,20 @@ VerboseCursor::set_text (string const & text)
 	_canvas_item->property_text() = text.c_str();
 }
 
+/** @param xoffset x offset to be applied on top of any set_position() call
+ *  before the next show ().
+ *  @param yoffset y offset as above.
+ */
 void
-VerboseCursor::show ()
+VerboseCursor::show (double xoffset, double yoffset)
 {
+	_xoffset = xoffset;
+	_yoffset = yoffset;
+
+	if (_visible) {
+		return;
+	}
+	
 	_canvas_item->raise_to_top ();
 	_canvas_item->show ();
 	_visible = true;
@@ -244,11 +258,15 @@ VerboseCursor::set_color (uint32_t color)
 	_canvas_item->property_fill_color_rgba() = color;
 }
 
+/** Set the position of the verbose cursor.  Any x/y offsets
+ *  passed to the last call to show() will be applied to the
+ *  coordinates passed in here.
+ */
 void
 VerboseCursor::set_position (double x, double y)
 {
-	_canvas_item->property_x() = clamp_x (x);
-	_canvas_item->property_y() = clamp_y (y);
+	_canvas_item->property_x() = clamp_x (x + _xoffset);
+	_canvas_item->property_y() = clamp_y (y + _yoffset);
 }
 
 bool

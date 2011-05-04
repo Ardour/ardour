@@ -369,27 +369,27 @@ Drag::show_verbose_cursor_time (framepos_t frame)
 }
 
 void
-Drag::show_verbose_cursor_duration (framepos_t start, framepos_t end)
+Drag::show_verbose_cursor_duration (framepos_t start, framepos_t end, double xoffset)
 {
+	_editor->verbose_cursor()->show (xoffset);
+	
 	_editor->verbose_cursor()->set_duration (
 		start, end,
 		_drags->current_pointer_x() + 10 - _editor->horizontal_position(),
 		_drags->current_pointer_y() + 10 - _editor->vertical_adjustment.get_value() + _editor->canvas_timebars_vsize
 		);
-
-	_editor->verbose_cursor()->show ();
 }
 
 void
 Drag::show_verbose_cursor_text (string const & text)
 {
+	_editor->verbose_cursor()->show ();
+	
 	_editor->verbose_cursor()->set (
 		text,
 		_drags->current_pointer_x() + 10 - _editor->horizontal_position(),
 		_drags->current_pointer_y() + 10 - _editor->vertical_adjustment.get_value() + _editor->canvas_timebars_vsize
 		);
-
-	_editor->verbose_cursor()->show ();
 }
 
 
@@ -2165,7 +2165,7 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> const r = arv->audio_region ();
 
-	show_verbose_cursor_duration (r->position(), r->position() + r->fade_in()->back()->when);
+	show_verbose_cursor_duration (r->position(), r->position() + r->fade_in()->back()->when, 32);
 	
 	arv->show_fade_line((framepos_t) r->fade_in()->back()->when);
 }
@@ -2207,7 +2207,7 @@ FadeInDrag::motion (GdkEvent* event, bool)
 		tmp->show_fade_line((framecnt_t) fade_length);
 	}
 
-	show_verbose_cursor_duration (region->position(), region->position() + fade_length);
+	show_verbose_cursor_duration (region->position(), region->position() + fade_length, 32);
 }
 
 void

@@ -213,7 +213,7 @@ protected:
 	}
 
 	void show_verbose_cursor_time (framepos_t);
-	void show_verbose_cursor_duration (framepos_t, framepos_t);
+	void show_verbose_cursor_duration (framepos_t, framepos_t, double xoffset = 0);
 	void show_verbose_cursor_text (std::string const &);
 
 	Editor* _editor; ///< our editor
