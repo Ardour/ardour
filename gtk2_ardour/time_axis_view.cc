@@ -168,6 +168,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	_controls_padding_table.set_row_spacings (2);
 	_controls_padding_table.set_col_spacings (0);
 	_controls_padding_table.attach (controls_table, 1, 2, 1, 2);
+	_controls_padding_table.show ();
 	
 	controls_vbox.pack_start (_controls_padding_table, false, false);
 	controls_vbox.pack_end (resizer_box, false, false);
