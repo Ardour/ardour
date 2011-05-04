@@ -178,3 +178,43 @@ ostream & Mackie::operator << ( ostream & os, const SurfacePort & port )
 	os << " }";
 	return os;
 }
+
+/** Handle timeouts to reset in_use for controls that can't
+ *  do this by themselves (e.g. pots, and faders without touch support).
+ *  @param in_use_control the control whose in_use flag to reset.
+ *  @param touch_control a touch control to emit an event for, or 0.
+ */
+bool
+SurfacePort::control_in_use_timeout (Control* in_use_control, Control* touch_control)
+{
+	in_use_control->set_in_use (false);
+
+	if (touch_control) {
+		// empty control_state
+		ControlState control_state;
+		control_event (*this, *touch_control, control_state);
+	}
+	
+	// only call this method once from the timer
+	return false;
+}
+
+/** Add a timeout so that a control's in_use flag will be reset some time in the future.
+ *  @param in_use_control the control whose in_use flag to reset.
+ *  @param touch_control a touch control to emit an event for, or 0.
+ */
+void
+SurfacePort::add_in_use_timeout (Control& in_use_control, Control* touch_control)
+{
+	in_use_control.in_use_connection.disconnect ();
+
+	/* XXX should this use the GUI event loop (default) or the MIDI UI event loop? */
+	
+	/* timeout after 250ms */
+	in_use_control.in_use_connection = Glib::signal_timeout().connect (
+		sigc::bind (sigc::mem_fun (*this, &SurfacePort::control_in_use_timeout), &in_use_control, touch_control),
+		250
+		);
+	
+	in_use_control.in_use_touch_control = touch_control;
+}

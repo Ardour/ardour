@@ -111,7 +111,6 @@ Control::Control( int id, int ordinal, std::string name, Group & group )
 , _name( name )
 , _group( group )
 , _in_use( false )
-, _in_use_timeout( 250 )
 {
 }
 
@@ -178,15 +177,22 @@ Button & Strip::fader_touch()
 	return *_fader_touch;
 }
 
-bool Control::in_use() const
+/** @return true if the control is in use, or false otherwise.
+    Buttons are `in use' when they are held down.
+    Faders with touch support are `in use' when they are being touched.
+    Pots, or faders without touch support, are `in use' from the first move
+    event until a timeout after the last move event.
+*/
+bool
+Control::in_use () const
 {
 	return _in_use;
 }
 
-Control & Control::in_use( bool rhs )
+void
+Control::set_in_use (bool in_use)
 {
-	_in_use = rhs;
-	return *this;
+	_in_use = in_use;
 }
 
 ostream & Mackie::operator << ( ostream & os, const Mackie::Control & control )

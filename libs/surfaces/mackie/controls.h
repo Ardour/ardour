@@ -214,21 +214,16 @@ public:
 	/// Return true if this control is the one and only Jog Wheel
 	virtual bool is_jog() const { return false; }
 
-	/**
-		Return true if the control is in use, or false otherwise. For buttons
-		this returns true if the button is currently being held down. For
-		faders, the touch button has not been released. For pots, this returns
-		true from the first move event until a timeout after the last move event.
-	*/
-	virtual bool in_use() const;
-	virtual Control & in_use( bool );
+	bool in_use () const;
+	void set_in_use (bool);
 	
-	/// The timeout value for this control. Normally defaulted to 250ms, but
-	/// certain controls (ie jog wheel) may want to override it.
-	virtual unsigned int in_use_timeout() { return _in_use_timeout; }
-
 	/// Keep track of the timeout so it can be updated with more incoming events
 	sigc::connection in_use_connection;
+
+	/** If we are doing an in_use timeout for a fader without touch, this
+	 *  is its touch button control; otherwise 0.
+	 */
+	Control* in_use_touch_control;
 	
 private:
 	int _id;
@@ -236,7 +231,6 @@ private:
 	std::string _name;
 	Group & _group;
 	bool _in_use;
-	unsigned int _in_use_timeout;
 };
 
 std::ostream & operator << ( std::ostream & os, const Control & control );

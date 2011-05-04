@@ -86,12 +86,16 @@ public:
 
 	virtual bool active() const { return _active; }
 	virtual void active( bool yn ) { _active = yn; }
+
+	void add_in_use_timeout (Control &, Control *);
 	
 protected:
 	/// Only for use by DummyPort
 	SurfacePort();
 	
 private:
+	bool control_in_use_timeout (Control *, Control *);
+
 	MIDI::Port * _input_port;
 	MIDI::Port * _output_port;
 	int _number;

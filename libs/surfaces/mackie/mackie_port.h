@@ -72,7 +72,7 @@ public:
 	/// Connect the any signal from the parser to handle_midi_any
 	/// unless it's already connected
 	void connect_any();
-	
+
 protected:
 	/**
 		The initialisation sequence is fairly complex. First a lock is acquired
@@ -106,10 +106,6 @@ protected:
 		environment variables. Or existence of a file.
 	*/
 	void probe_emulation( const MidiByteArray & bytes );
-
-	/// Handle timeout events set for controls that don't emit
-	/// an off event
-	bool handle_control_timeout_event ( Control * );
 
 private:
 	MackieControlProtocol & _mcp;

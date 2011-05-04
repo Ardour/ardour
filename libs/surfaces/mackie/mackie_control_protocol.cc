@@ -397,7 +397,7 @@ MackieControlProtocol::set_active (bool yn)
 }
 
 bool 
-MackieControlProtocol::handle_strip_button (Control & control, ButtonState bs, boost::shared_ptr<Route> route)
+MackieControlProtocol::handle_strip_button (SurfacePort & port, Control & control, ButtonState bs, boost::shared_ptr<Route> route)
 {
 	bool state = false;
 
@@ -433,7 +433,14 @@ MackieControlProtocol::handle_strip_button (Control & control, ButtonState bs, b
 	if (control.name() == "fader_touch")
 	{
 		state = bs == press;
-		control.strip().gain().in_use (state);
+		control.strip().gain().set_in_use (state);
+
+		if (ARDOUR::Config->get_mackie_emulation() == "bcf" && state) {
+			/* BCF faders don't support touch, so add a timeout to reset
+			   their `in_use' state.
+			*/
+			port.add_in_use_timeout (control.strip().gain(), &control.strip().fader_touch());
+		}
 	}
 
 	return state;
@@ -803,6 +810,11 @@ MackieControlProtocol::handle_control_event (SurfacePort & port, Control & contr
 			{
 				route->gain_control()->set_value (state.pos);
 
+				if (ARDOUR::Config->get_mackie_emulation() == "bcf") {
+					/* reset the timeout while we're still moving the fader */
+					port.add_in_use_timeout (control, control.in_use_touch_control);
+				}
+
 				// must echo bytes back to slider now, because
 				// the notifier only works if the fader is not being
 				// touched. Which it is if we're getting input.
@@ -814,7 +826,7 @@ MackieControlProtocol::handle_control_event (SurfacePort & port, Control & contr
 			if (control.group().is_strip()) {
 				// strips
 				if (route != 0) {
-					handle_strip_button (control, state.button_state, route);
+					handle_strip_button (port, control, state.button_state, route);
 				} else {
 					// no route so always switch the light off
 					// because no signals will be emitted by a non-route
@@ -823,7 +835,7 @@ MackieControlProtocol::handle_control_event (SurfacePort & port, Control & contr
 			} else if (control.group().is_master()) {
 				// master fader touch
 				if (route != 0) {
-					handle_strip_button (control, state.button_state, route);
+					handle_strip_button (port, control, state.button_state, route);
 				}
 			} else {
 				// handle all non-strip buttons

@@ -270,7 +270,7 @@ class MackieControlProtocol
 	   Handle a button press for the control and return whether
 	   the corresponding light should be on or off.
 	*/
-	bool handle_strip_button(Mackie::Control &, Mackie::ButtonState, boost::shared_ptr<ARDOUR::Route>);
+	bool handle_strip_button (Mackie::SurfacePort &, Mackie::Control &, Mackie::ButtonState, boost::shared_ptr<ARDOUR::Route>);
 
 	void add_port (MIDI::Port &, MIDI::Port &, int number);
 
