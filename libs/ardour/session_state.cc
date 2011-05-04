@@ -6,7 +6,7 @@
   the Free Software Foundation; either version 2 of the License, or
   (at your option) any later version.
 
- This program is distributed in the hope that it will be useful,
+  This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
@@ -755,6 +755,7 @@ Session::jack_session_event (jack_session_event_t * event)
 }
 #endif
 
+/** @param snapshot_name Name to save under, without .ardour / .pending prefix */
 int
 Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot)
 {

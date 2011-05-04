@@ -2166,7 +2166,7 @@ ARDOUR_UI::save_state_canfail (string name, bool switch_to_it)
 			return ret;
 		}
 	}
-	cerr << "SS canfail\n";
+
 	save_ardour_state (); /* XXX cannot fail? yeah, right ... */
 	return 0;
 }
@@ -2503,7 +2503,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	int ret = -1;
 	bool likely_new = false;
 
-	if (! load_template.empty()) {
+	if (!load_template.empty()) {
 		should_be_new = true;
 		template_name = load_template;
 	}
@@ -2517,13 +2517,16 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			   to find the session.
 			*/
 
-			if (ARDOUR_COMMAND_LINE::session_name.find (statefile_suffix) != string::npos) {
+			string::size_type suffix = ARDOUR_COMMAND_LINE::session_name.find (statefile_suffix);
+
+			if (suffix != string::npos) {
 				session_path = Glib::path_get_dirname (ARDOUR_COMMAND_LINE::session_name);
+				session_name = ARDOUR_COMMAND_LINE::session_name.substr (0, suffix);
+				session_name = Glib::path_get_basename (session_name);
 			} else {
 				session_path = ARDOUR_COMMAND_LINE::session_name;
+				session_name = Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name);
 			}
-
-			session_name = Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name);
 
 		} else {
 
@@ -2680,7 +2683,9 @@ ARDOUR_UI::close_session()
 	goto_editor_window ();
 }
 
-/** @return -2 if the load failed because we are not connected to the AudioEngine */
+/** @param snap_name Snapshot name (without .ardour suffix).
+ *  @return -2 if the load failed because we are not connected to the AudioEngine.
+ */
 int
 ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, std::string mix_template)
 {

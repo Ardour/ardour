@@ -1004,6 +1004,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void when_engine_running ();
 	void graph_reordered ();
 
+	/** current snapshot name, without the .ardour suffix */
 	std::string _current_snapshot_name;
 
 	XMLTree*         state_tree;
