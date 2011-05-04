@@ -215,7 +215,7 @@ public:
 	virtual bool is_jog() const { return false; }
 
 	/**
-		Return true if the controlis in use, or false otherwise. For buttons
+		Return true if the control is in use, or false otherwise. For buttons
 		this returns true if the button is currently being held down. For
 		faders, the touch button has not been released. For pots, this returns
 		true from the first move event until a timeout after the last move event.
