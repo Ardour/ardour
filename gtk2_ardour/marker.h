@@ -125,6 +125,11 @@ class Marker : public sigc::trackable
 	void reposition ();
 	void setup_line_x ();
 	void setup_name_display ();
+
+private:
+	/* disallow copy construction */
+	Marker (Marker const &);
+	Marker & operator= (Marker const &);
 };
 
 class TempoMarker : public Marker
