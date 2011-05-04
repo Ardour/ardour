@@ -341,8 +341,6 @@ ARDOUR::init_post_engine ()
 	if ((node = Config->control_protocol_state()) != 0) {
 		ControlProtocolManager::instance().set_state (*node, Stateful::loading_state_version);
 	}
-
-	MIDI::Manager::instance()->set_port_states (Config->midi_port_states ());
 }
 
 int

@@ -63,6 +63,7 @@
 #include "ardour/butler.h"
 #include "ardour/click.h"
 #include "ardour/configuration.h"
+#include "ardour/control_protocol_manager.h"
 #include "ardour/crossfade.h"
 #include "ardour/cycle_timer.h"
 #include "ardour/data_type.h"
@@ -516,6 +517,17 @@ Session::when_engine_running ()
 	}
 
 	BootMessage (_("Setup signal flow and plugins"));
+
+	ControlProtocolManager::instance().set_session (this);
+
+	/* This must be done after the ControlProtocolManager set_session above,
+	   as it will set states for ports which the ControlProtocolManager creates.
+	*/
+	MIDI::Manager::instance()->set_port_states (Config->midi_port_states ());
+
+	/* And this must be done after the MIDI::Manager::set_port_states as
+	 * it will try to make connections whose details are loaded by set_port_states.
+	 */
 
 	hookup_io ();
 

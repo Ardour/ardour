@@ -368,10 +368,6 @@ Session::second_stage_init ()
 
 	/* initial program change will be delivered later; see ::config_changed() */
 
-	BootMessage (_("Reset Control Protocols"));
-
-	ControlProtocolManager::instance().set_session (this);
-
 	_state_of_the_state = Clean;
 
 	Port::set_connecting_blocked (false);
