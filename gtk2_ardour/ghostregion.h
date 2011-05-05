@@ -37,7 +37,7 @@ namespace Gnome {
 class MidiStreamView;
 class TimeAxisView;
 
-class GhostRegion
+class GhostRegion : public sigc::trackable
 {
 public:
 	GhostRegion(ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
