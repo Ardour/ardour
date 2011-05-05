@@ -608,7 +608,7 @@ MackieControlProtocol::create_ports()
 		new MIDI::Port (string_compose (_("%1 out"), default_port_name), MIDI::Port::IsOutput, session->engine().jack())
 		);
 
-	// open main port		
+	/* Create main port */
 
 	if (!midi_input_port->ok() || !midi_output_port->ok()) {
 		ostringstream os;
@@ -619,10 +619,9 @@ MackieControlProtocol::create_ports()
 
 	add_port (*midi_input_port, *midi_output_port, 0);
 
-	// open extender ports. Up to 9. Should be enough.
-	// could also use mm->get_midi_ports()
+	/* Create extender ports */
 
-	for (int index = 1; index <= 9; ++index) {
+	for (int index = 1; index <= Config->get_mackie_extenders(); ++index) {
 		MIDI::Port * midi_input_port = mm->add_port (
 			new MIDI::Port (string_compose (_("mcu_xt_%1 in"), index), MIDI::Port::IsInput, session->engine().jack())
 			);
@@ -1507,9 +1506,11 @@ MackieControlProtocol::left_press (Button &)
 	if (sorted.size() > route_table.size())
 	{
 		int new_initial = _current_initial_bank - route_table.size();
-		if (new_initial < 0) new_initial = 0;
-		if (new_initial != int (_current_initial_bank))
-		{
+		if (new_initial < 0) {
+			new_initial = 0;
+		}
+		
+		if (new_initial != int (_current_initial_bank)) {
 			session->set_dirty();
 			switch_banks (new_initial);
 		}
@@ -1534,7 +1535,11 @@ MackieControlProtocol::right_press (Button &)
 	Sorted sorted = get_sorted_routes();
 	if (sorted.size() > route_table.size()) {
 		uint32_t delta = sorted.size() - (route_table.size() + _current_initial_bank);
-		if (delta > route_table.size()) delta = route_table.size();
+
+		if (delta > route_table.size()) {
+			delta = route_table.size();
+		}
+		
 		if (delta > 0) {
 			session->set_dirty();
 			switch_banks (_current_initial_bank + delta);

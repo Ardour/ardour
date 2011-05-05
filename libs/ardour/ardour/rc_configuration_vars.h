@@ -50,6 +50,7 @@ CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
 CONFIG_VARIABLE (uint32_t, feedback_interval_ms,  "feedback-interval-ms", 100)
 CONFIG_VARIABLE (bool, use_tranzport,  "use-tranzport", false)
 CONFIG_VARIABLE (std::string, mackie_emulation, "mackie-emulation", "mcu")
+CONFIG_VARIABLE (uint32_t, mackie_extenders, "mackie-extenders", 0)
 CONFIG_VARIABLE (RemoteModel, remote_model, "remote-model", MixerOrdered)
 
 /* disk operations */

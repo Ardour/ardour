@@ -18,6 +18,8 @@
 
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/box.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/table.h>
 #include "gtkmm2ext/utils.h"
 #include "ardour/rc_configuration.h"
 #include "mackie_control_protocol.h"
@@ -33,9 +35,11 @@ public:
 private:
 
 	void surface_combo_changed ();
+	void extenders_changed ();
 	
 	MackieControlProtocol& _cp;
 	Gtk::ComboBoxText _surface_combo;
+	Gtk::SpinButton _extenders;
 };
 
 void*
@@ -63,10 +67,11 @@ MackieControlProtocol::build_gui ()
 MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	: _cp (p)
 {
-	Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox);
-	hbox->set_spacing (4);
-	hbox->pack_start (*manage (new Gtk::Label (_("Surface to support:"))));
-	hbox->pack_start (_surface_combo);
+	Gtk::Table* table = Gtk::manage (new Gtk::Table (2, 2));
+	table->set_spacings (4);
+	
+	table->attach (*manage (new Gtk::Label (_("Surface type:"))), 0, 1, 0, 1);
+	table->attach (_surface_combo, 1, 2, 0, 1);
 
 	vector<string> surfaces;
 	surfaces.push_back (_("Mackie Control"));
@@ -79,11 +84,25 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 		_surface_combo.set_active_text (surfaces.back ());
 	}
 
-	pack_start (*hbox);
+	_extenders.set_range (0, 8);
+	_extenders.set_increments (1, 4);
 
+	Gtk::Label* l = manage (new Gtk::Label (_("Extenders:")));
+	l->set_alignment (0, 0.5);
+	table->attach (*l, 0, 1, 1, 2);
+	table->attach (_extenders, 1, 2, 1, 2);
+
+	pack_start (*table);
+
+	Gtk::Label* cop_out = manage (new Gtk::Label (_("<i>You must restart Ardour for changes\nto these settings to take effect.</i>")));
+	cop_out->set_use_markup (true);
+	pack_start (*cop_out);
+
+	set_spacing (4);
 	show_all ();
 
 	_surface_combo.signal_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::surface_combo_changed));
+	_extenders.signal_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::extenders_changed));
 }
 
 void
@@ -94,4 +113,10 @@ MackieControlProtocolGUI::surface_combo_changed ()
 	} else {
 		ARDOUR::Config->set_mackie_emulation (X_("bcf"));
 	}
+}
+
+void
+MackieControlProtocolGUI::extenders_changed ()
+{
+	ARDOUR::Config->set_mackie_extenders (_extenders.get_value_as_int ());
 }
