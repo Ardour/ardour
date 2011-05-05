@@ -801,13 +801,15 @@ Locations::set_state (const XMLNode& node, int version)
 
 	XMLNodeList nlist = node.children();
 
-	locations.clear ();
+	/* build up a new locations list in here */
+	LocationList new_locations;
+
 	current_location = 0;
 
 	Location* session_range_location = 0;
 	if (version < 3000) {
 		session_range_location = new Location (_session, 0, 0, _("session"), Location::IsSessionRange);
-		locations.push_back (session_range_location);
+		new_locations.push_back (session_range_location);
 	}
 
 	{
@@ -818,7 +820,23 @@ Locations::set_state (const XMLNode& node, int version)
 
 			try {
 
-				Location *loc = new Location (_session, **niter);
+				XMLProperty const * prop_id = (*niter)->property ("id");
+				assert (prop_id);
+				PBD::ID id (prop_id->value ());
+				
+				LocationList::const_iterator i = locations.begin();
+				while (i != locations.end () && (*i)->id() != id) {
+					++i;
+				}
+
+				Location* loc;
+				if (i != locations.end()) {
+					/* we can re-use an old Location object */
+					loc = *i;
+					loc->set_state (**niter, version);
+				} else {
+					loc = new Location (_session, **niter);
+				}
 
 				bool add = true;
 
@@ -850,7 +868,7 @@ Locations::set_state (const XMLNode& node, int version)
 				}
 
 				if (add) {
-					locations.push_back (loc);
+					new_locations.push_back (loc);
 				}
 			}
 
@@ -858,6 +876,8 @@ Locations::set_state (const XMLNode& node, int version)
 				error << _("could not load location from session file - ignored") << endmsg;
 			}
 		}
+
+		locations = new_locations;
 
 		if (locations.size()) {
 			current_location = locations.front();
