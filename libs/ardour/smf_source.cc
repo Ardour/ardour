@@ -578,3 +578,29 @@ SMFSource::set_path (const string& p)
 	FileSource::set_path (p);
 	SMF::set_path (_path);
 }
+
+/** Ensure that this source has some file on disk, even if it's just a SMF header */
+void
+SMFSource::ensure_disk_file ()
+{
+	if (_model) {
+		/* We have a model, so write it to disk; see MidiSource::session_saved
+		   for an explanation of what we are doing here.
+		*/
+		boost::shared_ptr<MidiModel> mm = _model;
+		_model.reset ();
+		mm->sync_to_source ();
+		_model = mm;
+	} else {
+		/* No model; if it's not already open, it's an empty source, so create
+		   and open it for writing.
+		*/
+		if (!_open) {
+			open_for_write ();
+		}
+
+		/* Flush, which will definitely put something on disk */
+		flush_midi ();
+	}
+}
+

@@ -64,6 +64,7 @@ public:
 	void destroy_model ();
 
 	void flush_midi ();
+	void ensure_disk_file ();
 
 	static void set_header_position_offset (framecnt_t offset, bool negative);
 

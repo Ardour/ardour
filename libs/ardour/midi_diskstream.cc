@@ -1314,13 +1314,8 @@ MidiDiskstream::steal_write_sources()
 {
 	list<boost::shared_ptr<Source> > ret;
 
-	/* put some data on the disk, even if its just a header for an empty file.
-	   XXX should we not have a more direct method for doing this? Maybe not
-	   since we don't want to mess around with the model/disk relationship
-	   that the Source has to pay attention to.
-	*/
-
-	boost::dynamic_pointer_cast<MidiSource>(_write_source)->session_saved ();
+	/* put some data on the disk, even if its just a header for an empty file */
+	boost::dynamic_pointer_cast<SMFSource> (_write_source)->ensure_disk_file ();
 
 	/* never let it go away */
 	_write_source->mark_nonremovable ();
