@@ -119,6 +119,8 @@ class AudioDiskstream : public Diskstream
 	int add_channel (uint32_t how_many);
 	int remove_channel (uint32_t how_many);
 
+	bool set_name (std::string const &);
+
 	/* stateful */
 
 	XMLNode& get_state(void);

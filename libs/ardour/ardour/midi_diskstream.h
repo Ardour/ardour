@@ -72,6 +72,8 @@ class MidiDiskstream : public Diskstream
 	int use_new_playlist ();
 	int use_copy_playlist ();
 
+	bool set_name (std::string const &);
+
 	/* stateful */
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&, int version);

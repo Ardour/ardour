@@ -2359,3 +2359,21 @@ AudioDiskstream::ChannelInfo::~ChannelInfo ()
 	capture_transition_buf = 0;
 }
 
+
+bool
+AudioDiskstream::set_name (string const & name)
+{
+	Diskstream::set_name (name);
+
+	/* get a new write source so that its name reflects the new diskstream name */
+
+	boost::shared_ptr<ChannelList> c = channels.reader();
+	ChannelList::iterator i;
+	int n = 0;
+	
+	for (n = 0, i = c->begin(); i != c->end(); ++i, ++n) {
+		use_new_write_source (n);
+	}
+
+	return true;
+}

@@ -64,7 +64,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	Diskstream (Session &, const XMLNode&);
 	virtual ~Diskstream();
 
-	bool set_name (const std::string& str);
+	virtual bool set_name (const std::string& str);
 
 	boost::shared_ptr<ARDOUR::IO> io() const { return _io; }
 	void set_track (ARDOUR::Track *);

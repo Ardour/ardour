@@ -79,8 +79,6 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 	, _frames_written_to_ringbuffer(0)
 	, _frames_read_from_ringbuffer(0)
 {
-	/* prevent any write sources from being created */
-
 	in_set_state = true;
 
 	init ();
@@ -1288,7 +1286,7 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 	if (!_session.writable() || !recordable()) {
 		return 1;
 	}
-
+	
 	assert(n == 0);
 
 	_write_source.reset();
@@ -1438,5 +1436,16 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framepos_t start, framepos_t end)
 
 	gint32 frames_read = end - start;
 	g_atomic_int_add(&_frames_read_from_ringbuffer, frames_read);
+}
+
+bool
+MidiDiskstream::set_name (string const & name)
+{
+	Diskstream::set_name (name);
+
+	/* get a new write source so that its name reflects the new diskstream name */
+	use_new_write_source (0);
+
+	return true;
 }
 
