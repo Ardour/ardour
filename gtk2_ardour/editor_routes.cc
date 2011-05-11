@@ -701,16 +701,12 @@ EditorRoutes::reordered (TreeModel::Path const &, TreeModel::iterator const &, i
 void
 EditorRoutes::sync_order_keys (string const & src)
 {
-	vector<int> neworder;
+	map<int, int> new_order;
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator ri;
 
 	if (src == N_ ("editor") || !_session || (_session->state_of_the_state() & (Session::Loading|Session::Deletion)) || rows.empty()) {
 		return;
-	}
-
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		neworder.push_back (0);
 	}
 
 	bool changed = false;
@@ -719,10 +715,10 @@ EditorRoutes::sync_order_keys (string const & src)
 	for (order = 0, ri = rows.begin(); ri != rows.end(); ++ri, ++order) {
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
 
-		int old_key = order;
-		int new_key = route->order_key (N_ ("editor"));
+		int const old_key = order;
+		int const new_key = route->order_key (N_ ("editor"));
 
-		neworder[new_key] = old_key;
+		new_order[new_key] = old_key;
 
 		if (new_key != old_key) {
 			changed = true;
@@ -731,7 +727,14 @@ EditorRoutes::sync_order_keys (string const & src)
 
 	if (changed) {
 		_redisplay_does_not_reset_order_keys = true;
-		_model->reorder (neworder);
+
+		/* `compact' new_order into a vector */
+		vector<int> co;
+		for (map<int, int>::const_iterator i = new_order.begin(); i != new_order.end(); ++i) {
+			co.push_back (i->second);
+		}
+		
+		_model->reorder (co);
 		_redisplay_does_not_reset_order_keys = false;
 	}
 }
