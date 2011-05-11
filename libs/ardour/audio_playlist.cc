@@ -168,6 +168,17 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, fram
 	, _crossfades (*this)
 {
 	add_property (_crossfades);
+
+	/* Audio regions that have been created by the Playlist constructor
+	   will currently have the same fade in/out as the regions that they
+	   were created from.  This is wrong, so reset the fades here.
+	*/
+
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*i);
+		assert (ar);
+		ar->set_default_fades ();
+	}
 	
 	/* this constructor does NOT notify others (session) */
 }
