@@ -167,19 +167,85 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, fram
 	: Playlist (other, start, cnt, name, hidden)
 	, _crossfades (*this)
 {
+	RegionLock rlock2 (const_cast<Playlist*> (other.get()));
+	in_set_state++;
+	
 	add_property (_crossfades);
+
+	framepos_t const end = start + cnt - 1;
 
 	/* Audio regions that have been created by the Playlist constructor
 	   will currently have the same fade in/out as the regions that they
 	   were created from.  This is wrong, so reset the fades here.
 	*/
 
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*i);
-		assert (ar);
-		ar->set_default_fades ();
+	RegionList::iterator ours = regions.begin ();
+
+	for (RegionList::const_iterator i = other->regions.begin(); i != other->regions.end(); ++i) {
+		boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (*i);
+		assert (region);
+
+		framecnt_t fade_in = 64;
+		framecnt_t fade_out = 64;
+
+		switch (region->coverage (start, end)) {
+		case OverlapNone:
+			continue;
+
+		case OverlapInternal:
+		{
+			framecnt_t const offset = start - region->position ();
+			framecnt_t const trim = region->last_frame() - end;
+			if (region->fade_in()->back()->when > offset) {
+				fade_in = region->fade_in()->back()->when - offset;
+			}
+			if (region->fade_out()->back()->when > trim) {
+				fade_out = region->fade_out()->back()->when - trim;
+			}
+			break;
+		}
+
+		case OverlapStart:
+		{
+			if (region->fade_in()->back()->when > 0) {
+				fade_in = region->fade_in()->back()->when;
+			}
+			if (start > region->last_frame() - region->fade_out()->back()->when) {
+				fade_out = region->last_frame() - start;
+			}
+			break;
+		}
+
+		case OverlapEnd:
+		{
+			framecnt_t const offset = start - region->position();
+			if (region->fade_in()->back()->when > offset) {
+				fade_in = region->fade_in()->back()->when - offset;
+			}
+			if (start > region->last_frame() - region->fade_out()->back()->when) {
+				fade_out = region->last_frame() - start;
+			} else {
+				fade_out = region->fade_out()->back()->when;
+			}
+			break;
+		}
+
+		case OverlapExternal:
+			fade_in = region->fade_in()->back()->when;
+			fade_out = region->fade_out()->back()->when;
+			break;
+		}
+
+		boost::shared_ptr<AudioRegion> our_region = boost::dynamic_pointer_cast<AudioRegion> (*ours);
+		assert (our_region);
+
+		our_region->set_fade_in_length (fade_in);
+		our_region->set_fade_out_length (fade_out);
+		++ours;
 	}
-	
+
+	in_set_state--;
+
 	/* this constructor does NOT notify others (session) */
 }
 

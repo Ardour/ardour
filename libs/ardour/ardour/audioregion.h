@@ -140,8 +140,6 @@ class AudioRegion : public Region
 	void set_fade_out (FadeShape, framecnt_t);
 	void set_fade_out (boost::shared_ptr<AutomationList>);
 
-	void set_default_fades ();
-	
 	void set_envelope_active (bool yn);
 	void set_default_envelope ();
 
@@ -203,6 +201,7 @@ class AudioRegion : public Region
 	void post_set (const PBD::PropertyChange&);
 
 	void init ();
+	void set_default_fades ();
 	void set_default_fade_in ();
 	void set_default_fade_out ();
 
