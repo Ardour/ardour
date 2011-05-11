@@ -621,7 +621,7 @@ MackieControlProtocol::create_ports()
 
 	/* Create extender ports */
 
-	for (int index = 1; index <= Config->get_mackie_extenders(); ++index) {
+	for (uint32_t index = 1; index <= Config->get_mackie_extenders(); ++index) {
 		MIDI::Port * midi_input_port = mm->add_port (
 			new MIDI::Port (string_compose (_("mcu_xt_%1 in"), index), MIDI::Port::IsInput, session->engine().jack())
 			);
