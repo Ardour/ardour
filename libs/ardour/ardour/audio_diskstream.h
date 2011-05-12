@@ -196,7 +196,6 @@ class AudioDiskstream : public Diskstream
 
 		float       peak_power;
 
-		boost::shared_ptr<AudioFileSource> fades_source;
 		boost::shared_ptr<AudioFileSource> write_source;
 
 		/// information the Port that our audio data comes from
