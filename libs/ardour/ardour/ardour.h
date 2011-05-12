@@ -69,8 +69,6 @@ namespace ARDOUR {
 		return (microseconds_t) jack_get_time();
 	}
 
-	static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
-
 	void setup_fpu ();
 }
 
