@@ -986,6 +986,8 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 		}
 
 	} else {
+		
+		/* not zero, not 1.0 ... varispeed */
 
 		if ((synced_to_jack()) && speed != 0.0 && speed != 1.0) {
 			warning << string_compose (
@@ -1035,6 +1037,8 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 			add_post_transport_work (todo);
 			_butler->schedule_transport_work ();
 		}
+		
+		TransportStateChange (); /* EMIT SIGNAL */
 	}
 }
 
@@ -1101,6 +1105,8 @@ Session::stop_transport (bool abort, bool clear_state)
 void
 Session::start_transport ()
 {
+	DEBUG_TRACE (DEBUG::Transport, "start_transport\n");
+
 	_last_roll_location = _transport_frame;
 	_last_roll_or_reversal_location = _transport_frame;
 	
