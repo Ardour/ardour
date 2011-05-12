@@ -167,7 +167,7 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, fram
 	: Playlist (other, start, cnt, name, hidden)
 	, _crossfades (*this)
 {
-	RegionLock rlock2 (const_cast<Playlist*> (other.get()));
+	RegionLock rlock2 (const_cast<AudioPlaylist*> (other.get()));
 	in_set_state++;
 	
 	add_property (_crossfades);
