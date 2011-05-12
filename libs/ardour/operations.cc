@@ -32,3 +32,5 @@ GQuark Operations::selection_grab    = g_quark_from_static_string (_("selection 
 GQuark Operations::region_fill       = g_quark_from_static_string (_("region fill"));
 GQuark Operations::fill_selection    = g_quark_from_static_string (_("fill selection"));
 GQuark Operations::create_region     = g_quark_from_static_string (_("create region"));
+GQuark Operations::region_copy       = g_quark_from_static_string (_("region copy"));
+GQuark Operations::fixed_time_region_copy = g_quark_from_static_string (_("fixed time region copy"));

@@ -2534,6 +2534,8 @@ Session::playlist_region_added (boost::weak_ptr<Region> w)
 	ops.push_back (Operations::region_fill);
 	ops.push_back (Operations::fill_selection);
 	ops.push_back (Operations::create_region);
+	ops.push_back (Operations::region_copy);
+	ops.push_back (Operations::fixed_time_region_copy);
 	ops.sort ();
 
 	/* See if any of the current operations match the ones that we want */

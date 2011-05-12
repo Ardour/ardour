@@ -38,6 +38,8 @@ namespace Operations {
 	extern GQuark region_fill;
 	extern GQuark fill_selection;
 	extern GQuark create_region;
+	extern GQuark region_copy;
+	extern GQuark fixed_time_region_copy;
 
 };
 	

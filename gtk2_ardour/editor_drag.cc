@@ -869,9 +869,9 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 	}
 
 	if (_x_constrained) {
-		_editor->begin_reversible_command (_("fixed time region copy"));
+		_editor->begin_reversible_command (Operations::fixed_time_region_copy);
 	} else {
-		_editor->begin_reversible_command (_("region copy"));
+		_editor->begin_reversible_command (Operations::region_copy);
 	}
 
 	/* insert the regions into their new playlists */
