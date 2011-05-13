@@ -46,7 +46,7 @@ class FileSource : virtual public Source {
 public:
 	virtual ~FileSource () {}
 	
-	const std::string& path() const { return _path; }
+	virtual const std::string& path() const { return _path; }
 
 	virtual bool safe_file_extension (const std::string& path) const = 0;
 

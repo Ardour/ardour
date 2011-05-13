@@ -173,14 +173,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	static PBD::Signal1<void,std::string> Dialog;
 
-	std::string sound_dir (bool with_path = true) const;
-	std::string peak_dir () const;
-	std::string dead_dir () const;
+	int ensure_subdirs ();
+
 	std::string automation_dir () const;
 	std::string analysis_dir() const;
 	std::string plugins_dir() const;
-	
-	int ensure_subdirs ();
 
 	std::string peak_path (std::string) const;
 

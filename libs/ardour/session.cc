@@ -300,7 +300,7 @@ Session::destroy ()
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->path(), i->second.use_count()));
+		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->name(), i->second.use_count()));
 		i->second->drop_references ();
 	}
 

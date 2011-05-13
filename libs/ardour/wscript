@@ -39,6 +39,7 @@ libardour_sources = [
         'audio_library.cc',
         'audio_playlist.cc',
         'audio_playlist_importer.cc',
+        'audio_playlist_source.cc',
         'audio_port.cc',
         'audio_region_importer.cc',
         'audio_track.cc',

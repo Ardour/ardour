@@ -461,7 +461,11 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 static void
 remove_file_source (boost::shared_ptr<Source> source)
 {
-	::unlink (source->path().c_str());
+	boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (source);
+
+	if (fs) {
+		::unlink (fs->path().c_str());
+	}
 }
 
 // This function is still unable to cleanly update an existing source, even though

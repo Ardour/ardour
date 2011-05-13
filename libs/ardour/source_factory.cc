@@ -28,6 +28,8 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
 
+#include "ardour/audioplaylist.h"
+#include "ardour/audio_playlist_source.h"
 #include "ardour/source_factory.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/silentfilesource.h"
@@ -320,5 +322,44 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 	}
 
 	return boost::shared_ptr<Source> ();
+}
+
+boost::shared_ptr<Source>
+SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<Playlist> p, const std::string& name,
+				   uint32_t chn, frameoffset_t start, framecnt_t len, bool copy, Source::Flag flags, 
+				   bool announce, bool defer_peaks)
+{
+	if (type == DataType::AUDIO) {
+		try {
+
+			boost::shared_ptr<AudioPlaylist> ap = boost::dynamic_pointer_cast<AudioPlaylist>(p);
+
+			if (ap) {
+				Source* src = new AudioPlaylistSource (s, name, ap, chn, start, len, copy, flags);
+				boost::shared_ptr<Source> ret (src);
+				
+				if (setup_peakfile (ret, defer_peaks)) {
+					return boost::shared_ptr<Source>();
+				}
+				
+				ret->check_for_analysis_data_on_disk ();
+				
+				if (announce) {
+					SourceCreated (ret);
+				}
+				
+				return ret;
+			}
+		}
+
+		catch (failed_constructor& err) {
+			/* relax - return at function scope */
+		}
+
+	} else if (type == DataType::MIDI) {
+
+	}
+
+	return boost::shared_ptr<Source>();
 }
 

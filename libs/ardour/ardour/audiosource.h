@@ -47,11 +47,11 @@ class AudioSource : virtual public Source,
 	virtual ~AudioSource ();
 
 	framecnt_t readable_length() const { return _length; }
-	uint32_t   n_channels()      const { return 1; }
+	virtual uint32_t n_channels()      const { return 1; }
 
-        bool       empty() const;
+        virtual bool       empty() const;
 	framecnt_t length (framepos_t pos) const;
-	void      update_length (framepos_t pos, framecnt_t cnt);
+	void       update_length (framepos_t pos, framecnt_t cnt);
 
 	virtual framecnt_t available_peaks (double zoom) const;
 
@@ -129,7 +129,7 @@ class AudioSource : virtual public Source,
 	virtual framecnt_t write_unlocked (Sample *dst, framecnt_t cnt) = 0;
 	virtual std::string peak_path(std::string audio_path) = 0;
 	virtual std::string find_broken_peakfile (std::string missing_peak_path,
-                                                  std::string audio_path) = 0;
+                                                  std::string audio_path) { return std::string(); }
 
 	virtual int read_peaks_with_fpp (PeakData *peaks,
 					 framecnt_t npeaks, framepos_t start, framecnt_t cnt,
