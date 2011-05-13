@@ -31,7 +31,8 @@
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
+namespace ARDOUR
+{
 
 void
 setup_enum_writer ()
@@ -362,4 +363,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Track, UnFrozen);
 	REGISTER (_Track_FreezeState);
 	
+}
+
 }
