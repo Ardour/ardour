@@ -1068,7 +1068,7 @@ RouteTimeAxisView::use_copy_playlist (bool prompt, vector<boost::shared_ptr<Play
 
 	name = pl->name();
 
-	if (route_group() && route_group()->is_active()) {
+	if (route_group() && route_group()->is_active() && route_group()->enabled_property (ARDOUR::Properties::edit.property_id)) {
 		name = resolve_new_group_playlist_name(name, playlists_before_op);
 	}
 
@@ -1123,7 +1123,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 
 	name = pl->name();
 
-	if (route_group() && route_group()->is_active()) {
+	if (route_group() && route_group()->is_active() && route_group()->enabled_property (ARDOUR::Properties::edit.property_id)) {
 		name = resolve_new_group_playlist_name(name,playlists_before_op);
 	}
 
@@ -1506,7 +1506,7 @@ RouteTimeAxisView::build_playlist_menu ()
 	playlist_items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
 	playlist_items.push_back (SeparatorElem());
 
-	if (!route_group() || !route_group()->is_active()) {
+	if (!route_group() || !route_group()->is_active() || !route_group()->enabled_property (ARDOUR::Properties::edit.property_id)) {
 		playlist_items.push_back (MenuElem (_("New..."), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::new_playlists), this)));
 		playlist_items.push_back (MenuElem (_("New Copy..."), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::copy_playlists), this)));
 
@@ -1550,8 +1550,10 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 		}
 		track()->use_playlist (apl);
 
-		if (route_group() && route_group()->is_active()) {
-			std::string group_string = "."+route_group()->name()+".";
+		RouteGroup* rg = route_group();
+
+		if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::edit.property_id)) {
+			std::string group_string = "." + rg->name() + ".";
 
 			std::string take_name = apl->name();
 			std::string::size_type idx = take_name.find(group_string);
@@ -1561,7 +1563,7 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 
 			take_name = take_name.substr(idx + group_string.length()); // find the bit containing the take number / name
 
-			boost::shared_ptr<RouteList> rl (route_group()->route_list());
+			boost::shared_ptr<RouteList> rl (rg->route_list());
 
 			for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
 				if ( (*i) == this->route()) {
