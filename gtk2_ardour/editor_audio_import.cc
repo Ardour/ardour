@@ -750,7 +750,13 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 			just_one.clear ();
 			just_one.push_back (*x);
 
-			region_name = region_name_from_path ((*x)->path(), false, false, sources.size(), n);
+			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (*x);
+
+			if (fs) {
+				region_name = region_name_from_path (fs->path(), false, false, sources.size(), n);
+			} else{
+				region_name = (*x)->name();
+			}
 
 			PropertyList plist;
 
