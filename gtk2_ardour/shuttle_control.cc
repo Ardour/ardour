@@ -54,6 +54,7 @@ ShuttleControl::ShuttleControl ()
 	last_shuttle_request = 0;
 	last_speed_displayed = -99999999;
 	shuttle_grabbed = false;
+	shuttle_speed_on_grab = 0;
 	shuttle_fract = 0.0;
 	shuttle_max_speed = 8.0f;
 	shuttle_style_menu = 0;
@@ -236,6 +237,7 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 	case 1:
 		add_modal_grab ();
 		shuttle_grabbed = true;
+		shuttle_speed_on_grab = _session->transport_speed ();
 		mouse_shuttle (ev->x, true);
 		break;
 
@@ -261,11 +263,7 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 		remove_modal_grab ();
 
 		if (Config->get_shuttle_behaviour() == Sprung) {
-			if (_session->config.get_auto_play()) {
-				_session->request_transport_speed (1.0);
-			} else {
-				_session->request_transport_speed (0.0);
-			}
+			_session->request_transport_speed (shuttle_speed_on_grab);
 		} else {
                         mouse_shuttle (ev->x, true);
                 }

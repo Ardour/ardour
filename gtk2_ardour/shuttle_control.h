@@ -60,6 +60,7 @@ class ShuttleControl : public Gtk::DrawingArea, public ARDOUR::SessionHandlePtr
 	float  shuttle_max_speed;
 	float  last_speed_displayed;
 	bool   shuttle_grabbed;
+	double shuttle_speed_on_grab;
 	float shuttle_fract;
 	boost::shared_ptr<ShuttleControllable> _controllable;
 	cairo_pattern_t* pattern;
