@@ -32,6 +32,8 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace PBD;
 
+#define NS_UI "http://lv2plug.in/ns/extensions/ui#"
+
 #if defined(HAVE_NEW_SLV2) && defined(HAVE_SUIL)
 SuilHost* LV2PluginUI::ui_host = NULL;
 #endif
@@ -180,14 +182,15 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		LV2PluginUI::ui_host = suil_host_new(
 	        LV2PluginUI::lv2_ui_write, NULL, NULL, NULL);
 	}
-	LV2World* lv2_world      = ARDOUR::PluginManager::the_manager()->lv2_world();
-	SLV2Value container_type = (is_external_ui)
-		? lv2_world->external_gui : lv2_world->gtk_gui;
+	const char* container_type = (is_external_ui)
+		? NS_UI "external"
+		: NS_UI "GtkUI";
+
 	SLV2UI ui = _lv2->slv2_ui();
 	_inst = suil_instance_new(
 		LV2PluginUI::ui_host,
 		this,
-		slv2_value_as_uri(container_type),
+		container_type,
 		slv2_value_as_uri(slv2_plugin_get_uri(_lv2->slv2_plugin())),
 		slv2_value_as_uri(slv2_ui_get_uri(ui)),
 		slv2_value_as_uri(_lv2->ui_type()),

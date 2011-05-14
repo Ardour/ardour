@@ -27,6 +27,8 @@
 
 #include <glibmm.h>
 
+#include <boost/utility.hpp>
+
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
@@ -67,26 +69,46 @@ uint32_t LV2Plugin::_midi_event_type = _uri_map.uri_to_id(
         "http://lv2plug.in/ns/ext/event",
         "http://lv2plug.in/ns/ext/midi#MidiEvent");
 
+class LV2World : boost::noncopyable {
+public:
+	LV2World ();
+	~LV2World ();
+
+	SLV2World world;
+	SLV2Value input_class; ///< Input port
+	SLV2Value output_class; ///< Output port
+	SLV2Value audio_class; ///< Audio port
+	SLV2Value control_class; ///< Control port
+	SLV2Value event_class; ///< Event port
+	SLV2Value midi_class; ///< MIDI event
+	SLV2Value in_place_broken;
+	SLV2Value integer;
+	SLV2Value toggled;
+	SLV2Value srate;
+	SLV2Value gtk_gui;
+	SLV2Value external_gui;
+	SLV2Value logarithmic;
+};
+
+static LV2World _world;
+
 LV2Plugin::LV2Plugin (AudioEngine& engine,
                       Session&     session,
-                      LV2World&    world,
                       SLV2Plugin   plugin,
                       framecnt_t   rate)
 	: Plugin(engine, session)
-	, _world(world)
 	, _features(NULL)
 	, _insert_id("0")
 {
-	init(world, plugin, rate);
+	init(plugin, rate);
 }
 
 LV2Plugin::LV2Plugin (const LV2Plugin& other)
 	: Plugin(other)
-	, _world(other._world)
 	, _features(NULL)
 	, _insert_id(other._insert_id)
 {
-	init(other._world, other._plugin, other._sample_rate);
+	init(other._plugin, other._sample_rate);
 
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		_control_data[i] = other._shadow_data[i];
@@ -95,11 +117,10 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 }
 
 void
-LV2Plugin::init(LV2World& world, SLV2Plugin plugin, framecnt_t rate)
+LV2Plugin::init(SLV2Plugin plugin, framecnt_t rate)
 {
 	DEBUG_TRACE(DEBUG::LV2, "init\n");
 
-	_world                = world;
 	_plugin               = plugin;
 	_ui                   = NULL;
 	_ui_type              = NULL;
@@ -155,7 +176,7 @@ LV2Plugin::init(LV2World& world, SLV2Plugin plugin, framecnt_t rate)
 	_data_access_extension_data.extension_data = _instance->lv2_descriptor->extension_data;
 	_data_access_feature.data                  = &_data_access_extension_data;
 
-	if (slv2_plugin_has_feature(plugin, world.in_place_broken)) {
+	if (slv2_plugin_has_feature(plugin, _world.in_place_broken)) {
 		error << string_compose(
 		    _("LV2: \"%1\" cannot be used, since it cannot do inplace processing"),
 		    slv2_value_as_string(_name)) << endmsg;
@@ -283,6 +304,30 @@ string
 LV2Plugin::unique_id() const
 {
 	return slv2_value_as_uri(slv2_plugin_get_uri(_plugin));
+}
+
+const char*
+LV2Plugin::label() const
+{
+	return slv2_value_as_string(_name);
+}
+
+const char*
+LV2Plugin::name() const
+{
+	return slv2_value_as_string(_name);
+}
+
+const char*
+LV2Plugin::maker() const
+{
+	return _author ? slv2_value_as_string (_author) : "Unknown";
+}
+
+uint32_t
+LV2Plugin::parameter_count() const
+{
+	return slv2_plugin_get_num_ports(_plugin);
 }
 
 float
@@ -1137,9 +1182,8 @@ LV2World::~LV2World()
 	slv2_value_free(in_place_broken);
 }
 
-LV2PluginInfo::LV2PluginInfo (void* lv2_world, void* slv2_plugin)
-	: _lv2_world(lv2_world)
-	, _slv2_plugin(slv2_plugin)
+LV2PluginInfo::LV2PluginInfo (void* slv2_plugin)
+	: _slv2_plugin(slv2_plugin)
 {
 	type = ARDOUR::LV2;
 }
@@ -1154,7 +1198,7 @@ LV2PluginInfo::load(Session& session)
 		PluginPtr plugin;
 
 		plugin.reset(new LV2Plugin(session.engine(), session,
-		                           *(LV2World*)_lv2_world, (SLV2Plugin)_slv2_plugin,
+		                           (SLV2Plugin)_slv2_plugin,
 		                           session.frame_rate()));
 
 		plugin->set_info(PluginInfoPtr(new LV2PluginInfo(*this)));
@@ -1167,17 +1211,16 @@ LV2PluginInfo::load(Session& session)
 }
 
 PluginInfoList*
-LV2PluginInfo::discover(void* lv2_world)
+LV2PluginInfo::discover()
 {
 	PluginInfoList* plugs   = new PluginInfoList;
-	LV2World*       world   = (LV2World*)lv2_world;
-	SLV2Plugins     plugins = slv2_world_get_all_plugins(world->world);
+	SLV2Plugins     plugins = slv2_world_get_all_plugins(_world.world);
 
 	cerr << "LV2: Discovering " << slv2_plugins_size(plugins) << " plugins" << endl;
 
 	for (unsigned i = 0; i < slv2_plugins_size(plugins); ++i) {
 		SLV2Plugin       p = slv2_plugins_get_at(plugins, i);
-		LV2PluginInfoPtr info(new LV2PluginInfo(lv2_world, p));
+		LV2PluginInfoPtr info(new LV2PluginInfo(p));
 
 		SLV2Value name = slv2_plugin_get_name(p);
 
@@ -1203,17 +1246,17 @@ LV2PluginInfo::discover(void* lv2_world)
 
 		info->n_inputs.set_audio(
 			slv2_plugin_get_num_ports_of_class(
-				p, world->input_class, world->audio_class, NULL));
+				p, _world.input_class, _world.audio_class, NULL));
 		info->n_inputs.set_midi(
 			slv2_plugin_get_num_ports_of_class(
-				p, world->input_class, world->event_class, NULL));
+				p, _world.input_class, _world.event_class, NULL));
 
 		info->n_outputs.set_audio(
 			slv2_plugin_get_num_ports_of_class(
-				p, world->output_class, world->audio_class, NULL));
+				p, _world.output_class, _world.audio_class, NULL));
 		info->n_outputs.set_midi(
 			slv2_plugin_get_num_ports_of_class(
-				p, world->output_class, world->event_class, NULL));
+				p, _world.output_class, _world.event_class, NULL));
 
 		info->unique_id = slv2_value_as_uri(slv2_plugin_get_uri(p));
 		info->index     = 0; // Meaningless for LV2

@@ -38,7 +38,6 @@
 namespace ARDOUR {
 
 class AudioEngine;
-class LV2World;
 class Session;
 
 class LV2Plugin : public ARDOUR::Plugin
@@ -46,21 +45,17 @@ class LV2Plugin : public ARDOUR::Plugin
   public:
 	LV2Plugin (ARDOUR::AudioEngine& engine,
 	           ARDOUR::Session&     session,
-	           ARDOUR::LV2World&    world,
 	           SLV2Plugin           plugin,
 	           framecnt_t           sample_rate);
 	LV2Plugin (const LV2Plugin &);
 	~LV2Plugin ();
 
 	std::string unique_id () const;
+	const char* label () const;
+	const char* name () const;
+	const char* maker () const;
 
-	const char* label () const { return slv2_value_as_string(_name); }
-	const char* name () const  { return slv2_value_as_string(_name); }
-	const char* maker () const {
-		return _author ? slv2_value_as_string (_author) : "Unknown";
-	}
-
-	uint32_t   parameter_count () const { return slv2_plugin_get_num_ports(_plugin); }
+	uint32_t   parameter_count () const;
 	float      default_value (uint32_t port);
 	framecnt_t signal_latency () const;
 	void       set_parameter (uint32_t port, float val);
@@ -125,7 +120,6 @@ class LV2Plugin : public ARDOUR::Plugin
 
   private:
 	void*             _module;
-	LV2World&         _world;
 	LV2_Feature**     _features;
 	SLV2Plugin        _plugin;
 	SLV2UI            _ui;
@@ -178,7 +172,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	static char* lv2_files_new_file_path (void*       host_data,
 	                                      const char* relative_path);
 
-	void init (LV2World& world, SLV2Plugin plugin, framecnt_t rate);
+	void init (SLV2Plugin plugin, framecnt_t rate);
 	void run (pframes_t nsamples);
 
 	void latency_compute_run ();
@@ -189,42 +183,15 @@ class LV2Plugin : public ARDOUR::Plugin
 };
 
 
-/** The SLV2World, and various cached (as symbols, fast) URIs.
- *
- * This object represents everything ardour 'knows' about LV2
- * (ie understood extensions/features/etc)
- */
-class LV2World {
-public:
-	LV2World ();
-	~LV2World ();
-
-	SLV2World world;
-	SLV2Value input_class; ///< Input port
-	SLV2Value output_class; ///< Output port
-	SLV2Value audio_class; ///< Audio port
-	SLV2Value control_class; ///< Control port
-	SLV2Value event_class; ///< Event port
-	SLV2Value midi_class; ///< MIDI event
-	SLV2Value in_place_broken;
-	SLV2Value integer;
-	SLV2Value toggled;
-	SLV2Value srate;
-	SLV2Value gtk_gui;
-	SLV2Value external_gui;
-	SLV2Value logarithmic;
-};
-
-
 class LV2PluginInfo : public PluginInfo {
 public:
-	LV2PluginInfo (void* slv2_world, void* slv2_plugin);
+	LV2PluginInfo (void* slv2_plugin);
 	~LV2PluginInfo ();
-	static PluginInfoList* discover (void* slv2_world);
+
+	static PluginInfoList* discover ();
 
 	PluginPtr load (Session& session);
 
-	void* _lv2_world;
 	void* _slv2_plugin;
 };
 

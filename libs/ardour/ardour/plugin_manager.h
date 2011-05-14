@@ -33,10 +33,6 @@
 #include "ardour/types.h"
 #include "ardour/plugin.h"
 
-#ifdef LV2_SUPPORT
-#include "ardour/lv2_plugin.h"
-#endif
-
 namespace ARDOUR {
 
 class Plugin;
@@ -55,10 +51,6 @@ class PluginManager : public boost::noncopyable {
 
 	int add_ladspa_directory (std::string dirpath);
 	int add_vst_directory (std::string dirpath);
-
-#ifdef LV2_SUPPORT
-	LV2World* lv2_world() { return _lv2_world; }
-#endif
 
 	static PluginManager* the_manager() { return _manager; }
 
@@ -106,10 +98,6 @@ class PluginManager : public boost::noncopyable {
 	ARDOUR::PluginInfoList* _ladspa_plugin_info;
 	ARDOUR::PluginInfoList* _lv2_plugin_info;
 	ARDOUR::PluginInfoList* _au_plugin_info;
-
-#ifdef LV2_SUPPORT
-	LV2World* _lv2_world;
-#endif
 
 	std::map<uint32_t, std::string> rdf_type;
 

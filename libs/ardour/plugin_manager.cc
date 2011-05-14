@@ -133,19 +133,12 @@ PluginManager::PluginManager ()
 		ladspa_plugin_whitelist.push_back (2150); // tap pitch shifter
 	}
 
-#ifdef LV2_SUPPORT
-	_lv2_world = new LV2World();
-#endif
-
 	BootMessage (_("Discovering Plugins"));
 }
 
 
 PluginManager::~PluginManager()
 {
-#ifdef LV2_SUPPORT
-	delete _lv2_world;
-#endif
 }
 
 
@@ -475,7 +468,7 @@ void
 PluginManager::lv2_refresh ()
 {
 	delete _lv2_plugin_info;
-	_lv2_plugin_info = LV2PluginInfo::discover(_lv2_world);
+	_lv2_plugin_info = LV2PluginInfo::discover();
 }
 #endif
 
