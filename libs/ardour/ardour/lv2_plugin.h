@@ -30,7 +30,6 @@
 #include "pbd/stateful.h"
 
 #include <jack/types.h>
-#include <slv2/slv2.h>
 
 #include "ardour/plugin.h"
 #include "ardour/uri_map.h"
@@ -45,16 +44,18 @@ class LV2Plugin : public ARDOUR::Plugin
   public:
 	LV2Plugin (ARDOUR::AudioEngine& engine,
 	           ARDOUR::Session&     session,
-	           SLV2Plugin           plugin,
+	           void*                c_plugin,
 	           framecnt_t           sample_rate);
 	LV2Plugin (const LV2Plugin &);
 	~LV2Plugin ();
 
 	std::string unique_id () const;
+	const char* uri () const;
 	const char* label () const;
 	const char* name () const;
 	const char* maker () const;
 
+	uint32_t   num_ports () const;
 	uint32_t   parameter_count () const;
 	float      default_value (uint32_t port);
 	framecnt_t signal_latency () const;
@@ -63,13 +64,10 @@ class LV2Plugin : public ARDOUR::Plugin
 	int        get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	uint32_t   nth_parameter (uint32_t port, bool& ok) const;
 
-	const void* extension_data (const char* uri) {
-		return _instance->lv2_descriptor->extension_data (uri);
-	}
+	const void* extension_data (const char* uri);
 
-	SLV2Plugin slv2_plugin () { return _plugin; }
-	SLV2UI     slv2_ui ()     { return _ui; }
-	SLV2Value  ui_type ()     { return _ui_type; }
+	void* c_plugin();
+	void* c_ui();
 
 	bool is_external_ui () const;
 
@@ -119,14 +117,10 @@ class LV2Plugin : public ARDOUR::Plugin
 	bool has_editor () const;
 
   private:
+	struct Impl;
+	Impl*             _impl;
 	void*             _module;
 	LV2_Feature**     _features;
-	SLV2Plugin        _plugin;
-	SLV2UI            _ui;
-	SLV2Value         _ui_type;
-	SLV2Value         _name;
-	SLV2Value         _author;
-	SLV2Instance      _instance;
 	framecnt_t        _sample_rate;
 	float*            _control_data;
 	float*            _shadow_data;
@@ -172,7 +166,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	static char* lv2_files_new_file_path (void*       host_data,
 	                                      const char* relative_path);
 
-	void init (SLV2Plugin plugin, framecnt_t rate);
+	void init (void* c_plugin, framecnt_t rate);
 	void run (pframes_t nsamples);
 
 	void latency_compute_run ();
@@ -185,14 +179,14 @@ class LV2Plugin : public ARDOUR::Plugin
 
 class LV2PluginInfo : public PluginInfo {
 public:
-	LV2PluginInfo (void* slv2_plugin);
+	LV2PluginInfo (void* c_plugin);
 	~LV2PluginInfo ();
 
 	static PluginInfoList* discover ();
 
 	PluginPtr load (Session& session);
 
-	void* _slv2_plugin;
+	void* _c_plugin;
 };
 
 typedef boost::shared_ptr<LV2PluginInfo> LV2PluginInfoPtr;

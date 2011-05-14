@@ -36,13 +36,9 @@
 #include "ardour/types.h"
 #include "plugin_ui.h"
 
-#ifdef HAVE_SLV2
+#ifdef LV2_SUPPORT
 
 #include "lv2_external_ui.h"
-
-#if defined(HAVE_NEW_SLV2) && defined(HAVE_SUIL)
-#include <suil/suil.h>
-#endif
 
 namespace ARDOUR {
 	class PluginInsert;
@@ -81,15 +77,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 
 	static void on_external_ui_closed(void* controller);
 
-#if defined(HAVE_NEW_SLV2) && defined(HAVE_SUIL)
-	static SuilHost* ui_host;
-	static SLV2Value ui_GtkUI;
-	static SLV2Value ui_external;
-
-	SuilInstance* _inst;
-#else
-	SLV2UIInstance _inst;
-#endif
+	void* _inst;
 
 	static void lv2_ui_write(
 			void*       controller,
@@ -110,7 +98,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	virtual void on_window_hide();
 };
 
-#endif // HAVE_SLV2
+#endif // LV2_SUPPORT
 
 #endif /* __ardour_lv2_plugin_ui_h__ */
 
