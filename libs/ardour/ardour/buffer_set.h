@@ -41,7 +41,7 @@ class Buffer;
 class AudioBuffer;
 class MidiBuffer;
 class PortSet;
-#ifdef HAVE_SLV2
+#ifdef LV2_SUPPORT
 class LV2EventBuffer;
 #endif
 
@@ -108,7 +108,7 @@ public:
 		return (const MidiBuffer&)get(DataType::MIDI, i);
 	}
 
-#ifdef HAVE_SLV2
+#ifdef LV2_SUPPORT
 	/** Get a MIDI buffer translated into an LV2 MIDI buffer for use with plugins.
 	 * The index here corresponds directly to MIDI buffer numbers (i.e. the index
 	 * passed to get_midi), translation back and forth will happen as needed */
@@ -170,7 +170,7 @@ private:
 	/// Vector of vectors, indexed by DataType
 	std::vector<BufferVec> _buffers;
 
-#ifdef HAVE_SLV2
+#ifdef LV2_SUPPORT
 	/// LV2 MIDI buffers (for conversion to/from MIDI buffers)
 	typedef std::vector< std::pair<bool, LV2EventBuffer*> > LV2Buffers;
 	LV2Buffers _lv2_buffers;

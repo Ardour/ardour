@@ -33,7 +33,7 @@
 #include "ardour/types.h"
 #include "ardour/plugin.h"
 
-#ifdef HAVE_SLV2
+#ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
 #endif
 
@@ -56,7 +56,7 @@ class PluginManager : public boost::noncopyable {
 	int add_ladspa_directory (std::string dirpath);
 	int add_vst_directory (std::string dirpath);
 
-#ifdef HAVE_SLV2
+#ifdef LV2_SUPPORT
 	LV2World* lv2_world() { return _lv2_world; }
 #endif
 
@@ -107,7 +107,7 @@ class PluginManager : public boost::noncopyable {
 	ARDOUR::PluginInfoList* _lv2_plugin_info;
 	ARDOUR::PluginInfoList* _au_plugin_info;
 
-#ifdef HAVE_SLV2
+#ifdef LV2_SUPPORT
 	LV2World* _lv2_world;
 #endif
 

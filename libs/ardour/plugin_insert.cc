@@ -37,7 +37,7 @@
 #include "ardour/port.h"
 #include "ardour/route.h"
 
-#ifdef HAVE_SLV2
+#ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
 #endif
 
@@ -549,7 +549,7 @@ boost::shared_ptr<Plugin>
 PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 {
 	boost::shared_ptr<LadspaPlugin> lp;
-#ifdef HAVE_SLV2
+#ifdef LV2_SUPPORT
 	boost::shared_ptr<LV2Plugin> lv2p;
 #endif
 #ifdef VST_SUPPORT
@@ -561,7 +561,7 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 
 	if ((lp = boost::dynamic_pointer_cast<LadspaPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new LadspaPlugin (*lp));
-#ifdef HAVE_SLV2
+#ifdef LV2_SUPPORT
 	} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new LV2Plugin (*lv2p));
 #endif

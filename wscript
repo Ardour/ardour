@@ -533,7 +533,7 @@ def configure(conf):
     autowaf.display_msg(conf, 'Freesound', opts.freesound)
     if opts.freesound:
         conf.define('FREESOUND',1)
-    autowaf.display_msg(conf, 'LV2 Support', bool(conf.env['HAVE_SLV2']))
+    autowaf.display_msg(conf, 'LV2 Support', bool(conf.env['LV2_SUPPORT']))
     autowaf.display_msg(conf, 'LV2 UI Embedding', bool(conf.env['HAVE_SUIL']))
     autowaf.display_msg(conf, 'OGG', bool(conf.env['HAVE_OGG']))
     autowaf.display_msg(conf, 'Rubberband', bool(conf.env['HAVE_RUBBERBAND']))
