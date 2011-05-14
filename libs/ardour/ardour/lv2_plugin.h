@@ -64,7 +64,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	int        get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	uint32_t   nth_parameter (uint32_t port, bool& ok) const;
 
-	const void* extension_data (const char* uri);
+	const void* extension_data (const char* uri) const;
 
 	void* c_plugin();
 	void* c_ui();
