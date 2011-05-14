@@ -72,11 +72,11 @@ class LV2Plugin : public ARDOUR::Plugin
 		return _instance->lv2_descriptor->extension_data (uri);
 	}
 
-	SLV2Plugin slv2_plugin ()         { return _plugin; }
-	SLV2UI     slv2_ui ()             { return _ui; }
-	SLV2Value  ui_type()              { return _ui_type; }
-	SLV2Port   slv2_port (uint32_t i) { return slv2_plugin_get_port_by_index (_plugin, i); }
-	bool       is_external_ui () const;
+	SLV2Plugin slv2_plugin () { return _plugin; }
+	SLV2UI     slv2_ui ()     { return _ui; }
+	SLV2Value  ui_type ()     { return _ui_type; }
+
+	bool is_external_ui () const;
 
 	const char* port_symbol (uint32_t port) const;
 
