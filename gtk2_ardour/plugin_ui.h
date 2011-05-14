@@ -241,7 +241,6 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
 	void build ();
 	ControlUI* build_control_ui (guint32 port_index, boost::shared_ptr<ARDOUR::AutomationControl>);
-	std::vector<std::string> setup_scale_values(guint32 port_index, ControlUI* cui);
 	void ui_parameter_changed (ControlUI* cui);
 	void toggle_parameter_changed (ControlUI* cui);
 	void update_control_display (ControlUI* cui);

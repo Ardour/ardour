@@ -1027,6 +1027,33 @@ LV2Plugin::print_parameter(uint32_t param, char* buf, uint32_t len) const
 	}
 }
 
+boost::shared_ptr<Plugin::ScalePoints>
+LV2Plugin::get_scale_points(uint32_t port_index) const
+{
+	SLV2Port        port   = slv2_plugin_get_port_by_index(_plugin, port_index);
+	SLV2ScalePoints points = slv2_port_get_scale_points(_plugin, port);
+
+	boost::shared_ptr<Plugin::ScalePoints> ret;
+	if (!points) {
+		return ret;
+	}
+
+	ret = boost::shared_ptr<Plugin::ScalePoints>(new ScalePoints());
+
+	for (unsigned i = 0; i < slv2_scale_points_size(points); ++i) {
+		SLV2ScalePoint p     = slv2_scale_points_get_at(points, i);
+		SLV2Value      label = slv2_scale_point_get_label(p);
+		SLV2Value      value = slv2_scale_point_get_value(p);
+		if (label && (slv2_value_is_float(value) || slv2_value_is_int(value))) {
+			ret->insert(make_pair(slv2_value_as_string(label),
+			                      slv2_value_as_float(value)));
+		}
+	}
+
+	slv2_scale_points_free(points);
+	return ret;
+}
+
 void
 LV2Plugin::run(pframes_t nframes)
 {

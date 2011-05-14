@@ -97,7 +97,10 @@ class LadspaPlugin : public ARDOUR::Plugin
 	bool parameter_is_output(uint32_t) const;
 	bool parameter_is_toggled(uint32_t) const;
 
-	int      set_state (const XMLNode&, int version);
+	boost::shared_ptr<Plugin::ScalePoints>
+	get_scale_points(uint32_t port_index) const;
+
+	int set_state (const XMLNode&, int version);
 
 	bool load_preset (PresetRecord);
 

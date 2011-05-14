@@ -108,6 +108,9 @@ class LV2Plugin : public ARDOUR::Plugin
 	bool parameter_is_output (uint32_t) const;
 	bool parameter_is_toggled (uint32_t) const;
 
+	boost::shared_ptr<Plugin::ScalePoints>
+	get_scale_points(uint32_t port_index) const;
+		
 	static uint32_t midi_event_type () { return _midi_event_type; }
 
 	void set_insert_info(const PluginInsert* insert);

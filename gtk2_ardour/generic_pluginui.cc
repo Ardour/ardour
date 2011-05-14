@@ -41,10 +41,6 @@
 
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
-#include "ardour/ladspa_plugin.h"
-#ifdef HAVE_SLV2
-#include "ardour/lv2_plugin.h"
-#endif
 #include "ardour/session.h"
 
 #include <lrdf.h>
@@ -325,7 +321,7 @@ GenericPluginUI::ControlUI::ControlUI ()
 	   below). be sure to include a descender.
 	*/
 
-        set_size_request_to_display_given_text (automate_button, _("Mgnual"), 15, 10);
+	set_size_request_to_display_given_text (automate_button, _("Mgnual"), 15, 10);
 
 	ignore_change = 0;
 	display = 0;
@@ -404,55 +400,35 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 	Gtk::Requisition req (control_ui->automate_button.size_request());
 
-	if (plugin->parameter_is_input (port_index)) {
+	if (plugin->parameter_is_input(port_index)) {
 
-		boost::shared_ptr<LadspaPlugin> lp;
-#ifdef HAVE_SLV2
-		boost::shared_ptr<LV2Plugin> lv2p;
-#endif
-		if ((lp = boost::dynamic_pointer_cast<LadspaPlugin>(plugin)) != 0) {
+		/* Build a combo box */
 
-			// FIXME: not all plugins have a numeric unique ID
-			uint32_t id = atol (lp->unique_id().c_str());
-			lrdf_defaults* defaults = lrdf_get_scale_values(id, port_index);
+		boost::shared_ptr<ARDOUR::Plugin::ScalePoints> points
+			= plugin->get_scale_points(port_index);
 
-			if (defaults && defaults->count > 0)	{
-
-				control_ui->combo = new Gtk::ComboBoxText;
-				//control_ui->combo->set_value_in_list(true, false);
-				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
-				control_ui->combo->signal_changed().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::control_combo_changed), control_ui));
-				mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::ui_parameter_changed, this, control_ui), gui_context());
-				control_ui->pack_start(control_ui->label, true, true);
-				control_ui->pack_start(*control_ui->combo, false, true);
-
-				update_control_display(control_ui);
-
-				lrdf_free_setting_values(defaults);
-				return control_ui;
+		if (points) {
+			std::vector<std::string> labels;
+			for (ARDOUR::Plugin::ScalePoints::const_iterator i = points->begin();
+			     i != points->end(); ++i) {
+				labels.push_back(i->first);
 			}
 
-#ifdef HAVE_SLV2
-		} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin>(plugin)) != 0) {
+			control_ui->combo = new Gtk::ComboBoxText();
+			set_popdown_strings(*control_ui->combo, labels);
+			control_ui->combo->signal_changed().connect(
+				sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::control_combo_changed),
+				            control_ui));
+			mcontrol->Changed.connect(control_connections, invalidator(*this),
+			                          boost::bind(&GenericPluginUI::ui_parameter_changed,
+			                                      this, control_ui),
+			                          gui_context());
+			control_ui->pack_start(control_ui->label, true, true);
+			control_ui->pack_start(*control_ui->combo, false, true);
 
-			SLV2Port port = lv2p->slv2_port(port_index);
-			SLV2ScalePoints points = slv2_port_get_scale_points(lv2p->slv2_plugin(), port);
+			update_control_display(control_ui);
 
-			if (points) {
-				control_ui->combo = new Gtk::ComboBoxText;
-				//control_ui->combo->set_value_in_list(true, false);
-				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
-				control_ui->combo->signal_changed().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::control_combo_changed), control_ui));
-				mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::ui_parameter_changed, this, control_ui), gui_context());
-				control_ui->pack_start(control_ui->label, true, true);
-				control_ui->pack_start(*control_ui->combo, false, true);
-
-				update_control_display(control_ui);
-
-				slv2_scale_points_free(points);
-				return control_ui;
-			}
-#endif
+			return control_ui;
 		}
 
 		if (desc.toggled) {
@@ -471,13 +447,13 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 			control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui, (uint32_t) port_index));
 
 			mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::toggle_parameter_changed, this, control_ui), gui_context());
-                        mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
+			mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
 	
 			if (plugin->get_parameter (port_index) > 0.5){
 				control_ui->button->set_active(true);
 			}
 
-                        automation_state_changed (control_ui);
+			automation_state_changed (control_ui);
 
 			return control_ui;
 		}
@@ -492,7 +468,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		   the absence of bounds in any sensible fashion.
 		*/
 
-                Adjustment* adj = control_ui->controller->adjustment();
+		Adjustment* adj = control_ui->controller->adjustment();
 		boost::shared_ptr<PluginInsert::PluginControl> pc = boost::dynamic_pointer_cast<PluginInsert::PluginControl> (control_ui->control);
 
 		adj->set_lower (pc->user_to_ui (desc.lower));
@@ -512,7 +488,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 			control_ui->controller->set_name (X_("PluginSlider"));
 			control_ui->controller->set_style (BarController::LeftToRight);
 			control_ui->controller->set_use_parent (true);
-                        control_ui->controller->set_logarithmic (desc.logarithmic);
+			control_ui->controller->set_logarithmic (desc.logarithmic);
 
 			control_ui->controller->StartGesture.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::start_touch), control_ui));
 			control_ui->controller->StopGesture.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::stop_touch), control_ui));
@@ -675,7 +651,7 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 	cui->ignore_change++;
 
 	if (cui->combo) {
-	        std::map<string,float>::iterator it;
+		std::map<string,float>::iterator it;
 		for (it = cui->combo_map->begin(); it != cui->combo_map->end(); ++it) {
 			if (it->second == val) {
 				cui->combo->set_active_text(it->first);
@@ -793,61 +769,5 @@ GenericPluginUI::output_update ()
 		}
 	}
 }
-
-vector<string>
-GenericPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
-{
-	vector<string> enums;
-	boost::shared_ptr<LadspaPlugin> lp;
-#ifdef HAVE_SLV2
-	boost::shared_ptr<LV2Plugin> lv2p;
-#endif
-
-	if ((lp = boost::dynamic_pointer_cast<LadspaPlugin>(plugin)) != 0) {
-		// all LADPSA plugins have a numeric unique ID
-		uint32_t id = atol (lp->unique_id().c_str());
-
-		cui->combo_map = new std::map<string, float>;
-		lrdf_defaults* defaults = lrdf_get_scale_values(id, port_index);
-		if (defaults)	{
-			for (uint32_t i = 0; i < defaults->count; ++i) {
-				enums.push_back(defaults->items[i].label);
-				pair<string, float> newpair;
-				newpair.first = defaults->items[i].label;
-				newpair.second = defaults->items[i].value;
-				cui->combo_map->insert(newpair);
-			}
-
-			lrdf_free_setting_values(defaults);
-		}
-
-#ifdef HAVE_SLV2
-	} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin>(plugin)) != 0) {
-
-		SLV2Port port = lv2p->slv2_port(port_index);
-		SLV2ScalePoints points = slv2_port_get_scale_points(lv2p->slv2_plugin(), port);
-		cui->combo_map = new std::map<string, float>;
-
-		for (unsigned i=0; i < slv2_scale_points_size(points); ++i) {
-			SLV2ScalePoint p = slv2_scale_points_get_at(points, i);
-			SLV2Value label = slv2_scale_point_get_label(p);
-			SLV2Value value = slv2_scale_point_get_value(p);
-			if (label && (slv2_value_is_float(value) || slv2_value_is_int(value))) {
-				enums.push_back(slv2_value_as_string(label));
-				pair<string, float> newpair;
-				newpair.first = slv2_value_as_string(label);
-				newpair.second = slv2_value_as_float(value);
-				cui->combo_map->insert(newpair);
-			}
-		}
-
-		slv2_scale_points_free(points);
-#endif
-	}
-
-
-	return enums;
-}
-
 
 

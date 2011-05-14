@@ -134,6 +134,13 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool parameter_is_input(uint32_t) const = 0;
 	virtual bool parameter_is_output(uint32_t) const = 0;
 
+	typedef std::map<const std::string, const float> ScalePoints;
+
+	virtual boost::shared_ptr<ScalePoints>
+	get_scale_points(uint32_t port_index) const {
+		return boost::shared_ptr<ScalePoints>();
+	}
+
 	void realtime_handle_transport_stopped ();
 
 	struct PresetRecord {
