@@ -321,7 +321,10 @@ def build(bld):
     obj.cxxflags     += ['-DPROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"']
     obj.cxxflags     += ['-I../libs']
 
-    if bld.env['HAVE_SLV2']:
+    if bld.env['HAVE_SUIL']:
+        obj.source += [ 'lv2_plugin_ui.cc' ]
+        obj.uselib += ' SUIL '
+    elif bld.env['HAVE_SLV2']:
         obj.source += [ 'lv2_plugin_ui.cc' ]
         obj.uselib += ' SLV2 '
 

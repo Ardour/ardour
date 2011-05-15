@@ -28,10 +28,15 @@
 
 #include "lv2_ui.h"
 
-#include <slv2/slv2.h>
+/* Note this file is not compiled without either Suil or SLV2 present,
+   and if Suil is present then Lilv is also present.
+*/
 
-#if defined(HAVE_NEW_SLV2) && defined(HAVE_SUIL)
+#ifdef HAVE_SUIL
+#include <lilv/lilv.h>
 #include <suil/suil.h>
+#else
+#include <slv2/slv2.h>
 #endif
 
 using namespace Gtk;
@@ -40,7 +45,7 @@ using namespace PBD;
 
 #define NS_UI "http://lv2plug.in/ns/extensions/ui#"
 
-#if defined(HAVE_NEW_SLV2) && defined(HAVE_SUIL)
+#ifdef HAVE_SUIL
 static SuilHost* ui_host = NULL;
 #endif
 
@@ -85,7 +90,7 @@ LV2PluginUI::parameter_update(uint32_t port_index, float val)
 	}
 
 #ifdef HAVE_SUIL
-	suil_instance_port_event(_inst, port_index, 4, 0, &val);
+	suil_instance_port_event((SuilInstance*)_inst, port_index, 4, 0, &val);
 #else
 	SLV2UIInstance          inst      = (SLV2UIInstance)_inst;
 	const LV2UI_Descriptor* ui_desc   = slv2_ui_instance_get_descriptor(inst);
@@ -184,7 +189,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		features_dst = (LV2_Feature**)_lv2->features();
 	}
 
-#if defined(HAVE_NEW_SLV2) && defined(HAVE_SUIL)
+#ifdef HAVE_SUIL
 	if (!ui_host) {
 		ui_host = suil_host_new(LV2PluginUI::lv2_ui_write, NULL, NULL, NULL);
 	}
@@ -192,16 +197,16 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		? NS_UI "external"
 		: NS_UI "GtkUI";
 
-	SLV2UI ui = _lv2->slv2_ui();
+	LilvUI* ui = (LilvUI*)_lv2->c_ui();
 	_inst = suil_instance_new(
 		ui_host,
 		this,
 		container_type,
-		slv2_value_as_uri(slv2_plugin_get_uri(_lv2->slv2_plugin())),
-		slv2_value_as_uri(slv2_ui_get_uri(ui)),
-		slv2_value_as_uri(_lv2->ui_type()),
-		slv2_uri_to_path(slv2_value_as_uri(slv2_ui_get_bundle_uri(ui))),
-		slv2_uri_to_path(slv2_value_as_uri(slv2_ui_get_binary_uri(ui))),
+		_lv2->uri(),
+		lilv_node_as_uri(lilv_ui_get_uri(ui)),
+		lilv_node_as_uri((const LilvNode*)_lv2->c_ui_type()),
+		lilv_uri_to_path(lilv_node_as_uri(lilv_ui_get_bundle_uri(ui))),
+		lilv_uri_to_path(lilv_node_as_uri(lilv_ui_get_binary_uri(ui))),
 		features_dst);
 #else
 	_inst = slv2_ui_instantiate((SLV2Plugin)_lv2->c_plugin(),
@@ -215,7 +220,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		free(features_dst);
 	}
 
-#if defined(HAVE_NEW_SLV2) && defined(HAVE_SUIL)
+#ifdef HAVE_SUIL
 #define GET_WIDGET(inst) suil_instance_get_widget((SuilInstance*)inst);
 #else
 #define GET_WIDGET(inst) slv2_ui_instance_get_widget((SLV2UIInstance)inst);
@@ -268,7 +273,7 @@ LV2PluginUI::~LV2PluginUI ()
 	}
 
 	/* Close and delete GUI. */
-#if defined(HAVE_NEW_SLV2) && defined(HAVE_SUIL)
+#ifdef HAVE_SUIL
 	suil_instance_free((SuilInstance*)_inst);
 #else
 	SLV2UIInstance          inst      = (SLV2UIInstance)_inst;

@@ -1,4 +1,4 @@
-/*
+;/*
     Copyright (C) 2008-2011 Paul Davis
     Author: David Robillard
 
@@ -49,7 +49,7 @@
 #include "i18n.h"
 #include <locale.h>
 
-#include <slv2/slv2.h>
+#include <lilv/lilv.h>
 
 #include "lv2ext/lv2_files.h"
 #include "lv2ext/lv2_persist.h"
@@ -77,32 +77,32 @@ public:
 	LV2World ();
 	~LV2World ();
 
-	SLV2World world;
-	SLV2Value input_class; ///< Input port
-	SLV2Value output_class; ///< Output port
-	SLV2Value audio_class; ///< Audio port
-	SLV2Value control_class; ///< Control port
-	SLV2Value event_class; ///< Event port
-	SLV2Value midi_class; ///< MIDI event
-	SLV2Value in_place_broken;
-	SLV2Value integer;
-	SLV2Value toggled;
-	SLV2Value srate;
-	SLV2Value gtk_gui;
-	SLV2Value external_gui;
-	SLV2Value logarithmic;
+	LilvWorld* world;
+	LilvNode*  input_class;      ///< Input port
+	LilvNode*  output_class;     ///< Output port
+	LilvNode*  audio_class;      ///< Audio port
+	LilvNode*  control_class;    ///< Control port
+	LilvNode*  event_class;      ///< Event port
+	LilvNode*  midi_class;       ///< MIDI event
+	LilvNode*  in_place_broken;
+	LilvNode*  integer;
+	LilvNode*  toggled;
+	LilvNode*  srate;
+	LilvNode*  gtk_gui;
+	LilvNode*  external_gui;
+	LilvNode*  logarithmic;
 };
 
 static LV2World _world;
 
 struct LV2Plugin::Impl {
 	Impl() : plugin(0), ui(0), ui_type(0), name(0), author(0), instance(0) {}
-	SLV2Plugin   plugin;
-	SLV2UI       ui;
-	SLV2Value    ui_type;
-	SLV2Value    name;
-	SLV2Value    author;
-	SLV2Instance instance;
+	LilvPlugin*     plugin;
+	const LilvUI*   ui;
+	const LilvNode* ui_type;
+	LilvNode*       name;
+	LilvNode*       author;
+	LilvInstance*   instance;
 };
 
 LV2Plugin::LV2Plugin (AudioEngine& engine,
@@ -136,7 +136,7 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 {
 	DEBUG_TRACE(DEBUG::LV2, "init\n");
 
-	_impl->plugin          = (SLV2Plugin)c_plugin;
+	_impl->plugin          = (LilvPlugin*)c_plugin;
 	_impl->ui              = NULL;
 	_impl->ui_type         = NULL;
 	_control_data         = 0;
@@ -151,11 +151,11 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_persist_feature.URI          = "http://lv2plug.in/ns/ext/persist";
 	_persist_feature.data         = NULL;
 
-	SLV2Plugin plugin = _impl->plugin;
+	LilvPlugin* plugin = _impl->plugin;
 
-	SLV2Value persist_uri = slv2_value_new_uri(_world.world, _persist_feature.URI);
-	_supports_persist = slv2_plugin_has_feature(plugin, persist_uri);
-	slv2_value_free(persist_uri);
+	LilvNode* persist_uri = lilv_new_uri(_world.world, _persist_feature.URI);
+	_supports_persist = lilv_plugin_has_feature(plugin, persist_uri);
+	lilv_node_free(persist_uri);
 
 	_features    = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * 7);
 	_features[0] = &_instance_access_feature;
@@ -179,9 +179,9 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	new_file_support->new_file_path = &lv2_files_new_file_path;
 	_new_file_support_feature.data = new_file_support;
 
-	_impl->instance = slv2_plugin_instantiate(plugin, rate, _features);
-	_impl->name     = slv2_plugin_get_name(plugin);
-	_impl->author   = slv2_plugin_get_author_name(plugin);
+	_impl->instance = lilv_plugin_instantiate(plugin, rate, _features);
+	_impl->name     = lilv_plugin_get_name(plugin);
+	_impl->author   = lilv_plugin_get_author_name(plugin);
 
 	if (_impl->instance == 0) {
 		error << _("LV2: Failed to instantiate plugin ") << uri() << endmsg;
@@ -192,21 +192,21 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_data_access_extension_data.extension_data = _impl->instance->lv2_descriptor->extension_data;
 	_data_access_feature.data                  = &_data_access_extension_data;
 
-	if (slv2_plugin_has_feature(plugin, _world.in_place_broken)) {
+	if (lilv_plugin_has_feature(plugin, _world.in_place_broken)) {
 		error << string_compose(
 		    _("LV2: \"%1\" cannot be used, since it cannot do inplace processing"),
-		    slv2_value_as_string(_impl->name)) << endmsg;
-		slv2_value_free(_impl->name);
-		slv2_value_free(_impl->author);
+		    lilv_node_as_string(_impl->name)) << endmsg;
+		lilv_node_free(_impl->name);
+		lilv_node_free(_impl->author);
 		throw failed_constructor();
 	}
 
 	_sample_rate = rate;
 
 	const uint32_t num_ports    = this->num_ports();
-	const bool     latent       = slv2_plugin_has_latency(plugin);
+	const bool     latent       = lilv_plugin_has_latency(plugin);
 	const uint32_t latency_port = (latent)
-	    ? slv2_plugin_get_latency_port_index(plugin)
+	    ? lilv_plugin_get_latency_port_index(plugin)
 		: 0;
 
 	_control_data = new float[num_ports];
@@ -214,20 +214,20 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 	_defaults     = new float[num_ports];
 
 	for (uint32_t i = 0; i < num_ports; ++i) {
-		SLV2Port  port = slv2_plugin_get_port_by_index(plugin, i);
-		SLV2Value sym  = slv2_port_get_symbol(plugin, port);
+		const LilvPort* port = lilv_plugin_get_port_by_index(plugin, i);
+		const LilvNode* sym  = lilv_port_get_symbol(plugin, port);
 
 		// Store index in map so we can look up index by symbol
-		_port_indices.insert(std::make_pair(slv2_value_as_string(sym), i));
+		_port_indices.insert(std::make_pair(lilv_node_as_string(sym), i));
 
 		// Get range and default value if applicable
 		if (parameter_is_control(i)) {
-			SLV2Value def;
-			slv2_port_get_range(plugin, port, &def, NULL, NULL);
-			_defaults[i] = def ? slv2_value_as_float(def) : 0.0f;
-			slv2_value_free(def);
+			LilvNode* def;
+			lilv_port_get_range(plugin, port, &def, NULL, NULL);
+			_defaults[i] = def ? lilv_node_as_float(def) : 0.0f;
+			lilv_node_free(def);
 
-			slv2_instance_connect_port(_impl->instance, i, &_control_data[i]);
+			lilv_instance_connect_port(_impl->instance, i, &_control_data[i]);
 
 			if (latent && ( i == latency_port) ) {
 				_latency_control_port  = &_control_data[i];
@@ -242,29 +242,28 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 		}
 	}
 
-	SLV2UIs uis = slv2_plugin_get_uis(plugin);
-	if (slv2_uis_size(uis) > 0) {
-#if defined(HAVE_NEW_SLV2) and defined(HAVE_SUIL)
+	LilvUIs* uis = lilv_plugin_get_uis(plugin);
+	if (lilv_uis_size(uis) > 0) {
+#ifdef HAVE_SUIL
 		// Look for embeddable UI
-		SLV2Value ui_type = NULL;
-		SLV2_FOREACH(uis, u, uis) {
-			SLV2UI    this_ui      = slv2_uis_get(uis, u);
-			SLV2Value this_ui_type = NULL;
-			if (slv2_ui_is_supported(this_ui,
+		LILV_FOREACH(uis, u, uis) {
+			const LilvUI*   this_ui      = lilv_uis_get(uis, u);
+			const LilvNode* this_ui_type = NULL;
+			if (lilv_ui_is_supported(this_ui,
 			                         suil_ui_supported,
 			                         _world.gtk_gui,
 			                         &this_ui_type)) {
 				// TODO: Multiple UI support
-				_ui      = this_ui;
-				_ui_type = this_ui_type;
+				_impl->ui      = this_ui;
+				_impl->ui_type = this_ui_type;
 				break;
 			} 
 		}
 #else
 		// Look for Gtk native UI
-		for (unsigned i = 0; i < slv2_uis_size(uis); ++i) {
-			SLV2UI ui = slv2_uis_get_at(uis, i);
-			if (slv2_ui_is_a(ui, _world.gtk_gui)) {
+		LILV_FOREACH(uis, i, uis) {
+			const LilvUI* ui = lilv_uis_get(uis, i);
+			if (lilv_ui_is_a(ui, _world.gtk_gui)) {
 				_impl->ui      = ui;
 				_impl->ui_type = _world.gtk_gui;
 				break;
@@ -274,9 +273,9 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 
 		// If Gtk UI is not available, try to find external UI
 		if (!_impl->ui) {
-			for (unsigned i = 0; i < slv2_uis_size(uis); ++i) {
-				SLV2UI ui = slv2_uis_get_at(uis, i);
-				if (slv2_ui_is_a(ui, _world.external_gui)) {
+			LILV_FOREACH(uis, i, uis) {
+				const LilvUI* ui = lilv_uis_get(uis, i);
+				if (lilv_ui_is_a(ui, _world.external_gui)) {
 					_impl->ui      = ui;
 					_impl->ui_type = _world.external_gui;
 					break;
@@ -295,14 +294,10 @@ LV2Plugin::~LV2Plugin ()
 	deactivate();
 	cleanup();
 
-	slv2_instance_free(_impl->instance);
-	slv2_value_free(_impl->name);
-	slv2_value_free(_impl->author);
-#if defined(HAVE_NEW_SLV2) and defined(HAVE_SUIL)
-	slv2_value_free(_impl->ui_type);
-#else
-	/* _ui_type points to a global, so leave it alone */
-#endif
+	lilv_instance_free(_impl->instance);
+	lilv_node_free(_impl->name);
+	lilv_node_free(_impl->author);
+
 	delete [] _control_data;
 	delete [] _shadow_data;
 }
@@ -313,49 +308,49 @@ LV2Plugin::is_external_ui() const
 	if (!_impl->ui) {
 		return false;
 	}
-	return slv2_ui_is_a(_impl->ui, _world.external_gui);
+	return lilv_ui_is_a(_impl->ui, _world.external_gui);
 }
 
 string
 LV2Plugin::unique_id() const
 {
-	return slv2_value_as_uri(slv2_plugin_get_uri(_impl->plugin));
+	return lilv_node_as_uri(lilv_plugin_get_uri(_impl->plugin));
 }
 
 const char*
 LV2Plugin::uri() const
 {
-	return slv2_value_as_uri(slv2_plugin_get_uri(_impl->plugin));
+	return lilv_node_as_uri(lilv_plugin_get_uri(_impl->plugin));
 }
 
 const char*
 LV2Plugin::label() const
 {
-	return slv2_value_as_string(_impl->name);
+	return lilv_node_as_string(_impl->name);
 }
 
 const char*
 LV2Plugin::name() const
 {
-	return slv2_value_as_string(_impl->name);
+	return lilv_node_as_string(_impl->name);
 }
 
 const char*
 LV2Plugin::maker() const
 {
-	return _impl->author ? slv2_value_as_string (_impl->author) : "Unknown";
+	return _impl->author ? lilv_node_as_string (_impl->author) : "Unknown";
 }
 
 uint32_t
 LV2Plugin::num_ports() const
 {
-	return slv2_plugin_get_num_ports(_impl->plugin);
+	return lilv_plugin_get_num_ports(_impl->plugin);
 }
 
 uint32_t
 LV2Plugin::parameter_count() const
 {
-	return slv2_plugin_get_num_ports(_impl->plugin);
+	return lilv_plugin_get_num_ports(_impl->plugin);
 }
 
 float
@@ -367,13 +362,13 @@ LV2Plugin::default_value(uint32_t port)
 const char*
 LV2Plugin::port_symbol(uint32_t index) const
 {
-	SLV2Port port = slv2_plugin_get_port_by_index(_impl->plugin, index);
+	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, index);
 	if (!port) {
 		error << name() << ": Invalid port index " << index << endmsg;
 	}
 
-	SLV2Value sym = slv2_port_get_symbol(_impl->plugin, port);
-	return slv2_value_as_string(sym);
+	const LilvNode* sym = lilv_port_get_symbol(_impl->plugin, port);
+	return lilv_node_as_string(sym);
 }
 
 void
@@ -382,7 +377,7 @@ LV2Plugin::set_parameter(uint32_t which, float val)
 	DEBUG_TRACE(DEBUG::LV2, string_compose(
 		            "%1 set parameter %2 to %3\n", name(), which, val));
 
-	if (which < slv2_plugin_get_num_ports(_impl->plugin)) {
+	if (which < lilv_plugin_get_num_ports(_impl->plugin)) {
 		_shadow_data[which] = val;
 	} else {
 		warning << string_compose(
@@ -409,7 +404,7 @@ uint32_t
 LV2Plugin::nth_parameter(uint32_t n, bool& ok) const
 {
 	ok = false;
-	for (uint32_t c = 0, x = 0; x < slv2_plugin_get_num_ports(_impl->plugin); ++x) {
+	for (uint32_t c = 0, x = 0; x < lilv_plugin_get_num_ports(_impl->plugin); ++x) {
 		if (parameter_is_control(x)) {
 			if (c++ == n) {
 				ok = true;
@@ -424,7 +419,7 @@ LV2Plugin::nth_parameter(uint32_t n, bool& ok) const
 const void*
 LV2Plugin::extension_data (const char* uri) const
 {
-	return slv2_instance_get_extension_data(_impl->instance, uri);
+	return lilv_instance_get_extension_data(_impl->instance, uri);
 }
 
 void*
@@ -436,13 +431,13 @@ LV2Plugin::c_plugin ()
 void*
 LV2Plugin::c_ui ()
 {
-	return _impl->ui;
+	return (void*)_impl->ui;
 }
 
 void*
 LV2Plugin::c_ui_type ()
 {
-	return _impl->ui_type;
+	return (void*)_impl->ui_type;
 }
 
 int
@@ -618,38 +613,38 @@ LV2Plugin::add_state(XMLNode* root) const
 	}
 }
 
-static inline SLV2Value
-get_value(SLV2Plugin p, SLV2Value subject, SLV2Value predicate)
+static inline const LilvNode*
+get_value(LilvWorld* world, const LilvNode* subject, const LilvNode* predicate)
 {
-	SLV2Values vs = slv2_plugin_get_value_for_subject(p, subject, predicate);
-	return vs ? slv2_values_get_at(vs, 0) : NULL;
+	LilvNodes* vs = lilv_world_find_nodes(world, subject, predicate, NULL);
+	return vs ? lilv_nodes_get_first(vs) : NULL;
 }
 
 void
 LV2Plugin::find_presets()
 {
-	SLV2Value dc_title       = slv2_value_new_uri(_world.world, NS_DC   "title");
-	SLV2Value pset_hasPreset = slv2_value_new_uri(_world.world, NS_PSET "hasPreset");
+	LilvNode* dc_title       = lilv_new_uri(_world.world, NS_DC   "title");
+	LilvNode* pset_hasPreset = lilv_new_uri(_world.world, NS_PSET "hasPreset");
 
-	SLV2Values presets = slv2_plugin_get_value(_impl->plugin, pset_hasPreset);
-	for (unsigned i = 0; i < slv2_values_size(presets); ++i) {
-		SLV2Value preset = slv2_values_get_at(presets, i);
-		SLV2Value name   = get_value(_impl->plugin, preset, dc_title);
+	LilvNodes* presets = lilv_plugin_get_value(_impl->plugin, pset_hasPreset);
+	LILV_FOREACH(nodes, i, presets) {
+		const LilvNode* preset = lilv_nodes_get(presets, i);
+		const LilvNode* name   = get_value(_world.world, preset, dc_title);
 		if (name) {
-			_presets.insert(std::make_pair(slv2_value_as_string(preset),
+			_presets.insert(std::make_pair(lilv_node_as_string(preset),
 			                               PresetRecord(
-			                                   slv2_value_as_string(preset),
-			                                   slv2_value_as_string(name))));
+			                                   lilv_node_as_string(preset),
+			                                   lilv_node_as_string(name))));
 		} else {
 			warning << string_compose(
 			    _("Plugin \"%1\% preset \"%2%\" is missing a dc:title\n"),
-			    unique_id(), slv2_value_as_string(preset));
+			    unique_id(), lilv_node_as_string(preset));
 		}
 	}
-	slv2_values_free(presets);
+	lilv_nodes_free(presets);
 
-	slv2_value_free(pset_hasPreset);
-	slv2_value_free(dc_title);
+	lilv_node_free(pset_hasPreset);
+	lilv_node_free(dc_title);
 }
 
 bool
@@ -657,47 +652,28 @@ LV2Plugin::load_preset(PresetRecord r)
 {
 	Plugin::load_preset(r);
 
-#ifdef HAVE_NEW_SLV2
-	// New (>= 0.7.0) slv2 no longer supports SPARQL, but exposes blank nodes
-	// so querying ports is possible with the simple/fast API
-	SLV2Value lv2_port   = slv2_value_new_uri(_world.world, NS_LV2 "port");
-	SLV2Value lv2_symbol = slv2_value_new_uri(_world.world, NS_LV2 "symbol");
-	SLV2Value pset_value = slv2_value_new_uri(_world.world, NS_PSET "value");
-	SLV2Value preset     = slv2_value_new_uri(_world.world, r.uri.c_str());
+	LilvNode* lv2_port   = lilv_new_uri(_world.world, NS_LV2 "port");
+	LilvNode* lv2_symbol = lilv_new_uri(_world.world, NS_LV2 "symbol");
+	LilvNode* pset_value = lilv_new_uri(_world.world, NS_PSET "value");
+	LilvNode* preset     = lilv_new_uri(_world.world, r.uri.c_str());
 
-	SLV2Values ports = slv2_plugin_get_value_for_subject(_impl->plugin, preset, lv2_port);
-	for (unsigned i = 0; i < slv2_values_size(ports); ++i) {
-		SLV2Value port   = slv2_values_get_at(ports, i);
-		SLV2Value symbol = get_value(_impl->plugin, port, lv2_symbol);
-		SLV2Value value  = get_value(_impl->plugin, port, pset_value);
-		if (value && slv2_value_is_float(value)) {
-			set_parameter(_port_indices[slv2_value_as_string(symbol)],
-			              slv2_value_as_float(value));
+	LilvNodes* ports = lilv_world_find_nodes(_world.world, preset, lv2_port, NULL);
+	LILV_FOREACH(nodes, i, ports) {
+		const LilvNode* port   = lilv_nodes_get(ports, i);
+		const LilvNode* symbol = get_value(_world.world, port, lv2_symbol);
+		const LilvNode* value  = get_value(_world.world, port, pset_value);
+		if (value && lilv_node_is_float(value)) {
+			set_parameter(_port_indices[lilv_node_as_string(symbol)],
+			              lilv_node_as_float(value));
 		}
 	}
-	slv2_values_free(ports);
+	lilv_nodes_free(ports);
 
-	slv2_value_free(preset);
-	slv2_value_free(pset_value);
-	slv2_value_free(lv2_symbol);
-	slv2_value_free(lv2_port);
-#else
-	const string query = string(
-	        "PREFIX lv2p: <http://lv2plug.in/ns/dev/presets#>\n"
-	        "PREFIX dc:  <http://dublincore.org/documents/dcmi-namespace/>\n"
-	        "SELECT ?sym ?val WHERE { <") + r.uri + "> lv2:port ?port . "
-	    " ?port lv2:symbol ?sym ; lv2p:value ?val . }";
-	SLV2Results values = slv2_plugin_query_sparql(_impl->plugin, query.c_str());
-	for (; !slv2_results_finished(values); slv2_results_next(values)) {
-		SLV2Value sym = slv2_results_get_binding_value(values, 0);
-		SLV2Value val = slv2_results_get_binding_value(values, 1);
-		if (slv2_value_is_float(val)) {
-			uint32_t index = _port_indices[slv2_value_as_string(sym)];
-			set_parameter(index, slv2_value_as_float(val));
-		}
-	}
-	slv2_results_free(values);
-#endif
+	lilv_node_free(preset);
+	lilv_node_free(pset_value);
+	lilv_node_free(lv2_symbol);
+	lilv_node_free(lv2_port);
+
 	return true;
 }
 
@@ -809,18 +785,18 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 int
 LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) const
 {
-	SLV2Port port = slv2_plugin_get_port_by_index(_impl->plugin, which);
+	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, which);
 
-	SLV2Value def, min, max;
-	slv2_port_get_range(_impl->plugin, port, &def, &min, &max);
+	LilvNode *def, *min, *max;
+	lilv_port_get_range(_impl->plugin, port, &def, &min, &max);
 
-	desc.integer_step = slv2_port_has_property(_impl->plugin, port, _world.integer);
-	desc.toggled      = slv2_port_has_property(_impl->plugin, port, _world.toggled);
-	desc.logarithmic  = slv2_port_has_property(_impl->plugin, port, _world.logarithmic);
-	desc.sr_dependent = slv2_port_has_property(_impl->plugin, port, _world.srate);
-	desc.label        = slv2_value_as_string(slv2_port_get_name(_impl->plugin, port));
-	desc.lower        = min ? slv2_value_as_float(min) : 0.0f;
-	desc.upper        = max ? slv2_value_as_float(max) : 1.0f;
+	desc.integer_step = lilv_port_has_property(_impl->plugin, port, _world.integer);
+	desc.toggled      = lilv_port_has_property(_impl->plugin, port, _world.toggled);
+	desc.logarithmic  = lilv_port_has_property(_impl->plugin, port, _world.logarithmic);
+	desc.sr_dependent = lilv_port_has_property(_impl->plugin, port, _world.srate);
+	desc.label        = lilv_node_as_string(lilv_port_get_name(_impl->plugin, port));
+	desc.lower        = min ? lilv_node_as_float(min) : 0.0f;
+	desc.upper        = max ? lilv_node_as_float(max) : 1.0f;
 	desc.min_unbound  = false; // TODO: LV2 extension required
 	desc.max_unbound  = false; // TODO: LV2 extension required
 
@@ -835,9 +811,9 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 		desc.largestep = delta / 10.0f;
 	}
 
-	slv2_value_free(def);
-	slv2_value_free(min);
-	slv2_value_free(max);
+	lilv_node_free(def);
+	lilv_node_free(min);
+	lilv_node_free(max);
 
 	return 0;
 }
@@ -846,10 +822,10 @@ string
 LV2Plugin::describe_parameter(Evoral::Parameter which)
 {
 	if (( which.type() == PluginAutomation) && ( which.id() < parameter_count()) ) {
-		SLV2Value name = slv2_port_get_name(_impl->plugin,
-		                                    slv2_plugin_get_port_by_index(_impl->plugin, which.id()));
-		string ret(slv2_value_as_string(name));
-		slv2_value_free(name);
+		LilvNode* name = lilv_port_get_name(_impl->plugin,
+		                                    lilv_plugin_get_port_by_index(_impl->plugin, which.id()));
+		string ret(lilv_node_as_string(name));
+		lilv_node_free(name);
 		return ret;
 	} else {
 		return "??";
@@ -886,7 +862,7 @@ LV2Plugin::activate()
 	DEBUG_TRACE(DEBUG::LV2, string_compose("%1 activate\n", name()));
 
 	if (!_was_activated) {
-		slv2_instance_activate(_impl->instance);
+		lilv_instance_activate(_impl->instance);
 		_was_activated = true;
 	}
 }
@@ -897,7 +873,7 @@ LV2Plugin::deactivate()
 	DEBUG_TRACE(DEBUG::LV2, string_compose("%1 deactivate\n", name()));
 
 	if (_was_activated) {
-		slv2_instance_deactivate(_impl->instance);
+		lilv_instance_deactivate(_impl->instance);
 		_was_activated = false;
 	}
 }
@@ -909,7 +885,7 @@ LV2Plugin::cleanup()
 
 	activate();
 	deactivate();
-	slv2_instance_free(_impl->instance);
+	lilv_instance_free(_impl->instance);
 	_impl->instance = NULL;
 }
 
@@ -931,27 +907,27 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		if (parameter_is_audio(port_index)) {
 			if (parameter_is_input(port_index)) {
 				const uint32_t buf_index = in_map.get(DataType::AUDIO, audio_in_index++);
-				slv2_instance_connect_port(_impl->instance, port_index,
+				lilv_instance_connect_port(_impl->instance, port_index,
 				                           bufs.get_audio(buf_index).data(offset));
 			} else if (parameter_is_output(port_index)) {
 				const uint32_t buf_index = out_map.get(DataType::AUDIO, audio_out_index++);
 				//cerr << port_index << " : " << " AUDIO OUT " << buf_index << endl;
-				slv2_instance_connect_port(_impl->instance, port_index,
+				lilv_instance_connect_port(_impl->instance, port_index,
 				                           bufs.get_audio(buf_index).data(offset));
 			}
 		} else if (parameter_is_midi(port_index)) {
 			if (parameter_is_input(port_index)) {
 				const uint32_t buf_index = in_map.get(DataType::MIDI, midi_in_index++);
-				slv2_instance_connect_port(_impl->instance, port_index,
+				lilv_instance_connect_port(_impl->instance, port_index,
 				                           bufs.get_lv2_midi(true, buf_index).data());
 			} else if (parameter_is_output(port_index)) {
 				const uint32_t buf_index = out_map.get(DataType::MIDI, midi_out_index++);
-				slv2_instance_connect_port(_impl->instance, port_index,
+				lilv_instance_connect_port(_impl->instance, port_index,
 				                           bufs.get_lv2_midi(false, buf_index).data());
 			}
 		} else if (!parameter_is_control(port_index)) {
 			// Optional port (it'd better be if we've made it this far...)
-			slv2_instance_connect_port(_impl->instance, port_index, NULL);
+			lilv_instance_connect_port(_impl->instance, port_index, NULL);
 		}
 	}
 
@@ -974,37 +950,37 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 bool
 LV2Plugin::parameter_is_control(uint32_t param) const
 {
-	SLV2Port port = slv2_plugin_get_port_by_index(_impl->plugin, param);
-	return slv2_port_is_a(_impl->plugin, port, _world.control_class);
+	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, param);
+	return lilv_port_is_a(_impl->plugin, port, _world.control_class);
 }
 
 bool
 LV2Plugin::parameter_is_audio(uint32_t param) const
 {
-	SLV2Port port = slv2_plugin_get_port_by_index(_impl->plugin, param);
-	return slv2_port_is_a(_impl->plugin, port, _world.audio_class);
+	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, param);
+	return lilv_port_is_a(_impl->plugin, port, _world.audio_class);
 }
 
 bool
 LV2Plugin::parameter_is_midi(uint32_t param) const
 {
-	SLV2Port port = slv2_plugin_get_port_by_index(_impl->plugin, param);
-	return slv2_port_is_a(_impl->plugin, port, _world.event_class);
-	//	&& slv2_port_supports_event(_impl->plugin, port, _world.midi_class);
+	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, param);
+	return lilv_port_is_a(_impl->plugin, port, _world.event_class);
+	//	&& lilv_port_supports_event(_impl->plugin, port, _world.midi_class);
 }
 
 bool
 LV2Plugin::parameter_is_output(uint32_t param) const
 {
-	SLV2Port port = slv2_plugin_get_port_by_index(_impl->plugin, param);
-	return slv2_port_is_a(_impl->plugin, port, _world.output_class);
+	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, param);
+	return lilv_port_is_a(_impl->plugin, port, _world.output_class);
 }
 
 bool
 LV2Plugin::parameter_is_input(uint32_t param) const
 {
-	SLV2Port port = slv2_plugin_get_port_by_index(_impl->plugin, param);
-	return slv2_port_is_a(_impl->plugin, port, _world.input_class);
+	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, param);
+	return lilv_port_is_a(_impl->plugin, port, _world.input_class);
 }
 
 void
@@ -1022,8 +998,8 @@ LV2Plugin::print_parameter(uint32_t param, char* buf, uint32_t len) const
 boost::shared_ptr<Plugin::ScalePoints>
 LV2Plugin::get_scale_points(uint32_t port_index) const
 {
-	SLV2Port        port   = slv2_plugin_get_port_by_index(_impl->plugin, port_index);
-	SLV2ScalePoints points = slv2_port_get_scale_points(_impl->plugin, port);
+	const LilvPort*  port   = lilv_plugin_get_port_by_index(_impl->plugin, port_index);
+	LilvScalePoints* points = lilv_port_get_scale_points(_impl->plugin, port);
 
 	boost::shared_ptr<Plugin::ScalePoints> ret;
 	if (!points) {
@@ -1032,17 +1008,17 @@ LV2Plugin::get_scale_points(uint32_t port_index) const
 
 	ret = boost::shared_ptr<Plugin::ScalePoints>(new ScalePoints());
 
-	for (unsigned i = 0; i < slv2_scale_points_size(points); ++i) {
-		SLV2ScalePoint p     = slv2_scale_points_get_at(points, i);
-		SLV2Value      label = slv2_scale_point_get_label(p);
-		SLV2Value      value = slv2_scale_point_get_value(p);
-		if (label && (slv2_value_is_float(value) || slv2_value_is_int(value))) {
-			ret->insert(make_pair(slv2_value_as_string(label),
-			                      slv2_value_as_float(value)));
+	LILV_FOREACH(scale_points, i, points) {
+		const LilvScalePoint* p     = lilv_scale_points_get(points, i);
+		const LilvNode*       label = lilv_scale_point_get_label(p);
+		const LilvNode*       value = lilv_scale_point_get_value(p);
+		if (label && (lilv_node_is_float(value) || lilv_node_is_int(value))) {
+			ret->insert(make_pair(lilv_node_as_string(label),
+			                      lilv_node_as_float(value)));
 		}
 	}
 
-	slv2_scale_points_free(points);
+	lilv_scale_points_free(points);
 	return ret;
 }
 
@@ -1055,7 +1031,7 @@ LV2Plugin::run(pframes_t nframes)
 		}
 	}
 
-	slv2_instance_run(_impl->instance, nframes);
+	lilv_instance_run(_impl->instance, nframes);
 }
 
 void
@@ -1085,10 +1061,10 @@ LV2Plugin::latency_compute_run()
 	while (port_index < parameter_count()) {
 		if (parameter_is_audio(port_index)) {
 			if (parameter_is_input(port_index)) {
-				slv2_instance_connect_port(_impl->instance, port_index, buffer);
+				lilv_instance_connect_port(_impl->instance, port_index, buffer);
 				in_index++;
 			} else if (parameter_is_output(port_index)) {
-				slv2_instance_connect_port(_impl->instance, port_index, buffer);
+				lilv_instance_connect_port(_impl->instance, port_index, buffer);
 				out_index++;
 			}
 		}
@@ -1100,33 +1076,33 @@ LV2Plugin::latency_compute_run()
 }
 
 LV2World::LV2World()
-	: world(slv2_world_new())
+	: world(lilv_world_new())
 {
-	slv2_world_load_all(world);
-	input_class     = slv2_value_new_uri(world, SLV2_PORT_CLASS_INPUT);
-	output_class    = slv2_value_new_uri(world, SLV2_PORT_CLASS_OUTPUT);
-	control_class   = slv2_value_new_uri(world, SLV2_PORT_CLASS_CONTROL);
-	audio_class     = slv2_value_new_uri(world, SLV2_PORT_CLASS_AUDIO);
-	event_class     = slv2_value_new_uri(world, SLV2_PORT_CLASS_EVENT);
-	midi_class      = slv2_value_new_uri(world, SLV2_EVENT_CLASS_MIDI);
-	in_place_broken = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "inPlaceBroken");
-	integer         = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "integer");
-	toggled         = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "toggled");
-	srate           = slv2_value_new_uri(world, SLV2_NAMESPACE_LV2 "sampleRate");
-	gtk_gui         = slv2_value_new_uri(world, NS_UI "GtkUI");
-	external_gui    = slv2_value_new_uri(world, NS_UI "external");
-	logarithmic     = slv2_value_new_uri(world, "http://lv2plug.in/ns/dev/extportinfo#logarithmic");
+	lilv_world_load_all(world);
+	input_class     = lilv_new_uri(world, LILV_URI_INPUT_PORT);
+	output_class    = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
+	control_class   = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
+	audio_class     = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
+	event_class     = lilv_new_uri(world, LILV_URI_EVENT_PORT);
+	midi_class      = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
+	in_place_broken = lilv_new_uri(world, LILV_NS_LV2 "inPlaceBroken");
+	integer         = lilv_new_uri(world, LILV_NS_LV2 "integer");
+	toggled         = lilv_new_uri(world, LILV_NS_LV2 "toggled");
+	srate           = lilv_new_uri(world, LILV_NS_LV2 "sampleRate");
+	gtk_gui         = lilv_new_uri(world, NS_UI "GtkUI");
+	external_gui    = lilv_new_uri(world, NS_UI "external");
+	logarithmic     = lilv_new_uri(world, "http://lv2plug.in/ns/dev/extportinfo#logarithmic");
 }
 
 LV2World::~LV2World()
 {
-	slv2_value_free(input_class);
-	slv2_value_free(output_class);
-	slv2_value_free(control_class);
-	slv2_value_free(audio_class);
-	slv2_value_free(event_class);
-	slv2_value_free(midi_class);
-	slv2_value_free(in_place_broken);
+	lilv_node_free(input_class);
+	lilv_node_free(output_class);
+	lilv_node_free(control_class);
+	lilv_node_free(audio_class);
+	lilv_node_free(event_class);
+	lilv_node_free(midi_class);
+	lilv_node_free(in_place_broken);
 }
 
 LV2PluginInfo::LV2PluginInfo (void* c_plugin)
@@ -1145,7 +1121,7 @@ LV2PluginInfo::load(Session& session)
 		PluginPtr plugin;
 
 		plugin.reset(new LV2Plugin(session.engine(), session,
-		                           (SLV2Plugin)_c_plugin,
+		                           (LilvPlugin*)_c_plugin,
 		                           session.frame_rate()));
 
 		plugin->set_info(PluginInfoPtr(new LV2PluginInfo(*this)));
@@ -1160,17 +1136,16 @@ LV2PluginInfo::load(Session& session)
 PluginInfoList*
 LV2PluginInfo::discover()
 {
-	PluginInfoList* plugs   = new PluginInfoList;
-	SLV2Plugins     plugins = slv2_world_get_all_plugins(_world.world);
+	PluginInfoList*    plugs   = new PluginInfoList;
+	const LilvPlugins* plugins = lilv_world_get_all_plugins(_world.world);
 
-	cerr << "LV2: Discovering " << slv2_plugins_size(plugins) << " plugins" << endl;
+	cerr << "LV2: Discovering " << lilv_plugins_size(plugins) << " plugins" << endl;
 
-	for (unsigned i = 0; i < slv2_plugins_size(plugins); ++i) {
-		SLV2Plugin       p = slv2_plugins_get_at(plugins, i);
-		LV2PluginInfoPtr info(new LV2PluginInfo(p));
+	LILV_FOREACH(plugins, i, plugins) {
+		const LilvPlugin* p = lilv_plugins_get(plugins, i);
+		LV2PluginInfoPtr  info(new LV2PluginInfo((void*)p));
 
-		SLV2Value name = slv2_plugin_get_name(p);
-
+		LilvNode* name = lilv_plugin_get_name(p);
 		if (!name) {
 			cerr << "LV2: invalid plugin\n";
 			continue;
@@ -1178,34 +1153,34 @@ LV2PluginInfo::discover()
 
 		info->type = LV2;
 
-		info->name = string(slv2_value_as_string(name));
-		slv2_value_free(name);
+		info->name = string(lilv_node_as_string(name));
+		lilv_node_free(name);
 
-		SLV2PluginClass pclass = slv2_plugin_get_class(p);
-		SLV2Value       label  = slv2_plugin_class_get_label(pclass);
-		info->category = slv2_value_as_string(label);
+		const LilvPluginClass* pclass = lilv_plugin_get_class(p);
+		const LilvNode*        label  = lilv_plugin_class_get_label(pclass);
+		info->category = lilv_node_as_string(label);
 
-		SLV2Value author_name = slv2_plugin_get_author_name(p);
-		info->creator = author_name ? string(slv2_value_as_string(author_name)) : "Unknown";
-		slv2_value_free(author_name);
+		LilvNode* author_name = lilv_plugin_get_author_name(p);
+		info->creator = author_name ? string(lilv_node_as_string(author_name)) : "Unknown";
+		lilv_node_free(author_name);
 
 		info->path = "/NOPATH"; // Meaningless for LV2
 
 		info->n_inputs.set_audio(
-			slv2_plugin_get_num_ports_of_class(
+			lilv_plugin_get_num_ports_of_class(
 				p, _world.input_class, _world.audio_class, NULL));
 		info->n_inputs.set_midi(
-			slv2_plugin_get_num_ports_of_class(
+			lilv_plugin_get_num_ports_of_class(
 				p, _world.input_class, _world.event_class, NULL));
 
 		info->n_outputs.set_audio(
-			slv2_plugin_get_num_ports_of_class(
+			lilv_plugin_get_num_ports_of_class(
 				p, _world.output_class, _world.audio_class, NULL));
 		info->n_outputs.set_midi(
-			slv2_plugin_get_num_ports_of_class(
+			lilv_plugin_get_num_ports_of_class(
 				p, _world.output_class, _world.event_class, NULL));
 
-		info->unique_id = slv2_value_as_uri(slv2_plugin_get_uri(p));
+		info->unique_id = lilv_node_as_uri(lilv_plugin_get_uri(p));
 		info->index     = 0; // Meaningless for LV2
 
 		plugs->push_back(info);

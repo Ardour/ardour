@@ -1,3 +1,4 @@
+
 /*
     Copyright (C) 2008-2011 Paul Davis
     Author: David Robillard
@@ -68,6 +69,7 @@ class LV2Plugin : public ARDOUR::Plugin
 
 	void* c_plugin();
 	void* c_ui();
+	void* c_ui_type();
 
 	bool is_external_ui () const;
 

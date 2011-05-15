@@ -317,10 +317,7 @@ PluginUIWindow::app_activated (bool)
 bool
 PluginUIWindow::create_lv2_editor(boost::shared_ptr<PluginInsert> insert)
 {
-#ifndef LV2_SUPPORT
-	return false;
-#else
-
+#if defined(HAVE_SLV2) || defined(HAVE_SUIL)
 	boost::shared_ptr<LV2Plugin> vp;
 
 	if ((vp = boost::dynamic_pointer_cast<LV2Plugin> (insert->plugin())) == 0) {
@@ -334,6 +331,8 @@ PluginUIWindow::create_lv2_editor(boost::shared_ptr<PluginInsert> insert)
 	}
 
 	return true;
+#else
+	return false;
 #endif
 }
 
