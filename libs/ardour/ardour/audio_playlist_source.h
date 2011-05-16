@@ -26,16 +26,17 @@
 
 #include "ardour/ardour.h"
 #include "ardour/audiosource.h"
+#include "ardour/playlist_source.h"
 
 namespace ARDOUR {
 
 class AudioPlaylist;
 
-class AudioPlaylistSource : public AudioSource {
+class AudioPlaylistSource : public AudioSource, public PlaylistSource {
   public:
     virtual ~AudioPlaylistSource ();
-    
-    bool       empty() const;
+
+    bool empty() const;
     std::string peak_path (std::string audio_path);
     uint32_t   n_channels() const;
     bool clamped_at_unity () const { return false; }
@@ -56,15 +57,15 @@ class AudioPlaylistSource : public AudioSource {
     friend class SourceFactory;
 
     AudioPlaylistSource (Session&, const std::string& name, boost::shared_ptr<AudioPlaylist>, uint32_t chn,
-                         frameoffset_t begin, framecnt_t len, bool copy, Source::Flag flags);
+                         frameoffset_t begin, framecnt_t len, Source::Flag flags);
     AudioPlaylistSource (Session&, const XMLNode&);
     
   private:
-    boost::shared_ptr<AudioPlaylist> _playlist;
-    frameoffset_t                    _playlist_offset;
-    framecnt_t                       _playlist_length;
     uint32_t                         _playlist_channel;
     std::string                      _peak_path;
+
+    int set_state (const XMLNode&, int version, bool with_descendants);
+
 };
         
 } /* namespace */

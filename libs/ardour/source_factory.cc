@@ -332,9 +332,15 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<
 		try {
 
 			boost::shared_ptr<AudioPlaylist> ap = boost::dynamic_pointer_cast<AudioPlaylist>(p);
-
+			
 			if (ap) {
-				Source* src = new AudioPlaylistSource (s, name, ap, chn, start, len, copy, Source::Flag (0));
+				
+				if (copy) {
+					ap.reset (new AudioPlaylist (ap, start, len, name, true));
+					start = 0;
+				}
+				
+				Source* src = new AudioPlaylistSource (s, name, ap, chn, start, len, Source::Flag (0));
 				boost::shared_ptr<Source> ret (src);
 				
 				if (setup_peakfile (ret, defer_peaks)) {

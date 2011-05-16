@@ -150,6 +150,7 @@ libardour_sources = [
         'pi_controller.cc',
         'playlist.cc',
         'playlist_factory.cc',
+        'playlist_source.cc',
         'plugin.cc',
         'plugin_insert.cc',
         'plugin_manager.cc',

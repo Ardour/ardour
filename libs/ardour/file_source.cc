@@ -68,7 +68,7 @@ FileSource::FileSource (Session& session, DataType type, const string& path, con
 }
 
 FileSource::FileSource (Session& session, const XMLNode& node, bool /*must_exist*/)
-	: Source(session, node)
+	: Source (session, node)
 	, _file_is_new (false)
 {
 	/* this setting of _path is temporary - we expect derived classes

@@ -46,39 +46,33 @@ using namespace ARDOUR;
 using namespace PBD;
 
 AudioPlaylistSource::AudioPlaylistSource (Session& s, const std::string& name, boost::shared_ptr<AudioPlaylist> p, 
-					  uint32_t chn, frameoffset_t begin, framecnt_t len, bool copy, Source::Flag flags)
+					  uint32_t chn, frameoffset_t begin, framecnt_t len, Source::Flag flags)
 	: Source (s, DataType::AUDIO, name)
 	, AudioSource (s, name)
-	, _playlist (p)
+	, PlaylistSource (s, name, p, DataType::AUDIO, begin, len, flags)
 	, _playlist_channel (chn)
 {
-	/* PlaylistSources are never writable, renameable, removable or destructive */
-	_flags = Flag (_flags & ~(Writable|CanRename|Removable|RemovableIfEmpty|RemoveAtDestroy|Destructive));
-
-	if (!copy) {
-		_playlist = p;
-		_playlist_offset = begin;
-		_playlist_length = len;
-	} else {
-		_playlist.reset (new AudioPlaylist (p, begin, len, "XXXNAMEXXX", true));
-		_playlist_offset = 0;
-		_playlist_length = len;
-	}
-
-	_length = len;
 	_peak_path = Glib::build_filename (_session.session_directory().peak_path().to_string(), name);
-	_level = _playlist->max_source_level () + 1;
+
+	AudioSource::_length = len;
 	ensure_buffers_for_level (_level);
 }
 
 AudioPlaylistSource::AudioPlaylistSource (Session& s, const XMLNode& node)
 	: Source (s, DataType::AUDIO, "toBeRenamed")
 	, AudioSource (s, node)
+	, PlaylistSource (s, node)
 {
 	/* PlaylistSources are never writable, renameable, removable or destructive */
 	_flags = Flag (_flags & ~(Writable|CanRename|Removable|RemovableIfEmpty|RemoveAtDestroy|Destructive));
+
+	/* ancestors have already called ::set_state() in their XML-based
+	   constructors.
+	*/
 	
-	set_state (node, 3000);
+	if (set_state (node, Stateful::loading_state_version, false)) {
+		throw failed_constructor ();
+	}
 }
 
 AudioPlaylistSource::~AudioPlaylistSource ()
@@ -90,61 +84,39 @@ AudioPlaylistSource::get_state ()
 {
 	XMLNode& node (AudioSource::get_state ());
 	char buf[64];
-	snprintf (buf, sizeof (buf), "%" PRIi64, _playlist_offset);
-	node.add_property ("offset", buf);
-	snprintf (buf, sizeof (buf), "%" PRIu64, _playlist_length);
-	node.add_property ("length", buf);
+
+	/* merge PlaylistSource state */
+
+	PlaylistSource::add_state (node);
+
 	snprintf (buf, sizeof (buf), "%" PRIu32, _playlist_channel);
 	node.add_property ("channel", buf);
-	node.add_property ("name", name());
 	node.add_property ("peak-path", _peak_path);
 
 	return node;
 }
 
-int
-AudioPlaylistSource::set_state (const XMLNode& node, int /* version */) 
-{
-	/* get playlist ID */
-
-	const XMLProperty *prop = node.property (X_("playlist"));
-
-	if (!prop) {
-		throw failed_constructor ();
-	}
-
-	PBD::ID id (prop->value());
-
-	/* get playlist */
-
-	boost::shared_ptr<Playlist> p = _session.playlists->by_id (id);
-	_playlist = boost::dynamic_pointer_cast<AudioPlaylist>(p);
-
-	if (!_playlist) {
-		throw failed_constructor ();
-	}
-
-	pair<framepos_t,framepos_t> extent = _playlist->get_extent();
-	_length = extent.second - extent.first;
-
-	/* other properties */
-
-	if ((prop = node.property (X_("name"))) == 0) {
-		throw failed_constructor ();
-	}
 	
-	set_name (prop->value());
+int
+AudioPlaylistSource::set_state (const XMLNode& node, int version) 
+{
+	return set_state (node, version, true);
+}
 
-	if ((prop = node.property (X_("offset"))) == 0) {
-		throw failed_constructor ();
+int
+AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_descendants) 
+{
+	if (with_descendants) {
+		if (Source::set_state (node, version) || 
+		    AudioSource::set_state (node, version) ||
+		    PlaylistSource::set_state (node, version)) {
+			return -1;
+		}
 	}
-	sscanf (prop->value().c_str(), "%" PRIi64, &_playlist_offset);
 
-	if ((prop = node.property (X_("length"))) == 0) {
-		throw failed_constructor ();
-	}
-
-	sscanf (prop->value().c_str(), "%" PRIu64, &_playlist_length);
+	const XMLProperty* prop;
+	pair<framepos_t,framepos_t> extent = _playlist->get_extent();
+	AudioSource::_length = extent.second - extent.first;
 
 	if ((prop = node.property (X_("channel"))) == 0) {
 		throw failed_constructor ();
@@ -158,7 +130,6 @@ AudioPlaylistSource::set_state (const XMLNode& node, int /* version */)
 
 	_peak_path = prop->value ();
 
-	_level = _playlist->max_source_level () + 1;
 	ensure_buffers_for_level (_level);
 
 	return 0;
@@ -197,7 +168,7 @@ AudioPlaylistSource::read_unlocked (Sample* dst, framepos_t start, framecnt_t cn
 		gbuf = _gain_buffers[_level-1];
 	}
 
-	_playlist->read (dst, sbuf, gbuf, start+_playlist_offset, to_read, _playlist_channel);
+	boost::dynamic_pointer_cast<AudioPlaylist>(_playlist)->read (dst, sbuf, gbuf, start+_playlist_offset, to_read, _playlist_channel);
 
 	if (to_zero) {
 		memset (dst+to_read, 0, sizeof (Sample) * to_zero);
