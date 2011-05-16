@@ -3184,8 +3184,6 @@ TimeFXDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	}
 #endif
 
-	_editor->begin_reversible_command (_("timestretch"));
-
 	// XXX how do timeFX on multiple regions ?
 
 	RegionSelection rs;
