@@ -105,8 +105,8 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 	, fade_out_handle(0)
 	, fade_position_line(0)
 	, gain_line(0)
-	, _amplitude_above_axis(1.0)
-	, _flags(0)
+	, _amplitude_above_axis (other._amplitude_above_axis)
+	, _flags (other._flags)
 	, fade_color(0)
 {
 	Gdk::Color c;
