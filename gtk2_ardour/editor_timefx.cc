@@ -74,10 +74,9 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 		if (!rtv)
 			return -1;
 
-		boost::shared_ptr<Playlist> playlist
-			= rtv->track()->playlist();
-
-	    ARDOUR::TimeFXRequest request;
+		boost::shared_ptr<Playlist> playlist = rtv->track()->playlist();
+		
+		ARDOUR::TimeFXRequest request;
 		request.time_fraction = fraction;
 		MidiStretch stretch(*_session, request);
 		begin_reversible_command ("midi stretch");
@@ -98,7 +97,9 @@ Editor::pitch_shift (RegionSelection& regions, float fraction)
 	return time_fx (regions, fraction, true);
 }
 
-/** @return -1 in case of error, 1 if operation was cancelled by the user, 0 if everything went ok */
+/** @param val Percentage to time stretch by; ignored if pitch-shifting.
+ *  @param pitching true to pitch shift, false to time stretch.
+ *  @return -1 in case of error, 1 if operation was cancelled by the user, 0 if everything went ok */
 int
 Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 {
