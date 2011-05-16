@@ -365,8 +365,8 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 			sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
 			MidiStreamView::ContentsRange)));
 
-	items.push_back (MenuElem (_("Note range"), *range_menu));
-	items.push_back (MenuElem (_("Note mode"), *build_note_mode_menu()));
+	items.push_back (MenuElem (_("Note Range"), *range_menu));
+	items.push_back (MenuElem (_("Note Mode"), *build_note_mode_menu()));
 	items.push_back (MenuElem (_("Default Channel"), *build_def_channel_menu()));
 
 	items.push_back (CheckMenuElem (_("MIDI Thru"), sigc::mem_fun(*this, &MidiTimeAxisView::toggle_midi_thru)));

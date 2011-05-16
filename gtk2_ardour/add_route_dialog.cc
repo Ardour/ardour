@@ -405,11 +405,11 @@ void
 AddRouteDialog::refill_route_groups ()
 {
 	route_group_combo.clear ();
-	route_group_combo.append_text (_("New group..."));
+	route_group_combo.append_text (_("New Group..."));
 
 	route_group_combo.append_text ("separator");
 
-	route_group_combo.append_text (_("No group"));
+	route_group_combo.append_text (_("No Group"));
 
 	_session->foreach_route_group (sigc::mem_fun (*this, &AddRouteDialog::add_route_group));
 
@@ -419,7 +419,7 @@ AddRouteDialog::refill_route_groups ()
 void
 AddRouteDialog::group_changed ()
 {
-	if (_session && route_group_combo.get_active_text () == _("New group...")) {
+	if (_session && route_group_combo.get_active_text () == _("New Group...")) {
 		RouteGroup* g = new RouteGroup (*_session, "");
 
 		PropertyList plist;

@@ -78,11 +78,11 @@ RouteGroupMenu::build (WeakRouteList const & s)
 
 	MenuList& items = _menu->items ();
 	
-	items.push_back (MenuElem (_("New group..."), sigc::mem_fun (*this, &RouteGroupMenu::new_group)));
+	items.push_back (MenuElem (_("New Group..."), sigc::mem_fun (*this, &RouteGroupMenu::new_group)));
 	items.push_back (SeparatorElem ());
 
 	RadioMenuItem::Group group;
-	items.push_back (RadioMenuElem (group, _("No group")));
+	items.push_back (RadioMenuElem (group, _("No Group")));
 	RadioMenuItem* i = static_cast<RadioMenuItem *> (&items.back ());
 	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::set_group), (RouteGroup *) 0));
 

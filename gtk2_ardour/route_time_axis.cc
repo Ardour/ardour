@@ -1521,7 +1521,7 @@ RouteTimeAxisView::build_playlist_menu ()
 	playlist_items.push_back (MenuElem (_("Clear Current"), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::clear_playlists), this)));
 	playlist_items.push_back (SeparatorElem());
 
-	playlist_items.push_back (MenuElem(_("Select from all..."), sigc::mem_fun(*this, &RouteTimeAxisView::show_playlist_selector)));
+	playlist_items.push_back (MenuElem(_("Select From All..."), sigc::mem_fun(*this, &RouteTimeAxisView::show_playlist_selector)));
 }
 
 void
