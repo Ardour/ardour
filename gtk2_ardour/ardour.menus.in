@@ -588,6 +588,7 @@
     <menuitem action='pitch-shift-region'/>
     <menuitem action='transpose-region'/>
     <menuitem action='naturalize-region'/>
+    <menuitem action='combine-regions'/>
     <menuitem action='split-region'/>
     <menuitem action='split-multichannel-region'/>
     <menuitem action='remove-region'/>

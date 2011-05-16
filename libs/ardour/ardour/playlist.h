@@ -229,6 +229,7 @@ public:
 	}
 
 	framepos_t find_next_top_layer_position (framepos_t) const;	
+	uint32_t combine_ops() const { return _combine_ops; }
 
   protected:
 	friend class Session;
@@ -295,6 +296,7 @@ public:
 	uint64_t         layer_op_counter;
 	framecnt_t       freeze_length;
 	bool             auto_partition;
+	uint32_t        _combine_ops;
 
 	/** true if relayering should be done using region's current layers and their `pending explicit relayer'
 	 *  flags; otherwise false if relayering should be done using the layer-model (most recently moved etc.)

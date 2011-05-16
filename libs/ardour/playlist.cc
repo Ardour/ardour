@@ -28,10 +28,10 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "pbd/convert.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/xml++.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
 #include "ardour/playlist.h"
@@ -357,6 +357,7 @@ Playlist::init (bool hide)
 	layer_op_counter = 0;
 	freeze_length = 0;
 	_explicit_relayering = false;
+	_combine_ops = 0;
 
 	_session.history().BeginUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::begin_undo, this));
 	_session.history().EndUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::end_undo, this));
@@ -2277,6 +2278,8 @@ Playlist::set_state (const XMLNode& node, int version)
 			_orig_diskstream_id = prop->value ();
 		} else if (prop->name() == X_("frozen")) {
 			_frozen = string_is_affirmative (prop->value());
+		} else if (prop->name() == X_("combine-ops")) {
+			_combine_ops = atoi (prop->value());
 		}
 	}
 
@@ -2369,7 +2372,7 @@ XMLNode&
 Playlist::state (bool full_state)
 {
 	XMLNode *node = new XMLNode (X_("Playlist"));
-	char buf[64] = "";
+	char buf[64];
 
 	node->add_property (X_("id"), id().to_s());
 	node->add_property (X_("name"), _name);
@@ -2382,6 +2385,9 @@ Playlist::state (bool full_state)
 	if (full_state) {
 		RegionLock rlock (this, false);
 		XMLNode* nested_node = 0;
+
+		snprintf (buf, sizeof (buf), "%u", _combine_ops);
+		node->add_property ("combine-ops", buf);
 
 		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 			if ((*i)->max_source_level() > 0) {
@@ -3208,6 +3214,7 @@ Playlist::join (const RegionList& r, const std::string& name)
 	/* add the new region at the right location */
 	
 	add_region (compound_region, earliest_position);
+	_combine_ops++;
 
 	thaw ();
 }

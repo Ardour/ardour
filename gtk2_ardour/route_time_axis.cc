@@ -2500,9 +2500,7 @@ RouteTimeAxisView::combine_regions ()
 
 	_view->foreach_selected_regionview (sigc::bind (sigc::ptr_fun (add_region_to_list), &selected_regions, &max_level));
 	
-	uint32_t num_joined_regions = playlist->count_joined_regions();
-	string name = string_compose (_("%1 compound-%2 (%3)"), playlist->name(), num_joined_regions+1, max_level+1);
-
+	string name = string_compose (_("%1 compound-%2 (%3)"), playlist->name(), playlist->combine_ops()+1, max_level+1);
 
 	playlist->clear_changes ();
 	playlist->join (selected_regions, name);
