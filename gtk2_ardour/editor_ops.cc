@@ -3556,6 +3556,7 @@ Editor::cut_copy_points (CutCopyOp op)
 	for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
 
 		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*>((*i).track);
+		_last_cut_copy_source_track = atv;
 
 		if (atv) {
 			atv->cut_copy_clear_objects (selection->points, op);
