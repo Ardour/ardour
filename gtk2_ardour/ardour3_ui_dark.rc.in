@@ -25,6 +25,7 @@
 
 #@color arm #F33
 #@color solo #A8F730
+#@color midi_channel_selector #A8F730
 #@color isolate #B9ECF2
 #@color mute #FFFA87
 #@color mono #DEC
@@ -710,6 +711,14 @@ style "transport_rec_button_alternate"
 	bg[NORMAL] = @@COLPREFIX@_arm
 	bg[SELECTED] = @@COLPREFIX@_arm
 	bg[ACTIVE] = @@COLPREFIX@_arm
+}
+
+style "midi_channel_selector_button"
+{
+	bg[NORMAL] = @@COLPREFIX@_bg
+	bg[ACTIVE] = @@COLPREFIX@_midi_channel_selector
+	fg[NORMAL] = @@COLPREFIX@_fg
+	fg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "shuttle_control" = "very_small_text"
@@ -1831,6 +1840,7 @@ widget "*SoloSafeLED" style:highest "solo_safe_led"
 widget "*SoloLEDLabel" style:highest "very_small_text"
 widget "*ContrastingPopup" style:highest "contrasting_popup"
 widget "*ContrastingPopup*" style:highest "contrasting_popup"
+widget "*MidiChannelSelectorButton" style:highest "midi_channel_selector_button"
 
 widget "*RouteNameEditorEntry" style:highest "text_cell_entry"
 widget "*RegionNameEditorEntry" style:highest "text_cell_entry"

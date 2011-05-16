@@ -226,6 +226,8 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 			_percussion_mode_item->set_active (_note_mode == Percussive);
 		}
 	}
+
+	set_color_mode (_color_mode, true);
 }
 
 void
@@ -759,17 +761,17 @@ MidiTimeAxisView::build_color_mode_menu()
 
 	RadioMenuItem::Group mode_group;
 	items.push_back (RadioMenuElem (mode_group, _("Meter Colors"),
-				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode), MeterColors)));
+					sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode), MeterColors, false)));
 	_meter_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_meter_color_mode_item->set_active(_color_mode == MeterColors);
 
 	items.push_back (RadioMenuElem (mode_group, _("Channel Colors"),
-				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode), ChannelColors)));
+					sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode), ChannelColors, false)));
 	_channel_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_channel_color_mode_item->set_active(_color_mode == ChannelColors);
 
 	items.push_back (RadioMenuElem (mode_group, _("Track Color"),
-				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode), TrackColor)));
+					sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode), TrackColor, false)));
 	_channel_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_channel_color_mode_item->set_active(_color_mode == TrackColor);
 
@@ -788,19 +790,21 @@ MidiTimeAxisView::set_note_mode(NoteMode mode)
 }
 
 void
-MidiTimeAxisView::set_color_mode(ColorMode mode)
+MidiTimeAxisView::set_color_mode (ColorMode mode, bool force)
 {
-	if (_color_mode != mode) {
-		if (mode == ChannelColors) {
-			_channel_selector.set_channel_colors(CanvasNoteEvent::midi_channel_colors);
-		} else {
-			_channel_selector.set_default_channel_color();
-		}
-
-		_color_mode = mode;
-		xml_node->add_property ("color-mode", enum_2_string(_color_mode));
-		_view->redisplay_track();
+	if (_color_mode == mode && !force) {
+		return;
 	}
+	
+	if (mode == ChannelColors) {
+		_channel_selector.set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+	} else {
+		_channel_selector.set_default_channel_color();
+	}
+	
+	_color_mode = mode;
+	xml_node->add_property ("color-mode", enum_2_string(_color_mode));
+	_view->redisplay_track();
 }
 
 void

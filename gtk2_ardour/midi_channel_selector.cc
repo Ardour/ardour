@@ -52,10 +52,10 @@ MidiChannelSelector::MidiChannelSelector(int n_rows, int n_columns, int start_ro
 					sigc::mem_fun(this, &MidiChannelSelector::button_toggled),
 					&_buttons[row][column],
 					channel_nr - 1));
+			_buttons[row][column].set_widget_name (X_("MidiChannelSelectorButton"));
 
 			_buttons[row][column].signal_button_release_event().connect(
                                 sigc::mem_fun(this, &MidiChannelSelector::was_clicked), false);
-
 
 			int table_row    = start_row + row;
 			int table_column = start_column + column;
@@ -95,8 +95,10 @@ MidiChannelSelector::set_default_channel_color()
 {
 	for (int row = 0; row < 4; ++row) {
 		for (int column = 0; column < 4; ++column) {
-			_buttons[row][column].unset_bg(STATE_NORMAL);
-			_buttons[row][column].unset_bg(STATE_ACTIVE);
+			_buttons[row][column].unset_fg (STATE_NORMAL);
+			_buttons[row][column].unset_fg (STATE_ACTIVE);
+			_buttons[row][column].unset_bg (STATE_NORMAL);
+			_buttons[row][column].unset_bg (STATE_ACTIVE);
 		}
 	}
 }

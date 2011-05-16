@@ -35,6 +35,7 @@ class StateButton
 	void set_visual_state (int);
 	int  get_visual_state () { return visual_state; }
 	void set_self_managed (bool yn) { _self_managed = yn; }
+	virtual void set_widget_name (const std::string& name) = 0;
 
   protected:
 	int  visual_state;
@@ -45,7 +46,6 @@ class StateButton
         bool is_toggle;
 
 	virtual std::string  get_widget_name() const = 0;
-	virtual void         set_widget_name (const std::string& name) = 0;
         virtual Gtk::Widget* get_child_widget () = 0;
 
         void avoid_prelight_on_style_changed (const Glib::RefPtr<Gtk::Style>& style, GtkWidget* widget);
@@ -59,6 +59,7 @@ class StatefulToggleButton : public StateButton, public Gtk::ToggleButton
 	StatefulToggleButton();
 	explicit StatefulToggleButton(const std::string &label);
 	~StatefulToggleButton() {}
+	void set_widget_name (const std::string& name);
 
   protected:
 	void on_realize ();
@@ -68,7 +69,6 @@ class StatefulToggleButton : public StateButton, public Gtk::ToggleButton
 
         Gtk::Widget* get_child_widget ();
 	std::string get_widget_name() const { return get_name(); }
-	void set_widget_name (const std::string& name);
 };
 
 class StatefulButton : public StateButton, public Gtk::Button
@@ -77,6 +77,7 @@ class StatefulButton : public StateButton, public Gtk::Button
 	StatefulButton();
 	explicit StatefulButton(const std::string &label);
 	virtual ~StatefulButton() {}
+	void set_widget_name (const std::string& name);
         
   protected:
 	void on_realize ();
@@ -85,7 +86,6 @@ class StatefulButton : public StateButton, public Gtk::Button
         
         Gtk::Widget* get_child_widget ();
 	std::string get_widget_name() const { return get_name(); }
-	void set_widget_name (const std::string& name);
 };
 
 };

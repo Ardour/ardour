@@ -25,8 +25,8 @@
 #include "sigc++/trackable.h"
 #include "gtkmm/table.h"
 #include "gtkmm/button.h"
-#include "gtkmm/togglebutton.h"
 #include "gtkmm/label.h"
+#include "gtkmm2ext/stateful_button.h"
 #include "ardour/types.h"
 
 
@@ -45,7 +45,7 @@ public:
 protected:
 	virtual void button_toggled(Gtk::ToggleButton* button, uint8_t button_nr) = 0;
 	Gtk::Label        _button_labels[4][4];
-	Gtk::ToggleButton _buttons[4][4];
+	Gtkmm2ext::StatefulToggleButton _buttons[4][4];
 	int               _recursion_counter;
         bool              was_clicked (GdkEventButton*);
 };
