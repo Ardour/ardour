@@ -298,7 +298,6 @@ MidiModel::NoteDiffCommand::operator() ()
 				if (temporary_removals.find (i->note) == temporary_removals.end()) {
 					_model->remove_note_unlocked (i->note);
 					temporary_removals.insert (i->note);
-
 				}
 				i->note->set_time (i->new_time);
 				break;
@@ -325,7 +324,6 @@ MidiModel::NoteDiffCommand::operator() ()
 			}
 		}
 
-
 		for (set<NotePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
 			NoteDiffCommand side_effects (model(), "side effects");
 			if (_model->add_note_unlocked (*i, &side_effects)) {
@@ -333,23 +331,9 @@ MidiModel::NoteDiffCommand::operator() ()
 				*this += side_effects;
 			} else {
 				/* The note that we removed earlier could not be re-added.  This change record
-				   must say that the note was removed.  It is an un-note.
+				   must say that the note was removed.  We'll keep the changes we made, though,
+				   as if the note is re-added by the undo the changes must also be undone.
 				*/
-
-				/* We didn't change it... */
-				for (ChangeList::iterator j = _changes.begin(); j != _changes.end(); ) {
-
-					ChangeList::iterator k = j;
-					++k;
-					
-					if (*i == j->note) {
-						_changes.erase (j);
-					}
-
-					j = k;
-				}
-
-				/* ...in fact, we removed it */
 				_removed_notes.push_back (*i);
 			}
 		}
@@ -375,9 +359,12 @@ MidiModel::NoteDiffCommand::undo ()
 			_model->remove_note_unlocked(*i);
 		}
 
-		for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
-			_model->add_note_unlocked(*i);
-		}
+		/* Apply changes first; this is important in the case of a note change which
+		   resulted in the note being removed by the overlap checker.  If the overlap
+		   checker removes a note, it will be in _removed_notes.  We are going to re-add
+		   it below, but first we must undo the changes we made so that the overlap
+		   checker doesn't refuse the re-add.
+		*/
 
 		/* notes we modify in a way that requires remove-then-add to maintain ordering */
 		set<NotePtr> temporary_removals;
@@ -385,34 +372,68 @@ MidiModel::NoteDiffCommand::undo ()
 		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
 			Property prop = i->property;
 			switch (prop) {
+				
 			case NoteNumber:
-				if (temporary_removals.find (i->note) == temporary_removals.end()) {
+				if (
+					temporary_removals.find (i->note) == temporary_removals.end() &&
+					find (_removed_notes.begin(), _removed_notes.end(), i->note) == _removed_notes.end()
+					) {
+
+					/* We only need to mark this note for re-add if (a) we haven't
+					   already marked it and (b) it isn't on the _removed_notes
+					   list (which means that it has already been removed and it
+					   will be re-added anyway)
+					*/
+					
 					_model->remove_note_unlocked (i->note);
 					temporary_removals.insert (i->note);
 				}
 				i->note->set_note (i->old_value);
 				break;
-			case Velocity:
-				i->note->set_velocity (i->old_value);
-				break;
+				
 			case StartTime:
-				if (temporary_removals.find (i->note) == temporary_removals.end()) {
+				if (
+					temporary_removals.find (i->note) == temporary_removals.end() &&
+					find (_removed_notes.begin(), _removed_notes.end(), i->note) == _removed_notes.end()
+					) {
+
+					/* See above ... */
+
 					_model->remove_note_unlocked (i->note);
 					temporary_removals.insert (i->note);
 				}
 				i->note->set_time (i->old_time);
 				break;
-			case Length:
-				i->note->set_length (i->old_time);
-				break;
+				
 			case Channel:
-				if (temporary_removals.find (i->note) == temporary_removals.end()) {
+				if (
+					temporary_removals.find (i->note) == temporary_removals.end() &&
+					find (_removed_notes.begin(), _removed_notes.end(), i->note) == _removed_notes.end()
+					) {
+
+					/* See above ... */
+					
 					_model->remove_note_unlocked (i->note);
 					temporary_removals.insert (i->note);
 				}
 				i->note->set_channel (i->old_value);
 				break;
+
+				/* no remove-then-add required for these properties, since we do not index them
+				 */
+
+			case Velocity:
+				i->note->set_velocity (i->old_value);
+				break;
+				
+			case Length:
+				i->note->set_length (i->old_time);
+				break;
 			}
+		}
+
+		for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
+			_model->add_note_unlocked(*i);
 		}
 
 		for (set<NotePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
