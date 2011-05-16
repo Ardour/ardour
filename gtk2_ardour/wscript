@@ -234,23 +234,28 @@ def set_options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    autowaf.build_version_files(path_prefix+'version.h', path_prefix+'version.cc',
-                    'gtk2_ardour', MAJOR, MINOR, MICRO)
+    autowaf.build_version_files(
+        path_prefix + 'version.h',
+        path_prefix + 'version.cc',
+        'gtk2_ardour', MAJOR, MINOR, MICRO)
     autowaf.configure(conf)
     conf.check_tool('compiler_cxx')
 
     if re.search ("linux", sys.platform) != None:
         autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
-        #
-        #       TODO: Insert a sanity check for on OS X
-        #       to ensure that CoreAudio is present....
-        #       Really shouldn't these checks be in AutoWaf?
-        #
-    autowaf.check_pkg(conf, 'flac', uselib_store='FLAC', atleast_version='1.2.1')
-    autowaf.check_pkg(conf, 'gthread', uselib_store='GTHREAD', atleast_version='2.10.1')
-    autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.18')
-    autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM', atleast_version='2.18')
-    autowaf.check_pkg(conf, 'libgnomecanvasmm-2.6', uselib_store='GNOMECANVASMM', atleast_version='2.16')
+
+    # TODO: Insert a sanity check for on OS X to ensure CoreAudio is present
+
+    autowaf.check_pkg(conf, 'flac', uselib_store='FLAC',
+                      atleast_version='1.2.1')
+    autowaf.check_pkg(conf, 'gthread', uselib_store='GTHREAD',
+                      atleast_version='2.10.1')
+    autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK',
+                      atleast_version='2.18')
+    autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM',
+                      atleast_version='2.18')
+    autowaf.check_pkg(conf, 'libgnomecanvasmm-2.6',
+                      uselib_store='GNOMECANVASMM', atleast_version='2.16')
     autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
 
     conf.check_tool('misc') # subst tool
@@ -287,8 +292,8 @@ def build_color_scheme(path, prefix):
 
 
 def build(bld):
-    # GTK front-end; if we're using VST we build this as a shared library, otherwise
-    # it's a normal executabale
+    # GTK front-end; if we're using VST we build this as a shared library,
+    # otherwise it's a normal executabale
     if bld.env['VST_SUPPORT']:
         obj = bld.new_task_gen(features = 'cxx cc cshlib')
     else:
@@ -310,16 +315,17 @@ def build(bld):
                           libgtkmm2ext libtaglib libgnomecanvas-2'''
     if sys.platform == 'darwin':
         obj.uselib_local + ' libappleutility'
-    obj.cflags       = ['-DPACKAGE="gtk2_ardour"']
-    obj.cxxflags     = ['-DPACKAGE="gtk2_ardour"']
-    obj.cxxflags     += ['-DVERSIONSTRING="' + bld.env['VERSION'] + '"']
-    obj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
-    obj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
-    obj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
-    obj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
-                    os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
-    obj.cxxflags     += ['-DPROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"']
-    obj.cxxflags     += ['-I../libs']
+    obj.defines     = [
+        'PACKAGE="gtk2_ardour"',
+        'VERSIONSTRING="' + bld.env['VERSION'] + '"',
+        'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
+        'CONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"',
+        'MODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"',
+        'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']),
+                                     'locale') + '"',
+        'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"'
+        ]
+    obj.includes += ['../libs']
 
     if bld.env['HAVE_SUIL']:
         obj.source += [ 'lv2_plugin_ui.cc' ]
@@ -333,10 +339,10 @@ def build(bld):
 
     if bld.env['VST_SUPPORT']:
         obj.source += [ 'vst_pluginui.cc' ]
-        obj.cxxflags += [ '-DVST_SUPPORT' ]
+        obj.defines += [ 'VST_SUPPORT' ]
 
     if bld.env['PHONE_HOME']:
-        obj.cxxflags += [ '-DPHONE_HOME' ]
+        obj.defines += [ 'PHONE_HOME' ]
 
     if bld.env['COREAUDIO']:
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
@@ -346,8 +352,8 @@ def build(bld):
         obj.source += [ 'x11.cc' ]
 
     if bld.env['VST_SUPPORT']:
-        # If we require VST support we build a stub main() and the FST library here using
-        # winegcc, and link it to the GTK front-end library
+        # If we require VST support we build a stub main() and the FST library
+        # here using winegcc, and link it to the GTK front-end library
         obj = bld.new_task_gen (features = 'cxx cc cprogram wine')
         obj.source = '''
                 ../libs/fst/fst.c
@@ -361,7 +367,9 @@ def build(bld):
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic', '-lpthread']
         obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
         obj.uselib = 'ALSA'
-        obj.uselib_local = '''libpbd libmidipp libtaglib libardour libardour_cp libgtkmm2ext libtaglib gtk2_ardour'''
+        obj.uselib_local = ['libpbd','libmidipp','libtaglib','libardour',
+                            'libardour_cp','libgtkmm2ext','libtaglib',
+                            'gtk2_ardour']
 
     # Wrappers
 
@@ -437,9 +445,11 @@ def build(bld):
             light_rc_subst_dict[key] = fontstyle
 
     # RC files
-    dark_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme ('gtk2_ardour/ardour3_ui_dark.rc.in', 'ARDOUR_DARK')
+    dark_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme(
+        'gtk2_ardour/ardour3_ui_dark.rc.in', 'ARDOUR_DARK')
     dark_rc_subst_dict['COLPREFIX'] = 'ARDOUR_DARK'
-    light_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme ('gtk2_ardour/ardour3_ui_light.rc.in', 'ARDOUR_LIGHT')
+    light_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme(
+        'gtk2_ardour/ardour3_ui_light.rc.in', 'ARDOUR_LIGHT')
     light_rc_subst_dict['COLPREFIX'] = 'ARDOUR_LIGHT'
 
     obj              = bld.new_task_gen('subst')
@@ -467,22 +477,25 @@ def build(bld):
     obj.argv = menus_argv
     obj.stdin = 'ardour.menus.in'
     obj.stdout = 'ardour.menus'
-    bld.install_files(os.path.join(bld.env['CONFIGDIR'], 'ardour3'), 'ardour.menus')
+    bld.install_files(os.path.join(bld.env['CONFIGDIR'], 'ardour3'),
+                      'ardour.menus')
 
     # Keybindings
 
-    # 'SAE-de-keypad', 'SAE-de-nokeypad', 'SAE-us-keypad', 'SAE-us-nokeypad', 'ergonomic-us'
+    # 'SAE-de-keypad', 'SAE-de-nokeypad', 'SAE-us-keypad',
+    # 'SAE-us-nokeypad', 'ergonomic-us'
 
     for b in [ 'mnemonic-us' ] :
         obj = bld.new_task_gen (
-                target = b + '.bindings',
-                source = b + '.bindings.in',
-                rule = '../tools/fmt-bindings --winkey="%s" --accelmap <${SRC} >${TGT}' % bld.env['WINDOWS_KEY']
-                )
+            target = b + '.bindings',
+            source = b + '.bindings.in',
+            rule = '../tools/fmt-bindings --winkey="%s" --accelmap <${SRC} >${TGT}' % bld.env['WINDOWS_KEY']
+            )
         obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
 
     # not modified at present
-    bld.install_files(os.path.join(bld.env['CONFIGDIR'], 'ardour3'), 'step_editing.bindings')
+    bld.install_files(os.path.join(bld.env['CONFIGDIR'], 'ardour3'),
+                      'step_editing.bindings')
 
     # Icons/Images
     bld.install_files('${DATADIR}/ardour3/icons', 'icons/*.png')
@@ -500,7 +513,9 @@ def build(bld):
         mo_files = glob.glob (os.path.join (bld.get_curdir(), 'po/*.mo'))
         for mo in mo_files:
             lang = os.path.basename (mo).replace ('.mo', '')
-            bld.install_as (os.path.join (bld.env['PREFIX'], 'share', 'locale', lang, 'LC_MESSAGES', APPNAME + '.mo'), mo)
+            bld.install_as (os.path.join(bld.env['PREFIX'], 'share', 'locale',
+                                         lang, 'LC_MESSAGES', APPNAME + '.mo'),
+                            mo)
 
 def i18n(bld):
-    autowaf.build_i18n (bld, srcdir, 'gtk2_ardour', APPNAME, gtk2_ardour_sources)
+    autowaf.build_i18n(bld, srcdir, 'gtk2_ardour', APPNAME, gtk2_ardour_sources)
