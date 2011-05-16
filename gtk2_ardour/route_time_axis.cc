@@ -2479,9 +2479,10 @@ RouteTimeAxisView::create_gain_automation_child (const Evoral::Parameter& param,
 }
 
 static
-void add_region_to_list (RegionView* rv, Playlist::RegionList* l)
+void add_region_to_list (RegionView* rv, Playlist::RegionList* l, uint32_t* max_level)
 {
 	l->push_back (rv->region());
+	*max_level = max (*max_level, rv->region()->max_source_level());
 }
 
 void
@@ -2494,7 +2495,11 @@ RouteTimeAxisView::join_regions ()
 	}
 
 	Playlist::RegionList selected_regions;
+	uint32_t max_level = 0;
 
-	_view->foreach_selected_regionview (sigc::bind (sigc::ptr_fun (add_region_to_list), &selected_regions));
-	track()->playlist()->join (selected_regions, "foshizzle");
+	_view->foreach_selected_regionview (sigc::bind (sigc::ptr_fun (add_region_to_list), &selected_regions, &max_level));
+	
+	uint32_t num_joined_regions = track()->playlist()->count_joined_regions();
+	string name = string_compose (_("%1 combine-%2 (%3)"), track()->playlist()->name(), num_joined_regions+1, max_level+1);
+	track()->playlist()->join (selected_regions, name);
 }

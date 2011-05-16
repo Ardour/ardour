@@ -1756,12 +1756,12 @@ Playlist::regions_at (framepos_t frame)
 }
 
 uint32_t
-Playlist::count_regions_at (framepos_t frame)
+Playlist::count_regions_at (framepos_t frame) const
 {
-	RegionLock rlock (this);
+	RegionLock rlock (const_cast<Playlist*>(this));
 	uint32_t cnt = 0;
 
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 		if ((*i)->covers (frame)) {
 			cnt++;
 		}
@@ -3166,3 +3166,20 @@ Playlist::max_source_level () const
 
 	return lvl;
 }
+
+
+uint32_t
+Playlist::count_joined_regions () const
+{
+	RegionLock rlock (const_cast<Playlist *> (this));
+	uint32_t cnt = 0;
+
+	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+		if ((*i)->max_source_level() > 0) {
+			cnt++;
+		}
+	}
+
+	return cnt;
+}
+

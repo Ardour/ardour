@@ -158,7 +158,7 @@ AudioPlaylistSource::set_state (const XMLNode& node, int /* version */)
 
 	_peak_path = prop->value ();
 
-	_level = _playlist->max_source_level ();
+	_level = _playlist->max_source_level () + 1;
 	ensure_buffers_for_level (_level);
 
 	return 0;
@@ -167,6 +167,8 @@ AudioPlaylistSource::set_state (const XMLNode& node, int /* version */)
 framecnt_t 
 AudioPlaylistSource::read_unlocked (Sample* dst, framepos_t start, framecnt_t cnt) const
 {
+	Sample* sbuf;
+	gain_t* gbuf;
 	framecnt_t to_read;
 	framecnt_t to_zero;
 	pair<framepos_t,framepos_t> extent = _playlist->get_extent();
@@ -185,9 +187,17 @@ AudioPlaylistSource::read_unlocked (Sample* dst, framepos_t start, framecnt_t cn
 	}
 
 	{ 
+		/* Don't need to hold the lock for the actual read, and
+		   actually, we cannot, but we do want to interlock
+		   with any changes to the list of buffers caused
+		   by creating new nested playlists/sources
+		*/
 		Glib::Mutex::Lock lm (_level_buffer_lock);
-		_playlist->read (dst, _mixdown_buffers[_level-1], _gain_buffers[_level-1], start+_playlist_offset, to_read, _playlist_channel);
+		sbuf = _mixdown_buffers[_level-1];
+		gbuf = _gain_buffers[_level-1];
 	}
+
+	_playlist->read (dst, sbuf, gbuf, start+_playlist_offset, to_read, _playlist_channel);
 
 	if (to_zero) {
 		memset (dst+to_read, 0, sizeof (Sample) * to_zero);
@@ -246,19 +256,13 @@ AudioPlaylistSource::setup_peakfile ()
 	/* the peak data is setup once and once only 
 	 */
 	
-	cerr << "looking for peakfile " << _peak_path << endl;
-
-
 	if (!Glib::file_test (_peak_path, Glib::FILE_TEST_EXISTS)) {
 		/* the 2nd argument here will be passed
 		   in to ::peak_path, and is irrelevant
 		   since our peak file path is fixed and
 		   not dependent on anything.
 		*/
-		cerr << "build it!\n";
 		return initialize_peakfile (false, string());
-	} else {
-		cerr << "exists!\n";
 	}
 
 	return 0;

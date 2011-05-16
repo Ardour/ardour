@@ -151,7 +151,8 @@ public:
 	const RegionListProperty& region_list () const { return regions; }
 
 	RegionList*                regions_at (framepos_t frame);
-        uint32_t                   count_regions_at (framepos_t);
+        uint32_t                   count_regions_at (framepos_t) const;
+	uint32_t                   count_joined_regions () const;
 	RegionList*                regions_touched (framepos_t start, framepos_t end);
 	RegionList*                regions_to_read (framepos_t start, framepos_t end);
 	uint32_t                   region_use_count (boost::shared_ptr<Region>) const;
