@@ -6401,3 +6401,27 @@ Editor::toggle_region_mute ()
 	commit_reversible_command ();
 }
 
+void
+Editor::join_regions ()
+{
+	/* foreach track with selected regions, take all selected regions
+	   and join them into a new region containing the subregions (as a
+	   playlist)
+	*/
+
+	typedef set<RouteTimeAxisView*> RTVS;
+	RTVS tracks;
+
+	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&(*i)->get_time_axis_view());
+
+		if (rtv) {
+			tracks.insert (rtv);
+		}
+	}
+
+	for (RTVS::iterator i = tracks.begin(); i != tracks.end(); ++i) {
+		(*i)->join_regions ();
+	}
+}
+

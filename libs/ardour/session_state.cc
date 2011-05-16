@@ -69,6 +69,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/audio_diskstream.h"
+#include "ardour/audio_playlist_source.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
@@ -220,6 +221,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
         _speakers.reset (new Speakers);
 
 	AudioDiskstream::allocate_working_buffers();
+	AudioSource::allocate_working_buffers ();
 
 	/* default short fade = 15ms */
 

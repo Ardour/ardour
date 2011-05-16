@@ -106,9 +106,25 @@ class AudioSource : virtual public Source,
 	/** @return true if the each source sample s must be clamped to -1 < s < 1 */
 	virtual bool clamped_at_unity () const = 0;
 
+	static void allocate_working_buffers ();
+    
   protected:
 	static bool _build_missing_peakfiles;
 	static bool _build_peakfiles;
+
+	static size_t _working_buffers_size;
+	
+	/* these collections of working buffers for supporting
+	   playlist's reading from potentially nested/recursive
+	   sources assume SINGLE THREADED reads by the butler
+	   thread, or a lock around calls that use them. 
+	*/
+
+	static std::vector<Sample*> _mixdown_buffers;
+	static std::vector<gain_t*> _gain_buffers;
+	static Glib::StaticMutex    _level_buffer_lock;
+
+	static void ensure_buffers_for_level (uint32_t);
 
 	framecnt_t           _length;
 	std::string         peakpath;
@@ -129,7 +145,7 @@ class AudioSource : virtual public Source,
 	virtual framecnt_t write_unlocked (Sample *dst, framecnt_t cnt) = 0;
 	virtual std::string peak_path(std::string audio_path) = 0;
 	virtual std::string find_broken_peakfile (std::string missing_peak_path,
-                                                  std::string audio_path) { return std::string(); }
+                                                  std::string audio_path) { return peak_path (audio_path); }
 
 	virtual int read_peaks_with_fpp (PeakData *peaks,
 					 framecnt_t npeaks, framepos_t start, framecnt_t cnt,

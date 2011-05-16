@@ -38,6 +38,7 @@
 #include "pbd/pthread_utils.h"
 
 #include "ardour/audiosource.h"
+#include "ardour/audio_diskstream.h"
 #include "ardour/cycle_timer.h"
 #include "ardour/session.h"
 #include "ardour/transient_detector.h"
@@ -49,6 +50,10 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+Glib::StaticMutex AudioSource::_level_buffer_lock = GLIBMM_STATIC_MUTEX_INIT;
+vector<Sample*> AudioSource::_mixdown_buffers;
+vector<gain_t*> AudioSource::_gain_buffers;
+size_t AudioSource::_working_buffers_size = 0;
 bool AudioSource::_build_missing_peakfiles = false;
 
 /** true if we want peakfiles (e.g. if we are displaying a GUI) */
@@ -956,5 +961,28 @@ AudioSource::mark_streaming_write_completed ()
 
 	if (_peaks_built) {
 		PeaksReady (); /* EMIT SIGNAL */
+	}
+}
+
+void
+AudioSource::allocate_working_buffers()
+{
+	assert(AudioDiskstream::disk_io_frames() > 0);
+	_working_buffers_size = AudioDiskstream::disk_io_frames();
+	/* we don't need any buffers allocated until
+	   a level 1 audiosource is created, at which
+	   time we'll call ::ensure_buffers_for_level()
+	   with the right value and do the right thing.
+	*/
+}
+
+void
+AudioSource::ensure_buffers_for_level (uint32_t level) 
+{
+	Glib::Mutex::Lock lm (_level_buffer_lock);
+
+	while (_mixdown_buffers.size() < level) {
+		_mixdown_buffers.push_back (new Sample[_working_buffers_size]);
+		_gain_buffers.push_back (new gain_t[_working_buffers_size]);
 	}
 }

@@ -106,17 +106,19 @@ class Source : public SessionObject
         virtual void dec_use_count ();
         int  use_count() const { return g_atomic_int_get (&_use_count); }
         bool used() const { return use_count() > 0; }
+	uint32_t level() const { return _level; }
 
   protected:
 	DataType            _type;
 	Flag                _flags;
 	time_t              _timestamp;
-	framepos_t           _timeline_position;
+	framepos_t          _timeline_position;
 	bool                _analysed;
 	mutable Glib::Mutex _lock;
 	mutable Glib::Mutex _analysis_lock;
 	Glib::Mutex         _playlist_lock;
         gint                _use_count; /* atomic */
+	uint32_t            _level; /* how deeply nested is this source w.r.t a disk file */
 
   private:
 	void fix_writable_flags ();

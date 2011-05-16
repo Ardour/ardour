@@ -1372,6 +1372,7 @@ Editor::register_region_actions ()
 	reg_sens (_region_actions, "play-selected-regions", _("Play"), sigc::mem_fun(*this, &Editor::play_selected_region));
 
 	reg_sens (_region_actions, "bounce-region", _("Bounce"), sigc::mem_fun (*this, &Editor::bounce_region_selection));
+	reg_sens (_region_actions, "join-regions", _("Join"), sigc::mem_fun (*this, &Editor::join_regions));
 
 	reg_sens (_region_actions, "analyze-region", _("Spectral Analysis..."), sigc::mem_fun (*this, &Editor::analyze_region_selection));
 

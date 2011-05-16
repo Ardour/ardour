@@ -24,6 +24,7 @@
 #include <cstdio>
 
 #include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
@@ -48,6 +49,7 @@ AudioPlaylistSource::AudioPlaylistSource (Session& s, const std::string& name, b
 					  uint32_t chn, frameoffset_t begin, framecnt_t len, bool copy, Source::Flag flags)
 	: Source (s, DataType::AUDIO, name)
 	, AudioSource (s, name)
+	, _playlist (p)
 	, _playlist_channel (chn)
 {
 	/* PlaylistSources are never writable, renameable, removable or destructive */
@@ -63,7 +65,10 @@ AudioPlaylistSource::AudioPlaylistSource (Session& s, const std::string& name, b
 		_playlist_length = len;
 	}
 
-	_peak_path = tempnam (_session.session_directory().peak_path().to_string().c_str(), "apspk");
+	_length = len;
+	_peak_path = Glib::build_filename (_session.session_directory().peak_path().to_string(), name);
+	_level = _playlist->max_source_level () + 1;
+	ensure_buffers_for_level (_level);
 }
 
 AudioPlaylistSource::AudioPlaylistSource (Session& s, const XMLNode& node)
@@ -113,10 +118,14 @@ AudioPlaylistSource::set_state (const XMLNode& node, int /* version */)
 	/* get playlist */
 
 	boost::shared_ptr<Playlist> p = _session.playlists->by_id (id);
+	_playlist = boost::dynamic_pointer_cast<AudioPlaylist>(p);
 
-	if (!p) {
+	if (!_playlist) {
 		throw failed_constructor ();
 	}
+
+	pair<framepos_t,framepos_t> extent = _playlist->get_extent();
+	_length = extent.second - extent.first;
 
 	/* other properties */
 
@@ -149,6 +158,9 @@ AudioPlaylistSource::set_state (const XMLNode& node, int /* version */)
 
 	_peak_path = prop->value ();
 
+	_level = _playlist->max_source_level ();
+	ensure_buffers_for_level (_level);
+
 	return 0;
 }
 
@@ -172,8 +184,11 @@ AudioPlaylistSource::read_unlocked (Sample* dst, framepos_t start, framecnt_t cn
 		to_zero = 0;
 	}
 
-	_playlist->read (dst, 0, 0, start+_playlist_offset, to_read, _playlist_channel);
-	
+	{ 
+		Glib::Mutex::Lock lm (_level_buffer_lock);
+		_playlist->read (dst, _mixdown_buffers[_level-1], _gain_buffers[_level-1], start+_playlist_offset, to_read, _playlist_channel);
+	}
+
 	if (to_zero) {
 		memset (dst+to_read, 0, sizeof (Sample) * to_zero);
 	}
@@ -230,6 +245,9 @@ AudioPlaylistSource::setup_peakfile ()
 {
 	/* the peak data is setup once and once only 
 	 */
+	
+	cerr << "looking for peakfile " << _peak_path << endl;
+
 
 	if (!Glib::file_test (_peak_path, Glib::FILE_TEST_EXISTS)) {
 		/* the 2nd argument here will be passed
@@ -237,9 +255,12 @@ AudioPlaylistSource::setup_peakfile ()
 		   since our peak file path is fixed and
 		   not dependent on anything.
 		*/
-		
-		return initialize_peakfile (true, string());
-	} 
+		cerr << "build it!\n";
+		return initialize_peakfile (false, string());
+	} else {
+		cerr << "exists!\n";
+	}
+
 	return 0;
 }
 
@@ -248,3 +269,4 @@ AudioPlaylistSource::peak_path (string /*audio_path*/)
 {
 	return _peak_path;
 }
+

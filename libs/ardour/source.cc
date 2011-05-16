@@ -53,6 +53,7 @@ Source::Source (Session& s, DataType type, const string& name, Flag flags)
 	, _flags(flags)
 	, _timeline_position(0)
         , _use_count (0)
+	, _level (0)
 {
 	_analysed = false;
 	_timestamp = 0;
@@ -65,6 +66,7 @@ Source::Source (Session& s, const XMLNode& node)
 	, _flags (Flag (Writable|CanRename))
 	, _timeline_position(0)
         , _use_count (0)
+	, _level (0)
 {
 	_timestamp = 0;
 	_analysed = false;
@@ -308,3 +310,4 @@ Source::writable () const
 {
         return (_flags & Writable) && _session.writable();
 }
+

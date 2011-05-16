@@ -97,6 +97,8 @@ public:
 
 	boost::shared_ptr<Region> region_by_id (const PBD::ID&) const;
 
+	uint32_t max_source_level () const;
+
 	void set_region_ownership ();
 
 	virtual void clear (bool with_signals=true);
@@ -137,6 +139,8 @@ public:
 	void partition (framepos_t start, framepos_t end, bool cut = false);
 	void duplicate (boost::shared_ptr<Region>, framepos_t position, float times);
 	void nudge_after (framepos_t start, framecnt_t distance, bool forwards);
+	void join (const RegionList&, const std::string&);
+
 	void shuffle (boost::shared_ptr<Region>, int dir);
 	void update_after_tempo_map_change ();
 

@@ -41,6 +41,7 @@
 #include "ardour/playlist_factory.h"
 #include "ardour/transient_detector.h"
 #include "ardour/session_playlists.h"
+#include "ardour/source_factory.h"
 
 #include "i18n.h"
 
@@ -3083,4 +3084,85 @@ Playlist::find_next_top_layer_position (framepos_t t) const
 	}
 
 	return max_framepos;
+}
+
+void
+Playlist::join (const RegionList& r, const std::string& name)
+{
+	PropertyList plist; 
+	uint32_t channels = 0;
+	uint32_t layer = 0;
+	framepos_t earliest_position = max_framepos;
+
+	boost::shared_ptr<Playlist> pl = PlaylistFactory::create (_type, _session, name, true);
+	
+	for (RegionList::const_iterator i = r.begin(); i != r.end(); ++i) {
+		earliest_position = min (earliest_position, (*i)->position());
+	}
+
+	for (RegionList::const_iterator i = r.begin(); i != r.end(); ++i) {
+
+		/* copy the region */
+
+		boost::shared_ptr<Region> original_region = (*i);
+		boost::shared_ptr<Region> copied_region = RegionFactory::create (original_region, false);
+
+		/* make position relative to zero */
+
+		pl->add_region (copied_region, original_region->position() - earliest_position);
+
+		/* use the maximum number of channels for any region */
+
+		channels = max (channels, original_region->n_channels());
+
+		/* it will go above the layer of the highest existing region */
+
+		layer = max (layer, original_region->layer());
+	}
+
+	/* now create a new PlaylistSource for each channel in the new playlist */
+
+	SourceList sources;
+	pair<framepos_t,framepos_t> extent = pl->get_extent();
+	
+	for (uint32_t chn = 0; chn < channels; ++chn) {
+		sources.push_back (SourceFactory::createFromPlaylist (_type, _session, pl, name, chn, 0, extent.second, false, false));
+	}
+	
+	/* now a new region using the list of sources */
+
+	plist.add (Properties::start, 0);
+	plist.add (Properties::length, extent.second);
+	plist.add (Properties::name, name);
+	plist.add (Properties::layer, layer+1);
+	
+	boost::shared_ptr<Region> compound_region = RegionFactory::create (sources, plist, true);
+
+	/* remove all the selected regions from the current playlist
+	 */
+
+	freeze ();
+	
+	for (RegionList::const_iterator i = r.begin(); i != r.end(); ++i) {
+		remove_region (*i);
+	}
+
+	/* add the new region at the right location */
+	
+	add_region (compound_region, earliest_position);
+
+	thaw ();
+}
+
+uint32_t
+Playlist::max_source_level () const
+{
+	RegionLock rlock (const_cast<Playlist *> (this));
+	uint32_t lvl = 0;
+
+	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+		lvl = max (lvl, (*i)->max_source_level());
+	}
+
+	return lvl;
 }

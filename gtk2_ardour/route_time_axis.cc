@@ -2477,3 +2477,24 @@ RouteTimeAxisView::create_gain_automation_child (const Evoral::Parameter& param,
 	
 	add_automation_child (Evoral::Parameter(GainAutomation), gain_track, show);
 }
+
+static
+void add_region_to_list (RegionView* rv, Playlist::RegionList* l)
+{
+	l->push_back (rv->region());
+}
+
+void
+RouteTimeAxisView::join_regions ()
+{
+	assert (is_track());
+
+	if (!_view) {
+		return;
+	}
+
+	Playlist::RegionList selected_regions;
+
+	_view->foreach_selected_regionview (sigc::bind (sigc::ptr_fun (add_region_to_list), &selected_regions));
+	track()->playlist()->join (selected_regions, "foshizzle");
+}

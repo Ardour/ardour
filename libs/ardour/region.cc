@@ -1660,3 +1660,14 @@ Region::can_trim () const
 	return ct;
 }
                       
+uint32_t
+Region::max_source_level () const
+{
+	uint32_t lvl = 0;
+
+	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
+		lvl = max (lvl, (*i)->level());
+	}
+
+	return lvl;
+}

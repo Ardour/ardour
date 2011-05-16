@@ -114,6 +114,7 @@ class Region
 	layer_t    layer ()     const { return _layer; }
 
 	framecnt_t source_length(uint32_t n) const;
+	uint32_t   max_source_level () const;
 
 	/* these two are valid ONLY during a StateChanged signal handler */
 

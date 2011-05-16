@@ -1099,6 +1099,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void duplicate_some_regions (RegionSelection&, float times);
 	void duplicate_selection (float times);
 	void region_fill_selection ();
+	void join_regions ();
 
 	void region_fill_track ();
 	void audition_playlist_region_standalone (boost::shared_ptr<ARDOUR::Region>);

@@ -65,6 +65,7 @@ class AudioPlaylistSource : public AudioSource {
     framecnt_t                       _playlist_length;
     uint32_t                         _playlist_channel;
     std::string                      _peak_path;
+    uint32_t                         _level; /* how recursive is this? */
 };
         
 } /* namespace */
