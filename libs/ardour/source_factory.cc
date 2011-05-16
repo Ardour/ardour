@@ -147,44 +147,66 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 
 	if (type == DataType::AUDIO) {
 
-		try {
-			Source* src = new SndFileSource (s, node);
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			// boost_debug_shared_ptr_mark_interesting (src, "Source");
-#endif
-			boost::shared_ptr<Source> ret (src);
-			if (setup_peakfile (ret, defer_peaks)) {
-				return boost::shared_ptr<Source>();
+		/* it could be nested */
+
+		if (node.property ("playlist") != 0) {
+
+			try {
+				boost::shared_ptr<AudioPlaylistSource> ap (new AudioPlaylistSource (s, node));
+
+				if (setup_peakfile (ap, true)) {
+					return boost::shared_ptr<Source>();
+				}
+
+				ap->check_for_analysis_data_on_disk ();
+				SourceCreated (ap);
+				return ap;
+
+			} catch (failed_constructor&) {
+				/* oh well, so much for that then ... */
 			}
-			ret->check_for_analysis_data_on_disk ();
-			SourceCreated (ret);
-			return ret;
-		}
+			
+		} else {
 
-		catch (failed_constructor& err) {
 
+			try {
+				Source* src = new SndFileSource (s, node);
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
+				// boost_debug_shared_ptr_mark_interesting (src, "Source");
+#endif
+				boost::shared_ptr<Source> ret (src);
+				if (setup_peakfile (ret, defer_peaks)) {
+					return boost::shared_ptr<Source>();
+				}
+				ret->check_for_analysis_data_on_disk ();
+				SourceCreated (ret);
+				return ret;
+			}
+
+			catch (failed_constructor& err) {
+				
 #ifdef USE_COREAUDIO_FOR_FILES
-
-			/* this is allowed to throw */
-
-			Source *src = new CoreAudioSource (s, node);
+				
+				/* this is allowed to throw */
+				
+				Source *src = new CoreAudioSource (s, node);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-			// boost_debug_shared_ptr_mark_interesting (src, "Source");
+				// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
-			boost::shared_ptr<Source> ret (src);
-
-			if (setup_peakfile (ret, defer_peaks)) {
-				return boost::shared_ptr<Source>();
-			}
-
-			ret->check_for_analysis_data_on_disk ();
-			SourceCreated (ret);
-			return ret;
+				boost::shared_ptr<Source> ret (src);
+				
+				if (setup_peakfile (ret, defer_peaks)) {
+					return boost::shared_ptr<Source>();
+				}
+				
+				ret->check_for_analysis_data_on_disk ();
+				SourceCreated (ret);
+				return ret;
 #else
-			throw; // rethrow
+				throw; // rethrow
 #endif
+			}
 		}
-
 	} else if (type == DataType::MIDI) {
 		boost::shared_ptr<SMFSource> src (new SMFSource (s, node));
 		src->load_model (true, true);
@@ -348,9 +370,7 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<
 				}
 				
 				ret->check_for_analysis_data_on_disk ();
-				
-				/* we never announce these sources */
-				
+				SourceCreated (ret);
 				return ret;
 			}
 		}

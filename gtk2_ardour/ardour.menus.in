@@ -228,7 +228,7 @@
       <menuitem action='play-selected-regions'/>
       <menuitem action='export-region'/>
       <menuitem action='bounce-region'/>
-      <menuitem action='join-regions'/>
+      <menuitem action='combine-regions'/>
       <menuitem action='analyze-region'/>
       <menuitem action='toggle-region-lock'/>
       <menuitem action='toggle-region-lock-style'/>

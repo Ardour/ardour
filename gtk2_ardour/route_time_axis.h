@@ -94,7 +94,7 @@ public:
 	/* Editing operations */
 	void cut_copy_clear (Selection&, Editing::CutCopyOp);
 	bool paste (ARDOUR::framepos_t, float times, Selection&, size_t nth);
-	void join_regions ();
+	void combine_regions ();
 	void toggle_automation_track (const Evoral::Parameter& param);
 
 	/* The editor calls these when mapping an operation across multiple tracks */

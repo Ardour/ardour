@@ -1056,20 +1056,23 @@ Session::state(bool full_state)
 
 		for (SourceMap::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
 
-			/* Don't save information about non-destructive file sources that are empty
-                           and unused by any regions.
+			/* Don't save information about non-file Sources, or
+			 * about non-destructive file sources that are empty
+			 * and unused by any regions.
                         */
 
 			boost::shared_ptr<FileSource> fs;
+
 			if ((fs = boost::dynamic_pointer_cast<FileSource> (siter->second)) != 0) {
+
 				if (!fs->destructive()) {
 					if (fs->empty() && !fs->used()) {
 						continue;
 					}
 				}
+				
+				child->add_child_nocopy (siter->second->get_state());
 			}
-
-			child->add_child_nocopy (siter->second->get_state());
 		}
 	}
 

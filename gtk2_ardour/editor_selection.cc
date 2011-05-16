@@ -957,7 +957,6 @@ Editor::sensitize_the_right_region_actions ()
 		if (!selection->time.empty()) {
 			_region_actions->get_action("split-region")->set_sensitive (true);
 		}
-		
 		return;
 
 	} else if (mouse_mode != MouseObject) {
@@ -1063,9 +1062,11 @@ Editor::sensitize_the_right_region_actions ()
 		_region_actions->get_action("show-region-list-editor")->set_sensitive (false);
 		_region_actions->get_action("show-region-properties")->set_sensitive (false);
 		_region_actions->get_action("rename-region")->set_sensitive (false);
+		_region_actions->get_action("combine-regions")->set_sensitive (true);
 	} else if (rs.size() == 1) {
 		_region_actions->get_action("add-range-markers-from-region")->set_sensitive (false);
 		_region_actions->get_action("close-region-gaps")->set_sensitive (false);
+		_region_actions->get_action("combine-regions")->set_sensitive (false);
 	} 
 
 	if (!have_midi) {

@@ -34,6 +34,7 @@
 #include "ardour/audio_playlist_source.h"
 #include "ardour/audioregion.h"
 #include "ardour/debug.h"
+#include "ardour/filename_extensions.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_playlists.h"
@@ -52,14 +53,12 @@ AudioPlaylistSource::AudioPlaylistSource (Session& s, const std::string& name, b
 	, PlaylistSource (s, name, p, DataType::AUDIO, begin, len, flags)
 	, _playlist_channel (chn)
 {
-	_peak_path = Glib::build_filename (_session.session_directory().peak_path().to_string(), name);
-
 	AudioSource::_length = len;
 	ensure_buffers_for_level (_level);
 }
 
 AudioPlaylistSource::AudioPlaylistSource (Session& s, const XMLNode& node)
-	: Source (s, DataType::AUDIO, "toBeRenamed")
+	: Source (s, node)
 	, AudioSource (s, node)
 	, PlaylistSource (s, node)
 {
@@ -91,7 +90,6 @@ AudioPlaylistSource::get_state ()
 
 	snprintf (buf, sizeof (buf), "%" PRIu32, _playlist_channel);
 	node.add_property ("channel", buf);
-	node.add_property ("peak-path", _peak_path);
 
 	return node;
 }
@@ -123,12 +121,6 @@ AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_desc
 	}
 
 	sscanf (prop->value().c_str(), "%" PRIu32, &_playlist_channel);
-
-	if ((prop = node.property (X_("peak-path"))) == 0) {
-		throw failed_constructor ();
-	}
-
-	_peak_path = prop->value ();
 
 	ensure_buffers_for_level (_level);
 
@@ -224,23 +216,12 @@ AudioPlaylistSource::sample_rate () const
 int
 AudioPlaylistSource::setup_peakfile ()
 {
-	/* the peak data is setup once and once only 
-	 */
-	
-	if (!Glib::file_test (_peak_path, Glib::FILE_TEST_EXISTS)) {
-		/* the 2nd argument here will be passed
-		   in to ::peak_path, and is irrelevant
-		   since our peak file path is fixed and
-		   not dependent on anything.
-		*/
-		return initialize_peakfile (false, string());
-	}
-
-	return 0;
+	_peak_path = Glib::build_filename (_session.session_directory().peak_path().to_string(), name() + ARDOUR::peakfile_suffix);
+	return initialize_peakfile (false, string());
 }
 
 string
-AudioPlaylistSource::peak_path (string /*audio_path*/)
+AudioPlaylistSource::peak_path (string /*audio_path_IGNORED*/)
 {
 	return _peak_path;
 }

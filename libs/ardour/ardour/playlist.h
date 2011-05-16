@@ -376,6 +376,7 @@ public:
 	void timestamp_layer_op (boost::shared_ptr<Region>);
 
 	void _split_region (boost::shared_ptr<Region>, framepos_t position);
+	void load_nested_sources (const XMLNode& node);
 };
 
 } /* namespace ARDOUR */

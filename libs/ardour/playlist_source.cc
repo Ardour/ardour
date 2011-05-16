@@ -32,6 +32,7 @@
 
 #include "ardour/playlist.h"
 #include "ardour/playlist_source.h"
+#include "ardour/playlist_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
 #include "ardour/source_factory.h"
@@ -84,26 +85,38 @@ PlaylistSource::add_state (XMLNode& node)
 	node.add_property ("offset", buf);
 	snprintf (buf, sizeof (buf), "%" PRIu64, _playlist_length);
 	node.add_property ("length", buf);
+	
+	node.add_child_nocopy (_playlist->get_state());
 }
 
 int
 PlaylistSource::set_state (const XMLNode& node, int version) 
 {
-	/* get playlist ID */
+	/* check that we have a playlist ID */
 
 	const XMLProperty *prop = node.property (X_("playlist"));
 
 	if (!prop) {
+		error << _("No playlist ID in PlaylistSource XML!") << endmsg;
 		throw failed_constructor ();
 	}
 
-	PBD::ID id (prop->value());
+	/* create playlist from child node */
 
-	/* get playlist */
+	XMLNodeList nlist;
+	XMLNodeConstIterator niter;
 
-	boost::shared_ptr<Playlist> p = _session.playlists->by_id (id);
+	nlist = node.children();
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() == "Playlist") {
+			_playlist = PlaylistFactory::create (_session, **niter, true, false);
+			break;
+		}
+	}
 
 	if (!_playlist) {
+		error << _("No playlist node in PlaylistSource XML!") << endmsg;
 		throw failed_constructor ();
 	}
 

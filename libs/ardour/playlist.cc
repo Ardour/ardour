@@ -2221,6 +2221,26 @@ Playlist::update (const RegionListProperty::ChangeRecord& change)
 	thaw ();
 }
 
+void
+Playlist::load_nested_sources (const XMLNode& node)
+{
+	XMLNodeList nlist;
+	XMLNodeConstIterator niter;
+
+	nlist = node.children();
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() == "Source") {
+			try {
+				SourceFactory::create (_session, **niter, true);
+			} 
+			catch (failed_constructor& err) {
+				error << string_compose (_("Cannot reconstruct nested source for playlist %1"), name()) << endmsg;
+			}
+		}
+	}
+}
+
 int
 Playlist::set_state (const XMLNode& node, int version)
 {
@@ -2264,6 +2284,19 @@ Playlist::set_state (const XMLNode& node, int version)
 
 	nlist = node.children();
 
+	/* find the "Nested" node, if any, and recreate the PlaylistSources
+	   listed there
+	*/
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		child = *niter;
+
+		if (child->name() == "Nested") {
+			load_nested_sources (*child);
+			break;
+		}
+	}
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		child = *niter;
@@ -2292,7 +2325,7 @@ Playlist::set_state (const XMLNode& node, int version)
 				error << _("Playlist: cannot create region from XML") << endmsg;
 				continue;
 			}
-
+			
 
 			add_region (region, region->position(), 1.0);
 
@@ -2348,6 +2381,31 @@ Playlist::state (bool full_state)
 
 	if (full_state) {
 		RegionLock rlock (this, false);
+		XMLNode* nested_node = 0;
+
+		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+			if ((*i)->max_source_level() > 0) {
+
+				if (!nested_node) {
+					nested_node = new XMLNode (X_("Nested"));
+				}
+
+				/* region is compound - get its playlist and
+				   store that before we list the region that
+				   needs it ...
+				*/
+
+				const SourceList& sl ((*i)->sources());
+
+				for (SourceList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
+					nested_node->add_child_nocopy ((*s)->get_state ());
+				}
+			}
+		}
+
+		if (nested_node) {
+			node->add_child_nocopy (*nested_node);
+		}
 
 		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 			node->add_child_nocopy ((*i)->get_state());
