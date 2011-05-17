@@ -3157,12 +3157,19 @@ Playlist::join (const RegionList& r, const std::string& name)
 	uint32_t channels = 0;
 	uint32_t layer = 0;
 	framepos_t earliest_position = max_framepos;
+	vector<TwoRegions> old_and_new_regions;
 
 	boost::shared_ptr<Playlist> pl = PlaylistFactory::create (_type, _session, name, true);
-	
+
 	for (RegionList::const_iterator i = r.begin(); i != r.end(); ++i) {
 		earliest_position = min (earliest_position, (*i)->position());
 	}
+
+	/* enable this so that we do not try to create xfades etc. as we add
+	 * regions
+	 */
+
+	pl->in_partition = true;
 
 	for (RegionList::const_iterator i = r.begin(); i != r.end(); ++i) {
 
@@ -3170,6 +3177,8 @@ Playlist::join (const RegionList& r, const std::string& name)
 
 		boost::shared_ptr<Region> original_region = (*i);
 		boost::shared_ptr<Region> copied_region = RegionFactory::create (original_region, false);
+
+		old_and_new_regions.push_back (TwoRegions (original_region,copied_region));
 
 		/* make position relative to zero */
 
@@ -3183,6 +3192,8 @@ Playlist::join (const RegionList& r, const std::string& name)
 
 		layer = max (layer, original_region->layer());
 	}
+
+	pl->in_partition = false;
 
 	/* now create a new PlaylistSource for each channel in the new playlist */
 
@@ -3202,6 +3213,10 @@ Playlist::join (const RegionList& r, const std::string& name)
 	
 	boost::shared_ptr<Region> compound_region = RegionFactory::create (sources, plist, true);
 
+	/* add any dependent regions to the new playlist */
+
+	copy_dependents (old_and_new_regions, pl);
+
 	/* remove all the selected regions from the current playlist
 	 */
 
@@ -3214,6 +3229,7 @@ Playlist::join (const RegionList& r, const std::string& name)
 	/* add the new region at the right location */
 	
 	add_region (compound_region, earliest_position);
+
 	_combine_ops++;
 
 	thaw ();

@@ -104,6 +104,7 @@ public:
         void refresh_dependents (boost::shared_ptr<Region> region);
         void check_dependents (boost::shared_ptr<Region> region, bool norefresh);
         void remove_dependents (boost::shared_ptr<Region> region);
+	void copy_dependents (const std::vector<TwoRegions>&, boost::shared_ptr<Playlist>);
 
     private:
        CrossfadeListProperty _crossfades;
