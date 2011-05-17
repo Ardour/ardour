@@ -116,7 +116,6 @@ class Source : public SessionObject
 	bool                _analysed;
 	mutable Glib::Mutex _lock;
 	mutable Glib::Mutex _analysis_lock;
-	Glib::Mutex         _playlist_lock;
         gint                _use_count; /* atomic */
 	uint32_t            _level; /* how deeply nested is this source w.r.t a disk file */
 
