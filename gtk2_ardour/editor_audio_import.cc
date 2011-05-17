@@ -760,10 +760,14 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 
 			PropertyList plist;
 
-			/* Fudge region length to ensure it is non-zero */
+			/* Fudge region length to ensure it is non-zero; make it 1 beat at 120bpm
+			   for want of a better idea.  It can't be too small, otherwise if this
+			   is a MIDI region the conversion from frames -> beats -> frames will
+			   round it back down to 0 again.
+			*/
 			framecnt_t len = (*x)->length (pos);
 			if (len == 0) {
-				len = 1;
+				len = (60 / 120) * _session->frame_rate ();
 			}
 			
 			plist.add (ARDOUR::Properties::start, 0);
