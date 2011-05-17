@@ -81,8 +81,6 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 
 	_lock = seq.read_lock();
 
-	typename Sequence<Time>::ReadLock lock(seq.read_lock());
-
 	// Find first note which begins at or after t
 	_note_iter = seq.note_lower_bound(t);
 
