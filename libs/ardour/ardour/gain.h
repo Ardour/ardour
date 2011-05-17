@@ -25,17 +25,16 @@
 
 namespace ARDOUR {
 
-struct Gain : public AutomationList {
+struct Gain : public AutomationList
+{
+	Gain ();
+	Gain (const Gain&);
+	Gain& operator= (const Gain&);
 
-    Gain();
-    Gain (const Gain&);
-    Gain& operator= (const Gain&);
-
-    static void fill_linear_fade_in (Gain& curve, framecnt_t frames);
-    static void fill_linear_volume_fade_in (Gain& curve, framecnt_t frames);
-    static void fill_linear_fade_out (Gain& curve, framecnt_t frames);
-    static void fill_linear_volume_fade_out (Gain& curve, framecnt_t frames);
-
+	static void fill_linear_fade_in (Gain& curve, framecnt_t frames);
+	static void fill_linear_volume_fade_in (Gain& curve, framecnt_t frames);
+	static void fill_linear_fade_out (Gain& curve, framecnt_t frames);
+	static void fill_linear_volume_fade_out (Gain& curve, framecnt_t frames);
 };
 
 } /* namespace ARDOUR */
