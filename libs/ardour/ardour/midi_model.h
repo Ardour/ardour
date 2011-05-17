@@ -278,8 +278,8 @@ private:
 	};
 
 public:
-	virtual WriteLock edit_lock();
-	virtual WriteLock write_lock();
+	WriteLock edit_lock();
+	WriteLock write_lock();
 
 private:
 	friend class DeltaCommand;
