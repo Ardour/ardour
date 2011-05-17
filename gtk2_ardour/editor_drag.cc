@@ -92,9 +92,11 @@ DragManager::abort ()
 		delete *i;
 	}
 
-	_drags.clear ();
+	if (!_drags.empty ()) {
+		_editor->set_follow_playhead (_old_follow_playhead, false);
+	}
 
-	_editor->set_follow_playhead (_old_follow_playhead, false);
+	_drags.clear ();
 	
 	_ending = false;
 }
