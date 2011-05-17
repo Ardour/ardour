@@ -75,11 +75,11 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 {
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("Created Iterator @ %1 (is end: %2)\n)", t, _is_end));
 
-	if (!_is_end) {
-		_lock = seq.read_lock();
-	} else {
+	if (_is_end) {
 		return;
 	}
+
+	_lock = seq.read_lock();
 
 	typename Sequence<Time>::ReadLock lock(seq.read_lock());
 
@@ -434,10 +434,11 @@ Sequence<Time>::const_iterator::operator=(const const_iterator& other)
 	_force_discrete = other._force_discrete;
 	_active_patch_change_message = other._active_patch_change_message;
 
-	if (other._lock)
+	if (other._lock) {
 		_lock = _seq->read_lock();
-	else
+	} else {
 		_lock.reset();
+	}
 
 	if (other._control_iter == other._control_iters.end()) {
 		_control_iter = _control_iters.end();
