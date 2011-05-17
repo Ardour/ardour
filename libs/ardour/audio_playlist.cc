@@ -205,31 +205,30 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, fram
 			break;
 		}
 
-		case OverlapStart:
-		{
-			if (region->fade_in()->back()->when > 0) {
-				fade_in = region->fade_in()->back()->when;
-			}
-			if (start > region->last_frame() - region->fade_out()->back()->when) {
-				fade_out = region->last_frame() - start;
-			}
+		case OverlapStart: {
+			position = region->position() - start;
+			len = end - region->position();
+
+			if (end > region->position() + region->fade_in().back()->when)
+				fade_in_len = region->fade_in().back()->when;  //end is after fade-in, preserve the fade-in
+			if (end > region->last_frame() - region->fade_out().back()->when)
+				fade_out_len = region->fade_out().back()->when - ( region->last_frame() - end );  //end is inside the fadeout, preserve the fades endpoint
 			break;
 		}
+		
+		case OverlapEnd: {
+			position = 0;
+			offset = start - region->position();
+			len = region->length() - offset;
 
-		case OverlapEnd:
-		{
-			framecnt_t const offset = start - region->position();
-			if (region->fade_in()->back()->when > offset) {
-				fade_in = region->fade_in()->back()->when - offset;
-			}
-			if (start > region->last_frame() - region->fade_out()->back()->when) {
-				fade_out = region->last_frame() - start;
-			} else {
-				fade_out = region->fade_out()->back()->when;
-			}
+			if (start < region->last_frame() - region->fade_out().back()->when)  //start is before fade-out, preserve the fadeout
+				fade_out_len = region->fade_out().back()->when;
+			
+			if (start < region->position() + region->fade_in().back()->when)
+				fade_in_len = region->fade_in().back()->when - (start - region->position());  //end is inside the fade-in, preserve the fade-in endpoint
 			break;
 		}
-
+		
 		case OverlapExternal:
 			fade_in = region->fade_in()->back()->when;
 			fade_out = region->fade_out()->back()->when;
