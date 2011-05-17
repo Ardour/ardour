@@ -1073,10 +1073,10 @@ AudioPlaylist::copy_dependents (const vector<TwoRegions>& old_and_new, boost::sh
 								       boost::dynamic_pointer_cast<AudioRegion>(ci->second.new_out)));
 		
 		/* add it at the right position - which must be at the start
-		 * of the fade-out region
+		 * of the fade-in region
 		 */
 
-		new_xfade->set_position (ci->second.new_out->position(), this);
+		new_xfade->set_position (ci->second.new_in->position(), this);
 		other_audio->add_crossfade (new_xfade);
 	}
 }
