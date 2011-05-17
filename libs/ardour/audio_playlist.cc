@@ -1040,7 +1040,7 @@ AudioPlaylist::copy_dependents (const vector<TwoRegions>& old_and_new, boost::sh
 					*/
 					
 					cf->second.new_out = on->second;
-					
+
 				} else {
 					
 					/* add a record of this crossfade, keeping an association
@@ -1074,9 +1074,7 @@ AudioPlaylist::copy_dependents (const vector<TwoRegions>& old_and_new, boost::sh
 		
 		/* add it at the right position */
 
-		new_xfade->set_position (new_xfade->position() + (ci->second.new_in->position() - ci->second.old_in->position()), this);
-		cerr << "Add new xfade to new playlist @ " << new_xfade->position() << " len " << new_xfade->length()
-		     << " in = " << new_xfade->in()->name() << " out = " << new_xfade->out()->name() << endl;
+		new_xfade->set_position (ci->second.new_in->position(), this);
 		other_audio->add_crossfade (new_xfade);
 	}
 }
