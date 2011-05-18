@@ -41,16 +41,16 @@ using std::max;
 
 gboolean qt (gboolean, gint, gint, gboolean, Gtk::Tooltip*, gpointer)
 {
-        return FALSE;
+	return FALSE;
 }
 
 ShuttleControl::ShuttleControl ()
-        : _controllable (new ShuttleControllable (*this))
-        , binding_proxy (_controllable)
+	: _controllable (new ShuttleControllable (*this))
+	, binding_proxy (_controllable)
 {
-        ARDOUR_UI::instance()->set_tip (*this, _("Shuttle speed control (Context-click for options)"));
+	ARDOUR_UI::instance()->set_tip (*this, _("Shuttle speed control (Context-click for options)"));
 
-        pattern = 0;
+	pattern = 0;
 	last_shuttle_request = 0;
 	last_speed_displayed = -99999999;
 	shuttle_grabbed = false;
@@ -59,18 +59,18 @@ ShuttleControl::ShuttleControl ()
 	shuttle_max_speed = 8.0f;
 	shuttle_style_menu = 0;
 	shuttle_unit_menu = 0;
-        shuttle_context_menu = 0;
+	shuttle_context_menu = 0;
 
-        set_flags (CAN_FOCUS);
-        add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
-        set_size_request (100, 15);
+	set_flags (CAN_FOCUS);
+	add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
+	set_size_request (100, 15);
 	set_name (X_("ShuttleControl"));
 
-        Config->ParameterChanged.connect (parameter_connection, MISSING_INVALIDATOR, ui_bind (&ShuttleControl::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (parameter_connection, MISSING_INVALIDATOR, ui_bind (&ShuttleControl::parameter_changed, this, _1), gui_context());
 
-        /* gtkmm 2.4: the C++ wrapper doesn't work */
-        g_signal_connect ((GObject*) gobj(), "query-tooltip", G_CALLBACK (qt), NULL);
-        // signal_query_tooltip().connect (sigc::mem_fun (*this, &ShuttleControl::on_query_tooltip));
+	/* gtkmm 2.4: the C++ wrapper doesn't work */
+	g_signal_connect ((GObject*) gobj(), "query-tooltip", G_CALLBACK (qt), NULL);
+	// signal_query_tooltip().connect (sigc::mem_fun (*this, &ShuttleControl::on_query_tooltip));
 }
 
 ShuttleControl::~ShuttleControl ()
@@ -81,23 +81,23 @@ ShuttleControl::~ShuttleControl ()
 void
 ShuttleControl::set_session (Session *s)
 {
-        SessionHandlePtr::set_session (s);
+	SessionHandlePtr::set_session (s);
 
-        if (_session) {
-                set_sensitive (true);
-                _session->add_controllable (_controllable);
-        } else {
-                set_sensitive (false);
-        }
+	if (_session) {
+		set_sensitive (true);
+		_session->add_controllable (_controllable);
+	} else {
+		set_sensitive (false);
+	}
 }
 
 void
 ShuttleControl::on_size_allocate (Gtk::Allocation& alloc)
 {
-        if (pattern) {
-                cairo_pattern_destroy (pattern);
-                pattern = 0;
-        }
+	if (pattern) {
+		cairo_pattern_destroy (pattern);
+		pattern = 0;
+	}
 
 	pattern = cairo_pattern_create_linear (0, 0, alloc.get_width(), alloc.get_height());
 	
@@ -107,7 +107,7 @@ ShuttleControl::on_size_allocate (Gtk::Allocation& alloc)
 	cairo_pattern_add_color_stop_rgb (pattern, 0.5, 0.0, 0.0, 1.0);
 	cairo_pattern_add_color_stop_rgb (pattern, 1.0, 0, 0, 0);
 
-        DrawingArea::on_size_allocate (alloc);
+	DrawingArea::on_size_allocate (alloc);
 }
 
 void
@@ -117,14 +117,14 @@ ShuttleControl::map_transport_state ()
 
 	if (fabs(speed) <= (2*DBL_EPSILON)) {
 		shuttle_fract = 0;
-        } else {
-                if (Config->get_shuttle_units() == Semitones) {
-                        bool reverse;
-                        int semi = speed_as_semitones (speed, reverse);
-                        shuttle_fract = semitones_as_fract (semi, reverse);
-                } else {
-                        shuttle_fract = speed/shuttle_max_speed;
-                }
+	} else {
+		if (Config->get_shuttle_units() == Semitones) {
+			bool reverse;
+			int semi = speed_as_semitones (speed, reverse);
+			shuttle_fract = semitones_as_fract (semi, reverse);
+		} else {
+			shuttle_fract = speed/shuttle_max_speed;
+		}
 	}
 
 	queue_draw ();
@@ -141,34 +141,34 @@ ShuttleControl::build_shuttle_context_menu ()
 	Menu* speed_menu = manage (new Menu());
 	MenuList& speed_items = speed_menu->items();
 
-        Menu* units_menu = manage (new Menu);
-        MenuList& units_items = units_menu->items();
+	Menu* units_menu = manage (new Menu);
+	MenuList& units_items = units_menu->items();
 	RadioMenuItem::Group units_group;
         
 	units_items.push_back (RadioMenuElem (units_group, _("Percent"), sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_units), Percentage)));
-        if (Config->get_shuttle_units() == Percentage) {
-                static_cast<RadioMenuItem*>(&units_items.back())->set_active();
-        }
+	if (Config->get_shuttle_units() == Percentage) {
+		static_cast<RadioMenuItem*>(&units_items.back())->set_active();
+	}
 	units_items.push_back (RadioMenuElem (units_group, _("Semitones"), sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_units), Semitones)));
-        if (Config->get_shuttle_units() == Semitones) {
-                static_cast<RadioMenuItem*>(&units_items.back())->set_active();
-        }
-        items.push_back (MenuElem (_("Units"), *units_menu));
+	if (Config->get_shuttle_units() == Semitones) {
+		static_cast<RadioMenuItem*>(&units_items.back())->set_active();
+	}
+	items.push_back (MenuElem (_("Units"), *units_menu));
         
-        Menu* style_menu = manage (new Menu);
-        MenuList& style_items = style_menu->items();
+	Menu* style_menu = manage (new Menu);
+	MenuList& style_items = style_menu->items();
 	RadioMenuItem::Group style_group;
 
 	style_items.push_back (RadioMenuElem (style_group, _("Sprung"), sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_style), Sprung)));
-        if (Config->get_shuttle_behaviour() == Sprung) {
-                static_cast<RadioMenuItem*>(&style_items.back())->set_active();
-        }
+	if (Config->get_shuttle_behaviour() == Sprung) {
+		static_cast<RadioMenuItem*>(&style_items.back())->set_active();
+	}
 	style_items.push_back (RadioMenuElem (style_group, _("Wheel"), sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_style), Wheel)));
-        if (Config->get_shuttle_behaviour() == Wheel) {
-                static_cast<RadioMenuItem*>(&style_items.back())->set_active();
-        }
+	if (Config->get_shuttle_behaviour() == Wheel) {
+		static_cast<RadioMenuItem*>(&style_items.back())->set_active();
+	}
         
-        items.push_back (MenuElem (_("Mode"), *style_menu));
+	items.push_back (MenuElem (_("Mode"), *style_menu));
 
 	RadioMenuItem::Group speed_group;
 
@@ -265,8 +265,8 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 		if (Config->get_shuttle_behaviour() == Sprung) {
 			_session->request_transport_speed (shuttle_speed_on_grab);
 		} else {
-                        mouse_shuttle (ev->x, true);
-                }
+			mouse_shuttle (ev->x, true);
+		}
 
 		return true;
 
@@ -288,7 +288,7 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 bool
 ShuttleControl::on_query_tooltip (int, int, bool, const Glib::RefPtr<Gtk::Tooltip>&)
 {
-        return false;
+	return false;
 }
 
 bool
@@ -298,46 +298,46 @@ ShuttleControl::on_scroll_event (GdkEventScroll* ev)
 		return true;
 	}
 
-        switch (ev->direction) {
-        case GDK_SCROLL_UP:
-        case GDK_SCROLL_RIGHT:
-                shuttle_fract += 0.005;
-                break;
-        case GDK_SCROLL_DOWN:
-        case GDK_SCROLL_LEFT:
-                shuttle_fract -= 0.005;
-                break;
-        default:
-                return false;
-        }
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+	case GDK_SCROLL_RIGHT:
+		shuttle_fract += 0.005;
+		break;
+	case GDK_SCROLL_DOWN:
+	case GDK_SCROLL_LEFT:
+		shuttle_fract -= 0.005;
+		break;
+	default:
+		return false;
+	}
         
-        if (Config->get_shuttle_units() == Semitones) {
+	if (Config->get_shuttle_units() == Semitones) {
 
-                float lower_side_of_dead_zone = semitones_as_fract (-24, true);
-                float upper_side_of_dead_zone = semitones_as_fract (-24, false);
+		float lower_side_of_dead_zone = semitones_as_fract (-24, true);
+		float upper_side_of_dead_zone = semitones_as_fract (-24, false);
 
-                /* if we entered the "dead zone" (-24 semitones in forward or reverse), jump
-                   to the far side of it.
-                */
+		/* if we entered the "dead zone" (-24 semitones in forward or reverse), jump
+		   to the far side of it.
+		*/
 
-                if (shuttle_fract > lower_side_of_dead_zone && shuttle_fract < upper_side_of_dead_zone) {
-                        switch (ev->direction) {
-                        case GDK_SCROLL_UP:
-                        case GDK_SCROLL_RIGHT:
-                                shuttle_fract = upper_side_of_dead_zone;
-                                break;
-                        case GDK_SCROLL_DOWN:
-                        case GDK_SCROLL_LEFT:
-                                shuttle_fract = lower_side_of_dead_zone;
-                                break;
-                        default:
-                                /* impossible, checked above */
-                                return false;
-                        }
-                }
-        }
+		if (shuttle_fract > lower_side_of_dead_zone && shuttle_fract < upper_side_of_dead_zone) {
+			switch (ev->direction) {
+			case GDK_SCROLL_UP:
+			case GDK_SCROLL_RIGHT:
+				shuttle_fract = upper_side_of_dead_zone;
+				break;
+			case GDK_SCROLL_DOWN:
+			case GDK_SCROLL_LEFT:
+				shuttle_fract = lower_side_of_dead_zone;
+				break;
+			default:
+				/* impossible, checked above */
+				return false;
+			}
+		}
+	}
 
-        use_shuttle_fract (true);
+	use_shuttle_fract (true);
 
 	return true;
 }
@@ -364,10 +364,10 @@ ShuttleControl::mouse_shuttle (double x, bool force)
 		distance_from_center = max (distance_from_center, -center);
 	}
 
-        /* compute shuttle fract as expressing how far between the center
-           and the edge we are. positive values indicate we are right of 
-           center, negative values indicate left of center
-        */
+	/* compute shuttle fract as expressing how far between the center
+	   and the edge we are. positive values indicate we are right of 
+	   center, negative values indicate left of center
+	*/
 
 	shuttle_fract = distance_from_center / center; // center == half the width
 	use_shuttle_fract (force);
@@ -384,39 +384,39 @@ ShuttleControl::set_shuttle_fract (double f)
 int
 ShuttleControl::speed_as_semitones (float speed, bool& reverse)
 {
-        assert (speed != 0.0);
+	assert (speed != 0.0);
 
-        if (speed < 0.0) {
-                reverse = true;
-                return (int) round (12.0 * fast_log2 (-speed));
-        } else {
-                reverse = false;
-                return (int) round (12.0 * fast_log2 (speed));
-        }
+	if (speed < 0.0) {
+		reverse = true;
+		return (int) round (12.0 * fast_log2 (-speed));
+	} else {
+		reverse = false;
+		return (int) round (12.0 * fast_log2 (speed));
+	}
 }        
 
 float
 ShuttleControl::semitones_as_speed (int semi, bool reverse)
 {
-        if (reverse) {
-                return -pow (2.0, (semi / 12.0));
-        } else {
-                return pow (2.0, (semi / 12.0));
-        }
+	if (reverse) {
+		return -pow (2.0, (semi / 12.0));
+	} else {
+		return pow (2.0, (semi / 12.0));
+	}
 }
 
 float
 ShuttleControl::semitones_as_fract (int semi, bool reverse)
 {
-        float speed = semitones_as_speed (semi, reverse);
-        return speed/4.0; /* 4.0 is the maximum speed for a 24 semitone shift */
+	float speed = semitones_as_speed (semi, reverse);
+	return speed/4.0; /* 4.0 is the maximum speed for a 24 semitone shift */
 }
 
 int
 ShuttleControl::fract_as_semitones (float fract, bool& reverse)
 {
-        assert (fract != 0.0);
-        return speed_as_semitones (fract * 4.0, reverse);
+	assert (fract != 0.0);
+	return speed_as_semitones (fract * 4.0, reverse);
 }
 
 void
@@ -424,12 +424,12 @@ ShuttleControl::use_shuttle_fract (bool force)
 {
 	microseconds_t now = get_microseconds();
 
-        shuttle_fract = max (-1.0f, shuttle_fract);
-        shuttle_fract = min (1.0f, shuttle_fract);
+	shuttle_fract = max (-1.0f, shuttle_fract);
+	shuttle_fract = min (1.0f, shuttle_fract);
 
 	/* do not attempt to submit a motion-driven transport speed request
 	   more than once per process cycle.
-	 */
+	*/
 
 	if (!force && (last_shuttle_request - now) < (microseconds_t) AudioEngine::instance()->usecs_per_cycle()) {
 		return;
@@ -439,17 +439,17 @@ ShuttleControl::use_shuttle_fract (bool force)
 
 	double speed = 0;
 
-        if (Config->get_shuttle_units() == Semitones) {
-                if (shuttle_fract != 0.0) {
-                        bool reverse;
-                        int semi = fract_as_semitones (shuttle_fract, reverse);
-                        speed = semitones_as_speed (semi, reverse);
-                } else {
-                        speed = 0.0;
-                }
-        } else {
-                speed = shuttle_max_speed * shuttle_fract;
-        }
+	if (Config->get_shuttle_units() == Semitones) {
+		if (shuttle_fract != 0.0) {
+			bool reverse;
+			int semi = fract_as_semitones (shuttle_fract, reverse);
+			speed = semitones_as_speed (semi, reverse);
+		} else {
+			speed = 0.0;
+		}
+	} else {
+		speed = shuttle_max_speed * shuttle_fract;
+	}
 
 	_session->request_transport_speed_nonzero (speed);
 }
@@ -457,8 +457,8 @@ ShuttleControl::use_shuttle_fract (bool force)
 bool
 ShuttleControl::on_expose_event (GdkEventExpose* event)
 {
-        cairo_text_extents_t extents;
-        Glib::RefPtr<Gdk::Window> win (get_window());
+	cairo_text_extents_t extents;
+	Glib::RefPtr<Gdk::Window> win (get_window());
 	Glib::RefPtr<Gtk::Style> style (get_style());
 
 	cairo_t* cr = gdk_cairo_create (win->gobj());	
@@ -472,13 +472,13 @@ ShuttleControl::on_expose_event (GdkEventExpose* event)
 
 	float speed = 0.0;
 
-        if (_session) {
-                speed = _session->transport_speed ();
-        }
+	if (_session) {
+		speed = _session->transport_speed ();
+	}
 
 	/* Marker */
 
-        double visual_fraction = std::min (1.0f, speed/shuttle_max_speed);
+	double visual_fraction = std::min (1.0f, speed/shuttle_max_speed);
 	double x = (get_width() / 2.0) + (0.5 * (get_width() * visual_fraction));
 	cairo_move_to (cr, x, 1);
 	cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
@@ -493,26 +493,26 @@ ShuttleControl::on_expose_event (GdkEventExpose* event)
 
 		if (Config->get_shuttle_units() == Percentage) {
 
-                        if (speed == 1.0) {
-                                snprintf (buf, sizeof (buf), _("Playing"));
-                        } else {
-                                if (speed < 0.0) {
-                                        snprintf (buf, sizeof (buf), "<<< %d%%", (int) round (-speed * 100));
-                                } else {
-                                        snprintf (buf, sizeof (buf), ">>> %d%%", (int) round (speed * 100));
-                                }
-                        }
+			if (speed == 1.0) {
+				snprintf (buf, sizeof (buf), _("Playing"));
+			} else {
+				if (speed < 0.0) {
+					snprintf (buf, sizeof (buf), "<<< %d%%", (int) round (-speed * 100));
+				} else {
+					snprintf (buf, sizeof (buf), ">>> %d%%", (int) round (speed * 100));
+				}
+			}
 
 		} else {
 
-                        bool reversed;
-                        int semi = speed_as_semitones (speed, reversed);
+			bool reversed;
+			int semi = speed_as_semitones (speed, reversed);
 
-                        if (reversed) {
-                                snprintf (buf, sizeof (buf), _("<<< %+d semitones"), semi);
-                        } else {
-                                snprintf (buf, sizeof (buf), _(">>> %+d semitones"), semi);
-                        }
+			if (reversed) {
+				snprintf (buf, sizeof (buf), _("<<< %+d semitones"), semi);
+			} else {
+				snprintf (buf, sizeof (buf), _(">>> %+d semitones"), semi);
+			}
 		}
 
 	} else {
@@ -522,7 +522,7 @@ ShuttleControl::on_expose_event (GdkEventExpose* event)
 	last_speed_displayed = speed;
 
 	cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
-        cairo_text_extents (cr, buf, &extents);
+	cairo_text_extents (cr, buf, &extents);
 	cairo_move_to (cr, 10, extents.height + 2);
 	cairo_show_text (cr, buf);
 
@@ -538,7 +538,7 @@ ShuttleControl::on_expose_event (GdkEventExpose* event)
 		break;
 	}
 
-        cairo_text_extents (cr, buf, &extents);
+	cairo_text_extents (cr, buf, &extents);
 
 	cairo_move_to (cr, get_width() - (fabs(extents.x_advance) + 5), extents.height + 2);
 	cairo_show_text (cr, buf);
@@ -560,13 +560,13 @@ ShuttleControl::shuttle_unit_clicked ()
 void
 ShuttleControl::set_shuttle_style (ShuttleBehaviour s)
 {
-        Config->set_shuttle_behaviour (s);
+	Config->set_shuttle_behaviour (s);
 }
 
 void
 ShuttleControl::set_shuttle_units (ShuttleUnits s)
 {
-        Config->set_shuttle_units (s);
+	Config->set_shuttle_units (s);
 }
 
 void
@@ -578,69 +578,69 @@ ShuttleControl::update_speed_display ()
 }
       
 ShuttleControl::ShuttleControllable::ShuttleControllable (ShuttleControl& s)
-        : PBD::Controllable (X_("Shuttle")) 
-        , sc (s)
+	: PBD::Controllable (X_("Shuttle")) 
+	, sc (s)
 {
 }
 
 void
 ShuttleControl::ShuttleControllable::set_id (const std::string& str)
 {
-        _id = str;
+	_id = str;
 }
 
 void
 ShuttleControl::ShuttleControllable::set_value (double val)
 {
-        double fract;
+	double fract;
         
-        if (val == 0.5) {
-                fract = 0.0;
-        } else {
-                if (val < 0.5) {
-                        fract = -((0.5 - val)/0.5);
-                } else {
-                        fract = ((val - 0.5)/0.5);
-                }
-        }
+	if (val == 0.5) {
+		fract = 0.0;
+	} else {
+		if (val < 0.5) {
+			fract = -((0.5 - val)/0.5);
+		} else {
+			fract = ((val - 0.5)/0.5);
+		}
+	}
 
-        sc.set_shuttle_fract (fract);
+	sc.set_shuttle_fract (fract);
 }
 
 double 
 ShuttleControl::ShuttleControllable::get_value () const
 {
-        return sc.get_shuttle_fract ();
+	return sc.get_shuttle_fract ();
 }
 
 void
 ShuttleControl::parameter_changed (std::string p)
 {
-        if (p == "shuttle-behaviour") {
+	if (p == "shuttle-behaviour") {
 		switch (Config->get_shuttle_behaviour ()) {
 		case Sprung:
-                        /* back to Sprung - reset to speed = 1.0 if playing
-                         */
+			/* back to Sprung - reset to speed = 1.0 if playing
+			 */
 			if (_session) {
 				if (_session->transport_rolling()) {
-                                        if (_session->transport_speed() == 1.0) {
-                                                queue_draw ();
-                                        } else {
-                                                _session->request_transport_speed (1.0);
-                                                /* redraw when speed changes */
-                                        }
+					if (_session->transport_speed() == 1.0) {
+						queue_draw ();
+					} else {
+						_session->request_transport_speed (1.0);
+						/* redraw when speed changes */
+					}
 				} else {
-                                        queue_draw ();
-                                }
+					queue_draw ();
+				}
 			}
 			break;
 
 		case Wheel:
-                        queue_draw ();
+			queue_draw ();
 			break;
 		}
                         
 	} else if (p == "shuttle-units") {
-                queue_draw ();
-        }
+		queue_draw ();
+	}
 }
