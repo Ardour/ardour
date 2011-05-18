@@ -115,16 +115,13 @@ GainMeterBase::GainMeterBase (Session* s,
 	gain_slider->set_name ("GainFader");
 
 	gain_display.set_name ("MixerStripGainDisplay");
-	gain_display.set_has_frame (false);
 	set_size_request_to_display_given_text (gain_display, "-80.g", 2, 6); /* note the descender */
 	gain_display.signal_activate().connect (sigc::mem_fun (*this, &GainMeter::gain_activated));
 	gain_display.signal_focus_in_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
 	gain_display.signal_focus_out_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
 
 	peak_display.set_name ("MixerStripPeakDisplay");
-//	peak_display.set_has_frame (false);
-//	peak_display.set_editable (false);
-	set_size_request_to_display_given_text  (peak_display, "-80.g", 2, 6); /* note the descender */
+	set_size_request_to_display_given_text (peak_display, "-80.g", 2, 6); /* note the descender */
 	max_peak = minus_infinity();
 	peak_display.set_label (_("-inf"));
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
@@ -320,7 +317,7 @@ GainMeterBase::reset_group_peak_display (RouteGroup* group)
 {
 	if (_route && group == _route->route_group()) {
 		reset_peak_display ();
-		}
+	}
 }
 
 void
@@ -803,7 +800,7 @@ GainMeterBase::on_theme_changed()
 
 GainMeter::GainMeter (Session* s, int fader_length)
 	: GainMeterBase (s, slider, false, fader_length)
-	, gain_display_box(true, 2)
+	, gain_display_box(true, 0)
 	, hbox(true, 2)
 {
 	gain_display_box.pack_start (gain_display, true, true);
