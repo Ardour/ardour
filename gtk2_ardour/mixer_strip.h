@@ -147,7 +147,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::VBox           whvbox;
 	Gtk::EventBox       top_event_box;
 	Gtk::EventBox*      spacer;
-	Gtk::Alignment      gain_meter_alignment;
 
 	void hide_clicked();
 	void width_clicked ();
@@ -156,11 +155,11 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::VBox           global_vpacker;
 
 	ProcessorBox processor_box;
-	GainMeter   gpm;
-	PannerUI    panners;
+	GainMeter    gpm;
+	PannerUI     panners;
 
 	Gtk::Table button_table;
-        Gtk::Table solo_led_table;
+	Gtk::Table solo_led_table;
 	Gtk::HBox  below_panner_box;
 	Gtk::Table middle_button_table;
 	Gtk::Table bottom_button_table;
@@ -286,7 +285,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width width, bool input_button);
 	void port_connected_or_disconnected (ARDOUR::Port *, ARDOUR::Port *);
 
-        static std::string meter_point_string (ARDOUR::MeterPoint);
+	static std::string meter_point_string (ARDOUR::MeterPoint);
 };
 
 #endif /* __ardour_mixer_strip__ */

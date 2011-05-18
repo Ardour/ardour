@@ -212,6 +212,8 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	Gtk::HBox  fader_box;
 	Gtk::VBox* fader_vbox;
 	Gtk::HBox  hbox;
+	Gtk::Alignment fader_alignment;
+	Gtk::Alignment meter_alignment;
 	std::vector<ARDOUR::DataType> _types;
 
 	static Glib::RefPtr<Gdk::Pixbuf> slider;

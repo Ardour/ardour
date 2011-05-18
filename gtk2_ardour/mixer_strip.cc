@@ -247,7 +247,7 @@ MixerStrip::init ()
 	ARDOUR_UI::instance()->set_tip (&group_button, _("Mix group"), "");
 	group_button.add (group_label);
 	group_button.set_name ("MixerGroupButton");
-        Gtkmm2ext::set_size_request_to_display_given_text (group_button, "Group", 2, 2);
+	Gtkmm2ext::set_size_request_to_display_given_text (group_button, "Group", 2, 2);
 	group_label.set_name ("MixerGroupButtonLabel");
 
 	global_vpacker.set_border_width (0);
@@ -263,19 +263,17 @@ MixerStrip::init ()
 	width_hide_box.pack_start (width_button, false, true);
 	width_hide_box.pack_start (top_event_box, true, true);
 	width_hide_box.pack_end (hide_button, false, true);
-	gain_meter_alignment.set_padding(0, 4, 0, 0);
-	gain_meter_alignment.add(gpm);
 
 	whvbox.pack_start (width_hide_box, true, true);
 
 	global_vpacker.pack_start (whvbox, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (button_table,Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (button_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (processor_box, true, true);
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (below_panner_box, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (middle_button_table,Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (gain_meter_alignment,Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (bottom_button_table,Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (middle_button_table, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (bottom_button_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
 
 	global_frame.add (global_vpacker);
@@ -380,13 +378,13 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		set_color (unique_random_color());
 	}
 
-        if (route()->is_master()) {
-                solo_button->hide ();
-                below_panner_box.hide ();
-        } else {
-                solo_button->show ();
-                below_panner_box.show ();
-        }
+	if (route()->is_master()) {
+		solo_button->hide ();
+		below_panner_box.hide ();
+	} else {
+		solo_button->show ();
+		below_panner_box.show ();
+	}
 
 	if (_mixer_owned && (route()->is_master() || route()->is_monitor())) {
 
@@ -428,7 +426,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-        meter_point_label.set_text (meter_point_string (_route->meter_point()));
+	meter_point_label.set_text (meter_point_string (_route->meter_point()));
 
 	delete route_ops_menu;
 	route_ops_menu = 0;
@@ -452,7 +450,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	/* now force an update of all the various elements */
 
 	mute_changed (0);
-        update_solo_display ();
+	update_solo_display ();
 	name_changed ();
 	comment_changed (0);
 	route_group_changed ();
@@ -482,7 +480,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	middle_button_table.show();
 	bottom_button_table.show();
 	gpm.show_all ();
-	gain_meter_alignment.show ();
 	gain_unit_button.show();
 	gain_unit_label.show();
 	meter_point_button.show();
@@ -631,9 +628,9 @@ struct RouteCompareByName {
 gint
 MixerStrip::output_press (GdkEventButton *ev)
 {
-        using namespace Menu_Helpers;
+	using namespace Menu_Helpers;
 	if (!_session->engine().connected()) {
-	        MessageDialog msg (_("Not connected to JACK - no I/O changes are possible"));
+		MessageDialog msg (_("Not connected to JACK - no I/O changes are possible"));
 		msg.run ();
 		return true;
 	}
@@ -689,7 +686,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 	}
 
 	default:
-	        break;
+		break;
 	}
 	return TRUE;
 }
@@ -746,7 +743,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 	citems.clear();
 
 	if (!_session->engine().connected()) {
-	        MessageDialog msg (_("Not connected to JACK - no I/O changes are possible"));
+		MessageDialog msg (_("Not connected to JACK - no I/O changes are possible"));
 		msg.run ();
 		return true;
 	}
@@ -800,7 +797,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 		break;
 	}
 	default:
-	        break;
+		break;
 	}
 	return TRUE;
 }
@@ -934,10 +931,10 @@ MixerStrip::connect_to_pan ()
 		return;
 	}
 
-        boost::shared_ptr<Pannable> p = _route->pannable ();
+	boost::shared_ptr<Pannable> p = _route->pannable ();
 
-        p->automation_state_changed.connect (panstate_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_state_changed, &panners), gui_context());
-        p->automation_style_changed.connect (panstyle_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_style_changed, &panners), gui_context());
+	p->automation_state_changed.connect (panstate_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_state_changed, &panners), gui_context());
+	p->automation_style_changed.connect (panstyle_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_style_changed, &panners), gui_context());
 
 	panners.panshell_changed ();
 }
@@ -1300,7 +1297,7 @@ MixerStrip::route_group_changed ()
 	RouteGroup *rg = _route->route_group();
 
 	if (rg) {
-                group_label.set_text (PBD::short_version (rg->name(), 5));
+		group_label.set_text (PBD::short_version (rg->name(), 5));
 	} else {
 		switch (_width) {
 		case Wide:
@@ -1372,7 +1369,7 @@ MixerStrip::build_route_ops_menu ()
 	if (!Profile->get_sae()) {
 		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Remote Control ID..."), sigc::mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
-        }
+	}
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), false)));
@@ -1389,8 +1386,8 @@ MixerStrip::name_button_button_press (GdkEventButton* ev)
 		route_ops_menu->popup (1, ev->time);
 
 	} else if (ev->button == 1) {
-                revert_to_default_display ();
-        }
+		revert_to_default_display ();
+	}
 
 	return false;
 }
@@ -1424,7 +1421,7 @@ MixerStrip::name_changed ()
 		RouteUI::property_changed (PropertyChange (ARDOUR::Properties::name));
 		break;
 	case Narrow:
-	        name_label.set_text (PBD::short_version (_route->name(), 5));
+		name_label.set_text (PBD::short_version (_route->name(), 5));
 		break;
 	}
 }
@@ -1569,24 +1566,24 @@ MixerStrip::meter_point_string (MeterPoint mp)
 {
 	switch (mp) {
 	case MeterInput:
-                return _("in");
+		return _("in");
 		break;
 
 	case MeterPreFader:
-                return _("pre");
+		return _("pre");
 		break;
 
 	case MeterPostFader:
-                return _("post");
+		return _("post");
 		break;
 
 	case MeterOutput:
-                return _("out");
+		return _("out");
 		break;
 
 	case MeterCustom:
-        default:
-                return _("custom");
+	default:
+		return _("custom");
 		break;
 	}
 }
@@ -1595,7 +1592,7 @@ MixerStrip::meter_point_string (MeterPoint mp)
 void
 MixerStrip::meter_changed ()
 {
-        meter_point_label.set_text (meter_point_string (_route->meter_point()));
+	meter_point_label.set_text (meter_point_string (_route->meter_point()));
 	gpm.setup_meters ();
 	// reset peak when meter point changes
 	gpm.reset_peak_display();
@@ -1649,14 +1646,14 @@ MixerStrip::drop_send ()
 	send_gone_connection.disconnect ();
 	input_button.set_sensitive (true);
 	output_button.set_sensitive (true);
-        group_button.set_sensitive (true);
-        set_invert_sensitive (true);
-        meter_point_button.set_sensitive (true);
-        mute_button->set_sensitive (true);
-        solo_button->set_sensitive (true);
-        rec_enable_button->set_sensitive (true);
-        solo_isolated_led->set_sensitive (true);
-        solo_safe_led->set_sensitive (true);
+	group_button.set_sensitive (true);
+	set_invert_sensitive (true);
+	meter_point_button.set_sensitive (true);
+	mute_button->set_sensitive (true);
+	solo_button->set_sensitive (true);
+	rec_enable_button->set_sensitive (true);
+	solo_isolated_led->set_sensitive (true);
+	solo_safe_led->set_sensitive (true);
 }
 
 void
@@ -1685,14 +1682,14 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	panner_ui().setup_pan ();
 
 	input_button.set_sensitive (false);
-        group_button.set_sensitive (false);
-        set_invert_sensitive (false);
-        meter_point_button.set_sensitive (false);
-        mute_button->set_sensitive (false);
-        solo_button->set_sensitive (false);
-        rec_enable_button->set_sensitive (false);
-        solo_isolated_led->set_sensitive (false);
-        solo_safe_led->set_sensitive (false);
+	group_button.set_sensitive (false);
+	set_invert_sensitive (false);
+	meter_point_button.set_sensitive (false);
+	mute_button->set_sensitive (false);
+	solo_button->set_sensitive (false);
+	rec_enable_button->set_sensitive (false);
+	solo_isolated_led->set_sensitive (false);
+	solo_safe_led->set_sensitive (false);
 
 	if (boost::dynamic_pointer_cast<InternalSend>(send)) {
 		output_button.set_sensitive (false);
@@ -1724,46 +1721,46 @@ MixerStrip::revert_to_default_display ()
 void
 MixerStrip::set_button_names ()
 {
-        switch (_width) {
+	switch (_width) {
 	case Wide:
 		rec_enable_button_label.set_text (_("Rec"));
 		mute_button_label.set_text (_("Mute"));
-                if (_route && _route->solo_safe()) {
-                        solo_button_label.set_text (X_("!"));
-                } else {
-                        if (!Config->get_solo_control_is_listen_control()) {
-                                solo_button_label.set_text (_("Solo"));
-                        } else {
-                                switch (Config->get_listen_position()) {
-                                case AfterFaderListen:
-                                        solo_button_label.set_text (_("AFL"));
-                                        break;
-                                case PreFaderListen:
-                                        solo_button_label.set_text (_("PFL"));
-                                        break;
-                                }
-                        }
-                }
+		if (_route && _route->solo_safe()) {
+			solo_button_label.set_text (X_("!"));
+		} else {
+			if (!Config->get_solo_control_is_listen_control()) {
+				solo_button_label.set_text (_("Solo"));
+			} else {
+				switch (Config->get_listen_position()) {
+				case AfterFaderListen:
+					solo_button_label.set_text (_("AFL"));
+					break;
+				case PreFaderListen:
+					solo_button_label.set_text (_("PFL"));
+					break;
+				}
+			}
+		}
 		break;
 
 	default:
 		rec_enable_button_label.set_text (_("R"));
 		mute_button_label.set_text (_("M"));
-                if (_route && _route->solo_safe()) {
-                        solo_button_label.set_text (X_("!"));
-                        if (!Config->get_solo_control_is_listen_control()) {
-                                solo_button_label.set_text (_("S"));
-                        } else {
-                                switch (Config->get_listen_position()) {
-                                case AfterFaderListen:
-                                        solo_button_label.set_text (_("A"));
-                                        break;
-                                case PreFaderListen:
-                                        solo_button_label.set_text (_("P"));
-                                        break;
-                                }
-                        }
-                }
+		if (_route && _route->solo_safe()) {
+			solo_button_label.set_text (X_("!"));
+			if (!Config->get_solo_control_is_listen_control()) {
+				solo_button_label.set_text (_("S"));
+			} else {
+				switch (Config->get_listen_position()) {
+				case AfterFaderListen:
+					solo_button_label.set_text (_("A"));
+					break;
+				case PreFaderListen:
+					solo_button_label.set_text (_("P"));
+					break;
+				}
+			}
+		}
 		break;
 
 	}
@@ -1842,7 +1839,7 @@ MixerStrip::on_key_release_event (GdkEventKey* ev)
 		break;
 
 	case GDK_r:
-                cerr << "Stole that r\n";
+		cerr << "Stole that r\n";
 		rec_enable_release (&fake);
 		return true;
 		break;
@@ -1866,7 +1863,7 @@ MixerStrip::on_key_release_event (GdkEventKey* ev)
 bool
 MixerStrip::on_enter_notify_event (GdkEventCrossing*)
 {
-        Keyboard::magic_widget_grab_focus ();
+	Keyboard::magic_widget_grab_focus ();
 	return false;
 }
 

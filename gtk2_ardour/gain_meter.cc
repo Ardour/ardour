@@ -803,9 +803,9 @@ GainMeterBase::on_theme_changed()
 
 GainMeter::GainMeter (Session* s, int fader_length)
 	: GainMeterBase (s, slider, false, fader_length)
+	, gain_display_box(true, 2)
+	, hbox(true, 2)
 {
-	gain_display_box.set_homogeneous (true);
-	gain_display_box.set_spacing (2);
 	gain_display_box.pack_start (gain_display, true, true);
 
 	meter_metric_area.set_name ("AudioTrackMetrics");
@@ -825,17 +825,23 @@ GainMeter::GainMeter (Session* s, int fader_length)
 
 	fader_vbox = manage (new Gtk::VBox());
 	fader_vbox->set_spacing (0);
-	fader_vbox->pack_start (*gain_slider, false, false, 0);
+	fader_vbox->pack_start (*gain_slider, true, true);
 
-	hbox.set_spacing (2);
-        hbox.pack_start (*fader_vbox, false, false, 4);
+	fader_alignment.set (0.5, 0.5, 0.0, 1.0);
+	fader_alignment.add (*fader_vbox);
+
+	hbox.pack_start (fader_alignment, true, true);
 
 	set_spacing (2);
 
 	pack_start (gain_display_box, Gtk::PACK_SHRINK);
 	pack_start (hbox, Gtk::PACK_SHRINK);
 
-	meter_metric_area.signal_expose_event().connect (sigc::mem_fun(*this, &GainMeter::meter_metrics_expose));
+	meter_alignment.set (0.5, 0.5, 0.0, 1.0);
+	meter_alignment.add (*level_meter);
+
+	meter_metric_area.signal_expose_event().connect (
+		sigc::mem_fun(*this, &GainMeter::meter_metrics_expose));
 }
 
 void
@@ -843,8 +849,8 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 			 boost::shared_ptr<PeakMeter> meter,
 			 boost::shared_ptr<Amp> amp)
 {
-	if (level_meter->get_parent()) {
-		hbox.remove (*level_meter);
+	if (meter_alignment.get_parent()) {
+		hbox.remove (meter_alignment);
 	}
 
 	if (peak_display.get_parent()) {
@@ -872,7 +878,7 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 	*/
 
 	gain_display_box.pack_end (peak_display, true, true);
-	hbox.pack_start (*level_meter, true, true);
+	hbox.pack_start (meter_alignment, true, true);
 
 	if (r && !r->is_hidden()) {
 		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
