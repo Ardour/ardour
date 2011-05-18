@@ -29,6 +29,7 @@
 #include "gtkmm2ext/gui_thread.h"
 
 #include "ardour_ui.h"
+#include "rgb_macros.h"
 #include "shuttle_control.h"
 
 #include "i18n.h"
@@ -103,8 +104,13 @@ ShuttleControl::on_size_allocate (Gtk::Allocation& alloc)
 	
 	/* add 3 color stops */
 
+	uint32_t col = ARDOUR_UI::config()->canvasvar_Shuttle.get();
+
+	int r,b,g,a;
+	UINT_TO_RGBA(col, &r, &g, &b, &a);
+
 	cairo_pattern_add_color_stop_rgb (pattern, 0.0, 0, 0, 0);
-	cairo_pattern_add_color_stop_rgb (pattern, 0.5, 0.0, 0.0, 1.0);
+	cairo_pattern_add_color_stop_rgb (pattern, 0.5, r/255.0, g/255.0, b/255.0);
 	cairo_pattern_add_color_stop_rgb (pattern, 1.0, 0, 0, 0);
 
 	DrawingArea::on_size_allocate (alloc);
