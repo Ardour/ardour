@@ -211,7 +211,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
 		/* input */
 		
-		Gtk::ComboBoxText*	                combo;
+		Gtk::ComboBoxText*                      combo;
 		std::map<std::string, float>*           combo_map;
 		Gtk::ToggleButton*                      button;
 		boost::shared_ptr<AutomationController> controller;
@@ -261,7 +261,10 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 class PluginUIWindow : public Gtk::Window
 {
   public:
-	PluginUIWindow (Gtk::Window*, boost::shared_ptr<ARDOUR::PluginInsert> insert, bool scrollable=false);
+	PluginUIWindow (Gtk::Window*,
+	                boost::shared_ptr<ARDOUR::PluginInsert> insert,
+	                bool scrollable=false,
+	                bool editor=true);
 	~PluginUIWindow ();
 
 	PlugUIBase& pluginui() { return *_pluginui; }

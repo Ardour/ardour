@@ -74,7 +74,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	set_border_width (10);
 	//set_homogeneous (false);
 
-	pack_start (main_contents, false, false);
+	pack_start (main_contents, true, true);
 	settings_box.set_homogeneous (false);
 
 	HBox* constraint_hbox = manage (new HBox);
@@ -99,7 +99,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	VBox* v1_box = manage (new VBox);
 	VBox* v2_box = manage (new VBox);
-	pack_end (plugin_analysis_expander, true, true);
+	pack_end (plugin_analysis_expander, false, false);
 
 	v1_box->pack_start (*smaller_hbox, false, true);
 	v2_box->pack_start (focus_button, false, true);
@@ -111,7 +111,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	main_contents.pack_start (*constraint_hbox, false, false);
 
-	if ( is_scrollable ) {
+	if (is_scrollable ) {
 		scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 		scroller.set_name ("PluginEditor");
 		scroller_view.set_name("PluginEditor");
@@ -120,8 +120,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 		main_contents.pack_start (scroller, true, true);
 
-	}
-	else {
+	} else {
 		main_contents.pack_start (hpacker, false, false);
 	}
 
@@ -216,7 +215,7 @@ GenericPluginUI::build ()
 					box->set_spacing (1);
 
 					frame->add (*box);
-					hpacker.pack_start(*frame,true,true);
+					hpacker.pack_start(*frame, true, true);
 
 					x = 1;
 				}
@@ -650,7 +649,7 @@ GenericPluginUI::update_control_display (ControlUI* cui)
 
 	cui->ignore_change++;
 
-	if (cui->combo) {
+	if (cui->combo && cui->combo_map) {
 		std::map<string,float>::iterator it;
 		for (it = cui->combo_map->begin(); it != cui->combo_map->end(); ++it) {
 			if (it->second == val) {
@@ -694,7 +693,7 @@ GenericPluginUI::control_port_toggled (ControlUI* cui)
 void
 GenericPluginUI::control_combo_changed (ControlUI* cui)
 {
-	if (!cui->ignore_change) {
+	if (!cui->ignore_change && cui->combo_map) {
 		string value = cui->combo->get_active_text();
 		std::map<string,float> mapping = *cui->combo_map;
 		insert->automation_control(cui->parameter())->set_value(mapping[value]);

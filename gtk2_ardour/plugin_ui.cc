@@ -77,17 +77,23 @@ using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 
-PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert> insert, bool scrollable)
+PluginUIWindow::PluginUIWindow (
+	Gtk::Window*                    win,
+	boost::shared_ptr<PluginInsert> insert,
+	bool                            scrollable,
+	bool                            editor)
 	: parent (win)
-        , was_visible (false)
-        , _keyboard_focused (false)
+	, was_visible (false)
+	, _keyboard_focused (false)
 {
 	bool have_gui = false;
 
 	Label* label = manage (new Label());
 	label->set_markup ("<b>THIS IS THE PLUGIN UI</b>");
 
-	if (insert->plugin()->has_editor()) {
+	std::cout << "SHOW UI " << insert->plugin()->unique_id()
+	          << " editor: " << editor << std::endl;
+	if (editor && insert->plugin()->has_editor()) {
 		switch (insert->type()) {
 		case ARDOUR::VST:
 			have_gui = create_vst_editor (insert);
@@ -119,8 +125,7 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 	}
 
 	if (!have_gui) {
-
-		GenericPluginUI*  pu  = new GenericPluginUI (insert, scrollable);
+		GenericPluginUI* pu = new GenericPluginUI (insert, scrollable);
 
 		_pluginui = pu;
 		_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
@@ -281,7 +286,7 @@ PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert>)
 #else
 	VBox* box;
 	_pluginui = create_au_gui (insert, &box);
-        _pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
+	_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
 	add (*box);
 
 	Application::instance()->ActivationChanged.connect (mem_fun (*this, &PluginUIWindow::app_activated));
@@ -347,32 +352,32 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 {
 	if (_keyboard_focused) {
 		if (_pluginui) {
-                        if (_pluginui->non_gtk_gui()) {
-                                _pluginui->forward_key_event (event); 
-                        } else {
-                                return relay_key_press (event, this);
-                        }
+			if (_pluginui->non_gtk_gui()) {
+				_pluginui->forward_key_event (event); 
+			} else {
+				return relay_key_press (event, this);
+			}
 		}
 		return true;
 	} else {
-                /* for us to be getting key press events, there really
-                   MUST be a _pluginui, but just to be safe, check ...
-                */
+		/* for us to be getting key press events, there really
+		   MUST be a _pluginui, but just to be safe, check ...
+		*/
 
-                if (_pluginui) {
-                        if (_pluginui->non_gtk_gui()) {
-                                /* pass editor window as the window for the event
-                                   to be handled in, not this one, because there are
-                                   no widgets in this window that we want to have
-                                   key focus.
-                                */
-                                return relay_key_press (event, &PublicEditor::instance());
-                        } else {
-                                return relay_key_press (event, this);
-                        }
-                } else {
-                        return false;
-                }
+		if (_pluginui) {
+			if (_pluginui->non_gtk_gui()) {
+				/* pass editor window as the window for the event
+				   to be handled in, not this one, because there are
+				   no widgets in this window that we want to have
+				   key focus.
+				*/
+				return relay_key_press (event, &PublicEditor::instance());
+			} else {
+				return relay_key_press (event, this);
+			}
+		} else {
+			return false;
+		}
 	}
 }
 
@@ -381,10 +386,10 @@ PluginUIWindow::on_key_release_event (GdkEventKey *event)
 {
 	if (_keyboard_focused) {
 		if (_pluginui) {
-                        if (_pluginui->non_gtk_gui()) {
-                                _pluginui->forward_key_event (event);
-                        } 
-                        return true;
+			if (_pluginui->non_gtk_gui()) {
+				_pluginui->forward_key_event (event);
+			} 
+			return true;
 		}
 		return false;
 	} else {

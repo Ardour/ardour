@@ -92,6 +92,7 @@ RefPtr<Action> ProcessorBox::paste_action;
 RefPtr<Action> ProcessorBox::cut_action;
 RefPtr<Action> ProcessorBox::rename_action;
 RefPtr<Action> ProcessorBox::edit_action;
+RefPtr<Action> ProcessorBox::controls_action;
 Glib::RefPtr<Gdk::Pixbuf> SendProcessorEntry::_slider;
 
 ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
@@ -883,14 +884,24 @@ ProcessorBox::build_processor_menu ()
 void
 ProcessorBox::selection_changed ()
 {
-	bool const sensitive = (processor_display.selection().empty()) ? false : true;
-	ActionManager::set_sensitive (ActionManager::plugin_selection_sensitive_actions, sensitive);
-	edit_action->set_sensitive (one_processor_can_be_edited ());
+	const bool sensitive = !processor_display.selection().empty();
+	ActionManager::set_sensitive(ActionManager::plugin_selection_sensitive_actions,
+	                             sensitive);
+	edit_action->set_sensitive(one_processor_can_be_edited());
+
+	const bool single_selection = (processor_display.selection().size() == 1);
+
+	boost::shared_ptr<PluginInsert> pi;
+	if (single_selection) {
+		pi = boost::dynamic_pointer_cast<PluginInsert>(
+			processor_display.selection().front()->processor());
+	}
+
+	/* enable gui for plugin inserts with editors */
+	controls_action->set_sensitive(pi && pi->plugin()->has_editor());
 
 	/* disallow rename for multiple selections and for plugin inserts */
-	rename_action->set_sensitive (
-		processor_display.selection().size() == 1 && boost::dynamic_pointer_cast<PluginInsert> (processor_display.selection().front()->processor()) == 0
-		);
+	rename_action->set_sensitive(single_selection && pi);
 }
 
 void
@@ -1838,10 +1849,10 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
 
-                if (boost::dynamic_pointer_cast<InternalReturn> (retrn)) {
-                        /* no GUI for these */
-                        return;
-                }
+		if (boost::dynamic_pointer_cast<InternalReturn> (retrn)) {
+			/* no GUI for these */
+			return;
+		}
 
 		if (!_session->engine().connected()) {
 			return;
@@ -1922,6 +1933,28 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 }
 
 void
+ProcessorBox::toggle_processor_controls (boost::shared_ptr<Processor> processor)
+{
+	boost::shared_ptr<PluginInsert> plugin_insert
+		= boost::dynamic_pointer_cast<PluginInsert>(processor);
+	if (!plugin_insert) {
+		return;
+	}
+
+	Container*      toplevel  = get_toplevel();
+	Window*         win       = dynamic_cast<Gtk::Window*>(toplevel);
+	PluginUIWindow* plugin_ui = new PluginUIWindow(win, plugin_insert, true, false);
+	plugin_ui->set_title(generate_processor_title (plugin_insert));
+
+	if (plugin_ui->is_visible()) {
+		plugin_ui->hide();
+	} else {
+		plugin_ui->show_all();
+		plugin_ui->present();
+	}
+}
+
+void
 ProcessorBox::register_actions ()
 {
 	Glib::RefPtr<Gtk::ActionGroup> popup_act_grp = Gtk::ActionGroup::create(X_("ProcessorMenu"));
@@ -1971,15 +2004,21 @@ ProcessorBox::register_actions ()
 	/* activation etc. */
 
 	ActionManager::register_action (popup_act_grp, X_("activate_all"), _("Activate all"),
-					sigc::ptr_fun (ProcessorBox::rb_activate_all));
+			sigc::ptr_fun (ProcessorBox::rb_activate_all));
 	ActionManager::register_action (popup_act_grp, X_("deactivate_all"), _("Deactivate all"),
-					sigc::ptr_fun (ProcessorBox::rb_deactivate_all));
+			sigc::ptr_fun (ProcessorBox::rb_deactivate_all));
 	ActionManager::register_action (popup_act_grp, X_("ab_plugins"), _("A/B Plugins"),
-					sigc::ptr_fun (ProcessorBox::rb_ab_plugins));
+			sigc::ptr_fun (ProcessorBox::rb_ab_plugins));
 
 	/* show editors */
-	edit_action = ActionManager::register_action (popup_act_grp, X_("edit"), _("Edit..."),
-						      sigc::ptr_fun (ProcessorBox::rb_edit));
+	edit_action = ActionManager::register_action (
+		popup_act_grp, X_("edit"), _("Edit..."),
+		sigc::ptr_fun (ProcessorBox::rb_edit));
+
+	/* show plugin GUI */
+	controls_action = ActionManager::register_action (
+			popup_act_grp, X_("controls"), _("Controls..."),
+			sigc::ptr_fun (ProcessorBox::rb_controls));
 
 	ActionManager::add_action_group (popup_act_grp);
 }
@@ -2161,6 +2200,16 @@ ProcessorBox::rb_edit ()
 }
 
 void
+ProcessorBox::rb_controls ()
+{
+	if (_current_processor_box == 0) {
+		return;
+	}
+
+	_current_processor_box->for_selected_processors (&ProcessorBox::toggle_processor_controls);
+}
+
+void
 ProcessorBox::route_property_changed (const PropertyChange& what_changed)
 {
 	if (!what_changed.contains (ARDOUR::Properties::name)) {
@@ -2255,9 +2304,9 @@ void
 ProcessorBox::set_processor_ui (boost::shared_ptr<Processor> p, Gtk::Window* w)
 {
  	list<ProcessorWindowProxy*>::iterator i = _processor_window_proxies.begin ();
-        
-        p->set_ui (w);
-        
+
+	p->set_ui (w);
+
 	while (i != _processor_window_proxies.end()) {
 		boost::shared_ptr<Processor> t = (*i)->processor().lock ();
 		if (t && t == p) {

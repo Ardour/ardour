@@ -57,7 +57,7 @@ class PluginInsert : public Processor
 
 	void activate ();
 	void deactivate ();
-        void flush ();
+	void flush ();
 
 	int set_block_size (pframes_t nframes);
 
@@ -83,13 +83,13 @@ class PluginInsert : public Processor
 
 		void set_value (double val);
 		double get_value (void) const;
-                XMLNode& get_state();
+		XMLNode& get_state();
 
 		double user_to_ui (double) const;
 		double ui_to_user (double) const;
 		double plugin_to_ui (double) const;
 		double plugin_to_user (double) const;
-                
+
 	private:
 		double user_to_plugin (double) const;
 		
@@ -158,7 +158,7 @@ class PluginInsert : public Processor
 	void set_automatable ();
 	void control_list_automation_state_changed (Evoral::Parameter, AutoState);
 	void set_parameter_state_2X (const XMLNode& node, int version);
-        void set_control_ids (const XMLNode&, int version);
+	void set_control_ids (const XMLNode&, int version);
 
 	int32_t count_for_configuration (ChanCount in, ChanCount out) const;
 

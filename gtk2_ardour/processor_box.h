@@ -215,6 +215,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	Gtk::Window* get_processor_ui (boost::shared_ptr<ARDOUR::Processor>) const;
 	void toggle_edit_processor (boost::shared_ptr<ARDOUR::Processor>);
+	void toggle_processor_controls (boost::shared_ptr<ARDOUR::Processor>);
 	
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorSelected;
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorUnselected;
@@ -313,12 +314,13 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void for_selected_processors (void (ProcessorBox::*pmf)(boost::shared_ptr<ARDOUR::Processor>));
 	void get_selected_processors (ProcSelection&) const;
 
-        bool can_cut() const;
+	bool can_cut() const;
 
 	static Glib::RefPtr<Gtk::Action> cut_action;
 	static Glib::RefPtr<Gtk::Action> paste_action;
 	static Glib::RefPtr<Gtk::Action> rename_action;
 	static Glib::RefPtr<Gtk::Action> edit_action;
+	static Glib::RefPtr<Gtk::Action> controls_action;
 	void paste_processor_state (const XMLNodeList&, boost::shared_ptr<ARDOUR::Processor>);
 
 	void activate_processor (boost::shared_ptr<ARDOUR::Processor>);
@@ -353,6 +355,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	static void rb_deactivate_all ();
 	static void rb_ab_plugins ();
 	static void rb_edit ();
+	static void rb_controls ();
 
 	void route_property_changed (const PBD::PropertyChange&);
 	std::string generate_processor_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);
