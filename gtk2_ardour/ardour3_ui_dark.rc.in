@@ -1056,12 +1056,22 @@ style "audio_track_metrics" = "audio_track_base"
 	font_name = "@FONT_TINY@"
 }
 
+style "midi_track_metrics" = "midi_track_base"
+{
+	font_name = "@FONT_TINY@"
+}
+
 style "audio_bus_metrics" = "audio_bus_base"
 {
 	font_name = "@FONT_TINY@"
 }
 
 style "audio_track_metrics_inactive" = "track_controls_inactive"
+{
+	font_name = "@FONT_TINY@"
+}
+
+style "midi_track_metrics_inactive" = "track_controls_inactive"
 {
 	font_name = "@FONT_TINY@"
 }
@@ -1635,8 +1645,10 @@ widget "*AudioBusStripBaseInactive" style:highest "track_controls_inactive"
 widget "*MidiTrackStripBaseInactive" style:highest "track_controls_inactive"
 widget "*FaderMetricsStrip" style:highest "audio_track_metrics"
 widget "*AudioTrackMetrics" style:highest "audio_track_metrics"
+widget "*MidiTrackMetrics" style:highest "midi_track_metrics"
 widget "*AudioBusMetrics" style:highest "audio_bus_metrics"
 widget "*AudioTrackMetricsInactive" style:highest "audio_track_metrics_inactive"
+widget "*MidiTrackMetricsInactive" style:highest "midi_track_metrics_inactive"
 widget "*AudioBusMetricsInactive" style:highest "audio_bus_metrics_inactive"
 
 widget "*TimeAxisViewControlsBaseUnselected" style:highest "audio_track_base"
