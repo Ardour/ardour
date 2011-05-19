@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001-2010 Paul Davis
+    Copyright (C) 2001-2011 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ class EditNoteDialog;
 
 class MidiRegionView : public RegionView
 {
-  public:
+public:
 	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
 	typedef Evoral::Sequence<Evoral::MusicalTime>::Notes Notes;
 
@@ -86,29 +86,29 @@ class MidiRegionView : public RegionView
 	virtual void init (Gdk::Color const & basic_color, bool wfd);
 
 	inline const boost::shared_ptr<ARDOUR::MidiRegion> midi_region() const
-		{ return boost::dynamic_pointer_cast<ARDOUR::MidiRegion>(_region); }
+	{ return boost::dynamic_pointer_cast<ARDOUR::MidiRegion>(_region); }
 
 	inline MidiTimeAxisView* midi_view() const
-		{ return dynamic_cast<MidiTimeAxisView*>(&trackview); }
+	{ return dynamic_cast<MidiTimeAxisView*>(&trackview); }
 
 	inline MidiStreamView* midi_stream_view() const
-		{ return midi_view()->midi_view(); }
+	{ return midi_view()->midi_view(); }
 
 	void step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
-                            Evoral::MusicalTime pos, Evoral::MusicalTime len);
-        void step_sustain (Evoral::MusicalTime beats);
+	                    Evoral::MusicalTime pos, Evoral::MusicalTime len);
+	void step_sustain (Evoral::MusicalTime beats);
 	void set_height (double);
 	void apply_note_range(uint8_t lowest, uint8_t highest, bool force=false);
 
 	inline ARDOUR::ColorMode color_mode() const { return midi_view()->color_mode(); }
 
 	void set_frame_color();
-        void color_handler ();
+	void color_handler ();
         
-        void show_step_edit_cursor (Evoral::MusicalTime pos);
-        void move_step_edit_cursor (Evoral::MusicalTime pos);
-        void hide_step_edit_cursor ();
-        void set_step_edit_cursor_width (Evoral::MusicalTime beats);
+	void show_step_edit_cursor (Evoral::MusicalTime pos);
+	void move_step_edit_cursor (Evoral::MusicalTime pos);
+	void hide_step_edit_cursor ();
+	void set_step_edit_cursor_width (Evoral::MusicalTime beats);
 
 	void redisplay_model();
 
@@ -190,7 +190,7 @@ class MidiRegionView : public RegionView
 	void   delete_selection();
 	void   delete_note (boost::shared_ptr<NoteType>);
 	size_t selection_size() { return _selection.size(); }
-        void   select_all_notes ();
+	void   select_all_notes ();
 
 	void move_selection(double dx, double dy, double cumulative_dy);
 	void note_dropped (ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::frameoffset_t, int8_t d_note);
@@ -277,7 +277,7 @@ class MidiRegionView : public RegionView
 	void trim_front_starting ();
 	void trim_front_ending ();
         
-  protected:
+protected:
 	/** Allows derived types to specify their visibility requirements
 	 * to the TimeAxisViewItem parent class.
 	 */
@@ -295,7 +295,7 @@ class MidiRegionView : public RegionView
 
 	void reset_width_dependent_items (double pixel_width);
 
-  private:
+private:
 
 	friend class EditNoteDialog;
 
@@ -303,7 +303,7 @@ class MidiRegionView : public RegionView
 	 * and schedule the playback of the corresponding NoteOff event.
 	 */
 	void play_midi_note(boost::shared_ptr<NoteType> note);
-        void play_midi_chord (std::vector<boost::shared_ptr<NoteType> > notes);
+	void play_midi_chord (std::vector<boost::shared_ptr<NoteType> > notes);
 
 	/** Play the NoteOff-Event of the given note immediately
 	 * (scheduled by @ref play_midi_note()).
@@ -324,7 +324,7 @@ class MidiRegionView : public RegionView
 	void change_note_time(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::TimeType, bool relative=false);
 	void change_note_length (ArdourCanvas::CanvasNoteEvent *, ARDOUR::MidiModel::TimeType);
 	void trim_note(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::TimeType start_delta,
-		       ARDOUR::MidiModel::TimeType end_delta);
+	               ARDOUR::MidiModel::TimeType end_delta);
 
 	void clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev);
 	void clear_selection() { clear_selection_except(NULL); }
@@ -363,14 +363,14 @@ class MidiRegionView : public RegionView
 	ArdourCanvas::CanvasNote*            _ghost_note;
 	double                               _last_ghost_x;
 	double                               _last_ghost_y;
-        double                               _drag_start_x;
-        double                               _drag_start_y;
-        double                               _last_x;
-        double                               _last_y;
+	double                               _drag_start_x;
+	double                               _drag_start_y;
+	double                               _last_x;
+	double                               _last_y;
 	ArdourCanvas::SimpleRect*            _drag_rect;
-        ArdourCanvas::SimpleRect*            _step_edit_cursor;
-        Evoral::MusicalTime                  _step_edit_cursor_width;
-        Evoral::MusicalTime                  _step_edit_cursor_position;
+	ArdourCanvas::SimpleRect*            _step_edit_cursor;
+	Evoral::MusicalTime                  _step_edit_cursor_width;
+	Evoral::MusicalTime                  _step_edit_cursor_position;
 	ArdourCanvas::CanvasNoteEvent*	     _channel_selection_scoped_note;
 	
 
@@ -413,26 +413,26 @@ class MidiRegionView : public RegionView
 	void update_ghost_note (double, double);
 
 	MidiListEditor* _list_editor;
-	bool no_sound_notes;
+	bool _no_sound_notes;
 
-        PBD::ScopedConnection note_delete_connection;
-        void maybe_remove_deleted_note_from_selection (ArdourCanvas::CanvasNoteEvent*);
+	PBD::ScopedConnection note_delete_connection;
+	void maybe_remove_deleted_note_from_selection (ArdourCanvas::CanvasNoteEvent*);
 
 	void snap_changed ();
 	PBD::ScopedConnection snap_changed_connection;
 
-        bool motion (GdkEventMotion*);
-        bool scroll (GdkEventScroll*);
-        bool key_press (GdkEventKey*);
-        bool key_release (GdkEventKey*);
-        bool button_press (GdkEventButton*);
-        bool button_release (GdkEventButton*);
-        bool enter_notify (GdkEventCrossing*);
-        bool leave_notify (GdkEventCrossing*);
+	bool motion (GdkEventMotion*);
+	bool scroll (GdkEventScroll*);
+	bool key_press (GdkEventKey*);
+	bool key_release (GdkEventKey*);
+	bool button_press (GdkEventButton*);
+	bool button_release (GdkEventButton*);
+	bool enter_notify (GdkEventCrossing*);
+	bool leave_notify (GdkEventCrossing*);
 
-        void drop_down_keys ();
-        void maybe_select_by_position (GdkEventButton* ev, double x, double y);
-        void get_events (Events& e, Evoral::Sequence<Evoral::MusicalTime>::NoteOperator op, uint8_t val, int chan_mask = 0);
+	void drop_down_keys ();
+	void maybe_select_by_position (GdkEventButton* ev, double x, double y);
+	void get_events (Events& e, Evoral::Sequence<Evoral::MusicalTime>::NoteOperator op, uint8_t val, int chan_mask = 0);
 
 	void display_patch_changes_on_channel (uint8_t);
 
@@ -446,7 +446,7 @@ class MidiRegionView : public RegionView
 
 	PBD::ScopedConnection _mouse_mode_connection;
 
-        Gdk::Cursor* pre_enter_cursor;
+	Gdk::Cursor* _pre_enter_cursor;
 };
 
 
