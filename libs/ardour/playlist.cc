@@ -2274,7 +2274,7 @@ Playlist::set_state (const XMLNode& node, int version)
 			_set_sort_id ();
 		} else if (prop->name() == X_("id")) {
 			_id = prop->value();
-		} else if (prop->name() == X_("orig_diskstream_id")) {
+		} else if (prop->name() == X_("orig-diskstream-id")) {
 			_orig_diskstream_id = prop->value ();
 		} else if (prop->name() == X_("frozen")) {
 			_frozen = string_is_affirmative (prop->value());
@@ -2379,7 +2379,7 @@ Playlist::state (bool full_state)
 	node->add_property (X_("type"), _type.to_string());
 
 	_orig_diskstream_id.print (buf, sizeof (buf));
-	node->add_property (X_("orig_diskstream_id"), buf);
+	node->add_property (X_("orig-diskstream-id"), buf);
 	node->add_property (X_("frozen"), _frozen ? "yes" : "no");
 
 	if (full_state) {
