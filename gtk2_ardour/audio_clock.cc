@@ -59,7 +59,8 @@ const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
 	2,   /* Timecode_Frames */
 	2,   /* MS_Hours */
 	2,   /* MS_Minutes */
-	5,   /* MS_Seconds */
+	2,   /* MS_Seconds */
+	3,   /* MS_Milliseconds */
 	3,   /* Bars */
 	2,   /* Beats */
 	4,   /* Tick */
@@ -78,6 +79,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	  colon3 (":"),
 	  colon4 (":"),
 	  colon5 (":"),
+	  period1 ("."),
 	  b1 ("|"),
 	  b2 ("|"),
 	  last_when(0),
@@ -151,6 +153,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	ms_hours_ebox.add (ms_hours_label);
 	ms_minutes_ebox.add (ms_minutes_label);
 	ms_seconds_ebox.add (ms_seconds_label);
+	ms_milliseconds_ebox.add (ms_milliseconds_label);
 
 	timecode_packer.set_homogeneous (false);
 	timecode_packer.set_border_width (2);
@@ -189,6 +192,8 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	minsec_packer.pack_start (ms_minutes_ebox, false, false);
 	minsec_packer.pack_start (colon5, false, false);
 	minsec_packer.pack_start (ms_seconds_ebox, false, false);
+	minsec_packer.pack_start (period1, false, false);
+	minsec_packer.pack_start (ms_milliseconds_ebox, false, false);
 
 	minsec_packer_hbox.pack_start (minsec_packer, true, false);
 
@@ -247,6 +252,7 @@ AudioClock::set_widget_name (string name)
 	ms_hours_label.set_name (name);
 	ms_minutes_label.set_name (name);
 	ms_seconds_label.set_name (name);
+	ms_milliseconds_label.set_name (name);
 	hours_ebox.set_name (name);
 	minutes_ebox.set_name (name);
 	seconds_ebox.set_name (name);
@@ -258,6 +264,7 @@ AudioClock::set_widget_name (string name)
 	ms_hours_ebox.set_name (name);
 	ms_minutes_ebox.set_name (name);
 	ms_seconds_ebox.set_name (name);
+	ms_milliseconds_ebox.set_name (name);
 
 	colon1.set_name (name);
 	colon2.set_name (name);
@@ -266,6 +273,7 @@ AudioClock::set_widget_name (string name)
 	colon5.set_name (name);
 	b1.set_name (name);
 	b2.set_name (name);
+	period1.set_name (name);
 
 	queue_draw ();
 }
@@ -285,6 +293,7 @@ AudioClock::setup_events ()
 	ms_hours_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 	ms_minutes_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 	ms_seconds_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
+	ms_milliseconds_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 	audio_frames_ebox.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::FOCUS_CHANGE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 
 	hours_ebox.set_flags (Gtk::CAN_FOCUS);
@@ -298,6 +307,7 @@ AudioClock::setup_events ()
 	ms_hours_ebox.set_flags (Gtk::CAN_FOCUS);
 	ms_minutes_ebox.set_flags (Gtk::CAN_FOCUS);
 	ms_seconds_ebox.set_flags (Gtk::CAN_FOCUS);
+	ms_milliseconds_ebox.set_flags (Gtk::CAN_FOCUS);
 
 	hours_ebox.signal_motion_notify_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_motion_notify_event), Timecode_Hours));
 	minutes_ebox.signal_motion_notify_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_motion_notify_event), Timecode_Minutes));
@@ -310,6 +320,7 @@ AudioClock::setup_events ()
 	ms_hours_ebox.signal_motion_notify_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_motion_notify_event), MS_Hours));
 	ms_minutes_ebox.signal_motion_notify_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_motion_notify_event), MS_Minutes));
 	ms_seconds_ebox.signal_motion_notify_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_motion_notify_event), MS_Seconds));
+	ms_milliseconds_ebox.signal_motion_notify_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_motion_notify_event), MS_Milliseconds));
 
 	hours_ebox.signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_press_event), Timecode_Hours));
 	minutes_ebox.signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_press_event), Timecode_Minutes));
@@ -322,6 +333,7 @@ AudioClock::setup_events ()
 	ms_hours_ebox.signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_press_event), MS_Hours));
 	ms_minutes_ebox.signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_press_event), MS_Minutes));
 	ms_seconds_ebox.signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_press_event), MS_Seconds));
+	ms_milliseconds_ebox.signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_press_event), MS_Milliseconds));
 
 	hours_ebox.signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_release_event), Timecode_Hours));
 	minutes_ebox.signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_release_event), Timecode_Minutes));
@@ -334,6 +346,7 @@ AudioClock::setup_events ()
 	ms_hours_ebox.signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_release_event), MS_Hours));
 	ms_minutes_ebox.signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_release_event), MS_Minutes));
 	ms_seconds_ebox.signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_release_event), MS_Seconds));
+	ms_milliseconds_ebox.signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_release_event), MS_Milliseconds));
 
 	hours_ebox.signal_scroll_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_scroll_event), Timecode_Hours));
 	minutes_ebox.signal_scroll_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_scroll_event), Timecode_Minutes));
@@ -346,6 +359,7 @@ AudioClock::setup_events ()
 	ms_hours_ebox.signal_scroll_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_scroll_event), MS_Hours));
 	ms_minutes_ebox.signal_scroll_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_scroll_event), MS_Minutes));
 	ms_seconds_ebox.signal_scroll_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_scroll_event), MS_Seconds));
+	ms_milliseconds_ebox.signal_scroll_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_button_scroll_event), MS_Milliseconds));
 
 	hours_ebox.signal_key_press_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_key_press_event), Timecode_Hours));
 	minutes_ebox.signal_key_press_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_key_press_event), Timecode_Minutes));
@@ -358,6 +372,7 @@ AudioClock::setup_events ()
 	ms_hours_ebox.signal_key_press_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_key_press_event), MS_Hours));
 	ms_minutes_ebox.signal_key_press_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_key_press_event), MS_Minutes));
 	ms_seconds_ebox.signal_key_press_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_key_press_event), MS_Seconds));
+	ms_milliseconds_ebox.signal_key_press_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_key_press_event), MS_Milliseconds));
 
 	hours_ebox.signal_key_release_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_key_release_event), Timecode_Hours));
 	minutes_ebox.signal_key_release_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_key_release_event), Timecode_Minutes));
@@ -370,6 +385,7 @@ AudioClock::setup_events ()
 	ms_hours_ebox.signal_key_release_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_key_release_event), MS_Hours));
 	ms_minutes_ebox.signal_key_release_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_key_release_event), MS_Minutes));
 	ms_seconds_ebox.signal_key_release_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_key_release_event), MS_Seconds));
+	ms_milliseconds_ebox.signal_key_release_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_key_release_event), MS_Milliseconds));
 
 	hours_ebox.signal_focus_in_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_focus_in_event), Timecode_Hours));
 	minutes_ebox.signal_focus_in_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_focus_in_event), Timecode_Minutes));
@@ -382,6 +398,7 @@ AudioClock::setup_events ()
 	ms_hours_ebox.signal_focus_in_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_focus_in_event), MS_Hours));
 	ms_minutes_ebox.signal_focus_in_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_focus_in_event), MS_Minutes));
 	ms_seconds_ebox.signal_focus_in_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_focus_in_event), MS_Seconds));
+	ms_milliseconds_ebox.signal_focus_in_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_focus_in_event), MS_Milliseconds));
 
 	hours_ebox.signal_focus_out_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_focus_out_event), Timecode_Hours));
 	minutes_ebox.signal_focus_out_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_focus_out_event), Timecode_Minutes));
@@ -394,6 +411,7 @@ AudioClock::setup_events ()
 	ms_hours_ebox.signal_focus_out_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_focus_out_event), MS_Hours));
 	ms_minutes_ebox.signal_focus_out_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_focus_out_event), MS_Minutes));
 	ms_seconds_ebox.signal_focus_out_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_focus_out_event), MS_Seconds));
+	ms_milliseconds_ebox.signal_focus_out_event().connect (sigc::bind (sigc::mem_fun(*this, &AudioClock::field_focus_out_event), MS_Milliseconds));
 
 	clock_base.signal_focus_in_event().connect (sigc::mem_fun (*this, &AudioClock::drop_focus_handler));
 }
@@ -542,14 +560,17 @@ AudioClock::set_minsec (framepos_t when, bool force)
 	framecnt_t left;
 	int hrs;
 	int mins;
-	float secs;
+	int secs;
+	int millisecs;
 
 	left = when;
 	hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
 	left -= (framecnt_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
 	mins = (int) floor (left / (_session->frame_rate() * 60.0f));
 	left -= (framecnt_t) floor (mins * _session->frame_rate() * 60.0f);
-	secs = left / (float) _session->frame_rate();
+	secs = (int) floor (left / (float) _session->frame_rate());
+	left -= (framecnt_t) floor (secs * _session->frame_rate());
+	millisecs = floor (left * 1000.0 / (float) _session->frame_rate());
 
 	if (force || hrs != ms_last_hrs) {
 		sprintf (buf, "%02d", hrs);
@@ -564,9 +585,15 @@ AudioClock::set_minsec (framepos_t when, bool force)
 	}
 
 	if (force || secs != ms_last_secs) {
-		sprintf (buf, "%06.3f", secs);
+		sprintf (buf, "%02d", secs);
 		ms_seconds_label.set_text (buf);
 		ms_last_secs = secs;
+	}
+
+	if (force || millisecs != ms_last_millisecs) {
+		sprintf (buf, "%03d", millisecs);
+		ms_milliseconds_label.set_text (buf);
+		ms_last_millisecs = millisecs;
 	}
 }
 
@@ -789,6 +816,9 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 	case MS_Seconds:
 		label = &ms_seconds_label;
 		break;
+	case MS_Milliseconds:
+		label = &ms_milliseconds_label;
+		break;
 
 	case Bars:
 		label = &bars_label;
@@ -971,6 +1001,9 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 			ms_seconds_ebox.grab_focus ();
 			break;
 		case MS_Seconds:
+			ms_milliseconds_ebox.grab_focus ();
+			break;
+		case MS_Milliseconds:
 			clock_base.grab_focus ();
 			break;
 
@@ -1044,6 +1077,10 @@ AudioClock::field_focus_in_event (GdkEventFocus */*ev*/, Field field)
 		ms_seconds_ebox.set_flags (Gtk::HAS_FOCUS);
 		ms_seconds_ebox.set_state (Gtk::STATE_ACTIVE);
 		break;
+	case MS_Milliseconds:
+		ms_milliseconds_ebox.set_flags (Gtk::HAS_FOCUS);
+		ms_milliseconds_ebox.set_state (Gtk::STATE_ACTIVE);
+		break;
 	case Bars:
 		bars_ebox.set_flags (Gtk::HAS_FOCUS);
 		bars_ebox.set_state (Gtk::STATE_ACTIVE);
@@ -1100,6 +1137,10 @@ AudioClock::field_focus_out_event (GdkEventFocus */*ev*/, Field field)
 		ms_seconds_ebox.unset_flags (Gtk::HAS_FOCUS);
 		ms_seconds_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
+	case MS_Milliseconds:
+		ms_milliseconds_ebox.unset_flags (Gtk::HAS_FOCUS);
+		ms_milliseconds_ebox.set_state (Gtk::STATE_NORMAL);
+		break;
 
 	case Bars:
 		bars_ebox.unset_flags (Gtk::HAS_FOCUS);
@@ -1124,7 +1165,6 @@ bool
 AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 {
 	if (dragging) {
-		cerr << "button event on clock but we are dragging\n";
 		gdk_pointer_ungrab (GDK_CURRENT_TIME);
 		dragging = false;
 		if (ev->y > drag_start_y+1 || ev->y < drag_start_y-1 || Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)){
@@ -1177,6 +1217,9 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 			break;
 		case MS_Seconds:
 			ms_seconds_ebox.grab_focus();
+			break;
+		case MS_Milliseconds:
+			ms_milliseconds_ebox.grab_focus();
 			break;
 
 		case Bars:
@@ -1375,7 +1418,10 @@ AudioClock::get_frames (Field field, framepos_t pos, int dir)
 		frames = (framecnt_t) floor (60.0 * _session->frame_rate());
 		break;
 	case MS_Seconds:
-		frames = _session->frame_rate();
+		frames = (framecnt_t) _session->frame_rate();
+		break;
+	case MS_Milliseconds:
+		frames = (framecnt_t) floor (_session->frame_rate() / 1000.0);
 		break;
 
 	case Bars:
@@ -1908,11 +1954,12 @@ AudioClock::minsec_frame_from_display () const
 
 	int hrs = atoi (ms_hours_label.get_text());
 	int mins = atoi (ms_minutes_label.get_text());
-	float secs = atof (ms_seconds_label.get_text());
+	int secs = atoi (ms_seconds_label.get_text());
+	int millisecs = atoi (ms_milliseconds_label.get_text());
 
 	framecnt_t sr = _session->frame_rate();
 
-	return (framepos_t) floor ((hrs * 60.0f * 60.0f * sr) + (mins * 60.0f * sr) + (secs * sr));
+	return (framepos_t) floor ((hrs * 60.0f * 60.0f * sr) + (mins * 60.0f * sr) + (secs * sr) + (millisecs * sr / 1000.0));
 }
 
 framepos_t
@@ -2085,7 +2132,8 @@ AudioClock::set_size_requests ()
 	case MinSec:
 		Gtkmm2ext::set_size_request_to_display_given_text (ms_hours_label, "88", 5, 5);
 		Gtkmm2ext::set_size_request_to_display_given_text (ms_minutes_label, "88", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_seconds_label, "88.888", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (ms_seconds_label, "88", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (ms_milliseconds_label, "888", 5, 5);
 		break;
 
 	case Frames:
@@ -2126,6 +2174,7 @@ AudioClock::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
 	ms_hours_label.modify_style (rcstyle);
 	ms_minutes_label.modify_style (rcstyle);
 	ms_seconds_label.modify_style (rcstyle);
+	ms_milliseconds_label.modify_style (rcstyle);
 	hours_ebox.modify_style (rcstyle);
 	minutes_ebox.modify_style (rcstyle);
 	seconds_ebox.modify_style (rcstyle);
@@ -2137,6 +2186,7 @@ AudioClock::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
 	ms_hours_ebox.modify_style (rcstyle);
 	ms_minutes_ebox.modify_style (rcstyle);
 	ms_seconds_ebox.modify_style (rcstyle);
+	ms_milliseconds_ebox.modify_style (rcstyle);
 
 	colon1.modify_style (rcstyle);
 	colon2.modify_style (rcstyle);
@@ -2145,6 +2195,7 @@ AudioClock::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
 	colon5.modify_style (rcstyle);
 	b1.modify_style (rcstyle);
 	b2.modify_style (rcstyle);
+	period1.modify_style (rcstyle);
 
 	set_size_requests ();
 }

@@ -106,6 +106,7 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 		MS_Hours,
 		MS_Minutes,
 		MS_Seconds,
+		MS_Milliseconds,
 		Bars,
 		Beats,
 		Ticks,
@@ -125,6 +126,7 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	Gtk::EventBox  ms_hours_ebox;
 	Gtk::EventBox  ms_minutes_ebox;
 	Gtk::EventBox  ms_seconds_ebox;
+	Gtk::EventBox  ms_milliseconds_ebox;
 
 	Gtk::EventBox  bars_ebox;
 	Gtk::EventBox  beats_ebox;
@@ -139,7 +141,9 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	Gtk::Label  ms_hours_label;
 	Gtk::Label  ms_minutes_label;
 	Gtk::Label  ms_seconds_label;
+	Gtk::Label  ms_milliseconds_label;
 	Gtk::Label  colon4, colon5;
+	Gtk::Label  period1;
 
 	Gtk::Label  bars_label;
 	Gtk::Label  beats_label;
@@ -176,7 +180,8 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	long  ms_last_hrs;
 	long  ms_last_mins;
-	float ms_last_secs;
+	int   ms_last_secs;
+	int   ms_last_millisecs;
 
 	bool dragging;
 	double drag_start_y;
