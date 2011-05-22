@@ -809,7 +809,11 @@ ARDOUR_UI::finish()
 		}
 
 		if (_session->dirty()) {
-			switch (ask_about_saving_session(_("quit"))) {
+			vector<string> actions;
+			actions.push_back (_("Don't quit"));
+			actions.push_back (_("Just quit"));
+			actions.push_back (_("Save and quit"));
+			switch (ask_about_saving_session(actions)) {
 			case -1:
 				return;
 				break;
@@ -858,7 +862,7 @@ If you still wish to quit, please use the\n\n\
 }
 
 int
-ARDOUR_UI::ask_about_saving_session (const string & what)
+ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
 {
 	ArdourDialog window (_("Unsaved Session"));
 	Gtk::HBox dhbox;  // the hbox for the image and text
@@ -867,12 +871,11 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 
 	string msg;
 
-	msg = string_compose(_("Don't %1"), what);
-	window.add_button (msg, RESPONSE_REJECT);
-	msg = string_compose(_("Just %1"), what);
-	window.add_button (msg, RESPONSE_APPLY);
-	msg = string_compose(_("Save and %1"), what);
-	window.add_button (msg, RESPONSE_ACCEPT);
+	assert (actions.size() >= 3);
+
+	window.add_button (actions[0], RESPONSE_REJECT);
+	window.add_button (actions[1], RESPONSE_APPLY);
+	window.add_button (actions[2], RESPONSE_ACCEPT);
 
 	window.set_default_response (RESPONSE_ACCEPT);
 
