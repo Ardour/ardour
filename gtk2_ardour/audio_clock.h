@@ -20,6 +20,7 @@
 #ifndef __audio_clock_h__
 #define __audio_clock_h__
 
+#include <map>
 #include <gtkmm/box.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/eventbox.h>
@@ -113,41 +114,17 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 		AudioFrames
 	};
 
-	Gtk::EventBox  audio_frames_ebox;
-	Gtk::Label     audio_frames_label;
+	/** EventBoxes for each of our Field entries */
+	std::map<Field, Gtk::EventBox*> _eboxes;
+	Gtk::Label const * label (Field) const;
+	/** Labels for each of our Field entries */
+	std::map<Field, Gtk::Label*> _labels;
 
 	Gtk::HBox      off_hbox;
 
-	Gtk::EventBox  hours_ebox;
-	Gtk::EventBox  minutes_ebox;
-	Gtk::EventBox  seconds_ebox;
-	Gtk::EventBox  frames_ebox;
-
-	Gtk::EventBox  ms_hours_ebox;
-	Gtk::EventBox  ms_minutes_ebox;
-	Gtk::EventBox  ms_seconds_ebox;
-	Gtk::EventBox  ms_milliseconds_ebox;
-
-	Gtk::EventBox  bars_ebox;
-	Gtk::EventBox  beats_ebox;
-	Gtk::EventBox  ticks_ebox;
-
-	Gtk::Label  hours_label;
-	Gtk::Label  minutes_label;
-	Gtk::Label  seconds_label;
-	Gtk::Label  frames_label;
 	Gtk::Label  colon1, colon2, colon3;
-
-	Gtk::Label  ms_hours_label;
-	Gtk::Label  ms_minutes_label;
-	Gtk::Label  ms_seconds_label;
-	Gtk::Label  ms_milliseconds_label;
 	Gtk::Label  colon4, colon5;
 	Gtk::Label  period1;
-
-	Gtk::Label  bars_label;
-	Gtk::Label  beats_label;
-	Gtk::Label  ticks_label;
 	Gtk::Label  b1;
 	Gtk::Label  b2;
 
