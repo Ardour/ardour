@@ -229,6 +229,7 @@
       <menuitem action='export-region'/>
       <menuitem action='bounce-region'/>
       <menuitem action='combine-regions'/>
+      <menuitem action='uncombine-regions'/>
       <menuitem action='analyze-region'/>
       <menuitem action='toggle-region-lock'/>
       <menuitem action='toggle-region-lock-style'/>
@@ -590,6 +591,7 @@
     <menuitem action='transpose-region'/>
     <menuitem action='naturalize-region'/>
     <menuitem action='combine-regions'/>
+    <menuitem action='uncombine-regions'/>
     <menuitem action='split-region'/>
     <menuitem action='split-multichannel-region'/>
     <menuitem action='remove-region'/>

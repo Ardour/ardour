@@ -1373,6 +1373,7 @@ Editor::register_region_actions ()
 
 	reg_sens (_region_actions, "bounce-region", _("Bounce"), sigc::mem_fun (*this, &Editor::bounce_region_selection));
 	reg_sens (_region_actions, "combine-regions", _("Combine"), sigc::mem_fun (*this, &Editor::combine_regions));
+	reg_sens (_region_actions, "uncombine-regions", _("Uncombine"), sigc::mem_fun (*this, &Editor::uncombine_regions));
 
 	reg_sens (_region_actions, "analyze-region", _("Spectral Analysis..."), sigc::mem_fun (*this, &Editor::analyze_region_selection));
 

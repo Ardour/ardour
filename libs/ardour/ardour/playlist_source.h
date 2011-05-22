@@ -36,7 +36,8 @@ class PlaylistSource : virtual public Source {
     virtual ~PlaylistSource ();
     
     int set_state (const XMLNode&, int version);
-    
+    boost::shared_ptr<const Playlist> playlist() const { return _playlist; }
+
   protected:
     boost::shared_ptr<Playlist>      _playlist;
     frameoffset_t                    _playlist_offset;

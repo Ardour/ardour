@@ -2503,6 +2503,35 @@ RouteTimeAxisView::combine_regions ()
 	string name = string_compose (_("%1 compound-%2 (%3)"), playlist->name(), playlist->combine_ops()+1, max_level+1);
 
 	playlist->clear_changes ();
-	playlist->join (selected_regions, name);
+	playlist->combine (selected_regions, name);
 	_session->add_command (new StatefulDiffCommand (playlist));
 }
+
+void
+RouteTimeAxisView::uncombine_regions ()
+{
+	assert (is_track());
+
+	if (!_view) {
+		return;
+	}
+
+	Playlist::RegionList selected_regions;
+	boost::shared_ptr<Playlist> playlist = track()->playlist();
+	uint32_t max_level = 0;
+
+	/* have to grab selected regions first because the uncombine is going
+	 * to change that in the middle of the list traverse
+	 */
+
+	_view->foreach_selected_regionview (sigc::bind (sigc::ptr_fun (add_region_to_list), &selected_regions, &max_level));
+
+	playlist->clear_changes ();
+
+	for (Playlist::RegionList::iterator i = selected_regions.begin(); i != selected_regions.end(); ++i) {
+		playlist->uncombine (*i);
+	}
+
+	_session->add_command (new StatefulDiffCommand (playlist));
+}
+

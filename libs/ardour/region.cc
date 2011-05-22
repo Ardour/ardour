@@ -1671,3 +1671,9 @@ Region::max_source_level () const
 
 	return lvl;
 }
+
+bool
+Region::is_compound () const
+{
+	return max_source_level() > 0;
+}

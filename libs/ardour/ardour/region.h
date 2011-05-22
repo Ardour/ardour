@@ -228,6 +228,8 @@ class Region
 
 	void source_deleted (boost::weak_ptr<Source>);
 
+	bool is_compound () const;
+
 	boost::shared_ptr<Source> source (uint32_t n=0) const { return _sources[ (n < _sources.size()) ? n : 0 ]; }
 	uint32_t n_channels() const { return _sources.size(); }
 

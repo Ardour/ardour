@@ -39,6 +39,7 @@
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
 #include "ardour/playlist_factory.h"
+#include "ardour/playlist_source.h"
 #include "ardour/transient_detector.h"
 #include "ardour/session_playlists.h"
 #include "ardour/source_factory.h"
@@ -2335,7 +2336,8 @@ Playlist::set_state (const XMLNode& node, int version)
 			// So that layer_op ordering doesn't get screwed up
 			region->set_last_layer_op( region->layer());
 			region->resume_property_changes ();
-		}
+
+		} 
 	}
 
 	/* update dependents, which was not done during add_region_internal
@@ -3151,7 +3153,7 @@ Playlist::find_next_top_layer_position (framepos_t t) const
 }
 
 void
-Playlist::join (const RegionList& r, const std::string& name)
+Playlist::combine (const RegionList& r, const std::string& name)
 {
 	PropertyList plist; 
 	uint32_t channels = 0;
@@ -3179,6 +3181,8 @@ Playlist::join (const RegionList& r, const std::string& name)
 		boost::shared_ptr<Region> copied_region = RegionFactory::create (original_region, false);
 
 		old_and_new_regions.push_back (TwoRegions (original_region,copied_region));
+
+		RegionFactory::add_compound_association (original_region, copied_region);
 
 		/* make position relative to zero */
 
@@ -3235,6 +3239,52 @@ Playlist::join (const RegionList& r, const std::string& name)
 	thaw ();
 }
 
+void
+Playlist::uncombine (boost::shared_ptr<Region> target)
+{
+	// (1) check that its really a compound region
+	
+	boost::shared_ptr<PlaylistSource> pls;
+	boost::shared_ptr<const Playlist> pl;
+	vector<boost::shared_ptr<Region> > originals;
+
+	if ((pls = boost::dynamic_pointer_cast<PlaylistSource>(target->source (0))) == 0) {
+		return;
+	}
+
+	pl = pls->playlist();
+
+	// (2) get all the original regions
+
+	const RegionList& rl (pl->region_list().rlist());
+
+	RegionFactory::CompoundAssociations& cassocs (RegionFactory::compound_associations());
+
+	for (RegionList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
+		RegionFactory::CompoundAssociations::iterator ca = cassocs.find (*i);
+		if (ca != cassocs.end()) {
+			originals.push_back (ca->second);
+		}
+	}
+
+	in_partition = true;
+	freeze ();
+
+	// (3) remove the compound region
+
+	remove_region (target);
+
+	// (4) add the originals. This will reset their playlist reference back
+	// to us, which means they are no longer considered owned by the RegionFactory
+
+	for (vector<boost::shared_ptr<Region> >::iterator i = originals.begin(); i != originals.end(); ++i) {
+		add_region ((*i), (*i)->position());
+	}
+
+	in_partition = false;
+	thaw ();
+}
+
 uint32_t
 Playlist::max_source_level () const
 {
@@ -3263,4 +3313,3 @@ Playlist::count_joined_regions () const
 
 	return cnt;
 }
-

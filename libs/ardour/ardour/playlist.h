@@ -139,7 +139,8 @@ public:
 	void partition (framepos_t start, framepos_t end, bool cut = false);
 	void duplicate (boost::shared_ptr<Region>, framepos_t position, float times);
 	void nudge_after (framepos_t start, framecnt_t distance, bool forwards);
-	void join (const RegionList&, const std::string&);
+	void combine (const RegionList&, const std::string&);
+	void uncombine (boost::shared_ptr<Region>);
 
 	void shuffle (boost::shared_ptr<Region>, int dir);
 	void update_after_tempo_map_change ();
@@ -382,6 +383,13 @@ public:
 
 	typedef std::pair<boost::shared_ptr<Region>, boost::shared_ptr<Region> > TwoRegions;
 	virtual void copy_dependents (const std::vector<TwoRegions>&, boost::shared_ptr<Playlist>) { }
+
+	struct RegionInfo {
+	    boost::shared_ptr<Region> region;
+	    framepos_t position;
+	    framecnt_t length;
+	    framepos_t start;
+	};
 };
 
 } /* namespace ARDOUR */

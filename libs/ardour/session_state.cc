@@ -1088,6 +1088,22 @@ Session::state(bool full_state)
                                 child->add_child_nocopy (r->state ());
                         }
                 }
+		
+		RegionFactory::CompoundAssociations& cassocs (RegionFactory::compound_associations());
+
+		if (!cassocs.empty()) {
+			XMLNode* ca = node->add_child (X_("CompoundAssociations"));
+
+			for (RegionFactory::CompoundAssociations::iterator i = cassocs.begin(); i != cassocs.end(); ++i) {
+				char buf[64];
+				XMLNode* can = new XMLNode (X_("CompoundAssociation"));
+				i->first->id().print (buf, sizeof (buf));
+				can->add_property (X_("copy"), buf);
+				i->second->id().print (buf, sizeof (buf));
+				can->add_property (X_("original"), buf);
+				ca->add_child_nocopy (*can);
+			}
+		}  
 	}
 
 	if (full_state) {
@@ -1316,6 +1332,12 @@ Session::set_state (const XMLNode& node, int version)
 		// this is OK
 	} else if (playlists->load_unused (*this, *child)) {
 		goto out;
+	}
+	
+	if ((child = find_named_node (node, "CompoundAssociations")) != 0) {
+		if (load_compounds (*child)) {
+			goto out;
+		}
 	}
 	
 	if ((child = find_named_node (node, "NamedSelections")) != 0) {
@@ -1587,6 +1609,44 @@ Session::load_regions (const XMLNode& node)
 
 			error << endmsg;
 		}
+	}
+
+	return 0;
+}
+
+int
+Session::load_compounds (const XMLNode& node)
+{
+	XMLNodeList calist = node.children();
+	XMLNodeConstIterator caiter;
+	XMLProperty *caprop;
+	
+	for (caiter = calist.begin(); caiter != calist.end(); ++caiter) {
+		XMLNode* ca = *caiter;
+		ID orig_id;
+		ID copy_id;
+		
+		if ((caprop = ca->property (X_("original"))) == 0) {
+			continue;
+		}
+		orig_id = caprop->value();
+		
+		if ((caprop = ca->property (X_("copy"))) == 0) {
+			continue;
+		}
+		copy_id = caprop->value();
+		
+		boost::shared_ptr<Region> orig = RegionFactory::region_by_id (orig_id);
+		boost::shared_ptr<Region> copy = RegionFactory::region_by_id (copy_id);
+		
+		if (!orig || !copy) {
+			warning << string_compose (_("Regions in compound description not found (ID's %1 and %2): ignored"),
+						   orig_id, copy_id) 
+				<< endmsg;
+			continue;
+		}
+		
+		RegionFactory::add_compound_association (orig, copy);
 	}
 
 	return 0;

@@ -61,6 +61,7 @@ public:
 	/** create a region from a single Source */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>, 
 	                                         const PBD::PropertyList&, bool announce = true);
+	
 	/** create a region from a multiple sources */
 	static boost::shared_ptr<Region> create (const SourceList &, 
 	                                         const PBD::PropertyList&, bool announce = true);
@@ -91,6 +92,24 @@ public:
 	static int region_name (std::string &, std::string, bool new_level = false);
 	static std::string new_region_name (std::string);
   
+	/* when we make a compound region, for every region involved there
+	 * are two "instances" - the original, which is removed from this
+	 * playlist, and a copy, which is added to the playlist used as 
+	 * the source for the compound.
+	 *
+	 * when we uncombine, we want to put the originals back into this
+	 * playlist after we remove the compound. this map lets us
+	 * look them up easily. note that if the compound was trimmed or
+	 * split, we may have to trim the originals
+	 * and they may not be added back if the compound was trimmed
+	 * or split sufficiently.
+	 */
+
+	typedef std::map<boost::shared_ptr<Region>, boost::shared_ptr<Region> > CompoundAssociations;
+	static CompoundAssociations& compound_associations() { return _compound_associations; }
+
+	static void add_compound_association (boost::shared_ptr<Region>, boost::shared_ptr<Region>);
+	
   private:
 
 	static void region_changed (PBD::PropertyChange const &, boost::weak_ptr<Region>);
@@ -106,6 +125,7 @@ public:
 	static void update_region_name_map (boost::shared_ptr<Region>);
 
 	static PBD::ScopedConnectionList region_list_connections;
+	static CompoundAssociations _compound_associations;
 };
 
 }

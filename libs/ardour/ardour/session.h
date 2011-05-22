@@ -1253,6 +1253,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	mutable Glib::Mutex region_lock;
 
 	int load_regions (const XMLNode& node);
+	int load_compounds (const XMLNode& node);
 
 	void route_group_changed ();
 

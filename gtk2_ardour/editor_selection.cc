@@ -989,6 +989,7 @@ Editor::sensitize_the_right_region_actions ()
 	bool have_envelope_active = false;
 	bool have_envelope_inactive = false;
 	bool have_non_unity_scale_amplitude = false;
+	bool have_compound_regions = false;
 
 	for (list<RegionView*>::const_iterator i = rs.begin(); i != rs.end(); ++i) {
 
@@ -1001,6 +1002,10 @@ Editor::sensitize_the_right_region_actions ()
 		
 		if (boost::dynamic_pointer_cast<MidiRegion> (r)) {
 			have_midi = true;
+		}
+
+		if (r->is_compound()) {
+			have_compound_regions = true;
 		}
 
 		if (r->locked()) {
@@ -1082,6 +1087,10 @@ Editor::sensitize_the_right_region_actions ()
 		_region_actions->get_action("trim-back")->set_sensitive (false);
 		_region_actions->get_action("split-region")->set_sensitive (false);
 		_region_actions->get_action("place-transient")->set_sensitive (false);
+	}
+
+	if (have_compound_regions) {
+		_region_actions->get_action("uncombine-regions")->set_sensitive (true);
 	}
 
 	if (have_audio) {

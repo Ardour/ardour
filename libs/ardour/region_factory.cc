@@ -43,6 +43,7 @@ RegionFactory::RegionMap                      RegionFactory::region_map;
 PBD::ScopedConnectionList                     RegionFactory::region_list_connections;
 Glib::StaticMutex                             RegionFactory::region_name_map_lock;
 std::map<std::string, uint32_t>               RegionFactory::region_name_map;
+RegionFactory::CompoundAssociations           RegionFactory::_compound_associations;
 
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
@@ -366,8 +367,8 @@ RegionFactory::clear_map ()
 	{
 		Glib::Mutex::Lock lm (region_map_lock);
 		region_map.clear ();
+		_compound_associations.clear ();
 	}
-
 }
 
 void
@@ -560,4 +561,11 @@ RegionFactory::remove_regions_using_source (boost::shared_ptr<Source> src)
 			region_map.erase (i);
                 }
 	}
+}
+
+void
+RegionFactory::add_compound_association (boost::shared_ptr<Region> orig, boost::shared_ptr<Region> copy)
+{
+	Glib::Mutex::Lock lm (region_map_lock);
+	_compound_associations[copy] = orig;
 }
