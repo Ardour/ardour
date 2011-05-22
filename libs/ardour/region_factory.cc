@@ -488,25 +488,49 @@ RegionFactory::region_name (string& result, string base, bool newlevel)
 }
 
 string
+RegionFactory::compound_region_name (const string& playlist, uint32_t compound_ops, uint32_t depth)
+{
+	return string_compose (_("%1 compound-%2.1 (%3)"), playlist, compound_ops+1, depth+1);
+}
+
+string
 RegionFactory::new_region_name (string old)
 {
 	string::size_type last_period;
 	uint32_t number;
 	string::size_type len = old.length() + 64;
+	string remainder;
 	char buf[len];
 
 	if ((last_period = old.find_last_of ('.')) == string::npos) {
-
+		
 		/* no period present - add one explicitly */
-
+		
 		old += '.';
 		last_period = old.length() - 1;
 		number = 0;
-
+		
 	} else {
+		
+		if (last_period < old.length() - 1) {
 
-		number = atoi (old.substr (last_period+1).c_str());
+			string period_to_end = old.substr (last_period+1);
+			
+			/* extra material after the period */
 
+			string::size_type numerals_end = period_to_end.find_first_not_of ("0123456789");
+			
+			number = atoi (period_to_end);
+			
+			if (numerals_end < period_to_end.length() - 1) {
+				/* extra material after the end of the digits */
+				remainder = period_to_end.substr (numerals_end);
+			}
+
+		} else {
+			last_period = old.length();
+			number = 0;
+		}
 	}
 
 	while (number < (UINT_MAX-1)) {
@@ -517,7 +541,7 @@ RegionFactory::new_region_name (string old)
 
 		number++;
 
-		snprintf (buf, len, "%s%" PRIu32, old.substr (0, last_period + 1).c_str(), number);
+		snprintf (buf, len, "%s%" PRIu32 "%s", old.substr (0, last_period + 1).c_str(), number, remainder.c_str());
 		sbuf = buf;
 
 		for (i = regions.begin(); i != regions.end(); ++i) {

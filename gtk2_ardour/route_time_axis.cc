@@ -53,6 +53,7 @@
 #include "ardour/playlist.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
+#include "ardour/region_factory.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/session_playlist.h"
@@ -2500,7 +2501,7 @@ RouteTimeAxisView::combine_regions ()
 
 	_view->foreach_selected_regionview (sigc::bind (sigc::ptr_fun (add_region_to_list), &selected_regions, &max_level));
 	
-	string name = string_compose (_("%1 compound-%2 (%3)"), playlist->name(), playlist->combine_ops()+1, max_level+1);
+	string name = RegionFactory::compound_region_name (playlist->name(), playlist->combine_ops(), max_level);
 
 	playlist->clear_changes ();
 	playlist->combine (selected_regions, name);
