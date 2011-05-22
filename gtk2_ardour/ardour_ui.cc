@@ -883,15 +883,14 @@ ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
 	noquit_button.set_name ("EditorGTKButton");
 
 	string prompt;
-	string type;
 
 	if (_session->snap_name() == _session->name()) {
-		type = _("session");
+		prompt = string_compose(_("The session \"%1\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"),
+					_session->snap_name());
 	} else {
-		type = _("snapshot");
+		prompt = string_compose(_("The snapshot \"%1\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"),
+					_session->snap_name());
 	}
-	prompt = string_compose(_("The %1 \"%2\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"),
-			 type, _session->snap_name());
 
 	prompt_label.set_text (prompt);
 	prompt_label.set_name (X_("PrompterLabel"));
