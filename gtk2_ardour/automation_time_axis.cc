@@ -245,12 +245,22 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	automation_state_changed ();
 	ColorsChanged.connect (sigc::mem_fun (*this, &AutomationTimeAxisView::color_handler));
+
+	_route->DropReferences.connect (
+		_route_connections, invalidator (*this), ui_bind (&AutomationTimeAxisView::route_going_away, this), gui_context ()
+		);
 }
 
 AutomationTimeAxisView::~AutomationTimeAxisView ()
 {
 }
 
+void
+AutomationTimeAxisView::route_going_away ()
+{
+	_route.reset ();
+}
+	
 void
 AutomationTimeAxisView::auto_clicked ()
 {
@@ -492,7 +502,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 	}
 
 	if (changed) {
-		if (canvas_item_visible (_canvas_display)) {
+		if (canvas_item_visible (_canvas_display) && _route) {
 			/* only emit the signal if the height really changed and we were visible */
 			_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 		}

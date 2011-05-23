@@ -168,6 +168,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void cut_copy_clear_objects_one (AutomationLine&, PointSelection&, Editing::CutCopyOp);
 	bool paste_one (AutomationLine&, ARDOUR::framepos_t, float times, Selection&, size_t nth);
 	void reset_objects_one (AutomationLine&, PointSelection&);
+	void route_going_away ();
 
 	void set_automation_state (ARDOUR::AutoState);
 	bool ignore_state_request;
@@ -178,6 +179,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void interpolation_changed (ARDOUR::AutomationList::InterpolationStyle);
 
 	PBD::ScopedConnectionList _list_connections;
+	PBD::ScopedConnectionList _route_connections;
 
 	void update_extra_xml_shown (bool editor_shown);
 

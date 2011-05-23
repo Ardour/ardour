@@ -527,6 +527,7 @@ ProcessorBox::route_going_away ()
 {
 	/* don't keep updating display as processors are deleted */
 	no_processor_redisplay = true;
+	_route.reset ();
 }
 
 void

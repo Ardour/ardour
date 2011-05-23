@@ -63,6 +63,8 @@ void RouteSignal::connect()
 	// TODO this works when a currently-banked route is made inactive, but not
 	// when a route is activated which should be currently banked.
 	_route->active_changed.connect (connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_active_changed, &_mcp, this), midi_ui_context());
+
+	_route->DropReferences.connect (connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::refresh_current_bank, &_mcp), midi_ui_context());
 	
 	// TODO
 	// SelectedChanged
