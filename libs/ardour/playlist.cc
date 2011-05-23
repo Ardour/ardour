@@ -3187,7 +3187,7 @@ Playlist::combine (const RegionList& r, const std::string& name)
 		/* make position relative to zero */
 
 		pl->add_region (copied_region, original_region->position() - earliest_position);
-
+		
 		/* use the maximum number of channels for any region */
 
 		channels = max (channels, original_region->n_channels());
@@ -3254,17 +3254,107 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 	pl = pls->playlist();
 
+	framepos_t adjusted_start;
+	framepos_t adjusted_end;
+
+	/* the leftmost (earliest) edge of the compound region
+	   starts at zero in its source, or larger if it
+	   has been trimmed or content-scrolled.
+	   
+	   the rightmost (latest) edge of the compound region
+	   relative to its source is the starting point plus
+	   the length of the region.
+	*/
+	
+	adjusted_start = target->start();
+	adjusted_end = target->start() + target->length();
+
 	// (2) get all the original regions
 
 	const RegionList& rl (pl->region_list().rlist());
-
 	RegionFactory::CompoundAssociations& cassocs (RegionFactory::compound_associations());
+	frameoffset_t move_offset = 0;
 
 	for (RegionList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
+
+		boost::shared_ptr<Region> current (*i);
+
+
 		RegionFactory::CompoundAssociations::iterator ca = cassocs.find (*i);
-		if (ca != cassocs.end()) {
-			originals.push_back (ca->second);
+
+		if (ca == cassocs.end()) {
+			continue;
 		}
+
+		boost::shared_ptr<Region> original (ca->second);
+		bool modified_region;
+
+		if (i == rl.begin()) {
+			move_offset = (target->position() - original->position()) - target->start();
+		}
+
+		/* check to see how the original region (in the
+		 * playlist before compounding occured) overlaps
+		 * with the new state of the compound region.
+		 */
+
+		original->clear_changes ();
+		modified_region = false;
+
+		switch (original->coverage (adjusted_start, adjusted_end)) {
+		case OverlapNone:
+			/* original region does not cover any part 
+			   of the current state of the compound region
+			*/
+			continue;
+
+		case OverlapInternal:
+			/* overlap is just a small piece inside the
+			 * original so trim both ends
+			 */
+			original->trim_to (adjusted_start, adjusted_end - adjusted_start, this);
+			modified_region = true;
+			break;
+				
+		case OverlapExternal:
+			/* overlap fully covers original, so leave it
+			   as is
+			*/
+			break;
+
+		case OverlapEnd:
+			/* overlap starts within but covers end,
+			   so trim the front of the region
+			*/
+			original->trim_front (adjusted_start, this);
+			modified_region = true;
+			break;
+				
+		case OverlapStart:
+			/* overlap covers start but ends within, so
+			 * trim the end of the region.
+			 */
+			original->trim_end (adjusted_end, this);
+			modified_region = true;
+			break;
+		}
+
+		if (move_offset) {
+			/* fix the position to match any movement of the compound region.
+			 */
+			original->set_position (original->position() + move_offset, this);
+			modified_region = true;
+		}
+
+		if (modified_region) {
+			_session.add_command (new StatefulDiffCommand (original));
+		}
+
+		/* and add to the list of regions waiting to be
+		 * re-inserted 
+		 */
+
+		originals.push_back (original);
 	}
 
 	in_partition = true;
