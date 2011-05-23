@@ -348,8 +348,6 @@ def build(bld):
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
         obj.source += [ 'cocoacarbon.mm', 'au_pluginui.mm' ]
         obj.uselib_local += ' libappleutility '
-    else:
-        obj.source += [ 'x11.cc' ]
 
     if bld.env['VST_SUPPORT']:
         # If we require VST support we build a stub main() and the FST library

@@ -327,8 +327,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	
 	starting.connect (sigc::mem_fun(*this, &ARDOUR_UI::startup));
 	stopping.connect (sigc::mem_fun(*this, &ARDOUR_UI::shutdown));
-
-	platform_setup ();
 }
 
 /** @return true if a session was chosen and `apply' clicked, otherwise false if `cancel' was clicked */
@@ -2270,34 +2268,6 @@ ARDOUR_UI::import_metadata ()
 	dialog.set_session (_session);
 	editor->ensure_float (dialog);
 	dialog.run ();
-}
-
-void
-ARDOUR_UI::fontconfig_dialog ()
-{
-#ifdef GTKOSX
-	/* X11 users will always have fontconfig info around, but new GTK-OSX users
-	   may not and it can take a while to build it. Warn them.
-	*/
-
-	std::string fontconfig = Glib::build_filename (Glib::get_home_dir(), ".fontconfig");
-
-	if (!Glib::file_test (fontconfig, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
-		MessageDialog msg (*_startup,
-		                   string_compose (_("Welcome to %1.\n\n"
-		                                     "The program will take a bit longer to start up\n"
-		                                     "while the system fonts are checked.\n\n"
-		                                     "This will only be done once, and you will\n"
-		                                     "not see this message again\n"), PROGRAM_NAME),
-		                   true,
-		                   Gtk::MESSAGE_INFO,
-		                   Gtk::BUTTONS_OK);
-		pop_back_splash ();
-		msg.show_all ();
-		msg.present ();
-		msg.run ();
-	}
-#endif
 }
 
 bool
