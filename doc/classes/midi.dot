@@ -1,0 +1,41 @@
+digraph Ardour {
+	rankdir = BT
+	node [shape=box,arrowhead=normal,arrowtail=normal]
+
+	Evoral_Control [label=<
+Evoral::Control<br/>
+<font face="inconsolata" color="#0000ff">ControlList</font>
+>]
+	Evoral_ControlSet [label=<
+Evoral::ControlSet<br/>
+<font face="inconsolata" color="#ff0000">_control_lock</font><br/>
+<font face="inconsolata" color="#0000ff">map&lt;Parameter, Control&gt;</font>
+>]
+
+	Evoral_Sequence [label=<
+Evoral::Sequence<br/>
+<font face="inconsolata" color="#ff0000">_lock</font><br/>
+<font face="inconsolata" color="#aa0000">read_lock(): _lock</font><br/>
+<font face="inconsolata" color="#aa000">write_lock(): _lock, _control_lock</font><br/>
+<font face="inconsolata" color="#0000ff">Notes, Pitches, SysExes, PatchChanges</font>
+>]
+
+	Evoral_ControlList [label=<Evoral::ControlList<br/><font face="inconsolata" color="#ff0000">_lock</font>>]
+
+	ARDOUR_MidiModel [label=<
+ARDOUR::MidiModel<br/>
+<font face="inconsolata" color="#aa0000">edit_lock(): source mutex(), _lock, _control_lock</font><br/>
+<font face="inconsolata" color="#aa0000">write_lock(): _lock, _control_lock</font><br/>
+>]
+
+	"ARDOUR::Automatable" -> Evoral_ControlSet;
+	"ARDOUR::AutomatableSequence" -> "ARDOUR::Automatable";
+	"ARDOUR::AutomatableSequence" -> Evoral_Sequence;
+	Evoral_Sequence -> Evoral_ControlSet;
+	ARDOUR_MidiModel -> "ARDOUR::AutomatableSequence";
+
+	rank=same {Evoral_ControlSet; Evoral_Control; Evoral_ControlList}
+
+	Evoral_Control -> Evoral_ControlList [arrowhead=box];
+	Evoral_ControlSet -> Evoral_Control [arrowhead=box];
+}
