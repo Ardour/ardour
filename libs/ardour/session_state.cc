@@ -648,7 +648,8 @@ Session::remove_pending_capture_state ()
 }
 
 /** Rename a state file.
- * @param snapshot_name Snapshot name.
+ *  @param old_name Old snapshot name.
+ *  @param new_name New snapshot name.
  */
 void
 Session::rename_state (string old_name, string new_name)
@@ -676,7 +677,7 @@ Session::rename_state (string old_name, string new_name)
 }
 
 /** Remove a state file.
- * @param snapshot_name Snapshot name.
+ *  @param snapshot_name Snapshot name.
  */
 void
 Session::remove_state (string snapshot_name)

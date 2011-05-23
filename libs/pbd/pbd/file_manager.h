@@ -89,7 +89,7 @@ private:
 class FdFileDescriptor : public FileDescriptor
 {
 public:
-	FdFileDescriptor (std::string const &, bool, mode_t);
+	FdFileDescriptor (std::string const & file_name, bool writeable, mode_t mode);
 	~FdFileDescriptor ();
 
 	int allocate ();
@@ -110,7 +110,7 @@ private:
 class StdioFileDescriptor : public FileDescriptor
 {
 public:
-	StdioFileDescriptor (std::string const &, std::string const &);
+	StdioFileDescriptor (std::string const & file_name, std::string const & mode);
 	~StdioFileDescriptor ();
 
 	FILE* allocate ();

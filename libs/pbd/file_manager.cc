@@ -193,13 +193,13 @@ FileDescriptor::release ()
 
 
 
-/** @param n Filename.
- *  @param w true to open writeable, otherwise false.
- *  @param m Open mode for the file.
+/** @param file_name Filename.
+ *  @param writeable true to open writeable, otherwise false.
+ *  @param mode Open mode for the file.
  */
 
-FdFileDescriptor::FdFileDescriptor (string const & n, bool w, mode_t m)
-	: FileDescriptor (n, w)
+FdFileDescriptor::FdFileDescriptor (string const & file_name, bool writeable, mode_t mode)
+	: FileDescriptor (file_name, writeable)
 	, _fd (-1)
 	, _mode (m)
 {
@@ -259,14 +259,14 @@ FileDescriptor::set_path (const string& p)
         _path = p;
 }
 
-/** @param n Filename.
- *  @param w true to open writeable, otherwise false.
+/** @param file_name Filename.
+ *  @param mode Mode to pass to fopen.
  */
 
-StdioFileDescriptor::StdioFileDescriptor (string const & n, std::string const & m)
-	: FileDescriptor (n, false)
+StdioFileDescriptor::StdioFileDescriptor (string const & file_name, std::string const & mode)
+	: FileDescriptor (file_name, false)
 	, _file (0)
-	, _mode (m)
+	, _mode (mode)
 {
 	manager()->add (this);
 }

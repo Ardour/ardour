@@ -127,7 +127,7 @@ public:
 		}
 	}
 
-	/** @param Child
+	/** @param child Child
 	 *  @return true if the child is selected, otherwise false.
 	 */
 	bool selected (T* child) const {

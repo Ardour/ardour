@@ -68,7 +68,7 @@ public:
 	 * Initialize SearchPath from a vector of paths that may or may
 	 * not exist.
 	 *
-	 * @param path A path.
+	 * @param paths A vector of paths.
 	 */
 	SearchPath (const std::vector<PBD::sys::path>& paths);
 

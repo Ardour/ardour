@@ -2104,7 +2104,7 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 
 
 /** Compare the time of this with that of another MetricSection.
- *  @param with_bbt True to compare using ::start(), false to use ::frame().
+ *  @param with_bbt True to compare using start(), false to use frame().
  *  @return -1 for less than, 0 for equal, 1 for greater than.
  */
 

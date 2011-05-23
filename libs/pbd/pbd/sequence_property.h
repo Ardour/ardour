@@ -110,7 +110,7 @@ class SequenceProperty : public PropertyBase
 
 	/** Get a representation of one of our items as XML.  The representation must be sufficient to
 	 *  restore the item's state later; an ID is ok if someone else is storing the item state,
-	 *  otherwise it needs to be the full state.  The supplied node is an <Add> or <Remove>
+	 *  otherwise it needs to be the full state.  The supplied node is an \<Add\> or \<Remove\>
 	 *  which this method can either add properties or children to.
 	 */
 	virtual void get_content_as_xml (typename ChangeContainer::value_type, XMLNode &) const = 0;
@@ -211,7 +211,7 @@ class SequenceProperty : public PropertyBase
 		return p;
         }
 
-	/** Given an <Add> or <Remove> node as passed into get_content_to_xml, obtain an item */
+	/** Given an \<Add\> or \<Remove\> node as passed into get_content_to_xml, obtain an item */
 	virtual typename Container::value_type get_content_from_xml (XMLNode const & node) const = 0;
 
 	void clear_owned_changes () {

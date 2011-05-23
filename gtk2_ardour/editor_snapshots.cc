@@ -108,7 +108,7 @@ EditorSnapshots::button_press (GdkEventButton* ev)
 /** Pop up the snapshot display context menu.
  * @param button Button used to open the menu.
  * @param time Menu open time.
- * @snapshot_name Name of the snapshot that the menu click was over.
+ * @param snapshot_name Name of the snapshot that the menu click was over.
  */
 void
 EditorSnapshots::popup_context_menu (int button, int32_t time, std::string snapshot_name)

@@ -17,6 +17,10 @@
 
 */
 
+/** @file libs/pbd/sndfile_manager.cc
+ *  @brief A FileDescriptor for files opened using libsndfile.
+ */
+
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/types.h>
@@ -31,15 +35,15 @@
 using namespace std;
 using namespace PBD;
 
-/** @param n Filename.
- *  @param w true to open writeable, otherwise false.
- *  @param i SF_INFO for the file.
+/** @param file_name Filename.
+ *  @param writeable true to open writeable, otherwise false.
+ *  @param info SF_INFO for the file.
  */
 
-SndFileDescriptor::SndFileDescriptor (string const & n, bool w, SF_INFO* i)
-	: FileDescriptor (n, w)
+SndFileDescriptor::SndFileDescriptor (string const & file_name, bool writeable, SF_INFO* info)
+	: FileDescriptor (file_name, writeable)
 	, _sndfile (0)
-	, _info (i)
+	, _info (info)
 {
 	manager()->add (this);
 }

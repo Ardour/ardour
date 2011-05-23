@@ -178,7 +178,7 @@ Stateful::get_changes_as_properties (Command* cmd) const
 }
 
 /** Set our property values from an XML node.
- *  Derived types can call this from ::set_state() (or elsewhere)
+ *  Derived types can call this from set_state() (or elsewhere)
  *  to get basic property setting done.
  *  @return IDs of properties that were changed.
  */

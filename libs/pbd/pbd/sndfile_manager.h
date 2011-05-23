@@ -34,7 +34,7 @@ namespace PBD {
 class SndFileDescriptor : public FileDescriptor
 {
 public:
-	SndFileDescriptor (std::string const &, bool, SF_INFO *);
+	SndFileDescriptor (std::string const & file_name, bool writeable, SF_INFO* info);
 	~SndFileDescriptor ();
 
 	SNDFILE* allocate ();
