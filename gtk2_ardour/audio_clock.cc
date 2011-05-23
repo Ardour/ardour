@@ -1873,7 +1873,7 @@ AudioClock::set_bbt_reference (framepos_t pos)
 }
 
 void
-AudioClock::on_style_changed (const Glib::RefPtr<Style>& old_style)
+AudioClock::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
 {
 	HBox::on_style_changed (old_style);
 
