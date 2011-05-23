@@ -201,7 +201,7 @@ FileDescriptor::release ()
 FdFileDescriptor::FdFileDescriptor (string const & file_name, bool writeable, mode_t mode)
 	: FileDescriptor (file_name, writeable)
 	, _fd (-1)
-	, _mode (m)
+	, _mode (mode)
 {
 	manager()->add (this);
 }
