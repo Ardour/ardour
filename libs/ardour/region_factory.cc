@@ -488,9 +488,13 @@ RegionFactory::region_name (string& result, string base, bool newlevel)
 }
 
 string
-RegionFactory::compound_region_name (const string& playlist, uint32_t compound_ops, uint32_t depth)
+RegionFactory::compound_region_name (const string& playlist, uint32_t compound_ops, uint32_t depth, bool whole_source)
 {
-	return string_compose (_("%1 compound-%2.1 (%3)"), playlist, compound_ops+1, depth+1);
+	if (whole_source) {
+		return string_compose (_("%1 compound-%2 (%3)"), playlist, compound_ops+1, depth+1);
+	} else {
+		return string_compose (_("%1 compound-%2.1 (%3)"), playlist, compound_ops+1, depth+1);
+	}
 }
 
 string

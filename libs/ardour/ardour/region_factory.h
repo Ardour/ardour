@@ -91,7 +91,7 @@ public:
 
 	static int region_name (std::string &, std::string, bool new_level = false);
 	static std::string new_region_name (std::string);
-	static std::string compound_region_name (const std::string& playlist, uint32_t compound_ops, uint32_t depth);
+	static std::string compound_region_name (const std::string& playlist, uint32_t compound_ops, uint32_t depth, bool whole_source);
   
 	/* when we make a compound region, for every region involved there
 	 * are two "instances" - the original, which is removed from this

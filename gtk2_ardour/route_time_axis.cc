@@ -2480,10 +2480,9 @@ RouteTimeAxisView::create_gain_automation_child (const Evoral::Parameter& param,
 }
 
 static
-void add_region_to_list (RegionView* rv, Playlist::RegionList* l, uint32_t* max_level)
+void add_region_to_list (RegionView* rv, Playlist::RegionList* l)
 {
 	l->push_back (rv->region());
-	*max_level = max (*max_level, rv->region()->max_source_level());
 }
 
 RegionView*
@@ -2497,14 +2496,11 @@ RouteTimeAxisView::combine_regions ()
 
 	Playlist::RegionList selected_regions;
 	boost::shared_ptr<Playlist> playlist = track()->playlist();
-	uint32_t max_level = 0;
 
-	_view->foreach_selected_regionview (sigc::bind (sigc::ptr_fun (add_region_to_list), &selected_regions, &max_level));
+	_view->foreach_selected_regionview (sigc::bind (sigc::ptr_fun (add_region_to_list), &selected_regions));
 	
-	string name = RegionFactory::compound_region_name (playlist->name(), playlist->combine_ops(), max_level);
-
 	playlist->clear_changes ();
-	boost::shared_ptr<Region> compound_region = playlist->combine (selected_regions, name);
+	boost::shared_ptr<Region> compound_region = playlist->combine (selected_regions);
 
 	_session->add_command (new StatefulDiffCommand (playlist));
 	/* make the new region be selected */
@@ -2523,13 +2519,12 @@ RouteTimeAxisView::uncombine_regions ()
 
 	Playlist::RegionList selected_regions;
 	boost::shared_ptr<Playlist> playlist = track()->playlist();
-	uint32_t max_level = 0;
 
 	/* have to grab selected regions first because the uncombine is going
 	 * to change that in the middle of the list traverse
 	 */
 
-	_view->foreach_selected_regionview (sigc::bind (sigc::ptr_fun (add_region_to_list), &selected_regions, &max_level));
+	_view->foreach_selected_regionview (sigc::bind (sigc::ptr_fun (add_region_to_list), &selected_regions));
 
 	playlist->clear_changes ();
 

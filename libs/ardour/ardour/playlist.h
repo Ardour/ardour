@@ -139,7 +139,7 @@ public:
 	void partition (framepos_t start, framepos_t end, bool cut = false);
 	void duplicate (boost::shared_ptr<Region>, framepos_t position, float times);
 	void nudge_after (framepos_t start, framecnt_t distance, bool forwards);
-	boost::shared_ptr<Region> combine (const RegionList&, const std::string&);
+	boost::shared_ptr<Region> combine (const RegionList&);
 	void uncombine (boost::shared_ptr<Region>);
 
 	void shuffle (boost::shared_ptr<Region>, int dir);

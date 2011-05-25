@@ -3153,15 +3153,27 @@ Playlist::find_next_top_layer_position (framepos_t t) const
 }
 
 boost::shared_ptr<Region>
-Playlist::combine (const RegionList& r, const std::string& name)
+Playlist::combine (const RegionList& r)
 {
 	PropertyList plist; 
 	uint32_t channels = 0;
 	uint32_t layer = 0;
 	framepos_t earliest_position = max_framepos;
 	vector<TwoRegions> old_and_new_regions;
+	string parent_name;
+	string child_name;
+	uint32_t max_level = 0;
 
-	boost::shared_ptr<Playlist> pl = PlaylistFactory::create (_type, _session, name, true);
+	/* find the maximum depth of all the regions we're combining */
+
+	for (RegionList::const_iterator i = r.begin(); i != r.end(); ++i) {
+		max_level = max (max_level, (*i)->max_source_level());
+	}
+
+	parent_name = RegionFactory::compound_region_name (name(), combine_ops(), max_level, true);
+	child_name = RegionFactory::compound_region_name (name(), combine_ops(), max_level, false);
+
+	boost::shared_ptr<Playlist> pl = PlaylistFactory::create (_type, _session, parent_name, true);
 
 	for (RegionList::const_iterator i = r.begin(); i != r.end(); ++i) {
 		earliest_position = min (earliest_position, (*i)->position());
@@ -3205,17 +3217,29 @@ Playlist::combine (const RegionList& r, const std::string& name)
 	pair<framepos_t,framepos_t> extent = pl->get_extent();
 	
 	for (uint32_t chn = 0; chn < channels; ++chn) {
-		sources.push_back (SourceFactory::createFromPlaylist (_type, _session, pl, name, chn, 0, extent.second, false, false));
+		sources.push_back (SourceFactory::createFromPlaylist (_type, _session, pl, parent_name, chn, 0, extent.second, false, false));
 	}
 	
-	/* now a new region using the list of sources */
+	/* now a new whole-file region using the list of sources */
 
 	plist.add (Properties::start, 0);
 	plist.add (Properties::length, extent.second);
-	plist.add (Properties::name, name);
+	plist.add (Properties::name, parent_name);
+	plist.add (Properties::whole_file, true);
+
+	boost::shared_ptr<Region> parent_region = RegionFactory::create (sources, plist, true);
+
+	/* now the non-whole-file region that we will actually use in the
+	 * playlist 
+	 */
+
+	plist.clear ();
+	plist.add (Properties::start, 0);
+	plist.add (Properties::length, extent.second);
+	plist.add (Properties::name, child_name);
 	plist.add (Properties::layer, layer+1);
-	
-	boost::shared_ptr<Region> compound_region = RegionFactory::create (sources, plist, true);
+
+	boost::shared_ptr<Region> compound_region = RegionFactory::create (parent_region, plist, true);
 
 	/* add any dependent regions to the new playlist */
 
@@ -3256,8 +3280,8 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 	pl = pls->playlist();
 
-	framepos_t adjusted_start;
-	framepos_t adjusted_end;
+	framepos_t adjusted_start = 0; // gcc isn't smart enough
+	framepos_t adjusted_end = 0;   // gcc isn't smart enough
 
 	/* the leftmost (earliest) edge of the compound region
 	   starts at zero in its source, or larger if it
