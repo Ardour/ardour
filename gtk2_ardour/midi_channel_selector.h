@@ -36,7 +36,6 @@ public:
 	MidiChannelSelector(int n_rows = 4, int n_columns = 4, int start_row = 0, int start_column = 0);
 	virtual ~MidiChannelSelector() = 0;
 
-	sigc::signal<void, ARDOUR::ChannelMode, uint16_t> mode_changed;
 	sigc::signal<void> clicked;
 
 	void set_channel_colors(const uint32_t new_channel_colors[16]);
@@ -74,6 +73,12 @@ public:
 
 	virtual ~MidiMultipleChannelSelector();
 
+	/** The channel mode or selected channel(s) has changed.
+	 *  First parameter is the new channel mode, second parameter is a bitmask
+	 *  of the currently selected channels.
+	 */
+	sigc::signal<void, ARDOUR::ChannelMode, uint16_t> mode_changed;
+	
 	void set_channel_mode(ARDOUR::ChannelMode mode, uint16_t mask);
 
 	/**

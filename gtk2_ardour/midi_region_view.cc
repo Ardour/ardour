@@ -827,7 +827,7 @@ MidiRegionView::create_note_at(double x, double y, double length, bool sh)
 		length = frames_to_beats (beats_to_frames (length) - 1);
 	}
 
-	const boost::shared_ptr<NoteType> new_note (new NoteType (get_channel_for_add (),
+	const boost::shared_ptr<NoteType> new_note (new NoteType (mtv->get_channel_for_add (),
 	                                                          frames_to_beats(start_frames + _region->start()), length,
 	                                                          (uint8_t)note, 0x40));
 
@@ -1725,15 +1725,17 @@ MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const
 /** Add a patch change to the region.
  *  @param t Time in frames relative to region position
  *  @param patch Patch to add; time and channel are ignored (time is converted from t, and channel comes from
- *  get_channel_for_add())
+ *  MidiTimeAxisView::get_channel_for_add())
  */
 void
 MidiRegionView::add_patch_change (framecnt_t t, Evoral::PatchChange<Evoral::MusicalTime> const & patch)
 {
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("add patch change"));
 	c->add (MidiModel::PatchChangePtr (
 		        new Evoral::PatchChange<Evoral::MusicalTime> (
-			        frames_to_beats (t + midi_region()->start()), get_channel_for_add(), patch.program(), patch.bank()
+			        frames_to_beats (t + midi_region()->start()), mtv->get_channel_for_add(), patch.program(), patch.bank()
 		                                                      )
 	                                   ));
 			
@@ -3154,6 +3156,8 @@ MidiRegionView::selection_as_notelist (Notes& selected, bool allow_all_if_none_s
 void
 MidiRegionView::update_ghost_note (double x, double y)
 {
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	
 	_last_ghost_x = x;
 	_last_ghost_y = y;
 	
@@ -3172,6 +3176,7 @@ MidiRegionView::update_ghost_note (double x, double y)
 	_ghost_note->note()->set_time (frames_to_beats (f + _region->start()));
 	_ghost_note->note()->set_length (length);
 	_ghost_note->note()->set_note (midi_stream_view()->y_to_note (y));
+	_ghost_note->note()->set_channel (mtv->get_channel_for_add ());
 
 	/* the ghost note does not appear in ghost regions, so pass false in here */
 	update_note (_ghost_note, false);
@@ -3392,35 +3397,6 @@ MidiRegionView::trim_front_ending ()
 		/* Trim drag made start time -ve; fix this */
 		midi_region()->fix_negative_start ();
 	}
-}
-
-/** @return channel (counted from 0) to add an event to, based on the current setting
- *  of the channel selector.
- */
-uint8_t
-MidiRegionView::get_channel_for_add () const
-{
-	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
-	uint16_t const chn_mask = mtv->channel_selector().get_selected_channels();
-	int chn_cnt = 0;
-	uint8_t channel = 0;
-
-	/* pick the highest selected channel, unless all channels are selected,
-	   which is interpreted to mean channel 1 (zero)
-	*/
-
-	for (uint16_t i = 0; i < 16; ++i) {
-		if (chn_mask & (1<<i)) {
-			channel = i;
-			chn_cnt++;
-		}
-	}
-
-	if (chn_cnt == 16) {
-		channel = 0;
-	}
-
-	return channel;
 }
 
 void

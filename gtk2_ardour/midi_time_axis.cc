@@ -115,7 +115,6 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 	, _track_color_mode_item(0)
 	, _step_edit_item (0)
 	, _midi_thru_item (0)
-	, default_channel_menu (0)
 	, controller_menu (0)
         , _step_editor (0)
 {
@@ -367,43 +366,11 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 
 	items.push_back (MenuElem (_("Note Range"), *range_menu));
 	items.push_back (MenuElem (_("Note Mode"), *build_note_mode_menu()));
-	items.push_back (MenuElem (_("Default Channel"), *build_def_channel_menu()));
 
 	items.push_back (CheckMenuElem (_("MIDI Thru"), sigc::mem_fun(*this, &MidiTimeAxisView::toggle_midi_thru)));
 	_midi_thru_item = dynamic_cast<CheckMenuItem*>(&items.back());
 
 	items.push_back (SeparatorElem ());
-}
-
-Gtk::Menu*
-MidiTimeAxisView::build_def_channel_menu ()
-{
-	using namespace Menu_Helpers;
-
-	default_channel_menu = manage (new Menu ());
-
-	uint8_t defchn = midi_track()->default_channel();
-	MenuList& def_channel_items = default_channel_menu->items();
-	RadioMenuItem* item;
-	RadioMenuItem::Group dc_group;
-
-	for (int i = 0; i < 16; ++i) {
-		char buf[4];
-		snprintf (buf, sizeof (buf), "%d", i+1);
-
-		def_channel_items.push_back (RadioMenuElem (dc_group, buf,
-							    sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_default_channel), i)));
-		item = dynamic_cast<RadioMenuItem*>(&def_channel_items.back());
-		item->set_active ((i == defchn));
-	}
-
-	return default_channel_menu;
-}
-
-void
-MidiTimeAxisView::set_default_channel (int chn)
-{
-	midi_track()->set_default_channel (chn);
 }
 
 void
@@ -1132,4 +1099,33 @@ MidiTimeAxisView::stop_step_editing ()
         if (_step_editor) {
                 _step_editor->stop_step_editing ();
         }
+}
+
+
+/** @return channel (counted from 0) to add an event to, based on the current setting
+ *  of the channel selector.
+ */
+uint8_t
+MidiTimeAxisView::get_channel_for_add () const
+{
+	uint16_t const chn_mask = _channel_selector.get_selected_channels ();
+	int chn_cnt = 0;
+	uint8_t channel = 0;
+
+	/* pick the highest selected channel, unless all channels are selected,
+	   which is interpreted to mean channel 1 (zero)
+	*/
+
+	for (uint16_t i = 0; i < 16; ++i) {
+		if (chn_mask & (1<<i)) {
+			channel = i;
+			chn_cnt++;
+		}
+	}
+
+	if (chn_cnt == 16) {
+		channel = 0;
+	}
+
+	return channel;
 }

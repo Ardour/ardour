@@ -656,11 +656,12 @@ void
 PianoRollHeader::send_note_on(uint8_t note)
 {
 	boost::shared_ptr<ARDOUR::MidiTrack> track = _view.trackview().midi_track();
+	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (&_view.trackview ());
 
 	//cerr << "note on: " << (int) note << endl;
 
 	if (track) {
-		_event[0] = (MIDI_CMD_NOTE_ON | track->default_channel());
+		_event[0] = (MIDI_CMD_NOTE_ON | mtv->get_channel_for_add ());
 		_event[1] = note;
 		_event[2] = 100;
 
@@ -672,9 +673,10 @@ void
 PianoRollHeader::send_note_off(uint8_t note)
 {
 	boost::shared_ptr<ARDOUR::MidiTrack> track = _view.trackview().midi_track();
+	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (&_view.trackview ());
 
 	if (track) {
-		_event[0] = (MIDI_CMD_NOTE_OFF | track->default_channel());
+		_event[0] = (MIDI_CMD_NOTE_OFF | mtv->get_channel_for_add ());
 		_event[1] = note;
 		_event[2] = 100;
 

@@ -89,9 +89,6 @@ public:
 
         PBD::Signal1<void,bool> StepEditStatusChange;
 
-	uint8_t default_channel() const { return _default_channel; }
-	void set_default_channel (uint8_t chn);
-
 	bool midi_thru() const { return _midi_thru; }
 	void set_midi_thru (bool yn);
 
@@ -126,7 +123,6 @@ protected:
 	MidiRingBuffer<framepos_t> _step_edit_ring_buffer;
 	NoteMode                  _note_mode;
 	bool                      _step_editing;
-	uint8_t                   _default_channel;
 	bool                      _midi_thru;
 
 	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,

@@ -56,7 +56,6 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	, _step_edit_ring_buffer(64) // FIXME: size?
 	, _note_mode(Sustained)
 	, _step_editing (false)
-	, _default_channel (0)
 	, _midi_thru (true)
 {
 }
@@ -150,10 +149,6 @@ MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
 		set_midi_thru (prop->value() == "yes");
 	}
 
-	if ((prop = node.property ("default-channel")) != 0) {
-		set_default_channel ((uint8_t) atoi (prop->value()));
-	}
-
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 	XMLNode *child;
@@ -227,7 +222,6 @@ MidiTrack::state(bool full_state)
 	root.add_property ("step-editing", (_step_editing ? "yes" : "no"));
 	root.add_property ("note-mode", enum_2_string (_note_mode));
 	root.add_property ("midi-thru", (_midi_thru ? "yes" : "no"));
-	snprintf (buf, sizeof (buf), "%d", (int) _default_channel);
 	root.add_property ("default-channel", buf);
 
 	return root;
@@ -602,12 +596,6 @@ MidiTrack::set_step_editing (bool yn)
 		_step_editing = yn;
 		StepEditStatusChange (yn);
 	}
-}
-
-void
-MidiTrack::set_default_channel (uint8_t chn)
-{
-	_default_channel = std::min ((unsigned int) chn, 15U);
 }
 
 void
