@@ -10562,3 +10562,52 @@ msgstr "Broadcast WAVE-metadata"
 msgid "Country code"
 msgstr "Landskod"
 
+#: rc_option_editor.cc:1074
+msgid "Color regions using their track's color"
+msgstr "Färglägg regioner med spårets färg"
+
+#: rc_option_editor.cc:1066
+msgid "Show zoom toolbar"
+msgstr "Visa zoom-verktygsraden"
+
+#: rc_option_editor.cc:1115
+msgid "PFL signals come from"
+msgstr "PFL-signaler kommer från"
+
+#: rc_option_editor.cc:1120
+msgid "before pre-fader processors"
+msgstr "innan för-nivåreglageprocessorer"
+
+#: rc_option_editor.cc:1121
+msgid "pre-fader but after pre-fader processors"
+msgstr "för-nivåreglage men efter för-nivåreglageprocessorer"
+
+#: rc_option_editor.cc:1127
+msgid "AFL signals come from"
+msgstr "AFL-signaler kommer från"
+
+#: rc_option_editor.cc:1132
+msgid "post-fader but before post-fader processors"
+msgstr "efter-nivåreglage men innan efter-nivåreglageprocessorer"
+
+#: rc_option_editor.cc:1133
+msgid "after post-fader processors"
+msgstr "efter efter-nivåreglageprocessorer"
+
+#: rc_option_editor.cc:805
+msgid "%1 processors"
+msgstr "%1 processor(er)"
+
+#: editor_actions.cc:1375
+msgid "Combine"
+msgstr "Kombinera"
+
+#: editor_actions.cc:1376
+msgid "Uncombine"
+msgstr "Okombinera"
+
+#: shuttle_control.cc:162
+msgid "Units"
+msgstr "Enheter"
+
+
