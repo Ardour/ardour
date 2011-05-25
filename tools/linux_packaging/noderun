@@ -15,7 +15,7 @@ svn update || exit 1
 ./waf || exit 1
 cd tools/linux_packaging || exit 1
 ./build --public --strip some || exit 1
-./package --public --nostrip --singlearch || exit 1
+./package --public --singlearch || exit 1
 file=`ls -t *.tar`
 echo "Copying $file to shared folder ..."
 sudo cp $file $HOME/vmshare || exit 1
