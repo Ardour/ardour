@@ -3152,7 +3152,7 @@ Playlist::find_next_top_layer_position (framepos_t t) const
 	return max_framepos;
 }
 
-void
+boost::shared_ptr<Region>
 Playlist::combine (const RegionList& r, const std::string& name)
 {
 	PropertyList plist; 
@@ -3237,6 +3237,8 @@ Playlist::combine (const RegionList& r, const std::string& name)
 	_combine_ops++;
 
 	thaw ();
+
+	return compound_region;
 }
 
 void

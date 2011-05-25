@@ -6426,9 +6426,20 @@ Editor::combine_regions ()
 	}
 
 	begin_reversible_command (_("combine regions"));
+	
+	vector<RegionView*> new_selection;
 
 	for (RTVS::iterator i = tracks.begin(); i != tracks.end(); ++i) {
-		(*i)->combine_regions ();
+		RegionView* rv;
+
+		if ((rv = (*i)->combine_regions ()) != 0) {
+			new_selection.push_back (rv);
+		}
+	}
+
+	selection->clear_regions ();
+	for (vector<RegionView*>::iterator i = new_selection.begin(); i != new_selection.end(); ++i) {
+		selection->add (*i);
 	}
 
 	commit_reversible_command ();

@@ -2486,13 +2486,13 @@ void add_region_to_list (RegionView* rv, Playlist::RegionList* l, uint32_t* max_
 	*max_level = max (*max_level, rv->region()->max_source_level());
 }
 
-void
+RegionView*
 RouteTimeAxisView::combine_regions ()
 {
 	assert (is_track());
 
 	if (!_view) {
-		return;
+		return 0;
 	}
 
 	Playlist::RegionList selected_regions;
@@ -2504,8 +2504,12 @@ RouteTimeAxisView::combine_regions ()
 	string name = RegionFactory::compound_region_name (playlist->name(), playlist->combine_ops(), max_level);
 
 	playlist->clear_changes ();
-	playlist->combine (selected_regions, name);
+	boost::shared_ptr<Region> compound_region = playlist->combine (selected_regions, name);
+
 	_session->add_command (new StatefulDiffCommand (playlist));
+	/* make the new region be selected */
+	
+	return _view->find_view (compound_region);
 }
 
 void
