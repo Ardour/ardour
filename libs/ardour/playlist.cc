@@ -38,6 +38,7 @@
 #include "ardour/session.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
+#include "ardour/region_sorters.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/playlist_source.h"
 #include "ardour/transient_detector.h"
@@ -65,40 +66,7 @@ struct ShowMeTheList {
     string name;
 };
 
-struct RegionSortByLayer {
-    bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
-	    return a->layer() < b->layer();
-    }
-};
 
-struct RegionSortByLayerWithPending {
-	bool operator () (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
-
-		double p = a->layer ();
-		if (a->pending_explicit_relayer()) {
-			p += 0.5;
-		}
-
-		double q = b->layer ();
-		if (b->pending_explicit_relayer()) {
-			q += 0.5;
-		}
-
-		return p < q;
-	}
-};
-
-struct RegionSortByPosition {
-    bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
-	    return a->position() < b->position();
-    }
-};
-
-struct RegionSortByLastLayerOp {
-    bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
-	    return a->last_layer_op() < b->last_layer_op();
-    }
-};
 
 void
 Playlist::make_property_quarks ()
@@ -3160,6 +3128,7 @@ Playlist::combine (const RegionList& r)
 	uint32_t layer = 0;
 	framepos_t earliest_position = max_framepos;
 	vector<TwoRegions> old_and_new_regions;
+	vector<boost::shared_ptr<Region> > originals;
 	string parent_name;
 	string child_name;
 	uint32_t max_level = 0;
@@ -3193,6 +3162,7 @@ Playlist::combine (const RegionList& r)
 		boost::shared_ptr<Region> copied_region = RegionFactory::create (original_region, false);
 
 		old_and_new_regions.push_back (TwoRegions (original_region,copied_region));
+		originals.push_back (original_region);
 
 		RegionFactory::add_compound_association (original_region, copied_region);
 
@@ -3253,6 +3223,12 @@ Playlist::combine (const RegionList& r)
 	for (RegionList::const_iterator i = r.begin(); i != r.end(); ++i) {
 		remove_region (*i);
 	}
+
+	/* do type-specific stuff with the originals and the new compound
+	   region 
+	*/
+
+	pre_combine (originals, compound_region);
 
 	/* add the new region at the right location */
 	

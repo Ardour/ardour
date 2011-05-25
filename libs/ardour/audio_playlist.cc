@@ -27,6 +27,7 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/crossfade.h"
+#include "ardour/region_sorters.h"
 #include "ardour/session.h"
 #include "pbd/enumwriter.h"
 
@@ -1079,4 +1080,46 @@ AudioPlaylist::copy_dependents (const vector<TwoRegions>& old_and_new, boost::sh
 		new_xfade->set_position (ci->second.new_in->position(), this);
 		other_audio->add_crossfade (new_xfade);
 	}
+}
+
+void
+AudioPlaylist::pre_combine (vector<boost::shared_ptr<Region> >& originals, boost::shared_ptr<Region> compound_region)
+{
+	/* sort the originals into time order */
+
+	RegionSortByPosition cmp;
+	boost::shared_ptr<AudioRegion> ar;
+	boost::shared_ptr<AudioRegion> cr;
+
+	if ((cr = boost::dynamic_pointer_cast<AudioRegion> (compound_region)) == 0) {
+		return;
+	}
+
+	sort (originals.begin(), originals.end(), cmp);
+
+	ar = boost::dynamic_pointer_cast<AudioRegion> (originals.front());
+
+	/* copy the fade in of the first into the compound region */
+
+	if (ar) {
+		cr->set_fade_in (ar->fade_in());
+		
+		/* disable the fade in of the first */
+		
+		ar->set_fade_in_active (false);
+	}
+
+	ar = boost::dynamic_pointer_cast<AudioRegion> (originals.front());
+
+	if (ar) {
+		/* copy the fade out of the last into the compound region */
+		cr->set_fade_out (ar->fade_out());
+		/* disable the fade out of the first */
+		ar->set_fade_out_active (false);
+	}
+}
+
+void
+AudioPlaylist::pre_uncombine (vector<boost::shared_ptr<Region> >& originals, boost::shared_ptr<Region> compound_region)
+{
 }

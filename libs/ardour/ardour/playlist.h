@@ -390,6 +390,9 @@ public:
 	    framecnt_t length;
 	    framepos_t start;
 	};
+
+	virtual void pre_combine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>) {}
+	virtual void pre_uncombine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>) {}
 };
 
 } /* namespace ARDOUR */
