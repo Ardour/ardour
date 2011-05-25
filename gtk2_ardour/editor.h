@@ -1980,7 +1980,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void timecode_snap_to_internal (framepos_t& first, int32_t direction = 0, bool for_mark = false);
 
 	RhythmFerret* rhythm_ferret;
-	BundleManager* _bundle_manager;
 
 	void fit_tracks (TrackViewList &);
 	void fit_selected_tracks ();

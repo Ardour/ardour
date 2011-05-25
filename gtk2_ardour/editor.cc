@@ -364,7 +364,6 @@ Editor::Editor ()
 	select_new_marker = false;
 	rhythm_ferret = 0;
 	layering_order_editor = 0;
-	_bundle_manager = 0;
 	no_save_visual = false;
 	resize_idle_id = -1;
 

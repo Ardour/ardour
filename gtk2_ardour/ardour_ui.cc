@@ -204,6 +204,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	ui_config = new UIConfiguration();
 	theme_manager = new ThemeManager();
 
+	key_editor = 0;
+
 	editor = 0;
 	mixer = 0;
 	editor = 0;
@@ -217,6 +219,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	_will_create_new_session_automatically = false;
 	add_route_dialog = 0;
 	route_params = 0;
+	bundle_manager = 0;
 	rc_option_editor = 0;
 	session_option_editor = 0;
 	location_ui = 0;
