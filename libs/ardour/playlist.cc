@@ -3266,9 +3266,9 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	   the length of the region.
 	*/
 	
-	adjusted_start = target->start();
-	adjusted_end = target->start() + target->length();
 
+	cerr << "Compound region: bounds within nested playlist = " << adjusted_start << " .. " << adjusted_end << endl;
+			
 	// (2) get all the original regions
 
 	const RegionList& rl (pl->region_list().rlist());
@@ -3291,12 +3291,31 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 		if (i == rl.begin()) {
 			move_offset = (target->position() - original->position()) - target->start();
+
+
+			cerr << "Move offset is " << target->position() << " - " << original->position()
+			     << " - " << target->start() << " = " << move_offset
+			     << endl;
+
+			adjusted_start = original->position() + target->start();
+			adjusted_end = adjusted_start + target->length();
+
+			cerr << "adjusted range = " << adjusted_start << " based on "
+			     << original->position() << " + " << target->start() << " .. "
+			     << adjusted_end << " from " << target->length() 
+			     << endl;
 		}
 
 		/* check to see how the original region (in the
 		 * playlist before compounding occured) overlaps
 		 * with the new state of the compound region.
 		 */
+
+		cerr << "Original " << original->name() 
+		     << " overlaptype = " << enum_2_string (original->coverage (adjusted_start, adjusted_end))
+		     << " target range: " << adjusted_start << " .. " << adjusted_end
+		     << " orig range: " << original->position() << " .. " << original->last_frame ()
+		     << endl;
 
 		original->clear_changes ();
 		modified_region = false;
@@ -3306,6 +3325,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			/* original region does not cover any part 
 			   of the current state of the compound region
 			*/
+			cerr << "Not present - skip\n";
 			continue;
 
 		case OverlapInternal:
@@ -3314,12 +3334,14 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			 */
 			original->trim_to (adjusted_start, adjusted_end - adjusted_start, this);
 			modified_region = true;
+			cerr << "trim to\n";
 			break;
 				
 		case OverlapExternal:
 			/* overlap fully covers original, so leave it
 			   as is
 			*/
+			cerr << "leave as is\n";
 			break;
 
 		case OverlapEnd:
@@ -3328,6 +3350,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			*/
 			original->trim_front (adjusted_start, this);
 			modified_region = true;
+			cerr << "trim front\n";
 			break;
 				
 		case OverlapStart:
@@ -3336,12 +3359,14 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			 */
 			original->trim_end (adjusted_end, this);
 			modified_region = true;
+			cerr << "trim end\n";
 			break;
 		}
 
 		if (move_offset) {
 			/* fix the position to match any movement of the compound region.
 			 */
+			cerr << "Moving region to new position based on " << original->position() << " + " << move_offset << endl;
 			original->set_position (original->position() + move_offset, this);
 			modified_region = true;
 		}
