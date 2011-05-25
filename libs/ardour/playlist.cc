@@ -3281,7 +3281,6 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 		boost::shared_ptr<Region> current (*i);
 
-
 		RegionFactory::CompoundAssociations::iterator ca = cassocs.find (*i);
 
 		if (ca == cassocs.end()) {
@@ -3383,6 +3382,8 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 		originals.push_back (original);
 	}
+
+	pre_uncombine (originals, target);
 
 	in_partition = true;
 	freeze ();
