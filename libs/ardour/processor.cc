@@ -265,7 +265,7 @@ Processor::set_state (const XMLNode& node, int version)
 	return 0;
 }
 
-/** Caller must hold process lock */
+/** @pre Caller must hold process lock */
 bool
 Processor::configure_io (ChanCount in, ChanCount out)
 {

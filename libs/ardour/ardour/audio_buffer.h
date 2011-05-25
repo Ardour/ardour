@@ -24,6 +24,7 @@
 
 namespace ARDOUR {
 
+/** Buffer containing audio data. */
 class AudioBuffer : public Buffer
 {
 public:
@@ -57,14 +58,14 @@ public:
 		_written = true;
 	}
 
-	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @ dst_offset*/
+	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @a dst_offset */
 	void merge_from (const Buffer& src, framecnt_t len, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) {
 		const AudioBuffer* ab = dynamic_cast<const AudioBuffer*>(&src);
 		assert (ab);
 		accumulate_from (*ab, len, dst_offset, src_offset);
 	}
 
-	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @ dst_offset*/
+	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @a dst_offset */
 	void accumulate_from (const AudioBuffer& src, framecnt_t len, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) {
 		assert(_capacity > 0);
 		assert(len <= _capacity);
@@ -78,7 +79,7 @@ public:
 		_written = true;
 	}
 
-	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @ dst_offset
+	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @dst_offset
 	 * scaling by @a gain_coeff */
 	void accumulate_with_gain_from (const AudioBuffer& src, framecnt_t len, gain_t gain_coeff, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) {
 

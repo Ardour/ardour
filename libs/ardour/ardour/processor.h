@@ -40,8 +40,7 @@ namespace ARDOUR {
 class Session;
 class Route;
 
-/* A mixer strip element - plugin, send, meter, etc.
- */
+/** A mixer strip element - plugin, send, meter, etc */
 class Processor : public SessionObject, public Automatable, public Latent
 {
   public:
@@ -67,8 +66,8 @@ class Processor : public SessionObject, public Automatable, public Latent
 	virtual int set_block_size (pframes_t /*nframes*/) { return 0; }
         virtual bool requires_fixed_sized_buffers() const { return false; }
 
-	/** @param result_required true if, on return from this method, bufs is required to contain valid data;
-	 *  if false, the method need not bother writing to bufs if it doesn't want to.
+	/** @param result_required true if, on return from this method, @a bufs is required to contain valid data;
+	 *  if false, the method need not bother writing to @a bufs if it doesn't want to.
 	 */  
 	virtual void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t /*nframes*/, bool /*result_required*/) {}
 	virtual void silence (framecnt_t /*nframes*/) {}
@@ -114,7 +113,7 @@ protected:
 	ChanCount _configured_input;
 	ChanCount _configured_output;
 	bool      _display_to_user;
-	bool      _pre_fader;
+	bool      _pre_fader; ///< true if this processor is currently placed before the Amp, otherwise false
         void*     _ui_pointer;
 };
 
