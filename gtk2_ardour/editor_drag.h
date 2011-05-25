@@ -594,13 +594,14 @@ public:
 	}
 
 	bool y_movement_matters () const {
-		return false;
+		return true;
 	}
 	
 private:
 	void fake_locate (framepos_t);
 	
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
+	double _grab_zoom; ///< editor frames per unit when our grab started
 };
 
 /** Region fade-in drag */
