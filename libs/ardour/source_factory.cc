@@ -347,7 +347,7 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 }
 
 boost::shared_ptr<Source>
-SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<Playlist> p, const std::string& name,
+SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<Playlist> p, const ID& orig, const std::string& name,
 				   uint32_t chn, frameoffset_t start, framecnt_t len, bool copy, bool defer_peaks)
 {
 	if (type == DataType::AUDIO) {
@@ -362,7 +362,7 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<
 					start = 0;
 				}
 				
-				Source* src = new AudioPlaylistSource (s, name, ap, chn, start, len, Source::Flag (0));
+				Source* src = new AudioPlaylistSource (s, orig, name, ap, chn, start, len, Source::Flag (0));
 				boost::shared_ptr<Source> ret (src);
 				
 				if (setup_peakfile (ret, defer_peaks)) {

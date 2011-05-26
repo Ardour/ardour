@@ -2498,6 +2498,10 @@ RouteTimeAxisView::combine_regions ()
 	boost::shared_ptr<Playlist> playlist = track()->playlist();
 
 	_view->foreach_selected_regionview (sigc::bind (sigc::ptr_fun (add_region_to_list), &selected_regions));
+
+	if (selected_regions.size() < 2) {
+		return 0;
+	}
 	
 	playlist->clear_changes ();
 	boost::shared_ptr<Region> compound_region = playlist->combine (selected_regions);

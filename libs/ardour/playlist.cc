@@ -3133,9 +3133,8 @@ Playlist::combine (const RegionList& r)
 	pair<framepos_t,framepos_t> extent = pl->get_extent();
 	
 	for (uint32_t chn = 0; chn < channels; ++chn) {
-		sources.push_back (SourceFactory::createFromPlaylist (_type, _session, pl, parent_name, chn, 0, extent.second, false, false));
+		sources.push_back (SourceFactory::createFromPlaylist (_type, _session, pl, id(), parent_name, chn, 0, extent.second, false, false));
 	}
-
 	
 	/* now a new whole-file region using the list of sources */
 
@@ -3191,12 +3190,12 @@ Playlist::combine (const RegionList& r)
 void
 Playlist::uncombine (boost::shared_ptr<Region> target)
 {
-	// (1) check that its really a compound region
-	
 	boost::shared_ptr<PlaylistSource> pls;
 	boost::shared_ptr<const Playlist> pl;
 	vector<boost::shared_ptr<Region> > originals;
 
+	// (1) check that its really a compound region
+	
 	if ((pls = boost::dynamic_pointer_cast<PlaylistSource>(target->source (0))) == 0) {
 		return;
 	}
@@ -3215,14 +3214,23 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	   the length of the region.
 	*/
 	
-
-	cerr << "Compound region: bounds within nested playlist = " << adjusted_start << " .. " << adjusted_end << endl;
-			
 	// (2) get all the original regions
 
 	const RegionList& rl (pl->region_list().rlist());
 	RegionFactory::CompoundAssociations& cassocs (RegionFactory::compound_associations());
 	frameoffset_t move_offset = 0;
+	
+	/* there are two possibilities here:
+	   1) the playlist that the playlist source was based on
+	   is us, so just add the originals (which belonged to
+	   us anyway) back in the right place.
+	   
+	   2) the playlist that the playlist source was based on
+	   is NOT us, so we need to make copies of each of
+	   the original regions that we find, and add them
+	   instead.
+	*/
+	bool same_playlist = (pls->original() == id());
 
 	for (RegionList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
 
@@ -3239,31 +3247,24 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 		if (i == rl.begin()) {
 			move_offset = (target->position() - original->position()) - target->start();
-
-
-			cerr << "Move offset is " << target->position() << " - " << original->position()
-			     << " - " << target->start() << " = " << move_offset
-			     << endl;
-
 			adjusted_start = original->position() + target->start();
 			adjusted_end = adjusted_start + target->length();
+		}
 
-			cerr << "adjusted range = " << adjusted_start << " based on "
-			     << original->position() << " + " << target->start() << " .. "
-			     << adjusted_end << " from " << target->length() 
-			     << endl;
+		if (!same_playlist) {
+			framepos_t pos = original->position();
+			/* make a copy, but don't announce it */
+			original = RegionFactory::create (original, false);
+			/* the pure copy constructor resets position() to zero,
+			   so fix that up.
+			*/
+			original->set_position (pos, this);
 		}
 
 		/* check to see how the original region (in the
 		 * playlist before compounding occured) overlaps
 		 * with the new state of the compound region.
 		 */
-
-		cerr << "Original " << original->name() 
-		     << " overlaptype = " << enum_2_string (original->coverage (adjusted_start, adjusted_end))
-		     << " target range: " << adjusted_start << " .. " << adjusted_end
-		     << " orig range: " << original->position() << " .. " << original->last_frame ()
-		     << endl;
 
 		original->clear_changes ();
 		modified_region = false;
@@ -3273,7 +3274,6 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			/* original region does not cover any part 
 			   of the current state of the compound region
 			*/
-			cerr << "Not present - skip\n";
 			continue;
 
 		case OverlapInternal:
@@ -3282,14 +3282,12 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			 */
 			original->trim_to (adjusted_start, adjusted_end - adjusted_start, this);
 			modified_region = true;
-			cerr << "trim to\n";
 			break;
 				
 		case OverlapExternal:
 			/* overlap fully covers original, so leave it
 			   as is
 			*/
-			cerr << "leave as is\n";
 			break;
 
 		case OverlapEnd:
@@ -3298,7 +3296,6 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			*/
 			original->trim_front (adjusted_start, this);
 			modified_region = true;
-			cerr << "trim front\n";
 			break;
 				
 		case OverlapStart:
@@ -3307,14 +3304,12 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			 */
 			original->trim_end (adjusted_end, this);
 			modified_region = true;
-			cerr << "trim end\n";
 			break;
 		}
 
 		if (move_offset) {
 			/* fix the position to match any movement of the compound region.
 			 */
-			cerr << "Moving region to new position based on " << original->position() << " + " << move_offset << endl;
 			original->set_position (original->position() + move_offset, this);
 			modified_region = true;
 		}
@@ -3339,8 +3334,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 	remove_region (target);
 
-	// (4) add the originals. This will reset their playlist reference back
-	// to us, which means they are no longer considered owned by the RegionFactory
+	// (4) add the constituent regions
 
 	for (vector<boost::shared_ptr<Region> >::iterator i = originals.begin(); i != originals.end(); ++i) {
 		add_region ((*i), (*i)->position());

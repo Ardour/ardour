@@ -37,13 +37,15 @@ class PlaylistSource : virtual public Source {
     
     int set_state (const XMLNode&, int version);
     boost::shared_ptr<const Playlist> playlist() const { return _playlist; }
+    const PBD::ID& original() const { return _original; }
 
   protected:
-    boost::shared_ptr<Playlist>      _playlist;
-    frameoffset_t                    _playlist_offset;
-    framecnt_t                       _playlist_length;
+    boost::shared_ptr<Playlist> _playlist;
+    PBD::ID                     _original;
+    frameoffset_t               _playlist_offset;
+    framecnt_t                  _playlist_length;
 
-    PlaylistSource (Session&, const std::string& name, boost::shared_ptr<Playlist>, DataType,
+    PlaylistSource (Session&, const PBD::ID&, const std::string& name, boost::shared_ptr<Playlist>, DataType,
 		    frameoffset_t begin, framecnt_t len, Source::Flag flags);
     PlaylistSource (Session&, const XMLNode&);
     

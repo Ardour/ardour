@@ -56,7 +56,7 @@ class SourceFactory {
 
 
 	static boost::shared_ptr<Source> createFromPlaylist 
-		(DataType type, Session& s, boost::shared_ptr<Playlist> p, const std::string& name,
+		(DataType type, Session& s, boost::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name,
 		 uint32_t chn, frameoffset_t start, framecnt_t len, bool copy, bool defer_peaks);
 
 	static Glib::Cond*                               PeaksToBuild;

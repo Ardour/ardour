@@ -46,11 +46,11 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-AudioPlaylistSource::AudioPlaylistSource (Session& s, const std::string& name, boost::shared_ptr<AudioPlaylist> p, 
+AudioPlaylistSource::AudioPlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<AudioPlaylist> p, 
 					  uint32_t chn, frameoffset_t begin, framecnt_t len, Source::Flag flags)
 	: Source (s, DataType::AUDIO, name)
 	, AudioSource (s, name)
-	, PlaylistSource (s, name, p, DataType::AUDIO, begin, len, flags)
+	, PlaylistSource (s, orig, name, p, DataType::AUDIO, begin, len, flags)
 	, _playlist_channel (chn)
 {
 	AudioSource::_length = len;

@@ -43,10 +43,11 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PlaylistSource::PlaylistSource (Session& s, const std::string& name, boost::shared_ptr<Playlist> p, DataType type,
+PlaylistSource::PlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<Playlist> p, DataType type,
 				frameoffset_t begin, framecnt_t len, Source::Flag flags)
 	: Source (s, type, name)
 	, _playlist (p)
+	, _original (orig)
 {
 	/* PlaylistSources are never writable, renameable, removable or destructive */
 	_flags = Flag (_flags & ~(Writable|CanRename|Removable|RemovableIfEmpty|RemoveAtDestroy|Destructive));
@@ -85,6 +86,7 @@ PlaylistSource::add_state (XMLNode& node)
 	node.add_property ("offset", buf);
 	snprintf (buf, sizeof (buf), "%" PRIu64, _playlist_length);
 	node.add_property ("length", buf);
+	node.add_property ("original", _id.to_s());
 	
 	node.add_child_nocopy (_playlist->get_state());
 }
@@ -138,6 +140,12 @@ PlaylistSource::set_state (const XMLNode& node, int version)
 	}
 
 	sscanf (prop->value().c_str(), "%" PRIu64, &_playlist_length);
+
+	if ((prop = node.property (X_("original"))) == 0) {
+		throw failed_constructor ();
+	}
+
+	_id = prop->value();
 
 	_level = _playlist->max_source_level () + 1;
 
