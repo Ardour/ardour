@@ -222,7 +222,6 @@ MidiTrack::state(bool full_state)
 	root.add_property ("step-editing", (_step_editing ? "yes" : "no"));
 	root.add_property ("note-mode", enum_2_string (_note_mode));
 	root.add_property ("midi-thru", (_midi_thru ? "yes" : "no"));
-	root.add_property ("default-channel", buf);
 
 	return root;
 }
