@@ -3434,6 +3434,15 @@ MidiRegionView::show_verbose_cursor (string const & text, double xoffset, double
 	wx += xoffset;
 	wy += yoffset;
 
+	/* Flip the cursor above the mouse pointer if it would overlap the bottom of the canvas */
+	
+	double x1, y1, x2, y2;
+	trackview.editor().verbose_cursor()->canvas_item()->get_bounds (x1, y1, x2, y2);
+
+	if ((wy + y2 - y1) > trackview.editor().canvas_height()) {
+		wy -= (y2 - y1) + 2 * yoffset;
+	}
+
 	trackview.editor().verbose_cursor()->set (text, wx, wy);
 	trackview.editor().verbose_cursor()->show ();
 }
