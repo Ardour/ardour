@@ -37,6 +37,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
+#include "ardour/source_factory.h"
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
 
@@ -1206,6 +1207,24 @@ Region::state ()
 		node->add_property (buf2, buf);
 	}
 
+	if (max_source_level() > 0) {
+		
+		XMLNode* nested_node = new XMLNode (X_("NestedSource"));
+		
+		/* region is compound - get its playlist and
+		   store that before we list the region that
+		   needs it ...
+		*/
+		
+		for (SourceList::const_iterator s = _sources.begin(); s != _sources.end(); ++s) {
+			nested_node->add_child_nocopy ((*s)->get_state ());
+		}
+
+		if (nested_node) {
+			node->add_child_nocopy (*nested_node);
+		}
+	}
+
 	if (_extra_xml) {
 		node->add_child_copy (*_extra_xml);
 	}
@@ -1230,6 +1249,17 @@ int
 Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_changed, bool send)
 {
 	const XMLProperty* prop;
+	const XMLNodeList& nlist = node.children();
+
+	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
+
+		XMLNode *child = (*niter);
+
+		if (child->name () == "Extra") {
+			delete _extra_xml;
+			_extra_xml = new XMLNode (*child);
+		}
+	}
 
 	what_changed = set_values (node);
 
@@ -1260,21 +1290,6 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 	
 	if (_shift == 0.0f) {
 		_shift = 1.0f;
-	}
-
-	const XMLNodeList& nlist = node.children();
-
-	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
-		XMLNode *child;
-
-		child = (*niter);
-
-		if (child->name () == "Extra") {
-			delete _extra_xml;
-			_extra_xml = new XMLNode (*child);
-			break;
-		}
 	}
 
 	if (send) {

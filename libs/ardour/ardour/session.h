@@ -1500,6 +1500,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	framepos_t compute_stop_limit () const;
 
         boost::shared_ptr<Speakers> _speakers; 
+	void load_nested_sources (const XMLNode& node);
 };
 
 } // namespace ARDOUR

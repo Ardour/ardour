@@ -1091,6 +1091,8 @@ Editor::sensitize_the_right_region_actions ()
 
 	if (have_compound_regions) {
 		_region_actions->get_action("uncombine-regions")->set_sensitive (true);
+	} else {
+		_region_actions->get_action("uncombine-regions")->set_sensitive (false);
 	}
 
 	if (have_audio) {

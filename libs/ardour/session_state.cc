@@ -1653,12 +1653,41 @@ Session::load_compounds (const XMLNode& node)
 	return 0;
 }
 
+void
+Session::load_nested_sources (const XMLNode& node)
+{
+	XMLNodeList nlist;
+	XMLNodeConstIterator niter;
+
+	nlist = node.children();
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() == "Source") {
+			try {
+				SourceFactory::create (*this, **niter, true);
+			} 
+			catch (failed_constructor& err) {
+				error << string_compose (_("Cannot reconstruct nested source for region %1"), name()) << endmsg;
+			}
+		}
+	}
+}
+
 boost::shared_ptr<Region>
 Session::XMLRegionFactory (const XMLNode& node, bool full)
 {
 	const XMLProperty* type = node.property("type");
 
 	try {
+
+		const XMLNodeList& nlist = node.children();
+		
+		for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
+			XMLNode *child = (*niter);
+			if (child->name() == "NestedSource") {
+				load_nested_sources (*child);
+			}
+		}
 
                 if (!type || type->value() == "audio") {
                         return boost::shared_ptr<Region>(XMLAudioRegionFactory (node, full));
