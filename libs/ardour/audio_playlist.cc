@@ -1083,10 +1083,31 @@ AudioPlaylist::copy_dependents (const vector<TwoRegions>& old_and_new, boost::sh
 }
 
 void
-AudioPlaylist::pre_combine (vector<boost::shared_ptr<Region> >& originals, boost::shared_ptr<Region> compound_region)
+AudioPlaylist::pre_combine (vector<boost::shared_ptr<Region> >& copies)
 {
-	/* sort the originals into time order */
+	RegionSortByPosition cmp;
+	boost::shared_ptr<AudioRegion> ar;
 
+	sort (copies.begin(), copies.end(), cmp);
+
+	ar = boost::dynamic_pointer_cast<AudioRegion> (copies.front());
+
+	/* copy the fade in of the first into the compound region */
+
+	if (ar) {
+		ar->set_fade_in_active (false);
+	}
+
+	ar = boost::dynamic_pointer_cast<AudioRegion> (copies.back());
+
+	if (ar) {
+		ar->set_fade_out_active (false);
+	}
+}
+
+void
+AudioPlaylist::post_combine (vector<boost::shared_ptr<Region> >& originals, boost::shared_ptr<Region> compound_region)
+{
 	RegionSortByPosition cmp;
 	boost::shared_ptr<AudioRegion> ar;
 	boost::shared_ptr<AudioRegion> cr;
@@ -1103,9 +1124,6 @@ AudioPlaylist::pre_combine (vector<boost::shared_ptr<Region> >& originals, boost
 
 	if (ar) {
 		cr->set_fade_in (ar->fade_in());
-		
-		/* disable the fade in of the first */
-		
 		ar->set_fade_in_active (false);
 	}
 
@@ -1114,7 +1132,6 @@ AudioPlaylist::pre_combine (vector<boost::shared_ptr<Region> >& originals, boost
 	if (ar) {
 		/* copy the fade out of the last into the compound region */
 		cr->set_fade_out (ar->fade_out());
-		/* disable the fade out of the first */
 		ar->set_fade_out_active (false);
 	}
 }

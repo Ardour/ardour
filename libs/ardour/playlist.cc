@@ -3071,6 +3071,7 @@ Playlist::combine (const RegionList& r)
 	framepos_t earliest_position = max_framepos;
 	vector<TwoRegions> old_and_new_regions;
 	vector<boost::shared_ptr<Region> > originals;
+	vector<boost::shared_ptr<Region> > copies;
 	string parent_name;
 	string child_name;
 	uint32_t max_level = 0;
@@ -3105,6 +3106,7 @@ Playlist::combine (const RegionList& r)
 
 		old_and_new_regions.push_back (TwoRegions (original_region,copied_region));
 		originals.push_back (original_region);
+		copies.push_back (copied_region);
 
 		RegionFactory::add_compound_association (original_region, copied_region);
 
@@ -3123,6 +3125,8 @@ Playlist::combine (const RegionList& r)
 
 	pl->in_partition = false;
 
+	pre_combine (copies);
+
 	/* now create a new PlaylistSource for each channel in the new playlist */
 
 	SourceList sources;
@@ -3131,6 +3135,7 @@ Playlist::combine (const RegionList& r)
 	for (uint32_t chn = 0; chn < channels; ++chn) {
 		sources.push_back (SourceFactory::createFromPlaylist (_type, _session, pl, parent_name, chn, 0, extent.second, false, false));
 	}
+
 	
 	/* now a new whole-file region using the list of sources */
 
@@ -3169,8 +3174,8 @@ Playlist::combine (const RegionList& r)
 	/* do type-specific stuff with the originals and the new compound
 	   region 
 	*/
-
-	pre_combine (originals, compound_region);
+	
+	post_combine (originals, compound_region);
 
 	/* add the new region at the right location */
 	

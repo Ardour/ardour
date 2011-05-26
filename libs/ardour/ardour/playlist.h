@@ -390,7 +390,13 @@ public:
 	    framepos_t start;
 	};
 
-	virtual void pre_combine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>) {}
+	/* this is called before we create a new compound region */
+	virtual void pre_combine (std::vector<boost::shared_ptr<Region> >&) {}
+	/* this is called before we create a new compound region */
+	virtual void post_combine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>) {}
+	/* this is called before we remove a compound region and replace it
+	   with its constituent regions
+	*/
 	virtual void pre_uncombine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>) {}
 };
 
