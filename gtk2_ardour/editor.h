@@ -49,10 +49,7 @@
 #include "ardour/import_status.h"
 #include "ardour/tempo.h"
 #include "ardour/location.h"
-#include "ardour/audioregion.h"
-#include "ardour/track.h"
 #include "ardour/types.h"
-#include "ardour/route_group.h"
 
 #include "audio_clock.h"
 #include "gtk-custom-ruler.h"
@@ -71,13 +68,14 @@ namespace Gnome { namespace Canvas {
 
 namespace Gtkmm2ext {
 	class TearOff;
-        class Bindings;
+	class Bindings;
 }
 
 namespace ARDOUR {
 	class RouteGroup;
 	class Playlist;
 	class AudioPlaylist;
+	class AudioRegion;
 	class Region;
 	class Location;
 	class TempoSection;
@@ -87,6 +85,7 @@ namespace ARDOUR {
 	class Crossfade;
 	class ChanCount;
 	class MidiOperator;
+	class Track;
 	class MidiTrack;
 	class AudioTrack;
 }
@@ -343,10 +342,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* playhead/screen stuff */
 
-        void set_stationary_playhead (bool yn);
-        void toggle_stationary_playhead ();
-        bool stationary_playhead() const { return _stationary_playhead; }
-        
+	void set_stationary_playhead (bool yn);
+	void toggle_stationary_playhead ();
+	bool stationary_playhead() const { return _stationary_playhead; }
+
 	void set_follow_playhead (bool yn, bool catch_up = true);
 	void toggle_follow_playhead ();
 	bool follow_playhead() const { return _follow_playhead; }
@@ -436,11 +435,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	}
 
 	void maybe_autoscroll (bool, bool);
-	
-        Gdk::Cursor* get_canvas_cursor () const { return current_canvas_cursor; }
-        void set_canvas_cursor (Gdk::Cursor*, bool save=false);
-        void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>);
-        void set_current_movable (boost::shared_ptr<ARDOUR::Movable>);
+
+	Gdk::Cursor* get_canvas_cursor () const { return current_canvas_cursor; }
+	void set_canvas_cursor (Gdk::Cursor*, bool save=false);
+	void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>);
+	void set_current_movable (boost::shared_ptr<ARDOUR::Movable>);
 
 	MouseCursors const * cursors () const {
 		return _cursors;
@@ -532,7 +531,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool _notebook_shrunk;
 	void add_notebook_page (std::string const &, Gtk::Widget &);
 	bool notebook_tab_clicked (GdkEventButton *, Gtk::Widget *);
-	
+
 	Gtk::HPaned   edit_pane;
 	Gtk::VPaned   editor_summary_pane;
 
@@ -565,11 +564,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		Marker* start;
 		Marker* end;
 		bool    valid;
-		
+
 		LocationMarkers () : start(0), end(0), valid (true) {}
-		
+
 		~LocationMarkers ();
-		
+
 		void hide ();
 		void show ();
 
@@ -577,7 +576,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		void set_selected (bool);
 		void canvas_height_set (double);
 		void setup_lines ();
-		
+
 		void set_name (const std::string&);
 		void set_position (framepos_t start, framepos_t end = 0);
 		void set_color_rgba (uint32_t);
@@ -645,7 +644,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void select_all_tracks ();
-        void select_all_internal_edit (Selection::Operation);
+	void select_all_internal_edit (Selection::Operation);
 
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
 	void set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
@@ -843,7 +842,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	BBTRulerScale bbt_ruler_scale;
 
-        uint32_t bbt_bars;
+	uint32_t bbt_bars;
 	gint bbt_nmarks;
 	uint32_t bbt_bar_helper_on;
 	uint32_t bbt_accent_modulo;
@@ -923,7 +922,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void    select_range_between ();
 
 	boost::shared_ptr<ARDOUR::Region> find_next_region (ARDOUR::framepos_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
-        ARDOUR::framepos_t find_next_region_boundary (ARDOUR::framepos_t, int32_t dir, const TrackViewList&);
+	ARDOUR::framepos_t find_next_region_boundary (ARDOUR::framepos_t, int32_t dir, const TrackViewList&);
 
 	std::vector<ARDOUR::framepos_t> region_boundary_cache;
 	void build_region_boundary_cache ();
@@ -934,11 +933,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Table          edit_packer;
 
 	Gtk::Adjustment     vertical_adjustment;
-        
+
 	Gtk::Layout         controls_layout;
 	bool control_layout_scroll (GdkEventScroll* ev);
-        void reset_controls_layout_width ();
-        void reset_controls_layout_height (int32_t height);
+	void reset_controls_layout_width ();
+	void reset_controls_layout_height (int32_t height);
 
 	enum Direction {
 		LEFT,
@@ -946,7 +945,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		UP,
 		DOWN
 	};
-		
+
 	bool scroll_press (Direction);
 	void scroll_release ();
 	sigc::connection _scroll_connection;
@@ -1032,23 +1031,23 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	framepos_t cut_buffer_start;
 	framecnt_t cut_buffer_length;
 
-        Gdk::Cursor* pre_press_cursor;
-        boost::weak_ptr<ARDOUR::Trimmable> _trimmable;
-        boost::weak_ptr<ARDOUR::Movable> _movable;
+	Gdk::Cursor* pre_press_cursor;
+	boost::weak_ptr<ARDOUR::Trimmable> _trimmable;
+	boost::weak_ptr<ARDOUR::Movable> _movable;
 
 	bool typed_event (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_handler_1 (ArdourCanvas::Item *, GdkEvent *, ItemType);
 	bool button_press_handler_2 (ArdourCanvas::Item *, GdkEvent *, ItemType);
 	bool button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
-        bool button_press_dispatch (GdkEventButton*);
-        bool button_release_dispatch (GdkEventButton*);
+	bool button_press_dispatch (GdkEventButton*);
+	bool button_release_dispatch (GdkEventButton*);
 	bool motion_handler (ArdourCanvas::Item*, GdkEvent*, bool from_autoscroll = false);
 	bool enter_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool leave_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 
-        Gtkmm2ext::Bindings* button_bindings;
-        XMLNode* button_settings () const;
+	Gtkmm2ext::Bindings* button_bindings;
+	XMLNode* button_settings () const;
 
 	/* KEYMAP HANDLING */
 
@@ -1076,7 +1075,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_region_lock_style ();
 	void raise_region ();
 	void raise_region_to_top ();
-        void change_region_layering_order ();
+	void change_region_layering_order ();
 	void lower_region ();
 	void lower_region_to_bottom ();
 	void split_regions_at (framepos_t, RegionSelection&);
@@ -1138,7 +1137,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void cut ();
 	void copy ();
 	void paste (float times);
-	
+
 	void place_transient ();
 	void remove_transient (ArdourCanvas::Item* item);
 	void snap_regions_to_grid ();
@@ -1373,14 +1372,14 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool canvas_markerview_item_view_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*);
 	bool canvas_markerview_start_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*);
 	bool canvas_markerview_end_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*);
-	
+
 	PBD::Signal0<void> EditorFreeze;
 	PBD::Signal0<void> EditorThaw;
 
   private:
-        friend class DragManager;
-        friend class EditorRouteGroups;
-        friend class EditorRegions;
+	friend class DragManager;
+	friend class EditorRouteGroups;
+	friend class EditorRegions;
 
 	ArdourCanvas::Item *last_item_entered;
 	/** true if the mouse is over a place where region trim can happen */
@@ -1414,8 +1413,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool _show_measures;
 	/// true if the editor should follow the playhead, otherwise false
 	bool _follow_playhead;
-        /// true if we scroll the tracks rather than the playhead
-        bool _stationary_playhead;
+	/// true if we scroll the tracks rather than the playhead
+	bool _stationary_playhead;
 
 	ARDOUR::TempoMap::BBTPointList *current_bbt_points;
 
@@ -1464,7 +1463,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void new_transport_marker_menu_set_punch ();
 	void update_loop_range_view (bool visibility=false);
 	void update_punch_range_view (bool visibility=false);
-        void new_transport_marker_menu_popdown ();
+	void new_transport_marker_menu_popdown ();
 	void marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void tempo_or_meter_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
@@ -1540,7 +1539,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Gtk::ComboBoxText edit_mode_selector;
 	Gtk::VBox         edit_mode_box;
-        std::vector<std::string> edit_mode_strings;
+	std::vector<std::string> edit_mode_strings;
 
 	void set_edit_mode (ARDOUR::EditMode);
 	void cycle_edit_mode ();
@@ -1584,7 +1583,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::EventBox            toolbar_base;
 	Gtk::Frame               toolbar_frame;
 	Gtk::Viewport           _toolbar_viewport;
-	
+
 	/* midi toolbar */
 
 	Gtk::HBox                panic_box;
@@ -1715,7 +1714,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
                 const Gtk::SelectionData&             data,
                 guint                                 info,
                 guint                                 time);
-        
+
 	void track_canvas_drag_data_received (
                 const Glib::RefPtr<Gdk::DragContext>& context,
                 gint                                  x,
@@ -1723,7 +1722,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
                 const Gtk::SelectionData&             data,
                 guint                                 info,
                 guint                                 time);
-        
+
 	void drop_paths (
                 const Glib::RefPtr<Gdk::DragContext>& context,
                 gint                                  x,
@@ -1731,7 +1730,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
                 const Gtk::SelectionData&             data,
                 guint                                 info,
                 guint                                 time);
-        
+
 	void drop_regions (
                 const Glib::RefPtr<Gdk::DragContext>& context,
                 gint                                  x,
@@ -1739,7 +1738,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
                 const Gtk::SelectionData&             data,
                 guint                                 info,
                 guint                                 time);
-        
+
 	void drop_routes (
                 const Glib::RefPtr<Gdk::DragContext>& context,
                 gint                x,
@@ -1747,7 +1746,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
                 const Gtk::SelectionData& data,
                 guint               info,
                 guint               time);
-        
+
 	/* audio export */
 
 	int  write_region_selection(RegionSelection&);
@@ -1968,7 +1967,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	RegionSelection get_regions_from_selection ();
 	RegionSelection get_regions_from_selection_and_edit_point ();
 	RegionSelection get_regions_from_selection_and_entered ();
-	
+
 	void start_updating_meters ();
 	void stop_updating_meters ();
 	bool meters_running;
@@ -1998,10 +1997,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void visible_order_range (int*, int*) const;
 
 	void located ();
-	
+
 	/** true if we've made a locate request that hasn't yet been processed */
 	bool _pending_locate_request;
-	
+
 	/** if true, there is a pending Session locate which is the initial one when loading a session;
 	    we need to know this so that we don't (necessarily) set the viewport to show the playhead
 	    initially.
@@ -2019,7 +2018,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	EditorGroupTabs* _group_tabs;
 	void fit_route_group (ARDOUR::RouteGroup *);
 
-        void step_edit_status_change (bool);
+	void step_edit_status_change (bool);
 	void start_step_editing ();
 	void stop_step_editing ();
 	bool check_step_edit ();
@@ -2027,8 +2026,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	double _last_motion_y;
 
-        RegionLayeringOrderEditor* layering_order_editor;
-        void update_region_layering_order_editor ();
+	RegionLayeringOrderEditor* layering_order_editor;
+	void update_region_layering_order_editor ();
 
 	/** Track that was the source for the last cut/copy operation.  Used as a place
 	    to paste things iff there is no selected track.
@@ -2047,12 +2046,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::MenuItem& action_menu_item (std::string const &);
 	void action_pre_activated (Glib::RefPtr<Gtk::Action> const &);
 
-        void set_canvas_cursor_for_region_view (double, RegionView *);
+	void set_canvas_cursor_for_region_view (double, RegionView *);
 
 	MouseCursors* _cursors;
 
-        void resize_text_widgets ();
-	
+	void resize_text_widgets ();
+
 	friend class Drag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;
@@ -2068,8 +2067,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	friend class ControlPointDrag;
 	friend class LineDrag;
 	friend class RubberbandSelectDrag;
-        friend class TimeFXDrag;
-        friend class ScrubDrag;
+	friend class TimeFXDrag;
+	friend class ScrubDrag;
 	friend class SelectionDrag;
 	friend class RangeMarkerBarDrag;
 	friend class MouseZoomDrag;
