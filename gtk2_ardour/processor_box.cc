@@ -954,7 +954,7 @@ ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams)
 	ArdourDialog dialog (_("Plugin Incompatibility"));
 	Label label;
 
-	string text = string_compose(_("You attempted to add the plugin \"%1\" at index %2.\n"),
+	string text = string_compose(_("You attempted to add the plugin \"%1\" in slot %2.\n"),
 			p.name(), streams.index);
 
 	bool has_midi  = streams.count.n_midi() > 0 || p.get_info()->n_inputs.n_midi() > 0;
