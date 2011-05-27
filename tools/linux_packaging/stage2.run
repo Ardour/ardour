@@ -196,7 +196,7 @@ else
 	REQUIRED_BYTES=$(cat .${PGM_NAME}_${ARCH}-*.size)
 
 	#Check space in current folder
-	FREE_BYTES=$(df -B 1 ${PKG_PATH} | grep / | awk '{print $4}')
+	FREE_BYTES=$(df -P -B 1 ${PKG_PATH} | grep / | awk '{print $4}')
 
 	if [ ${FREE_BYTES} -le ${REQUIRED_BYTES} ] ; then
 		echo ""
@@ -206,7 +206,7 @@ else
 	fi
 
 	#Check space in INSTALL_DEST_BASE
-	FREE_BYTES=$(df -B 1 ${INSTALL_DEST_BASE} | grep / | awk '{print $4}')
+	FREE_BYTES=$(df -P -B 1 ${INSTALL_DEST_BASE} | grep / | awk '{print $4}')
 
 	if [ ${FREE_BYTES} -le ${REQUIRED_BYTES} ] ; then
 		echo ""
