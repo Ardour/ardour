@@ -101,8 +101,8 @@ SystemInstall ()
 
 # If you double click a script, some systems don't get the PWD correct.
 # Force it to be correct
-PKG_PATH=$(dirname $(readlink -f $0))
-cd ${PKG_PATH}
+PKG_PATH=$(dirname "$(readlink -f "$0")")
+cd "${PKG_PATH}"
 
 echo ""
 echo "Welcome to the ${PGM_NAME} installer"
@@ -196,7 +196,7 @@ else
 	REQUIRED_BYTES=$(cat .${PGM_NAME}_${ARCH}-*.size)
 
 	#Check space in current folder
-	FREE_BYTES=$(df -P -B 1 ${PKG_PATH} | grep / | awk '{print $4}')
+	FREE_BYTES=$(df -P -B 1 "${PKG_PATH}" | grep / | awk '{print $4}')
 
 	if [ ${FREE_BYTES} -le ${REQUIRED_BYTES} ] ; then
 		echo ""
