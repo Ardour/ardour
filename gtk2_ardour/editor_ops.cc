@@ -3319,10 +3319,11 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 
 	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-		if (rtv && rtv->track() && !rtv->track()->bounceable()) {
+		if (rtv && rtv->track() && replace && enable_processing && !rtv->track()->bounceable()) {
 			MessageDialog d (
-				_("One or more selected tracks cannot be bounced because it has more outputs than inputs.  "
-				  "You can fix this by increasing the number of inputs on that track.")
+				_("You can't perform this operation because the processing of the signal "
+				  "will cause one or more of the tracks will end up with a region with more channels than this track has inputs.\n\n"
+				  "You can do this without processing, which is a different operation.")
 				);
 			d.set_title (_("Cannot bounce"));
 			d.run ();

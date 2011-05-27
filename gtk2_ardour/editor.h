@@ -1751,7 +1751,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	int  write_region_selection(RegionSelection&);
 	bool write_region (std::string path, boost::shared_ptr<ARDOUR::AudioRegion>);
-	void bounce_region_selection ();
+	void bounce_region_selection (bool with_processing);
 	void bounce_range_selection (bool replace, bool enable_processing);
 	void external_edit_region ();
 

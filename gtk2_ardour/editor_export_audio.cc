@@ -145,23 +145,11 @@ Editor::write_region_selection (RegionSelection& regions)
 }
 
 void
-Editor::bounce_region_selection ()
+Editor::bounce_region_selection (bool with_processing)
 {
-	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&(*i)->get_time_axis_view());
-		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (rtv->route());
-
-		if (!track->bounceable()) {
-			MessageDialog d (
-				_("One or more of the selected regions' tracks cannot be bounced because it has more outputs than inputs.  "
-				  "You can fix this by increasing the number of inputs on that track.")
-				);
-			d.set_title (_("Cannot bounce"));
-			d.run ();
-			return;
-		}
-	}
+	/* no need to check for bounceable() because this operation never puts
+	 * its results back in the playlist (only in the region list).
+	 */
 
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 
@@ -171,12 +159,7 @@ Editor::bounce_region_selection ()
 
 		InterThreadInfo itt;
 
-		boost::shared_ptr<Region> r = track->bounce_range (region->position(), region->position() + region->length(), itt);
-		cerr << "Result of bounce of "
-		     << region->name() << " len = " << region->length()
-		     << " was "
-		     << r->name() << " len = " << r->length()
-		     << endl;
+		boost::shared_ptr<Region> r = track->bounce_range (region->position(), region->position() + region->length(), itt, with_processing);
 	}
 }
 

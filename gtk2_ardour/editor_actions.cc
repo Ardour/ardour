@@ -1371,7 +1371,8 @@ Editor::register_region_actions ()
 
 	reg_sens (_region_actions, "play-selected-regions", _("Play"), sigc::mem_fun(*this, &Editor::play_selected_region));
 
-	reg_sens (_region_actions, "bounce-region", _("Bounce"), sigc::mem_fun (*this, &Editor::bounce_region_selection));
+	reg_sens (_region_actions, "bounce-regions-unprocessed", _("Bounce (with processing)"), (sigc::bind (sigc::mem_fun (*this, &Editor::bounce_region_selection), true)));
+	reg_sens (_region_actions, "bounce-regions-processed", _("Bounce (without processing)"), (sigc::bind (sigc::mem_fun (*this, &Editor::bounce_region_selection), false)));
 	reg_sens (_region_actions, "combine-regions", _("Combine"), sigc::mem_fun (*this, &Editor::combine_regions));
 	reg_sens (_region_actions, "uncombine-regions", _("Uncombine"), sigc::mem_fun (*this, &Editor::uncombine_regions));
 
