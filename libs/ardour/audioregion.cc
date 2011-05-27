@@ -390,6 +390,10 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 	     << " chan " << chan_n
 	     << " rops " << hex << rops << dec
 	     << endl;
+	
+	if (cnt > 64 * 1024) {
+		abort ();
+	}
 
 	if (n_channels() == 0) {
 		return 0;
