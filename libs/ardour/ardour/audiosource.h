@@ -106,7 +106,7 @@ class AudioSource : virtual public Source,
 	/** @return true if the each source sample s must be clamped to -1 < s < 1 */
 	virtual bool clamped_at_unity () const = 0;
 
-	static void allocate_working_buffers ();
+	static void allocate_working_buffers (framecnt_t framerate);
     
   protected:
 	static bool _build_missing_peakfiles;
@@ -124,7 +124,7 @@ class AudioSource : virtual public Source,
 	static std::vector<gain_t*> _gain_buffers;
 	static Glib::StaticMutex    _level_buffer_lock;
 
-	static void ensure_buffers_for_level (uint32_t);
+	static void ensure_buffers_for_level (uint32_t, framecnt_t);
 
 	framecnt_t           _length;
 	std::string         peakpath;

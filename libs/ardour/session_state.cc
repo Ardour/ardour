@@ -221,7 +221,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
         _speakers.reset (new Speakers);
 
 	AudioDiskstream::allocate_working_buffers();
-	AudioSource::allocate_working_buffers ();
 
 	/* default short fade = 15ms */
 
@@ -3559,6 +3558,8 @@ Session::config_changed (std::string p, bool ours)
 		solo_control_mode_changed ();
 	} else if (p == "timecode-offset" || p == "timecode-offset-negative") {
 		last_timecode_valid = false;
+	} else if (p == "playback-buffer-seconds") {
+		AudioSource::allocate_working_buffers (frame_rate());
 	}
 
 	set_dirty ();

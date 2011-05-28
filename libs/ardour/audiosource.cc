@@ -965,24 +965,45 @@ AudioSource::mark_streaming_write_completed ()
 }
 
 void
-AudioSource::allocate_working_buffers()
+AudioSource::allocate_working_buffers (framecnt_t framerate)
 {
-	assert(AudioDiskstream::disk_io_frames() > 0);
-	_working_buffers_size = AudioDiskstream::disk_io_frames();
-	/* we don't need any buffers allocated until
+	uint32_t current_level;
+	
+	{
+		Glib::Mutex::Lock lm (_level_buffer_lock);
+		current_level = _mixdown_buffers.size();
+	}
+
+	/* Note: we don't need any buffers allocated until
 	   a level 1 audiosource is created, at which
 	   time we'll call ::ensure_buffers_for_level()
 	   with the right value and do the right thing.
 	*/
+	
+	if (current_level) {
+		ensure_buffers_for_level (current_level, framerate);
+	}
 }
 
 void
-AudioSource::ensure_buffers_for_level (uint32_t level) 
+AudioSource::ensure_buffers_for_level (uint32_t level, framecnt_t frame_rate) 
 {
+	framecnt_t nframes = (framecnt_t) floor (Config->get_audio_playback_buffer_seconds() * frame_rate);
+
+	cerr << "audiosource: allocate buffers for level " << level << " size = " << nframes << endl;
+
 	Glib::Mutex::Lock lm (_level_buffer_lock);
 
+	/* this will leak memory. oh well. rather complex
+	   to stop it from doing that without using shared_ptrs,
+	   which i might do next. paul - may 27th 2011
+	 */
+
+	_mixdown_buffers.clear ();
+	_gain_buffers.clear ();
+
 	while (_mixdown_buffers.size() < level) {
-		_mixdown_buffers.push_back (new Sample[_working_buffers_size]);
-		_gain_buffers.push_back (new gain_t[_working_buffers_size]);
+		_mixdown_buffers.push_back (new Sample[nframes]);
+		_gain_buffers.push_back (new gain_t[nframes]);
 	}
 }

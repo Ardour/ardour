@@ -54,7 +54,7 @@ AudioPlaylistSource::AudioPlaylistSource (Session& s, const ID& orig, const std:
 	, _playlist_channel (chn)
 {
 	AudioSource::_length = len;
-	ensure_buffers_for_level (_level);
+	ensure_buffers_for_level (_level, _session.frame_rate());
 }
 
 AudioPlaylistSource::AudioPlaylistSource (Session& s, const XMLNode& node)
@@ -122,7 +122,7 @@ AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_desc
 
 	sscanf (prop->value().c_str(), "%" PRIu32, &_playlist_channel);
 
-	ensure_buffers_for_level (_level);
+	ensure_buffers_for_level (_level, _session.frame_rate());
 
 	return 0;
 }
