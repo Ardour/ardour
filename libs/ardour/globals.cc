@@ -99,6 +99,10 @@ Change ARDOUR::PositionChanged = ARDOUR::new_change ();
 Change ARDOUR::NameChanged = ARDOUR::new_change ();
 Change ARDOUR::BoundsChanged = Change (0); // see init(), below
 
+namespace ARDOUR {
+        extern void setup_enum_writer ();
+}
+
 sigc::signal<void,std::string> ARDOUR::BootMessage;
 
 #ifdef HAVE_LIBLO
@@ -294,8 +298,6 @@ lotsa_files_please ()
 int
 ARDOUR::init (bool use_vst, bool try_optimization)
 {
-	extern void setup_enum_writer ();
-
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 
 	setup_enum_writer ();
