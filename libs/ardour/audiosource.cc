@@ -51,8 +51,8 @@ using namespace ARDOUR;
 using namespace PBD;
 
 Glib::StaticMutex AudioSource::_level_buffer_lock = GLIBMM_STATIC_MUTEX_INIT;
-vector<Sample*> AudioSource::_mixdown_buffers;
-vector<gain_t*> AudioSource::_gain_buffers;
+vector<boost::shared_ptr<Sample> > AudioSource::_mixdown_buffers;
+vector<boost::shared_ptr<gain_t> > AudioSource::_gain_buffers;
 size_t AudioSource::_working_buffers_size = 0;
 bool AudioSource::_build_missing_peakfiles = false;
 
@@ -967,43 +967,37 @@ AudioSource::mark_streaming_write_completed ()
 void
 AudioSource::allocate_working_buffers (framecnt_t framerate)
 {
-	uint32_t current_level;
+	Glib::Mutex::Lock lm (_level_buffer_lock);
 	
-	{
-		Glib::Mutex::Lock lm (_level_buffer_lock);
-		current_level = _mixdown_buffers.size();
-	}
-
+	
 	/* Note: we don't need any buffers allocated until
 	   a level 1 audiosource is created, at which
 	   time we'll call ::ensure_buffers_for_level()
 	   with the right value and do the right thing.
 	*/
 	
-	if (current_level) {
-		ensure_buffers_for_level (current_level, framerate);
+	if (!_mixdown_buffers.empty()) {
+		ensure_buffers_for_level_locked ( _mixdown_buffers.size(), framerate);
 	}
 }
 
 void
 AudioSource::ensure_buffers_for_level (uint32_t level, framecnt_t frame_rate) 
 {
-	framecnt_t nframes = (framecnt_t) floor (Config->get_audio_playback_buffer_seconds() * frame_rate);
-
-	cerr << "audiosource: allocate buffers for level " << level << " size = " << nframes << endl;
-
 	Glib::Mutex::Lock lm (_level_buffer_lock);
+	ensure_buffers_for_level_locked (level, frame_rate);
+}
 
-	/* this will leak memory. oh well. rather complex
-	   to stop it from doing that without using shared_ptrs,
-	   which i might do next. paul - may 27th 2011
-	 */
+void
+AudioSource::ensure_buffers_for_level_locked (uint32_t level, framecnt_t frame_rate) 
+{
+	framecnt_t nframes = (framecnt_t) floor (Config->get_audio_playback_buffer_seconds() * frame_rate);
 
 	_mixdown_buffers.clear ();
 	_gain_buffers.clear ();
 
 	while (_mixdown_buffers.size() < level) {
-		_mixdown_buffers.push_back (new Sample[nframes]);
-		_gain_buffers.push_back (new gain_t[nframes]);
+		_mixdown_buffers.push_back (boost::shared_ptr<Sample> (new Sample[nframes]));
+		_gain_buffers.push_back (boost::shared_ptr<gain_t> (new gain_t[nframes]));
 	}
 }

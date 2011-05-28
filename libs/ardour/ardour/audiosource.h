@@ -120,11 +120,12 @@ class AudioSource : virtual public Source,
 	   thread, or a lock around calls that use them. 
 	*/
 
-	static std::vector<Sample*> _mixdown_buffers;
-	static std::vector<gain_t*> _gain_buffers;
+	static std::vector<boost::shared_ptr<Sample> > _mixdown_buffers;
+	static std::vector<boost::shared_ptr<gain_t> > _gain_buffers;
 	static Glib::StaticMutex    _level_buffer_lock;
 
 	static void ensure_buffers_for_level (uint32_t, framecnt_t);
+	static void ensure_buffers_for_level_locked (uint32_t, framecnt_t);
 
 	framecnt_t           _length;
 	std::string         peakpath;

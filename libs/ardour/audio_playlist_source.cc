@@ -130,8 +130,8 @@ AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_desc
 framecnt_t 
 AudioPlaylistSource::read_unlocked (Sample* dst, framepos_t start, framecnt_t cnt) const
 {
-	Sample* sbuf;
-	gain_t* gbuf;
+	boost::shared_ptr<Sample> sbuf;
+	boost::shared_ptr<gain_t> gbuf;
 	framecnt_t to_read;
 	framecnt_t to_zero;
 	pair<framepos_t,framepos_t> extent = _playlist->get_extent();
@@ -160,7 +160,7 @@ AudioPlaylistSource::read_unlocked (Sample* dst, framepos_t start, framecnt_t cn
 		gbuf = _gain_buffers[_level-1];
 	}
 
-	boost::dynamic_pointer_cast<AudioPlaylist>(_playlist)->read (dst, sbuf, gbuf, start+_playlist_offset, to_read, _playlist_channel);
+	boost::dynamic_pointer_cast<AudioPlaylist>(_playlist)->read (dst, sbuf.get(), gbuf.get(), start+_playlist_offset, to_read, _playlist_channel);
 
 	if (to_zero) {
 		memset (dst+to_read, 0, sizeof (Sample) * to_zero);
