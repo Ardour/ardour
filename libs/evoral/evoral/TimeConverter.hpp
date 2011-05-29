@@ -55,6 +55,8 @@ protected:
 /** A stub TimeConverter that simple statically casts between types. */
 template<typename A, typename B>
 class IdentityConverter : public TimeConverter<A,B> {
+  public:
+        IdentityConverter() {}
 	B to(A a)   const { return static_cast<B>(a); }
 	A from(B b) const { return static_cast<A>(b); }
 };
