@@ -34,7 +34,7 @@ using namespace PBD;
  */
 template<typename T>
 size_t
-MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, framecnt_t offset)
+MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, framecnt_t offset, bool stop_on_overflow_in_dst)
 {
 	if (this->read_space() == 0) {
 		return 0;
@@ -74,9 +74,22 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 
 	size_t count = 0;
 
-	while (this->read_space() >= sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t)) {
+	const size_t prefix_size = sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t);
 
-		this->peek ((uint8_t*) &ev_time, sizeof (T));
+	while (this->read_space() >= prefix_size) {
+
+		uint8_t peekbuf[prefix_size];
+		bool success;
+
+		success = this->peek (peekbuf, prefix_size);
+		/* this cannot fail, because we've already verified that there
+		   is prefix_space to read
+		*/
+		assert (success);
+
+		ev_time = *((T*) peekbuf);
+		ev_type = *((Evoral::EventType*)(peekbuf + sizeof (T)));
+		ev_size = *((uint32_t*)(peekbuf + sizeof(T) + sizeof (Evoral::EventType)));
 
 		if (ev_time + loop_offset >= end) {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 past end @ %2\n", ev_time, end));
@@ -87,12 +100,32 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		} else {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 in range %2 .. %3\n", ev_time, start, end));
 		}
+		
+		/* lets see if we are going to be able to write this event into dst.
+		 */
 
-		bool success = read_prefix(&ev_time, &ev_type, &ev_size);
-		if (!success) {
-			cerr << "WARNING: error reading event prefix from MIDI ring" << endl;
+		assert(ev_time >= start);
+		
+		ev_time -= start;
+		ev_time += offset;
+
+		// write the timestamp to address (write_loc - 1)
+		uint8_t* write_loc = dst.reserve(ev_time, ev_size);
+		if (write_loc == NULL) {
+			if (stop_on_overflow_in_dst) {
+				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events\n", count));
+				break;
+			}
+			cerr << "MRB: Unable to reserve space in buffer, event skipped";
+			this->increment_read_ptr (prefix_size + ev_size); // Advance read pointer to next event
 			continue;
 		}
+
+		/* we're good to go ahead and read the data now but since we
+		 * have the prefix data already, just skip over that
+		 */
+
+		this->increment_read_ptr (prefix_size);
 
 		// This event marks a loop end (i.e. the next event's timestamp will be non-monotonic)
 		if (ev_type == LoopEventType) {
@@ -118,19 +151,6 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 				this->increment_read_ptr (ev_size); // Advance read pointer to next event
 				continue;
 			}
-		}
-
-		assert(ev_time >= start);
-		
-		ev_time -= start;
-		ev_time += offset;
-
-		// write the timestamp to address (write_loc - 1)
-		uint8_t* write_loc = dst.reserve(ev_time, ev_size);
-		if (write_loc == NULL) {
-			cerr << "MRB: Unable to reserve space in buffer, event skipped";
-			this->increment_read_ptr (ev_size); // Advance read pointer to next event
-			continue;
 		}
 
 		// write MIDI buffer contents

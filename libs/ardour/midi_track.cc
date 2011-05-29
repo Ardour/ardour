@@ -441,13 +441,26 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes)
 void
 MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framepos_t /*end*/, framecnt_t nframes)
 {
-	// Append immediate events
 	MidiBuffer& buf (bufs.get_midi (0));
+
+	// Append immediate events
+
 	if (_immediate_events.read_space()) {
+
 		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 has %2 of immediate events to deliver\n", 
 		                                            name(), _immediate_events.read_space()));
+
+		/* write as many of the immediate events as we can, but give "true" as
+		 * the last argument ("stop on overflow in destination") so that we'll
+		 * ship the rest out next time.
+		 *
+		 * the (nframes-1) argument puts all these events at the last
+		 * possible position of the output buffer, so that we do not 
+		 * violate monotonicity when writing.
+		 */
+		
+		_immediate_events.read (buf, 0, 1, nframes-1, true);
 	}
-	_immediate_events.read (buf, 0, 1, nframes-1); // all stamps = 0
 
 	// MIDI thru: send incoming data "through" output
 	if (_midi_thru && _session.transport_speed() != 0.0f && _input->n_ports().n_midi()) {
