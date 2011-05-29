@@ -30,6 +30,8 @@
 
 #include "ardour/audioplaylist.h"
 #include "ardour/audio_playlist_source.h"
+#include "ardour/midi_playlist.h"
+#include "ardour/midi_playlist_source.h"
 #include "ardour/source_factory.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/silentfilesource.h"
@@ -380,6 +382,29 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<
 		}
 
 	} else if (type == DataType::MIDI) {
+		
+		try {
+
+			boost::shared_ptr<MidiPlaylist> ap = boost::dynamic_pointer_cast<MidiPlaylist>(p);
+			
+			if (ap) {
+				
+				if (copy) {
+					ap.reset (new MidiPlaylist (ap, start, len, name, true));
+					start = 0;
+				}
+				
+				Source* src = new MidiPlaylistSource (s, orig, name, ap, chn, start, len, Source::Flag (0));
+				boost::shared_ptr<Source> ret (src);
+				
+				SourceCreated (ret);
+				return ret;
+			}
+		}
+
+		catch (failed_constructor& err) {
+			/* relax - return at function scope */
+		}
 
 	}
 

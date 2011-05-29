@@ -124,6 +124,7 @@ libardour_sources = [
         'midi_model.cc',
         'midi_patch_manager.cc',
         'midi_playlist.cc',
+        'midi_playlist_source.cc',
         'midi_port.cc',
         'midi_region.cc',
         'midi_ring_buffer.cc',

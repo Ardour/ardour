@@ -88,7 +88,7 @@ struct EventsSortByTime {
 
 /** Returns the number of frames in time duration read (eg could be large when 0 events are read) */
 framecnt_t
-MidiPlaylist::read (MidiRingBuffer<framepos_t>& dst, framepos_t start, framecnt_t dur, unsigned chan_n)
+MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framecnt_t dur, unsigned chan_n)
 {
 	/* this function is never called from a realtime thread, so
 	   its OK to block (for short intervals).

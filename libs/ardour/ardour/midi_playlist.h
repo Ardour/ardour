@@ -48,7 +48,7 @@ public:
 
 	~MidiPlaylist ();
 
-	framecnt_t read (MidiRingBuffer<framepos_t>& buf,
+	framecnt_t read (Evoral::EventSink<framepos_t>& buf,
 			 framepos_t start, framecnt_t cnt, uint32_t chan_n = 0);
 
 	int set_state (const XMLNode&, int version);
