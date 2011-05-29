@@ -815,12 +815,6 @@ AudioEngine::register_port (DataType dtype, const string& portname, bool input)
 			throw PortRegistrationFailure("unable to create port (unknown type)");
 		}
 
-		size_t& old_buffer_size  = _raw_buffer_sizes[newport->type()];
-		size_t  port_buffer_size = newport->raw_buffer_size(0);
-		if (port_buffer_size > old_buffer_size) {
-			old_buffer_size = port_buffer_size;
-		}
-
 		RCUWriter<Ports> writer (ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
 		ps->insert (ps->begin(), newport);

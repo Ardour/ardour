@@ -43,8 +43,7 @@ class MidiPort : public Port {
 
 	void flush_buffers (pframes_t nframes, framepos_t time);
 	void transport_stopped ();
-
-	size_t raw_buffer_size (pframes_t nframes) const;
+	void reset ();
 
 	Buffer& get_buffer (pframes_t nframes) {
 		return get_midi_buffer (nframes);

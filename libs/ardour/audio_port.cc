@@ -79,9 +79,5 @@ AudioPort::get_audio_buffer (pframes_t nframes)
 	return *_buffer;
 }
 
-size_t
-AudioPort::raw_buffer_size (pframes_t nframes) const
-{
-	return nframes * sizeof (Sample);
-}
+
 

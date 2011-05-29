@@ -21,6 +21,7 @@
 
 #include "ardour/midi_port.h"
 #include "ardour/data_type.h"
+#include "ardour/audioengine.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -30,7 +31,7 @@ MidiPort::MidiPort (const std::string& name, Flags flags)
 	, _has_been_mixed_down (false)
 	, _resolve_in_process (false)
 {
-	_buffer = new MidiBuffer (raw_buffer_size(0));
+	_buffer = new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI));
 }
 
 MidiPort::~MidiPort()
@@ -162,9 +163,10 @@ MidiPort::transport_stopped ()
 	_resolve_in_process = true;
 }
 
-size_t
-MidiPort::raw_buffer_size (pframes_t nframes) const
+void
+MidiPort::reset ()
 {
-	return jack_midi_max_event_size (jack_port_get_buffer (_jack_port, nframes));
+	Port::reset ();
+	delete _buffer;
+	_buffer = new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI));
 }
-

@@ -111,9 +111,6 @@ public:
 
 	virtual void reset ();
 
-	/** @return the size of the raw buffer (bytes) for duration @a nframes (audio frames) */
-	virtual size_t raw_buffer_size (pframes_t nframes) const = 0;
-
 	virtual DataType type () const = 0;
 	virtual void cycle_start (pframes_t);
 	virtual void cycle_end (pframes_t) = 0;
