@@ -50,7 +50,6 @@ class PlaylistSource : virtual public Source {
     PlaylistSource (Session&, const XMLNode&);
     
     void add_state (XMLNode&);
-
 };
         
 } /* namespace */

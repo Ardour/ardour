@@ -32,7 +32,7 @@ namespace ARDOUR {
 
 class AudioPlaylist;
 
-class AudioPlaylistSource : public AudioSource, public PlaylistSource {
+class AudioPlaylistSource : public PlaylistSource, public AudioSource  {
   public:
     virtual ~AudioPlaylistSource ();
 
@@ -59,6 +59,7 @@ class AudioPlaylistSource : public AudioSource, public PlaylistSource {
     AudioPlaylistSource (Session&, const PBD::ID& orig, const std::string& name, boost::shared_ptr<AudioPlaylist>, uint32_t chn,
                          frameoffset_t begin, framecnt_t len, Source::Flag flags);
     AudioPlaylistSource (Session&, const XMLNode&);
+
     
   private:
     uint32_t                         _playlist_channel;

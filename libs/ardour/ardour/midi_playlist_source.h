@@ -50,8 +50,6 @@ class MidiPlaylistSource : public MidiSource, public PlaylistSource {
     void load_model(bool lock=true, bool force_reload=false);
     void destroy_model();
 
-    static void ensure_buffers_for_level (uint32_t);
-
   protected:
     friend class SourceFactory;
 
@@ -70,6 +68,7 @@ class MidiPlaylistSource : public MidiSource, public PlaylistSource {
     framepos_t write_unlocked (MidiRingBuffer<framepos_t>& dst,
 					   framepos_t position,
 					   framecnt_t cnt);
+
   private:
     int set_state (const XMLNode&, int version, bool with_descendants);
     framecnt_t _length;

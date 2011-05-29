@@ -52,7 +52,6 @@ MidiPlaylistSource::MidiPlaylistSource (Session& s, const ID& orig, const std::s
 	, MidiSource (s, name, flags)
 	, PlaylistSource (s, orig, name, p, DataType::AUDIO, begin, len, flags)
 {
-	ensure_buffers_for_level (_level);
 }
 
 MidiPlaylistSource::MidiPlaylistSource (Session& s, const XMLNode& node)
@@ -105,8 +104,6 @@ MidiPlaylistSource::set_state (const XMLNode& node, int version, bool with_desce
 			return -1;
 		}
 	}
-
-	ensure_buffers_for_level (_level);
 
 	return 0;
 }
@@ -182,10 +179,4 @@ MidiPlaylistSource::empty () const
 {
 	return !_playlist || _playlist->empty();
 }
-
-void
-MidiPlaylistSource::ensure_buffers_for_level (uint32_t level)
-{
-}
-
 

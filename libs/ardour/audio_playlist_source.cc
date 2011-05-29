@@ -49,8 +49,8 @@ using namespace PBD;
 AudioPlaylistSource::AudioPlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<AudioPlaylist> p, 
 					  uint32_t chn, frameoffset_t begin, framecnt_t len, Source::Flag flags)
 	: Source (s, DataType::AUDIO, name)
-	, AudioSource (s, name)
 	, PlaylistSource (s, orig, name, p, DataType::AUDIO, begin, len, flags)
+	, AudioSource (s, name)
 	, _playlist_channel (chn)
 {
 	AudioSource::_length = len;
@@ -59,8 +59,8 @@ AudioPlaylistSource::AudioPlaylistSource (Session& s, const ID& orig, const std:
 
 AudioPlaylistSource::AudioPlaylistSource (Session& s, const XMLNode& node)
 	: Source (s, node)
-	, AudioSource (s, node)
 	, PlaylistSource (s, node)
+	, AudioSource (s, node)
 {
 	/* PlaylistSources are never writable, renameable, removable or destructive */
 	_flags = Flag (_flags & ~(Writable|CanRename|Removable|RemovableIfEmpty|RemoveAtDestroy|Destructive));
@@ -93,7 +93,6 @@ AudioPlaylistSource::get_state ()
 
 	return node;
 }
-
 	
 int
 AudioPlaylistSource::set_state (const XMLNode& node, int version) 
@@ -106,8 +105,8 @@ AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_desc
 {
 	if (with_descendants) {
 		if (Source::set_state (node, version) || 
-		    AudioSource::set_state (node, version) ||
-		    PlaylistSource::set_state (node, version)) {
+		    PlaylistSource::set_state (node, version) ||
+		    AudioSource::set_state (node, version)) {
 			return -1;
 		}
 	}
@@ -225,4 +224,5 @@ AudioPlaylistSource::peak_path (string /*audio_path_IGNORED*/)
 {
 	return _peak_path;
 }
+
 

@@ -252,8 +252,14 @@ AudioSource::initialize_peakfile (bool newfile, string audio_path)
 			int err = stat (audio_path.c_str(), &stat_file);
 
 			if (err) {
-				_peaks_built = false;
-				_peak_byte_max = 0;
+
+				/* no audio path - nested source or we can't
+				   read it or ... whatever, use the peakfile as-is.
+				*/
+
+				_peaks_built = true;
+				_peak_byte_max = statbuf.st_size;
+
 			} else {
 
 				/* allow 6 seconds slop on checking peak vs. file times because of various
@@ -995,6 +1001,8 @@ AudioSource::ensure_buffers_for_level_locked (uint32_t level, framecnt_t frame_r
 
 	_mixdown_buffers.clear ();
 	_gain_buffers.clear ();
+
+	cerr << "Allocating nested buffers for level " << level << endl;
 
 	while (_mixdown_buffers.size() < level) {
 		_mixdown_buffers.push_back (boost::shared_ptr<Sample> (new Sample[nframes]));
