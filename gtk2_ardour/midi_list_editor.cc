@@ -38,6 +38,12 @@ MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r)
 	: ArdourDialog (r->name(), false, false)
 	, region (r)
 {
+	/* We do not handle nested sources/regions. Caller should have tackled this */
+
+	if (r->max_source_level() > 0) {
+		throw failed_constructor();
+	}
+
 	set_session (s);
 
 	model = ListStore::create (columns);

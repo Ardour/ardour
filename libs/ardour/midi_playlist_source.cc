@@ -46,11 +46,22 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+/*******************************************************************************
+As of May 2011, it appears too complex to support compound regions for MIDI
+because of the need to be able to edit the data represented by the region.  It
+seems that it would be a better idea to render the consituent regions into a
+new MIDI file and create a new region based on that, an operation we have been
+calling "consolidate"
+
+This code has been in place as a stub in case anyone gets any brilliant ideas
+on other ways to approach this issue.
+********************************************************************************/
+
 MidiPlaylistSource::MidiPlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<MidiPlaylist> p, 
 					uint32_t chn, frameoffset_t begin, framecnt_t len, Source::Flag flags)
-	: Source (s, DataType::AUDIO, name)
+	: Source (s, DataType::MIDI, name)
 	, MidiSource (s, name, flags)
-	, PlaylistSource (s, orig, name, p, DataType::AUDIO, begin, len, flags)
+	, PlaylistSource (s, orig, name, p, DataType::MIDI, begin, len, flags)
 {
 }
 
@@ -157,15 +168,13 @@ MidiPlaylistSource::append_event_unlocked_frames(const Evoral::Event<framepos_t>
 void
 MidiPlaylistSource::load_model (bool, bool) 
 {
-	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::load_model() called - should be impossible") << endmsg;
-	/*NOTREACHED*/
+	/* nothing to do */
 }
 
 void
 MidiPlaylistSource::destroy_model () 
 {
-	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::destroy_model() called - should be impossible") << endmsg;
-	/*NOTREACHED*/
+	/* nothing to do */
 }
 
 void

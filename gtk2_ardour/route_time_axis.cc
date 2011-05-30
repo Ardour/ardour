@@ -2488,7 +2488,12 @@ void add_region_to_list (RegionView* rv, Playlist::RegionList* l)
 RegionView*
 RouteTimeAxisView::combine_regions ()
 {
-	assert (is_track());
+	/* as of may 2011, we do not offer uncombine for MIDI tracks
+	 */
+
+	if (!is_audio_track()) {
+		return 0;
+	}
 
 	if (!_view) {
 		return 0;
@@ -2515,7 +2520,11 @@ RouteTimeAxisView::combine_regions ()
 void
 RouteTimeAxisView::uncombine_regions ()
 {
-	assert (is_track());
+	/* as of may 2011, we do not offer uncombine for MIDI tracks
+	 */
+	if (!is_audio_track()) {
+		return;
+	}
 
 	if (!_view) {
 		return;

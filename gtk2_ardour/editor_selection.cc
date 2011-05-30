@@ -1067,7 +1067,11 @@ Editor::sensitize_the_right_region_actions ()
 		_region_actions->get_action("show-region-list-editor")->set_sensitive (false);
 		_region_actions->get_action("show-region-properties")->set_sensitive (false);
 		_region_actions->get_action("rename-region")->set_sensitive (false);
-		_region_actions->get_action("combine-regions")->set_sensitive (true);
+		if (have_audio) {
+			_region_actions->get_action("combine-regions")->set_sensitive (true);
+		} else {
+			_region_actions->get_action("combine-regions")->set_sensitive (false);
+		}
 	} else if (rs.size() == 1) {
 		_region_actions->get_action("add-range-markers-from-region")->set_sensitive (false);
 		_region_actions->get_action("close-region-gaps")->set_sensitive (false);
