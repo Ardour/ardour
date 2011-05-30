@@ -3193,6 +3193,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	boost::shared_ptr<PlaylistSource> pls;
 	boost::shared_ptr<const Playlist> pl;
 	vector<boost::shared_ptr<Region> > originals;
+	vector<TwoRegions> old_and_new_regions;
 
 	// (1) check that its really a compound region
 	
@@ -3323,6 +3324,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 		 */
 
 		originals.push_back (original);
+		old_and_new_regions.push_back (TwoRegions (*i, original));
 	}
 
 	pre_uncombine (originals, target);
@@ -3339,6 +3341,10 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	for (vector<boost::shared_ptr<Region> >::iterator i = originals.begin(); i != originals.end(); ++i) {
 		add_region ((*i), (*i)->position());
 	}
+
+	/* now move dependent regions back from the compound to this playlist */
+	
+	pl->copy_dependents (old_and_new_regions, this);
 
 	in_partition = false;
 	thaw ();
