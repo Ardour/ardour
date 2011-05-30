@@ -22,6 +22,7 @@
 #define _SIGC_SIGNAL_BASE_H_
 
 #include <list>
+#include <cstddef>
 #include <sigc++config.h>
 #include <sigc++/type_traits.h>
 #include <sigc++/trackable.h>
