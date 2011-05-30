@@ -265,8 +265,6 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 
 	in_set_state--;
 	first_set_state = false;
-
-	/* this constructor does NOT notify others (session) */
 }
 
 void
@@ -806,6 +804,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t posi
 	/* we need to notify the existence of new region before checking dependents. Ick. */
 
 	notify_region_added (region);
+
 
 	if (!holding_state ()) {
 
@@ -3127,6 +3126,10 @@ Playlist::combine (const RegionList& r)
 
 	pre_combine (copies);
 
+	/* add any dependent regions to the new playlist */
+
+	copy_dependents (old_and_new_regions, pl);
+
 	/* now create a new PlaylistSource for each channel in the new playlist */
 
 	SourceList sources;
@@ -3134,6 +3137,7 @@ Playlist::combine (const RegionList& r)
 	
 	for (uint32_t chn = 0; chn < channels; ++chn) {
 		sources.push_back (SourceFactory::createFromPlaylist (_type, _session, pl, id(), parent_name, chn, 0, extent.second, false, false));
+	
 	}
 	
 	/* now a new whole-file region using the list of sources */
@@ -3156,10 +3160,6 @@ Playlist::combine (const RegionList& r)
 	plist.add (Properties::layer, layer+1);
 
 	boost::shared_ptr<Region> compound_region = RegionFactory::create (parent_region, plist, true);
-
-	/* add any dependent regions to the new playlist */
-
-	copy_dependents (old_and_new_regions, pl);
 
 	/* remove all the selected regions from the current playlist
 	 */

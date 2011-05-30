@@ -17,9 +17,6 @@
 
 */
 
-
-#include "pbd/stacktrace.h"
-
 #include "ardour/debug.h"
 #include "ardour/types.h"
 #include "ardour/crossfade.h"

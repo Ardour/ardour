@@ -269,6 +269,9 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 {
 	framecnt_t ret = cnt;
 
+	DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Playlist %1 read @ %2 for %3, channel %4, regions %5 xfades %6\n",
+							   name(), start, cnt, chan_n, regions.size(), _crossfades.size()));
+
 	/* optimizing this memset() away involves a lot of conditionals
 	   that may well cause more of a hit due to cache misses
 	   and related stuff than just doing this here.
@@ -315,9 +318,15 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
                 }
 	}
 
+	DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Checking %1 xfades\n", _crossfades.size()));
+
 	for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
+		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("%1 check xfade between %2 and %3 ...\n",
+								   name(), (*i)->out()->name(), (*i)->in()->name()));
 		if ((*i)->coverage (start, end) != OverlapNone) {
 			relevant_xfades[(*i)->upper_layer()].push_back (*i);
+			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\t\txfade is relevant, place on layer %1\n",
+									   (*i)->upper_layer()));
 		}
 	}
 
@@ -334,6 +343,8 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 
 	for (vector<uint32_t>::iterator l = relevant_layers.begin(); l != relevant_layers.end(); ++l) {
 
+		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("read for layer %1\n", *l));
+
 		vector<boost::shared_ptr<Region> > r (relevant_regions[*l]);
 		vector<boost::shared_ptr<Crossfade> >& x (relevant_xfades[*l]);
 
@@ -347,6 +358,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 		}
 
 		for (vector<boost::shared_ptr<Crossfade> >::iterator i = x.begin(); i != x.end(); ++i) {
+                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("read from xfade between %1 & %2\n", (*i)->out()->name(), (*i)->in()->name()));
 			(*i)->read_at (buf, mixdown_buffer, gain_buffer, start, cnt, chan_n);
 
 			/* don't JACK up _read_data_count, since its the same data as we just

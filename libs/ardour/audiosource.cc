@@ -670,6 +670,7 @@ AudioSource::build_peaks_from_scratch ()
 			framecnt_t frames_to_read = min (bufsize, cnt);
 			framecnt_t frames_read;
 
+
 			if ((frames_read = read_unlocked (buf, current_frame, frames_to_read)) != frames_to_read) {
 				error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
 				done_with_peakfile_writes (false);
@@ -1001,8 +1002,6 @@ AudioSource::ensure_buffers_for_level_locked (uint32_t level, framecnt_t frame_r
 
 	_mixdown_buffers.clear ();
 	_gain_buffers.clear ();
-
-	cerr << "Allocating nested buffers for level " << level << endl;
 
 	while (_mixdown_buffers.size() < level) {
 		_mixdown_buffers.push_back (boost::shared_ptr<Sample> (new Sample[nframes]));
