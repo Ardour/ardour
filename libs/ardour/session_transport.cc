@@ -271,6 +271,15 @@ Session::realtime_stop (bool abort, bool clear_state)
 }
 
 void
+Session::realtime_locate ()
+{
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		(*i)->realtime_locate ();
+	}
+}
+
+void
 Session::butler_transport_work ()
 {
   restart:
@@ -843,8 +852,20 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 	outbound_mtc_timecode_frame = _transport_frame;
 	next_quarter_frame_to_send = 0;
 
+	/* do "stopped" stuff if:
+	 *
+	 * we are rolling AND
+	 *    no autoplay in effect AND
+         *       we're not going to keep rolling after the locate AND
+         *           !(playing a loop with JACK sync)
+         *
+	 */
+                 
 	if (transport_rolling() && (!auto_play_legal || !config.get_auto_play()) && !with_roll && !(synced_to_jack() && play_loop)) {
 		realtime_stop (false, true); // XXX paul - check if the 2nd arg is really correct
+	} else {
+		/* otherwise tell the world that we located */
+		realtime_locate ();
 	}
 
 	if (force || !with_loop || loop_changing) {

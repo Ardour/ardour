@@ -146,7 +146,7 @@ MidiDiskstream::non_realtime_locate (framepos_t position)
 	if (_write_source) {
 		_write_source->set_timeline_position (position);
 	}
-	seek(position, false);
+	seek (position, false);
 }
 
 

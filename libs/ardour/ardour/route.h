@@ -124,6 +124,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	virtual bool record_enabled() const { return false; }
 	virtual void nonrealtime_handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
 	virtual void realtime_handle_transport_stopped () {}
+	virtual void realtime_locate () {}
 	virtual void set_pending_declick (int);
 
 	/* end of vfunc-based API */

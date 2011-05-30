@@ -206,6 +206,9 @@ MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_sta
 
 	BeatsFramesConverter converter(_session.tempo_map(), source_start);
 
+	DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("MidiSource::midi-read() sstart %1 start %2 cnt %3 tracker %4\n",
+							  source_start, start, cnt, tracker));
+
 	if (_model) {
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;
 

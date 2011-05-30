@@ -85,6 +85,7 @@ class Processor : public SessionObject, public Automatable, public Latent
 	virtual ChanCount output_streams() const { return _configured_output; }
 
 	virtual void realtime_handle_transport_stopped () {}
+	virtual void realtime_locate () {}
 
 	/* note: derived classes should implement state(), NOT get_state(), to allow
 	   us to merge C++ inheritance and XML lack-of-inheritance reasonably

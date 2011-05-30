@@ -43,6 +43,7 @@ public:
                   int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
 
 	void realtime_handle_transport_stopped ();
+	void realtime_locate ();
 
 	void use_new_diskstream ();
         void set_diskstream (boost::shared_ptr<Diskstream>);

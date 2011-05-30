@@ -29,7 +29,7 @@ using namespace std;
 MidiPort::MidiPort (const std::string& name, Flags flags)
 	: Port (name, DataType::MIDI, flags)
 	, _has_been_mixed_down (false)
-	, _resolve_in_process (false)
+	, _resolve_required (false)
 {
 	_buffer = new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI));
 }
@@ -119,30 +119,59 @@ MidiPort::cycle_split ()
 }
 
 void
+MidiPort::resolve_notes (void* jack_buffer, MidiBuffer::TimeType when)
+{
+	uint8_t ev[3];
+	
+	ev[2] = 0;
+	
+	for (uint8_t channel = 0; channel <= 0xF; channel++) {
+		ev[0] = (MIDI_CMD_CONTROL | channel);
+		
+		/* we need to send all notes off AND turn the
+		 * sustain/damper pedal off to handle synths
+		 * that prioritize sustain over AllNotesOff
+		 */
+		
+		ev[1] = MIDI_CTL_SUSTAIN;
+		
+		if (jack_midi_event_write (jack_buffer, when, ev, 3) != 0) {
+			cerr << "failed to deliver sustain-zero on channel " << channel << " on port " << name() << endl;
+		} 
+		
+		ev[1] = MIDI_CTL_ALL_NOTES_OFF;
+		
+		if (jack_midi_event_write (jack_buffer, 0, ev, 3) != 0) {
+			cerr << "failed to deliver ALL NOTES OFF on channel " << channel << " on port " << name() << endl;
+		} 
+	}
+}
+
+void
 MidiPort::flush_buffers (pframes_t nframes, framepos_t time)
 {
 	if (sends_output ()) {
 
 		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
 
-		// Feed the data through the MidiStateTracker
-		bool did_loop;
-
-		_midi_state_tracker.track (_buffer->begin(), _buffer->end(), did_loop);
-
-		if (did_loop || _resolve_in_process) {
-			/* add necessary note offs */
-			_midi_state_tracker.resolve_notes (*_buffer, time);
+		if (_resolve_required) {
+			/* resolve all notes at the start of the buffer */
+			resolve_notes (jack_buffer, 0);
+			_resolve_required= false;
 		}
 
-		_resolve_in_process = false;
-
 		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
-			const Evoral::Event<framepos_t>& ev = *i;
+
+			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev (*i, false);
 
 			// event times are in frames, relative to cycle start
 
 			assert (ev.time() < (nframes + _global_port_buffer_offset + _port_buffer_offset));
+
+			if (ev.event_type() == LoopEventType) {
+				resolve_notes (jack_buffer, ev.time());
+				continue;
+			}
 
 			if (ev.time() >= _global_port_buffer_offset + _port_buffer_offset) {
 				if (jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size()) != 0) {
@@ -160,7 +189,13 @@ MidiPort::flush_buffers (pframes_t nframes, framepos_t time)
 void
 MidiPort::transport_stopped ()
 {
-	_resolve_in_process = true;
+	_resolve_required = true;
+}
+
+void
+MidiPort::realtime_locate ()
+{
+	_resolve_required = true;
 }
 
 void

@@ -76,6 +76,7 @@ public:
 	void no_outs_cuz_we_no_monitor(bool);
 	void cycle_start (pframes_t);
 	void transport_stopped (framepos_t frame);
+	void realtime_locate ();
 
 	BufferSet& output_buffers() { return *_output_buffers; }
 

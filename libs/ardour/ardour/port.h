@@ -118,6 +118,7 @@ public:
 	virtual Buffer& get_buffer (pframes_t nframes) = 0;
 	virtual void flush_buffers (pframes_t /*nframes*/, framepos_t /*time*/) {}
 	virtual void transport_stopped () {}
+	virtual void realtime_locate () {}
 
         bool physically_connected () const;
 

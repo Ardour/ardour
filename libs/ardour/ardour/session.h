@@ -1195,6 +1195,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void stop_transport (bool abort = false, bool clear_state = false);
 	void start_transport ();
 	void realtime_stop (bool abort, bool clear_state);
+	void realtime_locate ();
 	void non_realtime_start_scrub ();
 	void non_realtime_set_speed ();
 	void non_realtime_locate ();
