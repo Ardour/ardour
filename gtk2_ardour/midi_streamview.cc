@@ -489,8 +489,8 @@ MidiStreamView::setup_rec_box ()
 				                                      (RegionFactory::create (sources, plist, false)));
 
 				assert(region);
-				region->set_start (_trackview.track()->current_capture_start() - _trackview.track()->get_capture_start_frame (0), this);
-				region->set_position (_trackview.track()->current_capture_start(), this);
+				region->set_start (_trackview.track()->current_capture_start() - _trackview.track()->get_capture_start_frame (0));
+				region->set_position (_trackview.track()->current_capture_start());
 				RegionView* rv = add_region_view_internal (region, false);
 				MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
 				mrv->begin_write ();
@@ -639,7 +639,7 @@ MidiStreamView::update_rec_box ()
 
 	/* Update the region being recorded to reflect where we currently are */
 	boost::shared_ptr<ARDOUR::Region> region = rec_regions.back().first;
-	region->set_length (_trackview.track()->current_capture_end () - _trackview.track()->current_capture_start(), this);
+	region->set_length (_trackview.track()->current_capture_end () - _trackview.track()->current_capture_start());
 
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rec_regions.back().second);
 	mrv->extend_active_notes ();

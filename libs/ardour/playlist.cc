@@ -787,7 +787,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t posi
 		region->set_playlist (boost::weak_ptr<Playlist>(foo));
 	}
 
-	region->set_position (position, this);
+	region->set_position (position);
 
 	timestamp_layer_op (region);
 
@@ -1045,7 +1045,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 				current->suspend_property_changes ();
 				thawlist.push_back (current);
-				current->cut_end (pos2 - 1, this);
+				current->cut_end (pos2 - 1);
 
 			} else if (overlap == OverlapEnd) {
 
@@ -1084,7 +1084,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 				current->suspend_property_changes ();
 				thawlist.push_back (current);
-				current->cut_end (pos2 - 1, this);
+				current->cut_end (pos2 - 1);
 
 			} else if (overlap == OverlapStart) {
 
@@ -1127,7 +1127,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 				current->suspend_property_changes ();
 				thawlist.push_back (current);
-				current->trim_front (pos3, this);
+				current->trim_front (pos3);
 			} else if (overlap == OverlapExternal) {
 
 				/* split: no split required.
@@ -1355,7 +1355,7 @@ Playlist::shift (framepos_t at, frameoffset_t distance, bool move_intersected, b
 			continue;
 		}
 
-		(*r)->set_position ((*r)->position() + distance, this);
+		(*r)->set_position ((*r)->position() + distance);
 	}
 
 	for (RegionList::iterator r = fixup.begin(); r != fixup.end(); ++r) {
@@ -1524,7 +1524,7 @@ Playlist::core_splice (framepos_t at, framecnt_t distance, boost::shared_ptr<Reg
 				new_pos = max_framepos - (*i)->length();
 			}
 
-			(*i)->set_position (new_pos, this);
+			(*i)->set_position (new_pos);
 		}
 	}
 
@@ -2725,7 +2725,7 @@ Playlist::nudge_after (framepos_t start, framecnt_t distance, bool forwards)
 					}
 				}
 
-				(*i)->set_position (new_pos, this);
+				(*i)->set_position (new_pos);
 				moved = true;
 			}
 		}
@@ -2876,8 +2876,8 @@ Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 							new_pos = region->position() + (*next)->length();
 						}
 
-						(*next)->set_position (region->position(), this);
-						region->set_position (new_pos, this);
+						(*next)->set_position (region->position());
+						region->set_position (new_pos);
 
 						/* avoid a full sort */
 
@@ -2917,8 +2917,8 @@ Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 							new_pos = (*prev)->position() + region->length();
 						}
 
-						region->set_position ((*prev)->position(), this);
-						(*prev)->set_position (new_pos, this);
+						region->set_position ((*prev)->position());
+						(*prev)->set_position (new_pos);
 
 						/* avoid a full sort */
 
@@ -3128,7 +3128,7 @@ Playlist::combine (const RegionList& r)
 
 	/* add any dependent regions to the new playlist */
 
-	copy_dependents (old_and_new_regions, pl);
+	copy_dependents (old_and_new_regions, pl.get());
 
 	/* now create a new PlaylistSource for each channel in the new playlist */
 
@@ -3258,7 +3258,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			/* the pure copy constructor resets position() to zero,
 			   so fix that up.
 			*/
-			original->set_position (pos, this);
+			original->set_position (pos);
 		}
 
 		/* check to see how the original region (in the
@@ -3280,7 +3280,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			/* overlap is just a small piece inside the
 			 * original so trim both ends
 			 */
-			original->trim_to (adjusted_start, adjusted_end - adjusted_start, this);
+			original->trim_to (adjusted_start, adjusted_end - adjusted_start);
 			modified_region = true;
 			break;
 				
@@ -3294,7 +3294,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			/* overlap starts within but covers end,
 			   so trim the front of the region
 			*/
-			original->trim_front (adjusted_start, this);
+			original->trim_front (adjusted_start);
 			modified_region = true;
 			break;
 				
@@ -3302,7 +3302,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			/* overlap covers start but ends within, so
 			 * trim the end of the region.
 			 */
-			original->trim_end (adjusted_end, this);
+			original->trim_end (adjusted_end);
 			modified_region = true;
 			break;
 		}
@@ -3310,7 +3310,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 		if (move_offset) {
 			/* fix the position to match any movement of the compound region.
 			 */
-			original->set_position (original->position() + move_offset, this);
+			original->set_position (original->position() + move_offset);
 			modified_region = true;
 		}
 

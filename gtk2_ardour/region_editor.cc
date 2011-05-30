@@ -278,7 +278,7 @@ RegionEditor::position_clock_changed ()
 
 	if (pl) {
 		_region->clear_changes ();
-		_region->set_position (position_clock.current_time(), this);
+		_region->set_position (position_clock.current_time());
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
 
@@ -294,7 +294,7 @@ RegionEditor::end_clock_changed ()
 
 	if (pl) {
                 _region->clear_changes ();
-		_region->trim_end (end_clock.current_time(), this);
+		_region->trim_end (end_clock.current_time());
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
 
@@ -314,7 +314,7 @@ RegionEditor::length_clock_changed ()
 
 	if (pl) {
                 _region->clear_changes ();
-		_region->trim_end (_region->position() + frames - 1, this);
+		_region->trim_end (_region->position() + frames - 1);
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
 

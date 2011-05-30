@@ -381,7 +381,7 @@ public:
 	void _split_region (boost::shared_ptr<Region>, framepos_t position);
 
 	typedef std::pair<boost::shared_ptr<Region>, boost::shared_ptr<Region> > TwoRegions;
-	virtual void copy_dependents (const std::vector<TwoRegions>&, boost::shared_ptr<Playlist>) { }
+	virtual void copy_dependents (const std::vector<TwoRegions>&, Playlist*) const { }
 
 	struct RegionInfo {
 	    boost::shared_ptr<Region> region;

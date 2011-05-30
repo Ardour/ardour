@@ -363,7 +363,7 @@ AudioDiskstream::use_destructive_playlist ()
 
 	/* be sure to stretch the region out to the maximum length */
 
-	region->set_length (max_framepos - region->position(), this);
+	region->set_length (max_framepos - region->position());
 
 	uint32_t n;
 	ChannelList::iterator chan;

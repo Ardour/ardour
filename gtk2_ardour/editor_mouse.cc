@@ -2227,7 +2227,7 @@ Editor::point_trim (GdkEvent* event, framepos_t new_bound)
 
 				if (!(*i)->region()->locked()) {
 					(*i)->region()->clear_changes ();
-					(*i)->region()->trim_front (new_bound, this);
+					(*i)->region()->trim_front (new_bound);
 					_session->add_command(new StatefulDiffCommand ((*i)->region()));
 				}
 			}
@@ -2235,7 +2235,7 @@ Editor::point_trim (GdkEvent* event, framepos_t new_bound)
 		} else {
 			if (!rv->region()->locked()) {
 				rv->region()->clear_changes ();
-				rv->region()->trim_front (new_bound, this);
+				rv->region()->trim_front (new_bound);
 				_session->add_command(new StatefulDiffCommand (rv->region()));
 			}
 		}
@@ -2252,7 +2252,7 @@ Editor::point_trim (GdkEvent* event, framepos_t new_bound)
 			{
 				if (!(*i)->region()->locked()) {
 					(*i)->region()->clear_changes();
-					(*i)->region()->trim_end (new_bound, this);
+					(*i)->region()->trim_end (new_bound);
 					_session->add_command(new StatefulDiffCommand ((*i)->region()));
 				}
 			}
@@ -2261,7 +2261,7 @@ Editor::point_trim (GdkEvent* event, framepos_t new_bound)
 
 			if (!rv->region()->locked()) {
 				rv->region()->clear_changes ();
-				rv->region()->trim_end (new_bound, this);
+				rv->region()->trim_end (new_bound);
 				_session->add_command (new StatefulDiffCommand (rv->region()));
 			}
 		}

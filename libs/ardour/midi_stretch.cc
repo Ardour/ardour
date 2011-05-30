@@ -110,7 +110,7 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	const int ret = finish (region, nsrcs, new_name);
 
-	results[0]->set_length((framecnt_t) floor (r->length() * _request.time_fraction), NULL);
+	results[0]->set_length((framecnt_t) floor (r->length() * _request.time_fraction));
 
 	return ret;
 }

@@ -988,9 +988,9 @@ struct crossfade_triple {
 };
 
 void
-AudioPlaylist::copy_dependents (const vector<TwoRegions>& old_and_new, boost::shared_ptr<Playlist> other)
+AudioPlaylist::copy_dependents (const vector<TwoRegions>& old_and_new, Playlist* other) const
 {
-	boost::shared_ptr<AudioPlaylist> other_audio = boost::dynamic_pointer_cast<AudioPlaylist>(other);
+	AudioPlaylist* other_audio = dynamic_cast<AudioPlaylist*>(other);
 
 	if (!other_audio) {
 		return;
@@ -1012,7 +1012,7 @@ AudioPlaylist::copy_dependents (const vector<TwoRegions>& old_and_new, boost::sh
 
 	for (vector<TwoRegions>::const_iterator on = old_and_new.begin(); on != old_and_new.end(); ++on) {
 
-		for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
+		for (Crossfades::const_iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
 
 			if ((*i)->in() == on->first) {
 				
@@ -1089,7 +1089,7 @@ AudioPlaylist::copy_dependents (const vector<TwoRegions>& old_and_new, boost::sh
 		 * of the fade-in region
 		 */
 
-		new_xfade->set_position (ci->second.new_in->position(), this);
+		new_xfade->set_position (ci->second.new_in->position());
 		other_audio->add_crossfade (new_xfade);
 	}
 }

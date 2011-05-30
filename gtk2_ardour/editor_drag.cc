@@ -757,7 +757,7 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 
 			const boost::shared_ptr<const Region> original = rv->region();
 			boost::shared_ptr<Region> region_copy = RegionFactory::create (original, true);
-			region_copy->set_position (original->position(), this);
+			region_copy->set_position (original->position());
 			
 			RegionView* nrv;
 			if (arv) {
@@ -1037,7 +1037,7 @@ RegionMoveDrag::finished_no_copy (
 				playlist->clear_changes ();
 			}
 
-			rv->region()->set_position (where, (void*) this);
+			rv->region()->set_position (where);
 
 			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
 		}
@@ -1407,7 +1407,7 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 		if (_region) {
 			framepos_t const f = adjusted_current_frame (event);
 			if (f < grab_frame()) {
-				_region->set_position (f, this);
+				_region->set_position (f);
 			}
                         
 			/* Don't use a zero-length region, and subtract 1 frame from the snapped length
@@ -1418,7 +1418,7 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 			*/
 			  
 			framecnt_t const len = abs (f - grab_frame () - 1);
-			_region->set_length (len < 1 ? 1 : len, this);
+			_region->set_length (len < 1 ? 1 : len);
 		}
 	}
 }

@@ -841,7 +841,7 @@ RegionView::trim_front (framepos_t new_bound, bool no_overlap)
 
 	framepos_t const pre_trim_first_frame = _region->first_frame();
 
-	_region->trim_front ((framepos_t) (new_bound * speed), this);
+	_region->trim_front ((framepos_t) (new_bound * speed));
 
 	if (no_overlap) {
 		// Get the next region on the left of this region and shrink/expand it.
@@ -856,7 +856,7 @@ RegionView::trim_front (framepos_t new_bound, bool no_overlap)
 
 		// Only trim region on the left if the first frame has gone beyond the left region's last frame.
 		if (region_left != 0 &&	(region_left->last_frame() > _region->first_frame() || regions_touching)) {
-			region_left->trim_end (_region->first_frame() - 1, this);
+			region_left->trim_end (_region->first_frame() - 1);
 		}
 	}
 
@@ -875,7 +875,7 @@ RegionView::trim_end (framepos_t new_bound, bool no_overlap)
 
 	framepos_t const pre_trim_last_frame = _region->last_frame();
 
-	_region->trim_end ((framepos_t) (new_bound * speed), this);
+	_region->trim_end ((framepos_t) (new_bound * speed));
 
 	if (no_overlap) {
 		// Get the next region on the right of this region and shrink/expand it.
@@ -890,7 +890,7 @@ RegionView::trim_end (framepos_t new_bound, bool no_overlap)
 
 		// Only trim region on the right if the last frame has gone beyond the right region's first frame.
 		if (region_right != 0 && (region_right->first_frame() < _region->last_frame() || regions_touching)) {
-			region_right->trim_front (_region->last_frame() + 1, this);
+			region_right->trim_front (_region->last_frame() + 1);
 		}
 
 		region_changed (ARDOUR::bounds_change);
@@ -938,7 +938,7 @@ RegionView::trim_contents (framepos_t frame_delta, bool left_direction, bool swa
 		}
 	}
 
-	_region->trim_start ((framepos_t) (new_bound * speed), this);
+	_region->trim_start ((framepos_t) (new_bound * speed));
 	region_changed (PropertyChange (ARDOUR::Properties::start));
 }
 

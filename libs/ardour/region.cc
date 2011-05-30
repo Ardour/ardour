@@ -433,7 +433,7 @@ Region::set_name (const std::string& str)
 }
 
 void
-Region::set_length (framecnt_t len, void */*src*/)
+Region::set_length (framecnt_t len)
 {
 	//cerr << "Region::set_length() len = " << len << endl;
 	if (locked()) {
@@ -519,7 +519,7 @@ Region::at_natural_position () const
 }
 
 void
-Region::move_to_natural_position (void *src)
+Region::move_to_natural_position ()
 {
 	boost::shared_ptr<Playlist> pl (playlist());
 
@@ -530,7 +530,7 @@ Region::move_to_natural_position (void *src)
 	boost::shared_ptr<Region> whole_file_region = get_parent();
 
 	if (whole_file_region) {
-		set_position (whole_file_region->position() + _start, src);
+		set_position (whole_file_region->position() + _start);
 	}
 }
 
@@ -587,7 +587,7 @@ Region::update_position_after_tempo_map_change ()
 }
 
 void
-Region::set_position (framepos_t pos, void* /*src*/)
+Region::set_position (framepos_t pos)
 {
 	if (!can_move()) {
 		return;
@@ -629,7 +629,7 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 }
 
 void
-Region::set_position_on_top (framepos_t pos, void* /*src*/)
+Region::set_position_on_top (framepos_t pos)
 {
 	if (locked()) {
 		return;
@@ -660,7 +660,7 @@ Region::recompute_position_from_lock_style ()
 }
 
 void
-Region::nudge_position (frameoffset_t n, void* /*src*/)
+Region::nudge_position (frameoffset_t n)
 {
 	if (locked()) {
 		return;
@@ -701,7 +701,7 @@ Region::set_ancestral_data (framepos_t s, framecnt_t l, float st, float sh)
 }
 
 void
-Region::set_start (framepos_t pos, void* /*src*/)
+Region::set_start (framepos_t pos)
 {
 	if (locked() || position_locked()) {
 		return;
@@ -727,7 +727,7 @@ Region::set_start (framepos_t pos, void* /*src*/)
 }
 
 void
-Region::trim_start (framepos_t new_position, void */*src*/)
+Region::trim_start (framepos_t new_position)
 {
 	if (locked() || position_locked()) {
 		return;
@@ -771,25 +771,25 @@ Region::trim_start (framepos_t new_position, void */*src*/)
 }
 
 void
-Region::trim_front (framepos_t new_position, void *src)
+Region::trim_front (framepos_t new_position)
 {
-	modify_front (new_position, false, src);
+	modify_front (new_position, false);
 }
 
 void
-Region::cut_front (framepos_t new_position, void *src)
+Region::cut_front (framepos_t new_position)
 {
-	modify_front (new_position, true, src);
+	modify_front (new_position, true);
 }
 
 void
-Region::cut_end (framepos_t new_endpoint, void *src)
+Region::cut_end (framepos_t new_endpoint)
 {
-	modify_end (new_endpoint, true, src);
+	modify_end (new_endpoint, true);
 }
 
 void
-Region::modify_front (framepos_t new_position, bool reset_fade, void *src)
+Region::modify_front (framepos_t new_position, bool reset_fade)
 {
 	if (locked()) {
 		return;
@@ -822,7 +822,7 @@ Region::modify_front (framepos_t new_position, bool reset_fade, void *src)
 			delta = _position - new_position;
 		}
 		
-		trim_to_internal (new_position, newlen, src);
+		trim_to_internal (new_position, newlen);
 		
 		if (reset_fade) {
 			_right_of_split = true;
@@ -839,14 +839,14 @@ Region::modify_front (framepos_t new_position, bool reset_fade, void *src)
 }
 
 void
-Region::modify_end (framepos_t new_endpoint, bool reset_fade, void* /*src*/)
+Region::modify_end (framepos_t new_endpoint, bool reset_fade)
 {
 	if (locked()) {
 		return;
 	}
 
 	if (new_endpoint > _position) {
-		trim_to_internal (_position, new_endpoint - _position +1, this);
+		trim_to_internal (_position, new_endpoint - _position +1);
 		if (reset_fade) {
 			_left_of_split = true;
 		}
@@ -861,19 +861,19 @@ Region::modify_end (framepos_t new_endpoint, bool reset_fade, void* /*src*/)
  */
 
 void
-Region::trim_end (framepos_t new_endpoint, void* src)
+Region::trim_end (framepos_t new_endpoint)
 {
-	modify_end (new_endpoint, false, src);
+	modify_end (new_endpoint, false);
 }
 
 void
-Region::trim_to (framepos_t position, framecnt_t length, void *src)
+Region::trim_to (framepos_t position, framecnt_t length)
 {
 	if (locked()) {
 		return;
 	}
 
-	trim_to_internal (position, length, src);
+	trim_to_internal (position, length);
 
 	if (!property_changes_suspended()) {
 		recompute_at_start ();
@@ -882,7 +882,7 @@ Region::trim_to (framepos_t position, framecnt_t length, void *src)
 }
 
 void
-Region::trim_to_internal (framepos_t position, framecnt_t length, void */*src*/)
+Region::trim_to_internal (framepos_t position, framecnt_t length)
 {
 	framepos_t new_start;
 

@@ -104,7 +104,7 @@ public:
         void refresh_dependents (boost::shared_ptr<Region> region);
         void check_dependents (boost::shared_ptr<Region> region, bool norefresh);
         void remove_dependents (boost::shared_ptr<Region> region);
-	void copy_dependents (const std::vector<TwoRegions>&, boost::shared_ptr<Playlist>);
+	void copy_dependents (const std::vector<TwoRegions>&, Playlist*) const;
 
 	void pre_combine (std::vector<boost::shared_ptr<Region> >&);
 	void post_combine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>);

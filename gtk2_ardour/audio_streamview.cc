@@ -494,7 +494,7 @@ AudioStreamView::setup_rec_box ()
 					boost::dynamic_pointer_cast<AudioRegion>(RegionFactory::create (sources, plist, false)));
 
 				assert(region);
-				region->set_position (_trackview.session()->transport_frame(), this);
+				region->set_position (_trackview.session()->transport_frame());
 				rec_regions.push_back (make_pair(region, (RegionView*) 0));
 			}
 
@@ -670,8 +670,8 @@ AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 				if (nlen != region->length()) {
 
 					region->suspend_property_changes ();
-					region->set_position (_trackview.track()->get_capture_start_frame(n), this);
-					region->set_length (nlen, this);
+					region->set_position (_trackview.track()->get_capture_start_frame(n));
+					region->set_length (nlen);
 					region->resume_property_changes ();
 					
 					if (origlen == 1) {
@@ -697,8 +697,8 @@ AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 					if (region->source_length(0) >= region->start() + nlen) {
 
 						region->suspend_property_changes ();
-						region->set_position (_trackview.track()->get_capture_start_frame(n), this);
-						region->set_length (nlen, this);
+						region->set_position (_trackview.track()->get_capture_start_frame(n));
+						region->set_length (nlen);
 						region->resume_property_changes ();
 
 						if (origlen == 1) {

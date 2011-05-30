@@ -300,7 +300,7 @@ Editor::nudge_forward (bool next, bool force_playhead)
 			}
 
 			r->clear_changes ();
-			r->set_position (r->position() + distance, this);
+			r->set_position (r->position() + distance);
 			_session->add_command (new StatefulDiffCommand (r));
 		}
 
@@ -383,9 +383,9 @@ Editor::nudge_backward (bool next, bool force_playhead)
 			r->clear_changes ();
 
 			if (r->position() > distance) {
-				r->set_position (r->position() - distance, this);
+				r->set_position (r->position() - distance);
 			} else {
-				r->set_position (0, this);
+				r->set_position (0);
 			}
 			_session->add_command (new StatefulDiffCommand (r));
 		}
@@ -466,7 +466,7 @@ Editor::nudge_forward_capture_offset ()
 		boost::shared_ptr<Region> r ((*i)->region());
 		
 		r->clear_changes ();
-		r->set_position (r->position() + distance, this);
+		r->set_position (r->position() + distance);
 		_session->add_command(new StatefulDiffCommand (r));
 	}
 	
@@ -492,9 +492,9 @@ Editor::nudge_backward_capture_offset ()
 		r->clear_changes ();
 		
 		if (r->position() > distance) {
-			r->set_position (r->position() - distance, this);
+			r->set_position (r->position() - distance);
 		} else {
-			r->set_position (0, this);
+			r->set_position (0);
 		}
 		_session->add_command(new StatefulDiffCommand (r));
 	}
@@ -2744,7 +2744,7 @@ Editor::crop_region_to (framepos_t start, framepos_t end)
 		cnt = the_end - the_start + 1;
 
 		region->clear_changes ();
-		region->trim_to (the_start, cnt, this);
+		region->trim_to (the_start, cnt);
 		_session->add_command (new StatefulDiffCommand (region));
 	}
 
@@ -2905,7 +2905,7 @@ Editor::naturalize_region ()
 		
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		(*i)->region()->clear_changes ();
-		(*i)->region()->move_to_natural_position (this);
+		(*i)->region()->move_to_natural_position ();
 		_session->add_command (new StatefulDiffCommand ((*i)->region()));
 	}
 	
@@ -3000,7 +3000,7 @@ Editor::align_regions_relative (RegionPoint point)
 	/* move first one specially */
 
 	r->clear_changes ();
-	r->set_position (pos, this);
+	r->set_position (pos);
 	_session->add_command(new StatefulDiffCommand (r));
 
 	/* move rest by the same amount */
@@ -3014,9 +3014,9 @@ Editor::align_regions_relative (RegionPoint point)
 		region->clear_changes ();
 
 		if (dir > 0) {
-			region->set_position (region->position() + distance, this);
+			region->set_position (region->position() + distance);
 		} else {
-			region->set_position (region->position() - distance, this);
+			region->set_position (region->position() - distance);
 		}
                 
 		_session->add_command(new StatefulDiffCommand (region));
@@ -3041,17 +3041,17 @@ Editor::align_region_internal (boost::shared_ptr<Region> region, RegionPoint poi
 
 	switch (point) {
 	case SyncPoint:
-		region->set_position (region->adjust_to_sync (position), this);
+		region->set_position (region->adjust_to_sync (position));
 		break;
 
 	case End:
 		if (position > region->length()) {
-			region->set_position (position - region->length(), this);
+			region->set_position (position - region->length());
 		}
 		break;
 
 	case Start:
-		region->set_position (position, this);
+		region->set_position (position);
 		break;
 	}
 
@@ -3093,9 +3093,9 @@ Editor::trim_region (bool front)
 			(*i)->region()->clear_changes ();
 			
 			if (front) {
-				(*i)->region()->trim_front (where, this);
+				(*i)->region()->trim_front (where);
 			} else {
-				(*i)->region()->trim_end (where, this);
+				(*i)->region()->trim_end (where);
 			}
 			
 			_session->add_command (new StatefulDiffCommand ((*i)->region()));
@@ -3161,7 +3161,7 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 		end = session_frame_to_track_frame (loc.end(), speed);
                 
 		rv->region()->clear_changes ();
-		rv->region()->trim_to (start, (end - start), this);
+		rv->region()->trim_to (start, (end - start));
 		_session->add_command(new StatefulDiffCommand (rv->region()));
 	}
 
@@ -3223,7 +3223,7 @@ Editor::trim_to_region(bool forward)
 			continue;
 		    }
 
-		    region->trim_end((framepos_t) ( (next_region->first_frame() - 1) * speed), this);
+		    region->trim_end((framepos_t) ( (next_region->first_frame() - 1) * speed));
 		    arv->region_changed (PropertyChange (ARDOUR::Properties::length));
 		}
 		else {
@@ -3234,7 +3234,7 @@ Editor::trim_to_region(bool forward)
 			continue;
 		    }
 
-		    region->trim_front((framepos_t) ((next_region->last_frame() + 1) * speed), this);
+		    region->trim_front((framepos_t) ((next_region->last_frame() + 1) * speed));
 
 		    arv->region_changed (ARDOUR::bounds_change);
 		}
@@ -5712,7 +5712,7 @@ Editor::snap_regions_to_grid ()
 
 		framepos_t start_frame = (*r)->region()->first_frame ();
 		snap_to (start_frame);
-		(*r)->region()->set_position (start_frame, this);
+		(*r)->region()->set_position (start_frame);
 	}
 	
 	while (used_playlists.size() > 0) {
@@ -5808,8 +5808,8 @@ Editor::close_region_gaps ()
 			continue;
 		}
 		
-		(*r)->region()->trim_front( (position - pull_back_frames), this );
-		last_region->trim_end( (position - pull_back_frames + crossfade_len), this );
+		(*r)->region()->trim_front( (position - pull_back_frames));
+		last_region->trim_end( (position - pull_back_frames + crossfade_len));
 		
 		last_region = (*r)->region();
 		

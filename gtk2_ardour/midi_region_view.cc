@@ -1602,7 +1602,7 @@ MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity
 	framepos_t region_end = _region->position() + _region->length() - 1;
 
 	if (end_frame > region_end) {
-		_region->set_length (end_frame - _region->position(), this);
+		_region->set_length (end_frame - _region->position());
 	}
 	
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
@@ -3047,7 +3047,7 @@ MidiRegionView::paste (framepos_t pos, float times, const MidiCutBuffer& mcb)
 		DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste extended region from %1 to %2\n", region_end, end_frame));
 
 		_region->clear_changes ();
-		_region->set_length (end_frame, this);
+		_region->set_length (end_frame);
 		trackview.session()->add_command (new StatefulDiffCommand (_region));
 	}
 

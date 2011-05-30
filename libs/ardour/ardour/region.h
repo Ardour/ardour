@@ -184,24 +184,24 @@ class Region
 
 	/* EDITING OPERATIONS */
 
-	void set_length (framecnt_t, void *src);
-	void set_start (framepos_t, void *src);
-	void set_position (framepos_t, void *src);
-	void set_position_on_top (framepos_t, void *src);
+	void set_length (framecnt_t);
+	void set_start (framepos_t);
+	void set_position (framepos_t);
+	void set_position_on_top (framepos_t);
 	void special_set_position (framepos_t);
 	void update_position_after_tempo_map_change ();
-	void nudge_position (frameoffset_t, void *src);
+	void nudge_position (frameoffset_t);
 
 	bool at_natural_position () const;
-	void move_to_natural_position (void *src);
+	void move_to_natural_position ();
 
-	void trim_start (framepos_t new_position, void *src);
-	void trim_front (framepos_t new_position, void *src);
-	void trim_end (framepos_t new_position, void *src);
-	void trim_to (framepos_t position, framecnt_t length, void *src);
+	void trim_start (framepos_t new_position);
+	void trim_front (framepos_t new_position);
+	void trim_end (framepos_t new_position);
+	void trim_to (framepos_t position, framecnt_t length);
 
-	void cut_front (framepos_t new_position, void *src);
-	void cut_end (framepos_t new_position, void *src);
+	void cut_front (framepos_t new_position);
+	void cut_end (framepos_t new_position);
 
 	void set_layer (layer_t l); /* ONLY Playlist can call this */
 	void raise ();
@@ -335,11 +335,11 @@ class Region
 	void send_change (const PBD::PropertyChange&);
 	void mid_thaw (const PBD::PropertyChange&);
 
-	void trim_to_internal (framepos_t position, framecnt_t length, void *src);
+	void trim_to_internal (framepos_t position, framecnt_t length);
 	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
 	virtual void set_length_internal (framepos_t pos);
-	void modify_front (framepos_t new_position, bool reset_fade, void* src);
-	void modify_end (framepos_t new_position, bool reset_fade, void* src);
+	void modify_front (framepos_t new_position, bool reset_fade);
+	void modify_end (framepos_t new_position, bool reset_fade);
 
 	void maybe_uncopy ();
 	void first_edit ();
