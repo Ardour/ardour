@@ -1236,10 +1236,6 @@ AudioEngine::reconnect_to_jack ()
 		}
 
 		(*i)->reset ();
-
-		if ((*i)->flags() & JackPortIsOutput) {
-			(*i)->silence (jack_get_buffer_size (_priv_jack));
-		}
 	}
 
 	if (i != p->end()) {
