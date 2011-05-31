@@ -54,7 +54,7 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 	tearoff_event_box.set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 	tearoff_event_box.signal_button_release_event().connect (mem_fun (*this, &TearOff::tearoff_click));
 
-        tearoff_event_box.set_tooltip_text (_("Click to to tear this into its own window"));
+	tearoff_event_box.set_tooltip_text (_("Click to tear this into its own window"));
         
 	close_event_box.add (close_arrow);
 	close_event_box.set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
