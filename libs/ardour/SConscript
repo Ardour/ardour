@@ -139,6 +139,23 @@ ardour.Append(CXXFLAGS="-DLOCALEDIR=\\\"" + os.path.join (final_prefix, 'share',
 ardour.Merge ([ libraries['jack'] ])
 
 #
+# See if JACK supports jack_port_type_get_buffer_size()
+#
+jack_port_type_buffer_size_source_file = """
+#include <jack/jack.h>
+int main(int argc, char **argv)
+{
+    jack_port_type_get_buffer_size (0, JACK_DEFAULT_AUDIO_TYPE);
+    return 0;
+}
+"""
+def CheckJackPortTypeGetBufferSize(context):
+        context.Message('Checking for jack_port_type_get_buffer_size()...')
+        result = context.TryLink(jack_port_type_buffer_size_source_file, '.c')
+        context.Result(result)
+        return result
+
+#
 # See if JACK supports jack_client_open()
 #
 
@@ -236,11 +253,15 @@ conf = Configure(ardour, custom_tests = {
 	'CheckJackOnInfoShutdown' : CheckJackOnInfoShutdown,
 	'CheckJackRecomputeLatencies' : CheckJackRecomputeLatencies,
 	'CheckJackVideoFrameOffset' : CheckJackVideoFrameOffset,
-	'CheckJackEnsureMonitorInput' : CheckJackEnsureMonitorInput
+	'CheckJackEnsureMonitorInput' : CheckJackEnsureMonitorInput,
+	'CheckJackPortTypeGetBufferSize' : CheckJackPortTypeGetBufferSize
 })
 
 if conf.CheckJackClientOpen():
 	ardour.Append(CXXFLAGS="-DHAVE_JACK_CLIENT_OPEN")
+
+if conf.CheckJackPortTypeGetBufferSize():
+	ardour.Append(CXXFLAGS="-DHAVE_JACK_PORT_TYPE_GET_BUFFER_SIZE")
 
 if conf.CheckJackOnInfoShutdown():
 	ardour.Append(CXXFLAGS="-DHAVE_JACK_ON_INFO_SHUTDOWN")

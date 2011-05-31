@@ -1249,7 +1249,20 @@ AudioEngine::reconnect_to_jack ()
 
 	if (session) {
 		session->reset_jack_connection (_priv_jack);
-		nframes_t blocksize = jack_get_buffer_size (_priv_jack);
+                
+                nframes_t blocksize;
+
+#ifdef HAVE_JACK_PORT_TYPE_GET_BUFFER_SIZE
+                if (jack_port_type_get_buffer_size) {
+                        blocksize = jack_port_type_get_buffer_size (_priv_jack, JACK_DEFAULT_AUDIO_TYPE);
+                } else {
+                        warning << _("This version of JACK is old - you should upgrade to a newer version that supports jack_port_type_get_buffer_size()") << endmsg;
+                        blocksize = jack_get_buffer_size (_priv_jack);
+                }
+#else
+                blocksize = jack_get_buffer_size (_priv_jack);
+#endif
+                
 		Port::set_buffer_size (blocksize);
 		session->set_block_size (blocksize);
 		session->set_frame_rate (jack_get_sample_rate (_priv_jack));
