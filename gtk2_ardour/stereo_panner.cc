@@ -141,7 +141,7 @@ StereoPanner::on_expose_event (GdkEventExpose* ev)
         double swidth = width_control->get_value (); /* -1..+1 */
         double fswidth = fabs (swidth);
         uint32_t o, f, t, b, r;
-        State state;
+       State state;
         const double corner_radius = 5.0;
 
         width = get_width();
