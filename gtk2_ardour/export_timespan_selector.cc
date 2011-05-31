@@ -330,7 +330,7 @@ ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * se
 	range_id (range_id)
 {
 	range_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
-	range_view.append_column_editable ("Range", range_cols.name);
+	range_view.append_column_editable (_("Range"), range_cols.name);
 
 	// Adjust selector height
 	int x_offset, y_offset, width, height;
@@ -343,11 +343,11 @@ ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * se
 	}
 
 	Gtk::CellRendererText * label_render = Gtk::manage (new Gtk::CellRendererText());
-	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column ("Time Span", *label_render));
+	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column (_("Time Span"), *label_render));
 	label_col->add_attribute (label_render->property_markup(), range_cols.label);
 	range_view.append_column (*label_col);
 
-	range_view.append_column ("Length", range_cols.length);
+	range_view.append_column (_("Length"), range_cols.length);
 }
 
 void
@@ -397,7 +397,7 @@ ExportTimespanSelectorMultiple::ExportTimespanSelectorMultiple (ARDOUR::Session 
 {
 	range_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	range_view.append_column_editable ("", range_cols.selected);
-	range_view.append_column_editable ("Range", range_cols.name);
+	range_view.append_column_editable (_("Range"), range_cols.name);
 
 	if (Gtk::CellRendererToggle * renderer = dynamic_cast<Gtk::CellRendererToggle *> (range_view.get_column_cell_renderer (0))) {
 		renderer->signal_toggled().connect (sigc::hide (sigc::mem_fun (*this, &ExportTimespanSelectorMultiple::update_selection)));
@@ -407,11 +407,11 @@ ExportTimespanSelectorMultiple::ExportTimespanSelectorMultiple (ARDOUR::Session 
 	}
 
 	Gtk::CellRendererText * label_render = Gtk::manage (new Gtk::CellRendererText());
-	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column ("Time Span", *label_render));
+	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column (_("Time Span"), *label_render));
 	label_col->add_attribute (label_render->property_markup(), range_cols.label);
 	range_view.append_column (*label_col);
 
-	range_view.append_column ("Length", range_cols.length);
+	range_view.append_column (_("Length"), range_cols.length);
 }
 
 void
