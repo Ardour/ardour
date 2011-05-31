@@ -4331,7 +4331,10 @@ Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv
 	vector<Evoral::Sequence<Evoral::MusicalTime>::Notes> v;
 	v.push_back (selected);
 
-	return op (mrv.midi_region()->model(), v);
+	framepos_t pos_frames = mrv.midi_region()->position();
+	double     pos_beats  = _session->tempo_map().framewalk_to_beats(0, pos_frames);
+
+	return op (mrv.midi_region()->model(), pos_beats, v);
 }
 
 void

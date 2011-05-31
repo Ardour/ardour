@@ -37,7 +37,9 @@ class MidiOperator {
 	MidiOperator () {}
 	virtual ~MidiOperator() {}
 
-	virtual Command* operator() (boost::shared_ptr<ARDOUR::MidiModel>, std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>&) = 0;
+	virtual Command* operator() (boost::shared_ptr<ARDOUR::MidiModel>,
+	                             double,
+	                             std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>&) = 0;
 	virtual std::string name() const = 0;
 };
 

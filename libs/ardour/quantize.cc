@@ -60,8 +60,17 @@ Quantize::~Quantize ()
 }
 
 Command*
-Quantize::operator () (boost::shared_ptr<MidiModel> model, std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>& seqs)
+Quantize::operator () (boost::shared_ptr<MidiModel> model,
+                       double position,
+                       std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>& seqs)
 {
+	/* Calculate offset from start of model to next closest quantize step,
+	   to quantize relative to actual session beats (etc.) rather than from the
+	   start of the model.
+	*/
+	const double round_pos = ceil(position / _start_grid) * _start_grid;
+	const double offset    = round_pos - position;
+
 	bool even;
 	MidiModel::NoteDiffCommand* cmd = new MidiModel::NoteDiffCommand (model, "quantize");
 
@@ -71,9 +80,8 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model, std::vector<Evoral::S
 
 		for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = (*s).begin(); i != (*s).end(); ++i) {
 
-			double new_start = round ((*i)->time() / _start_grid) * _start_grid;
-			double new_end = round ((*i)->end_time() / _end_grid) * _end_grid;
-			double delta;
+			double new_start = round ((*i)->time() / _start_grid) * _start_grid + offset;
+			double new_end = round ((*i)->end_time() / _end_grid) * _end_grid + offset;
 
 			if (_swing > 0.0 && !even) {
 
@@ -97,7 +105,7 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model, std::vector<Evoral::S
 
 			}
 
-			delta = new_start - (*i)->time();
+			double delta = new_start - (*i)->time();
 
 			if (fabs (delta) >= _threshold) {
 				if (_snap_start) {
