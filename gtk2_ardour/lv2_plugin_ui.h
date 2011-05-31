@@ -87,6 +87,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 			const void* buffer);
 
 	void lv2ui_instantiate(const std::string& title);
+	void lv2ui_free();
 
 	void parameter_update(uint32_t, float);
 	bool configure_handler (GdkEventConfigure*);

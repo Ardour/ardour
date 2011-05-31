@@ -118,8 +118,7 @@ LV2PluginUI::stop_updating(GdkEventAny*)
 {
 	//cout << "stop_updating" << endl;
 
-	if ( //!_external_ui_ptr &&
-	    !_output_ports.empty()) {
+	if (!_output_ports.empty()) {
 		_screen_update_connection.disconnect();
 	}
 	return false;
@@ -146,13 +145,11 @@ LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
                          boost::shared_ptr<LV2Plugin>    lv2p)
 	: PlugUIBase(pi)
 	, _lv2(lv2p)
+	, _gui_widget(NULL)
 	, _values(NULL)
 	, _external_ui_ptr(NULL)
 	, _inst(NULL)
 {
-	if (!_lv2->is_external_ui()) {
-		lv2ui_instantiate("gtk2gui");
-	}
 }
 
 void
@@ -264,15 +261,16 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	}
 }
 
-LV2PluginUI::~LV2PluginUI ()
+void
+LV2PluginUI::lv2ui_free()
 {
-	//cout << "LV2PluginUI destructor called" << endl;
-
-	if (_values) {
-		delete[] _values;
+	if (_lv2->is_external_ui() || !_gui_widget) {
+		return;
 	}
 
-	/* Close and delete GUI. */
+	stop_updating(NULL);
+	remove(*_gui_widget);
+
 #ifdef HAVE_SUIL
 	suil_instance_free((SuilInstance*)_inst);
 #else
@@ -284,6 +282,21 @@ LV2PluginUI::~LV2PluginUI ()
 		ui_desc->cleanup(ui_handle);
 	}
 #endif
+
+	_inst = NULL;
+	_gui_widget = NULL;
+}
+
+LV2PluginUI::~LV2PluginUI ()
+{
+	//cout << "LV2PluginUI destructor called" << endl;
+
+	if (_values) {
+		delete[] _values;
+	}
+
+	/* Close and delete GUI. */
+	lv2ui_free();
 
 	_screen_update_connection.disconnect();
 
@@ -362,6 +375,8 @@ LV2PluginUI::on_window_show(const std::string& title)
 		_screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
 		        (sigc::mem_fun(*this, &LV2PluginUI::output_update));
 		return false;
+	} else {
+		lv2ui_instantiate("gtk2gui");
 	}
 
 	return true;
@@ -377,5 +392,7 @@ LV2PluginUI::on_window_hide()
 		//slv2_ui_instance_get_descriptor(_inst)->cleanup(_inst);
 		//_external_ui_ptr = NULL;
 		//_screen_update_connection.disconnect();
+	} else {
+		lv2ui_free();
 	}
 }
