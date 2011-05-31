@@ -78,11 +78,11 @@ foreach my $tmp (keys %sources) {
 	       "-t", "raw",        # /dev/zero is raw :)
 	       "-r", $samplerate,  # set sample rate
 	       "-c", "1",	   # 1 channel
-	       "-b", "8"	   # input in 8 bit chunks
+	       "-b", "8",	   # input in 8 bit chunks
 	       "-s",               # signed
 	       "/dev/zero",        # input signal
 
-	       "-b", "16"	   # input in 16 bit chunks
+	       "-b", "16",	   # input in 16 bit chunks
 	       "-t", "wav",        # format wav
 	       $audioFileDirectory."/".$sources{$tmp}->{name}, # filename
 	       "trim", "0", $sources{$tmp}->{calculated_length}."s" # trim silence to wanted sample amount
