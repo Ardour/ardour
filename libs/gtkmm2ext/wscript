@@ -26,6 +26,7 @@ gtkmm2ext_sources = [
         'binding_proxy.cc',
         'bindable_button.cc',
         'bindings.cc',
+        'cairocell.cc',
         'cell_renderer_pixbuf_multi.cc',
         'cell_renderer_pixbuf_toggle.cc',
         'choice.cc',
