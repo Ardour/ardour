@@ -28,11 +28,11 @@
 namespace ARDOUR {
 
 struct SoundFileInfo {
-    float       samplerate;
-    uint16_t    channels;
-    int64_t     length;
-    std::string format_name;
-    int64_t     timecode;
+	float       samplerate;
+	uint16_t    channels;
+	int64_t     length;
+	std::string format_name;
+	int64_t     timecode;
 };
 
 class AudioFileSource : public AudioSource, public FileSource {
