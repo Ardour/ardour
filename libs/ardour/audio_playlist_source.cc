@@ -46,7 +46,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-AudioPlaylistSource::AudioPlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<AudioPlaylist> p, 
+AudioPlaylistSource::AudioPlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<AudioPlaylist> p,
 					  uint32_t chn, frameoffset_t begin, framecnt_t len, Source::Flag flags)
 	: Source (s, DataType::AUDIO, name)
 	, PlaylistSource (s, orig, name, p, DataType::AUDIO, begin, len, flags)
@@ -68,7 +68,7 @@ AudioPlaylistSource::AudioPlaylistSource (Session& s, const XMLNode& node)
 	/* ancestors have already called ::set_state() in their XML-based
 	   constructors.
 	*/
-	
+
 	if (set_state (node, Stateful::loading_state_version, false)) {
 		throw failed_constructor ();
 	}
@@ -93,18 +93,18 @@ AudioPlaylistSource::get_state ()
 
 	return node;
 }
-	
+
 int
-AudioPlaylistSource::set_state (const XMLNode& node, int version) 
+AudioPlaylistSource::set_state (const XMLNode& node, int version)
 {
 	return set_state (node, version, true);
 }
 
 int
-AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_descendants) 
+AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_descendants)
 {
 	if (with_descendants) {
-		if (Source::set_state (node, version) || 
+		if (Source::set_state (node, version) ||
 		    PlaylistSource::set_state (node, version) ||
 		    AudioSource::set_state (node, version)) {
 			return -1;
@@ -126,7 +126,7 @@ AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_desc
 	return 0;
 }
 
-framecnt_t 
+framecnt_t
 AudioPlaylistSource::read_unlocked (Sample* dst, framepos_t start, framecnt_t cnt) const
 {
 	boost::shared_ptr<Sample> sbuf;
@@ -148,7 +148,7 @@ AudioPlaylistSource::read_unlocked (Sample* dst, framepos_t start, framecnt_t cn
 		to_zero = 0;
 	}
 
-	{ 
+	{
 		/* Don't need to hold the lock for the actual read, and
 		   actually, we cannot, but we do want to interlock
 		   with any changes to the list of buffers caused
@@ -168,8 +168,8 @@ AudioPlaylistSource::read_unlocked (Sample* dst, framepos_t start, framecnt_t cn
 	return cnt;
 }
 
-framecnt_t 
-AudioPlaylistSource::write_unlocked (Sample *src, framecnt_t cnt) 
+framecnt_t
+AudioPlaylistSource::write_unlocked (Sample *src, framecnt_t cnt)
 {
 	fatal << string_compose (_("programming error: %1"), "AudioPlaylistSource::write() called - should be impossible") << endmsg;
 	/*NOTREACHED*/

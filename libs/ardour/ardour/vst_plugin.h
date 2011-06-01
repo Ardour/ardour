@@ -100,7 +100,7 @@ private:
 	bool load_user_preset (PresetRecord);
 	bool load_plugin_preset (PresetRecord);
 	void add_state (XMLNode *) const;
-	
+
 	FSTHandle* handle;
 	FST*       _fst;
 	AEffect*   _plugin;

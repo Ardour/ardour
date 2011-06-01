@@ -249,7 +249,7 @@ IOProcessor::silence (framecnt_t nframes)
 	}
 }
 
-void 
+void
 IOProcessor::increment_port_buffer_offset (pframes_t offset)
 {
         if (_own_output && _output) {

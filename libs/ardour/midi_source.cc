@@ -130,7 +130,7 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 				error << _("Missing parameter property on InterpolationStyle") << endmsg;
 				return -1;
 			}
-			
+
 			Evoral::Parameter p = EventTypeMap::instance().new_parameter (prop->value());
 
 			if ((prop = (*i)->property (X_("style"))) == 0) {
@@ -140,16 +140,16 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 
 			Evoral::ControlList::InterpolationStyle s = static_cast<Evoral::ControlList::InterpolationStyle> (string_2_enum (prop->value(), s));
 			set_interpolation_of (p, s);
-			
+
 		} else if ((*i)->name() == X_("AutomationState")) {
-			
+
 			XMLProperty* prop;
 
 			if ((prop = (*i)->property (X_("parameter"))) == 0) {
 				error << _("Missing parameter property on AutomationState") << endmsg;
 				return -1;
 			}
-			
+
 			Evoral::Parameter p = EventTypeMap::instance().new_parameter (prop->value());
 
 			if ((prop = (*i)->property (X_("state"))) == 0) {
@@ -325,14 +325,14 @@ MidiSource::clone (Evoral::MusicalTime begin, Evoral::MusicalTime end)
 	/* get a new name for the MIDI file we're going to write to
 	 */
 
-	do { 
+	do {
 
 		newname = bump_name_once (newname, '-');
 		/* XXX build path safely */
 		newpath = _session.session_directory().midi_path().to_string() +"/"+ newname + ".mid";
 
 	} while (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS));
-        
+
 	boost::shared_ptr<MidiSource> newsrc = boost::dynamic_pointer_cast<MidiSource>(
 		SourceFactory::createWritable(DataType::MIDI, _session,
 		                              newpath, string(), false, _session.frame_rate()));
@@ -355,20 +355,20 @@ MidiSource::clone (Evoral::MusicalTime begin, Evoral::MusicalTime end)
 	newsrc->flush_midi();
 
 	/* force a reload of the model if the range is partial */
-        
+
 	if (begin != Evoral::MinMusicalTime || end != Evoral::MaxMusicalTime) {
 		newsrc->load_model (true, true);
 	} else {
 		newsrc->set_model (_model);
 	}
-        
+
 	return newsrc;
 }
 
 void
 MidiSource::session_saved()
 {
-	/* this writes a copy of the data to disk. 
+	/* this writes a copy of the data to disk.
 	   XXX do we need to do this every time?
 	*/
 
@@ -383,7 +383,7 @@ MidiSource::session_saved()
 		*/
 
 		boost::shared_ptr<MidiModel> mm = _model ;
-		_model.reset ();   
+		_model.reset ();
 
 		/* flush model contents to disk
 		 */
@@ -410,7 +410,7 @@ MidiSource::set_note_mode(NoteMode mode)
 void
 MidiSource::drop_model ()
 {
-	_model.reset(); 
+	_model.reset();
 	ModelChanged (); /* EMIT SIGNAL */
 }
 
@@ -457,7 +457,7 @@ MidiSource::set_interpolation_of (Evoral::Parameter p, Evoral::ControlList::Inte
 	if (interpolation_of (p) == s) {
 		return;
 	}
-	
+
 	if (EventTypeMap::instance().interpolation_of (p) == s) {
 		/* interpolation type is being set to the default, so we don't need a note in our map */
 		_interpolation_style.erase (p);
@@ -474,7 +474,7 @@ MidiSource::set_automation_state_of (Evoral::Parameter p, AutoState s)
 	if (automation_state_of (p) == s) {
 		return;
 	}
-	
+
 	if (s == Play) {
 		/* automation state is being set to the default, so we don't need a note in our map */
 		_automation_state.erase (p);

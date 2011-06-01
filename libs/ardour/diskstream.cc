@@ -355,7 +355,7 @@ Diskstream::get_captured_frames (uint32_t n) const
 	if (capture_info.size() > n) {
 		/* this is a completed capture */
 		return capture_info[n]->frames;
-	} else {  
+	} else {
 		/* this is the currently in-progress capture */
 		return capture_captured;
 	}
@@ -481,7 +481,7 @@ Diskstream::get_state ()
 	if (_extra_xml) {
 		node->add_child_copy (*_extra_xml);
 	}
-        
+
         return *node;
 }
 
@@ -548,11 +548,11 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const &
 	   automation undo (it must, since automation-follows-regions
 	   can lose automation data).  Hence we can do nothing here.
 	*/
-	
+
 	if (from_undo) {
 		return;
 	}
-	
+
 	if (!_track || Config->get_automation_follows_regions () == false) {
 		return;
 	}
@@ -569,14 +569,14 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const &
 	/* move panner automation */
 	boost::shared_ptr<Pannable> pannable = _track->pannable();
         Evoral::ControlSet::Controls& c (pannable->controls());
-        
+
         for (Evoral::ControlSet::Controls::iterator ci = c.begin(); ci != c.end(); ++ci) {
                 boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl>(ci->second);
                 if (!ac) {
                         continue;
                 }
                 boost::shared_ptr<AutomationList> alist = ac->alist();
-                
+
                 XMLNode & before = alist->get_state ();
                 bool const things_moved = alist->move_ranges (movements);
                 if (things_moved) {
@@ -657,19 +657,19 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
                                                                       name(), first_recordable_frame, last_recordable_frame, capture_start_frame,
                                                                       _capture_offset,
                                                                       existing_material_offset,
-                                                                      transport_frame, 
+                                                                      transport_frame,
                                                                       _roll_delay,
                                                                       _session.transport_frame(),
                                                                       _session.worst_output_latency(),
                                                                       _session.worst_track_latency()));
-                                                                    
+
 
                 if (_alignment_style == ExistingMaterial) {
                         first_recordable_frame += existing_material_offset;
                         DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tshift FRF by EMO %1\n",
                                                                               first_recordable_frame));
-                } 
-                
+                }
+
                 prepare_record_status (capture_start_frame);
 
         } else {
@@ -677,22 +677,22 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
                 if (last_possibly_recording == fully_rec_enabled) {
 
                         /* we were recording last time */
-                        
+
                         if (change & transport_rolling) {
 
                                 /* transport-change (stopped rolling): last_recordable_frame was set in ::prepare_to_stop(). We
                                    had to set it there because we likely rolled past the stopping point to declick out,
                                    and then backed up.
                                  */
-                                
+
                         } else {
                                 /* punch out */
-                                
+
                                 last_recordable_frame = _session.transport_frame() + _capture_offset;
-                                
+
                                 if (_alignment_style == ExistingMaterial) {
                                         last_recordable_frame += existing_material_offset;
-                                } 
+                                }
                         }
                 }
         }
@@ -751,7 +751,7 @@ Diskstream::calculate_record_range(OverlapType ot, framepos_t transport_frame, f
 	}
 
         DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 rec? %2 @ %3 (for %4) FRF %5 LRF %6 : rf %7 @ %8\n",
-                                                              _name, enum_2_string (ot), transport_frame, nframes, 
+                                                              _name, enum_2_string (ot), transport_frame, nframes,
                                                               first_recordable_frame, last_recordable_frame, rec_nframes, rec_offset));
 }
 

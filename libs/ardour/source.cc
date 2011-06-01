@@ -149,7 +149,7 @@ Source::set_state (const XMLNode& node, int version)
 	}
 
 	if (version < 3000) {
-		/* a source with an XML node must necessarily already exist, 
+		/* a source with an XML node must necessarily already exist,
 		   and therefore cannot be removable/writable etc. etc.; 2.X
 		   sometimes marks sources as removable which shouldn't be.
 		*/
@@ -254,10 +254,10 @@ Source::mark_for_remove ()
 {
 	// This operation is not allowed for sources for destructive tracks or out-of-session files.
 
-	/* XXX need a way to detect _within_session() condition here - move it from FileSource? 
+	/* XXX need a way to detect _within_session() condition here - move it from FileSource?
 	 */
 
-	if ((_flags & Destructive)) { 
+	if ((_flags & Destructive)) {
 		return;
 	}
 
@@ -300,7 +300,7 @@ Source::dec_use_count ()
                 abort ();
         }
         assert (oldval > 0);
-#else 
+#else
         g_atomic_int_exchange_and_add (&_use_count, -1);
 #endif
 }

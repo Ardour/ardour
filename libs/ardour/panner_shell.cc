@@ -167,9 +167,9 @@ PannerShell::set_state (const XMLNode& node, int version)
 						   are of the same type. pretty good
 						   assumption, but it's still an assumption.
 						*/
-                                                        
+
                                                 _panner.reset ((*p)->descriptor.factory (_pannable, _session.get_speakers ()));
-                                                
+
 						if (_panner->set_state (**niter, version) == 0) {
                                                         return -1;
                                                 }
@@ -306,7 +306,7 @@ PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame,
 
 		// Speed quietning
 		gain_t gain_coeff = 1.0;
-                
+
 		if (fabsf(_session.transport_speed()) > 1.5f && Config->get_quieten_at_speed ()) {
 			gain_coeff = speed_quietning;
 		}
@@ -321,7 +321,7 @@ PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame,
                 for (BufferSet::audio_iterator i = outbufs.audio_begin(); i != outbufs.audio_end(); ++i) {
                         i->silence(nframes);
                 }
-                
+
                 _panner->distribute_automated (inbufs, outbufs, start_frame, end_frame, nframes, _session.pan_automation_buffer());
         }
 }

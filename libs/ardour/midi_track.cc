@@ -98,7 +98,7 @@ void
 MidiTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 {
 	Track::set_diskstream (ds);
-	
+
 	_diskstream->set_track (this);
 	_diskstream->set_destructive (_mode == Destructive);
 
@@ -440,7 +440,7 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes)
 			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
 
 			/* note on, since for step edit, note length is determined
-			   elsewhere 
+			   elsewhere
 			*/
 
 			if (ev.is_note_on()) {
@@ -460,7 +460,7 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framep
 
 	if (_immediate_events.read_space()) {
 
-		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 has %2 of immediate events to deliver\n", 
+		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 has %2 of immediate events to deliver\n",
 		                                            name(), _immediate_events.read_space()));
 
 		/* write as many of the immediate events as we can, but give "true" as
@@ -468,10 +468,10 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framep
 		 * ship the rest out next time.
 		 *
 		 * the (nframes-1) argument puts all these events at the last
-		 * possible position of the output buffer, so that we do not 
+		 * possible position of the output buffer, so that we do not
 		 * violate monotonicity when writing.
 		 */
-		
+
 		_immediate_events.read (buf, 0, 1, nframes-1, true);
 	}
 
@@ -664,7 +664,7 @@ MidiTrack::diskstream_data_recorded (boost::shared_ptr<MidiBuffer> buf, boost::w
 {
 	DataRecorded (buf, src); /* EMIT SIGNAL */
 }
-			       
+
 bool
 MidiTrack::should_monitor () const
 {

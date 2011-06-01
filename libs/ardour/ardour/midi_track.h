@@ -31,7 +31,7 @@ class Session;
 class MidiDiskstream;
 class MidiPlaylist;
 class RouteGroup;
-class SMFSource;	
+class SMFSource;
 
 class MidiTrack : public Track
 {
@@ -40,13 +40,13 @@ public:
 	~MidiTrack ();
 
 	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-                  int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
+	          int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
 
 	void realtime_handle_transport_stopped ();
 	void realtime_locate ();
 
 	void use_new_diskstream ();
-        void set_diskstream (boost::shared_ptr<Diskstream>);
+	void set_diskstream (boost::shared_ptr<Diskstream>);
 	void set_record_enabled (bool yn, void *src);
 
 	DataType data_type () const {
@@ -57,7 +57,7 @@ public:
 
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
-        
+
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
 	boost::shared_ptr<Region> bounce_range (
 			framepos_t start, framepos_t end, InterThreadInfo&, bool enable_processing
@@ -88,7 +88,7 @@ public:
 	void set_step_editing (bool yn);
 	MidiRingBuffer<framepos_t>& step_edit_ring_buffer() { return _step_edit_ring_buffer; }
 
-        PBD::Signal1<void,bool> StepEditStatusChange;
+	PBD::Signal1<void,bool> StepEditStatusChange;
 
 	bool midi_thru() const { return _midi_thru; }
 	void set_midi_thru (bool yn);
@@ -102,15 +102,15 @@ public:
 	bool bounceable () const {
 		return false;
 	}
-	
+
 	PBD::Signal2<void, boost::shared_ptr<MidiBuffer>, boost::weak_ptr<MidiSource> > DataRecorded;
 
 protected:
 	XMLNode& state (bool full);
-	
+
 	int _set_state (const XMLNode&, int, bool call_base);
-        bool should_monitor () const;
-        bool send_silence () const;
+	bool should_monitor () const;
+	bool send_silence () const;
 
   private:
 	boost::shared_ptr<MidiDiskstream> midi_diskstream () const;

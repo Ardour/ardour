@@ -44,10 +44,10 @@ class SndFileImportableSource : public ImportableSource {
    protected:
 	SF_INFO sf_info;
 	boost::shared_ptr<SNDFILE> in;
-        
-        /* these are int64_t so as to be independent of whatever
-           types Ardour may use for framepos_t, framecnt_t etc.
-        */
+
+	/* these are int64_t so as to be independent of whatever
+	   types Ardour may use for framepos_t, framecnt_t etc.
+	*/
 
 	int64_t timecode;
 	int64_t get_timecode_info (SNDFILE*, SF_BROADCAST_INFO*, bool&);

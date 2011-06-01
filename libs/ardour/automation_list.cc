@@ -219,7 +219,7 @@ AutomationList::stop_touch (bool mark, double when)
 		*/
 		return;
 	}
-	
+
 	g_atomic_int_set (&_touching, 0);
 
         if (_state == Touch) {
@@ -227,13 +227,13 @@ AutomationList::stop_touch (bool mark, double when)
 		assert (!nascent.empty ());
 
                 Glib::Mutex::Lock lm (ControlList::_lock);
-                
+
                 if (mark) {
 
 			nascent.back()->end_time = when;
-                        
+
                 } else {
-                        
+
                         /* nascent info created in start touch but never used. just get rid of it.
                          */
 
@@ -495,7 +495,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 	}
 
 	bool have_events = false;
-	
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == X_("events")) {
 			deserialize_events (*(*niter));

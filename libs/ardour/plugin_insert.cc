@@ -426,23 +426,23 @@ PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end
 			}
 
 			bufs.count().set_audio (out);
-		
+
 		} else {
 
 			/* does this need to be done with MIDI? it appears not */
-			
+
 			uint32_t in = _plugins[0]->get_info()->n_inputs.n_audio();
 			uint32_t out = _plugins[0]->get_info()->n_outputs.n_audio();
-			
+
 			if (out > in) {
-				
+
 				/* not active, but something has make up for any channel count increase */
-				
+
 				for (uint32_t n = out - in; n < out; ++n) {
 					memcpy (bufs.get_audio(n).data(), bufs.get_audio(in - 1).data(), sizeof (Sample) * nframes);
 				}
 			}
-			
+
 			bufs.count().set_audio (out);
 		}
 	}

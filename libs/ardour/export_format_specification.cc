@@ -219,7 +219,7 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 
 	set_silence_beginning (other.silence_beginning_time());
 	set_silence_end (other.silence_end_time());
-	
+
 	set_extension(other.extension());
 }
 

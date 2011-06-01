@@ -47,10 +47,10 @@ public:
 
 	virtual ~Port ();
 
-	static void set_connecting_blocked( bool yn ) { 
+	static void set_connecting_blocked( bool yn ) {
 		_connecting_blocked = yn;
 	}
-	static bool connecting_blocked() { 
+	static bool connecting_blocked() {
 		return _connecting_blocked;
 	}
 
@@ -95,19 +95,19 @@ public:
 	int reestablish ();
 	int reconnect ();
 	void request_monitor_input (bool);
-        
-        bool last_monitor() const { return _last_monitor; }
-        void set_last_monitor (bool yn) { _last_monitor = yn; }
 
-        jack_port_t* jack_port() const { return _jack_port; }
-        
-        void get_connected_latency_range (jack_latency_range_t& range, bool playback) const;
+	bool last_monitor() const { return _last_monitor; }
+	void set_last_monitor (bool yn) { _last_monitor = yn; }
 
-        void set_private_latency_range (jack_latency_range_t& range, bool playback);
-        const jack_latency_range_t&  private_latency_range (bool playback) const;
+	jack_port_t* jack_port() const { return _jack_port; }
 
-        void set_public_latency_range (jack_latency_range_t& range, bool playback) const;
-        jack_latency_range_t public_latency_range (bool playback) const;
+	void get_connected_latency_range (jack_latency_range_t& range, bool playback) const;
+
+	void set_private_latency_range (jack_latency_range_t& range, bool playback);
+	const jack_latency_range_t&  private_latency_range (bool playback) const;
+
+	void set_public_latency_range (jack_latency_range_t& range, bool playback) const;
+	jack_latency_range_t public_latency_range (bool playback) const;
 
 	virtual void reset ();
 
@@ -120,16 +120,16 @@ public:
 	virtual void transport_stopped () {}
 	virtual void realtime_locate () {}
 
-        bool physically_connected () const;
+	bool physically_connected () const;
 
 	static void set_engine (AudioEngine *);
 
 	PBD::Signal1<void,bool> MonitorInputChanged;
 
 
-        static void set_cycle_framecnt (pframes_t n) {
-                _cycle_nframes = n;
-        }
+	static void set_cycle_framecnt (pframes_t n) {
+		_cycle_nframes = n;
+	}
 	static framecnt_t port_offset() { return _global_port_buffer_offset; }
 	static void set_global_port_buffer_offset (pframes_t off) {
 		_global_port_buffer_offset = off;
@@ -138,7 +138,7 @@ public:
 		_global_port_buffer_offset += n;
 	}
 
-        virtual void increment_port_buffer_offset (pframes_t n);
+	virtual void increment_port_buffer_offset (pframes_t n);
 
 protected:
 
@@ -148,13 +148,13 @@ protected:
 
 	static bool	  _connecting_blocked;
 	static pframes_t  _global_port_buffer_offset;   /* access only from process() tree */
-        static pframes_t  _cycle_nframes; /* access only from process() tree */
+	static pframes_t  _cycle_nframes; /* access only from process() tree */
 
-        framecnt_t _port_buffer_offset; /* access only from process() tree */
+	framecnt_t _port_buffer_offset; /* access only from process() tree */
 
-        jack_latency_range_t _private_playback_latency;
-        jack_latency_range_t _private_capture_latency;
-        
+	jack_latency_range_t _private_playback_latency;
+	jack_latency_range_t _private_capture_latency;
+
 	static AudioEngine* _engine; ///< the AudioEngine
 
 private:
@@ -163,8 +163,8 @@ private:
 	bool        _last_monitor;
 
 	/** ports that we are connected to, kept so that we can
-	    reconnect to JACK when required 
-        */
+	    reconnect to JACK when required
+	*/
 	std::set<std::string> _connections;
 
 };

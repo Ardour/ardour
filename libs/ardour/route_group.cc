@@ -51,7 +51,7 @@ namespace ARDOUR {
 		PropertyDescriptor<bool> select;
 		PropertyDescriptor<bool> edit;
 		PropertyDescriptor<bool> route_active;
-	}	
+	}
 }
 
 void
@@ -116,7 +116,7 @@ RouteGroup::~RouteGroup ()
 		++tmp;
 
 		(*i)->leave_route_group ();
-		
+
 		i = tmp;
 	}
 }
@@ -130,14 +130,14 @@ RouteGroup::add (boost::shared_ptr<Route> r)
 	if (find (routes->begin(), routes->end(), r) != routes->end()) {
 		return 0;
 	}
-	
+
 	r->leave_route_group ();
 
 	routes->push_back (r);
 
 	r->join_route_group (this);
 	r->DropReferences.connect_same_thread (*this, boost::bind (&RouteGroup::remove_when_going_away, this, boost::weak_ptr<Route> (r)));
-	
+
 	_session.set_dirty ();
 	MembershipChanged (); /* EMIT SIGNAL */
 	return 0;
@@ -216,12 +216,12 @@ XMLNode&
 RouteGroup::get_state (void)
 {
 	XMLNode *node = new XMLNode ("RouteGroup");
-	
+
 	add_properties (*node);
 
 	if (!routes->empty()) {
 		stringstream str;
-		
+
 		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 			str << (*i)->id () << ' ';
 		}
@@ -247,14 +247,14 @@ RouteGroup::set_state (const XMLNode& node, int version)
 		stringstream str (prop->value());
 		vector<string> ids;
 		split (str.str(), ids, ' ');
-		
+
 		for (vector<string>::iterator i = ids.begin(); i != ids.end(); ++i) {
 			PBD::ID id (*i);
 			boost::shared_ptr<Route> r = _session.route_by_id (id);
-			
+
 			if (r) {
 				add (r);
-			} 
+			}
 		}
 	}
 
@@ -357,7 +357,7 @@ RouteGroup::set_active (bool yn, void* /*src*/)
 
 	_active = yn;
 	send_change (PropertyChange (Properties::active));
-		
+
 	_session.set_dirty ();
 }
 
@@ -377,7 +377,7 @@ RouteGroup::set_hidden (bool yn, void* /*src*/)
 	if (is_hidden() == yn) {
 		return;
 	}
-	
+
 	if (yn) {
 		_hidden = true;
 		if (Config->get_hiding_groups_deactivates_groups()) {
@@ -391,7 +391,7 @@ RouteGroup::set_hidden (bool yn, void* /*src*/)
 	}
 
 	PropertyChanged (Properties::hidden); /* EMIT SIGNAL */
-	
+
 	_session.set_dirty ();
 }
 
@@ -442,7 +442,7 @@ RouteGroup::make_subgroup (bool aux, Placement placement)
 	} else {
 
 		boost::shared_ptr<Bundle> bundle = subgroup_bus->input()->bundle ();
-		
+
 		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 			(*i)->output()->disconnect (this);
 			(*i)->output()->connect_ports_to_bundle (bundle, this);
@@ -456,7 +456,7 @@ RouteGroup::destroy_subgroup ()
 	if (!subgroup_bus) {
 		return;
 	}
-	
+
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		(*i)->output()->disconnect (this);
 		/* XXX find a new bundle to connect to */

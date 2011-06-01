@@ -47,7 +47,7 @@ class Processor : public SessionObject, public Automatable, public Latent
 	static const std::string state_node_name;
 
 	Processor(Session&, const std::string& name);
-        Processor (const Processor& other);
+	Processor (const Processor& other);
 
 	virtual ~Processor() { }
 
@@ -64,17 +64,17 @@ class Processor : public SessionObject, public Automatable, public Latent
 	virtual framecnt_t signal_latency() const { return 0; }
 
 	virtual int set_block_size (pframes_t /*nframes*/) { return 0; }
-        virtual bool requires_fixed_sized_buffers() const { return false; }
+	virtual bool requires_fixed_sized_buffers() const { return false; }
 
 	/** @param result_required true if, on return from this method, @a bufs is required to contain valid data;
 	 *  if false, the method need not bother writing to @a bufs if it doesn't want to.
-	 */  
+	 */
 	virtual void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t /*nframes*/, bool /*result_required*/) {}
 	virtual void silence (framecnt_t /*nframes*/) {}
 
 	virtual void activate ()   { _pending_active = true; ActiveChanged(); }
 	virtual void deactivate () { _pending_active = false; ActiveChanged(); }
-        virtual void flush() {}
+	virtual void flush() {}
 
 	virtual bool configure_io (ChanCount in, ChanCount out);
 
@@ -95,18 +95,18 @@ class Processor : public SessionObject, public Automatable, public Latent
 	virtual XMLNode& state (bool full);
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
-	
+
 	void set_pre_fader (bool);
 
 	PBD::Signal0<void>                     ActiveChanged;
 	PBD::Signal2<void,ChanCount,ChanCount> ConfigurationChanged;
-        
-        void  set_ui (void*);
-        void* get_ui () const { return _ui_pointer; }
+
+	void  set_ui (void*);
+	void* get_ui () const { return _ui_pointer; }
 
 protected:
 	virtual int set_state_2X (const XMLNode&, int version);
-	
+
 	int       _pending_active;
 	bool      _active;
 	bool      _next_ab_is_active;
@@ -115,7 +115,7 @@ protected:
 	ChanCount _configured_output;
 	bool      _display_to_user;
 	bool      _pre_fader; ///< true if this processor is currently placed before the Amp, otherwise false
-        void*     _ui_pointer;
+	void*     _ui_pointer;
 };
 
 } // namespace ARDOUR

@@ -49,7 +49,7 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 	results.clear ();
 
 	/* we only operate on AudioRegions, for now, though this could be adapted to MIDI
-	   as well I guess 
+	   as well I guess
         */
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
         InterThreadInfo itt;
@@ -102,14 +102,14 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 	--last_silence;
 
 	frameoffset_t const end_of_region = r->start() + r->length();
-	
+
 	if (last_silence->second != end_of_region - 1) {
 		audible.push_back (std::make_pair (last_silence->second, end_of_region - 1));
 	}
 
 	int n = 0;
 	int const N = audible.size ();
-	
+
 	for (AudioIntervalResult::const_iterator i = audible.begin(); i != audible.end(); ++i) {
 
 		PBD::PropertyList plist;
@@ -117,20 +117,20 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 
 		plist.add (Properties::length, i->second - i->first);
 		plist.add (Properties::position, r->position() + (i->first - r->start()));
-		
+
 		copy = boost::dynamic_pointer_cast<AudioRegion> (
 			RegionFactory::create (region, (i->first - r->start()), plist)
 			);
-		
+
 		copy->set_name (RegionFactory::new_region_name (region->name ()));
 
 		framecnt_t const f = std::min (_fade_length, (i->second - i->first));
-		
+
 		copy->set_fade_in_active (true);
 		copy->set_fade_in (FadeLinear, f);
 		copy->set_fade_out (FadeLinear, f);
 		results.push_back (copy);
-	
+
 		if (progress && (n <= N)) {
 			progress->set_progress (float (n) / N);
 		}

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006-2009 Paul Davis 
+    Copyright (C) 2006-2009 Paul Davis
     Some portions Copyright (C) Sophia Poirier.
 
     This program is free software; you can redistribute it and/or modify
@@ -81,7 +81,7 @@ static string preset_suffix = ".aupreset";
 static bool preset_search_path_initialized = false;
 static bool debug_io_config = true;
 
-static OSStatus 
+static OSStatus
 _render_callback(void *userData,
 		 AudioUnitRenderActionFlags *ioActionFlags,
 		 const AudioTimeStamp    *inTimeStamp,
@@ -95,19 +95,19 @@ _render_callback(void *userData,
 	return paramErr;
 }
 
-static OSStatus 
+static OSStatus
 _get_beat_and_tempo_callback (void*    userData,
-                              Float64* outCurrentBeat, 
+                              Float64* outCurrentBeat,
                               Float64* outCurrentTempo)
 {
 	if (userData) {
 		return ((AUPlugin*)userData)->get_beat_and_tempo_callback (outCurrentBeat, outCurrentTempo);
 	}
-    
+
 	return paramErr;
 }
 
-static OSStatus 
+static OSStatus
 _get_musical_time_location_callback (void *     userData,
                                      UInt32 *   outDeltaSampleOffsetToNextBeat,
                                      Float32 *  outTimeSig_Numerator,
@@ -123,7 +123,7 @@ _get_musical_time_location_callback (void *     userData,
 	return paramErr;
 }
 
-static OSStatus 
+static OSStatus
 _get_transport_state_callback (void*     userData,
 			       Boolean*  outIsPlaying,
 			       Boolean*  outTransportStateChanged,
@@ -142,7 +142,7 @@ _get_transport_state_callback (void*     userData,
 }
 
 
-static int 
+static int
 save_property_list (CFPropertyListRef propertyList, Glib::ustring path)
 
 {
@@ -150,7 +150,7 @@ save_property_list (CFPropertyListRef propertyList, Glib::ustring path)
 	int fd;
 
 	// Convert the property list into XML data.
-	
+
 	xmlData = CFPropertyListCreateXMLData( kCFAllocatorDefault, propertyList);
 
 	if (!xmlData) {
@@ -184,10 +184,10 @@ save_property_list (CFPropertyListRef propertyList, Glib::ustring path)
 	close (fd);
 	return 0;
 }
- 
 
-static CFPropertyListRef 
-load_property_list (Glib::ustring path) 
+
+static CFPropertyListRef
+load_property_list (Glib::ustring path)
 {
 	int fd;
 	CFPropertyListRef propertyList = 0;
@@ -195,12 +195,12 @@ load_property_list (Glib::ustring path)
 	CFStringRef       errorString;
 
 	// Read the XML file.
-	
+
 	if ((fd = open (path.c_str(), O_RDONLY)) < 0) {
 		return propertyList;
 
 	}
-	
+
 	off_t len = lseek (fd, 0, SEEK_END);
 	char* buf = new char[len];
 	lseek (fd, 0, SEEK_SET);
@@ -210,13 +210,13 @@ load_property_list (Glib::ustring path)
 		close (fd);
 		return propertyList;
 	}
-	
+
 	close (fd);
 
 	xmlData = CFDataCreateWithBytesNoCopy (kCFAllocatorDefault, (UInt8*) buf, len, kCFAllocatorNull);
-	
+
 	// Reconstitute the dictionary using the XML data.
-	
+
 	propertyList = CFPropertyListCreateFromXMLData( kCFAllocatorDefault,
 							xmlData,
 							kCFPropertyListImmutable,
@@ -229,7 +229,7 @@ load_property_list (Glib::ustring path)
 }
 
 //-----------------------------------------------------------------------------
-static void 
+static void
 set_preset_name_in_plist (CFPropertyListRef plist, string preset_name)
 {
 	if (!plist) {
@@ -240,7 +240,7 @@ set_preset_name_in_plist (CFPropertyListRef plist, string preset_name)
 	if (CFGetTypeID (plist) == CFDictionaryGetTypeID()) {
 		CFDictionarySetValue ((CFMutableDictionaryRef)plist, CFSTR(kAUPresetNameKey), pn);
 	}
-	
+
 	CFRelease (pn);
 }
 
@@ -264,7 +264,7 @@ get_preset_name_in_plist (CFPropertyListRef plist)
 			if (CFStringGetCString (str, local_buffer, len, kCFStringEncodingUTF8)) {
 				ret = local_buffer;
 			}
-		} 
+		}
 	}
 	return ret;
 }
@@ -278,7 +278,7 @@ Boolean ComponentDescriptionsMatch_General(const ComponentDescription * inCompon
 	if ( (inComponentDescription1 == NULL) || (inComponentDescription2 == NULL) )
 		return FALSE;
 
-	if ( (inComponentDescription1->componentSubType == inComponentDescription2->componentSubType) 
+	if ( (inComponentDescription1->componentSubType == inComponentDescription2->componentSubType)
 			&& (inComponentDescription1->componentManufacturer == inComponentDescription2->componentManufacturer) )
 	{
 		// only sub-type and manufacturer IDs need to be equal
@@ -315,7 +315,7 @@ Boolean ComponentAndDescriptionMatch_General(Component inComponent, const Compon
 
 //--------------------------------------------------------------------------
 // determine if 2 ComponentDescriptions are basically equal
-// (by that, I mean that the important identifying values are compared, 
+// (by that, I mean that the important identifying values are compared,
 // but not the ComponentDescription flags)
 Boolean ComponentDescriptionsMatch(const ComponentDescription * inComponentDescription1, const ComponentDescription * inComponentDescription2)
 {
@@ -358,7 +358,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, frames_processed (0)
 	, last_transport_rolling (false)
 	, last_transport_speed (0.0)
-{			
+{
 	if (!preset_search_path_initialized) {
 		Glib::ustring p = Glib::get_home_dir();
 		p += "/Library/Audio/Presets:";
@@ -383,7 +383,7 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, current_offset (0)
 	, current_buffers (0)
 	, frames_processed (0)
-	  
+
 {
 	init ();
 }
@@ -406,7 +406,7 @@ AUPlugin::discover_factory_presets ()
 	CFArrayRef presets;
 	UInt32 dataSize = sizeof (presets);
 	OSStatus err;
-	
+
 	TRACE_API ("get property FactoryPresets in global scope\n");
 	if ((err = unit->GetProperty (kAudioUnitProperty_FactoryPresets, kAudioUnitScope_Global, 0, (void*) &presets, &dataSize)) != 0) {
 		cerr << "cannot get factory preset info: " << err << endl;
@@ -425,7 +425,7 @@ AUPlugin::discover_factory_presets ()
 		string name = CFStringRefToStdString (preset->presetName);
 		factory_preset_map[name] = preset->presetNumber;
 	}
-	
+
 	CFRelease (presets);
 }
 
@@ -446,7 +446,7 @@ AUPlugin::init ()
 		error << _("AudioUnit: Could not convert CAComponent to CAAudioUnit") << endmsg;
 		throw failed_constructor ();
 	}
-	
+
 	TRACE_API ("count global elements\n");
 	unit->GetElementCount (kAudioUnitScope_Global, global_elements);
 	TRACE_API ("count input elements\n");
@@ -456,12 +456,12 @@ AUPlugin::init ()
 
 	if (input_elements > 0) {
 		AURenderCallbackStruct renderCallbackInfo;
-                
+
 		renderCallbackInfo.inputProc = _render_callback;
 		renderCallbackInfo.inputProcRefCon = this;
-                
+
 		TRACE_API ("set render callback in input scope\n");
-		if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 
+		if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input,
 		                              0, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
 			cerr << "cannot install render callback (err = " << err << ')' << endl;
 			throw failed_constructor();
@@ -476,12 +476,12 @@ AUPlugin::init ()
 	info.beatAndTempoProc = _get_beat_and_tempo_callback;
 	info.musicalTimeLocationProc = _get_musical_time_location_callback;
 	info.transportStateProc = _get_transport_state_callback;
-	
+
 	//ignore result of this - don't care if the property isn't supported
 	TRACE_API ("set host callbacks in global scope\n");
-	unit->SetProperty (kAudioUnitProperty_HostCallbacks, 
-			   kAudioUnitScope_Global, 
-			   0, //elementID 
+	unit->SetProperty (kAudioUnitProperty_HostCallbacks,
+			   kAudioUnitScope_Global,
+			   0, //elementID
 			   &info,
 			   sizeof (HostCallbackInfo));
 
@@ -511,8 +511,8 @@ void
 AUPlugin::discover_parameters ()
 {
 	/* discover writable parameters */
-	
-	AudioUnitScope scopes[] = { 
+
+	AudioUnitScope scopes[] = {
 		kAudioUnitScope_Global,
 		kAudioUnitScope_Output,
 		kAudioUnitScope_Input
@@ -523,7 +523,7 @@ AUPlugin::discover_parameters ()
 	for (uint32_t i = 0; i < sizeof (scopes) / sizeof (scopes[0]); ++i) {
 
 		AUParamInfo param_info (unit->AU(), false, false, scopes[i]);
-		
+
 		for (uint32_t i = 0; i < param_info.NumParams(); ++i) {
 
 			AUParameterDescriptor d;
@@ -602,10 +602,10 @@ AUPlugin::discover_parameters ()
 			d.toggled = (info.unit == kAudioUnitParameterUnit_Boolean) ||
 				(d.integer_step && ((d.upper - d.lower) == 1.0));
 			d.sr_dependent = (info.unit == kAudioUnitParameterUnit_SampleFrames);
-			d.automatable = !d.toggled && 
+			d.automatable = !d.toggled &&
 				!(info.flags & kAudioUnitParameterFlag_NonRealTime) &&
 				(info.flags & kAudioUnitParameterFlag_IsWritable);
-			
+
 			d.logarithmic = (info.flags & kAudioUnitParameterFlag_DisplayLogarithmic);
 			d.unit = info.unit;
 
@@ -639,8 +639,8 @@ AUPlugin::maybe_fix_broken_au_id (const std::string& id)
 
 	/* ID format is xxxx-xxxx-xxxx
 	   where x maybe \xNN or a printable character.
-	   
-	   Split at the '-' and and process each part into an integer. 
+
+	   Split at the '-' and and process each part into an integer.
 	   Then put it back together.
 	*/
 
@@ -672,16 +672,16 @@ AUPlugin::maybe_fix_broken_au_id (const std::string& id)
 				++in;
 
 			} else {
-				
+
 				if (cstr[1] == 'x' && isxdigit (cstr[2]) && isxdigit (cstr[3])) {
-					
+
 					/* parse \xNN */
-					
+
 					memcpy (short_buf, &cstr[2], 2);
 					nascent[in] = strtol (short_buf, NULL, 16);
 					cstr += 4;
 					++in;
-					
+
 				} else {
 
 					/* treat as literal characters */
@@ -720,7 +720,7 @@ AUPlugin::maybe_fix_broken_au_id (const std::string& id)
 	}
 
 	s << n[0] << '-' << n[1] << '-' << n[2];
-	
+
 	return s.str();
 
   err:
@@ -767,24 +767,24 @@ AUPlugin::set_parameter (uint32_t which, float val)
 	if (which >= descriptors.size()) {
 		return;
 	}
-	
+
 	const AUParameterDescriptor& d (descriptors[which]);
 	TRACE_API ("set parameter %d in scope %d element %d to %f\n", d.id, d.scope, d.element, val);
 	unit->SetParameter (d.id, d.scope, d.element, val);
-	
+
 	/* tell the world what we did */
-	
+
 	AudioUnitEvent theEvent;
-	
+
 	theEvent.mEventType = kAudioUnitEvent_ParameterValueChange;
 	theEvent.mArgument.mParameter.mAudioUnit = unit->AU();
 	theEvent.mArgument.mParameter.mParameterID = d.id;
 	theEvent.mArgument.mParameter.mScope = d.scope;
 	theEvent.mArgument.mParameter.mElement = d.element;
-	
+
 	TRACE_API ("notify about parameter change\n");
 	AUEventListenerNotify (NULL, NULL, &theEvent);
-	
+
 	Plugin::set_parameter (which, val);
 }
 
@@ -806,7 +806,7 @@ AUPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& pd) con
 	if (which < descriptors.size()) {
 		pd = descriptors[which];
 		return 0;
-	} 
+	}
 	return -1;
 }
 
@@ -870,7 +870,7 @@ AUPlugin::set_block_size (pframes_t nframes)
 	}
 
 	TRACE_API ("set MaximumFramesPerSlice in global scope to %u\n", numFrames);
-	if ((err = unit->SetProperty (kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 
+	if ((err = unit->SetProperty (kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global,
 				      0, &numFrames, sizeof (numFrames))) != noErr) {
 		cerr << "cannot set max frames (err = " << err << ')' << endl;
 		return -1;
@@ -1021,7 +1021,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 				plugcnt = 1;
 			}
 		}
-		
+
 		if (possible_in == -1) {
 
 			/* wildcard for input */
@@ -1043,8 +1043,8 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 				audio_out = possible_out;
 				plugcnt = 1;
 			}
-		}	
-			
+		}
+
 		if (possible_in == -2) {
 
 			if (possible_out == -1) {
@@ -1097,7 +1097,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 		if (possible_in == audio_in) {
 
 			/* exact number of inputs ... must match obviously */
-			
+
 			if (possible_out == -1) {
 				/* out must match in */
 				audio_out = audio_in;
@@ -1154,8 +1154,8 @@ AUPlugin::set_output_format (AudioStreamBasicDescription& fmt)
 		free (buffers);
 		buffers = 0;
 	}
-	
-	buffers = (AudioBufferList *) malloc (offsetof(AudioBufferList, mBuffers) + 
+
+	buffers = (AudioBufferList *) malloc (offsetof(AudioBufferList, mBuffers) +
 					      fmt.mChannelsPerFrame * sizeof(::AudioBuffer));
 
 	Glib::Mutex::Lock em (_session.engine().process_lock());
@@ -1189,7 +1189,7 @@ AUPlugin::set_stream_format (int scope, uint32_t cnt, AudioStreamBasicDescriptio
 	return 0;
 }
 
-OSStatus 
+OSStatus
 AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 			  const AudioTimeStamp*,
 			  UInt32,
@@ -1214,12 +1214,12 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 			case MIDI_CMD_BENDER:
 			case MIDI_CMD_PGM_CHANGE:
 			case MIDI_CMD_CHANNEL_PRESSURE:
-			{ 
+			{
 				const uint8_t* b = ev.buffer();
 				unit->MIDIEvent (b[0], b[1], b[2], ev.time());
 				break;
 			}
-			
+
 			default:
 				/* plugins do not get other stuff by default */
 				break;
@@ -1256,7 +1256,7 @@ int
 AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_map, pframes_t nframes, framecnt_t offset)
 {
 	Plugin::connect_and_run (bufs, in_map, out_map, nframes, offset);
-	
+
 	AudioUnitRenderActionFlags flags = 0;
 	AudioTimeStamp ts;
 	OSErr err;
@@ -1287,7 +1287,7 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 
 		current_maxbuf = 0;
 		frames_processed += nframes;
-		
+
 		uint32_t limit = min ((uint32_t) buffers->mNumberBuffers, maxbuf);
 		uint32_t i;
 
@@ -1309,22 +1309,22 @@ AUPlugin::connect_and_run (BufferSet& bufs, ChanMapping in_map, ChanMapping out_
 		}
 
 		return 0;
-	} 
+	}
 
 	cerr << name() << " render status " << err << endl;
 	return -1;
 }
 
-OSStatus 
-AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat, 
+OSStatus
+AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 				       Float64* outCurrentTempo)
 {
 	TempoMap& tmap (_session.tempo_map());
 
 	TRACE_API ("AU calls ardour beat&tempo callback\n");
 
-	/* more than 1 meter or more than 1 tempo means that a simplistic computation 
-	   (and interpretation) of a beat position will be incorrect. So refuse to 
+	/* more than 1 meter or more than 1 tempo means that a simplistic computation
+	   (and interpretation) of a beat position will be incorrect. So refuse to
 	   offer the value.
 	*/
 
@@ -1352,7 +1352,7 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 
 }
 
-OSStatus 
+OSStatus
 AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNextBeat,
 					      Float32*  outTimeSig_Numerator,
 					      UInt32*   outTimeSig_Denominator,
@@ -1362,8 +1362,8 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 
 	TRACE_API ("AU calls ardour music time location callback\n");
 
-	/* more than 1 meter or more than 1 tempo means that a simplistic computation 
-	   (and interpretation) of a beat position will be incorrect. So refuse to 
+	/* more than 1 meter or more than 1 tempo means that a simplistic computation
+	   (and interpretation) of a beat position will be incorrect. So refuse to
 	   offer the value.
 	*/
 
@@ -1384,7 +1384,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 									  metric.tempo().frames_per_beat(_session.frame_rate(), metric.meter())); // frames per beat
 		}
 	}
-	
+
 	if (outTimeSig_Numerator) {
 		*outTimeSig_Numerator = (UInt32) lrintf (metric.meter().beats_per_bar());
 	}
@@ -1394,11 +1394,11 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 
 	if (outCurrentMeasureDownBeat) {
 
-		/* beat for the start of the bar. 
+		/* beat for the start of the bar.
 		   1|1|0 -> 1
 		   2|1|0 -> 1 + beats_per_bar
 		   3|1|0 -> 1 + (2 * beats_per_bar)
-		   etc. 
+		   etc.
 		*/
 
 		*outCurrentMeasureDownBeat = 1 + metric.meter().beats_per_bar() * (bbt.bars - 1);
@@ -1407,7 +1407,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 	return noErr;
 }
 
-OSStatus 
+OSStatus
 AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 					Boolean*  outTransportStateChanged,
 					Float64*  outCurrentSampleInTimeLine,
@@ -1455,14 +1455,14 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 
 				TempoMap& tmap (_session.tempo_map());
 
-				/* more than 1 meter means that a simplistic computation (and interpretation) of 
+				/* more than 1 meter means that a simplistic computation (and interpretation) of
 				   a beat position will be incorrect. so refuse to offer the value.
 				*/
 
 				if (tmap.n_meters() > 1) {
 					return kAudioUnitErr_CannotDoInCurrentContext;
 				}
-				
+
 				Timecode::BBT_Time bbt;
 
 				if (outCycleStartBeat) {
@@ -1473,19 +1473,19 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 					beat = metric.meter().beats_per_bar() * bbt.bars;
 					beat += bbt.beats;
 					beat += bbt.ticks / BBT_Time::ticks_per_beat;
-					
+
 					*outCycleStartBeat = beat;
 				}
 
 				if (outCycleEndBeat) {
 					TempoMetric metric = tmap.metric_at (loc->end() + current_offset);
 					_session.tempo_map().bbt_time_with_metric (loc->end(), bbt, metric);
-					
+
 					float beat;
 					beat = metric.meter().beats_per_bar() * bbt.bars;
 					beat += bbt.beats;
 					beat += bbt.ticks / BBT_Time::ticks_per_beat;
-					
+
 					*outCycleEndBeat = beat;
 				}
 			}
@@ -1567,7 +1567,7 @@ AUPlugin::add_state (XMLNode* root)
 	}
 
 	// Convert the property list into XML data.
-	
+
 	xmlData = CFPropertyListCreateXMLData( kCFAllocatorDefault, propertyList);
 
 	if (!xmlData) {
@@ -1611,7 +1611,7 @@ AUPlugin::set_state(const XMLNode& node, int version)
 		error << _("Bad node sent to AUPlugin::set_state") << endmsg;
 		return -1;
 	}
-	
+
 	if (node.children().empty()) {
 		return -1;
 	}
@@ -1632,22 +1632,22 @@ AUPlugin::set_state(const XMLNode& node, int version)
 							&errorString);
 
 	CFRelease (xmlData);
-	
+
 	if (propertyList) {
 		TRACE_API ("set preset\n");
 		if (unit->SetAUPreset (propertyList) == noErr) {
 			ret = 0;
-			
+
 			/* tell the world */
 
 			AudioUnitParameter changedUnit;
 			changedUnit.mAudioUnit = unit->AU();
 			changedUnit.mParameterID = kAUParameterListener_AnyParameter;
 			AUParameterListenerNotify (NULL, NULL, &changedUnit);
-		} 
+		}
 		CFRelease (propertyList);
 	}
-	
+
 	Plugin::set_state (node, version);
 	return ret;
 #else
@@ -1664,7 +1664,7 @@ bool
 AUPlugin::load_preset (PluginRecord r)
 {
 	Plugin::load_preset (r);
-	
+
 #ifdef AU_STATE_SUPPORT
 	bool ret = false;
 	CFPropertyListRef propertyList;
@@ -1675,14 +1675,14 @@ AUPlugin::load_preset (PluginRecord r)
 	/* look first in "user" presets */
 
 	if ((ux = user_preset_map.find (preset_label)) != user_preset_map.end()) {
-	
+
 		if ((propertyList = load_property_list (ux->second)) != 0) {
 			TRACE_API ("set preset from user presets\n");
 			if (unit->SetAUPreset (propertyList) == noErr) {
 				ret = true;
 
 				/* tell the world */
-				
+
 				AudioUnitParameter changedUnit;
 				changedUnit.mAudioUnit = unit->AU();
 				changedUnit.mParameterID = kAUParameterListener_AnyParameter;
@@ -1692,12 +1692,12 @@ AUPlugin::load_preset (PluginRecord r)
 		}
 
 	} else if ((fx = factory_preset_map.find (preset_label)) != factory_preset_map.end()) {
-		
+
 		AUPreset preset;
-		
+
 		preset.presetNumber = fx->second;
 		preset.presetName = CFStringCreateWithCString (kCFAllocatorDefault, fx->first.c_str(), kCFStringEncodingUTF8);
-		
+
 		TRACE_API ("set preset from factory presets\n");
 
 		if (unit->SetPresentPreset (preset) == 0) {
@@ -1711,7 +1711,7 @@ AUPlugin::load_preset (PluginRecord r)
 			AUParameterListenerNotify (NULL, NULL, &changedUnit);
 		}
 	}
-		
+
 	return ret;
 #else
 	if (!seen_loading_message) {
@@ -1735,7 +1735,7 @@ AUPlugin::save_preset (string preset_name)
 
 	std::string m = maker();
 	std::string n = name();
-	
+
 	strip_whitespace_edges (m);
 	strip_whitespace_edges (n);
 
@@ -1745,7 +1745,7 @@ AUPlugin::save_preset (string preset_name)
 	v.push_back ("Presets");
 	v.push_back (m);
 	v.push_back (n);
-	
+
 	user_preset_path = Glib::build_filename (v);
 
 	if (g_mkdir_with_parents (user_preset_path.c_str(), 0775) < 0) {
@@ -1761,11 +1761,11 @@ AUPlugin::save_preset (string preset_name)
 	// add the actual preset name */
 
 	v.push_back (preset_name + preset_suffix);
-		
+
 	// rebuild
 
 	user_preset_path = Glib::build_filename (v);
-	
+
 	set_preset_name_in_plist (propertyList, preset_name);
 
 	if (save_property_list (propertyList, user_preset_path)) {
@@ -1789,7 +1789,7 @@ AUPlugin::save_preset (string preset_name)
 
 //-----------------------------------------------------------------------------
 // this is just a little helper function used by GetAUComponentDescriptionFromPresetFile()
-static SInt32 
+static SInt32
 GetDictionarySInt32Value(CFDictionaryRef inAUStateDictionary, CFStringRef inDictionaryKey, Boolean * outSuccess)
 {
 	CFNumberRef cfNumber;
@@ -1817,7 +1817,7 @@ GetDictionarySInt32Value(CFDictionaryRef inAUStateDictionary, CFStringRef inDict
 		return 0;
 }
 
-static OSStatus 
+static OSStatus
 GetAUComponentDescriptionFromStateData(CFPropertyListRef inAUStateData, ComponentDescription * outComponentDescription)
 {
 	CFDictionaryRef auStateDictionary;
@@ -1827,7 +1827,7 @@ GetAUComponentDescriptionFromStateData(CFPropertyListRef inAUStateData, Componen
 
 	if ( (inAUStateData == NULL) || (outComponentDescription == NULL) )
 		return paramErr;
-	
+
 	// the property list for AU state data must be of the dictionary type
 	if (CFGetTypeID(inAUStateData) != CFDictionaryGetTypeID()) {
 		return kAudioUnitErr_InvalidPropertyValue;
@@ -1865,7 +1865,7 @@ static bool au_preset_filter (const string& str, void* arg)
 	/* Not a dotfile, has a prefix before a period, suffix is aupreset */
 
 	bool ret;
-	
+
 	ret = (str[0] != '.' && str.length() > 9 && str.find (preset_suffix) == (str.length() - preset_suffix.length()));
 
 	if (ret && arg) {
@@ -1890,32 +1890,32 @@ static bool au_preset_filter (const string& str, void* arg)
 			match = m;
 			match += '/';
 			match += n;
-			
+
 			ret = str.find (match) != string::npos;
 		}
 	}
-	
+
 	return ret;
 }
 
-bool 
+bool
 check_and_get_preset_name (Component component, const string& pathstr, string& preset_name)
 {
 	OSStatus status;
 	CFPropertyListRef plist;
 	ComponentDescription presetDesc;
 	bool ret = false;
-		
+
 	plist = load_property_list (pathstr);
 
 	if (!plist) {
 		return ret;
 	}
-	
+
 	// get the ComponentDescription from the AU preset file
-	
+
 	status = GetAUComponentDescriptionFromStateData(plist, &presetDesc);
-	
+
 	if (status == noErr) {
 		if (ComponentAndDescriptionMatch_Loosely(component, &presetDesc)) {
 
@@ -1938,7 +1938,7 @@ check_and_get_preset_name (Component component, const string& pathstr, string& p
 					}
 				}
 			}
-		} 
+		}
 	}
 
 	CFRelease (plist);
@@ -1950,7 +1950,7 @@ std::string
 AUPlugin::current_preset() const
 {
 	string preset_name;
-	
+
 #ifdef AU_STATE_SUPPORT
 	CFPropertyListRef propertyList;
 
@@ -1973,7 +1973,7 @@ AUPlugin::find_presets ()
 	user_preset_map.clear ();
 
 	preset_files = scanner (preset_search_path, au_preset_filter, this, true, true, -1, true);
-	
+
 	if (!preset_files) {
 		return;
 	}
@@ -1995,7 +1995,7 @@ AUPlugin::find_presets ()
 
 		if (check_and_get_preset_name (get_comp()->Comp(), path, preset_name)) {
 			user_preset_map[preset_name] = path;
-		} 
+		}
 
 		delete *x;
 	}
@@ -2046,13 +2046,13 @@ AUPluginInfo::load (Session& session)
 
 		TRACE_API ("load AU as a component\n");
 		boost::shared_ptr<CAComponent> comp (new CAComponent(*descriptor));
-		
+
 		if (!comp->IsValid()) {
 			error << ("AudioUnit: not a valid Component") << endmsg;
 		} else {
 			plugin.reset (new AUPlugin (session.engine(), session, comp));
 		}
-		
+
 		AUPluginInfo *aup = new AUPluginInfo (*this);
 		plugin->set_info (PluginInfoPtr (aup));
 		boost::dynamic_pointer_cast<AUPlugin> (plugin)->set_fixed_size_buffers (aup->creator == "Universal Audio");
@@ -2080,7 +2080,7 @@ AUPluginInfo::discover ()
 	}
 
 	PluginInfoList* plugs = new PluginInfoList;
-	
+
 	discover_fx (*plugs);
 	discover_music (*plugs);
 	discover_generators (*plugs);
@@ -2152,7 +2152,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		CAComponentDescription temp;
 		GetComponentInfo (comp, &temp, NULL, NULL, NULL);
 
-		AUPluginInfoPtr info (new AUPluginInfo 
+		AUPluginInfoPtr info (new AUPluginInfo
 				      (boost::shared_ptr<CAComponentDescription> (new CAComponentDescription(temp))));
 
 		/* although apple designed the subtype field to be a "category" indicator,
@@ -2160,7 +2160,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		   there are no categories for AudioUnits. However, to keep the plugins
 		   showing up under "categories", we'll use the "type" as a high level
 		   selector.
-		   
+
 		   NOTE: no panners, format converters or i/o AU's for our purposes
 		 */
 
@@ -2194,7 +2194,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		}
 
 		AUPluginInfo::get_names (temp, info->name, info->creator);
-		
+
 		info->type = ARDOUR::AudioUnit;
 		info->unique_id = stringify_descriptor (*info->descriptor);
 
@@ -2206,7 +2206,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		if (cacomp.GetResourceVersion (info->version) != noErr) {
 			info->version = 0;
 		}
-		
+
 		if (cached_io_configuration (info->unique_id, info->version, cacomp, info->cache, info->name)) {
 
 			/* here we have to map apple's wildcard system to a simple pair
@@ -2225,16 +2225,16 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		} else {
 			error << string_compose (_("Cannot get I/O configuration info for AU %1"), info->name) << endmsg;
 		}
-		
+
 		comp = FindNextComponent (comp, &desc);
 	}
 }
 
 bool
-AUPluginInfo::cached_io_configuration (const std::string& unique_id, 
+AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 				       UInt32 version,
-				       CAComponent& comp, 
-				       AUPluginCachedInfo& cinfo, 
+				       CAComponent& comp,
+				       AUPluginCachedInfo& cinfo,
 				       const std::string& name)
 {
 	std::string id;
@@ -2261,9 +2261,9 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 	AUChannelInfo* channel_info;
 	UInt32 cnt;
 	int ret;
-	
+
 	ARDOUR::BootMessage (string_compose (_("Checking AudioUnit: %1"), name));
-	
+
 	try {
 
 		if (CAAudioUnit::Open (comp, unit) != noErr) {
@@ -2277,7 +2277,7 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 		return false;
 
 	}
-		
+
 	TRACE_API ("get AU channel info\n");
 	if ((ret = unit.GetChannelInfo (&channel_info, cnt)) < 0) {
 		return false;
@@ -2289,9 +2289,9 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 		cinfo.io_configs.push_back (pair<int,int> (-1, -1));
 
 	} else {
-		
+
 		/* store each configuration */
-		
+
 		for (uint32_t n = 0; n < cnt; ++n) {
 			cinfo.io_configs.push_back (pair<int,int> (channel_info[n].inChannels,
 								   channel_info[n].outChannels));
@@ -2321,7 +2321,7 @@ AUPluginInfo::save_cached_info ()
 
 	node = new XMLNode (X_("AudioUnitPluginCache"));
 	node->add_property( "version", AU_CACHE_VERSION );
-	
+
 	for (map<string,AUPluginCachedInfo>::iterator i = cached_info.begin(); i != cached_info.end(); ++i) {
 		XMLNode* parent = new XMLNode (X_("plugin"));
 		parent->add_property ("id", i->first);
@@ -2357,7 +2357,7 @@ AUPluginInfo::load_cached_info ()
 {
 	Glib::ustring path = au_cache_path ();
 	XMLTree tree;
-	
+
 	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
 		return 0;
 	}
@@ -2366,28 +2366,28 @@ AUPluginInfo::load_cached_info ()
 		error << "au_cache is not a valid XML file.  AU plugins will be re-scanned" << endmsg;
 		return -1;
 	}
-	
+
 	const XMLNode* root (tree.root());
 
 	if (root->name() != X_("AudioUnitPluginCache")) {
 		return -1;
 	}
-	
+
 	//initial version has incorrectly stored i/o info, and/or garbage chars.
 	const XMLProperty* version = root->property(X_("version"));
 	if (! ((version != NULL) && (version->value() == X_(AU_CACHE_VERSION)))) {
 		error << "au_cache is not correct version.  AU plugins will be re-scanned" << endmsg;
 		return -1;
 	}
-	
+
 	cached_info.clear ();
 
 	const XMLNodeList children = root->children();
 
 	for (XMLNodeConstIterator iter = children.begin(); iter != children.end(); ++iter) {
-		
+
 		const XMLNode* child = *iter;
-		
+
 		if (child->name() == X_("plugin")) {
 
 			const XMLNode* gchild;
@@ -2397,7 +2397,7 @@ AUPluginInfo::load_cached_info ()
 			if (!prop) {
 				continue;
 			}
-			
+
 			string id = prop->value();
 			string fixed;
 			string version;
@@ -2415,7 +2415,7 @@ AUPluginInfo::load_cached_info ()
 			if (fixed.empty()) {
 				error << string_compose (_("Your AudioUnit configuration cache contains an AU plugin whose ID cannot be understood - ignored (%1)"), id) << endmsg;
 				continue;
-			} 
+			}
 
 			id = fixed;
 			id += version;
@@ -2437,7 +2437,7 @@ AUPluginInfo::load_cached_info ()
 					    ((oprop = gchild->property (X_("out"))) != 0)) {
 						in = atoi (iprop->value());
 						out = atoi (oprop->value());
-						
+
 						cinfo.io_configs.push_back (pair<int,int> (in, out));
 					}
 				}
@@ -2473,16 +2473,16 @@ AUPluginInfo::get_names (CAComponentDescription& comp_desc, std::string& name, s
 			DisposeHandle(nameHandle);
 		}
 	}
-    
+
 	// if Marc-style fails, do the original way
 	if (itemName == NULL) {
 		CFStringRef compTypeString = UTCreateStringForOSType(comp_desc.componentType);
 		CFStringRef compSubTypeString = UTCreateStringForOSType(comp_desc.componentSubType);
 		CFStringRef compManufacturerString = UTCreateStringForOSType(comp_desc.componentManufacturer);
-    
-		itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"), 
+
+		itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"),
 			compTypeString, compManufacturerString, compSubTypeString);
-    
+
 		if (compTypeString != NULL)
 			CFRelease(compTypeString);
 		if (compSubTypeString != NULL)
@@ -2490,7 +2490,7 @@ AUPluginInfo::get_names (CAComponentDescription& comp_desc, std::string& name, s
 		if (compManufacturerString != NULL)
 			CFRelease(compManufacturerString);
 	}
-	
+
 	string str = CFStringRefToStdString(itemName);
 	string::size_type colon = str.find (':');
 

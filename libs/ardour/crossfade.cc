@@ -149,7 +149,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode const & node)
 		*/
 		r = RegionFactory::region_by_id (id);
 	}
-	
+
 	if (!r) {
 		error << string_compose (_("Crossfade: no \"in\" region %1 found in playlist %2 nor in region map"), id, playlist.name())
 		      << endmsg;
@@ -172,7 +172,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode const & node)
 	if (!r) {
 		r = RegionFactory::region_by_id (id2);
 	}
-	
+
 	if (!r) {
 		error << string_compose (_("Crossfade: no \"out\" region %1 found in playlist %2 nor in region map"), id2, playlist.name())
 		      << endmsg;
@@ -236,7 +236,7 @@ Crossfade::initialize ()
         for (SourceList::iterator i = _sources.begin(); i != _sources.end(); ++i) {
                 (*i)->inc_use_count ();
         }
-        
+
 	_master_sources = _in->master_sources();
 	_master_sources.insert(_master_sources.end(), _out->master_sources().begin(), _out->master_sources().end());
 
@@ -314,7 +314,7 @@ Crossfade::read_raw_internal (Sample* buf, framecnt_t start, framecnt_t cnt, int
 	Sample* mixdown = new Sample[cnt];
 	float* gain = new float[cnt];
 	framecnt_t ret;
-	
+
 	ret = read_at (buf, mixdown, gain, start, cnt, channel, cnt);
 
 	delete [] mixdown;
@@ -438,7 +438,7 @@ Crossfade::refresh ()
 		Invalidated (shared_from_this());
 		return false;
 	}
-        
+
         /* regions must cannot be identically sized and placed */
 
         if (_in->position() == _out->position() && _in->length() == _out->length()) {
@@ -976,7 +976,7 @@ Crossfade::set_xfade_length (framecnt_t len)
 	_length = len;
 
 	PropertyChanged (PropertyChange (Properties::length));
-	
+
 	return len;
 }
 

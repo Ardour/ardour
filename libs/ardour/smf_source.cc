@@ -65,7 +65,7 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 	if (init(_path, false)) {
 		throw failed_constructor ();
 	}
-        
+
         /* file is not opened until write */
 }
 
@@ -106,7 +106,7 @@ SMFSource::open_for_write ()
 {
 	if (create (_path)) {
                 return -1;
-        } 
+        }
         _open = true;
         return 0;
 }
@@ -295,7 +295,7 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 	if (ev.size() == 0)  {
 		return;
 	}
-        
+
 	/* printf("SMFSource: %s - append_event_unlocked_beats ID = %d time = %lf, size = %u, data = ",
                name().c_str(), ev.id(), ev.time(), ev.size());
            for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
@@ -359,12 +359,12 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 	}
 
 	if (_model) {
-		const Evoral::Event<double> beat_ev (ev.event_type(), 
-		                                     ev_time_beats, 
-		                                     ev.size(), 
+		const Evoral::Event<double> beat_ev (ev.event_type(),
+		                                     ev_time_beats,
+		                                     ev.size(),
 		                                     (uint8_t*)ev.buffer());
 		_model->append (beat_ev, event_id);
-	} 
+	}
 
 	_length_beats = max(_length_beats, ev_time_beats);
 
@@ -413,7 +413,7 @@ SMFSource::mark_streaming_midi_write_started (NoteMode mode)
         if (!_open && open_for_write()) {
                 error << string_compose (_("cannot open MIDI file %1 for write"), _path) << endmsg;
                 /* XXX should probably throw or return something */
-                return; 
+                return;
         }
 
 	MidiSource::mark_streaming_midi_write_started (mode);
@@ -435,12 +435,12 @@ SMFSource::mark_streaming_write_completed ()
 	if (_model) {
 		_model->set_edited(false);
 	}
-	
+
 	Evoral::SMF::end_write ();
 
 	/* data in the file now, not removable */
 
-	mark_nonremovable (); 
+	mark_nonremovable ();
 }
 
 bool
@@ -492,7 +492,7 @@ SMFSource::load_model (bool lock, bool force_reload)
 	while ((ret = read_event (&delta_t, &size, &buf, &event_id)) >= 0) {
 
 		time += delta_t;
-                
+
 		if (ret == 0) {
 
 			/* meta-event : did we get an event ID ?
@@ -503,9 +503,9 @@ SMFSource::load_model (bool lock, bool force_reload)
 			}
 
 			continue;
-		} 
-                        
-		if (ret > 0) { 
+		}
+
+		if (ret > 0) {
 
 			/* not a meta-event */
 
@@ -513,11 +513,11 @@ SMFSource::load_model (bool lock, bool force_reload)
 			ev.set_event_type(EventTypeMap::instance().midi_event_type(buf[0]));
 
 			if (!have_event_id) {
-				event_id = Evoral::next_event_id();   
+				event_id = Evoral::next_event_id();
 			}
 #ifndef NDEBUG
 			std::string ss;
-                        
+
 			for (uint32_t xx = 0; xx < size; ++xx) {
 				char b[8];
 				snprintf (b, sizeof (b), "0x%x ", buf[xx]);
@@ -527,21 +527,21 @@ SMFSource::load_model (bool lock, bool force_reload)
 			DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF %6 load model delta %1, time %2, size %3 buf %4, type %5\n",
 			                                                  delta_t, time, size, ss , ev.event_type(), name()));
 #endif
-                        
+
 			_model->append (ev, event_id);
 
 			if (ev.size() > scratch_size) {
 				scratch_size = ev.size();
 			}
-                        
+
 			ev.size() = scratch_size; // ensure read_event only allocates if necessary
-                        
+
 			_length_beats = max(_length_beats, ev.time());
 		}
 
 		/* event ID's must immediately precede the event they are for
 		 */
-                   
+
 		have_event_id = false;
 	}
 
@@ -569,7 +569,7 @@ SMFSource::flush_midi ()
 
 	Evoral::SMF::end_write();
 	/* data in the file means its no longer removable */
-	mark_nonremovable (); 
+	mark_nonremovable ();
 }
 
 void

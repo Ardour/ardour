@@ -220,9 +220,9 @@ Butler::thread_work ()
 		bytes = 0;
 		compute_io = true;
 
-restart:		
+restart:
 		disk_work_outstanding = false;
-		
+
 		if (transport_work_requested()) {
 			_session.butler_transport_work ();
 		}
@@ -299,7 +299,7 @@ restart:
 			if (!tr) {
 				continue;
 			}
-			
+
 			/* note that we still try to flush diskstreams attached to inactive routes
 			 */
 
@@ -435,12 +435,12 @@ void
 Butler::empty_pool_trash ()
 {
 	/* look in the trash, deleting empty pools until we come to one that is not empty */
-	
+
 	RingBuffer<CrossThreadPool*>::rw_vector vec;
 	pool_trash.get_read_vector (&vec);
 
 	guint deleted = 0;
-	
+
 	for (int i = 0; i < 2; ++i) {
 		for (guint j = 0; j < vec.len[i]; ++j) {
 			if (vec.buf[i][j]->empty()) {

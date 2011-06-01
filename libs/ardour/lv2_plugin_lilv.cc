@@ -257,7 +257,7 @@ LV2Plugin::init(void* c_plugin, framecnt_t rate)
 				_impl->ui      = this_ui;
 				_impl->ui_type = this_ui_type;
 				break;
-			} 
+			}
 		}
 #else
 		// Look for Gtk native UI
@@ -455,8 +455,8 @@ LV2Plugin::lv2_persist_store_callback(void*       host_data,
 		            _uri_map.id_to_uri(NULL, type)));
 
 	LV2PersistState* state = (LV2PersistState*)host_data;
-	state->add_uri(key,  _uri_map.id_to_uri(NULL, key)); 
-	state->add_uri(type, _uri_map.id_to_uri(NULL, type)); 
+	state->add_uri(key,  _uri_map.id_to_uri(NULL, key));
+	state->add_uri(type, _uri_map.id_to_uri(NULL, type));
 	return state->add_value(key, value, size, type, flags);
 }
 
@@ -557,7 +557,7 @@ LV2Plugin::lv2_files_new_file_path(LV2_Files_Host_Data host_data,
 
 	DEBUG_TRACE(DEBUG::LV2, string_compose("new file path %1 => %2\n",
 	                                       relative_path, path));
-	
+
 	return g_strndup(path.c_str(), path.length());
 }
 

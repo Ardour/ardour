@@ -102,10 +102,10 @@ class Source : public SessionObject
 	Glib::Mutex& mutex()       { return _lock; }
 	Flag         flags() const { return _flags; }
 
-        virtual void inc_use_count ();
-        virtual void dec_use_count ();
-        int  use_count() const { return g_atomic_int_get (&_use_count); }
-        bool used() const { return use_count() > 0; }
+	virtual void inc_use_count ();
+	virtual void dec_use_count ();
+	int  use_count() const { return g_atomic_int_get (&_use_count); }
+	bool used() const { return use_count() > 0; }
 	uint32_t level() const { return _level; }
 
   protected:
@@ -116,7 +116,7 @@ class Source : public SessionObject
 	bool                _analysed;
 	mutable Glib::Mutex _lock;
 	mutable Glib::Mutex _analysis_lock;
-        gint                _use_count; /* atomic */
+	gint                _use_count; /* atomic */
 	uint32_t            _level; /* how deeply nested is this source w.r.t a disk file */
 
   private:

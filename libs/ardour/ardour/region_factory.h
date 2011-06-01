@@ -59,22 +59,22 @@ public:
 	static boost::shared_ptr<Region> create (boost::shared_ptr<const Region> other, bool announce = false);
 
 	/** create a region from a single Source */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>, 
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>,
 	                                         const PBD::PropertyList&, bool announce = true);
-	
+
 	/** create a region from a multiple sources */
-	static boost::shared_ptr<Region> create (const SourceList &, 
+	static boost::shared_ptr<Region> create (const SourceList &,
 	                                         const PBD::PropertyList&, bool announce = true);
 	/** create a copy of @other starting at zero within @param other's sources */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, 
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other,
 	                                         const PBD::PropertyList&, bool announce = true);
 	/** create a copy of @param other starting at @param offset within @param other */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, frameoffset_t offset, 
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, frameoffset_t offset,
 	                                         const PBD::PropertyList&, bool announce = true);
 	/** create a "copy" of @param other but using a different set of sources @param srcs */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, const SourceList& srcs, 
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, const SourceList& srcs,
 	                                         const PBD::PropertyList&, bool announce = true);
-	
+
 	/** create a region with no sources, using XML state */
 	static boost::shared_ptr<Region> create (Session&, XMLNode&, bool);
 	/** create a region with specified sources @param srcs and XML state */
@@ -92,10 +92,10 @@ public:
 	static int region_name (std::string &, std::string, bool new_level = false);
 	static std::string new_region_name (std::string);
 	static std::string compound_region_name (const std::string& playlist, uint32_t compound_ops, uint32_t depth, bool whole_source);
-  
+
 	/* when we make a compound region, for every region involved there
 	 * are two "instances" - the original, which is removed from this
-	 * playlist, and a copy, which is added to the playlist used as 
+	 * playlist, and a copy, which is added to the playlist used as
 	 * the source for the compound.
 	 *
 	 * when we uncombine, we want to put the originals back into this
@@ -110,13 +110,13 @@ public:
 	static CompoundAssociations& compound_associations() { return _compound_associations; }
 
 	static void add_compound_association (boost::shared_ptr<Region>, boost::shared_ptr<Region>);
-	
+
   private:
 
 	static void region_changed (PBD::PropertyChange const &, boost::weak_ptr<Region>);
-	
+
 	static Glib::StaticMutex region_map_lock;
-	
+
 	static RegionMap region_map;
 	static void map_add (boost::shared_ptr<Region>);
 

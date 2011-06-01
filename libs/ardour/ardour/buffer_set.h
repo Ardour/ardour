@@ -33,7 +33,7 @@
 #include "evoral/MIDIEvent.hpp"
 struct VstEvents;
 struct VstMidiEvent;
-#endif	
+#endif
 
 namespace ARDOUR {
 
@@ -120,7 +120,7 @@ public:
 
 #ifdef VST_SUPPORT
 	VstEvents* get_vst_midi (size_t);
-#endif	
+#endif
 
 	void read_from(const BufferSet& in, framecnt_t nframes);
 	void merge_from(const BufferSet& in, framecnt_t nframes);
@@ -191,15 +191,15 @@ private:
 	private:
 		/* prevent copy construction */
 		VSTBuffer (VSTBuffer const &);
-		
+
 		VstEvents* _events; /// the parent VSTEvents struct
 		VstMidiEvent* _midi_events; ///< storage area for VSTMidiEvents
 		size_t _capacity;
 	};
-	
+
 	typedef std::vector<VSTBuffer*> VSTBuffers;
 	VSTBuffers _vst_buffers;
-#endif	
+#endif
 
 	/// Use counts (there may be more actual buffers than this)
 	ChanCount _count;

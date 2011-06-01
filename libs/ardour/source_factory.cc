@@ -167,7 +167,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 			} catch (failed_constructor&) {
 				/* oh well, so much for that then ... */
 			}
-			
+
 		} else {
 
 
@@ -186,21 +186,21 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 			}
 
 			catch (failed_constructor& err) {
-				
+
 #ifdef USE_COREAUDIO_FOR_FILES
-				
+
 				/* this is allowed to throw */
-				
+
 				Source *src = new CoreAudioSource (s, node);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 				// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
 				boost::shared_ptr<Source> ret (src);
-				
+
 				if (setup_peakfile (ret, defer_peaks)) {
 					return boost::shared_ptr<Source>();
 				}
-				
+
 				ret->check_for_analysis_data_on_disk ();
 				SourceCreated (ret);
 				return ret;
@@ -238,7 +238,7 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path,
 				// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
 				boost::shared_ptr<Source> ret (src);
-				
+
 				if (setup_peakfile (ret, defer_peaks)) {
 					return boost::shared_ptr<Source>();
 				}
@@ -277,7 +277,7 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path,
 		}
 
 	} else if (type == DataType::MIDI) {
-		
+
 		SMFSource* src = new SMFSource (s, path, SMFSource::Flag(0));
 		src->load_model (true, true);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
@@ -330,7 +330,7 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
                 // XXX writable flags should belong to MidiSource too
 		boost::shared_ptr<SMFSource> src (new SMFSource (s, path, SndFileSource::default_writable_flags));
 		assert (src->writable ());
-		
+
 		src->load_model (true, true);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 		// boost_debug_shared_ptr_mark_interesting (src, "Source");
@@ -356,21 +356,21 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<
 		try {
 
 			boost::shared_ptr<AudioPlaylist> ap = boost::dynamic_pointer_cast<AudioPlaylist>(p);
-			
+
 			if (ap) {
-				
+
 				if (copy) {
 					ap.reset (new AudioPlaylist (ap, start, len, name, true));
 					start = 0;
 				}
-				
+
 				Source* src = new AudioPlaylistSource (s, orig, name, ap, chn, start, len, Source::Flag (0));
 				boost::shared_ptr<Source> ret (src);
-				
+
 				if (setup_peakfile (ret, defer_peaks)) {
 					return boost::shared_ptr<Source>();
 				}
-				
+
 				ret->check_for_analysis_data_on_disk ();
 				SourceCreated (ret);
 				return ret;
@@ -382,21 +382,21 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<
 		}
 
 	} else if (type == DataType::MIDI) {
-		
+
 		try {
 
 			boost::shared_ptr<MidiPlaylist> ap = boost::dynamic_pointer_cast<MidiPlaylist>(p);
-			
+
 			if (ap) {
-				
+
 				if (copy) {
 					ap.reset (new MidiPlaylist (ap, start, len, name, true));
 					start = 0;
 				}
-				
+
 				Source* src = new MidiPlaylistSource (s, orig, name, ap, chn, start, len, Source::Flag (0));
 				boost::shared_ptr<Source> ret (src);
-				
+
 				SourceCreated (ret);
 				return ret;
 			}

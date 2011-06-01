@@ -147,7 +147,7 @@ Session::setup_click_sounds (Sample** data, Sample const * default_data, framecn
 
 		SF_INFO info;
 		SNDFILE* sndfile;
-		
+
 		info.format = 0;
 		if ((sndfile = sf_open (path.c_str(), SFM_READ, &info)) == 0) {
 			char errbuf[256];
@@ -158,7 +158,7 @@ Session::setup_click_sounds (Sample** data, Sample const * default_data, framecn
 		}
 
 		/* read the (possibly multi-channel) click data into a temporary buffer */
-		
+
 		sf_count_t const samples = info.frames * info.channels;
 
 		Sample* tmp = new Sample[samples];
@@ -168,14 +168,14 @@ Session::setup_click_sounds (Sample** data, Sample const * default_data, framecn
 			warning << _("cannot read data from click soundfile") << endmsg;
 			*data = 0;
 			_clicking = false;
-			
+
 		} else {
 
 			*data = new Sample[info.frames];
 			*length = info.frames;
-			
+
 			/* mix down to mono */
-			
+
 			for (int i = 0; i < info.frames; ++i) {
 				(*data)[i] = 0;
 				for (int j = 0; j < info.channels; ++j) {

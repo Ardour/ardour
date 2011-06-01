@@ -59,13 +59,13 @@ class ProcessThread;
 
 class AudioEngine : public SessionHandlePtr
 {
-   public:
+public:
 	typedef std::set<Port*> Ports;
 
-        class disconnected_exception : public std::exception {
-          public:
-                virtual const char *what() const throw() { return "AudioEngine is disconnected"; }
-        };
+	class disconnected_exception : public std::exception {
+	public:
+		virtual const char *what() const throw() { return "AudioEngine is disconnected"; }
+	};
 
 	AudioEngine (std::string client_name, std::string session_uuid);
 	virtual ~AudioEngine ();
@@ -75,7 +75,7 @@ class AudioEngine : public SessionHandlePtr
 
 	bool is_realtime () const;
 
-        ProcessThread* main_thread() const { return _main_thread; }
+	ProcessThread* main_thread() const { return _main_thread; }
 
 	std::string client_name() const { return jack_client_name; }
 
@@ -107,7 +107,7 @@ class AudioEngine : public SessionHandlePtr
 		}
 		return jack_frames_since_cycle_start (_priv_jack);
 	}
-	
+
 	pframes_t frame_time () {
   	        jack_client_t* _priv_jack = _jack;
 		if (!_running || !_priv_jack) {
@@ -170,8 +170,8 @@ class AudioEngine : public SessionHandlePtr
 	Port *register_output_port (DataType, const std::string& portname);
 	int   unregister_port (Port &);
 
-        bool port_is_physical (const std::string&) const;
-        void ensure_monitor_input (const std::string&, bool) const;
+	bool port_is_physical (const std::string&) const;
+	void ensure_monitor_input (const std::string&, bool) const;
 
 	void split_cycle (pframes_t offset);
 
@@ -255,14 +255,14 @@ _	   the regular process() call to session->process() is not made.
 
 	std::string make_port_name_relative (std::string) const;
 	std::string make_port_name_non_relative (std::string) const;
-        bool port_is_mine (const std::string&) const;
+	bool port_is_mine (const std::string&) const;
 
 	static AudioEngine* instance() { return _instance; }
 	void died ();
 
-        int create_process_thread (boost::function<void()>, pthread_t*, size_t stacksize);
+	int create_process_thread (boost::function<void()>, pthread_t*, size_t stacksize);
 
-  private:
+private:
 	static AudioEngine*       _instance;
 
 	jack_client_t* volatile   _jack; /* could be reset to null by SIGPIPE or another thread */
@@ -321,10 +321,10 @@ _	   the regular process() call to session->process() is not made.
 	int  jack_bufsize_callback (pframes_t);
 	int  jack_sample_rate_callback (pframes_t);
 
-        void set_jack_callbacks ();
+	void set_jack_callbacks ();
 
-        static void _latency_callback (jack_latency_callback_mode_t, void*);
-        void jack_latency_callback (jack_latency_callback_mode_t);
+	static void _latency_callback (jack_latency_callback_mode_t, void*);
+	void jack_latency_callback (jack_latency_callback_mode_t);
 
 	int connect_to_jack (std::string client_name, std::string session_uuid);
 
@@ -337,19 +337,19 @@ _	   the regular process() call to session->process() is not made.
 
 	Glib::Thread*    m_meter_thread;
 	static gint      m_meter_exit;
-	
-        ProcessThread* _main_thread;
 
-        struct ThreadData {
-            AudioEngine* engine;
-            boost::function<void()> f;
-            size_t stacksize;
-            
-            ThreadData (AudioEngine* ae, boost::function<void()> fp, size_t stacksz) 
-            : engine (ae) , f (fp) , stacksize (stacksz) {}
-        };
-        
-        static void* _start_process_thread (void*);
+	ProcessThread* _main_thread;
+
+	struct ThreadData {
+		AudioEngine* engine;
+		boost::function<void()> f;
+		size_t stacksize;
+
+		ThreadData (AudioEngine* ae, boost::function<void()> fp, size_t stacksz)
+		: engine (ae) , f (fp) , stacksize (stacksz) {}
+	};
+
+	static void* _start_process_thread (void*);
 };
 
 } // namespace ARDOUR

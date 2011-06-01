@@ -361,7 +361,7 @@ ExportProfileManager::init_timespans (XMLNodeList nodes)
 	if (timespans.empty()) {
 		TimespanStatePtr state (new TimespanState (session_range, selection_range, ranges));
 		timespans.push_back (state);
-		
+
 		// Add session as default selection
 		TimespanPtr timespan = handler->add_timespan();
 		timespan->set_name (session_range->name());
@@ -473,15 +473,15 @@ ExportProfileManager::init_channel_configs (XMLNodeList nodes)
 	if (nodes.empty()) {
 		ChannelConfigStatePtr config (new ChannelConfigState (handler->add_channel_config()));
 		channel_configs.push_back (config);
-		
+
 		// Add master outs as default
 		IO* master_out = session.master_out()->output().get();
 		if (!master_out) { return false; }
-		
+
 		for (uint32_t n = 0; n < master_out->n_ports().n_audio(); ++n) {
 			PortExportChannel * channel = new PortExportChannel ();
 			channel->add_port (master_out->audio (n));
-			
+
 			ExportChannelPtr chan_ptr (channel);
 			config->config->register_channel (chan_ptr);
 		}

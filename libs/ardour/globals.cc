@@ -114,13 +114,13 @@ void ARDOUR::setup_enum_writer ();
 */
 PBD::PropertyChange ARDOUR::bounds_change;
 
-namespace ARDOUR { 
+namespace ARDOUR {
 	namespace Properties {
 
 		/* the envelope and fades are not scalar items and so
 		   currently (2010/02) are not stored using Property.
 		   However, these descriptors enable us to notify
-		   about changes to them via PropertyChange. 
+		   about changes to them via PropertyChange.
 
 		   Declared in ardour/audioregion.h ...
 		*/
@@ -202,7 +202,7 @@ setup_hardware_optimization (bool try_optimization)
 
 		info << "No H/W specific optimizations in use" << endmsg;
 	}
-	
+
 	AudioGrapher::Routines::override_compute_peak (compute_peak);
 	AudioGrapher::Routines::override_apply_gain_to_buffer (apply_gain_to_buffer);
 }
@@ -245,7 +245,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
 	PBD::ID::init ();
 	SessionEvent::init_event_pool ();
-	
+
 	make_property_quarks ();
 	SessionObject::make_property_quarks ();
 	Region::make_property_quarks ();
@@ -286,7 +286,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	if (Config->load_state ()) {
 		return -1;
 	}
-        
+
 	Config->set_use_vst (use_vst);
 
 	Profile = new RuntimeProfile;

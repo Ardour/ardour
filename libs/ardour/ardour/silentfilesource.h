@@ -55,7 +55,7 @@ protected:
 	}
 
 	framecnt_t write_unlocked (Sample */*dst*/, framecnt_t /*cnt*/) { return 0; }
-	
+
 	void set_header_timeline_position () {}
 
 	int read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t /*start*/, framecnt_t /*cnt*/,

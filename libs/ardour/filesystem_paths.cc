@@ -47,20 +47,20 @@ user_config_directory ()
 		p = c;
 	} else {
 		const string home_dir = Glib::get_home_dir();
-	
+
 		if (home_dir.empty ()) {
 			const string error_msg = "Unable to determine home directory";
-			
+
 			// log the error
 			error << error_msg << endmsg;
-			
+
 			throw sys::filesystem_error(error_msg);
 		}
 
 		p = home_dir;
 		p /= ".config";
 	}
-	
+
 	p /= user_config_dir_name;
 
 	return p;

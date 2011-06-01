@@ -28,7 +28,7 @@ framecnt_t
 BeatsFramesConverter::to (double beats) const
 {
 	assert (beats >= 0);
-	
+
 	return _tempo_map.framepos_plus_bbt (_origin_b, Timecode::BBT_Time(beats)) - _origin_b;
 }
 

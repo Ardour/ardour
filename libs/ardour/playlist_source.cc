@@ -64,7 +64,7 @@ PlaylistSource::PlaylistSource (Session& s, const XMLNode& node)
 {
 	/* PlaylistSources are never writable, renameable, removable or destructive */
 	_flags = Flag (_flags & ~(Writable|CanRename|Removable|RemovableIfEmpty|RemoveAtDestroy|Destructive));
-	
+
 
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
@@ -87,12 +87,12 @@ PlaylistSource::add_state (XMLNode& node)
 	snprintf (buf, sizeof (buf), "%" PRIu64, _playlist_length);
 	node.add_property ("length", buf);
 	node.add_property ("original", _id.to_s());
-	
+
 	node.add_child_nocopy (_playlist->get_state());
 }
 
 int
-PlaylistSource::set_state (const XMLNode& node, int version) 
+PlaylistSource::set_state (const XMLNode& node, int version)
 {
 	/* check that we have a playlist ID */
 
@@ -127,7 +127,7 @@ PlaylistSource::set_state (const XMLNode& node, int version)
 	if ((prop = node.property (X_("name"))) == 0) {
 		throw failed_constructor ();
 	}
-	
+
 	set_name (prop->value());
 
 	if ((prop = node.property (X_("offset"))) == 0) {

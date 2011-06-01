@@ -41,7 +41,7 @@ class Butler : public SessionHandleRef
   public:
 	Butler (Session& session);
 	~Butler();
-	
+
 	int  start_thread();
 	void terminate_thread();
 	void schedule_transport_work();
@@ -83,7 +83,7 @@ class Butler : public SessionHandleRef
 
 private:
 	void empty_pool_trash ();
-        void config_changed (std::string);
+	void config_changed (std::string);
 };
 
 } // namespace ARDOUR

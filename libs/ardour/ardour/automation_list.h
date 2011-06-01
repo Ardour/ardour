@@ -64,8 +64,8 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 		return (_state & Play) || ((_state & Touch) && !touching());
 	}
 	bool automation_write () const {
-                return ((_state & Write) || ((_state & Touch) && touching()));
-        }
+		return ((_state & Write) || ((_state & Touch) && touching()));
+	}
 
 	PBD::Signal0<void> StateChanged;
 
@@ -75,9 +75,9 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 	void stop_touch (bool mark, double when);
 	bool touching() const { return g_atomic_int_get (&_touching); }
 	bool writing() const { return _state == Write; }
-        bool touch_enabled() const { return _state == Touch; }
+	bool touch_enabled() const { return _state == Touch; }
 
-	XMLNode& get_state (); 
+	XMLNode& get_state ();
 	int set_state (const XMLNode &, int version);
 	XMLNode& state (bool full);
 	XMLNode& serialize_events ();

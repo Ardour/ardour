@@ -68,7 +68,7 @@ namespace ARDOUR {
 	*/
 	typedef int64_t frameoffset_t;
 
-	/* Any count of audio frames. 
+	/* Any count of audio frames.
 	   Assumed to be positive but not enforced.
 	*/
 	typedef int64_t framecnt_t;
@@ -105,22 +105,22 @@ namespace ARDOUR {
 		OverlapEnd,       // overlap begins within and covers end
 		OverlapExternal   // overlap extends to (at least) begin+end
 	};
-        
-        ARDOUR::OverlapType coverage (framepos_t sa, framepos_t ea,
-                                      framepos_t sb, framepos_t eb);
 
-        /* policies for inserting/pasting material where overlaps
-           might be an issue.
-        */
+	ARDOUR::OverlapType coverage (framepos_t sa, framepos_t ea,
+	                              framepos_t sb, framepos_t eb);
 
-        enum InsertMergePolicy {
-                InsertMergeReject,  // no overlaps allowed
-                InsertMergeRelax,   // we just don't care about overlaps
-                InsertMergeReplace, // replace old with new
-                InsertMergeTruncateExisting, // shorten existing to avoid overlap
-                InsertMergeTruncateAddition, // shorten new to avoid overlap
-                InsertMergeExtend   // extend new (or old) to the range of old+new
-        };
+	/* policies for inserting/pasting material where overlaps
+	   might be an issue.
+	*/
+
+	enum InsertMergePolicy {
+		InsertMergeReject,  // no overlaps allowed
+		InsertMergeRelax,   // we just don't care about overlaps
+		InsertMergeReplace, // replace old with new
+		InsertMergeTruncateExisting, // shorten existing to avoid overlap
+		InsertMergeTruncateAddition, // shorten new to avoid overlap
+		InsertMergeExtend   // extend new (or old) to the range of old+new
+	};
 
 	/** See evoral/Parameter.hpp
 	 */
@@ -171,14 +171,14 @@ namespace ARDOUR {
 	enum AlignChoice {
 		UseCaptureTime,
 		UseExistingMaterial,
-                Automatic
+		Automatic
 	};
 
 	enum MeterPoint {
 		MeterInput,
 		MeterPreFader,
 		MeterPostFader,
-                MeterOutput,
+		MeterOutput,
 		MeterCustom
 	};
 
@@ -237,10 +237,10 @@ namespace ARDOUR {
 		};
 
 		AnyTime() { type = Frames; frames = 0; }
-		
+
 		bool operator== (AnyTime const & other) const {
 			if (type != other.type) { return false; }
-			
+
 			switch (type) {
 			  case Timecode:
 				return timecode == other.timecode;
@@ -252,7 +252,7 @@ namespace ARDOUR {
 				return seconds == other.seconds;
 			}
 		}
-		
+
 		bool not_zero() const
 		{
 			switch (type) {
@@ -404,7 +404,7 @@ namespace ARDOUR {
 
 	struct InterThreadInfo {
 		InterThreadInfo () : done (false), cancel (false), progress (0), thread (0) {}
-			
+
 		volatile bool  done;
 		volatile bool  cancel;
 		volatile float progress;
@@ -551,13 +551,13 @@ namespace ARDOUR {
 		bool meter_visibly_changed;
 	};
 
-        struct BusProfile {
-            AutoConnectOption input_ac;      /* override the RC config for input auto-connection */
-            AutoConnectOption output_ac;     /* override the RC config for output auto-connection */
-            uint32_t master_out_channels;    /* how many channels for the master bus */
-            uint32_t requested_physical_in;  /* now many of the available physical inputs to consider usable */
-            uint32_t requested_physical_out; /* now many of the available physical inputs to consider usable */
-        };
+	struct BusProfile {
+		AutoConnectOption input_ac;      /* override the RC config for input auto-connection */
+		AutoConnectOption output_ac;     /* override the RC config for output auto-connection */
+		uint32_t master_out_channels;    /* how many channels for the master bus */
+		uint32_t requested_physical_in;  /* now many of the available physical inputs to consider usable */
+		uint32_t requested_physical_out; /* now many of the available physical inputs to consider usable */
+	};
 
 	enum FadeShape {
 		FadeLinear,

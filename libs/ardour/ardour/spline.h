@@ -30,8 +30,8 @@ typedef struct _spline_point SplinePoint;
 
 struct _spline_point
 {
-    float x;
-    float y;
+	float x;
+	float y;
 };
 
 Spline *spline_new (void);

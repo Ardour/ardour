@@ -108,7 +108,7 @@ PannerManager::select_panner (ChanCount in, ChanCount out)
         PanPluginDescriptor* d;
         int32_t nin = in.n_audio();
         int32_t nout = out.n_audio();
-        
+
         /* look for exact match first */
 
         for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
@@ -123,7 +123,7 @@ PannerManager::select_panner (ChanCount in, ChanCount out)
 
         for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
                 d = &(*p)->descriptor;
-         
+
                 if (d->in == nin && d->out == -1) {
                         return *p;
                 }
@@ -133,7 +133,7 @@ PannerManager::select_panner (ChanCount in, ChanCount out)
 
         for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
                 d = &(*p)->descriptor;
-         
+
                 if (d->in == -1 && d->out == nout) {
                         return *p;
                 }
@@ -143,7 +143,7 @@ PannerManager::select_panner (ChanCount in, ChanCount out)
 
         for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
                 d = &(*p)->descriptor;
-         
+
                 if (d->in == -1 && d->out == -1) {
                         return *p;
                 }

@@ -43,13 +43,13 @@ public:
 
 	void set_speed (double new_speed)          { _speed = new_speed; _target_speed = new_speed; }
 	void set_target_speed (double new_speed)   { _target_speed = new_speed; }
-	
+
 	double target_speed()          const { return _target_speed; }
 	double speed()                 const { return _speed; }
-	
+
 	void add_channel_to (int /*input_buffer_size*/, int /*output_buffer_size*/) { phase.push_back (0.0); }
 	void remove_channel_from () { phase.pop_back (); }
-	
+
 	void reset () {
 		for (size_t i = 0; i < phase.size(); i++) {
 			phase[i] = 0.0;

@@ -147,7 +147,7 @@ class Locations : public SessionHandleRef, public PBD::StatefulDestructible
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
-        Location *get_location_by_id(PBD::ID);
+	Location *get_location_by_id(PBD::ID);
 
 	Location* auto_loop_location () const;
 	Location* auto_punch_location () const;

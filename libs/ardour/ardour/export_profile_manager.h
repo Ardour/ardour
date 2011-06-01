@@ -268,7 +268,7 @@ class ExportProfileManager
 	                   ChannelConfigStatePtr channel_config_state,
 	                   FormatStatePtr format_state,
 	                   FilenameStatePtr filename_state);
-	
+
 	bool check_format (FormatPtr format, uint32_t channels);
 	bool check_sndfile_format (FormatPtr format, unsigned int channels);
 

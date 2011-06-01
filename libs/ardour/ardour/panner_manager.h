@@ -8,36 +8,36 @@
 namespace ARDOUR {
 
 struct PannerInfo {
-    PanPluginDescriptor descriptor;
-    void* module;
-    
-    PannerInfo (PanPluginDescriptor& d, void* handle) 
-            : descriptor (d)
-            , module (handle)
-    {}
-    
-    ~PannerInfo () { 
-            dlclose (module);
-    }
+	PanPluginDescriptor descriptor;
+	void* module;
+
+	PannerInfo (PanPluginDescriptor& d, void* handle)
+	: descriptor (d)
+	, module (handle)
+	{}
+
+	~PannerInfo () {
+		dlclose (module);
+	}
 };
-        
+
 class PannerManager : public ARDOUR::SessionHandlePtr
 {
-  public:
-    ~PannerManager ();
-    static PannerManager& instance ();
-    
-    void discover_panners ();
-    std::list<PannerInfo*> panner_info;
+public:
+	~PannerManager ();
+	static PannerManager& instance ();
 
-    PannerInfo* select_panner (ChanCount in, ChanCount out);
-    
-  private:
-    PannerManager();
-    static PannerManager* _instance;
+	void discover_panners ();
+	std::list<PannerInfo*> panner_info;
 
-    PannerInfo* get_descriptor (std::string path);
-    int panner_discover (std::string path);
+	PannerInfo* select_panner (ChanCount in, ChanCount out);
+
+private:
+	PannerManager();
+	static PannerManager* _instance;
+
+	PannerInfo* get_descriptor (std::string path);
+	int panner_discover (std::string path);
 };
 
 } // namespace

@@ -182,7 +182,7 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, framepos_t timestamp)
 						       t1 * session->frame_rate(),
 						       session->frame_rate(),
 						       ((t1 - t0) * session->frame_rate()) / one_ppqn_in_frames));
-	
+
 	last_timestamp = timestamp;
 }
 
@@ -209,7 +209,7 @@ MIDIClock_Slave::reset ()
 
 	_starting = true;
 	_started  = true;
-	
+
 	// session->request_locate(0, false);
 }
 
@@ -332,7 +332,7 @@ MIDIClock_Slave::speed_and_position (double& speed, framepos_t& pos)
 
 	// calculate speed
 	speed = ((t1 - t0) * session->frame_rate()) / one_ppqn_in_frames;
-	
+
 	// provide a 3% deadzone to lock the speed
 	if (fabs(speed - 1.0) <= 0.03)
 	        speed = 1.0;

@@ -42,4 +42,4 @@ namespace Operations {
 	extern GQuark fixed_time_region_copy;
 
 };
-	
+

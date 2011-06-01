@@ -42,20 +42,20 @@ class SourceFactory {
 
 	static boost::shared_ptr<Source> create (Session&, const XMLNode& node, bool async = false);
 	static boost::shared_ptr<Source> createSilent (Session&, const XMLNode& node,
-                                                       framecnt_t nframes, float sample_rate);
+	                                               framecnt_t nframes, float sample_rate);
 
-	static boost::shared_ptr<Source> createReadable 
+	static boost::shared_ptr<Source> createReadable
 		(DataType type, Session&,
-		 const std::string& path, 
+		 const std::string& path,
 		 int chn, Source::Flag flags, bool announce = true, bool async = false);
 
-	static boost::shared_ptr<Source> createWritable 
+	static boost::shared_ptr<Source> createWritable
 		(DataType type, Session&,
 		 const std::string& path, const std::string& origin,
 		 bool destructive, framecnt_t rate, bool announce = true, bool async = false);
 
 
-	static boost::shared_ptr<Source> createFromPlaylist 
+	static boost::shared_ptr<Source> createFromPlaylist
 		(DataType type, Session& s, boost::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name,
 		 uint32_t chn, frameoffset_t start, framecnt_t len, bool copy, bool defer_peaks);
 

@@ -42,7 +42,7 @@ int
 ExportGraphBuilder::process (framecnt_t frames, bool last_cycle)
 {
 	assert(frames <= process_buffer_frames);
-	
+
 	for (ChannelMap::iterator it = channels.begin(); it != channels.end(); ++it) {
 		Sample const * process_buffer = 0;
 		it->first->read (process_buffer, frames);
@@ -50,7 +50,7 @@ ExportGraphBuilder::process (framecnt_t frames, bool last_cycle)
 		if (last_cycle) { context().set_flag (ProcessContext<Sample>::EndOfInput); }
 		it->second->process (context);
 	}
-	
+
 	return 0;
 }
 
@@ -64,7 +64,7 @@ ExportGraphBuilder::process_normalize ()
 			++it;
 		}
 	}
-	
+
 	return normalizers.empty();
 }
 
@@ -101,28 +101,28 @@ ExportGraphBuilder::add_config (FileSpec const & config)
 		framecnt_t session_rate = session.nominal_frame_rate();
 		new_config.format->set_sample_rate(ExportFormatBase::nearest_sample_rate(session_rate));
 	}
-	
-	
+
+
 	if (!new_config.channel_config->get_split ()) {
 		add_split_config (new_config);
 		return;
 	}
-	
+
 	// Split channel configurations are split into several channel configurations,
 	// each corresponding to a file, at this stage
 	typedef std::list<boost::shared_ptr<ExportChannelConfiguration> > ConfigList;
 	ConfigList file_configs;
 	new_config.channel_config->configurations_for_files (file_configs);
-	
+
 	unsigned chan = 1;
 	for (ConfigList::iterator it = file_configs.begin(); it != file_configs.end(); ++it, ++chan) {
 		FileSpec copy = new_config;
 		copy.channel_config = *it;
-		
+
 		copy.filename.reset (new ExportFilename (*copy.filename));
 		copy.filename->include_channel = true;
 		copy.filename->set_channel (chan);
-		
+
 		add_split_config (copy);
 	}
 }
@@ -136,7 +136,7 @@ ExportGraphBuilder::add_split_config (FileSpec const & config)
 			return;
 		}
 	}
-	
+
 	// No duplicate channel config found, create new one
 	channel_configs.push_back (new ChannelConfig (*this, config, channels));
 }
@@ -197,7 +197,7 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::Sndfil
 	int format = get_real_format (config);
 	config.filename->set_channel_config(config.channel_config);
 	string filename = config.filename->get_path (config.format);
-	
+
 	writer.reset (new AudioGrapher::SndfileWriter<T> (filename, format, channels, config.format->sample_rate(), config.broadcast_info));
 	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
 }
@@ -220,7 +220,7 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &, FileSpec const & new_config,
 	config = new_config;
 	data_width = sndfile_data_width (Encoder::get_real_format (config));
 	unsigned channels = new_config.channel_config->get_n_chans();
-	
+
 	if (data_width == 8 || data_width == 16) {
 		short_converter = ShortConverterPtr (new SampleFormatConverter<short> (channels));
 		short_converter->init (max_frames, config.format->dither_type(), data_width);
@@ -258,10 +258,10 @@ ExportGraphBuilder::SFC::add_child (FileSpec const & new_config)
 			return;
 		}
 	}
-	
+
 	children.push_back (new Encoder());
 	Encoder & encoder = children.back();
-	
+
 	if (data_width == 8 || data_width == 16) {
 		short_converter->add_output (encoder.init<short> (new_config));
 	} else if (data_width == 24 || data_width == 32) {
@@ -284,22 +284,22 @@ ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpe
 {
 	config = new_config;
 	max_frames_out = 4086; // TODO good chunk size
-	
+
 	buffer.reset (new AllocatingProcessContext<Sample> (max_frames_out, config.channel_config->get_n_chans()));
 	peak_reader.reset (new PeakReader ());
 	normalizer.reset (new AudioGrapher::Normalizer (config.format->normalize_target()));
 	threader.reset (new Threader<Sample> (parent.thread_pool));
-	
+
 	normalizer->alloc_buffer (max_frames_out);
 	normalizer->add_output (threader);
-	
+
 	int format = ExportFormatBase::F_RAW | ExportFormatBase::SF_Float;
-	tmp_file.reset (new TmpFile<float> (format, config.channel_config->get_n_chans(), 
+	tmp_file.reset (new TmpFile<float> (format, config.channel_config->get_n_chans(),
 	                                    config.format->sample_rate()));
 	tmp_file->FileWritten.connect_same_thread (post_processing_connection, boost::bind (&Normalizer::start_post_processing, this));
-	
+
 	add_child (new_config);
-	
+
 	peak_reader->add_output (tmp_file);
 }
 
@@ -318,7 +318,7 @@ ExportGraphBuilder::Normalizer::add_child (FileSpec const & new_config)
 			return;
 		}
 	}
-	
+
 	children.push_back (new SFC (parent, new_config, max_frames_out));
 	threader->add_output (children.back().sink());
 }
@@ -356,7 +356,7 @@ ExportGraphBuilder::SRC::SRC (ExportGraphBuilder & parent, FileSpec const & new_
 	ExportFormatSpecification & format = *new_config.format;
 	converter->init (parent.session.nominal_frame_rate(), format.sample_rate(), format.src_quality());
 	max_frames_out = converter->allocate_buffers (max_frames);
-	
+
 	add_child (new_config);
 }
 
@@ -386,7 +386,7 @@ ExportGraphBuilder::SRC::add_child_to_list (FileSpec const & new_config, boost::
 			return;
 		}
 	}
-	
+
 	list.push_back (new T (parent, new_config, max_frames_out));
 	converter->add_output (list.back().sink ());
 }
@@ -404,17 +404,17 @@ ExportGraphBuilder::SilenceHandler::SilenceHandler (ExportGraphBuilder & parent,
 	config = new_config;
 	max_frames_in = max_frames;
 	framecnt_t sample_rate = parent.session.nominal_frame_rate();
-	
+
 	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in));
 	silence_trimmer->set_trim_beginning (config.format->trim_beginning());
 	silence_trimmer->set_trim_end (config.format->trim_end());
-	
+
 	framecnt_t sb = config.format->silence_beginning_at (parent.timespan->get_start(), sample_rate);
 	framecnt_t se = config.format->silence_end_at (parent.timespan->get_end(), sample_rate);
-	
+
 	silence_trimmer->add_silence_to_beginning (sb);
 	silence_trimmer->add_silence_to_end (se);
-	
+
 	add_child (new_config);
 }
 
@@ -433,7 +433,7 @@ ExportGraphBuilder::SilenceHandler::add_child (FileSpec const & new_config)
 			return;
 		}
 	}
-	
+
 	children.push_back (new SRC (parent, new_config, max_frames_in));
 	silence_trimmer->add_output (children.back().sink());
 }
@@ -455,13 +455,13 @@ ExportGraphBuilder::ChannelConfig::ChannelConfig (ExportGraphBuilder & parent, F
   : parent (parent)
 {
 	typedef ExportChannelConfiguration::ChannelList ChannelList;
-	
+
 	config = new_config;
 	max_frames = parent.session.engine().frames_per_cycle();
-	
+
 	interleaver.reset (new Interleaver<Sample> ());
 	interleaver->init (new_config.channel_config->get_n_chans(), max_frames);
-	
+
 	ChannelList const & channel_list = config.channel_config->get_channels();
 	unsigned chan = 0;
 	for (ChannelList::const_iterator it = channel_list.begin(); it != channel_list.end(); ++it, ++chan) {
@@ -474,7 +474,7 @@ ExportGraphBuilder::ChannelConfig::ChannelConfig (ExportGraphBuilder & parent, F
 		}
 		map_it->second->add_output (interleaver->input (chan));
 	}
-	
+
 	add_child (new_config);
 }
 
@@ -487,7 +487,7 @@ ExportGraphBuilder::ChannelConfig::add_child (FileSpec const & new_config)
 			return;
 		}
 	}
-	
+
 	framecnt_t const max_frames_out = new_config.channel_config->get_n_chans() * max_frames;
 	children.push_back (new SilenceHandler (parent, new_config, max_frames_out));
 	interleaver->add_output (children.back().sink ());

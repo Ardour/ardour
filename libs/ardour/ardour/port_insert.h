@@ -65,12 +65,12 @@ class PortInsert : public IOProcessor
 
 	uint32_t bit_slot() const { return bitslot; }
 
-        void start_latency_detection ();
-        void stop_latency_detection ();
+	void start_latency_detection ();
+	void stop_latency_detection ();
 
-        MTDM* mtdm () const { return _mtdm; }
-        void set_measured_latency (framecnt_t);
-        framecnt_t latency () const;
+	MTDM* mtdm () const { return _mtdm; }
+	void set_measured_latency (framecnt_t);
+	framecnt_t latency () const;
 
   private:
 	/* disallow copy construction */
@@ -79,10 +79,10 @@ class PortInsert : public IOProcessor
 	boost::shared_ptr<Delivery> _out;
 
 	uint32_t    bitslot;
-        MTDM*      _mtdm;
-        bool       _latency_detect;
-        framecnt_t _latency_flush_frames;
-        framecnt_t _measured_latency;
+	MTDM*      _mtdm;
+	bool       _latency_detect;
+	framecnt_t _latency_flush_frames;
+	framecnt_t _measured_latency;
 };
 
 } // namespace ARDOUR

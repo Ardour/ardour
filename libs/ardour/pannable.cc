@@ -114,14 +114,14 @@ Pannable::set_automation_state (AutoState state)
                 _auto_state = state;
 
                 const Controls& c (controls());
-        
+
                 for (Controls::const_iterator ci = c.begin(); ci != c.end(); ++ci) {
                         boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl>(ci->second);
                         if (ac) {
                                 ac->alist()->set_automation_state (state);
                         }
                 }
-                
+
                 session().set_dirty ();
                 automation_state_changed (_auto_state);
         }
@@ -134,14 +134,14 @@ Pannable::set_automation_style (AutoStyle style)
                 _auto_style = style;
 
                 const Controls& c (controls());
-                
+
                 for (Controls::const_iterator ci = c.begin(); ci != c.end(); ++ci) {
                         boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl>(ci->second);
                         if (ac) {
                                 ac->alist()->set_automation_style (style);
                         }
                 }
-                
+
                 session().set_dirty ();
                 automation_style_changed ();
         }
@@ -151,7 +151,7 @@ void
 Pannable::start_touch (double when)
 {
         const Controls& c (controls());
-        
+
         for (Controls::const_iterator ci = c.begin(); ci != c.end(); ++ci) {
                 boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl>(ci->second);
                 if (ac) {
@@ -165,7 +165,7 @@ void
 Pannable::stop_touch (bool mark, double when)
 {
         const Controls& c (controls());
-        
+
         for (Controls::const_iterator ci = c.begin(); ci != c.end(); ++ci) {
                 boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl>(ci->second);
                 if (ac) {
@@ -192,7 +192,7 @@ Pannable::state (bool full)
         snprintf (buf, sizeof(buf), "%.12g", pan_azimuth_control->get_value());
         control_node->add_property (X_("value"), buf);
         node->add_child_nocopy (*control_node);
-        
+
         control_node = new XMLNode (X_("width"));
         snprintf (buf, sizeof(buf), "%.12g", pan_width_control->get_value());
         control_node->add_property (X_("value"), buf);
@@ -212,7 +212,7 @@ Pannable::state (bool full)
         snprintf (buf, sizeof(buf), "%.12g", pan_lfe_control->get_value());
         control_node->add_property (X_("value"), buf);
         node->add_child_nocopy (*control_node);
-        
+
         node->add_child_nocopy (get_automation_xml_state ());
 
      return *node;
@@ -225,7 +225,7 @@ Pannable::set_state (const XMLNode& root, int /*version - not used*/)
                 warning << string_compose (_("Pannable given XML data for %1 - ignored"), root.name()) << endmsg;
                 return -1;
         }
-        
+
         XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 	const XMLProperty *prop;
@@ -262,20 +262,20 @@ Pannable::set_state (const XMLNode& root, int /*version - not used*/)
                         set_automation_xml_state (**niter, PanAzimuthAutomation);
                 }
         }
-        
+
         _has_state = true;
 
         return 0;
 }
 
-string 
+string
 Pannable::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 {
         boost::shared_ptr<Panner> p = panner ();
 
         if (p) {
                 return p->value_as_string (ac);
-        } 
+        }
 
         return Automatable::value_as_string (ac);
 }

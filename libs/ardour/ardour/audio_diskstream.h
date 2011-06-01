@@ -159,7 +159,7 @@ class AudioDiskstream : public Diskstream
 	void set_block_size (pframes_t);
 	int  internal_playback_seek (framecnt_t distance);
 	int  can_internal_playback_seek (framecnt_t distance);
-        std::list<boost::shared_ptr<Source> > steal_write_sources();
+	std::list<boost::shared_ptr<Source> > steal_write_sources();
 	void reset_write_sources (bool, bool force = false);
 	void non_realtime_input_change ();
 	void non_realtime_locate (framepos_t location);
@@ -175,19 +175,19 @@ class AudioDiskstream : public Diskstream
 	bool commit  (framecnt_t nframes);
 
   private:
-        struct ChannelSource { 
-            std::string name;
+	struct ChannelSource {
+		std::string name;
 
-            bool is_physical () const;
-            void ensure_monitor_input (bool) const;
-        };
+		bool is_physical () const;
+		void ensure_monitor_input (bool) const;
+	};
 
 	struct ChannelInfo : public boost::noncopyable {
 
-		ChannelInfo (framecnt_t playback_buffer_size, 
-                             framecnt_t capture_buffer_size,
-                             framecnt_t speed_buffer_size, 
-                             framecnt_t wrap_buffer_size);
+		ChannelInfo (framecnt_t playback_buffer_size,
+		             framecnt_t capture_buffer_size,
+		             framecnt_t speed_buffer_size,
+		             framecnt_t wrap_buffer_size);
 		~ChannelInfo ();
 
 		Sample     *playback_wrap_buffer;
@@ -199,8 +199,8 @@ class AudioDiskstream : public Diskstream
 		boost::shared_ptr<AudioFileSource> write_source;
 
 		/// information the Port that our audio data comes from
-		
-                ChannelSource source;
+
+		ChannelSource source;
 
 		Sample       *current_capture_buffer;
 		Sample       *current_playback_buffer;
@@ -219,8 +219,8 @@ class AudioDiskstream : public Diskstream
 		// the following are used in the butler thread only
 		framecnt_t                     curr_capture_cnt;
 
-                void resize_playback (framecnt_t);
-                void resize_capture (framecnt_t);
+		void resize_playback (framecnt_t);
+		void resize_capture (framecnt_t);
 	};
 
 	typedef std::vector<ChannelInfo*> ChannelList;
@@ -234,8 +234,8 @@ class AudioDiskstream : public Diskstream
 	int do_refill_with_alloc ();
 
 	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
-                  framepos_t& start, framecnt_t cnt,
-                  ChannelInfo* channel_info, int channel, bool reversed);
+	          framepos_t& start, framecnt_t cnt,
+	          ChannelInfo* channel_info, int channel, bool reversed);
 
 	void finish_capture (bool rec_monitors_input, boost::shared_ptr<ChannelList>);
 	void transport_stopped_wallclock (struct tm&, time_t, bool abort);
@@ -260,8 +260,8 @@ class AudioDiskstream : public Diskstream
 	void setup_destructive_playlist ();
 	void use_destructive_playlist ();
 
-        void adjust_playback_buffering ();
-        void adjust_capture_buffering ();
+	void adjust_playback_buffering ();
+	void adjust_capture_buffering ();
 
 	void engage_record_enable ();
 	void disengage_record_enable ();

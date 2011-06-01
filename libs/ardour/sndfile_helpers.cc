@@ -180,7 +180,7 @@ sndfile_major_format(int format)
 			m[format_info.format & SF_FORMAT_TYPEMASK] = format_info.name;
 
                         /* normalize a couple of names rather than use what libsndfile gives us */
-                        
+
                         if (strncasecmp (format_info.name, "OGG", 3) == 0) {
                                 m[format_info.format & SF_FORMAT_TYPEMASK] = "Ogg";
                         } else if (strncasecmp (format_info.name, "WAV", 3) == 0) {

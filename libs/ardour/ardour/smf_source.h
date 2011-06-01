@@ -37,7 +37,7 @@ template<typename T> class MidiRingBuffer;
 class SMFSource : public MidiSource, public FileSource, public Evoral::SMF {
 public:
 	/** Constructor for existing external-to-session files */
-	SMFSource (Session& session, const std::string& path, 
+	SMFSource (Session& session, const std::string& path,
 			Source::Flag flags = Source::Flag(0));
 
 	/** Constructor for existing in-session files */
@@ -71,10 +71,10 @@ public:
 	static bool safe_midi_file_extension (const std::string& path);
 
   protected:
-        void set_path (const std::string& newpath);
-        
+	void set_path (const std::string& newpath);
+
   private:
-        int open_for_write ();
+	int open_for_write ();
 
 	framecnt_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
 				  framepos_t position,

@@ -29,7 +29,7 @@ MidiAutomationListBinder::MidiAutomationListBinder (boost::shared_ptr<MidiSource
 	: _source (s)
 	, _parameter (p)
 {
-	
+
 }
 
 MidiAutomationListBinder::MidiAutomationListBinder (XMLNode* node, Session::SourceMap const & sources)
@@ -37,7 +37,7 @@ MidiAutomationListBinder::MidiAutomationListBinder (XMLNode* node, Session::Sour
 {
 	XMLProperty* source = node->property ("source-id");
 	assert (source);
-	
+
 	XMLProperty* parameter = node->property ("parameter");
 	assert (parameter);
 
@@ -53,10 +53,10 @@ MidiAutomationListBinder::get ()
 {
 	boost::shared_ptr<MidiModel> model = _source->model ();
 	assert (model);
-	
+
 	boost::shared_ptr<AutomationControl> control = model->automation_control (_parameter);
 	assert (control);
-	
+
 	return control->alist().get();
 }
 

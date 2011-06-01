@@ -53,7 +53,7 @@ snprintf_bounded_null_filled (char* target, size_t target_size, char const * fmt
 
 BroadcastInfo::BroadcastInfo ()
 {
-	
+
 }
 
 void

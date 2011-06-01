@@ -26,7 +26,7 @@ class Playlist;
 class Source;
 class Location;
 
-/** Public interface to a Diskstream */	
+/** Public interface to a Diskstream */
 class PublicDiskstream
 {
 public:
@@ -61,7 +61,7 @@ public:
 	virtual void transport_stopped_wallclock (struct tm &, time_t, bool) = 0;
 	virtual bool pending_overwrite () const = 0;
 	virtual double speed () const = 0;
-        virtual void prepare_to_stop (framepos_t) = 0;
+	virtual void prepare_to_stop (framepos_t) = 0;
 	virtual void set_slaved (bool) = 0;
 	virtual ChanCount n_channels () = 0;
 	virtual framepos_t get_capture_start_frame (uint32_t n = 0) const = 0;
@@ -74,9 +74,8 @@ public:
 	virtual void set_align_choice (AlignChoice, bool force=false) = 0;
 	virtual int use_copy_playlist () = 0;
 	virtual int use_new_playlist () = 0;
-        virtual void adjust_playback_buffering () = 0;
-        virtual void adjust_capture_buffering () = 0;
-	
+	virtual void adjust_playback_buffering () = 0;
+	virtual void adjust_capture_buffering () = 0;
 };
 
 }

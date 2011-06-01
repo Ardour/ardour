@@ -34,7 +34,7 @@ class CoreAudioSource : public AudioFileSource {
 	CoreAudioSource (ARDOUR::Session&, const string& path, int chn, Flag);
 	~CoreAudioSource ();
 
-        void set_path (const std::string& p);
+	void set_path (const std::string& p);
 
 	float sample_rate() const;
 	int update_header (framepos_t when, struct tm&, time_t);
@@ -48,7 +48,7 @@ class CoreAudioSource : public AudioFileSource {
   protected:
 	framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const;
 	framecnt_t write_unlocked (Sample *, framecnt_t) { return 0; }
-	
+
   private:
 	mutable CAAudioFile af;
 	uint16_t n_channels;

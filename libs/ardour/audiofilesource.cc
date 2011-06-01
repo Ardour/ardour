@@ -129,7 +129,7 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exi
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
 	}
-	
+
 	if (init (_path, must_exist)) {
 		throw failed_constructor ();
 	}
@@ -246,7 +246,7 @@ AudioFileSource::get_soundfile_info (string path, SoundFileInfo& _info, string& 
 	if (SndFileSource::get_soundfile_info (path, _info, error_msg) != 0) {
 		return true;
 	}
-        
+
 #ifdef HAVE_COREAUDIO
 	if (CoreAudioSource::get_soundfile_info (path, _info, error_msg) == 0) {
 		return true;

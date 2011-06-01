@@ -77,10 +77,10 @@ public:
 	void set_value (double);
 	double get_value () const;
 
-        double lower() const { return parameter().min(); }
-        double upper() const { return parameter().max(); }
+	double lower() const { return parameter().min(); }
+	double upper() const { return parameter().max(); }
 
-        const ARDOUR::Session& session() const { return _session; }
+	const ARDOUR::Session& session() const { return _session; }
 
 	/** Convert user values to UI values.  See pbd/controllable.h */
 	virtual double user_to_ui (double val) const {
@@ -91,9 +91,9 @@ public:
 	virtual double ui_to_user (double val) const {
 		return val;
 	}
-	
+
 protected:
-	
+
 	ARDOUR::Session& _session;
 };
 

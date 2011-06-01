@@ -40,11 +40,11 @@ public:
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) \
-        Type get_##var () const { return var.get(); } \
-        bool set_##var (Type val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
+	Type get_##var () const { return var.get(); } \
+	bool set_##var (Type val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
 #define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) \
-        Type get_##var () const { return var.get(); } \
-        bool set_##var (Type val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret; }
+	Type get_##var () const { return var.get(); } \
+	bool set_##var (Type val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret; }
 #include "ardour/session_configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL

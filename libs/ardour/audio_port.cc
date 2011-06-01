@@ -56,7 +56,7 @@ void
 AudioPort::cycle_end (pframes_t nframes)
 {
         if (sends_output() && !_buffer->written()) {
-                /* we can't use nframes here because the current buffer capacity may 
+                /* we can't use nframes here because the current buffer capacity may
                    be shorter than the full buffer size if we split the cycle.
                 */
 		if (_buffer->capacity () > 0) {
@@ -74,7 +74,7 @@ AudioBuffer&
 AudioPort::get_audio_buffer (pframes_t nframes)
 {
 	/* caller must hold process lock */
-       _buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, _cycle_nframes) + 
+       _buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, _cycle_nframes) +
                           _global_port_buffer_offset + _port_buffer_offset, nframes);
 	return *_buffer;
 }

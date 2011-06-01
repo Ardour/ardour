@@ -123,7 +123,7 @@ ExportHandler::add_export_config (TimespanPtr timespan, ChannelConfigPtr channel
 	FileSpec spec (channel_config, format, filename, broadcast_info);
 	ConfigPair pair (timespan, spec);
 	config_map.insert (pair);
-	
+
 	return true;
 }
 
@@ -198,7 +198,7 @@ ExportHandler::process_timespan (framecnt_t frames)
 	framecnt_t frames_to_read = 0;
 	framepos_t const start = current_timespan->get_start();
 	framepos_t const end = current_timespan->get_end();
-	
+
 	bool const last_cycle = (process_position + frames >= end);
 
 	if (last_cycle) {
@@ -223,7 +223,7 @@ ExportHandler::process_normalize ()
 	if (graph_builder->process_normalize ()) {
 		finish_timespan ();
 	}
-	
+
 	return 0;
 }
 

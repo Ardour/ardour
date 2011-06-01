@@ -91,8 +91,11 @@ class HasSampleFormat : public PBD::ScopedConnectionList {
 
 	class SampleFormatState : public ExportFormatBase::SelectableCompatible {
 	  public:
-                SampleFormatState (ExportFormatBase::SampleFormat format, std::string name) :
-		  format (format) { set_name (name); }
+		SampleFormatState (ExportFormatBase::SampleFormat format, std::string name)
+			: format (format)
+		{
+			set_name (name);
+		}
 
 		ExportFormatBase::SampleFormat  format;
 	};

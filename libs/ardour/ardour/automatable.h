@@ -43,7 +43,7 @@ class Automatable : virtual public Evoral::ControlSet
 {
 public:
 	Automatable(Session&);
-        Automatable (const Automatable& other);
+	Automatable (const Automatable& other);
 
 	virtual ~Automatable() {}
 
@@ -63,7 +63,7 @@ public:
 	virtual void transport_stopped (framepos_t now);
 
 	virtual std::string describe_parameter(Evoral::Parameter param);
-        virtual std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
+	virtual std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
 
 	AutoState get_parameter_automation_state (Evoral::Parameter param);
 	virtual void set_parameter_automation_state (Evoral::Parameter param, AutoState);
@@ -93,11 +93,11 @@ public:
 
 	typedef Evoral::ControlSet::Controls Controls;
 
-        static const std::string xml_node_name;
+	static const std::string xml_node_name;
 
 	int set_automation_xml_state (const XMLNode&, Evoral::Parameter default_param);
 	XMLNode& get_automation_xml_state();
-	
+
   protected:
 	Session& _a_session;
 

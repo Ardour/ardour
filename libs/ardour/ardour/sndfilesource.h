@@ -31,12 +31,12 @@ namespace ARDOUR {
 class SndFileSource : public AudioFileSource {
   public:
 	/** Constructor to be called for existing external-to-session files */
-        SndFileSource (Session&, const std::string& path, int chn, Flag flags);
+	SndFileSource (Session&, const std::string& path, int chn, Flag flags);
 
 	/* Constructor to be called for new in-session files */
 	SndFileSource (Session&, const std::string& path, const std::string& origin,
-			SampleFormat samp_format, HeaderFormat hdr_format, framecnt_t rate,
-			Flag flags = SndFileSource::default_writable_flags);
+	               SampleFormat samp_format, HeaderFormat hdr_format, framecnt_t rate,
+	               Flag flags = SndFileSource::default_writable_flags);
 
 	/** Constructor to be called for existing in-session files */
 	SndFileSource (Session&, const XMLNode&);
@@ -66,7 +66,7 @@ class SndFileSource : public AudioFileSource {
 	static int get_soundfile_info (const std::string& path, SoundFileInfo& _info, std::string& error_msg);
 
   protected:
-        void set_path (const std::string& p);
+	void set_path (const std::string& p);
 	void set_header_timeline_position ();
 
 	framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const;
@@ -96,7 +96,7 @@ class SndFileSource : public AudioFileSource {
 	framecnt_t     xfade_out_count;
 	framecnt_t     xfade_in_count;
 	Sample*        xfade_buf;
-	
+
 	framecnt_t crossfade (Sample* data, framecnt_t cnt, int dir);
 	void set_timeline_position (framepos_t);
 	framecnt_t destructive_write_unlocked (Sample *dst, framecnt_t cnt);

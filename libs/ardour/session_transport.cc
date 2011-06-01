@@ -483,7 +483,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	if (abort && did_record) {
-		_state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);                
+		_state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);
 	}
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
@@ -528,7 +528,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 			if (_requested_return_frame >= 0) {
 
 				/* explicit return request pre-queued in event list. overrides everything else */
-				
+
 				cerr << "explicit auto-return to " << _requested_return_frame << endl;
 
 				_transport_frame = _requested_return_frame;
@@ -544,7 +544,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 						if (!synced_to_jack()) {
 
 							Location *location = _locations->auto_loop_location();
-							
+
 							if (location != 0) {
 								_transport_frame = location->start();
 							} else {
@@ -563,21 +563,21 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 						}
 
 					} else {
-						
+
 						/* regular auto-return */
-						
+
 						_transport_frame = _last_roll_location;
 						do_locate = true;
 					}
-				} 
+				}
 			}
 
-			_requested_return_frame = -1;			
+			_requested_return_frame = -1;
 
 			if (do_locate) {
 				_engine.transport_locate (_transport_frame);
 			}
-		} 
+		}
 
 	}
 
@@ -676,7 +676,7 @@ Session::unset_play_loop ()
 {
 	play_loop = false;
 	clear_events (SessionEvent::AutoLoop);
-	
+
 	// set all tracks to NOT use internal looping
 	boost::shared_ptr<RouteList> rl = routes.reader ();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
@@ -698,7 +698,7 @@ Session::set_play_loop (bool yn)
 		/* nothing to do, or can't change loop status while recording */
 		return;
 	}
-	
+
 	if (yn && Config->get_seamless_loop() && synced_to_jack()) {
 		warning << string_compose (
 			_("Seamless looping cannot be supported while %1 is using JACK transport.\n"
@@ -706,7 +706,7 @@ Session::set_play_loop (bool yn)
 			<< endmsg;
 		return;
 	}
-	
+
 	if (yn) {
 
 		play_loop = true;
@@ -735,13 +735,13 @@ Session::set_play_loop (bool yn)
 					}
 				}
 			}
-			
+
 			/* put the loop event into the event list */
-			
+
 			SessionEvent* event = new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f);
 			merge_event (event);
 
-			/* locate to start of loop and roll. If doing seamless loop, force a 
+			/* locate to start of loop and roll. If doing seamless loop, force a
 			   locate+buffer refill even if we are positioned there already.
 			*/
 
@@ -860,7 +860,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
          *           !(playing a loop with JACK sync)
          *
 	 */
-                 
+
 	if (transport_rolling() && (!auto_play_legal || !config.get_auto_play()) && !with_roll && !(synced_to_jack() && play_loop)) {
 		realtime_stop (false, true); // XXX paul - check if the 2nd arg is really correct
 	} else {
@@ -874,7 +874,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 		if (with_roll) {
 			todo = PostTransportWork (todo | PostTransportRoll);
-		} 
+		}
 
 		add_post_transport_work (todo);
 		_butler->schedule_transport_work ();
@@ -979,7 +979,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 
 		if (synced_to_jack ()) {
 			if (clear_state) {
-				/* do this here because our response to the slave won't 
+				/* do this here because our response to the slave won't
 				   take care of it.
 				*/
 				_play_range = false;
@@ -989,7 +989,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 		} else {
 			stop_transport (abort);
 		}
-		
+
 		unset_play_loop ();
 
 	} else if (transport_stopped() && speed == 1.0) {
@@ -1007,7 +1007,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 		}
 
 	} else {
-		
+
 		/* not zero, not 1.0 ... varispeed */
 
 		if ((synced_to_jack()) && speed != 0.0 && speed != 1.0) {
@@ -1035,7 +1035,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 		/* if we are reversing relative to the current speed, or relative to the speed
 		   before the last stop, then we have to do extra work.
 		*/
-		
+
 		PostTransportWork todo = PostTransportWork (0);
 
 		if ((_transport_speed && speed * _transport_speed < 0.0) || (_last_transport_speed * speed < 0.0) || (_last_transport_speed == 0.0f && speed < 0.0f)) {
@@ -1058,7 +1058,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 			add_post_transport_work (todo);
 			_butler->schedule_transport_work ();
 		}
-		
+
 		TransportStateChange (); /* EMIT SIGNAL */
 	}
 }
@@ -1130,7 +1130,7 @@ Session::start_transport ()
 
 	_last_roll_location = _transport_frame;
 	_last_roll_or_reversal_location = _transport_frame;
-	
+
 	have_looped = false;
 
 	/* if record status is Enabled, move it to Recording. if its
@@ -1302,7 +1302,7 @@ Session::switch_to_sync_source (SyncSource src)
 		try {
 			new_slave = new MIDIClock_Slave (*this, *MIDI::Manager::instance()->midi_clock_input_port(), 24);
 		}
-		
+
 		catch (failed_constructor& err) {
 			return;
 		}
@@ -1319,7 +1319,7 @@ Session::switch_to_sync_source (SyncSource src)
 
 		new_slave = new JACK_Slave (_engine.jack());
 		break;
-		
+
 	default:
 		new_slave = 0;
 		break;
@@ -1361,7 +1361,7 @@ Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
 	/* Called from event-processing context */
 
 	unset_play_range ();
-	
+
 	if (range.empty()) {
 		/* _play_range set to false in unset_play_range()
 		 */
@@ -1379,45 +1379,45 @@ Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
 	unset_play_loop ();
 
 	list<AudioRange>::size_type sz = range.size();
-	
+
 	if (sz > 1) {
-		
-		list<AudioRange>::iterator i = range.begin(); 
+
+		list<AudioRange>::iterator i = range.begin();
 		list<AudioRange>::iterator next;
-		
+
 		while (i != range.end()) {
-			
+
 			next = i;
 			++next;
-			
+
 			/* locating/stopping is subject to delays for declicking.
 			 */
-			
+
 			framepos_t requested_frame = i->end;
-			
+
 			if (requested_frame > current_block_size) {
 				requested_frame -= current_block_size;
 			} else {
 				requested_frame = 0;
 			}
-			
+
 			if (next == range.end()) {
 				ev = new SessionEvent (SessionEvent::RangeStop, SessionEvent::Add, requested_frame, 0, 0.0f);
 			} else {
 				ev = new SessionEvent (SessionEvent::RangeLocate, SessionEvent::Add, requested_frame, (*next).start, 0.0f);
 			}
-			
+
 			merge_event (ev);
-			
+
 			i = next;
 		}
-		
+
 	} else if (sz == 1) {
 
 		ev = new SessionEvent (SessionEvent::RangeStop, SessionEvent::Add, range.front().end, 0, 0.0f);
 		merge_event (ev);
-		
-	} 
+
+	}
 
 	/* save range so we can do auto-return etc. */
 
@@ -1427,7 +1427,7 @@ Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
 
 	ev = new SessionEvent (SessionEvent::LocateRoll, SessionEvent::Add, SessionEvent::Immediate, range.front().start, 0.0f, false);
 	merge_event (ev);
-	
+
 	TransportStateChange ();
 }
 

@@ -30,23 +30,24 @@ class XMLNode;
 
 namespace ARDOUR
 {
+
 class Session;
 class Playlist;
 
 struct NamedSelection : public PBD::Stateful
 {
-    NamedSelection (std::string, std::list<boost::shared_ptr<Playlist> >&);
-    NamedSelection (Session&, const XMLNode&);
-    virtual ~NamedSelection ();
+	NamedSelection (std::string, std::list<boost::shared_ptr<Playlist> >&);
+	NamedSelection (Session&, const XMLNode&);
+	virtual ~NamedSelection ();
 
-    std::string name;
-    std::list<boost::shared_ptr<Playlist> > playlists;
+	std::string name;
+	std::list<boost::shared_ptr<Playlist> > playlists;
 
-    XMLNode& get_state (void);
+	XMLNode& get_state (void);
 
-    int set_state (const XMLNode&, int version);
+	int set_state (const XMLNode&, int version);
 
-    static PBD::Signal1<void,NamedSelection*> NamedSelectionCreated;
+	static PBD::Signal1<void,NamedSelection*> NamedSelectionCreated;
 };
 
 }/* namespace ARDOUR */

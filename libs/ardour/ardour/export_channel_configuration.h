@@ -55,7 +55,7 @@ class ExportChannelConfiguration : public boost::enable_shared_from_this<ExportC
   public:
 	bool operator== (ExportChannelConfiguration const & other) const { return channels == other.channels; }
 	bool operator!= (ExportChannelConfiguration const & other) const { return channels != other.channels; }
-	
+
 	XMLNode & get_state ();
 	int set_state (const XMLNode &);
 
@@ -76,7 +76,7 @@ class ExportChannelConfiguration : public boost::enable_shared_from_this<ExportC
 		std::copy (new_channels.begin(), new_channels.end(), std::back_inserter(channels));
 	}
 	void clear_channels () { channels.clear (); }
-	
+
 	/** Returns a list of channel configurations that match the files created.
 	  * I.e. many configurations if splitting is enabled, one if not. */
 	void configurations_for_files (std::list<boost::shared_ptr<ExportChannelConfiguration> > & configs);

@@ -21,7 +21,7 @@ ResampledSourceTest::seekTest ()
 	r.read (A, 64);
 
 	r.seek (0);
-	
+
 	Sample B[64];
 	r.read (B, 64);
 

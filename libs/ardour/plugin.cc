@@ -83,12 +83,12 @@ Plugin::Plugin (const Plugin& other)
 	, _have_pending_stop_events (false)
 	, _parameter_changed_since_last_preset (false)
 {
-	
+
 }
 
 Plugin::~Plugin ()
 {
-	
+
 }
 
 void
@@ -200,7 +200,7 @@ Plugin::preset_by_label (const string& label)
 			return &i->second;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -226,7 +226,7 @@ Plugin::connect_and_run (BufferSet& bufs,
 		MidiBuffer& b = bufs.get_midi (0);
 		bool looped;
 		_tracker.track (b.begin(), b.end(), looped);
-		
+
 		if (_have_pending_stop_events) {
 			/* Transmit note-offs that are pending from the last transport stop */
 			bufs.merge_from (_pending_stop_events, 0);
@@ -243,7 +243,7 @@ Plugin::realtime_handle_transport_stopped ()
 	/* Create note-offs for any active notes and put them in _pending_stop_events, to be picked
 	   up on the next call to connect_and_run ().
 	*/
-	
+
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
 	_pending_stop_events.get_midi(0).clear ();
 	_tracker.resolve_notes (_pending_stop_events.get_midi (0), 0);
@@ -262,7 +262,7 @@ Plugin::get_presets ()
 	for (map<string, PresetRecord>::const_iterator i = _presets.begin(); i != _presets.end(); ++i) {
 		p.push_back (i->second);
 	}
-	
+
 	return p;
 }
 

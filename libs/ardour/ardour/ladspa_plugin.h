@@ -133,7 +133,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	bool                     _was_activated;
 
 	void find_presets ();
-	
+
 	void init (void *mod, uint32_t index, framecnt_t rate);
 	void run_in_place (pframes_t nsamples);
 	void latency_compute_run ();

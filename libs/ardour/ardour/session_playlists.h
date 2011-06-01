@@ -32,7 +32,7 @@
 class XMLNode;
 
 namespace PBD {
-        class ID;
+	class ID;
 }
 
 namespace ARDOUR {
@@ -41,32 +41,32 @@ class Playlist;
 class Region;
 class Source;
 class Session;
-class Crossfade;	
-	
+class Crossfade;
+
 class SessionPlaylists : public PBD::ScopedConnectionList
 {
 public:
 	~SessionPlaylists ();
-	
+
 	boost::shared_ptr<Playlist> by_name (std::string name);
 	boost::shared_ptr<Playlist> by_id (const PBD::ID&);
 	uint32_t source_use_count (boost::shared_ptr<const Source> src) const;
-        uint32_t region_use_count (boost::shared_ptr<Region> region) const;
+	uint32_t region_use_count (boost::shared_ptr<Region> region) const;
 	template<class T> void foreach (T *obj, void (T::*func)(boost::shared_ptr<Playlist>));
 	void get (std::vector<boost::shared_ptr<Playlist> >&);
 	void unassigned (std::list<boost::shared_ptr<Playlist> > & list);
-        void destroy_region (boost::shared_ptr<Region>);
+	void destroy_region (boost::shared_ptr<Region>);
 	boost::shared_ptr<Crossfade> find_crossfade (const PBD::ID &);
-        void sync_all_regions_with_regions ();
+	void sync_all_regions_with_regions ();
 
 private:
 	friend class Session;
-	
+
 	bool add (boost::shared_ptr<Playlist>);
 	void remove (boost::shared_ptr<Playlist>);
 	void remove_weak (boost::weak_ptr<Playlist>);
 	void track (bool, boost::weak_ptr<Playlist>);
-	
+
 	uint32_t n_playlists() const;
 	void find_equivalent_playlist_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >& result);
 	void update_after_tempo_map_change ();
@@ -75,7 +75,7 @@ private:
 	int load (Session &, const XMLNode&);
 	int load_unused (Session &, const XMLNode&);
 	boost::shared_ptr<Playlist> XMLPlaylistFactory (Session &, const XMLNode&);
-        
+
 	mutable Glib::Mutex lock;
 	typedef std::set<boost::shared_ptr<Playlist> > List;
 	List playlists;

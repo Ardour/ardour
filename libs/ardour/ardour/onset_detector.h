@@ -29,26 +29,25 @@ class Session;
 
 class OnsetDetector : public AudioAnalyser
 {
+public:
+	OnsetDetector (float sample_rate);
+	~OnsetDetector();
 
-  public:
-    OnsetDetector (float sample_rate);
-    ~OnsetDetector();
+	static std::string operational_identifier();
 
-    static std::string operational_identifier();
+	void set_silence_threshold (float);
+	void set_peak_threshold (float);
+	void set_function (int);
 
-    void set_silence_threshold (float);
-    void set_peak_threshold (float);
-    void set_function (int);
+	int run (const std::string& path, Readable*, uint32_t channel, AnalysisFeatureList& results);
 
-    int run (const std::string& path, Readable*, uint32_t channel, AnalysisFeatureList& results);
+	static void cleanup_onsets (AnalysisFeatureList&, float sr, float gap_msecs);
 
-    static void cleanup_onsets (AnalysisFeatureList&, float sr, float gap_msecs);
+protected:
+	AnalysisFeatureList* current_results;
+	int use_features (Vamp::Plugin::FeatureSet&, std::ostream*);
 
-  protected:
-    AnalysisFeatureList* current_results;
-    int use_features (Vamp::Plugin::FeatureSet&, std::ostream*);
-
-    static std::string _op_id;
+	static std::string _op_id;
 };
 
 } /* namespace */

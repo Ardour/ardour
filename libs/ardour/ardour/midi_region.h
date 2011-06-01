@@ -39,7 +39,7 @@ namespace ARDOUR {
 	namespace Properties {
 		/* this is pseudo-property: nothing has this as an actual
 		   property, but it allows us to signal changes to the
-		   MidiModel used by the MidiRegion 
+		   MidiModel used by the MidiRegion
 		*/
 		extern PBD::PropertyDescriptor<void*> midi_data;
 		extern PBD::PropertyDescriptor<Evoral::MusicalTime> length_beats;
@@ -64,7 +64,7 @@ class MidiRegion : public Region
 	~MidiRegion();
 
 	boost::shared_ptr<MidiRegion> clone ();
-        
+
 	boost::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
 
 	/* Stub Readable interface */
@@ -77,7 +77,7 @@ class MidiRegion : public Region
 	                    uint32_t  chan_n = 0,
 	                    NoteMode  mode = Sustained,
 	                    MidiStateTracker* tracker = 0) const;
-	
+
 	framepos_t master_read_at (MidiRingBuffer<framepos_t>& dst,
 	                           framepos_t position,
 	                           framecnt_t dur,
@@ -86,11 +86,11 @@ class MidiRegion : public Region
 
 	XMLNode& state ();
 	int      set_state (const XMLNode&, int version);
-	
+
 	int separate_by_channel (ARDOUR::Session&, std::vector< boost::shared_ptr<Region> >&) const;
 
 	/* automation */
-	
+
 	boost::shared_ptr<Evoral::Control>
 	control(const Evoral::Parameter& id, bool create=false) {
 		return model()->control(id, create);
@@ -112,7 +112,7 @@ class MidiRegion : public Region
 	void transpose (int);
 
   protected:
-	
+
 	virtual bool can_trim_start_before_source_start () const {
 		return true;
 	}
@@ -129,7 +129,7 @@ class MidiRegion : public Region
 	                     framepos_t position,
 	                     framecnt_t dur,
 	                     uint32_t chan_n = 0,
-	                     NoteMode mode = Sustained, 
+	                     NoteMode mode = Sustained,
 	                     MidiStateTracker* tracker = 0) const;
 
 	void register_properties ();

@@ -31,7 +31,7 @@ using namespace std;
 
 Private<ThreadBuffers>* ProcessThread::_private_thread_buffers = 0;
 
-static void 
+static void
 release_thread_buffer (void* arg)
 {
         BufferManager::put_thread_buffers ((ThreadBuffers*) arg);

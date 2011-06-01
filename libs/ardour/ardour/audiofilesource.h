@@ -43,9 +43,9 @@ public:
 		return (set_source_name(newname, destructive()) == 0);
 	}
 
-        std::string peak_path (std::string audio_path);
-        std::string find_broken_peakfile (std::string missing_peak_path,
-			std::string audio_path);
+	std::string peak_path (std::string audio_path);
+	std::string find_broken_peakfile (std::string missing_peak_path,
+	                                  std::string audio_path);
 
 	static void set_peak_dir (std::string dir) { peak_dir = dir; }
 

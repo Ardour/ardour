@@ -37,7 +37,7 @@ MuteMaster::MuteMaster (Session& s, const std::string&)
         , _soloed (false)
         , _solo_ignore (false)
 {
-	
+
 	if (Config->get_mute_affects_pre_fader ()) {
 		_mute_point = MutePoint (_mute_point | PreFader);
 	}
@@ -109,7 +109,7 @@ MuteMaster::mute_gain_at (MutePoint mp) const
                         }
                 }
         }
-        
+
         return gain;
 }
 
@@ -119,14 +119,14 @@ MuteMaster::set_mute_points (const std::string& mute_point)
         MutePoint old = _mute_point;
 
 	_mute_point = (MutePoint) string_2_enum (mute_point, _mute_point);
-        
+
         if (old != _mute_point) {
                 MutePointChanged(); /* EMIT SIGNAL */
         }
 }
 
 void
-MuteMaster::set_mute_points (MutePoint mp) 
+MuteMaster::set_mute_points (MutePoint mp)
 {
         if (_mute_point != mp) {
                 _mute_point = mp;
@@ -166,4 +166,4 @@ MuteMaster::muted_by_others_at (MutePoint mp) const
 {
 	return (!_solo_ignore && _session.soloing() && (_mute_point & mp));
 }
-	
+

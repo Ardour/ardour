@@ -106,7 +106,7 @@ VSTPlugin::~VSTPlugin ()
 	fst_close (_fst);
 }
 
-int 
+int
 VSTPlugin::set_block_size (pframes_t nframes)
 {
 	deactivate ();
@@ -162,7 +162,7 @@ VSTPlugin::get_chunk (bool single) const
 	if (data_size == 0) {
 		return 0;
 	}
-	
+
 	return g_base64_encode (data, data_size);
 }
 
@@ -399,34 +399,34 @@ VSTPlugin::load_user_preset (PresetRecord r)
 	/* This is a user preset; we load it, and this code also knows about the
 	   non-direct-dispatch thing.
 	*/
-	
+
 	boost::shared_ptr<XMLTree> t (presets_tree ());
 	if (t == 0) {
 		return false;
 	}
-	
+
 	XMLNode* root = t->root ();
-	
+
 	for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
-		
+
 		XMLProperty* uri = (*i)->property (X_("uri"));
 		XMLProperty* label = (*i)->property (X_("label"));
-		
+
 		assert (uri);
 		assert (label);
-		
+
 		if (label->value() != r.label) {
 			continue;
 		}
-			
+
 		if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
-			
+
 			/* Load a user preset chunk from our XML file and send it via a circuitous route to the plugin */
-			
+
 			if (_fst->wanted_chunk) {
 				g_free (_fst->wanted_chunk);
 			}
-			
+
 			for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
 				if ((*j)->is_content ()) {
 					/* we can't dispatch directly here; too many plugins expect only one GUI thread */
@@ -438,28 +438,28 @@ VSTPlugin::load_user_preset (PresetRecord r)
 					return true;
 				}
 			}
-			
+
 			return false;
-				
+
 		} else {
-			
+
 			for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
 				if ((*j)->name() == X_("Parameter")) {
-					
+
 						XMLProperty* index = (*j)->property (X_("index"));
 						XMLProperty* value = (*j)->property (X_("value"));
-						
+
 						assert (index);
 						assert (value);
-						
+
 						set_parameter (atoi (index->value().c_str()), atof (value->value().c_str ()));
 				}
 			}
-			
+
 			return true;
 		}
 	}
-		
+
 	return false;
 }
 
@@ -483,7 +483,7 @@ VSTPlugin::do_save_preset (string name)
 		gchar* data = get_chunk (true);
 		p->add_content (string (data));
 		g_free (data);
-		
+
 	} else {
 
 		p = new XMLNode (X_("Preset"));
@@ -498,15 +498,15 @@ VSTPlugin::do_save_preset (string name)
 				p->add_child_nocopy (*c);
 			}
 		}
-		
+
 	}
 
 	t->root()->add_child_nocopy (*p);
-	
+
 	sys::path f = ARDOUR::user_config_directory ();
 	f /= "presets";
 	f /= presets_file ();
-	
+
 	t->write (f.to_string ());
 	return uri;
 }
@@ -518,13 +518,13 @@ VSTPlugin::do_remove_preset (string name)
 	if (t == 0) {
 		return;
 	}
-	
+
 	t->root()->remove_nodes_and_delete (X_("label"), name);
-	
+
 	sys::path f = ARDOUR::user_config_directory ();
 	f /= "presets";
 	f /= presets_file ();
-	
+
 	t->write (f.to_string ());
 }
 
@@ -568,7 +568,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		pframes_t nframes, framecnt_t offset)
 {
 	Plugin::connect_and_run (bufs, in_map, out_map, nframes, offset);
-	
+
 	float *ins[_plugin->numInputs];
 	float *outs[_plugin->numOutputs];
 	int32_t i;
@@ -718,11 +718,11 @@ void
 VSTPlugin::find_presets ()
 {
 	/* Built-in presets */
-	
+
 	int const vst_version = _plugin->dispatcher (_plugin, effGetVstVersion, 0, 0, NULL, 0);
 	for (int i = 0; i < _plugin->numPrograms; ++i) {
 		PresetRecord r (string_compose (X_("VST:%1:%2"), unique_id (), i), "", false);
-		
+
 		if (vst_version >= 2) {
 			char buf[256];
 			if (_plugin->dispatcher (_plugin, 29, i, 0, buf, 0) == 1) {
@@ -779,7 +779,7 @@ VSTPlugin::presets_tree () const
 		t->set_root (new XMLNode (X_("VSTPresets")));
 		return t;
 	}
-	
+
 	t->set_filename (p.to_string ());
 	if (!t->read ()) {
 		delete t;

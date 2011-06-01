@@ -113,7 +113,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 		}
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS	
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
         boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
 #endif
 	return ret;
@@ -129,7 +129,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, c
 	if ((other_a = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
 
 		ret = boost::shared_ptr<Region> (new AudioRegion (other_a, offset));
-		
+
 	} else if ((other_m = boost::dynamic_pointer_cast<MidiRegion>(region)) != 0) {
 
 		ret = boost::shared_ptr<Region> (new MidiRegion (other_m, offset));
@@ -169,7 +169,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 	if ((other = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
 
 		// XXX use me in caller where plist is setup, this is start i think srcs.front()->length (srcs.front()->timeline_position())
-		
+
 		ret = boost::shared_ptr<Region> (new AudioRegion (other, srcs));
 
 	} else {
@@ -187,7 +187,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 		}
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS	
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
         boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
 #endif
 	return ret;
@@ -204,7 +204,7 @@ RegionFactory::create (boost::shared_ptr<Source> src, const PropertyList& plist,
 boost::shared_ptr<Region>
 RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool announce)
 {
-	boost::shared_ptr<Region> ret; 
+	boost::shared_ptr<Region> ret;
 	boost::shared_ptr<AudioSource> as;
 	boost::shared_ptr<MidiSource> ms;
 
@@ -253,7 +253,7 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 		ret = boost::shared_ptr<Region> (new AudioRegion (srcs));
 
 	} else if (srcs[0]->type() == DataType::MIDI) {
-		
+
 		ret = boost::shared_ptr<Region> (new MidiRegion (srcs));
 
 	}
@@ -280,7 +280,7 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
 	p.first = r->id();
 	p.second = r;
 
-	{ 
+	{
 		Glib::Mutex::Lock lm (region_map_lock);
 		region_map.insert (p);
 	}
@@ -319,7 +319,7 @@ RegionFactory::map_remove_with_equivalents (boost::shared_ptr<Region> r)
 			region_map.erase (i);
 		} else if (r == i->second) {
 			region_map.erase (i);
-		} 
+		}
 
 		i = tmp;
 	}
@@ -346,7 +346,7 @@ RegionFactory::wholefile_region_by_name (const std::string& name)
 		}
 	}
 	return boost::shared_ptr<Region>();
-}	
+}
 
 boost::shared_ptr<Region>
 RegionFactory::region_by_name (const std::string& name)
@@ -357,7 +357,7 @@ RegionFactory::region_by_name (const std::string& name)
 		}
 	}
 	return boost::shared_ptr<Region>();
-}	
+}
 
 void
 RegionFactory::clear_map ()
@@ -394,7 +394,7 @@ RegionFactory::delete_all_regions ()
 	   vanish as we leave this scope, thus calling all destructors.
 	*/
 }
-        
+
 uint32_t
 RegionFactory::nregions ()
 {
@@ -507,25 +507,25 @@ RegionFactory::new_region_name (string old)
 	char buf[len];
 
 	if ((last_period = old.find_last_of ('.')) == string::npos) {
-		
+
 		/* no period present - add one explicitly */
-		
+
 		old += '.';
 		last_period = old.length() - 1;
 		number = 0;
-		
+
 	} else {
-		
+
 		if (last_period < old.length() - 1) {
 
 			string period_to_end = old.substr (last_period+1);
-			
+
 			/* extra material after the period */
 
 			string::size_type numerals_end = period_to_end.find_first_not_of ("0123456789");
-			
+
 			number = atoi (period_to_end);
-			
+
 			if (numerals_end < period_to_end.length() - 1) {
 				/* extra material after the end of the digits */
 				remainder = period_to_end.substr (numerals_end);
@@ -538,7 +538,7 @@ RegionFactory::new_region_name (string old)
 	}
 
 	while (number < (UINT_MAX-1)) {
-		
+
 		const RegionMap& regions (RegionFactory::regions());
 		RegionMap::const_iterator i;
 		string sbuf;
@@ -567,7 +567,7 @@ RegionFactory::new_region_name (string old)
 	return old;
 }
 
-void 
+void
 RegionFactory::get_regions_using_source (boost::shared_ptr<Source> s, std::set<boost::shared_ptr<Region> >& r)
 {
 	Glib::Mutex::Lock lm (region_map_lock);
@@ -579,7 +579,7 @@ RegionFactory::get_regions_using_source (boost::shared_ptr<Source> s, std::set<b
 	}
 }
 
-void 
+void
 RegionFactory::remove_regions_using_source (boost::shared_ptr<Source> src)
 {
 	Glib::Mutex::Lock lm (region_map_lock);

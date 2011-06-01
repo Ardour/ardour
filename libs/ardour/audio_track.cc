@@ -366,7 +366,7 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 	Sample* tmpb;
 	framepos_t transport_frame;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
-        
+
 	automation_snapshot (start_frame, false);
 
 	if (n_outputs().n_total() == 0 && _processors.empty()) {
@@ -568,7 +568,7 @@ AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nfram
 		boost::shared_ptr<Processor> processor = boost::dynamic_pointer_cast<Processor> (*i);
 		boost::shared_ptr<Delivery> delivery = boost::dynamic_pointer_cast<Delivery> (*i);
 		boost::shared_ptr<PeakMeter> meter = boost::dynamic_pointer_cast<PeakMeter> (*i);
-		
+
 		if (processor && (!delivery || !Delivery::role_requires_output_ports (delivery->role())) && !meter) {
 			processor->run (buffers, start, start+nframes, nframes, true);
 		}
@@ -669,7 +669,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 	/* create a new region from all filesources, keep it private */
 
 	PropertyList plist;
-	
+
 	plist.add (Properties::start, 0);
 	plist.add (Properties::length, srcs[0]->length(srcs[0]->timeline_position()));
 	plist.add (Properties::name, region_name);

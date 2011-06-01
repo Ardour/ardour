@@ -117,7 +117,7 @@ class ConfigVariable<bool> : public ConfigVariableBase
 	}
 
 	void set_from_string (std::string const & s) {
-                value = string_is_affirmative (s);
+		value = string_is_affirmative (s);
 	}
 
   protected:
@@ -141,11 +141,11 @@ class ConfigVariableWithMutation : public ConfigVariable<T>
 	}
 
 	void set_from_string (std::string const & s) {
-                T v;
-                std::stringstream ss;
-                ss << s;
+		T v;
+		std::stringstream ss;
+		ss << s;
 		ss >> v;
-                set (v);
+		set (v);
 	}
 
   protected:

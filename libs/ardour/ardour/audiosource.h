@@ -49,7 +49,7 @@ class AudioSource : virtual public Source,
 	framecnt_t readable_length() const { return _length; }
 	virtual uint32_t n_channels()      const { return 1; }
 
-        virtual bool       empty() const;
+	virtual bool       empty() const;
 	framecnt_t length (framepos_t pos) const;
 	void       update_length (framepos_t pos, framecnt_t cnt);
 
@@ -107,17 +107,17 @@ class AudioSource : virtual public Source,
 	virtual bool clamped_at_unity () const = 0;
 
 	static void allocate_working_buffers (framecnt_t framerate);
-    
+
   protected:
 	static bool _build_missing_peakfiles;
 	static bool _build_peakfiles;
 
 	static size_t _working_buffers_size;
-	
+
 	/* these collections of working buffers for supporting
 	   playlist's reading from potentially nested/recursive
 	   sources assume SINGLE THREADED reads by the butler
-	   thread, or a lock around calls that use them. 
+	   thread, or a lock around calls that use them.
 	*/
 
 	static std::vector<boost::shared_ptr<Sample> > _mixdown_buffers;
@@ -146,14 +146,14 @@ class AudioSource : virtual public Source,
 	virtual framecnt_t write_unlocked (Sample *dst, framecnt_t cnt) = 0;
 	virtual std::string peak_path(std::string audio_path) = 0;
 	virtual std::string find_broken_peakfile (std::string missing_peak_path,
-                                                  std::string audio_path) { return peak_path (audio_path); }
+	                                          std::string audio_path) { return peak_path (audio_path); }
 
 	virtual int read_peaks_with_fpp (PeakData *peaks,
 					 framecnt_t npeaks, framepos_t start, framecnt_t cnt,
 					 double samples_per_visual_peak, framecnt_t fpp) const;
-	
+
 	int compute_and_write_peaks (Sample* buf, framecnt_t first_frame, framecnt_t cnt,
-				     bool force, bool intermediate_peaks_ready_signal, 
+				     bool force, bool intermediate_peaks_ready_signal,
 				     framecnt_t frames_per_peak);
 
   private:
@@ -165,7 +165,7 @@ class AudioSource : virtual public Source,
 	 *  during the handling of the signal.
 	 */
 	mutable Glib::Mutex _peaks_ready_lock;
-	
+
 	PBD::FdFileDescriptor* _peakfile_descriptor;
 	int        _peakfile_fd;
 	framecnt_t peak_leftover_cnt;

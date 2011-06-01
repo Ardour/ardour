@@ -75,13 +75,13 @@ BufferSet::clear()
 	_count.reset();
 	_available.reset();
 
-#ifdef VST_SUPPORT	
+#ifdef VST_SUPPORT
 	for (VSTBuffers::iterator i = _vst_buffers.begin(); i != _vst_buffers.end(); ++i) {
 		delete *i;
 	}
 
 	_vst_buffers.clear ();
-#endif	
+#endif
 }
 
 /** Set up this BufferSet so that its data structures mirror a PortSet's buffers.
@@ -195,7 +195,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 			_vst_buffers.push_back (new VSTBuffer (buffer_capacity));
 		}
 	}
-#endif	
+#endif
 
 	// Post-conditions
 	assert(bufs[0]->type() == type);
@@ -246,7 +246,7 @@ LV2EventBuffer&
 BufferSet::get_lv2_midi(bool input, size_t i)
 {
 	assert (count().get(DataType::MIDI) > i);
-	
+
 	MidiBuffer& mbuf = get_midi(i);
 	LV2Buffers::value_type b = _lv2_buffers.at(i * 2 + (input ? 0 : 1));
 	LV2EventBuffer* ebuf = b.second;
@@ -256,7 +256,7 @@ BufferSet::get_lv2_midi(bool input, size_t i)
 		for (MidiBuffer::iterator e = mbuf.begin(); e != mbuf.end(); ++e) {
 			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
 			uint32_t type = LV2Plugin::midi_event_type();
-#ifndef NDEBUG                
+#ifndef NDEBUG
                         DEBUG_TRACE (PBD::DEBUG::LV2, string_compose ("(FLUSH) MIDI event of size %1\n", ev.size()));
                         for (uint16_t x = 0; x < ev.size(); ++x) {
                                 DEBUG_TRACE (PBD::DEBUG::LV2, string_compose ("\tByte[%1] = %2\n", x, (int) ev.buffer()[x]));
@@ -283,7 +283,7 @@ BufferSet::flush_lv2_midi(bool input, size_t i)
 		uint16_t size;
 		uint8_t* data;
 		ebuf->get_event(&frames, &subframes, &type, &size, &data);
-#ifndef NDEBUG                
+#ifndef NDEBUG
                 DEBUG_TRACE (PBD::DEBUG::LV2, string_compose ("(FLUSH) MIDI event of size %1\n", size));
                 for (uint16_t x = 0; x < size; ++x) {
                         DEBUG_TRACE (PBD::DEBUG::LV2, string_compose ("\tByte[%1] = %2\n", x, (int) data[x]));
@@ -308,7 +308,7 @@ BufferSet::get_vst_midi (size_t b)
 	for (MidiBuffer::iterator i = m.begin(); i != m.end(); ++i) {
 		vst->push_back (*i);
 	}
-	
+
 	return vst->events();
 }
 
@@ -354,7 +354,7 @@ BufferSet::VSTBuffer::push_back (Evoral::MIDIEvent<framepos_t> const & ev)
 
 	_events->events[n] = reinterpret_cast<VstEvent*> (_midi_events + n);
 	VstMidiEvent* v = reinterpret_cast<VstMidiEvent*> (_events->events[n]);
-	
+
 	v->type = kVstMidiType;
 	v->byteSize = sizeof (VstMidiEvent);
 	v->deltaFrames = ev.time ();
@@ -426,7 +426,7 @@ BufferSet::is_silent (bool yn)
 			(*b)->is_silent (yn);
 		}
 	}
-		
+
 }
 
 } // namespace ARDOUR

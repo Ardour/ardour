@@ -59,7 +59,7 @@ MidiModel::new_note_diff_command (const string name)
 {
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
-	
+
 	return new NoteDiffCommand (ms->model(), name);
 }
 
@@ -69,7 +69,7 @@ MidiModel::new_sysex_diff_command (const string name)
 {
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
-	
+
 	return new SysExDiffCommand (ms->model(), name);
 }
 
@@ -79,7 +79,7 @@ MidiModel::new_patch_change_diff_command (const string name)
 {
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
-	
+
 	return new PatchChangeDiffCommand (ms->model(), name);
 }
 
@@ -165,7 +165,7 @@ MidiModel::NoteDiffCommand::change (const NotePtr note, Property prop,
                                     uint8_t new_value)
 {
 	assert (note);
-	
+
 	NoteChange change;
 
 	switch (prop) {
@@ -211,7 +211,7 @@ MidiModel::NoteDiffCommand::change (const NotePtr note, Property prop,
                                     TimeType new_time)
 {
 	assert (note);
-	
+
 	NoteChange change;
 
 	switch (prop) {
@@ -372,7 +372,7 @@ MidiModel::NoteDiffCommand::undo ()
 		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
 			Property prop = i->property;
 			switch (prop) {
-				
+
 			case NoteNumber:
 				if (
 					temporary_removals.find (i->note) == temporary_removals.end() &&
@@ -384,13 +384,13 @@ MidiModel::NoteDiffCommand::undo ()
 					   list (which means that it has already been removed and it
 					   will be re-added anyway)
 					*/
-					
+
 					_model->remove_note_unlocked (i->note);
 					temporary_removals.insert (i->note);
 				}
 				i->note->set_note (i->old_value);
 				break;
-				
+
 			case StartTime:
 				if (
 					temporary_removals.find (i->note) == temporary_removals.end() &&
@@ -404,7 +404,7 @@ MidiModel::NoteDiffCommand::undo ()
 				}
 				i->note->set_time (i->old_time);
 				break;
-				
+
 			case Channel:
 				if (
 					temporary_removals.find (i->note) == temporary_removals.end() &&
@@ -412,7 +412,7 @@ MidiModel::NoteDiffCommand::undo ()
 					) {
 
 					/* See above ... */
-					
+
 					_model->remove_note_unlocked (i->note);
 					temporary_removals.insert (i->note);
 				}
@@ -425,7 +425,7 @@ MidiModel::NoteDiffCommand::undo ()
 			case Velocity:
 				i->note->set_velocity (i->old_value);
 				break;
-				
+
 			case Length:
 				i->note->set_length (i->old_time);
 				break;
@@ -725,29 +725,29 @@ MidiModel::NoteDiffCommand::get_state ()
 	diff_command->add_property("midi-source", _model->midi_source()->id().to_s());
 
 	XMLNode* changes = diff_command->add_child(DIFF_NOTES_ELEMENT);
-	for_each(_changes.begin(), _changes.end(), 
+	for_each(_changes.begin(), _changes.end(),
 	         boost::bind (
 		         boost::bind (&XMLNode::add_child_nocopy, changes, _1),
 		         boost::bind (&NoteDiffCommand::marshal_change, this, _1)));
 
 	XMLNode* added_notes = diff_command->add_child(ADDED_NOTES_ELEMENT);
-	for_each(_added_notes.begin(), _added_notes.end(), 
+	for_each(_added_notes.begin(), _added_notes.end(),
 	         boost::bind(
 		         boost::bind (&XMLNode::add_child_nocopy, added_notes, _1),
 		         boost::bind (&NoteDiffCommand::marshal_note, this, _1)));
 
 	XMLNode* removed_notes = diff_command->add_child(REMOVED_NOTES_ELEMENT);
-	for_each(_removed_notes.begin(), _removed_notes.end(), 
+	for_each(_removed_notes.begin(), _removed_notes.end(),
 	         boost::bind (
 		         boost::bind (&XMLNode::add_child_nocopy, removed_notes, _1),
 		         boost::bind (&NoteDiffCommand::marshal_note, this, _1)));
 
-	/* if this command had side-effects, store that state too 
+	/* if this command had side-effects, store that state too
 	 */
 
 	if (!side_effect_removals.empty()) {
 		XMLNode* side_effect_notes = diff_command->add_child(SIDE_EFFECT_REMOVALS_ELEMENT);
-		for_each(side_effect_removals.begin(), side_effect_removals.end(), 
+		for_each(side_effect_removals.begin(), side_effect_removals.end(),
 		         boost::bind (
 			         boost::bind (&XMLNode::add_child_nocopy, side_effect_notes, _1),
 			         boost::bind (&NoteDiffCommand::marshal_note, this, _1)));
@@ -920,7 +920,7 @@ MidiModel::SysExDiffCommand::get_state ()
 	diff_command->add_property ("midi-source", _model->midi_source()->id().to_s());
 
 	XMLNode* changes = diff_command->add_child(DIFF_SYSEXES_ELEMENT);
-	for_each (_changes.begin(), _changes.end(), 
+	for_each (_changes.begin(), _changes.end(),
 	          boost::bind (
 		          boost::bind (&XMLNode::add_child_nocopy, changes, _1),
 		          boost::bind (&SysExDiffCommand::marshal_change, this, _1)));
@@ -997,7 +997,7 @@ MidiModel::PatchChangeDiffCommand::change_bank (PatchChangePtr patch, int bank)
 	c.patch = patch;
 	c.old_bank = patch->bank ();
 	c.new_bank = bank;
-	
+
 	_changes.push_back (c);
 }
 
@@ -1006,7 +1006,7 @@ MidiModel::PatchChangeDiffCommand::operator() ()
 {
 	{
 		MidiModel::WriteLock lock (_model->edit_lock ());
-		
+
 		for (list<PatchChangePtr>::iterator i = _added.begin(); i != _added.end(); ++i) {
 			_model->add_patch_change_unlocked (*i);
 		}
@@ -1014,7 +1014,7 @@ MidiModel::PatchChangeDiffCommand::operator() ()
 		for (list<PatchChangePtr>::iterator i = _removed.begin(); i != _removed.end(); ++i) {
 			_model->remove_patch_change_unlocked (*i);
 		}
-		
+
 		set<PatchChangePtr> temporary_removals;
 
 		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
@@ -1062,7 +1062,7 @@ MidiModel::PatchChangeDiffCommand::undo ()
 		for (list<PatchChangePtr>::iterator i = _removed.begin(); i != _removed.end(); ++i) {
 			_model->add_patch_change_unlocked (*i);
 		}
-		
+
 		set<PatchChangePtr> temporary_removals;
 
 		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
@@ -1092,7 +1092,7 @@ MidiModel::PatchChangeDiffCommand::undo ()
 		for (set<PatchChangePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
 			_model->add_patch_change_unlocked (*i);
 		}
-		
+
 	}
 
 	_model->ContentsChanged (); /* EMIT SIGNAL */
@@ -1179,7 +1179,7 @@ MidiModel::PatchChangeDiffCommand::marshal_change (const Change& c)
 		s << c.patch->id ();
 		n->add_property ("id", s.str ());
 	}
-	
+
 	return *n;
 }
 
@@ -1197,7 +1197,7 @@ MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 		istringstream s (prop->value());
 		s >> id;
 	}
-	
+
 	if ((prop = n->property ("time")) != 0) {
 		istringstream s (prop->value ());
 		s >> time;
@@ -1236,7 +1236,7 @@ MidiModel::PatchChangeDiffCommand::unmarshal_change (XMLNode* n)
 	prop = n->property ("id");
 	assert (prop);
 	Evoral::event_id_t const id = atoi (prop->value().c_str());
-	
+
 	prop = n->property ("old");
 	assert (prop);
 	{
@@ -1311,7 +1311,7 @@ MidiModel::PatchChangeDiffCommand::get_state ()
 	diff_command->add_property("midi-source", _model->midi_source()->id().to_s());
 
 	XMLNode* added = diff_command->add_child (ADDED_PATCH_CHANGES_ELEMENT);
-	for_each (_added.begin(), _added.end(), 
+	for_each (_added.begin(), _added.end(),
 		  boost::bind (
 			  boost::bind (&XMLNode::add_child_nocopy, added, _1),
 			  boost::bind (&PatchChangeDiffCommand::marshal_patch_change, this, _1)
@@ -1319,13 +1319,13 @@ MidiModel::PatchChangeDiffCommand::get_state ()
 		);
 
 	XMLNode* removed = diff_command->add_child (REMOVED_PATCH_CHANGES_ELEMENT);
-	for_each (_removed.begin(), _removed.end(), 
+	for_each (_removed.begin(), _removed.end(),
 		  boost::bind (
 			  boost::bind (&XMLNode::add_child_nocopy, removed, _1),
 			  boost::bind (&PatchChangeDiffCommand::marshal_patch_change, this, _1)
 			  )
 		);
-	
+
 	XMLNode* changes = diff_command->add_child (DIFF_PATCH_CHANGES_ELEMENT);
 	for_each (_changes.begin(), _changes.end(),
 		  boost::bind (
@@ -1357,7 +1357,7 @@ MidiModel::write_to (boost::shared_ptr<MidiSource> source)
 
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
-	
+
 	source->drop_model();
 	source->mark_streaming_midi_write_started (note_mode());
 
@@ -1388,7 +1388,7 @@ MidiModel::sync_to_source ()
 
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
-	
+
 	ms->mark_streaming_midi_write_started (note_mode());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(0, true); i != end(); ++i) {
@@ -1422,7 +1422,7 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource> source, Evoral::Music
 
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
 	assert (ms);
-	
+
 	source->drop_model();
 	source->mark_streaming_midi_write_started (note_mode());
 
@@ -1431,7 +1431,7 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource> source, Evoral::Music
 
 		if (ev.time() >= begin_time && ev.time() < end_time) {
 
-			const Evoral::MIDIEvent<Evoral::MusicalTime>* mev = 
+			const Evoral::MIDIEvent<Evoral::MusicalTime>* mev =
 				static_cast<const Evoral::MIDIEvent<Evoral::MusicalTime>* > (&ev);
 
 			if (!mev) {
@@ -1609,8 +1609,8 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 	TimeType note_length = note->length();
 
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 checking overlaps for note %2 @ %3\n", this, (int)note->note(), note->time()));
-	
-	for (Pitches::const_iterator i = p.lower_bound (search_note); 
+
+	for (Pitches::const_iterator i = p.lower_bound (search_note);
 	     i != p.end() && (*i)->note() == note->note(); ++i) {
 
 		TimeType sb = (*i)->time();
@@ -1662,7 +1662,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 			case InsertMergeExtend:
 				if (cmd) {
 					cmd->change ((*i), NoteDiffCommand::Length, note->end_time() - (*i)->time());
-				} 
+				}
 				(*i)->set_length (note->end_time() - (*i)->time());
 				return -1; /* do not add the new note */
 				break;
@@ -1764,14 +1764,14 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 	if (set_note_time) {
 		if (cmd) {
 			cmd->change (note, NoteDiffCommand::StartTime, note_time);
-		} 
+		}
 		note->set_time (note_time);
 	}
 
 	if (set_note_length) {
 		if (cmd) {
 			cmd->change (note, NoteDiffCommand::Length, note_length);
-		} 
+		}
 		note->set_length (note_length);
 	}
 
@@ -1779,7 +1779,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 }
 
 InsertMergePolicy
-MidiModel::insert_merge_policy () const 
+MidiModel::insert_merge_policy () const
 {
 	/* XXX ultimately this should be a per-track or even per-model policy */
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
@@ -1792,7 +1792,7 @@ void
 MidiModel::set_midi_source (boost::shared_ptr<MidiSource> s)
 {
 	boost::shared_ptr<MidiSource> old = _midi_source.lock ();
-	
+
 	if (old) {
 		old->invalidate ();
 	}
@@ -1888,16 +1888,16 @@ MidiModel::insert_silence_at_start (TimeType t)
 {
 	boost::shared_ptr<MidiSource> s = _midi_source.lock ();
 	assert (s);
-	
+
 	/* Notes */
 
 	if (!notes().empty ()) {
 		NoteDiffCommand* c = new_note_diff_command ("insert silence");
-		
+
 		for (Notes::const_iterator i = notes().begin(); i != notes().end(); ++i) {
 			c->change (*i, NoteDiffCommand::StartTime, (*i)->time() + t);
 		}
-		
+
 		apply_command_as_subcommand (s->session(), c);
 	}
 
@@ -1936,20 +1936,20 @@ void
 MidiModel::transpose (TimeType from, TimeType to, int semitones)
 {
 	boost::shared_ptr<const MidiSource> s = midi_source ();
-	
+
 	NoteDiffCommand* c = new_note_diff_command (_("transpose"));
-	
+
 	for (Notes::iterator i = notes().begin(); i != notes().end(); ++i) {
 
 		if ((*i)->time() >= to) {
-			
+
 			/* finished */
 			break;
-			
+
 		} else if ((*i)->time() >= from) {
 
 			int new_note = (*i)->note() + semitones;
-			
+
 			if (new_note < 0) {
 				new_note = 0;
 			} else if (new_note > 127) {
@@ -1957,7 +1957,7 @@ MidiModel::transpose (TimeType from, TimeType to, int semitones)
 			}
 
 			c->change (*i, NoteDiffCommand::NoteNumber, (uint8_t) new_note);
-			
+
 		}
 	}
 

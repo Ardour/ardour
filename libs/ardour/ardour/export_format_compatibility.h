@@ -32,7 +32,7 @@ class ExportFormatCompatibility : public ExportFormatBase, public ExportFormatBa
   private:
 
   public:
-        ExportFormatCompatibility (std::string name)
+	ExportFormatCompatibility (std::string name)
 	{
 		set_name (name);
 		sample_formats.insert (SF_None);

@@ -34,10 +34,10 @@ BufferManager::init (uint32_t size)
         thread_buffers = new ThreadBufferFIFO (size+1); // must be one larger than requested
 	thread_buffers_list = new ThreadBufferList;
 
-        /* and populate with actual ThreadBuffers 
+        /* and populate with actual ThreadBuffers
          */
 
-        for (uint32_t n = 0; n < size; ++n) {        
+        for (uint32_t n = 0; n < size; ++n) {
                 ThreadBuffers* ts = new ThreadBuffers;
                 thread_buffers->write (&ts, 1);
 		thread_buffers_list->push_back (ts);

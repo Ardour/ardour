@@ -22,7 +22,7 @@
 namespace ARDOUR {
 
 /// A filter to strip silence from regions
-class StripSilence : public Filter 
+class StripSilence : public Filter
 {
   public:
 	StripSilence (Session &, const AudioIntervalMap&, framecnt_t fade_length);
@@ -30,7 +30,7 @@ class StripSilence : public Filter
 	int run (boost::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
 
 private:
-        const AudioIntervalMap& _smap;
+	const AudioIntervalMap& _smap;
 	framecnt_t _fade_length; ///< fade in/out to use on trimmed regions, in samples
 };
 

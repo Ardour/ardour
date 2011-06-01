@@ -66,7 +66,7 @@ Send::deactivate ()
 	_amp->deactivate ();
 	_meter->deactivate ();
 	_meter->reset ();
-	
+
 	Processor::deactivate ();
 }
 
@@ -144,7 +144,7 @@ Send::set_state (const XMLNode& node, int version)
 	if (version < 3000) {
 		return set_state_2X (node, version);
 	}
-	
+
 	const XMLProperty* prop;
 
 	Delivery::set_state (node, version);

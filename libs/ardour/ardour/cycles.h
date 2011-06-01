@@ -122,27 +122,27 @@ static inline cycles_t get_cycles (void)
 typedef uint32_t long cycles_t;
 static inline cycles_t get_cycles(void)
 {
-        cycles_t cycles;
-        __asm__("stck 0(%0)" : : "a" (&(cycles)) : "memory", "cc");
-        return cycles >> 2;
+	cycles_t cycles;
+	__asm__("stck 0(%0)" : : "a" (&(cycles)) : "memory", "cc");
+	return cycles >> 2;
 }
 
 #elif defined(__hppa__)
 /* hppa/parisc */
 
 #define mfctl(reg)      ({              \
-        uint32_t cr;               \
-        __asm__ __volatile__(           \
-                "mfctl " #reg ",%0" :   \
-                 "=r" (cr)              \
-        );                              \
-        cr;                             \
+	uint32_t cr;               \
+	__asm__ __volatile__(           \
+	        "mfctl " #reg ",%0" :   \
+	         "=r" (cr)              \
+	);                              \
+	cr;                             \
 })
 
 typedef uint32_t cycles_t;
 static inline cycles_t get_cycles (void)
 {
-        return mfctl(16);
+	return mfctl(16);
 }
 
 #elif defined(__mips__)
@@ -159,19 +159,19 @@ static inline cycles_t get_cycles (void)
  * We know that all SMP capable CPUs have cycle counters.
  */
 
-#define __read_32bit_c0_register(source, sel)                           \
-({ int __res;                                                           \
-        if (sel == 0)                                                   \
-                __asm__ __volatile__(                                   \
-                        "mfc0\t%0, " #source "\n\t"                     \
-                        : "=r" (__res));                                \
-        else                                                            \
-                __asm__ __volatile__(                                   \
-                        ".set\tmips32\n\t"                              \
-                        "mfc0\t%0, " #source ", " #sel "\n\t"           \
-                        ".set\tmips0\n\t"                               \
-                        : "=r" (__res));                                \
-        __res;                                                          \
+#define __read_32bit_c0_register(source, sel)               \
+({ int __res;                                               \
+	if (sel == 0)                                           \
+		__asm__ __volatile__(                               \
+			"mfc0\t%0, " #source "\n\t"                     \
+			: "=r" (__res));                                \
+	else                                                    \
+		__asm__ __volatile__(                               \
+			".set\tmips32\n\t"                              \
+			"mfc0\t%0, " #source ", " #sel "\n\t"           \
+			".set\tmips0\n\t"                               \
+			: "=r" (__res));                                \
+	__res;                                                  \
 })
 
 /* #define CP0_COUNT $9 */
@@ -180,7 +180,7 @@ static inline cycles_t get_cycles (void)
 typedef uint32_t cycles_t;
 static inline cycles_t get_cycles (void)
 {
-        return read_c0_count();
+	return read_c0_count();
 }
 
 /* begin mach */
@@ -191,8 +191,8 @@ static inline cycles_t get_cycles (void)
 typedef UInt64 cycles_t;
 static inline cycles_t get_cycles (void)
 {
-       UInt64 time = AudioGetCurrentHostTime();
-       return AudioConvertHostTimeToNanos(time);
+	UInt64 time = AudioGetCurrentHostTime();
+	return AudioConvertHostTimeToNanos(time);
 }
 /* end mach  */
 
@@ -210,10 +210,10 @@ extern cycles_t cacheflush_time;
 
 static inline cycles_t get_cycles(void)
 {
-       struct timeval tv;
-       gettimeofday (&tv, NULL);
+	struct timeval tv;
+	gettimeofday (&tv, NULL);
 
-       return tv.tv_usec;
+	return tv.tv_usec;
 }
 
 #endif

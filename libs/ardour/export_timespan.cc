@@ -34,7 +34,7 @@ ExportTimespan::ExportTimespan (ExportStatusPtr status, framecnt_t frame_rate) :
 	position (0),
 	frame_rate (frame_rate)
 {
-	
+
 }
 
 ExportTimespan::~ExportTimespan ()

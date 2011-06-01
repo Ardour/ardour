@@ -90,7 +90,7 @@ class IO : public SessionObject, public Latent
 	bool set_name (const std::string& str);
 
 	virtual void silence (framecnt_t);
-        void increment_port_buffer_offset (pframes_t offset);
+	void increment_port_buffer_offset (pframes_t offset);
 
 	int ensure_io (ChanCount cnt, bool clear, void *src);
 
@@ -107,9 +107,9 @@ class IO : public SessionObject, public Latent
 	int disconnect (Port *our_port, std::string other_port, void *src);
 	int disconnect (void *src);
 	bool connected_to (boost::shared_ptr<const IO>) const;
-        bool connected () const;
-        bool physically_connected () const;
-        
+	bool connected () const;
+	bool physically_connected () const;
+
 	framecnt_t signal_latency () const { return _own_latency; }
 	framecnt_t latency () const;
 
@@ -168,7 +168,7 @@ class IO : public SessionObject, public Latent
 	 *  the change from happening.
 	 */
 	PBD::Signal1<bool, ChanCount, BoolCombiner> PortCountChanging;
-	
+
 	static int  disable_connecting (void);
 	static int  enable_connecting (void);
 	static int  disable_ports (void);
@@ -219,7 +219,7 @@ class IO : public SessionObject, public Latent
 	    boost::shared_ptr<UserBundle> bundle;
 	    PBD::ScopedConnection changed;
 	};
-	
+
 	std::vector<UserBundleInfo*> _bundles_connected; ///< user bundles connected to our ports
 
 	static int parse_io_string (const std::string&, std::vector<std::string>& chns);

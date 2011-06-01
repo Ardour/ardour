@@ -283,7 +283,7 @@ LadspaPlugin::set_parameter (uint32_t which, float val)
 	if (which < _descriptor->PortCount) {
 		_shadow_data[which] = (LADSPA_Data) val;
 
-#if 0		
+#if 0
 		if (which < parameter_count() && controls[which]) {
 			controls[which]->Changed ();
 		}
@@ -544,7 +544,7 @@ LadspaPlugin::connect_and_run (BufferSet& bufs,
 		pframes_t nframes, framecnt_t offset)
 {
 	Plugin::connect_and_run (bufs, in_map, out_map, nframes, offset);
-	
+
 	cycles_t now;
 	cycles_t then = get_cycles ();
 
@@ -637,7 +637,7 @@ LadspaPlugin::run_in_place (pframes_t nframes)
 	}
 
 	assert (_was_activated);
-	
+
 	_descriptor->run (_handle, nframes);
 }
 
@@ -768,7 +768,7 @@ lrdf_remove_preset (const char *source, const char *setting_uri)
 	lrdf_statement *i;
 	char setting_uri_copy[64];
 	char buf[64];
-	
+
 	strncpy(setting_uri_copy, setting_uri, sizeof(setting_uri_copy));
 
 	p.subject = setting_uri_copy;
@@ -811,7 +811,7 @@ LadspaPlugin::do_remove_preset (string name)
 	if (!p) {
 		return;
 	}
-	
+
 	string const source = preset_source (envvar);
 	lrdf_remove_preset (source.c_str(), p->uri.c_str ());
 
@@ -825,7 +825,7 @@ LadspaPlugin::preset_envvar () const
 	if ((envvar = getenv ("HOME")) == 0) {
 		return "";
 	}
-	
+
 	return envvar;
 }
 
@@ -870,7 +870,7 @@ LadspaPlugin::do_save_preset (string name)
 			input_parameter_pids.push_back (i);
 		}
 	}
-	
+
 	std::string unique (unique_id());
 
 	if (!isdigit (unique[0])) {

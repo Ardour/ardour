@@ -28,29 +28,29 @@
 
 namespace PBD {
 	namespace DEBUG {
-                extern uint64_t MidiSourceIO;
-                extern uint64_t MidiPlaylistIO;
-                extern uint64_t MidiDiskstreamIO;
-                extern uint64_t SnapBBT;
-                extern uint64_t Configuration;
-                extern uint64_t Latency;
-                extern uint64_t Processors;
-                extern uint64_t ProcessThreads;
-                extern uint64_t Graph;
-                extern uint64_t Destruction;
-                extern uint64_t MTC;
-                extern uint64_t Transport;
-                extern uint64_t Slave;
-                extern uint64_t SessionEvents;
-                extern uint64_t MidiIO;
-                extern uint64_t MackieControl;
-                extern uint64_t MidiClock;
-                extern uint64_t Monitor;
-                extern uint64_t Solo;
-                extern uint64_t AudioPlayback;
-                extern uint64_t Panning;
-                extern uint64_t LV2;
-                extern uint64_t CaptureAlignment;
+		extern uint64_t MidiSourceIO;
+		extern uint64_t MidiPlaylistIO;
+		extern uint64_t MidiDiskstreamIO;
+		extern uint64_t SnapBBT;
+		extern uint64_t Configuration;
+		extern uint64_t Latency;
+		extern uint64_t Processors;
+		extern uint64_t ProcessThreads;
+		extern uint64_t Graph;
+		extern uint64_t Destruction;
+		extern uint64_t MTC;
+		extern uint64_t Transport;
+		extern uint64_t Slave;
+		extern uint64_t SessionEvents;
+		extern uint64_t MidiIO;
+		extern uint64_t MackieControl;
+		extern uint64_t MidiClock;
+		extern uint64_t Monitor;
+		extern uint64_t Solo;
+		extern uint64_t AudioPlayback;
+		extern uint64_t Panning;
+		extern uint64_t LV2;
+		extern uint64_t CaptureAlignment;
 	}
 }
 

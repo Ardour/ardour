@@ -31,12 +31,12 @@ using namespace ARDOUR;
 using namespace PBD;
 
 SessionHandlePtr::SessionHandlePtr (Session* s)
-	: _session (s) 
+	: _session (s)
 {
 	if (_session) {
 		_session->DropReferences.connect_same_thread (_session_connections, boost::bind (&SessionHandlePtr::session_going_away, this));
 	}
-}	
+}
 
 void
 SessionHandlePtr::set_session (Session* s)
@@ -63,11 +63,11 @@ SessionHandlePtr::session_going_away ()
 
 
 SessionHandleRef::SessionHandleRef (Session& s)
-	: _session (s) 
+	: _session (s)
 {
 	_session.DropReferences.connect_same_thread (*this, boost::bind (&SessionHandleRef::session_going_away, this));
 	_session.Destroyed.connect_same_thread (*this, boost::bind (&SessionHandleRef::insanity_check, this));
-}	
+}
 
 SessionHandleRef::~SessionHandleRef ()
 {

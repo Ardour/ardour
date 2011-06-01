@@ -25,21 +25,21 @@
 namespace ARDOUR {
 
 struct RegionSortByPosition {
-    bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
-	    return a->position() < b->position();
-    }
+	bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
+		return a->position() < b->position();
+	}
 };
 
 struct RegionSortByLastLayerOp {
-    bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
-	    return a->last_layer_op() < b->last_layer_op();
-    }
+	bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
+		return a->last_layer_op() < b->last_layer_op();
+	}
 };
 
 struct RegionSortByLayer {
-    bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
-	    return a->layer() < b->layer();
-    }
+	bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
+		return a->layer() < b->layer();
+	}
 };
 
 struct RegionSortByLayerWithPending {
@@ -59,6 +59,6 @@ struct RegionSortByLayerWithPending {
 	}
 };
 
-} // namespace 
+} // namespace
 
 #endif /* __libardour_region_sorters_h__ */

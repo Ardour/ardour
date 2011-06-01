@@ -156,7 +156,7 @@ Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
 
 	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (ac->list ());
 	assert (al);
-	
+
 	al->automation_state_changed.connect_same_thread (
 		_list_connections, boost::bind (&Automatable::automation_list_automation_state_changed, this, ac->parameter(), _1)
 		);
@@ -256,7 +256,7 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
                         }
 
 
-			
+
 			if (!id_prop) {
 				warning << "AutomationList node without automation-id property, "
 					<< "using default: " << EventTypeMap::instance().to_symbol(legacy_param) << endmsg;
@@ -415,7 +415,7 @@ Automatable::transport_stopped (framepos_t now)
                 if (c) {
                         boost::shared_ptr<AutomationList> l
 				= boost::dynamic_pointer_cast<AutomationList>(c->list());
-                        
+
                         if (l) {
 				/* Stop any active touch gesture just before we mark the write pass
 				   as finished.  If we don't do this, the transport can end up stopped with
@@ -425,11 +425,11 @@ Automatable::transport_stopped (framepos_t now)
 				*/
 				l->stop_touch (true, now);
                                 l->write_pass_finished (now);
-                                
+
                                 if (l->automation_playback()) {
                                         c->set_value(c->list()->eval(now));
                                 }
-                                
+
                                 if (l->automation_state() == Write) {
                                         l->set_automation_state (Touch);
                                 }

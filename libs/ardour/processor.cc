@@ -186,7 +186,7 @@ Processor::set_state (const XMLNode& node, int version)
 	if (version < 3000) {
 		return set_state_2X (node, version);
 	}
-	
+
 	const XMLProperty *prop;
 	const XMLProperty *legacy_active = 0;
 
@@ -284,7 +284,7 @@ Processor::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Processor::set_display_to_user (bool yn) 
+Processor::set_display_to_user (bool yn)
 {
 	_display_to_user = yn;
 }

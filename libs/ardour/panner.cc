@@ -124,7 +124,7 @@ Panner::touching () const
         return _pannable->touching ();
 }
 
-set<Evoral::Parameter> 
+set<Evoral::Parameter>
 Panner::what_can_be_automated() const
 {
         return _pannable->what_can_be_automated ();
@@ -136,7 +136,7 @@ Panner::describe_parameter (Evoral::Parameter p)
         return _pannable->describe_parameter (p);
 }
 
-string 
+string
 Panner::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 {
         return _pannable->value_as_string (ac);

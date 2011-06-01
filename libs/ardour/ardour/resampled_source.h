@@ -51,7 +51,7 @@ class ResampledImportableSource : public ImportableSource
 
    private:
 	boost::shared_ptr<ImportableSource> source;
-        float* input;
+	float* input;
 	int _src_type;
 	SRC_STATE*	src_state;
 	SRC_DATA	src_data;

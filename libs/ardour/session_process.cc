@@ -1148,7 +1148,7 @@ framepos_t
 Session::compute_stop_limit () const
 {
 	bool const punching = (config.get_punch_in () && _locations->auto_punch_location());
-		
+
 	if (!actively_recording() && !punching && Config->get_stop_at_session_end()) {
 		return current_end_frame ();
 	}

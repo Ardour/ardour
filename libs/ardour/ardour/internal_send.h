@@ -38,7 +38,7 @@ class InternalSend : public Send
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node, int version);
-	
+
 	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
 	bool feeds (boost::shared_ptr<Route> other) const;
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
@@ -57,13 +57,13 @@ class InternalSend : public Send
 	boost::shared_ptr<Route> _send_to;
 	PBD::ID _send_to_id;
 	PBD::ScopedConnection connect_c;
-        PBD::ScopedConnectionList target_connections;
+	PBD::ScopedConnectionList target_connections;
 
 	void send_to_going_away ();
 	void send_to_property_changed (const PBD::PropertyChange&);
 	int  connect_when_legal ();
 	int  set_our_state (XMLNode const &, int);
-        int  use_target (boost::shared_ptr<Route>);
+	int  use_target (boost::shared_ptr<Route>);
 };
 
 } // namespace ARDOUR

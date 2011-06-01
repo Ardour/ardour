@@ -165,7 +165,7 @@ Session::process_export (pframes_t nframes)
 
 		process_without_events (nframes);
 	}
-	
+
 	try {
 		/* handle export - XXX what about error handling? */
 

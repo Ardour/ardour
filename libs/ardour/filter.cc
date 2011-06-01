@@ -121,7 +121,7 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 	results.clear ();
 
 	PropertyList plist;
-	
+
 	plist.add (Properties::start, 0);
 	plist.add (Properties::length, region->length());
 	plist.add (Properties::name, region_name);

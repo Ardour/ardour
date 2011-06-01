@@ -34,32 +34,32 @@ namespace ARDOUR  {
 class Speakers : public PBD::Stateful {
 public:
 	Speakers ();
-        Speakers (const Speakers&);
+	Speakers (const Speakers&);
 	virtual ~Speakers ();
 
-        Speakers& operator= (const Speakers&);
+	Speakers& operator= (const Speakers&);
 
 	virtual int  add_speaker (const PBD::AngularVector&);
 	virtual void remove_speaker (int id);
 	virtual void move_speaker (int id, const PBD::AngularVector& new_position);
 	virtual void clear_speakers ();
-        uint32_t size() const { return _speakers.size(); } 
+	uint32_t size() const { return _speakers.size(); }
 
-        void setup_default_speakers (uint32_t nspeakers);
+	void setup_default_speakers (uint32_t nspeakers);
 
 	std::vector<Speaker>& speakers() { return _speakers; }
 
 	void dump_speakers (std::ostream&);
 
-        XMLNode& get_state ();
-        int set_state (const XMLNode&, int version);
+	XMLNode& get_state ();
+	int set_state (const XMLNode&, int version);
 
 	PBD::Signal0<void> Changed;
-        
+
 protected:
 	std::vector<Speaker>  _speakers;
 
-	virtual void update () {}  
+	virtual void update () {}
 };
 
 } /* namespace */

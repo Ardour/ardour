@@ -57,7 +57,7 @@ This code has been in place as a stub in case anyone gets any brilliant ideas
 on other ways to approach this issue.
 ********************************************************************************/
 
-MidiPlaylistSource::MidiPlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<MidiPlaylist> p, 
+MidiPlaylistSource::MidiPlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<MidiPlaylist> p,
 					uint32_t chn, frameoffset_t begin, framecnt_t len, Source::Flag flags)
 	: Source (s, DataType::MIDI, name)
 	, MidiSource (s, name, flags)
@@ -76,7 +76,7 @@ MidiPlaylistSource::MidiPlaylistSource (Session& s, const XMLNode& node)
 	/* ancestors have already called ::set_state() in their XML-based
 	   constructors.
 	*/
-	
+
 	if (set_state (node, Stateful::loading_state_version, false)) {
 		throw failed_constructor ();
 	}
@@ -98,18 +98,18 @@ MidiPlaylistSource::get_state ()
 	return node;
 }
 
-	
+
 int
-MidiPlaylistSource::set_state (const XMLNode& node, int version) 
+MidiPlaylistSource::set_state (const XMLNode& node, int version)
 {
 	return set_state (node, version, true);
 }
 
 int
-MidiPlaylistSource::set_state (const XMLNode& node, int version, bool with_descendants) 
+MidiPlaylistSource::set_state (const XMLNode& node, int version, bool with_descendants)
 {
 	if (with_descendants) {
-		if (Source::set_state (node, version) || 
+		if (Source::set_state (node, version) ||
 		    MidiSource::set_state (node, version) ||
 		    PlaylistSource::set_state (node, version)) {
 			return -1;
@@ -126,11 +126,11 @@ MidiPlaylistSource::length (framepos_t)  const
 	return extent.second - extent.first;
 }
 
-framepos_t 
+framepos_t
 MidiPlaylistSource::read_unlocked (Evoral::EventSink<framepos_t>& dst,
 				   framepos_t position,
 				   framepos_t start, framecnt_t cnt,
-				   MidiStateTracker* tracker) const 
+				   MidiStateTracker* tracker) const
 {
 	boost::shared_ptr<MidiPlaylist> mp = boost::dynamic_pointer_cast<MidiPlaylist> (_playlist);
 
@@ -141,24 +141,24 @@ MidiPlaylistSource::read_unlocked (Evoral::EventSink<framepos_t>& dst,
 	return mp->read (dst, start, cnt);
 }
 
-framepos_t 
+framepos_t
 MidiPlaylistSource::write_unlocked (MidiRingBuffer<framepos_t>& dst,
 				    framepos_t position,
-				    framecnt_t cnt) 
+				    framecnt_t cnt)
 {
 	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::write_unlocked() called - should be impossible") << endmsg;
 	/*NOTREACHED*/
 	return 0;
 }
 
-void 
+void
 MidiPlaylistSource::append_event_unlocked_beats(const Evoral::Event<Evoral::MusicalTime>& /*ev*/)
 {
 	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::append_event_unlocked_beats() called - should be impossible") << endmsg;
 	/*NOTREACHED*/
 }
 
-void 
+void
 MidiPlaylistSource::append_event_unlocked_frames(const Evoral::Event<framepos_t>& ev, framepos_t source_start)
 {
 	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::append_event_unlocked_frames() called - should be impossible") << endmsg;
@@ -166,13 +166,13 @@ MidiPlaylistSource::append_event_unlocked_frames(const Evoral::Event<framepos_t>
 }
 
 void
-MidiPlaylistSource::load_model (bool, bool) 
+MidiPlaylistSource::load_model (bool, bool)
 {
 	/* nothing to do */
 }
 
 void
-MidiPlaylistSource::destroy_model () 
+MidiPlaylistSource::destroy_model ()
 {
 	/* nothing to do */
 }

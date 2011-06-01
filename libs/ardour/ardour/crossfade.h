@@ -44,7 +44,7 @@ enum AnchorPoint {
 	EndOfIn,
 	EndOfOut
 };
-	
+
 class Playlist;
 
 class Crossfade : public ARDOUR::AudioRegion
@@ -175,7 +175,7 @@ class Crossfade : public ARDOUR::AudioRegion
 	bool update ();
 
 	bool operator== (const ARDOUR::Crossfade&);
-	
+
   protected:
 	framecnt_t read_raw_internal (Sample*, framepos_t, framecnt_t, int) const;
 };

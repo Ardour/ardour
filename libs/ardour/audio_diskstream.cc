@@ -441,7 +441,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool ca
 		(*chan)->current_playback_buffer = 0;
 	}
 
-	// Safeguard against situations where process() goes haywire when autopunching 
+	// Safeguard against situations where process() goes haywire when autopunching
 	// and last_recordable_frame < first_recordable_frame
 
 	if (last_recordable_frame < first_recordable_frame) {
@@ -452,7 +452,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool ca
 
 		OverlapType ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
 		calculate_record_range (ot, transport_frame, nframes, rec_nframes, rec_offset);
-                
+
 		if (rec_nframes && !was_recording) {
 			capture_captured = 0;
 			was_recording = true;
@@ -626,7 +626,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, bool ca
 
 		_speed = _target_speed;
 
-	} 
+	}
 
 	ret = 0;
 
@@ -685,11 +685,11 @@ AudioDiskstream::commit (framecnt_t /* nframes */)
 		capture_captured += adjust_capture_position;
 		adjust_capture_position = 0;
 	}
-	
+
 	if (c->empty()) {
 		return false;
 	}
-	
+
 	if (_slaved) {
 		if (_io && _io->active()) {
 			need_butler = c->front()->playback_buf->write_space() >= c->front()->playback_buf->bufsize() / 2;
@@ -731,7 +731,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 		_pending_overwrite = false;
 		return 0;
 	}
-	
+
 	Sample* mixdown_buffer;
 	float* gain_buffer;
 	int ret = -1;
@@ -865,7 +865,7 @@ AudioDiskstream::internal_playback_seek (framecnt_t distance)
 }
 
 int
-AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
+AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
                        framepos_t& start, framecnt_t cnt,
                        ChannelInfo* /*channel_info*/, int channel, bool reversed)
 {
@@ -912,7 +912,7 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 	if (reversed) {
 		start -= cnt;
 	}
-	
+
 	while (cnt) {
 
 		/* take any loop into account. we can't read past the end of the loop. */
@@ -1187,7 +1187,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 	file_frame = file_frame_tmp;
 	assert (file_frame >= 0);
-	
+
   out:
 
 	return ret;
@@ -1473,18 +1473,18 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 			string region_name;
 
 			RegionFactory::region_name (region_name, whole_file_region_name, false);
-                        
+
 			DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 capture start @ %2 length %3 add new region %4\n",
 			                                                      _name, (*ci)->start, (*ci)->frames, region_name));
 
 			try {
 
 				PropertyList plist;
-				
+
 				plist.add (Properties::start, buffer_position);
 				plist.add (Properties::length, (*ci)->frames);
 				plist.add (Properties::name, region_name);
-				
+
 				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 				region = boost::dynamic_pointer_cast<AudioRegion> (rx);
 			}
@@ -1503,7 +1503,7 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 				region->set_layer (_playlist->top_layer() + 1);
 				region->set_pending_explicit_relayer (true);
 			}
-			
+
 			_playlist->add_region (region, (*ci)->start, 1, non_layered());
 			i_am_the_modifier--;
 
@@ -1841,11 +1841,11 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 	/* do not remove destructive files even if they are empty */
 
 	chan->write_source->set_allow_remove_if_empty (!destructive());
-	
+
 	return 0;
 }
 
-list<boost::shared_ptr<Source> > 
+list<boost::shared_ptr<Source> >
 AudioDiskstream::steal_write_sources()
 {
 	/* not possible to steal audio write sources */
@@ -1881,7 +1881,7 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 					(*chan)->write_source->mark_for_remove ();
 					(*chan)->write_source->drop_references ();
 				}
-				
+
 				(*chan)->write_source.reset ();
 			}
 
@@ -2001,7 +2001,7 @@ AudioDiskstream::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_
 {
 	while (how_many--) {
 		c->push_back (new ChannelInfo(
-			              _session.butler()->audio_diskstream_playback_buffer_size(), 
+			              _session.butler()->audio_diskstream_playback_buffer_size(),
 			              _session.butler()->audio_diskstream_capture_buffer_size(),
 			              speed_buffer_size, wrap_buffer_size));
 		interpolation.add_channel_to (
@@ -2067,7 +2067,7 @@ AudioDiskstream::capture_buffer_load () const
 	if (c->empty ()) {
 		return 0;
 	}
-	
+
 	return (float) ((double) c->front()->capture_buf->write_space()/
 			(double) c->front()->capture_buf->bufsize());
 }
@@ -2142,9 +2142,9 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	boost::shared_ptr<AudioRegion> region;
 
 	try {
-		
+
 		PropertyList plist;
-		
+
 		plist.add (Properties::start, 0);
 		plist.add (Properties::length, first_fs->length (first_fs->timeline_position()));
 		plist.add (Properties::name, region_name_from_path (first_fs->name(), true));
@@ -2253,7 +2253,7 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 	return true;
 }
 
-void 
+void
 AudioDiskstream::adjust_playback_buffering ()
 {
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -2263,7 +2263,7 @@ AudioDiskstream::adjust_playback_buffering ()
 	}
 }
 
-void 
+void
 AudioDiskstream::adjust_capture_buffering ()
 {
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -2370,7 +2370,7 @@ AudioDiskstream::set_name (string const & name)
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	ChannelList::iterator i;
 	int n = 0;
-	
+
 	for (n = 0, i = c->begin(); i != c->end(); ++i, ++n) {
 		use_new_write_source (n);
 	}

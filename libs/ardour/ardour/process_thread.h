@@ -12,31 +12,31 @@ class ThreadBuffers;
 
 class ProcessThread
 {
-  public:
-    ProcessThread ();
-    ~ProcessThread ();
+public:
+	ProcessThread ();
+	~ProcessThread ();
 
-    static void init();
+	static void init();
 
-    void get_buffers ();
-    void drop_buffers ();
+	void get_buffers ();
+	void drop_buffers ();
 
-    /* these MUST be called by a process thread's thread, nothing else
-     */
+	/* these MUST be called by a process thread's thread, nothing else
+	 */
 
-    static BufferSet& get_silent_buffers (ChanCount count = ChanCount::ZERO);
-    static BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO);
-    static BufferSet& get_mix_buffers (ChanCount count = ChanCount::ZERO);
-    static gain_t* gain_automation_buffer ();
-    static pan_t** pan_automation_buffer ();
+	static BufferSet& get_silent_buffers (ChanCount count = ChanCount::ZERO);
+	static BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO);
+	static BufferSet& get_mix_buffers (ChanCount count = ChanCount::ZERO);
+	static gain_t* gain_automation_buffer ();
+	static pan_t** pan_automation_buffer ();
 
-  protected:
-    void session_going_away ();
+protected:
+	void session_going_away ();
 
-  private:
-    Glib::Thread* _thread;
+private:
+	Glib::Thread* _thread;
 
-    static Glib::Private<ThreadBuffers>* _private_thread_buffers;
+	static Glib::Private<ThreadBuffers>* _private_thread_buffers;
 };
 
 } // namespace

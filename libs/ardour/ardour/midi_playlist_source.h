@@ -33,47 +33,47 @@ namespace ARDOUR {
 class MidiPlaylist;
 
 class MidiPlaylistSource : public MidiSource, public PlaylistSource {
-  public:
-    virtual ~MidiPlaylistSource ();
+public:
+	virtual ~MidiPlaylistSource ();
 
-    bool empty() const;
-    framecnt_t length (framepos_t) const;
+	bool empty() const;
+	framecnt_t length (framepos_t) const;
 
-    framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const;
-    framecnt_t write_unlocked (Sample *src, framecnt_t cnt);
-    
-    XMLNode& get_state ();
-    int set_state (const XMLNode&, int version);
+	framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const;
+	framecnt_t write_unlocked (Sample *src, framecnt_t cnt);
 
-    void append_event_unlocked_beats(const Evoral::Event<Evoral::MusicalTime>& ev);
-    void append_event_unlocked_frames(const Evoral::Event<framepos_t>& ev, framepos_t source_start);
-    void load_model(bool lock=true, bool force_reload=false);
-    void destroy_model();
+	XMLNode& get_state ();
+	int set_state (const XMLNode&, int version);
 
-  protected:
-    friend class SourceFactory;
+	void append_event_unlocked_beats(const Evoral::Event<Evoral::MusicalTime>& ev);
+	void append_event_unlocked_frames(const Evoral::Event<framepos_t>& ev, framepos_t source_start);
+	void load_model(bool lock=true, bool force_reload=false);
+	void destroy_model();
 
-    MidiPlaylistSource (Session&, const PBD::ID& orig, const std::string& name, boost::shared_ptr<MidiPlaylist>, uint32_t chn,
-			frameoffset_t begin, framecnt_t len, Source::Flag flags);
-    MidiPlaylistSource (Session&, const XMLNode&);
-    
-    
-    void flush_midi();
+protected:
+	friend class SourceFactory;
 
-    framepos_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
-				      framepos_t position,
-				      framepos_t start, framecnt_t cnt,
-				      MidiStateTracker* tracker) const;
-    
-    framepos_t write_unlocked (MidiRingBuffer<framepos_t>& dst,
-					   framepos_t position,
-					   framecnt_t cnt);
+	MidiPlaylistSource (Session&, const PBD::ID& orig, const std::string& name, boost::shared_ptr<MidiPlaylist>, uint32_t chn,
+	                    frameoffset_t begin, framecnt_t len, Source::Flag flags);
+	MidiPlaylistSource (Session&, const XMLNode&);
 
-  private:
-    int set_state (const XMLNode&, int version, bool with_descendants);
-    framecnt_t _length;
+
+	void flush_midi();
+
+	framepos_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
+	                          framepos_t position,
+	                          framepos_t start, framecnt_t cnt,
+	                          MidiStateTracker* tracker) const;
+
+	framepos_t write_unlocked (MidiRingBuffer<framepos_t>& dst,
+	                           framepos_t position,
+	                           framecnt_t cnt);
+
+private:
+	int set_state (const XMLNode&, int version, bool with_descendants);
+	framecnt_t _length;
 };
-        
+
 } /* namespace */
 
 #endif /* __ardour_midi_playlist_source_h__ */

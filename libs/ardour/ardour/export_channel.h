@@ -100,7 +100,7 @@ class PortExportChannel : public ExportChannel
 };
 
 /// Handles RegionExportChannels and does actual reading from region
-class RegionExportChannelFactory 
+class RegionExportChannelFactory
 {
   public:
 	enum Type {

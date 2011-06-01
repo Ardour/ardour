@@ -27,7 +27,7 @@
 
 namespace ARDOUR {
 
-class InternalSend;	
+class InternalSend;
 
 class InternalReturn : public Return
 {
@@ -45,14 +45,14 @@ class InternalReturn : public Return
 
 	void add_send (InternalSend *);
 	void remove_send (InternalSend *);
-	
+
 	static PBD::Signal1<void, pframes_t> CycleStart;
 
   private:
 	BufferSet buffers;
 	/** sends that we are receiving data from */
 	std::list<InternalSend*> _sends;
-	
+
 	void allocate_buffers (pframes_t);
 	void cycle_start (pframes_t);
 };

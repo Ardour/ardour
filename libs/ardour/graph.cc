@@ -52,8 +52,8 @@ int alloc_allowed ()
 }
 #endif
 
-Graph::Graph (Session & session) 
-        : SessionHandleRef (session) 
+Graph::Graph (Session & session)
+        : SessionHandleRef (session)
         , _quit_threads (false)
 	, _execution_sem ("graph_execution", 0)
 	, _callback_start_sem ("graph_start", 0)
@@ -74,15 +74,15 @@ Graph::Graph (Session & session)
         _setup_chain   = 1;
         _quit_threads = false;
         _graph_empty = true;
-        
+
         reset_thread_list ();
 
         Config->ParameterChanged.connect_same_thread (processor_usage_connection, boost::bind (&Graph::parameter_changed, this, _1));
 
-#ifdef DEBUG_RT_ALLOC	
+#ifdef DEBUG_RT_ALLOC
 	graph = this;
 	pbd_alloc_allowed = &::alloc_allowed;
-#endif	
+#endif
 }
 
 void
@@ -189,7 +189,7 @@ Graph::clear_other_chain ()
                 /* setup chain == pending chain - we have
                    to wait till this is no longer true.
                 */
-                _cleanup_cond.wait (_swap_mutex);                
+                _cleanup_cond.wait (_swap_mutex);
         }
 }
 
@@ -240,7 +240,7 @@ Graph::dec_ref()
 
                 // ok... this cycle is finished now.
                 // we are the only thread alive.
-	
+
                 this->restart_cycle();
         }
 }
@@ -330,7 +330,7 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist)
                 for (RouteList::iterator ri=routelist->begin(); ri!=routelist->end(); ri++) {
                         if (rp->direct_feeds (*ri)) {
                                 if (is_feedback (routelist, rp.get(), *ri)) {
-                                        continue; 
+                                        continue;
                                 }
 
                                 has_output = true;
@@ -355,7 +355,7 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist)
 
                 if (!has_output)
                         _init_finished_refcount[chain] += 1;
-        } 
+        }
 
         _pending_chain = chain;
         dump(chain);
@@ -421,10 +421,10 @@ static void get_rt()
 
         if (priority) {
                 struct sched_param rtparam;
-	
+
                 memset (&rtparam, 0, sizeof (rtparam));
                 rtparam.sched_priority = priority;
-	
+
                 pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam);
         }
 }
@@ -567,7 +567,7 @@ Graph::process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end
 }
 
 int
-Graph::routes_no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, 
+Graph::routes_no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
                        bool non_rt_pending, bool can_record, int declick)
 {
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("no-roll graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
@@ -613,7 +613,7 @@ Graph::process_one_route (Route* route)
         if (retval) {
                 _process_retval = retval;
         }
-    
+
         if (need_butler) {
                 _process_need_butler = true;
         }

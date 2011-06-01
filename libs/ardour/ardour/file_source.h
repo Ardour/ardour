@@ -28,24 +28,24 @@
 
 namespace ARDOUR {
 
-class MissingSource : public std::exception 
+class MissingSource : public std::exception
 {
   public:
-        MissingSource (const std::string& p, DataType t) throw ()
-                : path (p), type (t) {}
-        ~MissingSource() throw() {}
+	MissingSource (const std::string& p, DataType t) throw ()
+		: path (p), type (t) {}
+	~MissingSource() throw() {}
 
 	virtual const char *what() const throw() { return "source file does not exist"; }
 
-        std::string path;
-        DataType type;
+	std::string path;
+	DataType type;
 };
 
 /** A source associated with a file on disk somewhere */
 class FileSource : virtual public Source {
 public:
 	virtual ~FileSource () {}
-	
+
 	virtual const std::string& path() const { return _path; }
 
 	virtual bool safe_file_extension (const std::string& path) const = 0;
@@ -64,31 +64,31 @@ public:
 	int set_source_name (const std::string& newname, bool destructive);
 
 	static bool find (Session&, DataType type, const std::string& path,
-                          bool must_exist, bool& is_new, uint16_t& chan,
-                          std::string& found_path);
+	                  bool must_exist, bool& is_new, uint16_t& chan,
+	                  std::string& found_path);
 
 	static bool find_2X (Session&, DataType type, const std::string& path,
-                             bool must_exist, bool& is_new, uint16_t& chan,
-                             std::string& found_path);
+	                     bool must_exist, bool& is_new, uint16_t& chan,
+	                     std::string& found_path);
 
-        void inc_use_count ();
+	void inc_use_count ();
 	bool removable () const;
 
-        const std::string& origin() const { return _origin; }
+	const std::string& origin() const { return _origin; }
 
 	static PBD::Signal3<int,std::string,std::string,std::vector<std::string> > AmbiguousFileName;
 
 protected:
 	FileSource (Session& session, DataType type,
-                    const std::string& path, 
-                    const std::string& origin,
-                    Source::Flag flags = Source::Flag(0));
+	            const std::string& path,
+	            const std::string& origin,
+	            Source::Flag flags = Source::Flag(0));
 
 	FileSource (Session& session, const XMLNode& node, bool must_exist);
 
 	virtual int init (const std::string& idstr, bool must_exist);
 
-        virtual void set_path (const std::string&);
+	virtual void set_path (const std::string&);
 	virtual int move_dependents_to_trash() { return 0; }
 	void set_within_session_from_path (const std::string&);
 
@@ -97,10 +97,10 @@ protected:
 	bool        _file_is_new;
 	uint16_t    _channel;
 	bool        _within_session;
-        std::string _origin;
-        bool        _open;
-        
-        void prevent_deletion ();
+	std::string _origin;
+	bool        _open;
+
+	void prevent_deletion ();
 };
 
 } // namespace ARDOUR

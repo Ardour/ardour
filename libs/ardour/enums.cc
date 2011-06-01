@@ -255,7 +255,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (MoveAddHigher);
 	REGISTER_ENUM (AddHigher);
 	REGISTER (_LayerModel);
-        
+
         REGISTER_ENUM (InsertMergeReject);
         REGISTER_ENUM (InsertMergeRelax);
         REGISTER_ENUM (InsertMergeReplace);
@@ -557,7 +557,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (MidiModel::PatchChangeDiffCommand, Program);
 	REGISTER_CLASS_ENUM (MidiModel::PatchChangeDiffCommand, Bank);
 	REGISTER (_MidiModel_PatchChangeDiffCommand_Property);
-	
+
 	REGISTER_ENUM(Linear);
 	REGISTER_ENUM(Logarithmic);
 	REGISTER(_WaveformScale);
@@ -580,90 +580,90 @@ setup_enum_writer ()
 
 /* deserializing types from ardour/types.h */
 
-std::istream& operator>>(std::istream& o, HeaderFormat& var) 
-{ 
+std::istream& operator>>(std::istream& o, HeaderFormat& var)
+{
 	std::string s;
 	o >> s;
 	var = (HeaderFormat) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const HeaderFormat& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const HeaderFormat& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
 
-std::istream& operator>>(std::istream& o, SampleFormat& var) 
-{ 
+std::istream& operator>>(std::istream& o, SampleFormat& var)
+{
 	std::string s;
 	o >> s;
 	var = (SampleFormat) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const SampleFormat& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const SampleFormat& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
-std::istream& operator>>(std::istream& o, AutoConnectOption& var) 
-{ 
+std::istream& operator>>(std::istream& o, AutoConnectOption& var)
+{
 	std::string s;
 	o >> s;
 	var = (AutoConnectOption) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const AutoConnectOption& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const AutoConnectOption& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
 
-std::istream& operator>>(std::istream& o, MonitorModel& var) 
-{ 
+std::istream& operator>>(std::istream& o, MonitorModel& var)
+{
 	std::string s;
 	o >> s;
 	var = (MonitorModel) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const MonitorModel& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const MonitorModel& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
 
-std::istream& operator>>(std::istream& o, PFLPosition& var) 
-{ 
+std::istream& operator>>(std::istream& o, PFLPosition& var)
+{
 	std::string s;
 	o >> s;
 	var = (PFLPosition) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const PFLPosition& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const PFLPosition& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
 
-std::istream& operator>>(std::istream& o, AFLPosition& var) 
-{ 
+std::istream& operator>>(std::istream& o, AFLPosition& var)
+{
 	std::string s;
 	o >> s;
 	var = (AFLPosition) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const AFLPosition& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const AFLPosition& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
 
-std::istream& operator>>(std::istream& o, RemoteModel& var) 
+std::istream& operator>>(std::istream& o, RemoteModel& var)
 {
 	std::string s;
 	o >> s;
@@ -671,179 +671,179 @@ std::istream& operator>>(std::istream& o, RemoteModel& var)
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const RemoteModel& var) 
+std::ostream& operator<<(std::ostream& o, const RemoteModel& var)
 {
 	std::string s = enum_2_string (var);
 	return o << s;
 }
-std::istream& operator>>(std::istream& o, EditMode& var) 
-{ 
+std::istream& operator>>(std::istream& o, EditMode& var)
+{
 	std::string s;
 	o >> s;
 	var = (EditMode) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const EditMode& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const EditMode& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
-std::istream& operator>>(std::istream& o, ListenPosition& var) 
-{ 
+std::istream& operator>>(std::istream& o, ListenPosition& var)
+{
 	std::string s;
 	o >> s;
 	var = (ListenPosition) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const ListenPosition& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const ListenPosition& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
-std::istream& operator>>(std::istream& o, LayerModel& var) 
-{ 
+std::istream& operator>>(std::istream& o, LayerModel& var)
+{
 	std::string s;
 	o >> s;
 	var = (LayerModel) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const LayerModel& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const LayerModel& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
 
-std::istream& operator>>(std::istream& o, InsertMergePolicy& var) 
-{ 
+std::istream& operator>>(std::istream& o, InsertMergePolicy& var)
+{
 	std::string s;
 	o >> s;
 	var = (InsertMergePolicy) string_2_enum (s, var);
 	return o;
 }
-std::ostream& operator<<(std::ostream& o, const InsertMergePolicy& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const InsertMergePolicy& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
 
-std::istream& operator>>(std::istream& o, CrossfadeModel& var) 
-{ 
+std::istream& operator>>(std::istream& o, CrossfadeModel& var)
+{
 	std::string s;
 	o >> s;
 	var = (CrossfadeModel) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const CrossfadeModel& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const CrossfadeModel& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
-std::istream& operator>>(std::istream& o, SyncSource& var) 
-{ 
+std::istream& operator>>(std::istream& o, SyncSource& var)
+{
 	std::string s;
 	o >> s;
 	var = (SyncSource) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const SyncSource& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const SyncSource& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
-std::istream& operator>>(std::istream& o, ShuttleBehaviour& var) 
-{ 
+std::istream& operator>>(std::istream& o, ShuttleBehaviour& var)
+{
 	std::string s;
 	o >> s;
 	var = (ShuttleBehaviour) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const ShuttleBehaviour& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const ShuttleBehaviour& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
-std::istream& operator>>(std::istream& o, ShuttleUnits& var) 
-{ 
+std::istream& operator>>(std::istream& o, ShuttleUnits& var)
+{
 	std::string s;
 	o >> s;
 	var = (ShuttleUnits) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const ShuttleUnits& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const ShuttleUnits& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
-std::istream& operator>>(std::istream& o, TimecodeFormat& var) 
-{ 
+std::istream& operator>>(std::istream& o, TimecodeFormat& var)
+{
 	std::string s;
 	o >> s;
 	var = (TimecodeFormat) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const TimecodeFormat& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const TimecodeFormat& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
-std::istream& operator>>(std::istream& o, DenormalModel& var) 
-{ 
+std::istream& operator>>(std::istream& o, DenormalModel& var)
+{
 	std::string s;
 	o >> s;
 	var = (DenormalModel) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const DenormalModel& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const DenormalModel& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
-std::istream& operator>>(std::istream& o, WaveformScale& var) 
-{ 
+std::istream& operator>>(std::istream& o, WaveformScale& var)
+{
 	std::string s;
 	o >> s;
 	var = (WaveformScale) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const WaveformScale& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const WaveformScale& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
-std::istream& operator>>(std::istream& o, WaveformShape& var) 
-{ 
+std::istream& operator>>(std::istream& o, WaveformShape& var)
+{
 	std::string s;
 	o >> s;
 	var = (WaveformShape) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const WaveformShape& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const WaveformShape& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }
 
-std::istream& operator>>(std::istream& o, PositionLockStyle& var) 
-{ 
+std::istream& operator>>(std::istream& o, PositionLockStyle& var)
+{
 	std::string s;
 	o >> s;
 	var = (PositionLockStyle) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const PositionLockStyle& var) 
-{ 
+std::ostream& operator<<(std::ostream& o, const PositionLockStyle& var)
+{
 	std::string s = enum_2_string (var);
 	return o << s;
 }

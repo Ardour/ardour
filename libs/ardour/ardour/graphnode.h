@@ -54,7 +54,7 @@ class GraphNode
 
 	node_set_t  _activation_set[2];
 
-        boost::shared_ptr<Graph> _graph;
+	boost::shared_ptr<Graph> _graph;
 
 	gint _refcount;
 	gint _init_refcount[2];

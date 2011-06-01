@@ -78,7 +78,7 @@ legalize_for_path (const string& str)
 	return legal;
 }
 
-string 
+string
 bump_name_once (const std::string& name, char delimiter)
 {
 	string::size_type delim;
@@ -134,7 +134,7 @@ could_be_a_valid_path (const string& path)
 
         posix_dirs.erase (--posix_dirs.end());
         dos_dirs.erase (--dos_dirs.end());
-        
+
         if (G_DIR_SEPARATOR == '/') {
                 for (vector<string>::iterator x = posix_dirs.begin(); x != posix_dirs.end(); ++x) {
                         testpath = Glib::build_filename (testpath, *x);
@@ -570,7 +570,7 @@ native_header_format_extension (HeaderFormat hf, const DataType& type)
         if (type == DataType::MIDI) {
                 return ".mid";
         }
-        
+
         switch (hf) {
         case BWF:
                 return ".wav";
@@ -606,28 +606,28 @@ matching_unsuffixed_filename_exists_in (const string& dir, const string& path)
                 error << string_compose (_("cannot open directory %1 (%2)"), dir, strerror (errno)) << endl;
                 return false;
         }
-        
+
         while ((dentry = ::readdir (dead)) != 0) {
-                
+
                 /* avoid '.' and '..' */
-                
+
                 if ((dentry->d_name[0] == '.' && dentry->d_name[1] == '\0') ||
                     (dentry->d_name[2] == '\0' && dentry->d_name[0] == '.' && dentry->d_name[1] == '.')) {
                         continue;
                 }
-        
+
                 string fullpath = Glib::build_filename (dir, dentry->d_name);
 
                 if (::stat (fullpath.c_str(), &statbuf)) {
                         continue;
                 }
-                
+
                 if (!S_ISREG (statbuf.st_mode)) {
                         continue;
                 }
 
                 string bws2 = basename_nosuffix (dentry->d_name);
-                
+
                 if (bws2 == bws) {
                         ret = true;
                         break;
@@ -657,15 +657,15 @@ how_many_dsp_threads ()
 
         } else if (pu == 0) {
 
-                /* use all available CPUs 
+                /* use all available CPUs
                  */
-                
+
                 num_threads = num_cpu;
 
         } else {
                 /* use "pu" cores, if available
                  */
-                
+
                 num_threads = min (num_cpu, pu);
         }
 

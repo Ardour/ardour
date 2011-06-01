@@ -39,7 +39,7 @@ class Track : public Route, public PublicDiskstream
 	Track (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
 	virtual ~Track ();
 
-        int init ();
+	int init ();
 
 	bool set_name (const std::string& str);
 
@@ -49,23 +49,23 @@ class Track : public Route, public PublicDiskstream
 	PBD::Signal0<void> TrackModeChanged;
 
 	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-			bool state_changing, bool can_record, bool rec_monitors_input);
+	                     bool state_changing, bool can_record, bool rec_monitors_input);
 
 	int silent_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-                         bool can_record, bool rec_monitors_input, bool& need_butler);
+	                 bool can_record, bool rec_monitors_input, bool& need_butler);
 
 	virtual int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-                          int declick, bool can_record, bool rec_monitors_input, bool& need_butler) = 0;
+	                  int declick, bool can_record, bool rec_monitors_input, bool& need_butler) = 0;
 
-        bool needs_butler() const { return _needs_butler; }
+	bool needs_butler() const { return _needs_butler; }
 	void toggle_monitor_input ();
 
 	virtual DataType data_type () const = 0;
 
 	bool can_record();
 
-        virtual void use_new_diskstream () = 0;
-        virtual void set_diskstream (boost::shared_ptr<Diskstream>);
+	virtual void use_new_diskstream () = 0;
+	virtual void set_diskstream (boost::shared_ptr<Diskstream>);
 
 	void set_latency_compensation (framecnt_t);
 
@@ -109,7 +109,7 @@ class Track : public Route, public PublicDiskstream
 	bool destructive () const;
 	std::list<boost::shared_ptr<Source> > & last_capture_sources ();
 	void set_capture_offset ();
-        std::list<boost::shared_ptr<Source> > steal_write_sources();
+	std::list<boost::shared_ptr<Source> > steal_write_sources();
 	void reset_write_sources (bool, bool force = false);
 	float playback_buffer_load () const;
 	float capture_buffer_load () const;
@@ -133,7 +133,7 @@ class Track : public Route, public PublicDiskstream
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
 	bool pending_overwrite () const;
 	double speed () const;
-        void prepare_to_stop (framepos_t);
+	void prepare_to_stop (framepos_t);
 	void set_slaved (bool);
 	ChanCount n_channels ();
 	framepos_t get_capture_start_frame (uint32_t n = 0) const;
@@ -147,8 +147,8 @@ class Track : public Route, public PublicDiskstream
 	void set_align_choice (AlignChoice, bool force=false);
 	int use_copy_playlist ();
 	int use_new_playlist ();
-        void adjust_playback_buffering ();
-        void adjust_capture_buffering ();
+	void adjust_playback_buffering ();
+	void adjust_capture_buffering ();
 
 	PBD::Signal0<void> DiskstreamChanged;
 	PBD::Signal0<void> FreezeChange;
@@ -163,7 +163,7 @@ class Track : public Route, public PublicDiskstream
 	boost::shared_ptr<Diskstream> _diskstream;
 	MeterPoint  _saved_meter_point;
 	TrackMode   _mode;
-        bool        _needs_butler;
+	bool        _needs_butler;
 
 	//private: (FIXME)
 	struct FreezeRecordProcessorInfo {
@@ -203,7 +203,7 @@ class Track : public Route, public PublicDiskstream
 	XMLNode*              pending_state;
 	bool                  _destructive;
 
-        void maybe_declick (BufferSet&, framecnt_t, int);
+	void maybe_declick (BufferSet&, framecnt_t, int);
 
 	virtual bool send_silence () const;
 

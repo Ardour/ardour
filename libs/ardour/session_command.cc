@@ -139,7 +139,7 @@ Session::memento_command_factory(XMLNode *n)
 			    before, after
 			    );
 	    }
-	    
+
 	    cerr << "Alist not found\n";
 
     } else if (obj_T == "ARDOUR::Crossfade") {
@@ -182,10 +182,10 @@ Session::stateful_diff_command_factory (XMLNode* n)
         }
 
 	/* we failed */
-	
+
 	error << string_compose (
 		_("could not reconstitute StatefulDiffCommand from XMLNode. object type = %1 id = %2"), obj_T, id.to_s())
 	      << endmsg;
-	
+
 	return 0;
 }

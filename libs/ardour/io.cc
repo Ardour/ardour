@@ -96,7 +96,7 @@ IO::~IO ()
 	}
 }
 
-void 
+void
 IO::increment_port_buffer_offset (pframes_t offset)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
@@ -178,23 +178,23 @@ IO::disconnect (Port* our_port, string other_port, void* src)
 
         {
                 Glib::Mutex::Lock lm (io_lock);
-                
+
                 /* check that our_port is really one of ours */
-                
+
                 if ( ! _ports.contains(our_port)) {
                         return -1;
                 }
-                
+
                 /* disconnect it from the source */
-                
+
                 if (our_port->disconnect (other_port)) {
                         error << string_compose(_("IO: cannot disconnect port %1 from %2"), our_port->name(), other_port) << endmsg;
                         return -1;
                 }
-                
+
                 check_bundles_connected ();
         }
-        
+
         changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
 
 	_session.set_dirty ();
@@ -211,15 +211,15 @@ IO::connect (Port* our_port, string other_port, void* src)
 
 	{
 		Glib::Mutex::Lock lm (io_lock);
-		
+
 		/* check that our_port is really one of ours */
-		
+
 		if ( ! _ports.contains(our_port) ) {
 			return -1;
 		}
-		
+
 		/* connect it to the source */
-		
+
 		if (our_port->connect (other_port)) {
 			return -1;
 		}
@@ -327,7 +327,7 @@ IO::add_port (string destination, void* src, DataType type)
 		}
 
 		PortCountChanged (n_ports()); /* EMIT SIGNAL */
-		
+
 		// pan_changed (src); /* EMIT SIGNAL */
 		change.type = IOChange::ConfigurationChanged;
 		change.after = _ports.count ();
@@ -351,14 +351,14 @@ IO::disconnect (void* src)
 {
 	{
 		Glib::Mutex::Lock lm (io_lock);
-		
+
 		for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 			i->disconnect_all ();
 		}
-		
+
 		check_bundles_connected ();
 	}
-	
+
 	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
 
 	return 0;
@@ -369,7 +369,7 @@ bool
 IO::ensure_ports_locked (ChanCount count, bool clear, void* /*src*/)
 {
 	assert (!AudioEngine::instance()->process_lock().trylock());
-	
+
 	Port* port = 0;
 	bool  changed    = false;
 
@@ -439,7 +439,7 @@ int
 IO::ensure_ports (ChanCount count, bool clear, void* src)
 {
 	assert (!AudioEngine::instance()->process_lock().trylock());
-	
+
 	bool changed = false;
 
 	if (count == n_ports() && !clear) {
@@ -449,7 +449,7 @@ IO::ensure_ports (ChanCount count, bool clear, void* src)
 	IOChange change;
 
 	change.before = _ports.count ();
-	
+
 	{
 		Glib::Mutex::Lock im (io_lock);
 		changed = ensure_ports_locked (count, clear, src);
@@ -472,7 +472,7 @@ int
 IO::ensure_io (ChanCount count, bool clear, void* src)
 {
 	assert (!AudioEngine::instance()->process_lock().trylock());
-	
+
 	return ensure_ports (count, clear, src);
 }
 
@@ -852,7 +852,7 @@ IO::create_ports (const XMLNode& node, int version)
 
 	{
 		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-		
+
 		if (ensure_ports (n, true, this)) {
 			error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
 			return -1;
@@ -909,12 +909,12 @@ IO::make_connections (const XMLNode& node, int version, bool in)
 					if ((prop = cnode->property (X_("other"))) == 0) {
 						continue;
 					}
-                                        
+
 					if (prop) {
                                                 connect (p, prop->value(), this);
 					}
 				}
-			} 
+			}
 		}
 	}
 
@@ -1030,7 +1030,7 @@ IO::set_ports (const string& str)
 
 	{
 		Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-		
+
 		// FIXME: audio-only
 		if (ensure_ports (ChanCount(DataType::AUDIO, nports), true, this)) {
 			return -1;
@@ -1129,7 +1129,7 @@ IO::set_name (const string& requested_name)
 
 	/* replace all colons in the name. i wish we didn't have to do this */
 
-	replace_all (name, ":", "-"); 
+	replace_all (name, ":", "-");
 
 	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		string current_name = i->name();
@@ -1157,14 +1157,14 @@ IO::latency () const
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		if ((latency = i->private_latency_range (_direction == Output).max) > max_latency) {
                         DEBUG_TRACE (DEBUG::Latency, string_compose ("port %1 has %2 latency of %3 - use\n",
-                                                                     name(), 
+                                                                     name(),
                                                                      ((_direction == Output) ? "PLAYBACK" : "CAPTURE"),
                                                                      latency));
 			max_latency = latency;
 		}
 	}
 
-        DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: max %4 latency from %2 ports = %3\n", 
+        DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: max %4 latency from %2 ports = %3\n",
                                                      name(), _ports.num_ports(), max_latency,
                                                      ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
 	return max_latency;
@@ -1485,13 +1485,13 @@ bool
 IO::connected () const
 {
         /* do we have any connections at all? */
-        
+
         for (PortSet::const_iterator p = _ports.begin(); p != _ports.end(); ++p) {
                 if (p->connected()) {
                         return true;
                 }
         }
-        
+
         return false;
 }
 

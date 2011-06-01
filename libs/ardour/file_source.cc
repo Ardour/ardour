@@ -87,7 +87,7 @@ FileSource::prevent_deletion ()
 {
         /* if this file already exists, it cannot be removed, ever
          */
-        
+
         if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS)) {
                 if (!(_flags & Destructive)) {
                         mark_immutable ();
@@ -101,9 +101,9 @@ bool
 FileSource::removable () const
 {
         bool r = ((_flags & Removable)
-                  && ((_flags & RemoveAtDestroy) || 
+                  && ((_flags & RemoveAtDestroy) ||
                       ((_flags & RemovableIfEmpty) && empty() == 0)));
-        
+
         return r;
 }
 
@@ -241,7 +241,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
         string keeppath;
 
 	isnew = false;
-        
+
         if (!Glib::path_is_absolute (path)) {
                 vector<string> dirs;
                 vector<string> hits;
@@ -256,33 +256,33 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
                 }
 
                 split (search_path, dirs, ':');
-                
+
                 cnt = 0;
                 hits.clear ();
-                
+
                 for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
-                        
+
                         fullpath = Glib::build_filename (*i, path);
-                        
+
                         if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
                                 keeppath = fullpath;
                                 hits.push_back (fullpath);
                                 ++cnt;
                         }
                 }
-                
+
                 if (cnt > 1) {
-                        
+
                         int which = FileSource::AmbiguousFileName (path, search_path, hits).get_value_or (-1);
-                        
+
                         if (which < 0) {
                                 goto out;
                         } else {
                                 keeppath = hits[which];
                         }
-                        
+
                 } else if (cnt == 0) {
-                        
+
                         if (must_exist) {
                                 error << string_compose(
                                         _("Filesource: cannot find required file (%1): while searching %2"),
@@ -295,9 +295,9 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
         } else {
                 keeppath = path;
         }
-        
+
         /* Current find() is unable to parse relative path names to yet non-existant
-           sources. QuickFix(tm) 
+           sources. QuickFix(tm)
         */
         if (keeppath == "") {
                 if (must_exist) {
@@ -306,11 +306,11 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
                         keeppath = path;
                 }
         }
-        
+
         found_path = keeppath;
-        
+
         ret = true;
-        
+
   out:
 	return ret;
 }
@@ -353,7 +353,7 @@ FileSource::find_2X (Session& s, DataType type, const string& path, bool must_ex
 		cnt = 0;
 
 		for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
-                        
+
                         fullpath = Glib::build_filename (*i, pathstr);
 
 			/* i (paul) made a nasty design error by using ':' as a special character in
@@ -504,7 +504,7 @@ FileSource::set_source_name (const string& newname, bool destructive)
 		error << string_compose (_("Programming error! %1 tried to rename a file over another file! It's safe to continue working, but please report this to the developers."), PROGRAM_NAME) << endmsg;
 		return -1;
 	}
-        
+
         if (::rename (oldpath.c_str(), newpath.c_str()) != 0) {
                 error << string_compose (_("cannot rename file %1 to %2 (%3)"), oldpath, newpath, strerror(errno)) << endmsg;
                 return -1;
@@ -543,9 +543,9 @@ FileSource::set_path (const std::string& newpath)
         _path = newpath;
 }
 
-void 
+void
 FileSource::inc_use_count ()
 {
         Source::inc_use_count ();
 }
- 
+

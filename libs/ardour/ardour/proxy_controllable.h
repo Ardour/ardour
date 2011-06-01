@@ -39,15 +39,15 @@ public:
 		, _setter (setter)
 		, _getter (getter)
 	{}
-	
+
 	void set_value (double v) { _setter (v); }
 	double get_value () const { return _getter (); }
-	
+
 private:
 	boost::function1<void,double> _setter;
 	boost::function0<double> _getter;
 };
-	
+
 } // namespace
 
 #endif /* __libardour_proxy_controllable_h__ */

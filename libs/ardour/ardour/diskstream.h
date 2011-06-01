@@ -48,7 +48,7 @@ class Processor;
 class Source;
 class Session;
 class Track;
-class Location;	
+class Location;
 
 class Diskstream : public SessionObject, public PublicDiskstream
 {
@@ -214,8 +214,8 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	virtual void transport_looped (framepos_t transport_frame) = 0;
 
 	struct CaptureInfo {
-            framepos_t start;
-            framecnt_t frames;
+		framepos_t start;
+		framecnt_t frames;
 	};
 
 	virtual int use_new_write_source (uint32_t n=0) = 0;
@@ -235,7 +235,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	virtual void set_align_style_from_io() {}
 	virtual void setup_destructive_playlist () {}
 	virtual void use_destructive_playlist () {}
-        virtual void prepare_to_stop (framepos_t pos);
+	virtual void prepare_to_stop (framepos_t pos);
 
 	void calculate_record_range(OverlapType ot, framepos_t transport_frame, framecnt_t nframes,
 			framecnt_t& rec_nframes, framecnt_t& rec_offset);

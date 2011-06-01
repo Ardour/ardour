@@ -36,7 +36,7 @@ using namespace ARDOUR;
 SessionPlaylists::~SessionPlaylists ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, "delete playlists\n");
-	
+
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ) {
 		SessionPlaylists::List::iterator tmp;
 
@@ -112,7 +112,7 @@ SessionPlaylists::remove (boost::shared_ptr<Playlist> playlist)
 		unused_playlists.erase (i);
 	}
 }
-	
+
 
 void
 SessionPlaylists::track (bool inuse, boost::weak_ptr<Playlist> wpl)
@@ -170,7 +170,7 @@ SessionPlaylists::by_name (string name)
 			return* i;
 		}
 	}
-	
+
 	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		if ((*i)->name() == name) {
 			return* i;
@@ -190,7 +190,7 @@ SessionPlaylists::by_id (const PBD::ID& id)
 			return* i;
 		}
 	}
-	
+
 	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		if ((*i)->id() == id) {
 			return* i;
@@ -210,7 +210,7 @@ SessionPlaylists::unassigned (std::list<boost::shared_ptr<Playlist> > & list)
 			list.push_back (*i);
 		}
 	}
-	
+
 	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		if (!(*i)->get_orig_diskstream_id().to_s().compare ("0")) {
 			list.push_back (*i);
@@ -226,7 +226,7 @@ SessionPlaylists::get (vector<boost::shared_ptr<Playlist> >& s)
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		s.push_back (*i);
 	}
-	
+
 	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		s.push_back (*i);
 	}
@@ -240,7 +240,7 @@ SessionPlaylists::destroy_region (boost::shared_ptr<Region> r)
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
                 (*i)->destroy_region (r);
 	}
-	
+
 	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
                 (*i)->destroy_region (r);
 	}
@@ -416,7 +416,7 @@ SessionPlaylists::find_crossfade (const PBD::ID& id)
 	Glib::Mutex::Lock lm (lock);
 
 	boost::shared_ptr<Crossfade> c;
-	
+
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		c = (*i)->find_crossfade (id);
 		if (c) {
@@ -439,7 +439,7 @@ SessionPlaylists::region_use_count (boost::shared_ptr<Region> region) const
 {
 	Glib::Mutex::Lock lm (lock);
         uint32_t cnt = 0;
-	
+
 	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
                 cnt += (*i)->region_use_count (region);
 	}

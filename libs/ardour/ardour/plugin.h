@@ -116,7 +116,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual uint32_t nth_parameter (uint32_t which, bool& ok) const = 0;
 	virtual void activate () = 0;
 	virtual void deactivate () = 0;
-        virtual void flush () { deactivate(); activate(); }
+	virtual void flush () { deactivate(); activate(); }
 
 	virtual int set_block_size (pframes_t nframes) = 0;
 
@@ -150,7 +150,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 		bool operator!= (PresetRecord const & a) const {
 			return uri != a.uri || label != a.label;
 		}
-		
+
 		std::string uri;
 		std::string label;
 		bool user;
@@ -160,7 +160,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	void remove_preset (std::string);
 
 	virtual bool load_preset (PresetRecord);
-	
+
 	const PresetRecord * preset_by_label (const std::string &);
 	const PresetRecord * preset_by_uri (const std::string &);
 
@@ -172,15 +172,15 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	PresetRecord last_preset () const {
 		return _last_preset;
 	}
-	
+
 	bool parameter_changed_since_last_preset () const {
 		return _parameter_changed_since_last_preset;
 	}
-	
+
 	virtual int first_user_preset_index () const {
 		return 0;
 	}
-	
+
 	/** Emitted when a preset is added or removed, respectively */
 	PBD::Signal0<void> PresetAdded;
 	PBD::Signal0<void> PresetRemoved;
@@ -225,7 +225,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	cycles_t cycles() const { return _cycles; }
 
 protected:
-	
+
 	friend class PluginInsert;
 	friend struct PluginInsert::PluginControl;
 

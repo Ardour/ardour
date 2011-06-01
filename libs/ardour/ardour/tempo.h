@@ -145,17 +145,17 @@ typedef std::list<MetricSection*> Metrics;
 class TempoMetric {
   public:
 	TempoMetric (const Meter& m, const Tempo& t) : _meter (&m), _tempo (&t), _frame (0) {}
-	
+
 	void set_tempo (const Tempo& t)    { _tempo = &t; }
 	void set_meter (const Meter& m)    { _meter = &m; }
 	void set_frame (framepos_t f)      { _frame = f; }
 	void set_start (const Timecode::BBT_Time& t) { _start = t; }
-	
+
 	const Meter&    meter() const { return *_meter; }
 	const Tempo&    tempo() const { return *_tempo; }
 	framepos_t      frame() const { return _frame; }
 	const Timecode::BBT_Time& start() const { return _start; }
-	
+
   private:
 	const Meter*       _meter;
 	const Tempo*       _tempo;
@@ -246,8 +246,8 @@ class TempoMap : public PBD::StatefulDestructible
 	Timecode::BBT_Time bbt_add (const Timecode::BBT_Time& a, const Timecode::BBT_Time& b) const;
 	Timecode::BBT_Time bbt_subtract (const Timecode::BBT_Time&, const Timecode::BBT_Time&) const;
 
-        framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
-        double framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
+	framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
+	double framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
 
 	void change_existing_tempo_at (framepos_t, double bpm, double note_type);
 	void change_initial_tempo (double bpm, double note_type);

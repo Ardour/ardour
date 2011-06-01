@@ -53,7 +53,7 @@ bool                          Delivery::panners_legal = false;
 
 /* deliver to an existing IO object */
 
-Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pannable> pannable, 
+Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pannable> pannable,
                     boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
 	: IOProcessor(s, boost::shared_ptr<IO>(), (role_requires_output_ports (r) ? io : boost::shared_ptr<IO>()), name)
 	, _role (r)
@@ -99,7 +99,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 
 Delivery::~Delivery()
 {
-	DEBUG_TRACE (DEBUG::Destruction, string_compose ("delivery %1 destructor\n", _name));        
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("delivery %1 destructor\n", _name));
 	delete _output_buffers;
 }
 
@@ -214,7 +214,7 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 		}
 
 	}
-	
+
 	if (!Processor::configure_io (in, out)) {
 		return false;
 	}
@@ -298,7 +298,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 #endif
 
 	if (panner && !panner->bypassed()) {
-                
+
 		// Use the panner to distribute audio to output port buffers
 
 		_panshell->run (bufs, output_buffers(), start_frame, end_frame, nframes);
@@ -458,7 +458,7 @@ Delivery::flush_buffers (framecnt_t nframes, framepos_t time)
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
 	PortSet& ports (_output->ports());
-        
+
 	for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
 		(*i).flush_buffers (nframes, time);
 	}
@@ -472,7 +472,7 @@ Delivery::transport_stopped (framepos_t now)
 
         if (_output) {
                 PortSet& ports (_output->ports());
-                
+
                 for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
                         (*i).transport_stopped ();
                 }
@@ -484,7 +484,7 @@ Delivery::realtime_locate ()
 {
         if (_output) {
                 PortSet& ports (_output->ports());
-                
+
                 for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
                         (*i).realtime_locate ();
                 }
@@ -509,7 +509,7 @@ Delivery::target_gain ()
 	}
 
         MuteMaster::MutePoint mp = MuteMaster::Main; // stupid gcc uninit warning
-        
+
         switch (_role) {
         case Main:
                 mp = MuteMaster::Main;
@@ -529,17 +529,17 @@ Delivery::target_gain ()
         }
 
         gain_t desired_gain = _mute_master->mute_gain_at (mp);
-        
+
         if (_role == Listen && _session.monitor_out() && !_session.listening()) {
-                
+
                 /* nobody is soloed, and this delivery is a listen-send to the
                    control/monitor/listen bus, we should be silent since
                    it gets its signal from the master out.
                 */
-                
+
                 desired_gain = 0.0;
-                
-        } 
+
+        }
 
 	return desired_gain;
 }

@@ -53,8 +53,8 @@ void MidiClockTicker::set_session (Session* s)
 void
 MidiClockTicker::session_going_away ()
 {
-	SessionHandlePtr::session_going_away(); 
-	_midi_port = 0; 
+	SessionHandlePtr::session_going_away();
+	_midi_port = 0;
 }
 
 void MidiClockTicker::update_midi_clock_port()
@@ -75,7 +75,7 @@ void MidiClockTicker::transport_state_changed()
 	DEBUG_TRACE (PBD::DEBUG::MidiClock,
 		     string_compose ("Transport state change, speed: %1 position: %2 play loop: %3\n", speed, position, _session->get_play_loop())
 		);
-	
+
 	if (speed == 1.0f) {
 		_last_tick = position;
 
@@ -185,7 +185,7 @@ void MidiClockTicker::send_start_event (pframes_t offset)
 	if (!_midi_port) {
 		return;
 	}
-	
+
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_START };
 	_midi_port->write (_midi_clock_tick, 1, offset);
 }
@@ -195,7 +195,7 @@ void MidiClockTicker::send_continue_event (pframes_t offset)
 	if (!_midi_port) {
 		return;
 	}
-	
+
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CONTINUE };
 	_midi_port->write (_midi_clock_tick, 1, offset);
 }
@@ -205,7 +205,7 @@ void MidiClockTicker::send_stop_event (pframes_t offset)
 	if (!_midi_port) {
 		return;
 	}
-	
+
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_STOP };
 	_midi_port->write (_midi_clock_tick, 1, offset);
 }

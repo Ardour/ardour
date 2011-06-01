@@ -82,5 +82,5 @@ CapturingProcessor::state (bool full)
 	node.add_property (X_("type"), X_("capture"));
 	return node;
 }
-	
+
 } // namespace ARDOUR

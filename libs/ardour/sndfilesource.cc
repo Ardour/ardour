@@ -143,7 +143,7 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 	_info.channels = 1;
 	_info.samplerate = rate;
 	_info.format = fmt;
-        
+
         /* do not open the file here - do that in write_unlocked() as needed
          */
 }
@@ -183,7 +183,7 @@ SndFileSource::open ()
 	_descriptor = new SndFileDescriptor (_path, writable(), &_info);
 	_descriptor->Closed.connect_same_thread (file_manager_connection, boost::bind (&SndFileSource::file_closed, this));
 	SNDFILE* sf = _descriptor->allocate ();
-	
+
 	if (sf == 0) {
 		char errbuf[256];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
@@ -227,16 +227,16 @@ SndFileSource::open ()
 
 	if (writable()) {
 		sf_command (sf, SFC_SET_UPDATE_HEADER_AUTO, 0, SF_FALSE);
-                
+
                 if (_flags & Broadcast) {
-                        
+
                         if (!_broadcast_info) {
                                 _broadcast_info = new BroadcastInfo;
                         }
-                        
+
                         _broadcast_info->set_from_session (_session, header_position_offset);
                         _broadcast_info->set_description (string_compose ("BWF %1", _name));
-                        
+
                         if (!_broadcast_info->write_to_file (sf)) {
                                 error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
                                                          _path, _broadcast_info->get_error())
@@ -526,7 +526,7 @@ SndFileSource::flush_header ()
 		error << string_compose (_("could not allocate file %1 to write header"), _path) << endmsg;
 		return -1;
 	}
-	
+
 	int const r = sf_command (sf, SFC_UPDATE_HEADER_NOW, 0, 0) != SF_TRUE;
 	_descriptor->release ();
 
@@ -582,7 +582,7 @@ SndFileSource::set_header_timeline_position ()
 	_broadcast_info->set_time_reference (_timeline_position);
 
 	SNDFILE* sf = _descriptor->allocate ();
-	
+
 	if (sf == 0 || !_broadcast_info->write_to_file (sf)) {
 		error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
 		                           _path, _broadcast_info->get_error())
@@ -599,7 +599,7 @@ framecnt_t
 SndFileSource::write_float (Sample* data, framepos_t frame_pos, framecnt_t cnt)
 {
 	SNDFILE* sf = _descriptor->allocate ();
-	
+
 	if (sf == 0 || sf_seek (sf, frame_pos, SEEK_SET|SFM_WRITE) < 0) {
 		char errbuf[256];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
@@ -770,7 +770,7 @@ SndFileSource::crossfade (Sample* data, framecnt_t cnt, int fade_in)
 		for (framecnt_t n = 0; n < xfade; ++n) {
 			xfade_buf[n] = (xfade_buf[n] * out[n]) + (fade_data[n] * in[n]);
 		}
-		
+
 	} else if (xfade) {
 
 		/* long xfade length, has to be computed across several calls */
@@ -866,10 +866,10 @@ SndFileSource::get_soundfile_info (const string& path, SoundFileInfo& info, stri
 	info.samplerate  = sf_info.samplerate;
 	info.channels    = sf_info.channels;
 	info.length      = sf_info.frames;
-        
+
         string major = sndfile_major_format(sf_info.format);
         string minor = sndfile_minor_format(sf_info.format);
-        
+
         if (major.length() + minor.length() < 16) { /* arbitrary */
                 info.format_name = string_compose("%1/%2", major, minor);
         } else {
@@ -906,7 +906,7 @@ SndFileSource::file_closed ()
 	   to make sure its time is as new as the audio
 	   file.
 	*/
-	
+
 	touch_peakfile ();
 }
 

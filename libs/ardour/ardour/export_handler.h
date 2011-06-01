@@ -90,7 +90,7 @@ class ExportHandler : public ExportElementFactory
 		FilenamePtr      filename;
 		boost::shared_ptr<AudioGrapher::BroadcastInfo> broadcast_info;
 	};
-	
+
   private:
 
 	/* Stuff for export configs
@@ -120,7 +120,7 @@ class ExportHandler : public ExportElementFactory
   private:
 
 	int process (framecnt_t frames);
-	
+
 	Session &          session;
 	GraphBuilderPtr    graph_builder;
 	StatusPtr          export_status;
@@ -139,7 +139,7 @@ class ExportHandler : public ExportElementFactory
 	typedef std::pair<ConfigMap::iterator, ConfigMap::iterator> TimespanBounds;
 	TimespanPtr           current_timespan;
 	TimespanBounds        timespan_bounds;
-	
+
 	PBD::ScopedConnection process_connection;
 	framepos_t             process_position;
 

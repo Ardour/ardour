@@ -52,7 +52,7 @@ public:
 	bool can_support_io_configuration (const ChanCount &, ChanCount &) const {
 		return false;
 	}
-	
+
 	XMLNode & state (bool);
 
 private:

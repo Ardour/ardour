@@ -40,7 +40,7 @@ Speaker::Speaker (Speaker const & o)
 	, _coords (o._coords)
 	, _angles (o._angles)
 {
-	
+
 }
 
 Speaker &
@@ -92,7 +92,7 @@ void
 Speakers::dump_speakers (ostream& o)
 {
 	for (vector<Speaker>::iterator i = _speakers.begin(); i != _speakers.end(); ++i) {
-		o << "Speaker " << (*i).id << " @ " 
+		o << "Speaker " << (*i).id << " @ "
 		  << (*i).coords().x << ", " << (*i).coords().y << ", " << (*i).coords().z
 		  << " azimuth " << (*i).angles().azi
 		  << " elevation " << (*i).angles().ele
@@ -108,7 +108,7 @@ Speakers::clear_speakers ()
 	update ();
 }
 
-int 
+int
 Speakers::add_speaker (const AngularVector& position)
 {
 	int id = _speakers.size();
@@ -119,7 +119,7 @@ Speakers::add_speaker (const AngularVector& position)
 	Changed ();
 
 	return id;
-}        
+}
 
 void
 Speakers::remove_speaker (int id)
@@ -176,7 +176,7 @@ Speakers::setup_default_speakers (uint32_t n)
                 add_speaker (AngularVector (215.0, 0.0));
 		break;
 
-	default: 
+	default:
 	{
 		double degree_step = 360.0 / n;
 		double deg;
@@ -197,7 +197,7 @@ Speakers::setup_default_speakers (uint32_t n)
 	}
         }
 }
-        
+
 XMLNode&
 Speakers::get_state ()
 {
@@ -217,7 +217,7 @@ Speakers::get_state ()
 
                 node->add_child_nocopy (*speaker);
         }
-        
+
         return *node;
 }
 
@@ -245,7 +245,7 @@ Speakers::set_state (const XMLNode& node, int /*version*/)
                                 continue;
                         }
                         e = atof (prop->value());
-                                            
+
                         if ((prop = (*i)->property (X_("distance"))) == 0) {
                                 warning << _("Speaker information is missing distance - speaker ignored") << endmsg;
                                 continue;
@@ -257,6 +257,6 @@ Speakers::set_state (const XMLNode& node, int /*version*/)
         }
 
         update ();
-        
+
         return 0;
 }

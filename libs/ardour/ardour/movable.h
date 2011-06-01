@@ -5,9 +5,9 @@ namespace ARDOUR {
 
 class Movable {
   public:
-        Movable() {}
+	Movable() {}
 
-        bool locked () const { return false; }
+	bool locked () const { return false; }
 };
 
 }

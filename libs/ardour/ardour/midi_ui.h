@@ -6,7 +6,7 @@
 #include "pbd/abstract_ui.h"
 #include "pbd/signals.h"
 
-namespace MIDI { 
+namespace MIDI {
 	class Port;
 }
 
@@ -32,15 +32,15 @@ class MidiControlUI : public AbstractUI<MidiUIRequest>
 	~MidiControlUI ();
 
 	static MidiControlUI* instance() { return _instance; }
-	
+
 	static BaseUI::RequestType PortChange;
-	
+
 	void change_midi_ports ();
-	
+
   protected:
 	void thread_init ();
 	void do_request (MidiUIRequest*);
-	
+
   private:
 	typedef std::list<GSource*> PortSources;
 	PortSources port_sources;

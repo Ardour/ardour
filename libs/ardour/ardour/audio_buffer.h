@@ -122,12 +122,12 @@ public:
 		assert(len <= _capacity);
 
 		Sample* dst = _data + dst_offset;
-                gain_t  gain_delta = (target - initial)/len;
+		gain_t  gain_delta = (target - initial)/len;
 
-                for (framecnt_t n = 0; n < len; ++n) {
-                        *dst++ += (*src++ * initial);
-                        initial += gain_delta;
-                }
+		for (framecnt_t n = 0; n < len; ++n) {
+			*dst++ += (*src++ * initial);
+			initial += gain_delta;
+		}
 
 		_silent = (_silent && initial == 0 && target == 0);
 		_written = true;

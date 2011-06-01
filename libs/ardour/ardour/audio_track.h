@@ -28,7 +28,7 @@ class Session;
 class AudioDiskstream;
 class AudioPlaylist;
 class RouteGroup;
-class AudioFileSource;	
+class AudioFileSource;
 
 class AudioTrack : public Track
 {
@@ -40,10 +40,10 @@ class AudioTrack : public Track
 	bool can_use_mode (TrackMode m, bool& bounce_required);
 
 	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-                  int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
+	          int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
 
 	void use_new_diskstream ();
-        void set_diskstream (boost::shared_ptr<Diskstream>);
+	void set_diskstream (boost::shared_ptr<Diskstream>);
 
 	DataType data_type () const {
 		return DataType::AUDIO;
@@ -62,11 +62,11 @@ class AudioTrack : public Track
 	boost::shared_ptr<AudioFileSource> write_source (uint32_t n = 0);
 
 	bool bounceable () const;
-	
+
   protected:
 	boost::shared_ptr<AudioDiskstream> audio_diskstream () const;
 	XMLNode& state (bool full);
-	
+
 	int _set_state (const XMLNode&, int, bool call_base);
 
   private:

@@ -332,10 +332,10 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 
 	RouteList::iterator i;
 	boost::shared_ptr<RouteList> r = routes.reader();
-	
+
 	for (i = r->begin(); i != r->end(); ++i) {
 		AudioTrack *at;
-		
+
 		if ((at = dynamic_cast<AudioTrack*>((*i).get())) != 0) {
 			if (trk == at->remote_control_id()) {
 				at->set_record_enabled (enabled, &mmc);

@@ -83,8 +83,8 @@ PortInsert::set_measured_latency (framecnt_t n)
         _measured_latency = n;
 }
 
-framecnt_t 
-PortInsert::latency() const 
+framecnt_t
+PortInsert::latency() const
 {
 	/* because we deliver and collect within the same cycle,
 	   all I/O is necessarily delayed by at least frames_per_cycle().
@@ -108,37 +108,37 @@ PortInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, 
 	}
 
         if (_latency_detect) {
-                
+
                 if (_input->n_ports().n_audio() != 0) {
 
                         AudioBuffer& outbuf (_output->ports().nth_audio_port(0)->get_audio_buffer (nframes));
                         Sample* in = _input->ports().nth_audio_port(0)->get_audio_buffer (nframes).data();
                         Sample* out = outbuf.data();
-                        
+
                         _mtdm->process (nframes, in, out);
-                        
+
                         outbuf.is_silent (false);
                 }
-                
+
                 return;
-                
+
         } else if (_latency_flush_frames) {
-                
+
                 /* wait for the entire input buffer to drain before picking up input again so that we can't
                    hear the remnants of whatever MTDM pumped into the pipeline.
                 */
-                
+
                 silence (nframes);
-                
+
                 if (_latency_flush_frames > nframes) {
                         _latency_flush_frames -= nframes;
                 } else {
                         _latency_flush_frames = 0;
                 }
-                
+
                 return;
         }
-        
+
 	if (!_active && !_pending_active) {
 		/* deliver silence */
 		silence (nframes);
@@ -208,7 +208,7 @@ PortInsert::set_state (const XMLNode& node, int version)
         if ((prop = node.property ("block_size")) != 0) {
                 sscanf (prop->value().c_str(), "%u", &blocksize);
         }
-        
+
         //if the jack period is the same as when the value was saved, we can recall our latency..
         if ( (_session.get_block_size() == blocksize) && (prop = node.property ("latency")) != 0) {
                 uint32_t latency = 0;
@@ -249,13 +249,13 @@ bool
 PortInsert::configure_io (ChanCount in, ChanCount out)
 {
 	assert (!AudioEngine::instance()->process_lock().trylock());
-	
+
 	/* for an insert, processor input corresponds to IO output, and vice versa */
 
 	if (_input->ensure_io (in, false, this) != 0) {
 		return false;
 	}
-	
+
 	if (_output->ensure_io (out, false, this) != 0) {
 		return false;
 	}

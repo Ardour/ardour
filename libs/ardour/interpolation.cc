@@ -73,13 +73,13 @@ CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input,
     }
 
     /* keep this condition out of the inner loop */
-    
+
     if (input && output) {
 
 	    Sample inm1;
-	    
+
 	    if (floor (distance) == 0.0) {
-		    /* best guess for the fake point we have to add to be able to interpolate at i == 0: 
+		    /* best guess for the fake point we have to add to be able to interpolate at i == 0:
 		       .... maintain slope of first actual segment ...
 		    */
 		    inm1 = input[i] - (input[i+1] - input[i]);
@@ -106,7 +106,7 @@ CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input,
 		    if (fractional_phase_part >= 1.0) {
 			    fractional_phase_part -= 1.0;
 			    ++i;
-		    } 
+		    }
 
 		    // Cubically interpolate into the output buffer: keep this inlined for speed and rely on compiler
 		    // optimization to take care of the rest

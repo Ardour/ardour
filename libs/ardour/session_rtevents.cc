@@ -33,7 +33,7 @@ using namespace ARDOUR;
 using namespace Glib;
 
 SessionEvent*
-Session::get_rt_event (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override,  
+Session::get_rt_event (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override,
 		       void (Session::*method) (boost::shared_ptr<RouteList>, bool, bool))
 {
 	SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
@@ -65,7 +65,7 @@ Session::rt_set_solo (boost::shared_ptr<RouteList> rl, bool yn, bool /* group_ov
 void
 Session::set_just_one_solo (boost::shared_ptr<Route> r, bool yn, SessionEvent::RTeventCallback after)
 {
-	/* its a bit silly to have to do this, but it keeps the API for this public method sane (we're 
+	/* its a bit silly to have to do this, but it keeps the API for this public method sane (we're
 	   only going to solo one route) and keeps our ability to use get_rt_event() for the internal
 	   private method.
 	*/
@@ -87,9 +87,9 @@ Session::rt_set_just_one_solo (boost::shared_ptr<RouteList> just_one, bool yn, b
 			(*i)->set_solo (!yn, (*i)->route_group());
 		}
 	}
-	
+
 	r->set_solo (yn, r->route_group());
-	
+
 	set_dirty();
 }
 
@@ -125,7 +125,7 @@ Session::rt_set_mute (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_ove
 			(*i)->set_mute (yn, this);
 		}
 	}
-	
+
 	set_dirty();
 }
 
@@ -143,7 +143,7 @@ Session::rt_set_solo_isolated (boost::shared_ptr<RouteList> rl, bool yn, bool /*
 			(*i)->set_solo_isolated (yn, this);
 		}
 	}
-	
+
 	set_dirty();
 }
 
@@ -153,7 +153,7 @@ Session::set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, SessionEv
 	if (!writable()) {
 		return;
 	}
-	
+
 	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_record_enabled));
 }
 

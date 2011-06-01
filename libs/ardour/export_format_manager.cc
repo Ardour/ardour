@@ -126,7 +126,7 @@ ExportFormatManager::init_formats ()
 	fl_ptr->add_sample_format (ExportFormatBase::SF_32);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_Float);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_Double);
-	fl_ptr->add_endianness (ExportFormatBase::E_Big); 
+	fl_ptr->add_endianness (ExportFormatBase::E_Big);
 	fl_ptr->set_default_sample_format (ExportFormatBase::SF_16);
 	fl_ptr->set_extension ("aiff");
 	add_format (f_ptr);
@@ -161,7 +161,7 @@ ExportFormatManager::init_formats ()
 	fl_ptr->add_sample_format (ExportFormatBase::SF_32);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_Float);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_Double);
-	fl_ptr->add_endianness (ExportFormatBase::E_Little); 
+	fl_ptr->add_endianness (ExportFormatBase::E_Little);
 	fl_ptr->set_default_sample_format (ExportFormatBase::SF_16);
 	fl_ptr->set_extension ("wav");
 	add_format (f_ptr);

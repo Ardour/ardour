@@ -494,7 +494,7 @@ Bundle::channel_type (uint32_t c) const
 
 	Glib::Mutex::Lock lm (_channel_mutex);
 	return _channel[c].type;
-}	
+}
 
 ostream &
 operator<< (ostream& os, Bundle const & b)

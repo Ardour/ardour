@@ -60,7 +60,7 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 	reset_position = false;
 
 	pic = new PIChaser();
-	
+
 	last_mtc_fps_byte = session.get_mtc_timecode_bits ();
 	mtc_frame = 0;
 
@@ -81,7 +81,7 @@ MTC_Slave::~MTC_Slave()
 	delete [] speed_accumulator;
 }
 
-bool 
+bool
 MTC_Slave::give_slave_full_control_over_transport_speed() const
 {
 	return true; // for PiC control */
@@ -92,9 +92,9 @@ void
 MTC_Slave::rebind (MIDI::Port& p)
 {
 	port_connections.drop_connections ();
-	
+
 	port = &p;
-	
+
 	port->parser()->mtc_time.connect_same_thread (port_connections,  boost::bind (&MTC_Slave::update_mtc_time, this, _1, _2, _3));
 	port->parser()->mtc_qtr.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_qtr, this, _1, _2, _3));
 	port->parser()->mtc_status.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_status, this, _1));
@@ -126,7 +126,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 	framepos_t window_root = -1;
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("full mtc time known at %1, full ? %2\n", now, was_full));
-	
+
 	timecode.hours = msg[3];
 	timecode.minutes = msg[2];
 	timecode.seconds = msg[1];
@@ -180,9 +180,9 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 		session.config.set_timecode_format (tc_format);
 	}
 
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC time timestamp = %1 TC %2 = frame %3 (from full message ? %4)\n", 
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC time timestamp = %1 TC %2 = frame %3 (from full message ? %4)\n",
 						 now, timecode, mtc_frame, was_full));
-	
+
 	if (was_full || outside_window (mtc_frame)) {
 
 		session.timecode_to_sample (timecode, mtc_frame, true, false);
@@ -193,25 +193,25 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 		reset_window (mtc_frame);
 
 	} else {
-			
+
 		/* we've had the first set of 8 qtr frame messages, determine position
 		   and allow continuing qtr frame messages to provide position
 		   and speed information.
 		*/
-		
+
 		/* do a careful conversion of the timecode value to a position
-		   so that we take drop/nondrop and all that nonsense into 
+		   so that we take drop/nondrop and all that nonsense into
 		   consideration.
 		*/
 
 		session.timecode_to_sample (timecode, mtc_frame, true, false);
-		
+
 		/* We received the last quarter frame 7 quarter frames (1.75 mtc
 		   frames) after the instance when the contents of the mtc quarter
 		   frames were decided. Add time to compensate for the elapsed 1.75
 		   frames. Also compensate for audio latency.
 		*/
-		
+
 		mtc_frame += (long) (1.75 * session.frames_per_timecode_frame()) + session.worst_playback_latency();
 
 
@@ -225,13 +225,13 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 			} else {
 
 				if (give_slave_full_control_over_transport_speed()) {
-					/* PIC 
-					 * 
+					/* PIC
+					 *
 					 * its not the average, but we will assign it to current.speed below
 					 */
 
-				    static framepos_t last_seen_timestamp = 0; 
-				    static framepos_t last_seen_position = 0; 
+				    static framepos_t last_seen_timestamp = 0;
+				    static framepos_t last_seen_position = 0;
 
 				    if ((now - last_seen_timestamp) < 300) {
 					mtc_frame = (mtc_frame + last_seen_position)/2;
@@ -240,24 +240,24 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 				    last_seen_timestamp = now;
 				    last_seen_position = mtc_frame;
 
-					
-					
+
+
 				} else {
 
-					/* Non-PiC 
+					/* Non-PiC
 					 */
 
 					framepos_t time_delta = (now - last_mtc_timestamp);
-					
+
 					if (time_delta != 0) {
 						double apparent_speed = (mtc_frame - last_mtc_frame) / (double) (time_delta);
-						
+
 						process_apparent_speed (apparent_speed);
 						DEBUG_TRACE (DEBUG::Slave, string_compose ("apparent speed was %1 average is now %2\n", apparent_speed, average_speed));
 					} else {
 						DEBUG_TRACE (DEBUG::Slave, string_compose ("no apparent calc, average is %1\n", average_speed));
 					}
-					
+
 					/* every second, recalibrate the starting point for the speed measurement */
 					if (mtc_frame - last_mtc_frame > session.frame_rate()) {
 						last_mtc_timestamp = now;
@@ -358,7 +358,7 @@ MTC_Slave::update_mtc_status (MIDI::MTC_Status status)
 		current.guard2++;
 		break;
 	}
-	
+
 }
 
 void
@@ -423,19 +423,19 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 
 	if (give_slave_full_control_over_transport_speed()) {
 		in_control = (session.slave_state() == Session::Running);
-		framepos_t pic_want_locate = 0; 
+		framepos_t pic_want_locate = 0;
 		//framepos_t slave_pos = session.audible_frame();
 		framepos_t slave_pos = session.transport_frame();
 		static double average_speed = 0;
-		
+
 		framepos_t ref_now = session.engine().frame_time_at_cycle_start();
 		average_speed = pic->get_ratio (last.timestamp, last.position, ref_now, slave_pos, in_control, session.engine().frames_per_cycle());
-  
+
 		pic_want_locate = pic->want_locate();
-		
+
 		if (in_control && pic_want_locate) {
 			last.speed = average_speed + (double) (pic_want_locate - session.transport_frame()) / (double)session.get_block_size();
-			std::cout << "locate req " << pic_want_locate << " speed: " << average_speed << "\n"; 
+			std::cout << "locate req " << pic_want_locate << " speed: " << average_speed << "\n";
 		} else {
 			last.speed = average_speed;
 		}
@@ -463,16 +463,16 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	if (in_control) {
 		pos = session.transport_frame();
 	} else {
-		pos = last.position + elapsed; 
+		pos = last.position + elapsed;
 	}
 
 	speed = last.speed;
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::speed_and_position FINAL %1 %2\n", last.speed, pos));
 
-	
+
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("last = %1 elapsed = %2 pos = %3 speed = %4\n", last.position, elapsed, pos, speed));
-	
+
 	return true;
 }
 
@@ -501,7 +501,7 @@ MTC_Slave::maybe_reset ()
 		reset (reset_position);
 		reset_pending = 0;
 		reset_position = false;
-	} 
+	}
 }
 
 void
@@ -537,7 +537,7 @@ MTC_Slave::reset (bool with_position)
 void
 MTC_Slave::reset_window (framepos_t root)
 {
-	
+
 	/* if we're waiting for the master to catch us after seeking ahead, keep the window
 	   of acceptable MTC frames wide open. otherwise, shrink it down to just 2 video frames
 	   ahead of the window root (taking direction into account).
@@ -572,7 +572,7 @@ MTC_Slave::reset_window (framepos_t root)
 		}
 		window_end = root;
 		break;
-		
+
 	default:
 		/* do nothing */
 		break;

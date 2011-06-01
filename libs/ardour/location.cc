@@ -95,7 +95,7 @@ Location::Location (Session& s, const XMLNode& node)
 	/* Note: _position_lock_style is initialised above in case set_state doesn't set it
 	   (for 2.X session file compatibility).
 	*/
-	
+
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
 	}
@@ -163,14 +163,14 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 
 		assert (_start >= 0);
 		assert (_end >= 0);
-		
+
 		return 0;
 	}
-	
+
 	if (s != _start) {
 
 		framepos_t const old = _start;
-		
+
 		_start = s;
 		if (allow_bbt_recompute) {
 			recompute_bbt_from_frames ();
@@ -183,7 +183,7 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 	}
 
 	assert (_start >= 0);
-	
+
 	return 0;
 }
 
@@ -204,7 +204,7 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 			return -1;
 		}
 	}
-	
+
 	if (is_mark()) {
 		if (_start != e) {
 			_start = e;
@@ -218,13 +218,13 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 
 		assert (_start >= 0);
 		assert (_end >= 0);
-		
+
 		return 0;
 	}
 
 	if (e != _end) {
 		framepos_t const old = _end;
-		
+
 		_end = e;
 		if (allow_bbt_recompute) {
 			recompute_bbt_from_frames ();
@@ -520,7 +520,7 @@ Location::recompute_bbt_from_frames ()
 	if (_position_lock_style != MusicTime) {
 		return;
 	}
-	
+
 	_session.tempo_map().bbt_time (_start, _bbt_start);
 	_session.tempo_map().bbt_time (_end, _bbt_end);
 }
@@ -710,7 +710,7 @@ void
 Locations::add (Location *loc, bool make_current)
 {
 	assert (loc);
-	
+
 	{
 		Glib::Mutex::Lock lm (lock);
 		locations.push_back (loc);
@@ -823,7 +823,7 @@ Locations::set_state (const XMLNode& node, int version)
 				XMLProperty const * prop_id = (*niter)->property ("id");
 				assert (prop_id);
 				PBD::ID id (prop_id->value ());
-				
+
 				LocationList::const_iterator i = locations.begin();
 				while (i != locations.end () && (*i)->id() != id) {
 					++i;
@@ -970,7 +970,7 @@ void
 Locations::marks_either_side (framepos_t const frame, framepos_t& before, framepos_t& after) const
 {
 	before = after = max_framepos;
-	
+
 	LocationList locs;
 
 	{
@@ -979,7 +979,7 @@ Locations::marks_either_side (framepos_t const frame, framepos_t& before, framep
 	}
 
 	/* Get a list of positions; don't store any that are exactly on our requested position */
-	
+
 	std::list<framepos_t> positions;
 
 	for (LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
@@ -1026,7 +1026,7 @@ Locations::marks_either_side (framepos_t const frame, framepos_t& before, framep
 		/* none before */
 		return;
 	}
-	
+
 	--i;
 	before = *i;
 }

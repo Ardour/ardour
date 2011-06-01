@@ -23,7 +23,7 @@ TransientDetector::TransientDetector (float sr)
 	// XXX this should load the above-named plugin and get the current version
 
 	_op_id += ":2";
-	
+
 	threshold = 0.00;
 }
 
@@ -126,18 +126,18 @@ void
 TransientDetector::update_positions (Readable* src, uint32_t channel, AnalysisFeatureList& positions)
 {
 	Plugin::FeatureSet features;
-	
+
 	Sample* data = 0;
 	float* bufs[1] = { 0 };
-	
+
 	int buff_size = 1024;
 	int step_size = 64;
-	
+
 	data = new Sample[buff_size];
 	bufs[0] = data;
-	
+
 	AnalysisFeatureList::iterator i = positions.begin();
-	
+
 	while (i != positions.end()) {
 
 		framecnt_t to_read;
@@ -148,7 +148,7 @@ TransientDetector::update_positions (Readable* src, uint32_t channel, AnalysisFe
 		if (src->read (data, (*i) - buff_size, to_read, channel) != to_read) {
 			break;
 		}
-		
+
 		// Simple heuristic for locating approx correct cut position.
 
 		for (int j = 0; j < buff_size;){
@@ -161,7 +161,7 @@ TransientDetector::update_positions (Readable* src, uint32_t channel, AnalysisFe
 				(*i) = (*i) - buff_size + (j + 24);
 				break;
 			}
-			
+
 			j = j + step_size;
 		}
 

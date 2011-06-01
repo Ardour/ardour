@@ -103,7 +103,7 @@ AudioRegion::register_properties ()
 	, _fade_in_active (Properties::fade_in_active, true) \
 	, _fade_out_active (Properties::fade_out_active, true) \
 	, _scale_amplitude (Properties::scale_amplitude, 1.0)
-	
+
 #define AUDIOREGION_COPY_STATE(other) \
 	_envelope_active (Properties::envelope_active, other->_envelope_active) \
 	, _default_fade_in (Properties::default_fade_in, other->_default_fade_in) \
@@ -259,7 +259,7 @@ AudioRegion::post_set (const PropertyChange& /*ignored*/)
 	if (_left_of_split) {
 		if (_fade_in->back()->when >= _length) {
 			set_default_fade_in ();
-		} 
+		}
 		set_default_fade_out ();
 		_left_of_split = false;
 	}
@@ -267,7 +267,7 @@ AudioRegion::post_set (const PropertyChange& /*ignored*/)
 	if (_right_of_split) {
 		if (_fade_out->back()->when >= _length) {
 			set_default_fade_out ();
-		} 
+		}
 
 		set_default_fade_in ();
 		_right_of_split = false;
@@ -372,7 +372,7 @@ AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_bu
 framecnt_t
 AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 		       Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-		       framepos_t position, 
+		       framepos_t position,
 		       framecnt_t cnt,
 		       uint32_t chan_n,
 		       framecnt_t /*read_frames*/,
@@ -442,7 +442,7 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
 		if (Config->get_replicate_missing_region_channels()) {
 			/* track is N-channel, this region has less channels, so use a relevant channel
 			 */
-			
+
 			uint32_t channel = n_channels() % chan_n;
 			boost::shared_ptr<AudioSource> src = audio_source (channel);
 
@@ -580,10 +580,10 @@ AudioRegion::state ()
 	child = node.add_child ("Envelope");
 
 	bool default_env = false;
-	
+
 	// If there are only two points, the points are in the start of the region and the end of the region
 	// so, if they are both at 1.0f, that means the default region.
-	
+
 	if (_envelope->size() == 2 &&
 	    _envelope->front()->value == 1.0f &&
 	    _envelope->back()->value==1.0f) {
@@ -591,7 +591,7 @@ AudioRegion::state ()
 			default_env = true;
 		}
 	}
-	
+
 	if (default_env) {
 		child->add_property ("default", "yes");
 	} else {
@@ -623,7 +623,7 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 	const XMLNodeList& nlist = node.children();
 	const XMLProperty *prop;
 	LocaleGuard lg (X_("POSIX"));
-	boost::shared_ptr<Playlist> the_playlist (_playlist.lock());	
+	boost::shared_ptr<Playlist> the_playlist (_playlist.lock());
 
 	suspend_property_changes ();
 
@@ -752,7 +752,7 @@ AudioRegion::set_fade_in (boost::shared_ptr<AutomationList> f)
 	_fade_in->freeze ();
 	*_fade_in = *f;
 	_fade_in->thaw ();
-	
+
 	send_change (PropertyChange (Properties::fade_in));
 }
 
@@ -985,7 +985,7 @@ AudioRegion::recompute_at_end ()
 	_envelope->truncate_end (_length);
 	_envelope->set_max_xval (_length);
 	_envelope->thaw ();
-	
+
 	suspend_property_changes();
 
 	if (_left_of_split) {
@@ -1000,7 +1000,7 @@ AudioRegion::recompute_at_end ()
 		_fade_in->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_in));
 	}
-	
+
 	resume_property_changes();
 }
 
@@ -1010,7 +1010,7 @@ AudioRegion::recompute_at_start ()
 	/* as above, but the shift was from the front */
 
 	_envelope->truncate_start (_length);
-	
+
 	suspend_property_changes();
 
 	if (_right_of_split) {
@@ -1025,7 +1025,7 @@ AudioRegion::recompute_at_start ()
 		_fade_out->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_out));
 	}
-	
+
 	resume_property_changes();
 }
 
@@ -1062,7 +1062,7 @@ AudioRegion::separate_by_channel (Session& /*session*/, vector<boost::shared_ptr
 		 */
 
 		PropertyList plist;
-		
+
 		plist.add (Properties::start, _start.val());
 		plist.add (Properties::length, _length.val());
 		plist.add (Properties::name, new_name);
@@ -1179,7 +1179,7 @@ AudioRegion::maximum_amplitude (Progress* p) const
 
 	framecnt_t const blocksize = 64 * 1024;
 	Sample buf[blocksize];
-	
+
 	while (fpos < fend) {
 
 		uint32_t n;
@@ -1331,17 +1331,17 @@ AudioRegion::audio_source (uint32_t n) const
 	return boost::dynamic_pointer_cast<AudioSource>(source(n));
 }
 
-int 
+int
 AudioRegion::adjust_transients (frameoffset_t delta)
 {
 	for (AnalysisFeatureList::iterator x = _transients.begin(); x != _transients.end(); ++x) {
 		(*x) = (*x) + delta;
 	}
-	
+
 	send_change (PropertyChange (Properties::valid_transients));
-	
-	return 0;  
-} 
+
+	return 0;
+}
 
 int
 AudioRegion::update_transient (framepos_t old_position, framepos_t new_position)
@@ -1350,11 +1350,11 @@ AudioRegion::update_transient (framepos_t old_position, framepos_t new_position)
 		if ((*x) == old_position) {
 			(*x) = new_position;
 			send_change (PropertyChange (Properties::valid_transients));
-			
+
 			break;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -1363,7 +1363,7 @@ AudioRegion::add_transient (framepos_t where)
 {
 	_transients.push_back(where);
 	_valid_transients = true;
-	
+
 	send_change (PropertyChange (Properties::valid_transients));
 }
 
@@ -1372,7 +1372,7 @@ AudioRegion::remove_transient (framepos_t where)
 {
 	_transients.remove(where);
 	_valid_transients = true;
-	
+
 	send_change (PropertyChange (Properties::valid_transients));
 }
 
@@ -1382,9 +1382,9 @@ AudioRegion::set_transients (AnalysisFeatureList& results)
 	_transients.clear();
 	_transients = results;
 	_valid_transients = true;
-	
+
 	send_change (PropertyChange (Properties::valid_transients));
-	
+
 	return 0;
 }
 

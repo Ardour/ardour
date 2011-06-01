@@ -207,19 +207,19 @@ class SlaveSessionProxy : public ISlaveSessionProxy {
 };
 
 struct SafeTime {
-    volatile int guard1;
-    framepos_t  position;
-    framepos_t  timestamp;
-    double       speed;
-    volatile int guard2;
-    
-    SafeTime() {
-	    guard1 = 0;
-	    position = 0;
-	    timestamp = 0;
-	    speed = 0;
-	    guard2 = 0;
-    }
+	volatile int guard1;
+	framepos_t   position;
+	framepos_t   timestamp;
+	double       speed;
+	volatile int guard2;
+
+	SafeTime() {
+		guard1 = 0;
+		position = 0;
+		timestamp = 0;
+		speed = 0;
+		guard2 = 0;
+	}
 };
 
 class MTC_Slave : public Slave {

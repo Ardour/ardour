@@ -98,7 +98,7 @@ Return::set_state (const XMLNode& node, int version)
 		sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
 		_session.mark_return_id (_bitslot);
 	}
-        
+
 	return 0;
 }
 

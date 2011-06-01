@@ -160,7 +160,7 @@ Route::init ()
 		_intreturn.reset (new InternalReturn (_session));
 		_intreturn->activate ();
 
-		/* the thing that provides proper control over a control/monitor/listen bus 
+		/* the thing that provides proper control over a control/monitor/listen bus
 		   (such as per-channel cut, dim, solo, invert, etc).
 		*/
 		_monitor_control.reset (new MonitorProcessor (_session));
@@ -188,13 +188,13 @@ Route::~Route ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("route %1 destructor\n", _name));
 
-	/* do this early so that we don't get incoming signals as we are going through destruction 
+	/* do this early so that we don't get incoming signals as we are going through destruction
 	 */
 
 	drop_connections ();
 
 	/* don't use clear_processors here, as it depends on the session which may
-	   be half-destroyed by now 
+	   be half-destroyed by now
 	*/
 
 	Glib::RWLock::WriterLock lm (_processor_lock);
@@ -291,7 +291,7 @@ Route::sync_order_keys (std::string const & base)
 	}
 
 	bool changed = false;
-	
+
 	for (; i != order_keys.end(); ++i) {
 		if (i->second != key) {
 			i->second = key;
@@ -496,7 +496,7 @@ Route::process_output_buffers (BufferSet& bufs,
 				abort ();
 			}
 		}
-#endif                
+#endif
 		/* should we NOT run plugins here if the route is inactive?
 		   do we catch route != active somewhere higher?
 		*/
@@ -599,7 +599,7 @@ Route::set_solo_safe (bool yn, void *src)
 	if (_solo_safe != yn) {
 		_solo_safe = yn;
 		solo_safe_changed (src);
-	} 
+	}
 }
 
 bool
@@ -655,16 +655,16 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 
 	DEBUG_TRACE (DEBUG::Solo, string_compose (
 		             "%1 SbU delta %2 = %3 old = %4 sbd %5 ss %6 exclusive %7\n",
-		             name(), delta, _soloed_by_others_upstream, old_sbu, 
+		             name(), delta, _soloed_by_others_upstream, old_sbu,
 		             _soloed_by_others_downstream, _self_solo, Config->get_exclusive_solo()));
 
-	/* push the inverse solo change to everything that feeds us. 
+	/* push the inverse solo change to everything that feeds us.
 
 	   This is important for solo-within-group. When we solo 1 track out of N that
 	   feed a bus, that track will cause mod_solo_by_upstream (+1) to be called
 	   on the bus. The bus then needs to call mod_solo_by_downstream (-1) on all
 	   tracks that feed it. This will silence them if they were audible because
-	   of a bus solo, but the newly soloed track will still be audible (because 
+	   of a bus solo, but the newly soloed track will still be audible (because
 	   it is self-soloed).
 
 	   but .. do this only when we are being told to solo-by-upstream (i.e delta = +1),
@@ -672,7 +672,7 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 	*/
 
 	if ((_self_solo || _soloed_by_others_downstream) &&
-	    ((old_sbu == 0 && _soloed_by_others_upstream > 0) || 
+	    ((old_sbu == 0 && _soloed_by_others_upstream > 0) ||
 	     (old_sbu > 0 && _soloed_by_others_upstream == 0))) {
 
 		if (delta > 0 || !Config->get_exclusive_solo()) {
@@ -683,7 +683,7 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 					sr->mod_solo_by_others_downstream (-delta);
 				}
 			}
-		} 
+		}
 	}
 
 	set_mute_master_solo ();
@@ -730,7 +730,7 @@ Route::set_solo_isolated (bool yn, void *src)
 		_route_group->foreach_route (boost::bind (&Route::set_solo_isolated, _1, yn, _route_group));
 		return;
 	}
-	
+
 	/* forward propagate solo-isolate status to everything fed by this route, but not those via sends only */
 
 	boost::shared_ptr<RouteList> routes = _session.get_routes ();
@@ -742,7 +742,7 @@ Route::set_solo_isolated (bool yn, void *src)
 
 		bool sends_only;
 		bool does_feed = direct_feeds (*i, &sends_only); // we will recurse anyway, so don't use ::feeds()
-		
+
 		if (does_feed && !sends_only) {
 			(*i)->set_solo_isolated (yn, (*i)->route_group());
 		}
@@ -857,7 +857,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 
 	DEBUG_TRACE (DEBUG::Processors, string_compose (
 		             "%1 adding processor %2\n", name(), processor->name()));
-	
+
 	ChanCount old_pms = processor_max_streams;
 
 	if (!_session.engine().connected() || !processor) {
@@ -945,7 +945,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 
 		XMLNodeList const & children = node.children ();
 		XMLNodeList::const_iterator i = children.begin ();
-		
+
 		while (i != children.end() && (*i)->name() != X_("Redirect")) {
 			++i;
 		}
@@ -962,7 +962,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 
 			if ((prop = node.property ("type")) != 0) {
 
-				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || 
+				if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 						prop->value() == "lv2" ||
 						prop->value() == "vst" ||
 						prop->value() == "audiounit") {
@@ -1307,7 +1307,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
-		
+
 		ProcessorList::iterator i;
 		bool removed = false;
 
@@ -1352,7 +1352,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 
 		{
 			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-		
+
 			if (configure_processors_unlocked (err)) {
 				pstate.restore ();
 				/* we know this will work, because it worked before :) */
@@ -1396,7 +1396,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
-		
+
 		ProcessorList::iterator i;
 		boost::shared_ptr<Processor> processor;
 
@@ -1442,7 +1442,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 
 		{
 			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-		
+
 			if (configure_processors_unlocked (err)) {
 				pstate.restore ();
 				/* we know this will work, because it worked before :) */
@@ -1482,12 +1482,12 @@ int
 Route::configure_processors (ProcessorStreams* err)
 {
 	assert (!AudioEngine::instance()->process_lock().trylock());
-	
+
 	if (!_in_configure_processors) {
 		Glib::RWLock::WriterLock lm (_processor_lock);
 		return configure_processors_unlocked (err);
 	}
-	
+
 	return 0;
 }
 
@@ -1522,7 +1522,7 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 			DEBUG_TRACE (DEBUG::Processors, "--- CONFIGURE ABORTED due to unknown processor.\n");
 			break;
 		}
-		
+
 		if ((*p)->can_support_io_configuration(in, out)) {
 			DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1 ID=%2 in=%3 out=%4\n",(*p)->name(), (*p)->id(), in, out));
 			configuration.push_back(make_pair(in, out));
@@ -1540,7 +1540,7 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 	}
 
 	DEBUG_TRACE (DEBUG::Processors, "}\n");
-	
+
 	return configuration;
 }
 
@@ -1577,7 +1577,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 		if (boost::dynamic_pointer_cast<UnknownProcessor> (*p)) {
 			break;
 		}
-		
+
 		(*p)->configure_io(c->first, c->second);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->second);
@@ -1690,7 +1690,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
-		
+
 		ProcessorList::iterator oiter;
 		ProcessorList::const_iterator niter;
 		ProcessorList as_it_will_be;
@@ -1748,7 +1748,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 
 		{
 			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-		
+
 			if (configure_processors_unlocked (err)) {
 				pstate.restore ();
 				return -1;
@@ -2063,12 +2063,12 @@ Route::_set_state_2X (const XMLNode& node, int version)
 	} else {
 		_flags = Flag (0);
 	}
-	
+
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
 		boost::dynamic_bitset<> p (_input->n_ports().n_audio ());
 		if (string_is_affirmative (prop->value ())) {
 			p.set ();
-		}			
+		}
 		set_phase_invert (p);
 	}
 
@@ -2085,60 +2085,60 @@ Route::_set_state_2X (const XMLNode& node, int version)
 	}
 
 	if ((prop = node.property (X_("muted"))) != 0) {
-		
+
 		bool first = true;
 		bool muted = string_is_affirmative (prop->value());
-		
+
 		if (muted) {
 
 			string mute_point;
-			
+
 			if ((prop = node.property (X_("mute-affects-pre-fader"))) != 0) {
-			  
+
 				if (string_is_affirmative (prop->value())){
 					mute_point = mute_point + "PreFader";
 					first = false;
 				}
 			}
-			
+
 			if ((prop = node.property (X_("mute-affects-post-fader"))) != 0) {
-			  
+
 				if (string_is_affirmative (prop->value())){
-				  
+
 					if (!first) {
 						mute_point = mute_point + ",";
 					}
-					
+
 					mute_point = mute_point + "PostFader";
 					first = false;
 				}
 			}
 
 			if ((prop = node.property (X_("mute-affects-control-outs"))) != 0) {
-			  
+
 				if (string_is_affirmative (prop->value())){
-				  
+
 					if (!first) {
 						mute_point = mute_point + ",";
 					}
-					
+
 					mute_point = mute_point + "Listen";
 					first = false;
 				}
 			}
 
 			if ((prop = node.property (X_("mute-affects-main-outs"))) != 0) {
-			  
+
 				if (string_is_affirmative (prop->value())){
-				  
+
 					if (!first) {
 						mute_point = mute_point + ",";
 					}
-					
+
 					mute_point = mute_point + "Main";
 				}
 			}
-			
+
 			_mute_master->set_mute_points (mute_point);
 			_mute_master->set_muted_by_self (true);
 		}
@@ -2212,7 +2212,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 				_active = !yn; // force switch
 				set_active (yn, this);
 			}
-			
+
 			if ((prop = child->property (X_("gain"))) != 0) {
 				gain_t val;
 
@@ -2220,17 +2220,17 @@ Route::_set_state_2X (const XMLNode& node, int version)
 					_amp->gain_control()->set_value (val);
 				}
 			}
-			
+
 			/* Set up Panners in the IO */
 			XMLNodeList io_nlist = child->children ();
-			
+
 			XMLNodeConstIterator io_niter;
 			XMLNode *io_child;
-			
+
 			for (io_niter = io_nlist.begin(); io_niter != io_nlist.end(); ++io_niter) {
 
 				io_child = *io_niter;
-				
+
 				if (io_child->name() == X_("Panner")) {
 					_main_outs->panner_shell()->set_state(*io_child, version);
 				} else if (io_child->name() == X_("Automation")) {
@@ -2283,7 +2283,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 				set_remote_control_id (x);
 			}
 
-		} 
+		}
 	}
 
 	return 0;
@@ -2359,7 +2359,7 @@ Route::set_processor_state (const XMLNode& node)
 				}
 			}
 
-			// If the processor (*niter) is not on the route then create it 
+			// If the processor (*niter) is not on the route then create it
 
 			if (o == _processors.end()) {
 
@@ -2461,22 +2461,22 @@ void
 Route::silence_unlocked (framecnt_t nframes)
 {
 	/* Must be called with the processor lock held */
-	
+
 	if (!_silent) {
 
 		_output->silence (nframes);
 
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			boost::shared_ptr<PluginInsert> pi;
-			
+
 			if (!_active && (pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
 				// skip plugins, they don't need anything when we're not active
 				continue;
 			}
-			
+
 			(*i)->silence (nframes);
 		}
-		
+
 		if (nframes == _session.get_block_size()) {
 			// _silent = true;
 		}
@@ -2526,13 +2526,13 @@ Route::listen_via_monitor ()
 {
 	/* master never sends to control outs */
 	assert (!is_master ());
-	
+
 	/* make sure we have one */
 	if (!_monitor_send) {
 		_monitor_send.reset (new InternalSend (_session, _pannable, _mute_master, _session.monitor_out(), Delivery::Listen));
 		_monitor_send->set_display_to_user (false);
 	}
-	
+
 	/* set it up */
 	Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 	configure_processors (0);
@@ -2540,7 +2540,7 @@ Route::listen_via_monitor ()
 	return 0;
 }
 
-/** Add an internal send to a route.  
+/** Add an internal send to a route.
  *  @param route route to send to.
  *  @param placement placement for the send.
  */
@@ -2548,7 +2548,7 @@ int
 Route::listen_via (boost::shared_ptr<Route> route, Placement placement)
 {
 	assert (route != _session.monitor_out ());
-	
+
 	{
 		Glib::RWLock::ReaderLock rm (_processor_lock);
 
@@ -2676,7 +2676,7 @@ Route::direct_feeds (boost::shared_ptr<Route> other, bool* only_send)
 		return true;
 	}
 
-	
+
 	for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
 		boost::shared_ptr<IOProcessor> iop;
@@ -2694,7 +2694,7 @@ Route::direct_feeds (boost::shared_ptr<Route> other, bool* only_send)
 		} else {
 			DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tPROC %1 is not an IOP\n", (*r)->name()));
 		}
-			
+
 	}
 
 	DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tdoes NOT feed %1\n", other->name()));
@@ -2771,7 +2771,7 @@ Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		if (_session.transport_speed() != 0.0f) {
 			/* we're rolling but some state is changing (e.g. our diskstream contents)
 			   so we cannot use them. Be silent till this is over.
-			   
+
 			   XXX note the absurdity of ::no_roll() being called when we ARE rolling!
 			*/
 			silence_unlocked (nframes);
@@ -2819,7 +2819,7 @@ Route::check_initial_delay (framecnt_t nframes, framecnt_t& transport_frame)
 
 		_roll_delay = 0;
 
-	} 
+	}
 
 	return nframes;
 }
@@ -2832,7 +2832,7 @@ Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 	if (!lm.locked()) {
 		return 0;
 	}
-	
+
 	automation_snapshot (_session.transport_frame(), false);
 
 	if (n_outputs().n_total() == 0) {
@@ -2925,22 +2925,22 @@ Route::set_meter_point (MeterPoint p, bool force)
 	}
 
 	_meter_point = p;
-	
+
 	bool meter_was_visible_to_user = _meter->display_to_user ();
 
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
-	
+
 		if (_meter_point != MeterCustom) {
 
 			_meter->set_display_to_user (false);
-			
+
 			setup_invisible_processors ();
-			
+
 			ProcessorList::iterator loc = find (_processors.begin(), _processors.end(), _meter);
 
 			ChanCount m_in;
-			
+
 			if (loc == _processors.begin()) {
 				m_in = _input->n_ports();
 			} else {
@@ -2948,19 +2948,19 @@ Route::set_meter_point (MeterPoint p, bool force)
 				--before;
 				m_in = (*before)->output_streams ();
 			}
-			
+
 			_meter->reflect_inputs (m_in);
-			
+
 			/* we do not need to reconfigure the processors, because the meter
 			   (a) is always ready to handle processor_max_streams
 			   (b) is always an N-in/N-out processor, and thus moving
 			   it doesn't require any changes to the other processors.
 			*/
-			
+
 		} else {
-			
+
 			// just make it visible and let the user move it
-			
+
 			_meter->set_display_to_user (true);
 		}
 	}
@@ -2968,7 +2968,7 @@ Route::set_meter_point (MeterPoint p, bool force)
 	meter_change (); /* EMIT SIGNAL */
 
 	bool const meter_visibly_changed = (_meter->display_to_user() != meter_was_visible_to_user);
-	
+
 	processors_changed (RouteProcessorChange (RouteProcessorChange::MeterPointChange, meter_visibly_changed)); /* EMIT SIGNAL */
 }
 
@@ -2981,7 +2981,7 @@ Route::listen_position_changed ()
 
 		{
 			Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			
+
 			if (configure_processors_unlocked (0)) {
 				pstate.restore ();
 				configure_processors_unlocked (0); // it worked before we tried to add it ...
@@ -2998,7 +2998,7 @@ boost::shared_ptr<CapturingProcessor>
 Route::add_export_point()
 {
 	if (!_capturing_processor) {
-		
+
 		_capturing_processor.reset (new CapturingProcessor (_session));
 		_capturing_processor->activate ();
 
@@ -3008,7 +3008,7 @@ Route::add_export_point()
 		}
 
 	}
-	
+
 	return _capturing_processor;
 }
 
@@ -3094,7 +3094,7 @@ Route::SoloControllable::set_value (double val)
 	if (!r) {
 		return;
 	}
-	
+
 	rl->push_back (r);
 
 	if (Config->get_solo_control_is_listen_control()) {
@@ -3111,7 +3111,7 @@ Route::SoloControllable::get_value () const
 	if (!r) {
 		return 0;
 	}
-	
+
 	if (Config->get_solo_control_is_listen_control()) {
 		return r->listening_via_monitor() ? 1.0f : 0.0f;
 	} else {
@@ -3139,7 +3139,7 @@ Route::MuteControllable::set_value (double val)
 	if (!r) {
 		return;
 	}
-	
+
 	rl->push_back (r);
 	_session.set_mute (rl, bval);
 }
@@ -3151,7 +3151,7 @@ Route::MuteControllable::get_value () const
 	if (!r) {
 		return 0;
 	}
-	
+
 	return r->muted() ? 1.0f : 0.0f;
 }
 
@@ -3161,7 +3161,7 @@ Route::set_block_size (pframes_t nframes)
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->set_block_size (nframes);
 	}
-	
+
 	_session.ensure_buffers (n_process_buffers ());
 }
 
@@ -3276,7 +3276,7 @@ Route::set_name (const string& str)
 		 * just fine as it is (it will not contain the route
 		 * name if its a port insert, port send or port return).
 		 */
-		
+
 		if (_main_outs) {
 			if (_main_outs->set_name (name)) {
 				/* XXX returning false here is stupid because
@@ -3365,7 +3365,7 @@ Route::set_active (bool yn, void* src)
 		_route_group->foreach_route (boost::bind (&Route::set_active, _1, yn, _route_group));
 		return;
 	}
-	
+
 	if (_active != yn) {
 		_active = yn;
 		_input->set_active (yn);
@@ -3479,7 +3479,7 @@ Route::nth_send (uint32_t n)
 			if (n-- == 0) {
 				return *i;
 			}
-		} 
+		}
 	}
 
 	return boost::shared_ptr<Processor> ();
@@ -3543,7 +3543,7 @@ list<string>
 Route::unknown_processors () const
 {
 	list<string> p;
-	
+
 	Glib::RWLock::ReaderLock lm (_processor_lock);
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if (boost::dynamic_pointer_cast<UnknownProcessor const> (*i)) {
@@ -3674,11 +3674,11 @@ Route::setup_invisible_processors ()
 	}
 
 	/* we'll build this new list here and then use it */
-	
+
 	ProcessorList new_processors;
 
 	/* find visible processors */
-	
+
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->display_to_user ()) {
 			new_processors.push_back (*i);
@@ -3787,7 +3787,7 @@ Route::setup_invisible_processors ()
 		assert (!_monitor_control->display_to_user ());
 		new_processors.push_front (_monitor_control);
 	}
-	
+
 	/* INTERNAL RETURN */
 
 	/* doing this here means that any monitor control will come just after
@@ -3800,7 +3800,7 @@ Route::setup_invisible_processors ()
 	}
 
 	/* EXPORT PROCESSOR */
-	
+
 	if (_capturing_processor) {
 		assert (!_capturing_processor->display_to_user ());
 		new_processors.push_front (_capturing_processor);

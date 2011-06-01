@@ -109,13 +109,13 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	/* these are the core of the API of a Route. see the protected sections as well */
 
 	virtual int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-                          int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
+	                  int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
 
 	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-			bool state_changing, bool can_record, bool rec_monitors_input);
+	                     bool state_changing, bool can_record, bool rec_monitors_input);
 
 	virtual int silent_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-                                 bool can_record, bool rec_monitors_input, bool& need_butler);
+	                         bool can_record, bool rec_monitors_input, bool& need_butler);
 
 	virtual void toggle_monitor_input ();
 	virtual bool can_record() { return false; }
@@ -146,11 +146,11 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void set_solo (bool yn, void *src);
 	bool soloed () const { return self_soloed () || soloed_by_others (); }
 
-        bool soloed_by_others () const { return _soloed_by_others_upstream||_soloed_by_others_downstream; }
+	bool soloed_by_others () const { return _soloed_by_others_upstream||_soloed_by_others_downstream; }
 	bool soloed_by_others_upstream () const { return _soloed_by_others_upstream; }
 	bool soloed_by_others_downstream () const { return _soloed_by_others_downstream; }
 	bool self_soloed () const { return _self_solo; }
-	
+
 	void set_solo_isolated (bool yn, void *src);
 	bool solo_isolated() const;
 
@@ -208,11 +208,11 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	bool processor_is_prefader (boost::shared_ptr<Processor> p);
 
-        bool has_io_processor_named (const std::string&);
+	bool has_io_processor_named (const std::string&);
 	ChanCount max_processor_streams () const { return processor_max_streams; }
 
 	std::list<std::string> unknown_processors () const;
-	
+
 	/* special processors */
 
 	boost::shared_ptr<Delivery>         monitor_send() const { return _monitor_send; }
@@ -251,15 +251,15 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void all_processors_flip();
 	void all_processors_active (Placement, bool state);
 
-        framecnt_t set_private_port_latencies (bool playback) const;
-        void       set_public_port_latencies (framecnt_t, bool playback) const;
+	framecnt_t set_private_port_latencies (bool playback) const;
+	void       set_public_port_latencies (framecnt_t, bool playback) const;
 
 	framecnt_t   update_signal_latency();
 	virtual void set_latency_compensation (framecnt_t);
 
 	void set_user_latency (framecnt_t);
 	framecnt_t initial_delay() const { return _initial_delay; }
-        framecnt_t signal_latency() const { return _signal_latency; }
+	framecnt_t signal_latency() const { return _signal_latency; }
 
 	PBD::Signal0<void>       active_changed;
 	PBD::Signal0<void>       phase_invert_changed;
@@ -276,7 +276,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	PBD::Signal1<void,RouteProcessorChange> processors_changed;
 	PBD::Signal1<void,void*> record_enable_changed;
 	/** the metering point has changed */
-	PBD::Signal0<void>       meter_change; 
+	PBD::Signal0<void>       meter_change;
 	PBD::Signal0<void>       signal_latency_changed;
 	PBD::Signal0<void>       initial_delay_changed;
 	PBD::Signal0<void>       order_key_changed;
@@ -305,39 +305,39 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	int listen_via (boost::shared_ptr<Route>, Placement p);
 	void drop_listen (boost::shared_ptr<Route>);
 
-       /** 
-        * return true if this route feeds the first argument via at least one
-        * (arbitrarily long) signal pathway.
-        */
-        bool feeds (boost::shared_ptr<Route>, bool* via_send_only = 0);
+	/**
+	 * return true if this route feeds the first argument via at least one
+	 * (arbitrarily long) signal pathway.
+	 */
+	bool feeds (boost::shared_ptr<Route>, bool* via_send_only = 0);
 
-       /** 
-        * return true if this route feeds the first argument directly, via
-        * either its main outs or a send.
-        */
+	/**
+	 * return true if this route feeds the first argument directly, via
+	 * either its main outs or a send.
+	 */
 	bool direct_feeds (boost::shared_ptr<Route>, bool* via_send_only = 0);
 
-        struct FeedRecord {
-            boost::weak_ptr<Route> r;
-            bool sends_only;
+	struct FeedRecord {
+		boost::weak_ptr<Route> r;
+		bool sends_only;
 
-            FeedRecord (boost::shared_ptr<Route> rp, bool sendsonly)
-                    : r (rp)
-                    , sends_only (sendsonly) {}
-        };
+		FeedRecord (boost::shared_ptr<Route> rp, bool sendsonly)
+		: r (rp)
+		, sends_only (sendsonly) {}
+	};
 
-        struct FeedRecordCompare {
-            bool operator() (const FeedRecord& a, const FeedRecord& b) const {
-                    return a.r < b.r;
-            }
-        };
+	struct FeedRecordCompare {
+		bool operator() (const FeedRecord& a, const FeedRecord& b) const {
+			return a.r < b.r;
+		}
+	};
 
-        typedef std::set<FeedRecord,FeedRecordCompare> FedBy;
+	typedef std::set<FeedRecord,FeedRecordCompare> FedBy;
 
-        const FedBy& fed_by() const { return _fed_by; }
-        void clear_fed_by ();
-        bool add_fed_by (boost::shared_ptr<Route>, bool sends_only);
-        bool not_fed() const { return _fed_by.empty(); }
+	const FedBy& fed_by() const { return _fed_by; }
+	void clear_fed_by ();
+	bool add_fed_by (boost::shared_ptr<Route>, bool sends_only);
+	bool not_fed() const { return _fed_by.empty(); }
 
 	/* Controls (not all directly owned by the Route */
 
@@ -359,7 +359,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 		void set_value (double);
 		double get_value () const;
 
-	private:		
+	private:
 		boost::weak_ptr<Route> _route;
 	};
 
@@ -383,7 +383,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::shared_ptr<Panner> panner() const;  /* may return null */
 	boost::shared_ptr<PannerShell> panner_shell() const;
 	boost::shared_ptr<AutomationControl> gain_control() const;
-        boost::shared_ptr<Pannable> pannable() const;
+	boost::shared_ptr<Pannable> pannable() const;
 
 	void automation_snapshot (framepos_t now, bool force=false);
 	void protect_automation ();
@@ -423,15 +423,15 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 			framecnt_t /* nframes */) {}
 
 	virtual void process_output_buffers (BufferSet& bufs,
-                                             framepos_t start_frame, framepos_t end_frame,
-                                             pframes_t nframes, bool with_processors, int declick, 
-                                             bool gain_automation_ok);
+	                                     framepos_t start_frame, framepos_t end_frame,
+	                                     pframes_t nframes, bool with_processors, int declick,
+	                                     bool gain_automation_ok);
 
 	boost::shared_ptr<IO> _input;
 	boost::shared_ptr<IO> _output;
 
 	bool           _active;
-        framecnt_t     _signal_latency;
+	framecnt_t     _signal_latency;
 	framecnt_t     _initial_delay;
 	framecnt_t     _roll_delay;
 
@@ -441,7 +441,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::shared_ptr<Delivery> _monitor_send;
 	boost::shared_ptr<InternalReturn> _intreturn;
 	boost::shared_ptr<MonitorProcessor> _monitor_control;
-        boost::shared_ptr<Pannable> _pannable;
+	boost::shared_ptr<Pannable> _pannable;
 
 	Flag           _flags;
 	int            _pending_declick;
@@ -461,14 +461,14 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::shared_ptr<SoloControllable> _solo_control;
 	boost::shared_ptr<MuteControllable> _mute_control;
 	boost::shared_ptr<MuteMaster> _mute_master;
-    
+
 	std::string    _comment;
 	bool           _have_internal_generator;
 	bool           _solo_safe;
 	DataType       _default_type;
-        FedBy          _fed_by;
+	FedBy          _fed_by;
 
-        virtual ChanCount input_streams () const;
+	virtual ChanCount input_streams () const;
 
   protected:
 	virtual XMLNode& state(bool);
@@ -487,8 +487,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
 
-        virtual bool should_monitor () const;
-        virtual void maybe_declick (BufferSet&, framecnt_t, int);
+	virtual bool should_monitor () const;
+	virtual void maybe_declick (BufferSet&, framecnt_t, int);
 
 	virtual int  _set_state (const XMLNode&, int, bool call_base);
 
@@ -523,7 +523,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void set_mute_master_solo ();
 
 	void set_processor_positions ();
-        framecnt_t update_port_latencies (PortSet& ports, PortSet& feeders, bool playback, framecnt_t) const;
+	framecnt_t update_port_latencies (PortSet& ports, PortSet& feeders, bool playback, framecnt_t) const;
 
 	void setup_invisible_processors ();
 

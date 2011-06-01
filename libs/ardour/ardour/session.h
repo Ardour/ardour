@@ -206,7 +206,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void refresh_disk_space ();
 
 	int load_diskstreams_2X (XMLNode const &, int);
-	
+
 	int load_routes (const XMLNode&, int);
 	boost::shared_ptr<RouteList> get_routes() const {
 		return routes.reader ();
@@ -279,7 +279,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	 *  - engine halted
 	*/
 	PBD::Signal0<void> TransportStateChange;
-	
+
 	PBD::Signal1<void,framepos_t> PositionChanged; /* sent after any non-sequential motion */
 	PBD::Signal1<void,framepos_t> Xrun;
 	PBD::Signal0<void> TransportLooped;
@@ -360,7 +360,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	framecnt_t worst_track_latency ()  const { return _worst_track_latency; }
 	framecnt_t worst_playback_latency () const { return _worst_output_latency + _worst_track_latency; }
 
-#ifdef HAVE_JACK_SESSION 
+#ifdef HAVE_JACK_SESSION
 	void jack_session_event (jack_session_event_t* event);
 #endif
 	int save_state (std::string snapshot_name, bool pending = false, bool switch_to_snapshot = false);
@@ -481,7 +481,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void timecode_duration_string (char *, framecnt_t) const;
 
 	framecnt_t convert_to_frames (AnyTime const & position);
-        framecnt_t any_duration_to_frames (framepos_t position, AnyTime const & duration);
+	framecnt_t any_duration_to_frames (framepos_t position, AnyTime const & duration);
 
 	static PBD::Signal1<void, framepos_t> StartTimeChanged;
 	static PBD::Signal1<void, framepos_t> EndTimeChanged;
@@ -554,7 +554,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (
 		size_t, std::string const &, uint32_t, bool destructive);
-	
+
 	boost::shared_ptr<MidiSource> create_midi_source_for_session (
 		Track*, std::string const &);
 
@@ -612,7 +612,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	PBD::Signal1<void,bool> SoloActive;
 	PBD::Signal0<void> SoloChanged;
 	PBD::Signal0<void> IsolatedChanged;
-	
+
 	/* control/master out */
 
 	boost::shared_ptr<Route> monitor_out() const { return _monitor_out; }
@@ -733,7 +733,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* Speakers */
 
-        boost::shared_ptr<Speakers> get_speakers ();
+	boost::shared_ptr<Speakers> get_speakers ();
 
 	/* Controllables */
 
@@ -743,7 +743,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void add_controllable (boost::shared_ptr<PBD::Controllable>);
 	void remove_controllable (PBD::Controllable*);
 
-        boost::shared_ptr<PBD::Controllable> solo_cut_control() const;
+	boost::shared_ptr<PBD::Controllable> solo_cut_control() const;
 
 	SessionMetadata & metadata () { return *_metadata; }
 
@@ -784,7 +784,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		Waiting,
 		Running
 	};
-	
+
 	SlaveState slave_state() const { return _slave_state; }
 
 	boost::shared_ptr<SessionPlaylists> playlists;
@@ -862,7 +862,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool                    _silent;
 
 	void maybe_update_session_range (framepos_t, framepos_t);
-	
+
 	// varispeed playback
 	double                  _transport_speed;
 	double                  _last_transport_speed;
@@ -892,8 +892,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void set_worst_io_latencies_x (IOChange, void *) {
 		set_worst_io_latencies ();
 	}
-        void post_capture_latency ();
-        void post_playback_latency ();
+	void post_capture_latency ();
+	void post_playback_latency ();
 
 	void update_latency_compensation_proxy (void* ignored);
 
@@ -1232,9 +1232,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool find_route_name (std::string const &, uint32_t& id, char* name, size_t name_len, bool);
 	void count_existing_track_channels (ChanCount& in, ChanCount& out);
 	void auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing_inputs, ChanCount& existing_outputs,
-                                 bool with_lock, bool connect_inputs = true, 
-                                 ChanCount input_start = ChanCount (), ChanCount output_start = ChanCount ());
-        void midi_output_change_handler (IOChange change, void* /*src*/, boost::weak_ptr<Route> midi_track);
+	                         bool with_lock, bool connect_inputs = true,
+	                         ChanCount input_start = ChanCount (), ChanCount output_start = ChanCount ());
+	void midi_output_change_handler (IOChange change, void* /*src*/, boost::weak_ptr<Route> midi_track);
 
 	/* mixer stuff */
 
@@ -1262,10 +1262,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	mutable Glib::Mutex source_lock;
 
-  public:	
+  public:
 	typedef std::map<PBD::ID,boost::shared_ptr<Source> > SourceMap;
 
-  private:	
+  private:
 	SourceMap sources;
 
   public:
@@ -1376,7 +1376,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void reset_jack_connection (jack_client_t* jack);
 	void process_rtop (SessionEvent*);
 
-        void  update_latency (bool playback);
+	void  update_latency (bool playback);
 
 	XMLNode& state(bool);
 
@@ -1440,7 +1440,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	Glib::Mutex controllables_lock;
 	Controllables controllables;
 
-        boost::shared_ptr<PBD::Controllable> _solo_cut_control;
+	boost::shared_ptr<PBD::Controllable> _solo_cut_control;
 
 	void reset_native_file_format();
 	bool first_file_data_format_reset;
@@ -1467,7 +1467,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* realtime "apply to set of routes" operations */
 	SessionEvent* get_rt_event (
 		boost::shared_ptr<RouteList> rl, bool yn,
-		SessionEvent::RTeventCallback after, bool group_override, 
+		SessionEvent::RTeventCallback after, bool group_override,
 		void (Session::*method) (boost::shared_ptr<RouteList>, bool, bool));
 
 	void rt_set_solo (boost::shared_ptr<RouteList>, bool yn, bool group_override);
@@ -1497,10 +1497,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void start_time_changed (framepos_t);
 	void end_time_changed (framepos_t);
 
-        void set_track_monitor_input_status (bool);
+	void set_track_monitor_input_status (bool);
 	framepos_t compute_stop_limit () const;
 
-        boost::shared_ptr<Speakers> _speakers; 
+	boost::shared_ptr<Speakers> _speakers;
 	void load_nested_sources (const XMLNode& node);
 };
 

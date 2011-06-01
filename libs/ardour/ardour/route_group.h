@@ -53,11 +53,11 @@ class Track;
 class AudioTrack;
 class Session;
 
-class RouteGroup : public SessionObject 
+class RouteGroup : public SessionObject
 {
   public:
 	static void make_property_quarks();
-	
+
 	RouteGroup (Session& s, const std::string &n);
 	~RouteGroup ();
 
@@ -124,9 +124,9 @@ class RouteGroup : public SessionObject
 	PBD::Signal0<void> MembershipChanged;
 
 	XMLNode& get_state ();
-	
+
 	int set_state (const XMLNode&, int version);
-	
+
 private:
 	boost::shared_ptr<RouteList> routes;
 	boost::shared_ptr<Route> subgroup_bus;

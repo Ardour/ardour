@@ -51,7 +51,7 @@ class SessionObject : public SessionHandleRef, public PBD::StatefulDestructible
 	{
 		add_property (_name);
 	}
-	
+
 	Session&    session() const { return _session; }
 	std::string name()    const { return _name; }
 

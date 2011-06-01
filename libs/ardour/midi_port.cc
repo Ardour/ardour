@@ -84,12 +84,12 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 
 			/* check that the event is in the acceptable time range */
 
-			if ((ev.time >= (_global_port_buffer_offset + _port_buffer_offset)) && 
+			if ((ev.time >= (_global_port_buffer_offset + _port_buffer_offset)) &&
 			    (ev.time < (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
 				_buffer->push_back (ev);
 			} else {
-				cerr << "Dropping incoming MIDI at time " << ev.time << "; offset=" 
-				     << _global_port_buffer_offset << " limit=" 
+				cerr << "Dropping incoming MIDI at time " << ev.time << "; offset="
+				     << _global_port_buffer_offset << " limit="
 				     << (_global_port_buffer_offset + _port_buffer_offset + nframes) << "\n";
 			}
 		}
@@ -122,28 +122,28 @@ void
 MidiPort::resolve_notes (void* jack_buffer, MidiBuffer::TimeType when)
 {
 	uint8_t ev[3];
-	
+
 	ev[2] = 0;
-	
+
 	for (uint8_t channel = 0; channel <= 0xF; channel++) {
 		ev[0] = (MIDI_CMD_CONTROL | channel);
-		
+
 		/* we need to send all notes off AND turn the
 		 * sustain/damper pedal off to handle synths
 		 * that prioritize sustain over AllNotesOff
 		 */
-		
+
 		ev[1] = MIDI_CTL_SUSTAIN;
-		
+
 		if (jack_midi_event_write (jack_buffer, when, ev, 3) != 0) {
 			cerr << "failed to deliver sustain-zero on channel " << channel << " on port " << name() << endl;
-		} 
-		
+		}
+
 		ev[1] = MIDI_CTL_ALL_NOTES_OFF;
-		
+
 		if (jack_midi_event_write (jack_buffer, 0, ev, 3) != 0) {
 			cerr << "failed to deliver ALL NOTES OFF on channel " << channel << " on port " << name() << endl;
-		} 
+		}
 	}
 }
 
@@ -175,11 +175,11 @@ MidiPort::flush_buffers (pframes_t nframes, framepos_t time)
 
 			if (ev.time() >= _global_port_buffer_offset + _port_buffer_offset) {
 				if (jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size()) != 0) {
-					cerr << "write failed, drop flushed note off on the floor, time " 
+					cerr << "write failed, drop flushed note off on the floor, time "
 					     << ev.time() << " > " << _global_port_buffer_offset + _port_buffer_offset << endl;
 				}
 			} else {
-				cerr << "drop flushed event on the floor, time " << ev.time() 
+				cerr << "drop flushed event on the floor, time " << ev.time()
 				     << " < " << _global_port_buffer_offset + _port_buffer_offset << endl;
 			}
 		}

@@ -46,7 +46,7 @@ MidiControlUI* MidiControlUI::_instance = 0;
 
 MidiControlUI::MidiControlUI (Session& s)
 	: AbstractUI<MidiUIRequest> (_("midiui"))
-	, _session (s) 
+	, _session (s)
 {
 	MIDI::Manager::instance()->PortsChanged.connect_same_thread (rebind_connection, boost::bind (&MidiControlUI::change_midi_ports, this));
 	_instance = this;
@@ -145,13 +145,13 @@ MidiControlUI::reset_ports ()
 
 			port_sources.push_back (psrc->gobj());
 			g_source_ref (psrc->gobj());
-		} 
+		}
 	}
 }
 
 void
 MidiControlUI::thread_init ()
-{	
+{
 	struct sched_param rtparam;
 
 	pthread_set_name (X_("midiUI"));

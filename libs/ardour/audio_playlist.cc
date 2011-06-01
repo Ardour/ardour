@@ -54,7 +54,7 @@ CrossfadeListProperty::CrossfadeListProperty (AudioPlaylist& pl)
         : SequenceProperty<std::list<boost::shared_ptr<Crossfade> > > (Properties::crossfades.property_id, boost::bind (&AudioPlaylist::update, &pl, _1))
         , _playlist (pl)
 {
-	
+
 }
 
 CrossfadeListProperty::CrossfadeListProperty (CrossfadeListProperty const & p)
@@ -125,7 +125,7 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, stri
 	, _crossfades (*this)
 {
 	add_property (_crossfades);
-	
+
 	RegionList::const_iterator in_o  = other->regions.begin();
 	RegionList::iterator in_n = regions.begin();
 
@@ -170,7 +170,7 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, fram
 {
 	RegionLock rlock2 (const_cast<AudioPlaylist*> (other.get()));
 	in_set_state++;
-	
+
 	add_property (_crossfades);
 
 	framepos_t const end = start + cnt - 1;
@@ -219,7 +219,7 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, fram
 				fade_out = region->fade_out()->back()->when - ( region->last_frame() - end );  //end is inside the fadeout, preserve the fades endpoint
 			break;
 		}
-		
+
 		case OverlapEnd: {
 			position = 0;
 			offset = start - region->position();
@@ -227,12 +227,12 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, fram
 
 			if (start < region->last_frame() - region->fade_out()->back()->when)  //start is before fade-out, preserve the fadeout
 				fade_out = region->fade_out()->back()->when;
-			
+
 			if (start < region->position() + region->fade_in()->back()->when)
 				fade_in = region->fade_in()->back()->when - (start - region->position());  //end is inside the fade-in, preserve the fade-in endpoint
 			break;
 		}
-		
+
 		case OverlapExternal:
 			fade_in = region->fade_in()->back()->when;
 			fade_out = region->fade_out()->back()->when;
@@ -1015,25 +1015,25 @@ AudioPlaylist::copy_dependents (const vector<TwoRegions>& old_and_new, Playlist*
 		for (Crossfades::const_iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
 
 			if ((*i)->in() == on->first) {
-				
+
 				CrossfadeInfo::iterator cf;
 
 				if ((cf = crossfade_info.find (*i)) != crossfade_info.end()) {
 
-					/* already have a record for the old fade-in region, 
+					/* already have a record for the old fade-in region,
 					   so note the new fade-in region
 					*/
-					
+
 					cf->second.new_in = on->second;
-					
+
 				} else {
-					
+
 					/* add a record of this crossfade, keeping an association
 					   with the new fade-in region
 					*/
-					
+
 					crossfade_triple ct;
-					
+
 					ct.old_in = on->first;
 					ct.new_in = on->second;
 
@@ -1041,21 +1041,21 @@ AudioPlaylist::copy_dependents (const vector<TwoRegions>& old_and_new, Playlist*
 				}
 
 			} else if ((*i)->out() == on->first) {
-				
+
 				/* this old region is the fade-out region of this crossfade */
-				
+
 				CrossfadeInfo::iterator cf;
-				
+
 				if ((cf = crossfade_info.find (*i)) != crossfade_info.end()) {
-					
+
 					/* already have a record for this crossfade, so just keep
 					   an association for the new fade out region
 					*/
-					
+
 					cf->second.new_out = on->second;
 
 				} else {
-					
+
 					/* add a record of this crossfade, keeping an association
 					   with the new fade-in region
 					*/
@@ -1072,19 +1072,19 @@ AudioPlaylist::copy_dependents (const vector<TwoRegions>& old_and_new, Playlist*
 	}
 
 	for (CrossfadeInfo::iterator ci = crossfade_info.begin(); ci != crossfade_info.end(); ++ci) {
-		
+
 		/* for each crossfade that involves at least two of the old regions,
 		   create a new identical crossfade with the new regions
 		*/
-		
+
 		if (!ci->second.new_in || !ci->second.new_out) {
 			continue;
 		}
 
-		boost::shared_ptr<Crossfade> new_xfade (new Crossfade (ci->first, 
+		boost::shared_ptr<Crossfade> new_xfade (new Crossfade (ci->first,
 								       boost::dynamic_pointer_cast<AudioRegion>(ci->second.new_in),
 								       boost::dynamic_pointer_cast<AudioRegion>(ci->second.new_out)));
-		
+
 		/* add it at the right position - which must be at the start
 		 * of the fade-in region
 		 */
@@ -1178,11 +1178,11 @@ AudioPlaylist::pre_uncombine (vector<boost::shared_ptr<Region> >& originals, boo
 		ar->set_scale_amplitude (ar->scale_amplitude() * cr->scale_amplitude());
 
 		if (i == originals.begin()) {
-			
+
 			/* copy the compound region's fade in back into the first
 			   original region.
 			*/
-			
+
 			if (cr->fade_in()->back()->when <= ar->length()) {
 				/* don't do this if the fade is longer than the
 				 * region
@@ -1190,13 +1190,13 @@ AudioPlaylist::pre_uncombine (vector<boost::shared_ptr<Region> >& originals, boo
 				ar->set_fade_in (cr->fade_in());
 			}
 
-			
+
 		} else if (*i == originals.back()) {
 
 			/* copy the compound region's fade out back into the last
 			   original region.
 			*/
-			
+
 			if (cr->fade_out()->back()->when <= ar->length()) {
 				/* don't do this if the fade is longer than the
 				 * region

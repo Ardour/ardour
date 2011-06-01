@@ -58,47 +58,47 @@ class ExportGraphBuilder
 	typedef std::map<ExportChannelPtr,  IdentityVertexPtr> ChannelMap;
 
   public:
-	
+
 	ExportGraphBuilder (Session const & session);
 	~ExportGraphBuilder ();
-	
+
 	int process (framecnt_t frames, bool last_cycle);
 	bool process_normalize (); // returns true when finished
-	
+
 	void reset ();
 	void set_current_timespan (boost::shared_ptr<ExportTimespan> span);
 	void add_config (FileSpec const & config);
-	
+
   private:
-	
+
 	void add_split_config (FileSpec const & config);
-	
+
 	class Encoder {
 	  public:
 		template <typename T> boost::shared_ptr<AudioGrapher::Sink<T> > init (FileSpec const & new_config);
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
-	
+
 		static int get_real_format (FileSpec const & config);
-	
+
 	  private:
 		typedef boost::shared_ptr<AudioGrapher::SndfileWriter<Sample> > FloatWriterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SndfileWriter<int> >    IntWriterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SndfileWriter<short> >  ShortWriterPtr;
-		  
+
 		template<typename T> void init_writer (boost::shared_ptr<AudioGrapher::SndfileWriter<T> > & writer);
 		void copy_files (std::string orig_path);
-		
+
 		FileSpec               config;
 		std::list<FilenamePtr> filenames;
 		PBD::ScopedConnection  copy_files_connection;
-		
+
 		// Only one of these should be available at a time
 		FloatWriterPtr float_writer;
 		IntWriterPtr   int_writer;
 		ShortWriterPtr short_writer;
 	};
-	
+
 	// sample format converter
 	class SFC {
 	  public:
@@ -107,56 +107,56 @@ class ExportGraphBuilder
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
-		
+
 	  private:
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<Sample> > FloatConverterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<int> >   IntConverterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<short> > ShortConverterPtr;
-		
+
 		FileSpec           config;
 		boost::ptr_list<Encoder> children;
 		int                data_width;
-		
+
 		// Only one of these should be available at a time
 		FloatConverterPtr float_converter;
 		IntConverterPtr int_converter;
 		ShortConverterPtr short_converter;
 	};
-	
+
 	class Normalizer {
 	  public:
 		Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
-		
+
 		/// Returns true when finished
 		bool process ();
-		
+
 	  private:
 		typedef boost::shared_ptr<AudioGrapher::PeakReader> PeakReaderPtr;
 		typedef boost::shared_ptr<AudioGrapher::Normalizer> NormalizerPtr;
 		typedef boost::shared_ptr<AudioGrapher::TmpFile<Sample> > TmpFilePtr;
 		typedef boost::shared_ptr<AudioGrapher::Threader<Sample> > ThreaderPtr;
 		typedef boost::shared_ptr<AudioGrapher::AllocatingProcessContext<Sample> > BufferPtr;
-		
+
 		void start_post_processing();
-		
+
 		ExportGraphBuilder & parent;
-		
+
 		FileSpec        config;
 		framecnt_t      max_frames_out;
-		
+
 		BufferPtr       buffer;
 		PeakReaderPtr   peak_reader;
 		TmpFilePtr      tmp_file;
 		NormalizerPtr   normalizer;
 		ThreaderPtr     threader;
 		boost::ptr_list<SFC> children;
-		
+
 		PBD::ScopedConnection post_processing_connection;
 	};
-	
+
 	// sample rate converter
 	class SRC {
 	  public:
@@ -164,13 +164,13 @@ class ExportGraphBuilder
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
-		
+
 	  private:
 		typedef boost::shared_ptr<AudioGrapher::SampleRateConverter> SRConverterPtr;
-		
+
 		template<typename T>
 		void add_child_to_list (FileSpec const & new_config, boost::ptr_list<T> & list);
-  
+
 		ExportGraphBuilder &  parent;
 		FileSpec              config;
 		boost::ptr_list<SFC>  children;
@@ -178,7 +178,7 @@ class ExportGraphBuilder
 		SRConverterPtr        converter;
 		framecnt_t            max_frames_out;
 	};
-	
+
 	// Silence trimmer + adder
 	class SilenceHandler {
 	  public:
@@ -186,27 +186,27 @@ class ExportGraphBuilder
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
-		
+
 	  private:
 		typedef boost::shared_ptr<AudioGrapher::SilenceTrimmer<Sample> > SilenceTrimmerPtr;
-		
+
 		ExportGraphBuilder & parent;
 		FileSpec             config;
 		boost::ptr_list<SRC> children;
 		SilenceTrimmerPtr    silence_trimmer;
 		framecnt_t           max_frames_in;
 	};
-	
+
 	// channel configuration
 	class ChannelConfig {
 	  public:
 		ChannelConfig (ExportGraphBuilder & parent, FileSpec const & new_config, ChannelMap & channel_map);
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
-		
+
 	  private:
 		typedef boost::shared_ptr<AudioGrapher::Interleaver<Sample> > InterleaverPtr;
-		
+
 		ExportGraphBuilder &      parent;
 		FileSpec                  config;
 		boost::ptr_list<SilenceHandler> children;
@@ -216,18 +216,18 @@ class ExportGraphBuilder
 
 	Session const & session;
 	boost::shared_ptr<ExportTimespan> timespan;
-	
+
 	// Roots for export processor trees
 	typedef boost::ptr_list<ChannelConfig> ChannelConfigList;
 	ChannelConfigList channel_configs;
-	
+
 	// The sources of all data, each channel is read only once
 	ChannelMap channels;
-	
+
 	framecnt_t process_buffer_frames;
-	
+
 	std::list<Normalizer *> normalizers;
-	
+
 	Glib::ThreadPool thread_pool;
 };
 

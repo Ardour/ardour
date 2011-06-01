@@ -89,7 +89,7 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 					sp[nx] *= gab[nx];
 				}
 			}
-			
+
 			_current_gain = gab[nframes-1];
 
 		} else { /* manual (scalar) gain */
@@ -282,18 +282,18 @@ Amp::apply_gain (AudioBuffer& buf, framecnt_t nframes, gain_t initial, gain_t ta
 
 
         Sample* const buffer = buf.data();
-        
+
         fractional_pos = 1.0;
-        
+
         for (pframes_t nx = 0; nx < declick; ++nx) {
                 buffer[nx] *= (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
                 fractional_pos += fractional_shift;
         }
-        
+
         /* now ensure the rest of the buffer has the target value applied, if necessary. */
-        
+
         if (declick != nframes) {
-                
+
                 if (target == 0.0) {
                         memset (&buffer[declick], 0, sizeof (Sample) * (nframes - declick));
                 } else if (target != 1.0) {
@@ -404,7 +404,7 @@ Amp::set_state (const XMLNode& node, int version)
         if ((gain_node = node.child (Controllable::xml_node_name.c_str())) != 0) {
                 _gain_control->set_state (*gain_node, version);
         }
-        
+
 	return 0;
 }
 

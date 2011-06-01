@@ -73,7 +73,7 @@ ControlProtocolManager::set_session (Session* s)
 			if ((*i)->requested || (*i)->mandatory) {
 				instantiate (**i);
 				(*i)->requested = false;
-				
+
 				if ((*i)->protocol && (*i)->state) {
 					(*i)->protocol->set_state (*(*i)->state, Stateful::loading_state_version);
 				}

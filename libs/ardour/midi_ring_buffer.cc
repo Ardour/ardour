@@ -48,7 +48,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 	   to the MidiBuffer with adjusted times.  The situation is as follows:
 
 	   session frames----------------------------->
-	   
+
 	             |                            |                    |
 	        start_of_loop                   start              end_of_loop
 
@@ -100,12 +100,12 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		} else {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 in range %2 .. %3\n", ev_time, start, end));
 		}
-		
+
 		/* lets see if we are going to be able to write this event into dst.
 		 */
 
 		assert(ev_time >= start);
-		
+
 		ev_time -= start;
 		ev_time += offset;
 
@@ -206,8 +206,8 @@ MidiRingBuffer<T>::dump(ostream& str)
 		return;
 	}
 
-	str << this << ": Dump size = " << vec.len[0] + vec.len[1] 
-	    << " r@ " << RingBufferNPT<uint8_t>::get_read_ptr() 
+	str << this << ": Dump size = " << vec.len[0] + vec.len[1]
+	    << " r@ " << RingBufferNPT<uint8_t>::get_read_ptr()
 	    << " w@" << RingBufferNPT<uint8_t>::get_write_ptr() << endl;
 
 
@@ -222,7 +222,7 @@ MidiRingBuffer<T>::dump(ostream& str)
 	const uint8_t* end = buf + vec.len[0] + vec.len[1];
 
 	while (data < end) {
-                
+
 		memcpy (&ev_time, data, sizeof (T));
 		data += sizeof (T);
 		str << "\ttime " << ev_time;

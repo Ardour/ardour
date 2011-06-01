@@ -24,7 +24,7 @@
 
 namespace ARDOUR {
 
-/** A class to handle reporting of progress of something */	
+/** A class to handle reporting of progress of something */
 class Progress
 {
 public:
@@ -36,7 +36,7 @@ public:
 	void descend (float);
 
 	bool cancelled () const;
-	
+
 protected:
 	void cancel ();
 
@@ -48,7 +48,7 @@ private:
 
 	struct Level {
 		Level (float a) : allocation (a), normalised (0) {}
-		
+
 		float allocation;
 		float normalised;
 	};

@@ -92,7 +92,7 @@ class PluginInsert : public Processor
 
 	private:
 		double user_to_plugin (double) const;
-		
+
 		PluginInsert* _plugin;
 		bool _logarithmic;
 		bool _sr_dependent;

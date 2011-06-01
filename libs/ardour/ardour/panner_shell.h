@@ -67,14 +67,14 @@ public:
 
 	PBD::Signal0<void> Changed; /* panner and/or outputs count changed */
 
-        boost::shared_ptr<Panner> panner() const { return _panner; }
-        boost::shared_ptr<Pannable> pannable() const { return _pannable; }
+	boost::shared_ptr<Panner> panner() const { return _panner; }
+	boost::shared_ptr<Pannable> pannable() const { return _pannable; }
 
   private:
 	void distribute_no_automation (BufferSet& src, BufferSet& dest, pframes_t nframes, gain_t gain_coeff);
-        boost::shared_ptr<Panner> _panner;
-        boost::shared_ptr<Pannable> _pannable;
-     
+	boost::shared_ptr<Panner> _panner;
+	boost::shared_ptr<Pannable> _pannable;
+
 	static float current_automation_version_number;
 };
 

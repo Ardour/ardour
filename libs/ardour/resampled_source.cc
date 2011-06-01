@@ -55,7 +55,7 @@ ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<Importab
 	input = new float[blocksize];
 
 	seek (0);
-	
+
 	src_data.src_ratio = ((float) rate) / source->samplerate();
 }
 
@@ -128,12 +128,12 @@ ResampledImportableSource::seek (framepos_t pos)
 		error << string_compose(_("Import: src_new() failed : %1"), src_strerror (err)) << endmsg ;
 		throw failed_constructor ();
 	}
-	
+
 	src_data.input_frames = 0;
 	src_data.data_in = input;
 	src_data.end_of_input = 0;
 }
-	
+
 framepos_t
 ResampledImportableSource::natural_position () const
 {

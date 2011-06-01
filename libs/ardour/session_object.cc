@@ -33,8 +33,8 @@ namespace ARDOUR {
 	}
 }
 
-void 
-SessionObject::make_property_quarks () 
+void
+SessionObject::make_property_quarks ()
 {
 	Properties::name.property_id = g_quark_from_static_string (X_("name"));
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for name = %1\n", 	Properties::name.property_id));

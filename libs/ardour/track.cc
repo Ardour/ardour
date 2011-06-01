@@ -313,7 +313,7 @@ void
 Track::set_diskstream (boost::shared_ptr<Diskstream> ds)
 {
 	_diskstream = ds;
-	
+
 	ds->PlaylistChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_playlist_changed, this));
 	diskstream_playlist_changed ();
 	ds->RecordEnableChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_record_enable_changed, this));
@@ -375,7 +375,7 @@ Track::set_capture_offset ()
 	_diskstream->set_capture_offset ();
 }
 
-list<boost::shared_ptr<Source> > 
+list<boost::shared_ptr<Source> >
 Track::steal_write_sources()
 {
         return _diskstream->steal_write_sources ();
@@ -616,7 +616,7 @@ Track::set_block_size (pframes_t n)
 	_diskstream->set_block_size (n);
 }
 
-void 
+void
 Track::adjust_playback_buffering ()
 {
         if (_diskstream) {
@@ -624,7 +624,7 @@ Track::adjust_playback_buffering ()
         }
 }
 
-void 
+void
 Track::adjust_capture_buffering ()
 {
         if (_diskstream) {
@@ -676,8 +676,8 @@ Track::send_silence () const
 
 void
 Track::maybe_declick (BufferSet& bufs, framecnt_t nframes, int declick)
-{	
-        /* never declick if there is an internal generator - we just want it to 
+{
+        /* never declick if there is an internal generator - we just want it to
            keep generating sound without interruption.
         */
 

@@ -65,7 +65,7 @@ PortExportChannel::read (Sample const *& data, framecnt_t frames) const
 		data = (*ports.begin())->get_audio_buffer(frames).data();
 		return;
 	}
-	
+
 	memset (buffer.get(), 0, frames * sizeof (Sample));
 
 	for (PortSet::const_iterator it = ports.begin(); it != ports.end(); ++it) {

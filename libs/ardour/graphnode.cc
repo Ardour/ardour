@@ -26,7 +26,7 @@ using namespace ARDOUR;
 
 GraphNode::GraphNode (graph_ptr_t graph)
         : _graph(graph)
-{ 
+{
 }
 
 GraphNode::~GraphNode()

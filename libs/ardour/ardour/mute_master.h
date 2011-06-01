@@ -48,22 +48,22 @@ class MuteMaster : public SessionHandleRef, public PBD::Stateful
 	~MuteMaster() {}
 
 	bool muted_by_self () const { return _muted_by_self && (_mute_point != MutePoint (0)); }
-        bool muted_by_self_at (MutePoint mp) const { return _muted_by_self && (_mute_point & mp); }
+	bool muted_by_self_at (MutePoint mp) const { return _muted_by_self && (_mute_point & mp); }
 	bool muted_by_others_at (MutePoint mp) const;
 
 	gain_t mute_gain_at (MutePoint) const;
 
-        void set_muted_by_self (bool yn) { _muted_by_self = yn; }
+	void set_muted_by_self (bool yn) { _muted_by_self = yn; }
 
 	void mute_at (MutePoint);
 	void unmute_at (MutePoint);
 
 	void set_mute_points (const std::string& mute_point);
-        void set_mute_points (MutePoint);
-        MutePoint mute_points() const { return _mute_point; }
+	void set_mute_points (MutePoint);
+	MutePoint mute_points() const { return _mute_point; }
 
-        void set_soloed (bool);
-        void set_solo_ignore (bool yn) { _solo_ignore = yn; }
+	void set_soloed (bool);
+	void set_solo_ignore (bool yn) { _solo_ignore = yn; }
 
 	PBD::Signal0<void> MutePointChanged;
 
@@ -72,9 +72,9 @@ class MuteMaster : public SessionHandleRef, public PBD::Stateful
 
   private:
 	volatile MutePoint _mute_point;
-        volatile bool      _muted_by_self;
-        volatile bool      _soloed;
-        volatile bool      _solo_ignore;
+	volatile bool      _muted_by_self;
+	volatile bool      _soloed;
+	volatile bool      _solo_ignore;
 };
 
 } // namespace ARDOUR

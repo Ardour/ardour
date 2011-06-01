@@ -70,7 +70,7 @@ namespace Properties {
 class Playlist;
 class Filter;
 class ExportSpecification;
-class Progress;	
+class Progress;
 
 enum RegionEditState {
 	EditChangesNothing = 0,
@@ -90,20 +90,20 @@ class Region
 	typedef std::vector<boost::shared_ptr<Source> > SourceList;
 
 	static void make_property_quarks ();
-	
+
 	static PBD::Signal2<void,boost::shared_ptr<ARDOUR::Region>, const PBD::PropertyChange&> RegionPropertyChanged;
 
 	virtual ~Region();
-	
+
 	/** Note: changing the name of a Region does not constitute an edit */
 	bool set_name (const std::string& str);
 
 	const DataType& data_type () const { return _type; }
-	
+
 	AnalysisFeatureList transients () { return _transients; };
 
 	/** How the region parameters play together:
-	 *   
+	 *
 	 * POSITION: first frame of the region along the timeline
 	 * START:    first frame of the region within its source(s)
 	 * LENGTH:   number of frames the region represents
@@ -123,7 +123,7 @@ class Region
 
 	framepos_t ancestral_start ()  const { return _ancestral_start; }
 	framecnt_t ancestral_length () const { return _ancestral_length; }
-	
+
 	float stretch () const { return _stretch; }
 	float shift ()   const { return _shift; }
 
@@ -132,7 +132,7 @@ class Region
 	frameoffset_t sync_offset (int& dir) const;
 	framepos_t sync_position () const;
 	framepos_t sync_point () const;
-	
+
 	framepos_t adjust_to_sync (framepos_t) const;
 
 	/* first_frame() is an alias; last_frame() just hides some math */
@@ -153,11 +153,11 @@ class Region
 	bool sync_marked ()      const { return _sync_marked; }
 	bool external ()         const { return _external; }
 	bool import ()           const { return _import; }
-        
-        Trimmable::CanTrim can_trim () const;
+
+	Trimmable::CanTrim can_trim () const;
 
 	PositionLockStyle position_lock_style () const { return _position_lock_style; }
-	
+
 	void set_position_lock_style (PositionLockStyle ps);
 	void recompute_position_from_lock_style ();
 
@@ -178,7 +178,7 @@ class Region
 	bool source_equivalent (boost::shared_ptr<const Region>) const;
 	bool uses_source (boost::shared_ptr<const Source>) const;
 	bool uses_source_path (const std::string&) const;
-	
+
 	std::string source_string () const;
 
 
@@ -320,7 +320,7 @@ class Region
 
 	/** Construct a region from another region, at an offset within that region */
 	Region (boost::shared_ptr<const Region>, frameoffset_t start_offset);
-	
+
 	/** Construct a region as a copy of another region, but with different sources */
 	Region (boost::shared_ptr<const Region>, const SourceList&);
 
@@ -351,7 +351,7 @@ class Region
 
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
-	
+
 	DataType _type;
 
 	PBD::Property<bool>        _muted;
@@ -384,7 +384,7 @@ class Region
 	mutable RegionEditState _first_edit;
 	Timecode::BBT_Time      _bbt_time;
 	AnalysisFeatureList     _transients;
-	
+
 	mutable uint64_t        _read_data_count;  ///< modified in read()
 	uint64_t                _last_layer_op;  ///< timestamp
 	SourceList              _sources;

@@ -57,11 +57,11 @@ InternalSend::use_target (boost::shared_ptr<Route> sendto)
 	if (_send_to) {
 		_send_to->remove_send_from_internal_return (this);
 	}
-	
+
         _send_to = sendto;
 
         _send_to->add_send_to_internal_return (this);
-        
+
         set_name (sendto->name());
         _send_to_id = _send_to->id();
 
@@ -106,7 +106,7 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 
 		Amp::apply_gain (mixbufs, nframes, _current_gain, tgain);
 		_current_gain = tgain;
-                
+
 	} else if (tgain == 0.0) {
 
 		/* we were quiet last time, and we're still supposed to be quiet.

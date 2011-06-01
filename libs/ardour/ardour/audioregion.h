@@ -115,10 +115,10 @@ class AudioRegion : public Region
 				     uint32_t  chan_n      = 0,
 				     framecnt_t read_frames = 0,
 				     framecnt_t skip_frames = 0) const;
-	
+
 	virtual framecnt_t master_read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
 					   framepos_t position, framecnt_t cnt, uint32_t chan_n=0) const;
-	
+
 	virtual framecnt_t read_raw_internal (Sample*, framepos_t, framecnt_t, int channel) const;
 
 	XMLNode& state ();
@@ -196,7 +196,7 @@ class AudioRegion : public Region
 	PBD::Property<bool>     _fade_out_active;
 	/** linear gain to apply to the whole region */
 	PBD::Property<gain_t>   _scale_amplitude;
-	
+
 	void register_properties ();
 	void post_set (const PBD::PropertyChange&);
 

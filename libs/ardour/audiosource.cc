@@ -446,7 +446,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		*/
 
 		const framecnt_t chunksize = (framecnt_t) min (expected_peaks, 65536.0);
-		
+
 		staging = new PeakData[chunksize];
 
 		/* compute the rounded up frame position  */
@@ -582,14 +582,14 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
                                            adjusting zero_fill and npeaks and then breaking out of
                                            this loop early
 					*/
-                                        
+
                                         memset (raw_staging, 0, sizeof (Sample) * chunksize);
-                                        
+
                                 } else {
-                                        
+
                                         to_read = min (chunksize, (_length - current_frame));
-                                        
-                                        
+
+
                                         if ((frames_read = read_unlocked (raw_staging, current_frame, to_read)) == 0) {
                                                 error << string_compose(_("AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"),
                                                                         _name, to_read, current_frame, _length, strerror (errno))
@@ -597,7 +597,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
                                                 goto out;
                                         }
                                 }
-                                
+
 				i = 0;
 			}
 
@@ -956,7 +956,7 @@ AudioSource::dec_read_data_count (framecnt_t cnt)
 
         if (val < _read_data_count) {
                 _read_data_count -= val;
-        } else { 
+        } else {
                 _read_data_count = 0;
         }
 }
@@ -975,28 +975,28 @@ void
 AudioSource::allocate_working_buffers (framecnt_t framerate)
 {
 	Glib::Mutex::Lock lm (_level_buffer_lock);
-	
-	
+
+
 	/* Note: we don't need any buffers allocated until
 	   a level 1 audiosource is created, at which
 	   time we'll call ::ensure_buffers_for_level()
 	   with the right value and do the right thing.
 	*/
-	
+
 	if (!_mixdown_buffers.empty()) {
 		ensure_buffers_for_level_locked ( _mixdown_buffers.size(), framerate);
 	}
 }
 
 void
-AudioSource::ensure_buffers_for_level (uint32_t level, framecnt_t frame_rate) 
+AudioSource::ensure_buffers_for_level (uint32_t level, framecnt_t frame_rate)
 {
 	Glib::Mutex::Lock lm (_level_buffer_lock);
 	ensure_buffers_for_level_locked (level, frame_rate);
 }
 
 void
-AudioSource::ensure_buffers_for_level_locked (uint32_t level, framecnt_t frame_rate) 
+AudioSource::ensure_buffers_for_level_locked (uint32_t level, framecnt_t frame_rate)
 {
 	framecnt_t nframes = (framecnt_t) floor (Config->get_audio_playback_buffer_seconds() * frame_rate);
 

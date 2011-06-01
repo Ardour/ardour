@@ -1,4 +1,4 @@
-#ifndef __libardour_buffer_manager__ 
+#ifndef __libardour_buffer_manager__
 #define __libardour_buffer_manager__
 
 #include <stdint.h>
@@ -15,21 +15,21 @@ class ThreadBuffers;
 
 class BufferManager
 {
-  public:
-        static void init (uint32_t);
-        
-        static ThreadBuffers* get_thread_buffers ();
-        static void           put_thread_buffers (ThreadBuffers*);
+public:
+	static void init (uint32_t);
 
-        static void ensure_buffers (ChanCount howmany = ChanCount::ZERO);
+	static ThreadBuffers* get_thread_buffers ();
+	static void           put_thread_buffers (ThreadBuffers*);
 
-  private:
+	static void ensure_buffers (ChanCount howmany = ChanCount::ZERO);
+
+private:
 	static Glib::StaticMutex rb_mutex;
-	
-        typedef PBD::RingBufferNPT<ThreadBuffers*> ThreadBufferFIFO;
+
+	typedef PBD::RingBufferNPT<ThreadBuffers*> ThreadBufferFIFO;
 	typedef std::list<ThreadBuffers*> ThreadBufferList;
 
-        static ThreadBufferFIFO* thread_buffers;
+	static ThreadBufferFIFO* thread_buffers;
 	static ThreadBufferList* thread_buffers_list;
 };
 

@@ -58,8 +58,8 @@ public:
 
 	static void apply_gain (BufferSet& bufs, framecnt_t nframes, gain_t initial, gain_t target);
 	static void apply_simple_gain(BufferSet& bufs, framecnt_t nframes, gain_t target);
-        
-        static void apply_gain (AudioBuffer& buf, framecnt_t nframes, gain_t initial, gain_t target);
+
+	static void apply_gain (AudioBuffer& buf, framecnt_t nframes, gain_t initial, gain_t target);
 	static void apply_simple_gain(AudioBuffer& buf, framecnt_t nframes, gain_t target);
 
 	static void declick (BufferSet& bufs, framecnt_t nframes, int dir);

@@ -163,7 +163,7 @@ class ExportFormatBase {
 
 	void set_extension (std::string const & extension) { _extension = extension; }
 	std::string const & extension () const { return _extension; }
-	
+
 	static SampleRate nearest_sample_rate (framecnt_t sample_rate);
 
   protected:

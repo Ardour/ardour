@@ -81,7 +81,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress*)
 	framepos_t pos = 0;
 	framecnt_t avail = 0;
 	boost::shared_ptr<AudioRegion> result;
-	
+
 	cerr << "RBEffect: source region: position = " << region->position()
 	     << ", start = " << region->start()
 	     << ", length = " << region->length()

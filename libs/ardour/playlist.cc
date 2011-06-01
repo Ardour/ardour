@@ -80,7 +80,7 @@ RegionListProperty::RegionListProperty (Playlist& pl)
 	: SequenceProperty<std::list<boost::shared_ptr<Region> > > (Properties::regions.property_id, boost::bind (&Playlist::update, &pl, _1))
 	, _playlist (pl)
 {
-	
+
 }
 
 RegionListProperty::RegionListProperty (RegionListProperty const & p)
@@ -108,7 +108,7 @@ RegionListProperty::get_content_as_xml (boost::shared_ptr<Region> region, XMLNod
 	/* All regions (even those which are deleted) have their state saved by other
 	   code, so we can just store ID here.
 	*/
-	
+
 	node.add_property ("id", region->id().to_s ());
 }
 
@@ -121,7 +121,7 @@ RegionListProperty::get_content_from_xml (XMLNode const & node) const
 	PBD::ID id (prop->value ());
 
 	boost::shared_ptr<Region> ret = _playlist.region_by_id (id);
-        
+
 	if (!ret) {
 		ret = RegionFactory::region_by_id (id);
 	}
@@ -142,7 +142,7 @@ Playlist::Playlist (Session& sess, string nom, DataType type, bool hide)
 
 Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide)
 	: SessionObject(sess, "unnamed playlist")
-	, regions (*this)	
+	, regions (*this)
 	, _type(type)
 {
 #ifndef NDEBUG
@@ -251,7 +251,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 
 		RegionFactory::region_name (new_name, region->name(), false);
 
-		PropertyList plist; 
+		PropertyList plist;
 
 		plist.add (Properties::start, region->start() + offset);
 		plist.add (Properties::length, len);
@@ -328,7 +328,7 @@ Playlist::init (bool hide)
 
 	_session.history().BeginUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::begin_undo, this));
 	_session.history().EndUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::end_undo, this));
-	
+
 	ContentsChanged.connect_same_thread (*this, boost::bind (&Playlist::mark_session_dirty, this));
 }
 
@@ -355,7 +355,7 @@ Playlist::_set_sort_id ()
 	  or <track name>.<edit group name>.<id> where id
 	  is an integer. We extract the id and sort by that.
 	*/
-        
+
 	size_t dot_position = _name.val().find_last_of(".");
 
 	if (dot_position == string::npos) {
@@ -384,7 +384,7 @@ Playlist::set_name (const string& str)
 
 	if (_refcnt > 2) {
 		return false;
-	} 
+	}
 
 	bool ret =  SessionObject::set_name(str);
 	if (ret) {
@@ -515,17 +515,17 @@ Playlist::notify_region_start_trimmed (boost::shared_ptr<Region> r)
 	}
 
 	Evoral::Range<framepos_t> const extra (r->position(), r->last_position());
-	
+
 	if (holding_state ()) {
-		
+
 		pending_region_extensions.push_back (extra);
-		
+
 	} else {
-		
+
 		list<Evoral::Range<framepos_t> > r;
 		r.push_back (extra);
 		RegionsExtended (r);
-		
+
 	}
 }
 
@@ -679,7 +679,7 @@ Playlist::flush_notifications (bool from_undo)
 	if (!pending_region_extensions.empty ()) {
 		RegionsExtended (pending_region_extensions);
 	}
-	
+
 	clear_pending ();
 
 	in_flush = false;
@@ -741,7 +741,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, flo
 
 		{
 			PropertyList plist;
-			
+
 			plist.add (Properties::start, region->start());
 			plist.add (Properties::length, length);
 			plist.add (Properties::name, name);
@@ -1009,7 +1009,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 				  	RegionFactory::region_name (new_name, current->name(), false);
 
 					PropertyList plist;
-					
+
 					plist.add (Properties::start, current->start() + (pos2 - pos1));
 					plist.add (Properties::length, pos3 - pos2);
 					plist.add (Properties::name, new_name);
@@ -1028,14 +1028,14 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 				RegionFactory::region_name (new_name, current->name(), false);
 
 				PropertyList plist;
-				
+
 				plist.add (Properties::start, current->start() + (pos3 - pos1));
 				plist.add (Properties::length, pos4 - pos3);
 				plist.add (Properties::name, new_name);
 				plist.add (Properties::layer, regions.size());
 				plist.add (Properties::automatic, true);
 				plist.add (Properties::right_of_split, true);
-				
+
 				region = RegionFactory::create (current, plist);
 
 				add_region_internal (region, end);
@@ -1064,9 +1064,9 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 					/* end +++++ */
 
 					RegionFactory::region_name (new_name, current->name(), false);
-					
+
 					PropertyList plist;
-					
+
 					plist.add (Properties::start, current->start() + (pos2 - pos1));
 					plist.add (Properties::length, pos4 - pos2);
 					plist.add (Properties::name, new_name);
@@ -1109,7 +1109,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 					RegionFactory::region_name (new_name, current->name(), false);
 
 					PropertyList plist;
-					
+
 					plist.add (Properties::start, current->start());
 					plist.add (Properties::length, pos3 - pos1);
 					plist.add (Properties::name, new_name);
@@ -1311,14 +1311,14 @@ Playlist::duplicate (boost::shared_ptr<Region> region, framepos_t position, floa
 		framecnt_t length = (framecnt_t) floor (region->length() * (times - floor (times)));
 		string name;
 		RegionFactory::region_name (name, region->name(), false);
-		
+
 		{
 			PropertyList plist;
-			
+
 			plist.add (Properties::start, region->start());
 			plist.add (Properties::length, length);
 			plist.add (Properties::name, name);
-			
+
 			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
 			add_region_internal (sub, pos);
 		}
@@ -1884,7 +1884,7 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 					                                                   (*x)->name(),
 					                                                   (*t)));
 				}
-                                        
+
 			}
 
 			RegionSortByLayer cmp;
@@ -2174,9 +2174,9 @@ Playlist::clear_owned_changes ()
 void
 Playlist::update (const RegionListProperty::ChangeRecord& change)
 {
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("Playlist %1 updates from a change record with %2 adds %3 removes\n", 
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("Playlist %1 updates from a change record with %2 adds %3 removes\n",
 	                                                name(), change.added.size(), change.removed.size()));
-        
+
 	freeze ();
 	/* add the added regions */
 	for (RegionListProperty::ChangeContainer::iterator i = change.added.begin(); i != change.added.end(); ++i) {
@@ -2245,7 +2245,7 @@ Playlist::set_state (const XMLNode& node, int version)
 				error << _("region state node has no ID, ignored") << endmsg;
 				continue;
 			}
-			
+
 			ID id = prop->value ();
 
 			if ((region = region_by_id (id))) {
@@ -2256,14 +2256,14 @@ Playlist::set_state (const XMLNode& node, int version)
 					region->resume_property_changes ();
 					continue;
 				}
-				
+
 			} else if ((region = RegionFactory::create (_session, *child, true)) != 0) {
 				region->suspend_property_changes ();
 			} else {
 				error << _("Playlist: cannot create region from XML") << endmsg;
 				continue;
 			}
-			
+
 
 			add_region (region, region->position(), 1.0);
 
@@ -2271,7 +2271,7 @@ Playlist::set_state (const XMLNode& node, int version)
 			region->set_last_layer_op( region->layer());
 			region->resume_property_changes ();
 
-		} 
+		}
 	}
 
 	/* update dependents, which was not done during add_region_internal
@@ -2524,7 +2524,7 @@ Playlist::relayer ()
 		for (int k = start_division; k <= end_division; ++k) {
 			layers[j][k].push_back (*i);
 		}
-		
+
 		if ((*i)->layer() != j) {
 			changed = true;
 		}
@@ -3009,7 +3009,7 @@ bool
 Playlist::has_region_at (framepos_t const p) const
 {
 	RegionLock (const_cast<Playlist *> (this));
-	
+
 	RegionList::const_iterator i = regions.begin ();
 	while (i != regions.end() && !(*i)->covers (p)) {
 		++i;
@@ -3023,12 +3023,12 @@ void
 Playlist::remove_region_by_source (boost::shared_ptr<Source> s)
 {
 	RegionLock rl (this);
-	
+
 	RegionList::iterator i = regions.begin();
 	while (i != regions.end()) {
 		RegionList::iterator j = i;
 		++j;
-		
+
 		if ((*i)->uses_source (s)) {
 			remove_region_internal (*i);
 		}
@@ -3046,7 +3046,7 @@ framepos_t
 Playlist::find_next_top_layer_position (framepos_t t) const
 {
 	RegionLock rlock (const_cast<Playlist *> (this));
-	
+
 	layer_t const top = top_layer ();
 
 	RegionList copy = regions.rlist ();
@@ -3064,7 +3064,7 @@ Playlist::find_next_top_layer_position (framepos_t t) const
 boost::shared_ptr<Region>
 Playlist::combine (const RegionList& r)
 {
-	PropertyList plist; 
+	PropertyList plist;
 	uint32_t channels = 0;
 	uint32_t layer = 0;
 	framepos_t earliest_position = max_framepos;
@@ -3112,7 +3112,7 @@ Playlist::combine (const RegionList& r)
 		/* make position relative to zero */
 
 		pl->add_region (copied_region, original_region->position() - earliest_position);
-		
+
 		/* use the maximum number of channels for any region */
 
 		channels = max (channels, original_region->n_channels());
@@ -3134,12 +3134,12 @@ Playlist::combine (const RegionList& r)
 
 	SourceList sources;
 	pair<framepos_t,framepos_t> extent = pl->get_extent();
-	
+
 	for (uint32_t chn = 0; chn < channels; ++chn) {
 		sources.push_back (SourceFactory::createFromPlaylist (_type, _session, pl, id(), parent_name, chn, 0, extent.second, false, false));
-	
+
 	}
-	
+
 	/* now a new whole-file region using the list of sources */
 
 	plist.add (Properties::start, 0);
@@ -3150,7 +3150,7 @@ Playlist::combine (const RegionList& r)
 	boost::shared_ptr<Region> parent_region = RegionFactory::create (sources, plist, true);
 
 	/* now the non-whole-file region that we will actually use in the
-	 * playlist 
+	 * playlist
 	 */
 
 	plist.clear ();
@@ -3165,19 +3165,19 @@ Playlist::combine (const RegionList& r)
 	 */
 
 	freeze ();
-	
+
 	for (RegionList::const_iterator i = r.begin(); i != r.end(); ++i) {
 		remove_region (*i);
 	}
 
 	/* do type-specific stuff with the originals and the new compound
-	   region 
+	   region
 	*/
-	
+
 	post_combine (originals, compound_region);
 
 	/* add the new region at the right location */
-	
+
 	add_region (compound_region, earliest_position);
 
 	_combine_ops++;
@@ -3196,7 +3196,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	vector<TwoRegions> old_and_new_regions;
 
 	// (1) check that its really a compound region
-	
+
 	if ((pls = boost::dynamic_pointer_cast<PlaylistSource>(target->source (0))) == 0) {
 		return;
 	}
@@ -3209,23 +3209,23 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	/* the leftmost (earliest) edge of the compound region
 	   starts at zero in its source, or larger if it
 	   has been trimmed or content-scrolled.
-	   
+
 	   the rightmost (latest) edge of the compound region
 	   relative to its source is the starting point plus
 	   the length of the region.
 	*/
-	
+
 	// (2) get all the original regions
 
 	const RegionList& rl (pl->region_list().rlist());
 	RegionFactory::CompoundAssociations& cassocs (RegionFactory::compound_associations());
 	frameoffset_t move_offset = 0;
-	
+
 	/* there are two possibilities here:
 	   1) the playlist that the playlist source was based on
 	   is us, so just add the originals (which belonged to
 	   us anyway) back in the right place.
-	   
+
 	   2) the playlist that the playlist source was based on
 	   is NOT us, so we need to make copies of each of
 	   the original regions that we find, and add them
@@ -3272,7 +3272,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 		switch (original->coverage (adjusted_start, adjusted_end)) {
 		case OverlapNone:
-			/* original region does not cover any part 
+			/* original region does not cover any part
 			   of the current state of the compound region
 			*/
 			continue;
@@ -3284,7 +3284,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			original->trim_to (adjusted_start, adjusted_end - adjusted_start);
 			modified_region = true;
 			break;
-				
+
 		case OverlapExternal:
 			/* overlap fully covers original, so leave it
 			   as is
@@ -3298,7 +3298,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			original->trim_front (adjusted_start);
 			modified_region = true;
 			break;
-				
+
 		case OverlapStart:
 			/* overlap covers start but ends within, so
 			 * trim the end of the region.
@@ -3320,7 +3320,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 		}
 
 		/* and add to the list of regions waiting to be
-		 * re-inserted 
+		 * re-inserted
 		 */
 
 		originals.push_back (original);
@@ -3343,7 +3343,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	}
 
 	/* now move dependent regions back from the compound to this playlist */
-	
+
 	pl->copy_dependents (old_and_new_regions, this);
 
 	in_partition = false;

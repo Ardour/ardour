@@ -35,7 +35,7 @@
 
 #include "ardour/types.h"
 
-#include <jack/jack.h> 
+#include <jack/jack.h>
 
 namespace MIDI {
 	class MachineControl;
@@ -53,15 +53,15 @@ namespace ARDOUR {
 	int cleanup ();
 	bool no_auto_connect ();
 	void make_property_quarks ();
-        
+
 	extern PBD::PropertyChange bounds_change;
 
 	extern const char* const ardour_config_info;
 
 	void find_bindings_files (std::map<std::string,std::string>&);
 
-        std::string translation_kill_path ();
-        bool translations_are_disabled ();
+	std::string translation_kill_path ();
+	bool translations_are_disabled ();
 
 	const layer_t max_layer = UCHAR_MAX;
 

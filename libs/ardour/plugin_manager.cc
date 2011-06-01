@@ -640,7 +640,7 @@ PluginManager::save_statuses ()
 			ofs << "Hidden";
 			break;
 		}
-	
+
 		ofs << ' ';
 		ofs << (*i).unique_id;;
 		ofs << endl;
@@ -659,7 +659,7 @@ PluginManager::load_statuses ()
 	if (!ifs) {
 		return;
 	}
-	
+
 	std::string stype;
 	std::string sstatus;
 	std::string id;
@@ -714,12 +714,12 @@ PluginManager::load_statuses ()
 			      << endmsg;
 			continue;
 		}
-		
+
 		id = buf;
 		strip_whitespace_edges (id);
 		set_status (type, id, status);
 	}
-	
+
 	ifs.close ();
 }
 

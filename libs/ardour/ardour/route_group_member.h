@@ -25,7 +25,7 @@ namespace ARDOUR  {
 
 class RouteGroup;
 
-class RouteGroupMember 
+class RouteGroupMember
 {
   public:
 	RouteGroupMember () : _route_group (0) {}

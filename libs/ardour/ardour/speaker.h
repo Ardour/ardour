@@ -22,14 +22,14 @@
 #include "pbd/cartesian.h"
 #include "pbd/signals.h"
 
-namespace ARDOUR { 
+namespace ARDOUR {
 
 class Speaker {
 public:
 	Speaker (int, const PBD::AngularVector& position);
 	Speaker (const Speaker &);
 	Speaker& operator= (const Speaker &);
-        
+
 	void move (const PBD::AngularVector& new_position);
 
 	const PBD::CartesianVector& coords() const { return _coords; }

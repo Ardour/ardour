@@ -77,7 +77,7 @@ mothership_blocked ()
 void
 call_the_mothership (const string& version)
 {
-        /* check if the user says never to do this 
+        /* check if the user says never to do this
          */
 
         if (mothership_blocked()) {
@@ -91,7 +91,7 @@ call_the_mothership (const string& version)
         if (uname (&utb)) {
                 return;
         }
-        
+
         curl_global_init (CURL_GLOBAL_NOTHING);
 
         c = curl_easy_init ();
@@ -105,26 +105,26 @@ call_the_mothership (const string& version)
         if (!wm.empty()) {
                 data += string_compose ("&watermark=%1", wm);
         }
-        
+
         curl_easy_setopt(c, CURLOPT_POSTFIELDS, data.c_str());
         curl_easy_setopt(c, CURLOPT_URL, PING_URL);
-        curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, curl_write_data); 
-        curl_easy_setopt(c, CURLOPT_WRITEDATA, &versionstr); 
-        
+        curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, curl_write_data);
+        curl_easy_setopt(c, CURLOPT_WRITEDATA, &versionstr);
+
         std::cerr << "Callback to ardour.org ...\n";
 
         char errbuf[CURL_ERROR_SIZE];
-        curl_easy_setopt(c, CURLOPT_ERRORBUFFER, errbuf); 
+        curl_easy_setopt(c, CURLOPT_ERRORBUFFER, errbuf);
 
         if (curl_easy_perform (c) == 0) {
                 cerr << "Current release is " << versionstr << endl;
 
                 vector<string> ours;
                 vector<string> current;
-                
+
                 split (version, ours, '.');
                 split (versionstr, current, '.');
-                
+
                 if (ours.size() == 3 && current.size() == 3) {
 
                         int ours_n[3];
@@ -141,7 +141,7 @@ call_the_mothership (const string& version)
                         current_n[2] = atoi (current[2]);
 
                         if (ours_n[0] < current_n[0] ||
-                            ((ours_n[0] == current_n[0]) && (ours_n[1] < current_n[1])) || 
+                            ((ours_n[0] == current_n[0]) && (ours_n[1] < current_n[1])) ||
                             ((ours_n[0] == current_n[0]) && (ours_n[1] == current_n[1]) && (ours_n[2] < current_n[2]))) {
                                 cerr << "TOO OLD\n";
                         } else {
@@ -151,6 +151,6 @@ call_the_mothership (const string& version)
                         cerr << "Unusual local version: " << version << endl;
                 }
         }
-        
+
         curl_easy_cleanup (c);
 }

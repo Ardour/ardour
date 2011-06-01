@@ -1,11 +1,11 @@
 /*
   Copyright (C) 2008 Torben Hohn
-  
+
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -25,8 +25,8 @@
 static inline double hann(double x) {
 	return 0.5 * (1.0 - cos(2 * M_PI * x));
 }
-    
-PIController::PIController (double resample_factor, int fir_size) 
+
+PIController::PIController (double resample_factor, int fir_size)
 {
 	resample_mean = resample_factor;
 	static_resample_factor = resample_factor;
@@ -35,12 +35,12 @@ PIController::PIController (double resample_factor, int fir_size)
 	offset_differential_index = 0;
 	offset_integral = 0.0;
 	smooth_size = fir_size;
-        
+
 	for (int i = 0; i < fir_size; i++) {
                 offset_array[i] = 0.0;
                 window_array[i] = hann(double(i) / (double(fir_size) - 1.0));
 	}
-	
+
 	// These values could be configurable
 	catch_factor = 20000;
 	catch_factor2 = 4000;
@@ -62,7 +62,7 @@ PIController::get_ratio (int fill_level, int period_size)
 	double this_catch_factor = catch_factor;
 	double this_catch_factor2 = catch_factor2 * 4096.0/(double)period_size;
 
-	
+
 	// Save offset.
 	if( fir_empty ) {
 	    for (int i = 0; i < smooth_size; i++) {
@@ -72,50 +72,50 @@ PIController::get_ratio (int fill_level, int period_size)
 	} else {
 	    offset_array[(offset_differential_index++) % smooth_size] = offset;
 	}
-        
+
 	// Build the mean of the windowed offset array basically fir lowpassing.
 	smooth_offset = 0.0;
 	for (int i = 0; i < smooth_size; i++) {
                 smooth_offset += offset_array[(i + offset_differential_index - 1) % smooth_size] * window_array[i];
 	}
 	smooth_offset /= double(smooth_size);
-        
+
 	// This is the integral of the smoothed_offset
 	offset_integral += smooth_offset;
 
 	std::cerr << smooth_offset << " ";
-	
+
 	// Clamp offset : the smooth offset still contains unwanted noise which would go straigth onto the resample coeff.
 	// It only used in the P component and the I component is used for the fine tuning anyways.
-    
+
 	if (fabs(smooth_offset) < pclamp)
                 smooth_offset = 0.0;
-	
+
 	smooth_offset += (static_resample_factor - resample_mean) * this_catch_factor;
-	
-	// Ok, now this is the PI controller. 
+
+	// Ok, now this is the PI controller.
 	// u(t) = K * (e(t) + 1/T \int e(t') dt')
-	// Kp = 1/catch_factor and T = catch_factor2  Ki = Kp/T 
-	current_resample_factor 
+	// Kp = 1/catch_factor and T = catch_factor2  Ki = Kp/T
+	current_resample_factor
                 = static_resample_factor - smooth_offset / this_catch_factor - offset_integral / this_catch_factor / this_catch_factor2;
-	
+
 	// Now quantize this value around resample_mean, so that the noise which is in the integral component doesnt hurt.
 	current_resample_factor = floor((current_resample_factor - resample_mean) * controlquant + 0.5) / controlquant + resample_mean;
-	
+
 	// Calculate resample_mean so we can init ourselves to saner values.
 	// resample_mean = 0.9999 * resample_mean + 0.0001 * current_resample_factor;
 	resample_mean = (1.0-0.01) * resample_mean + 0.01 * current_resample_factor;
 	std::cerr << fill_level << " " << smooth_offset << " " << offset_integral << " " << current_resample_factor << " " << resample_mean << "\n";
 	return current_resample_factor;
 }
-        
-void 
+
+void
 PIController::out_of_bounds()
 {
 	int i;
 	// Set the resample_rate... we need to adjust the offset integral, to do this.
 	// first look at the PI controller, this code is just a special case, which should never execute once
-	// everything is swung in. 
+	// everything is swung in.
 	offset_integral = - (resample_mean - static_resample_factor) * catch_factor * catch_factor2;
 	// Also clear the array. we are beginning a new control cycle.
 	for (i = 0; i < smooth_size; i++) {
@@ -157,7 +157,7 @@ PIChaser::get_ratio(framepos_t chasetime_measured, framepos_t chasetime, framepo
 	feed_estimator( chasetime_measured, chasetime );
 	std::cerr << (double)chasetime_measured/48000.0 << " " << chasetime << " " << slavetime << " ";
 	double crude = get_estimate();
-	double fine;  
+	double fine;
 	framepos_t massaged_chasetime = chasetime + (framepos_t)( (double)(slavetime_measured - chasetime_measured) * crude );
 
 	fine = pic->get_ratio (slavetime - massaged_chasetime, period_size);
@@ -183,7 +183,7 @@ PIChaser::get_ratio(framepos_t chasetime_measured, framepos_t chasetime, framepo
 	    speed = crude;
 	    pic->reset( crude );
 	}
-	
+
 	return speed;
 }
 

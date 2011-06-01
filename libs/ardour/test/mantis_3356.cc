@@ -29,7 +29,7 @@ Mantis3356Test::test ()
 	AudioEngine engine ("test", "");
 	MIDI::Manager::create (engine.jack ());
 	CPPUNIT_ASSERT (engine.start () == 0);
-	
+
 	Session session (engine, "../../libs/ardour/test/data/mantis_3356", "mantis_3356");
 	engine.set_session (&session);
 
@@ -65,5 +65,5 @@ Mantis3356Test::test ()
 		CPPUNIT_ASSERT (!result.eof ());
 		CPPUNIT_ASSERT (!ref.eof ());
 	}
-	
+
 }

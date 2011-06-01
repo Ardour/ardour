@@ -26,10 +26,10 @@
 
 extern "C" {
 /* SSE functions */
-    float x86_sse_compute_peak         (const ARDOUR::Sample * buf, ARDOUR::pframes_t nsamples, float current);
-    void  x86_sse_apply_gain_to_buffer (ARDOUR::Sample * buf, ARDOUR::pframes_t nframes, float gain);
-    void  x86_sse_mix_buffers_with_gain(ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes, float gain);
-    void  x86_sse_mix_buffers_no_gain  (ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes);
+float x86_sse_compute_peak         (const ARDOUR::Sample * buf, ARDOUR::pframes_t nsamples, float current);
+void  x86_sse_apply_gain_to_buffer (ARDOUR::Sample * buf, ARDOUR::pframes_t nframes, float gain);
+void  x86_sse_mix_buffers_with_gain(ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes, float gain);
+void  x86_sse_mix_buffers_no_gain  (ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes);
 }
 
 void  x86_sse_find_peaks               (const ARDOUR::Sample * buf, ARDOUR::pframes_t nsamples, float *min, float *max);

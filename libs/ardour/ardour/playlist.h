@@ -49,19 +49,19 @@ namespace ARDOUR  {
 class Session;
 class Region;
 class Playlist;
-class Crossfade;	
+class Crossfade;
 
 namespace Properties {
-        /* fake the type, since regions are handled by SequenceProperty which doesn't
-           care about such things.
-        */
-        extern PBD::PropertyDescriptor<bool> regions;
+	/* fake the type, since regions are handled by SequenceProperty which doesn't
+	   care about such things.
+	*/
+	extern PBD::PropertyDescriptor<bool> regions;
 }
 
 class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_ptr<Region> > >
 {
   public:
-        RegionListProperty (Playlist&);
+	RegionListProperty (Playlist&);
 
 	RegionListProperty* clone () const;
 	void get_content_as_xml (boost::shared_ptr<Region>, XMLNode &) const;
@@ -73,16 +73,16 @@ class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_
 	/* copy construction only by ourselves */
 	RegionListProperty (RegionListProperty const & p);
 
-        friend class Playlist;
-        /* we live and die with our playlist, no lifetime management needed */
-        Playlist& _playlist;
+	friend class Playlist;
+	/* we live and die with our playlist, no lifetime management needed */
+	Playlist& _playlist;
 };
 
 class Playlist : public SessionObject , public boost::enable_shared_from_this<Playlist>
 {
 public:
 	typedef std::list<boost::shared_ptr<Region> > RegionList;
-        static void make_property_quarks ();
+	static void make_property_quarks ();
 
 	Playlist (Session&, const XMLNode&, DataType type, bool hidden = false);
 	Playlist (Session&, std::string name, DataType type, bool hidden = false);
@@ -91,9 +91,9 @@ public:
 
 	virtual ~Playlist ();
 
-        void update (const RegionListProperty::ChangeRecord&);
-        void clear_owned_changes ();
-        void rdiff (std::vector<Command*>&) const;
+	void update (const RegionListProperty::ChangeRecord&);
+	void clear_owned_changes ();
+	void rdiff (std::vector<Command*>&) const;
 
 	boost::shared_ptr<Region> region_by_id (const PBD::ID&) const;
 
@@ -109,7 +109,7 @@ public:
 	bool used () const { return _refcnt != 0; }
 
 	bool set_name (const std::string& str);
-        int sort_id() { return _sort_id; }
+	int sort_id() { return _sort_id; }
 
 	const DataType& data_type() const { return _type; }
 
@@ -152,7 +152,7 @@ public:
 	const RegionListProperty& region_list () const { return regions; }
 
 	RegionList*                regions_at (framepos_t frame);
-        uint32_t                   count_regions_at (framepos_t) const;
+	uint32_t                   count_regions_at (framepos_t) const;
 	uint32_t                   count_joined_regions () const;
 	RegionList*                regions_touched (framepos_t start, framepos_t end);
 	RegionList*                regions_to_read (framepos_t start, framepos_t end);
@@ -165,7 +165,7 @@ public:
 	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);
 	bool                       has_region_at (framepos_t const) const;
 
-        bool uses_source (boost::shared_ptr<const Source> src) const;
+	bool uses_source (boost::shared_ptr<const Source> src) const;
 
 	framepos_t find_next_transient (framepos_t position, int dir);
 
@@ -211,7 +211,7 @@ public:
 
 	virtual bool destroy_region (boost::shared_ptr<Region>) = 0;
 
-        void sync_all_regions_with_regions ();
+	void sync_all_regions_with_regions ();
 
 	/* special case function used by UI selection objects, which have playlists that actually own the regions
 	   within them.
@@ -229,7 +229,7 @@ public:
 		return boost::shared_ptr<Crossfade> ();
 	}
 
-	framepos_t find_next_top_layer_position (framepos_t) const;	
+	framepos_t find_next_top_layer_position (framepos_t) const;
 	uint32_t combine_ops() const { return _combine_ops; }
 
   protected:
@@ -255,11 +255,11 @@ public:
 
 	friend class RegionLock;
 
-        RegionListProperty   regions;  /* the current list of regions in the playlist */
+	RegionListProperty   regions;  /* the current list of regions in the playlist */
 	std::set<boost::shared_ptr<Region> > all_regions; /* all regions ever added to this playlist */
 	PBD::ScopedConnectionList region_state_changed_connections;
 	DataType        _type;
-        int             _sort_id;
+	int             _sort_id;
 	mutable gint    block_notifications;
 	mutable gint    ignore_state_changes;
 	mutable Glib::RecMutex region_lock;
@@ -317,7 +317,7 @@ public:
 	virtual void flush_notifications (bool from_undo = false);
 	void clear_pending ();
 
-        void _set_sort_id ();
+	void _set_sort_id ();
 
 	void notify_region_removed (boost::shared_ptr<Region>);
 	void notify_region_added (boost::shared_ptr<Region>);

@@ -57,7 +57,7 @@ SessionEvent::create_per_thread_pool (const std::string& name, uint32_t nitems)
 }
 
 void *
-SessionEvent::operator new (size_t) 
+SessionEvent::operator new (size_t)
 {
 	CrossThreadPool* p = pool->per_thread_pool ();
 	SessionEvent* ev = static_cast<SessionEvent*> (p->alloc ());
@@ -70,9 +70,9 @@ SessionEvent::operator new (size_t)
 	ev->own_pool = p;
 	return ev;
 }
-    
-void 
-SessionEvent::operator delete (void *ptr, size_t /*size*/) 
+
+void
+SessionEvent::operator delete (void *ptr, size_t /*size*/)
 {
 	Pool* p = pool->per_thread_pool ();
 	SessionEvent* ev = static_cast<SessionEvent*> (ptr);
@@ -87,7 +87,7 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 		stacktrace (cerr, 40);
 	}
 #endif
-	
+
 	if (p == ev->own_pool) {
 		p->release (ptr);
 	} else {

@@ -115,7 +115,7 @@ MidiRegion::~MidiRegion ()
 {
 }
 
-/** Create a new MidiRegion that has its own version of some/all of the Source used by another. 
+/** Create a new MidiRegion that has its own version of some/all of the Source used by another.
  */
 boost::shared_ptr<MidiRegion>
 MidiRegion::clone ()
@@ -189,7 +189,7 @@ MidiRegion::master_read_at (MidiRingBuffer<framepos_t>& out, framepos_t position
 }
 
 framecnt_t
-MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<framepos_t>& dst, framepos_t position, framecnt_t dur, uint32_t chan_n, 
+MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<framepos_t>& dst, framepos_t position, framecnt_t dur, uint32_t chan_n,
 		      NoteMode mode, MidiStateTracker* tracker) const
 {
 	frameoffset_t internal_offset = 0;
@@ -224,7 +224,7 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<framepos_t>&
 
 	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
 	src->set_note_mode(mode);
-        
+
 	/*
 	  cerr << "MR read @ " << position << " * " << to_read
 	  << " _position = " << _position
@@ -315,7 +315,7 @@ MidiRegion::model_changed ()
 	if (!model()) {
 		return;
 	}
-	
+
 	/* build list of filtered Parameters, being those whose automation state is not `Play' */
 
 	_filtered_parameters.clear ();
@@ -342,14 +342,14 @@ MidiRegion::model_changed ()
 void
 MidiRegion::model_contents_changed ()
 {
-	send_change (PropertyChange (Properties::midi_data));        
+	send_change (PropertyChange (Properties::midi_data));
 }
 
 void
 MidiRegion::model_automation_state_changed (Evoral::Parameter const & p)
 {
 	/* Update our filtered parameters list after a change to a parameter's AutoState */
-	
+
 	boost::shared_ptr<AutomationControl> ac = model()->automation_control (p);
 	assert (ac);
 

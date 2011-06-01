@@ -65,7 +65,7 @@ class IOProcessor : public Processor
 	void silence (framecnt_t nframes);
 	void disconnect ();
 
-        void increment_port_buffer_offset (pframes_t);
+	void increment_port_buffer_offset (pframes_t);
 
 	virtual bool feeds (boost::shared_ptr<Route> other) const;
 
@@ -74,7 +74,7 @@ class IOProcessor : public Processor
 
 	XMLNode& state (bool full_state);
 	int set_state (const XMLNode&, int version);
-	
+
   protected:
 	boost::shared_ptr<IO> _input;
 	boost::shared_ptr<IO> _output;
@@ -84,7 +84,7 @@ class IOProcessor : public Processor
 	IOProcessor (const IOProcessor&);
 
 	virtual int set_state_2X (const XMLNode &, int);
-	
+
 	bool _own_input;
 	bool _own_output;
 

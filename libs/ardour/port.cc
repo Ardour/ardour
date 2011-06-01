@@ -104,7 +104,7 @@ bool
 Port::connected_to (std::string const & o) const
 {
 	if (!_engine->connected()) {
-		/* in some senses, this answer isn't the right one all the time, 
+		/* in some senses, this answer isn't the right one all the time,
 		   because we know about our connections and will re-establish
 		   them when we reconnect to JACK.
 		*/
@@ -128,7 +128,7 @@ Port::get_connections (std::vector<std::string> & c) const
 				c.push_back (jc[i]);
 				++n;
 			}
-                        
+
                         if (jack_free) {
                                 jack_free (jc);
                         } else {
@@ -240,7 +240,7 @@ Port::increment_port_buffer_offset (pframes_t nframes)
 {
         _port_buffer_offset += nframes;
 }
-        
+
 void
 Port::set_public_latency_range (jack_latency_range_t& range, bool playback) const
 {
@@ -251,7 +251,7 @@ Port::set_public_latency_range (jack_latency_range_t& range, bool playback) cons
 	if (!jack_port_set_latency_range) {
 		return;
 	}
-        
+
 	DEBUG_TRACE (DEBUG::Latency,
 	             string_compose ("SET PORT %1 %4 PUBLIC latency now [%2 - %3]\n",
 	                             name(), range.min, range.max,
@@ -270,14 +270,14 @@ Port::set_private_latency_range (jack_latency_range_t& range, bool playback)
 		DEBUG_TRACE (DEBUG::Latency, string_compose (
 			             "SET PORT %1 playback PRIVATE latency now [%2 - %3]\n",
 			             name(),
-			             _private_playback_latency.min, 
+			             _private_playback_latency.min,
 			             _private_playback_latency.max));
 	} else {
 		_private_capture_latency = range;
 		DEBUG_TRACE (DEBUG::Latency, string_compose (
 			             "SET PORT %1 capture PRIVATE latency now [%2 - %3]\n",
-			             name(), 
-			             _private_capture_latency.min, 
+			             name(),
+			             _private_capture_latency.min,
 			             _private_capture_latency.max));
 	}
 
@@ -292,15 +292,15 @@ Port::private_latency_range (bool playback) const
 	if (playback) {
 		DEBUG_TRACE (DEBUG::Latency, string_compose (
 			             "GET PORT %1 playback PRIVATE latency now [%2 - %3]\n",
-			             name(), 
-			             _private_playback_latency.min, 
-			             _private_playback_latency.max)); 
+			             name(),
+			             _private_playback_latency.min,
+			             _private_playback_latency.max));
 		return _private_playback_latency;
 	} else {
 		DEBUG_TRACE (DEBUG::Latency, string_compose (
 			             "GET PORT %1 capture PRIVATE latency now [%2 - %3]\n",
-			             name(), 
-			             _private_playback_latency.min, 
+			             name(),
+			             _private_playback_latency.min,
 			             _private_playback_latency.max));
 		return _private_capture_latency;
 	}
@@ -311,11 +311,11 @@ Port::public_latency_range (bool playback) const
 {
 	jack_latency_range_t r;
 
-	jack_port_get_latency_range (_jack_port, 
+	jack_port_get_latency_range (_jack_port,
 	                             sends_output() ? JackPlaybackLatency : JackCaptureLatency,
 	                             &r);
 	DEBUG_TRACE (DEBUG::Latency, string_compose (
-		             "GET PORT %1: %4 PUBLIC latency range %2 .. %3\n", 
+		             "GET PORT %1: %4 PUBLIC latency range %2 .. %3\n",
 		             name(), r.min, r.max,
 		             sends_output() ? "PLAYBACK" : "CAPTURE"));
 	return r;
@@ -330,7 +330,7 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
 
 	vector<string> connections;
 	jack_client_t* jack = _engine->jack();
-        
+
 	if (!jack) {
 		range.min = 0;
 		range.max = 0;
@@ -341,7 +341,7 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
 	get_connections (connections);
 
 	if (!connections.empty()) {
-                
+
 		range.min = ~((jack_nframes_t) 0);
 		range.max = 0;
 
@@ -351,7 +351,7 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
 		     c != connections.end(); ++c) {
 
                         jack_latency_range_t lr;
-                                
+
                         if (!AudioEngine::instance()->port_is_mine (*c)) {
 
                                 /* port belongs to some other JACK client, use
@@ -365,7 +365,7 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
                                                 remote_port,
                                                 (playback ? JackPlaybackLatency : JackCaptureLatency),
                                                 &lr);
-                                        
+
                                         DEBUG_TRACE (DEBUG::Latency, string_compose (
                                                              "\t%1 <-> %2 : latter has latency range %3 .. %4\n",
                                                              name(), *c, lr.min, lr.max));
@@ -473,7 +473,7 @@ Port::physically_connected () const
 		for (int i = 0; jc[i]; ++i) {
 
 			jack_port_t* port = jack_port_by_name (_engine->jack(), jc[i]);
-                        
+
 			if (port && (jack_port_flags (port) & JackPortIsPhysical)) {
                                 if (jack_free) {
                                         jack_free (jc);
