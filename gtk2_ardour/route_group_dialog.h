@@ -32,7 +32,7 @@ public:
 	RouteGroupDialog (ARDOUR::RouteGroup *, bool);
 
 	bool do_run ();
-	
+
 private:
 	ARDOUR::RouteGroup* _group;
 	std::string _initial_name;

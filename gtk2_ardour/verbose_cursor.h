@@ -28,12 +28,12 @@ class VerboseCursor
 {
 public:
 	VerboseCursor (Editor *);
-	
+
 	ArdourCanvas::Item* canvas_item () const;
 	bool visible () const;
 
 	void set_color (uint32_t);
-	
+
 	void set (std::string const &, double, double);
 	void set_text (std::string const &);
 	void set_position (double, double);

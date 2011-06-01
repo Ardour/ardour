@@ -175,7 +175,7 @@ QuantizeDialog::grid_size_to_musical_time (const string& txt) const
 	} else if (txt == _("Beats")) {
 		return 1.0;
 	}
-        
+
 	return 1.0;
 }
 

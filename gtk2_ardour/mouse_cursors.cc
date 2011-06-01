@@ -26,7 +26,7 @@ MouseCursors::MouseCursors ()
 {
 	using namespace Glib;
 	using namespace Gdk;
-	
+
 	{
 		RefPtr<Pixbuf> p (::get_icon ("zoom_in_cursor"));
 		zoom_in = new Cursor (Display::get_default(), p, 5, 5);
@@ -36,7 +36,7 @@ MouseCursors::MouseCursors ()
 		RefPtr<Pixbuf> p (::get_icon ("zoom_out_cursor"));
 		zoom_out = new Cursor (Display::get_default(), p, 5, 5);
 	}
-	
+
 	Color fbg ("#ffffff");
 	Color ffg ("#000000");
 
@@ -103,7 +103,7 @@ MouseCursors::MouseCursors ()
 		RefPtr<Pixbuf> p (::get_icon ("trim_right_cursor_left_only"));
 		right_side_trim_left_only = new Cursor (Display::get_default(), p, 23, 11);
 	}
-	
+
 	{
 		RefPtr<Pixbuf> p (::get_icon ("fade_in_cursor"));
 		fade_in = new Cursor (Display::get_default(), p, 0, 0);
@@ -168,7 +168,7 @@ MouseCursors::MouseCursors ()
 		RefPtr<Pixbuf> p (::get_icon ("expand_up_down_cursor"));
 		expand_up_down = new Cursor (Display::get_default(), p, 4, 11);
 	}
-	
+
 	selector = new Cursor (XTERM);
 	time_fx = new Cursor (SIZING);
 	wait = new Cursor (WATCH);

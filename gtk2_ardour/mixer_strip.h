@@ -271,10 +271,10 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void engine_stopped();
 
 	void switch_io (boost::shared_ptr<ARDOUR::Route>);
-	
+
 	void set_current_delivery (boost::shared_ptr<ARDOUR::Delivery>);
 	boost::shared_ptr<ARDOUR::Delivery> _current_delivery;
-	
+
 	void drop_send ();
 	PBD::ScopedConnection send_gone_connection;
 

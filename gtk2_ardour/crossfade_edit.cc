@@ -97,7 +97,7 @@ CrossfadeEditor::CrossfadeEditor (Session* s, boost::shared_ptr<Crossfade> xf, d
 	  select_out_button (_("Fade Out")),
 
 	  _peaks_ready_connection (0)
-	  
+
 {
 	set_session (s);
 
@@ -509,7 +509,7 @@ CrossfadeEditor::Point::move_to (double nx, double ny, double xfract, double yfr
 	} else if ( xfract > 1.0 ) {
 		xfract = 1.0;
 	}
-        
+
 	if ( yfract < 0.0 ) {
 		yfract = 0.0;
 	} else if ( yfract > 1.0 ) {
@@ -788,7 +788,7 @@ CrossfadeEditor::apply ()
 	_session->begin_reversible_command (_("Edit crossfade"));
 
 	XMLNode& before = xfade->get_state ();
-	
+
 	_apply_to (xfade);
 
 	_session->add_command (new MementoCommand<Crossfade> (*xfade.get(), &before, &xfade->get_state ()));
@@ -1154,7 +1154,7 @@ CrossfadeEditor::make_waves (boost::shared_ptr<AudioRegion> region, WhichFade wh
 
 	delete _peaks_ready_connection;
 	_peaks_ready_connection = 0;
-	
+
 	for (uint32_t n = 0; n < nchans; ++n) {
 
 		gdouble yoff = n * ht;
@@ -1207,7 +1207,7 @@ CrossfadeEditor::peaks_ready (boost::weak_ptr<AudioRegion> wr, WhichFade which)
 	*/
 	delete _peaks_ready_connection;
 	_peaks_ready_connection = 0;
-	
+
 	make_waves (r, which);
 }
 
@@ -1251,16 +1251,16 @@ CrossfadeEditor::audition (Audition which)
 		right_length = xfade->in()->length();
 	}
 
-	PropertyList left_plist; 
-	PropertyList right_plist; 
+	PropertyList left_plist;
+	PropertyList right_plist;
 
-	
+
 	left_plist.add (ARDOUR::Properties::start, left_start_offset);
 	left_plist.add (ARDOUR::Properties::length, left_length);
 	left_plist.add (ARDOUR::Properties::name, string ("xfade out"));
 	left_plist.add (ARDOUR::Properties::layer, 0);
 	left_plist.add (ARDOUR::Properties::fade_in_active, true);
-	
+
 	right_plist.add (ARDOUR::Properties::start, 0);
 	right_plist.add (ARDOUR::Properties::length, right_length);
 	right_plist.add (ARDOUR::Properties::name, string("xfade in"));
@@ -1273,9 +1273,9 @@ CrossfadeEditor::audition (Audition which)
 		left_plist.add (ARDOUR::Properties::scale_amplitude, 0.0f);
 	}
 
-	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> 
+	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion>
 						     (RegionFactory::create (xfade->out(), left_plist, false)));
-	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> 
+	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion>
 					      (RegionFactory::create (xfade->in(), right_plist, false)));
 
 	// apply a 20ms declicking fade at the start and end of auditioning
@@ -1302,14 +1302,14 @@ CrossfadeEditor::audition_both ()
 void
 CrossfadeEditor::audition_left_dry ()
 {
-	PropertyList plist; 
+	PropertyList plist;
 
 	plist.add (ARDOUR::Properties::start, xfade->out()->length() - xfade->length());
 	plist.add (ARDOUR::Properties::length, xfade->length());
 	plist.add (ARDOUR::Properties::name, string("xfade left"));
 	plist.add (ARDOUR::Properties::layer, 0);
-	
-	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> 
+
+	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion>
 					     (RegionFactory::create (xfade->out(), plist, false)));
 
 	_session->audition_region (left);
@@ -1324,14 +1324,14 @@ CrossfadeEditor::audition_left ()
 void
 CrossfadeEditor::audition_right_dry ()
 {
-	PropertyList plist; 
+	PropertyList plist;
 
 	plist.add (ARDOUR::Properties::start, 0);
 	plist.add (ARDOUR::Properties::length, xfade->length());
 	plist.add (ARDOUR::Properties::name, string ("xfade right"));
 	plist.add (ARDOUR::Properties::layer, 0);
 
-	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> 
+	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion>
 					      (RegionFactory::create (xfade->in(), plist, false)));
 
 	_session->audition_region (right);

@@ -69,7 +69,7 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
   private:
 	ARDOUR::PeakMeter* _meter;
-	
+
 	Width _width;
 
 	struct MeterInfo {

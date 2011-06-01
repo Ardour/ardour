@@ -87,7 +87,7 @@ bool RegionSelection::contains (RegionView* rv) const
 
 /** Add a region to the selection.
  *  @param rv Region to add.
- *  @return false if we already had the region or if it cannot be added, 
+ *  @return false if we already had the region or if it cannot be added,
  *          otherwise true.
  */
 bool
@@ -137,7 +137,7 @@ RegionSelection::remove (RegionView* rv)
 
 		// remove from layer sorted list
 		_bylayer.remove (rv);
-		
+
 		erase (r);
 		return true;
 	}
@@ -260,7 +260,7 @@ RegionSelection::start () const
 	if (s == max_framepos) {
 		return 0;
 	}
-	
+
 	return s;
 }
 

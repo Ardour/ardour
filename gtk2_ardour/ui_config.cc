@@ -92,7 +92,7 @@ UIConfiguration::load_defaults ()
 			return -1;
 		}
 	}
-		
+
 	return found;
 }
 

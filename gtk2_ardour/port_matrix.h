@@ -85,7 +85,7 @@ public:
 		LEFT_TO_BOTTOM ///< row labels to the left, column labels on the bottom
 	};
 
-	
+
 	/** @return Arrangement in use */
 	Arrangement arrangement () const {
 		return _arrangement;
@@ -116,7 +116,7 @@ public:
 	}
 
 	boost::shared_ptr<const PortGroup> visible_ports (int d) const;
-	
+
 	void init ();
 	void setup ();
 	virtual void setup_ports (int) = 0;

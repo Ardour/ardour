@@ -67,7 +67,7 @@ const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
 	10   /* Audio Frame */
 };
 
-AudioClock::AudioClock (const string& clock_name, bool transient, const string& widget_name, 
+AudioClock::AudioClock (const string& clock_name, bool transient, const string& widget_name,
 			bool allow_edit, bool follows_playhead, bool duration, bool with_info)
 	: _name (clock_name),
 	  is_transient (transient),
@@ -87,7 +87,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	  _canonical_time (0)
 {
 	/* XXX: these are leaked, but I don't suppose it's the end of the world */
-	
+
 	_eboxes[Timecode_Hours] = new EventBox;
 	_eboxes[Timecode_Minutes] = new EventBox;
 	_eboxes[Timecode_Seconds] = new EventBox;
@@ -113,7 +113,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	_labels[Beats] = new Label;
 	_labels[Ticks] = new Label;
 	_labels[AudioFrames] = new Label;
-	
+
 	last_when = 0;
 	last_pdelta = 0;
 	last_sdelta = 0;
@@ -283,7 +283,7 @@ void
 AudioClock::setup_events ()
 {
 	clock_base.set_flags (CAN_FOCUS);
-	
+
 	for (std::map<Field, EventBox*>::iterator i = _eboxes.begin(); i != _eboxes.end(); ++i) {
 		i->second->add_events (
 			Gdk::BUTTON_PRESS_MASK |
@@ -293,7 +293,7 @@ AudioClock::setup_events ()
 			Gdk::FOCUS_CHANGE_MASK |
 			Gdk::POINTER_MOTION_MASK |
 			Gdk::SCROLL_MASK);
-		
+
 		i->second->set_flags (CAN_FOCUS);
 		i->second->signal_motion_notify_event().connect (sigc::bind (sigc::mem_fun (*this, &AudioClock::field_motion_notify_event), i->first));
 		i->second->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &AudioClock::field_button_press_event), i->first));
@@ -393,7 +393,7 @@ AudioClock::session_configuration_changed (std::string p)
 	if (p != "timecode-offset" && p != "timecode-offset-negative") {
 		return;
 	}
-	
+
 	framecnt_t current;
 
 	switch (_mode) {
@@ -1159,7 +1159,7 @@ AudioClock::current_time (framepos_t pos) const
 	if (!_canonical_time_is_displayed) {
 		return _canonical_time;
 	}
-	
+
 	framepos_t ret = 0;
 
 	switch (_mode) {
@@ -1770,7 +1770,7 @@ AudioClock::locate ()
 	if (!_session || is_duration) {
 		return;
 	}
-	
+
 	_session->request_locate (current_time(), _session->transport_rolling ());
 }
 
@@ -1909,7 +1909,7 @@ AudioClock::set_is_duration (bool yn)
 	if (yn == is_duration) {
 		return;
 	}
-        
+
 	is_duration = yn;
 	set (last_when, true, 0, 's');
 }

@@ -149,7 +149,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 				exit (0);
 			}
 			break;
-			
+
 		case 'm':
 			menus_file = optarg;
 			break;

@@ -75,7 +75,7 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 			return -1;
 
 		boost::shared_ptr<Playlist> playlist = rtv->track()->playlist();
-		
+
 		ARDOUR::TimeFXRequest request;
 		request.time_fraction = fraction;
 		MidiStretch stretch(*_session, request);
@@ -179,22 +179,22 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 			break;
 		}
 	}
-	
+
 	switch (rb_current_opt) {
 		case 0:
-			transients = NoTransients; peaklock = false; longwin = true; shortwin = false; 
+			transients = NoTransients; peaklock = false; longwin = true; shortwin = false;
 			break;
 		case 1:
-			transients = NoTransients; peaklock = false; longwin = false; shortwin = false; 
+			transients = NoTransients; peaklock = false; longwin = false; shortwin = false;
 			break;
 		case 2:
-			transients = NoTransients; peaklock = true; longwin = false; shortwin = false; 
+			transients = NoTransients; peaklock = true; longwin = false; shortwin = false;
 			break;
 		case 3:
-			transients = BandLimitedTransients; peaklock = true; longwin = false; shortwin = false; 
+			transients = BandLimitedTransients; peaklock = true; longwin = false; shortwin = false;
 			break;
 		case 5:
-			transients = Transients; peaklock = false; longwin = false; shortwin = true; 
+			transients = Transients; peaklock = false; longwin = false; shortwin = true;
 			break;
 		case 6:
 			transients = NoTransients;
@@ -205,8 +205,8 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 			// peaklock = false;
 			break;
 		default:
-			/* default/4 */	
-			transients = Transients; peaklock = true; longwin = false; shortwin = false; 
+			/* default/4 */
+			transients = Transients; peaklock = true; longwin = false; shortwin = false;
 			break;
 	};
 

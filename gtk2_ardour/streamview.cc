@@ -101,7 +101,7 @@ StreamView::~StreamView ()
 	if (owns_background_group) {
 		delete _background_group;
 	}
-	
+
 	if (owns_canvas_group) {
 		delete _canvas_group;
 	}
@@ -308,7 +308,7 @@ StreamView::playlist_layered (boost::weak_ptr<Track> wtr)
 	} else {
 		/* layering has probably been modified. reflect this in the canvas. */
 		layer_regions();
-	} 
+	}
 }
 
 void
@@ -348,7 +348,7 @@ void
 StreamView::diskstream_changed ()
 {
 	boost::shared_ptr<Track> t;
-        
+
 	if ((t = _trackview.track()) != 0) {
 		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&StreamView::display_track, this, t));
 	} else {
@@ -624,13 +624,13 @@ StreamView::check_record_layers (boost::shared_ptr<Region> region, framepos_t to
 
 		/* Stop this happening again */
 		_new_rec_layer_time = max_framepos;
-		
+
 		/* Make space in the view for the new layer */
 		++_layers;
-		
+
 		/* Set the temporary region to the correct layer so that it gets drawn correctly */
 		region->set_layer (_layers - 1);
-		
+
 		/* and reset the view */
 		update_contents_height ();
 	}

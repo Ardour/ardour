@@ -59,7 +59,7 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 	virtual void set_marked_for_display (bool yn) {
 		_marked_for_display = yn;
 	}
-	
+
 	sigc::signal<void> Hiding;
 
 	void set_old_order_key (uint32_t ok) { _old_order_key = ok; }

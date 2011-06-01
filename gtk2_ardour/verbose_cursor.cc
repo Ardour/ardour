@@ -79,7 +79,7 @@ VerboseCursor::show (double xoffset, double yoffset)
 	if (_visible) {
 		return;
 	}
-	
+
 	_canvas_item->raise_to_top ();
 	_canvas_item->show ();
 	_visible = true;

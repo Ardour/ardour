@@ -40,41 +40,41 @@ public:
 		       Gdk::Color& basic_color,
 		       AudioRegionView& leftview,
 		       AudioRegionView& rightview);
-	
+
 	~CrossfadeView ();
 
 	boost::shared_ptr<ARDOUR::Crossfade> crossfade;  // ok, let 'em have it
 
 	AudioRegionView& left_view;    // and these too
 	AudioRegionView& right_view;
-	
+
 	void set_height (double);
-	
+
 	bool valid() const { return _valid; }
 	bool visible() const { return _visible; }
 	void set_valid (bool yn);
-	
+
 	static PBD::Signal1<void,CrossfadeView*> CatchDeletion;
-	
+
 	AudioRegionView& upper_regionview () const;
-	
+
 	void fake_hide ();
 	void hide ();
 	void show ();
 	void horizontal_position_changed ();
-	
+
 protected:
 	void reset_width_dependent_items (double pixel_width);
-	
+
 private:
 	bool _valid;
 	bool _visible;
-	bool _all_in_view;   
-	
+	bool _all_in_view;
+
 	ArdourCanvas::Line *fade_in;
 	ArdourCanvas::Line *fade_out;
 	ArdourCanvas::Item *active_button;
-	
+
 	void crossfade_changed (const PBD::PropertyChange&);
 	void crossfade_fades_changed ();
 	void active_changed ();

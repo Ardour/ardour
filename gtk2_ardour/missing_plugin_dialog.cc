@@ -44,7 +44,7 @@ MissingPluginDialog::MissingPluginDialog (Session * s, list<string> const & plug
 
 	t << "\nThose plugins and any following them on a track or buss have been disabled, and will be hidden.\n";
 	t << "It is recommended that you install the missing plugins and re-load the session.\n";
-	
+
         m->set_markup (t.str ());
         get_vbox()->pack_start (*m, false, false);
 

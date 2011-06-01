@@ -1,5 +1,5 @@
 /*sfdb_freesound_mootcher.h****************************************************************************
-	
+
 	Adapted for Ardour by Ben Loftis, March 2008
 
 	Mootcher Online Access to thefreesoundproject website
@@ -27,7 +27,7 @@
 // mootcher version
 #define ___VERSION___ 1.3
 
-//--- struct to store XML file 
+//--- struct to store XML file
 struct MemoryStruct {
 	char *memory;
 	size_t size;
@@ -51,7 +51,7 @@ public:
 
 
 	struct dlprocess bar;
-	
+
 private:
 
 	const char*	changeWorkingDir(const char *saveLocation);

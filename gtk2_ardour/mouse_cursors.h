@@ -26,7 +26,7 @@ class MouseCursors
 {
 public:
 	MouseCursors ();
-	
+
 	Gdk::Cursor* cross_hair;
 	Gdk::Cursor* trimmer;
 	Gdk::Cursor* right_side_trim;

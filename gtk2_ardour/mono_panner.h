@@ -70,7 +70,7 @@ class MonoPanner : public Gtk::DrawingArea
         void value_change ();
         void set_drag_data ();
 
-        struct ColorScheme { 
+        struct ColorScheme {
             uint32_t outline;
             uint32_t fill;
             uint32_t text;

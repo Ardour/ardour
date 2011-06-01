@@ -146,7 +146,7 @@ class ExportRangeDialog : public ExportDialog
 
   private:
 	void init_components ();
-        
+
         std::string range_id;
 };
 
@@ -176,7 +176,7 @@ class StemExportDialog : public ExportDialog
 {
   public:
 	StemExportDialog (PublicEditor & editor);
-	
+
   private:
 	void init_components ();
 };

@@ -47,7 +47,7 @@ IOSelector::IOSelector (Gtk::Window* p, ARDOUR::Session* session, boost::shared_
 	, _io (io)
 {
 	setup_type ();
-	
+
 	/* signal flow from 0 to 1 */
 
 	_find_inputs_for_io_outputs = (_io->direction() == IO::Output);
@@ -97,7 +97,7 @@ IOSelector::io_changed_proxy ()
 	   so we can't call setup_all_ports (which results in a call to Route::foreach_processor)
 	   without a deadlock unless we break things up with this idle handler.
 	*/
-	
+
 	Glib::signal_idle().connect_once (sigc::mem_fun (*this, &IOSelector::io_changed));
 }
 
@@ -143,7 +143,7 @@ IOSelector::set_state (ARDOUR::BundleChannel c[2], bool s)
 			if (!f) {
 				return;
 			}
-                        
+
                         if (s) {
                                 _io->connect (f, *j, 0);
                         } else {
@@ -219,7 +219,7 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session* session, boost::shared_ptr<
 	set_name ("IOSelectorWindow2");
 
 	get_vbox()->pack_start (_selector);
-        
+
 	set_position (Gtk::WIN_POS_MOUSE);
 
 	io_name_changed (this);

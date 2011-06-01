@@ -32,7 +32,7 @@ namespace Gtk {
 
 #include "ardour/types.h"
 
-class ShuttleControl : public Gtk::DrawingArea, public ARDOUR::SessionHandlePtr 
+class ShuttleControl : public Gtk::DrawingArea, public ARDOUR::SessionHandlePtr
 {
   public:
 	ShuttleControl ();
@@ -48,9 +48,9 @@ class ShuttleControl : public Gtk::DrawingArea, public ARDOUR::SessionHandlePtr
 		ShuttleControllable (ShuttleControl&);
 		void set_value (double);
 		double get_value (void) const;
-		
+
 		void set_id (const std::string&);
-		
+
 		ShuttleControl& sc;
 	};
 

@@ -35,7 +35,7 @@ NormalizeDialog::NormalizeDialog (bool more_than_one)
 	, _normalize_individually (0)
 {
 	get_vbox()->set_spacing (12);
-	
+
 	HBox* hbox = manage (new HBox);
 	hbox->set_spacing (6);
 	hbox->set_border_width (6);
@@ -68,7 +68,7 @@ NormalizeDialog::NormalizeDialog (bool more_than_one)
 	get_vbox()->pack_start (*_progress_bar);
 
 	show_all ();
-	
+
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (_("Normalize"), RESPONSE_ACCEPT);
 	set_default_response (RESPONSE_ACCEPT);

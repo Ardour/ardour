@@ -38,7 +38,7 @@ public:
 private:
 	void update_progress_gui (float);
 	void button_clicked (int);
-	
+
 	Gtk::RadioButton* _normalize_individually;
 	Gtk::SpinButton* _spin;
 	Gtk::ProgressBar* _progress_bar;

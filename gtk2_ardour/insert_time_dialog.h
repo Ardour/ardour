@@ -37,7 +37,7 @@ public:
 
 private:
 	void move_markers_toggled ();
-	
+
 	PublicEditor& _editor;
 	Gtk::ComboBoxText _intersected_combo;
 	Gtk::CheckButton _move_glued;

@@ -185,7 +185,7 @@ void
 NagScreen::offer_to_subscribe ()
 {
 	const char* uri = "http://ardour.org/subscribe";
-        
+
 	if (PBD::open_uri (uri)) {
 		mark_subscriber ();
 	}

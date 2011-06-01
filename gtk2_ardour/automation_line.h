@@ -66,7 +66,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	void reset ();
 	void clear ();
 
-	std::list<ControlPoint*> point_selection_to_control_points (PointSelection const &); 
+	std::list<ControlPoint*> point_selection_to_control_points (PointSelection const &);
 	void set_selected_points (PointSelection&);
 	void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable*>&);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
@@ -147,7 +147,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	void set_offset (ARDOUR::framecnt_t);
 	void set_width (ARDOUR::framecnt_t);
-	
+
   protected:
 
 	std::string    _name;
@@ -234,7 +234,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	/** maximum time that a point on this line can be at, relative to the position of its region or start of its track */
 	ARDOUR::framecnt_t _maximum_time;
-	
+
 	friend class AudioRegionGainLine;
 };
 

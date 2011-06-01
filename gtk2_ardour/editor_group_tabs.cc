@@ -85,7 +85,7 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 	} else {
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
 	}
-	
+
 	cairo_move_to (cr, 0, tab.from + arc_radius);
 	cairo_arc (cr, _width, tab.from + arc_radius, arc_radius, M_PI, 3 * M_PI / 2);
 	cairo_line_to (cr, _width, tab.to);
@@ -95,10 +95,10 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 
 	if (tab.group) {
 		pair<string, double> const f = fit_to_pixels (cr, tab.group->name(), tab.to - tab.from - arc_radius * 2);
-		
+
 		cairo_text_extents_t ext;
 		cairo_text_extents (cr, tab.group->name().c_str(), &ext);
-		
+
 		cairo_set_source_rgb (cr, 1, 1, 1);
 		cairo_move_to (cr, _width - ext.height / 2, tab.from + (f.second + tab.to - tab.from) / 2);
 		cairo_save (cr);
@@ -119,7 +119,7 @@ EditorGroupTabs::routes_for_tab (Tab const * t) const
 {
 	RouteList routes;
 	int32_t y = 0;
-	
+
 	for (TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
 
 		if ((*i)->marked_for_display() == false) {
@@ -152,7 +152,7 @@ void
 EditorGroupTabs::add_menu_items (Gtk::Menu* m, RouteGroup* g)
 {
 	using namespace Gtk::Menu_Helpers;
-	
+
 	if (g) {
 		MenuList& items = m->items ();
 		items.push_back (MenuElem (_("Fit to Window"), sigc::bind (sigc::mem_fun (*_editor, &Editor::fit_route_group), g)));
@@ -163,7 +163,7 @@ PBD::PropertyList
 EditorGroupTabs::default_properties () const
 {
 	PBD::PropertyList plist;
-	
+
 	plist.add (Properties::active, true);
 	plist.add (Properties::mute, true);
 	plist.add (Properties::solo, true);
@@ -172,7 +172,7 @@ EditorGroupTabs::default_properties () const
 
 	return plist;
 }
-	
+
 string
 EditorGroupTabs::order_key () const
 {

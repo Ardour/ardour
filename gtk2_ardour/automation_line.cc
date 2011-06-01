@@ -249,7 +249,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList> (memento_command_binder(), 0, &alist->get_state())
 		);
-	
+
 	trackview.editor().session()->commit_reversible_command ();
 	trackview.editor().session()->set_dirty ();
 }
@@ -446,7 +446,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		/* ok, we should display this point */
 
 		add_visible_control_point (view_index, pi, tx, ty, model, npoints);
-		
+
 		prev_rx = this_rx;
 		prev_ry = this_ry;
 
@@ -598,7 +598,7 @@ AutomationLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 			}
 		}
 	}
-	
+
 	start_drag_common (x, fraction);
 }
 
@@ -689,7 +689,7 @@ AutomationLine::drag_motion (double x, float fraction, bool ignore_x, bool with_
 		copy (_push_points.begin(), _push_points.end(), back_inserter (points));
 		points.sort (ControlPointSorter ());
 	}
-	   
+
 	double dx = ignore_x ? 0 : (x - _drag_x);
 	double dy = fraction - _last_drag_fraction;
 
@@ -793,7 +793,7 @@ AutomationLine::end_drag ()
 		copy (_push_points.begin(), _push_points.end(), back_inserter (points));
 		points.sort (ControlPointSorter ());
 	}
-	
+
 	sync_model_with_view_points (points, did_push, rint (_drag_distance * trackview.editor().get_current_zoom ()));
 
 	alist->thaw ();
@@ -803,7 +803,7 @@ AutomationLine::end_drag ()
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList>(memento_command_binder (), 0, &alist->get_state())
 		);
-	
+
 	trackview.editor().session()->set_dirty ();
 }
 
@@ -950,7 +950,7 @@ AutomationLine::remove_point (ControlPoint& cp)
 	trackview.editor().session()->add_command(
 		new MementoCommand<AutomationList> (memento_command_binder (), &before, &alist->get_state())
 		);
-	
+
 	trackview.editor().session()->commit_reversible_command ();
 	trackview.editor().session()->set_dirty ();
 }
@@ -992,7 +992,7 @@ list<ControlPoint*>
 AutomationLine::point_selection_to_control_points (PointSelection const & s)
 {
 	list<ControlPoint*> cp;
-	
+
 	for (PointSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
 
 		if (i->track != &trackview) {
@@ -1284,7 +1284,7 @@ AutomationLine::add_visible_control_point (uint32_t view_index, uint32_t pi, dou
 	control_points[view_index]->reset (tx, ty, model, view_index, shape);
 
 	/* finally, control visibility */
-	
+
 	if (_visible && points_visible) {
 		control_points[view_index]->show ();
 		control_points[view_index]->set_visible (true);
@@ -1313,9 +1313,9 @@ void
 AutomationLine::connect_to_list ()
 {
 	_list_connections.drop_connections ();
-	
+
 	alist->StateChanged.connect (_list_connections, invalidator (*this), boost::bind (&AutomationLine::list_changed, this), gui_context());
-	
+
 	alist->InterpolationChanged.connect (
 		_list_connections, invalidator (*this), boost::bind (&AutomationLine::interpolation_changed, this, _1), gui_context()
 		);
@@ -1362,7 +1362,7 @@ AutomationLine::set_offset (framepos_t off)
 	if (_offset == off) {
 		return;
 	}
-	
+
 	_offset = off;
 	reset ();
 }

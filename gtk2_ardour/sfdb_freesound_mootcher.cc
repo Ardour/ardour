@@ -1,7 +1,7 @@
 /* sfdb_freesound_mootcher.cpp **********************************************************************
-	
+
 	Adapted for Ardour by Ben Loftis, March 2008
-		
+
 	Mootcher 23-8-2005
 
 	Mootcher Online Access to thefreesoundproject website
@@ -72,15 +72,15 @@ const char* Mootcher::changeWorkingDir(const char *saveLocation)
 		pos = (int)basePath.find("\\");
 	}
 #endif
-	// 
+	//
 	int pos2 = basePath.find_last_of("/");
 	if(basePath.length() != (pos2+1)) basePath += "/";
-	
+
 	// create Freesound directory and sound dir
 	std::string sndLocation = basePath;
-	mkdir(sndLocation.c_str(), 0777);        
+	mkdir(sndLocation.c_str(), 0777);
 	sndLocation += "snd";
-	mkdir(sndLocation.c_str(), 0777);        
+	mkdir(sndLocation.c_str(), 0777);
 
 	return basePath.c_str();
 }
@@ -91,7 +91,7 @@ size_t		Mootcher::WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void
 	register int realsize = (int)(size * nmemb);
 	struct MemoryStruct *mem = (struct MemoryStruct *)data;
 
-	// There might be a realloc() out there that doesn't like 
+	// There might be a realloc() out there that doesn't like
 	// reallocing NULL pointers, so we take care of it here
 	if(mem->memory)	mem->memory = (char *)realloc(mem->memory, mem->size + realsize + 1);
 	else			mem->memory = (char *)malloc(mem->size + realsize + 1);
@@ -132,7 +132,7 @@ int			Mootcher::doLogin(std::string login, std::string password)
 {
 	if(connection==1)
 		return 1;
-	
+
 	struct MemoryStruct xml_page;
 	xml_page.memory = NULL;
 	xml_page.size = 0;
@@ -154,7 +154,7 @@ int			Mootcher::doLogin(std::string login, std::string password)
 	if(curl)
 	{
 		setcUrlOptions();
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback); 
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&xml_page);
 		// save the sessoin id that is given back by the server in a cookie
 		curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookiejar.txt");
@@ -175,7 +175,7 @@ int			Mootcher::doLogin(std::string login, std::string password)
 			toLog(curl_easy_strerror(res));
 			connection = 0;
 		}
-		
+
 		if (connection == 1){
 			std::string check_page = xml_page.memory;
 			int test = (int)check_page.find("login");   //logged
@@ -188,7 +188,7 @@ int			Mootcher::doLogin(std::string login, std::string password)
 		}
 
 		// free the memory
-		if(xml_page.memory){		
+		if(xml_page.memory){
 			free( xml_page.memory );
 			xml_page.memory = NULL;
 			xml_page.size = 0;
@@ -205,7 +205,7 @@ std::string	Mootcher::searchText(std::string word)
 	struct MemoryStruct xml_page;
 	xml_page.memory = NULL;
 	xml_page.size = 0;
-	
+
 	std::string result;
 
 	if(connection != 0)
@@ -243,23 +243,23 @@ std::string	Mootcher::searchText(std::string word)
 		// The limit of 10 samples is arbitrary, but seems
 		// reasonable in light of the fact that all of the returned
 		// samples get downloaded, and downloads are s-l-o-w.
-		
+
 		if(curl)
 		{
-			// basic init for curl 
-			setcUrlOptions();	
-			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback); 
+			// basic init for curl
+			setcUrlOptions();
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&xml_page);
 			// setup the post message
 			curl_easy_setopt(curl, CURLOPT_POST, TRUE);
 			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postMessage.c_str());
 			curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1);
-			
+
 			// the url to get
 			std::string search_url = "http://www.freesound.org/searchTextXML.php";
 			curl_easy_setopt(curl, CURLOPT_URL, search_url.c_str());
 
-			// perform the online search 
+			// perform the online search
 			connection = 1;
 			CURLcode res = curl_easy_perform(curl);
 			if( res != 0 ) {
@@ -267,7 +267,7 @@ std::string	Mootcher::searchText(std::string word)
 				toLog(curl_easy_strerror(res));
 				connection = 0;
 			}
-			
+
 			result = xml_page.memory;
 			toLog( result.c_str() );
 
@@ -298,17 +298,17 @@ std::string Mootcher::changeExtension(std::string filename)
 	int pos = 0;
 
  	pos = (int)filename.find(aiff);
-	if(pos != std::string::npos) filename.replace(pos, aiff.size(), replace); 
+	if(pos != std::string::npos) filename.replace(pos, aiff.size(), replace);
  	pos = (int)filename.find(aif);
-	if(pos != std::string::npos) filename.replace(pos, aif.size(), replace); 
+	if(pos != std::string::npos) filename.replace(pos, aif.size(), replace);
  	pos = (int)filename.find(wav);
-	if(pos != std::string::npos) filename.replace(pos, wav.size(), replace); 
+	if(pos != std::string::npos) filename.replace(pos, wav.size(), replace);
  	pos = (int)filename.find(mp3);
-	if(pos != std::string::npos) filename.replace(pos, mp3.size(), replace); 
+	if(pos != std::string::npos) filename.replace(pos, mp3.size(), replace);
  	pos = (int)filename.find(ogg);
-	if(pos != std::string::npos) filename.replace(pos, ogg.size(), replace); 
+	if(pos != std::string::npos) filename.replace(pos, ogg.size(), replace);
  	pos = (int)filename.find(flac);
-	if(pos != std::string::npos) filename.replace(pos, flac.size(), replace); 
+	if(pos != std::string::npos) filename.replace(pos, flac.size(), replace);
 
 	return filename;
 }
@@ -318,7 +318,7 @@ void		Mootcher::GetXml(std::string ID, struct MemoryStruct &xml_page)
 
 	if(curl) {
 		setcUrlOptions();
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback); 
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&xml_page);
 
 		// URL to get
@@ -326,7 +326,7 @@ void		Mootcher::GetXml(std::string ID, struct MemoryStruct &xml_page)
 		getxml_url += ID;
 
 		curl_easy_setopt(curl, CURLOPT_URL, getxml_url.c_str() );
- 		
+
 		// get it!
 		connection = 1;
 		CURLcode res = curl_easy_perform(curl);
@@ -347,7 +347,7 @@ std::string	Mootcher::getXmlFile(std::string ID, int &length)
 	std::string xmlFileName;
 	std::string audioFileName;
 	std::string filename;
-	
+
 	if(connection != 0) {
 		// download the xmlfile into xml_page
 		GetXml(ID, xml_page);
@@ -362,7 +362,7 @@ std::string	Mootcher::getXmlFile(std::string ID, int &length)
 			XMLTree doc;
 			doc.read_buffer( xml_page.memory );
 			XMLNode *freesound = doc.root();
-			
+
 			// if the page is not a valid xml document with a 'freesound' root
 			if( freesound == NULL){
 				sprintf(message, "getXmlFile: There is no valid root in the xml file");
@@ -375,10 +375,10 @@ std::string	Mootcher::getXmlFile(std::string ID, int &length)
 					name = sample->child("originalFilename");
 					filesize = sample->child("filesize");
 				}
-				
+
 				// get the file name and size from xml file
 				if (sample && name && filesize) {
-					
+
 					audioFileName = name->child("text")->content();
 					sprintf( message, "getXmlFile: %s needs to be downloaded\n", audioFileName.c_str() );
 					toLog(message);
@@ -396,7 +396,7 @@ std::string	Mootcher::getXmlFile(std::string ID, int &length)
 
 					sprintf(message, "getXmlFile: saving XML: %s\n", xmlFileName.c_str() );
 					toLog(message);
-					
+
 					// save the xml file to disk
 					doc.write(xmlFileName.c_str());
 
@@ -417,7 +417,7 @@ std::string	Mootcher::getXmlFile(std::string ID, int &length)
 						ARDOUR::Library->save_changes ();
 					}
 				}
-				
+
 				// clear the memory
 				if(xml_page.memory){
 					free( xml_page.memory );
@@ -456,9 +456,9 @@ std::string	Mootcher::getFile(std::string ID)
 			audioFileName += basePath;
 			audioFileName += "snd/";
 			audioFileName += ID;
-			audioFileName += "-";			
+			audioFileName += "-";
 			audioFileName += name;
-			
+
 			//check to see if audio file already exists
 			FILE *testFile = fopen(audioFileName.c_str(), "r");
 			if (testFile) {  //TODO:  should also check length to see if file is complete
@@ -470,9 +470,9 @@ std::string	Mootcher::getFile(std::string ID)
 					return audioFileName;
 				} else {
 					remove( audioFileName.c_str() );  //file was not correct length, delete it and try again
-				}					
+				}
 			}
-			
+
 
 			//now download the actual file
 			if (curl) {
@@ -500,14 +500,14 @@ std::string	Mootcher::getFile(std::string ID)
 
 				fclose(theFile);
 			}
-	
+
 /*
 			bar.dlnowMoo = 0;
 			bar.dltotalMoo = 0;
 			curl_easy_setopt (curl, CURLOPT_NOPROGRESS, 0); // turn on the process bar thingy
 			curl_easy_setopt (curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
 			curl_easy_setopt (curl, CURLOPT_PROGRESSDATA, &bar);
-*/				
+*/
 		}
 	}
 

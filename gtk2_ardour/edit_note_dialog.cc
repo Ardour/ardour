@@ -120,7 +120,7 @@ EditNoteDialog::run ()
 	_velocity.update ();
 
 	_region_view->start_note_diff_command (_("edit note"));
-	
+
 	bool had_change = false;
 
 	if (_channel.get_value_as_int() - 1 != _event->note()->channel()) {
@@ -139,7 +139,7 @@ EditNoteDialog::run ()
 	}
 
 	double const t = _region_view->time_converter().from (_time_clock.current_time ());
-	
+
 	if (t != _event->note()->time()) {
 		_region_view->change_note_time (_event, t);
 		had_change = true;
@@ -158,7 +158,7 @@ EditNoteDialog::run ()
 
 	_region_view->apply_diff ();
 
-	_event->set_selected (_event->selected()); // change color 
-	
+	_event->set_selected (_event->selected()); // change color
+
 	return r;
 }

@@ -84,7 +84,7 @@ Editor::add_external_audio_action (ImportMode mode_hint)
 		msg.run ();
 		return;
 	}
-	
+
 	if (sfbrowser == 0) {
 		sfbrowser = new SoundFileOmega (*this, _("Add Existing Media"), _session, 0, true, mode_hint);
 	} else {
@@ -155,7 +155,7 @@ Editor::external_audio_dialog ()
                 for (vector<string>::iterator x = upaths.begin(); x != upaths.end(); ++x) {
                         paths.push_back (*x);
                 }
-                
+
 		ImportPosition pos = sfbrowser->get_position ();
 		ImportMode mode = sfbrowser->get_mode ();
 		ImportDisposition chns = sfbrowser->get_channel_disposition ();
@@ -370,7 +370,7 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 		for (vector<string>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
 			const int check = check_whether_and_how_to_import (*a, true);
-                        
+
 			switch (check) {
 			case 2:
 				// user said skip
@@ -388,36 +388,36 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 			}
 
 			/* have to reset this for every file we handle */
-                        
+
 			if (use_timestamp) {
 				pos = -1;
 			}
 
 			ipw.show ();
-                                
+
 			switch (chns) {
 			case Editing::ImportDistinctFiles:
-                                
+
 				to_import.clear ();
 				to_import.push_back (*a);
-                                
+
 				if (mode == Editing::ImportToTrack) {
 					track = get_nth_selected_audio_track (nth++);
 				}
-			
+
 				ok = (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, replace) == 0);
 				break;
-				
+
 			case Editing::ImportDistinctChannels:
-				
+
 				to_import.clear ();
 				to_import.push_back (*a);
-				
+
 				ok = (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, replace) == 0);
 				break;
-				
+
 			case Editing::ImportSerializeFiles:
-				
+
 				to_import.clear ();
 				to_import.push_back (*a);
 
@@ -521,7 +521,7 @@ Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quali
 	import_status.target_regions = target_regions;
 	import_status.track = track;
 	import_status.replace = replace;
-        
+
 	set_canvas_cursor (_cursors->wait);
 	gdk_flush ();
 
@@ -719,8 +719,8 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 			region_name = bump_name_once (region_name, '.');
 		}
 
-		PropertyList plist; 
-		
+		PropertyList plist;
+
 		plist.add (ARDOUR::Properties::start, 0);
 		plist.add (ARDOUR::Properties::length, sources[0]->length (pos));
 		plist.add (ARDOUR::Properties::name, region_name);
@@ -769,7 +769,7 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 			if (len == 0) {
 				len = (60 / 120) * _session->frame_rate ();
 			}
-			
+
 			plist.add (ARDOUR::Properties::start, 0);
 			plist.add (ARDOUR::Properties::length, len);
 			plist.add (ARDOUR::Properties::name, region_name);
@@ -806,19 +806,19 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 	int n = 0;
 	framepos_t rlen = 0;
 
-	for (vector<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {                
+	for (vector<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*r);
-                
+
 		if (use_timestamp) {
                         if (ar) {
-                        
+
                                 /* get timestamp for this region */
-                                
+
                                 const boost::shared_ptr<Source> s (ar->sources().front());
                                 const boost::shared_ptr<AudioSource> as = boost::dynamic_pointer_cast<AudioSource> (s);
-                                
+
                                 assert (as);
-                                
+
                                 if (as->natural_position() != 0) {
                                         pos = as->natural_position();
                                 } else if (target_tracks == 1) {
@@ -837,15 +837,15 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
                                 pos = get_preferred_edit_position ();
                         }
                 }
-                        
+
 
 		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track);
 
 		rlen = (*r)->length();
-                
+
 		if (target_tracks != 1) {
 			track.reset ();
-		} else { 
+		} else {
 			if (!use_timestamp || !ar) {
 				/* line each one up right after the other */
 				pos += (*r)->length();
@@ -919,7 +919,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 
 				existing_track = mt.front();
 			}
-                        
+
 			existing_track->set_name (region->name());
 		}
 

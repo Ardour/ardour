@@ -54,7 +54,7 @@ MidiTracer::MidiTracer ()
 	get_vbox()->set_spacing (4);
 
 	Manager::instance()->PortsChanged.connect (_manager_connection, invalidator (*this), boost::bind (&MidiTracer::ports_changed, this), gui_context());
-	
+
 	HBox* pbox = manage (new HBox);
 	pbox->pack_start (*manage (new Label (_("Port:"))), false, false);
 
@@ -62,11 +62,11 @@ MidiTracer::MidiTracer ()
 	pbox->pack_start (_port_combo);
 	pbox->show_all ();
 	get_vbox()->pack_start (*pbox, false, false);
-	
+
 	scroller.add (text);
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (scroller, true, true);
-	
+
 	text.show ();
 	text.set_name ("MidiTracerTextView");
 	scroller.show ();
@@ -91,7 +91,7 @@ MidiTracer::MidiTracer ()
 	bbox->add (collect_button);
 	bbox->add (autoscroll_button);
 	bbox->show ();
-	
+
 	get_action_area()->add (*bbox);
 
 	base_button.signal_toggled().connect (sigc::mem_fun (*this, &MidiTracer::base_toggle));
@@ -116,7 +116,7 @@ MidiTracer::ports_changed ()
 {
 	string const c = _port_combo.get_active_text ();
 	_port_combo.clear ();
-	
+
 	Manager::PortList const & p = Manager::instance()->get_midi_ports ();
 	for (Manager::PortList::const_iterator i = p.begin(); i != p.end(); ++i) {
 		_port_combo.append_text ((*i)->name());
@@ -172,7 +172,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 			s += snprintf (&buf[s], bufsize, "%16s chn %2d %-3d %-3d\n", "NoteOff", (msg[0]&0xf)+1, (int) msg[1], (int) msg[2]);
 		}
 		break;
-		
+
 	case on:
 		if (show_hex) {
 			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x %02x\n", "NoteOn", (msg[0]&0xf)+1, (int) msg[1], (int) msg[2]);
@@ -180,7 +180,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 			s += snprintf (&buf[s], bufsize, "%16s chn %2d %-3d %-3d\n", "NoteOn", (msg[0]&0xf)+1, (int) msg[1], (int) msg[2]);
 		}
 		break;
-	    
+
 	case polypress:
 		if (show_hex) {
 			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x\n", "PolyPressure", (msg[0]&0xf)+1, (int) msg[1]);
@@ -188,7 +188,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 			s += snprintf (&buf[s], bufsize, "%16s chn %2d %-3d\n", "PolyPressure", (msg[0]&0xf)+1, (int) msg[1]);
 		}
 		break;
-	    
+
 	case MIDI::controller:
 		if (show_hex) {
 			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x %02x\n", "Controller", (msg[0]&0xf)+1, (int) msg[1], (int) msg[2]);
@@ -196,7 +196,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 			s += snprintf (&buf[s], bufsize, "%16s chn %2d %2d %-3d\n", "Controller", (msg[0]&0xf)+1, (int) msg[1], (int) msg[2]);
 		}
 		break;
-		
+
 	case program:
 		if (show_hex) {
 			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x\n", "Program Change", (msg[0]&0xf)+1, (int) msg[1]);
@@ -204,7 +204,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 			s += snprintf (&buf[s], bufsize, "%16s chn %2d %-3d\n", "Program Change", (msg[0]&0xf)+1, (int) msg[1]);
 		}
 		break;
-		
+
 	case chanpress:
 		if (show_hex) {
 			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x/%-3d\n", "Channel Pressure", (msg[0]&0xf)+1, (int) msg[1], (int) msg[1]);
@@ -212,7 +212,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x/%-3d\n", "Channel Pressure", (msg[0]&0xf)+1, (int) msg[1], (int) msg[1]);
 		}
 		break;
-	    
+
 	case MIDI::pitchbend:
 		if (show_hex) {
 			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x\n", "Pitch Bend", (msg[0]&0xf)+1, (int) msg[1]);
@@ -220,7 +220,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 			s += snprintf (&buf[s], bufsize, "%16s chn %2d %-3d\n", "Pitch Bend", (msg[0]&0xf)+1, (int) msg[1]);
 		}
 		break;
-	    
+
 	case MIDI::sysex:
 		if (len == 1) {
 			switch (msg[0]) {
@@ -245,7 +245,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 			default:
 				s += snprintf (&buf[s], bufsize, "%16s %02x\n", "Sysex", (int) msg[1]);
 				break;
-			} 
+			}
 
 		} else if (len > 5 && msg[0] == 0xf0 && msg[1] == 0x7f && msg[3] == 0x06) {
 			/* MMC */
@@ -274,7 +274,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 					s += snprintf (&buf[s], bufsize, " MMC command %02x\n", cmd);
 				}
 			}
-			
+
 		} else if (len == 10 && msg[0] == 0xf0 && msg[1] == 0x7f && msg[9] == 0xf7)  {
 
 			/* MTC full frame */
@@ -283,12 +283,12 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 				);
 
 		} else {
-			
+
 			/* other sys-ex */
-			
+
 			s += snprintf (&buf[s], bufsize, "%16s (%d) = [", "Sysex", (int) len);
 			bufsize -= s;
-			
+
 			for (unsigned int i = 0; i < len && bufsize > 3; ++i) {
 				if (i > 0) {
 					s += snprintf (&buf[s], bufsize, " %02x", msg[i]);
@@ -300,39 +300,39 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 			s += snprintf (&buf[s], bufsize, "]\n");
 		}
 		break;
-	    
+
 	case MIDI::song:
 		s += snprintf (&buf[s], bufsize, "%16s\n", "Song");
 		break;
-	    
+
 	case MIDI::tune:
 		s += snprintf (&buf[s], bufsize, "%16s\n", "Tune");
 		break;
-	    
+
 	case MIDI::eox:
 		s += snprintf (&buf[s], bufsize, "%16s\n", "EOX");
 		break;
-	    
+
 	case MIDI::timing:
 		s += snprintf (&buf[s], bufsize, "%16s\n", "Timing");
 		break;
-	    
+
 	case MIDI::start:
 		s += snprintf (&buf[s], bufsize, "%16s\n", "Start");
 		break;
-	    
+
 	case MIDI::stop:
 		s += snprintf (&buf[s], bufsize, "%16s\n", "Stop");
 		break;
-	    
+
 	case MIDI::contineu:
 		s += snprintf (&buf[s], bufsize, "%16s\n", "Continue");
 		break;
-	    
+
 	case active:
 		s += snprintf (&buf[s], bufsize, "%16s\n", "Active Sense");
 		break;
-	    
+
 	default:
 		s += snprintf (&buf[s], bufsize, "%16s\n", "Unknown");
 		break;

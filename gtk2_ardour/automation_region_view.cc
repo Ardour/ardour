@@ -98,23 +98,23 @@ AutomationRegionView::canvas_event (GdkEvent* ev)
 
 		/* XXX: icky dcast to Editor */
 		e.drags()->set (new RubberbandSelectDrag (dynamic_cast<Editor*> (&e), group), ev);
-		
+
 	} else if (ev->type == GDK_BUTTON_RELEASE) {
 
 		if (trackview.editor().drags()->active() && trackview.editor().drags()->end_grab (ev)) {
 			return true;
 		}
-		
+
 		double x = ev->button.x;
 		double y = ev->button.y;
-		
+
 		/* convert to item coordinates in the time axis view */
 		automation_view()->canvas_display()->w2i (x, y);
 
 		/* clamp y */
 		y = max (y, 0.0);
 		y = min (y, _height - NAME_HIGHLIGHT_SIZE);
-		
+
 		add_automation_event (ev, trackview.editor().pixel_to_frame (x) - _region->position(), y);
 	}
 
@@ -137,7 +137,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 	assert(_line);
 
 	AutomationTimeAxisView* const view = automation_view ();
-	
+
 	/* compute vertical fractional position */
 
 	const double h = trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2;
@@ -158,11 +158,11 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 	/* XXX: hack! */
 	boost::shared_ptr<ARDOUR::MidiRegion> mr = boost::dynamic_pointer_cast<ARDOUR::MidiRegion> (_region);
 	assert (mr);
-	
+
 	view->session()->commit_reversible_command (
 		new MementoCommand<ARDOUR::AutomationList> (new ARDOUR::MidiAutomationListBinder (mr->midi_source(), _parameter), &before, &after)
 		);
-	
+
 
 	view->session()->set_dirty ();
 }
@@ -183,7 +183,7 @@ AutomationRegionView::set_position (framepos_t pos, void* src, double* ignored)
 	if (_line) {
 		_line->set_maximum_time (_region->length ());
 	}
-	
+
 	return RegionView::set_position(pos, src, ignored);
 }
 

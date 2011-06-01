@@ -37,20 +37,20 @@ class MidiTracer : public ArdourDialog
 	bool autoscroll;
 	bool show_hex;
 	bool collect;
-	
+
 	/** Incremented when an update is requested, decremented when one is handled; hence
 	 *  equal to 0 when an update is not queued.  May temporarily be negative if a
 	 *  update is handled before it was noted that it had just been queued.
 	 */
 	volatile gint _update_queued;
-	 
+
 	RingBuffer<char *> fifo;
 	Pool buffer_pool;
 	static const size_t buffer_size = 256;
 
 	void tracer (MIDI::Parser&, MIDI::byte*, size_t);
 	void update ();
-	
+
 	Gtk::CheckButton autoscroll_button;
 	Gtk::CheckButton base_button;
 	Gtk::CheckButton collect_button;

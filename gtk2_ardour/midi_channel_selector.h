@@ -78,7 +78,7 @@ public:
 	 *  of the currently selected channels.
 	 */
 	sigc::signal<void, ARDOUR::ChannelMode, uint16_t> mode_changed;
-	
+
 	void set_channel_mode(ARDOUR::ChannelMode mode, uint16_t mask);
 
 	/**

@@ -203,12 +203,12 @@ MixerStrip::init ()
 
 	_iso_label = manage (new Label (_("iso")));
 	_safe_label = manage (new Label (_("lock")));
-        
+
 	_iso_label->set_name (X_("SoloLEDLabel"));
 	_safe_label->set_name (X_("SoloLEDLabel"));
 
 	_iso_label->show ();
-	_safe_label->show (); 
+	_safe_label->show ();
 
         solo_led_table.set_spacings (0);
         solo_led_table.set_border_width (1);
@@ -411,13 +411,13 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	if (is_track ()) {
-		
+
 		below_panner_box.pack_start (*rec_enable_button);
 		rec_enable_button->set_sensitive (_session->writable());
 		rec_enable_button->show();
 
 	} else {
-		
+
 		/* non-master bus */
 
 		if (!_route->is_master()) {
@@ -589,14 +589,14 @@ MixerStrip::set_width_enum (Width w, void* owner)
 
 		_iso_label->hide ();
 		_safe_label->hide ();
-		
+
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, longest_label.c_str(), 2, 2);
 		set_size_request (max (50, gpm.get_gm_width()), -1);
 		break;
 	}
 
 	processor_box.set_width (w);
-	
+
 	update_input_display ();
 	update_output_display ();
 	route_group_changed ();
@@ -656,7 +656,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 		boost::shared_ptr<ARDOUR::BundleList> b = _session->bundles ();
 
 		/* give user bundles first chance at being in the menu */
-		
+
 		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 			if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
 				maybe_add_bundle_to_output_menu (*i, current);
@@ -668,7 +668,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 				maybe_add_bundle_to_output_menu (*i, current);
 			}
 		}
-		
+
 		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
 		RouteList copy = *routes;
 		copy.sort (RouteCompareByName ());
@@ -695,7 +695,7 @@ void
 MixerStrip::edit_output_configuration ()
 {
 	if (output_selector == 0) {
-		
+
 		boost::shared_ptr<Send> send;
 		boost::shared_ptr<IO> output;
 
@@ -704,11 +704,11 @@ MixerStrip::edit_output_configuration ()
 				output = send->output();
 			} else {
 				output = _route->output ();
-			} 
+			}
 		} else {
 			output = _route->output ();
 		}
-		
+
 		output_selector = new IOSelectorWindow (_session, output);
 	}
 
@@ -748,7 +748,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 		return true;
 	}
 
-	if (_session->actively_recording() && _route->record_enabled()) 
+	if (_session->actively_recording() && _route->record_enabled())
 		return true;
 
 	switch (ev->button) {
@@ -768,7 +768,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 		boost::shared_ptr<ARDOUR::BundleList> b = _session->bundles ();
 
 		/* give user bundles first chance at being in the menu */
-		
+
 		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 			if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
 				maybe_add_bundle_to_input_menu (*i, current);
@@ -780,7 +780,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 				maybe_add_bundle_to_input_menu (*i, current);
 			}
 		}
-		
+
 		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
 		RouteList copy = *routes;
 		copy.sort (RouteCompareByName ());
@@ -887,7 +887,7 @@ MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR
 	}
 
 	output_menu_bundles.push_back (b);
-	
+
 	MenuList& citems = output_menu.items();
 
 	std::string n = b->name ();
@@ -1022,7 +1022,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 		} else {
 			port = route->output()->nth (io_index);
 		}
-		
+
 		port_connections.clear ();
 		port->get_connections(port_connections);
 		io_connection_count = 0;
@@ -1195,12 +1195,12 @@ MixerStrip::comment_editor_done_editing ()
 	ignore_toggle = true;
 	_comment_menu_item->set_active (false);
 	ignore_toggle = false;
-	
+
 	string const str = comment_area->get_buffer()->get_text();
 	if (str == _route->comment ()) {
 		return;
 	}
-	
+
 	_route->set_comment (str, this);
 }
 
@@ -1210,7 +1210,7 @@ MixerStrip::toggle_comment ()
 	if (ignore_toggle) {
 		return;
 	}
-	
+
 	if (comment_window == 0) {
 		setup_comment_editor ();
 	}
@@ -1511,7 +1511,7 @@ MixerStrip::reset_strip_style ()
 		gpm.set_fader_name ("SendStripBase");
 
 	} else {
-		
+
 		if (is_midi_track()) {
 			if (_route->active()) {
 				set_name ("MidiTrackStripBase");
@@ -1539,7 +1539,7 @@ MixerStrip::reset_strip_style ()
 				gpm.set_meter_strip_name ("AudioBusMetricsInactive");
 			}
 			gpm.set_fader_name ("AudioBusFader");
-			
+
 			/* (no MIDI busses yet) */
 		}
 	}

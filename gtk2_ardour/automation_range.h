@@ -43,7 +43,7 @@ struct AutomationRange
 	double low_fract;
 	double high_fract;
 	TimeAxisView* track; // ref would be better, but ARDOUR::SessionHandlePtr is non-assignable
-	
+
 	AutomationRange (double s, double e, double l, double h, TimeAxisView* atv)
 		: start (s), end (e), low_fract (l), high_fract (h), track (atv) {}
 };

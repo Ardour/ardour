@@ -112,9 +112,9 @@ public:
 	void add_underlay (StreamView*, bool update_xml = true);
 	void remove_underlay (StreamView*);
 	void build_underlay_menu(Gtk::Menu*);
-	
+
 	int set_state (const XMLNode&, int version);
-	
+
 	virtual void create_automation_child (const Evoral::Parameter& param, bool show) = 0;
 
 	/* make sure we get the right version of this */
@@ -126,7 +126,7 @@ public:
 
 	boost::shared_ptr<AutomationTimeAxisView> automation_child(Evoral::Parameter param);
 	virtual Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
-	
+
 	std::string         name() const;
 	StreamView*         view() const { return _view; }
 	ARDOUR::RouteGroup* route_group() const;
@@ -187,7 +187,7 @@ protected:
 	                                       boost::shared_ptr<ARDOUR::Processor>);
 
 	void automation_track_hidden (Evoral::Parameter param);
-	
+
 	ProcessorAutomationNode*
 	find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
 
@@ -245,7 +245,7 @@ protected:
 	void create_gain_automation_child (const Evoral::Parameter &, bool);
 
 	boost::shared_ptr<AutomationTimeAxisView> gain_track;
-	
+
 	StreamView*           _view;
 	ArdourCanvas::Canvas& parent_canvas;
 	bool                  no_redraw;

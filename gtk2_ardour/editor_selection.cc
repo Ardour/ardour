@@ -191,9 +191,9 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op, bool /*force
         bool had_tracks = !selection->tracks.empty();
         RouteGroup* group = clicked_routeview->route()->route_group();
         RouteGroup& arg (_session->all_route_group());
-        
+
 	switch (op) {
-	case Selection::Toggle: 
+	case Selection::Toggle:
 		if (selection->selected (clicked_axisview)) {
 			if (arg.is_select() && arg.is_active()) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
@@ -222,8 +222,8 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op, bool /*force
                         }
 		}
                 break;
-	
-	case Selection::Add: 
+
+	case Selection::Add:
 		if (!had_tracks && arg.is_select() && arg.is_active()) {
                         /* nothing was selected already, and all group is active etc. so use
                            all tracks.
@@ -240,7 +240,7 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op, bool /*force
 			selection->add (clicked_axisview);
                 }
                 break;
-		
+
 	case Selection::Set:
                 selection->clear();
 		if (!had_tracks && arg.is_select() && arg.is_active()) {
@@ -259,8 +259,8 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op, bool /*force
 			selection->set (clicked_axisview);
                 }
                 break;
-	
-	case Selection::Extend: 
+
+	case Selection::Extend:
 		selection->clear();
 		cerr << ("Editor::set_selected_track_as_side_effect  case  Selection::Add  not yet implemented\n");
                 break;
@@ -329,7 +329,7 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool /*n
 	if (!clicked_control_point) {
 		return false;
 	}
-	
+
 	switch (op) {
 	case Selection::Set:
 		selection->set (clicked_control_point);
@@ -395,7 +395,7 @@ Editor::mapover_tracks (sigc::slot<void, RouteTimeAxisView&, uint32_t> sl, TimeA
 
 	/* call the slots */
 	uint32_t const sz = tracks.size ();
-	
+
 	for (set<RouteTimeAxisView*>::iterator i = tracks.begin(); i != tracks.end(); ++i) {
 		sl (**i, sz);
 	}
@@ -535,7 +535,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 					if (button_release_can_deselect) {
 
 						/* just remove this one region, but only on a permitted button release */
-                                                
+
 						selection->remove (clicked_regionview);
 						commit = true;
 
@@ -685,7 +685,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 				relevant_tracks.insert (r);
 			}
 		}
-		
+
 		set<RouteTimeAxisView*> already_in_selection;
 
 		if (relevant_tracks.empty()) {
@@ -886,16 +886,16 @@ Editor::track_selection_changed ()
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 
                 bool yn = (find (selection->tracks.begin(), selection->tracks.end(), *i) != selection->tracks.end());
-                
+
                 (*i)->set_selected (yn);
-                
+
                 TimeAxisView::Children c = (*i)->get_child_list ();
                 for (TimeAxisView::Children::iterator j = c.begin(); j != c.end(); ++j) {
                         (*j)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), j->get()) != selection->tracks.end());
                 }
 
-                if (yn && 
-                    ((mouse_mode == MouseRange) || 
+                if (yn &&
+                    ((mouse_mode == MouseRange) ||
                      ((mouse_mode == MouseObject) && (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT)))) {
                         (*i)->reshow_selection (selection->time);
                 } else {
@@ -965,14 +965,14 @@ Editor::sensitize_the_right_region_actions ()
 	}
 
 	/* We get here if we are in Object mode */
-			
+
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 	sensitize_all_region_actions (!rs.empty ());
 
 	_ignore_region_action = true;
-	
+
 	/* Look through the regions that are selected and make notes about what we have got */
-	
+
 	bool have_audio = false;
 	bool have_midi = false;
 	bool have_locked = false;
@@ -995,11 +995,11 @@ Editor::sensitize_the_right_region_actions ()
 
 		boost::shared_ptr<Region> r = (*i)->region ();
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
-		
+
 		if (ar) {
 			have_audio = true;
 		}
-		
+
 		if (boost::dynamic_pointer_cast<MidiRegion> (r)) {
 			have_midi = true;
 		}
@@ -1076,7 +1076,7 @@ Editor::sensitize_the_right_region_actions ()
 		_region_actions->get_action("add-range-markers-from-region")->set_sensitive (false);
 		_region_actions->get_action("close-region-gaps")->set_sensitive (false);
 		_region_actions->get_action("combine-regions")->set_sensitive (false);
-	} 
+	}
 
 	if (!have_midi) {
 		_region_actions->get_action("show-region-list-editor")->set_sensitive (false);
@@ -1100,40 +1100,40 @@ Editor::sensitize_the_right_region_actions ()
 	}
 
 	if (have_audio) {
-		
+
 		if (have_envelope_visible && !have_envelope_invisible) {
 			Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-gain-envelope-visible"))->set_active ();
 		} else if (have_envelope_visible && have_envelope_invisible) {
 //			_region_actions->get_action("toggle-region-gain-envelope-visible")->set_inconsistent ();
 		}
-		
+
 		if (have_envelope_active && !have_envelope_inactive) {
 			Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-gain-envelope-active"))->set_active ();
 		} else if (have_envelope_active && have_envelope_inactive) {
 //			_region_actions->get_action("toggle-region-gain-envelope-active")->set_inconsistent ();
 		}
-	
+
 	} else {
-		
+
 		_region_actions->get_action("analyze-region")->set_sensitive (false);
 		_region_actions->get_action("reset-region-gain-envelopes")->set_sensitive (false);
 		_region_actions->get_action("toggle-region-gain-envelope-visible")->set_sensitive (false);
 		_region_actions->get_action("toggle-region-gain-envelope-active")->set_sensitive (false);
 		_region_actions->get_action("pitch-shift-region")->set_sensitive (false);
-		
+
 	}
 
 	if (!have_non_unity_scale_amplitude || !have_audio) {
 		_region_actions->get_action("reset-region-scale-amplitude")->set_sensitive (false);
 	}
-		
+
 	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock"))->set_active (have_locked && !have_unlocked);
 	if (have_locked && have_unlocked) {
 //		_region_actions->get_action("toggle-region-lock")->set_inconsistent ();
 	}
 
 	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock-style"))->set_active (have_position_lock_style_music && !have_position_lock_style_audio);
-		
+
 	if (have_position_lock_style_music && have_position_lock_style_audio) {
 //		_region_actions->get_action("toggle-region-lock-style")->set_inconsistent ();
 	}
@@ -1142,7 +1142,7 @@ Editor::sensitize_the_right_region_actions ()
 	if (have_muted && have_unmuted) {
 //		_region_actions->get_action("toggle-region-mute")->set_inconsistent ();
 	}
-        
+
 	Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-opaque-region"))->set_active (have_opaque && !have_non_opaque);
 	if (have_opaque && have_non_opaque) {
 //			_region_actions->get_action("toggle-opaque-region")->set_inconsistent ();
@@ -1160,7 +1160,7 @@ Editor::sensitize_the_right_region_actions ()
 	}
 
 	_ignore_region_action = false;
-	
+
 	_all_region_actions_sensitized = false;
 }
 
@@ -1318,7 +1318,7 @@ Editor::select_all_within (
 	list<Selectable*> found;
 
 	for (TrackViewList::const_iterator iter = tracklist.begin(); iter != tracklist.end(); ++iter) {
-		
+
 		if ((*iter)->hidden()) {
 			continue;
 		}
@@ -1741,9 +1741,9 @@ long
 Editor::select_range_around_region (RegionView* rv)
 {
 	assert (rv);
-	
+
 	selection->set (&rv->get_time_axis_view());
-	
+
 	selection->time.clear ();
 	boost::shared_ptr<Region> r = rv->region ();
 	return selection->set (r->position(), r->position() + r->length());

@@ -29,7 +29,7 @@
 namespace Gnome {
 namespace Canvas {
 
-class CanvasNote : public SimpleRect, public CanvasNoteEvent 
+class CanvasNote : public SimpleRect, public CanvasNoteEvent
 {
  public:
 	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
@@ -61,7 +61,7 @@ class NoEventCanvasNote : public CanvasNote
                            Group& group,
                            const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>())
 		: CanvasNote (region, group, note, false) {}
-        
+
 	double point_vfunc(double, double, int, int, GnomeCanvasItem**) {
 		/* return a huge value to tell the canvas that we're never the item for an event */
 		return 9999999999999.0;

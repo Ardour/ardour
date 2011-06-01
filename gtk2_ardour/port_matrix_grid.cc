@@ -192,15 +192,15 @@ PortMatrixGrid::render (cairo_t* cr)
 						} else {
 							/* these two channels might be associated */
 							PortMatrixNode::State const s = _matrix->get_state (c);
-							
+
 							switch (s) {
 							case PortMatrixNode::ASSOCIATED:
 								draw_association_indicator (cr, x, y);
 								break;
-								
+
 							case PortMatrixNode::NOT_ASSOCIATED:
 								break;
-								
+
 							default:
 								break;
 							}
@@ -284,10 +284,10 @@ PortMatrixGrid::button_press (double x, double y, int b, uint32_t t, guint)
 	ARDOUR::BundleChannel const py = position_to_channel (y, x, _matrix->visible_rows());
 
 	if (b == 1) {
-		
+
 		_dragging = true;
 		_drag_valid = (px.bundle && py.bundle);
-		
+
 		_moved = false;
 		_drag_start_x = x / grid_spacing ();
 		_drag_start_y = y / grid_spacing ();
@@ -310,7 +310,7 @@ PortMatrixGrid::set_association (PortMatrixNode node, bool s)
 				if (!_matrix->should_show (node.column.bundle->channel_type(i)) || !_matrix->should_show (node.row.bundle->channel_type(j))) {
 					continue;
 				}
-				
+
 				ARDOUR::BundleChannel c[2];
 				c[_matrix->column_index()] = ARDOUR::BundleChannel (node.column.bundle, i);
 				c[_matrix->row_index()] = ARDOUR::BundleChannel (node.row.bundle, j);
@@ -336,12 +336,12 @@ PortMatrixGrid::button_release (double x, double y, int b, uint32_t /*t*/, guint
 	if (b == 1) {
 
 		if (x != -1) {
-			
+
 			if (_dragging && _moved) {
-				
+
 				if (_drag_valid) {
 					list<PortMatrixNode> const p = nodes_on_line (_drag_start_x, _drag_start_y, _drag_x, _drag_y);
-					
+
 					if (!p.empty()) {
 						PortMatrixNode::State const s = _matrix->get_association (p.front());
 						for (list<PortMatrixNode>::const_iterator i = p.begin(); i != p.end(); ++i) {
@@ -349,9 +349,9 @@ PortMatrixGrid::button_release (double x, double y, int b, uint32_t /*t*/, guint
 						}
 					}
 				}
-				
+
 			} else {
-				
+
 				if (Keyboard::modifier_state_equals (s, Keyboard::PrimaryModifier)) {
 					/* associate/disassociate things diagonally down and right until we run out */
 					PortMatrixNode::State s = (PortMatrixNode::State) 0;
@@ -368,9 +368,9 @@ PortMatrixGrid::button_release (double x, double y, int b, uint32_t /*t*/, guint
 						x += grid_spacing ();
 						y += grid_spacing ();
 					}
-					
+
 				} else {
-					
+
 					PortMatrixNode const n = position_to_node (x, y);
 					if (n.row.bundle && n.column.bundle) {
 						PortMatrixNode::State const s = _matrix->get_association (n);
@@ -381,7 +381,7 @@ PortMatrixGrid::button_release (double x, double y, int b, uint32_t /*t*/, guint
 
 			require_render ();
 		}
-		
+
 		_body->queue_draw ();
 	}
 
@@ -398,7 +398,7 @@ PortMatrixGrid::draw_extra (cairo_t* cr)
 	list<PortMatrixNode> const m = _body->mouseover ();
 
 	for (list<PortMatrixNode>::const_iterator i = m.begin(); i != m.end(); ++i) {
-	
+
 		double const x = component_to_parent_x (channel_to_position (i->column, _matrix->visible_columns()) * grid_spacing()) + grid_spacing() / 2;
 		double const y = component_to_parent_y (channel_to_position (i->row, _matrix->visible_rows()) * grid_spacing()) + grid_spacing() / 2;
 
@@ -411,7 +411,7 @@ PortMatrixGrid::draw_extra (cairo_t* cr)
 				cairo_line_to (cr, _parent_rectangle.get_x() + _parent_rectangle.get_width(), y);
 			}
 			cairo_stroke (cr);
-			
+
 			cairo_move_to (cr, x, y);
 			if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
 				cairo_line_to (cr, x, _parent_rectangle.get_y() + _parent_rectangle.get_height());
@@ -496,7 +496,7 @@ void
 PortMatrixGrid::queue_draw_for (list<PortMatrixNode> const &n)
 {
 	for (list<PortMatrixNode>::const_iterator i = n.begin(); i != n.end(); ++i) {
-		
+
 		if (i->row.bundle) {
 
 			double const y = channel_to_position (i->row, _matrix->visible_rows()) * grid_spacing ();
@@ -511,7 +511,7 @@ PortMatrixGrid::queue_draw_for (list<PortMatrixNode> const &n)
 		if (i->column.bundle) {
 
 			double const x = channel_to_position (i->column, _matrix->visible_columns()) * grid_spacing ();
-			
+
 			_body->queue_draw_area (
 				component_to_parent_x (x),
 				_parent_rectangle.get_y(),

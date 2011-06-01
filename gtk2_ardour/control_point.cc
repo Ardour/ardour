@@ -121,11 +121,11 @@ ControlPoint::reset (double x, double y, AutomationList::iterator mi, uint32_t v
 	/* If this is too big, libart will confuse itself and segfault after it casts the bounding box
 	   of this automation line to ints.  Sigh.
 	*/
-	
+
 	if (x > INT32_MAX) {
 		x = INT32_MAX;
 	}
-	
+
 	_model = mi;
 	_view_index = vi;
 	move_to (x, y, shape);

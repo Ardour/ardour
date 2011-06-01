@@ -186,7 +186,7 @@ PluginEqGui::on_show()
 		if (!_window_unmap_connection.connected()) {
 			_window_unmap_connection = toplevel->signal_unmap().connect( sigc::mem_fun(this, &PluginEqGui::stop_updating));
 		}
-		
+
 		if (!_window_map_connection.connected()) {
 			_window_map_connection = toplevel->signal_map().connect( sigc::mem_fun(this, &PluginEqGui::start_updating));
 		}

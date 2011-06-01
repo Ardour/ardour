@@ -363,9 +363,9 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 	val = (*iter)[_columns.edits];
 	plist.add (Properties::edit, val);
 	plist.add (Properties::name, string ((*iter)[_columns.text]));
-	
+
 	group->set_hidden (!(*iter)[_columns.is_visible], this);
-	
+
 	group->apply_changes (plist);
 }
 
@@ -498,7 +498,7 @@ EditorRouteGroups::set_session (Session* s)
 	if (_session) {
 
 		RouteGroup& arg (_session->all_route_group());
-                
+
 		arg.PropertyChanged.connect (all_route_groups_changed_connection, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::all_group_changed, this, _1), gui_context());
 
 		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::add, this, _1), gui_context());
@@ -522,7 +522,7 @@ void
 EditorRouteGroups::run_new_group_dialog ()
 {
 	RouteList rl;
-	
+
 	return _editor->_group_tabs->run_new_group_dialog (rl);
 }
 
@@ -544,7 +544,7 @@ EditorRouteGroups::all_group_changed (const PropertyChange&)
 		_all_group_active_button.set_active (false);
 	}
 }
-        
+
 /** Called when a model row is deleted, but also when the model is
  *  reordered by a user drag-and-drop; the latter is what we are
  *  interested in here.
@@ -558,7 +558,7 @@ EditorRouteGroups::row_deleted (Gtk::TreeModel::Path const &)
 		*/
 		return;
 	}
-	
+
 	/* Re-write the session's route group list so that the new order is preserved */
 
 	list<RouteGroup*> new_list;

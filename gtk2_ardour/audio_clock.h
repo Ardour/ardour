@@ -44,7 +44,7 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 		Off
 	};
 
-	AudioClock (const std::string& clock_name, bool is_transient, const std::string& widget_name, 
+	AudioClock (const std::string& clock_name, bool is_transient, const std::string& widget_name,
                     bool editable, bool follows_playhead, bool duration = false, bool with_info = false);
 
 	Mode mode() const { return _mode; }

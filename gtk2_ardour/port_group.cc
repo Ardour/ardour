@@ -109,14 +109,14 @@ PortGroup::add_bundle_internal (boost::shared_ptr<Bundle> b, boost::shared_ptr<I
 	assert (b.get());
 
 	if (!allow_dups) {
-		
+
 		/* don't add this bundle if we already have one with the same ports */
-		
+
 		BundleList::iterator i = _bundles.begin ();
 		while (i != _bundles.end() && b->has_same_ports ((*i)->bundle) == false) {
 			++i;
 		}
-		
+
 		if (i != _bundles.end ()) {
 			return;
 		}
@@ -126,7 +126,7 @@ PortGroup::add_bundle_internal (boost::shared_ptr<Bundle> b, boost::shared_ptr<I
 	b->Changed.connect (br->changed_connection, invalidator (*this), ui_bind (&PortGroup::bundle_changed, this, _1), gui_context());
 	_bundles.push_back (br);
 
-	Changed ();	
+	Changed ();
 }
 
 void
@@ -254,11 +254,11 @@ PortGroup::remove_duplicates ()
 				}
 			}
 		}
-		
+
 		if (remove) {
 			_bundles.erase (i);
 		}
-		
+
 		i = tmp;
 	}
 }
@@ -272,7 +272,7 @@ PortGroupList::PortGroupList ()
 
 }
 
-PortGroupList::~PortGroupList() 
+PortGroupList::~PortGroupList()
 {
 	/* XXX need to clean up bundles, but ownership shared with PortGroups */
 }
@@ -306,7 +306,7 @@ struct RouteIOs {
 		route = r;
 		ios.push_back (i);
 	}
-	
+
 	boost::shared_ptr<Route> route;
 	/* it's ok to use a shared_ptr here as RouteIOs structs are only used during ::gather () */
 	std::list<boost::shared_ptr<IO> > ios;
@@ -355,7 +355,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 		/* keep track of IOs that we have taken bundles from,
 		   so that we can avoid taking the same IO from both
-		   Route::output() and the main_outs Delivery 
+		   Route::output() and the main_outs Delivery
                 */
 
 		set<boost::shared_ptr<IO> > used_io;
@@ -375,7 +375,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	   Note that if the RouteIO's bundles are multi-type, we may make new Bundles
 	   with only the ports of one type.
 	*/
-	
+
 	for (list<RouteIOs>::iterator i = route_ios.begin(); i != route_ios.end(); ++i) {
 		TimeAxisView* tv = PublicEditor::instance().axis_view_from_route (i->route);
 
@@ -422,7 +422,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 			}
 		}
 	}
-	
+
 	/* Ardour stuff */
 
 	if (!inputs) {
@@ -485,7 +485,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 				_("MMC out"), DataType::MIDI, ae.make_port_name_non_relative (mmc->output_port()->name())
 				);
 		}
-		
+
 		ardour->add_bundle (sync);
 	}
 
@@ -505,7 +505,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	} else {
 		ports = session->engine().get_ports ("", type.to_jack_type(), inputs ? JackPortIsInput : JackPortIsOutput);
 	}
-	
+
  	if (ports) {
 
 		int n = 0;
@@ -519,7 +519,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 			    !track->has_port(p) &&
 			    !ardour->has_port(p) &&
 			    !other->has_port(p)) {
-                                
+
                                 /* special hack: ignore MIDI ports labelled Midi-Through. these
                                    are basically useless and mess things up for default
                                    connections.
@@ -530,14 +530,14 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
                                         continue;
                                 }
 
-                                /* special hack: ignore our monitor inputs (which show up here because 
+                                /* special hack: ignore our monitor inputs (which show up here because
                                    we excluded them earlier.
                                 */
-                                
+
                                 string lp = p;
                                 boost::to_lower (lp);
 
-                                if ((lp.find (N_(":monitor")) != string::npos) && 
+                                if ((lp.find (N_(":monitor")) != string::npos) &&
                                     (lp.find (lpn) != string::npos)) {
                                         ++n;
                                         continue;
@@ -549,8 +549,8 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 				if (jp) {
 					DataType t (jack_port_type (jp));
 					if (t != DataType::NIL) {
-						if (port_has_prefix (p, N_("system:")) || 
-                                                    port_has_prefix (p, N_("alsa_pcm")) || 
+						if (port_has_prefix (p, N_("system:")) ||
+                                                    port_has_prefix (p, N_("alsa_pcm")) ||
                                                     port_has_prefix (p, lpnc)) {
 							extra_system[t].push_back (p);
 						} else {

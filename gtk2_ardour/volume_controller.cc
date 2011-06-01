@@ -35,7 +35,7 @@ VolumeController::VolumeController (Glib::RefPtr<Gdk::Pixbuf> p,
                                     int subw, int subh)
 
 	: MotionFeedback (p, MotionFeedback::Rotary, "", adj, with_numeric, subw, subh)
-{			  
+{
 	get_adjustment()->signal_value_changed().connect (mem_fun (*this,&VolumeController::adjustment_value_changed));
 }
 

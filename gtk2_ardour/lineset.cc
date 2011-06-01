@@ -417,7 +417,7 @@ LineSet::update_bounds()
 	if (fx1 > INT_MAX) {
 		fx1 = INT_MAX;
 	}
-	
+
 	cv.w2c (fx0, new_b.y0, bbox.x0, bbox.y0);
 	cv.w2c (fx1, new_b.y1, bbox.x1, bbox.y1);
 

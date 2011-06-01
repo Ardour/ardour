@@ -31,11 +31,11 @@ class TimeSelection : public std::list<ARDOUR::AudioRange>
 {
 public:
 	ARDOUR::AudioRange& operator[](uint32_t);
-	
+
         ARDOUR::framepos_t start();
         ARDOUR::framepos_t end_frame();
         ARDOUR::framepos_t length();
-	
+
 	bool consolidate ();
 };
 

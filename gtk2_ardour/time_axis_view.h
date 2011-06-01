@@ -214,7 +214,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	SelectionRect* get_selection_rect(uint32_t id);
 
 	static uint32_t preset_height (Height);
-	
+
   protected:
 	/* The Standard LHS Controls */
 	Gtk::HBox     controls_hbox;

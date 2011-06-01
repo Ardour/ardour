@@ -359,14 +359,14 @@ SoundFileBox::audition ()
 
 	afs = boost::dynamic_pointer_cast<AudioFileSource> (srclist[0]);
 	string rname = region_name_from_path (afs->path(), false);
-	
-	PropertyList plist; 
-	
+
+	PropertyList plist;
+
 	plist.add (ARDOUR::Properties::start, 0);
 	plist.add (ARDOUR::Properties::length, srclist[0]->length(srclist[0]->timeline_position()));
 	plist.add (ARDOUR::Properties::name, rname);
 	plist.add (ARDOUR::Properties::layer, 0);
-	
+
 	r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
 
 	_session->audition_region(r);
@@ -434,7 +434,7 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
         chooser.add_shortcut_folder_uri("file:///Library/GarageBand/Apple Loops");
         chooser.add_shortcut_folder_uri("file:///Library/Audio/Apple Loops");
         chooser.add_shortcut_folder_uri("file:///Library/Application Support/GarageBand/Instrument Library/Sampler/Sampler Files");
-        
+
         chooser.add_shortcut_folder_uri("file:///Volumes");
 #endif
 

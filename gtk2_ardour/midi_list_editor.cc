@@ -182,7 +182,7 @@ MidiListEditor::edited (const std::string& path, const std::string& /* text */)
 	cerr << "Edited " << *note << endl;
 
 	redisplay_model ();
-	
+
 	/* keep selected row(s), move cursor there, to allow us to continue editing */
 }
 
@@ -193,24 +193,24 @@ MidiListEditor::redisplay_model ()
 	model->clear ();
 
 	if (_session) {
-		
+
 		BeatsFramesConverter conv (_session->tempo_map(), region->position());
 		MidiModel::Notes notes = region->midi_source(0)->model()->notes();
 		TreeModel::Row row;
 		stringstream ss;
-		
+
 		for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
 			row = *(model->append());
 			row[columns.channel] = (*i)->channel() + 1;
 			row[columns.note_name] = Evoral::midi_note_name ((*i)->note());
 			row[columns.note] = (*i)->note();
 			row[columns.velocity] = (*i)->velocity();
-			
+
 			Timecode::BBT_Time bbt;
 			double dur;
 
 			_session->tempo_map().bbt_time (conv.to ((*i)->time()), bbt);
-			
+
 			ss.str ("");
 			ss << bbt;
 			row[columns.start] = ss.str();
@@ -219,19 +219,19 @@ MidiListEditor::redisplay_model ()
 			dur = (*i)->end_time() - (*i)->time();
 			bbt.beats = floor (dur);
 			bbt.ticks = (uint32_t) lrint (fmod (dur, 1.0) * Timecode::BBT_Time::ticks_per_beat);
-			
+
 			_session->tempo_map().bbt_duration_at (region->position(), bbt, 0);
 
 			ss.str ("");
 			ss << bbt;
 			row[columns.length] = ss.str();
-			
+
 			_session->tempo_map().bbt_time (conv.to ((*i)->end_time()), bbt);
-												 
+
 			ss.str ("");
 			ss << bbt;
 			row[columns.end] = ss.str();
-			
+
 			row[columns._note] = (*i);
 		}
 	}

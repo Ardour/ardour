@@ -60,7 +60,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
         }
 
 	Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox);
-        
+
 	Gtk::Table* table = Gtk::manage (new Gtk::Table (3, 3));
 	table->set_spacings (6);
 
@@ -70,7 +70,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	table->attach (_threshold, 1, 2, n, n + 1, Gtk::FILL);
 	table->attach (*Gtk::manage (new Gtk::Label (_("dbFS"))), 2, 3, n, n + 1, Gtk::FILL);
 	++n;
-        
+
 	_threshold.set_digits (1);
 	_threshold.set_increments (1, 10);
 	_threshold.set_range (-120, 0);
@@ -79,7 +79,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	table->attach (*Gtk::manage (new Gtk::Label (_("Minimum length"), 1, 0.5)), 0, 1, n, n + 1, Gtk::FILL);
 	table->attach (_minimum_length, 1, 2, n, n + 1, Gtk::FILL);
 	++n;
-	
+
         _minimum_length.set_session (s);
         _minimum_length.set_mode (AudioClock::Frames);
         _minimum_length.set (1000, true);
@@ -119,9 +119,9 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 StripSilenceDialog::~StripSilenceDialog ()
 {
 	_destroying = true;
-	
+
 	/* Terminate our thread */
-	
+
 	_lock.lock ();
 	_interthread_info.cancel = true;
 	_thread_should_finish = true;
@@ -129,7 +129,7 @@ StripSilenceDialog::~StripSilenceDialog ()
 
 	_run_cond.signal ();
 	pthread_join (_thread, 0);
-	
+
 	delete _peaks_ready_connection;
 }
 
@@ -161,7 +161,7 @@ StripSilenceDialog::update_threshold_line ()
 	for (list<Wave*>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
 		(*i)->threshold_line->property_x1() = 0;
 		(*i)->threshold_line->property_x2() = _wave_width;
-		
+
 		double const y = alt_log_meter (_threshold.get_value());
 
 		(*i)->threshold_line->property_y1() = (n + 1 - y) * _wave_height;
@@ -206,7 +206,7 @@ StripSilenceDialog::detection_thread_work ()
 
 	/* Hold this lock when we are doing work */
 	_lock.lock ();
-	
+
 	while (1) {
 		for (list<ViewInterval>::iterator i = views.begin(); i != views.end(); ++i) {
                         boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> ((*i).view->region());
@@ -249,7 +249,7 @@ StripSilenceDialog::restart_thread ()
 		*/
 		return;
 	}
-	
+
 	/* Cancel any current run */
 	_interthread_info.cancel = true;
 
@@ -281,7 +281,7 @@ StripSilenceDialog::fade_length () const
 {
         return _fade_length.current_duration (views.front().view->region()->position());
 }
-		
+
 void
 StripSilenceDialog::update_progress_gui (float p)
 {

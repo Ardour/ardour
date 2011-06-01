@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2010 Paul Davis 
+    Copyright (C) 2010 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ class XMLNode;
  *  Subclasses of WindowProxy handle windows that are created in different
  *  ways.
  */
- 
+
 class WindowProxyBase
 {
 public:
@@ -43,7 +43,7 @@ public:
 	std::string name () const {
 		return _name;
 	}
-	
+
 	void maybe_show ();
 	XMLNode* get_state () const;
 	void setup ();
@@ -61,11 +61,11 @@ public:
 
 private:
 	XMLNode* state_node (bool, int, int, int, int) const;
-	
+
 	std::string _name; ///< internal unique name for this window
 	bool _visible; ///< true if the window should be visible on startup
 	int _x_off; ///< x position
-	int _y_off; ///< y position 
+	int _y_off; ///< y position
 	int _width; ///< width
 	int _height; ///< height
 };
@@ -79,7 +79,7 @@ public:
 		: WindowProxyBase (name, node)
 		, _window (0)
 	{
-		
+
 	}
 
 	Gtk::Window* get_gtk_window () const {
@@ -119,7 +119,7 @@ public:
 		: WindowProxy<T> (name, node)
 		, _action (action)
 	{
-		
+
 	}
 
 	void show () {

@@ -141,7 +141,7 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 
 				_region.edit_patch_change (this);
 				return true;
-				
+
 			} else if (ev->button.button == 1) {
 				e->drags()->set (new PatchChangeDrag (e, this, &_region), ev);
 				return true;

@@ -97,7 +97,7 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 				list<Tab>::iterator j = _tabs.insert (next, n);
 				t = &(*j);
 			}
-			
+
 		} else {
 			_dragging_new_tab = false;
 		}
@@ -169,18 +169,18 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 	if (!_drag_moved) {
 
 		if (_dragging->group) {
-			
+
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-				
+
 				/* edit */
 				RouteGroupDialog d (_dragging->group, false);
 				d.do_run ();
-				
+
 			} else {
-				
+
 				/* toggle active state */
 				_dragging->group->set_active (!_dragging->group->is_active (), this);
-				
+
 			}
 		}
 
@@ -305,7 +305,7 @@ GroupTabs::get_menu (RouteGroup* g)
 
 	items.push_back (MenuElem (_("New..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_group))));
 	items.push_back (MenuElem (_("New From"), *new_from));
-	
+
 	if (g) {
 		items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::edit_group), g)));
 		items.push_back (MenuElem (_("Add New Subgroup Bus"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, false, PreFader)));
@@ -316,13 +316,13 @@ GroupTabs::get_menu (RouteGroup* g)
 	}
 
 	add_menu_items (_menu, g);
-	
+
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Activate All"), sigc::mem_fun(*this, &GroupTabs::activate_all)));
 	items.push_back (MenuElem (_("Disable All"), sigc::mem_fun(*this, &GroupTabs::disable_all)));
 
 	return _menu;
-	
+
 }
 
 void
@@ -407,7 +407,7 @@ GroupTabs::create_and_add_group () const
 		delete g;
 		return 0;
 	}
-	
+
 	_session->add_route_group (g);
 	return g;
 }
@@ -427,7 +427,7 @@ GroupTabs::subgroup (RouteGroup* g, bool aux, Placement placement)
 
 struct CollectSorter {
 	CollectSorter (std::string const & key) : _key (key) {}
-	
+
 	bool operator () (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 		return a->order_key (_key) < b->order_key (_key);
 	}
@@ -470,9 +470,9 @@ GroupTabs::collect (RouteGroup* g)
 			++i;
 
 		} else {
-			
+
 			(*j)->set_order_key (order_key (), k + diff);
-			
+
 		}
 
 		++j;
@@ -502,7 +502,7 @@ GroupTabs::set_activation (RouteGroup* g, bool a)
 {
 	g->set_active (a, this);
 }
-	
+
 void
 GroupTabs::remove_group (RouteGroup* g)
 {

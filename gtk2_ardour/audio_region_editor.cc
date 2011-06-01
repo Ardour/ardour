@@ -74,14 +74,14 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 	b->set_spacing (6);
 	b->pack_start (_peak_amplitude);
 	b->pack_start (*Gtk::manage (new Gtk::Label (_("dBFS"))), false, false);
-	
+
 	_peak_amplitude_label.set_name ("AudioRegionEditorLabel");
 	_peak_amplitude_label.set_text (_("Peak amplitude:"));
 	_peak_amplitude_label.set_alignment (1, 0.5);
 	_table.attach (_peak_amplitude_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	_table.attach (*b, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	++_table_row;
-	
+
 	gain_changed ();
 
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
@@ -106,7 +106,7 @@ void
 AudioRegionEditor::region_changed (const PBD::PropertyChange& what_changed)
 {
 	RegionEditor::region_changed (what_changed);
-	
+
 	if (what_changed.contains (ARDOUR::Properties::scale_amplitude)) {
 		gain_changed ();
 	}

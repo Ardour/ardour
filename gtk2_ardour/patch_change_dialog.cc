@@ -51,26 +51,26 @@ PatchChangeDialog::PatchChangeDialog (
 		t->attach (*l, 0, 1, r, r + 1);
 		t->attach (_time, 1, 2, r, r + 1);
 		++r;
-		
+
 		_time.set_session (session);
 		_time.set_mode (AudioClock::BBT);
 		_time.set (_time_converter->to (patch.time ()), true);
-		
+
 		l = manage (new Label (_("Channel")));
 		l->set_alignment (0, 0.5);
 		t->attach (*l, 0, 1, r, r + 1);
 		t->attach (_channel, 1, 2, r, r + 1);
 		++r;
-		
+
 		_channel.set_value (patch.channel() + 1);
 	}
-	
+
 	Label* l = manage (new Label (_("Program")));
 	l->set_alignment (0, 0.5);
 	t->attach (*l, 0, 1, r, r + 1);
 	t->attach (_program, 1, 2, r, r + 1);
 	++r;
-	
+
 	_program.set_value (patch.program () + 1);
 
 	l = manage (new Label (_("Bank")));
@@ -78,9 +78,9 @@ PatchChangeDialog::PatchChangeDialog (
 	t->attach (*l, 0, 1, r, r + 1);
 	t->attach (_bank, 1, 2, r, r + 1);
 	++r;
-	
+
 	_bank.set_value (patch.bank() + 1);
-	
+
 	get_vbox()->add (*t);
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
@@ -97,7 +97,7 @@ PatchChangeDialog::patch () const
 	if (_time_converter) {
 		t = _time_converter->from (_time.current_time ());
 	}
-	
+
 	return Evoral::PatchChange<Evoral::MusicalTime> (
 		t,
 		_channel.get_value_as_int() - 1,

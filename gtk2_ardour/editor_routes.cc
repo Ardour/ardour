@@ -158,12 +158,12 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.append_column (*solo_state_column);
 	_display.append_column (*solo_isolate_state_column);
 	_display.append_column (*solo_safe_state_column);
-	
+
         int colnum = _display.append_column (_("Name"), _columns.text);
 	TreeViewColumn* c = _display.get_column (colnum-1);
         c->set_data ("i_am_the_tab_column", (void*) 0xfeedface);
 	_display.append_column (_("V"), _columns.visible);
-	
+
 	_display.set_headers_visible (true);
 	_display.set_name ("TrackListDisplay");
 	_display.get_selection()->set_mode (SELECTION_SINGLE);
@@ -196,16 +196,16 @@ EditorRoutes::EditorRoutes (Editor* e)
 	visible_cell->property_activatable() = true;
 	visible_cell->property_radio() = false;
 	visible_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRoutes::visible_changed));
-	
+
 	TreeViewColumn* visible_col = dynamic_cast<TreeViewColumn*> (_display.get_column (6));
 	visible_col->set_expand(false);
 	visible_col->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	visible_col->set_fixed_width(30);
 	visible_col->set_alignment(ALIGN_CENTER);
-	
+
 	_model->signal_row_deleted().connect (sigc::mem_fun (*this, &EditorRoutes::route_deleted));
 	_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &EditorRoutes::reordered));
-	
+
 	_display.signal_button_press_event().connect (sigc::mem_fun (*this, &EditorRoutes::button_press), false);
 	_scroller.signal_key_press_event().connect (sigc::mem_fun(*this, &EditorRoutes::key_press), false);
 
@@ -254,8 +254,8 @@ EditorRoutes::enter_notify (GdkEventCrossing*)
 	if (name_editable) {
 		return true;
 	}
-	
-        /* arm counter so that ::selection_filter() will deny selecting anything for the 
+
+        /* arm counter so that ::selection_filter() will deny selecting anything for the
            next two attempts to change selection status.
         */
         selection_countdown = 2;
@@ -315,7 +315,7 @@ EditorRoutes::on_tv_mute_enable_toggled (std::string const & path_string)
 
 	TimeAxisView *tv = row[_columns.tv];
 	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
-        
+
 	if (rtv != 0) {
 		boost::shared_ptr<RouteList> rl (new RouteList);
 		rl->push_back (rtv->route());
@@ -477,7 +477,7 @@ EditorRoutes::route_deleted (Gtk::TreeModel::Path const &)
 	if (!_session || _session->deletion_in_progress()) {
 		return;
 	}
-		
+
         /* this could require an order reset & sync */
 	_session->set_remote_control_ids();
 	_ignore_reorder = true;
@@ -733,7 +733,7 @@ EditorRoutes::sync_order_keys (string const & src)
 		for (map<int, int>::const_iterator i = new_order.begin(); i != new_order.end(); ++i) {
 			co.push_back (i->second);
 		}
-		
+
 		_model->reorder (co);
 		_redisplay_does_not_reset_order_keys = false;
 	}
@@ -801,13 +801,13 @@ EditorRoutes::set_all_audio_midi_visibility (int tracks, bool yn)
 	suspend_redisplay ();
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
-	  
+
 		TreeModel::Row row = (*i);
 		TimeAxisView* tv = row[_columns.tv];
-		
+
 		AudioTimeAxisView* atv;
 		MidiTimeAxisView* mtv;
-		
+
 		if (tv == 0) {
 			continue;
 		}
@@ -910,7 +910,7 @@ EditorRoutes::key_press (GdkEventKey* ev)
                 if (name_editable) {
                         name_editable->editing_done ();
                         name_editable = 0;
-                } 
+                }
 
                 col = _display.get_column (5); // select&focus on name column
 
@@ -1002,35 +1002,35 @@ EditorRoutes::button_press (GdkEventButton* ev)
 		show_menu ();
 		return true;
 	}
-	
+
 	//Scroll editor canvas to selected track
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-		
+
 		TreeModel::Path path;
 		TreeViewColumn *tvc;
 		int cell_x;
 		int cell_y;
-		
+
 		_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, tvc, cell_x, cell_y);
 
 		// Get the model row.
 		Gtk::TreeModel::Row row = *_model->get_iter (path);
-		
+
 		TimeAxisView *tv = row[_columns.tv];
-		
+
 		int y_pos = tv->y_position();
-		
+
 		//Clamp the y pos so that we do not extend beyond the canvas full height.
 		if (_editor->full_canvas_height - y_pos < _editor->_canvas_height){
 		    y_pos = _editor->full_canvas_height - _editor->_canvas_height;
 		}
-		
+
 		//Only scroll to if the track is visible
 		if(y_pos != -1){
 		    _editor->reset_y_origin (y_pos);
 		}
 	}
-	
+
 	return false;
 }
 
@@ -1259,7 +1259,7 @@ EditorRoutes::update_rec_display ()
 			} else {
 				(*i)[_columns.rec_state] = 0;
 			}
-		
+
 			(*i)[_columns.name_editable] = !route->record_enabled ();
 		}
 	}
@@ -1384,7 +1384,7 @@ EditorRoutes::show_tracks_with_regions_at_playhead ()
 	}
 
 	suspend_redisplay ();
-	
+
 	TreeModel::Children rows = _model->children ();
 	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView* tv = (*i)[_columns.tv];

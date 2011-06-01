@@ -213,7 +213,7 @@ NumberMetadataField::str_to_uint (string const & str) const
 
 /* SessionMetadataSet */
 
-SessionMetadataSet::SessionMetadataSet (string const & name) 
+SessionMetadataSet::SessionMetadataSet (string const & name)
   : name (name)
 {
 }
@@ -226,7 +226,7 @@ SessionMetadataSet::add_data_field (MetadataPtr field)
 
 /* SessionMetadataSetEditable */
 
-SessionMetadataSetEditable::SessionMetadataSetEditable (string const & name) 
+SessionMetadataSetEditable::SessionMetadataSetEditable (string const & name)
   : SessionMetadataSet (name)
 {
 	table.set_row_spacings (6);
@@ -277,7 +277,7 @@ SessionMetadataSetEditable::save_data ()
 
 /* SessionMetadataSetImportable */
 
-SessionMetadataSetImportable::SessionMetadataSetImportable (string const & name) 
+SessionMetadataSetImportable::SessionMetadataSetImportable (string const & name)
   : SessionMetadataSet (name)
   , session_list (list)
 {

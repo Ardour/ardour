@@ -192,7 +192,7 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 	set_height (trackview.current_height());
 
 	_region->PropertyChanged.connect (*this, invalidator (*this), ui_bind (&RegionView::region_changed, this, _1), gui_context());
-	
+
 	group->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
 
 	set_colors ();
@@ -239,7 +239,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double thres
 		_silent_frames.push_back (cr);
 
 		/* coordinates for the rect are relative to the regionview origin */
-                
+
 		cr->property_x1() = trackview.editor().frame_to_pixel (i->first - _region->start());
 		cr->property_x2() = trackview.editor().frame_to_pixel (i->second - _region->start());
 		cr->property_y1() = 1;
@@ -252,7 +252,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double thres
 
 	/* Find shortest audible segment */
         framecnt_t shortest_audible = max_framecnt;
-	
+
 	framecnt_t s = _region->start();
 	for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
 		framecnt_t const dur = i->first - s;
@@ -270,20 +270,20 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double thres
 
         _silence_text = new ArdourCanvas::NoEventText (*group);
         _silence_text->property_font_desc() = *(get_font_for_style (N_("SilenceText")));
-        _silence_text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SilenceText.get();                                                
+        _silence_text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SilenceText.get();
         _silence_text->property_anchor() = ANCHOR_NW;
-        
+
         /* both positions are relative to the region start offset in source */
-        
+
         _silence_text->property_x() = trackview.editor().frame_to_pixel (silences.front().first - _region->start()) + 10.0;
         _silence_text->property_y() = 20.0;
-        
+
         double ms = (float) shortest/_region->session().frame_rate();
-        
+
         /* ms are now in seconds */
 
         char const * sunits;
-        
+
         if (ms >= 60.0) {
                 sunits = _("minutes");
                 ms /= 60.0;
@@ -302,7 +302,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double thres
                 /* ms are now in seconds */
                 double ma = (float) shortest_audible / _region->session().frame_rate();
                 char const * aunits;
-                
+
                 if (ma >= 60.0) {
                         aunits = _("minutes");
                         ma /= 60.0;
@@ -317,7 +317,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double thres
 	}
 
 	_silence_text->property_text() = text.c_str ();
-} 
+}
 
 void
 RegionView::hide_silent_frames ()
@@ -618,7 +618,7 @@ RegionView::region_sync_changed ()
 		sync_mark->property_fill_color_rgba() = RGBA_TO_UINT(0,255,0,255);     // fill_color;			// FIXME make a themeable colour
 
 		sync_line = new ArdourCanvas::Line (*group);
-		sync_line->property_fill_color_rgba() = RGBA_TO_UINT(0,255,0,255);     // fill_color;			// FIXME make a themeable colour	
+		sync_line->property_fill_color_rgba() = RGBA_TO_UINT(0,255,0,255);     // fill_color;			// FIXME make a themeable colour
 		sync_line->property_width_pixels() = 1;
 	}
 
@@ -894,7 +894,7 @@ RegionView::trim_end (framepos_t new_bound, bool no_overlap)
 		}
 
 		region_changed (ARDOUR::bounds_change);
-			
+
 	} else {
 		region_changed (PropertyChange (ARDOUR::Properties::length));
 	}

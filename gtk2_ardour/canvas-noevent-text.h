@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2009 Paul Davis <paul@linuxaudiosystems.com>
  *
  * This library is free software; you can redistribute it and/or
@@ -29,7 +29,7 @@ namespace Gnome { namespace Canvas {
 class NoEventText : public Text
 {
   public:
-	NoEventText(Group& parent, double x, double y, const std::string& text) 
+	NoEventText(Group& parent, double x, double y, const std::string& text)
 		: Text (parent, x, y, text) {}
         NoEventText(Group& parent)
 	  : Text (parent) {}

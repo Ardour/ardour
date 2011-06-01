@@ -353,7 +353,7 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 	if (_keyboard_focused) {
 		if (_pluginui) {
 			if (_pluginui->non_gtk_gui()) {
-				_pluginui->forward_key_event (event); 
+				_pluginui->forward_key_event (event);
 			} else {
 				return relay_key_press (event, this);
 			}
@@ -388,7 +388,7 @@ PluginUIWindow::on_key_release_event (GdkEventKey *event)
 		if (_pluginui) {
 			if (_pluginui->non_gtk_gui()) {
 				_pluginui->forward_key_event (event);
-			} 
+			}
 			return true;
 		}
 		return false;
@@ -433,7 +433,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	update_preset_list ();
 	update_preset ();
-	
+
 	add_button.set_name ("PluginAddButton");
 	add_button.signal_clicked().connect (sigc::mem_fun (*this, &PlugUIBase::add_plugin_setting));
 
@@ -466,11 +466,11 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	plugin_analysis_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &PlugUIBase::toggle_plugin_analysis));
 	plugin_analysis_expander.set_expanded(false);
-	
+
 	insert->DropReferences.connect (death_connection, invalidator (*this), boost::bind (&PlugUIBase::plugin_going_away, this), gui_context());
 
 	plugin->PresetAdded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
-	plugin->PresetRemoved.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());	
+	plugin->PresetRemoved.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
 	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::update_preset, this), gui_context ());
 	plugin->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::parameter_changed, this, _1, _2), gui_context ());
 }
@@ -674,7 +674,7 @@ PlugUIBase::update_preset_list ()
 	}
 
 	set_popdown_strings (_preset_combo, preset_labels);
-	
+
 	--_no_load_preset;
 }
 
@@ -700,7 +700,7 @@ PlugUIBase::update_preset_modified ()
 		_preset_modified.set_text ("");
 		return;
 	}
-	
+
 	bool const c = plugin->parameter_changed_since_last_preset ();
 	if (_preset_modified.get_text().empty() == c) {
 		_preset_modified.set_text (c ? "*" : "");

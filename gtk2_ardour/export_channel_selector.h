@@ -256,7 +256,7 @@ class TrackExportChannelSelector : public ExportChannelSelector
 	Gtk::TreeView                track_view;
 
 	Gtk::ScrolledWindow          track_scroller;
-	
+
 };
 
 #endif /* __export_channel_selector_h__ */

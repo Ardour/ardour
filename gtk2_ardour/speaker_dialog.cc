@@ -89,7 +89,7 @@ SpeakerDialog::SpeakerDialog ()
 }
 
 void
-SpeakerDialog::set_speakers (boost::shared_ptr<Speakers> s) 
+SpeakerDialog::set_speakers (boost::shared_ptr<Speakers> s)
 {
         _speakers = s;
 }
@@ -130,7 +130,7 @@ SpeakerDialog::darea_expose_event (GdkEventExpose* event)
 	cairo_stroke (cr);
 
 	/* vertical line of "crosshairs" */
-	
+
 	cairo_move_to (cr, width/2+0.5, 0.5);
 	cairo_line_to (cr, width/2+0.5, height+0.5);
 	cairo_stroke (cr);
@@ -141,9 +141,9 @@ SpeakerDialog::darea_expose_event (GdkEventExpose* event)
 	cairo_stroke (cr);
 
         float arc_radius;
-        
+
         cairo_select_font_face (cr, "sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-        
+
         if (height < 100) {
                 cairo_set_font_size (cr, 10);
                 arc_radius = 2.0;
@@ -154,17 +154,17 @@ SpeakerDialog::darea_expose_event (GdkEventExpose* event)
 
         int n = 0;
         for (vector<Speaker>::iterator i = speakers->speakers().begin(); i != speakers->speakers().end(); ++i) {
-                
+
                 Speaker& s (*i);
                 CartesianVector c (s.coords());
-                
+
                 cart_to_gtk (c);
-                
+
                 x = (gint) floor (c.x);
                 y = (gint) floor (c.y);
-                
+
                 /* XXX need to shift circles so that they are centered on the circle */
-                
+
                 cairo_arc (cr, x, y, arc_radius, 0, 2.0 * M_PI);
 		if (selected_index == n) {
 			cairo_set_source_rgb (cr, 0.8, 0.8, 0.2);
@@ -173,9 +173,9 @@ SpeakerDialog::darea_expose_event (GdkEventExpose* event)
 		}
                 cairo_close_path (cr);
                 cairo_fill (cr);
-                
+
                 cairo_move_to (cr, x + 6, y + 6);
-                
+
                 char buf[256];
                 snprintf (buf, sizeof (buf), "%d:%d", n+1, (int) lrint (s.angles().azi));
                 cairo_show_text (cr, buf);
@@ -185,14 +185,14 @@ SpeakerDialog::darea_expose_event (GdkEventExpose* event)
         cairo_destroy (cr);
 
 	return true;
-        
+
 }
 
 void
 SpeakerDialog::cart_to_gtk (CartesianVector& c) const
 {
 	/* "c" uses a coordinate space that is:
-            
+
 	   center = 0.0
 	   dimension = 2.0 * 2.0
 	   so max values along each axis are -1..+1
@@ -253,7 +253,7 @@ SpeakerDialog::darea_button_press_event (GdkEventButton *ev)
 	if (!speakers) {
 		return false;
 	}
-	
+
 	GdkModifierType state;
 
 	if (ev->type == GDK_2BUTTON_PRESS && ev->button == 1) {
@@ -300,7 +300,7 @@ SpeakerDialog::darea_button_release_event (GdkEventButton *ev)
 	if (!speakers) {
 		return false;
 	}
-	
+
 	gint x, y;
 	GdkModifierType state;
 	bool ret = false;
@@ -312,7 +312,7 @@ SpeakerDialog::darea_button_release_event (GdkEventButton *ev)
 		state = (GdkModifierType) ev->state;
 
 		if (Keyboard::modifier_state_contains (state, Keyboard::TertiaryModifier)) {
-                        
+
 			for (vector<Speaker>::iterator i = speakers->speakers().begin(); i != speakers->speakers().end(); ++i) {
 				/* XXX DO SOMETHING TO SET SPEAKER BACK TO "normal" */
 			}
@@ -338,14 +338,14 @@ SpeakerDialog::darea_button_release_event (GdkEventButton *ev)
 		break;
 
 	}
-        
+
         drag_index = -1;
 
 	return ret;
 }
 
 int
-SpeakerDialog::find_closest_object (gdouble x, gdouble y) 
+SpeakerDialog::find_closest_object (gdouble x, gdouble y)
 {
 	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
 	if (!speakers) {
@@ -361,7 +361,7 @@ SpeakerDialog::find_closest_object (gdouble x, gdouble y)
 
 		Speaker& candidate (*i);
 		CartesianVector c;
-        
+
 		candidate.angles().cartesian (c);
 		cart_to_gtk (c);
 
@@ -375,7 +375,7 @@ SpeakerDialog::find_closest_object (gdouble x, gdouble y)
 		}
 	}
 
-	if (best_distance > 20) { // arbitrary 
+	if (best_distance > 20) { // arbitrary
                 return -1;
 	}
 
@@ -449,7 +449,7 @@ SpeakerDialog::handle_motion (gint evx, gint evy, GdkModifierType state)
 			/* position actual signal on circle */
 
 			clamp_to_circle (cp.x, cp.y);
-                        
+
 			/* generate an angular representation and set drag target (GUI) position */
 
                         AngularVector a;
@@ -460,7 +460,7 @@ SpeakerDialog::handle_motion (gint evx, gint evy, GdkModifierType state)
 
 			queue_draw ();
 		}
-	} 
+	}
 
 	return true;
 }
@@ -472,7 +472,7 @@ SpeakerDialog::add_speaker ()
 	if (!speakers) {
 		return;
 	}
-	
+
 	speakers->add_speaker (PBD::AngularVector (0, 0, 0));
 	queue_draw ();
 }
@@ -484,7 +484,7 @@ SpeakerDialog::set_selected (int i)
 	if (!speakers) {
 		return;
 	}
-	
+
 	if (i == selected_index) {
 		return;
 	}
@@ -493,10 +493,10 @@ SpeakerDialog::set_selected (int i)
 	queue_draw ();
 
 	selected_speaker_connection.disconnect ();
-	
+
 	azimuth_spinner.set_sensitive (selected_index != -1);
 	remove_speaker_button.set_sensitive (selected_index != -1);
-	
+
 	if (selected_index != -1) {
 		azimuth_adjustment.set_value (speakers->speakers()[selected_index].angles().azi);
 		speakers->speakers()[selected_index].PositionChanged.connect (
@@ -520,7 +520,7 @@ SpeakerDialog::azimuth_changed ()
 	if (ignore_azimuth_change) {
 		return;
 	}
-	
+
 	ignore_speaker_position_change = true;
 	speakers->move_speaker (speakers->speakers()[selected_index].id, PBD::AngularVector (azimuth_adjustment.get_value (), 0, 0));
 	ignore_speaker_position_change = false;
@@ -535,20 +535,20 @@ SpeakerDialog::speaker_position_changed ()
 	if (!speakers) {
 		return;
 	}
-	
+
 	assert (selected_index != -1);
 
 	if (ignore_speaker_position_change) {
 		return;
 	}
-	
+
 	ignore_azimuth_change = true;
 	azimuth_adjustment.set_value (speakers->speakers()[selected_index].angles().azi);
 	ignore_azimuth_change = false;
 
 	queue_draw ();
 }
-					   
+
 void
 SpeakerDialog::remove_speaker ()
 {
@@ -556,11 +556,11 @@ SpeakerDialog::remove_speaker ()
 	if (!speakers) {
 		return;
 	}
-	
+
 	assert (selected_index != -1);
 
 	speakers->remove_speaker (speakers->speakers()[selected_index].id);
 	set_selected (-1);
-	
+
 	queue_draw ();
 }

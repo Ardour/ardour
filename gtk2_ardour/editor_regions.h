@@ -41,20 +41,20 @@ public:
 	void reset_sort_type (Editing::RegionListSortType, bool);
 	void set_selected (RegionSelection &);
 	void selection_mapover (sigc::slot<void,boost::shared_ptr<ARDOUR::Region> >);
-	
+
 	boost::shared_ptr<ARDOUR::Region> get_dragged_region ();
 	boost::shared_ptr<ARDOUR::Region> get_single_selection ();
-	
+
 	Editing::RegionListSortType sort_type () const {
 		return _sort_type;
 	}
-	
+
 	void redisplay ();
 
 	void suspend_redisplay () {
 		_no_redisplay = true;
 	}
-	
+
 	void resume_redisplay () {
 		_no_redisplay = false;
 		redisplay ();
@@ -67,7 +67,7 @@ public:
 	void unselect_all () {
 		_display.get_selection()->unselect_all ();
 	}
-	
+
 	void delete_unused_regions();
 
 	XMLNode& get_state () const;
@@ -115,14 +115,14 @@ private:
 	};
 
 	Columns _columns;
-	
+
 	Gtk::TreeModel::RowReference last_row;
 
 	void freeze_tree_model ();
 	void thaw_tree_model ();
 	void region_changed (boost::shared_ptr<ARDOUR::Region>, PBD::PropertyChange const &);
 	void selection_changed ();
-	
+
 	sigc::connection _change_connection;
 
 	bool selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
@@ -130,7 +130,7 @@ private:
         Gtk::Widget* old_focus;
         Gtk::CellEditable* name_editable;
         void name_editing_started (Gtk::CellEditable*, const Glib::ustring&);
-	
+
 	void name_edit (const std::string&, const std::string&);
 	void locked_changed (std::string const &);
 	void glued_changed (std::string const &);
@@ -168,7 +168,7 @@ private:
         void populate_row_name (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row);
         void populate_row_source (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row);
 
-	void update_row (boost::shared_ptr<ARDOUR::Region>);	
+	void update_row (boost::shared_ptr<ARDOUR::Region>);
 	void update_all_rows ();
 
 	void insert_into_tmp_regionlist (boost::shared_ptr<ARDOUR::Region>);
@@ -185,36 +185,36 @@ private:
 	Glib::RefPtr<Gtk::Action> delete_unused_regions_action() const;
 	Glib::RefPtr<Gtk::ToggleAction> toggle_full_action () const;
 	Glib::RefPtr<Gtk::ToggleAction> toggle_show_auto_regions_action () const;
-	
+
 	Gtk::Menu* _menu;
 	Gtk::ScrolledWindow _scroller;
 	Gtk::Frame _frame;
-	
+
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Region> > _display;
-	
+
 	Glib::RefPtr<Gtk::TreeStore> _model;
-	
+
 	bool _show_automatic_regions;
 	bool ignore_region_list_selection_change;
 	bool ignore_selected_region_change;
 	bool _no_redisplay;
-	
+
 	Editing::RegionListSortType _sort_type;
 
 	std::list<boost::shared_ptr<ARDOUR::Region> > tmp_region_list;
-	
+
 	typedef boost::unordered_map<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::RowReference> RegionRowMap;
 	typedef boost::unordered_map<std::string, Gtk::TreeModel::RowReference > RegionSourceMap;
-	
+
 	RegionRowMap region_row_map;
 	RegionSourceMap parent_regions_sources_map;
-	
+
 	PBD::ScopedConnection region_property_connection;
 	PBD::ScopedConnection check_new_region_connection;
-	
+
 	PBD::ScopedConnection editor_freeze_connection;
 	PBD::ScopedConnection editor_thaw_connection;
-	
+
         bool expanded;
 };
 

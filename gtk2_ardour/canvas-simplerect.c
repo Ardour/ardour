@@ -628,23 +628,23 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 
         if (simplerect->outline_a > 0) {
                 for (i = 0; i < simplerect->outline_pixels; ++i) {
-                        
+
                         if (simplerect->outline_what & 0x1) {
                                 if (begin == simplerect->bbox_ulx) {
                                         PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin + i, sy, ey);
                                 }
                         }
-                        
+
                         if (simplerect->outline_what & 0x2) {
                                 if (end == (simplerect->bbox_lrx - 1)) {
                                         PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, end - i, sy, ey + 1);
                                 }
                         }
-                        
+
                         if (simplerect->outline_what & 0x4) {
                                 PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end, sy+i);
                         }
-                        
+
                         if (simplerect->outline_what & 0x8) {
                                 PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end + 1, ey-i);
                         }
@@ -662,7 +662,7 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 	int end, begin;
 	int ey, sy;
 	int i;
-        
+
 	simplerect = GNOME_CANVAS_SIMPLERECT (item);
 
 	if (parent_class->render) {
@@ -707,23 +707,23 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 
         if (simplerect->outline_a) {
                 for (i = 0; i < (int) simplerect->outline_pixels; ++i) {
-                        
+
                         if (simplerect->outline_what & 0x1) {
                                 if (begin == simplerect->bbox_ulx) {
                                         PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin + i, sy, ey);
                                 }
                         }
-                        
+
                         if (simplerect->outline_what & 0x2) {
                                 if (end == (simplerect->bbox_lrx - 1)) {
                                         PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, end - i, sy, ey + 1);
                                 }
                         }
-                        
+
                         if (simplerect->outline_what & 0x4) {
                                 PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end, sy+i);
                         }
-                        
+
                         if (simplerect->outline_what & 0x8) {
                                 PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end + 1, ey-i);
                         }

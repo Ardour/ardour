@@ -37,7 +37,7 @@ class PortInsertUI : public Gtk::VBox
 
   private:
         boost::shared_ptr<ARDOUR::PortInsert> _pi;
-        
+
         Gtk::Notebook notebook;
         Gtk::ToggleButton latency_button;
 	IOSelector input_selector;

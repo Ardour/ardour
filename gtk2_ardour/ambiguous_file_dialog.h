@@ -32,4 +32,4 @@ private:
 	std::vector<Gtk::RadioButton*> _radio_buttons;
 };
 
-	
+

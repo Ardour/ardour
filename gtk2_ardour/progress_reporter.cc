@@ -23,7 +23,7 @@
 
 ProgressReporter::ProgressReporter ()
 {
-	
+
 }
 
 ProgressReporter::~ProgressReporter ()

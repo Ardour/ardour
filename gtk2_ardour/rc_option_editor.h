@@ -35,7 +35,7 @@ public:
 
 private:
 	void parameter_changed (std::string const &);
-	
+
 	ARDOUR::RCConfiguration* _rc_config;
 	BoolOption* _solo_control_is_listen_control;
 	ComboOption<ARDOUR::ListenPosition>* _listen_position;

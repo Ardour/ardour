@@ -191,7 +191,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 
 	boost::shared_ptr<ARDOUR::Route> route;
 	AutomationTimeAxisView* atv;
-        
+
 	if ((atv = dynamic_cast<AutomationTimeAxisView*>(&view)) != 0) {
 
 		AudioTimeAxisView *parent = dynamic_cast<AudioTimeAxisView*>(view.get_parent());
@@ -213,7 +213,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 			}
 		}
 	}
-                
+
 	if (current_mixer_strip->route() == route) {
 		return;
 	}

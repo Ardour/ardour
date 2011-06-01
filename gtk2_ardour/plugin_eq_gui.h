@@ -79,65 +79,65 @@ private:
 	void redraw_scales ();
 
 	// Fields:
-	
+
 	// analysis parameters
 	float _samplerate;
-	
+
 	float _min_dB;
 	float _max_dB;
 	float _step_dB;
-	
+
 	float _log_coeff;
 	float _log_max;
-	
+
 	ARDOUR::framecnt_t _buffer_size;
 	ARDOUR::framecnt_t _signal_buffer_size;
-	
+
 	// buffers
 	ARDOUR::BufferSet _bufferset;
 	ARDOUR::BufferSet _collect_bufferset;
-	
-	
+
+
 	// dimensions
 	float _analysis_width;
 	float _analysis_height;
-	
+
 	// My objects
         GTKArdour::FFT *_impulse_fft;
         GTKArdour::FFT *_signal_input_fft;
         GTKArdour::FFT *_signal_output_fft;
 	boost::shared_ptr<ARDOUR::Plugin> _plugin;
 	boost::shared_ptr<ARDOUR::PluginInsert> _plugin_insert;
-	
+
 	// gui objects
 	Gtk::DrawingArea *_analysis_area;
 	cairo_surface_t *_analysis_scale_surface;
-	
+
 	// dB scale selection:
 	class dBSelectionColumns : public Gtk::TreeModel::ColumnRecord
 	{
 	public:
 		dBSelectionColumns()
 		{ add(dBMin); add(dBMax); add(dBStep); add(name); }
-		
+
 		Gtk::TreeModelColumn<float> dBMin;
 		Gtk::TreeModelColumn<float> dBMax;
 		Gtk::TreeModelColumn<float> dBStep;
 		Gtk::TreeModelColumn<std::string> name;
 	};
-	
+
 	dBSelectionColumns dBColumns;
-	
+
 	Gtk::ComboBox *dBScaleCombo;
 	Glib::RefPtr<Gtk::ListStore> dBScaleModel;
-	
+
 	Gtk::CheckButton *_phase_button;
-	
+
 	// signals and connections
 	sigc::connection _update_connection;
 	sigc::connection _window_unmap_connection;
 	sigc::connection _window_map_connection;
-	
+
 	PBD::ScopedConnection analysis_connection;
 };
 

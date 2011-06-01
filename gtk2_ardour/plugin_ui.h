@@ -210,7 +210,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 		Evoral::Parameter parameter() { return control->parameter(); }
 
 		/* input */
-		
+
 		Gtk::ComboBoxText*                      combo;
 		std::map<std::string, float>*           combo_map;
 		Gtk::ToggleButton*                      button;
@@ -220,9 +220,9 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 		bool                                    update_pending;
 		char                                    ignore_change;
 		Gtk::Button                             automate_button;
-		
+
 		/* output */
-		
+
 		Gtk::EventBox* display;
 		Gtk::Label*    display_label;
 

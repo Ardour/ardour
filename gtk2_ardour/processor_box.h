@@ -113,7 +113,7 @@ public:
 		Fader,
 		PostFader
 	};
-	
+
 	void set_position (Position);
 	boost::shared_ptr<ARDOUR::Processor> processor () const;
 	void set_enum_width (Width);
@@ -123,12 +123,12 @@ public:
 	virtual void hide_things () {}
 
 protected:
-	
+
 	virtual void setup_visuals ();
-	
+
 	Gtk::VBox _vbox;
 	Position _position;
-	
+
 private:
 
 	void active_toggled ();
@@ -161,7 +161,7 @@ public:
 private:
 	void show_gain ();
 	void gain_adjusted ();
-	
+
 	boost::shared_ptr<ARDOUR::Send> _send;
 	Gtk::Adjustment _adjustment;
 	Gtkmm2ext::HSliderController _fader;
@@ -177,7 +177,7 @@ public:
 	PluginInsertProcessorEntry (boost::shared_ptr<ARDOUR::PluginInsert>, Width);
 
 	void hide_things ();
-	
+
 private:
 	void setup_visuals ();
 	void plugin_insert_splitting_changed ();
@@ -216,7 +216,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	Gtk::Window* get_processor_ui (boost::shared_ptr<ARDOUR::Processor>) const;
 	void toggle_edit_processor (boost::shared_ptr<ARDOUR::Processor>);
 	void toggle_processor_controls (boost::shared_ptr<ARDOUR::Processor>);
-	
+
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorSelected;
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorUnselected;
 
@@ -226,7 +226,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	/* prevent copy construction */
 	ProcessorBox (ProcessorBox const &);
-	
+
 	boost::shared_ptr<ARDOUR::Route>  _route;
 	MixerStrip*         _parent_strip; // null if in RouteParamsUI
 	bool                _owner_is_mixer;
@@ -334,7 +334,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void on_size_allocate (Gtk::Allocation &);
 
 	void setup_entry_positions ();
-	
+
 	static ProcessorBox* _current_processor_box;
 
 	static void rb_choose_aux (boost::weak_ptr<ARDOUR::Route>);

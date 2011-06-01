@@ -13,7 +13,7 @@ CanvasHit::CanvasHit (MidiRegionView&                   region,
                       Group&                            group,
                       double                            size,
                       const boost::shared_ptr<NoteType> note,
-                      bool with_events) 
+                      bool with_events)
 	: Diamond(group, size)
 	, CanvasNoteEvent(region, this, note)
 {
@@ -27,7 +27,7 @@ CanvasHit::on_event(GdkEvent* ev)
 {
 	if (!CanvasNoteEvent::on_event (ev)) {
 		return _region.get_time_axis_view().editor().canvas_note_event (ev, this);
-	} 
+	}
 	return true;
 }
 

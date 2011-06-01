@@ -75,7 +75,7 @@ class ArdourStartup : public Gtk::Assistant {
 	bool connect_outs_to_master() const;
 	bool connect_outs_to_physical() const;
 
-	gint response () const { 
+	gint response () const {
 		return  _response;
 	}
 

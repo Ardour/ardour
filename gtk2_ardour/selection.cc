@@ -50,7 +50,7 @@ struct AudioRangeComparator {
 Selection::Selection (const PublicEditor* e)
 	: tracks (e)
 	, editor (e)
-	, next_time_id (0) 
+	, next_time_id (0)
 {
 	clear ();
 
@@ -61,7 +61,7 @@ Selection::Selection (const PublicEditor* e)
 
 	void (Selection::*marker_remove)(Marker*) = &Selection::remove;
 	Marker::CatchDeletion.connect (*this, MISSING_INVALIDATOR, ui_bind (marker_remove, this, _1), gui_context());
-}	
+}
 
 #if 0
 Selection&
@@ -793,7 +793,7 @@ Selection::set_preserving_all_ranges (framepos_t start, framepos_t end)
 	}
 
 	time.consolidate ();
-	
+
 	TimeChanged ();
 }
 
@@ -903,7 +903,7 @@ Selection::set (list<Selectable*> const & selectables)
 	if (Config->get_link_region_and_track_selection ()) {
 		clear_tracks ();
 	}
-	
+
 	add (selectables);
 }
 
@@ -1067,7 +1067,7 @@ void
 Selection::set_point_selection_from_line (AutomationLine const & line)
 {
 	points.clear ();
-	
+
 	AutomationRange current (DBL_MAX, 0, 1, 0, &line.trackview);
 
 	for (uint32_t i = 0; i < line.npoints(); ++i) {
@@ -1087,7 +1087,7 @@ Selection::set_point_selection_from_line (AutomationLine const & line)
 			double const size = cp->size ();
 			double const x_size = line.time_converter().from (line.trackview.editor().pixel_to_frame (size));
 			double const y_size = size / line.trackview.current_height ();
-			
+
 			double const x1 = max (0.0, x - x_size / 2);
 			double const x2 = x + x_size / 2;
 			double const y1 = max (0.0, y - y_size / 2);
@@ -1125,7 +1125,7 @@ Selection::get_state () const
 	/* XXX: not complete; just sufficient to get track selection state
 	   so that re-opening plugin windows for editor mixer strips works
 	*/
-	
+
 	XMLNode* node = new XMLNode (X_("Selection"));
 
 	for (TrackSelection::const_iterator i = tracks.begin(); i != tracks.end(); ++i) {
@@ -1150,11 +1150,11 @@ Selection::set_state (XMLNode const & node, int)
 	if (node.name() != X_("Selection")) {
 		return -1;
 	}
-	
+
 	XMLNodeList children = node.children ();
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == X_("RouteView")) {
-			
+
 			XMLProperty* prop_id = (*i)->property (X_("id"));
 			assert (prop_id);
 			PBD::ID id (prop_id->value ());
@@ -1162,9 +1162,9 @@ Selection::set_state (XMLNode const & node, int)
 			if (rtv) {
 				add (rtv);
 			}
-			
+
 		} else if ((*i)->name() == X_("AutomationView")) {
-			
+
 			XMLProperty* prop_id = (*i)->property (X_("id"));
 			XMLProperty* prop_parameter = (*i)->property (X_("parameter"));
 
@@ -1176,12 +1176,12 @@ Selection::set_state (XMLNode const & node, int)
 
 			if (rtv) {
 				boost::shared_ptr<AutomationTimeAxisView> atv = rtv->automation_child (EventTypeMap::instance().new_parameter (prop_parameter->value ()));
-                        
+
 				/* the automation could be for an entity that was never saved
 				   in the session file. Don't freak out if we can't find
 				   it.
 				*/
-				
+
 				if (atv) {
 					add (atv.get());
 				}

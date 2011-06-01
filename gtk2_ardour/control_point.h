@@ -68,7 +68,7 @@ class ControlPoint : public Selectable
 	double size () const {
 		return _size;
 	}
-	
+
 	void set_size (double);
 	void set_visible (bool);
 	bool visible () const;

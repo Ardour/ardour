@@ -101,7 +101,7 @@ ShuttleControl::on_size_allocate (Gtk::Allocation& alloc)
 	}
 
 	pattern = cairo_pattern_create_linear (0, 0, alloc.get_width(), alloc.get_height());
-	
+
 	/* add 3 color stops */
 
 	uint32_t col = ARDOUR_UI::config()->canvasvar_Shuttle.get();
@@ -150,7 +150,7 @@ ShuttleControl::build_shuttle_context_menu ()
 	Menu* units_menu = manage (new Menu);
 	MenuList& units_items = units_menu->items();
 	RadioMenuItem::Group units_group;
-        
+
 	units_items.push_back (RadioMenuElem (units_group, _("Percent"), sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_units), Percentage)));
 	if (Config->get_shuttle_units() == Percentage) {
 		static_cast<RadioMenuItem*>(&units_items.back())->set_active();
@@ -160,7 +160,7 @@ ShuttleControl::build_shuttle_context_menu ()
 		static_cast<RadioMenuItem*>(&units_items.back())->set_active();
 	}
 	items.push_back (MenuElem (_("Units"), *units_menu));
-        
+
 	Menu* style_menu = manage (new Menu);
 	MenuList& style_items = style_menu->items();
 	RadioMenuItem::Group style_group;
@@ -173,7 +173,7 @@ ShuttleControl::build_shuttle_context_menu ()
 	if (Config->get_shuttle_behaviour() == Wheel) {
 		static_cast<RadioMenuItem*>(&style_items.back())->set_active();
 	}
-        
+
 	items.push_back (MenuElem (_("Mode"), *style_menu));
 
 	RadioMenuItem::Group speed_group;
@@ -204,7 +204,7 @@ ShuttleControl::build_shuttle_context_menu ()
 	}
 
 	items.push_back (MenuElem (_("Maximum speed"), *speed_menu));
-        
+
 }
 
 void
@@ -279,7 +279,7 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 	case 2:
 		if (_session->transport_rolling()) {
 			_session->request_transport_speed (1.0);
-		} 
+		}
 		return true;
 
 	case 3:
@@ -316,7 +316,7 @@ ShuttleControl::on_scroll_event (GdkEventScroll* ev)
 	default:
 		return false;
 	}
-        
+
 	if (Config->get_shuttle_units() == Semitones) {
 
 		float lower_side_of_dead_zone = semitones_as_fract (-24, true);
@@ -371,7 +371,7 @@ ShuttleControl::mouse_shuttle (double x, bool force)
 	}
 
 	/* compute shuttle fract as expressing how far between the center
-	   and the edge we are. positive values indicate we are right of 
+	   and the edge we are. positive values indicate we are right of
 	   center, negative values indicate left of center
 	*/
 
@@ -399,7 +399,7 @@ ShuttleControl::speed_as_semitones (float speed, bool& reverse)
 		reverse = false;
 		return (int) round (12.0 * fast_log2 (speed));
 	}
-}        
+}
 
 float
 ShuttleControl::semitones_as_speed (int semi, bool reverse)
@@ -467,7 +467,7 @@ ShuttleControl::on_expose_event (GdkEventExpose* event)
 	Glib::RefPtr<Gdk::Window> win (get_window());
 	Glib::RefPtr<Gtk::Style> style (get_style());
 
-	cairo_t* cr = gdk_cairo_create (win->gobj());	
+	cairo_t* cr = gdk_cairo_create (win->gobj());
 
 	cairo_set_source (cr, pattern);
 	cairo_rectangle (cr, 0.0, 0.0, get_width(), get_height());
@@ -582,9 +582,9 @@ ShuttleControl::update_speed_display ()
 		queue_draw ();
 	}
 }
-      
+
 ShuttleControl::ShuttleControllable::ShuttleControllable (ShuttleControl& s)
-	: PBD::Controllable (X_("Shuttle")) 
+	: PBD::Controllable (X_("Shuttle"))
 	, sc (s)
 {
 }
@@ -599,7 +599,7 @@ void
 ShuttleControl::ShuttleControllable::set_value (double val)
 {
 	double fract;
-        
+
 	if (val == 0.5) {
 		fract = 0.0;
 	} else {
@@ -613,7 +613,7 @@ ShuttleControl::ShuttleControllable::set_value (double val)
 	sc.set_shuttle_fract (fract);
 }
 
-double 
+double
 ShuttleControl::ShuttleControllable::get_value () const
 {
 	return sc.get_shuttle_fract ();
@@ -645,7 +645,7 @@ ShuttleControl::parameter_changed (std::string p)
 			queue_draw ();
 			break;
 		}
-                        
+
 	} else if (p == "shuttle-units") {
 		queue_draw ();
 	}

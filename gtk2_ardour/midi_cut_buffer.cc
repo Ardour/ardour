@@ -24,7 +24,7 @@ MidiCutBuffer::MidiCutBuffer (Session* s)
 	: AutomatableSequence<MidiModel::TimeType> (*s)
 	, _origin (0)
 {
-	
+
 }
 
 MidiCutBuffer::~MidiCutBuffer ()

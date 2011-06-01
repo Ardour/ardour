@@ -145,7 +145,7 @@ PortMatrix::init ()
 	}
 
 	/* Part 2: notice when things have changed that require our subclass to clear and refill _ports[] */
-	
+
 	/* watch for routes being added or removed */
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::routes_changed, this), gui_context());
 
@@ -159,14 +159,14 @@ PortMatrix::init ()
 	_session->RouteOrderKeyChanged.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports_proxy, this), gui_context());
 
 	/* Part 3: other stuff */
-	
+
 	_session->engine().PortConnectedOrDisconnected.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::port_connected_or_disconnected, this), gui_context ());
 
 	_hscroll.signal_value_changed().connect (sigc::mem_fun (*this, &PortMatrix::hscroll_changed));
 	_vscroll.signal_value_changed().connect (sigc::mem_fun (*this, &PortMatrix::vscroll_changed));
 
 	reconnect_to_routes ();
-	
+
 	setup ();
 }
 
@@ -209,7 +209,7 @@ PortMatrix::setup ()
 	   notebook state to decide which ports are being shown */
 
 	setup_notebooks ();
-	
+
 	_body->setup ();
 	setup_scrollbars ();
 	queue_draw ();
@@ -331,7 +331,7 @@ PortMatrix::select_arrangement ()
 		attach (_hscroll, 2, 3, 3, 4, FILL | EXPAND, SHRINK);
 		attach (_vbox, 1, 2, 1, 2, SHRINK);
 		attach (_hbox, 2, 3, 2, 3, FILL | EXPAND, SHRINK);
-		
+
 	} else {
 
 		_row_index = 1;
@@ -426,7 +426,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 					can_add_or_rename = true;
 				}
 			}
-			
+
 			if (can_rename_channels (bc[dim].bundle)) {
 				snprintf (
 					buf, sizeof (buf), _("Rename '%s'..."),
@@ -454,7 +454,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 					sub.push_back (
 						MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::remove_all_channels), w))
 						);
-					
+
 					if (bc[dim].bundle->nchannels().n_total() > 1) {
                                                 for (uint32_t i = 0; i < bc[dim].bundle->nchannels().n_total(); ++i) {
                                                         if (should_show (bc[dim].bundle->channel_type(i))) {
@@ -470,9 +470,9 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 				sub.push_back (
 					MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc[dim].channel, dim))
 					);
-				
+
 			} else {
-				
+
 				if (bc[dim].channel != -1) {
 					add_disassociate_option (sub, w, dim, bc[dim].channel);
 				} else {
@@ -480,7 +480,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 					sub.push_back (
 						MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_bundle), w, dim))
 						);
-							
+
 					for (uint32_t i = 0; i < bc[dim].bundle->nchannels().n_total(); ++i) {
 						if (should_show (bc[dim].bundle->channel_type(i))) {
 							add_disassociate_option (sub, w, dim, i);
@@ -620,7 +620,7 @@ PortMatrix::toggle_show_only_bundles ()
 	}
 
 	_show_only_bundles = !_show_only_bundles;
-	
+
 	setup ();
 }
 
@@ -745,12 +745,12 @@ PortMatrix::setup_notebooks ()
 {
 	int const h_current_page = _hnotebook.get_current_page ();
 	int const v_current_page = _vnotebook.get_current_page ();
-	
+
 	/* for some reason best known to GTK, erroneous switch_page signals seem to be generated
 	   when adding or removing pages to or from notebooks, so ignore them */
-	
+
 	_ignore_notebook_page_selected = true;
-	
+
 	remove_notebook_pages (_hnotebook);
 	remove_notebook_pages (_vnotebook);
 
@@ -808,7 +808,7 @@ void
 PortMatrix::remove_notebook_pages (Notebook& n)
 {
 	int const N = n.get_n_pages ();
-	
+
 	for (int i = 0; i < N; ++i) {
 		n.remove_page ();
 	}
@@ -852,7 +852,7 @@ PortMatrix::body_dimensions_changed ()
 	/* Don't shrink the window */
 	m.first = max (int (m.first), curr_width);
 	m.second = max (int (m.second), curr_height);
-	
+
 	resize_window_to_proportion_of_monitor (_parent, m.first, m.second);
 }
 
@@ -875,7 +875,7 @@ PortMatrix::visible_ports (int d) const
 		++i;
 		++j;
 	}
-		
+
 	if (j == p.end()) {
 		return boost::shared_ptr<const PortGroup> ();
 	}
@@ -892,7 +892,7 @@ PortMatrix::add_remove_option (Menu_Helpers::MenuList& m, boost::weak_ptr<Bundle
 	if (!b) {
 		return;
 	}
-	
+
 	char buf [64];
 	snprintf (buf, sizeof (buf), _("Remove '%s'"), escape_underscores (b->channel_name (c)).c_str());
 	m.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::remove_channel_proxy), w, c)));
@@ -907,7 +907,7 @@ PortMatrix::add_disassociate_option (Menu_Helpers::MenuList& m, boost::weak_ptr<
 	if (!b) {
 		return;
 	}
-	
+
 	char buf [64];
 	snprintf (buf, sizeof (buf), _("%s all from '%s'"), disassociation_verb().c_str(), escape_underscores (b->channel_name (c)).c_str());
 	m.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, c, d)));
@@ -931,7 +931,7 @@ PortMatrix::should_show (DataType t) const
 {
 	return (_type == DataType::NIL || t == _type);
 }
-	
+
 uint32_t
 PortMatrix::count_of_our_type (ChanCount c) const
 {

@@ -42,11 +42,11 @@ public:
 protected:
 
 	virtual bool update ();
-	
+
 	Gtk::Button _cancel_button;
 	Gtk::Label _cancel_label;
 	Gtk::ProgressBar _bar;
-	
+
 private:
 	void cancel_clicked ();
 

@@ -151,7 +151,7 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 		} else {
 			x += _matrix->count_of_our_type ((*i)->bundle->nchannels()) * grid_spacing();
 		}
-		
+
 		++N;
 	}
 
@@ -168,12 +168,12 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 				if (!_matrix->should_show ((*i)->bundle->channel_type(j))) {
 					continue;
 				}
-				
+
 				Gdk::Color c = (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (N);
 				render_channel_name (cr, background_colour (), c, x, 0, ARDOUR::BundleChannel ((*i)->bundle, j));
 				x += grid_spacing();
 			}
-			
+
 			++N;
 		}
 	}
@@ -213,7 +213,7 @@ PortMatrixColumnLabels::mouseover_changed (list<PortMatrixNode> const &)
 
 		ARDOUR::BundleChannel c = i->column;
 		ARDOUR::BundleChannel r = i->row;
-		
+
 		if (c.bundle && r.bundle) {
 			add_channel_highlight (c);
 		} else if (c.bundle) {
@@ -359,7 +359,7 @@ PortMatrixColumnLabels::render_channel_name (
 			xoff + grid_spacing() - q * sin (angle ()),
 			yoff + _height - q * cos (angle ())
 			);
-				
+
 
 	} else {
 
@@ -375,15 +375,15 @@ PortMatrixColumnLabels::render_channel_name (
 
 		/* only plot the name if the bundle has more than one channel;
 		   the name of a single channel is assumed to be redundant */
-		
+
 		cairo_save (cr);
 		cairo_rotate (cr, -angle());
-		
+
 		cairo_show_text (
 			cr,
 			bc.bundle->channel_name(bc.channel).c_str()
 			);
-		
+
 		cairo_restore (cr);
 	}
 }
@@ -494,7 +494,7 @@ PortMatrixColumnLabels::motion (double x, double y)
 		) {
 
 		/* if the mouse is over a bundle name, highlight all channels in the bundle */
-		
+
 		list<PortMatrixNode> n;
 
 		for (uint32_t i = 0; i < w.bundle->nchannels().n_total(); ++i) {
@@ -502,7 +502,7 @@ PortMatrixColumnLabels::motion (double x, double y)
 			if (!_matrix->should_show (w.bundle->channel_type(i))) {
 				continue;
 			}
-			
+
 			ARDOUR::BundleChannel const bc (w.bundle, i);
 			n.push_back (PortMatrixNode (ARDOUR::BundleChannel (), bc));
 		}
@@ -510,7 +510,7 @@ PortMatrixColumnLabels::motion (double x, double y)
 		_body->set_mouseover (n);
 
 	} else {
-	
+
 		_body->set_mouseover (PortMatrixNode (ARDOUR::BundleChannel (), w));
 	}
-}	
+}

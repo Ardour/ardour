@@ -207,7 +207,7 @@ Editor::which_grabber_cursor ()
 			boost::shared_ptr<Movable> m = _movable.lock();
 			if (m && m->locked()) {
 				c = _cursors->speaker;
-			} 
+			}
 			break;
 		}
 	}
@@ -373,24 +373,24 @@ Editor::mouse_mode_toggled (MouseMode m)
 	mouse_mode = m;
 
 	instant_save ();
-        
+
 	if (!internal_editing()) {
 		if (mouse_mode != MouseRange && _join_object_range_state == JOIN_OBJECT_RANGE_NONE) {
-                        
+
 			/* in all modes except range and joined object/range, hide the range selection,
 			   show the object (region) selection.
 			*/
-                        
+
 			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 				(*i)->hide_selection ();
 			}
-                        
+
 		} else {
-                        
+
 			/*
 			  in range or object/range mode, show the range selection.
 			*/
-                        
+
 			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 				(*i)->show_selection (selection->time);
 			}
@@ -770,7 +770,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				return true;
 			}
 			break;
-			
+
 		default:
 			break;
 		}
@@ -798,12 +798,12 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 
 			case FeatureLineItem:
-			{			
+			{
 				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
 					remove_transient(item);
 					return true;
 				}
-				
+
 				_drags->set (new FeatureLineDrag (this, item), event);
 				return true;
 				break;
@@ -821,7 +821,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					/* no region drags in internal edit mode */
 					break;
 				}
-				
+
 				/* click on a normal region view */
 				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
 					add_region_copy_drag (item, event, clicked_regionview);
@@ -830,7 +830,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				} else {
 					add_region_drag (item, event, clicked_regionview);
 				}
-				
+
 				if (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT && !selection->regions.empty()) {
 					_drags->add (new SelectionDrag (this, clicked_axisview->get_selection_rect (clicked_selection)->rect, SelectionDrag::SelectionMove));
 				}
@@ -877,7 +877,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					_drags->set (new RubberbandSelectDrag (this, item), event);
 				}
 				break;
-				
+
 			case AutomationTrackItem:
 				/* rubberband drag to select automation points */
 				_drags->set (new RubberbandSelectDrag (this, item), event);
@@ -905,7 +905,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 							if (t) {
 								boost::shared_ptr<Playlist> pl = t->playlist ();
 								if (pl) {
-									
+
 									boost::shared_ptr<Region> r = pl->top_region_at (event_frame (event));
 									if (r) {
 										RegionView* rv = rtv->view()->find_view (r);
@@ -1054,7 +1054,7 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				/* no region drags in internal edit mode */
 				return false;
 			}
-			
+
 			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
 				add_region_copy_drag (item, event, clicked_regionview);
 			} else {
@@ -1505,7 +1505,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		default:
 			break;
-                        
+
 		}
 
                 /* do any (de)selection operations that should occur on button release */
@@ -1751,7 +1751,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			set_canvas_cursor ();
 		}
 		break;
-		
+
 	default:
 		break;
 	}
@@ -1821,7 +1821,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 #endif
 
 		_over_region_trim_target = false;
-		
+
 		if (is_drawable()) {
 			set_canvas_cursor (current_canvas_cursor);
 		}
@@ -1843,7 +1843,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case RegionViewName:
 		/* see enter_handler() for notes */
 		_over_region_trim_target = false;
-		
+
 		if (!reinterpret_cast<RegionView *> (item->get_data ("regionview"))->name_active()) {
 			if (is_drawable() && mouse_mode == MouseObject) {
 				set_canvas_cursor (current_canvas_cursor);
@@ -2007,7 +2007,7 @@ bool
 Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from_autoscroll)
 {
 	_last_motion_y = event->motion.y;
-	
+
 	if (event->motion.is_hint) {
 		gint x, y;
 
@@ -2048,7 +2048,7 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 	if (_drags->active ()) {
 		handled = _drags->motion_handler (event, from_autoscroll);
 	}
-	
+
 	if (!handled) {
 		return false;
 	}
@@ -2122,7 +2122,7 @@ Editor::edit_note (ArdourCanvas::Item* item)
 
 	d.run ();
 }
-	
+
 
 void
 Editor::visible_order_range (int* low, int* high) const
@@ -2429,7 +2429,7 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent* event, Region
 	if (!region_view->region()->playlist()) {
 		return;
 	}
-        
+
 	if (Config->get_edit_mode() == Splice) {
 		return;
 	}
@@ -2558,12 +2558,12 @@ Editor::update_join_object_range_location (double x, double y)
 	   entered_{track,regionview} is not always setup (e.g. if the mouse is over a TimeSelection), and to get a Region
 	   that we're over requires searching the playlist.
 	*/
-	   
+
 	if (join_object_range_button.get_active() == false || (mouse_mode != MouseRange && mouse_mode != MouseObject)) {
 		_join_object_range_state = JOIN_OBJECT_RANGE_NONE;
 		return;
 	}
-	
+
 	if (mouse_mode == MouseObject) {
 		_join_object_range_state = JOIN_OBJECT_RANGE_OBJECT;
 	} else if (mouse_mode == MouseRange) {
@@ -2572,7 +2572,7 @@ Editor::update_join_object_range_location (double x, double y)
 
 	/* XXX: maybe we should make entered_track work in all cases, rather than resorting to this */
 	pair<TimeAxisView*, int> tvp = trackview_by_y_position (y + vertical_adjustment.get_value() - canvas_timebars_vsize);
-	
+
 	if (tvp.first) {
 
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
@@ -2616,7 +2616,7 @@ void
 Editor::set_canvas_cursor_for_region_view (double x, RegionView* rv)
 {
 	assert (rv);
-	
+
 	ArdourCanvas::Group* g = rv->get_canvas_group ();
 	ArdourCanvas::Group* p = g->get_parent_group ();
 

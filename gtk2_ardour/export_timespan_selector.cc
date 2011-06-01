@@ -208,7 +208,7 @@ ExportTimespanSelector::construct_length (ARDOUR::Location const * location) con
 	}
 
 	std::stringstream s;
-	
+
 	switch (state->time_format) {
 	case AudioClock::BBT:
 		s << bbt_str (location->length ());
@@ -225,11 +225,11 @@ ExportTimespanSelector::construct_length (ARDOUR::Location const * location) con
 	case AudioClock::MinSec:
 		s << ms_str (location->length ());
 		break;
-		
+
 	case AudioClock::Frames:
 		s << location->length ();
 		break;
-		
+
 	case AudioClock::Off:
 		break;
 	}

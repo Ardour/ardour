@@ -162,7 +162,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 	case SessionStart:
 	case RangeStart:
-		
+
 	        points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 		points->push_back (Gnome::Art::Point (6.5, 6.5));
@@ -234,7 +234,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	frame_position = frame;
 	unit_position = editor.frame_to_unit (frame);
 	unit_position -= _shift;
-	
+
 	group = new Group (parent, unit_position, 1.0);
 
 	_name_background = new ArdourCanvas::SimpleRect (*group);
@@ -317,7 +317,7 @@ Marker::setup_line ()
 
 			_line->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
 		}
-		
+
                 /* work out where to start the line from so that it extends from the top of the canvas */
 		double yo = 0;
                 double xo = 0;
@@ -372,7 +372,7 @@ void
 Marker::setup_name_display ()
 {
 	double limit = DBL_MAX;
-	
+
 	if (label_on_left ()) {
 		limit = _left_label_limit;
 	} else {
@@ -398,7 +398,7 @@ Marker::setup_name_display ()
 		_name_background->property_x1() = name_pixbuf->property_x() - _label_offset + 2;
 		_name_background->property_x2() = name_pixbuf->property_x() + name_width;
 	}
-	
+
 	_name_background->property_y1() = 0;
 	_name_background->property_y2() = 13;
 }
@@ -423,7 +423,7 @@ void
 Marker::show ()
 {
 	_shown = true;
-	
+
         group->show ();
 	setup_line ();
 }
@@ -432,7 +432,7 @@ void
 Marker::hide ()
 {
 	_shown = false;
-	
+
 	group->hide ();
 	setup_line ();
 }
@@ -462,7 +462,7 @@ Marker::set_left_label_limit (double p)
 	if (_left_label_limit < 0) {
 		_left_label_limit = 0;
 	}
-	
+
 	if (label_on_left ()) {
 		setup_name_display ();
 	}
@@ -477,7 +477,7 @@ Marker::set_right_label_limit (double p)
 	if (_right_label_limit < 0) {
 		_right_label_limit = 0;
 	}
-	
+
 	if (!label_on_left ()) {
 		setup_name_display ();
 	}

@@ -444,12 +444,12 @@ PluginSelector::run ()
 	TreeModel::Children::iterator i;
 
 	bool finish = false;
-	
+
 	while (!finish) {
 
 		SelectedPlugins plugins;
 		r = (ResponseType) Dialog::run ();
-		
+
 		switch (r) {
 		case RESPONSE_APPLY:
 			for (i = amodel->children().begin(); i != amodel->children().end(); ++i) {
@@ -465,16 +465,16 @@ PluginSelector::run ()
 			if (interested_object && !plugins.empty()) {
 				finish = !interested_object->use_plugins (plugins);
                         }
-			
+
 			break;
-			
+
 		default:
 			finish = true;
 			break;
 		}
 	}
-		
-		
+
+
 	hide();
 	amodel->clear();
 	interested_object = 0;
@@ -595,10 +595,10 @@ PluginSelector::build_plugin_menu ()
 	using namespace Menu_Helpers;
 
 	delete _plugin_menu;
-	
+
 	_plugin_menu = manage (new Menu);
 	_plugin_menu->set_name("ArdourContextMenu");
-	
+
 	MenuList& items = _plugin_menu->items();
 	items.clear ();
 

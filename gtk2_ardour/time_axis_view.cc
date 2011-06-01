@@ -84,10 +84,10 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	if (extra_height == 0) {
 		compute_heights ();
 	}
-	
+
 	_canvas_background = new Group (*ed.get_background_group (), 0.0, 0.0);
 	_canvas_display = new Group (*ed.get_trackview_group (), 0.0, 0.0);
-	_canvas_display->hide(); // reveal as needed 
+	_canvas_display->hide(); // reveal as needed
 
 	selection_group = new Group (*_canvas_display);
 	selection_group->set_data (X_("timeselection"), (void *) 1);
@@ -169,7 +169,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	_controls_padding_table.set_col_spacings (0);
 	_controls_padding_table.attach (controls_table, 1, 2, 1, 2);
 	_controls_padding_table.show ();
-	
+
 	controls_vbox.pack_start (_controls_padding_table, false, false);
 	controls_vbox.pack_end (resizer_box, false, false);
 	controls_vbox.show ();
@@ -279,7 +279,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 		if (canvas_item_visible ((*i)->_canvas_display)) {
 			++nth;
 			_effective_height += (*i)->show_at (y + _effective_height, nth, parent);
-		} 
+		}
 	}
 
 	return _effective_height;
@@ -400,11 +400,11 @@ TimeAxisView::step_height (bool coarser)
 	static const uint32_t step = 25;
 
 	if (coarser) {
-		
+
 		if (height == preset_height (HeightSmall)) {
 			return;
 		}
-		
+
 		if (height <= preset_height (HeightSmaller) && height > preset_height (HeightSmall)) {
 			set_height_enum (HeightSmall);
 		} else if (height <= preset_height (HeightNormal) && height > preset_height (HeightSmaller)) {
@@ -412,9 +412,9 @@ TimeAxisView::step_height (bool coarser)
 		} else {
 			set_height (height - step);
 		}
-		
+
 	} else {
-		
+
 		if (height == preset_height(HeightSmall)) {
 			set_height_enum (HeightSmaller);
 		} else if (height == preset_height(HeightSmaller)) {
@@ -422,7 +422,7 @@ TimeAxisView::step_height (bool coarser)
 		} else {
 			set_height (height + step);
 		}
-		
+
 	}
 }
 
@@ -452,7 +452,7 @@ TimeAxisView::set_height (uint32_t h)
 	if (h < preset_height (HeightSmall)) {
 		h = preset_height (HeightSmall);
 	}
-	
+
 	time_axis_vbox.property_height_request () = h;
 	height = h;
 
@@ -506,18 +506,18 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 				} while ((*i)->hidden());
 			}
 		}
-		
-		
+
+
 		/* resize to show editable name display */
-		
+
 		if ((*i)->current_height() <= preset_height (HeightSmaller)) {
 			(*i)->set_height_enum (HeightSmaller);
 		}
-		
+
 		(*i)->name_entry.grab_focus();
 	}
 	return true;
-	
+
 	case GDK_Up:
 	case GDK_Down:
 		name_entry_changed ();
@@ -867,7 +867,7 @@ TimeAxisView::get_selection_rect (uint32_t id)
 		rect->start_trim->property_outline_what() = 0x0;
 		rect->start_trim->property_x1() = 0.0;
 		rect->start_trim->property_x2() = 0.0;
-		
+
 		rect->end_trim = new SimpleRect (*selection_group);
 		rect->end_trim->property_outline_what() = 0x0;
 		rect->end_trim->property_x1() = 0.0;
@@ -940,18 +940,18 @@ TimeAxisView::add_ghost (RegionView* rv)
 }
 
 void
-TimeAxisView::remove_ghost (RegionView* rv) 
+TimeAxisView::remove_ghost (RegionView* rv)
 {
 	rv->remove_ghost_in (*this);
 }
 
 void
-TimeAxisView::erase_ghost (GhostRegion* gr) 
+TimeAxisView::erase_ghost (GhostRegion* gr)
 {
 	if (in_destructor) {
 		return;
 	}
-	
+
 	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		if ((*i) == gr) {
 			ghosts.erase (i);
@@ -1005,7 +1005,7 @@ XMLNode&
 TimeAxisView::get_state ()
 {
 	/* XXX: is this method used? */
-	
+
 	XMLNode* node = new XMLNode ("TAV-" + name());
 	char buf[32];
 
@@ -1319,7 +1319,7 @@ TimeAxisView::set_visibility (bool yn)
 		}
 		return true; // things changed
 	}
-	
+
 	return false;
 }
 
@@ -1356,7 +1356,7 @@ TimeAxisView::get_child_list ()
 			c.push_back(*i);
 		}
 	}
-	
+
 	return c;
 }
 
@@ -1368,13 +1368,13 @@ TimeAxisView::build_size_menu ()
 	}
 
 	delete _size_menu;
-	
+
 	using namespace Menu_Helpers;
 
 	_size_menu = new Menu;
 	_size_menu->set_name ("ArdourContextMenu");
 	MenuList& items = _size_menu->items();
-	
+
 	items.push_back (MenuElem (_("Largest"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLargest, true)));
 	items.push_back (MenuElem (_("Larger"),  sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarger, true)));
 	items.push_back (MenuElem (_("Large"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarge, true)));

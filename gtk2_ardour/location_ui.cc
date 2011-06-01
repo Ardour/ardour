@@ -45,7 +45,7 @@ using namespace Gtkmm2ext;
 
 LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	: SessionHandlePtr (0) /* explicitly set below */
-        , location(0) 
+        , location(0)
         , item_table (1, 6, false)
         , start_clock (X_("locationstart"), true, X_("LocationEditRowClock"), true, false)
         , end_clock (X_("locationend"), true, X_("LocationEditRowClock"), true, false)
@@ -88,7 +88,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 
 	 ARDOUR_UI::instance()->tooltips().set_tip (*start_to_playhead_button, _("Set value to playhead"));
 	 ARDOUR_UI::instance()->tooltips().set_tip (*end_to_playhead_button, _("Set value to playhead"));
-	 
+
          isrc_label.set_text ("ISRC: ");
          isrc_label.set_size_request (30, -1);
          performer_label.set_text ("Performer: ");
@@ -197,7 +197,7 @@ LocationEditRow::set_session (Session *sess)
 {
 	SessionHandlePtr::set_session (sess);
 
-	if (!_session) { 
+	if (!_session) {
 		return;
 	}
 
@@ -343,7 +343,7 @@ void
 LocationEditRow::name_entry_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &LocationEditRow::name_entry_changed)
-	
+
 	if (i_am_the_modifier || !location) {
 		return;
 	}
@@ -748,12 +748,12 @@ LocationUI::LocationUI ()
 
 	loop_punch_box.pack_start (loop_edit_row, false, false);
 	loop_punch_box.pack_start (punch_edit_row, false, false);
-	
+
 	table->attach (loop_punch_box, 1, 2, table_row, table_row + 1);
 	++table_row;
 
 	vbox->pack_start (*table, false, false);
-	
+
  	table = manage (new Table (3, 2));
 	table->set_spacings (4);
 	table->set_col_spacing (0, 32);
@@ -761,7 +761,7 @@ LocationUI::LocationUI ()
 
 	table->attach (*manage (new Label ("")), 0, 2, table_row, table_row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	++table_row;
-	
+
 	l = manage (new Label (_("<b>Markers (Including CD Index)</b>")));
 	l->set_alignment (0, 0.5);
 	l->set_use_markup (true);
@@ -796,7 +796,7 @@ LocationUI::LocationUI ()
 
 	table->attach (*manage (new Label ("")), 0, 2, table_row, table_row + 1, Gtk::SHRINK, Gtk::SHRINK);
 	++table_row;
-	
+
 	l = manage (new Label (_("<b>Ranges (Including CD Track Ranges)</b>")));
 	l->set_alignment (0, 0.5);
 	l->set_use_markup (true);
@@ -832,7 +832,7 @@ LocationUI::LocationUI ()
 
 	add_location_button.signal_clicked().connect (sigc::mem_fun(*this, &LocationUI::add_new_location));
 	add_range_button.signal_clicked().connect (sigc::mem_fun(*this, &LocationUI::add_new_range));
-	
+
 	show_all ();
 }
 
@@ -841,7 +841,7 @@ LocationUI::~LocationUI()
         delete _clock_group;
 }
 
-gint 
+gint
 LocationUI::do_location_remove (ARDOUR::Location *loc)
 {
 	/* this is handled internally by Locations, but there's
@@ -863,7 +863,7 @@ LocationUI::do_location_remove (ARDOUR::Location *loc)
 	return FALSE;
 }
 
-void 
+void
 LocationUI::location_remove_requested (ARDOUR::Location *loc)
 {
 	// must do this to prevent problems when destroying
@@ -873,7 +873,7 @@ LocationUI::location_remove_requested (ARDOUR::Location *loc)
 }
 
 
-void 
+void
 LocationUI::location_redraw_ranges ()
 {
 	range_rows.hide();
@@ -921,7 +921,7 @@ LocationUI::location_added (Location* location)
 			}
 
 			++i;
-			
+
 			if (j != children.end()) {
 				++j;
 			}
@@ -1133,7 +1133,7 @@ LocationUIWindow::~LocationUIWindow()
 {
 }
 
-void 
+void
 LocationUIWindow::on_map ()
 {
 	ArdourDialog::on_map ();

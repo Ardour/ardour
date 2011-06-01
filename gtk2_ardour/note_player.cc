@@ -35,7 +35,7 @@ NotePlayer::play ()
                 }
         }
 
-	uint32_t note_length_ms = 350; 
+	uint32_t note_length_ms = 350;
         /* beats_to_frames (longest_duration_beats)
          * (1000 / (double)track->session().nominal_frame_rate()); */
 

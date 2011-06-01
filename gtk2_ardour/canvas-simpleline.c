@@ -223,7 +223,7 @@ gnome_canvas_simpleline_set_property (GObject      *object,
 	case PROP_Y1:
                 d = g_value_get_double (value);
 	        if (simpleline->y1 != d) {
-		        simpleline->y1 = d; 
+		        simpleline->y1 = d;
 			bounds_changed = TRUE;
 		}
 		break;
@@ -310,7 +310,7 @@ gnome_canvas_simpleline_update (GnomeCanvasItem *item, double *affine, ArtSVP *c
 
         /* get current bounding box in parent-relative world coordinates */
 
-        gnome_canvas_simpleline_bounds (item, &x1, &y1, &x2, &y2); 
+        gnome_canvas_simpleline_bounds (item, &x1, &y1, &x2, &y2);
 
         /* convert parent-relative item coordinates to world coordinates */
 
@@ -325,7 +325,7 @@ gnome_canvas_simpleline_update (GnomeCanvasItem *item, double *affine, ArtSVP *c
         y2 = ceil (y2);
 
         /* force non-zero dimensionality for both axes */
-        
+
         if (x1 == x2) {
                 x2 += 1.0;
         }
@@ -375,12 +375,12 @@ gnome_canvas_simpleline_render (GnomeCanvasItem *item,
 	x1 = simpleline->cx1;
 	x2 = simpleline->cx2;
         y1 = simpleline->cy1;
-        
+
 	if (buf->is_bg) {
 		gnome_canvas_buf_ensure_buf (buf);
 		buf->is_bg = FALSE;
 	}
-        
+
         if (simpleline->x1 != simpleline->x2) {
                 PAINT_HORIZA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
                              x1, x2, y1);
@@ -388,7 +388,7 @@ gnome_canvas_simpleline_render (GnomeCanvasItem *item,
                 y2 = simpleline->cy2;
                 PAINT_VERTA (buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
                              x1, y1, y2);
-                
+
         }
 }
 

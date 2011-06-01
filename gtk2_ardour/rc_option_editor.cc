@@ -349,7 +349,7 @@ public:
 		_delete_button_adjustment.set_value (Keyboard::delete_button());
 		_delete_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::delete_button_changed));
 
-		
+
 		set_popdown_strings (_insert_note_modifier_combo, dumb);
 		_insert_note_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::insert_note_modifier_chosen));
 
@@ -359,7 +359,7 @@ public:
 				break;
 			}
 		}
-		
+
 		l = manage (new Label (_("Insert note using:")));
 		l->set_name ("OptionsLabel");
 		l->set_alignment (0, 0.5);
@@ -376,8 +376,8 @@ public:
 		_insert_note_button_spin.set_name ("OptionsEntry");
 		_insert_note_button_adjustment.set_value (Keyboard::insert_note_button());
 		_insert_note_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::insert_note_button_changed));
-		
-		
+
+
 		set_popdown_strings (_snap_modifier_combo, dumb);
 		_snap_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::snap_modifier_chosen));
 
@@ -572,7 +572,7 @@ private:
 class BufferingOptions : public OptionEditorBox
 {
 public:
-	BufferingOptions (RCConfiguration* c) 
+	BufferingOptions (RCConfiguration* c)
                 : _rc_config (c)
 		, _playback_adjustment (5, 1, 60, 1, 4)
                 , _capture_adjustment (5, 1, 60, 1, 4)
@@ -591,7 +591,7 @@ public:
 		h->pack_start (_playback_slider, true, true);
 
 		_box->pack_start (*h, false, false);
-                
+
 		_capture_adjustment.set_value (_rc_config->get_audio_capture_buffer_seconds());
 
 		l = manage (new Label (_("Recording (seconds of buffering):")));
@@ -604,7 +604,7 @@ public:
 		h->pack_start (_capture_slider, true, true);
 
 		_box->pack_start (*h, false, false);
-                
+
 		_capture_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &BufferingOptions::capture_changed));
 		_playback_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &BufferingOptions::playback_changed));
 	}
@@ -664,7 +664,7 @@ public:
 
 		_box->pack_start (*label, false, false);
 		label->show ();
-		
+
 		_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::model_changed));
 		_view.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
 	}
@@ -730,15 +730,15 @@ private:
 		std::string name;
 		ControlProtocolInfo* cpi;
 		TreeModel::Row row;
-		
+
 		row = *(_view.get_selection()->get_selected());
 
 		Window* win = row[_model.editor];
 		if (win && !win->is_visible()) {
-			win->present (); 
+			win->present ();
 		} else {
 			cpi = row[_model.protocol_info];
-			
+
 			if (cpi && cpi->protocol && cpi->protocol->has_editor ()) {
 				Box* box = (Box*) cpi->protocol->get_gui ();
 				if (box) {
@@ -790,21 +790,21 @@ RCOptionEditor::RCOptionEditor ()
 
         if (hwcpus > 1) {
                 add_option (_("Misc"), new OptionEditorHeading (_("DSP CPU Utilization")));
-                
+
                 ComboOption<int32_t>* procs = new ComboOption<int32_t> (
                         "processor-usage",
                         _("Signal processing uses"),
                         sigc::mem_fun (*_rc_config, &RCConfiguration::get_processor_usage),
                         sigc::mem_fun (*_rc_config, &RCConfiguration::set_processor_usage)
                         );
-                
+
                 procs->add (-1, _("all but one processor"));
                 procs->add (0, _("all available processors"));
-                
+
                 for (uint32_t i = 1; i <= hwcpus; ++i) {
                         procs->add (i, string_compose (_("%1 processors"), i));
                 }
-                
+
                 add_option (_("Misc"), procs);
         }
 
@@ -901,7 +901,7 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Click")));
-	
+
 	add_option (_("Misc"), new ClickOptions (_rc_config, this));
 
 	/* TRANSPORT */
@@ -1109,7 +1109,7 @@ RCOptionEditor::RCOptionEditor ()
 	mm->add (ExternalMonitoring, _("audio hardware"));
 
 	add_option (_("Audio"), mm);
-	
+
 	ComboOption<PFLPosition>* pp = new ComboOption<PFLPosition> (
 		"pfl-position",
 		_("PFL signals come from"),
@@ -1312,7 +1312,7 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 	add_option (_("Solo / mute"), new OptionEditorHeading (_("Default track / bus muting options")));
-	
+
 	add_option (_("Solo / mute"),
 	     new BoolOption (
 		     "mute-affects-pre-fader",
@@ -1328,7 +1328,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_post_fader),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_post_fader)
 		     ));
-	
+
 	add_option (_("Solo / mute"),
 	     new BoolOption (
 		     "mute-affects-control-outs",
@@ -1336,7 +1336,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_control_outs),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_control_outs)
 		     ));
-	
+
 	add_option (_("Solo / mute"),
 	     new BoolOption (
 		     "mute-affects-main-outs",
@@ -1447,7 +1447,7 @@ void
 RCOptionEditor::parameter_changed (string const & p)
 {
 	OptionEditor::parameter_changed (p);
-	
+
 	if (p == "use-monitor-bus") {
 		bool const s = Config->get_use_monitor_bus ();
 		if (!s) {

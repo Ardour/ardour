@@ -23,10 +23,10 @@ class RegionLayeringOrderEditor : public ArdourDialog
   public:
 	RegionLayeringOrderEditor (PublicEditor&);
 	virtual ~RegionLayeringOrderEditor ();
-	
+
 	void set_context(const std::string& name, ARDOUR::Session* s, const boost::shared_ptr<ARDOUR::Playlist>  & pl, ARDOUR::framepos_t position);
 	void maybe_present ();
-	
+
   protected:
 	virtual bool on_key_press_event (GdkEventKey* event);
 
@@ -35,7 +35,7 @@ class RegionLayeringOrderEditor : public ArdourDialog
 	framepos_t position;
 	bool in_row_change;
 	uint32_t regions_at_position;
-	
+
         PBD::ScopedConnection playlist_modified_connection;
 
 	struct LayeringOrderColumns : public Gtk::TreeModel::ColumnRecord {

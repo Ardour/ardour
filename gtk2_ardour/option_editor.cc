@@ -156,7 +156,7 @@ FaderOption::FaderOption (string const & i, string const & n, sigc::slot<gain_t>
 	_box.pack_start (*_db_slider, false, false);
 	_box.pack_start (_db_display, false, false);
 	_box.show_all ();
-	
+
 	set_size_request_to_display_given_text (_db_display, "-99.0", 12, 12);
 
 	_db_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &FaderOption::db_changed));
@@ -175,7 +175,7 @@ FaderOption::set_state_from_config ()
 	} else {
 		snprintf (buf, sizeof (buf), "%.2f", accurate_coefficient_to_dB (val));
 	}
-	
+
 	_db_display.set_text (buf);
 }
 
@@ -219,7 +219,7 @@ ClockOption::set_session (Session* s)
 {
 	_clock.set_session (s);
 }
-	   
+
 OptionEditorPage::OptionEditorPage (Gtk::Notebook& n, std::string const & t)
 	: table (1, 3)
 {
@@ -318,4 +318,4 @@ OptionEditor::set_current_page (string const & p)
 }
 
 
-	
+

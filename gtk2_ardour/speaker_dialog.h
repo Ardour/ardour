@@ -34,10 +34,10 @@ class SpeakerDialog  : public ArdourDialog
 {
 public:
 	SpeakerDialog ();
-	
+
 	boost::shared_ptr<ARDOUR::Speakers> get_speakers() const;
 	void set_speakers (boost::shared_ptr<ARDOUR::Speakers>);
-	
+
 private:
 	boost::weak_ptr<ARDOUR::Speakers> _speakers;
 	Gtk::HBox        hbox;
@@ -63,14 +63,14 @@ private:
 	PBD::ScopedConnection selected_speaker_connection;
 	bool             ignore_speaker_position_change;
 	bool             ignore_azimuth_change;
-	
+
 	bool darea_expose_event (GdkEventExpose*);
 	void darea_size_allocate (Gtk::Allocation& alloc);
 	bool darea_motion_notify_event (GdkEventMotion *ev);
 	bool handle_motion (gint evx, gint evy, GdkModifierType state);
 	bool darea_button_press_event (GdkEventButton *ev);
 	bool darea_button_release_event (GdkEventButton *ev);
-	
+
 	void clamp_to_circle (double& x, double& y);
 	void gtk_to_cart (PBD::CartesianVector& c) const;
 	void cart_to_gtk (PBD::CartesianVector& c) const;

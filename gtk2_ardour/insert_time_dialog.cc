@@ -34,7 +34,7 @@ InsertTimeDialog::InsertTimeDialog (PublicEditor& e)
 	, _clock ("insertTimeClock", true, X_("InsertTimeClock"), true, false, true, true)
 {
 	set_session (_editor.session ());
-	
+
 	framepos_t const pos = _editor.get_preferred_edit_position ();
 
 	get_vbox()->set_border_width (12);

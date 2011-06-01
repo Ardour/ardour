@@ -512,7 +512,7 @@ Mixer_UI::session_going_away ()
 	_in_group_rebuild_or_clear = true;
 	group_model->clear ();
 	_in_group_rebuild_or_clear = false;
-	
+
 	_selection.clear ();
 	track_model->clear ();
 
@@ -1133,7 +1133,7 @@ void
 Mixer_UI::new_route_group ()
 {
 	RouteList rl;
-	
+
 	_group_tabs->run_new_group_dialog (rl);
 }
 
@@ -1521,7 +1521,7 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 	}
 }
 void
-Mixer_UI::scroll_left () 
+Mixer_UI::scroll_left ()
 {
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
 	/* stupid GTK: can't rely on clamping across versions */
@@ -1668,7 +1668,7 @@ Mixer_UI::setup_track_display ()
 	b->add (*w);
 
 	b->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
-	
+
 	v->pack_start (*b, false, false);
 
 	track_display_frame.set_name("BaseFrame");

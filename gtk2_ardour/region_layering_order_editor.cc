@@ -46,7 +46,7 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
         scroller_table->attach (scroller, 0, 1, 0, 1);
         scroller_table->set_col_spacings (5);
         scroller_table->set_row_spacings (5);
-  
+
         track_label.set_name ("RegionLayeringOrderEditorLabel");
         track_label.set_text (_("Track:"));
 	track_label.set_alignment (0, 0.5);
@@ -56,7 +56,7 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
         track_name_label.set_name ("RegionLayeringOrderEditorNameLabel");
 	track_name_label.set_alignment (0, 0.5);
         clock.set_mode (AudioClock::BBT);
-  
+
         Gtk::Table* info_table = manage (new Gtk::Table (2, 2));
         info_table->set_col_spacings (5);
         info_table->set_row_spacings (5);
@@ -64,11 +64,11 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
         info_table->attach (track_name_label, 1, 2, 0, 1, FILL, FILL);
         info_table->attach (clock_label, 0, 1, 1, 2, FILL, FILL);
         info_table->attach (clock, 1, 2, 1, 2, FILL, FILL);
- 
+
         get_vbox()->set_spacing (12);
         get_vbox()->pack_start (*info_table, false, false);
         get_vbox()->pack_start (*scroller_table, true, true);
- 
+
         info_table->set_name ("RegionLayeringOrderTable");
         scroller_table->set_name ("RegionLayeringOrderTable");
 
@@ -187,7 +187,7 @@ RegionLayeringOrderEditor::on_key_press_event (GdkEventKey* ev)
 	if (ev->keyval == GDK_Return) {
 		handled = ArdourDialog::on_key_press_event (ev);
 	}
-	
+
 	if (!handled) {
 		handled = key_press_focus_accelerator_handler (editor, ev);
 	}
@@ -195,10 +195,10 @@ RegionLayeringOrderEditor::on_key_press_event (GdkEventKey* ev)
 	if (!handled) {
 		handled = ArdourDialog::on_key_press_event (ev);
 	}
-	
+
 	return handled;
 }
-	
+
 void
 RegionLayeringOrderEditor::maybe_present ()
 {

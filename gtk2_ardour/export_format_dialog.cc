@@ -405,7 +405,7 @@ ExportFormatDialog::init_format_table ()
 		row[sample_rate_cols.ptr] = *it;
 		row[sample_rate_cols.color] = "white";
 		row[sample_rate_cols.label] = (*it)->name();
-		
+
 		WeakSampleRatePtr ptr (*it);
 		(*it)->SelectChanged.connect (*this, invalidator (*this), ui_bind (&ExportFormatDialog::change_sample_rate_selection, this, _1, ptr), gui_context());
 		(*it)->CompatibleChanged.connect (*this, invalidator (*this), ui_bind (&ExportFormatDialog::change_sample_rate_compatibility, this, _1, ptr), gui_context());

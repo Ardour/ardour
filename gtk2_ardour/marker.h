@@ -92,7 +92,7 @@ class Marker : public sigc::trackable
 	}
 
 	bool label_on_left () const;
-	
+
   protected:
 	PublicEditor& editor;
 

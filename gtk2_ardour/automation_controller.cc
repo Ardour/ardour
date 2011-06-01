@@ -122,7 +122,7 @@ AutomationController::end_touch ()
 
 		bool mark = false;
 		double when = 0;
-                
+
 		if (_controllable->session().transport_rolling()) {
 			mark = true;
 			when = _controllable->session().transport_frame();

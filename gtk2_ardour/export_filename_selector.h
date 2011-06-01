@@ -28,7 +28,7 @@
 #include "ardour/session_handle.h"
 
 ///
-class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr 
+class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
   public:
 	typedef boost::shared_ptr<ARDOUR::ExportFilename> FilenamePtr;

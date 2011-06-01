@@ -45,7 +45,7 @@ using namespace ARDOUR;
 
 list<Gdk::Color> AxisView::used_colors;
 
-AxisView::AxisView (ARDOUR::Session* sess) 
+AxisView::AxisView (ARDOUR::Session* sess)
 	: SessionHandlePtr (sess)
 {
 	_selected = false;

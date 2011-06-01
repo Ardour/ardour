@@ -28,7 +28,7 @@ class ProgressReporter : public ARDOUR::Progress
 public:
 	ProgressReporter ();
 	virtual ~ProgressReporter ();
-	
+
 private:
 	void set_overall_progress (float);
 

@@ -194,7 +194,7 @@ Editor::create_named_selection ()
 		}
 
 		boost::shared_ptr<NamedSelection> ns (new NamedSelection (name, thelist));
-		
+
 		/* make the one we just added be selected */
 
 		TreeModel::Children::iterator added = named_selection_model->children().end();

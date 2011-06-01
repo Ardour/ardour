@@ -510,12 +510,12 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
 	track_scroller.set_size_request (-1, 130);
 	track_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	pack_start(track_scroller);
-	
+
 	// Track list
 	track_list = Gtk::ListStore::create (track_cols);
 	track_view.set_model (track_list);
 	track_view.set_headers_visible (true);
-	
+
 	track_view.append_column_editable (_("Track"), track_cols.selected);
 	Gtk::CellRendererToggle *toggle = dynamic_cast<Gtk::CellRendererToggle *>(track_view.get_column_cell_renderer (0));
 	toggle->signal_toggled().connect (sigc::hide (sigc::mem_fun (*this, &TrackExportChannelSelector::update_config)));
@@ -526,9 +526,9 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
 	Gtk::TreeView::Column* column = track_view.get_column (0);
 	column->pack_start (*text_renderer);
 	column->add_attribute (text_renderer->property_text(), track_cols.label);
-	
+
 	fill_list();
-	
+
 	show_all_children ();
 }
 
@@ -575,7 +575,7 @@ TrackExportChannelSelector::update_config()
 		if (!row[track_cols.selected]) {
 			continue;
 		}
-		
+
 		ExportProfileManager::ChannelConfigStatePtr state = manager->add_channel_config();
 
 		Route * track = row[track_cols.track];

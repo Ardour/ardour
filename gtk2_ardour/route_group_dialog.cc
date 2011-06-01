@@ -139,7 +139,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 		add_button (Stock::CLOSE, RESPONSE_CLOSE);
 		set_default_response (RESPONSE_CLOSE);
 	}
-	
+
 	show_all_children ();
 }
 
@@ -158,7 +158,7 @@ RouteGroupDialog::do_run ()
 			/* not cancelled and the name is ok, so all is well */
 			return false;
 		}
-	
+
 		_group->set_name (_initial_name);
 		MessageDialog msg (
 			_("A route group of this name already exists.  Please use a different name."),
@@ -167,7 +167,7 @@ RouteGroupDialog::do_run ()
 			Gtk::BUTTONS_OK,
 			true
 			);
-		
+
 		msg.run ();
 	}
 

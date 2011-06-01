@@ -471,17 +471,17 @@ PianoRollHeader::on_motion_notify_event (GdkEventMotion* ev)
 			} else {
 				invalidate_note_range(note, _highlighted_note);
 			}
-			
+
 			_highlighted_note = note;
 		}
-		
+
 		/* redraw already taken care of above */
 		if (_clicked_note != no_note && _clicked_note != note) {
 			_active_notes[_clicked_note] = false;
 			send_note_off(_clicked_note);
 
 			_clicked_note = note;
-			
+
 			if (!_active_notes[note]) {
 				_active_notes[note] = true;
 				send_note_on(note);
@@ -503,17 +503,17 @@ PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 		send_note_on (note);
 		/* relax till release */
 	} else {
-		
+
 		if (ev->type == GDK_BUTTON_PRESS && note >= 0 && note < 128) {
-			
+
 			add_modal_grab();
 			_dragging = true;
-			
+
 			if (!_active_notes[note]) {
 				_active_notes[note] = true;
 				_clicked_note = note;
 				send_note_on(note);
-				
+
 				invalidate_note_range(note, note);
 			} else {
 				reset_clicked_note(note);
@@ -534,22 +534,22 @@ PianoRollHeader::on_button_release_event (GdkEventButton* ev)
 
 		if (Keyboard::no_modifiers_active (ev->state)) {
 			AddNoteSelection (note); // EMIT SIGNAL
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {			
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			ToggleNoteSelection (note); // EMIT SIGNAL
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::RangeSelectModifier)) {
 			ExtendNoteSelection (note); // EMIT SIGNAL
 		}
-		
+
 	} else {
 
 		if (_dragging) {
 			remove_modal_grab();
 			_dragging = false;
-			
+
 			if (note == _clicked_note) {
 				reset_clicked_note(note);
 			}
-		} 
+		}
 	}
 
 	return true;

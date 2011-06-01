@@ -36,7 +36,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	, _session_config (&(s->config))
 {
 	set_session (s);
-	
+
         set_name ("SessionProperties");
 
 	/* TIMECODE*/
@@ -47,7 +47,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_sync_source),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_sync_source)
 		);
-	
+
 	populate_sync_options ();
 	parameter_changed (string ("external-sync"));
 
@@ -122,7 +122,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 		);
 
 	co->set_session (_session);
-	
+
 	add_option (_("Timecode"), co);
 
 	add_option (_("Timecode"), new BoolOption (
@@ -229,7 +229,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	hf->add (CAF, _("CAF"));
 
 	add_option (_("Media"), hf);
-        
+
 	add_option (_("Media"), new OptionEditorHeading (_("File locations")));
 
         SearchPathOption* spo = new SearchPathOption ("audio-search-path", _("Search for audio files in:"),
@@ -311,7 +311,7 @@ void
 SessionOptionEditor::parameter_changed (std::string const & p)
 {
 	OptionEditor::parameter_changed (p);
-	
+
 	if (p == "external-sync") {
 		_sync_source->set_sensitive (!_session->config.get_external_sync ());
 	}

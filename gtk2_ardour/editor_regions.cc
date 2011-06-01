@@ -66,14 +66,14 @@ EditorRegions::EditorRegions (Editor* e)
 	, _show_automatic_regions (true)
 	, ignore_region_list_selection_change (false)
 	, ignore_selected_region_change (false)
- 	, _no_redisplay (false) 
+ 	, _no_redisplay (false)
 	, _sort_type ((Editing::RegionListSortType) 0)
 	, expanded (false)
 {
 	_display.set_size_request (100, -1);
 	_display.set_name ("RegionListDisplay");
 	_display.set_rules_hint (true);
-	
+
 	/* Try to prevent single mouse presses from initiating edits.
 	   This relies on a hack in gtktreeview.c:gtk_treeview_button_press()
 	*/
@@ -119,31 +119,31 @@ EditorRegions::EditorRegions (Editor* e)
 	CellRendererToggle* locked_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (7));
 	locked_cell->property_activatable() = true;
 	locked_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::locked_changed));
-	
+
 	TreeViewColumn* locked_col = _display.get_column (7);
 	locked_col->add_attribute (locked_cell->property_visible(), _columns.property_toggles_visible);
 
 	CellRendererToggle* glued_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (8));
 	glued_cell->property_activatable() = true;
 	glued_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::glued_changed));
-	
+
 	TreeViewColumn* glued_col = _display.get_column (8);
 	glued_col->add_attribute (glued_cell->property_visible(), _columns.property_toggles_visible);
 
 	CellRendererToggle* muted_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (9));
 	muted_cell->property_activatable() = true;
 	muted_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::muted_changed));
-	
+
 	TreeViewColumn* muted_col = _display.get_column (9);
 	muted_col->add_attribute (muted_cell->property_visible(), _columns.property_toggles_visible);
 
 	CellRendererToggle* opaque_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (10));
 	opaque_cell->property_activatable() = true;
 	opaque_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::opaque_changed));
-	
+
 	TreeViewColumn* opaque_col = _display.get_column (10);
 	opaque_col->add_attribute (opaque_cell->property_visible(), _columns.property_toggles_visible);
-	
+
 	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
 	_display.add_object_drag (_columns.region.index(), "regions");
 
@@ -177,7 +177,7 @@ EditorRegions::EditorRegions (Editor* e)
 	ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &EditorRegions::update_all_rows));
 	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::region_changed, this, _1, _2), gui_context());
 	ARDOUR::RegionFactory::CheckNewRegion.connect (check_new_region_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::add_region, this, _1), gui_context());
-	
+
 	e->EditorFreeze.connect (editor_freeze_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::freeze_tree_model, this), gui_context());
 	e->EditorThaw.connect (editor_thaw_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::thaw_tree_model, this), gui_context());
 }
@@ -218,8 +218,8 @@ EditorRegions::enter_notify (GdkEventCrossing* ev)
 	if (name_editable) {
 		return true;
 	}
-	
-	/* arm counter so that ::selection_filter() will deny selecting anything for the 
+
+	/* arm counter so that ::selection_filter() will deny selecting anything for the
 	   next two attempts to change selection status.
 	*/
 	_scroller.grab_focus ();
@@ -369,15 +369,15 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 		// find parent node, add as new child
 		TreeModel::iterator i;
 		TreeModel::Children rows = _model->children();
-                        
+
 		boost::unordered_map<string, Gtk::TreeModel::RowReference>::iterator it;
-		
+
 		it = parent_regions_sources_map.find (region->source_string());
-		
+
 		if (it != parent_regions_sources_map.end()){
 
 			TreeModel::iterator j = _model->get_iter ((*it).second.get_path());
-		
+
 			TreeModel::iterator ii;
 			TreeModel::Children subrows = (*j).children();
 
@@ -391,7 +391,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 				}
 			}
 			*/
-			
+
 			row = *(_model->insert (subrows.end()));
 		}
 		else {
@@ -449,7 +449,7 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 	our_interests.add (ARDOUR::Properties::opaque);
 	our_interests.add (ARDOUR::Properties::fade_in);
 	our_interests.add (ARDOUR::Properties::fade_out);
-	
+
 	if (what_changed.contains (our_interests)) {
 
 		if (last_row != 0) {
@@ -459,19 +459,19 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 
 			if (c == r) {
 				populate_row (r, (*j));
-				
+
 				if (what_changed.contains (ARDOUR::Properties::hidden)) {
 					redisplay ();
 				}
-				
+
 				return;
 			}
 		}
-		
+
 		RegionRowMap::iterator it;
-		
+
 		it = region_row_map.find (r);
-		
+
 		if (it != region_row_map.end()){
 
 			TreeModel::iterator j = _model->get_iter ((*it).second.get_path());
@@ -479,13 +479,13 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 
 			if (c == r) {
 				populate_row (r, (*j));
-				
+
 				if (what_changed.contains (ARDOUR::Properties::hidden)) {
 					redisplay ();
 				}
-				
+
 				return;
-			}    
+			}
 		}
 
 		/* find the region in our model and update its row */
@@ -517,7 +517,7 @@ EditorRegions::selection_changed ()
 
 		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 
-			if (iter = _model->get_iter (*i)) { 
+			if (iter = _model->get_iter (*i)) {
 				boost::shared_ptr<Region> region = (*iter)[_columns.region];
 
 				// they could have clicked on a row that is just a placeholder, like "Hidden"
@@ -525,7 +525,7 @@ EditorRegions::selection_changed ()
 				// since we need a region ptr.
 
 				if (region) {
-                                        
+
 					if (region->automatic()) {
 
 						_display.get_selection()->unselect(*i);
@@ -552,9 +552,9 @@ EditorRegions::set_selected (RegionSelection& regions)
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
 
 		boost::shared_ptr<Region> r ((*i)->region());
-		
+
 		RegionRowMap::iterator it;
-		
+
 		it = region_row_map.find (r);
 
 		if (it != region_row_map.end()){
@@ -581,17 +581,17 @@ EditorRegions::redisplay ()
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	_model->clear ();
 	_model->set_sort_column (-2, SORT_ASCENDING); //Disable sorting to gain performance
-	
+
 
 	region_row_map.clear();
 	parent_regions_sources_map.clear();
-	
+
 	/* now add everything we have, via a temporary list used to help with sorting */
 
 	const RegionFactory::RegionMap& regions (RegionFactory::regions());
 
 	for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		
+
 		if ( i->second->whole_file()) {
 			/* add automatic regions first so that children can find their parents as we add them */
 			add_region (i->second);
@@ -604,7 +604,7 @@ EditorRegions::redisplay ()
 	for (list<boost::shared_ptr<Region> >::iterator r = tmp_region_list.begin(); r != tmp_region_list.end(); ++r) {
 		add_region (*r);
 	}
-	
+
 	_model->set_sort_column (0, SORT_ASCENDING); // renabale sorting
 	_display.set_model (_model);
 
@@ -623,7 +623,7 @@ EditorRegions::update_row (boost::shared_ptr<Region> region)
 	}
 
 	RegionRowMap::iterator it;
-	
+
 	it = region_row_map.find (region);
 
 	if (it != region_row_map.end()){
@@ -645,9 +645,9 @@ EditorRegions::update_all_rows ()
 	for (i = region_row_map.begin(); i != region_row_map.end(); ++i) {
 
 		TreeModel::iterator j = _model->get_iter ((*i).second.get_path());
-		
+
 		boost::shared_ptr<Region> region = (*j)[_columns.region];
-		
+
 		if (!region->automatic()) {
 			populate_row(region, (*j));
 		}
@@ -701,7 +701,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 	//uint32_t used = _session->playlists->region_use_count (region);
 	/* Presently a region is only used once so let's save on the sequential scan to determine use count */
 	uint32_t used = 1;
-	
+
 	populate_row_position (region, row, used);
 	populate_row_end (region, row, used);
 	populate_row_sync (region, row, used);
@@ -825,7 +825,7 @@ EditorRegions::populate_row_fade_in (boost::shared_ptr<Region> region, TreeModel
 			char buf[16];
 			format_position (audioregion->fade_in()->back()->when, buf, sizeof (buf));
 			row[_columns.fadein] = buf;
-                        
+
 			if (audioregion->fade_in_active()) {
 				row[_columns.fadein] = string_compose("%1%2%3", " ", buf, " ");
 			} else {
@@ -846,16 +846,16 @@ EditorRegions::populate_row_fade_out (boost::shared_ptr<Region> region, TreeMode
 		} else {
 			char buf[16];
 			format_position (audioregion->fade_out()->back()->when, buf, sizeof (buf));
-                        
+
 			if (audioregion->fade_out_active()) {
 				row[_columns.fadeout] = string_compose("%1%2%3", " ", buf, " ");
 			} else {
 				row[_columns.fadeout] = string_compose("%1%2%3", "(", buf, ")");
 			}
-		} 
+		}
 	}
 }
-        
+
 void
 EditorRegions::populate_row_locked (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
 {
@@ -910,7 +910,7 @@ EditorRegions::populate_row_name (boost::shared_ptr<Region> region, TreeModel::R
 	} else {
 		row[_columns.name] = region->name();
 	}
-}        
+}
 
 void
 EditorRegions::populate_row_source (boost::shared_ptr<Region> region, TreeModel::Row const &row)
@@ -964,7 +964,7 @@ EditorRegions::show_context_menu (int button, int time)
 
 	bool have_shown = false;
 	bool have_hidden = false;
-	
+
 	TreeView::Selection::ListHandle_Path rows = _display.get_selection()->get_selected_rows ();
 	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 		TreeIter t = _model->get_iter (*i);
@@ -992,7 +992,7 @@ EditorRegions::key_press (GdkEventKey* ev)
 	switch (ev->keyval) {
 	case GDK_Tab:
 	case GDK_ISO_Left_Tab:
-                
+
 		if (name_editable) {
 			name_editable->editing_done ();
 			name_editable = 0;
@@ -1237,7 +1237,7 @@ void
 EditorRegions::name_editing_started (CellEditable* ce, const Glib::ustring&)
 {
 	name_editable = ce;
-        
+
 	/* give it a special name */
 
 	Gtk::Entry *e = dynamic_cast<Gtk::Entry*> (ce);
@@ -1246,7 +1246,7 @@ EditorRegions::name_editing_started (CellEditable* ce, const Glib::ustring&)
 		e->set_name (X_("RegionNameEditorEntry"));
 	}
 }
-                          
+
 void
 EditorRegions::name_edit (const std::string& path, const std::string& new_text)
 {
@@ -1286,7 +1286,7 @@ EditorRegions::get_dragged_region ()
 	if (regions.empty()) {
 		return boost::shared_ptr<Region> ();
 	}
-	
+
 	assert (regions.size() == 1);
 	return regions.front ();
 }
@@ -1297,7 +1297,7 @@ EditorRegions::clear ()
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore> (0));
 	_model->clear ();
 	_display.set_model (_model);
-	
+
 	/* Clean up the maps */
 	region_row_map.clear();
 	parent_regions_sources_map.clear();
@@ -1325,15 +1325,15 @@ EditorRegions::get_single_selection ()
 	return (*iter)[_columns.region];
 }
 
-void 
+void
 EditorRegions::freeze_tree_model (){
- 
+
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	_model->set_sort_column (-2, SORT_ASCENDING); //Disable sorting to gain performance
 
 }
 
-void 
+void
 EditorRegions::thaw_tree_model (){
 
 	_model->set_sort_column (0, SORT_ASCENDING); // renabale sorting
@@ -1422,7 +1422,7 @@ EditorRegions::set_state (const XMLNode & node)
 	}
 
 	XMLProperty const * p = node.property (X_("sort-type"));
-	
+
 	if (p) {
 		Editing::RegionListSortType const t = static_cast<Editing::RegionListSortType> (string_2_enum (p->value(), _sort_type));
 
@@ -1436,21 +1436,21 @@ EditorRegions::set_state (const XMLNode & node)
 	}
 
 	p = node.property (X_("sort-ascending"));
-	
+
 	if (p) {
 		bool const yn = string_is_affirmative (p->value ());
 		SortType old_sort_type;
 		int old_sort_column;
 
 		_model->get_sort_column_id (old_sort_column, old_sort_type);
-		
+
 		if (old_sort_type != (yn ? SORT_ASCENDING : SORT_DESCENDING)) {
 			changed = true;
 		}
 
 		reset_sort_direction (yn);
 		RefPtr<Action> act;
-		
+
 		if (yn) {
 			act = ActionManager::get_action (X_("RegionList"), X_("SortAscending"));
 		} else {
@@ -1467,7 +1467,7 @@ EditorRegions::set_state (const XMLNode & node)
 		if (expanded != yn) {
 			changed = true;
 		}
-		
+
 		set_full (yn);
 		toggle_full_action()->set_active (yn);
 	}
@@ -1482,7 +1482,7 @@ EditorRegions::set_state (const XMLNode & node)
 			changed = true;
 		}
 	}
-        
+
 	if (changed) {
 		redisplay ();
 	}
@@ -1539,7 +1539,7 @@ RefPtr<Action>
 EditorRegions::hide_action () const
 {
 	return ActionManager::get_action (X_("RegionList"), X_("rlHide"));
-	
+
 }
 
 RefPtr<Action>

@@ -31,7 +31,7 @@ namespace ARDOUR {
 
 class IOSelector;
 
-class ReturnUI : public Gtk::HBox 
+class ReturnUI : public Gtk::HBox
 {
   public:
 	ReturnUI (Gtk::Window *,boost::shared_ptr<ARDOUR::Return>, ARDOUR::Session*);

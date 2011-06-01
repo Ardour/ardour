@@ -80,7 +80,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	boost::shared_ptr<PBD::Controllable> get_controllable();
 
 	void on_size_allocate (Gtk::Allocation &);
-        
+
 	static void setup_slider_pix ();
 
   private:

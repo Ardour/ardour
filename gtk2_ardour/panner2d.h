@@ -86,18 +86,18 @@ class Panner2d : public Gtk::DrawingArea
 		PBD::AngularVector position;
 		bool visible;
 		std::string text;
-                
+
 		Target (const PBD::AngularVector&, const char* txt = 0);
 		~Target ();
-                
+
 		void set_text (const char*);
 		void set_selected (bool yn) {
 			_selected = yn;
 		}
-		bool selected() const { 
+		bool selected() const {
 			return _selected;
 		}
-                
+
 	private:
 		bool _selected;
 	};

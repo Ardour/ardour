@@ -58,7 +58,7 @@ class IOSelector : public PortMatrix
 	void setup_type ();
 	void io_changed ();
 	void io_changed_proxy ();
-	
+
 	int _other;
 	int _ours;
 	boost::shared_ptr<ARDOUR::IO> _io;

@@ -195,7 +195,7 @@ XMLNode*
 ARDOUR_UI::tearoff_settings (const char* name) const
 {
 	XMLNode* ui_node = Config->extra_xml(X_("UI"));
-        
+
 	if (ui_node) {
 		XMLNode* tearoff_node = ui_node->child (X_("Tearoffs"));
 		if (tearoff_node) {

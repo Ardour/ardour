@@ -51,7 +51,7 @@ void
 RouteGroupMenu::build (WeakRouteList const & s)
 {
 	assert (!s.empty ());
-	
+
 	using namespace Menu_Helpers;
 
 	_subject = s;
@@ -68,7 +68,7 @@ RouteGroupMenu::build (WeakRouteList const & s)
 	_inhibit_group_selected = true;
 
 	delete _menu;
-	
+
 	/* Note: don't use manage() here, otherwise if our _menu object is attached as a submenu
 	   and its parent is then destroyed, our _menu object will be deleted and we'll have no
 	   way of knowing about it.  Without manage(), when the above happens our _menu's gobject
@@ -77,7 +77,7 @@ RouteGroupMenu::build (WeakRouteList const & s)
 	_menu = new Menu;
 
 	MenuList& items = _menu->items ();
-	
+
 	items.push_back (MenuElem (_("New Group..."), sigc::mem_fun (*this, &RouteGroupMenu::new_group)));
 	items.push_back (SeparatorElem ());
 

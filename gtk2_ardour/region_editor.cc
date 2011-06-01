@@ -69,7 +69,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
         _clock_group->add (sync_offset_relative_clock);
         _clock_group->add (sync_offset_absolute_clock);
         _clock_group->add (start_clock);
-	
+
 	position_clock.set_session (_session);
 	end_clock.set_session (_session);
 	length_clock.set_session (_session);
@@ -134,15 +134,15 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
  	_table.attach (end_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	_table.attach (end_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	++_table_row;
-	
+
  	_table.attach (length_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	_table.attach (length_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	++_table_row;
-	
+
  	_table.attach (sync_relative_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
  	_table.attach (sync_offset_relative_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	++_table_row;
- 
+
  	_table.attach (sync_absolute_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
  	_table.attach (sync_offset_absolute_clock, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	++_table_row;
@@ -154,7 +154,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	_table.attach (_sources_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	_table.attach (_sources, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	++_table_row;
-	
+
 	get_vbox()->pack_start (_table, true, true);
 
 	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
@@ -407,7 +407,7 @@ RegionEditor::sync_offset_absolute_clock_changed ()
         _region->clear_changes ();
 	_region->set_sync_position (sync_offset_absolute_clock.current_time());
 	_session->add_command (new StatefulDiffCommand (_region));
-	
+
 	_session->commit_reversible_command ();
 }
 
@@ -419,7 +419,7 @@ RegionEditor::sync_offset_relative_clock_changed ()
         _region->clear_changes ();
 	_region->set_sync_position (sync_offset_relative_clock.current_time() + _region->position ());
 	_session->add_command (new StatefulDiffCommand (_region));
-	
+
 	_session->commit_reversible_command ();
 }
 

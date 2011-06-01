@@ -69,7 +69,7 @@ private:
 class MeterDialog : public ArdourDialog
 {
 public:
-	
+
 	MeterDialog (ARDOUR::TempoMap&, framepos_t, const std::string & action);
 	MeterDialog (ARDOUR::MeterSection&, const std::string & action);
 

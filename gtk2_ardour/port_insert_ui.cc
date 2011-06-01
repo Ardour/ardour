@@ -58,7 +58,7 @@ PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, boost::s
         notebook.append_page (input_selector, _("Return/Input"));
 
         notebook.set_current_page (0);
-        
+
         set_spacing (12);
         pack_start (notebook, true, true);
         pack_start (latency_hbox, false, false);
@@ -76,7 +76,7 @@ PortInsertUI::update_latency_display ()
                 latency_display.set_text (_("Disconnected from audio engine"));
         } else {
                 char buf[64];
-                snprintf (buf, sizeof (buf), "%10.3lf frames %10.3lf ms", 
+                snprintf (buf, sizeof (buf), "%10.3lf frames %10.3lf ms",
                           (float)_pi->latency(), (float)_pi->latency() * 1000.0f/sample_rate);
                 latency_display.set_text(buf);
         }

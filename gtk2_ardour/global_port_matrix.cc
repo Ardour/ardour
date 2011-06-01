@@ -89,7 +89,7 @@ GlobalPortMatrix::get_state (BundleChannel c[2]) const
 	if (_session == 0) {
 		return PortMatrixNode::NOT_ASSOCIATED;
 	}
-	
+
 	Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
 	Bundle::PortList const & out_ports = c[OUT].bundle->channel_ports (c[OUT].channel);
 	if (in_ports.empty() || out_ports.empty()) {
@@ -114,11 +114,11 @@ GlobalPortMatrix::get_state (BundleChannel c[2]) const
 				if (jp == 0) {
 					return PortMatrixNode::NOT_ASSOCIATED;
 				}
-				
+
 				char const ** c = jack_port_get_all_connections (jack, jp);
 
 				char const ** p = c;
-				
+
 				while (p && *p != 0) {
 					if (strcmp (*p, j->c_str()) == 0) {
 						free (c);
@@ -185,4 +185,4 @@ GlobalPortMatrix::channel_noun () const
 {
 	return _("port");
 }
-		 
+

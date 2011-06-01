@@ -30,11 +30,11 @@ using namespace ARDOUR;
 
 ExportFilenameSelector::ExportFilenameSelector () :
 	include_label (_("Include in Filename(s):"), Gtk::ALIGN_LEFT),
-	
+
 	label_label (_("Label:"), Gtk::ALIGN_LEFT),
 	session_checkbox (_("Session Name")),
 	revision_checkbox (_("Revision:")),
-	
+
 	path_label (_("Folder:"), Gtk::ALIGN_LEFT),
 	browse_button (_("Browse"))
 {

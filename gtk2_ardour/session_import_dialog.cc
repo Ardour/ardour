@@ -97,7 +97,7 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session* target) :
 	// prompt signals XXX: problem - handlers to be in the same thread since they return values
 	ElementImporter::Rename.connect_same_thread (connections, boost::bind (&SessionImportDialog::open_rename_dialog, this, _1, _2));
 	ElementImporter::Prompt.connect_same_thread (connections, boost::bind (&SessionImportDialog::open_prompt_dialog, this, _1));
-		
+
 	// Finalize
 	show_all();
 }
@@ -112,16 +112,16 @@ SessionImportDialog::load_session (const string& filename)
                 }
 		boost::shared_ptr<AudioRegionImportHandler> region_handler (new AudioRegionImportHandler (tree, *_session));
 		boost::shared_ptr<AudioPlaylistImportHandler> pl_handler (new AudioPlaylistImportHandler (tree, *_session, *region_handler));
-		
+
 		handlers.push_back (boost::static_pointer_cast<ElementImportHandler> (region_handler));
 		handlers.push_back (boost::static_pointer_cast<ElementImportHandler> (pl_handler));
 		handlers.push_back (HandlerPtr(new UnusedAudioPlaylistImportHandler (tree, *_session, *region_handler)));
 		handlers.push_back (HandlerPtr(new AudioTrackImportHandler (tree, *_session, *pl_handler)));
 		handlers.push_back (HandlerPtr(new LocationImportHandler (tree, *_session)));
 		handlers.push_back (HandlerPtr(new TempoMapImportHandler (tree, *_session)));
-		
+
 		fill_list();
-		
+
 		if (ElementImportHandler::dirty()) {
 			// Warn user
 			string txt = _("Some elements had errors in them. Please see the log for details");

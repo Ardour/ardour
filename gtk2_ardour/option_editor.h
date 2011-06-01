@@ -155,7 +155,7 @@ public:
 	void set_sensitive (bool yn) {
 		_button->set_sensitive (yn);
 	}
-	
+
 private:
 
 	void toggled ();
@@ -351,7 +351,7 @@ public:
 
 private:
 	void db_changed ();
-	
+
 	Gtk::Adjustment _db_adjustment;
 	Gtkmm2ext::HSliderController* _db_slider;
 	Glib::RefPtr<Gdk::Pixbuf> _pix;
@@ -405,7 +405,7 @@ public:
 protected:
 
 	virtual void parameter_changed (std::string const &);
-	
+
 	ARDOUR::Configuration* _config;
 
 private:

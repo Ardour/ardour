@@ -97,9 +97,9 @@ MonoPanner::set_drag_data ()
         }
 
         double pos = position_control->get_value(); // 0..1
-        
+
         /* We show the position of the center of the image relative to the left & right.
-           This is expressed as a pair of percentage values that ranges from (100,0) 
+           This is expressed as a pair of percentage values that ranges from (100,0)
            (hard left) through (50,50) (hard center) to (0,100) (hard right).
 
            This is pretty wierd, but its the way audio engineers expect it. Just remember that
@@ -126,7 +126,7 @@ MonoPanner::on_expose_event (GdkEventExpose* ev)
 	Glib::RefPtr<Gdk::Window> win (get_window());
 	Glib::RefPtr<Gdk::GC> gc (get_style()->get_base_gc (get_state()));
         Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
-       
+
         int width, height;
         double pos = position_control->get_value (); /* 0..1 */
         uint32_t o, f, t, b, pf, po;
@@ -154,7 +154,7 @@ MonoPanner::on_expose_event (GdkEventExpose* ev)
 
         if (fmod (usable_width,2.0) == 0) {
                 /* even width, but we need odd, so that there is an exact center.
-                   So, offset cairo by 1, and reduce effective width by 1 
+                   So, offset cairo by 1, and reduce effective width by 1
                 */
                 usable_width -= 1.0;
                 context->translate (1.0, 0.0);
@@ -173,18 +173,18 @@ MonoPanner::on_expose_event (GdkEventExpose* ev)
         context->move_to ((pos_box_size/2.0) + (usable_width/2.0), 0);
         context->line_to ((pos_box_size/2.0) + (usable_width/2.0), height);
         context->stroke ();
-        
+
         /* left box */
 
-        rounded_rectangle (context, 
+        rounded_rectangle (context,
                           left - half_lr_box,
-                          half_lr_box+step_down, 
+                          half_lr_box+step_down,
                           lr_box_size, lr_box_size, corner_radius);
         context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
         context->stroke_preserve ();
         context->set_source_rgba (UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
 	context->fill ();
-        
+
         /* add text */
 
         context->move_to (
@@ -198,7 +198,7 @@ MonoPanner::on_expose_event (GdkEventExpose* ev)
 
         rounded_rectangle (context,
                            right - half_lr_box,
-                           half_lr_box+step_down, 
+                           half_lr_box+step_down,
                            lr_box_size, lr_box_size, corner_radius);
         context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
         context->stroke_preserve ();
@@ -265,7 +265,7 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
 {
         drag_start_x = ev->x;
         last_drag_x = ev->x;
-        
+
         dragging = false;
         accumulated_delta = 0;
         detented = false;
@@ -278,7 +278,7 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
                         return true;
                 }
         }
-        
+
         if (ev->button != 1) {
                 return false;
         }
@@ -291,7 +291,7 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
                         return true;
                 }
 
-                        
+
                 if (ev->x <= width/3) {
                         /* left side dbl click */
                         position_control->set_value (0);
@@ -308,7 +308,7 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
                 if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
                         /* handled by button release */
                         return true;
-                } 
+                }
 
                 dragging = true;
                 StartGesture ();
@@ -327,11 +327,11 @@ MonoPanner::on_button_release_event (GdkEventButton* ev)
         dragging = false;
         accumulated_delta = 0;
         detented = false;
-        
+
         if (drag_data_window) {
                 drag_data_window->hide ();
         }
-        
+
         if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
                 /* reset to default */
                 position_control->set_value (0.5);
@@ -348,7 +348,7 @@ MonoPanner::on_scroll_event (GdkEventScroll* ev)
         double one_degree = 1.0/180.0; // one degree as a number from 0..1, since 180 degrees is the full L/R axis
         double pv = position_control->get_value(); // 0..1.0 ; 0 = left
         double step;
-        
+
         if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
                 step = one_degree;
         } else {
@@ -383,14 +383,14 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
                 drag_data_window->set_name (X_("ContrastingPopup"));
                 drag_data_window->set_position (WIN_POS_MOUSE);
                 drag_data_window->set_decorated (false);
-                
+
                 drag_data_label = manage (new Label);
                 drag_data_label->set_use_markup (true);
 
                 drag_data_window->set_border_width (6);
                 drag_data_window->add (*drag_data_label);
                 drag_data_label->show ();
-                
+
                 Window* toplevel = dynamic_cast<Window*> (get_toplevel());
                 if (toplevel) {
                         drag_data_window->set_transient_for (*toplevel);
@@ -407,20 +407,20 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 
         int w = get_width();
         double delta = (ev->x - last_drag_x) / (double) w;
-        
+
         /* create a detent close to the center */
-        
+
         if (!detented && ARDOUR::Panner::equivalent (position_control->get_value(), 0.5)) {
                 detented = true;
                 /* snap to center */
                 position_control->set_value (0.5);
         }
-        
+
         if (detented) {
                 accumulated_delta += delta;
-                
+
                 /* have we pulled far enough to escape ? */
-                
+
                 if (fabs (accumulated_delta) >= 0.025) {
                         position_control->set_value (position_control->get_value() + accumulated_delta);
                         detented = false;
@@ -461,10 +461,10 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
                 pv += step;
                 position_control->set_value (pv);
                 break;
-        default: 
+        default:
                 return false;
         }
-                
+
         return true;
 }
 

@@ -82,7 +82,7 @@ MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataT
         button_packer_box->pack_start (stop_loading_button, false, false);
 
         button_packer_box->show_all ();
-        
+
         get_vbox()->set_spacing (6);
         get_vbox()->set_border_width (25);
         get_vbox()->set_homogeneous (false);
@@ -140,8 +140,8 @@ MissingFileDialog::add_chosen ()
 
         if (!str.empty()) {
                 str += ':';
-        } 
-        
+        }
+
         str += newdir;
 
         switch (filetype) {

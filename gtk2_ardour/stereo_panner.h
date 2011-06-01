@@ -31,7 +31,7 @@ namespace PBD {
         class Controllable;
 }
 
-namespace ARDOUR { 
+namespace ARDOUR {
         class Panner;
 }
 
@@ -80,7 +80,7 @@ class StereoPanner : public Gtk::DrawingArea
         void value_change ();
         void set_drag_data ();
 
-        struct ColorScheme { 
+        struct ColorScheme {
             uint32_t outline;
             uint32_t fill;
             uint32_t text;
@@ -88,7 +88,7 @@ class StereoPanner : public Gtk::DrawingArea
             uint32_t rule;
         };
 
-        enum State { 
+        enum State {
                 Normal,
                 Mono,
                 Inverted

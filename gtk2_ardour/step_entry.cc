@@ -69,7 +69,7 @@ StepEntry::StepEntry (StepEditor& seditor)
 	, rest_button (_("rest"))
 	, grid_rest_button (_("g-rest"))
 	, back_button (_("back"))
-	, channel_adjustment (1, 1, 16, 1, 4) 
+	, channel_adjustment (1, 1, 16, 1, 4)
 	, channel_spinner (channel_adjustment)
         , octave_adjustment (4, 0, 10, 1, 4) // start in octave 4
         , octave_spinner (octave_adjustment)
@@ -97,7 +97,7 @@ StepEntry::StepEntry (StepEditor& seditor)
 	*/
 
 	uint16_t chn_mask = se->channel_selector().get_selected_channels();
-        
+
 	for (uint32_t i = 0; i < 16; ++i) {
 		if (chn_mask & (1<<i)) {
 			channel_adjustment.set_value (i+1);
@@ -376,7 +376,7 @@ StepEntry::StepEntry (StepEditor& seditor)
         act = myactions.find_action ("StepEditing/sustain");
         gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (sustain_button.gobj()), false);
         gtk_activatable_set_related_action (GTK_ACTIVATABLE (sustain_button.gobj()), act->gobj());
-                
+
 	upper_box.set_spacing (6);
 	upper_box.pack_start (chord_button, false, false);
 	upper_box.pack_start (note_length_box, false, false, 12);
@@ -445,7 +445,7 @@ StepEntry::StepEntry (StepEditor& seditor)
 
 	g_signal_connect(G_OBJECT(_piano), "note-off", G_CALLBACK(_note_off_event_handler), this);
 	g_signal_connect(G_OBJECT(_piano), "rest", G_CALLBACK(_rest_event_handler), this);
-        
+
 	program_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::program_click));
 	bank_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::bank_click));
 	beat_resync_button.signal_clicked().connect (sigc::mem_fun (*this, &StepEntry::beat_resync_click));
@@ -461,7 +461,7 @@ StepEntry::StepEntry (StepEditor& seditor)
 	get_vbox()->add (packer);
 
 	/* initial settings: quarter note and mezzo forte */
-	
+
         act = myactions.find_action ("StepEditing/note-length-quarter");
 	RefPtr<RadioAction> r = RefPtr<RadioAction>::cast_dynamic (act);
 	assert (r);
@@ -495,7 +495,7 @@ StepEntry::on_key_press_event (GdkEventKey* ev)
         /* focus widget gets first shot, then bindings, otherwise
            forward to main window
         */
-        
+
 	if (!gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
                 KeyboardKey k (ev->state, ev->keyval);
 
@@ -517,7 +517,7 @@ StepEntry::on_key_release_event (GdkEventKey* ev)
                         return true;
                 }
 	}
-        
+
         /* don't forward releases */
 
         return true;
@@ -533,7 +533,7 @@ Evoral::MusicalTime
 StepEntry::note_length ()
 {
         Evoral::MusicalTime base_time = 4.0 / (Evoral::MusicalTime) length_divisor_adjustment.get_value();
-        
+
         RefPtr<Action> act = myactions.find_action ("StepEditing/toggle-triplet");
         RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
         bool triplets = tact->get_active ();
@@ -558,7 +558,7 @@ StepEntry::note_velocity () const
         return (Evoral::MusicalTime) velocity_adjustment.get_value();
 }
 
-uint8_t 
+uint8_t
 StepEntry::note_channel() const
 {
 	return channel_adjustment.get_value() - 1;
@@ -640,11 +640,11 @@ StepEntry::register_actions ()
 
         RadioAction::Group note_length_group;
 
-        myactions.register_radio_action ("StepEditing", note_length_group, "note-length-whole", 
+        myactions.register_radio_action ("StepEditing", note_length_group, "note-length-whole",
                                          _("Set Note Length to Whole"), sigc::mem_fun (*this, &StepEntry::note_length_change), 1);
-        myactions.register_radio_action ("StepEditing", note_length_group, "note-length-half", 
+        myactions.register_radio_action ("StepEditing", note_length_group, "note-length-half",
                                          _("Set Note Length to 1/2"), sigc::mem_fun (*this, &StepEntry::note_length_change), 2);
-        myactions.register_radio_action ("StepEditing", note_length_group, "note-length-third", 
+        myactions.register_radio_action ("StepEditing", note_length_group, "note-length-third",
                                          _("Set Note Length to 1/3"), sigc::mem_fun (*this, &StepEntry::note_length_change), 3);
         myactions.register_radio_action ("StepEditing", note_length_group, "note-length-quarter",
                                          _("Set Note Length to 1/4"), sigc::mem_fun (*this, &StepEntry::note_length_change), 4);
@@ -681,13 +681,13 @@ StepEntry::register_actions ()
 
         RadioAction::Group dot_group;
 
-        myactions.register_radio_action ("StepEditing", dot_group, "no-dotted", _("No Dotted Notes"), 
+        myactions.register_radio_action ("StepEditing", dot_group, "no-dotted", _("No Dotted Notes"),
                                          sigc::mem_fun (*this, &StepEntry::dot_change), 0);
-        myactions.register_radio_action ("StepEditing", dot_group, "toggle-dotted", _("Toggled Dotted Notes"), 
+        myactions.register_radio_action ("StepEditing", dot_group, "toggle-dotted", _("Toggled Dotted Notes"),
                                          sigc::mem_fun (*this, &StepEntry::dot_change), 1);
-        myactions.register_radio_action ("StepEditing", dot_group, "toggle-double-dotted", _("Toggled Double-Dotted Notes"), 
+        myactions.register_radio_action ("StepEditing", dot_group, "toggle-double-dotted", _("Toggled Double-Dotted Notes"),
                                          sigc::mem_fun (*this, &StepEntry::dot_change), 2);
-        myactions.register_radio_action ("StepEditing", dot_group, "toggle-triple-dotted", _("Toggled Triple-Dotted Notes"), 
+        myactions.register_radio_action ("StepEditing", dot_group, "toggle-triple-dotted", _("Toggled Triple-Dotted Notes"),
                                          sigc::mem_fun (*this, &StepEntry::dot_change), 3);
 
         myactions.register_toggle_action ("StepEditing", "toggle-chord", _("Toggle Chord Entry"),
@@ -754,11 +754,11 @@ StepEntry::dot_value_change ()
         for (vector<const char*>::iterator i = dot_actions.begin(); i != dot_actions.end(); ++i) {
 
                 act = myactions.find_action (*i);
-                
+
                 if (act) {
                         ract = RefPtr<RadioAction>::cast_dynamic (act);
 
-                        if (ract) { 
+                        if (ract) {
                                 if (ract->property_value() == val) {
                                         ract->set_active (true);
                                         inconsistent = false;
@@ -767,7 +767,7 @@ StepEntry::dot_value_change ()
                         }
                 }
         }
-        
+
         dot1_button.set_inconsistent (inconsistent);
         dot2_button.set_inconsistent (inconsistent);
         dot3_button.set_inconsistent (inconsistent);
@@ -881,7 +881,7 @@ StepEntry::note_length_change (GtkAction* act)
            becaome "active". so ... only bother to actually change the value when this
            is called for the "active" action.
         */
-        
+
         if (gtk_toggle_action_get_active (GTK_TOGGLE_ACTION(act))) {
                 gint v = gtk_radio_action_get_current_value (GTK_RADIO_ACTION (act));
                 length_divisor_adjustment.set_value (v);
@@ -898,7 +898,7 @@ StepEntry::note_velocity_change (GtkAction* act)
            becaome "active". so ... only bother to actually change the value when this
            is called for the "active" action.
         */
-        
+
         if (gtk_toggle_action_get_active (GTK_TOGGLE_ACTION(act))) {
                 gint v = gtk_radio_action_get_current_value (GTK_RADIO_ACTION (act));
                 velocity_adjustment.set_value (v);
@@ -926,11 +926,11 @@ StepEntry::velocity_value_change ()
         for (vector<const char*>::iterator i = velocity_actions.begin(); i != velocity_actions.end(); ++i) {
 
                 act = myactions.find_action (*i);
-                
+
                 if (act) {
                         ract = RefPtr<RadioAction>::cast_dynamic (act);
 
-                        if (ract) { 
+                        if (ract) {
                                 if (ract->property_value() == val) {
                                         ract->set_active (true);
                                         inconsistent = false;
@@ -970,11 +970,11 @@ StepEntry::length_value_change ()
         for (vector<const char*>::iterator i = length_actions.begin(); i != length_actions.end(); ++i) {
 
                 act = myactions.find_action (*i);
-                
+
                 if (act) {
                         ract = RefPtr<RadioAction>::cast_dynamic (act);
 
-                        if (ract) { 
+                        if (ract) {
                                 if (ract->property_value() == val) {
                                         ract->set_active (true);
                                         inconsistent = false;
@@ -1000,7 +1000,7 @@ StepEntry::radio_button_press (GdkEventButton* ev)
 {
         if (ev->button == 1) {
                 return true;
-        } 
+        }
 
         return false;
 }
@@ -1010,13 +1010,13 @@ StepEntry::radio_button_release (GdkEventButton* ev, RadioButton* btn, int v)
 {
         if (ev->button == 1) {
                 GtkAction* act = gtk_activatable_get_related_action (GTK_ACTIVATABLE (btn->gobj()));
-                
+
                 if (act) {
                         gtk_radio_action_set_current_value (GTK_RADIO_ACTION(act), v);
                 }
-                
+
                 return true;
-        } 
+        }
 
         return false;
 }
@@ -1113,7 +1113,7 @@ StepEntry::next_note_velocity ()
         } else if (l < 127) {
                 l = 127;
         }
-        
+
         velocity_adjustment.set_value (l);
 }
 
@@ -1139,7 +1139,7 @@ StepEntry::prev_note_velocity ()
         } else {
                 l = 1;
         }
-        
+
         velocity_adjustment.set_value (l);
 }
 

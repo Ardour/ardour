@@ -41,7 +41,7 @@ EditorLocations::set_session (ARDOUR::Session* s)
 }
 
 Widget&
-EditorLocations::widget() 
+EditorLocations::widget()
 {
 	return _scroller;
 }

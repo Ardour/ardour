@@ -59,7 +59,7 @@ BundleEditorMatrix::setup_ports (int dim)
 		/* when we gather, allow the matrix to contain bundles with duplicate port sets,
 		   otherwise in some cases the basic system IO ports may be hidden, making
 		   the bundle editor useless */
-		
+
 		_ports[OTHER].gather (_session, DataType::NIL, _bundle->ports_are_inputs(), true);
 		_ports[OTHER].remove_bundle (_bundle);
 		_ports[OTHER].resume_signals ();
@@ -86,7 +86,7 @@ BundleEditorMatrix::get_state (BundleChannel c[2]) const
 	if (pl.empty ()) {
 		return PortMatrixNode::NOT_ASSOCIATED;
 	}
-	
+
 	for (Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 		if (!c[OURS].bundle->port_attached_to_channel (c[OURS].channel, *i)) {
 			return PortMatrixNode::NOT_ASSOCIATED;
@@ -401,7 +401,7 @@ BundleManager::row_activated (Gtk::TreeModel::Path const & p, Gtk::TreeViewColum
 	if (!i) {
 		return;
 	}
-	
+
 	boost::shared_ptr<UserBundle> b = (*i)[_list_model_columns.bundle];
 	BundleEditor e (_session, b);
 	e.run ();

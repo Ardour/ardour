@@ -427,14 +427,14 @@ EngineControl::build_command_line (vector<string>& cmd)
 	/* now jackd arguments */
 
 	str = timeout_combo.get_active_text ();
-	
+
 	if (str != _("Ignore")) {
 
 		double secs = 0;
 		uint32_t msecs;
 		secs = atof (str);
 		msecs = (uint32_t) floor (secs * 1000.0);
-		
+
 		if (msecs > 0) {
 			cmd.push_back ("-t");
 			cmd.push_back (to_string (msecs, std::dec));
@@ -473,7 +473,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 	cmd.push_back ("-d");
 
 	driver = driver_combo.get_active_text ();
-	
+
 	if (driver == X_("ALSA")) {
 		using_alsa = true;
 		cmd.push_back ("alsa");
@@ -515,7 +515,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 			cmd.push_back ("-C");
 			cmd.push_back (input_device);
-			
+
 			cmd.push_back ("-P");
 			cmd.push_back (output_device);
 
@@ -536,7 +536,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 	cmd.push_back ("-p");
 	cmd.push_back (period_size_combo.get_active_text());
-	
+
 	if (using_alsa || using_ffado || using_coreaudio) {
 
 		double val = input_latency_adjustment.get_value();
@@ -547,7 +547,7 @@ EngineControl::build_command_line (vector<string>& cmd)
                 }
 
                 val = output_latency_adjustment.get_value();
-                
+
 		if (val) {
                         cmd.push_back ("-O");
                         cmd.push_back (to_string ((uint32_t) val, std::dec));
@@ -1243,7 +1243,7 @@ EngineControl::set_state (const XMLNode& root)
 
 	if ( (child = root.child ("driver"))){
 		prop = child->property("val");
-		
+
 		if (prop && (prop->value() == "Dummy") ) {
 			using_dummy = true;
 		}
@@ -1263,15 +1263,15 @@ EngineControl::set_state (const XMLNode& root)
 
 		if (!prop || prop->value().empty()) {
 
-			if (((using_dummy || using_ffado) 
-				&& ( child->name() == "interface" 
-					|| child->name() == "inputdevice" 
-					|| child->name() == "outputdevice")) 
+			if (((using_dummy || using_ffado)
+				&& ( child->name() == "interface"
+					|| child->name() == "inputdevice"
+					|| child->name() == "outputdevice"))
 				|| child->name() == "timeout")
 			{
 				continue;
 			}
-			
+
 			error << string_compose (_("AudioSetup value for %1 is missing data"), child->name()) << endmsg;
 			continue;
 		}
@@ -1338,13 +1338,13 @@ EngineControl::set_state (const XMLNode& root)
 		} else if (child->name() == "periodsize") {
 			period_size_combo.set_active_text(strval);
 		} else if (child->name() == "serverpath") {
-                        
+
                         /* only attempt to set this if we have bothered to look
                            up server names already. otherwise this is all
                            redundant (actually, all of this dialog/widget
                            is redundant in that case ...)
                         */
-                        
+
                         if (!server_strings.empty()) {
                                 /* do not allow us to use a server path that doesn't
                                    exist on this system. this handles cases where
@@ -1365,7 +1365,7 @@ EngineControl::set_state (const XMLNode& root)
                                                 << endmsg;
                                 }
                         }
-                        
+
 		} else if (child->name() == "driver") {
 			driver_combo.set_active_text(strval);
 		} else if (child->name() == "interface") {

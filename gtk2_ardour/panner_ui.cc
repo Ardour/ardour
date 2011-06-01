@@ -227,7 +227,7 @@ PannerUI::setup_pan ()
 {
 	if (!_panner) {
 		return;
-	} 
+	}
 
 	uint32_t const nouts = _panner->out().n_audio();
 	uint32_t const nins = _panner->in().n_audio();
@@ -271,36 +271,36 @@ PannerUI::setup_pan ()
                         boost::shared_ptr<AutomationControl> ac;
 
                         ac = pannable->pan_azimuth_control;
-                        _stereo_panner->StartPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
+                        _stereo_panner->StartPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
                                                                                   boost::weak_ptr<AutomationControl> (ac)));
-                        _stereo_panner->StopPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
+                        _stereo_panner->StopPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
                                                                                  boost::weak_ptr<AutomationControl>(ac)));
-                        
+
                         ac = pannable->pan_width_control;
-                        _stereo_panner->StartWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
+                        _stereo_panner->StartWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
                                                                                boost::weak_ptr<AutomationControl> (ac)));
-                        _stereo_panner->StopWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
+                        _stereo_panner->StopWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
                                                                               boost::weak_ptr<AutomationControl>(ac)));
                         _stereo_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
-                        
+
                 } else if (nins == 1) {
                         /* 1-in/2out */
-                        
+
                         MonoPanner* mp;
                         boost::shared_ptr<Pannable> pannable = _panner->pannable();
                         boost::shared_ptr<AutomationControl> ac = pannable->pan_azimuth_control;
-                        
+
                         mp = new MonoPanner (ac);
-                        
-                        mp->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch), 
+
+                        mp->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
                                                                       boost::weak_ptr<AutomationControl> (ac)));
-                        mp->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch), 
+                        mp->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
                                                              boost::weak_ptr<AutomationControl>(ac)));
-                        
+
                         mp->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
-                        
+
                         mp->set_size_request (-1, pan_bar_height);
-                        
+
                         update_pan_sensitive ();
                         pan_vbox.pack_start (*mp, false, false);
 
@@ -516,7 +516,7 @@ PannerUI::pan_automation_state_changed ()
 	}
 
 	bool x = (pannable->automation_state() != Off);
-        
+
 	if (pan_automation_state_button.get_active() != x) {
                 ignore_toggle = true;
 		pan_automation_state_button.set_active (x);
@@ -524,11 +524,11 @@ PannerUI::pan_automation_state_changed ()
 	}
 
 	update_pan_sensitive ();
-        
+
 	/* start watching automation so that things move */
-        
+
 	pan_watching.disconnect();
-        
+
 	if (x) {
 		pan_watching = ARDOUR_UI::RapidScreenUpdate.connect (sigc::mem_fun (*this, &PannerUI::effective_pan_display));
 	}

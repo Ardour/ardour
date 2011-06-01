@@ -214,7 +214,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 		uint32_t how_many,
 		std::string const & name_template
 		) {
-		
+
 		session_add_audio_route (true, input_channels, output_channels, mode, route_group, how_many, name_template);
 	}
 
@@ -225,7 +225,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 		uint32_t how_many,
 		std::string const & name_template
 		) {
-		
+
 		session_add_audio_route (false, input_channels, output_channels, ARDOUR::Normal, route_group, how_many, name_template);
 	}
 
@@ -234,7 +234,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 		uint32_t how_many,
 		std::string const & name_template
 		) {
-		
+
 		session_add_midi_route (true, route_group, how_many, name_template);
 	}
 
@@ -611,7 +611,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	/* Keyboard Handling */
 
 	ArdourKeyboard* keyboard;
-	
+
 	/* Keymap handling */
 
 	void install_actions ();

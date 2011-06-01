@@ -946,19 +946,19 @@ ArdourStartup::setup_existing_session_page ()
 		recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
 		recent_session_display.set_headers_visible (false);
 		recent_session_display.get_selection()->set_mode (SELECTION_BROWSE);
-		
+
 		recent_session_display.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ArdourStartup::recent_session_row_selected));
-		
+
 		recent_scroller.add (recent_session_display);
 		recent_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 		recent_scroller.set_shadow_type	(Gtk::SHADOW_IN);
-		
+
 		recent_session_display.show();
-		
+
 		recent_scroller.show();
 		int cnt = redisplay_recent_sessions ();
 		recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &ArdourStartup::recent_row_activated));
-		
+
 		if (cnt > 4) {
 			recent_scroller.set_size_request (-1, 300);
 		}
@@ -968,11 +968,11 @@ ArdourStartup::setup_existing_session_page ()
 
 		existing_session_chooser.set_title (_("Select session file"));
 		existing_session_chooser.signal_file_set().connect (sigc::mem_fun (*this, &ArdourStartup::existing_session_selected));
-		
+
 #ifdef GTKOSX
 		existing_session_chooser.add_shortcut_folder ("/Volumes");
 #endif
-		
+
 		HBox* hbox = manage (new HBox);
 		hbox->set_spacing (4);
 		hbox->pack_start (*manage (new Label (_("Browse:"))), PACK_SHRINK);
@@ -980,7 +980,7 @@ ArdourStartup::setup_existing_session_page ()
 		session_existing_vbox.pack_start (*hbox, false, false);
 		hbox->show_all ();
 	}
-	
+
 	session_existing_vbox.show_all ();
 	session_hbox.pack_start (session_existing_vbox, true, true);
 

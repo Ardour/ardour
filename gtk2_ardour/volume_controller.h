@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1998-2007 Paul Davis 
+    Copyright (C) 1998-2007 Paul Davis
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -47,6 +47,6 @@ class VolumeController : public Gtkmm2ext::MotionFeedback
 	void controllable_value_changed ();
 };
 
-#endif // __gtk_ardour_vol_controller_h__		
+#endif // __gtk_ardour_vol_controller_h__
 
 

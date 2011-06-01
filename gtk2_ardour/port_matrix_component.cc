@@ -155,17 +155,17 @@ PortMatrixComponent::channel_to_position (ARDOUR::BundleChannel bc, boost::share
 		if ((*i)->bundle == bc.bundle) {
 
 			/* found the bundle */
-			
+
 			if (_matrix->show_only_bundles()) {
 				return p;
 			} else {
 				return p + bc.channel;
 			}
-			
+
 		}
 
 		/* move past this bundle */
-		
+
 		if (_matrix->show_only_bundles()) {
 			p += 1;
 		} else {
@@ -181,30 +181,30 @@ ARDOUR::BundleChannel
 PortMatrixComponent::position_to_channel (double p, double, boost::shared_ptr<const PortGroup> group) const
 {
 	p /= grid_spacing ();
-	
+
 	PortGroup::BundleList const & bundles = group->bundles ();
 	for (PortGroup::BundleList::const_iterator j = bundles.begin(); j != bundles.end(); ++j) {
 
 		if (_matrix->show_only_bundles()) {
-			
+
 			if (p < 1) {
 				return ARDOUR::BundleChannel ((*j)->bundle, -1);
 			} else {
 				p -= 1;
 			}
-			
+
 		} else {
-			
+
 			uint32_t const s = _matrix->count_of_our_type ((*j)->bundle->nchannels());
 			if (p < s) {
 				return ARDOUR::BundleChannel ((*j)->bundle, p);
 			} else {
 				p -= s;
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	return ARDOUR::BundleChannel (boost::shared_ptr<ARDOUR::Bundle> (), -1);
 }

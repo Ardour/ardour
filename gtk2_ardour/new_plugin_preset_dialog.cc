@@ -60,7 +60,7 @@ NewPluginPresetDialog::setup_sensitivity ()
 		_add->set_sensitive (false);
 		return;
 	}
-		
+
 	vector<ARDOUR::Plugin::PresetRecord>::const_iterator i = _presets.begin ();
 	while (i != _presets.end() && i->label != _name.get_text()) {
 		++i;

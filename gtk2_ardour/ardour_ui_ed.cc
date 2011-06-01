@@ -161,7 +161,7 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_action (main_actions, X_("ExportAudio"), _("Export To Audio File(s)..."),  sigc::mem_fun (*editor, &PublicEditor::export_audio));
 	ActionManager::session_sensitive_actions.push_back (act);
-	
+
 	act = ActionManager::register_action (main_actions, X_("StemExport"), _("Stem export..."),  sigc::mem_fun (*editor, &PublicEditor::stem_export));
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -616,7 +616,7 @@ ARDOUR_UI::big_clock_realized ()
 
 	Pango::FontDescription fd (big_clock.get_style()->get_font());
 	original_big_clock_font_size = fd.get_size ();
-        
+
 	if (!fd.get_size_is_absolute ()) {
 		original_big_clock_font_size /= PANGO_SCALE;
 	}
@@ -661,7 +661,7 @@ ARDOUR_UI::idle_big_clock_text_resizer (int, int)
 
 	win->get_geometry (x, y, w, h, d);
 
-	double scale  = min (((double) w / (double) original_big_clock_width), 
+	double scale  = min (((double) w / (double) original_big_clock_width),
 	                     ((double) h / (double) original_big_clock_height));
 
 	int size = (int) lrintf (original_big_clock_font_size * scale);
@@ -671,14 +671,14 @@ ARDOUR_UI::idle_big_clock_text_resizer (int, int)
 		string family = fd.get_family();
 		char buf[family.length()+16];
 		snprintf (buf, family.length()+16, "%s %d", family.c_str(), size);
-                
-		try { 
+
+		try {
 			Pango::FontDescription fd (buf);
 			Glib::RefPtr<Gtk::RcStyle> rcstyle = big_clock.get_modifier_style ();
 			rcstyle->set_font (fd);
 			big_clock.modify_style (rcstyle);
-		} 
-                
+		}
+
 		catch (...) {
 			/* oh well, do nothing */
 		}
@@ -709,7 +709,7 @@ ARDOUR_UI::save_ardour_state ()
 			window_node->add_child_nocopy (*((*i)->get_state ()));
 		}
 	}
-        
+
 	/* tearoffs */
 
 	XMLNode* tearoff_node = new XMLNode (X_("Tearoffs"));
@@ -718,20 +718,20 @@ ARDOUR_UI::save_ardour_state ()
 		XMLNode* t = new XMLNode (X_("transport"));
 		transport_tearoff->add_state (*t);
 		tearoff_node->add_child_nocopy (*t);
-	} 
+	}
 
 	if (mixer && mixer->monitor_section()) {
 		XMLNode* t = new XMLNode (X_("monitor-section"));
 		mixer->monitor_section()->tearoff().add_state (*t);
 		tearoff_node->add_child_nocopy (*t);
-	} 
+	}
 
 	if (editor && editor->mouse_mode_tearoff()) {
 		XMLNode* t = new XMLNode (X_("mouse-mode"));
 		editor->mouse_mode_tearoff ()->add_state (*t);
 		tearoff_node->add_child_nocopy (*t);
-	} 
-        
+	}
+
 	window_node->add_child_nocopy (*tearoff_node);
 
 	Config->add_extra_xml (*window_node);
@@ -760,7 +760,7 @@ void
 ARDOUR_UI::toggle_global_port_matrix (ARDOUR::DataType t)
 {
 	std::string const action = string_compose ("toggle-%1-connection-manager", t.to_string ());
-	
+
 	if (_global_port_matrix[t]->get() == 0) {
 		_global_port_matrix[t]->set (new GlobalPortMatrixWindow (_session, t));
 		_global_port_matrix[t]->get()->signal_unmap().connect(sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), string_compose (X_("<Actions>/Common/%1"), action)));

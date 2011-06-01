@@ -109,7 +109,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	}
 
 	if (_route->panner()) {
-		_route->panner_shell()->Changed.connect (*this, invalidator (*this), 
+		_route->panner_shell()->Changed.connect (*this, invalidator (*this),
                                                          boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
 	}
 
@@ -202,7 +202,7 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 		ensure_pan_views (show);
 
 	} else if (param.type() == PluginAutomation) {
-                
+
 		/* handled elsewhere */
 
 	} else {
@@ -241,8 +241,8 @@ AudioTimeAxisView::ensure_pan_views (bool show)
 
 			boost::shared_ptr<AutomationTimeAxisView> t (
 				new AutomationTimeAxisView (_session,
-							    _route, 
-                                                            _route->pannable(), 
+							    _route,
+                                                            _route->pannable(),
                                                             pan_control,
 							    pan_control->parameter (),
 							    _editor,
@@ -301,7 +301,7 @@ AudioTimeAxisView::update_pan_track_visibility ()
 				(*i)->hide ();
 				(*i)->get_state_node()->add_property ("shown", X_("no"));
 			}
-			
+
 			/* now trigger a redisplay */
 			if (!no_redraw) {
 				_route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
@@ -316,13 +316,13 @@ AudioTimeAxisView::show_all_automation (bool apply_to_selection)
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_audio_time_axis (boost::bind (&AudioTimeAxisView::show_all_automation, _1, false));
 	} else {
-		
+
 		no_redraw = true;
-		
+
 		RouteTimeAxisView::show_all_automation ();
 
 		no_redraw = false;
-		
+
 		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
 }
@@ -334,11 +334,11 @@ AudioTimeAxisView::show_existing_automation (bool apply_to_selection)
 		_editor.get_selection().tracks.foreach_audio_time_axis (boost::bind (&AudioTimeAxisView::show_existing_automation, _1, false));
 	} else {
 		no_redraw = true;
-		
+
 		RouteTimeAxisView::show_existing_automation ();
-		
+
 		no_redraw = false;
-		
+
 		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
 }
@@ -350,9 +350,9 @@ AudioTimeAxisView::hide_all_automation (bool apply_to_selection)
 		_editor.get_selection().tracks.foreach_audio_time_axis (boost::bind (&AudioTimeAxisView::hide_all_automation, _1, false));
 	} else {
 		no_redraw = true;
-		
+
 		RouteTimeAxisView::hide_all_automation();
-		
+
 		no_redraw = false;
 		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
@@ -479,7 +479,7 @@ AudioTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> w
 	   as its automation lane can be accessed using the special "Fader" menu
 	   option
 	*/
-	
+
 	boost::shared_ptr<Processor> p = wp.lock ();
 	if (!p) {
 		return;

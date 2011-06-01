@@ -161,7 +161,7 @@ LED::set_colors_from_style ()
 {
         RefPtr<Style> style = get_style();
         Color c;
-        
+
         switch (_visual_state) {
         case 0:
                 c = style->get_fg (STATE_NORMAL);
@@ -170,10 +170,10 @@ LED::set_colors_from_style ()
                 c = style->get_fg (STATE_ACTIVE);
                 break;
         }
-        
+
         _red = c.get_red_p ();
         _green = c.get_green_p ();
         _blue = c.get_blue_p ();
-        
+
         set_dirty ();
 }

@@ -58,7 +58,7 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void set_number (int);
 	void focus_name();
         void set_clock_group (ClockGroup&);
-        
+
 	sigc::signal<void,ARDOUR::Location*> remove_requested;
 	sigc::signal<void> redraw_ranges;
 
@@ -148,7 +148,7 @@ class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
   public:
 	LocationUI ();
 	~LocationUI ();
-	
+
 	void set_session (ARDOUR::Session *);
         void set_clock_mode (AudioClock::Mode);
 

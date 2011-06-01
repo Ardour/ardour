@@ -130,7 +130,7 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	_event_box.show ();
 	_name.show ();
 	_active.show ();
-	
+
 	_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
 	_processor->PropertyChanged.connect (name_connection, invalidator (*this), ui_bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
 }
@@ -211,7 +211,7 @@ ProcessorEntry::setup_visuals ()
 		break;
 	}
 }
-	
+
 
 boost::shared_ptr<Processor>
 ProcessorEntry::processor () const
@@ -260,18 +260,18 @@ ProcessorEntry::name () const
 {
 	boost::shared_ptr<Send> send;
 	string name_display;
-	
+
 	if ((send = boost::dynamic_pointer_cast<Send> (_processor)) != 0 &&
 	    !boost::dynamic_pointer_cast<InternalSend>(_processor)) {
-		
+
 		name_display += '>';
-		
+
 		/* grab the send name out of its overall name */
-		
+
 		string::size_type lbracket, rbracket;
 		lbracket = send->name().find ('[');
 		rbracket = send->name().find (']');
-		
+
 		switch (_width) {
 		case Wide:
 			name_display += send->name().substr (lbracket+1, lbracket-rbracket-1);
@@ -280,9 +280,9 @@ ProcessorEntry::name () const
 			name_display += PBD::short_version (send->name().substr (lbracket+1, lbracket-rbracket-1), 4);
 			break;
 		}
-		
+
 	} else {
-		
+
 		switch (_width) {
 		case Wide:
 			name_display += _processor->display_name();
@@ -291,9 +291,9 @@ ProcessorEntry::name () const
 			name_display += PBD::short_version (_processor->display_name(), 5);
 			break;
 		}
-		
+
 	}
-	
+
 	return name_display;
 }
 
@@ -327,7 +327,7 @@ void
 SendProcessorEntry::show_gain ()
 {
 	ENSURE_GUI_THREAD (*this, &SendProcessorEntry::show_gain)
-	
+
 	float const value = gain_to_slider_position (_send->amp()->gain ());
 
 	if (_adjustment.get_value() != value) {
@@ -423,7 +423,7 @@ PluginInsertProcessorEntry::SplittingIcon::on_expose_event (GdkEventExpose* ev)
 
 	Gdk::Color const bg = get_style()->get_bg (STATE_NORMAL);
 	cairo_set_source_rgb (cr, bg.get_red_p (), bg.get_green_p (), bg.get_blue_p ());
-	
+
 	cairo_rectangle (cr, 0, 0, width, height);
 	cairo_fill (cr);
 
@@ -500,7 +500,7 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 	if (_route == r) {
 		return;
 	}
-	
+
 	_route_connections.drop_connections();
 
 	/* new route: any existing block on processor redisplay must be meaningless */
@@ -510,11 +510,11 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 	_route->processors_changed.connect (
 		_route_connections, invalidator (*this), ui_bind (&ProcessorBox::route_processors_changed, this, _1), gui_context()
 		);
-	
+
 	_route->DropReferences.connect (
 		_route_connections, invalidator (*this), boost::bind (&ProcessorBox::route_going_away, this), gui_context()
 		);
-	
+
 	_route->PropertyChanged.connect (
 		_route_connections, invalidator (*this), ui_bind (&ProcessorBox::route_property_changed, this, _1), gui_context()
 		);
@@ -577,7 +577,7 @@ ProcessorBox::set_width (Width w)
 	if (_width == w) {
 		return;
 	}
-	
+
 	_width = w;
 
 	list<ProcessorEntry*> children = processor_display.children ();
@@ -722,7 +722,7 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			processor_display.select_all ();
 			ret = true;
-		} 
+		}
 		break;
 
 	case GDK_c:
@@ -792,7 +792,7 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 	if (child) {
 		processor = child->processor ();
 	}
-	
+
 	int ret = false;
 	bool selected = processor_display.selected (child);
 
@@ -825,7 +825,7 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev, ProcessorEntry
 	if (child) {
 		processor = child->processor ();
 	}
-	
+
 	int ret = false;
 
 	if (processor && Keyboard::is_delete_event (ev)) {
@@ -1144,7 +1144,7 @@ ProcessorBox::redisplay_processors ()
 	for (list<ProcessorWindowProxy*>::iterator i = _processor_window_proxies.begin(); i != _processor_window_proxies.end(); ++i) {
 		(*i)->marked = false;
 	}
-		
+
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::maybe_add_processor_to_ui_list));
 
 	/* trim dead wood from the processor window proxy list */
@@ -1181,7 +1181,7 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 	while (i != _processor_window_proxies.end()) {
 
 		boost::shared_ptr<Processor> t = (*i)->processor().lock ();
-		
+
 		if (p == t) {
 			/* this processor is already on the list; done */
 			(*i)->marked = true;
@@ -1203,19 +1203,19 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 	} else {
 		loc = X_("P");
 	}
-	
+
 	ProcessorWindowProxy* wp = new ProcessorWindowProxy (
 		string_compose ("%1-%2-%3", loc, _route->id(), p->id()),
 		_session->extra_xml (X_("UI")),
 		this,
 		w);
-	
+
 	wp->marked = true;
 
-        /* if the processor already has an existing UI, 
+        /* if the processor already has an existing UI,
            note that so that we don't recreate it
         */
-        
+
         void* existing_ui = p->get_ui ();
 
         if (existing_ui) {
@@ -1245,7 +1245,7 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	} else {
 		e = new ProcessorEntry (processor, _width);
 	}
-	
+
 	e->set_pixel_width (get_allocation().get_width());
 	processor_display.add_child (e);
 }
@@ -1261,7 +1261,7 @@ ProcessorBox::build_processor_tooltip (EventBox& box, string start)
 		tip += '\n';
   		tip += (*i)->processor()->name();
 	}
-	
+
 	ARDOUR_UI::instance()->set_tip (box, tip);
 }
 
@@ -1277,7 +1277,7 @@ ProcessorBox::setup_entry_positions ()
 {
 	list<ProcessorEntry*> children = processor_display.children ();
 	bool pre_fader = true;
-	
+
 	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
 		if (boost::dynamic_pointer_cast<Amp>((*i)->processor())) {
 			pre_fader = false;
@@ -1316,14 +1316,14 @@ void
 ProcessorBox::report_failed_reorder ()
 {
 	/* reorder failed, so redisplay */
-	
+
 	redisplay_processors ();
-	
+
 	/* now tell them about the problem */
-	
+
 	ArdourDialog dialog (_("Plugin Incompatibility"));
 	Label label;
-	
+
 	label.set_text (_("\
 You cannot reorder these plugins/sends/inserts\n\
 in that way because the inputs and\n\
@@ -1332,12 +1332,12 @@ outputs will not work correctly."));
 	dialog.get_vbox()->set_border_width (12);
 	dialog.get_vbox()->pack_start (label);
 	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
-	
+
 	dialog.set_name (X_("PluginIODialog"));
 	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.set_modal (true);
 	dialog.show_all ();
-	
+
 	dialog.run ();
 }
 
@@ -1363,18 +1363,18 @@ ProcessorBox::can_cut () const
         vector<boost::shared_ptr<Processor> > sel;
 
         get_selected_processors (sel);
-        
+
         /* cut_processors () does not cut inserts */
 
         for (vector<boost::shared_ptr<Processor> >::const_iterator i = sel.begin (); i != sel.end (); ++i) {
-                
+
 		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0 ||
 		    (boost::dynamic_pointer_cast<Send>((*i)) != 0) ||
 		    (boost::dynamic_pointer_cast<Return>((*i)) != 0)) {
                         return true;
                 }
         }
-        
+
         return false;
 }
 
@@ -1629,7 +1629,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
                                 }
 
 				p.reset (s);
-                                        
+
 
 			} else if (type->value() == "return") {
 
@@ -1824,7 +1824,7 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 	if (boost::dynamic_pointer_cast<Amp> (processor)) {
 
 		_parent_strip->revert_to_default_display ();
-		
+
 	} else if ((internal_send = boost::dynamic_pointer_cast<InternalSend> (processor)) != 0) {
 
 		if (!_session->engine().connected()) {

@@ -75,7 +75,7 @@ public:
 	    boost::shared_ptr<ARDOUR::Bundle> bundle;
 	    /** IO whose ports are in the bundle, or 0.  This is so that we can do things like adding
 		ports to the IO from matrix editor menus. */
-	    boost::weak_ptr<ARDOUR::IO> io; 
+	    boost::weak_ptr<ARDOUR::IO> io;
 	    Gdk::Color colour;
 	    bool has_colour;
 	    PBD::ScopedConnection changed_connection;

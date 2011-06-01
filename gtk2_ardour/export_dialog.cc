@@ -319,7 +319,7 @@ ExportDialog::show_progress ()
 			usleep (10000);
 		}
 	}
-	
+
 	if (!status->aborted()) {
 		status->finish ();
 	}
@@ -437,7 +437,7 @@ ExportRegionDialog::init_components ()
 StemExportDialog::StemExportDialog (PublicEditor & editor)
   : ExportDialog(editor, _("Stem Export"), X_("StemExportProfile"))
 {
-	
+
 }
 
 void

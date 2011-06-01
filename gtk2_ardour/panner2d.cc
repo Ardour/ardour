@@ -110,7 +110,7 @@ Panner2d::reset (uint32_t n_inputs)
 
 		signals.resize (n_inputs);
 	}
-						
+
         label_signals ();
 
         for (uint32_t i = 0; i < n_inputs; ++i) {
@@ -134,7 +134,7 @@ Panner2d::reset (uint32_t n_inputs)
 	for (Targets::iterator x = speakers.begin(); x != speakers.end(); ++x) {
 		(*x)->visible = false;
 	}
-        
+
         vector<Speaker>& the_speakers (panner->get_speakers()->speakers());
 
 	for (uint32_t n = 0; n < nouts; ++n) {
@@ -273,7 +273,7 @@ Panner2d::move_signal (int which, const AngularVector& a)
 	if (which >= int (speakers.size())) {
 		return;
 	}
-	
+
 	speakers[which]->position = a;
 	queue_draw ();
 }
@@ -295,7 +295,7 @@ Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
         best_distance = sqrt ((c.x - x) * (c.x - x) +
                          (c.y - y) * (c.y - y));
         closest = &position;
-        
+
 	for (Targets::const_iterator i = signals.begin(); i != signals.end(); ++i) {
 		candidate = *i;
 
@@ -315,12 +315,12 @@ Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
 
         if (height > large_size_threshold) {
                 /* "big" */
-                if (best_distance > 30) { // arbitrary 
+                if (best_distance > 30) { // arbitrary
                         closest = 0;
                 }
         } else {
                 /* "small" */
-                if (best_distance > 10) { // arbitrary 
+                if (best_distance > 10) { // arbitrary
                         closest = 0;
                 }
         }
@@ -330,29 +330,29 @@ Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
         if (!closest) {
                 for (Targets::const_iterator i = speakers.begin(); i != speakers.end(); ++i) {
                         candidate = *i;
-                        
+
                         candidate->position.cartesian (c);
                         cart_to_gtk (c);
-                        
+
                         distance = sqrt ((c.x - x) * (c.x - x) +
                                          (c.y - y) * (c.y - y));
-                        
+
                         if (distance < best_distance) {
                                 closest = candidate;
                                 best_distance = distance;
                         }
                 }
-                
+
                 if (height > large_size_threshold) {
                         /* "big" */
-                        if (best_distance < 30) { // arbitrary 
+                        if (best_distance < 30) { // arbitrary
                                 is_signal = false;
                         } else {
                                 closest = 0;
                         }
                 } else {
                         /* "small" */
-                        if (best_distance < 10) { // arbitrary 
+                        if (best_distance < 10) { // arbitrary
                                 is_signal = false;
                         } else {
                                 closest = 0;
@@ -419,7 +419,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	cairo_stroke (cr);
 
 	/* vertical line of "crosshairs" */
-	
+
 	cairo_move_to (cr, radius, 0);
 	cairo_line_to (cr, radius, diameter);
 	cairo_stroke (cr);
@@ -471,7 +471,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 		double arc_radius;
 
 		cairo_select_font_face (cr, "sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-                
+
 		if (small) {
 			arc_radius = 4.0;
 		} else {
@@ -484,19 +484,19 @@ Panner2d::on_expose_event (GdkEventExpose *event)
                 if (signals.size() > 1) {
                         for (Targets::iterator i = signals.begin(); i != signals.end(); ++i) {
                                 Target* signal = *i;
-                                
+
                                 if (signal->visible) {
 
                                         signal->position.cartesian (c);
                                         cart_to_gtk (c);
-                                        
+
                                         cairo_new_path (cr);
                                         cairo_arc (cr, c.x, c.y, arc_radius, 0, 2.0 * M_PI);
                                         cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.85);
                                         cairo_fill_preserve (cr);
                                         cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, 1.0);
                                         cairo_stroke (cr);
-                                        
+
                                         if (!small && !signal->text.empty()) {
                                                 cairo_set_source_rgb (cr, 0.517, 0.772, 0.882);
                                                 /* the +/- adjustments are a hack to try to center the text in the circle */
@@ -523,14 +523,14 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 			if (speaker->visible) {
 
 				CartesianVector c;
-                                
+
 				speaker->position.cartesian (c);
 				cart_to_gtk (c);
 
 				snprintf (buf, sizeof (buf), "%d", n);
 
                                 /* stroke out a speaker shape */
-                                
+
                                 cairo_move_to (cr, c.x, c.y);
                                 cairo_save (cr);
                                 cairo_rotate (cr, -(speaker->position.azi/360.0) * (2.0 * M_PI));
@@ -556,7 +556,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
                                         cairo_set_font_size (cr, 16);
 
                                         /* move the text in just a bit */
-                                        
+
                                         AngularVector textpos (speaker->position.azi, speaker->position.ele, 0.85);
                                         textpos.cartesian (c);
                                         cart_to_gtk (c);
@@ -568,7 +568,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 		}
 
                 /* draw position */
-                
+
                 position.position.cartesian (c);
                 cart_to_gtk (c);
 
@@ -604,7 +604,7 @@ Panner2d::on_button_press_event (GdkEventButton *ev)
 	case 2:
                 x = ev->x - border;
                 y = ev->y - border;
-                        
+
 		if ((drag_target = find_closest_object (x, y, is_signal)) != 0) {
                         if (!is_signal) {
                                 panner->set_position (drag_target->position.azi/360.0);
@@ -614,7 +614,7 @@ Panner2d::on_button_press_event (GdkEventButton *ev)
                         }
 		}
 
-		drag_x = ev->x; 
+		drag_x = ev->x;
 		drag_y = ev->y;
 		state = (GdkModifierType) ev->state;
 
@@ -677,12 +677,12 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 	if ((state & (GDK_BUTTON1_MASK|GDK_BUTTON2_MASK)) == 0) {
 		return false;
 	}
-        
+
 
 	if (state & GDK_BUTTON1_MASK && !(state & GDK_BUTTON2_MASK)) {
 		CartesianVector c;
 		bool need_move = false;
-                
+
 		drag_target->position.cartesian (c);
 		cart_to_gtk (c);
 
@@ -702,13 +702,13 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 			/* generate an angular representation of the current mouse position */
 
 			cp.angular (av);
-                        
+
                         if (drag_target == &position) {
                                 double degree_fract = av.azi / 360.0;
                                 panner->set_position (degree_fract);
                         }
 		}
-	} 
+	}
 
 	return true;
 }
@@ -839,7 +839,7 @@ Panner2dWindow::bypass_toggled ()
 {
         bool view = bypass_button.get_active ();
         bool model = widget.get_panner()->bypassed ();
-        
+
         if (model != view) {
                 widget.get_panner()->set_bypassed (view);
         }

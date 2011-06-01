@@ -50,7 +50,7 @@ protected:
 
 	struct Tab {
 		Tab () : group (0) {}
-		
+
 		double from;
 		double to;
 		Gdk::Color colour; ///< colour
@@ -97,7 +97,7 @@ private:
 	void activate_all ();
 	void disable_all ();
 	void remove_group (ARDOUR::RouteGroup *);
-	
+
 	void render (cairo_t *);
 	void on_size_request (Gtk::Requisition *);
 	bool on_button_press_event (GdkEventButton *);

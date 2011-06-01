@@ -97,7 +97,7 @@ GainMeterBase::GainMeterBase (Session* s,
 	_width = Wide;
 
 	if (horizontal) {
-		gain_slider = manage (new HSliderController (pix,	
+		gain_slider = manage (new HSliderController (pix,
 							     &gain_adjustment,
 							     fader_length,
 							     false));
@@ -223,13 +223,13 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 		connections.push_back (gain_automation_state_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
 
 		boost::shared_ptr<AutomationControl> gc = amp->gain_control();
-		
+
 		gc->alist()->automation_state_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::gain_automation_state_changed, this), gui_context());
 		gc->alist()->automation_style_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::gain_automation_style_changed, this), gui_context());
-		
+
 		gain_automation_state_changed ();
 	}
-	
+
 	amp->gain_control()->Changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeterBase::gain_changed, this), gui_context());
 
 	gain_changed ();
@@ -480,7 +480,7 @@ next_meter_point (MeterPoint mp)
 		break;
 
 	case MeterCustom:
-		return MeterInput;		
+		return MeterInput;
 		break;
 	}
 
@@ -864,11 +864,11 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 		_meter->ConfigurationChanged.connect (
 			model_connections, invalidator (*this), ui_bind (&GainMeter::meter_configuration_changed, this, _1), gui_context()
 			);
-		
+
 		meter_configuration_changed (_meter->input_streams ());
 	}
 
-	
+
 	/*
 	   if we have a non-hidden route (ie. we're not the click or the auditioner),
 	   pack some route-dependent stuff.
@@ -913,7 +913,7 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
 
 		Glib::RefPtr<Gdk::GC> fg_gc (w.get_style()->get_fg_gc (Gtk::STATE_NORMAL));
-		
+
 		if (types.size() > 1) {
 			/* we're overlaying more than 1 set of marks, so use different colours */
 			Gdk::Color c;
@@ -925,12 +925,12 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 				c.set_rgb_p (0.2, 0.2, 0.5);
 				break;
 			}
-			
+
 			fg_gc->set_rgb_fg_color (c);
 		}
 
 		vector<int> points;
-		
+
 		switch (*i) {
 		case DataType::AUDIO:
 			points.push_back (-50);
@@ -942,13 +942,13 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 			points.push_back (0);
 			points.push_back (4);
 			break;
-			
+
 		case DataType::MIDI:
 			points.push_back (0);
 			if (types.size() == 1) {
 				points.push_back (32);
 			} else {
-				/* tweak so as not to overlay the -30dB mark */				
+				/* tweak so as not to overlay the -30dB mark */
 				points.push_back (48);
 			}
 			points.push_back (64);
@@ -956,11 +956,11 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 			points.push_back (127);
 			break;
 		}
-		
+
 		char buf[32];
-		
+
 		for (vector<int>::const_iterator j = points.begin(); j != points.end(); ++j) {
-			
+
 			float fraction = 0;
 			switch (*i) {
 			case DataType::AUDIO:
@@ -970,24 +970,24 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 				fraction = *j / 127.0;
 				break;
 			}
-			
+
 			gint const pos = height - (gint) floor (height * fraction);
-			
+
 			snprintf (buf, sizeof (buf), "%d", abs (*j));
-			
+
 			layout->set_text (buf);
-			
+
 			/* we want logical extents, not ink extents here */
-			
+
 			int tw, th;
 			layout->get_pixel_size (tw, th);
-			
+
 			pixmap->draw_line (fg_gc, 0, pos, 4, pos);
-			
+
 			int p = pos - (th / 2);
 			p = min (p, height - th);
 			p = max (p, 0);
-			
+
 			pixmap->draw_layout (fg_gc, 6, p, layout);
 		}
 	}

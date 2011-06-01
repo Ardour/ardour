@@ -82,7 +82,7 @@ class MidiListEditor : public ArdourDialog
 
 	bool key_press (GdkEventKey* ev);
 	bool key_release (GdkEventKey* ev);
-	
+
 	void delete_selected_note ();
 };
 

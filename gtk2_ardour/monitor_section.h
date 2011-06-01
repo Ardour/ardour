@@ -52,7 +52,7 @@ class MonitorSection : public RouteUI
         Gtk::VBox lower_packer;
         Gtkmm2ext::TearOff* _tearoff;
 
-        struct ChannelButtonSet { 
+        struct ChannelButtonSet {
             BindableToggleButton cut;
             BindableToggleButton dim;
             BindableToggleButton solo;
@@ -133,6 +133,6 @@ class MonitorSection : public RouteUI
 
         PBD::ScopedConnection config_connection;
         PBD::ScopedConnectionList control_connections;
-        
+
         void assign_controllables ();
 };

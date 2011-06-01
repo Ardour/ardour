@@ -14,7 +14,7 @@ using namespace Gtk;
 using namespace std;
 
 StepEditor::StepEditor (PublicEditor& e, boost::shared_ptr<MidiTrack> t, MidiTimeAxisView& mtv)
-        : _editor (e) 
+        : _editor (e)
         , _track (t)
         , step_editor (0)
         , _mtv (mtv)
@@ -24,7 +24,7 @@ StepEditor::StepEditor (PublicEditor& e, boost::shared_ptr<MidiTrack> t, MidiTim
         _step_edit_within_chord = 0;
         _step_edit_chord_duration = 0.0;
         step_edit_region_view = 0;
- 
+
         _track->PlaylistChanged.connect (*this, invalidator (*this),
                                          boost::bind (&StepEditor::playlist_changed, this),
                                          gui_context());
@@ -99,9 +99,9 @@ StepEditor::prepare_step_edit_region ()
 
 		const Meter& m = _mtv.session()->tempo_map().meter_at (step_edit_insert_position);
 		const Tempo& t = _mtv.session()->tempo_map().tempo_at (step_edit_insert_position);
-		
+
                 step_edit_region = _mtv.add_region (step_edit_insert_position, floor (m.frames_per_bar (t, _mtv.session()->frame_rate())), true);
-		
+
                 RegionView* rv = _mtv.midi_view()->find_view (step_edit_region);
                 step_edit_region_view = dynamic_cast<MidiRegionView*>(rv);
         }
@@ -115,14 +115,14 @@ StepEditor::reset_step_edit_beat_pos ()
         assert (step_edit_region_view);
 
         framecnt_t frames_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
-        
+
         if (frames_from_start < 0) {
                 /* this can happen with snap enabled, and the edit point == Playhead. we snap the
                    position of the new region, and it can end up after the edit point.
                 */
                 frames_from_start = 0;
         }
-        
+
         step_edit_beat_pos = step_edit_region_view->frames_to_beats (frames_from_start);
         step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
@@ -209,7 +209,7 @@ void
 StepEditor::move_step_edit_beat_pos (Evoral::MusicalTime beats)
 {
         if (beats > 0.0) {
-                step_edit_beat_pos = min (step_edit_beat_pos + beats, 
+                step_edit_beat_pos = min (step_edit_beat_pos + beats,
                                           step_edit_region_view->frames_to_beats (step_edit_region->length()));
         } else if (beats < 0.0) {
                 if (beats < step_edit_beat_pos) {
@@ -236,30 +236,30 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
 
         assert (step_edit_region);
         assert (step_edit_region_view);
-                
+
         if (beat_duration == 0.0) {
                 bool success;
                 beat_duration = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
-                
+
                 if (!success) {
                         return -1;
                 }
         }
-        
+
         MidiStreamView* msv = _mtv.midi_view();
-        
+
         /* make sure its visible on the vertical axis */
-        
+
         if (pitch < msv->lowest_note() || pitch > msv->highest_note()) {
                 msv->update_note_range (pitch);
                 msv->set_note_range (MidiStreamView::ContentsRange);
         }
-        
+
         /* make sure its visible on the horizontal axis */
-        
-        framepos_t fpos = step_edit_region->position() + 
+
+        framepos_t fpos = step_edit_region->position() +
                 step_edit_region_view->beats_to_frames (step_edit_beat_pos + beat_duration);
-        
+
         if (fpos >= (_editor.leftmost_position() + _editor.current_page_frames())) {
                 _editor.reset_x_origin (fpos - (_editor.current_page_frames()/4));
         }
@@ -272,7 +272,7 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
                 /* avoid any apparent note overlap - move the start of this note
                    up by 1 tick from where the last note ended
                 */
-                
+
                 at += 1.0/Timecode::BBT_Time::ticks_per_beat;
                 len -= 1.0/Timecode::BBT_Time::ticks_per_beat;
         }
@@ -284,12 +284,12 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
 
         if (_step_edit_triplet_countdown > 0) {
                 _step_edit_triplet_countdown--;
-                
+
                 if (_step_edit_triplet_countdown == 0) {
                         _step_edit_triplet_countdown = 3;
                 }
         }
-        
+
         if (!_step_edit_within_chord) {
                 step_edit_beat_pos += beat_duration;
                 step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
@@ -362,14 +362,14 @@ StepEditor::step_edit_rest (Evoral::MusicalTime beats)
         }
 }
 
-void 
+void
 StepEditor::step_edit_beat_sync ()
 {
         step_edit_beat_pos = ceil (step_edit_beat_pos);
         step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 
-void 
+void
 StepEditor::step_edit_bar_sync ()
 {
         Session* _session = _mtv.session ();
@@ -378,7 +378,7 @@ StepEditor::step_edit_bar_sync ()
                 return;
         }
 
-        framepos_t fpos = step_edit_region->position() + 
+        framepos_t fpos = step_edit_region->position() +
                 step_edit_region_view->beats_to_frames (step_edit_beat_pos);
         fpos = _session->tempo_map().round_to_bar (fpos, 1);
         step_edit_beat_pos = ceil (step_edit_region_view->frames_to_beats (fpos - step_edit_region->position()));
@@ -398,7 +398,7 @@ void
 StepEditor::region_removed (boost::weak_ptr<Region> wr)
 {
         boost::shared_ptr<Region> r (wr.lock());
- 
+
         if (!r) {
                 return;
         }
@@ -412,7 +412,7 @@ StepEditor::region_removed (boost::weak_ptr<Region> wr)
 }
 
 string
-StepEditor::name() const 
+StepEditor::name() const
 {
         return _track->name();
 }

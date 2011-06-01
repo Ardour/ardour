@@ -124,7 +124,7 @@ public:
 
 	ARDOUR::framepos_t adjusted_frame (ARDOUR::framepos_t, GdkEvent const *, bool snap = true) const;
 	ARDOUR::framepos_t adjusted_current_frame (GdkEvent const *, bool snap = true) const;
-	
+
 	/** Called to start a grab of an item.
 	 *  @param e Event that caused the grab to start.
 	 *  @param c Cursor to use, or 0.
@@ -275,9 +275,9 @@ protected:
 	int _visible_y_high;
 
 	friend class DraggingView;
-	
+
 private:
-	
+
 	void region_going_away (RegionView *);
 	PBD::ScopedConnection death_connection;
 };
@@ -369,7 +369,7 @@ private:
 	void add_stateful_diff_commands_for_playlists (PlaylistSet const &);
 
 	void collect_new_region_view (RegionView *);
-	
+
 	bool _copy;
 	RegionView* _new_region_view;
 };
@@ -447,7 +447,7 @@ class NoteDrag : public Drag
 
 	ARDOUR::frameoffset_t total_dx () const;
 	int8_t total_dy () const;
-	
+
 	MidiRegionView* _region;
 	Gnome::Canvas::CanvasNoteEvent* _primary;
 	double _cumulative_dx;
@@ -515,7 +515,7 @@ public:
 	}
 
 	void setup_pointer_frame_offset ();
-	
+
 private:
 
 	Operation _operation;
@@ -541,7 +541,7 @@ public:
 	}
 
 	void setup_pointer_frame_offset ();
-	
+
 private:
 	MeterMarker* _marker;
 	bool _copy;
@@ -567,7 +567,7 @@ public:
 	}
 
 	void setup_pointer_frame_offset ();
-	
+
 private:
 	TempoMarker* _marker;
 	bool _copy;
@@ -596,10 +596,10 @@ public:
 	bool y_movement_matters () const {
 		return true;
 	}
-	
+
 private:
 	void fake_locate (framepos_t);
-	
+
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
 	double _grab_zoom; ///< editor frames per unit when our grab started
 };
@@ -661,7 +661,7 @@ public:
 	}
 
 	void setup_pointer_frame_offset ();
-	
+
 private:
 	void update_item (ARDOUR::Location *);
 
@@ -737,10 +737,10 @@ private:
 
 	ArdourCanvas::Line* _line;
 	AudioRegionView* _arv;
-	
+
 	double _region_view_grab_x;
 	double _cumulative_x_drag;
-	
+
 	float _before;
 	uint32_t _max_x;
 };
@@ -891,9 +891,9 @@ private:
 		std::pair<ARDOUR::framepos_t, ARDOUR::framepos_t> range; ///< the range of all points on the line, in session frames
 		XMLNode* state; ///< the XML state node before the drag
 	};
-	
+
 	std::list<Line> _lines;
-	
+
 	bool _nothing_to_drag;
 };
 

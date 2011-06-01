@@ -33,9 +33,9 @@ public:
 
 private:
 	void setup_sensitivity ();
-	
+
 	Gtk::Entry _name;
 	Gtk::CheckButton _replace;
 	Gtk::Button* _add;
-	std::vector<ARDOUR::Plugin::PresetRecord> _presets;	
+	std::vector<ARDOUR::Plugin::PresetRecord> _presets;
 };

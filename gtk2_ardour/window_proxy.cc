@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2010 Paul Davis 
+    Copyright (C) 2010 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ WindowProxyBase::WindowProxyBase (string const & name, XMLNode const * node)
 	if (!node) {
 		return;
 	}
-	
+
 	XMLNodeList children = node->children ();
 
 	XMLNodeList::const_iterator i = children.begin ();
@@ -48,7 +48,7 @@ WindowProxyBase::WindowProxyBase (string const & name, XMLNode const * node)
 		if ((*i)->name() == X_("Window") && prop && prop->value() == _name) {
 			break;
 		}
-		
+
 		++i;
 	}
 
@@ -59,7 +59,7 @@ WindowProxyBase::WindowProxyBase (string const & name, XMLNode const * node)
 		if ((prop = (*i)->property (X_("visible"))) != 0) {
 			_visible = string_is_affirmative (prop->value ());
 		}
-		
+
 		if ((prop = (*i)->property (X_("x-off"))) != 0) {
 			_x_off = atoi (prop->value().c_str());
 		}
@@ -116,7 +116,7 @@ WindowProxyBase::get_state () const
 	/* If the window has been created, get its current state; otherwise use
 	   the state that we started off with.
 	*/
-	
+
 	Gtk::Window* gtk_window = get_gtk_window ();
 	if (gtk_window) {
 		v = gtk_window->is_visible ();

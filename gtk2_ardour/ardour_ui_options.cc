@@ -51,7 +51,7 @@ void
 ARDOUR_UI::toggle_keep_tearoffs ()
 {
 	ActionManager::toggle_config_state ("Common", "KeepTearoffs", &RCConfiguration::set_keep_tearoffs, &RCConfiguration::get_keep_tearoffs);
- 
+
 	ARDOUR_UI::toggle_editing_space ();
 }
 
@@ -68,7 +68,7 @@ when the pull up/down setting is non-zero."));
 				return;
 			}
 		}
-                                                                   
+
 		ActionManager::toggle_config_state_foo ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::set_external_sync), sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
 	}
 }
@@ -240,12 +240,12 @@ ARDOUR_UI::show_loop_punch_ruler_and_disallow_hide ()
 	}
 
 	act->set_sensitive (false);
-	
+
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 	if (!tact) {
 		return;
 	}
-	
+
 	if (!tact->get_active()) {
 		tact->set_active ();
 	}
@@ -336,7 +336,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
 		}
-	
+
 	} else if (p == "send-mtc") {
 
 		ActionManager::map_some_state ("options", "SendMTC", &RCConfiguration::get_send_mtc);

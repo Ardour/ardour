@@ -100,10 +100,10 @@ MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 
 	if (tab.group) {
 		pair<string, double> const f = fit_to_pixels (cr, tab.group->name(), tab.to - tab.from - arc_radius * 2);
-		
+
 		cairo_text_extents_t ext;
 		cairo_text_extents (cr, tab.group->name().c_str(), &ext);
-		
+
 		cairo_set_source_rgb (cr, 1, 1, 1);
 		cairo_move_to (cr, tab.from + (tab.to - tab.from - f.second) / 2, _height - ext.height / 2);
 		cairo_save (cr);

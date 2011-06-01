@@ -113,7 +113,7 @@ RhythmFerret::RhythmFerret (Editor& e)
 	t->attach (peak_picker_threshold_scale, 1, 2, n, n + 1, FILL);
 	t->attach (*manage (new Label (_("dB"))), 2, 3, n, n + 1, FILL);
 	++n;
-	
+
 	t->attach (*manage (new Label (_("Silence threshold"), 1, 0.5)), 0, 1, n, n + 1, FILL);
 	t->attach (silence_threshold_scale, 1, 2, n, n + 1, FILL);
 	t->attach (*manage (new Label (_("dB"))), 2, 3, n, n + 1, FILL);
@@ -145,7 +145,7 @@ void
 RhythmFerret::analysis_mode_changed ()
 {
 	bool const perc = get_analysis_mode() == PercussionOnset;
-	
+
 	trigger_gap_spinner.set_sensitive (!perc);
 	detection_threshold_scale.set_sensitive (perc);
 	sensitivity_scale.set_sensitive (perc);
@@ -209,7 +209,7 @@ RhythmFerret::run_analysis ()
 		default:
 			break;
 		}
-		
+
 		(*i)->region()->set_transients (current_results);
 		current_results.clear();
 	}
@@ -236,7 +236,7 @@ RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readabl
 
 		results.insert (results.end(), these_results.begin(), these_results.end());
 		these_results.clear ();
-		
+
 		t.update_positions (readable.get(), i, results);
 	}
 
@@ -254,10 +254,10 @@ RhythmFerret::get_note_onset_function ()
 			return n;
 		}
 	}
-	
+
 	fatal << string_compose (_("programming error: %1 (%2)"), X_("illegal note onset function string"), txt)
 	      << endmsg;
-	
+
 	/*NOTREACHED*/
 	return -1;
 }
@@ -330,18 +330,18 @@ RhythmFerret::do_split_action ()
 	   being considered)
 	*/
 	RegionSelection regions = editor.get_regions_from_selection();
-	
+
 	if (regions.empty()) {
 		return;
 	}
-	
+
 	editor.EditorFreeze(); /* Emit signal */
 
 	_session->begin_reversible_command (_("split regions (rhythm ferret)"));
-	
+
 	/* Merge the transient positions for regions in consideration */
 	AnalysisFeatureList merged_features;
-	
+
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
 
 		AnalysisFeatureList features;
@@ -367,7 +367,7 @@ RhythmFerret::do_split_action ()
 	}
 
 	_session->commit_reversible_command ();
-	
+
 	editor.EditorThaw(); /* Emit signal */
 }
 
@@ -390,11 +390,11 @@ void
 RhythmFerret::clear_transients ()
 {
 	current_results.clear ();
-	
+
 	for (RegionSelection::iterator i = regions_with_transients.begin(); i != regions_with_transients.end(); ++i) {
 		(*i)->region()->set_transients (current_results);
 	}
-	
+
 	regions_with_transients.clear ();
 }
 

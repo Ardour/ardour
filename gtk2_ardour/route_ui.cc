@@ -203,7 +203,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	if (self_destruct) {
 		rp->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::self_delete, this), gui_context());
 	}
-	
+
 	mute_button->set_controllable (_route->mute_control());
 	solo_button->set_controllable (_route->solo_control());
 
@@ -317,14 +317,14 @@ RouteUI::mute_press (GdkEventButton* ev)
 						if (_mute_release) {
 							_mute_release->routes = _session->get_routes ();
 						}
-								
+
 						_session->set_mute (_session->get_routes(), !_route->muted(), Session::rt_cleanup, true);
 					}
 
 				} else {
 
 					/* plain click applies change to this route */
-					
+
 					boost::shared_ptr<RouteList> rl (new RouteList);
 					rl->push_back (_route);
 
@@ -365,54 +365,54 @@ RouteUI::solo_press(GdkEventButton* ev)
 	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
 		return true;
 	}
-	
+
 	multiple_solo_change = false;
 
 	if (!_i_am_the_modifier) {
-		
+
 		if (Keyboard::is_context_menu_event (ev)) {
-			
+
                         if (!solo_isolated_led) {
 
                                 if (solo_menu == 0) {
                                         build_solo_menu ();
                                 }
-                                
+
                                 solo_menu->popup (1, ev->time);
                         }
-			
+
 		} else {
-			
+
 			if (Keyboard::is_button2_event (ev)) {
-				
+
 				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
-				
+
                                 if (solo_button->on_button_press_event (ev)) {
                                         return true;
                                 }
 
 				_solo_release = new SoloMuteRelease (_route->self_soloed());
 			}
-			
+
 			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
-				
+
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
-					
+
 					/* Primary-Tertiary-click applies change to all routes */
 
 					if (_solo_release) {
 						_solo_release->routes = _session->get_routes ();
 					}
-					
+
 					if (Config->get_solo_control_is_listen_control()) {
 						_session->set_listen (_session->get_routes(), !_route->listening_via_monitor(),  Session::rt_cleanup, true);
 					} else {
 						_session->set_solo (_session->get_routes(), !_route->self_soloed(),  Session::rt_cleanup, true);
 					}
-					
+
 				} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
-					
+
 					// Primary-Secondary-click: exclusively solo this track
 
 					if (_solo_release) {
@@ -428,7 +428,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 							}
 						}
 					}
-					
+
 					if (Config->get_solo_control_is_listen_control()) {
 						/* ??? we need a just_one_listen() method */
 					} else {
@@ -436,36 +436,36 @@ RouteUI::solo_press(GdkEventButton* ev)
 					}
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-					
+
 					// shift-click: toggle solo isolated status
-					
+
 					_route->set_solo_isolated (!_route->solo_isolated(), this);
 					delete _solo_release;
 					_solo_release = 0;
-					
+
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-					
+
 					/* Primary-button1: solo mix group.
 					   NOTE: Primary-button2 is MIDI learn.
 					*/
-					
+
 					if (ev->button == 1 && _route->route_group()) {
 
 						if (_solo_release) {
 							_solo_release->routes = _route->route_group()->route_list();
 						}
-					
+
 						if (Config->get_solo_control_is_listen_control()) {
 							_session->set_listen (_route->route_group()->route_list(), !_route->listening_via_monitor(),  Session::rt_cleanup, true);
 						} else {
 							_session->set_solo (_route->route_group()->route_list(), !_route->self_soloed(),  Session::rt_cleanup, true);
 						}
 					}
-					
+
 				} else {
-					
+
 					/* click: solo this route */
-					
+
 					boost::shared_ptr<RouteList> rl (new RouteList);
 					rl->push_back (route());
 
@@ -490,7 +490,7 @@ bool
 RouteUI::solo_release (GdkEventButton*)
 {
 	if (!_i_am_the_modifier) {
-		
+
 		if (_solo_release) {
 
 			if (_solo_release->exclusive) {
@@ -530,7 +530,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
                 if (midi_track()->step_editing()) {
                         return true;
-                } 
+                }
         }
 
 	if (!_i_am_the_modifier && is_track() && rec_enable_button) {
@@ -575,16 +575,16 @@ RouteUI::build_record_menu ()
                 return;
         }
 
-        /* no rec-button context menu for non-MIDI tracks 
+        /* no rec-button context menu for non-MIDI tracks
          */
 
         if (is_midi_track()) {
                 record_menu = new Menu;
                 record_menu->set_name ("ArdourContextMenu");
-                
+
                 using namespace Menu_Helpers;
                 MenuList& items = record_menu->items();
-                
+
                 items.push_back (CheckMenuElem (_("Step Entry"), sigc::mem_fun (*this, &RouteUI::toggle_step_edit)));
                 step_edit_item = dynamic_cast<CheckMenuItem*> (&items.back());
 
@@ -612,7 +612,7 @@ RouteUI::step_edit_changed (bool yn)
         if (yn) {
                 if (rec_enable_button) {
                         rec_enable_button->set_visual_state (3);
-                } 
+                }
 
                 start_step_editing ();
 
@@ -624,7 +624,7 @@ RouteUI::step_edit_changed (bool yn)
 
                 if (rec_enable_button) {
                         rec_enable_button->set_visual_state (0);
-                } 
+                }
 
                 stop_step_editing ();
 
@@ -660,15 +660,15 @@ RouteUI::build_sends_menu ()
 	items.push_back (
 		MenuElem(_("Assign all tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader, false))
 		);
-	
+
 	items.push_back (
 		MenuElem(_("Assign all tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader, true))
 		);
-	
+
 	items.push_back (
 		MenuElem(_("Assign all tracks (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PostFader, false))
 		);
-	
+
 	items.push_back (
 		MenuElem(_("Assign all tracks and buses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PostFader, true))
 		);
@@ -679,7 +679,7 @@ RouteUI::build_sends_menu ()
 
 	items.push_back (
 		MenuElem(_("Assign selected tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PreFader, true)));
-	
+
 	items.push_back (
 		MenuElem(_("Assign selected tracks (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader, false))
 		);
@@ -687,7 +687,7 @@ RouteUI::build_sends_menu ()
 	items.push_back (
 		MenuElem(_("Assign selected tracks and buses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader, true))
 		);
-	
+
 	items.push_back (MenuElem(_("Copy track/bus gains to sends"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
 	items.push_back (MenuElem(_("Set sends gain to -inf"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
 	items.push_back (MenuElem(_("Set sends gain to 0dB"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_unity)));
@@ -717,7 +717,7 @@ RouteUI::create_selected_sends (Placement p, bool include_buses)
 			}
 		}
 	}
-	
+
 	_session->add_internal_sends (_route, p, rlist);
 }
 
@@ -811,7 +811,7 @@ RouteUI::solo_visual_state (boost::shared_ptr<Route> r)
 	if (r->is_master() || r->is_monitor()) {
 		return 0;
 	}
-	
+
 	if (Config->get_solo_control_is_listen_control()) {
 
 		if (r->listening_via_monitor()) {
@@ -820,8 +820,8 @@ RouteUI::solo_visual_state (boost::shared_ptr<Route> r)
 			return 0;
 		}
 
-	} 
-	
+	}
+
 	if (r->soloed()) {
                 if (!r->self_soloed()) {
                         return 3;
@@ -839,7 +839,7 @@ RouteUI::solo_visual_state_with_isolate (boost::shared_ptr<Route> r)
 	if (r->is_master() || r->is_monitor()) {
 		return 0;
 	}
-	
+
 	if (Config->get_solo_control_is_listen_control()) {
 
 		if (r->listening_via_monitor()) {
@@ -848,8 +848,8 @@ RouteUI::solo_visual_state_with_isolate (boost::shared_ptr<Route> r)
                         return 0;
 		}
 
-	} 
-	
+	}
+
 	if (r->solo_isolated()) {
 		return 2;
 	} else if (r->soloed()) {
@@ -869,7 +869,7 @@ RouteUI::solo_isolate_visual_state (boost::shared_ptr<Route> r)
 	if (r->is_master() || r->is_monitor()) {
 		return 0;
 	}
-	
+
 	if (r->solo_isolated()) {
 		return 1;
 	} else {
@@ -883,7 +883,7 @@ RouteUI::solo_safe_visual_state (boost::shared_ptr<Route> r)
 	if (r->is_master() || r->is_monitor()) {
 		return 0;
 	}
-	
+
 	if (r->solo_safe()) {
 		return 1;
 	} else {
@@ -937,8 +937,8 @@ RouteUI::update_solo_display ()
         }
 
 	solo_button->set_visual_state (solo_visual_state (_route));
-        
-        /* some changes to solo status can affect mute display, so catch up 
+
+        /* some changes to solo status can affect mute display, so catch up
          */
 
         update_mute_display ();
@@ -963,7 +963,7 @@ RouteUI::mute_visual_state (Session* s, boost::shared_ptr<Route> r)
 		return 0;
 	}
 
-		
+
 	if (Config->get_show_solo_mutes() && !Config->get_solo_control_is_listen_control ()) {
 
 		if (r->muted ()) {
@@ -1031,7 +1031,7 @@ RouteUI::update_rec_display ()
 	if (!rec_enable_button || !_route) {
 		return;
 	}
-			
+
 	bool model = _route->record_enabled();
 	bool view = rec_enable_button->get_active();
 
@@ -1052,12 +1052,12 @@ RouteUI::update_rec_display ()
                 case Session::Recording:
                         rec_enable_button->set_visual_state (1);
                         break;
-                        
+
                 case Session::Disabled:
                 case Session::Enabled:
                         rec_enable_button->set_visual_state (2);
                         break;
-                        
+
                 }
 
                 if (step_edit_item) {
@@ -1071,7 +1071,7 @@ RouteUI::update_rec_display ()
                         step_edit_item->set_sensitive (true);
                 }
 	}
-        
+
 
 	check_rec_enable_sensitivity ();
 }
@@ -1396,28 +1396,28 @@ edit your ardour.rc file to set the\n\
 			msg.run ();
 			return;
 		}
-		
+
 		vector<string> choices;
 		string prompt;
-		
+
 		if (is_track()) {
 			prompt  = string_compose (_("Do you really want to remove track \"%1\" ?\n\nYou may also lose the playlist used by this track.\n\n(This action cannot be undone, and the session file will be overwritten)"), _route->name());
 		} else {
 			prompt  = string_compose (_("Do you really want to remove bus \"%1\" ?\n\n(This action cannot be undone, and the session file will be overwritten)"), _route->name());
 		}
-		
+
 		choices.push_back (_("No, do nothing."));
 		choices.push_back (_("Yes, remove it."));
-		
+
 		string title;
 		if (is_track()) {
 			title = _("Remove track");
 		} else {
 			title = _("Remove bus");
 		}
-		
+
 		Choice prompter (title, prompt, choices);
-		
+
 		if (prompter.run () == 1) {
 			Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (&RouteUI::idle_remove_this_route), this));
 		}
@@ -1718,7 +1718,7 @@ RouteUI::setup_invert_buttons ()
 		BindableToggleButton* b = manage (new BindableToggleButton);
 		b->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::invert_toggled), i, b));
 		b->signal_button_press_event().connect (sigc::mem_fun (*this, &RouteUI::invert_press));
-		
+
 		b->set_name (X_("MixerInvertButton"));
 		if (to_add == 1) {
 			b->add (*manage (new Label (X_("Ø"))));
@@ -1731,11 +1731,11 @@ RouteUI::setup_invert_buttons ()
 		} else {
 			UI::instance()->set_tip (*b, string_compose (_("Left-click to invert (phase reverse) all channels of this track.  Right-click to show menu."), i + 1));
 		}
-		
+
 		_invert_buttons.push_back (b);
 		_invert_button_box.pack_start (*b);
 	}
-	
+
 	_invert_button_box.show_all ();
 }
 
@@ -1743,7 +1743,7 @@ void
 RouteUI::set_invert_button_state ()
 {
 	++_i_am_the_modifier;
-	
+
 	uint32_t const N = _route->input()->n_ports().n_audio();
 	if (N > _max_invert_buttons) {
 		_invert_buttons.front()->set_active (_route->phase_invert().any());
@@ -1765,7 +1765,7 @@ RouteUI::invert_toggled (uint32_t i, BindableToggleButton* b)
 	if (_i_am_the_modifier) {
 		return;
 	}
-	
+
 	uint32_t const N = _route->input()->n_ports().n_audio();
 	if (N <= _max_invert_buttons) {
 		_route->set_phase_invert (i, b->get_active ());
@@ -1812,7 +1812,7 @@ RouteUI::invert_menu_toggled (uint32_t c)
 	if (_i_am_the_modifier) {
 		return;
 	}
-	
+
 	_route->set_phase_invert (c, !_route->phase_invert (c));
 }
 

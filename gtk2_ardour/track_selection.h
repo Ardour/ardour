@@ -34,7 +34,7 @@ public:
 	TrackSelection (PublicEditor const *, TrackViewList const &);
 
 	virtual ~TrackSelection ();
-	
+
 	TrackViewList add (TrackViewList const &);
 
 	template <typename Function>
@@ -83,7 +83,7 @@ public:
 			}
 		}
 	}
-	
+
 private:
 	PublicEditor const * _editor;
 };

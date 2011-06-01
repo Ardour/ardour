@@ -43,7 +43,7 @@ MonitorSection::MonitorSection (Session* s)
         , dim_control (0)
         , solo_boost_adjustment (1.0, 1.0, 3.0, 0.01, 0.1)  // upper and lower will be reset to match model
         , solo_boost_control (0)
-        , solo_cut_adjustment (0.0, 0.0, 1.0, 0.01, 0.1) 
+        , solo_cut_adjustment (0.0, 0.0, 1.0, 0.01, 0.1)
         , solo_cut_control (0)
         , solo_in_place_button (solo_model_group, _("SiP"))
         , afl_button (solo_model_group, _("AFL"))
@@ -66,7 +66,7 @@ MonitorSection::MonitorSection (Session* s)
                 register_actions ();
 
         }
-        
+
         set_session (s);
 
         VBox* spin_packer;
@@ -84,7 +84,7 @@ MonitorSection::MonitorSection (Session* s)
         spin_packer->show ();
         spin_packer->set_spacing (6);
         spin_packer->pack_start (*dim_control, false, false);
-        spin_packer->pack_start (*spin_label, false, false); 
+        spin_packer->pack_start (*spin_label, false, false);
 
         dim_packer->set_spacing (12);
         dim_packer->pack_start (*spin_packer, true, true);
@@ -124,17 +124,17 @@ MonitorSection::MonitorSection (Session* s)
         act = ActionManager::get_action (X_("Solo"), X_("solo-use-in-place"));
         if (act) {
                 act->connect_proxy (solo_in_place_button);
-        } 
+        }
 
         act = ActionManager::get_action (X_("Solo"), X_("solo-use-afl"));
         if (act) {
                 act->connect_proxy (afl_button);
-        } 
+        }
 
         act = ActionManager::get_action (X_("Solo"), X_("solo-use-pfl"));
         if (act) {
                 act->connect_proxy (pfl_button);
-        } 
+        }
 
         /* Solo Boost */
 
@@ -149,7 +149,7 @@ MonitorSection::MonitorSection (Session* s)
         spin_packer->show ();
         spin_packer->set_spacing (6);
         spin_packer->pack_start (*solo_boost_control, false, false);
-        spin_packer->pack_start (*spin_label, false, false); 
+        spin_packer->pack_start (*spin_label, false, false);
 
         solo_packer->pack_start (*spin_packer, true, true);
 
@@ -162,7 +162,7 @@ MonitorSection::MonitorSection (Session* s)
         spin_packer->show ();
         spin_packer->set_spacing (6);
         spin_packer->pack_start (*solo_cut_control, false, false);
-        spin_packer->pack_start (*spin_label, false, false); 
+        spin_packer->pack_start (*spin_label, false, false);
 
         solo_packer->pack_start (*spin_packer, true, true);
 
@@ -172,15 +172,15 @@ MonitorSection::MonitorSection (Session* s)
         act = ActionManager::get_action (X_("Monitor"), X_("toggle-exclusive-solo"));
         if (act) {
                 act->connect_proxy (exclusive_solo_button);
-        } 
+        }
 
         solo_mute_override_button.set_name (X_("MonitorOptButton"));
         ARDOUR_UI::instance()->set_tip (&solo_mute_override_button, _("If enabled, solo will override mute\n(a soloed & muted track or bus will be audible)"));
-        
+
         act = ActionManager::get_action (X_("Monitor"), X_("toggle-mute-overrides-solo"));
         if (act) {
                 act->connect_proxy (solo_mute_override_button);
-        } 
+        }
 
         HBox* solo_opt_box = manage (new HBox);
         solo_opt_box->set_spacing (12);
@@ -188,7 +188,7 @@ MonitorSection::MonitorSection (Session* s)
         solo_opt_box->pack_start (exclusive_solo_button);
         solo_opt_box->pack_start (solo_mute_override_button);
         solo_opt_box->show ();
-        
+
         upper_packer.set_spacing (12);
 
         Gtk::HBox* rude_box = manage (new HBox);
@@ -204,17 +204,17 @@ MonitorSection::MonitorSection (Session* s)
         act = ActionManager::get_action (X_("Monitor"), X_("monitor-cut-all"));
         if (act) {
                 act->connect_proxy (cut_all_button);
-        } 
+        }
 
         act = ActionManager::get_action (X_("Monitor"), X_("monitor-dim-all"));
         if (act) {
                 act->connect_proxy (dim_all_button);
-        } 
+        }
 
         act = ActionManager::get_action (X_("Monitor"), X_("monitor-mono"));
         if (act) {
                 act->connect_proxy (mono_button);
-        } 
+        }
 
         cut_all_button.set_name (X_("MonitorMuteButton"));
         cut_all_button.unset_flags (Gtk::CAN_FOCUS);
@@ -313,12 +313,12 @@ MonitorSection::set_session (Session* s)
                         /* session with monitor section */
                         _monitor = _route->monitor_control ();
                         assign_controllables ();
-                } else { 
+                } else {
                         /* session with no monitor section */
                         _monitor.reset ();
                         _route.reset ();
                 }
-                
+
         } else {
                 /* no session */
 
@@ -363,7 +363,7 @@ MonitorSection::populate_buttons ()
 
         Glib::RefPtr<Action> act;
         uint32_t nchans = _monitor->output_streams().n_audio();
-        
+
         main_table.resize (nchans+1, 5);
         main_table.set_col_spacings (6);
         main_table.set_row_spacings (6);
@@ -383,7 +383,7 @@ MonitorSection::populate_buttons ()
         const uint32_t row_offset = 1;
 
         for (uint32_t i = 0; i < nchans; ++i) {
-                
+
                 string l;
                 char buf[64];
 
@@ -407,15 +407,15 @@ MonitorSection::populate_buttons ()
                 _channel_buttons.push_back (cbs);
 
                 main_table.attach (cbs->cut, 1, 2, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
-                main_table.attach (cbs->dim, 2, 3, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL); 
+                main_table.attach (cbs->dim, 2, 3, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
                 main_table.attach (cbs->solo, 3, 4, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
                 main_table.attach (cbs->invert, 4, 5, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
-               
+
                 snprintf (buf, sizeof (buf), "monitor-cut-%u", i+1);
                 act = ActionManager::get_action (X_("Monitor"), buf);
                 if (act) {
                         act->connect_proxy (cbs->cut);
-                } 
+                }
 
                 snprintf (buf, sizeof (buf), "monitor-dim-%u", i+1);
                 act = ActionManager::get_action (X_("Monitor"), buf);
@@ -439,7 +439,7 @@ MonitorSection::populate_buttons ()
         main_table.show_all ();
 }
 
-void 
+void
 MonitorSection::set_button_names ()
 {
         rec_enable_button_label.set_text ("rec");
@@ -595,7 +595,7 @@ MonitorSection::invert_channel (uint32_t chn)
         if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
                 _monitor->set_polarity (chn, tact->get_active());
-        } 
+        }
 }
 
 void
@@ -608,24 +608,24 @@ MonitorSection::register_actions ()
         monitor_actions = ActionGroup::create (X_("Monitor"));
 	ActionManager::add_action_group (monitor_actions);
 
-        ActionManager::register_toggle_action (monitor_actions, "monitor-mono", "", "Switch monitor to mono", 
+        ActionManager::register_toggle_action (monitor_actions, "monitor-mono", "", "Switch monitor to mono",
                                                sigc::mem_fun (*this, &MonitorSection::mono));
 
-        ActionManager::register_toggle_action (monitor_actions, "monitor-cut-all", "", "Cut monitor", 
+        ActionManager::register_toggle_action (monitor_actions, "monitor-cut-all", "", "Cut monitor",
                                                sigc::mem_fun (*this, &MonitorSection::cut_all));
 
-        ActionManager::register_toggle_action (monitor_actions, "monitor-dim-all", "", "Dim monitor", 
+        ActionManager::register_toggle_action (monitor_actions, "monitor-dim-all", "", "Dim monitor",
                                                sigc::mem_fun (*this, &MonitorSection::dim_all));
 
-        act = ActionManager::register_toggle_action (monitor_actions, "toggle-exclusive-solo", "", "Toggle exclusive solo mode", 
+        act = ActionManager::register_toggle_action (monitor_actions, "toggle-exclusive-solo", "", "Toggle exclusive solo mode",
                                                sigc::mem_fun (*this, &MonitorSection::toggle_exclusive_solo));
 
         Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
         tact->set_active (Config->get_exclusive_solo());
 
-        act = ActionManager::register_toggle_action (monitor_actions, "toggle-mute-overrides-solo", "", "Toggle mute overrides solo mode", 
+        act = ActionManager::register_toggle_action (monitor_actions, "toggle-mute-overrides-solo", "", "Toggle mute overrides solo mode",
                                                      sigc::mem_fun (*this, &MonitorSection::toggle_mute_overrides_solo));
-        
+
         tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
         tact->set_active (Config->get_solo_mute_override());
 
@@ -636,22 +636,22 @@ MonitorSection::register_actions ()
 
                 action_name = string_compose (X_("monitor-cut-%1"), chn);
                 action_descr = string_compose (_("Cut monitor channel %1"), chn);
-                ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(), 
+                ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::cut_channel), chn));
 
                 action_name = string_compose (X_("monitor-dim-%1"), chn);
                 action_descr = string_compose (_("Dim monitor channel %1"), chn+1);
-                ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(), 
+                ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::dim_channel), chn));
 
                 action_name = string_compose (X_("monitor-solo-%1"), chn);
                 action_descr = string_compose (_("Solo monitor channel %1"), chn+1);
-                ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(), 
+                ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::solo_channel), chn));
 
                 action_name = string_compose (X_("monitor-invert-%1"), chn);
                 action_descr = string_compose (_("Invert monitor channel %1"), chn+1);
-                ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(), 
+                ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::invert_channel), chn));
 
         }
@@ -695,7 +695,7 @@ MonitorSection::solo_use_afl ()
 	   once for the item that became inactive and once for the one that became
 	   active.
 	*/
-        
+
         Glib::RefPtr<Action> act = ActionManager::get_action (X_("Solo"), X_("solo-use-afl"));
         if (act) {
                 Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
@@ -732,11 +732,11 @@ void
 MonitorSection::setup_knob_images ()
 {
         try {
-                
-                big_knob_pixbuf = MotionFeedback::render_pixbuf (80);                
+
+                big_knob_pixbuf = MotionFeedback::render_pixbuf (80);
 
         }  catch (...) {
-                
+
                 error << "No usable large knob image" << endmsg;
                 throw failed_constructor ();
         }
@@ -745,13 +745,13 @@ MonitorSection::setup_knob_images ()
                 error << "No usable large knob image" << endmsg;
                 throw failed_constructor ();
         }
-        
+
         try {
 
                 little_knob_pixbuf = MotionFeedback::render_pixbuf (30);
-                
+
         }  catch (...) {
-                
+
                 error << "No usable small knob image" << endmsg;
                 throw failed_constructor ();
         }
@@ -760,7 +760,7 @@ MonitorSection::setup_knob_images ()
                 error << "No usable small knob image" << endmsg;
                 throw failed_constructor ();
         }
-                
+
 }
 
 bool
@@ -825,7 +825,7 @@ MonitorSection::map_state ()
         Glib::RefPtr<Action> act;
 
         update_solo_model ();
-        
+
         act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
         if (act) {
                 Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
@@ -841,7 +841,7 @@ MonitorSection::map_state ()
                         tact->set_active (_monitor->dim_all());
                 }
         }
-        
+
         act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
         if (act) {
                 Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
@@ -1030,7 +1030,7 @@ MonitorSection::assign_controllables ()
                 dim_control->set_controllable (c);
                 dim_adjustment.set_lower (c->lower());
                 dim_adjustment.set_upper (c->upper());
-                
+
                 c = _monitor->solo_boost_control ();
                 solo_boost_control->set_controllable (c);
                 solo_boost_adjustment.set_lower (c->lower());

@@ -131,7 +131,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 	if (line && line->the_list()) {
 		line->the_list()->set_automation_state (automation_state ());
 	}
-	
+
 	RegionViewAdded (region_view);
 
 	return region_view;
@@ -147,7 +147,7 @@ void
 AutomationStreamView::set_automation_state (AutoState state)
 {
 	/* Setting the automation state for this view sets the state of all regions' lists to the same thing */
-	
+
 	if (region_views.empty()) {
 		_pending_automation_state = state;
 	} else {
@@ -218,7 +218,7 @@ bool
 AutomationStreamView::has_automation () const
 {
 	list<boost::shared_ptr<AutomationLine> > lines = get_lines ();
-	
+
 	for (list<boost::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
 		if ((*i)->npoints() > 0) {
 			return true;
@@ -235,7 +235,7 @@ void
 AutomationStreamView::set_interpolation (AutomationList::InterpolationStyle s)
 {
 	list<boost::shared_ptr<AutomationLine> > lines = get_lines ();
-	
+
 	for (list<boost::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
 		(*i)->the_list()->set_interpolation (s);
 	}
@@ -259,7 +259,7 @@ void
 AutomationStreamView::clear ()
 {
 	list<boost::shared_ptr<AutomationLine> > lines = get_lines ();
-	
+
 	for (list<boost::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
 		(*i)->clear ();
 	}
@@ -286,7 +286,7 @@ void
 AutomationStreamView::set_selected_points (PointSelection& ps)
 {
 	list<boost::shared_ptr<AutomationLine> > lines = get_lines ();
-	
+
 	for (list<boost::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
 		(*i)->set_selected_points (ps);
 	}
@@ -296,7 +296,7 @@ list<boost::shared_ptr<AutomationLine> >
 AutomationStreamView::get_lines () const
 {
 	list<boost::shared_ptr<AutomationLine> > lines;
-	
+
 	for (list<RegionView*>::const_iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*i);
 		assert (arv);
@@ -311,7 +311,7 @@ struct RegionPositionSorter {
 		return a->region()->position() < b->region()->position();
 	}
 };
-	
+
 
 /** @param pos Position, in session frames.
  *  @return AutomationLine to paste to for that position, or 0 if there is none appropriate.

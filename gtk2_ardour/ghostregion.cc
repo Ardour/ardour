@@ -104,7 +104,7 @@ GhostRegion::is_automation_ghost()
 AudioGhostRegion::AudioGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
 	: GhostRegion(tv.ghost_group(), tv, source_tv, initial_unit_pos)
 {
-	
+
 }
 
 void
@@ -192,7 +192,7 @@ MidiGhostRegion::~MidiGhostRegion()
 MidiGhostRegion::Event::Event(ArdourCanvas::CanvasNoteEvent* e)
 	: event(e)
 {
-	
+
 }
 
 MidiGhostRegion::Note::Note(ArdourCanvas::CanvasNote* n, ArdourCanvas::Group* g)
@@ -339,7 +339,7 @@ MidiGhostRegion::find_event (ArdourCanvas::CanvasNote* parent)
 	/* we are using _optimization_iterator to speed up the common case where a caller
 	   is going through our notes in order.
 	*/
-	
+
 	if (_optimization_iterator != events.end()) {
 		++_optimization_iterator;
 	}

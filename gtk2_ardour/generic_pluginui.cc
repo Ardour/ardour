@@ -447,7 +447,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 			mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::toggle_parameter_changed, this, control_ui), gui_context());
 			mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
-	
+
 			if (plugin->get_parameter (port_index) > 0.5){
 				control_ui->button->set_active(true);
 			}
@@ -727,11 +727,11 @@ GenericPluginUI::stop_updating (GdkEventAny*)
 	for (vector<ControlUI*>::iterator i = input_controls.begin(); i != input_controls.end(); ++i) {
 		(*i)->controller->stop_updating ();
 	}
-	
+
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
 	}
-	
+
 	return false;
 }
 

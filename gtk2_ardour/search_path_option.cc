@@ -40,7 +40,7 @@ SearchPathOption::SearchPathOption (const string& pathname, const string& label,
         hbox->pack_end (add_chooser, true, true);
         hbox->pack_end (*manage (new Label (_("Click to add a new location"))), false, false);
         hbox->show_all ();
-        
+
         vbox.pack_start (path_box);
         vbox.pack_end (*hbox);
 
@@ -54,7 +54,7 @@ SearchPathOption::SearchPathOption (const string& pathname, const string& label,
 
 SearchPathOption::~SearchPathOption()
 {
-        
+
 
 }
 
@@ -101,7 +101,7 @@ SearchPathOption::set_state_from_config ()
         path_box.pack_start (session_label);
 
         split (str, dirs, ':');
-        
+
         for (vector<string>::iterator d = dirs.begin(); d != dirs.end(); ++d) {
                 add_path (*d);
         }
@@ -111,7 +111,7 @@ void
 SearchPathOption::changed ()
 {
         string str;
-        
+
         for (list<PathEntry*>::iterator p = paths.begin(); p != paths.end(); ++p) {
 
                 if (!str.empty()) {
@@ -150,7 +150,7 @@ SearchPathOption::PathEntry::PathEntry (const std::string& path, bool removable)
         box.set_spacing (6);
         box.set_homogeneous (false);
         box.pack_start (entry, true, true);
-        
+
         if (removable) {
                 box.pack_start (remove_button, false, false);
                 remove_button.show ();

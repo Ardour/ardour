@@ -44,9 +44,9 @@ class StepEntry : public ArdourDialog
         Evoral::MusicalTime note_length();
         uint8_t note_velocity() const;
         uint8_t note_channel() const;
-        
+
         int current_octave () const { return (int) floor (octave_adjustment.get_value()); }
-        
+
   private:
         Evoral::MusicalTime _current_note_length;
         uint8_t _current_note_velocity;
@@ -158,7 +158,7 @@ class StepEntry : public ArdourDialog
         void insert_fsharp ();
         void insert_g ();
         void insert_gsharp ();
-        
+
         void note_length_change (GtkAction*);
         void note_velocity_change (GtkAction*);
 
@@ -199,7 +199,7 @@ class StepEntry : public ArdourDialog
 
         void toggle_triplet();
         void toggle_chord();
-        
+
         void do_sustain ();
         void back();
         void sync_to_edit_point ();

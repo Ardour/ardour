@@ -125,7 +125,7 @@ void
 ReturnUIWindow::return_going_away ()
 {
 	ENSURE_GUI_THREAD (*this, &ReturnUIWindow::return_going_away)
-	going_away_connection.disconnect ();	
+	going_away_connection.disconnect ();
 	delete_when_idle (this);
 }
 

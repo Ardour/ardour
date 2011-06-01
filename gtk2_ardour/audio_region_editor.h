@@ -57,14 +57,14 @@ class AudioRegionEditor : public RegionEditor
 	~AudioRegionEditor ();
 
 	void peak_amplitude_thread ();
-	
+
   private:
 
 	void region_changed (PBD::PropertyChange const &);
-	
+
 	void gain_changed ();
 	void gain_adjustment_changed ();
-	
+
 	boost::shared_ptr<ARDOUR::AudioRegion> _audio_region;
 
 	Gtk::Label gain_label;

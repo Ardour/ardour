@@ -226,7 +226,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	} else {
 		/* no regions, just a single line for the entire track (e.g. bus gain) */
-		
+
 		boost::shared_ptr<AutomationLine> line (
 			new AutomationLine (
 				ARDOUR::EventTypeMap::instance().to_symbol(_parameter),
@@ -260,7 +260,7 @@ AutomationTimeAxisView::route_going_away ()
 {
 	_route.reset ();
 }
-	
+
 void
 AutomationTimeAxisView::auto_clicked ()
 {
@@ -298,14 +298,14 @@ AutomationTimeAxisView::set_automation_state (AutoState state)
 	if (_route == _automatable) { // This is a time axis for route (not region) automation
 		_route->set_parameter_automation_state (_parameter, state);
 	}
-	
+
 	if (_control->list()) {
 		_control->alist()->set_automation_state(state);
 	}
 #endif
 	if (_view) {
 		_view->set_automation_state (state);
-		
+
 		/* AutomationStreamViews don't signal when their automation state changes, so handle
 		   our updates `manually'.
 		*/
@@ -401,7 +401,7 @@ AutomationTimeAxisView::set_interpolation (AutomationList::InterpolationStyle st
 	/* Tell our view's list, if we have one, otherwise tell our own.
 	 * Everything else will be signalled back from that.
 	 */
-	
+
 	if (_view) {
 		_view->set_interpolation (style);
 	} else {
@@ -413,9 +413,9 @@ void
 AutomationTimeAxisView::clear_clicked ()
 {
 	assert (_line || _view);
-	
+
 	_session->begin_reversible_command (_("clear automation"));
-	
+
 	if (_line) {
 		_line->clear ();
 	} else if (_view) {
@@ -672,10 +672,10 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 	const Evoral::TimeConverter<double, ARDOUR::framepos_t>& tc = line.time_converter ();
 	double const start = tc.from (selection.time.front().start - tc.origin_b ());
 	double const end = tc.from (selection.time.front().end - tc.origin_b ());
-	
+
 	switch (op) {
 	case Cut:
-		
+
 		if ((what_we_got = alist->cut (start, end)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
 			_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
@@ -810,7 +810,7 @@ bool
 AutomationTimeAxisView::paste (framepos_t pos, float times, Selection& selection, size_t nth)
 {
 	boost::shared_ptr<AutomationLine> line;
-	
+
 	if (_line) {
 		line = _line;
 	} else if (_view) {
@@ -820,7 +820,7 @@ AutomationTimeAxisView::paste (framepos_t pos, float times, Selection& selection
 	if (!line) {
 		return false;
 	}
-	
+
 	return paste_one (*line, pos, times, selection, nth);
 }
 
@@ -940,7 +940,7 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 	_control->alist()->automation_state_changed.connect (
 		_list_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::automation_state_changed, this), gui_context()
 		);
-	
+
 	_control->alist()->InterpolationChanged.connect (
 		_list_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::interpolation_changed, this, _1), gui_context()
 		);
@@ -988,7 +988,7 @@ AutomationTimeAxisView::set_state (const XMLNode& node, int version)
 	if (version < 3000) {
 		return set_state_2X (node, version);
 	}
-	
+
 	XMLProperty const * type = node.property ("automation-id");
 	if (type && type->value () == ARDOUR::EventTypeMap::instance().to_symbol (_parameter)) {
 		XMLProperty const * shown = node.property ("shown");
@@ -1084,7 +1084,7 @@ list<boost::shared_ptr<AutomationLine> >
 AutomationTimeAxisView::lines () const
 {
 	list<boost::shared_ptr<AutomationLine> > lines;
-	
+
 	if (_line) {
 		lines.push_back (_line);
 	} else if (_view) {

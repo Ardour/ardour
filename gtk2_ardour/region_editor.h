@@ -56,9 +56,9 @@ class RegionEditor : public ArdourDialog
 	RegionEditor (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Region>);
 	virtual ~RegionEditor ();
 
-  protected:	
+  protected:
 	virtual void region_changed (const PBD::PropertyChange&);
-	
+
 	Gtk::Table _table;
 	int _table_row;
 

@@ -104,7 +104,7 @@ public:
 
 	void set_frame_color();
 	void color_handler ();
-        
+
 	void show_step_edit_cursor (Evoral::MusicalTime pos);
 	void move_step_edit_cursor (Evoral::MusicalTime pos);
 	void hide_step_edit_cursor ();
@@ -270,13 +270,13 @@ public:
 	void selection_as_notelist (Notes& selected, bool allow_all_if_none_selected = false);
 
 	void enable_display (bool);
-	
+
 	void set_channel_selector_scoped_note(ArdourCanvas::CanvasNoteEvent* note){ _channel_selection_scoped_note = note; }
 	ArdourCanvas::CanvasNoteEvent* channel_selector_scoped_note(){  return _channel_selection_scoped_note; }
 
 	void trim_front_starting ();
 	void trim_front_ending ();
-        
+
 protected:
 	/** Allows derived types to specify their visibility requirements
 	 * to the TimeAxisViewItem parent class.
@@ -370,7 +370,7 @@ private:
 	Evoral::MusicalTime                  _step_edit_cursor_width;
 	Evoral::MusicalTime                  _step_edit_cursor_position;
 	ArdourCanvas::CanvasNoteEvent*	     _channel_selection_scoped_note;
-	
+
 
 	/** A group used to temporarily reparent _note_group to during start trims, so
 	 *  that the notes don't move with the parent region view.

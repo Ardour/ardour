@@ -112,7 +112,7 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 		r.intersect ((*i)->parent_rectangle(), intersects);
 
 		if (intersects) {
-			
+
 			gdk_draw_drawable (
 				get_window()->gobj(),
 				get_style()->get_fg_gc (Gtk::STATE_NORMAL)->gobj(),
@@ -261,25 +261,25 @@ PortMatrixBody::setup ()
 	if (_matrix->visible_rows()) {
 		PortGroup::BundleList r = _matrix->visible_rows()->bundles ();
 		for (PortGroup::BundleList::iterator i = r.begin(); i != r.end(); ++i) {
-			
+
 			(*i)->bundle->Changed.connect (_bundle_connections, invalidator (*this), boost::bind (&PortMatrixBody::rebuild_and_draw_row_labels, this), gui_context());
-			
+
 		}
 	}
-	
+
 	if (_matrix->visible_columns()) {
 		PortGroup::BundleList c = _matrix->visible_columns()->bundles ();
 		for (PortGroup::BundleList::iterator i = c.begin(); i != c.end(); ++i) {
 			(*i)->bundle->Changed.connect (_bundle_connections, invalidator (*this), boost::bind (&PortMatrixBody::rebuild_and_draw_column_labels, this), gui_context());
 		}
 	}
-		
+
 	for (list<PortMatrixComponent*>::iterator i = _components.begin(); i != _components.end(); ++i) {
 		(*i)->setup ();
 	}
 
 	set_mouseover (PortMatrixNode ());
-	
+
 	_ignore_component_size_changed = true;
 	compute_rectangles ();
 	_ignore_component_size_changed = false;
@@ -398,7 +398,7 @@ bool
 PortMatrixBody::on_motion_notify_event (GdkEventMotion* ev)
 {
 	bool done = false;
-	
+
 	for (list<PortMatrixComponent*>::iterator i = _components.begin(); i != _components.end(); ++i) {
 		if (Gdk::Region ((*i)->parent_rectangle()).point_in (ev->x, ev->y)) {
 			(*i)->motion (
@@ -409,7 +409,7 @@ PortMatrixBody::on_motion_notify_event (GdkEventMotion* ev)
 			done = true;
 		}
 	}
-			
+
 
 	if (!done) {
 		set_mouseover (PortMatrixNode ());
@@ -446,7 +446,7 @@ PortMatrixBody::set_mouseover (list<PortMatrixNode> const & n)
 
 	list<PortMatrixNode> old = _mouseover;
 	_mouseover = n;
-	
+
 	for (list<PortMatrixComponent*>::iterator i = _components.begin(); i != _components.end(); ++i) {
 		(*i)->mouseover_changed (old);
 	}
@@ -507,7 +507,7 @@ PortMatrixBody::component_size_changed ()
 	if (_ignore_component_size_changed) {
 		return;
 	}
-	
+
 	compute_rectangles ();
 	_matrix->setup_scrollbars ();
 }

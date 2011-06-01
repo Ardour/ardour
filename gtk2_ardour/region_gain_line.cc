@@ -56,7 +56,7 @@ AudioRegionGainLine::start_drag_single (ControlPoint* cp, double x, float fracti
 	AutomationLine::start_drag_single (cp, x, fraction);
 
         // XXX Stateful need to capture automation curve data
-	
+
 	if (!rv.audio_region()->envelope_active()) {
 		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
 		rv.audio_region()->set_envelope_active(false);

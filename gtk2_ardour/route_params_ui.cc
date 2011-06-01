@@ -195,7 +195,7 @@ RouteParams_UI::route_property_changed (const PropertyChange& what_changed, boos
 
 	boost::shared_ptr<Route> route (wr.lock());
 
-	if (!route) { 
+	if (!route) {
 		return;
 	}
 
@@ -278,7 +278,7 @@ RouteParams_UI::cleanup_latency_frame ()
 
 		delete latency_widget;
 		latency_widget = 0;
-		
+
 	}
 }
 
@@ -362,7 +362,7 @@ RouteParams_UI::route_removed (boost::weak_ptr<Route> wr)
 {
 	boost::shared_ptr<Route> route (wr.lock());
 
-	if (!route) { 
+	if (!route) {
 		return;
 	}
 
@@ -395,7 +395,7 @@ void
 RouteParams_UI::set_session (Session *sess)
 {
 	ArdourDialog::set_session (sess);
-	
+
 	route_display_model->clear();
 	_plugin_selector->set_session (_session);
 
@@ -462,7 +462,7 @@ RouteParams_UI::route_selected()
 		setup_latency_frame ();
 
 		route->processors_changed.connect (_route_processors_connection, invalidator (*this), ui_bind (&RouteParams_UI::processors_changed, this, _1), gui_context());
-		
+
 		track_input_label.set_text (_route->name());
 
 		update_title();

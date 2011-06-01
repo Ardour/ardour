@@ -43,7 +43,7 @@ ClockGroup::remove (AudioClock& clock)
 {
         clocks.erase (&clock);
 }
-        
+
 void
 ClockGroup::one_clock_changed (AudioClock* clock)
 {
@@ -62,5 +62,5 @@ ClockGroup::set_clock_mode (AudioClock::Mode mode)
                 (*c)->set_mode (mode);
         }
         ignore_changes = false;
-}        
+}
 

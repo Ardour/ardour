@@ -92,7 +92,7 @@ queue_note_draw (PianoKeyboard* pk, int note)
 	}
 }
 
-static void 
+static void
 draw_note(PianoKeyboard *pk, cairo_t* cr, int note)
 {
 	int		is_white = pk->notes[note].white;
@@ -138,7 +138,7 @@ draw_note(PianoKeyboard *pk, cairo_t* cr, int note)
 	}
 }
 
-static int 
+static int
 press_key(PianoKeyboard *pk, int key)
 {
 	assert(key >= 0);
@@ -163,7 +163,7 @@ press_key(PianoKeyboard *pk, int key)
 	return 1;
 }
 
-static int 
+static int
 release_key(PianoKeyboard *pk, int key)
 {
 	assert(key >= 0);
@@ -192,9 +192,9 @@ static void
 rest (PianoKeyboard* pk)
 {
 	g_signal_emit_by_name(GTK_WIDGET(pk), "rest");
-}        
+}
 
-static void 
+static void
 stop_unsustained_notes(PianoKeyboard *pk)
 {
 	int		i;
@@ -208,7 +208,7 @@ stop_unsustained_notes(PianoKeyboard *pk)
 	}
 }
 
-static void 
+static void
 stop_sustained_notes(PianoKeyboard *pk)
 {
 	int		i;
@@ -255,7 +255,7 @@ clear_notes(PianoKeyboard *pk)
 	g_hash_table_remove_all(pk->key_bindings);
 }
 
-static void 
+static void
 bind_keys_qwerty(PianoKeyboard *pk)
 {
 	clear_notes(pk);
@@ -298,7 +298,7 @@ bind_keys_qwerty(PianoKeyboard *pk)
 	bind_key(pk, "p", 40);
 }
 
-static void 
+static void
 bind_keys_qwertz(PianoKeyboard *pk)
 {
 	bind_keys_qwerty(pk);
@@ -351,7 +351,7 @@ bind_keys_azerty(PianoKeyboard *pk)
 	bind_key(pk, "p", 40);
 }
 
-static gint 
+static gint
 keyboard_event_handler(GtkWidget *mk, GdkEventKey *event, gpointer notused)
 {
 	int		note;
@@ -386,7 +386,7 @@ keyboard_event_handler(GtkWidget *mk, GdkEventKey *event, gpointer notused)
 		if (event->type == GDK_KEY_RELEASE) {
 			rest (pk);
 		}
-                        
+
 		return TRUE;
 	}
 
@@ -405,7 +405,7 @@ keyboard_event_handler(GtkWidget *mk, GdkEventKey *event, gpointer notused)
 	return TRUE;
 }
 
-static int 
+static int
 get_note_for_xy(PianoKeyboard *pk, int x, int y)
 {
 	int		height = GTK_WIDGET(pk)->allocation.height;
@@ -432,7 +432,7 @@ get_note_for_xy(PianoKeyboard *pk, int x, int y)
 	return -1;
 }
 
-static gboolean 
+static gboolean
 mouse_button_event_handler(PianoKeyboard *pk, GdkEventButton *event, gpointer notused)
 {
 	int		x = event->x;
@@ -472,7 +472,7 @@ mouse_button_event_handler(PianoKeyboard *pk, GdkEventButton *event, gpointer no
 	return TRUE;
 }
 
-static gboolean 
+static gboolean
 mouse_motion_event_handler(PianoKeyboard *pk, GdkEventMotion *event, gpointer notused)
 {
 	int		note;
@@ -483,7 +483,7 @@ mouse_motion_event_handler(PianoKeyboard *pk, GdkEventMotion *event, gpointer no
 	note = get_note_for_xy(pk, event->x, event->y);
 
 	if (note != pk->note_being_pressed_using_mouse && note >= 0) {
-		
+
 		if (pk->note_being_pressed_using_mouse >= 0)
 			release_key(pk, pk->note_being_pressed_using_mouse);
 		press_key(pk, note);
@@ -499,7 +499,7 @@ piano_keyboard_expose(GtkWidget *widget, GdkEventExpose *event)
 	int i;
 	PianoKeyboard *pk = PIANO_KEYBOARD(widget);
 	cairo_t* cr = gdk_cairo_create (GDK_DRAWABLE (GTK_WIDGET(pk)->window));
-	
+
 	gdk_cairo_region (cr, event->region);
 	cairo_clip (cr);
 
@@ -526,7 +526,7 @@ piano_keyboard_expose(GtkWidget *widget, GdkEventExpose *event)
 	return TRUE;
 }
 
-static void 
+static void
 piano_keyboard_size_request(GtkWidget* widget, GtkRequisition *requisition)
 {
 	requisition->width = PIANO_KEYBOARD_DEFAULT_WIDTH;
@@ -613,7 +613,7 @@ piano_keyboard_class_init(PianoKeyboardClass *klass)
                 G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
                 0, NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
-	widget_klass = (GtkWidgetClass*) klass;	
+	widget_klass = (GtkWidgetClass*) klass;
 
 	widget_klass->expose_event = piano_keyboard_expose;
 	widget_klass->size_request = piano_keyboard_size_request;
@@ -691,7 +691,7 @@ piano_keyboard_sustain_press(PianoKeyboard *pk)
 	}
 }
 
-void	
+void
 piano_keyboard_sustain_release(PianoKeyboard *pk)
 {
 	if (pk->maybe_stop_sustained_notes)
