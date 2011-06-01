@@ -362,7 +362,7 @@ def set_options(opt):
     opt.add_option('--gprofile', action='store_true', default=False, dest='gprofile',
                     help='Compile for use with gprofile')
     opt.add_option('--lv2', action='store_true', default=False, dest='lv2',
-                    help='Compile with support for LV2 (if slv2 is available)')
+                    help='Compile with support for LV2 (if SLV2 or Lilv+Suil is available)')
     opt.add_option('--nls', action='store_true', default=True, dest='nls',
                     help='Enable i18n (native language support) (default)')
     opt.add_option('--no-nls', action='store_false', dest='nls')
@@ -586,7 +586,7 @@ def configure(conf):
     config_text.write ('FPU optimization: '); config_text.write (str (opts.fpu_optimization)); config_text.write ("\\n\\\n")
     config_text.write ('Freedesktop files: '); config_text.write (str (opts.freedesktop)); config_text.write ("\\n\\\n")
     config_text.write ('Freesound: '); config_text.write (str (opts.freesound)); config_text.write ("\\n\\\n")
-    config_text.write ('LV2 support: '); config_text.write (str (bool(conf.env['HAVE_SLV2']))); config_text.write ("\\n\\\n")
+    config_text.write ('LV2 support: '); config_text.write (str (bool(conf.env['LV2_SUPPORT']))); config_text.write ("\\n\\\n")
     config_text.write ('LV2 UI embedding: '); config_text.write (str (bool(conf.env['HAVE_SUIL']))); config_text.write ("\\n\\\n")
     config_text.write ('Rubberband: '); config_text.write (str (bool(conf.env['HAVE_RUBBERBAND']))); config_text.write ("\\n\\\n")
     config_text.write ('Samplerate: '); config_text.write (str (bool(conf.env['HAVE_SAMPLERATE']))); config_text.write ("\\n\\\n")
