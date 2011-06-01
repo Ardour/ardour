@@ -1519,41 +1519,15 @@ Session::set_block_size (nframes_t nframes)
 
 	{ 
 		vector<Sample*>::iterator i;
-		uint32_t np;
 			
 		current_block_size = nframes;
 
-		for (np = 0, i = _passthru_buffers.begin(); i != _passthru_buffers.end(); ++i, ++np) {
-			free (*i);
-		}
+		ensure_passthru_buffers (_passthru_buffers.size());
 
-		for (vector<Sample*>::iterator i = _silent_buffers.begin(); i != _silent_buffers.end(); ++i) {
-			free (*i);
-		}
-
-		_passthru_buffers.clear ();
-		_silent_buffers.clear ();
-
-		ensure_passthru_buffers (np);
-
-		for (vector<Sample*>::iterator i = _send_buffers.begin(); i != _send_buffers.end(); ++i) {
-			free(*i);
-
-			Sample *buf;
-#ifdef NO_POSIX_MEMALIGN
-			buf = (Sample *) malloc(current_block_size * sizeof(Sample));
-#else
-			posix_memalign((void **)&buf,CPU_CACHE_ALIGN,current_block_size * sizeof(Sample));
-#endif			
-			*i = buf;
-
-			memset (*i, 0, sizeof (Sample) * current_block_size);
-		}
-
-		
 		if (_gain_automation_buffer) {
 			delete [] _gain_automation_buffer;
 		}
+
 		_gain_automation_buffer = new gain_t[nframes];
 
 		allocate_pan_automation_buffers (nframes, _npan_buffers, true);
@@ -3906,50 +3880,81 @@ Session::tempo_map_changed (Change ignored)
 void
 Session::ensure_passthru_buffers (uint32_t howmany)
 {
+        vector<Sample*>::iterator i;
+        Sample *buf;
+
 	if (current_block_size == 0) {
 		return;
 	}
 
-	while (howmany > _passthru_buffers.size()) {
-		Sample *p;
+        while (_passthru_buffers.size() < howmany) {
+                _passthru_buffers.push_back (0);
+        }
+
+        for (i = _passthru_buffers.begin(); i != _passthru_buffers.end(); ++i) {
+
+                if (*i) {
+                        free (*i);
+                }
+
 #ifdef NO_POSIX_MEMALIGN
-		p =  (Sample *) malloc(current_block_size * sizeof(Sample));
+		buf =  (Sample *) malloc(current_block_size * sizeof(Sample));
 #else
-		if (posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * sizeof(Sample)) != 0) {
+		if (posix_memalign((void **)&buf,CPU_CACHE_ALIGN,current_block_size * sizeof(Sample)) != 0) {
 			fatal << string_compose (_("Memory allocation error: posix_memalign (%1 * %2) failed (%3)"),
 						 current_block_size, sizeof (Sample), strerror (errno))
 			      << endmsg;
 			/*NOTREACHED*/
 		}
 #endif			
-		_passthru_buffers.push_back (p);
+                (*i) = buf;
+        }
 
-		*p = 0;
+        while (_passthru_buffers.size() < howmany) {
+                _passthru_buffers.push_back (0);
+        }
+
+        for (i = _send_buffers.begin(); i != _send_buffers.end(); ++i) {
+
+                if (*i) {
+                        free (*i);
+                }
 		
 #ifdef NO_POSIX_MEMALIGN
-		p =  (Sample *) malloc(current_block_size * sizeof(Sample));
+		buf =  (Sample *) malloc(current_block_size * sizeof(Sample));
 #else
-		if (posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * sizeof(Sample)) != 0) {
-			fatal << string_compose (_("Memory allocation error: posix_memalign (%1 * %2) failed (%3)"),
-						 current_block_size, sizeof (Sample), strerror (errno))
-			      << endmsg;
-			/*NOTREACHED*/
-		}
+		posix_memalign((void **)&buf,CPU_CACHE_ALIGN,current_block_size * sizeof(Sample));
 #endif			
-		memset (p, 0, sizeof (Sample) * current_block_size);
-		_silent_buffers.push_back (p);
+		memset (buf, 0, sizeof (Sample) * current_block_size);
 
-		*p = 0;
-		
-#ifdef NO_POSIX_MEMALIGN
-		p =  (Sample *) malloc(current_block_size * sizeof(Sample));
-#else
-		posix_memalign((void **)&p,CPU_CACHE_ALIGN,current_block_size * sizeof(Sample));
-#endif			
-		memset (p, 0, sizeof (Sample) * current_block_size);
-		_send_buffers.push_back (p);
-		
+		(*i) = buf;
 	}
+
+        while (_silent_buffers.size() < howmany) {
+                _silent_buffers.push_back (0);
+        }
+
+        for (i = _silent_buffers.begin(); i != _silent_buffers.end(); ++i) {
+                
+                if (*i) {
+                        free (*i);
+                }
+
+#ifdef NO_POSIX_MEMALIGN
+                buf =  (Sample *) malloc(current_block_size * sizeof(Sample));
+#else
+                if (posix_memalign((void **)&buf,CPU_CACHE_ALIGN,current_block_size * sizeof(Sample)) != 0) {
+                        fatal << string_compose (_("Memory allocation error: posix_memalign (%1 * %2) failed (%3)"),
+                                                 current_block_size, sizeof (Sample), strerror (errno))
+                              << endmsg;
+                        /*NOTREACHED*/
+                }
+#endif			
+                
+                memset (buf, 0, sizeof (Sample) * current_block_size);
+                (*i) = buf;
+        }
+
 	allocate_pan_automation_buffers (current_block_size, howmany, false);
 }
 
