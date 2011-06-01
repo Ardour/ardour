@@ -3910,8 +3910,8 @@ Session::ensure_passthru_buffers (uint32_t howmany)
                 (*i) = buf;
         }
 
-        while (_passthru_buffers.size() < howmany) {
-                _passthru_buffers.push_back (0);
+        while (_send_buffers.size() < howmany) {
+                _send_buffers.push_back (0);
         }
 
         for (i = _send_buffers.begin(); i != _send_buffers.end(); ++i) {
