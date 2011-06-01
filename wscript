@@ -127,8 +127,6 @@ def set_compiler_flags (conf,opt):
     config_os = 3
     config = config_guess.split ("-")
 
-    autowaf.display_msg(conf, "System Triple", config_guess)
-
     if opt.gprofile:
         debug_flags = [ '-pg' ]
     else:
@@ -512,97 +510,87 @@ def configure(conf):
     conf.env.append_value('CCFLAGS', '-DWAF_BUILD')
     conf.env.append_value('CXXFLAGS', '-DWAF_BUILD')
 
-    # debug builds should not call home
-
+    # Set up waf environment
     opts = Options.options
     if opts.debug:
-        opts.phone_home = False;
-
-    autowaf.display_msg(conf, 'Build Target', conf.env['build_target'])
-    autowaf.display_msg(conf, 'Architecture flags', opts.arch)
-    autowaf.display_msg(conf, 'Aubio', bool(conf.env['HAVE_AUBIO']))
-    autowaf.display_msg(conf, 'CoreAudio', bool(conf.env['HAVE_COREAUDIO']))
-    autowaf.display_msg(conf, 'FLAC', bool(conf.env['HAVE_FLAC']))
-    autowaf.display_msg(conf, 'Phone Home', opts.phone_home)
+        opts.phone_home = False;   # debug builds should not call home
     if opts.phone_home:
         conf.env['PHONE_HOME'] = opts.phone_home
-    autowaf.display_msg(conf, 'FPU Optimization', opts.fpu_optimization)
     if opts.fpu_optimization:
         conf.define('FPU_OPTIMIZATION', 1)
-    autowaf.display_msg(conf, 'Freedesktop Files', opts.freedesktop)
-    autowaf.display_msg(conf, 'Freesound', opts.freesound)
     if opts.freesound:
         conf.define('FREESOUND',1)
-    autowaf.display_msg(conf, 'LV2 Support', bool(conf.env['LV2_SUPPORT']))
-    autowaf.display_msg(conf, 'LV2 UI Embedding', bool(conf.env['HAVE_SUIL']))
-    autowaf.display_msg(conf, 'OGG', bool(conf.env['HAVE_OGG']))
-    autowaf.display_msg(conf, 'Rubberband', bool(conf.env['HAVE_RUBBERBAND']))
-    autowaf.display_msg(conf, 'Samplerate', bool(conf.env['HAVE_SAMPLERATE']))
-    autowaf.display_msg(conf, 'Soundtouch', bool(conf.env['HAVE_SOUNDTOUCH']))
-    autowaf.display_msg(conf, 'Translation', opts.nls)
     if opts.nls:
         conf.define ('ENABLE_NLS', 1)
-    autowaf.display_msg(conf, 'Tranzport', opts.tranzport)
     if opts.build_tests:
         conf.env['BUILD_TESTS'] = opts.build_tests
-    autowaf.display_msg(conf, 'Unit Tests', bool(conf.env['BUILD_TESTS']) and bool (conf.env['HAVE_CPPUNIT']))
     if opts.tranzport:
         conf.define('TRANZPORT', 1)
-    autowaf.display_msg(conf, 'Universal Binary', opts.universal)
-    autowaf.display_msg(conf, 'VST Support', opts.vst)
     if opts.vst:
         conf.define('VST_SUPPORT', 1)
         conf.env.append_value('CPPPATH', Options.options.wine_include)
         autowaf.check_header(conf, 'windows.h', mandatory = True)
     if bool(conf.env['JACK_SESSION']):
         conf.define ('HAVE_JACK_SESSION', 1)
-    autowaf.display_msg(conf, 'Wiimote Support', opts.wiimote)
     if opts.wiimote:
         conf.define('WIIMOTE',1)
     conf.define('WINDOWS_KEY', opts.windows_key)
-    autowaf.display_msg(conf, 'Windows Key', opts.windows_key)
     conf.env['PROGRAM_NAME'] = opts.program_name
-    autowaf.display_msg(conf, 'Program Name', opts.program_name)
     if opts.rt_alloc_debug:
         conf.define('DEBUG_RT_ALLOC', 1)
+    if not conf.env['HAVE_CPPUNIT']:
+        conf.env['BUILD_TESTS'] = False
 
     set_compiler_flags (conf, Options.options)
 
-    autowaf.display_msg(conf, 'C Compiler flags', conf.env['CCFLAGS'])
-    autowaf.display_msg(conf, 'C++ Compiler flags', conf.env['CXXFLAGS'])
-    print('')
+    config_text = open('libs/ardour/config_text.cc', "w")
+    config_text.write('''#include "ardour/ardour.h"
+namespace ARDOUR {
+const char* const ardour_config_info = "\\n\\
+''')
 
-    # and dump the same stuff to a file for use in the build
+    def write_config_text(title, val):
+        autowaf.display_msg(conf, title, val)
+        config_text.write(title + ': ')
+        config_text.write(str(val))
+        config_text.write("\\n\\\n")
 
-    config_text = open ('libs/ardour/config_text.cc',"w")
-    config_text.write ('#include "ardour/ardour.h"\n\nnamespace ARDOUR {\nconst char* const ardour_config_info = "\\n\\\n')
-    config_text.write ("Install prefix: "); config_text.write (str (conf.env['PREFIX'])); config_text.write ("\\n\\\n")
-    config_text.write ("Debuggable build: "); config_text.write (str (str(conf.env['DEBUG']))); config_text.write ("\\n\\\n")
-    config_text.write ("Strict compiler flags: "); config_text.write (str (str(conf.env['STRICT']))); config_text.write ("\\n\\\n")
-    config_text.write ("Build documentation: "); config_text.write (str (str(conf.env['DOCS']))); config_text.write ("\\n\\\n")
-    config_text.write ('Build target: '); config_text.write (str (conf.env['build_target'])); config_text.write ("\\n\\\n")
-    config_text.write ('Architecture flags: '); config_text.write (str (opts.arch)); config_text.write ("\\n\\\n")
-    config_text.write ('Aubio: '); config_text.write (str (bool(conf.env['HAVE_AUBIO']))); config_text.write ("\\n\\\n")
-    config_text.write ('FPU optimization: '); config_text.write (str (opts.fpu_optimization)); config_text.write ("\\n\\\n")
-    config_text.write ('Freedesktop files: '); config_text.write (str (opts.freedesktop)); config_text.write ("\\n\\\n")
-    config_text.write ('Freesound: '); config_text.write (str (opts.freesound)); config_text.write ("\\n\\\n")
-    config_text.write ('LV2 support: '); config_text.write (str (bool(conf.env['LV2_SUPPORT']))); config_text.write ("\\n\\\n")
-    config_text.write ('LV2 UI embedding: '); config_text.write (str (bool(conf.env['HAVE_SUIL']))); config_text.write ("\\n\\\n")
-    config_text.write ('Rubberband: '); config_text.write (str (bool(conf.env['HAVE_RUBBERBAND']))); config_text.write ("\\n\\\n")
-    config_text.write ('Samplerate: '); config_text.write (str (bool(conf.env['HAVE_SAMPLERATE']))); config_text.write ("\\n\\\n")
-    config_text.write ('Soundtouch: '); config_text.write (str (bool(conf.env['HAVE_SOUNDTOUCH']))); config_text.write ("\\n\\\n")
-    config_text.write ('Translation: '); config_text.write (str (opts.nls)); config_text.write ("\\n\\\n")
-    config_text.write ('Tranzport: '); config_text.write (str (opts.tranzport)); config_text.write ("\\n\\\n")
-    config_text.write ('Universal binary: '); config_text.write (str (opts.universal)); config_text.write ("\\n\\\n")
-    config_text.write ('VST support: '); config_text.write (str (opts.vst)); config_text.write ("\\n\\\n")
-    config_text.write ('Wiimote support: '); config_text.write (str (opts.wiimote)); config_text.write ("\\n\\\n")
-    config_text.write ('Windows key: '); config_text.write (str (opts.windows_key)); config_text.write ("\\n\\\n")
-    config_text.write ('C compiler flags: '); config_text.write (str (conf.env['CCFLAGS'])); config_text.write ("\\n\\\n")
-    config_text.write ('C++ compiler flags: '); config_text.write (str (conf.env['CXXFLAGS'])); config_text.write ("\\n\\\n")
-    config_text.write ('Phone home: '); config_text.write (str (bool(conf.env['PHONE_HOME']))); config_text.write ("\\n\\\n")
-    config_text.write ('JACK session support: '); config_text.write (str (bool(conf.env['JACK_SESSION']))); config_text.write ("\\n\\\n")
-    config_text.write ('";}\n')
+    write_config_text('Build documentation',   conf.env['DOCS'])
+    write_config_text('Debuggable build',      conf.env['DEBUG'])
+    write_config_text('Install prefix',        conf.env['PREFIX'])
+    write_config_text('Strict compiler flags', conf.env['STRICT'])
+
+    write_config_text('Architecture flags',    opts.arch)
+    write_config_text('Aubio',                 bool(conf.env['HAVE_AUBIO']))
+    write_config_text('Build target',          conf.env['build_target'])
+    write_config_text('CoreAudio',             bool(conf.env['HAVE_COREAUDIO']))
+    write_config_text('FLAC',                  bool(conf.env['HAVE_FLAC']))
+    write_config_text('FPU optimization',      opts.fpu_optimization)
+    write_config_text('Freedesktop files',     opts.freedesktop)
+    write_config_text('Freesound',             opts.freesound)
+    write_config_text('JACK session support',  bool(conf.env['JACK_SESSION']))
+    write_config_text('LV2 UI embedding',      bool(conf.env['HAVE_SUIL']))
+    write_config_text('LV2 support',           bool(conf.env['LV2_SUPPORT']))
+    write_config_text('OGG',                   bool(conf.env['HAVE_OGG']))
+    write_config_text('Phone home',            bool(conf.env['PHONE_HOME']))
+    write_config_text('Program name',          opts.program_name)
+    write_config_text('Rubberband',            bool(conf.env['HAVE_RUBBERBAND']))
+    write_config_text('Samplerate',            bool(conf.env['HAVE_SAMPLERATE']))
+    write_config_text('Soundtouch',            bool(conf.env['HAVE_SOUNDTOUCH']))
+    write_config_text('Translation',           opts.nls)
+    write_config_text('Tranzport',             opts.tranzport)
+    write_config_text('Unit tests',            bool(conf.env['BUILD_TESTS']))
+    write_config_text('Universal binary',      opts.universal)
+    write_config_text('VST support',           opts.vst)
+    write_config_text('Wiimote support',       opts.wiimote)
+    write_config_text('Windows key',           opts.windows_key)
+
+    write_config_text('C compiler flags',      conf.env['CCFLAGS'])
+    write_config_text('C++ compiler flags',    conf.env['CXXFLAGS'])
+
+    config_text.write ('";\n}\n')
     config_text.close ()
+    print('')
 
 def build(bld):
     # add directories that contain only headers, to workaround an issue with waf
