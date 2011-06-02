@@ -24,6 +24,8 @@
 #include "pbd/enumwriter.h"
 
 #include <gtkmm/style.h>
+
+#include "gtkmm2ext/cairocell.h"
 #include <gtkmm2ext/utils.h>
 
 #include "ardour/ardour.h"
@@ -52,19 +54,23 @@ using PBD::atof;
 sigc::signal<void> AudioClock::ModeChanged;
 vector<AudioClock*> AudioClock::clocks;
 
-const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
-	2,   /* Timecode_Hours */
-	2,   /* Timecode_Minutes */
-	2,   /* Timecode_Seconds */
-	2,   /* Timecode_Frames */
-	2,   /* MS_Hours */
-	2,   /* MS_Minutes */
-	2,   /* MS_Seconds */
-	3,   /* MS_Milliseconds */
-	3,   /* Bars */
-	2,   /* Beats */
-	4,   /* Tick */
-	10   /* Audio Frame */
+std::map<AudioClock::Field,uint32_t> AudioClock::field_length;
+
+void
+AudioClock::fill_field_lengths()
+{
+	field_length[Timecode_Hours] = 2;
+	field_length[Timecode_Minutes] = 2;
+	field_length[Timecode_Seconds] = 2;
+	field_length[Timecode_Frames] = 2;
+	field_length[MS_Hours] = 2;
+	field_length[MS_Minutes] = 2;
+	field_length[MS_Seconds] = 2;
+	field_length[MS_Milliseconds] = 3;
+	field_length[Bars] = 4;
+	field_length[Beats] = 2;
+	field_length[Ticks] = 4;
+	field_length[AudioFrames] = 10;
 };
 
 AudioClock::AudioClock (const string& clock_name, bool transient, const string& widget_name,
@@ -74,53 +80,132 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	  is_duration (duration),
 	  editable (allow_edit),
 	  _follows_playhead (follows_playhead),
-	  colon1 (":"),
-	  colon2 (":"),
-	  colon3 (":"),
-	  colon4 (":"),
-	  colon5 (":"),
-	  period1 ("."),
-	  b1 ("|"),
-	  b2 ("|"),
 	  last_when(0),
 	  _canonical_time_is_displayed (true),
 	  _canonical_time (0)
 {
-	/* XXX: these are leaked, but I don't suppose it's the end of the world */
+	CairoTextCell* tc;
+	CairoBarCell* bc;
+	CairoColonCell* cc;
 
-	_eboxes[Timecode_Hours] = new EventBox;
-	_eboxes[Timecode_Minutes] = new EventBox;
-	_eboxes[Timecode_Seconds] = new EventBox;
-	_eboxes[Timecode_Frames] = new EventBox;
-	_eboxes[MS_Hours] = new EventBox;
-	_eboxes[MS_Minutes] = new EventBox;
-	_eboxes[MS_Seconds] = new EventBox;
-	_eboxes[MS_Milliseconds] = new EventBox;
-	_eboxes[Bars] = new EventBox;
-	_eboxes[Beats] = new EventBox;
-	_eboxes[Ticks] = new EventBox;
-	_eboxes[AudioFrames] = new EventBox;
+	if (field_length.empty()) {
+		fill_field_lengths ();
+	}
 
-	_labels[Timecode_Hours] = new Label;
-	_labels[Timecode_Minutes] = new Label;
-	_labels[Timecode_Seconds] = new Label;
-	_labels[Timecode_Frames] = new Label;
-	_labels[MS_Hours] = new Label;
-	_labels[MS_Minutes] = new Label;
-	_labels[MS_Seconds] = new Label;
-	_labels[MS_Milliseconds] = new Label;
-	_labels[Bars] = new Label;
-	_labels[Beats] = new Label;
-	_labels[Ticks] = new Label;
-	_labels[AudioFrames] = new Label;
+	timecode = new CairoEditableText ();
+	minsec = new CairoEditableText ();
+	bbt = new CairoEditableText ();
+	frames = new CairoEditableText ();
+
+	// add an extra 0.6 "average char width" for the negative sign
+	tc = new CairoTextCell (field_length[Timecode_Hours] + 0.6); 
+	_text_cells[Timecode_Hours] = tc;
+	timecode->add_cell (Timecode_Hours, tc);
+
+	cc = new CairoColonCell ();
+	_fixed_cells[Timecode_Colon1] = cc;
+	timecode->add_cell (Timecode_Colon1, cc);
+
+	tc = new CairoTextCell (field_length[Timecode_Minutes]);
+	_text_cells[Timecode_Minutes] = tc;
+	timecode->add_cell (Timecode_Minutes, tc);
+	
+	cc = new CairoColonCell ();
+	_fixed_cells[Timecode_Colon2] = cc;
+	timecode->add_cell (Timecode_Colon2, cc);
+
+	tc = new CairoTextCell (field_length[Timecode_Seconds]);
+	_text_cells[Timecode_Seconds] = tc;
+	timecode->add_cell (Timecode_Seconds, tc);
+
+	cc = new CairoColonCell ();
+	_fixed_cells[Timecode_Colon3] = cc;
+	timecode->add_cell (Timecode_Colon3, cc);
+
+	tc = new CairoTextCell (field_length[Timecode_Frames]);
+	_text_cells[Timecode_Frames] = tc;
+	timecode->add_cell (Timecode_Frames, tc);
+
+	/* Minutes/Seconds */
+	
+	tc = new CairoTextCell (field_length[MS_Hours]);
+	_text_cells[MS_Hours] = tc;
+	minsec->add_cell (MS_Hours, tc);
+	
+	cc = new CairoColonCell ();
+	_fixed_cells[MS_Colon1] = cc;
+	minsec->add_cell (MS_Colon1, cc);
+
+	tc = new CairoTextCell (field_length[MS_Minutes]);
+	_text_cells[MS_Minutes] = tc;
+	minsec->add_cell (MS_Minutes, tc);
+	
+	cc = new CairoColonCell ();
+	_fixed_cells[MS_Colon2] = cc;
+	minsec->add_cell (MS_Colon2, cc);
+
+	tc = new CairoTextCell (field_length[MS_Seconds]);
+	_text_cells[MS_Seconds] = tc;
+	minsec->add_cell (MS_Seconds, tc);
+
+	cc = new CairoColonCell ();
+	_fixed_cells[MS_Colon3] = cc;
+	minsec->add_cell (MS_Colon3, cc);
+	
+	tc = new CairoTextCell (field_length[MS_Milliseconds]);
+	_text_cells[MS_Milliseconds] = tc;
+	minsec->add_cell (MS_Milliseconds, tc);
+
+	/* Beats/Bars/Ticks */
+	
+	tc = new CairoTextCell (field_length[Bars]);
+	_text_cells[Bars] = tc;
+	bbt->add_cell (Bars, tc);
+
+	bc = new CairoBarCell ();
+	_fixed_cells[BBT_Bar1] = bc;
+	bbt->add_cell (BBT_Bar1, bc);
+	
+	tc = new CairoTextCell (field_length[Beats]);
+	_text_cells[Beats] = tc;
+	bbt->add_cell (Beats, tc);
+	
+	bc = new CairoBarCell ();
+	_fixed_cells[BBT_Bar2] = bc;
+	bbt->add_cell (BBT_Bar2, bc);
+
+	tc = new CairoTextCell (field_length[Ticks]);
+	_text_cells[Ticks] = tc;
+	bbt->add_cell (Ticks, tc);
+
+	/* Audio Frames */
+	
+	tc = new CairoTextCell (field_length[AudioFrames]);
+	_text_cells[AudioFrames] = tc;
+	frames->add_cell (AudioFrames, tc);
 
 	last_when = 0;
+	
+	last_hrs = 9999;
+	last_mins = 9999;
+	last_secs = 9999;
+	last_frames = 99999;
+
+	ms_last_hrs = 9999;
+	ms_last_mins = 9999;
+	ms_last_secs = 9999;
+	ms_last_millisecs = 99999;
+
+	last_negative = false;
+	
 	last_pdelta = 0;
 	last_sdelta = 0;
 	key_entry_state = 0;
 	ops_menu = 0;
 	dragging = false;
 	bbt_reference_time = -1;
+	editing_field = (Field) 0;
+	current_cet = 0;
 
 	if (with_info) {
 		frames_upper_info_label = manage (new Label);
@@ -161,168 +246,160 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 
 	frames_packer.set_homogeneous (false);
 	frames_packer.set_border_width (2);
-	frames_packer.pack_start (*_eboxes[AudioFrames], false, false);
+	frames_packer.pack_start (*frames);
+
+#ifdef CLOCKFIX
+	/* XXX THE with_info CLAUSES NEED HANDLING BECAUSE WE'RE NOT PACKING
+	   INTO BOXES
+	*/
 
 	if (with_info) {
 		frames_packer.pack_start (frames_info_box, false, false, 5);
 	}
-
-	frames_packer_hbox.pack_start (frames_packer, true, false);
-
-	for (std::map<Field, EventBox*>::iterator i = _eboxes.begin(); i != _eboxes.end(); ++i) {
-		i->second->add (*_labels[i->first]);
-	}
+#endif
 
 	timecode_packer.set_homogeneous (false);
 	timecode_packer.set_border_width (2);
-	timecode_packer.pack_start (*_eboxes[Timecode_Hours], false, false);
-	timecode_packer.pack_start (colon1, false, false);
-	timecode_packer.pack_start (*_eboxes[Timecode_Minutes], false, false);
-	timecode_packer.pack_start (colon2, false, false);
-	timecode_packer.pack_start (*_eboxes[Timecode_Seconds], false, false);
-	timecode_packer.pack_start (colon3, false, false);
-	timecode_packer.pack_start (*_eboxes[Timecode_Frames], false, false);
-
+	timecode_packer.pack_start (*timecode);
+	
+#ifdef CLOCKFIX
 	if (with_info) {
 		timecode_packer.pack_start (timecode_info_box, false, false, 5);
 	}
-
-	timecode_packer_hbox.pack_start (timecode_packer, true, false);
+#endif
 
 	bbt_packer.set_homogeneous (false);
 	bbt_packer.set_border_width (2);
-	bbt_packer.pack_start (*_eboxes[Bars], false, false);
-	bbt_packer.pack_start (b1, false, false);
-	bbt_packer.pack_start (*_eboxes[Beats], false, false);
-	bbt_packer.pack_start (b2, false, false);
-	bbt_packer.pack_start (*_eboxes[Ticks], false, false);
-
+	bbt_packer.pack_start (*bbt);
+	
+#ifdef CLOCKFIX
 	if (with_info) {
 		bbt_packer.pack_start (bbt_info_box, false, false, 5);
 	}
-
-	bbt_packer_hbox.pack_start (bbt_packer, true, false);
-
+#endif
+	
 	minsec_packer.set_homogeneous (false);
 	minsec_packer.set_border_width (2);
-	minsec_packer.pack_start (*_eboxes[MS_Hours], false, false);
-	minsec_packer.pack_start (colon4, false, false);
-	minsec_packer.pack_start (*_eboxes[MS_Minutes], false, false);
-	minsec_packer.pack_start (colon5, false, false);
-	minsec_packer.pack_start (*_eboxes[MS_Seconds], false, false);
-	minsec_packer.pack_start (period1, false, false);
-	minsec_packer.pack_start (*_eboxes[MS_Milliseconds], false, false);
-
-	minsec_packer_hbox.pack_start (minsec_packer, true, false);
-
-	clock_frame.set_shadow_type (SHADOW_IN);
-	clock_frame.set_name ("BaseFrame");
-
-	clock_frame.add (clock_base);
+	minsec_packer.pack_start (*minsec);
 
 	set_widget_name (widget_name);
 
 	_mode = BBT; /* lie to force mode switch */
 	set_mode (Timecode);
-
-	pack_start (clock_frame, true, true);
-
-	/* the clock base handles button releases for menu popup regardless of
-	   editable status. if the clock is editable, the clock base is where
-	   we pass focus to after leaving the last editable "field", which
-	   will then shutdown editing till the user starts it up again.
-
-	   it does this because the focus out event on the field disables
-	   keyboard event handling, and we don't connect anything up to
-	   notice focus in on the clock base. hence, keyboard event handling
-	   stays disabled.
-	*/
-
-	clock_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
-	clock_base.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &AudioClock::field_button_release_event), Timecode_Hours));
-
-	if (editable) {
-		setup_events ();
-	}
-
 	set (last_when, true);
 
 	if (!is_transient) {
 		clocks.push_back (this);
 	}
 }
+	
+AudioClock::~AudioClock ()
+{
+	delete timecode;
+	delete minsec;
+	delete bbt;
+	delete frames;
+}
 
 void
 AudioClock::set_widget_name (string name)
 {
 	Widget::set_name (name);
+	set_theme ();
+}
 
-	clock_base.set_name (name);
+void
+AudioClock::set_theme ()
+{
+	Glib::RefPtr<Gtk::Style> style = get_style ();
+	double r, g, b, a;
 
-	for (std::map<Field, EventBox*>::iterator i = _eboxes.begin(); i != _eboxes.end(); ++i) {
-		i->second->set_name (name);
+	if (!style) {
+		return;
 	}
 
-	for (std::map<Field, Label*>::iterator i = _labels.begin(); i != _labels.end(); ++i) {
-		i->second->set_name (name);
+	Pango::FontDescription font; 
+
+	if (!is_realized()) {
+		font = get_font_for_style (get_name());
+	} else {
+		font = style->get_font();
 	}
 
-	colon1.set_name (name);
-	colon2.set_name (name);
-	colon3.set_name (name);
-	colon4.set_name (name);
-	colon5.set_name (name);
-	b1.set_name (name);
-	b2.set_name (name);
-	period1.set_name (name);
+	timecode->set_font (font);
+	minsec->set_font (font);
+	bbt->set_font (font);
+	frames->set_font (font);
+
+	Gdk::Color bg = style->get_base (Gtk::STATE_NORMAL);
+	Gdk::Color fg = style->get_text (Gtk::STATE_NORMAL);
+	Gdk::Color eg = style->get_text (Gtk::STATE_ACTIVE);
+
+	r = bg.get_red_p ();
+	g = bg.get_green_p ();
+	b = bg.get_blue_p ();
+	a = 1.0;
+
+	timecode->set_bg (r, g, b, a);
+	minsec->set_bg (r, g, b, a);
+	bbt->set_bg (r, g, b, a);
+	frames->set_bg (r, g, b, a);
+
+	r = fg.get_red_p ();
+	g = fg.get_green_p ();
+	b = fg.get_blue_p ();
+	a = 1.0;
+
+	timecode->set_colors (r, g, b, a);
+	minsec->set_colors (r, g, b, a);
+	bbt->set_colors (r, g, b, a);
+	frames->set_colors (r, g, b, a);
+
+	r = eg.get_red_p ();
+	g = eg.get_green_p ();
+	b = eg.get_blue_p ();
+	a = 1.0;
+
+	timecode->set_edit_colors (r, g, b, a);
+	minsec->set_edit_colors (r, g, b, a);
+	bbt->set_edit_colors (r, g, b, a);
+	frames->set_edit_colors (r, g, b, a);
 
 	queue_draw ();
 }
 
 void
-AudioClock::setup_events ()
+AudioClock::focus ()
 {
-	clock_base.set_flags (CAN_FOCUS);
-
-	for (std::map<Field, EventBox*>::iterator i = _eboxes.begin(); i != _eboxes.end(); ++i) {
-		i->second->add_events (
-			Gdk::BUTTON_PRESS_MASK |
-			Gdk::BUTTON_RELEASE_MASK |
-			Gdk::KEY_PRESS_MASK |
-			Gdk::KEY_RELEASE_MASK |
-			Gdk::FOCUS_CHANGE_MASK |
-			Gdk::POINTER_MOTION_MASK |
-			Gdk::SCROLL_MASK);
-
-		i->second->set_flags (CAN_FOCUS);
-		i->second->signal_motion_notify_event().connect (sigc::bind (sigc::mem_fun (*this, &AudioClock::field_motion_notify_event), i->first));
-		i->second->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &AudioClock::field_button_press_event), i->first));
-		i->second->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &AudioClock::field_button_release_event), i->first));
-		i->second->signal_scroll_event().connect (sigc::bind (sigc::mem_fun (*this, &AudioClock::field_button_scroll_event), i->first));
-		i->second->signal_key_press_event().connect (sigc::bind (sigc::mem_fun (*this, &AudioClock::field_key_press_event), i->first));
-		i->second->signal_key_release_event().connect (sigc::bind (sigc::mem_fun (*this, &AudioClock::field_key_release_event), i->first));
-		i->second->signal_focus_in_event().connect (sigc::bind (sigc::mem_fun (*this, &AudioClock::field_focus_in_event), i->first));
-		i->second->signal_focus_out_event().connect (sigc::bind (sigc::mem_fun (*this, &AudioClock::field_focus_out_event), i->first));
-	}
-
-	clock_base.signal_focus_in_event().connect (sigc::mem_fun (*this, &AudioClock::drop_focus_handler));
 }
 
-bool
-AudioClock::drop_focus_handler (GdkEventFocus*)
+void
+AudioClock::end_edit ()
 {
+	current_cet->stop_editing ();
+	editing_field = (Field) 0;
+	key_entry_state = 0;
+
+	/* move focus back to the default widget in the top level window */
+
 	Keyboard::magic_widget_drop_focus ();
-	return false;
+
+	Widget* top = get_toplevel();
+
+	if (top->is_toplevel ()) {
+		Window* win = dynamic_cast<Window*> (top);
+		win->grab_focus ();
+	}
 }
 
 void
 AudioClock::on_realize ()
 {
-	HBox::on_realize ();
+	Alignment::on_realize ();
 
 	/* styles are not available until the widgets are bound to a window */
-
-	set_size_requests ();
+	
+	set_theme ();
 }
 
 void
@@ -415,7 +492,8 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 {
 	char buf[32];
 	snprintf (buf, sizeof (buf), "%" PRId64, when);
-	_labels[AudioFrames]->set_text (buf);
+	
+	frames->set_text (AudioFrames, buf);
 
 	if (frames_upper_info_label) {
 		framecnt_t rate = _session->frame_rate();
@@ -466,25 +544,25 @@ AudioClock::set_minsec (framepos_t when, bool force)
 
 	if (force || hrs != ms_last_hrs) {
 		sprintf (buf, "%02d", hrs);
-		_labels[MS_Hours]->set_text (buf);
+		minsec->set_text (MS_Hours, buf);
 		ms_last_hrs = hrs;
 	}
 
 	if (force || mins != ms_last_mins) {
 		sprintf (buf, "%02d", mins);
-		_labels[MS_Minutes]->set_text (buf);
+		minsec->set_text (MS_Minutes, buf);
 		ms_last_mins = mins;
 	}
 
 	if (force || secs != ms_last_secs) {
 		sprintf (buf, "%02d", secs);
-		_labels[MS_Seconds]->set_text (buf);
+		minsec->set_text (MS_Seconds, buf);
 		ms_last_secs = secs;
 	}
 
 	if (force || millisecs != ms_last_millisecs) {
 		sprintf (buf, "%03d", millisecs);
-		_labels[MS_Milliseconds]->set_text (buf);
+		minsec->set_text (MS_Milliseconds, buf);
 		ms_last_millisecs = millisecs;
 	}
 }
@@ -493,41 +571,41 @@ void
 AudioClock::set_timecode (framepos_t when, bool force)
 {
 	char buf[32];
-	Timecode::Time timecode;
+	Timecode::Time TC;
 
 	if (is_duration) {
-		_session->timecode_duration (when, timecode);
+		_session->timecode_duration (when, TC);
 	} else {
-		_session->timecode_time (when, timecode);
+		_session->timecode_time (when, TC);
 	}
 
-	if (force || timecode.hours != last_hrs || timecode.negative != last_negative) {
-		if (timecode.negative) {
-			sprintf (buf, "-%02" PRIu32, timecode.hours);
+	if (force || TC.hours != last_hrs || TC.negative != last_negative) {
+		if (TC.negative) {
+			sprintf (buf, "-%0*" PRIu32, field_length[Timecode_Hours], TC.hours);
 		} else {
-			sprintf (buf, " %02" PRIu32, timecode.hours);
+			sprintf (buf, " %0*" PRIu32, field_length[Timecode_Hours], TC.hours);
 		}
-		_labels[Timecode_Hours]->set_text (buf);
-		last_hrs = timecode.hours;
-		last_negative = timecode.negative;
+		timecode->set_text (Timecode_Hours, buf);
+		last_hrs = TC.hours;
+		last_negative = TC.negative;
 	}
 
-	if (force || timecode.minutes != last_mins) {
-		sprintf (buf, "%02" PRIu32, timecode.minutes);
-		_labels[Timecode_Minutes]->set_text (buf);
-		last_mins = timecode.minutes;
+	if (force || TC.minutes != last_mins) {
+		sprintf (buf, "%0*" PRIu32, field_length[Timecode_Minutes], TC.minutes);
+		timecode->set_text (Timecode_Minutes, buf);
+		last_mins = TC.minutes;
 	}
 
-	if (force || timecode.seconds != last_secs) {
-		sprintf (buf, "%02" PRIu32, timecode.seconds);
-		_labels[Timecode_Seconds]->set_text (buf);
-		last_secs = timecode.seconds;
+	if (force || TC.seconds != last_secs) {
+		sprintf (buf, "%0*" PRIu32, field_length[Timecode_Seconds], TC.seconds);
+		timecode->set_text (Timecode_Seconds, buf);
+		last_secs = TC.seconds;
 	}
 
-	if (force || timecode.frames != last_frames) {
-		sprintf (buf, "%02" PRIu32, timecode.frames);
-		_labels[Timecode_Frames]->set_text (buf);
-		last_frames = timecode.frames;
+	if (force || TC.frames != last_frames) {
+		sprintf (buf, "%0*" PRIu32, field_length[Timecode_Frames], TC.frames);
+		timecode->set_text (Timecode_Frames, buf);
+		last_frames = TC.frames;
 	}
 
 	if (timecode_upper_info_label) {
@@ -564,34 +642,35 @@ void
 AudioClock::set_bbt (framepos_t when, bool force)
 {
 	char buf[16];
-	Timecode::BBT_Time bbt;
+	Timecode::BBT_Time BBT;
 
 	/* handle a common case */
 	if (is_duration) {
 		if (when == 0) {
-			bbt.bars = 0;
-			bbt.beats = 0;
-			bbt.ticks = 0;
+			BBT.bars = 0;
+			BBT.beats = 0;
+			BBT.ticks = 0;
 		} else {
-			_session->tempo_map().bbt_time (when, bbt);
-			bbt.bars--;
-			bbt.beats--;
+			_session->tempo_map().bbt_time (when, BBT);
+			BBT.bars--;
+			BBT.beats--;
 		}
 	} else {
-		_session->tempo_map().bbt_time (when, bbt);
+		_session->tempo_map().bbt_time (when, BBT);
 	}
 
-	sprintf (buf, "%03" PRIu32, bbt.bars);
-	if (force || _labels[Bars]->get_text () != buf) {
-		_labels[Bars]->set_text (buf);
+	sprintf (buf, "%0*" PRIu32, field_length[Bars], BBT.bars);
+	if (force || _text_cells[Bars]->get_text () != buf) {
+		bbt->set_text (Bars, buf);
+		_text_cells[Bars]->set_text (buf);
 	}
-	sprintf (buf, "%02" PRIu32, bbt.beats);
-	if (force || _labels[Beats]->get_text () != buf) {
-		_labels[Beats]->set_text (buf);
+	sprintf (buf, "%0*" PRIu32, field_length[Beats], BBT.beats);
+	if (force || _text_cells[Beats]->get_text () != buf) {
+		bbt->set_text (Beats, buf);
 	}
-	sprintf (buf, "%04" PRIu32, bbt.ticks);
-	if (force || _labels[Ticks]->get_text () != buf) {
-		_labels[Ticks]->set_text (buf);
+	sprintf (buf, "%0*" PRIu32, field_length[Ticks], BBT.ticks);
+	if (force || _text_cells[Ticks]->get_text () != buf) {
+		bbt->set_text (Ticks, buf);
 	}
 
 	if (bbt_upper_info_label) {
@@ -641,42 +720,128 @@ AudioClock::set_session (Session *s)
 }
 
 void
-AudioClock::focus ()
+AudioClock::edit_next_field ()
 {
-	switch (_mode) {
-	case Timecode:
-		_eboxes[Timecode_Hours]->grab_focus ();
+	/* move on to the next field.
+	 */
+	
+	switch (editing_field) {
+		
+		/* Timecode */
+		
+	case Timecode_Hours:
+		editing_field = Timecode_Minutes;
+		timecode->start_editing (Timecode_Minutes);
 		break;
+	case Timecode_Minutes:
+		editing_field = Timecode_Seconds;
+		timecode->start_editing (Timecode_Seconds);
+		break;
+	case Timecode_Seconds:
+		editing_field = Timecode_Frames;
+		timecode->start_editing (Timecode_Frames);
+		break;
+	case Timecode_Frames:
+		end_edit ();
+		break;
+		
+		/* Min:Sec */
+		
+	case MS_Hours:
+		editing_field = MS_Minutes;
+		minsec->start_editing (MS_Minutes);
+		break;
+	case MS_Minutes:
+		editing_field = MS_Seconds;
+		minsec->start_editing (MS_Seconds);
+		break;
+	case MS_Seconds:
+		editing_field = MS_Milliseconds;
+		minsec->start_editing (MS_Milliseconds);
+		break;
+	case MS_Milliseconds:
+		end_edit ();
+		break;
+		
+		/* BBT */
+		
+	case Bars:
+		editing_field = Beats;
+		bbt->start_editing (Beats);
+		break;
+	case Beats:
+		editing_field = Ticks;
+		bbt->start_editing (Ticks);
+		break;
+	case Ticks:
+		end_edit ();
+		break;
+		
+		/* audio frames */
+	case AudioFrames:
+		end_edit ();
+		break;
+		
+	default:
+		break;
+	}
 
-	case BBT:
-		_eboxes[Bars]->grab_focus ();
-		break;
+	key_entry_state = 0;
+}
 
-	case MinSec:
-		_eboxes[MS_Hours]->grab_focus ();
-		break;
-
-	case Frames:
-		_eboxes[AudioFrames]->grab_focus ();
-		break;
-
-	case Off:
-		break;
+bool
+AudioClock::on_key_press_event (GdkEventKey* ev)
+{
+	/* return true for keys that we MIGHT use 
+	   at release
+	*/
+	switch (ev->keyval) {
+	case GDK_0:
+	case GDK_KP_0:
+	case GDK_1:
+	case GDK_KP_1:
+	case GDK_2:
+	case GDK_KP_2:
+	case GDK_3:
+	case GDK_KP_3:
+	case GDK_4:
+	case GDK_KP_4:
+	case GDK_5:
+	case GDK_KP_5:
+	case GDK_6:
+	case GDK_KP_6:
+	case GDK_7:
+	case GDK_KP_7:
+	case GDK_8:
+	case GDK_KP_8:
+	case GDK_9:
+	case GDK_KP_9:
+	case GDK_period:
+	case GDK_comma:
+	case GDK_KP_Decimal:
+	case GDK_Tab:
+	case GDK_Return:
+	case GDK_KP_Enter:
+	case GDK_Escape:
+		return true;
+	default:
+		return false;
 	}
 }
 
-
 bool
-AudioClock::field_key_press_event (GdkEventKey */*ev*/, Field /*field*/)
+AudioClock::on_key_release_event (GdkEventKey *ev)
 {
-	/* all key activity is handled on key release */
-	return true;
-}
+	if (editing_field == 0) {
+		return false;
+	}
 
-bool
-AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
-{
-	Label *label = _labels[field];
+	CairoTextCell *cell = _text_cells[editing_field];
+
+	if (!cell) {
+		return false;
+	}
+
 	string new_text;
 	char new_char = 0;
 	bool move_on = false;
@@ -724,9 +889,10 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 		break;
 
 	case GDK_period:
+	case GDK_comma:
 	case GDK_KP_Decimal:
-		if (_mode == MinSec && field == MS_Seconds) {
-			new_char = '.';
+		if (_mode == MinSec && editing_field == MS_Seconds) {
+			new_char = '.'; // XXX i18n
 		} else {
 			return false;
 		}
@@ -739,8 +905,7 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 		break;
 
 	case GDK_Escape:
-		key_entry_state = 0;
-		clock_base.grab_focus ();
+		end_edit ();
 		ChangeAborted();  /*  EMIT SIGNAL  */
 		return true;
 
@@ -754,8 +919,8 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 
 			/* initialize with a fresh new string */
 
-			if (field != AudioFrames) {
-				for (uint32_t xn = 0; xn < field_length[field] - 1; ++xn) {
+			if (editing_field != AudioFrames) {
+				for (uint32_t xn = 0; xn < field_length[editing_field] - 1; ++xn) {
 					new_text += '0';
 				}
 			} else {
@@ -764,21 +929,25 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 
 		} else {
 
-			string existing = label->get_text();
-			if (existing.length() >= field_length[field]) {
-				new_text = existing.substr (1, field_length[field] - 1);
+			string existing = cell->get_text();
+			if (existing.length() >= field_length[editing_field]) {
+				new_text = existing.substr (1, field_length[editing_field] - 1);
 			} else {
-				new_text = existing.substr (0, field_length[field] - 1);
+				new_text = existing.substr (0, field_length[editing_field] - 1);
 			}
 		}
 
 		new_text += new_char;
-		label->set_text (new_text);
+
+		if (current_cet) {
+			current_cet->set_text (editing_field, new_text);
+		}
+
 		_canonical_time_is_displayed = true;
 		key_entry_state++;
 	}
 
-	if (key_entry_state == field_length[field]) {
+	if (key_entry_state == field_length[editing_field]) {
 		move_on = true;
 	}
 
@@ -786,7 +955,12 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 
 		if (key_entry_state) {
 
-			switch (field) {
+			/* if key_entry_state != then we edited the text
+			 */
+
+			char buf[16];
+
+			switch (editing_field) {
 			case Timecode_Hours:
 			case Timecode_Minutes:
 			case Timecode_Seconds:
@@ -797,14 +971,16 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 			case Bars:
 			case Beats:
 			case Ticks:
-				// Bars should never be, unless this clock is for a duration
-				if (atoi (_labels[Bars]->get_text()) == 0 && !is_duration) {
-					_labels[Bars]->set_text("001");
+				// Bars should never be zero, unless this clock is for a duration
+				if (atoi (_text_cells[Bars]->get_text()) == 0 && !is_duration) {
+					snprintf (buf, sizeof (buf), "%0*" PRIu32, field_length[Bars], 1);
+					_text_cells[Bars]->set_text (buf);
 					_canonical_time_is_displayed = true;
 				}
-				//  beats should never be 0, unless this clock is for a duration
-				if (atoi (_labels[Beats]->get_text()) == 0 && !is_duration) {
-					_labels[Beats]->set_text("01");
+				//  beats should never be zero, unless this clock is for a duration
+				if (atoi (_text_cells[Beats]->get_text()) == 0 && !is_duration) {
+					snprintf (buf, sizeof (buf), "%0*" PRIu32, field_length[Beats], 1);
+					_text_cells[Beats]->set_text (buf);
 					_canonical_time_is_displayed = true;
 				}
 				break;
@@ -814,101 +990,52 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 
 			ValueChanged(); /* EMIT_SIGNAL */
 		}
-
-		/* move on to the next field.
-		 */
-
-		switch (field) {
-
-			/* Timecode */
-
-		case Timecode_Hours:
-			_eboxes[Timecode_Minutes]->grab_focus ();
-			break;
-		case Timecode_Minutes:
-			_eboxes[Timecode_Seconds]->grab_focus ();
-			break;
-		case Timecode_Seconds:
-			_eboxes[Timecode_Frames]->grab_focus ();
-			break;
-		case Timecode_Frames:
-			clock_base.grab_focus ();
-			break;
-
-		/* audio frames */
-		case AudioFrames:
-			clock_base.grab_focus ();
-			break;
-
-		/* Min:Sec */
-
-		case MS_Hours:
-			_eboxes[MS_Minutes]->grab_focus ();
-			break;
-		case MS_Minutes:
-			_eboxes[MS_Seconds]->grab_focus ();
-			break;
-		case MS_Seconds:
-			_eboxes[MS_Milliseconds]->grab_focus ();
-			break;
-		case MS_Milliseconds:
-			clock_base.grab_focus ();
-			break;
-
-		/* BBT */
-
-		case Bars:
-			_eboxes[Beats]->grab_focus ();
-			break;
-		case Beats:
-			_eboxes[Ticks]->grab_focus ();
-			break;
-		case Ticks:
-			clock_base.grab_focus ();
-			break;
-
-		default:
-			break;
-		}
-
+		
+		edit_next_field ();
 	}
 
 	//if user hit Enter, lose focus
 	switch (ev->keyval) {
 	case GDK_Return:
 	case GDK_KP_Enter:
-		clock_base.grab_focus ();
+		end_edit ();
 	}
 
 	return true;
 }
 
 bool
-AudioClock::field_focus_in_event (GdkEventFocus */*ev*/, Field field)
+AudioClock::button_press (GdkEventButton *ev, uint32_t id)
 {
-	key_entry_state = 0;
+	Field field = (Field) id;
 
-	Keyboard::magic_widget_grab_focus ();
+	switch (ev->button) {
+	case 1:
+		editing_field = field;
+		current_cet->start_editing (field);
 
-	_eboxes[field]->set_flags (HAS_FOCUS);
-	_eboxes[field]->set_state (STATE_ACTIVE);
+		Keyboard::magic_widget_grab_focus ();
 
-	return false;
+		/* make absolutely sure that the pointer is grabbed */
+		gdk_pointer_grab(ev->window,false ,
+				 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
+				 NULL,NULL,ev->time);
+		dragging = true;
+		drag_accum = 0;
+		drag_start_y = ev->y;
+		drag_y = ev->y;
+		break;
+		
+	default:
+		return false;
+		break;
+	}
+
+	return true;
 }
 
 bool
-AudioClock::field_focus_out_event (GdkEventFocus */*ev*/, Field field)
-{
-	_eboxes[field]->unset_flags (HAS_FOCUS);
-	_eboxes[field]->set_state (STATE_NORMAL);
-
-	Keyboard::magic_widget_drop_focus ();
-
-	return false;
-}
-
-bool
-AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
+AudioClock::button_release (GdkEventButton *ev, uint32_t id)
 {
 	if (dragging) {
 		gdk_pointer_ungrab (GDK_CURRENT_TIME);
@@ -935,67 +1062,14 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 		return true;
 	}
 
-	switch (ev->button) {
-	case 1:
-		_eboxes[field]->grab_focus ();
-		break;
-
-	default:
-		break;
-	}
-
 	return true;
 }
 
 bool
-AudioClock::field_button_press_event (GdkEventButton *ev, Field /*field*/)
+AudioClock::scroll (GdkEventScroll *ev, uint32_t id)
 {
-	if (_session == 0) {
-		return false;
-	}
+	Field field = (Field) id;
 
-	framepos_t frames = 0;
-
-	switch (ev->button) {
-	case 1:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-			set (frames, true);
-			ValueChanged (); /* EMIT_SIGNAL */
-					}
-
-		/* make absolutely sure that the pointer is grabbed */
-		gdk_pointer_grab(ev->window,false ,
-				 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
-				 NULL,NULL,ev->time);
-		dragging = true;
-		drag_accum = 0;
-		drag_start_y = ev->y;
-		drag_y = ev->y;
-		break;
-
-	case 2:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-			set (frames, true);
-			ValueChanged (); /* EMIT_SIGNAL */
-		}
-		break;
-
-	case 3:
-		/* used for context sensitive menu */
-		return false;
-		break;
-
-	default:
-		return false;
-		break;
-	}
-
-	return true;
-}
-
-bool
-AudioClock::field_button_scroll_event (GdkEventScroll *ev, Field field)
-{
 	if (_session == 0) {
 		return false;
 	}
@@ -1097,60 +1171,64 @@ AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 framepos_t
 AudioClock::get_frames (Field field, framepos_t pos, int dir)
 {
-	framecnt_t frames = 0;
-	Timecode::BBT_Time bbt;
+	framecnt_t f = 0;
+	Timecode::BBT_Time BBT;
 	switch (field) {
 	case Timecode_Hours:
-		frames = (framecnt_t) floor (3600.0 * _session->frame_rate());
+		f = (framecnt_t) floor (3600.0 * _session->frame_rate());
 		break;
 	case Timecode_Minutes:
-		frames = (framecnt_t) floor (60.0 * _session->frame_rate());
+		f = (framecnt_t) floor (60.0 * _session->frame_rate());
 		break;
 	case Timecode_Seconds:
-		frames = _session->frame_rate();
+		f = _session->frame_rate();
 		break;
 	case Timecode_Frames:
-		frames = (framecnt_t) floor (_session->frame_rate() / _session->timecode_frames_per_second());
+		f = (framecnt_t) floor (_session->frame_rate() / _session->timecode_frames_per_second());
 		break;
 
 	case AudioFrames:
-		frames = 1;
+		f = 1;
 		break;
 
 	case MS_Hours:
-		frames = (framecnt_t) floor (3600.0 * _session->frame_rate());
+		f = (framecnt_t) floor (3600.0 * _session->frame_rate());
 		break;
 	case MS_Minutes:
-		frames = (framecnt_t) floor (60.0 * _session->frame_rate());
+		f = (framecnt_t) floor (60.0 * _session->frame_rate());
 		break;
 	case MS_Seconds:
-		frames = (framecnt_t) _session->frame_rate();
+		f = (framecnt_t) _session->frame_rate();
 		break;
 	case MS_Milliseconds:
-		frames = (framecnt_t) floor (_session->frame_rate() / 1000.0);
+		f = (framecnt_t) floor (_session->frame_rate() / 1000.0);
 		break;
 
 	case Bars:
-		bbt.bars = 1;
-		bbt.beats = 0;
-		bbt.ticks = 0;
-		frames = _session->tempo_map().bbt_duration_at(pos,bbt,dir);
+		BBT.bars = 1;
+		BBT.beats = 0;
+		BBT.ticks = 0;
+		f = _session->tempo_map().bbt_duration_at (pos,BBT,dir);
 		break;
 	case Beats:
-		bbt.bars = 0;
-		bbt.beats = 1;
-		bbt.ticks = 0;
-		frames = _session->tempo_map().bbt_duration_at(pos,bbt,dir);
+		BBT.bars = 0;
+		BBT.beats = 1;
+		BBT.ticks = 0;
+		f = _session->tempo_map().bbt_duration_at(pos,BBT,dir);
 		break;
 	case Ticks:
-		bbt.bars = 0;
-		bbt.beats = 0;
-		bbt.ticks = 1;
-		frames = _session->tempo_map().bbt_duration_at(pos,bbt,dir);
+		BBT.bars = 0;
+		BBT.beats = 0;
+		BBT.ticks = 1;
+		f = _session->tempo_map().bbt_duration_at(pos,BBT,dir);
+		break;
+	default:
+		error << string_compose (_("programming error: %1"), "attempt to get frames from non-text field!") << endmsg;
+		f = 0;
 		break;
 	}
 
-	return frames;
+	return f;
 }
 
 framepos_t
@@ -1217,32 +1295,32 @@ void
 AudioClock::timecode_sanitize_display()
 {
 	// Check Timecode fields for sanity, possibly adjusting values
-	if (atoi (_labels[Timecode_Minutes]->get_text()) > 59) {
-		_labels[Timecode_Minutes]->set_text("59");
+	if (atoi (_text_cells[Timecode_Minutes]->get_text()) > 59) {
+		_text_cells[Timecode_Minutes]->set_text("59");
 		_canonical_time_is_displayed = true;
 	}
 
-	if (atoi (_labels[Timecode_Seconds]->get_text()) > 59) {
-		_labels[Timecode_Seconds]->set_text("59");
+	if (atoi (_text_cells[Timecode_Seconds]->get_text()) > 59) {
+		_text_cells[Timecode_Seconds]->set_text("59");
 		_canonical_time_is_displayed = true;
 	}
 
 	switch ((long)rint(_session->timecode_frames_per_second())) {
 	case 24:
-		if (atoi (_labels[Timecode_Frames]->get_text()) > 23) {
-			_labels[Timecode_Frames]->set_text("23");
+		if (atoi (_text_cells[Timecode_Frames]->get_text()) > 23) {
+			_text_cells[Timecode_Frames]->set_text("23");
 			_canonical_time_is_displayed = true;
 		}
 		break;
 	case 25:
-		if (atoi (_labels[Timecode_Frames]->get_text()) > 24) {
-			_labels[Timecode_Frames]->set_text("24");
+		if (atoi (_text_cells[Timecode_Frames]->get_text()) > 24) {
+			_text_cells[Timecode_Frames]->set_text("24");
 			_canonical_time_is_displayed = true;
 		}
 		break;
 	case 30:
-		if (atoi (_labels[Timecode_Frames]->get_text()) > 29) {
-			_labels[Timecode_Frames]->set_text("29");
+		if (atoi (_text_cells[Timecode_Frames]->get_text()) > 29) {
+			_text_cells[Timecode_Frames]->set_text("29");
 			_canonical_time_is_displayed = true;
 		}
 		break;
@@ -1251,8 +1329,8 @@ AudioClock::timecode_sanitize_display()
 	}
 
 	if (_session->timecode_drop_frames()) {
-		if ((atoi (_labels[Timecode_Minutes]->get_text()) % 10) && (atoi (_labels[Timecode_Seconds]->get_text()) == 0) && (atoi (_labels[Timecode_Frames]->get_text()) < 2)) {
-			_labels[Timecode_Frames]->set_text("02");
+		if ((atoi (_text_cells[Timecode_Minutes]->get_text()) % 10) && (atoi (_text_cells[Timecode_Seconds]->get_text()) == 0) && (atoi (_text_cells[Timecode_Frames]->get_text()) < 2)) {
+			_text_cells[Timecode_Frames]->set_text("02");
 			_canonical_time_is_displayed = true;
 		}
 	}
@@ -1262,11 +1340,11 @@ AudioClock::timecode_sanitize_display()
  *  @param f Field.
  *  @return Label widget.
  */
-Label const *
+CairoTextCell*
 AudioClock::label (Field f) const
 {
-	std::map<Field, Label*>::const_iterator i = _labels.find (f);
-	assert (i != _labels.end ());
+	std::map<Field,CairoTextCell*>::const_iterator i = _text_cells.find (f);
+	assert (i != _text_cells.end ());
 
 	return i->second;
 }
@@ -1278,17 +1356,17 @@ AudioClock::timecode_frame_from_display () const
 		return 0;
 	}
 
-	Timecode::Time timecode;
+	Timecode::Time TC;
 	framepos_t sample;
 
-	timecode.hours = atoi (label (Timecode_Hours)->get_text());
-	timecode.minutes = atoi (label (Timecode_Minutes)->get_text());
-	timecode.seconds = atoi (label (Timecode_Seconds)->get_text());
-	timecode.frames = atoi (label (Timecode_Frames)->get_text());
-	timecode.rate = _session->timecode_frames_per_second();
-	timecode.drop= _session->timecode_drop_frames();
+	TC.hours = atoi (label (Timecode_Hours)->get_text());
+	TC.minutes = atoi (label (Timecode_Minutes)->get_text());
+	TC.seconds = atoi (label (Timecode_Seconds)->get_text());
+	TC.frames = atoi (label (Timecode_Frames)->get_text());
+	TC.rate = _session->timecode_frames_per_second();
+	TC.drop= _session->timecode_drop_frames();
 
-	_session->timecode_to_sample (timecode, sample, false /* use_offset */, false /* use_subframes */ );
+	_session->timecode_to_sample (TC, sample, false /* use_offset */, false /* use_subframes */ );
 
 
 #if 0
@@ -1775,6 +1853,26 @@ AudioClock::locate ()
 }
 
 void
+AudioClock::disconnect_signals ()
+{
+	scroll_connection.disconnect ();
+	button_press_connection.disconnect ();
+	button_release_connection.disconnect ();
+}
+
+void
+AudioClock::connect_signals ()
+{
+	disconnect_signals ();
+
+	if (editable && current_cet) {
+		scroll_connection = current_cet->scroll.connect (sigc::mem_fun (*this, &AudioClock::scroll));
+		button_press_connection = current_cet->button_press.connect (sigc::mem_fun (*this, &AudioClock::button_press));
+		button_release_connection = current_cet->button_release.connect (sigc::mem_fun (*this, &AudioClock::button_release));
+	}	
+}
+
+void
 AudioClock::set_mode (Mode m)
 {
 	/* slightly tricky: this is called from within the ARDOUR_UI
@@ -1784,86 +1882,57 @@ AudioClock::set_mode (Mode m)
 	   started editing the clock and then we switch clock mode.
 	*/
 
-	clock_base.grab_focus ();
+	// clock_base.grab_focus ();
 
 	if (_mode == m) {
 		return;
 	}
 
-	clock_base.remove ();
-
+	remove ();
 	_mode = m;
 
 	switch (_mode) {
 	case Timecode:
-		clock_base.add (timecode_packer_hbox);
+		current_cet = timecode;
+		add (timecode_packer);
 		break;
 
 	case BBT:
-		clock_base.add (bbt_packer_hbox);
+		current_cet = bbt;
+		add (bbt_packer);
 		break;
 
 	case MinSec:
-		clock_base.add (minsec_packer_hbox);
+		current_cet = minsec;
+		add (minsec_packer);
 		break;
 
 	case Frames:
-		clock_base.add (frames_packer_hbox);
+		current_cet = frames;
+		add (frames_packer);
 		break;
 
 	case Off:
-		clock_base.add (off_hbox);
+		current_cet = 0;
+		add (off_hbox);
 		break;
 	}
 
-	set_size_requests ();
+	if (current_cet) {
+		connect_signals ();
+	} else {
+		disconnect_signals  ();
+	}
+
+	get_child()->show_all ();
 
 	set (last_when, true);
-	clock_base.show_all ();
-	key_entry_state = 0;
 
         if (!is_transient) {
                 ModeChanged (); /* EMIT SIGNAL (the static one)*/
         }
 
         mode_changed (); /* EMIT SIGNAL (the member one) */
-}
-
-void
-AudioClock::set_size_requests ()
-{
-	/* note that in some fonts, "88" is narrower than "00" */
-
-	switch (_mode) {
-	case Timecode:
-		Gtkmm2ext::set_size_request_to_display_given_text (*_labels[Timecode_Hours], "-88", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (*_labels[Timecode_Minutes], "88", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (*_labels[Timecode_Seconds], "88", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (*_labels[Timecode_Frames], "88", 5, 5);
-		break;
-
-	case BBT:
-		Gtkmm2ext::set_size_request_to_display_given_text (*_labels[Bars], "-888", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (*_labels[Beats], "88", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (*_labels[Ticks], "8888", 5, 5);
-		break;
-
-	case MinSec:
-		Gtkmm2ext::set_size_request_to_display_given_text (*_labels[MS_Hours], "88", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (*_labels[MS_Minutes], "88", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (*_labels[MS_Seconds], "88", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (*_labels[MS_Milliseconds], "888", 5, 5);
-		break;
-
-	case Frames:
-		Gtkmm2ext::set_size_request_to_display_given_text (*_labels[AudioFrames], "8888888888", 5, 5);
-		break;
-
-	case Off:
-		Gtkmm2ext::set_size_request_to_display_given_text (off_hbox, "00000", 5, 5);
-		break;
-
-	}
 }
 
 void
@@ -1875,32 +1944,8 @@ AudioClock::set_bbt_reference (framepos_t pos)
 void
 AudioClock::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
 {
-	HBox::on_style_changed (old_style);
-
-	/* propagate style changes to all component widgets that should inherit the main one */
-
-	Glib::RefPtr<RcStyle> rcstyle = get_modifier_style();
-
-	clock_base.modify_style (rcstyle);
-
-	for (std::map<Field, Label*>::iterator i = _labels.begin(); i != _labels.end(); ++i) {
-		i->second->modify_style (rcstyle);
-	}
-
-	for (std::map<Field, EventBox*>::iterator i = _eboxes.begin(); i != _eboxes.end(); ++i) {
-		i->second->modify_style (rcstyle);
-	}
-
-	colon1.modify_style (rcstyle);
-	colon2.modify_style (rcstyle);
-	colon3.modify_style (rcstyle);
-	colon4.modify_style (rcstyle);
-	colon5.modify_style (rcstyle);
-	b1.modify_style (rcstyle);
-	b2.modify_style (rcstyle);
-	period1.modify_style (rcstyle);
-
-	set_size_requests ();
+	Alignment::on_style_changed (old_style);
+	set_theme ();
 }
 
 void
