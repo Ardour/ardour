@@ -31,7 +31,6 @@
 #include <sys/mman.h>
 
 #include "pbd/error.h"
-#include <glibmm/thread.h>
 #include "pbd/xml++.h"
 #include "pbd/memento_command.h"
 #include "pbd/enumwriter.h"
