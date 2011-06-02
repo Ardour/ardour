@@ -51,7 +51,7 @@ guint Keyboard::edit_but = 3;
 guint Keyboard::edit_mod = GDK_CONTROL_MASK;
 guint Keyboard::delete_but = 3;
 guint Keyboard::delete_mod = GDK_SHIFT_MASK;
-guint Keyboard::insert_note_but = 3;
+guint Keyboard::insert_note_but = 1;
 guint Keyboard::insert_note_mod = GDK_CONTROL_MASK;
 guint Keyboard::snap_mod = GDK_MOD3_MASK;
 
