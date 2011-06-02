@@ -71,18 +71,33 @@ AudioClock::fill_field_lengths()
 	field_length[Beats] = 2;
 	field_length[Ticks] = 4;
 	field_length[AudioFrames] = 10;
+
+	field_length[Timecode_LowerLeft1] = 4;
+	field_length[Timecode_LowerLeft2] = 4;
+	field_length[Timecode_LowerRight1] = 3;
+	field_length[Timecode_LowerRight2] = 6; // 29.97 D
+
+	field_length[BBT_LowerLeft1] = 1;
+	field_length[BBT_LowerLeft2] = 7;
+	field_length[BBT_LowerRight1] = 1;
+	field_length[BBT_LowerRight2] = 3;
+
 };
 
 AudioClock::AudioClock (const string& clock_name, bool transient, const string& widget_name,
 			bool allow_edit, bool follows_playhead, bool duration, bool with_info)
-	: _name (clock_name),
-	  is_transient (transient),
-	  is_duration (duration),
-	  editable (allow_edit),
-	  _follows_playhead (follows_playhead),
-	  last_when(0),
-	  _canonical_time_is_displayed (true),
-	  _canonical_time (0)
+	: _name (clock_name)
+	, is_transient (transient)
+	, is_duration (duration)
+	, editable (allow_edit)
+	, _follows_playhead (follows_playhead)
+	, timecode_supplemental_left (0)
+	, timecode_supplemental_right (0)
+	, bbt_supplemental_left (0)
+	, bbt_supplemental_right (0)
+	, last_when(0)
+	, _canonical_time_is_displayed (true)
+	, _canonical_time (0)
 {
 	CairoTextCell* tc;
 	CairoBarCell* bc;
@@ -91,6 +106,34 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	if (field_length.empty()) {
 		fill_field_lengths ();
 	}
+
+	last_when = 0;
+	
+	last_hrs = 9999;
+	last_mins = 9999;
+	last_secs = 9999;
+	last_frames = 99999;
+
+	ms_last_hrs = 9999;
+	ms_last_mins = 9999;
+	ms_last_secs = 9999;
+	ms_last_millisecs = 99999;
+
+	last_negative = false;
+	
+	last_pdelta = 0;
+	last_sdelta = 0;
+	key_entry_state = 0;
+	ops_menu = 0;
+	dragging = false;
+	bbt_reference_time = -1;
+	editing_field = (Field) 0;
+	current_cet = 0;
+
+	frames_upper_info_label = 0;
+	frames_lower_info_label = 0;
+
+	/* basic per-mode editable text "arrays" */
 
 	timecode = new CairoEditableText ();
 	minsec = new CairoEditableText ();
@@ -184,99 +227,90 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	_text_cells[AudioFrames] = tc;
 	frames->add_cell (AudioFrames, tc);
 
-	last_when = 0;
-	
-	last_hrs = 9999;
-	last_mins = 9999;
-	last_secs = 9999;
-	last_frames = 99999;
-
-	ms_last_hrs = 9999;
-	ms_last_mins = 9999;
-	ms_last_secs = 9999;
-	ms_last_millisecs = 99999;
-
-	last_negative = false;
-	
-	last_pdelta = 0;
-	last_sdelta = 0;
-	key_entry_state = 0;
-	ops_menu = 0;
-	dragging = false;
-	bbt_reference_time = -1;
-	editing_field = (Field) 0;
-	current_cet = 0;
-
-	if (with_info) {
-		frames_upper_info_label = manage (new Label);
-		frames_lower_info_label = manage (new Label);
-		timecode_upper_info_label = manage (new Label);
-		timecode_lower_info_label = manage (new Label);
-		bbt_upper_info_label = manage (new Label);
-		bbt_lower_info_label = manage (new Label);
-
-		frames_upper_info_label->set_name ("AudioClockFramesUpperInfo");
-		frames_lower_info_label->set_name ("AudioClockFramesLowerInfo");
-		timecode_upper_info_label->set_name ("AudioClockTimecodeUpperInfo");
-		timecode_lower_info_label->set_name ("AudioClockTimecodeLowerInfo");
-		bbt_upper_info_label->set_name ("AudioClockBBTUpperInfo");
-		bbt_lower_info_label->set_name ("AudioClockBBTLowerInfo");
-
-		Gtkmm2ext::set_size_request_to_display_given_text(*timecode_upper_info_label, "23.98",0,0);
-		Gtkmm2ext::set_size_request_to_display_given_text(*timecode_lower_info_label, "NDF",0,0);
-
-		Gtkmm2ext::set_size_request_to_display_given_text(*bbt_upper_info_label, "88|88",0,0);
-		Gtkmm2ext::set_size_request_to_display_given_text(*bbt_lower_info_label, "888.88",0,0);
-
-		frames_info_box.pack_start (*frames_upper_info_label, true, true);
-		frames_info_box.pack_start (*frames_lower_info_label, true, true);
-		timecode_info_box.pack_start (*timecode_upper_info_label, true, true);
-		timecode_info_box.pack_start (*timecode_lower_info_label, true, true);
-		bbt_info_box.pack_start (*bbt_upper_info_label, true, true);
-		bbt_info_box.pack_start (*bbt_lower_info_label, true, true);
-
-	} else {
-		frames_upper_info_label = 0;
-		frames_lower_info_label = 0;
-		timecode_upper_info_label = 0;
-		timecode_lower_info_label = 0;
-		bbt_upper_info_label = 0;
-		bbt_lower_info_label = 0;
-	}
-
 	frames_packer.set_homogeneous (false);
 	frames_packer.set_border_width (2);
 	frames_packer.pack_start (*frames);
 
-#ifdef CLOCKFIX
-	/* XXX THE with_info CLAUSES NEED HANDLING BECAUSE WE'RE NOT PACKING
-	   INTO BOXES
-	*/
-
-	if (with_info) {
-		frames_packer.pack_start (frames_info_box, false, false, 5);
-	}
-#endif
+	/* Timecode */
 
 	timecode_packer.set_homogeneous (false);
 	timecode_packer.set_border_width (2);
-	timecode_packer.pack_start (*timecode);
-	
-#ifdef CLOCKFIX
+
 	if (with_info) {
-		timecode_packer.pack_start (timecode_info_box, false, false, 5);
+		timecode_supplemental_left = new CairoEditableText ();
+		tc = new CairoTextCell (field_length[Timecode_LowerLeft1]); 
+		_text_cells[Timecode_LowerLeft1] = tc;
+		timecode_supplemental_left->add_cell (Timecode_LowerLeft1, tc);
+		tc = new CairoTextCell (field_length[Timecode_LowerLeft2]);
+		_text_cells[Timecode_LowerLeft2] = tc;
+		timecode_supplemental_left->add_cell (Timecode_LowerLeft2, tc);
+		
+		timecode_supplemental_right = new CairoEditableText ();
+		tc = new CairoTextCell (field_length[Timecode_LowerRight1]); 
+		_text_cells[Timecode_LowerRight1] = tc;
+		timecode_supplemental_right->add_cell (Timecode_LowerRight1, tc);
+		tc = new CairoTextCell (field_length[Timecode_LowerRight2]); 
+		_text_cells[Timecode_LowerRight2] = tc;
+		timecode_supplemental_right->add_cell (Timecode_LowerRight2, tc);
+		
+		timecode_supplemental_right->set_text (Timecode_LowerRight1, "FPS");
+		/* LowerRight2 is set dynamically */
+
+		timecode_bottom.set_spacing (1);
+		timecode_bottom.set_homogeneous (false);
+		timecode_bottom.pack_start (*timecode_supplemental_left, true, true);
+		timecode_bottom.pack_start (*timecode_supplemental_right, true, true);
+
+		timecode_top.pack_start (*timecode, true, true);
+		
+		timecode_packer.set_spacing (1);
+		timecode_packer.pack_start (timecode_top, true, true);
+		timecode_packer.pack_start (timecode_bottom, false, false);
+	} else {
+		timecode_packer.pack_start (*timecode, true, true);
 	}
-#endif
+
+	/* BBT */
 
 	bbt_packer.set_homogeneous (false);
 	bbt_packer.set_border_width (2);
-	bbt_packer.pack_start (*bbt);
-	
-#ifdef CLOCKFIX
+
 	if (with_info) {
-		bbt_packer.pack_start (bbt_info_box, false, false, 5);
+		bbt_supplemental_left = new CairoEditableText ();
+		tc = new CairoTextCell (field_length[BBT_LowerLeft1]); 
+		_text_cells[BBT_LowerLeft1] = tc;
+		bbt_supplemental_left->add_cell (BBT_LowerLeft1, tc);
+		tc = new CairoTextCell (field_length[BBT_LowerLeft2]);
+		_text_cells[BBT_LowerLeft2] = tc;
+		bbt_supplemental_left->add_cell (BBT_LowerLeft2, tc);
+		
+		bbt_supplemental_right = new CairoEditableText ();
+		tc = new CairoTextCell (field_length[BBT_LowerRight1]); 
+		_text_cells[BBT_LowerRight1] = tc;
+		bbt_supplemental_right->add_cell (BBT_LowerRight1, tc);
+		tc = new CairoTextCell (field_length[BBT_LowerRight2]); 
+		_text_cells[BBT_LowerRight2] = tc;
+		bbt_supplemental_right->add_cell (BBT_LowerRight2, tc);
+		
+		bbt_supplemental_left->set_text (BBT_LowerLeft1, _("M")); // M is for meter
+		bbt_supplemental_right->set_text (BBT_LowerRight1, _("T")); // T is for tempo
+
+		/* LowerLeft2 and LowerRight2 are set dynamically */
+
+		bbt_bottom.set_spacing (1);
+		bbt_bottom.set_homogeneous (false);
+		bbt_bottom.pack_start (*bbt_supplemental_left, true, true);
+		bbt_bottom.pack_start (*bbt_supplemental_right, true, true);
+
+		bbt_top.pack_start (*bbt, true, true);
+		
+		bbt_packer.set_spacing (1);
+		bbt_packer.pack_start (bbt_top, true, true);
+		bbt_packer.pack_start (bbt_bottom, false, false);
+
+	} else {
+		bbt_packer.pack_start (*bbt);
 	}
-#endif
 	
 	minsec_packer.set_homogeneous (false);
 	minsec_packer.set_border_width (2);
@@ -295,16 +329,22 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	
 AudioClock::~AudioClock ()
 {
+	/* these are not manage()'d, so that we can add/remove
+	   them from containers as necessary.
+	*/
 	delete timecode;
 	delete minsec;
 	delete bbt;
 	delete frames;
+	delete timecode_supplemental_left;
+	delete timecode_supplemental_right;
 }
 
 void
 AudioClock::set_widget_name (string name)
 {
 	Widget::set_name (name);
+
 	set_theme ();
 }
 
@@ -331,6 +371,15 @@ AudioClock::set_theme ()
 	bbt->set_font (font);
 	frames->set_font (font);
 
+	if (timecode_supplemental_right) {
+		Pango::FontDescription smaller_font ("Sans 8");
+		
+		timecode_supplemental_right->set_font (smaller_font);
+		timecode_supplemental_left->set_font (smaller_font);
+		bbt_supplemental_right->set_font (smaller_font);
+		bbt_supplemental_left->set_font (smaller_font);
+	}
+
 	Gdk::Color bg = style->get_base (Gtk::STATE_NORMAL);
 	Gdk::Color fg = style->get_text (Gtk::STATE_NORMAL);
 	Gdk::Color eg = style->get_text (Gtk::STATE_ACTIVE);
@@ -345,6 +394,13 @@ AudioClock::set_theme ()
 	bbt->set_bg (r, g, b, a);
 	frames->set_bg (r, g, b, a);
 
+	if (timecode_supplemental_right) {
+		timecode_supplemental_right->set_bg (r,g,b,a);
+		timecode_supplemental_left->set_bg (r,g,b,a);
+		bbt_supplemental_right->set_bg (r,g,b,a);
+		bbt_supplemental_left->set_bg (r,g,b,a);
+	}
+
 	r = fg.get_red_p ();
 	g = fg.get_green_p ();
 	b = fg.get_blue_p ();
@@ -355,6 +411,13 @@ AudioClock::set_theme ()
 	bbt->set_colors (r, g, b, a);
 	frames->set_colors (r, g, b, a);
 
+	if (timecode_supplemental_right) {
+		timecode_supplemental_right->set_colors (r,g,b,a);
+		timecode_supplemental_left->set_colors (r,g,b,a);
+		bbt_supplemental_right->set_colors (r,g,b,a);
+		bbt_supplemental_left->set_colors (r,g,b,a);
+	}
+
 	r = eg.get_red_p ();
 	g = eg.get_green_p ();
 	b = eg.get_blue_p ();
@@ -364,6 +427,13 @@ AudioClock::set_theme ()
 	minsec->set_edit_colors (r, g, b, a);
 	bbt->set_edit_colors (r, g, b, a);
 	frames->set_edit_colors (r, g, b, a);
+
+	if (timecode_supplemental_right) {
+		timecode_supplemental_right->set_edit_colors (r,g,b,a);
+		timecode_supplemental_left->set_edit_colors (r,g,b,a);
+		bbt_supplemental_right->set_edit_colors (r,g,b,a);
+		bbt_supplemental_left->set_edit_colors (r,g,b,a);
+	}
 
 	queue_draw ();
 }
@@ -608,33 +678,25 @@ AudioClock::set_timecode (framepos_t when, bool force)
 		last_frames = TC.frames;
 	}
 
-	if (timecode_upper_info_label) {
+	if (timecode_supplemental_right) {
 		double timecode_frames = _session->timecode_frames_per_second();
-
-		if (fmod(timecode_frames, 1.0) == 0.0) {
-			sprintf (buf, "%u", int (timecode_frames));
-		} else {
-			sprintf (buf, "%.2f", timecode_frames);
-		}
-
-		if (timecode_upper_info_label->get_text() != buf) {
-			timecode_upper_info_label->set_text (buf);
-		}
+		bool drop;
 
 		if ((fabs(timecode_frames - 29.97) < 0.0001) || timecode_frames == 30) {
 			if (_session->timecode_drop_frames()) {
-				sprintf (buf, "DF");
+				drop = true;
 			} else {
-				sprintf (buf, "NDF");
+				drop = false;
 			}
+		} 
+	
+		if (fmod(timecode_frames, 1.0) == 0.0) {
+			sprintf (buf, "%u %s", int (timecode_frames), (drop ? "D" : ""));
 		} else {
-			// there is no drop frame alternative
-			buf[0] = '\0';
+			sprintf (buf, "%.2f %s", timecode_frames, (drop ? "D" : ""));
 		}
 
-		if (timecode_lower_info_label->get_text() != buf) {
-			timecode_lower_info_label->set_text (buf);
-		}
+		timecode_supplemental_right->set_text (Timecode_LowerRight2, buf);
 	}
 }
 
@@ -673,7 +735,7 @@ AudioClock::set_bbt (framepos_t when, bool force)
 		bbt->set_text (Ticks, buf);
 	}
 
-	if (bbt_upper_info_label) {
+	if (bbt_supplemental_right) {
 		framepos_t pos;
 
 		if (bbt_reference_time < 0) {
@@ -685,13 +747,10 @@ AudioClock::set_bbt (framepos_t when, bool force)
 		TempoMetric m (_session->tempo_map().metric_at (pos));
 
 		sprintf (buf, "%-5.2f", m.tempo().beats_per_minute());
-		if (bbt_lower_info_label->get_text() != buf) {
-			bbt_lower_info_label->set_text (buf);
-		}
+		bbt_supplemental_left->set_text (BBT_LowerLeft2, buf);
+
 		sprintf (buf, "%g|%g", m.meter().beats_per_bar(), m.meter().note_divisor());
-		if (bbt_upper_info_label->get_text() != buf) {
-			bbt_upper_info_label->set_text (buf);
-		}
+		bbt_supplemental_right->set_text (BBT_LowerRight2, buf);
 	}
 }
 

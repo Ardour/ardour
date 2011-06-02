@@ -125,6 +125,16 @@ class AudioClock : public Gtk::Alignment, public ARDOUR::SessionHandlePtr
 		BBT_Bar2,
 		Ticks,
 		AudioFrames,
+
+		Timecode_LowerLeft1,
+		Timecode_LowerLeft2,
+		Timecode_LowerRight1,
+		Timecode_LowerRight2,
+
+		BBT_LowerLeft1,
+		BBT_LowerLeft2,
+		BBT_LowerRight1,
+		BBT_LowerRight2,
 	};
 
 	/** CairoCells of various kinds for each of our non-text Fields */
@@ -135,23 +145,23 @@ class AudioClock : public Gtk::Alignment, public ARDOUR::SessionHandlePtr
 
 	Gtk::HBox      off_hbox;
 	
-	Gtk::HBox timecode_packer;
+	CairoEditableText* timecode_supplemental_left;
+	CairoEditableText* timecode_supplemental_right;
+	CairoEditableText* bbt_supplemental_left;
+	CairoEditableText* bbt_supplemental_right;
+
+	Gtk::VBox timecode_packer;
+	Gtk::HBox timecode_top;
+	Gtk::HBox timecode_bottom;
 	Gtk::HBox minsec_packer;
-	Gtk::HBox bbt_packer;
+	Gtk::HBox bbt_top;
+	Gtk::HBox bbt_bottom;
+	Gtk::VBox bbt_packer;
 	Gtk::HBox frames_packer;
 
 	Gtk::Label*  frames_upper_info_label;
 	Gtk::Label*  frames_lower_info_label;
-
-	Gtk::Label*  timecode_upper_info_label;
-	Gtk::Label*  timecode_lower_info_label;
-
-	Gtk::Label*  bbt_upper_info_label;
-	Gtk::Label*  bbt_lower_info_label;
-
 	Gtk::VBox   frames_info_box;
-	Gtk::VBox   timecode_info_box;
-	Gtk::VBox   bbt_info_box;
 
 	CairoEditableText* current_cet;
 	Field editing_field;

@@ -111,9 +111,9 @@ CairoEditableText::CairoEditableText ()
 	, width (0)
 	, max_cell_height (0)
 	, height (0)
-	, corner_radius (18)
-	, xpad (10)
-	, ypad (5)
+	, _corner_radius (9)
+	, _xpad (5)
+	, _ypad (5)
 {
 	add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK |
 	            Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK);
@@ -207,7 +207,11 @@ CairoEditableText::on_expose_event (GdkEventExpose* ev)
 	context->clip ();
 
 	context->set_source_rgba (bg_r, bg_g, bg_b, bg_a);
-	rounded_rectangle (context, 0, 0, width, height, corner_radius);
+	if (_corner_radius) {
+		rounded_rectangle (context, 0, 0, width, height, _corner_radius);
+	} else {
+		context->rectangle (0, 0, width, height);
+	}
 	context->fill ();
 
 	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
@@ -324,23 +328,34 @@ CairoEditableText::on_size_request (GtkRequisition* req)
 
 	max_cell_height = 0;
 
-	x = xpad;
+	x = _xpad;
 
-	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
+	CellMap::iterator i = cells.begin(); 
+
+	while (i != cells.end()) {
 		CairoCell* cell = i->second;
 
 		if (cell->visible()) {
-			cell->set_position (x, ypad);
+			cell->set_position (x, _ypad);
 		}
 
-		x += cell->width() + cell->xpad();
+		x += cell->width();
 		max_cell_height = std::max ((double) cell->height(), max_cell_height);
+
+		++i;
+
+		if (i != cells.end()) {
+			/* only add cell padding intra-cellularly */
+			x += cell->xpad();
+		} else {
+			break;
+		}
 	}
 
-	x += xpad;
+	x += _xpad;
 
 	req->width = x;
-	req->height = max_cell_height + (ypad * 2);
+	req->height = max_cell_height + (_ypad * 2);
 }
 
 void

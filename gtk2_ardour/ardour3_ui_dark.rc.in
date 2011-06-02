@@ -942,7 +942,7 @@ style "recording_big_clock_display" = "non_recording_big_clock_display"
 
 style "transport_clock_display"
 {
-	font_name = "@FONT_BOLD_BIGGER@"
+	font_name = "@FONT_BOLD_BIG@"
 
 	fg[ACTIVE] = darker(@@COLPREFIX@_bright_indicator)
 	fg[SELECTED] = darker(@@COLPREFIX@_bright_indicator)

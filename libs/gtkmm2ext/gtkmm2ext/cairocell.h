@@ -154,11 +154,20 @@ public:
 		bg_g = g;
 		bg_b = b;
 		bg_a = a;
+		queue_draw ();
 	}
 
 	void set_font (const std::string& str);
 	void set_font (const Pango::FontDescription&);
 
+	double xpad() const { return _xpad; }
+	void set_xpad (double x) { _xpad = x; queue_resize(); }
+	double ypad() const { return _ypad; }
+	void set_ypad (double y) { _ypad = y; queue_resize(); }
+	
+	double corner_radius() const { return _corner_radius; }
+	void set_corner_radius (double r) { _corner_radius = r; queue_draw (); }
+	
 	sigc::signal<bool,GdkEventScroll*,uint32_t> scroll;
 	sigc::signal<bool,GdkEventButton*,uint32_t> button_press;
 	sigc::signal<bool,GdkEventButton*,uint32_t> button_release;
@@ -182,9 +191,9 @@ private:
 	double width;
 	double max_cell_height;
 	double height;
-	double corner_radius;
-	double xpad;
-	double ypad;
+	double _corner_radius;
+	double _xpad;
+	double _ypad;
 	double r;
 	double g;
 	double b;
