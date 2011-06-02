@@ -433,7 +433,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 			{
 				clear_selection();
 
-				if (Keyboard::is_insert_note_event(ev)){
+				if (Keyboard::is_insert_note_event(ev)) {
 
 					double event_x, event_y;
 
@@ -484,7 +484,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 
 		_mouse_state = None;
 
-		if (Keyboard::is_insert_note_event(ev) || trackview.editor().current_mouse_mode() == MouseRange){
+		if (Keyboard::is_insert_note_event(ev) || trackview.editor().current_mouse_mode() == MouseRange) {
 
 			if (_drag_rect->property_x2() > _drag_rect->property_x1() + 2) {
 
@@ -522,23 +522,20 @@ MidiRegionView::motion (GdkEventMotion* ev)
 
 	if (!_ghost_note && trackview.editor().current_mouse_mode() != MouseRange
 	    && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())
-	    && _mouse_state != AddDragging){
+	    && _mouse_state != AddDragging) {
 
 		create_ghost_note (ev->x, ev->y);
-	}
-	else if (_ghost_note && trackview.editor().current_mouse_mode() != MouseRange
-	         && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())){
+	} else if (_ghost_note && trackview.editor().current_mouse_mode() != MouseRange
+	           && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
 
 		update_ghost_note (ev->x, ev->y);
-	}
-	else if (_ghost_note && trackview.editor().current_mouse_mode() != MouseRange){
+	} else if (_ghost_note && trackview.editor().current_mouse_mode() != MouseRange) {
 
 		delete _ghost_note;
 		_ghost_note = 0;
 
 		trackview.editor().verbose_cursor()->hide ();
-	}
-	else if (_ghost_note && trackview.editor().current_mouse_mode() == MouseRange) {
+	} else if (_ghost_note && trackview.editor().current_mouse_mode() == MouseRange) {
 		update_ghost_note (ev->x, ev->y);
 	}
 
@@ -556,9 +553,9 @@ MidiRegionView::motion (GdkEventMotion* ev)
 			return false;
 		}
 
-		// Select drag start
 		if (_pressed_button == 1 && trackview.editor().current_mouse_mode() == MouseObject
 		    && !Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
+			// Select drag start
 
 			group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 			            Gdk::Cursor(Gdk::FLEUR), ev->time);
@@ -582,8 +579,8 @@ MidiRegionView::motion (GdkEventMotion* ev)
 			_mouse_state = SelectRectDragging;
 			return true;
 
-			// Add note drag start
 		} else if (trackview.editor().internal_editing()) {
+			// Add note drag start
 
 			delete _ghost_note;
 			_ghost_note = 0;
@@ -610,7 +607,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 
 			_mouse_state = AddDragging;
 
-			if (_ghost_note){
+			if (_ghost_note) {
 
 				delete _ghost_note;
 				_ghost_note = 0;
@@ -635,13 +632,13 @@ MidiRegionView::motion (GdkEventMotion* ev)
 			event_y = t_y;
 		}
 
-		if (_mouse_state == AddDragging){
+		if (_mouse_state == AddDragging) {
 			event_x = trackview.editor().frame_to_pixel(event_frame);
 		}
 
 		if (_drag_rect) {
 
-			if (event_x > _drag_start_x){
+			if (event_x > _drag_start_x) {
 				_drag_rect->property_x2() = event_x;
 			}
 			else {
@@ -651,7 +648,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 
 		if (_drag_rect && _mouse_state == SelectRectDragging) {
 
-			if (event_y > _drag_start_y){
+			if (event_y > _drag_start_y) {
 				_drag_rect->property_y2() = event_y;
 			}
 			else {
@@ -702,7 +699,7 @@ MidiRegionView::key_press (GdkEventKey* ev)
 	   repeated presses, carry out key actions at key press, not release.
 	*/
 
-	if (ev->keyval == GDK_Alt_L || ev->keyval == GDK_Alt_R){
+	if (ev->keyval == GDK_Alt_L || ev->keyval == GDK_Alt_R) {
 		_mouse_state = SelectTouchDragging;
 		return true;
 

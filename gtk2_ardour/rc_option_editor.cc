@@ -282,8 +282,6 @@ public:
 		  _edit_button_spin (_edit_button_adjustment),
 		  _insert_note_button_adjustment (3, 1, 5),
 		  _insert_note_button_spin (_insert_note_button_adjustment)
-
-
 	{
 		/* internationalize and prepare for use with combos */
 
