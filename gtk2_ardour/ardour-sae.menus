@@ -191,7 +191,6 @@
 		     <menuitem action='track-height-large'/>
 		     <menuitem action='track-height-larger'/>
 		     <menuitem action='track-height-normal'/>
-		     <menuitem action='track-height-smaller'/>
 		     <menuitem action='track-height-small'/>
 		</menu>
 		<menu action='WaveformMenu'>

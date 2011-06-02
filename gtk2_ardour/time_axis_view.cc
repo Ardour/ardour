@@ -68,14 +68,13 @@ using Gtkmm2ext::Keyboard;
 
 const double trim_handle_size = 6.0; /* pixels */
 uint32_t TimeAxisView::extra_height;
-uint32_t TimeAxisView::smaller_height;
+uint32_t TimeAxisView::small_height;
 int const TimeAxisView::_max_order = 512;
 PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
 	, controls_table (2, 8)
-	, _controls_padding_table (3, 3)
 	, _size_menu (0)
 	, _y_position (0)
 	, _editor (ed)
@@ -161,16 +160,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 
 	HSeparator* separator = manage (new HSeparator());
 
-	/* Use a rather hacky extra table so that we can control the space above/below and
-	 * left/right of the controls_table separately.  This in turn is so that we can
-	 * shrink the vertical space when the track is at its minimum height.
-	 */
-	_controls_padding_table.set_row_spacings (2);
-	_controls_padding_table.set_col_spacings (0);
-	_controls_padding_table.attach (controls_table, 1, 2, 1, 2);
-	_controls_padding_table.show ();
-
-	controls_vbox.pack_start (_controls_padding_table, false, false);
+	controls_vbox.pack_start (controls_table, false, false);
 	controls_vbox.pack_end (resizer_box, false, false);
 	controls_vbox.show ();
 
@@ -401,23 +391,17 @@ TimeAxisView::step_height (bool coarser)
 
 	if (coarser) {
 
-		if (height == preset_height (HeightSmall)) {
+		if (height <= preset_height (HeightSmall)) {
 			return;
-		}
-
-		if (height <= preset_height (HeightSmaller) && height > preset_height (HeightSmall)) {
+		} else if (height <= preset_height (HeightNormal) && height > preset_height (HeightSmall)) {
 			set_height_enum (HeightSmall);
-		} else if (height <= preset_height (HeightNormal) && height > preset_height (HeightSmaller)) {
-			set_height_enum (HeightSmaller);
 		} else {
 			set_height (height - step);
 		}
 
 	} else {
 
-		if (height == preset_height(HeightSmall)) {
-			set_height_enum (HeightSmaller);
-		} else if (height == preset_height(HeightSmaller)) {
+		if (height <= preset_height(HeightSmall)) {
 			set_height_enum (HeightNormal);
 		} else {
 			set_height (height + step);
@@ -505,13 +489,6 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 					--i;
 				} while ((*i)->hidden());
 			}
-		}
-
-
-		/* resize to show editable name display */
-
-		if ((*i)->current_height() <= preset_height (HeightSmaller)) {
-			(*i)->set_height_enum (HeightSmaller);
 		}
 
 		(*i)->name_entry.grab_focus();
@@ -1039,9 +1016,7 @@ TimeAxisView::set_state (const XMLNode& node, int /*version*/)
 			set_height_enum (HeightLarger);
 		} else if (prop->value() == "normal") {
 			set_height_enum (HeightNormal);
-		} else if (prop->value() == "smaller") {
-			set_height_enum (HeightSmaller);
-		} else if (prop->value() == "small") {
+		} else if (prop->value() == "smaller" || prop->value() == "small") {
 			set_height_enum (HeightSmall);
 		} else {
 			error << string_compose(_("unknown track height name \"%1\" in XML GUI information"), prop->value()) << endmsg;
@@ -1106,7 +1081,7 @@ TimeAxisView::compute_heights ()
 
 	// height required to show 1 row of buttons
 
-	smaller_height = req.height + extra_height;
+	small_height = req.height + (2 * border_width);
 }
 
 void
@@ -1336,9 +1311,7 @@ TimeAxisView::preset_height (Height h)
 	case HeightNormal:
 		return extra_height + 48;
 	case HeightSmall:
-		return 27;
-	case HeightSmaller:
-		return smaller_height;
+		return small_height;
 	}
 
 	/* NOTREACHED */
@@ -1379,6 +1352,5 @@ TimeAxisView::build_size_menu ()
 	items.push_back (MenuElem (_("Larger"),  sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarger, true)));
 	items.push_back (MenuElem (_("Large"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightLarge, true)));
 	items.push_back (MenuElem (_("Normal"),  sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightNormal, true)));
-	items.push_back (MenuElem (_("Smaller"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightSmaller, true)));
 	items.push_back (MenuElem (_("Small"),   sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_height_enum), HeightSmall, true)));
 }

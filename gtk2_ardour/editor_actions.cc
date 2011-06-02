@@ -375,10 +375,6 @@ Editor::register_actions ()
 	act = reg_sens (editor_actions, "track-height-small", _("Small"), sigc::bind (
 				sigc::mem_fun(*this, &Editor::set_track_height), HeightSmall));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
-	ActionManager::track_selection_sensitive_actions.push_back (act);
-	act = reg_sens (editor_actions, "track-height-smaller", _("Smaller"), sigc::bind (
-				sigc::mem_fun(*this, &Editor::set_track_height), HeightSmaller));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	Glib::RefPtr<ActionGroup> zoom_actions = ActionGroup::create (X_("Zoom"));
 	RadioAction::Group zoom_group;

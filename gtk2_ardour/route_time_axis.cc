@@ -867,8 +867,6 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 	if (height >= preset_height (HeightNormal)) {
 
-		_controls_padding_table.set_row_spacings (2);
-
 		reset_meter();
 
 		gm.get_gain_slider().show();
@@ -888,9 +886,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 			playlist_button.show();
 		}
 
-	} else if (height >= preset_height (HeightSmaller)) {
-
-		_controls_padding_table.set_row_spacings (2);
+	} else {
 
 		reset_meter();
 
@@ -910,10 +906,6 @@ RouteTimeAxisView::set_height (uint32_t h)
 		if (is_track() && track()->mode() == ARDOUR::Normal) {
 			playlist_button.hide ();
 		}
-
-	} else {
-
-		_controls_padding_table.set_row_spacings (0);
 
 	}
 

@@ -217,16 +217,15 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
   protected:
 	/* The Standard LHS Controls */
-	Gtk::HBox     controls_hbox;
-	Gtk::Table    controls_table;
-	Gtk::Table   _controls_padding_table;
-	Gtk::EventBox controls_ebox;
-	Gtk::VBox     controls_vbox;
-	Gtk::VBox     time_axis_vbox;
-	Gtk::DrawingArea resizer;
-	Gtk::HBox     resizer_box;
-	Gtk::HBox     name_hbox;
-	Gtk::Frame    name_frame;
+	Gtk::HBox             controls_hbox;
+	Gtk::Table            controls_table;
+	Gtk::EventBox         controls_ebox;
+	Gtk::VBox             controls_vbox;
+	Gtk::VBox             time_axis_vbox;
+	Gtk::DrawingArea      resizer;
+	Gtk::HBox             resizer_box;
+	Gtk::HBox             name_hbox;
+	Gtk::Frame            name_frame;
  	Gtkmm2ext::FocusEntry name_entry;
 
 	uint32_t height;  /* in canvas units */
@@ -326,7 +325,7 @@ private:
 
 	void compute_heights ();
 	static uint32_t extra_height;
-	static uint32_t smaller_height;
+	static uint32_t small_height;
 
 	static int const _max_order;
 
