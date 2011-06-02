@@ -19,12 +19,15 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 #include "gtkmm2ext/cairocell.h"
 #include "gtkmm2ext/utils.h"
 
 using std::string;
 using std::map;
+using std::cerr;
+using std::endl;
 using namespace Gtkmm2ext;
 
 CairoCell::CairoCell ()
@@ -37,9 +40,33 @@ CairoCell::CairoCell ()
 	bbox.height = 0;
 }
 
-CairoTextCell::CairoTextCell (uint32_t wc)
+void
+CairoColonCell::render (Cairo::RefPtr<Cairo::Context>& context)
+{
+	/* two very small circles */
+	context->arc (bbox.x, bbox.y + (bbox.height/3.0), bbox.width/2.0, 0.0, M_PI*2.0);
+	context->fill ();
+	context->arc (bbox.x, bbox.y + (2.0 * bbox.height/3.0), bbox.width/2.0, 0.0, M_PI*2.0);
+	context->fill ();
+}
+
+void 
+CairoColonCell::set_size (Glib::RefPtr<Pango::Context>& context, const Pango::FontDescription& font)
+{
+	Pango::FontMetrics metrics = context->get_metrics (font);
+	bbox.width = std::max (3.0, (0.25 * metrics.get_approximate_char_width() / PANGO_SCALE));
+	bbox.height = (metrics.get_ascent() + metrics.get_descent()) / PANGO_SCALE;
+}
+
+CairoTextCell::CairoTextCell (double wc)
 	: _width_chars (wc)
 {
+}
+
+void
+CairoTextCell::set_text (const std::string& txt)
+{
+	layout->set_text (txt); 
 }
 
 void
@@ -57,8 +84,11 @@ CairoTextCell::render (Cairo::RefPtr<Cairo::Context>& context)
 void
 CairoTextCell::set_size (Glib::RefPtr<Pango::Context>& context, const Pango::FontDescription& font)
 {
-	layout = Pango::Layout::create (context);
-	layout->set_font_description (font);
+	if (!layout) {
+		layout = Pango::Layout::create (context);
+	}
+
+        layout->set_font_description (font);
 
 	Pango::FontMetrics metrics = context->get_metrics (font);
 
@@ -77,20 +107,40 @@ CairoEditableText::get_cell (uint32_t id)
 }
 
 CairoEditableText::CairoEditableText ()
-	: editing_id (0)
-	, editing_pos (0)
-	, width (0)
-	, max_cell_height (0)
-	, height (0)
-	, corner_radius (24)
-	, xpad (10)
-	, ypad (5)
+        : editing_id (0)
+        , width (0)
+        , max_cell_height (0)
+        , height (0)
+        , corner_radius (18)
+        , xpad (10)
+        , ypad (5)
 {
-	add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK |
-	            Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
-	set_flags (Gtk::CAN_FOCUS);
-	set_can_default (true);
-	set_receives_default (true);
+        add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK |
+                    Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK);
+        set_flags (Gtk::CAN_FOCUS);
+
+        set_can_default (true);
+        set_receives_default (true);
+}
+
+CairoEditableText::~CairoEditableText ()
+{
+	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
+		delete i->second;
+	}
+}
+
+bool
+CairoEditableText::on_scroll_event (GdkEventScroll* ev)
+{
+	uint32_t id;
+	CairoCell* cell = find_cell (ev->x, ev->y, id);
+
+	if (cell) {
+		return scroll (ev, id);
+	}
+
+	return false;
 }
 
 bool
@@ -102,13 +152,11 @@ CairoEditableText::on_focus_in_event (GdkEventFocus* ev)
 bool
 CairoEditableText::on_focus_out_event (GdkEventFocus* ev)
 {
-	if (editing_id) {
-		CairoCell* cell = get_cell (editing_id);
-		queue_draw_cell (cell);
-		editing_id = 0;
-		editing_pos = 0;
-	}
-
+        if (editing_id) {
+                CairoCell* cell = get_cell (editing_id);
+                queue_draw_cell (cell);
+                editing_id = 0;
+        }
 	return false;
 }
 
@@ -134,10 +182,10 @@ CairoEditableText::set_text (uint32_t id, const string& text)
 
 	CairoTextCell* textcell = dynamic_cast<CairoTextCell*> (i->second);
 
-	if (textcell) {
-		set_text (textcell, text);
-	}
-}
+        if (textcell) {
+                set_text (textcell, text);
+        } 
+}            
 
 void
 CairoEditableText::set_text (CairoTextCell* cell, const string& text)
@@ -150,7 +198,7 @@ bool
 CairoEditableText::on_expose_event (GdkEventExpose* ev)
 {
 	Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
-
+	
 	if (cells.empty()) {
 		return true;
 	}
@@ -161,27 +209,27 @@ CairoEditableText::on_expose_event (GdkEventExpose* ev)
 	context->set_source_rgba (bg_r, bg_g, bg_b, bg_a);
 	rounded_rectangle (context, 0, 0, width, height, corner_radius);
 	context->fill ();
-
+	
 	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
-
+		
 		uint32_t id = i->first;
 		CairoCell* cell = i->second;
-
+		
 		/* is cell inside the expose area?
 		 */
 
-		if (cell->intersects (ev->area)) {
-
+                if (cell->intersects (ev->area)) {		
 			if (id == editing_id) {
 				context->set_source_rgba (edit_r, edit_b, edit_g, edit_a);
 			} else {
 				context->set_source_rgba (r, g, b, a);
 			}
-
+			
 			cell->render (context);
 		}
 	}
-	return true;
+
+        return true;
 }
 
 void
@@ -220,177 +268,53 @@ CairoEditableText::find_cell (uint32_t x, uint32_t y, uint32_t& id)
 bool
 CairoEditableText::on_button_press_event (GdkEventButton* ev)
 {
-	uint32_t id;
-	CairoCell* cell;
-
-	if (editing_id) {
-		cell = get_cell (editing_id);
-		/* redraw the old cell */
-		queue_draw_cell (cell);
-	}
-
-	cell = find_cell (ev->x, ev->y, id);
-
+        uint32_t id;         
+        CairoCell* cell = find_cell (ev->x, ev->y, id);
+		
 	if (!cell) {
-		editing_id = 0;
 		return false;
 	}
-
-	grab_focus ();
-	editing_id = id;
-	editing_pos = 0;
-
-	/* redraw the new cell (maybe the same as the old - no real cost) */
-	queue_draw_cell (cell);
-
-	return true;
+		
+	return button_press (ev, id);
 }
 
 bool
 CairoEditableText::on_button_release_event (GdkEventButton* ev)
 {
-	return true;
-}
-
-bool
-CairoEditableText::on_key_press_event (GdkEventKey* ev)
-{
-	if (!editing_id) {
-		return true;
-	}
-
-	bool commit_change = false;
-
-	CairoCell* cell = get_cell (editing_id);
-
+        uint32_t id;         
+        CairoCell* cell = find_cell (ev->x, ev->y, id);
+		
 	if (!cell) {
-		return true;
+		return false;
 	}
-
-	CairoTextCell* text_cell = dynamic_cast<CairoTextCell*> (cell);
-
-	if (!text_cell) {
-		return true;
-	}
-
-	string txt = text_cell->get_text ();
-
-	switch (ev->keyval) {
-	case GDK_Tab:
-		queue_draw_cell (cell);
-		edit_next_cell ();
-		break;
-
-	case GDK_0:
-	case GDK_KP_0:
-		txt[editing_pos] = '0';
-		commit_change = true;
-		break;
-	case GDK_1:
-	case GDK_KP_1:
-		txt[editing_pos] = '1';
-		commit_change = true;
-		break;
-	case GDK_2:
-	case GDK_KP_2:
-		txt[editing_pos] = '2';
-		commit_change = true;
-		break;
-	case GDK_3:
-	case GDK_KP_3:
-		txt[editing_pos] = '3';
-		commit_change = true;
-		break;
-	case GDK_4:
-	case GDK_KP_4:
-		txt[editing_pos] = '4';
-		commit_change = true;
-		break;
-	case GDK_5:
-	case GDK_KP_5:
-		txt[editing_pos] = '5';
-		commit_change = true;
-		break;
-	case GDK_6:
-	case GDK_KP_6:
-		txt[editing_pos] = '6';
-		commit_change = true;
-		break;
-	case GDK_7:
-	case GDK_KP_7:
-		txt[editing_pos] = '7';
-		commit_change = true;
-		break;
-	case GDK_8:
-	case GDK_KP_8:
-		txt[editing_pos] = '8';
-		commit_change = true;
-		break;
-	case GDK_9:
-	case GDK_KP_9:
-		txt[editing_pos] = '9';
-		commit_change = true;
-		break;
-
-	case GDK_Right:
-		if (editing_pos < text_cell->width_chars() - 1) {
-			editing_pos++;
-		}
-		break;
-
-	case GDK_Left:
-		if (editing_pos > 0) {
-			editing_pos--;
-		}
-		break;
-
-	default:
-		break;
-	}
-
-	if (commit_change) {
-		set_text (text_cell, txt);
-
-		if (++editing_pos >= text_cell->width_chars()) {
-			edit_next_cell ();
-		}
-	}
-
-
-	return true;
+		
+	return button_release (ev, id);
 }
 
 void
-CairoEditableText::edit_next_cell ()
+CairoEditableText::start_editing (uint32_t id)
 {
-	CairoCell* next;
-	CairoTextCell* next_text;
-	uint32_t next_id = editing_id + 1;
+	CairoCell* cell = get_cell (id);
 
-	while (true) {
-		next = get_cell (next_id);
+	stop_editing ();
 
-		if (!next || !next->visible() || (next_text = dynamic_cast<CairoTextCell*> (next)) != 0) {
-			break;
-		}
-
-		next_id += 1;
-	}
-
-	if (next) {
-		editing_id = next_id;
-		editing_pos = 0;
-		queue_draw_cell (next_text);
-	} else {
-		editing_id = 0;
-		editing_pos = 0;
+	if (cell) {
+		editing_id = id;
+		queue_draw_cell (cell);
+		grab_focus ();
 	}
 }
 
-bool
-CairoEditableText::on_key_release_event (GdkEventKey* ev)
+void
+CairoEditableText::stop_editing ()
 {
-	return true;
+	if (editing_id) {
+		CairoCell* cell;
+		if ((cell = get_cell (editing_id))) {
+			queue_draw_cell (cell);
+		}
+		editing_id = 0;
+	}
 }
 
 void
@@ -426,4 +350,23 @@ CairoEditableText::on_size_allocate (Gtk::Allocation& alloc)
 
 	width = alloc.get_width();
 	height = alloc.get_height();
+}
+
+void
+CairoEditableText::set_font (const std::string& str)
+{
+	set_font (Pango::FontDescription (str));
+}
+
+void
+CairoEditableText::set_font (const Pango::FontDescription& fd)
+{
+	Glib::RefPtr<Pango::Context> context = get_pango_context ();
+
+        for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
+		i->second->set_size (context, fd);
+	}
+
+	queue_resize ();
+	queue_draw ();
 }
