@@ -50,7 +50,7 @@ CairoColonCell::render (Cairo::RefPtr<Cairo::Context>& context)
 	context->fill ();
 }
 
-void 
+void
 CairoColonCell::set_size (Glib::RefPtr<Pango::Context>& context, const Pango::FontDescription& font)
 {
 	Pango::FontMetrics metrics = context->get_metrics (font);
@@ -66,7 +66,7 @@ CairoTextCell::CairoTextCell (double wc)
 void
 CairoTextCell::set_text (const std::string& txt)
 {
-	layout->set_text (txt); 
+	layout->set_text (txt);
 }
 
 void
@@ -88,7 +88,7 @@ CairoTextCell::set_size (Glib::RefPtr<Pango::Context>& context, const Pango::Fon
 		layout = Pango::Layout::create (context);
 	}
 
-        layout->set_font_description (font);
+	layout->set_font_description (font);
 
 	Pango::FontMetrics metrics = context->get_metrics (font);
 
@@ -107,20 +107,20 @@ CairoEditableText::get_cell (uint32_t id)
 }
 
 CairoEditableText::CairoEditableText ()
-        : editing_id (0)
-        , width (0)
-        , max_cell_height (0)
-        , height (0)
-        , corner_radius (18)
-        , xpad (10)
-        , ypad (5)
+	: editing_id (0)
+	, width (0)
+	, max_cell_height (0)
+	, height (0)
+	, corner_radius (18)
+	, xpad (10)
+	, ypad (5)
 {
-        add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK |
-                    Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK);
-        set_flags (Gtk::CAN_FOCUS);
+	add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK |
+	            Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK);
+	set_flags (Gtk::CAN_FOCUS);
 
-        set_can_default (true);
-        set_receives_default (true);
+	set_can_default (true);
+	set_receives_default (true);
 }
 
 CairoEditableText::~CairoEditableText ()
@@ -152,11 +152,11 @@ CairoEditableText::on_focus_in_event (GdkEventFocus* ev)
 bool
 CairoEditableText::on_focus_out_event (GdkEventFocus* ev)
 {
-        if (editing_id) {
-                CairoCell* cell = get_cell (editing_id);
-                queue_draw_cell (cell);
-                editing_id = 0;
-        }
+	if (editing_id) {
+		CairoCell* cell = get_cell (editing_id);
+		queue_draw_cell (cell);
+		editing_id = 0;
+	}
 	return false;
 }
 
@@ -182,10 +182,10 @@ CairoEditableText::set_text (uint32_t id, const string& text)
 
 	CairoTextCell* textcell = dynamic_cast<CairoTextCell*> (i->second);
 
-        if (textcell) {
-                set_text (textcell, text);
-        } 
-}            
+	if (textcell) {
+		set_text (textcell, text);
+	}
+}
 
 void
 CairoEditableText::set_text (CairoTextCell* cell, const string& text)
@@ -198,7 +198,7 @@ bool
 CairoEditableText::on_expose_event (GdkEventExpose* ev)
 {
 	Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
-	
+
 	if (cells.empty()) {
 		return true;
 	}
@@ -209,27 +209,27 @@ CairoEditableText::on_expose_event (GdkEventExpose* ev)
 	context->set_source_rgba (bg_r, bg_g, bg_b, bg_a);
 	rounded_rectangle (context, 0, 0, width, height, corner_radius);
 	context->fill ();
-	
+
 	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
-		
+
 		uint32_t id = i->first;
 		CairoCell* cell = i->second;
-		
+
 		/* is cell inside the expose area?
 		 */
 
-                if (cell->intersects (ev->area)) {		
+		if (cell->intersects (ev->area)) {
 			if (id == editing_id) {
 				context->set_source_rgba (edit_r, edit_b, edit_g, edit_a);
 			} else {
 				context->set_source_rgba (r, g, b, a);
 			}
-			
+
 			cell->render (context);
 		}
 	}
 
-        return true;
+	return true;
 }
 
 void
@@ -268,26 +268,26 @@ CairoEditableText::find_cell (uint32_t x, uint32_t y, uint32_t& id)
 bool
 CairoEditableText::on_button_press_event (GdkEventButton* ev)
 {
-        uint32_t id;         
-        CairoCell* cell = find_cell (ev->x, ev->y, id);
-		
+	uint32_t id;
+	CairoCell* cell = find_cell (ev->x, ev->y, id);
+
 	if (!cell) {
 		return false;
 	}
-		
+
 	return button_press (ev, id);
 }
 
 bool
 CairoEditableText::on_button_release_event (GdkEventButton* ev)
 {
-        uint32_t id;         
-        CairoCell* cell = find_cell (ev->x, ev->y, id);
-		
+	uint32_t id;
+	CairoCell* cell = find_cell (ev->x, ev->y, id);
+
 	if (!cell) {
 		return false;
 	}
-		
+
 	return button_release (ev, id);
 }
 
@@ -363,7 +363,7 @@ CairoEditableText::set_font (const Pango::FontDescription& fd)
 {
 	Glib::RefPtr<Pango::Context> context = get_pango_context ();
 
-        for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
+	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
 		i->second->set_size (context, fd);
 	}
 
