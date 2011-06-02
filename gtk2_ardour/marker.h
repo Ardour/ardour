@@ -96,7 +96,7 @@ class Marker : public sigc::trackable
   protected:
 	PublicEditor& editor;
 
-	Pango::FontDescription* name_font;
+	Pango::FontDescription name_font;
 
 	ArdourCanvas::Group* _parent;
 	ArdourCanvas::Group *group;

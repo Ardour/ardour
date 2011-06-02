@@ -63,7 +63,6 @@
 #include "ardour/utils.h"
 #include "ardour/session_handle.h"
 
-#include "audio_clock.h"
 #include "ardour_dialog.h"
 #include "editing.h"
 #include "ui_config.h"
@@ -193,10 +192,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void xrun_handler (framepos_t);
 	void create_xrun_marker (framepos_t);
 
-	AudioClock primary_clock;
-	AudioClock secondary_clock;
-	AudioClock preroll_clock;
-	AudioClock postroll_clock;
+	AudioClock* primary_clock;
+	AudioClock* secondary_clock;
+	AudioClock* preroll_clock;
+	AudioClock* postroll_clock;
 
 	void store_clock_modes ();
 	void restore_clock_modes ();
@@ -337,7 +336,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void manage_window (Gtk::Window&);
 
-	AudioClock   big_clock;
+	AudioClock*   big_clock;
 	ActionWindowProxy<Gtk::Window>* big_clock_window;
 	int original_big_clock_width;
 	int original_big_clock_height;

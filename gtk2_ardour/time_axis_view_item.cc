@@ -50,7 +50,7 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace Gtkmm2ext;
 
-Pango::FontDescription* TimeAxisViewItem::NAME_FONT = 0;
+Pango::FontDescription TimeAxisViewItem::NAME_FONT;
 const double TimeAxisViewItem::NAME_X_OFFSET = 15.0;
 const double TimeAxisViewItem::GRAB_HANDLE_LENGTH = 6;
 
@@ -72,7 +72,7 @@ TimeAxisViewItem::set_constant_heights ()
         int width = 0;
         int height = 0;
 
-        layout->set_font_description (*NAME_FONT);
+        layout->set_font_description (NAME_FONT);
         Gtkmm2ext::get_ink_pixel_size (layout, width, height);
 
         NAME_HEIGHT = height;
@@ -508,7 +508,7 @@ TimeAxisViewItem::set_name_text(const string& new_name)
 	}
 
 	last_item_width = trackview.editor().frame_to_pixel(item_duration);
-	name_pixbuf_width = pixel_width (new_name, *NAME_FONT) + 2;
+	name_pixbuf_width = pixel_width (new_name, NAME_FONT) + 2;
 	name_pixbuf->property_pixbuf() = pixbuf_from_string(new_name, NAME_FONT, name_pixbuf_width, NAME_HEIGHT, Gdk::Color ("#000000"));
 }
 

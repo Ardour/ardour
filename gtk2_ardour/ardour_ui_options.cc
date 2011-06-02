@@ -35,6 +35,7 @@
 #include "ardour/osc.h"
 #endif
 
+#include "audio_clock.h"
 #include "ardour_ui.h"
 #include "actions.h"
 #include "gui_thread.h"
@@ -395,9 +396,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "show-track-meters") {
 		editor->toggle_meter_updating();
 	} else if (p == "primary-clock-delta-edit-cursor") {
-		primary_clock.set_is_duration (Config->get_primary_clock_delta_edit_cursor());
+		primary_clock->set_is_duration (Config->get_primary_clock_delta_edit_cursor());
 	} else if (p == "secondary-clock-delta-edit-cursor") {
-		secondary_clock.set_is_duration (Config->get_secondary_clock_delta_edit_cursor());
+		secondary_clock->set_is_duration (Config->get_secondary_clock_delta_edit_cursor());
 	}
 }
 
@@ -407,11 +408,11 @@ ARDOUR_UI::reset_main_clocks ()
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::reset_main_clocks)
 
 	if (_session) {
-		primary_clock.set (_session->audible_frame(), true);
-		secondary_clock.set (_session->audible_frame(), true);
+		primary_clock->set (_session->audible_frame(), true);
+		secondary_clock->set (_session->audible_frame(), true);
 	} else {
-		primary_clock.set (0, true);
-		secondary_clock.set (0, true);
+		primary_clock->set (0, true);
+		secondary_clock->set (0, true);
 	}
 }
 

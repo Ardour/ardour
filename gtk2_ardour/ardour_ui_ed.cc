@@ -591,7 +591,7 @@ ARDOUR_UI::setup_clock ()
 
 	big_clock_window->get()->set_keep_above (true);
 	big_clock_window->get()->set_border_width (0);
-	big_clock_window->get()->add (big_clock);
+	big_clock_window->get()->add (*big_clock);
 
 	big_clock_window->get()->set_title (_("Big Clock"));
 	big_clock_window->get()->set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
@@ -614,7 +614,7 @@ ARDOUR_UI::big_clock_realized ()
 	original_big_clock_height = big_clock_height;
 	original_big_clock_width = w;
 
-	Pango::FontDescription fd (big_clock.get_style()->get_font());
+	Pango::FontDescription fd (big_clock->get_style()->get_font());
 	original_big_clock_font_size = fd.get_size ();
 
 	if (!fd.get_size_is_absolute ()) {
@@ -651,7 +651,7 @@ ARDOUR_UI::idle_big_clock_text_resizer (int, int)
 	big_clock_resize_in_progress = false;
 
 	Glib::RefPtr<Gdk::Window> win = big_clock_window->get()->get_window();
-	Pango::FontDescription fd (big_clock.get_style()->get_font());
+	Pango::FontDescription fd (big_clock->get_style()->get_font());
 	int current_size = fd.get_size ();
 	int x, y, w, h, d;
 
@@ -674,9 +674,9 @@ ARDOUR_UI::idle_big_clock_text_resizer (int, int)
 
 		try {
 			Pango::FontDescription fd (buf);
-			Glib::RefPtr<Gtk::RcStyle> rcstyle = big_clock.get_modifier_style ();
+			Glib::RefPtr<Gtk::RcStyle> rcstyle = big_clock->get_modifier_style ();
 			rcstyle->set_font (fd);
-			big_clock.modify_style (rcstyle);
+			big_clock->modify_style (rcstyle);
 		}
 
 		catch (...) {

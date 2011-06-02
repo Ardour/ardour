@@ -269,7 +269,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double thres
 	}
 
         _silence_text = new ArdourCanvas::NoEventText (*group);
-        _silence_text->property_font_desc() = *(get_font_for_style (N_("SilenceText")));
+        _silence_text->property_font_desc() = get_font_for_style (N_("SilenceText"));
         _silence_text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_SilenceText.get();
         _silence_text->property_anchor() = ANCHOR_NW;
 

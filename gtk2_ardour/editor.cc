@@ -77,6 +77,7 @@
 
 #include "control_protocol/control_protocol.h"
 
+#include "audio_clock.h"
 #include "editor.h"
 #include "debug.h"
 #include "keyboard.h"
@@ -260,7 +261,7 @@ Editor::Editor ()
 
 	  /* tool bar related */
 
-	, zoom_range_clock (X_("zoomrange"), false, X_("ZoomRangeClock"), true, false, true)
+	, zoom_range_clock (new AudioClock (X_("zoomrange"), false, X_("ZoomRangeClock"), true, false, true))
 
 	, toolbar_selection_clock_table (2,3)
 
@@ -276,7 +277,7 @@ Editor::Editor ()
 
 	  /* nudge */
 
-	, nudge_clock (X_("nudge"), false, X_("NudgeClock"), true, false, true)
+	, nudge_clock (new AudioClock (X_("nudge"), false, X_("NudgeClock"), true, false, true))
 	, meters_running(false)
 	, _pending_locate_request (false)
 	, _pending_initial_locate (false)
@@ -387,7 +388,7 @@ Editor::Editor ()
 
 	zoom_focus = ZoomFocusLeft;
 	set_zoom_focus (ZoomFocusLeft);
-	zoom_range_clock.ValueChanged.connect (sigc::mem_fun(*this, &Editor::zoom_adjustment_changed));
+	zoom_range_clock->ValueChanged.connect (sigc::mem_fun(*this, &Editor::zoom_adjustment_changed));
 
 	bbt_label.set_name ("EditorTimeButton");
 	bbt_label.set_size_request (-1, (int)timebar_height);
@@ -896,14 +897,14 @@ Editor::zoom_adjustment_changed ()
 		return;
 	}
 
-	double fpu = zoom_range_clock.current_duration() / _canvas_width;
+	double fpu = zoom_range_clock->current_duration() / _canvas_width;
 
 	if (fpu < 1.0) {
 		fpu = 1.0;
-		zoom_range_clock.set ((framepos_t) floor (fpu * _canvas_width));
+		zoom_range_clock->set ((framepos_t) floor (fpu * _canvas_width));
 	} else if (fpu > _session->current_end_frame() / _canvas_width) {
 		fpu = _session->current_end_frame() / _canvas_width;
-		zoom_range_clock.set ((framepos_t) floor (fpu * _canvas_width));
+		zoom_range_clock->set ((framepos_t) floor (fpu * _canvas_width));
 	}
 
 	temporal_zoom (fpu);
@@ -1084,9 +1085,9 @@ Editor::set_session (Session *t)
 		return;
 	}
 
-	zoom_range_clock.set_session (_session);
+	zoom_range_clock->set_session (_session);
 	_playlist_selector->set_session (_session);
-	nudge_clock.set_session (_session);
+	nudge_clock->set_session (_session);
 	_summary->set_session (_session);
 	_group_tabs->set_session (_session);
 	_route_groups->set_session (_session);
@@ -1145,11 +1146,11 @@ Editor::set_session (Session *t)
 		bbt.beats = 0;
 		bbt.ticks = 120;
 		framepos_t pos = _session->tempo_map().bbt_duration_at (0, bbt, 1);
-		nudge_clock.set_mode(AudioClock::BBT);
-		nudge_clock.set (pos, true, 0, AudioClock::BBT);
+		nudge_clock->set_mode(AudioClock::BBT);
+		nudge_clock->set (pos, true, 0, AudioClock::BBT);
 
 	} else {
-		nudge_clock.set (_session->frame_rate() * 5, true, 0, AudioClock::Timecode); // default of 5 seconds
+		nudge_clock->set (_session->frame_rate() * 5, true, 0, AudioClock::Timecode); // default of 5 seconds
 	}
 
 	playhead_cursor->canvas_item.show ();
@@ -2907,7 +2908,7 @@ Editor::setup_toolbar ()
 
 	nudge_box->pack_start (nudge_backward_button, false, false);
 	nudge_box->pack_start (nudge_forward_button, false, false);
-	nudge_box->pack_start (nudge_clock, false, false);
+	nudge_box->pack_start (*nudge_clock, false, false);
 
 
 	/* Pack everything in... */
@@ -3821,7 +3822,7 @@ Editor::get_nudge_distance (framepos_t pos, framecnt_t& next)
 {
 	framecnt_t ret;
 
-	ret = nudge_clock.current_duration (pos);
+	ret = nudge_clock->current_duration (pos);
 	next = ret + 1; /* XXXX fix me */
 
 	return ret;
@@ -4254,8 +4255,8 @@ Editor::post_zoom ()
 
 	framepos_t frames = (framepos_t) floor (frames_per_unit * _canvas_width);
 
-	if (frames_per_unit != zoom_range_clock.current_duration()) {
-		zoom_range_clock.set (frames);
+	if (frames_per_unit != zoom_range_clock->current_duration()) {
+		zoom_range_clock->set (frames);
 	}
 
 	if (mouse_mode == MouseRange && selection->time.start () != selection->time.end_frame ()) {
@@ -5349,8 +5350,8 @@ Editor::session_going_away ()
 	}
 	track_views.clear ();
 
-	zoom_range_clock.set_session (0);
-	nudge_clock.set_session (0);
+	zoom_range_clock->set_session (0);
+	nudge_clock->set_session (0);
 
 	editor_list_button.set_active(false);
 	editor_list_button.set_sensitive(false);

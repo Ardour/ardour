@@ -51,7 +51,6 @@
 #include "ardour/location.h"
 #include "ardour/types.h"
 
-#include "audio_clock.h"
 #include "gtk-custom-ruler.h"
 #include "ardour_dialog.h"
 #include "public_editor.h"
@@ -95,6 +94,7 @@ namespace LADSPA {
 }
 
 class AnalysisWindow;
+class AudioClock;
 class AudioRegionView;
 class AudioStreamView;
 class AudioTimeAxisView;
@@ -1501,7 +1501,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void editor_mixer_button_toggled ();
 	void editor_list_button_toggled ();
 
-	AudioClock               zoom_range_clock;
+	AudioClock*               zoom_range_clock;
 	Gtk::Button              zoom_in_button;
 	Gtk::Button              zoom_out_button;
 	Gtk::Button              zoom_out_full_button;
@@ -1887,7 +1887,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Button      nudge_backward_button;
 	Gtk::HBox        nudge_hbox;
 	Gtk::VBox        nudge_vbox;
-	AudioClock       nudge_clock;
+	AudioClock*       nudge_clock;
 
 	bool nudge_forward_release (GdkEventButton*);
 	bool nudge_backward_release (GdkEventButton*);

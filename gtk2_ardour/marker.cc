@@ -255,7 +255,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("Hg")); /* ascender + descender */
 	int width;
 
-	layout->set_font_description (*name_font);
+	layout->set_font_description (name_font);
 	Gtkmm2ext::get_ink_pixel_size (layout, width, name_height);
 
 	name_pixbuf = new ArdourCanvas::Pixbuf(*group);
@@ -380,7 +380,7 @@ Marker::setup_name_display ()
 	}
 
 	/* Work out how wide the name can be */
-	int name_width = min ((double) pixel_width (_name, *name_font) + 2, limit);
+	int name_width = min ((double) pixel_width (_name, name_font) + 2, limit);
 	if (name_width == 0) {
 		name_width = 1;
 	}

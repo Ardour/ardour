@@ -61,7 +61,7 @@ namespace Gtkmm2ext {
 						     gint vpadding);
 
         Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_string (const std::string& name, 
-                                                      Pango::FontDescription* font, 
+                                                      const Pango::FontDescription& font, 
                                                       int clip_width, 
                                                       int clip_height, 
                                                       Gdk::Color fg);

@@ -29,6 +29,7 @@ namespace ARDOUR {
         class Session;
 }
 
+class AudioClock;
 class RegionView;
 
 /// Dialog box to set options for the `strip silence' filter
@@ -63,8 +64,8 @@ private:
 	void restart_thread ();
 
 	Gtk::SpinButton _threshold;
-	AudioClock      _minimum_length;
-        AudioClock      _fade_length;
+	AudioClock*      _minimum_length;
+        AudioClock*      _fade_length;
 	Gtk::ProgressBar _progress_bar;
 
         struct ViewInterval {

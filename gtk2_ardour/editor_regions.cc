@@ -37,6 +37,7 @@
 #include "gtkmm2ext/choice.h"
 #include "gtkmm2ext/treeutils.h"
 
+#include "audio_clock.h"
 #include "editor.h"
 #include "editing.h"
 #include "keyboard.h"
@@ -174,7 +175,7 @@ EditorRegions::EditorRegions (Editor* e)
 	// _display.signal_popup_menu().connect (sigc::bind (sigc::mem_fun (*this, &Editor::show__display_context_menu), 1, 0));
 
 	//ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &Editor::redisplay_regions));
-	ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &EditorRegions::update_all_rows));
+	ARDOUR_UI::instance()->secondary_clock->mode_changed.connect (sigc::mem_fun(*this, &EditorRegions::update_all_rows));
 	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::region_changed, this, _1, _2), gui_context());
 	ARDOUR::RegionFactory::CheckNewRegion.connect (check_new_region_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::add_region, this, _1), gui_context());
 
@@ -660,7 +661,7 @@ EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize)
 	Timecode::BBT_Time bbt;
 	Timecode::Time timecode;
 
-	switch (ARDOUR_UI::instance()->secondary_clock.mode ()) {
+	switch (ARDOUR_UI::instance()->secondary_clock->mode ()) {
 	case AudioClock::BBT:
 		_session->tempo_map().bbt_time (pos, bbt);
 		snprintf (buf, bufsize, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);

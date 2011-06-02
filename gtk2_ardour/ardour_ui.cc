@@ -131,52 +131,52 @@ bool could_be_a_valid_path (const string& path);
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
-	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp),
+	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
 
-	  primary_clock (X_("primary"), false, X_("TransportClockDisplay"), true, true, false, true),
-	  secondary_clock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, true, false, true),
-	  preroll_clock (X_("preroll"), false, X_("PreRollClock"), true, false, true),
-	  postroll_clock (X_("postroll"), false, X_("PostRollClock"), true, false, true),
+	, primary_clock (new AudioClock (X_("primary"), false, X_("TransportClockDisplay"), true, true, false, true))
+	, secondary_clock (new AudioClock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, true, false, true))
+	, preroll_clock (new AudioClock (X_("preroll"), false, X_("PreRollClock"), true, false, true))
+	, postroll_clock (new AudioClock (X_("postroll"), false, X_("PostRollClock"), true, false, true))
 
 	  /* preroll stuff */
 
-	  preroll_button (_("pre\nroll")),
-	  postroll_button (_("post\nroll")),
+	, preroll_button (_("pre\nroll"))
+	, postroll_button (_("post\nroll"))
 
 	  /* big clock */
 
-	  big_clock (X_("bigclock"), false, "BigClockNonRecording", true, true, false, false),
+	, big_clock (new AudioClock (X_("bigclock"), false, "BigClockNonRecording", true, true, false, false))
 
 	  /* transport */
 
-	  roll_controllable (new TransportControllable ("transport roll", *this, TransportControllable::Roll)),
-	  stop_controllable (new TransportControllable ("transport stop", *this, TransportControllable::Stop)),
-	  goto_start_controllable (new TransportControllable ("transport goto start", *this, TransportControllable::GotoStart)),
-	  goto_end_controllable (new TransportControllable ("transport goto end", *this, TransportControllable::GotoEnd)),
-	  auto_loop_controllable (new TransportControllable ("transport auto loop", *this, TransportControllable::AutoLoop)),
-	  play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection)),
-	  rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable)),
+	, roll_controllable (new TransportControllable ("transport roll", *this, TransportControllable::Roll))
+	, stop_controllable (new TransportControllable ("transport stop", *this, TransportControllable::Stop))
+	, goto_start_controllable (new TransportControllable ("transport goto start", *this, TransportControllable::GotoStart))
+	, goto_end_controllable (new TransportControllable ("transport goto end", *this, TransportControllable::GotoEnd))
+	, auto_loop_controllable (new TransportControllable ("transport auto loop", *this, TransportControllable::AutoLoop))
+	, play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection))
+	, rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable))
 
-	  roll_button (roll_controllable),
-	  stop_button (stop_controllable),
-	  goto_start_button (goto_start_controllable),
-	  goto_end_button (goto_end_controllable),
-	  auto_loop_button (auto_loop_controllable),
-	  play_selection_button (play_selection_controllable),
-	  rec_button (rec_controllable),
+	, roll_button (roll_controllable)
+	, stop_button (stop_controllable)
+	, goto_start_button (goto_start_controllable)
+	, goto_end_button (goto_end_controllable)
+	, auto_loop_button (auto_loop_controllable)
+	, play_selection_button (play_selection_controllable)
+	, rec_button (rec_controllable)
 
-	  punch_in_button (_("Punch In")),
-	  punch_out_button (_("Punch Out")),
-	  auto_return_button (_("Auto Return")),
-	  auto_play_button (_("Auto Play")),
-	  auto_input_button (_("Auto Input")),
-	  click_button (_("Click")),
-	  time_master_button (_("time\nmaster")),
+	, punch_in_button (_("Punch In"))
+	, punch_out_button (_("Punch Out"))
+	, auto_return_button (_("Auto Return"))
+	, auto_play_button (_("Auto Play"))
+	, auto_input_button (_("Auto Input"))
+	, click_button (_("Click"))
+	, time_master_button (_("time\nmaster"))
 
-	  auditioning_alert_button (_("AUDITION")),
-	  solo_alert_button (_("SOLO")),
+	, auditioning_alert_button (_("AUDITION"))
+	, solo_alert_button (_("SOLO"))
 
-	  error_log_button (_("Errors"))
+	, error_log_button (_("Errors"))
 
 {
 	using namespace Gtk::Menu_Helpers;
@@ -442,11 +442,11 @@ ARDOUR_UI::post_engine ()
 	/* set default clock modes */
 
 	if (Profile->get_sae()) {
-		primary_clock.set_mode (AudioClock::BBT);
-		secondary_clock.set_mode (AudioClock::MinSec);
+		primary_clock->set_mode (AudioClock::BBT);
+		secondary_clock->set_mode (AudioClock::MinSec);
 	}  else {
-		primary_clock.set_mode (AudioClock::Timecode);
-		secondary_clock.set_mode (AudioClock::BBT);
+		primary_clock->set_mode (AudioClock::Timecode);
+		secondary_clock->set_mode (AudioClock::BBT);
 	}
 
 	/* start the time-of-day-clock */
@@ -2178,7 +2178,7 @@ void
 ARDOUR_UI::primary_clock_value_changed ()
 {
 	if (_session) {
-		_session->request_locate (primary_clock.current_time ());
+		_session->request_locate (primary_clock->current_time ());
 	}
 }
 
@@ -2186,7 +2186,7 @@ void
 ARDOUR_UI::big_clock_value_changed ()
 {
 	if (_session) {
-		_session->request_locate (big_clock.current_time ());
+		_session->request_locate (big_clock->current_time ());
 	}
 }
 
@@ -2194,7 +2194,7 @@ void
 ARDOUR_UI::secondary_clock_value_changed ()
 {
 	if (_session) {
-		_session->request_locate (secondary_clock.current_time ());
+		_session->request_locate (secondary_clock->current_time ());
 	}
 }
 
@@ -3409,19 +3409,19 @@ void
 ARDOUR_UI::update_transport_clocks (framepos_t pos)
 {
 	if (Config->get_primary_clock_delta_edit_cursor()) {
-		primary_clock.set (pos, false, editor->get_preferred_edit_position(), 1);
+		primary_clock->set (pos, false, editor->get_preferred_edit_position(), 1);
 	} else {
-		primary_clock.set (pos, 0, true);
+		primary_clock->set (pos, 0, true);
 	}
 
 	if (Config->get_secondary_clock_delta_edit_cursor()) {
-		secondary_clock.set (pos, false, editor->get_preferred_edit_position(), 2);
+		secondary_clock->set (pos, false, editor->get_preferred_edit_position(), 2);
 	} else {
-		secondary_clock.set (pos);
+		secondary_clock->set (pos);
 	}
 
 	if (big_clock_window->get()) {
-		big_clock.set (pos);
+		big_clock->set (pos);
 	}
 }
 
@@ -3455,9 +3455,9 @@ ARDOUR_UI::record_state_changed ()
 	bool const h = _session->have_rec_enabled_track ();
 
 	if (r == Session::Recording && h)  {
-		big_clock.set_widget_name ("BigClockRecording");
+		big_clock->set_widget_name ("BigClockRecording");
 	} else {
-		big_clock.set_widget_name ("BigClockNonRecording");
+		big_clock->set_widget_name ("BigClockNonRecording");
 	}
 }
 

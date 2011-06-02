@@ -184,7 +184,7 @@ convert_bgra_to_rgba (guint8 const* src,
 }
 
 Glib::RefPtr<Gdk::Pixbuf>
-Gtkmm2ext::pixbuf_from_string(const string& name, Pango::FontDescription* font, int clip_width, int clip_height, Gdk::Color fg)
+Gtkmm2ext::pixbuf_from_string(const string& name, const Pango::FontDescription& font, int clip_width, int clip_height, Gdk::Color fg)
 {
 	static Glib::RefPtr<Gdk::Pixbuf>* empty_pixbuf = 0;
 
@@ -203,9 +203,9 @@ Gtkmm2ext::pixbuf_from_string(const string& name, Pango::FontDescription* font, 
 	cairo_text_extents_t te;
 	
 	cairo_set_source_rgba (cr, fg.get_red_p(), fg.get_green_p(), fg.get_blue_p(), 1.0);
-	cairo_select_font_face (cr, font->get_family().c_str(),
+	cairo_select_font_face (cr, font.get_family().c_str(),
 				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (cr,  font->get_size() / Pango::SCALE);
+	cairo_set_font_size (cr,  font.get_size() / Pango::SCALE);
 	cairo_text_extents (cr, name.c_str(), &te);
 	
 	cairo_move_to (cr, 0.5, int (0.5 - te.height / 2 - te.y_bearing + clip_height / 2));

@@ -318,9 +318,9 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (primary_clock, &AudioClock::set), 'p'));
 	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (secondary_clock, &AudioClock::set), 's'));
 
-	primary_clock.ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
-	secondary_clock.ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
-	big_clock.ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::big_clock_value_changed));
+	primary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
+	secondary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
+	big_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::big_clock_value_changed));
 
 	ActionManager::get_action ("Transport", "ToggleAutoReturn")->connect_proxy (auto_return_button);
 	ActionManager::get_action ("Transport", "ToggleAutoPlay")->connect_proxy (auto_play_button);
@@ -334,10 +334,10 @@ ARDOUR_UI::setup_transport ()
 	preroll_button.set_name ("TransportButton");
 	postroll_button.set_name ("TransportButton");
 
-	preroll_clock.set_mode (AudioClock::MinSec);
-	preroll_clock.set_name ("TransportClockDisplay");
-	postroll_clock.set_mode (AudioClock::MinSec);
-	postroll_clock.set_name ("TransportClockDisplay");
+	preroll_clock->set_mode (AudioClock::MinSec);
+	preroll_clock->set_name ("TransportClockDisplay");
+	postroll_clock->set_mode (AudioClock::MinSec);
+	postroll_clock->set_name ("TransportClockDisplay");
 
 	/* alerts */
 
@@ -385,9 +385,9 @@ ARDOUR_UI::setup_transport ()
 	transport_hbox->pack_start (rec_button, false, false, 6);
 
 	HBox* clock_box = manage (new HBox);
-	clock_box->pack_start (primary_clock, false, false);
+	clock_box->pack_start (*primary_clock, false, false);
 	if (!ARDOUR::Profile->get_small_screen()) {
-		clock_box->pack_start (secondary_clock, false, false);
+		clock_box->pack_start (*secondary_clock, false, false);
 	}
 
 	if (!Profile->get_sae()) {
