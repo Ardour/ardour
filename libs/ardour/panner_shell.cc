@@ -65,62 +65,62 @@ using namespace PBD;
 
 PannerShell::PannerShell (string name, Session& s, boost::shared_ptr<Pannable> p)
 	: SessionObject (s, name)
-        , _pannable (p)
+	, _pannable (p)
 {
 	set_name (name);
 }
 
 PannerShell::~PannerShell ()
 {
-        DEBUG_TRACE(DEBUG::Destruction, string_compose ("panner shell for %1 destructor, pannable is %2\n", _name, _pannable));
+	DEBUG_TRACE(DEBUG::Destruction, string_compose ("panner shell for %1 destructor, pannable is %2\n", _name, _pannable));
 }
 
 void
 PannerShell::configure_io (ChanCount in, ChanCount out)
 {
-        uint32_t nouts = out.n_audio();
-        uint32_t nins = in.n_audio();
+	uint32_t nouts = out.n_audio();
+	uint32_t nins = in.n_audio();
 
 	/* if new and old config don't need panning, or if
 	   the config hasn't changed, we're done.
 	*/
 
 	if (_panner && (_panner->in().n_audio() == nins) && (_panner->out().n_audio() == nouts)) {
-                return;
+		return;
 	}
 
 	if (nouts < 2 || nins == 0) {
 		/* no need for panning with less than 2 outputs or no inputs */
 		if (_panner) {
-                        _panner.reset ();
+			_panner.reset ();
 			Changed (); /* EMIT SIGNAL */
 		}
 		return;
 	}
 
-        PannerInfo* pi = PannerManager::instance().select_panner (in, out);
+	PannerInfo* pi = PannerManager::instance().select_panner (in, out);
 
-        if (pi == 0) {
-                abort ();
-        }
+	if (pi == 0) {
+		abort ();
+	}
 
-        boost::shared_ptr<Speakers> speakers = _session.get_speakers ();
+	boost::shared_ptr<Speakers> speakers = _session.get_speakers ();
 
-        if (nouts != speakers->size()) {
-                /* hmm, output count doesn't match session speaker count so
-                   create a new speaker set.
-                */
-                Speakers* s = new Speakers ();
-                s->setup_default_speakers (nouts);
-                speakers.reset (s);
-        }
+	if (nouts != speakers->size()) {
+		/* hmm, output count doesn't match session speaker count so
+		   create a new speaker set.
+		*/
+		Speakers* s = new Speakers ();
+		s->setup_default_speakers (nouts);
+		speakers.reset (s);
+	}
 
-        Panner* p = pi->descriptor.factory (_pannable, speakers);
-        boost_debug_shared_ptr_mark_interesting (p, "Panner");
-        _panner.reset (p);
-        _panner->configure_io (in, out);
+	Panner* p = pi->descriptor.factory (_pannable, speakers);
+	boost_debug_shared_ptr_mark_interesting (p, "Panner");
+	_panner.reset (p);
+	_panner->configure_io (in, out);
 
-        Changed (); /* EMIT SIGNAL */
+	Changed (); /* EMIT SIGNAL */
 }
 
 XMLNode&
@@ -134,7 +134,7 @@ PannerShell::state (bool full)
 {
 	XMLNode* node = new XMLNode ("PannerShell");
 
-        if (_panner) {
+	if (_panner) {
 		node->add_child_nocopy (_panner->state (full));
 	}
 
@@ -149,7 +149,7 @@ PannerShell::set_state (const XMLNode& node, int version)
 	const XMLProperty *prop;
 	LocaleGuard lg (X_("POSIX"));
 
-        _panner.reset ();
+	_panner.reset ();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
@@ -157,8 +157,8 @@ PannerShell::set_state (const XMLNode& node, int version)
 
 			if ((prop = (*niter)->property (X_("type")))) {
 
-                                list<PannerInfo*>::iterator p;
-                                PannerManager& pm (PannerManager::instance());
+				list<PannerInfo*>::iterator p;
+				PannerManager& pm (PannerManager::instance());
 
 				for (p = pm.panner_info.begin(); p != pm.panner_info.end(); ++p) {
 					if (prop->value() == (*p)->descriptor.name) {
@@ -168,11 +168,11 @@ PannerShell::set_state (const XMLNode& node, int version)
 						   assumption, but it's still an assumption.
 						*/
 
-                                                _panner.reset ((*p)->descriptor.factory (_pannable, _session.get_speakers ()));
+						_panner.reset ((*p)->descriptor.factory (_pannable, _session.get_speakers ()));
 
 						if (_panner->set_state (**niter, version) == 0) {
-                                                        return -1;
-                                                }
+							return -1;
+						}
 
 						break;
 					}
@@ -180,7 +180,7 @@ PannerShell::set_state (const XMLNode& node, int version)
 
 				if (p == pm.panner_info.end()) {
 					error << string_compose (_("Unknown panner plugin \"%1\" found in pan state - ignored"),
-							  prop->value())
+					                         prop->value())
 					      << endmsg;
 				}
 
@@ -207,7 +207,7 @@ PannerShell::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, pf
 
 	if (outbufs.count().n_audio() == 1) {
 
-                /* just one output: no real panning going on */
+		/* just one output: no real panning going on */
 
 		AudioBuffer& dst = outbufs.get_audio(0);
 
@@ -252,19 +252,19 @@ PannerShell::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, pf
 		return;
 	}
 
-        /* multiple outputs ... we must have a panner */
+	/* multiple outputs ... we must have a panner */
 
-        assert (_panner);
+	assert (_panner);
 
 	/* setup silent buffers so that we can mix into the outbuffers (slightly suboptimal -
-           better to copy the first set of data then mix after that, but hey, its 2011)
-         */
+	   better to copy the first set of data then mix after that, but hey, its 2011)
+	*/
 
 	for (BufferSet::audio_iterator b = outbufs.audio_begin(); b != outbufs.audio_end(); ++b) {
 		(*b).silence (nframes);
 	}
 
-        _panner->distribute (inbufs, outbufs, gain_coeff, nframes);
+	_panner->distribute (inbufs, outbufs, gain_coeff, nframes);
 }
 
 void
@@ -278,7 +278,7 @@ PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame,
 
 	if (outbufs.count().n_audio() == 1) {
 
-                /* one output only: no panner */
+		/* one output only: no panner */
 
 		AudioBuffer& dst = outbufs.get_audio(0);
 
@@ -298,7 +298,7 @@ PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame,
 
 	// More than 1 output
 
-        AutoState as = _panner->automation_state ();
+	AutoState as = _panner->automation_state ();
 
 	// If we shouldn't play automation defer to distribute_no_automation
 
@@ -315,14 +315,14 @@ PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame,
 
 	} else {
 
-                /* setup the terrible silence so that we can mix into the outbuffers (slightly suboptimal -
-                   better to copy the first set of data then mix after that, but hey, its 2011)
-                */
-                for (BufferSet::audio_iterator i = outbufs.audio_begin(); i != outbufs.audio_end(); ++i) {
-                        i->silence(nframes);
-                }
+		/* setup the terrible silence so that we can mix into the outbuffers (slightly suboptimal -
+		   better to copy the first set of data then mix after that, but hey, its 2011)
+		*/
+		for (BufferSet::audio_iterator i = outbufs.audio_begin(); i != outbufs.audio_end(); ++i) {
+			i->silence(nframes);
+		}
 
-                _panner->distribute_automated (inbufs, outbufs, start_frame, end_frame, nframes, _session.pan_automation_buffer());
-        }
+		_panner->distribute_automated (inbufs, outbufs, start_frame, end_frame, nframes, _session.pan_automation_buffer());
+	}
 }
 

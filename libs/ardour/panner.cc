@@ -38,7 +38,7 @@ Panner::Panner (boost::shared_ptr<Pannable> p)
 
 Panner::~Panner ()
 {
-        DEBUG_TRACE(PBD::DEBUG::Destruction, string_compose ("panner @ %1 destructor, pannable is %2\n", this, _pannable));
+	DEBUG_TRACE(PBD::DEBUG::Destruction, string_compose ("panner @ %1 destructor, pannable is %2\n", this, _pannable));
 }
 
 void
@@ -66,78 +66,78 @@ Panner::set_state (const XMLNode& node, int version)
 XMLNode&
 Panner::get_state ()
 {
-        XMLNode* node = new XMLNode (X_("Panner"));
+	XMLNode* node = new XMLNode (X_("Panner"));
 
 	node->add_property (X_("bypassed"), (bypassed() ? "yes" : "no"));
 
-        return *node;
+	return *node;
 }
 
 void
 Panner::distribute (BufferSet& ibufs, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes)
 {
-        uint32_t which = 0;
+	uint32_t which = 0;
 
 	for (BufferSet::audio_iterator src = ibufs.audio_begin(); src != ibufs.audio_end(); ++src, ++which) {
 		distribute_one (*src, obufs, gain_coeff, nframes, which);
-        }
+	}
 }
 
 void
 Panner::distribute_automated (BufferSet& ibufs, BufferSet& obufs,
                               framepos_t start, framepos_t end, pframes_t nframes, pan_t** buffers)
 {
-        uint32_t which = 0;
+	uint32_t which = 0;
 
 	for (BufferSet::audio_iterator src = ibufs.audio_begin(); src != ibufs.audio_end(); ++src, ++which) {
 		distribute_one_automated (*src, obufs, start, end, nframes, buffers, which);
-        }
+	}
 }
 
 void
 Panner::set_automation_style (AutoStyle style)
 {
-        _pannable->set_automation_style (style);
+	_pannable->set_automation_style (style);
 }
 
 void
 Panner::set_automation_state (AutoState state)
 {
-        _pannable->set_automation_state (state);
+	_pannable->set_automation_state (state);
 }
 
 AutoState
 Panner::automation_state () const
 {
-        return _pannable->automation_state();
+	return _pannable->automation_state();
 }
 
 AutoStyle
 Panner::automation_style () const
 {
-        return _pannable->automation_style ();
+	return _pannable->automation_style ();
 }
 
 bool
 Panner::touching () const
 {
-        return _pannable->touching ();
+	return _pannable->touching ();
 }
 
 set<Evoral::Parameter>
 Panner::what_can_be_automated() const
 {
-        return _pannable->what_can_be_automated ();
+	return _pannable->what_can_be_automated ();
 }
 
 string
 Panner::describe_parameter (Evoral::Parameter p)
 {
-        return _pannable->describe_parameter (p);
+	return _pannable->describe_parameter (p);
 }
 
 string
 Panner::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 {
-        return _pannable->value_as_string (ac);
+	return _pannable->value_as_string (ac);
 }
