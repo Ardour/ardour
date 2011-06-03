@@ -28,9 +28,11 @@
 
 class CairoCell
 {
-public:
-	CairoCell();
+  public:
+	CairoCell(int32_t id);
 	virtual ~CairoCell() {}
+	
+	int32_t id() const { return _id; }
 
 	virtual void render (Cairo::RefPtr<Cairo::Context>&) = 0;
 
@@ -61,7 +63,8 @@ public:
 	virtual void set_size (Glib::RefPtr<Pango::Context>&,
 	                       const Pango::FontDescription&) {}
 
-protected:
+  protected:
+	int32_t _id;
 	GdkRectangle bbox;
 	bool _visible;
 	uint32_t _xpad;
@@ -69,30 +72,32 @@ protected:
 
 class CairoBarCell : public CairoCell
 {
-public:
-	CairoBarCell() {};
+  public:
+        CairoBarCell(int32_t id) : CairoCell (id) {};
 
 	void render (Cairo::RefPtr<Cairo::Context>& context) {
-		context->move_to (bbox.x, bbox.y);
-		context->set_line_width (bbox.width);
-		context->rel_line_to (0, bbox.height);
-		context->stroke ();
+		if (bbox.height > 4) {
+			context->move_to (bbox.x, bbox.y + 2);
+			context->set_line_width (bbox.width);
+			context->rel_line_to (0, bbox.height - 2);
+			context->stroke ();
+		}
 	}
 
 	void set_size (Glib::RefPtr<Pango::Context>& context,
 	               const Pango::FontDescription& font) {
 		Pango::FontMetrics metrics = context->get_metrics (font);
-		bbox.width = 2;
+		bbox.width = std::max (1.5, (0.1 * metrics.get_approximate_digit_width() / PANGO_SCALE));
 		bbox.height = (metrics.get_ascent() + metrics.get_descent()) / PANGO_SCALE;
 	}
 
-private:
+  private:
 };
 
 class CairoColonCell : public CairoCell
 {
-public:
-	CairoColonCell() {};
+  public:
+	CairoColonCell (int32_t id) : CairoCell (id) {};
 
 	void render (Cairo::RefPtr<Cairo::Context>& context);
 	void set_size (Glib::RefPtr<Pango::Context>& context,
@@ -101,19 +106,23 @@ public:
 
 class CairoTextCell : public CairoCell
 {
-public:
-	CairoTextCell (double  width_chars);
+  public:
+	CairoTextCell (int32_t id, double  width_chars);
 	void set_size (Glib::RefPtr<Pango::Context>&, const Pango::FontDescription&);
-
-	void   set_text (const std::string& txt);
 
 	std::string get_text() const {
 		return layout->get_text ();
 	}
 	double width_chars() const { return _width_chars; }
+
 	void render (Cairo::RefPtr<Cairo::Context>&);
 
-protected:
+  protected:
+	friend class CairoEditableText;
+	void set_width_chars (double wc) { _width_chars = wc; }
+	void set_text (const std::string& txt);
+
+  private:
 	double _width_chars;
 	Glib::RefPtr<Pango::Layout> layout;
 };
@@ -124,15 +133,17 @@ public:
 	CairoEditableText ();
 	~CairoEditableText ();
 
-	void add_cell (uint32_t id, CairoCell*);
-	CairoCell* get_cell (uint32_t id);
+	void add_cell (CairoCell*);
+	void clear_cells ();
 
-	void start_editing (uint32_t id);
+	void start_editing (CairoCell*);
 	void stop_editing ();
 
-	void set_text (uint32_t id, const std::string& text);
 	void set_text (CairoTextCell* cell, const std::string&);
+	void set_width_chars (CairoTextCell* cell, uint32_t);
 
+	void set_draw_background (bool yn) { _draw_bg = yn; }
+	
 	void set_colors (double cr, double cg, double cb, double ca) {
 		r = cr;
 		g = cg;
@@ -168,9 +179,9 @@ public:
 	double corner_radius() const { return _corner_radius; }
 	void set_corner_radius (double r) { _corner_radius = r; queue_draw (); }
 	
-	sigc::signal<bool,GdkEventScroll*,uint32_t> scroll;
-	sigc::signal<bool,GdkEventButton*,uint32_t> button_press;
-	sigc::signal<bool,GdkEventButton*,uint32_t> button_release;
+	sigc::signal<bool,GdkEventScroll*,CairoCell*> scroll;
+	sigc::signal<bool,GdkEventButton*,CairoCell*> button_press;
+	sigc::signal<bool,GdkEventButton*,CairoCell*> button_release;
 
 protected:
 	bool on_expose_event (GdkEventExpose*);
@@ -183,11 +194,12 @@ protected:
 	bool on_scroll_event (GdkEventScroll*);
 
 private:
-	typedef std::map<uint32_t,CairoCell*> CellMap;
+	typedef std::vector<CairoCell*> CellMap;
 
 	CellMap cells;
-	Pango::FontDescription font;
-	uint32_t editing_id;
+	Pango::FontDescription _font;
+	CairoCell* editing_cell;
+	bool _draw_bg;
 	double width;
 	double max_cell_height;
 	double height;
@@ -207,7 +219,7 @@ private:
 	double bg_b;
 	double bg_a;
 
-	CairoCell* find_cell (uint32_t x, uint32_t y, uint32_t& cell_id);
+	CairoCell* find_cell (uint32_t x, uint32_t y);
 	void queue_draw_cell (CairoCell* target);
 };
 

@@ -86,6 +86,7 @@ class ShuttleControl;
 class Splash;
 class SpeakerDialog;
 class ThemeManager;
+class TimeInfoBox;
 class MidiTracer;
 class WindowProxyBase;
 class GlobalPortMatrixWindow;
@@ -196,6 +197,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	AudioClock* secondary_clock;
 	AudioClock* preroll_clock;
 	AudioClock* postroll_clock;
+
+	TimeInfoBox* time_info_box;
 
 	void store_clock_modes ();
 	void restore_clock_modes ();

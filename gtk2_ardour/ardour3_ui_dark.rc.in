@@ -942,7 +942,7 @@ style "recording_big_clock_display" = "non_recording_big_clock_display"
 
 style "transport_clock_display"
 {
-	font_name = "@FONT_BOLD_BIG@"
+	font_name = "monospace @FONT_BOLD_BIG@"
 
 	fg[ACTIVE] = darker(@@COLPREFIX@_bright_indicator)
 	fg[SELECTED] = darker(@@COLPREFIX@_bright_indicator)
@@ -989,6 +989,35 @@ style "default_clock_display" = "medium_text"
 	bg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
+style "selection_clock_display" 
+{
+        font_name = "monospace @FONT_SMALLER@"
+
+        text[NORMAL] = @@COLPREFIX@_contrasting_indicator
+	text[ACTIVE] = @@COLPREFIX@_bright_indicator
+	fg[NORMAL] = @@COLPREFIX@_contrasting_indicator
+	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
+	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+	base[NORMAL] = @@COLPREFIX@_darkest
+	base[ACTIVE] = @@COLPREFIX@_darkest
+	bg[NORMAL] = @@COLPREFIX@_darkest
+	bg[ACTIVE] = @@COLPREFIX@_darkest
+}
+
+style "punch_clock_display" = "very_small_text"
+{
+        font_name = "monospace @FONT_SMALLER@"
+
+        text[NORMAL] = @@COLPREFIX@_contrasting_indicator
+	text[ACTIVE] = @@COLPREFIX@_bright_indicator
+	fg[NORMAL] = @@COLPREFIX@_contrasting_indicator
+	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
+	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+	base[NORMAL] = @@COLPREFIX@_darkest
+	base[ACTIVE] = @@COLPREFIX@_darkest
+	bg[NORMAL] = @@COLPREFIX@_darkest
+	bg[ACTIVE] = @@COLPREFIX@_darkest
+}
 
 style "white_on_black_clock_display" = "medium_text"
 {
@@ -1599,6 +1628,8 @@ widget "*InfoMessage" style:highest "info_message"
 widget "*WarningMessage" style:highest "warning_message"
 widget "*BigClockNonRecording" style:highest "non_recording_big_clock_display"
 widget "*BigClockRecording" style:highest "recording_big_clock_display"
+widget "*SelectionClockDisplay" style:highest "selection_clock_display"
+widget "*PunchClockDisplay" style:highest "punch_clock_display"
 widget "*TransportClockDisplay" style:highest "transport_clock_display"
 widget "*SecondaryClockDisplay" style:highest "transport_clock_display"
 widget "*TransportClockDisplayDelta" style:highest "transport_clock_display_delta"

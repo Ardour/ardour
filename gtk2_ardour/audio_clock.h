@@ -25,9 +25,7 @@
 #include <gtkmm/alignment.h>
 #include <gtkmm/box.h>
 #include <gtkmm/menu.h>
-#include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
-#include <gtkmm/frame.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
@@ -66,7 +64,8 @@ class AudioClock : public Gtk::Alignment, public ARDOUR::SessionHandlePtr
 	void set_bbt_reference (framepos_t);
         void set_is_duration (bool);
 
-	void set_widget_name (std::string);
+	void set_widget_name (const std::string&);
+	void set_font (const std::string&);
 
 	std::string name() const { return _name; }
 
@@ -83,6 +82,10 @@ class AudioClock : public Gtk::Alignment, public ARDOUR::SessionHandlePtr
 
 	static bool has_focus() { return _has_focus; }
 
+	CairoEditableText& main_display () const { return *display; }
+	CairoEditableText* supplemental_left_display () const { return supplemental_left; }
+	CairoEditableText* supplemental_right_display () const { return supplemental_right; }
+
   private:
 	Mode             _mode;
 	uint32_t          key_entry_state;
@@ -95,46 +98,32 @@ class AudioClock : public Gtk::Alignment, public ARDOUR::SessionHandlePtr
 
 	Gtk::Menu  *ops_menu;
 
-	CairoEditableText* timecode;
-	CairoEditableText* minsec;
-	CairoEditableText* bbt;
-	CairoEditableText* frames;
+	CairoEditableText* display;
 
 	enum Field {
-		/* Field IDs must start at 1. Cell ID zero 
-		   is reserved in CairoEditableText
-		*/
-
-		Timecode_Hours = 1,
-		Timecode_Colon1,
+		Timecode_Hours,
 		Timecode_Minutes,
-		Timecode_Colon2,
 		Timecode_Seconds,
-		Timecode_Colon3,
 		Timecode_Frames,
 		MS_Hours,
-		MS_Colon1,
 		MS_Minutes,
-		MS_Colon2,
-		MS_Colon3, // to become a dot cell
 		MS_Seconds,
 		MS_Milliseconds,
 		Bars,
-		BBT_Bar1,
 		Beats,
-		BBT_Bar2,
 		Ticks,
 		AudioFrames,
 
-		Timecode_LowerLeft1,
-		Timecode_LowerLeft2,
-		Timecode_LowerRight1,
-		Timecode_LowerRight2,
+		Colon1,
+		Colon2,
+		Colon3,
+		Bar1,
+		Bar2,
 
-		BBT_LowerLeft1,
-		BBT_LowerLeft2,
-		BBT_LowerRight1,
-		BBT_LowerRight2,
+		LowerLeft1,
+		LowerLeft2,
+		LowerRight1,
+		LowerRight2,
 	};
 
 	/** CairoCells of various kinds for each of our non-text Fields */
@@ -145,25 +134,13 @@ class AudioClock : public Gtk::Alignment, public ARDOUR::SessionHandlePtr
 
 	Gtk::HBox      off_hbox;
 	
-	CairoEditableText* timecode_supplemental_left;
-	CairoEditableText* timecode_supplemental_right;
-	CairoEditableText* bbt_supplemental_left;
-	CairoEditableText* bbt_supplemental_right;
+	CairoEditableText* supplemental_left;
+	CairoEditableText* supplemental_right;
 
-	Gtk::VBox timecode_packer;
-	Gtk::HBox timecode_top;
-	Gtk::HBox timecode_bottom;
-	Gtk::HBox minsec_packer;
-	Gtk::HBox bbt_top;
-	Gtk::HBox bbt_bottom;
-	Gtk::VBox bbt_packer;
-	Gtk::HBox frames_packer;
+	Gtk::VBox packer;
+	Gtk::HBox top;
+	Gtk::HBox bottom;
 
-	Gtk::Label*  frames_upper_info_label;
-	Gtk::Label*  frames_lower_info_label;
-	Gtk::VBox   frames_info_box;
-
-	CairoEditableText* current_cet;
 	Field editing_field;
 	framepos_t bbt_reference_time;
 	framepos_t last_when;
@@ -200,9 +177,9 @@ class AudioClock : public Gtk::Alignment, public ARDOUR::SessionHandlePtr
 
 	/* proxied from CairoEditableText */
 
-	bool scroll (GdkEventScroll *ev, uint32_t);
-	bool button_press (GdkEventButton *ev, uint32_t);
-	bool button_release (GdkEventButton *ev, uint32_t);
+	bool scroll (GdkEventScroll *ev, CairoCell*);
+	bool button_press (GdkEventButton *ev, CairoCell*);
+	bool button_release (GdkEventButton *ev, CairoCell*);
 	sigc::connection scroll_connection;
 	sigc::connection button_press_connection;
 	sigc::connection button_release_connection;
@@ -230,8 +207,7 @@ class AudioClock : public Gtk::Alignment, public ARDOUR::SessionHandlePtr
 
 	void session_configuration_changed (std::string);
 
-	static std::map<AudioClock::Field,uint32_t> field_length;
-	static void fill_field_lengths();
+	static uint32_t field_length[];
 	static bool _has_focus;
 
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);

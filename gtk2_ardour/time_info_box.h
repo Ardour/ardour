@@ -1,0 +1,73 @@
+/*
+    Copyright (C) 2011 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
+#ifndef __time_info_box_h__
+#define __time_info_box_h__
+
+#include <map>
+
+#include <gtkmm/box.h>
+#include <gtkmm/label.h>
+
+#include "ardour/ardour.h"
+#include "ardour/session_handle.h"
+
+class CairoEditableText;
+class CairoCell;
+class CairoTextCell;
+
+namespace ARDOUR {
+	class Session;
+        class Location;
+}
+
+class AudioClock;
+
+class TimeInfoBox : public Gtk::Table, public ARDOUR::SessionHandlePtr
+{
+  public:
+    TimeInfoBox ();
+    ~TimeInfoBox ();
+
+    void set_session (ARDOUR::Session*);
+
+  protected:
+    bool on_expose_event (GdkEventExpose*);
+
+  private:
+    AudioClock* selection_start;
+    AudioClock* selection_end;
+    AudioClock* selection_length;
+    
+    AudioClock* punch_start;
+    AudioClock* punch_end;
+
+    Gtk::Label selection_title;
+    Gtk::Label punch_title;
+
+    void punch_changed (ARDOUR::Location*);
+    void punch_location_changed (ARDOUR::Location*);
+    void watch_punch (ARDOUR::Location*);
+    PBD::ScopedConnectionList punch_connections;
+
+    void selection_changed ();
+};
+
+
+#endif /* __time_info_box_h__ */

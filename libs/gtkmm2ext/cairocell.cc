@@ -30,9 +30,10 @@ using std::cerr;
 using std::endl;
 using namespace Gtkmm2ext;
 
-CairoCell::CairoCell ()
-	: _visible (true)
-	, _xpad (5)
+CairoCell::CairoCell (int32_t id)
+	: _id (id)
+	, _visible (true)
+	, _xpad (2)
 {
 	bbox.x = 0;
 	bbox.y = 0;
@@ -58,8 +59,9 @@ CairoColonCell::set_size (Glib::RefPtr<Pango::Context>& context, const Pango::Fo
 	bbox.height = (metrics.get_ascent() + metrics.get_descent()) / PANGO_SCALE;
 }
 
-CairoTextCell::CairoTextCell (double wc)
-	: _width_chars (wc)
+CairoTextCell::CairoTextCell (int32_t id, double wc)
+	: CairoCell (id)
+	, _width_chars (wc)
 {
 }
 
@@ -96,18 +98,9 @@ CairoTextCell::set_size (Glib::RefPtr<Pango::Context>& context, const Pango::Fon
 	bbox.height = (metrics.get_ascent() + metrics.get_descent()) / PANGO_SCALE;
 }
 
-CairoCell*
-CairoEditableText::get_cell (uint32_t id)
-{
-	CellMap::iterator i = cells.find (id);
-	if (i == cells.end()) {
-		return 0;
-	}
-	return i->second;
-}
-
 CairoEditableText::CairoEditableText ()
-	: editing_id (0)
+	: editing_cell (0)
+	, _draw_bg (true)
 	, width (0)
 	, max_cell_height (0)
 	, height (0)
@@ -125,19 +118,16 @@ CairoEditableText::CairoEditableText ()
 
 CairoEditableText::~CairoEditableText ()
 {
-	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
-		delete i->second;
-	}
+	/* we don't own cells */
 }
 
 bool
 CairoEditableText::on_scroll_event (GdkEventScroll* ev)
 {
-	uint32_t id;
-	CairoCell* cell = find_cell (ev->x, ev->y, id);
+	CairoCell* cell = find_cell (ev->x, ev->y);
 
 	if (cell) {
-		return scroll (ev, id);
+		return scroll (ev, cell);
 	}
 
 	return false;
@@ -152,38 +142,37 @@ CairoEditableText::on_focus_in_event (GdkEventFocus* ev)
 bool
 CairoEditableText::on_focus_out_event (GdkEventFocus* ev)
 {
-	if (editing_id) {
-		CairoCell* cell = get_cell (editing_id);
-		queue_draw_cell (cell);
-		editing_id = 0;
+	if (editing_cell) {
+		queue_draw_cell (editing_cell);
+		editing_cell = 0;
 	}
 	return false;
 }
 
 void
-CairoEditableText::add_cell (uint32_t id, CairoCell* cell)
+CairoEditableText::add_cell (CairoCell* cell)
 {
-	if (id > 0) {
-		Glib::RefPtr<Pango::Context> context = get_pango_context ();
-		cell->set_size (context, font);
-
-		cells[id] = cell; /* we own it */
-	}
+	Glib::RefPtr<Pango::Context> context = get_pango_context ();
+	cell->set_size (context, _font);
+	cells.push_back (cell);
+	queue_resize ();
+	queue_draw ();
 }
 
 void
-CairoEditableText::set_text (uint32_t id, const string& text)
+CairoEditableText::clear_cells ()
 {
-	CellMap::iterator i = cells.find (id);
+	cells.clear ();
+	queue_resize ();
+	queue_draw ();
+}
 
-	if (i == cells.end()) {
-		return;
-	}
-
-	CairoTextCell* textcell = dynamic_cast<CairoTextCell*> (i->second);
-
-	if (textcell) {
-		set_text (textcell, text);
+void
+CairoEditableText::set_width_chars (CairoTextCell* cell, uint32_t wc)
+{
+	if (cell) {
+		cell->set_width_chars (wc);
+		queue_resize ();
 	}
 }
 
@@ -206,24 +195,25 @@ CairoEditableText::on_expose_event (GdkEventExpose* ev)
 	context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	context->clip ();
 
-	context->set_source_rgba (bg_r, bg_g, bg_b, bg_a);
-	if (_corner_radius) {
-		rounded_rectangle (context, 0, 0, width, height, _corner_radius);
-	} else {
-		context->rectangle (0, 0, width, height);
+	if (_draw_bg) {
+		context->set_source_rgba (bg_r, bg_g, bg_b, bg_a);
+		if (_corner_radius) {
+			rounded_rectangle (context, 0, 0, width, height, _corner_radius);
+		} else {
+			context->rectangle (0, 0, width, height);
+		}
+		context->fill ();
 	}
-	context->fill ();
 
 	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
 
-		uint32_t id = i->first;
-		CairoCell* cell = i->second;
+		CairoCell* cell = (*i);
 
 		/* is cell inside the expose area?
 		 */
 
 		if (cell->intersects (ev->area)) {
-			if (id == editing_id) {
+			if (cell == editing_cell) {
 				context->set_source_rgba (edit_r, edit_b, edit_g, edit_a);
 			} else {
 				context->set_source_rgba (r, g, b, a);
@@ -257,12 +247,11 @@ CairoEditableText::queue_draw_cell (CairoCell* cell)
 }
 
 CairoCell*
-CairoEditableText::find_cell (uint32_t x, uint32_t y, uint32_t& id)
+CairoEditableText::find_cell (uint32_t x, uint32_t y)
 {
 	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
-		if (i->second->covers (x, y)) {
-			id = i->first;
-			return i->second;
+		if ((*i)->covers (x, y)) {
+			return (*i);
 		}
 	}
 
@@ -272,38 +261,24 @@ CairoEditableText::find_cell (uint32_t x, uint32_t y, uint32_t& id)
 bool
 CairoEditableText::on_button_press_event (GdkEventButton* ev)
 {
-	uint32_t id;
-	CairoCell* cell = find_cell (ev->x, ev->y, id);
-
-	if (!cell) {
-		return false;
-	}
-
-	return button_press (ev, id);
+	CairoCell* cell = find_cell (ev->x, ev->y);
+	return button_press (ev, cell);
 }
 
 bool
 CairoEditableText::on_button_release_event (GdkEventButton* ev)
 {
-	uint32_t id;
-	CairoCell* cell = find_cell (ev->x, ev->y, id);
-
-	if (!cell) {
-		return false;
-	}
-
-	return button_release (ev, id);
+	CairoCell* cell = find_cell (ev->x, ev->y);
+	return button_release (ev, cell);
 }
 
 void
-CairoEditableText::start_editing (uint32_t id)
+CairoEditableText::start_editing (CairoCell* cell)
 {
-	CairoCell* cell = get_cell (id);
-
 	stop_editing ();
 
 	if (cell) {
-		editing_id = id;
+		editing_cell = cell;
 		queue_draw_cell (cell);
 		grab_focus ();
 	}
@@ -312,12 +287,9 @@ CairoEditableText::start_editing (uint32_t id)
 void
 CairoEditableText::stop_editing ()
 {
-	if (editing_id) {
-		CairoCell* cell;
-		if ((cell = get_cell (editing_id))) {
-			queue_draw_cell (cell);
-		}
-		editing_id = 0;
+	if (editing_cell) {
+		queue_draw_cell (editing_cell);
+		editing_cell = 0;
 	}
 }
 
@@ -333,7 +305,7 @@ CairoEditableText::on_size_request (GtkRequisition* req)
 	CellMap::iterator i = cells.begin(); 
 
 	while (i != cells.end()) {
-		CairoCell* cell = i->second;
+		CairoCell* cell = (*i);
 
 		if (cell->visible()) {
 			cell->set_position (x, _ypad);
@@ -378,8 +350,10 @@ CairoEditableText::set_font (const Pango::FontDescription& fd)
 {
 	Glib::RefPtr<Pango::Context> context = get_pango_context ();
 
+	_font = fd;
+
 	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
-		i->second->set_size (context, fd);
+		(*i)->set_size (context, _font);
 	}
 
 	queue_resize ();

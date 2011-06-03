@@ -32,6 +32,7 @@
 #include "pbd/error.h"
 #include "pbd/basename.h"
 #include "pbd/fastlog.h"
+#include <gtkmm2ext/cairocell.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/tearoff.h>
@@ -54,6 +55,7 @@
 #include "global_port_matrix.h"
 #include "location_ui.h"
 #include "rc_option_editor.h"
+#include "time_info_box.h"
 
 #include "i18n.h"
 
@@ -385,8 +387,13 @@ ARDOUR_UI::setup_transport ()
 	transport_hbox->pack_start (rec_button, false, false, 6);
 
 	HBox* clock_box = manage (new HBox);
+	clock_box->set_border_width (2);
+	primary_clock->main_display().set_ypad (2);
+	primary_clock->set_border_width (2);
 	clock_box->pack_start (*primary_clock, false, false);
 	if (!ARDOUR::Profile->get_small_screen()) {
+		secondary_clock->set_border_width (2);
+		secondary_clock->main_display().set_ypad (2);
 		clock_box->pack_start (*secondary_clock, false, false);
 	}
 
@@ -409,6 +416,9 @@ ARDOUR_UI::setup_transport ()
 
 	transport_tearoff_hbox.pack_start (*transport_vbox, false, false, 0);
 	transport_tearoff_hbox.pack_start (*clock_box, false, false, 0);
+
+	time_info_box = manage (new TimeInfoBox);
+	transport_tearoff_hbox.pack_start (*time_info_box, false, false);
 
 	HBox* toggle_box = manage(new HBox);
 

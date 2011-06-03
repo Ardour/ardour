@@ -217,6 +217,7 @@ gtk2_ardour_sources = [
         'time_axis_view.cc',
         'time_axis_view_item.cc',
         'time_fx_dialog.cc',
+        'time_info_box.cc',
         'time_selection.cc',
         'track_selection.cc',
         'track_view_list.cc',
