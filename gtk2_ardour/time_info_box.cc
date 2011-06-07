@@ -108,11 +108,11 @@ TimeInfoBox::TimeInfoBox ()
 
 	attach (punch_title, 2, 4, 0, 1);
 	l = manage (new Label);
-	l->set_markup (string_compose ("<span size=\"x-small\">%1</span>", _("Start")));
+	l->set_markup (string_compose ("<span size=\"x-small\">%1</span>", _("In")));
         attach (*l, 2, 3, 1, 2);
         attach (*punch_start, 3, 4, 1, 2);
 	l = manage (new Label);
-	l->set_markup (string_compose ("<span size=\"x-small\">%1</span>", _("End")));
+	l->set_markup (string_compose ("<span size=\"x-small\">%1</span>", _("Out")));
         attach (*l, 2, 3, 2, 3);
         attach (*punch_end, 3, 4, 2, 3);
 
