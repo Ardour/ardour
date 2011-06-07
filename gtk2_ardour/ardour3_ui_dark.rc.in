@@ -90,7 +90,7 @@ style "medium_text"
 
 style "medium_monospace_text"
 {
-        font_name = "monospace @FONT_NORMAL@"
+        font_name = "monospace @FONT_SIZE_NORMAL@"
 }
 
 style "red_medium_text" = "medium_text"
@@ -919,25 +919,27 @@ style "small_red_on_black_entry"  = "small_bold_text"
        bg[ACTIVE] = @@COLPREFIX@_base
 }
 
+#
+# Clocks: "text" is the clock digits; "base" is the bg
+#
+
 style "non_recording_big_clock_display" = "medium_entry"
 {
 	font_name = "@FONT_MASSIVE@"
 
-	fg[NORMAL] = @@COLPREFIX@_control_text
-	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
-	fg[SELECTED] = @@COLPREFIX@_bright_indicator
-	fg[PRELIGHT] = @@COLPREFIX@_bright_indicator
-	fg[INSENSITIVE] = @@COLPREFIX@_bright_indicator
+	text[NORMAL] = @@COLPREFIX@_control_text
+	text[ACTIVE] = @@COLPREFIX@_bright_indicator
+	text[SELECTED] = @@COLPREFIX@_bright_indicator
+	text[PRELIGHT] = @@COLPREFIX@_bright_indicator
+	text[INSENSITIVE] = @@COLPREFIX@_bright_indicator
 	
 	base[NORMAL] = @@COLPREFIX@_base
-	base[ACTIVE] = @@COLPREFIX@_base
-	bg[NORMAL] = @@COLPREFIX@_base
-	bg[ACTIVE] = shade(0.5,@@COLPREFIX@_bright_indicator)
+	base[ACTIVE] = shade(0.5,@@COLPREFIX@_bright_indicator)
 }
 
 style "recording_big_clock_display" = "non_recording_big_clock_display"
 {
-	fg[NORMAL] = darker(@@COLPREFIX@_arm)
+	text[NORMAL] = darker(@@COLPREFIX@_arm)
 }
 
 style "transport_clock_display"

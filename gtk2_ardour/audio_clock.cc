@@ -915,8 +915,10 @@ AudioClock::button_press (GdkEventButton *ev, CairoCell* cell)
 }
 
 bool
-AudioClock::button_release (GdkEventButton *ev, CairoCell*)
+AudioClock::button_release (GdkEventButton *ev, CairoCell* cell)
 {
+	cerr << "button press, cell = " << cell << endl;
+
 	if (dragging) {
 		gdk_pointer_ungrab (GDK_CURRENT_TIME);
 		dragging = false;

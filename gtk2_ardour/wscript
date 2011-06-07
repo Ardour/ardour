@@ -430,7 +430,8 @@ def build(bld):
                 'MASSIVE' : '60'
         }
 
- # Set up font substitution dictionary
+    # Set up font substitution dictionary
+    # @FONT_XXXX@
     for style in ['', 'BOLD', 'ITALIC']:
         for sizename,points in iter(font_sizes.items()):
             if (len (style)):
@@ -442,6 +443,12 @@ def build(bld):
 
             dark_rc_subst_dict[key] = fontstyle
             light_rc_subst_dict[key] = fontstyle
+
+    # @FONT_SIZE_XXXX@
+    for sizename,points in iter(font_sizes.items()):
+            key = "_".join (['FONT_SIZE',sizename])
+            dark_rc_subst_dict[key] = points
+            light_rc_subst_dict[key] = points
 
     # RC files
     dark_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme(

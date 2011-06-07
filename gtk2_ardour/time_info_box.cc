@@ -82,6 +82,10 @@ TimeInfoBox::TimeInfoBox ()
 
 	set_homogeneous (false);
 	set_spacings (0);
+	set_border_width (2);
+
+	/* a bit more spacing between the two "sides" */
+	set_col_spacing (1, 10);
 
 	Gtk::Label* l;
 
@@ -199,12 +203,13 @@ TimeInfoBox::on_expose_event (GdkEventExpose* ev)
 		if (win) {
 		
 			Cairo::RefPtr<Cairo::Context> context = win->create_cairo_context();
-			
-			translate_coordinates (*window_parent, 0, 0, x, y);
-			
+
+#if 0			
+			translate_coordinates (*window_parent, ev->area.x, ev->area.y, x, y);
 			context->rectangle (x, y, ev->area.width, ev->area.height);
 			context->clip ();
-			
+#endif
+			translate_coordinates (*window_parent, 0, 0, x, y);
 			context->set_source_rgba (0.149, 0.149, 0.149, 1.0);
 			Gtkmm2ext::rounded_rectangle (context, x, y, get_allocation().get_width(), get_allocation().get_height(), 5);
 			context->fill ();

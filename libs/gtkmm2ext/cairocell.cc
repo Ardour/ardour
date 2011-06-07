@@ -116,9 +116,16 @@ CairoTextCell::render (Cairo::RefPtr<Cairo::Context>& context)
 		return;
 	}
 
+	context->save ();
+
+	context->rectangle (bbox.x, bbox.y, bbox.width, bbox.height);
+	context->clip ();
+
 	_font->apply (context);
 	context->move_to (bbox.x, bbox.y + bbox.height + y_offset);
 	context->show_text (_text);
+
+	context->restore ();
 }
 
 void
