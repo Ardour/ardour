@@ -125,6 +125,12 @@ TimeInfoBox::TimeInfoBox ()
 	punch_start->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_punch_mode), punch_start));
 	punch_end->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_punch_mode), punch_end));
 
+	selection_start->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), selection_start), true);
+	selection_end->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), selection_end), true);
+
+	punch_start->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), punch_start), true);
+	punch_end->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), punch_end), true);
+
 	Editor::instance().get_selection().TimeChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 }
 
@@ -136,6 +142,21 @@ TimeInfoBox::~TimeInfoBox ()
         
         delete punch_start;
         delete punch_end;
+}
+
+bool
+TimeInfoBox::clock_button_release_event (GdkEventButton* ev, AudioClock* src)
+{
+	if (!_session) {
+		return false;
+	}
+
+	if (ev->button == 1) {
+		_session->request_locate (src->current_time ());
+		return true;
+	}
+
+	return false;
 }
 
 void

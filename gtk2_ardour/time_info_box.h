@@ -72,6 +72,8 @@ class TimeInfoBox : public Gtk::Table, public ARDOUR::SessionHandlePtr
 
     void sync_selection_mode (AudioClock*);
     void sync_punch_mode (AudioClock*);
+
+    bool clock_button_release_event (GdkEventButton* ev, AudioClock* src);
 };
 
 

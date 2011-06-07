@@ -889,21 +889,23 @@ AudioClock::button_press (GdkEventButton *ev, CairoCell* cell)
 {
 	switch (ev->button) {
 	case 1:
-		if (cell) {
-			editing_field = (Field) cell->id ();
-			display->start_editing (cell);
+		if (editable) {
+			if (cell) {
+				editing_field = (Field) cell->id ();
+				display->start_editing (cell);
+			}
+			
+			Keyboard::magic_widget_grab_focus ();
+			
+			/* make absolutely sure that the pointer is grabbed */
+			gdk_pointer_grab(ev->window,false ,
+					 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
+					 NULL,NULL,ev->time);
+			dragging = true;
+			drag_accum = 0;
+			drag_start_y = ev->y;
+			drag_y = ev->y;
 		}
-
-		Keyboard::magic_widget_grab_focus ();
-
-		/* make absolutely sure that the pointer is grabbed */
-		gdk_pointer_grab(ev->window,false ,
-				 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
-				 NULL,NULL,ev->time);
-		dragging = true;
-		drag_accum = 0;
-		drag_start_y = ev->y;
-		drag_y = ev->y;
 		break;
 		
 	default:
@@ -917,21 +919,15 @@ AudioClock::button_press (GdkEventButton *ev, CairoCell* cell)
 bool
 AudioClock::button_release (GdkEventButton *ev, CairoCell* cell)
 {
-	if (dragging) {
-		gdk_pointer_ungrab (GDK_CURRENT_TIME);
-		dragging = false;
-		if (ev->y > drag_start_y+1 || ev->y < drag_start_y-1 || Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)){
-			// we actually dragged so return without setting editing focus, or we shift clicked
-			return true;
+	if (editable) {
+		if (dragging) {
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
+			dragging = false;
+			if (ev->y > drag_start_y+1 || ev->y < drag_start_y-1 || Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)){
+				// we actually dragged so return without setting editing focus, or we shift clicked
+				return true;
+			}
 		}
-	}
-
-	if (!editable) {
-		if (ops_menu == 0) {
-			build_ops_menu ();
-		}
-		ops_menu->popup (1, ev->time);
-		return true;
 	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
@@ -942,7 +938,7 @@ AudioClock::button_release (GdkEventButton *ev, CairoCell* cell)
 		return true;
 	}
 
-	return true;
+	return false;
 }
 
 bool
