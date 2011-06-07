@@ -944,13 +944,11 @@ style "transport_clock_display"
 {
 	font_name = "@FONT_BOLD_BIG@"
 
-	fg[ACTIVE] = darker(@@COLPREFIX@_bright_indicator)
-	fg[SELECTED] = darker(@@COLPREFIX@_bright_indicator)
-	fg[PRELIGHT] = darker(@@COLPREFIX@_bright_indicator)
-	fg[INSENSITIVE] = darker(@@COLPREFIX@_bright_indicator)
-
         text[NORMAL] = darker (@@COLPREFIX@_contrasting_indicator)
         text[ACTIVE] = darker (@@COLPREFIX@_bright_indicator)
+	text[SELECTED] = darker(@@COLPREFIX@_bright_indicator)
+	text[PRELIGHT] = darker(@@COLPREFIX@_bright_indicator)
+        text[INSENSITIVE] = darker(@@COLPREFIX@_bright_indicator)
 
 	base[NORMAL] = @@COLPREFIX@_darkest
 	base[ACTIVE] = @@COLPREFIX@_darkest
@@ -960,33 +958,25 @@ style "transport_clock_display"
 
 style "transport_clock_display_delta" = "transport_clock_display"
 {
-	fg[NORMAL] = @@COLPREFIX@_bright_color
+        text[NORMAL] = @@COLPREFIX@_bright_color
 }
 
 style "tempo_meter_clock_display" = "very_small_text"
 {
 	text[NORMAL] = @@COLPREFIX@_fg
         text[ACTIVE] = @@COLPREFIX@_somewhat_bright_indicator
-	fg[NORMAL] = @@COLPREFIX@_fg
-	fg[ACTIVE] = @@COLPREFIX@_somewhat_bright_indicator
-	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+	text[SELECTED] = @@COLPREFIX@_bright_indicator
 	base[NORMAL] = @@COLPREFIX@_base
 	base[ACTIVE] = @@COLPREFIX@_contrasting_indicator
-	bg[NORMAL] = @@COLPREFIX@_bright_color
-	bg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
 }
 
 style "default_clock_display" = "medium_text"
 {
         text[NORMAL] = @@COLPREFIX@_contrasting_indicator
 	text[ACTIVE] = @@COLPREFIX@_bright_indicator
-	fg[NORMAL] = @@COLPREFIX@_contrasting_indicator
-	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
-	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+	text[SELECTED] = @@COLPREFIX@_bright_indicator
 	base[NORMAL] = @@COLPREFIX@_darkest
 	base[ACTIVE] = @@COLPREFIX@_darkest
-	bg[NORMAL] = @@COLPREFIX@_darkest
-	bg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "selection_clock_display" 
@@ -995,13 +985,9 @@ style "selection_clock_display"
 
         text[NORMAL] = @@COLPREFIX@_contrasting_indicator
 	text[ACTIVE] = @@COLPREFIX@_bright_indicator
-	fg[NORMAL] = @@COLPREFIX@_contrasting_indicator
-	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
-	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+	text[SELECTED] = @@COLPREFIX@_bright_indicator
 	base[NORMAL] = @@COLPREFIX@_darkest
 	base[ACTIVE] = @@COLPREFIX@_darkest
-	bg[NORMAL] = @@COLPREFIX@_darkest
-	bg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "punch_clock_display" = "very_small_text"
@@ -1010,26 +996,18 @@ style "punch_clock_display" = "very_small_text"
 
         text[NORMAL] = @@COLPREFIX@_contrasting_indicator
 	text[ACTIVE] = @@COLPREFIX@_bright_indicator
-	fg[NORMAL] = @@COLPREFIX@_contrasting_indicator
-	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
-	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+	text[SELECTED] = @@COLPREFIX@_bright_indicator
 	base[NORMAL] = @@COLPREFIX@_darkest
 	base[ACTIVE] = @@COLPREFIX@_darkest
-	bg[NORMAL] = @@COLPREFIX@_darkest
-	bg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "white_on_black_clock_display" = "medium_text"
 {
 	text[NORMAL] = @@COLPREFIX@_fg
 	text[ACTIVE] = @@COLPREFIX@_bright_indicator
-	fg[NORMAL] = @@COLPREFIX@_fg
-	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
-	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+        base[SELECTED] = @@COLPREFIX@_bright_indicator
 	base[NORMAL] = @@COLPREFIX@_darkest
 	base[ACTIVE] = @@COLPREFIX@_darkest
-	bg[NORMAL] = @@COLPREFIX@_darkest
-	bg[ACTIVE] = @@COLPREFIX@_darkest
 }
 
 style "editor_time_ruler" = "small_text"
