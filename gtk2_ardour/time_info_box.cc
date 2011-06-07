@@ -37,6 +37,8 @@ using namespace ARDOUR;
 
 TimeInfoBox::TimeInfoBox ()
 	: Table (4, 4)
+	, syncing_selection (false)
+	, syncing_punch (false)
 {
 	selection_start = new AudioClock ("selection-start", false, "SelectionClockDisplay", false, false, false, false);
 	selection_end = new AudioClock ("selection-end", false, "SelectionClockDisplay", false, false, false, false);
@@ -83,6 +85,7 @@ TimeInfoBox::TimeInfoBox ()
 	set_homogeneous (false);
 	set_spacings (0);
 	set_border_width (2);
+	set_col_spacings (2);
 
 	/* a bit more spacing between the two "sides" */
 	set_col_spacing (1, 10);
@@ -115,6 +118,13 @@ TimeInfoBox::TimeInfoBox ()
 
         show_all ();
 
+	selection_start->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), selection_start));
+	selection_end->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), selection_start));
+	selection_length->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), selection_start));
+
+	punch_start->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_punch_mode), punch_start));
+	punch_end->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_punch_mode), punch_end));
+
 	Editor::instance().get_selection().TimeChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 }
 
@@ -127,6 +137,30 @@ TimeInfoBox::~TimeInfoBox ()
         delete punch_start;
         delete punch_end;
 }
+
+void
+TimeInfoBox::sync_selection_mode (AudioClock* src)
+{
+	if (!syncing_selection) {
+		syncing_selection = true;
+		selection_start->set_mode (src->mode());
+		selection_end->set_mode (src->mode());
+		selection_length->set_mode (src->mode());
+		syncing_selection = false;
+	}
+}
+
+void
+TimeInfoBox::sync_punch_mode (AudioClock* src)
+{
+	if (!syncing_punch) {
+		syncing_punch = true;
+		punch_start->set_mode (src->mode());
+		punch_end->set_mode (src->mode());
+		syncing_punch = false;
+	}
+}
+	
 
 void
 TimeInfoBox::set_session (Session* s)

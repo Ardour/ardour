@@ -917,8 +917,6 @@ AudioClock::button_press (GdkEventButton *ev, CairoCell* cell)
 bool
 AudioClock::button_release (GdkEventButton *ev, CairoCell* cell)
 {
-	cerr << "button press, cell = " << cell << endl;
-
 	if (dragging) {
 		gdk_pointer_ungrab (GDK_CURRENT_TIME);
 		dragging = false;
@@ -950,7 +948,7 @@ AudioClock::button_release (GdkEventButton *ev, CairoCell* cell)
 bool
 AudioClock::scroll (GdkEventScroll *ev, CairoCell* cell)
 {
-	if (_session == 0) {
+	if (_session == 0 || !editable) {
 		return false;
 	}
 
@@ -1745,11 +1743,9 @@ AudioClock::connect_signals ()
 {
 	disconnect_signals ();
 
-	if (editable) {
-		scroll_connection = display->scroll.connect (sigc::mem_fun (*this, &AudioClock::scroll));
-		button_press_connection = display->button_press.connect (sigc::mem_fun (*this, &AudioClock::button_press));
-		button_release_connection = display->button_release.connect (sigc::mem_fun (*this, &AudioClock::button_release));
-	}	
+	scroll_connection = display->scroll.connect (sigc::mem_fun (*this, &AudioClock::scroll));
+	button_press_connection = display->button_press.connect (sigc::mem_fun (*this, &AudioClock::button_press));
+	button_release_connection = display->button_release.connect (sigc::mem_fun (*this, &AudioClock::button_release));
 }
 
 void

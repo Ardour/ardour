@@ -60,6 +60,8 @@ class TimeInfoBox : public Gtk::Table, public ARDOUR::SessionHandlePtr
 
     Gtk::Label selection_title;
     Gtk::Label punch_title;
+    bool syncing_selection;
+    bool syncing_punch;
 
     void punch_changed (ARDOUR::Location*);
     void punch_location_changed (ARDOUR::Location*);
@@ -67,6 +69,9 @@ class TimeInfoBox : public Gtk::Table, public ARDOUR::SessionHandlePtr
     PBD::ScopedConnectionList punch_connections;
 
     void selection_changed ();
+
+    void sync_selection_mode (AudioClock*);
+    void sync_punch_mode (AudioClock*);
 };
 
 
