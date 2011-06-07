@@ -132,6 +132,9 @@ TimeInfoBox::TimeInfoBox ()
 	punch_end->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::clock_button_release_event), punch_end), true);
 
 	Editor::instance().get_selection().TimeChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
+	Editor::instance().get_selection().RegionsChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
+
+	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), ui_bind (&TimeInfoBox::track_mouse_mode, this), gui_context());
 }
 
 TimeInfoBox::~TimeInfoBox ()
@@ -142,6 +145,12 @@ TimeInfoBox::~TimeInfoBox ()
         
         delete punch_start;
         delete punch_end;
+}
+
+void
+TimeInfoBox::track_mouse_mode ()
+{
+	selection_changed ();
 }
 
 bool
@@ -210,9 +219,36 @@ TimeInfoBox::set_session (Session* s)
 void
 TimeInfoBox::selection_changed ()
 {
-	selection_start->set (Editor::instance().get_selection().time.start());
-	selection_end->set (Editor::instance().get_selection().time.end_frame());
-	selection_length->set (Editor::instance().get_selection().time.length());
+	framepos_t s, e;
+
+	switch (Editor::instance().current_mouse_mode()) {
+	case Editing::MouseObject:
+		s = Editor::instance().get_selection().regions.start();
+		e = Editor::instance().get_selection().regions.end_frame();
+	
+		selection_start->set_off (false);
+		selection_end->set_off (false);
+		selection_length->set_off (false);
+		selection_start->set (s);
+		selection_end->set (e);
+		selection_length->set (e - s + 1);
+		break;
+
+	case Editing::MouseRange:
+		selection_start->set_off (false);
+		selection_end->set_off (false);
+		selection_length->set_off (false);
+		selection_start->set (Editor::instance().get_selection().time.start());
+		selection_end->set (Editor::instance().get_selection().time.end_frame());
+		selection_length->set (Editor::instance().get_selection().time.length());
+		break;
+
+	default:
+		selection_start->set_off (true);
+		selection_end->set_off (true);
+		selection_length->set_off (true);	
+		break;
+	}
 }
 
 void

@@ -523,7 +523,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (ExportProfileManager, BBT);
 	REGISTER_CLASS_ENUM (ExportProfileManager, MinSec);
 	REGISTER_CLASS_ENUM (ExportProfileManager, Frames);
-	REGISTER_CLASS_ENUM (ExportProfileManager, Off);
 	REGISTER (_ExportProfileManager_TimeFormat);
 
 	REGISTER_CLASS_ENUM (Delivery, Insert);

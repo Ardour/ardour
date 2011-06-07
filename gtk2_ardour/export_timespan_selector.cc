@@ -180,9 +180,6 @@ ExportTimespanSelector::construct_label (ARDOUR::Location const * location) cons
 		start = to_string (start_frame, std::dec);
 		end = to_string (end_frame, std::dec);
 		break;
-
-	  case AudioClock::Off:
-		break;
 	}
 
 	// label += _("from ");
@@ -228,9 +225,6 @@ ExportTimespanSelector::construct_length (ARDOUR::Location const * location) con
 
 	case AudioClock::Frames:
 		s << location->length ();
-		break;
-
-	case AudioClock::Off:
 		break;
 	}
 

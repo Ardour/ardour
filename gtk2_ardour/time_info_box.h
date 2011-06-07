@@ -68,12 +68,15 @@ class TimeInfoBox : public Gtk::Table, public ARDOUR::SessionHandlePtr
     void watch_punch (ARDOUR::Location*);
     PBD::ScopedConnectionList punch_connections;
 
+    PBD::ScopedConnectionList editor_connections;
+
     void selection_changed ();
 
     void sync_selection_mode (AudioClock*);
     void sync_punch_mode (AudioClock*);
 
     bool clock_button_release_event (GdkEventButton* ev, AudioClock* src);
+    void track_mouse_mode ();
 };
 
 

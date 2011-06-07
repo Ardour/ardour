@@ -687,7 +687,6 @@ EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize)
 		break;
 
 	case AudioClock::Timecode:
-	case AudioClock::Off: /* If the secondary clock is off, default to Timecode */
 	default:
 		_session->timecode_time (pos, timecode);
 		snprintf (buf, bufsize, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);

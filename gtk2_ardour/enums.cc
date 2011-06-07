@@ -51,7 +51,6 @@ setup_gtk_ardour_enums ()
 	REGISTER_CLASS_ENUM (AudioClock, BBT);
 	REGISTER_CLASS_ENUM (AudioClock, MinSec);
 	REGISTER_CLASS_ENUM (AudioClock, Frames);
-	REGISTER_CLASS_ENUM (AudioClock, Off);
 	REGISTER (clock_mode);
 
 	REGISTER_ENUM (Wide);

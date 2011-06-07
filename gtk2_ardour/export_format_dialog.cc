@@ -780,9 +780,6 @@ ExportFormatDialog::update_time (AnyTime & time, AudioClock const & clock)
 		time.type = AnyTime::Frames;
 		time.frames = frames;
 		break;
-	  case AudioClock::Off:
-		silence_end_checkbox.set_active (false);
-		return;
 	}
 }
 

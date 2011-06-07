@@ -55,6 +55,7 @@ sigc::signal<void> AudioClock::ModeChanged;
 vector<AudioClock*> AudioClock::clocks;
 
 uint32_t AudioClock::field_length[] = {
+	1, /* Timecode_Sign */
 	2, /* Timecode_Hours */
 	2, /* Timecode_Minutes */
 	2, /* Timecode_Seconds */
@@ -76,6 +77,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, is_duration (duration)
 	, editable (allow_edit)
 	, _follows_playhead (follows_playhead)
+	, _off (false)
 	, supplemental_left (0)
 	, supplemental_right (0)
 	, last_when(0)
@@ -114,8 +116,8 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	_fixed_cells[Bar1] = new CairoCharCell (Bar1, '|');
 	_fixed_cells[Bar2] = new CairoCharCell (Bar2, '|');
 	
-	// add an extra character for the negative sign
-	_text_cells[Timecode_Hours] = new CairoTextCell (Timecode_Hours, field_length[Timecode_Hours] + 1); 
+	_text_cells[Timecode_Sign] = new CairoTextCell (Timecode_Sign, field_length[Timecode_Sign]);
+	_text_cells[Timecode_Hours] = new CairoTextCell (Timecode_Hours, field_length[Timecode_Hours]);
 	_text_cells[Timecode_Minutes] = new CairoTextCell (Timecode_Minutes, field_length[Timecode_Minutes]);
 	_text_cells[Timecode_Seconds] = new CairoTextCell (Timecode_Seconds, field_length[Timecode_Seconds]);
 	_text_cells[Timecode_Frames] = new CairoTextCell (Timecode_Frames, field_length[Timecode_Frames]);
@@ -175,6 +177,8 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	set_mode (Timecode);
 	set (last_when, true);
 
+	connect_signals ();
+
 	if (!is_transient) {
 		clocks.push_back (this);
 	}
@@ -185,10 +189,18 @@ AudioClock::~AudioClock ()
 	/* these are not manage()'d, so that we can add/remove
 	   them from containers as necessary.
 	*/
+
 	delete display;
 	delete supplemental_left;
 	delete supplemental_right;
-	/* XXX need to delete all cells too */
+
+	for (std::map<Field,CairoCell*>::iterator i = _fixed_cells.begin(); i != _fixed_cells.end(); ++i) {
+		delete i->second;
+	}
+
+	for (std::map<Field,CairoTextCell*>::iterator i = _text_cells.begin(); i != _text_cells.end(); ++i) {
+		delete i->second;
+	}
 }
 
 void
@@ -354,9 +366,6 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset, char which)
 	case Frames:
 		set_frames (when, force);
 		break;
-
-	case Off:
-		break;
 	}
 
 	last_when = when;
@@ -394,6 +403,18 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 {
 	char buf[32];
 	snprintf (buf, sizeof (buf), "%" PRId64, when);
+
+	if (_off) {
+		display->set_text (_text_cells[AudioFrames], "--");
+
+		if (supplemental_left) {
+			supplemental_left->set_text (_text_cells[LowerLeft2], "");
+			supplemental_right->set_text (_text_cells[LowerRight2], "");
+		}
+		
+		return;
+	}
+
 	
 	display->set_text (_text_cells[AudioFrames], buf);
 
@@ -428,6 +449,20 @@ AudioClock::set_minsec (framepos_t when, bool force)
 	int mins;
 	int secs;
 	int millisecs;
+
+	if (_off) {
+		display->set_text (_text_cells[MS_Hours], "--");
+		display->set_text (_text_cells[MS_Minutes], "--");
+		display->set_text (_text_cells[MS_Seconds], "--");
+		display->set_text (_text_cells[MS_Milliseconds], "--");
+
+		if (supplemental_left) {
+			supplemental_left->set_text (_text_cells[LowerLeft2], "");
+			supplemental_right->set_text (_text_cells[LowerRight2], "");
+		}
+		
+		return;
+	}	
 
 	left = when;
 	hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
@@ -469,6 +504,21 @@ AudioClock::set_timecode (framepos_t when, bool force)
 	char buf[32];
 	Timecode::Time TC;
 
+	if (_off) {
+		display->set_text (_text_cells[Timecode_Sign], "");
+		display->set_text (_text_cells[Timecode_Hours], "--");
+		display->set_text (_text_cells[Timecode_Minutes], "--");
+		display->set_text (_text_cells[Timecode_Seconds], "--");
+		display->set_text (_text_cells[Timecode_Frames], "--");
+
+		if (supplemental_left) {
+			supplemental_left->set_text (_text_cells[LowerLeft2], "");
+			supplemental_right->set_text (_text_cells[LowerRight2], "");
+		}
+		
+		return;
+	}
+
 	if (is_duration) {
 		_session->timecode_duration (when, TC);
 	} else {
@@ -477,9 +527,11 @@ AudioClock::set_timecode (framepos_t when, bool force)
 
 	if (force || TC.hours != last_hrs || TC.negative != last_negative) {
 		if (TC.negative) {
-			sprintf (buf, "-%0*" PRIu32, field_length[Timecode_Hours], TC.hours);
+			display->set_text (_text_cells[Timecode_Sign], "-");
+			sprintf (buf, "%0*" PRIu32, field_length[Timecode_Hours], TC.hours);
 		} else {
-			sprintf (buf, " %0*" PRIu32, field_length[Timecode_Hours], TC.hours);
+			display->set_text (_text_cells[Timecode_Sign], " ");
+			sprintf (buf, "%0*" PRIu32, field_length[Timecode_Hours], TC.hours);
 		}
 		display->set_text (_text_cells[Timecode_Hours], buf);
 		last_hrs = TC.hours;
@@ -531,6 +583,19 @@ AudioClock::set_bbt (framepos_t when, bool force)
 {
 	char buf[16];
 	Timecode::BBT_Time BBT;
+
+	if (_off) {
+		display->set_text (_text_cells[Bars], "--");
+		display->set_text (_text_cells[Beats], "--");
+		display->set_text (_text_cells[Ticks], "--");
+
+		if (supplemental_left) {
+			supplemental_left->set_text (_text_cells[LowerLeft2], "");
+			supplemental_right->set_text (_text_cells[LowerRight2], "");
+		}
+		
+		return;
+	}
 
 	/* handle a common case */
 	if (is_duration) {
@@ -588,14 +653,23 @@ AudioClock::set_session (Session *s)
 
 		_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
 
-		XMLProperty* prop;
+		const XMLProperty* prop;
 		XMLNode* node = _session->extra_xml (X_("ClockModes"));
 		AudioClock::Mode amode;
 
 		if (node) {
-			if ((prop = node->property (_name)) != 0) {
-				amode = AudioClock::Mode (string_2_enum (prop->value(), amode));
-				set_mode (amode);
+			for (XMLNodeList::const_iterator i = node->children().begin(); i != node->children().end(); ++i) {
+				if ((prop = (*i)->property (X_("name"))) && prop->value() == _name) {
+
+					if ((prop = (*i)->property (X_("mode"))) != 0) {
+						amode = AudioClock::Mode (string_2_enum (prop->value(), amode));
+						set_mode (amode);
+					}
+					if ((prop = (*i)->property (X_("on"))) != 0) {
+						set_off (!string_is_affirmative (prop->value()));
+					}
+					break;
+				}
 			}
 		}
 
@@ -1129,9 +1203,6 @@ AudioClock::current_time (framepos_t pos) const
 	case Frames:
 		ret = audio_frame_from_display ();
 		break;
-
-	case Off:
-		break;
 	}
 
 	return ret;
@@ -1156,9 +1227,6 @@ AudioClock::current_duration (framepos_t pos) const
 
 	case Frames:
 		ret = audio_frame_from_display ();
-		break;
-
-	case Off:
 		break;
 	}
 
@@ -1233,7 +1301,12 @@ AudioClock::timecode_frame_from_display () const
 	Timecode::Time TC;
 	framepos_t sample;
 
-	TC.hours = atoi (label (Timecode_Hours)->get_text());
+	if (!label (Timecode_Sign)->get_text().empty()) {
+		TC.hours = atoi (label (Timecode_Hours)->get_text());
+	} else {
+		TC.hours = -atoi (label (Timecode_Hours)->get_text());
+	}
+
 	TC.minutes = atoi (label (Timecode_Minutes)->get_text());
 	TC.seconds = atoi (label (Timecode_Seconds)->get_text());
 	TC.frames = atoi (label (Timecode_Frames)->get_text());
@@ -1696,7 +1769,7 @@ AudioClock::build_ops_menu ()
 	ops_items.push_back (MenuElem (_("Bars:Beats"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), BBT)));
 	ops_items.push_back (MenuElem (_("Minutes:Seconds"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), MinSec)));
 	ops_items.push_back (MenuElem (_("Samples"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Frames)));
-	ops_items.push_back (MenuElem (_("Off"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Off)));
+	ops_items.push_back (MenuElem (_("Off"), sigc::mem_fun(*this, &AudioClock::toggle_off)));
 
 	if (editable && !is_duration && !_follows_playhead) {
 		ops_items.push_back (SeparatorElem());
@@ -1727,18 +1800,8 @@ AudioClock::locate ()
 }
 
 void
-AudioClock::disconnect_signals ()
-{
-	scroll_connection.disconnect ();
-	button_press_connection.disconnect ();
-	button_release_connection.disconnect ();
-}
-
-void
 AudioClock::connect_signals ()
 {
-	disconnect_signals ();
-
 	scroll_connection = display->scroll.connect (sigc::mem_fun (*this, &AudioClock::scroll));
 	button_press_connection = display->button_press.connect (sigc::mem_fun (*this, &AudioClock::button_press));
 	button_release_connection = display->button_release.connect (sigc::mem_fun (*this, &AudioClock::button_release));
@@ -1762,6 +1825,7 @@ AudioClock::set_mode (Mode m)
 
 	switch (_mode) {
 	case Timecode:
+		display->add_cell (_text_cells[Timecode_Sign]);
 		display->add_cell (_text_cells[Timecode_Hours]);
 		display->add_cell (_fixed_cells[Colon1]);
 		display->add_cell (_text_cells[Timecode_Minutes]);
@@ -1799,7 +1863,7 @@ AudioClock::set_mode (Mode m)
 			supplemental_right->add_cell (_text_cells[LowerRight1]);
 			supplemental_right->add_cell (_text_cells[LowerRight2]);
 
-			supplemental_left->set_width_chars (_text_cells[LowerLeft1], 1);
+			supplemental_left->set_width_chars (_text_cells[LowerLeft1], 1.5); // why not 1? M must be wider than 8, i suppose
 			supplemental_left->set_width_chars (_text_cells[LowerLeft2], 5.25);
 
 			supplemental_right->set_width_chars (_text_cells[LowerRight1], 1);
@@ -1838,9 +1902,6 @@ AudioClock::set_mode (Mode m)
 			supplemental_right->set_text (_text_cells[LowerRight1], _("Pull"));
 		}
 		break;
-
-	case Off:
-		break;
 	}
 
 	if (supplemental_left) {
@@ -1855,12 +1916,7 @@ AudioClock::set_mode (Mode m)
 		supplemental_left->set_font (smaller_font);
 	}
 
-	if (_mode != Off) {
-		connect_signals ();
-	} else {
-		disconnect_signals  ();
-	}
-
+	set_off (false);
 	set (last_when, true);
 
         if (!is_transient) {
@@ -1894,3 +1950,29 @@ AudioClock::set_is_duration (bool yn)
 	set (last_when, true, 0, 's');
 }
 
+void
+AudioClock::set_off (bool yn) 
+{
+	if (_off == yn) {
+		return;
+	}
+
+	_off = yn;
+
+	if (_off) {
+		_canonical_time = current_time ();
+		_canonical_time_is_displayed = false;
+	} else {
+		_canonical_time_is_displayed = true;
+	}
+
+	/* force a possible redraw */
+	
+	set (_canonical_time, true);
+}
+
+void
+AudioClock::toggle_off ()
+{
+	set_off (!_off);
+}

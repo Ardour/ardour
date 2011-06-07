@@ -3482,14 +3482,18 @@ ARDOUR_UI::store_clock_modes ()
 	XMLNode* node = new XMLNode(X_("ClockModes"));
 
 	for (vector<AudioClock*>::iterator x = AudioClock::clocks.begin(); x != AudioClock::clocks.end(); ++x) {
-		node->add_property ((*x)->name().c_str(), enum_2_string ((*x)->mode()));
+		XMLNode* child = new XMLNode (X_("Clock"));
+		
+		child->add_property (X_("name"), (*x)->name());
+		child->add_property (X_("mode"), enum_2_string ((*x)->mode()));
+		child->add_property (X_("on"), ((*x)->off() ? X_("no") : X_("yes")));
+
+		node->add_child_nocopy (*child);
 	}
 
 	_session->add_extra_xml (*node);
 	_session->set_dirty ();
 }
-
-
 
 ARDOUR_UI::TransportControllable::TransportControllable (std::string name, ARDOUR_UI& u, ToggleType tp)
 	: Controllable (name), ui (u), type(tp)

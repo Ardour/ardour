@@ -114,7 +114,6 @@ class ExportProfileManager
 		BBT,
 		MinSec,
 		Frames,
-		Off
 	};
 
 	struct TimespanState {

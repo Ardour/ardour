@@ -45,8 +45,7 @@ class AudioClock : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		Timecode,
 		BBT,
 		MinSec,
-		Frames,
-		Off
+		Frames
 	};
 
 	AudioClock (const std::string& clock_name, bool is_transient, const std::string& widget_name,
@@ -54,6 +53,8 @@ class AudioClock : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	~AudioClock ();
 
 	Mode mode() const { return _mode; }
+	void set_off (bool yn);
+	bool off() const { return _off; }
 
 	void focus ();
 
@@ -94,12 +95,14 @@ class AudioClock : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	bool              editable;
 	/** true if this clock follows the playhead, meaning that certain operations are redundant */
 	bool             _follows_playhead;
+	bool             _off;
 
 	Gtk::Menu  *ops_menu;
 
 	CairoEditableText* display;
 
 	enum Field {
+		Timecode_Sign,
 		Timecode_Hours,
 		Timecode_Minutes,
 		Timecode_Seconds,
@@ -219,6 +222,7 @@ class AudioClock : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void disconnect_signals ();
 
 	void set_theme ();
+	void toggle_off ();
 };
 
 #endif /* __audio_clock_h__ */
