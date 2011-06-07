@@ -45,35 +45,37 @@ TimeInfoBox::TimeInfoBox ()
 	punch_start = new AudioClock ("punch-start", false, "PunchClockDisplay", false, false, false, false);
 	punch_end = new AudioClock ("punch-end", false, "PunchClockDisplay", false, false, false, false);
 
+	bool bg = true;
+
 	CairoEditableText& ss (selection_start->main_display());
 	ss.set_ypad (1);
 	ss.set_xpad (1);
 	ss.set_corner_radius (0);
-	ss.set_draw_background (false);
+	ss.set_draw_background (bg);
 
 	CairoEditableText& se (selection_end->main_display());
 	se.set_ypad (1);
 	se.set_xpad (1);
 	se.set_corner_radius (0);
-	se.set_draw_background (false);
+	se.set_draw_background (bg);
 
 	CairoEditableText& sl (selection_length->main_display());
 	sl.set_ypad (1);
 	sl.set_xpad (2);
 	sl.set_corner_radius (0);
-	sl.set_draw_background (false);
+	sl.set_draw_background (bg);
 
 	CairoEditableText& ps (punch_start->main_display());
 	ps.set_ypad (1);
 	ps.set_xpad (2);
 	ps.set_corner_radius (0);
-	ps.set_draw_background (false);
+	ps.set_draw_background (bg);
 
 	CairoEditableText& pe (punch_end->main_display());
 	pe.set_ypad (1);
 	pe.set_xpad (2);
 	pe.set_corner_radius (0);
-	pe.set_draw_background (false);
+	pe.set_draw_background (bg);
 
 	selection_title.set_markup (string_compose ("<span size=\"x-small\">%1</span>", _("Selection")));
 	punch_title.set_markup (string_compose ("<span size=\"x-small\">%1</span>", _("Punch")));
@@ -189,18 +191,27 @@ TimeInfoBox::punch_changed (Location* loc)
 bool
 TimeInfoBox::on_expose_event (GdkEventExpose* ev)
 {
-	Table::on_expose_event (ev);
-
 	{
-		Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
+		int x, y;
+		Gtk::Widget* window_parent;
+		Glib::RefPtr<Gdk::Window> win = Gtkmm2ext::window_to_draw_on (*this, &window_parent);
+
+		if (win) {
 		
-		context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-		context->clip ();
-		
-		context->set_source_rgba (0.01, 0.02, 0.21, 1.0);
-		Gtkmm2ext::rounded_rectangle (context, 0, 0, get_allocation().get_width(), get_allocation().get_height(), 5);
-		context->fill ();
+			Cairo::RefPtr<Cairo::Context> context = win->create_cairo_context();
+			
+			translate_coordinates (*window_parent, 0, 0, x, y);
+			
+			context->rectangle (x, y, ev->area.width, ev->area.height);
+			context->clip ();
+			
+			context->set_source_rgba (0.149, 0.149, 0.149, 1.0);
+			Gtkmm2ext::rounded_rectangle (context, x, y, get_allocation().get_width(), get_allocation().get_height(), 5);
+			context->fill ();
+		}
 	}
+
+	Table::on_expose_event (ev);
 
 	return false;
 }

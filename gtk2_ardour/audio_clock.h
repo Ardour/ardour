@@ -38,7 +38,7 @@ namespace ARDOUR {
 	class Session;
 }
 
-class AudioClock : public Gtk::Alignment, public ARDOUR::SessionHandlePtr
+class AudioClock : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
   public:
 	enum Mode {
@@ -65,7 +65,6 @@ class AudioClock : public Gtk::Alignment, public ARDOUR::SessionHandlePtr
         void set_is_duration (bool);
 
 	void set_widget_name (const std::string&);
-	void set_font (const std::string&);
 
 	std::string name() const { return _name; }
 
@@ -137,7 +136,6 @@ class AudioClock : public Gtk::Alignment, public ARDOUR::SessionHandlePtr
 	CairoEditableText* supplemental_left;
 	CairoEditableText* supplemental_right;
 
-	Gtk::VBox packer;
 	Gtk::HBox top;
 	Gtk::HBox bottom;
 

@@ -23,6 +23,9 @@
 #include <map>
 
 #include <stdint.h>
+
+#include <boost/shared_ptr.hpp>
+
 #include <cairomm/cairomm.h>
 #include <gtkmm.h>
 
@@ -41,7 +44,7 @@ class CairoCell
 	double width() const { return bbox.width; }
 	double height() const { return bbox.height; }
 
-	void set_position (double x, double y) {
+        void set_position (double x, double y) {
 		bbox.x = x;
 		bbox.y = y;
 	}
@@ -60,8 +63,7 @@ class CairoCell
 
 	void set_visible (bool yn) { _visible = yn; }
 	bool visible() const { return _visible; }
-	virtual void set_size (Glib::RefPtr<Pango::Context>&,
-	                       const Pango::FontDescription&) {}
+	virtual void set_size (Cairo::RefPtr<Cairo::Context>&) {}
 
   protected:
 	int32_t _id;
@@ -70,67 +72,79 @@ class CairoCell
 	uint32_t _xpad;
 };
 
-class CairoBarCell : public CairoCell
-{
+class CairoFontDescription {
   public:
-        CairoBarCell(int32_t id) : CairoCell (id) {};
+	CairoFontDescription (const std::string& f,
+			      Cairo::FontSlant s,
+			      Cairo::FontWeight w,
+			      double sz)
+		: face (f)
+		, slant (s)
+		, weight (w)
+		, _size (sz)
+	{}
+	CairoFontDescription (Pango::FontDescription&);
 
-	void render (Cairo::RefPtr<Cairo::Context>& context) {
-		if (bbox.height > 4) {
-			context->move_to (bbox.x, bbox.y + 2);
-			context->set_line_width (bbox.width);
-			context->rel_line_to (0, bbox.height - 2);
-			context->stroke ();
-		}
+	void apply (Cairo::RefPtr<Cairo::Context> context) {
+		context->select_font_face (face, slant, weight);
+		context->set_font_size (_size);
 	}
 
-	void set_size (Glib::RefPtr<Pango::Context>& context,
-	               const Pango::FontDescription& font) {
-		Pango::FontMetrics metrics = context->get_metrics (font);
-		bbox.width = std::max (1.5, (0.1 * metrics.get_approximate_digit_width() / PANGO_SCALE));
-		bbox.height = (metrics.get_ascent() + metrics.get_descent()) / PANGO_SCALE;
-	}
+	void set_size (double sz) { _size = sz; }
+	double size() const { return _size; }
 
   private:
-};
-
-class CairoColonCell : public CairoCell
-{
-  public:
-	CairoColonCell (int32_t id) : CairoCell (id) {};
-
-	void render (Cairo::RefPtr<Cairo::Context>& context);
-	void set_size (Glib::RefPtr<Pango::Context>& context,
-	               const Pango::FontDescription& font);
+	std::string face;
+	Cairo::FontSlant slant;
+	Cairo::FontWeight weight;
+	double _size;
 };
 
 class CairoTextCell : public CairoCell
 {
   public:
-	CairoTextCell (int32_t id, double  width_chars);
-	void set_size (Glib::RefPtr<Pango::Context>&, const Pango::FontDescription&);
+	CairoTextCell (int32_t id, double width_chars, boost::shared_ptr<CairoFontDescription> font = boost::shared_ptr<CairoFontDescription>());
+	~CairoTextCell() {}
+
+	virtual void set_size (Cairo::RefPtr<Cairo::Context>&);
+
+	boost::shared_ptr<CairoFontDescription> font() const { return _font; }
 
 	std::string get_text() const {
-		return layout->get_text ();
+		return _text;
 	}
-	double width_chars() const { return _width_chars; }
 
+	double width_chars() const { return _width_chars; }
 	void render (Cairo::RefPtr<Cairo::Context>&);
 
   protected:
 	friend class CairoEditableText;
 	void set_width_chars (double wc) { _width_chars = wc; }
 	void set_text (const std::string& txt);
+	void set_font (boost::shared_ptr<CairoFontDescription> font) {
+		_font = font;
+	}
 
-  private:
+  protected:
 	double _width_chars;
-	Glib::RefPtr<Pango::Layout> layout;
+	std::string _text;
+	boost::shared_ptr<CairoFontDescription> _font;
+        double y_offset;
+        double x_offset;
+};
+
+class CairoCharCell : public CairoTextCell
+{
+  public:
+        CairoCharCell(int32_t id, char c);
+
+        void set_size (Cairo::RefPtr<Cairo::Context>& context);
 };
 
 class CairoEditableText : public Gtk::Misc
 {
 public:
-	CairoEditableText ();
+	CairoEditableText (boost::shared_ptr<CairoFontDescription> font  = boost::shared_ptr<CairoFontDescription>());
 	~CairoEditableText ();
 
 	void add_cell (CairoCell*);
@@ -168,9 +182,6 @@ public:
 		queue_draw ();
 	}
 
-	void set_font (const std::string& str);
-	void set_font (const Pango::FontDescription&);
-
 	double xpad() const { return _xpad; }
 	void set_xpad (double x) { _xpad = x; queue_resize(); }
 	double ypad() const { return _ypad; }
@@ -178,7 +189,11 @@ public:
 	
 	double corner_radius() const { return _corner_radius; }
 	void set_corner_radius (double r) { _corner_radius = r; queue_draw (); }
-	
+
+	boost::shared_ptr<CairoFontDescription> font() const { return _font; }
+	void set_font (boost::shared_ptr<CairoFontDescription> font);
+	void set_font (Pango::FontDescription& font);
+
 	sigc::signal<bool,GdkEventScroll*,CairoCell*> scroll;
 	sigc::signal<bool,GdkEventButton*,CairoCell*> button_press;
 	sigc::signal<bool,GdkEventButton*,CairoCell*> button_release;
@@ -188,21 +203,20 @@ protected:
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 	void on_size_request (GtkRequisition*);
-	void on_size_allocate (Gtk::Allocation&);
 	bool on_focus_in_event (GdkEventFocus*);
 	bool on_focus_out_event (GdkEventFocus*);
 	bool on_scroll_event (GdkEventScroll*);
+        void on_size_allocate (Gtk::Allocation&);
 
 private:
 	typedef std::vector<CairoCell*> CellMap;
 
 	CellMap cells;
-	Pango::FontDescription _font;
+	boost::shared_ptr<CairoFontDescription> _font;
 	CairoCell* editing_cell;
 	bool _draw_bg;
-	double width;
+	double max_cell_width;
 	double max_cell_height;
-	double height;
 	double _corner_radius;
 	double _xpad;
 	double _ypad;
@@ -221,6 +235,8 @@ private:
 
 	CairoCell* find_cell (uint32_t x, uint32_t y);
 	void queue_draw_cell (CairoCell* target);
+        void position_cells_and_get_bbox (GdkRectangle&);
+        void set_cell_sizes (); 
 };
 
 #endif /* __libgtmm2ext_cairocell_h__ */

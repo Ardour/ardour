@@ -26,14 +26,67 @@
 
 using std::string;
 using std::map;
+using std::max;
 using std::cerr;
 using std::endl;
 using namespace Gtkmm2ext;
 
+static const double cairo_font_fudge = 1.5;
+
+CairoFontDescription::CairoFontDescription (Pango::FontDescription& fd)
+{
+	_size = cairo_font_fudge * (fd.get_size() / PANGO_SCALE);
+
+	switch (fd.get_style()) {
+	case Pango::STYLE_NORMAL:
+		slant = Cairo::FONT_SLANT_NORMAL;
+		break;
+	case Pango::STYLE_OBLIQUE:
+		slant = Cairo::FONT_SLANT_OBLIQUE;
+		break;
+	case Pango::STYLE_ITALIC:
+		slant = Cairo::FONT_SLANT_ITALIC;
+		break;
+	}
+
+	switch (fd.get_weight()) {
+	case Pango::WEIGHT_ULTRALIGHT:
+		weight = Cairo::FONT_WEIGHT_NORMAL;
+		break;
+
+	case Pango::WEIGHT_LIGHT:
+		weight = Cairo::FONT_WEIGHT_NORMAL;
+		break;
+
+	case Pango::WEIGHT_NORMAL:
+		weight = Cairo::FONT_WEIGHT_NORMAL;
+		break;
+
+	case Pango::WEIGHT_SEMIBOLD:
+		weight = Cairo::FONT_WEIGHT_BOLD;
+		break;
+
+	case Pango::WEIGHT_BOLD:
+		weight = Cairo::FONT_WEIGHT_BOLD;
+		break;
+
+	case Pango::WEIGHT_ULTRABOLD:
+		weight = Cairo::FONT_WEIGHT_BOLD;
+		break;
+
+	case Pango::WEIGHT_HEAVY:
+		weight = Cairo::FONT_WEIGHT_BOLD;
+		break;
+
+	}
+
+	face = fd.get_family();
+}       
+
 CairoCell::CairoCell (int32_t id)
 	: _id (id)
 	, _visible (true)
-	, _xpad (2)
+	, _xpad (0)
 {
 	bbox.x = 0;
 	bbox.y = 0;
@@ -41,34 +94,19 @@ CairoCell::CairoCell (int32_t id)
 	bbox.height = 0;
 }
 
-void
-CairoColonCell::render (Cairo::RefPtr<Cairo::Context>& context)
-{
-	/* two very small circles */
-	context->arc (bbox.x, bbox.y + (bbox.height/3.0), bbox.width/2.0, 0.0, M_PI*2.0);
-	context->fill ();
-	context->arc (bbox.x, bbox.y + (2.0 * bbox.height/3.0), bbox.width/2.0, 0.0, M_PI*2.0);
-	context->fill ();
-}
-
-void
-CairoColonCell::set_size (Glib::RefPtr<Pango::Context>& context, const Pango::FontDescription& font)
-{
-	Pango::FontMetrics metrics = context->get_metrics (font);
-	bbox.width = std::max (3.0, (0.25 * metrics.get_approximate_char_width() / PANGO_SCALE));
-	bbox.height = (metrics.get_ascent() + metrics.get_descent()) / PANGO_SCALE;
-}
-
-CairoTextCell::CairoTextCell (int32_t id, double wc)
+CairoTextCell::CairoTextCell (int32_t id, double wc, boost::shared_ptr<CairoFontDescription> font)
 	: CairoCell (id)
 	, _width_chars (wc)
+	, _font (font)
+	, y_offset (0)
+	, x_offset (0)
 {
 }
 
 void
 CairoTextCell::set_text (const std::string& txt)
 {
-	layout->set_text (txt);
+	_text = txt;
 }
 
 void
@@ -78,36 +116,89 @@ CairoTextCell::render (Cairo::RefPtr<Cairo::Context>& context)
 		return;
 	}
 
-	context->move_to (bbox.x, bbox.y);
-	pango_cairo_update_layout (context->cobj(), layout->gobj());
-	pango_cairo_show_layout (context->cobj(), layout->gobj());
+	_font->apply (context);
+	context->move_to (bbox.x, bbox.y + bbox.height + y_offset);
+	context->show_text (_text);
 }
 
 void
-CairoTextCell::set_size (Glib::RefPtr<Pango::Context>& context, const Pango::FontDescription& font)
+CairoTextCell::set_size (Cairo::RefPtr<Cairo::Context>& context)
 {
-	if (!layout) {
-		layout = Pango::Layout::create (context);
+	const uint32_t lim = (uint32_t) ceil (_width_chars);
+	char buf[lim+1];
+	uint32_t n;
+	double max_width = 0.0;
+	double max_height = 0.0;
+	Cairo::TextExtents ext;
+	double bsum = 0;
+
+	buf[lim] = '\0';
+
+	_font->apply (context);
+
+	for (int digit = 0; digit < 10; digit++) {
+
+		for (n = 0; n < lim; ++n) {
+			buf[n] = '0' + digit; 
+		}
+		
+		context->get_text_extents (buf, ext);
+		
+		max_width = max (ext.width + ext.x_bearing, max_width);
+		max_height = max (ext.height, max_height);
+		bsum += ext.x_bearing;
 	}
 
-	layout->set_font_description (font);
+	/* add the average x-bearing for all digits as right hand side padding */
 
-	Pango::FontMetrics metrics = context->get_metrics (font);
+	bbox.width = max_width + (bsum/10.0);
 
-	bbox.width = (_width_chars * metrics.get_approximate_digit_width ()) / PANGO_SCALE;
-	bbox.height = (metrics.get_ascent() + metrics.get_descent()) / PANGO_SCALE;
+  	/* some fonts and some digits get their extents computed "too small", so fudge this
+	   by adding 2
+	*/
+	bbox.height = max_height;
 }
 
-CairoEditableText::CairoEditableText ()
+CairoCharCell::CairoCharCell (int32_t id, char c)
+	: CairoTextCell (id, 1)
+{
+	_text = c;
+}
+
+void
+CairoCharCell::set_size (Cairo::RefPtr<Cairo::Context>& context)
+{
+	Cairo::TextExtents ext;
+
+	_font->apply (context);
+	
+	{
+		const char* buf = "8";
+		context->get_text_extents (buf, ext);
+		/* same height as an "8" */
+		bbox.height = ext.height;
+	}
+
+	{
+		const char* buf = ":";
+		context->get_text_extents (buf, ext);
+		bbox.width = ext.width + (2.0 * ext.x_bearing);
+		/* center vertically */
+		y_offset = (ext.height - bbox.height) / 2.0;
+	}
+}
+
+CairoEditableText::CairoEditableText (boost::shared_ptr<CairoFontDescription> font)
 	: editing_cell (0)
 	, _draw_bg (true)
-	, width (0)
+	, max_cell_width (0)
 	, max_cell_height (0)
-	, height (0)
 	, _corner_radius (9)
-	, _xpad (5)
-	, _ypad (5)
+	, _xpad (0)
+	, _ypad (0)
 {
+	set_font (font);
+
 	add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK |
 	            Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK);
 	set_flags (Gtk::CAN_FOCUS);
@@ -152,11 +243,15 @@ CairoEditableText::on_focus_out_event (GdkEventFocus* ev)
 void
 CairoEditableText::add_cell (CairoCell* cell)
 {
-	Glib::RefPtr<Pango::Context> context = get_pango_context ();
-	cell->set_size (context, _font);
 	cells.push_back (cell);
+	
+	CairoTextCell* tc = dynamic_cast<CairoTextCell*>(cell);
+
+	if (tc) {
+		tc->set_font (_font);
+	}
+
 	queue_resize ();
-	queue_draw ();
 }
 
 void
@@ -164,7 +259,6 @@ CairoEditableText::clear_cells ()
 {
 	cells.clear ();
 	queue_resize ();
-	queue_draw ();
 }
 
 void
@@ -195,6 +289,10 @@ CairoEditableText::on_expose_event (GdkEventExpose* ev)
 	context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	context->clip ();
 
+	Gtk::Allocation alloc = get_allocation ();
+	double width = alloc.get_width();
+	double height = alloc.get_height ();
+		
 	if (_draw_bg) {
 		context->set_source_rgba (bg_r, bg_g, bg_b, bg_a);
 		if (_corner_radius) {
@@ -204,14 +302,14 @@ CairoEditableText::on_expose_event (GdkEventExpose* ev)
 		}
 		context->fill ();
 	}
-
+	
 	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
 
 		CairoCell* cell = (*i);
 
 		/* is cell inside the expose area?
 		 */
-
+		
 		if (cell->intersects (ev->area)) {
 			if (cell == editing_cell) {
 				context->set_source_rgba (edit_r, edit_b, edit_g, edit_a);
@@ -294,40 +392,40 @@ CairoEditableText::stop_editing ()
 }
 
 void
-CairoEditableText::on_size_request (GtkRequisition* req)
+CairoEditableText::set_cell_sizes ()
 {
-	double x = 0;
+	Glib::RefPtr<Gdk::Window> win = get_window();
 
-	max_cell_height = 0;
-
-	x = _xpad;
-
-	CellMap::iterator i = cells.begin(); 
-
-	while (i != cells.end()) {
-		CairoCell* cell = (*i);
-
-		if (cell->visible()) {
-			cell->set_position (x, _ypad);
-		}
-
-		x += cell->width();
-		max_cell_height = std::max ((double) cell->height(), max_cell_height);
-
-		++i;
-
-		if (i != cells.end()) {
-			/* only add cell padding intra-cellularly */
-			x += cell->xpad();
-		} else {
-			break;
-		}
+	if (!win) {
+		return;
+	}
+	
+	Cairo::RefPtr<Cairo::Context> context = win->create_cairo_context();
+	
+	if (!context) {
+		return;
 	}
 
-	x += _xpad;
+	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
+		(*i)->set_size (context);
+	}
+}
 
-	req->width = x;
-	req->height = max_cell_height + (_ypad * 2);
+void
+CairoEditableText::on_size_request (GtkRequisition* req)
+{
+	set_cell_sizes ();
+
+	max_cell_width = 0;
+	max_cell_height = 0;
+	
+	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
+		max_cell_width += (*i)->width();
+		max_cell_height = std::max ((double) (*i)->height(), max_cell_height);
+	}
+
+	req->width = max_cell_width;
+	req->height = max_cell_height;
 }
 
 void
@@ -335,27 +433,49 @@ CairoEditableText::on_size_allocate (Gtk::Allocation& alloc)
 {
 	Misc::on_size_allocate (alloc);
 
-	width = alloc.get_width();
-	height = alloc.get_height();
+	/* position each cell so that its centered in the allocated space
+	 */
+
+	double x = (alloc.get_width() - max_cell_width)/2.0;
+	double y = (alloc.get_height() - max_cell_height)/2.0;
+
+	CellMap::iterator i = cells.begin();
+
+	while (i != cells.end()) {
+		CairoCell* cell = (*i);
+
+		cell->set_position (x, y);
+		x += cell->width ();
+
+		if (++i != cells.end()) {
+			/* only add cell padding intra-cellularly */
+			x += cell->xpad();
+		} else {
+			break;
+		}
+	}
 }
 
 void
-CairoEditableText::set_font (const std::string& str)
+CairoEditableText::set_font (Pango::FontDescription& fd)
 {
-	set_font (Pango::FontDescription (str));
+	boost::shared_ptr<CairoFontDescription> cd (new CairoFontDescription (fd));
+	set_font (cd);
 }
 
 void
-CairoEditableText::set_font (const Pango::FontDescription& fd)
+CairoEditableText::set_font (boost::shared_ptr<CairoFontDescription> fd)
 {
-	Glib::RefPtr<Pango::Context> context = get_pango_context ();
+	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
+		CairoTextCell* tc = dynamic_cast<CairoTextCell*>(*i);
+		if (tc && (!tc->font() || tc->font() == _font)) {
+			tc->set_font (fd);
+		}
+	}
 
 	_font = fd;
-
-	for (CellMap::iterator i = cells.begin(); i != cells.end(); ++i) {
-		(*i)->set_size (context, _font);
-	}
 
 	queue_resize ();
 	queue_draw ();
 }
+

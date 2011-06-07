@@ -88,6 +88,8 @@ namespace Gtkmm2ext {
 	Glib::RefPtr<Gdk::Drawable> get_bogus_drawable();
 	void detach_menu (Gtk::Menu&);
 
+	Glib::RefPtr<Gdk::Window> window_to_draw_on (Gtk::Widget& w, Gtk::Widget** parent);
+
         bool possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval);
         uint32_t possibly_translate_legal_accelerator_to_real_key (uint32_t keyval);
 

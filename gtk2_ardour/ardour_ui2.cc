@@ -388,12 +388,10 @@ ARDOUR_UI::setup_transport ()
 
 	HBox* clock_box = manage (new HBox);
 	clock_box->set_border_width (2);
-	primary_clock->main_display().set_ypad (2);
 	primary_clock->set_border_width (2);
 	clock_box->pack_start (*primary_clock, false, false);
 	if (!ARDOUR::Profile->get_small_screen()) {
 		secondary_clock->set_border_width (2);
-		secondary_clock->main_display().set_ypad (2);
 		clock_box->pack_start (*secondary_clock, false, false);
 	}
 

@@ -108,14 +108,14 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 
 	display = new CairoEditableText ();
 
-	_fixed_cells[Colon1] = new CairoColonCell (Colon1);
-	_fixed_cells[Colon2] = new CairoColonCell (Colon2);
-	_fixed_cells[Colon3] = new CairoColonCell (Colon3);
-	_fixed_cells[Bar1] = new CairoBarCell (Bar1);
-	_fixed_cells[Bar2] = new CairoBarCell (Bar2);
+	_fixed_cells[Colon1] = new CairoCharCell (Colon1, ':');
+	_fixed_cells[Colon2] = new CairoCharCell (Colon2, ':');
+	_fixed_cells[Colon3] = new CairoCharCell (Colon3, ':');
+	_fixed_cells[Bar1] = new CairoCharCell (Bar1, '|');
+	_fixed_cells[Bar2] = new CairoCharCell (Bar2, '|');
 	
-	// add an extra 0.6 "average char width" for the negative sign
-	_text_cells[Timecode_Hours] = new CairoTextCell (Timecode_Hours, field_length[Timecode_Hours] + 0.6); 
+	// add an extra character for the negative sign
+	_text_cells[Timecode_Hours] = new CairoTextCell (Timecode_Hours, field_length[Timecode_Hours] + 1); 
 	_text_cells[Timecode_Minutes] = new CairoTextCell (Timecode_Minutes, field_length[Timecode_Minutes]);
 	_text_cells[Timecode_Seconds] = new CairoTextCell (Timecode_Seconds, field_length[Timecode_Seconds]);
 	_text_cells[Timecode_Frames] = new CairoTextCell (Timecode_Frames, field_length[Timecode_Frames]);
@@ -137,7 +137,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	
 	_text_cells[AudioFrames] = new CairoTextCell (AudioFrames, field_length[AudioFrames]);
 
-	packer.set_homogeneous (false);
+	set_homogeneous (false);
 
 	if (with_info) {
 
@@ -159,14 +159,14 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 
 		top.pack_start (*display, true, true);
 		
-		packer.set_spacing (1);
-		packer.pack_start (top, true, true);
-		packer.pack_start (bottom, false, false);
+		set_spacing (1);
+		
+		pack_start (top, true, true);
+		pack_start (bottom, true, true);
 	} else {
-		packer.pack_start (*display, true, true);
+		pack_start (*display, true, true);
 	}
 
-	add (packer);
 	show_all ();
 
 	set_widget_name (widget_name);
@@ -189,13 +189,6 @@ AudioClock::~AudioClock ()
 	delete supplemental_left;
 	delete supplemental_right;
 	/* XXX need to delete all cells too */
-}
-
-void
-AudioClock::set_font (const string& font)
-{
-	display->set_font (font);
-	/* XXX supplemental ...  */
 }
 
 void
@@ -226,9 +219,10 @@ AudioClock::set_theme ()
 
 	display->set_font (font);
 
-	if (supplemental_right) {
-		Pango::FontDescription smaller_font ("Sans 8");
-		
+	/* propagate font style,but smaller, into supplemental text */
+	if (supplemental_left) {
+		boost::shared_ptr<CairoFontDescription> smaller_font (new CairoFontDescription (*display->font().get()));
+		smaller_font->set_size (12);
 		supplemental_right->set_font (smaller_font);
 		supplemental_left->set_font (smaller_font);
 	}
@@ -303,7 +297,7 @@ AudioClock::end_edit ()
 void
 AudioClock::on_realize ()
 {
-	Alignment::on_realize ();
+	VBox::on_realize ();
 
 	/* styles are not available until the widgets are bound to a window */
 	
@@ -1859,6 +1853,12 @@ AudioClock::set_mode (Mode m)
 		/* clear information cells */
 		supplemental_left->set_text (_text_cells[LowerLeft2], _(""));
 		supplemental_right->set_text (_text_cells[LowerRight2], _(""));
+
+		/* propagate font style,but smaller, into cells */
+		boost::shared_ptr<CairoFontDescription> smaller_font (new CairoFontDescription (*display->font().get()));
+		smaller_font->set_size (12);
+		supplemental_right->set_font (smaller_font);
+		supplemental_left->set_font (smaller_font);
 	}
 
 	if (_mode != Off) {
@@ -1885,7 +1885,7 @@ AudioClock::set_bbt_reference (framepos_t pos)
 void
 AudioClock::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
 {
-	Alignment::on_style_changed (old_style);
+	VBox::on_style_changed (old_style);
 	set_theme ();
 }
 

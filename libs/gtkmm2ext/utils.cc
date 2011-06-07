@@ -468,3 +468,23 @@ Gtkmm2ext::rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, d
 }
 
 #endif
+
+Glib::RefPtr<Gdk::Window>
+Gtkmm2ext::window_to_draw_on (Gtk::Widget& w, Gtk::Widget** parent)
+{
+	if (w.get_has_window()) {
+		return w.get_window();
+	}
+
+	(*parent) = w.get_parent();
+
+	while (*parent) {
+		if ((*parent)->get_has_window()) {
+			return (*parent)->get_window ();
+		}
+		(*parent) = (*parent)->get_parent ();
+	}
+
+	return Glib::RefPtr<Gdk::Window> ();
+}
+

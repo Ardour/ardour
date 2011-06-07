@@ -942,7 +942,7 @@ style "recording_big_clock_display" = "non_recording_big_clock_display"
 
 style "transport_clock_display"
 {
-	font_name = "monospace @FONT_BOLD_BIG@"
+	font_name = "@FONT_BOLD_BIG@"
 
 	fg[ACTIVE] = darker(@@COLPREFIX@_bright_indicator)
 	fg[SELECTED] = darker(@@COLPREFIX@_bright_indicator)
@@ -991,7 +991,7 @@ style "default_clock_display" = "medium_text"
 
 style "selection_clock_display" 
 {
-        font_name = "monospace @FONT_SMALLER@"
+        font_name = "@FONT_SMALLER@"
 
         text[NORMAL] = @@COLPREFIX@_contrasting_indicator
 	text[ACTIVE] = @@COLPREFIX@_bright_indicator
@@ -1006,7 +1006,7 @@ style "selection_clock_display"
 
 style "punch_clock_display" = "very_small_text"
 {
-        font_name = "monospace @FONT_SMALLER@"
+        font_name = "@FONT_SMALLER@"
 
         text[NORMAL] = @@COLPREFIX@_contrasting_indicator
 	text[ACTIVE] = @@COLPREFIX@_bright_indicator
