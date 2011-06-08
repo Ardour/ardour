@@ -222,7 +222,6 @@ class AudioClock : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void disconnect_signals ();
 
 	void set_theme ();
-	void toggle_off ();
 };
 
 #endif /* __audio_clock_h__ */

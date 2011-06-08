@@ -17,6 +17,7 @@
 
 */
 
+#include <algorithm>
 #include "pbd/compose.h"
 
 #include "gtkmm2ext/cairocell.h"
@@ -34,6 +35,8 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using std::min;
+using std::max;
 
 TimeInfoBox::TimeInfoBox ()
 	: Table (4, 4)
@@ -119,8 +122,8 @@ TimeInfoBox::TimeInfoBox ()
         show_all ();
 
 	selection_start->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), selection_start));
-	selection_end->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), selection_start));
-	selection_length->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), selection_start));
+	selection_end->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), selection_end));
+	selection_length->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), selection_length));
 
 	punch_start->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_punch_mode), punch_start));
 	punch_end->mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_punch_mode), punch_end));
@@ -223,20 +226,45 @@ TimeInfoBox::selection_changed ()
 	Selection& selection (Editor::instance().get_selection());
 
 	switch (Editor::instance().current_mouse_mode()) {
+
 	case Editing::MouseObject:
-		if (selection.regions.empty()) {
+		if (Editor::instance().internal_editing()) {
+			/* displaying MIDI note selection is tricky */
+			
 			selection_start->set_off (true);
 			selection_end->set_off (true);
 			selection_length->set_off (true);
+
 		} else {
-			s = selection.regions.start();
-			e = selection.regions.end_frame();
-			selection_start->set_off (false);
-			selection_end->set_off (false);
-			selection_length->set_off (false);
-			selection_start->set (s);
-			selection_end->set (e);
-			selection_length->set (e - s + 1);
+			if (selection.regions.empty()) {
+				if (selection.points.empty()) {
+					selection_start->set_off (true);
+					selection_end->set_off (true);
+					selection_length->set_off (true);
+				} else {
+					s = max_framepos;
+					e = 0;
+					for (PointSelection::iterator i = selection.points.begin(); i != selection.points.end(); ++i) {
+						s = min (s, (framepos_t) i->start);
+						e = max (e, (framepos_t) i->end);
+					}
+					selection_start->set_off (false);
+					selection_end->set_off (false);
+					selection_length->set_off (false);
+					selection_start->set (s);
+					selection_end->set (e);
+					selection_length->set (e - s + 1);
+				}
+			} else {
+				s = selection.regions.start();
+				e = selection.regions.end_frame();
+				selection_start->set_off (false);
+				selection_end->set_off (false);
+				selection_length->set_off (false);
+				selection_start->set (s);
+				selection_end->set (e);
+				selection_length->set (e - s + 1);
+			}
 		}
 		break;
 

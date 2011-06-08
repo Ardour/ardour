@@ -1769,7 +1769,6 @@ AudioClock::build_ops_menu ()
 	ops_items.push_back (MenuElem (_("Bars:Beats"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), BBT)));
 	ops_items.push_back (MenuElem (_("Minutes:Seconds"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), MinSec)));
 	ops_items.push_back (MenuElem (_("Samples"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Frames)));
-	ops_items.push_back (MenuElem (_("Off"), sigc::mem_fun(*this, &AudioClock::toggle_off)));
 
 	if (editable && !is_duration && !_follows_playhead) {
 		ops_items.push_back (SeparatorElem());
@@ -1971,8 +1970,3 @@ AudioClock::set_off (bool yn)
 	set (_canonical_time, true);
 }
 
-void
-AudioClock::toggle_off ()
-{
-	set_off (!_off);
-}
