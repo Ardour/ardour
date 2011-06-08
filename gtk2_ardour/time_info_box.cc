@@ -220,27 +220,39 @@ void
 TimeInfoBox::selection_changed ()
 {
 	framepos_t s, e;
+	Selection& selection (Editor::instance().get_selection());
 
 	switch (Editor::instance().current_mouse_mode()) {
 	case Editing::MouseObject:
-		s = Editor::instance().get_selection().regions.start();
-		e = Editor::instance().get_selection().regions.end_frame();
-	
-		selection_start->set_off (false);
-		selection_end->set_off (false);
-		selection_length->set_off (false);
-		selection_start->set (s);
-		selection_end->set (e);
-		selection_length->set (e - s + 1);
+		if (selection.regions.empty()) {
+			selection_start->set_off (true);
+			selection_end->set_off (true);
+			selection_length->set_off (true);
+		} else {
+			s = selection.regions.start();
+			e = selection.regions.end_frame();
+			selection_start->set_off (false);
+			selection_end->set_off (false);
+			selection_length->set_off (false);
+			selection_start->set (s);
+			selection_end->set (e);
+			selection_length->set (e - s + 1);
+		}
 		break;
 
 	case Editing::MouseRange:
-		selection_start->set_off (false);
-		selection_end->set_off (false);
-		selection_length->set_off (false);
-		selection_start->set (Editor::instance().get_selection().time.start());
-		selection_end->set (Editor::instance().get_selection().time.end_frame());
-		selection_length->set (Editor::instance().get_selection().time.length());
+		if (selection.time.empty()) {
+			selection_start->set_off (true);
+			selection_end->set_off (true);
+			selection_length->set_off (true);
+		} else {
+			selection_start->set_off (false);
+			selection_end->set_off (false);
+			selection_length->set_off (false);
+			selection_start->set (selection.time.start());
+			selection_end->set (selection.time.end_frame());
+			selection_length->set (selection.time.length());
+		}
 		break;
 
 	default:
