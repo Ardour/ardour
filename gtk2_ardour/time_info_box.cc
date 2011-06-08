@@ -50,40 +50,23 @@ TimeInfoBox::TimeInfoBox ()
 	punch_start = new AudioClock ("punch-start", false, "PunchClockDisplay", false, false, false, false);
 	punch_end = new AudioClock ("punch-end", false, "PunchClockDisplay", false, false, false, false);
 
-	bool bg = true;
-
 	CairoEditableText& ss (selection_start->main_display());
-	ss.set_ypad (1);
-	ss.set_xpad (1);
 	ss.set_corner_radius (0);
-	ss.set_draw_background (bg);
 
 	CairoEditableText& se (selection_end->main_display());
-	se.set_ypad (1);
-	se.set_xpad (1);
 	se.set_corner_radius (0);
-	se.set_draw_background (bg);
 
 	CairoEditableText& sl (selection_length->main_display());
-	sl.set_ypad (1);
-	sl.set_xpad (2);
 	sl.set_corner_radius (0);
-	sl.set_draw_background (bg);
 
 	CairoEditableText& ps (punch_start->main_display());
-	ps.set_ypad (1);
-	ps.set_xpad (2);
 	ps.set_corner_radius (0);
-	ps.set_draw_background (bg);
 
 	CairoEditableText& pe (punch_end->main_display());
-	pe.set_ypad (1);
-	pe.set_xpad (2);
 	pe.set_corner_radius (0);
-	pe.set_draw_background (bg);
 
-	selection_title.set_markup (string_compose ("<span size=\"x-small\">%1</span>", _("Selection")));
-	punch_title.set_markup (string_compose ("<span size=\"x-small\">%1</span>", _("Punch")));
+	selection_title.set_text (_("Selection"));
+	punch_title.set_text (_("Punch"));
 
 	set_homogeneous (false);
 	set_spacings (0);
@@ -95,28 +78,43 @@ TimeInfoBox::TimeInfoBox ()
 
 	Gtk::Label* l;
 
+	selection_title.set_name ("TimeInfoSelectionTitle");
 	attach (selection_title, 0, 2, 0, 1);
 	l = manage (new Label);
-	l->set_markup (string_compose ("<span size=\"x-small\">%1</span>", _("Start")));
-        attach (*l, 0, 1, 1, 2);
+	l->set_text (_("Start"));
+	l->set_alignment (1.0, 0.5);
+	l->set_name (X_("TimeInfoSelectionLabel"));
+        attach (*l, 0, 1, 1, 2, FILL);
         attach (*selection_start, 1, 2, 1, 2);
+
 	l = manage (new Label);
-	l->set_markup (string_compose ("<span size=\"x-small\">%1</span>", _("End")));
-        attach (*l, 0, 1, 2, 3);
+	l->set_text (_("End"));
+	l->set_alignment (1.0, 0.5);
+	l->set_name (X_("TimeInfoSelectionLabel"));
+        attach (*l, 0, 1, 2, 3, FILL);
         attach (*selection_end, 1, 2, 2, 3);
+
 	l = manage (new Label);
-	l->set_markup (string_compose ("<span size=\"x-small\">%1</span>", _("Length")));
-        attach (*l, 0, 1, 3, 4);
+	l->set_text (_("Length"));
+	l->set_alignment (1.0, 0.5);
+	l->set_name (X_("TimeInfoSelectionLabel"));
+        attach (*l, 0, 1, 3, 4, FILL);
         attach (*selection_length, 1, 2, 3, 4);
 
+	punch_title.set_name ("TimeInfoSelectionTitle");
 	attach (punch_title, 2, 4, 0, 1);
 	l = manage (new Label);
-	l->set_markup (string_compose ("<span size=\"x-small\">%1</span>", _("In")));
-        attach (*l, 2, 3, 1, 2);
+	l->set_alignment (1.0, 0.5);
+	l->set_text (_("In"));
+	l->set_name (X_("TimeInfoPunchLabel"));
+        attach (*l, 2, 3, 1, 2, FILL);
         attach (*punch_start, 3, 4, 1, 2);
+
 	l = manage (new Label);
-	l->set_markup (string_compose ("<span size=\"x-small\">%1</span>", _("Out")));
-        attach (*l, 2, 3, 2, 3);
+	l->set_alignment (1.0, 0.5);
+	l->set_text (_("Out"));
+	l->set_name (X_("TimeInfoPunchLabel"));
+        attach (*l, 2, 3, 2, 3, FILL);
         attach (*punch_end, 3, 4, 2, 3);
 
         show_all ();
@@ -214,6 +212,8 @@ TimeInfoBox::set_session (Session* s)
 			watch_punch (punch);
 		}
 		
+		punch_changed (punch);
+
 		_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR, 
 							       boost::bind (&TimeInfoBox::punch_location_changed, this, _1), gui_context());
 	}
@@ -314,10 +314,13 @@ void
 TimeInfoBox::punch_changed (Location* loc)
 {
 	if (!loc) {
-		punch_start->set (99999999);
-		punch_end->set (999999999);
+		punch_start->set_off (true);
+		punch_end->set_off (true);
 		return;
 	}
+
+	punch_start->set_off (false);
+	punch_end->set_off (false);
 
 	punch_start->set (loc->start());
 	punch_end->set (loc->end());

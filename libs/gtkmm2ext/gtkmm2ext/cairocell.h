@@ -79,24 +79,30 @@ class CairoFontDescription {
 			      Cairo::FontWeight w,
 			      double sz)
 		: face (f)
-		, slant (s)
-		, weight (w)
+		, _slant (s)
+		, _weight (w)
 		, _size (sz)
 	{}
 	CairoFontDescription (Pango::FontDescription&);
 
 	void apply (Cairo::RefPtr<Cairo::Context> context) {
-		context->select_font_face (face, slant, weight);
+		context->select_font_face (face, _slant, _weight);
 		context->set_font_size (_size);
 	}
 
 	void set_size (double sz) { _size = sz; }
 	double size() const { return _size; }
 
+       Cairo::FontSlant slant() const { return _slant; }
+       void set_slant (Cairo::FontSlant sl) { _slant = sl; }
+
+       Cairo::FontWeight weight() const { return _weight; }
+       void set_weight (Cairo::FontWeight w) { _weight = w; }
+
   private:
 	std::string face;
-	Cairo::FontSlant slant;
-	Cairo::FontWeight weight;
+	Cairo::FontSlant _slant;
+        Cairo::FontWeight _weight;
 	double _size;
 };
 

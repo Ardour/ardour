@@ -231,10 +231,12 @@ AudioClock::set_theme ()
 
 	display->set_font (font);
 
-	/* propagate font style,but smaller, into supplemental text */
+
 	if (supplemental_left) {
+		/* propagate font style, sort of, into supplemental text */
 		boost::shared_ptr<CairoFontDescription> smaller_font (new CairoFontDescription (*display->font().get()));
 		smaller_font->set_size (12);
+		smaller_font->set_weight (Cairo::FONT_WEIGHT_NORMAL);
 		supplemental_right->set_font (smaller_font);
 		supplemental_left->set_font (smaller_font);
 	}
@@ -405,7 +407,7 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 	snprintf (buf, sizeof (buf), "%" PRId64, when);
 
 	if (_off) {
-		display->set_text (_text_cells[AudioFrames], "--");
+		display->set_text (_text_cells[AudioFrames], "-----------");
 
 		if (supplemental_left) {
 			supplemental_left->set_text (_text_cells[LowerLeft2], "");
@@ -1862,14 +1864,14 @@ AudioClock::set_mode (Mode m)
 			supplemental_right->add_cell (_text_cells[LowerRight1]);
 			supplemental_right->add_cell (_text_cells[LowerRight2]);
 
-			supplemental_left->set_width_chars (_text_cells[LowerLeft1], 1.5); // why not 1? M must be wider than 8, i suppose
+			supplemental_left->set_width_chars (_text_cells[LowerLeft1], 1); 
 			supplemental_left->set_width_chars (_text_cells[LowerLeft2], 5.25);
 
-			supplemental_right->set_width_chars (_text_cells[LowerRight1], 1);
+			supplemental_right->set_width_chars (_text_cells[LowerRight1], 2); // why not 1? M is too wide
 			supplemental_right->set_width_chars (_text_cells[LowerRight2], 5);
 
-			supplemental_left->set_text (_text_cells[LowerLeft1], _("M"));
-			supplemental_right->set_text (_text_cells[LowerRight1], _("T"));
+			supplemental_left->set_text (_text_cells[LowerLeft1], _("T")); 
+			supplemental_right->set_text (_text_cells[LowerRight1], _("M"));
 		}
 		break;
 
@@ -1881,6 +1883,23 @@ AudioClock::set_mode (Mode m)
 		display->add_cell (_text_cells[MS_Seconds]);
 		display->add_cell (_fixed_cells[Colon3]);
 		display->add_cell (_text_cells[MS_Milliseconds]);
+		if (supplemental_left) {
+			supplemental_left->add_cell (_text_cells[LowerLeft1]);
+			supplemental_left->add_cell (_text_cells[LowerLeft2]);
+			supplemental_right->add_cell (_text_cells[LowerRight1]);
+			supplemental_right->add_cell (_text_cells[LowerRight2]);
+
+			/* These are going to remain empty */
+
+			supplemental_left->set_width_chars (_text_cells[LowerLeft1], 1);
+			supplemental_left->set_width_chars (_text_cells[LowerLeft2], 5);
+			
+			supplemental_right->set_width_chars (_text_cells[LowerRight1], 1);
+			supplemental_right->set_width_chars (_text_cells[LowerRight2], 1);
+
+			supplemental_left->set_text (_text_cells[LowerLeft1], _(" "));
+			supplemental_right->set_text (_text_cells[LowerRight1], _(" "));
+		}
 		break;
 
 	case Frames:
@@ -1907,15 +1926,8 @@ AudioClock::set_mode (Mode m)
 		/* clear information cells */
 		supplemental_left->set_text (_text_cells[LowerLeft2], _(""));
 		supplemental_right->set_text (_text_cells[LowerRight2], _(""));
-
-		/* propagate font style,but smaller, into cells */
-		boost::shared_ptr<CairoFontDescription> smaller_font (new CairoFontDescription (*display->font().get()));
-		smaller_font->set_size (12);
-		supplemental_right->set_font (smaller_font);
-		supplemental_left->set_font (smaller_font);
 	}
 
-	set_off (false);
 	set (last_when, true);
 
         if (!is_transient) {

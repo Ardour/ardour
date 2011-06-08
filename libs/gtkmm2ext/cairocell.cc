@@ -39,43 +39,43 @@ CairoFontDescription::CairoFontDescription (Pango::FontDescription& fd)
 
 	switch (fd.get_style()) {
 	case Pango::STYLE_NORMAL:
-		slant = Cairo::FONT_SLANT_NORMAL;
+		_slant = Cairo::FONT_SLANT_NORMAL;
 		break;
 	case Pango::STYLE_OBLIQUE:
-		slant = Cairo::FONT_SLANT_OBLIQUE;
+		_slant = Cairo::FONT_SLANT_OBLIQUE;
 		break;
 	case Pango::STYLE_ITALIC:
-		slant = Cairo::FONT_SLANT_ITALIC;
+		_slant = Cairo::FONT_SLANT_ITALIC;
 		break;
 	}
 
 	switch (fd.get_weight()) {
 	case Pango::WEIGHT_ULTRALIGHT:
-		weight = Cairo::FONT_WEIGHT_NORMAL;
+		_weight = Cairo::FONT_WEIGHT_NORMAL;
 		break;
 
 	case Pango::WEIGHT_LIGHT:
-		weight = Cairo::FONT_WEIGHT_NORMAL;
+		_weight = Cairo::FONT_WEIGHT_NORMAL;
 		break;
 
 	case Pango::WEIGHT_NORMAL:
-		weight = Cairo::FONT_WEIGHT_NORMAL;
+		_weight = Cairo::FONT_WEIGHT_NORMAL;
 		break;
 
 	case Pango::WEIGHT_SEMIBOLD:
-		weight = Cairo::FONT_WEIGHT_BOLD;
+		_weight = Cairo::FONT_WEIGHT_BOLD;
 		break;
 
 	case Pango::WEIGHT_BOLD:
-		weight = Cairo::FONT_WEIGHT_BOLD;
+		_weight = Cairo::FONT_WEIGHT_BOLD;
 		break;
 
 	case Pango::WEIGHT_ULTRABOLD:
-		weight = Cairo::FONT_WEIGHT_BOLD;
+		_weight = Cairo::FONT_WEIGHT_BOLD;
 		break;
 
 	case Pango::WEIGHT_HEAVY:
-		weight = Cairo::FONT_WEIGHT_BOLD;
+		_weight = Cairo::FONT_WEIGHT_BOLD;
 		break;
 
 	}

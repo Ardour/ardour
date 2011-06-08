@@ -772,15 +772,26 @@ style "option_entry"  = "default"
 
 }
 
-style "red_when_active" = "medium_text"
+style "very_small_bright_when_active" = "very_small_text"
 {
 	fg[NORMAL] = @@COLPREFIX@_fg
 	bg[NORMAL] = @@COLPREFIX@_bg
-  bg[PRELIGHT] = @@COLPREFIX@_bg
+        bg[PRELIGHT] = @@COLPREFIX@_bg
 
 	fg[ACTIVE] = @@COLPREFIX@_fg
 	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
-  bg[PRELIGHT] = @@COLPREFIX@_bright_indicator
+        bg[PRELIGHT] = @@COLPREFIX@_bright_indicator
+}
+
+style "bright_when_active" = "medium_text"
+{
+	fg[NORMAL] = @@COLPREFIX@_fg
+	bg[NORMAL] = @@COLPREFIX@_bg
+        bg[PRELIGHT] = @@COLPREFIX@_bg
+
+	fg[ACTIVE] = @@COLPREFIX@_fg
+	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
+        bg[PRELIGHT] = @@COLPREFIX@_bright_indicator
 }
 
 style "xrun_warn"  = "larger_bold_text"
@@ -1366,7 +1377,7 @@ style "pan_zone" = "default"
 	fg[ACTIVE] = darker(@@COLPREFIX@_bright_color)
 }
 
-style "paler_red_when_active" = "medium_text"
+style "paler_bright_when_active" = "medium_text"
 {
 	fg[NORMAL] = @@COLPREFIX@_fg
 	fg[PRELIGHT] = @@COLPREFIX@_fg
@@ -1690,10 +1701,10 @@ widget "*EditorTrackNameDisplay" style:highest "track_name_display"
 widget "*EditorTrackNameDisplay*" style:highest "track_name_display"
 widget "*EditorActiveTrackNameDisplay" style:highest "active_track_name_display"
 widget "*EditorActiveTrackNameDisplay*" style:highest "active_track_name_display"
-widget "*CrossfadeEditAuditionButton" style:highest "red_when_active"
-widget "*CrossfadeEditAuditionButton*" style:highest "red_when_active"
-widget "*CrossfadeEditCurveButton" style:highest "red_when_active"
-widget "*CrossfadeEditCurveButton*" style:highest "red_when_active"
+widget "*CrossfadeEditAuditionButton" style:highest "bright_when_active"
+widget "*CrossfadeEditAuditionButton*" style:highest "bright_when_active"
+widget "*CrossfadeEditCurveButton" style:highest "bright_when_active"
+widget "*CrossfadeEditCurveButton*" style:highest "bright_when_active"
 widget "*CrossfadeEditLabel" style:highest "medium_text"
 widget "*CrossfadeEditFrame" style:highest "base_frame"
 widget "*MouseModeButton" style:highest "mouse_mode_button"
@@ -1737,8 +1748,8 @@ widget "*RegionEditorLabel" style:highest "medium_text"
 widget "*RegionEditorSmallLabel" style:highest "small_text"
 widget "*RegionEditorEntry" style:highest "medium_entry"
 widget "*RegionEditorClock" style:highest "default_clock_display"
-widget "*RegionEditorToggleButton" style:highest "paler_red_when_active"
-widget "*RegionEditorToggleButton*" style:highest "paler_red_when_active"
+widget "*RegionEditorToggleButton" style:highest "paler_bright_when_active"
+widget "*RegionEditorToggleButton*" style:highest "paler_bright_when_active"
 widget "*MixerStripSpeedBase" style:highest "small_entry"
 widget "*MixerStripSpeedBase*" style:highest "small_entry"
 widget "*MixerStripSpeedBaseNotOne" style:highest "small_red_on_black_entry"
@@ -1754,8 +1765,8 @@ widget "*MixerStripPeakDisplay*" style:highest "red_active_small_entry"
 widget "*MixerStripPeakDisplayPeak*" style:highest "peak_display_peaked_entry"
 widget "*MixerStripSelectedFrame" style:highest "selected_strip_frame"
 widget "*MixerStripFrame" style:highest "base_frame"
-widget "*HWMonitorButton" style:highest "red_when_active"
-widget "*HWMonitorButton*" style:highest "red_when_active"
+widget "*HWMonitorButton" style:highest "bright_when_active"
+widget "*HWMonitorButton*" style:highest "bright_when_active"
 widget "*MonitorInvertButton" style:highest "monitor_invert_button"
 widget "*MonitorInvertButton*" style:highest "monitor_invert_button"
 widget "*MonitorMuteButton" style:highest "monitor_mute_button"
@@ -1770,8 +1781,8 @@ widget "*MonitorOptButton" style:highest "monitor_opt_button"
 widget "*MonitorOptButton*" style:highest "monitor_opt_button"
 widget "*MonitorIsoAlert" style:highest "monitor_iso_button"
 widget "*MonitorIsoAlert*" style:highest "monitor_iso_button"
-widget "*BypassButton" style:highest "red_when_active"
-widget "*BypassButton*" style:highest "red_when_active"
+widget "*BypassButton" style:highest "bright_when_active"
+widget "*BypassButton*" style:highest "bright_when_active"
 widget "*TransportSoloAlert" style:highest "flashing_alert"
 widget "*TransportSoloAlert.*" style:highest "flashing_alert"
 widget "*TransportSoloAlert-active" style:highest "flashing_alert"
@@ -1819,7 +1830,7 @@ widget "*AddRouteDialog.GtkLabel" style:highest "medium_text"
 widget "*AddRouteDialogChannelChoice" style:highest "medium_bold_entry"
 widget "*AddRouteDialogSpinner" style:highest "medium_bold_entry"
 widget "*AddRouteDialogSpinner*" style:highest "medium_bold_entry"
-widget "*AddRouteDialogRadioButton" style:highest "red_when_active"
+widget "*AddRouteDialogRadioButton" style:highest "bright_when_active"
 widget "*AddRouteDialogButton" style:highest "default_button"
 widget "*AddRouteDialogNameTemplateEntry" style:highest "medium_bold_entry"
 widget "*NewSessionIOLabel" style:highest "large_bold_text"
@@ -1873,6 +1884,10 @@ widget "*SoloLEDLabel" style:highest "very_small_text"
 widget "*ContrastingPopup" style:highest "contrasting_popup"
 widget "*ContrastingPopup*" style:highest "contrasting_popup"
 widget "*MidiChannelSelectorButton" style:highest "midi_channel_selector_button"
+widget "*TimeInfoSelectionTitle" style:highest "very_small_bright_when_active"
+widget "*TimeInfoSelectionLabel" style:highest "very_small_bright_when_active"
+widget "*TimeInfoPunchTitle" style:highest "very_small_bright_when_active"
+widget "*TimeInfoPunchLabel" style:highest "very_small_bright_when_active"
 
 widget "*RouteNameEditorEntry" style:highest "text_cell_entry"
 widget "*RegionNameEditorEntry" style:highest "text_cell_entry"
