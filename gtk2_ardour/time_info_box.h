@@ -24,13 +24,10 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/label.h>
+#include <gtkmm/table.h>
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
-
-class CairoEditableText;
-class CairoCell;
-class CairoTextCell;
 
 namespace ARDOUR {
 	class Session;
@@ -67,8 +64,11 @@ class TimeInfoBox : public Gtk::Table, public ARDOUR::SessionHandlePtr
     void punch_location_changed (ARDOUR::Location*);
     void watch_punch (ARDOUR::Location*);
     PBD::ScopedConnectionList punch_connections;
-
     PBD::ScopedConnectionList editor_connections;
+
+    Gtkmm2ext::StatefulToggleButton punch_in_button;
+    Gtkmm2ext::StatefulToggleButton punch_out_button;
+    Gtk::HBox punch_button_box;
 
     void selection_changed ();
 

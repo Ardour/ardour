@@ -165,8 +165,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	, play_selection_button (play_selection_controllable)
 	, rec_button (rec_controllable)
 
-	, punch_in_button (_("Punch In"))
-	, punch_out_button (_("Punch Out"))
 	, auto_return_button (_("Auto Return"))
 	, auto_play_button (_("Auto Play"))
 	, auto_input_button (_("Auto Input"))

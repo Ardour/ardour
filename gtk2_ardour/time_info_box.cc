@@ -23,6 +23,8 @@
 #include "gtkmm2ext/cairocell.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/stateful_button.h"
+#include "gtkmm2ext/actions.h"
 
 #include "ardour/location.h"
 #include "ardour/session.h"
@@ -42,6 +44,8 @@ TimeInfoBox::TimeInfoBox ()
 	: Table (4, 4)
 	, syncing_selection (false)
 	, syncing_punch (false)
+	, punch_in_button (_("In"))
+	, punch_out_button (_("Out"))
 {
 	selection_start = new AudioClock ("selection-start", false, "SelectionClockDisplay", false, false, false, false);
 	selection_end = new AudioClock ("selection-end", false, "SelectionClockDisplay", false, false, false, false);
@@ -116,6 +120,22 @@ TimeInfoBox::TimeInfoBox ()
 	l->set_name (X_("TimeInfoPunchLabel"));
         attach (*l, 2, 3, 2, 3, FILL);
         attach (*punch_end, 3, 4, 2, 3);
+
+	punch_in_button.set_name ("TimeInfoPunchButton");
+	punch_out_button.set_name ("TimeInfoPunchButton");
+	punch_button_box.set_homogeneous (true);
+	punch_button_box.set_spacing (6);
+	punch_button_box.set_border_width (2);
+	punch_button_box.pack_start (punch_in_button, true, true);
+	punch_button_box.pack_start (punch_out_button, true, true);
+
+	ActionManager::get_action ("Transport", "TogglePunchIn")->connect_proxy (punch_in_button);
+	ActionManager::get_action ("Transport", "TogglePunchOut")->connect_proxy (punch_out_button);
+
+	Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
+	Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
+
+	attach (punch_button_box, 2, 4, 3, 4, FILL, FILL);
 
         show_all ();
 

@@ -432,8 +432,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	ShuttleControl* shuttle_box;
 
-	Gtkmm2ext::StatefulToggleButton punch_in_button;
-	Gtkmm2ext::StatefulToggleButton punch_out_button;
 	Gtkmm2ext::StatefulToggleButton auto_return_button;
 	Gtkmm2ext::StatefulToggleButton auto_play_button;
 	Gtkmm2ext::StatefulToggleButton auto_input_button;

@@ -136,8 +136,6 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
 	set_tip (auto_play_button, _("Start playback after any locate"));
 	set_tip (auto_input_button, _("Be sensible about input monitoring"));
-	set_tip (punch_in_button, _("Start recording at auto-punch start"));
-	set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 	set_tip (click_button, _("Enable/Disable audio click"));
 	set_tip (time_master_button, string_compose (_("Does %1 control the time?"), PROGRAM_NAME));
 	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
@@ -250,8 +248,6 @@ ARDOUR_UI::setup_transport ()
 	auto_return_button.set_name ("TransportButton");
 	auto_play_button.set_name ("TransportButton");
 	auto_input_button.set_name ("TransportButton");
-	punch_in_button.set_name ("TransportButton");
-	punch_out_button.set_name ("TransportButton");
 	click_button.set_name ("TransportButton");
 	time_master_button.set_name ("TransportButton");
 	sync_button.set_name ("TransportSyncButton");
@@ -328,8 +324,6 @@ ARDOUR_UI::setup_transport ()
 	ActionManager::get_action ("Transport", "ToggleAutoPlay")->connect_proxy (auto_play_button);
 	ActionManager::get_action ("Transport", "ToggleAutoInput")->connect_proxy (auto_input_button);
 	ActionManager::get_action ("Transport", "ToggleClick")->connect_proxy (click_button);
-	ActionManager::get_action ("Transport", "TogglePunchIn")->connect_proxy (punch_in_button);
-	ActionManager::get_action ("Transport", "TogglePunchOut")->connect_proxy (punch_out_button);
 
 	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
 
@@ -419,11 +413,6 @@ ARDOUR_UI::setup_transport ()
 	transport_tearoff_hbox.pack_start (*time_info_box, false, false);
 
 	HBox* toggle_box = manage(new HBox);
-
-	VBox* punch_box = manage (new VBox);
-	punch_box->pack_start (punch_in_button, false, false);
-	punch_box->pack_start (punch_out_button, false, false);
-	toggle_box->pack_start (*punch_box, false, false);
 
 	VBox* auto_box = manage (new VBox);
 	auto_box->pack_start (auto_play_button, false, false);

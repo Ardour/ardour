@@ -355,6 +355,15 @@ style "very_small_red_active_and_selected_button" = "very_small_button"
 	bg[SELECTED] = @@COLPREFIX@_bright_indicator
 }
 
+style "punch_button" = "very_small_red_active_and_selected_button"
+{
+ 	font_name = "@FONT_SMALLER@"
+
+	fg[ACTIVE] = @@COLPREFIX@_darkest
+	bg[ACTIVE] = @@COLPREFIX@_bright_indicator
+	bg[SELECTED] = @@COLPREFIX@_bright_indicator
+}
+
 style "small_red_active_and_selected_button" = "small_button"
 {
 	fg[ACTIVE] = @@COLPREFIX@_darkest
@@ -1888,6 +1897,7 @@ widget "*TimeInfoSelectionTitle" style:highest "very_small_bright_when_active"
 widget "*TimeInfoSelectionLabel" style:highest "very_small_bright_when_active"
 widget "*TimeInfoPunchTitle" style:highest "very_small_bright_when_active"
 widget "*TimeInfoPunchLabel" style:highest "very_small_bright_when_active"
+widget "*TimeInfoPunchButton" style:highest "punch_button"
 
 widget "*RouteNameEditorEntry" style:highest "text_cell_entry"
 widget "*RegionNameEditorEntry" style:highest "text_cell_entry"

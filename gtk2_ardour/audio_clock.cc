@@ -109,6 +109,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	/* basic per-mode editable text "arrays" */
 
 	display = new CairoEditableText ();
+	display->set_corner_radius (0);
 
 	_fixed_cells[Colon1] = new CairoCharCell (Colon1, ':');
 	_fixed_cells[Colon2] = new CairoCharCell (Colon2, ':');
@@ -145,6 +146,9 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 
 		supplemental_left = new CairoEditableText ();
 		supplemental_right = new CairoEditableText ();
+
+		supplemental_left->set_corner_radius (0);
+		supplemental_right->set_corner_radius (0);
 
 		/* field lengths of these cells will be set dynamically by ::set_mode()
 		 */
