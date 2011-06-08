@@ -564,20 +564,11 @@ AudioClock::set_timecode (framepos_t when, bool force)
 
 	if (supplemental_right) {
 		double timecode_frames = _session->timecode_frames_per_second();
-		bool drop;
-
-		if ((fabs(timecode_frames - 29.97) < 0.0001) || timecode_frames == 30) {
-			if (_session->timecode_drop_frames()) {
-				drop = true;
-			} else {
-				drop = false;
-			}
-		} 
 	
 		if (fmod(timecode_frames, 1.0) == 0.0) {
-			sprintf (buf, "%u %s", int (timecode_frames), (drop ? "D" : ""));
+			sprintf (buf, "%u %s", int (timecode_frames), (_session->timecode_drop_frames() ? "D" : ""));
 		} else {
-			sprintf (buf, "%.2f %s", timecode_frames, (drop ? "D" : ""));
+			sprintf (buf, "%.2f %s", timecode_frames, (_session->timecode_drop_frames() ? "D" : ""));
 		}
 
 		supplemental_right->set_text (_text_cells[LowerRight2], buf);
