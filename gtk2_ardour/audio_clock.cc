@@ -967,8 +967,26 @@ AudioClock::button_press (GdkEventButton *ev, CairoCell* cell)
 	case 1:
 		if (editable) {
 			if (cell) {
-				editing_field = (Field) cell->id ();
-				display->start_editing (cell);
+				Field f = (Field) cell->id ();
+				switch (f) {
+				case Timecode_Hours:
+				case Timecode_Minutes:
+				case Timecode_Seconds:
+				case Timecode_Frames:
+				case MS_Hours:
+				case MS_Minutes:
+				case MS_Seconds:
+				case MS_Milliseconds:
+				case Bars:
+				case Beats:
+				case Ticks:
+				case AudioFrames:
+					editing_field = f;
+					display->start_editing (cell);
+					break;
+				default:
+					return false;
+				}
 			}
 			
 			Keyboard::magic_widget_grab_focus ();
@@ -1024,6 +1042,27 @@ AudioClock::scroll (GdkEventScroll *ev, CairoCell* cell)
 		return false;
 	}
 
+	if (cell) {
+		Field f = (Field) cell->id ();
+		switch (f) {
+		case Timecode_Hours:
+		case Timecode_Minutes:
+		case Timecode_Seconds:
+		case Timecode_Frames:
+		case MS_Hours:
+		case MS_Minutes:
+		case MS_Seconds:
+		case MS_Milliseconds:
+		case Bars:
+		case Beats:
+		case Ticks:
+		case AudioFrames:
+			break;
+		default:
+			return false;
+		}
+	}
+			
 	framepos_t frames = 0;
 
 	switch (ev->direction) {
