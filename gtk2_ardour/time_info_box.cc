@@ -41,7 +41,8 @@ using std::min;
 using std::max;
 
 TimeInfoBox::TimeInfoBox ()
-	: Table (4, 4)
+	: left (2, 4)
+	, right (2, 4)
 	, syncing_selection (false)
 	, syncing_punch (false)
 	, punch_in_button (_("In"))
@@ -73,53 +74,63 @@ TimeInfoBox::TimeInfoBox ()
 	punch_title.set_text (_("Punch"));
 
 	set_homogeneous (false);
-	set_spacings (0);
+	set_spacing (6);
 	set_border_width (2);
-	set_col_spacings (2);
 
-	/* a bit more spacing between the two "sides" */
-	set_col_spacing (1, 10);
+	pack_start (left, true, true);
+	pack_start (right, true, true);
+
+	left.set_homogeneous (false);
+	left.set_spacings (0);
+	left.set_border_width (2);
+	left.set_col_spacings (2);
+
+	right.set_homogeneous (false);
+	right.set_spacings (0);
+	right.set_border_width (2);
+	right.set_col_spacings (2);
+
 
 	Gtk::Label* l;
 
 	selection_title.set_name ("TimeInfoSelectionTitle");
-	attach (selection_title, 0, 2, 0, 1);
+	left.attach (selection_title, 0, 2, 0, 1);
 	l = manage (new Label);
 	l->set_text (_("Start"));
 	l->set_alignment (1.0, 0.5);
 	l->set_name (X_("TimeInfoSelectionLabel"));
-        attach (*l, 0, 1, 1, 2, FILL);
-        attach (*selection_start, 1, 2, 1, 2);
+        left.attach (*l, 0, 1, 1, 2, FILL);
+        left.attach (*selection_start, 1, 2, 1, 2);
 
 	l = manage (new Label);
 	l->set_text (_("End"));
 	l->set_alignment (1.0, 0.5);
 	l->set_name (X_("TimeInfoSelectionLabel"));
-        attach (*l, 0, 1, 2, 3, FILL);
-        attach (*selection_end, 1, 2, 2, 3);
+        left.attach (*l, 0, 1, 2, 3, FILL);
+        left.attach (*selection_end, 1, 2, 2, 3);
 
 	l = manage (new Label);
 	l->set_text (_("Length"));
 	l->set_alignment (1.0, 0.5);
 	l->set_name (X_("TimeInfoSelectionLabel"));
-        attach (*l, 0, 1, 3, 4, FILL);
-        attach (*selection_length, 1, 2, 3, 4);
+        left.attach (*l, 0, 1, 3, 4, FILL);
+        left.attach (*selection_length, 1, 2, 3, 4);
 
 	punch_title.set_name ("TimeInfoSelectionTitle");
-	attach (punch_title, 2, 4, 0, 1);
+	right.attach (punch_title, 2, 4, 0, 1);
 	l = manage (new Label);
 	l->set_alignment (1.0, 0.5);
 	l->set_text (_("In"));
 	l->set_name (X_("TimeInfoPunchLabel"));
-        attach (*l, 2, 3, 1, 2, FILL);
-        attach (*punch_start, 3, 4, 1, 2);
+        right.attach (*l, 2, 3, 1, 2, FILL);
+        right.attach (*punch_start, 3, 4, 1, 2);
 
 	l = manage (new Label);
 	l->set_alignment (1.0, 0.5);
 	l->set_text (_("Out"));
 	l->set_name (X_("TimeInfoPunchLabel"));
-        attach (*l, 2, 3, 2, 3, FILL);
-        attach (*punch_end, 3, 4, 2, 3);
+        right.attach (*l, 2, 3, 2, 3, FILL);
+        right.attach (*punch_end, 3, 4, 2, 3);
 
 	punch_in_button.set_name ("TimeInfoPunchButton");
 	punch_out_button.set_name ("TimeInfoPunchButton");
@@ -135,7 +146,7 @@ TimeInfoBox::TimeInfoBox ()
 	Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 
-	attach (punch_button_box, 2, 4, 3, 4, FILL, FILL);
+	right.attach (punch_button_box, 2, 4, 3, 4, FILL, FILL);
 
         show_all ();
 
@@ -370,7 +381,7 @@ TimeInfoBox::on_expose_event (GdkEventExpose* ev)
 		}
 	}
 
-	Table::on_expose_event (ev);
+	HBox::on_expose_event (ev);
 
 	return false;
 }

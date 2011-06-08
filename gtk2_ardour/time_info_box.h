@@ -36,7 +36,7 @@ namespace ARDOUR {
 
 class AudioClock;
 
-class TimeInfoBox : public Gtk::Table, public ARDOUR::SessionHandlePtr
+class TimeInfoBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
   public:
     TimeInfoBox ();
@@ -48,6 +48,9 @@ class TimeInfoBox : public Gtk::Table, public ARDOUR::SessionHandlePtr
     bool on_expose_event (GdkEventExpose*);
 
   private:
+    Gtk::Table left;
+    Gtk::Table right;
+
     AudioClock* selection_start;
     AudioClock* selection_end;
     AudioClock* selection_length;
