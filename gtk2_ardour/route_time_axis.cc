@@ -1917,7 +1917,7 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 		pan->menu_item->set_active (true);
 	}
 
-	add_child (pan->view);
+	add_automation_child (control->parameter(), pan->view, true);
 
 	if (_view) {
 		_view->foreach_regionview (sigc::mem_fun(*pan->view.get(), &TimeAxisView::add_ghost));
