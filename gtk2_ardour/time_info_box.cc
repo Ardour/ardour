@@ -116,29 +116,8 @@ TimeInfoBox::TimeInfoBox ()
         left.attach (*l, 0, 1, 3, 4, FILL);
         left.attach (*selection_length, 1, 2, 3, 4);
 
-	punch_title.set_name ("TimeInfoSelectionTitle");
-	right.attach (punch_title, 2, 4, 0, 1);
-	l = manage (new Label);
-	l->set_alignment (1.0, 0.5);
-	l->set_text (_("In"));
-	l->set_name (X_("TimeInfoPunchLabel"));
-        right.attach (*l, 2, 3, 1, 2, FILL);
-        right.attach (*punch_start, 3, 4, 1, 2);
-
-	l = manage (new Label);
-	l->set_alignment (1.0, 0.5);
-	l->set_text (_("Out"));
-	l->set_name (X_("TimeInfoPunchLabel"));
-        right.attach (*l, 2, 3, 2, 3, FILL);
-        right.attach (*punch_end, 3, 4, 2, 3);
-
 	punch_in_button.set_name ("TimeInfoPunchButton");
 	punch_out_button.set_name ("TimeInfoPunchButton");
-	punch_button_box.set_homogeneous (true);
-	punch_button_box.set_spacing (6);
-	punch_button_box.set_border_width (2);
-	punch_button_box.pack_start (punch_in_button, true, true);
-	punch_button_box.pack_start (punch_out_button, true, true);
 
 	ActionManager::get_action ("Transport", "TogglePunchIn")->connect_proxy (punch_in_button);
 	ActionManager::get_action ("Transport", "TogglePunchOut")->connect_proxy (punch_out_button);
@@ -146,7 +125,12 @@ TimeInfoBox::TimeInfoBox ()
 	Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 
-	right.attach (punch_button_box, 2, 4, 3, 4, FILL, FILL);
+	punch_title.set_name ("TimeInfoSelectionTitle");
+	right.attach (punch_title, 2, 4, 0, 1);
+        right.attach (punch_in_button, 2, 3, 1, 2, FILL);
+        right.attach (*punch_start, 3, 4, 1, 2);
+        right.attach (punch_out_button, 2, 3, 2, 3, FILL);
+        right.attach (*punch_end, 3, 4, 2, 3);
 
         show_all ();
 

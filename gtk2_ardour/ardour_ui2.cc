@@ -323,9 +323,6 @@ ARDOUR_UI::setup_transport ()
 	ActionManager::get_action ("Transport", "ToggleAutoReturn")->connect_proxy (auto_return_button);
 	ActionManager::get_action ("Transport", "ToggleAutoPlay")->connect_proxy (auto_play_button);
 	ActionManager::get_action ("Transport", "ToggleAutoInput")->connect_proxy (auto_input_button);
-	ActionManager::get_action ("Transport", "ToggleClick")->connect_proxy (click_button);
-
-	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
 
 	preroll_button.set_name ("TransportButton");
 	postroll_button.set_name ("TransportButton");
@@ -409,6 +406,16 @@ ARDOUR_UI::setup_transport ()
 	transport_tearoff_hbox.pack_start (*transport_vbox, false, false, 0);
 	transport_tearoff_hbox.pack_start (*clock_box, false, false, 0);
 
+	w = manage (new Image (get_icon (X_("metronome"))));
+	w->show ();
+	click_button.add (*w);
+
+	ActionManager::get_action ("Transport", "ToggleClick")->connect_proxy (click_button);
+
+	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
+
+	transport_tearoff_hbox.pack_start (click_button, false, false, 4);
+
 	time_info_box = manage (new TimeInfoBox);
 	transport_tearoff_hbox.pack_start (*time_info_box, false, false);
 
@@ -423,7 +430,7 @@ ARDOUR_UI::setup_transport ()
 
 	VBox* io_box = manage (new VBox);
 	io_box->pack_start (auto_input_button, false, false);
-	io_box->pack_start (click_button, false, false);
+	//io_box->pack_start (click_button, false, false);
         if (!Profile->get_small_screen()) {
                 toggle_box->pack_start (*io_box, false, false);
         }

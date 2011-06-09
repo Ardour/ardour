@@ -1,0 +1,93 @@
+style "smallest_text"
+{
+	font_name = "@FONT_TINY@"
+}
+
+style "very_small_text"
+{
+ 	font_name = "@FONT_SMALLER@"
+}
+
+style "small_text"
+{
+ 	font_name = "@FONT_SMALL@"
+}
+
+style "small_italic_text"
+{
+	font_name = "italic @FONT_SMALL@"
+}
+
+style "small_bold_text"
+{
+ 	font_name = "bold @FONT_SMALL@"
+}
+
+style "medium_bold_text"
+{
+ 	font_name = "bold @FONT_NORMAL@"
+}
+
+style "medium_text"
+{
+ 	font_name = "@FONT_NORMAL@"
+}
+
+style "medium_monospace_text"
+{
+        font_name = "monospace @FONT_SIZE_NORMAL@"
+}
+
+style "red_medium_text" = "medium_text"
+{	
+	fg[NORMAL] = @@COLPREFIX@_bright_indicator
+	fg[ACTIVE] = @@COLPREFIX@_bright_indicator
+	fg[SELECTED] = @@COLPREFIX@_bright_indicator
+}
+
+style "large_bold_text"
+{
+ 	font_name = "bold @FONT_BIGGER@"
+}
+
+style "larger_text"
+{
+ 	font_name = "@FONT_LARGE@"
+}
+
+style "larger_bold_text"
+{
+ 	font_name = "bold @FONT_LARGE@"
+}
+
+style "big_bold_text"
+{
+	font_name = "bold @FONT_LARGER@"
+}
+
+style "plugin_name_text" = "big_bold_text"
+{
+	fg[NORMAL] = @@COLPREFIX@_text
+}
+
+style "plugin_maker_text" = "larger_bold_text"
+{
+	fg[NORMAL] = @@COLPREFIX@_text
+}
+
+style "verbose_canvas_cursor" = "big_bold_text"
+{
+}
+
+style "marker_text" = "small text"
+{
+}
+
+style "midi_tracer_textview" = "medium_monospace_text"
+{
+	
+}
+
+style "time_axis_view_item_name" = "very small text"
+{
+}

@@ -71,7 +71,6 @@ class TimeInfoBox : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
     Gtkmm2ext::StatefulToggleButton punch_in_button;
     Gtkmm2ext::StatefulToggleButton punch_out_button;
-    Gtk::HBox punch_button_box;
 
     void selection_changed ();
 

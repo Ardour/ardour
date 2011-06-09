@@ -168,7 +168,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	, auto_return_button (_("Auto Return"))
 	, auto_play_button (_("Auto Play"))
 	, auto_input_button (_("Auto Input"))
-	, click_button (_("Click"))
+	  // , click_button (_("Click"))
 	, time_master_button (_("time\nmaster"))
 
 	, auditioning_alert_button (_("AUDITION"))

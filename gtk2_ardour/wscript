@@ -459,15 +459,44 @@ def build(bld):
     light_rc_subst_dict['COLPREFIX'] = 'ARDOUR_LIGHT'
 
     obj              = bld.new_task_gen('subst')
-    obj.source       = 'ardour3_ui_dark.rc.in'
+    obj.source       = [ 'ardour3_ui_dark.rc.in' ]
     obj.target       = 'ardour3_ui_dark.rc'
     obj.dict         = dark_rc_subst_dict
     obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
 
     obj              = bld.new_task_gen('subst')
-    obj.source       = 'ardour3_ui_light.rc.in'
+    obj.source       = [ 'ardour3_ui_light.rc.in' ]
     obj.target       = 'ardour3_ui_light.rc'
     obj.dict         = light_rc_subst_dict
+    obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
+
+    obj              = bld.new_task_gen('subst')
+    obj.source       = [ 'ardour3_styles.rc.in' ]
+    obj.target       = 'ardour3_dark_styles.rc'
+    obj.dict         = dark_rc_subst_dict
+    obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
+
+    obj              = bld.new_task_gen('subst')
+    obj.source       = [ 'ardour3_styles.rc.in' ]
+    obj.target       = 'ardour3_light_styles.rc'
+    obj.dict         = light_rc_subst_dict
+    obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
+
+    obj              = bld.new_task_gen('subst')
+    obj.source       = [ 'ardour3_fonts.rc.in' ]
+    obj.target       = 'ardour3_dark_fonts.rc'
+    obj.dict         = dark_rc_subst_dict
+    obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
+
+    obj              = bld.new_task_gen('subst')
+    obj.source       = [ 'ardour3_fonts.rc.in' ]
+    obj.target       = 'ardour3_light_fonts.rc'
+    obj.dict         = light_rc_subst_dict
+    obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
+
+    obj              = bld.new_task_gen('copy')
+    obj.source       = [ 'ardour3_widget_list.rc' ]
+    obj.target       = 'ardour3_widgets.rc'
     obj.install_path = os.path.join(bld.env['CONFIGDIR'], 'ardour3')
 
     # Menus
@@ -510,7 +539,9 @@ def build(bld):
 
     # Default UI configuration
     bld.install_files('${CONFIGDIR}/ardour3', 'ardour3_ui_default.conf')
-
+    # Generic widget style mappings
+    bld.install_files('${CONFIGDIR}/ardour3', 'ardour3_widgets.rc')
+    
     # Default export stuff
     bld.install_files('${CONFIGDIR}/ardour3/export', 'export/*.format')
 
