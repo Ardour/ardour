@@ -886,7 +886,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		need_automatables = true;
 	}
 
-	Processor::set_state (node, version);
 	plugin->set_insert_info (this);
 
 	if ((prop = node.property ("count")) != 0) {
@@ -919,6 +918,12 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			add_plugin_with_activation (plugin_factory (plugin));
 		}
 	}
+
+	/* we cannot call this until the _plugins contains at least 1 
+	   plugin so that we can look up parameter information etc.
+	*/
+	
+	Processor::set_state (node, version);
 
 	if (need_automatables) {
 		set_automatable ();
