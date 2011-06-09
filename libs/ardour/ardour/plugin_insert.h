@@ -155,7 +155,7 @@ class PluginInsert : public Processor
 	void automation_run (BufferSet& bufs, pframes_t nframes);
 	void connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t offset, bool with_auto, framepos_t now = 0);
 
-	void set_automatable ();
+	void create_automatable_parameters ();
 	void control_list_automation_state_changed (Evoral::Parameter, AutoState);
 	void set_parameter_state_2X (const XMLNode& node, int version);
 	void set_control_ids (const XMLNode&, int version);
@@ -164,6 +164,7 @@ class PluginInsert : public Processor
 
 	boost::shared_ptr<Plugin> plugin_factory (boost::shared_ptr<Plugin>);
 	void add_plugin_with_activation (boost::shared_ptr<Plugin>);
+	void add_plugin (boost::shared_ptr<Plugin>);
 };
 
 } // namespace ARDOUR

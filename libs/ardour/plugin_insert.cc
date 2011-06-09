@@ -72,7 +72,8 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	if (plug) {
 		plug->set_insert_info (this);
 		_plugins.push_back (plug);
-		set_automatable ();
+
+		create_automatable_parameters ();
 
 		Glib::Mutex::Lock em (_session.engine().process_lock());
 		IO::PortCountChanged (max(input_streams(), output_streams()));
@@ -192,8 +193,10 @@ PluginInsert::is_generator() const
 }
 
 void
-PluginInsert::set_automatable ()
+PluginInsert::create_automatable_parameters ()
 {
+	assert (!_plugins.empty());
+
 	set<Evoral::Parameter> a = _plugins.front()->automatable ();
 
 	Plugin::ParameterDescriptor desc;
@@ -876,59 +879,49 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		return -1;
 	}
 
+	// The name of the PluginInsert comes from the plugin, nothing else
+	_name = plugin->get_info()->name;
+
 	uint32_t count = 1;
-	bool need_automatables = true;
 
 	if (_plugins.empty()) {
 		/* if we are adding the first plugin, we will need to set
 		   up automatable controls.
 		*/
-		need_automatables = true;
+		add_plugin (plugin);
+		create_automatable_parameters ();
+		set_control_ids (node, version);
 	}
-
-	plugin->set_insert_info (this);
 
 	if ((prop = node.property ("count")) != 0) {
 		sscanf (prop->value().c_str(), "%u", &count);
 	}
 
-	/* Handle the node list for this Processor (or Insert if an A2 session).
-	 * This needs to happen before the add_plugin_with_activation below, as
-	 * the plugin set_state calls may themselves call latency_compute_run,
-	 * which will leave the plugin deactivated whether it is currently
-	 * activated or not.
-	 */
+	if (_plugins.size() != count) {
+		for (uint32_t n = 1; n < count; ++n) {
+			add_plugin (plugin_factory (plugin));
+		}
+	}
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+
+		/* find the node with the type-specific node name ("lv2", "ladspa", etc)
+		   and set all plugins to the same state.
+		*/
 
 		if ((*niter)->name() == plugin->state_node_name()) {
 
 			plugin->set_state (**niter, version);
+
 			for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 				(*i)->set_state (**niter, version);
 			}
+
 			break;
 		}
 	}
 
-	if (_plugins.size() != count) {
-
-		add_plugin_with_activation (plugin);
-
-		for (uint32_t n = 1; n < count; ++n) {
-			add_plugin_with_activation (plugin_factory (plugin));
-		}
-	}
-
-	/* we cannot call this until the _plugins contains at least 1 
-	   plugin so that we can look up parameter information etc.
-	*/
-	
 	Processor::set_state (node, version);
-
-	if (need_automatables) {
-		set_automatable ();
-		set_control_ids (node, version);
-	}
 
 	if (version < 3000) {
 
@@ -947,8 +940,13 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		set_parameter_state_2X (node, version);
 	}
 
-	// The name of the PluginInsert comes from the plugin, nothing else
-	_name = plugin->get_info()->name;
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		if (active()) {
+			(*i)->activate ();
+		} else {
+			(*i)->deactivate ();
+		}
+	}
 
 	/* catch up on I/O */
 
@@ -1202,6 +1200,14 @@ PluginInsert::add_plugin_with_activation (boost::shared_ptr<Plugin> plugin)
 	if (active()) {
 		plugin->activate ();
 	}
+}
+
+/** Add a plugin to our list */
+void
+PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
+{
+	plugin->set_insert_info (this);
+	_plugins.push_back (plugin);
 }
 
 void

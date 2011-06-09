@@ -255,8 +255,6 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 				continue;
                         }
 
-
-
 			if (!id_prop) {
 				warning << "AutomationList node without automation-id property, "
 					<< "using default: " << EventTypeMap::instance().to_symbol(legacy_param) << endmsg;

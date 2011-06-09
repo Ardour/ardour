@@ -140,7 +140,7 @@ Session::memento_command_factory(XMLNode *n)
 			    );
 	    }
 
-	    cerr << "Alist not found\n";
+	    cerr << "Alist " << id << " not found\n";
 
     } else if (obj_T == "ARDOUR::Crossfade") {
 	    boost::shared_ptr<Crossfade> c = playlists->find_crossfade (id);

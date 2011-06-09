@@ -370,6 +370,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	init ();
 }
 
+
 AUPlugin::AUPlugin (const AUPlugin& other)
 	: Plugin (other)
 	, comp (other.get_comp())
