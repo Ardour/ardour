@@ -386,12 +386,6 @@ ARDOUR_UI::setup_transport ()
 		clock_box->pack_start (*secondary_clock, false, false);
 	}
 
-	if (!Profile->get_sae()) {
-		VBox* time_controls_box = manage (new VBox);
-		time_controls_box->pack_start (sync_button, false, false);
-		time_controls_box->pack_start (time_master_button, false, false);
-		clock_box->pack_start (*time_controls_box, false, false, 1);
-	}
 
 	shuttle_box = new ShuttleControl;
 	shuttle_box->show ();
@@ -404,7 +398,11 @@ ARDOUR_UI::setup_transport ()
 	transport_vbox->pack_start (*shuttle_box, false, false, 0);
 
 	transport_tearoff_hbox.pack_start (*transport_vbox, false, false, 0);
-	transport_tearoff_hbox.pack_start (*clock_box, false, false, 0);
+
+	Table* time_controls_table = manage (new Table (2, 2));
+	time_controls_table->set_col_spacings (6);
+	time_controls_table->attach (sync_button, 0, 1, 0, 1, Gtk::AttachOptions(FILL|EXPAND), Gtk::AttachOptions(0));
+	time_controls_table->attach (time_master_button, 0, 1, 1, 2, Gtk::AttachOptions(FILL|EXPAND), Gtk::AttachOptions(0));
 
 	w = manage (new Image (get_icon (X_("metronome"))));
 	w->show ();
@@ -413,8 +411,11 @@ ARDOUR_UI::setup_transport ()
 	ActionManager::get_action ("Transport", "ToggleClick")->connect_proxy (click_button);
 
 	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
+	
+	time_controls_table->attach (click_button, 1, 2, 0, 2, Gtk::AttachOptions(FILL|EXPAND), FILL);
 
-	transport_tearoff_hbox.pack_start (click_button, false, false, 4);
+	transport_tearoff_hbox.pack_start (*clock_box, false, false);
+	transport_tearoff_hbox.pack_start (*time_controls_table, false, false, 4);
 
 	time_info_box = manage (new TimeInfoBox);
 	transport_tearoff_hbox.pack_start (*time_info_box, false, false);
