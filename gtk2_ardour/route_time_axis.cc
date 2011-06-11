@@ -359,19 +359,6 @@ RouteTimeAxisView::set_state (const XMLNode& node, int version)
 		set_layer_display (LayerDisplay (string_2_enum (prop->value(), _view->layer_display ())));
 	}
 
-	for (iter = kids.begin(); iter != kids.end(); ++iter) {
-		if ((*iter)->name() == AutomationTimeAxisView::state_node_name) {
-			if ((prop = (*iter)->property ("automation-id")) != 0) {
-
-				Evoral::Parameter param = ARDOUR::EventTypeMap::instance().new_parameter(prop->value());
-				bool show = ((prop = (*iter)->property ("shown")) != 0) && string_is_affirmative (prop->value());
-				create_automation_child(param, show);
-			} else {
-				warning << "Automation child has no ID" << endmsg;
-			}
-		}
-	}
-
 	return 0;
 }
 
@@ -1664,9 +1651,6 @@ RouteTimeAxisView::automation_track_hidden (Evoral::Parameter param)
 
 	Gtk::CheckMenuItem* menu = automation_child_menu_item (param);
 
-	// if Evoral::Parameter::operator< doesn't obey strict weak ordering, we may crash here....
-	track->get_state_node()->add_property (X_("shown"), X_("no"));
-
 	if (menu && !_hidden) {
 		ignore_toggle = true;
 		menu->set_active (false);
@@ -1690,9 +1674,7 @@ RouteTimeAxisView::show_all_automation (bool apply_to_selection)
 		/* Show our automation */
 
 		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-			i->second->set_marked_for_display (true);
-			i->second->canvas_display()->show();
-			i->second->get_state_node()->add_property ("shown", X_("yes"));
+			i->second->set_visibility (true);
 
 			Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
 
@@ -1734,9 +1716,7 @@ RouteTimeAxisView::show_existing_automation (bool apply_to_selection)
 
 		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 			if (i->second->has_automation()) {
-				i->second->set_marked_for_display (true);
-				i->second->canvas_display()->show();
-				i->second->get_state_node()->add_property ("shown", X_("yes"));
+				i->second->set_visibility (true);
 
 				Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
 				if (menu) {
@@ -1744,7 +1724,6 @@ RouteTimeAxisView::show_existing_automation (bool apply_to_selection)
 				}
 			}
 		}
-
 
 		/* Show processor automation */
 
@@ -1773,9 +1752,7 @@ RouteTimeAxisView::hide_all_automation (bool apply_to_selection)
 		/* Hide our automation */
 
 		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-			i->second->set_marked_for_display (false);
-			i->second->hide ();
-			i->second->get_state_node()->add_property ("shown", X_("no"));
+			i->second->set_visibility (false);
 
 			Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
 
@@ -1854,25 +1831,6 @@ RouteTimeAxisView::find_processor_automation_node (boost::shared_ptr<Processor> 
 	return 0;
 }
 
-static string
-legalize_for_xml_node (string str)
-{
-	string::size_type pos;
-	string legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=:";
-	string legal;
-
-	legal = str;
-	pos = 0;
-
-	while ((pos = legal.find_first_not_of (legal_chars, pos)) != string::npos) {
-		legal.replace (pos, 1, "_");
-		pos += 1;
-	}
-
-	return legal;
-}
-
-
 void
 RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> processor, Evoral::Parameter what)
 {
@@ -1893,37 +1851,21 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 		return;
 	}
 
-	name = processor->describe_parameter (what);
-
-	/* create a string that is a legal XML node name that can be used to refer to this redirect+port combination */
-
-	/* FIXME: ew */
-
-	char state_name[256];
-	snprintf (state_name, sizeof (state_name), "%s-%" PRIu32, legalize_for_xml_node (processor->name()).c_str(), what.id());
-
 	boost::shared_ptr<AutomationControl> control
-			= boost::dynamic_pointer_cast<AutomationControl>(processor->control(what, true));
-
+		= boost::dynamic_pointer_cast<AutomationControl>(processor->control(what, true));
+	
 	pan->view = boost::shared_ptr<AutomationTimeAxisView>(
 		new AutomationTimeAxisView (_session, _route, processor, control, control->parameter (),
-					    _editor, *this, false, parent_canvas, name, state_name));
+					    _editor, *this, false, parent_canvas, 
+					    processor->describe_parameter (what), processor->name()));
 
 	pan->view->Hiding.connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::processor_automation_track_hidden), pan, processor));
 
-	if (!pan->view->marked_for_display()) {
-		pan->view->hide ();
-	} else {
-		pan->menu_item->set_active (true);
-	}
-
-	add_automation_child (control->parameter(), pan->view, true);
+	add_automation_child (control->parameter(), pan->view, pan->view->marked_for_display ());
 
 	if (_view) {
 		_view->foreach_regionview (sigc::mem_fun(*pan->view.get(), &TimeAxisView::add_ghost));
 	}
-
-	processor->mark_automation_visible (what, true);
 }
 
 void
@@ -1932,8 +1874,6 @@ RouteTimeAxisView::processor_automation_track_hidden (RouteTimeAxisView::Process
 	if (!_hidden) {
 		pan->menu_item->set_active (false);
 	}
-
-	i->mark_automation_visible (pan->what, false);
 
 	if (!no_redraw) {
 		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
@@ -1944,21 +1884,24 @@ void
 RouteTimeAxisView::add_existing_processor_automation_curves (boost::weak_ptr<Processor> p)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
+
 	if (!processor) {
 		return;
 	}
 
-	set<Evoral::Parameter> s;
-	boost::shared_ptr<AutomationLine> al;
+	set<Evoral::Parameter> existing;
 
-	processor->what_has_visible_data (s);
+	processor->what_has_data (existing);
 
-	for (set<Evoral::Parameter>::iterator i = s.begin(); i != s.end(); ++i) {
+	for (set<Evoral::Parameter>::iterator i = existing.begin(); i != existing.end(); ++i) {
+		
+		Evoral::Parameter param (*i);
+		boost::shared_ptr<AutomationLine> al;
 
-		if ((al = find_processor_automation_curve (processor, *i)) != 0) {
+		if ((al = find_processor_automation_curve (processor, param)) != 0) {
 			al->queue_reset ();
 		} else {
-			add_processor_automation_curve (processor, (*i));
+			add_processor_automation_curve (processor, param);
 		}
 	}
 }
@@ -1975,19 +1918,16 @@ RouteTimeAxisView::add_automation_child (Evoral::Parameter param, boost::shared_
 
 	track->Hiding.connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::automation_track_hidden), param));
 
-	bool hideit = (!show);
+	_automation_tracks[param] = track;
 
 	if ((node = track->get_state_node()) != 0) {
 		if  ((prop = node->property ("shown")) != 0) {
-			if (string_is_affirmative (prop->value())) {
-				hideit = false;
-			}
+			/* existing state overrides "show" argument */
+			show = string_is_affirmative (prop->value());
 		}
 	}
 
-	_automation_tracks[param] = track;
-
-	track->set_visibility (!hideit);
+	track->set_visibility (show);
 
 	if (!no_redraw) {
 		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
@@ -2013,14 +1953,20 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 		return;
 	}
 
+	/* we use this override to veto the Amp processor from the plugin menu,
+	   as its automation lane can be accessed using the special "Fader" menu
+	   option
+	*/
+
+	if (boost::dynamic_pointer_cast<Amp> (processor) != 0) {
+		return;
+	}
+
 	using namespace Menu_Helpers;
 	ProcessorAutomationInfo *rai;
 	list<ProcessorAutomationInfo*>::iterator x;
 
 	const std::set<Evoral::Parameter>& automatable = processor->what_can_be_automated ();
-	std::set<Evoral::Parameter> has_visible_automation;
-
-	processor->what_has_visible_data(has_visible_automation);
 
 	if (automatable.empty()) {
 		return;
@@ -2053,6 +1999,9 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 
 	items.clear ();
 
+	std::set<Evoral::Parameter> has_visible_automation;
+	AutomationTimeAxisView::what_has_visible_automation (processor, has_visible_automation);
+
 	for (std::set<Evoral::Parameter>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
 
 		ProcessorAutomationNode* pan;
@@ -2062,7 +2011,7 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 
 		items.push_back (CheckMenuElem (name));
 		mitem = dynamic_cast<CheckMenuItem*> (&items.back());
-
+		
 		_subplugin_menu_map[*i] = mitem;
 
 		if (has_visible_automation.find((*i)) != has_visible_automation.end()) {
@@ -2109,24 +2058,12 @@ RouteTimeAxisView::processor_menu_item_toggled (RouteTimeAxisView::ProcessorAuto
 	}
 
 	if (pan->view && showit != pan->view->marked_for_display()) {
-
-		if (showit) {
-			pan->view->set_marked_for_display (true);
-			pan->view->canvas_display()->show();
-			pan->view->canvas_background()->show();
-		} else {
-			rai->processor->mark_automation_visible (pan->what, true);
-			pan->view->set_marked_for_display (false);
-			pan->view->hide ();
-		}
-
+		pan->view->set_visibility (showit);
 		redraw = true;
-
 	}
 
 	if (redraw && !no_redraw) {
 		 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
-
 	}
 }
 

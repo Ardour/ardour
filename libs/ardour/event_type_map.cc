@@ -244,7 +244,7 @@ EventTypeMap::new_parameter(const string& str) const
 	} else {
 		PBD::warning << "Unknown Parameter '" << str << "'" << endmsg;
 	}
-
+	
 	return new_parameter(p_type, p_channel, p_id);
 }
 

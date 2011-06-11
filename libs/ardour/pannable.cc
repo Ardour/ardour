@@ -185,33 +185,12 @@ XMLNode&
 Pannable::state (bool full)
 {
 	XMLNode* node = new XMLNode (X_("Pannable"));
-	XMLNode* control_node;
-	char buf[32];
 
-	control_node = new XMLNode (X_("azimuth"));
-	snprintf (buf, sizeof(buf), "%.12g", pan_azimuth_control->get_value());
-	control_node->add_property (X_("value"), buf);
-	node->add_child_nocopy (*control_node);
-
-	control_node = new XMLNode (X_("width"));
-	snprintf (buf, sizeof(buf), "%.12g", pan_width_control->get_value());
-	control_node->add_property (X_("value"), buf);
-	node->add_child_nocopy (*control_node);
-
-	control_node = new XMLNode (X_("elevation"));
-	snprintf (buf, sizeof(buf), "%.12g", pan_elevation_control->get_value());
-	control_node->add_property (X_("value"), buf);
-	node->add_child_nocopy (*control_node);
-
-	control_node = new XMLNode (X_("frontback"));
-	snprintf (buf, sizeof(buf), "%.12g", pan_frontback_control->get_value());
-	control_node->add_property (X_("value"), buf);
-	node->add_child_nocopy (*control_node);
-
-	control_node = new XMLNode (X_("lfe"));
-	snprintf (buf, sizeof(buf), "%.12g", pan_lfe_control->get_value());
-	control_node->add_property (X_("value"), buf);
-	node->add_child_nocopy (*control_node);
+	node->add_child_nocopy (pan_azimuth_control->get_state());
+	node->add_child_nocopy (pan_width_control->get_state());
+	node->add_child_nocopy (pan_elevation_control->get_state());
+	node->add_child_nocopy (pan_frontback_control->get_state());
+	node->add_child_nocopy (pan_lfe_control->get_state());
 
 	node->add_child_nocopy (get_automation_xml_state ());
 
@@ -219,45 +198,27 @@ Pannable::state (bool full)
 }
 
 int
-Pannable::set_state (const XMLNode& root, int /*version - not used*/)
+Pannable::set_state (const XMLNode& root, int version)
 {
 	if (root.name() != X_("Pannable")) {
 		warning << string_compose (_("Pannable given XML data for %1 - ignored"), root.name()) << endmsg;
 		return -1;
 	}
 
-	XMLNodeList nlist;
+	const XMLNodeList& nlist (root.children());
 	XMLNodeConstIterator niter;
-	const XMLProperty *prop;
-
-	nlist = root.children();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == X_("azimuth")) {
-			prop = (*niter)->property (X_("value"));
-			if (prop) {
-				pan_azimuth_control->set_value (atof (prop->value()));
-			}
-		} else if ((*niter)->name() == X_("width")) {
-			prop = (*niter)->property (X_("value"));
-			if (prop) {
-				pan_width_control->set_value (atof (prop->value()));
-			}
-		} else if ((*niter)->name() == X_("elevation")) {
-			prop = (*niter)->property (X_("value"));
-			if (prop) {
-				pan_elevation_control->set_value (atof (prop->value()));
-			}
-		} else if ((*niter)->name() == X_("azimuth")) {
-			prop = (*niter)->property (X_("value"));
-			if (prop) {
-				pan_frontback_control->set_value (atof (prop->value()));
-			}
-		} else if ((*niter)->name() == X_("lfe")) {
-			prop = (*niter)->property (X_("value"));
-			if (prop) {
-				pan_lfe_control->set_value (atof (prop->value()));
-			}
+		if ((*niter)->name() == pan_azimuth_control->name()) {
+			pan_azimuth_control->set_state (**niter, version);
+		} else if ((*niter)->name() == pan_width_control->name()) {
+			pan_width_control->set_state (**niter, version);
+		} else if ((*niter)->name() == pan_elevation_control->name()) {
+			pan_elevation_control->set_state (**niter, version);
+		} else if ((*niter)->name() == pan_frontback_control->name()) {
+			pan_frontback_control->set_state (**niter, version);
+		} else if ((*niter)->name() == pan_lfe_control->name()) {
+			pan_lfe_control->set_state (**niter, version);
 		} else if ((*niter)->name() == Automatable::xml_node_name) {
 			set_automation_xml_state (**niter, PanAzimuthAutomation);
 		}

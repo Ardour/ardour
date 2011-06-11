@@ -1306,52 +1306,16 @@ RouteUI::ensure_xml_node ()
 					new_xml_node->add_property ((*i)->name().c_str (), (*i)->value().c_str ());
 				}
 
-				XMLNodeList old_children = xml_node->children ();
-				for (XMLNodeConstIterator i = old_children.begin(); i != old_children.end(); ++i) {
-					XMLNode* new_child = new XMLNode (AutomationTimeAxisView::state_node_name);
-					new_child->add_property (X_("automation-id"), (*i)->name());
-
-					XMLPropertyList old_props = (*i)->properties ();
-					for (XMLPropertyIterator j = old_props.begin(); j != old_props.end(); ++j) {
-						new_child->add_property ((*j)->name().c_str (), (*j)->value().c_str ());
-					}
-
-					new_xml_node->add_child_nocopy (*new_child);
-				}
+				/* we can't fix up the automation track nodes,
+				 * because the data is no longer stored
+				 * per-route, but per Controllable.
+				 */
 
 				_route->add_extra_xml (*new_xml_node);
 				xml_node = new_xml_node;
 			}
 		}
 	}
-}
-
-XMLNode*
-RouteUI::get_automation_child_xml_node (Evoral::Parameter param)
-{
-	ensure_xml_node ();
-
-	XMLNodeList kids = xml_node->children();
-	XMLNodeConstIterator iter;
-
-	const string sym = ARDOUR::EventTypeMap::instance().to_symbol(param);
-
-	for (iter = kids.begin(); iter != kids.end(); ++iter) {
-
-		if ((*iter)->name() == AutomationTimeAxisView::state_node_name) {
-			XMLProperty* type = (*iter)->property("automation-id");
-			if (type && type->value() == sym) {
-				return *iter;
-			}
-		}
-	}
-
-	// Didn't find it, make a new one
-	XMLNode* child = new XMLNode (AutomationTimeAxisView::state_node_name);
-	child->add_property("automation-id", sym);
-	xml_node->add_child_nocopy (*child);
-
-	return child;
 }
 
 int

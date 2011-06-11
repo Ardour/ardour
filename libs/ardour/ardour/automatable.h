@@ -73,10 +73,8 @@ public:
 
 	void protect_automation ();
 
-	void what_has_visible_data(std::set<Evoral::Parameter>&) const;
 	const std::set<Evoral::Parameter>& what_can_be_automated() const { return _can_automate_list; }
-
-	void mark_automation_visible(Evoral::Parameter, bool);
+	void what_has_existing_automation (std::set<Evoral::Parameter>&) const;
 
 	inline bool should_snapshot (framepos_t now) {
 		return (_last_automation_snapshot > now
@@ -90,8 +88,6 @@ public:
 	static framecnt_t automation_interval() {
 		return _automation_interval;
 	}
-
-	typedef Evoral::ControlSet::Controls Controls;
 
 	static const std::string xml_node_name;
 
@@ -108,7 +104,6 @@ public:
 	int load_automation (const std::string& path);
 	int old_set_automation_state(const XMLNode&);
 
-	std::set<Evoral::Parameter> _visible_controls;
 	std::set<Evoral::Parameter> _can_automate_list;
 
 	framepos_t _last_automation_snapshot;

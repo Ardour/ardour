@@ -40,7 +40,6 @@ public:
 	virtual void   set_double(double val, bool to_list=false, double frame=0);
 	virtual double get_double(bool from_list=false, double frame=0) const;
 
-
 	/** Get the latest user-set value
 	 * (which may not equal get_value() when automation is playing back).
 	 *
@@ -50,7 +49,6 @@ public:
 	double user_double() const { return _user_value; }
 
 	void set_list(boost::shared_ptr<ControlList>);
-
 
 	boost::shared_ptr<ControlList>       list()       { return _list; }
 	boost::shared_ptr<const ControlList> list() const { return _list; }

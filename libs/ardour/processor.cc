@@ -123,21 +123,7 @@ Processor::state (bool full_state)
 
 	if (full_state) {
 		XMLNode& automation = Automatable::get_automation_xml_state();
-		if (!automation.children().empty()
-				|| !automation.properties().empty()
-				|| !_visible_controls.empty()) {
-
-			stringstream sstr;
-			for (set<Evoral::Parameter>::iterator x = _visible_controls.begin();
-					x != _visible_controls.end(); ++x) {
-
-				if (x != _visible_controls.begin()) {
-					sstr << ' ';
-				}
-				sstr << (*x).id();
-			}
-
-			automation.add_property ("visible", sstr.str());
+		if (!automation.children().empty() || !automation.properties().empty()) {
 			node->add_child_nocopy (automation);
 		}
 	}
@@ -206,6 +192,8 @@ Processor::set_state (const XMLNode& node, int version)
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
 
+	Stateful::save_extra_xml (node);
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		if ((*niter)->name() == X_("Automation")) {
@@ -218,25 +206,6 @@ Processor::set_state (const XMLNode& node, int version)
 				set_automation_xml_state (*(*niter), Evoral::Parameter(PluginAutomation));
 			}
 
-			if ((prop = (*niter)->property ("visible")) != 0) {
-				uint32_t what;
-				stringstream sstr;
-
-				_visible_controls.clear ();
-
-				sstr << prop->value();
-				while (1) {
-					sstr >> what;
-					if (sstr.fail()) {
-						break;
-					}
-					// FIXME: other automation types?
-					mark_automation_visible (Evoral::Parameter(PluginAutomation, 0, what), true);
-				}
-			}
-
-		} else if ((*niter)->name() == "Extra") {
-			_extra_xml = new XMLNode (*(*niter));
 		} else if ((*niter)->name() == "Redirect") {
 			if ( !(legacy_active = (*niter)->property("active"))) {
 				error << string_compose(_("No %1 property flag in element %2"), "active", (*niter)->name()) << endl;

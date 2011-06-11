@@ -1902,6 +1902,8 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 	nlist = node.children();
 	XMLNode processor_state (X_("processor_state"));
 
+	Stateful::save_extra_xml (node);
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 
 		child = *niter;
@@ -2014,10 +2016,6 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 
 			XMLNode *cmt = *(child->children().begin());
 			_comment = cmt->content();
-
-		} else if (child->name() == X_("Extra")) {
-
-			_extra_xml = new XMLNode (*child);
 
 		} else if (child->name() == Controllable::xml_node_name && (prop = child->property("name")) != 0) {
 			if (prop->value() == "solo") {
@@ -2255,6 +2253,8 @@ Route::_set_state_2X (const XMLNode& node, int version)
 
 	set_processor_state_2X (redirect_nodes, version);
 
+	Stateful::save_extra_xml (node);
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
 		child = *niter;
 
@@ -2264,10 +2264,6 @@ Route::_set_state_2X (const XMLNode& node, int version)
 
 			XMLNode *cmt = *(child->children().begin());
 			_comment = cmt->content();
-
-		} else if (child->name() == X_("extra")) {
-
-			_extra_xml = new XMLNode (*child);
 
 		} else if (child->name() == Controllable::xml_node_name && (prop = child->property("name")) != 0) {
 			if (prop->value() == X_("solo")) {

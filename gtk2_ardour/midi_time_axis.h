@@ -67,7 +67,6 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	/* overridden from parent to store display state */
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void set_height (uint32_t);
-	void hide ();
 
         void enter_internal_edit_mode ();
         void leave_internal_edit_mode ();
@@ -110,6 +109,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
   private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 
+	void hide ();
 	void model_changed();
 	void custom_device_mode_changed();
 

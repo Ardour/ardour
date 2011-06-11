@@ -1250,9 +1250,7 @@ Session::set_state (const XMLNode& node, int version)
 
 	IO::disable_connecting ();
 
-	if ((child = find_named_node (node, "Extra")) != 0) {
-		_extra_xml = new XMLNode (*child);
-	}
+	Stateful::save_extra_xml (node);
 
 	if (((child = find_named_node (node, "Options")) != 0)) { /* old style */
 		load_options (*child);

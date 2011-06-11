@@ -70,7 +70,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	virtual void set_height (uint32_t);
 	void set_samples_per_unit (double);
-	bool set_visibility (bool yn);
 	std::string name() const { return _name; }
 
 	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, framepos_t, double);
@@ -99,7 +98,6 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	int  set_state (const XMLNode&, int version);
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
-	void hide ();
 
 	static const std::string state_node_name;
 	XMLNode* get_state_node();
@@ -119,6 +117,8 @@ class AutomationTimeAxisView : public TimeAxisView {
 	boost::shared_ptr<ARDOUR::Route> parent_route () {
 		return _route;
 	}
+
+	static void what_has_visible_automation (const boost::shared_ptr<ARDOUR::Automatable>& automatable, std::set<Evoral::Parameter>& visible);
 
   protected:
 	/** parent route */
@@ -155,6 +155,9 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	Gtk::CheckMenuItem* mode_discrete_item;
 	Gtk::CheckMenuItem* mode_line_item;
+
+	void hide ();
+	void show ();
 
 	void add_line (boost::shared_ptr<AutomationLine>);
 

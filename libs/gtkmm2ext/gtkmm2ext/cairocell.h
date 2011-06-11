@@ -27,7 +27,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <cairomm/cairomm.h>
-#include <gtkmm.h>
+#include <gtkmm/misc.h>
 
 class CairoCell
 {

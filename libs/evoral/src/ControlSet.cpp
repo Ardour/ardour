@@ -54,8 +54,11 @@ void
 ControlSet::what_has_data (set<Parameter>& s) const
 {
 	Glib::Mutex::Lock lm (_control_lock);
+
 	for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
-		s.insert(li->first);
+		if (li->second->list() && !li->second->list()->empty()) {
+			s.insert (li->first);
+		}
 	}
 }
 

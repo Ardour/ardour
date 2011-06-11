@@ -190,6 +190,29 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 void
 AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool show)
 {
+	if (param.type() == NullAutomation) {
+		cerr << "WARNING: Attempt to create NullAutomation child, ignoring" << endl;
+		return;
+	}
+
+	AutomationTracks::iterator existing = _automation_tracks.find (param);
+
+	if (existing != _automation_tracks.end()) {
+		
+		/* automation track created because we had existing data for
+		 * the processor, but visibility may need to be controlled
+		 * since it will have been set visible by default.
+		 */
+
+		existing->second->set_visibility (show);
+		
+		if (!no_redraw) {
+			_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		}
+
+		return;
+	}
+
 	if (param.type() == GainAutomation) {
 
 		create_gain_automation_child (param, show);
@@ -264,16 +287,7 @@ AudioTimeAxisView::update_gain_track_visibility ()
 	bool const showit = gain_automation_item->get_active();
 
 	if (showit != gain_track->marked_for_display()) {
-		if (showit) {
-			gain_track->set_marked_for_display (true);
-			gain_track->canvas_display()->show();
-			gain_track->canvas_background()->show();
-			gain_track->get_state_node()->add_property ("shown", X_("yes"));
-		} else {
-			gain_track->set_marked_for_display (false);
-			gain_track->hide ();
-			gain_track->get_state_node()->add_property ("shown", X_("no"));
-		}
+		gain_track->set_visibility (showit);
 
 		/* now trigger a redisplay */
 
@@ -291,17 +305,7 @@ AudioTimeAxisView::update_pan_track_visibility ()
 	for (list<boost::shared_ptr<AutomationTimeAxisView> >::iterator i = pan_tracks.begin(); i != pan_tracks.end(); ++i) {
 
 		if (showit != (*i)->marked_for_display()) {
-			if (showit) {
-				(*i)->set_marked_for_display (true);
-				(*i)->canvas_display()->show();
-				(*i)->canvas_background()->show();
-				(*i)->get_state_node()->add_property ("shown", X_("yes"));
-			} else {
-				(*i)->set_marked_for_display (false);
-				(*i)->hide ();
-				(*i)->get_state_node()->add_property ("shown", X_("no"));
-			}
-
+			(*i)->set_visibility (showit);
 			/* now trigger a redisplay */
 			if (!no_redraw) {
 				_route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
@@ -469,24 +473,6 @@ AudioTimeAxisView::build_automation_action_menu (bool for_selection)
 	set<Evoral::Parameter> const & params = _route->pannable()->what_can_be_automated ();
 	for (set<Evoral::Parameter>::iterator p = params.begin(); p != params.end(); ++p) {
 		_main_automation_menu_map[*p] = pan_automation_item;
-	}
-}
-
-void
-AudioTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> wp)
-{
-	/* we use this override to veto the Amp processor from the plugin menu,
-	   as its automation lane can be accessed using the special "Fader" menu
-	   option
-	*/
-
-	boost::shared_ptr<Processor> p = wp.lock ();
-	if (!p) {
-		return;
-	}
-
-	if (boost::dynamic_pointer_cast<Amp> (p) == 0) {
-		RouteTimeAxisView::add_processor_to_subplugin_menu (wp);
 	}
 }
 

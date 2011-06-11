@@ -846,40 +846,70 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 	}
 
 	AutomationTracks::iterator existing = _automation_tracks.find (param);
+
 	if (existing != _automation_tracks.end()) {
+
+		/* automation track created because we had existing data for
+		 * the processor, but visibility may need to be controlled
+		 * since it will have been set visible by default.
+		 */
+
+		existing->second->set_visibility (show);
+		
+		if (!no_redraw) {
+			_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+		}
+
 		return;
 	}
 
-	if (param.type() == GainAutomation) {
+	boost::shared_ptr<AutomationTimeAxisView> track;
+
+	switch (param.type()) {
+
+	case GainAutomation:
 		create_gain_automation_child (param, show);
-	} else {
+		break;
 
-		/* These controllers are region "automation", so we do not create
-		 * an AutomationList/Line for the track */
+	case PluginAutomation:
+		/* handled elsewhere */
+		break;
 
-		boost::shared_ptr<AutomationTimeAxisView> track (
-			new AutomationTimeAxisView (
-				_session,
-				_route,
-				boost::shared_ptr<Automatable> (),
-				boost::shared_ptr<AutomationControl> (),
-				param,
-				_editor,
-				*this,
-				true,
-				parent_canvas,
-				_route->describe_parameter(param)
-				)
-			);
+	case MidiCCAutomation:
+	case MidiPgmChangeAutomation:
+	case MidiPitchBenderAutomation:
+	case MidiChannelPressureAutomation:
+	case MidiSystemExclusiveAutomation:
+		/* These controllers are region "automation" - they are owned
+		 * by regions (and their MidiModels), not by the track. As a
+		 * result we do not create an AutomationList/Line for the track
+		 * ... except here we are doing something!! XXX 
+		 */
+
+		track.reset (new AutomationTimeAxisView (
+				     _session,
+				     _route,
+				     boost::shared_ptr<Automatable> (),
+				     boost::shared_ptr<AutomationControl> (),
+				     param,
+				     _editor,
+				     *this,
+				     true,
+				     parent_canvas,
+				     _route->describe_parameter(param)
+				     ));
 
 		if (_view) {
 			_view->foreach_regionview (sigc::mem_fun (*track.get(), &TimeAxisView::add_ghost));
 		}
 
 		add_automation_child (param, track, show);
+		break;
+
+	default:
+		error << "MidiTimeAxisView: unknown automation child " << EventTypeMap::instance().to_symbol(param) << endmsg;
 	}
 }
-
 
 void
 MidiTimeAxisView::route_active_changed ()

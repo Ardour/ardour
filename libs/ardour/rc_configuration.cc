@@ -268,14 +268,14 @@ RCConfiguration::set_state (const XMLNode& root, int /*version*/)
 
 	_midi_port_states.clear ();
 
+	Stateful::save_extra_xml (root);
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		node = *niter;
 
 		if (node->name() == "Config") {
 			set_variables (*node);
-		} else if (node->name() == "Extra") {
-			_extra_xml = new XMLNode (*node);
 		} else if (node->name() == ControlProtocolManager::state_node_name) {
 			_control_protocol_state = new XMLNode (*node);
 		} else if (node->name() == MIDI::Port::state_node_name) {

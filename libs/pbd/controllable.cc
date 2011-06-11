@@ -113,6 +113,10 @@ Controllable::get_state ()
 	snprintf (buf, sizeof (buf), "%2.12f", get_value());
         node->add_property (X_("value"), buf);
 
+	if (_extra_xml) {
+		node->add_child_copy (*_extra_xml);
+	}
+
 	return *node;
 }
 
@@ -122,6 +126,8 @@ Controllable::set_state (const XMLNode& node, int /*version*/)
 {
 	LocaleGuard lg (X_("POSIX"));
 	const XMLProperty* prop;
+
+	Stateful::save_extra_xml (node);
 
 	if ((prop = node.property (X_("id"))) != 0) {
 		_id = prop->value();

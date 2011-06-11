@@ -287,7 +287,14 @@ CairoEditableText::set_text (CairoTextCell* cell, const string& text)
 bool
 CairoEditableText::on_expose_event (GdkEventExpose* ev)
 {
-	Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
+	Glib::RefPtr<Gdk::Window> win = get_window ();
+
+	if (!win) {
+		std::cerr << "CET: no window to draw on\n";
+		return false;
+	}
+
+	Cairo::RefPtr<Cairo::Context> context = win->create_cairo_context();
 
 	if (cells.empty()) {
 		return true;

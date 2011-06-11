@@ -136,9 +136,6 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	bool touched (double top, double bot);
 
-	/** Hide this TrackView */
-	virtual void hide ();
-
 	/** @return true if hidden, otherwise false */
 	bool hidden () const { return _hidden; }
 
@@ -200,10 +197,6 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	TimeAxisView* get_parent () { return parent; }
 	void set_parent (TimeAxisView& p);
 	bool has_state () const;
-
-	/* call this on the parent */
-
-	virtual XMLNode* get_automation_child_xml_node (Evoral::Parameter) { return 0; }
 
 	virtual LayerDisplay layer_display () const { return Overlaid; }
 	virtual StreamView* view () const { return 0; }
@@ -285,6 +278,9 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	void remove_child (boost::shared_ptr<TimeAxisView>);
 	void add_child (boost::shared_ptr<TimeAxisView>);
+
+	virtual void hide ();
+	virtual void show ();
 
 	/* selection display */
 

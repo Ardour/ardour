@@ -61,7 +61,8 @@ class Stateful {
 	 */
 
 	void add_extra_xml (XMLNode&);
-	XMLNode *extra_xml (const std::string& str);
+	XMLNode *extra_xml (const std::string& str, bool add_if_missing = false);
+	void save_extra_xml (const XMLNode&);
 
 	const PBD::ID& id() const { return _id; }
         

@@ -68,22 +68,37 @@ Stateful::add_extra_xml (XMLNode& node)
 }
 
 XMLNode *
-Stateful::extra_xml (const string& str)
+Stateful::extra_xml (const string& str, bool add_if_missing)
 {
-	if (_extra_xml == 0) {
-		return 0;
+	XMLNode* node = 0;
+
+	if (_extra_xml) {
+		node = _extra_xml->child (str.c_str());
 	}
 
-	const XMLNodeList& nlist = _extra_xml->children();
-	XMLNodeConstIterator i;
+	if (!node && add_if_missing) {
+		node = new XMLNode (str);
+		add_extra_xml (*node);
+	} 
 
-	for (i = nlist.begin(); i != nlist.end(); ++i) {
-		if ((*i)->name() == str) {
-			return (*i);
-		}
+	return node;
+}
+
+void
+Stateful::save_extra_xml (const XMLNode& node)
+{
+	/* Looks for the child node called "Extra" and makes _extra_xml 
+	   point to a copy of it. Will delete any existing node pointed
+	   to by _extra_xml if a new Extra node is found, but not
+	   otherwise.
+	*/
+	
+	const XMLNode* xtra = node.child ("Extra");
+
+	if (xtra) {
+		delete _extra_xml;
+		_extra_xml = new XMLNode (*xtra);
 	}
-
-	return 0;
 }
 
 void

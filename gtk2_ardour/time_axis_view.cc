@@ -350,6 +350,13 @@ TimeAxisView::selection_click (GdkEventButton* ev)
 }
 
 void
+TimeAxisView::show ()
+{
+	canvas_display()->show();
+	canvas_background()->show();
+}
+
+void
 TimeAxisView::hide ()
 {
 	if (_hidden) {
@@ -1287,7 +1294,7 @@ TimeAxisView::set_visibility (bool yn)
 	if (yn != marked_for_display()) {
 		if (yn) {
 			set_marked_for_display (true);
-			canvas_display()->show();
+			show ();
 		} else {
 			set_marked_for_display (false);
 			hide ();
@@ -1297,6 +1304,7 @@ TimeAxisView::set_visibility (bool yn)
 
 	return false;
 }
+
 
 uint32_t
 TimeAxisView::preset_height (Height h)

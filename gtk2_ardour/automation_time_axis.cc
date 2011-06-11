@@ -19,7 +19,10 @@
 
 #include <utility>
 #include <gtkmm2ext/barcontroller.h>
+
 #include "pbd/memento_command.h"
+#include "pbd/stacktrace.h"
+
 #include "ardour/automation_control.h"
 #include "ardour/event_type_map.h"
 #include "ardour/route.h"
@@ -147,51 +150,22 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	hide_name_entry();
 
-	/* move the name label over a bit */
+	/* keep the parameter name short */
 
 	string shortpname = _name;
-	bool shortened = false;
-
 	int ignore_width;
 	shortpname = fit_to_pixels (_name, 60, name_font, ignore_width, true);
-
-	if (shortpname != _name ){
-		shortened = true;
-	}
 
 	name_label.set_text (shortpname);
 	name_label.set_alignment (Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
         name_label.set_name (X_("TrackParameterName"));
 
-	if (nomparent.length()) {
-
-		/* limit the plug name string */
-
-		string pname = fit_to_pixels (nomparent, 60, name_font, ignore_width, true);
-		if (pname != nomparent) {
-			shortened = true;
-		}
-
-		plugname = new Label (pname);
-		plugname->set_name (X_("TrackPlugName"));
-		plugname->show();
-		controls_table.remove (name_hbox);
-		controls_table.attach (*plugname, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-		plugname_packed = true;
-		controls_table.attach (name_hbox, 1, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	} else {
-		plugname = 0;
-		plugname_packed = false;
+	string tipname = nomparent;
+	if (!tipname.empty()) {
+		tipname += ": ";
 	}
-
-	if (shortened) {
-		string tipname = nomparent;
-		if (!tipname.empty()) {
-			tipname += ": ";
-		}
-		tipname += _name;
-		ARDOUR_UI::instance()->set_tip(controls_ebox, tipname);
-	}
+	tipname += _name;
+	ARDOUR_UI::instance()->set_tip(controls_ebox, tipname);
 
 	/* add the buttons */
 	controls_table.attach (hide_button, 0, 1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
@@ -212,7 +186,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	controls_base_unselected_name = X_("AutomationTrackControlsBase");
 	controls_ebox.set_name (controls_base_unselected_name);
 
-	XMLNode* xml_node = get_parent_with_state()->get_automation_child_xml_node (_parameter);
+	XMLNode* xml_node = get_state_node ();
 
 	if (xml_node) {
 		set_state (*xml_node, Stateful::loading_state_version);
@@ -435,7 +409,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 
 	TimeAxisView* state_parent = get_parent_with_state ();
 	assert(state_parent);
-	XMLNode* xml_node = state_parent->get_automation_child_xml_node (_parameter);
+	XMLNode* xml_node = _control->extra_xml ("GUI");
 
 	TimeAxisView::set_height (h);
 	_base_rect->property_y2() = h;
@@ -460,19 +434,6 @@ AutomationTimeAxisView::set_height (uint32_t h)
 		first_call_to_set_height = false;
 
 		if (h >= preset_height (HeightNormal)) {
-			controls_table.remove (name_hbox);
-
-			if (plugname) {
-				if (plugname_packed) {
-					controls_table.remove (*plugname);
-					plugname_packed = false;
-				}
-				controls_table.attach (*plugname, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-				plugname_packed = true;
-				controls_table.attach (name_hbox, 1, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-			} else {
-				controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-			}
 			hide_name_entry ();
 			show_name_label ();
 			name_hbox.show_all ();
@@ -481,14 +442,6 @@ AutomationTimeAxisView::set_height (uint32_t h)
 			hide_button.show_all();
 
 		} else if (h >= preset_height (HeightSmall)) {
-			controls_table.remove (name_hbox);
-			if (plugname) {
-				if (plugname_packed) {
-					controls_table.remove (*plugname);
-					plugname_packed = false;
-				}
-			}
-			controls_table.attach (name_hbox, 1, 5, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 			controls_table.hide_all ();
 			hide_name_entry ();
 			show_name_label ();
@@ -989,24 +942,18 @@ AutomationTimeAxisView::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
-	XMLProperty const * type = node.property ("automation-id");
-	if (type && type->value () == ARDOUR::EventTypeMap::instance().to_symbol (_parameter)) {
-		XMLProperty const * shown = node.property ("shown");
-		if (shown && shown->value () == "yes") {
-			set_marked_for_display (true);
-			_canvas_display->show (); /* FIXME: necessary? show_at? */
-		}
-	}
+	XMLProperty const * prop = node.property ("shown");
 
-	if (!_marked_for_display) {
-		hide();
+	if (prop) {
+		set_visibility (string_is_affirmative (prop->value()));
+	} else {
+		set_visibility (false);
 	}
 
 	return 0;
 }
 
 int
-
 AutomationTimeAxisView::set_state_2X (const XMLNode& node, int /*version*/)
 {
 	if (node.name() == X_("gain") && _parameter == Evoral::Parameter (GainAutomation)) {
@@ -1027,50 +974,77 @@ AutomationTimeAxisView::set_state_2X (const XMLNode& node, int /*version*/)
 XMLNode*
 AutomationTimeAxisView::get_state_node ()
 {
-	TimeAxisView* state_parent = get_parent_with_state ();
+	return _control->extra_xml ("GUI", true);
+}
 
-	if (state_parent) {
-		return state_parent->get_automation_child_xml_node (_parameter);
-	} else {
-		return 0;
+void
+AutomationTimeAxisView::update_extra_xml_shown (bool shown)
+{
+	XMLNode* xml_node = get_state_node();
+	if (xml_node) {
+		xml_node->add_property ("shown", shown ? "yes" : "no");
 	}
 }
 
 void
-AutomationTimeAxisView::update_extra_xml_shown (bool editor_shown)
+AutomationTimeAxisView::what_has_visible_automation (const boost::shared_ptr<Automatable>& automatable, set<Evoral::Parameter>& visible)
 {
-	XMLNode* xml_node = get_state_node();
-	if (xml_node) {
-		xml_node->add_property ("shown", editor_shown ? "yes" : "no");
+	/* this keeps "knowledge" of how we store visibility information
+	   in XML private to this class.
+	*/
+
+	assert (automatable);
+
+	Automatable::Controls& controls (automatable->controls());
+	
+	for (Automatable::Controls::iterator i = controls.begin(); i != controls.end(); ++i) {
+		
+		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (i->second);
+
+		if (ac) {
+			
+			const XMLNode* gui_node = ac->extra_xml ("GUI");
+			
+			if (gui_node) {
+				const XMLProperty* prop = gui_node->property ("shown");
+				if (prop) {
+					if (string_is_affirmative (prop->value())) {
+						visible.insert (i->first);
+					}
+				}
+			}
+		}
 	}
 }
 
 guint32
 AutomationTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
 {
-	update_extra_xml_shown (true);
+	if (!canvas_item_visible (_canvas_display)) {
+		update_extra_xml_shown (true);
+	}
 
 	return TimeAxisView::show_at (y, nth, parent);
 }
 
 void
-AutomationTimeAxisView::hide ()
+AutomationTimeAxisView::show ()
 {
-	update_extra_xml_shown (false);
-
-	TimeAxisView::hide ();
-}
-
-bool
-AutomationTimeAxisView::set_visibility (bool yn)
-{
-	bool changed = TimeAxisView::set_visibility (yn);
-
-	if (changed) {
-		get_state_node()->add_property ("shown", yn ? X_("yes") : X_("no"));
+	if (!canvas_item_visible (_canvas_display)) {
+		update_extra_xml_shown (true);
 	}
 
-	return changed;
+	return TimeAxisView::show ();
+}
+
+void
+AutomationTimeAxisView::hide ()
+{
+	if (canvas_item_visible (_canvas_display)) {
+		update_extra_xml_shown (false);
+	}
+
+	TimeAxisView::hide ();
 }
 
 /** @return true if this view has any automation data to display */

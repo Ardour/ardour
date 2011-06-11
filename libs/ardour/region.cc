@@ -1251,15 +1251,7 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 	const XMLProperty* prop;
 	const XMLNodeList& nlist = node.children();
 
-	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
-		XMLNode *child = (*niter);
-
-		if (child->name () == "Extra") {
-			delete _extra_xml;
-			_extra_xml = new XMLNode (*child);
-		}
-	}
+	Stateful::save_extra_xml (node);
 
 	what_changed = set_values (node);
 

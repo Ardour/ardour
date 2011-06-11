@@ -78,7 +78,6 @@ class AudioTimeAxisView : public RouteTimeAxisView
 
 	/* Overridden from parent to store display state */
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
-	void hide ();
 
         void enter_internal_edit_mode ();
         void leave_internal_edit_mode ();
@@ -101,6 +100,8 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void show_existing_automation (bool apply_to_selection = false);
 	void hide_all_automation (bool apply_to_selection = false);
 
+	void hide ();
+
 	void gain_hidden ();
 	void pan_hidden ();
 
@@ -109,8 +110,6 @@ class AudioTimeAxisView : public RouteTimeAxisView
 
 	void update_gain_track_visibility ();
 	void update_pan_track_visibility ();
-
-	void add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Processor>);
 
 	Gtk::CheckMenuItem* gain_automation_item;
 	std::list<boost::shared_ptr<AutomationTimeAxisView> > pan_tracks;

@@ -79,22 +79,6 @@ Automatable::old_set_automation_state (const XMLNode& node)
 		warning << _("Automation node has no path property") << endmsg;
 	}
 
-	if ((prop = node.property ("visible")) != 0) {
-		uint32_t what;
-		stringstream sstr;
-
-		_visible_controls.clear ();
-
-		sstr << prop->value();
-		while (1) {
-			sstr >> what;
-			if (sstr.fail()) {
-				break;
-			}
-			mark_automation_visible (Evoral::Parameter(PluginAutomation, 0, what), true);
-		}
-	}
-
 	_last_automation_snapshot = 0;
 
 	return 0;
@@ -167,17 +151,6 @@ Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
 	automation_list_automation_state_changed (param, al->automation_state ()); // sync everything up
 }
 
-void
-Automatable::what_has_visible_data(set<Evoral::Parameter>& s) const
-{
-	Glib::Mutex::Lock lm (control_lock());
-	set<Evoral::Parameter>::const_iterator li;
-
-	for (li = _visible_controls.begin(); li != _visible_controls.end(); ++li) {
-		s.insert  (*li);
-	}
-}
-
 string
 Automatable::describe_parameter (Evoral::Parameter param)
 {
@@ -205,20 +178,6 @@ Automatable::can_automate (Evoral::Parameter what)
 	_can_automate_list.insert (what);
 }
 
-void
-Automatable::mark_automation_visible (Evoral::Parameter what, bool yn)
-{
-	if (yn) {
-		_visible_controls.insert (what);
-	} else {
-		set<Evoral::Parameter>::iterator i;
-
-		if ((i = _visible_controls.find (what)) != _visible_controls.end()) {
-			_visible_controls.erase (i);
-		}
-	}
-}
-
 /** \a legacy_param is used for loading legacy sessions where an object (IO, Panner)
  * had a single automation parameter, with it's type implicit.  Derived objects should
  * pass that type and it will be used for the untyped AutomationList found.
@@ -229,8 +188,6 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 	Glib::Mutex::Lock lm (control_lock());
 
 	/* Don't clear controls, since some may be special derived Controllable classes */
-
-	_visible_controls.clear ();
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
@@ -292,8 +249,7 @@ Automatable::get_automation_xml_state ()
 	}
 
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
-		boost::shared_ptr<AutomationList> l
-				= boost::dynamic_pointer_cast<AutomationList>(li->second->list());
+		boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(li->second->list());
 		if (!l->empty()) {
 			node->add_child_nocopy (l->get_state ());
 		}
@@ -364,11 +320,9 @@ void
 Automatable::protect_automation ()
 {
 	typedef set<Evoral::Parameter> ParameterSet;
-	ParameterSet automated_params;
+	const ParameterSet& automated_params = what_can_be_automated ();
 
-	what_has_data(automated_params);
-
-	for (ParameterSet::iterator i = automated_params.begin(); i != automated_params.end(); ++i) {
+	for (ParameterSet::const_iterator i = automated_params.begin(); i != automated_params.end(); ++i) {
 
 		boost::shared_ptr<Evoral::Control> c = control(*i);
 		boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());

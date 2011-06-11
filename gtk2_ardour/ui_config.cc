@@ -229,6 +229,8 @@ UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 		return -1;
 	}
 
+	Stateful::save_extra_xml (root);
+
 	XMLNodeList nlist = root.children();
 	XMLNodeConstIterator niter;
 	XMLNode *node;
@@ -236,11 +238,9 @@ UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		node = *niter;
+
 		if (node->name() == "Canvas" ||  node->name() == "UI") {
 			set_variables (*node);
-
-		} else if (node->name() == "Extra") {
-			_extra_xml = new XMLNode (*node);
 
 		}
 	}
