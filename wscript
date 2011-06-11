@@ -9,7 +9,7 @@ import sys
 import glob
 
 # Variables for 'waf dist'
-VERSION = '3.0alpha5'
+VERSION = '3.0alpha6'
 APPNAME = 'Ardour'
 
 # Mandatory variables
