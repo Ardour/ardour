@@ -28,7 +28,6 @@
 #include <string>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 
 #include "pbd/uuid.h"
 #include "pbd/file_utils.h"
@@ -37,16 +36,12 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/location.h"
 #include "ardour/types.h"
+#include "ardour/export_handler.h"
 
 namespace ARDOUR
 {
 
 class ExportHandler;
-class ExportTimespan;
-class ExportChannelConfiguration;
-class ExportFormatSpecification;
-class ExportFilename;
-class ExportPreset;
 class Location;
 class Session;
 
@@ -61,13 +56,12 @@ class ExportProfileManager
 	void load_profile ();
 	void prepare_for_export ();
 
-	typedef boost::shared_ptr<ExportPreset> PresetPtr;
-	typedef std::list<PresetPtr> PresetList;
+	typedef std::list<ExportPresetPtr> PresetList;
 
 	PresetList const & get_presets () { return preset_list; }
-	bool load_preset (PresetPtr preset);
-	PresetPtr new_preset (std::string const & name);
-	PresetPtr save_preset (std::string const & name);
+	bool load_preset (ExportPresetPtr preset);
+	ExportPresetPtr new_preset (std::string const & name);
+	ExportPresetPtr save_preset (std::string const & name);
 	void remove_preset ();
 
   private:
@@ -92,9 +86,9 @@ class ExportProfileManager
 	void serialize_global_profile (XMLNode & root);
 	void serialize_local_profile (XMLNode & root);
 
-	PresetList preset_list;
-	PresetPtr  current_preset;
-	FileMap    preset_file_map;
+	PresetList      preset_list;
+	ExportPresetPtr current_preset;
+	FileMap         preset_file_map;
 
 	std::vector<PBD::sys::path> find_file (std::string const & pattern);
 
@@ -104,8 +98,7 @@ class ExportProfileManager
 /* Timespans */
   public:
 
-	typedef boost::shared_ptr<ExportTimespan> TimespanPtr;
-	typedef std::list<TimespanPtr> TimespanList;
+	typedef std::list<ExportTimespanPtr> TimespanList;
 	typedef boost::shared_ptr<TimespanList> TimespanListPtr;
 	typedef std::list<Location *> LocationList;
 
@@ -165,12 +158,10 @@ class ExportProfileManager
 /* Channel Configs */
   public:
 
-	typedef boost::shared_ptr<ExportChannelConfiguration> ChannelConfigPtr;
-
 	struct ChannelConfigState {
-		ChannelConfigPtr config;
+		ExportChannelConfigPtr config;
 
-		ChannelConfigState (ChannelConfigPtr ptr) : config (ptr) {}
+		ChannelConfigState (ExportChannelConfigPtr ptr) : config (ptr) {}
 	};
 	typedef boost::shared_ptr<ChannelConfigState> ChannelConfigStatePtr;
 	typedef std::list<ChannelConfigStatePtr> ChannelConfigStateList;
@@ -188,14 +179,13 @@ class ExportProfileManager
 /* Formats */
   public:
 
-	typedef boost::shared_ptr<ExportFormatSpecification> FormatPtr;
-	typedef std::list<FormatPtr> FormatList;
+	typedef std::list<ExportFormatSpecPtr> FormatList;
 
 	struct FormatState {
 		boost::shared_ptr<FormatList const> list;
-		FormatPtr                           format;
+		ExportFormatSpecPtr                     format;
 
-		FormatState (boost::shared_ptr<FormatList const> list, FormatPtr format) :
+		FormatState (boost::shared_ptr<FormatList const> list, ExportFormatSpecPtr format) :
 		  list (list), format (format) {}
 	};
 	typedef boost::shared_ptr<FormatState> FormatStatePtr;
@@ -205,9 +195,9 @@ class ExportProfileManager
 	FormatStatePtr duplicate_format_state (FormatStatePtr state);
 	void remove_format_state (FormatStatePtr state);
 
-	PBD::sys::path save_format_to_disk (FormatPtr format);
-	void remove_format_profile (FormatPtr format);
-	FormatPtr get_new_format (FormatPtr original);
+	PBD::sys::path save_format_to_disk (ExportFormatSpecPtr format);
+	void remove_format_profile (ExportFormatSpecPtr format);
+	ExportFormatSpecPtr get_new_format (ExportFormatSpecPtr original);
 
 	PBD::Signal0<void> FormatListChanged;
 
@@ -221,7 +211,7 @@ class ExportProfileManager
 
 	void load_formats ();
 
-	FormatPtr load_format (XMLNode & node);
+	ExportFormatSpecPtr load_format (XMLNode & node);
 	void load_format_from_disk (PBD::sys::path const & path);
 
 	boost::shared_ptr<FormatList> format_list;
@@ -230,12 +220,10 @@ class ExportProfileManager
 /* Filenames */
   public:
 
-	typedef boost::shared_ptr<ExportFilename> FilenamePtr;
-
 	struct FilenameState {
-		FilenamePtr  filename;
+		ExportFilenamePtr  filename;
 
-		FilenameState (FilenamePtr ptr) : filename (ptr) {}
+		FilenameState (ExportFilenamePtr ptr) : filename (ptr) {}
 	};
 	typedef boost::shared_ptr<FilenameState> FilenameStatePtr;
 	typedef std::list<FilenameStatePtr> FilenameStateList;
@@ -249,7 +237,7 @@ class ExportProfileManager
 	FilenameStateList filenames;
 
 	bool init_filenames (XMLNodeList nodes);
-	FilenamePtr load_filename (XMLNode & node);
+	ExportFilenamePtr load_filename (XMLNode & node);
 
 /* Warnings */
   public:
@@ -268,8 +256,8 @@ class ExportProfileManager
 	                   FormatStatePtr format_state,
 	                   FilenameStatePtr filename_state);
 
-	bool check_format (FormatPtr format, uint32_t channels);
-	bool check_sndfile_format (FormatPtr format, unsigned int channels);
+	bool check_format (ExportFormatSpecPtr format, uint32_t channels);
+	bool check_sndfile_format (ExportFormatSpecPtr format, unsigned int channels);
 
  /* Utilities */
 

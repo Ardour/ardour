@@ -102,7 +102,7 @@ ExportTimespanSelector::~ExportTimespanSelector ()
 void
 ExportTimespanSelector::add_range_to_selection (ARDOUR::Location const * loc)
 {
-	TimespanPtr span = _session->get_export_handler()->add_timespan();
+	ExportTimespanPtr span = _session->get_export_handler()->add_timespan();
 
 	std::string id;
 	if (loc == state->session_range.get()) {

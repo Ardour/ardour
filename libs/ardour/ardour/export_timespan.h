@@ -58,6 +58,13 @@ class ExportTimespan
 	framepos_t get_start () const { return start_frame; }
 	framepos_t get_end () const { return end_frame; }
 
+	/// Primarily compare start time, then end time
+	bool operator< (ExportTimespan const & other) {
+		if (start_frame < other.start_frame) { return true; }
+		if (start_frame > other.start_frame) { return false; }
+		return end_frame < other.end_frame;
+	}
+
   private:
 
 	ExportStatusPtr status;

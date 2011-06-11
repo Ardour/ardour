@@ -206,7 +206,7 @@ void
 ExportGraphBuilder::Encoder::copy_files (std::string orig_path)
 {
 	while (filenames.size()) {
-		FilenamePtr & filename = filenames.front();
+		ExportFilenamePtr & filename = filenames.front();
 		PBD::sys::copy_file (orig_path, filename->get_path (config.format).c_str());
 		filenames.pop_front();
 	}

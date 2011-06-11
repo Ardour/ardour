@@ -40,7 +40,7 @@ class ExportPresetSelector : public Gtk::HBox
   private:
 
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
-	typedef ARDOUR::ExportProfileManager::PresetPtr PresetPtr;
+	typedef ARDOUR::ExportPresetPtr PresetPtr;
 	typedef ARDOUR::ExportProfileManager::PresetList PresetList;
 
 	ManagerPtr       profile_manager;

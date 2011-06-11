@@ -31,7 +31,7 @@ using std::string;
 namespace ARDOUR
 {
 
-ExportFormatManager::ExportFormatManager (SpecPtr specification) :
+ExportFormatManager::ExportFormatManager (ExportFormatSpecPtr specification) :
   pending_selection_change (false),
   universal_set (new ExportFormatBase ())
 {
@@ -51,7 +51,7 @@ ExportFormatManager::~ExportFormatManager ()
 void
 ExportFormatManager::init_compatibilities ()
 {
-	CompatPtr c_ptr;
+	ExportFormatCompatibilityPtr c_ptr;
 
 	c_ptr.reset (new ExportFormatCompatibility (_("CD")));
 	c_ptr->add_sample_rate (ExportFormatBase::SR_44_1);
@@ -115,7 +115,7 @@ ExportFormatManager::init_qualities ()
 void
 ExportFormatManager::init_formats ()
 {
-	FormatPtr f_ptr;
+	ExportFormatPtr f_ptr;
 	ExportFormatLinear * fl_ptr;
 
 	f_ptr.reset (fl_ptr = new ExportFormatLinear ("AIFF", ExportFormatBase::F_AIFF));
@@ -213,10 +213,12 @@ ExportFormatManager::init_sample_rates ()
 }
 
 void
-ExportFormatManager::add_compatibility (CompatPtr ptr)
+ExportFormatManager::add_compatibility (ExportFormatCompatibilityPtr ptr)
 {
 	compatibilities.push_back (ptr);
-	ptr->SelectChanged.connect_same_thread (*this, boost::bind (&ExportFormatManager::change_compatibility_selection, this, _1, WeakCompatPtr (ptr)));
+	ptr->SelectChanged.connect_same_thread (*this,
+	                                        boost::bind (&ExportFormatManager::change_compatibility_selection,
+	                                                     this, _1, WeakExportFormatCompatibilityPtr (ptr)));
 }
 
 void
@@ -227,10 +229,10 @@ ExportFormatManager::add_quality (QualityPtr ptr)
 }
 
 void
-ExportFormatManager::add_format (FormatPtr ptr)
+ExportFormatManager::add_format (ExportFormatPtr ptr)
 {
 	formats.push_back (ptr);
-	ptr->SelectChanged.connect_same_thread (*this, boost::bind (&ExportFormatManager::change_format_selection, this, _1, WeakFormatPtr (ptr)));
+	ptr->SelectChanged.connect_same_thread (*this, boost::bind (&ExportFormatManager::change_format_selection, this, _1, WeakExportFormatPtr (ptr)));
 	universal_set = universal_set->get_union (*ptr);
 
 	/* Encoding options */
@@ -305,14 +307,14 @@ ExportFormatManager::select_tagging (bool tag)
 }
 
 void
-ExportFormatManager::change_compatibility_selection (bool select, WeakCompatPtr const & compat)
+ExportFormatManager::change_compatibility_selection (bool select, WeakExportFormatCompatibilityPtr const & compat)
 {
 	bool do_selection_changed = !pending_selection_change;
 	if (!pending_selection_change) {
 		pending_selection_change = true;
 	}
 
-	CompatPtr ptr = compat.lock();
+	ExportFormatCompatibilityPtr ptr = compat.lock();
 
 	if (ptr && select) {
 		select_compatibility (ptr);
@@ -341,9 +343,9 @@ ExportFormatManager::change_quality_selection (bool select, WeakQualityPtr const
 }
 
 void
-ExportFormatManager::change_format_selection (bool select, WeakFormatPtr const & format)
+ExportFormatManager::change_format_selection (bool select, WeakExportFormatPtr const & format)
 {
-	FormatPtr ptr = format.lock();
+	ExportFormatPtr ptr = format.lock();
 
 	if (!ptr) {
 		return;
@@ -409,11 +411,11 @@ ExportFormatManager::change_dither_type_selection (bool select, WeakDitherTypePt
 }
 
 void
-ExportFormatManager::select_compatibility (WeakCompatPtr const & /*compat*/)
+ExportFormatManager::select_compatibility (WeakExportFormatCompatibilityPtr const & /*compat*/)
 {
 	/* Calculate compatibility intersection for the selection */
 
-	FormatBasePtr compat_intersect = get_compatibility_intersection ();
+	ExportFormatBasePtr compat_intersect = get_compatibility_intersection ();
 
 	/* Unselect incompatible items */
 
@@ -426,7 +428,7 @@ ExportFormatManager::select_compatibility (WeakCompatPtr const & /*compat*/)
 
 	select_intersect = compat_intersect->get_intersection (*current_selection);
 	if (select_intersect->formats_empty()) {
-		select_format (FormatPtr());
+		select_format (ExportFormatPtr());
 	}
 
 	select_intersect = compat_intersect->get_intersection (*current_selection);
@@ -453,7 +455,7 @@ ExportFormatManager::select_quality (QualityPtr const & quality)
 
 		/* Deselect format if it is incompatible */
 
-		FormatPtr format = get_selected_format();
+		ExportFormatPtr format = get_selected_format();
 		if (format && !format->has_quality (quality->quality)) {
 			format->set_selected (false);
 		}
@@ -479,7 +481,7 @@ ExportFormatManager::select_quality (QualityPtr const & quality)
 }
 
 void
-ExportFormatManager::select_format (FormatPtr const & format)
+ExportFormatManager::select_format (ExportFormatPtr const & format)
 {
 	bool do_selection_changed = !pending_selection_change;
 	if (!pending_selection_change) {
@@ -525,7 +527,7 @@ ExportFormatManager::select_format (FormatPtr const & format)
 		current_selection->set_sample_format (format_to_select);
 
 	} else {
-		FormatPtr current_format = get_selected_format ();
+		ExportFormatPtr current_format = get_selected_format ();
 		if (current_format) {
 			current_format->set_selected (false);
 		}
@@ -627,7 +629,7 @@ ExportFormatManager::selection_changed ()
 	/* Mark compatibility for everything necessary */
 
 	std::set<ExportFormatBase::Quality> compatible_qualities;
-	FormatBasePtr compat_intersect = get_compatibility_intersection ();
+	ExportFormatBasePtr compat_intersect = get_compatibility_intersection ();
 	ExportFormatCompatibility global_compat (*compat_intersect);
 
 	for (FormatList::iterator it = formats.begin(); it != formats.end(); ++it) {
@@ -702,10 +704,10 @@ ExportFormatManager::get_selected_quality ()
 	return QualityPtr();
 }
 
-ExportFormatManager::FormatPtr
+ExportFormatPtr
 ExportFormatManager::get_selected_format ()
 {
-	FormatPtr format;
+	ExportFormatPtr format;
 
 	for (FormatList::iterator it = formats.begin(); it != formats.end(); ++it) {
 		if ((*it)->selected()) {
@@ -741,10 +743,10 @@ ExportFormatManager::get_selected_sample_format ()
 }
 
 
-ExportFormatManager::FormatBasePtr
+ExportFormatBasePtr
 ExportFormatManager::get_compatibility_intersection ()
 {
-	FormatBasePtr compat_intersect = universal_set;
+	ExportFormatBasePtr compat_intersect = universal_set;
 
 	for (CompatList::iterator it = compatibilities.begin(); it != compatibilities.end(); ++it) {
 		if ((*it)->selected ()) {

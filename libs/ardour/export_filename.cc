@@ -139,7 +139,7 @@ ExportFilename::set_state (const XMLNode & node)
 }
 
 string
-ExportFilename::get_path (FormatPtr format) const
+ExportFilename::get_path (ExportFormatSpecPtr format) const
 {
 	string path = folder;
 	bool filename_empty = true;

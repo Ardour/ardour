@@ -51,7 +51,6 @@ class ExportGraphBuilder
 {
   private:
 	typedef ExportHandler::FileSpec FileSpec;
-	typedef ExportElementFactory::FilenamePtr FilenamePtr;
 
 	typedef boost::shared_ptr<AudioGrapher::Sink<Sample> > FloatSinkPtr;
 	typedef boost::shared_ptr<AudioGrapher::IdentityVertex<Sample> > IdentityVertexPtr;
@@ -90,7 +89,7 @@ class ExportGraphBuilder
 		void copy_files (std::string orig_path);
 
 		FileSpec               config;
-		std::list<FilenamePtr> filenames;
+		std::list<ExportFilenamePtr> filenames;
 		PBD::ScopedConnection  copy_files_connection;
 
 		// Only one of these should be available at a time

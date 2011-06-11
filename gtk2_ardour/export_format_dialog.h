@@ -37,9 +37,9 @@
 class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList {
   private:
 
-	typedef ARDOUR::ExportFormatManager::WeakCompatPtr WeakCompatPtr;
+	typedef ARDOUR::WeakExportFormatCompatibilityPtr WeakCompatPtr;
+	typedef ARDOUR::WeakExportFormatPtr WeakFormatPtr;
 	typedef ARDOUR::ExportFormatManager::WeakQualityPtr WeakQualityPtr;
-	typedef ARDOUR::ExportFormatManager::WeakFormatPtr WeakFormatPtr;
 	typedef ARDOUR::ExportFormatManager::WeakSampleRatePtr WeakSampleRatePtr;
 	typedef ARDOUR::ExportFormatManager::WeakSampleFormatPtr WeakSampleFormatPtr;
 	typedef ARDOUR::ExportFormatManager::WeakDitherTypePtr WeakDitherTypePtr;
@@ -131,7 +131,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	/*** Encoding options */
 
-	void change_encoding_options (ARDOUR::ExportFormatManager::FormatPtr ptr);
+	void change_encoding_options (ARDOUR::ExportFormatPtr ptr);
 
 	void empty_encoding_option_table ();
 	void remove_widget (Gtk::Widget & to_remove, Gtk::Container * remove_from);
@@ -177,8 +177,8 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	struct CompatibilityCols : public Gtk::TreeModelColumnRecord
 	{
 	  public:
-		Gtk::TreeModelColumn<ARDOUR::ExportFormatManager::CompatPtr>  ptr;
-		Gtk::TreeModelColumn<bool>                                    selected;
+		Gtk::TreeModelColumn<ARDOUR::ExportFormatCompatibilityPtr>  ptr;
+		Gtk::TreeModelColumn<bool>                                  selected;
 		Gtk::TreeModelColumn<std::string>                           label;
 
 		CompatibilityCols () { add(ptr); add(selected); add(label); }
@@ -205,9 +205,9 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	struct FormatCols : public Gtk::TreeModelColumnRecord
 	{
 	  public:
-		Gtk::TreeModelColumn<ARDOUR::ExportFormatManager::FormatPtr>  ptr;
-		Gtk::TreeModelColumn<std::string>                           color;
-		Gtk::TreeModelColumn<std::string>                           label;
+		Gtk::TreeModelColumn<ARDOUR::ExportFormatPtr>  ptr;
+		Gtk::TreeModelColumn<std::string>              color;
+		Gtk::TreeModelColumn<std::string>              label;
 
 		FormatCols () { add(ptr); add(color); add(label); }
 	};

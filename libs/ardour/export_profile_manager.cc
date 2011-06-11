@@ -124,7 +124,7 @@ ExportProfileManager::prepare_for_export ()
 		     format_it != formats.end() && filename_it != filenames.end();
 		     ++format_it, ++filename_it) {
 
-			FilenamePtr filename = (*filename_it)->filename;
+			ExportFilenamePtr filename = (*filename_it)->filename;
 //			filename->include_timespan = (ts_list->size() > 1); Disabled for now...
 
 			boost::shared_ptr<BroadcastInfo> b;
@@ -143,7 +143,7 @@ ExportProfileManager::prepare_for_export ()
 }
 
 bool
-ExportProfileManager::load_preset (PresetPtr preset)
+ExportProfileManager::load_preset (ExportPresetPtr preset)
 {
 	bool ok = true;
 
@@ -181,7 +181,7 @@ ExportProfileManager::preset_filename (std::string const & preset_name)
 	return export_config_dir.to_string() + "/" + safe_name + export_preset_suffix;
 }
 
-ExportProfileManager::PresetPtr
+ExportPresetPtr
 ExportProfileManager::new_preset (string const & name)
 {
 	// Generate new ID and do regular save
@@ -191,7 +191,7 @@ ExportProfileManager::new_preset (string const & name)
 	return save_preset (name);
 }
 
-ExportProfileManager::PresetPtr
+ExportPresetPtr
 ExportProfileManager::save_preset (string const & name)
 {
 	string filename = preset_filename (name);
@@ -241,7 +241,7 @@ ExportProfileManager::remove_preset ()
 void
 ExportProfileManager::load_preset_from_disk (PBD::sys::path const & path)
 {
-	PresetPtr preset (new ExportPreset (path.to_string(), session));
+	ExportPresetPtr preset (new ExportPreset (path.to_string(), session));
 
 	/* Handle id to filename mapping and don't add duplicates to list */
 
@@ -363,7 +363,7 @@ ExportProfileManager::init_timespans (XMLNodeList nodes)
 		timespans.push_back (state);
 
 		// Add session as default selection
-		TimespanPtr timespan = handler->add_timespan();
+		ExportTimespanPtr timespan = handler->add_timespan();
 		timespan->set_name (session_range->name());
 		timespan->set_range_id ("session");
 		timespan->set_range (session_range->start(), session_range->end());
@@ -391,7 +391,7 @@ ExportProfileManager::deserialize_timespan (XMLNode & root)
 			if ((!id.compare ("session") && *it == session_range.get()) ||
 			    (!id.compare ("selection") && *it == selection_range.get()) ||
 			    (!id.compare ((*it)->id().to_s()))) {
-				TimespanPtr timespan = handler->add_timespan();
+				ExportTimespanPtr timespan = handler->add_timespan();
 				timespan->set_name ((*it)->name());
 				timespan->set_range_id (id);
 				timespan->set_range ((*it)->start(), (*it)->end());
@@ -520,7 +520,7 @@ ExportProfileManager::remove_format_state (FormatStatePtr state)
 }
 
 sys::path
-ExportProfileManager::save_format_to_disk (FormatPtr format)
+ExportProfileManager::save_format_to_disk (ExportFormatSpecPtr format)
 {
 	// TODO filename character stripping
 
@@ -577,7 +577,7 @@ ExportProfileManager::save_format_to_disk (FormatPtr format)
 }
 
 void
-ExportProfileManager::remove_format_profile (FormatPtr format)
+ExportProfileManager::remove_format_profile (ExportFormatSpecPtr format)
 {
 	for (FormatList::iterator it = format_list->begin(); it != format_list->end(); ++it) {
 		if (*it == format) {
@@ -595,10 +595,10 @@ ExportProfileManager::remove_format_profile (FormatPtr format)
 	FormatListChanged ();
 }
 
-ExportProfileManager::FormatPtr
-ExportProfileManager::get_new_format (FormatPtr original)
+ExportFormatSpecPtr
+ExportProfileManager::get_new_format (ExportFormatSpecPtr original)
 {
-	FormatPtr format;
+	ExportFormatSpecPtr format;
 	if (original) {
 		format.reset (new ExportFormatSpecification (*original));
 	} else {
@@ -630,7 +630,7 @@ ExportProfileManager::init_formats (XMLNodeList nodes)
 	}
 
 	if (formats.empty ()) {
-		FormatStatePtr format (new FormatState (format_list, FormatPtr ()));
+		FormatStatePtr format (new FormatState (format_list, ExportFormatSpecPtr ()));
 		formats.push_back (format);
 		return false;
 	}
@@ -682,7 +682,7 @@ void
 ExportProfileManager::load_format_from_disk (PBD::sys::path const & path)
 {
 	XMLTree const tree (path.to_string());
-	FormatPtr format = handler->add_format (*tree.root());
+	ExportFormatSpecPtr format = handler->add_format (*tree.root());
 
 	/* Handle id to filename mapping and don't add duplicates to list */
 
@@ -719,7 +719,7 @@ ExportProfileManager::init_filenames (XMLNodeList nodes)
 	filenames.clear ();
 
 	for (XMLNodeList::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
-		FilenamePtr filename = handler->add_filename();
+		ExportFilenamePtr filename = handler->add_filename();
 		filename->set_state (**it);
 		filenames.push_back (FilenameStatePtr (new FilenameState (filename)));
 	}
@@ -746,7 +746,7 @@ ExportProfileManager::get_warnings ()
 	/*** Check "global" config ***/
 
 	TimespanListPtr timespans = timespan_state->timespans;
-	ChannelConfigPtr channel_config = channel_config_state->config;
+	ExportChannelConfigPtr channel_config = channel_config_state->config;
 
 	/* Check Timespans are not empty */
 
@@ -781,9 +781,9 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 	                            FilenameStatePtr filename_state)
 {
 	TimespanListPtr timespans = timespan_state->timespans;
-	ChannelConfigPtr channel_config = channel_config_state->config;
-	FormatPtr format = format_state->format;
-	FilenamePtr filename = filename_state->filename;
+	ExportChannelConfigPtr channel_config = channel_config_state->config;
+	ExportFormatSpecPtr format = format_state->format;
+	ExportFilenamePtr filename = filename_state->filename;
 
 	/* Check format and maximum channel count */
 	if (!format || !format->type()) {
@@ -806,7 +806,7 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 
 //	filename->include_timespan = (timespans->size() > 1); Disabled for now...
 
-	for (std::list<TimespanPtr>::iterator timespan_it = timespans->begin(); timespan_it != timespans->end(); ++timespan_it) {
+	for (std::list<ExportTimespanPtr>::iterator timespan_it = timespans->begin(); timespan_it != timespans->end(); ++timespan_it) {
 		filename->set_timespan (*timespan_it);
 
 		if (channel_config->get_split()) {
@@ -833,7 +833,7 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 }
 
 bool
-ExportProfileManager::check_format (FormatPtr format, uint32_t channels)
+ExportProfileManager::check_format (ExportFormatSpecPtr format, uint32_t channels)
 {
 	switch (format->type()) {
 	  case ExportFormatBase::T_Sndfile:
@@ -845,7 +845,7 @@ ExportProfileManager::check_format (FormatPtr format, uint32_t channels)
 }
 
 bool
-ExportProfileManager::check_sndfile_format (FormatPtr format, unsigned int channels)
+ExportProfileManager::check_sndfile_format (ExportFormatSpecPtr format, unsigned int channels)
 {
 	SF_INFO sf_info;
 	sf_info.channels = channels;

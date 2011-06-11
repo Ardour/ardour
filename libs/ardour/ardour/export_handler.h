@@ -25,9 +25,11 @@
 #include <list>
 #include <fstream>
 
+#include <boost/operators.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "ardour/ardour.h"
+#include "ardour/export_pointers.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
 
@@ -48,26 +50,20 @@ class ExportGraphBuilder;
 class ExportElementFactory
 {
   public:
-	typedef boost::shared_ptr<ExportTimespan> TimespanPtr;
-	typedef boost::shared_ptr<ExportChannelConfiguration> ChannelConfigPtr;
-	typedef boost::shared_ptr<ExportFormatSpecification> FormatPtr;
-	typedef boost::shared_ptr<ExportFilename> FilenamePtr;
-
-  public:
 
 	ExportElementFactory (Session & session);
 	~ExportElementFactory ();
 
-	TimespanPtr      add_timespan ();
+	ExportTimespanPtr add_timespan ();
 
-	ChannelConfigPtr add_channel_config ();
+	ExportChannelConfigPtr add_channel_config ();
 
-	FormatPtr        add_format ();
-	FormatPtr        add_format (XMLNode const & state);
-	FormatPtr        add_format_copy (FormatPtr other);
+	ExportFormatSpecPtr    add_format ();
+	ExportFormatSpecPtr    add_format (XMLNode const & state);
+	ExportFormatSpecPtr    add_format_copy (ExportFormatSpecPtr other);
 
-	FilenamePtr      add_filename ();
-	FilenamePtr      add_filename_copy (FilenamePtr other);
+	ExportFilenamePtr      add_filename ();
+	ExportFilenamePtr      add_filename_copy (ExportFilenamePtr other);
 
   private:
 	Session & session;
@@ -78,17 +74,18 @@ class ExportHandler : public ExportElementFactory
   public:
 	struct FileSpec {
 		FileSpec() {}
-		FileSpec (ChannelConfigPtr channel_config, FormatPtr format, FilenamePtr filename, boost::shared_ptr<AudioGrapher::BroadcastInfo> broadcast_info)
+		FileSpec (ExportChannelConfigPtr channel_config, ExportFormatSpecPtr format,
+		          ExportFilenamePtr filename, BroadcastInfoPtr broadcast_info)
 		  : channel_config (channel_config)
 		  , format (format)
 		  , filename (filename)
 		  , broadcast_info (broadcast_info)
 			{}
 
-		ChannelConfigPtr channel_config;
-		FormatPtr        format;
-		FilenamePtr      filename;
-		boost::shared_ptr<AudioGrapher::BroadcastInfo> broadcast_info;
+		ExportChannelConfigPtr channel_config;
+		ExportFormatSpecPtr        format;
+		ExportFilenamePtr      filename;
+		BroadcastInfoPtr       broadcast_info;
 	};
 
   private:
@@ -97,11 +94,10 @@ class ExportHandler : public ExportElementFactory
 	 * The multimap maps timespans to file specifications
 	 */
 
-	typedef std::pair<TimespanPtr, FileSpec> ConfigPair;
-	typedef std::multimap<TimespanPtr, FileSpec> ConfigMap;
+	typedef std::pair<ExportTimespanPtr, FileSpec> ConfigPair;
+	typedef std::multimap<ExportTimespanPtr, FileSpec> ConfigMap;
 
 	typedef boost::shared_ptr<ExportGraphBuilder> GraphBuilderPtr;
-	typedef boost::shared_ptr<ExportStatus> StatusPtr;
 
   private:
 	/* Session::get_export_handler() should be used to obtain an export handler
@@ -114,7 +110,9 @@ class ExportHandler : public ExportElementFactory
   public:
 	~ExportHandler ();
 
-	bool add_export_config (TimespanPtr timespan, ChannelConfigPtr channel_config, FormatPtr format, FilenamePtr filename, boost::shared_ptr<AudioGrapher::BroadcastInfo> broadcast_info);
+	bool add_export_config (ExportTimespanPtr timespan, ExportChannelConfigPtr channel_config,
+	                        ExportFormatSpecPtr format, ExportFilenamePtr filename,
+	                        BroadcastInfoPtr broadcast_info);
 	void do_export (bool rt = false);
 
   private:
@@ -123,7 +121,7 @@ class ExportHandler : public ExportElementFactory
 
 	Session &          session;
 	GraphBuilderPtr    graph_builder;
-	StatusPtr          export_status;
+	ExportStatusPtr    export_status;
 	ConfigMap          config_map;
 
 	bool               realtime;
@@ -137,7 +135,7 @@ class ExportHandler : public ExportElementFactory
 	void finish_timespan ();
 
 	typedef std::pair<ConfigMap::iterator, ConfigMap::iterator> TimespanBounds;
-	TimespanPtr           current_timespan;
+	ExportTimespanPtr     current_timespan;
 	TimespanBounds        timespan_bounds;
 
 	PBD::ScopedConnection process_connection;
@@ -146,21 +144,22 @@ class ExportHandler : public ExportElementFactory
 	/* CD Marker stuff */
 
 	struct CDMarkerStatus {
-		CDMarkerStatus (std::string out_file, TimespanPtr timespan, FormatPtr format, std::string filename) :
-		  out (out_file.c_str()), timespan (timespan), format (format), filename (filename), marker(0),
-		  track_number (1), track_position (0), track_duration (0), track_start_frame (0),
-		  index_number (1), index_position (0)
+		CDMarkerStatus (std::string out_file, ExportTimespanPtr timespan,
+		                ExportFormatSpecPtr format, std::string filename)
+		  : out (out_file.c_str()), timespan (timespan), format (format), filename (filename), marker(0)
+		  , track_number (1), track_position (0), track_duration (0), track_start_frame (0)
+		  , index_number (1), index_position (0)
 		  {}
 
 		/* General info */
 		std::ofstream  out;
-		TimespanPtr    timespan;
-		FormatPtr      format;
-		std::string    filename;
-		Location *     marker;
+		ExportTimespanPtr   timespan;
+		ExportFormatSpecPtr format;
+		std::string         filename;
+		Location *          marker;
 
 		/* Track info */
-		uint32_t       track_number;
+		uint32_t        track_number;
 		framepos_t      track_position;
 		framepos_t      track_duration;
 		framepos_t      track_start_frame;
@@ -171,7 +170,8 @@ class ExportHandler : public ExportElementFactory
 	};
 
 
-	void export_cd_marker_file (TimespanPtr timespan, FormatPtr file_format, std::string filename, CDMarkerFormat format);
+	void export_cd_marker_file (ExportTimespanPtr timespan, ExportFormatSpecPtr file_format,
+	                            std::string filename, CDMarkerFormat format);
 
 	void write_cue_header (CDMarkerStatus & status);
 	void write_toc_header (CDMarkerStatus & status);

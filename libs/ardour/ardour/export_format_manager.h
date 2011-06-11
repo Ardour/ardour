@@ -25,11 +25,11 @@
 #include <string>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 
 #include "pbd/signals.h"
 
 #include "ardour/export_formats.h"
+#include "ardour/export_pointers.h"
 
 namespace ARDOUR
 {
@@ -43,13 +43,8 @@ class ExportFormatManager : public PBD::ScopedConnectionList
 {
   public:
 
-	typedef boost::shared_ptr<ExportFormatCompatibility> CompatPtr;
-	typedef boost::weak_ptr<ExportFormatCompatibility> WeakCompatPtr;
-	typedef std::list<CompatPtr> CompatList;
-
-	typedef boost::shared_ptr<ExportFormat> FormatPtr;
-	typedef boost::weak_ptr<ExportFormat> WeakFormatPtr;
-	typedef std::list<FormatPtr> FormatList;
+	typedef std::list<ExportFormatCompatibilityPtr> CompatList;
+	typedef std::list<ExportFormatPtr> FormatList;
 
 	typedef HasSampleFormat::SampleFormatPtr SampleFormatPtr;
 	typedef HasSampleFormat::SampleFormatList SampleFormatList;
@@ -57,9 +52,6 @@ class ExportFormatManager : public PBD::ScopedConnectionList
 
 	typedef HasSampleFormat::DitherTypePtr DitherTypePtr;
 	typedef HasSampleFormat::WeakDitherTypePtr WeakDitherTypePtr;
-
-	typedef boost::shared_ptr<ExportFormatSpecification> SpecPtr;
-	typedef boost::shared_ptr<ExportFormatBase> FormatBasePtr;
 
 	/* Quality states */
 
@@ -87,7 +79,7 @@ class ExportFormatManager : public PBD::ScopedConnectionList
 
   public:
 
-	explicit ExportFormatManager (SpecPtr specification);
+	explicit ExportFormatManager (ExportFormatSpecPtr specification);
 	~ExportFormatManager ();
 
 	/* Signals */
@@ -121,16 +113,16 @@ class ExportFormatManager : public PBD::ScopedConnectionList
 	void init_formats ();
 	void init_sample_rates ();
 
-	void add_compatibility (CompatPtr ptr);
+	void add_compatibility (ExportFormatCompatibilityPtr ptr);
 	void add_quality (QualityPtr ptr);
-	void add_format (FormatPtr ptr);
+	void add_format (ExportFormatPtr ptr);
 	void add_sample_rate (SampleRatePtr ptr);
 
 	/* Connected to signals */
 
-	void change_compatibility_selection (bool select, WeakCompatPtr const & compat);
+	void change_compatibility_selection (bool select, WeakExportFormatCompatibilityPtr const & compat);
 	void change_quality_selection (bool select, WeakQualityPtr const & quality);
-	void change_format_selection (bool select, WeakFormatPtr const & format);
+	void change_format_selection (bool select, WeakExportFormatPtr const & format);
 	void change_sample_rate_selection (bool select, WeakSampleRatePtr const & rate);
 
 	void change_sample_format_selection (bool select, WeakSampleFormatPtr const & format);
@@ -138,9 +130,9 @@ class ExportFormatManager : public PBD::ScopedConnectionList
 
 	/* Do actual selection */
 
-	void select_compatibility (WeakCompatPtr const & compat);
+	void select_compatibility (WeakExportFormatCompatibilityPtr const & compat);
 	void select_quality (QualityPtr const & quality);
-	void select_format (FormatPtr const & format);
+	void select_format (ExportFormatPtr const & format);
 	void select_sample_rate (SampleRatePtr const & rate);
 
 	void select_sample_format (SampleFormatPtr const & format);
@@ -152,15 +144,15 @@ class ExportFormatManager : public PBD::ScopedConnectionList
 	/* Formats and compatibilities */
 
 	QualityPtr    get_selected_quality ();
-	FormatPtr     get_selected_format ();
+	ExportFormatPtr     get_selected_format ();
 	SampleRatePtr get_selected_sample_rate ();
 
 	SampleFormatPtr get_selected_sample_format ();
 
-	FormatBasePtr get_compatibility_intersection ();
+	ExportFormatBasePtr get_compatibility_intersection ();
 
-	FormatBasePtr   universal_set;
-	SpecPtr         current_selection;
+	ExportFormatBasePtr   universal_set;
+	ExportFormatSpecPtr         current_selection;
 
 	CompatList      compatibilities;
 	QualityList     qualities;

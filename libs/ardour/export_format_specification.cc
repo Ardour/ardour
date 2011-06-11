@@ -519,7 +519,7 @@ ExportFormatSpecification::description ()
 	} else if (_trim_beginning) {
 		desc += _("trim start, ");
 	} else if (_trim_end) {
-		desc += "trim end, ";
+		desc += _("trim end, ");
 	}
 
 	desc += _format_name + ", ";

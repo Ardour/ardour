@@ -251,6 +251,7 @@ namespace ARDOUR {
 			  case Seconds:
 				return seconds == other.seconds;
 			}
+			return false; // get rid of warning
 		}
 
 		bool not_zero() const

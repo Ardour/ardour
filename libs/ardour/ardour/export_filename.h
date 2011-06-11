@@ -22,24 +22,19 @@
 #define __ardour_export_filename_h__
 
 #include <boost/shared_ptr.hpp>
+
 #include <string>
+
+#include <ardour/export_pointers.h>
+
 #include "pbd/statefuldestructible.h"
 
 namespace ARDOUR
 {
 
 class Session;
-class ExportTimespan;
-class ExportChannelConfiguration;
-class ExportFormatSpecification;
 
 class ExportFilename {
-  private:
-
-	typedef boost::shared_ptr<ExportTimespan> TimespanPtr;
-	typedef boost::shared_ptr<ExportChannelConfiguration> ChannelConfigPtr;
-	typedef boost::shared_ptr<ExportFormatSpecification const> FormatPtr;
-
   public:
 
 	enum DateFormat {
@@ -68,7 +63,7 @@ class ExportFilename {
 
 	/* data access */
 
-	std::string get_path (FormatPtr format) const;
+	std::string get_path (ExportFormatSpecPtr format) const;
 	std::string get_folder () const { return folder; }
 
 	TimeFormat get_time_format () const { return time_format; }
@@ -88,8 +83,8 @@ class ExportFilename {
 	void set_channel (uint32_t value) { channel = value; }
 	bool set_folder (std::string path);
 
-	void set_timespan (TimespanPtr ts) { timespan = ts; }
-	void set_channel_config (ChannelConfigPtr cc) { channel_config = cc; }
+	void set_timespan (ExportTimespanPtr ts) { timespan = ts; }
+	void set_channel_config (ExportChannelConfigPtr cc) { channel_config = cc; }
 
 	/* public members */
 
@@ -119,8 +114,8 @@ class ExportFilename {
 	// Due to the static allocation used in strftime(), no destructor or copy-ctor is needed for this
 	struct tm * time_struct;
 
-	TimespanPtr timespan;
-	ChannelConfigPtr channel_config;
+	ExportTimespanPtr timespan;
+	ExportChannelConfigPtr channel_config;
 
 	/* Serialization helpers */
 

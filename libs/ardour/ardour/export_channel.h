@@ -26,11 +26,11 @@
 #include <boost/signals2.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
-#include <boost/operators.hpp>
 
 #include "pbd/signals.h"
 
 #include "ardour/buffer_set.h"
+#include "ardour/export_pointers.h"
 
 namespace ARDOUR {
 
@@ -62,17 +62,6 @@ class ExportChannel : public boost::less_than_comparable<ExportChannel>
 	virtual bool operator< (ExportChannel const & other) const = 0;
 };
 
-/// Safe pointer for storing ExportChannels in ordered STL containers
-class ExportChannelPtr : public boost::shared_ptr<ExportChannel>
-                       , public boost::less_than_comparable<ExportChannel>
-{
-  public:
-	ExportChannelPtr () {}
-	template<typename Y> explicit ExportChannelPtr (Y * ptr) : boost::shared_ptr<ExportChannel> (ptr) {}
-
-	bool operator< (ExportChannelPtr const & other) const { return **this < *other; }
-};
-
 /// Basic export channel that reads from AudioPorts
 class PortExportChannel : public ExportChannel
 {
@@ -98,6 +87,7 @@ class PortExportChannel : public ExportChannel
 	boost::scoped_array<Sample> buffer;
 	framecnt_t buffer_size;
 };
+
 
 /// Handles RegionExportChannels and does actual reading from region
 class RegionExportChannelFactory
