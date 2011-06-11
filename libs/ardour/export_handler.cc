@@ -138,6 +138,7 @@ ExportHandler::do_export (bool rt)
 	std::set<ExportTimespanPtr> timespan_set;
 	for (ConfigMap::iterator it = config_map.begin(); it != config_map.end(); ++it) {
 		timespan_set.insert (it->first);
+		export_status->total_frames += it->first->get_length();
 	}
 	export_status->total_timespans = timespan_set.size();
 
@@ -198,7 +199,6 @@ ExportHandler::process_timespan (framecnt_t frames)
 	/* update position */
 
 	framecnt_t frames_to_read = 0;
-	framepos_t const start = current_timespan->get_start();
 	framepos_t const end = current_timespan->get_end();
 
 	bool const last_cycle = (process_position + frames >= end);
@@ -212,7 +212,8 @@ ExportHandler::process_timespan (framecnt_t frames)
 	}
 
 	process_position += frames_to_read;
-	export_status->progress = (float) (process_position - start) / (end - start);
+	export_status->processed_frames += frames_to_read;
+	export_status->progress = (float) export_status->processed_frames / export_status->total_frames;
 
 	/* Do actual processing */
 
@@ -224,6 +225,9 @@ ExportHandler::process_normalize ()
 {
 	if (graph_builder->process_normalize ()) {
 		finish_timespan ();
+		export_status->normalizing = false;
+	} else {
+		export_status->normalizing = true;
 	}
 
 	return 0;

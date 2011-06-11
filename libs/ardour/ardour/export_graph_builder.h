@@ -63,6 +63,7 @@ class ExportGraphBuilder
 
 	int process (framecnt_t frames, bool last_cycle);
 	bool process_normalize (); // returns true when finished
+	bool will_normalize() { return !normalizers.empty(); }
 
 	void reset ();
 	void set_current_timespan (boost::shared_ptr<ExportTimespan> span);

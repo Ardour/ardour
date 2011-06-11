@@ -37,17 +37,14 @@ ExportStatus::init ()
 	_finished = false;
 	_errors = false;
 
-	stage = export_None;
 	progress = 0.0;
+	normalizing = false;
 
 	total_timespans = 0;
 	timespan = 0;
 
-	total_channel_configs = 0;
-	channel_config = 0;
-
-	total_formats = 0;
-	format = 0;
+	total_frames = 0;
+	processed_frames = 0;
 }
 
 void

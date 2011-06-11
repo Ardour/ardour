@@ -328,26 +328,15 @@ ExportDialog::show_progress ()
 gint
 ExportDialog::progress_timeout ()
 {
-	switch (status->stage) {
-	  case export_None:
-		progress_label.set_text ("");
-		break;
-	  case export_ReadTimespan:
-		progress_label.set_text (string_compose (_("Reading timespan %1 of %2"), status->timespan, status->total_timespans));
-		break;
-	  case export_PostProcess:
-		progress_label.set_text (string_compose (_("Processing file %2 of %3 (%1) from timespan %4 of %5"),
-		                                         file_notebook->get_nth_format_name (status->format),
-		                                         status->format, status->total_formats,
-		                                         status->timespan, status->total_timespans));
-		break;
-	  case export_Write:
-		progress_label.set_text (string_compose (_("Encoding file %2 of %3 (%1) from timespan %4 of %5"),
-		                                         file_notebook->get_nth_format_name (status->format),
-		                                         status->format, status->total_formats,
-		                                         status->timespan, status->total_timespans));
-		break;
+	std::string status_text;
+	if (status->normalizing) {
+		 status_text = string_compose (_("Normalizing timespan %1 of %2"),
+		                               status->timespan, status->total_timespans);
+	} else {
+		status_text = string_compose (_("Exporting timespan %1 of %2"),
+		                              status->timespan, status->total_timespans);
 	}
+	progress_label.set_text (status_text);
 
 	progress_bar.set_fraction (status->progress);
 	return TRUE;

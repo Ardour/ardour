@@ -22,19 +22,14 @@
 #define __ardour_export_status_h__
 
 #include <list>
-#include "pbd/signals.h"
-
 #include <stdint.h>
+
+#include "ardour/types.h"
+
+#include "pbd/signals.h"
 
 namespace ARDOUR
 {
-
-enum ExportStage {
-	export_None,
-	export_ReadTimespan,
-	export_PostProcess,
-	export_Write
-};
 
 struct ExportStatus {
 
@@ -57,17 +52,14 @@ struct ExportStatus {
 
 	/* Progress info */
 
-	volatile ExportStage    stage;
 	volatile float          progress;
+	volatile bool           normalizing;
 
 	volatile uint32_t       total_timespans;
 	volatile uint32_t       timespan;
 
-	volatile uint32_t       total_channel_configs;
-	volatile uint32_t       channel_config;
-
-	volatile uint32_t       total_formats;
-	volatile uint32_t       format;
+	volatile framecnt_t     total_frames;
+	volatile framecnt_t     processed_frames;
 
   private:
 	volatile bool          _aborted;
