@@ -913,10 +913,9 @@ AutomationList::truncate_start (double overall_length)
 		double first_legal_coordinate;
 
 		if (events.empty()) {
-			fatal << _("programming error:")
+			cerr  << _("programming error:")
 			      << "AutomationList::truncate_start() called on an empty list"
-			      << endmsg;
-			/*NOTREACHED*/
+			      << endmsg;			
 			return;
 		}
 		
