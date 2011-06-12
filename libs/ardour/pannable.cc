@@ -209,16 +209,25 @@ Pannable::set_state (const XMLNode& root, int version)
 	XMLNodeConstIterator niter;
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == pan_azimuth_control->name()) {
-			pan_azimuth_control->set_state (**niter, version);
-		} else if ((*niter)->name() == pan_width_control->name()) {
-			pan_width_control->set_state (**niter, version);
-		} else if ((*niter)->name() == pan_elevation_control->name()) {
-			pan_elevation_control->set_state (**niter, version);
-		} else if ((*niter)->name() == pan_frontback_control->name()) {
-			pan_frontback_control->set_state (**niter, version);
-		} else if ((*niter)->name() == pan_lfe_control->name()) {
-			pan_lfe_control->set_state (**niter, version);
+		if ((*niter)->name() == Controllable::xml_node_name) {
+			const XMLProperty* prop = (*niter)->property (X_("name"));
+
+			if (!prop) {
+				continue;
+			}
+
+			if (prop->value() == pan_azimuth_control->name()) {
+				pan_azimuth_control->set_state (**niter, version);
+			} else if (prop->value() == pan_width_control->name()) {
+				pan_width_control->set_state (**niter, version);
+			} else if (prop->value() == pan_elevation_control->name()) {
+				pan_elevation_control->set_state (**niter, version);
+			} else if (prop->value() == pan_frontback_control->name()) {
+				pan_frontback_control->set_state (**niter, version);
+			} else if (prop->value() == pan_lfe_control->name()) {
+				pan_lfe_control->set_state (**niter, version);
+			}
+
 		} else if ((*niter)->name() == Automatable::xml_node_name) {
 			set_automation_xml_state (**niter, PanAzimuthAutomation);
 		}
