@@ -2121,7 +2121,7 @@ CursorDrag::motion (GdkEvent* event, bool)
 		/* we will multiply the grab zoom by a factor between scale_range and scale_range^-1 */
 		double const scale_range = 4;
 		/* dead zone around the grab point in which to do no zooming (pixels) */
-		double const dead_zone = 128;
+		double const dead_zone = 100;
 
 		/* current dy */
 		double dy = _drags->current_pointer_y() - grab_y();
