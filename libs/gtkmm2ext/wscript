@@ -96,5 +96,17 @@ def build(bld):
     else:
         obj.source += ['gtkapplication_x11.c']
 
+    # i18n
+    if bld.env['ENABLE_NLS']:
+        mo_files = glob.glob (os.path.join (bld.get_curdir(), 'po/*.mo'))
+        for mo in mo_files:
+            lang = os.path.basename (mo).replace ('.mo', '')
+            bld.install_as (os.path.join(bld.env['PREFIX'], 'share', 'locale',
+                                         lang, 'LC_MESSAGES', 'libgtkmm2ext.mo'),
+                            mo)
+
+def i18n(bld):
+    autowaf.build_i18n(bld, '.', 'libs/gtkmm2ext', APPNAME, gtkmm2ext_sources)
+
 def shutdown():
     autowaf.shutdown()

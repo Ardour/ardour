@@ -3,11 +3,12 @@
 # This file is distributed under the same license as the gtk-ardour package.
 # Klearchos Gourgourinis <muadib@in.gr>, 2004.
 #
+#: audio_clock.cc:1961 audio_clock.cc:1962
 msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-05-30 22:28-0400\n"
+"POT-Creation-Date: 2011-06-12 17:45-0400\n"
 "PO-Revision-Date: 2007-04-11 02:27+0200\n"
 "Last-Translator: Klearchos Gourgourinis <muadib@in.gr>\n"
 "Language-Team: Hellenic\n"
@@ -321,8 +322,8 @@ msgstr ""
 msgid "Add MIDI Controller Track"
 msgstr ""
 
-#: add_route_dialog.cc:48 add_route_dialog.cc:255 editor_actions.cc:372
-#: time_axis_view.cc:1381
+#: add_route_dialog.cc:48 add_route_dialog.cc:255 editor_actions.cc:373
+#: time_axis_view.cc:1362
 msgid "Normal"
 msgstr "Κανονικό"
 
@@ -345,12 +346,12 @@ msgstr "Πρόσθεση καναλιού/διαύλου"
 msgid "Track mode:"
 msgstr "Κανάλι"
 
-#: add_route_dialog.cc:95 ardour_ui.cc:1403 editor_ops.cc:6019
+#: add_route_dialog.cc:95 ardour_ui.cc:1401 editor_ops.cc:6040
 #, fuzzy
 msgid "tracks"
 msgstr "Κανάλια"
 
-#: add_route_dialog.cc:96 ardour_ui.cc:1403 editor_ops.cc:6025
+#: add_route_dialog.cc:96 ardour_ui.cc:1401 editor_ops.cc:6046
 #, fuzzy
 msgid "busses"
 msgstr "Δίαυλοι"
@@ -380,14 +381,14 @@ msgstr "Διάταξη"
 msgid "Group:"
 msgstr "Διαμόρφωση Group"
 
-#: add_route_dialog.cc:197 add_route_dialog.cc:207 rc_option_editor.cc:1081
-#: rc_option_editor.cc:1083 rc_option_editor.cc:1085 rc_option_editor.cc:1087
-#: rc_option_editor.cc:1111 rc_option_editor.cc:1123 rc_option_editor.cc:1135
-#: rc_option_editor.cc:1137 rc_option_editor.cc:1145 rc_option_editor.cc:1147
-#: rc_option_editor.cc:1165 rc_option_editor.cc:1178 rc_option_editor.cc:1180
-#: rc_option_editor.cc:1182 rc_option_editor.cc:1213 rc_option_editor.cc:1215
-#: rc_option_editor.cc:1217 rc_option_editor.cc:1225 rc_option_editor.cc:1233
-#: rc_option_editor.cc:1241 rc_option_editor.cc:1249
+#: add_route_dialog.cc:197 add_route_dialog.cc:207 rc_option_editor.cc:1079
+#: rc_option_editor.cc:1081 rc_option_editor.cc:1083 rc_option_editor.cc:1085
+#: rc_option_editor.cc:1109 rc_option_editor.cc:1121 rc_option_editor.cc:1133
+#: rc_option_editor.cc:1135 rc_option_editor.cc:1143 rc_option_editor.cc:1145
+#: rc_option_editor.cc:1163 rc_option_editor.cc:1176 rc_option_editor.cc:1178
+#: rc_option_editor.cc:1180 rc_option_editor.cc:1211 rc_option_editor.cc:1213
+#: rc_option_editor.cc:1215 rc_option_editor.cc:1223 rc_option_editor.cc:1231
+#: rc_option_editor.cc:1239 rc_option_editor.cc:1247
 #, fuzzy
 msgid "Audio"
 msgstr "Ακρόαση"
@@ -515,7 +516,7 @@ msgstr "Εξομάλυνση"
 msgid "FFT analysis window"
 msgstr ""
 
-#: analysis_window.cc:60 editor.cc:1802
+#: analysis_window.cc:60 editor.cc:1803
 msgid "Spectral Analysis"
 msgstr ""
 
@@ -524,7 +525,7 @@ msgstr ""
 msgid "Track"
 msgstr "Κανάλι"
 
-#: analysis_window.cc:68 editor_actions.cc:567 editor_route_groups.cc:71
+#: analysis_window.cc:68 editor_actions.cc:564 editor_route_groups.cc:71
 #: mixer_ui.cc:103 mixer_ui.cc:1637
 #, fuzzy
 msgid "Show"
@@ -550,79 +551,65 @@ msgstr ""
 "post\n"
 "roll"
 
-#: ardour_ui.cc:168 ardour_ui_ed.cc:375
-#, fuzzy
-msgid "Punch In"
-msgstr "Punch"
-
-#: ardour_ui.cc:169 ardour_ui_ed.cc:378
-#, fuzzy
-msgid "Punch Out"
-msgstr "Punch"
-
-#: ardour_ui.cc:170 ardour_ui_ed.cc:393
+#: ardour_ui.cc:168 ardour_ui_ed.cc:396
 #, fuzzy
 msgid "Auto Return"
 msgstr ""
 "αυτόματη\n"
 "επιστροφή"
 
-#: ardour_ui.cc:171 ardour_ui_ed.cc:390
+#: ardour_ui.cc:169 ardour_ui_ed.cc:393
 #, fuzzy
 msgid "Auto Play"
 msgstr ""
 "αυτόματη\n"
 "αναπαρ/γή"
 
-#: ardour_ui.cc:172 ardour_ui_ed.cc:387
+#: ardour_ui.cc:170 ardour_ui_ed.cc:390
 #, fuzzy
 msgid "Auto Input"
 msgstr "πρόσθεση Input"
 
-#: ardour_ui.cc:173 ardour_ui_ed.cc:384 rc_option_editor.cc:903
-msgid "Click"
-msgstr "Μετρονόμος"
-
-#: ardour_ui.cc:174
+#: ardour_ui.cc:172
 msgid ""
 "time\n"
 "master"
 msgstr ""
 
-#: ardour_ui.cc:176
+#: ardour_ui.cc:174
 #, fuzzy
 msgid "AUDITION"
 msgstr "ΑΚΡΟΑΣΗ"
 
-#: ardour_ui.cc:177
+#: ardour_ui.cc:175
 msgid "SOLO"
 msgstr "ΣΟΛΟ"
 
-#: ardour_ui.cc:179
+#: ardour_ui.cc:177
 msgid "Errors"
 msgstr ""
 
-#: ardour_ui.cc:289
+#: ardour_ui.cc:287
 #, fuzzy
 msgid "could not initialize %1."
 msgstr "δεν γινόταν να εκκινηθεί ο  Ardour."
 
-#: ardour_ui.cc:375
+#: ardour_ui.cc:373
 #, fuzzy
 msgid "Starting audio engine"
 msgstr "Εναρκτήριο διάστημα"
 
-#: ardour_ui.cc:637
+#: ardour_ui.cc:635
 #, fuzzy
 msgid "%1 could not start JACK"
 msgstr "Το Ardour δεν μπόρεσε να συνδεθεί στον JACK."
 
-#: ardour_ui.cc:639 main.cc:76
+#: ardour_ui.cc:637 main.cc:76
 #, fuzzy
 msgid "%1 could not connect to JACK."
 msgstr "Το Ardour δεν μπόρεσε να συνδεθεί στον JACK."
 
-#: ardour_ui.cc:648
+#: ardour_ui.cc:646
 #, fuzzy
 msgid ""
 "There are several possible reasons:\n"
@@ -640,7 +627,7 @@ msgstr ""
 "\n"
 "Παρακαλώ αναλογιστείτε τις πιθανότητες, ίσως (ξανα)ξεκινήστε τον JACK."
 
-#: ardour_ui.cc:655 main.cc:80
+#: ardour_ui.cc:653 main.cc:80
 msgid ""
 "There are several possible reasons:\n"
 "\n"
@@ -658,11 +645,11 @@ msgstr ""
 "\n"
 "Παρακαλώ αναλογιστείτε τις πιθανότητες, ίσως (ξανα)ξεκινήστε τον JACK."
 
-#: ardour_ui.cc:716 startup.cc:574
+#: ardour_ui.cc:714 startup.cc:574
 msgid "%1 is ready for use"
 msgstr ""
 
-#: ardour_ui.cc:758
+#: ardour_ui.cc:756
 msgid ""
 "WARNING: Your system has a limit for maximum amount of locked memory. This "
 "might cause %1 to run out of memory before your system runs out of memory. \n"
@@ -671,26 +658,26 @@ msgid ""
 "controlled by /etc/security/limits.conf"
 msgstr ""
 
-#: ardour_ui.cc:767
+#: ardour_ui.cc:765
 msgid "Do not show this window again"
 msgstr ""
 
-#: ardour_ui.cc:814
+#: ardour_ui.cc:812
 #, fuzzy
 msgid "Don't quit"
 msgstr "ΟΧΙ %1"
 
-#: ardour_ui.cc:815
+#: ardour_ui.cc:813
 #, fuzzy
 msgid "Just quit"
 msgstr "Μόνο %1"
 
-#: ardour_ui.cc:816
+#: ardour_ui.cc:814
 #, fuzzy
 msgid "Save and quit"
 msgstr "Αποθήκευση και %1"
 
-#: ardour_ui.cc:826
+#: ardour_ui.cc:824
 msgid ""
 "Ardour was unable to save your session.\n"
 "\n"
@@ -704,12 +691,12 @@ msgstr ""
 "\n"
 "επιλογή \"Μόνο Έξοδος\"."
 
-#: ardour_ui.cc:868
+#: ardour_ui.cc:866
 #, fuzzy
 msgid "Unsaved Session"
 msgstr "Νέα συνεδρία"
 
-#: ardour_ui.cc:889
+#: ardour_ui.cc:887
 #, fuzzy
 msgid ""
 "The session \"%1\"\n"
@@ -728,7 +715,7 @@ msgstr ""
 "\n"
 "τί θέλετε να κάνετε;"
 
-#: ardour_ui.cc:892
+#: ardour_ui.cc:890
 #, fuzzy
 msgid ""
 "The snapshot \"%1\"\n"
@@ -747,80 +734,80 @@ msgstr ""
 "\n"
 "τί θέλετε να κάνετε;"
 
-#: ardour_ui.cc:906
+#: ardour_ui.cc:904
 msgid "Prompter"
 msgstr "Υποβολέας"
 
-#: ardour_ui.cc:969
+#: ardour_ui.cc:967
 #, c-format
 msgid "disconnected"
 msgstr "Αποσυνδέθηκε"
 
-#: ardour_ui.cc:976
+#: ardour_ui.cc:974
 #, fuzzy, c-format
 msgid "%.1f kHz / %4.1f ms"
 msgstr "SR: %.1f kHz"
 
-#: ardour_ui.cc:980
+#: ardour_ui.cc:978
 #, fuzzy, c-format
 msgid "%<PRId64> kHz / %4.1f ms"
 msgstr "SR: %.1f kHz"
 
-#: ardour_ui.cc:993
+#: ardour_ui.cc:991
 #, fuzzy, c-format
 msgid "DSP: %5.1f%%"
 msgstr "Φορτίο DSP: %.1f%%"
 
-#: ardour_ui.cc:1007
+#: ardour_ui.cc:1005
 #, fuzzy, c-format
 msgid "Buffers p:%<PRIu32>%% c:%<PRIu32>%%"
 msgstr "Buffers p:%5.0f%% c:%5.0f%%"
 
-#: ardour_ui.cc:1036
+#: ardour_ui.cc:1034
 #, fuzzy
 msgid "Disk: 24hrs+"
 msgstr "χώρος : 24hrs+"
 
-#: ardour_ui.cc:1055
+#: ardour_ui.cc:1053
 #, fuzzy, c-format
 msgid "Disk: %02dh:%02dm:%02ds"
 msgstr "χώρος: %02dh:%02dm:%02ds"
 
-#: ardour_ui.cc:1179 ardour_ui.cc:1188 startup.cc:946
+#: ardour_ui.cc:1177 ardour_ui.cc:1186 startup.cc:946
 msgid "Recent Sessions"
 msgstr "Πρόσφατες συνεδρίες"
 
-#: ardour_ui.cc:1271
+#: ardour_ui.cc:1269
 msgid ""
 "%1 is not connected to JACK\n"
 "You cannot open or close sessions in this condition"
 msgstr ""
 
-#: ardour_ui.cc:1298
+#: ardour_ui.cc:1296
 msgid "Open Session"
 msgstr "Άνοιγμα Συνεδρίας"
 
-#: ardour_ui.cc:1305 session_import_dialog.cc:169
+#: ardour_ui.cc:1303 session_import_dialog.cc:169
 #: session_metadata_dialog.cc:677
 #, fuzzy
 msgid "%1 sessions"
 msgstr "Συνεδρία"
 
-#: ardour_ui.cc:1341
+#: ardour_ui.cc:1339
 msgid "You cannot add a track without a session already loaded."
 msgstr "Δεν γίνεται να προστεθεί κανάλι χωρίς ήδη φορτωμένη συνεδρία."
 
-#: ardour_ui.cc:1352
+#: ardour_ui.cc:1350
 #, fuzzy
 msgid "could not create a new midi track"
 msgstr "Δεν γίνεται να δημιουργηθεί νέο ηχητικό κανάλι"
 
-#: ardour_ui.cc:1354
+#: ardour_ui.cc:1352
 #, fuzzy
 msgid "could not create %1 new midi tracks"
 msgstr "Δεν γίνεται να δημιουργηθεί νέο ηχητικό κανάλι"
 
-#: ardour_ui.cc:1366 ardour_ui.cc:1423
+#: ardour_ui.cc:1364 ardour_ui.cc:1421
 #, fuzzy
 msgid ""
 "There are insufficient JACK ports available\n"
@@ -833,27 +820,27 @@ msgstr ""
 "Αποθηκεύστε τη συνεδρία, τερματίστε το Ardour\n"
 "και επανεκκινήστε το JACK με περισσότερες θύρες."
 
-#: ardour_ui.cc:1390
+#: ardour_ui.cc:1388
 #, fuzzy
 msgid "You cannot add a track or bus without a session already loaded."
 msgstr "Δεν γίνεται να προστεθεί κανάλι χωρίς ήδη φορτωμένη συνεδρία."
 
-#: ardour_ui.cc:1400 ardour_ui.cc:1413
+#: ardour_ui.cc:1398 ardour_ui.cc:1411
 #, fuzzy
 msgid "could not create a new audio track"
 msgstr "Δεν γίνεται να δημιουργηθεί νέο ηχητικό κανάλι"
 
-#: ardour_ui.cc:1402
+#: ardour_ui.cc:1400
 #, fuzzy
 msgid "could only create %1 of %2 new audio %3"
 msgstr "Δεν γίνεται να δημιουργηθεί νέος ηχητικός δίαυλος"
 
-#: ardour_ui.cc:1415
+#: ardour_ui.cc:1413
 #, fuzzy
 msgid "could not create %1 new audio tracks"
 msgstr "Δεν γίνεται να δημιουργηθεί νέο ηχητικό κανάλι"
 
-#: ardour_ui.cc:1567
+#: ardour_ui.cc:1565
 msgid ""
 "Please create 1 or more track\n"
 "before trying to record.\n"
@@ -863,14 +850,14 @@ msgstr ""
 "κανάλια πριν προσπαθήστε να ηχογραφήσετε.\n"
 "Κοιτάξτε στο μενού 'Συνεδρία'."
 
-#: ardour_ui.cc:1954
+#: ardour_ui.cc:1952
 msgid ""
 "The audio backend (JACK) was shutdown because:\n"
 "\n"
 "%1"
 msgstr ""
 
-#: ardour_ui.cc:1956
+#: ardour_ui.cc:1954
 #, fuzzy
 msgid ""
 "JACK has either been shutdown or it\n"
@@ -883,61 +870,61 @@ msgstr ""
 "δεν ήταν αρκετά γρήγορο. Μπορείτε να αποθηκεύσετε\n"
 "τη συνεδρία και/ή να επανακινήσετε το JACK."
 
-#: ardour_ui.cc:1981
+#: ardour_ui.cc:1979
 msgid "Unable to start the session running"
 msgstr "Σφάλμα στην έναρξη της συνεδρίας"
 
-#: ardour_ui.cc:2076 ardour_ui.cc:2077
+#: ardour_ui.cc:2074 ardour_ui.cc:2075
 #, fuzzy
 msgid "Take Snapshot"
 msgstr "Στιγμιότυπο"
 
-#: ardour_ui.cc:2078
+#: ardour_ui.cc:2076
 #, fuzzy
 msgid "Name of new snapshot"
 msgstr "Όνομα νέου στιγμιοτύπου"
 
-#: ardour_ui.cc:2101
+#: ardour_ui.cc:2099
 msgid ""
 "To ensure compatibility with various systems\n"
 "snapshot names may not contain a '/' character"
 msgstr ""
 
-#: ardour_ui.cc:2107
+#: ardour_ui.cc:2105
 msgid ""
 "To ensure compatibility with various systems\n"
 "snapshot names may not contain a '\\' character"
 msgstr ""
 
-#: ardour_ui.cc:2119
+#: ardour_ui.cc:2117
 msgid "Confirm Snapshot Overwrite"
 msgstr ""
 
-#: ardour_ui.cc:2120
+#: ardour_ui.cc:2118
 #, fuzzy
 msgid "A snapshot already exists with that name.  Do you want to overwrite it?"
 msgstr "Το αρχείο ήδη υπάρχει, θέλετε να σώστε από πάνω?"
 
-#: ardour_ui.cc:2123
+#: ardour_ui.cc:2121
 #, fuzzy
 msgid "Overwrite"
 msgstr "awrite"
 
-#: ardour_ui.cc:2239
+#: ardour_ui.cc:2237
 #, fuzzy
 msgid "Save Template"
 msgstr "Αποθήκευση προσχεδίου..."
 
-#: ardour_ui.cc:2240
+#: ardour_ui.cc:2238
 #, fuzzy
 msgid "Name for template:"
 msgstr "Όνομα για προσχεδίο μίξεως:"
 
-#: ardour_ui.cc:2241
+#: ardour_ui.cc:2239
 msgid "-template"
 msgstr "-προσχέδιο"
 
-#: ardour_ui.cc:2279
+#: ardour_ui.cc:2277
 #, fuzzy
 msgid ""
 "This session\n"
@@ -945,69 +932,69 @@ msgid ""
 "already exists. Do you want to open it?"
 msgstr "Το αρχείο ήδη υπάρχει, θέλετε να σώστε από πάνω?"
 
-#: ardour_ui.cc:2289
+#: ardour_ui.cc:2287
 #, fuzzy
 msgid "Open Existing Session"
 msgstr "Άνοιγμα Συνεδρίας"
 
-#: ardour_ui.cc:2484 ardour_ui.cc:2531
+#: ardour_ui.cc:2482 ardour_ui.cc:2529
 msgid ""
 "To ensure compatibility with various systems\n"
 "session names may not contain a '/' character"
 msgstr ""
 
-#: ardour_ui.cc:2493 ardour_ui.cc:2540
+#: ardour_ui.cc:2491 ardour_ui.cc:2538
 msgid ""
 "To ensure compatibility with various systems\n"
 "session names may not contain a '\\' character"
 msgstr ""
 
-#: ardour_ui.cc:2523
+#: ardour_ui.cc:2521
 msgid "There is no existing session at \"%1\""
 msgstr ""
 
-#: ardour_ui.cc:2618
+#: ardour_ui.cc:2616
 msgid "Please wait while %1 loads your session"
 msgstr ""
 
-#: ardour_ui.cc:2633
+#: ardour_ui.cc:2631
 msgid "Port Registration Error"
 msgstr ""
 
-#: ardour_ui.cc:2634
+#: ardour_ui.cc:2632
 msgid "Click the Close button to try again."
 msgstr ""
 
-#: ardour_ui.cc:2655
+#: ardour_ui.cc:2653
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr "Η Συνεδρία \"%1 (στιγμιότυπο %2)\" δεν φορτώθηκε επιτυχώς"
 
-#: ardour_ui.cc:2661
+#: ardour_ui.cc:2659
 #, fuzzy
 msgid "Loading Error"
 msgstr "σφάλμα προγραμματισμού: "
 
-#: ardour_ui.cc:2662
+#: ardour_ui.cc:2660
 msgid "Click the Refresh button to try again."
 msgstr ""
 
-#: ardour_ui.cc:2744
+#: ardour_ui.cc:2742
 #, fuzzy
 msgid "Could not create session in \"%1\""
 msgstr "δεν γινόταν να φορτωθεί η συνεδρία γραμμής εντολών  \"%1\""
 
-#: ardour_ui.cc:2863
+#: ardour_ui.cc:2861
 #, fuzzy
 msgid "No files were ready for clean-up"
 msgstr "Δεν υπάρχει αρχείο ήχου για εκκαθάριση"
 
-#: ardour_ui.cc:2867 ardour_ui.cc:2877 ardour_ui.cc:2994 ardour_ui.cc:3001
+#: ardour_ui.cc:2865 ardour_ui.cc:2875 ardour_ui.cc:2992 ardour_ui.cc:2999
 #: ardour_ui_ed.cc:101
 #, fuzzy
 msgid "Clean-up"
 msgstr "Εκκαθάριση"
 
-#: ardour_ui.cc:2868
+#: ardour_ui.cc:2866
 msgid ""
 "If this seems suprising, \n"
 "check for any existing snapshots.\n"
@@ -1020,12 +1007,12 @@ msgstr ""
 "χρειάζονται κάποια αρχεία που δεν\n"
 "χρησιμοποιούνται αλλού."
 
-#: ardour_ui.cc:2989
+#: ardour_ui.cc:2987
 #, fuzzy
 msgid "Are you sure you want to clean-up?"
 msgstr "Στ'αλήθεια θέλετε να κάνετε εκκαθάριση?"
 
-#: ardour_ui.cc:2996
+#: ardour_ui.cc:2994
 #, fuzzy
 msgid ""
 "Clean-up is a destructive operation.\n"
@@ -1037,17 +1024,17 @@ msgstr ""
 "Μετά την εκκαθάριση, τα άχρηστα αρχεία μεταφέρονται στην\n"
 "\"dead sounds\" τοποθεσία."
 
-#: ardour_ui.cc:3004
+#: ardour_ui.cc:3002
 #, fuzzy
 msgid "CleanupDialog"
 msgstr "Εκκαθάριση"
 
-#: ardour_ui.cc:3035
+#: ardour_ui.cc:3033
 #, fuzzy
 msgid "Cleaned Files"
 msgstr "καθαρισμένα αρχεία"
 
-#: ardour_ui.cc:3036
+#: ardour_ui.cc:3034
 #, fuzzy
 msgid ""
 "The following %1 files were not in use and \n"
@@ -1068,7 +1055,7 @@ msgstr ""
 "θα ελευθερωθούν %4 %5bytes\n"
 "στο δίσκο.\n"
 
-#: ardour_ui.cc:3044
+#: ardour_ui.cc:3042
 #, fuzzy
 msgid ""
 "The following file was not in use and \n"
@@ -1088,11 +1075,11 @@ msgstr ""
 "θα ελευθερωθούν %4 %5bytes\n"
 "στο δίσκο.\n"
 
-#: ardour_ui.cc:3071
+#: ardour_ui.cc:3069
 msgid "deleted file"
 msgstr "διαγραμμένα αρχεία"
 
-#: ardour_ui.cc:3072
+#: ardour_ui.cc:3070
 #, fuzzy
 msgid ""
 "The following %1 files were deleted from\n"
@@ -1103,7 +1090,7 @@ msgstr ""
 "%3,\n"
 "ελευθερώνοντας %4 %5bytes χώρου στο δίσκο"
 
-#: ardour_ui.cc:3075
+#: ardour_ui.cc:3073
 #, fuzzy
 msgid ""
 "The following file was deleted from\n"
@@ -1114,15 +1101,15 @@ msgstr ""
 "%3,\n"
 "ελευθερώνοντας %4 %5bytes χώρου στο δίσκο"
 
-#: ardour_ui.cc:3145
+#: ardour_ui.cc:3143
 msgid "Sorry, MIDI Busses are not supported at this time."
 msgstr ""
 
-#: ardour_ui.cc:3224
+#: ardour_ui.cc:3222
 msgid "Recording was stopped because your system could not keep up."
 msgstr "η Εγγραφή διεκόπη διότι το σύστημά δεν μπορούσε να ανταπεξέλθει."
 
-#: ardour_ui.cc:3253
+#: ardour_ui.cc:3251
 #, fuzzy
 msgid ""
 "The disk system on your computer\n"
@@ -1137,7 +1124,7 @@ msgstr ""
 "Συγκεκριμένα, απέτυχε να γράψει δεδομένα\n"
 "αρκετά γρήγορα για να προλάβει την ηχογράφηση.\n"
 
-#: ardour_ui.cc:3272
+#: ardour_ui.cc:3270
 #, fuzzy
 msgid ""
 "The disk system on your computer\n"
@@ -1152,11 +1139,11 @@ msgstr ""
 "Συγκεκριμένα, απέτυχε να διαβάσει δεδομένα\n"
 "αρκετά γρήγορα για να προλάβει την αναπαραγωγή.\n"
 
-#: ardour_ui.cc:3312
+#: ardour_ui.cc:3310
 msgid "Crash Recovery"
 msgstr ""
 
-#: ardour_ui.cc:3313
+#: ardour_ui.cc:3311
 msgid ""
 "This session appears to have been in\n"
 "middle of recording when ardour or\n"
@@ -1173,115 +1160,107 @@ msgstr ""
 "ηχογραφημένα αρχεία, ή να τα αγνοήσει.\n"
 "Παρακαλώ αποφασίστε τί θέλετε να κάνετε.\n"
 
-#: ardour_ui.cc:3325
+#: ardour_ui.cc:3323
 msgid "Ignore crash data"
 msgstr "Διαγραφή τυχόν δεδομένων"
 
-#: ardour_ui.cc:3326
+#: ardour_ui.cc:3324
 msgid "Recover from crash"
 msgstr "Ανάκληση από 'κρασάρισμα'"
 
-#: ardour_ui.cc:3346
+#: ardour_ui.cc:3344
 msgid "Sample Rate Mismatch"
 msgstr ""
 
-#: ardour_ui.cc:3347
+#: ardour_ui.cc:3345
 msgid ""
 "This session was created with a sample rate of %1 Hz\n"
 "\n"
 "The audioengine is currently running at %2 Hz\n"
 msgstr ""
 
-#: ardour_ui.cc:3356
+#: ardour_ui.cc:3354
 #, fuzzy
 msgid "Do not load session"
 msgstr "Zoom στη συνεδρία"
 
-#: ardour_ui.cc:3357
+#: ardour_ui.cc:3355
 msgid "Load session anyway"
 msgstr ""
 
-#: ardour_ui.cc:3378
+#: ardour_ui.cc:3376
 msgid "Could not disconnect from JACK"
 msgstr "Αποσύνδεση απ'το JACK είναι αδύνατη"
 
-#: ardour_ui.cc:3391
+#: ardour_ui.cc:3389
 msgid "Could not reconnect to JACK"
 msgstr "Επανασύνδεση στο JACK αδύνατη"
 
-#: ardour_ui.cc:3618
+#: ardour_ui.cc:3620
 msgid "Translations disabled"
 msgstr ""
 
-#: ardour_ui.cc:3618
+#: ardour_ui.cc:3620
 msgid "Translations enabled"
 msgstr ""
 
-#: ardour_ui.cc:3622
+#: ardour_ui.cc:3624
 msgid "You must restart %1 for this to take effect."
 msgstr ""
 
-#: ardour_ui2.cc:71
+#: ardour_ui2.cc:73
 msgid "UI: cannot setup editor"
 msgstr "UI: Ο 'editor' δεν μπορεί να εγερθεί"
 
-#: ardour_ui2.cc:76
+#: ardour_ui2.cc:78
 msgid "UI: cannot setup mixer"
 msgstr "UI: ο μίκτης δεν μπορεί να εγερθεί"
 
-#: ardour_ui2.cc:125
+#: ardour_ui2.cc:127
 msgid "Play from playhead"
 msgstr "Αναπαρ/γή από τον Αναπαραγωγέα"
 
-#: ardour_ui2.cc:126
+#: ardour_ui2.cc:128
 msgid "Stop playback"
 msgstr "Διακοπή Αναπαρ/γής"
 
-#: ardour_ui2.cc:127
+#: ardour_ui2.cc:129
 #, fuzzy
 msgid "Toggle record"
 msgstr "Εγγραφή"
 
-#: ardour_ui2.cc:128
+#: ardour_ui2.cc:130
 msgid "Play range/selection"
 msgstr "Αναπαρ/γή διαστήματος/επιλογής"
 
-#: ardour_ui2.cc:129
+#: ardour_ui2.cc:131
 #, fuzzy
 msgid "Always play range/selection"
 msgstr "Αναπαρ/γή διαστήματος/επιλογής"
 
-#: ardour_ui2.cc:130
+#: ardour_ui2.cc:132
 msgid "Go to start of session"
 msgstr "Αρχή της συνεδρίας"
 
-#: ardour_ui2.cc:131
+#: ardour_ui2.cc:133
 msgid "Go to end of session"
 msgstr "Τέλος του συνεδρίας"
 
-#: ardour_ui2.cc:132
+#: ardour_ui2.cc:134
 msgid "Play loop range"
 msgstr "Επαναληπτική αναπαρ/γή διαστήματος"
 
-#: ardour_ui2.cc:134
+#: ardour_ui2.cc:136
 msgid "Return to last playback start when stopped"
 msgstr "Επιστροφή στην τελευταία θεση μετα απο παύση"
 
-#: ardour_ui2.cc:135
+#: ardour_ui2.cc:137
 msgid "Start playback after any locate"
 msgstr "Αρχή αναπαρ/γής μετά από κάθε τοποθέτηση"
 
-#: ardour_ui2.cc:136
+#: ardour_ui2.cc:138
 msgid "Be sensible about input monitoring"
 msgstr "Προσοχή στο input monitoring"
-
-#: ardour_ui2.cc:137
-msgid "Start recording at auto-punch start"
-msgstr "Έναρξη εγγραφής στην αρχή αυτο-εναπόθεσης"
-
-#: ardour_ui2.cc:138
-msgid "Stop recording at auto-punch end"
-msgstr "Λήξη εγγραφής στο τέλος αυτο-εναπόθεσης"
 
 #: ardour_ui2.cc:139
 msgid "Enable/Disable audio click"
@@ -1326,12 +1305,12 @@ msgstr ""
 msgid "[INFO]: "
 msgstr ""
 
-#: ardour_ui2.cc:644 rc_option_editor.cc:792 rc_option_editor.cc:808
-#: rc_option_editor.cc:811 rc_option_editor.cc:825 rc_option_editor.cc:842
-#: rc_option_editor.cc:844 rc_option_editor.cc:846 rc_option_editor.cc:848
-#: rc_option_editor.cc:852 rc_option_editor.cc:855 rc_option_editor.cc:863
-#: rc_option_editor.cc:871 rc_option_editor.cc:879 rc_option_editor.cc:887
-#: rc_option_editor.cc:895 rc_option_editor.cc:903 rc_option_editor.cc:905
+#: ardour_ui2.cc:649 rc_option_editor.cc:790 rc_option_editor.cc:806
+#: rc_option_editor.cc:809 rc_option_editor.cc:823 rc_option_editor.cc:840
+#: rc_option_editor.cc:842 rc_option_editor.cc:844 rc_option_editor.cc:846
+#: rc_option_editor.cc:850 rc_option_editor.cc:853 rc_option_editor.cc:861
+#: rc_option_editor.cc:869 rc_option_editor.cc:877 rc_option_editor.cc:885
+#: rc_option_editor.cc:893 rc_option_editor.cc:901 rc_option_editor.cc:903
 #: session_option_editor.cc:248 session_option_editor.cc:261
 #: session_option_editor.cc:263 session_option_editor.cc:279
 #: session_option_editor.cc:281 session_option_editor.cc:283
@@ -1354,17 +1333,17 @@ msgstr "Ανάδειξη Μίκτη"
 msgid "Reload Session History"
 msgstr "Δημιουργία Directory Συνεδρίας Στο:"
 
-#: ardour_ui_dialogs.cc:189
+#: ardour_ui_dialogs.cc:191
 #, fuzzy
 msgid "Don't close"
 msgstr "ΟΧΙ %1"
 
-#: ardour_ui_dialogs.cc:190
+#: ardour_ui_dialogs.cc:192
 #, fuzzy
 msgid "Just close"
 msgstr "Κλείσιμο"
 
-#: ardour_ui_dialogs.cc:191
+#: ardour_ui_dialogs.cc:193
 #, fuzzy
 msgid "Save and close"
 msgstr "Αποθήκευση και %1"
@@ -1373,7 +1352,7 @@ msgstr "Αποθήκευση και %1"
 msgid "Session"
 msgstr "Συνεδρία"
 
-#: ardour_ui_ed.cc:103 editor_actions.cc:127 editor_regions.cc:92
+#: ardour_ui_ed.cc:103 editor_actions.cc:127 editor_regions.cc:93
 #: port_group.cc:458
 msgid "Sync"
 msgstr "Sync"
@@ -1406,11 +1385,11 @@ msgstr ""
 msgid "Control Surfaces"
 msgstr "Επιφάνειες ελέγχου"
 
-#: ardour_ui_ed.cc:111 rc_option_editor.cc:1215 route_time_axis.cc:411
+#: ardour_ui_ed.cc:111 rc_option_editor.cc:1213 route_time_axis.cc:398
 msgid "Plugins"
 msgstr "Plugins"
 
-#: ardour_ui_ed.cc:112 rc_option_editor.cc:811
+#: ardour_ui_ed.cc:112 rc_option_editor.cc:809
 msgid "Metering"
 msgstr "Μέτρηση"
 
@@ -1427,7 +1406,7 @@ msgstr ""
 msgid "Denormal Handling"
 msgstr ""
 
-#: ardour_ui_ed.cc:119 group_tabs.cc:306 route_time_axis.cc:1511
+#: ardour_ui_ed.cc:119 group_tabs.cc:306 route_time_axis.cc:1499
 msgid "New..."
 msgstr ""
 
@@ -1505,7 +1484,7 @@ msgstr "Εκκαθάριση αχρήστων πηγών"
 msgid "Flush Wastebasket"
 msgstr "Άδειασμα κάδου"
 
-#: ardour_ui_ed.cc:182 rc_option_editor.cc:1105
+#: ardour_ui_ed.cc:182 rc_option_editor.cc:1103
 msgid "JACK"
 msgstr ""
 
@@ -1566,7 +1545,7 @@ msgstr "Κανάλια/Δίαυλοι"
 msgid "Locations"
 msgstr "Τοποθεσίες"
 
-#: ardour_ui_ed.cc:233 ardour_ui_ed.cc:596
+#: ardour_ui_ed.cc:233 ardour_ui_ed.cc:599
 msgid "Big Clock"
 msgstr "Μεγάλο ωρολόγιον"
 
@@ -1596,8 +1575,8 @@ msgstr "Πληροφορίες"
 msgid "Chat"
 msgstr ""
 
-#: ardour_ui_ed.cc:245 automation_time_axis.cc:274 automation_time_axis.cc:333
-#: automation_time_axis.cc:562 gain_meter.cc:209 generic_pluginui.cc:350
+#: ardour_ui_ed.cc:245 automation_time_axis.cc:248 automation_time_axis.cc:307
+#: automation_time_axis.cc:515 gain_meter.cc:209 generic_pluginui.cc:350
 #: generic_pluginui.cc:600 panner_ui.cc:147
 msgid "Manual"
 msgstr ""
@@ -1636,15 +1615,15 @@ msgstr "Πρόσθεση καναλιού"
 msgid "Save"
 msgstr "Αποθήκευση"
 
-#: ardour_ui_ed.cc:264 editor_actions.cc:345
+#: ardour_ui_ed.cc:264 editor_actions.cc:346
 #, fuzzy
 msgid "Remove Last Capture"
 msgstr "Απαλοιφή τελευταίας λήψης"
 
-#: ardour_ui_ed.cc:271 rc_option_editor.cc:909 rc_option_editor.cc:917
-#: rc_option_editor.cc:925 rc_option_editor.cc:933 rc_option_editor.cc:941
-#: rc_option_editor.cc:949 rc_option_editor.cc:957 rc_option_editor.cc:965
-#: rc_option_editor.cc:973
+#: ardour_ui_ed.cc:271 rc_option_editor.cc:907 rc_option_editor.cc:915
+#: rc_option_editor.cc:923 rc_option_editor.cc:931 rc_option_editor.cc:939
+#: rc_option_editor.cc:947 rc_option_editor.cc:955 rc_option_editor.cc:963
+#: rc_option_editor.cc:971
 msgid "Transport"
 msgstr ""
 
@@ -1741,131 +1720,188 @@ msgstr ""
 msgid "Focus On Clock"
 msgstr ""
 
-#: ardour_ui_ed.cc:357 ardour_ui_ed.cc:366 editor_actions.cc:524
+#: ardour_ui_ed.cc:357 ardour_ui_ed.cc:366 audio_clock.cc:1803 editor.cc:246
+#: editor_actions.cc:523 export_timespan_selector.cc:73
+#: session_option_editor.cc:54 session_option_editor.cc:56
+#: session_option_editor.cc:77 session_option_editor.cc:89
+#: session_option_editor.cc:91 session_option_editor.cc:115
+#: session_option_editor.cc:126 session_option_editor.cc:128
+msgid "Timecode"
+msgstr ""
+
+#: ardour_ui_ed.cc:359 ardour_ui_ed.cc:368 editor_actions.cc:521
 #, fuzzy
 msgid "Bars & Beats"
 msgstr "Μπάρες:Κτύποι"
 
-#: ardour_ui_ed.cc:359 ardour_ui_ed.cc:368
+#: ardour_ui_ed.cc:361 ardour_ui_ed.cc:370
 #, fuzzy
 msgid "Minutes & Seconds"
 msgstr "Λεπτά:Δεύτερα"
 
-#: ardour_ui_ed.cc:361 ardour_ui_ed.cc:370 audio_clock.cc:1746 editor.cc:246
-#: editor_actions.cc:525
+#: ardour_ui_ed.cc:363 ardour_ui_ed.cc:372 audio_clock.cc:1807 editor.cc:247
+#: editor_actions.cc:522
 msgid "Samples"
 msgstr ""
 
-#: ardour_ui_ed.cc:363 ardour_ui_ed.cc:372 audio_clock.cc:1747
-msgid "Off"
-msgstr "Εκτός"
+#: ardour_ui_ed.cc:375
+#, fuzzy
+msgid "Punch In"
+msgstr "Punch"
 
-#: ardour_ui_ed.cc:381
+#: ardour_ui_ed.cc:376 crossfade_edit.cc:85 time_info_box.cc:48
+msgid "In"
+msgstr ""
+
+#: ardour_ui_ed.cc:379
+#, fuzzy
+msgid "Punch Out"
+msgstr "Punch"
+
+#: ardour_ui_ed.cc:380 crossfade_edit.cc:83 time_info_box.cc:49
+msgid "Out"
+msgstr ""
+
+#: ardour_ui_ed.cc:383
 msgid "Punch In/Out"
 msgstr ""
 
-#: ardour_ui_ed.cc:397
+#: ardour_ui_ed.cc:384
+msgid "In/Out"
+msgstr ""
+
+#: ardour_ui_ed.cc:387 rc_option_editor.cc:901
+msgid "Click"
+msgstr "Μετρονόμος"
+
+#: ardour_ui_ed.cc:400
 msgid "Sync Startup to Video"
 msgstr ""
 
-#: ardour_ui_ed.cc:399
+#: ardour_ui_ed.cc:402
 #, fuzzy
 msgid "Time Master"
 msgstr "Απόκρυψη Στίγματος"
 
-#: ardour_ui_ed.cc:406
+#: ardour_ui_ed.cc:409
 #, fuzzy
 msgid "Toggle Record Enable Track %1"
 msgstr "Απ/Ενεργοποίηση Καναλιού 1"
 
-#: ardour_ui_ed.cc:413
+#: ardour_ui_ed.cc:416
 msgid "Percentage"
 msgstr "Ποσοστό"
 
-#: ardour_ui_ed.cc:414 shuttle_control.cc:158
+#: ardour_ui_ed.cc:417 shuttle_control.cc:158
 msgid "Semitones"
 msgstr "Ημιτόνια"
 
-#: ardour_ui_ed.cc:418
+#: ardour_ui_ed.cc:421
 msgid "Send MTC"
 msgstr "Αποστολή MTC"
 
-#: ardour_ui_ed.cc:420
+#: ardour_ui_ed.cc:423
 msgid "Send MMC"
 msgstr "Αποστολή MMC"
 
-#: ardour_ui_ed.cc:422
+#: ardour_ui_ed.cc:425
 msgid "Use MMC"
 msgstr ""
 
-#: ardour_ui_ed.cc:424 rc_option_editor.cc:1351
+#: ardour_ui_ed.cc:427 rc_option_editor.cc:1349
 #, fuzzy
 msgid "Send MIDI Clock"
 msgstr "Αποστολή MIDI feedback"
 
-#: ardour_ui_ed.cc:426
+#: ardour_ui_ed.cc:429
 #, fuzzy
 msgid "Send MIDI Feedback"
 msgstr "Αποστολή MIDI feedback"
 
-#: ardour_ui_ed.cc:431
+#: ardour_ui_ed.cc:434
 msgid "Enable Translations"
 msgstr ""
 
-#: ardour_ui_options.cc:65
+#: ardour_ui_options.cc:66
 msgid ""
 "It is not possible to use JACK as the the sync source\n"
 "when the pull up/down setting is non-zero."
 msgstr ""
 
-#: ardour_ui_options.cc:307 ardour_ui_options.cc:330
+#: ardour_ui_options.cc:308 ardour_ui_options.cc:331
 msgid "Internal"
 msgstr "Εσωτερικό"
 
-#: ardour_ui_options.cc:311
+#: ardour_ui_options.cc:312
 #, fuzzy
 msgid "External"
 msgstr "Εσωτερικό"
 
-#: ardour_ui_options.cc:450
+#: ardour_ui_options.cc:451
 #, fuzzy
 msgid "Enable/Disable external positional sync"
 msgstr "Άρση/Παύση μετρονόμου"
 
-#: ardour_ui_options.cc:452
+#: ardour_ui_options.cc:453
 msgid "Sync to JACK is not possible: video pull up/down is set"
 msgstr ""
 
-#: audio_clock.cc:436 audio_clock.cc:437 session_option_editor.cc:109
+#: audio_clock.cc:441 session_option_editor.cc:109
 msgid "none"
 msgstr "Κανένα"
 
-#: audio_clock.cc:1742 editor.cc:245 editor_actions.cc:526
-#: export_timespan_selector.cc:73 session_option_editor.cc:54
-#: session_option_editor.cc:56 session_option_editor.cc:77
-#: session_option_editor.cc:89 session_option_editor.cc:91
-#: session_option_editor.cc:115 session_option_editor.cc:126
-#: session_option_editor.cc:128
-msgid "Timecode"
-msgstr ""
+#: audio_clock.cc:1210 audio_streamview.cc:138 editor_actions.cc:836
+msgid "programming error: %1"
+msgstr "σφάλμα προγραμματισμού: %1"
 
-#: audio_clock.cc:1744 editor.cc:244 export_timespan_selector.cc:83
+#: audio_clock.cc:1805 editor.cc:245 export_timespan_selector.cc:83
 msgid "Bars:Beats"
 msgstr "Μπάρες:Κτύποι"
 
-#: audio_clock.cc:1745 export_timespan_selector.cc:78
+#: audio_clock.cc:1806 export_timespan_selector.cc:78
 msgid "Minutes:Seconds"
 msgstr "Λεπτά:Δεύτερα"
 
-#: audio_clock.cc:1751
+#: audio_clock.cc:1811
 #, fuzzy
 msgid "Set From Playhead"
 msgstr "Θέση playhead"
 
-#: audio_clock.cc:1752
+#: audio_clock.cc:1812
 #, fuzzy
 msgid "Locate to This Time"
 msgstr "Τοποθέτηση στο Στίγμα"
+
+#: audio_clock.cc:1884
+msgid "EXT"
+msgstr ""
+
+#: audio_clock.cc:1885
+#, fuzzy
+msgid "FPS"
+msgstr "24 FPS"
+
+#: audio_clock.cc:1907 gain_meter.cc:677 panner_ui.cc:562
+msgid "T"
+msgstr ""
+
+#: audio_clock.cc:1908 editor_route_groups.cc:66 editor_regions.cc:98
+#: gain_meter.cc:671 mixer_strip.cc:1748 panner_ui.cc:556 stereo_panner.cc:254
+msgid "M"
+msgstr ""
+
+#: audio_clock.cc:1934 audio_clock.cc:1935
+#, fuzzy
+msgid " "
+msgstr "% "
+
+#: audio_clock.cc:1953
+msgid "SR"
+msgstr ""
+
+#: audio_clock.cc:1954
+msgid "Pull"
+msgstr ""
 
 #: audio_region_editor.cc:63 control_point_dialog.cc:48 processor_box.cc:341
 #: rhythm_ferret.cc:109 rhythm_ferret.cc:114 rhythm_ferret.cc:119
@@ -1893,10 +1929,6 @@ msgstr ""
 msgid "add gain control point"
 msgstr "Προσθεση σημείου ελέγχου gain"
 
-#: audio_streamview.cc:138 editor_actions.cc:839
-msgid "programming error: %1"
-msgstr "σφάλμα προγραμματισμού: %1"
-
 #: audio_time_axis.cc:184
 #, fuzzy
 msgid "Hide All Crossfades"
@@ -1907,11 +1939,11 @@ msgstr "Απόκρυψη όλων των crossfades"
 msgid "Show All Crossfades"
 msgstr "Επαναφορά όλων των crossfades"
 
-#: audio_time_axis.cc:459
+#: audio_time_axis.cc:463
 msgid "Fader"
 msgstr ""
 
-#: audio_time_axis.cc:465
+#: audio_time_axis.cc:469
 msgid "Pan"
 msgstr ""
 
@@ -1932,71 +1964,71 @@ msgstr "έλξη διαστήματος αυτοματισμού"
 msgid "remove control point"
 msgstr "απαλοιφή σημείου ελέγχου"
 
-#: automation_region_view.cc:151 automation_time_axis.cc:637
+#: automation_region_view.cc:151 automation_time_axis.cc:590
 #, fuzzy
 msgid "add automation event"
 msgstr "πρόσθεση συμβάντος αυτοματισμού σε "
 
-#: automation_time_axis.cc:139
+#: automation_time_axis.cc:142
 msgid "automation state"
 msgstr "Κατάσταση αυτοματισμού"
 
-#: automation_time_axis.cc:140
+#: automation_time_axis.cc:143
 msgid "hide track"
 msgstr "απόκρυψη καναλιού"
 
-#: automation_time_axis.cc:276 automation_time_axis.cc:344
-#: automation_time_axis.cc:567 editor.cc:1879 editor.cc:1956
-#: editor_actions.cc:111 editor_actions.cc:1372 gain_meter.cc:212
+#: automation_time_axis.cc:250 automation_time_axis.cc:318
+#: automation_time_axis.cc:520 editor.cc:1880 editor.cc:1957
+#: editor_actions.cc:111 editor_actions.cc:1369 gain_meter.cc:212
 #: generic_pluginui.cc:353 generic_pluginui.cc:602 panner_ui.cc:150
 #: region_editor.cc:52 sfdb_ui.cc:190
 msgid "Play"
 msgstr "Αναπαρ/γή"
 
-#: automation_time_axis.cc:278 automation_time_axis.cc:355
-#: automation_time_axis.cc:572 gain_meter.cc:215 generic_pluginui.cc:356
+#: automation_time_axis.cc:252 automation_time_axis.cc:329
+#: automation_time_axis.cc:525 gain_meter.cc:215 generic_pluginui.cc:356
 #: generic_pluginui.cc:604 panner_ui.cc:153
 msgid "Write"
 msgstr "Γράψε"
 
-#: automation_time_axis.cc:280 automation_time_axis.cc:366
-#: automation_time_axis.cc:577 gain_meter.cc:218 generic_pluginui.cc:359
+#: automation_time_axis.cc:254 automation_time_axis.cc:340
+#: automation_time_axis.cc:530 gain_meter.cc:218 generic_pluginui.cc:359
 #: generic_pluginui.cc:606 panner_ui.cc:156
 msgid "Touch"
 msgstr "Αγγιγμα"
 
-#: automation_time_axis.cc:377 generic_pluginui.cc:362
+#: automation_time_axis.cc:351 generic_pluginui.cc:362
 msgid "???"
 msgstr "???"
 
-#: automation_time_axis.cc:417
+#: automation_time_axis.cc:391
 msgid "clear automation"
 msgstr "εκκαθάριση αυτοματισμού"
 
-#: automation_time_axis.cc:551 editor_actions.cc:564 editor_markers.cc:843
-#: location_ui.cc:54 route_time_axis.cc:716
+#: automation_time_axis.cc:504 editor_actions.cc:561 editor_markers.cc:843
+#: location_ui.cc:54 route_time_axis.cc:703
 msgid "Hide"
 msgstr "Κρύψιμο"
 
-#: automation_time_axis.cc:553 crossfade_edit.cc:79
+#: automation_time_axis.cc:506 crossfade_edit.cc:79
 msgid "Clear"
 msgstr "Εκκαθάριση"
 
-#: automation_time_axis.cc:582
+#: automation_time_axis.cc:535
 msgid "State"
 msgstr "Κατάσταση"
 
-#: automation_time_axis.cc:597
+#: automation_time_axis.cc:550
 #, fuzzy
 msgid "Discrete"
 msgstr "Αποσύνδεση"
 
-#: automation_time_axis.cc:603 editor.cc:1272 editor.cc:1279 editor.cc:1337
-#: editor.cc:1343 export_format_dialog.cc:456
+#: automation_time_axis.cc:556 editor.cc:1273 editor.cc:1280 editor.cc:1338
+#: editor.cc:1344 export_format_dialog.cc:456
 msgid "Linear"
 msgstr "Γραμμικό"
 
-#: automation_time_axis.cc:609 rhythm_ferret.cc:94 route_time_axis.cc:651
+#: automation_time_axis.cc:562 rhythm_ferret.cc:94 route_time_axis.cc:638
 #: shuttle_control.cc:177
 msgid "Mode"
 msgstr "Λειτουργία"
@@ -2024,18 +2056,18 @@ msgstr ""
 msgid "Output"
 msgstr ""
 
-#: bundle_manager.cc:261 editor.cc:1920 editor_actions.cc:85
+#: bundle_manager.cc:261 editor.cc:1921 editor_actions.cc:85
 msgid "Edit"
 msgstr "Επεξεργασία"
 
-#: bundle_manager.cc:262 editor_actions.cc:355 plugin_ui.cc:419
-#: processor_box.cc:1992 route_time_axis.cc:721
+#: bundle_manager.cc:262 editor_actions.cc:298 editor_actions.cc:356
+#: plugin_ui.cc:419 processor_box.cc:1994 route_time_axis.cc:708
 #, fuzzy
 msgid "Delete"
 msgstr "διαγραφή"
 
 #: bundle_manager.cc:268 bundle_manager.cc:433 editor_route_groups.cc:62
-#: editor_routes.cc:162 midi_list_editor.cc:58 rc_option_editor.cc:654
+#: editor_routes.cc:162 midi_list_editor.cc:58 rc_option_editor.cc:652
 msgid "Name"
 msgstr ""
 
@@ -2176,16 +2208,8 @@ msgstr ""
 msgid "Out (dry)"
 msgstr ""
 
-#: crossfade_edit.cc:83
-msgid "Out"
-msgstr ""
-
 #: crossfade_edit.cc:84
 msgid "In (dry)"
-msgstr ""
-
-#: crossfade_edit.cc:85
-msgid "In"
 msgstr ""
 
 #: crossfade_edit.cc:87
@@ -2198,15 +2222,15 @@ msgstr "με pre-roll"
 msgid "With Post-roll"
 msgstr "με post-roll"
 
-#: crossfade_edit.cc:96 editor_actions.cc:1287 editor_regions.cc:93
+#: crossfade_edit.cc:96 editor_actions.cc:1284 editor_regions.cc:94
 msgid "Fade In"
 msgstr "Fade In"
 
-#: crossfade_edit.cc:97 editor_actions.cc:1292 editor_regions.cc:94
+#: crossfade_edit.cc:97 editor_actions.cc:1289 editor_regions.cc:95
 msgid "Fade Out"
 msgstr "Fade Out"
 
-#: crossfade_edit.cc:180 editor_actions.cc:561
+#: crossfade_edit.cc:180 editor_actions.cc:558
 msgid "Audition"
 msgstr "Ακρόαση"
 
@@ -2237,8 +2261,9 @@ msgstr ""
 msgid "Time"
 msgstr ""
 
-#: edit_note_dialog.cc:88 editor_regions.cc:91 export_timespan_selector.cc:350
-#: export_timespan_selector.cc:414 location_ui.cc:316 midi_list_editor.cc:60
+#: edit_note_dialog.cc:88 editor_regions.cc:92 export_timespan_selector.cc:344
+#: export_timespan_selector.cc:408 location_ui.cc:316 midi_list_editor.cc:60
+#: time_info_box.cc:113
 msgid "Length"
 msgstr ""
 
@@ -2247,723 +2272,723 @@ msgstr ""
 msgid "edit note"
 msgstr "Λειτουργία Επεξ/σίας"
 
-#: editor.cc:144 editor.cc:3364
+#: editor.cc:145 editor.cc:3365
 msgid "CD Frames"
 msgstr ""
 
-#: editor.cc:145 editor.cc:3366
+#: editor.cc:146 editor.cc:3367
 #, fuzzy
 msgid "Timecode Frames"
 msgstr "Ηχητικά frames"
 
-#: editor.cc:146 editor.cc:3368
+#: editor.cc:147 editor.cc:3369
 #, fuzzy
 msgid "Timecode Seconds"
 msgstr "SMPTE Δευτερόλεπτα"
 
-#: editor.cc:147 editor.cc:3370
+#: editor.cc:148 editor.cc:3371
 #, fuzzy
 msgid "Timecode Minutes"
 msgstr "SMPTE Λεπτά"
 
-#: editor.cc:148 editor.cc:3372
+#: editor.cc:149 editor.cc:3373
 msgid "Seconds"
 msgstr "Δευτερόλεπτα"
 
-#: editor.cc:149 editor.cc:3374
+#: editor.cc:150 editor.cc:3375
 msgid "Minutes"
 msgstr "Λεπτά"
 
-#: editor.cc:150 editor.cc:3348 quantize_dialog.cc:39 quantize_dialog.cc:163
+#: editor.cc:151 editor.cc:3349 quantize_dialog.cc:39 quantize_dialog.cc:163
 msgid "Beats/32"
 msgstr "Κτύποι/32"
 
-#: editor.cc:151 editor.cc:3346
+#: editor.cc:152 editor.cc:3347
 #, fuzzy
 msgid "Beats/28"
 msgstr "Κτύποι/8"
 
-#: editor.cc:152 editor.cc:3344
+#: editor.cc:153 editor.cc:3345
 #, fuzzy
 msgid "Beats/24"
 msgstr "Κτύποι/4"
 
-#: editor.cc:153 editor.cc:3342
+#: editor.cc:154 editor.cc:3343
 #, fuzzy
 msgid "Beats/20"
 msgstr "Κτύποι/32"
 
-#: editor.cc:154 editor.cc:3340 quantize_dialog.cc:40 quantize_dialog.cc:165
+#: editor.cc:155 editor.cc:3341 quantize_dialog.cc:40 quantize_dialog.cc:165
 msgid "Beats/16"
 msgstr "Κτύποι/16"
 
-#: editor.cc:155 editor.cc:3338
+#: editor.cc:156 editor.cc:3339
 #, fuzzy
 msgid "Beats/14"
 msgstr "Κτύποι/4"
 
-#: editor.cc:156 editor.cc:3336
+#: editor.cc:157 editor.cc:3337
 #, fuzzy
 msgid "Beats/12"
 msgstr "Κτύποι/16"
 
-#: editor.cc:157 editor.cc:3334
+#: editor.cc:158 editor.cc:3335
 #, fuzzy
 msgid "Beats/10"
 msgstr "Κτύποι/16"
 
-#: editor.cc:158 editor.cc:3332 quantize_dialog.cc:41 quantize_dialog.cc:167
+#: editor.cc:159 editor.cc:3333 quantize_dialog.cc:41 quantize_dialog.cc:167
 msgid "Beats/8"
 msgstr "Κτύποι/8"
 
-#: editor.cc:159 editor.cc:3330
+#: editor.cc:160 editor.cc:3331
 #, fuzzy
 msgid "Beats/7"
 msgstr "Κτύποι/8"
 
-#: editor.cc:160 editor.cc:3328
+#: editor.cc:161 editor.cc:3329
 #, fuzzy
 msgid "Beats/6"
 msgstr "Κτύποι/16"
 
-#: editor.cc:161 editor.cc:3326
+#: editor.cc:162 editor.cc:3327
 #, fuzzy
 msgid "Beats/5"
 msgstr "Κτύποι/8"
 
-#: editor.cc:162 editor.cc:3324 quantize_dialog.cc:42 quantize_dialog.cc:169
+#: editor.cc:163 editor.cc:3325 quantize_dialog.cc:42 quantize_dialog.cc:169
 msgid "Beats/4"
 msgstr "Κτύποι/4"
 
-#: editor.cc:163 editor.cc:3322 quantize_dialog.cc:43 quantize_dialog.cc:171
+#: editor.cc:164 editor.cc:3323 quantize_dialog.cc:43 quantize_dialog.cc:171
 msgid "Beats/3"
 msgstr "Κτύποι/3"
 
-#: editor.cc:164 editor.cc:3320 quantize_dialog.cc:44 quantize_dialog.cc:173
+#: editor.cc:165 editor.cc:3321 quantize_dialog.cc:44 quantize_dialog.cc:173
 #, fuzzy
 msgid "Beats/2"
 msgstr "Κτύποι/32"
 
-#: editor.cc:165 editor.cc:3350 quantize_dialog.cc:45 quantize_dialog.cc:175
+#: editor.cc:166 editor.cc:3351 quantize_dialog.cc:45 quantize_dialog.cc:175
 msgid "Beats"
 msgstr "Κτύποι"
 
-#: editor.cc:166 editor.cc:3352
+#: editor.cc:167 editor.cc:3353
 msgid "Bars"
 msgstr "Μπάρες"
 
-#: editor.cc:167 editor.cc:3354
+#: editor.cc:168 editor.cc:3355
 msgid "Marks"
 msgstr "Στίγματα"
 
-#: editor.cc:168 editor.cc:3356
+#: editor.cc:169 editor.cc:3357
 msgid "Region starts"
 msgstr "Αρχές Περιοχών"
 
-#: editor.cc:169 editor.cc:3358
+#: editor.cc:170 editor.cc:3359
 msgid "Region ends"
 msgstr "Τέλη Περιοχών"
 
-#: editor.cc:170 editor.cc:3362
+#: editor.cc:171 editor.cc:3363
 msgid "Region syncs"
 msgstr "Συγχρονισμός Περιοχών"
 
-#: editor.cc:171 editor.cc:3360
+#: editor.cc:172 editor.cc:3361
 msgid "Region bounds"
 msgstr "Όρια περιοχών"
 
-#: editor.cc:176 editor.cc:3390 editor_actions.cc:472
+#: editor.cc:177 editor.cc:3391 editor_actions.cc:469
 msgid "No Grid"
 msgstr ""
 
-#: editor.cc:177 editor.cc:3392 editor_actions.cc:473 quantize_dialog.cc:50
+#: editor.cc:178 editor.cc:3393 editor_actions.cc:470 quantize_dialog.cc:50
 msgid "Grid"
 msgstr ""
 
-#: editor.cc:178 editor.cc:3394 editor_actions.cc:474
+#: editor.cc:179 editor.cc:3395 editor_actions.cc:471
 msgid "Magnetic"
 msgstr "Μαγνητικό"
 
-#: editor.cc:183 editor.cc:193 editor.cc:3433 editor.cc:3458
-#: editor_actions.cc:110 editor_actions.cc:455
+#: editor.cc:184 editor.cc:194 editor.cc:3434 editor.cc:3459
+#: editor_actions.cc:110 editor_actions.cc:452
 msgid "Playhead"
 msgstr ""
 
-#: editor.cc:184 editor.cc:3431 editor_actions.cc:457
+#: editor.cc:185 editor.cc:3432 editor_actions.cc:454
 msgid "Marker"
 msgstr "Στίγμα"
 
-#: editor.cc:185 editor.cc:194 editor.cc:3460 editor_actions.cc:456
+#: editor.cc:186 editor.cc:195 editor.cc:3461 editor_actions.cc:453
 #, fuzzy
 msgid "Mouse"
 msgstr "Πλκτρ/Ποντίκι"
 
-#: editor.cc:190 editor.cc:3452
+#: editor.cc:191 editor.cc:3453
 msgid "Left"
 msgstr "Αριστερό"
 
-#: editor.cc:191 editor.cc:3454
+#: editor.cc:192 editor.cc:3455
 msgid "Right"
 msgstr "Δεξιό"
 
-#: editor.cc:192 editor.cc:3456
+#: editor.cc:193 editor.cc:3457
 msgid "Center"
 msgstr "Κέντρο"
 
-#: editor.cc:195 editor.cc:2987 editor.cc:3462
+#: editor.cc:196 editor.cc:2988 editor.cc:3463
 #, fuzzy
 msgid "Edit point"
 msgstr "Επεξεργασία με"
 
-#: editor.cc:201
+#: editor.cc:202
 msgid "Mushy"
 msgstr ""
 
-#: editor.cc:202
+#: editor.cc:203
 msgid "Smooth"
 msgstr ""
 
-#: editor.cc:203
+#: editor.cc:204
 msgid "Balanced multitimbral mixture"
 msgstr ""
 
-#: editor.cc:204
+#: editor.cc:205
 msgid "Unpitched percussion with stable notes"
 msgstr ""
 
-#: editor.cc:205
+#: editor.cc:206
 msgid "Crisp monophonic instrumental"
 msgstr ""
 
-#: editor.cc:206
+#: editor.cc:207
 msgid "Unpitched solo percussion"
 msgstr ""
 
-#: editor.cc:207
+#: editor.cc:208
 msgid "Resample without preserving pitch"
 msgstr ""
 
-#: editor.cc:243
+#: editor.cc:244
 msgid "Mins:Secs"
 msgstr "Λεπτά:Δέυτερα"
 
-#: editor.cc:247 editor_actions.cc:128 editor_actions.cc:518
+#: editor.cc:248 editor_actions.cc:128 editor_actions.cc:515
 msgid "Tempo"
 msgstr "Χρόνος"
 
-#: editor.cc:248 editor_actions.cc:519
+#: editor.cc:249 editor_actions.cc:516
 msgid "Meter"
 msgstr "Μετρητής"
 
-#: editor.cc:249
+#: editor.cc:250
 msgid "Location Markers"
 msgstr "Στίγματα Τοποθεσίας"
 
-#: editor.cc:250
+#: editor.cc:251
 msgid "Range Markers"
 msgstr "Στίγματα διαστημάτων"
 
-#: editor.cc:251
+#: editor.cc:252
 msgid "Loop/Punch Ranges"
 msgstr "Διαστήματα Loop/Punch"
 
-#: editor.cc:252 editor_actions.cc:522
+#: editor.cc:253 editor_actions.cc:519
 #, fuzzy
 msgid "CD Markers"
 msgstr "Στίγμα"
 
-#: editor.cc:267
+#: editor.cc:268
 msgid "mode"
 msgstr "λειτουργία"
 
-#: editor.cc:268
+#: editor.cc:269
 msgid "automation"
 msgstr "αυτοματισμός"
 
-#: editor.cc:271 editor_actions.cc:627
+#: editor.cc:272 editor_actions.cc:624
 msgid "Panic"
 msgstr ""
 
-#: editor.cc:546 editor_regions.cc:88
+#: editor.cc:547 editor_regions.cc:89
 msgid "Regions"
 msgstr "Περιοχές"
 
-#: editor.cc:547
+#: editor.cc:548
 #, fuzzy
 msgid "Tracks & Busses"
 msgstr "Κανάλια/Δίαυλοι"
 
-#: editor.cc:548
+#: editor.cc:549
 msgid "Snapshots"
 msgstr "Στιγμιότυπα"
 
-#: editor.cc:549
+#: editor.cc:550
 #, fuzzy
 msgid "Route Groups"
 msgstr "επεξερ/σία Groups"
 
-#: editor.cc:550
+#: editor.cc:551
 #, fuzzy
 msgid "Ranges & Marks"
 msgstr "Στίγματα διαστημάτων"
 
-#: editor.cc:689 editor.cc:5369 rc_option_editor.cc:983
-#: rc_option_editor.cc:991 rc_option_editor.cc:999 rc_option_editor.cc:1007
-#: rc_option_editor.cc:1015 rc_option_editor.cc:1023 rc_option_editor.cc:1041
-#: rc_option_editor.cc:1053 rc_option_editor.cc:1055 rc_option_editor.cc:1063
-#: rc_option_editor.cc:1071
+#: editor.cc:690 editor.cc:5370 rc_option_editor.cc:981
+#: rc_option_editor.cc:989 rc_option_editor.cc:997 rc_option_editor.cc:1005
+#: rc_option_editor.cc:1013 rc_option_editor.cc:1021 rc_option_editor.cc:1039
+#: rc_option_editor.cc:1051 rc_option_editor.cc:1053 rc_option_editor.cc:1061
+#: rc_option_editor.cc:1069
 #, fuzzy
 msgid "Editor"
 msgstr "επεξεργαστής"
 
-#: editor.cc:1159 editor.cc:1169 editor.cc:4450 editor.cc:4477
-#: editor_actions.cc:123 editor_actions.cc:1320
+#: editor.cc:1160 editor.cc:1170 editor.cc:4451 editor.cc:4478
+#: editor_actions.cc:123 editor_actions.cc:1317
 msgid "Loop"
 msgstr "Loop"
 
-#: editor.cc:1175 editor.cc:1185 editor_actions.cc:124
+#: editor.cc:1176 editor.cc:1186 editor_actions.cc:124 time_info_box.cc:74
 msgid "Punch"
 msgstr "Punch"
 
-#: editor.cc:1251
+#: editor.cc:1252
 msgid "programming error: fade in canvas item has no regionview data pointer!"
 msgstr ""
 "Σφάλμα προγραμματισμού: το αντικείμενο 'fade in canvas' δεν διαθέτει δείκτη "
 "δεδομένων οπτικής περιοχών!"
 
-#: editor.cc:1263 editor.cc:1329
+#: editor.cc:1264 editor.cc:1330
 msgid "Deactivate"
 msgstr "Απενεργοποίηση"
 
-#: editor.cc:1265 editor.cc:1331
+#: editor.cc:1266 editor.cc:1332
 msgid "Activate"
 msgstr "Ενεργοποίηση"
 
-#: editor.cc:1273 editor.cc:1289 editor.cc:1338 editor.cc:1353
+#: editor.cc:1274 editor.cc:1290 editor.cc:1339 editor.cc:1354
 msgid "Slowest"
 msgstr "Αργότατο"
 
-#: editor.cc:1298 editor.cc:1362
+#: editor.cc:1299 editor.cc:1363
 msgid "Slow"
 msgstr "Αργό"
 
-#: editor.cc:1307 editor.cc:1371 sfdb_ui.cc:1323 sfdb_ui.cc:1425
+#: editor.cc:1308 editor.cc:1372 sfdb_ui.cc:1323 sfdb_ui.cc:1425
 msgid "Fast"
 msgstr "Ταχύ"
 
-#: editor.cc:1316 editor.cc:1380 sfdb_ui.cc:1324
+#: editor.cc:1317 editor.cc:1381 sfdb_ui.cc:1324
 msgid "Fastest"
 msgstr "Ταχύτατο"
 
-#: editor.cc:1391 route_time_axis.cc:1892 selection.cc:881 selection.cc:925
+#: editor.cc:1392 route_time_axis.cc:1851 selection.cc:881 selection.cc:925
 msgid "programming error: "
 msgstr "σφάλμα προγραμματισμού: "
 
-#: editor.cc:1499 editor.cc:1507 editor_ops.cc:3297
+#: editor.cc:1500 editor.cc:1508 editor_ops.cc:3297
 msgid "Freeze"
 msgstr "Πάγωμα"
 
-#: editor.cc:1503
+#: editor.cc:1504
 msgid "Unfreeze"
 msgstr "Ξεπάγωμα"
 
-#: editor.cc:1696 editor_actions.cc:1259 mixer_strip.cc:1727
+#: editor.cc:1697 editor_actions.cc:1256 mixer_strip.cc:1727
 #: route_time_axis.cc:196
 msgid "Mute"
 msgstr "Σιγή"
 
-#: editor.cc:1698
+#: editor.cc:1699
 msgid "Unmute"
 msgstr ""
 
-#: editor.cc:1702 editor_markers.cc:917 group_tabs.cc:310
-#: processor_box.cc:2016
+#: editor.cc:1703 editor_markers.cc:917 group_tabs.cc:310
+#: processor_box.cc:2018
 #, fuzzy
 msgid "Edit..."
 msgstr "Επεξεργασία"
 
-#: editor.cc:1707
+#: editor.cc:1708
 msgid "Convert to Short"
 msgstr ""
 
-#: editor.cc:1709
+#: editor.cc:1710
 #, fuzzy
 msgid "Convert to Full"
 msgstr "Εξαγωγή σε αρχείο"
 
-#: editor.cc:1720
+#: editor.cc:1721
 msgid "Crossfade"
 msgstr ""
 
-#: editor.cc:1755
+#: editor.cc:1756
 #, fuzzy
 msgid "Selected Regions"
 msgstr "επιλογή περιοχών"
 
-#: editor.cc:1798 editor_markers.cc:879
+#: editor.cc:1799 editor_markers.cc:879
 #, fuzzy
 msgid "Play Range"
 msgstr "Αναπαρ/γή διαστήματος"
 
-#: editor.cc:1799 editor_markers.cc:883
+#: editor.cc:1800 editor_markers.cc:883
 #, fuzzy
 msgid "Loop Range"
 msgstr "Loop διαστήματος"
 
-#: editor.cc:1808 editor_actions.cc:319
+#: editor.cc:1809 editor_actions.cc:320
 #, fuzzy
 msgid "Move Range Start to Previous Region Boundary"
 msgstr "Playhead στην προηγούμενη Region End"
 
-#: editor.cc:1815 editor_actions.cc:326
+#: editor.cc:1816 editor_actions.cc:327
 #, fuzzy
 msgid "Move Range Start to Next Region Boundary"
 msgstr "Playhead στην επόμενη Region End"
 
-#: editor.cc:1822 editor_actions.cc:333
+#: editor.cc:1823 editor_actions.cc:334
 #, fuzzy
 msgid "Move Range End to Previous Region Boundary"
 msgstr "Playhead στην προηγούμενη Region End"
 
-#: editor.cc:1829 editor_actions.cc:340
+#: editor.cc:1830 editor_actions.cc:341
 #, fuzzy
 msgid "Move Range End to Next Region Boundary"
 msgstr "Playhead στην επόμενη Region End"
 
-#: editor.cc:1835
+#: editor.cc:1836
 #, fuzzy
 msgid "Convert to Region In-Place"
 msgstr "Snap στο συγχρονισμό περιοχής"
 
-#: editor.cc:1836
+#: editor.cc:1837
 msgid "Convert to Region in Region List"
 msgstr ""
 
-#: editor.cc:1839 editor_markers.cc:902
+#: editor.cc:1840 editor_markers.cc:902
 msgid "Select All in Range"
 msgstr "Επιλογή όλων στο διάστημα"
 
-#: editor.cc:1842
+#: editor.cc:1843
 #, fuzzy
 msgid "Set Loop from Range"
 msgstr "Θέση Loop Διαστήματος"
 
-#: editor.cc:1843
+#: editor.cc:1844
 #, fuzzy
 msgid "Set Punch from Range"
 msgstr "Θέση Punch Διαστήματος"
 
-#: editor.cc:1846
+#: editor.cc:1847
 msgid "Add Range Markers"
 msgstr "Πρόσθεση Στιγμάτων Διαστήματος"
 
-#: editor.cc:1849
+#: editor.cc:1850
 #, fuzzy
 msgid "Crop Region to Range"
 msgstr "Κοπή Περιοχής κατά το διάστημα"
 
-#: editor.cc:1850
+#: editor.cc:1851
 #, fuzzy
 msgid "Fill Range with Region"
 msgstr "Γέμισμα περιοχής με το διάστημα"
 
-#: editor.cc:1851 editor_actions.cc:277
+#: editor.cc:1852 editor_actions.cc:277
 msgid "Duplicate Range"
 msgstr "Αντιγραφή διαστήματος"
 
-#: editor.cc:1854
+#: editor.cc:1855
 #, fuzzy
 msgid "Consolidate Range"
 msgstr "Αντιγραφή διαστήματος"
 
-#: editor.cc:1855
+#: editor.cc:1856
 msgid "Consolidate Range With Processing"
 msgstr ""
 
-#: editor.cc:1856
+#: editor.cc:1857
 #, fuzzy
 msgid "Bounce Range to Region List"
 msgstr "Διαχωρισμός διαστήματος στη λίστα περιοχής"
 
-#: editor.cc:1857
+#: editor.cc:1858
 msgid "Bounce Range to Region List With Processing"
 msgstr ""
 
-#: editor.cc:1858 editor_actions.cc:283 editor_markers.cc:891
-#: export_dialog.cc:386
+#: editor.cc:1859 editor_actions.cc:283 editor_markers.cc:891
+#: export_dialog.cc:375
 msgid "Export Range"
 msgstr "Εξαγωγή διαστήματος"
 
-#: editor.cc:1873 editor.cc:1954 editor_actions.cc:269
+#: editor.cc:1874 editor.cc:1955 editor_actions.cc:269
 #, fuzzy
 msgid "Play From Edit Point"
 msgstr "Αναπαρ/γή από Κέρσορα Επεξεργασίας"
 
-#: editor.cc:1874 editor.cc:1955
+#: editor.cc:1875 editor.cc:1956
 #, fuzzy
 msgid "Play From Start"
 msgstr "Αναπαρ/γή από αρχή"
 
-#: editor.cc:1875
+#: editor.cc:1876
 #, fuzzy
 msgid "Play Region"
 msgstr "Αναπαρ/γή Περιοχής"
 
-#: editor.cc:1877
+#: editor.cc:1878
 msgid "Loop Region"
 msgstr "Loop Περιοχής"
 
-#: editor.cc:1887 editor.cc:1964
+#: editor.cc:1888 editor.cc:1965
 #, fuzzy
 msgid "Select All in Track"
 msgstr "Επιλογή όλων στο  κανάλι"
 
-#: editor.cc:1888 editor.cc:1965 editor_actions.cc:178 processor_box.cc:2000
+#: editor.cc:1889 editor.cc:1966 editor_actions.cc:178 processor_box.cc:2002
 msgid "Select All"
 msgstr "Επιλογή όλων"
 
-#: editor.cc:1889 editor.cc:1966
+#: editor.cc:1890 editor.cc:1967
 #, fuzzy
 msgid "Invert Selection in Track"
 msgstr "Αντιστροφή επιλογής στο κανάλι"
 
-#: editor.cc:1890 editor.cc:1967 editor_actions.cc:180
+#: editor.cc:1891 editor.cc:1968 editor_actions.cc:180
 #, fuzzy
 msgid "Invert Selection"
 msgstr "Αντιστροφή επιλογής"
 
-#: editor.cc:1892
+#: editor.cc:1893
 #, fuzzy
 msgid "Set Range to Loop Range"
 msgstr "Επιλογή διαστήματος κατά το loop"
 
-#: editor.cc:1893
+#: editor.cc:1894
 #, fuzzy
 msgid "Set Range to Punch Range"
 msgstr "Επιλογή διαστήματος κατά το punch"
 
-#: editor.cc:1895 editor.cc:1969 editor_actions.cc:181
+#: editor.cc:1896 editor.cc:1970 editor_actions.cc:181
 #, fuzzy
 msgid "Select All After Edit Point"
 msgstr "Επιλογή όλων μετά το Κερσ.Επεξεργασίας"
 
-#: editor.cc:1896 editor.cc:1970 editor_actions.cc:182
+#: editor.cc:1897 editor.cc:1971 editor_actions.cc:182
 #, fuzzy
 msgid "Select All Before Edit Point"
 msgstr "Επιλογή όλων πρίν τον Edit Cursor"
 
-#: editor.cc:1897 editor.cc:1971
+#: editor.cc:1898 editor.cc:1972
 msgid "Select All After Playhead"
 msgstr "Επιλογή όλων μετά την playhead"
 
-#: editor.cc:1898 editor.cc:1972
+#: editor.cc:1899 editor.cc:1973
 msgid "Select All Before Playhead"
-msgstr "Επιλογή όλων πριν την playhead"
-
-#: editor.cc:1899
-#, fuzzy
-msgid "Select All Between Playhead and Edit Point"
 msgstr "Επιλογή όλων πριν την playhead"
 
 #: editor.cc:1900
 #, fuzzy
+msgid "Select All Between Playhead and Edit Point"
+msgstr "Επιλογή όλων πριν την playhead"
+
+#: editor.cc:1901
+#, fuzzy
 msgid "Select All Within Playhead and Edit Point"
 msgstr "Επιλογή όλων μετά την playhead"
 
-#: editor.cc:1901
+#: editor.cc:1902
 msgid "Select Range Between Playhead and Edit Point"
 msgstr ""
 
-#: editor.cc:1903 editor.cc:1974 editor_actions.cc:120 editor_actions.cc:121
+#: editor.cc:1904 editor.cc:1975 editor_actions.cc:120 editor_actions.cc:121
 msgid "Select"
 msgstr "Επιλογή"
 
-#: editor.cc:1911 editor.cc:1982 editor_actions.cc:297 processor_box.cc:1985
+#: editor.cc:1912 editor.cc:1983 editor_actions.cc:297 processor_box.cc:1987
 msgid "Cut"
 msgstr "Κοπή"
 
-#: editor.cc:1912 editor.cc:1983 editor_actions.cc:299 processor_box.cc:1988
+#: editor.cc:1913 editor.cc:1984 editor_actions.cc:300 processor_box.cc:1990
 msgid "Copy"
 msgstr "Αντιγραφή"
 
-#: editor.cc:1913 editor.cc:1984 editor_actions.cc:300 processor_box.cc:1996
+#: editor.cc:1914 editor.cc:1985 editor_actions.cc:301 processor_box.cc:1998
 msgid "Paste"
 msgstr "Επικόλληση"
 
-#: editor.cc:1917 editor_actions.cc:82
+#: editor.cc:1918 editor_actions.cc:82
 msgid "Align"
 msgstr "Ευθυγράμμιση"
 
-#: editor.cc:1918
+#: editor.cc:1919
 msgid "Align Relative"
 msgstr "Ευθυγράμμιση σχετικών"
 
-#: editor.cc:1925
+#: editor.cc:1926
 msgid "Insert Selected Region"
 msgstr "Εισαγωγή επιλεγμένης περιοχής"
 
-#: editor.cc:1926
+#: editor.cc:1927
 #, fuzzy
 msgid "Insert Existing Media"
 msgstr "Εισαγωγή Υπάρχοντος Audio"
 
-#: editor.cc:1935 editor.cc:1991
+#: editor.cc:1936 editor.cc:1992
 #, fuzzy
 msgid "Nudge Entire Track Forward"
 msgstr "Νύξη ολόκληρου καναλιού εμπρός"
 
-#: editor.cc:1936 editor.cc:1992
+#: editor.cc:1937 editor.cc:1993
 #, fuzzy
 msgid "Nudge Track After Edit Point Forward"
 msgstr "Νύξη καναλιού μετά του κέρσορα επεξεργασίας εμπρός"
 
-#: editor.cc:1937 editor.cc:1993
+#: editor.cc:1938 editor.cc:1994
 #, fuzzy
 msgid "Nudge Entire Track Backward"
 msgstr "Νύξη ολόκληρου καναλιού εμπρός"
 
-#: editor.cc:1938 editor.cc:1994
+#: editor.cc:1939 editor.cc:1995
 #, fuzzy
 msgid "Nudge Track After Edit Point Backward"
 msgstr "Νύξη καναλιού μετά του κέρσορα επεξεργασίας εμπρός"
 
-#: editor.cc:1940 editor.cc:1996 editor_actions.cc:94
+#: editor.cc:1941 editor.cc:1997 editor_actions.cc:94
 msgid "Nudge"
 msgstr "Νύξη"
 
-#: editor.cc:2969
+#: editor.cc:2970
 #, fuzzy
 msgid "Select/Move Objects"
 msgstr "επιλογή/μετακίνηση αντικειμένων"
 
-#: editor.cc:2970
+#: editor.cc:2971
 #, fuzzy
 msgid "Draw Region Gain"
 msgstr "Έλξη αντιγραφής περιοχής"
 
-#: editor.cc:2971
+#: editor.cc:2972
 #, fuzzy
 msgid "Select Zoom Range"
 msgstr "επιλογή διαστήματος zoom"
 
-#: editor.cc:2972
+#: editor.cc:2973
 #, fuzzy
 msgid "Stretch/Shrink Regions and MIDI Notes"
 msgstr "μεγέθυνση/σμίκρυνση περιοχών"
 
-#: editor.cc:2973
+#: editor.cc:2974
 #, fuzzy
 msgid "Listen to Specific Regions"
 msgstr "ακρόαση συγκεκριμένων περιοχών"
 
-#: editor.cc:2974
+#: editor.cc:2975
 #, fuzzy
 msgid "Select/Move Objects or Ranges"
 msgstr "επιλογή/μετακίνηση διαστημάτων"
 
-#: editor.cc:2975
+#: editor.cc:2976
 msgid "Edit Region Contents (e.g. notes)"
 msgstr ""
 
-#: editor.cc:2976
+#: editor.cc:2977
 msgid ""
 "Groups: click to (de)activate\n"
 "Context-click for other operations"
 msgstr ""
 
-#: editor.cc:2977
+#: editor.cc:2978
 #, fuzzy
 msgid "Nudge Region/Selection Forwards"
 msgstr "Νύξη περιοχής/επιλογής εμπρός"
 
-#: editor.cc:2978
+#: editor.cc:2979
 #, fuzzy
 msgid "Nudge Region/Selection Backwards"
 msgstr "Νύξη περιοχής/επιλογής πίσω"
 
-#: editor.cc:2979 editor_actions.cc:230
+#: editor.cc:2980 editor_actions.cc:230
 msgid "Zoom In"
 msgstr ""
 
-#: editor.cc:2980 editor_actions.cc:229
+#: editor.cc:2981 editor_actions.cc:229
 msgid "Zoom Out"
 msgstr ""
 
-#: editor.cc:2981 editor_actions.cc:231
+#: editor.cc:2982 editor_actions.cc:231
 #, fuzzy
 msgid "Zoom to Session"
 msgstr "Zoom στη συνεδρία"
 
-#: editor.cc:2982
+#: editor.cc:2983
 #, fuzzy
 msgid "Zoom focus"
 msgstr "Εστίαση Zoom"
 
-#: editor.cc:2983
+#: editor.cc:2984
 #, fuzzy
 msgid "Expand Tracks"
 msgstr "ως Κανάλια"
 
-#: editor.cc:2984
+#: editor.cc:2985
 #, fuzzy
 msgid "Shrink Tracks"
 msgstr "Άλλα κανάλια"
 
-#: editor.cc:2985
+#: editor.cc:2986
 msgid "Snap/Grid Units"
 msgstr ""
 
-#: editor.cc:2986
+#: editor.cc:2987
 #, fuzzy
 msgid "Snap/Grid Mode"
 msgstr "Λειτουργία Έλξεως"
 
-#: editor.cc:2988
+#: editor.cc:2989
 msgid "Sound Notes"
 msgstr ""
 
-#: editor.cc:2989
+#: editor.cc:2990
 msgid "Send note off and reset controller messages on all MIDI channels"
 msgstr ""
 
-#: editor.cc:2990
+#: editor.cc:2991
 msgid "Edit Mode"
 msgstr "Λειτουργία Επεξ/σίας"
 
-#: editor.cc:3122
+#: editor.cc:3123
 msgid "malformed URL passed to drag-n-drop code"
 msgstr ""
 
-#: editor.cc:3194 editor_actions.cc:279 rc_option_editor.cc:844
+#: editor.cc:3195 editor_actions.cc:279 rc_option_editor.cc:842
 msgid "Undo"
 msgstr "Undo"
 
-#: editor.cc:3196
+#: editor.cc:3197
 msgid "Undo (%1)"
 msgstr "Undo (%1)"
 
-#: editor.cc:3203 editor_actions.cc:280
+#: editor.cc:3204 editor_actions.cc:280
 msgid "Redo"
 msgstr "Redo"
 
-#: editor.cc:3205
+#: editor.cc:3206
 msgid "Redo (%1)"
 msgstr "Redo (%1)"
 
-#: editor.cc:3230 editor.cc:3254 editor_actions.cc:100 editor_actions.cc:1301
+#: editor.cc:3231 editor.cc:3255 editor_actions.cc:100 editor_actions.cc:1298
 msgid "Duplicate"
 msgstr "Αντιγραφή"
 
-#: editor.cc:3231
+#: editor.cc:3232
 msgid "Number of duplications:"
 msgstr ""
 
-#: editor.cc:3833
+#: editor.cc:3834
 #, fuzzy
 msgid "Playlist Deletion"
 msgstr "Αναπαρ/γή επιλογής"
 
-#: editor.cc:3834
+#: editor.cc:3835
 #, fuzzy
 msgid ""
 "Playlist %1 is currently unused.\n"
@@ -2976,36 +3001,36 @@ msgstr ""
 "Εάν διαγραφεί, τα ηχητικά αρχεία που χρησιμοποιούνται μόνο απ'αυτήν θα "
 "διαγραφούν."
 
-#: editor.cc:3844
+#: editor.cc:3845
 #, fuzzy
 msgid "Delete Playlist"
 msgstr "Διαγραφή λίστας αναπαρ/γής"
 
-#: editor.cc:3845
+#: editor.cc:3846
 #, fuzzy
 msgid "Keep Playlist"
 msgstr "Διατήρηση λίστας αναπαρ/γής"
 
-#: editor.cc:3846 editor_audio_import.cc:624 editor_ops.cc:5413
+#: editor.cc:3847 editor_audio_import.cc:624 editor_ops.cc:5434
 #: processor_box.cc:1740 processor_box.cc:1765 sfdb_ui.cc:780
 #: tempo_dialog.cc:41 tempo_dialog.cc:57 tempo_dialog.cc:245
 #: tempo_dialog.cc:258
 msgid "Cancel"
 msgstr "Ακύρωση"
 
-#: editor.cc:4030
+#: editor.cc:4031
 msgid "new playlists"
 msgstr "νέες playlists"
 
-#: editor.cc:4046
+#: editor.cc:4047
 msgid "copy playlists"
 msgstr "Αντιγραφή playlists"
 
-#: editor.cc:4061
+#: editor.cc:4062
 msgid "clear playlists"
 msgstr "εκκαθάριση playlists"
 
-#: editor.cc:4718
+#: editor.cc:4719
 msgid "Please wait while %1 loads visual data"
 msgstr ""
 
@@ -3061,12 +3086,12 @@ msgstr "Ισοστάθμιση"
 msgid "Gain"
 msgstr "Εργαλείο Gain"
 
-#: editor_actions.cc:97 editor_actions.cc:520
+#: editor_actions.cc:97 editor_actions.cc:517
 #, fuzzy
 msgid "Ranges"
 msgstr "Διάστημα"
 
-#: editor_actions.cc:98 editor_actions.cc:1297 session_option_editor.cc:147
+#: editor_actions.cc:98 editor_actions.cc:1294 session_option_editor.cc:147
 #: session_option_editor.cc:149 session_option_editor.cc:158
 #: session_option_editor.cc:167 session_option_editor.cc:174
 #: session_option_editor.cc:181 session_option_editor.cc:188
@@ -3088,7 +3113,7 @@ msgstr "Εστίαση Zoom"
 msgid "Locate to Markers"
 msgstr "Τοποθέτηση στο Στίγμα"
 
-#: editor_actions.cc:104 editor_actions.cc:521
+#: editor_actions.cc:104 editor_actions.cc:518
 #, fuzzy
 msgid "Markers"
 msgstr "Στίγμα"
@@ -3106,7 +3131,7 @@ msgstr "Παύση Μετρητή"
 msgid "Misc Options"
 msgstr "Επιλογές"
 
-#: editor_actions.cc:108 rc_option_editor.cc:1085
+#: editor_actions.cc:108 rc_option_editor.cc:1083
 msgid "Monitoring"
 msgstr ""
 
@@ -3155,7 +3180,7 @@ msgstr "Frames"
 msgid "Timecode fps"
 msgstr ""
 
-#: editor_actions.cc:130 route_time_axis.cc:435
+#: editor_actions.cc:130 route_time_axis.cc:422
 msgid "Height"
 msgstr "Ύψος"
 
@@ -3295,7 +3320,7 @@ msgstr "Playhead στην Αρχή Διαστήματος"
 msgid "Playhead to Range End"
 msgstr "Η playhead στο τέλος του διαστήματος"
 
-#: editor_actions.cc:179 processor_box.cc:2002
+#: editor_actions.cc:179 processor_box.cc:2004
 msgid "Deselect All"
 msgstr "Αποεπιλογή όλων"
 
@@ -3526,770 +3551,766 @@ msgstr "Διαχωρισμός περιοχών στο διάστημα"
 msgid "Separate Using Loop Range"
 msgstr "Διαχωρισμός περιοχών στο διάστημα"
 
-#: editor_actions.cc:294 editor_actions.cc:310
+#: editor_actions.cc:294 editor_actions.cc:311
 msgid "Crop"
 msgstr ""
 
-#: editor_actions.cc:302
+#: editor_actions.cc:303
 #, fuzzy
 msgid "Set Tempo from Edit Range = Bar"
 msgstr "Θέση από διάστημα"
 
-#: editor_actions.cc:304
+#: editor_actions.cc:305
 msgid "Log"
 msgstr ""
 
-#: editor_actions.cc:307
+#: editor_actions.cc:308
 msgid "Move Forward to Transient"
 msgstr ""
 
-#: editor_actions.cc:308
+#: editor_actions.cc:309
 msgid "Move Backwards to Transient"
 msgstr ""
 
-#: editor_actions.cc:312
+#: editor_actions.cc:313
 msgid "Start Range"
 msgstr "Εναρκτήριο διάστημα"
 
-#: editor_actions.cc:313
+#: editor_actions.cc:314
 msgid "Finish Range"
 msgstr "Ολοκλήρωση Διαστήματος"
 
-#: editor_actions.cc:314
+#: editor_actions.cc:315
 #, fuzzy
 msgid "Finish Add Range"
 msgstr "Ολοκλήρωση πρόσθεσης Διαστήματος"
 
-#: editor_actions.cc:344
+#: editor_actions.cc:345
 msgid "Follow Playhead"
 msgstr "Ακολουθώντας την playhead"
 
-#: editor_actions.cc:347
+#: editor_actions.cc:348
 #, fuzzy
 msgid "Stationary Playhead"
 msgstr "Θέση playhead"
 
-#: editor_actions.cc:349 insert_time_dialog.cc:32
+#: editor_actions.cc:350 insert_time_dialog.cc:32
 #, fuzzy
 msgid "Insert Time"
 msgstr "Προσθήκη περιοχής"
 
-#: editor_actions.cc:352
+#: editor_actions.cc:353
 #, fuzzy
 msgid "Toggle Active"
 msgstr "Επανενεργοποίηση γραφήματος"
 
-#: editor_actions.cc:357 editor_actions.cc:1225 editor_markers.cc:862
+#: editor_actions.cc:358 editor_actions.cc:1222 editor_markers.cc:862
 #: editor_markers.cc:918 editor_snapshots.cc:123 group_tabs.cc:315
-#: mixer_strip.cc:1375 route_time_axis.cc:718
+#: mixer_strip.cc:1375 route_time_axis.cc:705
 msgid "Remove"
 msgstr "Απαλοιφή"
 
-#: editor_actions.cc:361
+#: editor_actions.cc:362
 #, fuzzy
 msgid "Fit Selected Tracks"
 msgstr "θέση επιλεγμένης οπτικής καναλιού"
 
-#: editor_actions.cc:363 time_axis_view.cc:1378
+#: editor_actions.cc:364 time_axis_view.cc:1359
 msgid "Largest"
 msgstr "Μέγιστο"
 
-#: editor_actions.cc:366 time_axis_view.cc:1379
+#: editor_actions.cc:367 time_axis_view.cc:1360
 msgid "Larger"
 msgstr "Μεγαλύτερο"
 
-#: editor_actions.cc:369 time_axis_view.cc:1380
+#: editor_actions.cc:370 time_axis_view.cc:1361
 msgid "Large"
 msgstr "Μεγάλο"
 
-#: editor_actions.cc:375 time_axis_view.cc:1383
+#: editor_actions.cc:376 time_axis_view.cc:1363
 msgid "Small"
 msgstr "Μικρό"
 
-#: editor_actions.cc:379 time_axis_view.cc:1382
-msgid "Smaller"
-msgstr "Μικρότερο"
-
-#: editor_actions.cc:386
+#: editor_actions.cc:383
 msgid "Zoom Focus Left"
 msgstr "Εστίαση Zoom αριστερά"
 
-#: editor_actions.cc:387
+#: editor_actions.cc:384
 msgid "Zoom Focus Right"
 msgstr "Εστίαση Zoom δεξιά"
 
-#: editor_actions.cc:388
+#: editor_actions.cc:385
 msgid "Zoom Focus Center"
 msgstr "Εστίαση Zoom κέντρο"
 
-#: editor_actions.cc:389
+#: editor_actions.cc:386
 msgid "Zoom Focus Playhead"
 msgstr "Εστίαση Zoom στην playhead"
 
-#: editor_actions.cc:390
+#: editor_actions.cc:387
 #, fuzzy
 msgid "Zoom Focus Mouse"
 msgstr "Εστίαση Zoom αριστερά"
 
-#: editor_actions.cc:391
+#: editor_actions.cc:388
 #, fuzzy
 msgid "Zoom Focus Edit Point"
 msgstr "Εστίαση Zoom Κερσ.Επεξ."
 
-#: editor_actions.cc:396
+#: editor_actions.cc:393
 msgid "Object Tool"
 msgstr "Εργαλείο Object"
 
-#: editor_actions.cc:403
+#: editor_actions.cc:400
 msgid "Range Tool"
 msgstr "Εργαλείο Διαστήματος"
 
-#: editor_actions.cc:410
+#: editor_actions.cc:407
 #, fuzzy
 msgid "Link Object / Range Tools"
 msgstr "Εργαλείο Object"
 
-#: editor_actions.cc:417
+#: editor_actions.cc:414
 msgid "Gain Tool"
 msgstr "Εργαλείο Gain"
 
-#: editor_actions.cc:424
+#: editor_actions.cc:421
 msgid "Zoom Tool"
 msgstr "Εργαλείο Zoom"
 
-#: editor_actions.cc:431
+#: editor_actions.cc:428
 #, fuzzy
 msgid "Audition Tool"
 msgstr "Ακρόαση"
 
-#: editor_actions.cc:438
+#: editor_actions.cc:435
 #, fuzzy
 msgid "Time FX Tool"
 msgstr "Εργαλείο Timefx"
 
-#: editor_actions.cc:445
+#: editor_actions.cc:442
 msgid "Step Mouse Mode"
 msgstr ""
 
-#: editor_actions.cc:447
+#: editor_actions.cc:444
 #, fuzzy
 msgid "Edit MIDI"
 msgstr "Λειτουργία Επεξ/σίας"
 
-#: editor_actions.cc:459
+#: editor_actions.cc:456
 #, fuzzy
 msgid "Change Edit Point"
 msgstr "Αριθμός Καναλιών"
 
-#: editor_actions.cc:460
+#: editor_actions.cc:457
 msgid "Change Edit Point Including Marker"
 msgstr ""
 
-#: editor_actions.cc:462
+#: editor_actions.cc:459
 msgid "Splice"
 msgstr "Splice"
 
-#: editor_actions.cc:464
+#: editor_actions.cc:461
 msgid "Slide"
 msgstr "Ολίσθηση"
 
-#: editor_actions.cc:465 editor_actions.cc:1246 editor_markers.cc:846
+#: editor_actions.cc:462 editor_actions.cc:1243 editor_markers.cc:846
 #: location_ui.cc:55
 msgid "Lock"
 msgstr "Κλείδωμα"
 
-#: editor_actions.cc:466
+#: editor_actions.cc:463
 #, fuzzy
 msgid "Toggle Edit Mode"
 msgstr "Λειτουργία Επεξ/σίας"
 
-#: editor_actions.cc:468
+#: editor_actions.cc:465
 #, fuzzy
 msgid "Snap to"
 msgstr "Έλξη σε"
 
-#: editor_actions.cc:469
+#: editor_actions.cc:466
 msgid "Snap Mode"
 msgstr "Λειτουργία Έλξεως"
 
-#: editor_actions.cc:476
+#: editor_actions.cc:473
 #, fuzzy
 msgid "Next Snap Mode"
 msgstr "Λειτουργία Έλξεως"
 
-#: editor_actions.cc:477
+#: editor_actions.cc:474
 msgid "Next Snap Choice"
 msgstr ""
 
-#: editor_actions.cc:482
+#: editor_actions.cc:479
 #, fuzzy
 msgid "Snap to CD Frame"
 msgstr "Snap σε frame"
 
-#: editor_actions.cc:483
+#: editor_actions.cc:480
 #, fuzzy
 msgid "Snap to Timecode Frame"
 msgstr "Snap σε cd frame"
 
-#: editor_actions.cc:484
+#: editor_actions.cc:481
 #, fuzzy
 msgid "Snap to Timecode Seconds"
 msgstr "Snap σε Δευτερόλεπτα"
 
-#: editor_actions.cc:485
+#: editor_actions.cc:482
 #, fuzzy
 msgid "Snap to Timecode Minutes"
 msgstr "Snap σε λεπτά"
 
-#: editor_actions.cc:486
+#: editor_actions.cc:483
 #, fuzzy
 msgid "Snap to Seconds"
 msgstr "Snap σε Δευτερόλεπτα"
 
-#: editor_actions.cc:487
+#: editor_actions.cc:484
 #, fuzzy
 msgid "Snap to Minutes"
 msgstr "Snap σε λεπτά"
 
-#: editor_actions.cc:489
+#: editor_actions.cc:486
 #, fuzzy
 msgid "Snap to Thirty Seconds"
 msgstr "Snap σε τριακοστα-δεύτερα (32)"
 
-#: editor_actions.cc:490
+#: editor_actions.cc:487
 #, fuzzy
 msgid "Snap to Twenty Eighths"
 msgstr "Snap σε όγδοα"
 
-#: editor_actions.cc:491
+#: editor_actions.cc:488
 #, fuzzy
 msgid "Snap to Twenty Fourths"
 msgstr "Snap στο κέρσορα επεξεργασίας"
 
-#: editor_actions.cc:492
+#: editor_actions.cc:489
 #, fuzzy
 msgid "Snap to Twentieths"
 msgstr "Snap σε όγδοα"
 
-#: editor_actions.cc:493
+#: editor_actions.cc:490
 #, fuzzy
 msgid "Snap to Sixteenths"
 msgstr "Snap σε δέκατο-έκτο"
 
-#: editor_actions.cc:494
+#: editor_actions.cc:491
 #, fuzzy
 msgid "Snap to Fourteenths"
 msgstr "Snap σε τέταρτα"
 
-#: editor_actions.cc:495
+#: editor_actions.cc:492
 #, fuzzy
 msgid "Snap to Twelfths"
 msgstr "Snap σε όγδοα"
 
-#: editor_actions.cc:496
+#: editor_actions.cc:493
 #, fuzzy
 msgid "Snap to Tenths"
 msgstr "Snap σε όγδοα"
 
-#: editor_actions.cc:497
+#: editor_actions.cc:494
 #, fuzzy
 msgid "Snap to Eighths"
 msgstr "Snap σε όγδοα"
 
-#: editor_actions.cc:498
+#: editor_actions.cc:495
 #, fuzzy
 msgid "Snap to Sevenths"
 msgstr "Snap σε όγδοα"
 
-#: editor_actions.cc:499
+#: editor_actions.cc:496
 #, fuzzy
 msgid "Snap to Sixths"
 msgstr "Snap σε όγδοα"
 
-#: editor_actions.cc:500
+#: editor_actions.cc:497
 #, fuzzy
 msgid "Snap to Fifths"
 msgstr "Snap σε όγδοα"
 
-#: editor_actions.cc:501
+#: editor_actions.cc:498
 #, fuzzy
 msgid "Snap to Quarters"
 msgstr "Snap σε τέταρτα"
 
-#: editor_actions.cc:502
+#: editor_actions.cc:499
 #, fuzzy
 msgid "Snap to Thirds"
 msgstr "Snap σε τρίτα"
 
-#: editor_actions.cc:503
+#: editor_actions.cc:500
 #, fuzzy
 msgid "Snap to Halves"
 msgstr "Snap σε frame"
 
-#: editor_actions.cc:505
+#: editor_actions.cc:502
 #, fuzzy
 msgid "Snap to Beat"
 msgstr "Snap σε beat"
 
-#: editor_actions.cc:506
+#: editor_actions.cc:503
 #, fuzzy
 msgid "Snap to Bar"
 msgstr "Snap σε μπάρες"
 
-#: editor_actions.cc:507
+#: editor_actions.cc:504
 #, fuzzy
 msgid "Snap to Mark"
 msgstr "Snap σε στίγματα"
 
-#: editor_actions.cc:508
+#: editor_actions.cc:505
 #, fuzzy
 msgid "Snap to Region Start"
 msgstr "Snap στην αρχή περιοχής"
 
-#: editor_actions.cc:509
+#: editor_actions.cc:506
 #, fuzzy
 msgid "Snap to Region End"
 msgstr "Snap στο Τέλος Περιοχης"
 
-#: editor_actions.cc:510
+#: editor_actions.cc:507
 #, fuzzy
 msgid "Snap to Region Sync"
 msgstr "Snap στο συγχρονισμό περιοχής"
 
-#: editor_actions.cc:511
+#: editor_actions.cc:508
 #, fuzzy
 msgid "Snap to Region Boundary"
 msgstr "Snap στο Όριο περιοχης"
 
-#: editor_actions.cc:513
+#: editor_actions.cc:510
 #, fuzzy
 msgid "Show Marker Lines"
 msgstr "Ανάδειξη γραμμών μετρήσεων"
 
-#: editor_actions.cc:523
+#: editor_actions.cc:520
 #, fuzzy
 msgid "Loop/Punch"
 msgstr "Διαστήματα Loop/Punch"
 
-#: editor_actions.cc:527
+#: editor_actions.cc:524
 #, fuzzy
 msgid "Min:Sec"
 msgstr "Λεπ:Δεύτ"
 
-#: editor_actions.cc:559
+#: editor_actions.cc:556
 msgid "Sort"
 msgstr "Ταξινόμηση"
 
-#: editor_actions.cc:570 editor_routes.cc:385 mixer_ui.cc:1010
+#: editor_actions.cc:567 editor_routes.cc:385 mixer_ui.cc:1010
 msgid "Show All"
 msgstr "Εμφάνιση Όλων"
 
-#: editor_actions.cc:571
+#: editor_actions.cc:568
 #, fuzzy
 msgid "Show Automatic Regions"
 msgstr "Ανάδειξη αυτομάτων περιοχών"
 
-#: editor_actions.cc:573
+#: editor_actions.cc:570
 msgid "Ascending"
 msgstr "Αύξουσα"
 
-#: editor_actions.cc:575
+#: editor_actions.cc:572
 msgid "Descending"
 msgstr "Φθίνουσα"
 
-#: editor_actions.cc:578
+#: editor_actions.cc:575
 msgid "By Region Name"
 msgstr "Με Όνομα Περιοχής"
 
-#: editor_actions.cc:580
+#: editor_actions.cc:577
 msgid "By Region Length"
 msgstr "Με Μέγεθος Περιοχής"
 
-#: editor_actions.cc:582
+#: editor_actions.cc:579
 msgid "By Region Position"
 msgstr "Με Θέση Περιοχής"
 
-#: editor_actions.cc:584
+#: editor_actions.cc:581
 msgid "By Region Timestamp"
 msgstr "Με Χρονο-στάμπα Περιοχής"
 
-#: editor_actions.cc:586
+#: editor_actions.cc:583
 msgid "By Region Start in File"
 msgstr "Με Αρχή-στο-αρχείο της Περιοχής"
 
-#: editor_actions.cc:588
+#: editor_actions.cc:585
 msgid "By Region End in File"
 msgstr "Με Τέλος-στο -αρχείο της Περιοχής"
 
-#: editor_actions.cc:590
+#: editor_actions.cc:587
 msgid "By Source File Name"
 msgstr "Με Όνομα Αρχείου Πηγής"
 
-#: editor_actions.cc:592
+#: editor_actions.cc:589
 msgid "By Source File Length"
 msgstr "Με Μέγεθος Αρχείου Πηγής"
 
-#: editor_actions.cc:594
+#: editor_actions.cc:591
 msgid "By Source File Creation Date"
 msgstr "Με Ημ/νία Αρχείου Πηγής"
 
-#: editor_actions.cc:596
+#: editor_actions.cc:593
 msgid "By Source Filesystem"
 msgstr "Με Filesystem Πηγής"
 
-#: editor_actions.cc:599
+#: editor_actions.cc:596
 #, fuzzy
 msgid "Delete Unused"
 msgstr "Διαγραφή με"
 
-#: editor_actions.cc:603 editor_audio_import.cc:340
+#: editor_actions.cc:600 editor_audio_import.cc:340
 #: session_import_dialog.cc:74 session_import_dialog.cc:94
 #: session_metadata_dialog.cc:292
 msgid "Import"
 msgstr "Εισαγωγή"
 
-#: editor_actions.cc:606
+#: editor_actions.cc:603
 #, fuzzy
 msgid "Import to Region List..."
 msgstr "Διαχωρισμός διαστήματος στη λίστα περιοχής"
 
-#: editor_actions.cc:609 session_import_dialog.cc:43
+#: editor_actions.cc:606 session_import_dialog.cc:43
 #, fuzzy
 msgid "Import From Session"
 msgstr "Εξαγωγή Συνεδρίας"
 
-#: editor_actions.cc:612
+#: editor_actions.cc:609
 #, fuzzy
 msgid "Show Summary"
 msgstr "Ανάδειξη όλων"
 
-#: editor_actions.cc:614
+#: editor_actions.cc:611
 msgid "Show Group Tabs"
 msgstr ""
 
-#: editor_actions.cc:616
+#: editor_actions.cc:613
 #, fuzzy
 msgid "Show Measures"
 msgstr "Ανάδειξη γραμμών μετρήσεων"
 
-#: editor_actions.cc:620
+#: editor_actions.cc:617
 #, fuzzy
 msgid "Show Logo"
 msgstr "Ανάδειξη Θέσεως"
 
-#: editor_actions.cc:828 editor_actions.cc:967 editor_actions.cc:978
-#: editor_actions.cc:1031 editor_actions.cc:1042 editor_actions.cc:1089
-#: editor_actions.cc:1099 editor_regions.cc:1528
+#: editor_actions.cc:825 editor_actions.cc:964 editor_actions.cc:975
+#: editor_actions.cc:1028 editor_actions.cc:1039 editor_actions.cc:1086
+#: editor_actions.cc:1096 editor_regions.cc:1528
 #, fuzzy
 msgid "programming error: %1: %2"
 msgstr "σφάλμα προγραμματισμού: %1"
 
-#: editor_actions.cc:1228 mixer_strip.cc:1352 route_time_axis.cc:1507
+#: editor_actions.cc:1225 mixer_strip.cc:1352 route_time_axis.cc:1495
 #, fuzzy
 msgid "Rename..."
 msgstr "Μετονομασία"
 
-#: editor_actions.cc:1231
+#: editor_actions.cc:1228
 msgid "Raise"
 msgstr ""
 
-#: editor_actions.cc:1234
+#: editor_actions.cc:1231
 #, fuzzy
 msgid "Raise to Top"
 msgstr "Ανόρθωση στο ανώτατο στρώμα"
 
-#: editor_actions.cc:1237 gtk-custom-ruler.c:132
+#: editor_actions.cc:1234 gtk-custom-ruler.c:132
 msgid "Lower"
 msgstr "Κατώτερο"
 
-#: editor_actions.cc:1240
+#: editor_actions.cc:1237
 #, fuzzy
 msgid "Lower to Bottom"
 msgstr "Υποβίβαση στο κατώτατο στρώμα"
 
-#: editor_actions.cc:1243
+#: editor_actions.cc:1240
 #, fuzzy
 msgid "Move to Original Position"
 msgstr "Πρωταρχική θέση"
 
-#: editor_actions.cc:1251 editor_markers.cc:853
+#: editor_actions.cc:1248 editor_markers.cc:853
 msgid "Glue to Bars and Beats"
 msgstr ""
 
-#: editor_actions.cc:1256
+#: editor_actions.cc:1253
 #, fuzzy
 msgid "Remove Sync"
 msgstr "απαλοιφή συγχρονισμού(sync)"
 
-#: editor_actions.cc:1262
+#: editor_actions.cc:1259
 #, fuzzy
 msgid "Normalize..."
 msgstr "Εξομάλυνση"
 
-#: editor_actions.cc:1265
+#: editor_actions.cc:1262
 msgid "Reverse"
 msgstr "Αντιστροφή"
 
-#: editor_actions.cc:1268
+#: editor_actions.cc:1265
 #, fuzzy
 msgid "Make Mono Regions"
 msgstr "Δημιουργία mono περιοχών"
 
-#: editor_actions.cc:1271
+#: editor_actions.cc:1268
 msgid "Boost Gain"
 msgstr ""
 
-#: editor_actions.cc:1274
+#: editor_actions.cc:1271
 msgid "Cut Gain"
 msgstr ""
 
-#: editor_actions.cc:1277
+#: editor_actions.cc:1274
 msgid "Pitch Shift..."
 msgstr ""
 
-#: editor_actions.cc:1280
+#: editor_actions.cc:1277
 #, fuzzy
 msgid "Transpose..."
 msgstr "Αναζήτηση"
 
-#: editor_actions.cc:1283
+#: editor_actions.cc:1280
 #, fuzzy
 msgid "Opaque"
 msgstr "αδιαφανής"
 
-#: editor_actions.cc:1307
+#: editor_actions.cc:1304
 #, fuzzy
 msgid "Multi-Duplicate..."
 msgstr "Αντιγραφή"
 
-#: editor_actions.cc:1312
+#: editor_actions.cc:1309
 msgid "Fill Track"
 msgstr "Γόμωση καναλιού"
 
-#: editor_actions.cc:1316 editor_markers.cc:932
+#: editor_actions.cc:1313 editor_markers.cc:932
 msgid "Set Loop Range"
 msgstr "Θέση Loop Διαστήματος"
 
-#: editor_actions.cc:1323
+#: editor_actions.cc:1320
 #, fuzzy
 msgid "Set Punch"
 msgstr "Θέση Punch Διαστήματος"
 
-#: editor_actions.cc:1327
+#: editor_actions.cc:1324
 #, fuzzy
 msgid "Add 1 Range Marker"
 msgstr "Πρόσθεση Στιγμάτων Διαστήματος"
 
-#: editor_actions.cc:1332
+#: editor_actions.cc:1329
 #, fuzzy
 msgid "Add Range Marker(s)"
 msgstr "Πρόσθεση Στιγμάτων Διαστήματος"
 
-#: editor_actions.cc:1336
+#: editor_actions.cc:1333
 #, fuzzy
 msgid "Snap to Grid"
 msgstr "Snap σε μπάρες"
 
-#: editor_actions.cc:1339
+#: editor_actions.cc:1336
 #, fuzzy
 msgid "Close Gaps"
 msgstr "Κλείσιμο"
 
-#: editor_actions.cc:1342
+#: editor_actions.cc:1339
 msgid "Rhythm Ferret..."
 msgstr ""
 
-#: editor_actions.cc:1345
+#: editor_actions.cc:1342
 #, fuzzy
 msgid "Export..."
 msgstr "Εξαγωγή"
 
-#: editor_actions.cc:1351
+#: editor_actions.cc:1348
 #, fuzzy
 msgid "Separate Under"
 msgstr "Χωρισμός διαστήματος στο κανάλι"
 
-#: editor_actions.cc:1355
+#: editor_actions.cc:1352
 #, fuzzy
 msgid "Set Fade In Length"
 msgstr "αλλαγή μήκους fade in"
 
-#: editor_actions.cc:1356
+#: editor_actions.cc:1353
 #, fuzzy
 msgid "Set Fade Out Length"
 msgstr "αλλαγή μήκους fade out"
 
-#: editor_actions.cc:1357
+#: editor_actions.cc:1354
 #, fuzzy
 msgid "Set Tempo from Region = Bar"
 msgstr "θέση επιλογής από περιοχή"
 
-#: editor_actions.cc:1362
+#: editor_actions.cc:1359
 #, fuzzy
 msgid "Split at Percussion Onsets"
 msgstr "Κόψιμο στον κέρσορα επεξεργασίας"
 
-#: editor_actions.cc:1367
+#: editor_actions.cc:1364
 #, fuzzy
 msgid "List Editor..."
 msgstr "Επεξ/στης Ρυθμίσεων"
 
-#: editor_actions.cc:1370
+#: editor_actions.cc:1367
 msgid "Properties..."
 msgstr ""
 
-#: editor_actions.cc:1374
+#: editor_actions.cc:1371
 msgid "Bounce (with processing)"
 msgstr ""
 
-#: editor_actions.cc:1375
+#: editor_actions.cc:1372
 msgid "Bounce (without processing)"
 msgstr ""
 
-#: editor_actions.cc:1376
+#: editor_actions.cc:1373
 msgid "Combine"
 msgstr ""
 
-#: editor_actions.cc:1377
+#: editor_actions.cc:1374
 msgid "Uncombine"
 msgstr ""
 
-#: editor_actions.cc:1379
+#: editor_actions.cc:1376
 msgid "Spectral Analysis..."
 msgstr ""
 
-#: editor_actions.cc:1381
+#: editor_actions.cc:1378
 msgid "Reset Envelope"
 msgstr ""
 
-#: editor_actions.cc:1383
+#: editor_actions.cc:1380
 msgid "Reset Gain"
 msgstr ""
 
-#: editor_actions.cc:1388
+#: editor_actions.cc:1385
 #, fuzzy
 msgid "Envelope Visible"
 msgstr "ορατό"
 
-#: editor_actions.cc:1395
+#: editor_actions.cc:1392
 #, fuzzy
 msgid "Envelope Active"
 msgstr "Επανενεργοποίηση γραφήματος"
 
-#: editor_actions.cc:1399 quantize_dialog.cc:60
+#: editor_actions.cc:1396 quantize_dialog.cc:60
 msgid "Quantize"
 msgstr ""
 
-#: editor_actions.cc:1400
+#: editor_actions.cc:1397
 msgid "Insert Patch Change..."
 msgstr ""
 
-#: editor_actions.cc:1401
+#: editor_actions.cc:1398
 msgid "Fork"
 msgstr ""
 
-#: editor_actions.cc:1402
+#: editor_actions.cc:1399
 msgid "Strip Silence..."
 msgstr ""
 
-#: editor_actions.cc:1403
+#: editor_actions.cc:1400
 #, fuzzy
 msgid "Set Range Selection"
 msgstr "Ορισμός διαστήματος από επιλογή"
 
-#: editor_actions.cc:1405
+#: editor_actions.cc:1402
 #, fuzzy
 msgid "Nudge Forward"
 msgstr "νύξη εμπρός"
 
-#: editor_actions.cc:1406
+#: editor_actions.cc:1403
 msgid "Nudge Backward"
 msgstr "Νύξη πίσω"
 
-#: editor_actions.cc:1411
+#: editor_actions.cc:1408
 msgid "Nudge Forward by Capture Offset"
 msgstr ""
 
-#: editor_actions.cc:1418
+#: editor_actions.cc:1415
 #, fuzzy
 msgid "Nudge Backward by Capture Offset"
 msgstr "Νύξη πίσω"
 
-#: editor_actions.cc:1422
+#: editor_actions.cc:1419
 msgid "Trim to Loop"
 msgstr ""
 
-#: editor_actions.cc:1423
+#: editor_actions.cc:1420
 msgid "Trim to Punch"
 msgstr ""
 
-#: editor_actions.cc:1425
+#: editor_actions.cc:1422
 #, fuzzy
 msgid "Trim to Previous"
 msgstr "ισοστάθμιση προς σύνταξη"
 
-#: editor_actions.cc:1426
+#: editor_actions.cc:1423
 #, fuzzy
 msgid "Trim to Next"
 msgstr "ισοστάθμιση προς σύνταξη"
 
-#: editor_actions.cc:1433
+#: editor_actions.cc:1430
 #, fuzzy
 msgid "Insert Region From Region List"
 msgstr "θέση επιλογής από περιοχή"
 
-#: editor_actions.cc:1439
+#: editor_actions.cc:1436
 #, fuzzy
 msgid "Set Sync Position"
 msgstr "Θέση sync της Περιοχής"
 
-#: editor_actions.cc:1440
+#: editor_actions.cc:1437
 msgid "Place Transient"
 msgstr ""
 
-#: editor_actions.cc:1441
+#: editor_actions.cc:1438
 msgid "Split"
 msgstr "Διαχωρισμός"
 
-#: editor_actions.cc:1442
+#: editor_actions.cc:1439
 msgid "Trim Start at Edit Point"
 msgstr ""
 
-#: editor_actions.cc:1443
+#: editor_actions.cc:1440
 msgid "Trim End at Edit Point"
 msgstr ""
 
-#: editor_actions.cc:1448
+#: editor_actions.cc:1445
 #, fuzzy
 msgid "Align Start"
 msgstr "Ευθυγράμμιση αρχής Περιοχών"
 
-#: editor_actions.cc:1455
+#: editor_actions.cc:1452
 #, fuzzy
 msgid "Align Start Relative"
 msgstr "ευθυγράμμιση αρχής περιοχών(σχετική)"
 
-#: editor_actions.cc:1459
+#: editor_actions.cc:1456
 #, fuzzy
 msgid "Align End"
 msgstr "Ευθυγράμμιση"
 
-#: editor_actions.cc:1464
+#: editor_actions.cc:1461
 #, fuzzy
 msgid "Align End Relative"
 msgstr "Ευθυγράμμιση σχετικών"
 
-#: editor_actions.cc:1471
+#: editor_actions.cc:1468
 #, fuzzy
 msgid "Align Sync"
 msgstr "ευθυγράμμιση του sync των περιοχών"
 
-#: editor_actions.cc:1478
+#: editor_actions.cc:1475
 #, fuzzy
 msgid "Align Sync Relative"
 msgstr "Ευθυγράμμιση σχετικών"
 
-#: editor_actions.cc:1482
+#: editor_actions.cc:1479
 msgid "Choose Top..."
 msgstr ""
 
@@ -4357,10 +4378,10 @@ msgstr "Εμφύτευσέ το ούτως ή άλλως"
 msgid "could not open %1"
 msgstr "δεν μπόρεσα να ανοίξω το %1"
 
-#: editor_drag.cc:403 editor_routes.cc:431 editor_routes.cc:470
-#: editor_routes.cc:537 editor_routes.cc:538 editor_routes.cc:708
-#: editor_routes.cc:719 editor_routes.cc:1054 editor_routes.cc:1231
-#: editor_routes.cc:1236
+#: editor_drag.cc:403 editor_routes.cc:431 editor_routes.cc:469
+#: editor_routes.cc:536 editor_routes.cc:537 editor_routes.cc:707
+#: editor_routes.cc:718 editor_routes.cc:1053 editor_routes.cc:1230
+#: editor_routes.cc:1235
 msgid "editor"
 msgstr "επεξεργαστής"
 
@@ -4415,19 +4436,14 @@ msgstr "νέο στίγμα διαστήματος"
 msgid "No Selection = All Tracks"
 msgstr "Επιλογή όλων στο  κανάλι"
 
-#: editor_route_groups.cc:64 editor_regions.cc:96
+#: editor_route_groups.cc:64 editor_regions.cc:97
 #, fuzzy
 msgid "G"
 msgstr "Πήγαινε"
 
 #: editor_route_groups.cc:65 mixer_strip.cc:1747 mono_panner.cc:214
-#: stereo_panner.cc:233 stereo_panner.cc:260
+#: stereo_panner.cc:232 stereo_panner.cc:259
 msgid "R"
-msgstr ""
-
-#: editor_route_groups.cc:66 editor_regions.cc:97 gain_meter.cc:671
-#: mixer_strip.cc:1748 panner_ui.cc:556 stereo_panner.cc:255
-msgid "M"
 msgstr ""
 
 #: editor_route_groups.cc:67 mixer_strip.cc:1752
@@ -4504,8 +4520,8 @@ msgid "Create Range to Next Marker"
 msgstr "Χωρισμός διαστήματος στο κανάλι"
 
 #: editor_markers.cc:844 editor_markers.cc:1321 editor_mouse.cc:2316
-#: editor_snapshots.cc:125 processor_box.cc:1539 processor_box.cc:1998
-#: route_time_axis.cc:1004 route_ui.cc:1446
+#: editor_snapshots.cc:125 processor_box.cc:1539 processor_box.cc:2000
+#: route_time_axis.cc:983 route_ui.cc:1410
 msgid "Rename"
 msgstr "Μετονομασία"
 
@@ -4673,7 +4689,7 @@ msgstr "προσθήκη περιοχής"
 msgid "Rename Region"
 msgstr "αντιστροφή περιοχής"
 
-#: editor_ops.cc:2178 processor_box.cc:1537 route_ui.cc:1444
+#: editor_ops.cc:2178 processor_box.cc:1537 route_ui.cc:1408
 #, fuzzy
 msgid "New name:"
 msgstr "νέο όνομα: "
@@ -4780,39 +4796,44 @@ msgstr ""
 msgid "bounce range"
 msgstr "αναπήδηση διαστήματο"
 
-#: editor_ops.cc:3431
+#: editor_ops.cc:3438
+#, fuzzy
+msgid "delete"
+msgstr "διαγραφή"
+
+#: editor_ops.cc:3441
 msgid "cut"
 msgstr "κοπή"
 
-#: editor_ops.cc:3434
+#: editor_ops.cc:3444
 msgid "copy"
 msgstr "αντιγραφή"
 
-#: editor_ops.cc:3437
+#: editor_ops.cc:3447
 msgid "clear"
 msgstr "εκκαθάριση"
 
-#: editor_ops.cc:3495
+#: editor_ops.cc:3505
 msgid " objects"
 msgstr " αντικειμένων"
 
-#: editor_ops.cc:3531
+#: editor_ops.cc:3541
 msgid " range"
 msgstr " διαστήματος"
 
-#: editor_ops.cc:3605 editor_ops.cc:3623
+#: editor_ops.cc:3615 editor_ops.cc:3633
 msgid "remove region"
 msgstr "απαλοιφή περιοχής"
 
-#: editor_ops.cc:4009
+#: editor_ops.cc:4027
 msgid "duplicate selection"
 msgstr "αντιγραφή επιλογής"
 
-#: editor_ops.cc:4090
+#: editor_ops.cc:4108
 msgid "nudge track"
 msgstr "νύξη καναλιού"
 
-#: editor_ops.cc:4125
+#: editor_ops.cc:4143
 msgid ""
 "Do you really want to destroy the last capture?\n"
 "(This is destructive and cannot be undone)"
@@ -4820,155 +4841,155 @@ msgstr ""
 "Στ'αλήθεια θέλετε να καταστρέψετε την τελευταία λήψη?\n"
 "(Η πράξη είνα‎ι καταστρεπτική και δεν γίνεται επαναφορά της)"
 
-#: editor_ops.cc:4128 editor_ops.cc:6048 editor_regions.cc:424
-#: editor_snapshots.cc:159 route_ui.cc:1409
+#: editor_ops.cc:4146 editor_ops.cc:6069 editor_regions.cc:425
+#: editor_snapshots.cc:159 route_ui.cc:1373
 msgid "No, do nothing."
 msgstr "Όχι, να μην γίνει τίποτα."
 
-#: editor_ops.cc:4129
+#: editor_ops.cc:4147
 msgid "Yes, destroy it."
 msgstr "Ναι, να καταστραφεί."
 
-#: editor_ops.cc:4131
+#: editor_ops.cc:4149
 #, fuzzy
 msgid "Destroy last capture"
 msgstr "Απαλοιφή τελευταίας λήψης"
 
-#: editor_ops.cc:4192
+#: editor_ops.cc:4210
 msgid "normalize"
 msgstr "εξομάλυνση"
 
-#: editor_ops.cc:4287
+#: editor_ops.cc:4305
 msgid "reverse regions"
 msgstr "αντιστροφή περιοχών"
 
-#: editor_ops.cc:4321
+#: editor_ops.cc:4339
 msgid "strip silence"
 msgstr ""
 
-#: editor_ops.cc:4379
+#: editor_ops.cc:4400
 #, fuzzy
 msgid "Fork Region(s)"
 msgstr "ως περιοχή(ές)"
 
-#: editor_ops.cc:4565
+#: editor_ops.cc:4586
 #, fuzzy
 msgid "reset region gain"
 msgstr "αντιστροφή περιοχών"
 
-#: editor_ops.cc:4594
+#: editor_ops.cc:4615
 #, fuzzy
 msgid "region gain envelope visible"
 msgstr "ανάδειξη χρονοδιαγράμματος του gain"
 
-#: editor_ops.cc:4621
+#: editor_ops.cc:4642
 #, fuzzy
 msgid "region gain envelope active"
 msgstr "Επανενεργοποίηση γραφήματος"
 
-#: editor_ops.cc:4648
+#: editor_ops.cc:4669
 #, fuzzy
 msgid "toggle region lock"
 msgstr "σιγή περιοχής"
 
-#: editor_ops.cc:4672
+#: editor_ops.cc:4693
 #, fuzzy
 msgid "region lock style"
 msgstr "γόμωση περιοχής"
 
-#: editor_ops.cc:4697
+#: editor_ops.cc:4718
 #, fuzzy
 msgid "change region opacity"
 msgstr "Έλξη αντιγραφής περιοχής"
 
-#: editor_ops.cc:4758
+#: editor_ops.cc:4779
 #, fuzzy
 msgid "set fade in length"
 msgstr "αλλαγή μήκους fade in"
 
-#: editor_ops.cc:4765
+#: editor_ops.cc:4786
 #, fuzzy
 msgid "set fade out length"
 msgstr "αλλαγή μήκους fade out"
 
-#: editor_ops.cc:4810
+#: editor_ops.cc:4831
 #, fuzzy
 msgid "set fade in shape"
 msgstr "Crossfades εν ενεργεία"
 
-#: editor_ops.cc:4841
+#: editor_ops.cc:4862
 #, fuzzy
 msgid "set fade out shape"
 msgstr "επεξερ/σία fade out"
 
-#: editor_ops.cc:4871
+#: editor_ops.cc:4892
 #, fuzzy
 msgid "set fade in active"
 msgstr "επεξερ/σία fade in"
 
-#: editor_ops.cc:4900
+#: editor_ops.cc:4921
 #, fuzzy
 msgid "set fade out active"
 msgstr "επεξερ/σία fade out"
 
-#: editor_ops.cc:5197
+#: editor_ops.cc:5218
 #, fuzzy
 msgid "set loop range from selection"
 msgstr "Ορισμός διαστήματος από επιλογή"
 
-#: editor_ops.cc:5219
+#: editor_ops.cc:5240
 #, fuzzy
 msgid "set loop range from edit range"
 msgstr "θέση επιλογής από διάστημα"
 
-#: editor_ops.cc:5248
+#: editor_ops.cc:5269
 #, fuzzy
 msgid "set loop range from region"
 msgstr "θέση επιλογής από περιοχή"
 
-#: editor_ops.cc:5266
+#: editor_ops.cc:5287
 #, fuzzy
 msgid "set punch range from selection"
 msgstr "Ορισμός διαστήματος από επιλογή"
 
-#: editor_ops.cc:5283
+#: editor_ops.cc:5304
 #, fuzzy
 msgid "set punch range from edit range"
 msgstr "θέση punch διαστήματος"
 
-#: editor_ops.cc:5307
+#: editor_ops.cc:5328
 #, fuzzy
 msgid "set punch range from region"
 msgstr "θέση punch διαστήματος"
 
-#: editor_ops.cc:5414
+#: editor_ops.cc:5435
 #, fuzzy
 msgid "Add new marker"
 msgstr "πρόσθεση στίγματος διαστήματος"
 
-#: editor_ops.cc:5415
+#: editor_ops.cc:5436
 msgid "Set global tempo"
 msgstr ""
 
-#: editor_ops.cc:5418
+#: editor_ops.cc:5439
 msgid "Define one bar"
 msgstr ""
 
-#: editor_ops.cc:5419
+#: editor_ops.cc:5440
 msgid "Do you want to set the global tempo or add a new tempo marker?"
 msgstr ""
 
-#: editor_ops.cc:5445
+#: editor_ops.cc:5466
 #, fuzzy
 msgid "set tempo from region"
 msgstr "θέση επιλογής από περιοχή"
 
-#: editor_ops.cc:5473
+#: editor_ops.cc:5494
 #, fuzzy
 msgid "split regions"
 msgstr "επιλογή περιοχών"
 
-#: editor_ops.cc:5515
+#: editor_ops.cc:5536
 msgid ""
 "You are about to split\n"
 "%1\n"
@@ -4976,67 +4997,67 @@ msgid ""
 "This could take a long time."
 msgstr ""
 
-#: editor_ops.cc:5522
+#: editor_ops.cc:5543
 msgid "Call for the Ferret!"
 msgstr ""
 
-#: editor_ops.cc:5523
+#: editor_ops.cc:5544
 msgid ""
 "Press OK to continue with this split operation\n"
 "or ask the Ferret dialog to tune the analysis"
 msgstr ""
 
-#: editor_ops.cc:5525
+#: editor_ops.cc:5546
 msgid "Press OK to continue with this split operation"
 msgstr ""
 
-#: editor_ops.cc:5528
+#: editor_ops.cc:5549
 msgid "Excessive split?"
 msgstr ""
 
-#: editor_ops.cc:5664
+#: editor_ops.cc:5685
 msgid "place transient"
 msgstr ""
 
-#: editor_ops.cc:5699
+#: editor_ops.cc:5720
 #, fuzzy
 msgid "snap regions to grid"
 msgstr "Κοπή Περιοχής κατά το διάστημα"
 
-#: editor_ops.cc:5738
+#: editor_ops.cc:5759
 #, fuzzy
 msgid "Close Region Gaps"
 msgstr "ως περιοχή(ές)"
 
-#: editor_ops.cc:5743
+#: editor_ops.cc:5764
 #, fuzzy
 msgid "Crossfade length"
 msgstr "επεξερ/σία fade in"
 
-#: editor_ops.cc:5753 editor_ops.cc:5765 rhythm_ferret.cc:104
+#: editor_ops.cc:5774 editor_ops.cc:5786 rhythm_ferret.cc:104
 #: session_option_editor.cc:155 session_option_editor.cc:164
 #, fuzzy
 msgid "ms"
 msgstr "m"
 
-#: editor_ops.cc:5755
+#: editor_ops.cc:5776
 msgid "Pull-back length"
 msgstr ""
 
-#: editor_ops.cc:5769
+#: editor_ops.cc:5790
 msgid "Ok"
 msgstr ""
 
-#: editor_ops.cc:5784
+#: editor_ops.cc:5805
 #, fuzzy
 msgid "close region gaps"
 msgstr "αυτές τις περιοχές"
 
-#: editor_ops.cc:5997 route_ui.cc:1383
+#: editor_ops.cc:6018 route_ui.cc:1347
 msgid "That would be bad news ...."
 msgstr ""
 
-#: editor_ops.cc:6002 route_ui.cc:1388
+#: editor_ops.cc:6023 route_ui.cc:1352
 msgid ""
 "Removing the master or monitor bus is such a bad idea\n"
 "that %1 is not going to allow it.\n"
@@ -5046,17 +5067,17 @@ msgid ""
 "\"allow-special-bus-removal\" option to be \"yes\""
 msgstr ""
 
-#: editor_ops.cc:6021
+#: editor_ops.cc:6042
 #, fuzzy
 msgid "track"
 msgstr "Κανάλι"
 
-#: editor_ops.cc:6027
+#: editor_ops.cc:6048
 #, fuzzy
 msgid "bus"
 msgstr "abs"
 
-#: editor_ops.cc:6032
+#: editor_ops.cc:6053
 #, fuzzy
 msgid ""
 "Do you really want to remove %1 %2 and %3 %4?\n"
@@ -5069,7 +5090,7 @@ msgstr ""
 "Πιθανόν να χάσετε και τη λίστα που χρησιμοποιείται από το κανάλι.\n"
 "(δεν μπορεί να ανακληθεί)"
 
-#: editor_ops.cc:6037
+#: editor_ops.cc:6058
 #, fuzzy
 msgid ""
 "Do you really want to remove %1 %2?\n"
@@ -5082,7 +5103,7 @@ msgstr ""
 "Πιθανόν να χάσετε και τη λίστα που χρησιμοποιείται από το κανάλι.\n"
 "(δεν μπορεί να ανακληθεί)"
 
-#: editor_ops.cc:6043
+#: editor_ops.cc:6064
 #, fuzzy
 msgid ""
 "Do you really want to remove %1 %2?\n"
@@ -5092,80 +5113,81 @@ msgstr ""
 "Στ'αλήθεια θέλετε να απαλοίψετε το κανάλι \"%1\" ?\n"
 "(δεν μπορεί να ανακληθεί)"
 
-#: editor_ops.cc:6050
+#: editor_ops.cc:6071
 #, fuzzy
 msgid "Yes, remove them."
 msgstr "Ναι, απάλοιψε το."
 
-#: editor_ops.cc:6052 editor_snapshots.cc:160 route_ui.cc:1410
+#: editor_ops.cc:6073 editor_snapshots.cc:160 route_ui.cc:1374
 msgid "Yes, remove it."
 msgstr "Ναι, απάλοιψε το."
 
-#: editor_ops.cc:6057 editor_ops.cc:6059
+#: editor_ops.cc:6078 editor_ops.cc:6080
 #, fuzzy
 msgid "Remove %1"
 msgstr "Απαλοιφή"
 
-#: editor_ops.cc:6115
+#: editor_ops.cc:6136
 #, fuzzy
 msgid "insert time"
 msgstr "προσθήκη ηχο-αρχείου"
 
-#: editor_ops.cc:6249
+#: editor_ops.cc:6270
 msgid "There are too many tracks to fit in the current window"
 msgstr ""
 
-#: editor_ops.cc:6369
+#: editor_ops.cc:6390
 #, c-format
 msgid "Saved view %u"
 msgstr ""
 
-#: editor_ops.cc:6390
+#: editor_ops.cc:6411
 #, fuzzy
 msgid "mute regions"
 msgstr "σιγή περιοχής"
 
-#: editor_ops.cc:6392
+#: editor_ops.cc:6413
 msgid "mute region"
 msgstr "σιγή περιοχής"
 
-#: editor_ops.cc:6429
+#: editor_ops.cc:6450
 #, fuzzy
 msgid "combine regions"
 msgstr "Κανονικοποίηση περιοχής"
 
-#: editor_ops.cc:6467
+#: editor_ops.cc:6488
 #, fuzzy
 msgid "uncombine regions"
 msgstr "Αναπήδηση περιοχής"
 
-#: editor_regions.cc:89 gtk-custom-ruler.c:152 location_ui.cc:322
+#: editor_regions.cc:90 gtk-custom-ruler.c:152 location_ui.cc:322
 msgid "Position"
 msgstr "Θέση"
 
-#: editor_regions.cc:90 editor_regions.cc:806 midi_list_editor.cc:61
+#: editor_regions.cc:91 editor_regions.cc:806 midi_list_editor.cc:61
+#: time_info_box.cc:106
 #, fuzzy
 msgid "End"
 msgstr "Τέλος:"
 
-#: editor_regions.cc:95 mono_panner.cc:195 stereo_panner.cc:235
-#: stereo_panner.cc:258
+#: editor_regions.cc:96 mono_panner.cc:195 stereo_panner.cc:234
+#: stereo_panner.cc:257
 msgid "L"
 msgstr "L"
 
-#: editor_regions.cc:98
+#: editor_regions.cc:99
 msgid "O"
 msgstr ""
 
-#: editor_regions.cc:273 editor_regions.cc:278 editor_regions.cc:280
+#: editor_regions.cc:274 editor_regions.cc:279 editor_regions.cc:281
 msgid "Hidden"
 msgstr "Κρυμμένο"
 
-#: editor_regions.cc:352
+#: editor_regions.cc:353
 msgid "(MISSING) "
 msgstr ""
 
-#: editor_regions.cc:421
+#: editor_regions.cc:422
 #, fuzzy
 msgid ""
 "Do you really want to remove unused regions?\n"
@@ -5174,12 +5196,12 @@ msgstr ""
 "Στ'αλήθεια θέλετε να καταστρέψετε την τελευταία λήψη?\n"
 "(Η πράξη είνα‎ι καταστρεπτική και δεν γίνεται επαναφορά της)"
 
-#: editor_regions.cc:425
+#: editor_regions.cc:426
 #, fuzzy
 msgid "Yes, remove."
 msgstr "Ναι, απάλοιψε το."
 
-#: editor_regions.cc:427
+#: editor_regions.cc:428
 #, fuzzy
 msgid "Remove unused regions"
 msgstr "επιλογή περιοχών"
@@ -5189,6 +5211,7 @@ msgid "Mult."
 msgstr ""
 
 #: editor_regions.cc:804 engine_dialog.cc:85 midi_list_editor.cc:55
+#: time_info_box.cc:99
 #, fuzzy
 msgid "Start"
 msgstr "Αρχή:"
@@ -5727,8 +5750,8 @@ msgstr ""
 msgid "List files"
 msgstr "προσθήκη ηχο-αρχείου"
 
-#: export_dialog.cc:161 export_timespan_selector.cc:346
-#: export_timespan_selector.cc:410
+#: export_dialog.cc:161 export_timespan_selector.cc:340
+#: export_timespan_selector.cc:404
 #, fuzzy
 msgid "Time Span"
 msgstr "Εύρος Zoom"
@@ -5756,47 +5779,43 @@ msgstr ""
 msgid "Stop Export"
 msgstr "Παύση Εξαγωγής"
 
+#: export_dialog.cc:333
+msgid "Normalizing timespan %1 of %2"
+msgstr ""
+
 #: export_dialog.cc:336
-msgid "Reading timespan %1 of %2"
+msgid "Exporting timespan %1 of %2"
 msgstr ""
 
-#: export_dialog.cc:339
-msgid "Processing file %2 of %3 (%1) from timespan %4 of %5"
-msgstr ""
-
-#: export_dialog.cc:345
-msgid "Encoding file %2 of %3 (%1) from timespan %4 of %5"
-msgstr ""
-
-#: export_dialog.cc:363 export_dialog.cc:365
+#: export_dialog.cc:352 export_dialog.cc:354
 msgid "<span color=\"#ffa755\">Error: "
 msgstr ""
 
-#: export_dialog.cc:375
+#: export_dialog.cc:364
 msgid "<span color=\"#ffa755\">Warning: "
 msgstr ""
 
-#: export_dialog.cc:377
+#: export_dialog.cc:366
 msgid ""
 "\n"
 "<span color=\"#ffa755\">Warning: "
 msgstr ""
 
-#: export_dialog.cc:400
+#: export_dialog.cc:389
 #, fuzzy
 msgid "Export Selection"
 msgstr "Εξαγωγή Συνεδρίας"
 
-#: export_dialog.cc:413
+#: export_dialog.cc:402
 #, fuzzy
 msgid "Export Region"
 msgstr "Εξαγωγή Συνεδρίας"
 
-#: export_dialog.cc:423
+#: export_dialog.cc:412
 msgid "Source"
 msgstr ""
 
-#: export_dialog.cc:438
+#: export_dialog.cc:427
 #, fuzzy
 msgid "Stem Export"
 msgstr "Παύση Εξαγωγής"
@@ -5925,22 +5944,22 @@ msgstr ""
 msgid "Zero order hold"
 msgstr "Παύση Μετρητή"
 
-#: export_format_dialog.cc:843
+#: export_format_dialog.cc:840
 #, fuzzy
 msgid "Linear encoding options"
 msgstr "εκκαθάριση συνδέσεων"
 
-#: export_format_dialog.cc:859
+#: export_format_dialog.cc:856
 #, fuzzy
 msgid "Ogg Vorbis options"
 msgstr "Επιλογές Εμφανίσεως"
 
-#: export_format_dialog.cc:872
+#: export_format_dialog.cc:869
 #, fuzzy
 msgid "FLAC options"
 msgstr "Τοποθεσίες"
 
-#: export_format_dialog.cc:889
+#: export_format_dialog.cc:886
 #, fuzzy
 msgid "Broadcast Wave options"
 msgstr "Broadcast WAVE/μεταβλητής υποδ/λής"
@@ -5959,11 +5978,11 @@ msgstr ""
 msgid "Show Times as:"
 msgstr ""
 
-#: export_timespan_selector.cc:194
+#: export_timespan_selector.cc:191
 msgid " to "
 msgstr ""
 
-#: export_timespan_selector.cc:333 export_timespan_selector.cc:400
+#: export_timespan_selector.cc:327 export_timespan_selector.cc:394
 #, fuzzy
 msgid "Range"
 msgstr "Διάστημα"
@@ -5991,12 +6010,8 @@ msgid "-Inf"
 msgstr "-inf"
 
 #: gain_meter.cc:674 mixer_strip.cc:1759 panner_ui.cc:559
-#: route_time_axis.cc:2432
+#: route_time_axis.cc:2370
 msgid "P"
-msgstr ""
-
-#: gain_meter.cc:677 panner_ui.cc:562
-msgid "T"
 msgstr ""
 
 #: gain_meter.cc:680 panner_ui.cc:565
@@ -6456,73 +6471,73 @@ msgstr "Όνομα φακέλου:"
 msgid "MidiPortDialog"
 msgstr ""
 
-#: midi_region_view.cc:1616
+#: midi_region_view.cc:1613
 msgid "step add"
 msgstr ""
 
-#: midi_region_view.cc:1681 midi_region_view.cc:1701
+#: midi_region_view.cc:1678 midi_region_view.cc:1698
 #, fuzzy
 msgid "alter patch change"
 msgstr "αλλαγή σιγής"
 
-#: midi_region_view.cc:1735
+#: midi_region_view.cc:1732
 msgid "add patch change"
 msgstr ""
 
-#: midi_region_view.cc:1751
+#: midi_region_view.cc:1748
 #, fuzzy
 msgid "move patch change"
 msgstr "αλλαγή σιγής"
 
-#: midi_region_view.cc:1762
+#: midi_region_view.cc:1759
 #, fuzzy
 msgid "delete patch change"
 msgstr "θέση punch διαστήματος"
 
-#: midi_region_view.cc:1811
+#: midi_region_view.cc:1808
 #, fuzzy
 msgid "delete selection"
 msgstr "επέκταση επιλογής"
 
-#: midi_region_view.cc:1827
+#: midi_region_view.cc:1824
 #, fuzzy
 msgid "delete note"
 msgstr "διαγραμμένα αρχεία"
 
-#: midi_region_view.cc:2197
+#: midi_region_view.cc:2194
 #, fuzzy
 msgid "move notes"
 msgstr "Απαλοιφή Διαστήματος"
 
-#: midi_region_view.cc:2422
+#: midi_region_view.cc:2419
 msgid "resize notes"
 msgstr ""
 
-#: midi_region_view.cc:2640
+#: midi_region_view.cc:2637
 #, fuzzy
 msgid "change velocities"
 msgstr "επιλογή διαστήματος"
 
-#: midi_region_view.cc:2693
+#: midi_region_view.cc:2690
 msgid "transpose"
 msgstr ""
 
-#: midi_region_view.cc:2727
+#: midi_region_view.cc:2724
 #, fuzzy
 msgid "change note lengths"
 msgstr "αλλαγή μήκους fade out"
 
-#: midi_region_view.cc:2796
+#: midi_region_view.cc:2793
 #, fuzzy
 msgid "nudge"
 msgstr "Νύξη"
 
-#: midi_region_view.cc:2811
+#: midi_region_view.cc:2808
 #, fuzzy
 msgid "change channel"
 msgstr "κανάλια"
 
-#: midi_region_view.cc:3002 midi_region_view.cc:3004
+#: midi_region_view.cc:3003 midi_region_view.cc:3005
 msgid "paste"
 msgstr "επικόλληση"
 
@@ -6624,7 +6639,7 @@ msgstr ""
 msgid "Decimal"
 msgstr ""
 
-#: midi_tracer.cc:52 rc_option_editor.cc:657
+#: midi_tracer.cc:52 rc_option_editor.cc:655
 #, fuzzy
 msgid "Enabled"
 msgstr "Ενεργοποίηση Εγγραφής"
@@ -6747,7 +6762,7 @@ msgstr "Δευτερόλεπτα"
 msgid "Snd"
 msgstr "Δευτερόλεπτα"
 
-#: mixer_strip.cc:633 mixer_strip.cc:746 processor_box.cc:1906
+#: mixer_strip.cc:633 mixer_strip.cc:746 processor_box.cc:1908
 msgid "Not connected to JACK - no I/O changes are possible"
 msgstr "Μη συνδεδεμένο με τον JACK - I/O αλλαγές αδύνατες"
 
@@ -6778,7 +6793,7 @@ msgstr "Σχόλια"
 msgid "Save As Template..."
 msgstr "Αποθήκευση προσχεδίου..."
 
-#: mixer_strip.cc:1355 route_group_dialog.cc:38 route_time_axis.cc:704
+#: mixer_strip.cc:1355 route_group_dialog.cc:38 route_time_axis.cc:691
 msgid "Active"
 msgstr "Ενεργό"
 
@@ -6790,7 +6805,7 @@ msgstr ""
 msgid "Protect Against Denormals"
 msgstr ""
 
-#: mixer_strip.cc:1371 route_time_axis.cc:440
+#: mixer_strip.cc:1371 route_time_axis.cc:427
 #, fuzzy
 msgid "Remote Control ID..."
 msgstr "απαλοιφή σημείου ελέγχου"
@@ -6823,7 +6838,7 @@ msgstr ""
 msgid "PFL"
 msgstr ""
 
-#: mixer_strip.cc:1756 route_time_axis.cc:2429
+#: mixer_strip.cc:1756 route_time_axis.cc:2367
 msgid "A"
 msgstr ""
 
@@ -7017,7 +7032,7 @@ msgstr "Κανονικοποίηση περιοχής"
 msgid "Normalize region"
 msgstr "Κανονικοποίηση περιοχής"
 
-#: normalize_dialog.cc:49 strip_silence_dialog.cc:71
+#: normalize_dialog.cc:49 strip_silence_dialog.cc:72
 msgid "dbFS"
 msgstr "dbFS"
 
@@ -7708,60 +7723,60 @@ msgstr ""
 "Στ'αλήθεια θέλετε να απαλοίψετε όλα τα redirects από το δίαυλο?\n"
 "(δεν μπορεί να ανακληθεί)"
 
-#: processor_box.cc:1965
+#: processor_box.cc:1967
 #, fuzzy
 msgid "New Plugin"
 msgstr "Νέο Plugin ..."
 
-#: processor_box.cc:1968
+#: processor_box.cc:1970
 msgid "New Insert"
 msgstr "Νέο Προσθήκη"
 
-#: processor_box.cc:1971
+#: processor_box.cc:1973
 msgid "New Send ..."
-msgstr "Νέο Send ..."
-
-#: processor_box.cc:1975
-#, fuzzy
-msgid "New Aux Send ..."
 msgstr "Νέο Send ..."
 
 #: processor_box.cc:1977
 #, fuzzy
+msgid "New Aux Send ..."
+msgstr "Νέο Send ..."
+
+#: processor_box.cc:1979
+#, fuzzy
 msgid "Clear (all)"
 msgstr "Εκκαθάριση όλων των διαστημάτων"
 
-#: processor_box.cc:1979
+#: processor_box.cc:1981
 #, fuzzy
 msgid "Clear (pre-fader)"
 msgstr "Εκκαθάριση μέτρου"
 
-#: processor_box.cc:1981
+#: processor_box.cc:1983
 #, fuzzy
 msgid "Clear (post-fader)"
 msgstr "Εκκαθάριση μέτρου"
 
-#: processor_box.cc:2007
+#: processor_box.cc:2009
 #, fuzzy
 msgid "Activate all"
 msgstr "Ενεργοποίηση όλων"
 
-#: processor_box.cc:2009
+#: processor_box.cc:2011
 #, fuzzy
 msgid "Deactivate all"
 msgstr "Απενεργοποίηση όλων"
 
-#: processor_box.cc:2011
+#: processor_box.cc:2013
 #, fuzzy
 msgid "A/B Plugins"
 msgstr "Plugins"
 
-#: processor_box.cc:2021
+#: processor_box.cc:2023
 #, fuzzy
 msgid "Controls..."
 msgstr "Πίνακας Ελέγχου"
 
-#: processor_box.cc:2263
+#: processor_box.cc:2265
 #, fuzzy
 msgid "%1: %2 (by %3)"
 msgstr "ardour: %1: %2 (by %3)"
@@ -7863,533 +7878,533 @@ msgstr ""
 msgid "commands"
 msgstr "σχόλια"
 
-#: rc_option_editor.cc:308
+#: rc_option_editor.cc:306
 #, fuzzy
 msgid "Edit using:"
 msgstr "Επεξεργασία με"
 
-#: rc_option_editor.cc:315 rc_option_editor.cc:342 rc_option_editor.cc:370
+#: rc_option_editor.cc:313 rc_option_editor.cc:340 rc_option_editor.cc:368
 msgid "+ button"
 msgstr "+ κουμπί"
 
-#: rc_option_editor.cc:335
+#: rc_option_editor.cc:333
 #, fuzzy
 msgid "Delete using:"
 msgstr "Διαγραφή με"
 
-#: rc_option_editor.cc:363
+#: rc_option_editor.cc:361
 #, fuzzy
 msgid "Insert note using:"
 msgstr "Προσθήκη επιλεγμένου(ων)"
 
-#: rc_option_editor.cc:391
+#: rc_option_editor.cc:389
 #, fuzzy
 msgid "Toggle snap using:"
 msgstr "Άγνοια έλξεως με"
 
-#: rc_option_editor.cc:408
+#: rc_option_editor.cc:406
 msgid "Keyboard layout:"
 msgstr ""
 
-#: rc_option_editor.cc:532
+#: rc_option_editor.cc:530
 msgid "Font scaling:"
 msgstr ""
 
-#: rc_option_editor.cc:584
+#: rc_option_editor.cc:582
 msgid "Playback (seconds of buffering):"
 msgstr ""
 
-#: rc_option_editor.cc:597
+#: rc_option_editor.cc:595
 msgid "Recording (seconds of buffering):"
 msgstr ""
 
-#: rc_option_editor.cc:658
+#: rc_option_editor.cc:656
 msgid "Feedback"
 msgstr ""
 
-#: rc_option_editor.cc:663
+#: rc_option_editor.cc:661
 msgid "Double-click on a name to edit settings for an enabled protocol"
 msgstr ""
 
-#: rc_option_editor.cc:784
+#: rc_option_editor.cc:782
 msgid "%1 Preferences"
 msgstr ""
 
-#: rc_option_editor.cc:792
+#: rc_option_editor.cc:790
 msgid "DSP CPU Utilization"
 msgstr ""
 
-#: rc_option_editor.cc:796
+#: rc_option_editor.cc:794
 msgid "Signal processing uses"
 msgstr ""
 
-#: rc_option_editor.cc:801
+#: rc_option_editor.cc:799
 msgid "all but one processor"
 msgstr ""
 
-#: rc_option_editor.cc:802
+#: rc_option_editor.cc:800
 #, fuzzy
 msgid "all available processors"
 msgstr "Διαθέσιμες Θύρες"
 
-#: rc_option_editor.cc:805
+#: rc_option_editor.cc:803
 msgid "%1 processors"
 msgstr ""
 
-#: rc_option_editor.cc:815
+#: rc_option_editor.cc:813
 #, fuzzy
 msgid "Meter hold time"
 msgstr "Παύση Μετρητή"
 
-#: rc_option_editor.cc:820 rc_option_editor.cc:834
+#: rc_option_editor.cc:818 rc_option_editor.cc:832
 msgid "off"
 msgstr "εκτός"
 
-#: rc_option_editor.cc:821 session_option_editor.cc:145
+#: rc_option_editor.cc:819 session_option_editor.cc:145
 msgid "short"
 msgstr ""
 
-#: rc_option_editor.cc:822 rc_option_editor.cc:837
+#: rc_option_editor.cc:820 rc_option_editor.cc:835
 msgid "medium"
 msgstr ""
 
-#: rc_option_editor.cc:823
+#: rc_option_editor.cc:821
 msgid "long"
 msgstr ""
 
-#: rc_option_editor.cc:829
+#: rc_option_editor.cc:827
 msgid "Meter fall-off"
 msgstr ""
 
-#: rc_option_editor.cc:835
+#: rc_option_editor.cc:833
 #, fuzzy
 msgid "slowest"
 msgstr "Αργότατο"
 
-#: rc_option_editor.cc:836
+#: rc_option_editor.cc:834
 msgid "slow"
 msgstr ""
 
-#: rc_option_editor.cc:838
+#: rc_option_editor.cc:836
 #, fuzzy
 msgid "fast"
 msgstr "ταχύτατη"
 
-#: rc_option_editor.cc:839
+#: rc_option_editor.cc:837
 #, fuzzy
 msgid "faster"
 msgstr "Ταχύτερα"
 
-#: rc_option_editor.cc:840
+#: rc_option_editor.cc:838
 msgid "fastest"
 msgstr "ταχύτατη"
 
-#: rc_option_editor.cc:858
+#: rc_option_editor.cc:856
 #, fuzzy
 msgid "Verify removal of last capture"
 msgstr "Επιβεβαιώστε διαγραφή τελευταίας λήψης"
 
-#: rc_option_editor.cc:866
+#: rc_option_editor.cc:864
 msgid "Make periodic backups of the session file"
 msgstr ""
 
-#: rc_option_editor.cc:874
+#: rc_option_editor.cc:872
 msgid "Synchronise editor and mixer track order"
 msgstr ""
 
-#: rc_option_editor.cc:882
+#: rc_option_editor.cc:880
 msgid "Always copy imported files"
 msgstr ""
 
-#: rc_option_editor.cc:890
+#: rc_option_editor.cc:888
 #, fuzzy
 msgid "Use narrow mixer strips"
 msgstr "Στενοί διάδρομοι μείκτη"
 
-#: rc_option_editor.cc:898
+#: rc_option_editor.cc:896
 #, fuzzy
 msgid "Name new markers"
 msgstr "μετονομασία στίγματος"
 
-#: rc_option_editor.cc:912
+#: rc_option_editor.cc:910
 #, fuzzy
 msgid "Keep record-enable engaged on stop"
 msgstr "Το Rec-enable παραμένει ενεργό στο stop"
 
-#: rc_option_editor.cc:920
+#: rc_option_editor.cc:918
 #, fuzzy
 msgid "Stop recording when an xrun occurs"
 msgstr "Παύση εγγραφής στα xrun"
 
-#: rc_option_editor.cc:928
+#: rc_option_editor.cc:926
 msgid "Create markers where xruns occur"
 msgstr ""
 
-#: rc_option_editor.cc:936
+#: rc_option_editor.cc:934
 #, fuzzy
 msgid "Stop at the end of the session"
 msgstr "Τέλος του συνεδρίας"
 
-#: rc_option_editor.cc:944
+#: rc_option_editor.cc:942
 msgid "Do seamless looping (not possible when slaved to MTC, JACK etc)"
 msgstr ""
 
-#: rc_option_editor.cc:952
+#: rc_option_editor.cc:950
 #, fuzzy
 msgid "Primary clock delta to edit cursor"
 msgstr "Από αρχή μέχρι  κέρσορα επεξεργασίας"
 
-#: rc_option_editor.cc:960
+#: rc_option_editor.cc:958
 #, fuzzy
 msgid "Secondary clock delta to edit cursor"
 msgstr "Από αρχή μέχρι  κέρσορα επεξεργασίας"
 
-#: rc_option_editor.cc:968
+#: rc_option_editor.cc:966
 msgid "Disable per-track record disarm while rolling"
 msgstr ""
 
-#: rc_option_editor.cc:976
+#: rc_option_editor.cc:974
 msgid "12dB gain reduction during fast-forward and fast-rewind"
 msgstr ""
 
-#: rc_option_editor.cc:986
+#: rc_option_editor.cc:984
 #, fuzzy
 msgid "Link selection of regions and tracks"
 msgstr "Αντιστροφή επιλογής στο κανάλι"
 
-#: rc_option_editor.cc:994
+#: rc_option_editor.cc:992
 msgid "Move relevant automation when audio regions are moved"
 msgstr ""
 
-#: rc_option_editor.cc:1002
+#: rc_option_editor.cc:1000
 msgid "Show meters on tracks in the editor"
 msgstr ""
 
-#: rc_option_editor.cc:1010
+#: rc_option_editor.cc:1008
 #, fuzzy
 msgid "Use overlap equivalency for regions"
 msgstr "θέση επιλογής από περιοχή"
 
-#: rc_option_editor.cc:1018
+#: rc_option_editor.cc:1016
 msgid "Make rubberband selection rectangle snap to the grid"
 msgstr ""
 
-#: rc_option_editor.cc:1026
+#: rc_option_editor.cc:1024
 #, fuzzy
 msgid "Show waveforms in regions"
 msgstr "Ανάδειξη αυτομάτων περιοχών"
 
-#: rc_option_editor.cc:1033
+#: rc_option_editor.cc:1031
 #, fuzzy
 msgid "Waveform scale"
 msgstr "Κυματομορφή"
 
-#: rc_option_editor.cc:1038
+#: rc_option_editor.cc:1036
 msgid "linear"
 msgstr "γραμμική"
 
-#: rc_option_editor.cc:1039
+#: rc_option_editor.cc:1037
 msgid "logarithmic"
 msgstr ""
 
-#: rc_option_editor.cc:1045
+#: rc_option_editor.cc:1043
 #, fuzzy
 msgid "Waveform shape"
 msgstr "Κυματομορφή"
 
-#: rc_option_editor.cc:1050
+#: rc_option_editor.cc:1048
 #, fuzzy
 msgid "traditional"
 msgstr "Παραδοσιακή"
 
-#: rc_option_editor.cc:1051
+#: rc_option_editor.cc:1049
 #, fuzzy
 msgid "rectified"
 msgstr "Ανορθωμένή"
 
-#: rc_option_editor.cc:1058
+#: rc_option_editor.cc:1056
 msgid "Show waveforms for audio while it is being recorded"
 msgstr ""
 
-#: rc_option_editor.cc:1066
+#: rc_option_editor.cc:1064
 msgid "Show zoom toolbar"
 msgstr ""
 
-#: rc_option_editor.cc:1074
+#: rc_option_editor.cc:1072
 msgid "Color regions using their track's color"
 msgstr ""
 
-#: rc_option_editor.cc:1081
+#: rc_option_editor.cc:1079
 msgid "Buffering"
 msgstr ""
 
-#: rc_option_editor.cc:1090
+#: rc_option_editor.cc:1088
 msgid "Use a monitor bus (allows AFL/PFL and more control)"
 msgstr ""
 
-#: rc_option_editor.cc:1097
+#: rc_option_editor.cc:1095
 #, fuzzy
 msgid "Record monitoring handled by"
 msgstr "Παύση εγγραφής στα xrun"
 
-#: rc_option_editor.cc:1108
+#: rc_option_editor.cc:1106
 #, fuzzy
 msgid "ardour"
 msgstr "ardour: "
 
-#: rc_option_editor.cc:1109
+#: rc_option_editor.cc:1107
 #, fuzzy
 msgid "audio hardware"
 msgstr "Ηχητικά frames"
 
-#: rc_option_editor.cc:1115
+#: rc_option_editor.cc:1113
 msgid "PFL signals come from"
 msgstr ""
 
-#: rc_option_editor.cc:1120
+#: rc_option_editor.cc:1118
 #, fuzzy
 msgid "before pre-fader processors"
 msgstr "Απαλοιφή Στίγματος"
 
-#: rc_option_editor.cc:1121
+#: rc_option_editor.cc:1119
 msgid "pre-fader but after pre-fader processors"
 msgstr ""
 
-#: rc_option_editor.cc:1127
+#: rc_option_editor.cc:1125
 msgid "AFL signals come from"
 msgstr ""
 
-#: rc_option_editor.cc:1132
+#: rc_option_editor.cc:1130
 msgid "post-fader but before post-fader processors"
 msgstr ""
 
-#: rc_option_editor.cc:1133
+#: rc_option_editor.cc:1131
 #, fuzzy
 msgid "after post-fader processors"
 msgstr "Απαλοιφή Στίγματος"
 
-#: rc_option_editor.cc:1140
+#: rc_option_editor.cc:1138
 #, fuzzy
 msgid "Tape machine mode"
 msgstr "Λειτουργία αυτοματισμού Fader"
 
-#: rc_option_editor.cc:1145
+#: rc_option_editor.cc:1143
 msgid "Connection of tracks and busses"
 msgstr ""
 
-#: rc_option_editor.cc:1150
+#: rc_option_editor.cc:1148
 msgid "Auto-connect master/monitor busses"
 msgstr ""
 
-#: rc_option_editor.cc:1157
+#: rc_option_editor.cc:1155
 #, fuzzy
 msgid "Connect track inputs"
 msgstr "Σύνδεση νέων inputs καναλιού στο hardware"
 
-#: rc_option_editor.cc:1162
+#: rc_option_editor.cc:1160
 #, fuzzy
 msgid "automatically to physical inputs"
 msgstr "αυτόματη σύνδεση Inputs"
 
-#: rc_option_editor.cc:1163 rc_option_editor.cc:1176
+#: rc_option_editor.cc:1161 rc_option_editor.cc:1174
 msgid "manually"
 msgstr ""
 
-#: rc_option_editor.cc:1169
+#: rc_option_editor.cc:1167
 #, fuzzy
 msgid "Connect track and bus outputs"
 msgstr "Σύνδεση νέων outputs καναλιου στο master"
 
-#: rc_option_editor.cc:1174
+#: rc_option_editor.cc:1172
 #, fuzzy
 msgid "automatically to physical outputs"
 msgstr "Αυτόματη σύνδεση Οutputs"
 
-#: rc_option_editor.cc:1175
+#: rc_option_editor.cc:1173
 #, fuzzy
 msgid "automatically to master bus"
 msgstr "αυτόματη σύνδεση outputs καναλιών σε master outs"
 
-#: rc_option_editor.cc:1180
+#: rc_option_editor.cc:1178
 #, fuzzy
 msgid "Denormals"
 msgstr "Κανονικό"
 
-#: rc_option_editor.cc:1185
+#: rc_option_editor.cc:1183
 msgid "Use DC bias to protect against denormals"
 msgstr ""
 
-#: rc_option_editor.cc:1192
+#: rc_option_editor.cc:1190
 msgid "Processor handling"
 msgstr ""
 
-#: rc_option_editor.cc:1197
+#: rc_option_editor.cc:1195
 msgid "no processor handling"
 msgstr ""
 
-#: rc_option_editor.cc:1202
+#: rc_option_editor.cc:1200
 msgid "use FlushToZero"
 msgstr ""
 
-#: rc_option_editor.cc:1206
+#: rc_option_editor.cc:1204
 msgid "use DenormalsAreZero"
 msgstr ""
 
-#: rc_option_editor.cc:1210
+#: rc_option_editor.cc:1208
 msgid "use FlushToZero and DenormalsAreZerO"
 msgstr ""
 
-#: rc_option_editor.cc:1220
+#: rc_option_editor.cc:1218
 #, fuzzy
 msgid "Stop plugins when the transport is stopped"
 msgstr "Λήξη των plugins με την παύση"
 
-#: rc_option_editor.cc:1228
+#: rc_option_editor.cc:1226
 #, fuzzy
 msgid "Disable plugins during recording"
 msgstr "Απενεργοποίηση plugins κατα την εγγραφή"
 
-#: rc_option_editor.cc:1236
+#: rc_option_editor.cc:1234
 msgid "Make new plugins active"
 msgstr ""
 
-#: rc_option_editor.cc:1244
+#: rc_option_editor.cc:1242
 msgid "Enable automatic analysis of audio"
 msgstr ""
 
-#: rc_option_editor.cc:1252
+#: rc_option_editor.cc:1250
 #, fuzzy
 msgid "Replicate missing region channels"
 msgstr "Δημιουργία μίας περιοχής για κάθε κανάλι"
 
-#: rc_option_editor.cc:1259 rc_option_editor.cc:1274 rc_option_editor.cc:1286
-#: rc_option_editor.cc:1290 rc_option_editor.cc:1298 rc_option_editor.cc:1306
-#: rc_option_editor.cc:1314 rc_option_editor.cc:1316 rc_option_editor.cc:1324
-#: rc_option_editor.cc:1332 rc_option_editor.cc:1340
+#: rc_option_editor.cc:1257 rc_option_editor.cc:1272 rc_option_editor.cc:1284
+#: rc_option_editor.cc:1288 rc_option_editor.cc:1296 rc_option_editor.cc:1304
+#: rc_option_editor.cc:1312 rc_option_editor.cc:1314 rc_option_editor.cc:1322
+#: rc_option_editor.cc:1330 rc_option_editor.cc:1338
 #, fuzzy
 msgid "Solo / mute"
 msgstr "Solo μέσω διαύλου"
 
-#: rc_option_editor.cc:1262
+#: rc_option_editor.cc:1260
 msgid "Solo mute cut (dB)"
 msgstr ""
 
-#: rc_option_editor.cc:1269
+#: rc_option_editor.cc:1267
 msgid "Solo controls are Listen controls"
 msgstr ""
 
-#: rc_option_editor.cc:1278
+#: rc_option_editor.cc:1276
 #, fuzzy
 msgid "Listen Position"
 msgstr "Θέση"
 
-#: rc_option_editor.cc:1283
+#: rc_option_editor.cc:1281
 msgid "after-fader listen"
 msgstr ""
 
-#: rc_option_editor.cc:1284
+#: rc_option_editor.cc:1282
 msgid "pre-fader listen"
 msgstr ""
 
-#: rc_option_editor.cc:1293
+#: rc_option_editor.cc:1291
 msgid "Exclusive solo"
 msgstr ""
 
-#: rc_option_editor.cc:1301
+#: rc_option_editor.cc:1299
 #, fuzzy
 msgid "Show solo muting"
 msgstr "Ανάδειξη όλων των αυτοματισμών"
 
-#: rc_option_editor.cc:1309
+#: rc_option_editor.cc:1307
 msgid "Soloing overrides muting"
 msgstr ""
 
-#: rc_option_editor.cc:1314
+#: rc_option_editor.cc:1312
 #, fuzzy
 msgid "Default track / bus muting options"
 msgstr "κανάλια/δίαυλοι"
 
-#: rc_option_editor.cc:1319
+#: rc_option_editor.cc:1317
 msgid "Mute affects pre-fader sends"
 msgstr ""
 
-#: rc_option_editor.cc:1327
+#: rc_option_editor.cc:1325
 msgid "Mute affects post-fader sends"
 msgstr ""
 
-#: rc_option_editor.cc:1335
+#: rc_option_editor.cc:1333
 #, fuzzy
 msgid "Mute affects control outputs"
 msgstr "χρήση των control outs"
 
-#: rc_option_editor.cc:1343
+#: rc_option_editor.cc:1341
 msgid "Mute affects main outputs"
 msgstr ""
 
-#: rc_option_editor.cc:1348 rc_option_editor.cc:1356 rc_option_editor.cc:1364
-#: rc_option_editor.cc:1373 rc_option_editor.cc:1381 rc_option_editor.cc:1389
-#: rc_option_editor.cc:1397 rc_option_editor.cc:1406 rc_option_editor.cc:1415
+#: rc_option_editor.cc:1346 rc_option_editor.cc:1354 rc_option_editor.cc:1362
+#: rc_option_editor.cc:1371 rc_option_editor.cc:1379 rc_option_editor.cc:1387
+#: rc_option_editor.cc:1395 rc_option_editor.cc:1404 rc_option_editor.cc:1413
 #, fuzzy
 msgid "MIDI control"
 msgstr "MMC Θύρα"
 
-#: rc_option_editor.cc:1359
+#: rc_option_editor.cc:1357
 #, fuzzy
 msgid "Send MIDI Time Code"
 msgstr "Αποστολή MIDI feedback"
 
-#: rc_option_editor.cc:1367
+#: rc_option_editor.cc:1365
 msgid "Percentage either side of normal transport speed to transmit MTC"
 msgstr ""
 
-#: rc_option_editor.cc:1376
+#: rc_option_editor.cc:1374
 msgid "Obey MIDI Machine Control commands"
 msgstr ""
 
-#: rc_option_editor.cc:1384
+#: rc_option_editor.cc:1382
 msgid "Send MIDI Machine Control commands"
 msgstr ""
 
-#: rc_option_editor.cc:1392
+#: rc_option_editor.cc:1390
 #, fuzzy
 msgid "Send MIDI control feedback"
 msgstr "Αποστολή MIDI feedback"
 
-#: rc_option_editor.cc:1400
+#: rc_option_editor.cc:1398
 msgid "Inbound MMC device ID"
 msgstr ""
 
-#: rc_option_editor.cc:1409
+#: rc_option_editor.cc:1407
 msgid "Outbound MMC device ID"
 msgstr ""
 
-#: rc_option_editor.cc:1418
+#: rc_option_editor.cc:1416
 msgid "Initial program change"
 msgstr ""
 
-#: rc_option_editor.cc:1426 rc_option_editor.cc:1439
+#: rc_option_editor.cc:1424 rc_option_editor.cc:1437
 #, fuzzy
 msgid "Control surfaces"
 msgstr "Επιφάνειες ελέγχου"
 
-#: rc_option_editor.cc:1430
+#: rc_option_editor.cc:1428
 #, fuzzy
 msgid "Control surface remote ID"
 msgstr "Επιφάνειες ελέγχου"
 
-#: rc_option_editor.cc:1435
+#: rc_option_editor.cc:1433
 msgid "assigned by user"
 msgstr ""
 
-#: rc_option_editor.cc:1436
+#: rc_option_editor.cc:1434
 msgid "follows order of mixer"
 msgstr ""
 
-#: rc_option_editor.cc:1437
+#: rc_option_editor.cc:1435
 msgid "follows order of editor"
 msgstr ""
 
-#: rc_option_editor.cc:1443
+#: rc_option_editor.cc:1441
 msgid "Keyboard"
 msgstr ""
 
@@ -8583,7 +8598,7 @@ msgstr "Θέση sync της Περιοχής"
 msgid "Trigger gap"
 msgstr ""
 
-#: rhythm_ferret.cc:107 strip_silence_dialog.cc:69
+#: rhythm_ferret.cc:107 strip_silence_dialog.cc:70
 msgid "Threshold"
 msgstr ""
 
@@ -8608,7 +8623,7 @@ msgstr "Επιλογές"
 msgid "split regions (rhythm ferret)"
 msgstr ""
 
-#: route_group_dialog.cc:35 route_time_axis.cc:197 route_time_axis.cc:680
+#: route_group_dialog.cc:35 route_time_axis.cc:197 route_time_axis.cc:667
 #, fuzzy
 msgid "Route Group"
 msgstr "Διαμόρφωση Group"
@@ -8633,7 +8648,7 @@ msgstr "Σόλο"
 msgid "Record enable"
 msgstr "Εγγραφή"
 
-#: route_group_dialog.cc:44
+#: route_group_dialog.cc:44 time_info_box.cc:73
 #, fuzzy
 msgid "Selection"
 msgstr "Επιλογή"
@@ -8717,185 +8732,185 @@ msgstr ""
 msgid "Record"
 msgstr "Εγγραφή"
 
-#: route_time_axis.cc:198 route_time_axis.cc:662
+#: route_time_axis.cc:198 route_time_axis.cc:649
 msgid "Playlist"
 msgstr "Playlist"
 
-#: route_time_axis.cc:199 route_time_axis.cc:683
+#: route_time_axis.cc:199 route_time_axis.cc:670
 msgid "Automation"
 msgstr "Αυτοματισμός"
 
-#: route_time_axis.cc:397
+#: route_time_axis.cc:384
 #, fuzzy
 msgid "Show All Automation"
 msgstr "Ανάδειξη όλων των αυτοματισμών"
 
-#: route_time_axis.cc:400
+#: route_time_axis.cc:387
 #, fuzzy
 msgid "Show Existing Automation"
 msgstr "Ανάδειξη υπαρχόντων αυτοματισμών"
 
-#: route_time_axis.cc:403
+#: route_time_axis.cc:390
 #, fuzzy
 msgid "Hide All Automation"
 msgstr "Κρύψιμο όλων των αυτοματισμών"
 
-#: route_time_axis.cc:429
+#: route_time_axis.cc:416
 #, fuzzy
 msgid "Color..."
 msgstr "Χρώμα"
 
-#: route_time_axis.cc:483
+#: route_time_axis.cc:470
 msgid "Overlaid"
 msgstr ""
 
-#: route_time_axis.cc:490
+#: route_time_axis.cc:477
 msgid "Stacked"
 msgstr ""
 
-#: route_time_axis.cc:499
+#: route_time_axis.cc:486
 #, fuzzy
 msgid "Layers"
 msgstr "Στρώμα"
 
-#: route_time_axis.cc:568
+#: route_time_axis.cc:555
 #, fuzzy
 msgid "Automatic (based on I/O connections)"
 msgstr "Αυτόματη σύνδεση Οutputs"
 
-#: route_time_axis.cc:577
+#: route_time_axis.cc:564
 #, fuzzy
 msgid "(Currently: Existing Material)"
 msgstr "Ευθυγράμμιση με το υπάρχον υλικό"
 
-#: route_time_axis.cc:580
+#: route_time_axis.cc:567
 #, fuzzy
 msgid "(Currently: Capture Time)"
 msgstr "Ευθυγράμμιση με το χρόνο λήψεως"
 
-#: route_time_axis.cc:588
+#: route_time_axis.cc:575
 #, fuzzy
 msgid "Align With Existing Material"
 msgstr "Ευθυγράμμιση με το υπάρχον υλικό"
 
-#: route_time_axis.cc:593
+#: route_time_axis.cc:580
 #, fuzzy
 msgid "Align With Capture Time"
 msgstr "Ευθυγράμμιση με το χρόνο λήψεως"
 
-#: route_time_axis.cc:598
+#: route_time_axis.cc:585
 #, fuzzy
 msgid "Alignment"
 msgstr "Ευθυγράμμιση"
 
-#: route_time_axis.cc:633
+#: route_time_axis.cc:620
 #, fuzzy
 msgid "Normal Mode"
 msgstr "Κανονικό"
 
-#: route_time_axis.cc:639
+#: route_time_axis.cc:626
 #, fuzzy
 msgid "Tape Mode"
 msgstr "Λειτουργία Έλξεως"
 
-#: route_time_axis.cc:645
+#: route_time_axis.cc:632
 #, fuzzy
 msgid "Non-Layered Mode"
 msgstr "Τέλη Περιοχών"
 
-#: route_time_axis.cc:656
+#: route_time_axis.cc:643
 #, fuzzy
 msgid "Color Mode"
 msgstr "Χρώμα"
 
-#: route_time_axis.cc:1001
+#: route_time_axis.cc:980
 #, fuzzy
 msgid "Rename Playlist"
 msgstr "Όνομα για playlist"
 
-#: route_time_axis.cc:1002
+#: route_time_axis.cc:981
 #, fuzzy
 msgid "New name for playlist:"
 msgstr "Όνομα για playlist"
 
-#: route_time_axis.cc:1087
+#: route_time_axis.cc:1066
 #, fuzzy
 msgid "New Copy Playlist"
 msgstr "Όνομα για playlist"
 
-#: route_time_axis.cc:1088 route_time_axis.cc:1141
+#: route_time_axis.cc:1067 route_time_axis.cc:1120
 #, fuzzy
 msgid "Name for new playlist:"
 msgstr "Όνομα για playlist"
 
-#: route_time_axis.cc:1140
+#: route_time_axis.cc:1119
 #, fuzzy
 msgid "New Playlist"
 msgstr "Playlist"
 
-#: route_time_axis.cc:1331
+#: route_time_axis.cc:1310
 msgid "A track already exists with that name"
 msgstr "Κανάλι με αυτό το όνομα ήδη υπάρχει"
 
-#: route_time_axis.cc:1334
+#: route_time_axis.cc:1313
 #, fuzzy
 msgid "You cannot create a track with that name as it is reserved for %1"
 msgstr "Δεν γίνεται να προστεθεί κανάλι χωρίς ήδη φορτωμένη συνεδρία."
 
-#: route_time_axis.cc:1512
+#: route_time_axis.cc:1500
 #, fuzzy
 msgid "New Copy..."
 msgstr "Νέο αντίγραφο"
 
-#: route_time_axis.cc:1516
+#: route_time_axis.cc:1504
 #, fuzzy
 msgid "New Take"
 msgstr "Νέος Χρόνος"
 
-#: route_time_axis.cc:1517
+#: route_time_axis.cc:1505
 #, fuzzy
 msgid "Copy Take"
 msgstr "Αντιγραφή"
 
-#: route_time_axis.cc:1522
+#: route_time_axis.cc:1510
 msgid "Clear Current"
 msgstr "Εκκαθάριση τρέχοντος"
 
-#: route_time_axis.cc:1525
+#: route_time_axis.cc:1513
 #, fuzzy
 msgid "Select From All..."
 msgstr "Επιλογή όλων ..."
 
-#: route_time_axis.cc:2227
+#: route_time_axis.cc:2165
 #, fuzzy
 msgid "layer-display"
 msgstr "Απεικόνιση"
 
-#: route_time_axis.cc:2314
+#: route_time_axis.cc:2252
 msgid "Underlays"
 msgstr ""
 
-#: route_time_axis.cc:2317
+#: route_time_axis.cc:2255
 #, fuzzy
 msgid "Remove \"%1\""
 msgstr "Απαλοιφή"
 
-#: route_time_axis.cc:2367 route_time_axis.cc:2403
+#: route_time_axis.cc:2305 route_time_axis.cc:2341
 #, fuzzy
 msgid "programming error: underlay reference pointer pairs are inconsistent!"
 msgstr ""
 "Σφάλμα προγραμματισμού: κανένας  \"rect\" δείκτης δεν σχετίζεται με το "
 "επιλεγμένο αντικείμενο"
 
-#: route_time_axis.cc:2421
+#: route_time_axis.cc:2359
 msgid "r"
 msgstr "r"
 
-#: route_time_axis.cc:2436
+#: route_time_axis.cc:2374
 msgid "s"
 msgstr "s"
 
-#: route_time_axis.cc:2439
+#: route_time_axis.cc:2377
 msgid "m"
 msgstr "m"
 
@@ -9007,7 +9022,7 @@ msgstr "Main Outs"
 msgid "Color Selection"
 msgstr "Αναπαρ/γή επιλογής"
 
-#: route_ui.cc:1404
+#: route_ui.cc:1368
 #, fuzzy
 msgid ""
 "Do you really want to remove track \"%1\" ?\n"
@@ -9021,7 +9036,7 @@ msgstr ""
 "Πιθανόν να χάσετε και τη λίστα που χρησιμοποιείται από το κανάλι.\n"
 "(δεν μπορεί να ανακληθεί)"
 
-#: route_ui.cc:1406
+#: route_ui.cc:1370
 #, fuzzy
 msgid ""
 "Do you really want to remove bus \"%1\" ?\n"
@@ -9031,59 +9046,59 @@ msgstr ""
 "Στ'αλήθεια θέλετε να απαλοίψετε το κανάλι \"%1\" ?\n"
 "(δεν μπορεί να ανακληθεί)"
 
-#: route_ui.cc:1414
+#: route_ui.cc:1378
 #, fuzzy
 msgid "Remove track"
 msgstr "Απαλοιφή Στίγματος"
 
-#: route_ui.cc:1416
+#: route_ui.cc:1380
 #, fuzzy
 msgid "Remove bus"
 msgstr "Απαλοιφή"
 
-#: route_ui.cc:1440
+#: route_ui.cc:1404
 msgid "Rename Track"
 msgstr "Μετονομασία Καναλιού"
 
-#: route_ui.cc:1442
+#: route_ui.cc:1406
 #, fuzzy
 msgid "Rename Bus"
 msgstr "Μετονομασία"
 
-#: route_ui.cc:1586
+#: route_ui.cc:1550
 msgid " latency"
 msgstr ""
 
-#: route_ui.cc:1599
+#: route_ui.cc:1563
 msgid "Cannot create route template directory %1"
 msgstr ""
 
-#: route_ui.cc:1605
+#: route_ui.cc:1569
 #, fuzzy
 msgid "Save As Template"
 msgstr "Αποθήκευση προσχεδίου..."
 
-#: route_ui.cc:1606
+#: route_ui.cc:1570
 #, fuzzy
 msgid "Template name:"
 msgstr "Όνομα Πεδίου:"
 
-#: route_ui.cc:1673
+#: route_ui.cc:1637
 msgid "Remote Control ID"
 msgstr ""
 
-#: route_ui.cc:1679
+#: route_ui.cc:1643
 #, fuzzy
 msgid "Remote control ID:"
 msgstr "απαλοιφή σημείου ελέγχου"
 
-#: route_ui.cc:1730
+#: route_ui.cc:1694
 msgid ""
 "Left-click to invert (phase reverse) channel %1 of this track.  Right-click "
 "to show menu."
 msgstr ""
 
-#: route_ui.cc:1732
+#: route_ui.cc:1696
 msgid ""
 "Left-click to invert (phase reverse) all channels of this track.  Right-"
 "click to show menu."
@@ -10533,15 +10548,15 @@ msgstr "Απ/Ενεργοποίηση Καναλιού 1"
 msgid "Sustain Selected Notes by Note Length"
 msgstr ""
 
-#: strip_silence_dialog.cc:49
+#: strip_silence_dialog.cc:50
 msgid "Strip Silence"
 msgstr ""
 
-#: strip_silence_dialog.cc:79
+#: strip_silence_dialog.cc:80
 msgid "Minimum length"
 msgstr ""
 
-#: strip_silence_dialog.cc:87
+#: strip_silence_dialog.cc:88
 #, fuzzy
 msgid "Fade length"
 msgstr "Fade In"
@@ -10647,11 +10662,11 @@ msgstr "Χρώμα"
 msgid "Unable to find UI style file %1 in search path %2. %3 will look strange"
 msgstr ""
 
-#: time_axis_view.cc:125
+#: time_axis_view.cc:124
 msgid "gTortnam"
 msgstr "gTortnam"
 
-#: time_axis_view.cc:1047
+#: time_axis_view.cc:1029
 msgid "unknown track height name \"%1\" in XML GUI information"
 msgstr "Άγνωστο όνομα ύψους καναλιού\"%1\" στις XML GUI πληροφορίες"
 
@@ -10728,6 +10743,14 @@ msgstr "Μεγέθυνέ/Σμίκρυνέ το"
 msgid "<b>Progress</b>"
 msgstr ""
 
+#: time_info_box.cc:125
+msgid "Start recording at auto-punch start"
+msgstr "Έναρξη εγγραφής στην αρχή αυτο-εναπόθεσης"
+
+#: time_info_box.cc:126
+msgid "Stop recording at auto-punch end"
+msgstr "Λήξη εγγραφής στο τέλος αυτο-εναπόθεσης"
+
 #: time_selection.cc:40
 msgid "programming error: request for non-existent audio range (%1)!"
 msgstr "Σφάλμα προγραμματισμού: request για μη-υπάρχον ηχητικό διάστημα (%1)!"
@@ -10801,12 +10824,15 @@ msgstr "δεν ευρέθησαν εικόνες για το fader rail"
 msgid "cannot find icon image for %1"
 msgstr "δεν ευρέθησαν εικόνες για το fader rail"
 
-#: verbose_cursor.cc:41
+#: verbose_cursor.cc:44
 msgid "VerboseCanvasCursor"
 msgstr ""
 
-#~ msgid "% "
-#~ msgstr "% "
+#~ msgid "Off"
+#~ msgstr "Εκτός"
+
+#~ msgid "Smaller"
+#~ msgstr "Μικρότερο"
 
 #~ msgid "quit"
 #~ msgstr "Έξοδος"
@@ -11880,9 +11906,6 @@ msgstr ""
 
 #~ msgid "Paths/Files"
 #~ msgstr "Paths/Αρχεία"
-
-#~ msgid "24 FPS"
-#~ msgstr "24 FPS"
 
 #~ msgid "25 FPS"
 #~ msgstr "25 FPS"

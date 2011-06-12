@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 0.664.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-05-30 22:28-0400\n"
+"POT-Creation-Date: 2011-06-12 17:45-0400\n"
 "PO-Revision-Date: 2003-05-21 12:50+0500\n"
 "Last-Translator: Filippo Pappalardo <filippo@email.it>\n"
 "Language-Team: Italian\n"
@@ -16,73 +16,73 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: amp.cc:53 automatable.cc:187
+#: amp.cc:53 automatable.cc:160
 msgid "Fader"
 msgstr ""
 
-#: audio_diskstream.cc:249
+#: audio_diskstream.cc:248
 msgid "AudioDiskstream: Playlist \"%1\" isn't an audio playlist"
 msgstr ""
 
-#: audio_diskstream.cc:302
+#: audio_diskstream.cc:301
 #, fuzzy
 msgid "AudioDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr "DiskStream %1: non esiste alcuna playlist di cui fare una copia!"
 
-#: audio_diskstream.cc:775 audio_diskstream.cc:786
+#: audio_diskstream.cc:774 audio_diskstream.cc:785
 #, fuzzy
 msgid ""
 "AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"
 msgstr "DiskStream %1: impossibile leggere %2 dalla playlista al frame %3"
 
-#: audio_diskstream.cc:936
+#: audio_diskstream.cc:935
 #, fuzzy
 msgid "AudioDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr "DiskStream %1: impossibile leggere %2 dalla playlista al frame %3"
 
-#: audio_diskstream.cc:1304 audio_diskstream.cc:1321
+#: audio_diskstream.cc:1303 audio_diskstream.cc:1320
 #, fuzzy
 msgid "AudioDiskstream %1: cannot write to disk"
 msgstr "DiskStream %1: impossibile scrivere sul disco"
 
-#: audio_diskstream.cc:1366
+#: audio_diskstream.cc:1365
 #, fuzzy
 msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr "DiskStream \"%1\": impossibile scaricare i dati acquisiti sul disco!"
 
-#: audio_diskstream.cc:1460
+#: audio_diskstream.cc:1459
 msgid "%1: could not create region for complete audio file"
 msgstr "%1: impossibile creare una regione per il file audio completo"
 
-#: audio_diskstream.cc:1493
+#: audio_diskstream.cc:1492
 #, fuzzy
 msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr "DiskStream: impossibile creare una regione per l'audio registrato!"
 
-#: audio_diskstream.cc:1607
+#: audio_diskstream.cc:1606
 #, fuzzy
 msgid "programmer error: %1"
 msgstr "errore di programmazione: %1"
 
-#: audio_diskstream.cc:1822
+#: audio_diskstream.cc:1821
 #, fuzzy
 msgid "AudioDiskstream: channel %1 out of range"
 msgstr "DiskStream: canale fuori margine"
 
-#: audio_diskstream.cc:1836 midi_diskstream.cc:1304
+#: audio_diskstream.cc:1835 midi_diskstream.cc:1304
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr "%1:%2 nuovo file di registrazione non è stato avviato correttamente"
 
-#: audio_diskstream.cc:2115
+#: audio_diskstream.cc:2114
 #, fuzzy
 msgid "%1: cannot restore pending capture source file %2"
 msgstr "Import: impossibile aprire il file audio di input \"%1\""
 
-#: audio_diskstream.cc:2137
+#: audio_diskstream.cc:2136
 msgid "%1: incorrect number of pending sources listed - ignoring them all"
 msgstr ""
 
-#: audio_diskstream.cc:2161
+#: audio_diskstream.cc:2160
 #, fuzzy
 msgid "%1: cannot create whole-file region from pending capture sources"
 msgstr "Playlist: impossibile creare la Regione dal file di stato"
@@ -126,7 +126,7 @@ msgstr ""
 
 #: audio_playlist_source.cc:174 audiosource.cc:920 file_source.cc:498
 #: midi_playlist_source.cc:149 midi_playlist_source.cc:157
-#: midi_playlist_source.cc:164 midi_source.cc:351 plugin_insert.cc:578
+#: midi_playlist_source.cc:164 midi_source.cc:351 plugin_insert.cc:581
 #: session.cc:2248 session.cc:2281 session.cc:2321 session.cc:3275
 #: session_handle.cc:87 sndfilesource.cc:123
 msgid "programming error: %1"
@@ -322,12 +322,12 @@ msgstr ""
 msgid "Automation node has no path property"
 msgstr ""
 
-#: automatable.cc:117
+#: automatable.cc:101
 #, fuzzy
 msgid "cannot open %2 to load automation data (%3)"
 msgstr "impossibile accedere al file dell'automazione pan %1 (%2)"
 
-#: automatable.cc:147
+#: automatable.cc:131
 #, fuzzy
 msgid "cannot load automation data from %2"
 msgstr "impossibile accedere al file dell'automazione pan %1 (%2)"
@@ -567,6 +567,10 @@ msgstr ""
 msgid "trim start, "
 msgstr ""
 
+#: export_format_specification.cc:522
+msgid "trim end, "
+msgstr ""
+
 #: export_formats.cc:49
 msgid "Shaped Noise"
 msgstr ""
@@ -621,7 +625,7 @@ msgstr "separa"
 msgid "No sample format"
 msgstr "separa"
 
-#: export_handler.cc:283
+#: export_handler.cc:290
 msgid "Editor: cannot open \"%1\" as export file for CD marker file"
 msgstr ""
 
@@ -663,7 +667,7 @@ msgid ""
 "configuration"
 msgstr ""
 
-#: file_source.cc:201 session_state.cc:2902
+#: file_source.cc:201 session_state.cc:2900
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
 msgstr ""
@@ -1228,7 +1232,7 @@ msgstr "aggiungi regione"
 msgid "fixed time region copy"
 msgstr ""
 
-#: pannable.cc:225
+#: pannable.cc:204
 msgid "Pannable given XML data for %1 - ignored"
 msgstr ""
 
@@ -1281,24 +1285,24 @@ msgstr ""
 msgid "No playlist node in PlaylistSource XML!"
 msgstr ""
 
-#: plugin_insert.cc:540
+#: plugin_insert.cc:543
 msgid "programming error: "
 msgstr "errore di programmazione: "
 
-#: plugin_insert.cc:830
+#: plugin_insert.cc:833
 #, fuzzy
 msgid "XML node describing plugin is missing the `type' field"
 msgstr "Il nodo XML descrivente l'insert manca del campo `type'"
 
-#: plugin_insert.cc:843
+#: plugin_insert.cc:846
 msgid "unknown plugin type %1 in plugin insert state"
 msgstr ""
 
-#: plugin_insert.cc:863
+#: plugin_insert.cc:866
 msgid "Plugin has no unique ID field"
 msgstr ""
 
-#: plugin_insert.cc:872
+#: plugin_insert.cc:875
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
@@ -1306,15 +1310,15 @@ msgstr ""
 "Trovato un riferimento ad un plugin (\"%1\") sconosciuto.\n"
 "Forse  stato rimosso o spostato dall'ultima volta che lo si e' usato"
 
-#: plugin_insert.cc:988
+#: plugin_insert.cc:991
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr ""
 
-#: plugin_insert.cc:995
+#: plugin_insert.cc:998
 msgid "PluginInsert: Auto: port id out of range"
 msgstr ""
 
-#: plugin_insert.cc:1031
+#: plugin_insert.cc:1034
 msgid "PluginInsert: automatable control %1 not found - ignored"
 msgstr ""
 
@@ -1377,11 +1381,11 @@ msgstr "Il nodo XML descrivente l'insert manca del campo `type'"
 msgid "non-port insert XML used for port plugin insert"
 msgstr "insert non-port XML usato per insert di plugin di porta"
 
-#: processor.cc:242
+#: processor.cc:211
 msgid "No %1 property flag in element %2"
 msgstr ""
 
-#: processor.cc:251
+#: processor.cc:220
 msgid "No child node with active property"
 msgstr ""
 
@@ -1480,7 +1484,7 @@ msgstr ""
 msgid "signal"
 msgstr "segnale"
 
-#: route.cc:985 route.cc:2387
+#: route.cc:985 route.cc:2383
 #, fuzzy
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "impossibile creare la cartella per la sessione %1; ignorato"
@@ -1490,11 +1494,11 @@ msgstr "impossibile creare la cartella per la sessione %1; ignorato"
 msgid "processor could not be created. Ignored."
 msgstr "Sessione: impossibile creare un nuovo route"
 
-#: route.cc:1878 route.cc:2057
+#: route.cc:1878 route.cc:2055
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr ""
 
-#: route.cc:1987 route.cc:1991 route.cc:2165 route.cc:2169
+#: route.cc:1989 route.cc:1993 route.cc:2163 route.cc:2167
 msgid "badly formed order key string in state file! [%1] ... ignored."
 msgstr ""
 
@@ -1880,103 +1884,103 @@ msgstr "impossibile controllare il file di stato %1 (%2)"
 msgid "programming error: Session: incorrect XML node sent to set_state()"
 msgstr ""
 
-#: session_state.cc:1262
+#: session_state.cc:1260
 msgid "Session: XML state has no options section"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione option"
 
-#: session_state.cc:1267
+#: session_state.cc:1265
 #, fuzzy
 msgid "Session: XML state has no metadata section"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione routes"
 
-#: session_state.cc:1274
+#: session_state.cc:1272
 msgid "Session: XML state has no locations section"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione locations"
 
-#: session_state.cc:1304
+#: session_state.cc:1302
 msgid "Session: XML state has no sources section"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione sources"
 
-#: session_state.cc:1311
+#: session_state.cc:1309
 msgid "Session: XML state has no Tempo Map section"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione Tempo Map"
 
-#: session_state.cc:1318
+#: session_state.cc:1316
 msgid "Session: XML state has no Regions section"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione Regions"
 
-#: session_state.cc:1325
+#: session_state.cc:1323
 msgid "Session: XML state has no playlists section"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione playlist"
 
-#: session_state.cc:1351
+#: session_state.cc:1349
 #, fuzzy
 msgid "Session: XML state has no bundles section"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione routes"
 
-#: session_state.cc:1363
+#: session_state.cc:1361
 msgid "Session: XML state has no diskstreams section"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione diskstream"
 
-#: session_state.cc:1371
+#: session_state.cc:1369
 msgid "Session: XML state has no routes section"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione routes"
 
-#: session_state.cc:1383
+#: session_state.cc:1381
 #, fuzzy
 msgid "Session: XML state has no route groups section"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione routes"
 
-#: session_state.cc:1392
+#: session_state.cc:1390
 msgid "Session: XML state has no edit groups section"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione edit groups"
 
-#: session_state.cc:1399
+#: session_state.cc:1397
 msgid "Session: XML state has no mix groups section"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione mix groups"
 
-#: session_state.cc:1407
+#: session_state.cc:1405
 #, fuzzy
 msgid "Session: XML state has no click section"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione click"
 
-#: session_state.cc:1447
+#: session_state.cc:1445
 msgid "Session: cannot create Route from XML description."
 msgstr "Sessione: impossibile creare Route dalla descrizione XML"
 
-#: session_state.cc:1451
+#: session_state.cc:1449
 msgid "Loaded track/bus %1"
 msgstr ""
 
-#: session_state.cc:1549
+#: session_state.cc:1547
 msgid "Could not find diskstream for route"
 msgstr ""
 
-#: session_state.cc:1603
+#: session_state.cc:1601
 msgid "Session: cannot create Region from XML description."
 msgstr "Sessione: impossibile creare regione dalla descrizione XML"
 
-#: session_state.cc:1607
+#: session_state.cc:1605
 #, fuzzy
 msgid "Can not load state for region '%1'"
 msgstr "impossibile creare un nuovo nome per la regione \"%1\""
 
-#: session_state.cc:1643
+#: session_state.cc:1641
 msgid "Regions in compound description not found (ID's %1 and %2): ignored"
 msgstr ""
 
-#: session_state.cc:1669
+#: session_state.cc:1667
 #, fuzzy
 msgid "Cannot reconstruct nested source for region %1"
 msgstr "impossibile creare un nuovo nome per la regione \"%1\""
 
-#: session_state.cc:1730
+#: session_state.cc:1728
 #, fuzzy
 msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
 msgstr ""
 "Sessione: il nodo XML descrivente una Regione è incompleto (nessun source)"
 
-#: session_state.cc:1738 session_state.cc:1759 session_state.cc:1779
+#: session_state.cc:1736 session_state.cc:1757 session_state.cc:1777
 #, fuzzy
 msgid ""
 "Session: XMLNode describing a AudioRegion references an unknown source id =%1"
@@ -1984,7 +1988,7 @@ msgstr ""
 "Sessione: il nodo XML descrivente una Regione fa riferimento ad un source "
 "con id sconosciuto =%1"
 
-#: session_state.cc:1744 session_state.cc:1765 session_state.cc:1785
+#: session_state.cc:1742 session_state.cc:1763 session_state.cc:1783
 #, fuzzy
 msgid ""
 "Session: XMLNode describing a AudioRegion references a non-audio source id ="
@@ -1993,7 +1997,7 @@ msgstr ""
 "Sessione: il nodo XML descrivente una Regione fa riferimento ad un source "
 "con id sconosciuto =%1"
 
-#: session_state.cc:1808
+#: session_state.cc:1806
 #, fuzzy
 msgid ""
 "Session: XMLNode describing an AudioRegion is missing some master sources; "
@@ -2001,13 +2005,13 @@ msgid ""
 msgstr ""
 "Sessione: il nodo XML descrivente una Regione è incompleto (nessun source)"
 
-#: session_state.cc:1842
+#: session_state.cc:1840
 #, fuzzy
 msgid "Session: XMLNode describing a MidiRegion is incomplete (no source)"
 msgstr ""
 "Sessione: il nodo XML descrivente una Regione è incompleto (nessun source)"
 
-#: session_state.cc:1850
+#: session_state.cc:1848
 #, fuzzy
 msgid ""
 "Session: XMLNode describing a MidiRegion references an unknown source id =%1"
@@ -2015,7 +2019,7 @@ msgstr ""
 "Sessione: il nodo XML descrivente una Regione fa riferimento ad un source "
 "con id sconosciuto =%1"
 
-#: session_state.cc:1856
+#: session_state.cc:1854
 #, fuzzy
 msgid ""
 "Session: XMLNode describing a MidiRegion references a non-midi source id =%1"
@@ -2023,119 +2027,119 @@ msgstr ""
 "Sessione: il nodo XML descrivente una Regione fa riferimento ad un source "
 "con id sconosciuto =%1"
 
-#: session_state.cc:1924
+#: session_state.cc:1922
 msgid ""
 "cannot create new file from region name \"%1\" with ident = \"%2\": too many "
 "existing files with similar names"
 msgstr ""
 
-#: session_state.cc:1947
+#: session_state.cc:1945
 msgid "Session: cannot create Source from XML description."
 msgstr "Sessione: impossibile creare Source dalla descrizione XML"
 
-#: session_state.cc:1981
+#: session_state.cc:1979
 msgid "A sound file is missing. It will be replaced by silence."
 msgstr ""
 
-#: session_state.cc:2004
+#: session_state.cc:2002
 #, fuzzy
 msgid "Found a sound file that cannot be used by %1. Talk to the progammers."
 msgstr "E' stato trovato un file audio che non può essere usato da Ardour."
 
-#: session_state.cc:2026
+#: session_state.cc:2024
 msgid "Could not create mix templates directory \"%1\" (%2)"
 msgstr "Impossibile creare la cartella per i modelli di mixaggio \"%1\" (%2)"
 
-#: session_state.cc:2038
+#: session_state.cc:2036
 msgid "Template \"%1\" already exists - new version not created"
 msgstr "Il modello \"%1\" esiste già - non è stata creata una nuova versione"
 
-#: session_state.cc:2044
+#: session_state.cc:2042
 #, fuzzy
 msgid "template not saved"
 msgstr "modello di mixaggio non salvato"
 
-#: session_state.cc:2061
+#: session_state.cc:2059
 #, fuzzy
 msgid "Template \"%1\" already exists - template not renamed"
 msgstr "Il modello \"%1\" esiste già - non è stata creata una nuova versione"
 
-#: session_state.cc:2222
+#: session_state.cc:2220
 msgid "Session: cannot create Named Selection from XML description."
 msgstr "Sessione: impossibile creare Named Selection dalla descizione XML"
 
-#: session_state.cc:2273
+#: session_state.cc:2271
 #, fuzzy
 msgid "Unknown node \"%1\" found in Bundles list from state file"
 msgstr "Nodo sconosciuto \"%1\" trovato in Connections list dal file di stato"
 
-#: session_state.cc:2820 session_state.cc:2826
+#: session_state.cc:2818 session_state.cc:2824
 #, fuzzy
 msgid "Cannot expand path %1 (%2)"
 msgstr "impossibile controllare il percorso %1 (%2)"
 
-#: session_state.cc:2879
+#: session_state.cc:2877
 #, fuzzy
 msgid "Session: cannot create dead file folder \"%1\" (%2)"
 msgstr "Sessione: impossibile creare la cartella per la sessione \"%1\" (%2)"
 
-#: session_state.cc:2918
+#: session_state.cc:2916
 #, fuzzy
 msgid "cannot rename unused file source from %1 to %2 (%3)"
 msgstr "impossibile rinominare file audio sorgente da %1 a %2 (%3)"
 
-#: session_state.cc:2936
+#: session_state.cc:2934
 msgid "cannot remove peakfile %1 for %2 (%3)"
 msgstr "impossibile eliminare il peakfile %1 per %2 (%3)"
 
-#: session_state.cc:3243
+#: session_state.cc:3241
 #, fuzzy
 msgid "could not backup old history file, current history not saved"
 msgstr ""
 "impossibile fare copia di sicurezza del file di stato, stato attuale non "
 "salvato"
 
-#: session_state.cc:3256
+#: session_state.cc:3254
 #, fuzzy
 msgid "history could not be saved to %1"
 msgstr "stato non salvato"
 
-#: session_state.cc:3265
+#: session_state.cc:3263
 #, fuzzy
 msgid "could not restore history file from backup %1 (%2)"
 msgstr "Esportazione: impossibile scrivere dati sul file di output (%1)"
 
-#: session_state.cc:3290
+#: session_state.cc:3288
 msgid "%1: no history file \"%2\" for this session."
 msgstr ""
 
-#: session_state.cc:3296
+#: session_state.cc:3294
 #, fuzzy
 msgid "Could not understand session history file \"%1\""
 msgstr "IO: impossibile registrare la porta %1"
 
-#: session_state.cc:3338
+#: session_state.cc:3336
 msgid "Failed to downcast MidiSource for NoteDiffCommand"
 msgstr ""
 
-#: session_state.cc:3349
+#: session_state.cc:3347
 msgid "Failed to downcast MidiSource for SysExDiffCommand"
 msgstr ""
 
-#: session_state.cc:3360
+#: session_state.cc:3358
 msgid "Failed to downcast MidiSource for PatchChangeDiffCommand"
 msgstr ""
 
-#: session_state.cc:3368
+#: session_state.cc:3366
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
 msgstr ""
 
-#: session_state.cc:3590
+#: session_state.cc:3588
 #, fuzzy
 msgid "Session: unknown diskstream type in XML"
 msgstr "Sessione: il file di stato XML non ha alcuna sezione diskstream"
 
-#: session_state.cc:3595
+#: session_state.cc:3593
 msgid "Session: could not load diskstream via XML state"
 msgstr ""
 

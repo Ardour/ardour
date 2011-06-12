@@ -43,7 +43,8 @@ children = [
 
 i18n_children = [
         'gtk2_ardour',
-        'libs/ardour'
+        'libs/ardour',
+        'libs/gtkmm2ext',
 ]
 
 # Version stuff

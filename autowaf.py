@@ -441,7 +441,7 @@ def shutdown():
 		except: pass
 
 def build_i18n(bld,srcdir,dir,name,sources):
-	pwd = bld.get_curdir()
+	pwd = os.getcwd()
 	os.chdir(os.path.join (srcdir, dir))
 
 	pot_file = '%s.pot' % name
