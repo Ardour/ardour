@@ -1134,6 +1134,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void split_region ();
 
+	void delete_ ();
 	void cut ();
 	void copy ();
 	void paste (float times);

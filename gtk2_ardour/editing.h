@@ -196,6 +196,7 @@ enum InsertTimeOption {
 /////////////////////
 // These don't need their state saved. yet...
 enum CutCopyOp {
+	Delete,
 	Cut,
 	Copy,
 	Clear

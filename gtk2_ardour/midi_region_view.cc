@@ -2943,6 +2943,9 @@ MidiRegionView::cut_copy_clear (Editing::CutCopyOp op)
 	PublicEditor& editor (trackview.editor());
 
 	switch (op) {
+	case Delete:
+		/* XXX what to do ? */
+		break;
 	case Cut:
 	case Copy:
 		editor.get_cut_buffer().add (selection_as_cut_buffer());
@@ -2959,6 +2962,7 @@ MidiRegionView::cut_copy_clear (Editing::CutCopyOp op)
 			switch (op) {
 			case Copy:
 				break;
+			case Delete:
 			case Cut:
 			case Clear:
 				note_diff_remove_note (*i);

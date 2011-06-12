@@ -1369,10 +1369,19 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
         playlist->clear_owned_changes ();
 
 	switch (op) {
+	case Delete:
+		if (playlist->cut (time) != 0) {
+                        vector<Command*> cmds;
+                        playlist->rdiff (cmds);
+                        _session->add_commands (cmds);
+			
+                        _session->add_command (new StatefulDiffCommand (playlist));
+		}
+		break;
+		
 	case Cut:
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
-
                         vector<Command*> cmds;
                         playlist->rdiff (cmds);
                         _session->add_commands (cmds);

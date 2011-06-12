@@ -627,6 +627,12 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 	double const end = tc.from (selection.time.front().end - tc.origin_b ());
 
 	switch (op) {
+	case Delete:
+		if (alist->cut (start, end) != 0) {
+			_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+		}
+		break;
+
 	case Cut:
 
 		if ((what_we_got = alist->cut (start, end)) != 0) {
@@ -720,6 +726,11 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 		}
 
 		switch (op) {
+		case Delete:
+			if (alist->cut ((*i).start, (*i).end) != 0) {
+				_session->add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
+			}
+			break;
 		case Cut:
 			if ((what_we_got = alist->cut ((*i).start, (*i).end)) != 0) {
 				_editor.get_cut_buffer().add (what_we_got);

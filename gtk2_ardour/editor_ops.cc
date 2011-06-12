@@ -3375,6 +3375,13 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 	commit_reversible_command ();
 }
 
+/** Delete selected regions, automation points or a time range */
+void
+Editor::delete_ ()
+{
+	cut_copy (Delete);
+}
+
 /** Cut selected regions, automation points or a time range */
 void
 Editor::cut ()
@@ -3427,6 +3434,9 @@ Editor::cut_copy (CutCopyOp op)
 	string opname;
 
 	switch (op) {
+	case Delete:
+		opname = _("delete");
+		break;
 	case Cut:
 		opname = _("cut");
 		break;
@@ -3444,7 +3454,7 @@ Editor::cut_copy (CutCopyOp op)
 	   this function.
 	*/
 
-	if (op == Cut || op == Clear) {
+	if (op == Delete || op == Cut || op == Clear) {
 		if (_drags->active ()) {
 			_drags->abort ();
 		}
@@ -3497,7 +3507,7 @@ Editor::cut_copy (CutCopyOp op)
 				if (!rs.empty()) {
 					cut_copy_regions (op, rs);
 
-					if (op == Cut) {
+					if (op == Cut || op == Delete) {
 						selection->clear_regions ();
 					}
 				}
@@ -3505,7 +3515,7 @@ Editor::cut_copy (CutCopyOp op)
 				if (!selection->points.empty()) {
 					cut_copy_points (op);
 
-					if (op == Cut) {
+					if (op == Cut || op == Delete) {
 						selection->clear_points ();
 					}
 				}
@@ -3532,7 +3542,7 @@ Editor::cut_copy (CutCopyOp op)
 			cut_copy_ranges (op);
 			commit_reversible_command ();
 
-			if (op == Cut) {
+			if (op == Cut || op == Delete) {
 				selection->clear_time ();
 			}
 
@@ -3543,7 +3553,7 @@ Editor::cut_copy (CutCopyOp op)
 		}
 	}
 
-	if (op == Cut || op == Clear) {
+	if (op == Delete || op == Cut || op == Clear) {
 		_drags->abort ();
 	}
 }
@@ -3703,13 +3713,13 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 		first_position = min ((framepos_t) (*x)->region()->position(), first_position);
 
-		if (op == Cut || op == Clear) {
+		if (op == Cut || op == Clear || op == Delete) {
 			boost::shared_ptr<Playlist> pl = (*x)->region()->playlist();
 
 			if (pl) {
 				FreezeList::iterator fl;
 
-				//only take state if this is a new playlist.
+				// only take state if this is a new playlist.
 				for (fl = freezelist.begin(); fl != freezelist.end(); ++fl) {
 					if ((*fl) == pl) {
 						break;
@@ -3757,22 +3767,25 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		tmp = x;
 		++tmp;
 
-		vector<PlaylistMapping>::iterator z;
+		if (op != Delete) {
 
-		for (z = pmap.begin(); z != pmap.end(); ++z) {
-			if ((*z).tv == &tv) {
-				break;
+			vector<PlaylistMapping>::iterator z;
+			
+			for (z = pmap.begin(); z != pmap.end(); ++z) {
+				if ((*z).tv == &tv) {
+					break;
+				}
 			}
-		}
-
-		assert (z != pmap.end());
-
-		if (!(*z).pl) {
-			npl = PlaylistFactory::create (pl->data_type(), *_session, "cutlist", true);
-			npl->freeze();
-			(*z).pl = npl;
-		} else {
-			npl = (*z).pl;
+			
+			assert (z != pmap.end());
+			
+			if (!(*z).pl) {
+				npl = PlaylistFactory::create (pl->data_type(), *_session, "cutlist", true);
+				npl->freeze();
+				(*z).pl = npl;
+			} else {
+				npl = (*z).pl;
+			}
 		}
 
 		boost::shared_ptr<Region> r = (*x)->region();
@@ -3781,6 +3794,10 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		assert (r != 0);
 
 		switch (op) {
+		case Delete:
+			pl->remove_region (r);
+			break;
+			
 		case Cut:
 			_xx = RegionFactory::create (r);
 			npl->add_region (_xx, r->position() - first_position);
@@ -3790,9 +3807,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		case Copy:
 			/* copy region before adding, so we're not putting same object into two different playlists */
 			npl->add_region (RegionFactory::create (r), r->position() - first_position);
-			break;
-
-		case Clear:
+					case Clear:
 			pl->remove_region (r);
 			break;
 		}
@@ -3800,25 +3815,28 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		x = tmp;
 	}
 
-	list<boost::shared_ptr<Playlist> > foo;
+	if (op != Delete) {
 
-	/* the pmap is in the same order as the tracks in which selected regions occured */
-
-	for (vector<PlaylistMapping>::iterator i = pmap.begin(); i != pmap.end(); ++i) {
-		if ((*i).pl) {
-			(*i).pl->thaw();
-			foo.push_back ((*i).pl);
+		list<boost::shared_ptr<Playlist> > foo;
+		
+		/* the pmap is in the same order as the tracks in which selected regions occured */
+		
+		for (vector<PlaylistMapping>::iterator i = pmap.begin(); i != pmap.end(); ++i) {
+			if ((*i).pl) {
+				(*i).pl->thaw();
+				foo.push_back ((*i).pl);
+			}
 		}
-	}
-
-	if (!foo.empty()) {
-		cut_buffer->set (foo);
-	}
-
-	if (pmap.empty()) {
-		_last_cut_copy_source_track = 0;
-	} else {
-		_last_cut_copy_source_track = pmap.front().tv;
+		
+		if (!foo.empty()) {
+			cut_buffer->set (foo);
+		}
+		
+		if (pmap.empty()) {
+			_last_cut_copy_source_track = 0;
+		} else {
+			_last_cut_copy_source_track = pmap.front().tv;
+		}
 	}
 
 	for (FreezeList::iterator pl = freezelist.begin(); pl != freezelist.end(); ++pl) {
