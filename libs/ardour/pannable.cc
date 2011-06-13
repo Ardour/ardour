@@ -236,27 +236,27 @@ Pannable::set_state (const XMLNode& root, int version)
 
 			/* old school (alpha1-6) XML info */
 
-			if ((*niter)->name() == pan_azimuth_control->name()) {
+			if ((*niter)->name() == X_("azimuth")) {
 				prop = (*niter)->property (X_("value"));
 				if (prop) {
 					pan_azimuth_control->set_value (atof (prop->value()));
 				}
-			} else if ((*niter)->name() == pan_width_control->name()) {
+			} else if ((*niter)->name() == X_("width")) {
 				prop = (*niter)->property (X_("value"));
 				if (prop) {
 					pan_width_control->set_value (atof (prop->value()));
 				}
-			} else if ((*niter)->name() == pan_elevation_control->name()) {
+			} else if ((*niter)->name() == X_("elevation")) {
 				prop = (*niter)->property (X_("value"));
 				if (prop) {
 					pan_elevation_control->set_value (atof (prop->value()));
 				}
-			} else if ((*niter)->name() == pan_frontback_control->name()) {
+			} else if ((*niter)->name() == X_("frontback")) {
 				prop = (*niter)->property (X_("value"));
 				if (prop) {
 					pan_frontback_control->set_value (atof (prop->value()));
 				}
-			} else if ((*niter)->name() == pan_lfe_control->name()) {
+			} else if ((*niter)->name() == X_("lfe")) {
 				prop = (*niter)->property (X_("value"));
 				if (prop) {
 					pan_lfe_control->set_value (atof (prop->value()));
