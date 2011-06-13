@@ -230,6 +230,38 @@ Pannable::set_state (const XMLNode& root, int version)
 
 		} else if ((*niter)->name() == Automatable::xml_node_name) {
 			set_automation_xml_state (**niter, PanAzimuthAutomation);
+
+		} else {
+			const XMLProperty* prop;
+
+			/* old school (alpha1-6) XML info */
+
+			if ((*niter)->name() == pan_azimuth_control->name()) {
+				prop = (*niter)->property (X_("value"));
+				if (prop) {
+					pan_azimuth_control->set_value (atof (prop->value()));
+				}
+			} else if ((*niter)->name() == pan_width_control->name()) {
+				prop = (*niter)->property (X_("value"));
+				if (prop) {
+					pan_width_control->set_value (atof (prop->value()));
+				}
+			} else if ((*niter)->name() == pan_elevation_control->name()) {
+				prop = (*niter)->property (X_("value"));
+				if (prop) {
+					pan_elevation_control->set_value (atof (prop->value()));
+				}
+			} else if ((*niter)->name() == pan_frontback_control->name()) {
+				prop = (*niter)->property (X_("value"));
+				if (prop) {
+					pan_frontback_control->set_value (atof (prop->value()));
+				}
+			} else if ((*niter)->name() == pan_lfe_control->name()) {
+				prop = (*niter)->property (X_("value"));
+				if (prop) {
+					pan_lfe_control->set_value (atof (prop->value()));
+				}
+			}
 		}
 	}
 
