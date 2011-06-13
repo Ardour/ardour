@@ -271,7 +271,7 @@ LV2PluginUI::lv2ui_free()
 	}
 
 #ifdef HAVE_SUIL
-	cerr << "Calling suil_instance_free() to clean up "
+	std::cerr << "Calling suil_instance_free() to clean up "
 	     << (_lv2->is_external_ui() ? " external " : " internal ")
 	     << "UI\n";
 	suil_instance_free((SuilInstance*)_inst);
