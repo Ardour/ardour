@@ -23,12 +23,13 @@
 #include <set>
 #include "boost/shared_ptr.hpp"
 #include "sigc++/trackable.h"
+
 #include "gtkmm/table.h"
 #include "gtkmm/button.h"
 #include "gtkmm/label.h"
 #include "gtkmm2ext/stateful_button.h"
-#include "ardour/types.h"
 
+#include "ardour/types.h"
 
 class MidiChannelSelector : public Gtk::Table
 {

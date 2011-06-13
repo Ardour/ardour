@@ -54,6 +54,7 @@
 #include "ghostregion.h"
 #include "gui_thread.h"
 #include "keyboard.h"
+#include "midi_channel_dialog.h"
 #include "midi_cut_buffer.h"
 #include "midi_list_editor.h"
 #include "midi_region_view.h"
@@ -769,6 +770,9 @@ MidiRegionView::key_press (GdkEventKey* ev)
 	} else if (ev->keyval == GDK_Control_L) {
 		return true;
 
+	} else if (ev->keyval == GDK_c) {
+		channel_edit ();
+		return true;
 	}
 
 	return false;
@@ -782,6 +786,53 @@ MidiRegionView::key_release (GdkEventKey* ev)
 		return true;
 	}
 	return false;
+}
+
+void
+MidiRegionView::channel_edit ()
+{
+	bool first = true;
+	bool mixed = false;
+	uint8_t current_channel;
+
+	if (_selection.empty()) {
+		return;
+	}
+	
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		Selection::iterator next = i;
+		if (first) {
+			current_channel = (*i)->note()->channel ();
+			first = false;
+		} else {
+			if (current_channel != (*i)->note()->channel()) {
+				mixed = true;
+			}
+		}
+	}
+
+	MidiChannelDialog channel_dialog (current_channel);
+	int ret = channel_dialog.run ();
+
+	switch (ret) {
+	case Gtk::RESPONSE_OK:
+		break;
+	default:
+		return;
+	}
+
+	uint8_t new_channel = channel_dialog.active_channel ();
+
+	start_note_diff_command (_("channel edit"));
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ) {
+		Selection::iterator next = i;
+		++next;
+		change_note_channel (*i, new_channel);
+		i = next;
+	}
+
+	apply_diff ();
 }
 
 void
@@ -2470,12 +2521,6 @@ MidiRegionView::commit_resizing (ArdourCanvas::CanvasNoteEvent* primary, bool at
 }
 
 void
-MidiRegionView::change_note_channel (CanvasNoteEvent* event, int8_t channel)
-{
-	note_diff_add_change (event, MidiModel::NoteDiffCommand::Channel, (uint8_t) channel);
-}
-
-void
 MidiRegionView::change_note_velocity(CanvasNoteEvent* event, int8_t velocity, bool relative)
 {
 	uint8_t new_velocity;
@@ -2577,6 +2622,28 @@ MidiRegionView::trim_note (CanvasNoteEvent* event, Evoral::MusicalTime front_del
 	if (change_length) {
 		note_diff_add_change (event, MidiModel::NoteDiffCommand::Length, new_length);
 	}
+}
+
+void
+MidiRegionView::change_note_channel (CanvasNoteEvent* event, int8_t chn, bool relative)
+{
+	uint8_t new_channel;
+
+	if (relative) {
+		if (chn < 0.0) {
+			if (event->note()->channel() < -chn) {
+				new_channel = 0;
+			} else {
+				new_channel = event->note()->channel() + chn;
+			}
+		} else {
+			new_channel = event->note()->channel() + chn;
+		}
+	} else {
+		new_channel = (uint8_t) chn;
+	}
+
+	note_diff_add_change (event, MidiModel::NoteDiffCommand::Channel, new_channel);
 }
 
 void

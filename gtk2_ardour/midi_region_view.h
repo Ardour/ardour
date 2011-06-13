@@ -264,6 +264,7 @@ public:
 	void change_velocities (bool up, bool fine, bool allow_smush);
 	void transpose (bool up, bool fine, bool allow_smush);
 	void nudge_notes (bool forward);
+	void channel_edit ();
 
 	void show_list_editor ();
 
@@ -318,7 +319,7 @@ private:
 	void midi_channel_mode_changed(ARDOUR::ChannelMode mode, uint16_t mask);
 	void midi_patch_settings_changed(std::string model, std::string custom_device_mode);
 
-	void change_note_channel (ArdourCanvas::CanvasNoteEvent *, int8_t);
+	void change_note_channel (ArdourCanvas::CanvasNoteEvent *, int8_t, bool relative=false);
 	void change_note_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t vel, bool relative=false);
 	void change_note_note(ArdourCanvas::CanvasNoteEvent* ev, int8_t note, bool relative=false);
 	void change_note_time(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::TimeType, bool relative=false);
