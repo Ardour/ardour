@@ -125,11 +125,13 @@ Route::init ()
 
 	/* panning */
 
-        Pannable* p = new Pannable (_session);
+	if (!(_flags & Route::MonitorOut)) {
+		Pannable* p = new Pannable (_session);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-	boost_debug_shared_ptr_mark_interesting (p, "Pannable");
+		boost_debug_shared_ptr_mark_interesting (p, "Pannable");
 #endif
-	_pannable.reset (p);
+		_pannable.reset (p);
+	}
 
 	/* input and output objects */
 
@@ -1843,7 +1845,9 @@ Route::state(bool full_state)
 		cmt->add_content (_comment);
 	}
 
-	node->add_child_nocopy (_pannable->state (full_state));
+	if (_pannable) {
+		node->add_child_nocopy (_pannable->state (full_state));
+	}
 
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
 		node->add_child_nocopy((*i)->state (full_state));
@@ -1926,7 +1930,11 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 
 
 		if (child->name() == X_("Pannable")) {
-			_pannable->set_state (*child, version);
+			if (_pannable) {
+				_pannable->set_state (*child, version);
+			} else {
+				warning << string_compose (_("Pannable state found for route (%1) without a panner!"), name()) << endmsg;
+			}
 		}
 	}
 
@@ -3064,7 +3072,10 @@ Route::set_latency_compensation (framecnt_t longest_session_latency)
 void
 Route::automation_snapshot (framepos_t now, bool force)
 {
-	_pannable->automation_snapshot (now, force);
+	if (_pannable) {
+		_pannable->automation_snapshot (now, force);
+	}
+
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->automation_snapshot (now, force);
 	}
@@ -3204,7 +3215,7 @@ Route::shift (framepos_t pos, framecnt_t frames)
 	}
 
 	/* pan automation */
-	{
+	if (_pannable) {
 		ControlSet::Controls& c (_pannable->controls());
 
 		for (ControlSet::Controls::const_iterator ci = c.begin(); ci != c.end(); ++ci) {

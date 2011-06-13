@@ -64,7 +64,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 	, no_panner_reset (false)
         , scnt (0)
 {
-	_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
+	if (pannable) {
+		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
+	}
+
 	_display_to_user = false;
 
 	if (_output) {
@@ -86,7 +89,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 	, no_panner_reset (false)
         , scnt (0)
 {
-	_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
+	if (pannable) {
+		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
+	}
+
 	_display_to_user = false;
 
 	if (_output) {
@@ -280,7 +286,9 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 		Amp::apply_simple_gain (bufs, nframes, tgain);
 	}
 
-        panner = _panshell->panner();
+	if (_panshell) {
+		panner = _panshell->panner();
+	}
 
 #if 0
         if (_session.transport_rolling()) {
@@ -339,7 +347,10 @@ Delivery::state (bool full_state)
 	}
 
 	node.add_property("role", enum_2_string(_role));
-	node.add_child_nocopy (_panshell->state (full_state));
+
+	if (_panshell) {
+		node.add_child_nocopy (_panshell->state (full_state));
+	}
 
 	return node;
 }
@@ -362,7 +373,7 @@ Delivery::set_state (const XMLNode& node, int version)
 
 	XMLNode* pan_node = node.child (X_("Panner"));
 
-	if (pan_node) {
+	if (pan_node && _panshell) {
 		_panshell->set_state (*pan_node, version);
 	}
 
@@ -390,11 +401,13 @@ Delivery::reset_panner ()
 				ntargets = _configured_output.n_audio();
 			}
 
-			_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, ntargets));
-
-                        if (_role == Main) {
-                                _panshell->pannable()->set_panner (_panshell->panner());
-                        }
+			if (_panshell) {
+				_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, ntargets));
+				
+				if (_role == Main) {
+					_panshell->pannable()->set_panner (_panshell->panner());
+				}
+			}
 		}
 
 	} else {
@@ -414,11 +427,13 @@ Delivery::panners_became_legal ()
 		ntargets = _configured_output.n_audio();
 	}
 
-	_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, ntargets));
-
-        if (_role == Main) {
-                _panshell->pannable()->set_panner (_panshell->panner());
-        }
+	if (_panshell) {
+		_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, ntargets));
+		
+		if (_role == Main) {
+			_panshell->pannable()->set_panner (_panshell->panner());
+		}
+	}
 
 	panner_legal_c.disconnect ();
 	return 0;
@@ -468,7 +483,10 @@ void
 Delivery::transport_stopped (framepos_t now)
 {
         Processor::transport_stopped (now);
-        _panshell->pannable()->transport_stopped (now);
+
+	if (_panshell) {
+		_panshell->pannable()->transport_stopped (now);
+	}
 
         if (_output) {
                 PortSet& ports (_output->ports());
@@ -574,5 +592,9 @@ Delivery::output_changed (IOChange change, void* /*src*/)
 boost::shared_ptr<Panner>
 Delivery::panner () const
 {
-        return _panshell->panner();
+	if (_panshell) {
+		return _panshell->panner();
+	} else {
+		return boost::shared_ptr<Panner>();
+	}
 }
