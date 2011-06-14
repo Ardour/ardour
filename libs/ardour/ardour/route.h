@@ -526,6 +526,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	framecnt_t update_port_latencies (PortSet& ports, PortSet& feeders, bool playback, framecnt_t) const;
 
 	void setup_invisible_processors ();
+	void unpan ();
 
 	boost::shared_ptr<CapturingProcessor> _capturing_processor;
 

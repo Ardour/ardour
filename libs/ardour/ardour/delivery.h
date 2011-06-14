@@ -95,6 +95,7 @@ public:
 	boost::shared_ptr<PannerShell> panner_shell() const { return _panshell; }
 	boost::shared_ptr<Panner> panner() const;
 
+	void unpan ();
 	void reset_panner ();
 	void defer_pan_reset ();
 	void allow_pan_reset ();

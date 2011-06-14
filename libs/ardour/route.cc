@@ -1901,6 +1901,14 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 		_mute_master->set_solo_ignore (true);
 	}
 
+	if (is_monitor()) {
+		/* monitor bus does not get a panner, but if (re)created
+		   via XML, it will already have one by the time we
+		   call ::set_state(). so ... remove it.
+		*/
+		unpan ();
+	}
+
 	/* add all processors (except amp, which is always present) */
 
 	nlist = node.children();
@@ -2372,6 +2380,7 @@ Route::set_processor_state (const XMLNode& node)
 				if (prop->value() == "intsend") {
 
 					processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<Route>(), Delivery::Role (0)));
+
 				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 				           prop->value() == "lv2" ||
 				           prop->value() == "vst" ||
@@ -3836,3 +3845,18 @@ Route::should_monitor () const
 	return true;
 }
 
+void
+Route::unpan ()
+{
+	Glib::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+	Glib::RWLock::ReaderLock lp (_processor_lock);
+
+	_pannable.reset ();
+
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery>(*i);
+		if (d) {
+			d->unpan ();
+		}
+	}
+}

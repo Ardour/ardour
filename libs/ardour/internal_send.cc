@@ -21,6 +21,7 @@
 #include "pbd/failed_constructor.h"
 
 #include "ardour/amp.h"
+#include "ardour/audio_buffer.h"
 #include "ardour/internal_send.h"
 #include "ardour/meter.h"
 #include "ardour/route.h"
@@ -41,13 +42,25 @@ InternalSend::InternalSend (Session& s, boost::shared_ptr<Pannable> p, boost::sh
                 }
         }
 
-	_amp->set_gain (0, this);
+	init_gain ();
 }
 
 InternalSend::~InternalSend ()
 {
 	if (_send_to) {
 		_send_to->remove_send_from_internal_return (this);
+	}
+}
+
+void
+InternalSend::init_gain ()
+{
+	if (_role == Listen) {
+		/* send to monitor bus is always at unity */
+		_amp->set_gain (1.0, this);
+	} else {
+		/* aux sends start at -inf dB */
+		_amp->set_gain (0, this);
 	}
 }
 
@@ -72,7 +85,6 @@ InternalSend::use_target (boost::shared_ptr<Route> sendto)
 
         return 0;
 }
-
 
 void
 InternalSend::send_to_going_away ()
@@ -140,6 +152,20 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 		}
 	}
 
+#if 0
+        if (_session.transport_rolling()) {
+                for (BufferSet::audio_iterator b = mixbufs.audio_begin(); b != mixbufs.audio_end(); ++b) {
+                        Sample* p = b->data ();
+                        for (pframes_t n = 0; n < nframes; ++n) {
+				if (p[n] != 0.0) {
+					cerr << "\tnon-zero data SENT to " << b->data() << endl;
+					break;
+				}
+                        }
+                }
+        }
+#endif
+
 	/* target will pick up our output when it is ready */
 
   out:
@@ -182,9 +208,13 @@ InternalSend::get_state()
 }
 
 int
-InternalSend::set_our_state (const XMLNode& node, int /*version*/)
+InternalSend::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
+
+	Send::set_state (node, version);
+
+	init_gain ();
 
 	if ((prop = node.property ("target")) != 0) {
 
@@ -203,13 +233,6 @@ InternalSend::set_our_state (const XMLNode& node, int /*version*/)
 	}
 
 	return 0;
-}
-
-int
-InternalSend::set_state (const XMLNode& node, int version)
-{
-	Send::set_state (node, version);
-	return set_our_state (node, version);
 }
 
 int

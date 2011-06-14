@@ -383,6 +383,14 @@ Delivery::set_state (const XMLNode& node, int version)
 }
 
 void
+Delivery::unpan ()
+{
+	/* caller must hold process lock */
+
+	_panshell.reset ();
+}
+
+void
 Delivery::reset_panner ()
 {
         if (_role == Listen) {
