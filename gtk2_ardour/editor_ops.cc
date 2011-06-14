@@ -3519,7 +3519,6 @@ Editor::cut_copy (CutCopyOp op)
 						selection->clear_points ();
 					}
 				}
-
 				commit_reversible_command ();
 				break; // terminate case statement here
 			}
@@ -3807,8 +3806,10 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		case Copy:
 			/* copy region before adding, so we're not putting same object into two different playlists */
 			npl->add_region (RegionFactory::create (r), r->position() - first_position);
-					case Clear:
-			pl->remove_region (r);
+			break;
+
+		case Clear:
+			pl->remove_region (r);	
 			break;
 		}
 
