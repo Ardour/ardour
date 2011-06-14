@@ -248,7 +248,7 @@ if test x$WITH_NLS != x ; then
 		echo $file
 		lang=`basename $file | sed 's/\.mo//'`
 		mkdir -p $Locale/$lang/LC_MESSAGES
-		cp $file $Locale/$lang/LC_MESSAGES/$dl.mo
+		cp $file $Locale/$lang/LC_MESSAGES/`basename $dl`
                 if echo $LINGUAS | grep $lang >/dev/null 2>&1
                     :
                 else 
