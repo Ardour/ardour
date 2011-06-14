@@ -233,37 +233,28 @@ if test x$WITH_NLS != x ; then
 	echo "NLS support ..."
 	echo "I hope you remembered to run scons msgupdate!"
 	LINGUAS=
-	files=`find ../../gtk2_ardour/ -name "*.mo"`
 
-	if [ -z "$files" ]; then
+        for dl in gtk2_ardour libs/ardour libs/gtkmm2ext ; do 
+	    files=`find ../../$dl -name "*.mo"`
+
+	    if [ -z "$files" ]; then
 		echo ""
-		echo "!!!! WARNING !!!! - Did not find any .mo files in ../../gtk2_ardour"
+		echo "!!!! WARNING !!!! - Did not find any .mo files in ../../$dl"
 		echo ""
-	fi
+	    fi
  
-	for file in $files 
-	do
+	    for file in $files 
+	    do
 		echo $file
 		lang=`basename $file | sed 's/\.mo//'`
 		mkdir -p $Locale/$lang/LC_MESSAGES
-		cp $file $Locale/$lang/LC_MESSAGES/gtk2_ardour.mo
-		LINGUAS="$LINGUAS $lang"
-	done
-
-	files=`find ../../libs/ardour/ -name "*.mo"`
-
-	if [ -z "$files" ]; then
-		echo ""
-		echo "!!!! WARNING !!!! - Did not find any .mo files in ../../libs/ardour"
-		echo ""
-	fi
-
-	for file in $files 
-	do
-		echo $file
-		lang=`basename $file | sed 's/\.mo//'`
-		mkdir -p $Locale/$lang/LC_MESSAGES
-		cp $file $Locale/$lang/LC_MESSAGES/libardour.mo
+		cp $file $Locale/$lang/LC_MESSAGES/$dl.mo
+                if echo $LINGUAS | grep $lang >/dev/null 2>&1
+                    :
+                else 
+		    LINGUAS="$LINGUAS $lang"
+                fi
+	    done
 	done
 
 	GTK_MESSAGES="atk10.mo gdk-pixbuf.mo gtk20-properties.mo gtk20.mo atk10.mo glib20.mo"
