@@ -212,7 +212,7 @@ StepEditor::move_step_edit_beat_pos (Evoral::MusicalTime beats)
                 step_edit_beat_pos = min (step_edit_beat_pos + beats,
                                           step_edit_region_view->frames_to_beats (step_edit_region->length()));
         } else if (beats < 0.0) {
-                if (beats < step_edit_beat_pos) {
+                if (-beats < step_edit_beat_pos) {
                         step_edit_beat_pos += beats; // its negative, remember
                 } else {
                         step_edit_beat_pos = 0;
