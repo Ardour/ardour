@@ -264,25 +264,18 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 void
 LV2PluginUI::lv2ui_free()
 {
-	stop_updating(NULL);
+	stop_updating (0);
 
 	if (_gui_widget) {
 		remove (*_gui_widget);
 	}
 
 #ifdef HAVE_SUIL
-	std::cerr << "Calling suil_instance_free() to clean up "
-	     << (_lv2->is_external_ui() ? " external " : " internal ")
-	     << "UI\n";
 	suil_instance_free((SuilInstance*)_inst);
 #else
 	SLV2UIInstance          inst      = (SLV2UIInstance)_inst;
 	const LV2UI_Descriptor* ui_desc   = slv2_ui_instance_get_descriptor(inst);
 	LV2UI_Handle            ui_handle = slv2_ui_instance_get_handle(inst);
-
-	std::cerr << "Calling ui descriptor cleanup on " << ui_desc << " to clean up "
-		  << (_lv2->is_external_ui() ? " external " : " internal ")
-		  << "UI\n";
 
 	if (ui_desc) {
 		ui_desc->cleanup(ui_handle);
@@ -295,8 +288,6 @@ LV2PluginUI::lv2ui_free()
 
 LV2PluginUI::~LV2PluginUI ()
 {
-	std::cerr << "LV2PluginUI destructor called" << std::endl;
-
 	if (_values) {
 		delete[] _values;
 	}
