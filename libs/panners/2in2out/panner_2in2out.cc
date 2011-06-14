@@ -49,6 +49,7 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/session.h"
 #include "ardour/utils.h"
+#include "ardour/mix.h"
 
 #include "panner_2in2out.h"
 
@@ -269,7 +270,8 @@ Panner2in2out::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gai
 			if (pan != 0.0f) {
 
 				/* pan is 1 but also not 0, so we must do it "properly" */
-
+				
+				//obufs.get_audio(1).read_from (srcbuf, nframes);
 				mix_buffers_with_gain(dst,src,nframes,pan);
 
 				/* mark that we wrote into the buffer */
@@ -328,7 +330,8 @@ Panner2in2out::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gai
 				/* pan is not 1 but also not 0, so we must do it "properly" */
 				
 				mix_buffers_with_gain(dst,src,nframes,pan);
-
+				// obufs.get_audio(1).read_from (srcbuf, nframes);
+				
 				/* XXX it would be nice to mark the buffer as written to */
 			}
 

@@ -215,7 +215,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	/* special processors */
 
-	boost::shared_ptr<Delivery>         monitor_send() const { return _monitor_send; }
+	boost::shared_ptr<InternalSend>     monitor_send() const { return _monitor_send; }
 	boost::shared_ptr<Delivery>         main_outs() const { return _main_outs; }
 	boost::shared_ptr<InternalReturn>   internal_return() const { return _intreturn; }
 	boost::shared_ptr<MonitorProcessor> monitor_control() const { return _monitor_control; }
@@ -438,7 +438,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	ProcessorList  _processors;
 	mutable Glib::RWLock   _processor_lock;
 	boost::shared_ptr<Delivery> _main_outs;
-	boost::shared_ptr<Delivery> _monitor_send;
+	boost::shared_ptr<InternalSend> _monitor_send;
 	boost::shared_ptr<InternalReturn> _intreturn;
 	boost::shared_ptr<MonitorProcessor> _monitor_control;
 	boost::shared_ptr<Pannable> _pannable;

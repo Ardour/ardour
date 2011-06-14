@@ -3780,6 +3780,7 @@ Route::setup_invisible_processors ()
 					new_processors.insert (amp, _monitor_send);
 					break;
 				}
+				_monitor_send->set_can_pan (false);
 				break;
 			case AfterFaderListen:
 				switch (Config->get_afl_position ()) {
@@ -3790,10 +3791,12 @@ Route::setup_invisible_processors ()
 					new_processors.insert (new_processors.end(), _monitor_send);
 					break;
 				}
+				_monitor_send->set_can_pan (true);
 				break;
 			}
 		}  else {
 			new_processors.insert (new_processors.end(), _monitor_send);
+			_monitor_send->set_can_pan (false);
 		}
 	}
 

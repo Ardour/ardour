@@ -393,11 +393,6 @@ Delivery::unpan ()
 void
 Delivery::reset_panner ()
 {
-        if (_role == Listen) {
-                /* monitor out gets no panner */
-                return;
-        }
-
 	if (panners_legal) {
 		if (!no_panner_reset) {
 
@@ -606,3 +601,4 @@ Delivery::panner () const
 		return boost::shared_ptr<Panner>();
 	}
 }
+

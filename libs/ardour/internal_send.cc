@@ -24,6 +24,8 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/internal_send.h"
 #include "ardour/meter.h"
+#include "ardour/panner.h"
+#include "ardour/panner_shell.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 
@@ -106,7 +108,18 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 	// in-place, which a send must never do.
 
 	assert(mixbufs.available() >= bufs.count());
-	mixbufs.read_from (bufs, nframes);
+
+	boost::shared_ptr<Panner> panner;
+	
+	if (_panshell) {
+		panner = _panshell->panner();
+	}
+	
+	if (panner && !panner->bypassed()) {
+		_panshell->run (bufs, mixbufs, start_frame, end_frame, nframes);
+	} else {
+		mixbufs.read_from (bufs, nframes);
+	}
 
 	/* gain control */
 
@@ -139,8 +152,6 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 	// _amp->setup_gain_automation (start_frame, end_frame, nframes);
 
 	_amp->run (mixbufs, start_frame, end_frame, nframes, true);
-
-	/* XXX NEED TO PAN */
 
 	/* consider metering */
 
@@ -304,3 +315,27 @@ InternalSend::send_to_property_changed (const PropertyChange& what_changed)
 		set_name (_send_to->name ());
 	}
 }
+
+void
+InternalSend::set_can_pan (bool yn)
+{
+	boost::shared_ptr<Panner> panner;
+
+	if (_panshell) {
+		panner = _panshell->panner ();
+	}
+
+	if (panner) {
+		panner->set_bypassed (!yn);
+	}
+}
+
+void
+InternalSend::cycle_start (pframes_t nframes)
+{
+	Delivery::cycle_start (nframes);
+
+	for (BufferSet::audio_iterator b = mixbufs.audio_begin(); b != mixbufs.audio_end(); ++b) {
+		(*b).prepare ();
+	}
+}	

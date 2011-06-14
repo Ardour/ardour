@@ -39,6 +39,7 @@ class InternalSend : public Send
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node, int version);
 
+	void cycle_start (pframes_t);
 	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
 	bool feeds (boost::shared_ptr<Route> other) const;
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
@@ -51,6 +52,8 @@ class InternalSend : public Send
 	BufferSet const & get_buffers () const {
 		return mixbufs;
 	}
+
+	void set_can_pan (bool yn);
 
   private:
 	BufferSet mixbufs;
