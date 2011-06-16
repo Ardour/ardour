@@ -396,10 +396,16 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
 	vector<ustring> to_embed;
 	bool multi = paths.size() > 1;
 	int nth = 0;
+	bool use_timestamp = (pos == -1);
 
 	switch (chns) {
 	case Editing::ImportDistinctFiles:
 		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+
+			/* have to reset this for every file we handle */
+			if (use_timestamp) {
+				pos = -1;
+			}
 
 			to_embed.clear ();
 			to_embed.push_back (*a);
@@ -416,6 +422,11 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
 		
 	case Editing::ImportDistinctChannels:
 		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+
+			/* have to reset this for every file we handle */
+			if (use_timestamp) {
+				pos = -1;
+			}
 
 			to_embed.clear ();
 			to_embed.push_back (*a);
@@ -434,6 +445,11 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
 
 	case Editing::ImportSerializeFiles:
 		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
+
+			/* have to reset this for every file we handle */
+			if (use_timestamp) {
+				pos = -1;
+			}
 
 			to_embed.clear ();
 			to_embed.push_back (*a);
