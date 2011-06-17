@@ -33,18 +33,18 @@ namespace ARDOUR {
 class ProxyControllable : public PBD::Controllable {
 public:
 	ProxyControllable (const std::string& name, PBD::Controllable::Flag flags,
-			   boost::function1<void,double> setter,
+			   boost::function1<bool,double> setter,
 			   boost::function0<double> getter)
 		: PBD::Controllable (name, flags)
 		, _setter (setter)
 		, _getter (getter)
 	{}
 
-	void set_value (double v) { _setter (v); }
-	double get_value () const { return _getter (); }
+        void set_value (double v) { if (_setter (v)) { Changed(); /* EMIT SIGNAL */ } }
+        double get_value () const { return _getter (); }
 
 private:
-	boost::function1<void,double> _setter;
+	boost::function1<bool,double> _setter;
 	boost::function0<double> _getter;
 };
 

@@ -37,13 +37,9 @@ MonitorSection::MonitorSection (Session* s)
         , RouteUI (s)
         , main_table (2, 3)
         , _tearoff (0)
-        , gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1) // initial value is unity gain
         , gain_control (0)
-        , dim_adjustment (0.2, 0.0, 1.0, 0.01, 0.1) // upper+lower will be reset to match model
         , dim_control (0)
-        , solo_boost_adjustment (1.0, 1.0, 3.0, 0.01, 0.1)  // upper and lower will be reset to match model
         , solo_boost_control (0)
-        , solo_cut_adjustment (0.0, 0.0, 1.0, 0.01, 0.1)
         , solo_cut_control (0)
         , solo_in_place_button (solo_model_group, _("SiP"))
         , afl_button (solo_model_group, _("AFL"))
@@ -74,7 +70,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Dim */
 
-        dim_control = new VolumeController (little_knob_pixbuf,  &dim_adjustment, false, 30, 30);
+        dim_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.01, 0.1, true, 30, 30, true, true);
 
         HBox* dim_packer = manage (new HBox);
         dim_packer->show ();
@@ -87,7 +83,7 @@ MonitorSection::MonitorSection (Session* s)
         spin_packer->pack_start (*spin_label, false, false);
 
         dim_packer->set_spacing (12);
-        dim_packer->pack_start (*spin_packer, true, true);
+        dim_packer->pack_start (*spin_packer, true, false);
 
         /* Rude Solo */
 
@@ -138,7 +134,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Solo Boost */
 
-        solo_boost_control = new VolumeController (little_knob_pixbuf, &solo_boost_adjustment, false, 30, 30);
+        solo_boost_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.01, 0.1, true, 30, 30, true, true);
 
         HBox* solo_packer = manage (new HBox);
         solo_packer->set_spacing (12);
@@ -151,11 +147,11 @@ MonitorSection::MonitorSection (Session* s)
         spin_packer->pack_start (*solo_boost_control, false, false);
         spin_packer->pack_start (*spin_label, false, false);
 
-        solo_packer->pack_start (*spin_packer, true, true);
+        solo_packer->pack_start (*spin_packer, false, true);
 
         /* Solo (SiP) cut */
 
-        solo_cut_control = new VolumeController (little_knob_pixbuf, &solo_cut_adjustment, false, 30, 30);
+        solo_cut_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.01, 0.1, true, 30, 30, false, false);
 
         spin_label = manage (new Label (_("SiP Cut")));
         spin_packer = manage (new VBox);
@@ -164,7 +160,7 @@ MonitorSection::MonitorSection (Session* s)
         spin_packer->pack_start (*solo_cut_control, false, false);
         spin_packer->pack_start (*spin_label, false, false);
 
-        solo_packer->pack_start (*spin_packer, true, true);
+        solo_packer->pack_start (*spin_packer, false, true);
 
         exclusive_solo_button.set_name (X_("MonitorOptButton"));
         ARDOUR_UI::instance()->set_tip (&exclusive_solo_button, _("Exclusive solo means that only 1 solo is active at a time"));
@@ -238,7 +234,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Gain */
 
-        gain_control = new VolumeController (big_knob_pixbuf,  &gain_adjustment, false, 80, 80);
+        gain_control = new VolumeController (big_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.781787, 0.01, 0.1, true, 80, 80, false, false);
 
         spin_label = manage (new Label (_("Gain")));
         spin_packer = manage (new VBox);
@@ -763,26 +759,6 @@ MonitorSection::setup_knob_images ()
 
 }
 
-bool
-MonitorSection::nonlinear_gain_printer (SpinButton* button)
-{
-        double val = button->get_adjustment()->get_value();
-        char buf[16];
-        snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain (val)));
-        button->set_text (buf);
-        return true;
-}
-
-bool
-MonitorSection::linear_gain_printer (SpinButton* button)
-{
-        double val = button->get_adjustment()->get_value();
-        char buf[16];
-        snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (val));
-        button->set_text (buf);
-        return true;
-}
-
 void
 MonitorSection::update_solo_model ()
 {
@@ -817,10 +793,6 @@ MonitorSection::map_state ()
         if (!_route || !_monitor) {
                 return;
         }
-
-        gain_control->get_adjustment()->set_value (gain_to_slider_position (_route->gain_control()->get_value()));
-        dim_control->get_adjustment()->set_value (_monitor->dim_level());
-        solo_boost_control->get_adjustment()->set_value (_monitor->solo_boost_level());
 
         Glib::RefPtr<Action> act;
 
@@ -987,8 +959,6 @@ MonitorSection::parameter_changed (std::string name)
         if (name == "solo-control-is-listen-control" ||
             name == "listen-position") {
                 update_solo_model ();
-        } else if (name == "solo-mute-gain") {
-                solo_cut_adjustment.set_value (gain_to_slider_position (Config->get_solo_mute_gain()));
         }
 }
 
@@ -1005,7 +975,6 @@ MonitorSection::assign_controllables ()
         if (_session) {
                 boost::shared_ptr<Controllable> c = _session->solo_cut_control();
                 solo_cut_control->set_controllable (c);
-                solo_cut_control->get_adjustment()->set_value (gain_to_slider_position (c->get_value()));
         } else {
                 solo_cut_control->set_controllable (none);
         }
@@ -1025,16 +994,8 @@ MonitorSection::assign_controllables ()
                 mono_button.set_controllable (_monitor->mono_control());
                 mono_button.watch ();
 
-                boost::shared_ptr<Controllable> c (_monitor->dim_level_control ());
-
-                dim_control->set_controllable (c);
-                dim_adjustment.set_lower (c->lower());
-                dim_adjustment.set_upper (c->upper());
-
-                c = _monitor->solo_boost_control ();
-                solo_boost_control->set_controllable (c);
-                solo_boost_adjustment.set_lower (c->lower());
-                solo_boost_adjustment.set_upper (c->upper());
+		dim_control->set_controllable (_monitor->dim_level_control ());
+		solo_boost_control->set_controllable (_monitor->solo_boost_control ());
 
         } else {
 

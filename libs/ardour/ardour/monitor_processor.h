@@ -20,6 +20,7 @@
 #ifndef __ardour_monitor_processor_h__
 #define __ardour_monitor_processor_h__
 
+#include <algorithm>
 #include <iostream>
 #include <vector>
 
@@ -52,7 +53,7 @@ public:
 	void set_value (double v) {
 		T newval = (T) v;
 		if (newval != _value) {
-			_value = newval;
+			_value = std::max (_lower, std::min (_upper, newval));
 			Changed(); /* EMIT SIGNAL */
 		}
 	}
@@ -68,7 +69,7 @@ public:
 
 	MPControl& operator=(const T& v) {
 		if (v != _value) {
-			_value = v;
+			_value = std::max (_lower, std::min (_upper, v));
 			Changed (); /* EMIT SIGNAL */
 		}
 		return *this;

@@ -24,27 +24,33 @@
 
 #include "gtkmm2ext/motionfeedback.h"
 
-// march 2010: this exists as a placeholder to add a controllable, but maybe it will
-// end up in MotionFeedback
-
 class VolumeController : public Gtkmm2ext::MotionFeedback
 {
   public:
 	VolumeController (Glib::RefPtr<Gdk::Pixbuf>,
-			  Gtk::Adjustment *adj,
+			  boost::shared_ptr<PBD::Controllable>,
+			  double def,
+			  double step,
+			  double page,
 			  bool with_numeric = true,
                           int image_width = 40,
-                          int image_height = 40);
+                          int image_height = 40,
+			  bool linear = true,
+			  bool dB = false);
 
         virtual ~VolumeController () {}
-        void set_controllable (boost::shared_ptr<PBD::Controllable> c);
+
+	static void _dB_printer (char buf[32], const boost::shared_ptr<PBD::Controllable>& adj, void* arg);
+
+  protected:
+	double to_control_value (double);
+	double to_display_value (double);
 
   private:
-	Gtk::Adjustment *adjustment;
-        PBD::ScopedConnection controllable_connection;
+	bool _linear;
+	bool _controllable_uses_dB;
 
-	void adjustment_value_changed ();
-	void controllable_value_changed ();
+	void dB_printer (char buf[32], const boost::shared_ptr<PBD::Controllable>& adj);
 };
 
 #endif // __gtk_ardour_vol_controller_h__

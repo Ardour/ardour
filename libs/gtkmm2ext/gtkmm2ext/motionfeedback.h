@@ -20,6 +20,8 @@
 #ifndef __gtkmm2ext_motion_feedback_h__
 #define __gtkmm2ext_motion_feedback_h__
 
+#include "pbd/signals.h"
+
 #include <gdkmm/pixbuf.h>
 #include <gtkmm/box.h>
 #include <gtkmm/eventbox.h>
@@ -45,33 +47,38 @@ class MotionFeedback : public Gtk::VBox
 
 	MotionFeedback (Glib::RefPtr<Gdk::Pixbuf>, 
 			Type type,
+			boost::shared_ptr<PBD::Controllable>,
+			double default_value,
+			double step_increment,
+			double page_increment,
 			const char *widget_name = NULL,
-			Gtk::Adjustment *adj = NULL, 
 			bool with_numeric_display = true,
                         int sub_image_width = 40,
                         int sub_image_height = 40);
 	virtual ~MotionFeedback ();
 
-	void set_adjustment (Gtk::Adjustment *adj);
-	Gtk::Adjustment *get_adjustment () { return adjustment; }
+	Gtk::Widget& eventwin () { return pixwin; }
+        Gtk::Entry&  value_display() const { return *value; }
 
-	Gtk::Widget&     eventwin () { return pixwin; }
-        Gtk::SpinButton& spinner() const { return *value; }
-
-	gfloat lower () { return _lower; }
-	gfloat upper () { return _upper; }
-	gfloat range () { return _range; }
-        
         boost::shared_ptr<PBD::Controllable> controllable() const;
 	virtual void set_controllable (boost::shared_ptr<PBD::Controllable> c);
+
         void set_lamp_color (const Gdk::Color&);
         
         static Glib::RefPtr<Gdk::Pixbuf> render_pixbuf (int size);
 
+	void set_print_func(void (*pf)(char buf[32], const boost::shared_ptr<PBD::Controllable>&, void *),
+			    void *arg) {
+		print_func = pf;
+		print_arg = arg;
+	};
+
  protected:
-	gfloat _range;
-	gfloat _lower;
-	gfloat _upper;
+	boost::shared_ptr<PBD::Controllable> _controllable;
+	Gtk::Entry* value;
+        double default_value;
+	double step_inc;
+	double page_inc;
 
 	void pixwin_size_request (GtkRequisition *);
 
@@ -85,32 +92,37 @@ class MotionFeedback : public Gtk::VBox
 	bool pixwin_focus_out_event (GdkEventFocus *);
 	bool pixwin_expose_event (GdkEventExpose*);
 	bool pixwin_scroll_event (GdkEventScroll*);
-	void pixwin_realized ();
+
+	/* map a display value (0.0 .. 1.0) to a control
+	   value (controllable->lower() .. controllable()->upper)
+	*/
+	virtual double to_control_value (double) = 0;
+
+	/* map a control value (controllable->lower() .. controllable()->upper)
+	   to a display value (0.0 .. 1.0)
+	*/
+	virtual double to_display_value (double) = 0;
+	
+	double adjust (double control_value, double display_delta);
 
   private:
 	Type type;
 	Gtk::EventBox      pixwin;
         Gtk::HBox*         value_packer;
-	Gtk::SpinButton*   value;
-	Gtk::Adjustment*   adjustment;
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
         BindingProxy       binding_proxy;
 
-        double default_value;
-	double  step_inc;
-	double page_inc;
+	void (*print_func) (char buf[32], const boost::shared_ptr<PBD::Controllable>&, void *);
+	void *print_arg;
+	static void default_printer (char buf[32], const boost::shared_ptr<PBD::Controllable>&, void *);
+
 	bool   grab_is_fine;
 	double grabbed_y;
 	double grabbed_x;
-	bool i_own_my_adjustment;
         int subwidth;
         int subheight;
-	void adjustment_changed ();
-
-	ProlooksHSV* lamp_hsv;
-        Gdk::Color _lamp_color;
-	GdkColor lamp_bright;
-	GdkColor lamp_dark;
+	void controllable_value_changed ();
+	PBD::ScopedConnection controller_connection;
 
         static void core_draw (cairo_t*, int, double, double, double, double, const GdkColor* bright, const GdkColor* dark);
 };

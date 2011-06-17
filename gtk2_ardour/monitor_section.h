@@ -64,13 +64,9 @@ class MonitorSection : public RouteUI
         typedef std::vector<ChannelButtonSet*> ChannelButtons;
         ChannelButtons _channel_buttons;
 
-        Gtk::Adjustment   gain_adjustment;
         VolumeController* gain_control;
-        Gtk::Adjustment   dim_adjustment;
         VolumeController* dim_control;
-        Gtk::Adjustment   solo_boost_adjustment;
         VolumeController* solo_boost_control;
-        Gtk::Adjustment   solo_cut_adjustment;
         VolumeController* solo_cut_control;
 
         void populate_buttons ();
@@ -98,9 +94,6 @@ class MonitorSection : public RouteUI
         void dim_level_changed ();
         void solo_boost_changed ();
         void gain_value_changed ();
-
-        bool nonlinear_gain_printer (Gtk::SpinButton*);
-        bool linear_gain_printer (Gtk::SpinButton*);
 
         Gtk::RadioButtonGroup solo_model_group;
         Gtk::RadioButton solo_in_place_button;

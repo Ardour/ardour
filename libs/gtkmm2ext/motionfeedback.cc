@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 1998-99 Paul Barton-Davis
+    Copyright (C) 2010-2011 Paul Davis
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -27,9 +28,12 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtkmm.h>
 
+#include "pbd/controllable.h"
+
 #include "gtkmm2ext/motionfeedback.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/prolooks-helpers.h"
+#include "gtkmm2ext/gui_thread.h"
 
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -37,32 +41,33 @@ using namespace sigc;
 
 MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
 				Type t,
+				boost::shared_ptr<PBD::Controllable> c,
+				double default_val,
+				double step_increment,
+				double page_increment,
 				const char *widget_name, 
-				Adjustment *adj,
 				bool with_numeric_display, 
                                 int subw, 
                                 int subh) 
-	: type (t)
-        , value_packer (0)
+	: _controllable (c)
         , value (0)
+	, default_value (default_val)
+	, step_inc (step_increment)
+	, page_inc (page_increment)
+	, type (t)
+        , value_packer (0)
 	, pixbuf (pix)
         , subwidth (subw)
         , subheight (subh)
 {
 	char value_name[1024];
 
-	if (adj == NULL) {
-	    i_own_my_adjustment = true;
-	    set_adjustment (new Adjustment (0, 0, 10000, 1, 10, 0));
-	} else {
-	    i_own_my_adjustment = false;
-	    set_adjustment (adj);
-	}
+	print_func = default_printer;
+	print_arg = 0;
 
-        default_value = adjustment->get_value();
 
         HBox* hpacker = manage (new HBox);
-        hpacker->pack_start (pixwin, true, false);
+        hpacker->pack_start (pixwin, true, true);
         hpacker->show ();
 	pack_start (*hpacker, false, false);
 	pixwin.show ();
@@ -70,24 +75,29 @@ MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
 	if (with_numeric_display) {
 
                 value_packer = new HBox;
-		value = new SpinButton (*adjustment);
+		value = new Entry;
+		value->set_editable (false);
                 value_packer->pack_start (*value, false, false);
-
-		if (step_inc < 1) {
-			value->set_digits (abs ((int) ceil (log10 (step_inc))));
-		}
 		
-		pack_start (*value_packer, false, false);
+		hpacker = manage (new HBox);
+		hpacker->pack_start (*value_packer, true, false);
+		hpacker->show ();
+
+		pack_start (*hpacker, false, false);
 
 		if (widget_name) {
 			snprintf (value_name, sizeof(value_name), "%sValue", widget_name);
 			value->set_name (value_name);
 		}
 
+		if (_controllable) {
+			char buf[32];
+			print_func (buf, _controllable, print_arg);
+			value->set_text (buf);
+		}
+
 		value->show ();
 	}
-
-	adjustment->signal_value_changed().connect (mem_fun (*this, &MotionFeedback::adjustment_changed));
 
 	pixwin.set_events (Gdk::BUTTON_PRESS_MASK|
 			   Gdk::BUTTON_RELEASE_MASK|
@@ -111,34 +121,12 @@ MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
 	pixwin.signal_scroll_event().connect(mem_fun (*this,&MotionFeedback::pixwin_scroll_event));
 	pixwin.signal_expose_event().connect(mem_fun (*this,&MotionFeedback::pixwin_expose_event), true);
 	pixwin.signal_size_request().connect(mem_fun (*this,&MotionFeedback::pixwin_size_request));
-	pixwin.signal_realize().connect(mem_fun (*this,&MotionFeedback::pixwin_realized));
 }
 
 MotionFeedback::~MotionFeedback()
-
 {
-	if (i_own_my_adjustment) {
-		delete adjustment;
-	}
-
 	delete value;
         delete value_packer;
-}
-
-void
-MotionFeedback::set_adjustment (Adjustment *adj)
-{
-	adjustment = adj;
-
-	if (value) {
-		value->set_adjustment (*adj);
-	}
-
-	_lower = adj->get_lower();
-	_upper = adj->get_upper();
-	_range = _upper - _lower;
-	step_inc = adj->get_step_increment();
-	page_inc = adj->get_page_increment();
 }
 
 bool
@@ -172,6 +160,10 @@ MotionFeedback::pixwin_button_press_event (GdkEventButton *ev)
 bool
 MotionFeedback::pixwin_button_release_event (GdkEventButton *ev) 
 { 
+	if (!_controllable) {
+		return false;
+	}
+
 	switch (ev->button) {
 	case 1:
 		if (pixwin.has_grab()) {
@@ -182,7 +174,7 @@ MotionFeedback::pixwin_button_release_event (GdkEventButton *ev)
 		}
                 if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
                         /* shift click back to the default */
-                        adjustment->set_value (default_value);
+                        _controllable->set_value (default_value);
                         return true;
                 }
 		break;
@@ -203,6 +195,10 @@ MotionFeedback::pixwin_button_release_event (GdkEventButton *ev)
 bool
 MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev) 
 { 
+	if (!_controllable) {
+		return false;
+	}
+
 	gfloat multiplier;
 	gfloat x_delta;
 	gfloat y_delta;
@@ -212,9 +208,8 @@ MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
 	}
 
 	multiplier = ((ev->state & Keyboard::TertiaryModifier) ? 100 : 1) *
-                ((ev->state & Keyboard::SecondaryModifier) ? 10 : 1) * 
-                ((ev->state & Keyboard::PrimaryModifier) ? 2 : 1);
-
+                ((ev->state & Keyboard::PrimaryModifier) ? 10 : 1) *
+                ((ev->state & Keyboard::SecondaryModifier) ? 0.1 : 1);
 
         if (ev->state & Gdk::BUTTON1_MASK) {
 
@@ -229,12 +224,11 @@ MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
                 y_delta *= multiplier;
                 y_delta /= 10;
                 
-                adjustment->set_value (adjustment->get_value() + 
-                                       ((grab_is_fine ? step_inc : page_inc) * y_delta));
+                _controllable->set_value (adjust (_controllable->get_value(),
+						  ((grab_is_fine ? step_inc : page_inc) * y_delta)));
                 
         } else if (ev->state & Gdk::BUTTON3_MASK) {
 
-                double range = adjustment->get_upper() - adjustment->get_lower();
                 double x = ev->x - subwidth/2;
                 double y = - ev->y + subwidth/2;
                 double angle = std::atan2 (y, x) / M_PI;
@@ -244,11 +238,9 @@ MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
                 }
                 
                 angle = -(2.0/3.0) * (angle - 1.25);
-                angle *= range;
                 angle *= multiplier;
-                angle += adjustment->get_lower();
-                
-                adjustment->set_value (angle);
+
+                _controllable->set_value (to_control_value (angle));
         }
 
 
@@ -269,12 +261,22 @@ MotionFeedback::pixwin_leave_notify_event (GdkEventCrossing *ev)
 	return false;
 }
 
+double
+MotionFeedback::adjust (double control_value, double display_delta)
+{
+	return to_control_value (to_display_value (control_value) + display_delta);
+}
+
 bool
 MotionFeedback::pixwin_key_press_event (GdkEventKey *ev) 
 {
+	if (!_controllable) {
+		return false;
+	}
+
 	bool retval = false;
-	gfloat curval;
-	gfloat multiplier;
+	double curval = _controllable->get_value ();
+	double multiplier;
 
 	multiplier = ((ev->state & Keyboard::TertiaryModifier) ? 100 : 1) *
                 ((ev->state & Keyboard::SecondaryModifier) ? 10 : 1) * 
@@ -283,47 +285,236 @@ MotionFeedback::pixwin_key_press_event (GdkEventKey *ev)
 	switch (ev->keyval) {
 	case GDK_Page_Up:
 	        retval = true;
-		curval = adjustment->get_value();
-		adjustment->set_value (curval + (multiplier * page_inc));
+		_controllable->set_value (adjust (curval, multiplier * page_inc));
 		break;
 
 	case GDK_Page_Down:
 	        retval = true;
-		curval = adjustment->get_value();
-		adjustment->set_value (curval - (multiplier * page_inc));
+		_controllable->set_value (adjust (curval, multiplier * page_inc));
 		break;
 
 	case GDK_Up:
 	        retval = true;
-		curval = adjustment->get_value();
-		adjustment->set_value (curval + (multiplier * step_inc));
+		_controllable->set_value (adjust (curval, multiplier * step_inc));
 		break;
 
 	case GDK_Down:
 	        retval = true;
-		curval = adjustment->get_value();
-		adjustment->set_value (curval - (multiplier * step_inc));
+		_controllable->set_value (adjust (curval, multiplier * step_inc));
 		break;
 
 	case GDK_Home:
 	        retval = true;
-		adjustment->set_value (_lower);
+		_controllable->set_value (_controllable->lower());
 		break;
 
 	case GDK_End:
 	        retval = true;
-		adjustment->set_value (_upper);
+		_controllable->set_value (_controllable->upper());
 		break;
 	}
 	
 	return retval;
 }
 
-void
-MotionFeedback::adjustment_changed ()
+bool
+MotionFeedback::pixwin_expose_event (GdkEventExpose* ev)
 {
+	if (!_controllable) {
+		return true;
+	}
+
+	GdkWindow *window = pixwin.get_window()->gobj();
+	double display_val = to_display_value (_controllable->get_value());
+	int32_t phase = lrint (display_val * 64.0);
+	
+	// skip middle phase except for true middle value
+
+	if (type == Rotary && phase == 32) {
+		double pt = (display_val * 2.0) - 1.0;
+		if (pt < 0)
+			phase = 31;
+		if (pt > 0)
+			phase = 33;
+	}
+
+	// endless knob: skip 90deg highlights unless the value is really a multiple of 90deg
+
+	if (type == Endless && !(phase % 16)) {
+		if (phase == 64) {
+			phase = 0;
+                }
+
+		double nom = phase / 64.0;
+		double diff = display_val - nom;
+
+		if (diff > 0.0001)
+			phase = (phase + 1) % 64;
+		if (diff < -0.0001)
+			phase = (phase + 63) % 64;
+	}
+
+        phase = std::min (phase, (int32_t) 63);
+
+        GtkWidget* widget = GTK_WIDGET(pixwin.gobj());
+        gdk_draw_pixbuf (GDK_DRAWABLE(window), widget->style->fg_gc[0], 
+                         pixbuf->gobj(), 
+                         phase * subwidth, type * subheight, 
+			 /* center image in allocated area */
+                         (get_width() - subwidth)/2, 
+			 0,
+			 subwidth, subheight, GDK_RGB_DITHER_NORMAL, 0, 0);
+
+	return true;
+}
+
+bool
+MotionFeedback::pixwin_scroll_event (GdkEventScroll* ev)
+{
+	double scale;
+
+	if (!_controllable) {
+		return false;
+	}
+
+	if ((ev->state & (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) == (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) {
+		scale = 0.01;
+	} else if (ev->state & Keyboard::PrimaryModifier) {
+		scale = 0.1;
+	} else {
+		scale = 1.0;
+	}
+
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+	case GDK_SCROLL_RIGHT:
+		_controllable->set_value (adjust (_controllable->get_value(), (scale * step_inc)));
+		break;
+
+	case GDK_SCROLL_DOWN:
+	case GDK_SCROLL_LEFT:
+		_controllable->set_value (adjust (_controllable->get_value(), -(scale * step_inc)));
+		break;
+	}
+
+        return true;
+}
+
+void
+MotionFeedback::pixwin_size_request (GtkRequisition* req)
+{
+	req->width = subwidth;
+	req->height = subheight;
+}
+
+
+void
+MotionFeedback::controllable_value_changed ()
+{
+	if (value) {
+		char buf[32];
+		print_func (buf, _controllable, print_arg);
+		value->set_text (buf);
+	}
+
 	pixwin.queue_draw ();
 }
+
+void
+MotionFeedback::set_controllable (boost::shared_ptr<PBD::Controllable> c)
+{
+	_controllable = c;
+        binding_proxy.set_controllable (c);
+	controller_connection.disconnect ();
+
+	if (c) {
+		c->Changed.connect (controller_connection, MISSING_INVALIDATOR, boost::bind (&MotionFeedback::controllable_value_changed, this), gui_context());
+
+		char buf[32];
+		print_func (buf, _controllable, print_arg);
+		value->set_text (buf);
+	}
+
+	pixwin.queue_draw ();
+}
+
+boost::shared_ptr<PBD::Controllable>
+MotionFeedback::controllable () const 
+{
+        return _controllable;
+}
+       
+void
+MotionFeedback::default_printer (char buf[32], const boost::shared_ptr<PBD::Controllable>& c, void *)
+{
+	if (c) {
+		sprintf (buf, "%.2f", c->get_value());
+	} else {
+		buf[0] = '\0';
+	}
+}
+
+Glib::RefPtr<Gdk::Pixbuf>
+MotionFeedback::render_pixbuf (int size)
+{
+        Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+        char path[32];
+        int fd;
+
+        snprintf (path, sizeof (path), "/tmp/mfimg%dXXXXXX", size);
+        
+        if ((fd = mkstemp (path)) < 0) {
+                return pixbuf;
+        }
+        
+	GdkColor col2 = {0,0,0,0};
+	GdkColor col3 = {0,0,0,0};
+        Gdk::Color base ("#b9feff");
+        GdkColor dark;
+        GdkColor bright;
+        ProlooksHSV* hsv;
+
+	hsv = prolooks_hsv_new_for_gdk_color (base.gobj());
+	bright = (prolooks_hsv_to_gdk_color (hsv, &col2), col2);
+	prolooks_hsv_set_saturation (hsv, 0.66);
+	prolooks_hsv_set_value (hsv, 0.67);
+	dark = (prolooks_hsv_to_gdk_color (hsv, &col3), col3);
+
+        cairo_surface_t *surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, size * 64, size);
+        cairo_t* cr = cairo_create (surface);
+
+        for (int i = 0; i < 64; ++i) {
+                cairo_save (cr);
+                core_draw (cr, i, size, 20, size*i, 0, &bright, &dark);
+                cairo_restore (cr);
+        }
+
+        if (cairo_surface_write_to_png (surface, path) != CAIRO_STATUS_SUCCESS) {
+                std::cerr << "could not save image set to " << path << std::endl;
+                return pixbuf;
+        }
+
+        close (fd);
+
+        cairo_destroy (cr);
+        cairo_surface_destroy (surface);
+
+	try {
+		pixbuf = Gdk::Pixbuf::create_from_file (path);
+	} catch (const Gdk::PixbufError &e) {
+                std::cerr << "Caught PixbufError: " << e.what() << std::endl;
+                unlink (path);
+                throw;
+	} catch (...) {
+                unlink (path);
+		g_message("Caught ... ");
+                throw;
+	}
+
+        unlink (path);
+
+        return pixbuf;
+} 
 
 void
 MotionFeedback::core_draw (cairo_t* cr, int phase, double size, double progress_width, double xorigin, double yorigin,
@@ -540,180 +731,3 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double size, double progress_
 
 	cairo_pattern_destroy (knob_ripples);
 }
-
-bool
-MotionFeedback::pixwin_expose_event (GdkEventExpose* ev)
-{
-	GdkWindow *window = pixwin.get_window()->gobj();
-	GtkAdjustment* adj = adjustment->gobj();
-
-	int phase = (int)((adj->value - adj->lower) * 64 / 
-			  (adj->upper - adj->lower));
-
-	// skip middle phase except for true middle value
-
-	if (type == Rotary && phase == 32) {
-		double pt = (adj->value - adj->lower) * 2.0 / 
-			(adj->upper - adj->lower) - 1.0;
-		if (pt < 0)
-			phase = 31;
-		if (pt > 0)
-			phase = 33;
-	}
-
-	// endless knob: skip 90deg highlights unless the value is really a multiple of 90deg
-
-	if (type == Endless && !(phase % 16)) {
-		if (phase == 64) {
-			phase = 0;
-                }
-
-		double nom = adj->lower + phase * (adj->upper - adj->lower) / 64.0;
-		double diff = (adj->value - nom) / (adj->upper - adj->lower);
-
-		if (diff > 0.0001)
-			phase = (phase + 1) % 64;
-		if (diff < -0.0001)
-			phase = (phase + 63) % 64;
-	}
-
-        phase = std::min (phase, 63);
-
-        GtkWidget* widget = GTK_WIDGET(pixwin.gobj());
-        gdk_draw_pixbuf (GDK_DRAWABLE(window), widget->style->fg_gc[0], 
-                         pixbuf->gobj(), 
-                         phase * subwidth, type * subheight, 
-                         0, 0, subwidth, subheight, GDK_RGB_DITHER_NORMAL, 0, 0);
-
-	return true;
-}
-
-bool
-MotionFeedback::pixwin_scroll_event (GdkEventScroll* ev)
-{
-	double scale;
-
-	if ((ev->state & (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) == (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) {
-		scale = 0.01;
-	} else if (ev->state & Keyboard::PrimaryModifier) {
-		scale = 0.1;
-	} else {
-		scale = 1.0;
-	}
-
-	switch (ev->direction) {
-	case GDK_SCROLL_UP:
-	case GDK_SCROLL_RIGHT:
-		adjustment->set_value (adjustment->get_value() + (scale * adjustment->get_step_increment()));
-		break;
-
-	case GDK_SCROLL_DOWN:
-	case GDK_SCROLL_LEFT:
-		adjustment->set_value (adjustment->get_value() - (scale * adjustment->get_step_increment()));
-		break;
-	}
-
-        return true;
-}
-
-void
-MotionFeedback::pixwin_size_request (GtkRequisition* req)
-{
-	req->width = subwidth;
-	req->height = subheight;
-}
-
-void
-MotionFeedback::pixwin_realized ()
-{
-        set_lamp_color (Gdk::Color ("#b9feff"));
-}
-
-void
-MotionFeedback::set_lamp_color (const Gdk::Color& c)
-{
-	GdkColor col2 = {0,0,0,0};
-	GdkColor col3 = {0,0,0,0};
-
-	_lamp_color = c;
-	lamp_hsv = prolooks_hsv_new_for_gdk_color (_lamp_color.gobj());
-	lamp_bright = (prolooks_hsv_to_gdk_color (lamp_hsv, &col2), col2);
-	prolooks_hsv_set_saturation (lamp_hsv, 0.66);
-	prolooks_hsv_set_value (lamp_hsv, 0.67);
-	lamp_dark = (prolooks_hsv_to_gdk_color (lamp_hsv, &col3), col3);
-}
-
-Glib::RefPtr<Gdk::Pixbuf>
-MotionFeedback::render_pixbuf (int size)
-{
-        Glib::RefPtr<Gdk::Pixbuf> pixbuf;
-        char path[32];
-        int fd;
-
-        snprintf (path, sizeof (path), "/tmp/mfimg%dXXXXXX", size);
-        
-        if ((fd = mkstemp (path)) < 0) {
-                return pixbuf;
-        }
-        
-	GdkColor col2 = {0,0,0,0};
-	GdkColor col3 = {0,0,0,0};
-        Gdk::Color base ("#b9feff");
-        GdkColor dark;
-        GdkColor bright;
-        ProlooksHSV* hsv;
-
-	hsv = prolooks_hsv_new_for_gdk_color (base.gobj());
-	bright = (prolooks_hsv_to_gdk_color (hsv, &col2), col2);
-	prolooks_hsv_set_saturation (hsv, 0.66);
-	prolooks_hsv_set_value (hsv, 0.67);
-	dark = (prolooks_hsv_to_gdk_color (hsv, &col3), col3);
-
-        cairo_surface_t *surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, size * 64, size);
-        cairo_t* cr = cairo_create (surface);
-
-        for (int i = 0; i < 64; ++i) {
-                cairo_save (cr);
-                core_draw (cr, i, size, 20, size*i, 0, &bright, &dark);
-                cairo_restore (cr);
-        }
-
-        if (cairo_surface_write_to_png (surface, path) != CAIRO_STATUS_SUCCESS) {
-                std::cerr << "could not save image set to " << path << std::endl;
-                return pixbuf;
-        }
-
-        close (fd);
-
-        cairo_destroy (cr);
-        cairo_surface_destroy (surface);
-
-	try {
-		pixbuf = Gdk::Pixbuf::create_from_file (path);
-	} catch (const Gdk::PixbufError &e) {
-                std::cerr << "Caught PixbufError: " << e.what() << std::endl;
-                unlink (path);
-                throw;
-	} catch (...) {
-                unlink (path);
-		g_message("Caught ... ");
-                throw;
-	}
-
-        unlink (path);
-
-        return pixbuf;
-} 
-
-void
-MotionFeedback::set_controllable (boost::shared_ptr<PBD::Controllable> c)
-{
-        binding_proxy.set_controllable (c);
-}
-
-boost::shared_ptr<PBD::Controllable>
-MotionFeedback::controllable () const 
-{
-        return binding_proxy.get_controllable ();
-}
-       
