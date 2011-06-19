@@ -412,8 +412,8 @@ void
 Amp::GainControl::set_value (double val)
 {
 	// max gain at about +6dB (10.0 ^ ( 6 dB * 0.05))
-	if (val > 1.99526231f) {
-		val = 1.99526231f;
+	if (val > 1.99526231) {
+		val = 1.99526231;
 	}
 
 	_amp->set_gain (val, this);

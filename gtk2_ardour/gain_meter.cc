@@ -79,7 +79,7 @@ GainMeterBase::GainMeterBase (Session* s,
 			      const Glib::RefPtr<Gdk::Pixbuf>& pix,
 			      bool horizontal,
 			      int fader_length)
-	: gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1)  // 0.781787 is the value needed for gain to be set to 0.
+	: gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0.0, 1.0, 0.01, 0.1)
 	, gain_automation_style_button ("")
 	, gain_automation_state_button ("")
 	, style_changed (false)
@@ -382,7 +382,7 @@ GainMeterBase::show_gain ()
 		if (v == 0.0) {
 			strcpy (buf, _("-inf"));
 		} else {
-			snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain (v)));
+			snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain_with_max (v, Config->get_max_gain())));
 		}
 	} else {
 		snprintf (buf, sizeof (buf), "%.1f", v);
@@ -395,14 +395,13 @@ void
 GainMeterBase::gain_adjusted ()
 {
 	if (!ignore_toggle) {
-		if (_route && _route->amp() == _amp) {
-			if (_is_midi) {
-				_route->set_gain (gain_adjustment.get_value(), this);
-			} else {
-				_route->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
-			}
+		if (_is_midi) {
+			_amp->set_gain (gain_adjustment.get_value(), this);
 		} else {
-			_amp->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
+			cerr << "reset gain using slider pos " << gain_adjustment.get_value() << " to " 
+			     << slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain())
+			     << endl;
+			_amp->set_gain (slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain()), this);
 		}
 	}
 
@@ -415,14 +414,10 @@ GainMeterBase::effective_gain_display ()
 	gfloat value;
 
 	if (!_route || _route->output()->n_ports().n_midi() == 0) {
-		value = gain_to_slider_position (_amp->gain());
+		value = gain_to_slider_position_with_max (_amp->gain(), Config->get_max_gain());
 	} else {
 		value = _amp->gain ();
 	}
-
-	//cerr << this << " for " << _io->name() << " EGAIN = " << value
-	//		<< " AGAIN = " << gain_adjustment.get_value () << endl;
-	// stacktrace (cerr, 20);
 
 	if (gain_adjustment.get_value() != value) {
 		ignore_toggle = true;

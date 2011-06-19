@@ -571,7 +571,7 @@ style "medium_entry" = "medium_text"
 	fg[ACTIVE] = @@COLPREFIX@_text
 	fg[SELECTED] = @@COLPREFIX@_fg_selected
 	
-	bg[NORMAL] = @@COLPREFIX@_bg
+	bg[NORMAL] = @@COLPREFIX@_base
 	
 	base[NORMAL] = @@COLPREFIX@_base
 	base[ACTIVE] = @@COLPREFIX@_base
@@ -593,7 +593,7 @@ style "medium_bold_entry"  = "medium_bold_text"
 	fg[NORMAL] = @@COLPREFIX@_text
 	fg[ACTIVE] = @@COLPREFIX@_text
 	
-	bg[NORMAL] = @@COLPREFIX@_bg
+	bg[NORMAL] = @@COLPREFIX@_base
 	
 	base[NORMAL] = @@COLPREFIX@_base
 	base[ACTIVE] = @@COLPREFIX@_base
@@ -627,7 +627,7 @@ style "small_bold_entry" = "small_bold_text"
 	fg[NORMAL] = @@COLPREFIX@_text
 	fg[ACTIVE] = @@COLPREFIX@_text
 	
-	bg[NORMAL] = @@COLPREFIX@_bg
+	bg[NORMAL] = @@COLPREFIX@_base
 	
 	base[NORMAL] = @@COLPREFIX@_base
 	base[ACTIVE] = @@COLPREFIX@_base

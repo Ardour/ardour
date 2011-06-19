@@ -70,12 +70,12 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Dim */
 
-        dim_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.01, 0.1, true, 30, 30, true, true);
+        dim_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.1, 1.0, true, 30, 30, true);
 
         HBox* dim_packer = manage (new HBox);
         dim_packer->show ();
 
-        spin_label = manage (new Label (_("Dim Cut")));
+        spin_label = manage (new Label (_("Dim")));
         spin_packer = manage (new VBox);
         spin_packer->show ();
         spin_packer->set_spacing (6);
@@ -134,7 +134,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Solo Boost */
 
-        solo_boost_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.01, 0.1, true, 30, 30, true, true);
+        solo_boost_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.1, 1.0, true, 30, 30, true);
 
         HBox* solo_packer = manage (new HBox);
         solo_packer->set_spacing (12);
@@ -151,7 +151,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Solo (SiP) cut */
 
-        solo_cut_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.01, 0.1, true, 30, 30, false, false);
+        solo_cut_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.1, 1.0, true, 30, 30, true);
 
         spin_label = manage (new Label (_("SiP Cut")));
         spin_packer = manage (new VBox);
@@ -234,10 +234,10 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Gain */
 
-        gain_control = new VolumeController (big_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.781787, 0.01, 0.1, true, 80, 80, false, false);
+        gain_control = new VolumeController (big_knob_pixbuf, boost::shared_ptr<Controllable>(), 1.0, 0.1, 1.0, true, 80, 80, false);
 
-        spin_label = manage (new Label (_("Gain")));
-        spin_packer = manage (new VBox);
+        spin_label = manage (new Label (_("Monitor")));
+	spin_packer = manage (new VBox);
         spin_packer->show ();
         spin_packer->set_spacing (6);
         spin_packer->pack_start (*gain_control, false, false);

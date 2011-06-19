@@ -521,7 +521,7 @@ AutomationLine::fraction_to_string (double fraction) const
 		if (fraction == 0.0) {
 			snprintf (buf, sizeof (buf), "-inf");
 		} else {
-			snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain (fraction)));
+			snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain_with_max (fraction, Config->get_max_gain())));
 		}
 	} else {
 		view_to_model_coord_y (fraction);
@@ -551,7 +551,7 @@ AutomationLine::string_to_fraction (string const & s) const
 	sscanf (s.c_str(), "%lf", &v);
 
 	if (_uses_gain_mapping) {
-		v = gain_to_slider_position (dB_to_coefficient (v));
+		v = gain_to_slider_position_with_max (dB_to_coefficient (v), Config->get_max_gain());
 	} else {
 		double dummy = 0.0;
 		model_to_view_coord (dummy, v);
@@ -1198,7 +1198,7 @@ AutomationLine::view_to_model_coord_y (double& y) const
 	/* TODO: This should be more generic ... */
 	if (alist->parameter().type() == GainAutomation ||
 	    alist->parameter().type() == EnvelopeAutomation) {
-		y = slider_position_to_gain (y);
+		y = slider_position_to_gain_with_max (y, Config->get_max_gain());
 		y = max (0.0, y);
 		y = min (2.0, y);
 	} else if (alist->parameter().type() == PanAzimuthAutomation ||
@@ -1218,7 +1218,7 @@ AutomationLine::model_to_view_coord (double& x, double& y) const
 	/* TODO: This should be more generic ... */
 	if (alist->parameter().type() == GainAutomation ||
 	    alist->parameter().type() == EnvelopeAutomation) {
-		y = gain_to_slider_position (y);
+		y = gain_to_slider_position_with_max (y, Config->get_max_gain());
 	} else if (alist->parameter().type() == PanAzimuthAutomation ||
                    alist->parameter().type() == PanElevationAutomation ||
                    alist->parameter().type() == PanWidthAutomation) {

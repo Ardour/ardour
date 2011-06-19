@@ -28,6 +28,7 @@
 #include "gtkmm2ext/gui_thread.h"
 
 #include "ardour/dB.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/utils.h"
 
 #include "volume_controller.h"
@@ -42,12 +43,10 @@ VolumeController::VolumeController (Glib::RefPtr<Gdk::Pixbuf> p,
 				    bool with_numeric,
                                     int subw, 
 				    int subh,
-				    bool linear,
-				    bool dB)
+				    bool linear)
 
 	: MotionFeedback (p, MotionFeedback::Rotary, c, def, step, page, "", with_numeric, subw, subh)
 	, _linear (linear)
-	, _controllable_uses_dB (dB)
 {
 	set_print_func (VolumeController::_dB_printer, this);
 
@@ -72,27 +71,39 @@ VolumeController::dB_printer (char buf[32], const boost::shared_ptr<PBD::Control
 	if (c) {
 		
 		if (_linear) {
-			/* controllable units are in dB so just show the value */
+
+			double val = accurate_coefficient_to_dB (c->get_value());
+
 			if (step_inc < 1.0) {
-				snprintf (buf, 32, "%.2f dB", c->get_value());
+				if (val >= 0.0) {
+					snprintf (buf, 32, "+%5.2f dB", val);
+				} else {
+					snprintf (buf, 32, "%5.2f dB", val);
+				}
 			} else {
-				snprintf (buf, 32, "%ld dB", lrint (c->get_value()));
+				if (val >= 0.0) {
+					snprintf (buf, 32, "+%2ld dB", lrint (val));
+				} else {
+					snprintf (buf, 32, "%2ld dB", lrint (val));
+				}
 			}
+
 		} else {
 			
-			double gain_coefficient;
-
-			if (!_controllable_uses_dB) {
-				gain_coefficient = c->get_value();
-			} else {
-				double fract = (c->get_value() - c->lower()) / (c->upper() - c->lower());
-				gain_coefficient = slider_position_to_gain (fract);
-			}
+			double dB = accurate_coefficient_to_dB (c->get_value());
 
 			if (step_inc < 1.0) {
-				snprintf (buf, 32, "%.2f dB", accurate_coefficient_to_dB (gain_coefficient));
+				if (dB >= 0.0) {
+					snprintf (buf, 32, "+%5.2f dB", dB);
+				} else {
+					snprintf (buf, 32, "%5.2f dB", dB);
+				}
 			} else {
-				snprintf (buf, 32, "%ld dB", lrint (accurate_coefficient_to_dB (gain_coefficient)));
+				if (dB >= 0.0) {
+					snprintf (buf, 32, "+%2ld dB", lrint (dB));
+				} else {
+					snprintf (buf, 32, "%2ld dB", lrint (dB));
+				}
 			}
 		}
 	} else {
@@ -111,8 +122,7 @@ VolumeController::to_control_value (double display_value)
 	if (_linear) {
 		v = _controllable->lower() + ((_controllable->upper() - _controllable->lower()) * display_value);
 	} else {
-		
-		v = slider_position_to_gain (display_value);
+		v = slider_position_to_gain_with_max (display_value, ARDOUR::Config->get_max_gain());
 	}
 
 	return v;
@@ -123,11 +133,18 @@ VolumeController::to_display_value (double control_value)
 {
 	double v;
 
-	if (_linear) {
+//	if (_linear) {
 		v = (control_value - _controllable->lower ()) / (_controllable->upper() - _controllable->lower());
-	} else {
-		v = gain_to_slider_position (control_value);
-	}
+//	} else {
+//		v = gain_to_slider_position_with_max (control_value, ARDOUR::Config->get_max_gain());
+//	}
 
 	return v;
 }
+
+double
+VolumeController::adjust (double control_delta)
+{
+	return std::max (_controllable->lower(), std::min (_controllable->upper(), _controllable->get_value() + control_delta));
+}
+

@@ -35,8 +35,7 @@ class VolumeController : public Gtkmm2ext::MotionFeedback
 			  bool with_numeric = true,
                           int image_width = 40,
                           int image_height = 40,
-			  bool linear = true,
-			  bool dB = false);
+			  bool linear = true);
 
         virtual ~VolumeController () {}
 
@@ -45,10 +44,13 @@ class VolumeController : public Gtkmm2ext::MotionFeedback
   protected:
 	double to_control_value (double);
 	double to_display_value (double);
+	double adjust (double nominal_delta);
+
+	double display_value () const;
+	double control_value () const;
 
   private:
 	bool _linear;
-	bool _controllable_uses_dB;
 
 	void dB_printer (char buf[32], const boost::shared_ptr<PBD::Controllable>& adj);
 };

@@ -300,8 +300,7 @@ ProcessorEntry::name () const
 SendProcessorEntry::SendProcessorEntry (boost::shared_ptr<Send> s, Width w)
 	: ProcessorEntry (s, w),
 	  _send (s),
-	  /* set the adjustment to a gain of 0dB so that the fader's default value is right */
-	  _adjustment (0.781787, 0, 1, 0.01, 0.1),
+	  _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1),
 	  _fader (_slider, &_adjustment, 0, false),
 	  _ignore_gain_change (false)
 {
@@ -326,9 +325,7 @@ SendProcessorEntry::setup_slider_pix ()
 void
 SendProcessorEntry::show_gain ()
 {
-	ENSURE_GUI_THREAD (*this, &SendProcessorEntry::show_gain)
-
-	float const value = gain_to_slider_position (_send->amp()->gain ());
+	float const value = gain_to_slider_position_with_max (_send->amp()->gain (), Config->get_max_gain());
 
 	if (_adjustment.get_value() != value) {
 		_ignore_gain_change = true;
@@ -350,7 +347,7 @@ SendProcessorEntry::gain_adjusted ()
 		return;
 	}
 
-	_send->amp()->set_gain (slider_position_to_gain (_adjustment.get_value()), this);
+	_send->amp()->set_gain (slider_position_to_gain_with_max (_adjustment.get_value(), Config->get_max_gain()), this);
 }
 
 void

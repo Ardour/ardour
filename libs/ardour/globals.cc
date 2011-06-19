@@ -65,6 +65,7 @@
 #include "ardour/audiosource.h"
 #include "ardour/buffer_manager.h"
 #include "ardour/control_protocol_manager.h"
+#include "ardour/dB.h"
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_region.h"

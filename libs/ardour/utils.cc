@@ -672,6 +672,18 @@ how_many_dsp_threads ()
         return num_threads;
 }
 
+double gain_to_slider_position_with_max (double g, double max_gain)
+{
+	/* max gain is ignored for now */
+        return gain_to_slider_position (g);
+}
+
+double slider_position_to_gain_with_max (double g, double max_gain)
+{
+	/* max gain is ignored for now */
+	return slider_position_to_gain (g);
+}
+
 extern "C" {
 	void c_stacktrace() { stacktrace (cerr); }
 }

@@ -74,11 +74,17 @@ MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
 
 	if (with_numeric_display) {
 
-                value_packer = new HBox;
-		value = new Entry;
-		value->set_editable (false);
-                value_packer->pack_start (*value, false, false);
+                value_packer = new EventBox;
+                value_packer->set_name ("MotionControllerValue");
+		value_packer->show ();
+		value_packer->set_border_width (6);
+
+		value = new Label;
+		value->set_justify (Gtk::JUSTIFY_RIGHT);
+		value->show ();
 		
+                value_packer->add (*value);
+
 		hpacker = manage (new HBox);
 		hpacker->pack_start (*value_packer, true, false);
 		hpacker->show ();
@@ -95,8 +101,6 @@ MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
 			print_func (buf, _controllable, print_arg);
 			value->set_text (buf);
 		}
-
-		value->show ();
 	}
 
 	pixwin.set_events (Gdk::BUTTON_PRESS_MASK|
@@ -137,24 +141,22 @@ MotionFeedback::pixwin_button_press_event (GdkEventButton *ev)
 	}
 
 	switch (ev->button) {
-	case 2:
-		return FALSE;  /* XXX why ? */
-
 	case 1:
 		grab_is_fine = false;
 		break;
-	case 3:
+	case 2:
 		grab_is_fine = true;
 		break;
+	case 3:
+		return false;
 	}
 
 	gtk_grab_add(GTK_WIDGET(pixwin.gobj()));
+
 	grabbed_y = ev->y_root;
 	grabbed_x = ev->x_root;
 
-	/* XXX should we return TRUE ? */
-
-	return FALSE;
+	return false;
 }
 
 bool
@@ -213,6 +215,8 @@ MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
 
         if (ev->state & Gdk::BUTTON1_MASK) {
 
+		/* vertical control */
+
                 y_delta = grabbed_y - ev->y_root;
                 grabbed_y = ev->y_root;
                 
@@ -224,10 +228,11 @@ MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
                 y_delta *= multiplier;
                 y_delta /= 10;
                 
-                _controllable->set_value (adjust (_controllable->get_value(),
-						  ((grab_is_fine ? step_inc : page_inc) * y_delta)));
+                _controllable->set_value (adjust ((grab_is_fine ? step_inc : page_inc) * y_delta));
                 
-        } else if (ev->state & Gdk::BUTTON3_MASK) {
+        } else if (ev->state & Gdk::BUTTON2_MASK) {
+
+		/* rotary control */
 
                 double x = ev->x - subwidth/2;
                 double y = - ev->y + subwidth/2;
@@ -261,12 +266,6 @@ MotionFeedback::pixwin_leave_notify_event (GdkEventCrossing *ev)
 	return false;
 }
 
-double
-MotionFeedback::adjust (double control_value, double display_delta)
-{
-	return to_control_value (to_display_value (control_value) + display_delta);
-}
-
 bool
 MotionFeedback::pixwin_key_press_event (GdkEventKey *ev) 
 {
@@ -275,32 +274,31 @@ MotionFeedback::pixwin_key_press_event (GdkEventKey *ev)
 	}
 
 	bool retval = false;
-	double curval = _controllable->get_value ();
 	double multiplier;
 
-	multiplier = ((ev->state & Keyboard::TertiaryModifier) ? 100 : 1) *
-                ((ev->state & Keyboard::SecondaryModifier) ? 10 : 1) * 
-                ((ev->state & Keyboard::PrimaryModifier) ? 2 : 1);
+	multiplier = ((ev->state & Keyboard::TertiaryModifier) ? 100.0 : 1.0) *
+                ((ev->state & Keyboard::SecondaryModifier) ? 10.0 : 1.0) * 
+                ((ev->state & Keyboard::PrimaryModifier) ? 2.0 : 1.0);
 
 	switch (ev->keyval) {
 	case GDK_Page_Up:
 	        retval = true;
-		_controllable->set_value (adjust (curval, multiplier * page_inc));
+		_controllable->set_value (adjust (multiplier * page_inc));
 		break;
 
 	case GDK_Page_Down:
 	        retval = true;
-		_controllable->set_value (adjust (curval, multiplier * page_inc));
+		_controllable->set_value (adjust (multiplier * page_inc));
 		break;
 
 	case GDK_Up:
 	        retval = true;
-		_controllable->set_value (adjust (curval, multiplier * step_inc));
+		_controllable->set_value (adjust (multiplier * step_inc));
 		break;
 
 	case GDK_Down:
 	        retval = true;
-		_controllable->set_value (adjust (curval, multiplier * step_inc));
+		_controllable->set_value (adjust (multiplier * step_inc));
 		break;
 
 	case GDK_Home:
@@ -388,12 +386,12 @@ MotionFeedback::pixwin_scroll_event (GdkEventScroll* ev)
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
 	case GDK_SCROLL_RIGHT:
-		_controllable->set_value (adjust (_controllable->get_value(), (scale * step_inc)));
+		_controllable->set_value (adjust (scale * step_inc));
 		break;
 
 	case GDK_SCROLL_DOWN:
 	case GDK_SCROLL_LEFT:
-		_controllable->set_value (adjust (_controllable->get_value(), -(scale * step_inc)));
+		_controllable->set_value (adjust (-scale * step_inc));
 		break;
 	}
 

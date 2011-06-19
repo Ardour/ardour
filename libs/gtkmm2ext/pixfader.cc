@@ -342,6 +342,12 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 			fract = -fract;
 		}
 
+		std::cerr << "Motion tries to set adjustment to "
+			  << adjustment.get_value() + scale * fract * (adjustment.get_upper() - adjustment.get_lower())
+			  << " val = " << adjustment.get_value() << " upper = " << adjustment.get_upper() << " lower = " << adjustment.get_lower()
+			  << " fract = " << fract
+			  << std::endl;
+
 		adjustment.set_value (adjustment.get_value() + scale * fract * (adjustment.get_upper() - adjustment.get_lower()));
 	}
 

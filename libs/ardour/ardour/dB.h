@@ -34,6 +34,6 @@ static inline float accurate_coefficient_to_dB (float coeff) {
 	return 20.0f * log10 (coeff);
 }
 
-static const double zero_db_as_fraction = 0.781787;
+extern double zero_db_as_fraction;
 
 #endif /* __ardour_dB_h__ */

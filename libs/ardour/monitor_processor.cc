@@ -1,9 +1,9 @@
 #include "pbd/convert.h"
 #include "pbd/error.h"
+#include "pbd/locale_guard.h"
 #include "pbd/xml++.h"
 
 #include "ardour/amp.h"
-#include "ardour/dB.h"
 #include "ardour/debug.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/monitor_processor.h"
@@ -34,10 +34,12 @@ MonitorProcessor::MonitorProcessor (Session& s)
         , _dim_all_ptr (new MPControl<bool> (false, _("monitor dim"), Controllable::Toggle))
         , _cut_all_ptr (new MPControl<bool> (false, _("monitor cut"), Controllable::Toggle))
         , _mono_ptr (new MPControl<bool> (false, _("monitor mono"), Controllable::Toggle))
-        , _dim_level_ptr (new MPControl<volatile gain_t> /* units in dB */
-                          (-12.0, _("monitor dim level"), Controllable::Flag (0), -20.0f, 0.0f))
-        , _solo_boost_level_ptr (new MPControl<volatile gain_t> /* units in dB */
-                                 (0.0, _("monitor solo boost level"), Controllable::Flag (0), 0.0, 20.0))
+        , _dim_level_ptr (new MPControl<volatile gain_t> 
+			  /* default is -12dB, range is -20dB to 0dB */
+                          (0.251188635826, _("monitor dim level"), Controllable::Flag (0), 0.100000001490, 1.0))
+        , _solo_boost_level_ptr (new MPControl<volatile gain_t> 
+				 /* default is 0dB, range is 0dB to +20dB */
+                                 (1.0, _("monitor solo boost level"), Controllable::Flag (0), 1.0, 10.0))
 	  
         , _dim_all_control (_dim_all_ptr)
         , _cut_all_control (_cut_all_ptr)
@@ -202,6 +204,7 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
 XMLNode&
 MonitorProcessor::state (bool full)
 {
+	LocaleGuard lg (X_("POSIX"));
         XMLNode& node (Processor::state (full));
         char buf[64];
 
@@ -251,12 +254,11 @@ MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /
         gain_t target_gain;
         gain_t dim_level_this_time = _dim_level;
         gain_t global_cut = (_cut_all ? 0.0f : 1.0f);
-        gain_t global_dim = (_dim_all ? dim_level_this_time : 1.0f);
+        gain_t global_dim = (_dim_all ? dim_level_this_time : 1.0);
         gain_t solo_boost;
 
         if (_session.listening() || _session.soloing()) {
-		/* solo boost controller is in dB */
-                solo_boost = dB_to_coefficient (_solo_boost_level);
+                solo_boost = _solo_boost_level;
         } else {
                 solo_boost = 1.0;
         }
@@ -266,11 +268,7 @@ MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /
                 /* don't double-scale by both track dim and global dim coefficients */
 
                 gain_t dim_level = (global_dim == 1.0 ? (_channels[chn]->dim ? dim_level_this_time : 1.0) : 1.0);
-
-		/* dim level is in dB */
-
-		dim_level = dB_to_coefficient (dim_level);
-
+		
                 if (_channels[chn]->soloed) {
                         target_gain = _channels[chn]->polarity * _channels[chn]->cut * dim_level * global_cut * global_dim * solo_boost;
                 } else {

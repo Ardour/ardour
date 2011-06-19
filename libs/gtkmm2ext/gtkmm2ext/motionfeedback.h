@@ -24,6 +24,7 @@
 
 #include <gdkmm/pixbuf.h>
 #include <gtkmm/box.h>
+#include <gtkmm/label.h>
 #include <gtkmm/eventbox.h>
 
 #include "gtkmm2ext/binding_proxy.h"
@@ -58,7 +59,6 @@ class MotionFeedback : public Gtk::VBox
 	virtual ~MotionFeedback ();
 
 	Gtk::Widget& eventwin () { return pixwin; }
-        Gtk::Entry&  value_display() const { return *value; }
 
         boost::shared_ptr<PBD::Controllable> controllable() const;
 	virtual void set_controllable (boost::shared_ptr<PBD::Controllable> c);
@@ -75,7 +75,7 @@ class MotionFeedback : public Gtk::VBox
 
  protected:
 	boost::shared_ptr<PBD::Controllable> _controllable;
-	Gtk::Entry* value;
+	Gtk::Label* value;
         double default_value;
 	double step_inc;
 	double page_inc;
@@ -103,12 +103,12 @@ class MotionFeedback : public Gtk::VBox
 	*/
 	virtual double to_display_value (double) = 0;
 	
-	double adjust (double control_value, double display_delta);
+	virtual double adjust (double nominal_delta) = 0;
 
   private:
 	Type type;
 	Gtk::EventBox      pixwin;
-        Gtk::HBox*         value_packer;
+        Gtk::EventBox*     value_packer;
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
         BindingProxy       binding_proxy;
 

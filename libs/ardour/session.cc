@@ -1188,7 +1188,7 @@ Session::set_block_size (pframes_t nframes)
 	   ::process(). It is therefore fine to do things that block
 	   here.
 	*/
-
+	
 	{
 		current_block_size = nframes;
 

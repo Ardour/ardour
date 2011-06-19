@@ -66,14 +66,13 @@ using namespace ArdourCanvas;
 
 using Gtkmm2ext::Keyboard;
 
-double const ControlPointDrag::_zero_gain_fraction = gain_to_slider_position (dB_to_coefficient (0.0));
+double ControlPointDrag::_zero_gain_fraction = -1.0;
 
 DragManager::DragManager (Editor* e)
 	: _editor (e)
 	, _ending (false)
 	, _current_pointer_frame (0)
 {
-
 }
 
 DragManager::~DragManager ()
@@ -2752,6 +2751,10 @@ ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
 	  _cumulative_x_drag (0),
 	  _cumulative_y_drag (0)
 {
+	if (_zero_gain_fraction < 0.0) {
+		_zero_gain_fraction = gain_to_slider_position_with_max (dB_to_coefficient (0.0), Config->get_max_gain());
+	}
+
 	DEBUG_TRACE (DEBUG::Drags, "New ControlPointDrag\n");
 
 	_point = reinterpret_cast<ControlPoint*> (_item->get_data ("control_point"));

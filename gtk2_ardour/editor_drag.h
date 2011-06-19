@@ -690,7 +690,7 @@ private:
 	double _fixed_grab_y;
 	double _cumulative_x_drag;
 	double _cumulative_y_drag;
-	static double const _zero_gain_fraction;
+	static double _zero_gain_fraction;
 };
 
 /** Gain or automation line drag */
