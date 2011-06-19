@@ -206,25 +206,14 @@ AudioEngine::start ()
 
 	if (!_running) {
 
-                pframes_t blocksize;
-
-                if (jack_port_type_get_buffer_size) {
-                        blocksize = jack_port_type_get_buffer_size (_priv_jack, JACK_DEFAULT_AUDIO_TYPE);
-                } else {
+                if (!jack_port_type_get_buffer_size) {
                         warning << _("This version of JACK is old - you should upgrade to a newer version that supports jack_port_type_get_buffer_size()") << endmsg;
-                        blocksize = jack_get_buffer_size (_priv_jack);
-                }
+		}
 
 		if (_session) {
 			BootMessage (_("Connect session to engine"));
-			_session->set_block_size (blocksize);
 			_session->set_frame_rate (jack_get_sample_rate (_priv_jack));
 		}
-
-		_processed_frames = 0;
-		last_monitor_check = 0;
-
-                set_jack_callbacks ();
 
                 /* a proxy for whether jack_activate() will definitely call the buffer size
                  * callback. with older versions of JACK, this function symbol will be null.
@@ -232,8 +221,13 @@ AudioEngine::start ()
                  */
 
                 if (!jack_port_type_get_buffer_size) {
-                        jack_bufsize_callback (blocksize);
+			jack_bufsize_callback (jack_get_buffer_size (_priv_jack));
                 }
+		
+		_processed_frames = 0;
+		last_monitor_check = 0;
+
+                set_jack_callbacks ();
 
 		if (jack_activate (_priv_jack) == 0) {
 			_running = true;
@@ -243,7 +237,7 @@ AudioEngine::start ()
 			// error << _("cannot activate JACK client") << endmsg;
 		}
 	}
-
+		
 	return _running ? 0 : -1;
 }
 
