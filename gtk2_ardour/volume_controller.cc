@@ -49,13 +49,7 @@ VolumeController::VolumeController (Glib::RefPtr<Gdk::Pixbuf> p,
 	, _linear (linear)
 {
 	set_print_func (VolumeController::_dB_printer, this);
-
-	if (step < 1.0) {
-		value->set_width_chars (6 + abs ((int) ceil (log10 (step))));
-	} else {
-		value->set_width_chars (5); // -NNdB
-	}
-
+	value->set_width_chars (8);
 }
 
 void
@@ -152,8 +146,12 @@ VolumeController::adjust (double control_delta)
 	v = gain_to_slider_position_with_max (v, ARDOUR::Config->get_max_gain());
 	/* adjust in this domain */
 	v += control_delta;
+	/* clamp in this domain */
+	v = std::max (0.0, std::min (1.0, v));
 	/* convert back to gain coefficient domain */
 	v = slider_position_to_gain_with_max (v, ARDOUR::Config->get_max_gain());
+	/* clamp in this domain */
+	v = std::max (_controllable->lower(), std::min (_controllable->upper(), v));
 
 	/* now round to some precision in the dB domain */
 	v = accurate_coefficient_to_dB (v);
