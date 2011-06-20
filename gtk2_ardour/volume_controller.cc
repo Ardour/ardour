@@ -133,11 +133,11 @@ VolumeController::to_display_value (double control_value)
 {
 	double v;
 
-//	if (_linear) {
+	if (_linear) {
 		v = (control_value - _controllable->lower ()) / (_controllable->upper() - _controllable->lower());
-//	} else {
-//		v = gain_to_slider_position_with_max (control_value, ARDOUR::Config->get_max_gain());
-//	}
+	} else {
+		v = gain_to_slider_position_with_max (control_value, ARDOUR::Config->get_max_gain());
+	}
 
 	return v;
 }
@@ -145,6 +145,25 @@ VolumeController::to_display_value (double control_value)
 double
 VolumeController::adjust (double control_delta)
 {
-	return std::max (_controllable->lower(), std::min (_controllable->upper(), _controllable->get_value() + control_delta));
-}
+	double v = _controllable->get_value ();
+	double abs_delta = fabs (control_delta);
 
+	/* convert to linear/fractional slider position domain */
+	v = gain_to_slider_position_with_max (v, ARDOUR::Config->get_max_gain());
+	/* adjust in this domain */
+	v += control_delta;
+	/* convert back to gain coefficient domain */
+	v = slider_position_to_gain_with_max (v, ARDOUR::Config->get_max_gain());
+
+	/* now round to some precision in the dB domain */
+	v = accurate_coefficient_to_dB (v);
+
+	if (abs_delta <= 0.01) {
+		v -= fmod (v, 0.05);
+	} else {
+		v -= fmod (v, 0.1);
+	} 
+
+	/* and return it */
+	return dB_to_coefficient (v);
+}
