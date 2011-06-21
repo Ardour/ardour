@@ -687,7 +687,7 @@ Sequence<Time>::add_note_unlocked(const NotePtr note, void* arg)
  
 	_edited = true;
 
-       return true;
+	return true;
 }
 
 template<typename Time>
@@ -750,7 +750,7 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
         }
         
         if (!erased) {
-                cerr << "Unable to find note to erase" << endl;
+                cerr << "Unable to find note to erase matching " << *note.get() << endl;
         }
 }
 
@@ -1213,6 +1213,18 @@ Sequence<Time>::control_list_marked_dirty ()
 }
 
 template class Sequence<Evoral::MusicalTime>;
+
+template<typename Time>
+void
+Sequence<Time>::dump (ostream& str) const
+{
+	Sequence<Time>::const_iterator i;
+	str << "+++ dump\n";
+	for (i = begin(); i != end(); ++i) {
+		str << *i << endl;
+	}
+	str << "--- dump\n";
+}
 
 } // namespace Evoral
 

@@ -191,6 +191,8 @@ public:
 	inline       PatchChanges& patch_changes ()       { return _patch_changes; }
 	inline const PatchChanges& patch_changes () const { return _patch_changes; }
 
+        void dump (std::ostream&) const;
+
 private:
 	typedef std::priority_queue<NotePtr, std::deque<NotePtr>, LaterNoteEndComparator> ActiveNotes;
 public:
@@ -331,6 +333,8 @@ private:
 
 
 } // namespace Evoral
+
+// template<typename Time> std::ostream& operator<<(std::ostream& o, const Evoral::Sequence<Time>& s) { s.dump (o); return o; }
 
 #endif // EVORAL_SEQUENCE_HPP
 

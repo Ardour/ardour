@@ -101,17 +101,28 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 in range %2 .. %3\n", ev_time, start, end));
 		}
 
-		/* lets see if we are going to be able to write this event into dst.
-		 */
-
 		assert(ev_time >= start);
 
 		ev_time -= start;
 		ev_time += offset;
 
-		// write the timestamp to address (write_loc - 1)
-		uint8_t* write_loc = dst.reserve(ev_time, ev_size);
-		if (write_loc == NULL) {
+		// This event marks a loop end (i.e. the next event's timestamp
+		// will be non-monotonic). Don't write it into the buffer - the
+		// significance of this event ends here.
+		
+		if (ev_type == LoopEventType) {
+			assert (ev_size == sizeof (framepos_t));
+			framepos_t loop_start;
+			read_contents (ev_size, (uint8_t *) &loop_start);
+			loop_offset = ev_time - loop_start;
+			_tracker.resolve_notes (dst, ev_time);
+			continue;
+		}
+
+		/* lets see if we are going to be able to write this event into dst.
+		 */
+		uint8_t* write_loc = dst.reserve (ev_time, ev_size);
+		if (write_loc == 0) {
 			if (stop_on_overflow_in_dst) {
 				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events\n", count));
 				break;
@@ -124,19 +135,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		/* we're good to go ahead and read the data now but since we
 		 * have the prefix data already, just skip over that
 		 */
-
 		this->increment_read_ptr (prefix_size);
-
-		// This event marks a loop end (i.e. the next event's timestamp will be non-monotonic)
-		if (ev_type == LoopEventType) {
-			assert (ev_size == sizeof (framepos_t));
-			framepos_t loop_start;
-			read_contents (ev_size, (uint8_t *) &loop_start);
-
-			loop_offset = ev_time - loop_start;
-			continue;
-		}
-
 		ev_time += loop_offset;
 
 		uint8_t status;
@@ -172,6 +171,13 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 #endif
 
 		if (success) {
+
+			if (is_note_on(write_loc[0]) ) {
+				_tracker.add (write_loc[1], write_loc[0] & 0xf);
+			} else if (is_note_off(write_loc[0])) {
+				_tracker.remove (write_loc[1], write_loc[0] & 0xf);
+			}
+			
 			if (is_channel_event(status) && get_channel_mode() == ForceChannel) {
 				write_loc[0] = (write_loc[0] & 0xF0) | (get_channel_mask() & 0x0F);
 			}

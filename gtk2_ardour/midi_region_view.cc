@@ -1844,9 +1844,7 @@ MidiRegionView::maybe_remove_deleted_note_from_selection (CanvasNoteEvent* cne)
 		return;
 	}
 
-	if (_selection.erase (cne) > 0) {
-		cerr << "Erased a CNE from selection\n";
-	}
+	_selection.erase (cne);
 }
 
 void

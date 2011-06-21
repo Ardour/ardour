@@ -19,6 +19,8 @@
 #ifndef EVORAL_MIDI_UTIL_H
 #define EVORAL_MIDI_UTIL_H
 
+#include <iostream>
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <string>
@@ -66,9 +68,11 @@ midi_event_size(uint8_t status)
 		return 1;
 
 	case MIDI_CMD_COMMON_SYSEX:
+		std::cerr << "event size called for sysex\n";
 		return -1;
 	}
 
+	std::cerr << "event size called for unknown status byte " << std::hex << (int) status << "\n";
 	return -1;
 }
 

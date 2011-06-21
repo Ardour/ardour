@@ -1413,8 +1413,8 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framepos_t start, framepos_t end)
 
 #ifndef NDEBUG
 	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
-		             "%1 MDS pre-read read from %2 write to %3\n", _name,
-		             _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr()));
+		             "%1 MDS pre-read read %4..%5 from %2 write to %3\n", _name,
+		             _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr(), start, end));
 //        cerr << "================\n";
 //        _playback_buf->dump (cerr);
 //        cerr << "----------------\n";
