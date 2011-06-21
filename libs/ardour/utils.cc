@@ -674,14 +674,12 @@ how_many_dsp_threads ()
 
 double gain_to_slider_position_with_max (double g, double max_gain)
 {
-	/* max gain is ignored for now */
-        return gain_to_slider_position (g);
+        return gain_to_slider_position (g * 2.0/max_gain);
 }
 
 double slider_position_to_gain_with_max (double g, double max_gain)
 {
-	/* max gain is ignored for now */
-	return slider_position_to_gain (g);
+	return slider_position_to_gain (g * max_gain/2.0);
 }
 
 extern "C" {

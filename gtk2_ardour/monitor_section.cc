@@ -151,7 +151,7 @@ MonitorSection::MonitorSection (Session* s)
 
         /* Solo (SiP) cut */
 
-        solo_cut_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.01, 0.1, true, 30, 30, true);
+        solo_cut_control = new VolumeController (little_knob_pixbuf, boost::shared_ptr<Controllable>(), 0.0, 0.1, 0.5, true, 30, 30, true);
 
         spin_label = manage (new Label (_("SiP Cut")));
         spin_packer = manage (new VBox);
@@ -973,8 +973,7 @@ MonitorSection::assign_controllables ()
         }
 
         if (_session) {
-                boost::shared_ptr<Controllable> c = _session->solo_cut_control();
-                solo_cut_control->set_controllable (c);
+		solo_cut_control->set_controllable (_session->solo_cut_control());
         } else {
                 solo_cut_control->set_controllable (none);
         }

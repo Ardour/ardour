@@ -1257,7 +1257,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Solo / mute"),
 	     new FaderOption (
 		     "solo-mute-gain",
-		     _("Solo mute cut (dB)"),
+		     _("Solo-in-place mute cut (dB)"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_gain),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_gain)
 		     ));

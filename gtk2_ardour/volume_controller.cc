@@ -130,7 +130,7 @@ VolumeController::to_display_value (double control_value)
 	if (_linear) {
 		v = (control_value - _controllable->lower ()) / (_controllable->upper() - _controllable->lower());
 	} else {
-		v = gain_to_slider_position_with_max (control_value, ARDOUR::Config->get_max_gain());
+		v = gain_to_slider_position_with_max (control_value, _controllable->upper());
 	}
 
 	return v;
@@ -139,29 +139,92 @@ VolumeController::to_display_value (double control_value)
 double
 VolumeController::adjust (double control_delta)
 {
-	double v = _controllable->get_value ();
-	double abs_delta = fabs (control_delta);
+	double v;
 
-	/* convert to linear/fractional slider position domain */
-	v = gain_to_slider_position_with_max (v, ARDOUR::Config->get_max_gain());
-	/* adjust in this domain */
-	v += control_delta;
-	/* clamp in this domain */
-	v = std::max (0.0, std::min (1.0, v));
-	/* convert back to gain coefficient domain */
-	v = slider_position_to_gain_with_max (v, ARDOUR::Config->get_max_gain());
-	/* clamp in this domain */
-	v = std::max (_controllable->lower(), std::min (_controllable->upper(), v));
+	if (!_linear) {
 
-	/* now round to some precision in the dB domain */
-	v = accurate_coefficient_to_dB (v);
+		/* we map back into the linear/fractional slider position,
+		 * because this kind of control goes all the way down
+		 * to -inf dB, and we want this occur in a reasonable way in
+		 * terms of user interaction. if we leave the adjustment in the
+		 * gain coefficient domain (or dB domain), the lower end of the
+		 * control range (getting close to -inf dB) takes forever.
+		 */
 
-	if (abs_delta <= 0.01) {
-		v -= fmod (v, 0.05);
+		/* convert to linear/fractional slider position domain */
+		v = gain_to_slider_position_with_max (_controllable->get_value (), _controllable->upper());
+		/* increment in this domain */
+		v += control_delta;
+		/* clamp to appropriate range for linear/fractional slider domain */
+		v = std::max (0.0, std::min (1.0, v));
+		/* convert back to gain coefficient domain */
+		v = slider_position_to_gain_with_max (v, _controllable->upper());
+		/* clamp in controller domain */
+		v = std::max (_controllable->lower(), std::min (_controllable->upper(), v));
+		/* convert to dB domain */
+		v = accurate_coefficient_to_dB (v);
+		/* round up/down to nearest 0.1dB */
+		if (control_delta > 0.0) {
+			v = ceil (v * 10.0) / 10.0;
+		} else {
+			v = floor (v * 10.0) / 10.0;
+		}
+		/* and return it */
+		return dB_to_coefficient (v);
 	} else {
-		v -= fmod (v, 0.1);
-	} 
+		double mult;
 
-	/* and return it */
-	return dB_to_coefficient (v);
+		if (control_delta < 0.0) {
+			mult = -1.0;
+		} else {
+			mult = 1.0;
+		}
+
+		if (fabs (control_delta) < 0.05) {
+			control_delta = mult * 0.05;
+		} else  {
+			control_delta = mult * 0.1;
+		}
+
+		v = _controllable->get_value();
+
+		if (v == 0.0) {
+			/* if we don't special case this, we can't escape from
+			   the -infinity dB black hole.
+			*/
+			if (control_delta > 0.0) {
+				v = dB_to_coefficient (-100 + control_delta);
+			}
+		} else {
+			static const double dB_minus_200 = dB_to_coefficient (-200.0);
+			static const double dB_minus_100 = dB_to_coefficient (-100.0);
+			static const double dB_minus_50 = dB_to_coefficient (-50.0);
+			static const double dB_minus_20 = dB_to_coefficient (-20.0);
+
+			if (control_delta < 0 && v < dB_minus_200) {
+				v = 0.0;
+			} else {
+
+				/* non-linear scaling as the dB level gets low 
+				   so that we can hit -inf and get back out of
+				   it appropriately.
+				*/
+
+				if (v < dB_minus_100) {
+					control_delta *= 1000.0;
+				} else if (v < dB_minus_50) {
+					control_delta *= 100.0;
+				} else if (v < dB_minus_20) {
+					control_delta *= 10.0;
+				}
+
+				v = accurate_coefficient_to_dB (v);
+				v += control_delta;
+				v = dB_to_coefficient (v);
+			}
+		}
+
+		return std::max (_controllable->lower(), std::min (_controllable->upper(), v));
+	}
+
 }
