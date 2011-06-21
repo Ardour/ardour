@@ -633,6 +633,22 @@ ArdourStartup::on_prepare (Gtk::Widget* page)
 		} else {
 			/* existing session requested */
 			setup_existing_session_page ();
+
+		}
+
+		/* HACK HACK HACK ... change the "Apply" button label
+		   to say "Open"
+		*/
+
+		Gtk::Widget* tl = session_vbox.get_toplevel();
+		Gtk::Window* win;
+		if ((win = dynamic_cast<Gtk::Window*>(tl)) != 0) {
+			/* ::get_default_widget() is not wrapped in gtkmm */
+			Gtk::Widget* def = wrap (gtk_window_get_default_widget (win->gobj()));
+			Gtk::Button* button;
+			if ((button = dynamic_cast<Gtk::Button*>(def)) != 0) {
+				button->set_label (_("Open"));
+			}
 		}
 	}
 }
