@@ -1466,7 +1466,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 
 	control_id = ntracks() + nbusses();
 
-	bool const use_number = (how_many != 1);
+	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("Midi");
 
 	while (how_many) {
 		if (!find_route_name (name_template.empty() ? _("Midi") : name_template, ++track_id, track_name, sizeof(track_name), use_number)) {
@@ -1693,7 +1693,7 @@ Session::new_audio_track (
 
 	control_id = ntracks() + nbusses() + 1;
 
-	bool const use_number = (how_many != 1);
+	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("Audio");
 
 	while (how_many) {
 		if (!find_route_name (name_template.empty() ? _("Audio") : name_template, ++track_id, track_name, sizeof(track_name), use_number)) {
@@ -1812,7 +1812,8 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 
 	control_id = ntracks() + nbusses() + 1;
 
-	bool const use_number = (how_many != 1);
+	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("Bus");
+	
 	while (how_many) {
 		if (!find_route_name (name_template.empty () ? _("Bus") : name_template, ++bus_id, bus_name, sizeof(bus_name), use_number)) {
 			error << "cannot find name for new audio bus" << endmsg;
