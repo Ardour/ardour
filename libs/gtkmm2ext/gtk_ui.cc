@@ -650,19 +650,18 @@ UI::handle_fatal (const char *message)
 void
 UI::popup_error (const string& text)
 {
-	PopUp *pup;
-
 	if (!caller_is_ui_thread()) {
 		error << "non-UI threads can't use UI::popup_error"
 		      << endmsg;
 		return;
 	}
 
-	pup = new PopUp (WIN_POS_MOUSE, 0, true);
-	pup->set_text (text);
-	pup->touch ();
+	MessageDialog msg (text);
+	msg.set_title (string_compose (_("I'm sorry %1, I can't do that"), g_get_user_name()));
+	msg.set_wmclass (X_("error"), name());
+	msg.set_position (WIN_POS_MOUSE);
+	msg.run ();
 }
-
 
 void
 UI::flush_pending ()
