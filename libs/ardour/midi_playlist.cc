@@ -52,7 +52,9 @@ MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 #endif
 
 	in_set_state++;
-	set_state (node, Stateful::loading_state_version);
+	if (set_state (node, Stateful::loading_state_version)) {
+		throw failed_constructor ();
+	}
 	in_set_state--;
 }
 
@@ -326,7 +328,9 @@ MidiPlaylist::set_state (const XMLNode& node, int version)
 	in_set_state++;
 	freeze ();
 
-	Playlist::set_state (node, version);
+	if (Playlist::set_state (node, version)) {
+		return -1;
+	}
 
 	thaw();
 	in_set_state--;

@@ -72,6 +72,8 @@ AudioPlaylistSource::AudioPlaylistSource (Session& s, const XMLNode& node)
 	if (set_state (node, Stateful::loading_state_version, false)) {
 		throw failed_constructor ();
 	}
+
+	AudioSource::_length = _playlist_length;
 }
 
 AudioPlaylistSource::~AudioPlaylistSource ()
@@ -113,6 +115,9 @@ AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_desc
 
 	const XMLProperty* prop;
 	pair<framepos_t,framepos_t> extent = _playlist->get_extent();
+
+	cerr << "APS " << id() << " playlist ID " << _playlist->id() << " has " << _playlist->n_regions() << " playlist extents = " << extent.first << " .. " << extent.second << endl;
+
 	AudioSource::_length = extent.second - extent.first;
 
 	if ((prop = node.property (X_("channel"))) == 0) {

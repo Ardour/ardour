@@ -109,7 +109,9 @@ AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden
 	add_property (_crossfades);
 
 	in_set_state++;
-	set_state (node, Stateful::loading_state_version);
+	if (set_state (node, Stateful::loading_state_version)) {
+		throw failed_constructor();
+	}
 	in_set_state--;
 }
 
@@ -728,7 +730,9 @@ AudioPlaylist::set_state (const XMLNode& node, int version)
 
 	in_set_state++;
 
-	Playlist::set_state (node, version);
+	if (Playlist::set_state (node, version)) {
+		return -1;
+	}
 
 	freeze ();
 

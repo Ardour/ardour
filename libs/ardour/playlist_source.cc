@@ -118,7 +118,7 @@ PlaylistSource::set_state (const XMLNode& node, int version)
 	}
 
 	if (!_playlist) {
-		error << _("No playlist node in PlaylistSource XML!") << endmsg;
+		error << _("Could not construct playlist for PlaylistSource from session data!") << endmsg;
 		throw failed_constructor ();
 	}
 

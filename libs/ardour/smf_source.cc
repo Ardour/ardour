@@ -296,9 +296,9 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 		return;
 	}
 
-	/* printf("SMFSource: %s - append_event_unlocked_beats ID = %d time = %lf, size = %u, data = ",
+	/*printf("SMFSource: %s - append_event_unlocked_beats ID = %d time = %lf, size = %u, data = ",
                name().c_str(), ev.id(), ev.time(), ev.size());
-           for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
+	       for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
 
 	assert(ev.time() >= 0);
 	if (ev.time() < _last_ev_time_beats) {
