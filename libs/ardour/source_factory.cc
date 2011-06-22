@@ -155,12 +155,13 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 
 			try {
 				boost::shared_ptr<AudioPlaylistSource> ap (new AudioPlaylistSource (s, node));
-
+				
 				if (setup_peakfile (ap, true)) {
 					return boost::shared_ptr<Source>();
 				}
 
 				ap->check_for_analysis_data_on_disk ();
+
 				SourceCreated (ap);
 				return ap;
 

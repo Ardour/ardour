@@ -1207,7 +1207,11 @@ Region::state ()
 		node->add_property (buf2, buf);
 	}
 
-	if (max_source_level() > 0) {
+	/* Only store nested sources for the whole-file region that acts
+	   as the parent/root of all regions using it.
+	*/
+
+	if (_whole_file && max_source_level() > 0) {
 
 		XMLNode* nested_node = new XMLNode (X_("NestedSource"));
 

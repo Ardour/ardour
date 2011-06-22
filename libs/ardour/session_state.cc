@@ -1660,11 +1660,26 @@ Session::load_nested_sources (const XMLNode& node)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == "Source") {
-			try {
-				SourceFactory::create (*this, **niter, true);
+
+			/* it may already exist, so don't recreate it unnecessarily 
+			 */
+
+			XMLProperty* prop = (*niter)->property (X_("id"));
+			if (!prop) {
+				error << _("Nested source has no ID info in session state file! (ignored)") << endmsg;
+				continue;
 			}
-			catch (failed_constructor& err) {
-				error << string_compose (_("Cannot reconstruct nested source for region %1"), name()) << endmsg;
+
+			ID source_id (prop->value());
+
+			if (!source_by_id (source_id)) {
+
+				try {
+					SourceFactory::create (*this, **niter, true);
+				}
+				catch (failed_constructor& err) {
+					error << string_compose (_("Cannot reconstruct nested source for region %1"), name()) << endmsg;
+				}
 			}
 		}
 	}
