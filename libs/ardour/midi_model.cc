@@ -1415,7 +1415,6 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource> source, Evoral::Music
 {
 	ReadLock lock(read_lock());
 	MidiStateTracker mst;
-	Evoral::MusicalTime extra_note_on_time = end_time;
 
 	const bool old_percussive = percussive();
 	set_percussive(false);
@@ -1442,36 +1441,20 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource> source, Evoral::Music
 			if (mev->is_note_off()) {
 
 				if (!mst.active (mev->note(), mev->channel())) {
-
-					/* add a note-on at the start of the range we're writing
-					   to the file. velocity is just an arbitary reasonable value.
+					/* the matching note-on was outside the
+					   time range we were given, so just
+					   ignore this note-off.
 					*/
-
-					Evoral::MIDIEvent<Evoral::MusicalTime> on (mev->event_type(), extra_note_on_time, 3, 0, true);
-					on.set_type (mev->type());
-					on.set_note (mev->note());
-					on.set_channel (mev->channel());
-					on.set_velocity (mev->velocity());
-
-					cerr << "Add note on for odd note off, note = " << (int) on.note() << endl;
-					source->append_event_unlocked_beats (on);
-					mst.add (on.note(), on.channel());
-					mst.dump (cerr);
-					extra_note_on_time += 1.0/128.0;
+					continue;
 				}
 
-				cerr << "MIDI Note off (note = " << (int) mev->note() << endl;
 				source->append_event_unlocked_beats (*i);
 				mst.remove (mev->note(), mev->channel());
-				mst.dump (cerr);
 
 			} else if (mev->is_note_on()) {
-				cerr << "MIDI Note on (note = " << (int) mev->note() << endl;
 				mst.add (mev->note(), mev->channel());
 				source->append_event_unlocked_beats(*i);
-				mst.dump (cerr);
 			} else {
-				cerr << "MIDI other event type\n";
 				source->append_event_unlocked_beats(*i);
 			}
 		}
