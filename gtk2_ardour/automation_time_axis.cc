@@ -201,6 +201,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	} else {
 		/* no regions, just a single line for the entire track (e.g. bus gain) */
 
+		assert (_control);
+
 		boost::shared_ptr<AutomationLine> line (
 			new AutomationLine (
 				ARDOUR::EventTypeMap::instance().to_symbol(_parameter),
@@ -268,15 +270,7 @@ AutomationTimeAxisView::set_automation_state (AutoState state)
 	if (_automatable) {
 		_automatable->set_parameter_automation_state (_parameter, state);
 	}
-#if 0
-	if (_route == _automatable) { // This is a time axis for route (not region) automation
-		_route->set_parameter_automation_state (_parameter, state);
-	}
 
-	if (_control->list()) {
-		_control->alist()->set_automation_state(state);
-	}
-#endif
 	if (_view) {
 		_view->set_automation_state (state);
 
@@ -294,10 +288,11 @@ AutomationTimeAxisView::automation_state_changed ()
 
 	/* update button label */
 
-	if (_line) {
-		state = _control->alist()->automation_state ();
-	} else if (_view) {
+	if (_view) {
 		state = _view->automation_state ();
+	} else if (_line) {
+		assert (_control);
+		state = _control->alist()->automation_state ();
 	} else {
 		state = Off;
 	}
@@ -379,6 +374,7 @@ AutomationTimeAxisView::set_interpolation (AutomationList::InterpolationStyle st
 	if (_view) {
 		_view->set_interpolation (style);
 	} else {
+		assert (_control);
 		_control->list()->set_interpolation (style);
 	}
 }
@@ -409,7 +405,15 @@ AutomationTimeAxisView::set_height (uint32_t h)
 
 	TimeAxisView* state_parent = get_parent_with_state ();
 	assert(state_parent);
-	XMLNode* xml_node = _control->extra_xml ("GUI");
+	XMLNode* xml_node = 0;
+
+	if (_control) {
+		xml_node = _control->extra_xml ("GUI");
+	} else {
+		/* XXX we need somewhere to store GUI info for per-region
+		 * automation 
+		 */
+	}
 
 	TimeAxisView::set_height (h);
 	_base_rect->property_y2() = h;
@@ -587,14 +591,15 @@ AutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* /*item*/, GdkE
 
 	_line->view_to_model_coord (x, y);
 
+	boost::shared_ptr<AutomationList> list = _line->the_list ();
+
 	_session->begin_reversible_command (_("add automation event"));
-	XMLNode& before = _control->alist()->get_state();
+	XMLNode& before = list->get_state();
 
-	_control->alist()->add (when, y);
+	list->add (when, y);
 
-	XMLNode& after = _control->alist()->get_state();
-	_session->commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(*_control->alist(), &before, &after));
-
+	XMLNode& after = list->get_state();
+	_session->commit_reversible_command (new MementoCommand<ARDOUR::AutomationList> (*list, &before, &after));
 	_session->set_dirty ();
 }
 
@@ -899,18 +904,19 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 {
 	assert(line);
 	assert(!_line);
-	assert(line->the_list() == _control->list());
-
-	_control->alist()->automation_state_changed.connect (
-		_list_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::automation_state_changed, this), gui_context()
-		);
-
-	_control->alist()->InterpolationChanged.connect (
-		_list_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::interpolation_changed, this, _1), gui_context()
-		);
+	if (_control) {
+		assert(line->the_list() == _control->list());
+		
+		_control->alist()->automation_state_changed.connect (
+			_list_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::automation_state_changed, this), gui_context()
+			);
+		
+		_control->alist()->InterpolationChanged.connect (
+			_list_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::interpolation_changed, this, _1), gui_context()
+			);
+	}
 
 	_line = line;
-	//_controller = AutomationController::create(_session, line->the_list(), _control);
 
 	line->set_height (height);
 
@@ -985,7 +991,10 @@ AutomationTimeAxisView::set_state_2X (const XMLNode& node, int /*version*/)
 XMLNode*
 AutomationTimeAxisView::get_state_node ()
 {
-	return _control->extra_xml ("GUI", true);
+	if (_control) {
+		return _control->extra_xml ("GUI", true);
+	}
+	return 0;
 }
 
 void
