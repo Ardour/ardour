@@ -395,12 +395,13 @@ void
 GainMeterBase::gain_adjusted ()
 {
 	if (!ignore_toggle) {
-		if (_is_midi) {
-			_amp->set_gain (gain_adjustment.get_value(), this);
+		if (_route && _route->amp() == _amp) {
+			if (_is_midi) {
+				_route->set_gain (gain_adjustment.get_value(), this);
+			} else {
+				_route->set_gain (slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain()), this);
+			}
 		} else {
-			cerr << "reset gain using slider pos " << gain_adjustment.get_value() << " to " 
-			     << slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain())
-			     << endl;
 			_amp->set_gain (slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain()), this);
 		}
 	}
