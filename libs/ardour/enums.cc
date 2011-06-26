@@ -344,9 +344,6 @@ setup_enum_writer ()
 	REGISTER (_MIDI_MTC_Status);
 
 	REGISTER_CLASS_ENUM (Session, PostTransportStop);
-	REGISTER_CLASS_ENUM (Session, PostTransportDisableRecord);
-	REGISTER_CLASS_ENUM (Session, PostTransportPosition);
-	REGISTER_CLASS_ENUM (Session, PostTransportDidRecord);
 	REGISTER_CLASS_ENUM (Session, PostTransportDuration);
 	REGISTER_CLASS_ENUM (Session, PostTransportLocate);
 	REGISTER_CLASS_ENUM (Session, PostTransportRoll);
@@ -354,7 +351,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Session, PostTransportOverWrite);
 	REGISTER_CLASS_ENUM (Session, PostTransportSpeed);
 	REGISTER_CLASS_ENUM (Session, PostTransportAudition);
-	REGISTER_CLASS_ENUM (Session, PostTransportScrub);
 	REGISTER_CLASS_ENUM (Session, PostTransportReverse);
 	REGISTER_CLASS_ENUM (Session, PostTransportInputChange);
 	REGISTER_CLASS_ENUM (Session, PostTransportCurveRealloc);

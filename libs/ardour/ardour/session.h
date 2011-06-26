@@ -760,23 +760,19 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	enum PostTransportWork {
 		PostTransportStop               = 0x1,
-		PostTransportDisableRecord      = 0x2,
-		PostTransportPosition           = 0x8,
-		PostTransportDidRecord          = 0x20,
-		PostTransportDuration           = 0x40,
-		PostTransportLocate             = 0x80,
-		PostTransportRoll               = 0x200,
-		PostTransportAbort              = 0x800,
-		PostTransportOverWrite          = 0x1000,
-		PostTransportSpeed              = 0x2000,
-		PostTransportAudition           = 0x4000,
-		PostTransportScrub              = 0x8000,
-		PostTransportReverse            = 0x10000,
-		PostTransportInputChange        = 0x20000,
-		PostTransportCurveRealloc       = 0x40000,
-		PostTransportClearSubstate      = 0x80000,
-		PostTransportAdjustPlaybackBuffering  = 0x100000,
-		PostTransportAdjustCaptureBuffering   = 0x200000
+		PostTransportDuration           = 0x2,
+		PostTransportLocate             = 0x4,
+		PostTransportRoll               = 0x8,
+		PostTransportAbort              = 0x10,
+		PostTransportOverWrite          = 0x20,
+		PostTransportSpeed              = 0x40,
+		PostTransportAudition           = 0x80,
+		PostTransportReverse            = 0x100,
+		PostTransportInputChange        = 0x200,
+		PostTransportCurveRealloc       = 0x400,
+		PostTransportClearSubstate      = 0x800,
+		PostTransportAdjustPlaybackBuffering  = 0x1000,
+		PostTransportAdjustCaptureBuffering   = 0x2000
 	};
 
 	enum SlaveState {
@@ -1024,33 +1020,12 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	Butler* _butler;
 
-#if 0 // these should be here, see comments in their other location above
-	enum PostTransportWork {
-		PostTransportStop               = 0x1,
-		PostTransportDisableRecord      = 0x2,
-		PostTransportPosition           = 0x8,
-		PostTransportDidRecord          = 0x20,
-		PostTransportDuration           = 0x40,
-		PostTransportLocate             = 0x80,
-		PostTransportRoll               = 0x200,
-		PostTransportAbort              = 0x800,
-		PostTransportOverWrite          = 0x1000,
-		PostTransportSpeed              = 0x2000,
-		PostTransportAudition           = 0x4000,
-		PostTransportScrub              = 0x8000,
-		PostTransportReverse            = 0x10000,
-		PostTransportInputChange        = 0x20000,
-		PostTransportCurveRealloc       = 0x40000,
-		PostTransportClearSubstate      = 0x80000
-	};
-#endif
 	static const PostTransportWork ProcessCannotProceedMask =
 		PostTransportWork (
 				PostTransportInputChange|
 				PostTransportSpeed|
 				PostTransportReverse|
 				PostTransportCurveRealloc|
-				PostTransportScrub|
 				PostTransportAudition|
 				PostTransportLocate|
 				PostTransportStop|
